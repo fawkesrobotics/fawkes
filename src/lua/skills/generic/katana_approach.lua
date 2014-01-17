@@ -91,16 +91,26 @@ local DIR_X = "x"
 
 local vars = {}
 
+-- States
+fsm:define_states{
+   export_to=_M,
+   closure={katanaarm=katanaarm},
+
+   {"INIT",     JumpState},
+   {"APPROACH", SkillJumpState, skills={{katana_rel}},
+                final_to="FINAL", fail_to="APPROACH_FAILED"},
+
+   {"APPROACH_FAILED", JumpState}
+}
+
+-- Transitions
 fsm:add_transitions {
-   closure={p=p, katanaarm=katanaarm},
-   {"INIT", "FAILED", "not katanaarm:has_writer()", precond=true, desc="no writer"},
+   {"INIT", "FAILED", precond="not katanaarm:has_writer()", desc="no writer"},
 
-   {"INIT", "APPROACH", true, desc="move"},
+   {"INIT", "APPROACH", cond=true, desc="move"},
 
-   {"APPROACH", "FINAL", skill=katana_rel, fail_to="APPROACH_FAILED", desc="final"},
-
-   {"APPROACH_FAILED", "FAILED", "self.finished", desc="tried all approaches"},
-   {"APPROACH_FAILED", "APPROACH", true, desc="tried all approaches"}
+   {"APPROACH_FAILED", "FAILED", cond="self.finished", desc="tried all approaches"},
+   {"APPROACH_FAILED", "APPROACH", cond=true, desc="tried all approaches"}
 }
 
 function INIT:init()
@@ -166,7 +176,8 @@ function APPROACH:init()
    end
    table.remove(vars.targets,1)
 
-   self.args = {x = x,
+   self.args[katana_rel] = {
+                x = x,
                 y = y,
                 z = z,
                 straight=true,

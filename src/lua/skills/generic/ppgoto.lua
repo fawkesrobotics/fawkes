@@ -83,7 +83,7 @@ fsm:define_states{
 
 -- Transitions
 fsm:add_transitions{
-   {"PPGOTO", "FAILED", cond="not ppnavi:has_writer()", desc="No writer for interface", precond=true},
+   {"PPGOTO", "FAILED", cond_and_precond="not ppnavi:has_writer()", desc="No writer for interface"},
    {"PPGOTO", "FAILED", cond=jumpcond_paramfail, desc="Invalid/insufficient parameters"},
    {"PPGOTO", "FAILED", cond=jumpcond_navifail, desc="Navigator failure"},
    {"PPGOTO", "FINAL", cond=jumpcond_navifinal, desc="Position reached"}

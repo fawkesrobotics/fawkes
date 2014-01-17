@@ -62,8 +62,8 @@ fsm:define_states{
 
 -- Transitions
 fsm:add_transitions{
-   {"SAY", "FAILED", cond="not speechsynth:has_writer()", precond_only=true, desc="No SpeechSynth provider"},
-   {"SAY", "FAILED", cond="not vars.text", precond_only=true, desc="No text given"},
+   {"SAY", "FAILED", precond="not speechsynth:has_writer()", desc="No SpeechSynth provider"},
+   {"SAY", "FAILED", precond="not vars.text", desc="No text given"},
    {"SAY", "FINAL",  cond="not vars.wait", desc="Speech ordered"},
    {"SAY", "WAIT", cond=true, desc="Wait for final"},
 

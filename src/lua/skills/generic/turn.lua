@@ -62,7 +62,7 @@ TURN.nowriter_interfaces = {navigator}
 
 -- Transitions
 fsm:add_transitions{
-   {"TURN", "FAILED", cond=JumpState.jumpcond_nowriter, desc="No writer for navigator interface", precond_only=true},
+   {"TURN", "FAILED", precond=JumpState.jumpcond_nowriter, desc="No writer for navigator interface"},
    {"TURN", "FAILED", cond=jumpcond_navifail, desc="Navigator failure"},
    {"TURN", "FINAL", cond=jumpcond_navifinal, desc="Turn finished"}
 }

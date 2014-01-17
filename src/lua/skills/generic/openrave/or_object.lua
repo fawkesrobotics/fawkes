@@ -114,21 +114,21 @@ fsm:define_states{
 
 -- Transitions
 fsm:add_transitions {
-   {"INIT", "RELEASE_ALL", cond="vars.release_all", precond_only=true, desc="release all"}, -- put here, because do not need name for it
-   {"INIT", "FAILED", cond="not vars.name", precond_only=true, desc="no object name given"},
+   {"INIT", "RELEASE_ALL", precond="vars.release_all", desc="release all"}, -- put here, because do not need name for it
+   {"INIT", "FAILED", precond="not vars.name", desc="no object name given"},
 
-   {"INIT", "ADD", cond="vars.add", precond_only=true, desc="add"},
-   {"INIT", "DELETE", cond="vars.delete", precond_only=true, desc="delete"},
-   {"INIT", "ATTACH", cond="vars.attach", precond_only=true, desc="attach"},
-   {"INIT", "RELEASE", cond="vars.release", precond_only=true, desc="release"},
-   {"INIT", "MOVE", cond="vars.move", precond_only=true, desc="move"},
-   {"INIT", "ROTATE", cond="vars.rotate", precond_only=true, desc="rotate"},
-   {"INIT", "RENAME", cond="vars.rename", precond_only=true, desc="rename"},
+   {"INIT", "ADD", precond="vars.add", desc="add"},
+   {"INIT", "DELETE", precond="vars.delete", desc="delete"},
+   {"INIT", "ATTACH", precond="vars.attach", desc="attach"},
+   {"INIT", "RELEASE", precond="vars.release", desc="release"},
+   {"INIT", "MOVE", precond="vars.move", desc="move"},
+   {"INIT", "ROTATE", precond="vars.rotate", desc="rotate"},
+   {"INIT", "RENAME", precond="vars.rename", desc="rename"},
 
-   {"ADD", "FAILED", cond="not (vars.path)", precond_only=true, desc="insufficient arguments"},
-   {"MOVE", "FAILED", cond="not (vars.x and vars.y and vars.z)", precond_only=true, desc="insufficient arguments"},
-   {"ROTATE", "FAILED", cond="not (vars.x and vars.y and vars.z)", precond_only=true, desc="insufficient arguments"},
-   {"RENAME", "FAILED", cond="not (vars.new_name)", precond_only=true, desc="insufficient arguments"},
+   {"ADD", "FAILED", precond="not (vars.path)", desc="insufficient arguments"},
+   {"MOVE", "FAILED", precond="not (vars.x and vars.y and vars.z)", desc="insufficient arguments"},
+   {"ROTATE", "FAILED", precond="not (vars.x and vars.y and vars.z)", desc="insufficient arguments"},
+   {"RENAME", "FAILED", precond="not (vars.new_name)", desc="insufficient arguments"},
 
    {"ADD", "CHECK", cond=jc_msg_final, desc="final"},
    {"DELETE", "CHECK", cond=jc_msg_final, desc="final"},

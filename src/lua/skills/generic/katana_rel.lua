@@ -58,10 +58,10 @@ fsm:define_states{
 }
 
 fsm:add_transitions{
-   {"INIT", "FAILED", cond="not katanaarm:has_writer()", precond_only=true, desc="no writer"},
-   {"INIT", "FAILED", cond="(not vars.x) and (not vars.y) and (not vars.z)", precond_only=true, desc="insufficient arguments"},
+   {"INIT", "FAILED", precond="not katanaarm:has_writer()", desc="no writer"},
+   {"INIT", "FAILED", precond="(not vars.x) and (not vars.y) and (not vars.z)", desc="insufficient arguments"},
 
-   {"INIT", "MOVE", cond=true, precond_only=true, desc="move"}
+   {"INIT", "MOVE", precond=true, desc="move"}
 }
 
 function MOVE:init()
@@ -89,5 +89,5 @@ function MOVE:init()
       z = z + katanaarm:z()
    end
 
-   self.args = {x=x, y=y, z=z, theta=theta, frame=frame, theta_error=theta_error, straight=straight}
+   self.args[katana] = {x=x, y=y, z=z, theta=theta, frame=frame, theta_error=theta_error, straight=straight}
 end
