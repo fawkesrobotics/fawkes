@@ -179,14 +179,14 @@ ifeq ($(HAVE_ROS),1)
   else
     WARN_TARGETS += warning_move_base_msgs
   endif
-	ifeq ($(call ros-have-pkg,sensor_msgs),1)
-		CFLAGS_joint_thread += $(call ros-pkg-cflags,sensor_msgs)
-		CFLAGS_joint_plugin = $(CFLAGS_joint_thread)
-		LDFLAGS_joint += $(call ros-pkg-lflags,sensor_msgs)
-		PLUGINS_all += $(PLUGINDIR)/ros-joint.so
-	else
-		WARN_TARGETS += warning_sensor_msgs
-	endif
+  ifeq ($(call ros-have-pkg,sensor_msgs),1)
+    CFLAGS_joint_thread += $(call ros-pkg-cflags,sensor_msgs)
+    CFLAGS_joint_plugin = $(CFLAGS_joint_thread)
+    LDFLAGS_joint += $(call ros-pkg-lflags,sensor_msgs)
+    PLUGINS_all += $(PLUGINDIR)/ros-joint.so
+  else
+    WARN_TARGETS += warning_sensor_msgs
+  endif
 else
   WARN_TARGETS += warning_ros
 endif
