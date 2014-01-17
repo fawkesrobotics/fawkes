@@ -29,6 +29,7 @@
 #include <core/threading/wait_condition.h>
 #include <interfaces/PanTiltInterface.h>
 #include <interfaces/LedInterface.h>
+#include <interfaces/JointInterface.h>
 
 #include <cstdarg>
 #include <cmath>
@@ -72,6 +73,8 @@ void
 PanTiltRX28Thread::init()
 {
   __last_pan = __last_tilt = 0.f;
+  float init_pan_velocity = 0.f;
+  float init_tilt_velocity = 0.f;
 
   // Note: due to the use of auto_ptr and RefPtr resources are automatically
   // freed on destruction, therefore no special handling is necessary in init()
@@ -98,34 +101,39 @@ PanTiltRX28Thread::init()
   __cfg_tilt_margin      = config->get_float((__ptu_cfg_prefix + "tilt_margin").c_str());
   __cfg_pan_start        = config->get_float((__ptu_cfg_prefix + "pan_start").c_str());
   __cfg_tilt_start       = config->get_float((__ptu_cfg_prefix + "tilt_start").c_str());
+#ifdef HAVE_TF
+  __cfg_publish_transforms=config->get_bool((__ptu_cfg_prefix + "publish_transforms").c_str());
+#endif
 
 #ifdef HAVE_TF
-  float pan_trans_x  =
-    config->get_float((__ptu_cfg_prefix + "pan_trans_x").c_str());
-  float pan_trans_y  =
-    config->get_float((__ptu_cfg_prefix + "pan_trans_y").c_str());
-  float pan_trans_z  =
-    config->get_float((__ptu_cfg_prefix + "pan_trans_z").c_str());
-  float tilt_trans_x =
-    config->get_float((__ptu_cfg_prefix + "tilt_trans_x").c_str());
-  float tilt_trans_y =
-    config->get_float((__ptu_cfg_prefix + "tilt_trans_y").c_str());
-  float tilt_trans_z =
-    config->get_float((__ptu_cfg_prefix + "tilt_trans_z").c_str());
+  if (__cfg_publish_transforms) {
+    float pan_trans_x  =
+        config->get_float((__ptu_cfg_prefix + "pan_trans_x").c_str());
+    float pan_trans_y  =
+        config->get_float((__ptu_cfg_prefix + "pan_trans_y").c_str());
+    float pan_trans_z  =
+        config->get_float((__ptu_cfg_prefix + "pan_trans_z").c_str());
+    float tilt_trans_x =
+        config->get_float((__ptu_cfg_prefix + "tilt_trans_x").c_str());
+    float tilt_trans_y =
+        config->get_float((__ptu_cfg_prefix + "tilt_trans_y").c_str());
+    float tilt_trans_z =
+        config->get_float((__ptu_cfg_prefix + "tilt_trans_z").c_str());
 
-  
-  std::string frame_id_prefix = std::string("/") + __ptu_name;
-  try {
-    frame_id_prefix =
-      config->get_string((__ptu_cfg_prefix + "frame_id_prefix").c_str());
-  } catch (Exception &e) {} // ignore, use default
 
-  __cfg_base_frame = frame_id_prefix + "/base";
-  __cfg_pan_link   = frame_id_prefix + "/pan";
-  __cfg_tilt_link  = frame_id_prefix + "/tilt";
+    std::string frame_id_prefix = std::string("/") + __ptu_name;
+    try {
+      frame_id_prefix =
+          config->get_string((__ptu_cfg_prefix + "frame_id_prefix").c_str());
+    } catch (Exception &e) {} // ignore, use default
 
-  __translation_pan.setValue(pan_trans_x, pan_trans_y, pan_trans_z);
-  __translation_tilt.setValue(tilt_trans_x, tilt_trans_y, tilt_trans_z);
+    __cfg_base_frame = frame_id_prefix + "/base";
+    __cfg_pan_link   = frame_id_prefix + "/pan";
+    __cfg_tilt_link  = frame_id_prefix + "/tilt";
+
+    __translation_pan.setValue(pan_trans_x, pan_trans_y, pan_trans_z);
+    __translation_tilt.setValue(tilt_trans_x, tilt_trans_y, tilt_trans_z);
+  }
 #endif
 
   bool pan_servo_found = false, tilt_servo_found = false;
@@ -169,11 +177,23 @@ PanTiltRX28Thread::init()
   __pantilt_if->set_tilt_margin(__cfg_tilt_margin);
   __pantilt_if->set_max_pan_velocity(__rx28->get_max_supported_speed(__cfg_pan_servo_id));
   __pantilt_if->set_max_tilt_velocity(__rx28->get_max_supported_speed(__cfg_tilt_servo_id));
-  __pantilt_if->set_pan_velocity(__rx28->get_max_supported_speed(__cfg_pan_servo_id));
-  __pantilt_if->set_tilt_velocity(__rx28->get_max_supported_speed(__cfg_tilt_servo_id));
+  __pantilt_if->set_pan_velocity(init_pan_velocity);
+  __pantilt_if->set_tilt_velocity(init_tilt_velocity);
   __pantilt_if->write();
 
   __led_if = blackboard->open_for_writing<LedInterface>(bbid.c_str());
+
+  std::string panid = __ptu_name + " pan";
+  __panjoint_if = blackboard->open_for_writing<JointInterface>(panid.c_str());
+  __panjoint_if->set_position(__last_pan);
+  __panjoint_if->set_velocity(init_pan_velocity);
+  __panjoint_if->write();
+
+  std::string tiltid = __ptu_name + " tilt";
+  __tiltjoint_if = blackboard->open_for_writing<JointInterface>(tiltid.c_str());
+  __tiltjoint_if->set_position(__last_tilt);
+  __tiltjoint_if->set_velocity(init_tilt_velocity);
+  __tiltjoint_if->write();
 
   __wt = new WorkerThread(__ptu_name, logger, __rx28,
 			  __cfg_pan_servo_id, __cfg_tilt_servo_id,
@@ -187,6 +207,8 @@ PanTiltRX28Thread::init()
   }
 
   bbil_add_message_interface(__pantilt_if);
+  bbil_add_message_interface(__panjoint_if);
+  bbil_add_message_interface(__tiltjoint_if);
   blackboard->register_listener(this);
 
 #ifdef USE_TIMETRACKER
@@ -223,6 +245,8 @@ PanTiltRX28Thread::finalize()
   blackboard->unregister_listener(this);
   blackboard->close(__pantilt_if);
   blackboard->close(__led_if);
+  blackboard->close(__panjoint_if);
+  blackboard->close(__tiltjoint_if);
 
   __wt->cancel();
   __wt->join();
@@ -274,15 +298,25 @@ PanTiltRX28Thread::update_sensor_values()
     __pantilt_if->set_final(__wt->is_final());
     __pantilt_if->write();
 
-#ifdef HAVE_TF
-    // Always publish updated transforms
-    tf::Quaternion pr;  pr.setEulerZYX(pan, 0, 0);
-    tf::Transform ptr(pr, __translation_pan);
-    tf_publisher->send_transform(ptr, time, __cfg_base_frame, __cfg_pan_link);
+    __panjoint_if->set_position(pan);
+    __panjoint_if->set_velocity(panvel);
+    __panjoint_if->write();
 
-    tf::Quaternion tr; tr.setEulerZYX(0, tilt, 0);
-    tf::Transform ttr(tr, __translation_tilt);
-    tf_publisher->send_transform(ttr, time, __cfg_pan_link, __cfg_tilt_link);
+    __tiltjoint_if->set_position(tilt);
+    __tiltjoint_if->set_velocity(tiltvel);
+    __tiltjoint_if->write();
+
+#ifdef HAVE_TF
+    if (__cfg_publish_transforms) {
+      // Always publish updated transforms
+      tf::Quaternion pr;  pr.setEulerZYX(pan, 0, 0);
+      tf::Transform ptr(pr, __translation_pan);
+      tf_publisher->send_transform(ptr, time, __cfg_base_frame, __cfg_pan_link);
+
+      tf::Quaternion tr; tr.setEulerZYX(0, tilt, 0);
+      tf::Transform ttr(tr, __translation_tilt);
+      tf_publisher->send_transform(ttr, time, __cfg_pan_link, __cfg_tilt_link);
+    }
 #endif
   }
 }

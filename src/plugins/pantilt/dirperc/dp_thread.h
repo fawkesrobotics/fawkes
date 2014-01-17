@@ -35,6 +35,7 @@
 
 namespace fawkes {
   class PanTiltInterface;
+  class JointInterface;
 }
 
 class DirectedPerceptionPTU;
@@ -63,6 +64,8 @@ class PanTiltDirectedPerceptionThread
 
  private:
   fawkes::PanTiltInterface *__pantilt_if;
+  fawkes::JointInterface *__panjoint_if;
+  fawkes::JointInterface *__tiltjoint_if;
 
   fawkes::RefPtr<DirectedPerceptionPTU> __ptu;
 

@@ -79,6 +79,8 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/pantilt
     tilt_trans_y: 0.0
     # TILT servo base to joint translation Z; m
     tilt_trans_z: 0.039
+    # whether transforms should be published
+    publish_transforms: true
 
   # Type of PTU; one of RX28, EviD100P and DirectedPerceptionASCII
   EviD100P:

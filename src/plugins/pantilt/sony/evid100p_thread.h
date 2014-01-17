@@ -35,6 +35,7 @@
 
 namespace fawkes {
   class PanTiltInterface;
+  class JointInterface;
 }
 
 class SonyEviD100PVisca;
@@ -63,6 +64,8 @@ class PanTiltSonyEviD100PThread
 
  private:
   fawkes::PanTiltInterface *__pantilt_if;
+  fawkes::JointInterface *__panjoint_if;
+  fawkes::JointInterface *__tiltjoint_if;
 
   fawkes::RefPtr<SonyEviD100PVisca> __cam;
 

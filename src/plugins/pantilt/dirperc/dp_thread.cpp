@@ -25,6 +25,7 @@
 
 #include <core/threading/mutex_locker.h>
 #include <interfaces/PanTiltInterface.h>
+#include <interfaces/JointInterface.h>
 
 #include <cstdarg>
 #include <cmath>
@@ -89,10 +90,29 @@ PanTiltDirectedPerceptionThread::init()
   //__pantilt_if->set_tilt_velocity(0);
   __pantilt_if->write();
 
+  float init_pan = 0.f;
+  float init_tilt = 0.f;
+  float init_pan_velocity = 0.f;
+  float init_tilt_velocity = 0.f;
+
+  std::string panid = __ptu_name + " pan";
+  __panjoint_if = blackboard->open_for_writing<JointInterface>(panid.c_str());
+  __panjoint_if->set_position(init_pan);
+  __panjoint_if->set_velocity(init_pan_velocity);
+  __panjoint_if->write();
+
+  std::string tiltid = __ptu_name + " tilt";
+  __tiltjoint_if = blackboard->open_for_writing<JointInterface>(tiltid.c_str());
+  __tiltjoint_if->set_position(init_tilt);
+  __tiltjoint_if->set_velocity(init_tilt_velocity);
+  __tiltjoint_if->write();
+
   __wt = new WorkerThread(__ptu_name, logger, __ptu);
   __wt->start();
 
   bbil_add_message_interface(__pantilt_if);
+  bbil_add_message_interface(__panjoint_if);
+  bbil_add_message_interface(__tiltjoint_if);
   blackboard->register_listener(this);
 
 #ifdef USE_TIMETRACKER
@@ -109,6 +129,8 @@ PanTiltDirectedPerceptionThread::finalize()
 {
   blackboard->unregister_listener(this);
   blackboard->close(__pantilt_if);
+  blackboard->close(__panjoint_if);
+  blackboard->close(__tiltjoint_if);
 
   __wt->cancel();
   __wt->join();
@@ -133,6 +155,12 @@ PanTiltDirectedPerceptionThread::update_sensor_values()
     __pantilt_if->set_tilt(tilt);
     __pantilt_if->set_final(__wt->is_final());
     __pantilt_if->write();
+
+    __panjoint_if->set_position(pan);
+    __panjoint_if->write();
+
+    __tiltjoint_if->set_position(tilt);
+    __tiltjoint_if->write();
   }
 }
 
@@ -181,6 +209,10 @@ PanTiltDirectedPerceptionThread::loop()
 	__wt->set_velocities(msg->pan_velocity(), msg->tilt_velocity());
 	__pantilt_if->set_pan_velocity(msg->pan_velocity());
 	__pantilt_if->set_tilt_velocity(msg->tilt_velocity());
+	__panjoint_if->set_velocity(msg->pan_velocity());
+	__panjoint_if->write();
+	__tiltjoint_if->set_velocity(msg->tilt_velocity());
+	__tiltjoint_if->write();
       }
       */
 
