@@ -61,6 +61,10 @@ LIBS_ros_navigator = m pthread fawkescore fawkesutils fawkesaspects fawkesblackb
 		     fawkesinterface fawkesrosaspect NavigatorInterface
 OBJS_ros_navigator = navigator_plugin.o navigator_thread.o
 
+LIBS_ros_joint = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	      fawkesinterface fawkesrosaspect JointInterface
+OBJS_ros_joint = joint_plugin.o joint_thread.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
 	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator)
@@ -175,7 +179,14 @@ ifeq ($(HAVE_ROS),1)
   else
     WARN_TARGETS += warning_move_base_msgs
   endif
-
+	ifeq ($(call ros-have-pkg,sensor_msgs),1)
+		CFLAGS_joint_thread += $(call ros-pkg-cflags,sensor_msgs)
+		CFLAGS_joint_plugin = $(CFLAGS_joint_thread)
+		LDFLAGS_joint += $(call ros-pkg-lflags,sensor_msgs)
+		PLUGINS_all += $(PLUGINDIR)/ros-joint.so
+	else
+		WARN_TARGETS += warning_sensor_msgs
+	endif
 else
   WARN_TARGETS += warning_ros
 endif
@@ -212,6 +223,8 @@ warning_navigator_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator Plugin$(TNORMAL) (Fawkes TF library not available)"
 warning_actionlib:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator Plugin$(TNORMAL) (ROS package actionlib not found)"
+warning_sensor_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS JointState Plugin$(TNORMAL) (ROS package sensor_msgs not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
