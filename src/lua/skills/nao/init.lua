@@ -30,7 +30,6 @@ skillenv.use_skill("skills.generic.relgoto")
 skillenv.use_skill("skills.generic.goto")
 skillenv.use_skill("skills.generic.turn")
 skillenv.use_skill("skills.generic.say")
-skillenv.use_skill("skills.generic.serialexec")
 
 -- Nao specific but general skills
 skillenv.use_skill("skills.nao.led")
