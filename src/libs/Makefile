@@ -65,6 +65,7 @@ ifneq ($(CLASSIFIERS_DEPS),)
 fvclassifiers: $(CLASSIFIERS_DEPS)
 endif
 protobuf_clips: core protobuf_comm
+pcl_utils: core tf
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk
