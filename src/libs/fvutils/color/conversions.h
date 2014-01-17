@@ -86,6 +86,8 @@ convert(colorspace_t   from,  colorspace_t   to,
     rgb_to_yuv411packed_plainc(src, dst, width, height);
   } else if ( (from == RGB) && (to == YUV422_PLANAR) ) {
     rgb_to_yuv422planar_plainc(src, dst, width, height);
+  } else if ( (from == YUV420_PLANAR) && (to == YUV422_PLANAR) ) {
+    yuv420planar_to_yuv422planar(src, dst, width, height);
   } else if ( (from == RGB) && (to == YUV422_PACKED) ) {
     rgb_to_yuv422packed_plainc(src, dst, width, height);
   } else if ( (from == RGB_PLANAR) && (to == YUV422_PACKED) ) {

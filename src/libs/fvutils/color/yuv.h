@@ -52,6 +52,9 @@ namespace firevision {
 #define YUV422_PLANAR_U_PLANE(YUV, width, height) (YUV + (width) * (height))
 #define YUV422_PLANAR_V_PLANE(YUV, width, height) (YUV + ((width) * (height)) + ((width) * (height) / 2))
 
+#define YUV420_PLANAR_U_PLANE(YUV, width, height) (YUV + (width) * (height))
+#define YUV420_PLANAR_V_PLANE(YUV, width, height) (YUV + ((width) * (height)) + ((width) * (height) / 4))
+
 /** YUV pixel. */
 typedef struct YUV_t_struct{
   unsigned char Y;	/**< Y component */
@@ -107,6 +110,9 @@ void gray8_to_yuv422planar_plainc(const unsigned char *src, unsigned char *dst,
 void gray8_to_yuv422packed_plainc(const unsigned char *src, unsigned char *dst,
 				  unsigned int width, unsigned int height);
 
+
+void yuv420planar_to_yuv422planar(const unsigned char *src, unsigned char *dst,
+				  unsigned int width, unsigned int height);
 
 /** Copy part of the U anv V planes of a YUV422planar image to another
  */

@@ -135,6 +135,41 @@ yuv422planar_copy_uv(const unsigned char *src, unsigned char *dst,
 }
 
 
+/** Copy part of the U anv V planes of a YUV422planar image to another
+ */
+void
+yuv420planar_to_yuv422planar(const unsigned char *src, unsigned char *dst,
+			     unsigned int width, unsigned int height)
+{
+  register const unsigned char *sup = YUV420_PLANAR_U_PLANE(src, width, height);
+  register const unsigned char *svp = YUV420_PLANAR_V_PLANE(src, width, height);
+
+  register unsigned char *dup       = YUV422_PLANAR_U_PLANE(dst, width, height);
+  register unsigned char *dvp       = YUV422_PLANAR_V_PLANE(dst, width, height);
+
+  register unsigned int h;
+
+  // cp Y plane
+  memcpy(dst, src, width * height);
+
+  for (h = 0; h < height / 2; ++h) {
+    // cp U line twice!
+    memcpy(dup, sup, width / 2);
+    dup += width / 2;
+    memcpy(dup, sup, width / 2);
+    dup += width / 2;
+    sup += width / 2;
+
+    // cp V line twice!
+    memcpy(dvp, svp, width / 2);
+    dvp += width / 2;
+    memcpy(dvp, svp, width / 2);
+    dvp += width / 2;
+    svp += width / 2;
+  }
+}
+
+
 void
 yuv422planar_to_yuv422packed(const unsigned char *planar, unsigned char *packed,
 			     unsigned int width, unsigned int height)

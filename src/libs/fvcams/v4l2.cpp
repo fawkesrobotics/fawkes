@@ -602,6 +602,13 @@ V4L2Camera::select_format()
 
   char fourcc[5] = "    ";
 
+#ifdef HAVE_LIBV4L2
+  if (strcmp(_format, "") == 0) {
+    // no format setup, use YU12 by default when compiled with libv4l
+    strcpy(_format, "YU12");
+  }
+#endif
+
   if (strcmp(_format, ""))
   {
     /* Try to select preferred format */
@@ -728,6 +735,7 @@ V4L2Camera::select_format()
     else if (strcmp(_format, "BGR4") == 0) _colorspace = BGR_WITH_ALPHA;
     else if (strcmp(_format, "BA81") == 0) _colorspace = BAYER_MOSAIC_BGGR;
     else if (strcmp(_format, "Y16 ") == 0) _colorspace = MONO16;
+    else if (strcmp(_format, "YU12") == 0) _colorspace = YUV420_PLANAR;
     else _colorspace = CS_UNKNOWN;
   }
 
