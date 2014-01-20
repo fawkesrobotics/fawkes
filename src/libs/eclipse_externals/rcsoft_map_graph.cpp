@@ -190,10 +190,10 @@ p_map_graph_get_nodes()
 	nit != nodes.end();
 	++nit )
   {
-    EC_word n = list( nit->name().c_str(),
-		      list( (double) nit->x(),
-			    list( (double) nit->y(), nil() ) ) );
-    tail = list( n, tail );
+    EC_word n = ::list( nit->name().c_str(),
+			::list( (double) nit->x(),
+				::list( (double) nit->y(), nil() ) ) );
+    tail = ::list( n, tail );
   }
 
   if ( EC_succeed != EC_arg( 1 ).unify( tail ) )
@@ -264,10 +264,10 @@ p_map_graph_search_nodes()
 	nit != nodes.end();
 	++nit )
   {
-    EC_word n = list( nit->name().c_str(),
-		      list( (double) nit->x(),
-			    list( (double) nit->y(), nil() ) ) );
-    tail = list( n, tail );
+    EC_word n = ::list( nit->name().c_str(),
+			::list( (double) nit->x(),
+				::list( (double) nit->y(), nil() ) ) );
+    tail = ::list( n, tail );
   }
 
   if ( EC_succeed != EC_arg( 1 ).unify( tail ) )
@@ -302,7 +302,7 @@ p_map_graph_get_children()
 	nit != children.end();
 	++nit )
   {
-    tail = list( EC_word( (*nit).c_str() ), tail );
+    tail = ::list( EC_word( (*nit).c_str() ), tail );
   }
 
   if ( EC_succeed != EC_arg( 2 ).unify( tail ) )

@@ -32,6 +32,8 @@
 #include <aspect/logging.h>
 #include <aspect/tf.h>
 #include <aspect/blackboard.h>
+#include <aspect/aspect_provider.h>
+#include <plugins/navgraph/aspect/navgraph_inifin.h>
 
 #include <interfaces/NavigatorInterface.h>
 
@@ -51,6 +53,7 @@ class NavGraphThread
   public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::TransformAspect,
+  public fawkes::AspectProviderAspect,
   public fawkes::FamListener
 {
 public:
@@ -78,11 +81,13 @@ public:
   void start_plan();
   void send_next_goal();
   bool node_reached();
-  fawkes::TopologicalMapGraph * load_graph(std::string filename);
+  fawkes::LockPtr<fawkes::TopologicalMapGraph> load_graph(std::string filename);
   void log_graph();
 
 
  private:
+  fawkes::NavGraphAspectIniFin  navgraph_aspect_inifin_;
+
   std::string  cfg_graph_file_;
   std::string  cfg_base_frame_;
   std::string  cfg_global_frame_; 
@@ -98,7 +103,7 @@ public:
   fawkes::NavigatorInterface *nav_if_;
   fawkes::NavigatorInterface *pp_nav_if_;
 
-  fawkes::TopologicalMapGraph *graph_;
+  fawkes::LockPtr<fawkes::TopologicalMapGraph> graph_;
   fawkes::AStar *astar_;
 
   bool exec_active_;

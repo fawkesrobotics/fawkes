@@ -27,6 +27,7 @@
 #include <utils/graph/topological_map_edge.h>
 
 #include <vector>
+#include <list>
 #include <string>
 
 namespace fawkes {
@@ -76,6 +77,19 @@ class TopologicalMapGraph
 
   void calc_reachability();
 
+  TopologicalMapGraph & operator=(const TopologicalMapGraph &g);
+
+  void notify_of_change() throw();
+
+  class ChangeListener {
+   public:
+    virtual ~ChangeListener();
+    virtual void graph_changed() throw() = 0;
+  };
+
+  void add_change_listener(ChangeListener *listener);
+  void remove_change_listener(ChangeListener *listener);
+
  private:
   void assert_unique_edges();
   void assert_valid_edges();
@@ -87,6 +101,7 @@ class TopologicalMapGraph
   std::string                     graph_name_;
   std::vector<TopologicalMapNode> nodes_;
   std::vector<TopologicalMapEdge> edges_;
+  std::list<ChangeListener *>     change_listeners_;
 
 };
 

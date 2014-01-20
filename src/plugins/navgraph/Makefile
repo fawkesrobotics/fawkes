@@ -20,6 +20,7 @@ include $(BUILDSYSDIR)/ros.mk
 
 ENABLE_VISUALIZATION = 1
 
+PRESUBDIRS = aspect
 CFLAGS += -std=c++0x
 
 LIBS_navgraph = fawkescore fawkesutils fawkesaspects fawkesinterface \
@@ -32,7 +33,7 @@ ifeq ($(HAVE_TF),1)
   CFLAGS_navgraph_thread  = $(CFLAGS) $(CFLAGS_TF)
   CFLAGS_navgraph_plugin  = $(CFLAGS_navgraph_thread)
   LDFLAGS_navgraph       += $(LDFLAGS_TF)
-  LIBS_navgraph          += fawkestf
+  LIBS_navgraph          += fawkestf fawkesnavgraphaspect
 
   PLUGINS_all = $(PLUGINDIR)/navgraph.$(SOEXT)
 

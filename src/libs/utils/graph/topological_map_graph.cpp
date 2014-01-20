@@ -42,6 +42,10 @@ namespace fawkes {
  * properties which can be used at run-time for example to instruct
  * the robot behavior.
  *
+ * The class supports change listeners. These are called whenever the graph
+ * is changed, that is if a node or edge is added or if the graph is assigned
+ * from another one (i.e. graph := new_graph).
+ *
  * This class is based on KBSG RCSoft's MapGraph but has been
  * abstracted and improved.
  * @author Tim Niemueller
@@ -62,6 +66,29 @@ TopologicalMapGraph::~TopologicalMapGraph()
 {
 }
 
+
+/** Assign/copy structures from another graph.
+ * This method will remove internal data like root node, nodes, and edges
+ * and copy the data from the passed instance. The change listeners will
+ * not be copied. The assignment operator will trigger all registered
+ * change listeners to be called.
+ * @param g graph from which to copy the data
+ * @return reference to this instance
+ */
+TopologicalMapGraph &
+TopologicalMapGraph::operator=(const TopologicalMapGraph &g)
+{
+  root_node_  = g.root_node_;
+  graph_name_ = g.graph_name_;
+  nodes_.clear();
+  nodes_      = g.nodes_;
+  edges_.clear();
+  edges_      = g.edges_;
+
+  notify_of_change();
+
+  return *this;
+}
 
 /** Get graph name.
  * @return graph name
@@ -306,6 +333,7 @@ void
 TopologicalMapGraph::set_root(std::string node_id)
 {
   root_node_ = node(node_id);
+  notify_of_change();
 }
 
 
@@ -316,6 +344,7 @@ void
 TopologicalMapGraph::add_node(TopologicalMapNode node)
 {
   nodes_.push_back(node);
+  notify_of_change();
 }
 
 /** Add an edge
@@ -325,6 +354,7 @@ void
 TopologicalMapGraph::add_edge(TopologicalMapEdge edge)
 {
   edges_.push_back(edge);
+  notify_of_change();
 }
 
 
@@ -526,6 +556,50 @@ TopologicalMapGraph::calc_reachability()
     i->set_reachable_nodes(reachable_nodes(i->name()));
   }
   assert_connected();
+}
+
+
+/** Add a change listener.
+ * @param listener listener to add
+ */
+void
+TopologicalMapGraph::add_change_listener(ChangeListener *listener)
+{
+  change_listeners_.push_back(listener);
+}
+
+/** Remove a change listener.
+ * @param listener listener to remove
+ */
+void
+TopologicalMapGraph::remove_change_listener(ChangeListener *listener)
+{
+  change_listeners_.remove(listener);
+}
+
+/** Notify all listeners of a change. */
+void
+TopologicalMapGraph::notify_of_change() throw()
+{
+  std::list<ChangeListener *> tmp_listeners = change_listeners_;
+
+  std::list<ChangeListener *>::iterator l;
+  for (l = tmp_listeners.begin(); l != tmp_listeners.end(); ++l) {
+    (*l)->graph_changed();
+  }
+}
+
+/** @class TopologicalMapGraph::ChangeListener <utils/graph/topological_map_graph.h>
+ * Topological graph change listener.
+ * @author Tim Niemueller
+ *
+ * @fn void TopologicalMapGraph::ChangeListener::graph_changed() throw() = 0
+ * Function called if the graph has been changed.
+ */
+
+/** Virtual empty destructor. */
+TopologicalMapGraph::ChangeListener::~ChangeListener()
+{
 }
 
 

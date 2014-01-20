@@ -16,7 +16,7 @@
 (defrule load-config
   (agent-init)
   =>
-  (load-config ?*CONFIG_PREFIX*)
+  (config-load ?*CONFIG_PREFIX*)
 )
 
 (defrule load-agent

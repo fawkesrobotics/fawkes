@@ -39,7 +39,8 @@ using namespace fawkes;
 /** Constructor. */
 NavGraphThread::NavGraphThread()
   : Thread("NavGraphThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+    AspectProviderAspect(&navgraph_aspect_inifin_)
 {
 #ifdef HAVE_VISUALIZATION
   vt_ = NULL;
@@ -50,7 +51,8 @@ NavGraphThread::NavGraphThread()
 /** Constructor. */
 NavGraphThread::NavGraphThread(NavGraphVisualizationThread *vt)
   : Thread("NavGraphThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+    AspectProviderAspect(&navgraph_aspect_inifin_)
 {
   vt_ = vt;
 }
@@ -88,6 +90,7 @@ NavGraphThread::init()
   }
 
   graph_ = load_graph(cfg_graph_file_);
+  navgraph_aspect_inifin_.set_navgraph(graph_);
   if (cfg_log_graph_) {
     log_graph();
   }
@@ -112,8 +115,8 @@ NavGraphThread::finalize()
 {
   delete cmd_sent_at_;
   delete astar_;
-  delete graph_;
   delete target_reached_at_;
+  graph_.clear();
   blackboard->close(pp_nav_if_);
   blackboard->close(nav_if_);
 }
@@ -228,7 +231,7 @@ NavGraphThread::loop()
   }
 }
 
-TopologicalMapGraph *
+fawkes::LockPtr<fawkes::TopologicalMapGraph>
 NavGraphThread::load_graph(std::string filename)
 {
   std::ifstream inf(filename);
@@ -238,10 +241,10 @@ NavGraphThread::load_graph(std::string filename)
 
   if (firstword == "%YAML") {
     logger->log_info(name(), "Loading YAML graph from %s", filename.c_str());
-    return load_yaml_navgraph(filename);
+    return fawkes::LockPtr<TopologicalMapGraph>(load_yaml_navgraph(filename));
   } else if (firstword == "<Graph>") {
     logger->log_info(name(), "Loading RCSoft graph from %s", filename.c_str());
-    return load_rcsoft_graph(filename);
+    return fawkes::LockPtr<TopologicalMapGraph>(load_rcsoft_graph(filename));
   } else {
     throw Exception("Unknown graph format");
   }
@@ -268,7 +271,7 @@ NavGraphThread::generate_plan(std::string goal_name)
   plan_.clear();
   
   NavGraphSearchState *initial_state =
-    new NavGraphSearchState(init, goal, 0, NULL, graph_);
+    new NavGraphSearchState(init, goal, 0, NULL, *graph_);
 
   std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
 
@@ -524,38 +527,43 @@ NavGraphThread::node_reached()
 void
 NavGraphThread::fam_event(const char *filename, unsigned int mask)
 {
-  logger->log_info(name(), "Graph changed on disk, reloading");
-
-  try {
-    TopologicalMapGraph *old_graph = graph_;
-    graph_ = load_yaml_navgraph(cfg_graph_file_);
-    if (cfg_log_graph_)  log_graph();
-    delete old_graph;
-  } catch (Exception &e) {
-    logger->log_warn(name(), "Loading new graph failed, exception follows");
-    logger->log_warn(name(), e);
-    return;
+  // The file will be ignored from now onwards, re-register
+  if (mask & FAM_IGNORED) {
+    fam_->watch_file(cfg_graph_file_.c_str());
   }
 
-#ifdef HAVE_VISUALIZATION
-  if (vt_)  vt_->set_graph(graph_);
-#endif
+  if (mask & (FAM_MODIFY | FAM_IGNORED)) {
+    logger->log_info(name(), "Graph changed on disk, reloading");
 
-  if (exec_active_) {
-    // store the goal and restart it after the graph has been reloaded
-
-    stop_motion();
-    TopologicalMapNode goal = plan_.back();
-
-    if (goal.name() == "free-target") {
-      generate_plan(goal.x(), goal.y(), goal.property_as_float("orientation"));
-      optimize_plan();
-    } else {
-      generate_plan(goal.name());
-      optimize_plan();
+    try {
+      LockPtr<TopologicalMapGraph> new_graph = load_graph(cfg_graph_file_);
+      **graph_ = **new_graph;
+    } catch (Exception &e) {
+      logger->log_warn(name(), "Loading new graph failed, exception follows");
+      logger->log_warn(name(), e);
+      return;
     }
 
-    start_plan();
+#ifdef HAVE_VISUALIZATION
+    if (vt_)  vt_->set_graph(graph_);
+#endif
+
+    if (exec_active_) {
+      // store the goal and restart it after the graph has been reloaded
+
+      stop_motion();
+      TopologicalMapNode goal = plan_.back();
+
+      if (goal.name() == "free-target") {
+	generate_plan(goal.x(), goal.y(), goal.property_as_float("orientation"));
+	optimize_plan();
+      } else {
+	generate_plan(goal.name());
+	optimize_plan();
+      }
+
+      start_plan();
+    }
   }
 }
 
