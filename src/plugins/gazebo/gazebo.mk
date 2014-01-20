@@ -23,8 +23,6 @@ __buildsys_gazebo_mk_ := 1
 
 ifneq ($(PKGCONFIG),)
   HAVE_GAZEBO   = $(if $(shell $(PKGCONFIG) --atleast-version=1.0.1 'gazebo'; echo $${?/1/}),1,0)
-else
-  HAVE_GAZEBO   = 0
 endif
 
 ifeq ($(HAVE_GAZEBO),1)
