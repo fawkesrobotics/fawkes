@@ -45,7 +45,7 @@ using namespace fawkes;
 GazeboNodeThread::GazeboNodeThread()
   : Thread("GazeboNodeThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
-    AspectProviderAspect("GazeboAspect", &__gazebo_aspect_inifin)
+    AspectProviderAspect(&__gazebo_aspect_inifin)
 {
 }
 
