@@ -46,8 +46,7 @@ using namespace fawkes;
 /** Constructor. */
 RRDThread::RRDThread()
   : Thread("RRDThread", Thread::OPMODE_CONTINUOUS),
-    AspectProviderAspect("RRDAspect", &__rrd_aspect_inifin),
-    __rrd_aspect_inifin(this)
+    AspectProviderAspect(&__rrd_aspect_inifin), __rrd_aspect_inifin(this)
 {
   set_prepfin_conc_loop(true);
 }

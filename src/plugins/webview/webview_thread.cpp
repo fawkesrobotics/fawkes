@@ -85,6 +85,8 @@ WebviewThread::init()
 {
   __cfg_port = config->get_uint("/webview/port");
 
+  WebReply::set_caching(config->get_bool("/webview/client_side_caching"));
+
   bool __cfg_use_ssl = false;
   try {
     __cfg_use_ssl = config->get_bool("/webview/use_ssl");

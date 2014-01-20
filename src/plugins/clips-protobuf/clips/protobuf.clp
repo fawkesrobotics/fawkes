@@ -51,7 +51,7 @@
   (declare (salience -900))
   (init)
   =>
-  (load-config "/clips-protobuf")
+  (config-load "/clips-protobuf")
 )
 
 (defrule protobuf-silence-debug-facts

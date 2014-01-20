@@ -36,8 +36,7 @@ class ClipsWebviewPlugin : public fawkes::Plugin
    */
   ClipsWebviewPlugin(Configuration *config) : Plugin(config)
   {
-    std::string cfg_clips_env = config->get_string("/clips-webview/env-name");
-    thread_list.push_back(new ClipsWebviewThread(cfg_clips_env));
+    thread_list.push_back(new ClipsWebviewThread());
   }
 };
 

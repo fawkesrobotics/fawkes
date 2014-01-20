@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  clips-protobuf-thread.h - Protobuf communication for CLIPS
+ *  feature_blackboard.h - CLIPS blackboard feature
  *
- *  Created: Tue Apr 16 13:02:22 2013
+ *  Created: Thu Oct 03 11:46:20 2013
  *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,48 +20,47 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_PROTOBUF_CLIPS_PROTOBUF_THREAD_H_
-#define __PLUGINS_CLIPS_PROTOBUF_CLIPS_PROTOBUF_THREAD_H_
+#ifndef __PLUGINS_CLIPS_FEATURE_BLACKBOARD_H_
+#define __PLUGINS_CLIPS_FEATURE_BLACKBOARD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <plugins/clips/aspect/clips_feature.h>
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
 
-namespace protobuf_clips {
-  class ClipsProtobufCommunicator;
+namespace CLIPS {
+  class Environment;
 }
 
-class ClipsProtobufThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::CLIPSFeature,
-  public fawkes::CLIPSFeatureAspect
+namespace fawkes {
+  class BlackBoard;
+  class Logger;
+  class Interface;
+}
+
+class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
 {
  public:
-  ClipsProtobufThread();
-  virtual ~ClipsProtobufThread();
-
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+  BlackboardCLIPSFeature(fawkes::Logger *logger, fawkes::BlackBoard *blackboard);
+  virtual ~BlackboardCLIPSFeature();
 
   // for CLIPSFeature
   virtual void clips_context_init(const std::string &env_name,
 				  fawkes::LockPtr<CLIPS::Environment> &clips);
   virtual void clips_context_destroyed(const std::string &env_name);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+ private: // members
+  fawkes::Logger     *logger_;
+  fawkes::BlackBoard *blackboard_;
 
- private:
-  std::map<std::string, protobuf_clips::ClipsProtobufCommunicator *> pb_comms_;
-  std::vector<std::string> cfg_proto_dirs_;
+  typedef std::multimap<std::string, fawkes::Interface *> InterfaceMap;
+  std::map<std::string, InterfaceMap >  interfaces_;
+  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+
+ private: // methods
+  void clips_blackboard_open_interface(std::string env_name, std::string type, std::string id);
+  void clips_blackboard_read(std::string env_name);
+  void clips_blackboard_enable_time_read(std::string env_name);
 
 };
 

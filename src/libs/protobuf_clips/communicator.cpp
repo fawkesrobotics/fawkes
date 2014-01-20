@@ -93,12 +93,6 @@ ClipsProtobufCommunicator::~ClipsProtobufCommunicator()
   {
     fawkes::MutexLocker lock(&clips_mutex_);
 
-    CLIPS::DefaultFacts::pointer df = clips_->get_default_facts("protobuf-available");
-    if (df) df->retract();
-
-    avail_fact_->retract();
-    avail_fact_.reset();
-
     for (auto f : functions_) {
       clips_->remove_function(f);
     }
@@ -148,9 +142,6 @@ ClipsProtobufCommunicator::setup_clips()
   ADD_FUNCTION("pb-broadcast", (sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_broadcast))));
   ADD_FUNCTION("pb-connect", (sigc::slot<long int, std::string, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_client_connect))));
   ADD_FUNCTION("pb-disconnect", (sigc::slot<void, long int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_disconnect))));
-
-  clips_->build("(deffacts protobuf-available (protobuf-available))");
-  avail_fact_ = clips_->assert_fact("(protobuf-available)");
 }
 
 /** Enable protobuf stream server.

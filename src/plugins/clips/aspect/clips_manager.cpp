@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  aspect_provider.h - Aspect to provide a new aspect for Fawkes
+ *  clips_manager.cpp - CLIPS manager aspect for Fawkes
  *
- *  Created: Thu Nov 25 12:05:29 2010 (Thanksgiving)
+ *  Created: Thu Aug 15 18:52:36 2013
  *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -21,33 +21,41 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_ASPECT_PROVIDER_H_
-#define __ASPECT_ASPECT_PROVIDER_H_
-
-#include <aspect/aspect.h>
-
-#include <list>
+#include <plugins/clips/aspect/clips_manager.h>
+#include <clipsmm.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class AspectIniFin;
+/** @class CLIPSManagerAspect <plugins/clips/aspect/clips_manager.h>
+ * Thread aspect access the CLIPS environment manager.
 
-class AspectProviderAspect : public virtual Aspect
+ * Give this aspect to your thread if you want to access the CLIPS
+ * environment manager. Use this with extreme care and only if you
+ * know what you are doing. If you want to create a CLIPS environment
+ * to work with use the CLIPSAspect. If you want to provide a CLIPS
+ * feature to other environments use the CLIPSFeatureAspect.
+ *
+ * @ingroup Aspects
+ * @author Tim Niemueller
+ */
+
+/** @var fawkes::CLIPSEnvManager CLIPSManagerAspect::clips_env_mgr
+ * CLIPS environment manager.
+ */
+
+/** Constructor. */
+CLIPSManagerAspect::CLIPSManagerAspect()
 {
- public:
-  AspectProviderAspect(AspectIniFin *inifin);
-  AspectProviderAspect(const std::list<AspectIniFin *> aspects);
-  virtual ~AspectProviderAspect();
+  add_aspect("CLIPSManagerAspect");
+}
 
-  const std::list<AspectIniFin *> &  aspect_provider_aspects() const;
 
- private:
-  std::list<AspectIniFin *> __aspect_provider_aspects;
-};
+/** Virtual empty destructor. */
+CLIPSManagerAspect::~CLIPSManagerAspect()
+{
+}
 
 } // end namespace fawkes
-
-#endif

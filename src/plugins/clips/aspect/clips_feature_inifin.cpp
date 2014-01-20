@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  clips_inifin.cpp - Fawkes CLIPSAspect initializer/finalizer
+ *  clips_feature_inifin.cpp - CLIPSFeatureAspect initializer/finalizer
  *
- *  Created: Sat Jun 16 14:34:27 2012
- *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Fri Aug 16 13:15:27 2013
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/clips/aspect/clips_inifin.h>
+#include <plugins/clips/aspect/clips_feature_inifin.h>
 #include <plugins/clips/aspect/clips_env_manager.h>
 #include <core/threading/thread_finalizer.h>
 
@@ -32,57 +32,66 @@ namespace fawkes {
 }
 #endif
 
-/** @class CLIPSAspectIniFin <plugins/clips/aspect/clips_inifin.h>
- * CLIPSAspect initializer/finalizer.
- * This initializer/finalizer will provide the CLIPS node handle to
- * threads with the CLIPSAspect.
+/** @class CLIPSFeatureAspectIniFin <plugins/clips/aspect/clips_feature_inifin.h>
+ * CLIPSFeatureAspect initializer/finalizer.
  * @author Tim Niemueller
  */
 
 /** Constructor. */
-CLIPSAspectIniFin::CLIPSAspectIniFin()
-  : AspectIniFin("CLIPSAspect")
+CLIPSFeatureAspectIniFin::CLIPSFeatureAspectIniFin()
+  : AspectIniFin("CLIPSFeatureAspect")
 {
 }
 
 /** Destructor. */
-CLIPSAspectIniFin::~CLIPSAspectIniFin()
+CLIPSFeatureAspectIniFin::~CLIPSFeatureAspectIniFin()
 {
 }
 
 
 
 void
-CLIPSAspectIniFin::init(Thread *thread)
+CLIPSFeatureAspectIniFin::init(Thread *thread)
 {
-  CLIPSAspect *clips_thread;
-  clips_thread = dynamic_cast<CLIPSAspect *>(thread);
+  CLIPSFeatureAspect *clips_thread;
+  clips_thread = dynamic_cast<CLIPSFeatureAspect *>(thread);
   if (clips_thread == NULL) {
     throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "CLIPSAspect, but RTTI says it "
+					  "CLIPSFeatureAspect, but RTTI says it "
 					  "has not. ", thread->name());
   }
-  
-  LockPtr<CLIPS::Environment> clips =
-    clips_env_mgr_->create_env(clips_thread->clips_env_name,
-			       clips_thread->CLIPSAspect_log_component_name_);
 
-  clips_thread->clips = clips;
+  clips_env_mgr_->add_features(clips_thread->clips_features_);
+}
+
+
+bool
+CLIPSFeatureAspectIniFin::prepare_finalize(Thread *thread)
+{
+  CLIPSFeatureAspect *clips_thread;
+  clips_thread = dynamic_cast<CLIPSFeatureAspect *>(thread);
+  if (clips_thread == NULL)  return true;
+
+  try {
+    clips_env_mgr_->assert_can_remove_features(clips_thread->clips_features_);
+    return true;
+  } catch (Exception &e) {
+    return false;
+  }
 }
 
 void
-CLIPSAspectIniFin::finalize(Thread *thread)
+CLIPSFeatureAspectIniFin::finalize(Thread *thread)
 {
-  CLIPSAspect *clips_thread;
-  clips_thread = dynamic_cast<CLIPSAspect *>(thread);
+  CLIPSFeatureAspect *clips_thread;
+  clips_thread = dynamic_cast<CLIPSFeatureAspect *>(thread);
   if (clips_thread == NULL) {
     throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"CLIPSAspect, but RTTI says it "
+					"CLIPSFeatureAspect, but RTTI says it "
 					"has not. ", thread->name());
   }
 
-  clips_env_mgr_->destroy_env(clips_thread->clips_env_name);
-  clips_thread->finalize_CLIPSAspect();
+  clips_env_mgr_->remove_features(clips_thread->clips_features_);
 }
 
 
@@ -91,7 +100,7 @@ CLIPSAspectIniFin::finalize(Thread *thread)
  * @param clips_env_mgr CLIPS environment manager
  */
 void
-CLIPSAspectIniFin::set_manager(LockPtr<CLIPSEnvManager> &clips_env_mgr)
+CLIPSFeatureAspectIniFin::set_manager(LockPtr<CLIPSEnvManager> &clips_env_mgr)
 {
   clips_env_mgr_ = clips_env_mgr;
 }

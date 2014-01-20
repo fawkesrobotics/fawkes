@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  clips_inifin.h - Fawkes CLIPSAspect initializer/finalizer
+ *  clips_manager_inifin.h - Fawkes CLIPSManagerAspect initializer/finalizer
  *
- *  Created: Sat Jun 16 14:34:01 2012
+ *  Created: Fri Aug 16 16:05:50 2013
  *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -21,11 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_ASPECT_CLIPS_INIFIN_H_
-#define __PLUGINS_CLIPS_ASPECT_CLIPS_INIFIN_H_
+#ifndef __PLUGINS_CLIPS_ASPECT_CLIPS_MANAGER_INIFIN_H_
+#define __PLUGINS_CLIPS_ASPECT_CLIPS_MANAGER_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
-#include <plugins/clips/aspect/clips.h>
+#include <plugins/clips/aspect/clips_manager.h>
 
 #include <map>
 #include <string>
@@ -35,14 +35,13 @@ namespace fawkes {
 }
 #endif
 
-class Logger;
 class CLIPSEnvManager;
 
-class CLIPSAspectIniFin : public AspectIniFin
+class CLIPSManagerAspectIniFin : public AspectIniFin
 {
  public:
-  CLIPSAspectIniFin();
-  ~CLIPSAspectIniFin();
+  CLIPSManagerAspectIniFin();
+  ~CLIPSManagerAspectIniFin();
 
   virtual void init(Thread *thread);
   virtual void finalize(Thread *thread);

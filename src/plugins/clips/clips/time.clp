@@ -37,8 +37,29 @@
 )
 
 
+; Timer deftemplate, to be used with the timeout function.
+; An example for a periodically triggered rule (assuming that you do have
+; periodic assertion of a (time (now)) fact at suitable intervals) could be:
+; @code
+; (defrule timer-trigger
+;   (time $?now)
+;   ?tf <- (timer (name my-timer) (time $?t&:(timeout ?now ?t ?*TIMER-PERIOD*)) (seq ?seq))
+;   =>
+;   (modify ?tf (time ?now) (seq (+ ?seq 1)))
+; )
+; @endcode
+; This triggers the rule every ?*TIMER-PERIOD* seconds and updates the
+; last trigger time and the sequence number (which you can also skip if you
+; never need it yourself.
+(deftemplate timer
+  (slot name)
+  (multislot time (type INTEGER) (cardinality 2 2) (default-dynamic (now)))
+  (slot seq (type INTEGER) (default 1))
+)
+
+
 ; --- RULES - general housekeeping
-(defrule retract-time
+(defrule time-retract
   (declare (salience ?*PRIORITY-TIME-RETRACT*))
   ?f <- (time $?)
   =>

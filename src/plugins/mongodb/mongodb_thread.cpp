@@ -88,7 +88,7 @@ class MongoDBThread::ClientConf
 /** Constructor. */
 MongoDBThread::MongoDBThread()
   : Thread("MongoDBThread", Thread::OPMODE_WAITFORWAKEUP),
-    AspectProviderAspect("MongoDBAspect", &__mongodb_aspect_inifin),
+    AspectProviderAspect(&__mongodb_aspect_inifin),
     __mongodb_aspect_inifin(this)
 {
 }

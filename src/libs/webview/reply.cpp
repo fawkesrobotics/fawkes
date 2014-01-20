@@ -32,6 +32,8 @@ namespace fawkes {
 }
 #endif
 
+
+
 /** @class WebReply <webview/reply.h>
  * Basic web reply.
  * The base class for all web replies. Though the WebRequestDispatcher expects
@@ -39,12 +41,22 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
+/// Enable caching for this reply?
+bool WebReply::__caching = true;
+
 /** Constructor.
  * @param code HTTP response code
  */
 WebReply::WebReply(response_code_t code)
 {
   __code = code;
+
+  if (! __caching) {
+    // Headers to disable caching
+    __headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    __headers["Pragma"] = "no-cache";
+    __headers["Expires"] = "0";
+  }
 }
 
 
@@ -53,6 +65,18 @@ WebReply::~WebReply()
 {
 }
 
+
+/** Enable or disable caching for all consecutive replies.
+ * This static setting controls whether following replies will allow
+ * for client-side of the web pages or not. Disabling this allows to
+ * force clients to always reload the pages.
+ * @param caching true to enable client-side caching, false to disable
+ */
+void
+WebReply::set_caching(bool caching)
+{
+  __caching = caching;
+}
 
 /** Get response code.
  * @return HTTP response code

@@ -4,7 +4,19 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/clips-agent
 ---
 clips-agent:
+  # If true, will enable watching of facts and rules
   clips-debug: true
+
+  # If CLIPS debugging is enabled, certain rules and facts can be excluded
+  # from watching, e.g. if they are showing up at too high frequencies or
+  # are not of interest.
+  unwatch-facts: ["time"]
+  unwatch-rules: ["time-retract", "blackboard-read"]
+
+  # If true, simulate skills (assuming they always succeed) instead of
+  # actually executing the skills. The time indicates how long it should
+  # take to declare success on skill execution. Note that this cannot
+  # simulate side effects, like a called component writing to an interface
   skill-sim: true
   skill-sim-time: 2.0
 
@@ -17,7 +29,7 @@ clips-agent:
 
   # If set to true, will trigger the assertion of a (time (now)) fact in
   # each loop. This can be used to trigger loop events in CLIPS.
-  assert-time-each-loop: false
+  assert-time-each-loop: true
 
   # If set to true will force the acquisition of the skiller control.
   # This is particularly useful to kick an SkillGUI which is holding
@@ -30,4 +42,3 @@ clips-agent:
   # Agent name. On startup the clips-agent will try to resolve a file named
   # <agent name>.clp. It must be in the CLIPS path directories.
   agent: test
-

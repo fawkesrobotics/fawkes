@@ -1,0 +1,10 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/clips
+---
+clips:
+  # Directory where to look for the CLIPS files of the plugin
+  # Leave empty to use default, which is the "clips" subdir
+  # in the source directory
+  #clips-dir: "..."

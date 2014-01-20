@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  clips-protobuf-thread.h - Protobuf communication for CLIPS
+ *  feature_config.h - CLIPS config feature
  *
- *  Created: Tue Apr 16 13:02:22 2013
+ *  Created: Sun Oct 06 13:06:14 2013
  *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,48 +20,43 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_PROTOBUF_CLIPS_PROTOBUF_THREAD_H_
-#define __PLUGINS_CLIPS_PROTOBUF_CLIPS_PROTOBUF_THREAD_H_
+#ifndef __PLUGINS_CLIPS_FEATURE_CONFIG_H_
+#define __PLUGINS_CLIPS_FEATURE_CONFIG_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <plugins/clips/aspect/clips_feature.h>
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
 
-namespace protobuf_clips {
-  class ClipsProtobufCommunicator;
+namespace CLIPS {
+  class Environment;
 }
 
-class ClipsProtobufThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::CLIPSFeature,
-  public fawkes::CLIPSFeatureAspect
+namespace fawkes {
+  class Configuration;
+  class Logger;
+}
+
+class ConfigCLIPSFeature : public fawkes::CLIPSFeature
 {
  public:
-  ClipsProtobufThread();
-  virtual ~ClipsProtobufThread();
-
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+  ConfigCLIPSFeature(fawkes::Logger *logger, fawkes::Configuration *config);
+  virtual ~ConfigCLIPSFeature();
 
   // for CLIPSFeature
   virtual void clips_context_init(const std::string &env_name,
 				  fawkes::LockPtr<CLIPS::Environment> &clips);
   virtual void clips_context_destroyed(const std::string &env_name);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+ private: // members
+  fawkes::Logger        *logger_;
+  fawkes::Configuration *config_;
 
- private:
-  std::map<std::string, protobuf_clips::ClipsProtobufCommunicator *> pb_comms_;
-  std::vector<std::string> cfg_proto_dirs_;
+  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+
+ private: // methods
+  void clips_config_load(std::string env_name, std::string cfg_prefix);
+  void clips_config_cleanup(std::string env_name);
 
 };
 

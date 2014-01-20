@@ -134,7 +134,14 @@ PluginManager::~PluginManager()
   __pinfo_cache.unlock();
   // Unload all plugins
   for (rpit = plugins.rbegin(); rpit != plugins.rend(); ++rpit) {
-    thread_collector->force_remove((*rpit)->threads());
+    try {
+      thread_collector->force_remove((*rpit)->threads());
+    } catch (Exception &e) {
+      // We want it to be quiet on destruction, i.e. Fawkes quitting
+      //LibLogger::log_warn("PluginManager", "Forced unloading of %s caused exception",
+      //		  (*rpit)->name());
+      //LibLogger::log_warn("PluginManager", e);
+    }
     plugin_loader->unload(*rpit);
   }
   plugins.clear();

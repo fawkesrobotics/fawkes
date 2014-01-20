@@ -40,7 +40,7 @@ using namespace fawkes;
 ClipsAgentThread::ClipsAgentThread()
   : Thread("ClipsAgentThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
-    CLIPSAspect("agent", /* create */ true, /* excl */ false, "CLIPS (agent)")
+    CLIPSAspect("agent", "CLIPS (agent)")
 {
 }
 
@@ -79,31 +79,19 @@ ClipsAgentThread::init()
     cfg_steal_skiller_control_ = config->get_bool("/clips-agent/steal-skiller-control");
   } catch (Exception &e) {} // ignore, use default
 
-  cfg_clips_dirs_.clear();
+
+  std::vector<std::string> clips_dirs;
   try {
-    cfg_clips_dirs_ = config->get_strings("/clips-agent/clips-dirs");
-    for (size_t i = 0; i < cfg_clips_dirs_.size(); ++i) {
+    clips_dirs = config->get_strings("/clips-agent/clips-dirs");
+    for (size_t i = 0; i < clips_dirs.size(); ++i) {
       std::string::size_type pos;
-      if ((pos = cfg_clips_dirs_[i].find("@BASEDIR@")) != std::string::npos) {
-	cfg_clips_dirs_[i].replace(pos, 9, BASEDIR);
+      if (clips_dirs[i][clips_dirs[i].size()-1] != '/') {
+	clips_dirs[i] += "/";
       }
-      if ((pos = cfg_clips_dirs_[i].find("@FAWKES_BASEDIR@")) != std::string::npos) {
-	cfg_clips_dirs_[i].replace(pos, 16, FAWKES_BASEDIR);
-      }
-      if ((pos = cfg_clips_dirs_[i].find("@RESDIR@")) != std::string::npos) {
-	cfg_clips_dirs_[i].replace(pos, 8, RESDIR);
-      }
-      if ((pos = cfg_clips_dirs_[i].find("@CONFDIR@")) != std::string::npos) {
-	cfg_clips_dirs_[i].replace(pos, 9, CONFDIR);
-      }
-      if (cfg_clips_dirs_[i][cfg_clips_dirs_.size()-1] != '/') {
-	cfg_clips_dirs_[i] += "/";
-      }
-      logger->log_warn(name(), "DIR: %s", cfg_clips_dirs_[i].c_str());
+      logger->log_debug(name(), "DIR: %s", clips_dirs[i].c_str());
     }
   } catch (Exception &e) {} // ignore, use default
-
-  cfg_clips_dirs_.insert(cfg_clips_dirs_.begin(), std::string(SRCDIR) + "/clips/");
+  clips_dirs.insert(clips_dirs.begin(), std::string(SRCDIR) + "/clips/");
 
   if (! cfg_skill_sim_) {
     skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
@@ -120,14 +108,23 @@ ClipsAgentThread::init()
 
   switch_if_ = blackboard->open_for_reading<SwitchInterface>("Clips Agent Start");
 
-  clips->add_function("get-clips-dirs", sigc::slot<CLIPS::Values>(sigc::mem_fun(*this, &ClipsAgentThread::clips_get_clips_dirs)));
-  clips->add_function("now", sigc::slot<CLIPS::Values>(sigc::mem_fun( *this, &ClipsAgentThread::clips_now)));
+  clips->evaluate(std::string("(path-add-subst \"@BASEDIR@\" \"") + BASEDIR + "\")");
+  clips->evaluate(std::string("(path-add-subst \"@FAWKES_BASEDIR@\" \"") +
+		  FAWKES_BASEDIR + "\")");
+  clips->evaluate(std::string("(path-add-subst \"@RESDIR@\" \"") + RESDIR + "\")");
+  clips->evaluate(std::string("(path-add-subst \"@CONFDIR@\" \"") + CONFDIR + "\")");
+
+  for (size_t i = 0; i < clips_dirs.size(); ++i) {
+    clips->evaluate("(path-add \"" + clips_dirs[i] + "\")");
+  }
+
   clips->add_function("skill-call-ext", sigc::slot<void, std::string, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_skill_call_ext)));
   clips->add_function("load-config", sigc::slot<void, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_load_config)));
-  clips->add_function("blackboard-add-interface", sigc::slot<void, std::string, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_blackboard_add_interface)));
   clips->add_function("navgraph-load", sigc::slot<CLIPS::Value, std::string>(sigc::mem_fun( *this, &ClipsAgentThread::clips_navgraph_load)));
 
   clips->load(SRCDIR"/clips/navgraph.clp");
+
+  clips->evaluate("(ff-feature-request \"config\")");
 
   if (!clips->batch_evaluate(SRCDIR"/clips/init.clp")) {
     logger->log_error(name(), "Failed to initialize CLIPS environment, "
@@ -154,7 +151,6 @@ ClipsAgentThread::finalize()
   clips->remove_function("now");
   clips->remove_function("skill-call-ext");
   clips->remove_function("load-config");
-  clips->remove_function("blackboard-add-interface");
   clips->remove_function("navgraph-load");
 
   if ( ! cfg_skill_sim_ && skiller_if_->has_writer()) {
@@ -250,42 +246,6 @@ ClipsAgentThread::loop()
     }
   }
 
-  for (InterfaceMap::iterator i = interfaces_.begin(); i != interfaces_.end(); ++i) {
-    i->second->read();
-    if (i->second->changed()) {
-      const Time *t = i->second->timestamp();
-      std::string fact = std::string("(") + i->second->type() +
-	" (id \"" + i->second->id() + "\")" +
-	" (time " + StringConversions::to_string(t->get_sec()) + " "
-	+ StringConversions::to_string(t->get_usec()) + ")";
-
-      InterfaceFieldIterator f, f_end = i->second->fields_end();
-      for (f = i->second->fields(); f != f_end; ++f) {
-	std::string value;
-	if (f.get_type() == IFT_BOOL) {
-	  value = f.get_bool() ? "TRUE" : "FALSE";
-	} else if (f.get_type() == IFT_STRING) {
-	  value = f.get_value_string();
-	  std::string::size_type pos = 0;
-	  while ((pos = value.find("\"", pos)) != std::string::npos) {
-	    value.replace(pos, 1, "\\\"");
-	    pos += 2;
-	  }
-	  value = std::string("\"") + value + "\"";
-	} else {
-	  value = f.get_value_string();
-          std::string::size_type pos;
-          while ((pos = value.find(",")) != std::string::npos) {
-            value = value.erase(pos, 1);
-          }
-	}
-	fact += std::string(" (") + f.get_name() + " " + value + ")";
-      }
-      fact += ")";
-      clips->assert_fact(fact);
-    }
-  }
-
   clips->refresh_agenda();
   clips->run();
 }
@@ -300,27 +260,6 @@ ClipsAgentThread::status_string(SkillerInterface::SkillStatusEnum status)
   case SkillerInterface::S_RUNNING: return "RUNNING";
   default: return "IDLE";
   }
-}
-
-CLIPS::Values
-ClipsAgentThread::clips_now()
-{
-  CLIPS::Values rv;
-  fawkes::Time now(clock);
-  rv.push_back(now.get_sec());
-  rv.push_back(now.get_usec());
-  return rv;
-}
-
-
-CLIPS::Values
-ClipsAgentThread::clips_get_clips_dirs()
-{
-  CLIPS::Values rv(cfg_clips_dirs_.size(), CLIPS::Value(std::string("")));
-  for (size_t i = 0; i < cfg_clips_dirs_.size(); ++i) {
-    rv[i] = cfg_clips_dirs_[i];
-  }
-  return rv;
 }
 
 
@@ -437,118 +376,5 @@ ClipsAgentThread::clips_navgraph_load(std::string filename)
     logger->log_warn(name(), "Failed to load navgraph %s, exception follows", filename.c_str());
     logger->log_warn(name(), e);
     return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
-  }
-}
-
-void
-ClipsAgentThread::clips_blackboard_add_interface(std::string type, std::string id)
-{
-  Interface *iface = NULL;
-
-  if (interfaces_.find(type) == interfaces_.end()) {
-    // no interface of this type registered yet, add deftemplate for it
-    std::string deftemplate =
-      "(deftemplate " + type + "\n" +
-      "  (slot id (type STRING))\n" +
-      "  (multislot time (type INTEGER) (cardinality 2 2))\n";
-
-    try {
-      iface = blackboard->open_for_reading(type.c_str(), id.c_str());      
-    } catch (Exception &e) {
-      logger->log_warn(name(), "Failed to open interface %s:%s, exception follows",
-		       type.c_str(), id.c_str());
-      logger->log_warn(name(), e);
-      return;
-    }
-
-    InterfaceFieldIterator f, f_end = iface->fields_end();
-
-    for (f = iface->fields(); f != f_end; ++f) {
-      std::string type;
-
-      switch (f.get_type()) {
-      case IFT_BOOL:
-	deftemplate += std::string() +
-	  "  (" + ((f.get_length() > 1) ? "multi" : "") + "slot " + f.get_name() +
-	  " (type SYMBOL) (allowed-values TRUE FALSE))\n";
-	break;
-
-      case IFT_INT8:
-      case IFT_UINT8:
-      case IFT_INT16:
-      case IFT_UINT16:
-      case IFT_INT32:
-      case IFT_UINT32:
-      case IFT_INT64:
-      case IFT_UINT64:
-      case IFT_BYTE:
-	deftemplate += std::string() +
-	  "  (" + ((f.get_length() > 1) ? "multi" : "") + "slot " + f.get_name() +
-	  " (type INTEGER))\n";
-	break;
-
-      case IFT_FLOAT:
-      case IFT_DOUBLE:
-	deftemplate += std::string() +
-	  "  (" + ((f.get_length() > 1) ? "multi" : "") + "slot " + f.get_name() +
-	  " (type FLOAT))\n";
-	break;
-
-      case IFT_STRING:
-	deftemplate += std::string() +
-	  "  (" + ((f.get_length() > 1) ? "multi" : "") + "slot " + f.get_name() +
-	  " (type STRING))\n";
-	break;
-
-      case IFT_ENUM:
-	deftemplate += std::string() +
-	  "  (" + ((f.get_length() > 1) ? "multi" : "") + "slot " + f.get_name() +
-	  " (type SYMBOL))\n";
-	break;
-      }
-    }
-
-    deftemplate += ")";
-
-    std::string defrule =
-      "(defrule " + type + "-cleanup\n" +
-      "  (declare (salience -10000))\n" +
-      "  ?f <- (" + type + ")\n" +
-      "  =>\n"
-      "  (retract ?f)\n"
-      ")";
-
-    if (! clips->build(deftemplate) || ! clips->build(defrule)) {
-      logger->log_warn(name(), "Defining blackboard deftemplate or %s failed",
-		       type.c_str());
-      blackboard->close(iface);
-    } else {
-      logger->log_info(name(), "Added interface %s", iface->uid());
-      logger->log_info(name(), "Deftemplate:\n%s", deftemplate.c_str());
-      interfaces_.insert(std::make_pair(type, iface));
-    }
-  } else {
-    std::pair<InterfaceMap::iterator, InterfaceMap::iterator> range =
-      interfaces_.equal_range(type);
-    bool found = false;
-    for (InterfaceMap::iterator i = range.first; i != range.second; ++i) {
-      if ( (type == i->second->type()) && (id == i->second->id()) ) {
-	found = true;
-	break;
-      }
-    }
-    if (! found) {
-      try {
-	iface = blackboard->open_for_reading(type.c_str(), id.c_str());      
-	interfaces_.insert(std::make_pair(type, iface));
-        logger->log_info(name(), "Added interface %s", iface->uid());
-      } catch (Exception &e) {
-	logger->log_warn(name(), "Failed to open interface %s:%s, exception follows",
-			 type.c_str(), id.c_str());
-	logger->log_warn(name(), e);
-	return;
-      }
-
-    }
   }
 }

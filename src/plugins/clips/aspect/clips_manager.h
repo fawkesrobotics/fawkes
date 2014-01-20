@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  clips_inifin.h - Fawkes CLIPSAspect initializer/finalizer
+ *  clips_manager.h - CLIPS manager aspect for Fawkes
  *
- *  Created: Sat Jun 16 14:34:01 2012
- *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Aug 15 18:50:07 2013
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,36 +21,29 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_ASPECT_CLIPS_INIFIN_H_
-#define __PLUGINS_CLIPS_ASPECT_CLIPS_INIFIN_H_
+#ifndef __PLUGINS_CLIPS_ASPECT_CLIPS_MANAGER_H_
+#define __PLUGINS_CLIPS_ASPECT_CLIPS_MANAGER_H_
 
-#include <aspect/inifins/inifin.h>
-#include <plugins/clips/aspect/clips.h>
-
-#include <map>
-#include <string>
+#include <aspect/aspect.h>
+#include <core/utils/lockptr.h>
+#include <plugins/clips/aspect/clips_env_manager.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class Logger;
-class CLIPSEnvManager;
-
-class CLIPSAspectIniFin : public AspectIniFin
+class CLIPSManagerAspect : public virtual Aspect
 {
+  friend class CLIPSManagerAspectIniFin;
+
  public:
-  CLIPSAspectIniFin();
-  ~CLIPSAspectIniFin();
+  CLIPSManagerAspect();
+  virtual ~CLIPSManagerAspect();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+ protected:
+  LockPtr<CLIPSEnvManager> clips_env_mgr;
 
-  void set_manager(LockPtr<CLIPSEnvManager> &clips_env_mgr);
-
- private:
-  LockPtr<CLIPSEnvManager> clips_env_mgr_;
 };
 
 } // end namespace fawkes

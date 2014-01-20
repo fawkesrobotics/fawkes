@@ -106,10 +106,12 @@ class WebReply
   void              add_header(std::string header_string);
   const HeaderMap & headers() const;
   
+  static void       set_caching(bool caching);
 
  private:
   response_code_t  __code;
   HeaderMap        __headers;
+  static bool      __caching;
 };
 
 class DynamicWebReply : public WebReply

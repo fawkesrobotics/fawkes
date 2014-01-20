@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  clips.h - CLIPS aspect for Fawkes
+ *  clips_feature.h - CLIPS feature aspect for Fawkes
  *
- *  Created: Sat Jun 16 14:28:31 2012
- *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jul 25 17:37:58 2013
+ *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_ASPECT_CLIPS_H_
-#define __PLUGINS_CLIPS_ASPECT_CLIPS_H_
+#ifndef __PLUGINS_CLIPS_ASPECT_CLIPS_FEATURE_H_
+#define __PLUGINS_CLIPS_ASPECT_CLIPS_FEATURE_H_
 
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
@@ -38,24 +38,33 @@ namespace fawkes {
 }
 #endif
 
-class CLIPSAspect : public virtual Aspect
-{
-  friend class CLIPSAspectIniFin;
+class CLIPSFeature {
+  friend class CLIPSEnvManager;
 
  public:
-  CLIPSAspect(const char *env_name, const char *log_component_name = 0);
-  virtual ~CLIPSAspect();
+  CLIPSFeature(const char *feature_name);
+  virtual ~CLIPSFeature();
+
+  virtual void clips_context_init(const std::string &env_name,
+				  fawkes::LockPtr<CLIPS::Environment> &clips) = 0;
+  virtual void clips_context_destroyed(const std::string &env_name) = 0;
 
  protected:
-  const std::string            clips_env_name;
-  LockPtr<CLIPS::Environment>  clips;
+  const std::string clips_feature_name;	///< CLIPS feature name
+
+};
+
+class CLIPSFeatureAspect : public virtual Aspect
+{
+  friend class CLIPSFeatureAspectIniFin;
+
+ public:
+  CLIPSFeatureAspect(CLIPSFeature *feature);
+  CLIPSFeatureAspect(const std::list<CLIPSFeature *> features);
+  virtual ~CLIPSFeatureAspect();
 
  private:
-  void init_CLIPSAspect(LockPtr<CLIPS::Environment> clips);
-  void finalize_CLIPSAspect();
-
- private:
-  const std::string CLIPSAspect_log_component_name_;
+  std::list<CLIPSFeature *> clips_features_;
 };
 
 } // end namespace fawkes

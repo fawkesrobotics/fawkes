@@ -21,6 +21,9 @@
  */
 
 #include "clips_thread.h"
+#include "feature_blackboard.h"
+#include "feature_config.h"
+#include <plugins/clips/aspect/clips_env_manager.h>
 
 #include <clipsmm.h>
 
@@ -35,7 +38,7 @@ using namespace fawkes;
 /** Constructor. */
 CLIPSThread::CLIPSThread()
   : Thread("CLIPSThread", Thread::OPMODE_WAITFORWAKEUP),
-    AspectProviderAspect("CLIPSAspect", &__clips_aspect_inifin)
+    AspectProviderAspect(inifin_list())
 {
 }
 
@@ -49,19 +52,46 @@ CLIPSThread::~CLIPSThread()
 void
 CLIPSThread::init()
 {
+  std::string clips_dir = SRCDIR"/clips/";
+  try {
+    clips_dir = config->get_string("/clips/clips-dir");
+  } catch (Exception &e) {} // ignored, use default
+
   CLIPS::init();
-  __clips_aspect_inifin.set_logger(logger);
-  //logger->log_info(name(), "CLIPS initialized");
+  clips_env_mgr_ = new CLIPSEnvManager(logger, clock, clips_dir);
+  clips_aspect_inifin_.set_manager(clips_env_mgr_);
+  clips_feature_aspect_inifin_.set_manager(clips_env_mgr_);
+  clips_manager_aspect_inifin_.set_manager(clips_env_mgr_);
+
+  features_.push_back(new BlackboardCLIPSFeature(logger, blackboard));
+  features_.push_back(new ConfigCLIPSFeature(logger, config));
+  clips_env_mgr_->add_features(features_);
 }
 
 
 void
 CLIPSThread::finalize()
 {
+  clips_env_mgr_.clear();
+
+  for (auto f : features_) {
+    delete f;
+  }
 }
 
 
 void
 CLIPSThread::loop()
 {
+}
+
+
+const std::list<AspectIniFin *>
+CLIPSThread::inifin_list()
+{
+  std::list<AspectIniFin *> rv;
+  rv.push_back(&clips_aspect_inifin_);
+  rv.push_back(&clips_feature_aspect_inifin_);
+  rv.push_back(&clips_manager_aspect_inifin_);
+  return rv;
 }

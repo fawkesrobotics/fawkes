@@ -7,6 +7,10 @@ webview:
   # TCP port for Webview HTTP requests; TCP port
   port: !tcp-port 8088
 
+  # True to allow client side caching. Typically you want this disabled
+  # to force proper reloads each time with fresh data.
+  client_side_caching: false
+  
   # Encrypt connections?
   use_ssl: false
 

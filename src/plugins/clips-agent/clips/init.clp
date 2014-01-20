@@ -8,29 +8,10 @@
 ;---------------------------------------------------------------------------
 
 (defglobal
-  ?*CLIPS_DIRS* = (get-clips-dirs)
-  ?*DEBUG* = 2  ;debug levels: 0 ~ none, 1 ~ minimal, 2 ~ more, 3 ~ maximum
   ?*CONFIG_PREFIX* = "/clips-agent"
 )
 
-(deffunction resolve-file (?file)
-  (foreach ?d ?*CLIPS_DIRS*
-	   (bind ?fn (str-cat ?d ?file))
-	   ;(printout t "Testing file " ?fn crlf)
-	   (if (open ?fn file-clips-tmp)
-	    then
-	     (close file-clips-tmp)
-	     (return ?fn)
-	   )
-  )
-  (return FALSE)
-)
-
-(load* (resolve-file utils.clp))
-(load* (resolve-file time.clp))
-(load* (resolve-file config.clp))
-(load* (resolve-file skills.clp))
-
+(path-load skills.clp)
 
 (defrule load-config
   (agent-init)
@@ -43,7 +24,7 @@
   (confval (path "/clips-agent/agent") (type STRING) (value ?v))
   =>
   (printout t "Loading agent '" ?v "'" crlf)
-  (bind ?agent-file (resolve-file (str-cat ?v ".clp")))
+  (bind ?agent-file (path-resolve (str-cat ?v ".clp")))
   (if ?agent-file
     then (batch* ?agent-file)
     else (printout logerror "Cannot find agent file " ?v crlf))
@@ -64,7 +45,7 @@
   (confval (path "/clips-agent/debug-level") (type UINT) (value ?v))
   =>
   (printout t "Setting debug level to " ?v " (was " ?*DEBUG* ")" crlf)
-  (bind ?*DEBUG* ?v)
+  (debug-set-level ?v)
 )
 
 (defrule silence-debug-facts
