@@ -67,7 +67,7 @@ OBJS_ros_joint = joint_plugin.o joint_thread.o
 
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
-	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator)
+	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
