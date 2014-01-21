@@ -1,0 +1,10 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/eclipse-clp
+---
+eclipse-clp:
+  agent: drive_around #name of the ECLiPSe module in which the agent is stored (needs to be placed in plugins/eclipse-clp/interpreter/)
+  
+  #Basedirectory of ECLiPSe
+  eclipse_dir: /usr/libexec/eclipse-6.1-164-x86_64/
