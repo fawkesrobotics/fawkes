@@ -36,6 +36,35 @@
   (ff-feature-request "redefine-warning")
 )
 
+(defrule cedar-enable-debug
+  (cedar-init)
+  (confval (path "/cedar/clips-debug") (type BOOL) (value TRUE))
+  =>
+  (printout t "CLIPS debugging enabled, watching facts and rules" crlf)
+  (watch facts)
+  (watch rules)
+)
+
+(defrule cedar-silence-debug-facts
+  (declare (salience -1000))
+  (cedar-init)
+  (confval (path "/cedar/clips-debug") (type BOOL) (value TRUE))
+  (confval (path "/cedar/unwatch-facts") (type STRING) (is-list TRUE) (list-value $?lv))
+  =>
+  (printout t "Disabling watching of the following facts: " ?lv crlf)
+  (foreach ?v ?lv (unwatch facts (sym-cat ?v)))
+)
+
+(defrule cedar-silence-debug-rules
+  (declare (salience -1000))
+  (cedar-init)
+  (confval (path "/cedar/clips-debug") (type BOOL) (value TRUE))
+  (confval (path "/cedar/unwatch-rules") (type STRING) (is-list TRUE) (list-value $?lv))
+  =>
+  (printout t "Disabling watching of the following rules: " ?lv crlf)
+  (foreach ?v ?lv (unwatch rules (sym-cat ?v)))
+)
+
 
 (defrule cedar-ros-enable
   (cedar-init)

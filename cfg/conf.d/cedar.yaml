@@ -4,6 +4,23 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/cedar
 ---
 cedar:
+  # If true, will enable watching of facts and rules
+  clips-debug: true
+
+  # If CLIPS debugging is enabled, certain rules and facts can be excluded
+  # from watching, e.g. if they are showing up at too high frequencies or
+  # are not of interest.
+  unwatch-facts:
+    - time
+    - fawkes-plugin
+    - timer
+    - ros-node
+    - ros-topic-connection"]
+  unwatch-rules:
+    - time-retract
+    - blackboard-read
+
+
   # Set to true to load ROS related monitoring code.
   # Requires a ros-model.clp in CONFDIR/cedar defining the system model.
   use-ros: true
