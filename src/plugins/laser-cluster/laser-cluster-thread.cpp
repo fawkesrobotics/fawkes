@@ -127,6 +127,18 @@ LaserClusterThread::init()
   cfg_cluster_switch_tolerance_ = config->get_float(CFG_PREFIX"cluster_switch_tolerance");
   cfg_offset_x_               = config->get_float(CFG_PREFIX"offset_x");
 
+  cfg_selection_mode_ = SELECT_MIN_ANGLE;
+  try {
+    std::string selmode = config->get_string(CFG_PREFIX"cluster_selection_mode");
+    if (selmode == "min-angle") {
+      cfg_selection_mode_ = SELECT_MIN_ANGLE;
+    } else if (selmode == "min-dist") {
+      cfg_selection_mode_ = SELECT_MIN_DIST;
+    } else {
+      logger->log_warn(name(), "Invalid selection mode, using min angle");
+    }
+  } catch (Exception &e) {} // ignored, use default
+
   current_max_x_ = cfg_cluster_max_x_;
 
   finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pcl_.c_str());
@@ -386,36 +398,52 @@ LaserClusterThread::loop()
   }
 
   if (! cluster_indices.empty()) {
-    double min_angle = std::numeric_limits<double>::max();
     unsigned int min_index = std::numeric_limits<unsigned int>::max();
     Eigen::Vector4f min_centroid;
-    for (unsigned int i = 0; i < cluster_indices.size(); ++i) {
-      Eigen::Vector4f centroid;
-      pcl::compute3DCentroid(*noline_cloud, cluster_indices[i].indices, centroid);
-      if ( (centroid.x() >= cfg_cluster_min_x_) && (centroid.x() <= cfg_cluster_max_x_) &&
-	   (centroid.y() >= cfg_cluster_min_y_) && (centroid.y() <= cfg_cluster_max_y_))
-      {
-	double abs_angle = fabs(std::atan2(centroid.y(), centroid.x()));
-	//if (min_index != std::numeric_limits<unsigned int>::max()) {
-	  //logger->log_info(name(), "[L %u] (%f,%f,%f)|%f vs. (%f,%f,%f)|%f: %s", loop_count_,
-	  //		   centroid.x(), centroid.y(), centroid.z(), abs_angle,
-	  //		   min_centroid.x(), min_centroid.y(), min_centroid.z(), min_angle,
-	  //		   (abs_angle < min_angle) ? "true" : "false");
-	//}
-	if (abs_angle < min_angle) {
-	  min_index    = i;
-	  min_angle    = abs_angle;
-	  min_centroid = centroid;
+
+    if (cfg_selection_mode_ == SELECT_MIN_ANGLE) {
+      double min_angle = std::numeric_limits<double>::max();
+
+      for (unsigned int i = 0; i < cluster_indices.size(); ++i) {
+	Eigen::Vector4f centroid;
+	pcl::compute3DCentroid(*noline_cloud, cluster_indices[i].indices, centroid);
+	if ( (centroid.x() >= cfg_cluster_min_x_) && (centroid.x() <= cfg_cluster_max_x_) &&
+	     (centroid.y() >= cfg_cluster_min_y_) && (centroid.y() <= cfg_cluster_max_y_))
+	{
+	  double abs_angle = fabs(std::atan2(centroid.y(), centroid.x()));
+	  if (abs_angle < min_angle) {
+	    min_index    = i;
+	    min_angle    = abs_angle;
+	    min_centroid = centroid;
+	  }
 	}
-      } else {
-	/*
-	logger->log_info(name(), "[L %u] Cluster %u out of bounds (%f,%f) "
-			 "not in ((%f,%f),(%f,%f))",
-			 loop_count_, centroid.x(), centroid.y(),
-			 cfg_cluster_min_x_, cfg_cluster_max_x_,
-			 cfg_cluster_min_y_, cfg_cluster_max_y_);
-	*/
       }
+    } else if (cfg_selection_mode_ == SELECT_MIN_DIST) {
+      double min_dist = std::numeric_limits<double>::max();
+
+      for (unsigned int i = 0; i < cluster_indices.size(); ++i) {
+	Eigen::Vector4f centroid;
+	pcl::compute3DCentroid(*noline_cloud, cluster_indices[i].indices, centroid);
+	if ( (centroid.x() >= cfg_cluster_min_x_) && (centroid.x() <= cfg_cluster_max_x_) &&
+	     (centroid.y() >= cfg_cluster_min_y_) && (centroid.y() <= cfg_cluster_max_y_))
+	{
+	  if (centroid.norm() < min_dist) {
+	    min_index    = i;
+	    min_centroid = centroid;
+	    min_dist = centroid.norm();
+	  }
+	} else {
+	  /*
+	  logger->log_info(name(), "[L %u] Cluster %u out of bounds (%f,%f) "
+			   "not in ((%f,%f),(%f,%f))",
+			   loop_count_, centroid.x(), centroid.y(),
+			   cfg_cluster_min_x_, cfg_cluster_max_x_,
+			   cfg_cluster_min_y_, cfg_cluster_max_y_);
+	  */
+	}
+      }
+    } else {
+      logger->log_error(name(), "Invalid selection mode, cannot select cluster");
     }
 
     if (min_index != std::numeric_limits<unsigned int>::max()) {
