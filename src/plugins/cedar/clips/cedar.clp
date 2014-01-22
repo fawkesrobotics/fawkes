@@ -78,12 +78,12 @@
   (path-load "ros-model.clp")
 )
 
-(defrule cedar-blackboard-enable
+(defrule cedar-fawkes-enable
   (cedar-init)
   (ff-feature blackboard)
   (confval (path "/cedar/use-fawkes") (type BOOL) (value TRUE))
   =>
-  (printout warn "Enabling blackboard monitoring" crlf)
+  (printout warn "Enabling Fawkes monitoring" crlf)
   (ff-feature-request "blackboard")
   (path-load "cedar-fawkes.clp")
 )

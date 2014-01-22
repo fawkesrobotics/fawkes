@@ -13,7 +13,7 @@
 
 (deftemplate fawkes-plugin
   (slot name (type STRING))
-  (slot state (type SYMBOL) (allowed-values LOADED AVAILABLE)))
+  (slot state (type SYMBOL) (allowed-values LOADED AVAILABLE))
 )
 
 (deffunction fawkes-cleanup ()
@@ -28,6 +28,12 @@
 
 
 ; --- RULES - data collection and cleanup
+(defrule fawkes-init
+  (cedar-init)
+  =>
+  (blackboard-enable-time-read)
+)
+
 (defrule fawkes-collect
   (time $?now)
   ?tf <- (timer (name fawkes-collect) (time $?t&:(timeout ?now ?t ?*FAWKES-COLLECT-PERIOD*)))
