@@ -38,6 +38,8 @@ namespace fawkes {
 #endif
 
 
+#define ROUTER_NAME "fawkeslog"
+
 /// @cond INTERNALS
 class CLIPSLogger
 {
@@ -193,7 +195,7 @@ CLIPSEnvManager::new_env(const std::string &log_component_name)
 
     SetEnvironmentContext(env, cm);
 
-    EnvAddRouterWithContext(env, (char *)"fawkeslog",
+    EnvAddRouterWithContext(env, (char *)ROUTER_NAME,
                             /* exclusive */ 30,
                             log_router_query,
                             log_router_print,
@@ -264,7 +266,7 @@ CLIPSEnvManager::destroy_env(const std::string &env_name)
     CLIPSContextMaintainer *cm =
       static_cast<CLIPSContextMaintainer *>(GetEnvironmentContext(env));
 
-    EnvDeleteRouter(env, (char *)"fawkeslog");
+    EnvDeleteRouter(env, (char *)ROUTER_NAME);
     SetEnvironmentContext(env, NULL);
     delete cm;
 
