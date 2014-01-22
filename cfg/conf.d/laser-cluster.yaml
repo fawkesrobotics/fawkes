@@ -6,7 +6,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/laser-cluster
 laser-cluster:
 
   # Automatically start, i.e. set enabled to true?
-  auto-start: false
+  auto-start: true
 
   line_removal: false
   
@@ -42,6 +42,10 @@ laser-cluster:
   # min-angle: minimum angle between forward direction and direction to cluster
   # min-dist: minimum distance from sensor to cluster centroid
   cluster_selection_mode: min-dist
+
+  # The maximum number of clusters to publish on the blackboard
+  # The interfaces will be named "Laser Cluster N" for N=1..max_num_clusters
+  max_num_clusters: 3
   
   # The frame in which the result should be published; frame
   result_frame: /base_link

@@ -93,7 +93,8 @@ class LaserClusterThread
 
   pcl::SACSegmentation<PointType> seg_;
 
-  fawkes::Position3DInterface *cluster_pos_if_;
+  std::vector<fawkes::Position3DInterface *> cluster_pos_ifs_;
+  fawkes::Position3DInterface * cluster_pos_if_;
 
   fawkes::SwitchInterface *switch_if_;
   fawkes::LaserClusterInterface *config_if_;
@@ -121,10 +122,21 @@ class LaserClusterThread
   float        cfg_cluster_switch_tolerance_;
   float        cfg_offset_x_;
   selection_mode_t cfg_selection_mode_;
+  unsigned int cfg_max_num_clusters_;
 
   float        current_max_x_;
 
   unsigned int loop_count_;
+
+  class ClusterInfo {
+  public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    double angle;
+    double dist;
+    unsigned int index;
+    Eigen::Vector4f centroid;
+  };
 
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker  *tt_;

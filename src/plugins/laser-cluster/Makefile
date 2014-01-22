@@ -25,7 +25,7 @@ PRESUBDIRS = interfaces
 
 REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface
 
-CFLAGS += -Wno-unknown-pragmas
+CFLAGS += $(CFLAGS_CPP11) -Wno-unknown-pragmas
 
 # Enable for time measurements
 #CFLAGS += -DUSE_TIMETRACKER
