@@ -48,10 +48,11 @@ else
 endif
 
 ifeq ($(HAVE_ECLIPSE),1)
-  ECLIPSE_LIBDIR = $(shell $(ECLIPSE_BINARY) -e "get_flag(installation_directory,D),printf(\"%p\", [D])")/lib/$(HOSTARCH)
-  ECLIPSE_INCDIR = $(shell $(ECLIPSE_BINARY) -e "get_flag(installation_directory,D),printf(\"%p\", [D])")/include/$(HOSTARCH)
-
-  ECLIPSE_CFLAGS = -I$(ECLIPSE_INCDIR) -DECLIPSE_CODE_DIR=\"$(abspath $(BASEDIR)/src/plugins/eclipse-clp)\"
-  ECLIPSE_LDFLAGS = -L$(ECLIPSE_LIBDIR) -Wl,-R$(ECLIPSE_LIBDIR)
+  ECLIPSE_LIB = $(shell pkg-config --libs eclipse-clp)
+  ECLIPSE_INC = $(shell pkg-config --cflags eclipse-clp)
+  
+  ECLIPSE_CFLAGS = $(ECLIPSE_INC) -DECLIPSE_CODE_DIR=\"$(abspath $(BASEDIR)/src/plugins/eclipse-clp)\"
+  ECLIPSE_LDFLAGS = $(ECLIPSE_LIB)
+  
 endif
 
