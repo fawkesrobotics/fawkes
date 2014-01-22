@@ -10,21 +10,32 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file of cedar
 ;---------------------------------------------------------------------------
 
+
 (defglobal
   ?*CONFIG_PREFIX* = "/cedar"
 )
 
-(path-load "syscond.clp")
-
 (defrule cedar-init
-  (declare (salience 10000))
+  (declare (salience 8000))
   (cedar-init)
   =>
   (printout t "CEDAR starting" crlf)
   (watch facts)
   (watch rules)
+  (path-load "syscond.clp")
   (config-load ?*CONFIG_PREFIX*)
 )
+
+(defrule cedar-enable-redefine-warning
+  (declare (salience 8200))
+  (cedar-init)
+  (ff-feature redefine-warning)
+  (not (ff-feature-loaded redefine-warning))
+  =>
+  (printout t "Enabling redefinition warning feature" crlf)
+  (ff-feature-request "redefine-warning")
+)
+
 
 (defrule cedar-ros-enable
   (cedar-init)
