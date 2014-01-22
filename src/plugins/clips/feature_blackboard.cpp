@@ -82,6 +82,13 @@ BlackboardCLIPSFeature::clips_context_init(const std::string &env_name,
         env_name)
     )
   );
+  clips->add_function("blackboard-close",
+    sigc::slot<void, std::string, std::string>(
+      sigc::bind<0>(
+        sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_close_interface),
+        env_name)
+    )
+  );
   clips->add_function("blackboard-preload",
     sigc::slot<void, std::string>(
       sigc::bind<0>(
@@ -305,6 +312,31 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(std::string env_name,
     }
   }
 
+}
+
+
+void
+BlackboardCLIPSFeature::clips_blackboard_close_interface(std::string env_name,
+							 std::string type, std::string id)
+{
+  std::string name = "BBCLIPS|" + env_name;
+
+  if (envs_.find(env_name) == envs_.end()) {
+    logger_->log_warn(name.c_str(), "Environment %s has not been registered "
+		     "for blackboard feature", env_name.c_str());
+    return;
+  }
+
+  if (interfaces_[env_name].find(type) != interfaces_[env_name].end()) {
+    auto &l = interfaces_[env_name][type];
+    auto iface_it = find_if(l.begin(), l.end(), [&id] (const Interface *iface) { return id == iface->id(); } );
+    if (iface_it != l.end()) {
+      blackboard_->close(*iface_it);
+      l.erase(iface_it);
+      // do NOT remove the list, even if empty, because we need to remember
+      // that we already built the deftemplate and added the cleanup rule
+    }
+  }
 }
 
 void
