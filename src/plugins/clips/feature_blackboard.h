@@ -26,6 +26,7 @@
 #include <plugins/clips/aspect/clips_feature.h>
 
 #include <map>
+#include <list>
 #include <string>
 
 namespace CLIPS {
@@ -53,7 +54,7 @@ class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
   fawkes::Logger     *logger_;
   fawkes::BlackBoard *blackboard_;
 
-  typedef std::multimap<std::string, fawkes::Interface *> InterfaceMap;
+  typedef std::map<std::string, std::list<fawkes::Interface *> > InterfaceMap;
   std::map<std::string, InterfaceMap >  interfaces_;
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
 
@@ -62,7 +63,9 @@ class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
   void clips_blackboard_read(std::string env_name);
   void clips_blackboard_enable_time_read(std::string env_name);
   void clips_blackboard_get_info(std::string env_name);
-
+  bool clips_assert_interface_type(std::string &env_name, std::string &log_name,
+				   fawkes::Interface *iface, std::string &type);
+  void clips_blackboard_preload(std::string env_name, std::string type);
 };
 
 #endif
