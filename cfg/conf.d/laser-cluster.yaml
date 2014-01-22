@@ -37,6 +37,11 @@ laser-cluster:
   # How much must a cluster detection deviate from the previous to consider
   # this to be a different cluster (and thus restart the visibility history)
   cluster_switch_tolerance: 0.2
+
+  # How to select the best cluster?
+  # min-angle: minimum angle between forward direction and direction to cluster
+  # min-dist: minimum distance from sensor to cluster centroid
+  cluster_selection_mode: min-dist
   
   # The frame in which the result should be published; frame
   result_frame: /base_link

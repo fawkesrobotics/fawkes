@@ -98,6 +98,11 @@ class LaserClusterThread
   fawkes::SwitchInterface *switch_if_;
   fawkes::LaserClusterInterface *config_if_;
 
+  typedef enum  {
+    SELECT_MIN_ANGLE,
+    SELECT_MIN_DIST
+  } selection_mode_t;
+
   bool         cfg_line_removal_;
   float        cfg_depth_filter_min_x_;
   float        cfg_depth_filter_max_x_;
@@ -115,6 +120,7 @@ class LaserClusterThread
   float        cfg_cluster_max_y_;
   float        cfg_cluster_switch_tolerance_;
   float        cfg_offset_x_;
+  selection_mode_t cfg_selection_mode_;
 
   float        current_max_x_;
 
