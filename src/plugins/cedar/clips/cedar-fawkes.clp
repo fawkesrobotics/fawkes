@@ -52,3 +52,11 @@
   (retract ?rcpf)
   (fawkes-cleanup)
 )
+
+; --- RULES - enable particular features depending on configuration
+(defrule fawkes-enable-battery
+  (confval (path "/cedar/fawkes/battery/enable") (type BOOL) (value TRUE))
+  =>
+  (blackboard-preload "BatteryInterface")
+  (path-load "fawkes-battery.clp")
+)
