@@ -455,7 +455,7 @@ LaserClusterThread::loop()
 		  { 
 		    return a.angle < b.angle; 
 		  });
-      } else if (cfg_selection_mode_ == SELECT_MIN_ANGLE) {
+      } else if (cfg_selection_mode_ == SELECT_MIN_DIST) {
 	std::sort(cinfos.begin(), cinfos.end(),
 		  [](const ClusterInfo & a, const ClusterInfo & b) -> bool
 		  { 
