@@ -31,7 +31,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_protobuf
 warning_protobuf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting plugin$(TNORMAL) (protobuf not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting protobuf messages$(TNORMAL) (protobuf not found)"
 endif
 
 LIBS_libprotobufmsgs = stdc++
