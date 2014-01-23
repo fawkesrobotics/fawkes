@@ -25,12 +25,12 @@ PRESUBDIRS = aspect
 LIBS_gazebo = fawkescore fawkesaspects fawkesgazeboaspect
 OBJS_gazebo = gazebo_plugin.o node_thread.o
 
-CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
-LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system)
-
 OBJS_all    = $(OBJS_gazebo)
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(call boost-have-libs,system),111)
+  CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
+  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system)
+
   PLUGINS_all = $(PLUGINDIR)/gazebo.$(SOEXT)
 else
   ifneq ($(HAVE_GAZEBO),1)

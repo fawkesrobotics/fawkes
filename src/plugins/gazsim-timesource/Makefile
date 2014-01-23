@@ -32,7 +32,7 @@ OBJS_all = $(OBJS_gazsim_timesource)
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-ifeq ($(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),11)
+ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),111)
   CFLAGS  += $(CFLAGS_PROTOBUF) \
 	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS)) \
 	     $(CFLAGS_GAZEBO)
@@ -42,15 +42,31 @@ ifeq ($(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),11)
 
   PLUGINS_all = $(PLUGINDIR)/gazsim-timesource.so
 else
-  WARN_TARGETS += warning_protobuf
+  ifneq ($(HAVE_GAZEBO),1)
+    WARN_TARGETS += warning_gazebo
+  endif
+  ifneq ($(HAVE_PROTOBUF),1)
+    WARN_TARGETS += warning_protobuf
+  endif
+  ifneq ($(HAVE_BOOST_LIBS),1)
+    WARN_TARGETS += warning_boost
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_protobuf
+.PHONY: warning_gazebo warning_protobuf warning_boost
+warning_gazebo:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-timesource Plugin$(TNORMAL) " \
+		"(Gazebo Simulator not found)"
 warning_protobuf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting plugin$(TNORMAL) (protobuf not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-timesource Plugin$(TNORMAL) " \
+		"(protobuf[-devel] not installed)"
+warning_boost:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-timesource Plugin$(TNORMAL) " \
+		"(required boost libs not installed)"
+
 endif
 
 

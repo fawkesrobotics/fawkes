@@ -29,7 +29,7 @@ OBJS_gazsim_localization = gazsim_localization_plugin.o gazsim_localization_thre
 
 OBJS_all    = $(OBJS_gazsim_localization)
 
-ifeq ($(HAVE_TF),1)
+ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
   CFLAGS  += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
@@ -37,15 +37,29 @@ ifeq ($(HAVE_TF),1)
 
   PLUGINS_all = $(PLUGINDIR)/gazsim-localization.so
 else
-  WARN_TARGETS += warning_tf
+  ifneq ($(HAVE_GAZEBO),1)
+    WARN_TARGETS += warning_gazebo
+  endif
+  ifneq ($(HAVE_PROTOBUF),1)
+    WARN_TARGETS += warning_protobuf
+  endif
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS += warning_tf
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_tf warning_ros warning_geometry_msgs
+.PHONY: warning_tf warning_gazebo warning_protobuf
 warning_tf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Localization-Sim libs" \
-                         "$(TNORMAL) (tf not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-localization Plugin$(TNORMAL) " \
+                         "(tf not available)"
+warning_gazebo:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-localization Plugin$(TNORMAL) " \
+		"(Gazebo Simulator not found)"
+warning_protobuf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-localization Plugin$(TNORMAL) " \
+		"(protobuf[-devel] not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
