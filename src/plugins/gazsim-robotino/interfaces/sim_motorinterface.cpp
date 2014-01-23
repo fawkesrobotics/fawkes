@@ -202,7 +202,7 @@ void SimMotorInterface::on_pos_msg(ConstPosePtr &msg)
       double speed_abs_y = vx_ * sin(ori_) + vy_ * cos(ori_);
       double slipped_x = speed_abs_x * duration * slippery_wheels_threshold_;
       double slipped_y = speed_abs_y * duration * slippery_wheels_threshold_;
-      logger_->log_info(name_, "Wheels are slipping (%f, %f)", slipped_x, slipped_y);
+      //logger_->log_debug(name_, "Wheels are slipping (%f, %f)", slipped_x, slipped_y);
       new_x = x_ + slipped_x;
       new_y = y_ + slipped_y;
       //update the offset (otherwise the slippery error would be corrected in the next iteration)
