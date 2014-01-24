@@ -118,13 +118,6 @@ CSlowForwardDriveModule::SlowForward_Translation( float dist_to_target, float di
    */
   des_trans = LinInterpol( fabs(des_rot), 0.f, M_PI_2, m_MaxTranslation, 0.0);
 
-  // test the borders (no agressive behaviour!)
-  if ( des_trans < 0.0 )
-    des_trans = 0.0;
-  if ( des_trans > m_MaxTranslation )
-    des_trans = m_MaxTranslation;
-
-
   // OLD STUFF!!!
   //   // check stopping on target and compare distances with choosen velocities
   //   if ( fabs( dist_to_target - dist_to_front ) < 0.2 )
@@ -200,14 +193,6 @@ CSlowForwardDriveModule::Update()
   float alpha          = atan2( m_LocalTargetY, m_LocalTargetX );
   float dist_to_trajec = sqrt( sqr(m_LocalTrajecX) + sqr(m_LocalTrajecY) );
 
-  m_ProposedRotation = SlowForward_Curvature( dist_to_target, dist_to_trajec, alpha,
-                                              m_RoboTrans, m_RoboRot );
-
-  if ( fabs( alpha ) > M_PI_2+0.1 )
-    m_ProposedTranslation = 0.0;
-  else
-    m_ProposedTranslation = SlowForward_Translation( dist_to_target, dist_to_trajec, alpha,
-                                                     m_RoboTrans, m_RoboRot, m_ProposedRotation );
 
   // last time border check............. IMPORTANT!!!
   // because the motorinstructor just tests robots physical borders.
@@ -216,23 +201,32 @@ CSlowForwardDriveModule::Update()
     m_ProposedRotation    = 0.0;
 
   } else {
-    m_ProposedTranslation = std::min ( m_ProposedTranslation, m_MaxTranslation );
-    m_ProposedTranslation = std::max ( m_ProposedTranslation, (float)0.0 );
+    // Calculate ideal rotation and translation
+    m_ProposedRotation = SlowForward_Curvature( dist_to_target, dist_to_trajec, alpha,
+                                                m_RoboTrans, m_RoboRot );
 
+    m_ProposedTranslation = SlowForward_Translation( dist_to_target, dist_to_trajec, alpha,
+                                                     m_RoboTrans, m_RoboRot, m_ProposedRotation );
+
+    // Track relation between proposed-rotation and max-rotation. Use this to adjust the
+    // proposed-translation. Only required if the value is smaller than 1, otherwise we are not
+    // reducing the proposed-rotation, because it is smaller than max-rotaion
+    float trans_correction = fabs( m_MaxRotation / m_ProposedRotation );
+    if( trans_correction < 1.f ) {
+      // for now we simply reduce the translation quadratically to how much the rotation has been reduced
+      m_ProposedTranslation *= trans_correction * trans_correction;
+    }
+
+    // Check rotation limits.
+    // Remember, possible reduction of rotation has been considered already (trans_correction)
     if (m_ProposedRotation >  m_MaxRotation)
       m_ProposedRotation =  m_MaxRotation;
-
-    if (m_ProposedRotation < -m_MaxRotation)
+    else if (m_ProposedRotation < -m_MaxRotation)
       m_ProposedRotation = -m_MaxRotation;
 
-    if ( m_StopAtTarget == false && dist_to_target < 1.0 ) {
-      // Reduziere die rotationsgeschwindigkeiten, damit keine wilden lenkmanoever kommen
-      //  wenn stop on target = false ist.
-      if ( m_ProposedRotation > 0.5 )
-        m_ProposedRotation =  0.5;
-      else if ( m_ProposedRotation < -0.5 )
-        m_ProposedRotation = -0.5;
-    }
+    // Check translation limits
+    m_ProposedTranslation = std::max( 0.f, std::min (m_ProposedTranslation, m_MaxTranslation) );
+    // maybe consider adjusting rotation again, in case we had to reduce the translation
   }
 }
 
