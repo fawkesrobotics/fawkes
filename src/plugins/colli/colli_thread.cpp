@@ -389,9 +389,9 @@ ColliThread::loop()
                                                           m_pMotorInstruct->GetCurrentOri() );
         // need to consider minimum rotation velocity
         if ( m_ProposedRotation > 0.0 )
-          m_ProposedRotation = std::max(  cfg_min_rot_, m_ProposedRotation );
+          m_ProposedRotation = std::min( m_pColliTargetObj->max_rotation(), std::max( cfg_min_rot_, m_ProposedRotation));
         else
-          m_ProposedRotation = std::min( -cfg_min_rot_, m_ProposedRotation );
+          m_ProposedRotation = std::max(-m_pColliTargetObj->max_rotation(), std::min(-cfg_min_rot_, m_ProposedRotation));
 
         m_pLaserOccGrid->ResetOld();
 
