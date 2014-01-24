@@ -252,8 +252,8 @@ CSelectDriveMode::Update( bool escape )
                                      m_pMotor->GetCurrentY(),
                                      m_pMotor->GetCurrentOri() );
 
-    m_pDriveMode->SetCurrentRoboSpeed( m_pMotor->GetMotorDesiredTranslation(),
-                                       m_pMotor->GetMotorDesiredRotation() );
+    m_pDriveMode->SetCurrentRoboSpeed( m_pMotor->GetMotorCurrentTranslation(),
+                                       m_pMotor->GetMotorCurrentRotation() );
 
     m_pDriveMode->SetCurrentTarget( m_pColliTarget->dest_x(),
                                     m_pColliTarget->dest_y(),
