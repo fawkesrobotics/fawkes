@@ -142,7 +142,8 @@ class ColliThread
 
   float cfg_min_rot_;             /**< The minimum rotation speed. */
   float cfg_min_drive_dist_;      /**< The minimum distance to drive straight to target */
-  float cfg_min_drive_rot_dist_;  /**< The minimum distance to drive to AND rotate at target */
+  float cfg_min_long_dist_drive_; /**< The minimum distance to drive straight to target in a long distance */
+  float cfg_min_long_dist_prepos_;/**< The minimum distance to drive to a pre-positino of a target in long distance */
   float cfg_min_rot_dist_;        /**< The minimum rotation distance to rotate, when at target */
   float cfg_target_pre_pos_;      /**< Distance to target pre-position (only if ColliState == DriveToOrientPoint) */
 

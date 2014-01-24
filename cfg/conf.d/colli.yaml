@@ -39,13 +39,20 @@ plugins/colli:
   # The minimum rotation speed (in rad/s). Used for rotating at target
   min_rot: 0.1
 
-  # The minimum distance to target, such that colli decides to drive straight to target
-  min_drive_distance: 1.5
+  # The minimum distance to target, such that colli decides to drive straight to target.
+  # This is the lowest threshold, anything below this and the colli won't move. This will also
+  # be used to check whether the colli has reached its target position.
+  min_drive_distance: 0.1
 
-  # The minimum distance to target, such that colli drives AND orients
-  min_drive_rot_distance: 2.1
+  # The minimum distance to target in long distance, such that colli decides to drive straight to target.
+  min_long_dist_drive: 0.15
 
-  # The minimum orientation difference, such that colli rotates (in rad)
+  # The minimum distance to target in long distance, such that colli drives to a pre-position AND orients
+  # towards the target, so that the robot can approach the target with the front.
+  min_long_dist_prepos: 2.1
+
+  # The minimum orientation difference, such that colli rotates when robot is at target position(in rad)
+  # No translation is executed at this point anymore.
   min_rot_distance: 0.1
 
   # If the target is "far" away (>= min_drive_rot_distance), we approach a pre-position to

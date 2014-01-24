@@ -70,11 +70,12 @@ ColliThread::init()
 
   cfg_visualize_idle_   = config->get_bool((cfg_prefix + "visualize_idle").c_str());
 
-  cfg_min_rot_            = config->get_float((cfg_prefix + "min_rot").c_str());
-  cfg_min_drive_dist_     = config->get_float((cfg_prefix + "min_drive_distance").c_str());
-  cfg_min_drive_rot_dist_ = config->get_float((cfg_prefix + "min_drive_rot_distance").c_str());
-  cfg_min_rot_dist_       = config->get_float((cfg_prefix + "min_rot_distance").c_str());
-  cfg_target_pre_pos_     = config->get_float((cfg_prefix + "pre_position_distance").c_str());
+  cfg_min_rot_              = config->get_float((cfg_prefix + "min_rot").c_str());
+  cfg_min_drive_dist_       = config->get_float((cfg_prefix + "min_drive_distance").c_str());
+  cfg_min_long_dist_drive_  = config->get_float((cfg_prefix + "min_long_dist_drive").c_str());
+  cfg_min_long_dist_prepos_ = config->get_float((cfg_prefix + "min_long_dist_prepos").c_str());
+  cfg_min_rot_dist_         = config->get_float((cfg_prefix + "min_rot_distance").c_str());
+  cfg_target_pre_pos_       = config->get_float((cfg_prefix + "pre_position_distance").c_str());
 
   cfg_frame_base_       = config->get_string((cfg_prefix + "frame/base").c_str());
   cfg_frame_laser_      = config->get_string((cfg_prefix + "frame/laser").c_str());
@@ -562,7 +563,10 @@ void
 ColliThread::UpdateColliStateMachine()
 {
   // initialize
-  m_ColliStatus = NothingToDo;
+  if( m_pColliTargetObj->changed() ) {
+    // new target!
+    m_ColliStatus = NothingToDo;
+  }
 
   float curPosX = m_pMotorInstruct->GetCurrentX();
   float curPosY = m_pMotorInstruct->GetCurrentY();
@@ -575,6 +579,10 @@ ColliThread::UpdateColliStateMachine()
   bool  orient = m_pColliTargetObj->is_orient_at_target();
 
   float targetDist = distance(targetX, targetY, curPosX, curPosY);
+
+  bool isDriving = m_ColliStatus == DriveToTarget;
+  bool isNewShortTarget = (m_pColliTargetObj->dest_dist() < cfg_min_long_dist_drive_)
+                       && (m_pColliTargetObj->dest_dist() >= cfg_min_drive_dist_);
 
   //  bool  stop_on_target =  m_pColliTargetObj->StopOnTarget();
 
@@ -616,9 +624,37 @@ ColliThread::UpdateColliStateMachine()
 //  }
 //     }
 
-  // Real driving....
-  if( orient && ( targetDist >= cfg_min_drive_rot_dist_ ) ) {
-    //we approach a point prior to the target, to adjust the orientation a little
+  /* Decide which status we need to switch to.
+   * We keep the current status, unless one of the following happens:
+   * 1) The target is far away
+   *    -> we drive to the target via a pre-position
+   * 2) The target was initially far away, now exceeds a minimum-distance so that it can drive
+   *    straight to the target without a pre-position.
+   *    -> we drive to that target directly
+   * 3) The robot is considered to be "at target position" and exceeds a minimum angle to the target
+   *    orientation
+   *    -> we rotate towards the target rotation.
+   * 4) The new target is in a short distance (not as far as in case (2) yet)
+   *   -> we drive to that target directly
+   *
+   * Special cases are also considered:
+   * 1') We reached the target position and are already adjusting orientation
+   *    -> ONLY rotate at this point, and finish when rotation is over (avoid driving again)
+   * 2') We are driving straight to the target, but are not close enough yet to it to say "stop".
+   *    -> continue drivint straight to the target, even if the distance would not trigger (2) from above
+   *       anymore.
+   *
+   * 5) Other than that, we have nothing to do :)
+   */
+
+  if( m_ColliStatus == OrientAtTarget ) { // case (1')
+    if ( !orient || ( fabs( normalize_mirror_rad(curPosO - targetO) ) < cfg_min_rot_dist_ ) )
+      m_ColliStatus = NothingToDo; // we don't need to rotate anymore; case
+    return;
+  }
+
+  if( orient && ( targetDist >= cfg_min_long_dist_prepos_ ) ) { // case (1)
+    // We approach a point prior to the target, to adjust the orientation a little
     float pre_pos_dist = cfg_target_pre_pos_;
     if ( m_pMotorInstruct->GetUserDesiredTranslation() < 0 )
       pre_pos_dist = -pre_pos_dist;
@@ -629,17 +665,19 @@ ColliThread::UpdateColliStateMachine()
     m_ColliStatus = DriveToOrientPoint;
     return;
 
-  } else if( targetDist >= cfg_min_drive_dist_ )  { // soll im navigator wegen intercept parametrisierbar sein
+  } else if( (targetDist >= cfg_min_long_dist_drive_)                  // case (2)
+          || (isDriving && targetDist >= cfg_min_drive_dist_)          // case (2')
+          || (isNewShortTarget && targetDist >= cfg_min_drive_dist_) ) { // case (4)
     m_TargetPointX = targetX;
     m_TargetPointY = targetY;
     m_ColliStatus = DriveToTarget;
     return;
 
-  } else if ( orient && ( fabs( normalize_mirror_rad(curPosO - targetO) ) >= cfg_min_rot_dist_ ) ) {
+  } else if ( orient && ( fabs( normalize_mirror_rad(curPosO - targetO) ) >= cfg_min_rot_dist_ ) ) { // case (3)
     m_ColliStatus = OrientAtTarget;
     return;
 
-  } else {
+  } else {  // case (5)
     m_ColliStatus = NothingToDo;
     return;
   }
