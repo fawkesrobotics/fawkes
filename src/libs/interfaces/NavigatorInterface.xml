@@ -149,6 +149,10 @@
     <comment>States the maximum velocity of the robot for driving/walking, but not for turning.</comment>
     <ref>max_velocity</ref>
   </message>
+  <message name="SetMaxRotation">
+    <comment>States the maximum velocity of the robot for rotating/turning.</comment>
+    <ref>max_rotation</ref>
+  </message>
   <message name="SetEscaping">
     <comment>Sets if escaping is allowed (true) or not (false).</comment>
     <ref>escaping_enabled</ref>

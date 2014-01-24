@@ -106,13 +106,14 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("ObstacleMessage");
   add_messageinfo("ResetOdometryMessage");
   add_messageinfo("SetMaxVelocityMessage");
+  add_messageinfo("SetMaxRotationMessage");
   add_messageinfo("SetEscapingMessage");
   add_messageinfo("SetSecurityDistanceMessage");
   add_messageinfo("SetDriveModeMessage");
   add_messageinfo("SetStopAtTargetMessage");
   add_messageinfo("SetOrientAtTargetMessage");
   add_messageinfo("ResetParametersMessage");
-  unsigned char tmp_hash[] = {0x8, 0xe0, 0x75, 0x4f, 0xbd, 0x1e, 0x1f, 0x48, 0xcf, 0x21, 0xe7, 0x97, 0x60, 0x39, 0xaa, 0x2f};
+  unsigned char tmp_hash[] = {0x18, 0x12, 0x5a, 0x5c, 0x33, 0xb7, 0x54, 0x78, 0x2f, 0x3a, 0x8c, 0x58, 0x59, 0x63, 0x7c, 0x19};
   set_hash(tmp_hash);
 }
 
@@ -745,6 +746,8 @@ NavigatorInterface::create_message(const char *type) const
     return new ResetOdometryMessage();
   } else if ( strncmp("SetMaxVelocityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetMaxVelocityMessage();
+  } else if ( strncmp("SetMaxRotationMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetMaxRotationMessage();
   } else if ( strncmp("SetEscapingMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetEscapingMessage();
   } else if ( strncmp("SetSecurityDistanceMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -1660,6 +1663,96 @@ NavigatorInterface::SetMaxVelocityMessage::clone() const
 {
   return new NavigatorInterface::SetMaxVelocityMessage(this);
 }
+/** @class NavigatorInterface::SetMaxRotationMessage <interfaces/NavigatorInterface.h>
+ * SetMaxRotationMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_max_rotation initial value for max_rotation
+ */
+NavigatorInterface::SetMaxRotationMessage::SetMaxRotationMessage(const float ini_max_rotation) : Message("SetMaxRotationMessage")
+{
+  data_size = sizeof(SetMaxRotationMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMaxRotationMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->max_rotation = ini_max_rotation;
+  add_fieldinfo(IFT_FLOAT, "max_rotation", 1, &data->max_rotation);
+}
+/** Constructor */
+NavigatorInterface::SetMaxRotationMessage::SetMaxRotationMessage() : Message("SetMaxRotationMessage")
+{
+  data_size = sizeof(SetMaxRotationMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMaxRotationMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "max_rotation", 1, &data->max_rotation);
+}
+
+/** Destructor */
+NavigatorInterface::SetMaxRotationMessage::~SetMaxRotationMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::SetMaxRotationMessage::SetMaxRotationMessage(const SetMaxRotationMessage *m) : Message("SetMaxRotationMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetMaxRotationMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get max_rotation value.
+ * Maximum rotation velocity
+ * @return max_rotation value
+ */
+float
+NavigatorInterface::SetMaxRotationMessage::max_rotation() const
+{
+  return data->max_rotation;
+}
+
+/** Get maximum length of max_rotation value.
+ * @return length of max_rotation value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::SetMaxRotationMessage::maxlenof_max_rotation() const
+{
+  return 1;
+}
+
+/** Set max_rotation value.
+ * Maximum rotation velocity
+ * @param new_max_rotation new max_rotation value
+ */
+void
+NavigatorInterface::SetMaxRotationMessage::set_max_rotation(const float new_max_rotation)
+{
+  data->max_rotation = new_max_rotation;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::SetMaxRotationMessage::clone() const
+{
+  return new NavigatorInterface::SetMaxRotationMessage(this);
+}
 /** @class NavigatorInterface::SetEscapingMessage <interfaces/NavigatorInterface.h>
  * SetEscapingMessage Fawkes BlackBoard Interface Message.
  * 
@@ -2197,28 +2290,32 @@ NavigatorInterface::message_valid(const Message *message) const
   if ( m7 != NULL ) {
     return true;
   }
-  const SetEscapingMessage *m8 = dynamic_cast<const SetEscapingMessage *>(message);
+  const SetMaxRotationMessage *m8 = dynamic_cast<const SetMaxRotationMessage *>(message);
   if ( m8 != NULL ) {
     return true;
   }
-  const SetSecurityDistanceMessage *m9 = dynamic_cast<const SetSecurityDistanceMessage *>(message);
+  const SetEscapingMessage *m9 = dynamic_cast<const SetEscapingMessage *>(message);
   if ( m9 != NULL ) {
     return true;
   }
-  const SetDriveModeMessage *m10 = dynamic_cast<const SetDriveModeMessage *>(message);
+  const SetSecurityDistanceMessage *m10 = dynamic_cast<const SetSecurityDistanceMessage *>(message);
   if ( m10 != NULL ) {
     return true;
   }
-  const SetStopAtTargetMessage *m11 = dynamic_cast<const SetStopAtTargetMessage *>(message);
+  const SetDriveModeMessage *m11 = dynamic_cast<const SetDriveModeMessage *>(message);
   if ( m11 != NULL ) {
     return true;
   }
-  const SetOrientAtTargetMessage *m12 = dynamic_cast<const SetOrientAtTargetMessage *>(message);
+  const SetStopAtTargetMessage *m12 = dynamic_cast<const SetStopAtTargetMessage *>(message);
   if ( m12 != NULL ) {
     return true;
   }
-  const ResetParametersMessage *m13 = dynamic_cast<const ResetParametersMessage *>(message);
+  const SetOrientAtTargetMessage *m13 = dynamic_cast<const SetOrientAtTargetMessage *>(message);
   if ( m13 != NULL ) {
+    return true;
+  }
+  const ResetParametersMessage *m14 = dynamic_cast<const ResetParametersMessage *>(message);
+  if ( m14 != NULL ) {
     return true;
   }
   return false;

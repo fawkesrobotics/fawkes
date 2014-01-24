@@ -346,6 +346,33 @@ class NavigatorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetMaxRotationMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float max_rotation; /**< Maximum rotation velocity */
+    } SetMaxRotationMessage_data_t;
+#pragma pack(pop)
+
+    SetMaxRotationMessage_data_t *data;
+
+   public:
+    SetMaxRotationMessage(const float ini_max_rotation);
+    SetMaxRotationMessage();
+    ~SetMaxRotationMessage();
+
+    SetMaxRotationMessage(const SetMaxRotationMessage *m);
+    /* Methods */
+    float max_rotation() const;
+    void set_max_rotation(const float new_max_rotation);
+    size_t maxlenof_max_rotation() const;
+    virtual Message * clone() const;
+  };
+
   class SetEscapingMessage : public Message
   {
    private:

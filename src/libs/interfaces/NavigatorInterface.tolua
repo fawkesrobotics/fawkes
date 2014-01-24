@@ -137,6 +137,17 @@ class NavigatorInterface : public Interface
     int maxlenof_max_velocity() const;
   };
 
+  class SetMaxRotationMessage : public Message
+  {
+    SetMaxRotationMessage(float ini_max_rotation);
+    SetMaxRotationMessage();
+    ~SetMaxRotationMessage();
+
+    float max_rotation();
+    void set_max_rotation(const float new_max_rotation);
+    int maxlenof_max_rotation() const;
+  };
+
   class SetEscapingMessage : public Message
   {
     SetEscapingMessage(bool ini_escaping_enabled);
