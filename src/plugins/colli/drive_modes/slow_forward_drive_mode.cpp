@@ -78,7 +78,7 @@ CSlowForwardDriveModule::~CSlowForwardDriveModule()
  */
 float
 CSlowForwardDriveModule::SlowForward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-                                                float trans_0, float rot_0 )
+                                                float cur_trans, float cur_rot )
 {
   return 1.2*alpha;
 }
@@ -96,21 +96,21 @@ CSlowForwardDriveModule::SlowForward_Curvature( float dist_to_target, float dist
  */
 float
 CSlowForwardDriveModule::SlowForward_Translation( float dist_to_target, float dist_to_front, float alpha,
-                                                  float trans_0, float rot_0, float rot_1 )
+                                                  float cur_trans, float cur_rot, float des_rot )
 {
-  float trans_1 = 0.0;
+  float des_trans = 0.0;
 
-  if ( fabs( rot_1 ) >= 0.0 && fabs( rot_1 ) <= 1.0 )
-    trans_1 = LinInterpol( fabs( rot_1 ), 1.0, 0.0, 0.7, m_MaxTranslation+0.1 );
-  else if ( fabs( rot_1 ) > 1.0 )
-    trans_1 = LinInterpol( fabs( rot_1 ), M_PI, 1.0, 0.0, 0.7 );
+  if ( fabs( des_rot ) >= 0.0 && fabs( des_rot ) <= 1.0 )
+    des_trans = LinInterpol( fabs( des_rot ), 1.0, 0.0, 0.7, m_MaxTranslation+0.1 );
+  else if ( fabs( des_rot ) > 1.0 )
+    des_trans = LinInterpol( fabs( des_rot ), M_PI, 1.0, 0.0, 0.7 );
 
 
   // test the borders (no agressive behaviour!)
-  if ( trans_1 < 0.0 )
-    trans_1 = 0.0;
-  if ( trans_1 > m_MaxTranslation )
-    trans_1 = m_MaxTranslation;
+  if ( des_trans < 0.0 )
+    des_trans = 0.0;
+  if ( des_trans > m_MaxTranslation )
+    des_trans = m_MaxTranslation;
 
 
   // OLD STUFF!!!
@@ -118,13 +118,13 @@ CSlowForwardDriveModule::SlowForward_Translation( float dist_to_target, float di
   //   if ( fabs( dist_to_target - dist_to_front ) < 0.2 )
   //     {
   //       if (m_StopAtTarget == true)
-  //  trans_1 = min( trans_1, dist_to_target*1.5 );
+  //  des_trans = min( des_trans, dist_to_target*1.5 );
   //       else
   //  ;  // do not stop, so drive behind the target with full power
   //     }
   //   else
   //     {
-  //       trans_1 = min( trans_1, dist_to_front );
+  //       des_trans = min( des_trans, dist_to_front );
   //     }
   // OLD STUFF END HERE
 
@@ -134,16 +134,16 @@ CSlowForwardDriveModule::SlowForward_Translation( float dist_to_target, float di
   float trans_front  = 10000.0;
 
   if ( m_StopAtTarget == true )
-    trans_target = GuaranteeTransStop( dist_to_target, trans_0, trans_1 );
+    trans_target = GuaranteeTransStop( dist_to_target, cur_trans, des_trans );
 
   // And the next collision point
   if ( dist_to_front < dist_to_target )
-    trans_front = GuaranteeTransStop( (1.0*dist_to_front)/2.0, trans_0, trans_1 );
+    trans_front = GuaranteeTransStop( (1.0*dist_to_front)/2.0, cur_trans, des_trans );
   // NEW STUFF END HERE
 
-  trans_1 = std::min( trans_1, std::min( trans_target, trans_front ) );
+  des_trans = std::min( des_trans, std::min( trans_target, trans_front ) );
 
-  return trans_1;
+  return des_trans;
 }
 
 
