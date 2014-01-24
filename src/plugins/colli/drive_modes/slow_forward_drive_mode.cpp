@@ -98,6 +98,11 @@ float
 CSlowForwardDriveModule::SlowForward_Translation( float dist_to_target, float dist_to_front, float alpha,
                                                   float cur_trans, float cur_rot, float des_rot )
 {
+  if( fabs(alpha) >= M_PI_2 ) {
+    // target is more than +-90° away. Turn without driving first
+    return 0.f;
+  }
+
   float des_trans = 0.0;
 
   if ( fabs( des_rot ) >= 0.0 && fabs( des_rot ) <= 1.0 )
