@@ -116,7 +116,9 @@ class CAbstractDriveMode
 
 private:
 
+  float m_cMaxTransAcc;
   float m_cMaxTransDec;
+  float m_cMaxRotAcc;
   float m_cMaxRotDec;
 };
 
@@ -141,8 +143,10 @@ CAbstractDriveMode::CAbstractDriveMode(fawkes::Logger* logger, fawkes::Configura
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
 
   // read m_cMaxTransDec and m_cMaxRotDec
-  m_cMaxTransDec = 0.75*config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_TRANS_DEC");
-  m_cMaxRotDec   = 0.75*config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_ROT_DEC");
+  m_cMaxTransAcc = /*0.75* */config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_TRANS_ACC");
+  m_cMaxTransDec = /*0.75* */config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_TRANS_DEC");
+  m_cMaxRotAcc   = /*0.75* */config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_ROT_ACC");
+  m_cMaxRotDec   = /*0.75* */config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_ROT_DEC");
 
   logger_->log_info("CAbstractDriveMode", "(Constructor): Exiting...");
 }
@@ -300,14 +304,26 @@ CAbstractDriveMode::GuaranteeTransStop( float distance,
   if ( current_trans < 0.05 )
     return desired_trans;
 
+  // dividing by 10 because we're called at 10Hz (TODO: use config value!!)
   int time_needed_to_distance = (int)( distance / (current_trans/10.0) );
-  int time_needed_to_stop = (int)( desired_trans / m_cMaxTransDec );
+
+  /* (changes made during AdoT)
+   * 0.1 is an empirical value causing the expected deceleration while
+   * calculating with a slower one. This is likely the difference between what
+   * the colli wants and the motor actually does.
+   * We also add 1, to start deceleration 1 step earlier than the calculation
+   * suggests. Tests showed better results. We could probably skip this, if we
+   * had a proper calculation of velocity adjustment...
+   */
+  int time_needed_to_stop = (int)( current_trans / (0.1*m_cMaxTransDec) ) +1;
 
   if( time_needed_to_stop >= time_needed_to_distance ) {
-    float value = std::max( 0.0, current_trans - (1.0 * m_cMaxTransDec) );
+    float value = std::max( 0.f, current_trans - m_cMaxTransDec );
     return value;
   } else {
-    float value = std::min( current_trans + m_cMaxTransDec, desired_trans );
+    float value = std::min( current_trans + m_cMaxTransAcc, desired_trans );
+    // Use this if you are very cautions:
+    //float value = std::min( current_trans + std::min(m_cMaxTransDec, m_cMaxTransAcc), desired_trans );
     return value;
   }
 }
