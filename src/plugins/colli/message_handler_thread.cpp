@@ -134,6 +134,7 @@ ColliMessageHandlerThread::loop()
       if_navi_->set_dest_x(msg->x());
       if_navi_->set_dest_y(msg->y());
       if_navi_->set_dest_ori(msg->orientation());
+      if_navi_->set_dest_dist(sqrt(msg->x()*msg->x() + msg->y()*msg->y()));
       if_navi_->set_final(false);
 
       colli_relgoto(msg->x(), msg->y(), msg->orientation());
@@ -273,6 +274,7 @@ ColliMessageHandlerThread::colli_stop()
   if_colli_target_->set_dest_x( if_motor_->odometry_position_x() );
   if_colli_target_->set_dest_y( if_motor_->odometry_position_y() );
   if_colli_target_->set_dest_ori( if_motor_->odometry_orientation() );
+  if_colli_target_->set_dest_dist( 0.f );
 
   if_colli_target_->set_drive_mode( NavigatorInterface::MovingNotAllowed );
   if_colli_target_->set_stop_at_target( true );
@@ -307,6 +309,12 @@ ColliMessageHandlerThread::colli_goto(float x, float y, float ori)
   if_colli_target_->set_dest_x( x );
   if_colli_target_->set_dest_y( y );
   if_colli_target_->set_dest_ori( ori );
+
+  // x and y are not needed anymore. use them for calculation of target distance
+  x -= if_motor_->odometry_position_x();
+  y -= if_motor_->odometry_position_y();
+  float dist = sqrt(x*x + y*y);
+  if_colli_target_->set_dest_dist(dist);
 
   if_colli_target_->set_drive_mode( drive_mode_ );
   if_colli_target_->set_security_distance( security_distance_ );
