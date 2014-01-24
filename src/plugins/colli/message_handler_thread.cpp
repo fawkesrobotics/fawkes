@@ -61,6 +61,7 @@ ColliMessageHandlerThread::init()
   std::string cfg_prefix = "/plugins/colli/";
   cfg_security_distance_ = config->get_float((cfg_prefix + "security_distance").c_str());
   cfg_max_velocity_      = config->get_float((cfg_prefix + "max_velocity").c_str());
+  cfg_max_rotation_      = config->get_float((cfg_prefix + "max_rotation").c_str());
   cfg_escaping_enabled_  = config->get_bool((cfg_prefix + "escaping_enabled").c_str());
   cfg_stop_at_target_    = config->get_bool((cfg_prefix + "stop_at_target").c_str());
   cfg_orient_at_target_  = config->get_bool((cfg_prefix + "orient_at_target").c_str());
@@ -86,6 +87,7 @@ ColliMessageHandlerThread::init()
 
   security_distance_ = cfg_security_distance_;
   max_velocity_      = cfg_max_velocity_;
+  max_rotation_      = cfg_max_rotation_;
   escaping_enabled_  = cfg_escaping_enabled_;
   stop_at_target_    = cfg_stop_at_target_;
   orient_at_target_  = cfg_orient_at_target_;
@@ -174,6 +176,13 @@ ColliMessageHandlerThread::loop()
       max_velocity_ = msg->max_velocity();
       if_navi_->set_max_velocity(max_velocity_);
 
+    } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetMaxRotationMessage>() ) {
+      NavigatorInterface::SetMaxRotationMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetMaxRotationMessage>();
+
+      logger->log_debug(name(), "setting max rotation velocity to %f", msg->max_rotation());
+      max_velocity_ = msg->max_rotation();
+      if_navi_->set_max_rotation(max_rotation_);
+
     } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetEscapingMessage>() ) {
       NavigatorInterface::SetEscapingMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetEscapingMessage>();
 
@@ -213,6 +222,7 @@ ColliMessageHandlerThread::loop()
 
       logger->log_debug(name(), "resetting colli parameters to default values (from config)");
       max_velocity_      = cfg_max_velocity_;
+      max_rotation_      = cfg_max_rotation_;
       escaping_enabled_  = cfg_escaping_enabled_;
       security_distance_ = cfg_security_distance_;
       stop_at_target_    = cfg_stop_at_target_;
@@ -220,6 +230,7 @@ ColliMessageHandlerThread::loop()
       drive_mode_        = cfg_drive_mode_;
 
       if_navi_->set_max_velocity(max_velocity_);
+      if_navi_->set_max_rotation(max_rotation_);
       if_navi_->set_escaping_enabled(escaping_enabled_);
       if_navi_->set_security_distance(security_distance_);
       if_navi_->set_stop_at_target(stop_at_target_);
@@ -300,6 +311,7 @@ ColliMessageHandlerThread::colli_goto(float x, float y, float ori)
   if_colli_target_->set_drive_mode( drive_mode_ );
   if_colli_target_->set_security_distance( security_distance_ );
   if_colli_target_->set_max_velocity( max_velocity_ );
+  if_colli_target_->set_max_rotation( max_rotation_ );
   if_colli_target_->set_escaping_enabled( escaping_enabled_ );
   if_colli_target_->set_stop_at_target( stop_at_target_ );
   if_colli_target_->set_orient_at_target( orient_at_target_ );

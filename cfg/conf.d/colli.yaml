@@ -18,8 +18,11 @@ plugins/colli:
   # Default security distance to keep to obstacles
   security_distance: 0.2
 
-  # Default maximum velocity
+  # Default maximum translation velocity (in m/s)
   max_velocity: 1.5
+
+  # Default maximum rotation velocity (in rad/s)
+  max_rotation: 2.0
 
   # Default escaping behaviour (just enabled/disabled)
   escaping_enabled: true

@@ -84,6 +84,7 @@ class ColliMessageHandlerThread
   // default parameters, read from config
   float cfg_security_distance_;
   float cfg_max_velocity_;
+  float cfg_max_rotation_;
   float cfg_escaping_enabled_;
   bool  cfg_stop_at_target_;
   bool  cfg_orient_at_target_;
@@ -92,6 +93,7 @@ class ColliMessageHandlerThread
   // current parameters, may be set by colli internally, or externally via messages
   float security_distance_;
   float max_velocity_;
+  float max_rotation_;
   float escaping_enabled_;
   bool  stop_at_target_;
   bool  orient_at_target_;
