@@ -104,12 +104,19 @@ CSlowForwardDriveModule::SlowForward_Translation( float dist_to_target, float di
   }
 
   float des_trans = 0.0;
-
+  /*
   if ( fabs( des_rot ) >= 0.0 && fabs( des_rot ) <= 1.0 )
     des_trans = LinInterpol( fabs( des_rot ), 1.0, 0.0, 0.7, m_MaxTranslation+0.1 );
   else if ( fabs( des_rot ) > 1.0 )
     des_trans = LinInterpol( fabs( des_rot ), M_PI, 1.0, 0.0, 0.7 );
-
+  */
+  /* We only translate if the target is in angle of +-90° (checked above!)
+   * With this interpolation: The higher the rotation, the lower the translation.
+   * Why? Because the amount of rotation is related to where the target lies. If it
+   * lies ahead, i.e. rotation is low, we can drive faster. If the rotation needs
+   * to be high to reach the target, we assume that it is better to drive slower.
+   */
+  des_trans = LinInterpol( fabs(des_rot), 0.f, M_PI_2, m_MaxTranslation, 0.0);
 
   // test the borders (no agressive behaviour!)
   if ( des_trans < 0.0 )
@@ -142,8 +149,8 @@ CSlowForwardDriveModule::SlowForward_Translation( float dist_to_target, float di
     trans_target = GuaranteeTransStop( dist_to_target, cur_trans, des_trans );
 
   // And the next collision point
-  if ( dist_to_front < dist_to_target )
-    trans_front = GuaranteeTransStop( (1.0*dist_to_front)/2.0, cur_trans, des_trans );
+  if ( dist_to_front > 0.f && dist_to_front < dist_to_target )
+    trans_front = GuaranteeTransStop( dist_to_front/2.0, cur_trans, des_trans );
   // NEW STUFF END HERE
 
   des_trans = std::min( des_trans, std::min( trans_target, trans_front ) );
