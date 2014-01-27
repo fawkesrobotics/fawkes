@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <protobuf_msgs/SimTimeSync.pb.h>
+#include <gazsim_msgs/SimTime.pb.h>
 #include <boost/asio.hpp>
 #include <utils/time/timesource.h>
 #include <utils/time/clock.h>
@@ -29,7 +29,7 @@
 #define __GAZEBO_TIMESOURCE_H_
 
 
-typedef const boost::shared_ptr<llsf_msgs::SimTimeSync const> ConstSimTimeSyncPtr;
+typedef const boost::shared_ptr<gazsim_msgs::SimTime const> ConstSimTimePtr;
 
 namespace fawkes
 {
@@ -46,7 +46,7 @@ namespace fawkes
     virtual timeval conv_to_realtime(const timeval* tv) const;
 
     //store data from gazebo time message
-    void on_time_sync_msg(ConstSimTimeSyncPtr &msg);
+    void on_time_sync_msg(ConstSimTimePtr &msg);
 
   private:
     Clock* clock;

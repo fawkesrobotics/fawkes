@@ -66,7 +66,7 @@ timeval GazsimTimesource::conv_to_realtime(const timeval* tv) const
   return result;
 }
 
-void GazsimTimesource::on_time_sync_msg(ConstSimTimeSyncPtr &msg)
+void GazsimTimesource::on_time_sync_msg(ConstSimTimePtr &msg)
 {
   //we do not want to correct time back
   timeval sim_time;
