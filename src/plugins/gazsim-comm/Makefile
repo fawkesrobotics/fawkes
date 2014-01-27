@@ -19,12 +19,13 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/protobuf.mk
 include $(BUILDSYSDIR)/boost.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
-include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
+include $(BUILDSYSDIR)/protobuf.mk
+# include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_gazsim_comm = fawkescore fawkesutils fawkesaspects fawkes_protobuf_comm protobufmsgs fawkesgazeboaspect
+LIBS_gazsim_comm = fawkescore fawkesutils fawkesaspects fawkes_protobuf_comm gazsim_msgs fawkesgazeboaspect
 OBJS_gazsim_comm = gazsim_comm_plugin.o gazsim_comm_thread.o
 
 OBJS_all = $(OBJS_gazsim_comm)

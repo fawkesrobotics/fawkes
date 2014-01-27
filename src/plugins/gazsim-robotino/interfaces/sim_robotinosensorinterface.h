@@ -22,7 +22,7 @@
 #define __SIM_ROBOTINO_SENSOR_INTERFACE_H_
 
 #include "sim_interface.h"
-#include <protobuf_msgs/Float.pb.h>
+#include <gazsim_msgs/Float.pb.h>
 
 
 typedef const boost::shared_ptr<gazsim_msgs::Float const> ConstFloatPtr;

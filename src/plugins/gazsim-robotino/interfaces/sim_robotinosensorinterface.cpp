@@ -29,7 +29,6 @@
 #include <gazebo/transport/transport.hh>
 
 #include <interfaces/RobotinoSensorInterface.h>
-#include <protobuf_msgs/Float.pb.h>
 
 using namespace fawkes;
 using namespace gazebo;

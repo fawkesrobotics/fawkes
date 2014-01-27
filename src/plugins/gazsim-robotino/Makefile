@@ -19,12 +19,13 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
-include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
+include $(BUILDSYSDIR)/protobuf.mk
+# include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
 LIBS_gazsim_robotino = fawkescore fawkesutils fawkesaspects fvutils \
 	       fawkestf fawkesinterface fawkesblackboard \
 	       BatteryInterface RobotinoSensorInterface MotorInterface \
-	       Position3DInterface fawkesgazeboaspect protobufmsgs \
+	       Position3DInterface fawkesgazeboaspect gazsim_msgs \
 	       SwitchInterface
 OBJS_gazsim_robotino = gazsim_robotino_plugin.o gazsim_robotino_thread.o interfaces/sim_interface.o interfaces/sim_robotinosensorinterface.o interfaces/sim_motorinterface.o
 

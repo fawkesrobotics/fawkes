@@ -19,12 +19,13 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/protobuf.mk
 include $(BUILDSYSDIR)/boost.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
-include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
+include $(BUILDSYSDIR)/protobuf.mk
+# include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_gazsim_timesource = fawkescore fawkesutils fawkesaspects fawkesgazeboaspect protobufmsgs
+LIBS_gazsim_timesource = fawkescore fawkesutils fawkesaspects fawkesgazeboaspect gazsim_msgs
 OBJS_gazsim_timesource = gazsim_timesource_source.o gazsim_timesource_plugin.o gazsim_timesource_thread.o
 
 OBJS_all = $(OBJS_gazsim_timesource)
