@@ -32,3 +32,6 @@
 .*.swp
 .*.swo
 
+#Generated Protobuf C++ Files for gazsim
+/src/libs/gazsim_msgs/*.pb.h
+/src/libs/gazsim_msgs/*.pb.cpp
