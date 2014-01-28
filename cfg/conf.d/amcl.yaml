@@ -116,6 +116,12 @@ plugins/amcl:
   init_pose_y: 0.0
   init_pose_a: 0.0
 
+  # Set to true to read the initial covariance from the config file.
+  # Otherwise initialize to sensible uncertainty as default.
+  # If position saving to config is enabled (save_pose_period > 0.0)
+  # you most likely do _not_ want this and set this to false.
+  read_init_cov: false
+
   # Period (in sec) in which to save the current position as initial
   # position to the host config. Set to 0.0 to disable.
   save_pose_period: 2.0

@@ -220,17 +220,26 @@ void AmclThread::init()
     init_pose_[2] = config->get_float(CFG_PREFIX"init_pose_a");
   } catch (Exception &e) {} // ignored, use default
 
+  cfg_read_init_cov_ = false;
   try {
-    init_cov_[0] = config->get_float(CFG_PREFIX"init_cov_xx");
+    cfg_read_init_cov_ = config->get_bool(CFG_PREFIX"read_init_cov");
   } catch (Exception &e) {} // ignored, use default
 
-  try {
-    init_cov_[1] = config->get_float(CFG_PREFIX"init_cov_yy");
-  } catch (Exception &e) {} // ignored, use default
+  if (cfg_read_init_cov_) {
+    try {
+      init_cov_[0] = config->get_float(CFG_PREFIX"init_cov_xx");
+    } catch (Exception &e) {} // ignored, use default
 
-  try {
-    init_cov_[2] = config->get_float(CFG_PREFIX"init_cov_aa");
-  } catch (Exception &e) {} // ignored, use default
+    try {
+      init_cov_[1] = config->get_float(CFG_PREFIX"init_cov_yy");
+    } catch (Exception &e) {} // ignored, use default
+
+    try {
+      init_cov_[2] = config->get_float(CFG_PREFIX"init_cov_aa");
+    } catch (Exception &e) {} // ignored, use default
+  } else {
+    logger->log_debug(name(), "Reading initial covariance from config disabled");
+  }
 
   transform_tolerance_ = config->get_float(CFG_PREFIX"transform_tolerance");
 
