@@ -34,7 +34,7 @@ using namespace fawkes;
 MapLaserGenThread::MapLaserGenThread()
   : Thread("MapLaserGenThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-    TransformAspect(TransformAspect::BOTH, "Odometry")
+    TransformAspect(TransformAspect::BOTH_DEFER_PUBLISHER, "Map Laser Odometry")
 {
   map_ = NULL;
 }
@@ -104,6 +104,10 @@ void MapLaserGenThread::init()
   try {
     cfg_send_zero_odom_ = config->get_bool(CFG_PREFIX"map-lasergen/send_zero_odom");
   } catch (Exception &e) {}; // ignored
+  if (cfg_send_zero_odom_) {
+    logger->log_info(name(), "Enabling zero odometry publishing");
+    tf_enable_publisher();
+  }
 
   laser_if_->set_frame(laser_frame_id_.c_str());
 }
