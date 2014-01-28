@@ -55,13 +55,13 @@ void MapLaserGenThread::init()
     cfg_use_current_pose_ = config->get_bool(CFG_PREFIX"map-lasergen/use_current_pos");
   } catch (Exception &e) {} // ignored, use default
 
-  cfg_laser_ifname_ = config->get_string(CFG_PREFIX"laser_interface_id");
+  cfg_laser_ifname_ = config->get_string(CFG_PREFIX"map-lasergen/laser_interface_id");
   odom_frame_id_  = config->get_string(CFG_PREFIX"odom_frame_id");
   base_frame_id_  = config->get_string(CFG_PREFIX"base_frame_id");
   laser_frame_id_ = config->get_string(CFG_PREFIX"laser_frame_id");
 
   if (cfg_use_current_pose_) {
-    cfg_pose_ifname_ = config->get_string(CFG_PREFIX"pose_interface_id");
+    cfg_pose_ifname_ = config->get_string(CFG_PREFIX"map-lasergen/pose_interface_id");
     cur_pose_if_ = blackboard->open_for_reading<Position3DInterface>(cfg_pose_ifname_.c_str());
   } else {
     pos_x_     = config->get_float(CFG_PREFIX"map-lasergen/pos_x");
