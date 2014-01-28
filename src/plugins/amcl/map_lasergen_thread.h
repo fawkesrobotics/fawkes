@@ -2,7 +2,7 @@
  *  map_lasergen_thread.cpp - Thread to generate laser data from map
  *
  *  Created: Thu Aug 23 18:33:38 2012
- *  Copyright  2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2012-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -70,8 +70,10 @@ public:
   float        cfg_occupied_thresh_;
   float        cfg_free_thresh_;
   bool         cfg_send_zero_odom_;
+  bool         cfg_use_current_pose_;
 
   std::string  cfg_laser_ifname_;
+  std::string  cfg_pose_ifname_;
   std::string  laser_frame_id_;
   std::string  odom_frame_id_;
   std::string  base_frame_id_;
@@ -80,7 +82,8 @@ public:
   unsigned int map_height_;
   bool laser_pose_set_;
 
-  fawkes::tf::Transform latest_tf_;
+  fawkes::tf::Transform         latest_tf_;
+  fawkes::tf::Stamped<fawkes::tf::Pose> laser_pose_;
 
   float pos_x_;
   float pos_y_;
@@ -98,7 +101,8 @@ public:
 #endif
 
   fawkes::Laser360Interface* laser_if_;
-  fawkes::Position3DInterface * pos3d_if_;
+  fawkes::Position3DInterface * gt_pose_if_;
+  fawkes::Position3DInterface * cur_pose_if_;
 };
 
 #endif

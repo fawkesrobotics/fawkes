@@ -128,14 +128,27 @@ plugins/amcl:
 
   # Parameters for fake laser generation
   map-lasergen:
+    # Generate laser data for the current position, if set to false use
+    # position configured in pos_x/y/theta, otherwise use location from
+    # given pose interface
+    use_current_pos: false
+
     # Position for which to generate laser data
-    pos_x: 2.3
-    pos_y: 2.3
-    pos_theta: 0.78
+    # Ignored if use_current_pos is set to true
+    pos_x: 0.8
+    pos_y: 0.8
+    pos_theta: 0.0
 
     # Add gaussian noise to laser distances? If yes, what sigma?
     add_gaussian_noise: true
     noise_sigma: 0.02
 
     # Should the plugin send (fake) zero odometry?
+    # You most likely want to set this to false if use_current_pos is true
     send_zero_odom: true
+
+    # ID of interface to write laser data to
+    laser_interface_id: Map Laser
+
+    # Interface to read pose information from if use_current_pose is true
+    pose_interface_id: Pose
