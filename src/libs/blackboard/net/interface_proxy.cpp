@@ -69,8 +69,8 @@ BlackBoardInterfaceProxy::BlackBoardInterfaceProxy(FawkesNetworkClient *client,
   __notifier        = notifier;
   __interface       = interface;
   __instance_serial = ntohl(osm->serial);
-  __has_writer      = (osm->has_writer == 1);
-  __num_readers     = ntohl(osm->num_readers);
+  __has_writer      = osm->writer_readers & htonl(0x80000000);
+  __num_readers     = ntohl(osm->writer_readers & htonl(0x7FFFFFFF));
   __data_size       = ntohl(osm->data_size);
   __clid            = msg->clid();
   __next_msg_id     = 1;

@@ -87,11 +87,13 @@ typedef struct {
   char          type[__INTERFACE_TYPE_SIZE];	/**< interface type name */
   char          id[__INTERFACE_ID_SIZE];	/**< interface instance ID */
   unsigned char hash[__INTERFACE_HASH_SIZE];	/**< interface version hash */
-  uint32_t      serial;				/**< instance serial to unique identify
-						 * this instance */
-  uint32_t      has_writer  :  1;		/**< 1 if the interface currently has a
-						 * writer, 0 otherwise */
-  uint32_t      num_readers : 31;		/**< number of currently existing readers */
+  uint32_t      serial;				/**< instance serial to uniquely identify
+						 * this instance (big endian) */
+  uint32_t      writer_readers;			/**< combined writer reader
+						 * information. First bit (any endian) is
+						   1 if writer exists, 0 otherwise. The
+						   remaining 31 bits encode the number
+						   of readers as big endian number. */
 } bb_iinfo_msg_t;
 
 
@@ -132,8 +134,10 @@ typedef struct {
  */
 typedef struct {
   uint32_t serial;		/**< instance serial to unique identify this instance */
-  uint32_t has_writer  :  1;	/**< 1 if the interface currently has a writer, 0 otherwise */
-  uint32_t num_readers : 31;	/**< number of currently existing readers */
+  uint32_t writer_readers;	/**< combined writer reader information. First
+				 * bit (any endian) is 1 if writer exists, 0 otherwise.
+				 * The remaining 31 bits encode the number of readers
+				 * as big endian number. */
   uint32_t data_size;		/**< size in bytes of the following data. */
 } bb_iopensucc_msg_t;
 
