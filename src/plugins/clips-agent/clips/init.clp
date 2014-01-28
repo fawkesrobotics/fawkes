@@ -32,7 +32,7 @@
 
 (defrule enable-debug
   (agent-init)
-  (confval (path "/clips-agent/clips-debug") (type BOOL) (value true))
+  (confval (path "/clips-agent/clips-debug") (type BOOL) (value TRUE))
   =>
   (printout t "CLIPS debugging enabled, watching facts and rules" crlf)
   (watch facts)
@@ -51,7 +51,7 @@
 (defrule silence-debug-facts
   (declare (salience -1000))
   (agent-init)
-  (confval (path "/clips-agent/clips-debug") (type BOOL) (value true))
+  (confval (path "/clips-agent/clips-debug") (type BOOL) (value TRUE))
   (confval (path "/clips-agent/unwatch-facts") (type STRING) (is-list TRUE) (list-value $?lv))
   =>
   (printout t "Disabling watching of the following facts: " ?lv crlf)
@@ -61,7 +61,7 @@
 (defrule silence-debug-rules
   (declare (salience -1000))
   (agent-init)
-  (confval (path "/clips-agent/clips-debug") (type BOOL) (value true))
+  (confval (path "/clips-agent/clips-debug") (type BOOL) (value TRUE))
   (confval (path "/clips-agent/unwatch-rules") (type STRING) (is-list TRUE) (list-value $?lv))
   =>
   (printout t "Disabling watching of the following rules: " ?lv crlf)
