@@ -107,6 +107,9 @@ void AmclThread::init()
 		   map_width_ * map_height_,
                    (float)free_space_indices.size() / (float)(map_width_ * map_height_) * 100.);
 
+  save_pose_last_time.set_clock(clock);
+  save_pose_last_time.stamp();
+
   sent_first_transform_ = false;
   latest_tf_valid_ = false;
   pf_ = NULL;
@@ -125,7 +128,7 @@ void AmclThread::init()
   init_cov_[1] = 0.5 * 0.5;
   init_cov_[2] = (M_PI / 12.0) * (M_PI / 12.0);
 
-  save_pose_period = config->get_float(CFG_PREFIX"save_pose_rate");
+  save_pose_period = config->get_float(CFG_PREFIX"save_pose_period");
   laser_min_range_ = config->get_float(CFG_PREFIX"laser_min_range");
   laser_max_range_ = config->get_float(CFG_PREFIX"laser_max_range");
   pf_err_ = config->get_float(CFG_PREFIX"kld_err");
@@ -689,8 +692,6 @@ AmclThread::loop()
                                         global_frame_id_, odom_frame_id_);
     tf_publisher->send_transform(tmp_tf_stamped);
 
-    // Is it time to save our last pose to the param server
-    Time now(clock);
     // We need to apply the last transform to the latest odom pose to get
     // the latest map pose to store.  We'll take the covariance from
     // last_published_pose.
@@ -709,23 +710,25 @@ AmclThread::loop()
     pos3d_if_->set_rotation(rot);
     pos3d_if_->write();
 
-      /*
+    // Is it time to save our last pose to the config
+    Time now(clock);
     if ((save_pose_period > 0.0) &&
-      (now - save_pose_last_time) >= save_pose_period) {
+	(now - save_pose_last_time) >= save_pose_period)
+    {
       double yaw, pitch, roll;
       map_pose.getBasis().getEulerYPR(yaw, pitch, roll);
-      private_nh_.setParam("initial_pose_x", map_pose.getOrigin().x());
-      private_nh_.setParam("initial_pose_y", map_pose.getOrigin().y());
-      private_nh_.setParam("initial_pose_a", yaw);
-      private_nh_.setParam("initial_cov_xx",
-      last_published_pose.pose.covariance[6 * 0 + 0]);
-      private_nh_.setParam("initial_cov_yy",
-      last_published_pose.pose.covariance[6 * 1 + 1]);
-      private_nh_.setParam("initial_cov_aa",
-      last_published_pose.pose.covariance[6 * 5 + 5]);
+
+      logger->log_debug(name(), "Saving pose (%f,%f,%f) as initial pose to host config",
+			map_pose.getOrigin().x(), map_pose.getOrigin().y(), yaw);
+
+      config->set_float(CFG_PREFIX"init_pose_x", map_pose.getOrigin().x());
+      config->set_float(CFG_PREFIX"init_pose_y", map_pose.getOrigin().y());
+      config->set_float(CFG_PREFIX"init_pose_a", yaw);
+      config->set_float(CFG_PREFIX"init_cov_xx", last_covariance_[6 * 0 + 0]);
+      config->set_float(CFG_PREFIX"init_cov_yy", last_covariance_[6 * 1 + 1]);
+      config->set_float(CFG_PREFIX"init_cov_aa", last_covariance_[6 * 5 + 5]);
       save_pose_last_time = now;
-      }
-    */
+    }
   } else {
     if (pos3d_if_->visibility_history() <= 0) {
       pos3d_if_->set_visibility_history(pos3d_if_->visibility_history() - 1);
