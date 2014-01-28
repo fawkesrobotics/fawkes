@@ -14,14 +14,14 @@ plugins/amcl:
   # The 2-D pose of the lower-left pixel in the map, as (x, y, yaw),
   # with yaw as counterclockwise rotation (yaw=0 means no rotation)
   # around Z axis. Many parts of the system currently ignore yaw.; m
-  origin_x: 0.0
-  origin_y: 0.0
+  origin_x: -0.05
+  origin_y: -0.05
   origin_theta: 0.0
 
   # Pixels with occupancy probability greater than this threshold are
   # considered completely occupied. Occupancy probability is the
   # luminance value divided by 255.
-  occupied_threshold: 0.65
+  occupied_threshold: 0.8
 
   # Pixels with occupancy probability less than this threshold are
   # considered completely free
@@ -34,11 +34,11 @@ plugins/amcl:
   laser_max_range: 5.6
 
   # Maximum number of beams to consider
-  max_beams: 30
+  max_beams: 60
 
   # Minimum and maximum number of particles
   min_particles: 100
-  max_particles: 2000
+  max_particles: 1000
 
   # Error
   kld_err: 0.01
@@ -46,20 +46,20 @@ plugins/amcl:
 
   # Motion model parameters, alph5 is only used for omni-drive model
   # Expected noise in rotation estimate from rotational component
-  alpha1: 0.2
+  alpha1: 5
   # Expected noise in rotation estimate from translational component
-  alpha2: 0.2
+  alpha2: 5
   # Expected noise in translation estimate from translational component
-  alpha3: 0.2
+  alpha3: 0.6
   # Expected noise in translation estimate from rotational component
-  alpha4: 0.2
+  alpha4: 0.6
   # Translation-related noise parameter for omni model
-  alpha5: 0.2
+  alpha5: 0.6
 
   # A priori probabilities for a hit, short, max, or random reading.
   # Must sum up to 1. For likelihood field model only z_hit and z_rand are used
   z_hit: 0.95
-  z_short: 0.1
+  z_short: 0.05
   z_max: 0.05
   z_rand: 0.05
 
@@ -69,7 +69,7 @@ plugins/amcl:
   lambda_short: 0.1
 
   # Maximum discovery distance for likelihood field model
-  laser_likelihood_max_dist: 2.0
+  laser_likelihood_max_dist: 2.5
 
   # Laser model type, must be beam or likelihood_field
   laser_model_type: likelihood_field
@@ -80,11 +80,11 @@ plugins/amcl:
   # Thresholds for considering laser updates to update particle filter.
   # If any of the conditions is met the particle filter is updated.
   # Minimum distance odometry must change; m
-  d_thresh: 0.2
+  d_thresh: 0.1
   # Minimum angle odometry must change; rad
-  a_thresh: 0.5
+  a_thresh: 0.05
   # Time to keep updating after motion has stopped; sec
-  t_thresh: 3.0
+  t_thresh: 10.0
 
   # Laser blackboard interface ID
   laser_interface_id: Laser urg filtered
@@ -92,7 +92,7 @@ plugins/amcl:
   pose_interface_id: Pose
 
   # Coordinate frame IDs
-  odom_frame_id: !frame /robotino_odometry
+  odom_frame_id: !frame /odom
   base_frame_id: !frame /base_link
   global_frame_id: !frame /map
   laser_frame_id: !frame /base_laser
@@ -101,10 +101,10 @@ plugins/amcl:
   angle_increment: 1.0
 
   # Resampling module interval
-  resample_interval: 1
+  resample_interval: 4
 
   # Transform tolerance time; sec
-  transform_tolerance: 2.0
+  transform_tolerance: 3.0
 
   # Recovery alpha values for robustness against kidnapping.
   # Good valus are 0.001 and 0.01.
@@ -112,8 +112,8 @@ plugins/amcl:
   alpha_fast: 0.0
 
   # Initial pose (x, y, yaw)
-  init_pose_x: 0.0
-  init_pose_y: 0.0
+  init_pose_x: 0.5
+  init_pose_y: 0.5
   init_pose_a: 0.0
 
   # Set to true to read the initial covariance from the config file.
