@@ -22,7 +22,7 @@ CFLAGS += $(CFLAGS_CPP11)
 LIBS_clips = fawkescore fawkesutils fawkesaspects fawkesblackboard \
            fawkesinterface fawkesclipsaspect
 OBJS_clips = clips_plugin.o clips_thread.o \
-	     feature_blackboard.o feature_config.o
+	     feature_blackboard.o feature_config.o feature_redefine_warning.o
 
 OBJS_all = $(OBJS_clips)
 

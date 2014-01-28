@@ -23,6 +23,7 @@
 #include "clips_thread.h"
 #include "feature_blackboard.h"
 #include "feature_config.h"
+#include "feature_redefine_warning.h"
 #include <plugins/clips/aspect/clips_env_manager.h>
 
 #include <clipsmm.h>
@@ -65,6 +66,7 @@ CLIPSThread::init()
 
   features_.push_back(new BlackboardCLIPSFeature(logger, blackboard));
   features_.push_back(new ConfigCLIPSFeature(logger, config));
+  features_.push_back(new RedefineWarningCLIPSFeature(logger));
   clips_env_mgr_->add_features(features_);
 }
 
