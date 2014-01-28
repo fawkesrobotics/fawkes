@@ -532,7 +532,7 @@ AmclThread::loop()
 
 #ifdef HAVE_ROS
     pf_sample_set_t* set = (pf_->sets) + pf_->current_set;
-    logger->log_debug(name(), "Num samples: %d", set->sample_count);
+    //logger->log_debug(name(), "Num samples: %d", set->sample_count);
 
     // Publish the resulting cloud
     // TODO: set maximum rate for publishing
