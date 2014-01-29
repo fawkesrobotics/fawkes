@@ -55,7 +55,14 @@
   (confval (path "/clips-agent/unwatch-facts") (type STRING) (is-list TRUE) (list-value $?lv))
   =>
   (printout t "Disabling watching of the following facts: " ?lv crlf)
-  (foreach ?v ?lv (unwatch facts (sym-cat ?v)))
+  (bind ?deftemplates (get-deftemplate-list))
+  (foreach ?v ?lv
+    (bind ?v-sym (sym-cat ?v))
+    (if (member$ ?v-sym ?deftemplates)
+     then (unwatch facts ?v-sym)
+     else (printout warn "Cannot unwatch " ?v " (deftemplate not defined)" crlf)
+    )
+  )
 )
 
 (defrule silence-debug-rules
@@ -65,5 +72,12 @@
   (confval (path "/clips-agent/unwatch-rules") (type STRING) (is-list TRUE) (list-value $?lv))
   =>
   (printout t "Disabling watching of the following rules: " ?lv crlf)
-  (foreach ?v ?lv (unwatch rules (sym-cat ?v)))
+  (bind ?defrules (get-defrule-list))
+  (foreach ?v ?lv
+    (bind ?v-sym (sym-cat ?v))
+    (if (member$ ?v-sym ?defrules)
+     then (unwatch rules ?v-sym)
+     else (printout warn "Cannot unwatch " ?v " (defrule not defined)" crlf)
+    )
+  )
 )
