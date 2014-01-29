@@ -76,6 +76,8 @@ class CLIPSLogger
 		 strcmp(logical_name, WERROR) == 0)
       {
 	logger_->log_error(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
+      } else if (strcmp(logical_name, WDIALOG) == 0) {
+        // ignored
       } else {
 	logger_->log_info(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
       }
@@ -123,6 +125,7 @@ log_router_query(void *env, char *logical_name)
   if (strcmp(logical_name, "logerror") == 0) return TRUE;
   if (strcmp(logical_name, "stdout") == 0) return TRUE;
   if (strcmp(logical_name, WTRACE) == 0) return TRUE;
+  if (strcmp(logical_name, WDIALOG) == 0) return TRUE;
   if (strcmp(logical_name, WWARNING) == 0) return TRUE;
   if (strcmp(logical_name, WERROR) == 0) return TRUE;
   if (strcmp(logical_name, WDISPLAY) == 0) return TRUE;
