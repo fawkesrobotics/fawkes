@@ -11,7 +11,7 @@ clips-agent:
   # from watching, e.g. if they are showing up at too high frequencies or
   # are not of interest.
   unwatch-facts: ["time"]
-  unwatch-rules: ["time-retract", "blackboard-read"]
+  unwatch-rules: ["time-retract"]
 
   # If true, simulate skills (assuming they always succeed) instead of
   # actually executing the skills. The time indicates how long it should
