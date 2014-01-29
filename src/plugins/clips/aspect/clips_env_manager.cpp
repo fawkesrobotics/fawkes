@@ -191,6 +191,9 @@ CLIPSEnvManager::new_env(const std::string &log_component_name)
     LockPtr<CLIPS::Environment> clips(new CLIPS::Environment(),
 				      /* recursive mutex */ true);
 
+    // by default be silent
+    clips->unwatch("all");
+
     CLIPSContextMaintainer *cm =
       new CLIPSContextMaintainer(logger_, log_component_name.c_str());
 
