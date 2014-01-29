@@ -250,7 +250,7 @@ ProtobufStreamServer::Session::handle_read_message(const boost::system::error_co
  */
 ProtobufStreamServer::ProtobufStreamServer(unsigned short port)
   : io_service_(),
-    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v4(), port))
+    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v6(), port))
 {
   message_register_ = new MessageRegister();
   own_message_register_ = true;
@@ -272,7 +272,7 @@ ProtobufStreamServer::ProtobufStreamServer(unsigned short port)
 ProtobufStreamServer::ProtobufStreamServer(unsigned short port,
 					   std::vector<std::string> &proto_path)
   : io_service_(),
-    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v4(), port))
+    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v6(), port))
 {
   message_register_ = new MessageRegister(proto_path);
   own_message_register_ = true;
@@ -291,7 +291,7 @@ ProtobufStreamServer::ProtobufStreamServer(unsigned short port,
 ProtobufStreamServer::ProtobufStreamServer(unsigned short port,
 					   MessageRegister *mr)
   : io_service_(),
-    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v4(), port)),
+    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v6(), port)),
     message_register_(mr), own_message_register_(false)
 {
   next_cid_ = 1;
