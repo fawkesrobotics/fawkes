@@ -258,6 +258,7 @@ ColliThread::loop()
     escape_count = 0;
     abort = true;
 
+/*
     // THIS IF FOR CHALLENGE ONLY!!!
   } else if( m_pColliTargetObj->drive_mode() == NavigatorInterface::OVERRIDE ) {
     logger->log_debug(name(), "BEING OVERRIDDEN!");
@@ -265,6 +266,7 @@ ColliThread::loop()
     m_pColliDataObj->write();
     escape_count = 0;
     abort = true;
+*/
 
   } else if( m_pColliTargetObj->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
     logger->log_debug(name(), "Moving is not allowed!");
