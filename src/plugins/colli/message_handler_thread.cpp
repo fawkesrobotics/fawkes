@@ -117,8 +117,11 @@ ColliMessageHandlerThread::loop()
   if_colli_data_->read();
   if_motor_->read();
 
-  if( if_colli_data_->changed() )
+  if( if_colli_data_->changed() ) {
     if_navi_->set_final(colli_final());
+    if_colli_target_->set_final(colli_final());
+    if_colli_target_->write();
+  }  
 
   // process interface messages
   while( !if_navi_->msgq_empty() ) {
@@ -281,6 +284,7 @@ ColliMessageHandlerThread::colli_stop()
   if_colli_target_->set_orient_at_target( false );
   if_colli_target_->set_escaping_enabled( false );
 
+  if_colli_target_->set_final( false );
   if_colli_target_->write();
 }
 
@@ -324,6 +328,7 @@ ColliMessageHandlerThread::colli_goto(float x, float y, float ori)
   if_colli_target_->set_stop_at_target( stop_at_target_ );
   if_colli_target_->set_orient_at_target( orient_at_target_ );
 
+  if_colli_target_->set_final( false );
   if_colli_target_->write();
 }
 
