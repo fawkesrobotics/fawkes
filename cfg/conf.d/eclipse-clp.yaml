@@ -8,3 +8,7 @@ eclipse-clp:
   
   #Basedirectory of ECLiPSe
   eclipse_dir: /usr/libexec/eclipse-6.1-164-x86_64/
+
+  drive_around:
+    use_graph: True
+    rel_graph_path: /locations/kbsg/navgraph-robolab.yaml
