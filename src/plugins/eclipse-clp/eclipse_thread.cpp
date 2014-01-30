@@ -112,6 +112,15 @@ EclipseAgentThread::init()
   // load interpreter and agent
   load_file( agent_path.c_str() );
 
+  // check if navgraph is used and pass config value
+  if (config->get_bool( ("/eclipse-clp/"+agent+"/use_graph").c_str() )){
+    graph_path = CONFDIR + config->get_string( ("/eclipse-clp/"+agent+"/rel_graph_path").c_str());
+    logger->log_info( name(), "Setting graph_path to %s", graph_path.c_str() );
+    post_goal( term(EC_functor("load_graph",1), graph_path.c_str()) );
+    if ( EC_succeed != EC_resume() )
+    { throw Exception( "Error loading graph config to agent" ); }
+  }
+
    // register external predicates
        if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( agent.c_str(), 0 ) ) )
   { throw Exception( "Registering external predicate log/2 failed" ); }

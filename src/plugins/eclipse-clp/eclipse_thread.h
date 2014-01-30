@@ -68,6 +68,7 @@ class EclipseAgentThread
   bool _running;
   bool m_initialized;
   std::string agent;
+  std::string graph_path;
   fawkes::Mutex* mutex;
 
 };
