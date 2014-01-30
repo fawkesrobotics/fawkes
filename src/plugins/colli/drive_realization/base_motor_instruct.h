@@ -66,8 +66,6 @@ class CBaseMotorInstruct: public MotorControl
 
  private:
 
-  bool send_stop_msg_before_;
-
   float m_execTranslation, m_execRotation;
   float m_desiredTranslation, m_desiredRotation;
   float m_currentTranslation, m_currentRotation;
@@ -121,7 +119,6 @@ CBaseMotorInstruct::CBaseMotorInstruct( fawkes::MotorInterface* motor,
   m_desiredTranslation = m_desiredRotation = 0.0;
   m_currentTranslation = m_currentRotation = 0.0;
   m_execTranslation    = m_execRotation    = 0.0;
-  send_stop_msg_before_ = false;
   m_OldTimestamp.stamp();
   m_Frequency = frequency;
   logger_->log_info("CBaseMotorInstruct", "(Constructor): Exiting");
@@ -174,14 +171,6 @@ CBaseMotorInstruct::SetCommand()
 inline void
 CBaseMotorInstruct::Drive( float proposedTrans, float proposedRot )
 {
-  if ( proposedTrans == 0.0 && proposedRot == 0.0 ) {
-    if ( send_stop_msg_before_ ) {
-      return;
-    }
-    send_stop_msg_before_ = true;
-  } else {
-    send_stop_msg_before_ = false;
-  }
   // initializing driving values (to be on the sure side of life)
   m_execTranslation = 0.0;
   m_execRotation = 0.0;
