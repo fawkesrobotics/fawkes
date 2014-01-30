@@ -124,7 +124,6 @@ class ColliThread
 
   ColliState m_ColliStatus;     // representing current colli status
 
-  float m_oldTargetX, m_oldTargetY, m_oldTargetOri;   // for init problems
   float m_TargetPointX, m_TargetPointY;               // for Update
 
   float m_OldX, m_OldY, m_OldOri;  // for updating occgrid and performing pipe compensation

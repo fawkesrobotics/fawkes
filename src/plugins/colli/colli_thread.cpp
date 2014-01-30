@@ -124,11 +124,6 @@ ColliThread::init()
                      cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
   }
 
-  // store old target
-  m_oldTargetX   = m_pColliTargetObj->dest_x();
-  m_oldTargetY   = m_pColliTargetObj->dest_y();
-  m_oldTargetOri = m_pColliTargetObj->dest_ori();
-
   m_ProposedTranslation = 0.0;
   m_ProposedRotation    = 0.0;
 
@@ -278,12 +273,6 @@ ColliThread::loop()
       m_oldAnglesToTarget.push_back( 0.0 );
 
     abort = true;
-      
-
-  } else {
-    m_oldTargetX   = m_pColliTargetObj->dest_x()   + 1000.0;
-    m_oldTargetY   = m_pColliTargetObj->dest_y()   + 1000.0;
-    m_oldTargetOri = m_pColliTargetObj->dest_ori() + 1.0;
   }
 
   if( abort ) {
@@ -327,10 +316,6 @@ ColliThread::loop()
       //logger->log_debug(name(), "L, consider colli final now");
       m_pColliDataObj->set_final( true );
     }
-
-    m_oldTargetX   = m_pColliTargetObj->dest_x();
-    m_oldTargetY   = m_pColliTargetObj->dest_y();
-    m_oldTargetOri = m_pColliTargetObj->dest_ori();
 
     m_pLaserOccGrid->ResetOld();
 
@@ -533,9 +518,6 @@ ColliThread::InitializeModules()
   // Initialization of colli state machine:
   // Currently nothing is to accomplish
   m_ColliStatus  = NothingToDo;
-  m_oldTargetX   = m_pColliTargetObj->dest_x();
-  m_oldTargetY   = m_pColliTargetObj->dest_y();
-  m_oldTargetOri = m_pColliTargetObj->dest_ori();
 
   m_OldX   = m_pMotorInstruct->GetCurrentX();
   m_OldY   = m_pMotorInstruct->GetCurrentY();
