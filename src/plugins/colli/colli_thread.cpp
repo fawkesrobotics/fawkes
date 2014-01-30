@@ -251,10 +251,7 @@ ColliThread::loop()
   bool abort = false;
   if( !m_pLaserScannerObj->has_writer()
    || !m_pMopoObj->has_writer() ) {
-    logger->log_warn(name(), "***** Laser or sim_robot dead!!! --> STOPPING!!!!");
-    m_pMotorInstruct->Drive( 0.0, 0.0 );
-    m_pColliDataObj->set_final( true );
-    m_pColliDataObj->write();
+    logger->log_warn(name(), "***** Laser or sim_robot dead!!!");
     escape_count = 0;
     abort = true;
 
@@ -269,36 +266,19 @@ ColliThread::loop()
 */
 
   } else if( m_pColliTargetObj->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
-    logger->log_debug(name(), "Moving is not allowed!");
-    m_pMotorInstruct->Drive( 0.0, 0.0 );
-    m_pColliDataObj->set_final( true );
-    m_pColliDataObj->write();
+    //logger->log_debug(name(), "Moving is not allowed!");
     escape_count = 0;
     abort = true;
 
-    // Do only drive, if there is a new (first) target
-  } else if( ( m_oldTargetX   == m_pColliTargetObj->dest_x() )
-          && ( m_oldTargetY   == m_pColliTargetObj->dest_y() )
-          && ( m_oldTargetOri == m_pColliTargetObj->dest_ori() ) ) {
-      m_oldAnglesToTarget.clear();
-      for ( unsigned int i = 0; i < 10; i++ )
-        m_oldAnglesToTarget.push_back( 0.0 );
+    // Do not drive if there is no new target
+  } else if( m_pColliTargetObj->is_final() ) { 
+    //logger->log_debug(name(), "No new target for colli...ABORT");
+    m_oldAnglesToTarget.clear();
+    for ( unsigned int i = 0; i < 10; i++ )
+      m_oldAnglesToTarget.push_back( 0.0 );
 
-      m_ProposedTranslation = 0.0;
-      m_ProposedRotation    = 0.0;
-      if( abs(m_pMopoObj->vx()) > 0.01f
-       || abs(m_pMopoObj->vy()) > 0.01f
-       || abs(m_pMopoObj->omega()) > 0.01f ) {
-        // only stop movement, if we are moving. otherwise we flood the interface with messages
-        m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
-      }
-
-      m_pColliDataObj->set_final( true );
-      escape_count = 0;
-      // Send motor and colli data away.
-      m_pColliDataObj->write();
-
-      abort = true;
+    abort = true;
+      
 
   } else {
     m_oldTargetX   = m_pColliTargetObj->dest_x()   + 1000.0;
@@ -307,6 +287,22 @@ ColliThread::loop()
   }
 
   if( abort ) {
+    // check if we need to stop the current colli movememtn
+    if( !m_pColliDataObj->is_final() ) { 
+      //logger->log_debug(name(), "STOPPING");
+      // colli is active, but for some reason we need to abort -> STOP colli movement
+      if( abs(m_pMopoObj->vx()) > 0.01f
+       || abs(m_pMopoObj->vy()) > 0.01f
+       || abs(m_pMopoObj->omega()) > 0.01f ) { 
+        // only stop movement, if we are moving
+        m_pMotorInstruct->Drive( 0.0, 0.0 );
+      } else {
+        // movement has stopped, we are "final" now
+        m_pColliDataObj->set_final( true );
+        m_pColliDataObj->write();
+      }   
+    }
+
 #ifdef HAVE_VISUAL_DEBUGGING
     if( cfg_visualize_idle_ ) {
       UpdateOwnModules();
@@ -324,7 +320,13 @@ ColliThread::loop()
     m_pLaserOccGrid->ResetOld();
     m_ProposedTranslation = 0.0;
     m_ProposedRotation    = 0.0;
-    m_pColliDataObj->set_final( true );
+    if( abs(m_pMopoObj->vx()) <= 0.01f
+     && abs(m_pMopoObj->vy()) <= 0.01f
+     && abs(m_pMopoObj->omega()) <= 0.01f ) {
+      // we have stopped, can consider the colli final now
+      //logger->log_debug(name(), "L, consider colli final now");
+      m_pColliDataObj->set_final( true );
+    }
 
     m_oldTargetX   = m_pColliTargetObj->dest_x();
     m_oldTargetY   = m_pColliTargetObj->dest_y();
