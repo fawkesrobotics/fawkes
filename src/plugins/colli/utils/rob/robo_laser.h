@@ -69,9 +69,9 @@ class Laser
   ///\brief Get the time difference to previous readings
   float TimeDiff() const;
 
-  bool IsPipe( float i ) const;
-  bool IsOnlyPipe( float i ) const;
-
+  ///\brief Check if the reading is valid
+  bool IsValid( float i ) const;
+  bool IsValid( const int i ) const;
 
  protected:
 
@@ -93,38 +93,6 @@ class Laser
   fawkes::Laser360Interface *m_pLaserScannerObj;
   Time * newtime;
   Time * oldtime;
-
-
-  // are the pipes valid???
-  bool m_bValidConfig;
-
-
-  // ignore following readings
-  int m_IgnoreFRStart;
-  int m_IgnoreFREnd;
-
-  int m_IgnoreRRStart;
-  int m_IgnoreRREnd;
-
-  int m_IgnoreRLStart;
-  int m_IgnoreRLEnd;
-
-  int m_IgnoreFLStart;
-  int m_IgnoreFLEnd;
-
-  // ignore following float readings
-  float m_fIgnoreFRStart;
-  float m_fIgnoreFREnd;
-
-  float m_fIgnoreRRStart;
-  float m_fIgnoreRREnd;
-
-  float m_fIgnoreRLStart;
-  float m_fIgnoreRLEnd;
-
-  float m_fIgnoreFLStart;
-  float m_fIgnoreFLEnd;
-
 
 };
 

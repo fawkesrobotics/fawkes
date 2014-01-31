@@ -284,7 +284,7 @@ CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY,
 
           length = std::max( 4.0, ((length + inc - dec)*100.0)/m_CellWidth );
 
-          if ( !m_pLaser->IsPipe( rad ) ) {
+          if ( m_pLaser->IsValid( rad ) ) {
             integrateObstacle( ellipse_t(  posX, posY, height, length ) );
 
             if ( !Contained( p_x, p_y ) ) {

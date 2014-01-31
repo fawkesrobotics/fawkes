@@ -33,6 +33,7 @@
 #include <cstdio>
 #include <iostream>
 
+#define MIN_READING_LENGTH 0.01f
 
 using namespace std;
 
@@ -78,49 +79,6 @@ Laser::Laser( Laser360Interface* laser,
   } catch(...)  {
     throw ( 2 );
     return;
-  }
-
-  string cfg_path = "/plugins/colli/laser_calibration/";
-
-  if( config->exists((cfg_path + "IgnoreFRStart").c_str()) ) {
-    // query config file for ignore-readings
-    m_IgnoreFRStart = config->get_int((cfg_path + "IgnoreFRStart").c_str());
-    m_IgnoreFREnd = config->get_int((cfg_path + "IgnoreFREnd").c_str());
-    m_IgnoreRRStart = config->get_int((cfg_path + "IgnoreRRStart").c_str());
-    m_IgnoreRREnd = config->get_int((cfg_path + "IgnoreRREnd").c_str());
-    m_IgnoreRLStart = config->get_int((cfg_path + "IgnoreRLStart").c_str());
-    m_IgnoreRLEnd = config->get_int((cfg_path + "IgnoreRLEnd").c_str());
-    m_IgnoreFLStart = config->get_int((cfg_path + "IgnoreFLStart").c_str());
-    m_IgnoreFLEnd = config->get_int((cfg_path + "IgnoreFLEnd").c_str());
-
-    // calculate ignore reagions to floats from degree readings
-    m_fIgnoreFRStart = deg2rad(m_IgnoreFRStart);
-    m_fIgnoreFREnd   = deg2rad(m_IgnoreFREnd);
-
-    m_fIgnoreRRStart = deg2rad(m_IgnoreRRStart);
-    m_fIgnoreRREnd   = deg2rad(m_IgnoreRREnd);
-
-    m_fIgnoreRLStart = deg2rad(m_IgnoreRLStart);
-    m_fIgnoreRLEnd   = deg2rad(m_IgnoreRLEnd);
-
-    m_fIgnoreFLStart = deg2rad(m_IgnoreFLStart);
-    m_fIgnoreFLEnd   = deg2rad(m_IgnoreFLEnd);
-
-  } else {
-    logger->log_warn("Laser", "Config path '%s' not existing, using default ignore-readings calibration", cfg_path.c_str());
-
-    // Config non valid!
-    m_fIgnoreFRStart = -1;
-    m_fIgnoreFREnd   = -1;
-
-    m_fIgnoreRRStart = -1;
-    m_fIgnoreRREnd   = -1;
-
-    m_fIgnoreRLStart = -1;
-    m_fIgnoreRLEnd   = -1;
-
-    m_fIgnoreFLStart = -1;
-    m_fIgnoreFLEnd   = -1;
   }
 }
 
@@ -245,73 +203,26 @@ Laser::TimeDiff() const
   return ((*newtime - *oldtime).in_sec());
 }
 
-/** The famous is pipe method
- * Checks if the laser reading is to be ignored, as it is a "pipe" in the
- * robot's body construction.
- * Should become deprecated, laser readings are filtered in a previous step
- * of another plugin!
- * @param i Number of the laser readin.
- * @return true if the reading is blocked by a pipe
+/** Checks if a laser reading is valid
+ * @param i Angle of the laser readin.
+ * @return true if the reading is valid
  */
 bool
-Laser::IsPipe( float i ) const
+Laser::IsValid( const int i ) const
 {
-  i = normalize_rad( i );
-
-  int reading_num = (int)( ( (i+0.001) / (2.0*M_PI)) * m_NumberOfReadings );
-  // look below for explanation
-
-  if ( GetReadingLength( reading_num ) == 0.0 )
-    return true;
-
-  if( ( (i >= m_fIgnoreFRStart) && (i <= m_fIgnoreFREnd) )
-   || ( (i >= m_fIgnoreRRStart) && (i <= m_fIgnoreRREnd) )
-   || ( (i >= m_fIgnoreRLStart) && (i <= m_fIgnoreRLEnd) )
-   || ( (i >= m_fIgnoreFLStart) && (i <= m_fIgnoreFLEnd) ) ) {
-    // Meist sind die Kabel das Problem!!!!
-    // Wenn Danger if turning im Colli erscheint, erst Kabel checken.
-    //      cout << "Got pipe at " << i << endl;
-    return true;
-  }
-
-  return false;
+  return GetReadingLength(i) >= MIN_READING_LENGTH;
 }
 
-/** The famous is pipe method
- * Checks if the laser reading is to be ignored, as it is a "pipe" in the
- * robot's body construction.
- * Should become deprecated, laser readings are filtered in a previous step
- * of another plugin!
- * @param i Number of the laser readin.
- * @return true if the reading is blocked by a pipe
+/** Checks if a laser reading is valid
+ * @param i Angle of the laser readin.
+ * @return true if the reading is valid
  */
 bool
-Laser::IsOnlyPipe( float i ) const
+Laser::IsValid( float i ) const
 {
   i = normalize_rad( i );
-
-  //  int reading_num = (int)( ( (i+0.001) / (2.0*M_PI)) * m_NumberOfReadings );
-  // -0.01 because of numerical problems...
-  // numbers were before something like 1 2 3 5 6 6 7
-  //    cout << i << " has reading num " << reading_num << " and length : " << GetReadingLength( reading_num ) << endl;
-
-//   if ( ( (i > (26.0*M_PI)/180.0) && (i < (37.0*M_PI)/180.0) )
-//        || ( (i > (95.0*M_PI)/180.0) && (i < (115.0*M_PI)/180.0) )
-//        || ( (i > ((246.0-360.0)*M_PI)/180.0) && (i < ((263.0-360.0)*M_PI)/180.0) )
-//        || ( (i > ((323.0-360.0)*M_PI)/180.0) && (i < ((334.0-360.0)*M_PI)/180.0) )
-//       )
-
-  if( ( (i > m_fIgnoreFRStart) && (i < m_fIgnoreFREnd) )
-   || ( (i > m_fIgnoreRRStart) && (i < m_fIgnoreRREnd) )
-   || ( (i > m_fIgnoreRLStart) && (i < m_fIgnoreRLEnd) )
-   || ( (i > m_fIgnoreFLStart) && (i < m_fIgnoreFLEnd ) ) ) {
-    // Meist sind die Kabel das Problem!!!!
-    // Wenn Danger if turning im Colli erscheint, erst Kabel checken.
-    //      cout << "Got pipe at " << i << endl;
-    return true;
-  }
-
-  return false;
+  int reading_num = (int)( (i+0.001) * (m_NumberOfReadings / (2.0*M_PI)) );
+  return IsValid( reading_num );
 }
 
 } // namespace fawkes

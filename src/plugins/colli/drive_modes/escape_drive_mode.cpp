@@ -204,32 +204,32 @@ CEscapeDriveModule::SortNormalizedReadings()
 
   while ( i < m_pLaser->GetNumberOfReadings() ) {
 
-    if ( (pipe == 0) && !m_pLaser->IsPipe( rad ) )
+    if ( (pipe == 0) && m_pLaser->IsValid( rad ) )
       m_vFront.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 1) && !m_pLaser->IsPipe( rad ) && (rad < M_PI_2) )
+    else if ( (pipe == 1) && m_pLaser->IsValid( rad ) && (rad < M_PI_2) )
       m_vLeftFront.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 1) && !m_pLaser->IsPipe( rad ) && (rad > M_PI_2) )
+    else if ( (pipe == 1) && m_pLaser->IsValid( rad ) && (rad > M_PI_2) )
       m_vLeftBack.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 2) && !m_pLaser->IsPipe( rad ) )
+    else if ( (pipe == 2) && m_pLaser->IsValid( rad ) )
       m_vBack.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 3) && !m_pLaser->IsPipe( rad ) && (rad > 3*M_PI_2) )
+    else if ( (pipe == 3) && m_pLaser->IsValid( rad ) && (rad > 3*M_PI_2) )
       m_vRightFront.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 3) && !m_pLaser->IsPipe( rad ) && (rad < 3*M_PI_2) )
+    else if ( (pipe == 3) && m_pLaser->IsValid( rad ) && (rad < 3*M_PI_2) )
       m_vRightBack.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 4) && !m_pLaser->IsPipe( rad ) )
+    else if ( (pipe == 4) && m_pLaser->IsValid( rad ) )
       m_vFront.push_back( m_vNormalizedReadings[i] );
 
     rad = m_pLaser->GetRadiansForReading( ++i );
 
-    if ( m_pLaser->IsOnlyPipe( rad ) ) {
+    if ( !m_pLaser->IsValid( rad ) ) {
       ++pipe;
-      while (m_pLaser->IsOnlyPipe( rad )) {
+      while (!m_pLaser->IsValid( rad )) {
         rad = m_pLaser->GetRadiansForReading( ++i );
       }
     }

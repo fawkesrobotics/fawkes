@@ -175,27 +175,3 @@ plugins/colli:
     # The more states the better the search, but the slower the algorithm
     MAX_STATES: 15000
 
-  # default laser_calibration values for ignore-readings! It defines, which laser beams (ot of 360) are
-  # not taken into account in front/back left/righ (if there is a pipe occluding the laser sight).
-  # If this node is available ("laser_calibration"), these values are used.
-  laser_calibration:
-    IgnoreFRStart: 25
-    IgnoreFREnd: 39
-    IgnoreRRStart: 95
-    IgnoreRREnd: 117
-    IgnoreRLStart: 245
-    IgnoreRLEnd: 264
-    IgnoreFLStart: 322
-    IgnoreFLEnd: 335
-
-  # ignore-readings config for caesar. NOTE: these are not used, you need to put them into
-  # the "laser_calibration" node in order to be active.
-  laser_calibration_caesar:
-    IgnoreFRStart: 28
-    IgnoreFREnd: 35
-    IgnoreRRStart: 96
-    IgnoreRREnd: 110
-    IgnoreRLStart: 250
-    IgnoreRLEnd: 266
-    IgnoreFLStart: 325
-    IgnoreFLEnd: 332
