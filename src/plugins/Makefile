@@ -26,6 +26,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  clips clips-agent clips-protobuf clips-webview \
 	  mongodb mongodb_log \
 	  openni refboxcomm ros player xmlrpc \
+	  robotino/interfaces \
 	  gazebo gazsim-robotino gazsim-laser gazsim-localization gazsim-comm \
 	  gazsim-vis-localization gazsim-webcam gazsim-timesource
 	  # readylogagent
