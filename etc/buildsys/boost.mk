@@ -21,7 +21,8 @@ ifndef __buildsys_boost_mk_
 __buildsys_boost_mk_ := 1
 
 BOOST_LIB_DIRS=/usr/lib64 /usr/lib /usr/lib32 \
-	       /usr/local/lib64 /usr/local/lib
+	       /usr/local/lib64 /usr/local/lib \
+	       /usr/lib/x86_64-linux-gnu/
 BOOST_INCLUDE_DIRS=
 BOOST_LIBRARY_SUFFIXES=-mt NOSUFFIX
 
