@@ -34,9 +34,9 @@ int
 main(int argc, char **argv)
 {
   try {
-    int rv = 0;
-    if ((rv = fawkes::runtime::init(argc, argv)) != 0) {
-      return rv;
+    int retval = 0;
+    if (! fawkes::runtime::init(argc, argv, retval)) {
+      return retval;
     }
     fawkes::runtime::run();
     fawkes::runtime::cleanup();
