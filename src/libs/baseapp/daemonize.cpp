@@ -209,6 +209,8 @@ kill()
   if ((ret = daemon_pid_file_kill_wait(SIGINT, 5)) < 0) {
     daemon_log(LOG_WARNING, "Failed to kill daemon");
   }
+
+  daemon_pid_file_remove();
 #else
   throw Exception("Daemonizing support is not available.\n"
 		  "(libdaemon[-devel] was not available at compile time)\n");
