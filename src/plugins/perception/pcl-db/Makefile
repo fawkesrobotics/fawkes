@@ -65,13 +65,13 @@ ifeq ($(HAVE_MONGODB)$(HAVE_PCL)$(HAVE_TF),111)
     WARN_TARGETS += warning_pcl_components
   endif
 else
-  ifeq ($(HAVE_PCL),1)
+  ifneq ($(HAVE_PCL),1)
     WARN_TARGETS += warning_pcl
   endif
-  ifeq ($(HAVE_MONGODB),1)
+  ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb
   endif
-  ifeq ($(HAVE_TF),1)
+  ifneq ($(HAVE_TF),1)
     WARN_TARGETS += warning_tf
   endif
 endif
