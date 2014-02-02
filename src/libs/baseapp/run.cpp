@@ -86,28 +86,34 @@ tf::Transformer           * tf_listener = NULL;
 // this is NOT shared to the outside
 FawkesMainThread::Runner  * runner = NULL;
 
-int
-init(int argc, char **argv)
+bool
+init(int argc, char **argv, int & retval)
 {
-  return init(InitOptions(argc, argv));
+  return init(InitOptions(argc, argv), retval);
 }
 
 
-int
-init(InitOptions options)
+bool
+init(InitOptions options, int & retval)
 {
   init_options = new InitOptions(options);
 
-  if (init_options->show_help())  return 0;
+  if (init_options->show_help())  return true;
 
   if ( options.daemonize() ) {
     fawkes::daemon::init(options.daemon_pid_file(), options.basename());
     if (options.daemonize_kill()) {
       fawkes::daemon::kill();
+      retval = 0;
+      return false;
     } else if (options.daemonize_status()) {
-      return fawkes::daemon::running() ? 0 : 1;
+      retval = fawkes::daemon::running() ? 0 : 1;
+      return false;
     } else {
-      fawkes::daemon::start();
+      if (fawkes::daemon::start()) {
+	retval = 0;
+	return false;
+      }
     }
   }
 
@@ -125,7 +131,8 @@ init(InitOptions options)
     struct passwd *pw;
     if (! (pw = getpwnam(user))) {
       printf("Failed to find user %s, check -u argument.\n", user);
-      return 203;
+      retval = 203;
+      return false;
     }
     int r = 0;
     r = setreuid(pw->pw_uid, pw->pw_uid);
@@ -138,7 +145,8 @@ init(InitOptions options)
     struct group *gr;
     if (! (gr = getgrnam(group))) {
       printf("Failed to find group %s, check -g argument.\n", user);
-      return 204;
+      retval = 204;
+      return false;
     }
     int r = 0;
     r = setregid(gr->gr_gid, gr->gr_gid);
@@ -361,9 +369,8 @@ init(InitOptions options)
 					   network_manager->service_browser(),
 					   plugin_manager, tf_listener);
 
-  
-
-  return 0;
+  retval = 0;
+  return true;
 }
 
 void

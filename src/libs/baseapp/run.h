@@ -66,8 +66,8 @@ extern ConfigNetworkHandler  *nethandler_config;
 extern PluginNetworkHandler  *nethandler_plugin;
 extern tf::Transformer       *tf_listener; 
 
-int  init(int argc, char **argv);
-int  init(InitOptions options);
+bool init(int argc, char **argv, int & retval);
+bool init(InitOptions options, int & retval);
 void run();
 void cleanup();
 void quit();
