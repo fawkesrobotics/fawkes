@@ -20,7 +20,7 @@ include $(BUILDSYSDIR)/fvconf.mk
 SUBDIRS = core utils interface netcomm blackboard interfaces config logging tf \
 	  plugin lua aspect network_logger webview gui_utils baseapp navgraph \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
-	  kdl_parser protobuf_comm protobuf_clips pcl_utils
+	  kdl_parser protobuf_comm protobuf_clips pcl_utils syncpoint 
 
 ifeq ($(HAVE_SIFT),1)
   SUBDIRS += extlib/sift
@@ -66,6 +66,7 @@ endif
 protobuf_clips: core logging protobuf_comm
 pcl_utils: core tf
 kdl_parser: core
+syncpoint: core 
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk

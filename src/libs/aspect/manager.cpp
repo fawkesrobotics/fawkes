@@ -37,6 +37,7 @@
 #include <aspect/inifins/time_source.h>
 #include <aspect/inifins/vision_master.h>
 #include <aspect/inifins/vision.h>
+#include <aspect/inifins/syncpoint_manager.h>
 #ifdef HAVE_WEBVIEW
 #  include <aspect/inifins/webview.h>
 #endif
@@ -221,6 +222,7 @@ AspectManager::prepare_finalize(Thread *thread)
  * @param service_browser service browser for NetworkAspect
  * @param pmanager plugin manager for PluginDirectorAspect
  * @param tf_listener transformer for TransformAspect
+ * @param syncpoint_manager manager for SyncPointManagerAspect
  */
 void
 AspectManager::register_default_inifins(BlackBoard *blackboard,
@@ -236,7 +238,8 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
 					ServicePublisher *service_publisher,
 					ServiceBrowser *service_browser,
 					PluginManager *pmanager,
-					tf::Transformer *tf_listener)
+					tf::Transformer *tf_listener,
+					SyncPointManager *syncpoint_manager)
 {
   if (! __default_inifins.empty())  return;
 
@@ -258,6 +261,7 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
   TimeSourceAspectIniFin *ts_aif = new TimeSourceAspectIniFin(clock);
   VisionMasterAspectIniFin *vm_aif = new VisionMasterAspectIniFin();
   VisionAspectIniFin *vis_aif = new VisionAspectIniFin(vm_aif);
+  SyncPointManagerAspectIniFin *spm_aif = new SyncPointManagerAspectIniFin(syncpoint_manager);
 #ifdef HAVE_WEBVIEW
   WebviewAspectIniFin *web_aif = new WebviewAspectIniFin();
 #endif
@@ -284,6 +288,7 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
   __default_inifins[ts_aif->get_aspect_name()] = ts_aif;
   __default_inifins[vm_aif->get_aspect_name()] = vm_aif;
   __default_inifins[vis_aif->get_aspect_name()] = vis_aif;
+  __default_inifins[spm_aif->get_aspect_name()] = spm_aif;
 #ifdef HAVE_WEBVIEW
   __default_inifins[web_aif->get_aspect_name()] = web_aif;
 #endif

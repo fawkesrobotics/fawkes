@@ -20,7 +20,7 @@ include $(BUILDCONFDIR)/tf/tf.mk
 include $(BUILDSYSDIR)/pcl.mk
 
 LIBS_libfawkesaspects = fawkescore fawkesutils fawkesblackboard fawkesnetcomm \
-			fawkesconfig fawkesplugin fawkeslogging
+			fawkesconfig fawkesplugin fawkeslogging fawkessyncpoint
 
 ifneq ($(HAVE_WEBVIEW),1)
   OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/webview.cpp $(SRCDIR)/inifins/webview.cpp))
