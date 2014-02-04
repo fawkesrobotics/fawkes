@@ -20,6 +20,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+:- module(logging).
+:- export log_info/2.
+:- export log_info/1.
+:- export log_warn/2.
+:- export log_warn/1.
+:- export log_error/2.
+:- export log_error/1.
+:- export log_debug/2.
+:- export log_debug/1.
 :- external(log/2, p_log).
 
 :- log(ll_info, "Loading logging utils").
