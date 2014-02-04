@@ -100,7 +100,7 @@ class WorldModelObjPosMajorityFuser
   typedef std::vector<Opi*>           OpiBucket;
   typedef std::vector<OpiBucket>      OpiBuckets;
 
-  const static float GROUP_RADIUS = 1.0f;
+  const static float GROUP_RADIUS;
 
   void check();
   void copy_own_if();
