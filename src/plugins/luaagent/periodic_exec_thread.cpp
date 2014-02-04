@@ -140,7 +140,6 @@ LuaAgentPeriodicExecutionThread::init()
     __lua->add_package("fawkesconfig");
     __lua->add_package("fawkeslogging");
     __lua->add_package("fawkesinterface");
-    __lua->add_package("fawkesgeometry");
 #ifdef HAVE_TF
     __lua->add_package("fawkestf");
 #endif
