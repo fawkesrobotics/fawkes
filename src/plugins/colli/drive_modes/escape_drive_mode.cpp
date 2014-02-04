@@ -198,39 +198,44 @@ CEscapeDriveModule::SortNormalizedReadings()
   m_vRightFront.clear();
   m_vRightBack.clear();
 
-  int pipe = 0;
+  float ang_fl = m_pRoboShape->GetAngleFrontLeft();
+  float ang_fr = m_pRoboShape->GetAngleFrontRight();
+  float ang_bl = m_pRoboShape->GetAngleBackLeft();
+  float ang_br = m_pRoboShape->GetAngleBackRight();
+  float ang_ml = m_pRoboShape->GetAngleLeft();
+  float ang_mr = m_pRoboShape->GetAngleRight();
+
+  if(!( (ang_fl < ang_ml) && (ang_ml < ang_bl) && (ang_bl < ang_br)
+     &&(ang_br < ang_mr) && (ang_mr < ang_fr) ))
+    logger_->log_error("RoboShape", "Angles are bad!!!");
+
   int i = 0;
-  float rad;
+  float rad = 0.f;
 
   while ( i < m_pLaser->GetNumberOfReadings() ) {
-    rad = normalize_rad( m_pLaser->GetRadiansForReading( i ) );
+    if( m_pLaser->IsValid(i) ) {
+      rad = normalize_rad( m_pLaser->GetRadiansForReading( i ));
 
-    if ( (pipe == 0) && m_pLaser->IsValid( i ) )
-      m_vFront.push_back( m_vNormalizedReadings[i] );
+      if( rad < ang_fl || rad >= ang_fr )
+        m_vFront.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 1) && m_pLaser->IsValid( i ) && (rad < M_PI_2) )
-      m_vLeftFront.push_back( m_vNormalizedReadings[i] );
+      else if( rad < ang_ml )
+        m_vLeftFront.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 1) && m_pLaser->IsValid( i ) && (rad > M_PI_2) )
-      m_vLeftBack.push_back( m_vNormalizedReadings[i] );
+      else if( rad < ang_bl )
+        m_vLeftBack.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 2) && m_pLaser->IsValid( i ) )
-      m_vBack.push_back( m_vNormalizedReadings[i] );
+      else if( rad < ang_br )
+        m_vBack.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 3) && m_pLaser->IsValid( i ) && (rad > 3*M_PI_2) )
-      m_vRightFront.push_back( m_vNormalizedReadings[i] );
+      else if( rad < ang_mr )
+        m_vRightBack.push_back( m_vNormalizedReadings[i] );
 
-    else if ( (pipe == 3) && m_pLaser->IsValid( i ) && (rad < 3*M_PI_2) )
-      m_vRightBack.push_back( m_vNormalizedReadings[i] );
-
-    else if ( (pipe == 4) && m_pLaser->IsValid( i ) )
-      m_vFront.push_back( m_vNormalizedReadings[i] );
-
-    if ( !m_pLaser->IsValid( ++i ) ) {
-      ++pipe;
-      while (!m_pLaser->IsValid( ++i ))
-      {}
+      else if( rad < ang_fr )
+        m_vRightFront.push_back( m_vNormalizedReadings[i] );
     }
+
+    ++i;
   }
 }
 
