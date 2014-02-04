@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 
 SUBDIRS = core utils interface netcomm blackboard interfaces config logging tf \
-	  plugin lua aspect geometry webview gui_utils baseapp \
+	  plugin lua aspect webview gui_utils baseapp \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
 	  eclipse_externals protobuf_comm protobuf_clips pcl_utils
 
@@ -46,7 +46,6 @@ interfaces: core interface
 config: core netcomm utils logging
 plugin: core netcomm utils config logging
 aspect: core utils blackboard netcomm config plugin webview logging tf pcl_utils
-geometry: core
 lua: core utils blackboard config logging
 interfaces: core interface
 gui_utils: core netcomm plugin logging
@@ -58,7 +57,7 @@ eclipse_externals: blackboard interface utils
 tf: core utils blackboard interface interfaces
 fvutils: core utils netcomm logging
 fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils logging
-fvmodels: fvfilters fvclassifiers geometry
+fvmodels: fvfilters fvclassifiers
 fvstereo: fvcams
 ifneq ($(CLASSIFIERS_DEPS),)
 fvclassifiers: $(CLASSIFIERS_DEPS)
