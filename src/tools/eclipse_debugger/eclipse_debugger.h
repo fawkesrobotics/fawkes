@@ -1,8 +1,10 @@
 
 /***************************************************************************
- *  eclipse_debugger.h - Skill GUI
+ *  eclipse_debugger.h - Eclipse Debugger Tool
  *
- *  Created: Wed Dec 05 10:45:34 20012
+ *  Created: Mon Feb 25 14:22:00 2013
+ *  Copyright  2013  Gesche Gierse
+ *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

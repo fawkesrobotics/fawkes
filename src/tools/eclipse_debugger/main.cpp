@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  main.cpp - Skill GUI main
+ *  main.cpp - Eclipse Debugger Tool main
  *
- *  Created: Mon Nov 30 13:33:13 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Mon Feb 25 14:22:00 2013
+ *  Copyright  2013  Gesche Gierse
  *
  ****************************************************************************/
 
