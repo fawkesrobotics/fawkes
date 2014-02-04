@@ -1,10 +1,10 @@
-
 /***************************************************************************
  *  dummy.ecl - A dummy interpreter that only implements some event
  *  handlers to test the interaction with the ECLiPSe CLP plugin
  *
  *  Created: Wed Jul 22 11:25:21 2009
  *  Copyright  2009  Daniel Beck
+ *  Copyright  2012  Gesche Gierse
  *
  ****************************************************************************/
 
