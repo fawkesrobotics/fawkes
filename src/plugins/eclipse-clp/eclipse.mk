@@ -48,7 +48,8 @@ else
 endif
 
 ifeq ($(HAVE_ECLIPSE),1)
-  ifeq ( $(shell pkg-config --exists eclipse-clp), 0 )
+  HAVE_ECL_PACKAGE = $(shell pkg-config --exists eclipse-clp && echo 1 || echo 0)
+  ifeq ($(HAVE_ECL_PACKAGE), 1)
     ECLIPSE_LIB = $(shell pkg-config --libs eclipse-clp)
     ECLIPSE_INC = $(shell pkg-config --cflags eclipse-clp)
     ECLIPSE_CFLAGS = $(ECLIPSE_INC) -DECLIPSE_CODE_DIR=\"$(abspath $(BASEDIR)/src/plugins/eclipse-clp)\"
