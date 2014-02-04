@@ -100,9 +100,6 @@ CEscapeDriveModule::Update()
   bool dangerFront = CheckDanger( m_vFront );
   bool dangerBack  = CheckDanger( m_vBack  );
 
-  bool dangerLeft  = ( CheckDanger( m_vLeftFront ) || CheckDanger( m_vLeftBack ) );
-  bool dangerRight = ( CheckDanger( m_vRightFront ) || CheckDanger( m_vRightBack ) );
-
   bool turnLeftAllowed = TurnLeftAllowed();
   bool turnRightAllowed = TurnRightAllowed();
 
@@ -112,11 +109,17 @@ CEscapeDriveModule::Update()
   if (dangerBack)
     logger_->log_warn("CEscapeDriveModule", "DANGER IN BACK");
 
-  if (dangerLeft)
-    logger_->log_warn("CEscapeDriveModule", "DANGER IN LEFT");
+  if (CheckDanger(m_vLeftFront))
+    logger_->log_warn("CEscapeDriveModule", "DANGER IN LEFT FRONT");
 
-  if (dangerRight)
-    logger_->log_warn("CEscapeDriveModule", "DANGER IN RIGHT");
+  if (CheckDanger(m_vLeftBack))
+    logger_->log_warn("CEscapeDriveModule", "DANGER IN LEFT BACK");
+
+  if (CheckDanger(m_vRightFront))
+    logger_->log_warn("CEscapeDriveModule", "DANGER IN RIGHT FRONT");
+
+  if (CheckDanger(m_vRightBack))
+    logger_->log_warn("CEscapeDriveModule", "DANGER IN RIGHT BACK");
 
   if (!turnLeftAllowed)
     logger_->log_warn("CEscapeDriveModule", "DANGER IF TURNING LEFT!!!");
@@ -128,35 +131,29 @@ CEscapeDriveModule::Update()
   if ( dangerFront && dangerBack && turnRightAllowed ) {
     m_ProposedTranslation = 0.0;
     m_ProposedRotation = -m_MaxRotation;
-    return;
-  }
 
-  if ( dangerFront && dangerBack && turnLeftAllowed ) {
+  } else if ( dangerFront && dangerBack && turnLeftAllowed ) {
     m_ProposedTranslation = 0.0;
     m_ProposedRotation = m_MaxRotation;
-    return;
-  }
 
-  if (!dangerFront && dangerBack) {
+  } else if (!dangerFront && dangerBack) {
     m_ProposedTranslation = m_MaxTranslation;
 
     if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
       m_ProposedRotation =  -m_MaxRotation;
     else if ( (turnLeftAllowed) && (m_LocalTargetY >= m_RoboY) )
       m_ProposedRotation = m_MaxRotation;
-  }
 
-  if (dangerFront && !dangerBack) {
+  } else if (dangerFront && !dangerBack) {
     m_ProposedTranslation = -m_MaxTranslation;
 
     if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
       m_ProposedRotation =  -m_MaxRotation;
     else if ( (turnLeftAllowed) && (m_LocalTargetY >= m_RoboY) )
       m_ProposedRotation = m_MaxRotation;
-  }
 
-  if ( !dangerFront && !dangerBack ) {
-    // entscheide ueber die zielkoordinaten welche richtung einzuschlagen ist
+  } else if ( !dangerFront && !dangerBack ) {
+    // depending on target coordinates, decide which direction to escape to
     if ( m_TargetX > m_RoboX )
       m_ProposedTranslation = m_MaxTranslation;
     else
