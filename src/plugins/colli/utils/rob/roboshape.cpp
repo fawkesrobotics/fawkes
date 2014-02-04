@@ -260,37 +260,6 @@ RoboShape::GetRobotLengthforDegree( float angledeg )
   return GetRobotLengthforRad( deg2rad( angledeg ) );
 }
 
-/** Returns if there is a rod waiting in this direction.
- * @param anglerad is an angle in radians.
- * @return 0 if there is no rod, 1 if there is, and 3 if unsure (for now all rods are unsure).
- */
-int
-RoboShape::IsRodforRad( float anglerad )
-{
-  anglerad = normalize_mirror_rad( anglerad );
-
-  if ( (normalize_mirror_rad( deg2rad(  28 )) < anglerad ) && ( anglerad < normalize_mirror_rad( deg2rad(  35 ))) )
-    return 3;
-  else if ( (normalize_mirror_rad( deg2rad(  99 )) < anglerad ) && ( anglerad < normalize_mirror_rad( deg2rad( 113 ))) )
-    return 3;
-  else if ( (normalize_mirror_rad( deg2rad( 249 )) < anglerad ) && ( anglerad < normalize_mirror_rad( deg2rad( 260 ))) )
-    return 3;
-  else if ( (normalize_mirror_rad( deg2rad( 325 )) < anglerad ) && ( anglerad < normalize_mirror_rad( deg2rad( 331 ))) )
-    return 3;
-  else
-    return 0;
-}
-
-/** Returns if there is a rod waiting in this direction.
- * @param angledeg is an angle in degree.
- * @return 0 if there is no rod, 1 if there is, and 3 if unsure (for now all rods are unsure).
- */
-int
-RoboShape::IsRodforDegree( float angledeg )
-{
-  return IsRodforRad( deg2rad( angledeg ) );
-}
-
 /** Returns the radius of the robot if its round.
  * @return radius of the round robot
  */

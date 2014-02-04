@@ -55,12 +55,6 @@ class RoboShape
   ///\brief return the length of the robot for a specific angle
   float GetRobotLengthforDegree( float angledeg );
 
-  ///\brief Returns if there is a rod waiting in this direction.
-  static int IsRodforRad( float anglerad );
-
-  ///\brief Returns if there is a rod waiting in this direction.
-  int IsRodforDegree( float angledeg );
-
   ///\brief Returns the radius of the robot if its round.
   float GetRadius();
 
