@@ -121,8 +121,8 @@ RoboShape::RoboShape( const char * cfg_prefix,
     m_laserOffsetY  = config->get_float((cfg + "LASER_OFFSET_Y_FROM_MIDDLE").c_str());
 
     m_robotToBack  = m_radius + m_laserOffsetX + m_widthAddBack;
-    m_robotToFront = m_radius + m_laserOffsetX + m_widthAddFront;
-    m_robotToLeft  = m_radius + m_laserOffsetY + m_widthAddLeft;
+    m_robotToFront = m_radius - m_laserOffsetX + m_widthAddFront;
+    m_robotToLeft  = m_radius - m_laserOffsetY + m_widthAddLeft;
     m_robotToRight = m_radius + m_laserOffsetY + m_widthAddRight;
 
     logger_->log_info("RoboShape", "Shape is round!");
@@ -276,7 +276,24 @@ RoboShape::GetRobotLengthforRad( float anglerad )
   anglerad = normalize_mirror_rad( anglerad );
 
   if( IsRoundRobot() ) {
-    throw fawkes::Exception("RoboShape: GetRobotLengthforRad is NOT IMPLEMENTED YET for round robots");
+    /* use quadratic equation to get intersection point of ray to circle.
+     * The ray origins at the laser with angle "anglerad" and is a unit_vector.
+     * Consider robot-center as (0,0), we have an equation of:
+     *    length(v_laser + k*ray) = radius + expansion
+     * with v_laser = vector(m_laserOffsetX, m_laserOffsetY).
+     * "k" is the length from the laser to the robot edge at angle "anglerad".
+     *
+     * Transform that equation, i.e. resolve "length(..)" and you get a
+     * quadratic equation of the kind "ax^2 + 2bx + c = 0".
+     */
+    float ray_x = cos(anglerad); // unit vector!
+    float ray_y = sin(anglerad);
+
+    float a = ray_x*ray_x + ray_y*ray_y;
+    float b = ray_x*m_laserOffsetX + ray_y*m_laserOffsetY;
+    static float c = m_laserOffsetX*m_laserOffsetX + m_laserOffsetY*m_laserOffsetY - GetCompleteRadius()*GetCompleteRadius();
+
+    return ( -b + sqrt(b*b - a*c) ) / a;
 
   } else if( IsAngularRobot() ) {
     /* check all the quadrants in which the target angles lies. The quadrants are spanned
@@ -339,8 +356,8 @@ float
 RoboShape::GetCompleteRadius()
 {
   if ( IsRoundRobot() )
-    return ( std::max( m_radius + m_widthAddFront + m_widthAddBack,
-                       m_radius + m_widthAddRight + m_widthAddLeft ) );
+    return ( m_radius + std::max( std::max(m_widthAddFront, m_widthAddBack),
+                                  std::max(m_widthAddRight, m_widthAddLeft) ) );
   else
     logger_->log_error("RoboShape", "Error: The Robot is not round!");
 
