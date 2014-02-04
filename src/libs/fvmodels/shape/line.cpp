@@ -26,9 +26,6 @@
 #include <utils/math/angle.h>
 #include <fvmodels/shape/line.h>
 
-// #include <utils/geometry/line.h>
-// #include <utils/geometry/point.h>
-
 using namespace std;
 
 namespace firevision {
