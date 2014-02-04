@@ -2,10 +2,9 @@
  * Elevator example in vanilla golog
  */
 :- module(elevator).
-:- include("/home/gesche/fawkes/home/fawkes-athome/fawkes/src/plugins/readylogagent/utils/logging").
+:- use_module("../utils/logging").
 :- use_module("golog").
-%:- use_module("elevatorGolog").
-%:- include('golog').
+
 
 :- log_info("Loading elevator agent").
 
@@ -85,18 +84,17 @@ holds(next_floor(N),S) :- /*writeln(holds(next_floor(N),S)),*/ golog:holds(on(N)
 %the acutal program being performed (called from eclipse_thread.cpp)
 run :-
     (
-      (
+      /*(
+      terminate(_),!,
       log_info("Are you here?"),
-      terminate(_),
       log_info("Terminated")
       )      
-      ;
-      (
-      log_debug("Request: doo(control,s0,S)"), 
+      ;*/
+      log_info("Request: doo(control,s0,S)"), 
 		  doo(control,s0,S),
-      log_debug("logging result now"),
-		  log_debug("Result: %w",[S])
-      )    
+      log_info("logging result now"),
+		  log_info("Result: %w",[S])
+          
     ).
 		
 
