@@ -195,12 +195,12 @@ CEscapeDriveModule::SortNormalizedReadings()
   m_vRightFront.clear();
   m_vRightBack.clear();
 
-  float ang_fl = m_pRoboShape->GetAngleFrontLeft();
-  float ang_fr = m_pRoboShape->GetAngleFrontRight();
-  float ang_bl = m_pRoboShape->GetAngleBackLeft();
-  float ang_br = m_pRoboShape->GetAngleBackRight();
-  float ang_ml = m_pRoboShape->GetAngleLeft();
-  float ang_mr = m_pRoboShape->GetAngleRight();
+  float ang_fl = normalize_rad(m_pRoboShape->GetAngleFrontLeft());
+  float ang_fr = normalize_rad(m_pRoboShape->GetAngleFrontRight());
+  float ang_bl = normalize_rad(m_pRoboShape->GetAngleBackLeft());
+  float ang_br = normalize_rad(m_pRoboShape->GetAngleBackRight());
+  float ang_ml = normalize_rad(m_pRoboShape->GetAngleLeft());
+  float ang_mr = normalize_rad(m_pRoboShape->GetAngleRight());
 
   if(!( (ang_fl < ang_ml) && (ang_ml < ang_bl) && (ang_bl < ang_br)
      &&(ang_br < ang_mr) && (ang_mr < ang_fr) ))

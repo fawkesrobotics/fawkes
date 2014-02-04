@@ -101,14 +101,14 @@ RoboShape::RoboShape( const char * cfg_prefix,
 
   // angles from laser to the edges of real robot dimension
   //  (might be more precise than the calculation below. TODO: check this)
-  //m_angFrontLeft  = normalize_rad( atan2(  laserToLeft,   laserToFront ) );
-  //m_angFrontRight = normalize_rad( atan2( -laserToRight,  laserToFront ) );
-  //m_angBackLeft   = normalize_rad( atan2(  laserToLeft,  -laserToBack ) );
-  //m_angBackRight  = normalize_rad( atan2( -laserToRight, -laserToBack ) );
-  //m_angLeft  = normalize_rad( atan2(  laserToLeft,  laserToFront - m_widthX/2.f ) );
-  //m_angRight = normalize_rad( atan2( -laserToRight, laserToFront - m_widthX/2.f ) );
-  //m_angFront = normalize_rad( atan2(  laserToLeft - m_widthY/2.f,  laserToFront ) );
-  //m_angBack  = normalize_rad( atan2(  laserToLeft - m_widthY/2.f, -laserToBack ) );
+  //m_angFrontLeft  = normalize_mirror_rad( atan2(  laserToLeft,   laserToFront ) );
+  //m_angFrontRight = normalize_mirror_rad( atan2( -laserToRight,  laserToFront ) );
+  //m_angBackLeft   = normalize_mirror_rad( atan2(  laserToLeft,  -laserToBack ) );
+  //m_angBackRight  = normalize_mirror_rad( atan2( -laserToRight, -laserToBack ) );
+  //m_angLeft  = normalize_mirror_rad( atan2(  laserToLeft,  laserToFront - m_widthX/2.f ) );
+  //m_angRight = normalize_mirror_rad( atan2( -laserToRight, laserToFront - m_widthX/2.f ) );
+  //m_angFront = normalize_mirror_rad( atan2(  laserToLeft - m_widthY/2.f,  laserToFront ) );
+  //m_angBack  = normalize_mirror_rad( atan2(  laserToLeft - m_widthY/2.f, -laserToBack ) );
 
     logger_->log_info("RoboShape", "Shape is angular!");
 
@@ -138,14 +138,14 @@ RoboShape::RoboShape( const char * cfg_prefix,
   logger_->log_info("RoboShape", "+#-->  (m)  is to back : %f", m_robotToBack);
 
   // angles from laser to edges of the robot extension
-  m_angFrontLeft  = normalize_rad( atan2(  m_robotToLeft,   m_robotToFront ) );
-  m_angFrontRight = normalize_rad( atan2( -m_robotToRight,  m_robotToFront ) );
-  m_angBackLeft   = normalize_rad( atan2(  m_robotToLeft,  -m_robotToBack ) );
-  m_angBackRight  = normalize_rad( atan2( -m_robotToRight, -m_robotToBack ) );
-  m_angLeft  = normalize_rad( atan2(  m_robotToLeft,  m_robotToFront - m_widthX/2.f ) );
-  m_angRight = normalize_rad( atan2( -m_robotToRight, m_robotToFront - m_widthX/2.f ) );
-  m_angFront = normalize_rad( atan2(  m_robotToLeft - m_widthY/2.f,  m_robotToFront ) );
-  m_angBack  = normalize_rad( atan2(  m_robotToLeft - m_widthY/2.f, -m_robotToBack ) );
+  m_angFrontLeft  = normalize_mirror_rad( atan2(  m_robotToLeft,   m_robotToFront ) );
+  m_angFrontRight = normalize_mirror_rad( atan2( -m_robotToRight,  m_robotToFront ) );
+  m_angBackLeft   = normalize_mirror_rad( atan2(  m_robotToLeft,  -m_robotToBack ) );
+  m_angBackRight  = normalize_mirror_rad( atan2( -m_robotToRight, -m_robotToBack ) );
+  m_angLeft  = normalize_mirror_rad( atan2(  m_robotToLeft,  m_robotToFront - m_widthX/2.f ) );
+  m_angRight = normalize_mirror_rad( atan2( -m_robotToRight, m_robotToFront - m_widthX/2.f ) );
+  m_angFront = normalize_mirror_rad( atan2(  m_robotToLeft - m_widthY/2.f,  m_robotToFront ) );
+  m_angBack  = normalize_mirror_rad( atan2(  m_robotToLeft - m_widthY/2.f, -m_robotToBack ) );
 }
 
 
