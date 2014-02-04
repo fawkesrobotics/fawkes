@@ -79,9 +79,32 @@ class RoboShape
   ///\brief Returns the laser offset in y direction of the robot.
   float GetLaserOffsetY();
 
+  ///\brief Get angle to the front left corner of the robot
+  float GetAngleFrontLeft() const;
+
+  ///\brief Get angle to the front right corner of the robot
+  float GetAngleFrontRight() const;
+
+  ///\brief Get angle to of the rear left corner robot
+  float GetAngleBackLeft() const;
+
+  ///\brief Get angle to of the rear right corner robot
+  float GetAngleBackRight() const;
+
+  ///\brief Get angle to middle of the left side of the robot
+  float GetAngleLeft() const;
+
+  ///\brief Get angle to middle of the right side of the robot
+  float GetAngleRight() const;
+
+  ///\brief Get angle to middle of the front side of the robot
+  float GetAngleFront() const;
+
+  ///\brief Get angle to middle of the back side of the robot
+  float GetAngleBack() const;
+
 
 private:
-
 
   bool m_isRound;    /**< flag if the robot is round */
   bool m_isAngular;  /**< flag if the robot is angular */
@@ -91,6 +114,10 @@ private:
   float m_laserOffsetX, m_laserOffsetY;
   float m_widthAddFront, m_widthAddBack, m_widthAddLeft, m_widthAddRight;
   float m_robotToFront, m_robotToRight, m_robotToBack, m_robotToLeft;
+
+  // angles to the "corners" and mid-sections of the complete roboshape
+  float m_angFrontLeft, m_angFrontRight, m_angBackLeft, m_angBackRight;
+  float m_angLeft, m_angRight, m_angFront, m_angBack;
 
   fawkes::Logger* logger_;
 };

@@ -89,10 +89,26 @@ RoboShape::RoboShape( const char * cfg_prefix,
     m_laserOffsetX  = config->get_float((cfg + "LASER_OFFSET_X_FROM_BACK").c_str());
     m_laserOffsetY  = config->get_float((cfg + "LASER_OFFSET_Y_FROM_LEFT").c_str());
 
-    m_robotToBack  =             m_laserOffsetX  + m_widthAddBack;
-    m_robotToLeft  = (m_widthY - m_laserOffsetY) + m_widthAddLeft;
-    m_robotToRight =             m_laserOffsetY  + m_widthAddRight;
-    m_robotToFront = (m_widthX - m_laserOffsetX) + m_widthAddFront;
+    float laserToBack  = m_laserOffsetX;
+    float laserToLeft  = m_laserOffsetY;
+    float laserToRight = m_widthY - m_laserOffsetY;
+    float laserToFront = m_widthX - m_laserOffsetX;
+
+    m_robotToBack  =  laserToBack  + m_widthAddBack;
+    m_robotToLeft  =  laserToLeft  + m_widthAddLeft;
+    m_robotToRight =  laserToRight + m_widthAddRight;
+    m_robotToFront =  laserToFront + m_widthAddFront;
+
+  // angles from laser to the edges of real robot dimension
+  //  (might be more precise than the calculation below. TODO: check this)
+  //m_angFrontLeft  = normalize_rad( atan2(  laserToLeft,   laserToFront ) );
+  //m_angFrontRight = normalize_rad( atan2( -laserToRight,  laserToFront ) );
+  //m_angBackLeft   = normalize_rad( atan2(  laserToLeft,  -laserToBack ) );
+  //m_angBackRight  = normalize_rad( atan2( -laserToRight, -laserToBack ) );
+  //m_angLeft  = normalize_rad( atan2(  laserToLeft,  laserToFront - m_widthX/2.f ) );
+  //m_angRight = normalize_rad( atan2( -laserToRight, laserToFront - m_widthX/2.f ) );
+  //m_angFront = normalize_rad( atan2(  laserToLeft - m_widthY/2.f,  laserToFront ) );
+  //m_angBack  = normalize_rad( atan2(  laserToLeft - m_widthY/2.f, -laserToBack ) );
 
     logger_->log_info("RoboShape", "Shape is angular!");
 
@@ -120,6 +136,16 @@ RoboShape::RoboShape( const char * cfg_prefix,
   logger_->log_info("RoboShape", "|#-->  (m)  is to right: %f", m_robotToRight);
   logger_->log_info("RoboShape", "|#-->  (m)  is to left : %f", m_robotToLeft);
   logger_->log_info("RoboShape", "+#-->  (m)  is to back : %f", m_robotToBack);
+
+  // angles from laser to edges of the robot extension
+  m_angFrontLeft  = normalize_rad( atan2(  m_robotToLeft,   m_robotToFront ) );
+  m_angFrontRight = normalize_rad( atan2( -m_robotToRight,  m_robotToFront ) );
+  m_angBackLeft   = normalize_rad( atan2(  m_robotToLeft,  -m_robotToBack ) );
+  m_angBackRight  = normalize_rad( atan2( -m_robotToRight, -m_robotToBack ) );
+  m_angLeft  = normalize_rad( atan2(  m_robotToLeft,  m_robotToFront - m_widthX/2.f ) );
+  m_angRight = normalize_rad( atan2( -m_robotToRight, m_robotToFront - m_widthX/2.f ) );
+  m_angFront = normalize_rad( atan2(  m_robotToLeft - m_widthY/2.f,  m_robotToFront ) );
+  m_angBack  = normalize_rad( atan2(  m_robotToLeft - m_widthY/2.f, -m_robotToBack ) );
 }
 
 
@@ -168,6 +194,78 @@ RoboShape::IsRobotReadingforDegree( float angledeg, float length )
   return IsRobotReadingforRad( deg2rad( angledeg ), length );
 }
 
+/** Get angle to the front left corner of the robot
+ * @return angle in radians
+ */
+float
+RoboShape::GetAngleFrontLeft() const
+{
+  return m_angFrontLeft;
+}
+
+/** Get angle to the front right corner of the robot
+ * @return angle in radians
+ */
+float
+RoboShape::GetAngleFrontRight() const
+{
+  return m_angFrontRight;
+}
+
+/** Get angle to the rear left corner of the robot
+ * @return angle in radians
+ */
+float
+RoboShape::GetAngleBackLeft() const
+{
+  return m_angBackLeft;
+}
+
+/** Get angle to the rear right corner of the robot
+ * @return angle in radians
+ */
+float
+RoboShape::GetAngleBackRight() const
+{
+  return m_angBackRight;
+}
+
+/** Get angle to middle of the left side of the robot
+ * @return angle in radians
+ */
+float
+RoboShape::GetAngleLeft() const
+{
+  return m_angLeft;
+}
+
+/** Get angle to middle of the right side of the robot
+ * @return angle in radians
+ */
+float
+RoboShape::GetAngleRight() const
+{
+  return m_angRight;
+}
+
+/** Get angle to middle of the front side of the robot
+ * @return angle in radians
+ */
+float
+RoboShape::GetAngleFront() const
+{
+  return m_angFront;
+}
+
+/** Get angle to middle of the rear side of the robot
+ * @return angle in radians
+ */
+float
+RoboShape::GetAngleBack() const
+{
+  return m_angBack;
+}
+
 /** Returns the robots length for a specific angle.
  * @param anglerad is the angle in radians.
  * @return the length in this direction.
@@ -175,74 +273,34 @@ RoboShape::IsRobotReadingforDegree( float angledeg, float length )
 float
 RoboShape::GetRobotLengthforRad( float anglerad )
 {
-  float length_front_back;
-  float length_left_right;
-  float alpha = 0.0;
-
   anglerad = normalize_mirror_rad( anglerad );
 
-  if ( anglerad > 0 )
-    length_left_right = m_robotToRight;
-  else
-    length_left_right = -m_robotToLeft;
-
-  if ( fabs( anglerad ) > M_PI/2.0 )
-    length_front_back = -m_robotToBack;
-  else
-    length_front_back =  m_robotToFront;
-
-  alpha = atan2( length_left_right, length_front_back );
-
-  //logger_->log_info("RoboShape", "Question for RobotLength for Rad is hard.....");
-  //logger_->log_info("RoboShape", "You want to have length for angle %f", anglerad);
-  //logger_->log_info("RoboShape", "My lengths are X = %f and Y = %f", length_front_back, length_left_right);
-  //logger_->log_info("RoboShape", "My distinguishing alpha is %f", alpha);
-
-
-  if ( IsRoundRobot() == true ) {
-    // TODO
+  if( IsRoundRobot() == true ) {
     throw fawkes::Exception("RoboShape: GetRobotLengthforRad is NOT IMPLEMENTED YET for round robots");
 
-  } else if ( IsAngularRobot() == true ) {
+  } else if( IsAngularRobot() == true ) {
+    /* check all the quadrants in which the target angles lies. The quadrants are spanned
+     * by the angles from the center of the robot to its 4 corners. Use "cos(a) = adjacent / hypothenuse",
+     * we are looking for the length of the hypothenuse here.
+     */
+    if( anglerad >= m_angBackLeft || anglerad < m_angBackRight ) {
+      // bottom quadrant; fabs(anglerad) > M_PI_2
+      return m_robotToBack  / cos( M_PI - fabs(anglerad) );
 
-    if ( (alpha >= -M_PI) && (alpha < -M_PI_2) ) {
-      if ( anglerad < alpha ) {
-        //cout << "RoboShape Note: CASE 1 ||| Calculating with base LFB " << length_front_back << endl;
-        return ( fabs( length_front_back / cos( M_PI + anglerad) ) );
-      } else {
-        //cout << "RoboShape Note: CASE 2 ||| Calculating with base LLR " << length_left_right << endl;
-        return ( fabs( length_left_right / cos( M_PI_2 + anglerad) ) );
-      }
+    } else if( anglerad < m_angFrontRight ) {
+      // right quadrant; -M_PI < anglerad < 0
+      return m_robotToRight / cos( M_PI_2 + anglerad );
 
-    } else if ( (alpha >= -M_PI_2) && (alpha < 0.0) ) {
-      if ( anglerad < alpha ) {
-        //cout << "RoboShape Note: CASE 3 ||| Calculating with base LLR " << length_left_right << endl;
-        return ( fabs( length_left_right / cos( M_PI_2 + anglerad) ) );
-      } else {
-        //cout << "RoboShape Note: CASE 4 ||| Calculating with base LFB " << length_front_back << endl;
-        return ( fabs( length_front_back / cos( anglerad) ) );
-      }
+    } else if( anglerad < m_angFrontLeft ) {
+      // top quadrant; -M_PI_2 < anglerad < M_PI_2
+      return m_robotToFront / cos( anglerad );
 
-    } else if ( (alpha >= 0.0) && (alpha < M_PI_2) ) {
-      if ( anglerad < alpha ) {
-        //cout << "RoboShape Note: CASE 5 ||| Calculating with base LFB " << length_front_back << endl;
-        return ( fabs( length_front_back / cos( anglerad) ) );
-      } else {
-        //cout << "RoboShape Note: CASE 6 ||| Calculating with base LLR " << length_left_right << endl;
-        return ( fabs( length_left_right / cos( M_PI_2 - anglerad) ) );
-      }
-
-    } else if ( (alpha >= M_PI_2) && (alpha < M_PI) ) {
-      if ( anglerad < alpha ) {
-        //cout << "RoboShape Note: CASE 7 ||| Calculating with base LLR " << length_left_right << endl;
-        return ( fabs( length_left_right / cos( M_PI_2 - anglerad) ) );
-      } else {
-        //cout << "RoboShape Note: CASE 8 ||| Calculating with base LFB " << length_front_back << endl;
-        return ( fabs( length_front_back / cos( M_PI - anglerad) ) );
-      }
+    } else if( anglerad < m_angBackLeft ) {
+      // left quadrant; 0 < anglerad < M_PI
+      return m_robotToLeft  / cos( M_PI_2 - anglerad);
 
     } else {
-      throw fawkes::Exception("RoboShape: alpha has no valid value");
+      throw fawkes::Exception("RoboShape: Angles to corners of robot-shape do not cover the whole robot!");
     }
 
   } else {
