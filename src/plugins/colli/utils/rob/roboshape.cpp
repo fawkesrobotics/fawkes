@@ -59,15 +59,15 @@ RoboShape::RoboShape( const char * cfg_prefix,
   m_widthAddFront = m_widthAddBack = HUGE_VAL;
   m_widthAddRight = m_widthAddLeft = HUGE_VAL;
 
-  if( (isinf(m_laserOffsetX) == true)
-   && (isinf(m_laserOffsetY) == true)
-   && (isinf(m_radius) == true)
-   && (isinf(m_widthX) == true)
-   && (isinf(m_widthY) == true)
-   && (isinf(m_widthAddLeft) == true)
-   && (isinf(m_widthAddRight) == true)
-   && (isinf(m_widthAddFront) == true)
-   && (isinf(m_widthAddBack) == true) ) {
+  if( (isinf(m_laserOffsetX) )
+   && (isinf(m_laserOffsetY) )
+   && (isinf(m_radius) )
+   && (isinf(m_widthX) )
+   && (isinf(m_widthY) )
+   && (isinf(m_widthAddLeft) )
+   && (isinf(m_widthAddRight) )
+   && (isinf(m_widthAddFront) )
+   && (isinf(m_widthAddBack) ) ) {
     // go on, everything is fine, cause all are infinity
 
   } else {
@@ -275,10 +275,10 @@ RoboShape::GetRobotLengthforRad( float anglerad )
 {
   anglerad = normalize_mirror_rad( anglerad );
 
-  if( IsRoundRobot() == true ) {
+  if( IsRoundRobot() ) {
     throw fawkes::Exception("RoboShape: GetRobotLengthforRad is NOT IMPLEMENTED YET for round robots");
 
-  } else if( IsAngularRobot() == true ) {
+  } else if( IsAngularRobot() ) {
     /* check all the quadrants in which the target angles lies. The quadrants are spanned
      * by the angles from the center of the robot to its 4 corners. Use "cos(a) = adjacent / hypothenuse",
      * we are looking for the length of the hypothenuse here.
@@ -324,7 +324,7 @@ RoboShape::GetRobotLengthforDegree( float angledeg )
 float
 RoboShape::GetRadius()
 {
-  if ( IsRoundRobot() == true )
+  if ( IsRoundRobot() )
     return m_radius;
   else
     logger_->log_error("RoboShape", "The Robot is not round!");
@@ -338,7 +338,7 @@ RoboShape::GetRadius()
 float
 RoboShape::GetCompleteRadius()
 {
-  if ( IsRoundRobot() == true )
+  if ( IsRoundRobot() )
     return ( std::max( m_radius + m_widthAddFront + m_widthAddBack,
                        m_radius + m_widthAddRight + m_widthAddLeft ) );
   else
@@ -352,7 +352,7 @@ RoboShape::GetCompleteRadius()
 float
 RoboShape::GetWidthX()
 {
-  if ( IsAngularRobot() == true )
+  if ( IsAngularRobot() )
     return m_widthX;
   else
     logger_->log_error("RoboShape", "The Robot is not angular!");
@@ -366,7 +366,7 @@ RoboShape::GetWidthX()
 float
 RoboShape::GetWidthY()
 {
-  if ( IsAngularRobot() == true )
+  if ( IsAngularRobot() )
     return m_widthY;
   else
     logger_->log_error("RoboShape", "The Robot is not angular!");
@@ -380,7 +380,7 @@ RoboShape::GetWidthY()
 float
 RoboShape::GetCompleteWidthX()
 {
-  if ( IsAngularRobot() == true )
+  if ( IsAngularRobot() )
     return ( m_widthX + m_widthAddFront + m_widthAddBack );
   else
     logger_->log_error("RoboShape", "The Robot is not angular!");
@@ -395,7 +395,7 @@ RoboShape::GetCompleteWidthX()
 float
 RoboShape::GetCompleteWidthY()
 {
-  if ( IsAngularRobot() == true )
+  if ( IsAngularRobot() )
     return ( m_widthY + m_widthAddRight + m_widthAddLeft );
   else
     logger_->log_error("RoboShape", "The Robot is not angular!");
