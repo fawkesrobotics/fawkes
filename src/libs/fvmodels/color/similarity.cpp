@@ -90,6 +90,7 @@ void ColorModelSimilarity::add_color(color_t color_class, RGB_t reference, int c
 
   color_classes_[num_classes_].result = color_class;
   color_classes_[num_classes_].chroma_threshold = chroma_threshold;
+  color_classes_[num_classes_].saturation_threshold = saturation_threshold;
 
   int ignore, ref_u, ref_v;
 
