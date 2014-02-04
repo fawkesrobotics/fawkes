@@ -76,9 +76,12 @@ EclipseAgentThread::init()
     // ignore
   }
   
+
+  std::string agent = strdup( config->get_string( "/eclipse-clp/agent" ).c_str() );
+
   try{
   //set default module in which goals called from the top-level will be executed
-  ec_set_option_ptr(EC_OPTION_DEFAULT_MODULE, (void*) "elevator");
+  ec_set_option_ptr(EC_OPTION_DEFAULT_MODULE, (void*) agent.c_str());
     
   }
   catch (...){
@@ -90,25 +93,20 @@ EclipseAgentThread::init()
 
   free( eclipse_dir );
 
-  // register external predicates
-/*  if ( EC_succeed != ec_external( ec_did( "read_interface",  2 ), p_read_interface,  ec_did( "elevator", 0 ) ) )
-  { throw Exception( "Registering external predicate read_interface/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "write_interface", 2 ), p_write_interface, ec_did( "elevator", 0 ) ) )
-  { throw Exception( "Registering external predicate write_interface/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "send_message",    2 ), p_send_message,    ec_did( "elevator", 0 ) ) )
-  { throw Exception( "Registering external predicate send_message/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "recv_messages",   2 ), p_recv_messages,   ec_did( "elevator", 0 ) ) )
-  { throw Exception( "Registering external predicate recv_messages/2 failed" ); }
- if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( "eclipse", 0 ) ) )
-  { throw Exception( "Registering external predicate log/2 failed" ); } */
 
   m_initialized = true;
 
   // open & register interfaces
   try
   {
+
+ // std::string reading_prefix = "/luaagent/interfaces/" + __cfg_agent + "/reading/";
+
     // open for interfaces reading
-    Configuration::ValueIterator* vit = config->search( "/eclipse-clp/interfaces/reading" );
+    std::string reading_prefix = "/eclipse-clp/interfaces/" + agent + "/reading/";
+    std::string writing_prefix = "/eclipse-clp/interfaces/" + agent + "/writing/";
+
+    Configuration::ValueIterator* vit = config->search( reading_prefix.c_str() );
     while ( vit->next() )
     {
       if ( vit->is_string() )
@@ -130,7 +128,7 @@ EclipseAgentThread::init()
     }
 
     // open interfaces for writing
-    vit = config->search( "/eclipse-clp/interfaces/writing" );
+    vit = config->search( writing_prefix.c_str() );
     while ( vit->next() )
     {
       if ( vit->is_string() )
@@ -159,21 +157,22 @@ EclipseAgentThread::init()
 
   // load utility predicates
   //load_file( ECLIPSE_CODE_DIR"/utils/logging.ecl" );
-
+  std::string agent_path = ECLIPSE_CODE_DIR"/interpreter/"+ agent +".ecl";
   // load interpreter and agent
-  load_file( ECLIPSE_CODE_DIR"/interpreter/elevator.ecl" );
+  load_file( agent_path.c_str() );
 
    // register external predicates
-  if ( EC_succeed != ec_external( ec_did( "read_interface",  2 ), p_read_interface,  ec_did( "elevator", 0 ) ) )
+  if ( EC_succeed != ec_external( ec_did( "read_interface",  2 ), p_read_interface,  ec_did( agent.c_str(), 0 ) ) )
   { throw Exception( "Registering external predicate read_interface/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "write_interface", 2 ), p_write_interface, ec_did( "elevator", 0 ) ) )
+  if ( EC_succeed != ec_external( ec_did( "write_interface", 2 ), p_write_interface, ec_did( agent.c_str(), 0 ) ) )
   { throw Exception( "Registering external predicate write_interface/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "send_message",    2 ), p_send_message,    ec_did( "elevator", 0 ) ) )
+  if ( EC_succeed != ec_external( ec_did( "send_message",    2 ), p_send_message,    ec_did( agent.c_str(), 0 ) ) )
   { throw Exception( "Registering external predicate send_message/2 failed" ); }
-  if ( EC_succeed != ec_external( ec_did( "recv_messages",   2 ), p_recv_messages,   ec_did( "elevator", 0 ) ) )
+  if ( EC_succeed != ec_external( ec_did( "recv_messages",   2 ), p_recv_messages,   ec_did( agent.c_str(), 0 ) ) )
   { throw Exception( "Registering external predicate recv_messages/2 failed" ); }
-	if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( "elevator", 0 ) ) )
+	if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( agent.c_str(), 0 ) ) )
   { throw Exception( "Registering external predicate log/2 failed" ); }
+
 }
 
 void
