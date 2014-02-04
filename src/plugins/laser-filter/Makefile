@@ -20,8 +20,7 @@ include $(BUILDCONFDIR)/tf/tf.mk
 SUBDIRS = deadspots
 
 LIBS_laser_filter = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	            fawkesinterface Laser360Interface Laser720Interface \
-		    fawkesgeometry
+	            fawkesinterface Laser360Interface Laser720Interface
 
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF) -Wno-deprecated-declarations
