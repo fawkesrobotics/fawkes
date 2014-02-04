@@ -1,0 +1,16 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/readylogagent
+---
+readylogagent:
+  agent: elevator #name of the ECLiPSe module in which the agent is stored (needs to be placed in plugins/readylogagent/interpreter/)
+  
+  #Basedirectory of ECLiPSe
+  eclipse_dir: /home/gesche/fawkes/eclipsecdt
+
+  interfaces:
+    elevator:
+      reading:
+        readylog: TestInterface::readylog_test 
+      #writing:
