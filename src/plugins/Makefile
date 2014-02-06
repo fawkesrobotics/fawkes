@@ -41,4 +41,5 @@ mongodb_log: mongodb
 mongodb: rrd
 clips-agent clips-protobuf: clips
 clips-webview: clips webview
-
+gazsim-laser gazsim-localization gazsim-comm gazsim-vis-localization gazsim-webcam gazsim-timesource: gazebo
+gazsim-robotino: gazebo robotino/interfaces
