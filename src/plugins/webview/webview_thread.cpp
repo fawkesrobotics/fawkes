@@ -28,6 +28,7 @@
 #ifdef HAVE_TF
 #  include "tf_processor.h"
 #endif
+#include "camera_processor.h"
 #include "service_browse_handler.h"
 #include "header_generator.h"
 #include "footer_generator.h"
@@ -58,6 +59,8 @@ const char *WebviewThread::PLUGINS_URL_PREFIX = "/plugins";
 /** Prefix for the WebTfRequestProcessor. */
 const char *WebviewThread::TF_URL_PREFIX = "/tf";
 #endif
+/** Prefix for the WebMJPEGRequestProcessor. */
+const char *WebviewThread::CAMERA_URL_PREFIX = "/cams";
 
 /** @class WebviewThread "webview_thread.h"
  * Webview Thread.
@@ -181,6 +184,7 @@ WebviewThread::init()
 #ifdef HAVE_TF
   __tf_processor         = new WebviewTfRequestProcessor(TF_URL_PREFIX, tf_listener);
 #endif
+  __camera_processor     = new WebviewCameraRequestProcessor(CAMERA_URL_PREFIX, logger);
   webview_url_manager->register_baseurl("/", __startpage_processor);
   webview_url_manager->register_baseurl(STATIC_URL_PREFIX, __static_processor);
   webview_url_manager->register_baseurl(BLACKBOARD_URL_PREFIX, __blackboard_processor);
@@ -188,6 +192,7 @@ WebviewThread::init()
 #ifdef HAVE_TF
   webview_url_manager->register_baseurl(TF_URL_PREFIX, __tf_processor);
 #endif
+  webview_url_manager->register_baseurl(CAMERA_URL_PREFIX, __camera_processor);
 
   webview_nav_manager->add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
 #ifdef HAVE_TF
@@ -212,9 +217,17 @@ WebviewThread::finalize()
   webview_url_manager->unregister_baseurl(STATIC_URL_PREFIX);
   webview_url_manager->unregister_baseurl(BLACKBOARD_URL_PREFIX);
   webview_url_manager->unregister_baseurl(PLUGINS_URL_PREFIX);
+  webview_url_manager->unregister_baseurl(CAMERA_URL_PREFIX);
+
+#ifdef HAVE_TF
+  webview_url_manager->unregister_baseurl(TF_URL_PREFIX);
+#endif
 
   webview_nav_manager->remove_nav_entry(BLACKBOARD_URL_PREFIX);
   webview_nav_manager->remove_nav_entry(PLUGINS_URL_PREFIX);
+#ifdef HAVE_TF
+  webview_nav_manager->remove_nav_entry(TF_URL_PREFIX);
+#endif
 
   delete __webserver;
 
@@ -229,6 +242,7 @@ WebviewThread::finalize()
 #ifdef HAVE_TF
   delete __tf_processor;
 #endif
+  delete __camera_processor;
   delete __footer_gen;
   delete __header_gen;
   __dispatcher = NULL;

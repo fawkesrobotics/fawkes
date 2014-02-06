@@ -42,10 +42,11 @@ endif
 ifeq ($(HAVE_LIBMICROHTTPD),1)
   LIBS_webview = crypt fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		 fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
-		 fawkeslogging
+		 fawkeslogging fvutils fvcams
   OBJS_webview = blackboard_processor.o footer_generator.o header_generator.o \
 		 service_browse_handler.o startpage_processor.o static_processor.o \
-		 plugins_processor.o user_verifier.o webview_thread.o webview_plugin.o
+		 plugins_processor.o user_verifier.o webview_thread.o webview_plugin.o \
+		 camera_processor.o mjpeg_reply.o
   PLUGINS_all = $(PLUGINDIR)/webview.so
   INST_RESDIRS = webview
   ifeq ($(HAVE_TF)$(HAVE_GRAPHVIZ),11)

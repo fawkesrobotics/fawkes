@@ -54,6 +54,7 @@ class WebviewUserVerifier;
 #ifdef HAVE_TF
 class WebviewTfRequestProcessor;
 #endif
+class WebviewCameraRequestProcessor;
 
 class WebviewThread
 : public fawkes::Thread,
@@ -82,6 +83,7 @@ class WebviewThread
 #ifdef HAVE_TF
   static const char *TF_URL_PREFIX;
 #endif
+  static const char *CAMERA_URL_PREFIX;
 
  private:
   void ssl_create(const char *ssl_key_file, const char *ssl_cert_file);
@@ -101,6 +103,7 @@ class WebviewThread
 #ifdef HAVE_TF
   WebviewTfRequestProcessor          *__tf_processor;
 #endif
+  WebviewCameraRequestProcessor      *__camera_processor;
   WebviewServiceBrowseHandler        *__service_browse_handler;
   WebviewHeaderGenerator             *__header_gen;
   WebviewFooterGenerator             *__footer_gen;
