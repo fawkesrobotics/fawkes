@@ -46,7 +46,7 @@ OBJS_fv_qa_colormap := qa_colormap.o
 LIBS_fv_qa_colormap := fvutils fvwidgets fawkescore
 
 OBJS_fv_qa_createimage := qa_createimage.o
-LIBS_fv_qa_createimage := fvutils fvwidgets
+LIBS_fv_qa_createimage := fvutils
 
 #ifneq ($(wildcard $(FVBASEDIR)/fvutils/recognition/forest/forest.h),)
 #  OBJS_fv_qa_randomtree := qa_randomtree.o
@@ -71,9 +71,9 @@ BINS_all += $(BINDIR)/fv_qa_camargp		\
 	    $(BINDIR)/fv_qa_shmlut		\
 	    $(BINDIR)/fv_qa_rectlut		\
 	    $(BINDIR)/fv_qa_fuse		\
-	    $(BINDIR)/fv_qa_createimage		\
-	    $(BINDIR)/fv_qa_colormap
+	    $(BINDIR)/fv_qa_createimage
 
+BINS_gui += $(BINDIR)/fv_qa_colormap
 
 include $(BUILDSYSDIR)/base.mk
 
