@@ -140,7 +140,7 @@ Visca::open() {
 
   struct termios param;
 
-  __fd = ::open(__device_file, O_RDWR | O_NONBLOCK);
+  __fd = ::open(__device_file, O_RDWR);
   if (! __fd) {
     throw ViscaException("Cannot open device", errno);
   }
@@ -433,7 +433,13 @@ Visca::send_with_reply()
 {
   try {
     send();
-    recv();
+    bool recvd = false;
+    while (! recvd) {
+      try {
+	recv();
+	recvd = true;
+      } catch (fawkes::TimeoutException &e) {} // ignore
+    }
   } catch (ViscaException &e) {
     e.append("Sending with reply failed");
     throw;
@@ -465,13 +471,15 @@ Visca::recv_packet(unsigned int timeout_ms)
 
   // get octets one by one
   if (read(__fd, __ibuffer, 1) != 1) {
-    throw fawkes::Exception(errno, "Visca reading packet byte failed");
+    throw fawkes::Exception(errno, "Visca reading packet byte failed (1)");
   }
 
-  int pos = 0;
-  while (__ibuffer[pos] != VISCA_TERMINATOR) {
+  size_t pos = 0;
+  while (__ibuffer[pos] != VISCA_TERMINATOR && (pos < sizeof(__ibuffer)-1)) {
     if (read(__fd, &__ibuffer[++pos], 1) != 1) {
-      throw fawkes::Exception(errno, "Visca reading packet byte failed");
+      
+
+      throw fawkes::Exception(errno, "Visca reading packet byte failed (2)");
     }
     usleep(0);
   }
@@ -699,6 +707,7 @@ Visca::get_pan_tilt(int &pan, int &tilt)
       try {
 	recv();
       } catch (ViscaException &e) {
+      } catch (fawkes::TimeoutException &e) {
 	// Ignore
       }
 #ifdef TIMETRACKER_VISCA
