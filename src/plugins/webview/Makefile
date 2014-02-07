@@ -19,6 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/download.mk
 include $(LIBSRCDIR)/webview/webview.mk
 include $(BUILDCONFDIR)/tf/tf.mk
+include $(BUILDSYSDIR)/fvconf.mk
 
 ifneq ($(PKGCONFIG),)
   HAVE_GRAPHVIZ = $(if $(shell $(PKGCONFIG) --exists 'libgvc'; echo $${?/1/}),1,0)
@@ -42,13 +43,21 @@ endif
 ifeq ($(HAVE_LIBMICROHTTPD),1)
   LIBS_webview = crypt fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		 fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
-		 fawkeslogging fvutils fvcams
+		 fawkeslogging
   OBJS_webview = blackboard_processor.o footer_generator.o header_generator.o \
 		 service_browse_handler.o startpage_processor.o static_processor.o \
-		 plugins_processor.o user_verifier.o webview_thread.o webview_plugin.o \
-		 camera_processor.o mjpeg_reply.o
+		 plugins_processor.o user_verifier.o webview_thread.o webview_plugin.o
   PLUGINS_all = $(PLUGINDIR)/webview.so
   INST_RESDIRS = webview
+
+  ifeq ($(HAVE_JPEG),1)
+    LIBS_webview += fvutils fvcams
+    OBJS_webview += image_processor.o mjpeg_reply.o jpeg_stream_producer.o
+    CFLAGS += -DHAVE_JPEG
+  else
+    WARN_TARGETS += warning_jpeg
+  endif
+
   ifeq ($(HAVE_TF)$(HAVE_GRAPHVIZ),11)
     OBJS_webview += tf_processor.o
     LIBS_webview += fawkestf
@@ -79,6 +88,8 @@ warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting transforms support$(TNORMAL) (TF not available)"
 warning_graphviz:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting transforms support$(TNORMAL) (graphviz not found)"
+warning_jpeg:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting image viewing support$(TNORMAL) (JPEG not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

@@ -31,6 +31,9 @@
 #include <aspect/logger.h>
 #include <aspect/plugin_director.h>
 #include <aspect/webview.h>
+#ifdef HAVE_JPEG
+#  include <aspect/thread_producer.h>
+#endif
 #ifdef HAVE_TF
 #  include <aspect/tf.h>
 #endif
@@ -54,7 +57,9 @@ class WebviewUserVerifier;
 #ifdef HAVE_TF
 class WebviewTfRequestProcessor;
 #endif
-class WebviewCameraRequestProcessor;
+#ifdef HAVE_JPEG
+class WebviewImageRequestProcessor;
+#endif
 
 class WebviewThread
 : public fawkes::Thread,
@@ -64,6 +69,9 @@ class WebviewThread
   public fawkes::NetworkAspect,
   public fawkes::LoggerAspect,
   public fawkes::PluginDirectorAspect,
+#ifdef HAVE_JPEG
+  public fawkes::ThreadProducerAspect,
+#endif
 #ifdef HAVE_TF
   public fawkes::TransformAspect,
 #endif
@@ -80,10 +88,8 @@ class WebviewThread
   static const char *STATIC_URL_PREFIX;
   static const char *BLACKBOARD_URL_PREFIX;
   static const char *PLUGINS_URL_PREFIX;
-#ifdef HAVE_TF
   static const char *TF_URL_PREFIX;
-#endif
-  static const char *CAMERA_URL_PREFIX;
+  static const char *IMAGE_URL_PREFIX;
 
  private:
   void ssl_create(const char *ssl_key_file, const char *ssl_cert_file);
@@ -103,7 +109,9 @@ class WebviewThread
 #ifdef HAVE_TF
   WebviewTfRequestProcessor          *__tf_processor;
 #endif
-  WebviewCameraRequestProcessor      *__camera_processor;
+#ifdef HAVE_JPEG
+  WebviewImageRequestProcessor       *__image_processor;
+#endif
   WebviewServiceBrowseHandler        *__service_browse_handler;
   WebviewHeaderGenerator             *__header_gen;
   WebviewFooterGenerator             *__footer_gen;

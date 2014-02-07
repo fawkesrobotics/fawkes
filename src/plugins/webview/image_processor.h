@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  camera_processor.h - Web request processor for viewing camera images
+ *  image_processor.h - Web request processor for viewing images
  *
  *  Created: Wed Feb 05 17:43:36 2014
  *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
@@ -20,32 +20,30 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_CAMERA_PROCESSOR_H_
-#define __PLUGINS_WEBVIEW_CAMERA_PROCESSOR_H_
+#ifndef __PLUGINS_WEBVIEW_IMAGE_PROCESSOR_H_
+#define __PLUGINS_WEBVIEW_IMAGE_PROCESSOR_H_
 
 #include <webview/request_processor.h>
 #include <string>
 
 namespace fawkes {
   class Logger;
+  class ThreadCollector;
+  class WebviewJpegStreamProducer;
 }
 
-namespace firevision {
-  class SharedMemoryCamera;
-  class JpegImageCompressor;
-}
-
-class WebviewCameraRequestProcessor : public fawkes::WebRequestProcessor
+class WebviewImageRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
-  WebviewCameraRequestProcessor(const char *baseurl,
-				fawkes::Logger *logger);
-  virtual ~WebviewCameraRequestProcessor();
+  WebviewImageRequestProcessor(const char *baseurl,
+			       fawkes::Logger *logger, fawkes::ThreadCollector *thread_col);
+  virtual ~WebviewImageRequestProcessor();
 
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
-  firevision::SharedMemoryCamera * get_camera(const std::string &image_id);
+  fawkes::WebviewJpegStreamProducer * get_stream(const std::string &image_id,
+						 unsigned int quality, float fps);
 
 
  private:
@@ -53,9 +51,9 @@ class WebviewCameraRequestProcessor : public fawkes::WebRequestProcessor
   size_t  baseurl_len_;
 
   fawkes::Logger *logger_;
+  fawkes::ThreadCollector *thread_col_;
 
-  firevision::JpegImageCompressor *jpeg_;
-  std::map<std::string, firevision::SharedMemoryCamera *> cams_;
+  std::map<std::string, fawkes::WebviewJpegStreamProducer *> streams_;
 };
 
 #endif

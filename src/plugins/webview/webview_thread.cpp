@@ -28,7 +28,9 @@
 #ifdef HAVE_TF
 #  include "tf_processor.h"
 #endif
-#include "camera_processor.h"
+#ifdef HAVE_JPEG
+#  include "image_processor.h"
+#endif
 #include "service_browse_handler.h"
 #include "header_generator.h"
 #include "footer_generator.h"
@@ -55,12 +57,10 @@ const char *WebviewThread::STATIC_URL_PREFIX = "/static";
 const char *WebviewThread::BLACKBOARD_URL_PREFIX = "/blackboard";
 /** Prefix for the WebPluginsRequestProcessor. */
 const char *WebviewThread::PLUGINS_URL_PREFIX = "/plugins";
-#ifdef HAVE_TF
 /** Prefix for the WebTfRequestProcessor. */
 const char *WebviewThread::TF_URL_PREFIX = "/tf";
-#endif
 /** Prefix for the WebMJPEGRequestProcessor. */
-const char *WebviewThread::CAMERA_URL_PREFIX = "/cams";
+const char *WebviewThread::IMAGE_URL_PREFIX = "/images";
 
 /** @class WebviewThread "webview_thread.h"
  * Webview Thread.
@@ -184,7 +184,9 @@ WebviewThread::init()
 #ifdef HAVE_TF
   __tf_processor         = new WebviewTfRequestProcessor(TF_URL_PREFIX, tf_listener);
 #endif
-  __camera_processor     = new WebviewCameraRequestProcessor(CAMERA_URL_PREFIX, logger);
+#ifdef HAVE_JPEG
+  __image_processor     = new WebviewImageRequestProcessor(IMAGE_URL_PREFIX, logger, thread_collector);
+#endif
   webview_url_manager->register_baseurl("/", __startpage_processor);
   webview_url_manager->register_baseurl(STATIC_URL_PREFIX, __static_processor);
   webview_url_manager->register_baseurl(BLACKBOARD_URL_PREFIX, __blackboard_processor);
@@ -192,13 +194,18 @@ WebviewThread::init()
 #ifdef HAVE_TF
   webview_url_manager->register_baseurl(TF_URL_PREFIX, __tf_processor);
 #endif
-  webview_url_manager->register_baseurl(CAMERA_URL_PREFIX, __camera_processor);
+#ifdef HAVE_JPEG
+  webview_url_manager->register_baseurl(IMAGE_URL_PREFIX, __image_processor);
+#endif
 
   webview_nav_manager->add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
 #ifdef HAVE_TF
   webview_nav_manager->add_nav_entry(TF_URL_PREFIX, "TF");
 #endif
   webview_nav_manager->add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
+#ifdef HAVE_JPEG
+  webview_nav_manager->add_nav_entry(IMAGE_URL_PREFIX, "Images");
+#endif
 
   logger->log_info("WebviewThread", "Listening for HTTP connections on port %u", __cfg_port);
 
@@ -206,6 +213,7 @@ WebviewThread::init()
   service_browser->watch_service("_http._tcp", __service_browse_handler);
 
 }
+
 
 void
 WebviewThread::finalize()
@@ -217,7 +225,7 @@ WebviewThread::finalize()
   webview_url_manager->unregister_baseurl(STATIC_URL_PREFIX);
   webview_url_manager->unregister_baseurl(BLACKBOARD_URL_PREFIX);
   webview_url_manager->unregister_baseurl(PLUGINS_URL_PREFIX);
-  webview_url_manager->unregister_baseurl(CAMERA_URL_PREFIX);
+  webview_url_manager->unregister_baseurl(IMAGE_URL_PREFIX);
 
 #ifdef HAVE_TF
   webview_url_manager->unregister_baseurl(TF_URL_PREFIX);
@@ -242,7 +250,9 @@ WebviewThread::finalize()
 #ifdef HAVE_TF
   delete __tf_processor;
 #endif
-  delete __camera_processor;
+#ifdef HAVE_JPEG
+  delete __image_processor;
+#endif
   delete __footer_gen;
   delete __header_gen;
   __dispatcher = NULL;

@@ -23,35 +23,39 @@
 #ifndef __PLUGINS_WEBVIEW_MJPEG_REPLY_H_
 #define __PLUGINS_WEBVIEW_MJPEG_REPLY_H_
 
+#include "jpeg_stream_producer.h"
+
 #include <webview/reply.h>
 #include <cstdio>
-
-namespace firevision {
-  class SharedMemoryCamera;
-  class JpegImageCompressor;
-}
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class DynamicMJPEGStreamWebReply : public DynamicWebReply
+class DynamicMJPEGStreamWebReply
+: public DynamicWebReply,
+  public WebviewJpegStreamProducer::Subscriber
 {
  public:
-  DynamicMJPEGStreamWebReply(firevision::SharedMemoryCamera *cam);
+  DynamicMJPEGStreamWebReply(WebviewJpegStreamProducer *stream_producer);
   virtual ~DynamicMJPEGStreamWebReply();
 
   virtual size_t size();
   virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);
 
+  virtual void handle_buffer(RefPtr<WebviewJpegStreamProducer::Buffer> buffer) throw();
  private:
-  firevision::SharedMemoryCamera  *cam_;
-  firevision::JpegImageCompressor *jpeg_;
+  WebviewJpegStreamProducer *stream_producer_;
+
+  fawkes::RefPtr<WebviewJpegStreamProducer::Buffer> buffer_;
+  size_t buffer_bytes_written_;
+
+  fawkes::RefPtr<WebviewJpegStreamProducer::Buffer> next_buffer_;
+  fawkes::Mutex                                    *next_buffer_mutex_;
+  fawkes::WaitCondition                            *next_buffer_waitcond_;
+
   bool next_frame_;
-  unsigned char *buffer_;
-  size_t         buffer_length_;
-  unsigned char *buffer_ongoing_;
 };
 
 } // end namespace fawkes

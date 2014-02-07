@@ -22,6 +22,8 @@
 #include "mjpeg_reply.h"
 
 #include <core/exceptions/system.h>
+#include <core/threading/mutex.h>
+#include <core/threading/wait_condition.h>
 #include <fvutils/compression/jpeg_compressor.h>
 #include <fvcams/shmem.h>
 
@@ -44,26 +46,26 @@ namespace fawkes {
  */
 
 /** Constructor.
- * @param cam camera to get the image buffer from
+ * @param stream_producer stream producer to query for JPEG buffers
  */
-DynamicMJPEGStreamWebReply::DynamicMJPEGStreamWebReply(firevision::SharedMemoryCamera *cam)
-  : DynamicWebReply(WebReply::HTTP_OK), next_frame_(true)
+DynamicMJPEGStreamWebReply::DynamicMJPEGStreamWebReply(WebviewJpegStreamProducer *stream_producer)
+  : DynamicWebReply(WebReply::HTTP_OK)
 {
+  next_buffer_mutex_ = new fawkes::Mutex();
+  next_buffer_waitcond_ = new fawkes::WaitCondition(next_buffer_mutex_);
+  next_frame_ = true;
+
   add_header("Content-type", "multipart/x-mixed-replace;boundary=MJPEG-next-frame");
-  cam_ = cam;
-  jpeg_ = new JpegImageCompressor(10);
-  jpeg_->set_image_dimensions(cam_->pixel_width(), cam_->pixel_height());
-  jpeg_->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
-  size_t size = jpeg_->recommended_compressed_buffer_size();
-  buffer_ = (unsigned char *)malloc(size);
-  jpeg_->set_destination_buffer(buffer_, size);
+  stream_producer_ = stream_producer;
+  stream_producer_->add_subscriber(this);
 }
 
 /** Destructor. */
 DynamicMJPEGStreamWebReply::~DynamicMJPEGStreamWebReply()
 {
-  delete jpeg_;
-  free(buffer_);
+  stream_producer_->remove_subscriber(this);
+  delete next_buffer_mutex_;
+  delete next_buffer_waitcond_;
 }
 
 size_t
@@ -72,28 +74,37 @@ DynamicMJPEGStreamWebReply::size()
   return -1;
 }
 
+void
+DynamicMJPEGStreamWebReply::handle_buffer(RefPtr<WebviewJpegStreamProducer::Buffer> buffer) throw()
+{
+  next_buffer_mutex_->lock();
+  next_buffer_ = buffer;
+  next_buffer_waitcond_->wake_all();
+  next_buffer_mutex_->unlock();
+}
+
 size_t
 DynamicMJPEGStreamWebReply::next_chunk(size_t pos, char *buffer, size_t buf_max_size)
 {
-  if (buf_max_size == 0)  return 0;
+  if (buf_max_size == 0)  return  0;
 
   size_t written = 0;
 
   if (next_frame_) {
-    usleep(1000000);
-    cam_->capture();
-    jpeg_->set_image_buffer(cam_->colorspace(), cam_->buffer());
-    jpeg_->compress();
-    cam_->dispose_buffer();
-    buffer_length_ = jpeg_->compressed_size();
-    buffer_ongoing_ = buffer_;
+    next_buffer_mutex_->lock();
+    while (! next_buffer_) {
+      next_buffer_waitcond_->wait();
+    }
+    buffer_ = next_buffer_;
+    next_buffer_.clear();
+    next_buffer_mutex_->unlock();
 
     char *header;
     if (asprintf(&header,
 		 "--MJPEG-next-frame\r\n"
 		 "Content-type: image/jpeg\r\n"
 		 "Content-length: %zu\r\n"
-		 "\r\n", buffer_length_) == -1) {
+		 "\r\n", buffer_->size()) == -1) {
       return -2;
     }
     size_t header_len = strlen(header);
@@ -102,17 +113,18 @@ DynamicMJPEGStreamWebReply::next_chunk(size_t pos, char *buffer, size_t buf_max_
     buf_max_size -= header_len;
     written += header_len;
 
+    buffer_bytes_written_ = 0;
     next_frame_ = false;
   }
 
-  size_t remaining = buffer_ + buffer_length_ - buffer_ongoing_;
+  size_t remaining = buffer_->size() - buffer_bytes_written_;
   if (remaining <= buf_max_size) {
-    memcpy(buffer, buffer_ongoing_, remaining);
+    memcpy(buffer, buffer_->data() + buffer_bytes_written_, remaining);
     next_frame_ = true;
     written += remaining;
   } else {
-    memcpy(buffer, buffer_ongoing_, buf_max_size);
-    buffer_ongoing_ += buf_max_size;
+    memcpy(buffer, buffer_->data() + buffer_bytes_written_, buf_max_size);
+    buffer_bytes_written_ += buf_max_size;
     written += buf_max_size;
   }
 
