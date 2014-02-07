@@ -29,6 +29,7 @@
 #include <utils/misc/strndup.h>
 
 #include <iostream>
+#include <memory>
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
@@ -496,6 +497,22 @@ SharedMemoryImageBuffer::list()
 
   delete lister;
   delete h;
+}
+
+
+/** Get meta data about image buffers.
+ * @return list of meta data
+ */
+std::list<SharedMemoryImageBufferMetaData>
+SharedMemoryImageBuffer::list_meta_data()
+{
+  std::auto_ptr<SharedMemoryImageBufferMetaDataCollector>
+    lister(new SharedMemoryImageBufferMetaDataCollector());
+  std::auto_ptr<SharedMemoryImageBufferHeader>
+    h(new SharedMemoryImageBufferHeader());
+
+  SharedMemory::list(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h.get(), lister.get());
+  return lister->meta_data();
 }
 
 
@@ -969,6 +986,102 @@ SharedMemoryImageBufferLister::print_info(const SharedMemoryHeader *header,
 	 (SharedMemory::is_swapable(shm_id) ? "S" : ""),
 	 (SharedMemory::is_destroyed(shm_id) ? "D" : "")
 	 );
+}
+
+
+/** @class SharedMemoryImageBufferMetaData <fvutils/ipc/shm_image.h>
+ * Shared memory image buffer meta data container.
+ */
+
+/** Constructor. */
+SharedMemoryImageBufferMetaData::SharedMemoryImageBufferMetaData()
+{
+  image_id = frame_id = "";
+  colorspace = CS_UNKNOWN;
+  width = height = 0;
+  mem_size = 0;
+  mem_swapable = false;
+  mem_destroyed = false;
+}
+
+/** Value constructor.
+ * @param image_id Image buffer ID
+ * @param frame_id Coordinate frame ID
+ * @param colorspace Colorspace 
+ * @param width Image width
+ * @param height Image height
+ * @param mem_size Shared memory buffer size
+ * @param mem_swapable True if memory might be moved to swap space
+ * @param mem_destroyed True if memory has already been marked destroyed
+ */
+SharedMemoryImageBufferMetaData::SharedMemoryImageBufferMetaData(const char *image_id, const char *frame_id,
+								 colorspace_t colorspace,
+								 unsigned int width, unsigned int height,
+								 size_t mem_size,
+								 bool mem_swapable, bool mem_destroyed)
+{
+  this->image_id = image_id;
+  this->frame_id = frame_id;
+  this->colorspace = colorspace;
+  this->width = width;
+  this->height = height;
+  this->mem_size = mem_size;
+  this->mem_swapable = mem_swapable;
+  this->mem_destroyed = mem_destroyed;
+}
+
+/** @class SharedMemoryImageBufferMetaDataCollector <fvutils/ipc/shm_image.h>
+ * Collect meta data about shared memory segments.
+ */
+
+/** Constructor. */
+SharedMemoryImageBufferMetaDataCollector::SharedMemoryImageBufferMetaDataCollector()
+{
+}
+
+
+/** Destructor. */
+SharedMemoryImageBufferMetaDataCollector::~SharedMemoryImageBufferMetaDataCollector()
+{
+}
+
+
+void
+SharedMemoryImageBufferMetaDataCollector::print_header()
+{
+}
+
+
+void
+SharedMemoryImageBufferMetaDataCollector::print_footer()
+{
+}
+
+
+void
+SharedMemoryImageBufferMetaDataCollector::print_no_segments()
+{
+}
+
+
+void
+SharedMemoryImageBufferMetaDataCollector::print_no_orphaned_segments()
+{
+}
+
+
+void
+SharedMemoryImageBufferMetaDataCollector::print_info(const SharedMemoryHeader *header,
+					  int shm_id, int semaphore,
+					  unsigned int mem_size,
+					  const void *memptr)
+{
+  SharedMemoryImageBufferHeader *h = (SharedMemoryImageBufferHeader *)header;
+
+  meta_data_.push_back(SharedMemoryImageBufferMetaData(h->image_id(), h->frame_id(), h->colorspace(),
+						       h->height(), h->width(), mem_size,
+						       SharedMemory::is_swapable(shm_id),
+						       SharedMemory::is_destroyed(shm_id)));
 }
 
 } // end namespace firevision
