@@ -40,6 +40,7 @@ class WebUrlManager;
 class WebPageHeaderGenerator;
 class WebPageFooterGenerator;
 class StaticWebReply;
+class DynamicWebReply;
 class WebUserVerifier;
 
 class WebRequestDispatcher
@@ -65,6 +66,8 @@ class WebRequestDispatcher
   struct MHD_Response *  prepare_static_response(StaticWebReply *sreply);
   int queue_static_reply(struct MHD_Connection * connection,
 			 StaticWebReply *sreply);
+  int queue_dynamic_reply(struct MHD_Connection * connection,
+			  DynamicWebReply *sreply);
   int queue_basic_auth_fail(struct MHD_Connection * connection);
   int process_request(struct MHD_Connection * connection,
 		      const char *url,

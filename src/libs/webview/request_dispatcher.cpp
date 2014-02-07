@@ -207,6 +207,33 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
   return response;
 }
 
+/** Prepare response from static reply.
+ * @param sreply static reply
+ * @return response struct ready to be enqueued
+ */
+int
+WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection * connection,
+					  DynamicWebReply *dreply)
+{
+  struct MHD_Response *response;
+  response = MHD_create_response_from_callback(dreply->size(),
+					       dreply->chunk_size(),
+					       dynamic_reply_data_cb,
+					       dreply,
+					       dynamic_reply_free_cb);
+
+  const WebReply::HeaderMap &headers = dreply->headers();
+  WebReply::HeaderMap::const_iterator i;
+  for (i = headers.begin(); i != headers.end(); ++i) {
+    MHD_add_response_header(response, i->first.c_str(), i->second.c_str());
+  }
+
+  int ret = MHD_queue_response (connection, dreply->code(), response);
+  MHD_destroy_response (response);
+
+  return ret;
+}
+
 /** Queue a static web reply.
  * @param connection libmicrohttpd connection to queue response to
  * @param sreply static web reply to queue
@@ -364,14 +391,7 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 	ret = queue_static_reply(connection, sreply);
 	delete reply;
       } else if (dreply) {
-	struct MHD_Response *response;
-	response = MHD_create_response_from_callback(dreply->size(),
-						     dreply->chunk_size(),
-						     dynamic_reply_data_cb,
-						     dreply,
-						     dynamic_reply_free_cb);
-	ret = MHD_queue_response (connection, dreply->code(), response);
-	MHD_destroy_response (response);
+	ret = queue_dynamic_reply(connection, dreply);
       } else {
 	WebErrorPageReply ereply(WebReply::HTTP_INTERNAL_SERVER_ERROR);
 	ret = queue_static_reply(connection, &ereply);
