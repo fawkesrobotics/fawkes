@@ -139,7 +139,7 @@ WebReply::headers() const
  *
  * @fn size_t DynamicWebReply::size() = 0
  * Total size of the web reply.
- * Return the total size of the reply if known, or 0 if it is not known. In the
+ * Return the total size of the reply if known, or -1 if it is not known. In the
  * latter case your next_chunk() method has to return -1 at some point to end
  * the transfer. If possible by any means return a meaningful value, as it will
  * improve the experience of users, especially for long transfers!
