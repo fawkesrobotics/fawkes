@@ -192,7 +192,9 @@ FvRetrieverThread::loop()
     cam->capture();
     __tt->ping_end(__ttc_capture);
     __tt->ping_start(__ttc_memcpy);
+    shm->lock_for_write();
     memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
+    shm->unlock();
     __tt->ping_end(__ttc_memcpy);
     if (__cam_has_timestamp_support) shm->set_capture_time(cam->capture_time());
     __tt->ping_start(__ttc_dispose);
@@ -205,7 +207,9 @@ FvRetrieverThread::loop()
   } else {
     // no time tracker
     cam->capture();
+    shm->lock_for_write();
     memcpy(shm->buffer(), cam->buffer(), cam->buffer_size());
+    shm->unlock();
     if (__cam_has_timestamp_support) {
       shm->set_capture_time(cam->capture_time());
     } else {
