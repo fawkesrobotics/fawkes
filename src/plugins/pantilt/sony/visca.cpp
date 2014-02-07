@@ -1229,3 +1229,49 @@ Visca::get_white_balance_mode()
 
 }
 
+
+/** Sett mirror sate
+ * @param mirror true to enable mirroring, false to disable
+ */
+void
+Visca::set_mirror(bool mirror)
+{
+  __obuffer[1] = VISCA_COMMAND;
+  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
+  __obuffer[3] = VISCA_MIRROR;
+  __obuffer[4] = mirror ? VISCA_MIRROR_ON : VISCA_MIRROR_OFF;
+  __obuffer_length = 4;
+
+  try {
+    send_with_reply();
+  } catch (ViscaException &e) {
+    e.append("set_mirror() failed");
+    throw;
+  }
+}
+
+/** Get mirror sate.
+ * @return true if image is mirrored, false otherwise
+ */
+bool
+Visca::get_mirror()
+{
+  __obuffer[1] = VISCA_INQUIRY;
+  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
+  __obuffer[3] = VISCA_MIRROR;
+  __obuffer_length = 3;
+
+  try {
+    send_with_reply();
+  } catch (ViscaException &e) {
+    e.append("getZoom() failed");
+    throw;
+  }
+
+  // Extract information from __ibuffer
+  if ( __ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
+    return (__ibuffer[2] != 0);
+  } else {
+    throw ViscaException("getZoom(): zoom inquiry failed, response code not VISCA_RESPONSE_COMPLETED");
+  }
+}

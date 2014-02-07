@@ -127,6 +127,9 @@ class Visca {
 
   unsigned int get_white_balance_mode();
 
+  bool         get_mirror();
+  void         set_mirror(bool mirror);
+
  private:
   // possible running inquires
   static const unsigned int VISCA_RUNINQ_NONE                   = 0;
@@ -248,6 +251,8 @@ class Visca {
   static const unsigned char   VISCA_WIDE_MODE_CINEMA           = 0x01;
   static const unsigned char   VISCA_WIDE_MODE_16_9             = 0x02;
   static const unsigned char VISCA_MIRROR                       = 0x61;
+  static const unsigned char   VISCA_MIRROR_ON                  = 0x02;
+  static const unsigned char   VISCA_MIRROR_OFF                 = 0x03;
   static const unsigned char VISCA_FREEZE                       = 0x62;
   static const unsigned char VISCA_PICTURE_EFFECT               = 0x63;
   static const unsigned char   VISCA_PICTURE_EFFECT_OFF         = 0x00;
