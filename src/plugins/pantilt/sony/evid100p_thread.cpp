@@ -206,8 +206,6 @@ PanTiltSonyEviD100PThread::loop()
     } else if (__pantilt_if->msgq_first_is<PanTiltInterface::SetVelocityMessage>()) {
       PanTiltInterface::SetVelocityMessage *msg = __pantilt_if->msgq_first(msg);
 
-      logger->log_warn(name(), "SetVelocityMessage ignored for Sony EviD100P");
-
       if ((msg->pan_velocity() < 0) || (msg->tilt_velocity() < 0) ) {
 	logger->log_warn(name(), "Ignoring pan/tilt velocities %f/%f, at least one "
 			 " is negative", msg->pan_velocity(), msg->tilt_velocity());
@@ -252,7 +250,7 @@ PanTiltSonyEviD100PThread::bb_interface_message_received(Interface *interface,
     __pantilt_if->msgq_flush();
     return false;
   } else {
-    logger->log_info(name(), "Received message of type %s, enqueueing", message->type());
+    //logger->log_info(name(), "Received message of type %s, enqueueing", message->type());
     return true;
   }
 }
