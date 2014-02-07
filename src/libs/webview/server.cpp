@@ -23,6 +23,7 @@
 #include <webview/server.h>
 #include <webview/request_dispatcher.h>
 #include <webview/request.h>
+#include <core/threading/thread.h>
 #include <core/exception.h>
 #include <core/exceptions/system.h>
 #include <logging/logger.h>
@@ -202,7 +203,10 @@ WebServer::process()
     return;
   }
   select(max_fd + 1, &read_fd, &write_fd, &except_fd, NULL);
+  Thread::CancelState old_state;
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &old_state);
   MHD_run(__daemon);
+  Thread::set_cancel_state(old_state);
 }
 
 } // end namespace fawkes
