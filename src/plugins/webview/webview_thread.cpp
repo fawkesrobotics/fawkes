@@ -218,8 +218,12 @@ WebviewThread::init()
 void
 WebviewThread::finalize()
 {
-  service_publisher->unpublish_service(__webview_service);
-  service_browser->unwatch_service("_http._tcp", __service_browse_handler);
+  try {
+    service_publisher->unpublish_service(__webview_service);
+  } catch (Exception &e) {} // ignored, can happen if avahi-daemon not running
+  try {
+    service_browser->unwatch_service("_http._tcp", __service_browse_handler);
+  } catch (Exception &e) {} // ignored, can happen if avahi-daemon not running
 
   webview_url_manager->unregister_baseurl("/");
   webview_url_manager->unregister_baseurl(STATIC_URL_PREFIX);
