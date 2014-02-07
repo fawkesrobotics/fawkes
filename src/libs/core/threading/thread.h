@@ -114,6 +114,8 @@ class Thread {
   void add_notification_listener(ThreadNotificationListener *notification_listener);
   void remove_notification_listener(ThreadNotificationListener *notification_listener);
 
+  void notify_of_failed_init();
+
  protected:
   Thread(const char *name);
   Thread(const char *name, OpMode op_mode);
@@ -143,7 +145,6 @@ class Thread {
   Thread & operator=(const Thread &t);
   static void * entry(void * pthis);
   void __constructor(const char *name, OpMode op_mode);
-  void notify_of_failed_init();
   void notify_of_startup();
   void lock_sleep_mutex();
 
