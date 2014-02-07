@@ -25,20 +25,6 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
-ifneq ($(wildcard /opt/vc/include/bcm_host.h),)
-  HAVE_RASPI = 1
-  CFLAGS_RASPI =  -I/opt/vc/include \
-		-I/opt/vc/include/interface/vcos/pthreads \
-		-I/opt/vc/include/interface/vmcs_host/linux \
-		-DHAVE_RASPI -DOMX -DOMX_SKIP64BIT -DUSE_VCHIQ_ARM
-  LDFLAGS_RASPI = -L/opt/vc/lib/ -lbcm_host -lvcos
-  ifneq ($(wildcard /opt/vc/include/interface/mmal/mmal.h),)
-    HAVE_MMAL = 1
-    CFLAGS_MMAL  = -DHAVE_MMAL -I/opt/vc/include/interface
-    LDFLAGS_MMAL = -lmmal -lmmal_core -lmmal_util
-  endif
-endif
-
 ifneq ($(HAVE_RASPI)$(HAVE_MMAL),11)
   FILTER_OUT += compression/jpeg_compressor_mmal.o
 else

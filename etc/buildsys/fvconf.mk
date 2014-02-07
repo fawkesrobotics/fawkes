@@ -43,10 +43,32 @@ ifeq ($(HAVE_VISCA_CTRL),1)
   HAVE_EVID100P_CTRL  = 1
 endif
 
+# Raspberry Pi and MMAL
+ifneq ($(wildcard /opt/vc/include/bcm_host.h),)
+  HAVE_RASPI = 1
+  CFLAGS_RASPI =  -I/opt/vc/include \
+		-I/opt/vc/include/interface/vcos/pthreads \
+		-I/opt/vc/include/interface/vmcs_host/linux \
+		-DHAVE_RASPI -DOMX -DOMX_SKIP64BIT -DUSE_VCHIQ_ARM
+  LDFLAGS_RASPI = -L/opt/vc/lib/ -lbcm_host -lvcos
+  ifneq ($(wildcard /opt/vc/include/interface/mmal/mmal.h),)
+    HAVE_MMAL = 1
+    CFLAGS_MMAL  = -DHAVE_MMAL -I/opt/vc/include/interface
+    LDFLAGS_MMAL = -lmmal -lmmal_core -lmmal_util
+  endif
+endif
+
 # check for JPEG lib
 ifneq ($(wildcard $(SYSROOT)/usr/include/jpeglib.h $(SYSROOT)/usr/local/include/jpeglib.h $(SYSROOT)/opt/local/include/jpeglib.h),)
   HAVE_LIBJPEG   = 1
   VISION_CFLAGS += -DHAVE_LIBJPEG
+endif
+
+ifeq ($(HAVE_LIBJPEG),1)
+  HAVE_JPEG = 1
+endif
+ifeq ($(HAVE_RASPI)$(HAVE_MMAL),11)
+  HAVE_JPEG = 1
 endif
 
 ifneq ($(PKGCONFIG),)
