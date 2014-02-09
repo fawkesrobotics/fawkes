@@ -71,7 +71,8 @@ PanTiltSonyEviD100PThread::init()
   __cfg_read_timeout_ms  = config->get_uint((__ptu_cfg_prefix + "read_timeout_ms").c_str());
 
   try {
-    __cam = new SonyEviD100PVisca(__cfg_device.c_str(), __cfg_read_timeout_ms);
+    __cam = new SonyEviD100PVisca(__cfg_device.c_str(), __cfg_read_timeout_ms,
+				  /* blocking */ false);
   } catch (Exception &e) {
     e.print_trace();
     e.print_backtrace();
