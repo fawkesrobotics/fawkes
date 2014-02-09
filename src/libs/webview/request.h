@@ -74,6 +74,12 @@ class WebRequest {
     std::map<std::string, std::string>::const_iterator c = cookies_.find(key);
     return (c != cookies_.end()) ? c->second : "";
   }
+  /** Check if the named cookie has been received.
+   * @param key key of the requested cookie
+   * @return true if the cookie was set, false otherwise
+   */
+  bool has_cookie(std::string &key) const
+  { return (cookies_.find(key) != cookies_.end()); }
 
   /** Get map of POST values.
    * @return map of POST values. */
@@ -96,6 +102,12 @@ class WebRequest {
     std::map<std::string, std::string>::const_iterator p = post_values_.find(key);
     return (p != post_values_.end()) ? p->second : "";
   }
+  /** Check if the named post value has been received.
+   * @param key key of the post value
+   * @return true if the post value was received, false otherwise
+   */
+  bool has_post_value(std::string &key) const
+  { return (post_values_.find(key) != post_values_.end()); }
 
   /** Set a cookie.
    * @param key key of the cookie
