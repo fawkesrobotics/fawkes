@@ -94,3 +94,6 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/pantilt
 
     # Read timeout for EviD100P PTU
     read_timeout_ms: 50
+
+    # Enable horizontal mirroring/flip?
+    mirror: false

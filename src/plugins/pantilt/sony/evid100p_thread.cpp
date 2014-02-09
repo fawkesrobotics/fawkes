@@ -114,6 +114,12 @@ PanTiltSonyEviD100PThread::init()
   __tiltjoint_if->set_velocity(init_tilt_velocity);
   __tiltjoint_if->write();
 
+  bool mirror = false;
+  try {
+    mirror = config->get_bool((__ptu_cfg_prefix + "mirror").c_str());
+  } catch (Exception &e) {} // ignore, use default
+  __cam->set_mirror(mirror);
+
   __wt = new WorkerThread(__ptu_name, logger, __cam,
 			  SonyEviD100PVisca::MIN_PAN_RAD, SonyEviD100PVisca::MAX_PAN_RAD,
 			  SonyEviD100PVisca::MIN_TILT_RAD, SonyEviD100PVisca::MAX_TILT_RAD);
