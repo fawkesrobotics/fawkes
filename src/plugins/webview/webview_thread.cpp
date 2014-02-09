@@ -167,6 +167,7 @@ WebviewThread::init()
       __webserver->setup_basic_auth(__cfg_basic_auth_realm.c_str(),
 				    __user_verifier);
     }
+    __webserver->setup_request_manager(webview_request_manager);
   } catch (Exception &e) {
     delete __webview_service;
     delete __service_browse_handler;
@@ -211,7 +212,6 @@ WebviewThread::init()
 
   service_publisher->publish_service(__webview_service);
   service_browser->watch_service("_http._tcp", __service_browse_handler);
-
 }
 
 
