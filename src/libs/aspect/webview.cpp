@@ -67,14 +67,17 @@ WebviewAspect::~WebviewAspect()
  * Thread::start() is called (when running regularly inside Fawkes).
  * @param url_manager URL manager to register processors to
  * @param nav_manager Navigation manager to add navigation entries
+ * @param request_manager Request manager to query request information
  * @see WebviewMaster
  */
 void
 WebviewAspect::init_WebviewAspect(WebUrlManager *url_manager,
-				  WebNavManager *nav_manager)
+				  WebNavManager *nav_manager,
+				  WebRequestManager *request_manager)
 {
   webview_url_manager = url_manager;
   webview_nav_manager = nav_manager;
+  webview_request_manager = request_manager;
 }
 
 } // end namespace fawkes
