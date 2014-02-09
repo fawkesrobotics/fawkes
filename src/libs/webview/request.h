@@ -3,8 +3,7 @@
  *  request.h - Web request
  *
  *  Created: Mon Jun 17 17:58:51 2013
- *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -109,6 +108,34 @@ class WebRequest {
   bool has_post_value(std::string &key) const
   { return (post_values_.find(key) != post_values_.end()); }
 
+  /** Get map of GET values.
+   * @return map of GET values. */
+  const std::map<std::string, std::string> &  get_values() const { return get_values_; }
+  /** Get specific GET value.
+   * @param key key of the get value
+   * @return value of get value or empty string if not set
+   */
+  std::string  get_value(std::string &key) const
+  {
+    std::map<std::string, std::string>::const_iterator p = get_values_.find(key);
+    return (p != get_values_.end()) ? p->second : "";
+  }
+  /** Get specific GET value.
+   * @param key key of the get value
+   * @return value of get value or empty string if not set
+   */
+  std::string  get_value(const char *key) const
+  {
+    std::map<std::string, std::string>::const_iterator p = get_values_.find(key);
+    return (p != get_values_.end()) ? p->second : "";
+  }
+  /** Check if the named get value has been received.
+   * @param key key of the requested get value
+   * @return true if the get value was received, false otherwise
+   */
+  bool has_get_value(std::string &key) const
+  { return (get_values_.find(key) != get_values_.end()); }
+
   /** Set a cookie.
    * @param key key of the cookie
    * @param value value of the cookie
@@ -122,6 +149,11 @@ class WebRequest {
    */
   void set_post_value(const char *key, const char *data, size_t size);
 
+  /** Set a GET value.
+   * @param key key of the cookie
+   * @param value value of the GET argument
+   */
+  void set_get_value(const std::string &key, const std::string &value) { get_values_[key] = value; }
 
   /** Get raw post data.
    * @return raw port data or empty string if none. Note that this is not necesarily
@@ -143,6 +175,7 @@ class WebRequest {
   std::map<std::string, std::string> cookies_;
   std::map<std::string, std::string> post_values_;
   std::string                        post_raw_data_;
+  std::map<std::string, std::string> get_values_;
 
 };
 

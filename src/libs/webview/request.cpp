@@ -3,8 +3,7 @@
  *  request.cpp - Web request
  *
  *  Created: Mon Jun 17 18:04:04 2013
- *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -41,6 +40,16 @@ cookie_iterator(void *cls, enum MHD_ValueKind kind,
 {
   WebRequest *request = static_cast<WebRequest *>(cls);
   request->set_cookie(key, value);
+  return MHD_YES;
+}
+
+static int
+get_argument_iterator(void *cls, enum MHD_ValueKind kind,
+		      const char *key, const char *value)
+{
+  WebRequest *request = static_cast<WebRequest *>(cls);
+  if (value == NULL)  request->set_get_value(key, "");
+  else                request->set_get_value(key, value);
   return MHD_YES;
 }
 /// @endcond
@@ -80,12 +89,9 @@ WebRequest::WebRequest(const char *url, const char *method, MHD_Connection *conn
     method_ = METHOD_TRACE;
   }
 
-  if (MHD_get_connection_values(connection, MHD_COOKIE_KIND, &cookie_iterator, this) == MHD_NO)
-  {
-    // ignored
-    //throw Exception("Failed to read cookies for request");
-  }
-
+  MHD_get_connection_values(connection, MHD_COOKIE_KIND, &cookie_iterator, this);
+  MHD_get_connection_values(connection,
+			    MHD_GET_ARGUMENT_KIND, &get_argument_iterator, this);
 }
 
 
