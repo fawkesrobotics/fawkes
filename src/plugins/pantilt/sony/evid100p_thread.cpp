@@ -118,6 +118,8 @@ PanTiltSonyEviD100PThread::init()
 			  SonyEviD100PVisca::MIN_PAN_RAD, SonyEviD100PVisca::MAX_PAN_RAD,
 			  SonyEviD100PVisca::MIN_TILT_RAD, SonyEviD100PVisca::MAX_TILT_RAD);
   __wt->start();
+  // Wakeup once to get values
+  __wt->wakeup();
 
   __wt->set_velocities(pan_smax, tilt_smax);
 
@@ -296,6 +298,7 @@ PanTiltSonyEviD100PThread::WorkerThread::WorkerThread(std::string ptu_name,
   __move_pending     = false;
   __target_pan       = 0;
   __target_tilt      = 0;
+  __fresh_data       = false;
 
   __velo_pending     = false;
   __pan_vel          = 0;
