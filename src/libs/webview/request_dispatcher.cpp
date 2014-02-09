@@ -27,9 +27,11 @@
 #include <webview/error_reply.h>
 #include <webview/user_verifier.h>
 
+#include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 #include <core/exception.h>
 #include <utils/misc/string_urlescape.h>
+#include <utils/time/time.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -75,6 +77,9 @@ WebRequestDispatcher::WebRequestDispatcher(WebUrlManager *url_manager,
   __url_manager           = url_manager;
   __page_header_generator = headergen;
   __page_footer_generator = footergen;
+  __active_requests       = 0;
+  __active_requests_mutex = new Mutex();
+  __last_request_completion_time = new Time();
 }
 
 
@@ -82,6 +87,8 @@ WebRequestDispatcher::WebRequestDispatcher(WebUrlManager *url_manager,
 WebRequestDispatcher::~WebRequestDispatcher()
 {
   if (__realm)  free(__realm);
+  delete __active_requests_mutex;
+  delete __last_request_completion_time;
 }
 
 
@@ -133,6 +140,24 @@ WebRequestDispatcher::process_request_cb(void *callback_data,
   WebRequestDispatcher *rd = static_cast<WebRequestDispatcher *>(callback_data);
   return rd->process_request(connection, url, method, version,
 			     upload_data, upload_data_size, session_data);
+}
+
+
+/** Process request completion.
+ * @param cls closure which is a pointer to the request dispatcher
+ * @param connection connection on which the request completed
+ * @param con_cls connection specific data, for us the request
+ * @param toe termination code
+ */
+void
+WebRequestDispatcher::request_completed_cb(void *cls,
+					   struct MHD_Connection *connection, void **con_cls,
+					   enum MHD_RequestTerminationCode toe)
+{
+  WebRequestDispatcher *rd = static_cast<WebRequestDispatcher *>(cls);
+  WebRequest *request = static_cast<WebRequest *>(*con_cls);
+  rd->request_completed(request, toe);
+  delete request;
 }
 
 
@@ -348,6 +373,9 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       // do not respond in the first round...
       request = new WebRequest(url, method, connection);
       *session_data = request;
+      __active_requests_mutex->lock();
+      __active_requests += 1;
+      __active_requests_mutex->unlock();
 
       if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
 	request->pp_ =
@@ -411,6 +439,36 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
     }
   }
   return ret;
+}
+
+
+void
+WebRequestDispatcher::request_completed(WebRequest *request, MHD_RequestTerminationCode term_code)
+{
+  __active_requests_mutex->lock();
+  if (__active_requests >  0)  __active_requests -= 1;
+  __last_request_completion_time->stamp();
+  __active_requests_mutex->unlock();
+}
+
+/** Get number of active requests.
+ * @return number of ongoing requests.
+ */
+unsigned int
+WebRequestDispatcher::active_requests() const
+{
+  MutexLocker lock(__active_requests_mutex);
+  return __active_requests;
+}
+
+/** Get time when last request was completed.
+ * @return Time when last request was completed
+ */
+std::auto_ptr<Time>
+WebRequestDispatcher::last_request_completion_time() const
+{
+  MutexLocker lock(__active_requests_mutex);
+  return std::auto_ptr<Time>(new Time(__last_request_completion_time));
 }
 
 } // end namespace fawkes

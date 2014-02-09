@@ -26,9 +26,9 @@
 #include <string>
 #include <map>
 #include <stdint.h>
+#include <memory>
 
-struct MHD_Connection;
-struct MHD_Response;
+#include <microhttpd.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -42,6 +42,9 @@ class WebPageFooterGenerator;
 class StaticWebReply;
 class DynamicWebReply;
 class WebUserVerifier;
+class WebRequest;
+class Mutex;
+class Time;
 
 class WebRequestDispatcher
 {
@@ -60,7 +63,14 @@ class WebRequestDispatcher
 				size_t *upload_data_size,
 				void  **session_data);
 
+  static void request_completed_cb(void *cls,
+				   struct MHD_Connection *connection, void **con_cls,
+				   enum MHD_RequestTerminationCode toe);
+
   void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
+
+  unsigned int active_requests() const;
+  std::auto_ptr<Time> last_request_completion_time() const;
 
  private:
   struct MHD_Response *  prepare_static_response(StaticWebReply *sreply);
@@ -77,6 +87,9 @@ class WebRequestDispatcher
 		      size_t *upload_data_size,
 		      void **session_data);
 
+  void request_completed(WebRequest *request,
+			 MHD_RequestTerminationCode term_code);
+
  private:
   WebUrlManager            *__url_manager;
 
@@ -86,6 +99,10 @@ class WebRequestDispatcher
 
   char                     *__realm;
   WebUserVerifier          *__user_verifier;
+
+  unsigned int              __active_requests;
+  fawkes::Time             *__last_request_completion_time;
+  fawkes::Mutex            *__active_requests_mutex;
 };
 
 } // end namespace fawkes

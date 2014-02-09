@@ -23,6 +23,7 @@
 #include <webview/server.h>
 #include <webview/request_dispatcher.h>
 #include <webview/request.h>
+#include <webview/request_manager.h>
 #include <core/threading/thread.h>
 #include <core/exception.h>
 #include <core/exceptions/system.h>
@@ -38,16 +39,6 @@ namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
-
-/// @cond INTERNALS
-static void
-request_completed_callback(void *cls, struct MHD_Connection *connection, void **con_cls,
-			   enum MHD_RequestTerminationCode toe)
-{
-  WebRequest *request = static_cast<WebRequest *>(*con_cls);
-  delete request;
-}
-/// @endcond
 
 
 /** @class WebServer <webview/server.h>
@@ -68,6 +59,7 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
   __port         = port;
   __dispatcher   = dispatcher;
   __logger       = logger;
+  __request_manager = NULL;
 
   __ssl_key_mem  = NULL;
   __ssl_cert_mem = NULL;
@@ -78,7 +70,8 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 			      NULL,
 			      WebRequestDispatcher::process_request_cb,
 			      (void *)__dispatcher,
-			      MHD_OPTION_NOTIFY_COMPLETED, &request_completed_callback, NULL,
+			      MHD_OPTION_NOTIFY_COMPLETED,
+			        WebRequestDispatcher::request_completed_cb, (void *)__dispatcher,
 			      MHD_OPTION_END);
 
   if ( __daemon == NULL ) {
@@ -101,6 +94,7 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
   __port       = port;
   __dispatcher = dispatcher;
   __logger     = logger;
+  __request_manager = NULL;
 
   __ssl_key_mem  = read_file(key_pem_filepath);
   __ssl_cert_mem = read_file(cert_pem_filepath);
@@ -111,7 +105,8 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 			      NULL,
 			      WebRequestDispatcher::process_request_cb,
 			      (void *)__dispatcher,
-			      MHD_OPTION_NOTIFY_COMPLETED, &request_completed_callback, NULL,
+			      MHD_OPTION_NOTIFY_COMPLETED,
+			        WebRequestDispatcher::request_completed_cb, (void *)__dispatcher,
 			      MHD_OPTION_HTTPS_MEM_KEY,  __ssl_key_mem,
 			      MHD_OPTION_HTTPS_MEM_CERT, __ssl_cert_mem,
 			      MHD_OPTION_END);
@@ -126,6 +121,10 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 /** Destructor. */
 WebServer::~WebServer()
 {
+  if (__request_manager) {
+    __request_manager->set_server(NULL);
+  }
+
   MHD_stop_daemon(__daemon);
   __daemon = NULL;
   __dispatcher = NULL;
@@ -185,6 +184,36 @@ void
 WebServer::setup_basic_auth(const char *realm, WebUserVerifier *verifier)
 {
   __dispatcher->setup_basic_auth(realm, verifier);
+}
+
+
+/** Setup this server as request manager.
+ * The registration will be cancelled automatically on destruction.
+ * @param request_manager request manager to register with
+ */
+void
+WebServer::setup_request_manager(WebRequestManager *request_manager)
+{
+  request_manager->set_server(this);
+  __request_manager = request_manager;
+}
+
+/** Get number of active requests.
+ * @return number of ongoing requests.
+ */
+unsigned int
+WebServer::active_requests() const
+{
+  return __dispatcher->active_requests();
+}
+
+/** Get time when last request was completed.
+ * @return Time when last request was completed
+ */
+std::auto_ptr<Time>
+WebServer::last_request_completion_time() const
+{
+  return __dispatcher->last_request_completion_time();
 }
 
 
