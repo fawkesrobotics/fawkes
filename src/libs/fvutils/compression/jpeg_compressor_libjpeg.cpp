@@ -217,6 +217,18 @@ JpegImageCompressorLibJpeg::~JpegImageCompressorLibJpeg()
 }
 
 
+bool
+JpegImageCompressorLibJpeg::supports_vflip()
+{
+  return true;
+}
+
+void
+JpegImageCompressorLibJpeg::set_vflip(bool enabled)
+{
+  vflip = enabled;
+}
+
 void
 JpegImageCompressorLibJpeg::compress()
 {
@@ -283,18 +295,40 @@ JpegImageCompressorLibJpeg::compress()
 
 
   if ( jpeg_cs == JpegImageCompressor::JPEG_CS_RGB ) {
-    while (cinfo.next_scanline < cinfo.image_height) {
-      convert_line_yuv422planar_to_rgb( buffer, row_buffer,
-					cinfo.image_width, cinfo.image_height,
-					cinfo.next_scanline, 0 );
-      jpeg_write_scanlines(&cinfo, &row_buffer, 1);
+    if (vflip) {
+      while (cinfo.next_scanline < cinfo.image_height) {
+	convert_line_yuv422planar_to_rgb(
+	  buffer, row_buffer,
+	  cinfo.image_width, cinfo.image_height,
+	  cinfo.image_height - cinfo.next_scanline - 1, 0);
+	jpeg_write_scanlines(&cinfo, &row_buffer, 1);
+      }
+    } else {
+      while (cinfo.next_scanline < cinfo.image_height) {
+	convert_line_yuv422planar_to_rgb(
+          buffer, row_buffer,
+	  cinfo.image_width, cinfo.image_height,
+	  cinfo.next_scanline, 0 );
+	jpeg_write_scanlines(&cinfo, &row_buffer, 1);
+      }
     }
   } else {
-    while (cinfo.next_scanline < cinfo.image_height) {
-      convert_line_yuv422planar_to_yuv444packed( buffer, row_buffer,
-						 cinfo.image_width, cinfo.image_height,
-						 cinfo.next_scanline, 0 );
-      jpeg_write_scanlines(&cinfo, &row_buffer, 1);
+    if (vflip) {
+      while (cinfo.next_scanline < cinfo.image_height) {
+	convert_line_yuv422planar_to_yuv444packed(
+          buffer, row_buffer,
+	  cinfo.image_width, cinfo.image_height,
+	  cinfo.image_height - cinfo.next_scanline - 1, 0 );
+	jpeg_write_scanlines(&cinfo, &row_buffer, 1);
+      }
+    } else {
+      while (cinfo.next_scanline < cinfo.image_height) {
+	convert_line_yuv422planar_to_yuv444packed(
+          buffer, row_buffer,
+	  cinfo.image_width, cinfo.image_height,
+	  cinfo.next_scanline, 0 );
+	jpeg_write_scanlines(&cinfo, &row_buffer, 1);
+      }
     }
   }
 

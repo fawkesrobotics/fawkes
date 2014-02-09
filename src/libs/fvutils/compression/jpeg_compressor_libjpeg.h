@@ -51,6 +51,8 @@ class JpegImageCompressorLibJpeg : public ImageCompressor {
   virtual bool          supports_compression_destination(ImageCompressor::CompressionDestination cd);
   virtual void          compress();
   virtual size_t        recommended_compressed_buffer_size();
+  virtual bool          supports_vflip();
+  virtual void          set_vflip(bool enable);
 
  private:
   unsigned char *jpeg_buffer;
@@ -58,6 +60,7 @@ class JpegImageCompressorLibJpeg : public ImageCompressor {
   unsigned char *buffer;
 
   unsigned int   quality;
+  bool           vflip;
 
   unsigned int   width;
   unsigned int   height;

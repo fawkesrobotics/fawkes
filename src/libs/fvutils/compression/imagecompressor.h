@@ -53,6 +53,8 @@ class ImageCompressor {
   virtual size_t        recommended_compressed_buffer_size()                              = 0;
   virtual void          compress()                                                        = 0;
 
+  virtual bool          supports_vflip() = 0;
+  virtual void          set_vflip(bool enable) = 0;
 };
 
 } // end namespace firevision

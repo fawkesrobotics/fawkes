@@ -192,7 +192,7 @@ JpegImageCompressorMMAL::JpegImageCompressorMMAL(unsigned int quality)
 {
   width_ = height_ = 0;
   quality_ = quality;
-  state = new State();
+  state_ = new State();
   // we can always do this, it'll just do nothing the second time
   bcm_host_init();
 }
@@ -201,14 +201,27 @@ JpegImageCompressorMMAL::JpegImageCompressorMMAL(unsigned int quality)
 JpegImageCompressorMMAL::~JpegImageCompressorMMAL()
 {
   destroy_encoder_component();
-  delete state;
+  delete state_;
+}
+
+
+bool
+JpegImageCompressorMMAL::supports_vflip()
+{
+  return true;
 }
 
 
 void
+JpegImageCompressorMMAL::set_vflip(bool enable)
+{
+  vflip_ = enable;
+}
+
+void
 JpegImageCompressorMMAL::compress()
 {
-  state->reset();
+  state_->reset();
 
   MMAL_PORT_T *encoder_input = NULL;
   MMAL_PORT_T *encoder_output = NULL;
@@ -216,35 +229,35 @@ JpegImageCompressorMMAL::compress()
   MMAL_STATUS_T status = MMAL_SUCCESS;
 
   //  Enable component
-  if (mmal_component_enable(state->encoder_component) != MMAL_SUCCESS) {
-    mmal_component_destroy(state->encoder_component);
+  if (mmal_component_enable(state_->encoder_component) != MMAL_SUCCESS) {
+    mmal_component_destroy(state_->encoder_component);
     throw Exception("Unable to enable video encoder component");
   }
 
-  encoder_input  = state->encoder_component->input[0];
-  encoder_output = state->encoder_component->output[0];
+  encoder_input  = state_->encoder_component->input[0];
+  encoder_output = state_->encoder_component->output[0];
 
-  if (state->compdest == ImageCompressor::COMP_DEST_FILE) {
-    state->file_handle = fopen(filename_, "wb");
-    if (! state->file_handle) {
+  if (state_->compdest == ImageCompressor::COMP_DEST_FILE) {
+    state_->file_handle = fopen(filename_, "wb");
+    if (! state_->file_handle) {
       throw Exception(errno, "Failed to open output file");
     }
   }
 
-  state->frame_complete_mutex_->lock();
-  state->frame_complete_ = false;
-  state->frame_complete_mutex_->unlock();
+  state_->frame_complete_mutex_->lock();
+  state_->frame_complete_ = false;
+  state_->frame_complete_mutex_->unlock();
 
-  encoder_output->userdata = (::MMAL_PORT_USERDATA_T *)state;
+  encoder_output->userdata = (::MMAL_PORT_USERDATA_T *)state_;
 
   // Enable the encoder output port and tell it its callback function
   status = mmal_port_enable(encoder_output, encoder_output_buffer_callback);
 
   // Send all the buffers to the encoder output port
-  int num = mmal_queue_length(state->encoder_pool_out->queue);
+  int num = mmal_queue_length(state_->encoder_pool_out->queue);
 
   for (int q = 0; q < num; ++q) {
-    MMAL_BUFFER_HEADER_T *buffer = mmal_queue_get(state->encoder_pool_out->queue);
+    MMAL_BUFFER_HEADER_T *buffer = mmal_queue_get(state_->encoder_pool_out->queue);
 
     if (!buffer)
       printf("Unable to get a required buffer %d from pool queue", q);
@@ -257,7 +270,7 @@ JpegImageCompressorMMAL::compress()
   status = mmal_port_enable(encoder_input, encoder_input_buffer_callback);
 
   MMAL_BUFFER_HEADER_T *buffer;
-  if ((buffer = mmal_queue_get(state->encoder_pool_in->queue)) != NULL)
+  if ((buffer = mmal_queue_get(state_->encoder_pool_in->queue)) != NULL)
   {
     size_t exp_size = colorspace_buffer_size(YUV422_PLANAR,
 					     encoder_input->format->es->video.width,
@@ -273,22 +286,37 @@ JpegImageCompressorMMAL::compress()
     char *imgb = (char *)buffer_;
 
     unsigned int h;
-    for (h = 0; h < encoder_input->format->es->video.height; ++h) {
-      memcpy(data, imgb, width_);
-      imgb += width_;
-      data += encoder_input->format->es->video.width;
-    }
+    if (vflip_) {
+      for (h = 0; h < encoder_input->format->es->video.height; ++h) {
+	memcpy(data, imgb + ((height_ - h - 1) * width_), width_);
+	//imgb += width_;
+	data += encoder_input->format->es->video.width;
+      }
 
-    for (h = 0; h < encoder_input->format->es->video.height; ++h) {
-      memcpy(data, imgb, width_ / 2);
-      imgb += width_ / 2;
-      data += encoder_input->format->es->video.width / 2;
-    }
+      for (h = 0; h < encoder_input->format->es->video.height; ++h) {
+	memcpy(data, imgb + (width_ * height_) + ((height_ - h - 1) * (width_/2)), width_ / 2);
+	//imgb += width_ / 2;
+	data += encoder_input->format->es->video.width / 2;
+      }
 
-    for (h = 0; h < encoder_input->format->es->video.height; ++h) {
-      memcpy(data, imgb, width_ / 2);
-      imgb += width_ / 2;
-      data += encoder_input->format->es->video.width / 2;
+      for (h = 0; h < encoder_input->format->es->video.height; ++h) {
+	memcpy(data, imgb + (width_ * height_) + ((width_/2) * height_) + ((height_ - h - 1) * (width_/2)), width_ / 2);
+	//memcpy(data, imgb, width_ / 2);
+	//imgb += width_ / 2;
+	data += encoder_input->format->es->video.width / 2;
+      }
+    } else {
+      for (h = 0; h < encoder_input->format->es->video.height; ++h) {
+	memcpy(data, imgb, width_);
+	imgb += width_;
+	data += encoder_input->format->es->video.width;
+      }
+
+      for (h = 0; h < encoder_input->format->es->video.height * 2; ++h) {
+	memcpy(data, imgb, width_ / 2);
+	imgb += width_ / 2;
+	data += encoder_input->format->es->video.width / 2;
+      }
     }
 
     buffer->length = (size_t)(data - (char *)buffer->data);
@@ -299,11 +327,11 @@ JpegImageCompressorMMAL::compress()
       printf("Unable to send input buffer: %x\n", status);
     }
 
-    state->frame_complete_mutex_->lock();
-    while (! state->frame_complete_) {
-      state->frame_complete_waitcond_->wait();
+    state_->frame_complete_mutex_->lock();
+    while (! state_->frame_complete_) {
+      state_->frame_complete_waitcond_->wait();
     }
-    state->frame_complete_mutex_->unlock();
+    state_->frame_complete_mutex_->unlock();
   }
 
   if (encoder_input && encoder_input->is_enabled)
@@ -311,9 +339,9 @@ JpegImageCompressorMMAL::compress()
   if (encoder_output && encoder_output->is_enabled)
     mmal_port_disable(encoder_output);
 
-  if (state->compdest == ImageCompressor::COMP_DEST_FILE) {
-    fclose(state->file_handle);
-    state->file_handle = NULL;
+  if (state_->compdest == ImageCompressor::COMP_DEST_FILE) {
+    fclose(state_->file_handle);
+    state_->file_handle = NULL;
   }
 }
 
@@ -344,7 +372,7 @@ JpegImageCompressorMMAL::set_image_buffer(colorspace_t cspace, unsigned char *bu
 void
 JpegImageCompressorMMAL::set_compression_destination(ImageCompressor::CompressionDestination cd)
 {
-  state->compdest = cd;
+  state_->compdest = cd;
 }
 
 
@@ -358,15 +386,15 @@ JpegImageCompressorMMAL::supports_compression_destination(ImageCompressor::Compr
 void
 JpegImageCompressorMMAL::set_destination_buffer(unsigned char *buf, unsigned int buf_size)
 {
-  state->jpeg_buffer      = (char *)buf;
-  state->jpeg_buffer_size = buf_size;
+  state_->jpeg_buffer      = (char *)buf;
+  state_->jpeg_buffer_size = buf_size;
 }
 
 
 size_t
 JpegImageCompressorMMAL::compressed_size()
 {
-  return state->jpeg_bytes;
+  return state_->jpeg_bytes;
 }
 
 size_t
@@ -476,7 +504,7 @@ JpegImageCompressorMMAL::create_encoder_component()
     throw Exception("Failed to create buffer header pool for encoder output port %s", encoder_output->name);
   }
 
-  state->encoder_pool_out = pool;
+  state_->encoder_pool_out = pool;
 
   /* Create pool of buffer headers for the input port to consume */
   pool = mmal_port_pool_create(encoder_input, encoder_input->buffer_num, encoder_input->buffer_size);
@@ -486,29 +514,29 @@ JpegImageCompressorMMAL::create_encoder_component()
     throw Exception("Failed to create buffer header pool for encoder input port %s", encoder_input->name);
   }
 
-  state->encoder_pool_in = pool;
-  state->encoder_component = encoder;
+  state_->encoder_pool_in = pool;
+  state_->encoder_component = encoder;
 }
 
 /** Create the encoder component, set up its ports */
 void
 JpegImageCompressorMMAL::destroy_encoder_component()
 {
-  mmal_component_disable(state->encoder_component);
+  mmal_component_disable(state_->encoder_component);
 
-  if (state->encoder_pool_in) {
-    mmal_port_pool_destroy(state->encoder_component->input[0], state->encoder_pool_in);
-    state->encoder_pool_in = NULL;
+  if (state_->encoder_pool_in) {
+    mmal_port_pool_destroy(state_->encoder_component->input[0], state_->encoder_pool_in);
+    state_->encoder_pool_in = NULL;
   }
 
-  if (state->encoder_pool_out) {
-    mmal_port_pool_destroy(state->encoder_component->output[0], state->encoder_pool_out);
-    state->encoder_pool_out = NULL;
+  if (state_->encoder_pool_out) {
+    mmal_port_pool_destroy(state_->encoder_component->output[0], state_->encoder_pool_out);
+    state_->encoder_pool_out = NULL;
   }
 
-  if (state->encoder_component) {
-    mmal_component_destroy(state->encoder_component);
-    state->encoder_component = NULL;
+  if (state_->encoder_component) {
+    mmal_component_destroy(state_->encoder_component);
+    state_->encoder_component = NULL;
   }
 }
 

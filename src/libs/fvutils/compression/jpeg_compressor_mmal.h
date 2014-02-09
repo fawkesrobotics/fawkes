@@ -55,6 +55,9 @@ class JpegImageCompressorMMAL : public ImageCompressor {
   virtual void          compress();
   virtual size_t        recommended_compressed_buffer_size();
 
+  virtual bool          supports_vflip();
+  virtual void          set_vflip(bool enable);
+
   class State;
 
  private:
@@ -71,7 +74,8 @@ class JpegImageCompressorMMAL : public ImageCompressor {
 
   const char    *filename_;
 
-  State *state;
+  State *state_;
+  bool   vflip_;
 };
 
 } // end namespace firevision

@@ -69,6 +69,10 @@ class JpegImageCompressor : public ImageCompressor {
   { impl_->compress(); }
   virtual size_t        recommended_compressed_buffer_size()
   { return impl_->recommended_compressed_buffer_size(); }
+  virtual bool          supports_vflip()
+  { return impl_->supports_vflip(); }
+  virtual void          set_vflip(bool enable)
+  { impl_->set_vflip(true); }
 
  private:
   ImageCompressor *impl_;
