@@ -130,8 +130,6 @@ PanTiltSonyEviD100PThread::init()
   __wt->set_velocities(pan_smax, tilt_smax);
 
   bbil_add_message_interface(__pantilt_if);
-  bbil_add_message_interface(__panjoint_if);
-  bbil_add_message_interface(__tiltjoint_if);
   blackboard->register_listener(this);
 
 #ifdef USE_TIMETRACKER
