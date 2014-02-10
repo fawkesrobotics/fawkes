@@ -3,8 +3,7 @@
  *  visca.h - Class for accessing visca cams
  *
  *  Created: Wed Jun 08 12:06:15 2005 (FireVision)
- *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2005-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

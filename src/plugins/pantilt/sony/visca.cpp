@@ -426,19 +426,27 @@ Visca::is_nonblocking_finished(unsigned int item) const
 }
 
 
-/** Send and wait for reply, blocking.
- */
+/** Send and wait for reply, blocking. */
 void
 Visca::send_with_reply()
 {
   try {
     send();
-    bool recvd = false;
-    while (! recvd) {
-      try {
-	recv();
-	recvd = true;
-      } catch (fawkes::TimeoutException &e) {} // ignore
+
+    if (__obuffer[1] == VISCA_COMMAND) {
+      // do not catch timeouts here, we expect them to be on time
+      recv_ack();
+      bool rcvd = false;
+
+      while (! rcvd) {
+	try {
+	  recv();
+	  rcvd = true;
+	} catch (fawkes::TimeoutException &e) {} // ignored
+      }
+    } else {
+      // timeout applies to inquiries
+      recv();
     }
   } catch (ViscaException &e) {
     e.append("Sending with reply failed");
