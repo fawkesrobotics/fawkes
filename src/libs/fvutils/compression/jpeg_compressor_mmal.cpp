@@ -190,6 +190,7 @@ static void encoder_input_buffer_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_
  */
 JpegImageCompressorMMAL::JpegImageCompressorMMAL(unsigned int quality)
 {
+  vflip_ = false;
   width_ = height_ = 0;
   quality_ = quality;
   state_ = new State();

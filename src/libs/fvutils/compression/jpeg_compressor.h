@@ -72,7 +72,7 @@ class JpegImageCompressor : public ImageCompressor {
   virtual bool          supports_vflip()
   { return impl_->supports_vflip(); }
   virtual void          set_vflip(bool enable)
-  { impl_->set_vflip(true); }
+  { impl_->set_vflip(enable); }
 
  private:
   ImageCompressor *impl_;
