@@ -29,3 +29,21 @@ webview:
   # Example user, delete or change password!
   users:
     fawkes: fawkes
+
+  # Image specific settings, format is (all values are optional):
+  # image_id:
+  #   jpeg-quality: J
+  #   mjpeg-fps: F
+  #   jpeg-vflip: true/false
+  # J is the JPEG quality balancing file size and quality, range 1-100,
+  #   depends on actual compressor used
+  #   For libjpeg 70 or 80 are good values, for MMAL (Raspberry Pi) 5-10 are fine
+  # F Number of frames per second for MJPEG-streams
+  # Vertical flipping can be enabled, e.g. for ceiling cameras
+  images:
+    # default settings if there are no specific settings
+    default:
+      jpeg-quality: 75
+      mjpeg-fps: 15
+      jpeg-vflip: false
+

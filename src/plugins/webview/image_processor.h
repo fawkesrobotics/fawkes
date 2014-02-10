@@ -27,6 +27,7 @@
 #include <string>
 
 namespace fawkes {
+  class Configuration;
   class Logger;
   class ThreadCollector;
   class WebviewJpegStreamProducer;
@@ -35,21 +36,21 @@ namespace fawkes {
 class WebviewImageRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
-  WebviewImageRequestProcessor(const char *baseurl,
+  WebviewImageRequestProcessor(const char *baseurl, fawkes::Configuration *config,
 			       fawkes::Logger *logger, fawkes::ThreadCollector *thread_col);
   virtual ~WebviewImageRequestProcessor();
 
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
-  fawkes::WebviewJpegStreamProducer * get_stream(const std::string &image_id,
-						 unsigned int quality, float fps);
+  fawkes::WebviewJpegStreamProducer * get_stream(const std::string &image_id);
 
 
  private:
   char   *baseurl_;
   size_t  baseurl_len_;
 
+  fawkes::Configuration *config_;
   fawkes::Logger *logger_;
   fawkes::ThreadCollector *thread_col_;
 

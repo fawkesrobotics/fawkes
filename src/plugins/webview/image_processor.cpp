@@ -4,7 +4,6 @@
  *
  *  Created: Wed Feb 05 17:48:34 2014
  *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -28,6 +27,7 @@
 
 #include <core/exception.h>
 #include <core/threading/thread_collector.h>
+#include <config/config.h>
 #include <logging/logger.h>
 #include <fvutils/ipc/shm_image.h>
 
@@ -47,13 +47,16 @@ using namespace firevision;
 
 /** Constructor.
  * @param baseurl Base URL where the static processor is mounted
+ * @param config system configuration
  * @param logger logger
  * @param thread_col thread collector to use for stream producers
  */
 WebviewImageRequestProcessor::WebviewImageRequestProcessor(const char *baseurl,
-							     fawkes::Logger *logger,
-							     fawkes::ThreadCollector *thread_col)
+							   fawkes::Configuration *config,
+							   fawkes::Logger *logger,
+							   fawkes::ThreadCollector *thread_col)
 {
+  config_         = config;
   logger_         = logger;
   thread_col_     = thread_col;
   baseurl_        = strdup(baseurl);
@@ -71,13 +74,37 @@ WebviewImageRequestProcessor::~WebviewImageRequestProcessor()
 }
 
 WebviewJpegStreamProducer *
-WebviewImageRequestProcessor::get_stream(const std::string &image_id,
-					  unsigned int quality, float fps)
+WebviewImageRequestProcessor::get_stream(const std::string &image_id)
 {
   if (streams_.find(image_id) == streams_.end()) {
     try {
+      std::string cfg_prefix = "/webview/images/" + image_id + "/";
+      unsigned int quality = 80;
+      float fps = 15;
+      bool vflip = false;
+      // Read default values if set
+      try {
+	quality = config_->get_uint("/webview/images/default/jpeg-quality");
+      } catch (Exception &e) {} // ignored, use default
+      try {
+	fps = config_->get_float("/webview/images/default/mjpeg-fps");
+      } catch (Exception &e) {} // ignored, use default
+      try {
+	vflip = config_->get_bool("/webview/images/default/jpeg-vflip");
+      } catch (Exception &e) {} // ignored, use default
+      // Set camera-specific values
+      try {
+	quality = config_->get_uint((cfg_prefix + "jpeg-quality").c_str());
+      } catch (Exception &e) {} // ignored, use default
+      try {
+	fps = config_->get_float((cfg_prefix + "mjpeg-fps").c_str());
+      } catch (Exception &e) {} // ignored, use default
+      try {
+	vflip = config_->get_bool((cfg_prefix + "jpeg-vflip").c_str());
+      } catch (Exception &e) {} // ignored, use default
+
       WebviewJpegStreamProducer *stream =
-	new WebviewJpegStreamProducer(image_id.c_str(), quality, fps);
+	new WebviewJpegStreamProducer(image_id.c_str(), quality, fps, vflip);
 
       thread_col_->add(stream);
 
@@ -111,7 +138,7 @@ WebviewImageRequestProcessor::process_request(const fawkes::WebRequest *request)
       std::string image_id = subpath.substr(6, last_dot - 6);
       std::string image_type = subpath.substr(last_dot + 1);
 
-      WebviewJpegStreamProducer *stream = get_stream(image_id, 8, 5);
+      WebviewJpegStreamProducer *stream = get_stream(image_id);
       if (! stream) {
 	return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "Stream not found");
       }

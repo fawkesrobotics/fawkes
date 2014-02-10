@@ -186,7 +186,8 @@ WebviewThread::init()
   __tf_processor         = new WebviewTfRequestProcessor(TF_URL_PREFIX, tf_listener);
 #endif
 #ifdef HAVE_JPEG
-  __image_processor     = new WebviewImageRequestProcessor(IMAGE_URL_PREFIX, logger, thread_collector);
+  __image_processor     = new WebviewImageRequestProcessor(IMAGE_URL_PREFIX, config,
+							   logger, thread_collector);
 #endif
   webview_url_manager->register_baseurl("/", __startpage_processor);
   webview_url_manager->register_baseurl(STATIC_URL_PREFIX, __static_processor);

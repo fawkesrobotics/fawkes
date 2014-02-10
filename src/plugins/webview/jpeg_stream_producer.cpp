@@ -83,9 +83,10 @@ WebviewJpegStreamProducer::Subscriber::~Subscriber()
  * @param image_id ID of the shared memory image buffer to get the input image from
  * @param quality JPEG quality value, depends on used compressor (system default)
  * @param fps frames per second to achieve
+ * @param vflip true to enable vertical flipping, false to disable
  */
 WebviewJpegStreamProducer::WebviewJpegStreamProducer(const std::string & image_id,
-						     unsigned int quality, float fps)
+						     unsigned int quality, float fps, bool vflip)
   : Thread("WebviewJpegStreamProducer", Thread::OPMODE_WAITFORWAKEUP)
 {
   set_coalesce_wakeups(true);
@@ -98,6 +99,7 @@ WebviewJpegStreamProducer::WebviewJpegStreamProducer(const std::string & image_i
   quality_  = quality;
   image_id_ = image_id;
   fps_      = fps;
+  vflip_    = vflip;
 }
 
 /** Destructor. */
@@ -155,6 +157,7 @@ WebviewJpegStreamProducer::init()
   jpeg_ = new JpegImageCompressor(quality_);
   jpeg_->set_image_dimensions(cam_->pixel_width(), cam_->pixel_height());
   jpeg_->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
+  if (jpeg_->supports_vflip())  jpeg_->set_vflip(vflip_);
 
   long int loop_time = (long int)roundf((1. / fps_) * 1000000.);
   timewait_ = new TimeWait(clock, loop_time);

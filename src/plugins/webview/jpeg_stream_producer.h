@@ -77,7 +77,7 @@ class WebviewJpegStreamProducer
 
  public:
   WebviewJpegStreamProducer(const std::string & image_id,
-			    unsigned int quality, float fps);
+			    unsigned int quality, float fps, bool vflip);
   virtual ~WebviewJpegStreamProducer();
 
   void add_subscriber(Subscriber *subscriber);
@@ -92,6 +92,7 @@ class WebviewJpegStreamProducer
   std::string  image_id_;
   unsigned int quality_;
   float        fps_;
+  bool         vflip_;
 
   TimeWait *timewait_;
 
