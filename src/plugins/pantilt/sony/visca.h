@@ -64,6 +64,35 @@ class Visca {
   static const unsigned int  MAX_PAN_SPEED;
   static const unsigned int  MAX_TILT_SPEED;
 
+  /// Zoom value: wide
+  static const unsigned int    VISCA_ZOOM_VALUE_WIDE            = 0x0000;
+  /// Zoom value: 1x
+  static const unsigned int    VISCA_ZOOM_VALUE_1X              = 0x0E6D;
+  /// Zoom value: 2x
+  static const unsigned int    VISCA_ZOOM_VALUE_2X              = 0x188E;
+  /// Zoom value: 3x
+  static const unsigned int    VISCA_ZOOM_VALUE_3X              = 0x2507;
+  /// Zoom value: 4x
+  static const unsigned int    VISCA_ZOOM_VALUE_4X              = 0x2B82;
+  /// Zoom value: 5x
+  static const unsigned int    VISCA_ZOOM_VALUE_5X              = 0x3130;
+  /// Zoom value: 6x
+  static const unsigned int    VISCA_ZOOM_VALUE_6X              = 0x352E;
+  /// Zoom value: 7x
+  static const unsigned int    VISCA_ZOOM_VALUE_7X              = 0x385D;
+  /// Zoom value: 8x
+  static const unsigned int    VISCA_ZOOM_VALUE_8X              = 0x3B48;
+  /// Zoom value: 9x
+  static const unsigned int    VISCA_ZOOM_VALUE_9X              = 0x3E01;
+  /// Zoom value: 10x
+  static const unsigned int    VISCA_ZOOM_VALUE_10X             = 0x4000;
+  /// Zoom value: 20x
+  static const unsigned int    VISCA_ZOOM_VALUE_DIG_20X         = 0x5000;
+  /// Zoom value: 30x
+  static const unsigned int    VISCA_ZOOM_VALUE_DIG_30X         = 0x6000;
+  /// Zoom value: 40x
+  static const unsigned int    VISCA_ZOOM_VALUE_DIG_40X         = 0x7000;
+
   Visca(const char *device_file, unsigned int def_timeout_ms = 10,
 	bool blocking = true);
   virtual ~Visca();
@@ -107,7 +136,7 @@ class Visca {
   // zoom
   void         reset_zoom();
   void         set_zoom(unsigned int zoom);
-  void         get_zoom(unsigned int *zoom);
+  void         get_zoom(unsigned int &zoom);
   void         set_zoom_speed_tele(unsigned int speed);
   void         set_zoom_speed_wide(unsigned int speed);
   void         set_zoom_digital_enabled(bool enabled);

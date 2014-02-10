@@ -95,7 +95,6 @@ const unsigned int Visca::MAX_TILT_SPEED        = 0x14;
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param device_file serial device file (e.g. /dev/ttyUSB0)
  * @param def_timeout_ms default timeout for read operations applied if no explicit
@@ -992,7 +991,12 @@ Visca::set_zoom(unsigned int zoom)
   __obuffer_length = 7;
 
   try {
-    send_with_reply();
+    if (! __blocking) {
+      __nonblocking_running[ NONBLOCKING_ZOOM ] = true;
+      send_nonblocking( &(__nonblocking_sockets[ NONBLOCKING_ZOOM ]) );
+    } else {
+      send_with_reply();
+    }
   } catch (ViscaException &e) {
     e.append("setZoom() failed");
     throw;
@@ -1004,7 +1008,7 @@ Visca::set_zoom(unsigned int zoom)
  * @param zoom contains zoom upon return.
  */
 void
-Visca::get_zoom(unsigned int *zoom)
+Visca::get_zoom(unsigned int &zoom)
 {
   __obuffer[1] = VISCA_INQUIRY;
   __obuffer[2] = VISCA_CATEGORY_CAMERA1;
@@ -1014,7 +1018,7 @@ Visca::get_zoom(unsigned int *zoom)
   try {
     send_with_reply();
   } catch (ViscaException &e) {
-    e.append("getZoom() failed");
+    e.append("Failed to get zoom data");
     throw;
   }
 
@@ -1027,9 +1031,9 @@ Visca::get_zoom(unsigned int *zoom)
     zoom_val |= (__ibuffer[4] & 0x0F) << 4;
     zoom_val |= (__ibuffer[5] & 0x0F);
 
-    *zoom = zoom_val;
+    zoom = zoom_val;
   } else {
-    throw ViscaException("getZoom(): zoom inquiry failed, response code not VISCA_RESPONSE_COMPLETED");
+    throw ViscaException("Failed to get zoom data failed, response code not VISCA_RESPONSE_COMPLETED");
   }
 
 }
@@ -1272,7 +1276,7 @@ Visca::get_mirror()
   try {
     send_with_reply();
   } catch (ViscaException &e) {
-    e.append("getZoom() failed");
+    e.append("Failed to get mirror data");
     throw;
   }
 
@@ -1280,6 +1284,7 @@ Visca::get_mirror()
   if ( __ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
     return (__ibuffer[2] != 0);
   } else {
-    throw ViscaException("getZoom(): zoom inquiry failed, response code not VISCA_RESPONSE_COMPLETED");
+    throw ViscaException("Failed to get mirror data: zoom inquiry failed, "
+			 "response code not VISCA_RESPONSE_COMPLETED");
   }
 }
