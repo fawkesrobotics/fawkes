@@ -95,5 +95,11 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/pantilt
     # Read timeout for EviD100P PTU
     read_timeout_ms: 50
 
+    # Power up on init?
+    power-up: true
+
+    # Power down on finalization?
+    power-down: true
+
     # Enable horizontal mirroring/flip?
     mirror: false

@@ -3,8 +3,7 @@
  *  evid100p_thread.h - Sony EviD100P pan/tilt unit act thread
  *
  *  Created: Sun Jun 21 12:38:34 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -26,6 +25,7 @@
 #include <core/threading/mutex_locker.h>
 #include <interfaces/PanTiltInterface.h>
 #include <interfaces/JointInterface.h>
+#include <interfaces/SwitchInterface.h>
 
 #include <cstdarg>
 #include <cmath>
@@ -79,6 +79,12 @@ PanTiltSonyEviD100PThread::init()
     throw;
   }
 
+  bool power_up = true;
+  try {
+    power_up = config->get_bool((__ptu_cfg_prefix + "power-up").c_str());
+  } catch (Exception &e) {} // ignore, use default
+  if (power_up)  __cam->set_power(true);
+
   float init_pan = 0.f;
   float init_tilt = 0.f;
   float init_pan_velocity = 0.f;
@@ -114,11 +120,28 @@ PanTiltSonyEviD100PThread::init()
   __tiltjoint_if->set_velocity(init_tilt_velocity);
   __tiltjoint_if->write();
 
+  __camctrl_if = blackboard->open_for_writing<CameraControlInterface>(bbid.c_str());
+  __camctrl_if->set_effect(CameraControlInterface::EFF_NONE);
+  __camctrl_if->set_effect_supported(true);
+  __camctrl_if->set_zoom_supported(true);
+  __camctrl_if->set_zoom_min(0);
+  __camctrl_if->set_zoom_max(13);
+
+  __power_if = blackboard->open_for_writing<SwitchInterface>(bbid.c_str());
+  __power_if->set_enabled(__cam->is_powered());
+  __power_if->write();
+
   bool mirror = false;
   try {
     mirror = config->get_bool((__ptu_cfg_prefix + "mirror").c_str());
   } catch (Exception &e) {} // ignore, use default
-  __cam->set_mirror(mirror);
+  if (__power_if->is_enabled()) {
+    __cam->set_mirror(mirror);
+  }
+
+  __camctrl_if->set_mirror(mirror);
+  __camctrl_if->set_mirror_supported(true);
+  __camctrl_if->write();
 
   __wt = new WorkerThread(__ptu_name, logger, __cam,
 			  SonyEviD100PVisca::MIN_PAN_RAD, SonyEviD100PVisca::MAX_PAN_RAD,
@@ -148,10 +171,18 @@ PanTiltSonyEviD100PThread::finalize()
   blackboard->close(__pantilt_if);
   blackboard->close(__panjoint_if);
   blackboard->close(__tiltjoint_if);
+  blackboard->close(__camctrl_if);
+  blackboard->close(__power_if);
 
   __wt->cancel();
   __wt->join();
   delete __wt;
+
+  bool power_down = true;
+  try {
+    power_down = config->get_bool((__ptu_cfg_prefix + "power-down").c_str());
+  } catch (Exception &e) {} // ignore, use default
+  if (power_down)  __cam->set_power(false);
 
   // Setting to NULL deletes instance (RefPtr)
   __cam = NULL;
@@ -178,6 +209,12 @@ PanTiltSonyEviD100PThread::update_sensor_values()
 
     __tiltjoint_if->set_position(tilt);
     __tiltjoint_if->write();
+
+    unsigned int zoom = __wt->get_zoom();
+    if (__camctrl_if->zoom() != zoom) {
+      __camctrl_if->set_zoom(zoom);
+      __camctrl_if->write();
+    }
   }
 }
 
@@ -238,9 +275,52 @@ PanTiltSonyEviD100PThread::loop()
 
     __pantilt_if->msgq_pop();
   }
-
   __pantilt_if->write();
 
+  while (! __camctrl_if->msgq_empty() ) {
+    if (__camctrl_if->msgq_first_is<CameraControlInterface::SetMirrorMessage>()) {
+      CameraControlInterface::SetMirrorMessage *msg = __camctrl_if->msgq_first(msg);
+      __wt->set_mirror(msg->is_mirror());
+      __camctrl_if->set_mirror(msg->is_mirror());
+      __camctrl_if->write();
+    } else if (__camctrl_if->msgq_first_is<CameraControlInterface::SetEffectMessage>()) {
+      CameraControlInterface::SetEffectMessage *msg = __camctrl_if->msgq_first(msg);
+      __wt->set_effect(msg->effect());
+      __camctrl_if->set_effect(msg->effect());
+      __camctrl_if->write();
+    } else if (__camctrl_if->msgq_first_is<CameraControlInterface::SetZoomMessage>()) {
+      CameraControlInterface::SetZoomMessage *msg = __camctrl_if->msgq_first(msg);
+      __wt->set_zoom(msg->zoom());
+    } else {
+      logger->log_warn(name(), "Unhandled message %s ignored",
+		       __camctrl_if->msgq_first()->type());
+    }
+    __camctrl_if->msgq_pop();
+  }
+
+  while (! __power_if->msgq_empty() ) {
+    if (__power_if->msgq_first_is<SwitchInterface::EnableSwitchMessage>()) {
+      // must be re-established
+      __wt->set_mirror(__camctrl_if->is_mirror());
+      __wt->set_effect(__camctrl_if->effect());
+      __wt->set_power(true);
+      __power_if->set_enabled(true);
+      __power_if->write();
+    } else if (__power_if->msgq_first_is<SwitchInterface::DisableSwitchMessage>()) {
+      __wt->set_power(false);
+      __power_if->set_enabled(false);
+      __power_if->write();
+    } else if (__power_if->msgq_first_is<SwitchInterface::SetMessage>()) {
+      SwitchInterface::SetMessage *msg = __power_if->msgq_first(msg);
+      __wt->set_power(msg->is_enabled() || msg->value() > 0.5);
+      __power_if->set_enabled(msg->is_enabled() || msg->value() > 0.5);
+      __power_if->write();
+    } else {
+      logger->log_warn(name(), "Unhandled message %s ignored",
+		       __power_if->msgq_first()->type());
+    }
+    __power_if->msgq_pop();
+  }
 }
 
 
@@ -297,6 +377,10 @@ PanTiltSonyEviD100PThread::WorkerThread::WorkerThread(std::string ptu_name,
   __logger           = logger;
 
   __move_mutex       = new Mutex();
+  __effect_mutex     = new Mutex();
+  __zoom_mutex       = new Mutex();
+  __mirror_mutex     = new Mutex();
+  __power_mutex      = new Mutex();
 
   __cam              = cam;
   __move_pending     = false;
@@ -312,6 +396,15 @@ PanTiltSonyEviD100PThread::WorkerThread::WorkerThread(std::string ptu_name,
   __pan_max          = pan_max;
   __tilt_min         = tilt_min;
   __tilt_max         = tilt_max;
+
+  __zoom_pending     = false;
+  __target_zoom      = 0;
+
+  __mirror_pending   = false;
+  __power_pending    = false;
+  __effect_pending   = false;
+
+  __powered          = __cam->is_powered();
 }
 
 
@@ -319,6 +412,10 @@ PanTiltSonyEviD100PThread::WorkerThread::WorkerThread(std::string ptu_name,
 PanTiltSonyEviD100PThread::WorkerThread::~WorkerThread()
 {
   delete __move_mutex;
+  delete __zoom_mutex;
+  delete __effect_mutex;
+  delete __mirror_mutex;
+  delete __power_mutex;
 }
 
 
@@ -326,9 +423,11 @@ PanTiltSonyEviD100PThread::WorkerThread::~WorkerThread()
 void
 PanTiltSonyEviD100PThread::WorkerThread::stop_motion()
 {
-  float pan = 0, tilt = 0;
-  get_pantilt(pan, tilt);
-  goto_pantilt(pan, tilt);
+  if (__powered) {
+    float pan = 0, tilt = 0;
+    get_pantilt(pan, tilt);
+    goto_pantilt(pan, tilt);
+  }
 }
 
 
@@ -343,9 +442,77 @@ PanTiltSonyEviD100PThread::WorkerThread::goto_pantilt(float pan, float tilt)
   __target_pan   = pan;
   __target_tilt  = tilt;
   __move_pending = true;
-  wakeup();
+  if (__powered)  wakeup();
 }
 
+/** Set desired zoom value.
+ * @param zoom_value desired zoom
+ */
+void
+PanTiltSonyEviD100PThread::WorkerThread::set_zoom(unsigned int zoom_value)
+{
+  MutexLocker lock(__zoom_mutex);
+  __zoom_pending = true;
+
+  switch (zoom_value) {
+  case  0: __target_zoom = Visca::VISCA_ZOOM_VALUE_WIDE;    break;
+  case  1: __target_zoom = Visca::VISCA_ZOOM_VALUE_1X;      break;
+  case  2: __target_zoom = Visca::VISCA_ZOOM_VALUE_2X;      break;
+  case  3: __target_zoom = Visca::VISCA_ZOOM_VALUE_3X;      break;
+  case  4: __target_zoom = Visca::VISCA_ZOOM_VALUE_4X;      break;
+  case  5: __target_zoom = Visca::VISCA_ZOOM_VALUE_5X;      break;
+  case  6: __target_zoom = Visca::VISCA_ZOOM_VALUE_6X;      break;
+  case  7: __target_zoom = Visca::VISCA_ZOOM_VALUE_7X;      break;
+  case  8: __target_zoom = Visca::VISCA_ZOOM_VALUE_8X;      break;
+  case  9: __target_zoom = Visca::VISCA_ZOOM_VALUE_9X;      break;
+  case 10: __target_zoom = Visca::VISCA_ZOOM_VALUE_10X;     break;
+  case 11: __target_zoom = Visca::VISCA_ZOOM_VALUE_DIG_20X; break;
+  case 12: __target_zoom = Visca::VISCA_ZOOM_VALUE_DIG_30X; break;
+  case 13: __target_zoom = Visca::VISCA_ZOOM_VALUE_DIG_40X; break;
+  default:
+    __logger->log_warn(name(), "Illegal zoom value %u ignored", zoom_value);
+    __zoom_pending = false;
+  }
+  if (__powered)  wakeup();
+}
+
+
+/** Set desired effect.
+ * @param effect effect value
+ */
+void
+PanTiltSonyEviD100PThread::WorkerThread::set_effect(CameraControlInterface::Effect effect)
+{
+  MutexLocker lock(__effect_mutex);
+  __target_effect = effect;
+  __effect_pending = true;
+  if (__powered)  wakeup();
+}
+
+/** Set mirror state.
+ * @param enabled true to enable mirroring, false to disable
+ */
+void
+PanTiltSonyEviD100PThread::WorkerThread::set_mirror(bool enabled)
+{
+  MutexLocker lock(__effect_mutex);
+  __target_mirror = enabled;
+  __mirror_pending = true;
+  if (__powered)  wakeup();
+}
+
+
+/** Set power for camera.
+ * @param powered true to turn on, false to turn off
+ */
+void
+PanTiltSonyEviD100PThread::WorkerThread::set_power(bool powered)
+{
+  MutexLocker lock(__power_mutex);
+  __power_desired = powered;
+  __power_pending = true;
+  wakeup();
+}
 
 /** Get pan/tilt value.
  * @param pan upon return contains the current pan value
@@ -356,6 +523,31 @@ PanTiltSonyEviD100PThread::WorkerThread::get_pantilt(float &pan, float &tilt)
 {
   pan  = __cur_pan;
   tilt = __cur_tilt;
+}
+
+
+/** Get zoom value.
+ * @return current zoom value
+ */
+unsigned int
+PanTiltSonyEviD100PThread::WorkerThread::get_zoom()
+{
+  switch (__cur_zoom) {
+  case Visca::VISCA_ZOOM_VALUE_1X:      return 1;
+  case Visca::VISCA_ZOOM_VALUE_2X:      return 2;
+  case Visca::VISCA_ZOOM_VALUE_3X:      return 3;
+  case Visca::VISCA_ZOOM_VALUE_4X:      return 4;
+  case Visca::VISCA_ZOOM_VALUE_5X:      return 5;
+  case Visca::VISCA_ZOOM_VALUE_6X:      return 6;
+  case Visca::VISCA_ZOOM_VALUE_7X:      return 7;
+  case Visca::VISCA_ZOOM_VALUE_8X:      return 8;
+  case Visca::VISCA_ZOOM_VALUE_9X:      return 9;
+  case Visca::VISCA_ZOOM_VALUE_10X:     return 10;
+  case Visca::VISCA_ZOOM_VALUE_DIG_20X: return 11;
+  case Visca::VISCA_ZOOM_VALUE_DIG_30X: return 12;
+  case Visca::VISCA_ZOOM_VALUE_DIG_40X: return 13;
+  default: return 0;
+  }
 }
 
 
@@ -379,7 +571,8 @@ bool
 PanTiltSonyEviD100PThread::WorkerThread::is_final()
 {
   MutexLocker lock(__move_mutex);
-  return __cam->is_nonblocking_finished(SonyEviD100PVisca::NONBLOCKING_PANTILT);
+  return __powered && __cam->is_nonblocking_finished(SonyEviD100PVisca::NONBLOCKING_PANTILT)
+    &&   __cam->is_nonblocking_finished(SonyEviD100PVisca::NONBLOCKING_ZOOM);
 }
 
 
@@ -419,9 +612,18 @@ PanTiltSonyEviD100PThread::WorkerThread::loop()
     __logger->log_warn(name(), e);
   }
 
+  if (__power_pending) {
+    __power_mutex->lock();
+    __logger->log_debug(name(), "Powering %s the PTU", __power_desired ? "up" : "down");
+    __power_pending = false;
+    __cam->set_power(__power_desired);
+    __powered = __power_desired;
+    __power_mutex->unlock();
+  }
+
   if (__velo_pending) {
     try {
-      __cam->set_speed_radsec(__pan_vel, __tilt_vel);
+      if (__powered)  __cam->set_speed_radsec(__pan_vel, __tilt_vel);
     } catch (Exception &e) {
       __logger->log_warn(name(), "Setting pan/tilt values failed, exception follows");
       __logger->log_warn(name(), e);
@@ -432,20 +634,57 @@ PanTiltSonyEviD100PThread::WorkerThread::loop()
   if (__move_pending) {
     __move_mutex->lock();
     __logger->log_debug(name(), "Executing goto to %f, %f", __target_pan, __target_tilt);
-    exec_goto_pantilt(__target_pan, __target_tilt);
+    if (__powered) exec_goto_pantilt(__target_pan, __target_tilt);
+    __move_pending = false;
     __move_mutex->unlock();
+  }
+
+  if (__zoom_pending) {
+    __zoom_mutex->lock();
+    if (__powered) exec_set_zoom(__target_zoom);
+    __zoom_pending = false;
+    __zoom_mutex->unlock();
+  }
+
+  if (__effect_pending) {
+    __effect_mutex->lock();
+    if (__powered) exec_set_effect(__target_effect);
+    __effect_pending = false;
+    __effect_mutex->unlock();
+  }
+
+  if (__mirror_pending) {
+    __mirror_mutex->lock();
+    __logger->log_debug(name(), "%sabling mirroring", __target_mirror ? "En" : "Dis");
+    if (__powered) exec_set_mirror(__target_mirror);
+    __mirror_pending = false;
+    __mirror_mutex->unlock();
   }
 
   //__cam->start_get_pan_tilt();
   try {
-    __cam->get_pan_tilt_rad(__cur_pan, __cur_tilt);
-    __fresh_data = true;
+    if (__powered) {
+      __cam->get_pan_tilt_rad(__cur_pan, __cur_tilt);
+      __fresh_data = true;
+    }
   } catch (Exception &e) {
     __logger->log_warn(name(), "Failed to get new pan/tilt data, exception follows");
     __logger->log_warn(name(), e);
   }
 
-  if (! is_final() || ! __fresh_data) {
+  try {
+    unsigned int new_zoom;
+    if (__powered)  __cam->get_zoom(new_zoom);
+    if (new_zoom != __cur_zoom) {
+      __cur_zoom = new_zoom;
+      __fresh_data = true;
+    }
+  } catch (Exception &e) {
+    __logger->log_warn(name(), "Failed to get new zoom data, exception follows");
+    __logger->log_warn(name(), e);
+  }
+
+  if (__powered && (! is_final() || ! __fresh_data)) {
     // while moving or if data reception failed wake us up to get new servo data
     wakeup();
   }
@@ -477,5 +716,60 @@ PanTiltSonyEviD100PThread::WorkerThread::exec_goto_pantilt(float pan_rad, float 
 		       "follows", pan_rad, tilt_rad);
     __logger->log_warn(name(), e);
   }
-  __move_pending = false;
+}
+
+/** Execute zoom setting.
+ * @param zoom Zoom value to set
+ */
+void
+PanTiltSonyEviD100PThread::WorkerThread::exec_set_zoom(unsigned int zoom)
+{
+  try {
+    __cam->set_zoom(zoom);
+  } catch (Exception &e) {
+    __logger->log_warn(name(), "Failed to execute zoom to %u, exception "
+		       "follows", zoom);
+    __logger->log_warn(name(), e);
+  }
+}
+
+/** Execute mirror setting.
+ * @param mirror true to enable monitoring, false to disable
+ */
+void
+PanTiltSonyEviD100PThread::WorkerThread::exec_set_mirror(bool mirror)
+{
+  try {
+    __cam->set_mirror(mirror);
+  } catch (Exception &e) {
+    __logger->log_warn(name(), "Failed to %sabling mirror mod, exception follows",
+		       mirror ? "En" : "Dis");
+    __logger->log_warn(name(), e);
+  }
+}
+
+
+/** Execute effect setting.
+ * @param effect Target effect value to set
+ */
+void
+PanTiltSonyEviD100PThread::WorkerThread::exec_set_effect(CameraControlInterface::Effect effect)
+{
+  try {
+    switch (effect) {
+    case CameraControlInterface::EFF_NEGATIVE:
+      __cam->apply_effect_neg_art(); break;
+    case CameraControlInterface::EFF_PASTEL:
+      __cam->apply_effect_pastel(); break;
+    case CameraControlInterface::EFF_BW:
+      __cam->apply_effect_bnw(); break;
+    case CameraControlInterface::EFF_SOLARIZE:
+      __cam->apply_effect_solarize(); break;
+    default:
+      __cam->reset_effect(); break;
+    }
+  } catch (Exception &e) {
+    __logger->log_warn(name(), "Failed to set effect, exception follows");
+    __logger->log_warn(name(), e);
+  }
 }

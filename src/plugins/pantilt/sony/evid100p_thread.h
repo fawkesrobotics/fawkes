@@ -3,8 +3,7 @@
  *  evid100p_thread.h - Sony EviD100P pan/tilt unit act thread
  *
  *  Created: Sun Jun 21 12:30:59 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -26,6 +25,7 @@
 #include "../act_thread.h"
 
 #include <blackboard/interface_listener.h>
+#include <interfaces/CameraControlInterface.h>
 
 #ifdef USE_TIMETRACKER
 #  include <utils/time/tracker.h>
@@ -36,6 +36,7 @@
 namespace fawkes {
   class PanTiltInterface;
   class JointInterface;
+  class SwitchInterface;
 }
 
 class SonyEviD100PVisca;
@@ -66,6 +67,8 @@ class PanTiltSonyEviD100PThread
   fawkes::PanTiltInterface *__pantilt_if;
   fawkes::JointInterface *__panjoint_if;
   fawkes::JointInterface *__tiltjoint_if;
+  fawkes::CameraControlInterface *__camctrl_if;
+  fawkes::SwitchInterface *__power_if;
 
   fawkes::RefPtr<SonyEviD100PVisca> __cam;
 
@@ -74,7 +77,6 @@ class PanTiltSonyEviD100PThread
   std::string  __ptu_name;
   std::string  __cfg_device;
   unsigned int __cfg_read_timeout_ms;
-
 
   class WorkerThread : public fawkes::Thread
   {
@@ -85,9 +87,14 @@ class PanTiltSonyEviD100PThread
 		 const float &tilt_min, const float &tilt_max);
 
     ~WorkerThread();
+    void set_power(bool powered);
     void goto_pantilt(float pan, float tilt);
     void get_pantilt(float &pan, float &tilt);
     void set_velocities(float pan_vel, float tilt_vel);
+    void set_mirror(bool enabled);
+    void set_zoom(unsigned int zoom_value);
+    unsigned int get_zoom();
+    void set_effect(fawkes::CameraControlInterface::Effect effect);
     bool is_final();
     void stop_motion();
     bool has_fresh_data();
@@ -97,10 +104,18 @@ class PanTiltSonyEviD100PThread
 
   private:
     void exec_goto_pantilt(float pan, float tilt);
+    void exec_set_zoom(unsigned int zoom);
+    void exec_set_effect(fawkes::CameraControlInterface::Effect effect);
+    void exec_set_mirror(bool mirror);
 
   private:
     fawkes::RefPtr<SonyEviD100PVisca>  __cam;
     fawkes::Logger        *__logger;
+
+    fawkes::Mutex *__power_mutex;
+    bool           __powered;
+    bool           __power_pending;
+    bool           __power_desired;
 
     float         __pan_min;
     float         __pan_max;
@@ -115,8 +130,22 @@ class PanTiltSonyEviD100PThread
     float __pan_vel;
     float __tilt_vel;
 
+    fawkes::Mutex *__zoom_mutex;
+    bool  __zoom_pending;
+    float __target_zoom;
+
+    fawkes::Mutex *__effect_mutex;
+    bool  __effect_pending;
+    fawkes::CameraControlInterface::Effect __target_effect;
+
+    fawkes::Mutex *__mirror_mutex;
+    bool  __mirror_pending;
+    bool __target_mirror;
+
     float __cur_pan;
     float __cur_tilt;
+
+    unsigned int __cur_zoom;
 
     bool __fresh_data;
   };
