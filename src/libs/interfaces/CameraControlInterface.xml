@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="CameraControlInterface" author="Tim Niemueller" year="2014">
+  <constants>
+    <enum name="Effect">
+      <comment>
+        Enumeration defining the possible effects. A camera must not necessarily
+        implement all.
+      </comment>
+      <item name="EFF_NONE">No effect.</item>
+      <item name="EFF_PASTEL">Pastel colors.</item>
+      <item name="EFF_NEGATIVE">Negative/Positive Reversal.</item>
+      <item name="EFF_BW">Monochrome Image.</item>
+      <item name="EFF_SOLARIZE">Enhanced Contrast.</item>
+    </enum>
+  </constants>
+
+  <data>
+    <comment>
+    </comment>
+    <field type="Effect" name="effect">Currently active effect.</field>
+    <field type="bool"   name="effect_supported">Are effects supported?</field>
+    <field type="uint32" name="zoom">Current zoom setting.</field>
+    <field type="bool"   name="zoom_supported">Is zooming supported?</field>
+    <field type="uint32" name="zoom_max">Maximum zoom value</field>
+    <field type="uint32" name="zoom_min">Minimum zoom</field>
+    <field type="bool"   name="mirror">Is the image mirrored?</field>
+    <field type="bool"   name="mirror_supported">Is mirroring supported?</field>
+  </data>
+
+  <message name="SetEffect">
+    <comment>Set an effect.</comment>
+    <ref>effect</ref>
+  </message>
+
+  <message name="SetZoom">
+    <comment>Set zoom value.</comment>
+    <ref>zoom</ref>
+  </message>
+
+  <message name="SetMirror">
+    <comment>Set mirror state.</comment>
+    <ref>mirror</ref>
+  </message>
+</interface>
