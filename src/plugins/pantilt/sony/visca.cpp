@@ -582,6 +582,54 @@ Visca::process()
 }
 
 
+/** Set power state.
+ * @param powered true to power on, false to power off
+ */
+void
+Visca::set_power(bool powered)
+{
+  __obuffer[1] = VISCA_COMMAND;
+  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
+  __obuffer[3] = VISCA_POWER;
+  __obuffer[4] = powered ? VISCA_POWER_ON : VISCA_POWER_OFF;
+  __obuffer_length = 4;
+
+  try {
+    send_with_reply();
+  } catch (ViscaException &e) {
+    e.append("set_power() failed");
+    throw;
+  }
+}
+
+
+/** Check if camera is powered
+ * @return true if camera is powered, false otherwise
+ */
+bool
+Visca::is_powered()
+{
+  __obuffer[1] = VISCA_INQUIRY;
+  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
+  __obuffer[3] = VISCA_POWER;
+  __obuffer_length = 3;
+
+  try {
+    send_with_reply();
+  } catch (ViscaException &e) {
+    e.append("Failed to get power data");
+    throw;
+  }
+
+  // Extract information from __ibuffer
+  if ( __ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
+    return (__ibuffer[2] == VISCA_POWER_ON);
+  } else {
+    throw ViscaException("is_powered(): inquiry failed, response code not VISCA_RESPONSE_COMPLETED");
+  }
+}
+
+
 /** Set pan tilt.
  * @param pan pan
  * @param tilt tilt

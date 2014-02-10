@@ -104,6 +104,10 @@ class Visca {
   void         set_address();
   void         clear();
 
+  // power
+  void         set_power(bool powered);
+  bool         is_powered();
+
   // low level
   void         send();
   void         recv(unsigned int timeout_ms = 0xFFFFFFFF);
@@ -203,6 +207,8 @@ class Visca {
   static const unsigned char VISCA_CATEGORY_CAMERA2             = 0x07;
 
   static const unsigned char VISCA_POWER                        = 0x00;
+  static const unsigned char   VISCA_POWER_ON                   = 0x02;
+  static const unsigned char   VISCA_POWER_OFF                  = 0x03;
   static const unsigned char VISCA_DEVICE_INFO                  = 0x02;
   static const unsigned char VISCA_KEYLOCK                      = 0x17;
   static const unsigned char VISCA_ID                           = 0x22;
