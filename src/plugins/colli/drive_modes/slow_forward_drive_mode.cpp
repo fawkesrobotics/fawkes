@@ -143,7 +143,7 @@ CSlowForwardDriveModule::SlowForward_Translation( float dist_to_target, float di
 
   // And the next collision point
   if ( dist_to_front > 0.f && dist_to_front < dist_to_target )
-    trans_front = GuaranteeTransStop( dist_to_front/2.0, cur_trans, des_trans );
+    trans_front = GuaranteeTransStop( dist_to_front, cur_trans, des_trans );
   // NEW STUFF END HERE
 
   des_trans = std::min( des_trans, std::min( trans_target, trans_front ) );
