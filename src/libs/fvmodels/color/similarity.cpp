@@ -52,6 +52,7 @@ ColorModelSimilarity::ColorModelSimilarity()
 ColorModelSimilarity::~ColorModelSimilarity()
 {
   free(color_classes_);
+  color_classes_ = NULL;
 }
 
 const char * ColorModelSimilarity::get_name() {
