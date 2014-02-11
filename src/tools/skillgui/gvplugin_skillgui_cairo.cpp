@@ -267,7 +267,7 @@ skillgui_cairo_render_end_page(GVJ_t * job)
 }
 
 static void
-skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
+skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textspan_t *para)
 {
 #ifdef USE_GVPLUGIN_TIMETRACKER
   __tt.ping_start(__ttc_text);
@@ -330,8 +330,8 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
   Cairo::Matrix old_matrix;
   cairo->get_matrix(old_matrix);
 
-  cairo->select_font_face(para->fontname, slant, weight);
-  cairo->set_font_size(para->fontsize);
+  cairo->select_font_face(para->font->name, slant, weight);
+  cairo->set_font_size(para->font->size);
   //cairo->set_font_options ( Cairo::FontOptions() );
   //cairo->set_line_width(1.0);
 
