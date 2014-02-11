@@ -304,28 +304,48 @@ CAbstractDriveMode::GuaranteeTransStop( float distance,
   if ( current_trans < 0.05 )
     return desired_trans;
 
-  // dividing by 10 because we're called at 10Hz (TODO: use config value!!)
-  int time_needed_to_distance = (int)( distance / (current_trans/10.0) );
+  // calculate riemann integral to get distance until robot is stoped
+  int frequenz            = 10;    //TODO config value
+  float trans_tmp         = current_trans;
+  float distance_to_stop  = 0;
+  for (int loops_to_stop = 0; trans_tmp > 0; loops_to_stop++) {
+    distance_to_stop += trans_tmp / frequenz;           //First calculate sum (Untersumme)
+    trans_tmp        -= m_cMaxTransDec / frequenz;      //Then decrease tmp speed
+  }
 
-  /* (changes made during AdoT)
-   * 0.1 is an empirical value causing the expected deceleration while
-   * calculating with a slower one. This is likely the difference between what
-   * the colli wants and the motor actually does.
-   * We also add 1, to start deceleration 1 step earlier than the calculation
-   * suggests. Tests showed better results. We could probably skip this, if we
-   * had a proper calculation of velocity adjustment...
-   */
-  int time_needed_to_stop = (int)( current_trans / (0.1*m_cMaxTransDec) ) +1;
 
-  if( time_needed_to_stop >= time_needed_to_distance ) {
-    float value = std::max( 0.f, current_trans - m_cMaxTransDec );
+  if (distance_to_stop >= distance) {
+    float value = std::max( 0.f, current_trans - (m_cMaxTransDec / frequenz) );
     return value;
   } else {
-    float value = std::min( current_trans + m_cMaxTransAcc, desired_trans );
+    float value = std::min( current_trans + (m_cMaxTransAcc / frequenz), desired_trans );
     // Use this if you are very cautions:
     //float value = std::min( current_trans + std::min(m_cMaxTransDec, m_cMaxTransAcc), desired_trans );
     return value;
   }
+//
+//  // dividing by 10 because we're called at 10Hz (TODO: use config value!!)
+//  int time_needed_to_distance = (int)( distance / (current_trans/10.0) );
+//
+//  /* (changes made during AdoT)
+//   * 0.1 is an empirical value causing the expected deceleration while
+//   * calculating with a slower one. This is likely the difference between what
+//   * the colli wants and the motor actually does.
+//   * We also add 1, to start deceleration 1 step earlier than the calculation
+//   * suggests. Tests showed better results. We could probably skip this, if we
+//   * had a proper calculation of velocity adjustment...
+//   */
+//  int time_needed_to_stop = (int)( current_trans / (0.1*m_cMaxTransDec) ) +1;
+//
+//  if( time_needed_to_stop >= time_needed_to_distance ) {
+//    float value = std::max( 0.f, current_trans - m_cMaxTransDec );
+//    return value;
+//  } else {
+//    float value = std::min( current_trans + m_cMaxTransAcc, desired_trans );
+//    // Use this if you are very cautions:
+//    //float value = std::min( current_trans + std::min(m_cMaxTransDec, m_cMaxTransAcc), desired_trans );
+//    return value;
+//  }
 }
 
 } // end namespace fawkes
