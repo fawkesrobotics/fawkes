@@ -4,8 +4,7 @@
  *
  *  Created: Sat Jul  5 20:40:20 2008
  *  Copyright  2008  Tobias Kellner
- *             2010  Tim Niemueller
- *
+ *             2010-2014  Tim Niemueller
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -150,6 +149,11 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
   if (cap->has("device")) _device_name = strdup(cap->get("device").c_str());
   else throw MissingParameterException("V4L2Cam: Missing device");
 
+
+  if (cap->has("nao"))
+  {
+    _nao_hacks = true;
+  }
 
   if (cap->has("read_method"))
   {
@@ -668,7 +672,7 @@ V4L2Camera::select_format()
     format.fmt.pix.height = _height;
 
   int s_fmt_rv = v4l2_ioctl(_dev, VIDIOC_S_FMT, &format);
-  if (s_fmt_rv != 0 && errno != EBUSY)
+  if (s_fmt_rv != 0 && errno != EBUSY && _nao_hacks)
   {
     //throw Exception(errno, "Failed to set video format");
     //}
@@ -676,7 +680,6 @@ V4L2Camera::select_format()
     // Nao workaround (Hack alert)
     LibLogger::log_warn("V4L2Cam", "Format setting failed (driver sucks) - %d: %s", errno, strerror(errno));
     LibLogger::log_info("V4L2Cam", "Trying workaround");
-    _nao_hacks = true;
 
     v4l2_std_id std;
     if (v4l2_ioctl(_dev, VIDIOC_G_STD, &std))
