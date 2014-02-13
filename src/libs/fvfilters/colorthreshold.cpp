@@ -32,21 +32,10 @@ namespace firevision
 #endif
 
 
-FilterColorThreshold::FilterColorThreshold(RGB_t reference_color, int chroma_threshold, int saturation_threshold)
+FilterColorThreshold::FilterColorThreshold(ColorModelSimilarity *color_model)
     : Filter("FilterColorThreshold", 1),
-      chroma_thresh_(chroma_threshold),
-      saturation_thresh_(saturation_threshold)
-{
-  set_reference_color(reference_color);
-}
-
-void FilterColorThreshold::set_reference_color(RGB_t color) {
-  int ignore;
-  RGB2YUV(color.R, color.G, color.B, ignore, ref_u_, ref_v_);
-  ref_u_ -= 0x80;
-  ref_v_ -= 0x80;
-  ref_len_ = sqrt(ref_u_ * ref_u_ + ref_v_ * ref_v_);
-}
+      color_model_(color_model)
+{}
 
 FilterColorThreshold::~FilterColorThreshold() {
 }
@@ -82,7 +71,7 @@ void FilterColorThreshold::apply()
       *p_dst_y++ = *p_src_y++;
       *p_dst_y++ = *p_src_y++;
 
-      if (is_similar(*p_src_u - 0x80, *p_src_v - 0x80, ref_u_, ref_v_, ref_len_, chroma_thresh_, saturation_thresh_)) {
+      if (color_model_->determine(*p_src_y - 0x80, *p_src_u - 0x80, *p_src_v - 0x80) != C_OTHER) {
         *p_dst_u++ = *p_src_u;
         *p_dst_v++ = *p_src_v;
       }

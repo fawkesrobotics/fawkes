@@ -33,20 +33,12 @@ namespace firevision
 class FilterColorThreshold : public Filter
 {
   public:
-    FilterColorThreshold(RGB_t reference_color, int chroma_threshold, int saturation_threshold);
+    FilterColorThreshold(ColorModelSimilarity *color_model);
     ~FilterColorThreshold();
 
     virtual void apply();
-
-    void set_similarity_threshold(int thres);
-    void set_saturation_threshold(int thres);
-    void set_reference_color(RGB_t color);
   private:
-    int chroma_thresh_;
-    int saturation_thresh_;
-    int ref_u_;
-    int ref_v_;
-    int ref_len_;
+    ColorModelSimilarity *color_model_;
 };
 
 } /* namespace firevision */

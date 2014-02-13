@@ -32,7 +32,9 @@
 
 #include "colormodel.h"
 #include <fvutils/color/rgb.h>
-#include <stdlib.h>
+#include <fvutils/color/rgbyuv.h>
+#include <cmath>
+#include <vector>
 
 namespace firevision
 {
@@ -41,28 +43,37 @@ class ColorModelSimilarity : public firevision::ColorModel
 {
   public:
     ColorModelSimilarity();
-    virtual ~ColorModelSimilarity();
 
     virtual color_t determine(unsigned int y, unsigned int u,
       unsigned int v) const;
 
     virtual const char * get_name();
 
-    void add_color(color_t color_class, RGB_t reference, int chroma_threshold,
-      int saturation_threshold);
-
-  private:
-    typedef struct {
+    typedef struct _color_class_t {
       color_t result;
       int ref_u;
       int ref_v;
       int ref_length;
       int chroma_threshold;
       int saturation_threshold;
-    } color_class_t_;
 
-    color_class_t_ *color_classes_;
-    unsigned int num_classes_;
+      _color_class_t(color_t expect, RGB_t reference, int chroma_threshold, int saturation_threshold) {
+        this->result = expect;
+        int ignore;
+        RGB2YUV(reference.R, reference.G, reference.B,
+          ignore, ref_u, ref_v);
+        ref_u -= 0x80;
+        ref_v -= 0x80;
+        this->ref_length = sqrt(ref_u * ref_u + ref_v * ref_v);
+        this->chroma_threshold = chroma_threshold;
+        this->saturation_threshold = saturation_threshold;
+      }
+    } color_class_t;
+
+    void add_color(color_class_t *color_class);
+
+  private:
+    std::vector<color_class_t *> color_classes_;
 };
 
 } /* namespace firevision */
