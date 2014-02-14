@@ -71,7 +71,7 @@ void FilterColorThreshold::apply()
       *p_dst_y++ = *p_src_y++;
       *p_dst_y++ = *p_src_y++;
 
-      if (color_model_->determine(*p_src_y - 0x80, *p_src_u - 0x80, *p_src_v - 0x80) != C_OTHER) {
+      if (color_model_->determine(*p_src_y, *p_src_u, *p_src_v) != C_OTHER) {
         *p_dst_u++ = *p_src_u;
         *p_dst_v++ = *p_src_v;
       }
