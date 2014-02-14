@@ -4,11 +4,12 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/eclipse-clp
 ---
 eclipse-clp:
-  agent: drive_around #name of the ECLiPSe module in which the agent is stored (needs to be placed in plugins/eclipse-clp/interpreter/)
+  agent: skillexec #name of the ECLiPSe module in which the agent is stored (needs to be placed in plugins/eclipse-clp/interpreter/)
   
   #Basedirectory of ECLiPSe
   eclipse_dir: /usr/lib64/eclipse-clp-6.1-164-x86_64/
 
-  drive_around:
-    use_graph: True
-    rel_graph_path: /locations/robolab/navgraph-robolab.yaml
+  elevator:
+    use_graph: False
+  skillexec:
+    use_graph: False
