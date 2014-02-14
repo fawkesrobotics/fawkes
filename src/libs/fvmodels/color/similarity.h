@@ -49,7 +49,7 @@ class ColorModelSimilarity : public firevision::ColorModel
 
     virtual const char * get_name();
 
-    typedef struct _color_class_t {
+    typedef struct color_class_t {
       color_t result;
       int ref_u;
       int ref_v;
@@ -57,17 +57,24 @@ class ColorModelSimilarity : public firevision::ColorModel
       int chroma_threshold;
       int saturation_threshold;
 
-      _color_class_t(color_t expect, RGB_t reference, int chroma_threshold, int saturation_threshold) {
+      void set_reference(std::vector<unsigned int> &ref) {
+        if (ref.at(0) > 0xff || ref.at(1) > 0xff || ref.at(2) > 0xff)
+          throw "invalid reference color";
+        int r = ref.at(0), g = ref.at(1), b = ref.at(2);
+        int y, u, v;
+        RGB2YUV(r, g, b, y, u, v);
+        ref_u = u - 0x80;
+        ref_v = v - 0x80;
+        ref_length = sqrt(ref_u * ref_u + ref_v * ref_v);
+      }
+
+      color_class_t(color_t expect, std::vector<unsigned int> &v, int chroma_threshold, int saturation_threshold) {
         this->result = expect;
-        int ignore;
-        RGB2YUV(reference.R, reference.G, reference.B,
-          ignore, ref_u, ref_v);
-        ref_u -= 0x80;
-        ref_v -= 0x80;
-        this->ref_length = sqrt(ref_u * ref_u + ref_v * ref_v);
         this->chroma_threshold = chroma_threshold;
         this->saturation_threshold = saturation_threshold;
+        set_reference(v);
       }
+
     } color_class_t;
 
     void add_color(color_class_t *color_class);
