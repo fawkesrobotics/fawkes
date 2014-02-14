@@ -62,6 +62,7 @@ WebviewPtzCamThread::init()
   std::string camctrl_id = config->get_string("/webview/ptzcam/camctrl-id");
   std::string power_id   = config->get_string("/webview/ptzcam/power-id");
   std::string image_id   = config->get_string("/webview/ptzcam/image-id");
+  std::string camera_id  = config->get_string("/webview/ptzcam/camera-id");
 
   float pan_increment         = config->get_float("/webview/ptzcam/pan-increment");
   float tilt_increment        = config->get_float("/webview/ptzcam/tilt-increment");
@@ -83,7 +84,7 @@ WebviewPtzCamThread::init()
   cfg_park_tilt_pos_       = fabs(config->get_float("/webview/ptzcam/park/tilt"));
 
   web_proc_  = new WebviewPtzCamRequestProcessor(PTZCAM_URL_PREFIX, image_id,
-						 pantilt_id, camctrl_id, power_id,
+						 pantilt_id, camctrl_id, power_id, camera_id,
 						 pan_increment, tilt_increment,
 						 zoom_increment, post_powerup_time,
 						 blackboard, logger);
@@ -92,6 +93,7 @@ WebviewPtzCamThread::init()
 
   ptu_if_   = blackboard->open_for_reading<PanTiltInterface>(pantilt_id.c_str());
   power_if_ = blackboard->open_for_reading<SwitchInterface>(power_id.c_str());
+  camen_if_ = blackboard->open_for_reading<SwitchInterface>(camera_id.c_str());
 
   bool ceiling_mount = false;
   try {
@@ -123,6 +125,7 @@ WebviewPtzCamThread::finalize()
 
   blackboard->close(ptu_if_);
   blackboard->close(power_if_);
+  blackboard->close(camen_if_);
   delete time_wait_;
 }
 
@@ -141,6 +144,7 @@ WebviewPtzCamThread::loop()
       if (now - last_completion.get() >= cfg_inactivity_timeout_) {
 	ptu_if_->read();
 	power_if_->read();
+	camen_if_->read();
 	if (fabs(cfg_park_pan_pos_  - ptu_if_->pan()) >= cfg_park_pan_tolerance_ ||
 	    fabs(cfg_park_tilt_pos_ - ptu_if_->tilt()) >= cfg_park_tilt_tolerance_)
 	{
@@ -149,9 +153,13 @@ WebviewPtzCamThread::loop()
 	  PanTiltInterface::GotoMessage *gotomsg =
 	    new PanTiltInterface::GotoMessage(cfg_park_pan_pos_, cfg_park_tilt_pos_);
 	  ptu_if_->msgq_enqueue(gotomsg);
-	} else if (power_if_->is_enabled()) {
-	  if (power_if_->has_writer()) {
+	} else {
+	  if (power_if_->has_writer() && power_if_->is_enabled()) {
 	    power_if_->msgq_enqueue(new SwitchInterface::DisableSwitchMessage());
+	  }
+
+	  if (camen_if_->has_writer() && camen_if_->is_enabled()) {
+	    camen_if_->msgq_enqueue(new SwitchInterface::DisableSwitchMessage());
 	  }
 	}
       }

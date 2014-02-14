@@ -8,6 +8,7 @@ webview/ptzcam:
   pantilt-id: PanTilt EviD100P
   camctrl-id: PanTilt EviD100P
   power-id: PanTilt EviD100P
+  camera-id: Camera v4l2.firstcam
 
   # Image buffer ID to request image for, requires JPEG support
   # (image tab) in webview

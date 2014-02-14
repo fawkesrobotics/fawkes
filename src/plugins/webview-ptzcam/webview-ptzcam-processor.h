@@ -39,7 +39,7 @@ class WebviewPtzCamRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
   WebviewPtzCamRequestProcessor(std::string base_url, std::string image_id, std::string pantilt_id,
-				std::string camctrl_id, std::string power_id,
+				std::string camctrl_id, std::string power_id, std::string camera_id,
 				float pan_increment, float tilt_increment, unsigned int zoom_increment,
 				float post_powerup_time,
 				fawkes::BlackBoard *blackboard, fawkes::Logger *logger);
@@ -57,6 +57,7 @@ class WebviewPtzCamRequestProcessor : public fawkes::WebRequestProcessor
   fawkes::PanTiltInterface       *ptu_if_;
   fawkes::CameraControlInterface *camctrl_if_;
   fawkes::SwitchInterface        *power_if_;
+  fawkes::SwitchInterface        *camen_if_;
 
   std::string           baseurl_;
   std::string           image_id_;

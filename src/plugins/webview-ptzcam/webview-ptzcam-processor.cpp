@@ -49,7 +49,7 @@ using namespace fawkes;
  */
 WebviewPtzCamRequestProcessor::WebviewPtzCamRequestProcessor(std::string base_url, std::string image_id,
 							     std::string pantilt_id, std::string camctrl_id,
-							     std::string power_id,
+							     std::string power_id, std::string camera_id,
 							     float pan_increment, float tilt_increment,
 							     unsigned int zoom_increment, float post_powerup_time,
 							     fawkes::BlackBoard *blackboard,
@@ -67,6 +67,7 @@ WebviewPtzCamRequestProcessor::WebviewPtzCamRequestProcessor(std::string base_ur
   ptu_if_         = blackboard->open_for_reading<PanTiltInterface>(pantilt_id.c_str());
   camctrl_if_     = blackboard->open_for_reading<CameraControlInterface>(camctrl_id.c_str());
   power_if_       = blackboard->open_for_reading<SwitchInterface>(power_id.c_str());
+  camen_if_       = blackboard->open_for_reading<SwitchInterface>(camera_id.c_str());
 }
 
 
@@ -76,6 +77,7 @@ WebviewPtzCamRequestProcessor::~WebviewPtzCamRequestProcessor()
   blackboard_->close(ptu_if_);
   blackboard_->close(camctrl_if_);
   blackboard_->close(power_if_);
+  blackboard_->close(camen_if_);
 }
 
 
@@ -85,16 +87,24 @@ WebviewPtzCamRequestProcessor::process_request(const fawkes::WebRequest *request
   if ( request->url().find(baseurl_) == 0 ) {
     std::string subpath = request->url().substr(baseurl_.length());
 
+    camen_if_->read();
+    if (power_if_->has_writer() && ! camen_if_->is_enabled()) {
+      try {
+	camen_if_->msgq_enqueue(new SwitchInterface::EnableSwitchMessage());
+      } catch (Exception &e) {
+	logger_->log_warn("WebviewPtzCamReqProc", "Failed to power up camera, exception follows");
+	logger_->log_warn("WebviewPtzCamReqProc", e);
+      }
+    }
+
     power_if_->read();
-    if (! power_if_->is_enabled()) {
-      if (power_if_->has_writer()) {
-	try {
-	  power_if_->msgq_enqueue(new SwitchInterface::EnableSwitchMessage());
-	  usleep(post_powerup_time_);
-	} catch (Exception &e) {
-	  logger_->log_warn("WebviewPtzCamReqProc", "Failed to power up camera, exception follows");
-	  logger_->log_warn("WebviewPtzCamReqProc", e);
-	}
+    if (power_if_->has_writer() && ! power_if_->is_enabled()) {
+      try {
+	power_if_->msgq_enqueue(new SwitchInterface::EnableSwitchMessage());
+	usleep(post_powerup_time_);
+      } catch (Exception &e) {
+	logger_->log_warn("WebviewPtzCamReqProc", "Failed to power up PTU, exception follows");
+	logger_->log_warn("WebviewPtzCamReqProc", e);
       }
     }
 
