@@ -48,6 +48,7 @@ class FvAqtVisionThreads
   float empty_time();
 
   bool  has_cyclic_thread();
+  bool  has_cont_thread();
 
   void  wakeup_and_wait_cyclic_threads();
 

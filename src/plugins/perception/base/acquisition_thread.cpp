@@ -25,6 +25,9 @@
 
 #include <core/exceptions/system.h>
 #include <core/exceptions/software.h>
+#include <core/threading/mutex_locker.h>
+#include <core/threading/mutex.h>
+#include <core/threading/wait_condition.h>
 #ifdef FVBASE_TIMETRACKER
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
@@ -61,13 +64,19 @@ using namespace firevision;
  */
 FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
 					 Logger *logger, Clock *clock)
-  : Thread((std::string("FvAcquisitionThread::") + id).c_str())
+  : Thread("FvAcquisitionThread")
 {
+  set_prepfin_conc_loop(true);
+  set_name("FvAcquisitionThread::%s", id);
+
   __logger        = logger;
   __image_id      = strdup(id);
 
   vision_threads  = new FvAqtVisionThreads(clock);
   raw_subscriber_thread = NULL;
+
+  __enabled_mutex = new Mutex();
+  __enabled_waitcond = new WaitCondition(__enabled_mutex);
 
   __camera        = camera;
   __width         = __camera->pixel_width();
@@ -104,6 +113,8 @@ FvAcquisitionThread::~FvAcquisitionThread()
   delete vision_threads;
   delete __camera;
   free(__image_id);
+  delete __enabled_waitcond;
+  delete __enabled_mutex;
 }
 
 
@@ -212,6 +223,19 @@ FvAcquisitionThread::set_aqtmode(AqtMode mode)
 void
 FvAcquisitionThread::set_enabled(bool enabled)
 {
+  MutexLocker lock(__enabled_mutex);
+
+  if (__enabled && ! enabled) {
+    // disabling thread
+    __camera->stop();
+
+  } else if (! __enabled && enabled) {
+    // enabling thread
+    __camera->start();
+    __enabled_waitcond->wake_all();
+  } // else not state change
+
+  // we can safely do this every time...
   __enabled = enabled;
 }
 
@@ -246,17 +270,19 @@ FvAcquisitionThread::set_vt_prepfin_hold(bool hold)
 void
 FvAcquisitionThread::loop()
 {
+  MutexLocker lock(__enabled_mutex);
+
   // We disable cancelling here to avoid problems with the write lock
   Thread::CancelState old_cancel_state;
   set_cancel_state(Thread::CANCEL_DISABLED, &old_cancel_state);
 
 #ifdef FVBASE_TIMETRACKER
   try {
-    __tt->ping_start(__ttc_capture);
-    __camera->capture();
-    __tt->ping_end(__ttc_capture);
-
     if ( __enabled ) {
+      __tt->ping_start(__ttc_capture);
+      __camera->capture();
+      __tt->ping_end(__ttc_capture);
+
       for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
 	if (__shmit->first == CS_UNKNOWN)  continue;
 	__tt->ping_start(__ttc_lock);
@@ -281,9 +307,11 @@ FvAcquisitionThread::loop()
     __logger->log_error(name(), "Cannot convert image data");
     __logger->log_error(name(), e);
   }
-  __tt->ping_start(__ttc_dispose);
-  __camera->dispose_buffer();
-  __tt->ping_end(__ttc_dispose);
+  if ( __enabled ) {
+    __tt->ping_start(__ttc_dispose);
+    __camera->dispose_buffer();
+    __tt->ping_end(__ttc_dispose);
+  }
 
   if ( (++__loop_count % FVBASE_TT_PRINT_INT) == 0 ) {
     __tt->print_to_stdout();
@@ -291,8 +319,8 @@ FvAcquisitionThread::loop()
 
 #else // no time tracking
   try {
-    __camera->capture();
     if ( __enabled ) {
+      __camera->capture();
       for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
 	if (__shmit->first == CS_UNKNOWN)  continue;
 	__shmit->second->lock_for_write();
@@ -310,13 +338,20 @@ FvAcquisitionThread::loop()
   } catch (Exception &e) {
     __logger->log_error(name(), e);
   }
-  __camera->dispose_buffer();
+  if ( __enabled ) {
+    __camera->dispose_buffer();
+  }
 #endif
 
-  if ( __mode == AqtCyclic ) {
+  if ( __mode == AqtCyclic && __enabled ) {
     vision_threads->wakeup_and_wait_cyclic_threads();
   }
 
   // reset to the original cancel state, cancelling is now safe
   set_cancel_state(old_cancel_state);
+
+  // in continuous mode wait for signal if disabled
+  while ( __mode == AqtContinuous && ! __enabled ) {
+    __enabled_waitcond->wait();
+  }
 }

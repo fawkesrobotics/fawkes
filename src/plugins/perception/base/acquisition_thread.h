@@ -33,6 +33,8 @@
 namespace fawkes {
   class Logger;
   class Clock;
+  class Mutex;
+  class WaitCondition;
 #ifdef FVBASE_TIMETRACKER
   class TimeTracker;
 #endif
@@ -82,6 +84,8 @@ class FvAcquisitionThread : public fawkes::Thread
 
  private:
   bool                      __enabled;
+  fawkes::Mutex            *__enabled_mutex;
+  fawkes::WaitCondition    *__enabled_waitcond;
 
   firevision::Camera       *__camera;
   char                     *__image_id;

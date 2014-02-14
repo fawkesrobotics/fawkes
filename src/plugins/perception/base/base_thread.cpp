@@ -168,20 +168,30 @@ FvBaseThread::loop()
 	stit->second->set_aqtmode(FvAcquisitionThread::AqtCyclic);
 	stit->second->start();
 	stit->second->cancel_finalize();
-      }
-    } else if (stit->second->aqtmode() != FvAcquisitionThread::AqtContinuous ) {
-      logger->log_info(name(), "Switching acquisition thread %s to continuous mode",
-		       stit->second->name());
-      stit->second->prepare_finalize();
-      stit->second->cancel();
-      stit->second->join();
-      stit->second->set_aqtmode(FvAcquisitionThread::AqtContinuous);
-      stit->second->start();
-      stit->second->cancel_finalize();
-    }
 
-    // Make thread actually capture data
-    stit->second->set_enabled(true);
+	// Make thread actually capture data
+	stit->second->set_enabled(true);
+      }
+    } else if ( stit->second->vision_threads->has_cont_thread() ) {
+      if (stit->second->aqtmode() != FvAcquisitionThread::AqtContinuous ) {
+	logger->log_info(name(), "Switching acquisition thread %s to continuous mode",
+			 stit->second->name());
+	stit->second->prepare_finalize();
+	stit->second->cancel();
+	stit->second->join();
+	stit->second->set_aqtmode(FvAcquisitionThread::AqtContinuous);
+	stit->second->start();
+	stit->second->cancel_finalize();
+
+	// Make thread actually capture data
+	stit->second->set_enabled(true);
+      }
+    } else {
+      logger->log_warn(name(), "Acquisition thread %s has no threads while we expected some",
+		       stit->second->name());
+      // Make thread stop capturing data
+      stit->second->set_enabled(false);
+    }
 
     fawkes::LockMap<Thread *, FvAcquisitionThread *>::iterator stittmp = stit;
     ++stit;
@@ -246,10 +256,9 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread,
       try {
 	cam = CameraFactory::instance(cap);
 	cam->open();
-	cam->start();
       } catch (Exception &e) {
 	delete cam;
-	e.append("Could not open or start camera");
+	e.append("Could not open camera");
 	throw;
       }
 
@@ -414,6 +423,13 @@ FvBaseThread::unregister_thread(Thread *thread)
       __ait->second->set_aqtmode(FvAcquisitionThread::AqtContinuous);
       __ait->second->start();
       __ait->second->cancel_finalize();
+    }
+
+    if (__ait->second->vision_threads->empty()) {
+      // Make thread stop capturing data
+      logger->log_info(name(), "Disabling capturing on thread %s (no more threads)",
+		       __ait->second->name());
+      __ait->second->set_enabled(false);
     }
   }
   // Recreate as necessary after _removing_ threads

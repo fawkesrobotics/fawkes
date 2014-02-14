@@ -148,6 +148,16 @@ FvAqtVisionThreads::has_cyclic_thread()
 }
 
 
+/** Check if there is at least one continuous thread.
+ * @return true if there is at least one continuous thread, false otherwise.
+ */
+bool
+FvAqtVisionThreads::has_cont_thread()
+{
+  return ( ! running_threads_cont->empty() );
+}
+
+
 /** Check if the given waiting thread is registered.
  * @param t thread to check for
  * @return true if the given thread is marked as waiting, false otherwise
