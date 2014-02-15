@@ -3,8 +3,7 @@
  *  request_dispatcher.h - Web request dispatcher
  *
  *  Created: Mon Oct 13 22:44:33 2008
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -74,11 +73,11 @@ class WebRequestDispatcher
 
  private:
   struct MHD_Response *  prepare_static_response(StaticWebReply *sreply);
-  int queue_static_reply(struct MHD_Connection * connection,
+  int queue_static_reply(struct MHD_Connection * connection, WebRequest *request,
 			 StaticWebReply *sreply);
-  int queue_dynamic_reply(struct MHD_Connection * connection,
+  int queue_dynamic_reply(struct MHD_Connection * connection, WebRequest *request,
 			  DynamicWebReply *sreply);
-  int queue_basic_auth_fail(struct MHD_Connection * connection);
+  int queue_basic_auth_fail(struct MHD_Connection * connection, WebRequest *request);
   int process_request(struct MHD_Connection * connection,
 		      const char *url,
 		      const char *method,

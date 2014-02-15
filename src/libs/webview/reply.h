@@ -31,6 +31,8 @@ namespace fawkes {
 }
 #endif
 
+class WebRequest;
+
 class WebReply
 {
  public:
@@ -108,10 +110,14 @@ class WebReply
   
   static void       set_caching(bool caching);
 
+  void              set_request(WebRequest *request);
+  WebRequest *      get_request() const;
+
  private:
   Code              __code;
   HeaderMap         __headers;
   static bool       __caching;
+  WebRequest       *__request;
 };
 
 class DynamicWebReply : public WebReply

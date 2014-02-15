@@ -50,6 +50,7 @@ bool WebReply::__caching = true;
 WebReply::WebReply(Code code)
 {
   __code = code;
+  __request = NULL;
 
   if (! __caching) {
     // Headers to disable caching
@@ -130,6 +131,26 @@ WebReply::headers() const
   return __headers;
 }
 
+
+/** Get associated request.
+ * This is only valid after set_request() has been called.
+ * @return associated web request
+ */
+WebRequest *
+WebReply::get_request() const
+{
+  return __request;
+}
+
+
+/** Set associated request.
+ * @param request associated request
+ */
+void
+WebReply::set_request(WebRequest *request)
+{
+  __request = request;
+}
 
 /** @class DynamicWebReply <webview/reply.h>
  * Dynamic web reply.

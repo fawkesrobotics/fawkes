@@ -3,8 +3,7 @@
  *  request_dispatcher.cpp - Web request dispatcher
  *
  *  Created: Mon Oct 13 22:48:04 2008
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -233,13 +232,17 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
 }
 
 /** Prepare response from static reply.
+ * @param request request this reply is associated to
  * @param sreply static reply
  * @return response struct ready to be enqueued
  */
 int
 WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection * connection,
+					  WebRequest *request,
 					  DynamicWebReply *dreply)
 {
+  dreply->set_request(request);
+
   struct MHD_Response *response;
   response = MHD_create_response_from_callback(dreply->size(),
 					       dreply->chunk_size(),
@@ -261,13 +264,17 @@ WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection * connection,
 
 /** Queue a static web reply.
  * @param connection libmicrohttpd connection to queue response to
+ * @param request request this reply is associated to
  * @param sreply static web reply to queue
  * @return suitable libmicrohttpd return code
  */
 int
 WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
+					 WebRequest *request,
 					 StaticWebReply *sreply)
 {
+  sreply->set_request(request);
+
   struct MHD_Response *response = prepare_static_response(sreply);
 
   int rv = MHD_queue_response(connection, sreply->code(), response);
@@ -281,10 +288,12 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
  * @return suitable libmicrohttpd return code
  */
 int
-WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection * connection)
+WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection * connection,
+					    WebRequest *request)
 {
   StaticWebReply sreply(WebReply::HTTP_UNAUTHORIZED, UNAUTHORIZED_REPLY);
 #if MHD_VERSION >= 0x00090400
+  sreply.set_request(request);
   struct MHD_Response *response = prepare_static_response(&sreply);
 
   int rv = MHD_queue_basic_auth_fail_response(connection, __realm, response);
@@ -293,7 +302,7 @@ WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection * connection)
   sreply.add_header(MHD_HTTP_HEADER_WWW_AUTHENTICATE,
 		    (std::string("Basic realm=") + __realm).c_str());
   
-  int rv = queue_static_reply(connection, &sreply);
+  int rv = queue_static_reply(connection, request, &sreply);
 #endif
   return rv;
 }
@@ -394,7 +403,7 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       if ( (user == NULL) || (pass == NULL) ||
 	   ! __user_verifier->verify_user(user, pass))
       {
-	return queue_basic_auth_fail(connection);
+	return queue_basic_auth_fail(connection, request);
       }
     }
 #endif
@@ -416,26 +425,26 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
       DynamicWebReply *dreply = dynamic_cast<DynamicWebReply *>(reply);
       if (sreply) {
-	ret = queue_static_reply(connection, sreply);
+	ret = queue_static_reply(connection, request, sreply);
 	delete reply;
       } else if (dreply) {
-	ret = queue_dynamic_reply(connection, dreply);
+	ret = queue_dynamic_reply(connection, request, dreply);
       } else {
 	WebErrorPageReply ereply(WebReply::HTTP_INTERNAL_SERVER_ERROR);
-	ret = queue_static_reply(connection, &ereply);
+	ret = queue_static_reply(connection, request, &ereply);
 	delete reply;
       }
     } else {
       WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-      ret = queue_static_reply(connection, &ereply);
+      ret = queue_static_reply(connection, request, &ereply);
     }
   } else {
     if (surl == "/") {
       WebPageReply preply("Fawkes", "<h1>Welcome to Fawkes.</h1><hr />");
-      ret = queue_static_reply(connection, &preply);
+      ret = queue_static_reply(connection, request, &preply);
     } else {
       WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-      ret = queue_static_reply(connection, &ereply);
+      ret = queue_static_reply(connection, request, &ereply);
     }
   }
   return ret;
