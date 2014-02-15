@@ -66,6 +66,8 @@ class WebRequestDispatcher
 				   struct MHD_Connection *connection, void **con_cls,
 				   enum MHD_RequestTerminationCode toe);
 
+  static void * uri_log_cb(void *cls, const char *uri);
+
   void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
 
   unsigned int active_requests() const;
@@ -79,12 +81,10 @@ class WebRequestDispatcher
 			  DynamicWebReply *sreply);
   int queue_basic_auth_fail(struct MHD_Connection * connection, WebRequest *request);
   int process_request(struct MHD_Connection * connection,
-		      const char *url,
-		      const char *method,
-		      const char *version,
-		      const char *upload_data,
-		      size_t *upload_data_size,
+		      const char *url, const char *method, const char *version,
+		      const char *upload_data, size_t *upload_data_size,
 		      void **session_data);
+  void * log_uri(const char *uri);
 
   void request_completed(WebRequest *request,
 			 MHD_RequestTerminationCode term_code);

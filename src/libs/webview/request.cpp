@@ -74,13 +74,26 @@ header_iterator(void *cls, enum MHD_ValueKind kind,
 
 
 /** Constructor.
+ * @param uri URI of the request
+ */
+WebRequest::WebRequest(const char *uri)
+  : pp_(NULL), is_setup_(false), uri_(uri)
+{
+  reply_size_ = 0;
+}
+
+/** Complete setting up of request.
  * @param url requested URL
  * @param method HTTP transfer method
+ * @param version HTTP version string
  * @param connection MicroHTTPd connection
  */
-WebRequest::WebRequest(const char *url, const char *method, MHD_Connection *connection)
-  : pp_(NULL), url_(url)
+void
+WebRequest::setup(const char *url, const char *method,
+		  const char *version, MHD_Connection *connection)
 {
+  url_ = url;
+
   if (0 == strcmp(method, MHD_HTTP_METHOD_GET)) {
     method_ = METHOD_GET;
   } else if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
@@ -99,10 +112,40 @@ WebRequest::WebRequest(const char *url, const char *method, MHD_Connection *conn
     method_ = METHOD_TRACE;
   }
 
+  if (0 == strcmp(version, MHD_HTTP_VERSION_1_0)) {
+    http_version_ = HTTP_VERSION_1_0;
+  } else if (0 == strcmp(version, MHD_HTTP_VERSION_1_1)) {
+    http_version_ = HTTP_VERSION_1_1;
+  }
+
+  struct sockaddr *client_addr =
+    MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)
+      ->client_addr;
+
+  char addr_str[INET6_ADDRSTRLEN];
+  switch(client_addr->sa_family) {
+  case AF_INET:
+    inet_ntop(AF_INET, &(((struct sockaddr_in *)client_addr)->sin_addr),
+	      addr_str, INET6_ADDRSTRLEN);
+    break;
+
+  case AF_INET6:
+    inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)client_addr)->sin6_addr),
+	      addr_str, INET6_ADDRSTRLEN);
+    break;
+
+  default:
+    strncpy(addr_str, "Unknown AF", INET6_ADDRSTRLEN);
+  }
+
+  client_addr_ = addr_str;
+
   MHD_get_connection_values(connection, MHD_HEADER_KIND, &header_iterator, this);
   MHD_get_connection_values(connection, MHD_COOKIE_KIND, &cookie_iterator, this);
   MHD_get_connection_values(connection,
 			    MHD_GET_ARGUMENT_KIND, &get_argument_iterator, this);
+
+  is_setup_ = true;
 }
 
 
@@ -145,5 +188,76 @@ WebRequest::set_raw_post_data(const char *data, size_t data_size)
   post_raw_data_ = std::string(data, data_size);
 }
 
+/** Increment reply bytes counter.
+ * @param increment_by number of bytes sent
+ */
+void
+WebRequest::increment_reply_size(size_t increment_by)
+{
+  reply_size_ += increment_by;
+}
+
+/** Get number of bytes actually sent out so far.
+ * @return number of bytes sent
+ */
+size_t
+WebRequest::reply_size() const
+{
+  return reply_size_;
+}
+
+
+/** Get method as string.
+ * @return HTTP method as string
+ */
+const char *
+WebRequest::method_str() const
+{
+  switch (method_) {
+  case METHOD_CONNECT: return MHD_HTTP_METHOD_CONNECT;
+  case METHOD_DELETE:  return MHD_HTTP_METHOD_DELETE;
+  case METHOD_GET:     return MHD_HTTP_METHOD_GET;
+  case METHOD_HEAD:    return MHD_HTTP_METHOD_HEAD;
+  case METHOD_OPTIONS: return MHD_HTTP_METHOD_OPTIONS;
+  case METHOD_POST:    return MHD_HTTP_METHOD_POST;
+  case METHOD_PUT:     return MHD_HTTP_METHOD_PUT;
+  case METHOD_TRACE:   return MHD_HTTP_METHOD_TRACE;
+  default: return "UNKNOWN_METHOD";
+  }
+}
+
+
+/** Get HTTP version as string.
+ * @return HTTP version as string.
+ */
+const char *
+WebRequest::http_version_str() const
+{
+  switch (http_version_) {
+  case HTTP_VERSION_1_0: return MHD_HTTP_VERSION_1_0;
+  case HTTP_VERSION_1_1: return MHD_HTTP_VERSION_1_1;
+  default: return "UNKNOWN_VERSION";
+  }
+}
+
+
+/** Set HTTP code of the final reply.
+ * @param code reply code
+ */
+void
+WebRequest::set_reply_code(WebReply::Code code)
+{
+  reply_code_ = code;
+}
+
+
+/** Get HTTP code of reply.
+ * @return HTTP code of reply
+ */
+WebReply::Code
+WebRequest::reply_code() const
+{
+  return reply_code_;
+}
 
 } // end namespace fawkes

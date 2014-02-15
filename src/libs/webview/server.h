@@ -3,8 +3,7 @@
  *  server.h - Web server encapsulation around libmicrohttpd
  *
  *  Created: Sun Aug 30 17:38:37 2009
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

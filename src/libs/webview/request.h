@@ -22,8 +22,12 @@
 #ifndef __LIBS_WEBVIEW_REQUEST_H_
 #define __LIBS_WEBVIEW_REQUEST_H_
 
+#include <webview/reply.h>
+#include <utils/time/time.h>
+
 #include <map>
 #include <string>
+#include <arpa/inet.h>
 
 extern "C" {
   struct MHD_Connection;
@@ -51,15 +55,44 @@ class WebRequest {
     METHOD_TRACE	///< TRACE
   } Method;
 
-  WebRequest(const char *url, const char *method, MHD_Connection *connection);
+  /** HTTP version. */
+  typedef enum {
+    HTTP_VERSION_1_0,
+    HTTP_VERSION_1_1
+  } HttpVersion;
+
+  WebRequest(const char *uri);
   ~WebRequest();
 
   /** Get URL.
    * @return URL */
   const std::string &  url() const { return url_; } 
+
+  /** Get URI.
+   * @return URI */
+  const std::string &  uri() const { return uri_; } 
+
   /** Get HTTP transfer method.
    * @return request's HTTP transfer method */
   Method               method() const { return method_; } 
+  const char *         method_str() const;
+
+  /** Get HTTP version.
+   * @return HTTP protocol version */
+  HttpVersion          http_version() const { return http_version_; } 
+  const char *         http_version_str() const;
+
+  /** Get request time.
+   * @return request time */
+  const Time &         time() const { return time_; }
+
+  /** Get name of authenticated user (basic auth).
+   * @return name of authenticated user or empty if non-protected URL */
+  const std::string &  user() const { return user_; } 
+
+  /** Get client address as string.
+   * @return client address as string */
+  const std::string &  client_addr() const { return client_addr_; } 
 
   /** Get map of cookies.
    * @return map of cookies. */
@@ -196,6 +229,11 @@ class WebRequest {
    * a printable string (or zero-terminated) */
   const std::string &  raw_post_data() const { return post_raw_data_; }
 
+  void   increment_reply_size(size_t increment_by);
+  size_t reply_size() const;
+  WebReply::Code reply_code() const;
+  void           set_reply_code(WebReply::Code code);
+
  protected:
   /** Set cookie map.
    * @param cookies cookies map
@@ -204,10 +242,23 @@ class WebRequest {
   void set_raw_post_data(const char *data, size_t data_size);
 
  private:
-  MHD_PostProcessor *pp_;
+  bool is_setup() { return is_setup_; }
+  void setup(const char *url, const char *method,
+	     const char *version, MHD_Connection *connection);
 
+ private:
+  MHD_PostProcessor *pp_;
+  bool is_setup_;
+
+  std::string uri_;
   std::string url_;
+  std::string user_;
+  std::string client_addr_;
   Method      method_;
+  HttpVersion http_version_;
+  Time        time_;
+  size_t      reply_size_;
+  WebReply::Code reply_code_;
   std::map<std::string, std::string> cookies_;
   std::map<std::string, std::string> post_values_;
   std::string                        post_raw_data_;

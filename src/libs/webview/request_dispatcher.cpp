@@ -115,6 +115,19 @@ WebRequestDispatcher::setup_basic_auth(const char *realm,
 #endif
 }
 
+
+/** Callback for new requests.
+ * @param cls closure, must be WebRequestDispatcher
+ * @param uri requested URI
+ * @return returns output of WebRequestDispatcher::log_uri()
+ */
+void *
+WebRequestDispatcher::uri_log_cb(void *cls, const char * uri)
+{
+  WebRequestDispatcher *rd = static_cast<WebRequestDispatcher *>(cls);
+  return rd->log_uri(uri);
+}
+
 /** Process request callback for libmicrohttpd.
  * @param callback_data instance of WebRequestDispatcher to call
  * @param connection libmicrohttpd connection instance
@@ -168,20 +181,14 @@ WebRequestDispatcher::request_completed_cb(void *cls,
  * @param max maximum number of bytes that can be put in buf
  * @return suitable libmicrohttpd return code
  */
-#if MHD_VERSION >= 0x00090200
 static ssize_t
 dynamic_reply_data_cb(void *reply, uint64_t pos, char *buf, size_t max)
-#else
-static int
-#  if MHD_VERSION <= 0x00040000
-dynamic_reply_data_cb(void *reply, size_t pos, char *buf, int max)
-#  else
-dynamic_reply_data_cb(void *reply, uint64_t pos, char *buf, int max)
-#  endif
-#endif
 {
   DynamicWebReply *dreply = static_cast<DynamicWebReply *>(reply);
-  return dreply->next_chunk(pos, buf, max);
+  ssize_t bytes = dreply->next_chunk(pos, buf, max);
+  WebRequest *request = dreply->get_request();
+  if (bytes > 0 && request)  request->increment_reply_size(bytes);
+  return bytes;
 }
 
 
@@ -222,6 +229,12 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
 					     /* copy */ MHD_NO);
   }
 
+  WebRequest *request = sreply->get_request();
+  if (request) {
+    request->set_reply_code(sreply->code());
+    request->increment_reply_size(sreply->body_length());
+  }
+
   const WebReply::HeaderMap &headers = sreply->headers();
   WebReply::HeaderMap::const_iterator i;
   for (i = headers.begin(); i != headers.end(); ++i) {
@@ -242,6 +255,7 @@ WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection * connection,
 					  DynamicWebReply *dreply)
 {
   dreply->set_request(request);
+  request->set_reply_code(dreply->code());
 
   struct MHD_Response *response;
   response = MHD_create_response_from_callback(dreply->size(),
@@ -344,6 +358,15 @@ post_iterator(void *cls, enum MHD_ValueKind kind, const char *key,
 }
 /// @endcond
 
+/** URI logging callback.
+ * @param uri requested URI
+ */
+void *
+WebRequestDispatcher::log_uri(const char *uri)
+{
+  return new WebRequest(uri);
+}
+
 /** Process request callback for libmicrohttpd.
  * @param connection libmicrohttpd connection instance
  * @param url URL, may contain escape sequences
@@ -369,19 +392,19 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   MutexLocker lock(__url_manager->mutex());
   WebRequestProcessor *proc = __url_manager->find_processor(surl);
 
+  WebRequest *request = static_cast<WebRequest *>(*session_data);
+
   if (proc) {
     char *urlc = strdup(url);
     fawkes::hex_unescape(urlc);
     std::string urls = urlc;
     free(urlc);
 
-    WebRequest *request;
-
-    if ( *session_data == NULL) {
+    if ( ! request->is_setup() ) {
       // The first time only the headers are valid,
       // do not respond in the first round...
-      request = new WebRequest(url, method, connection);
-      *session_data = request;
+      request->setup(url, method, version, connection);
+
       __active_requests_mutex->lock();
       __active_requests += 1;
       __active_requests_mutex->unlock();
@@ -392,8 +415,6 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       }
 
       return MHD_YES;
-    } else {
-      request = static_cast<WebRequest *>(*session_data);
     }
 
 #if MHD_VERSION >= 0x00090400
@@ -405,6 +426,7 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       {
 	return queue_basic_auth_fail(connection, request);
       }
+      request->user_ = user;
     }
 #endif
 

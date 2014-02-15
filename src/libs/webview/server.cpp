@@ -3,8 +3,7 @@
  *  server.cpp - Web server encapsulation around libmicrohttpd
  *
  *  Created: Sun Aug 30 17:40:54 2009
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -72,6 +71,8 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 			      (void *)__dispatcher,
 			      MHD_OPTION_NOTIFY_COMPLETED,
 			        WebRequestDispatcher::request_completed_cb, (void *)__dispatcher,
+			      MHD_OPTION_URI_LOG_CALLBACK,
+			        WebRequestDispatcher::uri_log_cb, (void *)__dispatcher,
 			      MHD_OPTION_END);
 
   if ( __daemon == NULL ) {
@@ -107,6 +108,8 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 			      (void *)__dispatcher,
 			      MHD_OPTION_NOTIFY_COMPLETED,
 			        WebRequestDispatcher::request_completed_cb, (void *)__dispatcher,
+			      MHD_OPTION_URI_LOG_CALLBACK,
+			        WebRequestDispatcher::uri_log_cb, (void *)__dispatcher,
 			      MHD_OPTION_HTTPS_MEM_KEY,  __ssl_key_mem,
 			      MHD_OPTION_HTTPS_MEM_CERT, __ssl_cert_mem,
 			      MHD_OPTION_END);
