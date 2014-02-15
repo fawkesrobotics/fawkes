@@ -224,7 +224,8 @@ WebviewThread::init()
   webview_nav_manager->add_nav_entry(IMAGE_URL_PREFIX, "Images");
 #endif
 
-  logger->log_info("WebviewThread", "Listening for HTTP connections on port %u", __cfg_port);
+  logger->log_info("WebviewThread", "Listening for HTTP%s connections on port %u",
+		   __cfg_use_ssl ? "S" : "", __cfg_port);
 
   service_publisher->publish_service(__webview_service);
   service_browser->watch_service("_http._tcp", __service_browse_handler);
