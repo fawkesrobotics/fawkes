@@ -4,7 +4,6 @@
  *
  *  Created: Fri Feb 07 17:51:06 2014
  *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -26,6 +25,8 @@
 #include <webview/request_processor.h>
 
 #include <string>
+#include <tuple>
+#include <map>
 
 namespace fawkes {
   class Logger;
@@ -42,6 +43,7 @@ class WebviewPtzCamRequestProcessor : public fawkes::WebRequestProcessor
 				std::string camctrl_id, std::string power_id, std::string camera_id,
 				float pan_increment, float tilt_increment, unsigned int zoom_increment,
 				float post_powerup_time,
+				std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets,
 				fawkes::BlackBoard *blackboard, fawkes::Logger *logger);
 
   virtual ~WebviewPtzCamRequestProcessor();
@@ -61,6 +63,8 @@ class WebviewPtzCamRequestProcessor : public fawkes::WebRequestProcessor
 
   std::string           baseurl_;
   std::string           image_id_;
+
+  std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets_;
 
   float                 pan_increment_;
   float                 tilt_increment_;

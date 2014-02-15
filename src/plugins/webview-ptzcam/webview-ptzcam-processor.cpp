@@ -44,16 +44,29 @@ using namespace fawkes;
 
 
 /** Constructor.
+ * @param base_url base URL of the webview PTZ cam web request processor.
+ * @param image_id Shared memory image buffer ID for viewing
+ * @param pantilt_id PanTiltInterface ID
+ * @param camctrl_id CameraControlInterface ID
+ * @param power_id SwitchInterface ID for powering PTU
+ * @param camera_id SwitchInterface ID for enabling/disabling image retrieval
+ * @param pan_increment value by which to increment pan value on request
+ * @param tilt_increment value by which to increment tilt value on request
+ * @param zoom_increment value by which to increment zoom value on request
+ * @param post_powerup_time time in seconds by which to delay reponse when
+ * turning on PTU and camera after inactivity
+ * @param presets pan/tilt preset values
+ * @param blackboard blackboard to open interfaces 
  * @param logger logger to report problems
- * @param baseurl base URL of the Clips webrequest processor
  */
-WebviewPtzCamRequestProcessor::WebviewPtzCamRequestProcessor(std::string base_url, std::string image_id,
-							     std::string pantilt_id, std::string camctrl_id,
-							     std::string power_id, std::string camera_id,
-							     float pan_increment, float tilt_increment,
-							     unsigned int zoom_increment, float post_powerup_time,
-							     fawkes::BlackBoard *blackboard,
-							     fawkes::Logger *logger)
+WebviewPtzCamRequestProcessor::WebviewPtzCamRequestProcessor(
+  std::string base_url, std::string image_id,
+  std::string pantilt_id, std::string camctrl_id,
+  std::string power_id, std::string camera_id,
+  float pan_increment, float tilt_increment,
+  unsigned int zoom_increment, float post_powerup_time,
+  std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets,
+  fawkes::BlackBoard *blackboard, fawkes::Logger *logger)
 {
   logger_            = logger;
   blackboard_        = blackboard;
@@ -63,6 +76,7 @@ WebviewPtzCamRequestProcessor::WebviewPtzCamRequestProcessor(std::string base_ur
   tilt_increment_    = tilt_increment;
   zoom_increment_    = zoom_increment;
   post_powerup_time_ = (long int)roundf(fabs(post_powerup_time) * 1000000);
+  presets_           = presets;
 
   ptu_if_         = blackboard->open_for_reading<PanTiltInterface>(pantilt_id.c_str());
   camctrl_if_     = blackboard->open_for_reading<CameraControlInterface>(camctrl_id.c_str());
@@ -120,8 +134,12 @@ WebviewPtzCamRequestProcessor::process_request(const fawkes::WebRequest *request
       // NOTE: this it at the moment mirrored for ceiling mounting!
 
       float pan_val = ptu_if_->pan(), tilt_val = ptu_if_->tilt();
+      unsigned int zoom_val = camctrl_if_->zoom();
       float zoom = std::max(1u, camctrl_if_->zoom());
-      std::string pan_str = request->get_value("pan"), tilt_str = request->get_value("tilt");
+      std::string pan_str = request->get_value("pan");
+      std::string tilt_str = request->get_value("tilt");
+      std::string zoom_str = request->get_value("zoom");
+
       if (pan_str != "") {
 	if (pan_str == "right") {
 	  pan_val = std::max(ptu_if_->min_pan(), ptu_if_->pan() - pan_increment_ / zoom);
@@ -145,21 +163,12 @@ WebviewPtzCamRequestProcessor::process_request(const fawkes::WebRequest *request
 	}
       }
 
-      PanTiltInterface::GotoMessage *gotomsg =
-	new PanTiltInterface::GotoMessage(pan_val, tilt_val);
-      ptu_if_->msgq_enqueue(gotomsg);
+      if (tilt_str != "" || pan_str != "") {
+	PanTiltInterface::GotoMessage *gotomsg =
+	  new PanTiltInterface::GotoMessage(pan_val, tilt_val);
+	ptu_if_->msgq_enqueue(gotomsg);
+      }
 
-      StaticWebReply *r = new StaticWebReply(WebReply::HTTP_OK);
-      r->add_header("Content-type", "text/plain");
-      r->append_body("OK PAN %f TILT %f\n", pan_val, tilt_val);
-      //r->append_body("FAIL DISABLED\n");
-      return r;
-
-    } else if (subpath == "/zoom" || subpath == "/zoom/") {
-      camctrl_if_->read();
-
-      unsigned int zoom_val = camctrl_if_->zoom();
-      std::string zoom_str = request->get_value("zoom");
       if (zoom_str != "") {
 	if (zoom_str == "out") {
 	  zoom_val = std::max((long int)camctrl_if_->zoom_min(), (long int)camctrl_if_->zoom() - zoom_increment_);
@@ -170,15 +179,16 @@ WebviewPtzCamRequestProcessor::process_request(const fawkes::WebRequest *request
 	    zoom_val  = std::stol(request->get_value("zoom").c_str());
 	  } catch (std::exception &e) {} // ignored, use current val
 	}
-      }
 
-      CameraControlInterface::SetZoomMessage *setmsg =
-	new CameraControlInterface::SetZoomMessage(zoom_val);
-      camctrl_if_->msgq_enqueue(setmsg);
+	CameraControlInterface::SetZoomMessage *setmsg =
+	  new CameraControlInterface::SetZoomMessage(zoom_val);
+	camctrl_if_->msgq_enqueue(setmsg);
+      }
 
       StaticWebReply *r = new StaticWebReply(WebReply::HTTP_OK);
       r->add_header("Content-type", "text/plain");
-      r->append_body("OK ZOOM %u\n", zoom_val);
+      r->append_body("OK PAN %f TILT %f ZOOM %u\n", pan_val, tilt_val, zoom_val);
+      //r->append_body("FAIL DISABLED\n");
       return r;
       
     } else if (subpath == "/effect" || subpath == "/effect/") {
@@ -345,7 +355,7 @@ WebviewPtzCamRequestProcessor::process_request(const fawkes::WebRequest *request
 	"  .click(function() {\n"
 	"    $(this).blur();\n"
 	"    if (move_jqxhr != null)  move_jqxhr.abort();\n"
-	"    move_jqxhr = $.ajax(\"/ptzcam/zoom?zoom=in\");\n"
+	"    move_jqxhr = $.ajax(\"/ptzcam/move?zoom=in\");\n"
 	"  });\n"
 	"  $( \"#zoom-out\" ).button({\n"
 	"    icons: {\n"
@@ -356,7 +366,7 @@ WebviewPtzCamRequestProcessor::process_request(const fawkes::WebRequest *request
 	"  .click(function() {\n"
 	"    $(this).blur();\n"
 	"    if (move_jqxhr != null)  move_jqxhr.abort();\n"
-	"    move_jqxhr = $.ajax(\"/ptzcam/zoom?zoom=out\");\n"
+	"    move_jqxhr = $.ajax(\"/ptzcam/move?zoom=out\");\n"
 	"  });\n"
 	"  $( \"#zoom-reset\" ).button({\n"
 	"    icons: {\n"
@@ -367,7 +377,7 @@ WebviewPtzCamRequestProcessor::process_request(const fawkes::WebRequest *request
 	"  .click(function() {\n"
 	"    $(this).blur();\n"
 	"    if (move_jqxhr != null)  move_jqxhr.abort();\n"
-	"    move_jqxhr = $.ajax(\"/ptzcam/zoom?zoom=0\");\n"
+	"    move_jqxhr = $.ajax(\"/ptzcam/move?zoom=0\");\n"
 	"  });\n"
 	"});\n"
 	"</script>\n"
@@ -426,6 +436,27 @@ WebviewPtzCamRequestProcessor::process_request(const fawkes::WebRequest *request
 	"  });\n"
 	"});\n"
 	"</script>\n";
+
+      if (! presets_.empty()) {
+	*r += "<br/>\n";
+	for (auto p : presets_) {
+	  r->append_body(
+	    "<button id=\"preset-%s\" title=\"Look at %s\">%s</button>\n"
+	    "<script>\n"
+	    "$(function() {\n"
+	    "  $( \"#preset-%s\" ).button()\n"
+	    "  .click(function() {\n"
+	    "    $(this).blur();\n"
+	    "    if (move_jqxhr != null)  move_jqxhr.abort();\n"
+	    "    move_jqxhr = $.ajax(\"/ptzcam/move?pan=%f&tilt=%f&zoom=%u\");\n"
+	    "  });\n"
+	    "});\n"
+	    "</script>\n",
+	    p.first.c_str(), std::get<0>(p.second).c_str(),
+	    std::get<0>(p.second).c_str(), p.first.c_str(),
+	    std::get<1>(p.second), std::get<2>(p.second), std::get<3>(p.second));
+	}
+      }
 
       return r;
     } else {

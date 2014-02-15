@@ -85,10 +85,32 @@ WebviewPtzCamThread::init()
   cfg_park_tilt_tolerance_ = fabs(config->get_float("/webview/ptzcam/park/tilt-tolerance"));
   cfg_park_tilt_pos_       = fabs(config->get_float("/webview/ptzcam/park/tilt"));
 
+  std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets;
+  std::string prefix = "/webview/ptzcam/presets/";
+  std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+  while (i->next()) {
+    std::string cfg_name = std::string(i->path()).substr(prefix.length());
+    cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+
+    if (presets.find(cfg_name) == presets.end()) {
+      std::string cfg_prefix = prefix + cfg_name + "/";
+      try {
+	std::string name  = config->get_string((cfg_prefix + "name").c_str());
+	float pan         = config->get_float((cfg_prefix + "pan").c_str());
+	float tilt        = config->get_float((cfg_prefix + "tilt").c_str());
+	unsigned int zoom = config->get_uint((cfg_prefix + "zoom").c_str());
+	presets[cfg_name] = std::make_tuple(name, pan, tilt, zoom);
+      } catch (Exception &e) {
+	logger->log_warn(name(), "Invalid preset %s", cfg_name.c_str());
+      }
+    }
+  }
+
   web_proc_  = new WebviewPtzCamRequestProcessor(PTZCAM_URL_PREFIX, image_id,
 						 pantilt_id, camctrl_id, power_id, camera_id,
 						 pan_increment, tilt_increment,
 						 zoom_increment, post_powerup_time,
+						 presets,
 						 blackboard, logger);
   webview_url_manager->register_baseurl(PTZCAM_URL_PREFIX, web_proc_);
   webview_nav_manager->add_nav_entry(PTZCAM_URL_PREFIX, nav_entry.c_str());
