@@ -23,6 +23,7 @@
 #include <webview/request_dispatcher.h>
 #include <webview/request.h>
 #include <webview/request_manager.h>
+#include <webview/access_log.h>
 #include <core/threading/thread.h>
 #include <core/exception.h>
 #include <core/exceptions/system.h>
@@ -187,6 +188,16 @@ void
 WebServer::setup_basic_auth(const char *realm, WebUserVerifier *verifier)
 {
   __dispatcher->setup_basic_auth(realm, verifier);
+}
+
+
+/** Setup access log.
+ * @param filename access log file name
+ */
+void
+WebServer::setup_access_log(const char *filename)
+{
+  __dispatcher->setup_access_log(filename);
 }
 
 

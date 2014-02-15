@@ -25,6 +25,7 @@
 #include <webview/page_reply.h>
 #include <webview/error_reply.h>
 #include <webview/user_verifier.h>
+#include <webview/access_log.h>
 
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
@@ -73,6 +74,7 @@ WebRequestDispatcher::WebRequestDispatcher(WebUrlManager *url_manager,
 					   WebPageFooterGenerator *footergen)
 {
   __realm                 = NULL;
+  __access_log            = NULL;
   __url_manager           = url_manager;
   __page_header_generator = headergen;
   __page_footer_generator = footergen;
@@ -88,6 +90,7 @@ WebRequestDispatcher::~WebRequestDispatcher()
   if (__realm)  free(__realm);
   delete __active_requests_mutex;
   delete __last_request_completion_time;
+  delete __access_log;
 }
 
 
@@ -115,6 +118,17 @@ WebRequestDispatcher::setup_basic_auth(const char *realm,
 #endif
 }
 
+
+/** Setup access log.
+ * @param filename access log file name
+ */
+void
+WebRequestDispatcher::setup_access_log(const char *filename)
+{
+  delete __access_log;
+  __access_log = NULL;
+  __access_log = new WebviewAccessLog(filename);
+}
 
 /** Callback for new requests.
  * @param cls closure, must be WebRequestDispatcher
@@ -480,6 +494,7 @@ WebRequestDispatcher::request_completed(WebRequest *request, MHD_RequestTerminat
   if (__active_requests >  0)  __active_requests -= 1;
   __last_request_completion_time->stamp();
   __active_requests_mutex->unlock();
+  if (__access_log)  __access_log->log(request);
 }
 
 /** Get number of active requests.

@@ -51,6 +51,7 @@ class WebServer {
 
   void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
   void setup_request_manager(WebRequestManager *request_manager);
+  void setup_access_log(const char *filename);
 
   unsigned int active_requests() const;
   std::auto_ptr<Time> last_request_completion_time() const;

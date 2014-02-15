@@ -42,6 +42,7 @@ class StaticWebReply;
 class DynamicWebReply;
 class WebUserVerifier;
 class WebRequest;
+class WebviewAccessLog;
 class Mutex;
 class Time;
 
@@ -69,6 +70,7 @@ class WebRequestDispatcher
   static void * uri_log_cb(void *cls, const char *uri);
 
   void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
+  void setup_access_log(const char *filename);
 
   unsigned int active_requests() const;
   std::auto_ptr<Time> last_request_completion_time() const;
@@ -91,6 +93,7 @@ class WebRequestDispatcher
 
  private:
   WebUrlManager            *__url_manager;
+  WebviewAccessLog         *__access_log;
 
   std::string               __active_baseurl;
   WebPageHeaderGenerator   *__page_header_generator;
