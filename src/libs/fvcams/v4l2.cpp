@@ -3,9 +3,8 @@
  *  v4l2.cpp - Video4Linux 2 camera access
  *
  *  Created: Sat Jul  5 20:40:20 2008
- *  Copyright  2008  Tobias Kellner
- *             2010  Tim Niemueller
- *
+ *  Copyright  2008       Tobias Kellner
+ *             2010-2014  Tim Niemueller
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -78,9 +77,9 @@ class V4L2CameraData
  * Video4Linux 2 camera access implementation.
  *
  * @todo UPTR method
- * @todo Standards queries (VIDIOC_ENUMSTD)
  * @todo v4l2_pix_format.field
  * @author Tobias Kellner
+ * @author Tim Niemueller
  */
 
 
@@ -93,6 +92,8 @@ V4L2Camera::V4L2Camera(const char *device_name)
   _nao_hacks = _switch_u_v = false;
   _width = _height = _bytes_per_line = _fps = _buffers_length = 0;
   _current_buffer = -1;
+  _standard = NULL;
+  _input = NULL;
   _brightness.set = _contrast.set = _saturation.set = _hue.set =
     _red_balance.set = _blue_balance.set = _exposure.set = _gain.set =
     _lens_x.set = _lens_y.set = false;
@@ -116,6 +117,8 @@ V4L2Camera::V4L2Camera(const char *device_name)
  *    READ: read()
  *    MMAP: memory mapping
  *    UPTR: user pointer
+ * - standard=std, set video standard, e.g. PAL or NTSC
+ * - input=inp, set video input, e.g. S-Video
  * - format=FOURCC, preferred format
  * - size=WIDTHxHEIGHT, preferred image size
  * - switch_u_v=true/false, switch U and V channels
@@ -145,6 +148,8 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
   _current_buffer = -1;
   _frame_buffers = NULL;
   _capture_time = NULL;
+  _standard = NULL;
+  _input = NULL;
   _data = new V4L2CameraData();
 
   if (cap->has("device")) _device_name = strdup(cap->get("device").c_str());
@@ -167,6 +172,14 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
     _format[4] = '\0';
   } else {
     memset(_format, 0, 5);
+  }
+
+  if (cap->has("standard")) {
+    _standard = strdup(cap->get("standard").c_str());
+  }
+
+  if (cap->has("input")) {
+    _input = strdup(cap->get("input").c_str());
   }
 
   if (cap->has("size")) {
@@ -324,6 +337,8 @@ V4L2Camera::V4L2Camera(const char *device_name, int dev)
   _frame_buffers = NULL;
   _capture_time = NULL;
   _device_name = strdup(device_name);
+  _standard = NULL;
+  _input = NULL;
   _data = new V4L2CameraData();
 
   _dev = dev;
@@ -344,6 +359,8 @@ V4L2Camera::~V4L2Camera()
   if (_opened) close();
 
   free(_device_name);
+  if (_standard)  free(_standard);
+  if (_input)     free(_input);
   delete _data;
 }
 
@@ -383,6 +400,8 @@ V4L2Camera::open()
 void
 V4L2Camera::post_open()
 {
+  select_standard();
+  select_input();
   select_read_method();
   select_format();
   if (_fps)  set_fps();
@@ -461,6 +480,76 @@ V4L2Camera::select_read_method()
       //TODO
       throw Exception("V4L2Cam: user pointer method not supported yet");
       break;
+  }
+}
+
+/** Set requested video standard. */
+void
+V4L2Camera::select_standard()
+{
+  // No video standard setting requested? Return!
+  if (! _standard)  return;
+
+  v4l2_standard std;
+  bool found = false;
+  memset(&std, 0, sizeof(std));
+  for (std.index = 0; v4l2_ioctl(_dev, VIDIOC_ENUMSTD, &std) == 0; std.index++) {
+    if (strcmp(_standard, (const char *)std.name) == 0) {
+      found = true;
+      break;
+    }
+  }
+
+  if (! found) {
+    throw Exception("Requested standard %s is not supported by the device",
+		    _standard);
+  }
+
+  v4l2_std_id current_std_id;
+  if (v4l2_ioctl(_dev, VIDIOC_G_STD, &current_std_id) != 0) {
+    throw Exception("Failed to read current standard");
+  }
+  if (std.id != current_std_id) {
+    // Set it
+    v4l2_std_id set_std_id = std.id;
+    if (v4l2_ioctl(_dev, VIDIOC_S_STD, &set_std_id) != 0) {
+      throw Exception(errno, "Failed to set standard %s", _standard);
+    }
+  }
+}
+
+/** Set requested video input. */
+void
+V4L2Camera::select_input()
+{
+  // No video input setting requested? Return!
+  if (! _input)  return;
+
+  v4l2_input inp;
+  bool found = false;
+  memset(&inp, 0, sizeof(inp));
+  for (inp.index = 0; v4l2_ioctl(_dev, VIDIOC_ENUMINPUT, &inp) == 0; inp.index++) {
+    if (strcmp(_input, (const char *)inp.name) == 0) {
+      found = true;
+      break;
+    }
+  }
+
+  if (! found) {
+    throw Exception("Requested input %s is not supported by the device",
+		    _input);
+  }
+
+  int current_inp_ind;
+  if (v4l2_ioctl(_dev, VIDIOC_G_INPUT, &current_inp_ind) != 0) {
+    throw Exception("Failed to read current input index");
+  }
+  if ((int)inp.index != current_inp_ind) {
+    // Set it
+    int set_inp_ind = inp.index;
+    if (v4l2_ioctl(_dev, VIDIOC_S_INPUT, &set_inp_ind) != 0) {
+      throw Exception(errno, "Failed to set input %s", _input);
+    }
   }
 }
 
