@@ -47,7 +47,7 @@ bool WebReply::__caching = true;
 /** Constructor.
  * @param code HTTP response code
  */
-WebReply::WebReply(response_code_t code)
+WebReply::WebReply(Code code)
 {
   __code = code;
 
@@ -81,7 +81,7 @@ WebReply::set_caching(bool caching)
 /** Get response code.
  * @return HTTP response code
  */
-WebReply::response_code_t
+WebReply::Code
 WebReply::code() const
 {
   return __code;
@@ -158,7 +158,7 @@ WebReply::headers() const
 /** Constructor.
  * @param code HTTP response code
  */
-DynamicWebReply::DynamicWebReply(response_code_t code)
+DynamicWebReply::DynamicWebReply(Code code)
   : WebReply(code)
 {
 }
@@ -188,7 +188,7 @@ DynamicWebReply::chunk_size()
  * @param code HTTP response code
  * @param body optional initial body
  */
-StaticWebReply::StaticWebReply(response_code_t code, std::string body)
+StaticWebReply::StaticWebReply(Code code, std::string body)
   : WebReply(code)
 {
   _body = body;

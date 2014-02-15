@@ -93,15 +93,15 @@ class WebReply
     HTTP_INSUFFICIENT_STORAGE             = 507, /**< INSUFFICIENT_STORAGE */
     HTTP_BANDWIDTH_LIMIT_EXCEEDED         = 509, /**< BANDWIDTH_LIMIT_EXCEEDED */
     HTTP_NOT_EXTENDED                     = 510 /**< NOT_EXTENDED */
-  } response_code_t;
+  } Code;
 
   /** Map of headers. */
   typedef std::map<std::string, std::string> HeaderMap;
 
-  WebReply(response_code_t code);
+  WebReply(Code code);
   virtual ~WebReply();
 
-  response_code_t   code() const;
+  Code              code() const;
   void              add_header(std::string header, std::string content);
   void              add_header(std::string header_string);
   const HeaderMap & headers() const;
@@ -109,15 +109,15 @@ class WebReply
   static void       set_caching(bool caching);
 
  private:
-  response_code_t  __code;
-  HeaderMap        __headers;
-  static bool      __caching;
+  Code              __code;
+  HeaderMap         __headers;
+  static bool       __caching;
 };
 
 class DynamicWebReply : public WebReply
 {
  public:
-  DynamicWebReply(response_code_t code);
+  DynamicWebReply(Code code);
 
   virtual size_t chunk_size();
   virtual size_t size() = 0;
@@ -127,7 +127,7 @@ class DynamicWebReply : public WebReply
 class StaticWebReply : public WebReply
 {
  public:
-  StaticWebReply(response_code_t code, std::string body = "");
+  StaticWebReply(Code code, std::string body = "");
 
   void append_body(const char *format, ...);
   StaticWebReply & operator+=(std::string text);
