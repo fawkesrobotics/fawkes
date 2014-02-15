@@ -58,6 +58,8 @@ WebviewPtzCamThread::~WebviewPtzCamThread()
 void
 WebviewPtzCamThread::init()
 {
+  timeout_ = false;
+
   std::string pantilt_id = config->get_string("/webview/ptzcam/pantilt-id");
   std::string camctrl_id = config->get_string("/webview/ptzcam/camctrl-id");
   std::string power_id   = config->get_string("/webview/ptzcam/power-id");
@@ -142,14 +144,16 @@ WebviewPtzCamThread::loop()
 	webview_request_manager->last_request_completion_time();
 
       if (now - last_completion.get() >= cfg_inactivity_timeout_) {
+	if (! timeout_) {
+	  logger->log_info(name(), "Inactivity timeout");
+	  timeout_ = true;
+	}
 	ptu_if_->read();
 	power_if_->read();
 	camen_if_->read();
 	if (fabs(cfg_park_pan_pos_  - ptu_if_->pan()) >= cfg_park_pan_tolerance_ ||
 	    fabs(cfg_park_tilt_pos_ - ptu_if_->tilt()) >= cfg_park_tilt_tolerance_)
 	{
-	  logger->log_info(name(), "Inactivity timeout, parking camera");
-
 	  PanTiltInterface::GotoMessage *gotomsg =
 	    new PanTiltInterface::GotoMessage(cfg_park_pan_pos_, cfg_park_tilt_pos_);
 	  ptu_if_->msgq_enqueue(gotomsg);
@@ -162,6 +166,8 @@ WebviewPtzCamThread::loop()
 	    camen_if_->msgq_enqueue(new SwitchInterface::DisableSwitchMessage());
 	  }
 	}
+      } else {
+	timeout_ = false;
       }
     } catch (Exception &e) {} // ignore, a request got active
   }

@@ -3,8 +3,7 @@
  *  webview-ptzcam-thread.h - CLIPS introspection via webview
  *
  *  Created: Sat Jun 15 19:54:25 2013
- *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -64,6 +63,8 @@ class WebviewPtzCamThread
   fawkes::PanTiltInterface *ptu_if_;
   fawkes::SwitchInterface  *power_if_;
   fawkes::SwitchInterface  *camen_if_;
+
+  bool  timeout_;
 
   float cfg_inactivity_timeout_;
   float cfg_park_pan_tolerance_;
