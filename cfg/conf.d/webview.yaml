@@ -26,6 +26,9 @@ webview:
   # Use basic authentication?
   use_basic_auth: false
 
+  # Access log filename
+  # access_log: access_log
+
   # Example user, delete or change password!
   users:
     fawkes: fawkes

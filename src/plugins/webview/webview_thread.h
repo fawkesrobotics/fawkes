@@ -3,8 +3,7 @@
  *  webview_thread.h - Thread that handles web interface requests
  *
  *  Created: Mon Oct 13 17:49:52 2008 (I5 Developer's Day)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -124,6 +123,7 @@ class WebviewThread
   std::string  __cfg_ssl_cert;
   bool         __cfg_use_basic_auth;
   std::string  __cfg_basic_auth_realm;
+  std::string  __cfg_access_log;
 
   fawkes::CacheLogger     __cache_logger;
   fawkes::NetworkService *__webview_service;

@@ -3,8 +3,7 @@
  *  webview_thread.cpp - Thread that handles web interface requests
  *
  *  Created: Mon Oct 13 17:51:31 2008 (I5 Developer's Day)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -90,6 +89,12 @@ WebviewThread::init()
 
   WebReply::set_caching(config->get_bool("/webview/client_side_caching"));
 
+  __webview_service = NULL;
+  __service_browse_handler = NULL;
+  __header_gen = NULL;
+  __footer_gen = NULL;
+  __dispatcher = NULL;
+
   bool __cfg_use_ssl = false;
   try {
     __cfg_use_ssl = config->get_bool("/webview/use_ssl");
@@ -137,6 +142,11 @@ WebviewThread::init()
     __cfg_basic_auth_realm = config->get_bool("/webview/basic_auth_realm");
   } catch (Exception &e) {}
 
+  __cfg_access_log = "";
+  try {
+    __cfg_access_log = config->get_string("/webview/access_log");
+  } catch (Exception &e) {}
+
 
   __cache_logger.clear();
 
@@ -168,6 +178,11 @@ WebviewThread::init()
 				    __user_verifier);
     }
     __webserver->setup_request_manager(webview_request_manager);
+
+    if (__cfg_access_log != "") {
+      logger->log_debug(name(), "Setting up access log %s", __cfg_access_log.c_str());
+      __webserver->setup_access_log(__cfg_access_log.c_str());
+    }
   } catch (Exception &e) {
     delete __webview_service;
     delete __service_browse_handler;
