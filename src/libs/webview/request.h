@@ -77,7 +77,7 @@ class WebRequest {
    * @param key key of the requested cookie
    * @return true if the cookie was set, false otherwise
    */
-  bool has_cookie(std::string &key) const
+  bool has_cookie(std::string key) const
   { return (cookies_.find(key) != cookies_.end()); }
 
   /** Get map of POST values.
@@ -105,7 +105,7 @@ class WebRequest {
    * @param key key of the post value
    * @return true if the post value was received, false otherwise
    */
-  bool has_post_value(std::string &key) const
+  bool has_post_value(std::string key) const
   { return (post_values_.find(key) != post_values_.end()); }
 
   /** Get map of GET values.
@@ -133,8 +133,37 @@ class WebRequest {
    * @param key key of the requested get value
    * @return true if the get value was received, false otherwise
    */
-  bool has_get_value(std::string &key) const
+  bool has_get_value(std::string key) const
   { return (get_values_.find(key) != get_values_.end()); }
+
+
+  /** Get map of header values.
+   * @return map of header values. */
+  const std::map<std::string, std::string> &  headers() const { return headers_; }
+  /** Header specific header value.
+   * @param key key of the header value
+   * @return value of header value or empty string if not set
+   */
+  std::string  header(std::string &key) const
+  {
+    std::map<std::string, std::string>::const_iterator p = headers_.find(key);
+    return (p != headers_.end()) ? p->second : "";
+  }
+  /** Get specific header value.
+   * @param key key of the header value
+   * @return value of header value or empty string if not set
+   */
+  std::string  header(const char *key) const
+  {
+    std::map<std::string, std::string>::const_iterator p = headers_.find(key);
+    return (p != headers_.end()) ? p->second : "";
+  }
+  /** Check if the named header value has been received.
+   * @param key key of the requested header
+   * @return true if the header value was received, false otherwise
+   */
+  bool has_header(std::string key) const
+  { return (headers_.find(key) != headers_.end()); }
 
   /** Set a cookie.
    * @param key key of the cookie
@@ -154,6 +183,13 @@ class WebRequest {
    * @param value value of the GET argument
    */
   void set_get_value(const std::string &key, const std::string &value) { get_values_[key] = value; }
+
+  /** Set a header value.
+   * @param key key of the cookie
+   * @param value value of the header argument
+   */
+  void set_header(const std::string &key, const std::string &value)
+  { headers_[key] = value; }
 
   /** Get raw post data.
    * @return raw port data or empty string if none. Note that this is not necesarily
@@ -176,7 +212,7 @@ class WebRequest {
   std::map<std::string, std::string> post_values_;
   std::string                        post_raw_data_;
   std::map<std::string, std::string> get_values_;
-
+  std::map<std::string, std::string> headers_;
 };
 
 

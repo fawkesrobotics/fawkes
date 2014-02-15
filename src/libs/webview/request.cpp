@@ -52,6 +52,16 @@ get_argument_iterator(void *cls, enum MHD_ValueKind kind,
   else                request->set_get_value(key, value);
   return MHD_YES;
 }
+
+static int
+header_iterator(void *cls, enum MHD_ValueKind kind,
+		const char *key, const char *value)
+{
+  WebRequest *request = static_cast<WebRequest *>(cls);
+  if (value == NULL)  request->set_header(key, "");
+  else                request->set_header(key, value);
+  return MHD_YES;
+}
 /// @endcond
 
 /** @class WebRequest <webview/request.h>
@@ -89,6 +99,7 @@ WebRequest::WebRequest(const char *url, const char *method, MHD_Connection *conn
     method_ = METHOD_TRACE;
   }
 
+  MHD_get_connection_values(connection, MHD_HEADER_KIND, &header_iterator, this);
   MHD_get_connection_values(connection, MHD_COOKIE_KIND, &cookie_iterator, this);
   MHD_get_connection_values(connection,
 			    MHD_GET_ARGUMENT_KIND, &get_argument_iterator, this);
