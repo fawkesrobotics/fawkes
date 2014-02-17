@@ -48,9 +48,18 @@ void MapLaserGenThread::init()
 {
   laser_pose_set_ = false;
 
+  bool have_custom_map = false;
+  try {
+      config->get_string(CFG_PREFIX"map-lasergen/map_file");
+      have_custom_map = true;
+  } catch (Exception &e) {} // ignored, use AMCL map
+
+  logger->log_info(name(), "Using %s map configuration",
+		   have_custom_map ? "custom" : "AMCL");
   fawkes::amcl::read_map_config(config, cfg_map_file_, cfg_resolution_, cfg_origin_x_,
 				cfg_origin_y_, cfg_origin_theta_, cfg_occupied_thresh_,
-				cfg_free_thresh_);
+				cfg_free_thresh_,
+				have_custom_map ? CFG_PREFIX : CFG_PREFIX"map-lasergen/");
 
   cfg_use_current_pose_ = false;
   try {
