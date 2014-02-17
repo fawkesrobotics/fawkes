@@ -59,7 +59,7 @@ void MapLaserGenThread::init()
   fawkes::amcl::read_map_config(config, cfg_map_file_, cfg_resolution_, cfg_origin_x_,
 				cfg_origin_y_, cfg_origin_theta_, cfg_occupied_thresh_,
 				cfg_free_thresh_,
-				have_custom_map ? CFG_PREFIX : CFG_PREFIX"map-lasergen/");
+				have_custom_map ? CFG_PREFIX"map-lasergen/" : CFG_PREFIX);
 
   cfg_use_current_pose_ = false;
   try {
