@@ -46,6 +46,8 @@ MapLaserGenThread::~MapLaserGenThread()
 
 void MapLaserGenThread::init()
 {
+  laser_pose_set_ = false;
+
   fawkes::amcl::read_map_config(config, cfg_map_file_, cfg_resolution_, cfg_origin_x_,
 				cfg_origin_y_, cfg_origin_theta_, cfg_occupied_thresh_,
 				cfg_free_thresh_);
