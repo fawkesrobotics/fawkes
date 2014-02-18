@@ -97,7 +97,7 @@ class JoystickBlackBoardLogger
    */
   JoystickBlackBoardLogger(ArgumentParser &argp, Logger *logger)
     :  BlackBoardInterfaceListener("JoystickBlackBoardLogger"),
-       __argp(argp), __logger(logger)
+       __logger(logger)
   {
     char *host = (char *)"localhost";
     unsigned short int port = 1910;
@@ -181,7 +181,6 @@ class JoystickBlackBoardLogger
 
  private:
   bool __warning_printed;
-  ArgumentParser &__argp;
   BlackBoard *__bb;
   Logger *__logger;
   JoystickInterface *__joystick_if;
@@ -207,8 +206,7 @@ class JoystickBlackBoardActListener
                                 JoystickInterface *joystick_if,
                                 Logger *logger)
     :  BlackBoardInterfaceListener("JoystickBlackBoardActMsgProcThread"),
-       __bb(blackboard), __joystick_if(joystick_if),
-       __logger(logger)
+       __bb(blackboard), __joystick_if(joystick_if)
   {
     __msgproc = new JoystickActThread::MessageProcessor(aqt, __joystick_if);
     __msgproc->process();
@@ -240,7 +238,6 @@ class JoystickBlackBoardActListener
   JoystickActThread::MessageProcessor *__msgproc;
   BlackBoard *__bb;
   JoystickInterface *__joystick_if;
-  Logger *__logger;
 };
 
 /** Config tool main.
