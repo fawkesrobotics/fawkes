@@ -28,11 +28,11 @@
 #  include <sys/stat.h>
 #  include <poll.h>
 #  include <dirent.h>
-#  include <unistd.h>
 #  include <cstring>
 #endif
 #include <cerrno>
 #include <cstdlib>
+#include <unistd.h>
 
 namespace fawkes {
 
