@@ -74,7 +74,6 @@ class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
   float        __step_per_angle;
   float        __angle_per_step;
   float        __angular_range;
-  unsigned int __offset;
 };
 
 
