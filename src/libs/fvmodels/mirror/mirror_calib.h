@@ -108,6 +108,7 @@ class MirrorCalibTool
 
   class ConvexPolygon : public std::vector<PixelPoint> {
    public:
+    ConvexPolygon();
     bool contains(const CartesianImage& img, const CartesianPoint& r) const;
     bool contains(const PixelPoint& r) const;
   };
