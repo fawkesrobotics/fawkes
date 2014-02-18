@@ -60,6 +60,7 @@
 #  include <pcl/registration/ndt.h>
 #endif
 
+#include <Eigen/StdVector>
 #include <mongo/client/dbclient.h>
 
 /** Point cloud merging pipeline.
@@ -175,12 +176,13 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
     this->output_->is_dense = false;
 
     std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> pcls(num_clouds);
-    typename PointCloudDBPipeline<PointType>::CloudPtr non_transformed[num_clouds];
-    typename PointCloudDBPipeline<PointType>::CloudPtr non_aligned[num_clouds];
-    typename PointCloudDBPipeline<PointType>::CloudPtr non_aligned_downsampled[num_clouds];
-    typename PointCloudDBPipeline<PointType>::CloudPtr aligned_downsampled[num_clouds];
-    typename PointCloudDBPipeline<PointType>::CloudPtr aligned_downsampled_remplane[num_clouds];
-    Eigen::Matrix4f transforms[num_clouds-1];
+    std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> non_transformed(num_clouds);
+    std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> non_aligned(num_clouds);
+    std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> non_aligned_downsampled(num_clouds);
+    std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> aligned_downsampled(num_clouds);
+    std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> aligned_downsampled_remplane(num_clouds);
+    std::vector<Eigen::Matrix4f,Eigen::aligned_allocator<Eigen::Matrix4f> >
+      transforms(num_clouds-1);
 
     for (unsigned int i = 0; i < num_clouds; ++i) {
       non_transformed[i] = typename PointCloudDBPipeline<PointType>::CloudPtr(
