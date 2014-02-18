@@ -48,7 +48,7 @@ using namespace fawkes;
  * @param logger logger for log output
  */
 WebviewUserVerifier::WebviewUserVerifier(Configuration *config, Logger *logger)
-  : config(config), logger(logger)
+  : config(config)
 {
   int regerr;
   if ((regerr = regcomp(&__hash_regex, HASH_REGEX, REG_EXTENDED)) != 0) {
