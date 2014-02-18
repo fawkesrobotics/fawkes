@@ -16,6 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/lua.mk
+include $(BUILDCONFDIR)/utils/utils.mk
 
 ifneq ($(HAVE_SQLITE),1)
   ERROR_TARGETS += error_sqlite

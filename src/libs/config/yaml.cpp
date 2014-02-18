@@ -450,6 +450,7 @@ YamlConfiguration::load(const char *file_path)
   std::list<std::string> files, dirs;
   read_yaml_config(filename, host_file_, root_, host_root_, files, dirs);
 
+#ifdef HAVE_INOTIFY
   fam_thread_ = new FamThread();
   RefPtr<FileAlterationMonitor> fam = fam_thread_->get_fam();
   fam->add_filter("^[^.].*\\.yaml$");
@@ -464,6 +465,7 @@ YamlConfiguration::load(const char *file_path)
   }
   fam->add_listener(this);
   fam_thread_->start();
+#endif
 
   //root_->print();
 }
@@ -583,7 +585,6 @@ YamlConfiguration::read_yaml_config(std::string filename, std::string &host_file
     host_root = new YamlConfigurationNode();
   }
 }
-
 
 void
 YamlConfiguration::fam_event(const char *filename, unsigned int mask)
