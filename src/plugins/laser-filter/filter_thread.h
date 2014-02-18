@@ -98,12 +98,8 @@ class LaserFilterThread
 
   LaserDataFilter *__filter;
 
-  unsigned int     __num_values;
-
   std::string      __cfg_name;
   std::string      __cfg_prefix;
-
-
 
   std::list<LaserFilterThread *>  __wait_threads;
   bool                            __wait_done;
