@@ -56,11 +56,7 @@
 #include <stdint.h>
 
 #include <map>
-#ifdef __FreeBSD__
-#  include <tr1/unordered_map>
-#else
-#  include <unordered_map>
-#endif
+#include <unordered_map>
 #include <vector>
 #include <string>
 
@@ -180,11 +176,7 @@ class Transformer
   /// Flag to mark the transformer as disabled
   bool enabled_;
   /// Map from string frame ids to CompactFrameID.
-#ifdef __FreeBSD__
-  typedef std::tr1::unordered_map<std::string, CompactFrameID> M_StringToCompactFrameID;
-#else
   typedef std::unordered_map<std::string, CompactFrameID> M_StringToCompactFrameID;
-#endif
   /// Map from frame IDs to frame numbers
   M_StringToCompactFrameID frameIDs_;
   /// Map from CompactFrameID frame_id_numbers to string for debugging and output.
