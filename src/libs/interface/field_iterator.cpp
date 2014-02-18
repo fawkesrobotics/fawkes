@@ -315,7 +315,7 @@ InterfaceFieldIterator::get_value_string()
 	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int32_t *)__infol->value)[i]);
 	    break;
 	  case IFT_INT64:
-#if (defined(__WORDSIZE) && __WORDSIZE == 64) || (defined(LONG_BIT) && LONG_BIT == 64)
+#if (defined(__WORDSIZE) && __WORDSIZE == 64) || (defined(LONG_BIT) && LONG_BIT == 64) || defined(__x86_64__)
 	    rv = asprintf(&tmp2, "%s%li", tmp1, ((int64_t *)__infol->value)[i]);
 #else
 	    rv = asprintf(&tmp2, "%s%lli", tmp1, ((int64_t *)__infol->value)[i]);
@@ -331,7 +331,7 @@ InterfaceFieldIterator::get_value_string()
 	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint32_t *)__infol->value)[i]);
 	    break;
 	  case IFT_UINT64:
-#if (defined(__WORDSIZE) && __WORDSIZE == 64) || (defined(LONG_BIT) && LONG_BIT == 64)
+#if (defined(__WORDSIZE) && __WORDSIZE == 64) || (defined(LONG_BIT) && LONG_BIT == 64) || defined(__x86_64__)
 	    rv = asprintf(&tmp2, "%s%lu", tmp1, ((uint64_t *)__infol->value)[i]);
 #else
 	    rv = asprintf(&tmp2, "%s%llu", tmp1, ((uint64_t *)__infol->value)[i]);
