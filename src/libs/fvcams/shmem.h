@@ -78,8 +78,6 @@ class SharedMemoryCamera : public Camera
 
   bool          __deep_copy;
   bool          __opened;
-  unsigned int  __width;
-  unsigned int  __height;
   char *        __image_id;
 
   SharedMemoryImageBuffer  *__shm_buffer;
