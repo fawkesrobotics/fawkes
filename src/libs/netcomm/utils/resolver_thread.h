@@ -81,7 +81,9 @@ class NetworkNameResolverThread : public Thread
 
   Mutex *__namesq_mutex;
   unsigned int __namesq_active;
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
+  typedef LockHashSet<char *, std::hash<char *>, StringEquality>  NamesQMap;
+#elif __GLIBCXX__ > 20080305
   typedef LockHashSet<char *, std::tr1::hash<char *>, StringEquality>  NamesQMap;
 #else
   typedef LockHashSet<char *, __gnu_cxx::hash<char *>, StringEquality> NamesQMap;

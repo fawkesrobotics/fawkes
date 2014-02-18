@@ -78,7 +78,9 @@ class NetworkNameResolver
   LockHashMap<uint32_t, std::pair<char *, time_t> >       addr2name_cache;
   LockHashMap<char *,
     std::pair<struct sockaddr *, time_t>,
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
+             std::hash<char *>,
+#elif __GLIBCXX__ > 20080305
              std::tr1::hash<char *>,
 #else
              __gnu_cxx::hash<char *>,
@@ -87,7 +89,9 @@ class NetworkNameResolver
 
   LockHashMap<uint32_t, std::pair<char *, time_t> >::iterator  a2ncit;
   LockHashMap<char *, std::pair<struct sockaddr *, time_t>,
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
+    std::hash<char *>,
+#elif __GLIBCXX__ > 20080305
     std::tr1::hash<char *>,
 #else
     __gnu_cxx::hash<char *>,
