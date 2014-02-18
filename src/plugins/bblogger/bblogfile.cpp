@@ -617,7 +617,7 @@ BBLogFile::remaining_entries()
   size_t entry_size = sizeof(bblog_entry_header) + __header->data_size;
   long   curpos     = ftell(__f);
   size_t fsize      = file_size();
-  size_t sizediff   = fsize - curpos;
+  ssize_t sizediff  = fsize - curpos;
 
   if (sizediff < 0) {
     throw Exception("File %s shrank while reading it", __filename);
