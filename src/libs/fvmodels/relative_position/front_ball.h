@@ -97,8 +97,6 @@ private:
 
   float                 ball_circumference;
 
-  float                 last_x;
-  float                 last_y;
   bool                  last_available;
   float                 ball_x;
   float                 ball_y;
@@ -113,8 +111,6 @@ private:
   float                 avg_y_sum;
   unsigned int          avg_x_num;
   unsigned int          avg_y_num;
-  float                 rx;
-  float                 ry;
 
   float                 var_proc_x;
   float                 var_proc_y;

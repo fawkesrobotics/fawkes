@@ -70,14 +70,9 @@ private:
 
   MirrorModel          *mirror_model;
 
-  unsigned int          image_width;
-  unsigned int          image_height;
-
   unsigned int          image_x;
   unsigned int          image_y;
 
-  float                 last_x;
-  float                 last_y;
   bool                  last_available;
   float                 ball_x;
   float                 ball_y;
@@ -92,8 +87,6 @@ private:
   float                 avg_y_sum;
   unsigned int          avg_x_num;
   unsigned int          avg_y_num;
-  float                 rx;
-  float                 ry;
 
   //kalmanFilter2Dim     *kalman_filter;
 

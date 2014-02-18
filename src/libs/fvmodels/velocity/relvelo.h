@@ -89,9 +89,6 @@ class VelocityFromRelative : public VelocityModel
   std::list<vel_postime_t *>  ball_history;
   std::list<vel_postime_t *>::iterator bh_it;
 
-  int                    diff_sec;
-  int                    diff_usec;
-
   float                  f_diff_sec;
 
   unsigned int           max_history_length;
@@ -120,13 +117,8 @@ class VelocityFromRelative : public VelocityModel
 
   float                  avg_vx_sum;
   float                  avg_vy_sum;
-  float                  avg_vx;
-  float                  avg_vy;
   unsigned int           avg_vx_num;
   unsigned int           avg_vy_num;
-  float                  rx;
-  float                  ry;
-  float                  age_factor;
 
   /*
   bool                   kalman_enabled;

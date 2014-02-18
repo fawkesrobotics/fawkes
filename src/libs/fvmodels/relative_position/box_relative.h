@@ -91,8 +91,6 @@ private:
   float                 camera_offset_y;
   float                 camera_orientation;
 
-  float                 last_x;
-  float                 last_y;
   bool                  last_available;
   float                 box_x;
   float                 box_y;
