@@ -121,6 +121,7 @@ AvahiThread::loop()
 
       if ( ! client ) {
 	avahi_simple_poll_free( simple_poll );
+	simple_poll = NULL;
       }
     }
   }
