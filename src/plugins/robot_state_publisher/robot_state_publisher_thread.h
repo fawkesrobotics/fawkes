@@ -64,15 +64,12 @@
 #include <aspect/clock.h>
 #include <aspect/tf.h>
 #include <aspect/configurable.h>
-#include <plugins/ros/aspect/ros.h>
 #include <aspect/blackboard.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
 
 #include <interfaces/JointInterface.h>
 
-#include <sensor_msgs/JointState.h>
-#include <ros/ros.h>
 #include <kdl/kdl.hpp>
 #include <kdl/frames.hpp>
 #include <kdl/segment.hpp>
@@ -110,7 +107,6 @@ class RobotStatePublisherThread
   public fawkes::ClockAspect,
   public fawkes::TransformAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::ROSAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::BlackBoardInterfaceObserver,
   public fawkes::BlackBoardInterfaceListener

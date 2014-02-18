@@ -57,7 +57,7 @@
 
 #include "robot_state_publisher_thread.h"
 #include <kdl/frames_io.hpp>
-#include<kdl_parser/kdl_parser.hpp>
+#include <kdl_parser/kdl_parser.h>
 
 #include <fstream>
 #include <list>
@@ -103,9 +103,6 @@ void RobotStatePublisherThread::init()
   }
   // walk the tree and add segments to segments_
   add_children(tree_.getRootSegment());
-
-  // publish robot model to ROS
-  ros::param::set("/robot_description", urdf);
 
   std::map<std::string, SegmentPair> unknown_segments = segments_;
 
