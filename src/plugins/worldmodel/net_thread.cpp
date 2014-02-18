@@ -64,7 +64,6 @@ WorldModelNetworkThread::init()
   unsigned int port;
   std::string encryption_key;
   std::string encryption_iv;
-  bool        cfg_multicast_loopback;
   try {
     multicast_addr = config->get_string("/worldinfo/multicast_addr");
     port = config->get_uint("/worldinfo/udp_port");
@@ -73,7 +72,7 @@ WorldModelNetworkThread::init()
     __cfg_sleep_time_msec   = config->get_uint("/worldinfo/sleep_time_msec");
     __cfg_max_msgs_per_recv = config->get_uint("/worldinfo/max_msgs_per_recv");
     __cfg_flush_time_sec    = config->get_uint("/worldinfo/flush_time_sec");
-    cfg_multicast_loopback  = config->get_bool("/worldinfo/multicast_loopback");
+    __cfg_multicast_loopback  = config->get_bool("/worldinfo/multicast_loopback");
   } catch (Exception &e) {
     e.append("Could not get required configuration data for worldmodel");
     e.print_trace();
@@ -86,7 +85,7 @@ WorldModelNetworkThread::init()
 						     nnresolver);
 
   __worldinfo_transceiver->add_handler(this);
-  __worldinfo_transceiver->set_loop(cfg_multicast_loopback);
+  __worldinfo_transceiver->set_loop(__cfg_multicast_loopback);
 
   try {
     __gamestate_if = blackboard->open_for_writing<GameStateInterface>("WI GameState");
