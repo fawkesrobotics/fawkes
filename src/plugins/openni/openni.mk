@@ -32,6 +32,12 @@ endif
 ifeq ($(HAVE_OPENNI),1)
   CFLAGS_OPENNI += -DHAVE_OPENNI -Wno-unused-variable -Wno-reorder \
 		  -fno-strict-aliasing -Wno-unknown-pragmas \
-                  -Wno-unused-but-set-variable -Wno-return-type
+                  -Wno-return-type
+  ifeq ($(CC),gcc)
+    CFLAGS_OPENNI += -Wno-unused-but-set-variable
+  endif
+  ifeq ($(CC),clang)
+    CFLAGS_OPENNI += -Wno-attributes
+  endif
 endif
 
