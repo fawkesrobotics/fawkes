@@ -25,8 +25,10 @@ ifeq ($(HAVE_FLITE),1)
   ifeq ($(DISTRO),ubuntu)
     _FLITE_NEEDS_EXTRA_LIBS=1
   endif
+  ifeq ($(OS),FreeBSD)
+    _FLITE_NEEDS_EXTRA_LIBS=1
+  endif
   ifeq ($(_FLITE_NEEDS_EXTRA_LIBS),1)
-    CFLAGS_FLITE += -lflite_cmu_us_kal -lflite_usenglish -lflite_cmulex -lflite
     LDFLAGS_FLITE += -lflite_cmu_us_kal -lflite_usenglish -lflite_cmulex -lflite
   endif
 endif
