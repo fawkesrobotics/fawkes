@@ -45,7 +45,6 @@ class ROSWebviewRequestProcessor
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
-  fawkes::Logger    *logger;
   std::string        __logcomp;
 
   std::string        __baseurl;

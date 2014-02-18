@@ -48,7 +48,6 @@ ROSWebviewRequestProcessor::ROSWebviewRequestProcessor(LockPtr<ros::NodeHandle> 
 						       Logger *logger,
 						       std::string &baseurl,
 						       std::string &srv_name)
-  :  logger(logger)
 {
   __baseurl  = baseurl;
   __srv_name = srv_name;
