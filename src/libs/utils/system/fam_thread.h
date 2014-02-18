@@ -46,7 +46,6 @@ class FamThread : public Thread
 
  private:
   RefPtr<FileAlterationMonitor> __fam;
-  bool                          __own_fam;
 };
 
 

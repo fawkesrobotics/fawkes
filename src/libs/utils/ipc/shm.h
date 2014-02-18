@@ -141,7 +141,6 @@ class SharedMemory
     void reset();
 
     bool                    __initialized;
-    char                   *__magic_token;
     std::list<SharedMemoryRegistry::SharedMemID> __ids;
     std::list<SharedMemoryRegistry::SharedMemID>::iterator __id_it;
     int                     __cur_shmid;
