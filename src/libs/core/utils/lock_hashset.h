@@ -26,8 +26,11 @@
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
-
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#include <cstdlib>
+#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
+#  include <unordered_set>
+#  include <functional>
+#elif __GLIBCXX__ > 20080305
 #  include <tr1/unordered_set>
 #else
 #  include <ext/hash_set>
@@ -37,7 +40,11 @@ namespace fawkes {
 
 
 template <class KeyType,
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
+          class HashFunction = std::hash<KeyType>,
+          class EqualKey     = std::equal_to<KeyType> >
+class LockHashSet : public std::unordered_set<KeyType, HashFunction, EqualKey>
+#elif __GLIBCXX__ > 20080305
           class HashFunction = std::tr1::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType> >
 class LockHashSet : public std::tr1::unordered_set<KeyType, HashFunction, EqualKey>
@@ -91,7 +98,9 @@ LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet()
  */
 template <class KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet(const LockHashSet<KeyType, HashFunction, EqualKey> &lh)
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
+  : std::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
+#elif __GLIBCXX__ > 20080305
   : std::tr1::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
 #else
   : __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>::hash_set(lh),
