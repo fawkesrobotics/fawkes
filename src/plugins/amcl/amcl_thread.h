@@ -134,9 +134,7 @@ private:
   pf_t *pf_;
   int resample_count_;
 
-  double gui_publish_period;
   double save_pose_period;
-  double cloud_pub_interval;
   double transform_tolerance_;
   fawkes::Time save_pose_last_time;
 
@@ -154,11 +152,6 @@ private:
   bool first_map_received_;
   bool first_reconfigure_call_;
 
-  char* mapdata;
-  int sx, sy;
-  double resolution;
-
-
   // Particle filter
   double pf_err_, pf_z_;
   bool pf_init_;
@@ -172,8 +165,9 @@ private:
 
   fawkes::Time last_cloud_pub_time;
   fawkes::Time last_laser_received_ts_;
+#ifdef HAVE_ROS
   double last_covariance_[36];
-
+#endif
 
   float alpha1_;
   float alpha2_;
