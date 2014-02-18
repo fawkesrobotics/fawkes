@@ -52,11 +52,6 @@ class MultiColorClassifier : public Classifier
  private:
   unsigned int consider_neighbourhood(unsigned int x, unsigned int y, color_t what);
 
-  unsigned char *src;
-
-  unsigned int width;
-  unsigned int height;
-
   unsigned int neighbourhood_min_match;
   unsigned int grow_by;
 
