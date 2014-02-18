@@ -40,8 +40,14 @@ class MulticastDatagramSocket : public Socket
   virtual Socket *  clone();
 
   virtual void bind();
+  virtual void bind(const unsigned short int port);
+  virtual void bind(const unsigned short int port,
+		    const char *hostname);
 
-  virtual void send(void *buf, unsigned int buf_len);
+  virtual void send(void *buf, size_t buf_len);
+  virtual void send(void *buf, size_t buf_len,
+		    const struct sockaddr *to_addr, socklen_t addr_len)
+  { send(buf, buf_len); }
 
   void set_loop(bool loop);
   void set_ttl(int ttl);
