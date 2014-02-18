@@ -73,6 +73,10 @@ ifeq ($(HAVE_PCL),1)
   LDFLAGS_PCL += $(LDFLAGS_EIGEN3) \
 		 $(shell $(PKGCONFIG) --libs 'pcl_common$(PCL_VERSION_SUFFIX)')
 
+  ifeq ($(CC),clang)
+    CFLAGS_PCL += -Wno-overloaded-virtual
+  endif
+
   ROS_PCL=$(filter /opt/ros%,$(shell $(PKGCONFIG) --variable=prefix 'pcl_common$(PCL_VERSION_SUFFIX)'))
   ifneq ($(ROS_PCL),)
     ifneq ($(HAVE_ROS),1)
