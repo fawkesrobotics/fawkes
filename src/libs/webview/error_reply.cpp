@@ -46,7 +46,7 @@ WebErrorPageReply::WebErrorPageReply(response_code_t code,
 				     const char *format, ...)
   : WebPageReply(code)
 {
-  if ( (code < 400) || (code > 599) ) {
+  if ( ((int)code < 400) || ((int)code > 599) ) {
     throw fawkes::OutOfBoundsException("Error code invalid", code, 400, 599);
   }
 
