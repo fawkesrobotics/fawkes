@@ -75,7 +75,6 @@ class MongoRRDThread
   fawkes::RRDGraphDefinition *__opcounters_graph;
   fawkes::RRDGraphDefinition *__memory_graph;
   fawkes::RRDGraphDefinition *__indexes_graph;
-  fawkes::RRDGraphDefinition *__locks_graph;
 
   /// @cond INTERNALS
   typedef struct {
