@@ -412,6 +412,7 @@ FawkesMainThread::Runner::Runner(FawkesMainThread *fmt, bool register_signals)
 
   __fmt = fmt;
 
+  SignalManager::ignore(SIGPIPE);
   if (__register_signals) {
     SignalManager::register_handler(SIGINT,  this);
     SignalManager::register_handler(SIGTERM, this);
