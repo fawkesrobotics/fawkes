@@ -84,7 +84,6 @@ class WorldInfoViewer : public Gtk::Window
 
   fawkes::WorldInfoDataContainer* m_data_container;
 
-  unsigned int m_robot_id;
   std::map<Glib::ustring, unsigned int> m_robots;
   std::map<unsigned int, Gtk::TreeModel::Row> m_list_entries;
 };

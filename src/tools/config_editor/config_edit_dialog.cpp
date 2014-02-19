@@ -58,7 +58,7 @@ ConfigEditDialog::ConfigEditDialog(Gtk::Entry *ent_value, Gtk::ComboBox *cob_boo
 				   Gtk::Notebook *type_pages, Gtk::CheckButton *chb_is_default)
   : Gtk::Dialog()
 {
-  m_ent_value       = m_ent_value;
+  m_ent_value       = ent_value;
   m_cob_bool_value  = cob_bool_value;
   m_type_pages      = type_pages;
   m_chb_is_default  = chb_is_default;

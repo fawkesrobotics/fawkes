@@ -220,11 +220,8 @@ class Firestation : public Gtk::Window
 
   firevision::colorspace_t m_img_cs;
   size_t m_img_size;
-
-  bool m_cont_img_trans;
-
-  bool m_enable_scaling;
-  float m_scale_factor;
+  bool   m_cont_img_trans;
+  float  m_scale_factor;
 
 #ifdef HAVE_MIRROR_CALIB
   firevision::MirrorCalibTool* m_calib_tool;

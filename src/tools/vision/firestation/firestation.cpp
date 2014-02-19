@@ -983,9 +983,8 @@ Firestation::image_click(GdkEventButton* event)
     image_y = 0;
   }
 
-  if ( image_x < 0 || image_x > m_img_width ||
-       image_y < 0 || image_y > m_img_height )
-    { return true; }
+  if ( image_x > m_img_width || image_y > m_img_height )
+  { return true; }
 
   switch (m_op_mode)
     {
