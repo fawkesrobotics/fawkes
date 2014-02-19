@@ -120,7 +120,6 @@ class FuseImageListWidget : FuseClientHandler, public Gtk::TreeView
 
   ClientData m_cur_client;
 
-  Gtk::Menu* m_popup_menu;
   Gtk::CheckButton* m_chk_auto_update;
   Gtk::CheckButton* m_chk_compression;
   Gtk::TreeView* m_trv_image_list;
