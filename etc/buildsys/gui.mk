@@ -74,6 +74,9 @@ endif
 ifeq ($(HAVE_GTKMM),1)
   CFLAGS_GTKMM     = -DHAVE_GTKMM $(shell $(PKGCONFIG) --cflags '$(PC_GTKMM)')
   LDFLAGS_GTKMM    = $(shell $(PKGCONFIG) --libs '$(PC_GTKMM)')
+  ifeq ($(CC),clang)
+    CFLAGS_GTKMM += -Wno-overloaded-virtual
+  endif
 else
   PKG_MISSING += $(PKG_GTKMM)
 endif
