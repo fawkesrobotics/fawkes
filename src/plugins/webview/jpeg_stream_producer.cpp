@@ -27,6 +27,7 @@
 
 #include <fvcams/shmem.h>
 #include <fvutils/compression/jpeg_compressor.h>
+#include <fvutils/color/conversions.h>
 #include <utils/time/wait.h>
 
 #include <cstdlib>
@@ -153,11 +154,15 @@ WebviewJpegStreamProducer::wait_for_next_frame()
 void
 WebviewJpegStreamProducer::init()
 {
-  cam_  = new SharedMemoryCamera(image_id_.c_str(), /* deep copy */ true);
+  cam_  = new SharedMemoryCamera(image_id_.c_str(), /* deep copy */ false);
   jpeg_ = new JpegImageCompressor(quality_);
   jpeg_->set_image_dimensions(cam_->pixel_width(), cam_->pixel_height());
   jpeg_->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
   if (jpeg_->supports_vflip())  jpeg_->set_vflip(vflip_);
+
+  in_buffer_ = malloc_buffer(YUV422_PLANAR,
+			     cam_->pixel_width(), cam_->pixel_height());
+  jpeg_->set_image_buffer(YUV422_PLANAR, in_buffer_);
 
   long int loop_time = (long int)roundf((1. / fps_) * 1000000.);
   timewait_ = new TimeWait(clock, loop_time);
@@ -176,10 +181,14 @@ WebviewJpegStreamProducer::loop()
   unsigned char *buffer = (unsigned char *)malloc(size);
   jpeg_->set_destination_buffer(buffer, size);
 
+  cam_->lock_for_read();
   cam_->capture();
-  jpeg_->set_image_buffer(cam_->colorspace(), cam_->buffer());
+  firevision::convert(cam_->colorspace(), YUV422_PLANAR,
+		      cam_->buffer(), in_buffer_,
+		      cam_->pixel_width(), cam_->pixel_height());
   jpeg_->compress();
   cam_->dispose_buffer();
+  cam_->unlock();
 
   RefPtr<Buffer> shared_buf(new Buffer(buffer, jpeg_->compressed_size()));
   subs_.lock();
@@ -206,6 +215,7 @@ WebviewJpegStreamProducer::finalize()
   delete jpeg_;
   delete cam_;
   delete timewait_;
+  free(in_buffer_);
 }
 
 } // end namespace fawkes

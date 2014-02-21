@@ -89,10 +89,11 @@ class WebviewJpegStreamProducer
   virtual void finalize();
 
  private:
-  std::string  image_id_;
-  unsigned int quality_;
-  float        fps_;
-  bool         vflip_;
+  std::string    image_id_;
+  unsigned int   quality_;
+  float          fps_;
+  bool           vflip_;
+  unsigned char *in_buffer_;
 
   TimeWait *timewait_;
 
