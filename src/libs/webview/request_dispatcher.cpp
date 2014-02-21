@@ -400,50 +400,45 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 				      size_t *upload_data_size,
 				      void **session_data)
 {
+  WebRequest *request = static_cast<WebRequest *>(*session_data);
+
+  if ( ! request->is_setup() ) {
+    // The first time only the headers are valid,
+    // do not respond in the first round...
+    request->setup(url, method, version, connection);
+
+    __active_requests_mutex->lock();
+    __active_requests += 1;
+    __active_requests_mutex->unlock();
+
+    if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
+      request->pp_ =
+	MHD_create_post_processor(connection, 1024, &post_iterator, request);
+    }
+
+    return MHD_YES;
+  }
+
+#if MHD_VERSION >= 0x00090400
+  if (__realm) {
+    char *user, *pass = NULL;
+    user = MHD_basic_auth_get_username_password(connection, &pass);
+    if ( (user == NULL) || (pass == NULL) ||
+	 ! __user_verifier->verify_user(user, pass))
+    {
+      return queue_basic_auth_fail(connection, request);
+    }
+    request->user_ = user;
+  }
+#endif
+
   std::string surl = url;
   int ret;
 
   MutexLocker lock(__url_manager->mutex());
   WebRequestProcessor *proc = __url_manager->find_processor(surl);
 
-  WebRequest *request = static_cast<WebRequest *>(*session_data);
-
   if (proc) {
-    char *urlc = strdup(url);
-    fawkes::hex_unescape(urlc);
-    std::string urls = urlc;
-    free(urlc);
-
-    if ( ! request->is_setup() ) {
-      // The first time only the headers are valid,
-      // do not respond in the first round...
-      request->setup(url, method, version, connection);
-
-      __active_requests_mutex->lock();
-      __active_requests += 1;
-      __active_requests_mutex->unlock();
-
-      if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
-	request->pp_ =
-	  MHD_create_post_processor(connection, 1024, &post_iterator, request);
-      }
-
-      return MHD_YES;
-    }
-
-#if MHD_VERSION >= 0x00090400
-    if (__realm) {
-      char *user, *pass = NULL;
-      user = MHD_basic_auth_get_username_password(connection, &pass);
-      if ( (user == NULL) || (pass == NULL) ||
-	   ! __user_verifier->verify_user(user, pass))
-      {
-	return queue_basic_auth_fail(connection, request);
-      }
-      request->user_ = user;
-    }
-#endif
-
     if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
       if (MHD_post_process(request->pp_, upload_data, *upload_data_size) == MHD_NO) {
 	request->set_raw_post_data(upload_data, *upload_data_size);
