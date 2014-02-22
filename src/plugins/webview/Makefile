@@ -38,10 +38,16 @@ ifneq ($(PKGCONFIG),)
       CFLAGS_GRAPHVIZ += -DWITH_CGRAPH
     endif
   endif
+
+  HAVE_APR_UTIL = $(if $(shell $(PKGCONFIG) --exists 'apr-util-1'; echo $${?/1/}),1,0)
+  ifeq ($(HAVE_APR_UTIL),1)
+    CFLAGS_APR_UTIL  = -DHAVE_APR_UTIL $(shell $(PKGCONFIG) --cflags 'apr-util-1')
+    LDFLAGS_APR_UTIL = $(shell $(PKGCONFIG) --libs 'apr-util-1')
+  endif
 endif
 
 ifeq ($(HAVE_LIBMICROHTTPD),1)
-  LIBS_webview = crypt fawkescore fawkesutils fawkesaspects fawkesblackboard \
+  LIBS_webview = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		 fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
 		 fawkeslogging
   OBJS_webview = blackboard_processor.o footer_generator.o header_generator.o \
@@ -71,6 +77,15 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
       WARN_TARGETS += warning_graphviz
     endif
   endif
+
+  ifeq ($(HAVE_APR_UTIL),1)
+    CFLAGS  += $(CFLAGS_APR_UTIL)
+    LDFLAGS += $(LDFLAGS_APR_UTIL)
+  else
+    CFLAGS  += -DHAVE_CRYPT
+    LIBS_webview += crypt
+    WARN_TARGETS += warning_apr_util
+  endif
 else
   WARN_TARGETS += warning_libmicrohttpd
 endif
@@ -81,7 +96,7 @@ ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_libmicrohttpd warning_tf warning_graphviz
+.PHONY: warning_libmicrohttpd warning_tf warning_graphviz warning_apr_util
 warning_libmicrohttpd:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting webview plugin$(TNORMAL) (libmicrohttpd not installed)"
 warning_tf:
@@ -90,6 +105,8 @@ warning_graphviz:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting transforms support$(TNORMAL) (graphviz not found)"
 warning_jpeg:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting image viewing support$(TNORMAL) (JPEG not available)"
+warning_apr_util:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting APR based password verification support$(TNORMAL) (apr-util not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

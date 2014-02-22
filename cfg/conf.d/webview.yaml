@@ -30,8 +30,14 @@ webview:
   # access_log: access_log
 
   # Example user, delete or change password!
+  # Use !cleartext! prefix if you really want to use a clear text password
+  # (discouraged). Note that the password is only compared to the suffix.
+  # If you have a system that supports APR use
+  #   htpasswd -nB USERNAME
+  # to generate an appropriate password string and copy and paste the part
+  # after the colon and after the colon only.
   users:
-    fawkes: fawkes
+    fawkes: "!cleartext!fawkes"
 
   # Image specific settings, format is (all values are optional):
   # image_id:

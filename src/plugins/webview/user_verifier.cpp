@@ -27,14 +27,16 @@
 #include <logging/logger.h>
 
 #include <string>
-#ifdef __USE_GNU
-#  include <crypt.h>
-#else
-#  include <unistd.h>
+#ifdef HAVE_CRYPT
+#  ifdef __USE_GNU
+#    include <crypt.h>
+#  else
+#    include <unistd.h>
+#  endif
 #endif
-
-#define HASH_REGEX "^(\\$([[:alnum:]]+)\\$([a-zA-Z0-9/.]+)\\$)[a-zA-Z0-9/.]+$"
-
+#ifdef HAVE_APR_UTIL
+#  include <apr_md5.h>
+#endif
 using namespace fawkes;
 
 /** @class WebviewUserVerifier "user_verifier.h"
@@ -50,20 +52,12 @@ using namespace fawkes;
 WebviewUserVerifier::WebviewUserVerifier(Configuration *config, Logger *logger)
   : config(config), logger(logger)
 {
-  int regerr;
-  if ((regerr = regcomp(&__hash_regex, HASH_REGEX, REG_EXTENDED)) != 0) {
-    char errtmp[1024];
-    regerror(regerr, &__hash_regex, errtmp, sizeof(errtmp));
-    regfree(&__hash_regex);
-    throw Exception("Failed to compile hash regex: %s", errtmp);
-  }
 }
 
 
 /** Destructor. */
 WebviewUserVerifier::~WebviewUserVerifier()
 {
-  regfree(&__hash_regex);
 }
 
 
@@ -74,22 +68,23 @@ WebviewUserVerifier::verify_user(const char *user, const char *password) throw()
     std::string userpath = std::string("/webview/users/") + user;
     std::string confpass = config->get_string(userpath.c_str());
 
-    regmatch_t m[4];
-    if (regexec(&__hash_regex, confpass.c_str(), 4, m, 0) == REG_NOMATCH) {
-      // assume clear text
-      //logger->log_warn("WebviewUserVerifier", "Access denied for user %s, "
-      //		       "invalid clear text password", user);
-      return (confpass == password);
+    if (confpass.find("!cleartext!") == 0) {
+      return (confpass.substr(11) == password);
     }
 
-#ifdef __USE_GNU
+#ifdef HAVE_APR_UTIL
+    return
+      (apr_password_validate(password, confpass.c_str()) == APR_SUCCESS);
+
+#elif defined(HAVE_CRYPT)
+#  ifdef __USE_GNU
     struct crypt_data cd;
     cd.initialized = 0;
 
     char *crypted = crypt_r(password, confpass.c_str(), &cd);
-#else
+#  else
     char *crypted = crypt(password, confpass.c_str());
-#endif
+#  endif
 
     if (confpass == crypted) {
       return true;
@@ -98,6 +93,9 @@ WebviewUserVerifier::verify_user(const char *user, const char *password) throw()
       //		       "invalid clear hashed password", user);
       return false;
     }
+#else
+    return (confpass == password);
+#endif
 
   } catch (Exception &e) {
     //logger->log_warn("WebviewUserVerifier", "Access denied for unknown user %s",
