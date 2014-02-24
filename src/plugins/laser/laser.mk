@@ -43,6 +43,9 @@ else
     LDFLAGS_URG_GBX = $(shell $(PKGCONFIG) --libs 'flexiport' 'hokuyo_aist')
   endif
 endif
+ifeq ($(HAVE_URG_GBX)_$(CC),1_clang)
+  CFLAGS_URG_GBX += -Wno-overloaded-virtual
+endif
 
 
 HAVE_LIBUDEV=$(if $(shell $(PKGCONFIG) --exists 'libudev'; echo $${?/1/}),1,0)
