@@ -32,8 +32,7 @@
 #endif
 #include <Eigen/Geometry>
 
-extern "C"
-{
+extern "C" {
 #ifdef HAVE_QHULL_2011
 #  include "libqhull/libqhull.h"
 #  include "libqhull/mem.h"
@@ -69,7 +68,7 @@ using namespace fawkes;
 
 /** Constructor. */
 TabletopVisualizationThread::TabletopVisualizationThread()
-  : fawkes::Thread("TabletopVisualizationThread", Thread::OPMODE_WAITFORWAKEUP)
+: fawkes::Thread("TabletopVisualizationThread", Thread::OPMODE_WAITFORWAKEUP)
 {
   set_coalesce_wakeups(true);
 }
@@ -102,6 +101,9 @@ TabletopVisualizationThread::init()
   } catch (Exception &e) {} // ignored, use default
   try {
     cfg_show_cvxhull_vertex_ids_ = config->get_bool(CFG_PREFIX_VIS"show_convex_hull_vertex_ids");
+  } catch (Exception &e) {} // ignored, use default
+  try {
+    cfg_cylinder_fitting_ = config->get_bool(CFG_PREFIX"enable_cylinder_fitting");
   } catch (Exception &e) {} // ignored, use default
 
   vispub_ = new ros::Publisher();
@@ -146,17 +148,23 @@ TabletopVisualizationThread::loop()
   visualization_msgs::MarkerArray m;
 
   unsigned int idnum = 0;
-
-  for (size_t i = 0; i < centroids_.size(); ++i) {
+  for (M_Vector4f::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
     try {
+
+      /*
+       tf::Stamped<tf::Point> centroid(tf::Point(centroids_[i][0], centroids_[i][1], centroids_[i][2]), fawkes::Time(0, 0), frame_id_);
+       tf::Stamped<tf::Point> baserel_centroid;
+       tf_listener->transform_point("/base_link", centroid, baserel_centroid);
+       */
+
       tf::Stamped<tf::Point>
-        centroid(tf::Point(centroids_[i][0], centroids_[i][1], centroids_[i][2]),
-                 fawkes::Time(0, 0), frame_id_);
-      tf::Stamped<tf::Point> baserel_centroid;
-      tf_listener->transform_point("/base_link", centroid, baserel_centroid);
+        centroid(tf::Point(it->second[0], it->second[1], it->second[2]),
+                 fawkes::Time(0, 0), "/base_link");
+      tf::Stamped<tf::Point> camrel_centroid;
+      tf_listener->transform_point(frame_id_, centroid, camrel_centroid);
 
       char *tmp;
-      if (asprintf(&tmp, "TObj %zu", i) != -1) {
+      if (asprintf(&tmp, "TObj %u", it->first) != -1) {
         // Copy to get memory freed on exception
         std::string id = tmp;
         free(tmp);
@@ -168,9 +176,12 @@ TabletopVisualizationThread::loop()
         text.id = idnum++;
         text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
         text.action = visualization_msgs::Marker::ADD;
-        text.pose.position.x = baserel_centroid[0];
-        text.pose.position.y = baserel_centroid[1];
-        text.pose.position.z = baserel_centroid[2] + 0.13;
+        /*        text.pose.position.x = baserel_centroid[0];
+         text.pose.position.y = baserel_centroid[1];
+         text.pose.position.z = baserel_centroid[2] + 0.17;*/
+        text.pose.position.x = centroid[0];
+        text.pose.position.y = centroid[1];
+        text.pose.position.z = centroid[2] + 0.17;
         text.pose.orientation.w = 1.;
         text.scale.z = 0.05; // 5cm high
         text.color.r = text.color.g = text.color.b = 1.0f;
@@ -187,19 +198,69 @@ TabletopVisualizationThread::loop()
       sphere.id = idnum++;
       sphere.type = visualization_msgs::Marker::CYLINDER;
       sphere.action = visualization_msgs::Marker::ADD;
-      sphere.pose.position.x = baserel_centroid[0];
-      sphere.pose.position.y = baserel_centroid[1];
-      sphere.pose.position.z = baserel_centroid[2];
-      sphere.pose.orientation.w = 1.;
-      sphere.scale.x = sphere.scale.y = 0.08;
-      sphere.scale.z = 0.09;
-      sphere.color.r = (float)cluster_colors[i][0] / 255.f;
-      sphere.color.g = (float)cluster_colors[i][1] / 255.f;
-      sphere.color.b = (float)cluster_colors[i][2] / 255.f;
-      sphere.color.a = 1.0;
-      sphere.lifetime = ros::Duration(cfg_duration_, 0);
-      m.markers.push_back(sphere);
-    } catch (tf::TransformException &e) {} // ignored
+
+      if (cfg_cylinder_fitting_) {
+
+        /*
+       sphere.scale.x = sphere.scale.y = 0.08;
+       sphere.scale.z = 0.09;
+         */
+        sphere.scale.x = sphere.scale.y = 2 * cylinder_params_[it->first][0];
+        sphere.scale.z = cylinder_params_[it->first][1];
+        //if (obj_confidence_[it->first] >= 0.5)
+        if (best_obj_guess_[it->first] < 0) {
+          sphere.color.r = 1.0;
+          sphere.color.g = 0.0;
+          sphere.color.b = 0.0;
+        } else {
+          sphere.color.r = 0.0;
+          sphere.color.g = 1.0;
+          sphere.color.b = 0.0;
+        }
+        /*
+       sphere.color.r = (float)cluster_colors[it->first % MAX_CENTROIDS][0] / 255.f;
+       sphere.color.g = (float)cluster_colors[it->first % MAX_CENTROIDS][1] / 255.f;
+       sphere.color.b = (float)cluster_colors[it->first % MAX_CENTROIDS][2] / 255.f;
+         */
+        sphere.color.a = 1.0;
+
+        /*
+       sphere.pose.position.x = baserel_centroid[0];
+       sphere.pose.position.y = baserel_centroid[1];
+       sphere.pose.position.z = baserel_centroid[2];
+         */
+        sphere.pose.position.x = centroid[0];
+        sphere.pose.position.y = centroid[1];
+        sphere.pose.position.z = centroid[2];
+        //////////////
+        tf::Quaternion table_quat(tf::Vector3(0, 1, 0), cylinder_params_[2][0]);
+        /*
+      sphere.pose.orientation.x = table_quat.getX();
+      sphere.pose.orientation.y = table_quat.getY();
+      sphere.pose.orientation.z = table_quat.getZ();
+      sphere.pose.orientation.w = table_quat.getW();
+         */
+        sphere.pose.orientation.w = 1.;
+        //////////////
+        sphere.lifetime = ros::Duration(cfg_duration_, 0);
+        m.markers.push_back(sphere);
+      }
+      else {
+        sphere.pose.position.x = centroid[0];
+        sphere.pose.position.y = centroid[1];
+        sphere.pose.position.z = centroid[2];
+        sphere.pose.orientation.w = 1.;
+        sphere.scale.x = sphere.scale.y = 0.08;
+        sphere.scale.z = 0.09;
+        sphere.color.r = (float)cluster_colors[it->first % MAX_CENTROIDS][0] / 255.f;
+        sphere.color.g = (float)cluster_colors[it->first % MAX_CENTROIDS][1] / 255.f;
+        sphere.color.b = (float)cluster_colors[it->first % MAX_CENTROIDS][2] / 255.f;
+        sphere.color.a = 1.0;
+        sphere.lifetime = ros::Duration(cfg_duration_, 0);
+        m.markers.push_back(sphere);
+      }
+    } catch (Exception &e) {
+    } // ignored
   }
 
   Eigen::Vector4f normal_end = (table_centroid_ + (normal_ * -0.15));
@@ -336,7 +397,7 @@ TabletopVisualizationThread::loop()
   }
 
   // Table model surrounding polygon
-  if (! (table_model_vertices_.empty() && table_hull_vertices_.empty())) {
+  if (!(table_model_vertices_.empty() && table_hull_vertices_.empty())) {
     visualization_msgs::Marker hull;
     hull.header.frame_id = frame_id_;
     hull.header.stamp = ros::Time::now();
@@ -391,23 +452,23 @@ TabletopVisualizationThread::loop()
       plane.points[i].z = table_model_vertices_[i][2];
     }
     for (unsigned int i = 2; i < 5; ++i) {
-      plane.points[i+1].x = table_model_vertices_[i % 4][0];
-      plane.points[i+1].y = table_model_vertices_[i % 4][1];
-      plane.points[i+1].z = table_model_vertices_[i % 4][2];
+      plane.points[i + 1].x = table_model_vertices_[i % 4][0];
+      plane.points[i + 1].y = table_model_vertices_[i % 4][1];
+      plane.points[i + 1].z = table_model_vertices_[i % 4][2];
     }
     plane.pose.orientation.w = 1.;
     plane.scale.x = 1.0;
     plane.scale.y = 1.0;
     plane.scale.z = 1.0;
-    plane.color.r = ((float)table_color[0] / 255.f) * 0.8;
-    plane.color.g = ((float)table_color[1] / 255.f) * 0.8;
-    plane.color.b = ((float)table_color[2] / 255.f) * 0.8;
+    plane.color.r = ((float) table_color[0] / 255.f) * 0.8;
+    plane.color.g = ((float) table_color[1] / 255.f) * 0.8;
+    plane.color.b = ((float) table_color[2] / 255.f) * 0.8;
     plane.color.a = 1.0;
     plane.lifetime = ros::Duration(cfg_duration_, 0);
     m.markers.push_back(plane);
   }
 
-  if (cfg_show_frustrum_ && ! table_model_vertices_.empty()) {
+  if (cfg_show_frustrum_ && !table_model_vertices_.empty()) {
     // Frustrum
     visualization_msgs::Marker frustrum;
     frustrum.header.frame_id = frame_id_;
@@ -545,14 +606,27 @@ TabletopVisualizationThread::loop()
 #endif
 }
 
+/**
+ * Visualize the given data.
+ * @param frame_id reference frame ID
+ * @param table_centroid centroid of table
+ * @param normal normal vector of table
+ * @param table_hull_vertices points of the table hull
+ * @param table_model_vertices points of the fitted table model
+ * @param good_table_hull_edges "good" egdes in table hull, i.e. edges that have
+ * been considered for determining the table orientation
+ * @param centroids object cluster centroids
+ * @param cylinder_params The result of the cylinder fitting of the objects
+ * @param obj_confidence The fitting confidences
+ * @param best_obj_guess The best guesses of the objects
+ */
 void
 TabletopVisualizationThread::visualize(const std::string &frame_id,
-                                       Eigen::Vector4f &table_centroid,
-                                       Eigen::Vector4f &normal,
-                                       V_Vector4f &table_hull_vertices,
-                                       V_Vector4f &table_model_vertices,
-                                       V_Vector4f &good_table_hull_edges,
-                                       V_Vector4f &centroids) throw()
+    Eigen::Vector4f &table_centroid, Eigen::Vector4f &normal,
+    V_Vector4f &table_hull_vertices, V_Vector4f &table_model_vertices,
+    V_Vector4f &good_table_hull_edges, M_Vector4f &centroids,
+    M_Vector4f &cylinder_params, std::map<unsigned int, double> &obj_confidence,
+    std::map<unsigned int, signed int>& best_obj_guess) throw ()
 {
   MutexLocker lock(&mutex_);
   frame_id_ = frame_id;
@@ -562,6 +636,9 @@ TabletopVisualizationThread::visualize(const std::string &frame_id,
   table_model_vertices_ = table_model_vertices;
   good_table_hull_edges_ = good_table_hull_edges;
   centroids_ = centroids;
+  cylinder_params_ = cylinder_params;
+  obj_confidence_ = obj_confidence;
+  best_obj_guess_ = best_obj_guess;
   wakeup();
 }
 

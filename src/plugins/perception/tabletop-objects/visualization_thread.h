@@ -58,7 +58,10 @@ class TabletopVisualizationThread
                          V_Vector4f &table_hull_vertices,
                          V_Vector4f &table_model_vertices,
                          V_Vector4f &good_table_hull_edges,
-                         V_Vector4f &centroids) throw();
+                         M_Vector4f &centroids,
+                         M_Vector4f &cylinder_params,
+                         std::map<unsigned int, double> &obj_confidence,
+                         std::map<unsigned int, signed int>& best_obj_guess) throw();
 
  private:
   void triangulate_hull();
@@ -72,7 +75,10 @@ class TabletopVisualizationThread
   V_Vector4f table_model_vertices_;
   V_Vector4f good_table_hull_edges_;
   V_Vector4f table_triangle_vertices_;
-  V_Vector4f centroids_;
+  M_Vector4f centroids_;
+  M_Vector4f cylinder_params_;
+  std::map<unsigned int, double> obj_confidence_;
+  std::map<unsigned int, signed int> best_obj_guess_;
   ros::Publisher *vispub_;
 #ifdef USE_POSEPUB
   ros::Publisher *posepub_;
@@ -86,6 +92,7 @@ class TabletopVisualizationThread
   bool         cfg_show_cvxhull_line_highlighting_;
   bool         cfg_show_cvxhull_vertex_ids_;
   unsigned int cfg_duration_;
+  bool         cfg_cylinder_fitting_;
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

@@ -44,6 +44,15 @@ perception/tabletop-objects:
   # Maximum height of table; m
   table_max_height: 0.9
 
+  # Enable the use of the following table model?
+  # If enabled, the table model of the given size is instantiated and aligned
+  # to the table polygon in the best way possible. If disabled, the convex hull
+  # of the table plane cluster is used.
+  # The outline (either model or convex hull) defines the points considered for
+  # object clustering. Disable the table model if you expect not to stand on the
+  # long side of the table.
+  table_model_enable: false
+  
   # Table model width, i.e. if the robot is standing in front of the
   # longer edge of the table the distance between the close and the far edge; m
   table_model_width: 0.8
@@ -89,3 +98,20 @@ perception/tabletop-objects:
   # Vertical viewing angle of the camera, used for frustrum, value is for Kinect; deg
   vertical_viewing_angle: 43.0
 
+  # max number of loops a centroid is saved
+  centroid_max_age: 50
+
+  # max distance an old centroid may have moved
+  centroid_max_distance: 0.041
+
+  # min distance between two centroids, old centroids will be deleted if they are closer
+  centroid_min_distance: 0.01
+
+  # max height of a centroid relative to the table
+  centroid_max_height: 0.3
+
+  enable_cylinder_fitting: true
+
+  verbose_cylinder_fitting: false
+
+  enable_object_tracking: true
