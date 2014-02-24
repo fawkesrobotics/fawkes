@@ -66,11 +66,14 @@ TransformAspect::TransformAspect(Mode mode, const char *tf_bb_iface_id)
   : __tf_aspect_mode(mode)
 {
   add_aspect("TransformAspect");
-  if (((mode == ONLY_PUBLISHER) || (mode == BOTH)) && tf_bb_iface_id) {
+  if (((mode == ONLY_PUBLISHER) || (mode == BOTH) || (mode == BOTH_DEFER_PUBLISHER))
+       && tf_bb_iface_id)
+    {
     __tf_aspect_bb_iface_id = strdup(tf_bb_iface_id);
   } else {
     __tf_aspect_bb_iface_id = 0;
   }
+  __tf_aspect_blackboard = 0;
 }
 
 
@@ -99,11 +102,24 @@ TransformAspect::init_TransformAspect(BlackBoard *blackboard, tf::Transformer *t
                                           : "ONLY_PUBLISHER");
   }
 
-  if ((__tf_aspect_mode == ONLY_LISTENER) || (__tf_aspect_mode == BOTH)) {
-    __own_tf_listener = false;
+  __tf_aspect_blackboard = blackboard;
+
+  if (( (__tf_aspect_mode == DEFER_PUBLISHER) || (__tf_aspect_mode == BOTH_DEFER_PUBLISHER))
+      && (__tf_aspect_bb_iface_id == 0))
+  {
+    throw CannotInitializeThreadException("TransformAspect in %s mode "
+					  "requires a valid blackboard interface ID",
+					  __tf_aspect_mode == DEFER_PUBLISHER
+					  ? "DEFER_PUBLISHER" : "BOTH_DEFER_PUBLISHER" );
+  }
+
+  if ((__tf_aspect_mode == ONLY_LISTENER) || (__tf_aspect_mode == BOTH) ||
+      (__tf_aspect_mode == BOTH_DEFER_PUBLISHER))
+  {
+    __tf_aspect_own_listener = false;
     tf_listener = transformer;
   } else {
-    __own_tf_listener = true;
+    __tf_aspect_own_listener = true;
     tf_listener = new tf::TransformListener(NULL);
   }
 
@@ -115,13 +131,38 @@ TransformAspect::init_TransformAspect(BlackBoard *blackboard, tf::Transformer *t
   }
 }
 
+
+/** Late enabling of publisher.
+
+ * If and only if the TransformAspect has been initialized in
+ * DEFER_PUBLISHER or BOTH_DEFER_PUBLISHER mode the transform
+ * publisher can be enabled using this method. It will create a new
+ * transform publisher with the interface ID given as constructor
+ * parameter.
+ *
+ * This method is intended to be used if it is unclear at construction
+ * time whether the publisher will be needed or not.
+ * @exception Exception thrown if the TransformAspect is not initialized in
+ * DEFER_PUBLISHER or BOTH_DEFER_PUBLISHER mode.
+ */
+void
+TransformAspect::tf_enable_publisher()
+{
+  if ((__tf_aspect_mode != DEFER_PUBLISHER) && (__tf_aspect_mode != BOTH_DEFER_PUBLISHER)) {
+    throw Exception("Publisher can only be enabled later in (BOTH_)DEFER_PUBLISHER mode");
+  }
+  delete tf_publisher;
+  tf_publisher =
+    new tf::TransformPublisher(__tf_aspect_blackboard, __tf_aspect_bb_iface_id);
+}
+
 /** Finalize transform aspect.
  * This deletes the transform listener and publisher.
  */
 void
 TransformAspect::finalize_TransformAspect()
 {
-  if (__own_tf_listener) {
+  if (__tf_aspect_own_listener) {
     delete tf_listener;
   }
   delete tf_publisher;

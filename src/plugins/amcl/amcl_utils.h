@@ -48,7 +48,8 @@ void
 read_map_config(Configuration *config,
 		std::string  &cfg_map_file, float &cfg_resolution,
 		float &cfg_origin_x, float &cfg_origin_y, float &cfg_origin_theta,
-		float &cfg_occupied_thresh, float &cfg_free_thresh);
+		float &cfg_occupied_thresh, float &cfg_free_thresh,
+		std::string cfg_prefix = CFG_PREFIX);
 
 
 } // end namespace amcl

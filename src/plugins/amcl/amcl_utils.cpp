@@ -35,6 +35,16 @@ namespace fawkes {
 // compute linear index for given map coords
 #define MAP_IDX(sx, i, j) ((sx) * (j) + (i))
 
+/** Read map.
+ * @param map_file filename of map
+ * @param origin_x origin x offset
+ * @param origin_y origin y offset
+ * @param resolution map resolution
+ * @param occupied_threshold minimum threshold when to consider a cell occupied
+ * @param free_threshold maximum threshold when to consider a cell free
+ * @param free_space_indices upon return contains indices of free cells
+ * @return loaded map
+ */
 map_t *
 read_map(const char *map_file,
 	 float origin_x, float origin_y, float resolution,
@@ -84,21 +94,33 @@ read_map(const char *map_file,
 }
 
 
-
+/** Read map configuration.
+ * @param config configuration to read from
+ * @param cfg_map_file upon returns contains map filename
+ * @param cfg_resolution upon return contains map resolution
+ * @param cfg_origin_x upon return contains origin x offset
+ * @param cfg_origin_y upon return contains origin y offset
+ * @param cfg_occupied_thresh upon return contains minimum threshold
+ * when to consider a cell occupied
+ * @param cfg_free_thresh upon return contains maximum threshold when
+ * to consider a cell free
+ * @param cfg_prefix optional config path prefix
+ */
 void
 read_map_config(Configuration *config,
 		std::string  &cfg_map_file, float &cfg_resolution,
 		float &cfg_origin_x, float &cfg_origin_y, float &cfg_origin_theta,
-		float &cfg_occupied_thresh, float &cfg_free_thresh)
+		float &cfg_occupied_thresh, float &cfg_free_thresh,
+		std::string cfg_prefix)
 {
   cfg_map_file =
-    std::string(CONFDIR) + "/" + config->get_string(CFG_PREFIX"map_file");
-  cfg_resolution = config->get_float(CFG_PREFIX"resolution");
-  cfg_origin_x = config->get_float(CFG_PREFIX"origin_x");
-  cfg_origin_y = config->get_float(CFG_PREFIX"origin_y");
-  cfg_origin_theta = config->get_float(CFG_PREFIX"origin_theta");
-  cfg_occupied_thresh = config->get_float(CFG_PREFIX"occupied_threshold");
-  cfg_free_thresh = config->get_float(CFG_PREFIX"free_threshold");
+    std::string(CONFDIR) + "/" + config->get_string((cfg_prefix + "map_file").c_str());
+  cfg_resolution = config->get_float((cfg_prefix + "resolution").c_str());
+  cfg_origin_x = config->get_float((cfg_prefix + "origin_x").c_str());
+  cfg_origin_y = config->get_float((cfg_prefix + "origin_y").c_str());
+  cfg_origin_theta = config->get_float((cfg_prefix + "origin_theta").c_str());
+  cfg_occupied_thresh = config->get_float((cfg_prefix + "occupied_threshold").c_str());
+  cfg_free_thresh = config->get_float((cfg_prefix + "free_threshold").c_str());
 }
 
 

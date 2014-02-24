@@ -46,7 +46,13 @@ class TransformAspect : public virtual Aspect
   typedef enum {
     ONLY_LISTENER,	///< only create a transform listener
     ONLY_PUBLISHER,	///< only create a transform publisher
-    BOTH		///< create both, transform listener and publisher
+    DEFER_PUBLISHER,	/**< Create neither listener or publisher, but allow late
+			 * enabling of a publisher using tf_enable_publisher() in init().
+			 * Note that this requires to pass a valid (unique) tf_bb_iface_id
+			 * to the constructor. */
+    BOTH,		///< create both, transform listener and publisher
+    BOTH_DEFER_PUBLISHER /**< create transform listener but defer creation of publisher,
+			  * cf. DEFER_PUBLISHER mode documentation above for details. */
   } Mode;
 
   TransformAspect(Mode mode = ONLY_LISTENER, const char *tf_bb_iface_id = 0);
@@ -55,14 +61,18 @@ class TransformAspect : public virtual Aspect
   void init_TransformAspect(BlackBoard *blackboard, tf::Transformer *transformer);
   void finalize_TransformAspect();
 
- protected:
+ protected: // methods
+  void tf_enable_publisher();
+
+ protected: // members
   tf::Transformer         * tf_listener;
   tf::TransformPublisher  * tf_publisher;
 
  private:
   Mode  __tf_aspect_mode;
   char *__tf_aspect_bb_iface_id;
-  bool  __own_tf_listener;
+  BlackBoard *__tf_aspect_blackboard;
+  bool  __tf_aspect_own_listener;
 };
 
 } // end namespace fawkes

@@ -2,7 +2,7 @@
  *  map_lasergen_thread.cpp - Thread to generate laser data from map
  *
  *  Created: Thu Aug 23 18:43:39 2012
- *  Copyright  2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2012-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@ using namespace fawkes;
 MapLaserGenThread::MapLaserGenThread()
   : Thread("MapLaserGenThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-    TransformAspect(TransformAspect::BOTH, "Odometry")
+    TransformAspect(TransformAspect::BOTH_DEFER_PUBLISHER, "Map Laser Odometry")
 {
   map_ = NULL;
 }
@@ -46,15 +46,39 @@ MapLaserGenThread::~MapLaserGenThread()
 
 void MapLaserGenThread::init()
 {
+  laser_pose_set_ = false;
+
+  bool have_custom_map = false;
+  try {
+      config->get_string(CFG_PREFIX"map-lasergen/map_file");
+      have_custom_map = true;
+  } catch (Exception &e) {} // ignored, use AMCL map
+
+  logger->log_info(name(), "Using %s map configuration",
+		   have_custom_map ? "custom" : "AMCL");
   fawkes::amcl::read_map_config(config, cfg_map_file_, cfg_resolution_, cfg_origin_x_,
 				cfg_origin_y_, cfg_origin_theta_, cfg_occupied_thresh_,
-				cfg_free_thresh_);
+				cfg_free_thresh_,
+				have_custom_map ? CFG_PREFIX"map-lasergen/" : CFG_PREFIX);
 
-  cfg_laser_ifname_ = config->get_string(CFG_PREFIX"laser_interface_id");
+  cfg_use_current_pose_ = false;
+  try {
+    cfg_use_current_pose_ = config->get_bool(CFG_PREFIX"map-lasergen/use_current_pos");
+  } catch (Exception &e) {} // ignored, use default
 
+  cfg_laser_ifname_ = config->get_string(CFG_PREFIX"map-lasergen/laser_interface_id");
   odom_frame_id_  = config->get_string(CFG_PREFIX"odom_frame_id");
   base_frame_id_  = config->get_string(CFG_PREFIX"base_frame_id");
   laser_frame_id_ = config->get_string(CFG_PREFIX"laser_frame_id");
+
+  if (cfg_use_current_pose_) {
+    cfg_pose_ifname_ = config->get_string(CFG_PREFIX"map-lasergen/pose_interface_id");
+    cur_pose_if_ = blackboard->open_for_reading<Position3DInterface>(cfg_pose_ifname_.c_str());
+  } else {
+    pos_x_     = config->get_float(CFG_PREFIX"map-lasergen/pos_x");
+    pos_y_     = config->get_float(CFG_PREFIX"map-lasergen/pos_y");
+    pos_theta_ = config->get_float(CFG_PREFIX"map-lasergen/pos_theta");
+  }
 
   std::vector<std::pair<int, int> > free_space_indices;
   map_ = fawkes::amcl::read_map(cfg_map_file_.c_str(),
@@ -70,11 +94,7 @@ void MapLaserGenThread::init()
 		   (float)free_space_indices.size() / (float)(map_width_ * map_height_) * 100.);
 
   laser_if_ = blackboard->open_for_writing<Laser360Interface>(cfg_laser_ifname_.c_str());
-  pos3d_if_ = blackboard->open_for_writing<Position3DInterface>("Map LaserGen Groundtruth");
-
-  pos_x_     = config->get_float(CFG_PREFIX"map-lasergen/pos_x");
-  pos_y_     = config->get_float(CFG_PREFIX"map-lasergen/pos_y");
-  pos_theta_ = config->get_float(CFG_PREFIX"map-lasergen/pos_theta");
+  gt_pose_if_ = blackboard->open_for_writing<Position3DInterface>("Map LaserGen Groundtruth");
 
   cfg_add_noise_ = false;
   try {
@@ -95,6 +115,10 @@ void MapLaserGenThread::init()
   try {
     cfg_send_zero_odom_ = config->get_bool(CFG_PREFIX"map-lasergen/send_zero_odom");
   } catch (Exception &e) {}; // ignored
+  if (cfg_send_zero_odom_) {
+    logger->log_info(name(), "Enabling zero odometry publishing");
+    tf_enable_publisher();
+  }
 
   laser_if_->set_frame(laser_frame_id_.c_str());
 }
@@ -103,25 +127,47 @@ void MapLaserGenThread::init()
 void
 MapLaserGenThread::loop()
 {
+
   if (!laser_pose_set_) {
     if (set_laser_pose()) {
       laser_pose_set_ = true;
 
-
-      tf::Quaternion q(tf::create_quaternion_from_yaw(pos_theta_));
-      pos3d_if_->set_translation(0, pos_x_);
-      pos3d_if_->set_translation(1, pos_y_);
-      pos3d_if_->set_rotation(0, q.x());
-      pos3d_if_->set_rotation(1, q.y());
-      pos3d_if_->set_rotation(2, q.z());
-      pos3d_if_->set_rotation(3, q.w());
-      pos3d_if_->write();
-
+      if (! cfg_use_current_pose_) {
+	// only need to set it once, let's do it here
+	laser_pos_x_ = pos_x_ + laser_pose_.getOrigin().x();
+	laser_pos_y_ = pos_y_ + laser_pose_.getOrigin().y();
+	laser_pos_theta_ = pos_theta_ + tf::get_yaw(laser_pose_.getRotation());
+      }
     } else {
       logger->log_warn(name(), "Could not determine laser pose, skipping loop");
       return;
     }
   }
+
+  if (cfg_use_current_pose_) {
+    cur_pose_if_->read();
+    pos_x_     = cur_pose_if_->translation(0);
+    pos_y_     = cur_pose_if_->translation(1);
+    pos_theta_ = tf::get_yaw(tf::Quaternion(cur_pose_if_->rotation(0),
+					    cur_pose_if_->rotation(1),
+					    cur_pose_if_->rotation(2),
+					    cur_pose_if_->rotation(3)));
+
+    //logger->log_info(name(), "Pos: (%f,%f,%f)", pos_x_, pos_y_, pos_theta_);
+
+    laser_pos_x_ = pos_x_ + laser_pose_.getOrigin().x();
+    laser_pos_y_ = pos_y_ + laser_pose_.getOrigin().y();
+    laser_pos_theta_ = pos_theta_ + tf::get_yaw(laser_pose_.getRotation());
+  }
+
+  tf::Quaternion q(tf::create_quaternion_from_yaw(pos_theta_));
+  gt_pose_if_->set_translation(0, pos_x_);
+  gt_pose_if_->set_translation(1, pos_y_);
+  gt_pose_if_->set_rotation(0, q.x());
+  gt_pose_if_->set_rotation(1, q.y());
+  gt_pose_if_->set_rotation(2, q.z());
+  gt_pose_if_->set_rotation(3, q.w());
+  gt_pose_if_->write();
 
   float dists[360];
   for (unsigned int i = 0; i < 360; ++i) {
@@ -160,7 +206,8 @@ void MapLaserGenThread::finalize()
   }
 
   blackboard->close(laser_if_);
-  blackboard->close(pos3d_if_);
+  blackboard->close(gt_pose_if_);
+  blackboard->close(cur_pose_if_);
 }
 
 
@@ -171,22 +218,15 @@ MapLaserGenThread::set_laser_pose()
   tf::Stamped<tf::Pose>
     ident(tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
           &now, laser_frame_id_);
-  tf::Stamped<tf::Pose> laser_pose;
   try {
-    tf_listener->transform_pose(base_frame_id_, ident, laser_pose);
+    tf_listener->transform_pose(base_frame_id_, ident, laser_pose_);
   } catch (fawkes::Exception& e) {
     return false;
   }
 
-  laser_pos_x_ = pos_x_ + laser_pose.getOrigin().x();
-  laser_pos_y_ = pos_y_ + laser_pose.getOrigin().y();
-  laser_pos_theta_ = pos_theta_ + tf::get_yaw(laser_pose.getRotation());
-
-  logger->log_debug(name(), "Pos: (%f,%f,%f)  LaserTF: (%f,%f,%f)  LaserPos:(%f,%f,%f)",
-		    pos_x_, pos_y_, pos_theta_,
-		    laser_pose.getOrigin().x(), laser_pose.getOrigin().y(),
-		    tf::get_yaw(laser_pose.getRotation()),
-		    laser_pos_x_, laser_pos_y_, laser_pos_theta_);
+  logger->log_debug(name(), "LaserTF: (%f,%f,%f)",
+		    laser_pose_.getOrigin().x(), laser_pose_.getOrigin().y(),
+		    tf::get_yaw(laser_pose_.getRotation()));
 
   return true;
 }
