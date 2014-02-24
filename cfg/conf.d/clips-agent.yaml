@@ -11,7 +11,7 @@ clips-agent:
   # from watching, e.g. if they are showing up at too high frequencies or
   # are not of interest.
   unwatch-facts: ["time"]
-  unwatch-rules: ["time-retract", "blackboard-read"]
+  unwatch-rules: ["time-retract"]
 
   # If true, simulate skills (assuming they always succeed) instead of
   # actually executing the skills. The time indicates how long it should
@@ -22,6 +22,11 @@ clips-agent:
 
   # debug level is a number of: 0 ~ none, 1 ~ minimal, 2 ~ more, 3 ~ maximum
   debug-level: 3
+
+  # automatically pre-require redefine-warning feature? Enabling
+  # this in the plugin instead of in the initial code (init.clp) is
+  # beneficial because it already catches errors in said file.
+  request-redefine-warning-feature: false
 
   # Automatically assert the (start) fact after successful initialization,
   # otherwise wait until the an enalble message has been received

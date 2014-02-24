@@ -77,6 +77,17 @@
   (bind ?f (path-resolve ?file))
   (if ?f
   then
+    (load ?f)
+  else
+    (printout error "Cannot load file " ?file " (file not found in " (path-string) ")" crlf)
+    (return ?f)
+  )
+)
+
+(deffunction path-load* (?file)
+  (bind ?f (path-resolve ?file))
+  (if ?f
+  then
     (load* ?f)
   else
     (printout error "Cannot load file " ?file " (file not found in " (path-string) ")" crlf)

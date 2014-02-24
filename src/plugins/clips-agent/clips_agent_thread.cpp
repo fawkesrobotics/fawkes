@@ -120,6 +120,16 @@ ClipsAgentThread::init()
 
   clips->evaluate("(ff-feature-request \"config\")");
 
+  bool cfg_req_redefwarn_feature = true;
+  try {
+    cfg_req_redefwarn_feature =
+      config->get_bool("/clips-agent/request-redefine-warning-feature");
+  } catch (Exception &e) {} // ignored, use default
+  if (cfg_req_redefwarn_feature) {
+    logger->log_debug(name(), "Enabling warnings for redefinitions");
+    clips->evaluate("(ff-feature-request \"redefine-warning\")");
+  }
+
   if (!clips->batch_evaluate(SRCDIR"/clips/init.clp")) {
     logger->log_error(name(), "Failed to initialize CLIPS environment, "
                       "batch file failed.");

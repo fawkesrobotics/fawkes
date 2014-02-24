@@ -187,6 +187,13 @@ class Interface
     interface_messageinfo_t *next;   /**< the next field, NULL if last */
   };
 
+  /** Timestamp data, must be present and first entries for each interface
+   * data structs! This leans on timeval struct. */
+  typedef struct {
+    int64_t timestamp_sec;	/**< time in seconds since Unix epoch */
+    int64_t timestamp_usec;	/**< additional time microseconds */
+  } interface_data_ts_t;
+
   InterfaceFieldIterator fields();
   InterfaceFieldIterator fields_end();
 
@@ -208,12 +215,6 @@ class Interface
   unsigned int  data_size;
   bool          data_changed;
 
-  /** Timestamp data, must be present and first entries for each interface
-   * data structs! This leans on timeval struct. */
-  typedef struct {
-    int64_t timestamp_sec;	/**< time in seconds since Unix epoch */
-    int64_t timestamp_usec;	/**< additional time microseconds */
-  } interface_data_ts_t;
   interface_data_ts_t  *data_ts;
 
  private:

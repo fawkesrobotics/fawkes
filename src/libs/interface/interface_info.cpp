@@ -24,9 +24,11 @@
 #include <interface/interface_info.h>
 #include <interface/interface.h>
 #include <utils/misc/strndup.h>
+#include <utils/time/time.h>
 
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 namespace fawkes {
 
@@ -43,9 +45,11 @@ namespace fawkes {
  * @param has_writer true if there is a writer, false otherwise
  * @param num_readers number of readers
  * @param serial instance serial
+ * @param timestamp interface timestamp (time of last write or data timestamp)
  */
 InterfaceInfo::InterfaceInfo(const char *type, const char *id, const unsigned char *hash,
-			     unsigned int serial, bool has_writer, unsigned int num_readers)
+			     unsigned int serial, bool has_writer, unsigned int num_readers,
+			     const Time *timestamp)
 {
   __type = strndup(type, __INTERFACE_TYPE_SIZE);
   __id   = strndup(id, __INTERFACE_ID_SIZE);
@@ -54,6 +58,7 @@ InterfaceInfo::InterfaceInfo(const char *type, const char *id, const unsigned ch
   __has_writer = has_writer;
   __num_readers = num_readers;
   __serial = serial;
+  __timestamp = new Time(timestamp);
 }
 
 
@@ -69,6 +74,7 @@ InterfaceInfo::InterfaceInfo(const InterfaceInfo &i)
   __has_writer = i.__has_writer;
   __num_readers = i.__num_readers;
   __serial = i.__serial;
+  __timestamp = new Time(i.__timestamp);
 }
 
 
@@ -78,6 +84,7 @@ InterfaceInfo::~InterfaceInfo()
   free(__type);
   free(__id);
   free(__hash);
+  delete __timestamp;
 }
 
 
@@ -110,6 +117,20 @@ InterfaceInfo::hash() const
   return __hash;
 }
 
+/** Get interface version hash in printable format.
+ * @return interface version hash printable string
+ */
+std::string
+InterfaceInfo::hash_printable() const
+{
+  char phash[__INTERFACE_HASH_SIZE * 2 + 1];
+  phash[__INTERFACE_HASH_SIZE * 2] = 0;
+  for (size_t s = 0; s < __INTERFACE_HASH_SIZE; ++s) {
+    snprintf(&phash[s*2], 3, "%02X", __hash[s]);
+  }
+  return std::string(phash);
+}
+
 
 /** Check if there is a writer.
  * @return true if there is a writer, false otherwise
@@ -140,6 +161,15 @@ InterfaceInfo::serial() const
   return __serial;
 }
 
+
+/** Get interface timestamp.
+ * @return point to interface last update time
+ */
+const Time *
+InterfaceInfo::timestamp() const
+{
+  return __timestamp;
+}
 
 /** < operator
  * This compares two interface infos with respect to the less than (<) relation
@@ -176,12 +206,14 @@ InterfaceInfo::operator<(const InterfaceInfo &ii) const
  * @param has_writer true if there is a writer, false otherwise
  * @param num_readers number of readers
  * @param serial instance serial
+ * @param timestamp interface timestamp (time of last write or data timestamp)
  */
 void
 InterfaceInfoList::append(const char *type, const char *id, const unsigned char *hash,
-			  unsigned int serial, bool has_writer, unsigned int num_readers)
+			  unsigned int serial, bool has_writer, unsigned int num_readers,
+			  const Time &timestamp)
 {
-  push_back(InterfaceInfo(type, id, hash, serial, has_writer, num_readers));
+  push_back(InterfaceInfo(type, id, hash, serial, has_writer, num_readers, &timestamp));
 }
 
 } // end namespace fawkes

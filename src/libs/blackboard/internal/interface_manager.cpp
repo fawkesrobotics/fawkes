@@ -40,6 +40,7 @@
 #include <core/threading/refc_rwlock.h>
 #include <core/exceptions/system.h>
 #include <utils/system/dynamic_module/module.h>
+#include <utils/time/time.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -499,8 +500,11 @@ BlackBoardInterfaceManager::list_all() const
   BlackBoardMemoryManager::ChunkIterator cit;
   for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
     ih = (interface_header_t *)*cit;
+    Interface::interface_data_ts_t *data_ts =
+      (Interface::interface_data_ts_t *)((char *)*cit + sizeof(interface_header_t));
     infl->append(ih->type, ih->id, ih->hash, ih->serial,
-		 ih->flag_writer_active, ih->num_readers);
+		 ih->flag_writer_active, ih->num_readers,
+		 Time(data_ts->timestamp_sec, data_ts->timestamp_usec));
   }
 
   memmgr->unlock();
@@ -529,6 +533,8 @@ BlackBoardInterfaceManager::list(const char *type_pattern,
   BlackBoardMemoryManager::ChunkIterator cit;
   for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
     ih = (interface_header_t *)*cit;
+    Interface::interface_data_ts_t *data_ts =
+      (Interface::interface_data_ts_t *)((char *)*cit + sizeof(interface_header_t));
     char type[__INTERFACE_TYPE_SIZE + 1];
     char id[__INTERFACE_ID_SIZE + 1];
     // ensure NULL-termination
@@ -540,7 +546,8 @@ BlackBoardInterfaceManager::list(const char *type_pattern,
 	(fnmatch(id_pattern, id, FNM_NOESCAPE) == 0))
     {
       infl->append(ih->type, ih->id, ih->hash, ih->serial,
-		   ih->flag_writer_active, ih->num_readers);
+		   ih->flag_writer_active, ih->num_readers,
+		   fawkes::Time(data_ts->timestamp_sec, data_ts->timestamp_usec));
     }
   }
 

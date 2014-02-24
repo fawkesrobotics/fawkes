@@ -38,6 +38,8 @@ namespace fawkes {
 #endif
 
 
+#define ROUTER_NAME "fawkeslog"
+
 /// @cond INTERNALS
 class CLIPSLogger
 {
@@ -74,6 +76,8 @@ class CLIPSLogger
 		 strcmp(logical_name, WERROR) == 0)
       {
 	logger_->log_error(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
+      } else if (strcmp(logical_name, WDIALOG) == 0) {
+        // ignored
       } else {
 	logger_->log_info(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
       }
@@ -121,6 +125,7 @@ log_router_query(void *env, char *logical_name)
   if (strcmp(logical_name, "logerror") == 0) return TRUE;
   if (strcmp(logical_name, "stdout") == 0) return TRUE;
   if (strcmp(logical_name, WTRACE) == 0) return TRUE;
+  if (strcmp(logical_name, WDIALOG) == 0) return TRUE;
   if (strcmp(logical_name, WWARNING) == 0) return TRUE;
   if (strcmp(logical_name, WERROR) == 0) return TRUE;
   if (strcmp(logical_name, WDISPLAY) == 0) return TRUE;
@@ -186,6 +191,9 @@ CLIPSEnvManager::new_env(const std::string &log_component_name)
     LockPtr<CLIPS::Environment> clips(new CLIPS::Environment(),
 				      /* recursive mutex */ true);
 
+    // by default be silent
+    clips->unwatch("all");
+
     CLIPSContextMaintainer *cm =
       new CLIPSContextMaintainer(logger_, log_component_name.c_str());
 
@@ -193,7 +201,7 @@ CLIPSEnvManager::new_env(const std::string &log_component_name)
 
     SetEnvironmentContext(env, cm);
 
-    EnvAddRouterWithContext(env, (char *)"fawkeslog",
+    EnvAddRouterWithContext(env, (char *)ROUTER_NAME,
                             /* exclusive */ 30,
                             log_router_query,
                             log_router_print,
@@ -264,7 +272,7 @@ CLIPSEnvManager::destroy_env(const std::string &env_name)
     CLIPSContextMaintainer *cm =
       static_cast<CLIPSContextMaintainer *>(GetEnvironmentContext(env));
 
-    EnvDeleteRouter(env, (char *)"fawkeslog");
+    EnvDeleteRouter(env, (char *)ROUTER_NAME);
     SetEnvironmentContext(env, NULL);
     delete cm;
 

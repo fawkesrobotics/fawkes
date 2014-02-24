@@ -94,6 +94,8 @@ typedef struct {
 						   1 if writer exists, 0 otherwise. The
 						   remaining 31 bits encode the number
 						   of readers as big endian number. */
+  int64_t       timestamp_sec;			/**< data or write timestamp, sec part */
+  int64_t       timestamp_usec;			/**< data or write timestamp, usec part */
 } bb_iinfo_msg_t;
 
 

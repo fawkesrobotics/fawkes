@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  feature_blackboard.h - CLIPS blackboard feature
+ *  feature_redefine_warning.h - CLIPS feature to warn on redefinitions
  *
- *  Created: Thu Oct 03 11:46:20 2013
+ *  Created: Tue Jan 21 20:29:43 2014
  *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,13 +20,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_FEATURE_BLACKBOARD_H_
-#define __PLUGINS_CLIPS_FEATURE_BLACKBOARD_H_
+#ifndef __PLUGINS_CLIPS_FEATURE_REDEFINE_WARNING_H_
+#define __PLUGINS_CLIPS_FEATURE_REDEFINE_WARNING_H_
 
 #include <plugins/clips/aspect/clips_feature.h>
 
 #include <map>
-#include <list>
 #include <string>
 
 namespace CLIPS {
@@ -34,16 +33,14 @@ namespace CLIPS {
 }
 
 namespace fawkes {
-  class BlackBoard;
   class Logger;
-  class Interface;
 }
 
-class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
+class RedefineWarningCLIPSFeature : public fawkes::CLIPSFeature
 {
  public:
-  BlackboardCLIPSFeature(fawkes::Logger *logger, fawkes::BlackBoard *blackboard);
-  virtual ~BlackboardCLIPSFeature();
+  RedefineWarningCLIPSFeature(fawkes::Logger *logger);
+  virtual ~RedefineWarningCLIPSFeature();
 
   // for CLIPSFeature
   virtual void clips_context_init(const std::string &env_name,
@@ -52,22 +49,7 @@ class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
 
  private: // members
   fawkes::Logger     *logger_;
-  fawkes::BlackBoard *blackboard_;
-
-  typedef std::map<std::string, std::list<fawkes::Interface *> > InterfaceMap;
-  std::map<std::string, InterfaceMap >  interfaces_;
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
-
- private: // methods
-  void clips_blackboard_open_interface(std::string env_name, std::string type, std::string id);
-  void clips_blackboard_close_interface(std::string env_name,
-					std::string type, std::string id);
-  void clips_blackboard_read(std::string env_name);
-  void clips_blackboard_enable_time_read(std::string env_name);
-  void clips_blackboard_get_info(std::string env_name);
-  bool clips_assert_interface_type(std::string &env_name, std::string &log_name,
-				   fawkes::Interface *iface, std::string &type);
-  void clips_blackboard_preload(std::string env_name, std::string type);
 };
 
 #endif

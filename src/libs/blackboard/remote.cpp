@@ -36,6 +36,7 @@
 #include <core/threading/mutex_locker.h>
 #include <core/threading/wait_condition.h>
 #include <netcomm/fawkes/client.h>
+#include <utils/time/time.h>
 
 #include <string>
 #include <cstring>
@@ -383,7 +384,8 @@ RemoteBlackBoard::list_all()
     bool has_writer = ii->writer_readers & htonl(0x80000000);
     unsigned int num_readers = ntohl(ii->writer_readers & htonl(0x7FFFFFFF));
     infl->append(ii->type, ii->id, ii->hash,  ntohl(ii->serial),
-		 has_writer, num_readers);
+		 has_writer, num_readers,
+		 fawkes::Time(ii->timestamp_sec, ii->timestamp_usec));
   }
 
   __m->unref();
@@ -436,7 +438,8 @@ RemoteBlackBoard::list(const char *type_pattern, const char *id_pattern)
     bool has_writer = ii->writer_readers & htonl(0x80000000);
     unsigned int num_readers = ntohl(ii->writer_readers & htonl(0x7FFFFFFF));
     infl->append(ii->type, ii->id, ii->hash, ntohl(ii->serial),
-		 has_writer, num_readers);
+		 has_writer, num_readers,
+		 fawkes::Time(ii->timestamp_sec, ii->timestamp_usec));
   }
 
   __m->unref();

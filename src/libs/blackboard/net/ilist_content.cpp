@@ -26,6 +26,7 @@
 #include <netcomm/utils/dynamic_buffer.h>
 #include <netcomm/fawkes/component_ids.h>
 #include <core/exceptions/software.h>
+#include <utils/time/time.h>
 #include <cstdlib>
 #include <cstring>
 #include <arpa/inet.h>
@@ -90,12 +91,14 @@ BlackBoardInterfaceListContent::~BlackBoardInterfaceListContent()
  * @param serial instance serial
  * @param has_writer true if a writer exists, false otherwise
  * @param num_readers number of readers
+ * @param timestamp interface timestamp (time of last write or data timestamp)
  */
 void
 BlackBoardInterfaceListContent::append_interface(const char *type, const char *id,
 						 const unsigned char *hash,
 						 unsigned int serial,
-						 bool has_writer, unsigned int num_readers)
+						 bool has_writer, unsigned int num_readers,
+						 const fawkes::Time &timestamp)
 {
   bb_iinfo_msg_t info;
   memset(&info, 0, sizeof(info));
@@ -110,6 +113,8 @@ BlackBoardInterfaceListContent::append_interface(const char *type, const char *i
     info.writer_readers &= htonl(0x7FFFFFFF);
   }
   interface_list->append(&info, sizeof(info));
+  info.timestamp_sec  = timestamp.get_sec();
+  info.timestamp_usec = timestamp.get_usec();
 }
 
 
@@ -131,6 +136,10 @@ BlackBoardInterfaceListContent::append_interface(InterfaceInfo &iinfo)
   } else {
     info.writer_readers &= htonl(0x7FFFFFFF);
   }
+  const Time *timestamp = iinfo.timestamp();
+  info.timestamp_sec  = timestamp->get_sec();
+  info.timestamp_usec = timestamp->get_usec();
+
   interface_list->append(&info, sizeof(info));
 }
 

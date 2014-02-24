@@ -23,6 +23,7 @@
 
 #include <aspect/inifins/plugin_director.h>
 #include <aspect/plugin_director.h>
+#include <aspect/blocked_timing.h>
 #include <plugin/manager.h>
 
 namespace fawkes {
@@ -56,9 +57,11 @@ PluginDirectorAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  if ( thread->opmode() != Thread::OPMODE_CONTINUOUS ) {
-    throw CannotInitializeThreadException("Thread '%s' not in CONTINUOUS mode "
-					  "(required for PluginDirectorAspect)",
+  BlockedTimingAspect *blocked_timing_thread;
+  blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread);
+  if (blocked_timing_thread != NULL) {
+    throw CannotInitializeThreadException("Thread '%s' cannot have BlockedTimingAspect "
+					  "(conflicts with PluginDirectorAspect)",
 					  thread->name());
   }
 

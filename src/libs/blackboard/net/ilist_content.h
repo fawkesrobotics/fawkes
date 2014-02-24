@@ -41,7 +41,8 @@ class BlackBoardInterfaceListContent : public FawkesNetworkMessageContent
   virtual ~BlackBoardInterfaceListContent();
 
   void append_interface(const char *type, const char *id, const unsigned char *hash,
-			unsigned int serial, bool has_writer, unsigned int num_readers);
+			unsigned int serial, bool has_writer, unsigned int num_readers,
+			const fawkes::Time &time);
   void append_interface(InterfaceInfo &info);
 
   virtual void serialize();
