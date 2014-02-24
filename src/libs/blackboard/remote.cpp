@@ -380,8 +380,10 @@ RemoteBlackBoard::list_all()
   while ( bbilc->has_next() ) {
     size_t iisize;
     bb_iinfo_msg_t *ii = bbilc->next(&iisize);
-    infl->append(ii->type, ii->id, ii->hash,  ii->serial,
-		 ii->has_writer, ii->num_readers);
+    bool has_writer = ii->writer_readers & htonl(0x80000000);
+    unsigned int num_readers = ntohl(ii->writer_readers & htonl(0x7FFFFFFF));
+    infl->append(ii->type, ii->id, ii->hash,  ntohl(ii->serial),
+		 has_writer, num_readers);
   }
 
   __m->unref();
@@ -431,8 +433,10 @@ RemoteBlackBoard::list(const char *type_pattern, const char *id_pattern)
   while ( bbilc->has_next() ) {
     size_t iisize;
     bb_iinfo_msg_t *ii = bbilc->next(&iisize);
-    infl->append(ii->type, ii->id, ii->hash,  ii->serial,
-		 ii->has_writer, ii->num_readers);
+    bool has_writer = ii->writer_readers & htonl(0x80000000);
+    unsigned int num_readers = ntohl(ii->writer_readers & htonl(0x7FFFFFFF));
+    infl->append(ii->type, ii->id, ii->hash, ntohl(ii->serial),
+		 has_writer, num_readers);
   }
 
   __m->unref();

@@ -28,6 +28,7 @@
 #include <core/exceptions/software.h>
 #include <cstdlib>
 #include <cstring>
+#include <arpa/inet.h>
 
 namespace fawkes {
 
@@ -101,10 +102,14 @@ BlackBoardInterfaceListContent::append_interface(const char *type, const char *i
   strncpy(info.type, type, __INTERFACE_TYPE_SIZE);
   strncpy(info.id, id, __INTERFACE_ID_SIZE);
   memcpy(info.hash, hash, __INTERFACE_HASH_SIZE);
+  info.serial      = htonl(serial);
+  info.writer_readers = htonl(num_readers);
+  if (has_writer) {
+    info.writer_readers |= htonl(0x80000000);
+  } else {
+    info.writer_readers &= htonl(0x7FFFFFFF);
+  }
   interface_list->append(&info, sizeof(info));
-  info.serial      = serial;
-  info.has_writer  = has_writer ? 1 : 0;
-  info.num_readers = num_readers;
 }
 
 
@@ -119,9 +124,13 @@ BlackBoardInterfaceListContent::append_interface(InterfaceInfo &iinfo)
   strncpy(info.type, iinfo.type(), __INTERFACE_TYPE_SIZE);
   strncpy(info.id, iinfo.id(), __INTERFACE_ID_SIZE);
   memcpy(info.hash, iinfo.hash(), __INTERFACE_HASH_SIZE);
-  info.serial      = iinfo.serial();
-  info.has_writer  = iinfo.has_writer() ? 1 : 0;
-  info.num_readers = iinfo.num_readers();
+  info.serial      = htonl(iinfo.serial());
+  info.writer_readers = htonl(iinfo.num_readers());
+  if (iinfo.has_writer()) {
+    info.writer_readers |= htonl(0x80000000);
+  } else {
+    info.writer_readers &= htonl(0x7FFFFFFF);
+  }
   interface_list->append(&info, sizeof(info));
 }
 

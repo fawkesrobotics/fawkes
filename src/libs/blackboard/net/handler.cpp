@@ -106,7 +106,7 @@ BlackBoardNetworkHandler::loop()
 	try {
 	  __nhub->send(clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_LIST, ilist);
 	} catch (Exception &e) {
-	  LibLogger::log_error("BlackBoardNetworkHandler", "Failed to sent interface "
+	  LibLogger::log_error("BlackBoardNetworkHandler", "Failed to send interface "
 			       "list to %u, exception follows", clid);
 	  LibLogger::log_error("BlackBoardNetworkHandler", e);
 	}
@@ -137,7 +137,7 @@ BlackBoardNetworkHandler::loop()
 	try {
 	  __nhub->send(clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_LIST, ilist);
 	} catch (Exception &e) {
-	  LibLogger::log_error("BlackBoardNetworkHandler", "Failed to sent "
+	  LibLogger::log_error("BlackBoardNetworkHandler", "Failed to send "
 			       "interface list to %u, exception follows", clid);
 	  LibLogger::log_error("BlackBoardNetworkHandler", e);
 	}
@@ -331,8 +331,12 @@ BlackBoardNetworkHandler::send_opensuccess(unsigned int clid, Interface *interfa
   void *payload = calloc(1, sizeof(bb_iopensucc_msg_t) + interface->datasize());
   bb_iopensucc_msg_t *osm = (bb_iopensucc_msg_t *)payload;
   osm->serial = htonl(interface->serial());
-  osm->has_writer = interface->has_writer() ? 1 : 0;
-  osm->num_readers = htonl(interface->num_readers());
+  osm->writer_readers = htonl(interface->num_readers());
+  if (interface->has_writer()) {
+    osm->writer_readers |= htonl(0x80000000);
+  } else {
+    osm->writer_readers &= htonl(0x7FFFFFFF);
+  }
   osm->data_size = htonl(interface->datasize());
 
   if ( ! interface->is_writer() ) {
@@ -349,7 +353,7 @@ BlackBoardNetworkHandler::send_opensuccess(unsigned int clid, Interface *interfa
   try {
     __nhub->send(omsg);
   } catch (Exception &e) {
-    LibLogger::log_error("BlackBoardNetworkHandler", "Failed to sent interface "
+    LibLogger::log_error("BlackBoardNetworkHandler", "Failed to send interface "
 			 "open success to %u, exception follows", clid);
     LibLogger::log_error("BlackBoardNetworkHandler", e);
   }
@@ -368,7 +372,7 @@ BlackBoardNetworkHandler::send_openfailure(unsigned int clid, unsigned int errno
   try {
     __nhub->send(omsg);
   } catch (Exception &e) {
-    LibLogger::log_error("BlackBoardNetworkHandler", "Failed to sent interface "
+    LibLogger::log_error("BlackBoardNetworkHandler", "Failed to send interface "
 			 "open failure to %u, exception follows", clid);
     LibLogger::log_error("BlackBoardNetworkHandler", e);
   }
