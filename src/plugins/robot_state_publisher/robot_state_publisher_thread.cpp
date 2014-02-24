@@ -87,6 +87,10 @@ void RobotStatePublisherThread::init()
 
   string urdf;
   string line;
+  if (cfg_urdf_path_.substr(0,1) != "/") {
+    // relative path, add prefix RESDIR/urdf/
+    cfg_urdf_path_.insert(0, RESDIR"/urdf/");
+  }
   ifstream urdf_file(cfg_urdf_path_);
   if (!urdf_file.is_open()) {
     logger->log_error(name(), "failed to open URDF File %s", cfg_urdf_path_.c_str());

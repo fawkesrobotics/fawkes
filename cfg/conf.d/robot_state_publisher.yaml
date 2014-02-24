@@ -3,5 +3,7 @@
 ---
 robot_state_publisher:
  # path to URDF description of the robot
- urdf_file: "./res/urdf/caesar.urdf"
+ # if the path starts with '/', it is absolute
+ # otherwise, relative to RESDIR/urdf/
+ urdf_file: "caesar.urdf"
 
