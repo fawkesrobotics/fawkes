@@ -4,7 +4,7 @@
  *
  *  Created: Sun Nov 13 16:07:40 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
- *
+ *             2014  Sebastian Reuter
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 #include "sensor_thread.h"
 
 #include <interfaces/MotorInterface.h>
+#include <interfaces/GripperInterface.h>
 #include <utils/math/angle.h>
 
 #include <rec/robotino/com/Com.h>
@@ -71,11 +72,14 @@ RobotinoActThread::init()
 
   //get config values
   cfg_deadman_threshold_ = config->get_float("/hardware/robotino/deadman_time_threshold");
-  
+  cfg_gripper_enabled_ = config->get_bool("/hardware/robotino/gripper/enable_gripper");
+  gripper_close_ = false;
+
   msg_received_ = false;
   msg_zero_vel_ = false;
   
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
+  gripper_if_ = blackboard->open_for_writing<GripperInterface>("Robotino");
 }
 
 
@@ -83,24 +87,29 @@ void
 RobotinoActThread::finalize()
 {
   blackboard->close(motor_if_);
+  blackboard->close(gripper_if_);
   if (com_->isConnected()) {
     rec::iocontrol::remotestate::SetState set_state;
     set_state.speedSetPoint[0] = 0.;
     set_state.speedSetPoint[1] = 0.;
     set_state.speedSetPoint[2] = 0.;
+    set_state.gripper_isEnabled = false;
 
     com_->setSetState( set_state );
   }
   com_ = NULL;
 }
 
-
 void
 RobotinoActThread::loop()
 {
   if (com_->isConnected()) {
     rec::iocontrol::remotestate::SetState set_state;
+    set_state.gripper_isEnabled = cfg_gripper_enabled_;
+    set_state.gripper_close = gripper_close_;
+
     bool send_set_state = false;
+
     while (! motor_if_->msgq_empty()) {
 
       if (MotorInterface::TransRotMessage *msg = motor_if_->msgq_first_safe(msg))
@@ -131,6 +140,22 @@ RobotinoActThread::loop()
 
       motor_if_->msgq_pop();
     }//while
+
+    if (cfg_gripper_enabled_) {
+     while (! gripper_if_->msgq_empty()) {
+       if (gripper_if_->msgq_first_is<GripperInterface::OpenGripperMessage>()) {
+	 set_state.gripper_close = false;
+	 send_set_state = true;
+         gripper_close_ = false;
+       } else if (gripper_if_->msgq_first_is<GripperInterface::CloseGripperMessage>()) {
+	 set_state.gripper_close = true;
+	 send_set_state = true;
+         gripper_close_ = true;
+       }
+
+       gripper_if_->msgq_pop(); 
+     }//while
+    }//if
 
     // deadman switch to set the velocities to zero if no new message arrives
     double diff =  ( clock->now() - (&last_msg_time_) );
@@ -180,6 +205,16 @@ RobotinoActThread::loop()
 #endif
 
       last_seqnum_ = sensor_state.sequenceNumber;
+    }
+
+    if (cfg_gripper_enabled_) {
+      if (sensor_state.isGripperClosed) {
+	gripper_if_->set_gripper_state(GripperInterface::CLOSED);
+	gripper_if_->write();
+      } else if (sensor_state.isGripperOpened) {
+	gripper_if_->set_gripper_state(GripperInterface::OPEN);
+	gripper_if_->write();
+      }
     }
 
   }// connected

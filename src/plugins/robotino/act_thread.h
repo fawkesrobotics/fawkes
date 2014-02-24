@@ -3,8 +3,8 @@
  *  act_thread.h - Robotino act thread
  *
  *  Created: Sun Nov 13 16:05:34 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
+ *             2014       Sebastian Reuter
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -46,6 +46,7 @@ namespace rec {
 
 namespace fawkes {
   class MotorInterface;
+  class GripperInterface;
 }
 
 class RobotinoSensorThread;
@@ -72,15 +73,19 @@ class RobotinoActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
- RobotinoSensorThread           *sensor_thread_;
+  RobotinoSensorThread           *sensor_thread_;
   rec::robotino::com::Com        *com_;
   rec::robotino::com::OmniDrive  *omni_drive_;
   unsigned int                    last_seqnum_;
   fawkes::MotorInterface         *motor_if_;
+  fawkes::GripperInterface       *gripper_if_;
   float        			  cfg_deadman_threshold_;
   bool        			  msg_received_;
   bool        			  msg_zero_vel_;
+  bool 				  cfg_gripper_enabled_;
   fawkes::Time 			  last_msg_time_;
+
+  bool                            gripper_close_;
 };
 
 
