@@ -30,8 +30,7 @@
 
 #include <netcomm/worldinfo/transceiver.h>
 #include <utils/system/pathparser.h>
-#include <geometry/hom_point.h>
-#include <geometry/hom_vector.h>
+#include <tf/types.h>
 
 #include <interfaces/GameStateInterface.h>
 #include <interfaces/ObjectPositionInterface.h>
@@ -240,9 +239,7 @@ WorldModelThread::loop()
     bool do_send = false;
 
     // pose
-    HomPoint pos;
-    pos.x( __wi_send_pose->world_x() );
-    pos.y( __wi_send_pose->world_y() );
+    tf::Point pos(__wi_send_pose->world_x(), __wi_send_pose->world_y(), 0);
     float yaw = __wi_send_pose->yaw();
     if (__wi_send_pose->has_writer()) {
       do_send = true;
@@ -262,11 +259,10 @@ WorldModelThread::loop()
 					 __wi_send_ball->world_xyz_covariance() );
 	} else {
 	  // compute global ball position
-	  HomVector relative_ball;
-	  relative_ball.x( __wi_send_ball->relative_x() );
-	  relative_ball.y( __wi_send_ball->relative_y() );
-	  relative_ball.rotate_z( yaw );
-	  HomPoint global_ball = pos + relative_ball;
+	  tf::Vector3 relative_ball(__wi_send_ball->relative_x(),
+				    __wi_send_ball->relative_y(), 0);
+	  relative_ball.rotate(tf::Vector3(0,0,1), yaw);
+	  tf::Point global_ball = pos + relative_ball;
 	  
 	  transceiver->set_glob_ball_pos(global_ball.x(), global_ball.y(), 0.0,
 					 __wi_send_ball->dbs_covariance() /* TODO */);

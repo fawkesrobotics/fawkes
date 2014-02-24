@@ -28,7 +28,6 @@
 #  error "Neither IPP nor OpenCV are installed."
 #endif
 
-#include <geometry/hom_point.h>
 #include <utils/math/angle.h>
 #include <fvutils/base/types.h>
 

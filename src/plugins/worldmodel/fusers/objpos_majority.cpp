@@ -58,6 +58,8 @@
  * @author Christoph Schwering
  */
 
+const float WorldModelObjPosMajorityFuser::GROUP_RADIUS = 1.0f;
+
 /** Constructor.
  * @param blackboard BlackBoard.
  * @param logger Logger.

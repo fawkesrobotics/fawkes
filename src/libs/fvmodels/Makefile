@@ -38,7 +38,7 @@ ifeq ($(HAVE_IPP)$(HAVE_OPENCV),00)
 endif
 
 OBJS_libfvmodels := $(patsubst %.cpp,%.o,$(filter-out $(MODELS_FILTEROUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp))))))
-LIBS_libfvmodels := m fawkescore fawkesutils fvutils fawkesgeometry fvfilters
+LIBS_libfvmodels := m fawkescore fawkesutils fvutils fvfilters
 HDRS_libfvmodels = $(patsubst %.o,%.h,$(OBJS_libfvmodels))
 
 OBJS_all = $(OBJS_libfvmodels)

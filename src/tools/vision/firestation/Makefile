@@ -27,7 +27,7 @@ INCDIRS  = $(VISION_INCDIRS)
 LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
-LIBS_firestation = stdc++ m fawkescore fawkesutils fawkesgeometry fvutils \
+LIBS_firestation = stdc++ m fawkescore fawkesutils fvutils \
 		   fawkesnetcomm fvmodels fvcams fvwidgets \
 		   fawkesguiutils
 ifeq ($(HAVE_BULB_CREATOR),1)

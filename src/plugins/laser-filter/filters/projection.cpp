@@ -24,8 +24,6 @@
 
 #include <core/exception.h>
 #include <utils/math/angle.h>
-#include <geometry/hom_polar.h>
-#include <geometry/hom_vector.h>
 
 #include <cstdlib>
 #include <cstring>
