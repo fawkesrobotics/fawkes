@@ -63,22 +63,44 @@ namespace fawkes {
 class TabletopVisualizationThreadBase;
 #endif
 
+/** @class OldCentroid "tabletop_objects_thread.h"
+ * This class is used to save old centroids in order to check for reappearance
+ */
 class OldCentroid {
 public:
+  /**
+   * Constructor
+   * @param id The ID which the centroid was assigned to
+   * @param centroid The position of the centroid
+   */
   OldCentroid(const unsigned int &id, const Eigen::Vector4f &centroid)
   : id_(id), age_(0), centroid_(centroid) { }
+  /** Copy constructor
+   * @param other The other OldCentroid */
   OldCentroid(const OldCentroid &other)
   : id_(other.getId()), age_(other.getAge()), centroid_(other.getCentroid()) { }
   virtual ~OldCentroid() { }
+  // any class with Eigen::Vector4f needs a custom new operator
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  /** get the ID of the centroid
+   * @return the ID of the centroid */
   unsigned int getId() const { return id_; }
+  /** get the position of the centroid
+   * @return a reference to the centroid */
   const Eigen::Vector4f& getCentroid() const { return centroid_; }
+  /** get the age of the centroid
+   * @return the number of loops the centroids has been invisible
+   */
   unsigned int getAge() const { return age_; }
+  /** increment the age of the centroid */
   void age() { age_++; }
 
 protected:
+  /** The ID of the centroid */
   unsigned int id_;
+  /** The number of loops the centroid has been invisible for */
   unsigned int age_;
+  /** The position of centroid */
   Eigen::Vector4f centroid_;
 };
 

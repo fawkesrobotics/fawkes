@@ -37,6 +37,7 @@ class TabletopVisualizationThreadBase
  public:
   /** Aligned vector of vectors/points. */
   typedef std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > V_Vector4f;
+  /** aligned map of vectors. */
   typedef std::map<unsigned int, Eigen::Vector4f, std::less<unsigned int>,
         Eigen::aligned_allocator<std::pair<const unsigned int, Eigen::Vector4f>>>
         M_Vector4f;

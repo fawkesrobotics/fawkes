@@ -36,6 +36,9 @@
  * @param good_table_hull_edges "good" egdes in table hull, i.e. edges that have
  * been considered for determining the table orientation
  * @param centroids object cluster centroids
+ * @param cylinder_params The result of the cylinder fitting of the objects
+ * @param obj_confidence The fitting confidences
+ * @param best_obj_guess The best guesses of the objects
  */
 
 /** Virtual empty destructor. */
