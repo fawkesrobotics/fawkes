@@ -54,8 +54,7 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
   WorkerThread(fawkes::Logger *logger, fawkes::Clock *clock,
 	       fawkes::RefPtr<Roomba500> roomba, bool query_mode)
     : Thread("Roomba500WorkerThread", Thread::OPMODE_CONTINUOUS),
-      logger(logger), clock(clock), __roomba(roomba),
-      __query_mode(query_mode)
+      logger(logger), __roomba(roomba), __query_mode(query_mode)
   {
     __fresh_data_mutex = new Mutex();
     __time_wait = new TimeWait(clock, Roomba500::STREAM_INTERVAL_MS * 1000);
@@ -126,7 +125,6 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
 
  private:
   Logger            *logger;
-  Clock             *clock;
   RefPtr<Roomba500>  __roomba;
   TimeWait          *__time_wait;
   Mutex             *__fresh_data_mutex;

@@ -29,6 +29,7 @@
 
 #include <fvcams/control/control.h>
 
+#include <typeinfo>
 #include <cstddef>
 
 namespace firevision {

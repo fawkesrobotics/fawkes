@@ -41,7 +41,6 @@ class WebviewUserVerifier : public fawkes::WebUserVerifier
 
  private:
   fawkes::Configuration *config;
-  fawkes::Logger        *logger;
 
   regex_t __hash_regex;
 };

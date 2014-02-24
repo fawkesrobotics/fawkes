@@ -116,10 +116,8 @@ class FawkesMainThread
 
   Configuration        *__config;
   MultiLogger          *__multi_logger;
-  NetworkLogger        *__network_logger;
   Clock                *__clock;
   TimeWait             *__time_wait;
-  AspectManager        *__aspect_manager;
 
   Barrier              *__init_barrier;
   Thread               *__mainloop_thread;
@@ -131,8 +129,6 @@ class FawkesMainThread
 
   ThreadManager        *__thread_manager;
   PluginManager        *__plugin_manager;
-  Mutex                *__plugin_mutex;
-  FawkesNetworkManager *__network_manager;
 
   std::list<std::string>        __recovered_threads;
   unsigned int                  __desired_loop_time_usec;

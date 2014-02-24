@@ -31,9 +31,7 @@
 #include <core/threading/mutex_locker.h>
 #include <core/exception.h>
 #include <logging/liblogger.h>
-#ifdef HAVE_INOTIFY
-#  include <utils/system/fam_thread.h>
-#endif
+#include <utils/system/fam_thread.h>
 #include <config/config.h>
 #include <utils/system/dynamic_module/module_manager.h>
 
@@ -106,8 +104,8 @@ PluginManager::PluginManager(ThreadCollector *thread_collector,
 
   __config->add_change_handler(this);
 
-#ifdef HAVE_INOTIFY
   __fam_thread = new FamThread();
+#ifdef HAVE_INOTIFY
   RefPtr<FileAlterationMonitor> fam = __fam_thread->get_fam();
   fam->add_filter("^[^.].*\\."SOEXT"$");
   fam->add_listener(this);
@@ -126,8 +124,8 @@ PluginManager::~PluginManager()
 #ifdef HAVE_INOTIFY
   __fam_thread->cancel();
   __fam_thread->join();
-  delete __fam_thread;
 #endif
+  delete __fam_thread;
   __config->rem_change_handler(this);
   __pinfo_cache.lock();
   __pinfo_cache.clear();

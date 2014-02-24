@@ -78,15 +78,6 @@ class PointCloudDBMergeThread
 
   PointCloudDBMergePipeline<pcl::PointXYZ>     *pl_xyz_;
   PointCloudDBMergePipeline<pcl::PointXYZRGB>  *pl_xyzrgb_;
-
-#ifdef USE_TIMETRACKER
-  fawkes::TimeTracker  *tt_;
-  unsigned int tt_loopcount_;
-  unsigned int ttc_full_loop_;
-  unsigned int ttc_retrieval_;
-  unsigned int ttc_transform_;
-  unsigned int ttc_merge_;
-#endif
 };
 
 #endif

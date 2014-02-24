@@ -710,6 +710,11 @@ class MirrorCalibTool::CartesianImage
  * clock-wise-order.
  */
 
+/** Constructor. */
+MirrorCalibTool::ConvexPolygon::ConvexPolygon()
+{
+}
+
 /** Check if point is inside convex polygon.
  * The point r is converted to PixelPoint wrt img.
  * @param img image in which to check

@@ -98,7 +98,6 @@ class BBLoggerThread
   char               *__type;
   char               *__id;
   FILE               *__f_data;
-  FILE               *__f_msgs;
 
   fawkes::Time       *__start;
   fawkes::Time       *__now;

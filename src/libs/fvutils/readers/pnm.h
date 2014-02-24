@@ -47,7 +47,6 @@ class PNMReader : public Reader {
 
  private:
   FILE* m_pnmfile;
-  bool m_opened;
   unsigned char* m_yuv_buffer;
   unsigned char* m_pnm_buffer;
 

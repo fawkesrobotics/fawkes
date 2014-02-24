@@ -18,7 +18,13 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/download.mk
 
-CFLAGS += -Wno-cpp
+ifeq ($(CC),gcc)
+  CFLAGS += -Wno-cpp
+endif
+ifeq ($(CC),clang)
+  CFLAGS += "-Wno-\#warnings"
+endif
+
 
 ifeq ($(HAVE_PLAYERCC),1)
   LDFLAGS += $(LDFLAGS_PLAYERCC)

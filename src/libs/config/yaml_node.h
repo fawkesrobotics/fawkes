@@ -757,7 +757,7 @@ class YamlConfigurationNode
 
   void set_default(bool is_default)
   {
-    is_default_ = is_default_;
+    is_default_ = is_default;
   }
 
   void enum_leafs(std::map<std::string, YamlConfigurationNode *> &nodes,

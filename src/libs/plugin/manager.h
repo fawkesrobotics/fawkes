@@ -45,9 +45,7 @@ class PluginLoader;
 class Mutex;
 class PluginListMessage;
 class Configuration;
-#ifdef HAVE_INOTIFY
 class FamThread;
-#endif
 class PluginManagerListener;
 
 class PluginManager
@@ -118,11 +116,7 @@ class PluginManager
   Configuration *__config;
   std::string __meta_plugin_prefix;
 
-#ifdef HAVE_INOTIFY
   FamThread *__fam_thread;
-#else
-  void *__fam_thread;
-#endif
 };
 
 } // end namespace fawkes

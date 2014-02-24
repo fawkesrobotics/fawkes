@@ -152,8 +152,8 @@ Bulb::Bulb(const Bulb &bulb)
 
   this->orientation = bulb.orientation;
 
-  this->distance_min = distance_min;
-  this->distance_max = distance_max;
+  this->distance_min = bulb.distance_min;
+  this->distance_max = bulb.distance_max;
 
   create();
 

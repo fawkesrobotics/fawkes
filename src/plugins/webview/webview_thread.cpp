@@ -87,7 +87,7 @@ WebviewThread::init()
 
   WebReply::set_caching(config->get_bool("/webview/client_side_caching"));
 
-  bool __cfg_use_ssl = false;
+  __cfg_use_ssl = false;
   try {
     __cfg_use_ssl = config->get_bool("/webview/use_ssl");
   } catch (Exception &e) {}
@@ -125,7 +125,7 @@ WebviewThread::init()
     }
   }
 
-  bool __cfg_use_basic_auth = false;
+  __cfg_use_basic_auth = false;
   try {
     __cfg_use_basic_auth = config->get_bool("/webview/use_basic_auth");
   } catch (Exception &e) {}

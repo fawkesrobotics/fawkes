@@ -82,7 +82,6 @@ class TransformPublisher
   { send_transform(StampedTransform(transform, time, frame, child_frame)); }
 
  private:
-  bool __enabled;
   BlackBoard *__bb;
   TransformInterface *__tfif;
   Mutex *__mutex;

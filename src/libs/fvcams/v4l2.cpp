@@ -187,7 +187,7 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
     string size = cap->get("size");
     string::size_type pos;
     if ((pos = size.find('x')) == string::npos) throw Exception("V4L2Cam: invalid image size string");
-    if ((pos == (size.length() - 1))) throw Exception("V4L2Cam: invalid image size string");
+    if (pos == (size.length() - 1)) throw Exception("V4L2Cam: invalid image size string");
 
     unsigned int mult = 1;
     for (string::size_type i = pos - 1; i != string::npos; --i)

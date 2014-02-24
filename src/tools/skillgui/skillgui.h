@@ -117,7 +117,6 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::Label             *lab_error;
   Gtk::ScrolledWindow    *scw_graph;
   Gtk::Notebook          *ntb_tabs;
-  Gtk::DrawingArea       *drw_graph;
   Gtk::ToggleToolButton  *tb_skiller;
   Gtk::ToggleToolButton  *tb_agent;
   Gtk::ComboBoxText      *cb_graphlist;
@@ -154,8 +153,6 @@ class SkillGuiGtkWindow : public Gtk::Window
   fawkes::LogView         *__logview;
   fawkes::Throbber        *__throbber;
   fawkes::PluginTreeView  *__trv_plugins;
-
-  bool __update_graph;
 };
 
 #endif

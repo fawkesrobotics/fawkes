@@ -38,6 +38,7 @@
 #define _GNU_SOURCE
 #endif
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <algorithm>
 

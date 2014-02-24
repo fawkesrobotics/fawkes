@@ -141,8 +141,6 @@ class SkillGuiBatchRenderer
   virtual Cairo::RefPtr<Cairo::Context> get_cairo()
   {
     if (! cairo) {
-      this->bbw = bbw;
-      this->bbh = bbh;
       if (format == "pdf") {
 	surface = Cairo::PdfSurface::create(outfile, bbw * scale, bbh * scale);
 	printf("Creating PDF context of size %f x %f\n", bbw * scale, bbh * scale);

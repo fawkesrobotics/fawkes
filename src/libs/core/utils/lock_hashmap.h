@@ -26,7 +26,11 @@
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#include <cstdlib>
+#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
+#  include <unordered_map>
+#  include <functional>
+#elif __GLIBCXX__ > 20080305
 #  include <tr1/unordered_map>
 #else
 #  include <ext/hash_map>
@@ -37,7 +41,11 @@ namespace fawkes {
 
 template <class KeyType,
           class ValueType,
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
+          class HashFunction = std::hash<KeyType>,
+          class EqualKey     = std::equal_to<KeyType> >
+class LockHashMap : public std::unordered_map<KeyType, ValueType, HashFunction, EqualKey>
+#elif __GLIBCXX__ > 20080305
           class HashFunction = std::tr1::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType> >
 class LockHashMap : public std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>
@@ -90,7 +98,9 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap()
  */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh)
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
+#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
+  : std::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
+#elif __GLIBCXX__ > 20080305
   : std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
 #else
   : __gnu_cxx::hash_map<KeyType, ValueType, HashFunction, EqualKey>::hash_map(lh)

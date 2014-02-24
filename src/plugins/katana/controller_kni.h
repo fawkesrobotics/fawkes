@@ -36,7 +36,7 @@ class CCplSerialCRC;
 class CLMBase;
 class CKatBase;
 class CSctBase;
-class TMotInit;
+struct TMotInit;
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */

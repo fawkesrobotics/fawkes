@@ -114,6 +114,30 @@ BroadcastDatagramSocket::bind()
   }
 }
 
+void
+BroadcastDatagramSocket::bind(const unsigned short int port)
+{
+  broadcast_addr->sin_port = htons(port);
+
+  bind();
+}
+
+void
+BroadcastDatagramSocket::bind(const unsigned short int port, const char *hostname)
+{
+  free(broadcast_addr);
+  broadcast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
+
+  struct in_addr a;
+  if ( inet_aton(hostname, &a) == -1 ) {
+    throw SocketException("Invalid address given");
+  }
+  broadcast_addr->sin_family = AF_INET;
+  broadcast_addr->sin_addr.s_addr = a.s_addr;
+  broadcast_addr->sin_port = htons(port);
+
+  bind();
+}
 
 /** Clone socket.
  * @return a copied instance of BroadcastDatagramSocket.
@@ -132,7 +156,7 @@ BroadcastDatagramSocket::clone()
  * @param buf_len length of buffer, number of bytes to write to stream
  */
 void
-BroadcastDatagramSocket::send(void *buf, unsigned int buf_len)
+BroadcastDatagramSocket::send(void *buf, size_t buf_len)
 {
   try {
     Socket::send(buf, buf_len, (struct ::sockaddr *)broadcast_addr, sizeof(struct ::sockaddr_in));

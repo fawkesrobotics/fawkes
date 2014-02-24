@@ -73,7 +73,6 @@ class RRDThread
 
   fawkes::TimeWait           *__time_wait;
   float                       __cfg_graph_interval;
-  unsigned int                __loop_count;
 };
 
 #endif

@@ -93,7 +93,6 @@ class LogView
   Glib::RefPtr<Gtk::ListStore> __list;
 
   ConnectionDispatcher *__connection_dispatcher;
-  FawkesNetworkClient  *__client;
 
   bool                  __have_recently_added_path;
   Gtk::TreeModel::Path  __recently_added_path;

@@ -58,6 +58,7 @@
  * @author Christoph Schwering
  */
 
+/** Group radius, see class documentation. */
 const float WorldModelObjPosMajorityFuser::GROUP_RADIUS = 1.0f;
 
 /** Constructor.

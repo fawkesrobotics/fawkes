@@ -27,7 +27,10 @@ USE_BASELINK_FRAME = 1
 
 REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface
 
-CFLAGS += -Wno-unknown-pragmas
+#CFLAGS += -Wno-unknown-pragmas
+ifeq ($(CC),clang)
+  CFLAGS += -Wno-overloaded-virtual
+endif
 
 # Enable for time measurements
 #CFLAGS += -DUSE_TIMETRACKER

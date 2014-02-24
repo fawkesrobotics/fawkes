@@ -118,7 +118,7 @@ ToLuaInterfaceGenerator::convert_type(std::string c_type)
   } else if (c_type == "uint32_t") {
     return "unsigned int";
   } else if (c_type == "uint64_t") {
-#if __WORDSIZE == 64
+#if __WORDSIZE == 64 || defined(__x86_64__)
     return "unsigned long";
 #else
     return "unsigned long long";
@@ -130,7 +130,7 @@ ToLuaInterfaceGenerator::convert_type(std::string c_type)
   } else if (c_type == "int32_t") {
     return "int";
   } else if (c_type == "int64_t") {
-#if __WORDSIZE == 64
+#if __WORDSIZE == 64 || defined(__x86_64__)
     return "long";
 #else
     return "long long";
@@ -142,7 +142,7 @@ ToLuaInterfaceGenerator::convert_type(std::string c_type)
   } else if (c_type == "uint32_t *") {
     return "unsigned int *";
   } else if (c_type == "uint64_t *") {
-#if __WORDSIZE == 64
+#if __WORDSIZE == 64 || defined(__x86_64__)
     return "unsigned long *";
 #else
     return "unsigned long long *";
@@ -154,7 +154,7 @@ ToLuaInterfaceGenerator::convert_type(std::string c_type)
   } else if (c_type == "int32_t *") {
     return "int *";
   } else if (c_type == "int64_t *") {
-#if __WORDSIZE == 64
+#if __WORDSIZE == 64 || defined(__x86_64__)
     return "long *";
 #else
     return "long long *";
