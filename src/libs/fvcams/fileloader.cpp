@@ -106,6 +106,12 @@ FileLoader::FileLoader(const char *filename)
  * - file=FILENAME: open the given file
  * - dir=DIRECTORY: sequentially open files in this directory
  * - ext=EXTENSION: only open files with this extension
+ * - width=W: width in pixels of image
+ * - height=H: height in pixels of image
+ * - colorspace=C: colorspace of image
+ *
+ * Width, height, and colorspace are used for raw images without an header, e.g if
+ * captured by v4l2-ctl.
  *
  * @param cap camera argument parser
  */
@@ -114,8 +120,25 @@ FileLoader::FileLoader(const CameraArgumentParser *cap)
   filename = NULL;
   dirname = NULL;
 
+  file_list = NULL;
+  num_files = 0;
+  cur_file = 0;
+  width = height = 0;
+  file_buffer = NULL;
+  this->cspace = CS_UNKNOWN;
+  opened = started = false;
+
   if ( cap->has("file") ) {
     this->filename = strdup(cap->get("file").c_str());
+    if (cap->has("width")) {
+      width = cap->get_int("width");
+    }
+    if (cap->has("height")) {
+      height = cap->get_int("height");
+    }
+    if (cap->has("colorspace")) {
+      cspace = colorspace_by_name(cap->get("colorspace").c_str());
+    }
   } else if ( cap->has("dir") ) {
     this->dirname = strdup( cap->get("dir").c_str() );
     if ( cap->has("ext") ) {
@@ -125,13 +148,6 @@ FileLoader::FileLoader(const CameraArgumentParser *cap)
     throw MissingParameterException("Neither parameter file nor parameter directory are present");
   }
 
-  file_list = NULL;
-  num_files = 0;
-  cur_file = 0;
-  width = height = 0;
-  file_buffer = NULL;
-  this->cspace = CS_UNKNOWN;
-  opened = started = false;
 }
 
 

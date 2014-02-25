@@ -3,8 +3,7 @@
  *  webview_thread.h - Thread that handles web interface requests
  *
  *  Created: Mon Oct 13 17:49:52 2008 (I5 Developer's Day)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -31,6 +30,9 @@
 #include <aspect/logger.h>
 #include <aspect/plugin_director.h>
 #include <aspect/webview.h>
+#ifdef HAVE_JPEG
+#  include <aspect/thread_producer.h>
+#endif
 #ifdef HAVE_TF
 #  include <aspect/tf.h>
 #endif
@@ -54,6 +56,9 @@ class WebviewUserVerifier;
 #ifdef HAVE_TF
 class WebviewTfRequestProcessor;
 #endif
+#ifdef HAVE_JPEG
+class WebviewImageRequestProcessor;
+#endif
 
 class WebviewThread
 : public fawkes::Thread,
@@ -63,6 +68,9 @@ class WebviewThread
   public fawkes::NetworkAspect,
   public fawkes::LoggerAspect,
   public fawkes::PluginDirectorAspect,
+#ifdef HAVE_JPEG
+  public fawkes::ThreadProducerAspect,
+#endif
 #ifdef HAVE_TF
   public fawkes::TransformAspect,
 #endif
@@ -79,9 +87,8 @@ class WebviewThread
   static const char *STATIC_URL_PREFIX;
   static const char *BLACKBOARD_URL_PREFIX;
   static const char *PLUGINS_URL_PREFIX;
-#ifdef HAVE_TF
   static const char *TF_URL_PREFIX;
-#endif
+  static const char *IMAGE_URL_PREFIX;
 
  private:
   void ssl_create(const char *ssl_key_file, const char *ssl_cert_file);
@@ -101,6 +108,9 @@ class WebviewThread
 #ifdef HAVE_TF
   WebviewTfRequestProcessor          *__tf_processor;
 #endif
+#ifdef HAVE_JPEG
+  WebviewImageRequestProcessor       *__image_processor;
+#endif
   WebviewServiceBrowseHandler        *__service_browse_handler;
   WebviewHeaderGenerator             *__header_gen;
   WebviewFooterGenerator             *__footer_gen;
@@ -113,6 +123,7 @@ class WebviewThread
   std::string  __cfg_ssl_cert;
   bool         __cfg_use_basic_auth;
   std::string  __cfg_basic_auth_realm;
+  std::string  __cfg_access_log;
 
   fawkes::CacheLogger     __cache_logger;
   fawkes::NetworkService *__webview_service;

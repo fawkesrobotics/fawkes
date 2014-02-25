@@ -70,7 +70,7 @@ WebPageReply::WebPageReply(std::string title, std::string body)
  * Constructor that does not set a title or anything. Use for sub-classes.
  * @param code HTTP code for this reply
  */
-WebPageReply::WebPageReply(response_code_t code)
+WebPageReply::WebPageReply(Code code)
   : StaticWebReply(code)
 {
 }

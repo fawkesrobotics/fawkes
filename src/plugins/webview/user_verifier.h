@@ -24,7 +24,6 @@
 #define __PLUGINS_WEBVIEW_USER_VERIFIER_H_
 
 #include <webview/user_verifier.h>
-#include <regex.h>
 
 namespace fawkes {
   class Configuration;
@@ -41,8 +40,6 @@ class WebviewUserVerifier : public fawkes::WebUserVerifier
 
  private:
   fawkes::Configuration *config;
-
-  regex_t __hash_regex;
 };
 
 #endif

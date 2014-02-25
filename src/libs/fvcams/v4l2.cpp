@@ -3,7 +3,7 @@
  *  v4l2.cpp - Video4Linux 2 camera access
  *
  *  Created: Sat Jul  5 20:40:20 2008
- *  Copyright  2008  Tobias Kellner
+ *  Copyright  2008       Tobias Kellner
  *             2010-2014  Tim Niemueller
  ****************************************************************************/
 
@@ -77,9 +77,9 @@ class V4L2CameraData
  * Video4Linux 2 camera access implementation.
  *
  * @todo UPTR method
- * @todo Standards queries (VIDIOC_ENUMSTD)
  * @todo v4l2_pix_format.field
  * @author Tobias Kellner
+ * @author Tim Niemueller
  */
 
 
@@ -92,6 +92,8 @@ V4L2Camera::V4L2Camera(const char *device_name)
   _nao_hacks = _switch_u_v = false;
   _width = _height = _bytes_per_line = _fps = _buffers_length = 0;
   _current_buffer = -1;
+  _standard = NULL;
+  _input = NULL;
   _brightness.set = _contrast.set = _saturation.set = _hue.set =
     _red_balance.set = _blue_balance.set = _exposure.set = _gain.set =
     _lens_x.set = _lens_y.set = false;
@@ -115,6 +117,8 @@ V4L2Camera::V4L2Camera(const char *device_name)
  *    READ: read()
  *    MMAP: memory mapping
  *    UPTR: user pointer
+ * - standard=std, set video standard, e.g. PAL or NTSC
+ * - input=inp, set video input, e.g. S-Video
  * - format=FOURCC, preferred format
  * - size=WIDTHxHEIGHT, preferred image size
  * - switch_u_v=true/false, switch U and V channels
@@ -144,243 +148,172 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
   _current_buffer = -1;
   _frame_buffers = NULL;
   _capture_time = NULL;
+  _standard = NULL;
+  _input = NULL;
   _data = new V4L2CameraData();
 
   if (cap->has("device")) _device_name = strdup(cap->get("device").c_str());
   else throw MissingParameterException("V4L2Cam: Missing device");
 
-
-  if (cap->has("nao"))
-  {
+  if (cap->has("nao")) {
     _nao_hacks = true;
   }
 
-  if (cap->has("read_method"))
-  {
+  if (cap->has("read_method")) {
     string rm = cap->get("read_method");
     if (rm.compare("READ") == 0) _read_method = READ;
     else if (rm.compare("MMAP") == 0) _read_method = MMAP;
     else if (rm.compare("UPTR") == 0) _read_method = UPTR;
     else throw Exception("V4L2Cam: Invalid read method");
-  }
-  else
-  {
+  } else {
     _read_method = MMAP;
   }
 
-
-  if (cap->has("format"))
-  {
+  if (cap->has("format")) {
     string fmt = cap->get("format");
     if (fmt.length() != 4) throw Exception("V4L2Cam: Invalid format fourcc");
     strncpy(_format, fmt.c_str(), 4);
     _format[4] = '\0';
-  }
-  else
-  {
+  } else {
     memset(_format, 0, 5);
   }
 
+  if (cap->has("standard")) {
+    _standard = strdup(cap->get("standard").c_str());
+  }
 
-  if (cap->has("size"))
-  {
+  if (cap->has("input")) {
+    _input = strdup(cap->get("input").c_str());
+  }
+
+  if (cap->has("size")) {
     string size = cap->get("size");
     string::size_type pos;
     if ((pos = size.find('x')) == string::npos) throw Exception("V4L2Cam: invalid image size string");
     if (pos == (size.length() - 1)) throw Exception("V4L2Cam: invalid image size string");
 
     unsigned int mult = 1;
-    for (string::size_type i = pos - 1; i != string::npos; --i)
-    {
+    for (string::size_type i = pos - 1; i != string::npos; --i) {
       _width += (size.at(i) - '0') * mult;
       mult *= 10;
     }
 
     mult = 1;
-    for (string::size_type i = size.length() - 1; i > pos; --i)
-    {
+    for (string::size_type i = size.length() - 1; i > pos; --i) {
       _height += (size.at(i) - '0') * mult;
       mult *= 10;
     }
   }
 
-
-  if (cap->has("switch_u_v"))
-  {
+  if (cap->has("switch_u_v")) {
     _switch_u_v = (cap->get("switch_u_v").compare("true") == 0);
-  }
-  else
-  {
+  } else {
     _switch_u_v = false;
   }
 
-
-  if (cap->has("fps"))
-  {
+  if (cap->has("fps")) {
     if ((_fps = atoi(cap->get("fps").c_str())) == 0) throw Exception("V4L2Cam: invalid fps string");
-  }
-  else
-  {
+  } else {
     _fps = 0;
   }
 
-
-  if (cap->has("aec"))
-  {
+  if (cap->has("aec")) {
     _aec = (cap->get("aec").compare("true") == 0 ? TRUE : FALSE);
-  }
-  else
-  {
+  } else {
     _aec = NOT_SET;
   }
 
-
-  if (cap->has("awb"))
-  {
+  if (cap->has("awb")) {
     _awb = (cap->get("awb").compare("true") == 0 ? TRUE : FALSE);
-  }
-  else
-  {
+  } else {
     _awb = NOT_SET;
   }
 
-
-  if (cap->has("agc"))
-  {
+  if (cap->has("agc")) {
     _agc = (cap->get("agc").compare("true") == 0 ? TRUE : FALSE);
-  }
-  else
-  {
+  } else {
     _agc = NOT_SET;
   }
 
-
-  if (cap->has("h_flip"))
-  {
+  if (cap->has("h_flip")) {
     _h_flip = (cap->get("h_flip").compare("true") == 0 ? TRUE : FALSE);
-  }
-  else
-  {
+  } else {
     _h_flip = NOT_SET;
   }
 
-
-  if (cap->has("v_flip"))
-  {
+  if (cap->has("v_flip")) {
     _v_flip = (cap->get("v_flip").compare("true") == 0 ? TRUE : FALSE);
-  }
-  else
-  {
+  } else {
     _v_flip = NOT_SET;
   }
 
-
-  if (cap->has("brightness"))
-  {
+  if (cap->has("brightness")) {
     _brightness.set = true;
     _brightness.value = atoi(cap->get("brightness").c_str());
-  }
-  else
-  {
+  } else {
     _brightness.set = false;
   }
 
-
-  if (cap->has("contrast"))
-  {
+  if (cap->has("contrast")) {
     _contrast.set = true;
     _contrast.value = atoi(cap->get("contrast").c_str());
-  }
-  else
-  {
+  } else {
     _contrast.set = false;
   }
 
-
-  if (cap->has("saturation"))
-  {
+  if (cap->has("saturation")) {
     _saturation.set = true;
     _saturation.value = atoi(cap->get("saturation").c_str());
-  }
-  else
-  {
+  } else {
     _saturation.set = false;
   }
 
-
-  if (cap->has("hue"))
-  {
+  if (cap->has("hue")) {
     _hue.set = true;
     _hue.value = atoi(cap->get("hue").c_str());
-  }
-  else
-  {
+  } else {
     _hue.set = false;
   }
 
-
-  if (cap->has("red_balance"))
-  {
+  if (cap->has("red_balance")) {
     _red_balance.set = true;
     _red_balance.value = atoi(cap->get("red_balance").c_str());
-  }
-  else
-  {
+  } else {
     _red_balance.set = false;
   }
 
-
-  if (cap->has("blue_balance"))
-  {
+  if (cap->has("blue_balance")) {
     _blue_balance.set = true;
     _blue_balance.value = atoi(cap->get("blue_balance").c_str());
-  }
-  else
-  {
+  } else {
     _blue_balance.set = false;
   }
 
-
-  if (cap->has("exposure"))
-  {
+  if (cap->has("exposure")) {
     _exposure.set = true;
     _exposure.value = atoi(cap->get("exposure").c_str());
-  }
-  else
-  {
+  } else {
     _exposure.set = false;
   }
 
-
-  if (cap->has("gain"))
-  {
+  if (cap->has("gain")) {
     _gain.set = true;
     _gain.value = atoi(cap->get("gain").c_str());
-  }
-  else
-  {
+  } else {
     _gain.set = false;
   }
 
-
-  if (cap->has("lens_x"))
-  {
+  if (cap->has("lens_x")) {
     _lens_x.set = true;
     _lens_x.value = atoi(cap->get("lens_x").c_str());
-  }
-  else
-  {
+  } else {
     _lens_x.set = false;
   }
 
-
-  if (cap->has("lens_y"))
-  {
+  if (cap->has("lens_y")) {
     _lens_y.set = true;
     _lens_y.value = atoi(cap->get("lens_y").c_str());
-  }
-  else
-  {
+  } else {
     _lens_y.set = false;
   }
 }
@@ -408,13 +341,14 @@ V4L2Camera::V4L2Camera(const char *device_name, int dev)
   _frame_buffers = NULL;
   _capture_time = NULL;
   _device_name = strdup(device_name);
+  _standard = NULL;
+  _input = NULL;
   _data = new V4L2CameraData();
 
   _dev = dev;
 
   // getting capabilities
-  if (v4l2_ioctl(_dev, VIDIOC_QUERYCAP, &_data->caps))
-  {
+  if (v4l2_ioctl(_dev, VIDIOC_QUERYCAP, &_data->caps)) {
     close();
     throw Exception("V4L2Cam: Could not get capabilities - probably not a v4l2 device");
   }
@@ -429,6 +363,8 @@ V4L2Camera::~V4L2Camera()
   if (_opened) close();
 
   free(_device_name);
+  if (_standard)  free(_standard);
+  if (_input)     free(_input);
   delete _data;
 }
 
@@ -452,8 +388,7 @@ V4L2Camera::open()
   _opened = true;
 
   // getting capabilities
-  if (v4l2_ioctl(_dev, VIDIOC_QUERYCAP, &_data->caps))
-  {
+  if (v4l2_ioctl(_dev, VIDIOC_QUERYCAP, &_data->caps)) {
     close();
     throw Exception("V4L2Cam: Could not get capabilities - probably not a v4l2 device");
   }
@@ -469,27 +404,14 @@ V4L2Camera::open()
 void
 V4L2Camera::post_open()
 {
-  //LibLogger::log_debug("V4L2Cam", "select_read_method()");
+  select_standard();
+  select_input();
   select_read_method();
-
-  //LibLogger::log_debug("V4L2Cam", "select_format()");
   select_format();
-
-  if (_fps)
-  {
-    //LibLogger::log_debug("V4L2Cam", "set_fps()");
-    set_fps();
-  }
-
-  //LibLogger::log_debug("V4L2Cam", "set_controls()");
+  if (_fps)  set_fps();
   set_controls();
-
-  //LibLogger::log_debug("V4L2Cam", "create_buffer()");
   create_buffer();
-
-  //LibLogger::log_debug("V4L2Cam", "reset_cropping()");
   reset_cropping();
-
 }
 
 /**
@@ -515,60 +437,35 @@ V4L2Camera::select_read_method()
     }
   }
 
-  if (_read_method != READ)
-  {
+  if (_read_method != READ) {
     v4l2_requestbuffers buf;
 
     /* Streaming IO - Try 1st method, and if that fails 2nd */
-    for (int i = 0; i < 2; ++i)
-    {
-      if (_read_method == MMAP)
-      {
-        _buffers_length = MMAP_NUM_BUFFERS;
-        buf.count = _buffers_length;
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
-      }
-      else /* UPTR */
-      {
-        _buffers_length = 0;
-        buf.count = 0;
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_USERPTR;
-      }
-
-      if (v4l2_ioctl(_dev, VIDIOC_REQBUFS, &buf))
-      {
-        if (errno != EINVAL)
-        {
-          close();
-          throw Exception("V4L2Cam: REQBUFS query failed");
-        }
-
-        /* Not supported */
-        if (i == 1)
-        {
-          close();
-          throw Exception("V4L2Cam: Neither memory mapped nor user pointer IO supported");
-        }
-
-        /* try other method */
-        _read_method = (_read_method == MMAP ? UPTR : MMAP);
-        continue;
-      }
-
-      /* Method supported */
-      if ((_read_method == MMAP) && (buf.count < _buffers_length))
-      {
-        close();
-        throw Exception("V4L2Cam: Not enough memory for the buffers");
-      }
-
-      break;
+    if (_read_method == MMAP) {
+      _buffers_length = MMAP_NUM_BUFFERS;
+      buf.count = _buffers_length;
+      buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+      buf.memory = V4L2_MEMORY_MMAP;
+    } else if (_read_method == UPTR) {
+      _buffers_length = 0;
+      buf.count = 0;
+      buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+      buf.memory = V4L2_MEMORY_USERPTR;
     }
-  }
-  else /* Read IO */
-  {
+
+    if (v4l2_ioctl(_dev, VIDIOC_REQBUFS, &buf)) {
+      close();
+      throw Exception("V4L2Cam: REQBUFS query failed");
+    }
+
+    if (_read_method == MMAP) {
+      if (buf.count < _buffers_length) {
+	close();
+	throw Exception("V4L2Cam: Not enough memory for the buffers");
+      }
+    }
+  } else {
+    /* Read IO */
     _buffers_length = 1;
   }
 
@@ -587,6 +484,76 @@ V4L2Camera::select_read_method()
       //TODO
       throw Exception("V4L2Cam: user pointer method not supported yet");
       break;
+  }
+}
+
+/** Set requested video standard. */
+void
+V4L2Camera::select_standard()
+{
+  // No video standard setting requested? Return!
+  if (! _standard)  return;
+
+  v4l2_standard std;
+  bool found = false;
+  memset(&std, 0, sizeof(std));
+  for (std.index = 0; v4l2_ioctl(_dev, VIDIOC_ENUMSTD, &std) == 0; std.index++) {
+    if (strcmp(_standard, (const char *)std.name) == 0) {
+      found = true;
+      break;
+    }
+  }
+
+  if (! found) {
+    throw Exception("Requested standard %s is not supported by the device",
+		    _standard);
+  }
+
+  v4l2_std_id current_std_id;
+  if (v4l2_ioctl(_dev, VIDIOC_G_STD, &current_std_id) != 0) {
+    throw Exception("Failed to read current standard");
+  }
+  if (std.id != current_std_id) {
+    // Set it
+    v4l2_std_id set_std_id = std.id;
+    if (v4l2_ioctl(_dev, VIDIOC_S_STD, &set_std_id) != 0) {
+      throw Exception(errno, "Failed to set standard %s", _standard);
+    }
+  }
+}
+
+/** Set requested video input. */
+void
+V4L2Camera::select_input()
+{
+  // No video input setting requested? Return!
+  if (! _input)  return;
+
+  v4l2_input inp;
+  bool found = false;
+  memset(&inp, 0, sizeof(inp));
+  for (inp.index = 0; v4l2_ioctl(_dev, VIDIOC_ENUMINPUT, &inp) == 0; inp.index++) {
+    if (strcmp(_input, (const char *)inp.name) == 0) {
+      found = true;
+      break;
+    }
+  }
+
+  if (! found) {
+    throw Exception("Requested input %s is not supported by the device",
+		    _input);
+  }
+
+  int current_inp_ind;
+  if (v4l2_ioctl(_dev, VIDIOC_G_INPUT, &current_inp_ind) != 0) {
+    throw Exception("Failed to read current input index");
+  }
+  if ((int)inp.index != current_inp_ind) {
+    // Set it
+    int set_inp_ind = inp.index;
+    if (v4l2_ioctl(_dev, VIDIOC_S_INPUT, &set_inp_ind) != 0) {
+      throw Exception(errno, "Failed to set input %s", _input);
+    }
   }
 }
 
@@ -613,8 +580,7 @@ V4L2Camera::select_format()
   }
 #endif
 
-  if (strcmp(_format, ""))
-  {
+  if (strcmp(_format, "")) {
     /* Try to select preferred format */
     memset(&format_desc, 0, sizeof(format_desc));
     format_desc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -625,23 +591,20 @@ V4L2Camera::select_format()
       fourcc[2] = static_cast<char>((format_desc.pixelformat >> 16) & 0xFF);
       fourcc[3] = static_cast<char>((format_desc.pixelformat >> 24) & 0xFF);
 
-      if (strcmp(_format, fourcc) == 0)
-      {
+      if (strcmp(_format, fourcc) == 0) {
         preferred_found = true;
         break;
       }
     }
   }
 
-  if (!preferred_found)
-  {
+  if (!preferred_found) {
     /* Preferred format not found (or none selected)
        -> just take first available format */
     memset(&format_desc, 0, sizeof(format_desc));
     format_desc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     format_desc.index = 0;
-    if (v4l2_ioctl(_dev, VIDIOC_ENUM_FMT, &format_desc))
-    {
+    if (v4l2_ioctl(_dev, VIDIOC_ENUM_FMT, &format_desc)) {
       close();
       throw Exception("V4L2Cam: No image format found");
     }
@@ -656,8 +619,7 @@ V4L2Camera::select_format()
   v4l2_format format;
   memset(&format, 0, sizeof(format));
   format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  if (v4l2_ioctl(_dev, VIDIOC_G_FMT, &format))
-  {
+  if (v4l2_ioctl(_dev, VIDIOC_G_FMT, &format)) {
     close();
     throw Exception("V4L2Cam: Format query failed");
   }
@@ -672,8 +634,7 @@ V4L2Camera::select_format()
     format.fmt.pix.height = _height;
 
   int s_fmt_rv = v4l2_ioctl(_dev, VIDIOC_S_FMT, &format);
-  if (s_fmt_rv != 0 && errno != EBUSY && _nao_hacks)
-  {
+  if (s_fmt_rv != 0 && errno != EBUSY && _nao_hacks) {
     //throw Exception(errno, "Failed to set video format");
     //}
 
@@ -682,24 +643,19 @@ V4L2Camera::select_format()
     LibLogger::log_info("V4L2Cam", "Trying workaround");
 
     v4l2_std_id std;
-    if (v4l2_ioctl(_dev, VIDIOC_G_STD, &std))
-    {
+    if (v4l2_ioctl(_dev, VIDIOC_G_STD, &std)) {
       close();
       throw Exception("V4L2Cam: Standard query (workaround) failed");
     }
 
-    if ((_width == 320) && (_height == 240))
-    {
+    if ((_width == 320) && (_height == 240)) {
       std = 0x04000000UL; // QVGA
-    }
-    else
-    {
+    } else {
       std = 0x08000000UL; // VGA
       _width = 640;
       _height = 480;
     }
-    if (v4l2_ioctl(_dev, VIDIOC_S_STD, &std))
-    {
+    if (v4l2_ioctl(_dev, VIDIOC_S_STD, &std)) {
       close();
       throw Exception("V4L2Cam: Standard setting (workaround) failed");
     }
@@ -709,8 +665,7 @@ V4L2Camera::select_format()
     format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
     format.fmt.pix.field       = V4L2_FIELD_ANY;
 
-    if (v4l2_ioctl(_dev, VIDIOC_S_FMT, &format))
-    {
+    if (v4l2_ioctl(_dev, VIDIOC_S_FMT, &format)) {
       close();
       throw Exception("V4L2Cam: Format setting (workaround) failed");
     }
@@ -724,8 +679,7 @@ V4L2Camera::select_format()
   _format[2] = static_cast<char>((format.fmt.pix.pixelformat >> 16) & 0xFF);
   _format[3] = static_cast<char>((format.fmt.pix.pixelformat >> 24) & 0xFF);
 
-  if (!_nao_hacks || !_switch_u_v)
-  {
+  if (!_nao_hacks || !_switch_u_v) {
     if (strcmp(_format, "RGB3") == 0) _colorspace = RGB;
     else if (strcmp(_format, "Y41P") == 0) _colorspace = YUV411_PACKED; //different byte ordering
     else if (strcmp(_format, "411P") == 0) _colorspace = YUV411_PLANAR;
@@ -742,8 +696,7 @@ V4L2Camera::select_format()
     else _colorspace = CS_UNKNOWN;
   }
 
-  if (!_nao_hacks)
-  {
+  if (!_nao_hacks) {
     _width = format.fmt.pix.width;
     _height = format.fmt.pix.height;
   }
@@ -751,8 +704,7 @@ V4L2Camera::select_format()
   _bytes_per_line = format.fmt.pix.bytesperline;
 
   /* Hack for bad drivers */
-  if (_bytes_per_line == 0)
-  {
+  if (_bytes_per_line == 0) {
     LibLogger::log_warn("V4L2Cam", "bytesperline is 0 (driver sucks)");
     _bytes_per_line = colorspace_buffer_size(_colorspace, _width, _height) / _height;
   }
@@ -768,27 +720,22 @@ V4L2Camera::set_fps()
 {
   v4l2_streamparm param;
   param.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  if (v4l2_ioctl(_dev, VIDIOC_G_PARM, &param))
-  {
+  if (v4l2_ioctl(_dev, VIDIOC_G_PARM, &param)) {
     close();
     throw Exception("V4L2Cam: Streaming parameter query failed");
   }
 
-  if (!(param.parm.capture.capability & V4L2_CAP_TIMEPERFRAME))
-  {
+  if (!(param.parm.capture.capability & V4L2_CAP_TIMEPERFRAME)) {
     LibLogger::log_warn("V4L2Cam", "FPS change not supported");
     return;
   }
 
   param.parm.capture.timeperframe.numerator = 1;
   param.parm.capture.timeperframe.denominator = _fps;
-  if (v4l2_ioctl(_dev, VIDIOC_S_PARM, &param))
-  {
+  if (v4l2_ioctl(_dev, VIDIOC_S_PARM, &param)) {
     close();
     throw Exception("V4L2Cam: Streaming parameter setting failed");
-  }
-  else
-  {
+  } else {
     LibLogger::log_debug("V4L2Cam", "FPS set - %d/%d",
                          param.parm.capture.timeperframe.numerator,
                          param.parm.capture.timeperframe.denominator);
@@ -835,10 +782,8 @@ V4L2Camera::set_one_control(const char *ctrl, unsigned int id, int value)
   memset(&queryctrl, 0, sizeof(queryctrl));
   queryctrl.id = id;
 
-  if (v4l2_ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
-  {
-    if (errno == EINVAL)
-    {
+  if (v4l2_ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl)) {
+    if (errno == EINVAL) {
       LibLogger::log_error("V4L2Cam", "Control %s not supported", ctrl);
       return;
     }
@@ -846,8 +791,7 @@ V4L2Camera::set_one_control(const char *ctrl, unsigned int id, int value)
     close();
     throw Exception("V4L2Cam: %s Control query failed", ctrl);
   }
-  if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)
-  {
+  if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED) {
     LibLogger::log_error("V4L2Cam", "Control %s disabled", ctrl);
     return;
   }
@@ -856,8 +800,7 @@ V4L2Camera::set_one_control(const char *ctrl, unsigned int id, int value)
   control.id = id;
   control.value = value;
 
-  if (v4l2_ioctl(_dev, VIDIOC_S_CTRL, &control))
-  {
+  if (v4l2_ioctl(_dev, VIDIOC_S_CTRL, &control)) {
     close();
     throw Exception("V4L2Cam: %s Control setting failed", ctrl);
   }
@@ -878,10 +821,8 @@ V4L2Camera::get_one_control(const char *ctrl, unsigned int id)
   memset(&queryctrl, 0, sizeof(queryctrl));
   queryctrl.id = id;
 
-  if (v4l2_ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl))
-  {
-    if (errno == EINVAL)
-    {
+  if (v4l2_ioctl(_dev, VIDIOC_QUERYCTRL, &queryctrl)) {
+    if (errno == EINVAL) {
       LibLogger::log_error("V4L2Cam", "Control %s not supported", ctrl);
       return 0;
     }
@@ -889,8 +830,7 @@ V4L2Camera::get_one_control(const char *ctrl, unsigned int id)
     close();
     throw Exception("V4L2Cam: %s Control query failed", ctrl);
   }
-  if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)
-  {
+  if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED) {
     LibLogger::log_error("V4L2Cam", "Control %s disabled", ctrl);
     return 0;
   }
@@ -898,8 +838,7 @@ V4L2Camera::get_one_control(const char *ctrl, unsigned int id)
   memset(&control, 0, sizeof(control));
   control.id = id;
 
-  if (v4l2_ioctl(_dev, VIDIOC_G_CTRL, &control))
-  {
+  if (v4l2_ioctl(_dev, VIDIOC_G_CTRL, &control)) {
     close();
     throw Exception("V4L2Cam: %s Control value reading failed", ctrl);
   }
@@ -985,8 +924,11 @@ V4L2Camera::reset_cropping()
   memset(&cropcap, 0, sizeof(cropcap));
   cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-  if (v4l2_ioctl(_dev, VIDIOC_CROPCAP, &cropcap))
-  {
+  if (v4l2_ioctl(_dev, VIDIOC_CROPCAP, &cropcap)) {
+    if (errno == ENOTTY) {
+      // simply not suppored
+      return;
+    }
     LibLogger::log_warn("V4L2Cam", "cropcap query failed (driver sucks) - %d: %s", errno, strerror(errno));
   }
 
@@ -995,8 +937,7 @@ V4L2Camera::reset_cropping()
   crop.c = cropcap.defrect;
 
   /* Ignore if cropping is not supported (EINVAL). */
-  if (v4l2_ioctl(_dev, VIDIOC_S_CROP, &crop) && errno != EINVAL)
-  {
+  if (v4l2_ioctl(_dev, VIDIOC_S_CROP, &crop) && errno != EINVAL) {
     LibLogger::log_warn("V4L2Cam", "cropping query failed (driver sucks) - %d: %s", errno, strerror(errno));
   }
 }
@@ -1008,43 +949,38 @@ V4L2Camera::close()
 
   if (_started) stop();
 
-  if (_frame_buffers)
-  {
-    switch (_read_method)
+  if (_frame_buffers) {
+    switch (_read_method) {
+    case READ:
     {
-      case READ:
-      {
-        free(_frame_buffers[0].buffer);
-        break;
-      }
+      free(_frame_buffers[0].buffer);
+      break;
+    }
 
-      case MMAP:
-      {
-        for (unsigned int i = 0; i < _buffers_length; ++i)
-        {
-          v4l2_munmap(_frame_buffers[i].buffer, _frame_buffers[i].size);
-        }
-        break;
+    case MMAP:
+    {
+      for (unsigned int i = 0; i < _buffers_length; ++i) {
+	v4l2_munmap(_frame_buffers[i].buffer, _frame_buffers[i].size);
       }
+      break;
+    }
 
-      case UPTR:
-        /* not supported yet */
-        break;
+    case UPTR:
+      /* not supported yet */
+      break;
     }
     delete[] _frame_buffers;
     _frame_buffers = NULL;
     _current_buffer = -1;
   }
 
-  if (_opened)
-  {
+  if (_opened) {
     v4l2_close(_dev);
     _opened = false;
     _dev = 0;
   }
 
-  if (_capture_time)
-  {
+  if (_capture_time) {
     delete _capture_time;
     _capture_time = 0;
   }
@@ -1053,40 +989,34 @@ V4L2Camera::close()
 void
 V4L2Camera::start()
 {
-  //LibLogger::log_info("V4L2Cam", "start()");
-
   if (!_opened) throw Exception("VL42Cam: Camera not opened");
 
   if (_started) stop();
 
-  switch (_read_method)
-  {
+  switch (_read_method) {
     case READ:
       /* nothing to do here */
       break;
 
     case MMAP:
     {
-      /* enqueue buffers */
-      for (unsigned int i = 0; i < _buffers_length; ++i)
-      {
-        v4l2_buffer buffer;
-        memset(&buffer, 0, sizeof(buffer));
-        buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buffer.memory = V4L2_MEMORY_MMAP;
-        buffer.index = i;
+      // enqueue buffers
+      for (unsigned int i = 0; i < _buffers_length; ++i) {
+	v4l2_buffer buffer;
+	memset(&buffer, 0, sizeof(buffer));
+	buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	buffer.memory = V4L2_MEMORY_MMAP;
+	buffer.index = i;
 
-        if (v4l2_ioctl(_dev, VIDIOC_QBUF, &buffer))
-        {
-          close();
-          throw Exception("V4L2Cam: Enqueuing buffer failed");
-        }
+	if (v4l2_ioctl(_dev, VIDIOC_QBUF, &buffer)) {
+	  close();
+	  throw Exception("V4L2Cam: Enqueuing buffer failed");
+	}
       }
 
-      /* start streaming */
+      // start streaming
       int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-      if (v4l2_ioctl(_dev, VIDIOC_STREAMON, &type))
-      {
+      if (v4l2_ioctl(_dev, VIDIOC_STREAMON, &type)) {
         close();
         throw Exception("V4L2Cam: Starting stream failed");
       }
@@ -1109,19 +1039,17 @@ V4L2Camera::stop()
 
   if (!_started) return;
 
-  switch (_read_method)
-  {
+  switch (_read_method) {
     case READ:
-      /* nothing to do here */
+      // nothing to do here
       break;
 
-    case MMAP: /* fall through */
+    case MMAP:
     case UPTR:
     {
-      /* stop streaming */
+      // stop streaming
       int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-      if (v4l2_ioctl(_dev, VIDIOC_STREAMOFF, &type))
-      {
+      if (v4l2_ioctl(_dev, VIDIOC_STREAMOFF, &type)) {
         close();
         throw Exception("V4L2Cam: Stopping stream failed");
       }
@@ -1136,8 +1064,6 @@ V4L2Camera::stop()
 bool
 V4L2Camera::ready()
 {
-  //LibLogger::log_debug("V4L2Cam", "ready()");
-
   return _started;
 }
 
@@ -1151,30 +1077,20 @@ V4L2Camera::flush()
 void
 V4L2Camera::capture()
 {
-  //LibLogger::log_debug("V4L2Cam", "capture()");
-
   if (!_started) return;
 
-  switch (_read_method)
-  {
+  switch (_read_method) {
     case READ:
     {
       _current_buffer = 0;
-      //LibLogger::log_debug("V4L2Cam", "calling read()");
-      if (v4l2_read(_dev, _frame_buffers[_current_buffer].buffer, _frame_buffers[_current_buffer].size) == -1)
-      {
-        //TODO: errno handling
+      if (v4l2_read(_dev, _frame_buffers[_current_buffer].buffer, _frame_buffers[_current_buffer].size) == -1) {
         LibLogger::log_warn("V4L2Cam", "read() failed with code %d: %s", errno, strerror(errno));
       }
-      //LibLogger::log_debug("V4L2Cam", "returned from read()");
 
       //No timestamping support here - just take current system time
-      if (_capture_time)
-      {
+      if (_capture_time) {
         _capture_time->stamp();
-      }
-      else
-      {
+      } else {
         _capture_time = new fawkes::Time();
       }
 
@@ -1183,27 +1099,22 @@ V4L2Camera::capture()
 
     case MMAP:
     {
-      /* dequeue buffer */
+      // dequeue buffer
       v4l2_buffer buffer;
       memset(&buffer, 0, sizeof(buffer));
       buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
       buffer.memory = V4L2_MEMORY_MMAP;
 
-      if (v4l2_ioctl(_dev, VIDIOC_DQBUF, &buffer))
-      {
-        //TODO: errno handling -> EAGAIN, ...?
+      if (v4l2_ioctl(_dev, VIDIOC_DQBUF, &buffer)) {
         close();
         throw Exception("V4L2Cam: Dequeuing buffer failed");
       }
 
       _current_buffer = buffer.index;
 
-      if (_capture_time)
-      {
+      if (_capture_time) {
         _capture_time->set_time(&buffer.timestamp);
-      }
-      else
-      {
+      } else {
         _capture_time = new fawkes::Time(&buffer.timestamp);
       }
       break;
@@ -1238,8 +1149,7 @@ V4L2Camera::dispose_buffer()
 
   if (!_opened) return;
 
-  switch (_read_method)
-  {
+  switch (_read_method) {
     case READ:
       /* nothing to do here */
       break;
@@ -1254,8 +1164,7 @@ V4L2Camera::dispose_buffer()
       buffer.index = _current_buffer;
 
       //TODO: Test if the next buffer is also the latest buffer (VIDIOC_QUERYBUF)
-      if (v4l2_ioctl(_dev, VIDIOC_QBUF, &buffer))
-      {
+      if (v4l2_ioctl(_dev, VIDIOC_QBUF, &buffer)) {
         int errno_save = errno;
         close();
         throw Exception(errno_save, "V4L2Cam: Enqueuing buffer failed");

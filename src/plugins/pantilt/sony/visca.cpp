@@ -95,7 +95,6 @@ const unsigned int Visca::MAX_TILT_SPEED        = 0x14;
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param device_file serial device file (e.g. /dev/ttyUSB0)
  * @param def_timeout_ms default timeout for read operations applied if no explicit
@@ -140,7 +139,7 @@ Visca::open() {
 
   struct termios param;
 
-  __fd = ::open(__device_file, O_RDWR | O_NONBLOCK);
+  __fd = ::open(__device_file, O_RDWR);
   if (! __fd) {
     throw ViscaException("Cannot open device", errno);
   }
@@ -426,14 +425,28 @@ Visca::is_nonblocking_finished(unsigned int item) const
 }
 
 
-/** Send and wait for reply, blocking.
- */
+/** Send and wait for reply, blocking. */
 void
 Visca::send_with_reply()
 {
   try {
     send();
-    recv();
+
+    if (__obuffer[1] == VISCA_COMMAND) {
+      // do not catch timeouts here, we expect them to be on time
+      recv_ack();
+      bool rcvd = false;
+
+      while (! rcvd) {
+	try {
+	  recv();
+	  rcvd = true;
+	} catch (fawkes::TimeoutException &e) {} // ignored
+      }
+    } else {
+      // timeout applies to inquiries
+      recv();
+    }
   } catch (ViscaException &e) {
     e.append("Sending with reply failed");
     throw;
@@ -465,13 +478,15 @@ Visca::recv_packet(unsigned int timeout_ms)
 
   // get octets one by one
   if (read(__fd, __ibuffer, 1) != 1) {
-    throw fawkes::Exception(errno, "Visca reading packet byte failed");
+    throw fawkes::Exception(errno, "Visca reading packet byte failed (1)");
   }
 
-  int pos = 0;
-  while (__ibuffer[pos] != VISCA_TERMINATOR) {
+  size_t pos = 0;
+  while (__ibuffer[pos] != VISCA_TERMINATOR && (pos < sizeof(__ibuffer)-1)) {
     if (read(__fd, &__ibuffer[++pos], 1) != 1) {
-      throw fawkes::Exception(errno, "Visca reading packet byte failed");
+      
+
+      throw fawkes::Exception(errno, "Visca reading packet byte failed (2)");
     }
     usleep(0);
   }
@@ -563,6 +578,54 @@ Visca::process()
       // Ignore this error
       return;
     }
+  }
+}
+
+
+/** Set power state.
+ * @param powered true to power on, false to power off
+ */
+void
+Visca::set_power(bool powered)
+{
+  __obuffer[1] = VISCA_COMMAND;
+  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
+  __obuffer[3] = VISCA_POWER;
+  __obuffer[4] = powered ? VISCA_POWER_ON : VISCA_POWER_OFF;
+  __obuffer_length = 4;
+
+  try {
+    send_with_reply();
+  } catch (ViscaException &e) {
+    e.append("set_power() failed");
+    throw;
+  }
+}
+
+
+/** Check if camera is powered
+ * @return true if camera is powered, false otherwise
+ */
+bool
+Visca::is_powered()
+{
+  __obuffer[1] = VISCA_INQUIRY;
+  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
+  __obuffer[3] = VISCA_POWER;
+  __obuffer_length = 3;
+
+  try {
+    send_with_reply();
+  } catch (ViscaException &e) {
+    e.append("Failed to get power data");
+    throw;
+  }
+
+  // Extract information from __ibuffer
+  if ( __ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
+    return (__ibuffer[2] == VISCA_POWER_ON);
+  } else {
+    throw ViscaException("is_powered(): inquiry failed, response code not VISCA_RESPONSE_COMPLETED");
   }
 }
 
@@ -699,6 +762,7 @@ Visca::get_pan_tilt(int &pan, int &tilt)
       try {
 	recv();
       } catch (ViscaException &e) {
+      } catch (fawkes::TimeoutException &e) {
 	// Ignore
       }
 #ifdef TIMETRACKER_VISCA
@@ -975,7 +1039,12 @@ Visca::set_zoom(unsigned int zoom)
   __obuffer_length = 7;
 
   try {
-    send_with_reply();
+    if (! __blocking) {
+      __nonblocking_running[ NONBLOCKING_ZOOM ] = true;
+      send_nonblocking( &(__nonblocking_sockets[ NONBLOCKING_ZOOM ]) );
+    } else {
+      send_with_reply();
+    }
   } catch (ViscaException &e) {
     e.append("setZoom() failed");
     throw;
@@ -987,7 +1056,7 @@ Visca::set_zoom(unsigned int zoom)
  * @param zoom contains zoom upon return.
  */
 void
-Visca::get_zoom(unsigned int *zoom)
+Visca::get_zoom(unsigned int &zoom)
 {
   __obuffer[1] = VISCA_INQUIRY;
   __obuffer[2] = VISCA_CATEGORY_CAMERA1;
@@ -997,7 +1066,7 @@ Visca::get_zoom(unsigned int *zoom)
   try {
     send_with_reply();
   } catch (ViscaException &e) {
-    e.append("getZoom() failed");
+    e.append("Failed to get zoom data");
     throw;
   }
 
@@ -1010,9 +1079,9 @@ Visca::get_zoom(unsigned int *zoom)
     zoom_val |= (__ibuffer[4] & 0x0F) << 4;
     zoom_val |= (__ibuffer[5] & 0x0F);
 
-    *zoom = zoom_val;
+    zoom = zoom_val;
   } else {
-    throw ViscaException("getZoom(): zoom inquiry failed, response code not VISCA_RESPONSE_COMPLETED");
+    throw ViscaException("Failed to get zoom data failed, response code not VISCA_RESPONSE_COMPLETED");
   }
 
 }
@@ -1220,3 +1289,50 @@ Visca::get_white_balance_mode()
 
 }
 
+
+/** Sett mirror sate
+ * @param mirror true to enable mirroring, false to disable
+ */
+void
+Visca::set_mirror(bool mirror)
+{
+  __obuffer[1] = VISCA_COMMAND;
+  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
+  __obuffer[3] = VISCA_MIRROR;
+  __obuffer[4] = mirror ? VISCA_MIRROR_ON : VISCA_MIRROR_OFF;
+  __obuffer_length = 4;
+
+  try {
+    send_with_reply();
+  } catch (ViscaException &e) {
+    e.append("set_mirror() failed");
+    throw;
+  }
+}
+
+/** Get mirror sate.
+ * @return true if image is mirrored, false otherwise
+ */
+bool
+Visca::get_mirror()
+{
+  __obuffer[1] = VISCA_INQUIRY;
+  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
+  __obuffer[3] = VISCA_MIRROR;
+  __obuffer_length = 3;
+
+  try {
+    send_with_reply();
+  } catch (ViscaException &e) {
+    e.append("Failed to get mirror data");
+    throw;
+  }
+
+  // Extract information from __ibuffer
+  if ( __ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
+    return (__ibuffer[2] != 0);
+  } else {
+    throw ViscaException("Failed to get mirror data: zoom inquiry failed, "
+			 "response code not VISCA_RESPONSE_COMPLETED");
+  }
+}

@@ -3,8 +3,7 @@
  *  request_dispatcher.h - Web request dispatcher
  *
  *  Created: Mon Oct 13 22:44:33 2008
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -26,9 +25,9 @@
 #include <string>
 #include <map>
 #include <stdint.h>
+#include <memory>
 
-struct MHD_Connection;
-struct MHD_Response;
+#include <microhttpd.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -40,7 +39,12 @@ class WebUrlManager;
 class WebPageHeaderGenerator;
 class WebPageFooterGenerator;
 class StaticWebReply;
+class DynamicWebReply;
 class WebUserVerifier;
+class WebRequest;
+class WebviewAccessLog;
+class Mutex;
+class Time;
 
 class WebRequestDispatcher
 {
@@ -59,23 +63,37 @@ class WebRequestDispatcher
 				size_t *upload_data_size,
 				void  **session_data);
 
+  static void request_completed_cb(void *cls,
+				   struct MHD_Connection *connection, void **con_cls,
+				   enum MHD_RequestTerminationCode toe);
+
+  static void * uri_log_cb(void *cls, const char *uri);
+
   void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
+  void setup_access_log(const char *filename);
+
+  unsigned int active_requests() const;
+  std::auto_ptr<Time> last_request_completion_time() const;
 
  private:
   struct MHD_Response *  prepare_static_response(StaticWebReply *sreply);
-  int queue_static_reply(struct MHD_Connection * connection,
+  int queue_static_reply(struct MHD_Connection * connection, WebRequest *request,
 			 StaticWebReply *sreply);
-  int queue_basic_auth_fail(struct MHD_Connection * connection);
+  int queue_dynamic_reply(struct MHD_Connection * connection, WebRequest *request,
+			  DynamicWebReply *sreply);
+  int queue_basic_auth_fail(struct MHD_Connection * connection, WebRequest *request);
   int process_request(struct MHD_Connection * connection,
-		      const char *url,
-		      const char *method,
-		      const char *version,
-		      const char *upload_data,
-		      size_t *upload_data_size,
+		      const char *url, const char *method, const char *version,
+		      const char *upload_data, size_t *upload_data_size,
 		      void **session_data);
+  void * log_uri(const char *uri);
+
+  void request_completed(WebRequest *request,
+			 MHD_RequestTerminationCode term_code);
 
  private:
   WebUrlManager            *__url_manager;
+  WebviewAccessLog         *__access_log;
 
   std::string               __active_baseurl;
   WebPageHeaderGenerator   *__page_header_generator;
@@ -83,6 +101,10 @@ class WebRequestDispatcher
 
   char                     *__realm;
   WebUserVerifier          *__user_verifier;
+
+  unsigned int              __active_requests;
+  fawkes::Time             *__last_request_completion_time;
+  fawkes::Mutex            *__active_requests_mutex;
 };
 
 } // end namespace fawkes

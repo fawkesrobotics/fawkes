@@ -3,8 +3,7 @@
  *  visca.h - Class for accessing visca cams
  *
  *  Created: Wed Jun 08 12:06:15 2005 (FireVision)
- *  Copyright  2005-2009  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2005-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -65,6 +64,35 @@ class Visca {
   static const unsigned int  MAX_PAN_SPEED;
   static const unsigned int  MAX_TILT_SPEED;
 
+  /// Zoom value: wide
+  static const unsigned int    VISCA_ZOOM_VALUE_WIDE            = 0x0000;
+  /// Zoom value: 1x
+  static const unsigned int    VISCA_ZOOM_VALUE_1X              = 0x0E6D;
+  /// Zoom value: 2x
+  static const unsigned int    VISCA_ZOOM_VALUE_2X              = 0x188E;
+  /// Zoom value: 3x
+  static const unsigned int    VISCA_ZOOM_VALUE_3X              = 0x2507;
+  /// Zoom value: 4x
+  static const unsigned int    VISCA_ZOOM_VALUE_4X              = 0x2B82;
+  /// Zoom value: 5x
+  static const unsigned int    VISCA_ZOOM_VALUE_5X              = 0x3130;
+  /// Zoom value: 6x
+  static const unsigned int    VISCA_ZOOM_VALUE_6X              = 0x352E;
+  /// Zoom value: 7x
+  static const unsigned int    VISCA_ZOOM_VALUE_7X              = 0x385D;
+  /// Zoom value: 8x
+  static const unsigned int    VISCA_ZOOM_VALUE_8X              = 0x3B48;
+  /// Zoom value: 9x
+  static const unsigned int    VISCA_ZOOM_VALUE_9X              = 0x3E01;
+  /// Zoom value: 10x
+  static const unsigned int    VISCA_ZOOM_VALUE_10X             = 0x4000;
+  /// Zoom value: 20x
+  static const unsigned int    VISCA_ZOOM_VALUE_DIG_20X         = 0x5000;
+  /// Zoom value: 30x
+  static const unsigned int    VISCA_ZOOM_VALUE_DIG_30X         = 0x6000;
+  /// Zoom value: 40x
+  static const unsigned int    VISCA_ZOOM_VALUE_DIG_40X         = 0x7000;
+
   Visca(const char *device_file, unsigned int def_timeout_ms = 10,
 	bool blocking = true);
   virtual ~Visca();
@@ -75,6 +103,10 @@ class Visca {
   // basic communication
   void         set_address();
   void         clear();
+
+  // power
+  void         set_power(bool powered);
+  bool         is_powered();
 
   // low level
   void         send();
@@ -108,7 +140,7 @@ class Visca {
   // zoom
   void         reset_zoom();
   void         set_zoom(unsigned int zoom);
-  void         get_zoom(unsigned int *zoom);
+  void         get_zoom(unsigned int &zoom);
   void         set_zoom_speed_tele(unsigned int speed);
   void         set_zoom_speed_wide(unsigned int speed);
   void         set_zoom_digital_enabled(bool enabled);
@@ -126,6 +158,9 @@ class Visca {
   void         apply_effect_stretch();
 
   unsigned int get_white_balance_mode();
+
+  bool         get_mirror();
+  void         set_mirror(bool mirror);
 
  private:
   // possible running inquires
@@ -172,6 +207,8 @@ class Visca {
   static const unsigned char VISCA_CATEGORY_CAMERA2             = 0x07;
 
   static const unsigned char VISCA_POWER                        = 0x00;
+  static const unsigned char   VISCA_POWER_ON                   = 0x02;
+  static const unsigned char   VISCA_POWER_OFF                  = 0x03;
   static const unsigned char VISCA_DEVICE_INFO                  = 0x02;
   static const unsigned char VISCA_KEYLOCK                      = 0x17;
   static const unsigned char VISCA_ID                           = 0x22;
@@ -248,6 +285,8 @@ class Visca {
   static const unsigned char   VISCA_WIDE_MODE_CINEMA           = 0x01;
   static const unsigned char   VISCA_WIDE_MODE_16_9             = 0x02;
   static const unsigned char VISCA_MIRROR                       = 0x61;
+  static const unsigned char   VISCA_MIRROR_ON                  = 0x02;
+  static const unsigned char   VISCA_MIRROR_OFF                 = 0x03;
   static const unsigned char VISCA_FREEZE                       = 0x62;
   static const unsigned char VISCA_PICTURE_EFFECT               = 0x63;
   static const unsigned char   VISCA_PICTURE_EFFECT_OFF         = 0x00;

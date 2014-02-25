@@ -25,6 +25,9 @@
 
 #include <core/exceptions/system.h>
 #include <core/exceptions/software.h>
+#include <core/threading/mutex_locker.h>
+#include <core/threading/mutex.h>
+#include <core/threading/wait_condition.h>
 #ifdef FVBASE_TIMETRACKER
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
@@ -33,6 +36,7 @@
 
 #include <fvcams/shmem.h>
 #include <fvutils/color/conversions.h>
+#include <interfaces/SwitchInterface.h>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -62,20 +66,24 @@ using namespace firevision;
  */
 FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
 					 Logger *logger, Clock *clock)
-  : Thread((std::string("FvAcquisitionThread::") + id).c_str())
+  : Thread("FvAcquisitionThread"),
+    BlackBoardInterfaceListener("FvAcquisitionThread::%s", id)
 {
-  __logger        = logger;
+  set_prepfin_conc_loop(true);
+  set_name("FvAcquisitionThread::%s", id);
+
   __image_id      = strdup(id);
 
   vision_threads  = new FvAqtVisionThreads(clock);
   raw_subscriber_thread = NULL;
 
+  __enabled_mutex = new Mutex(Mutex::RECURSIVE);
+  __enabled_waitcond = new WaitCondition(__enabled_mutex);
+
   __camera        = camera;
   __width         = __camera->pixel_width();
   __height        = __camera->pixel_height();
   __colorspace    = __camera->colorspace();
-  logger->log_debug(name(), "Camera opened, w=%u  h=%u  c=%s", __width, __height,
-		    colorspace_to_string(__colorspace));
 
   __mode = AqtContinuous;
   __enabled = false;
@@ -105,6 +113,31 @@ FvAcquisitionThread::~FvAcquisitionThread()
   delete vision_threads;
   delete __camera;
   free(__image_id);
+  delete __enabled_waitcond;
+  delete __enabled_mutex;
+}
+
+void
+FvAcquisitionThread::init()
+{
+  logger->log_debug(name(), "Camera opened, w=%u  h=%u  c=%s", __width, __height,
+		    colorspace_to_string(__colorspace));
+
+  std::string if_id = std::string("Camera ") + __image_id;
+  __enabled_if = blackboard->open_for_writing<SwitchInterface>(if_id.c_str());
+  __enabled_if->set_enabled(__enabled);
+  __enabled_if->write();
+
+  bbil_add_message_interface(__enabled_if);
+  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+}
+
+
+void
+FvAcquisitionThread::finalize()
+{
+  blackboard->unregister_listener(this);
+  blackboard->close(__enabled_if);
 }
 
 
@@ -194,10 +227,10 @@ void
 FvAcquisitionThread::set_aqtmode(AqtMode mode)
 {
   if ( mode == AqtCyclic ) {
-    //__logger->log_info(name(), "Setting WAITFORWAKEUPMODE");
+    //logger->log_info(name(), "Setting WAITFORWAKEUPMODE");
     set_opmode(Thread::OPMODE_WAITFORWAKEUP);
   } else if ( mode == AqtContinuous ) {
-    //__logger->log_info(name(), "Setting CONTINUOUS");
+    //logger->log_info(name(), "Setting CONTINUOUS");
     set_opmode(Thread::OPMODE_CONTINUOUS);
   }
   __mode = mode;
@@ -213,6 +246,24 @@ FvAcquisitionThread::set_aqtmode(AqtMode mode)
 void
 FvAcquisitionThread::set_enabled(bool enabled)
 {
+  MutexLocker lock(__enabled_mutex);
+
+  if (__enabled && ! enabled) {
+    // disabling thread
+    __camera->stop();
+    __enabled_if->set_enabled(false);
+    __enabled_if->write();
+
+  } else if (! __enabled && enabled) {
+    // enabling thread
+    __camera->start();
+    __enabled_if->set_enabled(true);
+    __enabled_if->write();
+
+    __enabled_waitcond->wake_all();
+  } // else not state change
+
+  // we can safely do this every time...
   __enabled = enabled;
 }
 
@@ -237,7 +288,7 @@ FvAcquisitionThread::set_vt_prepfin_hold(bool hold)
   try {
     vision_threads->set_prepfin_hold(hold);
   } catch (Exception &e) {
-    __logger->log_warn(name(), "At least one thread was being finalized while prepfin hold "
+    logger->log_warn(name(), "At least one thread was being finalized while prepfin hold "
 		      "was about to be acquired");
     throw;
   }
@@ -247,17 +298,34 @@ FvAcquisitionThread::set_vt_prepfin_hold(bool hold)
 void
 FvAcquisitionThread::loop()
 {
+  MutexLocker lock(__enabled_mutex);
+
+  while (! __enabled_if->msgq_empty() ) {
+    if (__enabled_if->msgq_first_is<SwitchInterface::EnableSwitchMessage>()) {
+      // must be re-established
+      logger->log_info(name(), "Enabling on blackboard request");
+      set_enabled(true);
+    } else if (__enabled_if->msgq_first_is<SwitchInterface::DisableSwitchMessage>()) {
+      logger->log_info(name(), "Disabling on blackboard request");
+      set_enabled(false);
+    } else {
+      logger->log_warn(name(), "Unhandled message %s ignored",
+		       __enabled_if->msgq_first()->type());
+    }
+    __enabled_if->msgq_pop();
+  }
+
   // We disable cancelling here to avoid problems with the write lock
   Thread::CancelState old_cancel_state;
   set_cancel_state(Thread::CANCEL_DISABLED, &old_cancel_state);
 
 #ifdef FVBASE_TIMETRACKER
   try {
-    __tt->ping_start(__ttc_capture);
-    __camera->capture();
-    __tt->ping_end(__ttc_capture);
-
     if ( __enabled ) {
+      __tt->ping_start(__ttc_capture);
+      __camera->capture();
+      __tt->ping_end(__ttc_capture);
+
       for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
 	if (__shmit->first == CS_UNKNOWN)  continue;
 	__tt->ping_start(__ttc_lock);
@@ -279,12 +347,14 @@ FvAcquisitionThread::loop()
       }
     }
   } catch (Exception &e) {
-    __logger->log_error(name(), "Cannot convert image data");
-    __logger->log_error(name(), e);
+    logger->log_error(name(), "Cannot convert image data");
+    logger->log_error(name(), e);
   }
-  __tt->ping_start(__ttc_dispose);
-  __camera->dispose_buffer();
-  __tt->ping_end(__ttc_dispose);
+  if ( __enabled ) {
+    __tt->ping_start(__ttc_dispose);
+    __camera->dispose_buffer();
+    __tt->ping_end(__ttc_dispose);
+  }
 
   if ( (++__loop_count % FVBASE_TT_PRINT_INT) == 0 ) {
     __tt->print_to_stdout();
@@ -292,8 +362,8 @@ FvAcquisitionThread::loop()
 
 #else // no time tracking
   try {
-    __camera->capture();
     if ( __enabled ) {
+      __camera->capture();
       for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
 	if (__shmit->first == CS_UNKNOWN)  continue;
 	__shmit->second->lock_for_write();
@@ -309,15 +379,39 @@ FvAcquisitionThread::loop()
       }
     }
   } catch (Exception &e) {
-    __logger->log_error(name(), e);
+    logger->log_error(name(), e);
   }
-  __camera->dispose_buffer();
+  if ( __enabled ) {
+    __camera->dispose_buffer();
+  }
 #endif
 
-  if ( __mode == AqtCyclic ) {
+  if ( __mode == AqtCyclic && __enabled ) {
     vision_threads->wakeup_and_wait_cyclic_threads();
   }
 
   // reset to the original cancel state, cancelling is now safe
   set_cancel_state(old_cancel_state);
+
+  // in continuous mode wait for signal if disabled
+  while ( __mode == AqtContinuous && ! __enabled ) {
+    __enabled_waitcond->wait();
+  }
+}
+
+bool
+FvAcquisitionThread::bb_interface_message_received(Interface *interface,
+						   Message *message) throw()
+{
+  // in continuous mode wait for signal if disabled
+  MutexLocker lock(__enabled_mutex);
+  if (__mode == AqtContinuous && ! __enabled) {
+    if (message->is_of_type<SwitchInterface::EnableSwitchMessage>()) {
+      logger->log_info(name(), "Enabling on blackboard request");
+      set_enabled(true);
+      return false;
+    }
+  }
+
+  return true;
 }

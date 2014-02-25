@@ -33,7 +33,7 @@ namespace fawkes {
 class WebErrorPageReply : public WebPageReply
 {
  public:
-  WebErrorPageReply(response_code_t error_code, const char *format = NULL, ...);
+  WebErrorPageReply(Code error_code, const char *format = NULL, ...);
 };
 
 } // end namespace fawkes

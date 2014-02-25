@@ -45,5 +45,10 @@ ifeq ($(USE_OPENMP),1)
   LDFLAGS_MINIMUM += $(LDFLAGS_OPENMP)
 endif
 
+# Get rid of some annoying (useless) warnings on Raspberry Pi
+ifeq ($(ARCH),armv6l)
+  CFLAGS_MINIMUM += -Wno-psabi
+endif
+
 endif # __buildsys_gcc_mk_
 

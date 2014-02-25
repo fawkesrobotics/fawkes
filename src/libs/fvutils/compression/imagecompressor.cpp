@@ -72,6 +72,23 @@ namespace firevision {
  *
  * @fn void ImageCompressor::compress()
  * Compress image.
+ *
+ * @fn bool ImageCompressor::supports_vflip()
+ * Check if image compressor can do vflip during compress.
+ *
+ * Vertical flipping (having the image upside down) is an operation
+ * necessary for example for cameras hanging upside down. During
+ * compression when the buffer is typically copied or converted
+ * line-wise anyway, this is a particularly cheap operation. Therfore
+ * we provide an API to implement this.
+ * @return true, if the image compressor supports vflipping, false
+ * otherwise.
+ *
+ * @fn void ImageCompressor::set_vflip(bool enable)
+ * Enable or disable vflipping.
+ * This shall throw an exception if vflipping is not supported.
+ * @param enable true to enable vflipping, false to disable
+ * @exception Exception thrown if vflipping is not supported.
  */
 
 /** Virtual empty destructor. */

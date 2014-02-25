@@ -3,8 +3,7 @@
  *  server.h - Web server encapsulation around libmicrohttpd
  *
  *  Created: Sun Aug 30 17:38:37 2009
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,6 +23,7 @@
 #define __LIBS_WEBVIEW_SERVER_H_
 
 #include <sys/types.h>
+#include <memory>
 
 struct MHD_Daemon;
 
@@ -33,8 +33,10 @@ namespace fawkes {
 #endif
 
 class Logger;
+class Time;
 class WebRequestDispatcher;
 class WebUserVerifier;
+class WebRequestManager;
 
 class WebServer {
  public:
@@ -48,6 +50,11 @@ class WebServer {
   void process();
 
   void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
+  void setup_request_manager(WebRequestManager *request_manager);
+  void setup_access_log(const char *filename);
+
+  unsigned int active_requests() const;
+  std::auto_ptr<Time> last_request_completion_time() const;
 
  private:
   static char * read_file(const char *filename);
@@ -55,6 +62,7 @@ class WebServer {
  private:
   struct MHD_Daemon    *__daemon;
   WebRequestDispatcher *__dispatcher;
+  WebRequestManager    *__request_manager;
   fawkes::Logger       *__logger;
 
   unsigned short int    __port;

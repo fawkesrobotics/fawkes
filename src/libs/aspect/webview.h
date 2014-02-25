@@ -33,6 +33,7 @@ namespace fawkes {
 
 class WebUrlManager;
 class WebNavManager;
+class WebRequestManager;
 
 class WebviewAspect : public virtual Aspect
 {
@@ -41,13 +42,16 @@ class WebviewAspect : public virtual Aspect
   virtual ~WebviewAspect();
 
   void              init_WebviewAspect(WebUrlManager *url_manager,
-				       WebNavManager *nav_manager);
+				       WebNavManager *nav_manager,
+				       WebRequestManager *request_manager);
 
  protected:
   /** Webview request processor manager. */
   WebUrlManager *webview_url_manager;
   /** Webview navigation manager. */
   WebNavManager *webview_nav_manager;
+  /** Webview request manager. */
+  WebRequestManager *webview_request_manager;
 };
 
 } // end namespace fawkes

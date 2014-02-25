@@ -8,7 +8,9 @@
 *_tolua.pkg
 
 # Specific paths, _ variants for cross compilation environments
+/access_log
 /bin/
+/bin/access_log
 /bin_*/
 /cfg/*.db
 /cfg/*.key

@@ -3,8 +3,7 @@
  *  server.cpp - Web server encapsulation around libmicrohttpd
  *
  *  Created: Sun Aug 30 17:40:54 2009
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,6 +22,9 @@
 #include <webview/server.h>
 #include <webview/request_dispatcher.h>
 #include <webview/request.h>
+#include <webview/request_manager.h>
+#include <webview/access_log.h>
+#include <core/threading/thread.h>
 #include <core/exception.h>
 #include <core/exceptions/system.h>
 #include <logging/logger.h>
@@ -37,16 +39,6 @@ namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
-
-/// @cond INTERNALS
-static void
-request_completed_callback(void *cls, struct MHD_Connection *connection, void **con_cls,
-			   enum MHD_RequestTerminationCode toe)
-{
-  WebRequest *request = static_cast<WebRequest *>(*con_cls);
-  delete request;
-}
-/// @endcond
 
 
 /** @class WebServer <webview/server.h>
@@ -67,6 +59,7 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
   __port         = port;
   __dispatcher   = dispatcher;
   __logger       = logger;
+  __request_manager = NULL;
 
   __ssl_key_mem  = NULL;
   __ssl_cert_mem = NULL;
@@ -77,7 +70,10 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 			      NULL,
 			      WebRequestDispatcher::process_request_cb,
 			      (void *)__dispatcher,
-			      MHD_OPTION_NOTIFY_COMPLETED, &request_completed_callback, NULL,
+			      MHD_OPTION_NOTIFY_COMPLETED,
+			        WebRequestDispatcher::request_completed_cb, (void *)__dispatcher,
+			      MHD_OPTION_URI_LOG_CALLBACK,
+			        WebRequestDispatcher::uri_log_cb, (void *)__dispatcher,
 			      MHD_OPTION_END);
 
   if ( __daemon == NULL ) {
@@ -100,6 +96,7 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
   __port       = port;
   __dispatcher = dispatcher;
   __logger     = logger;
+  __request_manager = NULL;
 
   __ssl_key_mem  = read_file(key_pem_filepath);
   __ssl_cert_mem = read_file(cert_pem_filepath);
@@ -110,7 +107,10 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 			      NULL,
 			      WebRequestDispatcher::process_request_cb,
 			      (void *)__dispatcher,
-			      MHD_OPTION_NOTIFY_COMPLETED, &request_completed_callback, NULL,
+			      MHD_OPTION_NOTIFY_COMPLETED,
+			        WebRequestDispatcher::request_completed_cb, (void *)__dispatcher,
+			      MHD_OPTION_URI_LOG_CALLBACK,
+			        WebRequestDispatcher::uri_log_cb, (void *)__dispatcher,
 			      MHD_OPTION_HTTPS_MEM_KEY,  __ssl_key_mem,
 			      MHD_OPTION_HTTPS_MEM_CERT, __ssl_cert_mem,
 			      MHD_OPTION_END);
@@ -125,6 +125,10 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 /** Destructor. */
 WebServer::~WebServer()
 {
+  if (__request_manager) {
+    __request_manager->set_server(NULL);
+  }
+
   MHD_stop_daemon(__daemon);
   __daemon = NULL;
   __dispatcher = NULL;
@@ -187,6 +191,46 @@ WebServer::setup_basic_auth(const char *realm, WebUserVerifier *verifier)
 }
 
 
+/** Setup access log.
+ * @param filename access log file name
+ */
+void
+WebServer::setup_access_log(const char *filename)
+{
+  __dispatcher->setup_access_log(filename);
+}
+
+
+/** Setup this server as request manager.
+ * The registration will be cancelled automatically on destruction.
+ * @param request_manager request manager to register with
+ */
+void
+WebServer::setup_request_manager(WebRequestManager *request_manager)
+{
+  request_manager->set_server(this);
+  __request_manager = request_manager;
+}
+
+/** Get number of active requests.
+ * @return number of ongoing requests.
+ */
+unsigned int
+WebServer::active_requests() const
+{
+  return __dispatcher->active_requests();
+}
+
+/** Get time when last request was completed.
+ * @return Time when last request was completed
+ */
+std::auto_ptr<Time>
+WebServer::last_request_completion_time() const
+{
+  return __dispatcher->last_request_completion_time();
+}
+
+
 /** Process requests.
  * This method waits for new requests and processes them when received.
  */
@@ -202,7 +246,10 @@ WebServer::process()
     return;
   }
   select(max_fd + 1, &read_fd, &write_fd, &except_fd, NULL);
+  Thread::CancelState old_state;
+  Thread::set_cancel_state(Thread::CANCEL_DISABLED, &old_state);
   MHD_run(__daemon);
+  Thread::set_cancel_state(old_state);
 }
 
 } // end namespace fawkes

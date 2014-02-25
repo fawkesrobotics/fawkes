@@ -104,7 +104,7 @@ ROSWebviewRequestProcessor::process_request(const fawkes::WebRequest *request)
 
       return r;
     } else {
-      return new WebErrorPageReply((WebReply::response_code_t)srv.response.code,
+      return new WebErrorPageReply((WebReply::Code)srv.response.code,
 				   "Execution of service %s failed: %s",
 				   __srv_name.c_str(),
 				   srv.response.error.c_str());

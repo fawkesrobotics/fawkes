@@ -3,8 +3,7 @@
  *  request.h - Web request
  *
  *  Created: Mon Jun 17 17:58:51 2013
- *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,8 +22,12 @@
 #ifndef __LIBS_WEBVIEW_REQUEST_H_
 #define __LIBS_WEBVIEW_REQUEST_H_
 
+#include <webview/reply.h>
+#include <utils/time/time.h>
+
 #include <map>
 #include <string>
+#include <arpa/inet.h>
 
 extern "C" {
   struct MHD_Connection;
@@ -52,15 +55,44 @@ class WebRequest {
     METHOD_TRACE	///< TRACE
   } Method;
 
-  WebRequest(const char *url, const char *method, MHD_Connection *connection);
+  /** HTTP version. */
+  typedef enum {
+    HTTP_VERSION_1_0,
+    HTTP_VERSION_1_1
+  } HttpVersion;
+
+  WebRequest(const char *uri);
   ~WebRequest();
 
   /** Get URL.
    * @return URL */
   const std::string &  url() const { return url_; } 
+
+  /** Get URI.
+   * @return URI */
+  const std::string &  uri() const { return uri_; } 
+
   /** Get HTTP transfer method.
    * @return request's HTTP transfer method */
   Method               method() const { return method_; } 
+  const char *         method_str() const;
+
+  /** Get HTTP version.
+   * @return HTTP protocol version */
+  HttpVersion          http_version() const { return http_version_; } 
+  const char *         http_version_str() const;
+
+  /** Get request time.
+   * @return request time */
+  const Time &         time() const { return time_; }
+
+  /** Get name of authenticated user (basic auth).
+   * @return name of authenticated user or empty if non-protected URL */
+  const std::string &  user() const { return user_; } 
+
+  /** Get client address as string.
+   * @return client address as string */
+  const std::string &  client_addr() const { return client_addr_; } 
 
   /** Get map of cookies.
    * @return map of cookies. */
@@ -74,6 +106,12 @@ class WebRequest {
     std::map<std::string, std::string>::const_iterator c = cookies_.find(key);
     return (c != cookies_.end()) ? c->second : "";
   }
+  /** Check if the named cookie has been received.
+   * @param key key of the requested cookie
+   * @return true if the cookie was set, false otherwise
+   */
+  bool has_cookie(std::string key) const
+  { return (cookies_.find(key) != cookies_.end()); }
 
   /** Get map of POST values.
    * @return map of POST values. */
@@ -96,6 +134,69 @@ class WebRequest {
     std::map<std::string, std::string>::const_iterator p = post_values_.find(key);
     return (p != post_values_.end()) ? p->second : "";
   }
+  /** Check if the named post value has been received.
+   * @param key key of the post value
+   * @return true if the post value was received, false otherwise
+   */
+  bool has_post_value(std::string key) const
+  { return (post_values_.find(key) != post_values_.end()); }
+
+  /** Get map of GET values.
+   * @return map of GET values. */
+  const std::map<std::string, std::string> &  get_values() const { return get_values_; }
+  /** Get specific GET value.
+   * @param key key of the get value
+   * @return value of get value or empty string if not set
+   */
+  std::string  get_value(std::string &key) const
+  {
+    std::map<std::string, std::string>::const_iterator p = get_values_.find(key);
+    return (p != get_values_.end()) ? p->second : "";
+  }
+  /** Get specific GET value.
+   * @param key key of the get value
+   * @return value of get value or empty string if not set
+   */
+  std::string  get_value(const char *key) const
+  {
+    std::map<std::string, std::string>::const_iterator p = get_values_.find(key);
+    return (p != get_values_.end()) ? p->second : "";
+  }
+  /** Check if the named get value has been received.
+   * @param key key of the requested get value
+   * @return true if the get value was received, false otherwise
+   */
+  bool has_get_value(std::string key) const
+  { return (get_values_.find(key) != get_values_.end()); }
+
+
+  /** Get map of header values.
+   * @return map of header values. */
+  const std::map<std::string, std::string> &  headers() const { return headers_; }
+  /** Header specific header value.
+   * @param key key of the header value
+   * @return value of header value or empty string if not set
+   */
+  std::string  header(std::string &key) const
+  {
+    std::map<std::string, std::string>::const_iterator p = headers_.find(key);
+    return (p != headers_.end()) ? p->second : "";
+  }
+  /** Get specific header value.
+   * @param key key of the header value
+   * @return value of header value or empty string if not set
+   */
+  std::string  header(const char *key) const
+  {
+    std::map<std::string, std::string>::const_iterator p = headers_.find(key);
+    return (p != headers_.end()) ? p->second : "";
+  }
+  /** Check if the named header value has been received.
+   * @param key key of the requested header
+   * @return true if the header value was received, false otherwise
+   */
+  bool has_header(std::string key) const
+  { return (headers_.find(key) != headers_.end()); }
 
   /** Set a cookie.
    * @param key key of the cookie
@@ -110,11 +211,28 @@ class WebRequest {
    */
   void set_post_value(const char *key, const char *data, size_t size);
 
+  /** Set a GET value.
+   * @param key key of the cookie
+   * @param value value of the GET argument
+   */
+  void set_get_value(const std::string &key, const std::string &value) { get_values_[key] = value; }
+
+  /** Set a header value.
+   * @param key key of the cookie
+   * @param value value of the header argument
+   */
+  void set_header(const std::string &key, const std::string &value)
+  { headers_[key] = value; }
 
   /** Get raw post data.
    * @return raw port data or empty string if none. Note that this is not necesarily
    * a printable string (or zero-terminated) */
   const std::string &  raw_post_data() const { return post_raw_data_; }
+
+  void   increment_reply_size(size_t increment_by);
+  size_t reply_size() const;
+  WebReply::Code reply_code() const;
+  void           set_reply_code(WebReply::Code code);
 
  protected:
   /** Set cookie map.
@@ -124,14 +242,28 @@ class WebRequest {
   void set_raw_post_data(const char *data, size_t data_size);
 
  private:
-  MHD_PostProcessor *pp_;
+  bool is_setup() { return is_setup_; }
+  void setup(const char *url, const char *method,
+	     const char *version, MHD_Connection *connection);
 
+ private:
+  MHD_PostProcessor *pp_;
+  bool is_setup_;
+
+  std::string uri_;
   std::string url_;
+  std::string user_;
+  std::string client_addr_;
   Method      method_;
+  HttpVersion http_version_;
+  Time        time_;
+  size_t      reply_size_;
+  WebReply::Code reply_code_;
   std::map<std::string, std::string> cookies_;
   std::map<std::string, std::string> post_values_;
   std::string                        post_raw_data_;
-
+  std::map<std::string, std::string> get_values_;
+  std::map<std::string, std::string> headers_;
 };
 
 

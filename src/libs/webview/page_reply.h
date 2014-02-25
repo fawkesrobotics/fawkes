@@ -48,7 +48,7 @@ class WebPageReply : public StaticWebReply
   virtual void set_html_header(std::string h);
 
  protected:
-  WebPageReply(response_code_t code);
+  WebPageReply(Code code);
 
  protected:
   /** Title of the page. */

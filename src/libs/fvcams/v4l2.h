@@ -3,8 +3,8 @@
  *  v4l2.h - Video4Linux 2 camera access
  *
  *  Generated: Sat Jul  5 20:40:20 2008
- *  Copyright  2008 Tobias Kellner
- *
+ *  Copyright  2008      Tobias Kellner
+ *             2010-2014 Tim Niemueller
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -128,6 +128,8 @@ class V4L2Camera:
  private:
   virtual void post_open();
   virtual void select_read_method();
+  virtual void select_standard();
+  virtual void select_input();
   virtual void select_format();
   virtual void set_fps();
   virtual void set_controls();
@@ -171,6 +173,8 @@ class V4L2Camera:
   ReadMethod _read_method;           ///< Used read method
   bool _opened;                      ///< Device has been open()ed
   bool _started;                     ///< Device has been start()ed
+  char *_standard;                   ///< Desired video standard
+  char *_input;                      ///< Desired video input
   char _format[5];                   ///< FourCC of the image format
   colorspace_t _colorspace;          ///< Used colorspace_t
 

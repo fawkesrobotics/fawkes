@@ -1,0 +1,50 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/webview-ptzcam
+---
+webview/ptzcam:
+  # IDs for relevant blackboard interfaces
+  pantilt-id: PanTilt EviD100P
+  camctrl-id: PanTilt EviD100P
+  power-id: PanTilt EviD100P
+  camera-id: Camera v4l2.firstcam
+
+  # Image buffer ID to request image for, requires JPEG support
+  # (image tab) in webview
+  image-id: retriever_cam0
+
+  # Set to true if the camera is ceiling mounted. In that case it will
+  # mirrored and pan/tilt values will be inverted. Note that vflipping
+  # of the image must be configured in /webview/images
+  ceiling-mount: true
+  
+  # Increment for pan and tilt for the respective buttons. The values are
+  # scaled with the inverse of the zoom factor for fine grained control
+  pan-increment: 0.2
+  tilt-increment: 0.1
+
+  # By how much to increment or decrement the zoom
+  zoom-increment: 1
+
+  # String name for the webview nav tab entry
+  nav-entry: SkyCam
+
+  #Loop interval in which to check for inactivity
+  loop-interval: 5.0
+
+  # After which time to consider the web interface inactive if no
+  # request has been received in that time (afterwards camera and PTU are
+  # parked and powered down)
+  inactivity-timeout: 120
+
+  # Tolerance towards pan/tilt values when parking
+  # (when reaching the target position within this tolerance turn off camera
+  park:
+    pan: 0.0
+    tilt: 0.0
+    pan-tolerance: 0.05
+    tilt-tolerance: 0.05
+
+  # How long to hold a request after powering up the camera
+  post-power-up-time: 2.0

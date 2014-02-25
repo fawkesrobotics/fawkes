@@ -42,7 +42,7 @@ namespace fawkes {
  * @param format format for additional error message, use format as
  * known from sprintf.
  */
-WebErrorPageReply::WebErrorPageReply(response_code_t code,
+WebErrorPageReply::WebErrorPageReply(Code code,
 				     const char *format, ...)
   : WebPageReply(code)
 {

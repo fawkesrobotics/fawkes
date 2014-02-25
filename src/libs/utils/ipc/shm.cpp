@@ -1080,8 +1080,8 @@ SharedMemory::list(const char *magic_token,
 		   SharedMemoryHeader *header, SharedMemoryLister *lister,
                    const char *registry_name)
 {
-  printf("Looking for '%s' @ registry '%s'\n", magic_token,
-         registry_name ? registry_name : "default");
+  //printf("Looking for '%s' @ registry '%s'\n", magic_token,
+  //       registry_name ? registry_name : "default");
   lister->print_header();
   SharedMemoryIterator i = find(magic_token, header, registry_name);
   SharedMemoryIterator endi = end();

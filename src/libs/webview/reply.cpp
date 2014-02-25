@@ -47,9 +47,10 @@ bool WebReply::__caching = true;
 /** Constructor.
  * @param code HTTP response code
  */
-WebReply::WebReply(response_code_t code)
+WebReply::WebReply(Code code)
 {
   __code = code;
+  __request = NULL;
 
   if (! __caching) {
     // Headers to disable caching
@@ -81,7 +82,7 @@ WebReply::set_caching(bool caching)
 /** Get response code.
  * @return HTTP response code
  */
-WebReply::response_code_t
+WebReply::Code
 WebReply::code() const
 {
   return __code;
@@ -131,6 +132,26 @@ WebReply::headers() const
 }
 
 
+/** Get associated request.
+ * This is only valid after set_request() has been called.
+ * @return associated web request
+ */
+WebRequest *
+WebReply::get_request() const
+{
+  return __request;
+}
+
+
+/** Set associated request.
+ * @param request associated request
+ */
+void
+WebReply::set_request(WebRequest *request)
+{
+  __request = request;
+}
+
 /** @class DynamicWebReply <webview/reply.h>
  * Dynamic web reply.
  * A reply of this type is send out in chunks, not all as a whole. It should be
@@ -139,7 +160,7 @@ WebReply::headers() const
  *
  * @fn size_t DynamicWebReply::size() = 0
  * Total size of the web reply.
- * Return the total size of the reply if known, or 0 if it is not known. In the
+ * Return the total size of the reply if known, or -1 if it is not known. In the
  * latter case your next_chunk() method has to return -1 at some point to end
  * the transfer. If possible by any means return a meaningful value, as it will
  * improve the experience of users, especially for long transfers!
@@ -158,7 +179,7 @@ WebReply::headers() const
 /** Constructor.
  * @param code HTTP response code
  */
-DynamicWebReply::DynamicWebReply(response_code_t code)
+DynamicWebReply::DynamicWebReply(Code code)
   : WebReply(code)
 {
 }
@@ -188,7 +209,7 @@ DynamicWebReply::chunk_size()
  * @param code HTTP response code
  * @param body optional initial body
  */
-StaticWebReply::StaticWebReply(response_code_t code, std::string body)
+StaticWebReply::StaticWebReply(Code code, std::string body)
   : WebReply(code)
 {
   _body = body;

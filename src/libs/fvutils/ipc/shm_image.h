@@ -31,6 +31,7 @@
 #include <fvutils/ipc/defs.h>
 #include <fvutils/color/colorspaces.h>
 
+#include <string>
 
 // Magic token to identify FireVision shared memory images
 #define FIREVISION_SHM_IMAGE_MAGIC_TOKEN "FireVision Image"
@@ -131,6 +132,51 @@ class SharedMemoryImageBufferLister
 			  const void *memptr);
 };
 
+class SharedMemoryImageBufferMetaData
+{
+ public:
+  std::string  image_id;	///< Image buffer ID
+  std::string  frame_id;	///< Coordinate frame ID
+  colorspace_t colorspace;	///< Colorspace 
+  unsigned int width;		///< Image width
+  unsigned int height;		///< Image height
+
+  size_t       mem_size;	///< Shared memory buffer size
+  bool         mem_swapable;	///< True if memory might be moved to swap space
+  bool         mem_destroyed;	///< True if memory has already been marked destroyed
+
+  SharedMemoryImageBufferMetaData();
+  SharedMemoryImageBufferMetaData(const char *image_id, const char *frame_id,
+				  colorspace_t colorspace, unsigned int width, unsigned int height,
+				  size_t mem_size, bool mem_swapable, bool mem_destroyed);
+};
+
+
+class SharedMemoryImageBufferMetaDataCollector
+: public fawkes::SharedMemoryLister
+{
+ public:
+  SharedMemoryImageBufferMetaDataCollector();
+  virtual ~SharedMemoryImageBufferMetaDataCollector();
+
+  virtual void print_header();
+  virtual void print_footer();
+  virtual void print_no_segments();
+  virtual void print_no_orphaned_segments();
+  virtual void print_info(const fawkes::SharedMemoryHeader *header,
+			  int shm_id, int semaphore,
+			  unsigned int mem_size,
+			  const void *memptr);
+
+  /** Get meta data.
+   * @return image buffer meta data */
+  std::list<SharedMemoryImageBufferMetaData> &
+    meta_data() { return meta_data_; }
+
+ private:
+  std::list<SharedMemoryImageBufferMetaData> meta_data_;
+};
+
 
 class SharedMemoryImageBuffer : public fawkes::SharedMemory
 {
@@ -179,6 +225,8 @@ class SharedMemoryImageBuffer : public fawkes::SharedMemory
   static void      cleanup(bool use_lister = true);
   static bool      exists(const char *image_id);
   static void      wipe(const char *image_id);
+
+  static std::list<SharedMemoryImageBufferMetaData> list_meta_data();
 
  private:
   void constructor(const char *image_id, colorspace_t cspace,

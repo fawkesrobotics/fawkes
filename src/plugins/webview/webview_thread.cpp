@@ -3,8 +3,7 @@
  *  webview_thread.cpp - Thread that handles web interface requests
  *
  *  Created: Mon Oct 13 17:51:31 2008 (I5 Developer's Day)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -27,6 +26,9 @@
 #include "plugins_processor.h"
 #ifdef HAVE_TF
 #  include "tf_processor.h"
+#endif
+#ifdef HAVE_JPEG
+#  include "image_processor.h"
 #endif
 #include "service_browse_handler.h"
 #include "header_generator.h"
@@ -54,10 +56,10 @@ const char *WebviewThread::STATIC_URL_PREFIX = "/static";
 const char *WebviewThread::BLACKBOARD_URL_PREFIX = "/blackboard";
 /** Prefix for the WebPluginsRequestProcessor. */
 const char *WebviewThread::PLUGINS_URL_PREFIX = "/plugins";
-#ifdef HAVE_TF
 /** Prefix for the WebTfRequestProcessor. */
 const char *WebviewThread::TF_URL_PREFIX = "/tf";
-#endif
+/** Prefix for the WebMJPEGRequestProcessor. */
+const char *WebviewThread::IMAGE_URL_PREFIX = "/images";
 
 /** @class WebviewThread "webview_thread.h"
  * Webview Thread.
@@ -86,6 +88,12 @@ WebviewThread::init()
   __cfg_port = config->get_uint("/webview/port");
 
   WebReply::set_caching(config->get_bool("/webview/client_side_caching"));
+
+  __webview_service = NULL;
+  __service_browse_handler = NULL;
+  __header_gen = NULL;
+  __footer_gen = NULL;
+  __dispatcher = NULL;
 
   __cfg_use_ssl = false;
   try {
@@ -134,6 +142,11 @@ WebviewThread::init()
     __cfg_basic_auth_realm = config->get_bool("/webview/basic_auth_realm");
   } catch (Exception &e) {}
 
+  __cfg_access_log = "";
+  try {
+    __cfg_access_log = config->get_string("/webview/access_log");
+  } catch (Exception &e) {}
+
 
   __cache_logger.clear();
 
@@ -164,6 +177,12 @@ WebviewThread::init()
       __webserver->setup_basic_auth(__cfg_basic_auth_realm.c_str(),
 				    __user_verifier);
     }
+    __webserver->setup_request_manager(webview_request_manager);
+
+    if (__cfg_access_log != "") {
+      logger->log_debug(name(), "Setting up access log %s", __cfg_access_log.c_str());
+      __webserver->setup_access_log(__cfg_access_log.c_str());
+    }
   } catch (Exception &e) {
     delete __webview_service;
     delete __service_browse_handler;
@@ -181,6 +200,10 @@ WebviewThread::init()
 #ifdef HAVE_TF
   __tf_processor         = new WebviewTfRequestProcessor(TF_URL_PREFIX, tf_listener);
 #endif
+#ifdef HAVE_JPEG
+  __image_processor     = new WebviewImageRequestProcessor(IMAGE_URL_PREFIX, config,
+							   logger, thread_collector);
+#endif
   webview_url_manager->register_baseurl("/", __startpage_processor);
   webview_url_manager->register_baseurl(STATIC_URL_PREFIX, __static_processor);
   webview_url_manager->register_baseurl(BLACKBOARD_URL_PREFIX, __blackboard_processor);
@@ -188,33 +211,52 @@ WebviewThread::init()
 #ifdef HAVE_TF
   webview_url_manager->register_baseurl(TF_URL_PREFIX, __tf_processor);
 #endif
+#ifdef HAVE_JPEG
+  webview_url_manager->register_baseurl(IMAGE_URL_PREFIX, __image_processor);
+#endif
 
   webview_nav_manager->add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
 #ifdef HAVE_TF
   webview_nav_manager->add_nav_entry(TF_URL_PREFIX, "TF");
 #endif
   webview_nav_manager->add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
+#ifdef HAVE_JPEG
+  webview_nav_manager->add_nav_entry(IMAGE_URL_PREFIX, "Images");
+#endif
 
-  logger->log_info("WebviewThread", "Listening for HTTP connections on port %u", __cfg_port);
+  logger->log_info("WebviewThread", "Listening for HTTP%s connections on port %u",
+		   __cfg_use_ssl ? "S" : "", __cfg_port);
 
   service_publisher->publish_service(__webview_service);
   service_browser->watch_service("_http._tcp", __service_browse_handler);
-
 }
+
 
 void
 WebviewThread::finalize()
 {
-  service_publisher->unpublish_service(__webview_service);
-  service_browser->unwatch_service("_http._tcp", __service_browse_handler);
+  try {
+    service_publisher->unpublish_service(__webview_service);
+  } catch (Exception &e) {} // ignored, can happen if avahi-daemon not running
+  try {
+    service_browser->unwatch_service("_http._tcp", __service_browse_handler);
+  } catch (Exception &e) {} // ignored, can happen if avahi-daemon not running
 
   webview_url_manager->unregister_baseurl("/");
   webview_url_manager->unregister_baseurl(STATIC_URL_PREFIX);
   webview_url_manager->unregister_baseurl(BLACKBOARD_URL_PREFIX);
   webview_url_manager->unregister_baseurl(PLUGINS_URL_PREFIX);
+  webview_url_manager->unregister_baseurl(IMAGE_URL_PREFIX);
+
+#ifdef HAVE_TF
+  webview_url_manager->unregister_baseurl(TF_URL_PREFIX);
+#endif
 
   webview_nav_manager->remove_nav_entry(BLACKBOARD_URL_PREFIX);
   webview_nav_manager->remove_nav_entry(PLUGINS_URL_PREFIX);
+#ifdef HAVE_TF
+  webview_nav_manager->remove_nav_entry(TF_URL_PREFIX);
+#endif
 
   delete __webserver;
 
@@ -228,6 +270,9 @@ WebviewThread::finalize()
   delete __plugins_processor;
 #ifdef HAVE_TF
   delete __tf_processor;
+#endif
+#ifdef HAVE_JPEG
+  delete __image_processor;
 #endif
   delete __footer_gen;
   delete __header_gen;

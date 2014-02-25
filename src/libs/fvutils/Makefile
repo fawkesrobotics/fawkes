@@ -25,9 +25,18 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
+ifneq ($(HAVE_RASPI)$(HAVE_MMAL),11)
+  FILTER_OUT += compression/jpeg_compressor_mmal.o
+else
+  INFO_TARGETS += info_mmal
+  CFLAGS  += $(CFLAGS_RASPI) $(CFLAGS_MMAL)
+  LDFLAGS += $(LDFLAGS_RASPI) $(LDFLAGS_MMAL)
+endif
+
 ifneq ($(HAVE_LIBJPEG),1)
   WARN_TARGETS += warning_libjpeg
-  FILTER_OUT   += readers/jpeg.o writers/jpeg.o compression/jpeg_compressor.o \
+  FILTER_OUT   += readers/jpeg.o writers/jpeg.o \
+		compression/jpeg_compressor_libjpeg.o \
 		compression/jpeg_decompressor.o
 else
   UTILS_EXTRA_LIBS += jpeg
@@ -62,6 +71,7 @@ else
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
+.PHONY: $(WARN_TARGETS)
 all: $(WARN_TARGETS)
 warning_libjpeg:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting JPEG support$(TNORMAL) (No libjpeg[-devel] installed)"
@@ -71,6 +81,11 @@ warning_opencv:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenCV dependent stuff in the fvutils$(TNORMAL) (No opencv[-devel] installed)"
 warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL adapter$(TNORMAL) (pcl[-devel] not installed)"
+
+all: $(INFO_TARGETS)
+.PHONY: $(INFO_TARGETS)
+info_mmal:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TGREEN)Enabling Raspberry Pi MMAL JPEG encoding support$(TNORMAL)"
 endif
 
 # We are lazy in the utils...

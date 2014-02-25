@@ -69,9 +69,20 @@ FvRetrieverThread::~FvRetrieverThread()
 void
 FvRetrieverThread::init()
 {
+  colorspace_t cspace = YUV422_PLANAR;
+  std::string cspace_str = colorspace_to_string(cspace);
   try {
-    logger->log_debug(name(), "Registering for camera '%s'", camera_string_.c_str());
-    cam = vision_master->register_for_camera(camera_string_.c_str(), this);
+    cspace_str = config->get_string((cfg_prefix_ + "colorspace").c_str());
+    cspace = colorspace_by_name(cspace_str.c_str());
+  } catch (Exception &e) {} // ignored, use default
+  if (cspace == CS_UNKNOWN) {
+    throw Exception("Unknown colorspace '%s' configured", cspace_str.c_str());
+  }
+
+  try {
+    logger->log_debug(name(), "Registering for camera '%s' (colorspace %s)",
+                      camera_string_.c_str(), colorspace_to_string(cspace));
+    cam = vision_master->register_for_camera(camera_string_.c_str(), this, cspace);
   } catch (Exception &e) {
     e.append("FvRetrieverThread::init() failed");
     throw;
@@ -181,7 +192,9 @@ FvRetrieverThread::loop()
     cam->capture();
     __tt->ping_end(__ttc_capture);
     __tt->ping_start(__ttc_memcpy);
+    shm->lock_for_write();
     memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
+    shm->unlock();
     __tt->ping_end(__ttc_memcpy);
     if (__cam_has_timestamp_support) shm->set_capture_time(cam->capture_time());
     __tt->ping_start(__ttc_dispose);
@@ -194,7 +207,9 @@ FvRetrieverThread::loop()
   } else {
     // no time tracker
     cam->capture();
+    shm->lock_for_write();
     memcpy(shm->buffer(), cam->buffer(), cam->buffer_size());
+    shm->unlock();
     if (__cam_has_timestamp_support) {
       shm->set_capture_time(cam->capture_time());
     } else {

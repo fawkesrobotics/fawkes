@@ -25,14 +25,21 @@
 
 #include <core/threading/thread.h>
 
+#include <aspect/logging.h>
+#include <aspect/blackboard.h>
+
 #include <fvcams/shmem.h>
 #include <fvutils/color/colorspaces.h>
+#include <blackboard/interface_listener.h>
 
 #include <map>
 
 namespace fawkes {
   class Logger;
   class Clock;
+  class Mutex;
+  class WaitCondition;
+  class SwitchInterface;
 #ifdef FVBASE_TIMETRACKER
   class TimeTracker;
 #endif
@@ -43,7 +50,11 @@ namespace firevision {
 class FvBaseThread;
 class FvAqtVisionThreads;
 
-class FvAcquisitionThread : public fawkes::Thread
+class FvAcquisitionThread
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::BlackBoardAspect,
+  public fawkes::BlackBoardInterfaceListener
 {
  public:
   /** Acquisition thread mode. */
@@ -58,7 +69,9 @@ class FvAcquisitionThread : public fawkes::Thread
 		      fawkes::Logger *logger, fawkes::Clock *clock);
   virtual ~FvAcquisitionThread();
 
+  virtual void init();
   virtual void loop();
+  virtual void finalize();
 
   void set_aqtmode(AqtMode mode);
   AqtMode aqtmode();
@@ -81,11 +94,16 @@ class FvAcquisitionThread : public fawkes::Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  virtual bool bb_interface_message_received(fawkes::Interface *interface,
+                                             fawkes::Message *message) throw();
+
+ private:
   bool                      __enabled;
+  fawkes::Mutex            *__enabled_mutex;
+  fawkes::WaitCondition    *__enabled_waitcond;
 
   firevision::Camera       *__camera;
   char                     *__image_id;
-  fawkes::Logger           *__logger;
 
   firevision::colorspace_t  __colorspace;
   unsigned int              __width;
@@ -95,6 +113,8 @@ class FvAcquisitionThread : public fawkes::Thread
 
   std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *> __shm;
   std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *>::iterator __shmit;
+
+  fawkes::SwitchInterface  *__enabled_if;
 
 #ifdef FVBASE_TIMETRACKER
   fawkes::TimeTracker *__tt;

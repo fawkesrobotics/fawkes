@@ -1181,7 +1181,8 @@ Thread::notify_of_startup()
 
 
 /** Notify of failed init.
- * This method is called by ThreadList.
+ * This method must be called if the initialization of the thread
+ * failed, e.g. in a thread collector. Do not use it arbitrarily!
  */
 void
 Thread::notify_of_failed_init()
