@@ -54,6 +54,7 @@ h4 :link, h4 :visited, h5 :link, h5 :visited, h6 :link, h6 :visited {
     color: #000;
     padding: .2em 20px;
 }
+
 * html #mainnav :link, * html #mainnav :visited { background-position: 1px 0 }
 #mainnav :link:hover, #mainnav :visited:hover {
     background-color: #ccc;
@@ -69,6 +70,9 @@ h4 :link, h4 :visited, h5 :link, h5 :visited, h6 :link, h6 :visited {
 #mainnav .active :link:hover, #mainnav .active :visited:hover {
     border-right: 1px solid #000;
 }
+
+.navlogo { text-align: left; margin: 0 8px; float: left; }
+#mainnav #logo:link { background: none; border: none; padding: 0; }
 
 /* Navigation */
 .nav h2, .nav hr { display: none }

@@ -47,10 +47,7 @@ const char *  WebviewHeaderGenerator::PAGE_HEADER =
   "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/webview.css\" />\n"
   "%s"
   " </head>\n"
-  " <body>\n"
-  "  <div id=\"header\">"
-  "<a id=\"logo\" href=\"/\"/><img src=\"/static/webview.png\" alt=\"Fawkes WebView\"/></a>"
-  "<hr /></div>\n";
+  " <body>\n";
 
 /** Constructor.
  * @param nav_manager navigation manager to use to generate the navigation
@@ -76,7 +73,9 @@ WebviewHeaderGenerator::html_header(std::string &title,
     free(s);
   }
 
-  rv += "  <div id=\"mainnav\" class=\"nav\"><ul>";
+  rv +=
+    "  <div id=\"mainnav\" class=\"nav\"><a id=\"logo\" href=\"/\"/>"
+    "<img class=\"navlogo\" src=\"/static/chrome/navlogo.png\" /></a><ul>";
   WebNavManager::NavMap::const_iterator nei;
   const WebNavManager::NavMap &nav_entries(__nav_manager->get_nav_entries());
   for (nei = nav_entries.begin(); nei != nav_entries.end(); ++nei) {
