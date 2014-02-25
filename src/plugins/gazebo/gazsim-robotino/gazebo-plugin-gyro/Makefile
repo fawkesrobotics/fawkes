@@ -1,5 +1,5 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: Gazebo plugin for gps
+#               Makefile Build System for Fawkes: Gazebo plugin for gyro
 #
 #   Created on Tue Jan 28 13:30:39 2014
 #   Copyright (C) 2011 by Tim Niemueller, AllemaniACs RoboCup Team
@@ -14,7 +14,7 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../../..
+BASEDIR = ../../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
@@ -23,16 +23,16 @@ include $(BUILDSYSDIR)/protobuf.mk
 GAZEBO_LIBDIR = $(LIBDIR)/gazebo
 LIBDIRS_BASE += $(GAZEBO_LIBDIR)
 
-LIBS_gazebo_libgps = gazsim_msgs
-OBJS_gazebo_libgps = gps.o
+LIBS_gazebo_libgyro = gazsim_msgs
+OBJS_gazebo_libgyro = gyro.o
 
-OBJS_all    = $(OBJS_gazebo_libgps)
+OBJS_all    = $(OBJS_gazebo_libgyro)
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF),11)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
   LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
 
-  LIBS_all = $(LIBDIR)/gazebo/libgps.so
+  LIBS_all = $(LIBDIR)/gazebo/libgyro.so
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo
@@ -46,10 +46,10 @@ ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 .PHONY: warning_gazebo warning_protobuf
 warning_gazebo:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazebo-gps Plugin$(TNORMAL) " \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazebo-gyro Plugin$(TNORMAL) " \
 		"(Gazebo Simulator not found)"
 warning_protobuf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazebo-gps Plugin$(TNORMAL) " \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazebo-gyro Plugin$(TNORMAL) " \
 		"(protobuf[-devel] not installed)"
 endif
 

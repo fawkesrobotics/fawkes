@@ -31,10 +31,10 @@
 #include <boost/asio.hpp>
 #include <google/protobuf/message.h>
 #include <gazebo/physics/physics.hh>
-#include <gazsim_msgs/SimTime.pb.h>
 #include <plugins/gazebo/aspect/gazebo.h>
 
 #include "gazsim_timesource_source.h"
+#include "../msgs/SimTime.pb.h"
 
 typedef const boost::shared_ptr<gazsim_msgs::SimTime const> ConstSimTimePtr;
 

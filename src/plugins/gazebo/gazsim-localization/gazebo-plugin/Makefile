@@ -1,7 +1,7 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: Gazsim-webcam Plugin
+#               Makefile Build System for Fawkes: Gazebo plugin for gps
 #
-#   Created on Sat Sep 21 17:32:31 2013
+#   Created on Tue Jan 28 13:30:39 2014
 #   Copyright (C) 2011 by Tim Niemueller, AllemaniACs RoboCup Team
 #                         Frederik Zwilling
 #
@@ -14,28 +14,25 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
+BASEDIR = ../../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BUILDSYSDIR)/protobuf.mk
-# include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
-LIBS_gazsim_webcam = fawkescore fawkesutils fawkesaspects fvutils \
-	       fawkestf fawkesinterface fawkesblackboard \
-	       fawkesgazeboaspect
-OBJS_gazsim_webcam = gazsim_webcam_plugin.o gazsim_webcam_thread.o
+GAZEBO_LIBDIR = $(LIBDIR)/gazebo
+LIBDIRS_BASE += $(GAZEBO_LIBDIR)
 
-OBJS_all    = $(OBJS_gazsim_webcam)
+LIBS_gazebo_libgps = gazsim_msgs
+OBJS_gazebo_libgps = gps.o
 
-ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
-  CFLAGS  += $(CFLAGS_TF)
-  LDFLAGS += $(LDFLAGS_TF)
+OBJS_all    = $(OBJS_gazebo_libgps)
+
+ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF),11)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
   LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
 
-  PLUGINS_all = $(PLUGINDIR)/gazsim-webcam.so
+  LIBS_all = $(LIBDIR)/gazebo/libgps.so
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo
@@ -43,22 +40,16 @@ else
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf
   endif
-  ifneq ($(HAVE_TF),1)
-    WARN_TARGETS += warning_tf
-  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_tf warning_gazebo warning_protobuf
-warning_tf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-webcam Plugin$(TNORMAL) " \
-                         "(tf not available)"
+.PHONY: warning_gazebo warning_protobuf
 warning_gazebo:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-webcam Plugin$(TNORMAL) " \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazebo-gps Plugin$(TNORMAL) " \
 		"(Gazebo Simulator not found)"
 warning_protobuf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-webcam Plugin$(TNORMAL) " \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazebo-gps Plugin$(TNORMAL) " \
 		"(protobuf[-devel] not installed)"
 endif
 

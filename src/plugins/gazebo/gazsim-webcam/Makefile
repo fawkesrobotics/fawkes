@@ -1,7 +1,7 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: Gazebo plugin for hokuyo
+#               Makefile Build System for Fawkes: Gazsim-webcam Plugin
 #
-#   Created on Tue Jan 28 13:30:39 2014
+#   Created on Sat Sep 21 17:32:31 2013
 #   Copyright (C) 2011 by Tim Niemueller, AllemaniACs RoboCup Team
 #                         Frederik Zwilling
 #
@@ -17,22 +17,25 @@
 BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BUILDSYSDIR)/protobuf.mk
+# include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
-GAZEBO_LIBDIR = $(LIBDIR)/gazebo
-LIBDIRS_BASE += $(GAZEBO_LIBDIR)
+LIBS_gazsim_webcam = fawkescore fawkesutils fawkesaspects fvutils \
+	       fawkestf fawkesinterface fawkesblackboard \
+	       fawkesgazeboaspect
+OBJS_gazsim_webcam = gazsim_webcam_plugin.o gazsim_webcam_thread.o
 
-LIBS_gazebo_libhokuyo = gazsim_msgs
-OBJS_gazebo_libhokuyo = hokuyo.o
+OBJS_all    = $(OBJS_gazsim_webcam)
 
-OBJS_all    = $(OBJS_gazebo_libhokuyo)
-
-ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF),11)
+ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
+  CFLAGS  += $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_TF)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
   LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
 
-  LIBS_all = $(LIBDIR)/gazebo/libhokuyo.so
+  PLUGINS_all = $(PLUGINDIR)/gazsim-webcam.so
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo
@@ -40,16 +43,22 @@ else
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf
   endif
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS += warning_tf
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_gazebo warning_protobuf
+.PHONY: warning_tf warning_gazebo warning_protobuf
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-webcam Plugin$(TNORMAL) " \
+                         "(tf not available)"
 warning_gazebo:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazebo-hokuyo Plugin$(TNORMAL) " \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-webcam Plugin$(TNORMAL) " \
 		"(Gazebo Simulator not found)"
 warning_protobuf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazebo-hokuyo Plugin$(TNORMAL) " \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-webcam Plugin$(TNORMAL) " \
 		"(protobuf[-devel] not installed)"
 endif
 

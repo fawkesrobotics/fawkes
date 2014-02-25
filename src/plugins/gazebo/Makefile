@@ -20,7 +20,10 @@ include $(BASEDIR)/etc/buildsys/boost.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
-PRESUBDIRS = aspect
+PRESUBDIRS = aspect msgs
+
+SUBDIRS = gazsim-robotino gazsim-laser gazsim-localization gazsim-comm \
+	  gazsim-vis-localization gazsim-webcam gazsim-timesource
 
 LIBS_gazebo = fawkescore fawkesaspects fawkesgazeboaspect
 OBJS_gazebo = gazebo_plugin.o node_thread.o
@@ -57,4 +60,3 @@ warning_boost_system:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-

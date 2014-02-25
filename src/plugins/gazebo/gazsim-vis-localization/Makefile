@@ -1,7 +1,7 @@
 #*****************************************************************************
-#               Makefile Build System for Fawkes: Gazebo plugin for gyro
+#               Makefile Build System for Fawkes: Gazsim-vis-Localization Plugin
 #
-#   Created on Tue Jan 28 13:30:39 2014
+#   Created on Tue Sep 17 15:33:01 2013
 #   Copyright (C) 2011 by Tim Niemueller, AllemaniACs RoboCup Team
 #                         Frederik Zwilling
 #
@@ -17,22 +17,26 @@
 BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BUILDSYSDIR)/protobuf.mk
+# include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
-GAZEBO_LIBDIR = $(LIBDIR)/gazebo
-LIBDIRS_BASE += $(GAZEBO_LIBDIR)
+LIBS_gazsim_vis_localization = fawkescore fawkesutils fawkesaspects fvutils \
+	       fawkestf fawkesinterface fawkesblackboard \
+	       Position3DInterface \
+	       fawkesgazeboaspect
+OBJS_gazsim_vis_localization = gazsim_vis_localization_plugin.o gazsim_vis_localization_thread.o
 
-LIBS_gazebo_libgyro = gazsim_msgs
-OBJS_gazebo_libgyro = gyro.o
+OBJS_all    = $(OBJS_gazsim_vis_localization)
 
-OBJS_all    = $(OBJS_gazebo_libgyro)
-
-ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF),11)
+ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
+  CFLAGS  += $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_TF)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
   LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
 
-  LIBS_all = $(LIBDIR)/gazebo/libgyro.so
+  PLUGINS_all = $(PLUGINDIR)/gazsim-vis-localization.so
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo
@@ -40,16 +44,22 @@ else
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf
   endif
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS += warning_tf
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_gazebo warning_protobuf
+.PHONY: warning_tf warning_gazebo warning_protobuf
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-vis-localization Plugin$(TNORMAL) " \
+                         "(tf not available)"
 warning_gazebo:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazebo-gyro Plugin$(TNORMAL) " \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-vis-localization Plugin$(TNORMAL) " \
 		"(Gazebo Simulator not found)"
 warning_protobuf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazebo-gyro Plugin$(TNORMAL) " \
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting gazsim-vis-localization Plugin$(TNORMAL) " \
 		"(protobuf[-devel] not installed)"
 endif
 

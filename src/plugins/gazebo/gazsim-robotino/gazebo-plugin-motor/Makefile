@@ -14,7 +14,7 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../../..
+BASEDIR = ../../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk

@@ -13,7 +13,7 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../../..
+BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/protobuf.mk

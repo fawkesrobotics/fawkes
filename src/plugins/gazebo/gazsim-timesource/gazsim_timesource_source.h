@@ -20,10 +20,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <gazsim_msgs/SimTime.pb.h>
 #include <boost/asio.hpp>
 #include <utils/time/timesource.h>
 #include <utils/time/clock.h>
+
+#include "../msgs/SimTime.pb.h"
 
 #ifndef __GAZEBO_TIMESOURCE_H_
 #define __GAZEBO_TIMESOURCE_H_
