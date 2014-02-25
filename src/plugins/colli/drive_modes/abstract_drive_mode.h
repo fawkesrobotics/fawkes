@@ -120,6 +120,7 @@ private:
   float m_cMaxTransDec;
   float m_cMaxRotAcc;
   float m_cMaxRotDec;
+  int   m_frequency_;
 };
 
 
@@ -147,6 +148,8 @@ CAbstractDriveMode::CAbstractDriveMode(fawkes::Logger* logger, fawkes::Configura
   m_cMaxTransDec = /*0.75* */config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_TRANS_DEC");
   m_cMaxRotAcc   = /*0.75* */config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_ROT_ACC");
   m_cMaxRotDec   = /*0.75* */config_->get_float("/plugins/colli/QuadraticMotorInstruct/BASIC_ROT_DEC");
+
+  m_frequency_ = config_->get_int("/plugins/colli/FREQUENCY");
 
   logger_->log_info("CAbstractDriveMode", "(Constructor): Exiting...");
 }
@@ -305,20 +308,19 @@ CAbstractDriveMode::GuaranteeTransStop( float distance,
     return desired_trans;
 
   // calculate riemann integral to get distance until robot is stoped
-  int frequenz            = 10;    //TODO config value
   float trans_tmp         = current_trans;
   float distance_to_stop  = 0;
   for (int loops_to_stop = 0; trans_tmp > 0; loops_to_stop++) {
-    distance_to_stop += trans_tmp / frequenz;           //First calculate sum (Untersumme)
-    trans_tmp        -= m_cMaxTransDec / frequenz;      //Then decrease tmp speed
+    distance_to_stop += trans_tmp / m_frequency_;           //First calculate sum (Untersumme)
+    trans_tmp        -= m_cMaxTransDec;                 //Then decrease tmp speed
   }
 
-
+//  logger_->log_debug("CAbstractDriveMode","GuaranteeTransStop: distance needed to stop - distance to goal: %f - %f = %f", distance_to_stop, distance, distance_to_stop - distance);
   if (distance_to_stop >= distance) {
-    float value = std::max( 0.f, current_trans - (m_cMaxTransDec / frequenz) );
+    float value = std::max( 0.f, current_trans - m_cMaxTransDec );
     return value;
   } else {
-    float value = std::min( current_trans + (m_cMaxTransAcc / frequenz), desired_trans );
+    float value = std::min( current_trans + m_cMaxTransAcc, desired_trans );
     // Use this if you are very cautions:
     //float value = std::min( current_trans + std::min(m_cMaxTransDec, m_cMaxTransAcc), desired_trans );
     return value;
