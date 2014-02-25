@@ -673,11 +673,13 @@ PanTiltSonyEviD100PThread::WorkerThread::loop()
   }
 
   try {
-    unsigned int new_zoom;
-    if (__powered)  __cam->get_zoom(new_zoom);
-    if (new_zoom != __cur_zoom) {
-      __cur_zoom = new_zoom;
-      __fresh_data = true;
+    if (__powered) {
+      unsigned int new_zoom = 0;
+      __cam->get_zoom(new_zoom);
+      if (new_zoom != __cur_zoom) {
+	__cur_zoom = new_zoom;
+	__fresh_data = true;
+      }
     }
   } catch (Exception &e) {
     __logger->log_warn(name(), "Failed to get new zoom data, exception follows");
