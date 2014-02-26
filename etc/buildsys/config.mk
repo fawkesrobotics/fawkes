@@ -215,6 +215,12 @@ TCYANBG		= \033[46m
 TGREYBG		= \033[47m
 endif
 
+### If we are in the fawkes sub module include the top config 
+ifeq ($(SUBMODULE_INTERN),1)
+  include $(TOP_BASEDIR)/etc/buildsys/config.mk
+endif
+
+
 ### Check if there are special config files for the chosen compiler
 ifneq ($(wildcard $(BUILDSYSDIR)/$(CC).mk),)
   include $(BUILDSYSDIR)/$(CC).mk
@@ -230,12 +236,6 @@ else
     endif
   endif
 endif
-
-### If we are in the fawkes sub module include the top config 
-ifeq ($(SUBMODULE_INTERN),1)
-  include $(TOP_BASEDIR)/etc/buildsys/config.mk
-endif
-
 
 ### Check if there is a local config for this directory
 ifneq ($(SRCDIR),.)
