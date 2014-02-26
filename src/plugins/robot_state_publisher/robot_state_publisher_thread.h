@@ -120,10 +120,13 @@ public:
 
   // InterfaceObserver
   virtual void bb_interface_created(const char *type, const char *id) throw();
-  virtual void bb_interface_destroyed(const char *type, const char *id) throw();
 
   // InterfaceListener
   virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+  virtual void bb_interface_writer_removed(fawkes::Interface *interface,
+                                           unsigned int instance_serial) throw();
+  virtual void bb_interface_reader_removed(fawkes::Interface *interface,
+                                           unsigned int instance_serial) throw();
 
 private:
   void publish_fixed_transforms();
@@ -131,7 +134,9 @@ private:
   void add_children(const KDL::SegmentMap::const_iterator segment);
   void transform_kdl_to_tf(const KDL::Frame &k, fawkes::tf::Transform &t);
   bool joint_is_in_model(const char *id);
+  void conditional_close(fawkes::Interface *interface) throw();
 
+private:
 
   std::map<std::string, SegmentPair> segments_, segments_fixed_;
   KDL::Tree tree_;

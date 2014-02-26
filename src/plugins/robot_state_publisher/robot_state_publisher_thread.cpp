@@ -129,8 +129,6 @@ void RobotStatePublisherThread::init()
   }
   // watch for creation of new JointInterfaces
   bbio_add_observed_create("JointInterface");
-  // watch for destruction of JointInterfaces
-  bbio_add_observed_destroy("JointInterface");
 
   // register to blackboard
   blackboard->register_listener(this);
@@ -236,22 +234,44 @@ RobotStatePublisherThread::bb_interface_created(const char *type, const char *id
 }
 
 void
-RobotStatePublisherThread::bb_interface_destroyed(const char *type, const char *id) throw()
+RobotStatePublisherThread::bb_interface_writer_removed(Interface *interface,
+                                               unsigned int instance_serial)
+  throw()
 {
-  if (strncmp(type, "JointInterface", __INTERFACE_TYPE_SIZE) != 0)  return;
-  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); it++) {
-    if ((*it)->id() == id) {
-      logger->log_warn(name(), "JointInterface %s removed, but part of robot model", id);
-      bbil_remove_data_interface(*it);
-      blackboard->update_listener(this);
-      blackboard->close(*it);
-      ifs_.erase(it);
-      break;
+  conditional_close(interface);
+}
+
+
+void
+RobotStatePublisherThread::bb_interface_reader_removed(Interface *interface,
+                                               unsigned int instance_serial)
+  throw()
+{
+  conditional_close(interface);
+}
+
+void
+RobotStatePublisherThread::conditional_close(Interface *interface) throw()
+{
+  // Verify it's a JointInterface
+  JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
+  if (! jiface) return;
+
+  std::list<JointInterface *>::iterator it;
+  for (it = ifs_.begin(); it != ifs_.end(); ++it) {
+    if (*interface == **it) {
+      if (! interface->has_writer() && (interface->num_readers() == 1)) {
+        // It's only us
+        bbil_remove_data_interface(*it);
+        blackboard->update_listener(this);
+        blackboard->close(*it);
+        ifs_.erase(it);
+        break;
+      }
     }
   }
 }
 
-// InterfaceListener
 void
 RobotStatePublisherThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
 {
