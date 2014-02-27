@@ -29,7 +29,7 @@ LIBS_gazsim_robotino = fawkescore fawkesutils fawkesaspects fvutils \
 	       BatteryInterface RobotinoSensorInterface MotorInterface \
 	       Position3DInterface fawkesgazeboaspect gazsim_msgs \
 	       SwitchInterface
-OBJS_gazsim_robotino = gazsim_robotino_plugin.o gazsim_robotino_thread.o interfaces/sim_interface.o interfaces/sim_robotinosensorinterface.o interfaces/sim_motorinterface.o
+OBJS_gazsim_robotino = gazsim_robotino_plugin.o gazsim_robotino_thread.o
 
 OBJS_all    = $(OBJS_gazsim_robotino)
 

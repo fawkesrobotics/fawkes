@@ -31,14 +31,18 @@
 #include <aspect/blocked_timing.h>
 #include <plugins/gazebo/aspect/gazebo.h>
 #include <aspect/tf.h>
+#include "../msgs/Float.pb.h"
+#include <interfaces/MotorInterface.h>
+#include <interfaces/RobotinoSensorInterface.h>
+#include <interfaces/SwitchInterface.h>
 
 //from Gazebo
 #include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
 #include <gazebo/transport/transport.hh>
 
-//simulated interfaces
-#include "interfaces/sim_interface.h"
+
+typedef const boost::shared_ptr<gazsim_msgs::Float const> ConstFloatPtr;
 
 namespace fawkes {
   class BatteryInterface;
@@ -63,9 +67,60 @@ class RobotinoSimThread
  private:
   //Publisher to send messages to gazebo
   gazebo::transport::PublisherPtr string_pub_;
+  gazebo::transport::PublisherPtr motor_move_pub_;
+
+  //Suscribers to recieve messages from gazebo
+  gazebo::transport::SubscriberPtr gyro_sub_;
+  gazebo::transport::SubscriberPtr infrared_puck_sensor_sub_;
+  gazebo::transport::SubscriberPtr gripper_laser_left_sensor_sub_;
+  gazebo::transport::SubscriberPtr gripper_laser_right_sensor_sub_;
+  gazebo::transport::SubscriberPtr pos_sub_;
+
+  //Handler functions for incoming messages
+  void on_gyro_msg(ConstVector3dPtr &msg);
+  void on_infrared_puck_sensor_msg(ConstFloatPtr &msg);
+  void on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg);
+  void on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg);
+  void on_pos_msg(ConstPosePtr &msg);
 
   //provided interfaces
-  std::list<SimInterface*> interfaces_list_;
+  fawkes::RobotinoSensorInterface *sens_if_;
+  fawkes::MotorInterface *motor_if_;
+  fawkes::SwitchInterface *switch_if_;
+
+  //config values
+  double gripper_laser_threshold_;
+  double gripper_laser_value_far_;
+  double gripper_laser_value_near_;
+  bool slippery_wheels_enabled_;
+  double slippery_wheels_threshold_;
+  double  moving_speed_factor_;
+  double  rotation_speed_factor_;
+
+  //Helper variables for motor:
+
+  //motorMovements last sent to gazebo
+  float vx_;
+  float vy_;
+  float  vomega_;
+  //last received odom position
+  float  x_;
+  float  y_;
+  float  ori_;
+  float  path_length_;
+
+  fawkes::Time last_pos_time_;
+  fawkes::Time last_vel_set_time_;
+
+  //Odometry offset
+  float x_offset_;
+  float  y_offset_;
+  float  ori_offset_;
+
+  //Helper functions:
+  void process_motor_messages();
+  void send_transroot(double vx, double vy, double omega);
+  bool vel_changed(float before, float after, float relativeThreashold);  
 };
 
 #endif
