@@ -94,28 +94,38 @@ class RobotinoSimThread
   double gripper_laser_value_near_;
   bool slippery_wheels_enabled_;
   double slippery_wheels_threshold_;
-  double  moving_speed_factor_;
-  double  rotation_speed_factor_;
+  double moving_speed_factor_;
+  double rotation_speed_factor_;
 
   //Helper variables for motor:
 
   //motorMovements last sent to gazebo
   float vx_;
   float vy_;
-  float  vomega_;
+  float vomega_;
   //last received odom position
-  float  x_;
-  float  y_;
-  float  ori_;
-  float  path_length_;
+  float x_;
+  float y_;
+  float ori_;
+  float path_length_;
+ 
+  //RobotinoSensorInterface values (stored here to write the interfaces only in the loop)
+  bool gyro_available_;
+  float gyro_angle_;
+  float infrared_puck_sensor_dist_;
+  float analog_in_0_;
+  float analog_in_4_;
+
+  //are there new values to write in the interfaces?
+  bool new_data_;
 
   fawkes::Time last_pos_time_;
   fawkes::Time last_vel_set_time_;
 
   //Odometry offset
   float x_offset_;
-  float  y_offset_;
-  float  ori_offset_;
+  float y_offset_;
+  float ori_offset_;
 
   //Helper functions:
   void process_motor_messages();

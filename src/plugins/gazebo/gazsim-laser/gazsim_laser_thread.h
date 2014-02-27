@@ -65,6 +65,9 @@ class LaserSimThread
   //storage for laser data
   float  *laser_data_;
 
+  //is there new information to write in the interface?
+  bool new_data_;
+
   //handler function for incoming laser data messages
   void on_laser_data_msg(ConstLaserScanPtr &msg);
 

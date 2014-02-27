@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <utils/math/angle.h>
+#include <core/threading/mutex_locker.h>
 
 #include <interfaces/Laser360Interface.h>
 
@@ -63,6 +64,7 @@ void LaserSimThread::init()
 
   //initialize laser data
   laser_data_ = (float *)malloc(sizeof(float) * 360);
+  new_data_ = false;
 
   //set frame in the interface
   laser_if_->set_frame("/base_laser");
@@ -76,11 +78,21 @@ void LaserSimThread::finalize()
 
 void LaserSimThread::loop()
 {
+  if(new_data_)
+  {
+    //write interface
+    laser_if_->set_distances(laser_data_);
+    laser_if_->write();
+
+    new_data_ = false;
+  }  
 }
 
 void LaserSimThread::on_laser_data_msg(ConstLaserScanPtr &msg)
 {
   //logger->log_info(name(), "Got new Laser data.\n");
+
+  MutexLocker lock(loop_mutex);
 
   //calculate start angle
   int start_index = (msg->angle_min() + 2* M_PI) / M_PI * 180;
@@ -102,8 +114,5 @@ void LaserSimThread::on_laser_data_msg(ConstLaserScanPtr &msg)
     }
 
   }
-
-  //write interface
-  laser_if_->set_distances(laser_data_);
-  laser_if_->write();
+  new_data_  = true;
 }

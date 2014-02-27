@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <utils/math/angle.h>
+#include <core/threading/mutex_locker.h>
 
 #include <interfaces/Position3DInterface.h>
 
@@ -57,6 +58,8 @@ void LocalizationSimThread::init()
 
   //subscribing to gazebo publisher
   localization_sub_ = gazebonode->Subscribe(std::string("~/gazsim/gps/"), &LocalizationSimThread::on_localization_msg, this);
+
+  new_data_ = false;
 }
 
 void LocalizationSimThread::finalize()
@@ -66,28 +69,36 @@ void LocalizationSimThread::finalize()
 
 void LocalizationSimThread::loop()
 {
+  if(new_data_)
+  {
+    //write interface
+    localization_if_->set_translation(0, x_);
+    localization_if_->set_translation(1, y_);
+    localization_if_->set_translation(2, z_);
+    localization_if_->set_rotation(0, quat_x_);
+    localization_if_->set_rotation(1, quat_y_);
+    localization_if_->set_rotation(2, quat_z_);
+    localization_if_->set_rotation(3, quat_w_);
+    localization_if_->write();
+
+    new_data_ = false;
+  }
 }
 
 void LocalizationSimThread::on_localization_msg(ConstPosePtr &msg)
 {
   //logger->log_info(name(), "Got new Localization data.\n");
+  
+  MutexLocker lock(loop_mutex);
 
   //read data from message
-  double x = msg->position().x();
-  double y = msg->position().y();
-  double z = msg->position().z();
-  double quat_x = msg->orientation().x();
-  double quat_y = msg->orientation().y();
-  double quat_z = msg->orientation().z();
-  double quat_w = msg->orientation().w();
-
-  //write interface
-  localization_if_->set_translation(0, x);
-  localization_if_->set_translation(1, y);
-  localization_if_->set_translation(2, z);
-  localization_if_->set_rotation(0, quat_x);
-  localization_if_->set_rotation(1, quat_y);
-  localization_if_->set_rotation(2, quat_z);
-  localization_if_->set_rotation(3, quat_w);
-  localization_if_->write();
+  x_ = msg->position().x();
+  y_ = msg->position().y();
+  z_ = msg->position().z();
+  quat_x_ = msg->orientation().x();
+  quat_y_ = msg->orientation().y();
+  quat_z_ = msg->orientation().z();
+  quat_w_ = msg->orientation().w();
+  
+  new_data_ = true;
 }

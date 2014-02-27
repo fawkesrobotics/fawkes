@@ -65,6 +65,18 @@ class LocalizationSimThread
 
   //handler function for incoming localization data messages
   void on_localization_msg(ConstPosePtr &msg);
+
+  //is there new information to write in the interface?
+  bool new_data_;
+
+  //localization data
+  double x_;
+  double y_;
+  double z_;
+  double quat_x_;
+  double quat_y_;
+  double quat_z_;
+  double quat_w_;
 };
 
 #endif

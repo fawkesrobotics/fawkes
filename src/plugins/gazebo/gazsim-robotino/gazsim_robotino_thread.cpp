@@ -23,6 +23,7 @@
 #include <tf/types.h>
 #include <stdio.h>
 #include <list>
+#include <core/threading/mutex_locker.h>
 
 #include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
@@ -97,6 +98,8 @@ RobotinoSimThread::init()
   ori_offset_ = 0.0;
   path_length_ = 0.0;
 
+  new_data_ = false;
+
   if(string_pub_->HasConnections())
   {
     msgs::Header helloMessage;
@@ -120,6 +123,25 @@ RobotinoSimThread::loop()
 {
   //work off all messages passed to the motor_interfaces
   process_motor_messages();
+
+  //update interfaces
+  if(new_data_)
+  {
+    motor_if_->set_odometry_position_x(x_);
+    motor_if_->set_odometry_position_y(y_);
+    motor_if_->set_odometry_orientation(ori_);
+    motor_if_->set_odometry_path_length(path_length_);
+    motor_if_->write();
+
+    sens_if_->set_gyro_available(gyro_available_);
+    sens_if_->set_gyro_angle(gyro_angle_);
+    sens_if_->set_distance(8, infrared_puck_sensor_dist_);
+    sens_if_->set_analog_in(0, analog_in_0_);
+    sens_if_->set_analog_in(4, analog_in_4_);
+    sens_if_->write();
+
+    new_data_ = false;
+  }
 }
 
 void RobotinoSimThread::send_transroot(double vx, double vy, double omega)
@@ -204,6 +226,9 @@ bool RobotinoSimThread::vel_changed(float before, float after, float relativeThr
 void RobotinoSimThread::on_pos_msg(ConstPosePtr &msg)
 {
   //logger_->log_debug(name_, "Got Position MSG from gazebo with ori: %f", msg->z());
+
+  MutexLocker lock(loop_mutex);
+
   //read out values + substract offset
   float new_x = msg->position().x() - x_offset_;
   float new_y = msg->position().y() - y_offset_;
@@ -249,14 +274,7 @@ void RobotinoSimThread::on_pos_msg(ConstPosePtr &msg)
   y_ = new_y;
   ori_ = new_ori;
   path_length_ += length_driven;
-
-  //update interface
-  motor_if_->set_odometry_position_x(x_);
-  motor_if_->set_odometry_position_y(y_);
-  motor_if_->set_odometry_orientation(ori_);
-  motor_if_->set_odometry_path_length(path_length_);
-
-  motor_if_->write();
+  new_data_ = true;
 
   //publish transform (otherwise the transform can not convert /base_link to /odom)
   fawkes::Time now(clock);
@@ -267,41 +285,45 @@ void RobotinoSimThread::on_pos_msg(ConstPosePtr &msg)
 }
 void RobotinoSimThread::on_gyro_msg(ConstVector3dPtr &msg)
 {
-  float yaw = msg->z();
-  sens_if_->set_gyro_available(true);
-  sens_if_->set_gyro_angle(yaw);
-  sens_if_->write();
+  MutexLocker lock(loop_mutex);
+
+  gyro_angle_ = msg->z();
+  gyro_available_ = true;
+  new_data_ = true;
 }
 void RobotinoSimThread::on_infrared_puck_sensor_msg(ConstFloatPtr &msg)
 {
+  MutexLocker lock(loop_mutex);
+
   //make sure that the config values for fetch_puck are set right
-  float value = msg->value();
-  sens_if_->set_distance(8, value);
-  sens_if_->write();
+  infrared_puck_sensor_dist_ = msg->value();
+  new_data_ = true;
 }
 void RobotinoSimThread::on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg)
 {
-  float value = msg->value();
-  if(value < gripper_laser_threshold_)
+  MutexLocker lock(loop_mutex);
+
+  if(msg->value() < gripper_laser_threshold_)
   {
-    sens_if_->set_analog_in(4, gripper_laser_value_near_);
+    analog_in_4_ = gripper_laser_value_near_;
   }
   else
   {
-    sens_if_->set_analog_in(4, gripper_laser_value_far_);
+    analog_in_4_ = gripper_laser_value_far_;
   }
-  sens_if_->write();
+  new_data_ = true;
 }
 void RobotinoSimThread::on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg)
 {
-  float value = msg->value();
-  if(value < gripper_laser_threshold_)
+  MutexLocker lock(loop_mutex);
+
+  if(msg->value() < gripper_laser_threshold_)
   {
-    sens_if_->set_analog_in(0, gripper_laser_value_near_);
+    analog_in_0_ = gripper_laser_value_near_;
   }
   else
   {
-    sens_if_->set_analog_in(0, gripper_laser_value_far_);
+    analog_in_0_ = gripper_laser_value_far_;
   }
-  sens_if_->write();
+  new_data_ = true;
 }
