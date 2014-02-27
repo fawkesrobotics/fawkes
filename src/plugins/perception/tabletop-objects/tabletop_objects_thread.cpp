@@ -160,11 +160,12 @@ TabletopObjectsThread::init()
   try {
     double rotation[4] = {0., 0., 0., 1.};
     table_pos_if_ = NULL;
+    switch_if_    = NULL;
+
     table_pos_if_ = blackboard->open_for_writing<Position3DInterface>("Tabletop");
     table_pos_if_->set_rotation(rotation);
     table_pos_if_->write();
 
-    switch_if_ = NULL;
     switch_if_ = blackboard->open_for_writing<SwitchInterface>("tabletop-objects");
     switch_if_->set_enabled(true);
     switch_if_->write();
