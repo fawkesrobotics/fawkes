@@ -23,6 +23,7 @@
 #include "eclipse_thread.h"
 #include "externals/blackboard.h"
 #include "externals/fawkes_logger.h"
+#include "externals/eclipse_path.h"
 
 #include <interfaces/TestInterface.h>
 #include <core/threading/mutex_locker.h>
@@ -105,16 +106,28 @@ EclipseAgentThread::init()
   m_initialized = true;
 
 
+  // initialise pathfinding utility
+  EclipsePath::create_initial_object();
+  EclipsePath::instance()->add_path("@fawkesdir@/src/plugins/eclipse-clp/interpreter/");
+  EclipsePath::instance()->add_path("@fawkesdir@/src/plugins/eclipse-clp/utils/");
+  EclipsePath::instance()->add_path("@basedir@/src/plugins/eclipse-clp/interpreter/");
+  
+  EclipsePath::instance()->apply_regexes();
+
+  // debug
+  EclipsePath::instance()->print_all_paths();
 
   // load utility predicates
   //load_file( ECLIPSE_CODE_DIR"/utils/logging.ecl" );
-  std::string agent_path = ECLIPSE_CODE_DIR"/interpreter/"+ agent +".ecl";
+  std::string agent_path = EclipsePath::instance()->locate_file(agent + ".ecl");
+  //std::string agent_path = ECLIPSE_CODE_DIR"/interpreter/"+ agent +".ecl";
   // load interpreter and agent
   load_file( agent_path.c_str() );
 
   // check if navgraph is used and pass config value
   if (config->get_bool( ("/eclipse-clp/"+agent+"/use_graph").c_str() )){
     graph_path = CONFDIR + config->get_string( ("/eclipse-clp/"+agent+"/rel_graph_path").c_str());
+
     logger->log_info( name(), "Setting graph_path to %s", graph_path.c_str() );
     post_goal( term(EC_functor("load_graph",1), graph_path.c_str()) );
     if ( EC_succeed != EC_resume() )

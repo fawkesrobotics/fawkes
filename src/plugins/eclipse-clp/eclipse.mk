@@ -15,6 +15,7 @@
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(abspath $(BUILDSYSDIR)/ext/gmsl)
+include $(BUILDSYSDIR)/boost.mk
 
 ECLIPSE_BINARY = eclipse-clp
 ECLIPSE_MIN_VERSION_MAJOR=6
@@ -47,6 +48,11 @@ else
   ECLIPSE_FAIL_REASON="ECLiPSe not installed"
 endif
 
+ifeq ($(call boost-have-lib,thread system filesystem regex),0)
+  HAVE_ECLIPSE=0
+  ECLIPSE_FAIL_REASON="boost lib filesystem, thread, system or regex not installed"
+endif
+
 ifeq ($(HAVE_ECLIPSE),1)
   HAVE_ECL_PACKAGE = $(shell pkg-config --exists eclipse-clp && echo 1 || echo 0)
   ifeq ($(HAVE_ECL_PACKAGE), 1)
@@ -61,6 +67,8 @@ ifeq ($(HAVE_ECLIPSE),1)
     ECLIPSE_CFLAGS = -I$(ECLIPSE_INCDIR) -DECLIPSE_CODE_DIR=\"$(abspath $(BASEDIR)/src/plugins/eclipse-clp)\"
     ECLIPSE_LDFLAGS = -L$(ECLIPSE_LIBDIR) -Wl,-R$(ECLIPSE_LIBDIR)
   endif
+  ECLIPSE_LDFLAGS += $(call boost-libs-ldflags,thread system filesystem regex) \
+			-DBASEDIR=\"$(BASEDIR)\"
 endif
 
 
