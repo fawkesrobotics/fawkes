@@ -595,6 +595,23 @@ AmclThread::loop()
 	pf_matrix_fprintf(hyps[max_weight_hyp].pf_pose_cov, stdout, "%6.3f");
 	puts("");
       */
+
+      // Copy in the covariance, converting from 3-D to 6-D
+      pf_sample_set_t* set = pf_->sets + pf_->current_set;
+      for (int i = 0; i < 2; i++) {
+	for (int j = 0; j < 2; j++) {
+	  // Report the overall filter covariance, rather than the
+	  // covariance for the highest-weight cluster
+	  //last_covariance_[6 * i + j] = hyps[max_weight_hyp].pf_pose_cov.m[i][j];
+	  last_covariance_[6 * i + j] = set->cov.m[i][j];
+	}
+      }
+
+      // Report the overall filter covariance, rather than the
+      // covariance for the highest-weight cluster
+      //last_covariance_[6 * 5 + 5] = hyps[max_weight_hyp].pf_pose_cov.m[2][2];
+      last_covariance_[6 * 5 + 5] = set->cov.m[2][2];
+
 #ifdef HAVE_ROS
       geometry_msgs::PoseWithCovarianceStamped p;
       // Fill in the header
@@ -609,21 +626,16 @@ AmclThread::loop()
       p.pose.pose.orientation.y = q.y();
       p.pose.pose.orientation.z = q.z();
       p.pose.pose.orientation.w = q.w();
-      // Copy in the covariance, converting from 3-D to 6-D
-      pf_sample_set_t* set = pf_->sets + pf_->current_set;
+
+      // Copy in the covariance
       for (int i = 0; i < 2; i++) {
 	for (int j = 0; j < 2; j++) {
 	  // Report the overall filter covariance, rather than the
 	  // covariance for the highest-weight cluster
-	  //p.covariance[6*i+j] = hyps[max_weight_hyp].pf_pose_cov.m[i][j];
-	  last_covariance_[6 * i + j] = set->cov.m[i][j];
+	  p.pose.covariance[6*i+j] = last_covariance_[6 * i + j];
 	}
       }
-
-      // Report the overall filter covariance, rather than the
-      // covariance for the highest-weight cluster
-      //p.covariance[6*5+5] = hyps[max_weight_hyp].pf_pose_cov.m[2][2];
-      last_covariance_[6 * 5 + 5] = set->cov.m[2][2];
+      p.pose.covariance[6 * 5 + 5] = last_covariance_[6 * 5 + 5];
 
       pose_pub_.publish(p);
 #endif

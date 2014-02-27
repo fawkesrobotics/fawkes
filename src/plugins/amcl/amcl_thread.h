@@ -166,9 +166,7 @@ private:
 
   fawkes::Time last_cloud_pub_time;
   fawkes::Time last_laser_received_ts_;
-#ifdef HAVE_ROS
   double last_covariance_[36];
-#endif
 
   float alpha1_;
   float alpha2_;
