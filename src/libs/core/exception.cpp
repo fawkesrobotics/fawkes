@@ -168,16 +168,16 @@ Exception::Exception(const char *format, ...) throw()
  * Constructs a new exception with the given message and errno value. This
  * is particularly handy when throwing the exception after a function failed
  * that returns an error code in errno. 
- * @param errno error number
+ * @param errnoval error number
  * @param format The format of the primary message. Supports the same
  * arguments as append(). The message is copied and not just referenced.
  * Thus the memory has to be freed if it is a dynamic  string on the heap.
  */
-Exception::Exception(int errno, const char *format, ...) throw()
+Exception::Exception(int errnoval, const char *format, ...) throw()
 {
   messages_mutex = new Mutex();
 
-  _errno = errno;
+  _errno = errnoval;
   __type_id = "unknown";
 
   messages = NULL;
@@ -188,7 +188,7 @@ Exception::Exception(int errno, const char *format, ...) throw()
     va_list arg;
     va_start(arg, format);
     char *ext_format;
-    if ( asprintf(&ext_format, "%s (errno: %i, %s)", format, errno, strerror(errno)) == -1 ) {
+    if ( asprintf(&ext_format, "%s (errno: %i, %s)", format, _errno, strerror(_errno)) == -1 ) {
       append_nolock_va(format, arg);
     } else {
       append_nolock_va(ext_format, arg);
@@ -196,7 +196,7 @@ Exception::Exception(int errno, const char *format, ...) throw()
     }
     va_end(arg);
   } else {
-    append_nolock("Exception with errno=%i (%s)", errno, strerror(errno));
+    append_nolock("Exception with errno=%i (%s)", _errno, strerror(_errno));
   }
 }
 
