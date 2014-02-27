@@ -91,11 +91,10 @@ class FileAlterationMonitor
   LockList<regex_t *>                __regexes;
   LockList<regex_t *>::iterator      __rxit;
 
-#ifdef HAVE_INOTIFY
   int     __inotify_fd;
   char   *__inotify_buf;
   size_t  __inotify_bufsize;
-#endif
+
   std::map<int, std::string> __inotify_watches;
   std::map<int, std::string>::iterator __inotify_wit;
 

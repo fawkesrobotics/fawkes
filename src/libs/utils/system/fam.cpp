@@ -107,6 +107,10 @@ const unsigned int FamListener::FAM_ALL_EVENTS	   = (FAM_ACCESS | FAM_MODIFY | F
  */
 FileAlterationMonitor::FileAlterationMonitor()
 {
+  __inotify_fd      = -1;
+  __inotify_buf     = NULL;
+  __inotify_bufsize = 0;
+
 #ifdef HAVE_INOTIFY
   if ( (__inotify_fd = inotify_init()) == -1 ) {
     throw Exception(errno, "Failed to initialize inotify");
