@@ -6,4 +6,7 @@ robot_state_publisher:
  # if the path starts with '/', it is absolute
  # otherwise, relative to RESDIR/urdf/
  urdf_file: "caesar.urdf"
+ 
+ # publish transforms to the future
+ postdate_to_future: 0.5
 

@@ -84,6 +84,11 @@ RobotStatePublisherThread::RobotStatePublisherThread()
 void RobotStatePublisherThread::init()
 {
   cfg_urdf_path_ = config->get_string(CFG_PREFIX"urdf_file");
+  try {
+    cfg_postdate_to_future_ = config->get_float(CFG_PREFIX"postdate_to_future");
+  } catch (const Exception& e) {
+    cfg_postdate_to_future_ = 0.f;
+  }
 
   string urdf;
   string line;
@@ -177,7 +182,7 @@ void RobotStatePublisherThread::publish_fixed_transforms()
   std::vector<tf::StampedTransform> tf_transforms;
   tf::StampedTransform tf_transform;
   fawkes::Time now(clock);
-  tf_transform.stamp = now + 0.5;  // future publish by 0.5 seconds
+  tf_transform.stamp = now + cfg_postdate_to_future_;  // future publish
 
   // loop over all fixed segments
   for (map<string, SegmentPair>::const_iterator seg=segments_fixed_.begin(); seg != segments_fixed_.end(); seg++){

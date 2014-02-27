@@ -141,6 +141,7 @@ private:
   std::map<std::string, SegmentPair> segments_, segments_fixed_;
   KDL::Tree tree_;
   std::string cfg_urdf_path_;
+  float cfg_postdate_to_future_;
 
   std::list<fawkes::JointInterface *> ifs_;
 };
