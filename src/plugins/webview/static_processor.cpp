@@ -52,11 +52,16 @@ WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(const char *baseurl
 							     fawkes::Logger *logger)
 {
   __logger         = logger;
+
+  char htdocs_rp[PATH_MAX];
+  if (realpath(htdocs_dir, htdocs_rp) != NULL) {
+    __htdocs_dir     = strdup(htdocs_rp);
+    __htdocs_dir_len = strlen(__htdocs_dir);
+  } else {
+    throw Exception(errno, "Failed to resolve htdocs path '%s'", htdocs_dir);
+  }
   __baseurl        = strdup(baseurl);
   __baseurl_len    = strlen(__baseurl);
-  __htdocs_dir     = strdup(htdocs_dir);
-  __htdocs_dir_len = strlen(__htdocs_dir);
-
 }
 
 /** Destructor. */
