@@ -44,6 +44,7 @@ class Vector3 {
   double distance(const Vector3 &v) const;
   Vector3 & normalize();
   Vector3   normalized();
+  Vector3 rotate(const Vector3 &wAxis, double angle);
   double angle(const Vector3 &v) const;
   Vector3 absolute() const;
   Vector3 cross(const Vector3 &v) const;
