@@ -46,15 +46,10 @@ class GazeboAspectIniFin : public AspectIniFin
   //setters for the node_thread
   void set_gazebonode(gazebo::transport::NodePtr gazebonode);
   void set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node);
-  void set_light_publisher(gazebo::transport::PublisherPtr publisher);
-  void set_request_publisher(gazebo::transport::PublisherPtr publisher);
-  void set_model_publisher(gazebo::transport::PublisherPtr publisher);
-  void set_visual_publisher(gazebo::transport::PublisherPtr publisher);
 
  private:
   gazebo::transport::NodePtr __gazebonode;
   gazebo::transport::NodePtr __gazebo_world_node;
-  gazebo::transport::PublisherPtr __visual_publisher, __model_publisher, __request_publisher, __light_publisher;
 
 };
 

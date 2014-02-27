@@ -28,15 +28,16 @@
 #include <string.h>
 
 namespace gazebo
-{   
+{
+  /**
+   * Provides ground Truth position
+   * @author Frederik Zwilling
+   */
   class Gps : public ModelPlugin
   {
   public:
-    //Constructor
     Gps();
-
-    //Destructor
-    ~Gps();
+   ~Gps();
 
     //Overridden ModelPlugin-Functions
     virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/);
@@ -44,23 +45,23 @@ namespace gazebo
     virtual void Reset();
 
   private:
-    // Pointer to the model
+    /// Pointer to the gazbeo model
     physics::ModelPtr model_;
-    // Pointer to the update event connection
+    /// Pointer to the update event connection
     event::ConnectionPtr update_connection_;
-    //Node for communication to fawkes
+    ///Node for communication to fawkes
     transport::NodePtr node_;
-    //name of the gps and the communication channel
+    ///name of the gps and the communication channel
     std::string name_;
 
-    //time variable to send in intervals
+    ///time variable to send in intervals
     double last_sent_time_;
 
     //Gps Stuff:
-    //Functions for sending ionformation to fawkes:
+    ///Functions for sending information to fawkes:
     void send_position();
 
-    //Publisher for GyroAngle
+    ///Publisher for GyroAngle
     transport::PublisherPtr gps_pub_;
   };
 }

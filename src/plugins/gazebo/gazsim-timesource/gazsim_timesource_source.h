@@ -34,15 +34,18 @@ typedef const boost::shared_ptr<gazsim_msgs::SimTime const> ConstSimTimePtr;
 
 namespace fawkes
 {
+  /** @class GazsimTimesource
+   * This time-source provides the simulation time from Gazebo in Fawkes
+   * @author Frederik Zwilling
+   */
   class GazsimTimesource : public TimeSource
   {
   public:
-
-    //Constructor
+    ///Constructor
     GazsimTimesource();
+    ///Destructor
+   ~GazsimTimesource();
 
-    //Things to override and provide the time to fawkes
-    ~GazsimTimesource();
     virtual void get_time(timeval* tv) const;
     virtual timeval conv_to_realtime(const timeval* tv) const;
 

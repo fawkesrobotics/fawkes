@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  sim_motorinterface.cpp - Simulates an Interface
+ *  sim_interface.cpp - Simulates an Interface
  *
  *  Created: Wed Jun 19 09:30:26 2013
  *  Copyright  2013  Frederik Zwilling
@@ -29,7 +29,7 @@
 #include <gazebo/transport/transport.hh>
 
 /** @class SimInterface "sim_interface.cpp"
- * Class to simulate an Interface
+ * General Class to simulate an Interface
  * @author Frederik Zwilling
  */
 

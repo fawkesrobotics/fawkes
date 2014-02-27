@@ -29,13 +29,17 @@
 
 namespace gazebo
 {   
+  /** @class Motor
+   * Motor plugin for Gazebo
+   * @author Frederik Zwilling
+   */
   class Motor : public ModelPlugin
   {
   public:
-    //Constructor
+    ///Constructor
     Motor();
 
-    //Destructor
+    ///Destructor
     ~Motor();
 
     //Overridden ModelPlugin-Functions
@@ -44,25 +48,26 @@ namespace gazebo
     virtual void Reset();
 
   private:
-    // Pointer to the model
+    /// Pointer to the Gazebo model
     physics::ModelPtr model_;
-    // Pointer to the update event connection
+    /// Pointer to the update event connection
     event::ConnectionPtr update_connection_;
-    //Node for communication to fawkes
+    ///Node for communication to fawkes
     transport::NodePtr node_;
-    //name of the motor and the communication channel
+    ///name of the motor and the communication channel
     std::string name_;
 
 
     //Motor Stuff:
-    //Functions for recieving Messages (registerd via suscribers)
     void on_motor_move_msg(ConstVector3dPtr &msg);
 
-    //Suscriber for MotorMove Interfaces from Fawkes
+    ///Suscriber for MotorMove Interfaces from Fawkes
     transport::SubscriberPtr motor_move_sub_;
 
 
     //current movement commands:
-    float vx_, vy_, vomega_;  
+    float vx_;
+    float vy_;
+    float vomega_;  
   };
 }

@@ -33,10 +33,22 @@ namespace fawkes {
   class MotorInterface;
   class SwitchInterface;
 }
-
+/** @class SimMotorInterface
+ * class to simulate the motor interface
+ * @author Frederik Zwilling
+ */
 class SimMotorInterface: public SimInterface
 {
  public:
+  /** Constructor
+   * @param controlPublisher Publisher for sending control msgs
+   * @param logger Logger
+   * @param blackboard Blackboard
+   * @param gazebonode Gazebo node for communication
+   * @param config Fawkes Config
+   * @param clock Clock
+   * @param tf_publisher TF_Publisher
+   */
  SimMotorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard, gazebo::transport::NodePtr gazebonode, fawkes::Configuration *config, fawkes::Clock *clock, fawkes::tf::TransformPublisher *tf_publisher)
    : SimInterface(controlPublisher, logger, blackboard, gazebonode, "SimMotorInterface", config)
   {
@@ -47,6 +59,7 @@ class SimMotorInterface: public SimInterface
     y_offset_ = 0.0;
     ori_offset_ = 0.0;
   };
+  ///Destructor
   ~SimMotorInterface() {};
 
   virtual void init();
@@ -55,13 +68,13 @@ class SimMotorInterface: public SimInterface
  
 
  private:
-  //Publisher to send messages to gazebo
+  ///Publisher to send messages to gazebo
   gazebo::transport::PublisherPtr motor_move_pub_;
 
-  //Suscribers to recieve the robot's position from gazebo for odometry
+  ///Suscribers to recieve the robot's position from gazebo for odometry
   gazebo::transport::SubscriberPtr pos_sub_;
 
-  //provided interfaces
+  ///provided interfaces
   fawkes::MotorInterface *motor_if_;
   fawkes::SwitchInterface *switch_if_;
   
@@ -71,12 +84,20 @@ class SimMotorInterface: public SimInterface
 
   //Helper variables:
   //motorMovements last sent to gazebo
-  float vx_, vy_, vomega_, x_, y_, ori_, path_length_;
+  float vx_;
+  float vy_;
+  float  vomega_;
+  float  x_;
+  float  y_;
+  float  ori_;
+  float  path_length_;
   fawkes::Time last_pos_time_;
   fawkes::Time last_vel_set_time_;
 
   //Odometry offset
-  float x_offset_, y_offset_, ori_offset_;
+  float x_offset_;
+  float  y_offset_;
+  float  ori_offset_;
 
   //Helper functions:
   void process_messages();
@@ -87,7 +108,9 @@ class SimMotorInterface: public SimInterface
 
   //config values
   bool slippery_wheels_enabled_;
-  double slippery_wheels_threshold_, moving_speed_factor_, rotation_speed_factor_;
+  double slippery_wheels_threshold_;
+  double  moving_speed_factor_;
+  double  rotation_speed_factor_;
 };
 
 #endif

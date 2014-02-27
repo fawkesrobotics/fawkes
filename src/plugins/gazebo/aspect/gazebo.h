@@ -43,13 +43,13 @@ class GazeboAspect : public virtual Aspect
   virtual ~GazeboAspect();
 
  protected:
+  /// Gazebo Node for communication with a robot
   gazebo::transport::NodePtr gazebonode;
+  /**
+   * Gazebo Node for communication with the world
+   * (e.g. for spawning visuals or robot independent information)
+   */
   gazebo::transport::NodePtr gazebo_world_node;
-  //does not work, I don't know why
-  /* gazebo::transport::PublisherPtr visual_publisher; */
-  /* gazebo::transport::PublisherPtr model_publisher; */
-  /* gazebo::transport::PublisherPtr request_publisher; */
-  /* gazebo::transport::PublisherPtr light_publisher; */
 
  private:
   void init_GazeboAspect(gazebo::transport::NodePtr gazebonode, gazebo::transport::NodePtr gazebo_world_node,

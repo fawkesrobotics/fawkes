@@ -1,5 +1,5 @@
 /***************************************************************************
- *  robotino-sim_thread.cpp - Thread simulate the Robotino in Gazebo by sending needed informations to the Robotino-plugin in Gazebo and recieving sensordata from Gazebo
+ *  gazsim_robotino_thread.cpp - Thread simulate the Robotino in Gazebo by sending needed informations to the Robotino-plugin in Gazebo and recieving sensordata from Gazebo
  *
  *  Created: Fr 3. Mai 21:27:06 CEST 2013
  *  Copyright  2013  Frederik Zwilling
@@ -37,7 +37,7 @@
 using namespace fawkes;
 using namespace gazebo;
 
-/** @class RobotinoSimThread "robotino-sim_thread.h"
+/** @class RobotinoSimThread "gazsim_robotino_thread.h"
  * Thread simulate the Robotino in Gazebo 
  * by sending needed informations to the Robotino-plugin in Gazebo
  * and recieving sensordata from Gazebo
@@ -61,9 +61,8 @@ RobotinoSimThread::init()
 
   if(string_pub_->HasConnections())
   {
-    //Hello world message
     msgs::Header helloMessage;
-    helloMessage.set_str_id("Hello Gazebo-World!!!");
+    helloMessage.set_str_id("gazsim-robotino plugin connected");
     string_pub_->Publish(helloMessage);
 
   }
@@ -86,10 +85,10 @@ RobotinoSimThread::finalize()
   for (std::list<SimInterface*>::iterator it = interfaces_list_.begin(); it != interfaces_list_.end(); it++)
   {
     (*it)->finalize();
-    //TODO: delete
   }
-
-  //reset?
+  //delete list elements
+  interfaces_list_.clear();
+  
   string_pub_.reset();
 }
 

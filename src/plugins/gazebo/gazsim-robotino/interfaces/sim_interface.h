@@ -1,5 +1,5 @@
 /***************************************************************************
- *  sim_motorinterface.h - Simulates an Interface
+ *  sim_interface.h - Simulates an Interface
  *
  *  Created: Wed Jun 19 09:27:06 2013
  *  Copyright  2013  Frederik Zwilling
@@ -35,6 +35,14 @@
 class SimInterface
 {
  public:
+  /** Constructor
+   * @param controlPublisher Publisher for sending control msgs
+   * @param logger Logger
+   * @param blackboard Blackboard
+   * @param gazebonode Gazebo node for communication
+   * @param name name of the interface(ID)
+   * @param config Fawkes Config
+   */
   SimInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode, const char* name, fawkes::Configuration *config)
   {
     this->control_pub_ = controlPublisher;
@@ -44,21 +52,29 @@ class SimInterface
     this->name_ = name;
     this->config_ = config;
   };
+  ///Destructor
   ~SimInterface() {};
 
+  /// initialization of the interface
   virtual void init(){};
+  /// update on every loop
   virtual void loop(){};
+  /// finalize/close interface
   virtual void finalize(){};
  
  protected:
-  //Name for the logger
+  ///Name for the logger
   const char* name_;
+  ///Logger
   fawkes::Logger *logger_;
+  ///Blackboard
   fawkes::BlackBoard *blackboard_;
+  ///Gazebo node for communication
   gazebo::transport::NodePtr gazebonode_;
+  ///Access to Fawkes Config
   fawkes::Configuration *config_;
 
-  //Publisher to send control-messages to gazebo
+  ///Publisher to send control-messages to gazebo
   gazebo::transport::PublisherPtr control_pub_;
 };
 

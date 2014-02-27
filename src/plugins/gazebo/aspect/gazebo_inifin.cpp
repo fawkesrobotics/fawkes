@@ -43,6 +43,9 @@ GazeboAspectIniFin::GazeboAspectIniFin()
 {
 }
 
+/** Initialize
+ * @param thread thread
+ */
 void
 GazeboAspectIniFin::init(Thread *thread)
 {
@@ -61,6 +64,9 @@ GazeboAspectIniFin::init(Thread *thread)
     __model_publisher, __request_publisher, __light_publisher);
 }
 
+/** Finalize
+ * @param thread thread
+ */
 void
 GazeboAspectIniFin::finalize(Thread *thread)
 {
@@ -76,6 +82,7 @@ GazeboAspectIniFin::finalize(Thread *thread)
 
 
 /** Set the Gazebo node handle to use for aspect initialization.
+ * (used for robot specific communication)
  * @param gazebonode Gazebo node handle to pass to threads with GazeboAspect.
  */
 void
@@ -83,30 +90,14 @@ GazeboAspectIniFin::set_gazebonode(gazebo::transport::NodePtr gazebonode)
 {
   __gazebonode = gazebonode;
 }
+/** Set the Gazebo node handle to use for aspect initialization.
+ * (used for robot independent or world changing communication)
+ * @param gazebo_world_node Gazebo node handle to pass to threads with GazeboAspect.
+ */
 void
 GazeboAspectIniFin::set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node)
 {
   __gazebo_world_node = gazebo_world_node;
-}
-void
-GazeboAspectIniFin::set_visual_publisher(gazebo::transport::PublisherPtr publisher)
-{
-  __visual_publisher = publisher;
-}
-void
-GazeboAspectIniFin::set_model_publisher(gazebo::transport::PublisherPtr publisher)
-{
-  __model_publisher = publisher;
-}
-void
-GazeboAspectIniFin::set_request_publisher(gazebo::transport::PublisherPtr publisher)
-{
-  __request_publisher = publisher;
-}
-void
-GazeboAspectIniFin::set_light_publisher(gazebo::transport::PublisherPtr publisher)
-{
-  __light_publisher = publisher;
 }
 
 } // end namespace fawkes

@@ -31,9 +31,19 @@ namespace fawkes {
   class RobotinoSensorInterface;
 }
 
+/**
+   Class for simulating the RobotinoSensorInterface
+ */
 class SimRobotinoSensorInterface: public SimInterface
 {
  public:
+  /** Constructor
+   * @param controlPublisher Publisher for sending control msgs
+   * @param logger Logger
+   * @param blackboard Blackboard
+   * @param gazebonode Gazebo node for communication
+   * @param config Fawkes Config
+   */
  SimRobotinoSensorInterface(gazebo::transport::PublisherPtr controlPublisher, fawkes::Logger *logger, fawkes::BlackBoard *blackboard,   gazebo::transport::NodePtr gazebonode, fawkes::Configuration *config)
   : SimInterface(controlPublisher, logger, blackboard, gazebonode, "SimRobotinoSensorInterface", config)
   {};

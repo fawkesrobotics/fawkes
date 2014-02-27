@@ -36,6 +36,9 @@ Gyro::~Gyro()
   printf("Destructing Gyro Plugin!\n");
 }
 
+/** on loading of the plugin
+ * @param _parent Parent Model
+ */
 void Gyro::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/) 
 {
   // Store the pointer to the model
@@ -59,13 +62,16 @@ void Gyro::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
   this->gyro_pub_ = this->node_->Advertise<msgs::Vector3d>("~/RobotinoSim/Gyro/");
 }
 
-// Called by the world update start event
+/** Called by the world update start event
+ */
 void Gyro::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   //Send gyro information to Fawkes
   send_gyro();
 }
 
+/** on Gazebo reset
+ */
 void Gyro::Reset()
 {
 }

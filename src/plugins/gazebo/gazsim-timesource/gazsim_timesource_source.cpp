@@ -24,7 +24,6 @@
 
 using namespace fawkes;
 
-
 GazsimTimesource::GazsimTimesource()
 {
   clock = Clock::instance();
@@ -43,6 +42,7 @@ GazsimTimesource::~GazsimTimesource()
 /**
  * The Simulation time is estimated by looking at the timeinterval to the last received msg and the last real time factor.
  * With this method, I want to reduce the number of send messages from Gazebo
+ * @param tv timeinterval
  */
 void GazsimTimesource::get_time(timeval* tv) const
 {
@@ -66,6 +66,9 @@ timeval GazsimTimesource::conv_to_realtime(const timeval* tv) const
   return result;
 }
 
+/** store data from gazebo time message
+ * @param msg message
+ */
 void GazsimTimesource::on_time_sync_msg(ConstSimTimePtr &msg)
 {
   //we do not want to correct time back

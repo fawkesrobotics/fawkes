@@ -29,13 +29,17 @@
 
 namespace gazebo
 {   
+  /** @class Gyro
+   * Plugin for a gyro sensor on a model
+   * @author Frederik Zwilling
+   */
   class Gyro : public ModelPlugin
   {
   public:
-    //Constructor
+    ///Constructor
     Gyro();
 
-    //Destructor
+    ///Destructor
     ~Gyro();
 
     //Overridden ModelPlugin-Functions
@@ -44,21 +48,21 @@ namespace gazebo
     virtual void Reset();
 
   private:
-    // Pointer to the model
+    /// Pointer to the model
     physics::ModelPtr model_;
-    // Pointer to the update event connection
+    /// Pointer to the update event connection
     event::ConnectionPtr update_connection_;
-    //Node for communication to fawkes
+    ///Node for communication to fawkes
     transport::NodePtr node_;
-    //name of the gyro and the communication channel
+    ///name of the gyro and the communication channel
     std::string name_;
 
 
     //Gyro Stuff:
-    //Functions for sending ionformation to fawkes:
+    ///Sending Gyro-angle to fawkes:
     void send_gyro();
 
-    //Publisher for GyroAngle
+    ///Publisher for GyroAngle
     transport::PublisherPtr gyro_pub_;  
   };
 }

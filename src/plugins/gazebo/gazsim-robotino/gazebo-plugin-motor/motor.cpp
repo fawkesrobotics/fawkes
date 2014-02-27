@@ -36,6 +36,9 @@ Motor::~Motor()
   printf("Destructing Motor Plugin!\n");
 }
 
+/** on loading of the plugin
+ * @param _parent Parent Model
+ */
 void Motor::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/) 
 {
   // Store the pointer to the model
@@ -64,7 +67,8 @@ void Motor::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
   this->motor_move_sub_ = this->node_->Subscribe(std::string("~/RobotinoSim/MotorMove/"), &Motor::on_motor_move_msg, this);
 }
 
-// Called by the world update start event
+/** Called by the world update start event
+ */
 void Motor::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   //Apply movement command
@@ -81,10 +85,15 @@ void Motor::OnUpdate(const common::UpdateInfo & /*_info*/)
   this->model_->SetAngularVel(math::Vector3(0, 0, vomega_));
 }
 
+/** on Gazebo reset
+ */
 void Motor::Reset()
 {
 }
 
+/** Functions for recieving Messages (registerd via suscribers)
+ * @param msg message
+ */ 
 void Motor::on_motor_move_msg(ConstVector3dPtr &msg)
 {
   //printf("Got MotorMove Msg!!! %f %f %f\n", msg->x(), msg->y(), msg->z());

@@ -122,6 +122,13 @@ GazsimCommThread::loop()
 {
 }
 
+/**
+ * Receive and forward msg
+ * @param endpoint port msg received from
+ * @param component_id message_component_id
+ * @param msg_type msg_type
+ * @param msg Message
+ */
 void
 GazsimCommThread::receive_msg(boost::asio::ip::udp::endpoint &endpoint,
 		       uint16_t component_id, uint16_t msg_type,

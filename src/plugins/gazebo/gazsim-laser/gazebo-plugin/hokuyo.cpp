@@ -36,6 +36,9 @@ Hokuyo::~Hokuyo()
   printf("Destructing Hokuyo Plugin!\n");
 }
 
+/** on loading of the plugin
+ * @param _parent Parent Model
+ */
 void Hokuyo::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/) 
 {
   // Store the pointer to the model

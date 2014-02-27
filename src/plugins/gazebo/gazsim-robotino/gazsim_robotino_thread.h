@@ -1,5 +1,5 @@
 /***************************************************************************
- *  robotino-sim_thread.h - Thread simulate the Robotino in Gazebo by sending needed informations to the Robotino-plugin in Gazebo and recieving sensordata from Gazebo
+ *  gazsim_robotino_thread.h - Thread simulate the Robotino in Gazebo by sending needed informations to the Robotino-plugin in Gazebo and recieving sensordata from Gazebo
  *
  *  Created: Fr 3. Mai 21:20:08 CEST 2013
  *  Copyright  2013  Frederik Zwilling

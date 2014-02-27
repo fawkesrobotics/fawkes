@@ -27,15 +27,19 @@ using namespace gazebo;
 // Register this plugin to make it available in the simulator
 GZ_REGISTER_MODEL_PLUGIN(Gps)
 
+///Constructor
 Gps::Gps()
 {
 }
-
+///Destructor
 Gps::~Gps()
 {
   printf("Destructing Gps Plugin!\n");
 }
 
+/** on loading of the plugin
+ * @param _parent Parent Model
+ */
 void Gps::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/) 
 {
   // Store the pointer to the model
@@ -61,7 +65,9 @@ void Gps::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
   this->gps_pub_ = this->node_->Advertise<msgs::Pose>("~/RobotinoSim/Gps/");
 }
 
-// Called by the world update start event
+
+/** Called by the world update start event
+ */
 void Gps::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   //Send position information to Fawkes
@@ -73,10 +79,15 @@ void Gps::OnUpdate(const common::UpdateInfo & /*_info*/)
   }
 }
 
+/** on Gazebo reset
+ */
 void Gps::Reset()
 {
 }
 
+/** Sending position to Fawkes
+ * 
+ */
 void Gps::send_position()
 {
   if(gps_pub_->HasConnections())

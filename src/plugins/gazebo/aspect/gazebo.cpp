@@ -71,11 +71,6 @@ GazeboAspect::init_GazeboAspect(gazebo::transport::NodePtr gazebonode , gazebo::
 {
   this->gazebonode = gazebonode;
   this->gazebo_world_node = gazebo_world_node;
-  //does not work, I don't know why
-  // this->visual_publisher = visual_publisher;
-  // this->model_publisher = model_publisher;
-  // this->request_publisher = request_publisher;
-  // this->light_publisher = light_publisher;
 }
 
 /** Finalize Gazebo aspect.

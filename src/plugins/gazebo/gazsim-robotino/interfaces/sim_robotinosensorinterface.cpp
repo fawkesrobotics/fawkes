@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *  sim_robotinosensorinterface.cpp - Simulates the RobotinoSensorInterface
  *

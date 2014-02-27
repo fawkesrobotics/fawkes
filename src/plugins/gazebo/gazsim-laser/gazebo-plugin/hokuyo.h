@@ -30,37 +30,42 @@
 #include <gazebo/sensors/RaySensor.hh>
 
 namespace gazebo
-{   
+{
+  /** @class Hokuyo
+   * Plugin for getting laser sensor data from the simulation
+   * @author Frederik Zwilling
+   */  
   class Hokuyo : public ModelPlugin
   {
   public:
-    //Constructor
+    ///Constructor
     Hokuyo();
 
-    //Destructor
+    ///Destructor
     ~Hokuyo();
 
     //Overridden ModelPlugin-Functions
     virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/);
+    ///on Gazebo reset
     virtual void Reset();
 
 
-    //what happens if the sensor has new laser data
+    ///what happens if the sensor has new laser data
     void on_new_laser_scans();
 
   private:
-    // Pointer to the model
+    /// Pointer to the gazebo model
     physics::ModelPtr model_;
-    //Node for communication to fawkes
+    ///Node for communication to fawkes
     transport::NodePtr node_;
-    //name of the hokuyo and the communication channel
+    ///name of the hokuyo and the communication channel
     std::string name_;
 
-    //connection of the sensor
+    ///connection of the sensor
     event::ConnectionPtr new_laser_scans_connection_;
-    //Pointer to the hokuyo sensor
+    ///Pointer to the hokuyo sensor
     sensors::RaySensorPtr parent_sensor_;
-    //Publisher for communication to fawkes
+    ///Publisher for communication to fawkes
     transport::PublisherPtr laser_pub_;
 
   };
