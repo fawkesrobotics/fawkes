@@ -44,7 +44,7 @@ using namespace fawkes;
 OpenRaveThread::OpenRaveThread()
   : Thread("OpenRaveThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
-    AspectProviderAspect("OpenRaveAspect", &__or_aspectIniFin),
+    AspectProviderAspect(&__or_aspectIniFin),
   __or_aspectIniFin( this ),
   __OR_env( 0 ),
   __OR_robot( 0 )
