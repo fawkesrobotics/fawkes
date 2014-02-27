@@ -71,7 +71,7 @@ RobotinoSimThread::init()
   sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
 
   //Create suscribers
-  pos_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/Gps/"), &RobotinoSimThread::on_pos_msg, this);
+  pos_sub_ = gazebonode->Subscribe(std::string("~/gazsim/gps/"), &RobotinoSimThread::on_pos_msg, this);
   gyro_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/Gyro/"), &RobotinoSimThread::on_gyro_msg, this);
   infrared_puck_sensor_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/InfraredPuckSensor/"), &RobotinoSimThread::on_infrared_puck_sensor_msg, this);
   gripper_laser_left_sensor_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/GripperLaserSensor/Left/"), &RobotinoSimThread::on_gripper_laser_left_sensor_msg, this);

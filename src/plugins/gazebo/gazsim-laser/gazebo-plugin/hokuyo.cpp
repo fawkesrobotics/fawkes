@@ -62,7 +62,7 @@ void Hokuyo::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
   this->new_laser_scans_connection_ = this->parent_sensor_->GetLaserShape()->ConnectNewLaserScans(boost::bind(&Hokuyo::on_new_laser_scans, this));
 
   //create publisher
-  this->laser_pub_ = this->node_->Advertise<msgs::LaserScan>("~/RobotinoSim/LaserSensor/");
+  this->laser_pub_ = this->node_->Advertise<msgs::LaserScan>("~/gazsim/LaserSensor/");
 }
 
 void Hokuyo::on_new_laser_scans()

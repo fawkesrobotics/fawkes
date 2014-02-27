@@ -59,7 +59,7 @@ void LaserSimThread::init()
   max_range_ = config->get_float("/gazsim/laser/max_range");
 
   //subscribing to gazebo publisher
-  laser_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/LaserSensor/"), &LaserSimThread::on_laser_data_msg, this);
+  laser_sub_ = gazebonode->Subscribe(std::string("~/gazsim/LaserSensor/"), &LaserSimThread::on_laser_data_msg, this);
 
   //initialize laser data
   laser_data_ = (float *)malloc(sizeof(float) * 360);

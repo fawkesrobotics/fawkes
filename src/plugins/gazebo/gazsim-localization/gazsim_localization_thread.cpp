@@ -56,7 +56,7 @@ void LocalizationSimThread::init()
   localization_if_ = blackboard->open_for_writing<Position3DInterface>("Pose");
 
   //subscribing to gazebo publisher
-  localization_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/Gps/"), &LocalizationSimThread::on_localization_msg, this);
+  localization_sub_ = gazebonode->Subscribe(std::string("~/gazsim/gps/"), &LocalizationSimThread::on_localization_msg, this);
 }
 
 void LocalizationSimThread::finalize()

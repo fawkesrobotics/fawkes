@@ -62,7 +62,7 @@ void Gps::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
   last_sent_time_ = model_->GetWorld()->GetSimTime().Double();
 
   //create publisher
-  this->gps_pub_ = this->node_->Advertise<msgs::Pose>("~/RobotinoSim/Gps/");
+  this->gps_pub_ = this->node_->Advertise<msgs::Pose>("~/gazsim/gps/");
 }
 
 
