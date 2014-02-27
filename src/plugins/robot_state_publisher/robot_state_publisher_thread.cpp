@@ -106,7 +106,7 @@ void RobotStatePublisherThread::init()
   }
   urdf_file.close();
 
-  if (!kdl_parser::treeFromString(urdf, tree_)) {
+  if (!kdl_parser::tree_from_string(urdf, tree_)) {
     logger->log_error(name(), "failed to parse urdf description to tree");
     throw;
   }
