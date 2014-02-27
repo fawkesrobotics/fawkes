@@ -275,7 +275,8 @@ LuaContext::restart()
     lua_State *L = init_state();
     lua_State *tL = __L;
     __L = L;
-    lua_close(tL);
+    if (__owns_L)  lua_close(tL);
+    __owns_L = true;
 
   } catch (Exception &e) {
     LibLogger::log_error("LuaContext", "Could not restart Lua instance, an error "
