@@ -116,8 +116,6 @@ EXEC_MANDIR    = $(abspath $(EXEX_DOCDIR)/man)
 
 # Some paths divert in submodule configuration
 ifeq ($(SUBMODULE_INTERN),1)
-  RESDIR      = $(abspath $(FAWKES_BASEDIR)/res)
-  EXEC_RESDIR = $(abspath $(FAWKES_BASEDIR)/res)
   IFACESRCDIR = $(abspath $(FAWKES_BASEDIR)/src/libs/interfaces)
 endif
 
