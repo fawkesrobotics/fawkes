@@ -52,9 +52,7 @@ class GazeboAspect : public virtual Aspect
   gazebo::transport::NodePtr gazebo_world_node;
 
  private:
-  void init_GazeboAspect(gazebo::transport::NodePtr gazebonode, gazebo::transport::NodePtr gazebo_world_node,
-    gazebo::transport::PublisherPtr visual_publisher, gazebo::transport::PublisherPtr model_publisher,
-    gazebo::transport::PublisherPtr request_publisher, gazebo::transport::PublisherPtr light_publisher);
+  void init_GazeboAspect(gazebo::transport::NodePtr gazebonode, gazebo::transport::NodePtr gazebo_world_node);
   void finalize_GazeboAspect();
 };
 

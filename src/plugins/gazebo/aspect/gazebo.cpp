@@ -65,9 +65,7 @@ GazeboAspect::~GazeboAspect()
  * @param gazebonode Gazebo node handle
  */
 void
-GazeboAspect::init_GazeboAspect(gazebo::transport::NodePtr gazebonode , gazebo::transport::NodePtr gazebo_world_node,
-				 gazebo::transport::PublisherPtr visual_publisher, gazebo::transport::PublisherPtr model_publisher,
-				 gazebo::transport::PublisherPtr request_publisher, gazebo::transport::PublisherPtr light_publisher)
+GazeboAspect::init_GazeboAspect(gazebo::transport::NodePtr gazebonode , gazebo::transport::NodePtr gazebo_world_node)
 {
   this->gazebonode = gazebonode;
   this->gazebo_world_node = gazebo_world_node;

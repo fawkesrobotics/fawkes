@@ -91,15 +91,6 @@ GazeboNodeThread::init()
   __gazebo_world_node = gazebo::transport::NodePtr(new gazebo::transport::Node());
   __gazebo_world_node->Init(world_name.c_str());
   __gazebo_aspect_inifin.set_gazebo_world_node(__gazebo_world_node);
-  //with all possible publishers
-  __visual_publisher = __gazebo_world_node->Advertise<gazebo::msgs::Visual>("~/visual", 5);
-  __model_publisher = __gazebo_world_node->Advertise<gazebo::msgs::Model>("~/model", 5);
-  __request_publisher = __gazebo_world_node->Advertise<gazebo::msgs::Request>("~/request", 5);
-  __light_publisher = __gazebo_world_node->Advertise<gazebo::msgs::Light>("~/light", 5);
-  __gazebo_aspect_inifin.set_visual_publisher(__visual_publisher);
-  __gazebo_aspect_inifin.set_model_publisher(__model_publisher);
-  __gazebo_aspect_inifin.set_request_publisher(__request_publisher);
-  __gazebo_aspect_inifin.set_light_publisher(__light_publisher);
 }
 
 

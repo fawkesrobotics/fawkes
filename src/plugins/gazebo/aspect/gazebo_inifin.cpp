@@ -60,8 +60,7 @@ GazeboAspectIniFin::init(Thread *thread)
     throw CannotInitializeThreadException("Gazebo node handle has not been set.");
   }
 
-  gazebo_thread->init_GazeboAspect(__gazebonode, __gazebo_world_node, __visual_publisher,
-    __model_publisher, __request_publisher, __light_publisher);
+  gazebo_thread->init_GazeboAspect(__gazebonode, __gazebo_world_node);
 }
 
 /** Finalize
