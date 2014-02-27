@@ -54,6 +54,9 @@ sub check_file()
   if ( $entry !~ /\.(cpp|h|c|cxx|hpp|ext_h|lua|py)$/ ) {
     return;
   }
+  if ( $entry =~ /\.(pb.cpp|pb.h)$/ ) {
+    return;
+  }
 
   open(WORK, $entry);
   local $work = <WORK>;
