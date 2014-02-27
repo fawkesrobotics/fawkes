@@ -244,6 +244,10 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
     widget.create_pango_layout(__property_line1);
   Pango::Rectangle rect1 = layout_ptr->get_pixel_logical_extents();
 #if GTK_VERSION_GE(3,0)
+  Glib::RefPtr<Gtk::StyleContext> stylecontext = widget.get_style_context();
+  Gdk::RGBA c = stylecontext->get_color(Gtk::STATE_FLAG_NORMAL);
+
+  cr->set_source_rgba(c.get_red(), c.get_green(), c.get_blue(), c.get_alpha());
   cr->move_to(cell_area.get_x() + x_offset + 2 * property_xpad(),
               cell_area.get_y() + y_offset + 2 * property_ypad());
   layout_ptr->show_in_cairo_context(cr);
