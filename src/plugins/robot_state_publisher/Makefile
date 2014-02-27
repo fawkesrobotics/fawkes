@@ -29,7 +29,7 @@ HAVE_KDL = $(if $(shell $(PKGCONFIG) --exists 'orocos-kdl'; echo $${?/1/}),1,0)
 
 ifeq ($(HAVE_KDLPARSER),1)
   ifeq ($(HAVE_TF),1)
-    PLUGINS_all = $(PLUGINDIR)/robot_state_publisher.so
+    PLUGINS_all = $(PLUGINDIR)/robot-state-publisher.so
     CFLAGS += $(CFLAGS_TF) $(CFLAGS_KDLPARSER)
     LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_KDLPARSER) \
       $(call boost-lib-lflags,scoped_ptr)
