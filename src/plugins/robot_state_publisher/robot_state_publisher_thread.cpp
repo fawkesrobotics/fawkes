@@ -123,6 +123,8 @@ void RobotStatePublisherThread::init()
       unknown_segments.erase((*it)->id());
       ifs_.push_back(*it);
       bbil_add_data_interface(*it);
+      bbil_add_reader_interface(*it);
+      bbil_add_writer_interface(*it);
     }
     else {
       blackboard->close(*it);
@@ -230,8 +232,15 @@ RobotStatePublisherThread::bb_interface_created(const char *type, const char *id
   try {
     ifs_.push_back(interface);
     bbil_add_data_interface(interface);
+    bbil_add_reader_interface(interface);
+    bbil_add_writer_interface(interface);
     blackboard->update_listener(this);
   } catch (Exception &e) {
+    // remove from all watch lists, then close
+    bbil_remove_data_interface(interface);
+    bbil_remove_reader_interface(interface);
+    bbil_remove_writer_interface(interface);
+    blackboard->update_listener(this);
     blackboard->close(interface);
     logger->log_warn(name(), "Failed to register for %s:%s: %s", type, id, e.what());
     return;
@@ -268,6 +277,8 @@ RobotStatePublisherThread::conditional_close(Interface *interface) throw()
       if (! interface->has_writer() && (interface->num_readers() == 1)) {
         // It's only us
         bbil_remove_data_interface(*it);
+        bbil_remove_reader_interface(*it);
+        bbil_remove_writer_interface(*it);
         blackboard->update_listener(this);
         blackboard->close(*it);
         ifs_.erase(it);
