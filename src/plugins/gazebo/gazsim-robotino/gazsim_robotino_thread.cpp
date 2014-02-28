@@ -72,15 +72,15 @@ RobotinoSimThread::init()
   sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
 
   //Create suscribers
-  pos_sub_ = gazebonode->Subscribe(std::string("~/gazsim/gps/"), &RobotinoSimThread::on_pos_msg, this);
-  gyro_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/Gyro/"), &RobotinoSimThread::on_gyro_msg, this);
-  infrared_puck_sensor_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/InfraredPuckSensor/"), &RobotinoSimThread::on_infrared_puck_sensor_msg, this);
-  gripper_laser_left_sensor_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/GripperLaserSensor/Left/"), &RobotinoSimThread::on_gripper_laser_left_sensor_msg, this);
-  gripper_laser_right_sensor_sub_ = gazebonode->Subscribe(std::string("~/RobotinoSim/GripperLaserSensor/Right/"), &RobotinoSimThread::on_gripper_laser_right_sensor_msg, this);
+  pos_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gps"), &RobotinoSimThread::on_pos_msg, this);
+  gyro_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gyro"), &RobotinoSimThread::on_gyro_msg, this);
+  infrared_puck_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/infrared-puck-sensor"), &RobotinoSimThread::on_infrared_puck_sensor_msg, this);
+  gripper_laser_left_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-laser-left"), &RobotinoSimThread::on_gripper_laser_left_sensor_msg, this);
+  gripper_laser_right_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-laser-right"), &RobotinoSimThread::on_gripper_laser_right_sensor_msg, this);
 
   //Create publishers
-  motor_move_pub_ = gazebonode->Advertise<msgs::Vector3d>("~/RobotinoSim/MotorMove/");
-  string_pub_ = gazebonode->Advertise<msgs::Header>("~/RobotinoSim/String/");
+  motor_move_pub_ = gazebonode->Advertise<msgs::Vector3d>(config->get_string("/gazsim/topics/motor-move"));
+  string_pub_ = gazebonode->Advertise<msgs::Header>(config->get_string("/gazsim/topics/message"));
 
   //enable motor by default
   switch_if_->set_enabled(true);

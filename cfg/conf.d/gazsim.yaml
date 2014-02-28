@@ -10,6 +10,17 @@ gazsim:
   laser:
     max_range: 5.5 
 
+  topics:
+    gps: "~/gazsim/gps/"
+    laser: "~/gazsim/LaserSensor/"
+    gyro: "~/RobotinoSim/Gyro/"
+    infrared-puck-sensor: "~/RobotinoSim/InfraredPuckSensor/"
+    gripper-laser-left: "~/RobotinoSim/GripperLaserSensor/Left/"
+    gripper-laser-right: "~/RobotinoSim/GripperLaserSensor/Right/"
+    motor-move: "~/RobotinoSim/MotorMove/"
+    time: "~/gazsim/time-sync/"
+    message: "~/RobotinoSim/String/"
+    
   webcam:
     topic-suffix: "/webcam/link/webcam_sensor/image"
     width: 320

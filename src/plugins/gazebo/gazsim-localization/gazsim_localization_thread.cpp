@@ -56,8 +56,11 @@ void LocalizationSimThread::init()
   //open interface
   localization_if_ = blackboard->open_for_writing<Position3DInterface>("Pose");
 
+  //read cofig values
+  gps_topic_ = config->get_string("/gazsim/topics/gps");
+
   //subscribing to gazebo publisher
-  localization_sub_ = gazebonode->Subscribe(std::string("~/gazsim/gps/"), &LocalizationSimThread::on_localization_msg, this);
+  localization_sub_ = gazebonode->Subscribe(gps_topic_, &LocalizationSimThread::on_localization_msg, this);
 
   new_data_ = false;
 }

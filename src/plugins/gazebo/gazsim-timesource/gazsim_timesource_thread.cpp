@@ -45,7 +45,7 @@ void GazsimTimesourceThread::init()
   logger->log_info(name(), "GazsimTimesource initializing");
 
   //Create Subscriber
-  time_sync_sub_ = gazebo_world_node->Subscribe("~/gazsim/time-sync/", &GazsimTimesourceThread::on_time_sync_msg, this);
+  time_sync_sub_ = gazebo_world_node->Subscribe(config->get_string("/gazsim/topics/time"), &GazsimTimesourceThread::on_time_sync_msg, this);
 
   //Create Time Source
   time_source_ = new GazsimTimesource();

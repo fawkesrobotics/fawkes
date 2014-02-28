@@ -59,6 +59,7 @@ class LocalizationSimThread
  private:
   //Subscriber to receive localization data from gazebo
   gazebo::transport::SubscriberPtr localization_sub_;
+  std::string gps_topic_;
 
   //provided interface
   fawkes::Position3DInterface *localization_if_;

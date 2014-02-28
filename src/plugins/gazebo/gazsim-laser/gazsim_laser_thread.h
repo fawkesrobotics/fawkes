@@ -56,22 +56,23 @@ class LaserSimThread
   virtual void finalize();
 
  private:
-  //Subscriber to receive laser data from gazebo
+  ///Subscriber to receive laser data from gazebo
   gazebo::transport::SubscriberPtr laser_sub_;
+  std::string laser_topic_;
 
-  //provided interface
+  ///provided interface
   fawkes::Laser360Interface *laser_if_;
 
-  //storage for laser data
+  ///storage for laser data
   float  *laser_data_;
 
-  //is there new information to write in the interface?
+  ///is there new information to write in the interface?
   bool new_data_;
 
-  //handler function for incoming laser data messages
+  ///handler function for incoming laser data messages
   void on_laser_data_msg(ConstLaserScanPtr &msg);
 
-  //maximal range of the laser sensor
+  ///maximal range of the laser sensor
   float max_range_;  
 };
 
