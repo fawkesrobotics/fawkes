@@ -1,0 +1,15 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/gossip
+---
+gossip:
+  # Name of the local peer, e.g. robot identifier
+  name: R1
+
+  groups:
+    local:
+      active: true
+      port: 6000
+
+

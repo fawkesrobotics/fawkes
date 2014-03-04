@@ -28,13 +28,17 @@
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/network.h>
 #include <aspect/aspect_provider.h>
+
+#include <memory>
 
 class GossipThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::AspectProviderAspect
+  public fawkes::AspectProviderAspect,
+  public fawkes::NetworkAspect
 {
  public:
   GossipThread();
@@ -48,7 +52,11 @@ class GossipThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::GossipAspectIniFin  gossip_aspect_inifin_;
+  std::string cfg_service_name_;
+
+  std::auto_ptr<fawkes::GossipGroupManager>  group_mgr_;
+  fawkes::GossipAspectIniFin                 gossip_aspect_inifin_;
+
 };
 
 #endif

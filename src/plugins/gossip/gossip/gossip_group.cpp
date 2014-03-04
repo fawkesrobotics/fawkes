@@ -22,6 +22,12 @@
 
 #include <plugins/gossip/gossip/gossip_group.h>
 
+#include <netcomm/service_discovery/service.h>
+#include <netcomm/service_discovery/service_publisher.h>
+
+#define GOSSIP_MDNSSD_SERVICE_NAME "_gossip._udp"
+
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -35,15 +41,29 @@ namespace fawkes {
  */
 
 /** Constructor.
+ * @param group_name name of the group to join
+ * @param peer_name local peer name to announce on the network, i.e. robot identifier
+ * @param port UDP port to listen on for messages
+ * @param service_publisher service publisher to announce group membership with
  */
-GossipGroup::GossipGroup()
+GossipGroup::GossipGroup(std::string &group_name, std::string &peer_name,
+			 unsigned short port, ServicePublisher *service_publisher)
+  : name_(group_name), port_(port), service_publisher_(service_publisher)
 {
+  service_ =
+    std::auto_ptr<NetworkService>(new NetworkService(peer_name.c_str(),
+						     GOSSIP_MDNSSD_SERVICE_NAME, port_));
+
+  service_->add_txt("group=%s", group_name.c_str());
+  service_publisher_->publish_service(service_.get());
 }
 
 
 /** Destructor. */
 GossipGroup::~GossipGroup()
 {
+  service_publisher_->unpublish_service(service_.get());
+  service_.reset();
 }
 
 

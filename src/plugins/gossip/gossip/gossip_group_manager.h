@@ -26,20 +26,45 @@
 
 #include <core/utils/refptr.h>
 
+#include <map>
+#include <list>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
 class GossipGroup;
+class ServicePublisher;
+
+class GossipGroupConfiguration
+{
+ public:
+  GossipGroupConfiguration();
+  GossipGroupConfiguration(const GossipGroupConfiguration &c);
+  GossipGroupConfiguration(std::string &name, unsigned short port);
+
+  std::string    name;	///< name of the group
+  unsigned short port;	///< local UDP port for communication
+};
 
 class GossipGroupManager
 {
  public:
+  GossipGroupManager(std::string &service_name, ServicePublisher *service_publisher,
+		     std::map<std::string, GossipGroupConfiguration> &initial_groups);
   virtual ~GossipGroupManager();
 
-  virtual RefPtr<GossipGroup> join_group(const char *name) = 0;
-  virtual void leave_group(RefPtr<GossipGroup> &group) = 0;
+  virtual RefPtr<GossipGroup> join_group(const std::string &name);
+  virtual void                leave_group(RefPtr<GossipGroup> &group);
+
+ private:
+  void create_group(GossipGroupConfiguration &gc);
+
+ private:
+  std::string                                  service_name_;
+  ServicePublisher                            *service_publisher_;
+  std::map<std::string, RefPtr<GossipGroup> >  groups_;
 };
 
 } // end namespace fawkes

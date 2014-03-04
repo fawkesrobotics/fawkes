@@ -22,29 +22,113 @@
  */
 
 #include <plugins/gossip/gossip/gossip_group_manager.h>
+#include <plugins/gossip/gossip/gossip_group.h>
+#include <core/exception.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
+/** @class GossipGroupConfiguration <plugins/gossip/gossip/gossip_group_manager.h>
+ * Group configuration for initial groups.
+ */
+
+
+/** Constructor. */
+GossipGroupConfiguration::GossipGroupConfiguration()
+  : port(0)
+{
+}
+
+/** Constructor.
+ * @param name name of the group
+ * @param port UDP port to listen on for the group
+ */
+GossipGroupConfiguration::GossipGroupConfiguration(std::string &name, unsigned short port)
+  : name(name), port(port)
+{
+}
+
+/** Copy contructor.
+ * @param c group configuration to copy
+ */
+GossipGroupConfiguration::GossipGroupConfiguration(const GossipGroupConfiguration &c)
+  : name(c.name), port(c.port)
+{
+}
+
+
 /** @class GossipGroupManager <plugins/gossip/gossip/gossip_group_manager.h>
  * Abstract class for a Gossip group manager.
  * @author Tim Niemueller
- *
- * @fn fawkes::RefPtr<fawkes::GossipGroup> GossipGroupManager::join_group(const char *name) = 0
- * Join a gossip group.
- * @param name the name of the group to join
- * @return a shared object to communicate with the group.
- *
- * @fn void GossipGroupManager::leave_group(fawkes::RefPtr<fawkes::GossipGroup> &group) = 0
- * Leave a gossip group.
- * @param group the gossip group to leave, the handle becomes invalid after this call.
  */
 
-/** Virtual empty destructor. */
+/** Constructor.
+ * @param service_name service name to announce for each group we join, this
+ * must be unique in the group and should identify the robot
+ * @param service_publisher service discovery publisher to announce groups
+ * @param initial_groups initial group configurations to join
+ */
+GossipGroupManager::GossipGroupManager(std::string &service_name,
+				       ServicePublisher *service_publisher,
+				       std::map<std::string, GossipGroupConfiguration> &initial_groups)
+  : service_name_(service_name), service_publisher_(service_publisher)
+{
+  for (auto g : initial_groups) {
+    create_group(g.second);
+  }
+}
+
+
+/** Destructor. */
 GossipGroupManager::~GossipGroupManager()
 {
+}
+
+
+/** Join a group.
+ * @param name the name of the group to join
+ * @return a shared object to communicate with the group.
+ */
+fawkes::RefPtr<fawkes::GossipGroup>
+GossipGroupManager::join_group(const std::string &name)
+{
+  if (groups_.find(name) == groups_.end()) {
+    // try to join group
+  }
+
+  if (groups_.find(name) != groups_.end()) {
+    return groups_[name];
+  } else {
+    // still not registered -> fail
+    throw Exception("Cannot register to group %s", name.c_str());
+  }
+}
+
+/** Leave a gossip group.
+ * @param group the gossip group to leave, the handle becomes invalid after this call.
+ */
+void
+GossipGroupManager::leave_group(fawkes::RefPtr<fawkes::GossipGroup> &group)
+{
+  //std::string name = group->name();
+  group.reset();
+
+  /*
+  if (groups_.find(name) != groups_.end()) {
+    if (groups_[name].use_count() == 1) {
+      // only us, leave?
+    }
+  }
+  */
+}
+
+
+void
+GossipGroupManager::create_group(GossipGroupConfiguration &gc)
+{
+  groups_[gc.name] = new GossipGroup(gc.name, service_name_, gc.port, service_publisher_);
 }
 
 

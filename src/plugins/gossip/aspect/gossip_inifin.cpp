@@ -63,7 +63,7 @@ GossipAspectIniFin::init(Thread *thread)
   }
   
   RefPtr<GossipGroup> group =
-    gossip_group_mgr_->join_group(gossip_thread->GossipAspect_group_name_.c_str());
+    gossip_group_mgr_->join_group(gossip_thread->GossipAspect_group_name_);
 
   gossip_thread->gossip_group = group;
 }
