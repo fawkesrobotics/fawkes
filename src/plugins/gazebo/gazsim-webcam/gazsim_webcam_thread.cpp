@@ -82,6 +82,8 @@ void WebcamSimThread::init()
   }
   shm_buffer_->set_frame_id(frame_.c_str());
   buffer_ = shm_buffer_->buffer();
+  //enable locking
+  shm_buffer_->add_semaphore();
 }
 
 void WebcamSimThread::finalize()
@@ -97,8 +99,12 @@ void WebcamSimThread::loop()
 void WebcamSimThread::on_webcam_data_msg(ConstImageStampedPtr &msg)
 {
   //logger->log_info(name(), "Got new Webcam data.");
+  
   //convert image data and write it in the shared memory buffer
+  //lock the shm so noone can read a half written image
+  shm_buffer_->lock_for_write();
   convert(format_from_,  format_to_,
  	  (const unsigned char*) msg->image().data().data(),   buffer_,
 	  width_, height_);
+  shm_buffer_->unlock();
 }
