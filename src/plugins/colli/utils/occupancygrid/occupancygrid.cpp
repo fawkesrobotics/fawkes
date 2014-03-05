@@ -191,9 +191,9 @@ void
 OccupancyGrid::initGrid()
 {
   m_OccupancyProb.clear();
-  std::vector<Probability> row;
-  row.resize(m_Height, 0.0);
-  m_OccupancyProb.resize(m_Width, row);
+  std::vector<Probability> column;
+  column.resize(m_Height, 0.0);
+  m_OccupancyProb.resize(m_Width, column);
   fill( 0.0 );
 }
 
