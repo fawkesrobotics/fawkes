@@ -44,7 +44,7 @@ using namespace gazebo;
 /** Constructor. */
 WebcamSimThread::WebcamSimThread()
   : Thread("WebcamSimThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
 {
   shm_buffer_ = NULL;
 }

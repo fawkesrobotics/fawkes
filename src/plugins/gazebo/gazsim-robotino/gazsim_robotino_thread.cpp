@@ -46,7 +46,7 @@ using namespace gazebo;
 /** Constructor. */
 RobotinoSimThread::RobotinoSimThread()
   : Thread("RobotinoSimThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE), //sonsor and act here
     TransformAspect(TransformAspect::ONLY_PUBLISHER, "Robotino Odometry")
 {
 }
