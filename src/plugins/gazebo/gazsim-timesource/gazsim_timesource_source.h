@@ -41,8 +41,8 @@ namespace fawkes
   class GazsimTimesource : public TimeSource
   {
   public:
-    ///Constructor
-    GazsimTimesource();
+    //Constructor
+    GazsimTimesource(Clock* clock);
     ///Destructor
    ~GazsimTimesource();
 
@@ -53,7 +53,7 @@ namespace fawkes
     void on_time_sync_msg(ConstSimTimePtr &msg);
 
   private:
-    Clock* clock;
+    Clock* clock_;
 
     //from last msg all in sec
     double last_sim_time_;

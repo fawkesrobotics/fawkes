@@ -48,7 +48,7 @@ void GazsimTimesourceThread::init()
   time_sync_sub_ = gazebo_world_node->Subscribe(config->get_string("/gazsim/topics/time"), &GazsimTimesourceThread::on_time_sync_msg, this);
 
   //Create Time Source
-  time_source_ = new GazsimTimesource();
+  time_source_ = new GazsimTimesource(clock);
 
   //register timesource and make it default
   clock->register_ext_timesource(time_source_, true);

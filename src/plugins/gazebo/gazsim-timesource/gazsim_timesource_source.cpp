@@ -24,13 +24,17 @@
 
 using namespace fawkes;
 
-GazsimTimesource::GazsimTimesource()
+/**
+ * Constructor
+ * @param clock pointer to fawkes clock
+ */
+GazsimTimesource::GazsimTimesource(Clock* clock)
 {
-  clock = Clock::instance();
+  clock_ = clock;
 
   last_sim_time_ = get_system_time();
   last_real_time_factor_ = 1.0;
-  clock->get_systime(last_sys_recv_time_);
+  clock_->get_systime(last_sys_recv_time_);
   //registration will be done by plugin
 }
 
@@ -76,7 +80,7 @@ void GazsimTimesource::on_time_sync_msg(ConstSimTimePtr &msg)
   get_time(&sim_time);
   last_sim_time_ = ((double)sim_time.tv_sec) + 0.000001 * sim_time.tv_usec;
   last_real_time_factor_ = msg->real_time_factor();
-  clock->get_systime(last_sys_recv_time_);
+  clock_->get_systime(last_sys_recv_time_);
 }
 
 double GazsimTimesource::get_system_time() const
