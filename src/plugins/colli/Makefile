@@ -28,13 +28,6 @@ LIBS_colli = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkestf \
              fawkesinterface MotorInterface Laser360Interface  NavigatorInterface
 OBJS_colli = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(foreach d,$(UTILS),$(SRCDIR)/$d/*.cpp )))))
 
-ifeq ($(HAVE_TF),1)
-  CFLAGS += $(CFLAGS_TF)
-  LDFLAGS += $(LDFLAGS_TF)
-else
-  WARN_TARGETS += warning_tf
-endif
-
 ifeq ($(HAVE_ROS),1)
   CFLAGS  += $(CFLAGS_ROS) -DHAVE_ROS
   LDFLAGS += $(LDFLAGS_ROS)
@@ -67,15 +60,21 @@ ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
   LDFLAGS += $(call boost-lib-ldflags,thread)
 endif
 
-PLUGINS_all = $(PLUGINDIR)/colli.$(SOEXT)
-OBJS_all    = $(OBJS_colli)
+ifeq ($(HAVE_TF),1)
+  CFLAGS += $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_TF)
+  PLUGINS_all = $(PLUGINDIR)/colli.$(SOEXT)
+  OBJS_all    = $(OBJS_colli)
+else
+  WARN_TARGETS += warning_tf
+endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
 .PHONY: warning_tf warning_ros warning_visualization_msgs warning_nav_msgs
 warning_tf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting tf support for colli$(TNORMAL) (fawkestf not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Colli Plugin$(TNORMAL) (fawkestf not available)"
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting visual debugging$(TNORMAL) (ROS not available)"
 warning_visualization_msgs:
