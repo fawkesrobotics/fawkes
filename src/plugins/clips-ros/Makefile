@@ -22,22 +22,23 @@ include $(BUILDSYSDIR)/clips.mk
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-CFLAGS += $(CFLAGS_CPP11)
-
 LIBS_clips_ros = fawkescore fawkesutils fawkesaspects fawkesclipsaspect \
 		 fawkesrosaspect
 OBJS_clips_ros = clips_ros_plugin.o clips_ros_thread.o
 
 OBJS_all = $(OBJS_clips_ros)
 
-ifeq ($(HAVE_ROS)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS)$(call ros-have-pkg,xmlrpcpp),1111)
-  CFLAGS  += $(CFLAGS_ROS)  $(CFLAGS_CLIPS) $(call ros-pkg-cflags,xmlrpcpp) \
+ifeq ($(HAVE_CPP11)$(HAVE_ROS)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS)$(call ros-have-pkg,xmlrpcpp),11111)
+  CFLAGS  += $(CFLAGS_ROS)  $(CFLAGS_CLIPS) $(call ros-pkg-cflags,xmlrpcpp) $(CFLAGS_CPP11) \
              $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
   LDFLAGS += $(LDFLAGS_ROS) $(LDFLAGS_CLIPS) $(call ros-pkg-lflags,xmlrpcpp) \
              $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
   PLUGINS_all = $(PLUGINDIR)/clips-ros.$(SOEXT)
 else
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
   ifneq ($(HAVE_ROS),1)
     WARN_TARGETS += warning_ros
   endif
@@ -54,12 +55,15 @@ endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS) $(WARN_TARGETS_BOOST)
-.PHONY: warning_ros warning_clips warning_xmlrpcpp $(WARN_TARGETS_BOOST)
+.PHONY: warning_ros warning_clips warning_xmlrpcpp warning_cpp11 $(WARN_TARGETS_BOOST)
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-ros plugin$(TNORMAL) (ROS not found)"
 
 warning_xmlrpcpp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-ros plugin$(TNORMAL) (xmlrpcpp ROS package not found)"
+
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-ros plugin$(TNORMAL) (C++11 not supported)"
 
 warning_clips:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-ros plugin$(TNORMAL) (CLIPS not found)"
