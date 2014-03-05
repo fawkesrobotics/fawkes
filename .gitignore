@@ -7,6 +7,10 @@
 *_tolua.cpp
 *_tolua.pkg
 
+# Generated protobuf files
+*.pb.h
+*.pb.cpp
+
 # Specific paths, _ variants for cross compilation environments
 /bin/
 /bin_*/
@@ -31,7 +35,3 @@
 # Vim files
 .*.swp
 .*.swo
-
-#Generated Protobuf C++ Files for gazsim
-/src/libs/gazsim_msgs/*.pb.h
-/src/libs/gazsim_msgs/*.pb.cpp
