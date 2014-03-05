@@ -56,12 +56,17 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
   PLUGINS_all = $(PLUGINDIR)/webview.so
   INST_RESDIRS = webview
 
-  ifeq ($(HAVE_JPEG),1)
+  ifeq ($(HAVE_CPP11)$(HAVE_JPEG),11)
     LIBS_webview += fvutils fvcams
     OBJS_webview += image_processor.o mjpeg_reply.o jpeg_stream_producer.o
-    CFLAGS += -DHAVE_JPEG
+    CFLAGS += -DHAVE_JPEG $(CFLAGS_CPP11)
   else
-    WARN_TARGETS += warning_jpeg
+    ifneq ($(HAVE_CPP11),1)
+      WARN_TARGETS += warning_cpp11
+    endif
+    ifneq ($(HAVE_JPEG),1)
+      WARN_TARGETS = warning_jpeg
+    endif
   endif
 
   ifeq ($(HAVE_TF)$(HAVE_GRAPHVIZ),11)
@@ -96,7 +101,7 @@ ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_libmicrohttpd warning_tf warning_graphviz warning_apr_util
+.PHONY: warning_libmicrohttpd warning_tf warning_graphviz warning_jpeg warning_apr_util warning_cpp11
 warning_libmicrohttpd:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting webview plugin$(TNORMAL) (libmicrohttpd not installed)"
 warning_tf:
@@ -105,6 +110,8 @@ warning_graphviz:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting transforms support$(TNORMAL) (graphviz not found)"
 warning_jpeg:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting image viewing support$(TNORMAL) (JPEG not available)"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting image viewing support$(TNORMAL) (C++11 not supported)"
 warning_apr_util:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting APR based password verification support$(TNORMAL) (apr-util not found)"
 endif
