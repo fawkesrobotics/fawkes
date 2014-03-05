@@ -121,7 +121,7 @@ Laser::CalculateReadings()
   float rad_inc = (2*M_PI) / m_NumberOfReadings;
   for (int i = 0; i < m_NumberOfReadings; i++) {
     m_pReadings->SetRadians(i, rad);
-    m_pReadings->SetLength(i, max(m_pLaserScannerObj->distances(i) - 0.02, 0.0 ) );
+    m_pReadings->SetLength(i, max(m_pLaserScannerObj->distances(i), 0.f ) );
     rad += rad_inc;
   }
 }
