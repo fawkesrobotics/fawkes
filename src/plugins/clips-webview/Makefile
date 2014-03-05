@@ -18,8 +18,6 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
 include $(BUILDCONFDIR)/webview/webview.mk
 
-CFLAGS += $(CFLAGS_CPP11)
-
 LIBS_clips_webview = \
 	fawkescore fawkesutils fawkesaspects fawkesclipsaspect \
 	fawkeswebview
@@ -28,12 +26,15 @@ OBJS_clips_webview = clips-webview-plugin.o clips-webview-thread.o \
 
 OBJS_all = $(OBJS_clips_webview)
 
-ifeq ($(HAVE_WEBVIEW)$(HAVE_CLIPS),11)
-  CFLAGS  += $(CFLAGS_WEBVIEW)  $(CFLAGS_CLIPS)
+ifeq ($(HAVE_CPP11)$(HAVE_WEBVIEW)$(HAVE_CLIPS),111)
+  CFLAGS  += $(CFLAGS_WEBVIEW)  $(CFLAGS_CLIPS) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_WEBVIEW) $(LDFLAGS_CLIPS)
 
   PLUGINS_all = $(PLUGINDIR)/clips-webview.$(SOEXT)
 else
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
   ifneq ($(HAVE_WEBVIEW),1)
     WARN_TARGETS += warning_webview
   endif
@@ -44,10 +45,11 @@ endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_clips
+.PHONY: warning_clips warning_webview warning_cpp11
 warning_webview:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-webview plugin$(TNORMAL) (webview not available)"
-
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-webview plugin$(TNORMAL) (C++11 not supported)"
 warning_clips:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-webview plugin$(TNORMAL) (CLIPS not found)"
 endif
