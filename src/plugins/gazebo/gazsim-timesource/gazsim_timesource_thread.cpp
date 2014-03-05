@@ -58,6 +58,7 @@ void GazsimTimesourceThread::init()
 void GazsimTimesourceThread::finalize()
 {
   //remove time source
+  clock->remove_ext_timesource(time_source_);
   delete time_source_;
 }
 
