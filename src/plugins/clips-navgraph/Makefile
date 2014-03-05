@@ -17,20 +17,21 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
 
-CFLAGS += $(CFLAGS_CPP11)
-
 LIBS_clips_navgraph = fawkescore fawkesutils fawkesaspects \
 		      fawkesclipsaspect fawkesnavgraphaspect
 OBJS_clips_navgraph = clips_navgraph_plugin.o clips_navgraph_thread.o
 
 OBJS_all = $(OBJS_clips_navgraph)
 
-ifeq ($(HAVE_CLIPS),1)
-  CFLAGS  += $(CFLAGS_CLIPS)
+ifeq ($(HAVE_CPP11)$(HAVE_CLIPS),11)
+  CFLAGS  += $(CFLAGS_CLIPS) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_CLIPS)
 
   PLUGINS_all = $(PLUGINDIR)/clips-navgraph.$(SOEXT)
 else
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
   ifneq ($(HAVE_CLIPS),1)
     WARN_TARGETS = warning_clips
   endif
@@ -39,9 +40,12 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_clips
+.PHONY: warning_clips warning_cpp11
 warning_clips:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-navgraph plugin$(TNORMAL) (CLIPS not found)"
+
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-navgraph plugin$(TNORMAL) (C++11 not supported)"
 
 endif
 
