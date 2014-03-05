@@ -34,7 +34,7 @@ GazsimTimesource::GazsimTimesource(Clock* clock)
 
   last_sim_time_ = get_system_time();
   last_real_time_factor_ = 1.0;
-  clock_->get_systime(last_sys_recv_time_);
+  clock_->get_systime(&last_sys_recv_time_);
   //registration will be done by plugin
 }
 
@@ -50,23 +50,33 @@ GazsimTimesource::~GazsimTimesource()
  */
 void GazsimTimesource::get_time(timeval* tv) const
 {
-  double now = get_system_time();
-  double interval = now - last_sys_recv_time_.in_sec();
-  double estimated_sim_interval = interval * last_real_time_factor_;
-  double estimated_sim_now = last_sim_time_ + estimated_sim_interval;
-  Time result = estimated_sim_now;
+  //I do not use the Time - operator here because this would recursively call get_time
+  timeval now = get_system_time();
+  timeval interval = subtract(now, last_sys_recv_time_);  
 
+  //doing this: timeval estimated_sim_interval = interval * last_real_time_factor_;
+  timeval estimated_sim_interval;
+  estimated_sim_interval.tv_usec = last_real_time_factor_ * (interval.tv_sec * 1000000  + interval.tv_usec);
+  estimated_sim_interval.tv_sec = estimated_sim_interval.tv_usec / 1000000;
+  estimated_sim_interval.tv_usec -= estimated_sim_interval.tv_sec * 1000000;
+
+  timeval estimated_sim_now = add(last_sim_time_, estimated_sim_interval);
 
   //return
-  *tv =  *(result.get_timeval());
+  *tv =  estimated_sim_now;
 }
 
 timeval GazsimTimesource::conv_to_realtime(const timeval* tv) const
 {
-  Time asked_sim(tv);
-  double interval = asked_sim.in_sec() - last_sim_time_;
-  double est_real_interval = interval / last_real_time_factor_;
-  timeval result = *((last_sys_recv_time_ + est_real_interval).get_timeval());
+  timeval interval = subtract(*tv, last_sim_time_);
+
+  //doing this: timeval est_real_interval = interval / last_real_time_factor_;
+  timeval est_real_interval;
+  est_real_interval.tv_usec = (interval.tv_sec * 1000000  + interval.tv_usec) / last_real_time_factor_;
+  est_real_interval.tv_sec = est_real_interval.tv_usec / 1000000;
+  est_real_interval.tv_usec -= est_real_interval.tv_sec * 1000000;
+
+  timeval result = add(last_sys_recv_time_, est_real_interval);
   return result;
 }
 
@@ -76,16 +86,43 @@ timeval GazsimTimesource::conv_to_realtime(const timeval* tv) const
 void GazsimTimesource::on_time_sync_msg(ConstSimTimePtr &msg)
 {
   //we do not want to correct time back
-  timeval sim_time;
-  get_time(&sim_time);
-  last_sim_time_ = ((double)sim_time.tv_sec) + 0.000001 * sim_time.tv_usec;
+  get_time(&last_sim_time_);
   last_real_time_factor_ = msg->real_time_factor();
-  clock_->get_systime(last_sys_recv_time_);
+  clock_->get_systime(&last_sys_recv_time_);
 }
 
-double GazsimTimesource::get_system_time() const
+timeval GazsimTimesource::get_system_time() const
 {
   timeval now_timeval;
   gettimeofday(&now_timeval,NULL);
-  return ((double)now_timeval.tv_sec) + 0.000001 * now_timeval.tv_usec;
+  return now_timeval;
+}
+
+timeval GazsimTimesource::add(timeval a, timeval b) const
+{
+  timeval res;
+  res.tv_sec = a.tv_sec + b.tv_sec;
+  res.tv_usec = a.tv_usec + b.tv_usec;
+  if(res.tv_usec > 1000000)
+  {
+    res.tv_usec -= 1000000;
+    res.tv_sec++;
+  }
+  return res;
+}
+
+timeval GazsimTimesource::subtract(timeval a, timeval b) const
+{
+  timeval res;
+  res.tv_sec = a.tv_sec - b.tv_sec;
+  if(a.tv_usec >= b.tv_usec)
+  {
+    res.tv_usec = a.tv_usec - b.tv_usec;
+  }
+  else
+  {
+    res.tv_usec = 1000000 + a.tv_usec - b.tv_usec;
+    res.tv_sec--;
+  }
+  return res;
 }

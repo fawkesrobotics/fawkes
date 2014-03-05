@@ -56,11 +56,13 @@ namespace fawkes
     Clock* clock_;
 
     //from last msg all in sec
-    double last_sim_time_;
-    Time last_sys_recv_time_;
+    timeval last_sim_time_;
+    timeval last_sys_recv_time_;
     double last_real_time_factor_;
 
-    double get_system_time() const;
+    timeval get_system_time() const;
+    timeval add(timeval a, timeval b) const;
+    timeval subtract(timeval a, timeval b) const;
   };
 }
 
