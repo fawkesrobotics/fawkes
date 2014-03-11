@@ -79,8 +79,8 @@ class V4L2Camera:
   virtual void         set_auto_gain(bool enabled);
   virtual bool         auto_white_balance();
   virtual void         set_auto_white_balance(bool enabled);
-  virtual bool         auto_exposure();
-  virtual void         set_auto_exposure(bool enabled);
+  virtual unsigned int exposure_auto();
+  virtual void         set_exposure_auto(unsigned int exposure_auto);
   virtual int          red_balance();
   virtual void         set_red_balance(int red_balance);
   virtual int          blue_balance();
@@ -118,6 +118,13 @@ class V4L2Camera:
   virtual unsigned int lens_y_corr();
   virtual void         set_lens_x_corr(unsigned int x_corr);
   virtual void         set_lens_y_corr(unsigned int y_corr);
+
+  virtual bool         exposure_auto_priority();
+  virtual void         set_exposure_auto_priority(bool enabled);
+  virtual unsigned int white_balance_temperature();
+  virtual void         set_white_balance_temperature(unsigned int white_balance_temperature);
+  virtual unsigned int exposure_absolute();
+  virtual void         set_exposure_absolute(unsigned int exposure_absolute);
 
 
  protected:
@@ -189,7 +196,6 @@ class V4L2Camera:
   bool _switch_u_v;                  ///< Switch U and V channels
   unsigned int _fps;                 ///< Capture FPS
 
-  TriState _aec;                     ///< Auto Exposition enabled
   TriState _awb;                     ///< Auto White Balance enabled
   TriState _agc;                     ///< Auto Gain enabled
   TriState _h_flip;                  ///< Horizontal mirror
@@ -204,6 +210,12 @@ class V4L2Camera:
   ControlParameterInt _gain;         ///< Gain [0-255] (def. 0)
   ControlParameterInt _lens_x;       ///< Lens Correction X [0-255] (def. 0)
   ControlParameterInt _lens_y;       ///< Lens Correction Y [0-255] (def. 0)
+
+  ControlParameterInt _white_balance_temperature;
+  TriState _exposure_auto_priority;
+  ControlParameterInt _exposure_auto;
+  ControlParameterInt _exposure_absolute;
+
 
   bool _nao_hacks;                   ///< Nao-specific hacks (bad driver)
 

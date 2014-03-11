@@ -279,7 +279,7 @@ void NaoCamera::set_source(unsigned char source)
  * Return whether auto exposure is enabled.
  * @return true if auto exposure is enabled
  */
-bool NaoCamera::auto_exposure()
+bool NaoCamera::exposure_auto()
 {
   return get_one_control("AEC", V4L2_CID_AUTOEXPOSURE);
 }
@@ -288,7 +288,7 @@ bool NaoCamera::auto_exposure()
  * Enable/disable auto exposure.
  * @param enabled whether auto exposure should be enabled
  */
-void NaoCamera::set_auto_exposure(bool enabled)
+void NaoCamera::set_exposure_auto(bool enabled)
 {
   LibLogger::log_debug("NaoCamera", (enabled ? "enabling AEC" : "disabling AEC"));
 

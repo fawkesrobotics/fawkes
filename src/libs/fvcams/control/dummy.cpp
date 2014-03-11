@@ -55,12 +55,12 @@ void DummyCameraControl::set_auto_white_balance(bool enabled)
 {
 }
 
-bool DummyCameraControl::auto_exposure()
+unsigned int DummyCameraControl::exposure_auto()
 {
-  return true;
+  return 0;
 }
 
-void DummyCameraControl::set_auto_exposure(bool enabled)
+void DummyCameraControl::set_exposure_auto(unsigned int exposure_auto)
 {
 }
 
