@@ -79,9 +79,7 @@ GossipAspectIniFin::finalize(Thread *thread)
 					"has not. ", thread->name());
   }
 
-  RefPtr<GossipGroup> group = gossip_thread->gossip_group;
-  gossip_thread->gossip_group.clear();
-  gossip_group_mgr_->leave_group(group);
+  gossip_group_mgr_->leave_group(gossip_thread->gossip_group);
 }
 
 
