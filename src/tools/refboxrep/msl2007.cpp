@@ -35,13 +35,13 @@ static const char REFBOX_CANCEL              = 'x';
 static const char REFBOX_START               = 's';
 static const char REFBOX_HALT                = 'H';
 static const char REFBOX_STOP                = 'S';
-static const char REFBOX_ENDHALF             = 'H';
+//static const char REFBOX_ENDHALF             = 'H';
 static const char REFBOX_DROPPED_BALL        = 'N';
 
 static const char REFBOX_FIRST_HALF          = '1';
 static const char REFBOX_SECOND_HALF         = '2';
 static const char REFBOX_HALF_TIME           = 'h';
-static const char REFBOX_END_GAME            = 'e';
+//static const char REFBOX_END_GAME            = 'e';
 
 static const char REFBOX_GOAL_CYAN           = 'A';
 static const char REFBOX_GOAL_MAGENTA        = 'a';
