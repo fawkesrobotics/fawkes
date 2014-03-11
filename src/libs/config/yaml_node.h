@@ -31,6 +31,7 @@
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
 #include <fstream>
+#include <iostream>
 #include <stack>
 #include <cerrno>
 #include <unistd.h>
