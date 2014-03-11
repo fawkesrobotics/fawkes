@@ -60,9 +60,9 @@ void
 rgb_to_rgb_planar_plainc(const unsigned char *rgb, unsigned char *rgb_planar,
 			 const unsigned int width, const unsigned int height)
 {
-  register unsigned char *r = rgb_planar;
-  register unsigned char *g = rgb_planar + (width * height);
-  register unsigned char *b = rgb_planar + (width * height * 2);
+  unsigned char *r = rgb_planar;
+  unsigned char *g = rgb_planar + (width * height);
+  unsigned char *b = rgb_planar + (width * height * 2);
   for ( unsigned int i = 0; i < width * height; ++i) {
     *r++ = *rgb++;
     *g++ = *rgb++;
@@ -82,9 +82,9 @@ void
 rgb_planar_to_rgb_plainc(const unsigned char *rgb_planar, unsigned char *rgb,
 			 const unsigned int width, const unsigned int height)
 {
-  register const unsigned char *r = rgb_planar;
-  register const unsigned char *g = rgb_planar + (width * height);
-  register const unsigned char *b = rgb_planar + (width * height * 2);
+  const unsigned char *r = rgb_planar;
+  const unsigned char *g = rgb_planar + (width * height);
+  const unsigned char *b = rgb_planar + (width * height * 2);
   for ( unsigned int i = 0; i < width * height; ++i) {
     *rgb++ = *r++;
     *rgb++ = *g++;
@@ -127,7 +127,7 @@ bgr_to_rgb_plainc(const unsigned char *BGR, unsigned char *RGB,
 {
   RGB_t *rgb;
   BGR_t *bgr;
-  for (register unsigned int i = 0; i < (width * height); ++i) {
+  for (unsigned int i = 0; i < (width * height); ++i) {
     bgr = (BGR_t *)BGR;
     rgb = (RGB_t *)RGB;
     rgb->R = bgr->R;
@@ -153,9 +153,9 @@ bgr_to_rgb_plainc(const unsigned char *BGR, unsigned char *RGB,
 void convert_line_bgr_rgb(const unsigned char *BGR, unsigned char *RGB,
 			    unsigned int width, unsigned int height)
  {
-  register unsigned int i = 0;
-  register const unsigned char *r1, *r2, *r3;
-  register unsigned char *n1, *n2, *n3;
+  unsigned int i = 0;
+  const unsigned char *r1, *r2, *r3;
+  unsigned char *n1, *n2, *n3;
 
   while( i < width ) {
 

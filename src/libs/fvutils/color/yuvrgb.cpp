@@ -51,8 +51,8 @@ void
 yuv411packed_to_rgb_plainc(const unsigned char *YUV, unsigned char *RGB,
 			   unsigned int width, unsigned int height)
 {
-  register int y0, y1, y2, y3, u, v;
-  register unsigned int i = 0;
+  int y0, y1, y2, y3, u, v;
+  unsigned int i = 0;
   while (i < (width * height)*3/2) {
     u  = YUV[i++] - 128;
     y0 = YUV[i++] -  16;
@@ -104,9 +104,9 @@ void
 yuv422planar_to_rgb_plainc(const unsigned char *planar, unsigned char *RGB, unsigned int width, unsigned int height)
 {
 
-  register short y1, y2, u, v;
-  register const unsigned char *yp, *up, *vp;
-  register unsigned int i;
+  short y1, y2, u, v;
+  const unsigned char *yp, *up, *vp;
+  unsigned int i;
 
   yp = planar;
   up = planar + (width * height);
@@ -158,8 +158,8 @@ void
 yuv422packed_to_rgb_plainc(const unsigned char *YUV, unsigned char *RGB,
 			   unsigned int width, unsigned int height)
 {
-  register int y0, y1, u, v;
-  register unsigned int i = 0;
+  int y0, y1, u, v;
+  unsigned int i = 0;
   while (i < (width * height)/2) {
     u  = YUV[i++] - 128;
     y0 = YUV[i++] -  16;
@@ -190,9 +190,9 @@ yuv422planar_to_bgr_plainc(const unsigned char *planar, unsigned char *BGR,
 			   unsigned int width, unsigned int height)
 {
 
-  register short y1, y2, u, v;
-  register const unsigned char *yp, *up, *vp;
-  register unsigned int i;
+  short y1, y2, u, v;
+  const unsigned char *yp, *up, *vp;
+  unsigned int i;
 
   yp = planar;
   up = planar + (width * height);
@@ -227,9 +227,9 @@ void
 yuv422planar_to_rgb_with_alpha_plainc(const unsigned char *planar, unsigned char *RGB, unsigned int width, unsigned int height)
 {
 
-  register short y1, y2, u, v;
-  register const unsigned char *yp, *up, *vp;
-  register unsigned int i;
+  short y1, y2, u, v;
+  const unsigned char *yp, *up, *vp;
+  unsigned int i;
 
   yp = planar;
   up = planar + (width * height);
@@ -268,9 +268,9 @@ void
 yuv422planar_to_bgr_with_alpha_plainc(const unsigned char *planar, unsigned char *BGR, unsigned int width, unsigned int height)
 {
 
-  register short y1, y2, u, v;
-  register const unsigned char *yp, *up, *vp;
-  register unsigned int i;
+  short y1, y2, u, v;
+  const unsigned char *yp, *up, *vp;
+  unsigned int i;
 
   yp = planar;
   up = planar + (width * height);
@@ -310,8 +310,8 @@ yuv422packed_to_bgr_with_alpha_plainc(const unsigned char *YUV, unsigned char *B
 				      unsigned int width, unsigned int height)
 {
 
-  register int y0, y1, u, v;
-  register unsigned int i = 0;
+  int y0, y1, u, v;
+  unsigned int i = 0;
   while (i < (width * height * 2)) {
     u  = YUV[i++] - 128;
     y0 = YUV[i++] -  16;
@@ -382,7 +382,7 @@ yuv411planar_to_rgb_mmx (const unsigned char *yuv, unsigned char *rgb,
 			 unsigned int w, unsigned int h)
 {
   unsigned int xx, yy;
-  register const unsigned char *yp1, *up, *vp;
+  const unsigned char *yp1, *up, *vp;
   unsigned char *dp1;
 
   /* plane pointers */

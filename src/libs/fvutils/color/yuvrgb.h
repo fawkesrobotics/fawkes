@@ -151,9 +151,9 @@ convert_line_yuv422planar_to_rgb(const unsigned char *YUV, unsigned char *RGB,
 				 unsigned int width, unsigned int height,
 				 unsigned int yuv_line, unsigned int rgb_line)
 {
-  register unsigned int i = 0;
-  register RGB_t *r1, *r2;
-  register const unsigned char *yp, *up, *vp;
+  unsigned int i = 0;
+  RGB_t *r1, *r2;
+  const unsigned char *yp, *up, *vp;
 
   yp = YUV + (width * yuv_line);
   up = YUV422_PLANAR_U_PLANE(YUV, width, height) + (width * yuv_line / 2);
