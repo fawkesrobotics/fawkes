@@ -192,7 +192,13 @@ WebviewJpegStreamProducer::loop()
 
   RefPtr<Buffer> shared_buf(new Buffer(buffer, jpeg_->compressed_size()));
   subs_.lock();
-  for (auto s : subs_) {
+#if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100) > 40600
+  for (auto &s : subs_) {
+#else
+    fawkes::LockList<Subscriber *>::iterator si;
+  for (si = subs_.begin(); si != subs_.end(); ++si) {
+    Subscriber *s = *si;
+#endif
     s->handle_buffer(shared_buf);
   }
   bool go_on = ! subs_.empty();
