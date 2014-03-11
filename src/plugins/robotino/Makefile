@@ -36,8 +36,8 @@ LIBS_robotino_joystick = m fawkescore fawkesutils fawkesaspects \
 			 JoystickInterface MotorInterface
 OBJS_robotino_joystick = robotino_joystick_plugin.o joystick_thread.o
 
-LIBS_robotino_ir_pcl = m fawkescore fawkesutils fawkesaspects \
-			 fawkesblackboard fawkesinterface \
+LIBS_robotino_ir_pcl = m fawkescore fawkesutils fawkesaspects fawkestf \
+			 fawkesblackboard fawkesinterface fawkespcl_utils \
 			 RobotinoSensorInterface
 OBJS_robotino_ir_pcl = robotino_ir_pcl_plugin.o ir_pcl_thread.o
 
@@ -63,9 +63,9 @@ ifeq ($(HAVE_OPENROBOTINO),1)
   PLUGINS_all = $(PLUGINDIR)/robotino.so $(PLUGINDIR)/robotino-joystick.so
 
   ifeq ($(HAVE_PCL),1)
-    CFLAGS_robotino_ir_pcl_plugin = $(CFLAGS) $(CFLAGS_PCL)
+    CFLAGS_robotino_ir_pcl_plugin = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
     CFLAGS_ir_pcl_thread = $(CFLAGS_robotino_ir_pcl_plugin)
-    LDFLAGS_robotino_ir_pcl += $(LDFLAGS_PCL)
+    LDFLAGS_robotino_ir_pcl += $(LDFLAGS_PCL) $(LDFLAGS_TF)
 
     PLUGINS_all += $(PLUGINDIR)/robotino-ir-pcl.$(SOEXT)
   else
