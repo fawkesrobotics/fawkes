@@ -220,7 +220,7 @@ OpenNiPointCloudThread::fill_xyz_no_pcl(fawkes::Time &ts, const XnDepthPixel * c
   __pcl_xyz_buf->lock_for_write();
   __pcl_xyz_buf->set_capture_time(&ts);
 
-  register pcl_point_t *pclbuf = (pcl_point_t *)__pcl_xyz_buf->buffer();
+  pcl_point_t *pclbuf = (pcl_point_t *)__pcl_xyz_buf->buffer();
 
   unsigned int idx = 0;
   for (unsigned int h = 0; h < __height; ++h) {
@@ -251,7 +251,7 @@ OpenNiPointCloudThread::fill_xyzrgb_no_pcl(fawkes::Time &ts, const XnDepthPixel 
   __pcl_xyzrgb_buf->lock_for_write();
   __pcl_xyzrgb_buf->set_capture_time(&ts);
 
-  register pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
 
   unsigned int idx = 0;
   for (unsigned int h = 0; h < __height; ++h) {
@@ -288,8 +288,8 @@ OpenNiPointCloudThread::fill_xyz_xyzrgb_no_pcl(fawkes::Time &ts,
   __pcl_xyzrgb_buf->lock_for_write();
   __pcl_xyzrgb_buf->set_capture_time(&ts);
 
-  register pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
-  register pcl_point_t *pclbuf_xyz = (pcl_point_t *)__pcl_xyz_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
+  pcl_point_t *pclbuf_xyz = (pcl_point_t *)__pcl_xyz_buf->buffer();
 
   unsigned int idx = 0;
   for (unsigned int h = 0; h < __height; ++h) {
@@ -332,8 +332,8 @@ OpenNiPointCloudThread::fill_rgb_no_pcl()
 
   __img_thread->wait_loop_done();
 
-  register pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
-  register RGB_t *imagebuf = (RGB_t *)__image_rgb_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
+  RGB_t *imagebuf = (RGB_t *)__image_rgb_buf->buffer();
 
   for (unsigned int i = 0; i < __width * __height; ++i) {
     pclbuf_rgb->r = imagebuf[i].R;
@@ -355,7 +355,7 @@ OpenNiPointCloudThread::fill_xyz(fawkes::Time &ts, const XnDepthPixel * const de
   __pcl_xyz_buf->lock_for_write();
   __pcl_xyz_buf->set_capture_time(&ts);
 
-  register pcl_point_t *pclbuf = (pcl_point_t *)__pcl_xyz_buf->buffer();
+  pcl_point_t *pclbuf = (pcl_point_t *)__pcl_xyz_buf->buffer();
 
   unsigned int idx = 0;
   for (unsigned int h = 0; h < __height; ++h) {
@@ -391,7 +391,7 @@ OpenNiPointCloudThread::fill_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const
   __pcl_xyzrgb_buf->lock_for_write();
   __pcl_xyzrgb_buf->set_capture_time(&ts);
 
-  register pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
 
   unsigned int idx = 0;
   for (unsigned int h = 0; h < __height; ++h) {
@@ -437,8 +437,8 @@ OpenNiPointCloudThread::fill_xyz_xyzrgb(fawkes::Time &ts, const XnDepthPixel * c
   __pcl_xyzrgb_buf->lock_for_write();
   __pcl_xyzrgb_buf->set_capture_time(&ts);
 
-  register pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
-  register pcl_point_t *pclbuf_xyz = (pcl_point_t *)__pcl_xyz_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
+  pcl_point_t *pclbuf_xyz = (pcl_point_t *)__pcl_xyz_buf->buffer();
 
   unsigned int idx = 0;
   for (unsigned int h = 0; h < __height; ++h) {
@@ -487,8 +487,8 @@ OpenNiPointCloudThread::fill_rgb(pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb)
 
   __img_thread->wait_loop_done();
 
-  register pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
-  register RGB_t *imagebuf = (RGB_t *)__image_rgb_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
+  RGB_t *imagebuf = (RGB_t *)__image_rgb_buf->buffer();
 
   for (unsigned int i = 0; i < __width * __height; ++i) {
     pclbuf_rgb->r = pcl_rgb.points[i].r = imagebuf[i].R;

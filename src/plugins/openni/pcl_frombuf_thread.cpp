@@ -95,7 +95,7 @@ OpenNiPclOnlyThread::loop()
     if (__last_capture_time != capture_time) {
       __last_capture_time = capture_time;
 
-      register pcl_point_t *pclbuf = (pcl_point_t *)__pcl_buf->buffer();
+      pcl_point_t *pclbuf = (pcl_point_t *)__pcl_buf->buffer();
 
       pcl::PointCloud<pcl::PointXYZ> &pcl = **__pcl;
       pcl.header.seq += 1;
