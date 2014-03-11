@@ -86,24 +86,36 @@ class ProtobufBroadcastPeer
   MessageRegister &  message_register()
   { return *message_register_; }
 
+  typedef
+    boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, uint16_t, uint16_t,
+				  std::shared_ptr<google::protobuf::Message>)>
+    signal_received_type;
+
+  typedef
+    boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, std::string)>
+    signal_recv_error_type;
+
+  typedef
+    boost::signals2::signal<void (std::string)>
+    signal_send_error_type;
+
   /** Signal that is invoked when a message has been received.
    * @return signal
    */
-  boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, uint16_t, uint16_t,
-				std::shared_ptr<google::protobuf::Message>)> &
-    signal_received() { return sig_rcvd_; }
+  signal_received_type &  signal_received()
+  { return sig_rcvd_; }
 
   /** Signal that is invoked when receiving a message failed.
    * @return signal
    */
-  boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, std::string)> &
-    signal_recv_error() { return sig_recv_error_; }
+   signal_recv_error_type &  signal_recv_error()
+   { return sig_recv_error_; }
 
   /** Signal that is invoked when sending a message failed.
    * @return signal
    */
-  boost::signals2::signal<void (std::string)> &
-    signal_send_error() { return sig_send_error_; }
+  signal_send_error_type &  signal_send_error()
+  { return sig_send_error_; }
 
 
  private: // methods
@@ -125,10 +137,9 @@ class ProtobufBroadcastPeer
 
   std::list<boost::asio::ip::udp::endpoint>  local_endpoints_;
 
-  boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, uint16_t, uint16_t,
-				std::shared_ptr<google::protobuf::Message>)> sig_rcvd_;
-  boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, std::string)> sig_recv_error_;
-  boost::signals2::signal<void (std::string)> sig_send_error_;
+  signal_received_type   sig_rcvd_;
+  signal_recv_error_type sig_recv_error_;
+  signal_send_error_type sig_send_error_;
 
   std::string  send_to_address_;
 
