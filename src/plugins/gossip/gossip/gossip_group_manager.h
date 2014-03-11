@@ -42,14 +42,18 @@ class GossipGroupConfiguration
  public:
   GossipGroupConfiguration();
   GossipGroupConfiguration(const GossipGroupConfiguration &c);
-  GossipGroupConfiguration(std::string &name, unsigned short port);
+  GossipGroupConfiguration(std::string &name,
+			   std::string &broadcast_address,
+			   unsigned short broadcast_port);
 
   std::string    name;	///< name of the group
-  unsigned short port;	///< local UDP port for communication
+  std::string    broadcast_addr;	///< Broadcast IP Addr
+  unsigned short broadcast_port;	///< UDP port for communication
 };
 
 class GossipGroupManager
 {
+  friend class GossipAspectIniFin;
  public:
   GossipGroupManager(std::string &service_name, ServicePublisher *service_publisher,
 		     std::map<std::string, GossipGroupConfiguration> &initial_groups);

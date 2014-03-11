@@ -37,16 +37,19 @@ namespace fawkes {
 
 /** Constructor. */
 GossipGroupConfiguration::GossipGroupConfiguration()
-  : port(0)
+  : broadcast_port(0)
 {
 }
 
 /** Constructor.
  * @param name name of the group
- * @param port UDP port to listen on for the group
+ * @param broadcast_address IPv4 address to broadcast to
+ * @param broadcast_port UDP port to listen on for the group
  */
-GossipGroupConfiguration::GossipGroupConfiguration(std::string &name, unsigned short port)
-  : name(name), port(port)
+GossipGroupConfiguration::GossipGroupConfiguration(std::string &name,
+						   std::string &broadcast_address,
+						   unsigned short broadcast_port)
+  : name(name), broadcast_addr(broadcast_address), broadcast_port(broadcast_port)
 {
 }
 
@@ -54,7 +57,7 @@ GossipGroupConfiguration::GossipGroupConfiguration(std::string &name, unsigned s
  * @param c group configuration to copy
  */
 GossipGroupConfiguration::GossipGroupConfiguration(const GossipGroupConfiguration &c)
-  : name(c.name), port(c.port)
+  : name(c.name), broadcast_addr(c.broadcast_addr), broadcast_port(c.broadcast_port)
 {
 }
 
@@ -112,7 +115,6 @@ GossipGroupManager::join_group(const std::string &name)
 void
 GossipGroupManager::leave_group(fawkes::RefPtr<fawkes::GossipGroup> &group)
 {
-  //std::string name = group->name();
   group.reset();
 
   /*
@@ -128,7 +130,9 @@ GossipGroupManager::leave_group(fawkes::RefPtr<fawkes::GossipGroup> &group)
 void
 GossipGroupManager::create_group(GossipGroupConfiguration &gc)
 {
-  groups_[gc.name] = new GossipGroup(gc.name, service_name_, gc.port, service_publisher_);
+  groups_[gc.name] = new GossipGroup(gc.name, service_name_,
+				     gc.broadcast_addr, gc.broadcast_port,
+				     service_publisher_);
 }
 
 

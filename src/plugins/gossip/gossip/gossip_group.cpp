@@ -25,6 +25,8 @@
 #include <netcomm/service_discovery/service.h>
 #include <netcomm/service_discovery/service_publisher.h>
 
+#include <protobuf_comm/peer.h>
+
 #define GOSSIP_MDNSSD_SERVICE_NAME "_gossip._udp"
 
 
@@ -47,12 +49,18 @@ namespace fawkes {
  * @param service_publisher service publisher to announce group membership with
  */
 GossipGroup::GossipGroup(std::string &group_name, std::string &peer_name,
-			 unsigned short port, ServicePublisher *service_publisher)
-  : name_(group_name), port_(port), service_publisher_(service_publisher)
+			 std::string &broadcast_address, unsigned short broadcast_port,
+			 ServicePublisher *service_publisher)
+  : name_(group_name), service_publisher_(service_publisher)
 {
+  pb_peer_ =
+    std::shared_ptr<protobuf_comm::ProtobufBroadcastPeer>(
+      new protobuf_comm::ProtobufBroadcastPeer(broadcast_address, broadcast_port));
+
   service_ =
-    std::auto_ptr<NetworkService>(new NetworkService(peer_name.c_str(),
-						     GOSSIP_MDNSSD_SERVICE_NAME, port_));
+    std::shared_ptr<NetworkService>(new NetworkService(peer_name.c_str(),
+						       GOSSIP_MDNSSD_SERVICE_NAME,
+						       broadcast_port));
 
   service_->add_txt("group=%s", group_name.c_str());
   service_publisher_->publish_service(service_.get());
@@ -64,6 +72,7 @@ GossipGroup::~GossipGroup()
 {
   service_publisher_->unpublish_service(service_.get());
   service_.reset();
+  pb_peer_.reset();
 }
 
 
@@ -75,6 +84,7 @@ void
 GossipGroup::send(std::string &peer,
 		  google::protobuf::Message &m)
 {
+  pb_peer_->send(m);
 }
 
 
@@ -84,6 +94,7 @@ GossipGroup::send(std::string &peer,
 void
 GossipGroup::broadcast(google::protobuf::Message &m)
 {
+  pb_peer_->send(m);
 }
 
 

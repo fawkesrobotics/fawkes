@@ -26,7 +26,7 @@ OBJS_libfawkesgossip = gossip_group.o gossip_group_manager.o
 
 OBJS_all = $(OBJS_libfawkesgossip)
 
-REQ_BOOST_LIBS = system
+REQ_BOOST_LIBS = asio signals2 system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 ifeq ($(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),11)

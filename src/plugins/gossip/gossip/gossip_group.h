@@ -23,8 +23,17 @@
 #ifndef __PLUGINS_GOSSIP_GOSSIP_GOSSIP_GROUP_H_
 #define __PLUGINS_GOSSIP_GOSSIP_GOSSIP_GROUP_H_
 
+#include <protobuf_comm/peer.h>
+
 #include <google/protobuf/message.h>
+
+#include <boost/asio.hpp>
+#include <boost/signals2.hpp>
 #include <memory>
+
+namespace protobuf_comm {
+  class ProtobufBroadcastPeer;
+}
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -44,24 +53,52 @@ class GossipGroup {
 
   void broadcast(google::protobuf::Message &m);
 
+
+
+  /** Get the protobuf message register.
+   * @return message register */
+  protobuf_comm::MessageRegister &  message_register()
+  { return pb_peer_->message_register(); }
+
+  /** Signal that is invoked when a message has been received.
+   * @return signal */
+  boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, uint16_t, uint16_t,
+				std::shared_ptr<google::protobuf::Message>)> &
+  signal_received()
+  { return pb_peer_->signal_received(); }
+
+  /** Signal that is invoked when receiving a message failed.
+   * @return signal */
+  boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, std::string)> &
+  signal_recv_error()
+  { return pb_peer_->signal_recv_error(); }
+
+  /** Signal that is invoked when sending a message failed.
+   * @return signal */
+  boost::signals2::signal<void (std::string)> &
+  signal_send_error()
+  { return pb_peer_->signal_send_error(); }
+
   /** Get group name.
    * @return group name. */
   const std::string &  name() const { return name_; }
-  /** Get local UDP port.
-   * @return local UDP port. */
-  unsigned short       port() const { return port_; }
+
+  /** Get Protobuf broadcast peer.
+   * @return protobuf broadcast peer. */
+  std::shared_ptr<protobuf_comm::ProtobufBroadcastPeer> peer() const
+  { return pb_peer_; }
 
  private:
-  GossipGroup(std::string &group_name,
-	      std::string &peer_name, unsigned short port,
+  GossipGroup(std::string &group_name, std::string &peer_name,
+	      std::string &broadcast_address, unsigned short broadcast_port,
 	      ServicePublisher *service_publisher);
 
  private:
   std::string     name_;
-  unsigned short  port_;
 
   ServicePublisher *service_publisher_;
-  std::auto_ptr<NetworkService> service_;
+  std::shared_ptr<NetworkService> service_;
+  std::shared_ptr<protobuf_comm::ProtobufBroadcastPeer> pb_peer_;
 };
 
 
