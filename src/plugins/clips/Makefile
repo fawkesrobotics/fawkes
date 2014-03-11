@@ -26,23 +26,35 @@ OBJS_clips = clips_plugin.o clips_thread.o \
 
 OBJS_all = $(OBJS_clips)
 
-ifeq ($(HAVE_CLIPS),1)
-  PRESUBDIRS += aspect
+ifeq ($(CC),gcc)
+  ifneq ($(call gcc_atleast_version,4,6),1)
+    GCC_TOO_OLD=1
+  endif
+endif
 
-  CFLAGS  += $(CFLAGS_CLIPS)
-  LDFLAGS += $(LDFLAGS_CLIPS)
+ifneq ($(GCC_TOO_OLD),1)
+  ifeq ($(HAVE_CLIPS),1)
+    PRESUBDIRS += aspect
 
-  PLUGINS_all = $(PLUGINDIR)/clips.so
+    CFLAGS  += $(CFLAGS_CLIPS)
+    LDFLAGS += $(LDFLAGS_CLIPS)
+
+    PLUGINS_all = $(PLUGINDIR)/clips.so
+  else
+    WARN_TARGETS += warning_clips
+  endif
 else
-  WARN_TARGETS += warning_clips
+  WARN_TARGETS += warning_old_gcc
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_clips
+.PHONY: warning_clips warning_old_gcc
 warning_clips:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting CLIPS Plugins$(TNORMAL) (CLIPS not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting CLIPS Plugins$(TNORMAL) ($(CLIPS_ERROR))"
+warning_old_gcc:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting CLIPS Plugins$(TNORMAL) (GCC too old, have $(GCC_VERSION), required 4.6)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
