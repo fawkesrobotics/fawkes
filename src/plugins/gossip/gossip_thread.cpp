@@ -59,7 +59,7 @@ GossipThread::init()
 
   std::string prefix = CFG_PREFIX"groups/";
 
-  std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+  std::shared_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
   while (i->next()) {
     std::string cfg_name = std::string(i->path()).substr(prefix.length());
     cfg_name = cfg_name.substr(0, cfg_name.find("/"));
@@ -76,13 +76,14 @@ GossipThread::init()
 
       try {
 	if (active) {
-	  unsigned int port = config->get_uint((cfg_prefix + "port").c_str());
+	  std::string  addr = config->get_string((cfg_prefix + "broadcast-address").c_str());
+	  unsigned int port = config->get_uint((cfg_prefix + "broadcast-port").c_str());
 
 	  if (port > 0xFFFF) {
 	    throw Exception("Port number too high: %u > %u", port, 0xFFFF);
 	  }
 
-	  groups[cfg_name] = GossipGroupConfiguration(cfg_name, port);
+	  groups[cfg_name] = GossipGroupConfiguration(cfg_name, addr, port);
 	} else {
 	  //printf("Ignoring laser config %s\n", cfg_name.c_str());
 	  ignored_groups.insert(cfg_name);
@@ -94,7 +95,7 @@ GossipThread::init()
   }
 
   group_mgr_ =
-    std::auto_ptr<GossipGroupManager>(new GossipGroupManager(cfg_service_name_,
+    std::shared_ptr<GossipGroupManager>(new GossipGroupManager(cfg_service_name_,
 							     service_publisher,
 							     groups));
   gossip_aspect_inifin_.set_manager(group_mgr_.get());

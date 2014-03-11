@@ -54,8 +54,8 @@ class GossipThread
  private:
   std::string cfg_service_name_;
 
-  std::auto_ptr<fawkes::GossipGroupManager>  group_mgr_;
-  fawkes::GossipAspectIniFin                 gossip_aspect_inifin_;
+  std::shared_ptr<fawkes::GossipGroupManager>  group_mgr_;
+  fawkes::GossipAspectIniFin                   gossip_aspect_inifin_;
 
 };
 

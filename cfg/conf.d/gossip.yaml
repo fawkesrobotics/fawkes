@@ -8,8 +8,9 @@ gossip:
   name: R1
 
   groups:
-    local:
+    example:
       active: true
-      port: 6000
+      broadcast-address: 137.226.233.255
+      broadcast-port: 6000
 
 
