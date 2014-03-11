@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  encrypt.cpp - WorldInfo encryptio routine
+ *  encrypt.cpp - Message encryption routine
  *
  *  Created: Thu May 03 15:21:00 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <netcomm/crypto/encrypt.h>
 #include <core/exceptions/software.h>
-#include <netcomm/worldinfo/encrypt.h>
 
 #ifdef HAVE_LIBCRYPTO
 #  include <openssl/evp.h>
@@ -32,7 +31,7 @@
 
 namespace fawkes {
 
-/** @class MessageEncryptionException <netcomm/worldinfo/encrypt.h>
+/** @class MessageEncryptionException <netcomm/crypto/encrypt.h>
  * Message encryption failed.
  * This exception shall be thrown if there was a problem encrypting a
  * world info message.
@@ -48,8 +47,8 @@ MessageEncryptionException::MessageEncryptionException(const char *msg)
 }
 
 
-/** @class WorldInfoMessageEncryptor <netcomm/worldinfo/encrypt.h>
- * WorldInfo message encryptor.
+/** @class MessageEncryptor <netcomm/crypto/encrypt.h>
+ * Message encryptor.
  * This class is used to encrypt world info message before they are sent
  * over the network.
  *
@@ -83,7 +82,7 @@ MessageEncryptionException::MessageEncryptionException(const char *msg)
  * @param key encryption key
  * @param iv initialisation vector
  */
-WorldInfoMessageEncryptor::WorldInfoMessageEncryptor(const unsigned char *key, const unsigned char *iv)
+MessageEncryptor::MessageEncryptor(const unsigned char *key, const unsigned char *iv)
 {
   plain_buffer = NULL;
   plain_buffer_length = 0;
@@ -96,7 +95,7 @@ WorldInfoMessageEncryptor::WorldInfoMessageEncryptor(const unsigned char *key, c
 
 
 /** Empty destructor. */
-WorldInfoMessageEncryptor::~WorldInfoMessageEncryptor()
+MessageEncryptor::~MessageEncryptor()
 {
 }
 
@@ -109,7 +108,7 @@ WorldInfoMessageEncryptor::~WorldInfoMessageEncryptor()
  * @param buffer_length plain buffer length
  */
 void
-WorldInfoMessageEncryptor::set_plain_buffer(void *buffer, size_t buffer_length)
+MessageEncryptor::set_plain_buffer(void *buffer, size_t buffer_length)
 {
   plain_buffer        = buffer;
   plain_buffer_length = buffer_length;
@@ -129,7 +128,7 @@ WorldInfoMessageEncryptor::set_plain_buffer(void *buffer, size_t buffer_length)
  * been called or if the supplied buffer had zero size.
  */
 size_t
-WorldInfoMessageEncryptor::recommended_crypt_buffer_size()
+MessageEncryptor::recommended_crypt_buffer_size()
 {
   if ( plain_buffer_length == 0 ) {
     throw MissingParameterException("plain buffer must be set and plain buffer size > 0");
@@ -153,7 +152,7 @@ WorldInfoMessageEncryptor::recommended_crypt_buffer_size()
  * @param buffer_length crypted buffer length
  */
 void
-WorldInfoMessageEncryptor::set_crypt_buffer(void *buffer, size_t buffer_length)
+MessageEncryptor::set_crypt_buffer(void *buffer, size_t buffer_length)
 {
   crypt_buffer        = buffer;
   crypt_buffer_length = buffer_length;
@@ -165,7 +164,7 @@ WorldInfoMessageEncryptor::set_crypt_buffer(void *buffer, size_t buffer_length)
  * @return size of the crypted message in bytes
  */
 size_t
-WorldInfoMessageEncryptor::encrypt()
+MessageEncryptor::encrypt()
 {
   if ( (plain_buffer == NULL) || (plain_buffer_length == 0) ||
        (crypt_buffer == NULL) || (crypt_buffer_length == 0) ) {
@@ -194,9 +193,11 @@ WorldInfoMessageEncryptor::encrypt()
  
   return outl;
 #else
-  /* Plain text copy-through for debugging */
+  /* Plain text copy-through for debugging
   memcpy(crypt_buffer, plain_buffer, plain_buffer_length);
   return plain_buffer_length;
+  */
+  throw Exception("Encryption support not available");
 #endif
 }
 

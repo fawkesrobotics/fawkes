@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  encrypt.h - WorldInfo encryptio routine
+ *  encrypt.h - Message encryption routine
  *
  *  Created: Thu May 03 15:01:13 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_WORLDINFO_ENCRYPT_H_
-#define __NETCOMM_WORLDINFO_ENCRYPT_H_
+#ifndef __NETCOMM_CRYPTO_ENCRYPT_H_
+#define __NETCOMM_CRYPTO_ENCRYPT_H_
 
 #include <core/exception.h>
 #include <cstddef>
@@ -35,11 +34,11 @@ class MessageEncryptionException : public Exception
   MessageEncryptionException(const char *msg);
 };
 
-class WorldInfoMessageEncryptor
+class MessageEncryptor
 {
  public:
-  WorldInfoMessageEncryptor(const unsigned char *key, const unsigned char *iv);
-  ~WorldInfoMessageEncryptor();
+  MessageEncryptor(const unsigned char *key, const unsigned char *iv);
+  ~MessageEncryptor();
 
   void set_plain_buffer(void *buffer, size_t buffer_length);
   void set_crypt_buffer(void *buffer, size_t buffer_length);

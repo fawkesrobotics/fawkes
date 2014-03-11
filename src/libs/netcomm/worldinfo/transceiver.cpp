@@ -26,8 +26,8 @@
 
 #include <netcomm/worldinfo/transceiver.h>
 #include <netcomm/worldinfo/messages.h>
-#include <netcomm/worldinfo/encrypt.h>
-#include <netcomm/worldinfo/decrypt.h>
+#include <netcomm/crypto/encrypt.h>
+#include <netcomm/crypto/decrypt.h>
 
 #include <netcomm/socket/datagram_broadcast.h>
 #include <netcomm/socket/datagram_multicast.h>
@@ -145,8 +145,8 @@ WorldInfoTransceiver::WorldInfoTransceiver(SocketType socket_type,
   __key = strdup(key);
   __iv  = strdup(iv);
 
-  encryptor = new WorldInfoMessageEncryptor((const unsigned char *)__key, (const unsigned char *)__iv);
-  decryptor = new WorldInfoMessageDecryptor((const unsigned char *)__key, (const unsigned char *)__iv);
+  encryptor = new MessageEncryptor((const unsigned char *)__key, (const unsigned char *)__iv);
+  decryptor = new MessageDecryptor((const unsigned char *)__key, (const unsigned char *)__iv);
 
   // set maximum size buffer to get valid results from encryptor
   encryptor->set_plain_buffer(out_buffer, WORLDINFO_MTU);
