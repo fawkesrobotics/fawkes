@@ -1,0 +1,46 @@
+
+
+/***************************************************************************
+ *  TestMessage.proto - Gossip Example plugins test message
+ *
+ *  Created: Wed Mar 05 14:33:22 2014
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
+
+package gossip_example;
+
+// Time stamp and duration structure.
+// Can be used for absolute times or
+// durations alike.
+message TestMessage {
+
+  enum CompType {
+    COMP_ID  = 102;
+    MSG_TYPE =   1;
+  }
+
+  required uint64 counter = 1;
+
+  // Time in seconds since the Unix epoch
+  // in UTC or seconds part of duration
+  required int64  sec = 2;
+
+  // Nano seconds after seconds for a time
+  // or nanoseconds part for duration
+  required int64 nsec = 3;
+
+
+}
