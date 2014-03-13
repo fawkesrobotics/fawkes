@@ -2,12 +2,12 @@
  *  amcl_thread.cpp - Thread to perform localization
  *
  *  Created: Wed May 16 16:04:41 2012
- *  Copyright  2012  Tim Niemueller [www.niemueller.de]
- *             2012  Daniel Ewert
- *             2012  Kathrin Goffart (Robotino Hackathon 2012)
- *             2012  Kilian Hinterwaelder  (Robotino Hackathon 2012)
- *             2012  Marcel Prochnau (Robotino Hackathon 2012)
- *             2012  Jannik Altgen (Robotino Hackathon 2012)
+ *  Copyright  2012-2014  Tim Niemueller [www.niemueller.de]
+ *             2012       Daniel Ewert
+ *             2012       Kathrin Goffart (Robotino Hackathon 2012)
+ *             2012       Kilian Hinterwaelder  (Robotino Hackathon 2012)
+ *             2012       Marcel Prochnau (Robotino Hackathon 2012)
+ *             2012       Jannik Altgen (Robotino Hackathon 2012)
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -128,7 +128,7 @@ void AmclThread::init()
   init_cov_[1] = 0.5 * 0.5;
   init_cov_[2] = (M_PI / 12.0) * (M_PI / 12.0);
 
-  save_pose_period = config->get_float(CFG_PREFIX"save_pose_period");
+  save_pose_period_ = config->get_float(CFG_PREFIX"save_pose_period");
   laser_min_range_ = config->get_float(CFG_PREFIX"laser_min_range");
   laser_max_range_ = config->get_float(CFG_PREFIX"laser_max_range");
   pf_err_ = config->get_float(CFG_PREFIX"kld_err");
@@ -733,8 +733,8 @@ AmclThread::loop()
 
     // Is it time to save our last pose to the config
     Time now(clock);
-    if ((save_pose_period > 0.0) &&
-	(now - save_pose_last_time) >= save_pose_period)
+    if ((save_pose_period_ > 0.0) &&
+	(now - save_pose_last_time) >= save_pose_period_)
     {
       double yaw, pitch, roll;
       map_pose.getBasis().getEulerYPR(yaw, pitch, roll);
@@ -742,12 +742,18 @@ AmclThread::loop()
       logger->log_debug(name(), "Saving pose (%f,%f,%f) as initial pose to host config",
 			map_pose.getOrigin().x(), map_pose.getOrigin().y(), yaw);
 
-      config->set_float(CFG_PREFIX"init_pose_x", map_pose.getOrigin().x());
-      config->set_float(CFG_PREFIX"init_pose_y", map_pose.getOrigin().y());
-      config->set_float(CFG_PREFIX"init_pose_a", yaw);
-      config->set_float(CFG_PREFIX"init_cov_xx", last_covariance_[6 * 0 + 0]);
-      config->set_float(CFG_PREFIX"init_cov_yy", last_covariance_[6 * 1 + 1]);
-      config->set_float(CFG_PREFIX"init_cov_aa", last_covariance_[6 * 5 + 5]);
+      try {
+	config->set_float(CFG_PREFIX"init_pose_x", map_pose.getOrigin().x());
+	config->set_float(CFG_PREFIX"init_pose_y", map_pose.getOrigin().y());
+	config->set_float(CFG_PREFIX"init_pose_a", yaw);
+	config->set_float(CFG_PREFIX"init_cov_xx", last_covariance_[6 * 0 + 0]);
+	config->set_float(CFG_PREFIX"init_cov_yy", last_covariance_[6 * 1 + 1]);
+	config->set_float(CFG_PREFIX"init_cov_aa", last_covariance_[6 * 5 + 5]);
+      } catch (Exception &e) {
+	logger->log_warn(name(), "Failed to save pose, exception follows, disabling saving");
+	logger->log_warn(name(), e);
+	save_pose_period_ = 0.0; 
+      }
       save_pose_last_time = now;
     }
   } else {
