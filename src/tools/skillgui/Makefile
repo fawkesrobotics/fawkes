@@ -17,6 +17,7 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/gui.mk
+include $(BUILDSYSDIR)/utils.mk
 
 # Set to 1 to use Pyprus instead of Cairo for rendering the graph
 USE_PAPYRUS=0
@@ -57,6 +58,8 @@ ifneq ($(PKGCONFIG),)
     ifeq ($(GRAPHVIZ_ATLEAST_230),1)
       CFLAGS_GRAPHVIZ += -DGRAPHVIZ_ATLEAST_230
     endif
+    VERSION_GRAPHVIZ = $(shell $(PKGCONFIG) --modversion 'libgvc')
+    CFLAGS_GRAPHVIZ += -DGRAPHVIZ_VERSION=$(call version_number,$(VERSION_GRAPHVIZ))
   endif
 endif
 
