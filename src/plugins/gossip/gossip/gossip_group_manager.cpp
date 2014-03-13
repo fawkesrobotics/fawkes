@@ -57,7 +57,8 @@ GossipGroupConfiguration::GossipGroupConfiguration(std::string &name,
  * @param c group configuration to copy
  */
 GossipGroupConfiguration::GossipGroupConfiguration(const GossipGroupConfiguration &c)
-  : name(c.name), broadcast_addr(c.broadcast_addr), broadcast_port(c.broadcast_port)
+  : name(c.name), broadcast_addr(c.broadcast_addr), broadcast_port(c.broadcast_port),
+    crypto_key(c.crypto_key), crypto_cipher(c.crypto_cipher)
 {
 }
 
@@ -132,7 +133,7 @@ GossipGroupManager::create_group(GossipGroupConfiguration &gc)
 {
   groups_[gc.name] = new GossipGroup(gc.name, service_name_,
 				     gc.broadcast_addr, gc.broadcast_port,
-				     service_publisher_);
+				     service_publisher_, gc.crypto_key, gc.crypto_cipher);
 }
 
 

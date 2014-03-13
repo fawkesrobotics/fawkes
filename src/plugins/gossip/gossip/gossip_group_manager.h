@@ -46,9 +46,11 @@ class GossipGroupConfiguration
 			   std::string &broadcast_address,
 			   unsigned short broadcast_port);
 
-  std::string    name;	///< name of the group
+  std::string    name;			///< name of the group
   std::string    broadcast_addr;	///< Broadcast IP Addr
   unsigned short broadcast_port;	///< UDP port for communication
+  std::string    crypto_key;		///< encryption key
+  std::string    crypto_cipher;		///< encryption cipher
 };
 
 class GossipGroupManager

@@ -47,15 +47,19 @@ namespace fawkes {
  * @param peer_name local peer name to announce on the network, i.e. robot identifier
  * @param port UDP port to listen on for messages
  * @param service_publisher service publisher to announce group membership with
+ * @param crypto_key encryption key
+ * @param crypto_cipher cipher to use
  */
 GossipGroup::GossipGroup(std::string &group_name, std::string &peer_name,
 			 std::string &broadcast_address, unsigned short broadcast_port,
-			 ServicePublisher *service_publisher)
+			 ServicePublisher *service_publisher,
+			 const std::string &crypto_key, const std::string &crypto_cipher)
   : name_(group_name), service_publisher_(service_publisher)
 {
   pb_peer_ =
     std::shared_ptr<protobuf_comm::ProtobufBroadcastPeer>(
-      new protobuf_comm::ProtobufBroadcastPeer(broadcast_address, broadcast_port));
+      new protobuf_comm::ProtobufBroadcastPeer(broadcast_address, broadcast_port,
+					       crypto_key, crypto_cipher));
 
   service_ =
     std::shared_ptr<NetworkService>(new NetworkService(peer_name.c_str(),

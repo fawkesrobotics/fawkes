@@ -91,7 +91,8 @@ class GossipGroup {
  private:
   GossipGroup(std::string &group_name, std::string &peer_name,
 	      std::string &broadcast_address, unsigned short broadcast_port,
-	      ServicePublisher *service_publisher);
+	      ServicePublisher *service_publisher,
+	      const std::string &crypto_key, const std::string &crypto_cipher);
 
  private:
   std::string     name_;

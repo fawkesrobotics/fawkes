@@ -84,6 +84,21 @@ GossipThread::init()
 	  }
 
 	  groups[cfg_name] = GossipGroupConfiguration(cfg_name, addr, port);
+
+	  try {
+	    groups[cfg_name].crypto_key =
+	      config->get_string((cfg_prefix + "encryption-key").c_str());
+	    try {
+	      groups[cfg_name].crypto_cipher =
+		config->get_string((cfg_prefix + "encryption-cipher").c_str());
+	    } catch (Exception &e) {
+	      // ignore, use default
+	      groups[cfg_name].crypto_cipher = "aes-128-ecb";
+	    }
+	    logger->log_debug(name(), "Setup encryption of type %s for group '%s'",
+			      groups[cfg_name].crypto_cipher.c_str(), cfg_name.c_str());
+	  } catch (Exception &e) {} // ignored, no encryption
+
 	} else {
 	  //printf("Ignoring laser config %s\n", cfg_name.c_str());
 	  ignored_groups.insert(cfg_name);
