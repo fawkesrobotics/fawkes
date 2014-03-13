@@ -267,7 +267,11 @@ skillgui_cairo_render_end_page(GVJ_t * job)
 }
 
 static void
+#if GRAPHVIZ_VERSION >= 23600
+skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textspan_t *para)
+#else
 skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
+#endif
 {
 #ifdef USE_GVPLUGIN_TIMETRACKER
   __tt.ping_start(__ttc_text);
@@ -330,8 +334,14 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
   Cairo::Matrix old_matrix;
   cairo->get_matrix(old_matrix);
 
+#if GRAPHVIZ_VERSION >= 23600
+  cairo->select_font_face(para->font->name, slant, weight);
+  cairo->set_font_size(para->font->size);
+#else
   cairo->select_font_face(para->fontname, slant, weight);
   cairo->set_font_size(para->fontsize);
+#endif
+
   //cairo->set_font_options ( Cairo::FontOptions() );
   //cairo->set_line_width(1.0);
 
