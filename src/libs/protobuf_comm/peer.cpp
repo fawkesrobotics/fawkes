@@ -35,6 +35,7 @@
  */
 
 #include <protobuf_comm/peer.h>
+#include <protobuf_comm/crypto.h>
 
 #include <boost/lexical_cast.hpp>
 #include <ifaddrs.h>
@@ -139,6 +140,22 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned
   ctor(address, port);
 }
 
+/** Constructor with encryption.
+ * @param address IPv4 broadcast address to send to
+ * @param port IPv4 UDP port to listen on and to send to
+ * @param crypto_key encryption key for messages
+ * @param cipher cipher to use for encryption
+ */ 
+ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned short port,
+					     const std::string crypto_key, const std::string cipher)
+  : io_service_(), resolver_(io_service_),
+    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port))
+{
+  ctor(address, port, crypto_key, cipher);
+  message_register_ = new MessageRegister();
+  own_message_register_ = true;
+}
+
 
 /** Testing constructor.
  * This constructor listens and sends to different ports. It can be used to
@@ -164,14 +181,21 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 /** Constructor helper.
  * @param address hostname/address to send to
  * @param send_to_port UDP port to send messages to
+ * @param crypto_key encryption key for messages
+ * @param cipher cipher to use for encryption
  */
 void
-ProtobufBroadcastPeer::ctor(const std::string &address, unsigned int send_to_port)
+ProtobufBroadcastPeer::ctor(const std::string &address, unsigned int send_to_port,
+			    const std::string crypto_key, const std::string cipher)
 {
   filter_self_  = true;
+  crypto_       = false;
+  crypto_enc_   = NULL;
+  crypto_dec_   = NULL;
 
   in_data_size_ = max_packet_length;
   in_data_ = malloc(in_data_size_);
+  enc_in_data_ = NULL;
 
   socket_.set_option(socket_base::broadcast(true));
   socket_.set_option(socket_base::reuse_address(true));
@@ -183,6 +207,8 @@ ProtobufBroadcastPeer::ctor(const std::string &address, unsigned int send_to_por
 			  boost::bind(&ProtobufBroadcastPeer::handle_resolve, this,
 				      boost::asio::placeholders::error,
 				      boost::asio::placeholders::iterator));
+
+  if (! crypto_key.empty())  setup_crypto(crypto_key, cipher);
 
   start_recv();
   asio_thread_ = std::thread(&ProtobufBroadcastPeer::run_asio, this);
@@ -197,11 +223,40 @@ ProtobufBroadcastPeer::~ProtobufBroadcastPeer()
     asio_thread_.join();
   }
   free(in_data_);
+  if (enc_in_data_)  free(enc_in_data_);
   if (own_message_register_) {
     delete message_register_;
   }
+
+  delete crypto_enc_;
+  delete crypto_dec_;
 }
 
+
+/** Setup encryption.
+ * After this call communication will be encrypted. Note that the first
+ * received message might be considered invalid because we are still
+ * listening for plain text messages. To avoid this use the constructor
+ * which takes the encryption key as parameter.
+ * @param key encryption key
+ * @param cipher cipher to use for encryption
+ * @see BufferEncryptor for supported ciphers
+ */
+void
+ProtobufBroadcastPeer::setup_crypto(const std::string &key, const std::string &cipher)
+{
+  crypto_enc_ = new BufferEncryptor(key, cipher);
+
+  if (! enc_in_data_) {
+    // this depends on the cipher, but nothing is two times the incoming buffer...
+    enc_in_data_size_ = 2 * in_data_size_;
+    enc_in_data_      = malloc(enc_in_data_size_);
+  }
+
+  crypto_dec_ = new BufferDecryptor(key);
+  crypto_     = true;
+  crypto_buf_ = false;
+}
 
 void
 ProtobufBroadcastPeer::determine_local_endpoints()
@@ -268,30 +323,53 @@ void
 ProtobufBroadcastPeer::handle_recv(const boost::system::error_code& error,
 				   size_t bytes_rcvd)
 {
-  if (!error && bytes_rcvd >= sizeof(frame_header_t)) {
-    frame_header_t *frame_header = static_cast<frame_header_t *>(in_data_);
-    size_t to_read = ntohl(frame_header->payload_size);
+  if (!error && bytes_rcvd >= (sizeof(frame_header_t) + sizeof(message_header_t))) {
+    frame_header_t *frame_header = static_cast<frame_header_t *>(crypto_buf_ ? enc_in_data_ : in_data_);
 
-    if (bytes_rcvd == (sizeof(frame_header_t) + to_read)) {
+    if (! crypto_buf_ && (frame_header->cipher != PB_ENCRYPTION_NONE)) {
+      sig_recv_error_(in_endpoint_, "Received encrypted message but encryption is disabled");
+    } else if (crypto_buf_ && ! (frame_header->cipher  != PB_ENCRYPTION_NONE)) {
+      sig_recv_error_(in_endpoint_, "Received plain text message but encryption is enabled");
+    } else {
 
-      if (! filter_self_ ||
-	  ! std::binary_search(local_endpoints_.begin(), local_endpoints_.end(), in_endpoint_))
-      {
-	uint16_t comp_id   = ntohs(frame_header->component_id);
-	uint16_t msg_type  = ntohs(frame_header->msg_type);
-	void *msg_data = (char *)in_data_ + sizeof(frame_header_t);
+      if (crypto_buf_ && (frame_header->cipher  != PB_ENCRYPTION_NONE)) {
+	// we need to decrypt first
 	try {
-	  std::shared_ptr<google::protobuf::Message> m =
-	    message_register_->deserialize(*frame_header, msg_data);
-
-	  sig_rcvd_(in_endpoint_, comp_id, msg_type, m);
+	  memcpy(in_data_, enc_in_data_, sizeof(frame_header_t));
+	  size_t to_decrypt = bytes_rcvd - sizeof(frame_header_t);
+	  bytes_rcvd = crypto_dec_->decrypt(frame_header->cipher,
+					    (unsigned char *)enc_in_data_ + sizeof(frame_header_t), to_decrypt,
+					    (unsigned char *)in_data_ + sizeof(frame_header_t), in_data_size_);
+	  bytes_rcvd += sizeof(frame_header_t);
 	} catch (std::runtime_error &e) {
-	  //printf("Failed to deserialize: %s\n", e.what());
-	  sig_recv_error_(in_endpoint_, std::string("Deserialization fail: ") + e.what());
+	  sig_recv_error_(in_endpoint_, std::string("Decryption fail: ") + e.what());
+	  bytes_rcvd = 0;
 	}
       }
-    } else {
-      sig_recv_error_(in_endpoint_, "Invalid number of bytes received");
+
+      size_t to_read = ntohl(frame_header->payload_size);
+      if (bytes_rcvd == (sizeof(frame_header_t) + to_read)) {
+	message_header_t *message_header =
+	  static_cast<message_header_t *>((void*)((char *)in_data_ + sizeof(frame_header_t)));
+
+	if (! filter_self_ ||
+	    ! std::binary_search(local_endpoints_.begin(), local_endpoints_.end(), in_endpoint_))
+	{
+	  uint16_t comp_id   = ntohs(message_header->component_id);
+	  uint16_t msg_type  = ntohs(message_header->msg_type);
+	  void *msg_data = (char *)in_data_ + sizeof(frame_header_t) + sizeof(message_header_t);
+	  try {
+	    std::shared_ptr<google::protobuf::Message> m =
+	      message_register_->deserialize(*frame_header, *message_header, msg_data);
+
+	    sig_rcvd_(in_endpoint_, comp_id, msg_type, m);
+	  } catch (std::runtime_error &e) {
+	    sig_recv_error_(in_endpoint_, std::string("Deserialization fail: ") + e.what());
+	  }
+	}
+      } else {
+	sig_recv_error_(in_endpoint_, "Invalid number of bytes received");
+      }
     }
 
   } else {
@@ -332,13 +410,15 @@ ProtobufBroadcastPeer::send(uint16_t component_id, uint16_t msg_type,
 {
   QueueEntry *entry = new QueueEntry();
   message_register_->serialize(component_id, msg_type, m,
-			      entry->frame_header, entry->serialized_message);
+			       entry->frame_header, entry->message_header,
+			       entry->serialized_message);
 
   if (entry->serialized_message.size() > max_packet_length) {
     throw std::runtime_error("Serialized message too big");
   }
   entry->buffers[0] = boost::asio::buffer(&entry->frame_header, sizeof(frame_header_t));
-  entry->buffers[1] = boost::asio::buffer(entry->serialized_message);
+  entry->buffers[1] = boost::asio::buffer(&entry->message_header, sizeof(message_header_t));
+  entry->buffers[2] = boost::asio::buffer(entry->serialized_message);
  
   {
     std::lock_guard<std::mutex> lock(outbound_mutex_);
@@ -406,7 +486,8 @@ ProtobufBroadcastPeer::send(google::protobuf::Message &m)
 void
 ProtobufBroadcastPeer::start_recv()
 {
-  socket_.async_receive_from(boost::asio::buffer(in_data_, in_data_size_),
+  crypto_buf_ = crypto_;
+  socket_.async_receive_from(boost::asio::buffer(crypto_ ? enc_in_data_ : in_data_, in_data_size_),
 			     in_endpoint_,
 			     boost::bind(&ProtobufBroadcastPeer::handle_recv,
 					 this, boost::asio::placeholders::error,
@@ -423,6 +504,31 @@ ProtobufBroadcastPeer::start_send()
 
   QueueEntry *entry = outbound_queue_.front();
   outbound_queue_.pop();
+
+  if (crypto_) {
+    size_t plain_size = boost::asio::buffer_size(entry->buffers[1])
+      + boost::asio::buffer_size(entry->buffers[2]);
+    size_t enc_size   = crypto_enc_->encrypted_buffer_size(plain_size);
+
+    std::string plain_buf = std::string(plain_size, '\0');
+
+    plain_buf.replace(0,
+		      boost::asio::buffer_size(entry->buffers[1]),
+		      boost::asio::buffer_cast<const char *>(entry->buffers[1]),
+		      boost::asio::buffer_size(entry->buffers[1]));
+
+    plain_buf.replace(boost::asio::buffer_size(entry->buffers[1]),
+		      boost::asio::buffer_size(entry->buffers[2]),
+		      boost::asio::buffer_cast<const char *>(entry->buffers[2]),
+		      boost::asio::buffer_size(entry->buffers[2]));
+
+    entry->encrypted_message.resize(enc_size);
+    crypto_enc_->encrypt(plain_buf, entry->encrypted_message);
+
+    entry->frame_header.cipher = crypto_enc_->cipher_id();
+    entry->buffers[1] = boost::asio::buffer(entry->encrypted_message);
+    entry->buffers[2] = boost::asio::const_buffer();
+  }
 
   socket_.async_send_to(entry->buffers, outbound_endpoint_,
 			boost::bind(&ProtobufBroadcastPeer::handle_sent, this,

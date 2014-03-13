@@ -127,9 +127,13 @@ class MessageRegister : boost::noncopyable
 
   void serialize(uint16_t component_id, uint16_t msg_type,
 		 google::protobuf::Message &msg,
-		 frame_header_t &frame_header, std::string &data);
+		 frame_header_t &frame_header,
+		 message_header_t &message_header, 
+		 std::string &data);
   std::shared_ptr<google::protobuf::Message>
-    deserialize(frame_header_t &frame_header, void *data);
+  deserialize(frame_header_t &frame_header,
+	      message_header_t &message_header,
+	      void *data);
 
   /** Mapping from message type to load error message. */
   typedef std::multimap<std::string, std::string> LoadFailMap;

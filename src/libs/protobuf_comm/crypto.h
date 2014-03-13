@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  queue_entry.h - Protobuf stream protocol - send queue entry
+ *  crypto.h - Protobuf stream protocol - crypto utils
  *
- *  Created: Fri Feb 01 22:07:14 2013
- *  Copyright  2013  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Mar 11 21:12:35 2014
+ *  Copyright  2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  Redistribution and use in source and binary forms, with or without
@@ -34,33 +34,68 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PROTOBUF_COMM_QUEUE_ENTRY_H_
-#define __PROTOBUF_COMM_QUEUE_ENTRY_H_
+#ifndef __PROTOBUF_COMM_CRYPTO_H_
+#define __PROTOBUF_COMM_CRYPTO_H_
 
-#include <boost/asio.hpp>
-#include <array>
+#include <string>
+#include <map>
+
+#ifdef HAVE_LIBCRYPTO
+#  include <openssl/ossl_typ.h>
+#endif
 
 namespace protobuf_comm {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** Outgoing queue entry. */
-struct QueueEntry {
-public:
-  /** Constructor. */
-  QueueEntry()
-  {
-    frame_header.cipher = PB_ENCRYPTION_NONE;
-  };
-  std::string  serialized_message;	///< serialized protobuf message
-  frame_header_t frame_header;		///< Frame header (network byte order), never encrypted
-  message_header_t message_header;		///< Frame header (network byte order)
-  std::array<boost::asio::const_buffer, 3> buffers;	///< outgoing buffers
-  std::string   encrypted_message;	///< encrypted buffer if encryption is used
+class BufferEncryptor {
+ public:
+  BufferEncryptor(const std::string &key, std::string cipher_name = "AES-128-ECB");
+  ~BufferEncryptor();
+
+  void encrypt(const std::string &plain, std::string &enc);
+
+  /** Get cipher ID.
+   * @return cipher ID */
+  int cipher_id() const
+  { return cipher_id_; }
+
+  size_t encrypted_buffer_size(size_t plain_length);
+
+ private:
+  unsigned char *key_;
+  long long unsigned int iv_;
+
+  const EVP_CIPHER *cipher_;
+
+  int cipher_id_;
 };
 
 
-} // end namespace protobuf_comm
+class BufferDecryptor {
+ public:
+  BufferDecryptor(const std::string &key);
+  ~BufferDecryptor();
+
+  size_t decrypt(int cipher, const void *enc, size_t enc_size, void *plain, size_t plain_size);
+
+ private:
+  void generate_key(int cipher);
+
+ private:
+  std::string key_;
+  std::map<int, std::string> keys_;
+};
+
+const char * cipher_name_by_id(int cipher);
+int          cipher_name_to_id(const char *cipher);
+
+#ifdef HAVE_LIBCRYPTO
+const EVP_CIPHER * cipher_by_id(int cipher);
+const EVP_CIPHER * cipher_by_name(const char *cipher);
+#endif
+
+} // end namespace fawkes
 
 #endif

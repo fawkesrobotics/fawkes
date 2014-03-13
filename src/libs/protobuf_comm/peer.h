@@ -54,6 +54,9 @@ namespace protobuf_comm {
 }
 #endif
 
+class BufferEncryptor;
+class BufferDecryptor;
+
 class ProtobufBroadcastPeer
 {
  public:
@@ -69,6 +72,8 @@ class ProtobufBroadcastPeer
   ProtobufBroadcastPeer(const std::string address, unsigned short port, MessageRegister *mr);
   ProtobufBroadcastPeer(const std::string address, unsigned short send_to_port,
 			unsigned short recv_on_port, MessageRegister *mr);
+  ProtobufBroadcastPeer(const std::string address, unsigned short port,
+			const std::string crypto_key, const std::string cipher = "aes-128-ecb");
   ~ProtobufBroadcastPeer();
 
   void set_filter_self(bool filter);
@@ -80,21 +85,26 @@ class ProtobufBroadcastPeer
   void send(std::shared_ptr<google::protobuf::Message> m);
   void send(google::protobuf::Message &m);
 
+  void setup_crypto(const std::string &key, const std::string &cipher);
+
   /** Get the server's message register.
    * @return message register
    */
   MessageRegister &  message_register()
   { return *message_register_; }
 
+  /** Boost signal for a received message. */
   typedef
     boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, uint16_t, uint16_t,
 				  std::shared_ptr<google::protobuf::Message>)>
     signal_received_type;
 
+  /** Boost signal for an error during receiving a message. */
   typedef
     boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, std::string)>
     signal_recv_error_type;
 
+  /** Boost signal for an error during sending a message. */
   typedef
     boost::signals2::signal<void (std::string)>
     signal_send_error_type;
@@ -119,7 +129,8 @@ class ProtobufBroadcastPeer
 
 
  private: // methods
-  void ctor(const std::string &address, unsigned int send_to_port);
+  void ctor(const std::string &address, unsigned int send_to_port,
+	    const std::string crypto_key = "", const std::string cipher = "aes-128-ecb");
   void determine_local_endpoints();
   void run_asio();
   void start_send();
@@ -151,13 +162,20 @@ class ProtobufBroadcastPeer
   boost::asio::ip::udp::endpoint in_endpoint_;
 
   void *         in_data_;
+  void *         enc_in_data_;
   size_t         in_data_size_;
+  size_t         enc_in_data_size_;
 
   bool           filter_self_;
 
   std::thread asio_thread_;
   MessageRegister *message_register_;
   bool             own_message_register_;
+
+  bool             crypto_;
+  bool             crypto_buf_;
+  BufferEncryptor *crypto_enc_;
+  BufferDecryptor *crypto_dec_;
 };
 
 } // end namespace protobuf_comm

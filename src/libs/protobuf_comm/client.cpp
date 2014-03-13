@@ -231,11 +231,14 @@ void
 ProtobufStreamClient::handle_read_message(const boost::system::error_code& error)
 {
   if (! error) {
-    uint16_t comp_id   = ntohs(in_frame_header_.component_id);
-    uint16_t msg_type  = ntohs(in_frame_header_.msg_type);
+    message_header_t *message_header = static_cast<message_header_t *>(in_data_);
+
+    uint16_t comp_id   = ntohs(message_header->component_id);
+    uint16_t msg_type  = ntohs(message_header->msg_type);
     try {
       std::shared_ptr<google::protobuf::Message> m =
-	message_register_->deserialize(in_frame_header_, in_data_);
+	message_register_->deserialize(in_frame_header_, *message_header,
+				       (char *)in_data_ + sizeof(message_header));
       sig_rcvd_(comp_id, msg_type, m);
     } catch (std::runtime_error &e) {
       //printf("Deserializing of message failed: %s\n", e.what());
@@ -291,10 +294,12 @@ ProtobufStreamClient::send(uint16_t component_id, uint16_t msg_type,
 
   QueueEntry *entry = new QueueEntry();
   message_register_->serialize(component_id, msg_type, m,
-			       entry->frame_header, entry->serialized_message);
+			       entry->frame_header, entry->message_header,
+			       entry->serialized_message);
 
   entry->buffers[0] = boost::asio::buffer(&entry->frame_header, sizeof(frame_header_t));
-  entry->buffers[1] = boost::asio::buffer(entry->serialized_message);
+  entry->buffers[1] = boost::asio::buffer(&entry->message_header, sizeof(message_header_t));
+  entry->buffers[2] = boost::asio::buffer(entry->serialized_message);
  
   std::lock_guard<std::mutex> lock(outbound_mutex_);
   if (outbound_active_) {
