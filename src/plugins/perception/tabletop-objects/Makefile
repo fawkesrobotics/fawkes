@@ -31,6 +31,11 @@ REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface features
 ifeq ($(CC),clang)
   CFLAGS += -Wno-overloaded-virtual
 endif
+ifeq ($(CC),gcc)
+  ifneq ($(call gcc_atleast_version,4,5),1)
+    GCC_TOO_OLD=1
+  endif
+endif
 
 # Enable for time measurements
 #CFLAGS += -DUSE_TIMETRACKER
@@ -45,33 +50,30 @@ OBJS_tabletop_objects_standalone = tabletop_objects_standalone.o
 
 OBJS_all    = $(OBJS_tabletop_objects) $(OBJS_tabletop_objects_standalone)
 
-ifeq ($(HAVE_PCL)$(HAVE_TF),11)
-  ifeq ($(call pcl-have-libs,$(REQUIRED_PCL_LIBS)),1)
-    CFLAGS += $(CFLAGS_TF) $(CFLAGS_PCL) \
-	      $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS)) \
-	      -Wno-deprecated -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
+ifneq ($(CC)$(GCC_TOO_OLD),gcc1)
+  ifeq ($(HAVE_PCL)$(HAVE_TF),11)
+    ifeq ($(call pcl-have-libs,$(REQUIRED_PCL_LIBS)),1)
+      CFLAGS += $(CFLAGS_TF) $(CFLAGS_PCL) \
+	        $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS)) \
+	        -Wno-deprecated -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
 
-    LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL) \
-	       $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS))
+      LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL) \
+	         $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS))
 
-    # for standalone:
-    # $(CFLAGS_VTK) $(CFLAGS_OPENNI)
-    # $(LDFLAGS_OPENNI) 
-    #  -lpcl_io -lpcl_visualization -lboost_thread-mt 
-    #  -lvtkCommon -lvtkRendering -lvtkFiltering
-
-    PLUGINS_all = $(PLUGINDIR)/tabletop-objects.$(SOEXT)
-    #BINS_all = $(BINDIR)/tabletop-objects-standalone
+      PLUGINS_all = $(PLUGINDIR)/tabletop-objects.$(SOEXT)
+    else
+      WARN_TARGETS += warning_pcl_components
+    endif
   else
-    WARN_TARGETS += warning_pcl_components
+    ifneq ($(HAVE_PCL),1)
+      WARN_TARGETS += warning_pcl
+    endif
+    ifneq ($(HAVE_TF),1)
+      WARN_TARGETS += warning_tf
+    endif
   endif
 else
-  ifneq ($(HAVE_PCL),1)
-    WARN_TARGETS += warning_pcl
-  endif
-  ifneq ($(HAVE_TF),1)
-    WARN_TARGETS += warning_tf
-  endif
+  WARN_TARGETS += warning_old_gcc
 endif
 
 ifeq ($(USE_BASELINK_FRAME),1)
@@ -114,7 +116,7 @@ LDFLAGS += $(call boost-lib-ldflags,system)
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_tf warning_pcl warning_ros warning_visualization_msgs
+.PHONY: warning_tf warning_pcl warning_ros warning_visualization_msgs warning_old_gcc
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting tabletop objects plugin$(TNORMAL) (fawkestf not available)"
 warning_pcl:
@@ -125,6 +127,8 @@ warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS not available)"
 warning_visualization_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS package visualization_msgs not available)"
+warning_old_gcc:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting tabletop objects plugin$(TNORMAL) (GCC too old, have $(GCC_VERSION), required 4.5)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

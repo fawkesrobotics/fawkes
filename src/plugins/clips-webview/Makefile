@@ -49,7 +49,7 @@ warning_webview:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-webview plugin$(TNORMAL) (webview not available)"
 
 warning_clips:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-webview plugin$(TNORMAL) (CLIPS not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-webview plugin$(TNORMAL) ($(CLIPS_ERROR))"
 endif
 
 include $(BUILDSYSDIR)/base.mk

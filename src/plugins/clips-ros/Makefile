@@ -62,7 +62,7 @@ warning_xmlrpcpp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-ros plugin$(TNORMAL) (xmlrpcpp ROS package not found)"
 
 warning_clips:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-ros plugin$(TNORMAL) (CLIPS not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-ros plugin$(TNORMAL) ($(CLIPS_ERROR))"
 
 $(WARN_TARGETS_BOOST): warning_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-ros plugin $(TNORMAL) (Boost library $* not found)"

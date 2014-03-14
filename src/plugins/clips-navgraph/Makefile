@@ -41,7 +41,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_clips
 warning_clips:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-navgraph plugin$(TNORMAL) (CLIPS not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-navgraph plugin$(TNORMAL) ($(CLIPS_ERROR))"
 
 endif
 

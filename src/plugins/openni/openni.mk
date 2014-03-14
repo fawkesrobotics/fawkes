@@ -34,7 +34,9 @@ ifeq ($(HAVE_OPENNI),1)
 		  -fno-strict-aliasing -Wno-unknown-pragmas \
                   -Wno-return-type
   ifeq ($(CC),gcc)
-    CFLAGS_OPENNI += -Wno-unused-but-set-variable
+    ifeq ($(call gcc_atleast_version,4,6),1)
+      CFLAGS_OPENNI += -Wno-unused-but-set-variable
+    endif
   endif
   ifeq ($(CC),clang)
     CFLAGS_OPENNI += -Wno-attributes

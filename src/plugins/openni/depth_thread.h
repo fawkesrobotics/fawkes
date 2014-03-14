@@ -35,6 +35,9 @@
 #if defined(__linux__) && not defined(linux)
 #  define linux true
 #endif
+#if defined(__i386__) && not defined(i386)
+#  define i386 true
+#endif
 #include <XnCppWrapper.h>
 
 namespace firevision {

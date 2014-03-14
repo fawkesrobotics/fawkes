@@ -42,7 +42,7 @@ else
     WARN_TARGETS += warning_protobuf
   endif
   ifneq ($(HAVE_CLIPS),1)
-    WARN_TARGETS = warning_clips
+    WARN_TARGETS += warning_clips
   endif
   ifneq ($(HAVE_BOOST_LIBS),1)
     WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
@@ -56,7 +56,7 @@ warning_protobuf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build protobuf_clips library$(TNORMAL) (protobuf not found)"
 
 warning_clips:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build protobuf_clips library$(TNORMAL) (clipsmm not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build protobuf_clips library$(TNORMAL) ($(CLIPS_ERROR))"
 
 $(WARN_TARGETS_BOOST): warning_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build protobuf_comm library$(TNORMAL) (Boost library $* not found)"

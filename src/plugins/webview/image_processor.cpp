@@ -67,7 +67,13 @@ WebviewImageRequestProcessor::WebviewImageRequestProcessor(const char *baseurl,
 WebviewImageRequestProcessor::~WebviewImageRequestProcessor()
 {
   free(baseurl_);
-  for (auto s : streams_) {
+#if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100) > 40600
+  for (auto &s : streams_) {
+#else
+  std::map<std::string, fawkes::WebviewJpegStreamProducer *>::iterator si;
+  for (si = streams_.begin(); si != streams_.end(); ++si) {
+    std::pair<const std::string, fawkes::WebviewJpegStreamProducer *> &s = *si;
+#endif
     thread_col_->remove(s.second);
     delete s.second;
   }
@@ -171,7 +177,13 @@ WebviewImageRequestProcessor::process_request(const fawkes::WebRequest *request)
         *r += "<table>\n";
         *r += "<tr><th>Buffer</th><th>Frame</th><th>Colorspace</th>"
 	  "<th>Dimensions</th><th>Memory</th><th>View as</th></tr>\n";
-	for (auto m : meta_data) {
+#if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100) > 40600
+	for (auto &m : meta_data) {
+#else
+        std::list<SharedMemoryImageBufferMetaData>::iterator mi;
+        for (mi = meta_data.begin(); mi != meta_data.end(); ++mi) {
+          SharedMemoryImageBufferMetaData &m = *mi;
+#endif
 	  r->append_body("<tr><td>%s</td><td>%s</td><td>%s</td>"
 			 "<td>%ux%u</td><td>%zu B</td>"
 			 "<td><div class=\"actionlist\"><ul><li><a href=\"%s/view/%s.jpg\">JPEG</a></li>"

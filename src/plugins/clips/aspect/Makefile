@@ -27,18 +27,30 @@ OBJS_libfawkesclipsaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCD
 
 OBJS_all    = $(OBJS_libfawkesclipsaspect)
 
-ifeq ($(HAVE_CLIPS),1)
-  LIBS_all = $(LIBDIR)/libfawkesclipsaspect.so
+ifeq ($(CC),gcc)
+  ifneq ($(call gcc_atleast_version,4,6),1)
+    GCC_TOO_OLD=1
+  endif
+endif
+
+ifneq ($(GCC_TOO_OLD),1)
+  ifeq ($(HAVE_CLIPS),1)
+    LIBS_all = $(LIBDIR)/libfawkesclipsaspect.so
+  else
+    WARN_TARGETS += warning_clips
+  endif
 else
-  WARN_TARGETS += warning_clips
+  WARN_TARGETS += warning_old_gcc
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_clips
+.PHONY: warning_clips warning_old_gcc
 warning_clips:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting CLIPS Aspect$(TNORMAL) (CLIPS not found)"
+warning_old_gcc:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting CLIPS Aspect$(TNORMAL) (GCC too old, have $(GCC_VERSION), required 4.6)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
