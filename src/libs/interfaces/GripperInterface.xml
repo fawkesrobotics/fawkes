@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="GripperInterface" author="Sebastian Reuter" year="2013">
+  <constants>
+    <enum name="GripperState">
+      <comment>Indicator of current or desired gripper state.</comment>
+      <item name="OPEN">Gripper is open</item>
+      <item name="CLOSED">Gripper is closed</item>
+    </enum>
+  </constants>
+  <data>
+    <comment>
+      This interface provides support for a simple gripper actuator.
+      It has been used with the Robotino Gripper.
+    </comment>
+    <field type="GripperState" name="gripper_state">
+      The current state of the gripper.
+    </field>
+  </data>
+  <message name="OpenGripper">
+    <comment>Request gripper to open.</comment>
+  </message>
+  <message name="CloseGripper">
+    <comment>Request gripper to close.</comment>
+  </message>
+</interface>

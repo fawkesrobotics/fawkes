@@ -26,7 +26,7 @@ PRESUBDIRS = interfaces
 #CFLAGS += -DUSE_TIMETRACKER
 
 LIBS_robotino = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-		fawkesblackboard fawkesinterface MotorInterface \
+		fawkesblackboard fawkesinterface MotorInterface GripperInterface \
 		BatteryInterface RobotinoSensorInterface \
 		rec_iocontrol_robotstate rec_iocontrol_remotestate
 OBJS_robotino = robotino_plugin.o sensor_thread.o act_thread.o
