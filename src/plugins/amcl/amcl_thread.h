@@ -135,7 +135,7 @@ private:
   pf_t *pf_;
   int resample_count_;
 
-  double save_pose_period;
+  double save_pose_period_;
   double transform_tolerance_;
   fawkes::Time save_pose_last_time;
 
