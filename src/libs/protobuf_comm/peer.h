@@ -71,7 +71,8 @@ class ProtobufBroadcastPeer
 			unsigned short recv_on_port, std::vector<std::string> &proto_path);
   ProtobufBroadcastPeer(const std::string address, unsigned short port, MessageRegister *mr);
   ProtobufBroadcastPeer(const std::string address, unsigned short send_to_port,
-			unsigned short recv_on_port, MessageRegister *mr);
+			unsigned short recv_on_port, MessageRegister *mr,
+			frame_header_version_t header_version = PB_FRAME_V2);
   ProtobufBroadcastPeer(const std::string address, unsigned short port,
 			const std::string crypto_key, const std::string cipher = "aes-128-ecb");
   ~ProtobufBroadcastPeer();
@@ -130,7 +131,8 @@ class ProtobufBroadcastPeer
 
  private: // methods
   void ctor(const std::string &address, unsigned int send_to_port,
-	    const std::string crypto_key = "", const std::string cipher = "aes-128-ecb");
+	    const std::string crypto_key = "", const std::string cipher = "aes-128-ecb",
+	    frame_header_version_t = PB_FRAME_V2);
   void determine_local_endpoints();
   void run_asio();
   void start_send();
@@ -171,6 +173,8 @@ class ProtobufBroadcastPeer
   std::thread asio_thread_;
   MessageRegister *message_register_;
   bool             own_message_register_;
+
+  frame_header_version_t frame_header_version_;
 
   bool             crypto_;
   bool             crypto_buf_;

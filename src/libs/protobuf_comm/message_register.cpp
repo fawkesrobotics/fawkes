@@ -307,7 +307,9 @@ MessageRegister::deserialize(frame_header_t &frame_header, message_header_t &mes
 
   std::shared_ptr<google::protobuf::Message> m =
     new_message_for(comp_id, msg_type);
-  m->ParseFromArray(data, data_size);
+  if (! m->ParseFromArray(data, data_size)) {
+    throw std::runtime_error("Failed to parse message");
+  }
 
   return m;
 }

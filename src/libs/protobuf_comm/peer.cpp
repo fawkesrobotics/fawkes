@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *  peer.cpp - Protobuf stream protocol - broadcast peer
  *
@@ -165,16 +164,18 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned
  * @param send_to_port IPv4 UDP port to send data to
  * @param recv_on_port IPv4 UDP port to receive data on
  * @param mr message register to query for message types
+ * @param header_version which frame header version to send, use with caution
  */
 ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 					     unsigned short send_to_port,
 					     unsigned short recv_on_port,
-					     MessageRegister *mr)
+					     MessageRegister *mr,
+					     frame_header_version_t header_version)
   : io_service_(), resolver_(io_service_),
     socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port)),
     message_register_(mr), own_message_register_(false)
 {
-  ctor(address, send_to_port);
+  ctor(address, send_to_port, "", "", header_version);
 }
 
 
@@ -183,15 +184,18 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
  * @param send_to_port UDP port to send messages to
  * @param crypto_key encryption key for messages
  * @param cipher cipher to use for encryption
+ * @þaram header_version which frame header version to send, use with caution
  */
 void
 ProtobufBroadcastPeer::ctor(const std::string &address, unsigned int send_to_port,
-			    const std::string crypto_key, const std::string cipher)
+			    const std::string crypto_key, const std::string cipher,
+			    frame_header_version_t header_version)
 {
   filter_self_  = true;
   crypto_       = false;
   crypto_enc_   = NULL;
   crypto_dec_   = NULL;
+  frame_header_version_ = header_version;
 
   in_data_size_ = max_packet_length;
   in_data_ = malloc(in_data_size_);
@@ -245,6 +249,10 @@ ProtobufBroadcastPeer::~ProtobufBroadcastPeer()
 void
 ProtobufBroadcastPeer::setup_crypto(const std::string &key, const std::string &cipher)
 {
+  if (frame_header_version_ == PB_FRAME_V1) {
+    throw std::runtime_error("Crypto support only available with V2+ frame header");
+  }
+
   crypto_enc_ = new BufferEncryptor(key, cipher);
 
   if (! enc_in_data_) {
@@ -323,53 +331,84 @@ void
 ProtobufBroadcastPeer::handle_recv(const boost::system::error_code& error,
 				   size_t bytes_rcvd)
 {
-  if (!error && bytes_rcvd >= (sizeof(frame_header_t) + sizeof(message_header_t))) {
-    frame_header_t *frame_header = static_cast<frame_header_t *>(crypto_buf_ ? enc_in_data_ : in_data_);
+  const size_t expected_min_size =
+    (frame_header_version_ == PB_FRAME_V1)
+    ? sizeof(frame_header_v1_t) : (sizeof(frame_header_t) + sizeof(message_header_t));
 
-    if (! crypto_buf_ && (frame_header->cipher != PB_ENCRYPTION_NONE)) {
-      sig_recv_error_(in_endpoint_, "Received encrypted message but encryption is disabled");
-    } else if (crypto_buf_ && ! (frame_header->cipher  != PB_ENCRYPTION_NONE)) {
-      sig_recv_error_(in_endpoint_, "Received plain text message but encryption is enabled");
+  if (!error && bytes_rcvd >= expected_min_size ) {
+    frame_header_t frame_header;
+    size_t header_size;
+    if (frame_header_version_ == PB_FRAME_V1) {
+      frame_header_v1_t *frame_header_v1 = static_cast<frame_header_v1_t *>(in_data_);
+      frame_header.header_version = PB_FRAME_V1;
+      frame_header.cipher         = PB_ENCRYPTION_NONE;
+      frame_header.payload_size   = frame_header_v1->payload_size;
+      header_size  = sizeof(frame_header_v1_t);
     } else {
+      memcpy(&frame_header, crypto_buf_ ? enc_in_data_ : in_data_, sizeof(frame_header_t));
+      header_size  = sizeof(frame_header_t);
 
-      if (crypto_buf_ && (frame_header->cipher  != PB_ENCRYPTION_NONE)) {
-	// we need to decrypt first
-	try {
-	  memcpy(in_data_, enc_in_data_, sizeof(frame_header_t));
-	  size_t to_decrypt = bytes_rcvd - sizeof(frame_header_t);
-	  bytes_rcvd = crypto_dec_->decrypt(frame_header->cipher,
-					    (unsigned char *)enc_in_data_ + sizeof(frame_header_t), to_decrypt,
-					    (unsigned char *)in_data_ + sizeof(frame_header_t), in_data_size_);
-	  bytes_rcvd += sizeof(frame_header_t);
-	} catch (std::runtime_error &e) {
-	  sig_recv_error_(in_endpoint_, std::string("Decryption fail: ") + e.what());
-	  bytes_rcvd = 0;
-	}
-      }
+      if (! crypto_buf_ && (frame_header.cipher != PB_ENCRYPTION_NONE)) {
+	sig_recv_error_(in_endpoint_, "Received encrypted message but encryption is disabled");
+      } else if (crypto_buf_ && ! (frame_header.cipher  != PB_ENCRYPTION_NONE)) {
+	sig_recv_error_(in_endpoint_, "Received plain text message but encryption is enabled");
+      } else {
 
-      size_t to_read = ntohl(frame_header->payload_size);
-      if (bytes_rcvd == (sizeof(frame_header_t) + to_read)) {
-	message_header_t *message_header =
-	  static_cast<message_header_t *>((void*)((char *)in_data_ + sizeof(frame_header_t)));
-
-	if (! filter_self_ ||
-	    ! std::binary_search(local_endpoints_.begin(), local_endpoints_.end(), in_endpoint_))
-	{
-	  uint16_t comp_id   = ntohs(message_header->component_id);
-	  uint16_t msg_type  = ntohs(message_header->msg_type);
-	  void *msg_data = (char *)in_data_ + sizeof(frame_header_t) + sizeof(message_header_t);
+	if (crypto_buf_ && (frame_header.cipher != PB_ENCRYPTION_NONE)) {
+	  // we need to decrypt first
 	  try {
-	    std::shared_ptr<google::protobuf::Message> m =
-	      message_register_->deserialize(*frame_header, *message_header, msg_data);
-
-	    sig_rcvd_(in_endpoint_, comp_id, msg_type, m);
+	    memcpy(in_data_, enc_in_data_, sizeof(frame_header_t));
+	    size_t to_decrypt = bytes_rcvd - sizeof(frame_header_t);
+	    bytes_rcvd = crypto_dec_->decrypt(frame_header.cipher,
+					      (unsigned char *)enc_in_data_ + sizeof(frame_header_t), to_decrypt,
+					      (unsigned char *)in_data_ + sizeof(frame_header_t), in_data_size_);
+	    bytes_rcvd += sizeof(frame_header_t);
 	  } catch (std::runtime_error &e) {
-	    sig_recv_error_(in_endpoint_, std::string("Deserialization fail: ") + e.what());
+	    sig_recv_error_(in_endpoint_, std::string("Decryption fail: ") + e.what());
+	    bytes_rcvd = 0;
 	  }
 	}
-      } else {
-	sig_recv_error_(in_endpoint_, "Invalid number of bytes received");
       }
+    }
+
+    size_t payload_size = ntohl(frame_header.payload_size);
+
+    if (bytes_rcvd == (header_size + payload_size)) {
+      if (! filter_self_ ||
+	  ! std::binary_search(local_endpoints_.begin(), local_endpoints_.end(), in_endpoint_))
+      {
+	void *data;
+	message_header_t message_header;
+	
+	if (frame_header_version_ == PB_FRAME_V1) {
+	  frame_header_v1_t *frame_header_v1 = static_cast<frame_header_v1_t *>(in_data_);
+	  message_header.component_id = frame_header_v1->component_id;
+	  message_header.msg_type     = frame_header_v1->msg_type;
+	  data = (char *)in_data_ + sizeof(frame_header_v1_t);
+	  // message register expects payload size to include message header
+	  frame_header.payload_size = htonl(ntohl(frame_header.payload_size) + sizeof(message_header_t));
+	} else {
+	  message_header_t *msg_header =
+	    static_cast<message_header_t *>((void*)((char *)in_data_ + sizeof(frame_header_t)));
+	  message_header.component_id = msg_header->component_id;
+	  message_header.msg_type     = msg_header->msg_type;
+	  data = (char *)in_data_ + sizeof(frame_header_t) + sizeof(message_header_t);
+	}
+
+	uint16_t comp_id  = ntohs(message_header.component_id);
+	uint16_t msg_type = ntohs(message_header.msg_type);
+
+	try {
+	  std::shared_ptr<google::protobuf::Message> m =
+	    message_register_->deserialize(frame_header, message_header, data);
+
+	  sig_rcvd_(in_endpoint_, comp_id, msg_type, m);
+	} catch (std::runtime_error &e) {
+	  sig_recv_error_(in_endpoint_, std::string("Deserialization fail: ") + e.what());
+	}
+      }
+    } else {
+      sig_recv_error_(in_endpoint_, "Invalid number of bytes received");
     }
 
   } else {
@@ -416,8 +455,18 @@ ProtobufBroadcastPeer::send(uint16_t component_id, uint16_t msg_type,
   if (entry->serialized_message.size() > max_packet_length) {
     throw std::runtime_error("Serialized message too big");
   }
-  entry->buffers[0] = boost::asio::buffer(&entry->frame_header, sizeof(frame_header_t));
-  entry->buffers[1] = boost::asio::buffer(&entry->message_header, sizeof(message_header_t));
+
+  if (frame_header_version_ == PB_FRAME_V1) {
+    entry->frame_header_v1.component_id = entry->message_header.component_id;
+    entry->frame_header_v1.msg_type     = entry->message_header.msg_type;
+    entry->frame_header_v1.payload_size = entry->frame_header.payload_size;
+
+    entry->buffers[0] = boost::asio::buffer(&entry->frame_header_v1, sizeof(frame_header_v1_t));
+    entry->buffers[1] = boost::asio::const_buffer();
+  } else {
+    entry->buffers[0] = boost::asio::buffer(&entry->frame_header, sizeof(frame_header_t));
+    entry->buffers[1] = boost::asio::buffer(&entry->message_header, sizeof(message_header_t));
+  }
   entry->buffers[2] = boost::asio::buffer(entry->serialized_message);
  
   {

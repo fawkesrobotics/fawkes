@@ -61,7 +61,7 @@ class ProtobufStreamClient
  public:
   ProtobufStreamClient();
   ProtobufStreamClient(std::vector<std::string> &proto_path);
-  ProtobufStreamClient(MessageRegister *mr);
+  ProtobufStreamClient(MessageRegister *mr, frame_header_version_t header_version = PB_FRAME_V2);
   ~ProtobufStreamClient();
 
   /** Get the client's message register.
@@ -144,12 +144,15 @@ class ProtobufStreamClient
   std::mutex               outbound_mutex_;
   bool                     outbound_active_;
 
-  frame_header_t in_frame_header_;
-  size_t         in_data_size_;
-  void *         in_data_;
+  void   *in_frame_header_;
+  size_t  in_frame_header_size_;
+  size_t  in_data_size_;
+  void *  in_data_;
 
   MessageRegister *message_register_;
   bool             own_message_register_;
+
+  frame_header_version_t frame_header_version_;
 };
 
 } // end namespace protobuf_comm
