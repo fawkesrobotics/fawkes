@@ -19,8 +19,6 @@ include $(BUILDSYSDIR)/protobuf.mk
 include $(BUILDSYSDIR)/clips.mk
 include $(BUILDSYSDIR)/boost.mk
 
-CFLAGS += $(CFLAGS_CPP11)
-
 LIBS_clips_protobuf = \
 	fawkescore fawkesutils fawkesaspects fawkesclipsaspect \
 	fawkes_protobuf_comm fawkes_protobuf_clips
@@ -31,14 +29,17 @@ OBJS_all = $(OBJS_clips_protobuf)
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-ifeq ($(HAVE_PROTOBUF)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS),111)
-  CFLAGS  += $(CFLAGS_PROTOBUF)  $(CFLAGS_CLIPS) \
+ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS),1111)
+  CFLAGS  += $(CFLAGS_PROTOBUF)  $(CFLAGS_CLIPS) $(CFLAGS_CPP11) \
 	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
   LDFLAGS += $(LDFLAGS_PROTOBUF) $(LDFLAGS_CLIPS) \
 	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
   PLUGINS_all = $(PLUGINDIR)/clips-protobuf.so
 else
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf
   endif
@@ -55,9 +56,11 @@ all: $(WARN_TARGETS)
 warning_protobuf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-protobuf plugin$(TNORMAL) (protobuf not found)"
 
-.PHONY: warning_clips
+.PHONY: warning_clips warning_cpp11
 warning_clips:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-protobuf plugin$(TNORMAL) ($(CLIPS_ERROR))"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-protobuf plugin$(TNORMAL) (C++11 not supported)"
 
 $(WARN_TARGETS_BOOST): warning_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build protobuf_comm library$(TNORMAL) (Boost library $* not found)"
