@@ -188,7 +188,7 @@ ClipsProtobufCommunicator::enable_peer(std::string address, int send_port,
 
   if ((send_port > 0) && ! peer_) {
     peer_ = new protobuf_comm::ProtobufBroadcastPeer(address, send_port, recv_port,
-						     message_register_);
+						     message_register_, PB_FRAME_V1);
 
     peer_->signal_received()
       .connect(boost::bind(&ClipsProtobufCommunicator::handle_peer_msg, this, _1, _2, _3, _4));
@@ -546,7 +546,7 @@ ClipsProtobufCommunicator::clips_pb_client_connect(std::string host, int port)
 {
   if (port <= 0) return false;
 
-  ProtobufStreamClient *client = new ProtobufStreamClient(message_register_);
+  ProtobufStreamClient *client = new ProtobufStreamClient(message_register_, PB_FRAME_V1);
 
   long int client_id;
   {
