@@ -136,6 +136,8 @@ class ClipsProtobufCommunicator
   void handle_client_msg(long int client_id,
 			 uint16_t comp_id, uint16_t msg_type,
 			 std::shared_ptr<google::protobuf::Message> msg);
+  void handle_client_receive_fail(long int client_id,
+				  uint16_t comp_id, uint16_t msg_type, std::string msg);
 
  private:
   CLIPS::Environment   *clips_;

@@ -562,6 +562,8 @@ ClipsProtobufCommunicator::clips_pb_client_connect(std::string host, int port)
 		this, client_id, boost::asio::placeholders::error));
   client->signal_received().connect(
     boost::bind(&ClipsProtobufCommunicator::handle_client_msg, this, client_id, _1, _2, _3));
+  client->signal_receive_failed().connect(
+    boost::bind(&ClipsProtobufCommunicator::handle_client_receive_fail, this, client_id, _1, _2, _3));
 
   client->async_connect(host.c_str(), port);
   return CLIPS::Value(client_id);
@@ -935,6 +937,17 @@ ClipsProtobufCommunicator::handle_client_msg(long int client_id,
   fawkes::MutexLocker lock(&clips_mutex_);
   std::pair<std::string, unsigned short> endpp = std::make_pair(std::string(), 0);
   clips_assert_message(endpp, comp_id, msg_type, msg, CT_CLIENT, client_id);
+}
+
+
+void
+ClipsProtobufCommunicator::handle_client_receive_fail(long int client_id,
+						      uint16_t comp_id, uint16_t msg_type, std::string msg)
+{
+  fawkes::MutexLocker lock(&clips_mutex_);
+  clips_->assert_fact_f("(protobuf-receive-failed (client-id %li) (rcvd-via STREAM) "
+			"(comp-id %u) (msg-type %u) (message \"%s\"))",
+			client_id, comp_id, msg_type, msg.c_str());
 }
 
 } // end namespace protobuf_clips
