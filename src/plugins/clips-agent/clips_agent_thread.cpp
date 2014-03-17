@@ -106,6 +106,8 @@ ClipsAgentThread::init()
 
   switch_if_ = blackboard->open_for_reading<SwitchInterface>("Clips Agent Start");
 
+  MutexLocker lock(clips.objmutex_ptr());
+
   clips->evaluate(std::string("(path-add-subst \"@BASEDIR@\" \"") + BASEDIR + "\")");
   clips->evaluate(std::string("(path-add-subst \"@FAWKES_BASEDIR@\" \"") +
 		  FAWKES_BASEDIR + "\")");
