@@ -1336,7 +1336,7 @@ void
 V4L2Camera::set_exposure_auto(unsigned int exposure_auto)
 {
   LibLogger::log_debug("V4L2Cam", "setting exposure_auto to %d", exposure_auto);
-  set_one_control("AWB", V4L2_CID_EXPOSURE_AUTO, exposure_auto);
+  set_one_control("exposure_auto", V4L2_CID_EXPOSURE_AUTO, exposure_auto);
 }
 
 int
