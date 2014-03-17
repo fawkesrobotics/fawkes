@@ -216,6 +216,7 @@ ClipsWebRequestProcessor::process_request(const fawkes::WebRequest *request)
     } else if (subpath.find("/retract") == 0) {
       std::string index_str = subpath.substr(9); // length of "/retract/"
       long int index = StringConversions::to_long(index_str);
+      fawkes::MutexLocker lock(clips.objmutex_ptr());
       retract_fact(clips, index);
       return new WebRedirectReply(std::string(baseurl_) + "/" + env_name);
     }
