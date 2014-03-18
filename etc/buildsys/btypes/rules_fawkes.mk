@@ -15,8 +15,9 @@
 
 # Rule for building plugins in PLUGINDIR
 $(PLUGINDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
+	$(eval BUILT_PARTS += $@)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENT) echo -e "$(INDENT_PRINT)=== Linking plugin $(TBOLDGREEN)$*$(TNORMAL) ---"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[PLUGIN] $(TGRAY)$(PARENTDIR):$(TNORMAL) $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(PLUGINDIR)))/$*$(TNORMAL)"
 	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
 	-o $@ $(subst ..,__,$^) \
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(call nametr,$*)) \
@@ -25,13 +26,13 @@ $(PLUGINDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 	$(SILENT)$(NM) $@ | grep -q plugin_factory; \
 	if [ "$$?" != "0" ]; then \
 		rm $@; \
-		echo -e "$(INDENT_PRINT)--- $(TRED)Plugin has no plugin_factory symbol. Forgot EXPORT_PLUGIN?$(TNORMAL)"; \
+		echo -e "$(INDENT_PRINT)[ERR] $(TRED)Plugin has no plugin_factory symbol. Forgot EXPORT_PLUGIN?$(TNORMAL)"; \
 		exit 3; \
 	fi
 	$(SILENT)$(NM) $@ | grep -q plugin_description; \
 	if [ "$$?" != "0" ]; then \
 		rm $@; \
-		echo -e "$(INDENT_PRINT)--- $(TRED)Plugin has no plugin_description symbol. Forgot PLUGIN_DESCRIPTION?$(TNORMAL)"; \
+		echo -e "$(INDENT_PRINT)[ERR] $(TRED)Plugin has no plugin_description symbol. Forgot PLUGIN_DESCRIPTION?$(TNORMAL)"; \
 		exit 3; \
 	fi
 

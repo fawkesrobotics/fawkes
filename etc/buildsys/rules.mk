@@ -46,6 +46,8 @@ ifeq ($(MAKE_INSUFFICIENT),1)
   $(error You need at least GNU Make version $(MAKE_MIN_VERSION_MAJOR).$(MAKE_MIN_VERSION_MINOR), but you have only $(MAKE_VERSION))
 endif
 
+PARENTDIR=$(subst $(abspath $(TOP_BASEDIR))/,,$(SRCDIR)/)
+
 # indentation definitions, dash (-) is replaced with space
 INDENT_STRING = ---
 INDENT_PRINT := $(subst -, ,$(INDENT))
@@ -74,10 +76,20 @@ endif
 ifeq ($(MAKELEVEL),1)
   EXTRA_ALL = $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui) $(MANPAGES_gui)
 endif
-all: presubdirs $(LIBS_all:%.so=%.$(SOEXT)) $(PLUGINS_all:%.so=%.$(SOEXT)) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs
-gui: presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs
+all: presubdirs $(LIBS_all:%.so=%.$(SOEXT)) $(PLUGINS_all:%.so=%.$(SOEXT)) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs | silent-nothing-to-do-all
+gui: presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs | silent-nothing-to-do-gui
 uncolored-all: all
 uncolored-gui: gui
+
+BUILT_PARTS=
+.PHONY: silent-nothing-to-do-gui silent-nothing-to-do-all
+silent-nothing-to-do-all:
+	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
+	$(eval BUILT_PARTS += $@)
+
+silent-nothing-to-do-gui:
+	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
+	$(eval BUILT_PARTS += $@)
 
 ifdef OBJS_all
 ifneq ($(OBJS_all),)
@@ -94,10 +106,9 @@ else
   endif
 endif
 
-
 .PHONY: clean
 clean: presubdirs subdirs
-	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(CURDIR)$(TNORMAL)"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL)"
 	$(SILENT) if [ "$(SRCDIR)/$(OBJDIR)" != "/" ]; then rm -rf "$(SRCDIR)/$(OBJDIR)" ; fi
 	$(SILENT) if [ -n "$(DEPDIR)" ]; then rm -rf "$(DEPDIR)" ; fi
 	$(SILENT)$(foreach B,$(BINS_all),rm -f $(B);)
@@ -111,17 +122,6 @@ clean: presubdirs subdirs
 	$(SILENT)$(foreach M,$(MANPAGES_gui),rm -f $(M);)
 	$(SILENT)$(foreach T,$(TARGETS_gui),rm -rf $(T);)
 	$(SILENT)$(foreach E,$(CLEAN_FILES),rm -rf $(E);)
-
-ifeq (,$(findstring qa,$(SUBDIRS)))
-.PHONY: qa
-qa: presubdirs subdirs
-	$(SILENT) if [ -d "$(subst /.objs,,$(abspath $(CURDIR)))/qa" ]; then \
-		echo -e "$(INDENT_PRINT)--> Building QA in $(subst $(abspath $(CURDIR)/$(BASEDIR))/,,$(subst /.objs,,$(abspath $(CURDIR)))/qa)"; \
-		$(MAKE) --no-print-directory --no-keep-going -C "$(subst /.objs,,$(CURDIR))/qa" \
-			SRCDIR="$(subst /.objs,,$(CURDIR))/qa" $(MFLAGS) INDENT="$(INDENT)$(INDENT_STRING)" \
-			OBJSSUBMAKE=0 || exit $$?; \
-	fi
-endif
 
 .PHONY: presubdirs $(PRESUBDIRS) subdirs $(SUBDIRS)
 presubdirs: $(PRESUBDIRS)
@@ -145,16 +145,17 @@ $(SUBDIRS): | $(PRESUBDIRS)
   endif
 
 $(PRESUBDIRS) $(SUBDIRS):
+	$(eval BUILT_PARTS += $@)
 	$(SILENTSYMB) if [ ! -d "$(abspath $(SRCDIR)/$(@))" ]; then \
-		echo -e "$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check [PRE]SUBDIRS variable$(TNORMAL) ---"; \
+		echo -e "$(INDENT_PRINT)---$(TRED)Directory $(TNORMAL)$(TBOLDRED)$@$(TNORMAL)$(TRED) does not exist, check [PRE]SUBDIRS variable$(TNORMAL)"; \
 		exit 1; \
 	else \
-		echo -e "$(INDENT_PRINT)--> Entering sub-directory $(TBOLDBLUE)$@$(TNORMAL) ---"; \
+		echo -e "$(INDENT_PRINT)--> Entering sub-directory $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL)$(TBOLDBLUE)$@$(TNORMAL)"; \
 		$(MAKE) --no-print-directory --no-keep-going -C "$(abspath $(SRCDIR)/$@)" \
 		$(MFLAGS) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)" \
 		SRCDIR="$(abspath $(SRCDIR)/$@)" OBJSSUBMAKE=0 || exit $$?; \
 		if [ "$(MAKECMDGOALS)" != "clean" ]; then \
-			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $@"; \
+			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $(TGRAY)$(PARENTDIR)$(TNORMAL)$@"; \
 		fi \
 	fi
 endif
@@ -167,9 +168,10 @@ endif
 # directories are build in .objs, another change is needed below in bin, lib and plugin targets,
 # mocs etc.
 %.o: %.cpp
+	$(eval BUILT_PARTS += $@)
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENTSYMB) echo "$(INDENT_PRINT)--- Compiling $(subst $(SRCDIR)/,,$<) (C++)"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[C++] $(TGRAY)$(PARENTDIR)$(TNORMAL)$(subst $(SRCDIR)/,,$<)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(if $(CFLAGS_$*),$(CFLAGS_$*),$(CFLAGS))  \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
@@ -181,7 +183,7 @@ endif
 %.o: %.c
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENTSYMB) echo "$(INDENT_PRINT)--- Compiling $(subst $(SRCDIR)/,,$<) (C)"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[ C ] $(TGRAY)$(PARENTDIR)$(TNORMAL)$(subst $(SRCDIR)/,,$<)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(if $(CFLAGS_$*),$(CFLAGS_$*),$(CFLAGS)) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
@@ -191,13 +193,14 @@ endif
 	rm -f $(DEPFILE).td
 
 moc_%.cpp: %.h
+	$(eval BUILT_PARTS += $@)
 	$(SILENTSYMB) echo "$(INDENT_PRINT)--- Running Qt moc on $(subst $(SRCDIR)/,,$<), creating $(subst ..,__,$@)"
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p "../$(subst ..,__,$(@D))" $< -o $(subst ..,__,$@)
 
 $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT)if type -P $(ASCIIDOC_A2X) >/dev/null 2>&1; then \
-	echo -e "$(INDENT_PRINT)=== Generating man page for $(TBOLDGREEN)$*$(TNORMAL) ---"; \
+	echo -e "$(INDENT_PRINT)[MAN] $(TGRAY)$(PARENTDIR):$(TNORMAL) $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(dir $@)))/$*$(TNORMAL)"; \
 	TEMPFILE=$$(mktemp -t fawkes_manpage_$*_XXXXXXXXXX); \
 	$(ASCIIDOC_A2X) -f manpage \
 	--asciidoc-opts='-f $(BASEDIR)/doc/asciidoc.conf -afawkes_version="$(FAWKES_VERSION)"' \
@@ -208,25 +211,27 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 	rm $$TEMPFILE; \
 	rm -f $(SRCDIR)/$*.xml; \
 	else \
-		echo -e "$(INDENT_PRINT)=== $(TYELLOW)Cannot generate man page for $* (asciidoc not installed)$(TNORMAL) ---"; \
+		echo -e "$(INDENT_PRINT)=== $(TYELLOW)Cannot generate man page for $* (asciidoc not installed)$(TNORMAL)"; \
 	fi
 
 .SECONDEXPANSION:
 $(BINDIR)/%: $$(OBJS_$$(call nametr,$$*))
+	$(eval BUILT_PARTS += $@)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking $(TBOLDGREEN)$*$(TNORMAL) ---"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[BIN] $(TGRAY)$(PARENTDIR):$(TNORMAL) $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(BINDIR)))/$*$(TNORMAL)"
 	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
 	-o $@ $(subst ..,__,$^) $(LDFLAGS_BASE) \
 	$(if $(call seq,$(origin LDFLAGS_$(call nametr,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(call nametr,$*))) \
 	$(addprefix -l,$(LIBS_$(call nametr,$*))) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$(call nametr,$*))) $(addprefix -L,$(LIBDIRS))
 ifeq ($(WARN_MISSING_MANPAGE),1)
-	$(if $(strip $(foreach S,$(MANPAGE_SECTIONS),$(filter $(MANDIR)/man$S/$*.$S,$(MANPAGES_all) $(MANPAGES_gui)))),,$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Warning: $* does not have a man page$(TNORMAL) ---")
+	$(if $(strip $(foreach S,$(MANPAGE_SECTIONS),$(filter $(MANDIR)/man$S/$*.$S,$(MANPAGES_all) $(MANPAGES_gui)))),,$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Warning: $(TGRAY)$(PARENTDIR)$(TNORMAL)$* does not have a man page$(TNORMAL)")
 endif
 
 $(LIBDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
+	$(eval BUILT_PARTS += $@)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENTSYMB) echo -e "$(INDENT_PRINT)=== Linking lib $(TBOLDGREEN)$*$(TNORMAL) ---"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[LIB] $(TGRAY)$(PARENTDIR):$(TNORMAL) $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(LIBDIR)))/$*$(TNORMAL)"
 	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
 	-o $@$(if $(NOSOVER_$(call nametr,$*)),,.$(SOVER_$(call nametr,$*))) $(subst ..,__,$^) \
 	$(if $(NOSOVER_$(call nametr,$*)),,-Wl,-soname=$(@F).$(SOVER_$(call nametr,$*))) \

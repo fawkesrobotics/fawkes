@@ -106,7 +106,7 @@ ifeq ($(HAVE_LUA),1)
   ifeq ($(HAVE_TOLUA),1)
 .SECONDEXPANSION:
 %_tolua.cpp: $$(TOLUA_$$(call nametr,$$*))
-	$(SILENT) echo "$(INDENT_PRINT)--- Generating Lua package C++ file $(@F)"
+	$(SILENT) echo -e "$(INDENT_PRINT)[LUA] $(TGRAY)$(PARENTDIR)$(TNORMAL)$(@F)"
 	$(SILENT)cat $(addprefix $(SRCDIR)/,$(subst $(SRCDIR)/,,$(filter %.tolua,$^))) > $(patsubst %.cpp,%.pkg,$@)
 	$(SILENT)$(TOLUAPP) -n $(TOLUA_PKGPREFIX_$(call nametr,$*))$(notdir $*) $(patsubst %.cpp,%.pkg,$@) | \
 	sed -e 's/^\(.*Generated automatically .*\) on .*$$/\1/' | \
@@ -120,7 +120,7 @@ endif # HAVE_LUA is 1
 ifeq ($(OBJSSUBMAKE),1)
 .PHONY: warning_tolua_wrapper
 warning_tolua_wrapper:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Lua compatibility wrapper$(TNORMAL) (tolua++[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)[WARN] $(TRED)Omitting Lua compatibility wrapper in $(PARENTDIR)$(TNORMAL) (tolua++[-devel] not installed)"
 endif # OBJSSUBMAKE is 1
 
 endif # __buildsys_lua_mk_

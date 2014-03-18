@@ -29,14 +29,14 @@ linkscripts:
 		for f in $$(ls $(BASEDIR)/etc/scripts); do \
 			if [ -x "$(BASEDIR)/etc/scripts/$$f" ]; then \
 				if [[ -a "$(BINDIR)/$$f" && ! -L "$(BINDIR)/$$f" ]]; then \
-					echo -e "$(INDENT_PRINT)$(TRED)--- Non-symbolic link bin/$$f exists, *not* linking to etc/scripts/$$f$(TNORMAL)"; \
+					echo -e "$(INDENT_PRINT)$(TRED)[ERR] Non-symbolic link bin/$$f exists, *not* linking to etc/scripts/$$f$(TNORMAL)"; \
 				else \
-					echo -e "$(INDENT_PRINT)--- Linking bin/$$f -> etc/scripts/$$f"; \
+					echo -e "$(INDENT_PRINT)[LNK] bin/$$f -> etc/scripts/$$f"; \
 					rm -f $(BINDIR)/$$f; \
 					ln -s ../etc/scripts/$$f $(BINDIR)/$$f; \
 				fi \
 			else \
-				echo -e "$(INDENT_PRINT)$(TYELLOW)--- Omitting etc/scripts/$$f (not executable)$(TNORMAL)"; \
+				echo -e "$(INDENT_PRINT)$(TYELLOW)[WARN] Omitting etc/scripts/$$f (not executable)$(TNORMAL)"; \
 			fi \
 		done; \
 	fi
