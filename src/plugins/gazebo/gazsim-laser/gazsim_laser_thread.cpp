@@ -56,6 +56,7 @@ void LaserSimThread::init()
 
   //open interface
   laser_if_ = blackboard->open_for_writing<Laser360Interface>("Laser urg"); //not sure if the name is right
+  laser_if_->set_auto_timestamping(false);
 
   //read config values
   max_range_ = config->get_float("/gazsim/laser/max_range");
@@ -66,6 +67,7 @@ void LaserSimThread::init()
 
   //initialize laser data
   laser_data_ = (float *)malloc(sizeof(float) * 360);
+  laser_time_ = new Time(clock);
   new_data_ = false;
 
   //set frame in the interface
@@ -76,6 +78,7 @@ void LaserSimThread::finalize()
 {
   blackboard->close(laser_if_);
   free(laser_data_);
+  delete laser_time_;
 }
 
 void LaserSimThread::loop()
@@ -84,6 +87,7 @@ void LaserSimThread::loop()
   {
     //write interface
     laser_if_->set_distances(laser_data_);
+    laser_if_->set_timestamp(laser_time_);
     laser_if_->write();
 
     new_data_ = false;
@@ -103,6 +107,8 @@ void LaserSimThread::on_laser_data_msg(ConstLaserScanStampedPtr &msg)
   
   int number_beams = scan.ranges_size();
 
+  laser_time_->set_time(msg->time().sec(), msg->time().nsec() / 1000);
+  *laser_time_ = clock->native_to_time(*laser_time_);
 
   //copy laser data
   for(int i = 0; i < number_beams; i++)

@@ -37,6 +37,7 @@
 
 namespace fawkes {
   class Laser360Interface;
+  class Time;
 }
 
 class LaserSimThread
@@ -64,7 +65,8 @@ class LaserSimThread
   fawkes::Laser360Interface *laser_if_;
 
   ///storage for laser data
-  float  *laser_data_;
+  float        *laser_data_;
+  fawkes::Time *laser_time_;
 
   ///is there new information to write in the interface?
   bool new_data_;
