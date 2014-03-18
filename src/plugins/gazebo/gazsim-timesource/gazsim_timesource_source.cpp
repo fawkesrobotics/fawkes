@@ -48,7 +48,8 @@ GazsimTimesource::~GazsimTimesource()
  * With this method, I want to reduce the number of send messages from Gazebo
  * @param tv timeinterval
  */
-void GazsimTimesource::get_time(timeval* tv) const
+void
+GazsimTimesource::get_time(timeval* tv) const
 {
   //I do not use the Time - operator here because this would recursively call get_time
   timeval now = get_system_time();
@@ -66,7 +67,8 @@ void GazsimTimesource::get_time(timeval* tv) const
   *tv =  estimated_sim_now;
 }
 
-timeval GazsimTimesource::conv_to_realtime(const timeval* tv) const
+timeval
+GazsimTimesource::conv_to_realtime(const timeval* tv) const
 {
   timeval interval = subtract(*tv, last_sim_time_);
 
@@ -80,25 +82,45 @@ timeval GazsimTimesource::conv_to_realtime(const timeval* tv) const
   return result;
 }
 
+timeval
+GazsimTimesource::conv_native_to_exttime(const timeval* tv) const
+{
+  timeval t_offset    = subtract(*tv, last_native_sim_time_);
+  double  offset      = t_offset.tv_sec + t_offset.tv_usec / 1000000.f;
+  long    offset_sec  = ::ceil(offset);
+  long    offset_usec = ::round(offset - offset_sec) * 1000000;
+
+  timeval rv;
+  rv.tv_sec  = last_sim_time_.tv_sec  + offset_sec;
+  rv.tv_usec = last_sim_time_.tv_usec + offset_usec;
+
+  return rv;
+}
+
 /** store data from gazebo time message
  * @param msg message
  */
-void GazsimTimesource::on_time_sync_msg(ConstSimTimePtr &msg)
+void
+GazsimTimesource::on_time_sync_msg(ConstSimTimePtr &msg)
 {
   //we do not want to correct time back
   get_time(&last_sim_time_);
   last_real_time_factor_ = msg->real_time_factor();
   clock_->get_systime(&last_sys_recv_time_);
+  last_native_sim_time_.tv_sec  = msg->sim_time_sec();
+  last_native_sim_time_.tv_usec = msg->sim_time_nsec() / 1000;
 }
 
-timeval GazsimTimesource::get_system_time() const
+timeval
+GazsimTimesource::get_system_time() const
 {
   timeval now_timeval;
   gettimeofday(&now_timeval,NULL);
   return now_timeval;
 }
 
-timeval GazsimTimesource::add(timeval a, timeval b) const
+timeval
+GazsimTimesource::add(timeval a, timeval b) const
 {
   timeval res;
   res.tv_sec = a.tv_sec + b.tv_sec;
@@ -111,7 +133,8 @@ timeval GazsimTimesource::add(timeval a, timeval b) const
   return res;
 }
 
-timeval GazsimTimesource::subtract(timeval a, timeval b) const
+timeval
+GazsimTimesource::subtract(timeval a, timeval b) const
 {
   timeval res;
   res.tv_sec = a.tv_sec - b.tv_sec;

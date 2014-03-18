@@ -48,9 +48,15 @@ namespace fawkes
 
     virtual void get_time(timeval* tv) const;
     virtual timeval conv_to_realtime(const timeval* tv) const;
+    virtual timeval conv_native_to_exttime(const timeval* tv) const;
 
-    //store data from gazebo time message
+    /// store data from gazebo time message
     void on_time_sync_msg(ConstSimTimePtr &msg);
+
+  private:
+    timeval get_system_time() const;
+    timeval add(timeval a, timeval b) const;
+    timeval subtract(timeval a, timeval b) const;
 
   private:
     Clock* clock_;
@@ -58,12 +64,11 @@ namespace fawkes
     //from last msg all in sec
     timeval last_sim_time_;
     timeval last_sys_recv_time_;
-    double last_real_time_factor_;
+    double  last_real_time_factor_;
+    timeval last_native_sim_time_;
 
-    timeval get_system_time() const;
-    timeval add(timeval a, timeval b) const;
-    timeval subtract(timeval a, timeval b) const;
   };
+
 }
 
 #endif

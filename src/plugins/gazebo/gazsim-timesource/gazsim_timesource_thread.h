@@ -63,7 +63,7 @@ class GazsimTimesourceThread
 
   //handler
   void on_time_sync_msg(ConstSimTimePtr &msg);
-  
+
 };
 
 #endif

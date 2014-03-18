@@ -25,7 +25,7 @@ include $(BUILDSYSDIR)/protobuf.mk
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_gazsim_timesource = fawkescore fawkesutils fawkesaspects fawkesgazeboaspect gazsim_msgs
+LIBS_gazsim_timesource = m fawkescore fawkesutils fawkesaspects fawkesgazeboaspect gazsim_msgs
 OBJS_gazsim_timesource = gazsim_timesource_source.o gazsim_timesource_plugin.o gazsim_timesource_thread.o
 
 OBJS_all = $(OBJS_gazsim_timesource)
