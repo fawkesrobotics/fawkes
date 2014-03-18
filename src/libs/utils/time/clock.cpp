@@ -308,21 +308,40 @@ Time
 Clock::ext_to_realtime(const Time& t)
 {
   timeval tv;
-  Time ret;
+  Time ret(t);
   
-  if (NULL != ext_timesource) 
-    {
-      tv = ext_timesource->conv_to_realtime(t.get_timeval());
-      ret.set_time(&tv); 
-    }
-  else 
-    {
-      ret = t;
-    }
+  if (NULL != ext_timesource) {
+    tv = ext_timesource->conv_to_realtime(t.get_timeval());
+    ret.set_time(&tv); 
+  }
 
   return ret;
 }
 
+
+/** Convert some native time to a Fawkes time.
+ * If communicating with some entity using some native time format (e.g.
+ * a simulation giving offset timestamps from the simulation start) it
+ * is necessary to convert them to a time that the time is comparable
+ * to other times generated using the clock (and hence external timesource).
+ * @param t the time that is to be converted to the a Fawkes time
+ * @return the time in Fawkes time comparable to other times queried
+ * from this lock. Identity of the given time if no external time source
+ * has been registered.
+ */ 
+Time
+Clock::native_to_time(const Time &t)
+{
+  timeval tv;
+  Time ret(t);
+  
+  if (NULL != ext_timesource) {
+      tv = ext_timesource->conv_native_to_exttime(t.get_timeval());
+      ret.set_time(&tv); 
+  }
+
+  return ret;
+}
 
 /** Check whether an external time source is registered.
  * @return true if an external time source is registered
