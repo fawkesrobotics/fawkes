@@ -70,7 +70,7 @@ class LaserSimThread
   bool new_data_;
 
   ///handler function for incoming laser data messages
-  void on_laser_data_msg(ConstLaserScanPtr &msg);
+  void on_laser_data_msg(ConstLaserScanStampedPtr &msg);
 
   ///maximal range of the laser sensor
   float max_range_;  

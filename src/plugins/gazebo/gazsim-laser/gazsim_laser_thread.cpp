@@ -22,8 +22,6 @@
 #include "gazsim_laser_thread.h"
 
 #include <tf/types.h>
-#include <stdio.h>
-#include <math.h>
 #include <utils/math/angle.h>
 #include <core/threading/mutex_locker.h>
 
@@ -33,6 +31,9 @@
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/transport/transport.hh>
 #include <aspect/logging.h>
+
+#include <cstdio>
+#include <cmath>
 
 using namespace fawkes;
 using namespace gazebo;
@@ -89,22 +90,24 @@ void LaserSimThread::loop()
   }  
 }
 
-void LaserSimThread::on_laser_data_msg(ConstLaserScanPtr &msg)
+void LaserSimThread::on_laser_data_msg(ConstLaserScanStampedPtr &msg)
 {
   //logger->log_info(name(), "Got new Laser data.\n");
 
   MutexLocker lock(loop_mutex);
 
+  const gazebo::msgs::LaserScan &scan = msg->scan();
+
   //calculate start angle
-  int start_index = (msg->angle_min() + 2* M_PI) / M_PI * 180;
+  int start_index = (scan.angle_min() + 2* M_PI) / M_PI * 180;
   
-  int number_beams = msg->ranges_size();
+  int number_beams = scan.ranges_size();
 
 
   //copy laser data
   for(int i = 0; i < number_beams; i++)
   {
-    float range = msg->ranges(i);
+    const float range = scan.ranges(i);
     if(range < max_range_)
     {
       laser_data_[(start_index + i) % 360] = range; 
