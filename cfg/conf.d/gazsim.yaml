@@ -11,7 +11,7 @@ gazsim:
   
   topics:
     gps: "~/gazsim/gps/"
-    laser: "~/gazsim/LaserSensor/"
+    laser: "~/hokuyo/link/laser/scan"
     gyro: "~/RobotinoSim/Gyro/"
     infrared-puck-sensor: "~/RobotinoSim/InfraredPuckSensor/"
     gripper-laser-left: "~/RobotinoSim/GripperLaserSensor/Left/"

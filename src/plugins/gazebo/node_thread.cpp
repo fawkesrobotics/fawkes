@@ -60,15 +60,9 @@ void
 GazeboNodeThread::init()
 {
   //read config values
-  if(config->exists("/gazsim/gazebo-communication-channel"))
-  {
-    robot_channel = config->get_string("/gazsim/gazebo-communication-channel");
-  }
-  else
-  {
-    logger->log_warn(name(), "Please start fawkes with the configuration file for the simulation. The Gazebo node will be initialized with the channel \"\".");
-    robot_channel = "";
-  }
+  robot_channel = config->get_string("/gazsim/world-name")
+    + "/" + config->get_string("/gazsim/robot-name");
+  
   world_name = config->get_string("/gazsim/world-name");
 
   if(gazebo::transport::is_stopped()) {

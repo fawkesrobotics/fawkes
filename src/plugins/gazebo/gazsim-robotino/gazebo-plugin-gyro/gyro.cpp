@@ -55,7 +55,7 @@ void Gyro::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
   //Create the communication Node for communication with fawkes
   this->node_ = transport::NodePtr(new transport::Node());
   //the namespace is set to the model name!
-  this->node_->Init(name_);
+  this->node_->Init(model_->GetWorld()->GetName()+"/"+name_);
 
 
   //create publisher
