@@ -76,6 +76,9 @@ class LaserSimThread
 
   ///maximal range of the laser sensor
   float max_range_;  
+
+  std::string interface_id_;
+  std::string frame_id_;
 };
 
 #endif

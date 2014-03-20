@@ -54,13 +54,15 @@ void LaserSimThread::init()
 {
   logger->log_debug(name(), "Initializing Simulation of the Laser Sensor");
 
-  //open interface
-  laser_if_ = blackboard->open_for_writing<Laser360Interface>("Laser urg"); //not sure if the name is right
-  laser_if_->set_auto_timestamping(false);
-
   //read config values
   max_range_ = config->get_float("/gazsim/laser/max_range");
   laser_topic_ = config->get_string("/gazsim/topics/laser");
+  interface_id_ = config->get_string("/gazsim/laser/interface-id");
+  frame_id_ = config->get_string("/gazsim/laser/frame-id");
+
+  //open interface
+  laser_if_ = blackboard->open_for_writing<Laser360Interface>(interface_id_.c_str());
+  laser_if_->set_auto_timestamping(false);
 
   //subscribing to gazebo publisher
   laser_sub_ = gazebonode->Subscribe(laser_topic_, &LaserSimThread::on_laser_data_msg, this);
@@ -71,7 +73,7 @@ void LaserSimThread::init()
   new_data_ = false;
 
   //set frame in the interface
-  laser_if_->set_frame("/base_laser");
+  laser_if_->set_frame(frame_id_.c_str());
 }
 
 void LaserSimThread::finalize()

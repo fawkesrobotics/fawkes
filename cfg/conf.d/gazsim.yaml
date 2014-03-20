@@ -7,9 +7,8 @@ gazsim:
   world-name: "LLSF"
   #default robot name
   robot-name: ""
-  laser:
-    max_range: 5.5 
 
+  
   topics:
     gps: "~/gazsim/gps/"
     laser: "~/gazsim/LaserSensor/"
@@ -20,6 +19,11 @@ gazsim:
     motor-move: "~/RobotinoSim/MotorMove/"
     time: "~/gazsim/time-sync/"
     message: "~/RobotinoSim/String/"
+
+  laser:
+    max_range: 5.5 
+    interface-id: "Laser urg"
+    frame-id: "/base_laser"
     
   webcam:
     topic-suffix: "/webcam/link/webcam_sensor/image"
