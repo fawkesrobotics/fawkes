@@ -22,8 +22,6 @@ include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BUILDSYSDIR)/protobuf.mk
 # include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
-SUBDIRS = gazebo-plugin
-
 LIBS_gazsim_laser = fawkescore fawkesutils fawkesaspects fvutils \
 	       fawkestf fawkesinterface fawkesblackboard \
 	       Laser360Interface \
