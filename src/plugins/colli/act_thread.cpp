@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  messag_handler_thread.cpp - Colli Message Handler Thread
+ *  act_thread.cpp - Colli Act Thread
  *
  *  Created: Thu Oct 17 16:58:00 2013
- *  Copyright  2013  AllemaniACs
+ *  Copyright  2013-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "message_handler_thread.h"
+#include "act_thread.h"
 
 #include <interfaces/MotorInterface.h>
 #include <interfaces/NavigatorInterface.h>
@@ -36,27 +36,26 @@
 using namespace fawkes;
 using namespace std;
 
-/** @class ColliMessageHandlerThread "message_handler_thread.h"
- * This thread receives the messages of the main NavigatorInterface and
- * transforms them into appropriate commands/targets for the ColliThread.
- * This also includes setting the DriveMode etc (for now; should be more
- * adjustable in future releases)
+/** @class ColliActThread "act_thread.h"
+ * This thread hooks onto Fawkes main loop at the ACT hook. It is
+ * resoponsible for receiving the messages of the main NavigatorInterface
+ * and sending commands to the colli.
  */
 
 /** Constructor. */
-ColliMessageHandlerThread::ColliMessageHandlerThread()
-  : Thread("ColliMessageHandlerThread", Thread::OPMODE_WAITFORWAKEUP),
+ColliActThread::ColliActThread()
+  : Thread("ColliActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
 }
 
 /** Desctructor. */
-ColliMessageHandlerThread::~ColliMessageHandlerThread()
+ColliActThread::~ColliActThread()
 {
 }
 
 void
-ColliMessageHandlerThread::init()
+ColliActThread::init()
 {
   std::string cfg_prefix = "/plugins/colli/";
   cfg_security_distance_ = config->get_float((cfg_prefix + "security_distance").c_str());
@@ -124,7 +123,7 @@ ColliMessageHandlerThread::init()
 #ifdef HAVE_ROS
   std::string ros_target_topic = config->get_string((cfg_prefix + "ros/target_topic").c_str());
   sub_ = new ros::Subscriber();
-  *sub_ = rosnode->subscribe(ros_target_topic.c_str(), 1, &ColliMessageHandlerThread::callbackSimpleGoal, this);
+  *sub_ = rosnode->subscribe(ros_target_topic.c_str(), 1, &ColliActThread::callbackSimpleGoal, this);
 #endif
 
   security_distance_ = cfg_security_distance_;
@@ -138,7 +137,7 @@ ColliMessageHandlerThread::init()
 
 
 void
-ColliMessageHandlerThread::finalize()
+ColliActThread::finalize()
 {
   blackboard->close( if_navi_ );
   blackboard->close( if_colli_data_ );
@@ -152,7 +151,7 @@ ColliMessageHandlerThread::finalize()
 }
 
 void
-ColliMessageHandlerThread::loop()
+ColliActThread::loop()
 {
 
   // update interfaces
@@ -163,7 +162,7 @@ ColliMessageHandlerThread::loop()
     if_navi_->set_final(colli_final());
     if_colli_target_->set_final(colli_final());
     if_colli_target_->write();
-  }  
+  }
 
   // process interface messages
   while( !if_navi_->msgq_empty() ) {
@@ -296,7 +295,7 @@ ColliMessageHandlerThread::loop()
 
 
 bool
-ColliMessageHandlerThread::colli_final()
+ColliActThread::colli_final()
 {
   return if_colli_data_->is_final();
   // RCSoftX had more. Full code(from libmonaco and navigator_server) :
@@ -314,7 +313,7 @@ ColliMessageHandlerThread::colli_final()
 }
 
 void
-ColliMessageHandlerThread::colli_stop()
+ColliActThread::colli_stop()
 {
   if_colli_target_->set_dest_x( if_motor_->odometry_position_x() );
   if_colli_target_->set_dest_y( if_motor_->odometry_position_y() );
@@ -331,7 +330,7 @@ ColliMessageHandlerThread::colli_stop()
 }
 
 void
-ColliMessageHandlerThread::colli_relgoto(float x, float y, float ori)
+ColliActThread::colli_relgoto(float x, float y, float ori)
 {
   // my Pose in motor coordinates
   float colliTargetO = if_motor_->odometry_orientation();
@@ -350,7 +349,7 @@ ColliMessageHandlerThread::colli_relgoto(float x, float y, float ori)
 }
 
 void
-ColliMessageHandlerThread::colli_goto(float x, float y, float ori)
+ColliActThread::colli_goto(float x, float y, float ori)
 {
   if_colli_target_->set_dest_x( x );
   if_colli_target_->set_dest_y( y );
@@ -376,7 +375,7 @@ ColliMessageHandlerThread::colli_goto(float x, float y, float ori)
 
 #ifdef HAVE_ROS
 void
-ColliMessageHandlerThread::callbackSimpleGoal(const geometry_msgs::PoseStamped::ConstPtr& msg)
+ColliActThread::callbackSimpleGoal(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
   //calculate transform
   std::string from = msg->header.frame_id;  //maybe get this as well from the config ?? Should both be /map anyways

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include "act_thread.h"
 #include "colli_thread.h"
-#include "message_handler_thread.h"
 #ifdef HAVE_VISUAL_DEBUGGING
  #include "visualization_thread.h"
 #endif
@@ -42,7 +42,7 @@ public:
   ColliPlugin(Configuration *config)
       : Plugin(config)
   {
-    thread_list.push_back(new ColliMessageHandlerThread());
+    thread_list.push_back(new ColliActThread());
     ColliThread* colli_thread = new ColliThread();
     thread_list.push_back(colli_thread);
 #ifdef HAVE_VISUAL_DEBUGGING

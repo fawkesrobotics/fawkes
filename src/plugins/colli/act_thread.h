@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  messag_handler_thread.h - Colli Message Handler Thread
+ *  act_thread.h - Colli Act Thread
  *
  *  Created: Thu Oct 17 16:58:00 2013
- *  Copyright  2013  AllemaniACs
+ *  Copyright  2013-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_MESSAGE_HANDLER_THREAD_H_
-#define __PLUGINS_COLLI_MESSAGE_HANDLER_THREAD_H_
+#ifndef __PLUGINS_COLLI_ACT_THREAD_H_
+#define __PLUGINS_COLLI_ACT_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -48,7 +48,7 @@ namespace fawkes
   class NavigatorInterface;
 }
 
-class ColliMessageHandlerThread
+class ColliActThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -60,8 +60,8 @@ class ColliMessageHandlerThread
   public fawkes::TransformAspect
 {
  public:
-  ColliMessageHandlerThread();
-  virtual ~ColliMessageHandlerThread();
+  ColliActThread();
+  virtual ~ColliActThread();
 
   virtual void init();
   virtual void loop();
