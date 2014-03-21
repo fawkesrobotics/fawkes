@@ -81,7 +81,7 @@ EclipseDebugger::on_connect()
       unsigned int port = __debugger_if->port();
       std::stringstream portstr;
       portstr << port;
-      execlp("tktools", "tktools", "-h", host, "-p", portstr.str().c_str(), (char *) 0);
+      execlp("tktools-clp", "tktools-clp", "-h", host, "-p", portstr.str().c_str(), (char *) 0);
     }
 
   } catch (Exception &e) {
