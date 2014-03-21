@@ -5,6 +5,7 @@
  *  Created: Sun Nov 13 16:05:34 2011
  *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
  *             2014       Sebastian Reuter
+ *             2014       Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -80,6 +81,7 @@ class RobotinoActThread
   fawkes::MotorInterface         *motor_if_;
   fawkes::GripperInterface       *gripper_if_;
   float        			  cfg_deadman_threshold_;
+  float        			  cfg_odom_time_offset_;
   bool        			  msg_received_;
   bool        			  msg_zero_vel_;
   bool 				  cfg_gripper_enabled_;

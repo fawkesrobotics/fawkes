@@ -3,8 +3,9 @@
  *  act_thread.cpp - Robotino act thread
  *
  *  Created: Sun Nov 13 16:07:40 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
- *             2014  Sebastian Reuter
+ *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
+ *             2014       Sebastian Reuter
+ *             2014       Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -72,7 +73,9 @@ RobotinoActThread::init()
 
   //get config values
   cfg_deadman_threshold_ = config->get_float("/hardware/robotino/deadman_time_threshold");
-  cfg_gripper_enabled_ = config->get_bool("/hardware/robotino/gripper/enable_gripper");
+  cfg_gripper_enabled_   = config->get_bool("/hardware/robotino/gripper/enable_gripper");
+  cfg_odom_time_offset_  = config->get_float("/hardware/robotino/odom_time_offset");
+
   gripper_close_ = false;
 
   msg_received_ = false;
@@ -213,7 +216,8 @@ RobotinoActThread::loop()
                                   sensor_state.odometryY / 1000.f,
                                   0));
 
-      tf_publisher->send_transform(t, now, "/odom", "/base_link");
+      tf_publisher->send_transform(t, now + cfg_odom_time_offset_,
+				   "/odom", "/base_link");
 #endif
 
       last_seqnum_ = sensor_state.sequenceNumber;
