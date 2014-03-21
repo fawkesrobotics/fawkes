@@ -79,7 +79,7 @@ ColliVisualizationThread::init()
   pub_search_path_ = new ros::Publisher();
   *pub_search_path_ = rosnode->advertise< nav_msgs::GridCells >("colli_search_path", 1);
 
-  roboshape_ = new CRoboShape_Colli( "/plugins/colli/Roboshape/", logger, config );
+  roboshape_ = new CRoboShape_Colli( "/plugins/colli/roboshape/", logger, config );
 }
 
 void

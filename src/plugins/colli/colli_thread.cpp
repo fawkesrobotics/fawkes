@@ -64,8 +64,8 @@ ColliThread::init()
   logger->log_info(name(), "(init): Constructing...");
 
   std::string cfg_prefix = "/plugins/colli/";
-  m_ColliFrequency      = (int)(1000.0/(float)config->get_int((cfg_prefix + "FREQUENCY").c_str()));
-  m_MaximumRoboIncrease = config->get_float((cfg_prefix + "MAX_ROBO_INCREASE").c_str());
+  m_ColliFrequency      = (int)(1000.0/(float)config->get_int((cfg_prefix + "frequency").c_str()));
+  m_MaximumRoboIncrease = config->get_float((cfg_prefix + "max_robo_increase").c_str());
   cfg_obstacle_inc_     = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
 
   cfg_visualize_idle_   = config->get_bool((cfg_prefix + "visualize_idle").c_str());
@@ -83,11 +83,11 @@ ColliThread::init()
   cfg_iface_motor_      = config->get_string((cfg_prefix + "interface/motor").c_str());
   cfg_iface_laser_      = config->get_string((cfg_prefix + "interface/laser").c_str());
 
-  cfg_prefix += "OccGrid/";
-  m_OccGridHeight       = config->get_float((cfg_prefix + "HEIGHT").c_str());
-  m_OccGridWidth        = config->get_float((cfg_prefix + "WIDTH").c_str());
-  m_OccGridCellHeight   = config->get_int((cfg_prefix + "CELL_HEIGHT").c_str());
-  m_OccGridCellWidth    = config->get_int((cfg_prefix + "CELL_WIDTH").c_str());
+  cfg_prefix += "occ_grid/";
+  m_OccGridWidth        = config->get_float((cfg_prefix + "width").c_str());
+  m_OccGridHeight       = config->get_float((cfg_prefix + "height").c_str());
+  m_OccGridCellWidth    = config->get_int((cfg_prefix + "cell_width").c_str());
+  m_OccGridCellHeight   = config->get_int((cfg_prefix + "cell_height").c_str());
 
   for ( unsigned int i = 0; i < 10; i++ )
     m_oldAnglesToTarget.push_back( 0.0 );
@@ -266,7 +266,7 @@ ColliThread::loop()
     abort = true;
 
     // Do not drive if there is no new target
-  } else if( m_pColliTargetObj->is_final() ) { 
+  } else if( m_pColliTargetObj->is_final() ) {
     //logger->log_debug(name(), "No new target for colli...ABORT");
     m_oldAnglesToTarget.clear();
     for ( unsigned int i = 0; i < 10; i++ )
@@ -277,19 +277,19 @@ ColliThread::loop()
 
   if( abort ) {
     // check if we need to stop the current colli movememtn
-    if( !m_pColliDataObj->is_final() ) { 
+    if( !m_pColliDataObj->is_final() ) {
       //logger->log_debug(name(), "STOPPING");
       // colli is active, but for some reason we need to abort -> STOP colli movement
       if( abs(m_pMopoObj->vx()) > 0.01f
        || abs(m_pMopoObj->vy()) > 0.01f
-       || abs(m_pMopoObj->omega()) > 0.01f ) { 
+       || abs(m_pMopoObj->omega()) > 0.01f ) {
         // only stop movement, if we are moving
         m_pMotorInstruct->Drive( 0.0, 0.0 );
       } else {
         // movement has stopped, we are "final" now
         m_pColliDataObj->set_final( true );
         m_pColliDataObj->write();
-      }   
+      }
     }
 
 #ifdef HAVE_VISUAL_DEBUGGING

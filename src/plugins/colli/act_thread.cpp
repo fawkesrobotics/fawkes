@@ -65,7 +65,7 @@ ColliActThread::init()
   cfg_stop_at_target_    = config->get_bool((cfg_prefix + "stop_at_target").c_str());
   cfg_orient_at_target_  = config->get_bool((cfg_prefix + "orient_at_target").c_str());
 
-  std::string cfg_drive_mode = config->get_string((cfg_prefix + "drive_mode").c_str());
+  std::string cfg_drive_mode = config->get_string((cfg_prefix + "drive_mode/default").c_str());
   if ( cfg_drive_mode.compare("MovingNotAllowed") == 0 ) {
     cfg_drive_mode_ = NavigatorInterface::MovingNotAllowed;
   } else if ( cfg_drive_mode.compare("CarefulForward") == 0 ) {

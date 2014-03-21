@@ -53,8 +53,8 @@ CMediumBiwardDriveModule::CMediumBiwardDriveModule( CMediumForwardDriveModule*  
 
   m_CountForward = 1;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/MediumDriveModule/MAX_TRANS" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/MediumDriveModule/MAX_ROT" );
+  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/medium/max_trans" );
+  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/medium/max_rot" );
 
   logger_->log_info("CMediumBiwardDriveModule", "(Constructor): Exiting...");
 }

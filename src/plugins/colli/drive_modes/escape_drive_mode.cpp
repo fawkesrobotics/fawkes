@@ -46,10 +46,10 @@ CEscapeDriveModule::CEscapeDriveModule( Laser* laser, Logger* logger, Configurat
   m_DriveModeName = NavigatorInterface::ESCAPE;
   m_pLaser = laser;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/EscapeDriveModule/MAX_TRANS" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/EscapeDriveModule/MAX_ROT" );
+  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/escape/max_trans" );
+  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/escape/max_rot" );
 
-  m_pRoboShape = new CRoboShape_Colli( "/plugins/colli/Roboshape/", logger, config, 2 );
+  m_pRoboShape = new CRoboShape_Colli( "/plugins/colli/roboshape/", logger, config, 2 );
 
   logger_->log_info("CEscapeDriveModule", "(Constructor): Exiting...");
 }

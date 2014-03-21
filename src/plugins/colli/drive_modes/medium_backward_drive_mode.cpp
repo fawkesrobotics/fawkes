@@ -44,8 +44,8 @@ CMediumBackwardDriveModule::CMediumBackwardDriveModule(Logger* logger, Configura
   logger_->log_info("CMediumBackwardDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::ModerateBackward;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/MediumDriveModule/MAX_TRANS" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/MediumDriveModule/MAX_ROT" );
+  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/medium/max_trans" );
+  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/medium/max_rot" );
 
   logger_->log_info("CMediumBackwardDriveModule", "(Constructor): Exiting...");
 }

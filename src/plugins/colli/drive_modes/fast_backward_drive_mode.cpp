@@ -44,8 +44,8 @@ CFastBackwardDriveModule::CFastBackwardDriveModule(Logger* logger, Configuration
   logger_->log_info("CFastBackwardDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::FastBackward;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/FastDriveModule/MAX_TRANS" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/FastDriveModule/MAX_ROT" );
+  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/fast/max_trans" );
+  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/fast/max_rot" );
 
   logger_->log_info("CFastBackwardDriveModule", "(Constructor): Exiting...");
 }

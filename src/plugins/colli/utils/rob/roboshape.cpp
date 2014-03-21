@@ -74,20 +74,20 @@ RoboShape::RoboShape( const char * cfg_prefix,
     throw fawkes::Exception("RoboShape: Initializing Infinity-Values failed!");
   }
 
-  m_widthAddFront = config->get_float((cfg + "WIDTH_ADD_FRONT").c_str());
-  m_widthAddRight = config->get_float((cfg + "WIDTH_ADD_RIGHT").c_str());
-  m_widthAddBack  = config->get_float((cfg + "WIDTH_ADD_BACK").c_str());
-  m_widthAddLeft  = config->get_float((cfg + "WIDTH_ADD_LEFT").c_str());
+  m_widthAddFront = config->get_float((cfg + "extension/front").c_str());
+  m_widthAddRight = config->get_float((cfg + "extension/right").c_str());
+  m_widthAddBack  = config->get_float((cfg + "extension/back").c_str());
+  m_widthAddLeft  = config->get_float((cfg + "extension/left").c_str());
 
-  int shape = config->get_int((cfg + "ROBOSHAPE").c_str());
+  int shape = config->get_int((cfg + "shape").c_str());
   if( shape == 1 ) {
     // ANGULAR
     m_isAngular = true;
     m_isRound = false;
-    m_widthX        = config->get_float((cfg + "WIDTH_X").c_str());
-    m_widthY        = config->get_float((cfg + "WIDTH_Y").c_str());
-    m_laserOffsetX  = config->get_float((cfg + "LASER_OFFSET_X_FROM_BACK").c_str());
-    m_laserOffsetY  = config->get_float((cfg + "LASER_OFFSET_Y_FROM_LEFT").c_str());
+    m_widthX        = config->get_float((cfg + "angular/width_x").c_str());
+    m_widthY        = config->get_float((cfg + "angular/width_y").c_str());
+    m_laserOffsetX  = config->get_float((cfg + "angular/laser_offset_x_from_back").c_str());
+    m_laserOffsetY  = config->get_float((cfg + "angular/laser_offset_y_from_left").c_str());
 
     float laserToBack  = m_laserOffsetX;
     float laserToLeft  = m_laserOffsetY;
@@ -116,9 +116,9 @@ RoboShape::RoboShape( const char * cfg_prefix,
     // ROUND
     m_isAngular = false;
     m_isRound = true;
-    m_radius        = config->get_float((cfg + "RADIUS").c_str());
-    m_laserOffsetX  = config->get_float((cfg + "LASER_OFFSET_X_FROM_MIDDLE").c_str());
-    m_laserOffsetY  = config->get_float((cfg + "LASER_OFFSET_Y_FROM_MIDDLE").c_str());
+    m_radius        = config->get_float((cfg + "round/radius").c_str());
+    m_laserOffsetX  = config->get_float((cfg + "round/laser_offset_x_from_middle").c_str());
+    m_laserOffsetY  = config->get_float((cfg + "round/laser_offset_y_from_middle").c_str());
 
     m_robotToBack  = m_radius + m_laserOffsetX + m_widthAddBack;
     m_robotToFront = m_radius - m_laserOffsetX + m_widthAddFront;
@@ -129,7 +129,7 @@ RoboShape::RoboShape( const char * cfg_prefix,
 
   } else {
     // WRONG FORMAT!!!
-    throw fawkes::Exception("RoboShape: Loading RoboShape from ConfigFile failed! Invalid config value for ROBOSHAPE");
+    throw fawkes::Exception("RoboShape: Loading RoboShape from ConfigFile failed! Invalid config value for roboshape");
   }
 
   logger_->log_info("RoboShape", "|#-->  (m)  is to front: %f", m_robotToFront);
