@@ -117,11 +117,8 @@ EclipseAgentThread::init()
   // debug
   EclipsePath::instance()->print_all_paths();
 
-  // load utility predicates
-  //load_file( ECLIPSE_CODE_DIR"/utils/logging.ecl" );
-  std::string agent_path = EclipsePath::instance()->locate_file(agent + ".ecl");
-  //std::string agent_path = ECLIPSE_CODE_DIR"/interpreter/"+ agent +".ecl";
   // load interpreter and agent
+  std::string agent_path = EclipsePath::instance()->locate_file(agent + ".ecl");
   load_file( agent_path.c_str() );
 
   // check if navgraph is used and pass config value
@@ -156,11 +153,15 @@ EclipseAgentThread::once()
 }
 */
 
+/** Check if the agent is running
+ * @return true if ECLiPSe agent is running
+ */
 bool EclipseAgentThread::running()
 {
   MutexLocker lock(mutex);
   return _running;
 }
+
 
 void
 EclipseAgentThread::loop()

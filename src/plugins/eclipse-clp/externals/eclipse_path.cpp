@@ -30,10 +30,14 @@ EclipsePath::create_initial_object(){
 	m_instance->add_path("@basedir@/");
 	m_instance->apply_regexes();
 	std::string fawkes_path = m_instance->locate_file("fawkes");
+	m_instance->paths.clear(); // remove basedir from paths
 	//std::cout << "searched for fawkes folder" << fawkes_path << '\n';
 	if (not fawkes_path.empty()){
 		//std::cout << "found fawkes folder!\n";
 		m_instance->add_regex(boost::regex("@fawkesdir@"), fawkes_path);
+	}else{
+		// for convinience, if only fawkes exists, replace @fawkesdir@ with BASEDIR
+		m_instance->add_regex(boost::regex("@fawkesdir@"), BASEDIR);
 	}
 }
 
@@ -65,7 +69,9 @@ EclipsePath::add_path_check(std::string path)
 std::string
 EclipsePath::locate_file(std::string filename)
 {
-	//TODO: make sure vector is not empty
+	if (paths.empty()){
+		return "";
+	}
 	//std::cout << "locate file: " << filename << '\n';
 	for (std::vector<std::string>::iterator it = paths.begin(); it != paths.end(); ++it){
 		path p (*it);
@@ -88,8 +94,6 @@ EclipsePath::locate_file(std::string filename)
 	return "";
 }
 
-//TODO: make use of regex to match basedir
-// http://boost-sandbox.sourceforge.net/libs/xpressive/doc/html/boost_xpressive/user_s_guide/string_substitutions.html 
 void
 EclipsePath::apply_regexes()
 {

@@ -81,11 +81,12 @@ sub_list(_X1,_X2,[],[]).
 sub_list(X1,X2,[T1|L1],[T2|L2]) :- sub(X1,X2,T1,T2), sub_list(X1,X2,L1,L2).
 
 
+holds(X,S,Module) :- call(holds(X,S))@Module.
+
 holds(and(P1,P2),S,Module) :- holds(P1,S,Module), holds(P2,S,Module).
 holds(or(P1,P2),S,Module) :- ( holds(P1,S,Module); holds(P2,S,Module) ).
 holds(neg(P),S,Module) :- not holds(P,S,Module).
 holds(some(V,P),S,Module) :- sub(V,_,P,P1), holds(P1,S,Module).
 
-holds(X,S,Module) :- call(holds(X,S))@Module.
 
 %:- log_info("Loading golog interpreter done").
