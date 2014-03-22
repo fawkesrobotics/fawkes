@@ -4,7 +4,7 @@
  *
  *  Created: Mon Dec 06 00:24:43 2010
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *             2014       Sebastian Reuter
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -25,8 +25,8 @@ CFLAGS += -std=c++0x
 
 LIBS_navgraph = fawkescore fawkesutils fawkesaspects fawkesinterface \
 	    fawkesblackboard NavigatorInterface
-OBJS_navgraph = navgraph_plugin.o navgraph_thread.o search_state.o
-
+OBJS_navgraph = navgraph_plugin.o navgraph_thread.o search_state.o \
+           constraints/constraint_repo.o constraints/reserved_node_constraint.o 
 OBJS_all    = $(OBJS_navgraph)
 
 ifeq ($(HAVE_TF),1)

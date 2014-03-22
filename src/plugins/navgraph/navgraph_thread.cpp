@@ -131,6 +131,9 @@ NavGraphThread::init()
   last_node_         = "";
   cmd_sent_at_       = new Time(clock);
   target_reached_at_ = new Time(clock);
+
+  constraint_repo = new ConstraintRepo(logger);
+
 }
 
 void

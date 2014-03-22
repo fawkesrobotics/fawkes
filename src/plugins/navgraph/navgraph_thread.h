@@ -40,6 +40,8 @@
 #include <utils/graph/topological_map_graph.h>
 #include <utils/system/fam.h>
 
+#include <plugins/navgraph/constraints/constraint_repo.h>
+
 namespace fawkes {
   class AStar;
   class Time;
@@ -119,6 +121,8 @@ public:
   fawkes::Time *cmd_sent_at_;
 
   fawkes::FileAlterationMonitor *fam_;
+
+  fawkes::ConstraintRepo constraintRepo;
 
 #ifdef HAVE_VISUALIZATION
   NavGraphVisualizationThread *vt_;
