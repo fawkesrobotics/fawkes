@@ -105,7 +105,7 @@ $(INTERFACES_HDRS): $(IFACESRCDIR)/%.h: $(SRCDIR)/$(OBJDIR)/%.touch
 $(INTERFACES_TOLUA): $(SRCDIR)/%.tolua: $(SRCDIR)/$(OBJDIR)/%.touch
 
 $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
-	$(SILENTSYMB) echo "$(INDENT_PRINT)--> Generating $* (Interface XML Template)"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[IFC] $(TGRAY)$(PARENTDIR)$(TNORMAL)$*.cpp"
   ifeq ($(HAVE_INTERFACE_GENERATOR)$(INTERFACE_GENERATOR_BUILD),11)
 	$(SILENT)$(BINDIR)/ffifacegen -d $(SRCDIR) $<
 	$(SILENT)mkdir -p $(IFACESRCDIR)
@@ -113,10 +113,10 @@ $(INTERFACES_TOUCH): $(SRCDIR)/$(OBJDIR)/%.touch: $(SRCDIR)/%.xml
   else
     ifneq ($(abspath $(IFACESRCDIR)),$(abspath $(SRCDIR)))
 	$(SILENT) if [ ! -e $(SRCDIR)/$*.h_ext -o ! -e $(SRCDIR)/$*.cpp ]; then \
-		echo -e "$(INDENT_PRINT)--- $(TRED)Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
+		echo -e "$(INDENT_PRINT)[ERR] $(TRED)Interfaces cannot be generated and pre-generated code does not exist!$(TNORMAL)"; \
 		exit 1; \
 	else \
-		echo -e "$(INDENT_PRINT)--- $(TYELLOW)Generator not available, only copying $*.h(_ext)$(TNORMAL)"; \
+		echo -e "$(INDENT_PRINT)[WARN] $(TYELLOW)Generator not available, only copying $*.h(_ext)$(TNORMAL)"; \
 		cp -a $(SRCDIR)/$*.h_ext $(IFACESRCDIR)/$*.h; \
 		touch $(SRCDIR)/$*.cpp; \
 	fi

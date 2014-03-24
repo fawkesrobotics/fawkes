@@ -79,7 +79,7 @@ DISTRO=$(if $(wildcard /etc/os-release),$(shell sed -n "/^ID=/ s/ID=//p" /etc/os
 
 
 ### Directories
-SRCDIR       ?= .
+SRCDIR       ?= $(abspath .)
 OBJDIR        = .objs_$(BUILD_TYPE)
 DEPDIR        = $(abspath $(SRCDIR)/.deps_$(BUILD_TYPE))
 BINDIR        = $(abspath $(TOP_BASEDIR)/bin)
@@ -192,6 +192,7 @@ export LD_LIBRARY_PATH= $(call merge,:, $(LIBDIRS_BASE) $(LIBDIRS) $(SYS_LD_LIBR
 nametr = $(subst /,_,$(subst -,_,$1))
 
 ifeq ($(COLORED),1)
+TGRAY		= \033[0;37m
 TBOLDGRAY	= \033[1;30m
 TBLUE		= \033[0;34m
 TBOLDBLUE	= \033[1;34m
