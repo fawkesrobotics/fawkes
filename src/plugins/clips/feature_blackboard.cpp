@@ -300,7 +300,7 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(std::string env_name,
     if (! found) {
       try {
 	iface = blackboard_->open_for_reading(type.c_str(), id.c_str());      
-	interfaces_[env_name].insert(std::make_pair(type, std::list<fawkes::Interface *>(1, iface)));
+	interfaces_[env_name][type].push_back(iface);
         logger_->log_info(name.c_str(), "Added interface %s", iface->uid());
       } catch (Exception &e) {
 	logger_->log_warn(name.c_str(), "Failed to open interface %s:%s, exception follows",
