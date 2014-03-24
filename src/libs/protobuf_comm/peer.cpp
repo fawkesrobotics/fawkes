@@ -62,9 +62,9 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned
   : io_service_(), resolver_(io_service_),
     socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port))
 {
-  ctor(address, port);
   message_register_ = new MessageRegister();
   own_message_register_ = true;
+  ctor(address, port);
 }
 
 
@@ -82,9 +82,9 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
   : io_service_(), resolver_(io_service_),
     socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port))
 {
-  ctor(address, send_to_port);
   message_register_ = new MessageRegister();
   own_message_register_ = true;
+  ctor(address, send_to_port);
 }
 
 /** Constructor.
@@ -97,9 +97,9 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned
   : io_service_(), resolver_(io_service_),
     socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port))
 {
-  ctor(address, port);
   message_register_ = new MessageRegister(proto_path);
   own_message_register_ = true;
+  ctor(address, port);
 }
 
 
@@ -119,9 +119,9 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
   : io_service_(), resolver_(io_service_),
     socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port))
 {
-  ctor(address, send_to_port);
   message_register_ = new MessageRegister(proto_path);
   own_message_register_ = true;
+  ctor(address, send_to_port);
 }
 
 
