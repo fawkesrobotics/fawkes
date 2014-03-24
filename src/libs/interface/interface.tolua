@@ -3,8 +3,7 @@
  *  interface.tolua - BlackBoard Interface - toLua++ template file
  *
  *  Created: Wed Mar 12 19:10:19 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*
@@ -24,6 +23,8 @@
  */
 
 $#include <interface/interface.h>
+$#include <utils/time/time.h>
+$#include <utils/time/clock.h>
 
 namespace fawkes {
 
@@ -53,6 +54,11 @@ class Interface
   bool          has_writer() const;
   unsigned int  num_readers() const;
 
+  bool          changed() const;
+  const fawkes::Time *  timestamp() const;
+  void          set_auto_timestamping(bool enabled);
+  void          set_timestamp(const fawkes::Time *t);
+  void          set_clock(fawkes::Clock *clock);
 
   unsigned int  msgq_enqueue_copy(Message *message);
   void          msgq_remove(Message *message);

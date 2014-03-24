@@ -336,6 +336,11 @@ ToLuaInterfaceGenerator::write_superclass_h(FILE *f)
           "  bool          has_writer() const;\n"
           "  unsigned int  num_readers() const;\n"
 
+	  "  bool          changed() const;\n"
+	  "  const fawkes::Time *  timestamp() const;\n"
+	  "  void          set_auto_timestamping(bool enabled);\n"
+	  "  void          set_timestamp(const fawkes::Time *t);\n"
+	  "  void          set_clock(fawkes::Clock *clock);\n"
 
           "  unsigned int  msgq_enqueue_copy(Message *message);\n"
           "  void          msgq_remove(Message *message);\n"
@@ -427,6 +432,8 @@ ToLuaInterfaceGenerator::write_toluaf(FILE *f)
 {
   fprintf(f,
 	  "$#include <interfaces/%s>\n"
+	  "$#include <utils/time/time.h>\n"
+	  "$#include <utils/time/clock.h>\n"
 	  "$using namespace fawkes;\n"
 	  "namespace fawkes {\n"
 	  "class %s : public Interface\n"
