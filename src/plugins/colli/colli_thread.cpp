@@ -465,6 +465,7 @@ ColliThread::colli_execute_()
 
         logger->log_warn(name(), "Escape mode, escaping!");
         m_pSelectDriveMode->SetLocalTarget( m_LocalTarget.x, m_LocalTarget.y );
+        m_pSelectDriveMode->setGridInformation(m_pLaserOccGrid, m_RoboGridPos.x, m_RoboGridPos.y);
         m_pSelectDriveMode->Update( true );  // <-- this calls the ESCAPE mode!
         m_ProposedTranslation = m_pSelectDriveMode->GetProposedTranslation();
         m_ProposedRotation    = m_pSelectDriveMode->GetProposedRotation();

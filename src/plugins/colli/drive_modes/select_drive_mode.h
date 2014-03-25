@@ -37,6 +37,7 @@ class MotorControl;
 class Laser;
 class Logger;
 class Configuration;
+class CLaserOccupancyGrid;
 
 
 class CSelectDriveMode
@@ -64,6 +65,8 @@ public:
 
   ///\brief Returns the proposed rotation. After an update.
   float GetProposedRotation();
+
+  void setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, int roboY );
 
 private:
 

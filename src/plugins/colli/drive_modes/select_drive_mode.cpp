@@ -25,7 +25,7 @@
 
 // INCLUDE HERE YOUR DRIVE MODES!!!
 #include "stop_drive_mode.h"
-#include "escape_drive_mode.h"
+#include "escape_potential_field_drive_mode.h"
 #include "slow_forward_drive_mode.h"
 #include "slow_backward_drive_mode.h"
 #include "slow_biward_drive_mode.h"
@@ -39,6 +39,7 @@
 
 #include "../utils/rob/robo_motorcontrol.h"
 #include "../utils/rob/robo_laser.h"
+#include "../search/og_laser.h"
 
 #include <interfaces/NavigatorInterface.h>
 #include <logging/logger.h>
@@ -88,7 +89,7 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
 
   // and here an example of using extra data, e.g. the laser for escape...
   // escape drive mode
-  m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule(laser, logger, config) );
+  m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldDriveModule( logger, config) );
 
 
 
@@ -193,6 +194,19 @@ CSelectDriveMode::GetProposedRotation()
   return m_ProposedRotation;
 }
 
+void
+CSelectDriveMode::setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, int roboY )
+{
+  for ( unsigned int i = 0; i < m_vDriveModeList.size(); i++ ) {
+    // drive mode checking
+    if ( m_vDriveModeList[i]->GetDriveModeName() == NavigatorInterface::ESCAPE ) {
+      ((CEscapePotentialFieldDriveModule*)m_vDriveModeList[i])->setGridInformation( occGrid, roboX, roboY );
+
+      return;
+    }
+  }
+  logger_->log_error("CSelectDriveMode", "Can't find escape drive mode to set grid information");
+}
 
 /* ****************************************************************************** */
 /* ****************************************************************************** */
