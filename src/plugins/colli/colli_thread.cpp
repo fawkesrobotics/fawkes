@@ -146,10 +146,10 @@ ColliThread::finalize()
   delete m_pMotorInstruct;
 
   // close all registered bb-interfaces
-  blackboard->close( m_pColliDataObj );
-  blackboard->close( m_pColliTargetObj );
-  blackboard->close( m_pLaserScannerObj );
-  blackboard->close( m_pMopoObj );
+  blackboard->close( if_colli_data_ );
+  blackboard->close( if_colli_target_ );
+  blackboard->close( if_laser_ );
+  blackboard->close( if_motor_ );
 
   logger->log_info(name(), "(finalize): Destructing done.");
 }
@@ -244,29 +244,29 @@ ColliThread::loop()
 
   // check if we need to abort for some reason
   bool abort = false;
-  if( !m_pLaserScannerObj->has_writer()
-   || !m_pMopoObj->has_writer() ) {
+  if( !if_laser_->has_writer()
+   || !if_motor_->has_writer() ) {
     logger->log_warn(name(), "***** Laser or sim_robot dead!!!");
     escape_count = 0;
     abort = true;
 
 /*
     // THIS IF FOR CHALLENGE ONLY!!!
-  } else if( m_pColliTargetObj->drive_mode() == NavigatorInterface::OVERRIDE ) {
+  } else if( if_colli_target_->drive_mode() == NavigatorInterface::OVERRIDE ) {
     logger->log_debug(name(), "BEING OVERRIDDEN!");
-    m_pColliDataObj->set_final( false );
-    m_pColliDataObj->write();
+    if_colli_data_->set_final( false );
+    if_colli_data_->write();
     escape_count = 0;
     abort = true;
 */
 
-  } else if( m_pColliTargetObj->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
+  } else if( if_colli_target_->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
     //logger->log_debug(name(), "Moving is not allowed!");
     escape_count = 0;
     abort = true;
 
     // Do not drive if there is no new target
-  } else if( m_pColliTargetObj->is_final() ) {
+  } else if( if_colli_target_->is_final() ) {
     //logger->log_debug(name(), "No new target for colli...ABORT");
     m_oldAnglesToTarget.clear();
     for ( unsigned int i = 0; i < 10; i++ )
@@ -277,18 +277,18 @@ ColliThread::loop()
 
   if( abort ) {
     // check if we need to stop the current colli movememtn
-    if( !m_pColliDataObj->is_final() ) {
+    if( !if_colli_data_->is_final() ) {
       //logger->log_debug(name(), "STOPPING");
       // colli is active, but for some reason we need to abort -> STOP colli movement
-      if( abs(m_pMopoObj->vx()) > 0.01f
-       || abs(m_pMopoObj->vy()) > 0.01f
-       || abs(m_pMopoObj->omega()) > 0.01f ) {
+      if( abs(if_motor_->vx()) > 0.01f
+       || abs(if_motor_->vy()) > 0.01f
+       || abs(if_motor_->omega()) > 0.01f ) {
         // only stop movement, if we are moving
         m_pMotorInstruct->Drive( 0.0, 0.0 );
       } else {
         // movement has stopped, we are "final" now
-        m_pColliDataObj->set_final( true );
-        m_pColliDataObj->write();
+        if_colli_data_->set_final( true );
+        if_colli_data_->write();
       }
     }
 
@@ -309,12 +309,12 @@ ColliThread::loop()
     m_pLaserOccGrid->ResetOld();
     m_ProposedTranslation = 0.0;
     m_ProposedRotation    = 0.0;
-    if( abs(m_pMopoObj->vx()) <= 0.01f
-     && abs(m_pMopoObj->vy()) <= 0.01f
-     && abs(m_pMopoObj->omega()) <= 0.01f ) {
+    if( abs(if_motor_->vx()) <= 0.01f
+     && abs(if_motor_->vy()) <= 0.01f
+     && abs(if_motor_->omega()) <= 0.01f ) {
       // we have stopped, can consider the colli final now
       //logger->log_debug(name(), "L, consider colli final now");
-      m_pColliDataObj->set_final( true );
+      if_colli_data_->set_final( true );
     }
 
     m_pLaserOccGrid->ResetOld();
@@ -329,10 +329,10 @@ ColliThread::loop()
   } else {
     // perform the update of the grid.
     UpdateOwnModules();
-    m_pColliDataObj->set_final( false );
+    if_colli_data_->set_final( false );
 
-    if( m_pMopoObj->motor_state() == MotorInterface::MOTOR_DISABLED ) {
-      m_pMopoObj->msgq_enqueue(new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED));
+    if( if_motor_->motor_state() == MotorInterface::MOTOR_DISABLED ) {
+      if_motor_->msgq_enqueue(new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED));
       //TODO: return afterwards?! we are not controlling the motor directly as probably was the case in RCSoftX
     }
 
@@ -345,7 +345,7 @@ ColliThread::loop()
 
       // ueber denken und testen
 
-      if( m_pColliTargetObj->is_escaping_enabled() ) {
+      if( if_colli_target_->is_escaping_enabled() ) {
         // SJTODO: ERST wenn ich gestoppt habe, escape mode anwerfen!!!
         if (escape_count > 0)
           escape_count--;
@@ -374,14 +374,14 @@ ColliThread::loop()
       if (m_ColliStatus == OrientAtTarget) {
         m_ProposedTranslation = 0.0;
         // turn faster if angle-diff is high
-        //m_ProposedRotation    = 1.5*normalize_mirror_rad( m_pColliTargetObj->GetTargetOri() -
-        m_ProposedRotation    = 1.0*normalize_mirror_rad( m_pColliTargetObj->dest_ori() -
+        //m_ProposedRotation    = 1.5*normalize_mirror_rad( if_colli_target_->GetTargetOri() -
+        m_ProposedRotation    = 1.0*normalize_mirror_rad( if_colli_target_->dest_ori() -
                                                           m_pMotorInstruct->GetCurrentOri() );
         // need to consider minimum rotation velocity
         if ( m_ProposedRotation > 0.0 )
-          m_ProposedRotation = std::min( m_pColliTargetObj->max_rotation(), std::max( cfg_min_rot_, m_ProposedRotation));
+          m_ProposedRotation = std::min( if_colli_target_->max_rotation(), std::max( cfg_min_rot_, m_ProposedRotation));
         else
-          m_ProposedRotation = std::max(-m_pColliTargetObj->max_rotation(), std::min(-cfg_min_rot_, m_ProposedRotation));
+          m_ProposedRotation = std::max(-if_colli_target_->max_rotation(), std::min(-cfg_min_rot_, m_ProposedRotation));
 
         m_pLaserOccGrid->ResetOld();
 
@@ -421,10 +421,10 @@ ColliThread::loop()
         }
 
         //TODO: we should not mis-use the NavigatorInterface for these colli-data..
-        m_pColliDataObj->set_x( m_LocalTarget.x ); // waypoint X
-        m_pColliDataObj->set_y( m_LocalTarget.y ); // waypoint Y
-        m_pColliDataObj->set_dest_x( m_LocalTrajec.x ); // collision-point X
-        m_pColliDataObj->set_dest_y( m_LocalTrajec.y ); // collision-point Y
+        if_colli_data_->set_x( m_LocalTarget.x ); // waypoint X
+        if_colli_data_->set_y( m_LocalTarget.y ); // waypoint Y
+        if_colli_data_->set_dest_x( m_LocalTrajec.x ); // collision-point X
+        if_colli_data_->set_dest_y( m_LocalTrajec.y ); // collision-point Y
       }
     }
 
@@ -437,7 +437,7 @@ ColliThread::loop()
   m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
 
   // Send motor and colli data away.
-  m_pColliDataObj->write();
+  if_colli_data_->write();
 
   // visualize the new information
 #ifdef HAVE_VISUAL_DEBUGGING
@@ -464,21 +464,21 @@ ColliThread::loop()
 void
 ColliThread::RegisterAtBlackboard()
 {
-  m_pMopoObj     = blackboard->open_for_reading<MotorInterface>(cfg_iface_motor_.c_str());
+  if_motor_     = blackboard->open_for_reading<MotorInterface>(cfg_iface_motor_.c_str());
 
   // only use the obstacle laser scanner here!
-  m_pLaserScannerObj = blackboard->open_for_reading<Laser360Interface>(cfg_iface_laser_.c_str());
+  if_laser_ = blackboard->open_for_reading<Laser360Interface>(cfg_iface_laser_.c_str());
 
-  m_pColliTargetObj = blackboard->open_for_reading<NavigatorInterface>("Colli target");
+  if_colli_target_ = blackboard->open_for_reading<NavigatorInterface>("Colli target");
 
-  m_pColliDataObj = blackboard->open_for_writing<NavigatorInterface>("Colli data");
+  if_colli_data_ = blackboard->open_for_writing<NavigatorInterface>("Colli data");
 
-  m_pMopoObj->read();
-  m_pLaserScannerObj->read();
-  m_pColliTargetObj->read();
+  if_motor_->read();
+  if_laser_->read();
+  if_colli_target_->read();
 
-  m_pColliDataObj->set_final(true);
-  m_pColliDataObj->write();
+  if_colli_data_->set_final(true);
+  if_colli_data_->write();
 }
 
 
@@ -487,7 +487,7 @@ void
 ColliThread::InitializeModules()
 {
   // FIRST(!): the laserinterface (uses the laserscanner)
-  m_pLaser = new Laser( m_pLaserScannerObj, logger, config );
+  m_pLaser = new Laser( if_laser_, logger, config );
   m_pLaser->UpdateLaser();
 
   // SECOND(!): the occupancy grid (it uses the laser)
@@ -505,7 +505,7 @@ ColliThread::InitializeModules()
 
 
   // BEFORE DRIVE MODE: the motorinstruction set
-  m_pMotorInstruct = (CBaseMotorInstruct *)new CQuadraticMotorInstruct( m_pMopoObj,
+  m_pMotorInstruct = (CBaseMotorInstruct *)new CQuadraticMotorInstruct( if_motor_,
                                                                         m_ColliFrequency,
                                                                         logger,
                                                                         config );
@@ -513,7 +513,7 @@ ColliThread::InitializeModules()
 
 
   // AFTER MOTOR INSTRUCT: the motor propose values object
-  m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, m_pLaser, m_pColliTargetObj, logger, config );
+  m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, m_pLaser, if_colli_target_, logger, config );
 
   // Initialization of colli state machine:
   // Currently nothing is to accomplish
@@ -537,10 +537,10 @@ ColliThread::InitializeModules()
 void
 ColliThread::UpdateBB()
 {
-  m_pLaserScannerObj->read();
-  m_pMopoObj->read();
-  m_pColliTargetObj->read();
-  m_pColliDataObj->write();
+  if_laser_->read();
+  if_motor_->read();
+  if_colli_target_->read();
+  if_colli_data_->write();
 }
 
 
@@ -549,7 +549,7 @@ void
 ColliThread::UpdateColliStateMachine()
 {
   // initialize
-  if( m_pColliTargetObj->changed() ) {
+  if( if_colli_target_->changed() ) {
     // new target!
     m_ColliStatus = NothingToDo;
   }
@@ -558,19 +558,19 @@ ColliThread::UpdateColliStateMachine()
   float curPosY = m_pMotorInstruct->GetCurrentY();
   float curPosO = m_pMotorInstruct->GetCurrentOri();
 
-  float targetX = m_pColliTargetObj->dest_x();
-  float targetY = m_pColliTargetObj->dest_y();
-  float targetO = m_pColliTargetObj->dest_ori();
+  float targetX = if_colli_target_->dest_x();
+  float targetY = if_colli_target_->dest_y();
+  float targetO = if_colli_target_->dest_ori();
 
-  bool  orient = m_pColliTargetObj->is_orient_at_target();
+  bool  orient = if_colli_target_->is_orient_at_target();
 
   float targetDist = distance(targetX, targetY, curPosX, curPosY);
 
   bool isDriving = m_ColliStatus == DriveToTarget;
-  bool isNewShortTarget = (m_pColliTargetObj->dest_dist() < cfg_min_long_dist_drive_)
-                       && (m_pColliTargetObj->dest_dist() >= cfg_min_drive_dist_);
+  bool isNewShortTarget = (if_colli_target_->dest_dist() < cfg_min_long_dist_drive_)
+                       && (if_colli_target_->dest_dist() >= cfg_min_drive_dist_);
 
-  //  bool  stop_on_target =  m_pColliTargetObj->StopOnTarget();
+  //  bool  stop_on_target =  if_colli_target_->StopOnTarget();
 
 //   if ( stop_on_target == false )
 //     {
@@ -745,8 +745,8 @@ ColliThread::UpdateOwnModules()
   // Robo increasement for robots
   float m_RoboIncrease = 0.0;
 
-  if ( m_pColliTargetObj->security_distance() > 0.0 ) {
-    m_RoboIncrease = m_pColliTargetObj->security_distance();
+  if ( if_colli_target_->security_distance() > 0.0 ) {
+    m_RoboIncrease = if_colli_target_->security_distance();
     logger->log_info(name(),"(UpdateOwnModules ): Setting EXTERN Robot secure distance = %f. ATTENTION TO THE ROBOT!!!!",
                             m_RoboIncrease);
   } else {

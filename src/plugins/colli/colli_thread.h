@@ -92,10 +92,10 @@ class ColliThread
    *
    * Point                ->  cart_coord_2d_t     (point with 2 floats)
    */
-  fawkes::MotorInterface*         m_pMopoObj;          // MotorObject
-  fawkes::Laser360Interface*      m_pLaserScannerObj;  // LaserScannerObject
-  fawkes::NavigatorInterface*     m_pColliTargetObj;   // TargetObject
-  fawkes::NavigatorInterface*     m_pColliDataObj;     // Colli Data Object
+  fawkes::MotorInterface*         if_motor_;           // MotorObject
+  fawkes::Laser360Interface*      if_laser_;           // LaserScannerObject
+  fawkes::NavigatorInterface*     if_colli_target_;    // TargetObject
+  fawkes::NavigatorInterface*     if_colli_data_;      // Colli Data Object
 
   fawkes::Laser*                  m_pLaser;            // laser interface for easy use
   fawkes::CLaserOccupancyGrid*    m_pLaserOccGrid;     // the grid to drive on
