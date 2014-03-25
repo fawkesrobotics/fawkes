@@ -3,7 +3,8 @@
  *  colli_thread.h - Fawkes Colli Thread
  *
  *  Created: Wed Oct 16 18:00:00 2013
- *  Copyright  2013  Bahram Maleki-Fard
+ *  Copyright  2013-2014  Bahram Maleki-Fard
+ *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -22,8 +23,9 @@
 #ifndef __PLUGINS_COLLI_COLLI_THREAD_H_
 #define __PLUGINS_COLLI_COLLI_THREAD_H_
 
+#include "common/types.h"
+
 #include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
@@ -34,17 +36,11 @@
 #include <utils/math/types.h>
 #include <utils/math/angle.h>
 
-// Colli States
-enum ColliState
-{
-  NothingToDo,          // Indicating that nothing is to do
-  OrientAtTarget,       // Indicating that the robot is at target and has to orient
-  DriveToOrientPoint,   // Drive to the orientation point
-  DriveToTarget,        // Drive to the target
-};
-
 namespace fawkes
 {
+  class Mutex;
+  class TimeWait;
+
   class MotorInterface;
   class Laser360Interface;
   class NavigatorInterface;
@@ -62,7 +58,6 @@ class ColliVisualizationThread;
 
 class ColliThread
 : public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
@@ -78,7 +73,19 @@ class ColliThread
   virtual void finalize();
 
   virtual void set_vis_thread(ColliVisualizationThread* vis_thread);
+
+  void publish_data();
+
+  bool is_final() const;
+
+  void colli_goto(float x, float y, float ori, fawkes::NavigatorInterface* iface);
+  void colli_relgoto(float x, float y, float ori, fawkes::NavigatorInterface* iface);
+  void colli_stop();
+
  private:
+  fawkes::Mutex* mutex_;
+  fawkes::TimeWait* timer_;
+
   /* ************************************************************************ */
   /* PRIVATE OBJECT VARIABLES                                                 */
   /* ************************************************************************ */
@@ -88,14 +95,14 @@ class ColliThread
    * Mopo_Client          ->  MotorInterface      (motor data)
    * Laser_Client         ->  Laser360Interface   (laser data)
    * Colli_Target_Client  ->  NavigatorInterface  (colli target)
-   * Colli_Data_Server    ->  NavigatorInterface  (colli data)
+   * Colli_Data_Server    ->  colli_data_t        (colli data)
    *
    * Point                ->  cart_coord_2d_t     (point with 2 floats)
    */
   fawkes::MotorInterface*         if_motor_;           // MotorObject
   fawkes::Laser360Interface*      if_laser_;           // LaserScannerObject
   fawkes::NavigatorInterface*     if_colli_target_;    // TargetObject
-  fawkes::NavigatorInterface*     if_colli_data_;      // Colli Data Object
+  fawkes::colli_data_t            colli_data_;         // Colli Data Object
 
   fawkes::Laser*                  m_pLaser;            // laser interface for easy use
   fawkes::CLaserOccupancyGrid*    m_pLaserOccGrid;     // the grid to drive on
@@ -122,7 +129,8 @@ class ColliThread
   float m_ProposedTranslation;  // the proposed translation that should be realized in MotorInstruct
   float m_ProposedRotation;     // the proposed rotation that should be realized in MotorInstruct
 
-  ColliState m_ColliStatus;     // representing current colli status
+  fawkes::colli_state_t m_ColliStatus;     // representing current colli status
+  bool target_new_;
 
   float m_TargetPointX, m_TargetPointY;               // for Update
 
@@ -144,13 +152,15 @@ class ColliThread
   float cfg_min_long_dist_drive_; /**< The minimum distance to drive straight to target in a long distance */
   float cfg_min_long_dist_prepos_;/**< The minimum distance to drive to a pre-positino of a target in long distance */
   float cfg_min_rot_dist_;        /**< The minimum rotation distance to rotate, when at target */
-  float cfg_target_pre_pos_;      /**< Distance to target pre-position (only if ColliState == DriveToOrientPoint) */
+  float cfg_target_pre_pos_;      /**< Distance to target pre-position (only if colli_state_t == DriveToOrientPoint) */
 
   std::string cfg_frame_base_;    /**< The frame of the robot's base */
   std::string cfg_frame_laser_;   /**< The frame of the laser */
 
   std::string cfg_iface_motor_;   /**< The ID of the MotorInterface */
   std::string cfg_iface_laser_;   /**< The ID of the LaserInterface */
+  std::string cfg_iface_colli_;   /**< The ID of the NavigatorInterface for colli target*/
+  float cfg_iface_read_timeout_;  /**< Maximum age (in seconds) of required data from reading interfaces*/
 
   // stop on target stuff
   std::vector< float > m_oldAnglesToTarget;      // the old angles to the target
@@ -166,6 +176,11 @@ class ColliThread
   /* ************************************************************************ */
   /* PRIVATE METHODS                                                          */
   /* ************************************************************************ */
+  /// Run the actual Colli procedure
+  void colli_execute_();
+
+  /// Handle an incoming goto command
+  void colli_goto_(float x, float y, float ori, fawkes::NavigatorInterface* iface);
 
   /// Register all BB-Interfaces at the Blackboard.
   void RegisterAtBlackboard();
@@ -174,7 +189,7 @@ class ColliThread
   void InitializeModules();
 
   /// Get the newest values from the blackboard
-  void UpdateBB();
+  bool UpdateBB();
 
   /// Check, in what state the colli is, and what to do
   void UpdateColliStateMachine();

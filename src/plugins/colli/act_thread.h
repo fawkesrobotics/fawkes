@@ -44,9 +44,10 @@ namespace ros {
 
 namespace fawkes
 {
-  class MotorInterface;
   class NavigatorInterface;
 }
+
+class ColliThread;
 
 class ColliActThread
 : public fawkes::Thread,
@@ -60,7 +61,7 @@ class ColliActThread
   public fawkes::TransformAspect
 {
  public:
-  ColliActThread();
+  ColliActThread(ColliThread* colli_thread);
   virtual ~ColliActThread();
 
   virtual void init();
@@ -69,15 +70,13 @@ class ColliActThread
 
  private:
 
+  ColliThread*   thread_colli_;
+
   fawkes::NavigatorInterface* if_navi_;
-  fawkes::MotorInterface*     if_motor_;
-  fawkes::NavigatorInterface* if_colli_data_;
-  fawkes::NavigatorInterface* if_colli_target_;
 
   ros::Subscriber* sub_;
 
   std::string cfg_iface_navi_;
-  std::string cfg_iface_motor_;
 
   std::string cfg_frame_odom_;
 
@@ -89,15 +88,6 @@ class ColliActThread
   bool  cfg_stop_at_target_;
   bool  cfg_orient_at_target_;
   fawkes::NavigatorInterface::DriveMode cfg_drive_mode_;
-
-  // current parameters, may be set by colli internally, or externally via messages
-  float security_distance_;
-  float max_velocity_;
-  float max_rotation_;
-  float escaping_enabled_;
-  bool  stop_at_target_;
-  bool  orient_at_target_;
-  fawkes::NavigatorInterface::DriveMode drive_mode_;
 
 #ifdef HAVE_ROS
   void callbackSimpleGoal(const geometry_msgs::PoseStamped::ConstPtr& msg);

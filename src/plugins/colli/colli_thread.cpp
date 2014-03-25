@@ -3,7 +3,8 @@
  *  colli_thread.cpp - Fawkes Colli Thread
  *
  *  Created: Sat Jul 13 12:00:00 2013
- *  Copyright  2013  Bahram Maleki-Fard
+ *  Copyright  2013-2014  Bahram Maleki-Fard
+ *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -31,6 +32,8 @@
 #include "search/og_laser.h"
 #include "search/astar_search.h"
 
+#include <core/threading/mutex.h>
+#include <utils/time/wait.h>
 #include <interfaces/MotorInterface.h>
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/NavigatorInterface.h>
@@ -47,15 +50,16 @@ using namespace std;
 
 /** Constructor. */
 ColliThread::ColliThread()
-  : Thread("ColliThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+  : Thread("ColliThread", Thread::OPMODE_CONTINUOUS),
     vis_thread_( 0 )
 {
+  mutex_ = new Mutex();
 }
 
 /** Destructor. */
 ColliThread::~ColliThread()
 {
+  delete mutex_;
 }
 
 void
@@ -77,11 +81,13 @@ ColliThread::init()
   cfg_min_rot_dist_         = config->get_float((cfg_prefix + "min_rot_distance").c_str());
   cfg_target_pre_pos_       = config->get_float((cfg_prefix + "pre_position_distance").c_str());
 
-  cfg_frame_base_       = config->get_string((cfg_prefix + "frame/base").c_str());
-  cfg_frame_laser_      = config->get_string((cfg_prefix + "frame/laser").c_str());
+  cfg_frame_base_  = config->get_string((cfg_prefix + "frame/base").c_str());
+  cfg_frame_laser_ = config->get_string((cfg_prefix + "frame/laser").c_str());
 
-  cfg_iface_motor_      = config->get_string((cfg_prefix + "interface/motor").c_str());
-  cfg_iface_laser_      = config->get_string((cfg_prefix + "interface/laser").c_str());
+  cfg_iface_motor_        = config->get_string((cfg_prefix + "interface/motor").c_str());
+  cfg_iface_laser_        = config->get_string((cfg_prefix + "interface/laser").c_str());
+  cfg_iface_colli_        = config->get_string((cfg_prefix + "interface/colli").c_str());
+  cfg_iface_read_timeout_ = config->get_float((cfg_prefix + "interface/read_timeout").c_str());
 
   cfg_prefix += "occ_grid/";
   m_OccGridWidth        = config->get_float((cfg_prefix + "width").c_str());
@@ -103,12 +109,6 @@ ColliThread::init()
   vis_thread_->setup(m_pLaserOccGrid, m_pSearch, m_pLaser);
 #endif
 
-  // adjust the frequency of how often loop() should be processed
-  float fawkes_loop_time_ms = config->get_uint("/fawkes/mainapp/desired_loop_time") / 1000.f;
-  loop_count_trigger_ = m_ColliFrequency / fawkes_loop_time_ms;
-  logger->log_info(name(), "will process 1 loop() after %u main_loops", loop_count_trigger_);
-  loop_count_ = 0;
-
   // get distance from laser to robot base
   laser_to_base_valid_ = false;
   tf::Stamped<tf::Point> p_laser;
@@ -124,9 +124,13 @@ ColliThread::init()
                      cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
   }
 
+  // setup timer for colli-frequency
+  timer_ = new TimeWait(clock, m_ColliFrequency * 1000);
+
   m_ProposedTranslation = 0.0;
   m_ProposedRotation    = 0.0;
 
+  target_new_ = false;
   escape_count = 0;
 
   logger->log_info(name(), "(init): Initialization done.");
@@ -138,6 +142,8 @@ ColliThread::finalize()
 {
   logger->log_info(name(), "(finalize): Entering destructing ...");
 
+  delete timer_;
+
   // delete own modules
   delete m_pSelectDriveMode;
   delete m_pSearch;
@@ -146,7 +152,6 @@ ColliThread::finalize()
   delete m_pMotorInstruct;
 
   // close all registered bb-interfaces
-  blackboard->close( if_colli_data_ );
   blackboard->close( if_colli_target_ );
   blackboard->close( if_laser_ );
   blackboard->close( if_motor_ );
@@ -164,14 +169,191 @@ ColliThread::set_vis_thread(ColliVisualizationThread* vis_thread)
   vis_thread_ = vis_thread;
 }
 
+/** publish data */
+void
+ColliThread::publish_data()
+{
+  mutex_->lock();
+  if_colli_target_->write();
+  mutex_->unlock();
+}
+
+bool
+ColliThread::is_final() const
+{
+  return colli_data_.final;
+}
+
+void
+ColliThread::colli_goto(float x, float y, float ori, NavigatorInterface* iface)
+{
+  mutex_->lock();
+  // Update interface values
+  UpdateBB();
+
+  colli_goto_(x, y, ori, iface);
+}
+
+void
+ColliThread::colli_relgoto(float x, float y, float ori, NavigatorInterface* iface)
+{
+  mutex_->lock();
+
+  // Update interface values
+  UpdateBB();
+
+  float colliCurrentO = if_motor_->odometry_orientation();
+
+  // coord transformation: relative target -> (global) motor coordinates
+  float colliTargetX = if_motor_->odometry_position_x()
+                       + x * cos( colliCurrentO )
+                       - y * sin( colliCurrentO );
+  float colliTargetY = if_motor_->odometry_position_y()
+                       + x * sin( colliCurrentO )
+                       + y * cos( colliCurrentO );
+  float colliTargetO = colliCurrentO + ori;
+
+  this->colli_goto_(colliTargetX, colliTargetY, colliTargetO, iface);
+}
+
+void
+ColliThread::colli_stop()
+{
+  mutex_->lock();
+
+  if_colli_target_->set_dest_x( if_motor_->odometry_position_x() );
+  if_colli_target_->set_dest_y( if_motor_->odometry_position_y() );
+  if_colli_target_->set_dest_ori( if_motor_->odometry_orientation() );
+  if_colli_target_->set_dest_dist( 0.f );
+  if_colli_target_->set_final( true );
+
+  mutex_->unlock();
+}
+
+void
+ColliThread::loop()
+{
+  timer_->mark_start();
+
+  // Do not continue if we don't have a valid transform from base to laser yet
+  if( !laser_to_base_valid_ ) {
+    try {
+      tf::Stamped<tf::Point> p_laser;
+      tf::Stamped<tf::Point> p_base( tf::Point(0,0,0), fawkes::Time(0,0), cfg_frame_base_);
+
+      tf_listener->transform_point(cfg_frame_laser_, p_base, p_laser);
+      laser_to_base_.x = p_laser.x();
+      laser_to_base_.y = p_laser.y();
+      logger->log_info(name(), "distance from laser to base: x:%f  y:%f", laser_to_base_.x, laser_to_base_.y);
+      laser_to_base_valid_ = true;
+    } catch(Exception &e) {
+      logger->log_warn(name(), "Unable to transform %s to %s. Error: %s",
+                      cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
+      timer_->wait();
+      return;
+    }
+  }
+
+  mutex_->lock();
+
+  // check if we need to abort for some reason
+  bool abort = false;
+  if( !UpdateBB() ) {
+    escape_count = 0;
+    abort = true;
+
+/*
+    // THIS IF FOR CHALLENGE ONLY!!!
+  } else if( if_colli_target_->drive_mode() == NavigatorInterface::OVERRIDE ) {
+    logger->log_debug(name(), "BEING OVERRIDDEN!");
+    colli_data_.final = false;
+    escape_count = 0;
+    abort = true;
+*/
+
+  } else if( if_colli_target_->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
+    //logger->log_debug(name(), "Moving is not allowed!");
+    escape_count = 0;
+    abort = true;
+
+    // Do not drive if there is no new target
+  } else if( if_colli_target_->is_final() ) {
+    //logger->log_debug(name(), "No new target for colli...ABORT");
+    m_oldAnglesToTarget.clear();
+    for ( unsigned int i = 0; i < 10; i++ )
+      m_oldAnglesToTarget.push_back( 0.0 );
+
+    abort = true;
+  }
+
+  if( abort ) {
+    // check if we need to stop the current colli movement
+    if( !colli_data_.final ) {
+      //logger->log_debug(name(), "STOPPING");
+      // colli is active, but for some reason we need to abort -> STOP colli movement
+      if( abs(if_motor_->vx()) > 0.01f
+       || abs(if_motor_->vy()) > 0.01f
+       || abs(if_motor_->omega()) > 0.01f ) {
+        // only stop movement, if we are moving
+        m_pMotorInstruct->Drive( 0.0, 0.0 );
+      } else {
+        // movement has stopped, we are "final" now
+        colli_data_.final = true;
+      }
+    }
+
+#ifdef HAVE_VISUAL_DEBUGGING
+    if( cfg_visualize_idle_ ) {
+      UpdateOwnModules();
+      vis_thread_->wakeup();
+    }
+#endif
+
+  } else {
+
+    // Run Colli
+    colli_execute_();
+
+    // Send motor and colli data away.
+    if_colli_target_->set_final( colli_data_.final );
+
+    // visualize the new information
+#ifdef HAVE_VISUAL_DEBUGGING
+    vis_thread_->wakeup();
+#endif
+  }
+
+  mutex_->unlock();
+
+  timer_->wait();
+}
 
 /* **************************************************************************** */
 /* **************************************************************************** */
-/* ******************************  L O O P  *********************************** */
+/* ****************** P R I V A T E  -   S T U F F **************************** */
 /* **************************************************************************** */
 /* **************************************************************************** */
+void
+ColliThread::colli_goto_(float x, float y, float ori, NavigatorInterface* iface)
+{
+  if_colli_target_->copy_values(iface);
 
-//
+  if_colli_target_->set_dest_x( x );
+  if_colli_target_->set_dest_y( y );
+  if_colli_target_->set_dest_ori( ori );
+
+  // x and y are not needed anymore. use them for calculation of target distance
+  x -= if_motor_->odometry_position_x();
+  y -= if_motor_->odometry_position_y();
+  float dist = sqrt(x*x + y*y);
+  if_colli_target_->set_dest_dist(dist);
+
+  if_colli_target_->set_final( false );
+
+  target_new_ = true;
+  mutex_->unlock();
+}
+
 // ============================================================================ //
 // ============================================================================ //
 //                               BBCLIENT LOOP                                  //
@@ -209,97 +391,11 @@ ColliThread::set_vis_thread(ColliVisualizationThread* vis_thread)
 // ============================================================================ //
 //
 void
-ColliThread::loop()
+ColliThread::colli_execute_()
 {
-  if( ++loop_count_ < loop_count_trigger_ )
-    return;
-
-  // reset loop_count
-  loop_count_ = 0;
-
-  // Do not continue if we don't have a valid transform from base to laser yet
-  if( !laser_to_base_valid_ ) {
-    try {
-      tf::Stamped<tf::Point> p_laser;
-      tf::Stamped<tf::Point> p_base( tf::Point(0,0,0), fawkes::Time(0,0), cfg_frame_base_);
-
-      tf_listener->transform_point(cfg_frame_laser_, p_base, p_laser);
-      laser_to_base_.x = p_laser.x();
-      laser_to_base_.y = p_laser.y();
-      logger->log_info(name(), "distance from laser to base: x:%f  y:%f", laser_to_base_.x, laser_to_base_.y);
-      laser_to_base_valid_ = true;
-    } catch(Exception &e) {
-      logger->log_warn(name(), "Unable to transform %s to %s. Error: %s",
-                      cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
-      return;
-    }
-  }
-
   // to be on the sure side of life
   m_ProposedTranslation = 0.0;
   m_ProposedRotation    = 0.0;
-
-  // Update blackboard data
-  UpdateBB();
-
-  // check if we need to abort for some reason
-  bool abort = false;
-  if( !if_laser_->has_writer()
-   || !if_motor_->has_writer() ) {
-    logger->log_warn(name(), "***** Laser or sim_robot dead!!!");
-    escape_count = 0;
-    abort = true;
-
-/*
-    // THIS IF FOR CHALLENGE ONLY!!!
-  } else if( if_colli_target_->drive_mode() == NavigatorInterface::OVERRIDE ) {
-    logger->log_debug(name(), "BEING OVERRIDDEN!");
-    if_colli_data_->set_final( false );
-    if_colli_data_->write();
-    escape_count = 0;
-    abort = true;
-*/
-
-  } else if( if_colli_target_->drive_mode() == NavigatorInterface::MovingNotAllowed ) {
-    //logger->log_debug(name(), "Moving is not allowed!");
-    escape_count = 0;
-    abort = true;
-
-    // Do not drive if there is no new target
-  } else if( if_colli_target_->is_final() ) {
-    //logger->log_debug(name(), "No new target for colli...ABORT");
-    m_oldAnglesToTarget.clear();
-    for ( unsigned int i = 0; i < 10; i++ )
-      m_oldAnglesToTarget.push_back( 0.0 );
-
-    abort = true;
-  }
-
-  if( abort ) {
-    // check if we need to stop the current colli movememtn
-    if( !if_colli_data_->is_final() ) {
-      //logger->log_debug(name(), "STOPPING");
-      // colli is active, but for some reason we need to abort -> STOP colli movement
-      if( abs(if_motor_->vx()) > 0.01f
-       || abs(if_motor_->vy()) > 0.01f
-       || abs(if_motor_->omega()) > 0.01f ) {
-        // only stop movement, if we are moving
-        m_pMotorInstruct->Drive( 0.0, 0.0 );
-      } else {
-        // movement has stopped, we are "final" now
-        if_colli_data_->set_final( true );
-        if_colli_data_->write();
-      }
-    }
-
-#ifdef HAVE_VISUAL_DEBUGGING
-    if( cfg_visualize_idle_ ) {
-      UpdateOwnModules();
-      vis_thread_->wakeup();
-    }
-#endif
-    return;
-  }
 
   // Update state machine
   UpdateColliStateMachine();
@@ -314,7 +410,7 @@ ColliThread::loop()
      && abs(if_motor_->omega()) <= 0.01f ) {
       // we have stopped, can consider the colli final now
       //logger->log_debug(name(), "L, consider colli final now");
-      if_colli_data_->set_final( true );
+      colli_data_.final = true;
     }
 
     m_pLaserOccGrid->ResetOld();
@@ -329,7 +425,7 @@ ColliThread::loop()
   } else {
     // perform the update of the grid.
     UpdateOwnModules();
-    if_colli_data_->set_final( false );
+    colli_data_.final = false;
 
     if( if_motor_->motor_state() == MotorInterface::MOTOR_DISABLED ) {
       if_motor_->msgq_enqueue(new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED));
@@ -420,11 +516,8 @@ ColliThread::loop()
           m_pLaserOccGrid->ResetOld();
         }
 
-        //TODO: we should not mis-use the NavigatorInterface for these colli-data..
-        if_colli_data_->set_x( m_LocalTarget.x ); // waypoint X
-        if_colli_data_->set_y( m_LocalTarget.y ); // waypoint Y
-        if_colli_data_->set_dest_x( m_LocalTrajec.x ); // collision-point X
-        if_colli_data_->set_dest_y( m_LocalTrajec.y ); // collision-point Y
+        colli_data_.local_target = m_LocalTarget; // waypoints
+        colli_data_.local_trajec = m_LocalTrajec; // collision-points
       }
     }
 
@@ -435,50 +528,24 @@ ColliThread::loop()
 
   // Realize drive mode proposal with realization module
   m_pMotorInstruct->Drive( m_ProposedTranslation, m_ProposedRotation );
-
-  // Send motor and colli data away.
-  if_colli_data_->write();
-
-  // visualize the new information
-#ifdef HAVE_VISUAL_DEBUGGING
-  vis_thread_->wakeup();
-#endif
-
 }
-
-
-/* **************************************************************************** */
-/* **************************************************************************** */
-/* ****************** P R I V A T E  -   S T U F F **************************** */
-/* **************************************************************************** */
-/* **************************************************************************** */
 
 
 /* **************************************************************************** */
 /*                       Initialization                                         */
 /* **************************************************************************** */
-
-
-
 /// Register all BB-Interfaces at the Blackboard.
 void
 ColliThread::RegisterAtBlackboard()
 {
-  if_motor_     = blackboard->open_for_reading<MotorInterface>(cfg_iface_motor_.c_str());
-
-  // only use the obstacle laser scanner here!
+  if_motor_ = blackboard->open_for_reading<MotorInterface>(cfg_iface_motor_.c_str());
   if_laser_ = blackboard->open_for_reading<Laser360Interface>(cfg_iface_laser_.c_str());
-
-  if_colli_target_ = blackboard->open_for_reading<NavigatorInterface>("Colli target");
-
-  if_colli_data_ = blackboard->open_for_writing<NavigatorInterface>("Colli data");
-
   if_motor_->read();
   if_laser_->read();
-  if_colli_target_->read();
 
-  if_colli_data_->set_final(true);
-  if_colli_data_->write();
+  if_colli_target_ = blackboard->open_for_writing<NavigatorInterface>(cfg_iface_colli_.c_str());
+  if_colli_target_->set_final( true );
+  if_colli_target_->write();
 }
 
 
@@ -486,6 +553,8 @@ ColliThread::RegisterAtBlackboard()
 void
 ColliThread::InitializeModules()
 {
+  colli_data_.final = true;
+
   // FIRST(!): the laserinterface (uses the laserscanner)
   m_pLaser = new Laser( if_laser_, logger, config );
   m_pLaser->UpdateLaser();
@@ -503,14 +572,12 @@ ColliThread::InitializeModules()
   // THIRD(!): the search component (it uses the occ grid (without the laser)
   m_pSearch = new CSearch( m_pLaserOccGrid, logger, config );
 
-
   // BEFORE DRIVE MODE: the motorinstruction set
   m_pMotorInstruct = (CBaseMotorInstruct *)new CQuadraticMotorInstruct( if_motor_,
                                                                         m_ColliFrequency,
                                                                         logger,
                                                                         config );
   m_pMotorInstruct->SetRecoverEmergencyStop();
-
 
   // AFTER MOTOR INSTRUCT: the motor propose values object
   m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, m_pLaser, if_colli_target_, logger, config );
@@ -530,17 +597,37 @@ ColliThread::InitializeModules()
 /* **************************************************************************** */
 /*                          During Runtime                                      */
 /* **************************************************************************** */
-
-
-
 /// Get the newest values from the blackboard
-void
+bool
 ColliThread::UpdateBB()
 {
-  if_laser_->read();
-  if_motor_->read();
-  if_colli_target_->read();
-  if_colli_data_->write();
+  Time now(clock);
+
+  /* check if we have fresh data to fetch. An error has occured if
+   * a) laser or motor interface have no writer
+   * b) there is no new laser data for a while, or
+   * c) there is no motor data for a while and colli is currently moving
+   */
+  if( !if_laser_->has_writer() || !if_motor_->has_writer() ) {
+    logger->log_warn(name(), "Laser or Motor dead, no writing instance for interfaces!!!");
+    return false;
+  }
+
+  if( if_laser_->changed() )
+    if_laser_->read();
+  if( now - if_laser_->timestamp() > (double)cfg_iface_read_timeout_ ) {
+    logger->log_warn(name(), "LaserInterface writer has been inactive for too long");
+    return false;
+  }
+
+  if( if_motor_->changed() )
+    if_motor_->read();
+  if( !colli_data_.final && now - if_laser_->timestamp() > (double)cfg_iface_read_timeout_ ) {
+    logger->log_warn(name(), "MotorInterface writer has been inactive for too long");
+    return false;
+  }
+
+  return true;
 }
 
 
@@ -549,9 +636,10 @@ void
 ColliThread::UpdateColliStateMachine()
 {
   // initialize
-  if( if_colli_target_->changed() ) {
+  if( target_new_ ) {
     // new target!
     m_ColliStatus = NothingToDo;
+    target_new_ = false;
   }
 
   float curPosX = m_pMotorInstruct->GetCurrentX();

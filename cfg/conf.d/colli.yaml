@@ -63,6 +63,11 @@ plugins/colli:
     motor: Motor
     # ID of laser interface
     laser: Laser laser merged
+    # ID of colli target interface
+    colli: Colli target
+    # Maximum age (in seconds) of data for reading interfaces. If data is older than this, the colli_thread
+    #  assumes that there main_loop is delayed => abort movement
+    read_timeout: 0.5
 
   frame:
     # base_link frame

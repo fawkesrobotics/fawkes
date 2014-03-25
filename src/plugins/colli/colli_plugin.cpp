@@ -42,9 +42,11 @@ public:
   ColliPlugin(Configuration *config)
       : Plugin(config)
   {
-    thread_list.push_back(new ColliActThread());
     ColliThread* colli_thread = new ColliThread();
     thread_list.push_back(colli_thread);
+    
+    thread_list.push_back(new ColliActThread(colli_thread));
+
 #ifdef HAVE_VISUAL_DEBUGGING
     ColliVisualizationThread* vis_thread = new ColliVisualizationThread();
     thread_list.push_back(vis_thread);
