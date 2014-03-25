@@ -136,7 +136,7 @@ void MotorControl::SetDesiredRotation( float ori )
 
 bool MotorControl::SendCommand()
 {
-  if ( m_MovingAllowed ) {
+  if ( m_MovingAllowed && m_pMopo->has_writer() ) {
     m_pMopo->msgq_enqueue(new MotorInterface::TransRotMessage(m_MotorControlDesiredTranslation, 0,
                                                               m_MotorControlDesiredRotation));
     return true;
@@ -149,14 +149,16 @@ bool MotorControl::SendCommand()
 void MotorControl::SetEmergencyStop()
 {
   m_MovingAllowed = false;
-  m_pMopo->msgq_enqueue(new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_DISABLED));
+  if( m_pMopo->has_writer() )
+    m_pMopo->msgq_enqueue(new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_DISABLED));
 }
 
 
 void MotorControl::SetRecoverEmergencyStop()
 {
   m_MovingAllowed = true;
-  m_pMopo->msgq_enqueue(new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED));
+  if( m_pMopo->has_writer() )
+    m_pMopo->msgq_enqueue(new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED));
 }
 
 } // end of namespace fawkes
