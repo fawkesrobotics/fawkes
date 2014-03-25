@@ -17,6 +17,12 @@ hardware/robotino:
   # Odom TF offset. This time is added to the current time when the odometry <- base_link TF is published
   odom_time_offset: 0.25
 
+  # Odometry coordinate frame
+  odom_frame: !frame /odom
+
+  # Base coordinate frame
+  base_frame: !frame /base_link
+
   gripper:
     # Enable gripper {ENABLED=true / DISABLED=false}
     enable_gripper: true

@@ -75,6 +75,8 @@ RobotinoActThread::init()
   cfg_deadman_threshold_ = config->get_float("/hardware/robotino/deadman_time_threshold");
   cfg_gripper_enabled_   = config->get_bool("/hardware/robotino/gripper/enable_gripper");
   cfg_odom_time_offset_  = config->get_float("/hardware/robotino/odom_time_offset");
+  cfg_odom_frame_        = config->get_string("/hardware/robotino/odom_frame");
+  cfg_base_frame_        = config->get_string("/hardware/robotino/base_frame");
 
   gripper_close_ = false;
 
@@ -217,7 +219,7 @@ RobotinoActThread::loop()
                                   0));
 
       tf_publisher->send_transform(t, now + cfg_odom_time_offset_,
-				   "/odom", "/base_link");
+				   cfg_odom_frame_, cfg_base_frame_);
 #endif
 
       last_seqnum_ = sensor_state.sequenceNumber;

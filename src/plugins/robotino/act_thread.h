@@ -80,12 +80,15 @@ class RobotinoActThread
   unsigned int                    last_seqnum_;
   fawkes::MotorInterface         *motor_if_;
   fawkes::GripperInterface       *gripper_if_;
-  float        			  cfg_deadman_threshold_;
-  float        			  cfg_odom_time_offset_;
   bool        			  msg_received_;
   bool        			  msg_zero_vel_;
-  bool 				  cfg_gripper_enabled_;
   fawkes::Time 			  last_msg_time_;
+
+  float        			  cfg_deadman_threshold_;
+  float        			  cfg_odom_time_offset_;
+  bool 				  cfg_gripper_enabled_;
+  std::string                     cfg_odom_frame_;
+  std::string                     cfg_base_frame_;
 
   float                           des_vx_;
   float                           des_vy_;
