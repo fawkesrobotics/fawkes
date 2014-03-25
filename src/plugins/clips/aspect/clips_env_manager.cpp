@@ -3,8 +3,7 @@
  *  clips_env_manager.cpp - CLIPS environment manager
  *
  *  Created: Thu Aug 15 18:57:58 2013
- *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -304,6 +303,8 @@ CLIPSEnvManager::environments() const
 CLIPS::Value
 CLIPSEnvManager::clips_request_feature(std::string env_name, std::string feature_name)
 {
+  bool rv = true;
+
   logger_->log_debug("ClipsEnvManager", "Environment %s requests feature %s",
 		     env_name.c_str(), feature_name.c_str());
 
@@ -331,23 +332,23 @@ CLIPSEnvManager::clips_request_feature(std::string env_name, std::string feature
   envd.req_feat.sort();
 
   // deffact so it survives a reset
-  std::string deffact = "(deffact ff-features-loaded";
+  std::string deffacts = "(deffacts ff-features-loaded";
 
   for (auto feat : envd.req_feat) {
-    deffact += " (ff-feature-loaded " + feat + ")";
+    deffacts += " (ff-feature-loaded " + feat + ")";
   }
-  deffact += ")";
+  deffacts += ")";
 
   envd.env->assert_fact_f("(ff-feature-loaded %s)", feature_name.c_str());
 
-  CLIPS::DefaultFacts::pointer old_deffact =
-    envd.env->get_default_facts("ff-features-available");
-  if (old_deffact)  old_deffact->retract();
-  envd.env->build(deffact);
-
+  if (! envd.env->build(deffacts)) {
+    logger_->log_warn("ClipsEnvManager", "Failed to build deffacts ff-features-loaded "
+		      "for %s", env_name.c_str());
+    rv = false;
+  }
   envd.env.unlock();
 
-  return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+  return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
 }
 
 
@@ -374,20 +375,20 @@ CLIPSEnvManager::assert_features(LockPtr<CLIPS::Environment> &clips, bool immedi
 {
 
   // deffact so it survives a reset
-  std::string deffact = "(deffact ff-features-available";
+  std::string deffacts = "(deffacts ff-features-available";
 
   for (auto feat : features_) {
-    deffact += " (ff-feature " + feat.first + ")";
+    deffacts += " (ff-feature " + feat.first + ")";
     if (immediate_assert) {
       // assert so it is immediately available
       clips->assert_fact_f("(ff-feature %s)", feat.first.c_str());
     }
   }
-  deffact += ")";
-
-  CLIPS::DefaultFacts::pointer old_deffact = clips->get_default_facts("ff-features-available");
-  if (old_deffact)  old_deffact->retract();
-  clips->build(deffact);
+  deffacts += ")";
+  
+  if (! clips->build(deffacts)) {
+    logger_->log_warn("ClipsEnvManager", "Failed to build deffacts ff-features-available");
+  }
 }
 
 
@@ -403,6 +404,8 @@ CLIPSEnvManager::add_features(const std::list<CLIPSFeature *> &features)
     if (features_.find(feature_name) != features_.end()) {
       throw Exception("Feature '%s' has already been registered", feature_name.c_str());
     }
+
+    logger_->log_info("ClipsEnvManager", "Adding feature %s", feature_name.c_str());
 
     features_[feature_name] = feat;
 
