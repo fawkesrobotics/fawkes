@@ -102,7 +102,6 @@ Laser::UpdateLaser( )
 
   newtime->stamp();
 
-  m_pLaserScannerObj->read();
   m_NumberOfReadings = m_pLaserScannerObj->maxlenof_distances();
 
   // get all readings
