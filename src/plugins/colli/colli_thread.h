@@ -74,9 +74,6 @@ class ColliThread
 
   virtual void set_vis_thread(ColliVisualizationThread* vis_thread);
 
-  void interfaces_write();
-  void interfaces_read();
-
   bool is_final() const;
 
   void colli_goto(float x, float y, float ori, fawkes::NavigatorInterface* iface);
@@ -188,6 +185,9 @@ class ColliThread
 
   /// Initialize all modules used by the Colli
   void InitializeModules();
+
+  /// Update interface values
+  void interfaces_read();
 
   /// Check if the interface data is valid, i.e. not outdated
   bool interfaces_valid();

@@ -169,25 +169,6 @@ ColliThread::set_vis_thread(ColliVisualizationThread* vis_thread)
   vis_thread_ = vis_thread;
 }
 
-/** write interface data to blackboard */
-void
-ColliThread::interfaces_write()
-{
-  mutex_->lock();
-  if_colli_target_->write();
-  mutex_->unlock();
-}
-
-/** read interface data from blackboard */
-void
-ColliThread::interfaces_read()
-{
-  mutex_->lock();
-  if_laser_->read();
-  if_motor_->read();
-  mutex_->unlock();
-}
-
 bool
 ColliThread::is_final() const
 {
@@ -198,6 +179,7 @@ void
 ColliThread::colli_goto(float x, float y, float ori, NavigatorInterface* iface)
 {
   mutex_->lock();
+  interfaces_read();
 
   colli_goto_(x, y, ori, iface);
 }
@@ -206,6 +188,7 @@ void
 ColliThread::colli_relgoto(float x, float y, float ori, NavigatorInterface* iface)
 {
   mutex_->lock();
+  interfaces_read();
 
   float colliCurrentO = if_motor_->odometry_orientation();
 
@@ -231,7 +214,7 @@ ColliThread::colli_stop()
   if_colli_target_->set_dest_ori( if_motor_->odometry_orientation() );
   if_colli_target_->set_dest_dist( 0.f );
   if_colli_target_->set_final( true );
-
+  if_colli_target_->write();
   mutex_->unlock();
 }
 
@@ -260,6 +243,8 @@ ColliThread::loop()
   }
 
   mutex_->lock();
+
+  interfaces_read();
 
   // check if we need to abort for some reason
   bool abort = false;
@@ -321,6 +306,7 @@ ColliThread::loop()
 
     // Send motor and colli data away.
     if_colli_target_->set_final( colli_data_.final );
+    if_colli_target_->write();
 
     // visualize the new information
 #ifdef HAVE_VISUAL_DEBUGGING
@@ -354,6 +340,7 @@ ColliThread::colli_goto_(float x, float y, float ori, NavigatorInterface* iface)
   if_colli_target_->set_dest_dist(dist);
 
   if_colli_target_->set_final( false );
+  if_colli_target_->write();
 
   target_new_ = true;
   mutex_->unlock();
@@ -602,6 +589,15 @@ ColliThread::InitializeModules()
 /* **************************************************************************** */
 /*                          During Runtime                                      */
 /* **************************************************************************** */
+/// read interface data from blackboard
+void
+ColliThread::interfaces_read()
+{
+  if_laser_->read();
+  if_motor_->read();
+}
+
+
 /// Check if the interface data is valid, i.e. not outdated
 bool
 ColliThread::interfaces_valid()
