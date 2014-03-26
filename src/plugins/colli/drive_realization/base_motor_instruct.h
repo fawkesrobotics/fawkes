@@ -71,7 +71,7 @@ class CBaseMotorInstruct: public MotorControl
   float m_currentTranslation, m_currentRotation;
   float m_Frequency;
 
-  fawkes::Time m_OldTimestamp;
+  //fawkes::Time m_OldTimestamp;
 
 
   ///\brief setCommand sets the executable commands and sends them
@@ -119,7 +119,7 @@ CBaseMotorInstruct::CBaseMotorInstruct( fawkes::MotorInterface* motor,
   m_desiredTranslation = m_desiredRotation = 0.0;
   m_currentTranslation = m_currentRotation = 0.0;
   m_execTranslation    = m_execRotation    = 0.0;
-  m_OldTimestamp.stamp();
+  //m_OldTimestamp.stamp();
   m_Frequency = frequency;
   logger_->log_info("CBaseMotorInstruct", "(Constructor): Exiting");
 }
@@ -175,6 +175,7 @@ CBaseMotorInstruct::Drive( float proposedTrans, float proposedRot )
   m_execTranslation = 0.0;
   m_execRotation = 0.0;
 
+  /*
   // timediff storie to realize how often one was called
   Time currentTime;
   currentTime.stamp();
@@ -188,6 +189,8 @@ CBaseMotorInstruct::Drive( float proposedTrans, float proposedRot )
   }
 
   m_OldTimestamp = currentTime;
+  */
+  float time_factor = 1.f;
 
   // getting current performed values
   m_currentRotation    = GetMotorDesiredRotation();
