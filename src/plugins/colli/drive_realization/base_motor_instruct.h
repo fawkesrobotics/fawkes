@@ -179,8 +179,8 @@ CBaseMotorInstruct::Drive( float proposedTrans, float proposedRot )
   // timediff storie to realize how often one was called
   Time currentTime;
   currentTime.stamp();
-  float timediff = (currentTime - m_OldTimestamp).in_sec();
-  float time_factor = ( (timediff*1000.0) / m_Frequency);
+  long timediff = (currentTime - m_OldTimestamp).in_msec();
+  float time_factor = (float)timediff / (1000.f / m_Frequency);
 
   if (time_factor < 0.5) {
     logger_->log_debug("CBaseMotorInstruct","( Drive ): Blackboard timing(case 1) strange, time_factor is %f", time_factor);

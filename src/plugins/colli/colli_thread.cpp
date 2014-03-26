@@ -68,7 +68,7 @@ ColliThread::init()
   logger->log_info(name(), "(init): Constructing...");
 
   std::string cfg_prefix = "/plugins/colli/";
-  m_ColliFrequency      = (int)(1000.0/(float)config->get_int((cfg_prefix + "frequency").c_str()));
+  m_ColliFrequency      = config->get_int((cfg_prefix + "frequency").c_str());
   m_MaximumRoboIncrease = config->get_float((cfg_prefix + "max_robo_increase").c_str());
   cfg_obstacle_inc_     = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
 
@@ -125,7 +125,7 @@ ColliThread::init()
   }
 
   // setup timer for colli-frequency
-  timer_ = new TimeWait(clock, m_ColliFrequency * 1000);
+  timer_ = new TimeWait(clock, 1e6 / m_ColliFrequency);
 
   m_ProposedTranslation = 0.0;
   m_ProposedRotation    = 0.0;
