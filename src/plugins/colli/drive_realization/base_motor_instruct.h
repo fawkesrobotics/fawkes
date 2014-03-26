@@ -138,13 +138,6 @@ CBaseMotorInstruct::~CBaseMotorInstruct()
 inline void
 CBaseMotorInstruct::SetCommand()
 {
-  // This case here should be removed after Alex's RPC does work.
-  // SJ TODO!!!
-  if ( !(GetMovingAllowed()) )
-    SetRecoverEmergencyStop();
-  // SJ TODO!!!
-
-
   // Translation borders
   if ( fabs(m_execTranslation) < 0.05 ) {
     SetDesiredTranslation( 0.0 );

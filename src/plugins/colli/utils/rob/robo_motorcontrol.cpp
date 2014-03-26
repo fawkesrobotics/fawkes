@@ -37,7 +37,6 @@ namespace fawkes {
 MotorControl::MotorControl( fawkes::MotorInterface* motor )
 {
   m_pMopo = motor;
-  SetEmergencyStop();
 }
 
 
@@ -136,29 +135,13 @@ void MotorControl::SetDesiredRotation( float ori )
 
 bool MotorControl::SendCommand()
 {
-  if ( m_MovingAllowed && m_pMopo->has_writer() ) {
+  if ( m_pMopo->has_writer() ) {
     m_pMopo->msgq_enqueue(new MotorInterface::TransRotMessage(m_MotorControlDesiredTranslation, 0,
                                                               m_MotorControlDesiredRotation));
     return true;
   } else {
     return false;
   }
-}
-
-
-void MotorControl::SetEmergencyStop()
-{
-  m_MovingAllowed = false;
-  if( m_pMopo->has_writer() )
-    m_pMopo->msgq_enqueue(new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_DISABLED));
-}
-
-
-void MotorControl::SetRecoverEmergencyStop()
-{
-  m_MovingAllowed = true;
-  if( m_pMopo->has_writer() )
-    m_pMopo->msgq_enqueue(new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED));
 }
 
 } // end of namespace fawkes

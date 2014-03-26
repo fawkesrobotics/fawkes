@@ -450,11 +450,6 @@ ColliThread::colli_execute_()
     UpdateOwnModules();
     colli_data_.final = false;
 
-    if( if_motor_->motor_state() == MotorInterface::MOTOR_DISABLED ) {
-      if_motor_->msgq_enqueue(new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED));
-      //TODO: return afterwards?! we are not controlling the motor directly as probably was the case in RCSoftX
-    }
-
     // Check, if one of our positions (robo-, laser-gridpos is not valid) => Danger!
     if( CheckEscape() == true || escape_count > 0 ) {
       if( m_pMotorInstruct->GetMotorDesiredTranslation() == 0.0
@@ -603,7 +598,6 @@ ColliThread::InitializeModules()
                                                                         m_ColliFrequency,
                                                                         logger,
                                                                         config );
-  m_pMotorInstruct->SetRecoverEmergencyStop();
 
   // AFTER MOTOR INSTRUCT: the motor propose values object
   m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, m_pLaser, if_colli_target_, logger, config );

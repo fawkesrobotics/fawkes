@@ -122,18 +122,6 @@ class MotorControl
    */
   void SetDesiredRotation( float ori );
 
-  /** SetEmergencyStop.
-   *  Sets an emergency stop flag, and STOPS all movement of the robot.
-   *  This is a dangerous thing to play with!!!
-   */
-  void SetEmergencyStop( );
-
-  /** SetRecoverEmergencyStop.
-   *  This method recovers an emergency stop.
-   *  Afterwards moving is again allowed.
-   */
-  void SetRecoverEmergencyStop( );
-
   /** SendCommand.
    *  This method is the final sending command. Here the blackboard gets
    *    informed about the users desired intentions.
@@ -146,7 +134,6 @@ class MotorControl
 
  private:
 
-  bool m_MovingAllowed;                   // flag if moving is currently allowed.
   float m_MotorControlDesiredTranslation; // what translation the next set command realizes
   float m_MotorControlDesiredRotation;    // what rotationtion the next set command realizes
 
