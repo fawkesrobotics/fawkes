@@ -149,6 +149,7 @@ ColliActThread::loop()
 {
   // update interfaces
   if_navi_->set_final(colli_final());
+  thread_colli_->interfaces_read();
 
   // process interface messages
   Message* motion_msg = NULL;

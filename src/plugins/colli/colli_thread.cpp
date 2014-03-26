@@ -178,6 +178,16 @@ ColliThread::interfaces_write()
   mutex_->unlock();
 }
 
+/** read interface data from blackboard */
+void
+ColliThread::interfaces_read()
+{
+  mutex_->lock();
+  if_laser_->read();
+  if_motor_->read();
+  mutex_->unlock();
+}
+
 bool
 ColliThread::is_final() const
 {
@@ -188,8 +198,6 @@ void
 ColliThread::colli_goto(float x, float y, float ori, NavigatorInterface* iface)
 {
   mutex_->lock();
-  // Update interface values
-  UpdateBB();
 
   colli_goto_(x, y, ori, iface);
 }
@@ -198,9 +206,6 @@ void
 ColliThread::colli_relgoto(float x, float y, float ori, NavigatorInterface* iface)
 {
   mutex_->lock();
-
-  // Update interface values
-  UpdateBB();
 
   float colliCurrentO = if_motor_->odometry_orientation();
 
@@ -258,7 +263,7 @@ ColliThread::loop()
 
   // check if we need to abort for some reason
   bool abort = false;
-  if( !UpdateBB() ) {
+  if( !interfaces_valid() ) {
     escape_count = 0;
     abort = true;
 
@@ -597,9 +602,9 @@ ColliThread::InitializeModules()
 /* **************************************************************************** */
 /*                          During Runtime                                      */
 /* **************************************************************************** */
-/// Get the newest values from the blackboard
+/// Check if the interface data is valid, i.e. not outdated
 bool
-ColliThread::UpdateBB()
+ColliThread::interfaces_valid()
 {
   Time now(clock);
 
@@ -611,23 +616,21 @@ ColliThread::UpdateBB()
   if( !if_laser_->has_writer() || !if_motor_->has_writer() ) {
     logger->log_warn(name(), "Laser or Motor dead, no writing instance for interfaces!!!");
     return false;
-  }
 
-  if( if_laser_->changed() )
-    if_laser_->read();
-  if( now - if_laser_->timestamp() > (double)cfg_iface_read_timeout_ ) {
-    logger->log_warn(name(), "LaserInterface writer has been inactive for too long");
+  } else if( (now - if_laser_->timestamp()) > (double)cfg_iface_read_timeout_ ) {
+    logger->log_warn(name(), "LaserInterface writer has been inactive for too long (%f > %f)",
+                             (now - if_laser_->timestamp()), cfg_iface_read_timeout_);
     return false;
-  }
 
-  if( if_motor_->changed() )
-    if_motor_->read();
-  if( !colli_data_.final && now - if_laser_->timestamp() > (double)cfg_iface_read_timeout_ ) {
-    logger->log_warn(name(), "MotorInterface writer has been inactive for too long");
+  } else if( !colli_data_.final && (now - if_motor_->timestamp()) > (double)cfg_iface_read_timeout_ ) {
+    logger->log_warn(name(), "MotorInterface writer has been inactive for too long (%f > %f)",
+                             (now - if_motor_->timestamp()), cfg_iface_read_timeout_);
     return false;
-  }
 
-  return true;
+  } else {
+
+    return true;
+  }
 }
 
 

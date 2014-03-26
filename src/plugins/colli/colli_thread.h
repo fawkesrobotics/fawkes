@@ -75,6 +75,7 @@ class ColliThread
   virtual void set_vis_thread(ColliVisualizationThread* vis_thread);
 
   void interfaces_write();
+  void interfaces_read();
 
   bool is_final() const;
 
@@ -188,8 +189,8 @@ class ColliThread
   /// Initialize all modules used by the Colli
   void InitializeModules();
 
-  /// Get the newest values from the blackboard
-  bool UpdateBB();
+  /// Check if the interface data is valid, i.e. not outdated
+  bool interfaces_valid();
 
   /// Check, in what state the colli is, and what to do
   void UpdateColliStateMachine();
