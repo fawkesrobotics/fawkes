@@ -286,7 +286,7 @@ ColliActThread::loop()
   }
 
   if_navi_->write();
-  thread_colli_->publish_data();
+  thread_colli_->interfaces_write();
 }
 
 bool

@@ -74,7 +74,7 @@ class ColliThread
 
   virtual void set_vis_thread(ColliVisualizationThread* vis_thread);
 
-  void publish_data();
+  void interfaces_write();
 
   bool is_final() const;
 

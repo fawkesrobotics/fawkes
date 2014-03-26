@@ -169,9 +169,9 @@ ColliThread::set_vis_thread(ColliVisualizationThread* vis_thread)
   vis_thread_ = vis_thread;
 }
 
-/** publish data */
+/** write interface data to blackboard */
 void
-ColliThread::publish_data()
+ColliThread::interfaces_write()
 {
   mutex_->lock();
   if_colli_target_->write();
