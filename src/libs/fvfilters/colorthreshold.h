@@ -30,9 +30,17 @@
 namespace firevision
 {
 
+/**
+ * A filter that uses the VLC color similarity algorithm to mark a certain color.
+ * All pixels that don't match the given ColorModel are drawn in grayscale.
+ */
 class FilterColorThreshold : public Filter
 {
   public:
+    /**
+     * Constructor
+     * @param color_model Accepted color
+     */
     FilterColorThreshold(ColorModelSimilarity *color_model);
     ~FilterColorThreshold();
 

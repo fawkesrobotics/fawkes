@@ -3,28 +3,25 @@
  * given reference color. Tolerance is expressed in maximum saturation and
  * chroma deviation.
  *
- * The algorithm is ported from the VLC colorthreshold filter written by
+ * Uses the algorithm ported from the VLC colorthreshold filter written by
  * Sigmund Augdal and Antoine Cellerier. Cf.
  * modules/video_filter/colorthres.c in the VLC source tree.
  *
- * Initially ported in 2014 by Victor Mataré.
- *
- * The original code is licensed under GPL 2.1, so we do the same.
+ * (C) 2014 Victor Mataré.
  ****************************************************************************/
 
-/* This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
 #include "similarity.h"
@@ -71,10 +68,8 @@ color_t ColorModelSimilarity::determine(unsigned int y, unsigned int u, unsigned
 }
 
 /** Add a color to be recognized by this colormodel.
- * @param color_class The ::color_t that will be returned by ColorModelSimilarity::determine on a match
- * @param reference The base color for the similarity matcher
- * @param chroma_threshold Maximum difference between reference an input color
- * @param saturation_threshold Minimum saturation of input color
+ * @param color_class The ColorModelSimilarity::color_class_t that will be returned by
+ * ColorModelSimilarity::determine on a match
  */
 void ColorModelSimilarity::add_color(color_class_t *color_class) {
   color_classes_.push_back(color_class);
