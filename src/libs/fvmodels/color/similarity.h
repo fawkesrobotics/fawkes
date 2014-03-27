@@ -51,13 +51,12 @@ class ColorModelSimilarity : public firevision::ColorModel
      * Parameters that define a certain color
      */
     typedef struct color_class_t {
-      private:
-        color_t result;
-        int ref_u;
-        int ref_v;
-        int ref_length;
-        int chroma_threshold;
-        int saturation_threshold;
+        color_t result; /** Discrete color_t represented by this class */
+        int ref_u; /** YUV U-component of reference color */
+        int ref_v; /** YUV V-component of reference color */
+        int ref_length; /** Length of U,V vector, i.e. reference saturation */
+        int chroma_threshold; /** Required chroma similarity */
+        int saturation_threshold; /** Required saturation */
 
         /**
          * Define the RGB values for the reference color
@@ -73,7 +72,7 @@ class ColorModelSimilarity : public firevision::ColorModel
           ref_v = v - 0x80;
           ref_length = sqrt(ref_u * ref_u + ref_v * ref_v);
         }
-      public:
+
         /**
          * Initialize a color class
          * @param expect Discrete color_t represented by this class
