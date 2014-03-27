@@ -320,7 +320,7 @@ NavGraphThread::generate_plan(std::string goal_name)
   plan_.clear();
   
   NavGraphSearchState *initial_state =
-    new NavGraphSearchState(init, goal, 0, NULL, *graph_);
+    new NavGraphSearchState(init, goal, 0, NULL, *graph_, constraint_repo);
 
   std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
 

@@ -42,6 +42,7 @@
 
 #include <plugins/navgraph/constraints/constraint_repo.h>
 
+
 namespace fawkes {
   class AStar;
   class Time;

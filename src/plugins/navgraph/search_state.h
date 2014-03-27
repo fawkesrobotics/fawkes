@@ -24,6 +24,7 @@
 
 #include <utils/search/astar_state.h>
 #include <utils/graph/rcsoft_map_graph.h>
+#include <plugins/navgraph/constraints/constraint_repo.h>
 
 class NavGraphSearchState : public fawkes::AStarState
 {
@@ -36,7 +37,7 @@ public:
   //
   NavGraphSearchState(fawkes::TopologicalMapNode node, fawkes::TopologicalMapNode goal,
 		      double new_cost, NavGraphSearchState * parent,
-		      fawkes::TopologicalMapGraph *map_graph);
+		      fawkes::TopologicalMapGraph *map_graph, fawkes::ConstraintRepo *constraint_repo);
 
   /// standard destructor
   ~NavGraphSearchState();
@@ -61,6 +62,7 @@ public:
 
   fawkes::TopologicalMapGraph *map_graph_;
 
+  fawkes::ConstraintRepo *constraint_repo_;
   size_t key_;
 };
 
