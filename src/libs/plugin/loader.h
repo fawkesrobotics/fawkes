@@ -75,13 +75,16 @@ class PluginLoader {
 
  private:
   Module * open_module(const char *plugin_name);
+  std::string  get_string_symbol(const char *plugin_name, const char *symbol_name,
+				 const char *section_name = ".fawkes_plugin");
   Plugin * create_instance(const char *plugin_name, Module *module);
 
  private:
   class Data;
 
-  Data *d;
-  Configuration    *__config;
+  Data *d_;
+  Configuration    *config_;
+  std::string       plugin_base_dir_;
 };
 
 

@@ -28,6 +28,15 @@
 
 #include <map>
 
+#ifdef HAVE_LIBELF
+#  include <cstdio>
+#  include <cstring>
+#  include <fcntl.h>
+#  include <unistd.h>
+#  include <libelf.h>
+#  include <gelf.h>
+#endif
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -119,16 +128,17 @@ PluginUnloadException::PluginUnloadException(const char *plugin_name,
  */
 PluginLoader::PluginLoader(const char *plugin_base_dir, Configuration *config)
 {
-  d = new Data();
-  __config = config;
-  d->mm = new ModuleManager(plugin_base_dir);
+  plugin_base_dir_ = plugin_base_dir;
+  d_ = new Data();
+  config_ = config;
+  d_->mm = new ModuleManager(plugin_base_dir);
 }
 
 /** Destructor */
 PluginLoader::~PluginLoader()
 {
-  delete d->mm;
-  delete d;
+  delete d_->mm;
+  delete d_;
 }
 
 
@@ -140,17 +150,17 @@ PluginLoader::~PluginLoader()
 ModuleManager *
 PluginLoader::get_module_manager() const
 {
-  return d->mm;
+  return d_->mm;
 }
 
 
 Module *
 PluginLoader::open_module(const char *plugin_name)
 {
-  std::string module_name = std::string(plugin_name) + "." + d->mm->get_module_file_extension();
+  std::string module_name = std::string(plugin_name) + "." + d_->mm->get_module_file_extension();
 
   try {
-    return d->mm->open_module(module_name.c_str());
+    return d_->mm->open_module(module_name.c_str());
   } catch (ModuleOpenException &e) {
     throw PluginLoadException(plugin_name, "failed to open module", e);
   }
@@ -170,7 +180,7 @@ PluginLoader::create_instance(const char *plugin_name, Module *module)
   PluginFactoryFunc pff = (PluginFactoryFunc)module->get_symbol("plugin_factory");
   Plugin *p = NULL;
 
-  p = pff(__config);
+  p = pff(config_);
   if ( p == NULL ) {
     throw PluginLoadException(plugin_name, "Plugin could not be instantiated");
   } else {
@@ -202,22 +212,110 @@ PluginLoader::load(const char *plugin_name)
 {
   std::string pn = plugin_name;
 
-  if ( d->name_plugin_map.find(pn) != d->name_plugin_map.end() ) {
-    return d->name_plugin_map[pn];
+  if ( d_->name_plugin_map.find(pn) != d_->name_plugin_map.end() ) {
+    return d_->name_plugin_map[pn];
   }
 
   try {
     Module *module = open_module(plugin_name);
     Plugin *p = create_instance(plugin_name, module);
 
-    d->plugin_module_map[p] = module;
-    d->name_plugin_map[pn]  = p;
-    d->plugin_name_map[p]   = pn;
+    d_->plugin_module_map[p] = module;
+    d_->name_plugin_map[pn]  = p;
+    d_->plugin_name_map[p]   = pn;
 
     return p;
   } catch (PluginLoadException &e) {
     throw;
   }
+}
+
+
+/** Get content of a string symbol of a plugin.
+ * @param plugin_name name of the plugin
+ * @param symbol_name name of the desired symbol
+ * @param section_name ELF section name to look for
+ * @return string symbol
+ * @throw Exception thrown if the symbol could not be found or file unreadable
+ */
+std::string
+PluginLoader::get_string_symbol(const char *plugin_name,
+				const char *symbol_name, const char *section_name)
+{
+#ifdef HAVE_LIBELF
+  GElf_Ehdr elf_header;
+  Elf *elf;
+
+  std::string module_name =
+    plugin_base_dir_ + "/" + plugin_name + "." + d_->mm->get_module_file_extension();
+
+  if(elf_version(EV_CURRENT) == EV_NONE) {
+    throw Exception("libelf library ELF version too old");
+  }
+
+  int fd = open(module_name.c_str(), O_RDONLY);
+  if (fd == -1) {
+    throw Exception("Failed to open file of plugin '%s'", plugin_name);
+  }
+
+  elf = elf_begin(fd, ELF_C_READ, NULL);
+  if (! elf) {
+    throw Exception("Cannot read elf file: %s", elf_errmsg(elf_errno()));
+  }
+
+  if (gelf_getehdr(elf, &elf_header) == NULL) {
+    throw Exception("Failed to read ELF header of plugin %s: %s",
+		    plugin_name, elf_errmsg(elf_errno()));    
+  }
+
+  Elf_Scn *scn = NULL;
+  while((scn = elf_nextscn(elf, scn)) != 0) {
+    GElf_Shdr shdr;
+    gelf_getshdr(scn, &shdr);
+
+    if(shdr.sh_type == SHT_SYMTAB) {
+      Elf_Data *edata = elf_getdata(scn, NULL);
+      size_t symbol_count = shdr.sh_size / shdr.sh_entsize;
+
+      for(size_t i = 0; i < symbol_count; ++i) {
+	GElf_Sym sym;
+	gelf_getsym(edata, i, &sym);
+
+	GElf_Shdr sym_shdr;
+	Elf_Scn *sym_scn = elf_getscn(elf, sym.st_shndx);
+	gelf_getshdr(sym_scn, &sym_shdr);
+
+	char *secname = elf_strptr(elf, elf_header.e_shstrndx, sym_shdr.sh_name);
+	char *symname = elf_strptr(elf, shdr.sh_link, sym.st_name);
+
+	if ((strcmp(secname, section_name) == 0) &&
+	    (strcmp(symname, symbol_name) == 0))
+	{
+	  // found it, extract string
+	  Elf_Data *sym_data = elf_rawdata(sym_scn, NULL);
+	  const char *start =
+	    (const char *)sym_data->d_buf + (sym.st_value - sym_shdr.sh_offset);
+	  const char *const limit = start + sym.st_size;
+	  const char *end = (const char *)memchr(start, '\0', limit - start);
+
+	  if (end != NULL) {
+	    close(fd);
+	    return std::string(start);
+	  } else {
+	    close(fd);
+	    throw Exception("Failed to retrieve string for symbol '%s' in section '%s'"
+			    " of plugin '%s'", symbol_name, section_name, plugin_name);
+	  }
+	}
+      }
+    }
+  }
+  close(fd);
+  throw Exception("Description for plugin %s not found. "
+		  "Forgot PLUGIN_DESCRIPTION?", plugin_name);
+#else
+  throw Exception("libelf not supported at compile time");
+#endif
 }
 
 
@@ -229,6 +327,9 @@ PluginLoader::load(const char *plugin_name)
 std::string
 PluginLoader::get_description(const char *plugin_name)
 {
+#ifdef HAVE_LIBELF
+  return get_string_symbol(plugin_name, "_plugin_description");
+#else
   Module *module = open_module(plugin_name);
 
   if ( ! module->has_symbol("plugin_description") ) {
@@ -237,9 +338,10 @@ PluginLoader::get_description(const char *plugin_name)
 
   PluginDescriptionFunc pdf = (PluginDescriptionFunc)module->get_symbol("plugin_description");
   std::string rv = pdf();
-  d->mm->close_module(module);
+  d_->mm->close_module(module);
 
   return rv;
+#endif
 }
 
 
@@ -250,7 +352,7 @@ PluginLoader::get_description(const char *plugin_name)
 bool
 PluginLoader::is_loaded(const char *plugin_name)
 {
-  return ( d->name_plugin_map.find(plugin_name) != d->name_plugin_map.end() );
+  return ( d_->name_plugin_map.find(plugin_name) != d_->name_plugin_map.end() );
 }
 
 
@@ -268,17 +370,17 @@ PluginLoader::is_loaded(const char *plugin_name)
 void
 PluginLoader::unload(Plugin *plugin)
 {
-  if ( d->plugin_module_map.find(plugin) != d->plugin_module_map.end() ) {
+  if ( d_->plugin_module_map.find(plugin) != d_->plugin_module_map.end() ) {
     
-    PluginDestroyFunc pdf = (PluginDestroyFunc)d->plugin_module_map[plugin]->get_symbol("plugin_destroy");
+    PluginDestroyFunc pdf = (PluginDestroyFunc)d_->plugin_module_map[plugin]->get_symbol("plugin_destroy");
     if ( pdf != NULL ) {
       pdf(plugin);
     }
-    d->mm->close_module(d->plugin_module_map[plugin]);
-    d->plugin_module_map.erase(plugin);
+    d_->mm->close_module(d_->plugin_module_map[plugin]);
+    d_->plugin_module_map.erase(plugin);
 
-    d->name_plugin_map.erase(d->plugin_name_map[plugin]);
-    d->plugin_name_map.erase(plugin);
+    d_->name_plugin_map.erase(d_->plugin_name_map[plugin]);
+    d_->plugin_name_map.erase(plugin);
   }
 }
 
