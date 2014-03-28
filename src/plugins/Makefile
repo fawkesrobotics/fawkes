@@ -37,5 +37,6 @@ amcl navgraph perception robotino: ros
 mongodb_log: mongodb
 mongodb: rrd
 clips-navgraph clips-agent clips-protobuf: clips
+clips-navgraph: navgraph
 clips-webview: clips webview
 clips-ros: clips ros
