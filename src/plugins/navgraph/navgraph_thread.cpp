@@ -132,8 +132,8 @@ NavGraphThread::init()
   cmd_sent_at_       = new Time(clock);
   target_reached_at_ = new Time(clock);
 
-  constraint_repo = new ConstraintRepo(logger);
-
+  constraint_repo_   = new ConstraintRepo(logger);
+  navgraph_aspect_inifin_.set_constraint_repo(constraint_repo_);
 }
 
 void

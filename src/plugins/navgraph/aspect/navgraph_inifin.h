@@ -4,7 +4,7 @@
  *
  *  Created: Tue Oct 08 18:15:02 2013
  *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
- *
+ *             2014       Sebastian Reuter
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -33,6 +33,7 @@ namespace fawkes {
 #endif
 
 class TopologicalMapGraph;
+class ConstraintRepo;
 
 class NavGraphAspectIniFin : public AspectIniFin
 {
@@ -43,9 +44,12 @@ class NavGraphAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
   void set_navgraph(LockPtr<TopologicalMapGraph> &navgraph);
+  void set_constraint_repo(LockPtr<ConstraintRepo> &constraint_repo);
 
  private:
   LockPtr<TopologicalMapGraph> navgraph_;
+  LockPtr<ConstraintRepo> constraint_repo_;
+
 };
 
 } // end namespace fawkes
