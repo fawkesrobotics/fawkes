@@ -48,9 +48,11 @@
 #endif
 #include <string>
 #include <memory>
+#include <vector>
 
 namespace fawkes {
   class KatanaInterface;
+  class JointInterface;
   class Time;
   class KatanaController;
 }
@@ -79,7 +81,7 @@ class KatanaActThread
 
   // For BlackBoardInterfaceListener
   virtual bool bb_interface_message_received(fawkes::Interface *interface,
-					     fawkes::Message *message) throw();
+               fawkes::Message *message) throw();
 
   void update_sensor_values();
 
@@ -92,10 +94,11 @@ class KatanaActThread
   void update_sensors(bool refresh);
   void update_motors(bool refresh);
   void start_motion(fawkes::RefPtr<KatanaMotionThread> motion_thread,
-		    unsigned int msgid, const char *logmsg, ...);
+                    unsigned int msgid, const char *logmsg, ...);
 
  private:
   fawkes::KatanaInterface *__katana_if;
+  std::vector<fawkes::JointInterface*> *__joint_ifs;
 
   std::string    __cfg_controller;
   std::string    __cfg_device;
@@ -118,6 +121,7 @@ class KatanaActThread
   float          __cfg_update_interval;
 
   std::string    __cfg_frame_kni;
+  std::string    __cfg_frame_gripper;
   std::string    __cfg_frame_openrave;
 
   bool           __cfg_OR_enabled;

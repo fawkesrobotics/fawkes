@@ -80,9 +80,9 @@ function MOVE:init()
    local theta       = self.fsm.vars.theta or katanaarm:theta()
    local theta_error = self.fsm.vars.theta_error or 0.0
    local straight    = self.fsm.vars.straight    or false
-   local frame       = self.fsm.vars.frame or "/katana/kni"
+   local frame       = self.fsm.vars.frame or "/katana/base_frame"
 
-   if frame ~= "/katana/gripper" then
+   if frame ~= "/katana/tool_frame" then
      -- calculate global position (translation)
       x = x + katanaarm:x()
       y = y + katanaarm:y()
