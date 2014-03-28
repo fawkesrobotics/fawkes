@@ -40,8 +40,6 @@ struct Reading
   float rad;      /**< angle of reading (in rad) */
 };
 
-class TrigTable;
-
 class LaserPoint
 {
  public:
@@ -83,8 +81,6 @@ class LaserPoint
   void  SetPos  ( int number );
 
  private:
-
-  TrigTable * m_pTrigTable;
 
   // array containing scan data
   std::vector<Reading> m_pLaserPoint;

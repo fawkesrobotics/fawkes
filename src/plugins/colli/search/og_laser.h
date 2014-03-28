@@ -34,7 +34,6 @@ namespace fawkes
 
 class Laser;
 class CRoboShape_Colli;
-class TrigTable;
 class ColliObstacleMap;
 
 class Logger;
@@ -85,14 +84,11 @@ class CLaserOccupancyGrid : public OccupancyGrid
 
   Laser            *m_pLaser;     /**< pointer to the laser */
   CRoboShape_Colli *m_pRoboShape; /**< my roboshape */
-  TrigTable        *m_pTrigTable; /**< fast trigonometry table */
   ColliObstacleMap *obstacle_map;  /**< fast obstacle map */
 
   std::vector< float > m_vOldReadings; /**< readings history */
 
   point_t m_LaserPosition; /**< the laser's position in the grid */
-
-  int m_TrigTableResolution; /**< Trigonometry table resolution */
 
   /** History concerned constants */
   int m_MaxHistoryLength, m_MinHistoryLength, m_InitialHistorySize;

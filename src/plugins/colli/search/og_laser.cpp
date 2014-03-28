@@ -26,7 +26,6 @@
 #include "../common/defines.h"
 #include "../utils/rob/roboshape_colli.h"
 #include "../utils/rob/robo_laser.h"
-#include "../utils/geometry/trig_table.h"
 
 #include <utils/math/angle.h>
 #include <logging/logger.h>
@@ -71,15 +70,10 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
   m_InitialHistorySize  = 3*config->get_int((cfg_prefix + "laser_occupancy_grid/history/initial_size").c_str());
   m_MaxHistoryLength    = config->get_int(  (cfg_prefix + "laser_occupancy_grid/history/max_length").c_str());
   m_MinHistoryLength    = config->get_int(  (cfg_prefix + "laser_occupancy_grid/history/min_length").c_str());
-  m_TrigTableResolution = config->get_int(  (cfg_prefix + "trig_table/resolution").c_str());
   m_MinimumLaserLength  = config->get_float((cfg_prefix + "laser/min_reading_length").c_str());
 
 
   cfg_obstacle_inc_         = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
-
-  logger->log_debug("CLaserOccupancyGrid", "Generating trigonometry table");
-  m_pTrigTable = new TrigTable( m_TrigTableResolution );
-  logger->log_debug("CLaserOccupancyGrid", "Generating trigonometry table done");
 
   logger->log_debug("CLaserOccupancyGrid", "Generating obstacle map");
   obstacle_map = new ColliObstacleMap(m_pRoboShape->IsAngularRobot());
@@ -102,7 +96,6 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
 /** Descturctor. */
 CLaserOccupancyGrid::~CLaserOccupancyGrid()
 {
-  delete m_pTrigTable;
   delete m_pRoboShape;
 }
 
@@ -207,10 +200,10 @@ CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float 
       oldpos_x = m_vOldReadings[i];
       oldpos_y = m_vOldReadings[i+1];
 
-      newpos_x =  -xdiff + (  oldpos_x * m_pTrigTable->GetCos( oridiff ) +
-                              oldpos_y * m_pTrigTable->GetSin( oridiff ) );
-      newpos_y =  -ydiff + ( -oldpos_x * m_pTrigTable->GetSin( oridiff ) +
-                              oldpos_y * m_pTrigTable->GetCos( oridiff ) );
+      newpos_x =  -xdiff + (  oldpos_x * std::cos( oridiff ) +
+                              oldpos_y * std::sin( oridiff ) );
+      newpos_y =  -ydiff + ( -oldpos_x * std::sin( oridiff ) +
+                              oldpos_y * std::cos( oridiff ) );
 
       float angle_to_old_reading = atan2( newpos_y, newpos_x );
       float sqr_distance_to_old_reading = sqr( newpos_x ) + sqr( newpos_y );
@@ -253,7 +246,7 @@ CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float 
   }
 
   m_vOldReadings.clear();
-  m_vOldReadings.reserve( m_InitialHistorySize );
+  m_vOldReadings.reserve( old_readings.size() );
 
   // integrate the new calculated old readings
   for ( unsigned int i = 0; i < old_readings.size(); i++ )

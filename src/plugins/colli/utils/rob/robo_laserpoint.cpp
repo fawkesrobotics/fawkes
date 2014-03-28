@@ -21,7 +21,8 @@
  */
 
 #include "robo_laserpoint.h"
-#include "../geometry/trig_table.h"
+
+#include <math.h>
 
 namespace fawkes
 {
@@ -41,7 +42,6 @@ namespace fawkes
 LaserPoint::LaserPoint( int numberOfReadings ) throw (int)
 {
   m_NumberOfReadings = numberOfReadings;
-  m_pTrigTable = new TrigTable( 2 );
   m_pLaserPoint.reserve(numberOfReadings);
 }
 
@@ -131,7 +131,7 @@ LaserPoint::SetPosX( int number)
   number = RangeCheck(number);
 
   m_pLaserPoint[number].posX =
-    m_pLaserPoint[number].length * m_pTrigTable->GetCos(m_pLaserPoint[number].rad);
+    m_pLaserPoint[number].length * cos(m_pLaserPoint[number].rad);
 }
 
 /** Sets the number-readings x coordinate.
@@ -154,7 +154,7 @@ LaserPoint::SetPosY( int number )
   number = RangeCheck(number);
 
   m_pLaserPoint[number].posY =
-    m_pLaserPoint[number].length * m_pTrigTable->GetSin(m_pLaserPoint[number].rad);
+    m_pLaserPoint[number].length * sin(m_pLaserPoint[number].rad);
 }
 
 /** Computes the number-readings coordinates by the number-readings

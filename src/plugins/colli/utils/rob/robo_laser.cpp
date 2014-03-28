@@ -31,7 +31,6 @@
 
 #include <cmath>
 #include <cstdio>
-#include <iostream>
 
 #define MIN_READING_LENGTH 0.01f
 
