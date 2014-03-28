@@ -284,4 +284,22 @@
          in this frame); there is no actual arm part attached to this link -->
   </link>
 
+  <!-- **************************************************************** -->
+  <!-- We add reference frames that match our naming conventions in Fawkes
+       No need to change anything here, this are basically "aliases" of the frame-links -->
+  <joint name="katana/base_frame_joint" type="fixed">
+    <parent link="katana_base_frame"/>
+    <child link="/katana/base_frame" />
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="/katana/base_frame" />
+
+  <joint name="katana/tool_frame_joint" type="fixed">
+    <parent link="katana_gripper_tool_frame"/>
+    <child link="/katana/tool_frame" />
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="/katana/tool_frame" />
+
 </robot>
+
