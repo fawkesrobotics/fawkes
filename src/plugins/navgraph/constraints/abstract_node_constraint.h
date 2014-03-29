@@ -3,6 +3,7 @@
  *
  *  Created: Sun Mar 02 10:47:35 2014
  *  Copyright  2014  Sebastian Reuter
+ *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -94,8 +95,14 @@ inline AbstractNodeConstraint::~AbstractNodeConstraint(){
 }
 
 inline void AbstractNodeConstraint::add_node(fawkes::TopologicalMapNode node){
-	this->nodeList.push_back( node );
-	logger->log_info("abstract_node_constraint", "added node %s to constraint nodeList", node.name().c_str() );
+
+	if( !this->has_node(node) ){
+		this->nodeList.push_back( node );
+		logger->log_info("abstract_node_constraint", "Added node %s to constrained nodelist.", node.name().c_str() );
+	}
+	else{
+		logger->log_info("abstract_node_constraint", "Node %s is already in nodelist - doing nothing.", node.name().c_str() );
+	}
 }
 
 inline void AbstractNodeConstraint::remove_node(fawkes::TopologicalMapNode node){
