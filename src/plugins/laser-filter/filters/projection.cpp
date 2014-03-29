@@ -124,6 +124,7 @@ LaserProjectionDataFilter::filter()
   const unsigned int vecsize = std::min(in.size(), out.size());
   for (unsigned int a = 0; a < vecsize; ++a) {
     out[a]->frame = target_frame_;
+    out[a]->timestamp->set_time(in[a]->timestamp);
     float* inbuf  = in[a]->values;
     float* outbuf = out[a]->values;
     memset(outbuf, 0, sizeof(float) * out_data_size);

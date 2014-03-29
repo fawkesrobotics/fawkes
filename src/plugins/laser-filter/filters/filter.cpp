@@ -21,6 +21,7 @@
 
 #include "filter.h"
 #include <core/exception.h>
+#include <utils/time/time.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -76,7 +77,7 @@ LaserDataFilter::LaserDataFilter(unsigned int in_data_size,
 
   if (out_size > 0)  out.resize(out_size);
   for (unsigned int i = 0; i < out_size; ++i) {
-    out[i] = new Buffer(out_data_size);
+    out[i]      = new Buffer(out_data_size);
   }
 
   __own_in  = false;
@@ -221,4 +222,12 @@ LaserDataFilter::Buffer::Buffer(size_t num_values)
   if (num_values > 0) {
     values = (float *)malloc(num_values * sizeof(float));
   }
+  timestamp = new fawkes::Time(0,0);
+}
+
+
+/** Destructor. */
+LaserDataFilter::Buffer::~Buffer()
+{
+  delete timestamp;
 }

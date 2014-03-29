@@ -25,14 +25,20 @@
 #include <vector>
 #include <string>
 
+namespace fawkes {
+  class Time;
+}
+
 class LaserDataFilter
 {
  public:
   class Buffer {
    public:
     Buffer(size_t num_values = 0);
-    std::string  frame;		///< reference coordinate frame ID
-    float       *values;	///< values
+    ~Buffer();
+    std::string   frame;		///< reference coordinate frame ID
+    float        *values;	///< values
+    fawkes::Time *timestamp;	///< timestamp of data
   };
 
   LaserDataFilter(unsigned int in_data_size,

@@ -24,6 +24,7 @@
 
 #include <core/exception.h>
 #include <utils/math/angle.h>
+#include <utils/time/time.h>
 #include <cstdlib>
 
 /** @class Laser720to360DataFilter "720to360.h"
@@ -56,6 +57,7 @@ Laser720to360DataFilter::filter()
   const unsigned int vecsize = std::min(in.size(), out.size());
   for (unsigned int a = 0; a < vecsize; ++a) {
     out[a]->frame = in[a]->frame;
+    out[a]->timestamp->set_time(in[a]->timestamp);
     float *inbuf  = in[a]->values;
     float *outbuf = out[a]->values;
 

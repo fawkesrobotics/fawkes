@@ -23,6 +23,7 @@
 #include "min_merge.h"
 
 #include <core/exception.h>
+#include <utils/time/time.h>
 #include <cstring>
 
 /** @class LaserMinMergeDataFilter "min_merge.h"
@@ -38,8 +39,29 @@
  */
 LaserMinMergeDataFilter::LaserMinMergeDataFilter(unsigned int in_data_size,
 						 std::vector<LaserDataFilter::Buffer *> &in)
-  : LaserDataFilter(in_data_size, in, 1)
+  : LaserDataFilter(in_data_size, in, 1),
+    timestamp_selection_method_(TIMESTAMP_LATEST)
 {
+}
+
+/** Constructor.
+ * @param in_data_size number of entries input value arrays
+ * @param in vector of input arrays
+ * @param timestamp_selection_method method to use for timestamp selection
+ * @param timestamp_index if timestamp selection method is TIMESTAMP_INDEX this
+ * is the index of the input buffer to choose the timestamp from
+ */
+LaserMinMergeDataFilter::LaserMinMergeDataFilter(
+  unsigned int in_data_size,
+  std::vector<LaserDataFilter::Buffer *> &in,
+  TimestampSelectionMethod timestamp_selection_method, unsigned int timestamp_index)
+  : LaserDataFilter(in_data_size, in, 1),
+    timestamp_selection_method_(timestamp_selection_method),
+    timestamp_index_(timestamp_index)
+{
+  if (timestamp_index_ >= in.size()) {
+    throw fawkes::Exception("min_merge timestamp index larger than number of input buffers");
+  }
 }
 
 
@@ -66,5 +88,25 @@ LaserMinMergeDataFilter::filter()
 	outbuf[i] = inbuf[i];
       }
     }
+  }
+
+  if (timestamp_selection_method_ == TIMESTAMP_FIRST) {
+    fawkes::Time first(in[0]->timestamp);
+    for (unsigned int a = 1; a < vecsize; ++a) {
+      if (*in[a]->timestamp < first) {
+	first = in[a]->timestamp;
+      }
+    }
+    out[0]->timestamp->set_time(first);
+  } else if (timestamp_selection_method_ == TIMESTAMP_INDEX) {
+    out[0]->timestamp->set_time(in[timestamp_index_]->timestamp);
+ } else { // TIMESTAMP_LATEST
+    fawkes::Time latest(in[0]->timestamp);
+    for (unsigned int a = 1; a < vecsize; ++a) {
+      if (*in[a]->timestamp > latest) {
+	latest = in[a]->timestamp;
+      }
+    }
+    out[0]->timestamp->set_time(latest);
   }
 }
