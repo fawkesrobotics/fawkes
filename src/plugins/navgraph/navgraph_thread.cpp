@@ -24,6 +24,7 @@
 #include <utils/search/astar.h>
 #include <utils/math/angle.h>
 #include <tf/utils.h>
+#include <core/utils/lockptr.h>
 
 #include "search_state.h"
 
@@ -319,8 +320,10 @@ NavGraphThread::generate_plan(std::string goal_name)
 
   plan_.clear();
   
+  constraint_repo_.lock();
   NavGraphSearchState *initial_state =
-    new NavGraphSearchState(init, goal, 0, NULL, *graph_, constraint_repo);
+    new NavGraphSearchState(init, goal, 0, NULL, *graph_, *constraint_repo_);
+  constraint_repo_.unlock();
 
   std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
 

@@ -40,7 +40,7 @@ using namespace fawkes;
  */
 NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMapNode goal,
 					 double new_cost, NavGraphSearchState * parent,
-					 TopologicalMapGraph *map_graph, ConstraintRepo *constraint_repo)
+					 TopologicalMapGraph *map_graph, fawkes::ConstraintRepo *constraint_repo)
 {
   node_ = node;
   goal_ = goal;
@@ -99,7 +99,6 @@ NavGraphSearchState::children()
 
   for (unsigned int i = 0; i < descendants.size(); ++i) {
     TopologicalMapNode d = map_graph_->node(descendants[i]);
-
 
     std::vector<fawkes::AbstractNodeConstraint*> constraint_list = constraint_repo_->constraints();
 	std::vector<fawkes::AbstractNodeConstraint*>::const_iterator it = constraint_list.begin();

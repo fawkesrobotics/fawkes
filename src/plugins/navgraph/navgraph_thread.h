@@ -119,11 +119,11 @@ public:
   std::string last_node_;
   std::vector<fawkes::TopologicalMapNode> plan_;
 
+  fawkes::LockPtr<fawkes::ConstraintRepo> constraint_repo_;
+
   fawkes::Time *cmd_sent_at_;
 
   fawkes::FileAlterationMonitor *fam_;
-
-  fawkes::ConstraintRepo constraintRepo;
 
 #ifdef HAVE_VISUALIZATION
   NavGraphVisualizationThread *vt_;

@@ -25,6 +25,7 @@
 #include <utils/search/astar_state.h>
 #include <utils/graph/rcsoft_map_graph.h>
 #include <plugins/navgraph/constraints/constraint_repo.h>
+#include <core/utils/lockptr.h>
 
 class NavGraphSearchState : public fawkes::AStarState
 {
