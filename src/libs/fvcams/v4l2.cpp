@@ -103,6 +103,7 @@ V4L2Camera::V4L2Camera(const char *device_name)
   _white_balance_temperature.set = false;
   _exposure_absolute.set = false;
   _white_balance_temperature.set = false;
+  _sharpness.set = false;
   _read_method = MMAP;
   memset(_format, 0, 5);
   _frame_buffers = NULL;
@@ -344,6 +345,13 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
     _white_balance_temperature.set = false;
   }
 
+  if (cap->has("sharpness")) {
+    _sharpness.set = true;
+    _sharpness.value = atoi(cap->get("sharpness").c_str());
+  } else {
+    _sharpness.set = false;
+  }
+
 }
 
 
@@ -368,6 +376,7 @@ V4L2Camera::V4L2Camera(const char *device_name, int dev)
   _white_balance_temperature.set = false;
   _exposure_auto.set = false;
   _exposure_absolute.set = false;
+  _sharpness.set = false;
   _read_method = UPTR;
   memset(_format, 0, 5);
   _frame_buffers = NULL;
@@ -802,6 +811,7 @@ V4L2Camera::set_controls()
 
   if (_exposure_absolute.set) set_exposure_absolute(_exposure_absolute.value);
   if (_white_balance_temperature.set) set_white_balance_temperature(_white_balance_temperature.value);
+  if (_sharpness.set) set_sharpness(_sharpness.value);
 }
 
 /**
@@ -1297,7 +1307,20 @@ void
 V4L2Camera::set_exposure_absolute(unsigned int exposure_absolute)
 {
   LibLogger::log_debug("V4L2Cam", "setting exposure_absolute to %d", exposure_absolute);
-  set_one_control("AWB", V4L2_CID_EXPOSURE_ABSOLUTE, exposure_absolute);
+  set_one_control("exposure_absolute", V4L2_CID_EXPOSURE_ABSOLUTE, exposure_absolute);
+}
+
+unsigned int
+V4L2Camera::sharpness()
+{
+  return get_one_control("sharpness", V4L2_CID_SHARPNESS);
+}
+
+void
+V4L2Camera::set_sharpness(unsigned int sharpness)
+{
+  LibLogger::log_debug("V4L2Cam", "setting sharpness to %d", sharpness);
+  set_one_control("sharpness", V4L2_CID_SHARPNESS, sharpness);
 }
 
 bool

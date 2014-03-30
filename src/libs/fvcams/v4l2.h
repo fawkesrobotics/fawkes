@@ -125,6 +125,8 @@ class V4L2Camera:
   virtual void         set_white_balance_temperature(unsigned int white_balance_temperature);
   virtual unsigned int exposure_absolute();
   virtual void         set_exposure_absolute(unsigned int exposure_absolute);
+  virtual unsigned int sharpness();
+  virtual void         set_sharpness(unsigned int sharpness);
 
 
  protected:
@@ -215,6 +217,7 @@ class V4L2Camera:
   TriState _exposure_auto_priority;
   ControlParameterInt _exposure_auto;
   ControlParameterInt _exposure_absolute;
+  ControlParameterInt _sharpness;
 
 
   bool _nao_hacks;                   ///< Nao-specific hacks (bad driver)
