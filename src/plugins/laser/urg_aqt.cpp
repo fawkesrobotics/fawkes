@@ -309,6 +309,7 @@ HokuyoUrgAcquisitionThread::loop()
     _data_mutex->lock();
 
     _new_data = true;
+    _timestamp->stamp();
     for (unsigned int a = 0; a < 360; ++a) {
       unsigned int front_idx = __front_ray + roundf(a * __step_per_angle);
       unsigned int idx = front_idx % __slit_division;
