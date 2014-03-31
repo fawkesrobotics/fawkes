@@ -5,6 +5,7 @@
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
  *             2013  Bahram Maleki-Fard
+ *             2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,7 +26,6 @@
 
 #include "abstract_drive_mode.h"
 #include "../utils/rob/roboshape_colli.h"
-#include "../utils/rob/robo_laser.h"
 
 #include <vector>
 
@@ -38,16 +38,32 @@ namespace fawkes
 class CEscapeDriveModule : public CAbstractDriveMode
 {
  public:
+  class LaserPoint {
+  public:
+    double length;
+    double angle;
 
-  CEscapeDriveModule( Laser* laser, Logger* logger, Configuration* config );
+    LaserPoint() {
+      length  = 0.;
+      angle   = 0.;
+    }
+    LaserPoint(double l, double a) {
+      length  = l;
+      angle   = a;
+    }
+  };
+
+  CEscapeDriveModule( Logger* logger, Configuration* config );
   ~CEscapeDriveModule();
 
   virtual void Update();
 
+  void setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_points );
+
  private:
 
-  /// our pointer to the laserinterface.... lets escape ;-)
-  Laser*             m_pLaser;
+  std::vector<LaserPoint> m_laser_points;
+
   CRoboShape_Colli*  m_pRoboShape;
 
   /// Readings without robolength in it

@@ -25,6 +25,7 @@
 #define __PLUGINS_COLLI_SELECT_DRIVE_MODE_H_
 
 #include <vector>
+#include "escape_drive_mode.h"
 
 namespace fawkes
 {
@@ -35,7 +36,6 @@ namespace fawkes
 class CAbstractDriveMode;
 class NavigatorInterface;
 class MotorControl;
-class Laser;
 class Logger;
 class Configuration;
 class CLaserOccupancyGrid;
@@ -46,7 +46,6 @@ class CSelectDriveMode
 public:
 
   CSelectDriveMode( MotorControl* motor,
-                    Laser* laser,
                     NavigatorInterface* target,
                     Logger* logger,
                     Configuration* config,
@@ -70,12 +69,13 @@ public:
 
   void setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, int roboY );
 
+  void setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_point );
+
 private:
 
   // local pointers to bb client objects
   fawkes::NavigatorInterface*      m_pColliTarget;
   MotorControl*                    m_pMotor;       // USE ONLY AS GETTER!!!
-  Laser*                           m_pLaser;
 
   fawkes::Logger* logger_;
   fawkes::Configuration* config_;

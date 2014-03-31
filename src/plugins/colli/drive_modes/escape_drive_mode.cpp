@@ -5,6 +5,7 @@
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
  *             2013  Bahram Maleki-Fard
+ *             2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -39,12 +40,11 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CEscapeDriveModule::CEscapeDriveModule( Laser* laser, Logger* logger, Configuration* config )
+CEscapeDriveModule::CEscapeDriveModule( Logger* logger, Configuration* config )
  : CAbstractDriveMode(logger, config)
 {
   logger_->log_info("CEscapeDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::ESCAPE;
-  m_pLaser = laser;
 
   m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/escape/max_trans" );
   m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/escape/max_rot" );
@@ -166,6 +166,11 @@ CEscapeDriveModule::Update()
   }
 }
 
+void
+CEscapeDriveModule::setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_points )
+{
+  m_laser_points = laser_points;
+}
 
 /* ************************************************************************** */
 /* ***********************     Private Methods      ************************* */
@@ -176,10 +181,10 @@ CEscapeDriveModule::FillNormalizedReadings()
 {
   m_vNormalizedReadings.clear();
 
-  for ( int i = 0; i < m_pLaser->GetNumberOfReadings(); i++ ) {
-    float rad    = normalize_rad( m_pLaser->GetRadiansForReading( i ) );
+  for ( int i = 0; i < (int)m_laser_points.size(); i++ ) {
+    float rad    = normalize_rad( m_laser_points.at( i ).angle );
     float sub    = m_pRoboShape->GetRobotLengthforRad( rad );
-    float length = m_pLaser->GetReadingLength( i );
+    float length = m_laser_points.at( i ).length;
     m_vNormalizedReadings.push_back( length - sub );
   }
 }
@@ -209,9 +214,9 @@ CEscapeDriveModule::SortNormalizedReadings()
   int i = 0;
   float rad = 0.f;
 
-  while ( i < m_pLaser->GetNumberOfReadings() ) {
-    if( m_pLaser->IsValid(i) ) {
-      rad = normalize_rad( m_pLaser->GetRadiansForReading( i ));
+  while ( i < (int)m_laser_points.size() ) {
+    if( m_laser_points.at(i).length > 0. ) {
+      rad = normalize_rad( m_laser_points.at(i).angle );
 
       if( rad < ang_fl || rad >= ang_fr )
         m_vFront.push_back( m_vNormalizedReadings[i] );

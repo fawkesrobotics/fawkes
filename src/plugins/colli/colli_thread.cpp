@@ -29,7 +29,6 @@
 #include "common/defines.h"
 #include "drive_modes/select_drive_mode.h"
 #include "drive_realization/quadratic_motor_instruct.h"
-#include "utils/rob/robo_laser.h"
 #include "search/og_laser.h"
 #include "search/astar_search.h"
 
@@ -117,7 +116,7 @@ ColliThread::init()
   InitializeModules();
 
 #ifdef HAVE_VISUAL_DEBUGGING
-  vis_thread_->setup(m_pLaserOccGrid, m_pSearch, m_pLaser);
+  vis_thread_->setup(m_pLaserOccGrid, m_pSearch);
 #endif
 
   // get distance from laser to robot base
@@ -160,7 +159,6 @@ ColliThread::finalize()
   delete m_pSelectDriveMode;
   delete m_pSearch;
   delete m_pLaserOccGrid;
-  delete m_pLaser;
   delete m_pMotorInstruct;
 
   // close all registered bb-interfaces
@@ -219,6 +217,7 @@ ColliThread::colli_relgoto(float x, float y, float ori, NavigatorInterface* ifac
 
   float colliCurrentO = if_motor_->odometry_orientation();
 
+  //TODO: use TF instead tranform from base_link to odom
   // coord transformation: relative target -> (global) motor coordinates
   float colliTargetX = if_motor_->odometry_position_x()
                        + x * cos( colliCurrentO )
@@ -471,8 +470,21 @@ ColliThread::colli_execute_()
 
         logger->log_warn(name(), "Escape mode, escaping!");
         m_pSelectDriveMode->SetLocalTarget( m_LocalTarget.x, m_LocalTarget.y );
-        if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {
+        if ( cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field ) {
           m_pSelectDriveMode->setGridInformation(m_pLaserOccGrid, m_RoboGridPos.x, m_RoboGridPos.y);
+        } else if ( cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field ) {
+          if_laser_->read();
+
+          std::vector<CEscapeDriveModule::LaserPoint> laser_points;
+          laser_points.reserve(if_laser_->maxlenof_distances());
+
+          int angle_inc = 2.0 * M_PI / if_laser_->maxlenof_distances();
+
+          for ( int i = 0; (int)if_laser_->maxlenof_distances() > i; ++i ) {
+            CEscapeDriveModule::LaserPoint point( if_laser_->distances(i), angle_inc * i );
+            laser_points.push_back(point);
+          }
+          m_pSelectDriveMode->setLaserData(laser_points);
         }
         m_pSelectDriveMode->Update( true );  // <-- this calls the ESCAPE mode!
         m_ProposedTranslation = m_pSelectDriveMode->GetProposedTranslation();
@@ -576,12 +588,8 @@ ColliThread::InitializeModules()
 {
   colli_data_.final = true;
 
-  // FIRST(!): the laserinterface (uses the laserscanner)
-  m_pLaser = new Laser( if_laser_, logger, config );
-  m_pLaser->UpdateLaser();
-
-  // SECOND(!): the occupancy grid (it uses the laser)
-  m_pLaserOccGrid = new CLaserOccupancyGrid( m_pLaser, logger, config );
+  m_pLaserOccGrid = new CLaserOccupancyGrid( if_laser_, logger, config, tf_listener);
+  m_pLaserOccGrid->updateLaser();
 
   // set the cell width and heigth to 5 cm and the grid size to 7.5 m x 7.5 m.
   // this are 750/5 x 750/5 grid cells -> (750x750)/5 = 22500 grid cells
@@ -600,15 +608,11 @@ ColliThread::InitializeModules()
                                                                         config );
 
   // AFTER MOTOR INSTRUCT: the motor propose values object
-  m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, m_pLaser, if_colli_target_, logger, config );
+  m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, if_colli_target_, logger, config );
 
   // Initialization of colli state machine:
   // Currently nothing is to accomplish
   m_ColliStatus  = NothingToDo;
-
-  m_OldX   = m_pMotorInstruct->GetCurrentX();
-  m_OldY   = m_pMotorInstruct->GetCurrentY();
-  m_OldOri = m_pMotorInstruct->GetCurrentOri();
 }
 
 
@@ -855,7 +859,7 @@ ColliThread::UpdateOwnModules()
   }
 
   // update the laser
-  m_pLaser->UpdateLaser();
+  m_pLaserOccGrid->updateLaser();
 
   // Robo increasement for robots
   float m_RoboIncrease = 0.0;
@@ -878,22 +882,9 @@ ColliThread::UpdateOwnModules()
     m_RoboIncrease = min( m_MaximumRoboIncrease, m_RoboIncrease );
   }
 
-  float xdiff = m_pMotorInstruct->GetCurrentX() - m_OldX;
-  m_OldX = m_pMotorInstruct->GetCurrentX();
-  float ydiff = m_pMotorInstruct->GetCurrentY() - m_OldY;
-  m_OldY = m_pMotorInstruct->GetCurrentY();
-  float oridiff = normalize_mirror_rad( m_pMotorInstruct->GetCurrentOri() - m_OldOri );
-  m_OldOri = m_pMotorInstruct->GetCurrentOri();
-
-  float relxdiff =  xdiff *  cos( m_pMotorInstruct->GetCurrentOri() ) +
-                    ydiff *  sin( m_pMotorInstruct->GetCurrentOri() );
-  float relydiff =  xdiff * -sin( m_pMotorInstruct->GetCurrentOri() ) +
-                    ydiff *  cos( m_pMotorInstruct->GetCurrentOri() );
-
   // update the occgrid...
   m_pLaserOccGrid->UpdateOccGrid( laserpos_x, laserpos_y, 2*m_RoboIncrease,
-                                  m_pMotorInstruct->GetMotorDesiredTranslation(),
-                                  relxdiff, relydiff, oridiff );
+                                  m_pMotorInstruct->GetMotorDesiredTranslation() );
 
   // update the positions
   m_LaserGridPos.x = laserpos_x;
@@ -903,9 +894,6 @@ ColliThread::UpdateOwnModules()
   m_TargetGridPos.x = targetGridX;
   m_TargetGridPos.y = targetGridY;
 }
-
-
-
 
 /// Check if we want to escape an obstacle
 bool

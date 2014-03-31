@@ -167,13 +167,11 @@ plugins/colli:
       #  and this costs time. But to many elements result in page faults ;-)
       initial_size: 500
 
-      # the max size of the laser reading history for the search
-      # Note: This has to be divided by 10 to get seconds
-      max_length: 60
+      # the max time difference of the laser reading history for the search in seconds
+      max_length: 6.0
 
-      # the min size of the laser reading history for the search
-      # Note: This has to be divided by 10 to get seconds
-      min_length: 15
+      # the min time difference of the laser reading history for the search in seconds
+      min_length: 1.5
 
 
   trig_table:

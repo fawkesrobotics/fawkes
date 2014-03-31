@@ -5,6 +5,7 @@
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
  *             2013  Bahram Maleki-Fard
+ *             2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,6 +26,10 @@
 
 #include "../utils/occupancygrid/occupancygrid.h"
 #include <utils/math/types.h>
+#include <utils/time/time.h>
+#include <string>
+
+#include <tf/transformer.h>
 
 namespace fawkes
 {
@@ -32,7 +37,7 @@ namespace fawkes
 }
 #endif
 
-class Laser;
+class Laser360Interface;
 class CRoboShape_Colli;
 class ColliObstacleMap;
 
@@ -42,19 +47,34 @@ class Configuration;
 class CLaserOccupancyGrid : public OccupancyGrid
 {
  public:
+  class LaserPoint {
+  public:
+    cart_coord_2d_struct coord;
+    Time                 timestamp;
 
-  CLaserOccupancyGrid( Laser * laser, Logger* logger, Configuration* config,
+    LaserPoint() { }
+//    LaserPoint(LaserPoint& src) {
+//      coord     = src.coord;
+//      timestamp = src.timestamp;
+//    }
+//    LaserPoint operator=(LaserPoint src) {
+//      coord     = src.coord;
+//      timestamp = src.timestamp;
+//      return src;
+//    }
+  };
+
+  CLaserOccupancyGrid( Laser360Interface * laser, Logger* logger, Configuration* config, tf::Transformer* listener,
                        int width = 150, int height = 150,
                        int cell_width = 5, int cell_height = 5);
 
   ~CLaserOccupancyGrid();
 
   ///\brief Put the laser readings in the occupancy grid
-  void UpdateOccGrid( int midX, int midY, float inc, float vel,
-                      float xdiff, float ydiff, float oridiff );
+  void UpdateOccGrid( int midX, int midY, float inc, float vel );
 
   ///\brief Reset all old readings and forget about the world state!
-  void ResetOld( int max_age = -1 );
+  void ResetOld();
 
   ///\brief Get the laser's position in the grid
   point_t GetLaserPosition();
@@ -62,17 +82,19 @@ class CLaserOccupancyGrid : public OccupancyGrid
   ///\brief Set the offset of base_link from laser
   void set_base_offset(float x, float y);
 
+  void updateLaser();
+
  private:
+
+  std::vector< LaserPoint >* transformLaserPoints(std::vector< LaserPoint >& laserPoints, tf::StampedTransform& transform);
 
   /** Integrate historical readings to the current occgrid. */
   void IntegrateOldReadings( int midX, int midY, float inc, float vel,
-                             float xdiff, float ydiff, float oridiff );
+                             tf::StampedTransform& transform );
 
   /** Integrate the current readings to the current occgrid. */
-  void IntegrateNewReadings( int midX, int midY, float inc, float vel );
-
-  /** Check if the current value is contained in the history. */
-  bool Contained( float p_x, float p_y );
+  void IntegrateNewReadings( int midX, int midY, float inc, float vel,
+                             tf::StampedTransform& transform );
 
   /** Integrate a single obstacle
    * @param x x coordinate of obstacle center
@@ -82,16 +104,23 @@ class CLaserOccupancyGrid : public OccupancyGrid
    */
   void integrateObstacle( int x, int y, int width, int height );
 
-  Laser            *m_pLaser;     /**< pointer to the laser */
+  tf::Transformer* tf_listener;
+  std::string m_reference_frame;
+  std::string m_laser_frame;
+  Logger* logger_;
+
+  fawkes::Laser360Interface *if_laser_;
   CRoboShape_Colli *m_pRoboShape; /**< my roboshape */
   ColliObstacleMap *obstacle_map;  /**< fast obstacle map */
 
-  std::vector< float > m_vOldReadings; /**< readings history */
+  std::vector< LaserPoint > m_vNewReadings;
+  std::vector< LaserPoint > m_vOldReadings; /**< readings history */
 
   point_t m_LaserPosition; /**< the laser's position in the grid */
 
   /** History concerned constants */
-  int m_MaxHistoryLength, m_MinHistoryLength, m_InitialHistorySize;
+  float m_MaxHistoryLength, m_MinHistoryLength;
+  int m_InitialHistorySize;
 
   /** Laser concerned settings */
   float m_MinimumLaserLength, m_EllipseDistance;

@@ -27,7 +27,6 @@
 
 // INCLUDE HERE YOUR DRIVE MODES!!!
 #include "stop_drive_mode.h"
-#include "escape_drive_mode.h"
 #include "escape_potential_field_drive_mode.h"
 #include "slow_forward_drive_mode.h"
 #include "slow_backward_drive_mode.h"
@@ -41,7 +40,6 @@
 // YOUR CHANGES SHOULD END HERE!!!
 
 #include "../utils/rob/robo_motorcontrol.h"
-#include "../utils/rob/robo_laser.h"
 #include "../search/og_laser.h"
 
 #include <interfaces/NavigatorInterface.h>
@@ -66,7 +64,6 @@ namespace fawkes
  * @param config The fawkes configuration
  */
 CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
-                                    Laser* laser,
                                     NavigatorInterface* target,
                                     Logger* logger,
                                     Configuration* config,
@@ -78,7 +75,6 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
   logger_->log_info("CSelectDriveMode", "(Constructor): Entering");
   m_EscapeFlag   = 0;       // no escaping at the beginning
   m_pMotor       = motor;
-  m_pLaser       = laser;
   m_pColliTarget = target;
   m_vDriveModeList.clear();
 
@@ -97,10 +93,10 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
   if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {
     m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldDriveModule( logger, config) );
   } else if (cfg_escape_mode == fawkes::colli_escape_mode_t::basic) {
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( laser, logger, config) );
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger, config) );
   } else {
     logger_->log_error("CSelectDriveMode", "Unknown escape drive mode. Using basic as default");
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( laser, logger, config) );
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger, config) );
   }
 
 
@@ -216,6 +212,20 @@ CSelectDriveMode::setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, i
     }
   }
   logger_->log_error("CSelectDriveMode", "Can't find escape drive mode to set grid information");
+}
+
+void
+CSelectDriveMode::setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_point )
+{
+  for ( unsigned int i = 0; i < m_vDriveModeList.size(); i++ ) {
+      // drive mode checking
+      if ( m_vDriveModeList[i]->GetDriveModeName() == NavigatorInterface::ESCAPE ) {
+        ((CEscapeDriveModule*)m_vDriveModeList[i])->setLaserData( laser_point );
+
+        return;
+      }
+    }
+    logger_->log_error("CSelectDriveMode", "Can't find escape drive mode to set grid information");
 }
 
 /* ****************************************************************************** */

@@ -46,13 +46,11 @@ namespace fawkes
   class Laser360Interface;
   class NavigatorInterface;
 
-  class Laser;
   class CLaserOccupancyGrid;
   class CSearch;
 
   class CSelectDriveMode;
   class CBaseMotorInstruct;
-
 }
 
 class ColliVisualizationThread;
@@ -103,7 +101,6 @@ class ColliThread
   fawkes::NavigatorInterface*     if_colli_target_;    // TargetObject
   fawkes::colli_data_t            colli_data_;         // Colli Data Object
 
-  fawkes::Laser*                  m_pLaser;            // laser interface for easy use
   fawkes::CLaserOccupancyGrid*    m_pLaserOccGrid;     // the grid to drive on
   fawkes::CSearch*                m_pSearch;           // our plan module which calculates the info
 
@@ -132,8 +129,6 @@ class ColliThread
   bool target_new_;
 
   float m_TargetPointX, m_TargetPointY;               // for Update
-
-  float m_OldX, m_OldY, m_OldOri;  // for updating occgrid and performing pipe compensation
 
   int escape_count;                // count escaping behaviour
 

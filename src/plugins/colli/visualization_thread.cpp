@@ -24,7 +24,6 @@
 #ifdef HAVE_VISUAL_DEBUGGING
 
 #include "common/defines.h"
-#include "utils/rob/robo_laser.h"
 #include "utils/rob/roboshape_colli.h"
 #include "search/og_laser.h"
 #include "search/astar_search.h"
@@ -47,17 +46,13 @@ using namespace fawkes;
 ColliVisualizationThread::ColliVisualizationThread()
  : fawkes::Thread("ColliVisualizationThread", Thread::OPMODE_WAITFORWAKEUP),
    occ_grid_( 0 ),
-   search_( 0 ),
-   laser_( 0 )
+   search_( 0 )
 {
 }
 
 void
 ColliVisualizationThread::init()
 {
-  pub_laser_ = new ros::Publisher();
-  *pub_laser_ = rosnode->advertise< nav_msgs::GridCells >("colli_laser", 1);
-
   pub_roboshape_ = new ros::Publisher();
   *pub_roboshape_ = rosnode->advertise< nav_msgs::GridCells >("colli_roboshape", 1);
 
@@ -85,8 +80,6 @@ ColliVisualizationThread::init()
 void
 ColliVisualizationThread::finalize()
 {
-  pub_laser_->shutdown();
-  delete pub_laser_;
   pub_roboshape_->shutdown();
   delete pub_roboshape_;
 
@@ -111,7 +104,7 @@ ColliVisualizationThread::finalize()
 void
 ColliVisualizationThread::loop()
 {
-  if( (occ_grid_ == NULL) || (search_ == NULL) || (laser_ == NULL) )
+  if( (occ_grid_ == NULL) || (search_ == NULL)  )
     return;
 
   MutexLocker lock(&mutex_);
@@ -121,17 +114,6 @@ ColliVisualizationThread::loop()
   grid.header.frame_id = "/base_laser";
   grid.cell_width = 0.05;
   grid.cell_height = 0.05;
-
-  // publish laser
-  for( int i=0; i < laser_->GetNumberOfReadings(); ++i) {
-    geometry_msgs::Point p;
-    p.x =  laser_->GetReadingPosX(i);
-    p.y =  laser_->GetReadingPosY(i);
-    p.z = 0;
-    grid.cells.push_back(p);
-  }
-  grid.header.stamp = ros::Time::now();
-  pub_laser_->publish(grid);
 
   // publish roboshape
   grid.cells.clear();
@@ -208,13 +190,11 @@ ColliVisualizationThread::loop()
 
 void
 ColliVisualizationThread::setup(CLaserOccupancyGrid* occ_grid,
-                               CSearch* search,
-                               Laser* laser)
+                               CSearch* search)
 {
   MutexLocker lock(&mutex_);
   occ_grid_ = occ_grid;
   search_   = search;
-  laser_    = laser;
 }
 
 #endif
