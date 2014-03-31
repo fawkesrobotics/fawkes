@@ -66,6 +66,7 @@ class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
 
   std::string  __cfg_device;
   std::string  __cfg_serial;
+  float        __cfg_time_offset;
 
   unsigned int __first_ray;
   unsigned int __last_ray;
@@ -74,6 +75,7 @@ class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
   float        __step_per_angle;
   float        __angle_per_step;
   float        __angular_range;
+  long int     __scan_msec;
 };
 
 
