@@ -54,6 +54,8 @@ class ColorModelSimilarity : public firevision::ColorModel
         color_t result; /** Discrete color_t represented by this class */
         int ref_u; /** YUV U-component of reference color */
         int ref_v; /** YUV V-component of reference color */
+        int ref_y;
+        int luma_threshold;
         int ref_length; /** Length of U,V vector, i.e. reference saturation */
         int chroma_threshold; /** Required chroma similarity */
         int saturation_threshold; /** Required saturation */
@@ -70,6 +72,7 @@ class ColorModelSimilarity : public firevision::ColorModel
           RGB2YUV(r, g, b, y, u, v);
           ref_u = u - 0x80;
           ref_v = v - 0x80;
+          ref_y = y;
           ref_length = sqrt(ref_u * ref_u + ref_v * ref_v);
         }
 
@@ -80,15 +83,19 @@ class ColorModelSimilarity : public firevision::ColorModel
          * @param chroma_threshold Required color similarity (higher = more similar), 0..255
          * @param saturation_threshold Required saturation (higher = more saturation), 0..255
          */
-        color_class_t(color_t expect, std::vector<unsigned int> &v, int chroma_threshold, int saturation_threshold) {
+        color_class_t(color_t expect, std::vector<unsigned int> &v, int chroma_threshold, int saturation_threshold,
+          int luma_threshold = 0) {
           this->result = expect;
           this->chroma_threshold = chroma_threshold;
           this->saturation_threshold = saturation_threshold;
+          this->luma_threshold = luma_threshold;
           set_reference(v);
         }
     } color_class_t;
 
     void add_color(color_class_t *color_class);
+    void add_colors(std::vector<color_class_t *> color_classes);
+    void delete_colors();
 
   private:
     std::vector<color_class_t *> color_classes_;

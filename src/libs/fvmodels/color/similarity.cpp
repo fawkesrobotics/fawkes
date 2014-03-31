@@ -58,10 +58,19 @@ const char * ColorModelSimilarity::get_name() {
 color_t ColorModelSimilarity::determine(unsigned int y, unsigned int u, unsigned int v) const {
   for(std::vector<color_class_t *>::const_iterator it = color_classes_.begin();
       it != color_classes_.end(); it++) {
-    if(is_similar(u - 0x80, v - 0x80,
+    if((*it)->luma_threshold >= 0) {
+      if (is_similar_y(y, u - 0x80, v - 0x80,
+        (*it)->ref_y, (*it)->ref_u, (*it)->ref_v, (*it)->ref_length,
+        (*it)->chroma_threshold, (*it)->saturation_threshold, (*it)->luma_threshold)) {
+        return (*it)->result;
+      }
+    }
+    else {
+      if(is_similar(u - 0x80, v - 0x80,
         (*it)->ref_u, (*it)->ref_v, (*it)->ref_length,
         (*it)->chroma_threshold, (*it)->saturation_threshold)) {
-      return (*it)->result;
+        return (*it)->result;
+      }
     }
   }
   return C_OTHER;
@@ -73,6 +82,14 @@ color_t ColorModelSimilarity::determine(unsigned int y, unsigned int u, unsigned
  */
 void ColorModelSimilarity::add_color(color_class_t *color_class) {
   color_classes_.push_back(color_class);
+}
+
+void ColorModelSimilarity::add_colors(std::vector<color_class_t *> color_classes) {
+  color_classes_.insert(color_classes_.end(), color_classes.begin(), color_classes.end());
+}
+
+void ColorModelSimilarity::delete_colors() {
+  color_classes_.clear();
 }
 
 } /* namespace firevision */
