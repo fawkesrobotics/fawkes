@@ -108,6 +108,7 @@ public:
   fawkes::LockPtr<fawkes::TopologicalMapGraph> graph_;
   fawkes::AStar *astar_;
 
+  fawkes::tf::Stamped<fawkes::tf::Pose> pose_;
   bool exec_active_;
   bool target_reached_;
   float target_time_;
