@@ -186,21 +186,6 @@ NavGraphThread::loop()
 	pp_nav_if_->set_final(true);
 	needs_write = true;
       }
-    } else if ((shortcut_to = shortcut_possible()) > 0) {
-      logger->log_info(name(), "Shortcut posible, jumping from '%s' to '%s'",
-		       plan_[0].name().c_str(), plan_[shortcut_to].name().c_str());
-
-      plan_.erase(plan_.begin(), plan_.begin() + shortcut_to);
-
-      if (! plan_.empty()) {
-        try {
-          logger->log_info(name(), "Sending next goal after taking a shortcut");
-          send_next_goal();
-        } catch (Exception &e) {
-          logger->log_warn(name(), "Failed to send next goal (shortcut)");
-          logger->log_warn(name(), e);
-        }
-      }
 
     } else if (node_reached()) {
       logger->log_info(name(), "Node '%s' has been reached", plan_[0].name().c_str());
@@ -234,6 +219,23 @@ NavGraphThread::loop()
           logger->log_warn(name(), e);
         }
       }
+
+    } else if ((shortcut_to = shortcut_possible()) > 0) {
+      logger->log_info(name(), "Shortcut posible, jumping from '%s' to '%s'",
+		       plan_[0].name().c_str(), plan_[shortcut_to].name().c_str());
+
+      plan_.erase(plan_.begin(), plan_.begin() + shortcut_to);
+
+      if (! plan_.empty()) {
+        try {
+          logger->log_info(name(), "Sending next goal after taking a shortcut");
+          send_next_goal();
+        } catch (Exception &e) {
+          logger->log_warn(name(), "Failed to send next goal (shortcut)");
+          logger->log_warn(name(), e);
+        }
+      }
+
     } else {
       fawkes::Time now(clock);
       if ((now - cmd_sent_at_) > cfg_resend_interval_) {
