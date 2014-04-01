@@ -82,9 +82,9 @@ class CLaserOccupancyGrid : public OccupancyGrid
   ///\brief Set the offset of base_link from laser
   void set_base_offset(float x, float y);
 
-  void updateLaser();
-
  private:
+
+  void updateLaser();
 
   std::vector< LaserPoint >* transformLaserPoints(std::vector< LaserPoint >& laserPoints, tf::StampedTransform& transform);
 
@@ -117,6 +117,10 @@ class CLaserOccupancyGrid : public OccupancyGrid
   std::vector< LaserPoint > m_vOldReadings; /**< readings history */
 
   point_t m_LaserPosition; /**< the laser's position in the grid */
+
+  /* interface buffer history */
+  int m_if_buffer_size;
+  std::vector<bool> m_if_buffer_filled;
 
   /** History concerned constants */
   float m_MaxHistoryLength, m_MinHistoryLength;

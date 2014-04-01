@@ -589,7 +589,6 @@ ColliThread::InitializeModules()
   colli_data_.final = true;
 
   m_pLaserOccGrid = new CLaserOccupancyGrid( if_laser_, logger, config, tf_listener);
-  m_pLaserOccGrid->updateLaser();
 
   // set the cell width and heigth to 5 cm and the grid size to 7.5 m x 7.5 m.
   // this are 750/5 x 750/5 grid cells -> (750x750)/5 = 22500 grid cells
@@ -857,9 +856,6 @@ ColliThread::UpdateOwnModules()
     targetGridX = robopos_x + ((robopos_y-2)/(robopos_y - targetGridY) * (targetGridX - robopos_x));
     targetGridY = 2;
   }
-
-  // update the laser
-  m_pLaserOccGrid->updateLaser();
 
   // Robo increasement for robots
   float m_RoboIncrease = 0.0;

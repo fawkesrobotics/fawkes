@@ -65,8 +65,12 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
 {
   logger->log_debug("CLaserOccupancyGrid", "(Constructor): Entering");
   std::string cfg_prefix = "/plugins/colli/";
+  m_if_buffer_size     = 2;     //needs to be >= 1  //TODO: config
+  m_if_buffer_filled.resize(m_if_buffer_size);
+  std::fill(m_if_buffer_filled.begin(), m_if_buffer_filled.end(), false);
 
   if_laser_   = laser;
+  if_laser_->resize_buffers( m_if_buffer_size );
   logger_     = logger;
   tf_listener = listener;
 
@@ -125,45 +129,84 @@ CLaserOccupancyGrid::ResetOld()
 void
 CLaserOccupancyGrid::updateLaser()
 {
-  m_vNewReadings.clear();
-  m_vNewReadings.reserve( if_laser_->maxlenof_distances() );
-  //TODO just if there are new data
-  const Time* laser_time  = if_laser_->timestamp();
-  std::string laser_frame = if_laser_->frame();
+  //check for free pos in buffer
+  int if_buffer_free_pos = -1;
 
-  tf::StampedTransform transform;
+  for (int i = 0; i < m_if_buffer_size; ++i) {    //for all buffer possition
+    if (m_if_buffer_filled[i] == false) {         //if free (used == false)
+      if_buffer_free_pos = i;                     //use this buffer
+      //stop loop
+    }
+  }
+  //write BB date into buffer (instead of read())
+  if ( if_buffer_free_pos < 0 ) {                 //if there is no free buffer
+    logger_->log_warn("CLaserOccupancyGrid", "if_laser buffer is full empty oldest");
 
-  try {
-    tf_listener->lookup_transform(m_reference_frame, laser_frame, laser_time, transform);
+                                                  //search for the oldest buffer and uses this
+    double if_buffer_oldest_time = fawkes::Clock::instance()->now().in_sec() + 1000;
+    int if_buffer_oldest_pos = -1;
 
-    double angle_inc = M_PI * 2. / 360.;
-    tf::Point p;
-    //Save all Points in refernce Frame
-    for (unsigned int i = 0; i < if_laser_->maxlenof_distances(); ++i) {
-      if (if_laser_->distances(i) >= m_MinimumLaserLength) {
-        //Save as polar coordinaten
-        polar_coord_2d_t point_polar;
-        point_polar.r   = if_laser_->distances(i);
-        point_polar.phi = angle_inc * i;
-
-        //Calculate as cartesien
-        cart_coord_2d_t point_cart;
-        polar2cart2d(point_polar.phi, point_polar.r, &point_cart.x, &point_cart.y);
-
-        //transform into odom
-        p.setValue(point_cart.x, point_cart.y, 0.);
-        p = transform * p;
-
-        CLaserOccupancyGrid::LaserPoint point;
-        point.coord     = cart_coord_2d_t( p.getX(), p.getY() );
-        point.timestamp = Time(laser_time);
-
-        m_vNewReadings.push_back(point);
+    for (int i = 0; i < m_if_buffer_size; ++i) {
+      if_laser_->copy_shared_to_buffer( i );
+      if (if_laser_->timestamp()->in_sec() < if_buffer_oldest_time) {
+        if_buffer_oldest_pos = i;
+        if_buffer_oldest_time = if_laser_->timestamp()->in_sec();
       }
     }
-  } catch(Exception &e) {
-    logger_->log_error("CLaserOccupancyGrid", "Unable to transform %s to %s. New laser-data not used (Start implementing history!!!).",
-            laser_frame.c_str(), m_reference_frame.c_str());
+    if_buffer_free_pos = if_buffer_oldest_pos;
+  }
+
+  if_laser_->copy_shared_to_buffer( if_buffer_free_pos );     //read new laser data
+  m_if_buffer_filled[ if_buffer_free_pos ] = true;            //set buffer used
+
+  m_vNewReadings.clear();
+  m_vNewReadings.reserve( if_laser_->maxlenof_distances() * m_if_buffer_size );
+  //for all buffer: try to transform and save in grid
+  for (int i = 0; i < m_if_buffer_size; ++i) {
+    if (m_if_buffer_filled[i] == true) {      //if is filled
+
+      if_laser_->read_from_buffer( i );         //read buffer
+      m_if_buffer_filled[i] = false;            //show buffer is not used
+      //TODO just if there are new data
+      const Time* laser_time  = if_laser_->timestamp();
+      std::string laser_frame = if_laser_->frame();
+
+      tf::StampedTransform transform;
+
+      try {
+        tf_listener->lookup_transform(m_reference_frame, laser_frame, laser_time, transform);
+
+        double angle_inc = M_PI * 2. / 360.;
+        tf::Point p;
+        //Save all Points in refernce Frame
+        for (unsigned int i = 0; i < if_laser_->maxlenof_distances(); ++i) {
+          if (if_laser_->distances(i) >= m_MinimumLaserLength) {
+            //Save as polar coordinaten
+            polar_coord_2d_t point_polar;
+            point_polar.r   = if_laser_->distances(i);
+            point_polar.phi = angle_inc * i;
+
+            //Calculate as cartesien
+            cart_coord_2d_t point_cart;
+            polar2cart2d(point_polar.phi, point_polar.r, &point_cart.x, &point_cart.y);
+
+            //transform into odom
+            p.setValue(point_cart.x, point_cart.y, 0.);
+            p = transform * p;
+
+            CLaserOccupancyGrid::LaserPoint point;
+            point.coord     = cart_coord_2d_t( p.getX(), p.getY() );
+            point.timestamp = Time(laser_time);
+
+            m_vNewReadings.push_back(point);
+          }
+        }
+      } catch(Exception &e) {
+        m_if_buffer_filled[i] = true;            //show buffer still needs to be there
+        logger_->log_warn("CLaserOccupancyGrid", "Unable to transform %s to %s. Laser-data not used, will keeped in history.",
+                laser_frame.c_str(), m_reference_frame.c_str());
+      }
+    }
   }
 }
 
@@ -184,6 +227,8 @@ CLaserOccupancyGrid::UpdateOccGrid( int midX, int midY, float inc, float vel )
   for ( int y = 0; y < m_Width; ++y )
     for ( int x = 0; x < m_Height; ++x )
       m_OccupancyProb[x][y] = _COLLI_CELL_FREE_;
+
+  updateLaser();
 
   tf::StampedTransform transform;
 
@@ -265,7 +310,7 @@ CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float 
   // update all old readings
   for ( unsigned int i = 0; i < pointsTransformed->size(); ++i ) {
 
-    if ( (*pointsTransformed)[i].timestamp >= history ) {
+    if ( (*pointsTransformed)[i].timestamp.in_sec() >= history.in_sec() ) {
 
       newpos_x =  (*pointsTransformed)[i].coord.x;
       newpos_y =  (*pointsTransformed)[i].coord.y;
@@ -326,6 +371,7 @@ void
 CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY, float inc, float vel,
                                            tf::StampedTransform& transform )
 {
+  //TODO: for all in list
   std::vector< CLaserOccupancyGrid::LaserPoint >* pointsTransformed = transformLaserPoints(m_vNewReadings, transform);
 
   int numberOfReadings = pointsTransformed->size();
