@@ -115,6 +115,8 @@ class Interface
   void                    copy_private_to_buffer(unsigned int buffer);
   void                    read_from_buffer(unsigned int buffer);
   int                     compare_buffers(unsigned int buffer);
+  Time                    buffer_timestamp(unsigned int buffer);
+  void                    buffer_timestamp(unsigned int buffer, Time *timestamp);
 
   void          read();
   void          write();
