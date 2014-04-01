@@ -535,7 +535,7 @@ NavGraphThread::shortcut_possible()
     return 0;
   }
 
-  for (ssize_t i = plan_.size() - 2; i > 0; --i) {
+  for (ssize_t i = plan_.size() - 1; i > 0; --i) {
     TopologicalMapNode &node = plan_[i];
 
     float dist = sqrt(pow(pose_.getOrigin().x() - node.x(), 2) +
@@ -547,8 +547,7 @@ NavGraphThread::shortcut_possible()
     }
 
     if (tolerance == 0.0)  return 0;
-    // +1 to take the node following the shortcut node in the plan
-    if (dist <= tolerance) return i + 1;
+    if (dist <= tolerance) return i;
   }
 
   return 0;
