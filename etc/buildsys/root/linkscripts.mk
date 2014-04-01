@@ -20,7 +20,7 @@ endif
 ifndef __buildsys_root_linkscripts_mk_
 __buildsys_root_linkscripts_mk_ := 1
 
-TARGETS_all += linkscripts
+all: linkscripts
 
 .PHONY: linkscripts
 linkscripts:
