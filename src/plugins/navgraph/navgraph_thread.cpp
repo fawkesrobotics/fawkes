@@ -2,7 +2,7 @@
  *  navgraph_thread.cpp - Graph-based global path planning
  *
  *  Created: Tue Sep 18 16:00:34 2012
- *  Copyright  2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2012-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -73,6 +73,7 @@ NavGraphThread::init()
   cfg_travel_tolerance_ = config->get_float("/plugins/navgraph/travel_tolerance");
   cfg_target_tolerance_ = config->get_float("/plugins/navgraph/target_tolerance");
   cfg_orientation_tolerance_ = config->get_float("/plugins/navgraph/orientation_tolerance");
+  cfg_shortcut_tolerance_ = config->get_float("/plugins/navgraph/shortcut_tolerance");
   cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
   cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
   cfg_log_graph_       = config->get_bool("/plugins/navgraph/log_graph");
@@ -171,6 +172,8 @@ NavGraphThread::loop()
 
   if (exec_active_) {
     // check if current was target reached
+    size_t shortcut_to;
+
     if (target_reached_) {
       // reached the target, check if colli/navi/local planner is final
       nav_if_->read();
@@ -180,6 +183,22 @@ NavGraphThread::loop()
 	pp_nav_if_->set_final(true);
 	needs_write = true;
       }
+    } else if ((shortcut_to = shortcut_possible()) > 0) {
+      logger->log_info(name(), "Shortcut posible, jumping from '%s' to '%s'",
+		       plan_[0].name().c_str(), plan_[shortcut_to].name().c_str());
+
+      plan_.erase(plan_.begin(), plan_.begin() + shortcut_to);
+
+      if (! plan_.empty()) {
+        try {
+          logger->log_info(name(), "Sending next goal after taking a shortcut");
+          send_next_goal();
+        } catch (Exception &e) {
+          logger->log_warn(name(), "Failed to send next goal (shortcut)");
+          logger->log_warn(name(), e);
+        }
+      }
+
     } else if (node_reached()) {
       logger->log_info(name(), "Node '%s' has been reached", plan_[0].name().c_str());
       last_node_ = plan_[0].name();
@@ -521,6 +540,43 @@ NavGraphThread::node_reached()
   if (tolerance == 0.)  tolerance = default_tolerance;
 
   return (dist <= tolerance);
+}
+
+
+
+size_t
+NavGraphThread::shortcut_possible()
+{
+  if (plan_.size() <= 1) {
+    logger->log_debug(name(), "Cannot shortcut for last node or if plan empty");
+    return 0;
+  }
+
+  // get current position of robot in map frame
+  tf::Stamped<tf::Pose> pose;
+  if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
+    logger->log_warn(name(),
+		     "Failed to compute pose, cannot generate plan");
+    return 0;
+  }
+
+  for (ssize_t i = plan_.size() - 2; i > 0; --i) {
+    TopologicalMapNode &node = plan_[i];
+
+    float dist = sqrt(pow(pose.getOrigin().x() - node.x(), 2) +
+		      pow(pose.getOrigin().y() - node.y(), 2));
+
+    float tolerance = cfg_shortcut_tolerance_;
+    if (node.has_property("shortcut_tolerance")) {
+      tolerance = node.property_as_float("shortcut_tolerance");
+    }
+
+    if (tolerance == 0.0)  return 0;
+    // +1 to take the node following the shortcut node in the plan
+    if (dist <= tolerance) return i + 1;
+  }
+
+  return 0;
 }
 
 

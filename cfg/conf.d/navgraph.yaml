@@ -31,6 +31,14 @@ plugins/navgraph:
   # reached. This value is for the last node on a path; rad
   orientation_tolerance: 0.2
 
+  # When following a plan the robot will check all upcoming nodes if they
+  # are close to the robot within this tolerance. If so, they take a shortcut
+  # and will go to the node in the plan after the shortcut node.
+  # This is potentially dangerous depending on the graph and navigator as it
+  # might violate the typical graph constraint of only having direct-line-of-tavel
+  # connections. The value can be overidden with a node property of the same name; m
+  shortcut_tolerance: 0.0
+
   # Visualize graph and current actions?
   visualization: true
 
