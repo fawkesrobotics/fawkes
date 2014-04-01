@@ -238,7 +238,7 @@ NavGraphThread::loop()
       fawkes::Time now(clock);
       if ((now - cmd_sent_at_) > cfg_resend_interval_) {
         try {
-          logger->log_info(name(), "Re-sending goal");
+          //logger->log_info(name(), "Re-sending goal");
 	  send_next_goal();
         } catch (Exception &e) {
           logger->log_warn(name(), "Failed to send next goal (resending)");
@@ -450,9 +450,9 @@ NavGraphThread::send_next_goal()
     throw;
   }
 
-  logger->log_info(name(), "Sending goto(x=%f,y=%f,ori=%f) for node '%s'",
-                  tpose.getOrigin().x(), tpose.getOrigin().y(),
-                  tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
+  logger->log_debug(name(), "Sending goto(x=%f,y=%f,ori=%f) for node '%s'",
+		    tpose.getOrigin().x(), tpose.getOrigin().y(),
+		    tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
 
   NavigatorInterface::CartesianGotoMessage *gotomsg =
     new NavigatorInterface::CartesianGotoMessage(tpose.getOrigin().x(),
