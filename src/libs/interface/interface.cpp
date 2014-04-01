@@ -1262,6 +1262,9 @@ Interface::read_from_buffer(unsigned int buffer)
   __data_mutex->lock();
   void *buf = (char *)__buffers + buffer * data_size;
   memcpy(data_ptr, buf, data_size);
+  *__local_read_timestamp = *__timestamp;
+  __timestamp->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
+
   __data_mutex->unlock();
 }
 
