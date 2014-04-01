@@ -51,9 +51,9 @@ CSearch::CSearch( CLaserOccupancyGrid * occGrid, Logger* logger, Configuration* 
  : CAbstractSearch( occGrid, logger ),
    logger_( logger )
 {
-  logger_->log_info("CSearch", "(Constructor): Entering");
+  logger_->log_debug("CSearch", "(Constructor): Entering");
   m_pAStar = new CAStar( occGrid, logger, config );
-  logger_->log_info("CSearch", "(Constructor): Exiting");
+  logger_->log_debug("CSearch", "(Constructor): Exiting");
 }
 
 /** Destructor */

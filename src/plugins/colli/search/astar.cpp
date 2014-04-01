@@ -56,7 +56,7 @@ namespace fawkes
 CAStar::CAStar( OccupancyGrid * occGrid, Logger* logger, Configuration* config )
  : logger_( logger )
 {
-  logger_->log_info("AStar", "(Constructor): Initializing AStar");
+  logger_->log_debug("AStar", "(Constructor): Initializing AStar");
 
   m_MaxStates = config->get_int( "/plugins/colli/a_star/max_states" );
 
@@ -77,7 +77,7 @@ CAStar::CAStar( OccupancyGrid * occGrid, Logger* logger, Configuration* config )
 
   m_hClosedList.clear();
 
-  logger_->log_info("AStar", "(Constructor): Initializing AStar done");
+  logger_->log_debug("AStar", "(Constructor): Initializing AStar done");
 }
 
 
@@ -87,10 +87,10 @@ CAStar::CAStar( OccupancyGrid * occGrid, Logger* logger, Configuration* config )
  */
 CAStar::~CAStar()
 {
-  logger_->log_info("AStar", "(Destructor): Destroying AStar");
+  logger_->log_debug("AStar", "(Destructor): Destroying AStar");
   for( int i = 0; i < m_MaxStates; i++ )
     delete m_vAStarStates[i];
-  logger_->log_info("AStar", "(Destructor): Destroying AStar done");
+  logger_->log_debug("AStar", "(Destructor): Destroying AStar done");
 }
 
 

@@ -46,7 +46,7 @@ namespace fawkes
 CEscapePotentialFieldDriveModule::CEscapePotentialFieldDriveModule( Logger* logger, Configuration* config )
  : CAbstractDriveMode(logger, config)
 {
-  logger_->log_info("CEscapeDriveModule", "(Constructor): Entering...");
+  logger_->log_debug("CEscapeDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::ESCAPE;
   m_pOccGrid = NULL;
   m_robot_pos.x = 0;
@@ -56,7 +56,7 @@ CEscapePotentialFieldDriveModule::CEscapePotentialFieldDriveModule( Logger* logg
   m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/escape/max_trans" );
   m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/escape/max_rot" );
 
-  logger_->log_info("CEscapeDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("CEscapeDriveModule", "(Constructor): Exiting...");
 }
 
 
@@ -64,8 +64,8 @@ CEscapePotentialFieldDriveModule::CEscapePotentialFieldDriveModule( Logger* logg
  */
 CEscapePotentialFieldDriveModule::~CEscapePotentialFieldDriveModule()
 {
-  logger_->log_info("CEscapeDriveModule", "(Destructor): Entering...");
-  logger_->log_info("CEscapeDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("CEscapeDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("CEscapeDriveModule", "(Destructor): Exiting...");
 }
 
 void

@@ -40,17 +40,17 @@ namespace fawkes
 CStopDriveModule::CStopDriveModule(Logger* logger, Configuration* config)
  : CAbstractDriveMode(logger, config)
 {
-  logger_->log_info("CStopDriveModule", "(Constructor): Entering...");
+  logger_->log_debug("CStopDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_info("CStopDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("CStopDriveModule", "(Constructor): Exiting...");
 }
 
 
 /** Destruct your local values here. */
 CStopDriveModule::~CStopDriveModule()
 {
-  logger_->log_info("CStopDriveModule", "(Destructor): Entering...");
-  logger_->log_info("CStopDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("CStopDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("CStopDriveModule", "(Destructor): Exiting...");
 }
 
 

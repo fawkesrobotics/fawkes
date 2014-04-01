@@ -46,7 +46,7 @@ CMediumBiwardDriveModule::CMediumBiwardDriveModule( CMediumForwardDriveModule*  
                                                     Configuration* config )
  : CAbstractDriveMode(logger, config)
 {
-  logger_->log_info("CMediumBiwardDriveModule", "(Constructor): Entering...");
+  logger_->log_debug("CMediumBiwardDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::ModerateAllowBackward;
   m_pMediumForwardDriveModule  = forward_module;
   m_pMediumBackwardDriveModule = backward_module;
@@ -56,7 +56,7 @@ CMediumBiwardDriveModule::CMediumBiwardDriveModule( CMediumForwardDriveModule*  
   m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/medium/max_trans" );
   m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/medium/max_rot" );
 
-  logger_->log_info("CMediumBiwardDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("CMediumBiwardDriveModule", "(Constructor): Exiting...");
 }
 
 
@@ -64,9 +64,9 @@ CMediumBiwardDriveModule::CMediumBiwardDriveModule( CMediumForwardDriveModule*  
  */
 CMediumBiwardDriveModule::~CMediumBiwardDriveModule()
 {
-  logger_->log_info("CMediumBiwardDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("CMediumBiwardDriveModule", "(Destructor): Entering...");
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_info("CMediumBiwardDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("CMediumBiwardDriveModule", "(Destructor): Exiting...");
 }
 
 

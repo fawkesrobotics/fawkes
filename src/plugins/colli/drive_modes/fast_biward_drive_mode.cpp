@@ -46,7 +46,7 @@ CFastBiwardDriveModule::CFastBiwardDriveModule( CFastForwardDriveModule*  forwar
                                                 Configuration* config )
  : CAbstractDriveMode(logger, config)
 {
-  logger_->log_info("CFastBiwardDriveModule", "(Constructor): Entering...");
+  logger_->log_debug("CFastBiwardDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::FastAllowBackward;
   m_pFastForwardDriveModule  = forward_module;
   m_pFastBackwardDriveModule = backward_module;
@@ -56,7 +56,7 @@ CFastBiwardDriveModule::CFastBiwardDriveModule( CFastForwardDriveModule*  forwar
   m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/fast/max_trans" );
   m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/fast/max_rot" );
 
-  logger_->log_info("CFastBiwardDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("CFastBiwardDriveModule", "(Constructor): Exiting...");
 }
 
 
@@ -64,9 +64,9 @@ CFastBiwardDriveModule::CFastBiwardDriveModule( CFastForwardDriveModule*  forwar
  */
 CFastBiwardDriveModule::~CFastBiwardDriveModule()
 {
-  logger_->log_info("CFastBiwardDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("CFastBiwardDriveModule", "(Destructor): Entering...");
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_info("CFastBiwardDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("CFastBiwardDriveModule", "(Destructor): Exiting...");
 }
 
 

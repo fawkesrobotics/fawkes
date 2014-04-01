@@ -40,13 +40,13 @@ namespace fawkes
 CMediumForwardDriveModule::CMediumForwardDriveModule(Logger* logger, Configuration* config)
  : CAbstractDriveMode(logger, config)
 {
-  logger_->log_info("CMediumForwardDriveModule", "(Constructor): Entering...");
+  logger_->log_debug("CMediumForwardDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::ModerateForward;
 
   m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/medium/max_trans" );
   m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/medium/max_rot" );
 
-  logger_->log_info("CMediumForwardDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("CMediumForwardDriveModule", "(Constructor): Exiting...");
 }
 
 
@@ -54,9 +54,9 @@ CMediumForwardDriveModule::CMediumForwardDriveModule(Logger* logger, Configurati
  */
 CMediumForwardDriveModule::~CMediumForwardDriveModule()
 {
-  logger_->log_info("CMediumForwardDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("CMediumForwardDriveModule", "(Destructor): Entering...");
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_info("CMediumForwardDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("CMediumForwardDriveModule", "(Destructor): Exiting...");
 }
 
 

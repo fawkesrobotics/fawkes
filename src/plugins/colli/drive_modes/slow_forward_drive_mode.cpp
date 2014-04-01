@@ -40,13 +40,13 @@ namespace fawkes
 CSlowForwardDriveModule::CSlowForwardDriveModule(Logger* logger, Configuration* config)
  : CAbstractDriveMode(logger, config)
 {
-  logger_->log_info("CSlowForwardDriveModule", "(Constructor): Entering...");
+  logger_->log_debug("CSlowForwardDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::SlowForward;
 
   m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/slow/max_trans" );
   m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/slow/max_rot" );
 
-  logger_->log_info("CSlowForwardDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("CSlowForwardDriveModule", "(Constructor): Exiting...");
 }
 
 
@@ -54,9 +54,9 @@ CSlowForwardDriveModule::CSlowForwardDriveModule(Logger* logger, Configuration* 
  */
 CSlowForwardDriveModule::~CSlowForwardDriveModule()
 {
-  logger_->log_info("CSlowForwardDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("CSlowForwardDriveModule", "(Destructor): Entering...");
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_info("CSlowForwardDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("CSlowForwardDriveModule", "(Destructor): Exiting...");
 }
 
 

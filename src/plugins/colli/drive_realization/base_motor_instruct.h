@@ -114,14 +114,14 @@ CBaseMotorInstruct::CBaseMotorInstruct( fawkes::MotorInterface* motor,
  : MotorControl( motor ),
    logger_(logger)
 {
-  logger_->log_info("CBaseMotorInstruct", "(Constructor): Entering");
+  logger_->log_debug("CBaseMotorInstruct", "(Constructor): Entering");
   // init all members, zero, just to be on the save side
   m_desiredTranslation = m_desiredRotation = 0.0;
   m_currentTranslation = m_currentRotation = 0.0;
   m_execTranslation    = m_execRotation    = 0.0;
   //m_OldTimestamp.stamp();
   m_Frequency = frequency;
-  logger_->log_info("CBaseMotorInstruct", "(Constructor): Exiting");
+  logger_->log_debug("CBaseMotorInstruct", "(Constructor): Exiting");
 }
 
 
@@ -129,8 +129,8 @@ CBaseMotorInstruct::CBaseMotorInstruct( fawkes::MotorInterface* motor,
 inline
 CBaseMotorInstruct::~CBaseMotorInstruct()
 {
-  logger_->log_info("CBaseMotorInstruct", "(Destructor): Entering");
-  logger_->log_info("CBaseMotorInstruct", "(Destructor): Exiting");
+  logger_->log_debug("CBaseMotorInstruct", "(Destructor): Entering");
+  logger_->log_debug("CBaseMotorInstruct", "(Destructor): Exiting");
 }
 
 

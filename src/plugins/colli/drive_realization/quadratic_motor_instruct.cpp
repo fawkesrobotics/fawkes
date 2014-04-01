@@ -58,7 +58,7 @@ CQuadraticMotorInstruct::CQuadraticMotorInstruct( fawkes::MotorInterface* motor,
  : CBaseMotorInstruct( motor, frequency, logger ),
    config_( config )
 {
-  logger_->log_info("CQuadraticMotorInstruct", "(Constructor): Entering");
+  logger_->log_debug("CQuadraticMotorInstruct", "(Constructor): Entering");
 
   string cfg_prefix = "/plugins/colli/quadratic_motor_instruct/";
 
@@ -67,14 +67,14 @@ CQuadraticMotorInstruct::CQuadraticMotorInstruct( fawkes::MotorInterface* motor,
   basic_rot_acc   = config_->get_float((cfg_prefix + "rot_acc").c_str());
   basic_rot_dec   = config_->get_float((cfg_prefix + "rot_dec").c_str());
 
-  logger_->log_info("CQuadraticMotorInstruct", "(Constructor): Exiting");
+  logger_->log_debug("CQuadraticMotorInstruct", "(Constructor): Exiting");
 }
 
 
 CQuadraticMotorInstruct::~CQuadraticMotorInstruct()
 {
-  logger_->log_info("CQuadraticMotorInstruct", "(Destructor): Entering");
-  logger_->log_info("CQuadraticMotorInstruct", "(Destructor): Exiting");
+  logger_->log_debug("CQuadraticMotorInstruct", "(Destructor): Entering");
+  logger_->log_debug("CQuadraticMotorInstruct", "(Destructor): Exiting");
 }
 
 

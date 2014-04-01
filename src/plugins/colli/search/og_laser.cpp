@@ -63,7 +63,7 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
                                           int cell_width, int cell_height)
  : OccupancyGrid( width, height, cell_width, cell_height )
 {
-  logger->log_info("CLaserOccupancyGrid", "(Constructor): Entering");
+  logger->log_debug("CLaserOccupancyGrid", "(Constructor): Entering");
   std::string cfg_prefix = "/plugins/colli/";
 
   if_laser_   = laser;
@@ -100,7 +100,7 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
                     offset_laser_.x, offset_laser_.y);
 
 
-  logger->log_info("CLaserOccupancyGrid", "(Constructor): Exiting");
+  logger->log_debug("CLaserOccupancyGrid", "(Constructor): Exiting");
 }
 
 /** Descturctor. */
@@ -162,8 +162,8 @@ CLaserOccupancyGrid::updateLaser()
       }
     }
   } catch(Exception &e) {
-    logger_->log_error("CLaserOccupancyGrid", "Unable to transform %s to %s. Laser not used (Start implementing history!!!). Error: %s",
-            laser_frame.c_str(), m_reference_frame.c_str(), e.what());
+    logger_->log_error("CLaserOccupancyGrid", "Unable to transform %s to %s. New laser-data not used (Start implementing history!!!).",
+            laser_frame.c_str(), m_reference_frame.c_str());
   }
 }
 
@@ -191,8 +191,9 @@ CLaserOccupancyGrid::UpdateOccGrid( int midX, int midY, float inc, float vel )
     tf_listener->lookup_transform(m_laser_frame, m_reference_frame, Time(0,0), transform);
 
   } catch(Exception &e) {
-    logger_->log_error("CLaserOccupancyGrid", "Unable to transform %s to %s. Error: %s",
-        m_reference_frame.c_str(), m_laser_frame.c_str(), e.what());
+    logger_->log_error("CLaserOccupancyGrid", "Unable to transform %s to %s. Can't put obstacles into the grid",
+        m_reference_frame.c_str(), m_laser_frame.c_str());
+    return;
   }
 
   IntegrateOldReadings( midX, midY, inc, vel, transform );

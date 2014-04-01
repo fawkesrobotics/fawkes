@@ -46,7 +46,7 @@ CSlowBiwardDriveModule::CSlowBiwardDriveModule( CSlowForwardDriveModule*  slow_f
                                                 Configuration* config )
  : CAbstractDriveMode(logger, config)
 {
-  logger_->log_info("CSlowBiwardDriveModule", "(Constructor): Entering...");
+  logger_->log_debug("CSlowBiwardDriveModule", "(Constructor): Entering...");
   m_DriveModeName = NavigatorInterface::SlowAllowBackward;
   m_pSlowForwardDriveModule  = slow_forward;
   m_pSlowBackwardDriveModule = slow_backward;
@@ -56,7 +56,7 @@ CSlowBiwardDriveModule::CSlowBiwardDriveModule( CSlowForwardDriveModule*  slow_f
   m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/slow/max_trans" );
   m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/slow/max_rot" );
 
-  logger_->log_info("CSlowBiwardDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("CSlowBiwardDriveModule", "(Constructor): Exiting...");
 }
 
 
@@ -64,8 +64,8 @@ CSlowBiwardDriveModule::CSlowBiwardDriveModule( CSlowForwardDriveModule*  slow_f
  */
 CSlowBiwardDriveModule::~CSlowBiwardDriveModule()
 {
-  logger_->log_info("CSlowBiwardDriveModule", "(Destructor): Entering...");
-  logger_->log_info("CSlowBiwardDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("CSlowBiwardDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("CSlowBiwardDriveModule", "(Destructor): Exiting...");
 }
 
 

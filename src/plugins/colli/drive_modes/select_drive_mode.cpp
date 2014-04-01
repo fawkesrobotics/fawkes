@@ -72,7 +72,7 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
    config_( config ),
    cfg_escape_mode( escape_mode )
 {
-  logger_->log_info("CSelectDriveMode", "(Constructor): Entering");
+  logger_->log_debug("CSelectDriveMode", "(Constructor): Entering");
   m_EscapeFlag   = 0;       // no escaping at the beginning
   m_pMotor       = motor;
   m_pColliTarget = target;
@@ -148,16 +148,16 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
   // YOUR CHANGES SHOULD END HERE!
   // =============================
 
-  logger_->log_info("CSelectDriveMode", "(Constructor): Exiting");
+  logger_->log_debug("CSelectDriveMode", "(Constructor): Exiting");
 }
 
 
 CSelectDriveMode::~CSelectDriveMode()
 {
-  logger_->log_info("CSelectDriveMode", "(Destructor): Entering");
+  logger_->log_debug("CSelectDriveMode", "(Destructor): Entering");
   for ( unsigned int i = 0; i < m_vDriveModeList.size(); i++ )
     delete m_vDriveModeList[i];
-  logger_->log_info("CSelectDriveMode", "(Destructor): Exiting");
+  logger_->log_debug("CSelectDriveMode", "(Destructor): Exiting");
 }
 
 /** Set local target point before update!

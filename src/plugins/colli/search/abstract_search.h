@@ -87,9 +87,9 @@ class CAbstractSearch
 inline
 CAbstractSearch::CAbstractSearch( CLaserOccupancyGrid * occGrid, Logger* logger )
 {
-  logger->log_info("CAbstractSearch", "(Constructor): Entering");
+  logger->log_debug("CAbstractSearch", "(Constructor): Entering");
   m_pOccGrid = occGrid;
-  logger->log_info("CAbstractSearch", "(Constructor): Exiting");
+  logger->log_debug("CAbstractSearch", "(Constructor): Exiting");
 }
 
 /** Destructor. */

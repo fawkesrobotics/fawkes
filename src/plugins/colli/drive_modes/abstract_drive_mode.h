@@ -138,7 +138,7 @@ CAbstractDriveMode::CAbstractDriveMode(fawkes::Logger* logger, fawkes::Configura
  : logger_( logger ),
    config_( config )
 {
-  logger_->log_info("CAbstractDriveMode", "(Constructor): Entering...");
+  logger_->log_debug("CAbstractDriveMode", "(Constructor): Entering...");
   m_ProposedTranslation = 0.0;
   m_ProposedRotation = 0.0;
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
@@ -151,15 +151,15 @@ CAbstractDriveMode::CAbstractDriveMode(fawkes::Logger* logger, fawkes::Configura
 
   m_frequency_ = config_->get_int("/plugins/colli/frequency");
 
-  logger_->log_info("CAbstractDriveMode", "(Constructor): Exiting...");
+  logger_->log_debug("CAbstractDriveMode", "(Constructor): Exiting...");
 }
 
 /** Desctructor. */
 inline
 CAbstractDriveMode::~CAbstractDriveMode()
 {
-  logger_->log_info("CAbstractDriveMode", "(Destructor): Entering...");
-  logger_->log_info("CAbstractDriveMode", "(Destructor): Exiting...");
+  logger_->log_debug("CAbstractDriveMode", "(Destructor): Entering...");
+  logger_->log_debug("CAbstractDriveMode", "(Destructor): Exiting...");
 }
 
 

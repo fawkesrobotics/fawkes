@@ -65,7 +65,7 @@ ColliThread::~ColliThread()
 void
 ColliThread::init()
 {
-  logger->log_info(name(), "(init): Constructing...");
+  logger->log_debug(name(), "(init): Constructing...");
 
   std::string cfg_prefix = "/plugins/colli/";
   m_ColliFrequency      = config->get_int((cfg_prefix + "frequency").c_str());
@@ -110,7 +110,7 @@ ColliThread::init()
 
   srand( time( NULL ) );
 
-  logger->log_info(name(), "(init): Entering initialization ..." );
+  logger->log_debug(name(), "(init): Entering initialization ..." );
 
   RegisterAtBlackboard();
   InitializeModules();
@@ -131,8 +131,8 @@ ColliThread::init()
     laser_to_base_valid_ = true;
     m_pLaserOccGrid->set_base_offset(laser_to_base_.x, laser_to_base_.y);
   } catch(Exception &e) {
-    logger->log_warn(name(), "Unable to transform %s to %s. Error: %s",
-                     cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
+    logger->log_warn(name(), "Unable to transform %s to %s.\n%s",
+                     cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what() );
   }
 
   // setup timer for colli-frequency
@@ -144,14 +144,14 @@ ColliThread::init()
   target_new_ = false;
   escape_count = 0;
 
-  logger->log_info(name(), "(init): Initialization done.");
+  logger->log_debug(name(), "(init): Initialization done.");
 }
 
 
 void
 ColliThread::finalize()
 {
-  logger->log_info(name(), "(finalize): Entering destructing ...");
+  logger->log_debug(name(), "(finalize): Entering destructing ...");
 
   delete timer_;
 
@@ -166,7 +166,7 @@ ColliThread::finalize()
   blackboard->close( if_laser_ );
   blackboard->close( if_motor_ );
 
-  logger->log_info(name(), "(finalize): Destructing done.");
+  logger->log_debug(name(), "(finalize): Destructing done.");
 }
 
 /** Set the visualization thread.
@@ -264,7 +264,7 @@ ColliThread::loop()
       laser_to_base_valid_ = true;
       m_pLaserOccGrid->set_base_offset(laser_to_base_.x, laser_to_base_.y);
     } catch(Exception &e) {
-      logger->log_warn(name(), "Unable to transform %s to %s. Error: %s",
+      logger->log_warn(name(), "Unable to transform %s to %s.\n%s",
                       cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
       timer_->wait();
       return;
