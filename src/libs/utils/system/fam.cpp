@@ -22,6 +22,7 @@
 
 #include <utils/system/fam.h>
 #include <core/exception.h>
+#include <logging/liblogger.h>
 
 #ifdef HAVE_INOTIFY
 #  include <sys/inotify.h>
@@ -209,8 +210,8 @@ FileAlterationMonitor::watch_file(const char *filepath)
   uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF;
   int iw;
 
-  //LibLogger::log_debug("FileAlterationMonitor", "Adding watch for %s", dirpath);
   if ( (iw = inotify_add_watch(__inotify_fd, filepath, mask)) >= 0) {
+    //LibLogger::log_debug("FileAlterationMonitor", "Added watch for %s: %i", filepath, iw);
     __inotify_watches[iw] = filepath;
   } else {
     throw Exception("FileAlterationMonitor: cannot add watch for file %s", filepath);
@@ -290,6 +291,8 @@ FileAlterationMonitor::process_events(int timeout)
 #ifdef HAVE_INOTIFY
   // Check for inotify events
   __interrupted = false;
+  std::map<std::string, unsigned int> events;
+
   pollfd ipfd[2];
   ipfd[0].fd = __inotify_fd;
   ipfd[0].events = POLLIN;
@@ -316,39 +319,43 @@ FileAlterationMonitor::process_events(int timeout)
     } else {
       // must be POLLIN
       int bytes = 0, i = 0;
+
       if ((bytes = read(__inotify_fd, __inotify_buf, __inotify_bufsize)) != -1) {
 	while (!__interrupted && (i < bytes)) {
 	  struct inotify_event *event = (struct inotify_event *) &__inotify_buf[i];
-	  
+
+	  if (event->mask & IN_IGNORED) {
+	    i += sizeof(struct inotify_event) + event->len;
+	    continue;
+	  }
+
 	  bool valid = true;
 	  if (! (event->mask & IN_ISDIR)) {
 	    for (__rxit = __regexes.begin(); __rxit != __regexes.end(); ++__rxit) {
-	      if (regexec(*__rxit, event->name, 0, NULL, 0) == REG_NOMATCH ) {
-		//LibLogger::log_debug("FileAlterationMonitor", "A regex did not match for %s", event->name);
+              if (event->len > 0 &&
+		  (regexec(*__rxit, event->name, 0, NULL, 0) == REG_NOMATCH))
+	      {
 		valid = false;
 		break;
 	      }
 	    }
 	  }
 
-	  /*
-	  if (event->mask & IN_MODIFY) {
-	    LibLogger::log_debug("FileAlterationMonitor", "%s has been modified", event->name);
-	    }
-	  if (event->mask & IN_MOVE) {
-	    LibLogger::log_debug("FileAlterationMonitor", "%s has been moved", event->name);
-	    }
-	  if (event->mask & IN_DELETE) {
-	    LibLogger::log_debug("FileAlterationMonitor", "%s has been deleted", event->name);
-	  }
-	  if (event->mask & IN_CREATE) {
-	    LibLogger::log_debug("FileAlterationMonitor", "%s has been created", event->name);
-	  }
-	  */
-
 	  if ( valid ) {
-	    for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
-	      (*__lit)->fam_event(event->name ? event->name : "FILE_WATCH", event->mask);
+	    if (event->len == 0) {
+	      if (__inotify_watches.find(event->wd) != __inotify_watches.end()) {
+		if (events.find(__inotify_watches[event->wd]) != events.end()) {
+		  events[__inotify_watches[event->wd]] |= event->mask;
+		} else {
+		  events[__inotify_watches[event->wd]]  = event->mask;
+		}
+	      }
+	    } else {
+	      if (events.find(event->name) != events.end()) {
+		events[event->name] |= event->mask;
+	      } else {
+		events[event->name]  = event->mask;
+	      }
 	    }
 	  }
 
@@ -378,13 +385,25 @@ FileAlterationMonitor::process_events(int timeout)
 
 	  i += sizeof(struct inotify_event) + event->len;
 	}
-      } else {
-	//LibLogger::log_error("FileAlterationMonitor", "inotify failed to read any bytes");
+
       }
     }
 
+    // Give some time to wait for related events to pipe in, we still
+    // do not guarantee to merge them all, but we do a little better
+    usleep(1000);
     prv = poll(ipfd, 2, 0);
   }
+
+  std::map<std::string, unsigned int>::const_iterator e;
+  for (e = events.begin(); e != events.end(); ++e) {
+    //LibLogger::log_warn("FileAlterationMonitor", "Event %s %x",
+    //			e->first.c_str(), e->second);
+    for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
+      (*__lit)->fam_event(e->first.c_str(), e->second);
+    }
+  }
+
 #else
   //LibLogger::log_error("FileAlterationMonitor",
 //		       "inotify support not available, but "
