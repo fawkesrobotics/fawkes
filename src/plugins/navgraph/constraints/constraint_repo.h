@@ -40,7 +40,14 @@ public:
 public:
   void register_constraint(AbstractNodeConstraint* constraint);
   void unregister_constraint(std::string name);
+  bool has_constraint(std::string name);
+
+  void add_node(std::string constraint_name, fawkes::TopologicalMapNode node);
+  void add_nodes(std::string constraint_name, std::vector<fawkes::TopologicalMapNode> node);
   fawkes::AbstractNodeConstraint* get_constraint(std::string name);
+
+  void override_nodes(std::string constraint_name, std::vector<fawkes::TopologicalMapNode> nodes);
+
   const std::vector<fawkes::AbstractNodeConstraint*> &constraints() const;
 
 private:

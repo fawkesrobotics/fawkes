@@ -62,6 +62,43 @@ ConstraintRepo::unregister_constraint(std::string name){
 	}
 }
 
+bool
+ConstraintRepo::has_constraint(std::string name){
+
+	for(unsigned int i=0; i< constraintList_.size(); i++){
+		if( constraintList_[i]->get_constraint_name() == name ){
+			return true;
+		}
+	}
+	return false;
+
+}
+
+void
+ConstraintRepo::add_node(std::string constraint_name, fawkes::TopologicalMapNode node){
+
+	for(unsigned int i=0; i< constraintList_.size(); i++){
+		if( constraintList_[i]->get_constraint_name() == constraint_name ){
+			constraintList_[i]->add_node(node);
+			break;
+		}
+	}
+}
+
+void
+ConstraintRepo::add_nodes(std::string constraint_name, std::vector<fawkes::TopologicalMapNode> nodes){
+
+	for(unsigned int i=0; i< constraintList_.size(); i++){
+		if( constraintList_[i]->get_constraint_name() == constraint_name ){
+			constraintList_[i]->add_nodes(nodes);
+			break;
+		}
+	}
+
+
+}
+
+
 fawkes::AbstractNodeConstraint*
 ConstraintRepo::get_constraint(std::string name){
 
@@ -71,6 +108,24 @@ ConstraintRepo::get_constraint(std::string name){
 		}
 	}
 	return NULL;
+}
+
+void
+ConstraintRepo::override_nodes(std::string constraint_name, std::vector<fawkes::TopologicalMapNode> nodes){
+
+	if( has_constraint(constraint_name) ){
+		logger_->log_error( "Constraint Repo", "Updating nodeList of constraint '%s'", constraint_name.c_str() );
+
+		fawkes::AbstractNodeConstraint *constraint = get_constraint(constraint_name);
+
+		constraint->clear_nodes();
+		for(unsigned int i=0; i< nodes.size(); i++){
+			constraint->add_node(nodes[i]);
+		}
+	}
+	else {
+		logger_->log_error( "Constraint Repo", "Trying to override constraint '%s' which is not registered yet", constraint_name.c_str() );
+	}
 }
 
 const std::vector<fawkes::AbstractNodeConstraint*> &

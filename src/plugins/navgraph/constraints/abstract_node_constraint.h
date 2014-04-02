@@ -57,6 +57,11 @@ public:
 	 */
 	void add_node(fawkes::TopologicalMapNode node);
 
+	/** Adds nodes to constraintList
+	 */
+	void add_nodes(std::vector<fawkes::TopologicalMapNode> nodes);
+
+
 	/** removes node to from constraintList
 	 */
 	void remove_node(fawkes::TopologicalMapNode node);
@@ -73,6 +78,9 @@ public:
 	*/
 	std::vector<fawkes::TopologicalMapNode> get_node_list() const;
 
+	/** deletes all Nodes of list
+	*/
+	void clear_nodes();
 
 };
 
@@ -98,11 +106,19 @@ inline void AbstractNodeConstraint::add_node(fawkes::TopologicalMapNode node){
 
 	if( !this->has_node(node) ){
 		this->nodeList.push_back( node );
-		logger->log_info("abstract_node_constraint", "Added node %s to constrained nodelist.", node.name().c_str() );
-	}
+		logger->log_info("abstract_node_constraint", "Added Node %s to '%s'.", node.name().c_str(), constraintName.c_str() );	}
 	else{
-		logger->log_info("abstract_node_constraint", "Node %s is already in nodelist - doing nothing.", node.name().c_str() );
+		logger->log_info("abstract_node_constraint", "Node %s is already in '%s'", node.name().c_str(), constraintName.c_str() );
 	}
+}
+
+inline void AbstractNodeConstraint::add_nodes(std::vector<fawkes::TopologicalMapNode> nodes){
+
+	for(unsigned int i=0; i<nodes.size(); i++){
+		logger->log_info("abstract_node_constraint", "Added Node %s to '%s'", nodes[i].name().c_str(), constraintName.c_str() );
+		add_node( nodes[i] );
+	}
+
 }
 
 inline void AbstractNodeConstraint::remove_node(fawkes::TopologicalMapNode node){
@@ -142,6 +158,10 @@ inline std::string AbstractNodeConstraint::get_constraint_name(){
 
 inline std::vector<fawkes::TopologicalMapNode> AbstractNodeConstraint::get_node_list() const{
 	return this->nodeList;
+}
+
+inline void AbstractNodeConstraint::clear_nodes(){
+	this->nodeList.clear();
 }
 
 } // fawkes
