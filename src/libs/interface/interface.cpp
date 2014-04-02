@@ -27,6 +27,7 @@
 #include <interface/mediators/message_mediator.h>
 #include <core/threading/refc_rwlock.h>
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/exceptions/system.h>
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
@@ -1262,6 +1263,9 @@ Interface::read_from_buffer(unsigned int buffer)
   __data_mutex->lock();
   void *buf = (char *)__buffers + buffer * data_size;
   memcpy(data_ptr, buf, data_size);
+  *__local_read_timestamp = *__timestamp;
+  __timestamp->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
+
   __data_mutex->unlock();
 }
 
@@ -1286,6 +1290,49 @@ Interface::compare_buffers(unsigned int buffer)
   __data_mutex->unlock();
 
   return rv;
+}
+
+
+/** Get time of a buffer.
+ * @param buffer buffer number
+ * @return timestamp stored in the interface
+ */
+Time
+Interface::buffer_timestamp(unsigned int buffer)
+{
+  if (buffer >= __num_buffers) {
+    throw OutOfBoundsException("Buffer ID out of bounds",
+			       buffer, 0, __num_buffers);
+  }
+
+
+  MutexLocker lock(__data_mutex);
+  void *buf = (char *)__buffers + buffer * data_size;
+  interface_data_ts_t *buf_ts = (interface_data_ts_t *)buf;
+  return Time(buf_ts->timestamp_sec, buf_ts->timestamp_usec);
+}
+
+
+/** Get time of a buffer.
+ * Use this method to query the time without allocating a new Time instance.
+ * @param buffer buffer number
+ * @param timestamp upon return contains the timestamp of the buffer.
+ */
+void
+Interface::buffer_timestamp(unsigned int buffer, Time *timestamp)
+{
+  if (buffer >= __num_buffers) {
+    throw OutOfBoundsException("Buffer ID out of bounds",
+			       buffer, 0, __num_buffers);
+  }
+  if (timestamp == NULL) {
+    throw NullPointerException("%s.buffer_timestamp: timestamp cannot be null", __uid);
+  }
+
+  MutexLocker lock(__data_mutex);
+  void *buf = (char *)__buffers + buffer * data_size;
+  interface_data_ts_t *buf_ts = (interface_data_ts_t *)buf;
+  timestamp->set_time(buf_ts->timestamp_sec, buf_ts->timestamp_usec);
 }
 
 
