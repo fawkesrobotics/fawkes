@@ -36,12 +36,12 @@
 #include <plugins/navgraph/aspect/navgraph_inifin.h>
 
 #include <interfaces/NavigatorInterface.h>
+#include <interfaces/NavPathInterface.h>
 
 #include <utils/graph/topological_map_graph.h>
 #include <utils/system/fam.h>
 
 #include <plugins/navgraph/constraints/constraint_repo.h>
-
 
 namespace fawkes {
   class AStar;
@@ -87,6 +87,7 @@ public:
   size_t shortcut_possible();
   fawkes::LockPtr<fawkes::TopologicalMapGraph> load_graph(std::string filename);
   void log_graph();
+  void write_new_path(std::vector<fawkes::TopologicalMapNode> path);
 
 
  private:
@@ -107,6 +108,7 @@ public:
 
   fawkes::NavigatorInterface *nav_if_;
   fawkes::NavigatorInterface *pp_nav_if_;
+  fawkes::NavPathInterface *path_if_;
 
   fawkes::LockPtr<fawkes::TopologicalMapGraph> graph_;
   fawkes::AStar *astar_;
@@ -124,6 +126,7 @@ public:
   fawkes::Time *cmd_sent_at_;
 
   fawkes::FileAlterationMonitor *fam_;
+
 
 #ifdef HAVE_VISUALIZATION
   NavGraphVisualizationThread *vt_;

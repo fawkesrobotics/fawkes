@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="NavPathInterface" author="Sebastian Reuter" year="2014">
+  <data>
+    <comment>
+      The navigator interface is used by the navigator to export information about
+      the current status of the navigator and to define all messages by which the navigator
+      can be instructed.
+
+      There are three coordinate systems, the robot system which is a right-handed cartesian
+      coordinate system with the robot in its origin, X axis pointing forward, Y pointing to
+      the left and Z pointing upwards. The second coordinate system is the so-called
+      navigator system. It is a coordinate system similar to the robot system, but the
+      origin is defined on the initialization of the navigator. The last system is the
+      odometry system. It is again a similar system, but the origin is reset from time
+      to time and the robot's position in this system gives the odometry deltas.
+    </comment>
+
+    <field type="string" length="64" name="path_node_1">Path Node</field>
+    <field type="string" length="64" name="path_node_2">Path Node</field>
+    <field type="string" length="64" name="path_node_3">Path Node</field>
+    <field type="string" length="64" name="path_node_4">Path Node</field>
+    <field type="string" length="64" name="path_node_5">Path Node</field>
+    <field type="string" length="64" name="path_node_6">Path Node</field>
+    <field type="string" length="64" name="path_node_7">Path Node</field>
+    <field type="string" length="64" name="path_node_8">Path Node</field>
+    <field type="string" length="64" name="path_node_9">Path Node</field>
+    <field type="string" length="64" name="path_node_10">Path Node</field>
+    <field type="string" length="64" name="path_node_11">Path Node</field>
+    <field type="string" length="64" name="path_node_12">Path Node</field>
+    <field type="string" length="64" name="path_node_13">Path Node</field>
+    <field type="string" length="64" name="path_node_14">Path Node</field>
+    <field type="string" length="64" name="path_node_15">Path Node</field>
+    <field type="string" length="64" name="path_node_16">Path Node</field>
+    <field type="string" length="64" name="path_node_17">Path Node</field>
+    <field type="string" length="64" name="path_node_18">Path Node</field>
+    <field type="string" length="64" name="path_node_19">Path Node</field>
+    <field type="string" length="64" name="path_node_20">Path Node</field>
+    <field type="string" length="64" name="path_node_21">Path Node</field>
+    <field type="string" length="64" name="path_node_22">Path Node</field>
+    <field type="string" length="64" name="path_node_23">Path Node</field>
+    <field type="string" length="64" name="path_node_24">Path Node</field>
+    <field type="string" length="64" name="path_node_25">Path Node</field>
+    <field type="string" length="64" name="path_node_26">Path Node</field>
+    <field type="string" length="64" name="path_node_27">Path Node</field>
+    <field type="string" length="64" name="path_node_28">Path Node</field>
+    <field type="string" length="64" name="path_node_29">Path Node</field>
+    <field type="string" length="64" name="path_node_30">Path Node</field>
+    <field type="string" length="64" name="path_node_31">Path Node</field>
+    <field type="string" length="64" name="path_node_32">Path Node</field>
+    <field type="string" length="64" name="path_node_33">Path Node</field>
+    <field type="string" length="64" name="path_node_34">Path Node</field>
+    <field type="string" length="64" name="path_node_35">Path Node</field>
+    <field type="string" length="64" name="path_node_36">Path Node</field>
+    <field type="string" length="64" name="path_node_37">Path Node</field>
+    <field type="string" length="64" name="path_node_38">Path Node</field>
+    <field type="string" length="64" name="path_node_39">Path Node</field>
+    <field type="string" length="64" name="path_node_40">Path Node</field>
+   
+    <field type="uint32" name="path_length">Length of path</field>
+  
+  </data>
+</interface>

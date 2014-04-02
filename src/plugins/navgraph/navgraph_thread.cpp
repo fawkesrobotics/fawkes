@@ -86,6 +86,8 @@ NavGraphThread::init()
 
   pp_nav_if_ = blackboard->open_for_writing<NavigatorInterface>("Pathplan");
   nav_if_    = blackboard->open_for_reading<NavigatorInterface>(cfg_nav_if_id_.c_str());
+  path_if_ = blackboard->open_for_writing<NavPathInterface>("NavPath");
+
 
   if (cfg_graph_file_[0] != '/') {
     cfg_graph_file_ = std::string(CONFDIR) + "/" + cfg_graph_file_;
@@ -178,6 +180,7 @@ NavGraphThread::loop()
       generate_plan(msg->x(), msg->y(), msg->orientation());
       optimize_plan();
       start_plan();
+      write_new_path(plan_);
 
     } else if (pp_nav_if_->msgq_first_is<NavigatorInterface::PlaceGotoMessage>()) {
       NavigatorInterface::PlaceGotoMessage *msg = pp_nav_if_->msgq_first(msg);
@@ -187,6 +190,7 @@ NavGraphThread::loop()
       generate_plan(msg->place());
       optimize_plan();
       start_plan();
+      write_new_path(plan_);
     }
 
     pp_nav_if_->msgq_pop();
@@ -208,31 +212,31 @@ NavGraphThread::loop()
       nav_if_->read();
       fawkes::Time now(clock);
       if (nav_if_->is_final() || ((now - target_reached_at_) >= target_time_)) {
-	stop_motion();
-	pp_nav_if_->set_final(true);
-	needs_write = true;
+		stop_motion();
+		pp_nav_if_->set_final(true);
+		needs_write = true;
       }
 
     } else if (node_reached()) {
       logger->log_info(name(), "Node '%s' has been reached", plan_[0].name().c_str());
       last_node_ = plan_[0].name();
       if (plan_.size() == 1) {
-	target_time_ = 0;
-	if (plan_[0].has_property("target-time")) {
-	  target_time_ = plan_[0].property_as_float("target-time");
-	}
-	if (target_time_ == 0)  target_time_ = cfg_target_time_;
+		target_time_ = 0;
+		if (plan_[0].has_property("target-time")) {
+		  target_time_ = plan_[0].property_as_float("target-time");
+		}
+		if (target_time_ == 0)  target_time_ = cfg_target_time_;
 
-	nav_if_->read();
-	if (nav_if_->is_final()) {
-	  exec_active_ = false;
-	  target_reached_ = false;
-	  pp_nav_if_->set_final(true);
-	  needs_write = true;
-	} else {
-	  target_reached_ = true;
-	  target_reached_at_->stamp();
-	}
+		nav_if_->read();
+		if (nav_if_->is_final()) {
+		  exec_active_ = false;
+		  target_reached_ = false;
+		  pp_nav_if_->set_final(true);
+		  needs_write = true;
+		} else {
+		  target_reached_ = true;
+		  target_reached_at_->stamp();
+		}
       }
       plan_.erase(plan_.begin());
 
@@ -240,6 +244,7 @@ NavGraphThread::loop()
         try {
           logger->log_info(name(), "Sending next goal %s after node reached",
 			   plan_[0].name().c_str());
+          write_new_path(plan_);
           send_next_goal();
         } catch (Exception &e) {
           logger->log_warn(name(), "Failed to send next goal (node reached)");
@@ -275,7 +280,7 @@ NavGraphThread::loop()
         }
       }
     }
-  }
+  }//exec_active
 
   if (needs_write) {
     pp_nav_if_->write();
@@ -323,9 +328,8 @@ NavGraphThread::generate_plan(std::string goal_name)
   constraint_repo_.lock();
   NavGraphSearchState *initial_state =
     new NavGraphSearchState(init, goal, 0, NULL, *graph_, *constraint_repo_);
-  constraint_repo_.unlock();
-
   std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
+  constraint_repo_.unlock();
 
   NavGraphSearchState *solstate;
   for (unsigned int i = 0; i < a_star_solution.size(); ++i ) {
@@ -658,4 +662,48 @@ NavGraphThread::log_graph()
       logger->log_info(name(), "  - %s: %s", p->first.c_str(), p->second.c_str());
     }
   }
+}
+
+void
+NavGraphThread::write_new_path(std::vector<fawkes::TopologicalMapNode> path){
+
+	std::string vpath[40];
+	int path_length;
+
+	unsigned int i;
+	for(i=0; i<path.size() && i<39; i++){
+		vpath[i] = path[i].name();
+	}
+	path_length = i;
+	for(; i<39; i++){
+		vpath[i] = "";
+	}
+
+	path_if_->set_path_node_1( vpath[0].c_str() ); 		path_if_->set_path_node_2( vpath[1].c_str() );
+	path_if_->set_path_node_3( vpath[2].c_str() );		path_if_->set_path_node_4( vpath[3].c_str() );
+	path_if_->set_path_node_5( vpath[4].c_str() );		path_if_->set_path_node_6( vpath[5].c_str() );
+	path_if_->set_path_node_7( vpath[6].c_str() );		path_if_->set_path_node_8( vpath[7].c_str() );
+	path_if_->set_path_node_9( vpath[8].c_str() );		path_if_->set_path_node_10( vpath[9].c_str() );
+	path_if_->set_path_node_11( vpath[10].c_str() );	path_if_->set_path_node_12( vpath[11].c_str() );
+	path_if_->set_path_node_13( vpath[12].c_str() );	path_if_->set_path_node_14( vpath[13].c_str() );
+	path_if_->set_path_node_15( vpath[14].c_str() );	path_if_->set_path_node_16( vpath[15].c_str() );
+	path_if_->set_path_node_17( vpath[16].c_str() );	path_if_->set_path_node_18( vpath[17].c_str() );
+	path_if_->set_path_node_19( vpath[18].c_str() );	path_if_->set_path_node_20( vpath[19].c_str() );
+	path_if_->set_path_node_21( vpath[20].c_str() );	path_if_->set_path_node_22( vpath[21].c_str() );
+	path_if_->set_path_node_23( vpath[22].c_str() );	path_if_->set_path_node_24( vpath[23].c_str() );
+	path_if_->set_path_node_25( vpath[24].c_str() );	path_if_->set_path_node_26( vpath[25].c_str() );
+	path_if_->set_path_node_27( vpath[26].c_str() );	path_if_->set_path_node_28( vpath[27].c_str() );
+	path_if_->set_path_node_29( vpath[28].c_str() );	path_if_->set_path_node_30( vpath[29].c_str() );
+	path_if_->set_path_node_31( vpath[30].c_str() );	path_if_->set_path_node_32( vpath[31].c_str() );
+	path_if_->set_path_node_33( vpath[32].c_str() );	path_if_->set_path_node_34( vpath[33].c_str() );
+	path_if_->set_path_node_35( vpath[34].c_str() );	path_if_->set_path_node_36( vpath[35].c_str() );
+	path_if_->set_path_node_37( vpath[36].c_str() );	path_if_->set_path_node_38( vpath[37].c_str() );
+	path_if_->set_path_node_39( vpath[38].c_str() );	path_if_->set_path_node_40( vpath[39].c_str() );
+
+	path_if_->set_path_length(path_length);
+
+	logger->log_info(name(), "Knoten Nummer 1: %s !",  vpath[0].c_str()  );
+
+	path_if_->write();
+
 }

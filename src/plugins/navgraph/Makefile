@@ -24,7 +24,8 @@ PRESUBDIRS = constraints aspect
 CFLAGS += -std=c++0x
 
 LIBS_navgraph = fawkescore fawkesutils fawkesaspects fawkesinterface \
-	    fawkesblackboard fawkesnavgraphconstraints NavigatorInterface
+		fawkesblackboard fawkesnavgraphconstraints \
+		NavigatorInterface NavPathInterface
 OBJS_navgraph = navgraph_plugin.o navgraph_thread.o search_state.o
 OBJS_all    = $(OBJS_navgraph)
 
