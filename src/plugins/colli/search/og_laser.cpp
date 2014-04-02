@@ -141,7 +141,7 @@ CLaserOccupancyGrid::updateLaser()
   }
   //write BB date into buffer (instead of read())
   if ( if_buffer_free_pos < 0 ) {                 //if there is no free buffer
-    logger_->log_warn("CLaserOccupancyGrid", "if_laser buffer is full empty oldest");
+    logger_->log_error("CLaserOccupancyGrid", "if_laser buffer is full empty oldest");
 
                                                   //search for the oldest buffer and uses this
     double if_buffer_oldest_time = fawkes::Clock::instance()->now().in_sec() + 1000;
@@ -203,7 +203,7 @@ CLaserOccupancyGrid::updateLaser()
         }
       } catch(Exception &e) {
         m_if_buffer_filled[i] = true;            //show buffer still needs to be there
-        logger_->log_warn("CLaserOccupancyGrid", "Unable to transform %s to %s. Laser-data not used, will keeped in history.",
+        logger_->log_debug("CLaserOccupancyGrid", "Unable to transform %s to %s. Laser-data not used, will keeped in history.",
                 laser_frame.c_str(), m_reference_frame.c_str());
       }
     }
