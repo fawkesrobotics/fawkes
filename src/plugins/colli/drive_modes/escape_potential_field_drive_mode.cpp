@@ -147,35 +147,35 @@ CEscapePotentialFieldDriveModule::Update()
   float turn_direction  = 0;
   float drive_direction = 0;
 
-  if ( angle_abs > angle_difference && angle_abs < M_PI - angle_difference ) {    //just turn
+  if ( angle_abs > angle_difference/* && angle_abs < M_PI - angle_difference*/ ) {    //just turn
     turn = true;
 
-    if (angle_abs <= (M_PI_2 + 0.2 * m_turn)) {      //turn to 0
+//    if (angle_abs <= (M_PI_2 + 0.2 * m_turn)) {      //turn to 0
       m_turn =  1.0;
       if (angle < 0) {
         turn_direction = -1.0;
       } else {
         turn_direction =  1.0;
       }
-    } else {                                        //turn to PI
+/*    } else {                                        //turn to PI
       m_turn = -1.0;
       if (angle < 0) {
         turn_direction =  1.0;
       } else {
         turn_direction = -1.0;
       }
-    }
+    }*/
   } else {                                                                        //drive
     turn = false;
 
-    if (angle_abs <= angle_difference) {                 //forward
+//    if (angle_abs <= angle_difference) {                 //forward
       drive_direction =  1.0;
-    } else if (angle_abs >= M_PI - angle_difference){    //backward
+/*    } else if (angle_abs >= M_PI - angle_difference){    //backward
       drive_direction = -1.0;
     } else {
       drive_direction = 0.0;
       logger_->log_error("CEscapePotentialFieldDriveModule","Should drive, but don't know the direction");
-    }
+    }*/
   }
 
   if ( turn ) {
