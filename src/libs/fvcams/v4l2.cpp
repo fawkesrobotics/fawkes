@@ -1271,12 +1271,20 @@ V4L2Camera::set_image_number(unsigned int n)
 
 /* --- CameraControls --- */
 
+/**
+ * Get exposure_auto_priority V4L2 control
+ * @return whether auto exposure gets priority
+ */
 bool
 V4L2Camera::exposure_auto_priority()
 {
   return get_one_control("exposure_auto_priority", V4L2_CID_EXPOSURE_AUTO_PRIORITY);
 }
 
+/**
+ * Set exposure_auto_priority V4L2 control
+ * @param enabled
+ */
 void
 V4L2Camera::set_exposure_auto_priority(bool enabled)
 {
@@ -1284,12 +1292,20 @@ V4L2Camera::set_exposure_auto_priority(bool enabled)
   set_one_control("AGC", V4L2_CID_EXPOSURE_AUTO_PRIORITY, (enabled ? 1 : 0));
 }
 
+/**
+ * Get absolute white balance setting
+ * @return white balance temperature
+ */
 unsigned int
 V4L2Camera::white_balance_temperature()
 {
   return get_one_control("white_balance_temperature", V4L2_CID_WHITE_BALANCE_TEMPERATURE);
 }
 
+/**
+ * Set white balance
+ * @param white_balance_temperature
+ */
 void
 V4L2Camera::set_white_balance_temperature(unsigned int white_balance_temperature)
 {
@@ -1297,12 +1313,20 @@ V4L2Camera::set_white_balance_temperature(unsigned int white_balance_temperature
   set_one_control("white_balance_temperature", V4L2_CID_WHITE_BALANCE_TEMPERATURE, white_balance_temperature);
 }
 
+/**
+ * Get absolute exposure time
+ * @return exposure time value
+ */
 unsigned int
 V4L2Camera::exposure_absolute()
 {
   return get_one_control("exposure_absolute", V4L2_CID_EXPOSURE_ABSOLUTE);
 }
 
+/**
+ * set absolute exposure time (1/s)
+ * @param exposure_absolute
+ */
 void
 V4L2Camera::set_exposure_absolute(unsigned int exposure_absolute)
 {
@@ -1310,12 +1334,20 @@ V4L2Camera::set_exposure_absolute(unsigned int exposure_absolute)
   set_one_control("exposure_absolute", V4L2_CID_EXPOSURE_ABSOLUTE, exposure_absolute);
 }
 
+/**
+ * Get sharpness value
+ * @return V4L2 sharpness setting
+ */
 unsigned int
 V4L2Camera::sharpness()
 {
   return get_one_control("sharpness", V4L2_CID_SHARPNESS);
 }
 
+/**
+ * Set sharpness. Lower = blurrier picture
+ * @param sharpness
+ */
 void
 V4L2Camera::set_sharpness(unsigned int sharpness)
 {
