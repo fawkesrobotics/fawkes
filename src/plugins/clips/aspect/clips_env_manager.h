@@ -3,8 +3,7 @@
  *  clips_env_manager.h - CLIPS environment manager
  *
  *  Created: Thu Aug 15 18:55:32 2013
- *  Copyright  2006-2013  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
