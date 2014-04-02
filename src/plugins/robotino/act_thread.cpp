@@ -89,6 +89,9 @@ RobotinoActThread::init()
   
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
   gripper_if_ = blackboard->open_for_writing<GripperInterface>("Robotino");
+
+  motor_if_->set_motor_state(MotorInterface::MOTOR_ENABLED);
+  motor_if_->write();
 }
 
 
@@ -121,7 +124,16 @@ RobotinoActThread::loop()
 
     while (! motor_if_->msgq_empty()) {
 
-      if (MotorInterface::TransRotMessage *msg = motor_if_->msgq_first_safe(msg))
+      if (MotorInterface::SetMotorStateMessage *msg = motor_if_->msgq_first_safe(msg))
+      {
+        logger->log_info(name(), "%sabling motor on request",
+			 msg->motor_state() == MotorInterface::MOTOR_ENABLED
+			 ? "En" : "Dis");
+	motor_if_->set_motor_state(msg->motor_state());
+	motor_if_->write();
+      }
+
+      else if (MotorInterface::TransRotMessage *msg = motor_if_->msgq_first_safe(msg))
       {
         float m1, m2, m3;
         omni_drive_->project(&m1, &m2, &m3,
@@ -152,7 +164,7 @@ RobotinoActThread::loop()
       }
 
       motor_if_->msgq_pop();
-    }//while
+    } // while motor msgq
 
     if (cfg_gripper_enabled_) {
      while (! gripper_if_->msgq_empty()) {
@@ -172,16 +184,29 @@ RobotinoActThread::loop()
 
     // deadman switch to set the velocities to zero if no new message arrives
     double diff =  ( clock->now() - (&last_msg_time_) );
+    if (diff >= cfg_deadman_threshold_ && msg_received_ && !msg_zero_vel_) {
+      logger->log_error(name(), "Time-Gap between TransRotMsgs too large "
+			"(%f sec.), motion planner alive?", diff);
+      set_state.speedSetPoint[0] = 0.0;
+      set_state.speedSetPoint[1] = 0.0;
+      set_state.speedSetPoint[2] = 0.0;
+      send_set_state = true;
+      msg_received_ = false;
+    }
 
-    
-    if( diff >= cfg_deadman_threshold_ && msg_received_ && !msg_zero_vel_ ){
-
-    	logger->log_error(name(), "Time-Gap between TransRotMsgs too large (%f sec.) is motion_planner working ?", diff);
-        set_state.speedSetPoint[0] = 0.0;
-        set_state.speedSetPoint[1] = 0.0;
-        set_state.speedSetPoint[2] = 0.0;
-        send_set_state = true;
-	msg_received_ = false;
+    if (motor_if_->motor_state() == MotorInterface::MOTOR_DISABLED) {
+      if (send_set_state &&
+	  ((set_state.speedSetPoint[0] != 0.0) ||
+	   (set_state.speedSetPoint[1] != 0.0) ||
+	   (set_state.speedSetPoint[2] != 0.0)))
+      {
+	logger->log_warn(name(), "Motor command received while disabled, ignoring");
+      }
+      set_state.speedSetPoint[0] = 0.0;
+      set_state.speedSetPoint[1] = 0.0;
+      set_state.speedSetPoint[2] = 0.0;
+      logger->log_info(name(), "Motor disabled, stopping");
+      send_set_state = true;
     }
 
     if (send_set_state)  com_->setSetState(set_state);
