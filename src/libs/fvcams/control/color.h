@@ -41,8 +41,8 @@ class CameraControlColor : virtual public CameraControl
   virtual void         set_auto_gain(bool enabled)                      = 0;
   virtual bool         auto_white_balance()                             = 0;
   virtual void         set_auto_white_balance(bool enabled)             = 0;
-  virtual bool         auto_exposure()                                  = 0;
-  virtual void         set_auto_exposure(bool enabled)                  = 0;
+  virtual unsigned int exposure_auto()                                  = 0;
+  virtual void         set_exposure_auto(unsigned int enabled)          = 0;
   virtual void         set_auto_all(bool enabled);
 
   virtual int          red_balance()                                    = 0;

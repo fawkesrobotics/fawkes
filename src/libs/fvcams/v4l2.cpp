@@ -97,7 +97,13 @@ V4L2Camera::V4L2Camera(const char *device_name)
   _brightness.set = _contrast.set = _saturation.set = _hue.set =
     _red_balance.set = _blue_balance.set = _exposure.set = _gain.set =
     _lens_x.set = _lens_y.set = false;
-  _aec = _awb = _agc = _h_flip = _v_flip = NOT_SET;
+  _awb = _agc = _h_flip = _v_flip = NOT_SET;
+  _exposure_auto_priority = NOT_SET;
+  _exposure_auto.set = false;
+  _white_balance_temperature.set = false;
+  _exposure_absolute.set = false;
+  _white_balance_temperature.set = false;
+  _sharpness.set = false;
   _read_method = MMAP;
   memset(_format, 0, 5);
   _frame_buffers = NULL;
@@ -217,12 +223,6 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
     _fps = 0;
   }
 
-  if (cap->has("aec")) {
-    _aec = (cap->get("aec").compare("true") == 0 ? TRUE : FALSE);
-  } else {
-    _aec = NOT_SET;
-  }
-
   if (cap->has("awb")) {
     _awb = (cap->get("awb").compare("true") == 0 ? TRUE : FALSE);
   } else {
@@ -316,6 +316,42 @@ V4L2Camera::V4L2Camera(const CameraArgumentParser *cap)
   } else {
     _lens_y.set = false;
   }
+
+  if (cap->has("exposure_auto_priority")) {
+    _exposure_auto_priority = (cap->get("exposure_auto_priority").compare("true") == 0 ? TRUE : FALSE);
+  } else {
+    _exposure_auto_priority = NOT_SET;
+  }
+
+  if (cap->has("exposure_auto")) {
+    _exposure_auto.set = true;
+    _exposure_auto.value = atoi(cap->get("exposure_auto").c_str());
+  } else {
+    _exposure_auto.set = false;
+  }
+
+  if (cap->has("exposure_absolute")) {
+    _exposure_absolute.set = true;
+    _exposure_absolute.value = atoi(cap->get("exposure_absolute").c_str());
+  } else {
+    _exposure_absolute.set = false;
+  }
+
+
+  if (cap->has("white_balance_temperature")) {
+    _white_balance_temperature.set = true;
+    _white_balance_temperature.value = atoi(cap->get("white_balance_temperature").c_str());
+  } else {
+    _white_balance_temperature.set = false;
+  }
+
+  if (cap->has("sharpness")) {
+    _sharpness.set = true;
+    _sharpness.value = atoi(cap->get("sharpness").c_str());
+  } else {
+    _sharpness.set = false;
+  }
+
 }
 
 
@@ -335,7 +371,12 @@ V4L2Camera::V4L2Camera(const char *device_name, int dev)
   _brightness.set = _contrast.set = _saturation.set = _hue.set =
     _red_balance.set = _blue_balance.set = _exposure.set = _gain.set =
     _lens_x.set = _lens_y.set = false;
-  _aec = _awb = _agc = _h_flip = _v_flip = NOT_SET;
+  _awb = _agc = _h_flip = _v_flip = NOT_SET;
+  _exposure_auto_priority = NOT_SET;
+  _white_balance_temperature.set = false;
+  _exposure_auto.set = false;
+  _exposure_absolute.set = false;
+  _sharpness.set = false;
   _read_method = UPTR;
   memset(_format, 0, 5);
   _frame_buffers = NULL;
@@ -748,7 +789,9 @@ V4L2Camera::set_fps()
 void
 V4L2Camera::set_controls()
 {
-  if (_aec != NOT_SET) set_auto_exposure(_aec == TRUE);
+  if (_exposure_auto_priority != NOT_SET) set_exposure_auto_priority(_exposure_auto_priority == TRUE);
+  if (_exposure_auto.set) set_exposure_auto(_exposure_auto.value);
+
   if (_awb != NOT_SET) set_auto_white_balance(_awb == TRUE);
   if (_agc != NOT_SET) set_auto_gain(_agc == TRUE);
 
@@ -765,6 +808,10 @@ V4L2Camera::set_controls()
   if (_gain.set)         set_gain(_gain.value);
   if (_lens_x.set)       set_lens_x_corr(_lens_x.value);
   if (_lens_y.set)       set_lens_y_corr(_lens_y.value);
+
+  if (_exposure_absolute.set) set_exposure_absolute(_exposure_absolute.value);
+  if (_white_balance_temperature.set) set_white_balance_temperature(_white_balance_temperature.value);
+  if (_sharpness.set) set_sharpness(_sharpness.value);
 }
 
 /**
@@ -1224,6 +1271,90 @@ V4L2Camera::set_image_number(unsigned int n)
 
 /* --- CameraControls --- */
 
+/**
+ * Get exposure_auto_priority V4L2 control
+ * @return whether auto exposure gets priority
+ */
+bool
+V4L2Camera::exposure_auto_priority()
+{
+  return get_one_control("exposure_auto_priority", V4L2_CID_EXPOSURE_AUTO_PRIORITY);
+}
+
+/**
+ * Set exposure_auto_priority V4L2 control
+ * @param enabled
+ */
+void
+V4L2Camera::set_exposure_auto_priority(bool enabled)
+{
+  LibLogger::log_debug("V4L2Cam", (enabled ? "enabling exposure_auto_priority" : "disabling exposure_auto_priority"));
+  set_one_control("AGC", V4L2_CID_EXPOSURE_AUTO_PRIORITY, (enabled ? 1 : 0));
+}
+
+/**
+ * Get absolute white balance setting
+ * @return white balance temperature
+ */
+unsigned int
+V4L2Camera::white_balance_temperature()
+{
+  return get_one_control("white_balance_temperature", V4L2_CID_WHITE_BALANCE_TEMPERATURE);
+}
+
+/**
+ * Set white balance
+ * @param white_balance_temperature
+ */
+void
+V4L2Camera::set_white_balance_temperature(unsigned int white_balance_temperature)
+{
+  LibLogger::log_debug("V4L2Cam", "setting white_balance_temperature to %d", white_balance_temperature);
+  set_one_control("white_balance_temperature", V4L2_CID_WHITE_BALANCE_TEMPERATURE, white_balance_temperature);
+}
+
+/**
+ * Get absolute exposure time
+ * @return exposure time value
+ */
+unsigned int
+V4L2Camera::exposure_absolute()
+{
+  return get_one_control("exposure_absolute", V4L2_CID_EXPOSURE_ABSOLUTE);
+}
+
+/**
+ * set absolute exposure time (1/s)
+ * @param exposure_absolute
+ */
+void
+V4L2Camera::set_exposure_absolute(unsigned int exposure_absolute)
+{
+  LibLogger::log_debug("V4L2Cam", "setting exposure_absolute to %d", exposure_absolute);
+  set_one_control("exposure_absolute", V4L2_CID_EXPOSURE_ABSOLUTE, exposure_absolute);
+}
+
+/**
+ * Get sharpness value
+ * @return V4L2 sharpness setting
+ */
+unsigned int
+V4L2Camera::sharpness()
+{
+  return get_one_control("sharpness", V4L2_CID_SHARPNESS);
+}
+
+/**
+ * Set sharpness. Lower = blurrier picture
+ * @param sharpness
+ */
+void
+V4L2Camera::set_sharpness(unsigned int sharpness)
+{
+  LibLogger::log_debug("V4L2Cam", "setting sharpness to %d", sharpness);
+  set_one_control("sharpness", V4L2_CID_SHARPNESS, sharpness);
+}
+
 bool
 V4L2Camera::auto_gain()
 {
@@ -1250,16 +1381,17 @@ V4L2Camera::set_auto_white_balance(bool enabled)
   set_one_control("AWB", V4L2_CID_AUTO_WHITE_BALANCE, (enabled ? 1 : 0));
 }
 
-bool
-V4L2Camera::auto_exposure()
+unsigned int
+V4L2Camera::exposure_auto()
 {
-  throw NotImplementedException("No such method in the V4L2 standard");
+  return get_one_control("exposure_auto", V4L2_CID_EXPOSURE_AUTO);
 }
 
 void
-V4L2Camera::set_auto_exposure(bool enabled)
+V4L2Camera::set_exposure_auto(unsigned int exposure_auto)
 {
-  throw NotImplementedException("No such method in the V4L2 standard");
+  LibLogger::log_debug("V4L2Cam", "setting exposure_auto to %d", exposure_auto);
+  set_one_control("exposure_auto", V4L2_CID_EXPOSURE_AUTO, exposure_auto);
 }
 
 int

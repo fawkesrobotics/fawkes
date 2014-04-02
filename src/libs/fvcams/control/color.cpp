@@ -60,11 +60,11 @@ namespace firevision {
  * Enable/disable auto white balance.
  * @param enabled whether auto white balance should be enabled
  *
- * @fn bool CameraControlColor::auto_exposure() = 0
+ * @fn bool CameraControlColor::exposure_auto() = 0
  * Return whether auto exposure is enabled.
  * @return true if auto exposure is enabled
  *
- * @fn void CameraControlColor::set_auto_exposure(bool enabled) = 0
+ * @fn void CameraControlColor::set_exposure_auto(bool enabled) = 0
  * Enable/disable auto exposure.
  * @param enabled whether auto exposure should be enabled
  *
@@ -171,7 +171,7 @@ CameraControlColor::set_auto_all(bool enabled)
     set_auto_white_balance(enabled);
   } catch (NotImplementedException) {}
   try {
-    set_auto_exposure(enabled);
+    set_exposure_auto(enabled);
   } catch (NotImplementedException) {}
 }
 

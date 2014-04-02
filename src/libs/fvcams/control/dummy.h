@@ -55,8 +55,8 @@ class DummyCameraControl
   virtual void         set_auto_gain(bool enabled);
   virtual bool         auto_white_balance();
   virtual void         set_auto_white_balance(bool enabled);
-  virtual bool         auto_exposure();
-  virtual void         set_auto_exposure(bool enabled);
+  virtual unsigned int exposure_auto();
+  virtual void         set_exposure_auto(unsigned int enabled);
 
   virtual int          red_balance();
   virtual void         set_red_balance(int red_balance);
