@@ -517,19 +517,26 @@ PluginManager::fam_event(const char *filename, unsigned int mask)
     if (! found &&
 	!(mask & FAM_ISDIR) &&
 	((mask & FAM_MODIFY) || (mask & FAM_MOVED_TO) || (mask & FAM_CREATE))) {
+#ifndef HAVE_LIBELF
       if (plugin_loader->is_loaded(p.c_str())) {
 	LibLogger::log_info("PluginManager", "Plugin %s changed on disk, but is "
 			    "loaded, no new info can be loaded, keeping old.",
 			    p.c_str());
       }
+#endif
       try {
 	std::string s = plugin_loader->get_description(p.c_str());
+	LibLogger::log_info("PluginManager", "Reloaded meta-data of %s on file change",
+			    p.c_str());
 	__pinfo_cache.push_back(make_pair(p, s));
       } catch (Exception &e) {
+	// ignore, all it means is that the file has not been finished writing
+	/*
 	LibLogger::log_warn("PluginManager", "Could not get possibly modified "
 			    "description of plugin %s, exception follows",
 			    p.c_str());
 	LibLogger::log_warn("PluginManager", e);
+	*/
       }
     }
 
