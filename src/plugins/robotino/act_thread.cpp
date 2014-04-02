@@ -205,7 +205,7 @@ RobotinoActThread::loop()
       set_state.speedSetPoint[0] = 0.0;
       set_state.speedSetPoint[1] = 0.0;
       set_state.speedSetPoint[2] = 0.0;
-      logger->log_info(name(), "Motor disabled, stopping");
+      //logger->log_info(name(), "Motor disabled, stopping");
       send_set_state = true;
     }
 
