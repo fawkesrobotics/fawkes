@@ -28,9 +28,25 @@
 class LaserMinMergeDataFilter : public LaserDataFilter
 {
  public:
-  LaserMinMergeDataFilter(unsigned int in_data_size, std::vector<LaserDataFilter::Buffer *> &in);
+  /// Timestamp selection method
+  typedef enum {
+    TIMESTAMP_LATEST,	///< use the latest of all timestamps
+    TIMESTAMP_FIRST,	///< use the first (oldest) of all timestamps
+    TIMESTAMP_INDEX	///< use a specific index in the input buffer list
+  } TimestampSelectionMethod;
+
+  LaserMinMergeDataFilter(unsigned int in_data_size,
+			  std::vector<LaserDataFilter::Buffer *> &in);
+  LaserMinMergeDataFilter(unsigned int in_data_size,
+			  std::vector<LaserDataFilter::Buffer *> &in,
+			  TimestampSelectionMethod timestamp_selection_method,
+			  unsigned int timestamp_index = 0);
 
   virtual void filter();
+
+ private:
+  TimestampSelectionMethod timestamp_selection_method_;
+  unsigned int timestamp_index_;
 };
 
 #endif

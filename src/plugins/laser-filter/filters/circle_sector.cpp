@@ -24,6 +24,7 @@
 
 #include <core/exception.h>
 #include <utils/math/angle.h>
+#include <utils/time/time.h>
 #include <algorithm>
 #include <cstring>
 
@@ -62,6 +63,7 @@ LaserCircleSectorDataFilter::filter()
 
     reset_outbuf(out[a]);
     out[a]->frame = in[a]->frame;
+    out[a]->timestamp->set_time(in[a]->timestamp);
 
     float *inbuf  = in[a]->values;
     float *outbuf = out[a]->values;

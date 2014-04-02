@@ -210,6 +210,7 @@ HokuyoUrgGbxAcquisitionThread::loop()
   _data_mutex->lock();
 
   _new_data = true;
+  _timestamp->stamp();
   for (unsigned int a = 0; a < 360; ++a) {
     unsigned int frontrel_idx = __front_idx + roundf(a * __step_per_angle);
     unsigned int idx = frontrel_idx % __slit_division;

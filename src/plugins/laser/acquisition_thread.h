@@ -32,6 +32,7 @@ namespace fawkes {
   class Mutex;
   class Configuration;
   class Logger;
+  class Time;
 }
 
 class LaserAcquisitionThread
@@ -52,6 +53,7 @@ class LaserAcquisitionThread
 
   const float *  get_distance_data();
   const float *  get_echo_data();
+  const fawkes::Time *   get_timestamp();
 
   unsigned int   get_distance_data_size();
   unsigned int   get_echo_data_size();
@@ -65,6 +67,7 @@ class LaserAcquisitionThread
 
  protected:
   fawkes::Mutex    *_data_mutex;
+  fawkes::Time     *_timestamp;
 
   bool    _new_data;
   float  *_distances;

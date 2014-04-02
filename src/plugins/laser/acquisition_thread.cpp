@@ -3,8 +3,7 @@
  *  acqusition_thread.cpp - Thread that retrieves the laser data
  *
  *  Created: Wed Oct 08 13:42:32 2008
- *  Copyright  2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2008-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -69,6 +68,10 @@ using namespace fawkes;
  * Assign this the size of the _echoes array
  */
 
+/** @var fawkes::Time * LaserAcquisitionThread::_timestamp
+ * Time when the most recent data was received.
+ */
+
 
 /** Constructor.
  * @param thread_name name of the thread, be descriptive
@@ -77,6 +80,7 @@ LaserAcquisitionThread::LaserAcquisitionThread(const char *thread_name)
   : Thread(thread_name, Thread::OPMODE_CONTINUOUS)
 {
   _data_mutex = new Mutex();
+  _timestamp  = new Time();
   _new_data   = false;
   _distances = NULL;
   _echoes = NULL;
@@ -87,6 +91,7 @@ LaserAcquisitionThread::LaserAcquisitionThread(const char *thread_name)
 LaserAcquisitionThread::~LaserAcquisitionThread()
 {
   delete _data_mutex;
+  delete _timestamp;
 }
 
 
@@ -156,6 +161,16 @@ unsigned int
 LaserAcquisitionThread::get_echo_data_size()
 {
   return _echoes_size;
+}
+
+
+/** Get timestamp of data
+ * @return most recent data time
+ */
+const fawkes::Time *
+LaserAcquisitionThread::get_timestamp()
+{
+  return _timestamp;
 }
 
 

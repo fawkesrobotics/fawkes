@@ -76,10 +76,12 @@ LaserSensorThread::init()
 
   if (__num_values == 360) {
     __laser360_if = blackboard->open_for_writing<Laser360Interface>(if_id.c_str());
+    __laser360_if->set_auto_timestamping(false);
     __laser360_if->set_frame(__cfg_frame.c_str());
     __laser360_if->write();
   } else if (__num_values == 720){
     __laser720_if = blackboard->open_for_writing<Laser720Interface>(if_id.c_str());
+    __laser720_if->set_auto_timestamping(false);
     __laser720_if->set_frame(__cfg_frame.c_str());
     __laser720_if->write();
   } else {
@@ -102,11 +104,13 @@ LaserSensorThread::loop()
 {
   if ( __aqt->lock_if_new_data() ) {
     if (__num_values == 360) {
+      __laser360_if->set_timestamp(__aqt->get_timestamp());
       __laser360_if->set_distances(__aqt->get_distance_data());
       __laser360_if->write();
     } else if (__num_values == 720) {
+      __laser720_if->set_timestamp(__aqt->get_timestamp());
       __laser720_if->set_distances(__aqt->get_distance_data());
-       __laser720_if->write();
+      __laser720_if->write();
     }
     __aqt->unlock();
   }

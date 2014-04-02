@@ -235,7 +235,7 @@ HokuyoUrgAcquisitionThread::init()
     logger->log_info(name(), "%s: %s", di->first.c_str(), di->second.c_str());
   }
 
-  int scan_msec = __ctrl->scanMsec();
+  __scan_msec = __ctrl->scanMsec();
   float distance_min = 0.;
   float distance_max = 0.;
 
@@ -260,7 +260,7 @@ HokuyoUrgAcquisitionThread::init()
   __angle_per_step = 360. / __slit_division;
   __angular_range  = (__last_ray - __first_ray) * __angle_per_step;
 
-  logger->log_info(name(), "Time per scan: %i msec", scan_msec);
+  logger->log_info(name(), "Time per scan: %li msec", __scan_msec);
   logger->log_info(name(), "Rays range:    %u..%u, front at %u",
 		   __first_ray, __last_ray, __front_ray);
   logger->log_info(name(), "Slit Division: %u", __slit_division);
@@ -270,9 +270,21 @@ HokuyoUrgAcquisitionThread::init()
   logger->log_info(name(), "Min dist:      %f m", distance_min);
   logger->log_info(name(), "Max dist:      %f m", distance_max);
 
+
+  __cfg_time_offset = 0.;
+  try {
+    float time_factor =
+      config->get_float((__cfg_prefix + "time_offset_scan_time_factor").c_str());
+    __cfg_time_offset = (__scan_msec / -1000.) * time_factor;
+  } catch (Exception &e) {} // ignored, use default
+
+  try {
+    __cfg_time_offset += config->get_float((__cfg_prefix + "time_offset").c_str());
+  } catch (Exception &e) {} // ignored, use default
+
   // that should be 1000 really to convert msec -> usec. But empirically
   // the results are slightly better with 990 as factor.
-  __timer = new TimeWait(clock, scan_msec * 990);
+  __timer = new TimeWait(clock, __scan_msec * 990);
 
   alloc_distances(__number_of_values);
 
@@ -309,6 +321,8 @@ HokuyoUrgAcquisitionThread::loop()
     _data_mutex->lock();
 
     _new_data = true;
+    _timestamp->stamp();
+    *_timestamp += __cfg_time_offset;
     for (unsigned int a = 0; a < 360; ++a) {
       unsigned int front_idx = __front_ray + roundf(a * __step_per_angle);
       unsigned int idx = front_idx % __slit_division;

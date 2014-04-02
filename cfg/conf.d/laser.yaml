@@ -16,6 +16,14 @@ hardware/laser:
     # Device file
     device: /dev/ttyACM0
 
+    # Date back the data timestamp by the time it takes to acquire a single
+    # scan times the given factor. A factor of 1.0 will thus subtract one
+    # scan time from the time after completing the scan, defaults to 0.0 (no offset)
+    #time_offset_scan_time_factor: 0.0
+
+    # Date back time by a fixed time in seconds, defaults to 0.0 (no offset).
+    # This setting is added in addition to time_offset_scan_time_factor.
+    # time_offset: 0.0
 
   # URG using Gearbox
   urg_gbx:

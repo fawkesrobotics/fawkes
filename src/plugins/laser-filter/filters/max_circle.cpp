@@ -23,6 +23,7 @@
 #include "max_circle.h"
 
 #include <utils/math/angle.h>
+#include <utils/time/time.h>
 #include <cstdlib>
 
 /** @class LaserMaxCircleDataFilter "circle.h"
@@ -51,6 +52,7 @@ LaserMaxCircleDataFilter::filter()
   const unsigned int arrsize = std::min(in_data_size, out_data_size);
   for (unsigned int a = 0; a < vecsize; ++a) {
     out[a]->frame = in[a]->frame;
+    out[a]->timestamp->set_time(in[a]->timestamp);
     float *inbuf  = in[a]->values;
     float *outbuf = out[a]->values;
     for (unsigned int i = 0; i < arrsize; ++i) {

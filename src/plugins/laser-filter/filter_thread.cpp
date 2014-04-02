@@ -3,8 +3,7 @@
  *  filter_thread.cpp - Thread that filters data in blackboard
  *
  *  Created: Sun Mar 13 01:12:53 2011
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -210,9 +209,11 @@ LaserFilterThread::loop()
   for (size_t i = 0; i != in_num; ++i) {
     __in[i].interface->read();
     if (__in[i].is_360) {
-      __in_bufs[i]->frame = __in[i].interface_typed.as360->frame();
+      __in_bufs[i]->frame      = __in[i].interface_typed.as360->frame();
+      *__in_bufs[i]->timestamp = __in[i].interface_typed.as360->timestamp();
     } else {
-      __in_bufs[i]->frame = __in[i].interface_typed.as720->frame();
+      __in_bufs[i]->frame      = __in[i].interface_typed.as720->frame();
+      *__in_bufs[i]->timestamp = __in[i].interface_typed.as720->timestamp();
     }
   }
 
@@ -228,8 +229,10 @@ LaserFilterThread::loop()
   const size_t num = __out.size();
   for (size_t i = 0; i < num; ++i) {
     if (__out[i].is_360) {
+      __out[i].interface_typed.as360->set_timestamp(__out_bufs[i]->timestamp);
       __out[i].interface_typed.as360->set_frame(__out_bufs[i]->frame.c_str());
     } else {
+      __out[i].interface_typed.as720->set_timestamp(__out_bufs[i]->timestamp);
       __out[i].interface_typed.as720->set_frame(__out_bufs[i]->frame.c_str());
     }
     __out[i].interface->write();
@@ -320,6 +323,8 @@ LaserFilterThread::open_interfaces(std::string prefix,
 	  Laser360Interface *laser360 = 
 	    blackboard->open_for_writing<Laser360Interface>(ifs[i].id.c_str());
 
+	  laser360->set_auto_timestamping(false);
+
           ifs[i].interface_typed.as360 = laser360;
 	  ifs[i].interface = laser360;
           bufs[i] = new LaserDataFilter::Buffer();
@@ -334,6 +339,8 @@ LaserFilterThread::open_interfaces(std::string prefix,
 	  logger->log_debug(name(), "Opening writing Laser720Interface::%s", ifs[i].id.c_str());
 	  Laser720Interface *laser720 = 
 	    blackboard->open_for_writing<Laser720Interface>(ifs[i].id.c_str());
+
+	  laser720->set_auto_timestamping(false);
 
           ifs[i].interface_typed.as720 = laser720;
 	  ifs[i].interface = laser720;
@@ -404,7 +411,30 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
   } else if (filter_type == "deadspots") {
     return new LaserDeadSpotsDataFilter(config, logger, prefix, in_data_size, inbufs);
   } else if (filter_type == "min_merge") {
-    return new LaserMinMergeDataFilter(in_data_size, inbufs);
+    std::string timestamp_selection;
+    try {
+      timestamp_selection = config->get_string((prefix + "timestamp_selection").c_str());
+    } catch (Exception &e) {} // ignored, use default
+
+    if (timestamp_selection == "latest") {
+      return new LaserMinMergeDataFilter(in_data_size, inbufs,
+					 LaserMinMergeDataFilter::TIMESTAMP_LATEST);
+    } else if (timestamp_selection == "first") {
+      return new LaserMinMergeDataFilter(in_data_size, inbufs,
+					 LaserMinMergeDataFilter::TIMESTAMP_FIRST);
+    } else if (timestamp_selection == "index") {
+      unsigned int timestamp_if_index =
+	config->get_uint((prefix + "timestamp_index").c_str());
+      return new LaserMinMergeDataFilter(in_data_size, inbufs,
+					 LaserMinMergeDataFilter::TIMESTAMP_INDEX,
+					 timestamp_if_index);
+    } else if (timestamp_selection != "") {
+      throw Exception("Laser filter: unknown timestamp selection method '%s'",
+		      timestamp_selection.c_str());
+    } else {
+      return new LaserMinMergeDataFilter(in_data_size, inbufs,
+					 LaserMinMergeDataFilter::TIMESTAMP_LATEST);
+    }
   } else if (filter_type == "projection") {
 #ifdef HAVE_TF
     const float not_from_x = config->get_float((prefix + "not_from_x").c_str());

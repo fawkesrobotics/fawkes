@@ -648,6 +648,7 @@ LaseEdlAcquisitionThread::process_profiles()
 
   _data_mutex->lock();
   _new_data = true;
+  _timestamp->stamp();
 
   // see which data is requested
   if (__cfg_profile_format == PROFILEFORMAT_DISTANCE ) {
