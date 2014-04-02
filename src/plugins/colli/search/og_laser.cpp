@@ -65,7 +65,8 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
 {
   logger->log_debug("CLaserOccupancyGrid", "(Constructor): Entering");
   std::string cfg_prefix = "/plugins/colli/";
-  m_if_buffer_size     = 2;     //needs to be >= 1  //TODO: config
+  m_if_buffer_size     = 2; //TODO: config
+  m_if_buffer_size = std::max(m_if_buffer_size, 1); //needs to be >= 1, because the data is always wrote into the buffer (instead of read())
   m_if_buffer_filled.resize(m_if_buffer_size);
   std::fill(m_if_buffer_filled.begin(), m_if_buffer_filled.end(), false);
 
@@ -147,10 +148,9 @@ CLaserOccupancyGrid::updateLaser()
     int if_buffer_oldest_pos = -1;
 
     for (int i = 0; i < m_if_buffer_size; ++i) {
-      if_laser_->copy_shared_to_buffer( i );
-      if (if_laser_->timestamp()->in_sec() < if_buffer_oldest_time) {
+      if (if_laser_->buffer_timestamp( i ).in_sec() < if_buffer_oldest_time) {
         if_buffer_oldest_pos = i;
-        if_buffer_oldest_time = if_laser_->timestamp()->in_sec();
+        if_buffer_oldest_time = if_laser_->buffer_timestamp( i ).in_sec();
       }
     }
     if_buffer_free_pos = if_buffer_oldest_pos;
