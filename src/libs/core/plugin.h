@@ -118,23 +118,33 @@ typedef const char *  (* PluginDependenciesFunc) ();
  * @param info_string a short string describing the plugin
  */
 #define PLUGIN_DESCRIPTION(info_string)			\
+  extern "C" const char _plugin_description[]		\
+    __attribute((__section__(".fawkes_plugin")))	\
+    __attribute((__used__)) = info_string;		\
+							\
   extern "C"						\
   const char *						\
   plugin_description()					\
   {							\
-    return info_string;					\
+    return _plugin_description;				\
   }
+
+
 
 /** Set plugin dependencies.
  * @param plugin_list a string with a comma-separated list
  * of plugins that this plugin depends on.
  */
 #define PLUGIN_DEPENDS(plugin_list)			\
+  extern "C" const char _plugin_dependencies[]		\
+    __attribute((__section__(".fawkes_plugin")))	\
+    __attribute((__used__)) = info_string;		\
+							\
   extern "C"						\
   const char *						\
   plugin_depends()					\
   {							\
-    return plugin_list;					\
+    return _plugin_dependencies;			\
   }
 
 
