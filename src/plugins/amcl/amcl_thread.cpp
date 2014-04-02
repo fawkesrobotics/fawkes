@@ -335,6 +335,9 @@ void AmclThread::init()
   pos3d_if_ =
     blackboard->open_for_writing<Position3DInterface>(cfg_pose_ifname_.c_str());
 
+  laser_buffered_ = false;
+  laser_if_->resize_buffers(1);
+
   pos3d_if_->set_frame(global_frame_id_.c_str());
   pos3d_if_->write();
 
@@ -356,27 +359,71 @@ AmclThread::loop()
   }
 
   laser_if_->read();
-  if (! laser_if_->changed()) {
-    //logger->log_warn(name(), "Laser data unchanged, skipping loop");
-    return;
-  }
-  float* laser_distances = laser_if_->distances();
+  //if (! laser_if_->changed() && ! laser_buffered_) {
+  //  logger->log_warn(name(), "Laser data unchanged, skipping loop");
+  //  return;
+  //}
 
   MutexLocker lock(conf_mutex_);
 
   // Where was the robot when this scan was taken?
   tf::Stamped<tf::Pose> odom_pose;
   pf_vector_t pose;
-  Time latest(0, 0);
-  // cannot use laser_if_->timestamp() here, since odometry is updated in
-  // last cycle of main loop while laser is newer -> tf extrapolation
-  if (!get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
-                     &latest, base_frame_id_)) 
-  {
-    logger->log_error(name(), "Couldn't determine robot's pose "
-                      "associated with laser scan");
+
+  if (laser_if_->changed()) {
+    if (!get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
+                       laser_if_->timestamp(), base_frame_id_))
+    {
+      logger->log_warn(name(), "Couldn't determine robot's pose "
+		       "associated with current laser scan");
+      if (laser_buffered_) {
+	Time buffer_timestamp(laser_if_->buffer_timestamp(0));
+	if (!get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
+			   &buffer_timestamp, base_frame_id_))
+	{
+	  // could not even use the buffered scan, buffer current one and try that one next time
+	  logger->log_warn(name(), "Couldn't determine robot's pose "
+			    "associated with buffered laser scan, re-buffering");
+	  laser_if_->copy_private_to_buffer(0);
+	  return;
+	} else {
+	  // yay, that worked, use that one, re-buffer current data
+	  logger->log_warn(name(), "Using buffered laser data, re-buffering current");
+	  laser_if_->read_from_buffer(0);
+	  laser_if_->copy_shared_to_buffer(0);
+	}
+      } else {
+	logger->log_warn(name(), "Buffering current data for next loop");
+	laser_if_->copy_private_to_buffer(0);
+	laser_buffered_ = true;
+	return;
+      }
+    } else {
+      //logger->log_info(name(), "Fresh data is good, using that");
+      laser_buffered_ = false;
+    }
+  } else if (laser_buffered_) {
+    // either data is good to use now or there is no fresh we can buffer
+    laser_buffered_ = false;
+
+    Time buffer_timestamp(laser_if_->buffer_timestamp(0));
+    if (get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
+		       &buffer_timestamp, base_frame_id_))
+    {
+      // yay, that worked, use that one
+      logger->log_info(name(), "Using buffered laser data (no changed data)");
+      laser_if_->read_from_buffer(0);
+    } else {
+      logger->log_error(name(), "Couldn't determine robot's pose "
+			"associated with buffered laser scan (2)");
+      return;
+    }
+  } else {
+    //logger->log_error(name(), "Neither changed nor buffered data, skipping loop");
     return;
   }
+
+  float* laser_distances = laser_if_->distances();
 
   pf_vector_t delta = pf_vector_zero();
 

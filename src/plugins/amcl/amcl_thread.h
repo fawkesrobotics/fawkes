@@ -163,6 +163,7 @@ private:
   amcl::AMCLOdom* odom_;
   amcl::AMCLLaser* laser_;
   bool laser_update_;
+  bool laser_buffered_;
 
   fawkes::Time last_cloud_pub_time;
   fawkes::Time last_laser_received_ts_;
