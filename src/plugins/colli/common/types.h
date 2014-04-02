@@ -53,6 +53,12 @@ typedef enum {
   basic
 } colli_escape_mode_t;
 
+/** Colli motor_instuct modes */
+typedef enum {
+  linear,
+  quadratic
+} colli_motor_instruct_mode_t;
+
 } // end namespace firevision
 
 #endif

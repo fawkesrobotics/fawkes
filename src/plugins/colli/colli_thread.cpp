@@ -28,6 +28,7 @@
 
 #include "common/defines.h"
 #include "drive_modes/select_drive_mode.h"
+#include "drive_realization/linear_motor_instruct.h"
 #include "drive_realization/quadratic_motor_instruct.h"
 #include "search/og_laser.h"
 #include "search/astar_search.h"
@@ -97,6 +98,16 @@ ColliThread::init()
   } else {
     cfg_escape_mode = fawkes::colli_escape_mode_t::basic;
     throw fawkes::Exception("Default escape drive_mode is unknown");
+  }
+
+  std::string motor_instruct_mode = config->get_string((cfg_prefix + "motor_instruct/mode").c_str());
+  if ( motor_instruct_mode.compare("linear") == 0 ) {
+    cfg_motor_instruct_mode = fawkes::colli_motor_instruct_mode_t::linear;
+  } else if ( motor_instruct_mode.compare("quadratic") == 0 ) {
+    cfg_motor_instruct_mode = fawkes::colli_motor_instruct_mode_t::quadratic;
+  } else {
+    cfg_motor_instruct_mode = fawkes::colli_motor_instruct_mode_t::linear;
+    throw fawkes::Exception("Motor instruct mode is unknown, use linear");
   }
 
   cfg_prefix += "occ_grid/";
@@ -601,10 +612,23 @@ ColliThread::InitializeModules()
   m_pSearch = new CSearch( m_pLaserOccGrid, logger, config );
 
   // BEFORE DRIVE MODE: the motorinstruction set
-  m_pMotorInstruct = (CBaseMotorInstruct *)new CQuadraticMotorInstruct( if_motor_,
-                                                                        m_ColliFrequency,
-                                                                        logger,
-                                                                        config );
+  if ( cfg_motor_instruct_mode == fawkes::colli_motor_instruct_mode_t::linear ) {
+    m_pMotorInstruct = (CBaseMotorInstruct *)new CLinearMotorInstruct( if_motor_,
+                                                                       m_ColliFrequency,
+                                                                       logger,
+                                                                       config );
+  } else if ( cfg_motor_instruct_mode == fawkes::colli_motor_instruct_mode_t::quadratic ) {
+    m_pMotorInstruct = (CBaseMotorInstruct *)new CQuadraticMotorInstruct( if_motor_,
+                                                                          m_ColliFrequency,
+                                                                          logger,
+                                                                          config );
+  } else {
+    logger->log_error(name(), "Motor instruct not implemented, use linear");
+    m_pMotorInstruct = (CBaseMotorInstruct *)new CLinearMotorInstruct( if_motor_,
+                                                                       m_ColliFrequency,
+                                                                       logger,
+                                                                       config );
+  }
 
   // AFTER MOTOR INSTRUCT: the motor propose values object
   m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, if_colli_target_, logger, config );

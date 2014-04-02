@@ -89,7 +89,11 @@ plugins/colli:
     cell_width: 5
     cell_height: 5
 
-  quadratic_motor_instruct:
+  motor_instruct:
+    #set the used motor instruct. This sets the calculation for acc and dec.
+    #You can choose between linear or quadratic
+    mode: "linear"
+
     # Translation acceleration/deceleration
     trans_acc: 0.23
     trans_dec: 0.42
