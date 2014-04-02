@@ -158,6 +158,9 @@ FvBaseThread::loop()
     stit->second->vision_threads->set_thread_running(stit->first);
 
     if ( stit->second->vision_threads->has_cyclic_thread() ) {
+      // Make thread actually capture data
+      stit->second->set_enabled(true);
+
       if (stit->second->aqtmode() != FvAcquisitionThread::AqtCyclic ) {
 	logger->log_info(name(), "Switching acquisition thread %s to cyclic mode",
 			 stit->second->name());
@@ -168,11 +171,11 @@ FvBaseThread::loop()
 	stit->second->set_aqtmode(FvAcquisitionThread::AqtCyclic);
 	stit->second->start();
 	stit->second->cancel_finalize();
-
-	// Make thread actually capture data
-	stit->second->set_enabled(true);
       }
     } else if ( stit->second->vision_threads->has_cont_thread() ) {
+      // Make thread actually capture data
+      stit->second->set_enabled(true);
+
       if (stit->second->aqtmode() != FvAcquisitionThread::AqtContinuous ) {
 	logger->log_info(name(), "Switching acquisition thread %s to continuous mode",
 			 stit->second->name());
@@ -182,9 +185,6 @@ FvBaseThread::loop()
 	stit->second->set_aqtmode(FvAcquisitionThread::AqtContinuous);
 	stit->second->start();
 	stit->second->cancel_finalize();
-
-	// Make thread actually capture data
-	stit->second->set_enabled(true);
       }
     } else {
       logger->log_warn(name(), "Acquisition thread %s has no threads while we expected some",
