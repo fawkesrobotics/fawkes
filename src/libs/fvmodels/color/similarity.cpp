@@ -78,16 +78,21 @@ color_t ColorModelSimilarity::determine(unsigned int y, unsigned int u, unsigned
 
 /** Add a color to be recognized by this colormodel.
  * @param color_class The ColorModelSimilarity::color_class_t that will be returned by
- * ColorModelSimilarity::determine on a match
+ * ColorModelSimilarity::determine on a match ColorModelSimilarity::color_class_t
  */
 void ColorModelSimilarity::add_color(color_class_t *color_class) {
   color_classes_.push_back(color_class);
 }
 
+/** Add multiple colors to this colormodel.
+ * @param color_classes A list of
+ */
 void ColorModelSimilarity::add_colors(std::vector<color_class_t *> color_classes) {
   color_classes_.insert(color_classes_.end(), color_classes.begin(), color_classes.end());
 }
 
+/** Remove all colors from this colormodel.
+ */
 void ColorModelSimilarity::delete_colors() {
   color_classes_.clear();
 }

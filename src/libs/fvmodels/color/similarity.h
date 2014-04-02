@@ -51,14 +51,29 @@ class ColorModelSimilarity : public firevision::ColorModel
      * Parameters that define a certain color
      */
     typedef struct color_class_t {
-        color_t result; /** Discrete color_t represented by this class */
-        int ref_u; /** YUV U-component of reference color */
-        int ref_v; /** YUV V-component of reference color */
+        /** Discrete color_t represented by this class */
+        color_t result;
+
+        /** YUV U-component of reference color */
+        int ref_u;
+
+        /** YUV V-component of reference color */
+        int ref_v;
+
+        /** YUV Y-component of reference color */
         int ref_y;
+
+        /** Required luminousity */
         int luma_threshold;
-        int ref_length; /** Length of U,V vector, i.e. reference saturation */
-        int chroma_threshold; /** Required chroma similarity */
-        int saturation_threshold; /** Required saturation */
+
+        /** Length of U,V vector, i.e. reference saturation */
+        int ref_length;
+
+        /** Required chroma similarity */
+        int chroma_threshold;
+
+        /** Required saturation */
+        int saturation_threshold;
 
         /**
          * Define the RGB values for the reference color
@@ -82,6 +97,7 @@ class ColorModelSimilarity : public firevision::ColorModel
          * @param v A 3-element list [R, G, B]
          * @param chroma_threshold Required color similarity (higher = more similar), 0..255
          * @param saturation_threshold Required saturation (higher = more saturation), 0..255
+         * @param luma_threshold Required luminousity similarity (higher = more similar), 0..255, default 0
          */
         color_class_t(color_t expect, std::vector<unsigned int> &v, int chroma_threshold, int saturation_threshold,
           int luma_threshold = 0) {
