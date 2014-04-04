@@ -61,6 +61,13 @@ typedef struct {
   float phi;    /**< angle */
 } polar_coord_2d_t;
 
+/** Polar coordinates. */
+typedef struct {
+  float r;      /**< distance */
+  float phi;    /**< x-y : plane */
+  float theta;  /**< plane-z : space */
+} polar_coord_3d_t;
+
 /** Rectangular extent with unsigne integers. */
 typedef struct {
   unsigned int w;       /**< width */
