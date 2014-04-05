@@ -742,6 +742,8 @@ AmclThread::loop()
       logger->log_debug(name(), "Saving pose (%f,%f,%f) as initial pose to host config",
 			map_pose.getOrigin().x(), map_pose.getOrigin().y(), yaw);
 
+      // Make sure we write the config only once by locking/unlocking it
+      config->lock();
       try {
 	config->set_float(CFG_PREFIX"init_pose_x", map_pose.getOrigin().x());
 	config->set_float(CFG_PREFIX"init_pose_y", map_pose.getOrigin().y());
@@ -754,6 +756,7 @@ AmclThread::loop()
 	logger->log_warn(name(), e);
 	save_pose_period_ = 0.0; 
       }
+      config->unlock();
       save_pose_last_time = now;
     }
   } else {
