@@ -128,9 +128,9 @@ function INIT:init()
    vars.dist = self.fsm.vars.dist or vars.max_approach
 
    --create vector that lies on a x-y-plane and looks at same direction as gripper
-   local vector_xy = fawkes.HomVector:new(0, 0, 1)
-   vector_xy:rotate_y(math.pi/2) --look straight forward
-   vector_xy:rotate_z(katanaarm:phi() - math.pi/2) --look at same direciton as gripper
+   local vector_xy = fawkes.tf.Vector3:new(1, 0, 0) -- look straight forward
+   -- now look at same direction as gripper
+   vector_xy = vector_xy:rotate(fawkes.tf.Vector3:new(0,0,1), katanaarm:phi() - math.pi/2)
    vars.target = vector_xy
 
    --create table of different approach params
@@ -160,7 +160,7 @@ function APPROACH:init()
    local target = vars.targets[1]
     if vars.direction == DIR_Z then
       if target.orth ~= 0 then
-         vars.target:set_length(target.orth)
+         vars.target = fawkes.tf.resize_vector(vars.target, target.orth)
          x = vars.target:x()
          y = vars.target:y()
       else
@@ -169,7 +169,7 @@ function APPROACH:init()
       end
       z = target.dist
    else -- vars.direction == DIR_X
-      vars.target:set_length(target.dist)
+      vars.target = fawkes.tf.resize_vector(vars.target, target.dist)
       x = vars.target:x()
       y = vars.target:y()
       z = target.orth

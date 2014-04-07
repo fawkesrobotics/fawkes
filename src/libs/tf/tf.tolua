@@ -26,11 +26,14 @@
 $#include <tf/types_lua.h>
 $#include <tf/transformer.h>
 $#include <tf/types.h>
+$#include <tf/utils.h>
 
 namespace fawkes {
   namespace tf {
 
 double get_yaw(const Quaternion &bt_q);
+
+Vector3 resize_vector(const Vector3 &v, double s);
 
 class Vector3 {
  public:
@@ -44,6 +47,7 @@ class Vector3 {
   double distance(const Vector3 &v) const;
   Vector3 & normalize();
   Vector3   normalized();
+  Vector3 rotate(const Vector3 &wAxis, double angle);
   double angle(const Vector3 &v) const;
   Vector3 absolute() const;
   Vector3 cross(const Vector3 &v) const;

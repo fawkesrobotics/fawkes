@@ -114,6 +114,18 @@ ident(std::string frame, Time t = Time(0,0))
 			  t, frame);
 }
 
+/** Resize a vector.
+ * @param v The reference vector that should be resized
+ * @param s The new length of the vector
+ * @return Vector with the new length 's'
+ */
+inline Vector3
+resize_vector(const Vector3 &v, double s)
+{
+  return v.normalized() * s;
+}
+
+
 } // end namespace tf
 } // end namespace fawkes
 

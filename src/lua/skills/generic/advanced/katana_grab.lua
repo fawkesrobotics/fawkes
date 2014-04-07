@@ -39,6 +39,10 @@ Possible call modes:
 
 katana_grab{object=OBJECT}
  Grabs object "OBJECT"
+
+args:
+ x=X, y=Y, z=Z          -> target coordinates
+
 ]==]
 
 -- Initialize as skill module
@@ -161,10 +165,11 @@ function APPROACH_OBJ:init()
    -- get direction vector of manipulator, set length to MAX_APPROACH_DIST, move relatively to there
    katanaarm:read()
 
-   local vector_to_target = fawkes.HomVector:new(0, 0, 1)
-   vector_to_target:rotate_y(katanaarm:theta())
-   vector_to_target:rotate_z(katanaarm:phi() - math.pi/2)
-   vector_to_target:set_length(MAX_APPROACH_DIST)
+   local vector_to_target = fawkes.tf.Vector3:new(0, 0, MAX_APPROACH_DIST) -- look straight up
+   -- align tilt with gripper
+   vector_to_target = vector_to_target:rotate(fawkes.tf.Vector3:new(0,1,0), katanaarm:theta())
+   -- align pan with gripper
+   vector_to_target = vector_to_target:rotate(fawkes.tf.Vector3:new(0,0,1), katanaarm:phi() - math.pi/2)
 
    self.args = {x = vector_to_target:x(),
                 y = vector_to_target:y(),
