@@ -81,6 +81,7 @@ public:
   void start_plan();
   void send_next_goal();
   bool node_reached();
+  size_t shortcut_possible();
   fawkes::LockPtr<fawkes::TopologicalMapGraph> load_graph(std::string filename);
   void log_graph();
 
@@ -95,6 +96,7 @@ public:
   float        cfg_travel_tolerance_; 
   float        cfg_target_tolerance_; 
   float        cfg_orientation_tolerance_; 
+  float        cfg_shortcut_tolerance_; 
   float        cfg_resend_interval_; 
   bool         cfg_monitor_file_;
   float        cfg_target_time_;
@@ -106,6 +108,7 @@ public:
   fawkes::LockPtr<fawkes::TopologicalMapGraph> graph_;
   fawkes::AStar *astar_;
 
+  fawkes::tf::Stamped<fawkes::tf::Pose> pose_;
   bool exec_active_;
   bool target_reached_;
   float target_time_;

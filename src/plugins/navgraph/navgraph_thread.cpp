@@ -2,7 +2,7 @@
  *  navgraph_thread.cpp - Graph-based global path planning
  *
  *  Created: Tue Sep 18 16:00:34 2012
- *  Copyright  2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2012-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -73,6 +73,7 @@ NavGraphThread::init()
   cfg_travel_tolerance_ = config->get_float("/plugins/navgraph/travel_tolerance");
   cfg_target_tolerance_ = config->get_float("/plugins/navgraph/target_tolerance");
   cfg_orientation_tolerance_ = config->get_float("/plugins/navgraph/orientation_tolerance");
+  cfg_shortcut_tolerance_ = config->get_float("/plugins/navgraph/shortcut_tolerance");
   cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
   cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
   cfg_log_graph_       = config->get_bool("/plugins/navgraph/log_graph");
@@ -171,7 +172,12 @@ NavGraphThread::loop()
 
   if (exec_active_) {
     // check if current was target reached
-    if (target_reached_) {
+    size_t shortcut_to;
+
+    if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose_)) {
+      logger->log_warn(name(), "Cannot get pose info, skipping loop");
+
+    } else if (target_reached_) {
       // reached the target, check if colli/navi/local planner is final
       nav_if_->read();
       fawkes::Time now(clock);
@@ -180,6 +186,7 @@ NavGraphThread::loop()
 	pp_nav_if_->set_final(true);
 	needs_write = true;
       }
+
     } else if (node_reached()) {
       logger->log_info(name(), "Node '%s' has been reached", plan_[0].name().c_str());
       last_node_ = plan_[0].name();
@@ -212,11 +219,28 @@ NavGraphThread::loop()
           logger->log_warn(name(), e);
         }
       }
+
+    } else if ((shortcut_to = shortcut_possible()) > 0) {
+      logger->log_info(name(), "Shortcut posible, jumping from '%s' to '%s'",
+		       plan_[0].name().c_str(), plan_[shortcut_to].name().c_str());
+
+      plan_.erase(plan_.begin(), plan_.begin() + shortcut_to);
+
+      if (! plan_.empty()) {
+        try {
+          logger->log_info(name(), "Sending next goal after taking a shortcut");
+          send_next_goal();
+        } catch (Exception &e) {
+          logger->log_warn(name(), "Failed to send next goal (shortcut)");
+          logger->log_warn(name(), e);
+        }
+      }
+
     } else {
       fawkes::Time now(clock);
       if ((now - cmd_sent_at_) > cfg_resend_interval_) {
         try {
-          logger->log_info(name(), "Re-sending goal");
+          //logger->log_info(name(), "Re-sending goal");
 	  send_next_goal();
         } catch (Exception &e) {
           logger->log_warn(name(), "Failed to send next goal (resending)");
@@ -253,20 +277,19 @@ NavGraphThread::load_graph(std::string filename)
 void
 NavGraphThread::generate_plan(std::string goal_name)
 {
-  tf::Stamped<tf::Pose> pose;
-  if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
+  if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose_)) {
     logger->log_warn(name(),
 		     "Failed to compute pose, cannot generate plan");
     return;
   }
 
   TopologicalMapNode init =
-    graph_->closest_node(pose.getOrigin().x(), pose.getOrigin().y());
+    graph_->closest_node(pose_.getOrigin().x(), pose_.getOrigin().y());
   TopologicalMapNode goal = graph_->node(goal_name);
 
 
   logger->log_debug(name(), "Starting at (%f,%f), closest node is '%s'",
-		    pose.getOrigin().x(), pose.getOrigin().y(), init.name().c_str());
+		    pose_.getOrigin().x(), pose_.getOrigin().y(), init.name().c_str());
 
   plan_.clear();
   
@@ -314,18 +337,12 @@ NavGraphThread::optimize_plan()
 {
   if (plan_.size() > 1) {
     // get current position of robot in map frame
-    tf::Stamped<tf::Pose> pose;
-    if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
-      logger->log_warn(name(),
-                       "Failed to compute pose, cannot optimize plan");
-    }
-
-    double sqr_dist_a = ( pow(pose.getOrigin().x() - plan_[0].x(), 2) +
-                          pow(pose.getOrigin().y() - plan_[0].y(), 2) );
+    double sqr_dist_a = ( pow(pose_.getOrigin().x() - plan_[0].x(), 2) +
+                          pow(pose_.getOrigin().y() - plan_[0].y(), 2) );
     double sqr_dist_b = ( pow(plan_[0].x() - plan_[1].x(), 2) +
                           pow(plan_[0].y() - plan_[1].y(), 2) );
-    double sqr_dist_c = ( pow(pose.getOrigin().x() - plan_[1].x(), 2) +
-                          pow(pose.getOrigin().y() - plan_[1].y(), 2) );
+    double sqr_dist_c = ( pow(pose_.getOrigin().x() - plan_[1].x(), 2) +
+                          pow(pose_.getOrigin().y() - plan_[1].y(), 2) );
 
     if (sqr_dist_a + sqr_dist_b >= sqr_dist_c){
       plan_.erase(plan_.begin());
@@ -415,16 +432,10 @@ NavGraphThread::send_next_goal()
     // take the given orientation for the final node
     ori = next_target.property_as_float("orientation");
   } else {
-    tf::Stamped<tf::Pose> pose;
-    if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
-      logger->log_warn(name(),
-		       "Failed to compute pose, cannot compute facing direction");
-    } else {
-      // set direction facing from current to next target position, best
-      // chance to reach the destination without turning at the end
-      ori = atan2f(next_target.y() - pose.getOrigin().y(),
-                   next_target.x() - pose.getOrigin().x());
-    }
+    // set direction facing from current to next target position, best
+    // chance to reach the destination without turning at the end
+    ori = atan2f(next_target.y() - pose_.getOrigin().y(),
+		 next_target.x() - pose_.getOrigin().x());
   }
 
   // get target position in map frame
@@ -441,9 +452,9 @@ NavGraphThread::send_next_goal()
     throw;
   }
 
-  logger->log_info(name(), "Sending goto(x=%f,y=%f,ori=%f) for node '%s'",
-                  tpose.getOrigin().x(), tpose.getOrigin().y(),
-                  tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
+  logger->log_debug(name(), "Sending goto(x=%f,y=%f,ori=%f) for node '%s'",
+		    tpose.getOrigin().x(), tpose.getOrigin().y(),
+		    tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
 
   NavigatorInterface::CartesianGotoMessage *gotomsg =
     new NavigatorInterface::CartesianGotoMessage(tpose.getOrigin().x(),
@@ -481,15 +492,8 @@ NavGraphThread::node_reached()
   TopologicalMapNode &cur_target = plan_.front();
 
   // get current position of robot in map frame
-  tf::Stamped<tf::Pose> pose;
-  if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
-    logger->log_warn(name(),
-		     "Failed to compute pose, cannot generate plan");
-    return false;
-  }
-
-  float dist = sqrt(pow(pose.getOrigin().x() - cur_target.x(), 2) +
-		    pow( pose.getOrigin().y() - cur_target.y(), 2));
+  float dist = sqrt(pow(pose_.getOrigin().x() - cur_target.x(), 2) +
+		    pow( pose_.getOrigin().y() - cur_target.y(), 2));
 
   float tolerance = 0.;
   if (cur_target.has_property("travel_tolerance")) {
@@ -506,12 +510,12 @@ NavGraphThread::node_reached()
       float ori_tolerance = cfg_orientation_tolerance_;
       //cur_target.property_as_float("orientation_tolerance");
       float ori_diff  =
-	fabs( angle_distance( normalize_rad(tf::get_yaw(pose.getRotation())),
+	fabs( angle_distance( normalize_rad(tf::get_yaw(pose_.getRotation())),
 			      normalize_rad(cur_target.property_as_float("orientation"))));
       
       if (tolerance == 0.)  tolerance = default_tolerance;
       
-      //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f Tol=%f Dist=%f Tol=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose.getRotation() ), ori_diff, ori_tolerance, dist, tolerance);
+      //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f Tol=%f Dist=%f Tol=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose_.getRotation() ), ori_diff, ori_tolerance, dist, tolerance);
       return (dist <= tolerance) && (ori_diff <= ori_tolerance);
     }
   }
@@ -521,6 +525,34 @@ NavGraphThread::node_reached()
   if (tolerance == 0.)  tolerance = default_tolerance;
 
   return (dist <= tolerance);
+}
+
+
+
+size_t
+NavGraphThread::shortcut_possible()
+{
+  if (plan_.size() <= 1) {
+    logger->log_debug(name(), "Cannot shortcut for last node or if plan empty");
+    return 0;
+  }
+
+  for (ssize_t i = plan_.size() - 1; i > 0; --i) {
+    TopologicalMapNode &node = plan_[i];
+
+    float dist = sqrt(pow(pose_.getOrigin().x() - node.x(), 2) +
+		      pow(pose_.getOrigin().y() - node.y(), 2));
+
+    float tolerance = cfg_shortcut_tolerance_;
+    if (node.has_property("shortcut_tolerance")) {
+      tolerance = node.property_as_float("shortcut_tolerance");
+    }
+
+    if (tolerance == 0.0)  return 0;
+    if (dist <= tolerance) return i;
+  }
+
+  return 0;
 }
 
 
