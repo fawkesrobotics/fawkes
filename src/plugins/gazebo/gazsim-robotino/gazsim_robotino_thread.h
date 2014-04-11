@@ -99,10 +99,13 @@ class RobotinoSimThread
 
   //Helper variables for motor:
 
-  //motorMovements last sent to gazebo
+  //current motorMovements
   float vx_;
   float vy_;
   float vomega_;
+  float des_vx_;
+  float des_vy_;
+  float des_vomega_;
   //last received odom position
   float x_;
   float y_;

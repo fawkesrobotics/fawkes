@@ -93,6 +93,9 @@ RobotinoSimThread::init()
   vx_ = 0.0;
   vy_ = 0.0;
   vomega_ = 0.0;
+  des_vx_ = 0.0;
+  des_vy_ = 0.0;
+  des_vomega_ = 0.0;
   x_offset_ = 0.0;
   y_offset_ = 0.0;
   ori_offset_ = 0.0;
@@ -187,17 +190,23 @@ void RobotinoSimThread::process_motor_messages()
       //send command only if changed
       if(vel_changed(msg->vx(), vx_, 0.01) || vel_changed(msg->vy(), vy_, 0.01) || vel_changed(msg->omega(), vomega_, 0.01))
       {
-	vx_ = msg->vx() * moving_speed_factor_;
-	vy_ = msg->vy() * moving_speed_factor_;
-	vomega_ = msg->omega() * rotation_speed_factor_;
+	vx_ = msg->vx();
+	vy_ = msg->vy();
+	vomega_ = msg->omega();
+	des_vx_ = vx_;
+	des_vy_ = vy_;
+	des_vomega_ = vomega_;
 	
-	//send message to gazebo
-	send_transroot(vx_, vy_, vomega_);
+	//send message to gazebo (apply movement_factor to compensate friction)
+	send_transroot(vx_ * moving_speed_factor_, vy_ * moving_speed_factor_, vomega_ * rotation_speed_factor_);
 
 	//update interface
 	motor_if_->set_vx(vx_);
 	motor_if_->set_vy(vy_);
 	motor_if_->set_omega(vomega_);
+	motor_if_->set_des_vx(des_vx_);
+	motor_if_->set_des_vy(des_vy_);
+	motor_if_->set_des_omega(des_vomega_);
 	//update interface
 	motor_if_->write();
       }    
