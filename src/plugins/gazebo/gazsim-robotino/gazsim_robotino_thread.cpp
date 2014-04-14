@@ -65,7 +65,14 @@ RobotinoSimThread::init()
   gripper_laser_threshold_ = config->get_float("/gazsim/robotino/gripper-laser-threshold");
   gripper_laser_value_far_ = config->get_float("/gazsim/robotino/gripper-laser-value-far");
   gripper_laser_value_near_ = config->get_float("/gazsim/robotino/gripper-laser-value-near");
-
+  have_gripper_sensors_ = config->exists("/hardware/robotino/sensors/right_ir_id")
+    && config->exists("/hardware/robotino/sensors/left_ir_id");
+  if(have_gripper_sensors_)
+  {
+    gripper_laser_right_pos_ = config->get_int("/hardware/robotino/sensors/right_ir_id");
+    gripper_laser_left_pos_ = config->get_int("/hardware/robotino/sensors/left_ir_id");
+  }
+  
   //Open interfaces
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
   switch_if_ = blackboard->open_for_writing<fawkes::SwitchInterface>("Robotino Motor");
@@ -74,9 +81,12 @@ RobotinoSimThread::init()
   //Create suscribers
   pos_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gps"), &RobotinoSimThread::on_pos_msg, this);
   gyro_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gyro"), &RobotinoSimThread::on_gyro_msg, this);
-  infrared_puck_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/infrared-puck-sensor"), &RobotinoSimThread::on_infrared_puck_sensor_msg, this);
-  gripper_laser_left_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-laser-left"), &RobotinoSimThread::on_gripper_laser_left_sensor_msg, this);
-  gripper_laser_right_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-laser-right"), &RobotinoSimThread::on_gripper_laser_right_sensor_msg, this);
+  if(have_gripper_sensors_)
+  {
+    infrared_puck_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/infrared-puck-sensor"), &RobotinoSimThread::on_infrared_puck_sensor_msg, this);
+    gripper_laser_left_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-laser-left"), &RobotinoSimThread::on_gripper_laser_left_sensor_msg, this);
+    gripper_laser_right_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-laser-right"), &RobotinoSimThread::on_gripper_laser_right_sensor_msg, this);
+  }
 
   //Create publishers
   motor_move_pub_ = gazebonode->Advertise<msgs::Vector3d>(config->get_string("/gazsim/topics/motor-move"));
@@ -138,9 +148,12 @@ RobotinoSimThread::loop()
 
     sens_if_->set_gyro_available(gyro_available_);
     sens_if_->set_gyro_angle(gyro_angle_);
-    sens_if_->set_distance(8, infrared_puck_sensor_dist_);
-    sens_if_->set_analog_in(0, analog_in_0_);
-    sens_if_->set_analog_in(4, analog_in_4_);
+    if(have_gripper_sensors_)
+    {
+      sens_if_->set_distance(8, infrared_puck_sensor_dist_);
+      sens_if_->set_analog_in(gripper_laser_left_pos_, analog_in_left_);
+      sens_if_->set_analog_in(gripper_laser_right_pos_, analog_in_right_);
+    }    
     sens_if_->write();
 
     new_data_ = false;
@@ -314,11 +327,11 @@ void RobotinoSimThread::on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg)
 
   if(msg->value() < gripper_laser_threshold_)
   {
-    analog_in_4_ = gripper_laser_value_near_;
+    analog_in_right_ = gripper_laser_value_near_;
   }
   else
   {
-    analog_in_4_ = gripper_laser_value_far_;
+    analog_in_right_ = gripper_laser_value_far_;
   }
   new_data_ = true;
 }
@@ -328,11 +341,11 @@ void RobotinoSimThread::on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg)
 
   if(msg->value() < gripper_laser_threshold_)
   {
-    analog_in_0_ = gripper_laser_value_near_;
+    analog_in_left_ = gripper_laser_value_near_;
   }
   else
   {
-    analog_in_0_ = gripper_laser_value_far_;
+    analog_in_left_ = gripper_laser_value_far_;
   }
   new_data_ = true;
 }

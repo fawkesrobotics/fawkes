@@ -96,6 +96,9 @@ class RobotinoSimThread
   double slippery_wheels_threshold_;
   double moving_speed_factor_;
   double rotation_speed_factor_;
+  bool have_gripper_sensors_;
+  int gripper_laser_left_pos_;
+  int gripper_laser_right_pos_;
 
   //Helper variables for motor:
 
@@ -116,8 +119,8 @@ class RobotinoSimThread
   bool gyro_available_;
   float gyro_angle_;
   float infrared_puck_sensor_dist_;
-  float analog_in_0_;
-  float analog_in_4_;
+  float analog_in_left_;
+  float analog_in_right_;
 
   //are there new values to write in the interfaces?
   bool new_data_;
