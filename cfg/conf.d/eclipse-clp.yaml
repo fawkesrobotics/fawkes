@@ -13,3 +13,5 @@ eclipse-clp:
     use_graph: False
   skillexec:
     use_graph: False
+  indi_elevator:
+    use_graph: False
