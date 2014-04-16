@@ -50,8 +50,8 @@ class EclipseAgentThread
 
   virtual void init();
   virtual void finalize();
-  //virtual void once();
-  virtual void loop();
+  virtual void once();
+  //virtual void loop();
 
   void post_event( const char* );
   fawkes::Logger*    get_logger();

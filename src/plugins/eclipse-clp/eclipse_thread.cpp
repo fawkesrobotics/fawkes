@@ -54,7 +54,7 @@ EclipseAgentThread* EclipseAgentThread::m_instance = NULL;
 
 /** Constructor. */
 EclipseAgentThread::EclipseAgentThread()
-  : Thread( "ECLiPSe thread", fawkes::Thread::OPMODE_WAITFORWAKEUP ),
+  : Thread( "ECLiPSe thread", fawkes::Thread::OPMODE_CONTINUOUS ),
     m_initialized( false )
 {
   m_instance = this;
@@ -143,7 +143,7 @@ EclipseAgentThread::finalize()
   ec_cleanup();
 }
 
-/*
+
 void
 EclipseAgentThread::once()
 {
@@ -151,7 +151,6 @@ EclipseAgentThread::once()
   if ( EC_succeed != EC_resume() )
   { throw Exception( "Error running agent program" ); }
 }
-*/
 
 /** Check if the agent is running
  * @return true if ECLiPSe agent is running
@@ -162,7 +161,7 @@ bool EclipseAgentThread::running()
   return _running;
 }
 
-
+/*
 void
 EclipseAgentThread::loop()
 {
@@ -180,6 +179,7 @@ EclipseAgentThread::loop()
     mutex->unlock();
   }
 }
+*/
 
 /** Post an event to the ECLiPSe context.
  * @param event the name of the event
