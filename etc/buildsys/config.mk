@@ -131,6 +131,7 @@ PKGCONFIG = $(shell which pkg-config)
 NM=nm
 ASCIIDOC=asciidoc
 ASCIIDOC_A2X=a2x
+LUADOC=luadoc
 ifneq ($(wildcard /bin/bash),)
   SHELL = /bin/bash
 else
