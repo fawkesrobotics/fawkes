@@ -197,7 +197,7 @@ CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float 
       float sqr_distance_to_old_reading = sqr( newpos_x ) + sqr( newpos_y );
 
       int number_of_old_reading = (int)rad2deg(
-          normalize_rad(360.0/m_pLaser->GetNumberOfReadings() * angle_to_old_reading) );
+          normalize_rad(360.f/m_pLaser->GetNumberOfReadings() * angle_to_old_reading) );
       // This was RCSoftX, now ported to fawkes:
       //int number_of_old_reading = (int) (normalize_degree( ( 360.0/(m_pLaser->GetNumberOfReadings()) ) *
       //         rad2deg(angle_to_old_reading) ) );
@@ -205,21 +205,23 @@ CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float 
 
       bool SollEintragen = true;
 
+      // do not insert if current reading at that angle deviates more than 30cm from old reading
+      // TODO. make those 30cm configurable
       if ( sqr( m_pLaser->GetReadingLength( number_of_old_reading ) - 0.3 ) > sqr_distance_to_old_reading )
         SollEintragen = false;
 
       if ( SollEintragen == true ) {
-        float posX = midX + (int)((newpos_x*100.0) / ((float)m_CellWidth ));
-        float posY = midY + (int)((newpos_y*100.0) / ((float)m_CellHeight ));
-        if( posX > 4.0 && posX < m_Width-5
-         && posY > 4.0 && posY < m_Height-5 )
+        int posX = midX + (int)((newpos_x*100.f) / ((float)m_CellWidth ));
+        int posY = midY + (int)((newpos_y*100.f) / ((float)m_CellHeight ));
+        if( posX > 4 && posX < m_Width-5
+         && posY > 4 && posY < m_Height-5 )
           {
           old_readings.push_back( newpos_x );
           old_readings.push_back( newpos_y );
-          old_readings.push_back( m_vOldReadings[i+2]+1.0 );
+          old_readings.push_back( m_vOldReadings[i+2]+1.f );
 
           // 25 cm's in my opinion, that are here: 0.25*100/m_CellWidth
-          int size = (int)(((0.25+inc)*100.0)/(float)m_CellWidth);
+          int size = (int)(((0.25f+inc)*100.f)/(float)m_CellWidth);
           integrateObstacle( ellipse_t( posX, posY, size-2, size-2 ) );
         }
       }
@@ -244,12 +246,12 @@ CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY,
   int posX, posY;
   cart_coord_2d_t point;
   float p_x, p_y;
-  float oldp_x = 1000.0;
-  float oldp_y = 1000.0;
+  float oldp_x = 1000.f;
+  float oldp_y = 1000.f;
 
   for ( int i = 0; i < numberOfReadings; i++ ) {
 
-    if ( m_pLaser->GetReadingLength(i) >= m_MinimumLaserLength ) {
+    if( m_pLaser->IsValid(i) && m_pLaser->GetReadingLength(i) >= m_MinimumLaserLength ) {
       // point = transformLaser2Motor(Point(m_pLaser->GetReadingPosX(i), m_pLaser->GetReadingPosY(i)));
       point.x = m_pLaser->GetReadingPosX(i);
       point.y = m_pLaser->GetReadingPosY(i);
@@ -257,25 +259,23 @@ CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY,
       p_x = point.x;
       p_y = point.y;
 
-      if( !((p_x == 0.0) && (p_y == 0.0))
-       && sqr(p_x-oldp_x)+sqr(p_y-oldp_y) > sqr(m_EllipseDistance) )
-        {
+      if( !((p_x == 0.f) && (p_y == 0.f)) && sqr(p_x-oldp_x)+sqr(p_y-oldp_y) > sqr(m_EllipseDistance) ) {
         oldp_x = p_x;
         oldp_y = p_y;
-        posX = midX + (int)((p_x*100.0) / ((float)m_CellWidth ));
-        posY = midY + (int)((p_y*100.0) / ((float)m_CellHeight ));
+        posX = midX + (int)((p_x*100.f) / ((float)m_CellWidth ));
+        posY = midY + (int)((p_y*100.f) / ((float)m_CellHeight ));
 
         if ( !( posX <= 5 || posX >= m_Width-6 || posY <= 5 || posY >= m_Height-6 ) ) {
           // float dec = max( (sqrt(sqr(p_x)+sqr(p_y))/3.0-1.0), 0.0 );
           // float dec = max((m_pLaser->GetReadingLength(i)/2.0)-1.0, 0.0 );
-          float dec = 0.0;
+          float dec = 0.f;
 
-          float height = 0.0;
-          height = m_pRoboShape->GetRobotLengthforRad( deg2rad( 90 ) );
-          height = std::max( 4.0, ((height + inc - dec)*100.0)/m_CellHeight );
+          float width = 0.f;
+          width = m_pRoboShape->GetRobotLengthforRad( deg2rad( 90 ) );
+          width = std::max( 4.f, ((width + inc - dec)*100.f)/m_CellHeight );
 
           float rad = normalize_rad( m_pLaser->GetRadiansForReading( i ) );
-          float length = 0.0;
+          float length = 0.f;
           //length = m_pRoboShape->GetRobotLengthforRad( rad );
 
           if (fabs(normalize_mirror_rad(rad)) < M_PI_2)
@@ -283,21 +283,18 @@ CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY,
           else
             length = m_pRoboShape->GetRobotLengthforRad( rad );
 
-          length = std::max( 4.0, ((length + inc - dec)*100.0)/m_CellWidth );
+          length = std::max( 4.f, ((length + inc - dec)*100.f)/m_CellWidth );
 
-          if ( m_pLaser->IsValid( i ) ) {
-            integrateObstacle( ellipse_t(  posX, posY, height, length ) );
 
-            if ( !Contained( p_x, p_y ) ) {
-              m_vOldReadings.push_back( p_x );
-              m_vOldReadings.push_back( p_y );
-              m_vOldReadings.push_back( 0.0 );
-            }
+          integrateObstacle( ellipse_t(  posX, posY, width, length ) );
+
+          if ( !Contained( p_x, p_y ) ) {
+            m_vOldReadings.push_back( p_x );
+            m_vOldReadings.push_back( p_y );
+            m_vOldReadings.push_back( 0.f );
           }
-
         }
       }
-
     }
   }
 }
