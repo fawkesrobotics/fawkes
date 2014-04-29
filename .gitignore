@@ -18,6 +18,7 @@
 /cfg/host.yaml
 /doc/api
 /doc/man
+/doc/lua
 /lib/
 /lib_*/
 /log/
