@@ -100,13 +100,40 @@ class ColliFastEllipse : public ColliFastObstacle
  * @param height radius height of the new rectangle
  */
 inline
-ColliFastRectangle::ColliFastRectangle( int radius_width, int radius_height )
+ColliFastRectangle::ColliFastRectangle( int width, int height )
 {
+  int y_start = -width/2;
+  int x_start = -height/2;
+
+  //consider (0,0) to be bottom-left corner of obstacle.
+  for( int x=-6; x<height + 6; ++x ) {
+    for( int y=-6; y<width + 6; ++y ) {
+      occupied_cells_.push_back( x_start + x );
+      occupied_cells_.push_back( y_start + y );
+
+      if( x < -4 || x >= height+4 || y < -4 || y >= width+4 ) {
+        occupied_cells_.push_back( (int)_COLLI_CELL_FAR_ );
+
+      } else if( x < -2 || x >= height+2 || y < - 2 || y >= width+2 ) {
+        occupied_cells_.push_back( (int)_COLLI_CELL_MIDDLE_ );
+
+      } else if( x < 0 || x >= height || y < 0 || y >= width ) {
+        occupied_cells_.push_back( (int)_COLLI_CELL_NEAR_ );
+
+      } else {
+        occupied_cells_.push_back( (int)_COLLI_CELL_OCCUPIED_ );
+      }
+
+      ++y_start;
+    }
+
+    ++x_start;
+  }
 }
 
 /** Constructor for FastEllipse.
- * @param width radius width of the new ellipse
- * @param height radius height of the new ellipse
+ * @param radius_width radius width of the new ellipse
+ * @param radius_height radius height of the new ellipse
  * @param obstacle_increasement Increase obstacles?
  */
 inline

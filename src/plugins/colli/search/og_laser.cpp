@@ -82,7 +82,7 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
   logger->log_debug("CLaserOccupancyGrid", "Generating trigonometry table done");
 
   logger->log_debug("CLaserOccupancyGrid", "Generating obstacle map");
-  obstacle_map = new ColliObstacleMap();
+  obstacle_map = new ColliObstacleMap(m_pRoboShape->IsAngularRobot());
   logger->log_debug("CLaserOccupancyGrid", "Generating obstacle map done");
 
   m_LaserPosition = point_t(0,0);
