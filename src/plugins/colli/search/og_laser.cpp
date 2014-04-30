@@ -21,14 +21,13 @@
  */
 
 #include "og_laser.h"
-#include "ellipse_map.h"
+#include "obstacle_map.h"
 
 #include "../common/defines.h"
 #include "../utils/rob/roboshape.h"
 #include "../utils/rob/robo_laser.h"
 #include "../utils/geometry/trig_table.h"
 
-#include <utils/math/types.h>
 #include <utils/math/angle.h>
 #include <logging/logger.h>
 #include <config/config.h>
@@ -82,9 +81,9 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
   m_pTrigTable = new TrigTable( m_TrigTableResolution );
   logger->log_debug("CLaserOccupancyGrid", "Generating trigonometry table done");
 
-  logger->log_debug("CLaserOccupancyGrid", "Generating ellipse map");
-  ellipse_map = new CEllipseMap();
-  logger->log_debug("CLaserOccupancyGrid", "Generating ellipse map done");
+  logger->log_debug("CLaserOccupancyGrid", "Generating obstacle map");
+  obstacle_map = new ColliObstacleMap();
+  logger->log_debug("CLaserOccupancyGrid", "Generating obstacle map done");
 
   m_LaserPosition = point_t(0,0);
 
@@ -222,7 +221,7 @@ CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float 
 
           // 25 cm's in my opinion, that are here: 0.25*100/m_CellWidth
           int size = (int)(((0.25f+inc)*100.f)/(float)m_CellWidth);
-          integrateObstacle( ellipse_t( posX, posY, size-2, size-2 ) );
+          integrateObstacle( posX, posY, size-2, size-2 );
         }
       }
 
@@ -270,23 +269,17 @@ CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY,
           // float dec = max((m_pLaser->GetReadingLength(i)/2.0)-1.0, 0.0 );
           float dec = 0.f;
 
-          float width = 0.f;
-          width = m_pRoboShape->GetRobotLengthforRad( deg2rad( 90 ) );
-          width = std::max( 4.f, ((width + inc - dec)*100.f)/m_CellHeight );
-
           float rad = normalize_rad( m_pLaser->GetRadiansForReading( i ) );
+
+          float width = 0.f;
+          width = m_pRoboShape->GetRobotLengthforRad( rad );
+          width = std::max( 4.f, ((width + inc - dec)*100.f)/m_CellWidth );
+
           float length = 0.f;
-          //length = m_pRoboShape->GetRobotLengthforRad( rad );
+          length = m_pRoboShape->GetRobotLengthforRad( rad );
+          length = std::max( 4.f, ((length + inc - dec)*100.f)/m_CellHeight );
 
-          if (fabs(normalize_mirror_rad(rad)) < M_PI_2)
-            length = m_pRoboShape->GetRobotLengthforRad( deg2rad( 90 ) );
-          else
-            length = m_pRoboShape->GetRobotLengthforRad( rad );
-
-          length = std::max( 4.f, ((length + inc - dec)*100.f)/m_CellWidth );
-
-
-          integrateObstacle( ellipse_t(  posX, posY, width, length ) );
+          integrateObstacle( posX, posY, width, length );
 
           if ( !Contained( p_x, p_y ) ) {
             m_vOldReadings.push_back( p_x );
@@ -314,29 +307,23 @@ CLaserOccupancyGrid::Contained( float p_x, float p_y )
 
 
 void
-CLaserOccupancyGrid::integrateObstacle( ellipse_t ellipse )
+CLaserOccupancyGrid::integrateObstacle( int x, int y, int width, int height )
 {
-  int centerx = (int)(ellipse.center.x);
-  int centery = (int)(ellipse.center.y);
-
-  int width = (int)(ellipse.width);
-  int height = (int)(ellipse.height);
-
-  std::vector< int > fast_ellipse = ellipse_map->GetEllipse( width, height, cfg_obstacle_inc_ );
+  std::vector< int > fast_obstacle = obstacle_map->get_obstacle( width, height, cfg_obstacle_inc_ );
 
   int posX = 0;
   int posY = 0;
 
   // i = x offset, i+1 = y offset, i+2 is cost
-  for( unsigned int i = 0; i < fast_ellipse.size(); i+=3 ) {
-    posY = centery + fast_ellipse[i];
-    posX = centerx + fast_ellipse[i+1];
+  for( unsigned int i = 0; i < fast_obstacle.size(); i+=3 ) {
+    posY = y + fast_obstacle[i];
+    posX = x + fast_obstacle[i+1];
 
     if( (posX > 0) && (posX < m_Width)
      && (posY > 0) && (posY < m_Height)
-     && (m_OccupancyProb[posX][posY] < fast_ellipse[i+2]) )
+     && (m_OccupancyProb[posX][posY] < fast_obstacle[i+2]) )
       {
-      m_OccupancyProb[posX][posY] = fast_ellipse[i+2];
+      m_OccupancyProb[posX][posY] = fast_obstacle[i+2];
     }
   }
 }

@@ -35,7 +35,7 @@ namespace fawkes
 class Laser;
 class RoboShape;
 class TrigTable;
-class CEllipseMap;
+class ColliObstacleMap;
 
 class Logger;
 class Configuration;
@@ -72,18 +72,18 @@ class CLaserOccupancyGrid : public OccupancyGrid
   /** Check if the current value is contained in the history. */
   bool Contained( float p_x, float p_y );
 
-  /** Integrate a single ellipse
-   * @param ellipse the ellipse that is to be integrated
+  /** Integrate a single obstacle
+   * @param x x coordinate of obstacle center
+   * @param y y coordinate of obstacle center
+   * @param width total width of obstacle
+   * @param height total height of obstacle
    */
-  void integrateObstacle( ellipse_t ellipse );
+  void integrateObstacle( int x, int y, int width, int height );
 
-  //  void integrateEllipseCell( int centerx, int centery,
-  //                         int i, int j, float prob );
-
-  Laser       *m_pLaser;     /**< pointer to the laser */
-  RoboShape   *m_pRoboShape; /**< my roboshape */
-  TrigTable   *m_pTrigTable; /**< fast trigonometry table */
-  CEllipseMap *ellipse_map;  /**< fast ellipse map */
+  Laser            *m_pLaser;     /**< pointer to the laser */
+  RoboShape        *m_pRoboShape; /**< my roboshape */
+  TrigTable        *m_pTrigTable; /**< fast trigonometry table */
+  ColliObstacleMap *obstacle_map;  /**< fast obstacle map */
 
   std::vector< float > m_vOldReadings; /**< readings history */
 

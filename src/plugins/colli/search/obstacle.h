@@ -1,10 +1,10 @@
 
 /***************************************************************************
- *  ellipse.h - A fast ellipse
+ *  obstacle.h - A fast obstacle
  *
- *  Created: Fri Oct 18 15:16:23 2013
+ *  Created: Wed Apr 30 16:03:23 2014
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_SEARCH_ELLIPSE_H_
-#define __PLUGINS_COLLI_SEARCH_ELLIPSE_H_
+#ifndef __PLUGINS_COLLI_SEARCH_OBSTACLE_H_
+#define __PLUGINS_COLLI_SEARCH_OBSTACLE_H_
 
 #include "../common/defines.h"
 
@@ -36,58 +36,81 @@ namespace fawkes
 }
 #endif
 
-/** @class CFastEllipse <plugins/colli/search/ellipse.h>
- * This is an implementation of a a fast ellipse.
+/** @class ColliFastObstacle <plugins/colli/search/obstacle.h>
+ * This is an implementation of a a fast obstacle.
  */
 
-class CFastEllipse
+class ColliFastObstacle
 {
  public:
-
-  CFastEllipse( int radius_width, int radius_height, bool obstacle_increasement = true );
-  ~CFastEllipse();
+  ~ColliFastObstacle()
+  {
+    occupied_cells_.clear();
+  }
 
   /** Return the occupied cells with their values
    * @return vector containing the occupied cells (alternating x and y coordinates)
    */
-  inline const std::vector< int > GetEllipse()
+  inline const std::vector< int > get_obstacle()
   {
-    return m_OccupiedCells;
+    return occupied_cells_;
   }
 
   /** Get the key
    * @return The key
    */
-  inline int GetKey() {
-    return m_Key;
+  inline int get_key() {
+    return key_;
   }
 
   /** Set key.
    * @param key the new key
    */
-  inline void SetKey( int key ) {
-    m_Key = key;
+  inline void set_key( int key ) {
+    key_ = key;
   }
 
- private:
+ protected:
   // the occ cells, size is dividable through 3, 'cause:
   // [i]   = x coord,
   // [i+1] = y coord,
   // [i+2] = costs
-  std::vector< int > m_OccupiedCells;
+  std::vector< int > occupied_cells_;
 
-  // a unique identifier for each ellipse
-  int m_Key;
+ private:
+  // a unique identifier for each obstacle
+  int key_;
+};
+
+class ColliFastRectangle : public ColliFastObstacle
+{
+ public:
+  ColliFastRectangle(int width, int height);
+};
+
+class ColliFastEllipse : public ColliFastObstacle
+{
+ public:
+  ColliFastEllipse(int width, int height, bool obstacle_increasement = true);
 };
 
 
-/** Constructor.
- * @param radius_width radius width of the new ellipse
- * @param radius_height radius height of the new ellipse
+/** Constructor for FastRectangle.
+ * @param width radius width of the new rectangle
+ * @param height radius height of the new rectangle
+ */
+inline
+ColliFastRectangle::ColliFastRectangle( int radius_width, int radius_height )
+{
+}
+
+/** Constructor for FastEllipse.
+ * @param width radius width of the new ellipse
+ * @param height radius height of the new ellipse
  * @param obstacle_increasement Increase obstacles?
  */
 inline
-CFastEllipse::CFastEllipse( int radius_width, int radius_height, bool obstacle_increasement )
+ColliFastEllipse::ColliFastEllipse( int radius_width, int radius_height, bool obstacle_increasement )
 {
   float dist = 1000.0;
   float dist_near = 1000.0;
@@ -102,13 +125,13 @@ CFastEllipse::CFastEllipse( int radius_width, int radius_height, bool obstacle_i
       dist_near   = sqr((float)x/(float)(radius_width+2)) + sqr((float)y/(float)(radius_height+2));
       dist_middle = sqr((float)x/(float)(radius_width+4)) + sqr((float)y/(float)(radius_height+4));
 
-      /*
-      if ( !obstacle_increasement ) {
-        // ignore far distance obstacles
-      } else {
-        dist_far = sqr((float)x/(float)(radius_width+6)) +  sqr((float)y/(float)(radius_height+6));
-      }
-      */
+
+      //if ( !obstacle_increasement ) {
+      //  // ignore far distance obstacles
+      //} else {
+      //  dist_far = sqr((float)x/(float)(radius_width+6)) +  sqr((float)y/(float)(radius_height+6));
+      //}
+
 
       if( (dist > 1.0) && (dist_near > 1.0)
        && (dist_middle > 1.0) && (dist_far > 1.0) ) {
@@ -116,37 +139,32 @@ CFastEllipse::CFastEllipse( int radius_width, int radius_height, bool obstacle_i
 
       } else if( (dist > 1.0) && (dist_near > 1.0)
               && (dist_middle > 1.0) && (dist_far <= 1.0) ) {
-        m_OccupiedCells.push_back( x );
-        m_OccupiedCells.push_back( y );
-        m_OccupiedCells.push_back( (int)_COLLI_CELL_FAR_ );
+        occupied_cells_.push_back( x );
+        occupied_cells_.push_back( y );
+        occupied_cells_.push_back( (int)_COLLI_CELL_FAR_ );
 
       } else if( (dist > 1.0) && (dist_near > 1.0)
               && (dist_middle <= 1.0) ) {
-        m_OccupiedCells.push_back( x );
-        m_OccupiedCells.push_back( y );
-        m_OccupiedCells.push_back( (int)_COLLI_CELL_MIDDLE_ );
+        occupied_cells_.push_back( x );
+        occupied_cells_.push_back( y );
+        occupied_cells_.push_back( (int)_COLLI_CELL_MIDDLE_ );
 
       } else if( (dist > 1.0) && (dist_near <= 1.0)
               && (dist_middle <= 1.0) ) {
-        m_OccupiedCells.push_back( x );
-        m_OccupiedCells.push_back( y );
-        m_OccupiedCells.push_back( (int)_COLLI_CELL_NEAR_ );
+        occupied_cells_.push_back( x );
+        occupied_cells_.push_back( y );
+        occupied_cells_.push_back( (int)_COLLI_CELL_NEAR_ );
 
       } else if( (dist <= 1.0) && (dist_near <= 1.0)
               && (dist_middle <= 1.0) ) {
-        m_OccupiedCells.push_back( x );
-        m_OccupiedCells.push_back( y );
-        m_OccupiedCells.push_back( (int)_COLLI_CELL_OCCUPIED_ );
+        occupied_cells_.push_back( x );
+        occupied_cells_.push_back( y );
+        occupied_cells_.push_back( (int)_COLLI_CELL_OCCUPIED_ );
       }
     }
   }
 }
 
-inline
-CFastEllipse::~CFastEllipse()
-{
-  m_OccupiedCells.clear();
-}
 
 } // namespace fawkes
 
