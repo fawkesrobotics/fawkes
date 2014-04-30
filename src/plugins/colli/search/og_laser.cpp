@@ -24,7 +24,7 @@
 #include "obstacle_map.h"
 
 #include "../common/defines.h"
-#include "../utils/rob/roboshape.h"
+#include "../utils/rob/roboshape_colli.h"
 #include "../utils/rob/robo_laser.h"
 #include "../utils/geometry/trig_table.h"
 
@@ -63,7 +63,7 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
   std::string cfg_prefix = "/plugins/colli/";
 
   m_pLaser = laser;
-  m_pRoboShape = new RoboShape( (cfg_prefix + "roboshape/").c_str(), logger, config );
+  m_pRoboShape = new CRoboShape_Colli( (cfg_prefix + "roboshape/").c_str(), logger, config );
   m_vOldReadings.clear();
   initGrid();
 

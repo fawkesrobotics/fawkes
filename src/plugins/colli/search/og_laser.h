@@ -33,7 +33,7 @@ namespace fawkes
 #endif
 
 class Laser;
-class RoboShape;
+class CRoboShape_Colli;
 class TrigTable;
 class ColliObstacleMap;
 
@@ -81,7 +81,7 @@ class CLaserOccupancyGrid : public OccupancyGrid
   void integrateObstacle( int x, int y, int width, int height );
 
   Laser            *m_pLaser;     /**< pointer to the laser */
-  RoboShape        *m_pRoboShape; /**< my roboshape */
+  CRoboShape_Colli *m_pRoboShape; /**< my roboshape */
   TrigTable        *m_pTrigTable; /**< fast trigonometry table */
   ColliObstacleMap *obstacle_map;  /**< fast obstacle map */
 
