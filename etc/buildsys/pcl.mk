@@ -71,6 +71,7 @@ ifeq ($(HAVE_PCL),1)
 		 $(shell $(PKGCONFIG) --cflags 'pcl_common$(PCL_VERSION_SUFFIX)') \
 		 -Wno-unknown-pragmas -Wno-deprecated-declarations
   LDFLAGS_PCL += $(LDFLAGS_EIGEN3) \
+		 $(if $(HAVE_ROS),-L$(shell $(PKGCONFIG) --variable libdir 'pcl_common$(PCL_VERSION_SUFFIX)')) \
 		 $(shell $(PKGCONFIG) --libs 'pcl_common$(PCL_VERSION_SUFFIX)')
 
   ifeq ($(CC),clang)
