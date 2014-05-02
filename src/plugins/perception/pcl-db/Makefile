@@ -57,7 +57,8 @@ ifeq ($(HAVE_MONGODB)$(HAVE_PCL)$(HAVE_TF),111)
   PLUGINS_all = $(PLUGINDIR)/pcl-db-retrieve.so
 
   ifeq ($(call pcl-have-libs,$(REQUIRED_PCL_LIBS_MERGE)),1)
-    CFLAGS += $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS_MERGE))
+    CFLAGS += $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS_MERGE)) \
+	      -Wno-sign-compare
     LDFLAGS_pcl_db_merge +=  $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS_MERGE))
 
     PLUGINS_all += $(PLUGINDIR)/pcl-db-merge.so

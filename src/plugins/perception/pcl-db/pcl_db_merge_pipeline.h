@@ -41,6 +41,8 @@
 
 #define CFG_PREFIX_MERGE "/perception/pcl-db-merge/"
 
+// missing in Eigen3 causing a compiler error if not included here
+#include <assert.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/approximate_voxel_grid.h>
