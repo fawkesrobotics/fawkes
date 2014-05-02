@@ -17,7 +17,7 @@
 $(PLUGINDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 	$(eval BUILT_PARTS += $@)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[PLUGIN] $(TGRAY)$(PARENTDIR):$(TNORMAL) $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(PLUGINDIR)))/$*$(TNORMAL)"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[PLUGIN] $(PARENTDIR): $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(PLUGINDIR)))/$*$(TNORMAL)"
 	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
 	-o $@ $(subst ..,__,$^) \
 	$(LDFLAGS_BASE) $(LDFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_$(call nametr,$*)) \

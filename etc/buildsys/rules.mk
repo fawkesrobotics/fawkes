@@ -84,11 +84,11 @@ uncolored-gui: gui
 BUILT_PARTS=
 .PHONY: silent-nothing-to-do-gui silent-nothing-to-do-all
 silent-nothing-to-do-all:
-	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
+	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
 	$(eval BUILT_PARTS += $@)
 
 silent-nothing-to-do-gui:
-	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
+	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
 	$(eval BUILT_PARTS += $@)
 
 ifdef OBJS_all
@@ -155,7 +155,7 @@ $(PRESUBDIRS) $(SUBDIRS):
 		$(MFLAGS) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)" \
 		SRCDIR="$(abspath $(SRCDIR)/$@)" OBJSSUBMAKE=0 || exit $$?; \
 		if [ "$(MAKECMDGOALS)" != "clean" ]; then \
-			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $(TGRAY)$(PARENTDIR)$(TNORMAL)$@"; \
+			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $(PARENTDIR)$(TBOLDGRAY)$@$(TNORMAL)"; \
 		fi \
 	fi
 endif
@@ -171,7 +171,7 @@ endif
 	$(eval BUILT_PARTS += $@)
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[C++] $(TGRAY)$(PARENTDIR)$(TNORMAL)$(subst $(SRCDIR)/,,$<)"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[C++] $(PARENTDIR)$(TBOLDGRAY)$(subst $(SRCDIR)/,,$<)$(TNORMAL)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(if $(CFLAGS_$*),$(CFLAGS_$*),$(CFLAGS))  \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
@@ -183,7 +183,7 @@ endif
 %.o: %.c
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[ C ] $(TGRAY)$(PARENTDIR)$(TNORMAL)$(subst $(SRCDIR)/,,$<)"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[ C ] $(PARENTDIR)$(TBOLDGRAY)$(subst $(SRCDIR)/,,$<)$(TNORMAL)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(if $(CFLAGS_$*),$(CFLAGS_$*),$(CFLAGS)) \
 	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
@@ -200,7 +200,7 @@ moc_%.cpp: %.h
 $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT)if type -P $(ASCIIDOC_A2X) >/dev/null 2>&1; then \
-	echo -e "$(INDENT_PRINT)[MAN] $(TGRAY)$(PARENTDIR):$(TNORMAL) $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(dir $@)))/$*$(TNORMAL)"; \
+	echo -e "$(INDENT_PRINT)[MAN] $(PARENTDIR): $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(dir $@)))/$*$(TNORMAL)"; \
 	TEMPFILE=$$(mktemp -t fawkes_manpage_$*_XXXXXXXXXX); \
 	$(ASCIIDOC_A2X) -f manpage \
 	--asciidoc-opts='-f $(BASEDIR)/doc/asciidoc.conf -afawkes_version="$(FAWKES_VERSION)"' \
@@ -218,20 +218,20 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 $(BINDIR)/%: $$(OBJS_$$(call nametr,$$*))
 	$(eval BUILT_PARTS += $@)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[BIN] $(TGRAY)$(PARENTDIR):$(TNORMAL) $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(BINDIR)))/$*$(TNORMAL)"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[BIN] $(PARENTDIR): $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(BINDIR)))/$*$(TNORMAL)"
 	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
 	-o $@ $(subst ..,__,$^) $(LDFLAGS_BASE) \
 	$(if $(call seq,$(origin LDFLAGS_$(call nametr,$*)),undefined),$(LDFLAGS),$(LDFLAGS_$(call nametr,$*))) \
 	$(addprefix -l,$(LIBS_$(call nametr,$*))) $(addprefix -l,$(LIBS)) \
 	$(addprefix -L,$(LIBDIRS_$(call nametr,$*))) $(addprefix -L,$(LIBDIRS))
 ifeq ($(WARN_MISSING_MANPAGE),1)
-	$(if $(strip $(foreach S,$(MANPAGE_SECTIONS),$(filter $(MANDIR)/man$S/$*.$S,$(MANPAGES_all) $(MANPAGES_gui)))),,$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Warning: $(TGRAY)$(PARENTDIR)$(TNORMAL)$* does not have a man page$(TNORMAL)")
+	$(if $(strip $(foreach S,$(MANPAGE_SECTIONS),$(filter $(MANDIR)/man$S/$*.$S,$(MANPAGES_all) $(MANPAGES_gui)))),,$(SILENTSYMB) echo -e "$(INDENT_PRINT)--- $(TYELLOW)Warning:$(TNORMAL) $(PARENTDIR)$(TBOLDGRAY)$*$(TNORMAL) does not have a man page$(TNORMAL)")
 endif
 
 $(LIBDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 	$(eval BUILT_PARTS += $@)
 	$(SILENT) mkdir -p $(@D)
-	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[LIB] $(TGRAY)$(PARENTDIR):$(TNORMAL) $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(LIBDIR)))/$*$(TNORMAL)"
+	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[LIB] $(PARENTDIR): $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(LIBDIR)))/$*$(TNORMAL)"
 	$(SILENT) $(if $(LD_$(call nametr,$*)),$(LD_$(call nametr,$*)),$(LD)) \
 	-o $@$(if $(NOSOVER_$(call nametr,$*)),,.$(SOVER_$(call nametr,$*))) $(subst ..,__,$^) \
 	$(if $(NOSOVER_$(call nametr,$*)),,-Wl,-soname=$(@F).$(SOVER_$(call nametr,$*))) \

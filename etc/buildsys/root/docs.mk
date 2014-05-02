@@ -26,7 +26,7 @@ quickdoc: api-quick.doxygen
 tracdoc: api-trac.doxygen
 
 %.doxygen:
-	$(SILENT) echo "[DOC] Building documentation ($@). This may take a while..."
+	$(SILENT) echo -e "[DOC] Building documentation ($(TBOLDGRAY)$@$(TNORMAL)). This may take a while..."
 	$(SILENT) rm -rf doc/api
 	$(SILENT) mkdir -p doc/api
 	$(SILENT) $(DOXYGEN) $(DOCDIR)/doxygen/$*$(if $(SUBMODULE_EXTERN),-submodule).doxygen >/dev/null 2>&1

@@ -53,7 +53,7 @@ ifeq ($(HAVE_LUA),1)
       _HAVE_TOLUA_BIN=1
       TOLUAPP=tolua++
     endif
-    
+
     # Ubuntu
     ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++$(LUA_VERSION).a),)
       _HAVE_TOLUA_LIB=1
@@ -106,7 +106,7 @@ ifeq ($(HAVE_LUA),1)
   ifeq ($(HAVE_TOLUA),1)
 .SECONDEXPANSION:
 %_tolua.cpp: $$(TOLUA_$$(call nametr,$$*))
-	$(SILENT) echo -e "$(INDENT_PRINT)[LUA] $(TGRAY)$(PARENTDIR)$(TNORMAL)$(@F)"
+	$(SILENT) echo -e "$(INDENT_PRINT)[LUA] $(PARENTDIR)$(TBOLDGRAY)$(@F)$(TNORMAL)"
 	$(SILENT)cat $(addprefix $(SRCDIR)/,$(subst $(SRCDIR)/,,$(filter %.tolua,$^))) > $(patsubst %.cpp,%.pkg,$@)
 	$(SILENT)$(TOLUAPP) -n $(TOLUA_PKGPREFIX_$(call nametr,$*))$(notdir $*) $(patsubst %.cpp,%.pkg,$@) | \
 	sed -e 's/^\(.*Generated automatically .*\) on .*$$/\1/' | \
