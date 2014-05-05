@@ -123,11 +123,7 @@ ColliFastRectangle::ColliFastRectangle( int width, int height )
       } else {
         occupied_cells_.push_back( (int)_COLLI_CELL_OCCUPIED_ );
       }
-
-      ++y_start;
     }
-
-    ++x_start;
   }
 }
 
