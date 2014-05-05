@@ -87,6 +87,15 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
 
   m_LaserPosition = point_t(0,0);
 
+  // calculate laser offset from robot center
+  offset_base_.x=0;
+  offset_base_.y=0;
+  offset_laser_.x = m_pRoboShape->GetLaserOffsetX() - m_pRoboShape->GetWidthX()/2.f;
+  offset_laser_.y = m_pRoboShape->GetLaserOffsetY() - m_pRoboShape->GetWidthY()/2.f;
+  logger->log_debug("CLaserOccupancyGrid", "Laser (x,y) offset from robo-center is (%f, %f)",
+                    offset_laser_.x, offset_laser_.y);
+
+
   logger->log_info("CLaserOccupancyGrid", "(Constructor): Exiting");
 }
 
@@ -166,6 +175,17 @@ CLaserOccupancyGrid::GetLaserPosition()
   return m_LaserPosition;
 }
 
+/** Set the offset of base_link from laser.
+ * @param x offset in x-direction (in meters)
+ * @param y offset in y-direction (in meters)
+ */
+void
+CLaserOccupancyGrid::set_base_offset(float x, float y)
+{
+  offset_base_.x = (int)round( (offset_laser_.x + x)*100.f/m_CellHeight ); // # in grid-cells
+  offset_base_.y = (int)round( (offset_laser_.y + y)*100.f/m_CellWidth  );
+}
+
 
 void
 CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float vel,
@@ -220,8 +240,12 @@ CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float 
           old_readings.push_back( m_vOldReadings[i+2]+1.f );
 
           // 25 cm's in my opinion, that are here: 0.25*100/m_CellWidth
-          int size = (int)(((0.25f+inc)*100.f)/(float)m_CellWidth);
-          integrateObstacle( posX, posY, size-2, size-2 );
+          //int size = (int)(((0.25f+inc)*100.f)/(float)m_CellWidth);
+          int width = m_pRoboShape->GetCompleteWidthY();
+          width = std::max( 4.f, ((width + inc)*100.f)/m_CellWidth );
+          int height = m_pRoboShape->GetCompleteWidthX();
+          height = std::max( 4.f, ((height + inc)*100.f)/m_CellHeight );
+          integrateObstacle( posX, posY, width, height );
         }
       }
 
@@ -265,21 +289,15 @@ CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY,
         posY = midY + (int)((p_y*100.f) / ((float)m_CellWidth ));
 
         if ( !( posX <= 5 || posX >= m_Height-6 || posY <= 5 || posY >= m_Width-6 ) ) {
-          // float dec = max( (sqrt(sqr(p_x)+sqr(p_y))/3.0-1.0), 0.0 );
-          // float dec = max((m_pLaser->GetReadingLength(i)/2.0)-1.0, 0.0 );
-          float dec = 0.f;
-
-          float rad = normalize_rad( m_pLaser->GetRadiansForReading( i ) );
-
           float width = 0.f;
-          width = m_pRoboShape->GetRobotLengthforRad( rad );
-          width = std::max( 4.f, ((width + inc - dec)*100.f)/m_CellWidth );
+          width = m_pRoboShape->GetCompleteWidthY();
+          width = std::max( 4.f, ((width + inc)*100.f)/m_CellWidth );
 
-          float length = 0.f;
-          length = m_pRoboShape->GetRobotLengthforRad( rad );
-          length = std::max( 4.f, ((length + inc - dec)*100.f)/m_CellHeight );
+          float height = 0.f;
+          height = m_pRoboShape->GetCompleteWidthX();
+          height = std::max( 4.f, ((height + inc)*100.f)/m_CellHeight );
 
-          integrateObstacle( posX, posY, width, length );
+          integrateObstacle( posX, posY, width, height );
 
           if ( !Contained( p_x, p_y ) ) {
             m_vOldReadings.push_back( p_x );
@@ -316,8 +334,13 @@ CLaserOccupancyGrid::integrateObstacle( int x, int y, int width, int height )
 
   // i = x offset, i+1 = y offset, i+2 is cost
   for( unsigned int i = 0; i < fast_obstacle.size(); i+=3 ) {
-    posX = x + fast_obstacle[i];
-    posY = y + fast_obstacle[i+1];
+    /* On the laser-points, we draw obstacles based on base_link. The obstacle has the robot-shape,
+     * which means that we need to rotate the shape 180° around base_link and move that rotation-
+     * point onto the laser-point on the grid. That's the same as adding the center_to_base_offset
+     * to the calculated position of the obstacle-center ("x + fast_obstacle[i]" and "y" respectively).
+     */
+    posX = x + fast_obstacle[i]   + offset_base_.x;
+    posY = y + fast_obstacle[i+1] + offset_base_.y;
 
     if( (posX > 0) && (posX < m_Height)
      && (posY > 0) && (posY < m_Width)

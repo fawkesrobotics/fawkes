@@ -60,6 +60,9 @@ class CLaserOccupancyGrid : public OccupancyGrid
   ///\brief Get the laser's position in the grid
   point_t GetLaserPosition();
 
+  ///\brief Set the offset of base_link from laser
+  void set_base_offset(float x, float y);
+
  private:
 
   /** Integrate historical readings to the current occgrid. */
@@ -98,6 +101,10 @@ class CLaserOccupancyGrid : public OccupancyGrid
   float m_MinimumLaserLength, m_EllipseDistance;
 
   bool cfg_obstacle_inc_ ; /**< increasing obstacles or not */
+
+  /** Offsets to robot center */
+  cart_coord_2d_t offset_laser_; /**< in meters */
+  point_t         offset_base_; /**< in grid cells */
 };
 
 } // namespace fawkes

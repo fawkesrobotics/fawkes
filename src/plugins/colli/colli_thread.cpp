@@ -119,6 +119,7 @@ ColliThread::init()
     laser_to_base_.y = p_laser.y();
     logger->log_info(name(), "distance from laser to base: x:%f  y:%f", laser_to_base_.x, laser_to_base_.y);
     laser_to_base_valid_ = true;
+    m_pLaserOccGrid->set_base_offset(laser_to_base_.x, laser_to_base_.y);
   } catch(Exception &e) {
     logger->log_warn(name(), "Unable to transform %s to %s. Error: %s",
                      cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
@@ -251,6 +252,7 @@ ColliThread::loop()
       laser_to_base_.y = p_laser.y();
       logger->log_info(name(), "distance from laser to base: x:%f  y:%f", laser_to_base_.x, laser_to_base_.y);
       laser_to_base_valid_ = true;
+      m_pLaserOccGrid->set_base_offset(laser_to_base_.x, laser_to_base_.y);
     } catch(Exception &e) {
       logger->log_warn(name(), "Unable to transform %s to %s. Error: %s",
                       cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
@@ -881,7 +883,7 @@ ColliThread::UpdateOwnModules()
                     ydiff *  cos( m_pMotorInstruct->GetCurrentOri() );
 
   // update the occgrid...
-  m_pLaserOccGrid->UpdateOccGrid( laserpos_x, laserpos_y, m_RoboIncrease,
+  m_pLaserOccGrid->UpdateOccGrid( laserpos_x, laserpos_y, 2*m_RoboIncrease,
                                   m_pMotorInstruct->GetMotorDesiredTranslation(),
                                   relxdiff, relydiff, oridiff );
 
