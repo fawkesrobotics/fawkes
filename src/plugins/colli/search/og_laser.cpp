@@ -148,8 +148,8 @@ CLaserOccupancyGrid::UpdateOccGrid( int midX, int midY, float inc, float vel,
   m_LaserPosition.x = midX;
   m_LaserPosition.y = midY;
 
-  for ( int y = 0; y < m_Height; ++y )
-    for ( int x = 0; x < m_Width; ++x )
+  for ( int y = 0; y < m_Width; ++y )
+    for ( int x = 0; x < m_Height; ++x )
       m_OccupancyProb[x][y] = _COLLI_CELL_FREE_;
 
   IntegrateOldReadings( midX, midY, inc, vel, xdiff, ydiff, oridiff );
@@ -210,10 +210,10 @@ CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float 
         SollEintragen = false;
 
       if ( SollEintragen == true ) {
-        int posX = midX + (int)((newpos_x*100.f) / ((float)m_CellWidth ));
-        int posY = midY + (int)((newpos_y*100.f) / ((float)m_CellHeight ));
-        if( posX > 4 && posX < m_Width-5
-         && posY > 4 && posY < m_Height-5 )
+        int posX = midX + (int)((newpos_x*100.f) / ((float)m_CellHeight ));
+        int posY = midY + (int)((newpos_y*100.f) / ((float)m_CellWidth ));
+        if( posX > 4 && posX < m_Height-5
+         && posY > 4 && posY < m_Width-5 )
           {
           old_readings.push_back( newpos_x );
           old_readings.push_back( newpos_y );
@@ -261,10 +261,10 @@ CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY,
       if( !((p_x == 0.f) && (p_y == 0.f)) && sqr(p_x-oldp_x)+sqr(p_y-oldp_y) > sqr(m_EllipseDistance) ) {
         oldp_x = p_x;
         oldp_y = p_y;
-        posX = midX + (int)((p_x*100.f) / ((float)m_CellWidth ));
-        posY = midY + (int)((p_y*100.f) / ((float)m_CellHeight ));
+        posX = midX + (int)((p_x*100.f) / ((float)m_CellHeight ));
+        posY = midY + (int)((p_y*100.f) / ((float)m_CellWidth ));
 
-        if ( !( posX <= 5 || posX >= m_Width-6 || posY <= 5 || posY >= m_Height-6 ) ) {
+        if ( !( posX <= 5 || posX >= m_Height-6 || posY <= 5 || posY >= m_Width-6 ) ) {
           // float dec = max( (sqrt(sqr(p_x)+sqr(p_y))/3.0-1.0), 0.0 );
           // float dec = max((m_pLaser->GetReadingLength(i)/2.0)-1.0, 0.0 );
           float dec = 0.f;
@@ -316,11 +316,11 @@ CLaserOccupancyGrid::integrateObstacle( int x, int y, int width, int height )
 
   // i = x offset, i+1 = y offset, i+2 is cost
   for( unsigned int i = 0; i < fast_obstacle.size(); i+=3 ) {
-    posY = y + fast_obstacle[i];
-    posX = x + fast_obstacle[i+1];
+    posX = x + fast_obstacle[i];
+    posY = y + fast_obstacle[i+1];
 
-    if( (posX > 0) && (posX < m_Width)
-     && (posY > 0) && (posY < m_Height)
+    if( (posX > 0) && (posX < m_Height)
+     && (posY > 0) && (posY < m_Width)
      && (m_OccupancyProb[posX][posY] < fast_obstacle[i+2]) )
       {
       m_OccupancyProb[posX][posY] = fast_obstacle[i+2];

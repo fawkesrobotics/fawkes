@@ -144,9 +144,9 @@ ColliFastEllipse::ColliFastEllipse( int radius_width, int radius_height, bool ob
 
   for( int y = -(maxRad+6); y <= (maxRad+6); y++ ) {
     for( int x = -(maxRad+6); x <= (maxRad+6); x++ ) {
-      dist        = sqr((float)x/(float)radius_width)     + sqr((float)y/(float)radius_height);
-      dist_near   = sqr((float)x/(float)(radius_width+2)) + sqr((float)y/(float)(radius_height+2));
-      dist_middle = sqr((float)x/(float)(radius_width+4)) + sqr((float)y/(float)(radius_height+4));
+      dist        = sqr((float)y/(float)radius_width)     + sqr((float)x/(float)radius_height);
+      dist_near   = sqr((float)y/(float)(radius_width+2)) + sqr((float)x/(float)(radius_height+2));
+      dist_middle = sqr((float)y/(float)(radius_width+4)) + sqr((float)x/(float)(radius_height+4));
 
 
       //if ( !obstacle_increasement ) {
