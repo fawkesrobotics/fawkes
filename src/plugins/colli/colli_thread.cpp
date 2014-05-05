@@ -832,22 +832,22 @@ ColliThread::UpdateOwnModules()
   // Robo increasement for robots
   float m_RoboIncrease = 0.0;
 
-  if ( if_colli_target_->security_distance() > 0.0 ) {
+  if ( if_colli_target_->security_distance() > 0.0 )
     m_RoboIncrease = if_colli_target_->security_distance();
-    logger->log_info(name(),"(UpdateOwnModules ): Setting EXTERN Robot secure distance = %f. ATTENTION TO THE ROBOT!!!!",
-                            m_RoboIncrease);
-  } else {
-    if ( cfg_obstacle_inc_ ) {
-      //float transinc = max(0.0,fabs( m_pMotorInstruct->GetMotorCurrentTranslation()/2.0 )-0.35);
-      //float rotinc   = max(0.0,fabs( m_pMotorInstruct->GetMotorCurrentRotation()/3.5 )-0.4);
-      float transinc = max(0.0,fabs( m_pMotorInstruct->GetMotorCurrentTranslation()/2.0 )-0.7);
-      float rotinc   = max(0.0,fabs( m_pMotorInstruct->GetMotorCurrentRotation()/3.5 )-0.7);
 
-      m_RoboIncrease = max( transinc, rotinc );
-      m_RoboIncrease = min( m_MaximumRoboIncrease, m_RoboIncrease );
-    } else {
-      m_RoboIncrease = 0.0;
-    }
+  if ( cfg_obstacle_inc_ ) {
+    // calculate increasement due to speed
+    //float transinc = max(0.0,fabs( m_pMotorInstruct->GetMotorCurrentTranslation()/2.0 )-0.35);
+    //float rotinc   = max(0.0,fabs( m_pMotorInstruct->GetMotorCurrentRotation()/3.5 )-0.4);
+    float transinc = max(0.0,fabs( m_pMotorInstruct->GetMotorCurrentTranslation()/2.0 )-0.7);
+    float rotinc   = max(0.0,fabs( m_pMotorInstruct->GetMotorCurrentRotation()/3.5 )-0.7);
+    float speedinc = max( transinc, rotinc );
+
+    // increase at least as much as "security distance"!
+    m_RoboIncrease = max( m_RoboIncrease, speedinc);
+
+    // check against increasement limits
+    m_RoboIncrease = min( m_MaximumRoboIncrease, m_RoboIncrease );
   }
 
   float xdiff = m_pMotorInstruct->GetCurrentX() - m_OldX;
