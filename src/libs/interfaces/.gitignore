@@ -8,6 +8,7 @@ OpenRaveInterface.h
 PanTiltInterface.h
 PclDatabaseMergeInterface.h
 PclDatabaseRetrieveInterface.h
+PclDatabaseStoreInterface.h
 SkillerDebugInterface.h
 RobotinoSensorInterface.h
 Roomba500Interface.h
