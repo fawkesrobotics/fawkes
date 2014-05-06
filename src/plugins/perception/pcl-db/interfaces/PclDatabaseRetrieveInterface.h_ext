@@ -73,9 +73,24 @@ class PclDatabaseRetrieveInterface : public Interface
       int64_t timestamp; /**< 
       Timestamp for which to retrieve the most recent point clouds.
      */
-      char collection[256]; /**< 
-      Collection name from which to read the point clouds. Shall NOT
+      char database[64]; /**< 
+      Database name from which to read the point clouds. If empty will
+      use plugin-configured default.
+     */
+      char collection[128]; /**< 
+      Collection name from which to read the point clouds. May NOT
       include the database name.
+     */
+      char target_frame[64]; /**< 
+      Coordinate frame to which to transform the output point cloud.
+      The transformation will be done through a fixed frame specified
+      in the plugin config. If empty, no transformation is
+      performed. If set to "SENSOR" will convert to the sensor frame
+      specified in the plugin config.
+     */
+      bool original_timestamp; /**< 
+      Set to true to set the original timestamp on the point cloud,
+      false (default) to publish with current time.
      */
     } RetrieveMessage_data_t;
 #pragma pack(pop)
@@ -83,7 +98,7 @@ class PclDatabaseRetrieveInterface : public Interface
     RetrieveMessage_data_t *data;
 
    public:
-    RetrieveMessage(const int64_t ini_timestamp, const char * ini_collection);
+    RetrieveMessage(const int64_t ini_timestamp, const char * ini_database, const char * ini_collection, const char * ini_target_frame, const bool ini_original_timestamp);
     RetrieveMessage();
     ~RetrieveMessage();
 
@@ -92,9 +107,18 @@ class PclDatabaseRetrieveInterface : public Interface
     int64_t timestamp() const;
     void set_timestamp(const int64_t new_timestamp);
     size_t maxlenof_timestamp() const;
+    char * database() const;
+    void set_database(const char * new_database);
+    size_t maxlenof_database() const;
     char * collection() const;
     void set_collection(const char * new_collection);
     size_t maxlenof_collection() const;
+    char * target_frame() const;
+    void set_target_frame(const char * new_target_frame);
+    size_t maxlenof_target_frame() const;
+    bool is_original_timestamp() const;
+    void set_original_timestamp(const bool new_original_timestamp);
+    size_t maxlenof_original_timestamp() const;
     virtual Message * clone() const;
   };
 

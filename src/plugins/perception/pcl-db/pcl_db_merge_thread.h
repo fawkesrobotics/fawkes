@@ -74,6 +74,7 @@ class PointCloudDBMergeThread
   fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > foutput_;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_;
 
+  std::string cfg_database_;
   std::string cfg_output_id_;
 
   PointCloudDBMergePipeline<pcl::PointXYZ>     *pl_xyz_;

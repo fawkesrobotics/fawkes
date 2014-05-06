@@ -8,13 +8,16 @@ class PclDatabaseMergeInterface : public Interface
 
   class MergeMessage : public Message
   {
-    MergeMessage(long * ini_timestamps, char * ini_collection);
+    MergeMessage(long * ini_timestamps, char * ini_database, char * ini_collection);
     MergeMessage();
     ~MergeMessage();
 
     long timestamps(int index);
     void set_timestamps(unsigned int index, const long new_timestamps);
     int maxlenof_timestamps() const;
+    char * database();
+    void set_database(const char * new_database);
+    int maxlenof_database() const;
     char * collection();
     void set_collection(const char * new_collection);
     int maxlenof_collection() const;

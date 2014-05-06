@@ -52,7 +52,7 @@ PclDatabaseMergeInterface::PclDatabaseMergeInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_STRING, "error", 256, data->error);
   add_messageinfo("MergeMessage");
-  unsigned char tmp_hash[] = {0xa1, 0xdd, 0x2a, 0xc, 0x6c, 0x13, 0x95, 0xdf, 0x63, 0x8f, 0xa3, 0x5b, 0x7a, 0xc, 0x3a, 0xb6};
+  unsigned char tmp_hash[] = {0x1a, 0xb, 0xb8, 0x5a, 0x7, 0x88, 0x93, 0x55, 0x9e, 0x7e, 0xcb, 0x96, 0x46, 0x8f, 0x97, 0xb1};
   set_hash(tmp_hash);
 }
 
@@ -214,9 +214,10 @@ PclDatabaseMergeInterface::enum_tostring(const char *enumtype, int val) const
 
 /** Constructor with initial values.
  * @param ini_timestamps initial value for timestamps
+ * @param ini_database initial value for database
  * @param ini_collection initial value for collection
  */
-PclDatabaseMergeInterface::MergeMessage::MergeMessage(const int64_t * ini_timestamps, const char * ini_collection) : Message("MergeMessage")
+PclDatabaseMergeInterface::MergeMessage::MergeMessage(const int64_t * ini_timestamps, const char * ini_database, const char * ini_collection) : Message("MergeMessage")
 {
   data_size = sizeof(MergeMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -224,9 +225,11 @@ PclDatabaseMergeInterface::MergeMessage::MergeMessage(const int64_t * ini_timest
   data      = (MergeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   memcpy(data->timestamps, ini_timestamps, sizeof(int64_t) * 12);
-  strncpy(data->collection, ini_collection, 256);
+  strncpy(data->database, ini_database, 64);
+  strncpy(data->collection, ini_collection, 128);
   add_fieldinfo(IFT_INT64, "timestamps", 12, &data->timestamps);
-  add_fieldinfo(IFT_STRING, "collection", 256, data->collection);
+  add_fieldinfo(IFT_STRING, "database", 64, data->database);
+  add_fieldinfo(IFT_STRING, "collection", 128, data->collection);
 }
 /** Constructor */
 PclDatabaseMergeInterface::MergeMessage::MergeMessage() : Message("MergeMessage")
@@ -237,7 +240,8 @@ PclDatabaseMergeInterface::MergeMessage::MergeMessage() : Message("MergeMessage"
   data      = (MergeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_INT64, "timestamps", 12, &data->timestamps);
-  add_fieldinfo(IFT_STRING, "collection", 256, data->collection);
+  add_fieldinfo(IFT_STRING, "database", 64, data->database);
+  add_fieldinfo(IFT_STRING, "collection", 128, data->collection);
 }
 
 /** Destructor */
@@ -329,9 +333,45 @@ PclDatabaseMergeInterface::MergeMessage::set_timestamps(unsigned int index, cons
   }
   data->timestamps[index] = new_timestamps;
 }
+/** Get database value.
+ * 
+      Database name from which to read the point clouds. If empty will
+      use plugin-configured default.
+    
+ * @return database value
+ */
+char *
+PclDatabaseMergeInterface::MergeMessage::database() const
+{
+  return data->database;
+}
+
+/** Get maximum length of database value.
+ * @return length of database value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PclDatabaseMergeInterface::MergeMessage::maxlenof_database() const
+{
+  return 64;
+}
+
+/** Set database value.
+ * 
+      Database name from which to read the point clouds. If empty will
+      use plugin-configured default.
+    
+ * @param new_database new database value
+ */
+void
+PclDatabaseMergeInterface::MergeMessage::set_database(const char * new_database)
+{
+  strncpy(data->database, new_database, sizeof(data->database));
+}
+
 /** Get collection value.
  * 
-      Collection name from which to read the point clouds. Shall NOT
+      Collection name from which to read the point clouds. May NOT
       include the database name.
     
  * @return collection value
@@ -349,12 +389,12 @@ PclDatabaseMergeInterface::MergeMessage::collection() const
 size_t
 PclDatabaseMergeInterface::MergeMessage::maxlenof_collection() const
 {
-  return 256;
+  return 128;
 }
 
 /** Set collection value.
  * 
-      Collection name from which to read the point clouds. Shall NOT
+      Collection name from which to read the point clouds. May NOT
       include the database name.
     
  * @param new_collection new collection value

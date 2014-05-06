@@ -52,7 +52,7 @@ PclDatabaseRetrieveInterface::PclDatabaseRetrieveInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_STRING, "error", 256, data->error);
   add_messageinfo("RetrieveMessage");
-  unsigned char tmp_hash[] = {0x1d, 0xa9, 0x54, 0xc8, 0x23, 0x39, 0xd9, 0xc, 0x60, 0x69, 0xdb, 0xc7, 0xa0, 0x63, 0xac, 0x55};
+  unsigned char tmp_hash[] = {0x9d, 0xf8, 0x9d, 0x53, 0xd7, 0x74, 0xc1, 0x96, 0x38, 0x39, 0xd3, 0xee, 0x76, 0x54, 0x88, 0x75};
   set_hash(tmp_hash);
 }
 
@@ -214,9 +214,12 @@ PclDatabaseRetrieveInterface::enum_tostring(const char *enumtype, int val) const
 
 /** Constructor with initial values.
  * @param ini_timestamp initial value for timestamp
+ * @param ini_database initial value for database
  * @param ini_collection initial value for collection
+ * @param ini_target_frame initial value for target_frame
+ * @param ini_original_timestamp initial value for original_timestamp
  */
-PclDatabaseRetrieveInterface::RetrieveMessage::RetrieveMessage(const int64_t ini_timestamp, const char * ini_collection) : Message("RetrieveMessage")
+PclDatabaseRetrieveInterface::RetrieveMessage::RetrieveMessage(const int64_t ini_timestamp, const char * ini_database, const char * ini_collection, const char * ini_target_frame, const bool ini_original_timestamp) : Message("RetrieveMessage")
 {
   data_size = sizeof(RetrieveMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -224,9 +227,15 @@ PclDatabaseRetrieveInterface::RetrieveMessage::RetrieveMessage(const int64_t ini
   data      = (RetrieveMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->timestamp = ini_timestamp;
-  strncpy(data->collection, ini_collection, 256);
+  strncpy(data->database, ini_database, 64);
+  strncpy(data->collection, ini_collection, 128);
+  strncpy(data->target_frame, ini_target_frame, 64);
+  data->original_timestamp = ini_original_timestamp;
   add_fieldinfo(IFT_INT64, "timestamp", 1, &data->timestamp);
-  add_fieldinfo(IFT_STRING, "collection", 256, data->collection);
+  add_fieldinfo(IFT_STRING, "database", 64, data->database);
+  add_fieldinfo(IFT_STRING, "collection", 128, data->collection);
+  add_fieldinfo(IFT_STRING, "target_frame", 64, data->target_frame);
+  add_fieldinfo(IFT_BOOL, "original_timestamp", 1, &data->original_timestamp);
 }
 /** Constructor */
 PclDatabaseRetrieveInterface::RetrieveMessage::RetrieveMessage() : Message("RetrieveMessage")
@@ -237,7 +246,10 @@ PclDatabaseRetrieveInterface::RetrieveMessage::RetrieveMessage() : Message("Retr
   data      = (RetrieveMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_INT64, "timestamp", 1, &data->timestamp);
-  add_fieldinfo(IFT_STRING, "collection", 256, data->collection);
+  add_fieldinfo(IFT_STRING, "database", 64, data->database);
+  add_fieldinfo(IFT_STRING, "collection", 128, data->collection);
+  add_fieldinfo(IFT_STRING, "target_frame", 64, data->target_frame);
+  add_fieldinfo(IFT_BOOL, "original_timestamp", 1, &data->original_timestamp);
 }
 
 /** Destructor */
@@ -293,9 +305,45 @@ PclDatabaseRetrieveInterface::RetrieveMessage::set_timestamp(const int64_t new_t
   data->timestamp = new_timestamp;
 }
 
+/** Get database value.
+ * 
+      Database name from which to read the point clouds. If empty will
+      use plugin-configured default.
+    
+ * @return database value
+ */
+char *
+PclDatabaseRetrieveInterface::RetrieveMessage::database() const
+{
+  return data->database;
+}
+
+/** Get maximum length of database value.
+ * @return length of database value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PclDatabaseRetrieveInterface::RetrieveMessage::maxlenof_database() const
+{
+  return 64;
+}
+
+/** Set database value.
+ * 
+      Database name from which to read the point clouds. If empty will
+      use plugin-configured default.
+    
+ * @param new_database new database value
+ */
+void
+PclDatabaseRetrieveInterface::RetrieveMessage::set_database(const char * new_database)
+{
+  strncpy(data->database, new_database, sizeof(data->database));
+}
+
 /** Get collection value.
  * 
-      Collection name from which to read the point clouds. Shall NOT
+      Collection name from which to read the point clouds. May NOT
       include the database name.
     
  * @return collection value
@@ -313,12 +361,12 @@ PclDatabaseRetrieveInterface::RetrieveMessage::collection() const
 size_t
 PclDatabaseRetrieveInterface::RetrieveMessage::maxlenof_collection() const
 {
-  return 256;
+  return 128;
 }
 
 /** Set collection value.
  * 
-      Collection name from which to read the point clouds. Shall NOT
+      Collection name from which to read the point clouds. May NOT
       include the database name.
     
  * @param new_collection new collection value
@@ -327,6 +375,84 @@ void
 PclDatabaseRetrieveInterface::RetrieveMessage::set_collection(const char * new_collection)
 {
   strncpy(data->collection, new_collection, sizeof(data->collection));
+}
+
+/** Get target_frame value.
+ * 
+      Coordinate frame to which to transform the output point cloud.
+      The transformation will be done through a fixed frame specified
+      in the plugin config. If empty, no transformation is
+      performed. If set to "SENSOR" will convert to the sensor frame
+      specified in the plugin config.
+    
+ * @return target_frame value
+ */
+char *
+PclDatabaseRetrieveInterface::RetrieveMessage::target_frame() const
+{
+  return data->target_frame;
+}
+
+/** Get maximum length of target_frame value.
+ * @return length of target_frame value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PclDatabaseRetrieveInterface::RetrieveMessage::maxlenof_target_frame() const
+{
+  return 64;
+}
+
+/** Set target_frame value.
+ * 
+      Coordinate frame to which to transform the output point cloud.
+      The transformation will be done through a fixed frame specified
+      in the plugin config. If empty, no transformation is
+      performed. If set to "SENSOR" will convert to the sensor frame
+      specified in the plugin config.
+    
+ * @param new_target_frame new target_frame value
+ */
+void
+PclDatabaseRetrieveInterface::RetrieveMessage::set_target_frame(const char * new_target_frame)
+{
+  strncpy(data->target_frame, new_target_frame, sizeof(data->target_frame));
+}
+
+/** Get original_timestamp value.
+ * 
+      Set to true to set the original timestamp on the point cloud,
+      false (default) to publish with current time.
+    
+ * @return original_timestamp value
+ */
+bool
+PclDatabaseRetrieveInterface::RetrieveMessage::is_original_timestamp() const
+{
+  return data->original_timestamp;
+}
+
+/** Get maximum length of original_timestamp value.
+ * @return length of original_timestamp value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PclDatabaseRetrieveInterface::RetrieveMessage::maxlenof_original_timestamp() const
+{
+  return 1;
+}
+
+/** Set original_timestamp value.
+ * 
+      Set to true to set the original timestamp on the point cloud,
+      false (default) to publish with current time.
+    
+ * @param new_original_timestamp new original_timestamp value
+ */
+void
+PclDatabaseRetrieveInterface::RetrieveMessage::set_original_timestamp(const bool new_original_timestamp)
+{
+  data->original_timestamp = new_original_timestamp;
 }
 
 /** Clone this message.

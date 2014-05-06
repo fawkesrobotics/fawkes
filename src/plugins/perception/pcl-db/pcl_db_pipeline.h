@@ -110,7 +110,6 @@ class PointCloudDBPipeline
   {
     name_ = "PCL_DB_Pipeline";
 
-    cfg_database_name_     = config->get_string(CFG_PREFIX"database-name");
     cfg_pcl_age_tolerance_ =
       (long)round(config->get_float(CFG_PREFIX"pcl-age-tolerance") * 1000.);
     std::vector<float> transform_range = config->get_floats(CFG_PREFIX"transform-range");
@@ -122,15 +121,11 @@ class PointCloudDBPipeline
     }
     cfg_transform_range_[0] = (long)round(transform_range[0] * 1000.);
     cfg_transform_range_[1] = (long)round(transform_range[1] * 1000.);
-
-    mongodb_gridfs_ =
-      new mongo::GridFS(*mongodb_client_, cfg_database_name_);
   }
 
   /** Destructor. */
   virtual ~PointCloudDBPipeline()
   {
-    delete mongodb_gridfs_;
   }
 
   /** Check if this pipeline instance is suitable for the given times.
@@ -142,7 +137,8 @@ class PointCloudDBPipeline
    * @return applicability status
    */
   ApplicabilityStatus
-  applicable(std::vector<long long> &times, std::string &collection)
+    applicable(std::vector<long long> &times, std::string &database,
+	       std::string &collection)
   {
     const unsigned int num_clouds = times.size();
 
@@ -154,10 +150,11 @@ class PointCloudDBPipeline
     pcl::for_each_type<typename pcl::traits::fieldList<PointType>::type>
       (pcl::detail::FieldAdder<PointType>(pfields));
 
+    std::string fq_collection = database + "." + collection;
     try {
       for (unsigned int i = 0; i < num_clouds; ++i) {
 	std::auto_ptr<mongo::DBClientCursor> cursor =
-	  mongodb_client_->query(cfg_database_name_ + "." + collection,
+	  mongodb_client_->query(fq_collection,
 				 QUERY("timestamp" << mongo::LTE << times[i]
                            << mongo::GTE << (times[i] - cfg_pcl_age_tolerance_))
 				 .sort("timestamp", -1),
@@ -212,11 +209,13 @@ class PointCloudDBPipeline
    * @param filename name of file to read from GridFS.
    */
   void
-  read_gridfs_file(void *dataptr, std::string filename)
+    read_gridfs_file(void *dataptr, std::string &database, std::string filename)
   {
     char *tmp = (char *)dataptr;
+    mongo::GridFS gridfs(*mongodb_client_, database);
+
     mongo::GridFile file =
-      mongodb_gridfs_->findFile(filename);
+      gridfs.findFile(filename);
     if (! file.exists()) {
       logger_->log_warn(name_, "Grid file does not exist");
       return;
@@ -246,9 +245,9 @@ class PointCloudDBPipeline
    */
   std::vector<CloudPtr>
   retrieve_clouds(std::vector<long long> &times, std::vector<long long> &actual_times,
-		  std::string &collection)
+		  std::string &database, std::string &collection)
   {
-    mongodb_client_->ensureIndex(cfg_database_name_ + collection,
+    mongodb_client_->ensureIndex(database + "." + collection,
 				 mongo::fromjson("{timestamp:1}"));
 
     const unsigned int num_clouds = times.size();
@@ -258,7 +257,7 @@ class PointCloudDBPipeline
     for (unsigned int i = 0; i < num_clouds; ++i) {
 
       std::auto_ptr<mongo::DBClientCursor> cursor =
-	mongodb_client_->query(cfg_database_name_ + "." + collection,
+	mongodb_client_->query(database + "." + collection,
 			       QUERY("timestamp" << mongo::LTE << times[i]
                                << mongo::GTE << (times[i] - cfg_pcl_age_tolerance_))
 			       .sort("timestamp", -1),
@@ -288,7 +287,8 @@ class PointCloudDBPipeline
 	fawkes::pcl_utils::set_time(lpcl, actual_time);
 	lpcl->points.resize(pcldoc["num_points"].Int());
 
-	read_gridfs_file(&lpcl->points[0], pcldoc.getFieldDotted("data.filename").String());
+	read_gridfs_file(&lpcl->points[0], database,
+			 pcldoc.getFieldDotted("data.filename").String());
       } else {
 	logger_->log_warn(name_, "Cannot retrieve document for time %li", times[i]);
 	return std::vector<CloudPtr>();
@@ -302,12 +302,10 @@ class PointCloudDBPipeline
  protected: // members
   const char *name_;			/**< Name of the pipeline. */
 
-  std::string  cfg_database_name_;	/**< Database to read fro. */
   long         cfg_pcl_age_tolerance_;	/**< Age tolerance for retrieved point clouds. */
   long         cfg_transform_range_[2];	/**< Transform range start and end times. */
 
   mongo::DBClientBase *mongodb_client_;	/**< MongoDB client to retrieve data. */
-  mongo::GridFS *mongodb_gridfs_;	/**< MongoDB GridFS client to retrieve data. */
 
   fawkes::Logger        *logger_;	/**< Logger for informative messages. */
 

@@ -23,8 +23,12 @@
       Timestamps for which to retrieve the most recent point clouds
       and merge them.
     </field>
-    <field type="string" length="256" name="collection">
-      Collection name from which to read the point clouds. Shall NOT
+    <field type="string" length="64" name="database">
+      Database name from which to read the point clouds. If empty will
+      use plugin-configured default.
+    </field>
+    <field type="string" length="128" name="collection">
+      Collection name from which to read the point clouds. May NOT
       include the database name.
     </field>
   </message>

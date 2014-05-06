@@ -97,10 +97,16 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
 
   /** Retrieve point clouds.
    * @param timestamp time for which to retrieve the point cloud
+   * @param database database to retrieve from
    * @param collection collection from which to retrieve the data
+   * @param target_frame coordinate frame to transform to
+   * @param actual_time upon return contains the actual time for
+   * which a point cloud was retrieved
    */
   void
-  retrieve(long long timestamp, std::string &collection)
+  retrieve(long long timestamp, std::string &database,
+	   std::string &collection, std::string &target_frame,
+	   long long &actual_time)
   {
     TIMETRACK_START(ttc_retrieve_);
 
@@ -115,7 +121,7 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
 
     TIMETRACK_START(ttc_retrieval_);
 
-    pcls = PointCloudDBPipeline<PointType>::retrieve_clouds(times, actual_times, collection);
+    pcls = PointCloudDBPipeline<PointType>::retrieve_clouds(times, actual_times, database, collection);
     if (pcls.empty()) {
       this->logger_->log_warn(this->name_, "No point clouds found for desired timestamp");
       TIMETRACK_ABORT(ttc_retrieval_);
@@ -124,6 +130,7 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
     }
 
     copy_output(pcls[0], original_, 128, 128, 128);
+    actual_time = actual_times[0];
 
     TIMETRACK_INTER(ttc_retrieval_, ttc_transforms_);
 

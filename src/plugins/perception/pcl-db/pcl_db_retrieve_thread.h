@@ -74,6 +74,7 @@ class PointCloudDBRetrieveThread
   fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > foriginal_;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr original_;
 
+  std::string cfg_database_;
   std::string cfg_output_id_;
   std::string cfg_original_id_;
 

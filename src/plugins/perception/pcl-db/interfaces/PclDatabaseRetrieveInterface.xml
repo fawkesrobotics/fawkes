@@ -22,9 +22,24 @@
     <field type="int64" name="timestamp">
       Timestamp for which to retrieve the most recent point clouds.
     </field>
-    <field type="string" length="256" name="collection">
-      Collection name from which to read the point clouds. Shall NOT
+    <field type="string" length="64" name="database">
+      Database name from which to read the point clouds. If empty will
+      use plugin-configured default.
+    </field>
+    <field type="string" length="128" name="collection">
+      Collection name from which to read the point clouds. May NOT
       include the database name.
+    </field>
+    <field type="string" length="64" name="target_frame">
+      Coordinate frame to which to transform the output point cloud.
+      The transformation will be done through a fixed frame specified
+      in the plugin config. If empty, no transformation is
+      performed. If set to "SENSOR" will convert to the sensor frame
+      specified in the plugin config.
+    </field>
+    <field type="bool" name="original_timestamp">
+      Set to true to set the original timestamp on the point cloud,
+      false (default) to publish with current time.
     </field>
   </message>
 </interface>
