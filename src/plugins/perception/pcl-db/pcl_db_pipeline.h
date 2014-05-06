@@ -288,7 +288,7 @@ class PointCloudDBPipeline
 	fawkes::Time actual_time((long)actual_times[i]);
 
 	lpcl->header.frame_id = pcldoc["frame_id"].String();
-	lpcl->is_dense        = (pcldoc["is_dense"].Int() != 0);
+	lpcl->is_dense        = pcldoc["is_dense"].Bool();
 	lpcl->width           = pcldoc["width"].Int();
 	lpcl->height          = pcldoc["height"].Int();
 	fawkes::pcl_utils::set_time(lpcl, actual_time);
