@@ -57,10 +57,14 @@ set_time(pcl::PointCloud<PointT> &cloud, const fawkes::Time &time)
   cloud.header.stamp.sec  = time.get_sec();
   cloud.header.stamp.nsec = time.get_usec() * 1000;
 #else
+#  if PCL_VERSION_COMPARE(>=,1,7,0)
+  cloud.header.stamp = time.in_usec();
+#  else
   PointCloudTimestamp pclts;
   pclts.time.sec  = time.get_sec();
   pclts.time.usec = time.get_usec();
   cloud.header.stamp = pclts.timestamp;
+#  endif
 #endif
 }
 
@@ -105,9 +109,13 @@ get_time(const fawkes::RefPtr<const pcl::PointCloud<PointT> > &cloud, fawkes::Ti
 #if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
+#  if PCL_VERSION_COMPARE(>=,1,7,0)
+  time.set_time(cloud->header.stamp / 1000000U, cloud->header.stamp % 1000000);
+#  else
   PointCloudTimestamp pclts;
   pclts.timestamp = cloud->header.stamp;
   time.set_time(pclts.time.sec, pclts.time.usec);
+#  endif
 #endif
 }
 
@@ -125,9 +133,13 @@ get_time(const fawkes::RefPtr<pcl::PointCloud<PointT> > &cloud, fawkes::Time &ti
 #if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
+#  if PCL_VERSION_COMPARE(>=,1,7,0)
+  time.set_time(cloud->header.stamp / 1000000U, cloud->header.stamp % 1000000);
+#  else
   PointCloudTimestamp pclts;
   pclts.timestamp = cloud->header.stamp;
   time.set_time(pclts.time.sec, pclts.time.usec);
+#endif
 #endif
 }
 
@@ -145,9 +157,13 @@ get_time(const pcl::PointCloud<PointT> &cloud, fawkes::Time &time)
 #if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud.header.stamp.sec, cloud.header.stamp.nsec / 1000);
 #else
+#  if PCL_VERSION_COMPARE(>=,1,7,0)
+  time.set_time(cloud.header.stamp / 1000000U, cloud.header.stamp % 1000000);
+#  else
   PointCloudTimestamp pclts;
   pclts.timestamp = cloud.header.stamp;
   time.set_time(pclts.time.sec, pclts.time.usec);
+#  endif
 #endif
 }
 
@@ -165,9 +181,13 @@ get_time(const boost::shared_ptr<pcl::PointCloud<PointT> > &cloud, fawkes::Time 
 #if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
+#  if PCL_VERSION_COMPARE(>=,1,7,0)
+  time.set_time(cloud->header.stamp / 1000000U, cloud->header.stamp % 1000000);
+#  else
   PointCloudTimestamp pclts;
   pclts.timestamp = cloud->header.stamp;
   time.set_time(pclts.time.sec, pclts.time.usec);
+#  endif
 #endif
 }
 
@@ -185,9 +205,13 @@ get_time(const boost::shared_ptr<const pcl::PointCloud<PointT>> &cloud, fawkes::
 #if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
   time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
 #else
+#  if PCL_VERSION_COMPARE(>=,1,7,0)
+  time.set_time(cloud->header.stamp / 1000000U, cloud->header.stamp % 1000000);
+#  else
   PointCloudTimestamp pclts;
   pclts.timestamp = cloud->header.stamp;
   time.set_time(pclts.time.sec, pclts.time.usec);
+#  endif
 #endif
 }
 
@@ -213,6 +237,18 @@ template <typename PointT1, typename PointT2>
 inline void
 copy_time(boost::shared_ptr<const pcl::PointCloud<PointT1> > &from,
 	  fawkes::RefPtr<pcl::PointCloud<PointT2> > &to)
+{
+  to->header.stamp = from->header.stamp;
+}
+
+/** Copy time from one point cloud to another.
+ * @param from point cloud to copy time from
+ * @param to point cloud to copy time to
+ */
+template <typename PointT1, typename PointT2>
+inline void
+copy_time(const pcl::PointCloud<PointT1> &from,
+	  pcl::PointCloud<PointT2> &to)
 {
   to->header.stamp = from->header.stamp;
 }
