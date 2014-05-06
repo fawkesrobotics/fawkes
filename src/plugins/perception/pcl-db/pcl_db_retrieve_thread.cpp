@@ -166,8 +166,19 @@ PointCloudDBRetrieveThread::loop()
     retrieve_if_->set_error("No applicable merging pipeline known (for details see log)");
   }
 
-  Time now(clock);
-  pcl_utils::set_time(foutput_, now);
+  if (actual_time != 0) {
+    if (original_timestamp) {
+      Time now((long)actual_time);
+      Time last;
+      pcl_utils::get_time(foutput_, last);
+      // force sending with one microsecond offset if same than last time
+      if (last == now)	now += 1L;
+      pcl_utils::set_time(foutput_, now);
+    } else {
+      Time now(clock);
+      pcl_utils::set_time(foutput_, now);
+    }
+  }
 
   retrieve_if_->set_final(true);
   retrieve_if_->write();
