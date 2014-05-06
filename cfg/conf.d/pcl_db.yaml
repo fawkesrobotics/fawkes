@@ -5,7 +5,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/tabletop-objects
 ---
 perception/pcl-db:
   # mongodb-log database from which to read data 
-  database-name: "fflog"
+  database-name: pcl-db
 
   # Maximum age of point clouds restored from database; sec
   pcl-age-tolerance: 5.0
@@ -82,8 +82,11 @@ perception/pcl-db-retrieve:
   sensor-frame: !frame /kinect/image
 
   # ID of the output point cloud by which it is registered with the PCL manager
-  output-pcl-id: db-merged
+  output-pcl-id: db-retrieved
 
   # ID of the output point cloud by which it is registered with the PCL manager
-  original-pcl-id: db-original
+  original-pcl-id: db-retrieved-original
+
+perception/pcl-db-roscomm:
+  store-pcl-id: pcl-db-store
 
