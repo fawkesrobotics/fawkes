@@ -158,17 +158,18 @@ PointCloudDBMergeThread::loop()
   pl_xyz_->applicable(times, database, collection);
   if ((st_xyz = pl_xyz_->applicable(times, database, collection)) == APPLICABLE) {
     pl_xyz_->merge(times, database, collection);
+    Time now(clock);
+    pcl_utils::set_time(foutput_, now);
   } else if ((st_xyzrgb = pl_xyzrgb_->applicable(times, database, collection)) == APPLICABLE) {
     pl_xyzrgb_->merge(times, database, collection);
+    Time now(clock);
+    pcl_utils::set_time(foutput_, now);
   } else {
     logger->log_warn(name(), "No applicable merging pipeline known:");
     logger->log_warn(name(), "  XYZ:     %s", to_string(st_xyz));
     logger->log_warn(name(), "  XYZ/RGB: %s", to_string(st_xyzrgb));
     merge_if_->set_error("Merge failed, see pcl-db-merge log");
   }
-
-  Time now(clock);
-  pcl_utils::set_time(foutput_, now);
 
   merge_if_->set_final(true);
   merge_if_->write();
