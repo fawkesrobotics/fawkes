@@ -22,11 +22,17 @@
 #include "pcl_db_roscomm_thread.h"
 #include <interfaces/PclDatabaseMergeInterface.h>
 #include <interfaces/PclDatabaseRetrieveInterface.h>
+#include <interfaces/PclDatabaseStoreInterface.h>
 
 #include <core/threading/wait_condition.h>
 #include <blackboard/utils/on_update_waker.h>
 
 #include <ros/ros.h>
+#include <pcl_conversions/pcl_conversions.h>
+
+#include <pcl/pcl_config.h>
+#include <pcl/PCLPointCloud2.h>
+#include <pcl/common/conversions.h>
 
 using namespace fawkes;
 
@@ -55,6 +61,8 @@ PointCloudDBROSCommThread::~PointCloudDBROSCommThread()
 void
 PointCloudDBROSCommThread::init()
 {
+  cfg_store_pcl_id_ = config->get_string("/perception/pcl-db-roscomm/store-pcl-id");
+
   merge_if_ =
     blackboard->open_for_reading<PclDatabaseMergeInterface>("PCL Database Merge");
 
@@ -67,18 +75,25 @@ PointCloudDBROSCommThread::init()
   retrieve_waitcond_ = new WaitCondition();
   retrieve_update_waker_ = new BlackBoardOnUpdateWaker(blackboard, retrieve_if_, this);
 
-  srv_merge_ = new ros::ServiceServer();
-  srv_retrieve_ = new ros::ServiceServer();
-  srv_record_ = new ros::ServiceServer();
+  store_if_ =
+    blackboard->open_for_reading<PclDatabaseStoreInterface>("PCL Database Store");
 
-  *srv_merge_ = rosnode->advertiseService("/pcl_db_merge/merge",
+  store_waitcond_ = new WaitCondition();
+  store_update_waker_ = new BlackBoardOnUpdateWaker(blackboard, store_if_, this);
+
+  srv_merge_    = new ros::ServiceServer();
+  srv_retrieve_ = new ros::ServiceServer();
+  srv_record_   = new ros::ServiceServer();
+  srv_store_    = new ros::ServiceServer();
+
+  *srv_merge_ = rosnode->advertiseService("/pcl_db/merge",
 					  &PointCloudDBROSCommThread::merge_cb, this);
 
-  *srv_retrieve_ = rosnode->advertiseService("/pcl_db_merge/retrieve",
+  *srv_retrieve_ = rosnode->advertiseService("/pcl_db/retrieve",
 					     &PointCloudDBROSCommThread::retrieve_cb, this);
 
-  *srv_record_ = rosnode->advertiseService("/pcl_db_merge/record",
-					   &PointCloudDBROSCommThread::record_cb, this);
+  *srv_store_ = rosnode->advertiseService("/pcl_db/store",
+					  &PointCloudDBROSCommThread::store_cb, this);
 }
 
 void
@@ -86,18 +101,23 @@ PointCloudDBROSCommThread::finalize()
 {
   srv_merge_->shutdown();
   srv_retrieve_->shutdown();
+  srv_store_->shutdown();
   srv_record_->shutdown();
   delete srv_merge_;
   delete srv_retrieve_;
+  delete srv_store_;
   delete srv_record_;
 
   delete merge_update_waker_;
   delete retrieve_update_waker_;
+  delete store_update_waker_;
   delete merge_waitcond_;
   delete retrieve_waitcond_;
+  delete store_waitcond_;
 
   blackboard->close(merge_if_);
   blackboard->close(retrieve_if_);
+  blackboard->close(store_if_);
 }
 
 
@@ -128,6 +148,20 @@ PointCloudDBROSCommThread::loop()
     if ((retrieve_if_->msgid() == retrieve_msg_id_) && retrieve_if_->is_final()) {
       logger->log_info(name(), "Retrieve final");
       retrieve_waitcond_->wake_all();
+    }
+  }
+
+  store_if_->read();
+  if (store_if_->changed()) {
+    logger->log_info(name(), "Store interface has changed");
+
+    logger->log_info(name(), "%u vs. %u   final: %s",
+		     store_if_->msgid(), store_msg_id_,
+		     store_if_->is_final() ? "yes" : "no");
+
+    if ((store_if_->msgid() == store_msg_id_) && store_if_->is_final()) {
+      logger->log_info(name(), "Store final");
+      store_waitcond_->wake_all();
     }
   }
 }
@@ -164,6 +198,7 @@ PointCloudDBROSCommThread::merge_cb(hybris_c1_msgs::MergePointClouds::Request  &
   }
   sort(timestamps.begin(), timestamps.begin() + req.timestamps.size());
   mm->set_timestamps(&timestamps[0]);
+  mm->set_database(req.database.c_str());
   mm->set_collection(req.collection.c_str());
 
   mm->ref();
@@ -196,10 +231,14 @@ PointCloudDBROSCommThread::retrieve_cb(hybris_c1_msgs::RetrievePointCloud::Reque
   int64_t timestamp = (int64_t)req.timestamp.sec * 1000L
     + (int64_t)req.timestamp.nsec / 1000000L;
 
-  logger->log_info(name(), "Restoring %lli from %s", timestamp, req.collection.c_str());
+  logger->log_info(name(), "Restoring %lli from %s.%s", timestamp,
+		   req.database.c_str(), req.collection.c_str());
 
   mm->set_timestamp(timestamp);
+  mm->set_database(req.database.c_str());
   mm->set_collection(req.collection.c_str());
+  mm->set_target_frame(req.target_frame.c_str());
+  mm->set_original_timestamp(req.original_timestamp);
 
   mm->ref();
   retrieve_if_->msgq_enqueue(mm);
@@ -218,6 +257,75 @@ PointCloudDBROSCommThread::retrieve_cb(hybris_c1_msgs::RetrievePointCloud::Reque
     resp.error = retrieve_if_->error();
   }
   return true;
+}
+
+
+bool
+PointCloudDBROSCommThread::store_cb(hybris_c1_msgs::StorePointCloud::Request  &req,
+				    hybris_c1_msgs::StorePointCloud::Response &resp)
+{
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+  PclDatabaseStoreInterface::StoreMessage *mm =
+    new PclDatabaseStoreInterface::StoreMessage();
+
+  logger->log_info(name(), "Storing to %s.%s",
+		   (req.database == "") ? "<default>" : req.database.c_str(),
+		   (req.collection == "") ? "<default>" : req.collection.c_str());
+
+  pcl::PCLPointCloud2 pcl_in;
+  pcl_conversions::moveToPCL(req.pointcloud, pcl_in);
+
+  RefPtr<pcl::PointCloud<pcl::PointXYZ> >
+    pcl_xyz(new pcl::PointCloud<pcl::PointXYZ>());
+  RefPtr<pcl::PointCloud<pcl::PointXYZRGB> >
+    pcl_xyzrgb(new pcl::PointCloud<pcl::PointXYZRGB>());
+
+  std::string fields_in     = pcl::getFieldsList(pcl_in);
+  std::string fields_xyz    = pcl::getFieldsList(**pcl_xyz);
+  std::string fields_xyzrgb = pcl::getFieldsList(**pcl_xyzrgb);
+
+  if (fields_in == fields_xyz) {
+    pcl::fromPCLPointCloud2(pcl_in, **pcl_xyz);
+    pcl_manager->add_pointcloud(cfg_store_pcl_id_.c_str(), pcl_xyz);
+
+  } else if (fields_in == fields_xyzrgb) {
+    pcl::fromPCLPointCloud2(pcl_in, **pcl_xyzrgb);
+    pcl_manager->add_pointcloud(cfg_store_pcl_id_.c_str(), pcl_xyzrgb);
+
+  } else {
+    resp.ok = false;
+    resp.error = "Unsupported point cloud type";
+  }
+
+  mm->set_pcl_id(cfg_store_pcl_id_.c_str());
+  mm->set_database(req.database.c_str());
+  mm->set_collection(req.collection.c_str());
+
+  mm->ref();
+  store_if_->msgq_enqueue(mm);
+  store_msg_id_ = mm->id();
+  mm->unref();
+
+  // wait for result
+  store_waitcond_->wait();
+
+  pcl_manager->remove_pointcloud(cfg_store_pcl_id_.c_str());
+
+  // Check result
+  store_if_->read();
+  if (store_if_->is_final() && (std::string("") == store_if_->error())) {
+    resp.ok = true;
+  } else {
+    resp.ok = false;
+    resp.error = store_if_->error();
+  }
+  return true;
+#else
+  logger->log_warn(name(), "Cannot store point clouds, PCL < 1.7.0");
+  resp.ok = false;
+  resp.error = "Storing only supported with PCL >= 1.7.0";
+  return true;
+#endif
 }
 
 
