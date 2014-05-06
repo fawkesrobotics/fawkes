@@ -65,7 +65,7 @@ class PointCloudAdapter
 		    fawkes::Logger *logger);
   ~PointCloudAdapter();
 
-  void get_info(std::string &id,
+  void get_info(const std::string &id,
                 unsigned int &width, unsigned int &height,
                 std::string &frame_id, bool &is_dense,
                 V_PointFieldInfo &pfi);
@@ -73,6 +73,10 @@ class PointCloudAdapter
   void get_data(const std::string &id, std::string &frame_id,
                 unsigned int &width, unsigned int &height, fawkes::Time &time,
                 void **data_ptr, size_t &point_size, size_t &num_points);
+
+  void get_data_and_info(const std::string &id, std::string &frame_id, bool &is_dense,
+			 unsigned int &width, unsigned int &height, fawkes::Time &time,
+			 V_PointFieldInfo &pfi, void **data_ptr, size_t &point_size, size_t &num_points);
 
   void close(const std::string &id);
 
