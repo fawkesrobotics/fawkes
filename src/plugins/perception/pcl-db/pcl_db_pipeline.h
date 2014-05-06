@@ -165,32 +165,39 @@ class PointCloudDBPipeline
 	  mongo::BSONObj pcldoc = p.getObjectField("pointcloud");
 	  std::vector<mongo::BSONElement> fields = pcldoc["field_info"].Array();
 
-	  for (unsigned int i = 0; i < pfields.size(); ++i) {
+	  if (fields.size() == pfields.size()) {
+	    for (unsigned int i = 0; i < pfields.size(); ++i) {
 #if PCL_VERSION_COMPARE(>=,1,7,0)
-	    pcl::PCLPointField &pf = pfields[i];
+	      pcl::PCLPointField &pf = pfields[i];
 #else
-	    sensor_msgs::PointField &pf = pfields[i];
+	      sensor_msgs::PointField &pf = pfields[i];
 #endif
 
-	    bool found = false;
-	    for (unsigned int j = 0; j < fields.size(); ++j) {
-	      if ((fields[j]["name"].String() == pf.name) &&
-		  (fields[j]["offset"].Int() == (int)pf.offset) &&
-		  (fields[j]["datatype"].Int() == pf.datatype) &&
-		  (fields[j]["count"].Int() == (int)pf.count) )
-	      {
-		found = true;
+	      bool found = false;
+	      for (unsigned int j = 0; j < fields.size(); ++j) {
+		if ((fields[j]["name"].String() == pf.name) &&
+		    (fields[j]["offset"].Int() == (int)pf.offset) &&
+		    (fields[j]["datatype"].Int() == pf.datatype) &&
+		    (fields[j]["count"].Int() == (int)pf.count) )
+		{
+		  found = true;
 		break;
+		}
+	      }
+	      if (! found) {
+		logger_->log_warn(name_, "Type mismatch (fields) for pointcloud "
+				  "at timestamp %lli", times[i]);
+		return TYPE_MISMATCH;
 	      }
 	    }
-	    if (! found) {
-	      logger_->log_warn(name_, "Type mismatch for pointcloud "
-				"at timestamp %lli", times[i]);
-	      return TYPE_MISMATCH;
-	    }
+	  } else {
+	    logger_->log_warn(name_, "Type mismatch (num fields) for pointcloud "
+			      "at timestamp %lli", times[i]);
+	    return TYPE_MISMATCH;
 	  }
 	} else {
-	  logger_->log_warn(name_, "No pointclouds for timestamp %lli", times[i]);
+	  logger_->log_warn(name_, "No pointclouds for timestamp %lli in %s",
+			    times[i], fq_collection.c_str());
 	  return NO_POINTCLOUD;
 	}
       }
