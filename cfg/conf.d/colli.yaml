@@ -101,6 +101,9 @@ plugins/colli:
     # Default drive mode. It's an enum, see NavigatorInterface for details.
     default: "SlowForward"
 
+    # Default drive mode for escaping. You can choose between potential_field and basic
+    default_escape: "potential_field"
+
     slow:
       # Max translation/rotation velocities
       max_trans: 1.0

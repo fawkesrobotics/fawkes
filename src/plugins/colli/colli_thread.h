@@ -4,6 +4,7 @@
  *
  *  Created: Wed Oct 16 18:00:00 2013
  *  Copyright  2013-2014  Bahram Maleki-Fard
+ *                  2014  Tobias Neumann
  *
  ****************************************************************************/
 
@@ -151,6 +152,7 @@ class ColliThread
   float cfg_min_long_dist_prepos_;/**< The minimum distance to drive to a pre-positino of a target in long distance */
   float cfg_min_rot_dist_;        /**< The minimum rotation distance to rotate, when at target */
   float cfg_target_pre_pos_;      /**< Distance to target pre-position (only if colli_state_t == DriveToOrientPoint) */
+  fawkes::colli_escape_mode_t cfg_escape_mode;
 
   std::string cfg_frame_base_;    /**< The frame of the robot's base */
   std::string cfg_frame_laser_;   /**< The frame of the laser */

@@ -4,6 +4,7 @@
  *
  *  Created: Sat Jul 13 12:00:00 2013
  *  Copyright  2013-2014  Bahram Maleki-Fard
+ *                  2014  Tobias Neumann
  *
  ****************************************************************************/
 
@@ -88,6 +89,16 @@ ColliThread::init()
   cfg_iface_laser_        = config->get_string((cfg_prefix + "interface/laser").c_str());
   cfg_iface_colli_        = config->get_string((cfg_prefix + "interface/colli").c_str());
   cfg_iface_read_timeout_ = config->get_float((cfg_prefix + "interface/read_timeout").c_str());
+
+  std::string escape_mode = config->get_string((cfg_prefix + "drive_mode/default_escape").c_str());
+  if ( escape_mode.compare("potential_field") == 0 ) {
+    cfg_escape_mode = fawkes::colli_escape_mode_t::potential_field;
+  } else if ( escape_mode.compare("basic") == 0 ) {
+    cfg_escape_mode = fawkes::colli_escape_mode_t::basic;
+  } else {
+    cfg_escape_mode = fawkes::colli_escape_mode_t::basic;
+    throw fawkes::Exception("Default escape drive_mode is unknown");
+  }
 
   cfg_prefix += "occ_grid/";
   m_OccGridWidth        = config->get_float((cfg_prefix + "width").c_str());
@@ -465,7 +476,9 @@ ColliThread::colli_execute_()
 
         logger->log_warn(name(), "Escape mode, escaping!");
         m_pSelectDriveMode->SetLocalTarget( m_LocalTarget.x, m_LocalTarget.y );
-        m_pSelectDriveMode->setGridInformation(m_pLaserOccGrid, m_RoboGridPos.x, m_RoboGridPos.y);
+        if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {
+          m_pSelectDriveMode->setGridInformation(m_pLaserOccGrid, m_RoboGridPos.x, m_RoboGridPos.y);
+        }
         m_pSelectDriveMode->Update( true );  // <-- this calls the ESCAPE mode!
         m_ProposedTranslation = m_pSelectDriveMode->GetProposedTranslation();
         m_ProposedRotation    = m_pSelectDriveMode->GetProposedRotation();

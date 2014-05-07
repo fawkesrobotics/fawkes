@@ -5,6 +5,7 @@
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
  *             2013  Bahram Maleki-Fard
+ *             2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -48,7 +49,8 @@ public:
                     Laser* laser,
                     NavigatorInterface* target,
                     Logger* logger,
-                    Configuration* config );
+                    Configuration* config,
+                    fawkes::colli_escape_mode_t escape_mode = fawkes::colli_escape_mode_t::basic);
   ~CSelectDriveMode( );
 
   ///\brief Set local target point before update!
@@ -77,6 +79,7 @@ private:
 
   fawkes::Logger* logger_;
   fawkes::Configuration* config_;
+  fawkes::colli_escape_mode_t cfg_escape_mode;
 
   // Vector of drive modes
   std::vector< fawkes::CAbstractDriveMode * > m_vDriveModeList;

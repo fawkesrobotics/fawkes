@@ -5,6 +5,7 @@
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
  *             2013  Bahram Maleki-Fard
+ *             2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,11 +21,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include "../common/types.h"
 #include "select_drive_mode.h"
 #include "abstract_drive_mode.h"
 
 // INCLUDE HERE YOUR DRIVE MODES!!!
 #include "stop_drive_mode.h"
+#include "escape_drive_mode.h"
 #include "escape_potential_field_drive_mode.h"
 #include "slow_forward_drive_mode.h"
 #include "slow_backward_drive_mode.h"
@@ -66,9 +69,11 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
                                     Laser* laser,
                                     NavigatorInterface* target,
                                     Logger* logger,
-                                    Configuration* config )
+                                    Configuration* config,
+                                    fawkes::colli_escape_mode_t escape_mode )
  : logger_( logger ),
-   config_( config )
+   config_( config ),
+   cfg_escape_mode( escape_mode )
 {
   logger_->log_info("CSelectDriveMode", "(Constructor): Entering");
   m_EscapeFlag   = 0;       // no escaping at the beginning
@@ -89,9 +94,14 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
 
   // and here an example of using extra data, e.g. the laser for escape...
   // escape drive mode
-  m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldDriveModule( logger, config) );
-
-
+  if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldDriveModule( logger, config) );
+  } else if (cfg_escape_mode == fawkes::colli_escape_mode_t::basic) {
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( laser, logger, config) );
+  } else {
+    logger_->log_error("CSelectDriveMode", "Unknown escape drive mode. Using basic as default");
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( laser, logger, config) );
+  }
 
 
   // SLOW MODES

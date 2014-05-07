@@ -4,6 +4,7 @@
  *
  *  Created: Tue Mar 25 21:51:11 2014
  *  Copyright  2014  Bahram Maleki-Fard
+ *             2014  Tobias Neumann
  *
  ****************************************************************************/
 
@@ -45,6 +46,12 @@ typedef struct {
   cart_coord_2d_t local_target; /**< local target */
   cart_coord_2d_t local_trajec; /**< local trajectory */
 } colli_data_t;
+
+/** Colli Escape modes */
+typedef enum {
+  potential_field,
+  basic
+} colli_escape_mode_t;
 
 } // end namespace firevision
 
