@@ -90,8 +90,8 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser * laser, Logger* logger, Configu
   // calculate laser offset from robot center
   offset_base_.x=0;
   offset_base_.y=0;
-  offset_laser_.x = m_pRoboShape->GetLaserOffsetX() - m_pRoboShape->GetWidthX()/2.f;
-  offset_laser_.y = m_pRoboShape->GetLaserOffsetY() - m_pRoboShape->GetWidthY()/2.f;
+  offset_laser_.x = m_pRoboShape->GetCompleteWidthX()/2.f - m_pRoboShape->GetRobotLengthforDegree(0);
+  offset_laser_.y = m_pRoboShape->GetCompleteWidthY()/2.f - m_pRoboShape->GetRobotLengthforDegree(90);
   logger->log_debug("CLaserOccupancyGrid", "Laser (x,y) offset from robo-center is (%f, %f)",
                     offset_laser_.x, offset_laser_.y);
 
