@@ -96,9 +96,16 @@ class ClipsProtobufCommunicator
   void          clips_pb_disconnect(long int client_id);
   void          clips_pb_broadcast(long int peer_id, void *msgptr);
   void          clips_pb_enable_server(int port);
+
   long int      clips_pb_peer_create(std::string host,
 				     int send_port, int recv_port);
+  long int      clips_pb_peer_create_crypto(std::string host,
+					    int send_port, int recv_port,
+					    std::string crypto_key = "", std::string cipher = "");
   void          clips_pb_peer_destroy(long int peer_id);
+  void          clips_pb_peer_setup_crypto(long int peer_id,
+					   std::string crypto_key, std::string cipher);
+
   CLIPS::Value  clips_pb_connect(std::string host, int port);
 
 
