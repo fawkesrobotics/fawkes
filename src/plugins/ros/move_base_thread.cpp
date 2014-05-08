@@ -49,6 +49,18 @@ RosMoveBaseThread::init()
   cfg_base_frame_  = config->get_string("/frames/base");
   cfg_fixed_frame_ = config->get_string("/frames/fixed");
 
+  // basic sanity check, test if a node named move_base has been launched
+  // of course it might have a different name, but try at least the obvious
+  ros::V_string nodes;
+  if (ros::master::getNodes(nodes)) {
+    for (size_t i = 0; i < nodes.size(); ++i) {
+      if (nodes[i] == "/move_base" || nodes[i] == "/move_base_node") {
+	throw Exception("move_base appears to be already running"
+			" (node %s detected)", nodes[i].c_str());
+      }
+    }
+  }
+
   try {
     nav_navgraph_if_ = blackboard->open_for_reading<NavigatorInterface>("Pathplan");
     nav_colli_if_  = blackboard->open_for_reading<NavigatorInterface>("Navigator");
