@@ -65,6 +65,10 @@ LIBS_ros_joint = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect JointInterface
 OBJS_ros_joint = joint_plugin.o joint_thread.o
 
+LIBS_ros_move_base = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	      fawkesinterface fawkestf fawkesrosaspect NavigatorInterface
+OBJS_ros_move_base = move_base_plugin.o move_base_thread.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
 	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint)
@@ -169,7 +173,18 @@ ifeq ($(HAVE_ROS),1)
 				 $(call ros-pkg-lflags,actionlib) \
 				 $(call boost-lib-ldflags,thread) \
 				 $(LDFLAGS_TF)
-        PLUGINS_all += $(PLUGINDIR)/ros-navigator.so
+
+        CFLAGS_move_base_thread += $(call ros-pkg-cflags,move_base_msgs) \
+				   $(call ros-pkg-cflags,actionlib) \
+				   $(call boost-lib-cflags,thread) \
+				   $(CFLAGS) $(CFLAGS_TF)
+        CFLAGS_move_base_plugin = $(CFLAGS_move_base_thread)
+        LDFLAGS_ros_move_base += $(call ros-pkg-lflags,move_base_msgs) \
+				 $(call ros-pkg-lflags,actionlib) \
+				 $(call boost-lib-ldflags,thread) -lpthread \
+				 $(LDFLAGS_TF)
+
+        PLUGINS_all += $(PLUGINDIR)/ros-navigator.so $(PLUGINDIR)/ros-move-base.so
       else
         WARN_TARGETS += warning_navigator_tf
       endif
@@ -218,11 +233,11 @@ warning_odometry:
 warning_geometry_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS cmdvel Plugin$(TNORMAL) (ROS package geometry_msgs not found)"
 warning_move_base_msgs:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator Plugin$(TNORMAL) (ROS package move_base_msgs not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator and move_base plugins$(TNORMAL) (ROS package move_base_msgs not found)"
 warning_navigator_tf:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator Plugin$(TNORMAL) (Fawkes TF library not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator and move_base plugins$(TNORMAL) (Fawkes TF library not available)"
 warning_actionlib:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator Plugin$(TNORMAL) (ROS package actionlib not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator and move_base plugins$(TNORMAL) (ROS package actionlib not found)"
 warning_sensor_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS JointState Plugin$(TNORMAL) (ROS package sensor_msgs not found)"
 endif
