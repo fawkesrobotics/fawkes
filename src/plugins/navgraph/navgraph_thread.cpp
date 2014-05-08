@@ -532,8 +532,8 @@ NavGraphThread::node_reached()
 size_t
 NavGraphThread::shortcut_possible()
 {
-  if (plan_.size() <= 1) {
-    logger->log_debug(name(), "Cannot shortcut for last node or if plan empty");
+  if (plan_.size() < 1) {
+    logger->log_debug(name(), "Cannot shortcut if plan empty");
     return 0;
   }
 
