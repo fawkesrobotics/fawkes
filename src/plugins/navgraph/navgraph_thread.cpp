@@ -212,7 +212,8 @@ NavGraphThread::loop()
 
       if (! plan_.empty()) {
         try {
-          logger->log_info(name(), "Sending next goal after node reached");
+          logger->log_info(name(), "Sending next goal %s after node reached",
+			   plan_[0].name().c_str());
           send_next_goal();
         } catch (Exception &e) {
           logger->log_warn(name(), "Failed to send next goal (node reached)");
