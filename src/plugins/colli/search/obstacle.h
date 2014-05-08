@@ -39,7 +39,6 @@ namespace fawkes
 /** @class ColliFastObstacle <plugins/colli/search/obstacle.h>
  * This is an implementation of a a fast obstacle.
  */
-
 class ColliFastObstacle
 {
  public:
@@ -71,10 +70,11 @@ class ColliFastObstacle
   }
 
  protected:
-  // the occ cells, size is dividable through 3, 'cause:
-  // [i]   = x coord,
-  // [i+1] = y coord,
-  // [i+2] = costs
+  /** Aligned array of the occ cells, size is dividable through 3, because:
+   * [i]   = x coord,
+   * [i+1] = y coord,
+   * [i+2] = costs
+   */
   std::vector< int > occupied_cells_;
 
  private:
@@ -82,12 +82,18 @@ class ColliFastObstacle
   int key_;
 };
 
+/** @class ColliFastRectangle
+ * This is an implementation of a a fast rectangle.
+ */
 class ColliFastRectangle : public ColliFastObstacle
 {
  public:
   ColliFastRectangle(int width, int height);
 };
 
+/** @class ColliFastEllipse
+ * This is an implementation of a a fast ellipse.
+ */
 class ColliFastEllipse : public ColliFastObstacle
 {
  public:

@@ -52,7 +52,9 @@ class ColliObstacleMap
 
 };
 
-/** Constructor. */
+/** Constructor.
+ * @param is_rectangle Defines if obstacles are rectangles or ellipses(=default).
+ */
 inline
 ColliObstacleMap::ColliObstacleMap(bool is_rectangle)
 {
