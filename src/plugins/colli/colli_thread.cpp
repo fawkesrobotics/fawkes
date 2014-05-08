@@ -169,12 +169,21 @@ ColliThread::set_vis_thread(ColliVisualizationThread* vis_thread)
   vis_thread_ = vis_thread;
 }
 
+/** Checks if the colli is final.
+ * @return True if colli is final, false otherwise.
+ */
 bool
 ColliThread::is_final() const
 {
   return colli_data_.final;
 }
 
+/** Sends a goto-command, using global coordinates.
+ * @param x Global x-coordinate of destination
+ * @param y Global y-coordinate of destination
+ * @param ori Global orientation of robot at destination
+ * @param iface This interface holds the colli-parameters for the new destination
+ */
 void
 ColliThread::colli_goto(float x, float y, float ori, NavigatorInterface* iface)
 {
@@ -184,6 +193,12 @@ ColliThread::colli_goto(float x, float y, float ori, NavigatorInterface* iface)
   colli_goto_(x, y, ori, iface);
 }
 
+/** Sends a goto-command, using relative coordinates.
+ * @param x Relative x-coordinate of destination
+ * @param y Relative y-coordinate of destination
+ * @param ori Relative orientation of robot at destination
+ * @param iface This interface holds the colli-parameters for the new destination
+ */
 void
 ColliThread::colli_relgoto(float x, float y, float ori, NavigatorInterface* iface)
 {
@@ -204,6 +219,8 @@ ColliThread::colli_relgoto(float x, float y, float ori, NavigatorInterface* ifac
   this->colli_goto_(colliTargetX, colliTargetY, colliTargetO, iface);
 }
 
+/** Sends a stop-command.
+ * Colli will stop and discard the previous destinations. */
 void
 ColliThread::colli_stop()
 {

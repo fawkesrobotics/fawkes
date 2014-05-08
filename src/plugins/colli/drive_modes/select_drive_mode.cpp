@@ -153,7 +153,10 @@ CSelectDriveMode::~CSelectDriveMode()
   logger_->log_info("CSelectDriveMode", "(Destructor): Exiting");
 }
 
-
+/** Set local target point before update!
+ * @param localTargetX x-coordinate
+ * @param localTargetY y-coordinate
+ */
 void
 CSelectDriveMode::SetLocalTarget( float localTargetX, float localTargetY )
 {
@@ -161,7 +164,10 @@ CSelectDriveMode::SetLocalTarget( float localTargetX, float localTargetY )
   m_LocalTargetY = localTargetY;
 }
 
-
+/** Set local target trajectory before update!
+ * @param localTrajecX x-coordinate
+ * @param localTrajecY y-coordinate
+ */
 void
 CSelectDriveMode::SetLocalTrajec( float localTrajecX, float localTrajecY )
 {
@@ -194,6 +200,12 @@ CSelectDriveMode::GetProposedRotation()
 /* ****************************************************************************** */
 /* ****************************************************************************** */
 
+/** Pick the drive-mode that should be used and calculate the proposed translation
+ * and rotation for the current target (which is set by SetLocalTarget() and
+ * SetLocalTrajec(), so make sure to call them beforehand).
+ * Update() has to be called before the proposed values are fetched.
+ * @param escape Set to true if we want to enter escape-mode
+ */
 void
 CSelectDriveMode::Update( bool escape )
 {

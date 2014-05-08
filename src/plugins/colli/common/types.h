@@ -33,17 +33,17 @@ namespace fawkes {
 
 /** Colli States */
 typedef enum {
-  NothingToDo,          // Indicating that nothing is to do
-  OrientAtTarget,       // Indicating that the robot is at target and has to orient
-  DriveToOrientPoint,   // Drive to the orientation point
-  DriveToTarget,        // Drive to the target
+  NothingToDo,          /**< Indicating that nothing is to do */
+  OrientAtTarget,       /**< Indicating that the robot is at target and has to orient */
+  DriveToOrientPoint,   /**< Drive to the orientation point */
+  DriveToTarget,        /**< Drive to the target */
 } colli_state_t;
 
-/** Colli States */
+/** Colli data, refering to current movement */
 typedef struct {
-  bool final;
-  cart_coord_2d_t local_target;
-  cart_coord_2d_t local_trajec;
+  bool final;                   /**< final-status */
+  cart_coord_2d_t local_target; /**< local target */
+  cart_coord_2d_t local_trajec; /**< local trajectory */
 } colli_data_t;
 
 } // end namespace firevision

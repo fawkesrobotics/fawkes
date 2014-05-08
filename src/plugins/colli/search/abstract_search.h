@@ -49,6 +49,10 @@ class CAbstractSearch
 
   /** update complete plan things
    *  precondition: the occupancy grid has to be updated previously!
+   * @param roboX Robot x position in grid
+   * @param roboY Robot y position in grid
+   * @param targetX Target x position in grid
+   * @param targetY Target y position in grid
    */
   virtual void Update( int roboX, int roboY, int targetX, int targetY ) = 0;
 

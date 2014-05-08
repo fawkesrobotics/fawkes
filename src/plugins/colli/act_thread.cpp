@@ -42,7 +42,9 @@ using namespace std;
  * and sending commands to the colli.
  */
 
-/** Constructor. */
+/** Constructor.
+ * @param colli_thread The continuous colli thread that handles the colli behavior
+ */
 ColliActThread::ColliActThread(ColliThread* colli_thread)
   : Thread("ColliActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
