@@ -66,7 +66,7 @@ namespace protobuf_clips {
  */
 ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *env,
 						     fawkes::Mutex &env_mutex)
-  : clips_(env), clips_mutex_(env_mutex), server_(NULL), peer_(NULL)
+  : clips_(env), clips_mutex_(env_mutex), server_(NULL)
 {
   message_register_ = new MessageRegister();
   setup_clips();
@@ -80,7 +80,7 @@ ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *env,
 ClipsProtobufCommunicator::ClipsProtobufCommunicator(CLIPS::Environment *env,
 						     fawkes::Mutex &env_mutex,
 						     std::vector<std::string> &proto_path)
-  : clips_(env), clips_mutex_(env_mutex), server_(NULL), peer_(NULL)
+  : clips_(env), clips_mutex_(env_mutex), server_(NULL)
 {
   message_register_ = new MessageRegister(proto_path);
   setup_clips();
@@ -106,7 +106,6 @@ ClipsProtobufCommunicator::~ClipsProtobufCommunicator()
 
   delete message_register_;
   delete server_;
-  delete peer_;
 }
 
 
@@ -137,9 +136,9 @@ ClipsProtobufCommunicator::setup_clips()
   ADD_FUNCTION("pb-send", (sigc::slot<void, long int, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_send))));
   ADD_FUNCTION("pb-server-enable", (sigc::slot<void, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::enable_server))));
   ADD_FUNCTION("pb-server-disable", (sigc::slot<void>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::disable_server))));
-  ADD_FUNCTION("pb-peer-enable", (sigc::slot<void, std::string, int, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::enable_peer))));
-  ADD_FUNCTION("pb-peer-disable", (sigc::slot<void>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::disable_peer))));
-  ADD_FUNCTION("pb-broadcast", (sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_broadcast))));
+  ADD_FUNCTION("pb-peer-create", (sigc::slot<long int, std::string, int, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_peer_create))));
+  ADD_FUNCTION("pb-peer-destroy", (sigc::slot<void, long int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_peer_destroy))));
+  ADD_FUNCTION("pb-broadcast", (sigc::slot<void, long int, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_broadcast))));
   ADD_FUNCTION("pb-connect", (sigc::slot<long int, std::string, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_client_connect))));
   ADD_FUNCTION("pb-disconnect", (sigc::slot<void, long int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_disconnect))));
 }
@@ -179,32 +178,49 @@ ClipsProtobufCommunicator::disable_server()
  * @param address IP address to send messages to
  * @param send_port UDP port to send messages to
  * @param recv_port UDP port to receive messages on, 0 to use the same as the @p send_port
+ * @return peer identifier
  */
-void
-ClipsProtobufCommunicator::enable_peer(std::string address, int send_port,
-				       int recv_port)
+long int
+ClipsProtobufCommunicator::clips_pb_peer_create(std::string address, int send_port,
+						int recv_port)
 {
   if (recv_port <= 0)  recv_port = send_port;
 
-  if ((send_port > 0) && ! peer_) {
-    peer_ = new protobuf_comm::ProtobufBroadcastPeer(address, send_port, recv_port,
-						     message_register_, PB_FRAME_V1);
+  if (send_port > 0) {
+    protobuf_comm::ProtobufBroadcastPeer *peer =
+      new protobuf_comm::ProtobufBroadcastPeer(address, send_port, recv_port,
+					       message_register_);
 
-    peer_->signal_received()
-      .connect(boost::bind(&ClipsProtobufCommunicator::handle_peer_msg, this, _1, _2, _3, _4));
-    peer_->signal_recv_error()
-      .connect(boost::bind(&ClipsProtobufCommunicator::handle_peer_recv_error, this, _1, _2));
-    peer_->signal_send_error()
-      .connect(boost::bind(&ClipsProtobufCommunicator::handle_peer_send_error, this, _1));
+    long int peer_id;
+    {
+      fawkes::MutexLocker lock(&map_mutex_);
+      peer_id = ++next_client_id_;
+      peers_[peer_id] = peer;
+    }
+
+    peer->signal_received()
+      .connect(boost::bind(&ClipsProtobufCommunicator::handle_peer_msg, this, peer_id, _1, _2, _3, _4));
+    peer->signal_recv_error()
+      .connect(boost::bind(&ClipsProtobufCommunicator::handle_peer_recv_error, this, peer_id, _1, _2));
+    peer->signal_send_error()
+      .connect(boost::bind(&ClipsProtobufCommunicator::handle_peer_send_error, this, peer_id, _1));
+
+    return peer_id;
+  } else {
+    return 0;
   }
 }
 
-/** Disable peer. */
+/** Disable peer.
+ * @param peer_id ID of the peer to destroy
+ */
 void
-ClipsProtobufCommunicator::disable_peer()
+ClipsProtobufCommunicator::clips_pb_peer_destroy(long int peer_id)
 {
-  delete peer_;
-  peer_ = NULL;
+  if (peers_.find(peer_id) != peers_.end()) {
+    delete peers_[peer_id];
+    peers_.erase(peer_id);
+  }
 }
 
 
@@ -546,7 +562,7 @@ ClipsProtobufCommunicator::clips_pb_client_connect(std::string host, int port)
 {
   if (port <= 0) return false;
 
-  ProtobufStreamClient *client = new ProtobufStreamClient(message_register_, PB_FRAME_V1);
+  ProtobufStreamClient *client = new ProtobufStreamClient(message_register_);
 
   long int client_id;
   {
@@ -589,6 +605,9 @@ ClipsProtobufCommunicator::clips_pb_send(long int client_id, void *msgptr)
     } else if (clients_.find(client_id) != clients_.end()) {
       //printf("***** SENDING via CLIENT\n");
       clients_[client_id]->send(*m);
+    } else if (peers_.find(client_id) != peers_.end()) {
+      //printf("***** SENDING via CLIENT\n");
+      peers_[client_id]->send(*m);
     } else {
       //printf("Client ID %li is unknown, cannot send message of type %s\n",
       //     client_id, (*m)->GetTypeName().c_str());
@@ -604,7 +623,7 @@ ClipsProtobufCommunicator::clips_pb_send(long int client_id, void *msgptr)
 
 
 void
-ClipsProtobufCommunicator::clips_pb_broadcast(void *msgptr)
+ClipsProtobufCommunicator::clips_pb_broadcast(long int peer_id, void *msgptr)
 {
   std::shared_ptr<google::protobuf::Message> *m =
     static_cast<std::shared_ptr<google::protobuf::Message> *>(msgptr);
@@ -612,11 +631,13 @@ ClipsProtobufCommunicator::clips_pb_broadcast(void *msgptr)
     //logger_->log_warn("RefBox", "Cannot send broadcast: invalid message");
     return;
   }
-  if (!peer_)  return;
+
+  fawkes::MutexLocker lock(&map_mutex_);
+  if (peers_.find(peer_id) == peers_.end())  return;
 
   ////logger_->log_info("RefBox", "Broadcasting %s", (*m)->GetTypeName().c_str());
   try {
-    peer_->send(*m);
+    peers_[peer_id]->send(*m);
   } catch (google::protobuf::FatalException &e) {
     //logger_->log_warn("RefBox", "Failed to broadcast message of type %s: %s",
     //   (*m)->GetTypeName().c_str(), e.what());
@@ -878,14 +899,15 @@ ClipsProtobufCommunicator::handle_server_client_fail(ProtobufStreamServer::Clien
  * @param msg the message
  */
 void
-ClipsProtobufCommunicator::handle_peer_msg(boost::asio::ip::udp::endpoint &endpoint,
+ClipsProtobufCommunicator::handle_peer_msg(long int peer_id,
+					   boost::asio::ip::udp::endpoint &endpoint,
 					   uint16_t component_id, uint16_t msg_type,
 					   std::shared_ptr<google::protobuf::Message> msg)
 {
   fawkes::MutexLocker lock(&clips_mutex_);
   std::pair<std::string, unsigned short> endpp =
     std::make_pair(endpoint.address().to_string(), endpoint.port());
-  clips_assert_message(endpp, component_id, msg_type, msg, CT_PEER);
+  clips_assert_message(endpp, component_id, msg_type, msg, CT_PEER, peer_id);
 }
 
 
@@ -894,7 +916,8 @@ ClipsProtobufCommunicator::handle_peer_msg(boost::asio::ip::udp::endpoint &endpo
  * @param msg error message
  */
 void
-ClipsProtobufCommunicator::handle_peer_recv_error(boost::asio::ip::udp::endpoint &endpoint, std::string msg)
+ClipsProtobufCommunicator::handle_peer_recv_error(long int peer_id,
+						  boost::asio::ip::udp::endpoint &endpoint, std::string msg)
 {
   //logger_->log_warn("RefBox", "Failed to receive peer message from %s:%u: %s", msg.c_str(),
   //		    endpoint.address().to_string().c_str(), endpoint.port());
@@ -904,7 +927,7 @@ ClipsProtobufCommunicator::handle_peer_recv_error(boost::asio::ip::udp::endpoint
  * @param msg error message
  */
 void
-ClipsProtobufCommunicator::handle_peer_send_error(std::string msg)
+ClipsProtobufCommunicator::handle_peer_send_error(long int peer_id, std::string msg)
 {
   //logger_->log_warn("RefBox", "Failed to send peer message: %s", msg.c_str());
 }

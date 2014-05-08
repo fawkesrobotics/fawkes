@@ -3,7 +3,7 @@
  *  communicator.h - protobuf network communication for CLIPS
  *
  *  Created: Tue Apr 16 13:41:13 2013
- *  Copyright  2013  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2013-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  Redistribution and use in source and binary forms, with or without
@@ -63,10 +63,7 @@ class ClipsProtobufCommunicator
   ~ClipsProtobufCommunicator();
 
   void enable_server(int port);
-  void enable_peer(std::string address, int send_port, int recv_port = 0);
-
   void disable_server();
-  void disable_peer();
 
   /** Get Protobuf server.
    * @return protobuf server */
@@ -97,10 +94,11 @@ class ClipsProtobufCommunicator
   void          clips_pb_send(long int client_id, void *msgptr);
   long int      clips_pb_client_connect(std::string host, int port);
   void          clips_pb_disconnect(long int client_id);
-  void          clips_pb_broadcast(void *msgptr);
+  void          clips_pb_broadcast(long int peer_id, void *msgptr);
   void          clips_pb_enable_server(int port);
-  void          clips_pb_enable_peer(std::string host,
+  long int      clips_pb_peer_create(std::string host,
 				     int send_port, int recv_port);
+  void          clips_pb_peer_destroy(long int peer_id);
   CLIPS::Value  clips_pb_connect(std::string host, int port);
 
 
@@ -124,11 +122,12 @@ class ClipsProtobufCommunicator
 				 uint16_t component_id, uint16_t msg_type,
 				 std::string msg);
 
-  void handle_peer_msg(boost::asio::ip::udp::endpoint &endpoint,
+  void handle_peer_msg(long int peer_id,
+		       boost::asio::ip::udp::endpoint &endpoint,
 		       uint16_t component_id, uint16_t msg_type,
 		       std::shared_ptr<google::protobuf::Message> msg);
-  void handle_peer_recv_error(boost::asio::ip::udp::endpoint &endpoint, std::string msg);
-  void handle_peer_send_error(std::string msg);
+  void handle_peer_recv_error(long int peer_id, boost::asio::ip::udp::endpoint &endpoint, std::string msg);
+  void handle_peer_send_error(long int peer_id, std::string msg);
 
   void handle_client_connected(long int client_id);
   void handle_client_disconnected(long int client_id,
@@ -145,16 +144,16 @@ class ClipsProtobufCommunicator
 
   protobuf_comm::MessageRegister       *message_register_;
   protobuf_comm::ProtobufStreamServer  *server_;
-  protobuf_comm::ProtobufBroadcastPeer *peer_;
-
   
   fawkes::Mutex map_mutex_;
   long int next_client_id_;
-  std::map<long int, protobuf_comm::ProtobufStreamServer::ClientID> server_clients_;
 
+
+  std::map<long int, protobuf_comm::ProtobufStreamServer::ClientID> server_clients_;
   typedef std::map<protobuf_comm::ProtobufStreamServer::ClientID, long int> RevServerClientMap;
   RevServerClientMap rev_server_clients_;
   std::map<long int, protobuf_comm::ProtobufStreamClient *>  clients_;
+  std::map<long int, protobuf_comm::ProtobufBroadcastPeer *> peers_;
 
   std::map<long int, std::pair<std::string, unsigned short>> client_endpoints_;
 
