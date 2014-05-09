@@ -126,7 +126,7 @@ proc(smart_control, search(minimize_motion(0)) ).  % eventually succeeds
 
 %%%%%%%%% Main cycle from embedded eclipse %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-cycle :-	indigolog(smart_control).
+run :-	indigolog(smart_control).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
