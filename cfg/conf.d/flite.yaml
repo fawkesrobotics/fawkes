@@ -1,0 +1,9 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/flite
+---
+flite:
+  # Alsa device to use for output. You can find out the available
+  # devices using the command "aplay -L".
+  soundcard: "default"

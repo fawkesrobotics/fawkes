@@ -55,6 +55,8 @@ FliteSynthThread::init()
   __speechsynth_if = blackboard->open_for_writing<SpeechSynthInterface>("Flite");
   __voice = register_cmu_us_kal(NULL);
 
+  __cfg_soundcard = config->get_string("/flite/soundcard");
+
   bbil_add_message_interface(__speechsynth_if);
   blackboard->register_listener(this);
 
@@ -139,7 +141,7 @@ FliteSynthThread::play_wave(cst_wave *wave)
   snd_pcm_t *pcm;
   float duration = get_duration(wave);
   int err;
-  if ((err = snd_pcm_open(&pcm, "default", SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
+  if ((err = snd_pcm_open(&pcm, __cfg_soundcard.c_str(), SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
     throw Exception("Failed to open PCM: %s", snd_strerror(err));
   }
   snd_pcm_nonblock(pcm, 0);

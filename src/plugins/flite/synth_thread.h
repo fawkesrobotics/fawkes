@@ -31,6 +31,8 @@
 #include <aspect/clock.h>
 #include <blackboard/interface_listener.h>
 
+#include <string>
+
 #include <flite/flite.h>
 
 namespace fawkes {
@@ -66,6 +68,8 @@ class FliteSynthThread
 
  private:
   fawkes::SpeechSynthInterface   *__speechsynth_if;
+
+  std::string __cfg_soundcard;
 
   cst_voice  *__voice;
 };
