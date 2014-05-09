@@ -806,6 +806,8 @@ ClipsProtobufCommunicator::clips_assert_message(std::pair<std::string, unsigned 
 {
   CLIPS::Template::pointer temp = clips_->get_template("protobuf-msg");
   if (temp) {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
     void *ptr = new std::shared_ptr<google::protobuf::Message>(msg);
     CLIPS::Fact::pointer fact = CLIPS::Fact::create(*clips_, temp);
     fact->set_slot("type", msg->GetTypeName());
@@ -813,6 +815,10 @@ ClipsProtobufCommunicator::clips_assert_message(std::pair<std::string, unsigned 
     fact->set_slot("msg-type", msg_type);
     fact->set_slot("rcvd-via",
       CLIPS::Value((client_id == 0) ? "BROADCAST" : "STREAM", CLIPS::TYPE_SYMBOL));
+    CLIPS::Values rcvd_at(2, CLIPS::Value(CLIPS::TYPE_INTEGER));
+    rcvd_at[0] = tv.tv_sec;
+    rcvd_at[1] = tv.tv_usec;
+    fact->set_slot("rcvd-at", rcvd_at);
     CLIPS::Values host_port(2, CLIPS::Value(CLIPS::TYPE_STRING));
     host_port[0] = endpoint.first;
     host_port[1] = CLIPS::Value(endpoint.second);
