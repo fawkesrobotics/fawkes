@@ -13,6 +13,7 @@
   (slot msg-type (type INTEGER))
   (slot rcvd-via (type SYMBOL) (allowed-values STREAM BROADCAST))
   (multislot rcvd-from (cardinality 2 2))
+  (multislot rcvd-at (type INTEGER) (cardinality 2 2))
   (slot client-type (type SYMBOL) (allowed-values SERVER CLIENT PEER))
   (slot client-id (type INTEGER))
   (slot ptr (type EXTERNAL-ADDRESS))
@@ -27,12 +28,23 @@
   (slot message (type STRING))
 )
 
+(deftemplate protobuf-server-receive-failed
+  (slot comp-id (type INTEGER))
+  (slot msg-type (type INTEGER))
+  (slot rcvd-via (type SYMBOL) (allowed-values STREAM BROADCAST))
+  (multislot rcvd-from (cardinality 2 2))
+  (slot client-id (type INTEGER))
+  (slot message (type STRING))
+)
+
 (deffunction pb-is-broadcast (?rcvd-via)
   (eq ?rcvd-via BROADCAST)
 )
 
 (defrule protobuf-cleanup-receive-failed
   (declare (salience -4000))
+  ?f <- (protobuf-server-receive-failed (comp-id ?cid) (msg-type ?mt)
+					(rcvd-from ?host ?port) (message ?msg))
   ?f <- (protobuf-receive-failed (comp-id ?cid) (msg-type ?mt)
 				 (rcvd-from ?host ?port) (message ?msg))
   =>
@@ -45,31 +57,6 @@
   ?pf <- (protobuf-msg)
   =>
   (retract ?pf)
-)
-
-(defrule protobuf-load-config
-  (declare (salience -900))
-  (init)
-  =>
-  (config-load "/clips-protobuf")
-)
-
-(defrule protobuf-silence-debug-facts
-  (declare (salience -1000))
-  (init)
-  (confval (path "/clips-protobuf/unwatch-facts") (type STRING) (is-list TRUE) (list-value $?lv))
-  =>
-  (printout t "Disabling watching of the following facts: " ?lv crlf)
-  (foreach ?v ?lv (unwatch facts (sym-cat ?v)))
-)
-
-(defrule silence-debug-rules
-  (declare (salience -1000))
-  (init)
-  (confval (path "/clips-protobuf/unwatch-rules") (type STRING) (is-list TRUE) (list-value $?lv))
-  =>
-  (printout t "Disabling watching of the following rules: " ?lv crlf)
-  (foreach ?v ?lv (unwatch rules (sym-cat ?v)))
 )
 
 ; (defrule protobuf-client-connected
