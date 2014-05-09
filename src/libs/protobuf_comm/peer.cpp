@@ -307,17 +307,26 @@ ProtobufBroadcastPeer::setup_crypto(const std::string &key, const std::string &c
     throw std::runtime_error("Crypto support only available with V2+ frame header");
   }
 
-  crypto_enc_ = new BufferEncryptor(key, cipher);
-
-  if (! enc_in_data_) {
-    // this depends on the cipher, but nothing is two times the incoming buffer...
-    enc_in_data_size_ = 2 * in_data_size_;
-    enc_in_data_      = malloc(enc_in_data_size_);
-  }
-
-  crypto_dec_ = new BufferDecryptor(key);
-  crypto_     = true;
+  delete crypto_enc_;
+  delete crypto_dec_;
+  crypto_enc_ = NULL;
+  crypto_dec_ = NULL;
+  crypto_     = false;
   crypto_buf_ = false;
+
+  if (key != "" && cipher != "") {
+    crypto_enc_ = new BufferEncryptor(key, cipher);
+
+    if (! enc_in_data_) {
+      // this depends on the cipher, but nothing is two times the incoming buffer...
+      enc_in_data_size_ = 2 * in_data_size_;
+      enc_in_data_      = malloc(enc_in_data_size_);
+    }
+
+    crypto_dec_ = new BufferDecryptor(key);
+    crypto_     = true;
+    crypto_buf_ = false;
+  }
 }
 
 void
