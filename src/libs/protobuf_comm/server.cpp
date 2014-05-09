@@ -224,7 +224,7 @@ ProtobufStreamServer::Session::handle_read_message(const boost::system::error_co
     try {
       std::shared_ptr<google::protobuf::Message> m =
 	parent_->message_register().deserialize(in_frame_header_, *message_header,
-						(char *)in_data_ + sizeof(message_header));
+						(char *)in_data_ + sizeof(message_header_t));
       parent_->sig_rcvd_(id_, comp_id, msg_type, m);
     } catch (std::runtime_error &e) {
       // ignored, most likely unknown message tpye
