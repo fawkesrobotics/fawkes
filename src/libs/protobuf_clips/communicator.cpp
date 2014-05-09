@@ -136,10 +136,14 @@ ClipsProtobufCommunicator::setup_clips()
   ADD_FUNCTION("pb-send", (sigc::slot<void, long int, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_send))));
   ADD_FUNCTION("pb-server-enable", (sigc::slot<void, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::enable_server))));
   ADD_FUNCTION("pb-server-disable", (sigc::slot<void>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::disable_server))));
-  ADD_FUNCTION("pb-peer-create", (sigc::slot<long int, std::string, int, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_peer_create))));
+  ADD_FUNCTION("pb-peer-create", (sigc::slot<long int, std::string, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_peer_create))));
+  ADD_FUNCTION("pb-peer-create-local", (sigc::slot<long int, std::string, int, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_peer_create_local))));
   ADD_FUNCTION("pb-peer-create-crypto",
-	       (sigc::slot<long int, std::string, int, int, std::string, std::string>
+	       (sigc::slot<long int, std::string, int, std::string, std::string>
 		 (sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_peer_create_crypto))));
+  ADD_FUNCTION("pb-peer-create-local-crypto",
+	       (sigc::slot<long int, std::string, int, int, std::string, std::string>
+		 (sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_peer_create_local_crypto))));
   ADD_FUNCTION("pb-peer-destroy", (sigc::slot<void, long int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_peer_destroy))));
   ADD_FUNCTION("pb-peer-setup-crypto", (sigc::slot<void, long int, std::string, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_peer_setup_crypto))));
   ADD_FUNCTION("pb-broadcast", (sigc::slot<void, long int, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_broadcast))));
@@ -187,8 +191,8 @@ ClipsProtobufCommunicator::disable_server()
  * @return peer identifier
  */
 long int
-ClipsProtobufCommunicator::clips_pb_peer_create_crypto(std::string address, int send_port,
-						       int recv_port, std::string crypto_key, std::string cipher)
+ClipsProtobufCommunicator::clips_pb_peer_create_local_crypto(std::string address, int send_port, int recv_port,
+							     std::string crypto_key, std::string cipher)
 {
   if (recv_port <= 0)  recv_port = send_port;
 
@@ -219,15 +223,40 @@ ClipsProtobufCommunicator::clips_pb_peer_create_crypto(std::string address, int 
 
 /** Enable protobuf peer.
  * @param address IP address to send messages to
+ * @param port UDP port to send and receive messages
+ * @param crypto_key encryption key
+ * @param cipher cipher suite, see BufferEncryptor for supported types
+ * @return peer identifier
+ */
+long int
+ClipsProtobufCommunicator::clips_pb_peer_create_crypto(std::string address, int port,
+						       std::string crypto_key, std::string cipher)
+{
+  return clips_pb_peer_create_local_crypto(address, port, port, crypto_key, cipher);
+}
+
+/** Enable protobuf peer.
+ * @param address IP address to send messages to
+ * @param port UDP port to send and receive messages
+ * @return peer identifier
+ */
+long int
+ClipsProtobufCommunicator::clips_pb_peer_create(std::string address, int port)
+{
+  return clips_pb_peer_create_local_crypto(address, port, port);
+}
+
+/** Enable protobuf peer.
+ * @param address IP address to send messages to
  * @param send_port UDP port to send messages to
  * @param recv_port UDP port to receive messages on, 0 to use the same as the @p send_port
  * @return peer identifier
  */
 long int
-ClipsProtobufCommunicator::clips_pb_peer_create(std::string address, int send_port,
-						int recv_port)
+ClipsProtobufCommunicator::clips_pb_peer_create_local(std::string address, int send_port,
+						      int recv_port)
 {
-  return clips_pb_peer_create_crypto(address, send_port, recv_port);
+  return clips_pb_peer_create_local_crypto(address, send_port, recv_port);
 }
 
 
