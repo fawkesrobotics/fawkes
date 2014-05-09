@@ -285,7 +285,7 @@ p_map_graph_search_nodes()
     tail = ::list( n, tail );
   }
 
-  if ( EC_succeed != EC_arg( 1 ).unify( tail ) )
+  if ( EC_succeed != EC_arg( 2 ).unify( tail ) )
   {
     printf( "p_map_search_nodes(): could not bind return value\n" );
     return EC_fail;
