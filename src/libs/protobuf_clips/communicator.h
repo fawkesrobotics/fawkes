@@ -70,6 +70,12 @@ class ClipsProtobufCommunicator
   protobuf_comm::ProtobufStreamServer *  server() const
   { return server_; }
 
+  /** Get protobuf_comm peers.
+   * @return protobuf_comm peer */
+  const std::map<long int, protobuf_comm::ProtobufBroadcastPeer *> &
+  peers() const
+  { return peers_; }
+
   /** Get the communicator's message register.
    * @return message register */
   protobuf_comm::MessageRegister &  message_register()
