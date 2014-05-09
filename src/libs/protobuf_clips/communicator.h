@@ -75,6 +75,26 @@ class ClipsProtobufCommunicator
   protobuf_comm::MessageRegister &  message_register()
   { return *message_register_; }
 
+  /** Signal invoked for a message that has been sent to a server client.
+   * @return signal
+   */
+  boost::signals2::signal<void (protobuf_comm::ProtobufStreamServer::ClientID,
+				std::shared_ptr<google::protobuf::Message>)> &
+    signal_server_sent() { return sig_server_sent_; }
+
+  /** Signal invoked for a message that has been sent to a client.
+   * @return signal
+   */
+  boost::signals2::signal<void (std::string, unsigned short,
+				std::shared_ptr<google::protobuf::Message>)> &
+    signal_client_sent() { return sig_client_sent_; }
+
+  /** Signal invoked for a message that has been sent via broadcast.
+   * @return signal
+   */
+  boost::signals2::signal<void (long int, std::shared_ptr<google::protobuf::Message>)> &
+    signal_peer_sent() { return sig_peer_sent_; }
+
  private:
   void          setup_clips();
 
@@ -154,6 +174,12 @@ class ClipsProtobufCommunicator
 
   protobuf_comm::MessageRegister       *message_register_;
   protobuf_comm::ProtobufStreamServer  *server_;
+
+  boost::signals2::signal<void (protobuf_comm::ProtobufStreamServer::ClientID,
+				std::shared_ptr<google::protobuf::Message>)> sig_server_sent_;
+  boost::signals2::signal<void (std::string, unsigned short,
+				std::shared_ptr<google::protobuf::Message>)> sig_client_sent_;
+  boost::signals2::signal<void (long int, std::shared_ptr<google::protobuf::Message>)> sig_peer_sent_;
   
   fawkes::Mutex map_mutex_;
   long int next_client_id_;
