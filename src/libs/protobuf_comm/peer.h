@@ -75,6 +75,8 @@ class ProtobufBroadcastPeer
 			frame_header_version_t header_version = PB_FRAME_V2);
   ProtobufBroadcastPeer(const std::string address, unsigned short port,
 			const std::string crypto_key, const std::string cipher = "aes-128-ecb");
+  ProtobufBroadcastPeer(const std::string address, unsigned short port, MessageRegister *mr,
+			const std::string crypto_key, const std::string cipher = "aes-128-ecb");
   ProtobufBroadcastPeer(const std::string address, unsigned short send_to_port,
 			unsigned short recv_on_port,
 			const std::string crypto_key, const std::string cipher = "aes-128-ecb");

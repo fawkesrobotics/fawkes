@@ -192,6 +192,23 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned
   own_message_register_ = true;
 }
 
+/** Constructor with encryption.
+ * @param address IPv4 broadcast address to send to
+ * @param port IPv4 UDP port to listen on and to send to
+ * @param mr message register to query for message types
+ * @param crypto_key encryption key for messages
+ * @param cipher cipher to use for encryption
+ */ 
+ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned short port,
+					     MessageRegister *mr,
+					     const std::string crypto_key, const std::string cipher)
+  : io_service_(), resolver_(io_service_),
+    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port)),
+    message_register_(mr), own_message_register_(false)
+{
+  ctor(address, port, crypto_key, cipher);
+}
+
 
 /** Testing constructor.
  * This constructor listens and sends to different ports. It can be used to
