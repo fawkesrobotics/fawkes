@@ -631,7 +631,7 @@ ColliThread::InitializeModules()
   }
 
   // AFTER MOTOR INSTRUCT: the motor propose values object
-  m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, if_colli_target_, logger, config );
+  m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, if_colli_target_, logger, config, cfg_escape_mode );
 
   // Initialization of colli state machine:
   // Currently nothing is to accomplish
