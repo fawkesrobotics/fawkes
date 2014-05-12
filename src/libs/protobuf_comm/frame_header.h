@@ -58,8 +58,8 @@ namespace protobuf_comm {
  * V2 supports data encryption.
  */
 typedef enum {
-  PB_FRAME_V1,	///< Version 1
-  PB_FRAME_V2	///< Version 2
+  PB_FRAME_V1 = 1,	///< Version 1
+  PB_FRAME_V2 = 2	///< Version 2
 } frame_header_version_t;
 
 /** Network framing header.
@@ -72,7 +72,7 @@ typedef enum {
  * @author Tim Niemueller
  */
 typedef struct {
-  /// Frame header version indicator
+  /// Frame header version
   uint8_t  header_version;
   /// One of PB_ENCRYPTION_*
   uint8_t  cipher;
@@ -81,8 +81,8 @@ typedef struct {
   /// reserved for future use
   uint8_t  reserved_3;
   /// payload size in bytes
-  /// includes message, header,
-  /// does not include IV
+  /// includes message and
+  /// header, _not_ IV
   uint32_t  payload_size;
 } frame_header_t;
 
