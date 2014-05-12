@@ -55,8 +55,8 @@ typedef enum {
 
 /** Colli motor_instuct modes */
 typedef enum {
-  linear,
-  quadratic
+  linear,               // The enum for the linear motor instruct
+  quadratic             // The enum for the quadratic motor instruct
 } colli_motor_instruct_mode_t;
 
 } // end namespace firevision

@@ -57,11 +57,11 @@ namespace fawkes
  */
 
 /** Constructor.
- * @param motor The motor controller object
- * @param laser the Laser object
- * @param target The "colli target" NavigatorInterface
- * @param logger The fawkes logger
- * @param config The fawkes configuration
+ * @param motor       The motor controller object
+ * @param target      The "colli target" NavigatorInterface
+ * @param logger      The fawkes logger
+ * @param config      The fawkes configuration
+ * @param escape_mode The chosen escape mode
  */
 CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
                                     NavigatorInterface* target,
@@ -200,6 +200,13 @@ CSelectDriveMode::GetProposedRotation()
   return m_ProposedRotation;
 }
 
+/**
+ * Search for the escape drive mode and hands over the given information to the escape drive mode
+ * This should just be called if potential-field-escape mode is used!
+ * @param occGrid pointer to the occGrid
+ * @param roboX   robot position on the grid in x
+ * @param roboY   robot position on the grid in y
+ */
 void
 CSelectDriveMode::setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, int roboY )
 {
@@ -214,6 +221,11 @@ CSelectDriveMode::setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, i
   logger_->log_error("CSelectDriveMode", "Can't find escape drive mode to set grid information");
 }
 
+/**
+ * Search for the escape drive mode and hands over the given information to the escape drive mode
+ * This should just be called if basic-escape mode is used!
+ * @param laser_point vector of laser points
+ */
 void
 CSelectDriveMode::setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_point )
 {

@@ -36,7 +36,6 @@ namespace fawkes
  */
 
 /** Constructor.
- * @param laser The Laser object
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
@@ -166,6 +165,10 @@ CEscapeDriveModule::Update()
   }
 }
 
+/**
+ * This function sets the laser points for one escape round
+ * @param laser_point vector of laser points
+ */
 void
 CEscapeDriveModule::setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_points )
 {

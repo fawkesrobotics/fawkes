@@ -53,6 +53,7 @@ namespace fawkes
  * @param laser The Laser object
  * @param logger The fawkes logger
  * @param config The fawkes configuration
+ * @param listener The tf::Transformer
  * @param width The width of the grid (in m)
  * @param height The height of the grid (in m)
  * @param cell_width The width of a cell (in cm)

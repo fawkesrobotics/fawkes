@@ -38,15 +38,26 @@ namespace fawkes
 class CEscapeDriveModule : public CAbstractDriveMode
 {
  public:
+  /**
+   * Class to save one laser point with the needed information for the CEscapeDriveModule
+   */
   class LaserPoint {
   public:
-    double length;
-    double angle;
+    double length;  // length of the laser reading in meter
+    double angle;   // angle of the laser reading in rad [-pi, pi]
 
+    /**
+     * constructor
+     */
     LaserPoint() {
       length  = 0.;
       angle   = 0.;
     }
+    /**
+     * constructor
+     * @param l the length of the laser reading in m
+     * @param a the angle of the laser reading in rad
+     */
     LaserPoint(double l, double a) {
       length  = l;
       angle   = a;

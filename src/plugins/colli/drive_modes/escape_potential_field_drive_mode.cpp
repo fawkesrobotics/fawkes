@@ -33,13 +33,12 @@ namespace fawkes
 }
 #endif
 
-/** @class CEscapeDriveModule <plugins/colli/drive_modes/escape_drive_mode.h>
+/** @class CEscapePotentialFieldDriveModule <plugins/colli/drive_modes/escape_potential_field_drive_mode.h>
  * Class Escape-Drive-Module. This module is called, if an escape is neccessary.
  * It should try to maximize distance to the disturbing obstacle.
  */
 
 /** Constructor.
- * @param occGrid The CLaserOccupancyGrid object
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
@@ -68,6 +67,12 @@ CEscapePotentialFieldDriveModule::~CEscapePotentialFieldDriveModule()
   logger_->log_debug("CEscapeDriveModule", "(Destructor): Exiting...");
 }
 
+/**
+ * This function sets the Grid information for one escape step
+ * @param occGrid pointer to the occGrid
+ * @param roboX   robot position on the grid in x
+ * @param roboY   robot position on the grid in y
+ */
 void
 CEscapePotentialFieldDriveModule::setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, int roboY )
 {

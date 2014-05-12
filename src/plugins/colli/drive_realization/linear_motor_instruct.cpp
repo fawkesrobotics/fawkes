@@ -38,12 +38,12 @@ namespace fawkes
 
 using namespace std;
 
-/** @class CLinearMotorInstruct <plugins/colli/drive_realization/quadratic_motor_instruct.h>
+/** @class CLinearMotorInstruct <plugins/colli/drive_realization/linear_motor_instruct.h>
  * This module is a class for validity checks of drive
  * commands and sets those things with respect to the physical
  * borders of the robot.
  * For this purpose the two functions CalculateRotation and
- * CalculateTranslation are implemented quadratically ;-)
+ * CalculateTranslation are implemented linear ;-)
  */
 
 /** Constructor.
@@ -71,7 +71,9 @@ CLinearMotorInstruct::CLinearMotorInstruct( fawkes::MotorInterface* motor,
   logger_->log_debug("CLinearMotorInstruct", "(Constructor): Exiting");
 }
 
-
+/**
+ * destructor
+ */
 CLinearMotorInstruct::~CLinearMotorInstruct()
 {
   logger_->log_debug("CLinearMotorInstruct", "(Destructor): Entering");
@@ -85,6 +87,11 @@ CLinearMotorInstruct::~CLinearMotorInstruct()
  * These are dangerous! Take care while modifying. Only a minus sign too few
  *   or too much may result in non predictable motor behaviour!!!!
  * THIS FUNCTION IS THE LAST BORDER TO THE MOTOR, TAKE CARE AND PAY ATTENTION!!!
+ *
+ * @param currentTranslation  The current translation of the robot
+ * @param desiredTranslation  The desired translation of the robot
+ * @param time_factor         The time_factor (should become deprecated!)
+ * @return the new translation
  */
 float CLinearMotorInstruct::CalculateTranslation( float currentTranslation,
                  float desiredTranslation,
@@ -141,6 +148,11 @@ float CLinearMotorInstruct::CalculateTranslation( float currentTranslation,
  * These are dangerous! Take care while modifying. Only a minus sign too few
  *   or too much may result in non predictable motor behaviour!!!!
  * THIS FUNCTION IS THE LAST BORDER TO THE MOTOR, TAKE CARE AND PAY ATTENTION!!!
+ *
+ * @param currentRotation The current rotation of the robot
+ * @param desiredRotation The desired rotation of the robot
+ * @param time_factor     The time_factor (should become deprecated!)
+ * @return the new rotation
  */
 float CLinearMotorInstruct::CalculateRotation( float currentRotation,
               float desiredRotation,
