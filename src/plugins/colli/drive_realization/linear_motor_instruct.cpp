@@ -61,7 +61,7 @@ CLinearMotorInstruct::CLinearMotorInstruct( fawkes::MotorInterface* motor,
 {
   logger_->log_debug("CLinearMotorInstruct", "(Constructor): Entering");
 
-  string cfg_prefix = "/plugins/colli/quadratic_motor_instruct/";
+  string cfg_prefix = "/plugins/colli/motor_instruct/";
 
   basic_trans_acc = config_->get_float((cfg_prefix + "trans_acc").c_str());
   basic_trans_dec = config_->get_float((cfg_prefix + "trans_dec").c_str());
