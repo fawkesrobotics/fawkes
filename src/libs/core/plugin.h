@@ -93,7 +93,7 @@ typedef const char *  (* PluginDependenciesFunc) ();
  */
 #define PLUGIN_FACTORY(plugin_class)			\
   extern "C"						\
-  Plugin *						\
+  fawkes::Plugin *					\
   plugin_factory(fawkes::Configuration *config)		\
   {							\
     return new plugin_class(config);			\

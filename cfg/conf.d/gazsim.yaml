@@ -1,0 +1,65 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/gazsim
+---
+gazsim:
+  world-name: "LLSF"
+  #default robot name
+  robot-name: ""
+
+  
+  topics:
+    gps: "~/gazsim/gps/"
+    laser: "~/hokuyo/link/laser/scan"
+    gyro: "~/RobotinoSim/Gyro/"
+    infrared-puck-sensor: "~/RobotinoSim/InfraredPuckSensor/"
+    gripper-laser-left: "~/RobotinoSim/GripperLaserSensor/Left/"
+    gripper-laser-right: "~/RobotinoSim/GripperLaserSensor/Right/"
+    motor-move: "~/RobotinoSim/MotorMove/"
+    time: "~/gazsim/time-sync/"
+    message: "~/RobotinoSim/String/"
+
+  laser:
+    max_range: 5.5 
+    interface-id: "Laser urg"
+    frame-id: "/base_laser"
+    
+  webcam:
+    topic-suffix: "/webcam/link/webcam_sensor/image"
+    width: 320
+    height: 240
+    #Shared Memory Imagebuffer name
+    shm-image-id: "light_front"
+    frame: "/cam_front" #without "" in light_front.yaml?
+    
+  robotino:
+    gripper-laser-threshold: 0.18
+    gripper-laser-value-far: 0.17
+    gripper-laser-value-near: 9.99
+
+    motor:    
+      # does the odometry change if the robotino drives against an obstacle?
+      slippery-wheels-enabled: true
+      slippery-wheels-threshold: 0.8
+      moving-speed-factor: 1.0
+      rotation-speed-factor: 1.0
+
+  comm:
+    package-loss: 0.1
+    #all peers which need the comm plugin
+    # write down as follows:
+    # adrresses:  ["address_1", "address_2", ...]
+    # send-ports: [send_port_1, send_port_2, ...]
+    # revc-ports: [recv_port_1, recv_port_2, ...]
+    addresses:  []
+    send-ports: []
+    recv-ports: []
+  visualization:
+    location-scripts: "model://label/materials/scripts"
+    location-textures: "model://label/materials/textures"
+    label-arrow-name: "label/arrowredup"
+    localization:
+      #parent model::link to attach visuals on
+      parent-name: "ground_plane::link"
+      update-rate: 2.0 #in Hz

@@ -3,7 +3,7 @@
  *  gazebo.cpp - Gazebo aspect for Fawkes
  *
  *  Created: Fri Aug 24 09:24:31 2012
- *  Author Bastian Klingen
+ *  Author Bastian Klingen, Frederik Zwilling
  *
  ****************************************************************************/
 
@@ -22,6 +22,7 @@
  */
 
 #include <plugins/gazebo/aspect/gazebo.h>
+#include <stdio.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -32,9 +33,11 @@ namespace fawkes {
  * Thread aspect to get access to a Gazebo node handle.
  * Give this aspect to your thread to interact with the central Gazebo
  * node handle.
+ * You can also control the simulation by sending messages
+ * via the provided publishers
  *
  * @ingroup Aspects
- * @author Bastian Klingen
+ * @author Bastian Klingen, Frederik Zwilling
  */
 
 /** @var fawkes:LockPtr<gazebo::NodeHandle> GazeboAspect::gazebonode
@@ -62,9 +65,10 @@ GazeboAspect::~GazeboAspect()
  * @param gazebonode Gazebo node handle
  */
 void
-GazeboAspect::init_GazeboAspect(gazebo::transport::NodePtr gazebonode)
+GazeboAspect::init_GazeboAspect(gazebo::transport::NodePtr gazebonode , gazebo::transport::NodePtr gazebo_world_node)
 {
   this->gazebonode = gazebonode;
+  this->gazebo_world_node = gazebo_world_node;
 }
 
 /** Finalize Gazebo aspect.

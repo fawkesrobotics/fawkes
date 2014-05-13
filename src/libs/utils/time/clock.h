@@ -52,6 +52,7 @@ class Clock
   bool is_ext_default_timesource() const;
   bool has_ext_timesource() const;
   Time ext_to_realtime(const Time& t);
+  Time native_to_time(const Time &t);
   void remove_ext_timesource(TimeSource *ts = 0);
 
   void get_time(struct timeval *tv) const;

@@ -25,8 +25,9 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  static_transforms navgraph \
 	  clips clips-agent clips-protobuf clips-webview clips-navgraph clips-ros \
 	  mongodb mongodb_log \
-	  openni refboxcomm ros player xmlrpc
-	  #readylogagent
+	  openni refboxcomm ros player xmlrpc \
+	  gazebo
+	  # readylogagent
 
 include $(BUILDSYSDIR)/rules.mk
 
@@ -40,3 +41,4 @@ clips-navgraph clips-agent clips-protobuf: clips
 clips-navgraph: navgraph
 clips-webview: clips webview
 clips-ros: clips ros
+gazebo: robotino

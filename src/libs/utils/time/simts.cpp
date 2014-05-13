@@ -86,6 +86,13 @@ SimulatorTimeSource::conv_to_realtime(const timeval *tv) const
 }
 
 
+timeval
+SimulatorTimeSource::conv_native_to_exttime(const timeval *tv) const
+{
+  timeval rv = *tv;
+  return rv;
+}
+
 /** Set start time.
  * @param initial_offset initial offset in seconds
  */

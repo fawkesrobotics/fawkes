@@ -27,7 +27,7 @@ endif
 
 ifeq ($(HAVE_GAZEBO),1)
   CFLAGS_GAZEBO  = -DHAVE_GAZEBO $(shell $(PKGCONFIG) --cflags 'gazebo')
-  LDFLAGS_GAZEBO = $(shell $(PKGCONFIG) --libs 'gazebo')
+  LDFLAGS_GAZEBO = $(shell $(PKGCONFIG) --libs 'gazebo') -ldl
 endif
 
 endif # __buildsys_gazebo_mk_

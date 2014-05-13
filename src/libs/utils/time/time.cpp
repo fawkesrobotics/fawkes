@@ -352,7 +352,7 @@ Time::add(double seconds)
 Time
 Time::operator+(const Time& t) const
 {
-  Time ret;
+  Time ret(0,0);
   if (__time.tv_usec + t.__time.tv_usec >= 1000000)
   {
     ret.__time.tv_usec = __time.tv_usec + t.__time.tv_usec - 1000000;
@@ -386,7 +386,7 @@ Time::operator+(const Time* t) const
 Time
 Time::operator+(const double sec) const
 {
-  Time ret;
+  Time ret(0,0);
   time_t sec_only = (time_t)floor(sec);
   suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
   if ((__time.tv_usec + usec_only) >= 1000000)
@@ -411,7 +411,7 @@ Time::operator+(const double sec) const
 Time
 Time::operator+(const long int usec) const
 {
-  Time ret;
+  Time ret(0,0);
   if ( __time.tv_usec + usec >= 1000000 )
   {
     //usec + __time.tv_usec might be more than 1 second
@@ -436,7 +436,7 @@ Time::operator+(const long int usec) const
 Time
 Time::operator-(const Time& t) const
 {
-  Time ret;
+  Time ret(0,0);
   if (__time.tv_usec < t.__time.tv_usec)
   {
     ret.__time.tv_usec = 1000000 + __time.tv_usec - t.__time.tv_usec;
@@ -470,7 +470,7 @@ Time::operator-(const Time* t) const
 Time
 Time::operator-(const double sec) const
 {
-  Time ret;
+  Time ret(0,0);
   time_t sec_only = (time_t)floor(sec);
   suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
   if (__time.tv_usec < usec_only)
@@ -495,7 +495,7 @@ Time::operator-(const double sec) const
 Time
 Time::operator-(const long int usec) const
 {
-  Time ret;
+  Time ret(0,0);
   time_t sec_only = usec / 1000000;
   suseconds_t usec_only = usec % 1000000;
   if (__time.tv_usec < usec_only)

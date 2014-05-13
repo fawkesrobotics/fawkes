@@ -1,0 +1,33 @@
+/***************************************************************************
+ *  SimTime.proto - Message for time synchronization with a simulation
+ *
+ *  Created: Thu Sep 26 19:05:04 2013
+ *  Copyright  2013  Frederik Zwilling
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
+
+package gazsim_msgs;
+
+message SimTime {
+  enum CompType {
+    COMP_ID  = 2000;
+    MSG_TYPE = 397;
+  }
+
+  required int64 sim_time_sec = 1;
+  required int64 sim_time_nsec = 2;
+  required float real_time_factor = 3;
+  required bool paused = 4;
+}

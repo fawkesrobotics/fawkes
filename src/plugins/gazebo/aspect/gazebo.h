@@ -3,7 +3,7 @@
  *  gazebo.h - Gazebo aspect for Fawkes
  *
  *  Created: Fri Aug 24 09:25:22 2012
- *  Author Bastian Klingen
+ *  Author Bastian Klingen, Frederik Zwilling
  *
  ****************************************************************************/
 
@@ -43,10 +43,16 @@ class GazeboAspect : public virtual Aspect
   virtual ~GazeboAspect();
 
  protected:
+  /// Gazebo Node for communication with a robot
   gazebo::transport::NodePtr gazebonode;
+  /**
+   * Gazebo Node for communication with the world
+   * (e.g. for spawning visuals or robot independent information)
+   */
+  gazebo::transport::NodePtr gazebo_world_node;
 
  private:
-  void init_GazeboAspect(gazebo::transport::NodePtr gazebonode);
+  void init_GazeboAspect(gazebo::transport::NodePtr gazebonode, gazebo::transport::NodePtr gazebo_world_node);
   void finalize_GazeboAspect();
 };
 

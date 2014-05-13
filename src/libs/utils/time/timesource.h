@@ -49,6 +49,16 @@ class TimeSource
    * @return the converted time
    */
   virtual timeval conv_to_realtime(const timeval* tv) const = 0;
+
+  /** Convert a native time to the external time.
+   * When communicating with another instance which provides times in
+   * some timeformat native to the underlying time source (e.g. received
+   * from a simulation) it must be converted to a Fawkes time.
+   * @param tv time in external time source native format
+   * @return time in Fawkes comparable to other times generated using
+   * the external timesource.
+   */
+  virtual timeval conv_native_to_exttime(const timeval* tv) const = 0;
 };
 
 } // end namespace fawkes

@@ -3,7 +3,7 @@
  *  node_thread.h - Gazebo node handle providing thread
  *
  *  Created: Fri Aug 24 11:04:04 2012
- *  Author  Bastian Klingen
+ *  Author  Bastian Klingen, Frederik Zwilling
  *
  ****************************************************************************/
 
@@ -31,6 +31,7 @@
 #include <aspect/aspect_provider.h>
 #include <plugins/gazebo/aspect/gazebo_inifin.h>
 #include <utils/time/time.h>
+#include <string.h>
 
 #include <sys/types.h>
 
@@ -60,9 +61,17 @@ class GazeboNodeThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  //Node for communication to gazebo-robot-plugins
   gazebo::transport::NodePtr  __gazebonode;
+  //Node to control the gazebo world (e.g. spawn visual objects)
+  gazebo::transport::NodePtr  __gazebo_world_node;
+  //Publisher to send Messages:
+  gazebo::transport::PublisherPtr __visual_publisher, __model_publisher, __request_publisher, __light_publisher;
+
   fawkes::GazeboAspectIniFin  __gazebo_aspect_inifin;
 
+  //channel of a specified robot for the gazebo node communication
+  std::string robot_channel, world_name;
 };
 
 #endif

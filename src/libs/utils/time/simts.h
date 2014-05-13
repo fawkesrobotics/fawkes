@@ -37,6 +37,7 @@ class SimulatorTimeSource : public TimeSource
 
   virtual void get_time(timeval* tv) const;
   virtual timeval conv_to_realtime(const timeval* tv) const;
+  virtual timeval conv_native_to_exttime(const timeval* tv) const;
 
   void set_start(float initial_offset);
   void set_sim_offset(float sim_offset);

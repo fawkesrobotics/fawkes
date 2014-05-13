@@ -3,7 +3,7 @@
  *  gazebo_inifin.cpp - Fawkes GazeboAspect initializer/finalizer
  *
  *  Created: Fri Aug 24 09:26:04 2012
- *  Author  Bastian Klingen
+ *  Author  Bastian Klingen, Frederik Zwilling (2013)
  *
  ****************************************************************************/
 
@@ -23,6 +23,7 @@
 
 #include <plugins/gazebo/aspect/gazebo_inifin.h>
 #include <core/threading/thread_finalizer.h>
+#include <stdio.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -33,7 +34,7 @@ namespace fawkes {
  * GazeboAspect initializer/finalizer.
  * This initializer/finalizer will provide the Gazebo node handle to
  * threads with the GazeboAspect.
- * @author Bastian Klingen
+ * @author Bastian Klingen, Frederik Zwilling
  */
 
 /** Constructor. */
@@ -42,6 +43,9 @@ GazeboAspectIniFin::GazeboAspectIniFin()
 {
 }
 
+/** Initialize
+ * @param thread thread
+ */
 void
 GazeboAspectIniFin::init(Thread *thread)
 {
@@ -56,9 +60,12 @@ GazeboAspectIniFin::init(Thread *thread)
     throw CannotInitializeThreadException("Gazebo node handle has not been set.");
   }
 
-  gazebo_thread->init_GazeboAspect(__gazebonode);
+  gazebo_thread->init_GazeboAspect(__gazebonode, __gazebo_world_node);
 }
 
+/** Finalize
+ * @param thread thread
+ */
 void
 GazeboAspectIniFin::finalize(Thread *thread)
 {
@@ -74,12 +81,22 @@ GazeboAspectIniFin::finalize(Thread *thread)
 
 
 /** Set the Gazebo node handle to use for aspect initialization.
+ * (used for robot specific communication)
  * @param gazebonode Gazebo node handle to pass to threads with GazeboAspect.
  */
 void
 GazeboAspectIniFin::set_gazebonode(gazebo::transport::NodePtr gazebonode)
 {
   __gazebonode = gazebonode;
+}
+/** Set the Gazebo node handle to use for aspect initialization.
+ * (used for robot independent or world changing communication)
+ * @param gazebo_world_node Gazebo node handle to pass to threads with GazeboAspect.
+ */
+void
+GazeboAspectIniFin::set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node)
+{
+  __gazebo_world_node = gazebo_world_node;
 }
 
 } // end namespace fawkes

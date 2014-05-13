@@ -20,17 +20,20 @@ include $(BASEDIR)/etc/buildsys/boost.mk
 include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
-PRESUBDIRS = aspect
+PRESUBDIRS = aspect msgs
+
+SUBDIRS = gazsim-robotino gazsim-laser gazsim-localization gazsim-comm \
+	  gazsim-vis-localization gazsim-webcam gazsim-timesource
 
 LIBS_gazebo = fawkescore fawkesaspects fawkesgazeboaspect
 OBJS_gazebo = gazebo_plugin.o node_thread.o
 
-CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
-LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system)
-
 OBJS_all    = $(OBJS_gazebo)
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(call boost-have-libs,system),111)
+  CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
+  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system)
+
   PLUGINS_all = $(PLUGINDIR)/gazebo.$(SOEXT)
 else
   ifneq ($(HAVE_GAZEBO),1)
@@ -57,4 +60,3 @@ warning_boost_system:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-
