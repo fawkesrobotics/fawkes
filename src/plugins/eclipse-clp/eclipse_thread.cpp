@@ -84,9 +84,8 @@ EclipseAgentThread::init()
   {
     // ignore
   }
-  
 
-  agent = strdup( config->get_string( "/eclipse-clp/agent" ).c_str() );
+  agent = config->get_string( "/eclipse-clp/agent" );
 
   try{
   //set default module in which goals called from the top-level will be executed

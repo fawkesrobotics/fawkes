@@ -45,7 +45,7 @@ public:
   /** Cosntructor. */
   EclExternalRCSoftMapGraph() : m_map_graph(0) {}
   /** Destructor. */
-  ~EclExternalRCSoftMapGraph() { delete m_map_graph; }
+  ~EclExternalRCSoftMapGraph() {}
 
   /** Load map file.
    * @param file the map file
