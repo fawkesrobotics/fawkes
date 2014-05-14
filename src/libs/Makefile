@@ -64,6 +64,7 @@ fvclassifiers: $(CLASSIFIERS_DEPS)
 endif
 protobuf_clips: core protobuf_comm
 pcl_utils: core tf
+kdl_parser: core
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk
