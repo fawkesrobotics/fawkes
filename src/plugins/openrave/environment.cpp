@@ -674,7 +674,7 @@ OpenRaveEnvironment::rotate_object(const std::string& name, float rot_x, float r
   Vector q12  = quatMultiply (q1, q2);
   Vector quat = quatMultiply (q12, q3);
 
-  return rotate_object(name, quat.x, quat.y, quat.z, quat.w);
+  return rotate_object(name, quat[1], quat[2], quat[3], quat[0]);
 }
 
 } // end of namespace fawkes
