@@ -26,7 +26,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  clips clips-agent clips-protobuf clips-webview clips-navgraph clips-ros \
 	  mongodb mongodb_log \
 	  openni refboxcomm ros player xmlrpc \
-	  gazebo
+	  robot_state_publisher gazebo
 	  # readylogagent
 
 include $(BUILDSYSDIR)/rules.mk
