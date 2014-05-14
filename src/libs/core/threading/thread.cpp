@@ -33,6 +33,10 @@
 #include <core/exceptions/system.h>
 #include <core/utils/lock_list.h>
 
+#if defined(__gnu_linux__) && ! defined(_GNU_SOURCE)
+// to get pthread_setname_np
+#  define _GNU_SOURCE
+#endif
 #include <pthread.h>
 #include <climits>
 #include <unistd.h>
@@ -520,6 +524,12 @@ Thread::start(bool wait)
     // An error occured
     throw Exception("Could not start thread", err);
   }
+#ifdef _GNU_SOURCE
+  char tmpname[16];
+  strncpy(tmpname, __name, 15);
+  tmpname[15] = 0;
+  pthread_setname_np(__thread_id, tmpname);
+#endif
 
   if (__wait)  __startup_barrier->wait();
 }
@@ -758,6 +768,14 @@ Thread::set_name(const char *format, ...)
     free(old_name);
   }
   va_end(va);
+#ifdef _GNU_SOURCE
+  if (__thread_id) {
+    char tmpname[16];
+    strncpy(tmpname, __name, 15);
+    tmpname[15] = 0;
+    pthread_setname_np(__thread_id, tmpname);
+  }
+#endif
 }
 
 
