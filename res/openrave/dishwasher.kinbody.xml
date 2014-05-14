@@ -1,0 +1,50 @@
+<KinBody name="RobolabDishwasher">
+
+  <Body name="Base" type="dynamic">
+    <!-- base floor -->
+    <Geom type="box">
+      <extents>0.255 0.16 0.0025</extents>
+      <translation>0.255 0 0</translation>
+      <diffusecolor>0.8 0.8 0.8</diffusecolor>
+    </Geom>
+
+    <!-- restricting walls -->
+    <Geom type="box">
+      <extents>0.255 0.0025 0.06</extents>
+      <translation>0.255 -0.1575 0.06</translation>
+      <diffusecolor>0.8 0.8 0.8</diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <extents>0.255 0.0025 0.06</extents>
+      <translation>0.255 0.1575 0.06</translation>
+      <diffusecolor>0.8 0.8 0.8</diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <extents>0.0025 0.16 0.06</extents>
+      <translation>0.0425 0 0.06</translation>
+      <diffusecolor>0.8 0.8 0.8</diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <extents>0.0025 0.16 0.06</extents>
+      <translation>0.0025 0 0.06</translation>
+      <diffusecolor>0.8 0.8 0.8</diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <extents>0.005 0.07 0.03</extents>
+      <translation>0 0 0.08</translation>
+      <diffusecolor>0.2 0.2 0.7</diffusecolor>
+    </Geom>
+
+    <!-- extension to top -->
+    <Geom type="box">
+      <extents>0.255 0.01 0.02</extents>
+      <translation>0.255 -0.17 0.14</translation>
+      <diffusecolor>0.8 0.8 0.8</diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <extents>0.255 0.01 0.02</extents>
+      <translation>0.255 0.17 0.14</translation>
+      <diffusecolor>0.8 0.8 0.8</diffusecolor>
+    </Geom>
+  </Body>
+</KinBody>
