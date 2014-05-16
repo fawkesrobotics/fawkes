@@ -1,0 +1,12 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+ros/robot-description:
+ # path to URDF description of the robot
+ # if the path starts with '/', it is absolute
+ # otherwise, relative to RESDIR/urdf/
+ urdf_file: "/home/thofmann/athome-fawkes/res/urdf/caesar.urdf"
+ 
+ # publish the robot description under this ROS param name
+ ros_robot_description: "/robot_description"
+

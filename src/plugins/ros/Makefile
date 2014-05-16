@@ -65,9 +65,12 @@ LIBS_ros_joint = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect JointInterface
 OBJS_ros_joint = joint_plugin.o joint_thread.o
 
+LIBS_ros_robot_description = fawkescore fawkesutils fawkesaspects fawkesrosaspect
+OBJS_ros_robot_description = robot_description_plugin.o robot_description_thread.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
-	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint)
+	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) $(OBJS_ros_robot_description)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
@@ -187,6 +190,9 @@ ifeq ($(HAVE_ROS),1)
   else
     WARN_TARGETS += warning_sensor_msgs
   endif
+
+  PLUGINS_all += $(PLUGINDIR)/ros-robot-description.so
+
 else
   WARN_TARGETS += warning_ros
 endif
