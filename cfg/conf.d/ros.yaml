@@ -4,6 +4,12 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/ros
 ---
 ros:
+  # Set a custom node name, for example if multiple fawkes instances
+  # share the same roscore. Set to special value $HOSTNAME to use short
+  # hostname. Examples:
+  # node-name: tims_fawkes
+  # node-name: $HOSTNAME
+
   # Spin the ROS main loop asynchronously from the Fawkes main loop?
   # Synchronous is preferred. But this will block the ROSNodeThread for
   # example for long running service calls (where a Fawkes plugin provides

@@ -22,6 +22,8 @@
 
 #include "node_thread.h"
 
+#include <utils/system/hostinfo.h>
+
 #include <ros/ros.h>
 
 using namespace fawkes;
@@ -69,6 +71,11 @@ ROSNodeThread::init()
     try {
       node_name = config->get_string("/ros/node-name");
     } catch (Exception &e) {} // ignored, use default
+    if (node_name == "$HOSTNAME") {
+      HostInfo hinfo;
+      node_name = hinfo.short_name();
+    }
+
     ros::init(argc, (char **)argv, node_name,
 	      (uint32_t)ros::init_options::NoSigintHandler);
   } else {
