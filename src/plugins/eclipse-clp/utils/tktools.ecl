@@ -32,10 +32,12 @@
 :- log_info("Loading tktools").
 
 :- local initialization(init).
+:- local(finalization(fin)).
 
 init :- bb_ensure_connected,
         bb_open_interface(w,"EclipseDebuggerInterface","eclipse_clp_connect").
-
+fin :- bb_close_interface("eclipse_clp_connect"),
+	log_info("Closing eclipse_clp_connect").
 
 %% event handlers
 handle_check_debug_msg(check_debug_msg) :- log_debug("checking debug msg"), bb_read_interfaces,

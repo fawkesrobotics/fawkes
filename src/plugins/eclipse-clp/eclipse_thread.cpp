@@ -147,8 +147,13 @@ void
 EclipseAgentThread::once()
 {
   post_goal( "run" );
-  if ( EC_succeed != EC_resume() )
-  { throw Exception( "Error running agent program" ); }
+  int res = EC_resume();
+  if(EC_yield == res){
+    //terminate
+  } else { 
+    if ( EC_succeed != res)
+    { throw Exception( "Error running agent program" ); }
+  }
 }
 
 /** Check if the agent is running

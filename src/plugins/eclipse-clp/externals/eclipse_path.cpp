@@ -16,7 +16,7 @@ EclipsePath::EclipsePath()
 	if (m_instance == NULL){
 		m_instance = this;
    	}else{
-		throw Exception( "There is already an instance of type EclipsePath instantiated" );
+		//throw Exception( "There is already an instance of type EclipsePath instantiated" );
 	}
 	
 }

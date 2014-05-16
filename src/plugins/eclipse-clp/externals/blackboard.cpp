@@ -45,7 +45,7 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
     if (m_instance == NULL){
       m_instance = this;
     }else{
-      throw Exception( "There is already an instance of type EclExternalBlackBoard instantiated" );
+      //throw Exception( "There is already an instance of type EclExternalBlackBoard instantiated" );
     }
   }
 
@@ -55,7 +55,8 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
       m_instance = this;
       m_blackboard = blackboard;
     }else{
-      throw Exception( "There is already an instance of type EclExternalBlackBoard instantiated" );
+      m_blackboard = blackboard;
+      //throw Exception( "There is already an instance of type EclExternalBlackBoard instantiated" );
     }
   }
 

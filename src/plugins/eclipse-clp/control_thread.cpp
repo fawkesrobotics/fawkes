@@ -70,6 +70,7 @@ AgentControlThread::finalize()
 {
   // close interfaces
   blackboard->close( m_test_iface );
+  blackboard->close( m_debug_iface );
 }
 
 void
