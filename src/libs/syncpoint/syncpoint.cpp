@@ -49,17 +49,25 @@ namespace fawkes {
  */
 SyncPoint::SyncPoint(const char * identifier)
     : identifier_(identifier),
-      wait_condition(WaitCondition())
+      mutex(new Mutex()),
+      wait_condition(new WaitCondition(mutex))
 {
-  if (!strcmp(identifier, ""))
+  if (!strcmp(identifier, "")) {
+    delete wait_condition;
+    delete mutex;
     throw SyncPointInvalidIdentifierException(identifier);
-  if (strncmp(identifier, "/", 1))
+  }
+  if (strncmp(identifier, "/", 1)) {
+    delete wait_condition;
+    delete mutex;
     throw SyncPointInvalidIdentifierException(identifier);
+  }
 }
 
 SyncPoint::~SyncPoint()
 {
-
+  delete wait_condition;
+  delete mutex;
 }
 
 /**
@@ -98,10 +106,13 @@ SyncPoint::operator<(const SyncPoint &other) const
 void
 SyncPoint::emit(const char * component)
 {
+  mutex->lock();
   if (!watchers.count(component)) {
+    mutex->unlock();
     throw SyncPointNonWatcherCalledEmitException(component, get_identifier());
   }
-  wait_condition.wake_all();
+  wait_condition->wake_all();
+  mutex->unlock();
 }
 
 /** Wait until SyncPoint is emitted
@@ -109,10 +120,14 @@ SyncPoint::emit(const char * component)
  */
 void
 SyncPoint::wait(const char * component) {
+  mutex->lock();
+  // check if calling component is registered for this SyncPoint
   if (!watchers.count(component)) {
+    mutex->unlock();
     throw SyncPointNonWatcherCalledWaitException(component, get_identifier());
   }
-  wait_condition.wait();
+  wait_condition->wait();
+  mutex->unlock();
 }
 
 } // namespace fawkes

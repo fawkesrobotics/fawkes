@@ -26,6 +26,7 @@
 
 #include <syncpoint/syncpoint.h>
 #include <core/utils/refptr.h>
+#include <core/threading/mutex.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -55,6 +56,8 @@ class SyncPointManager
      * Set of all existing SyncPoints
      */
     std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > syncpoints_;
+    /** Mutex used for all SyncPointManager calls */
+    Mutex *mutex;
 
 
 };

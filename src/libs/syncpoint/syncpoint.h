@@ -24,6 +24,7 @@
 
 #include <interface/interface.h>
 #include <syncpoint/syncpoint_manager.h>
+#include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
 
 #include <set>
@@ -60,7 +61,8 @@ class SyncPoint
     const char * identifier_;
     std::set<const char *> watchers;
 
-    WaitCondition wait_condition;
+    Mutex *mutex;
+    WaitCondition *wait_condition;
 };
 
 } // end namespace fawkes

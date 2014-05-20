@@ -41,11 +41,13 @@ namespace fawkes {
  */
 
 SyncPointManager::SyncPointManager()
+: mutex(new Mutex())
 {
 }
 
 SyncPointManager::~SyncPointManager()
 {
+  delete mutex;
 }
 
 /**
@@ -61,20 +63,32 @@ SyncPointManager::~SyncPointManager()
 RefPtr<SyncPoint>
 SyncPointManager::get_syncpoint(const char * component, const char * identifier)
 {
-  if (!strcmp(component, ""))
+  mutex->lock();
+  if (!strcmp(component, "")) {
+    mutex->unlock();
     throw SyncPointInvalidComponentException(component, identifier);
+  }
   // insert a new SyncPoint if no SyncPoint with the same identifier exists,
   // otherwise, use that SyncPoint
-  std::pair<std::set<RefPtr<SyncPoint> >::iterator,bool> ret = syncpoints_.insert(
-      RefPtr<SyncPoint>(new SyncPoint(identifier)));
+  std::pair<std::set<RefPtr<SyncPoint> >::iterator,bool> ret;
+  try {
+  ret = syncpoints_.insert(RefPtr<SyncPoint>(new SyncPoint(identifier)));
+  } catch (const SyncPointInvalidIdentifierException &e) {
+    mutex->unlock();
+    throw;
+  }
+
   std::set<RefPtr<SyncPoint> >::iterator it = ret.first;
 
   // add component to the set of watchers
   // check if component is already a watcher
   // insert returns a pair whose second element is false if element already exists
   if (!(*it)->watchers.insert(component).second) {
+    mutex->unlock();
     throw SyncPointAlreadyOpenedException(component, identifier);
   }
+  mutex->unlock();
+
   return *it;
 }
 
@@ -91,15 +105,19 @@ SyncPointManager::get_syncpoint(const char * component, const char * identifier)
 void
 SyncPointManager::release_syncpoint(const char * component, RefPtr<SyncPoint> sync_point)
 {
+  mutex->lock();
   std::set<RefPtr<SyncPoint> >::iterator sp_it = syncpoints_.find(
       sync_point);
   if (sp_it == syncpoints_.end()) {
+    mutex->unlock();
     throw SyncPointReleasedDoesNotExistException(component, sync_point->get_identifier());
   }
   if (!(*sp_it)->watchers.erase(component)) {
+    mutex->unlock();
     throw SyncPointReleasedByNonWatcherException(component, sync_point->get_identifier());
   }
 
+  mutex->unlock();
 }
 
 
