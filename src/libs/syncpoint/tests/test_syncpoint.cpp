@@ -31,6 +31,7 @@
 #include <baseapp/run.h>
 
 #include <unistd.h>
+#include <time.h>
 
 #include <set>
 
@@ -200,6 +201,7 @@ TEST_F(SyncPointManagerTest, MultipleWaits)
   pthread_cancel(thread1);
 }
 
+
 /** struct used for multithreading tests */
 struct waiter_thread_params {
     /** SyncPointManager passed to the thread */
@@ -233,6 +235,57 @@ TEST_F(SyncPointManagerTest, ParallelWaitCalls)
   usleep(100);
   for (uint i = 0; i < num_threads; i++) {
     pthread_cancel(threads[i]);
+    delete params[i];
+  }
+}
+
+/** start multiple threads, let them wait for a SyncPoint,
+ * emit the SyncPoint and verify that they all returned
+ */
+TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
+{
+  uint num_threads = 100;
+  pthread_t threads[num_threads];
+  waiter_thread_params *params[num_threads];
+  for (uint i = 0; i < num_threads; i++) {
+    params[i] = new waiter_thread_params();
+    params[i]->manager = manager;
+    params[i]->thread_nr = i;
+    pthread_create(&threads[i], NULL, start_waiter_thread, params[i]);
+  }
+
+  usleep(50);
+  RefPtr<SyncPoint> sp =manager->get_syncpoint("main_thread", "/test/sp1");
+
+  sp->emit("main_thread");
+  usleep(500);
+  for (uint i = 0; i < num_threads; i++) {
+    ASSERT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    delete params[i];
+  }
+}
+
+/** start multiple threads, let them wait for a SyncPoint,
+ * but don't emit the SyncPoint. Verify that they have not returned
+ */
+TEST_F(SyncPointManagerTest, WaitDoesNotReturnImmediately)
+{
+  uint num_threads = 100;
+  pthread_t threads[num_threads];
+  waiter_thread_params *params[num_threads];
+  for (uint i = 0; i < num_threads; i++) {
+    params[i] = new waiter_thread_params();
+    params[i]->manager = manager;
+    params[i]->thread_nr = i;
+    pthread_create(&threads[i], NULL, start_waiter_thread, params[i]);
+  }
+
+  usleep(50);
+  RefPtr<SyncPoint> sp =manager->get_syncpoint("main_thread", "/test/sp1");
+  usleep(500);
+
+  for (uint i = 0; i < num_threads; i++) {
+    ASSERT_EQ(16, pthread_tryjoin_np(threads[i], NULL));
     delete params[i];
   }
 }
