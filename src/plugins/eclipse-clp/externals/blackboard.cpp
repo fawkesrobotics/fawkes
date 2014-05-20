@@ -139,7 +139,6 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
 
 }
 
-using namespace std;
 using namespace fawkes;
 
 
@@ -289,7 +288,7 @@ p_close_interface()
 
   bool iface_found = false;
 
-  for ( vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
+  for ( std::vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
 	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
@@ -321,7 +320,7 @@ p_has_writer()
     return EC_fail;
   }
 
-  for ( vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
+  for ( std::vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
 	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
@@ -356,7 +355,7 @@ p_instance_serial()
     return EC_fail;
   }
 
-  for ( vector< Interface* >::iterator iit = EclExternalBlackBoard::instance()->interfaces().begin();
+  for ( std::vector< Interface* >::iterator iit = EclExternalBlackBoard::instance()->interfaces().begin();
 	iit != EclExternalBlackBoard::instance()->interfaces().end();
 	++iit )
   {
@@ -379,7 +378,7 @@ p_instance_serial()
 int
 p_read_interfaces()
 {
-  for ( vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
+  for ( std::vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
 	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
@@ -392,7 +391,7 @@ p_read_interfaces()
 int
 p_write_interfaces()
 {
-  for ( vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
+  for ( std::vector< Interface* >::iterator it = EclExternalBlackBoard::instance()->interfaces().begin();
 	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
   {
@@ -402,6 +401,7 @@ p_write_interfaces()
 
   return EC_succeed;
 }
+
 
 int
 p_read_from_interface()
@@ -421,7 +421,7 @@ p_read_from_interface()
     return EC_fail;
   }
 
-  vector< Interface* >::iterator it;
+  std::vector< Interface* >::iterator it;
   for ( it = EclExternalBlackBoard::instance()->interfaces().begin();
 	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
@@ -525,16 +525,53 @@ p_read_from_interface()
 	      printf( "p_read_from_interface(): could not bind return value\n" );
 	      return EC_fail;
 	    }
-	    
+
 	    break;
-	    
+
 	  case IFT_FLOAT:
+	  if (fit.get_length() > 1)
+	  {
+	    EC_word res = nil();
+	    float* f_array = fit.get_floats();
+	    for (int i=fit.get_length()-1; i>= 0; i--)
+	      res = list( EC_word(f_array[i]), res);
+	    if ( EC_succeed != EC_arg( 3 ).unify( res ) )
+	    {
+	      printf( "p_read_from_interface(): could not bind return value\n" );
+	      return EC_fail;
+	    }
+	  } else
+	  {
 	    if ( EC_succeed != EC_arg( 3 ).unify( EC_word( (double) fit.get_float() ) ) )
 	    {
 	      printf( "p_read_from_interface(): could not bind return value\n" );
 	      return EC_fail;
 	    }
-	    
+	  }
+
+	    break;
+
+	  case IFT_DOUBLE:
+	  if (fit.get_length() > 1)
+	  {
+	    EC_word res = nil();
+	    double* double_array = fit.get_doubles();
+	    for (int i=fit.get_length()-1; i>= 0; i--)
+	      res = list( EC_word(double_array[i]), res);
+	    if ( EC_succeed != EC_arg( 3 ).unify( res ) )
+	    {
+	      printf( "p_read_from_interface(): could not bind return value\n" );
+	      return EC_fail;
+	    }
+	  } else
+	  {
+	    if ( EC_succeed != EC_arg( 3 ).unify( EC_word( (double) fit.get_double() ) ) )
+	    {
+	      printf( "p_read_from_interface(): could not bind return value\n" );
+	      return EC_fail;
+	    }
+	 }
+
 	    break;
 
 	  case IFT_STRING:
@@ -556,8 +593,10 @@ p_read_from_interface()
 	      printf( "p_read_from_interface(): could not bind return value\n" );
 	      return EC_fail;
 	    }
+      break;
 
 	  default:
+	    printf("p_read_from_interface(): could not find type of interface! Type: %s (%d)", fit.get_typename(), fit.get_type());
 	    break;
 	  }
 
@@ -607,7 +646,7 @@ p_write_to_interface()
     return EC_fail;
   }
 
-  vector< Interface* >::iterator it;
+  std::vector< Interface* >::iterator it;
   for ( it = EclExternalBlackBoard::instance()->interfaces().begin();
 	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
@@ -847,7 +886,7 @@ p_send_message()
     return EC_fail;
   }
 
-  vector< Interface* >::iterator it;
+  std::vector< Interface* >::iterator it;
   for ( it = EclExternalBlackBoard::instance()->interfaces().begin();
 	it != EclExternalBlackBoard::instance()->interfaces().end();
 	++it )
@@ -907,7 +946,7 @@ p_recv_messages()
     return EC_fail;
   }
 
-  vector< Interface* >::iterator it;
+  std::vector< Interface* >::iterator it;
 
   for ( it  = EclExternalBlackBoard::instance()->interfaces().begin();
 	it != EclExternalBlackBoard::instance()->interfaces().end();
