@@ -41,7 +41,7 @@ class SyncPointAlreadyOpenedException : public Exception
       const char *identifier)
     {
       append(
-          "Component %s called get_syncpoint() for identifier %s, but is already watching",
+          "Component '%s' called get_syncpoint() for identifier '%s', but is already watching",
           component, identifier);
     }
 };
@@ -59,7 +59,7 @@ class SyncPointNonWatcherCalledEmitException : public Exception
     SyncPointNonWatcherCalledEmitException(const char * component,
       const char *identifier)
     {
-      append("Component %s called emit for SyncPoint %s, but is not a watcher",
+      append("Component '%s' called emit for SyncPoint '%s', but is not a watcher",
           component, identifier);
     }
 };
@@ -77,7 +77,7 @@ class SyncPointNonWatcherCalledWaitException : public Exception
     SyncPointNonWatcherCalledWaitException(const char * component,
       const char *identifier)
     {
-      append("Component %s called wait for SyncPoint %s, but is not a watcher",
+      append("Component '%s' called wait for SyncPoint '%s', but is not a watcher",
           component, identifier);
     }
 };
@@ -95,7 +95,7 @@ class SyncPointReleasedDoesNotExistException : public Exception
     SyncPointReleasedDoesNotExistException(const char * component,
       const char * identifier)
     {
-      append("Component %s tried to release non-existing SyncPoint %s",
+      append("Component '%s' tried to release non-existing SyncPoint '%s'",
           component, identifier);
     }
 };
@@ -113,7 +113,7 @@ class SyncPointReleasedByNonWatcherException : public Exception
     SyncPointReleasedByNonWatcherException(const char * component,
       const char * identifier)
     {
-      append("Component %s tried to release SyncPoint %s but is not a watcher",
+      append("Component '%s' tried to release SyncPoint '%s' but is not a watcher",
           component, identifier);
     }
 };
@@ -129,7 +129,7 @@ class SyncPointInvalidIdentifierException : public Exception
      */
     SyncPointInvalidIdentifierException(const char * identifier)
     {
-      append("Tried to construct a SyncPoint with invalid identifier ('%s')"
+      append("Tried to construct a SyncPoint with invalid identifier ('%s'). "
           "Identifier must be a non-empty absolute path (e.g. '/path/to/syncpoint')",
           identifier);
     }
