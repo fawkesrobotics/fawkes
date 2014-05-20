@@ -30,6 +30,8 @@
 #include <pthread.h>
 #include <baseapp/run.h>
 
+#include <unistd.h>
+
 #include <set>
 
 using namespace fawkes;
@@ -176,4 +178,61 @@ TEST_F(SyncPointManagerTest, SyncPointManagerExceptions) {
         SyncPointInvalidIdentifierException);
 
 
+}
+
+// helper function used for testing wait()
+void * call_wait(void *data)
+{
+  SyncPoint * sp = (SyncPoint *)(data);
+  sp->wait("component");
+  return NULL;
+}
+
+TEST_F(SyncPointManagerTest, MultipleWaits)
+{
+  RefPtr<SyncPoint> sp_ref = manager->get_syncpoint("component", "/test/sp1");
+  SyncPoint * sp = *sp_ref;
+  pthread_t thread1;
+  pthread_create(&thread1, NULL, call_wait, (void *)sp);
+  // make sure the other thread is first
+  usleep(100);
+  ASSERT_THROW(sp_ref->wait("component"), SyncPointMultipleWaitCallsException);
+  pthread_cancel(thread1);
+}
+
+/** struct used for multithreading tests */
+struct waiter_thread_params {
+    /** SyncPointManager passed to the thread */
+    RefPtr<SyncPointManager> manager;
+    /** Thread number */
+    uint thread_nr;
+};
+
+/** get a SyncPoint and wait for it */
+void * start_waiter_thread(void * data) {
+  waiter_thread_params *params = (waiter_thread_params *)data;
+  char component[40];
+  sprintf(component, "component %u", params->thread_nr);
+  RefPtr<SyncPoint> sp = params->manager->get_syncpoint(component, "/test/sp1");
+  sp->wait(component);
+  return NULL;
+}
+
+TEST_F(SyncPointManagerTest, ParallelWaitCalls)
+{
+  uint num_threads = 100;
+  pthread_t threads[num_threads];
+  waiter_thread_params *params[num_threads];
+  for (uint i = 0; i < num_threads; i++) {
+    params[i] = new waiter_thread_params();
+    params[i]->manager = manager;
+    params[i]->thread_nr = i;
+    pthread_create(&threads[i], NULL, start_waiter_thread, params[i]);
+  }
+
+  usleep(100);
+  for (uint i = 0; i < num_threads; i++) {
+    pthread_cancel(threads[i]);
+    delete params[i];
+  }
 }
