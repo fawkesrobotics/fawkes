@@ -111,6 +111,7 @@ SyncPoint::emit(const char * component)
     mutex->unlock();
     throw SyncPointNonWatcherCalledEmitException(component, get_identifier());
   }
+  waiting_watchers.clear();
   wait_condition->wake_all();
   mutex->unlock();
 }
@@ -126,6 +127,12 @@ SyncPoint::wait(const char * component) {
     mutex->unlock();
     throw SyncPointNonWatcherCalledWaitException(component, get_identifier());
   }
+  // check if calling component is not already waiting
+  if (waiting_watchers.count(component)) {
+    mutex->unlock();
+    throw SyncPointMultipleWaitCallsException(component, get_identifier());
+  }
+  waiting_watchers.insert(component);
   wait_condition->wait();
   mutex->unlock();
 }

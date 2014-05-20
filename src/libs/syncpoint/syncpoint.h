@@ -60,6 +60,7 @@ class SyncPoint
   private:
     const char * identifier_;
     std::set<const char *> watchers;
+    std::set<const char *> waiting_watchers;
 
     Mutex *mutex;
     WaitCondition *wait_condition;

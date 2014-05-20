@@ -153,6 +153,24 @@ class SyncPointInvalidComponentException : public Exception
     }
 };
 
+/** A component called wait() but is already waiting
+ *
+ */
+class SyncPointMultipleWaitCallsException : public Exception
+{
+  public:
+    /** Constructor.
+     * @param component The calling component
+     * @param identifier The identifier of the SyncPoint
+     */
+    SyncPointMultipleWaitCallsException(const char * component,
+      const char * identifier)
+    {
+      append("Component '%s' called wait() on SyncPoint '%s', but is already waiting",
+          component, identifier);
+    }
+};
+
 
 } // namespace fawkes
 
