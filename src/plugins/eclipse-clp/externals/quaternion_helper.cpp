@@ -30,7 +30,7 @@
 #include <cstring>
 #include <cstdlib>
 
-namespace fawkes{
+using namespace fawkes;
 /* This class is a wrapper for tf/types.h
  * Currently it only includes one method to transform quaternions to a yaw value.
 */
@@ -39,25 +39,26 @@ int
 p_get_yaw()
 {
     int res;
-    double* quad[4];
+    double quad[4];
     EC_word list(EC_arg(1));
     EC_word head, tail;
-    
+    if (list.is_list(head,tail) != EC_succeed){
+      printf("p_get_yaw(): first argument is not a list!\n");
+    }
     for (int i=0 ; list.is_list(head,tail) == EC_succeed and i < 4; list=tail, i++)
     {
-        res = head.is_double(quad[i]);
+        res = head.is_double(&quad[i]);
         if (res != EC_succeed){
-            printf( "p_send_message(): quaternion is not a list of 4 floats\n" );
+            printf( "p_get_yaw(): quaternion is not a list of 4 doubles/floats\n" );
             return EC_fail;
         }
     }
-    double yaw = fawkes::tf::get_yaw(btQuaternion((float) *quad[0], (float) *quad[1], (float) *quad[2], (float) *quad[3]));
+    double yaw = fawkes::tf::get_yaw(btQuaternion((float) quad[0], (float) quad[1], (float) quad[2], (float) quad[3]));
     if ( EC_succeed != EC_arg( 2 ).unify( EC_word(yaw) ) )
     {
-	    printf( "p_recv_messages(): could not bind return value\n" );
+	    printf( "p_get_yaw(): could not bind return value\n" );
 	    return EC_fail;
     }
     return EC_succeed;
 }
 
-}
