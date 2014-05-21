@@ -38,12 +38,16 @@ align_laserht{}
 -- Initialize as skill module
 skillenv.skill_module(_M)
 
+-- Constants
+TIMEOUT_AVERAGE = 1.0 -- calculate average bearing over this many seconds of detection
+
 -- States
 fsm:define_states{
    export_to=_M,
    closure={laserht=laserht},
 
    {"INIT",     JumpState},
+   {"CALC_ORI", JumpState},
 
    {"ALIGN", SkillJumpState, skills={{"relgoto"}},
              final_to="FINAL", fail_to="FAILED"}
@@ -52,13 +56,30 @@ fsm:define_states{
 -- Transitions
 fsm:add_transitions {
    {"INIT", "FAILED", precond="not laserht:has_writer()", desc="no writer"},
-   {"INIT", "ALIGN", cond=true, desc="initialized"}
+   {"INIT", "CALC_ORI", cond=true, desc="initialized"},
+
+   {"CALC_ORI", "ALIGN", timeout=TIMEOUT_AVERAGE}
 }
 
 function INIT:init()
 end
 
+-- calculate the average orientation
+function CALC_ORI:init()
+   self.counter = 1
+   self.ori = laserht:bearing()
+end
+function CALC_ORI:loop()
+   if laserht:changed() then
+      --print("adding new bearing: "..laserht:bearing())
+      self.counter = self.counter + 1
+      self.ori = self.ori + laserht:bearing()
+   end
+end
+function CALC_ORI:exit()
+   self.fsm.vars.ori = self.ori / self.counter
+end
+
 function ALIGN:init()
-   -- for restoring, save current data from interfaces
-   self.args["relgoto"] = {x=0, y=0, ori=laserht:bearing()}
+   self.args["relgoto"] = {x=0, y=0, ori=self.fsm.vars.ori}
 end
