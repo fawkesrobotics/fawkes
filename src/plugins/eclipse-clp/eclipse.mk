@@ -16,6 +16,7 @@
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(abspath $(BUILDSYSDIR)/ext/gmsl)
 include $(BUILDSYSDIR)/boost.mk
+include $(BUILDSYSDIR)/ros.mk
 
 ECLIPSE_BINARY = eclipse-clp
 ECLIPSE_MIN_VERSION_MAJOR=6
@@ -69,6 +70,38 @@ ifeq ($(HAVE_ECLIPSE),1)
   endif
   ECLIPSE_LDFLAGS += $(call boost-libs-ldflags,thread system filesystem regex) \
 			-DBASEDIR=\"$(BASEDIR)\"
+endif
+
+# the following is needed for quaternion helper class
+USE_ROS_BULLET=0
+ifeq ($(HAVE_ROS),1)
+  ifeq ($(call ros-have-pkg,bullet),1)
+    USE_ROS_BULLET=1
+  endif
+endif
+
+ifeq ($(USE_ROS_BULLET),1)
+  HAVE_BULLET=1
+  CFLAGS_BULLET  = $(call ros-pkg-cflags,bullet) -Wno-deprecated-declarations
+  LDFLAGS_BULLET = $(call ros-pkg-lflags,bullet)
+else
+  ifneq ($(PKGCONFIG),)
+    HAVE_BULLET = $(if $(shell $(PKGCONFIG) --exists 'bullet'; echo $${?/1/}),1,0)
+    ifeq ($(HAVE_BULLET),1)
+      CFLAGS_BULLET  = $(shell $(PKGCONFIG) --cflags 'bullet')
+      # we're only interested in the math part
+      LDFLAGS_BULLET = -lLinearMath
+    endif
+  endif
+endif
+
+ifeq ($(HAVE_BULLET),1)
+  HAVE_TF = 1
+  ECLIPSE_CFLAGS += -DHAVE_TF $(CFLAGS_BULLET)
+  ECLIPSE_LDFLAGS += $(LDFLAGS_BULLET) -lm
+  ifeq ($(HAVE_CPP11),1)
+    CFLAGS_TF += $(CFLAGS_CPP11)
+  endif
 endif
 
 
