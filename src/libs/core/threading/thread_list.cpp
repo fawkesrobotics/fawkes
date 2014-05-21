@@ -263,6 +263,10 @@ ThreadList::wakeup_and_wait(unsigned int timeout_sec, unsigned int timeout_nanos
     RefPtr<ThreadList> passed_threads = __wnw_barrier->passed_threads();
     ThreadList bad_threads;
     for (iterator i = begin(); i != end(); ++i) {
+      if ((*i)->flagged_bad()) {
+        // thread is already flagged as bad, don't add it to bad_threads
+        continue;
+      }
       bool ok = false;
       for (iterator j = passed_threads->begin(); j != passed_threads->end(); ++j) {
 	if (*j == *i) {
