@@ -25,6 +25,7 @@
 
 #include <webview/request_processor.h>
 #include <cstdlib>
+#include <vector>
 
 namespace fawkes {
   class Logger;
@@ -34,7 +35,7 @@ class WebviewStaticRequestProcessor : public fawkes::WebRequestProcessor
 {
  public:
   WebviewStaticRequestProcessor(const char *baseurl,
-				const char *htdocs_dir,
+				std::vector<const char *> htdocs_dir,
 				fawkes::Logger *logger);
   virtual ~WebviewStaticRequestProcessor();
 
@@ -43,8 +44,8 @@ class WebviewStaticRequestProcessor : public fawkes::WebRequestProcessor
  private:
   char   *__baseurl;
   size_t  __baseurl_len;
-  char   *__htdocs_dir;
-  size_t  __htdocs_dir_len;
+  std::vector<char*> __htdocs_dirs;
+  std::vector<size_t> __htdocs_dirs_len;
 
   fawkes::Logger *__logger;
 };

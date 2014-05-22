@@ -44,6 +44,7 @@
 #include <webview/server.h>
 #include <webview/url_manager.h>
 #include <webview/nav_manager.h>
+#include <utils/misc/string_conversions.h>
 
 #include <sys/wait.h>
 
@@ -194,7 +195,15 @@ WebviewThread::init()
 
 
   __startpage_processor  = new WebviewStartPageRequestProcessor(&__cache_logger);
-  __static_processor     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, RESDIR"/webview", logger);
+  // get all directories for the static processor
+  std::vector<std::string> static_dirs = config->get_strings("/webview/static-dirs");
+  static_dirs = StringConversions::resolve_paths(static_dirs);
+  std::vector<const char *> static_dirs_cstr = std::vector<const char *>(static_dirs.size());
+  for(unsigned int i = 0; i < static_dirs.size(); i++)
+  {
+    static_dirs_cstr[i] = static_dirs[i].c_str();
+  }
+  __static_processor     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, static_dirs_cstr, logger);
   __blackboard_processor = new WebviewBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
   __plugins_processor    = new WebviewPluginsRequestProcessor(PLUGINS_URL_PREFIX, plugin_manager);
 #ifdef HAVE_TF

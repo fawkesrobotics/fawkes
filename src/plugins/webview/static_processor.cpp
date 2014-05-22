@@ -44,22 +44,34 @@ using namespace fawkes;
 
 /** Constructor.
  * @param baseurl Base URL where the static processor is mounted
- * @param htdocs_dir directory in the file system where to look for static files
+ * @param htdocs_dirs directories in the file system where to look for static files
  * @param logger logger
  */
 WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(const char *baseurl,
-							     const char *htdocs_dir,
+							     std::vector<const char *> htdocs_dirs,
 							     fawkes::Logger *logger)
 {
   __logger         = logger;
-
-  char htdocs_rp[PATH_MAX];
-  if (realpath(htdocs_dir, htdocs_rp) != NULL) {
-    __htdocs_dir     = strdup(htdocs_rp);
-    __htdocs_dir_len = strlen(__htdocs_dir);
-  } else {
-    throw Exception(errno, "Failed to resolve htdocs path '%s'", htdocs_dir);
+  //store all htdocs_dirs
+  if(htdocs_dirs.size() <= 0)
+  {
+    throw Exception(errno, "htdocs_dirs is empty");
   }
+  __htdocs_dirs = std::vector<char *>(htdocs_dirs.size());
+  __htdocs_dirs_len = std::vector<size_t>(htdocs_dirs.size());
+  for(unsigned int i = 0; i < htdocs_dirs.size(); i++)
+  {
+    char htdocs_rp[PATH_MAX];
+    if (realpath(htdocs_dirs[i], htdocs_rp) != NULL)
+    {
+      __htdocs_dirs[i]     = strdup(htdocs_rp);
+      __htdocs_dirs_len[i] = strlen(__htdocs_dirs[i]);
+    } else
+    {
+      throw Exception(errno, "Failed to resolve htdocs path '%s'", htdocs_dirs[i]);
+    }
+  }
+  
   __baseurl        = strdup(baseurl);
   __baseurl_len    = strlen(__baseurl);
 }
@@ -68,7 +80,10 @@ WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(const char *baseurl
 WebviewStaticRequestProcessor::~WebviewStaticRequestProcessor()
 {
   free(__baseurl);
-  free(__htdocs_dir);
+  for(unsigned int i = 0; i < __htdocs_dirs.size(); i++)
+  {
+    free(__htdocs_dirs[i]);
+  }
 }
 
 
@@ -77,42 +92,49 @@ WebviewStaticRequestProcessor::process_request(const fawkes::WebRequest *request
 {
   if ( strncmp(__baseurl, request->url().c_str(), __baseurl_len) == 0 ) {
     // It is in our URL prefix range
-    std::string file_path = std::string(__htdocs_dir) + request->url().substr(__baseurl_len);
 
-    char rf[PATH_MAX];
-    char *realfile = realpath(file_path.c_str(), rf);
-    if (! realfile ) {
-      if (errno == ENOENT) {
-	return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "File not found");
-      } else if (errno == EACCES) {
-	return new WebErrorPageReply(WebReply::HTTP_FORBIDDEN, "Access forbidden");
-      } else {
-	char tmp[1024];
-	if (strerror_r(errno, tmp, sizeof(tmp)) == 0) {
-	  return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-				     "File access failed: %s",  tmp);
+    // Try all htdocs_dirs
+    for(unsigned int i = 0; i < __htdocs_dirs.size(); i++)
+    {
+      std::string file_path = std::string(__htdocs_dirs[i]) + request->url().substr(__baseurl_len);
+      
+      char rf[PATH_MAX];
+      char *realfile = realpath(file_path.c_str(), rf);
+    
+      if(realfile)
+      {
+	if (strncmp(realfile, __htdocs_dirs[i], __htdocs_dirs_len[i]) == 0) {
+	  try {
+	    DynamicFileWebReply *freply = new DynamicFileWebReply(file_path.c_str());
+	    return freply;
+	  } catch (fawkes::Exception &e) {
+	    __logger->log_error("WebStaticReqProc",
+				"Cannot fulfill request for file %s,"
+				" exception follows", request->url().c_str());
+	    __logger->log_error("WebStaticReqProc", e);
+	    return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+					 *(e.begin()));
+	  }
 	} else {
-	  return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-				     "File access failed: Unknown error");
+	  // Someone tries to trick us to give away files we don't want to give
+	  return new WebErrorPageReply(WebReply::HTTP_FORBIDDEN,
+				       "Access forbidden, breakout detected.");
 	}
       }
+    }
+    //file not found or access forbidden
+    if (errno == ENOENT) {
+      return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "File not found");
+    } else if (errno == EACCES) {
+      return new WebErrorPageReply(WebReply::HTTP_FORBIDDEN, "Access forbidden");
     } else {
-      if (strncmp(realfile, __htdocs_dir, __htdocs_dir_len) == 0) {
-	try {
-	  DynamicFileWebReply *freply = new DynamicFileWebReply(file_path.c_str());
-	  return freply;
-	} catch (fawkes::Exception &e) {
-	  __logger->log_error("WebStaticReqProc",
-			      "Cannot fulfill request for file %s,"
-			      " exception follows", request->url().c_str());
-	  __logger->log_error("WebStaticReqProc", e);
-	  return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-				       *(e.begin()));
-	}
+      char tmp[1024];
+      if (strerror_r(errno, tmp, sizeof(tmp)) == 0) {
+	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+				     "File access failed: %s",  tmp);
       } else {
-	// Someone tries to trick us to give away files we don't want to give
-	return new WebErrorPageReply(WebReply::HTTP_FORBIDDEN,
-				     "Access forbidden, breakout detected.");
+	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+				     "File access failed: Unknown error");
       }
     }
   } else {
