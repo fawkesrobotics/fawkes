@@ -111,6 +111,10 @@ KatanaActThread::init()
     joint_name = config->get_string((cfg_prefix + "joints/" + std::to_string(i)).c_str() );
     joint_name.clear();
   }
+  joint_name = config->get_string((cfg_prefix + "joints/finger_l").c_str());
+  joint_name.clear();
+  joint_name = config->get_string((cfg_prefix + "joints/finger_r").c_str());
+  joint_name.clear();
 
   __last_update->set_clock(clock);
   __last_update->set_time(0, 0);
@@ -152,6 +156,16 @@ KatanaActThread::init()
       __joint_ifs->push_back( joint_if );
       joint_name.clear();
     }
+
+    joint_name = config->get_string((cfg_prefix + "joints/finger_l").c_str());
+    joint_if = blackboard->open_for_writing<JointInterface>(joint_name.c_str());
+    __joint_ifs->push_back( joint_if );
+    joint_name.clear();
+    joint_name = config->get_string((cfg_prefix + "joints/finger_r").c_str());
+    joint_if = blackboard->open_for_writing<JointInterface>(joint_name.c_str());
+    __joint_ifs->push_back( joint_if );
+    joint_name.clear();
+
     joint_if = NULL;
   } catch(Exception &e) {
     finalize();
@@ -298,8 +312,14 @@ KatanaActThread::update_position(bool refresh)
 
   float *a = __katana_if->angles();
 
+  __joint_ifs->at(0)->set_position(  a[0] + M_PI);
+  __joint_ifs->at(1)->set_position(  a[1]);// + M_PI/2);
+  __joint_ifs->at(2)->set_position(  a[2] + M_PI);
+  __joint_ifs->at(3)->set_position(  a[3] - M_PI);
+  __joint_ifs->at(4)->set_position(  a[4]);
+  __joint_ifs->at(5)->set_position(  -a[5]/2.f - 0.5f);
+  __joint_ifs->at(6)->set_position(  -a[5]/2.f - 0.5f);
   for( unsigned int i=0; i<__joint_ifs->size(); ++i) {
-    __joint_ifs->at(i)->set_position(a[i]);
     __joint_ifs->at(i)->write();
   }
 /*
@@ -605,7 +625,6 @@ KatanaActThread::loop()
                                                   __cfg_park_z * __cfg_distance_scale),
                                         fawkes::Time(0,0), __cfg_frame_kni);
         tf_listener->transform_point(__cfg_frame_openrave, target_local, target);
-
         __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
                                            __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
  #ifdef EARLY_PLANNING

@@ -74,6 +74,9 @@ hardware/katana:
     2: katana_motor3_lift_joint
     3: katana_motor4_lift_joint
     4: katana_motor5_wrist_roll_joint
+    finger_l: katana_l_finger_joint
+    finger_r: katana_r_finger_joint
+
 
   openrave:
     # Use OpenRAVE support?
