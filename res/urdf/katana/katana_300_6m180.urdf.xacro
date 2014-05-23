@@ -30,7 +30,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="file://$(env PWD)/katana/meshes/katana_base_link.stl"/>
+        <mesh filename="package://kbsg_models/meshes/katana/katana_base_link.stl"/>
       </geometry>
 
       <material name="grey">
@@ -59,7 +59,7 @@
     <visual>
       <origin xyz="0 0 ${-base_height}" rpy="0 0 0" />
       <geometry>
-        <mesh filename="file://$(env PWD)/katana/meshes/katana_motor1_pan_link.stl"/>
+        <mesh filename="package://kbsg_models/meshes/katana/katana_motor1_pan_link.stl"/>
       </geometry>
 
       <material name="grey" />
@@ -86,7 +86,7 @@
     <visual>
       <origin rpy="${-M_PI/2} 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="file://$(env PWD)/katana/meshes/katana_motor2_lift_link.stl"/>
+        <mesh filename="package://kbsg_models/meshes/katana/katana_motor2_lift_link.stl"/>
       </geometry>
       <!-- <geometry>
           <cylinder length="${link2_length}" radius="0.02"/>
@@ -118,7 +118,7 @@
     <visual>
       <origin rpy="${-M_PI/2} 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="file://$(env PWD)/katana/meshes/katana_motor3_lift_link.stl"/>
+        <mesh filename="package://kbsg_models/meshes/katana/katana_motor3_lift_link.stl"/>
       </geometry>
       <!--<geometry>
         <cylinder length="${link3_length}" radius="0.02"/>
@@ -149,7 +149,7 @@
     <visual>
       <origin rpy="${M_PI/2} 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="file://$(env PWD)/katana/meshes/katana_motor4_lift_link.stl"/>
+        <mesh filename="package://kbsg_models/meshes/katana/katana_motor4_lift_link.stl"/>
       </geometry>
       <!-- <geometry>
         <cylinder length="${link4_length}" radius="0.02"/>
@@ -181,7 +181,7 @@
     <visual>
       <origin rpy="0 ${M_PI} 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="file://$(env PWD)/katana/meshes/katana_motor5_wrist_roll_link.stl"/>
+        <mesh filename="package://kbsg_models/meshes/katana/katana_motor5_wrist_roll_link.stl"/>
       </geometry>
       <!--<geometry>
         <cylinder length="${link5_length}" radius="0.02"/>
@@ -210,7 +210,7 @@
     <visual>
       <origin rpy="0 ${M_PI} 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="file://$(env PWD)/katana/meshes/katana_gripper_link.stl"/>
+        <mesh filename="package://kbsg_models/meshes/katana/katana_gripper_link.stl"/>
       </geometry>
 
       <material name="grey" />
@@ -236,7 +236,7 @@
       <visual>
         <origin rpy="0 ${M_PI} 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://$(env PWD)/katana/meshes/katana_gripper_${prefix}_finger.stl"/>
+          <mesh filename="package://kbsg_models/meshes/katana/katana_gripper_${prefix}_finger.stl"/>
         </geometry>
 
         <material name="grey" />
