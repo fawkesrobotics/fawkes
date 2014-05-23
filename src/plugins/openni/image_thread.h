@@ -73,7 +73,8 @@ class OpenNiImageThread
   typedef enum {
     DEBAYER_BILINEAR,
     DEBAYER_NEAREST_NEIGHBOR,
-    CONVERT_YUV
+    CONVERT_YUV,
+    CONVERT_RGB
   } CopyMode;
   CopyMode                             __cfg_copy_mode;
 

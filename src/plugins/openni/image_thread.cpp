@@ -29,6 +29,7 @@
 #include <fvutils/color/bayer.h>
 #include <fvutils/color/yuv.h>
 #include <fvutils/color/yuvrgb.h>
+#include <fvutils/color/rgbyuv.h>
 
 #include <memory>
 
@@ -129,10 +130,11 @@ OpenNiImageThread::init()
   /*
   const char *pixel_format = "unknown";
   switch (__image_gen->GetPixelFormat()) {
-  case XN_PIXEL_FORMAT_RGB24:            pixel_format = "RGB24"; break;
+  case XN_PIXEL_FORMAT_RGB24:            pixel_format = "RGB24"; __cfg_copy_mode = CONVERT_RGB; break;
   case XN_PIXEL_FORMAT_YUV422:           pixel_format = "YUV422"; break;
   case XN_PIXEL_FORMAT_GRAYSCALE_8_BIT:  pixel_format = "Gray8"; break;
   case XN_PIXEL_FORMAT_GRAYSCALE_16_BIT: pixel_format = "Gray16"; break; 	
+  case XN_PIXEL_FORMAT_MJPEG:            pixel_format = "MJPEG"; break; 	
   }
 
   XnUInt64 input_format;
@@ -196,6 +198,9 @@ OpenNiImageThread::loop()
     } else if (__cfg_copy_mode == CONVERT_YUV) {
       yuv422packed_to_yuv422planar(image_data, __image_buf_yuv->buffer(),
 				   __image_width, __image_height);
+    } else if (__cfg_copy_mode == CONVERT_RGB) {
+      rgb_to_yuv422planar_plainc(image_data, __image_buf_yuv->buffer(),
+				 __image_width, __image_height);
     } else if (__cfg_copy_mode == DEBAYER_NEAREST_NEIGHBOR) {
       bayerGRBG_to_yuv422planar_nearest_neighbour(image_data,
 						  __image_buf_yuv->buffer(),
@@ -211,6 +216,9 @@ OpenNiImageThread::loop()
     } else if (__cfg_copy_mode == CONVERT_YUV) {
       yuv422packed_to_rgb_plainc(image_data, __image_buf_rgb->buffer(),
                                  __image_width, __image_height);
+    } else if (__cfg_copy_mode == CONVERT_RGB) {
+      memcpy(__image_buf_rgb->buffer(), image_data,
+	     colorspace_buffer_size(RGB, __image_width, __image_height));
     } else if (__cfg_copy_mode == DEBAYER_NEAREST_NEIGHBOR) {
       bayerGRBG_to_rgb_nearest_neighbour(image_data, __image_buf_rgb->buffer(),
                                          __image_width, __image_height);
