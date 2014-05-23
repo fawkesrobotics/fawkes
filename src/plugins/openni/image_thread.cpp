@@ -192,6 +192,7 @@ OpenNiImageThread::loop()
   lock.unlock();
 
   if (is_image_new && (__image_buf_yuv->num_attached() > 1)) {
+    __image_buf_yuv->lock_for_write();
     if (__cfg_copy_mode == DEBAYER_BILINEAR) {
       bayerGRBG_to_yuv422planar_bilinear(image_data, __image_buf_yuv->buffer(),
 					 __image_width, __image_height);
@@ -207,9 +208,11 @@ OpenNiImageThread::loop()
 						  __image_width, __image_height);
     }
     __image_buf_yuv->set_capture_time(&ts);
+    __image_buf_yuv->unlock();
   }
 
   if (is_image_new && (__image_buf_rgb->num_attached() > 1)) {
+    __image_buf_rgb->lock_for_write();
     if (__cfg_copy_mode == DEBAYER_BILINEAR) {
       bayerGRBG_to_rgb_bilinear(image_data, __image_buf_rgb->buffer(),
                                 __image_width, __image_height);
@@ -224,5 +227,6 @@ OpenNiImageThread::loop()
                                          __image_width, __image_height);
     }
     __image_buf_rgb->set_capture_time(&ts);
+    __image_buf_rgb->unlock();
   }
 }
