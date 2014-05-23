@@ -3,8 +3,7 @@
  *  setup.h - OpenNI utility methods: setup routines
  *
  *  Created: Thu Mar 24 10:21:31 2011
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -46,6 +45,8 @@ void setup_map_generator(xn::MapGenerator &generator,
 
 void setup_alternate_viewpoint(xn::Generator &gen, xn::Generator &target);
 void setup_synchronization(xn::Generator &gen, xn::Generator &target);
+
+void get_usb_info(xn::Generator &gen, unsigned short &vendor, unsigned short &product);
 
 /** Find existing or create new node.
  * This method will first try to find an existing node of the given type.

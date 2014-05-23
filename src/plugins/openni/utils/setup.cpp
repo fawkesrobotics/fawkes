@@ -3,8 +3,7 @@
  *  setup.cpp - OpenNI utility methods: setup routines
  *
  *  Created: Thu Mar 24 10:23:27 2011
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -159,6 +158,42 @@ setup_synchronization(xn::Generator &gen, xn::Generator &target)
     throw Exception("Setting synchronization of '%s' with '%s' failed: %s",
                     target.GetName(), gen.GetName(), xnGetStatusString(status));
   }
+}
+
+/** Get information about device used by generator.
+ * @param gen generator whose input device to query
+ * @param upon return contains the USB vendor ID
+ * @param upon return contains the USB product ID
+ * @throw exception thrown if no matching device could be found
+ */
+void
+get_usb_info(xn::Generator &gen, unsigned short &vendor, unsigned short &product)
+{
+  xn::NodeInfo node_info = gen.GetInfo();
+  xn::NodeInfoList &depnodes = node_info.GetNeededNodes();
+  for (xn::NodeInfoList::Iterator n = depnodes.Begin(); n != depnodes.End(); ++n) {
+    const XnProductionNodeDescription &pnd = (*n).GetDescription();
+
+    if ((pnd.Type == XN_NODE_TYPE_DEVICE) &&
+        (strcmp(pnd.strVendor, "PrimeSense") == 0) &&
+	(strcmp(pnd.strName, "SensorV2") == 0) )
+    {
+      // it's the primesense device node and we can check for USB vendor/product
+      unsigned short int usb_vendor = 0, usb_product = 0;
+      unsigned char bus = 0, addr = 0;
+      if (sscanf((*n).GetCreationInfo(), "%04hx/%04hx@%hhu/%hhu",
+		 &usb_vendor, &usb_product, &bus, &addr) == 4) {
+	//logger->log_debug(name(), "Detected USB device "
+	//		  "(vendor: %04hx  product: %04hx  bus: %hhu  addr: %hhu)",
+	//		  vendor, product, bus, addr);
+	vendor  = usb_vendor;
+	product = usb_product;
+	return;
+      }
+    }
+  }
+
+  throw Exception("No matching device node found to retrieve USB info from");
 }
 
 } // end namespace fawkes::openni
