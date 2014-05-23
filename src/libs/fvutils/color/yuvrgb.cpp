@@ -156,11 +156,11 @@ yuv422planar_to_rgb_plainc(const unsigned char *planar, unsigned char *RGB, unsi
  */
 void
 yuv422packed_to_rgb_plainc(const unsigned char *YUV, unsigned char *RGB,
-			   unsigned int width, unsigned int height)
+			   const unsigned int width, const unsigned int height)
 {
-  register int y0, y1, u, v;
-  register unsigned int i = 0;
-  while (i < (width * height)/2) {
+  int y0, y1, u, v;
+  unsigned int i = 0;
+  for (unsigned int pixel = 0; pixel < (width * height); pixel += 2) {
     u  = YUV[i++] - 128;
     y0 = YUV[i++] -  16;
     v  = YUV[i++] - 128;
