@@ -27,7 +27,7 @@ name               = "goto"
 fsm                = SkillHSM:new{name=name, start="GOTO"}
 depends_skills     = {"relgoto"}
 depends_interfaces = {
-   {v = "pose", type = "ObjectPositionInterface"},
+   {v = "pose", type = "Position3DInterface"},
    {v = "navigator", type = "NavigatorInterface"}
 }
 
