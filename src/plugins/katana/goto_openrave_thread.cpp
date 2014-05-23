@@ -96,7 +96,8 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
   __is_arm_extension( 0 ),
   __plannerparams( "default" ),
   __plannerparams_straight( "default" ),
-  _openrave( openrave )
+  _openrave( openrave ),
+  __theta_error( 0 )
 {
 }
 
