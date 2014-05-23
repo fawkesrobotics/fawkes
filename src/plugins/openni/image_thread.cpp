@@ -116,13 +116,6 @@ OpenNiImageThread::init()
     if (__image_gen->SetPixelFormat(XN_PIXEL_FORMAT_YUV422) != XN_STATUS_OK) {
       throw Exception("Failed to set pixel format");
     }
-    /*
-    // RegistrationType should be 2 (software) for Kinect, 1 (hardware) for PS
-    // (from ROS openni_camera)
-    if (__depth_gen->SetIntProperty ("RegistrationType", 1) != XN_STATUS_OK) {
-      throw Exception("Failed to set registration type");
-    }
-    */
     __cfg_copy_mode = CONVERT_YUV;
   }
 
