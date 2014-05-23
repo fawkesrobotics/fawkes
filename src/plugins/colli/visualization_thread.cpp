@@ -191,6 +191,7 @@ ColliVisualizationThread::loop()
 
   // publish path
   grid.cells.clear();
+  grid.header.frame_id = "/base_link";
   std::vector< point_t >* plan = search_->GetPlan();
   point_t gridpos_robo = search_->GetRoboPosition();
   for( std::vector<point_t>::iterator it=plan->begin(); it!=plan->end(); ++it ) {
@@ -200,6 +201,7 @@ ColliVisualizationThread::loop()
     p.z = 0;
     grid.cells.push_back( p );
   }
+  grid.header.stamp = ros::Time::now();
   pub_search_path_->publish( grid );
 
 }
