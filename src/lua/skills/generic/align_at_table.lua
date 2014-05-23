@@ -54,15 +54,22 @@ align_at_table{dist=DIST}
 skillenv.skill_module(_M)
 
 -- Constants
-MIN_VISIBILITY_HISTORY = 1
+MIN_VISIBILITY_HISTORY = 5
 
 TABLE_WIDTH = config:get_float("/perception/tabletop-objects/table_model_width") or 0.7
+
+DIST_TO_FRONT = 0.12 -- distance from base_link to robot front
+DIST_TABLE = 0.15 -- hold this distance to the table front
+
 TABLE_POSITION_DISTANCE = 0.2 -- hold a distance of 0.2m to table
 
 TIMEOUT = {DETECT_TABLE = 8.0,
            WAIT_FOR_STOPPING = 1.5}
 
 FRAMES = {TARGET = "/base_link"}
+
+YAW_LIMIT = math.pi/4
+MIN_DIST = 0.1
 
 -- position for PTU to be looking down at a table
 PTU = {PAN = 0.0,
@@ -81,7 +88,7 @@ function table_detected(state)
          if can_transform(table_pos:frame()) then
             x, y, z = transform_object(table_pos)
          else
-            print_warn("can't transform from %s to '/base_link'", table_pos:frame())
+            print_warn("can't transform from '%s' to '/base_link'", table_pos:frame())
          end
          state.fsm.vars.table_distance = x - TABLE_WIDTH/2 -- distance to table front
          local quat = fawkes.tf.Quaternion:new(table_pos:rotation(0),
@@ -90,7 +97,10 @@ function table_detected(state)
                                                table_pos:rotation(3))
          state.fsm.vars.table_yaw = fawkes.tf.get_yaw(quat)
          --printf("detected table. dist="..state.fsm.vars.table_distance.." , yaw="..state.fsm.vars.table_yaw)
-         return true
+         if math.abs(state.fsm.vars.table_yaw) <= YAW_LIMIT and
+            x >= MIN_DIST then
+            return true
+         end
       end
    end
 
@@ -142,7 +152,7 @@ fsm:add_transitions {
 }
 
 function INIT:init()
-   self.fsm.vars.dist = self.fsm.vars.dist or TABLE_POSITION_DISTANCE
+   self.fsm.vars.dist = self.fsm.vars.dist or DIST_TABLE
 end
 
 function LOOK_AT_TABLE:init()
@@ -179,7 +189,7 @@ function POSITION_AT_TABLE:init()
    navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(false))
    navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(navigator.SlowAllowBackward))
 
-   self.args["relgoto"] = {x=self.fsm.vars.table_distance - self.fsm.vars.dist, y=0, ori=0}
+   self.args["relgoto"] = {x=self.fsm.vars.table_distance - self.fsm.vars.dist - DIST_TO_FRONT, y=0, ori=0}
 end
 function POSITION_AT_TABLE:exit()
    navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(self.fsm.vars.navi.escaping))
