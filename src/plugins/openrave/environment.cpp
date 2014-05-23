@@ -206,12 +206,14 @@ OpenRaveEnvironment::get_env_ptr() const
 void
 OpenRaveEnvironment::start_viewer()
 {
-  try {
-    boost::thread thviewer(boost::bind(SetViewer,__env,"qtcoin"));
-  } catch( const openrave_exception &e) {
-    if(__logger)
-      {__logger->log_error("OpenRAVE Environment", "Could not load viewr. Ex:%s", e.what());}
-    throw;
+  if( !__viewer_enabled ) {
+    try {
+      boost::thread thviewer(boost::bind(SetViewer,__env,"qtcoin"));
+    } catch( const openrave_exception &e) {
+      if(__logger)
+        {__logger->log_error("OpenRAVE Environment", "Could not load viewr. Ex:%s", e.what());}
+      throw;
+    }
   }
 
   __viewer_enabled = true;
