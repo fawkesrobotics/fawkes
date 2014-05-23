@@ -239,10 +239,8 @@ end
 function APPROACH_AGAIN:init()
    katanaarm:read()
 
-   local vector_to_target = fawkes.HomVector:new(0, 0, 1)
-   vector_to_target:rotate_y(math.pi/2) --look straight forward
-   vector_to_target:rotate_z(katanaarm:phi() - math.pi/2)
-   vector_to_target:set_length(MIN_APPROACH_OFFSET + MAX_APPROACH_DIST)
+   local vector_to_target = fawkes.tf.Vector3:new(MIN_APPROACH_OFFSET + MAX_APPROACH_DIST, 0, 0) --look straight forward
+   vector_to_target = vector_to_target:rotate(fawkes.tf.Vector3:new(0,0,1), katanaarm:phi() - math.pi/2)
 
    katanaarm:msgq_enqueue_copy(katanaarm.SetPlannerParamsMessage:new("default", false))
    self.args[katana_rel] = {x = vector_to_target:x(),
