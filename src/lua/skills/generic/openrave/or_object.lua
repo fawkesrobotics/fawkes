@@ -24,7 +24,7 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "or_object"
-fsm                = SkillHSM:new{name=name, start="INIT"}
+fsm                = SkillHSM:new{name=name, start="INIT", debug=false}
 depends_skills     = {}
 depends_interfaces = {
    {v = "if_openrave", type = "OpenRaveInterface", id="OpenRAVE"}
@@ -109,21 +109,22 @@ fsm:define_states{
    {"ROTATE",      JumpState},
    {"RENAME",      JumpState},
 
-   {"CHECK", JumpState}
+   {"CHECK", JumpState},
+   {"CHECK_DELETE", JumpState}
 }
 
 -- Transitions
 fsm:add_transitions {
-   {"INIT", "RELEASE_ALL", precond="vars.release_all", desc="release all"}, -- put here, because do not need name for it
-   {"INIT", "FAILED", precond="not vars.name", desc="no object name given"},
+   {"INIT", "RELEASE_ALL", cond="vars.release_all", desc="release all"}, -- put here, because do not need name for it
+   {"INIT", "FAILED", cond="not vars.name", desc="no object name given"},
 
-   {"INIT", "ADD", precond="vars.add", desc="add"},
-   {"INIT", "DELETE", precond="vars.delete", desc="delete"},
-   {"INIT", "ATTACH", precond="vars.attach", desc="attach"},
-   {"INIT", "RELEASE", precond="vars.release", desc="release"},
-   {"INIT", "MOVE", precond="vars.move", desc="move"},
-   {"INIT", "ROTATE", precond="vars.rotate", desc="rotate"},
-   {"INIT", "RENAME", precond="vars.rename", desc="rename"},
+   {"INIT", "ADD", cond="vars.add", desc="add"},
+   {"INIT", "DELETE", cond="vars.delete", desc="delete"},
+   {"INIT", "ATTACH", cond="vars.attach", desc="attach"},
+   {"INIT", "RELEASE", cond="vars.release", desc="release"},
+   {"INIT", "MOVE", cond="vars.move", desc="move"},
+   {"INIT", "ROTATE", cond="vars.rotate", desc="rotate"},
+   {"INIT", "RENAME", cond="vars.rename", desc="rename"},
 
    {"ADD", "FAILED", precond="not (vars.path)", desc="insufficient arguments"},
    {"MOVE", "FAILED", precond="not (vars.x and vars.y and vars.z)", desc="insufficient arguments"},
@@ -131,7 +132,7 @@ fsm:add_transitions {
    {"RENAME", "FAILED", precond="not (vars.new_name)", desc="insufficient arguments"},
 
    {"ADD", "CHECK", cond=jc_msg_final, desc="final"},
-   {"DELETE", "CHECK", cond=jc_msg_final, desc="final"},
+   {"DELETE", "CHECK_DELETE", cond=jc_msg_final, desc="final"},
    {"ATTACH", "CHECK", cond=jc_msg_final, desc="final"},
    {"RELEASE", "CHECK", cond=jc_msg_final, desc="final"},
    {"RELEASE_ALL", "CHECK", cond=jc_msg_final, desc="final"},
@@ -139,9 +140,16 @@ fsm:add_transitions {
    {"ROTATE", "CHECK", cond=jc_msg_final, desc="final"},
    {"RENAME", "CHECK", cond=jc_msg_final, desc="final"},
 
-   {"CHECK", "FINAL", cond="if_openrave:is_success()", desc="command succeeded"},
+   {"CHECK_DELETE", "DELETE", cond="not vars.done", desc="delete next"},
+   {"CHECK_DELETE", "CHECK", cond=true, desc="final"},
+
+   {"CHECK", "FINAL", cond="vars.success", desc="command succeeded"},
    {"CHECK", "FAILED", cond=true, desc="command failed"}
 }
+
+function INIT:init()
+   self.fsm.vars.success = true
+end
 
 function ADD:init()
    self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(if_openrave.AddObjectMessage:new( self.fsm.vars.name,
@@ -149,7 +157,17 @@ function ADD:init()
 end
 
 function DELETE:init()
-   self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(if_openrave.DeleteObjectMessage:new( self.fsm.vars.name ))
+   if type(self.fsm.vars.name) == "table" then
+      self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(if_openrave.DeleteObjectMessage:new( self.fsm.vars.name[1] ))
+      table.remove(self.fsm.vars.name, 1)
+      self.fsm.vars.done = #self.fsm.vars.name == 0
+   else
+      self.fsm.vars.done = true
+      self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(if_openrave.DeleteObjectMessage:new( self.fsm.vars.name ))
+   end
+end
+function DELETE:exit()
+   self.fsm.vars.success = self.fsm.vars.success and if_openrave:is_success()
 end
 
 function ATTACH:init()
@@ -191,3 +209,6 @@ function RENAME:init()
                                                                                             self.fsm.vars.new_name ))
 end
 
+function CHECK:init()
+   self.fsm.vars.success = self.fsm.vars.success and if_openrave:is_success()
+end
