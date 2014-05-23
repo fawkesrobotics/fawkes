@@ -359,6 +359,7 @@ ColliThread::colli_goto_(float x, float y, float ori, NavigatorInterface* iface)
   if_colli_target_->set_final( false );
   if_colli_target_->write();
 
+  colli_data_.final = false;
   target_new_ = true;
   mutex_->unlock();
 }
