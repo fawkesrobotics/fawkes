@@ -73,29 +73,7 @@ OpenNiImageThread::init()
 
   fawkes::openni::setup_map_generator(*__image_gen, config);
 
-  __usb_vendor = 0;
-  __usb_product = 0;
-
-  xn::NodeInfo image_info = __image_gen->GetInfo();
-  xn::NodeInfoList &depnodes = image_info.GetNeededNodes();
-  for (xn::NodeInfoList::Iterator n = depnodes.Begin(); n != depnodes.End(); ++n) {
-    const XnProductionNodeDescription &pnd = (*n).GetDescription();
-
-    if ((pnd.Type == XN_NODE_TYPE_DEVICE) &&
-        (strcmp(pnd.strVendor, "PrimeSense") == 0) &&
-	(strcmp(pnd.strName, "SensorV2") == 0) )
-    {
-      // it's the primesense device node and we can check for USB vendor/product
-      unsigned short int vendor = 0, product = 0;
-      unsigned char bus = 0, addr = 0;
-      if (sscanf((*n).GetCreationInfo(), "%04hx/%04hx@%hhu/%hhu", &vendor, &product, &bus, &addr) == 4) {
-	logger->log_debug(name(), "Detected USB device (vendor: %04hx  product: %04hx  bus: %hhu  addr: %hhu)",
-			  vendor, product, bus, addr);
-	__usb_vendor  = vendor;
-	__usb_product = product;
-      }
-    }
-  }
+  fawkes::openni::get_usb_info(*__image_gen, __usb_vendor, __usb_product);
 
   if ( (__usb_vendor == 0x045e) && (__usb_product == 0x02ae) ) {
     // from OpenNI-PrimeSense/XnStreamParams.h:
