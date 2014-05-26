@@ -147,7 +147,7 @@ p_locate_file(...)
 //{
 //	std::cout << "main" << '\n' ;
 //	EclipsePath::create_initial_object();
-//	EclipsePath::instance()->add_path_check("@basedir@/src/plugins/readylog");
+//	EclipsePath::instance()->add_path_check("@basedir@/src/plugins/eclipse-clp");
 //	EclipsePath::instance()->add_path("/home/ggierse");
 //	std::cout << "created object" << '\n';
 //	path res = EclipsePath::instance()->locate_file("fawkes");
