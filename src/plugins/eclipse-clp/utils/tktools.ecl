@@ -40,7 +40,7 @@ fin :- bb_close_interface("eclipse_clp_connect"),
 	log_info("Closing eclipse_clp_connect").
 
 %% event handlers
-handle_check_debug_msg(check_debug_msg) :- log_debug("checking debug msg"), bb_read_interfaces,
+handle_check_debug_msg(check_debug_msg) :- bb_read_interfaces,
                                bb_recv_messages("eclipse_clp_connect", List),
                                eval_list(List). 
 %% set event handlers
