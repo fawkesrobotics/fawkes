@@ -51,6 +51,19 @@ IplImageAdapter::convert_image_bgr(unsigned char *buffer,
 }
 
 
+/** Convert image from IplImage into buffer.
+ * @param image IplImage with BGR notation
+ * @param buffer YUV422_PLANAR of the same size to write the converted IplImage
+ */
+void
+IplImageAdapter::convert_image_yuv422_planar(IplImage *image, 
+				   unsigned char *buffer)
+{
+  convert(BGR, YUV422_PLANAR, (unsigned char *)image->imageData, buffer,
+	  image->width, image->height);
+}
+
+
 /* Creates a new IplImage for a ROI.
  * This will create a new IplImage with the size of the ROI and convert the data of the
  * passed YUV422_PLANAR buffer to the IplImage.
