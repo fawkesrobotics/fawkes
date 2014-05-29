@@ -5,6 +5,7 @@
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
  *             2013  Bahram Maleki-Fard
+ *             2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -63,11 +64,17 @@ class MotorControl
    */
   float GetCurrentOri();
 
-  /** GetMotorDesiredTranslation.
-   *  This method returns current desired motor translation speed.
+  /** GetMotorDesiredTranslationX.
+   *  This method returns current desired motor x translation speed.
    *  @return float is the current desired motor translation speed.
    */
-  float GetMotorDesiredTranslation();
+  float GetMotorDesiredTranslationX();
+
+  /** GetMotorDesiredTranslationY.
+   *  This method returns current desired motor y translation speed.
+   *  @return float is the current desired motor translation speed.
+   */
+  float GetMotorDesiredTranslationY();
 
   /** GetMotorDesiredRotation.
    *  This method returns current desired motor rotation speed.
@@ -87,13 +94,21 @@ class MotorControl
    */
   float GetMotorCurrentRotation();
 
+  /** GetUserDesiredTranslationX.
+   *  This method returns current desired user translation speed.
+   *    The difference to the functions on top is that the user
+   *    desired settings are not yet sended to the motor.
+   *  @return float is the current desired user translation speed.
+   */
+  float GetUserDesiredTranslationX();
+
   /** GetUserDesiredTranslation.
    *  This method returns current desired user translation speed.
    *    The difference to the functions on top is that the user
    *    desired settings are not yet sended to the motor.
    *  @return float is the current desired user translation speed.
    */
-  float GetUserDesiredTranslation();
+  float GetUserDesiredTranslationY();
 
   /** GetUserDesiredRotation.
    *  This method returns current desired user rotation speed.
@@ -110,11 +125,17 @@ class MotorControl
   bool GetMovingAllowed();
 
 
+  /** SetDesiredTranslationX.
+   *  This method sets the current user desired translation speed.
+   *  @param speed is a float containing x translation speed in m/s.
+   */
+  void SetDesiredTranslationX( float speed );
+
   /** SetDesiredTranslation.
    *  This method sets the current user desired translation speed.
-   *  @param speed is a float containing translation speed in m/s.
+   *  @param speed is a float containing y translation speed in m/s.
    */
-  void SetDesiredTranslation( float speed );
+  void SetDesiredTranslationY( float speed );
 
   /** SetDesiredRotation.
    *  This method sets the current user desired rotation speed.
@@ -134,8 +155,9 @@ class MotorControl
 
  private:
 
-  float m_MotorControlDesiredTranslation; // what translation the next set command realizes
-  float m_MotorControlDesiredRotation;    // what rotationtion the next set command realizes
+  float m_MotorControlDesiredTranslationX;  // what translation the next set command realizes
+  float m_MotorControlDesiredTranslationY;  // what translation the next set command realizes
+  float m_MotorControlDesiredRotation;      // what rotationtion the next set command realizes
 
   fawkes::MotorInterface* m_pMopo;      // Interface with motor-values
 };

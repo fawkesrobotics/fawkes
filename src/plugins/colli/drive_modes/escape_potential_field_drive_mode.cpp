@@ -108,8 +108,9 @@ CEscapePotentialFieldDriveModule::Update()
   // This is only called, if we recently stopped...
   logger_->log_debug("CEscapeDriveModule", "CEscapeDriveModule( Update ): Calculating ESCAPING...");
 
-  m_ProposedTranslation = 0.0;
-  m_ProposedRotation    = 0.0;
+  m_ProposedTranslationX  = 0.;
+  m_ProposedTranslationY  = 0.;
+  m_ProposedRotation      = 0.;
 
   int cellHeight = m_pOccGrid->getCellHeight();
   int cellWidth = m_pOccGrid->getCellWidth();
@@ -188,7 +189,7 @@ CEscapePotentialFieldDriveModule::Update()
     m_ProposedRotation = turn_direction * m_MaxRotation;
   } else {
     logger_->log_warn("CEscapePotentialFieldDriveModule","Drive %f", drive_direction);
-    m_ProposedTranslation = drive_direction * m_MaxTranslation;
+    m_ProposedTranslationX = drive_direction * m_MaxTranslation;
   }
 
 //  if ( angle_abs > angle_difference && angle_abs < M_PI - angle_difference ) {    //just turn

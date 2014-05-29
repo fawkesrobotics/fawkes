@@ -182,13 +182,22 @@ CSelectDriveMode::SetLocalTrajec( float localTrajecX, float localTrajecY )
   m_LocalTrajecY = localTrajecY;
 }
 
-/** Returns the proposed translation which was previously calculated in Update()
+/** Returns the proposed x translation which was previously calculated in Update()
  * @return The proposed translation
  */
 float
-CSelectDriveMode::GetProposedTranslation()
+CSelectDriveMode::GetProposedTranslationX()
 {
-  return m_ProposedTranslation;
+  return m_ProposedTranslationX;
+}
+
+/** Returns the proposed y translation which was previously calculated in Update()
+ * @return The proposed translation
+ */
+float
+CSelectDriveMode::GetProposedTranslationY()
+{
+  return m_ProposedTranslationY;
 }
 
 /** Returns the proposed rotation which was previously calculated in Update()
@@ -256,14 +265,16 @@ void
 CSelectDriveMode::Update( bool escape )
 {
   CAbstractDriveMode * m_pDriveMode = 0;
-  m_ProposedTranslation = 0.0;
-  m_ProposedRotation = 0.0;
+  m_ProposedTranslationX  = 0.;
+  m_ProposedTranslationY  = 0.;
+  m_ProposedRotation      = 0.;
 
   // choose the correct drive mode!
   NavigatorInterface::DriveMode desiredMode = NavigatorInterface::MovingNotAllowed;
   if ( escape == true ) {
     if( m_EscapeFlag == 0
-     && m_pMotor->GetMotorDesiredTranslation() != 0
+     && m_pMotor->GetMotorDesiredTranslationX() != 0
+     && m_pMotor->GetMotorDesiredTranslationY() != 0
      && m_pMotor->GetMotorDesiredRotation() != 0 ) {
       desiredMode = NavigatorInterface::MovingNotAllowed;
       // we have not yet stopped!
@@ -300,8 +311,9 @@ CSelectDriveMode::Update( bool escape )
   if ( m_pDriveMode == 0 ) {
     // invalid pointer
     logger_->log_error("CSelectDriveMode", "INVALID DRIVE MODE POINTER, stopping!");
-    m_ProposedTranslation = 0.0;
-    m_ProposedRotation = 0.0;
+    m_ProposedTranslationX  = 0.;
+    m_ProposedTranslationY  = 0.;
+    m_ProposedRotation      = 0.;
 
   } else {
     // valid drive mode!
@@ -325,16 +337,25 @@ CSelectDriveMode::Update( bool escape )
     m_pDriveMode->Update();
 
     // get the values from the drive mode
-    m_ProposedTranslation = m_pDriveMode->GetProposedTranslation();
-    m_ProposedRotation    = m_pDriveMode->GetProposedRotation();
+    m_ProposedTranslationX  = m_pDriveMode->GetProposedTranslationX();
+    m_ProposedTranslationY  = m_pDriveMode->GetProposedTranslationY();
+    m_ProposedRotation      = m_pDriveMode->GetProposedRotation();
 
     // recheck with targetobj maximum settings
     if( (m_pColliTarget->max_velocity() != 0.0)
-     && (fabs( m_ProposedTranslation ) > fabs( m_pColliTarget->max_velocity() )) ) {
-      if ( m_ProposedTranslation > 0.0 )
-        m_ProposedTranslation = m_pColliTarget->max_velocity();
+     && (fabs( m_ProposedTranslationX ) > fabs( m_pColliTarget->max_velocity() )) ) {
+      if ( m_ProposedTranslationX > 0.0 )
+        m_ProposedTranslationX = m_pColliTarget->max_velocity();
       else
-        m_ProposedTranslation = -m_pColliTarget->max_velocity();
+        m_ProposedTranslationX = -m_pColliTarget->max_velocity();
+    }
+
+    if( (m_pColliTarget->max_velocity() != 0.0)
+     && (fabs( m_ProposedTranslationY ) > fabs( m_pColliTarget->max_velocity() )) ) {
+      if ( m_ProposedTranslationY > 0.0 )
+        m_ProposedTranslationY = m_pColliTarget->max_velocity();
+      else
+        m_ProposedTranslationY = -m_pColliTarget->max_velocity();
     }
 
     if( ( m_pColliTarget->max_rotation() != 0.0 )

@@ -186,8 +186,9 @@ CSlowForwardDriveModule::SlowForward_Translation( float dist_to_target, float di
 void
 CSlowForwardDriveModule::Update()
 {
-  m_ProposedTranslation = 0.0;
-  m_ProposedRotation    = 0.0;
+  m_ProposedTranslationX = 0.;
+  m_ProposedTranslationY = 0.;
+  m_ProposedRotation     = 0.;
 
   float dist_to_target = sqrt( sqr(m_LocalTargetX) + sqr(m_LocalTargetY) );
   float alpha          = atan2( m_LocalTargetY, m_LocalTargetX );
@@ -197,7 +198,7 @@ CSlowForwardDriveModule::Update()
   // last time border check............. IMPORTANT!!!
   // because the motorinstructor just tests robots physical borders.
   if ( dist_to_target < 0.04 ) {
-    m_ProposedTranslation = 0.0;
+    m_ProposedTranslationX = 0.0;
     m_ProposedRotation    = 0.0;
 
   } else {
@@ -205,7 +206,7 @@ CSlowForwardDriveModule::Update()
     m_ProposedRotation = SlowForward_Curvature( dist_to_target, dist_to_trajec, alpha,
                                                 m_RoboTrans, m_RoboRot );
 
-    m_ProposedTranslation = SlowForward_Translation( dist_to_target, dist_to_trajec, alpha,
+    m_ProposedTranslationX = SlowForward_Translation( dist_to_target, dist_to_trajec, alpha,
                                                      m_RoboTrans, m_RoboRot, m_ProposedRotation );
 
     // Track relation between proposed-rotation and max-rotation. Use this to adjust the
@@ -214,7 +215,7 @@ CSlowForwardDriveModule::Update()
     float trans_correction = fabs( m_MaxRotation / m_ProposedRotation );
     if( trans_correction < 1.f ) {
       // for now we simply reduce the translation quadratically to how much the rotation has been reduced
-      m_ProposedTranslation *= trans_correction * trans_correction;
+      m_ProposedTranslationX *= trans_correction * trans_correction;
     }
 
     // Check rotation limits.
@@ -225,7 +226,7 @@ CSlowForwardDriveModule::Update()
       m_ProposedRotation = -m_MaxRotation;
 
     // Check translation limits
-    m_ProposedTranslation = std::max( 0.f, std::min (m_ProposedTranslation, m_MaxTranslation) );
+    m_ProposedTranslationX = std::max( 0.f, std::min (m_ProposedTranslationX, m_MaxTranslation) );
     // maybe consider adjusting rotation again, in case we had to reduce the translation
   }
 }

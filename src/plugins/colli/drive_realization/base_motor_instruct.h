@@ -5,6 +5,7 @@
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
  *             2013  Bahram Maleki-Fard
+ *             2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -54,7 +55,7 @@ class CBaseMotorInstruct: public MotorControl
 
 
   ///\brief Try to realize the proposed values with respect to the maximum allowed values.
-  void Drive( float proposedTrans, float proposedRot );
+  void Drive( float proposedTransX, float proposedTransY, float proposedRot );
 
   ///\brief Executes a soft stop with respect to CalculateTranslation and CalculateRotation.
   void ExecuteStop( );
@@ -66,9 +67,9 @@ class CBaseMotorInstruct: public MotorControl
 
  private:
 
-  float m_execTranslation, m_execRotation;
-  float m_desiredTranslation, m_desiredRotation;
-  float m_currentTranslation, m_currentRotation;
+  float m_execTranslationX, m_execTranslationY, m_execRotation;
+  float m_desiredTranslationX, m_desiredTranslationY, m_desiredRotation;
+  float m_currentTranslationX, m_currentTranslationY, m_currentRotation;
   float m_Frequency;
 
   //fawkes::Time m_OldTimestamp;
@@ -93,7 +94,7 @@ class CBaseMotorInstruct: public MotorControl
    * calculate maximum allowed translation change between proposed and desired values
    */
   virtual float CalculateTranslation( float currentTranslation, float desiredTranslation,
-              float time_factor ) = 0;
+      float time_factor) = 0;
 };
 
 
@@ -116,9 +117,9 @@ CBaseMotorInstruct::CBaseMotorInstruct( fawkes::MotorInterface* motor,
 {
   logger_->log_debug("CBaseMotorInstruct", "(Constructor): Entering");
   // init all members, zero, just to be on the save side
-  m_desiredTranslation = m_desiredRotation = 0.0;
-  m_currentTranslation = m_currentRotation = 0.0;
-  m_execTranslation    = m_execRotation    = 0.0;
+  m_desiredTranslationX = m_desiredTranslationY = m_desiredRotation = 0.0;
+  m_currentTranslationX = m_currentTranslationY = m_currentRotation = 0.0;
+  m_execTranslationX    = m_execTranslationY    = m_execRotation    = 0.0;
   //m_OldTimestamp.stamp();
   m_Frequency = frequency;
   logger_->log_debug("CBaseMotorInstruct", "(Constructor): Exiting");
@@ -139,10 +140,20 @@ inline void
 CBaseMotorInstruct::SetCommand()
 {
   // Translation borders
-  if ( fabs(m_execTranslation) < 0.05 ) {
-    SetDesiredTranslation( 0.0 );
+  float execTranslation = std::fabs(std::sqrt( m_execTranslationX*m_execTranslationX + m_execTranslationY*m_execTranslationY ));
+  if ( execTranslation < 0.05 ) {
+    SetDesiredTranslationX( 0.0 );
+    SetDesiredTranslationY( 0.0 );
   } else {
-    SetDesiredTranslation( std::fmin(std::fmax(m_execTranslation, -3.0f), 3.0f) );  //send command within [-3, 3]
+    //send command where the total translation is between [-3, 3]
+    float reduction = 3. / execTranslation;                                     //Calculate factor of reduction to reach 3m/s
+
+    float vx_max  = fabs( m_execTranslationX * reduction );                     //Calculate positive maximum for vx and vy
+    float vy_max  = fabs( m_execTranslationY * reduction );
+    float vx      = std::fmin(std::fmax(m_execTranslationX, -vx_max), vx_max);  //Calculate new vx
+    float vy      = std::fmin(std::fmax(m_execTranslationY, -vy_max), vy_max);
+    SetDesiredTranslationX( vx );
+    SetDesiredTranslationY( vy );
   }
 
   // Rotation borders
@@ -158,14 +169,16 @@ CBaseMotorInstruct::SetCommand()
 
 
 /** Try to realize the proposed values with respect to the physical constraints of the robot.
- * @param proposedTrans the proposed translation velocity
+ * @param proposedTransX the proposed x translation velocity
+ * @param proposedTransY the proposed y translation velocity
  * @param proposedRot the proposed rotation velocity
  */
 inline void
-CBaseMotorInstruct::Drive( float proposedTrans, float proposedRot )
+CBaseMotorInstruct::Drive( float proposedTransX,  float proposedTransY, float proposedRot )
 {
   // initializing driving values (to be on the sure side of life)
-  m_execTranslation = 0.0;
+  m_execTranslationX = 0.0;
+  m_execTranslationY = 0.0;
   m_execRotation = 0.0;
 
   /*
@@ -187,15 +200,19 @@ CBaseMotorInstruct::Drive( float proposedTrans, float proposedRot )
 
   // getting current performed values
   m_currentRotation    = GetMotorDesiredRotation();
-  m_currentTranslation = GetMotorDesiredTranslation();
+  m_currentTranslationX = GetMotorDesiredTranslationX();
+  m_currentTranslationY = GetMotorDesiredTranslationY();
 
   // calculate maximum allowed rotation change between proposed and desired values
   m_desiredRotation = proposedRot;
   m_execRotation    = CalculateRotation( m_currentRotation, m_desiredRotation, time_factor );
 
   // calculate maximum allowed translation change between proposed and desired values
-  m_desiredTranslation = proposedTrans;
-  m_execTranslation    = CalculateTranslation( m_currentTranslation, m_desiredTranslation, time_factor );
+
+  m_desiredTranslationX = proposedTransX;
+  m_desiredTranslationY = proposedTransY;
+  m_execTranslationX    = CalculateTranslation( m_currentTranslationX, m_desiredTranslationX, time_factor );
+  m_execTranslationY    = CalculateTranslation( m_currentTranslationY, m_desiredTranslationY, time_factor );
 
   // send the command to the motor
   SetCommand( );
@@ -208,11 +225,12 @@ CBaseMotorInstruct::Drive( float proposedTrans, float proposedRot )
 inline void
 CBaseMotorInstruct::ExecuteStop()
 {
-  m_currentTranslation = GetMotorDesiredTranslation();
-  m_currentRotation    = GetMotorDesiredRotation();
+  m_currentTranslationX = GetMotorDesiredTranslationX();
+  m_currentTranslationY = GetMotorDesiredTranslationY();
+  m_currentRotation     = GetMotorDesiredRotation();
 
   // with respect to the physical borders do a stop to 0.0, 0.0.
-  Drive( 0.0, 0.0 );
+  Drive( 0.0, 0.0, 0.0 );
   SetCommand( );
 }
 

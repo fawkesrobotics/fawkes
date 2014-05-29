@@ -194,8 +194,9 @@ CFastForwardDriveModule::FastForward_Translation ( float dist_to_target, float d
 void
 CFastForwardDriveModule::Update()
 {
-  m_ProposedTranslation = 0.0;
-  m_ProposedRotation    = 0.0;
+  m_ProposedTranslationX  = 0.;
+  m_ProposedTranslationY  = 0.;
+  m_ProposedRotation      = 0.;
 
   float dist_to_target  = sqrt(  sqr(m_LocalTargetX) + sqr(m_LocalTargetY) );
   float alpha  = atan2( m_LocalTargetY, m_LocalTargetX );
@@ -205,21 +206,21 @@ CFastForwardDriveModule::Update()
                                               m_RoboTrans, m_RoboRot );
 
   if ( fabs( alpha ) > M_PI_2 )
-    m_ProposedTranslation = 0.0;
+    m_ProposedTranslationX = 0.0;
   else
-    m_ProposedTranslation = FastForward_Translation( dist_to_target, dist_to_trajec, alpha,
+    m_ProposedTranslationX = FastForward_Translation( dist_to_target, dist_to_trajec, alpha,
                                                      m_RoboTrans, m_RoboRot, m_ProposedRotation );
 
 
   // last time border check............. IMPORTANT!!!
   // because the motorinstructor just tests robots physical borders.
   if ( dist_to_target < 0.1 ) {
-    m_ProposedTranslation = 0.0;
+    m_ProposedTranslationX = 0.0;
     m_ProposedRotation    = 0.0;
 
   } else {
-    m_ProposedTranslation = std::min ( m_ProposedTranslation, m_MaxTranslation );
-    m_ProposedTranslation = std::max ( m_ProposedTranslation, (float)0.0 );
+    m_ProposedTranslationX = std::min ( m_ProposedTranslationX, m_MaxTranslation );
+    m_ProposedTranslationX = std::max ( m_ProposedTranslationX, (float)0.0 );
 
     if (m_ProposedRotation >  m_MaxRotation)
       m_ProposedRotation =  m_MaxRotation;

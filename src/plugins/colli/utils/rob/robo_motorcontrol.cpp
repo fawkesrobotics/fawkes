@@ -5,6 +5,7 @@
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
  *             2013  Bahram Maleki-Fard
+ *             2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -36,6 +37,9 @@ namespace fawkes {
 
 MotorControl::MotorControl( fawkes::MotorInterface* motor )
 {
+  m_MotorControlDesiredTranslationX = 0;
+  m_MotorControlDesiredTranslationY = 0;
+  m_MotorControlDesiredRotation     = 0;
   m_pMopo = motor;
 }
 
@@ -64,16 +68,14 @@ float MotorControl::GetCurrentOri()
 }
 
 
-float MotorControl::GetMotorDesiredTranslation()
+float MotorControl::GetMotorDesiredTranslationX()
 {
-  float vx = m_pMopo->des_vx();
-  float vy = m_pMopo->des_vy();
-  float speed = sqrt(vx*vx + vy*vy);
+  return m_pMopo->des_vx();
+}
 
-  if ( vx > 0 )
-    return speed;
-  else
-    return -speed;
+float MotorControl::GetMotorDesiredTranslationY()
+{
+  return m_pMopo->des_vy();
 }
 
 
@@ -103,9 +105,14 @@ float MotorControl::GetMotorCurrentRotation()
 
 
 
-float MotorControl::GetUserDesiredTranslation()
+float MotorControl::GetUserDesiredTranslationX()
 {
-  return m_MotorControlDesiredTranslation;
+  return m_MotorControlDesiredTranslationX;
+}
+
+float MotorControl::GetUserDesiredTranslationY()
+{
+  return m_MotorControlDesiredTranslationY;
 }
 
 
@@ -121,9 +128,14 @@ bool MotorControl::GetMovingAllowed()
 }
 
 
-void MotorControl::SetDesiredTranslation( float speed )
+void MotorControl::SetDesiredTranslationX( float speed )
 {
-  m_MotorControlDesiredTranslation = speed;
+  m_MotorControlDesiredTranslationX = speed;
+}
+
+void MotorControl::SetDesiredTranslationY( float speed )
+{
+  m_MotorControlDesiredTranslationY = speed;
 }
 
 
@@ -136,7 +148,9 @@ void MotorControl::SetDesiredRotation( float ori )
 bool MotorControl::SendCommand()
 {
   if ( m_pMopo->has_writer() ) {
-    m_pMopo->msgq_enqueue(new MotorInterface::TransRotMessage(m_MotorControlDesiredTranslation, 0,
+
+    m_pMopo->msgq_enqueue(new MotorInterface::TransRotMessage(m_MotorControlDesiredTranslationX,
+                                                              m_MotorControlDesiredTranslationY,
                                                               m_MotorControlDesiredRotation));
     return true;
   } else {

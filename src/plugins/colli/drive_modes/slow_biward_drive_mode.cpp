@@ -103,8 +103,9 @@ void
 CSlowBiwardDriveModule::Update()
 {
   // Just to take care.
-  m_ProposedTranslation = 0.0;
-  m_ProposedRotation    = 0.0;
+  m_ProposedTranslationX = 0.;
+  m_ProposedTranslationY = 0.;
+  m_ProposedRotation     = 0.;
 
   // Our drive mode (choose between forward and backward)
   CAbstractDriveMode * driveMode = 0;
@@ -146,7 +147,7 @@ CSlowBiwardDriveModule::Update()
   driveMode->Update();
 
   // get the values from the drive mode
-  m_ProposedTranslation = driveMode->GetProposedTranslation();
+  m_ProposedTranslationX = driveMode->GetProposedTranslationX();
   m_ProposedRotation    = driveMode->GetProposedRotation();
 }
 

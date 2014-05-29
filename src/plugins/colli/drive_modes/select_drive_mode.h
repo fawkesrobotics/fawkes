@@ -62,7 +62,10 @@ public:
   void Update( bool escape = false );
 
   ///\brief Returns the proposed translation. After an update.
-  float GetProposedTranslation();
+  float GetProposedTranslationX();
+
+  ///\brief Returns the proposed translation. After an update.
+  float GetProposedTranslationY();
 
   ///\brief Returns the proposed rotation. After an update.
   float GetProposedRotation();
@@ -90,7 +93,8 @@ private:
   float m_LocalTrajecX, m_LocalTrajecY;
 
   // local copies of the proposed values
-  float m_ProposedTranslation;
+  float m_ProposedTranslationX;
+  float m_ProposedTranslationY;
   float m_ProposedRotation;
 
   // an escape flag

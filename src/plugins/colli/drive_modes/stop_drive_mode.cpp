@@ -86,7 +86,8 @@ CStopDriveModule::~CStopDriveModule()
 void
 CStopDriveModule::Update()
 {
-  m_ProposedTranslation = 0.0;
+  m_ProposedTranslationX = 0.0;
+  m_ProposedTranslationY = 0.0;
   m_ProposedRotation    = 0.0;
 }
 

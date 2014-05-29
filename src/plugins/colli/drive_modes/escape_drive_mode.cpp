@@ -90,8 +90,9 @@ CEscapeDriveModule::Update()
   // This is only called, if we recently stopped...
   logger_->log_debug("CEscapeDriveModule", "CEscapeDriveModule( Update ): Calculating ESCAPING...");
 
-  m_ProposedTranslation = 0.0;
-  m_ProposedRotation    = 0.0;
+  m_ProposedTranslationX  = 0.;
+  m_ProposedTranslationY  = 0.;
+  m_ProposedRotation      = 0.;
 
   FillNormalizedReadings();
   SortNormalizedReadings();
@@ -128,15 +129,15 @@ CEscapeDriveModule::Update()
 
 
   if ( dangerFront && dangerBack && turnRightAllowed ) {
-    m_ProposedTranslation = 0.0;
+    m_ProposedTranslationX = 0.0;
     m_ProposedRotation = -m_MaxRotation;
 
   } else if ( dangerFront && dangerBack && turnLeftAllowed ) {
-    m_ProposedTranslation = 0.0;
+    m_ProposedTranslationX = 0.0;
     m_ProposedRotation = m_MaxRotation;
 
   } else if (!dangerFront && dangerBack) {
-    m_ProposedTranslation = m_MaxTranslation;
+    m_ProposedTranslationX = m_MaxTranslation;
 
     if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
       m_ProposedRotation =  -m_MaxRotation;
@@ -144,7 +145,7 @@ CEscapeDriveModule::Update()
       m_ProposedRotation = m_MaxRotation;
 
   } else if (dangerFront && !dangerBack) {
-    m_ProposedTranslation = -m_MaxTranslation;
+    m_ProposedTranslationX = -m_MaxTranslation;
 
     if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
       m_ProposedRotation =  -m_MaxRotation;
@@ -154,9 +155,9 @@ CEscapeDriveModule::Update()
   } else if ( !dangerFront && !dangerBack ) {
     // depending on target coordinates, decide which direction to escape to
     if ( m_TargetX > m_RoboX )
-      m_ProposedTranslation = m_MaxTranslation;
+      m_ProposedTranslationX = m_MaxTranslation;
     else
-      m_ProposedTranslation = -m_MaxTranslation;
+      m_ProposedTranslationX = -m_MaxTranslation;
 
     if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
       m_ProposedRotation =  -m_MaxRotation;

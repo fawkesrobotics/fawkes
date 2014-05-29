@@ -71,8 +71,11 @@ class CAbstractDriveMode
   ///\brief Calculate the proposed settings which are asked for afterwards.
   virtual void Update() = 0;
 
-  ///\brief Returns the proposed translation
-  float GetProposedTranslation();
+  ///\brief Returns the proposed x translation
+  float GetProposedTranslationX();
+
+  ///\brief Returns the proposed y translation
+  float GetProposedTranslationY();
 
   ///\brief Returns the proposed rotatio
   float GetProposedRotation();
@@ -106,8 +109,9 @@ class CAbstractDriveMode
   bool m_OrientAtTarget; /**< flag if orienting necessary */
   bool m_StopAtTarget;   /**< flag if stopping on or after target */
 
-  float m_ProposedTranslation; /**< proposed translation setting for next timestep */
-  float m_ProposedRotation;    /**< proposed rotation setting for next timestep */
+  float m_ProposedTranslationX; /**< proposed x translation setting for next timestep */
+  float m_ProposedTranslationY; /**< proposed y translation setting for next timestep */
+  float m_ProposedRotation;     /**< proposed rotation setting for next timestep */
 
   fawkes::NavigatorInterface::DriveMode m_DriveModeName;  /**< the drive mode name */
 
@@ -142,7 +146,8 @@ CAbstractDriveMode::CAbstractDriveMode(fawkes::Logger* logger, fawkes::Configura
    config_( config )
 {
   logger_->log_debug("CAbstractDriveMode", "(Constructor): Entering...");
-  m_ProposedTranslation = 0.0;
+  m_ProposedTranslationX = 0.0;
+  m_ProposedTranslationY = 0.0;
   m_ProposedRotation = 0.0;
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
 
@@ -170,14 +175,24 @@ CAbstractDriveMode::~CAbstractDriveMode()
 }
 
 
-/** Returns the proposed translation which was calculated previously in
+/** Returns the proposed x translation which was calculated previously in
  *  'Update()' which has to be implemented!
  * @return The proposed translation
  */
 inline float
-CAbstractDriveMode::GetProposedTranslation()
+CAbstractDriveMode::GetProposedTranslationX()
 {
-  return m_ProposedTranslation;
+  return m_ProposedTranslationX;
+}
+
+/** Returns the proposed y translation which was calculated previously in
+ *  'Update()' which has to be implemented!
+ * @return The proposed translation
+ */
+inline float
+CAbstractDriveMode::GetProposedTranslationY()
+{
+  return m_ProposedTranslationY;
 }
 
 /** Returns the proposed rotation which was calculated previously in
