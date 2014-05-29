@@ -102,6 +102,9 @@ plugins/colli:
     rot_dec: 0.42
 
   drive_mode:
+    # Used drive restriction. Options are: differential or omnidirectional
+    restriction: "omnidirectional"
+
     # Default drive mode. It's an enum, see NavigatorInterface for details.
     default: "SlowForward"
 

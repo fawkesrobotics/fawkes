@@ -68,6 +68,13 @@ typedef enum {
   quadratic             // The enum for the quadratic motor instruct
 } colli_motor_instruct_mode_t;
 
+/** Colli drive restrictions */
+typedef enum {
+  differential,               // The enum for the differential drive restriction
+  omnidirectional             // The enum for the omnidirectional drive restriction
+} colli_drive_restriction_t;
+
+
 } // end namespace firevision
 
 #endif
