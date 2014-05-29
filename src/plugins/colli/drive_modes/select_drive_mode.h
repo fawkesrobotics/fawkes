@@ -100,11 +100,15 @@ private:
   // an escape flag
   int m_EscapeFlag;
 
+  fawkes::colli_drive_restriction_t drive_restriction_;
+
 
   /* ************************************************************************ */
   /* PRIVATE METHODS                                                          */
   /* ************************************************************************ */
 
+  void addDriveModesDifferential();
+  void addDriveModesOmnidirectional();
 };
 
 } // namespace fawkes

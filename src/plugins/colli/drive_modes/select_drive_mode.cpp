@@ -35,6 +35,7 @@
 #include "medium_backward_drive_mode.h"
 #include "medium_biward_drive_mode.h"
 #include "fast_forward_drive_mode.h"
+#include "slow_forward_drive_mode_omni.h"
 #include "fast_backward_drive_mode.h"
 #include "fast_biward_drive_mode.h"
 // YOUR CHANGES SHOULD END HERE!!!
@@ -78,17 +79,45 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
   m_pColliTarget = target;
   m_vDriveModeList.clear();
 
+  std::string drive_restriction = config->get_string("/plugins/colli/drive_mode/restriction");
+
+  if (        drive_restriction.compare("omnidirectional") == 0 ) {
+    drive_restriction_ = fawkes::colli_drive_restriction_t::omnidirectional;
+  } else if ( drive_restriction.compare("differential") == 0 ) {
+    drive_restriction_ = fawkes::colli_drive_restriction_t::differential;
+  } else {
+    drive_restriction_ = fawkes::colli_drive_restriction_t::differential;
+    throw fawkes::Exception("Drive restriction is unknown, use differential");
+  }
+
   logger_->log_debug("CSelectDriveMode", "Creating Drive Mode Objects");
 
-
-  // ============================
-  // APPEND YOUR DRIVE MODE HERE!
-
-  // MISC MODES
-  // stop drive mode
+  // Add generic drive modes
   m_vDriveModeList.push_back( (CAbstractDriveMode *)new CStopDriveModule(logger_, config_) );
 
-  // and here an example of using extra data, e.g. the laser for escape...
+  // Add specific drive modes
+  if (        drive_restriction_ == fawkes::colli_drive_restriction_t::omnidirectional ) {
+    addDriveModesOmnidirectional();
+  } else if ( drive_restriction_ == fawkes::colli_drive_restriction_t::differential ) {
+    addDriveModesDifferential();
+  } else {
+    throw fawkes::Exception("Unknown drive restriction, needs to be implemented");
+  }
+
+  logger_->log_debug("CSelectDriveMode", "(Constructor): Exiting");
+}
+
+CSelectDriveMode::~CSelectDriveMode()
+{
+  logger_->log_debug("CSelectDriveMode", "(Destructor): Entering");
+  for ( unsigned int i = 0; i < m_vDriveModeList.size(); i++ )
+    delete m_vDriveModeList[i];
+  logger_->log_debug("CSelectDriveMode", "(Destructor): Exiting");
+}
+
+void
+CSelectDriveMode::addDriveModesDifferential()
+{
   // escape drive mode
   if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {
     m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldDriveModule( logger_, config_) );
@@ -98,7 +127,6 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
     logger_->log_error("CSelectDriveMode", "Unknown escape drive mode. Using basic as default");
     m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );
   }
-
 
   // SLOW MODES
   // slow forward drive mode (have to remember for biward driving!
@@ -144,20 +172,24 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
                                                                                 fast_backward,
                                                                                 logger_,
                                                                                 config_) );
-
-  // YOUR CHANGES SHOULD END HERE!
-  // =============================
-
-  logger_->log_debug("CSelectDriveMode", "(Constructor): Exiting");
 }
 
 
-CSelectDriveMode::~CSelectDriveMode()
+void
+CSelectDriveMode::addDriveModesOmnidirectional()
 {
-  logger_->log_debug("CSelectDriveMode", "(Destructor): Entering");
-  for ( unsigned int i = 0; i < m_vDriveModeList.size(); i++ )
-    delete m_vDriveModeList[i];
-  logger_->log_debug("CSelectDriveMode", "(Destructor): Exiting");
+  // escape drive mode
+  if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {  // This is an differential drive mode
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldDriveModule( logger_, config_) );
+  } else if (cfg_escape_mode == fawkes::colli_escape_mode_t::basic) {     // This is an differential drive mode
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );
+  } else {
+    logger_->log_error("CSelectDriveMode", "Unknown escape drive mode. Using basic as default");
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );
+  }
+
+  CSlowForwardOmniDriveModule* slow_forward = new CSlowForwardOmniDriveModule(logger_, config_);
+  m_vDriveModeList.push_back( (CAbstractDriveMode *) slow_forward );
 }
 
 /** Set local target point before update!
