@@ -66,16 +66,19 @@ the navigator started processing another goto message.
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+-- Constants
+TIMEOUT_NAVI = 2.0
 
 -- Jumpconditions
-function jumpcond_navifail(state)
-   return (state.fsm.vars.msgid == 0
-	   or (state.fsm.vars.msgid ~= navigator:msgid() and state.wait_start > 25)
-	   or not navigator:has_writer()
-	   or state.failed)
+function jc_msgidfail(state)
+   return state.fsm.vars.msgid ~= navigator:msgid()
 end
 
-function jumpcond_navifinal(state)
+function jc_navifail(state)
+   return state.fsm.vars.msgid == 0 or not navigator:has_writer()
+end
+
+function jc_navifinal(state)
    --printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, navigator:msgid(), tostring(navigator:is_final()))
    return state.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
 end
@@ -87,7 +90,10 @@ fsm:define_states{
    closure={navigator=navigator},
 
    {"INIT", JumpState},
-   {"RELGOTO", JumpState}
+   {"RELGOTO", JumpState},
+
+   {"CHECK", JumpState},
+   {"CHECK_MSGFAIL", JumpState},
 }
 
 -- Transitions
@@ -96,8 +102,14 @@ fsm:add_transitions{
    {"INIT", "FAILED", cond="vars.param_fail", desc="Invalid/insufficient parameteres"},
    {"INIT", "RELGOTO", cond=true, desc="Initialized"},
 
-   {"RELGOTO", "FAILED", cond=jumpcond_navifail,  desc="Navigator failure"},
-   {"RELGOTO", "FINAL",  cond=jumpcond_navifinal, desc="Position reached"}
+   {"RELGOTO", "CHECK", cond=true, desc="sent message"},
+
+   {"CHECK", "CHECK_MSGFAIL", timeout=TIMEOUT_NAVI, desc="check msgid"},
+   {"CHECK", "FAILED", cond=jc_navifail,  desc="Navigator failure"},
+   {"CHECK", "FINAL",  cond=jc_navifinal, desc="Position reached"},
+
+   {"CHECK_MSGFAIL", "FAILED", precond=jc_msgidfail, desc="msgid mismatch"},
+   {"CHECK_MSGFAIL", "CHECK", precond=true, desc="msgid ok"}
 }
 
 function INIT:init()
@@ -146,16 +158,11 @@ function RELGOTO:init()
 	  self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
    end
 
-   self.wait_start = 1
 end
 
-function RELGOTO:loop()
-   self.wait_start = self.wait_start + 1
-end
-
-function RELGOTO:exit()
+function CHECK:exit()
    if self.fsm.vars.backwards then
-      -- reset drive-mode
+      --printf("resetting drive-mode to "..tostring(self.fsm.vars.drive_mode))
       navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(self.fsm.vars.drive_mode))
    end
 end
