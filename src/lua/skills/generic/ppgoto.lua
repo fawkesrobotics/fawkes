@@ -120,7 +120,7 @@ function PPGOTO:loop()
 end
 
 function PPGOTO:reset()
-   if ppnavi:has_writer() then
+   if ppnavi:has_writer() and not ppnavi:is_final() then
       printf("ppgoto: sending stop");
       ppnavi:msgq_enqueue_copy(ppnavi.StopMessage:new())
    end
