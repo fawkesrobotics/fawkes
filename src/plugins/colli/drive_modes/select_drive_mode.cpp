@@ -27,6 +27,7 @@
 
 // INCLUDE HERE YOUR DRIVE MODES!!!
 #include "stop_drive_mode.h"
+#include "escape_drive_mode.h"
 #include "escape_potential_field_drive_mode.h"
 #include "slow_forward_drive_mode.h"
 #include "slow_backward_drive_mode.h"
@@ -35,9 +36,11 @@
 #include "medium_backward_drive_mode.h"
 #include "medium_biward_drive_mode.h"
 #include "fast_forward_drive_mode.h"
-#include "slow_forward_drive_mode_omni.h"
 #include "fast_backward_drive_mode.h"
 #include "fast_biward_drive_mode.h"
+
+#include "slow_forward_drive_mode_omni.h"
+#include "escape_potential_field_drive_mode_omni.h"
 // YOUR CHANGES SHOULD END HERE!!!
 
 #include "../utils/rob/robo_motorcontrol.h"
@@ -179,13 +182,13 @@ void
 CSelectDriveMode::addDriveModesOmnidirectional()
 {
   // escape drive mode
-  if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {  // This is an differential drive mode
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldDriveModule( logger_, config_) );
-  } else if (cfg_escape_mode == fawkes::colli_escape_mode_t::basic) {     // This is an differential drive mode
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );
+  if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldOmniDriveModule( logger_, config_) );
+  } else if (cfg_escape_mode == fawkes::colli_escape_mode_t::basic) {
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );                    // This is an differential drive mode
   } else {
-    logger_->log_error("CSelectDriveMode", "Unknown escape drive mode. Using basic as default");
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );
+    logger_->log_error("CSelectDriveMode", "Unknown escape drive mode. Using potential field omni as default");
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldOmniDriveModule( logger_, config_) );
   }
 
   CSlowForwardOmniDriveModule* slow_forward = new CSlowForwardOmniDriveModule(logger_, config_);
