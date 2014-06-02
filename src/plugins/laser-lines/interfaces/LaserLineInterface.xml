@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="LaserLineInterface" author="Tim Niemueller" year="2013">
+  <data>
+    <comment>Line parameterization.</comment>
+    <field type="string" length="32" name="frame_id">
+      Coordinate frame ID of data.
+    </field>
+    <field type="int32" name="visibility_history">
+      The visibilitiy history indicates the number of consecutive positive or negative
+      sightings. If the history is negative, there have been as many negative sightings
+      (object not visible) as the absolute value of the history. A positive value denotes
+      as many positive sightings. 0 shall only be used during the initialization of the
+      interface or if the visibility history is not updated.
+    </field>
+    <field type="float" length="3" name="point_on_line">
+      Vector to some point on the line
+    </field>
+    <field type="float" length="3" name="line_direction">
+      Vector in the direction of the line.
+    </field>
+    <field type="float" name="bearing">
+      Direction towards the line, i.e. if the robot turns by this
+      angle the robot will stand parallel to the line.
+    </field>
+  </data>
+</interface>
