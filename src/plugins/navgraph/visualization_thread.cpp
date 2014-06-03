@@ -23,9 +23,10 @@
 
 #include <utils/graph/topological_map_graph.h>
 #include <tf/types.h>
+#include <utils/math/angle.h>
+#include <utils/math/coord.h>
 
 #include <ros/ros.h>
-#include <visualization_msgs/MarkerArray.h>
 
 using namespace fawkes;
 
@@ -129,6 +130,38 @@ NavGraphVisualizationThread::loop()
 
 
 void
+NavGraphVisualizationThread::add_circle_markers(visualization_msgs::MarkerArray &m, size_t &id_num,
+						float center_x, float center_y, float radius,
+						unsigned int arc_length,
+						float r, float g, float b, float alpha, float line_width)
+{
+  for (unsigned int a = 0; a < 360; a += 2 * arc_length) {
+    visualization_msgs::Marker arc;
+    arc.header.frame_id = "/map";
+    arc.header.stamp = ros::Time::now();
+    arc.ns = "navgraph";
+    arc.id = id_num++;
+    arc.type = visualization_msgs::Marker::LINE_STRIP;
+    arc.action = visualization_msgs::Marker::ADD;
+    arc.scale.x = arc.scale.y = arc.scale.z = line_width;
+    arc.color.r = r;
+    arc.color.g = g;
+    arc.color.b = b;
+    arc.color.a = alpha;
+    arc.lifetime = ros::Duration(0, 0);
+    arc.points.resize(arc_length);
+    for (unsigned int j = 0; j < arc_length; ++j) {
+      float circ_x = 0, circ_y = 0;
+      polar2cart2d(deg2rad(a + j), radius, &circ_x, &circ_y);
+      arc.points[j].x = center_x + circ_x;
+      arc.points[j].y = center_y + circ_y;
+      arc.points[j].z = 0.;
+    }
+    m.markers.push_back(arc);
+  }
+}
+
+void
 NavGraphVisualizationThread::publish()
 {
   if (! graph_) return;
@@ -179,6 +212,11 @@ NavGraphVisualizationThread::publish()
 
 
   for (size_t i = 0; i < nodes.size(); ++i) {
+    bool is_in_plan = (std::find(plan_.begin(), plan_.end(), nodes[i]) != plan_.end());
+    bool is_last    = (plan_.size() >= 1) && (plan_.back().name() == nodes[i].name());
+    //bool is_next    = (plan_.size() >= 2) && (plan_[1].name() == nodes[i].name());
+    bool is_active  = (plan_to_ == nodes[i].name());
+
     visualization_msgs::Marker sphere;
     sphere.header.frame_id = "/map";
     sphere.header.stamp = ros::Time::now();
@@ -192,9 +230,9 @@ NavGraphVisualizationThread::publish()
     sphere.pose.orientation.w = 1.;
     sphere.scale.y = 0.05;
     sphere.scale.z = 0.05;
-    if (std::find(plan_.begin(), plan_.end(), nodes[i]) != plan_.end()) {
+    if (is_in_plan) {
       sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.1;
-      if (plan_to_ == nodes[i].name()) {
+      if (is_last) {
         sphere.color.r = sphere.color.g = 1.f;
       } else {
         sphere.color.r = 1.f;
@@ -208,6 +246,44 @@ NavGraphVisualizationThread::publish()
     sphere.color.a = 1.0;
     sphere.lifetime = ros::Duration(0, 0);
     m.markers.push_back(sphere);
+
+    if (is_last) {
+      float target_tolerance = 0.;
+      if (nodes[i].has_property("target_tolerance")) {
+	target_tolerance = nodes[i].property_as_float("target_tolerance");
+      } else if (graph_->has_default_property("target_tolerance")) {
+	target_tolerance = graph_->default_property_as_float("target_tolerance");
+      }
+      if (target_tolerance > 0.) {
+	add_circle_markers(m, id_num, nodes[i].x(), nodes[i].y(), target_tolerance, 5,
+			   sphere.color.r, sphere.color.g, sphere.color.b,
+			   is_active ? sphere.color.a : 0.4);
+      }
+    } else if (is_active) {
+      float travel_tolerance = 0.;
+      if (nodes[i].has_property("travel_tolerance")) {
+	travel_tolerance = nodes[i].property_as_float("travel_tolerance");
+      } else if (graph_->has_default_property("travel_tolerance")) {
+	travel_tolerance = graph_->default_property_as_float("travel_tolerance");
+      }
+      if (travel_tolerance > 0.) {
+	add_circle_markers(m, id_num, nodes[i].x(), nodes[i].y(), travel_tolerance, 10,
+			   sphere.color.r, sphere.color.g, sphere.color.b, sphere.color.a);
+      }
+    }
+
+    if (is_in_plan) {
+      float shortcut_tolerance = 0.;
+      if (nodes[i].has_property("shortcut_tolerance")) {
+	shortcut_tolerance = nodes[i].property_as_float("shortcut_tolerance");
+      } else if (graph_->has_default_property("shortcut_tolerance")) {
+	shortcut_tolerance = graph_->default_property_as_float("shortcut_tolerance");
+      }
+      if (shortcut_tolerance > 0.) {
+	add_circle_markers(m, id_num, nodes[i].x(), nodes[i].y(), shortcut_tolerance, 30,
+			   sphere.color.r, sphere.color.g, sphere.color.b, 0.3);
+      }
+    }
 
     if (nodes[i].has_property("orientation")) {
       float ori = nodes[i].property_as_float("orientation");
@@ -230,8 +306,8 @@ NavGraphVisualizationThread::publish()
       arrow.scale.x = 0.1;
       arrow.scale.y = 0.5;
       arrow.scale.z = 0.10;
-      if (std::find(plan_.begin(), plan_.end(), nodes[i]) != plan_.end()) {
-	if (plan_to_ == nodes[i].name()) {
+      if (is_in_plan) {
+	if (is_last) {
 	  arrow.color.r = arrow.color.g = 1.f;
 	} else {
 	  arrow.color.r = 1.f;
@@ -336,6 +412,29 @@ NavGraphVisualizationThread::publish()
       ori_arrow.color.a = 1.0;
       ori_arrow.lifetime = ros::Duration(0, 0);
       m.markers.push_back(ori_arrow);
+    }
+
+    float target_tolerance = 0.;
+    if (plan_.back().has_property("target_tolerance")) {
+      target_tolerance = plan_.back().property_as_float("target_tolerance");
+    } else if (graph_->has_default_property("target_tolerance")) {
+      target_tolerance = graph_->default_property_as_float("target_tolerance");
+    }
+    if (target_tolerance > 0.) {
+      add_circle_markers(m, id_num, plan_.back().x(), plan_.back().y(), target_tolerance, 10,
+			 sphere.color.r, sphere.color.g, sphere.color.b,
+			 (plan_.size() == 1) ? sphere.color.a : 0.5);
+    }
+
+    float shortcut_tolerance = 0.;
+    if (plan_.back().has_property("shortcut_tolerance")) {
+      shortcut_tolerance = plan_.back().property_as_float("shortcut_tolerance");
+    } else if (graph_->has_default_property("shortcut_tolerance")) {
+      shortcut_tolerance = graph_->default_property_as_float("shortcut_tolerance");
+    }
+    if (shortcut_tolerance > 0.) {
+      add_circle_markers(m, id_num, plan_.back().x(), plan_.back().y(), shortcut_tolerance, 30,
+			 sphere.color.r, sphere.color.g, sphere.color.b, 0.3);
     }
 
     if (plan_.size() >= 2) {
