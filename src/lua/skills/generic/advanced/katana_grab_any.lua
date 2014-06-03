@@ -146,8 +146,8 @@ fsm:add_transitions {
 
    {"REPOSITION_OBJ", "APPROACH_OBJ", cond_and_precond="not (vars.object and vars.table_height)", desc="no object given"},
 
-   {"APPROACH_OBJ", "STOP_MOVEMENT", cond=jc_obj_is_grabable, desc="obj close enough"},
-   {"APPROACH_AGAIN", "STOP_MOVEMENT", cond=jc_obj_is_grabable, desc="obj close enough"},
+   --{"APPROACH_OBJ", "STOP_MOVEMENT", cond=jc_obj_is_grabable, desc="obj close enough"},
+   --{"APPROACH_AGAIN", "STOP_MOVEMENT", cond=jc_obj_is_grabable, desc="obj close enough"},
 
    {"CHECK_GRABABILITY", "TO_GRAB", cond=jc_obj_is_grabable, desc="obj close enough"},
    --{"CHECK_GRABABILITY", "FAILED", cond=true, desc="obj out of range"},
