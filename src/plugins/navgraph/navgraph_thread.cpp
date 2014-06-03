@@ -91,6 +91,28 @@ NavGraphThread::init()
   }
 
   graph_ = load_graph(cfg_graph_file_);
+
+  if (graph_->has_default_property("travel_tolerance")) {
+    cfg_travel_tolerance_ = graph_->default_property_as_float("travel_tolerance");
+    logger->log_info(name(), "Using travel tolerance %f from graph file", cfg_travel_tolerance_);
+  }
+  if (graph_->has_default_property("target_tolerance")) {
+    cfg_target_tolerance_ = graph_->default_property_as_float("target_tolerance");
+    logger->log_info(name(), "Using target tolerance %f from graph file", cfg_target_tolerance_);
+  }
+  if (graph_->has_default_property("orientation_tolerance")) {
+    cfg_orientation_tolerance_ = graph_->default_property_as_float("orientation_tolerance");
+    logger->log_info(name(), "Using orientation tolerance %f from graph file", cfg_orientation_tolerance_);
+  }
+  if (graph_->has_default_property("shortcut_tolerance")) {
+    cfg_shortcut_tolerance_ = graph_->default_property_as_float("shortcut_tolerance");
+    logger->log_info(name(), "Using shortcut tolerance %f from graph file", cfg_shortcut_tolerance_);
+  }
+  if (graph_->has_default_property("target_time")) {
+    cfg_target_time_ = graph_->default_property_as_float("target_time");
+    logger->log_info(name(), "Using target time %f from graph file", cfg_target_time_);
+  }
+
   navgraph_aspect_inifin_.set_navgraph(graph_);
   if (cfg_log_graph_) {
     log_graph();

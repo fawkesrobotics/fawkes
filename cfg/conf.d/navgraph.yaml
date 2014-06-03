@@ -20,15 +20,18 @@ plugins/navgraph:
   # Max. distance between actual and target positions to deem the target
   # reached. This value is for intermediate nodes on a path; m
   # The value can be overwritten per node in the graph file.
+  # NOTE: it is recommended to set this as graph default property
   travel_tolerance: 0.25
 
   # Max. distance between actual and target positions to deem the target
   # reached. This value is for the last node on a path; m
   # The value can be overwritten per node in the graph file.
+  # NOTE: it is recommended to set this as graph default property
   target_tolerance: 0.15
 
   # Max. distance between actual and target orientation to deem the target
   # reached. This value is for the last node on a path; rad
+  # NOTE: it is recommended to set this as graph default property
   orientation_tolerance: 0.2
 
   # When following a plan the robot will check all upcoming nodes if they
@@ -37,6 +40,7 @@ plugins/navgraph:
   # This is potentially dangerous depending on the graph and navigator as it
   # might violate the typical graph constraint of only having direct-line-of-tavel
   # connections. The value can be overidden with a node property of the same name; m
+  # NOTE: it is recommended to set this as graph default property
   shortcut_tolerance: 0.0
 
   # Visualize graph and current actions?
@@ -46,6 +50,7 @@ plugins/navgraph:
   resend_interval: 6.0
 
   # Time to keep moving after the target tolerance has been reached; sec
+  # NOTE: it is recommended to set this as graph default property
   target_time: 2.5
 
   # Monitor graph file and automatically reload on changes?
