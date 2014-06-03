@@ -358,6 +358,123 @@ TopologicalMapGraph::add_edge(TopologicalMapEdge edge)
 }
 
 
+/** Get all default properties.
+ * @return property map
+ */
+const std::map<std::string, std::string> &
+TopologicalMapGraph::default_properties() const
+{
+  return default_properties_;
+}
+
+/** Check if graph has specified default property.
+ * @param property property key
+ * @return true if node has specified property, false otherwise
+ */
+bool
+TopologicalMapGraph::has_default_property(std::string property) const
+{
+  return default_properties_.find(property) != default_properties_.end();
+}
+
+/** Get specified default property as string.
+ * @param prop property key
+ * @return default property value as string
+ */
+std::string
+TopologicalMapGraph::default_property(std::string prop) const
+{
+  std::map<std::string, std::string>::const_iterator p;
+  if ((p = default_properties_.find(prop)) != default_properties_.end()) {
+    return p->second;
+  } else {
+    return "";
+  }
+}
+
+/** Get property converted to float.
+ * @param prop property key
+ * @return property value
+ */
+float
+TopologicalMapGraph::default_property_as_float(std::string prop) const
+{
+  return StringConversions::to_float(default_property(prop));
+}
+
+/** Get property converted to int.
+ * @param prop property key
+ * @return property value
+ */
+int
+TopologicalMapGraph::default_property_as_int(std::string prop) const
+{
+  return StringConversions::to_int(default_property(prop));
+}
+
+/** Get property converted to bol.
+ * @param prop property key
+ * @return property value
+ */
+bool
+TopologicalMapGraph::default_property_as_bool(std::string prop) const
+{
+  return StringConversions::to_bool(default_property(prop));
+}
+
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
+void
+TopologicalMapGraph::set_default_property(std::string property, std::string value)
+{
+  default_properties_[property] = value;
+}
+
+/** Set default properties.
+ * This overwrites all existing properties.
+ * @param properties map of property name to value as string
+ */
+void
+TopologicalMapGraph::set_default_properties(std::map<std::string, std::string> &properties)
+{
+  default_properties_ = properties;
+}
+
+
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
+void
+TopologicalMapGraph::set_default_property(std::string property, float value)
+{
+  default_properties_[property] = StringConversions::to_string(value);
+}
+
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
+void
+TopologicalMapGraph::set_default_property(std::string property, int value)
+{
+  default_properties_[property] = StringConversions::to_string(value);
+}
+
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
+void
+TopologicalMapGraph::set_default_property(std::string property, bool value)
+{
+  default_properties_[property] = value ? "true" : "false";
+}
+
+
+
 /** Get nodes reachable from specified nodes.
  * @param node_name name of the node to get reachable nodes for
  * @return vector of names of nodes reachable from the specified node

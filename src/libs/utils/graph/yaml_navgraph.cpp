@@ -183,7 +183,80 @@ operator >> (const YAML::Node& n, TopologicalMapEdge &edge) {
   }
 }
 
+/** Read default properties for graph from YAML node.
+ * @param graph the graph to assign the properties to
+ * @param doc the root document of the YAML graph definition
+ */
+void
+read_default_properties(TopologicalMapGraph *graph, YAML::Node &doc)
+{
+  bool has_properties = true;
+  try {
+#ifdef HAVE_YAMLCPP_0_5
+    has_properties = doc["default-properties"].IsDefined();
+#else
+    has_properties = (doc.FindValue("default-properties") != NULL);
+#endif
+  } catch (YAML::Exception &e) {
+    has_properties = false;
+  }
 
+  if (has_properties) {
+    try {
+      const YAML::Node &props = doc["default-properties"];
+      if (props.Type() != YAML::NodeType::Sequence) {
+	throw Exception("Default properties must be a list");
+      }
+
+      std::map<std::string, std::string> properties;
+
+#ifdef HAVE_YAMLCPP_0_5
+      YAML::const_iterator p;
+#else
+      YAML::Iterator p;
+#endif
+      for (p = props.begin(); p != props.end(); ++p) {
+#ifdef HAVE_OLD_YAMLCPP
+	if (p->GetType() == YAML::CT_SCALAR) {
+#else
+	if (p->Type() == YAML::NodeType::Scalar) {
+#endif
+#ifdef HAVE_YAMLCPP_0_5
+	  std::string key = p->as<std::string>();
+#else
+	  std::string key;
+	  *p >> key;
+#endif
+	  properties[key] = "true";
+#ifdef HAVE_OLD_YAMLCPP
+	} else if (p->GetType() == YAML::CT_MAP) {
+#else
+	} else if (p->Type() == YAML::NodeType::Map) {
+#endif
+#ifdef HAVE_YAMLCPP_0_5
+	  for (YAML::const_iterator i = p->begin(); i != p->end(); ++i) {
+	    std::string key   = i->first.as<std::string>();
+	    std::string value = i->second.as<std::string>();
+#else
+	  for (YAML::Iterator i = p->begin(); i != p->end(); ++i) {
+	    std::string key, value;
+	    i.first() >> key;
+	    i.second() >> value;
+#endif
+	    properties[key] = value;
+	  }
+	} else {
+	  throw Exception("Invalid default property for graph %s", graph->name().c_str());
+	}
+      }    
+
+      graph->set_default_properties(properties);
+    } catch (YAML::Exception &e) {
+      throw Exception("Failed to read default property of graph %s: %s",
+	    graph->name().c_str(), e.what());
+    }
+  }
+}
 
 /** Load topological map graph stored in RCSoft format.
  * @param filename path to the file to read
@@ -217,6 +290,8 @@ load_yaml_navgraph(std::string filename)
 #endif
 
   TopologicalMapGraph *graph = new TopologicalMapGraph(graph_name);
+
+  read_default_properties(graph, doc);
 
   const YAML::Node &nodes = doc["nodes"];
 #ifdef HAVE_YAMLCPP_0_5
