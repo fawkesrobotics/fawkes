@@ -148,9 +148,9 @@ has_poss(A, M) :- clause(poss(A,_))@M.
 
 
 debug_fluent(M) :- has_fluent(F, M), assert(fluent(F)), check_fluent(F, M), fail.
-debug_fluent(M) :- has_initially(F, M), check_fluent2(A, M), fail.
-debug_fluent(M) :- has_senses(F, M), check_fluent3(A, M), fail.
-debug_fluent(M) :- has_causes(F, M), check_fluent4(A, M), fail.
+debug_fluent(M) :- has_initially(F, M), check_fluent2(F, M), fail.
+debug_fluent(M) :- has_senses(F, M), check_fluent3(F, M), fail.
+debug_fluent(M) :- has_causes(F, M), check_fluent4(F, M), fail.
 %debug_fluent(M) :- log_info("Found the following fluents: "), fail.
 %debug_fluent(M) :- fluent(F), write(F), write(" "), fail.
 debug_fluent(M) :-
@@ -159,7 +159,7 @@ debug_fluent(M) :-
     log_info("GologChecker: basic fluent check finished.").
 
 
-list_all_fluents(Res) :- fluent(A), ground(A), list_all_actions2([], Res).
+list_all_fluents(Res) :- fluent(A), ground(A), list_all_fluents2([], Res).
 list_all_fluents2(List, [A|Res]) :- fluent(A), ground(A), not_in_list(A, List), !, list_all_fluents2([A|List], Res).
 list_all_fluents2(List, [A|Res]) :- fluent(A), nonground(A, n), not_in_list(A, List), !, list_all_fluents2([A|List], Res).
 list_all_fluents2(_, []).
