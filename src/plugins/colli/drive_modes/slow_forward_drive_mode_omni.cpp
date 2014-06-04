@@ -97,8 +97,7 @@ CSlowForwardOmniDriveModule::Update()
 
   float dist_to_target = sqrt( sqr(m_LocalTargetX) + sqr(m_LocalTargetY) );
   float alpha_target   = normalize_mirror_rad( atan2( m_LocalTargetY, m_LocalTargetX ) );
-//  float alpha_trajec   = normalize_mirror_rad( atan2( m_LocalTrajecY, m_LocalTrajecX ) );
-//  float alpha_next     = normalize_mirror_rad( m_TargetOri ); //TODO that is wrong, it should be m_LocalTargetOri
+//  float alpha_next     = normalize_mirror_rad( atan2( m_TargetY, m_TargetX ) );
 //  float dist_to_trajec = sqrt( sqr(m_LocalTrajecX) + sqr(m_LocalTrajecY) );
 
   // last time border check............. IMPORTANT!!!
@@ -121,14 +120,34 @@ CSlowForwardOmniDriveModule::Update()
 //    } else {
 //      float angle_min = normalize_mirror_rad( alpha_target - M_PI_4 );
 //      float angle_max = normalize_mirror_rad( alpha_target + M_PI_4 );
-//      m_ProposedRotation = std::min( angle_min,std::fmax(alpha_next, angle_max) );
+//      m_ProposedRotation = std::max( angle_min, std::min(alpha_next, angle_max) );
 //    }
-    m_ProposedRotation *= 1.2;
+
+    if        ( m_ProposedRotation > 0.1 ) {
+      m_ProposedRotation = m_MaxRotation;
+    } else if ( m_ProposedRotation < -0.1 ) {
+      m_ProposedRotation = -m_MaxRotation;
+    } else {
+      m_ProposedRotation *= ( m_MaxRotation / 0.1 );
+    }
 
 //    // Check translation limits
-    if ( m_ProposedTranslationX < 0. || fabs(alpha_target) >= M_PI_2 - 0.1 ) {
+    if ( m_ProposedTranslationX < 0. || fabs(alpha_target) >= M_PI_2 - 0.2 ) {
       m_ProposedTranslationX = 0.;
       m_ProposedTranslationY = 0.;
+    }
+
+    if ( m_StopAtTarget ) {
+      float target_rel    = std::sqrt( sqr(m_TargetX - m_RoboX) + sqr(m_TargetY - m_RoboY) );
+      float roboTrans     = std::sqrt( sqr(m_RoboTransX) + sqr(m_RoboTransY) );
+      float proposedTrans = std::sqrt( sqr(m_ProposedTranslationX) + sqr(m_ProposedTranslationY) );
+      float targetTrans   = GuaranteeTransStop(target_rel, roboTrans, proposedTrans);
+
+      float des = fabs(targetTrans / proposedTrans);
+      if      ( proposedTrans == 0 ) { des = 0; }
+
+      m_ProposedTranslationX *= des;
+      m_ProposedTranslationY *= des;
     }
   }
 }
