@@ -88,6 +88,18 @@ class MotorControl
    */
   float GetMotorCurrentTranslation();
 
+  /** GetMotorCurrentTranslationX.
+   *  This method returns current (noisy) motor x translation speed.
+   *  @return float is the current (noisy) motor translation speed.
+   */
+  float GetMotorCurrentTranslationX();
+
+  /** GetMotorCurrentTranslationY.
+   *  This method returns current (noisy) motor y translation speed.
+   *  @return float is the current (noisy) motor translation speed.
+   */
+  float GetMotorCurrentTranslationY();
+
   /** GetMotorCurrentRotation.
    *  This method returns current (noisy) motor rotation speed.
    *  @return float is the current (noisy) motor rotation speed.

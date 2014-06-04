@@ -97,6 +97,16 @@ float MotorControl::GetMotorCurrentTranslation()
     return -speed;
 }
 
+float MotorControl::GetMotorCurrentTranslationX()
+{
+  return m_pMopo->vx();
+}
+
+float MotorControl::GetMotorCurrentTranslationY()
+{
+  return m_pMopo->vy();
+}
+
 
 float MotorControl::GetMotorCurrentRotation()
 {

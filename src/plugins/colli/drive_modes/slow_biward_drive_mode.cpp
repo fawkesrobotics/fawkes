@@ -137,7 +137,7 @@ CSlowBiwardDriveModule::Update()
 
   // set the current info to the drive mode
   driveMode->SetCurrentRoboPos( m_RoboX, m_RoboY, m_RoboOri );
-  driveMode->SetCurrentRoboSpeed( m_RoboTrans, m_RoboRot );
+  driveMode->SetCurrentRoboSpeed( m_RoboTrans, m_RoboTransX, m_RoboTransY, m_RoboRot );
   driveMode->SetCurrentTarget( m_TargetX, m_TargetY, m_TargetOri );
   driveMode->SetLocalTarget( m_LocalTargetX, m_LocalTargetY );
   driveMode->SetLocalTrajec( m_LocalTrajecX, m_LocalTrajecY );

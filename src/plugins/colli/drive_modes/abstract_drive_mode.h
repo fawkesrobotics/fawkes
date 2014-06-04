@@ -53,7 +53,7 @@ class CAbstractDriveMode
   void SetCurrentRoboPos( float roboX, float roboY, float roboOri );
 
   ///\brief Sets the current robo speed.
-  void SetCurrentRoboSpeed( float roboTrans, float roboRot );
+  void SetCurrentRoboSpeed( float roboTrans, float roboTransX, float roboTransY, float roboRot );
 
   ///\brief Set the colli mode values for each drive mode.
   void SetCurrentColliMode( bool orient, bool stop );
@@ -98,6 +98,8 @@ class CAbstractDriveMode
   float m_RoboOri;    /**< current robo ori */
 
   float m_RoboTrans;  /**< current robo translation velocity */
+  float m_RoboTransX; /**< current robo x translation velocity */
+  float m_RoboTransY; /**< current robo y translation velocity */
   float m_RoboRot;    /**< current robo rotation velocity */
 
   float m_LocalTargetX;  /**< local target x */
@@ -240,10 +242,12 @@ CAbstractDriveMode::SetCurrentRoboPos( float roboX, float roboY, float roboOri )
  * @param roboRot The robot rotation velocity
  */
 inline void
-CAbstractDriveMode::SetCurrentRoboSpeed( float roboTrans, float roboRot )
+CAbstractDriveMode::SetCurrentRoboSpeed( float roboTrans, float roboTransX, float roboTransY, float roboRot )
 {
-  m_RoboTrans = roboTrans;
-  m_RoboRot   = roboRot;
+  m_RoboTransX = roboTransX;
+  m_RoboTransY = roboTransY;
+  m_RoboTrans  = roboTrans;
+  m_RoboRot    = roboRot;
 }
 
 /** Set the colli mode values for each drive mode.
@@ -339,13 +343,9 @@ CAbstractDriveMode::GuaranteeTransStop( float distance,
 
 //  logger_->log_debug("CAbstractDriveMode","GuaranteeTransStop: distance needed to stop - distance to goal: %f - %f = %f", distance_to_stop, distance, distance_to_stop - distance);
   if (distance_to_stop >= distance) {
-    float value = std::max( 0.f, current_trans - m_cMaxTransDec );
-    return value;
+    return 0.;
   } else {
-    float value = std::min( current_trans + m_cMaxTransAcc, desired_trans );
-    // Use this if you are very cautions:
-    //float value = std::min( current_trans + std::min(m_cMaxTransDec, m_cMaxTransAcc), desired_trans );
-    return value;
+    return desired_trans;
   }
 //
 //  // dividing by 10 because we're called at 10Hz (TODO: use config value!!)
