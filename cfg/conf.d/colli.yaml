@@ -177,7 +177,8 @@ plugins/colli:
       # the min time difference of the laser reading history for the search in seconds
       min_length: 1.5
 
-
+    buffer_size: 2
+      
   trig_table:
     # Trigonometry Resolution in number of steps per degree
     resolution: 2

@@ -65,9 +65,23 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
  : OccupancyGrid( width, height, cell_width, cell_height )
 {
   logger->log_debug("CLaserOccupancyGrid", "(Constructor): Entering");
+
+  //read config
   std::string cfg_prefix = "/plugins/colli/";
-  m_if_buffer_size     = 2; //TODO: config
+  m_EllipseDistance     = config->get_float((cfg_prefix + "laser_occupancy_grid/distance_account").c_str());
+  m_InitialHistorySize  = 3*config->get_int((cfg_prefix + "laser_occupancy_grid/history/initial_size").c_str());
+  m_MaxHistoryLength    = config->get_float((cfg_prefix + "laser_occupancy_grid/history/max_length").c_str());
+  m_MinHistoryLength    = config->get_float((cfg_prefix + "laser_occupancy_grid/history/min_length").c_str());
+  m_MinimumLaserLength  = config->get_float((cfg_prefix + "laser/min_reading_length").c_str());
+
+  m_reference_frame     = config->get_string((cfg_prefix + "frame/odometry").c_str());
+  m_laser_frame         = config->get_string((cfg_prefix + "frame/laser").c_str());       //TODO change to base_link => search in base_link instead base_laser
+
+  cfg_obstacle_inc_     = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
+
+  m_if_buffer_size      = config->get_int((cfg_prefix + "laser_occupancy_grid/buffer_size").c_str());
   m_if_buffer_size = std::max(m_if_buffer_size, 1); //needs to be >= 1, because the data is always wrote into the buffer (instead of read())
+
   m_if_buffer_filled.resize(m_if_buffer_size);
   std::fill(m_if_buffer_filled.begin(), m_if_buffer_filled.end(), false);
 
@@ -79,17 +93,6 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
   m_pRoboShape = new CRoboShape_Colli( (cfg_prefix + "roboshape/").c_str(), logger, config );
   m_vOldReadings.clear();
   initGrid();
-
-  m_EllipseDistance     = config->get_float((cfg_prefix + "laser_occupancy_grid/distance_account").c_str());
-  m_InitialHistorySize  = 3*config->get_int((cfg_prefix + "laser_occupancy_grid/history/initial_size").c_str());
-  m_MaxHistoryLength    = config->get_float((cfg_prefix + "laser_occupancy_grid/history/max_length").c_str());
-  m_MinHistoryLength    = config->get_float((cfg_prefix + "laser_occupancy_grid/history/min_length").c_str());
-  m_MinimumLaserLength  = config->get_float((cfg_prefix + "laser/min_reading_length").c_str());
-
-  m_reference_frame     = config->get_string((cfg_prefix + "frame/odometry").c_str());
-  m_laser_frame         = config->get_string((cfg_prefix + "frame/laser").c_str());       //TODO change to base_link => search in base_link instead base_laser
-
-  cfg_obstacle_inc_     = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
 
   logger->log_debug("CLaserOccupancyGrid", "Generating obstacle map");
   obstacle_map = new ColliObstacleMap(m_pRoboShape->IsAngularRobot());
