@@ -94,6 +94,8 @@ class ProtobufBroadcastPeer
   void send(std::shared_ptr<google::protobuf::Message> m);
   void send(google::protobuf::Message &m);
 
+  void send_raw(const frame_header_t &frame_header, const void *data, size_t data_size);
+
   void setup_crypto(const std::string &key, const std::string &cipher);
 
   /** Get the server's message register.
@@ -107,6 +109,12 @@ class ProtobufBroadcastPeer
     boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, uint16_t, uint16_t,
 				  std::shared_ptr<google::protobuf::Message>)>
     signal_received_type;
+
+  /** Boost signal for a received raw message. */
+  typedef
+    boost::signals2::signal<void (boost::asio::ip::udp::endpoint &, frame_header_t &,
+				  void *, size_t)>
+    signal_received_raw_type;
 
   /** Boost signal for an error during receiving a message. */
   typedef
@@ -123,6 +131,14 @@ class ProtobufBroadcastPeer
    */
   signal_received_type &  signal_received()
   { return sig_rcvd_; }
+
+  /** Signal that is invoked when a message has been received.
+   * This allows access to the raw packet data. This allows, for example,
+   * to write an ecryption agnostic repeater.
+   * @return signal
+   */
+  signal_received_raw_type &  signal_received_raw()
+  { return sig_rcvd_raw_; }
 
   /** Signal that is invoked when receiving a message failed.
    * @return signal
@@ -158,9 +174,10 @@ class ProtobufBroadcastPeer
 
   std::list<boost::asio::ip::udp::endpoint>  local_endpoints_;
 
-  signal_received_type   sig_rcvd_;
-  signal_recv_error_type sig_recv_error_;
-  signal_send_error_type sig_send_error_;
+  signal_received_type     sig_rcvd_;
+  signal_received_raw_type sig_rcvd_raw_;
+  signal_recv_error_type   sig_recv_error_;
+  signal_send_error_type   sig_send_error_;
 
   std::string  send_to_address_;
 

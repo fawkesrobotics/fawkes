@@ -411,68 +411,82 @@ ProtobufBroadcastPeer::handle_recv(const boost::system::error_code& error,
       memcpy(&frame_header, crypto_buf_ ? enc_in_data_ : in_data_, sizeof(frame_header_t));
       header_size  = sizeof(frame_header_t);
 
-      if (! crypto_buf_ && (frame_header.cipher != PB_ENCRYPTION_NONE)) {
-	sig_recv_error_(in_endpoint_, "Received encrypted message but encryption is disabled");
-      } else if (crypto_buf_ && ! (frame_header.cipher  != PB_ENCRYPTION_NONE)) {
-	sig_recv_error_(in_endpoint_, "Received plain text message but encryption is enabled");
+      if (crypto_buf_) {
+	sig_rcvd_raw_(in_endpoint_, frame_header,
+		      (unsigned char *)enc_in_data_ + sizeof(frame_header_t),
+		      bytes_rcvd - sizeof(frame_header_t));
       } else {
+	sig_rcvd_raw_(in_endpoint_, frame_header,
+		      (unsigned char *)in_data_ + sizeof(frame_header_t),
+		      bytes_rcvd - sizeof(frame_header_t));
+      }
 
-	if (crypto_buf_ && (frame_header.cipher != PB_ENCRYPTION_NONE)) {
-	  // we need to decrypt first
-	  try {
-	    memcpy(in_data_, enc_in_data_, sizeof(frame_header_t));
-	    size_t to_decrypt = bytes_rcvd - sizeof(frame_header_t);
-	    bytes_rcvd = crypto_dec_->decrypt(frame_header.cipher,
-					      (unsigned char *)enc_in_data_ + sizeof(frame_header_t), to_decrypt,
-					      (unsigned char *)in_data_ + sizeof(frame_header_t), in_data_size_);
-	    bytes_rcvd += sizeof(frame_header_t);
-	  } catch (std::runtime_error &e) {
-	    sig_recv_error_(in_endpoint_, std::string("Decryption fail: ") + e.what());
-	    bytes_rcvd = 0;
+      if (sig_rcvd_.num_slots() > 0) {
+	if (! crypto_buf_ && (frame_header.cipher != PB_ENCRYPTION_NONE)) {
+	  sig_recv_error_(in_endpoint_, "Received encrypted message but encryption is disabled");
+	} else if (crypto_buf_ && (frame_header.cipher  == PB_ENCRYPTION_NONE)) {
+	  sig_recv_error_(in_endpoint_, "Received plain text message but encryption is enabled");
+	} else {
+
+	  if (crypto_buf_ && (frame_header.cipher != PB_ENCRYPTION_NONE)) {
+	    // we need to decrypt first
+	    try {
+	      memcpy(in_data_, enc_in_data_, sizeof(frame_header_t));
+	      size_t to_decrypt = bytes_rcvd - sizeof(frame_header_t);
+	      bytes_rcvd = crypto_dec_->decrypt(frame_header.cipher,
+						(unsigned char *)enc_in_data_ + sizeof(frame_header_t), to_decrypt,
+						(unsigned char *)in_data_ + sizeof(frame_header_t), in_data_size_);
+	      bytes_rcvd += sizeof(frame_header_t);
+	    } catch (std::runtime_error &e) {
+	      sig_recv_error_(in_endpoint_, std::string("Decryption fail: ") + e.what());
+	      bytes_rcvd = 0;
+	    }
 	  }
 	}
-      }
+      } // else nobody cares about deserialized message
     }
 
     size_t payload_size = ntohl(frame_header.payload_size);
 
-    if (bytes_rcvd == (header_size + payload_size)) {
-      if (! filter_self_ ||
-	  ! std::binary_search(local_endpoints_.begin(), local_endpoints_.end(), in_endpoint_))
-      {
-	void *data;
-	message_header_t message_header;
-	
-	if (frame_header_version_ == PB_FRAME_V1) {
-	  frame_header_v1_t *frame_header_v1 = static_cast<frame_header_v1_t *>(in_data_);
-	  message_header.component_id = frame_header_v1->component_id;
-	  message_header.msg_type     = frame_header_v1->msg_type;
-	  data = (char *)in_data_ + sizeof(frame_header_v1_t);
-	  // message register expects payload size to include message header
-	  frame_header.payload_size = htonl(ntohl(frame_header.payload_size) + sizeof(message_header_t));
-	} else {
-	  message_header_t *msg_header =
+    if (sig_rcvd_.num_slots() > 0) {
+      if (bytes_rcvd == (header_size + payload_size)) {
+	if (! filter_self_ ||
+	    ! std::binary_search(local_endpoints_.begin(), local_endpoints_.end(), in_endpoint_))
+	{
+	  void *data;
+	  message_header_t message_header;
+
+	  if (frame_header_version_ == PB_FRAME_V1) {
+	    frame_header_v1_t *frame_header_v1 = static_cast<frame_header_v1_t *>(in_data_);
+	    message_header.component_id = frame_header_v1->component_id;
+	    message_header.msg_type     = frame_header_v1->msg_type;
+	    data = (char *)in_data_ + sizeof(frame_header_v1_t);
+	    // message register expects payload size to include message header
+	    frame_header.payload_size = htonl(ntohl(frame_header.payload_size) + sizeof(message_header_t));
+	  } else {
+	    message_header_t *msg_header =
 	    static_cast<message_header_t *>((void*)((char *)in_data_ + sizeof(frame_header_t)));
-	  message_header.component_id = msg_header->component_id;
-	  message_header.msg_type     = msg_header->msg_type;
-	  data = (char *)in_data_ + sizeof(frame_header_t) + sizeof(message_header_t);
+	    message_header.component_id = msg_header->component_id;
+	    message_header.msg_type     = msg_header->msg_type;
+	    data = (char *)in_data_ + sizeof(frame_header_t) + sizeof(message_header_t);
+	  }
+
+	  uint16_t comp_id  = ntohs(message_header.component_id);
+	  uint16_t msg_type = ntohs(message_header.msg_type);
+
+	  try {
+	    std::shared_ptr<google::protobuf::Message> m =
+	      message_register_->deserialize(frame_header, message_header, data);
+
+	    sig_rcvd_(in_endpoint_, comp_id, msg_type, m);
+	  } catch (std::runtime_error &e) {
+	    sig_recv_error_(in_endpoint_, std::string("Deserialization fail: ") + e.what());
+	  }
 	}
-
-	uint16_t comp_id  = ntohs(message_header.component_id);
-	uint16_t msg_type = ntohs(message_header.msg_type);
-
-	try {
-	  std::shared_ptr<google::protobuf::Message> m =
-	    message_register_->deserialize(frame_header, message_header, data);
-
-	  sig_rcvd_(in_endpoint_, comp_id, msg_type, m);
-	} catch (std::runtime_error &e) {
-	  sig_recv_error_(in_endpoint_, std::string("Deserialization fail: ") + e.what());
-	}
+      } else {
+	sig_recv_error_(in_endpoint_, "Invalid number of bytes received");
       }
-    } else {
-      sig_recv_error_(in_endpoint_, "Invalid number of bytes received");
-    }
+    } // else nobody cares (no one registered to signal)
 
   } else {
     sig_recv_error_(in_endpoint_, "General receiving error or truncated message");
@@ -537,6 +551,32 @@ ProtobufBroadcastPeer::send(uint16_t component_id, uint16_t msg_type,
     outbound_queue_.push(entry);
   }
   start_send();
+}
+
+/** Send a raw message.
+ * The message is sent as-is (frame_header appended by message data) over the wire.
+ * @param frame_header frame header to prepend, must be completely and properly
+ * setup.
+ * @param data data buffer, maybe encrypted (if indicated in frame header)
+ * @param data_size size in bytes of @p data
+ */
+void
+ProtobufBroadcastPeer::send_raw(const frame_header_t &frame_header,
+				const void *data, size_t data_size)
+{
+  QueueEntry *entry = new QueueEntry();
+  entry->frame_header = frame_header;
+  entry->serialized_message = std::string(reinterpret_cast<const char *>(data), data_size);
+
+  entry->buffers[0] = boost::asio::buffer(&entry->frame_header, sizeof(frame_header_t));
+  entry->buffers[1] = boost::asio::const_buffer();
+  entry->buffers[2] = boost::asio::buffer(entry->serialized_message);
+
+  {
+    std::lock_guard<std::mutex> lock(outbound_mutex_);
+    outbound_queue_.push(entry);
+  }
+  start_send();  
 }
 
 
