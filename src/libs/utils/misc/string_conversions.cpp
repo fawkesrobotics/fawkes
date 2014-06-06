@@ -276,7 +276,7 @@ StringConversions::trim(std::string &s)
 		  p2 == std::string::npos ? s.length() - 1 : p2 - p1 + 1);
 }
 
-/** Resolves path-string with @...@ tags
+/** Resolves path-string with \@...\@ tags
  * @param s string to resolve
  * @return path
  */
@@ -301,7 +301,7 @@ StringConversions::resolve_path(std::string s)
   return res;
 }
 
-/** Resolves vector of path-string with @...@ tags
+/** Resolves vector of path-string with \@...\@ tags
  * @param s strings to resolve
  * @return vector of resolved paths
  */
