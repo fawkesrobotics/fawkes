@@ -168,7 +168,11 @@ void AmclThread::init()
   } catch (Exception &e) {
     angle_max_idx_ = 359;
   }
-  angle_range_ = (unsigned int)abs(angle_max_idx_ - angle_min_idx_);
+  if (angle_max_idx_ > angle_min_idx_) {
+    angle_range_ = (unsigned int)abs(angle_max_idx_ - angle_min_idx_);
+  } else {
+    angle_range_ = (360 - angle_min_idx_) + angle_max_idx_;
+  }
   angle_min_ = deg2rad(angle_min_idx_);
 
   max_beams_ = config->get_uint(CFG_PREFIX"max_beams");
@@ -508,7 +512,7 @@ AmclThread::loop()
         ldata.ranges[i][0] = laser_distances[idx];
 
       // Compute bearing
-      ldata.ranges[i][1] = angle_min + (idx * angle_increment);
+      ldata.ranges[i][1] = fmod(angle_min_ + (i * angle_increment), 2 * M_PI);
     }
 
     try {
