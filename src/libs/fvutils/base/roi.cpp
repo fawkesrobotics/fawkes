@@ -314,6 +314,42 @@ ROI::contains(unsigned int x, unsigned int y)
 }
 
 
+/** Intersect this ROI with another.
+ * @param roi The other roi
+ * @return A new ROI that covers the intersection of this and the other ROI, or NULL if they don't intersect.
+ */
+ROI*
+ROI::intersect(ROI const &roi) const
+{
+  ROI *rv;
+  if (start.x + width < roi.start.x
+      || roi.start.x + roi.width < start.x
+      || start.y + height < roi.start.y
+      || roi.start.y + roi.width < start.y) {
+
+    rv = NULL;
+
+  } else {
+
+    rv = new ROI();
+    rv->start.x = start.x <= roi.start.x ? roi.start.x : start.x;
+    rv->start.y = start.y <= roi.start.y ? roi.start.y : start.y;
+    if (start.x + width < roi.start.x + roi.width) {
+      rv->width = start.x + width - rv->start.x;
+    } else {
+      rv->width = roi.start.x + roi.width - rv->start.x;
+    }
+    if (start.y + height < roi.start.y + roi.height) {
+      rv->height = start.y + height - rv->start.y;
+    } else {
+      rv->height = roi.start.y + roi.height - rv->start.y;
+    }
+
+  }
+  return rv;
+}
+
+
 /** Check if this ROI neighbours a pixel.
  * This checks if the given pixel is close to this ROI considered with
  * the given margin.
