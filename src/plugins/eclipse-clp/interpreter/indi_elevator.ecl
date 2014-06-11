@@ -53,10 +53,29 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- module(indi_elevator).
 % 1 - Consult the top-level interpreter
-:- ['indigolog-vanilla'].
+:- use_module("interrupts").
+:- use_module("indigolog_vanilla").
 :- use_module("../utils/logging.ecl").
+:- use_module("../utils/tktools.ecl").
+:- use_module("../utils/check_indigolog.ecl").
 
+% used to meassure time
+:- lib(util).
 
+% dynamic is needed for basic_check from check_indigolog, afterwards they
+% are re-compiled to static.
+:- dynamic execute/2.
+:- dynamic prim_action/1.
+:- dynamic poss/2.
+:- dynamic prim_fluent/1.
+:- dynamic initially/2.
+:- dynamic senses/2.
+:- dynamic causes_val/4.
+:- dynamic proc/2.
+
+%% event handlers
+handle_update(update).
+:- set_event_handler(update, handle_update/1).
 
 % Serve each floor whose call button is on initially, then park the elevator.
 % run: ?- indigolog(smart_control)  use search
@@ -85,6 +104,8 @@ prim_fluent(light(N)) :- fl(N). % call button of floor n (on or off)
 causes_val(up,   floor, N, N is floor+1).
 causes_val(down, floor, N, N is floor-1).
 causes_val(off(N), light(N), off, true).  % Note: nothing turns a light on
+
+senses(_,_) :- fail.
 
 % Preconditions of prim actions
 poss(down,    neg(floor=1)).
@@ -126,8 +147,7 @@ proc(smart_control, search(minimize_motion(0)) ).  % eventually succeeds
 
 %%%%%%%%% Main cycle from embedded eclipse %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-run :-	indigolog(smart_control).
-
+run :-	use_interrupts, basic_check, writeln("elevator go"), time(indigolog(smart_control)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % EOF: Elevator-Vanilla/main2_swi.pl
