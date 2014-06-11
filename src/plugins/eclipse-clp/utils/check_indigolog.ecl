@@ -48,6 +48,7 @@
 
 :- export basic_check/0.
 :- tool(basic_check/0, basic_check/1).
+:- tool(dynamic_to_static/1, dynamic_to_static_/2).
 :- use_module("logging").
 
 :- dynamic(fluent/1).
@@ -92,7 +93,25 @@ basic_check(M) :-
     debug_action(M),
     log_info("GologChecker: checking fluents..."),
     debug_fluent(M),
-    log_info("GologChecker: basic check finished.").
+    log_info("GologChecker: basic check finished."),
+    % change fluents from dynamic to static
+    dynamic_to_static_(execute/2, M),
+    dynamic_to_static_( prim_action/1, M),
+    dynamic_to_static_( poss/2, M),
+    dynamic_to_static_( prim_fluent/1, M),
+    dynamic_to_static_( initially/2, M),
+    dynamic_to_static_( senses/2, M),
+    dynamic_to_static_( causes_val/4, M),
+    dynamic_to_static_( proc/2, M),
+    log_info("GologChecker: changed predicates to static.").
+
+
+dynamic_to_static_(F/N, Module) :-
+    functor(Head, F, N),
+    findall(Head:-Body, clause(Head, Body), Clauses)@Module,
+    abolish(F/N)@Module,
+    compile_term(Clauses)@Module,
+    log_debug("Compiled Clauses %D_w", [Clauses]).
 
 debug_action(M) :- has_action(A, M), assert(action(A)), check_action(A,M), fail.
 debug_action(M) :- has_execute(A, M), check_action2(A, M), fail.
