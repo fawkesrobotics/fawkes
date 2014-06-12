@@ -155,11 +155,7 @@ BufferEncryptor::encrypted_buffer_size(size_t plain_length)
   const size_t iv_size = EVP_CIPHER_iv_length(evp_cipher);
   size_t block_size    = EVP_CIPHER_block_size(evp_cipher);
 
-  if ((plain_length % block_size) != 0) {
-    return (((plain_length / block_size) + 1) * block_size) + iv_size;
-  } else {
-    return plain_length + iv_size;
-  }
+  return (((plain_length / block_size) + 1) * block_size) + iv_size;
 #else
   throw std::runtime_error("Encryption not supported");
 #endif
