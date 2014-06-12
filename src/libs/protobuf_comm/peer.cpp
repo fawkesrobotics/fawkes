@@ -436,6 +436,7 @@ ProtobufBroadcastPeer::handle_recv(const boost::system::error_code& error,
 	      bytes_rcvd = crypto_dec_->decrypt(frame_header.cipher,
 						(unsigned char *)enc_in_data_ + sizeof(frame_header_t), to_decrypt,
 						(unsigned char *)in_data_ + sizeof(frame_header_t), in_data_size_);
+	      frame_header.payload_size = htonl(bytes_rcvd);
 	      bytes_rcvd += sizeof(frame_header_t);
 	    } catch (std::runtime_error &e) {
 	      sig_recv_error_(in_endpoint_, std::string("Decryption fail: ") + e.what());
@@ -677,7 +678,8 @@ ProtobufBroadcastPeer::start_send()
     entry->encrypted_message.resize(enc_size);
     crypto_enc_->encrypt(plain_buf, entry->encrypted_message);
 
-    entry->frame_header.cipher = crypto_enc_->cipher_id();
+    entry->frame_header.payload_size = htonl(entry->encrypted_message.size());
+    entry->frame_header.cipher       = crypto_enc_->cipher_id();
     entry->buffers[1] = boost::asio::buffer(entry->encrypted_message);
     entry->buffers[2] = boost::asio::const_buffer();
   }
