@@ -49,7 +49,7 @@ else
 endif
 
 ifeq ($(HAVE_LIBUSB),1)
-  OBJS_laser += sick_tim55x_usb_aqt.o
+  OBJS_laser += sick_tim55x_common_aqt.o sick_tim55x_usb_aqt.o
   CFLAGS     += $(CFLAGS_LIBUSB)
   LDFLAGS    += $(LDFLAGS_LIBUSB)
 else

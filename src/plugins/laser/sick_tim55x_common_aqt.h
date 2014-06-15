@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  sick_tim55x_aqt.h - Thread to retrieve laser data from Sick TiM 55x
+ *  sick_tim55x_common_aqt.h - Super class of TiM55x drivers
  *
- *  Created: Tue Jun 10 16:47:50 2014
+ *  Created: Sun Jun 15 18:47:08 2014
  *  Copyright  2008-2014  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -20,39 +20,45 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_SICK_TIM55X_USB_AQT_H_
-#define __PLUGINS_LASER_SICK_TIM55X_USB_AQT_H_
+#ifndef __PLUGINS_LASER_SICK_TIM55X_COMMON_AQT_H_
+#define __PLUGINS_LASER_SICK_TIM55X_COMMON_AQT_H_
 
-#include "sick_tim55x_common_aqt.h"
+#include "acquisition_thread.h"
 
 #include <string>
+#include <map>
 #include <libusb.h>
 
 namespace fawkes {
   class Mutex;
 }
 
-class SickTiM55xUSBAcquisitionThread : public SickTiM55xCommonAcquisitionThread
+class SickTiM55xCommonAcquisitionThread : public LaserAcquisitionThread
 {
  public:
-  SickTiM55xUSBAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
+  SickTiM55xCommonAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
+  virtual ~SickTiM55xCommonAcquisitionThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+  // from LaserAcquisitionThread
+  virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger);
+
+  void read_common_config();
+
+ protected:
+  void init_device();
+  void parse_datagram(const unsigned char *datagram, size_t datagram_length);
+
+  virtual void send_with_reply(const char *request, std::string *reply = NULL) = 0;
+  virtual void open_device() = 0;
+  virtual void close_device() = 0;
 
  private:
-  void open_device();
-  void close_device();
-  void send_with_reply(const char *request, std::string *reply = NULL);
-
- private:
-  std::string  cfg_serial_;
+  bool pre_init_done_;
   float        cfg_time_offset_;
 
-  libusb_context *usb_ctx_;
-  libusb_device_handle  *usb_device_handle_;
-  fawkes::Mutex  *usb_mutex_;
+ protected:
+  std::string  cfg_name_;
+  std::string  cfg_prefix_;
 };
 
 
