@@ -54,3 +54,8 @@ ifeq ($(HAVE_LIBUDEV),1)
   LDFLAGS_LIBUDEV = $(shell $(PKGCONFIG) --libs 'libudev')
 endif
 
+HAVE_LIBUSB=$(if $(shell $(PKGCONFIG) --exists 'libusb-1.0'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBUSB),1)
+  CFLAGS_LIBUSB  = -DHAVE_LIBUSB $(shell $(PKGCONFIG) --cflags 'libusb-1.0')
+  LDFLAGS_LIBUSB = $(shell $(PKGCONFIG) --libs 'libusb-1.0')
+endif

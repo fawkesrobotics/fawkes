@@ -19,36 +19,44 @@ include $(BASEDIR)/etc/buildsys/config.mk
 LIBS_laser = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	     fawkesinterface Laser360Interface Laser720Interface
 
+OBJS_laser = laser_plugin.o acquisition_thread.o sensor_thread.o
+
 CFLAGS  += $(CFLAGS_LIBUDEV)
 LDFLAGS += $(LDFLAGS_LIBUDEV)
 
 ifeq ($(HAVE_LIBPCAN),1)
+  OBJS_laser += lase_edl_aqt.o
   LIBS_laser += $(LIBS_LIBPCAN)
   CFLAGS     += $(CFLAGS_LIBPCAN)
 else
-  FILTER_OUT += lase_edl_aqt.o
   WARN_TARGETS += warning_libpcan
 endif
 
 ifeq ($(HAVE_URG),1)
+  OBJS_laser += urg_aqt.o
   LIBS_laser += $(LIBS_URG)
   CFLAGS     += $(CFLAGS_URG)
 else
-  FILTER_OUT += urg_aqt.o
   WARN_TARGETS += warning_urg
 endif
 
 ifeq ($(HAVE_URG_GBX),1)
+  OBJS_laser += urg_gbx_aqt.o
   CFLAGS     += $(CFLAGS_URG_GBX)
   LDFLAGS    += $(LDFLAGS_URG_GBX)
 else
-  FILTER_OUT += urg_gbx_aqt.o
   WARN_TARGETS += warning_urg_gbx
 endif
 
-OBJS_laser = $(filter-out deadspots/% $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))))
-  
-ifneq ($(HAVE_LIBPCAN)$(HAVE_URG)$(HAVE_URG_GBX),000)
+ifeq ($(HAVE_LIBUSB),1)
+  OBJS_laser += sick_tim55x_usb_aqt.o
+  CFLAGS     += $(CFLAGS_LIBUSB)
+  LDFLAGS    += $(LDFLAGS_LIBUSB)
+else
+  WARN_TARGETS += warning_libusb
+endif
+
+ifneq ($(HAVE_LIBPCAN)$(HAVE_URG)$(HAVE_URG_GBX)$(HAVE_LIBUSB),0000)
   PLUGINS_all = $(PLUGINDIR)/laser.so
 else
   WARN_TARGETS += warning_nolib
@@ -71,6 +79,9 @@ warning_urg:
 
 warning_urg_gbx:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)No support for Hokuyo via Gearbox library$(TNORMAL) (Gearbox library not found)"
+
+warning_libusb:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)No support for Sick TiM55x$(TNORMAL) (libusb not found)"
 
 endif
 
