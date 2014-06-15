@@ -48,12 +48,23 @@ else
   WARN_TARGETS += warning_urg_gbx
 endif
 
-ifeq ($(HAVE_LIBUSB),1)
+# Yes, only a single zero, boost.mk returns empty string on fail
+ifneq ($(HAVE_LIBUSB)$(HAVE_SICK_TIM55X_BOOST_LIBS),0)
   OBJS_laser += sick_tim55x_common_aqt.o sick_tim55x_usb_aqt.o
+endif
+ifeq ($(HAVE_LIBUSB),1)
+  OBJS_laser += sick_tim55x_usb_aqt.o
   CFLAGS     += $(CFLAGS_LIBUSB)
   LDFLAGS    += $(LDFLAGS_LIBUSB)
 else
   WARN_TARGETS += warning_libusb
+endif
+ifeq ($(HAVE_SICK_TIM55X_BOOST_LIBS),1)
+  OBJS_laser += sick_tim55x_ethernet_aqt.o
+  CFLAGS     += $(CFLAGS_SICK_TIM55X_BOOST)
+  LDFLAGS    += $(LDFLAGS_SICK_TIM55X_BOOST)
+else
+  WARN_TARGETS_SICK_TIM55X_BOOST = $(foreach l,$(SICK_TIM55X_REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_sick_55x_boost_$l))
 endif
 
 ifneq ($(HAVE_LIBPCAN)$(HAVE_URG)$(HAVE_URG_GBX)$(HAVE_LIBUSB),0000)
@@ -81,7 +92,10 @@ warning_urg_gbx:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)No support for Hokuyo via Gearbox library$(TNORMAL) (Gearbox library not found)"
 
 warning_libusb:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)No support for Sick TiM55x$(TNORMAL) (libusb not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)No support for Sick TiM55x-USB$(TNORMAL) (libusb not found)"
+
+$(WARN_TARGETS_SICK_TIM55X_BOOST): warning_sick_tim55x_boost_%:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)No suport for TiM55x-Ethernet$(TNORMAL) (Boost library $* not found)"
 
 endif
 
