@@ -37,6 +37,9 @@ gazsim:
     gripper-laser-threshold: 0.18
     gripper-laser-value-far: 0.17
     gripper-laser-value-near: 9.99
+    # buffer for delaying sensor values
+    gyro-buffer-size: 500
+    gyro-delay: 0.2
 
     motor:    
       # does the odometry change if the robotino drives against an obstacle?

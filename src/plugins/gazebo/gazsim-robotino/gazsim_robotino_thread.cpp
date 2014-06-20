@@ -72,6 +72,8 @@ RobotinoSimThread::init()
     gripper_laser_right_pos_ = config->get_int("/hardware/robotino/sensors/right_ir_id");
     gripper_laser_left_pos_ = config->get_int("/hardware/robotino/sensors/left_ir_id");
   }
+  gyro_buffer_size_ = config->get_int("/gazsim/robotino/gyro-buffer-size");
+  gyro_delay_ = config->get_float("/gazsim/robotino/gyro-delay");
   
   //Open interfaces
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
@@ -111,6 +113,11 @@ RobotinoSimThread::init()
   ori_offset_ = 0.0;
   path_length_ = 0.0;
 
+  gyro_buffer_index_new_ = 0;
+  gyro_buffer_index_delayed_ = 0;
+  gyro_timestamp_buffer_ = new fawkes::Time[gyro_buffer_size_];
+  gyro_angle_buffer_ = new float[gyro_buffer_size_];
+
   new_data_ = false;
 
   if(string_pub_->HasConnections())
@@ -129,6 +136,9 @@ RobotinoSimThread::finalize()
   blackboard->close(sens_if_);
   blackboard->close(motor_if_);
   blackboard->close(switch_if_);
+
+  delete [] gyro_timestamp_buffer_;
+  delete [] gyro_angle_buffer_;
 }
 
 void
@@ -146,8 +156,17 @@ RobotinoSimThread::loop()
     motor_if_->set_odometry_path_length(path_length_);
     motor_if_->write();
 
+    if(gyro_available_)
+    {
+      //update gyro (with delay)
+      fawkes::Time now(clock);
+      while((now - gyro_timestamp_buffer_[(gyro_buffer_index_delayed_ + 1) % gyro_buffer_size_]).in_sec() >= gyro_delay_
+	&& gyro_buffer_index_delayed_ < gyro_buffer_index_new_)
+	gyro_buffer_index_delayed_++;
+      sens_if_->set_gyro_angle(gyro_angle_buffer_[gyro_buffer_index_delayed_]);
+    }
     sens_if_->set_gyro_available(gyro_available_);
-    sens_if_->set_gyro_angle(gyro_angle_);
+
     if(have_gripper_sensors_)
     {
       sens_if_->set_distance(8, infrared_puck_sensor_dist_);
@@ -308,8 +327,9 @@ void RobotinoSimThread::on_pos_msg(ConstPosePtr &msg)
 void RobotinoSimThread::on_gyro_msg(ConstVector3dPtr &msg)
 {
   MutexLocker lock(loop_mutex);
-
-  gyro_angle_ = msg->z();
+  gyro_buffer_index_new_ = (gyro_buffer_index_new_ + 1) % gyro_buffer_size_;
+  gyro_angle_buffer_[gyro_buffer_index_new_] = msg->z();
+  gyro_timestamp_buffer_[gyro_buffer_index_new_] = clock->now();
   gyro_available_ = true;
   new_data_ = true;
 }
