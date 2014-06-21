@@ -3,6 +3,7 @@
  *
  *  Created: Tue Sep 18 16:00:34 2012
  *  Copyright  2012-2014  Tim Niemueller [www.niemueller.de]
+ *                  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -484,6 +485,14 @@ NavGraphThread::send_next_goal()
 						 tpose.getOrigin().y(),
 						 tf::get_yaw(tpose.getRotation()));
   try {
+    NavigatorInterface::SetStopAtTargetMessage* stop_at_target_msg;
+    if ( plan_.size() <= 1 ) {
+      stop_at_target_msg = new NavigatorInterface::SetStopAtTargetMessage(true);
+    } else {
+      stop_at_target_msg = new NavigatorInterface::SetStopAtTargetMessage(false);
+    }
+    nav_if_->msgq_enqueue(stop_at_target_msg);
+
     nav_if_->msgq_enqueue(gotomsg);
     cmd_sent_at_->stamp();
 
