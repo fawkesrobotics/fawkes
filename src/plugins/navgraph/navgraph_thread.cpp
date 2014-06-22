@@ -461,22 +461,34 @@ NavGraphThread::send_next_goal()
   }
 
   float ori = 0.;
-  if (plan_.size() == 1 && next_target.has_property("orientation")) {
-    orient_at_target  = true;
-    // take the given orientation for the final node
-    ori = next_target.property_as_float("orientation");
-  } else {
-    tf::Stamped<tf::Pose> pose;
-    if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
-      logger->log_warn(name(),
-		       "Failed to compute pose, cannot compute facing direction");
+  if ( plan_.size() == 1 ) {
+    if ( next_target.has_property("orientation") ) {
+      orient_at_target  = true;
+
+      // take the given orientation for the final node
+      ori = next_target.property_as_float("orientation");
     } else {
-      orient_at_target  = false;
-      // set direction facing from current to next target position, best
-      // chance to reach the destination without turning at the end
-      ori = atan2f(next_target.y() - pose.getOrigin().y(),
-                   next_target.x() - pose.getOrigin().x());
+      tf::Stamped<tf::Pose> pose;
+      if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
+        logger->log_warn(name(), "Failed to compute pose, cannot compute facing direction");
+      } else {
+        orient_at_target  = false;
+        // set direction facing from current to next target position, best    //TODO is this still necessary if orient_at_target is false?
+        // chance to reach the destination without turning at the end
+        ori = atan2f( next_target.y() - pose_.getOrigin().y(),
+                      next_target.x() - pose_.getOrigin().x());
+      }
     }
+  } else {
+    orient_at_target  = false;
+
+    // set direction facing from next_target (what is the actual point to drive to) to next point to drive to.
+    // So orientation is the direction from next_target to the target after that
+
+    TopologicalMapNode &next_next_target = *(plan_.begin()++);
+
+    ori = atan2f( next_next_target.y() - next_target.y(),
+                  next_next_target.y() - next_target.x());
   }
 
   // get target position in map frame
@@ -502,8 +514,8 @@ NavGraphThread::send_next_goal()
 						 tpose.getOrigin().y(),
 						 tf::get_yaw(tpose.getRotation()));
 
-  NavigatorInterface::SetStopAtTargetMessage* stop_at_target_msg  = new NavigatorInterface::SetStopAtTargetMessage(stop_at_target);
-  NavigatorInterface::SetOrientAtTarget* orient_at_target_msg     = new NavigatorInterface::SetOrientAtTarget(orient_at_target);
+  NavigatorInterface::SetStopAtTargetMessage* stop_at_target_msg      = new NavigatorInterface::SetStopAtTargetMessage(stop_at_target);
+  NavigatorInterface::SetOrientAtTargetMessage* orient_at_target_msg  = new NavigatorInterface::SetOrientAtTargetMessage(orient_at_target);
 
   try {
     nav_if_->msgq_enqueue(stop_at_target_msg);
