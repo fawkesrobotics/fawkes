@@ -56,6 +56,7 @@ SickTiM55xUSBAcquisitionThread::SickTiM55xUSBAcquisitionThread(std::string &cfg_
   : SickTiM55xCommonAcquisitionThread(cfg_name, cfg_prefix)
 {
   set_name("SickTiM55xUSB(%s)", cfg_name.c_str());
+  usb_device_handle_ = NULL;
 }
 
 void
