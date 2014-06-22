@@ -445,21 +445,38 @@ NavGraphThread::stop_motion()
 void
 NavGraphThread::send_next_goal()
 {
+  bool stop_at_target   = false;
+  bool orient_at_target = false;
+
   if (plan_.empty()) {
     throw Exception("Cannot send next goal if plan is empty");
   }
 
   TopologicalMapNode &next_target = plan_.front();
 
+  if (plan_.size() == 1) {
+    stop_at_target = true;
+  } else {
+    stop_at_target = false;
+  }
+
   float ori = 0.;
   if (plan_.size() == 1 && next_target.has_property("orientation")) {
+    orient_at_target  = true;
     // take the given orientation for the final node
     ori = next_target.property_as_float("orientation");
   } else {
-    // set direction facing from current to next target position, best
-    // chance to reach the destination without turning at the end
-    ori = atan2f(next_target.y() - pose_.getOrigin().y(),
-		 next_target.x() - pose_.getOrigin().x());
+    tf::Stamped<tf::Pose> pose;
+    if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
+      logger->log_warn(name(),
+		       "Failed to compute pose, cannot compute facing direction");
+    } else {
+      orient_at_target  = false;
+      // set direction facing from current to next target position, best
+      // chance to reach the destination without turning at the end
+      ori = atan2f(next_target.y() - pose.getOrigin().y(),
+                   next_target.x() - pose.getOrigin().x());
+    }
   }
 
   // get target position in map frame
@@ -484,14 +501,13 @@ NavGraphThread::send_next_goal()
     new NavigatorInterface::CartesianGotoMessage(tpose.getOrigin().x(),
 						 tpose.getOrigin().y(),
 						 tf::get_yaw(tpose.getRotation()));
+
+  NavigatorInterface::SetStopAtTargetMessage* stop_at_target_msg  = new NavigatorInterface::SetStopAtTargetMessage(stop_at_target);
+  NavigatorInterface::SetOrientAtTarget* orient_at_target_msg     = new NavigatorInterface::SetOrientAtTarget(orient_at_target);
+
   try {
-    NavigatorInterface::SetStopAtTargetMessage* stop_at_target_msg;
-    if ( plan_.size() <= 1 ) {
-      stop_at_target_msg = new NavigatorInterface::SetStopAtTargetMessage(true);
-    } else {
-      stop_at_target_msg = new NavigatorInterface::SetStopAtTargetMessage(false);
-    }
     nav_if_->msgq_enqueue(stop_at_target_msg);
+    nav_if_->msgq_enqueue(orient_at_target_msg);
 
     nav_if_->msgq_enqueue(gotomsg);
     cmd_sent_at_->stamp();
