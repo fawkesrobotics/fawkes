@@ -58,7 +58,12 @@
      <item name="ModerateDribbleBall">Moving moderate dribble ball constant</item>
      <item name="FastDribbleBall">Moving fast dribble ball constant</item>
      <item name="OVERRIDE">Override constant</item>
-  </enum>
+  </enum> 
+  <enum name="OrientationMode">
+     <comment>Orientation mode enum</comment>
+     <item name="OrientAtTarget">Orient when at target, if orientation is given</item> 
+     <item name="OrientDuringTravel">Orient during travel BUT NOT at target, if omnidirectional platform and orientation is given</item> 
+  </enum> 
   </constants>
   <data>
     <comment>
@@ -107,7 +112,7 @@
       a SetAutoDriveMode-message (otherwise the navigator might ignore that value).</field>
 
     <field type="bool" name="stop_at_target">Stop when target is reached?</field>
-    <field type="bool" name="orient_at_target">Adjust orientation when target position is reached?</field>
+    <field type="OrientationMode" name="orientation_mode">Mode how/when to orientate if orientation is given</field>
   </data>
   <message name="Stop">
     <comment>Stop motion immediately.</comment>
@@ -169,9 +174,9 @@
     <comment>Decide if robot should explicily stop when the target is reached.</comment>
     <ref>stop_at_target</ref>
   </message>
-    <message name="SetOrientAtTarget">
-    <comment>Decide if robot should adjust orientation when target is reached.</comment>
-    <ref>orient_at_target</ref>
+    <message name="SetOrientationMode">
+    <comment>Decide how/when the robot should orientate if orientation is given</comment>
+    <ref>orientation_mode</ref>
   </message>
   <message name="ResetParameters">
     <comment>Reset the settable parameters to default values.</comment>

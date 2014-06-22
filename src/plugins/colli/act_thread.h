@@ -86,8 +86,8 @@ class ColliActThread
   float cfg_max_rotation_;
   float cfg_escaping_enabled_;
   bool  cfg_stop_at_target_;
-  bool  cfg_orient_at_target_;
-  fawkes::NavigatorInterface::DriveMode cfg_drive_mode_;
+  fawkes::NavigatorInterface::OrientationMode cfg_orient_mode_;
+  fawkes::NavigatorInterface::DriveMode       cfg_drive_mode_;
 
 #ifdef HAVE_ROS
   void callbackSimpleGoal(const geometry_msgs::PoseStamped::ConstPtr& msg);

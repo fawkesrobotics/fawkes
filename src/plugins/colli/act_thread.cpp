@@ -66,7 +66,16 @@ ColliActThread::init()
   cfg_max_rotation_      = config->get_float((cfg_prefix + "max_rotation").c_str());
   cfg_escaping_enabled_  = config->get_bool((cfg_prefix + "escaping_enabled").c_str());
   cfg_stop_at_target_    = config->get_bool((cfg_prefix + "stop_at_target").c_str());
-  cfg_orient_at_target_  = config->get_bool((cfg_prefix + "orient_at_target").c_str());
+
+  std::string cfg_orient_mode = config->get_string((cfg_prefix + "orient_mode/default").c_str());
+  if ( cfg_orient_mode == "OrientAtTarget" ) {
+    cfg_orient_mode_ = fawkes::NavigatorInterface::OrientationMode::OrientAtTarget;
+  } else if ( cfg_orient_mode == "OrientDuringTravel" ) {
+    cfg_orient_mode_ = fawkes::NavigatorInterface::OrientationMode::OrientDuringTravel;
+  } else {
+    cfg_orient_mode_ = fawkes::NavigatorInterface::OrientationMode::OrientAtTarget;
+    throw fawkes::Exception("Default orient_mode is unknown");
+  }
 
   std::string cfg_drive_mode = config->get_string((cfg_prefix + "drive_mode/default").c_str());
   if ( cfg_drive_mode.compare("MovingNotAllowed") == 0 ) {
@@ -129,7 +138,7 @@ ColliActThread::init()
   if_navi_->set_escaping_enabled(cfg_escaping_enabled_);
   if_navi_->set_security_distance(cfg_security_distance_);
   if_navi_->set_stop_at_target(cfg_stop_at_target_);
-  if_navi_->set_orient_at_target(cfg_orient_at_target_);
+  if_navi_->set_orientation_mode(cfg_orient_mode_);
   if_navi_->set_drive_mode(cfg_drive_mode_);
   if_navi_->set_final(true);
   if_navi_->write();
@@ -203,11 +212,11 @@ ColliActThread::loop()
       logger->log_debug(name(), "setting stop_at_target to %u", msg->is_stop_at_target());
       if_navi_->set_stop_at_target(msg->is_stop_at_target());
 
-    } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetOrientAtTargetMessage>() ) {
-      NavigatorInterface::SetOrientAtTargetMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetOrientAtTargetMessage>();
+    } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetOrientationModeMessage>() ) {
+      NavigatorInterface::SetOrientationModeMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetOrientationModeMessage>();
 
-      logger->log_debug(name(), "setting orient_at_target to %u", msg->is_orient_at_target());
-      if_navi_->set_orient_at_target(msg->is_orient_at_target());
+      logger->log_debug(name(), "setting orient_at_target to %s", if_navi_->tostring_OrientationMode( msg->orientation_mode() ) );
+      if_navi_->set_orientation_mode( msg->orientation_mode() );
 
     } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetDriveModeMessage>() ) {
       NavigatorInterface::SetDriveModeMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetDriveModeMessage>();
@@ -223,7 +232,7 @@ ColliActThread::loop()
       if_navi_->set_escaping_enabled(cfg_escaping_enabled_);
       if_navi_->set_security_distance(cfg_security_distance_);
       if_navi_->set_stop_at_target(cfg_stop_at_target_);
-      if_navi_->set_orient_at_target(cfg_orient_at_target_);
+      if_navi_->set_orientation_mode(cfg_orient_mode_);
       if_navi_->set_drive_mode(cfg_drive_mode_);
 
     } else {

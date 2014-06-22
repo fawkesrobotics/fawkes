@@ -30,8 +30,10 @@ plugins/colli:
   # Default behaviour, deciding if colli should stop at target (not used in implementation atm though)
   stop_at_target: true
 
-  # Default behaviour, deciding if colli should adjust orientation when target is reached
-  orient_at_target: true
+  # Behaviour, deciding how/when colli should adjust orientation
+  orient_mode:
+    # default behaviour options are: OrientAtTarget or OrientDuringTravel
+    default: OrientAtTarget
 
   # The minimum rotation speed (in rad/s). Used for rotating at target
   min_rot: 0.1

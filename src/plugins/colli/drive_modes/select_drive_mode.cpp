@@ -368,7 +368,7 @@ CSelectDriveMode::Update( bool escape )
 
     m_pDriveMode->SetLocalTarget( m_LocalTargetX, m_LocalTargetY );
     m_pDriveMode->SetLocalTrajec( m_LocalTrajecX, m_LocalTrajecY );
-    m_pDriveMode->SetCurrentColliMode( m_pColliTarget->is_orient_at_target(), m_pColliTarget->is_stop_at_target() );
+    m_pDriveMode->SetCurrentColliMode( m_pColliTarget->orientation_mode(), m_pColliTarget->is_stop_at_target() );
 
     // update the drive mode
     m_pDriveMode->Update();

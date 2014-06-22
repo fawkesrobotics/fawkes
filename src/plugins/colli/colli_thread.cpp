@@ -720,7 +720,8 @@ ColliThread::UpdateColliStateMachine()
   float targetY = if_colli_target_->dest_y();
   float targetO = if_colli_target_->dest_ori();
 
-  bool  orient = if_colli_target_->is_orient_at_target();
+  bool  orient = ( if_colli_target_->orientation_mode() == fawkes::NavigatorInterface::OrientationMode::OrientAtTarget
+                && if_colli_target_->dest_ori() != NAN );
 
   float targetDist = distance(targetX, targetY, curPosX, curPosY);
 

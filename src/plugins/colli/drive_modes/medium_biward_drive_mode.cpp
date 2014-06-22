@@ -142,7 +142,7 @@ CMediumBiwardDriveModule::Update()
   driveMode->SetCurrentTarget( m_TargetX, m_TargetY, m_TargetOri );
   driveMode->SetLocalTarget( m_LocalTargetX, m_LocalTargetY );
   driveMode->SetLocalTrajec( m_LocalTrajecX, m_LocalTrajecY );
-  driveMode->SetCurrentColliMode( m_OrientAtTarget, m_StopAtTarget );
+  driveMode->SetCurrentColliMode( m_OrientMode, m_StopAtTarget );
 
   // update the drive mode
   driveMode->Update();

@@ -72,6 +72,13 @@ class NavigatorInterface : public Interface
   } DriveMode;
   const char * tostring_DriveMode(DriveMode value) const;
 
+  /** Orientation mode enum */
+  typedef enum {
+    OrientAtTarget /**< Orient when at target, if orientation is given */,
+    OrientDuringTravel /**< Orient during travel BUT NOT at target, if omnidirectional platform and orientation is given */
+  } OrientationMode;
+  const char * tostring_OrientationMode(OrientationMode value) const;
+
  private:
 #pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
@@ -103,7 +110,7 @@ class NavigatorInterface : public Interface
       False, if the drive mode should not automatically change, which is the case when sending
       a SetAutoDriveMode-message (otherwise the navigator might ignore that value). */
     bool stop_at_target; /**< Stop when target is reached? */
-    bool orient_at_target; /**< Adjust orientation when target position is reached? */
+    int32_t orientation_mode; /**< Mode how/when to orientate if orientation is given */
   } NavigatorInterface_data_t;
 #pragma pack(pop)
 
@@ -482,7 +489,7 @@ class NavigatorInterface : public Interface
     virtual Message * clone() const;
   };
 
-  class SetOrientAtTargetMessage : public Message
+  class SetOrientationModeMessage : public Message
   {
    private:
 #pragma pack(push,4)
@@ -490,22 +497,22 @@ class NavigatorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      bool orient_at_target; /**< Adjust orientation when target position is reached? */
-    } SetOrientAtTargetMessage_data_t;
+      int32_t orientation_mode; /**< Mode how/when to orientate if orientation is given */
+    } SetOrientationModeMessage_data_t;
 #pragma pack(pop)
 
-    SetOrientAtTargetMessage_data_t *data;
+    SetOrientationModeMessage_data_t *data;
 
    public:
-    SetOrientAtTargetMessage(const bool ini_orient_at_target);
-    SetOrientAtTargetMessage();
-    ~SetOrientAtTargetMessage();
+    SetOrientationModeMessage(const OrientationMode ini_orientation_mode);
+    SetOrientationModeMessage();
+    ~SetOrientationModeMessage();
 
-    SetOrientAtTargetMessage(const SetOrientAtTargetMessage *m);
+    SetOrientationModeMessage(const SetOrientationModeMessage *m);
     /* Methods */
-    bool is_orient_at_target() const;
-    void set_orient_at_target(const bool new_orient_at_target);
-    size_t maxlenof_orient_at_target() const;
+    OrientationMode orientation_mode() const;
+    void set_orientation_mode(const OrientationMode new_orientation_mode);
+    size_t maxlenof_orientation_mode() const;
     virtual Message * clone() const;
   };
 
@@ -589,9 +596,9 @@ class NavigatorInterface : public Interface
   bool is_stop_at_target() const;
   void set_stop_at_target(const bool new_stop_at_target);
   size_t maxlenof_stop_at_target() const;
-  bool is_orient_at_target() const;
-  void set_orient_at_target(const bool new_orient_at_target);
-  size_t maxlenof_orient_at_target() const;
+  OrientationMode orientation_mode() const;
+  void set_orientation_mode(const OrientationMode new_orientation_mode);
+  size_t maxlenof_orientation_mode() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

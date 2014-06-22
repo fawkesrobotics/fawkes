@@ -515,11 +515,18 @@ NavGraphThread::send_next_goal()
 						 tf::get_yaw(tpose.getRotation()));
 
   NavigatorInterface::SetStopAtTargetMessage* stop_at_target_msg      = new NavigatorInterface::SetStopAtTargetMessage(stop_at_target);
-  NavigatorInterface::SetOrientAtTargetMessage* orient_at_target_msg  = new NavigatorInterface::SetOrientAtTargetMessage(orient_at_target);
+  NavigatorInterface::SetOrientationModeMessage* orient_mode_msg;
+  if ( orient_at_target ) {
+    orient_mode_msg = new NavigatorInterface::SetOrientationModeMessage(
+        fawkes::NavigatorInterface::OrientationMode::OrientAtTarget );
+  } else {
+    orient_mode_msg = new NavigatorInterface::SetOrientationModeMessage(
+            fawkes::NavigatorInterface::OrientationMode::OrientDuringTravel );
+  }
 
   try {
     nav_if_->msgq_enqueue(stop_at_target_msg);
-    nav_if_->msgq_enqueue(orient_at_target_msg);
+    nav_if_->msgq_enqueue(orient_mode_msg);
 
     nav_if_->msgq_enqueue(gotomsg);
     cmd_sent_at_->stamp();

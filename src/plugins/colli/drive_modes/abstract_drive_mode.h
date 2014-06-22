@@ -56,7 +56,7 @@ class CAbstractDriveMode
   void SetCurrentRoboSpeed( float roboTrans, float roboTransX, float roboTransY, float roboRot );
 
   ///\brief Set the colli mode values for each drive mode.
-  void SetCurrentColliMode( bool orient, bool stop );
+  void SetCurrentColliMode( fawkes::NavigatorInterface::OrientationMode orient, bool stop );
 
   ///\brief Set the local targetpoint found by the search.
   void SetLocalTarget( float localTargetX, float localTargetY );
@@ -108,7 +108,7 @@ class CAbstractDriveMode
   float m_LocalTrajecX;  /**< local trajectory x */
   float m_LocalTrajecY;  /**< local trajectory y*/
 
-  bool m_OrientAtTarget; /**< flag if orienting necessary */
+  fawkes::NavigatorInterface::OrientationMode m_OrientMode; /**< orient mode of nav if */
   bool m_StopAtTarget;   /**< flag if stopping on or after target */
 
   float m_ProposedTranslationX; /**< proposed x translation setting for next timestep */
@@ -256,10 +256,10 @@ CAbstractDriveMode::SetCurrentRoboSpeed( float roboTrans, float roboTransX, floa
  * @param stop Stop at target position?
  */
 inline void
-CAbstractDriveMode::SetCurrentColliMode( bool orient, bool stop )
+CAbstractDriveMode::SetCurrentColliMode( fawkes::NavigatorInterface::OrientationMode orient, bool stop )
 {
-  m_OrientAtTarget = orient;
-  m_StopAtTarget   = stop;
+  m_OrientMode    = orient;
+  m_StopAtTarget  = stop;
 }
 
 
