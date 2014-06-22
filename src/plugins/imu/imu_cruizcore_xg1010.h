@@ -41,7 +41,8 @@ namespace fawkes {
 class CruizCoreXG1010AcquisitionThread : public IMUAcquisitionThread
 {
  public:
-  CruizCoreXG1010AcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
+  CruizCoreXG1010AcquisitionThread(std::string &cfg_name, std::string &cfg_prefix,
+				   bool continuous);
 
   virtual void init();
   virtual void finalize();
@@ -56,8 +57,6 @@ class CruizCoreXG1010AcquisitionThread : public IMUAcquisitionThread
   void check_deadline();
 
  private:
-  std::string  cfg_name_;
-  std::string  cfg_prefix_;
   std::string  cfg_serial_;
   unsigned int cfg_baud_rate_;
   unsigned int cfg_freq_;

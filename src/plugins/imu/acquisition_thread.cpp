@@ -22,6 +22,7 @@
 #include "acquisition_thread.h"
 
 #include <core/threading/mutex.h>
+#include <interfaces/IMUInterface.h>
 
 #include <limits>
 #include <cstring>
@@ -72,13 +73,38 @@ using namespace fawkes;
  * Time when the most recent data was received.
  */
 
+/** @var std::string IMUAcquisitionThread::cfg_name_
+ * Configuration name (third element in config path).
+ */
+
+/** @var std::string IMUAcquisitionThread::cfg_prefix_
+ * Configuration path prefix.
+ */
+
+/** @var std::string IMUAcquisitionThread::cfg_frame_
+ * Coordinate frame for sensor.
+ */
+
+/** @var std::string IMUAcquisitionThread::cfg_continuous_
+ * True if running continuous.
+ * Sub-classes must call init(), loop(), and finalize().
+ */
+
 
 /** Constructor.
  * @param thread_name name of the thread, be descriptive
+ * @param continuous true to run continuous, false otherwise
+ * @param cfg_name configuration name
+ * @param cfg_prefix configuration path prefix
  */
-IMUAcquisitionThread::IMUAcquisitionThread(const char *thread_name)
+IMUAcquisitionThread::IMUAcquisitionThread(const char *thread_name, bool continuous,
+					   std::string &cfg_name, std::string &cfg_prefix)
   : Thread(thread_name, Thread::OPMODE_CONTINUOUS)
 {
+  cfg_name_       = cfg_name;
+  cfg_prefix_     = cfg_prefix;
+  cfg_continuous_ = continuous;
+
   data_mutex_ = new Mutex();
   timestamp_  = new Time();
   new_data_   = false;
@@ -89,6 +115,7 @@ IMUAcquisitionThread::IMUAcquisitionThread(const char *thread_name)
   for (unsigned int i = 0; i < 9; ++i)  angular_velocity_covariance_[i] = 0.;
   for (unsigned int i = 0; i < 3; ++i)  linear_acceleration_[i] = 0.;
   for (unsigned int i = 0; i < 9; ++i)  linear_acceleration_covariance_[i] = 0.;
+
 }
 
 IMUAcquisitionThread::~IMUAcquisitionThread()
@@ -97,6 +124,47 @@ IMUAcquisitionThread::~IMUAcquisitionThread()
   delete timestamp_;
 }
 
+
+void
+IMUAcquisitionThread::init()
+{
+  if (! cfg_continuous_)  return;
+
+  imu_if_ = NULL;
+  cfg_frame_ = config->get_string((cfg_prefix_ + "frame").c_str());
+
+  std::string if_id = "IMU " + cfg_name_;
+
+  imu_if_ = blackboard->open_for_writing<IMUInterface>(if_id.c_str());
+  imu_if_->set_auto_timestamping(false);
+  imu_if_->set_frame(cfg_frame_.c_str());
+  imu_if_->write();
+}
+
+
+void
+IMUAcquisitionThread::finalize()
+{
+  blackboard->close(imu_if_);
+}
+
+
+void
+IMUAcquisitionThread::loop()
+{
+  data_mutex_->lock();
+  if (new_data_) {
+    imu_if_->set_timestamp(timestamp_);
+    imu_if_->set_orientation(orientation_);
+    imu_if_->set_orientation_covariance(orientation_covariance_);
+    imu_if_->set_angular_velocity(angular_velocity_);
+    imu_if_->set_angular_velocity_covariance(angular_velocity_covariance_);
+    imu_if_->set_linear_acceleration(linear_acceleration_);
+    imu_if_->set_linear_acceleration_covariance(linear_acceleration_covariance_);
+    imu_if_->write();
+  }
+  data_mutex_->unlock();
+}
 
 /** Lock data if fresh.
  * If new data has been received since get_distance_data() or get_echo_data()

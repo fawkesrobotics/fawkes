@@ -67,12 +67,16 @@ class IMUPlugin : public fawkes::Plugin
 	try {
 	  if (active) {
 	    std::string type = config->get_string((cfg_prefix + "type").c_str());
+	    bool continuous = false;
+	    try {
+	      continuous = config->get_bool((cfg_prefix + "continuous").c_str());
+	    } catch (Exception &e) {} // ignored, use default
 
 	    //printf("Adding IMU acquisition thread for %s\n", cfg_name.c_str());
 	    IMUAcquisitionThread *aqt = NULL;
 #ifdef HAVE_CRUIZCORE
 	    if ( type == "CruizCore-XG1010" ) {
-	      aqt = new CruizCoreXG1010AcquisitionThread(cfg_name, cfg_prefix);
+	      aqt = new CruizCoreXG1010AcquisitionThread(cfg_name, cfg_prefix, continuous);
 	    } else
 #endif
 
@@ -82,7 +86,9 @@ class IMUPlugin : public fawkes::Plugin
 	    }
 
 	    thread_list.push_back(aqt);
-	    thread_list.push_back(new IMUSensorThread(cfg_name, cfg_prefix, aqt));
+	    if (! continuous) {
+	      thread_list.push_back(new IMUSensorThread(cfg_name, cfg_prefix, aqt));
+	    }
 
 	    configs.insert(cfg_name);
 	  } else {

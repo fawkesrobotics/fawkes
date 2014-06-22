@@ -10,6 +10,11 @@ hardware/imu:
     # Enable this configuration?
     active: true
 
+    # If continuous operation is enabled, data will be written to
+    # blackboard as soon as it is available, otherwise only once per
+    # loop during the sensor hook
+    continuous: false
+    
     # Configuration is for CruizCore Gyro
     type: CruizCore-XG1010
 

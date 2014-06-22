@@ -46,15 +46,15 @@ using namespace fawkes;
 /** Constructor.
  * @param cfg_name short name of configuration group
  * @param cfg_prefix configuration path prefix
+ * @param continuous true to run continuous, false otherwise
  */
 CruizCoreXG1010AcquisitionThread::CruizCoreXG1010AcquisitionThread(std::string &cfg_name,
-								   std::string &cfg_prefix)
-  : IMUAcquisitionThread(cfg_name.c_str()),
+								   std::string &cfg_prefix,
+								   bool continuous)
+  : IMUAcquisitionThread(cfg_name.c_str(), continuous, cfg_name, cfg_prefix),
     serial_(io_service_), io_service_work_(io_service_), deadline_(io_service_)
 {
   set_name("CruizCoreXG1010(%s)", cfg_name.c_str());
-  cfg_name_   = cfg_name;
-  cfg_prefix_ = cfg_prefix;
 }
 
 void
@@ -93,6 +93,8 @@ CruizCoreXG1010AcquisitionThread::init()
   angular_velocity_covariance_[8] = deg2rad(0.1);
 
   open_device();
+
+  if (cfg_continuous_)  IMUAcquisitionThread::init();
 }
 
 
@@ -100,6 +102,7 @@ void
 CruizCoreXG1010AcquisitionThread::finalize()
 {
   close_device();
+  if (cfg_continuous_)  IMUAcquisitionThread::finalize();
 }
 
 
@@ -177,6 +180,8 @@ CruizCoreXG1010AcquisitionThread::loop()
       usleep(RECONNECT_INTERVAL * 1000);
     }
   }
+
+  if (cfg_continuous_)  IMUAcquisitionThread::loop();
 
   yield();
 }
