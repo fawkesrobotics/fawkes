@@ -118,9 +118,7 @@ CLaserOccupancyGrid::~CLaserOccupancyGrid()
   delete m_pRoboShape;
 }
 
-/** Reset all old readings and forget about the world state!
- * @param max_age The maximum age of for a reading to be considered.
- */
+/** Reset all old readings and forget about the world state! */
 void
 CLaserOccupancyGrid::ResetOld()
 {

@@ -43,8 +43,8 @@ class CEscapeDriveModule : public CAbstractDriveMode
    */
   class LaserPoint {
   public:
-    double length;  // length of the laser reading in meter
-    double angle;   // angle of the laser reading in rad [-pi, pi]
+    double length;  /**< length of the laser reading in meter */
+    double angle;   /**< angle of the laser reading in rad [-pi, pi] */
 
     /**
      * constructor

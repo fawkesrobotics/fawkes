@@ -167,7 +167,7 @@ CEscapeDriveModule::Update()
 
 /**
  * This function sets the laser points for one escape round
- * @param laser_point vector of laser points
+ * @param laser_points vector of laser points
  */
 void
 CEscapeDriveModule::setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_points )

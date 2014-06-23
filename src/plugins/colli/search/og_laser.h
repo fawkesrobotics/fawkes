@@ -47,23 +47,6 @@ class Configuration;
 class CLaserOccupancyGrid : public OccupancyGrid
 {
  public:
-  class LaserPoint {
-  public:
-    cart_coord_2d_struct coord;
-    Time                 timestamp;
-
-    LaserPoint() { }
-//    LaserPoint(LaserPoint& src) {
-//      coord     = src.coord;
-//      timestamp = src.timestamp;
-//    }
-//    LaserPoint operator=(LaserPoint src) {
-//      coord     = src.coord;
-//      timestamp = src.timestamp;
-//      return src;
-//    }
-  };
-
   CLaserOccupancyGrid( Laser360Interface * laser, Logger* logger, Configuration* config, tf::Transformer* listener,
                        int width = 150, int height = 150,
                        int cell_width = 5, int cell_height = 5);
@@ -83,6 +66,23 @@ class CLaserOccupancyGrid : public OccupancyGrid
   void set_base_offset(float x, float y);
 
  private:
+
+  class LaserPoint {
+  public:
+    cart_coord_2d_struct coord;
+    Time timestamp;
+
+    LaserPoint() { }
+//    LaserPoint(LaserPoint& src) {
+//      coord     = src.coord;
+//      timestamp = src.timestamp;
+//    }
+//    LaserPoint operator=(LaserPoint src) {
+//      coord     = src.coord;
+//      timestamp = src.timestamp;
+//      return src;
+//    }
+  };
 
   void updateLaser();
 
