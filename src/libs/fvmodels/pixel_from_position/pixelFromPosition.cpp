@@ -92,7 +92,7 @@ PixelFromPosition::get_pixel_position(fawkes::cart_coord_3d_t& position, std::st
   if (  polar_in.phi   <= cam_angle_min_horizontal_ || polar_in.phi   >= cam_angle_max_horizontal_ ||
         polar_in.theta <= cam_angle_min_vertical_   || polar_in.theta >= cam_angle_max_vertical_
      ) {
-    throw new fawkes::OutOfBoundsException("3D position is not in viewport of camera");
+    throw fawkes::OutOfBoundsException("3D position is not in viewport of camera");
   } else {
     fawkes::point_t pixel_in_cam_rel;
     pixel_in_cam_rel.x = polar_in.phi   * cam_pixel_per_angle_horizontal_;
