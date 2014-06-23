@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  escape_drive_mode.cpp - Implementation of drive-mode "escape"
+ *  escape_potential_drive_mode.cpp - Escaping mode using potential field
  *
- *  Created: Fri Oct 18 15:16:23 2013
- *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *  Created: Tue Mar 25 17:24:18 2014
+ *  Copyright  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
