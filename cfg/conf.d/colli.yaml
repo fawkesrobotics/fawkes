@@ -128,6 +128,17 @@ plugins/colli:
       max_trans: 0.3
       max_rot: 0.8
 
+    # Modifies the values used to calculate when to start breaking to stop at the target
+    stopping_adjustment:
+      # Add this distance to the calculated distance required for stopping stop, given the current speed.
+      # Higher values mean "stop earlier". Might cause bocking if too high.
+      distance_addition: 0.0
+      # This value is multiplied with the expected deceleration per loop. Should relate to how
+      #  much the speed actually drops compared to what is desired. So use a value in [0..1], anything
+      #  higher will be cropped to 1.
+      # Lower values mean "breaking effect is delayed more" (or "only x% of deceleration is actually
+      #  noticable in 1 iteration"), so it will "stop earlier".
+      deceleration_factor: 1.0
 
   roboshape:
     # Define the roboshape: 1 is angular (default), 2 is round

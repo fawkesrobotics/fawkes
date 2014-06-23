@@ -121,6 +121,9 @@ private:
   float m_cMaxRotAcc;
   float m_cMaxRotDec;
   int   m_frequency_;
+
+  float stopping_distance_;
+  float stopping_factor_;
 };
 
 
@@ -148,6 +151,10 @@ CAbstractDriveMode::CAbstractDriveMode(fawkes::Logger* logger, fawkes::Configura
   m_cMaxTransDec = /*0.75* */config_->get_float("/plugins/colli/motor_instruct/trans_dec");
   m_cMaxRotAcc   = /*0.75* */config_->get_float("/plugins/colli/motor_instruct/rot_acc");
   m_cMaxRotDec   = /*0.75* */config_->get_float("/plugins/colli/motor_instruct/rot_dec");
+
+  stopping_distance_ = config_->get_float("/plugins/colli/drive_mode/stopping_adjustment/distance_addition");
+  stopping_factor_   = config_->get_float("/plugins/colli/drive_mode/stopping_adjustment/deceleration_factor");
+  stopping_factor_   = std::min(1.f, std::max(0.f, stopping_factor_));
 
   m_frequency_ = config_->get_int("/plugins/colli/frequency");
 
@@ -309,10 +316,10 @@ CAbstractDriveMode::GuaranteeTransStop( float distance,
 
   // calculate riemann integral to get distance until robot is stoped
   float trans_tmp         = current_trans;
-  float distance_to_stop  = 0;
+  float distance_to_stop  = stopping_distance_;
   for (int loops_to_stop = 0; trans_tmp > 0; loops_to_stop++) {
     distance_to_stop += trans_tmp / m_frequency_;           //First calculate sum (Untersumme)
-    trans_tmp        -= m_cMaxTransDec;                 //Then decrease tmp speed
+    trans_tmp        -= m_cMaxTransDec * stopping_factor_;  //Then decrease tmp speed
   }
 
 //  logger_->log_debug("CAbstractDriveMode","GuaranteeTransStop: distance needed to stop - distance to goal: %f - %f = %f", distance_to_stop, distance, distance_to_stop - distance);
