@@ -20,20 +20,21 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef PIXELFROMPOSITION_H_
-#define PIXELFROMPOSITION_H_
+#ifndef __FIREVISION_PIXELFROMPOSITION_H_
+#define __FIREVISION_PIXELFROMPOSITION_H_
 
 #include <tf/transformer.h>
 #include <utils/math/types.h>
 
 #include <string>
 
+namespace firevision {
 class PixelFromPosition
 {
 public:
   PixelFromPosition(  fawkes::tf::Transformer* tf, std::string cam_frame,
                   float cam_aperture_x, float cam_aperture_y,
-                  unsigned int cam_width_x, unsigned int cam_height_y );
+                  unsigned int cam_width_x, unsigned int cam_height_y, float cam_angle_y = 0 );
   virtual
   ~PixelFromPosition();
 
@@ -56,5 +57,5 @@ private:
   float         cam_angle_max_vertical_;
   float         cam_angle_min_vertical_;
 };
-
-#endif /* PIXELPOSITION_H_ */
+}
+#endif /* __FIREVISION_PIXELFROMPOSITION_H_ */

@@ -25,12 +25,13 @@
 #include <utils/math/coord.h>
 #include <core/exceptions/software.h>
 
+namespace firevision {
 /**
  *
  */
 PixelFromPosition::PixelFromPosition(  fawkes::tf::Transformer* tf, std::string cam_frame,
                               float cam_aperture_x, float cam_aperture_y,
-                              unsigned int cam_width_x, unsigned int cam_height_y )
+                              unsigned int cam_width_x, unsigned int cam_height_y, float cam_angle_y )
 {
   tf_listener = tf;
   cam_frame_  = cam_frame;
@@ -43,11 +44,11 @@ PixelFromPosition::PixelFromPosition(  fawkes::tf::Transformer* tf, std::string 
   cam_pixel_per_angle_horizontal_ = double(cam_resulution_horizontal_) / cam_aperture_horizontal_;
   cam_pixel_per_angle_vertical_   = double(cam_resulution_vertical_)   / cam_aperture_vertical_;
 
-  cam_angle_max_horizontal_ = ( cam_aperture_horizontal_ / 2 );
-  cam_angle_min_horizontal_ = - cam_angle_max_horizontal_;
+  cam_angle_max_horizontal_ = cam_aperture_horizontal_ / 2.0;
+  cam_angle_min_horizontal_ = -1.0 * cam_angle_max_horizontal_;
 
-  cam_angle_max_vertical_ = ( cam_aperture_vertical_ / 2 );
-  cam_angle_min_vertical_ = - cam_angle_max_vertical_;
+  cam_angle_max_vertical_ = cam_angle_y + cam_aperture_vertical_ / 2.0;
+  cam_angle_min_vertical_ = cam_angle_y - cam_aperture_vertical_ / 2.0;
 }
 
 PixelFromPosition::~PixelFromPosition()
@@ -102,4 +103,5 @@ PixelFromPosition::get_pixel_position(fawkes::cart_coord_3d_t& position, std::st
 
     return pixel_in_cam;
   }
+}
 }
