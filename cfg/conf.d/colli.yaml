@@ -178,11 +178,6 @@ plugins/colli:
       min_length: 1.5
 
     buffer_size: 2
-      
-  trig_table:
-    # Trigonometry Resolution in number of steps per degree
-    resolution: 2
-
 
   a_star:
     # maximum number of states the colli uses to search for a path.
