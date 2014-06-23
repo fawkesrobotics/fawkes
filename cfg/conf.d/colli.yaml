@@ -162,7 +162,7 @@ plugins/colli:
 
 
   laser_occupancy_grid:
-    # This is the distance in which laser readings are ignored for putting a new ellipse into the grid
+    # This is the distance in which laser readings are ignored for putting a new obstacle into the grid
     distance_account: 0.1
 
     history:

@@ -127,7 +127,7 @@ class CLaserOccupancyGrid : public OccupancyGrid
   int m_InitialHistorySize;
 
   /** Laser concerned settings */
-  float m_MinimumLaserLength, m_EllipseDistance;
+  float m_MinimumLaserLength, m_ObstacleDistance;
 
   bool cfg_obstacle_inc_ ; /**< increasing obstacles or not */
 

@@ -68,7 +68,7 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
 
   //read config
   std::string cfg_prefix = "/plugins/colli/";
-  m_EllipseDistance     = config->get_float((cfg_prefix + "laser_occupancy_grid/distance_account").c_str());
+  m_ObstacleDistance     = config->get_float((cfg_prefix + "laser_occupancy_grid/distance_account").c_str());
   m_InitialHistorySize  = 3*config->get_int((cfg_prefix + "laser_occupancy_grid/history/initial_size").c_str());
   m_MaxHistoryLength    = config->get_float((cfg_prefix + "laser_occupancy_grid/history/max_length").c_str());
   m_MinHistoryLength    = config->get_float((cfg_prefix + "laser_occupancy_grid/history/min_length").c_str());
@@ -387,8 +387,8 @@ CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY, float inc, float 
   for ( int i = 0; i < numberOfReadings; i++ ) {
     point = (*pointsTransformed)[i].coord;
 
-    if( !((fabs(point.x) <= 0.03) && (fabs(point.y) <= 0.03))
-     && sqr(point.x-oldp_x)+sqr(point.y-oldp_y) > sqr(m_EllipseDistance) )
+    if( sqrt(sqr(point.x) + sqr(point.y)) >= m_MinimumLaserLength
+     && distance(point.x, point.y, oldp_x, oldp_y) >= m_ObstacleDistance)
       {
       oldp_x = point.x;
       oldp_y = point.y;
