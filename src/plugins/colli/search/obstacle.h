@@ -112,15 +112,15 @@ ColliFastRectangle::ColliFastRectangle( int width, int height )
   int x_start = -height/2;
 
   //consider (0,0) to be bottom-left corner of obstacle.
-  for( int x=-6; x<height + 6; ++x ) {
-    for( int y=-6; y<width + 6; ++y ) {
+  for( int x=-3; x<height + 3; ++x ) {
+    for( int y=-3; y<width + 3; ++y ) {
       occupied_cells_.push_back( x_start + x );
       occupied_cells_.push_back( y_start + y );
 
-      if( x < -4 || x >= height+4 || y < -4 || y >= width+4 ) {
+      if( x < -2 || x >= height+2 || y < -2 || y >= width+2 ) {
         occupied_cells_.push_back( (int)_COLLI_CELL_FAR_ );
 
-      } else if( x < -2 || x >= height+2 || y < - 2 || y >= width+2 ) {
+      } else if( x < -1 || x >= height+1 || y < - 1 || y >= width+1 ) {
         occupied_cells_.push_back( (int)_COLLI_CELL_MIDDLE_ );
 
       } else if( x < 0 || x >= height || y < 0 || y >= width ) {
@@ -134,33 +134,29 @@ ColliFastRectangle::ColliFastRectangle( int width, int height )
 }
 
 /** Constructor for FastEllipse.
- * @param radius_width radius width of the new ellipse
- * @param radius_height radius height of the new ellipse
+ * @param width radius width of the new ellipse
+ * @param height radius height of the new ellipse
  * @param obstacle_increasement Increase obstacles?
  */
 inline
-ColliFastEllipse::ColliFastEllipse( int radius_width, int radius_height, bool obstacle_increasement )
+ColliFastEllipse::ColliFastEllipse( int width, int height, bool obstacle_increasement )
 {
   float dist = 1000.0;
   float dist_near = 1000.0;
   float dist_middle = 1000.0;
   float dist_far = 1000.0;
 
+  int radius_width  = round(width/2.f);
+  int radius_height = round(height/2.f);
+
   int maxRad = std::max( radius_width, radius_height );
 
-  for( int y = -(maxRad+6); y <= (maxRad+6); y++ ) {
-    for( int x = -(maxRad+6); x <= (maxRad+6); x++ ) {
+  for( int y = -(maxRad+3); y <= (maxRad+3); y++ ) {
+    for( int x = -(maxRad+3); x <= (maxRad+3); x++ ) {
       dist        = sqr((float)y/(float)radius_width)     + sqr((float)x/(float)radius_height);
-      dist_near   = sqr((float)y/(float)(radius_width+2)) + sqr((float)x/(float)(radius_height+2));
-      dist_middle = sqr((float)y/(float)(radius_width+4)) + sqr((float)x/(float)(radius_height+4));
-
-
-      //if ( !obstacle_increasement ) {
-      //  // ignore far distance obstacles
-      //} else {
-      //  dist_far = sqr((float)x/(float)(radius_width+6)) +  sqr((float)y/(float)(radius_height+6));
-      //}
-
+      dist_near   = sqr((float)y/(float)(radius_width+1)) + sqr((float)x/(float)(radius_height+1));
+      dist_middle = sqr((float)y/(float)(radius_width+2)) + sqr((float)x/(float)(radius_height+2));
+      dist_far    = sqr((float)x/(float)(radius_width+3)) +  sqr((float)y/(float)(radius_height+3));
 
       if( (dist > 1.0) && (dist_near > 1.0)
        && (dist_middle > 1.0) && (dist_far > 1.0) ) {
