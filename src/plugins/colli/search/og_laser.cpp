@@ -347,9 +347,9 @@ CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float 
 
           // 25 cm's in my opinion, that are here: 0.25*100/m_CellWidth
           //int size = (int)(((0.25f+inc)*100.f)/(float)m_CellWidth);
-          int width = m_pRoboShape->GetCompleteWidthY();
+          float width = m_pRoboShape->GetCompleteWidthY();
           width = std::max( 4.f, ((width + inc)*100.f)/m_CellWidth );
-          int height = m_pRoboShape->GetCompleteWidthX();
+          float height = m_pRoboShape->GetCompleteWidthX();
           height = std::max( 4.f, ((height + inc)*100.f)/m_CellHeight );
           integrateObstacle( posX, posY, width, height );
         }
