@@ -24,6 +24,8 @@
 
 #ifdef HAVE_VISUAL_DEBUGGING
 
+#include "common/types.h"
+
 #include <core/threading/thread.h>
 #include <core/threading/mutex.h>
 #include <aspect/tf.h>
@@ -71,6 +73,7 @@ class ColliVisualizationThread
   fawkes::CLaserOccupancyGrid *occ_grid_;
   fawkes::CSearch             *search_;
   fawkes::CRoboShape_Colli    *roboshape_;
+  fawkes::colli_cell_cost_t   cell_costs_;
 
   ros::Publisher *pub_roboshape_;
 

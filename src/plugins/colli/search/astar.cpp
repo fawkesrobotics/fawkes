@@ -21,8 +21,7 @@
  */
 
 #include "astar.h"
-#include "../utils/occupancygrid/occupancygrid.h"
-#include "../common/defines.h"
+#include "../search/og_laser.h"
 
 #include <utils/math/types.h>
 #include <logging/logger.h>
@@ -49,11 +48,11 @@ namespace fawkes
  *  After that several states are initialized. This is done for speed purposes
  *   again, cause only here new is called in this code..
  *  Afterwards the Openlist, closedlist and states for A* are initialized.
- * @param occGrid is a pointer to an COccupancyGrid to search through.
+ * @param occGrid is a pointer to an CLaserOccupancyGrid to search through.
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CAStar::CAStar( OccupancyGrid * occGrid, Logger* logger, Configuration* config )
+CAStar::CAStar( CLaserOccupancyGrid * occGrid, Logger* logger, Configuration* config )
  : logger_( logger )
 {
   logger_->log_debug("AStar", "(Constructor): Initializing AStar");
@@ -63,6 +62,8 @@ CAStar::CAStar( OccupancyGrid * occGrid, Logger* logger, Configuration* config )
   m_pOccGrid = occGrid;
   m_Width = m_pOccGrid->getWidth() - 1;
   m_Height = m_pOccGrid->getHeight() - 1;
+
+  cell_costs_ = m_pOccGrid->get_cell_costs();
 
   m_AStarStateCount = 0;
   m_vAStarStates.reserve( m_MaxStates );
@@ -217,7 +218,7 @@ CAStar::GenerateChildren( CAStarState * father )
 
   if ( father->m_Y > 0 ) {
     prob = m_pOccGrid->getProb( father->m_X, father->m_Y-1 );
-    if ( prob != _COLLI_CELL_OCCUPIED_ ) {
+    if ( prob != cell_costs_.occ ) {
       child = m_vAStarStates[++m_AStarStateCount];
       child->m_X = father->m_X;
       child->m_Y = father->m_Y-1;
@@ -236,7 +237,7 @@ CAStar::GenerateChildren( CAStarState * father )
 
   if ( father->m_Y < (signed int)m_Height ) {
     prob = m_pOccGrid->getProb( father->m_X, father->m_Y+1 );
-    if ( prob != _COLLI_CELL_OCCUPIED_ ) {
+    if ( prob != cell_costs_.occ ) {
       child = m_vAStarStates[++m_AStarStateCount];
       child->m_X = father->m_X;
       child->m_Y = father->m_Y+1;
@@ -255,7 +256,7 @@ CAStar::GenerateChildren( CAStarState * father )
 
   if ( father->m_X > 0 ) {
     prob = m_pOccGrid->getProb( father->m_X-1, father->m_Y );
-    if ( prob != _COLLI_CELL_OCCUPIED_ ) {
+    if ( prob != cell_costs_.occ ) {
       child = m_vAStarStates[++m_AStarStateCount];
       child->m_X = father->m_X-1;
       child->m_Y = father->m_Y;
@@ -274,7 +275,7 @@ CAStar::GenerateChildren( CAStarState * father )
 
   if ( father->m_X < (signed int)m_Width ) {
     prob = m_pOccGrid->getProb( father->m_X+1, father->m_Y );
-    if ( prob != _COLLI_CELL_OCCUPIED_ ) {
+    if ( prob != cell_costs_.occ ) {
       child = m_vAStarStates[++m_AStarStateCount];
       child->m_X = father->m_X+1;
       child->m_Y = father->m_Y;
@@ -383,7 +384,7 @@ CAStar::RemoveTargetFromObstacle( int targetX, int targetY, int stepX, int stepY
         child->m_Y = father->m_Y;
         child->m_TotalCost = father->m_TotalCost+1;
         key = CalculateKey( child->m_X, child->m_Y );
-        if ( m_pOccGrid->getProb( child->m_X, child->m_Y ) == _COLLI_CELL_NEAR_ )
+        if ( m_pOccGrid->getProb( child->m_X, child->m_Y ) == cell_costs_.near )
           return point_t( child->m_X, child->m_Y );
         else if ( m_hClosedList.find( key ) == m_hClosedList.end() )
           m_pOpenList.push( child );
@@ -395,7 +396,7 @@ CAStar::RemoveTargetFromObstacle( int targetX, int targetY, int stepX, int stepY
         child->m_Y = father->m_Y + stepY;
         child->m_TotalCost = father->m_TotalCost+1;
         key = CalculateKey( child->m_X, child->m_Y );
-        if ( m_pOccGrid->getProb( child->m_X, child->m_Y ) == _COLLI_CELL_NEAR_ )
+        if ( m_pOccGrid->getProb( child->m_X, child->m_Y ) == cell_costs_.near )
           return point_t( child->m_X, child->m_Y );
         else if ( m_hClosedList.find( key ) == m_hClosedList.end() )
           m_pOpenList.push( child );

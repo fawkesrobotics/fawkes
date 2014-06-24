@@ -24,7 +24,6 @@
 #include "og_laser.h"
 #include "obstacle_map.h"
 
-#include "../common/defines.h"
 #include "../utils/rob/roboshape_colli.h"
 
 #include <utils/time/clock.h>
@@ -82,6 +81,12 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
   m_if_buffer_size      = config->get_int((cfg_prefix + "laser_occupancy_grid/buffer_size").c_str());
   m_if_buffer_size = std::max(m_if_buffer_size, 1); //needs to be >= 1, because the data is always wrote into the buffer (instead of read())
 
+  cell_costs_.occ       = config->get_int((cfg_prefix + "laser_occupancy_grid/cell_cost/occupied").c_str());
+  cell_costs_.near      = config->get_int((cfg_prefix + "laser_occupancy_grid/cell_cost/near").c_str());
+  cell_costs_.mid       = config->get_int((cfg_prefix + "laser_occupancy_grid/cell_cost/mid").c_str());
+  cell_costs_.far       = config->get_int((cfg_prefix + "laser_occupancy_grid/cell_cost/far").c_str());
+  cell_costs_.free      = config->get_int((cfg_prefix + "laser_occupancy_grid/cell_cost/free").c_str());
+
   m_if_buffer_filled.resize(m_if_buffer_size);
   std::fill(m_if_buffer_filled.begin(), m_if_buffer_filled.end(), false);
 
@@ -95,7 +100,7 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
   initGrid();
 
   logger->log_debug("CLaserOccupancyGrid", "Generating obstacle map");
-  obstacle_map = new ColliObstacleMap(m_pRoboShape->IsAngularRobot());
+  obstacle_map = new ColliObstacleMap(cell_costs_, m_pRoboShape->IsAngularRobot());
   logger->log_debug("CLaserOccupancyGrid", "Generating obstacle map done");
 
   m_LaserPosition = point_t(0,0);
@@ -228,7 +233,7 @@ CLaserOccupancyGrid::UpdateOccGrid( int midX, int midY, float inc, float vel )
 
   for ( int y = 0; y < m_Width; ++y )
     for ( int x = 0; x < m_Height; ++x )
-      m_OccupancyProb[x][y] = _COLLI_CELL_FREE_;
+      m_OccupancyProb[x][y] = cell_costs_.free;
 
   updateLaser();
 
@@ -295,6 +300,15 @@ CLaserOccupancyGrid::set_base_offset(float x, float y)
   offset_base_.y = (int)round( (offset_laser_.y + y)*100.f/m_CellWidth  );
 }
 
+
+/** Get cell costs.
+ * @return struct that contains all the cost values for the occgrid cells
+ */
+colli_cell_cost_t
+CLaserOccupancyGrid::get_cell_costs() const
+{
+  return cell_costs_;
+}
 
 void
 CLaserOccupancyGrid::IntegrateOldReadings( int midX, int midY, float inc, float vel,

@@ -47,6 +47,15 @@ typedef struct {
   cart_coord_2d_t local_trajec; /**< local trajectory */
 } colli_data_t;
 
+/** Costs of occupancy-grid cells */
+typedef struct {
+  unsigned int occ;  /**< The cost for an occupied cell */
+  unsigned int near; /**< The cost for a cell near an obstacle (distance="near")*/
+  unsigned int mid;  /**< The cost for a cell near an obstacle (distance="near")*/
+  unsigned int far;  /**< The cost for a cell near an obstacle (distance="near")*/
+  unsigned int free; /**< The cost for a free cell */
+} colli_cell_cost_t;
+
 /** Colli Escape modes */
 typedef enum {
   potential_field,

@@ -25,6 +25,8 @@
 #define __PLUGINS_COLLI_SEARCH_OG_LASER_H_
 
 #include "../utils/occupancygrid/occupancygrid.h"
+#include "../common/types.h"
+
 #include <utils/math/types.h>
 #include <utils/time/time.h>
 #include <string>
@@ -64,6 +66,9 @@ class CLaserOccupancyGrid : public OccupancyGrid
 
   ///\brief Set the offset of base_link from laser
   void set_base_offset(float x, float y);
+
+  ///\brief Get cell costs
+  colli_cell_cost_t get_cell_costs() const;
 
  private:
 
@@ -117,6 +122,9 @@ class CLaserOccupancyGrid : public OccupancyGrid
   std::vector< LaserPoint > m_vOldReadings; /**< readings history */
 
   point_t m_LaserPosition; /**< the laser's position in the grid */
+
+  /** Costs for the cells in grid */
+  colli_cell_cost_t cell_costs_;
 
   /* interface buffer history */
   int m_if_buffer_size;

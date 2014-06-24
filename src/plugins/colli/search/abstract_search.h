@@ -23,6 +23,9 @@
 #ifndef __PLUGINS_COLLI_SEARCH_ABSTRACTSEARCH_H_
 #define __PLUGINS_COLLI_SEARCH_ABSTRACTSEARCH_H_
 
+#include "og_laser.h"
+#include "../common/types.h"
+
 #include <logging/logger.h>
 #include <utils/math/types.h>
 
@@ -31,8 +34,6 @@ namespace fawkes
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
-
-class CLaserOccupancyGrid;
 
 /** @class CAbstractSearch <plugins/colli/search/abstract_search.h>
  * This is the abstract search interpretation class for an arbitrary
@@ -76,6 +77,8 @@ class CAbstractSearch
 
   point_t m_LocalTarget;      /**< the calculated target where to drive to */
   point_t m_LocalTrajectory;  /**< the calculated trajectory where to drive to */
+
+  colli_cell_cost_t cell_costs_; /**< The costs for cells in occupancy grid */
 };
 
 
@@ -89,6 +92,7 @@ CAbstractSearch::CAbstractSearch( CLaserOccupancyGrid * occGrid, Logger* logger 
 {
   logger->log_debug("CAbstractSearch", "(Constructor): Entering");
   m_pOccGrid = occGrid;
+  cell_costs_ = m_pOccGrid->get_cell_costs();
   logger->log_debug("CAbstractSearch", "(Constructor): Exiting");
 }
 

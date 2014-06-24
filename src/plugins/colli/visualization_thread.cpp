@@ -23,7 +23,6 @@
 
 #ifdef HAVE_VISUAL_DEBUGGING
 
-#include "common/defines.h"
 #include "utils/rob/roboshape_colli.h"
 #include "search/og_laser.h"
 #include "search/astar_search.h"
@@ -148,19 +147,19 @@ ColliVisualizationThread::loop()
       p.z = 0;
 
       prob = occ_grid_->getProb(x,y);
-      if( prob == _COLLI_CELL_OCCUPIED_) {
+      if( prob == cell_costs_.occ) {
         grid_cells_occ.cells.push_back( p );
 
-      } else if( prob == _COLLI_CELL_NEAR_ ) {
+      } else if( prob == cell_costs_.near ) {
         grid_cells_near.cells.push_back( p );
 
-      } else if( prob == _COLLI_CELL_MIDDLE_ ) {
+      } else if( prob == cell_costs_.mid ) {
         grid_cells_mid.cells.push_back( p );
 
-      } else if( prob == _COLLI_CELL_FAR_ ) {
+      } else if( prob == cell_costs_.far ) {
         grid_cells_far.cells.push_back( p );
 
-      } else if( prob == _COLLI_CELL_FREE_ ) {
+      } else if( prob == cell_costs_.free ) {
         grid_cells_free.cells.push_back( p );
       }
     }
@@ -193,8 +192,9 @@ ColliVisualizationThread::setup(CLaserOccupancyGrid* occ_grid,
                                CSearch* search)
 {
   MutexLocker lock(&mutex_);
-  occ_grid_ = occ_grid;
   search_   = search;
+  occ_grid_ = occ_grid;
+  cell_costs_ = occ_grid_->get_cell_costs();
 }
 
 #endif

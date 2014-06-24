@@ -24,6 +24,7 @@
 #define __PLUGINS_COLLI_SEARCH_OBSTACLE_MAP_H_
 
 #include "obstacle.h"
+#include "../common/types.h"
 
 #include <vector>
 #include <map>
@@ -41,7 +42,7 @@ namespace fawkes
 class ColliObstacleMap
 {
  public:
-  ColliObstacleMap(bool is_rectangle = false);
+  ColliObstacleMap(colli_cell_cost_t cell_costs, bool is_rectangle = false);
   ~ColliObstacleMap() { obstacles_.clear(); }
 
   const std::vector< int > get_obstacle( int width, int height, bool obstacle_increasement = true );
@@ -49,15 +50,17 @@ class ColliObstacleMap
  private:
   std::map< unsigned int, ColliFastObstacle * > obstacles_;
   bool is_rectangle_;
-
+  colli_cell_cost_t cell_costs_;
 };
 
 /** Constructor.
+ * @param cell_costs struct containing the occ-grid cell costs
  * @param is_rectangle Defines if obstacles are rectangles or ellipses(=default).
  */
 inline
-ColliObstacleMap::ColliObstacleMap(bool is_rectangle)
+ColliObstacleMap::ColliObstacleMap(colli_cell_cost_t cell_costs, bool is_rectangle)
 {
+  cell_costs_ = cell_costs;
   is_rectangle_ = is_rectangle;
 }
 
@@ -77,9 +80,9 @@ ColliObstacleMap::get_obstacle( int width, int height, bool obstacle_increasemen
     // obstacle not found
     ColliFastObstacle* obstacle;
     if( is_rectangle_ )
-      obstacle = new ColliFastRectangle( width, height );
+      obstacle = new ColliFastRectangle( width, height, cell_costs_ );
     else
-      obstacle = new ColliFastEllipse( width, height, obstacle_increasement );
+      obstacle = new ColliFastEllipse( width, height, cell_costs_, obstacle_increasement );
     obstacle->set_key( key );
     obstacles_[ key ] = obstacle;
     return obstacle->get_obstacle();

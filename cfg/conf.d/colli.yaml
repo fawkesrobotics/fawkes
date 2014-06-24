@@ -190,6 +190,19 @@ plugins/colli:
 
     buffer_size: 2
 
+    # costs of the cells in the occupancy grid
+    cell_cost:
+      # occupied cell
+      occupied: 1000
+      # cell near an obstacle
+      near: 4
+      # cell still relatively near on obstacle
+      mid: 3
+      # cell further away from obstacle
+      far: 2
+      # free cell
+      free: 1
+
   a_star:
     # maximum number of states the colli uses to search for a path.
     # The more states the better the search, but the slower the algorithm

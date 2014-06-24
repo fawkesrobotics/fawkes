@@ -24,8 +24,6 @@
 #include "astar.h"
 #include "og_laser.h"
 
-#include "../common/defines.h"
-
 #include <utils/math/types.h>
 #include <logging/logger.h>
 #include <config/config.h>
@@ -79,7 +77,7 @@ CSearch::Update( int roboX, int roboY, int targetX, int targetY )
   m_LocalTarget     = point_t( roboX, roboY );
   m_LocalTrajectory = point_t( roboX, roboY );
 
-  if ( m_pOccGrid->getProb( targetX, targetY ) == _COLLI_CELL_OCCUPIED_ ) {
+  if ( m_pOccGrid->getProb( targetX, targetY ) == cell_costs_.occ ) {
     int stepX = 1;  // initializing to 1
     int stepY = 1;
     if ( roboX < targetX ) // if we search in the other direction, inverse it!
@@ -251,15 +249,15 @@ CSearch::IsObstacleBetween( const point_t &a, const point_t &b, const int maxcou
 
       prob = m_pOccGrid->getProb( _actXGrid, _actYGrid );
 
-      if ( prob == _COLLI_CELL_FREE_ )
+      if ( prob == cell_costs_.free )
         ;
-      else if ( prob == _COLLI_CELL_OCCUPIED_ )
+      else if ( prob == cell_costs_.occ )
         return true;
-      else if ( prob == _COLLI_CELL_FAR_ )
+      else if ( prob == cell_costs_.far )
         ++count;
-      else if ( prob == _COLLI_CELL_MIDDLE_ )
+      else if ( prob == cell_costs_.mid )
         count += 2;
-      else if ( prob == _COLLI_CELL_NEAR_ )
+      else if ( prob == cell_costs_.near )
         count += 4;
       else
         logger_->log_warn("AStar_Search", "(line 261) ERROR IN RAYTRACER!");
@@ -285,15 +283,15 @@ CSearch::IsObstacleBetween( const point_t &a, const point_t &b, const int maxcou
 
       prob = m_pOccGrid->getProb( _actXGrid, _actYGrid );
 
-      if ( prob == _COLLI_CELL_FREE_ )
+      if ( prob == cell_costs_.free )
         ;
-      else if ( prob == _COLLI_CELL_OCCUPIED_ )
+      else if ( prob == cell_costs_.occ )
         return true;
-      else if ( prob == _COLLI_CELL_FAR_ )
+      else if ( prob == cell_costs_.far )
         ++count;
-      else if ( prob == _COLLI_CELL_MIDDLE_ )
+      else if ( prob == cell_costs_.mid )
         count += 2;
-      else if ( prob == _COLLI_CELL_NEAR_ )
+      else if ( prob == cell_costs_.near )
         count += 4;
       else
         logger_->log_warn("AStar_Search", "(line 295) ERROR IN RAYTRACER!");

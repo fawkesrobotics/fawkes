@@ -26,7 +26,6 @@
  #include "visualization_thread.h"
 #endif
 
-#include "common/defines.h"
 #include "drive_modes/select_drive_mode.h"
 #include "drive_realization/linear_motor_instruct.h"
 #include "drive_realization/quadratic_motor_instruct.h"
@@ -919,5 +918,6 @@ ColliThread::UpdateOwnModules()
 bool
 ColliThread::CheckEscape()
 {
-  return ((float)m_pLaserOccGrid->getProb(m_RoboGridPos.x,m_RoboGridPos.y) == _COLLI_CELL_OCCUPIED_ );
+  static unsigned int cell_cost_occ = m_pLaserOccGrid->get_cell_costs().occ;
+  return ((float)m_pLaserOccGrid->getProb(m_RoboGridPos.x,m_RoboGridPos.y) == cell_cost_occ );
 }

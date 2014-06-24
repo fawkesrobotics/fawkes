@@ -19,10 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "../common/defines.h"
-
 #include "escape_potential_field_drive_mode.h"
 #include "../search/og_laser.h"
+#include "../common/types.h"
 
 #include <utils/math/angle.h>
 
@@ -104,6 +103,8 @@ CEscapePotentialFieldDriveModule::setGridInformation( CLaserOccupancyGrid* occGr
 void
 CEscapePotentialFieldDriveModule::Update()
 {
+  static unsigned int cell_cost_occ = m_pOccGrid->get_cell_costs().occ;
+
   // This is only called, if we recently stopped...
   logger_->log_debug("CEscapeDriveModule", "CEscapeDriveModule( Update ): Calculating ESCAPING...");
 
@@ -123,7 +124,7 @@ CEscapePotentialFieldDriveModule::Update()
 
   for (int posX = 0; posX < width; ++posX) {
     for (int posY = 0; posY < height; ++posY) {
-      if (m_pOccGrid->getProb(posX,posY) >= _COLLI_CELL_OCCUPIED_) {
+      if (m_pOccGrid->getProb(posX,posY) >= cell_cost_occ) {
         float dx = float(posX - m_robot_pos.x) * cellHeight/100;
         float dy = float(posY - m_robot_pos.y) * cellWidth/100;
 

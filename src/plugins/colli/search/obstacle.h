@@ -23,8 +23,7 @@
 #ifndef __PLUGINS_COLLI_SEARCH_OBSTACLE_H_
 #define __PLUGINS_COLLI_SEARCH_OBSTACLE_H_
 
-#include "../common/defines.h"
-
+#include "../common/types.h"
 #include <utils/math/common.h>
 
 #include <vector>
@@ -88,7 +87,7 @@ class ColliFastObstacle
 class ColliFastRectangle : public ColliFastObstacle
 {
  public:
-  ColliFastRectangle(int width, int height);
+  ColliFastRectangle(int width, int height, colli_cell_cost_t &costs);
 };
 
 /** @class ColliFastEllipse
@@ -97,16 +96,17 @@ class ColliFastRectangle : public ColliFastObstacle
 class ColliFastEllipse : public ColliFastObstacle
 {
  public:
-  ColliFastEllipse(int width, int height, bool obstacle_increasement = true);
+  ColliFastEllipse(int width, int height, colli_cell_cost_t &costs, bool obstacle_increasement = true);
 };
 
 
 /** Constructor for FastRectangle.
  * @param width radius width of the new rectangle
  * @param height radius height of the new rectangle
+ * @param costs struct containing the occ-grid cell costs
  */
 inline
-ColliFastRectangle::ColliFastRectangle( int width, int height )
+ColliFastRectangle::ColliFastRectangle( int width, int height, colli_cell_cost_t &costs )
 {
   int y_start = -width/2;
   int x_start = -height/2;
@@ -118,16 +118,16 @@ ColliFastRectangle::ColliFastRectangle( int width, int height )
       occupied_cells_.push_back( y_start + y );
 
       if( x < -2 || x >= height+2 || y < -2 || y >= width+2 ) {
-        occupied_cells_.push_back( (int)_COLLI_CELL_FAR_ );
+        occupied_cells_.push_back( costs.far );
 
       } else if( x < -1 || x >= height+1 || y < - 1 || y >= width+1 ) {
-        occupied_cells_.push_back( (int)_COLLI_CELL_MIDDLE_ );
+        occupied_cells_.push_back( costs.mid );
 
       } else if( x < 0 || x >= height || y < 0 || y >= width ) {
-        occupied_cells_.push_back( (int)_COLLI_CELL_NEAR_ );
+        occupied_cells_.push_back( costs.near );
 
       } else {
-        occupied_cells_.push_back( (int)_COLLI_CELL_OCCUPIED_ );
+        occupied_cells_.push_back( costs.occ );
       }
     }
   }
@@ -136,10 +136,11 @@ ColliFastRectangle::ColliFastRectangle( int width, int height )
 /** Constructor for FastEllipse.
  * @param width radius width of the new ellipse
  * @param height radius height of the new ellipse
+ * @param costs struct containing the occ-grid cell costs
  * @param obstacle_increasement Increase obstacles?
  */
 inline
-ColliFastEllipse::ColliFastEllipse( int width, int height, bool obstacle_increasement )
+ColliFastEllipse::ColliFastEllipse( int width, int height, colli_cell_cost_t &costs, bool obstacle_increasement )
 {
   float dist = 1000.0;
   float dist_near = 1000.0;
@@ -166,25 +167,25 @@ ColliFastEllipse::ColliFastEllipse( int width, int height, bool obstacle_increas
               && (dist_middle > 1.0) && (dist_far <= 1.0) ) {
         occupied_cells_.push_back( x );
         occupied_cells_.push_back( y );
-        occupied_cells_.push_back( (int)_COLLI_CELL_FAR_ );
+        occupied_cells_.push_back( costs.far );
 
       } else if( (dist > 1.0) && (dist_near > 1.0)
               && (dist_middle <= 1.0) ) {
         occupied_cells_.push_back( x );
         occupied_cells_.push_back( y );
-        occupied_cells_.push_back( (int)_COLLI_CELL_MIDDLE_ );
+        occupied_cells_.push_back( costs.mid );
 
       } else if( (dist > 1.0) && (dist_near <= 1.0)
               && (dist_middle <= 1.0) ) {
         occupied_cells_.push_back( x );
         occupied_cells_.push_back( y );
-        occupied_cells_.push_back( (int)_COLLI_CELL_NEAR_ );
+        occupied_cells_.push_back( costs.near );
 
       } else if( (dist <= 1.0) && (dist_near <= 1.0)
               && (dist_middle <= 1.0) ) {
         occupied_cells_.push_back( x );
         occupied_cells_.push_back( y );
-        occupied_cells_.push_back( (int)_COLLI_CELL_OCCUPIED_ );
+        occupied_cells_.push_back( costs.occ );
       }
     }
   }

@@ -24,6 +24,7 @@
 #define __PLUGINS_COLLI_SEARCH_ASTAR_H_
 
 #include "astar_state.h"
+#include "../common/types.h"
 
 #include <vector>
 #include <queue>
@@ -35,7 +36,7 @@ namespace fawkes
 }
 #endif
 
-class OccupancyGrid;
+class CLaserOccupancyGrid;
 class Logger;
 class Configuration;
 
@@ -49,7 +50,7 @@ class CAStar
 {
  public:
 
-  CAStar( OccupancyGrid * occGrid, Logger* logger, Configuration* config );
+  CAStar( CLaserOccupancyGrid * occGrid, Logger* logger, Configuration* config );
   ~CAStar();
 
   /* =========================================== */
@@ -72,9 +73,12 @@ class CAStar
   fawkes::Logger* logger_;
 
   // this is the local reference to the occupancy grid.
-  OccupancyGrid * m_pOccGrid;
+  CLaserOccupancyGrid * m_pOccGrid;
   unsigned int m_Width;
   unsigned int m_Height;
+
+  // Costs for the cells in grid
+  colli_cell_cost_t cell_costs_;
 
   // this is the local robot position and target point.
   CAStarState m_pRoboPos;
