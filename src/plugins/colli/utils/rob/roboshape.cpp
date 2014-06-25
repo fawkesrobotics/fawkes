@@ -400,7 +400,7 @@ RoboShape::GetCompleteWidthX()
   if ( IsAngularRobot() )
     return ( m_widthX + m_widthAddFront + m_widthAddBack );
   else
-    logger_->log_error("RoboShape", "The Robot is not angular!");
+    return 2.f*GetCompleteRadius();
 
   return 0.0;
 }
@@ -415,7 +415,7 @@ RoboShape::GetCompleteWidthY()
   if ( IsAngularRobot() )
     return ( m_widthY + m_widthAddRight + m_widthAddLeft );
   else
-    logger_->log_error("RoboShape", "The Robot is not angular!");
+    return 2.f*GetCompleteRadius();
 
   return 0.0;
 }
