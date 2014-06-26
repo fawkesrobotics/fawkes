@@ -205,6 +205,33 @@ SickTiM55xEthernetAcquisitionThread::close_device()
   }
 }
 
+
+void
+SickTiM55xEthernetAcquisitionThread::flush_device()
+{
+  if (socket_.is_open()) {
+    try {
+      boost::system::error_code ec;
+      size_t bytes_read = 0;
+      do {
+	ec = boost::asio::error::would_block;
+	deadline_.expires_from_now(boost::posix_time::milliseconds(RECEIVE_TIMEOUT));
+	bytes_read = 0;
+
+	boost::asio::async_read_until(socket_, input_buffer_, '\03',
+				      (boost::lambda::var(ec) = boost::lambda::_1,
+				       boost::lambda::var(bytes_read) = boost::lambda::_2));
+
+	do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+
+      } while (ec || bytes_read > 0);
+    } catch (boost::system::system_error &e) {
+      // ignore, just assume done, if there really is an error we'll
+      // catch it later on
+    }
+  }
+}
+
 void
 SickTiM55xEthernetAcquisitionThread::send_with_reply(const char *request,
 						     std::string *reply)

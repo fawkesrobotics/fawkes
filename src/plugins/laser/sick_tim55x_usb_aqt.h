@@ -44,6 +44,7 @@ class SickTiM55xUSBAcquisitionThread : public SickTiM55xCommonAcquisitionThread
  private:
   void open_device();
   void close_device();
+  void flush_device();
   void send_with_reply(const char *request, std::string *reply = NULL);
 
  private:

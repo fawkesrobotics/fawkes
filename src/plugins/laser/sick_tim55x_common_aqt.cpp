@@ -58,6 +58,11 @@ using namespace fawkes;
  * Close the device.
  * Virtual method implemented by the actual connection driver.
  *
+ * @fn void SickTiM55xCommonAcquisitionThread::flush_device()
+ * Flush the device.
+ * Read all current data on the channel and return on no data to read
+ * or timeout.
+ *
  * @var std::string SickTiM55xCommonAcquisitionThread::cfg_name_
  * Name of the particular configuration instance.
  *
@@ -118,6 +123,8 @@ SickTiM55xCommonAcquisitionThread::init_device()
     const char *req_scan_data = "\x02sEN LMDscandata 0\x03";
     send_with_reply(req_scan_data);
   } catch (Exception &e) {} // ignore
+
+  flush_device();
 
   std::string rep_dev_indent;
   try {

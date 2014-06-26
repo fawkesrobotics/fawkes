@@ -262,6 +262,25 @@ SickTiM55xUSBAcquisitionThread::close_device()
 }
 
 void
+SickTiM55xUSBAcquisitionThread::flush_device()
+{
+  if (usb_device_handle_) {
+    MutexLocker lock(usb_mutex_);
+    int usb_rv = 0;
+    int actual_length = 0;
+    size_t recv_buf_size = 32*1024;
+    unsigned char recv_buf[recv_buf_size];
+    do {
+      usb_rv = libusb_bulk_transfer(usb_device_handle_, (1 | LIBUSB_ENDPOINT_IN),
+				    recv_buf, recv_buf_size - 1, &actual_length,
+				    USB_TIMEOUT);
+
+      // we don't care, we just want to get rid of data
+    } while (usb_rv == 0 && actual_length > 0);
+  }
+}
+
+void
 SickTiM55xUSBAcquisitionThread::send_with_reply(const char *request,
 						std::string *reply)
 {

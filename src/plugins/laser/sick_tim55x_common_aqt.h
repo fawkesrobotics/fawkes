@@ -56,6 +56,7 @@ class SickTiM55xCommonAcquisitionThread : public LaserAcquisitionThread
   virtual void send_with_reply(const char *request, std::string *reply = NULL) = 0;
   virtual void open_device() = 0;
   virtual void close_device() = 0;
+  virtual void flush_device() = 0;
 
  private:
   bool pre_init_done_;
