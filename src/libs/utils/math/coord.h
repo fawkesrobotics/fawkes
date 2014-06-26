@@ -57,7 +57,7 @@ cart2polar3d( float cart_x, float cart_y, float cart_z,
 {
   polar_r      = sqrtf( cart_x*cart_x + cart_y*cart_y + cart_z*cart_z );
   polar_phi    = atan2f( cart_y, cart_x );
-  polar_theta  = atan2f( cart_z, sqrtf( cart_x*cart_x + cart_y*cart_y ) );
+  polar_theta  = -1.0 * atan2f( cart_z, sqrtf( cart_x*cart_x + cart_y*cart_y ) );
 }
 
 /** Convert a 2D polar coordinate to a 2D cartesian coordinate.

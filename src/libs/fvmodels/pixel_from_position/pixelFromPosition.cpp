@@ -47,6 +47,7 @@ PixelFromPosition::PixelFromPosition(  fawkes::tf::Transformer* tf, std::string 
   cam_angle_max_horizontal_ = cam_aperture_horizontal_ / 2.0;
   cam_angle_min_horizontal_ = -1.0 * cam_angle_max_horizontal_;
 
+  cam_angle_y_ = cam_angle_y;
   cam_angle_max_vertical_ = cam_angle_y + cam_aperture_vertical_ / 2.0;
   cam_angle_min_vertical_ = cam_angle_y - cam_aperture_vertical_ / 2.0;
 }
@@ -97,8 +98,8 @@ PixelFromPosition::get_pixel_position(fawkes::cart_coord_3d_t& position, std::st
       cam_angle_min_vertical_, cam_angle_max_vertical_);
   } else {
     fawkes::point_t pixel_in_cam_rel;
-    pixel_in_cam_rel.x = polar_in.phi   * cam_pixel_per_angle_horizontal_;
-    pixel_in_cam_rel.y = polar_in.theta * cam_pixel_per_angle_vertical_;
+    pixel_in_cam_rel.x = -1.0 * polar_in.phi   * cam_pixel_per_angle_horizontal_;
+    pixel_in_cam_rel.y = (polar_in.theta - cam_angle_y_) * cam_pixel_per_angle_vertical_;
 
     pixel_in_cam.x = pixel_in_cam_rel.x + ( cam_resulution_horizontal_ / 2 );
     pixel_in_cam.y = pixel_in_cam_rel.y + ( cam_resulution_vertical_ / 2 );

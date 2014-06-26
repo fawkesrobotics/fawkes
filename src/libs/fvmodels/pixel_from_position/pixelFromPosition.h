@@ -46,6 +46,7 @@ private:
 
   float         cam_aperture_horizontal_;
   float         cam_aperture_vertical_;
+  float         cam_angle_y_;
   unsigned int  cam_resulution_horizontal_;
   unsigned int  cam_resulution_vertical_;
 
