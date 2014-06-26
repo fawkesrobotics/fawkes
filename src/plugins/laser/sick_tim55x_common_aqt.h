@@ -51,6 +51,7 @@ class SickTiM55xCommonAcquisitionThread : public LaserAcquisitionThread
 
  protected:
   void init_device();
+  void resync();
   void parse_datagram(const unsigned char *datagram, size_t datagram_length);
 
   virtual void send_with_reply(const char *request, std::string *reply = NULL) = 0;

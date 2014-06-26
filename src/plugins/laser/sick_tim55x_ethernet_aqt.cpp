@@ -129,6 +129,7 @@ SickTiM55xEthernetAcquisitionThread::loop()
 	  } catch (Exception &e) {
 	    logger->log_warn(name(), "Failed to parse datagram, resyncing, exception follows");
 	    logger->log_warn(name(), e);
+	    resync();
 	  }
 	}
       }

@@ -145,8 +145,9 @@ SickTiM55xUSBAcquisitionThread::loop()
       try {
 	parse_datagram(recv_buf, actual_length);
       } catch (Exception &e) {
-	logger->log_warn(name(), "Failed to parse datagram, exception follows");
+	logger->log_warn(name(), "Failed to parse datagram, resyncing, exception follows");
 	logger->log_warn(name(), e);
+	resync();
       }
     }
   } else {
@@ -279,6 +280,7 @@ SickTiM55xUSBAcquisitionThread::flush_device()
     } while (usb_rv == 0 && actual_length > 0);
   }
 }
+
 
 void
 SickTiM55xUSBAcquisitionThread::send_with_reply(const char *request,

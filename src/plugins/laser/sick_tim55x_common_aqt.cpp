@@ -152,6 +152,28 @@ SickTiM55xCommonAcquisitionThread::init_device()
 }
 
 
+/** Resynchronize to laser data.
+ * Stop data transfer, flush, restart.
+ */
+void
+SickTiM55xCommonAcquisitionThread::resync()
+{
+  // turn off data transfer
+  try {
+    const char *req_scan_data = "\x02sEN LMDscandata 0\x03";
+    send_with_reply(req_scan_data);
+  } catch (Exception &e) {} // ignore
+
+  flush_device();
+
+  // turn on data transfer
+  try {
+    const char *req_scan_data = "\x02sEN LMDscandata 1\x03";
+    send_with_reply(req_scan_data);
+  } catch (Exception &e) {} // ignore
+
+}
+
 /** Parse incoming message from device.
  * Based on https://www.mysick.com/saqqara/pdf.aspx?id=im0053129 and
  * https://github.com/uos/sick_tim3xx.
