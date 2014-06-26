@@ -76,7 +76,8 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
   m_reference_frame     = config->get_string((cfg_prefix + "frame/odometry").c_str());
   m_laser_frame         = config->get_string((cfg_prefix + "frame/laser").c_str());       //TODO change to base_link => search in base_link instead base_laser
 
-  cfg_obstacle_inc_     = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
+  cfg_obstacle_inc_           = config->get_bool((cfg_prefix + "obstacle_increasement").c_str());
+  cfg_force_elipse_obstacle_  = config->get_bool((cfg_prefix + "laser_occupancy_grid/force_ellipse_obstacle").c_str());
 
   m_if_buffer_size      = config->get_int((cfg_prefix + "laser_occupancy_grid/buffer_size").c_str());
   m_if_buffer_size = std::max(m_if_buffer_size, 1); //needs to be >= 1, because the data is always wrote into the buffer (instead of read())
@@ -100,7 +101,8 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
   initGrid();
 
   logger->log_debug("CLaserOccupancyGrid", "Generating obstacle map");
-  obstacle_map = new ColliObstacleMap(cell_costs_, m_pRoboShape->IsAngularRobot());
+  bool obstacle_shape = m_pRoboShape->IsAngularRobot() && ! cfg_force_elipse_obstacle_;
+  obstacle_map = new ColliObstacleMap(cell_costs_, obstacle_shape);
   logger->log_debug("CLaserOccupancyGrid", "Generating obstacle map done");
 
   m_LaserPosition = point_t(0,0);

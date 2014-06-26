@@ -176,6 +176,9 @@ plugins/colli:
     # This is the distance in which laser readings are ignored for putting a new obstacle into the grid
     distance_account: 0.1
 
+    # Define if elipse obsticles shoudl be used with angular robots
+    force_ellipse_obstacle: false
+
     history:
       # the history vector size with number of saved elements
       # Note: This is the initial size. If the history grows bigger, elements have to be appended
