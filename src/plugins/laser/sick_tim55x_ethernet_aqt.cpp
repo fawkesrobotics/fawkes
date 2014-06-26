@@ -124,7 +124,12 @@ SickTiM55xEthernetAcquisitionThread::loop()
 	in_stream.read((char *)recv_buf, bytes_read);
 
 	if (bytes_read > 0) {
-	  parse_datagram(recv_buf, bytes_read);
+	  try {
+	    parse_datagram(recv_buf, bytes_read);
+	  } catch (Exception &e) {
+	    logger->log_warn(name(), "Failed to parse datagram, resyncing, exception follows");
+	    logger->log_warn(name(), e);
+	  }
 	}
       }
     } catch (boost::system::system_error &e) {

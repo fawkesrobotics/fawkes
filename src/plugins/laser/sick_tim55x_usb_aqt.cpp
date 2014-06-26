@@ -142,7 +142,12 @@ SickTiM55xUSBAcquisitionThread::loop()
       reset_distances();
       reset_echoes();
 
-      parse_datagram(recv_buf, actual_length);
+      try {
+	parse_datagram(recv_buf, actual_length);
+      } catch (Exception &e) {
+	logger->log_warn(name(), "Failed to parse datagram, exception follows");
+	logger->log_warn(name(), e);
+      }
     }
   } else {
     try {
