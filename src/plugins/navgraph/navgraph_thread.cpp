@@ -468,16 +468,8 @@ NavGraphThread::send_next_goal()
       // take the given orientation for the final node
       ori = next_target.property_as_float("orientation");
     } else {
-      tf::Stamped<tf::Pose> pose;
-      if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose)) {
-        logger->log_warn(name(), "Failed to compute pose, cannot compute facing direction");
-      } else {
-        orient_at_target  = false;
-        // set direction facing from current to next target position, best    //TODO is this still necessary if orient_at_target is false?
-        // chance to reach the destination without turning at the end
-        ori = atan2f( next_target.y() - pose_.getOrigin().y(),
-                      next_target.x() - pose_.getOrigin().x());
-      }
+      orient_at_target  = false;
+      ori = NAN;
     }
   } else {
     orient_at_target  = false;
@@ -485,10 +477,10 @@ NavGraphThread::send_next_goal()
     // set direction facing from next_target (what is the actual point to drive to) to next point to drive to.
     // So orientation is the direction from next_target to the target after that
 
-    TopologicalMapNode &next_next_target = *(plan_.begin()++);
+    TopologicalMapNode &next_next_target = plan_[1];//*(++plan_.begin());
 
     ori = atan2f( next_next_target.y() - next_target.y(),
-                  next_next_target.y() - next_target.x());
+                  next_next_target.x() - next_target.x());
   }
 
   // get target position in map frame

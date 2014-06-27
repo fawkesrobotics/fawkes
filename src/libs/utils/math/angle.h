@@ -123,7 +123,7 @@ normalize_bigmirror_rad(float angle_rad)
  * Quadrants of the angles are considered to determine really the minimal
  * angle difference.
  * @param angle_rad1 first angle in radian
- * @param angle_rad2 first angle in radian
+ * @param angle_rad2 second angle in radian
  * @return distance between the two angles
  */
 inline float 
