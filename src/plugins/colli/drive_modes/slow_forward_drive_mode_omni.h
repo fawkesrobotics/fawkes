@@ -3,9 +3,7 @@
  *  slow_forward_drive_mode.h - Implementation of drive-mode "slow forward"
  *
  *  Created: Fri Oct 18 15:16:23 2013
- *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
- *             2014  Tobias Neumann
+ *  Copyright  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -46,6 +44,7 @@ class CSlowForwardOmniDriveModule : public CAbstractDriveMode
 
   float m_MaxTranslation, m_MaxRotation;
 
+  void calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target);
 };
 
 } // namespace fawkes

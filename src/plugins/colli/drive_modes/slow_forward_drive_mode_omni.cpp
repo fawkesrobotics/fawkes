@@ -3,9 +3,7 @@
  *  slow_forward_drive_mode.cpp - Implementation of drive-mode "slow forward"
  *
  *  Created: Fri Oct 18 15:16:23 2013
- *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
- *             2014  Tobias Neumann
+ *  Copyright  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -61,6 +59,30 @@ CSlowForwardOmniDriveModule::~CSlowForwardOmniDriveModule()
   logger_->log_debug("CSlowForwardDriveModule", "(Destructor): Exiting...");
 }
 
+void
+CSlowForwardOmniDriveModule::calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target)
+{
+  // first calculate desired angle
+  float des_alpha;
+  if ( /*dist_to_target >= 0.5 ||*/ isnanf( ori_alpha_next_target ) ) { // at the last 50cm rotate to new angle
+    des_alpha = ori_alpha_target;
+  } else {
+    float angle_min = ori_alpha_target - M_PI_4;
+    float angle_max = ori_alpha_target + M_PI_4;
+    des_alpha = normalize_mirror_rad( std::max( angle_min, std::min(ori_alpha_next_target, angle_max) ) );
+  }
+
+  // then choose rotation speed, depending on desired angle
+  const float _TURN_MAX_SPEED_LIMIT_ = 0.3;
+  if        ( des_alpha > _TURN_MAX_SPEED_LIMIT_ ) {
+    m_ProposedRotation = m_MaxRotation;
+  } else if ( des_alpha < -_TURN_MAX_SPEED_LIMIT_ ) {
+    m_ProposedRotation = -m_MaxRotation;
+  } else {
+    m_ProposedRotation = des_alpha * ( m_MaxRotation / _TURN_MAX_SPEED_LIMIT_ );
+  }
+}
+
 /* ************************************************************************** */
 /* ***********************        U P D A T E       ************************* */
 /* ************************************************************************** */
@@ -95,10 +117,9 @@ CSlowForwardOmniDriveModule::Update()
   m_ProposedTranslationX = 0.0;
   m_ProposedRotation    = 0.0;
 
-  float dist_to_target = sqrt( sqr(m_LocalTargetX) + sqr(m_LocalTargetY) );
-  float alpha_target   = normalize_mirror_rad( atan2( m_LocalTargetY, m_LocalTargetX ) );
-//  float alpha_next     = normalize_mirror_rad( atan2( m_TargetY, m_TargetX ) );
-//  float dist_to_trajec = sqrt( sqr(m_LocalTrajecX) + sqr(m_LocalTrajecY) );
+  float dist_to_target    = sqrt( sqr(m_LocalTargetX) + sqr(m_LocalTargetY) );
+  float alpha_target      = normalize_mirror_rad( atan2( m_LocalTargetY, m_LocalTargetX ) );
+  float alpha_next_target = angle_distance(m_RoboOri, m_TargetOri);
 
   // last time border check............. IMPORTANT!!!
   // because the motorinstructor just tests robots physical borders.
@@ -108,30 +129,18 @@ CSlowForwardOmniDriveModule::Update()
     m_ProposedRotation     = 0.0;
 
   } else {
-    float part_x   = m_LocalTargetX / (fabs(m_LocalTargetX) + fabs(m_LocalTargetY));
-    float part_y   = m_LocalTargetY / (fabs(m_LocalTargetX) + fabs(m_LocalTargetY));
-    // Calculate ideal rotation and translation
+    float part_x = 0;
+    float part_y = 0;
+    if ( ! (m_LocalTargetX == 0 && m_LocalTargetY == 0) ) {
+      part_x   = m_LocalTargetX / (fabs(m_LocalTargetX) + fabs(m_LocalTargetY));
+      part_y   = m_LocalTargetY / (fabs(m_LocalTargetX) + fabs(m_LocalTargetY));
+    }
     m_ProposedTranslationX = part_x * m_MaxTranslation;
     m_ProposedTranslationY = part_y * m_MaxTranslation;
 
-    m_ProposedRotation = alpha_target;
-//    if ( dist_to_target >= 0.5 ) {         // at the last 50cm rotate to new angle
-//      m_ProposedRotation = alpha_target;
-//    } else {
-//      float angle_min = normalize_mirror_rad( alpha_target - M_PI_4 );
-//      float angle_max = normalize_mirror_rad( alpha_target + M_PI_4 );
-//      m_ProposedRotation = std::max( angle_min, std::min(alpha_next, angle_max) );
-//    }
+    calculateRotation(alpha_target, alpha_next_target, dist_to_target);
 
-    if        ( m_ProposedRotation > 0.1 ) {
-      m_ProposedRotation = m_MaxRotation;
-    } else if ( m_ProposedRotation < -0.1 ) {
-      m_ProposedRotation = -m_MaxRotation;
-    } else {
-      m_ProposedRotation *= ( m_MaxRotation / 0.1 );
-    }
-
-//    // Check translation limits
+    // Check translation limits
     if ( m_ProposedTranslationX < 0. || fabs(alpha_target) >= M_PI_2 - 0.2 ) {
       m_ProposedTranslationX = 0.;
       m_ProposedTranslationY = 0.;
