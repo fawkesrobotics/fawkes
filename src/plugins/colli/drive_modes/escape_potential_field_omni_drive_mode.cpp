@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  escape_drive_mode.cpp - Implementation of drive-mode "escape"
+ *  escape_potential_field_omni_drive_mode.cpp - Implementation of drive-mode "escape"
  *
  *  Created: Tue Mar 25 17:24:18 2014
  *  Copyright  2014  Tobias Neumann
@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "escape_potential_field_drive_mode_omni.h"
+#include "escape_potential_field_omni_drive_mode.h"
 #include "../search/og_laser.h"
 #include "../common/types.h"
 
@@ -31,7 +31,7 @@ namespace fawkes
 }
 #endif
 
-/** @class CEscapePotentialFieldDriveModule <plugins/colli/drive_modes/escape_potential_field_drive_mode.h>
+/** @class CEscapePotentialFieldOmniDriveModule <plugins/colli/drive_modes/escape_potential_field_omni_drive_mode.h>
  * Class Escape-Drive-Module. This module is called, if an escape is neccessary.
  * It should try to maximize distance to the disturbing obstacle.
  */

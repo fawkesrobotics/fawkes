@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  slow_biward_drive_mode.h - Implementation of drive-mode "slow forward + backward"
+ *  backward_drive_mode.h - Implementation of drive-mode "backward"
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
@@ -20,12 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_SLOW_BIWARD_DRIVE_MODE_H_
-#define __PLUGINS_COLLI_SLOW_BIWARD_DRIVE_MODE_H_
+#ifndef __PLUGINS_COLLI_BACKWARD_DRIVE_MODE_H_
+#define __PLUGINS_COLLI_BACKWARD_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
-#include "slow_forward_drive_mode.h"
-#include "slow_backward_drive_mode.h"
 
 namespace fawkes
 {
@@ -33,31 +31,28 @@ namespace fawkes
 }
 #endif
 
-class CSlowBiwardDriveModule : public CAbstractDriveMode
+class CBackwardDriveModule : public CAbstractDriveMode
 {
  public:
 
-  CSlowBiwardDriveModule( CSlowForwardDriveModule*  slow_forward,
-                          CSlowBackwardDriveModule* slow_backward,
-                          Logger* logger,
-                          Configuration* config);
-  ~CSlowBiwardDriveModule();
+  CBackwardDriveModule(Logger* logger, Configuration* config);
+  ~CBackwardDriveModule();
 
   void Update();
 
 
  private:
 
-  CSlowForwardDriveModule*  m_pSlowForwardDriveModule;
-  CSlowBackwardDriveModule* m_pSlowBackwardDriveModule;
+  float Backward_Translation ( float dist_to_target, float dist_to_front, float alpha,
+           float trans_0, float rot_0, float rot_1 );
+
+  float Backward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
+        float trans_0, float rot_0 );
 
   float m_MaxTranslation, m_MaxRotation;
 
-
-  int   m_CountForward;
-
 };
 
-} // namespace fawkes
+} // nanespace fawkes
 
 #endif

@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  escape_potential_drive_mode.cpp - Escaping mode using potential field
+ *  escape_potential_field_drive_mode.cpp - Implementation of drive-mode "escape"
  *
  *  Created: Tue Mar 25 17:24:18 2014
  *  Copyright  2014  Tobias Neumann

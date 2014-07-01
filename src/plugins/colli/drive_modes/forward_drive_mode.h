@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  medium_biward_drive_mode.h - Implementation of drive-mode "medium forward + backward"
+ *  forward_drive_mode.h - Implementation of drive-mode "forward"
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
@@ -20,12 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_MEDIUM_BIWARD_DRIVE_MODE_H_
-#define __PLUGINS_COLLI_MEDIUM_BIWARD_DRIVE_MODE_H_
+#ifndef __PLUGINS_COLLI_FORWARD_DRIVE_MODE_H_
+#define __PLUGINS_COLLI_FORWARD_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
-#include "medium_forward_drive_mode.h"
-#include "medium_backward_drive_mode.h"
 
 namespace fawkes
 {
@@ -33,26 +31,24 @@ namespace fawkes
 }
 #endif
 
-class CMediumBiwardDriveModule : public CAbstractDriveMode
+class CForwardDriveModule : public CAbstractDriveMode
 {
-public:
+ public:
 
-  CMediumBiwardDriveModule( CMediumForwardDriveModule*  forward_module,
-                            CMediumBackwardDriveModule* backward_module,
-                            Logger* logger,
-                            Configuration* config );
-  ~CMediumBiwardDriveModule();
+  CForwardDriveModule(Logger* logger, Configuration* config);
+  ~CForwardDriveModule();
 
   virtual void Update();
 
+
  private:
 
+  float Forward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
+             float cur_trans, float cur_rot );
+  float Forward_Translation( float dist_to_target, float dist_to_front, float alpha,
+         float cur_trans, float cur_rot, float des_rot );
+
   float m_MaxTranslation, m_MaxRotation;
-
-  CMediumForwardDriveModule*   m_pMediumForwardDriveModule;
-  CMediumBackwardDriveModule*  m_pMediumBackwardDriveModule;
-
-  int   m_CountForward;
 
 };
 

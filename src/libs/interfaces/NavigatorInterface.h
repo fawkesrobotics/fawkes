@@ -52,23 +52,10 @@ class NavigatorInterface : public Interface
   /** Drive modes enum */
   typedef enum {
     MovingNotAllowed /**< Moving not allowed constant */,
-    CarefulForward /**< Moving careful forward constant */,
-    SlowForward /**< Moving slow forward constant */,
-    ModerateForward /**< Moving moderate forward constant */,
-    FastForward /**< Moving fast forward constant */,
-    CarefulAllowBackward /**< Moving careful allow backward conatant */,
-    SlowAllowBackward /**< Moving slow allow backward constant */,
-    ModerateAllowBackward /**< Moving moderate allow backward constant */,
-    FastAllowBackward /**< Moving fast allow backward constant */,
-    CarefulBackward /**< Moving careful backward constant */,
-    SlowBackward /**< Moving slow backward constant */,
-    ModerateBackward /**< Moving moderate backward constant */,
-    FastBackward /**< Moving fast backward constant */,
-    ESCAPE /**< Escape constant */,
-    SlowDribbleBall /**< Moving slow dribble ball constant */,
-    ModerateDribbleBall /**< Moving moderate dribble ball constant */,
-    FastDribbleBall /**< Moving fast dribble ball constant */,
-    OVERRIDE /**< Override constant */
+    Forward /**< Moving forward constant */,
+    AllowBackward /**< Moving allow backward constant */,
+    Backward /**< Moving backward constant */,
+    ESCAPE /**< Escape constant */
   } DriveMode;
   const char * tostring_DriveMode(DriveMode value) const;
 

@@ -113,7 +113,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("SetStopAtTargetMessage");
   add_messageinfo("SetOrientationModeMessage");
   add_messageinfo("ResetParametersMessage");
-  unsigned char tmp_hash[] = {0x4, 0x1b, 0x11, 0x83, 0x6a, 00, 0xc0, 0x87, 0xb3, 0x1b, 0xa8, 0x2, 0xfc, 0x40, 0xca, 0xfc};
+  unsigned char tmp_hash[] = {0xd6, 0xd6, 0x2e, 0x31, 0xfe, 0x38, 0xf0, 0x8, 0x16, 0x18, 0x53, 0x75, 0x13, 0xb1, 0xb9, 0xff};
   set_hash(tmp_hash);
 }
 
@@ -131,23 +131,10 @@ NavigatorInterface::tostring_DriveMode(DriveMode value) const
 {
   switch (value) {
   case MovingNotAllowed: return "MovingNotAllowed";
-  case CarefulForward: return "CarefulForward";
-  case SlowForward: return "SlowForward";
-  case ModerateForward: return "ModerateForward";
-  case FastForward: return "FastForward";
-  case CarefulAllowBackward: return "CarefulAllowBackward";
-  case SlowAllowBackward: return "SlowAllowBackward";
-  case ModerateAllowBackward: return "ModerateAllowBackward";
-  case FastAllowBackward: return "FastAllowBackward";
-  case CarefulBackward: return "CarefulBackward";
-  case SlowBackward: return "SlowBackward";
-  case ModerateBackward: return "ModerateBackward";
-  case FastBackward: return "FastBackward";
+  case Forward: return "Forward";
+  case AllowBackward: return "AllowBackward";
+  case Backward: return "Backward";
   case ESCAPE: return "ESCAPE";
-  case SlowDribbleBall: return "SlowDribbleBall";
-  case ModerateDribbleBall: return "ModerateDribbleBall";
-  case FastDribbleBall: return "FastDribbleBall";
-  case OVERRIDE: return "OVERRIDE";
   default: return "UNKNOWN";
   }
 }

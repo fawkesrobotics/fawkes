@@ -19,23 +19,10 @@ class NavigatorInterface : public Interface
 
   typedef enum {
     MovingNotAllowed,
-    CarefulForward,
-    SlowForward,
-    ModerateForward,
-    FastForward,
-    CarefulAllowBackward,
-    SlowAllowBackward,
-    ModerateAllowBackward,
-    FastAllowBackward,
-    CarefulBackward,
-    SlowBackward,
-    ModerateBackward,
-    FastBackward,
-    ESCAPE,
-    SlowDribbleBall,
-    ModerateDribbleBall,
-    FastDribbleBall,
-    OVERRIDE
+    Forward,
+    AllowBackward,
+    Backward,
+    ESCAPE
   } DriveMode;
 
   typedef enum {

@@ -29,18 +29,12 @@
 #include "stop_drive_mode.h"
 #include "escape_drive_mode.h"
 #include "escape_potential_field_drive_mode.h"
-#include "slow_forward_drive_mode.h"
-#include "slow_backward_drive_mode.h"
-#include "slow_biward_drive_mode.h"
-#include "medium_forward_drive_mode.h"
-#include "medium_backward_drive_mode.h"
-#include "medium_biward_drive_mode.h"
-#include "fast_forward_drive_mode.h"
-#include "fast_backward_drive_mode.h"
-#include "fast_biward_drive_mode.h"
+#include "forward_drive_mode.h"
+#include "backward_drive_mode.h"
+#include "biward_drive_mode.h"
 
-#include "slow_forward_drive_mode_omni.h"
-#include "escape_potential_field_drive_mode_omni.h"
+#include "forward_omni_drive_mode.h"
+#include "escape_potential_field_omni_drive_mode.h"
 // YOUR CHANGES SHOULD END HERE!!!
 
 #include "../utils/rob/robo_motorcontrol.h"
@@ -84,13 +78,13 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
 
   std::string drive_restriction = config->get_string("/plugins/colli/drive_mode/restriction");
 
-  if (        drive_restriction.compare("omnidirectional") == 0 ) {
+  if (        drive_restriction == "omnidirectional" ) {
     drive_restriction_ = fawkes::colli_drive_restriction_t::omnidirectional;
-  } else if ( drive_restriction.compare("differential") == 0 ) {
+  } else if ( drive_restriction == "differential" ) {
     drive_restriction_ = fawkes::colli_drive_restriction_t::differential;
   } else {
     drive_restriction_ = fawkes::colli_drive_restriction_t::differential;
-    throw fawkes::Exception("Drive restriction is unknown, use differential");
+    throw fawkes::Exception("Drive restriction is unknown");
   }
 
   logger_->log_debug("CSelectDriveMode", "Creating Drive Mode Objects");
@@ -131,50 +125,20 @@ CSelectDriveMode::addDriveModesDifferential()
     m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );
   }
 
-  // SLOW MODES
-  // slow forward drive mode (have to remember for biward driving!
-  CSlowForwardDriveModule* slow_forward = new CSlowForwardDriveModule(logger_, config_);
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) slow_forward );
+  // forward drive mode (have to remember for biward driving!
+  CForwardDriveModule* forward = new CForwardDriveModule(logger_, config_);
+  m_vDriveModeList.push_back( (CAbstractDriveMode *) forward );
 
-  // slow backward drive mode (have to remember for biward driving!
-  CSlowBackwardDriveModule* slow_backward = new CSlowBackwardDriveModule(logger_, config_);
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) slow_backward );
+  // backward drive mode (have to remember for biward driving!
+  CBackwardDriveModule* backward = new CBackwardDriveModule(logger_, config_);
+  m_vDriveModeList.push_back( (CAbstractDriveMode *) backward );
 
-  // slow biward drive mode (takes both forward and backward drive modes as argument!
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) new CSlowBiwardDriveModule(slow_forward,
-                                                                                slow_backward,
-                                                                                logger_,
-                                                                                config_) );
+  // biward drive mode (takes both forward and backward drive modes as argument!
+  m_vDriveModeList.push_back( (CAbstractDriveMode *) new CBiwardDriveModule(forward,
+                                                                            backward,
+                                                                            logger_,
+                                                                            config_) );
 
-  // MEDIUM MODES
-  // medium forward drive mode (have to remember for biward driving!
-  CMediumForwardDriveModule* medium_forward = new CMediumForwardDriveModule(logger_, config_);
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) medium_forward );
-
-  // medium backward drive mode (have to remember for biward driving!
-  CMediumBackwardDriveModule* medium_backward = new CMediumBackwardDriveModule(logger_, config_);
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) medium_backward );
-
-  // medium biward drive mode (takes both forward and backward drive modes as argument!
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) new CMediumBiwardDriveModule(medium_forward,
-                                                                                  medium_backward,
-                                                                                  logger_,
-                                                                                  config_) );
-
-  // FAST MODES
-  // fast forward drive mode (have to remember for biward driving!
-  CFastForwardDriveModule* fast_forward = new CFastForwardDriveModule(logger_, config_);
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) fast_forward );
-
-  // fast backward drive mode (have to remember for biward driving!
-  CFastBackwardDriveModule* fast_backward = new CFastBackwardDriveModule(logger_, config_);
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) fast_backward );
-
-  // fast biward drive mode (takes both forward and backward drive modes as argument!
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) new CFastBiwardDriveModule(fast_forward,
-                                                                                fast_backward,
-                                                                                logger_,
-                                                                                config_) );
 }
 
 
@@ -191,8 +155,8 @@ CSelectDriveMode::addDriveModesOmnidirectional()
     m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldOmniDriveModule( logger_, config_) );
   }
 
-  CSlowForwardOmniDriveModule* slow_forward = new CSlowForwardOmniDriveModule(logger_, config_);
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) slow_forward );
+  CForwardOmniDriveModule* forward = new CForwardOmniDriveModule(logger_, config_);
+  m_vDriveModeList.push_back( (CAbstractDriveMode *) forward );
 }
 
 /** Set local target point before update!
@@ -281,7 +245,7 @@ CSelectDriveMode::setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& las
         return;
       }
     }
-    logger_->log_error("CSelectDriveMode", "Can't find escape drive mode to set grid information");
+    logger_->log_error("CSelectDriveMode", "Can't find escape drive mode to set laser information");
 }
 
 /* ****************************************************************************** */

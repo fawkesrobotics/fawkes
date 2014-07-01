@@ -41,23 +41,10 @@
    <enum name="DriveMode">
      <comment>Drive modes enum</comment>
      <item name="MovingNotAllowed">Moving not allowed constant</item>
-     <item name="CarefulForward">Moving careful forward constant</item>
-     <item name="SlowForward">Moving slow forward constant</item>
-     <item name="ModerateForward">Moving moderate forward constant</item>
-     <item name="FastForward">Moving fast forward constant</item>
-     <item name="CarefulAllowBackward">Moving careful allow backward conatant</item>
-     <item name="SlowAllowBackward">Moving slow allow backward constant</item>
-     <item name="ModerateAllowBackward">Moving moderate allow backward constant</item>
-     <item name="FastAllowBackward">Moving fast allow backward constant</item>
-     <item name="CarefulBackward">Moving careful backward constant</item>
-     <item name="SlowBackward">Moving slow backward constant</item>
-     <item name="ModerateBackward">Moving moderate backward constant</item>
-     <item name="FastBackward">Moving fast backward constant</item>
+     <item name="Forward">Moving forward constant</item>
+     <item name="AllowBackward">Moving allow backward constant</item>
+     <item name="Backward">Moving backward constant</item>
      <item name="ESCAPE">Escape constant</item>
-     <item name="SlowDribbleBall">Moving slow dribble ball constant</item>
-     <item name="ModerateDribbleBall">Moving moderate dribble ball constant</item>
-     <item name="FastDribbleBall">Moving fast dribble ball constant</item>
-     <item name="OVERRIDE">Override constant</item>
   </enum> 
   <enum name="OrientationMode">
      <comment>Orientation mode enum</comment>

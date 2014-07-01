@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  medium_backward_drive_mode.h - Implementation of drive-mode "medium backward"
+ *  slow_biward_drive_mode.h - Implementation of drive-mode "slow forward + backward"
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
@@ -20,10 +20,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_MEDIUM_BACKWARD_DRIVE_MODE_H_
-#define __PLUGINS_COLLI_MEDIUM_BACKWARD_DRIVE_MODE_H_
+#ifndef __PLUGINS_COLLI_BIWARD_DRIVE_MODE_H_
+#define __PLUGINS_COLLI_BIWARD_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
+#include "forward_drive_mode.h"
+#include "backward_drive_mode.h"
 
 namespace fawkes
 {
@@ -31,24 +33,28 @@ namespace fawkes
 }
 #endif
 
-class CMediumBackwardDriveModule : public CAbstractDriveMode
+class CBiwardDriveModule : public CAbstractDriveMode
 {
  public:
 
-  CMediumBackwardDriveModule(Logger* logger, Configuration* config);
-  ~CMediumBackwardDriveModule();
+  CBiwardDriveModule( CForwardDriveModule*  forward,
+                          CBackwardDriveModule* backward,
+                          Logger* logger,
+                          Configuration* config);
+  ~CBiwardDriveModule();
 
-  virtual void Update();
+  void Update();
+
 
  private:
 
-  float MediumBackward_Translation ( float dist_to_target, float dist_to_front, float alpha,
-             float trans_0, float rot_0, float rot_1 );
-
-  float MediumBackward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-          float trans_0, float rot_0 );
+  CForwardDriveModule*  m_pForwardDriveModule;
+  CBackwardDriveModule* m_pBackwardDriveModule;
 
   float m_MaxTranslation, m_MaxRotation;
+
+
+  int   m_CountForward;
 
 };
 

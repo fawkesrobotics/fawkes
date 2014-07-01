@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  medium_forward_drive_mode.cpp - Implementation of drive-mode "medium forward"
+ *  backward_drive_mode.cpp - Implementation of drive-mode "backward"
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
@@ -20,7 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "medium_forward_drive_mode.h"
+#include "backward_drive_mode.h"
+
+#include <utils/math/angle.h>
 #include <utils/math/common.h>
 
 namespace fawkes
@@ -29,36 +31,35 @@ namespace fawkes
 }
 #endif
 
-/** @class CMediumForwardDriveModule <plugins/colli/drive_modes/medium_forward_drive_mode.h>
- * This is the MediumForward drive-module, for medium forward only movements.
+/** @class CBackwardDriveModule <plugins/colli/drive_modes/backward_drive_mode.h>
+ * This is the SlowBackward drive-module, for slow backward only movements.
  */
 
 /** Constructor.
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CMediumForwardDriveModule::CMediumForwardDriveModule(Logger* logger, Configuration* config)
+CBackwardDriveModule::CBackwardDriveModule(Logger* logger, Configuration* config)
  : CAbstractDriveMode(logger, config)
 {
-  logger_->log_debug("CMediumForwardDriveModule", "(Constructor): Entering...");
-  m_DriveModeName = NavigatorInterface::ModerateForward;
+  logger_->log_debug("CBackwardDriveModule", "(Constructor): Entering...");
+  m_DriveModeName = NavigatorInterface::Backward;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/medium/max_trans" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/medium/max_rot" );
+  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
+  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
 
-  logger_->log_debug("CMediumForwardDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("CBackwardDriveModule", "(Constructor): Exiting");
 }
 
 
-/** Destruct your local values here.
+/** Destruct your local values here!
  */
-CMediumForwardDriveModule::~CMediumForwardDriveModule()
+CBackwardDriveModule::~CBackwardDriveModule()
 {
-  logger_->log_debug("CMediumForwardDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("CBackwardDriveModule", "(Destructor): Entering...");
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_debug("CMediumForwardDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("CBackwardDriveModule", "(Destructor): Exiting");
 }
-
 
 
 
@@ -78,12 +79,11 @@ CMediumForwardDriveModule::~CMediumForwardDriveModule()
  *  @return A desired rotation.
  */
 float
-CMediumForwardDriveModule::MediumForward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-                                                    float trans_0, float rot_0 )
+CBackwardDriveModule::Backward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
+                                                  float trans_0, float rot_0 )
 {
-  return 1.4*alpha;
+  return 1.2*alpha;
 }
-
 
 
 /** Calculate by given variables a new translation to give for the motor to
@@ -96,60 +96,45 @@ CMediumForwardDriveModule::MediumForward_Curvature( float dist_to_target, float 
  *  @return A desired translation.
  */
 float
-CMediumForwardDriveModule::MediumForward_Translation ( float dist_to_target, float dist_to_front, float alpha,
-                                                       float trans_0, float rot_0, float rot_1 )
+CBackwardDriveModule::Backward_Translation( float dist_to_target, float dist_to_front, float alpha,
+                                                    float trans_0, float rot_0, float rot_1 )
 {
   float trans_1 = 0.0;
 
-  if ( fabs( rot_1 ) >= 0.0 && fabs( rot_1 ) <= 0.5 )
-    trans_1 = LinInterpol( fabs( rot_1 ), 0.5, 0.0, 1.7, m_MaxTranslation+0.05 );
+  if ( fabs( rot_1 ) >= 0.0 && fabs( rot_1 ) <= 1.0 )
+    trans_1 = LinInterpol( fabs( rot_1 ), 0.0, 1.0, 0.7, fabs(m_MaxTranslation+0.1) );
 
-  else if ( fabs( rot_1 ) > 0.5 && fabs( rot_1 ) <= 1.0 )
-    trans_1 = LinInterpol( fabs( rot_1 ), 1.0, 0.5, 1.2, 1.7 );
-
-  else if ( fabs( rot_1 ) > 1.0 && fabs( rot_1 ) <= 1.8 )
-    trans_1 = LinInterpol( fabs( rot_1 ), 1.8, 1.0, 0.8, 1.2 );
-
-  else if ( fabs( rot_1 ) > 1.8 )
-    trans_1 = LinInterpol( fabs( rot_1 ), M_PI, 1.8, 0.0, 0.8 );
-
-  else {
-    logger_->log_debug("CMediumForwardDriveModule", "************ MEDIUM DRIVE MODES:::NOT DEFINED STATE!!!!! EXITING");
-    trans_1 = 0;
-  }
+  else if ( fabs( rot_1 ) > 1.0 )
+    trans_1 = LinInterpol( fabs( rot_1 ), M_PI, 1.0, 0.0, 0.7 );
 
   // test the borders (no agressive behaviour!)
-  if ( trans_1 < 0.0 )
-    trans_1 = 0.0;
-  if ( trans_1 > m_MaxTranslation )
-    trans_1 = m_MaxTranslation;
+  if ( trans_1 > 0.0 ) trans_1 = 0.0;
+  if ( trans_1 < m_MaxTranslation ) trans_1 = m_MaxTranslation;
 
-  // OLD STUFF!!!
-//   // check stopping on target and compare distances with choosen velocities
-//   if ( fabs( dist_to_target - dist_to_front ) < 0.2 )
-//     {
-//       if (m_StopAtTarget == true)
-//  trans_1 = min( trans_1, dist_to_target*1.5 );
-//       else
-//  ; // do not stop, so drive behind the target with full power
-//     }
-//   else
-//     {
-//       trans_1 = min( trans_1, dist_to_front );
-//     }
-  // OLD STUFF END HERE!!!
-
+  // OLD STUFF
+  //   // check stopping on target and compare distances with choosen velocities
+  //   if ( fabs( dist_to_target - dist_to_front ) < 0.2 )
+  //     {
+  //       if (m_StopAtTarget == true)
+  //  trans_1 = min( trans_1, dist_to_target*1.5 );
+  //       else
+  //  ; // do not stop, so drive behind the target with full power
+  //     }
+  //   else
+  //     {
+  //       trans_1 = min( trans_1, dist_to_front );
+  //     }
 
   // NEW STUFF
   float trans_target = 10000.0;
-  float trans_front = 10000.0;
+  float trans_front  = 10000.0;
 
   if ( m_StopAtTarget == true )
-    trans_target = std::min( trans_1, GuaranteeTransStop( dist_to_target, trans_0, trans_1 ) );
+    trans_target = GuaranteeTransStop( dist_to_target, trans_0, trans_1 );
 
   // And the next collision point
   if ( dist_to_front < dist_to_target )
-    trans_front = std::min( trans_1, GuaranteeTransStop( dist_to_front, trans_0, trans_1 ) );
+    trans_front = GuaranteeTransStop( (1.0*dist_to_front)/2.0, trans_0, trans_1 );
   // NEW STUFF END HERE
 
   trans_1 = std::min( trans_1, std::min( trans_target, trans_front ) );
@@ -189,25 +174,27 @@ CMediumForwardDriveModule::MediumForward_Translation ( float dist_to_target, flo
  *  Those values are questioned after an Update() was called.
  */
 void
-CMediumForwardDriveModule::Update()
+CBackwardDriveModule::Update()
 {
-  m_ProposedTranslationX  = 0.;
-  m_ProposedTranslationY  = 0.;
-  m_ProposedRotation      = 0.;
+  m_ProposedTranslationX = 0.;
+  m_ProposedTranslationY = 0.;
+  m_ProposedRotation     = 0.;
+
+  float dist_to_target = sqrt( sqr(m_LocalTargetX) + sqr(m_LocalTargetY) );
+  float alpha          = normalize_mirror_rad(atan2( m_LocalTargetY, m_LocalTargetX ) + M_PI);
+  float dist_to_trajec = sqrt( sqr(m_LocalTrajecX) + sqr(m_LocalTrajecY) );
 
 
-  float dist_to_target  = sqrt(  sqr(m_LocalTargetX) + sqr(m_LocalTargetY) );
-  float alpha           = atan2( m_LocalTargetY, m_LocalTargetX );
-  float dist_to_trajec  = sqrt(  sqr(m_LocalTrajecX) + sqr(m_LocalTrajecY) );
+  m_ProposedRotation = Backward_Curvature( dist_to_target, dist_to_trajec, alpha,
+                                               -m_RoboTrans, -m_RoboRot );
 
-  m_ProposedRotation = MediumForward_Curvature( dist_to_target, dist_to_trajec, alpha,
-                                                m_RoboTrans, m_RoboRot );
 
-  if ( fabs( alpha ) > M_PI_2+0.2 )
+  if ( fabs( alpha ) > M_PI_2+0.1 )
     m_ProposedTranslationX = 0.0;
   else
-    m_ProposedTranslationX = MediumForward_Translation( dist_to_target, dist_to_trajec, alpha,
-                                                       m_RoboTrans, m_RoboRot, m_ProposedRotation );
+    m_ProposedTranslationX = Backward_Translation( dist_to_target, dist_to_trajec, alpha,
+                                                      -m_RoboTrans, -m_RoboRot, m_ProposedRotation);
+
 
   // last time border check............. IMPORTANT!!!
   // because the motorinstructor just tests robots physical borders.
@@ -216,8 +203,9 @@ CMediumForwardDriveModule::Update()
     m_ProposedRotation    = 0.0;
 
   } else {
-    m_ProposedTranslationX = std::min ( m_ProposedTranslationX, m_MaxTranslation );
-    m_ProposedTranslationX = std::max ( m_ProposedTranslationX, (float)0.0 );
+    m_ProposedTranslationX  = std::min ( m_ProposedTranslationX, m_MaxTranslation );
+    m_ProposedTranslationX  = std::max ( m_ProposedTranslationX, (float)0.0 );
+    m_ProposedTranslationX *= -1;
 
     if (m_ProposedRotation >  m_MaxRotation)
       m_ProposedRotation =  m_MaxRotation;
@@ -228,10 +216,10 @@ CMediumForwardDriveModule::Update()
 
     if ( m_StopAtTarget == false && dist_to_target < 1.0 ) {
       // Reduziere die rotationsgeschwindigkeiten, damit keine wilden lenkmanoever kommen
-      if ( m_ProposedRotation > 0.6 )
-        m_ProposedRotation =  0.6;
-      else if ( m_ProposedRotation < -0.6 )
-        m_ProposedRotation = -0.6;
+      if ( m_ProposedRotation > 0.5 )
+        m_ProposedRotation =  0.5;
+      else if ( m_ProposedRotation < -0.5 )
+        m_ProposedRotation = -0.5;
     }
   }
 }

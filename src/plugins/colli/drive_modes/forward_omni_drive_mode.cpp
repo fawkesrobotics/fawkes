@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  slow_forward_drive_mode.cpp - Implementation of drive-mode "slow forward"
+ *  forward_omni_drive_mode.cpp - Implementation of drive-mode "forward"
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2014  Tobias Neumann
@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "slow_forward_drive_mode_omni.h"
+#include "forward_omni_drive_mode.h"
 #include <utils/math/common.h>
 #include <utils/math/angle.h>
 
@@ -29,7 +29,7 @@ namespace fawkes
 }
 #endif
 
-/** @class CSlowForwardDriveModule <plugins/colli/drive_modes/slow_forward_drive_mode.h>
+/** @class CForwardOmniDriveModule <plugins/colli/drive_modes/forward_drive_mode.h>
  * This is the SlowForward drive-module, for slow forward only movements.
  */
 
@@ -37,30 +37,30 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CSlowForwardOmniDriveModule::CSlowForwardOmniDriveModule(Logger* logger, Configuration* config)
+CForwardOmniDriveModule::CForwardOmniDriveModule(Logger* logger, Configuration* config)
  : CAbstractDriveMode(logger, config)
 {
-  logger_->log_debug("CSlowForwardDriveModule", "(Constructor): Entering...");
-  m_DriveModeName = NavigatorInterface::SlowForward;
+  logger_->log_debug("CForwardOmniDriveModule", "(Constructor): Entering...");
+  m_DriveModeName = NavigatorInterface::Forward;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/slow/max_trans" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/slow/max_rot" );
+  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
+  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
 
-  logger_->log_debug("CSlowForwardDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("CForwardOmniDriveModule", "(Constructor): Exiting...");
 }
 
 
 /** Destruct your local values here.
  */
-CSlowForwardOmniDriveModule::~CSlowForwardOmniDriveModule()
+CForwardOmniDriveModule::~CForwardOmniDriveModule()
 {
-  logger_->log_debug("CSlowForwardDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("CForwardOmniDriveModule", "(Destructor): Entering...");
   m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_debug("CSlowForwardDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("CForwardOmniDriveModule", "(Destructor): Exiting...");
 }
 
 void
-CSlowForwardOmniDriveModule::calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target)
+CForwardOmniDriveModule::calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target)
 {
   // first calculate desired angle
   float des_alpha;
@@ -112,7 +112,7 @@ CSlowForwardOmniDriveModule::calculateRotation(float ori_alpha_target, float ori
  *  Those values are questioned after an Update() was called.
  */
 void
-CSlowForwardOmniDriveModule::Update()
+CForwardOmniDriveModule::Update()
 {
   m_ProposedTranslationX = 0.0;
   m_ProposedRotation    = 0.0;

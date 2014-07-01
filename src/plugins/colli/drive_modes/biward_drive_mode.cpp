@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  fast_biward_drive_mode.cpp - Implementation of drive-mode "fast forward + backward"
+ *  biward_drive_mode.cpp - Implementation of drive-mode "forward + backward"
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "fast_biward_drive_mode.h"
+#include "biward_drive_mode.h"
 
 namespace fawkes
 {
@@ -28,46 +28,46 @@ namespace fawkes
 }
 #endif
 
-/** @class CFastBiwardDriveModule <plugins/colli/drive_modes/fast_biward_drive_mode.h>
- * This is the FastBiward drive-module. It is inherited from  the abstract drive mode
+/** @class CBiwardDriveModule <plugins/colli/drive_modes/biward_drive_mode.h>
+ * This is the SlowBiward drive-module. It is inherited from  the abstract drive mode
  * and uses the other both modes.  If the target is in front, it drives forward
  * to the target, else it drives backward to the target.
  */
 
 /** Constructor.
- * @param forward_module The FastForward drive module
- * @param backward_module The FastBackward drive module
+ * @param forward The Forward drive module
+ * @param backward The Backward drive module
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CFastBiwardDriveModule::CFastBiwardDriveModule( CFastForwardDriveModule*  forward_module,
-                                                CFastBackwardDriveModule* backward_module,
+CBiwardDriveModule::CBiwardDriveModule( CForwardDriveModule*  forward,
+                                                CBackwardDriveModule* backward,
                                                 Logger* logger,
                                                 Configuration* config )
  : CAbstractDriveMode(logger, config)
 {
-  logger_->log_debug("CFastBiwardDriveModule", "(Constructor): Entering...");
-  m_DriveModeName = NavigatorInterface::FastAllowBackward;
-  m_pFastForwardDriveModule  = forward_module;
-  m_pFastBackwardDriveModule = backward_module;
+  logger_->log_debug("CBiwardDriveModule", "(Constructor): Entering...");
+  m_DriveModeName = NavigatorInterface::AllowBackward;
+  m_pForwardDriveModule  = forward;
+  m_pBackwardDriveModule = backward;
 
   m_CountForward = 1;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/fast/max_trans" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/fast/max_rot" );
+  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
+  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
 
-  logger_->log_debug("CFastBiwardDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("CBiwardDriveModule", "(Constructor): Exiting...");
 }
 
 
 /** Destruct your local values here.
  */
-CFastBiwardDriveModule::~CFastBiwardDriveModule()
+CBiwardDriveModule::~CBiwardDriveModule()
 {
-  logger_->log_debug("CFastBiwardDriveModule", "(Destructor): Entering...");
-  m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_debug("CFastBiwardDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("CBiwardDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("CBiwardDriveModule", "(Destructor): Exiting...");
 }
+
 
 
 
@@ -100,11 +100,12 @@ CFastBiwardDriveModule::~CFastBiwardDriveModule()
  *  Those values are questioned after an Update() was called.
  */
 void
-CFastBiwardDriveModule::Update()
+CBiwardDriveModule::Update()
 {
-  m_ProposedTranslationX  = 0.;
-  m_ProposedTranslationY  = 0.;
-  m_ProposedRotation      = 0.;
+  // Just to take care.
+  m_ProposedTranslationX = 0.;
+  m_ProposedTranslationY = 0.;
+  m_ProposedRotation     = 0.;
 
   // Our drive mode (choose between forward and backward)
   CAbstractDriveMode * driveMode = 0;
@@ -125,16 +126,14 @@ CFastBiwardDriveModule::Update()
     m_CountForward = -1;
 
   else {
-    logger_->log_debug("CFastBiwardDriveModule", "Undefined state");
+    logger_->log_debug("CBiwardDriveModule", "Undefined state");
     m_CountForward = 0;
   }
 
   if ( m_CountForward == 1 )
-    driveMode = m_pFastForwardDriveModule;
+    driveMode = m_pForwardDriveModule;
   else
-    driveMode = m_pFastBackwardDriveModule;
-
-
+    driveMode = m_pBackwardDriveModule;
 
   // set the current info to the drive mode
   driveMode->SetCurrentRoboPos( m_RoboX, m_RoboY, m_RoboOri );
@@ -150,7 +149,6 @@ CFastBiwardDriveModule::Update()
   // get the values from the drive mode
   m_ProposedTranslationX = driveMode->GetProposedTranslationX();
   m_ProposedRotation    = driveMode->GetProposedRotation();
-
 }
 
 } // namespace fawkes

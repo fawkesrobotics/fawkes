@@ -108,25 +108,15 @@ plugins/colli:
     restriction: "omnidirectional"
 
     # Default drive mode. It's an enum, see NavigatorInterface for details.
-    default: "SlowForward"
+    default: "Forward"
 
     # Default drive mode for escaping. You can choose between potential_field and basic
     default_escape: "potential_field"
 
-    slow:
+    normal:
       # Max translation/rotation velocities
       max_trans: 1.0
       max_rot: 2.0
-
-    medium:
-      # Max translation/rotation velocities
-      max_trans: 2.0
-      max_rot: 6.0
-
-    fast:
-      # Max translation/rotation velocities
-      max_trans: 2.99
-      max_rot: 7.0
 
     escape:
       # Max translation/rotation velocities for escape-mode

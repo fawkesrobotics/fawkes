@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  medium_forward_drive_mode.h - Implementation of drive-mode "medium forward"
+ *  escape_potential_field_omni_drive_mode.h - Implementation of drive-mode "escape"
  *
- *  Created: Fri Oct 18 15:16:23 2013
- *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *  Created: Tue Mar 25 17:24:18 2014
+ *  Copyright  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,10 +19,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_MEDIUM_FORWARD_DRIVE_MODE_H_
-#define __PLUGINS_COLLI_MEDIUM_FORWARD_DRIVE_MODE_H_
+#ifndef __PLUGINS_COLLI_ESCAPE_POTENTIAL_FIELD_OMNI_DRIVE_MODE_H_
+#define __PLUGINS_COLLI_ESCAPE_POTENTIAL_FIELD_OMNI_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
+#include <utils/math/types.h>
+
+#include <vector>
 
 namespace fawkes
 {
@@ -31,28 +33,30 @@ namespace fawkes
 }
 #endif
 
-class CMediumForwardDriveModule : public CAbstractDriveMode
+class CLaserOccupancyGrid;
+
+class CEscapePotentialFieldOmniDriveModule : public CAbstractDriveMode
 {
  public:
 
-  CMediumForwardDriveModule(Logger* logger, Configuration* config);
-  ~CMediumForwardDriveModule();
+  CEscapePotentialFieldOmniDriveModule( Logger* logger, Configuration* config );
+  ~CEscapePotentialFieldOmniDriveModule();
 
+  void setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, int roboY );
   virtual void Update();
-
 
  private:
 
-  float MediumForward_Translation ( float dist_to_target, float dist_to_front, float alpha,
-            float trans_0, float rot_0, float rot_1 );
+  CLaserOccupancyGrid*  m_pOccGrid;
+  point_t m_robot_pos;
 
-  float MediumForward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-         float trans_0, float rot_0 );
+  /// absolute values are the maximum values. do not act faster!
+  float m_MaxTranslation;
+  float m_MaxRotation;
 
-  float m_MaxTranslation, m_MaxRotation;
-
+  int   m_turn;
 };
 
-} // namespace fawkes
+} // end namespace fawkes
 
 #endif

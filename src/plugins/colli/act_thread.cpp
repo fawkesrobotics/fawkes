@@ -4,6 +4,7 @@
  *
  *  Created: Thu Oct 17 16:58:00 2013
  *  Copyright  2013-2014  Bahram Maleki-Fard
+ *                  2014  Tobias Neumann
  *
  ****************************************************************************/
 
@@ -78,45 +79,19 @@ ColliActThread::init()
   }
 
   std::string cfg_drive_mode = config->get_string((cfg_prefix + "drive_mode/default").c_str());
-  if ( cfg_drive_mode.compare("MovingNotAllowed") == 0 ) {
+  if (        cfg_drive_mode == "MovingNotAllowed" ) {
     cfg_drive_mode_ = NavigatorInterface::MovingNotAllowed;
-  } else if ( cfg_drive_mode.compare("CarefulForward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::CarefulForward;
-  } else if ( cfg_drive_mode.compare("SlowForward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::SlowForward;
-  } else if ( cfg_drive_mode.compare("ModerateForward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::ModerateForward;
-  } else if ( cfg_drive_mode.compare("FastForward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::FastForward;
-  } else if ( cfg_drive_mode.compare("CarefulAllowBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::CarefulAllowBackward;
-  } else if ( cfg_drive_mode.compare("SlowAllowBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::SlowAllowBackward;
-  } else if ( cfg_drive_mode.compare("ModerateAllowBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::ModerateAllowBackward;
-  } else if ( cfg_drive_mode.compare("FastAllowBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::FastAllowBackward;
-  } else if ( cfg_drive_mode.compare("CarefulBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::CarefulBackward;
-  } else if ( cfg_drive_mode.compare("SlowBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::SlowBackward;
-  } else if ( cfg_drive_mode.compare("ModerateBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::ModerateBackward;
-  } else if ( cfg_drive_mode.compare("FastBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::FastBackward;
-  } else if ( cfg_drive_mode.compare("ESCAPE") == 0 ) {
+  } else if ( cfg_drive_mode == "Forward" ) {
+    cfg_drive_mode_ = NavigatorInterface::Forward;
+  } else if ( cfg_drive_mode == "AllowBackward" ) {
+    cfg_drive_mode_ = NavigatorInterface::AllowBackward;
+  } else if ( cfg_drive_mode == "Backward" ) {
+    cfg_drive_mode_ = NavigatorInterface::Backward;
+  } else if ( cfg_drive_mode == "ESCAPE" ) {
     cfg_drive_mode_ = NavigatorInterface::ESCAPE;
-  } else if ( cfg_drive_mode.compare("SlowDribbleBall") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::SlowDribbleBall;
-  } else if ( cfg_drive_mode.compare("ModerateDribbleBall") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::ModerateDribbleBall;
-  } else if ( cfg_drive_mode.compare("FastDribbleBall") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::FastDribbleBall;
-  } else if ( cfg_drive_mode.compare("OVERRIDE") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::OVERRIDE;
   } else {
-      cfg_drive_mode_ = NavigatorInterface::MovingNotAllowed;
-      throw fawkes::Exception("Default drive_mode is unknown");
+    cfg_drive_mode_ = NavigatorInterface::MovingNotAllowed;
+    throw fawkes::Exception("Default drive_mode is unknown");
   }
 
   logger->log_debug(name(), "Default drive_mode: %i (%s)", cfg_drive_mode_, if_navi_->tostring_DriveMode(cfg_drive_mode_));
