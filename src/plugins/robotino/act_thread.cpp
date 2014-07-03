@@ -26,12 +26,15 @@
 
 #include <interfaces/MotorInterface.h>
 #include <interfaces/GripperInterface.h>
+#include <interfaces/IMUInterface.h>
 #include <utils/math/angle.h>
 
 #include <rec/robotino/com/Com.h>
 #include <rec/robotino/com/OmniDrive.h>
-#include <rec/iocontrol/remotestate/SensorState.h>
 
+#include <rec/sharedmemory/sharedmemory.h>
+#include <rec/iocontrol/remotestate/SensorState.h>
+#include <rec/iocontrol/robotstate/State.h>
 
 using namespace fawkes;
 
@@ -65,6 +68,10 @@ RobotinoActThread::init()
   last_seqnum_ = 0;
   last_msg_time_ = clock->now();
 
+  statemem_ =  new rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State>
+    (rec::iocontrol::robotstate::State::sharedMemoryKey);
+  state_ = statemem_->getData();
+
   // reset odometry once on startup
   rec::iocontrol::remotestate::SetState set_state;
   set_state.setOdometry = true;
@@ -74,9 +81,24 @@ RobotinoActThread::init()
   //get config values
   cfg_deadman_threshold_ = config->get_float("/hardware/robotino/deadman_time_threshold");
   cfg_gripper_enabled_   = config->get_bool("/hardware/robotino/gripper/enable_gripper");
-  cfg_odom_time_offset_  = config->get_float("/hardware/robotino/odom_time_offset");
-  cfg_odom_frame_        = config->get_string("/hardware/robotino/odom_frame");
+  cfg_odom_time_offset_  = config->get_float("/hardware/robotino/odometry/time_offset");
+  cfg_odom_frame_        = config->get_string("/hardware/robotino/odometry/frame");
   cfg_base_frame_        = config->get_string("/hardware/robotino/base_frame");
+  std::string odom_mode  = config->get_string("/hardware/robotino/odometry/mode");
+
+
+  std::string imu_if_id;
+
+  imu_if_ = NULL;
+  if (odom_mode == "copy") {
+    cfg_odom_mode_ = ODOM_COPY;
+  } else if (odom_mode == "calc") {
+    cfg_odom_mode_ = ODOM_CALC;
+    imu_if_id =
+      config->get_string("/hardware/robotino/odometry/calc/imu_interface_id");
+  } else {
+    throw Exception("Invalid odometry mode '%s', must be calc or copy", odom_mode.c_str());
+  }
 
   gripper_close_ = false;
 
@@ -86,9 +108,16 @@ RobotinoActThread::init()
   des_vx_    = 0.;
   des_vy_    = 0.;
   des_omega_ = 0.;
-  
+
+  odom_x_ = odom_y_ = odom_phi_ = 0.;
+  odom_time_ = new Time(clock);
+
   motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
   gripper_if_ = blackboard->open_for_writing<GripperInterface>("Robotino");
+
+  if (cfg_odom_mode_ == ODOM_CALC) {
+    imu_if_ = blackboard->open_for_reading<IMUInterface>(imu_if_id.c_str());
+  }
 
   motor_if_->set_motor_state(MotorInterface::MOTOR_ENABLED);
   motor_if_->write();
@@ -98,6 +127,7 @@ RobotinoActThread::init()
 void
 RobotinoActThread::finalize()
 {
+  blackboard->close(imu_if_);
   blackboard->close(motor_if_);
   blackboard->close(gripper_if_);
   if (com_->isConnected()) {
@@ -110,6 +140,8 @@ RobotinoActThread::finalize()
     com_->setSetState( set_state );
   }
   com_ = NULL;
+  delete odom_time_;
+  delete statemem_;
 }
 
 void
@@ -158,6 +190,12 @@ RobotinoActThread::loop()
       }
       else if (motor_if_->msgq_first_is<MotorInterface::ResetOdometryMessage>())
       {
+	odom_x_ = odom_y_ = odom_phi_ = 0.;
+	if (imu_if_) {
+	  imu_if_->read();
+	  odom_gyro_origin_ = tf::get_yaw(imu_if_->orientation());
+	}
+
         set_state.setOdometry = true;
         set_state.odometryX = set_state.odometryY = set_state.odometryPhi = 0;
         send_set_state = true;
@@ -220,28 +258,49 @@ RobotinoActThread::loop()
                              sensor_state.actualVelocity[2]);
 
       // div by 1000 to convert from mm to m
-      motor_if_->set_vx(vx / 1000.);
-      motor_if_->set_vy(vy / 1000.);
+      vx /= 1000.;
+      vy /= 1000.;
+
+      motor_if_->set_vx(vx);
+      motor_if_->set_vy(vy);
       motor_if_->set_omega(deg2rad(omega));
 
       motor_if_->set_des_vx(des_vx_);
       motor_if_->set_des_vy(des_vy_);
       motor_if_->set_des_omega(des_omega_);
 
-      motor_if_->set_odometry_position_x(sensor_state.odometryX / 1000.f);
-      motor_if_->set_odometry_position_y(sensor_state.odometryY / 1000.f);
-      motor_if_->set_odometry_orientation(deg2rad(sensor_state.odometryPhi));
+      if (cfg_odom_mode_ == ODOM_COPY) {
+	odom_x_   = sensor_state.odometryX / 1000.f;
+	odom_y_   = sensor_state.odometryY / 1000.f;
+	odom_phi_ = deg2rad(sensor_state.odometryPhi);
+      } else {
+	fawkes::Time now(clock);
+	float diff_sec = now - odom_time_;
+	*odom_time_ = now;
+
+	// velocity-based method
+	if (imu_if_ && imu_if_->has_writer()) {
+	  imu_if_->read();
+	  odom_phi_ =
+	    normalize_mirror_rad(tf::get_yaw(imu_if_->orientation()) - odom_gyro_origin_);
+	} else {
+	}
+
+	odom_x_ += cos(odom_phi_) * vx * diff_sec - sin(odom_phi_) * vy * diff_sec;
+	odom_y_ += sin(odom_phi_) * vx * diff_sec + cos(odom_phi_) * vy * diff_sec;
+      }
+
+      motor_if_->set_odometry_position_x(odom_x_);
+      motor_if_->set_odometry_position_y(odom_y_);
+      motor_if_->set_odometry_orientation(odom_phi_);
       motor_if_->write();
 
 
 #ifdef HAVE_TF
       fawkes::Time now(clock);
 
-      tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1),
-                                     deg2rad(sensor_state.odometryPhi)),
-                      tf::Vector3(sensor_state.odometryX / 1000.f,
-                                  sensor_state.odometryY / 1000.f,
-                                  0));
+      tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1), odom_phi_),
+                      tf::Vector3(odom_x_, odom_y_, 0.));
 
       tf_publisher->send_transform(t, now + cfg_odom_time_offset_,
 				   cfg_odom_frame_, cfg_base_frame_);

@@ -43,11 +43,20 @@ namespace rec {
       class OmniDrive;
     }
   }
+  namespace sharedmemory {
+    template<typename SharedType> class SharedMemory;
+  }
+  namespace iocontrol {
+    namespace robotstate {
+      class State;
+    }
+  }
 }
 
 namespace fawkes {
   class MotorInterface;
   class GripperInterface;
+  class IMUInterface;
 }
 
 class RobotinoSensorThread;
@@ -74,12 +83,22 @@ class RobotinoActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
+  typedef enum {
+    ODOM_COPY,
+    ODOM_CALC
+  } OdometryMode;
+
+ private:
   RobotinoSensorThread           *sensor_thread_;
   rec::robotino::com::Com        *com_;
   rec::robotino::com::OmniDrive  *omni_drive_;
+  rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State> *statemem_;
+  rec::iocontrol::robotstate::State *state_;
+
   unsigned int                    last_seqnum_;
   fawkes::MotorInterface         *motor_if_;
   fawkes::GripperInterface       *gripper_if_;
+  fawkes::IMUInterface           *imu_if_;
   bool        			  msg_received_;
   bool        			  msg_zero_vel_;
   fawkes::Time 			  last_msg_time_;
@@ -89,12 +108,19 @@ class RobotinoActThread
   bool 				  cfg_gripper_enabled_;
   std::string                     cfg_odom_frame_;
   std::string                     cfg_base_frame_;
+  OdometryMode                    cfg_odom_mode_;
 
   float                           des_vx_;
   float                           des_vy_;
   float                           des_omega_;
 
   bool                            gripper_close_;
+
+  float                           odom_x_;
+  float                           odom_y_;
+  float                           odom_phi_;
+  float                           odom_gyro_origin_;
+  fawkes::Time                   *odom_time_;
 };
 
 

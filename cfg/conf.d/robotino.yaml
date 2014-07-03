@@ -14,14 +14,9 @@ hardware/robotino:
   # Time threshold after all motor velocities are set to zero if no new messages arrived inbetween
   deadman_time_threshold: 0.5
 
-  # Odom TF offset. This time is added to the current time when the odometry <- base_link TF is published
-  odom_time_offset: 0.25
-
-  # Odometry coordinate frame
-  odom_frame: !frame /odom
-
   # Base coordinate frame
   base_frame: !frame /base_link
+
 
   gyro:
     # Enable Gyro publishing? This creates an IMUInterface and publishes
@@ -36,6 +31,26 @@ hardware/robotino:
     frame: !frame /gyro
 
     interface_id: IMU Robotino
+
+  odometry:
+
+    # Odometry mode, one of "calc" or "copy"
+    # calc: calculate on our own based on IMUInterface and velocity data
+    # copy: copy values as-is from OpenRobotino
+    # If you set this to calc, you should disable the gyro support in the
+    # robotino plugin and instead use the imu plugin with the gyro connected
+    # directly to the Fawkes machine.
+    mode: calc
+
+    # Odometry coordinate frame
+    frame: !frame /odom
+
+    # Odom TF offset. This time is added to the current time when the
+    # odometry <- base_link TF is published
+    time_offset: 0.25
+
+    # Interface ID of the IMU interface for the gyro.
+    calc/imu_interface_id:
 
   gripper:
     # Enable gripper {ENABLED=true / DISABLED=false}
