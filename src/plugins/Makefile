@@ -21,7 +21,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  laser flite festival joystick openrave \
 	  katana pantilt roomba nao robotino \
 	  bumblebee2 perception amcl \
-	  skiller luaagent worldmodel laserht laser-filter laser-pointclouds \
+	  skiller luaagent worldmodel laser-filter laser-pointclouds \
 	  static_transforms navgraph \
 	  clips clips-agent clips-protobuf clips-webview clips-navgraph clips-ros \
 	  mongodb mongodb_log \
