@@ -10,8 +10,5 @@
     <field type="float" name="distance" length="9">Distance sensor values.</field>
     <field type="bool" name="digital_in" length="8">Digital input values.</field>
     <field type="float" name="analog_in" length="8">Analog input values.</field>
-    <field type="bool" name="gyro_available">True if gyro is available</field>
-    <field type="float" name="gyro_angle">Gyro angle value; rad</field>
-    <field type="float" name="gyro_rate">Gyro rate value; rad/sec</field>
   </data>
 </interface>

@@ -53,6 +53,7 @@ namespace rec {
 namespace fawkes {
   class BatteryInterface;
   class RobotinoSensorInterface;
+  class IMUInterface;
 }
 
 class RobotinoSensorThread
@@ -79,6 +80,9 @@ class RobotinoSensorThread
  private: // members
   std::string cfg_hostname_;
   bool        cfg_quit_on_disconnect_;
+  bool        cfg_enable_gyro_;
+  std::string cfg_imu_iface_id_;
+
   rec::robotino::com::Com *com_;
   unsigned int last_seqnum_;
   rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State> *statemem_;
@@ -86,6 +90,7 @@ class RobotinoSensorThread
 
   fawkes::BatteryInterface        *batt_if_;
   fawkes::RobotinoSensorInterface *sens_if_;
+  fawkes::IMUInterface            *imu_if_;
 
   // Voltage to distance data points
   std::vector<std::pair<double, double> > voltage_to_dist_dps_;

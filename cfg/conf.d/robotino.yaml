@@ -23,6 +23,20 @@ hardware/robotino:
   # Base coordinate frame
   base_frame: !frame /base_link
 
+  gyro:
+    # Enable Gyro publishing? This creates an IMUInterface and publishes
+    # the gyro data if available via OpenRobotino. If enabled and the gyro
+    # is not available, properly writes "-1 invalid indicator" (cf. IMUInterface)
+    # If disabled, no interface will be opened and written. Recommended if you
+    # intend to use the imu plugin for gyro access
+    # If you enable this, you should also set the odometry mode to copy
+    enable: true
+    
+    # Gyro coordinate frame
+    frame: !frame /gyro
+
+    interface_id: IMU Robotino
+
   gripper:
     # Enable gripper {ENABLED=true / DISABLED=false}
     enable_gripper: true

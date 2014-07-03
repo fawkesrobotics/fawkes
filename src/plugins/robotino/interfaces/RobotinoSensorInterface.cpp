@@ -53,10 +53,7 @@ RobotinoSensorInterface::RobotinoSensorInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "distance", 9, &data->distance);
   add_fieldinfo(IFT_BOOL, "digital_in", 8, &data->digital_in);
   add_fieldinfo(IFT_FLOAT, "analog_in", 8, &data->analog_in);
-  add_fieldinfo(IFT_BOOL, "gyro_available", 1, &data->gyro_available);
-  add_fieldinfo(IFT_FLOAT, "gyro_angle", 1, &data->gyro_angle);
-  add_fieldinfo(IFT_FLOAT, "gyro_rate", 1, &data->gyro_rate);
-  unsigned char tmp_hash[] = {0xfe, 0x8a, 0xcf, 0x8f, 0xe8, 0xb9, 0xf, 0x3b, 0x35, 0x3b, 0x1a, 0xea, 0xe7, 0x59, 0xab, 0xc8};
+  unsigned char tmp_hash[] = {0x84, 0x8c, 0x96, 0x4b, 0x78, 0xf9, 0x3f, 0xd, 0x2b, 0x4c, 0x70, 0x5a, 0x3e, 0x3, 0x2a, 0x82};
   set_hash(tmp_hash);
 }
 
@@ -457,99 +454,6 @@ RobotinoSensorInterface::set_analog_in(unsigned int index, const float new_analo
   data->analog_in[index] = new_analog_in;
   data_changed = true;
 }
-/** Get gyro_available value.
- * True if gyro is available
- * @return gyro_available value
- */
-bool
-RobotinoSensorInterface::is_gyro_available() const
-{
-  return data->gyro_available;
-}
-
-/** Get maximum length of gyro_available value.
- * @return length of gyro_available value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-RobotinoSensorInterface::maxlenof_gyro_available() const
-{
-  return 1;
-}
-
-/** Set gyro_available value.
- * True if gyro is available
- * @param new_gyro_available new gyro_available value
- */
-void
-RobotinoSensorInterface::set_gyro_available(const bool new_gyro_available)
-{
-  data->gyro_available = new_gyro_available;
-  data_changed = true;
-}
-
-/** Get gyro_angle value.
- * Gyro angle value; rad
- * @return gyro_angle value
- */
-float
-RobotinoSensorInterface::gyro_angle() const
-{
-  return data->gyro_angle;
-}
-
-/** Get maximum length of gyro_angle value.
- * @return length of gyro_angle value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-RobotinoSensorInterface::maxlenof_gyro_angle() const
-{
-  return 1;
-}
-
-/** Set gyro_angle value.
- * Gyro angle value; rad
- * @param new_gyro_angle new gyro_angle value
- */
-void
-RobotinoSensorInterface::set_gyro_angle(const float new_gyro_angle)
-{
-  data->gyro_angle = new_gyro_angle;
-  data_changed = true;
-}
-
-/** Get gyro_rate value.
- * Gyro rate value; rad/sec
- * @return gyro_rate value
- */
-float
-RobotinoSensorInterface::gyro_rate() const
-{
-  return data->gyro_rate;
-}
-
-/** Get maximum length of gyro_rate value.
- * @return length of gyro_rate value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-RobotinoSensorInterface::maxlenof_gyro_rate() const
-{
-  return 1;
-}
-
-/** Set gyro_rate value.
- * Gyro rate value; rad/sec
- * @param new_gyro_rate new gyro_rate value
- */
-void
-RobotinoSensorInterface::set_gyro_rate(const float new_gyro_rate)
-{
-  data->gyro_rate = new_gyro_rate;
-  data_changed = true;
-}
-
 /* =========== message create =========== */
 Message *
 RobotinoSensorInterface::create_message(const char *type) const
