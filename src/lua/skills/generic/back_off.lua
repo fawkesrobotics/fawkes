@@ -77,21 +77,16 @@ function BACK_OFF:init()
    self.fsm.vars.navi = {escaping = navigator:is_escaping_enabled(),
                          drive_mode = navigator:drive_mode()}
 
-   -- enable backward-driving. disable escaping so that we only drive backwards
-   navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(false))
+   -- enable backward-driving. Enable escaping, in case security-distance or sth else changed and
+   --  we are in an obstacle now
+   navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(true))
    navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(navigator.SlowAllowBackward))
 
    self.args["relgoto"] = {x=-self.fsm.vars.dist, y=0, ori=0}
 end
 
 -- restore previous navigator settings
-function FINAL:init()
+function BACK_OFF:exit()
    navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(self.fsm.vars.navi.escaping))
    navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(self.fsm.vars.navi.drive_mode))
 end
-function FAILED:init()
-   navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(self.fsm.vars.navi.escaping))
-   navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(self.fsm.vars.navi.drive_mode))
-end
-
-
