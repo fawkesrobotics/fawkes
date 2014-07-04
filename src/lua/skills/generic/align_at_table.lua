@@ -56,7 +56,7 @@ skillenv.skill_module(_M)
 -- Constants
 MIN_VISIBILITY_HISTORY = 5
 
-TABLE_WIDTH = config:get_float("/perception/tabletop-objects/table_model_width") or 0.7
+TABLE_WIDTH = config:get_float("/perception/tabletop-detection/table_model_width") or 0.7
 
 DIST_TO_FRONT = 0.12 -- distance from base_link to robot front
 DIST_TABLE = 0.15 -- hold this distance to the table front
@@ -197,6 +197,7 @@ function POSITION_AT_TABLE:exit()
 end
 
 function RESTORE_PTU:init()
+   --print("(align_at_table) restoring to pan="..self.fsm.vars.ptu.pan..", tilt="..self.fsm.vars.ptu.tilt)
    self.args["pantilt"] = {pan=self.fsm.vars.ptu.pan,
                            tilt=self.fsm.vars.ptu.tilt,
                            max_speed=PTU.SPEED}
