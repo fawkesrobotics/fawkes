@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_imu = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_imu = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	     fawkesinterface IMUInterface
 
 CFLAGS  += $(CFLAGS_CPP11)

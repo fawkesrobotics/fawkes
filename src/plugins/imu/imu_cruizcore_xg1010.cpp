@@ -4,7 +4,6 @@
  *
  *  Created: Sun Jun 22 21:44:17 2014
  *  Copyright  2008-2014  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -28,6 +27,8 @@
 #include <tf/types.h>
 #include <utils/math/angle.h>
 
+#include <boost/bind.hpp>
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -41,6 +42,42 @@ using namespace fawkes;
  * IMU acquisition thread for CruizCore XG1010 gyros.
  * @author Tim Niemueller
  */
+
+
+/// @cond OLD_BOOST_COMPAT
+
+#if BOOST_VERSION < 104800
+
+// The default maximum number of bytes to transfer in a single operation.
+enum { default_max_transfer_size = 65536 };
+
+class transfer_exactly_t
+{
+ public:
+  typedef std::size_t result_type;
+
+  explicit transfer_exactly_t(std::size_t size)
+    : size_(size) {}
+
+  template <typename Error>
+  std::size_t operator()(const Error& err, std::size_t bytes_transferred)
+  {
+    return (!!err || bytes_transferred >= size_) ? 0 :
+      (size_ - bytes_transferred < default_max_transfer_size
+        ? size_ - bytes_transferred : std::size_t(default_max_transfer_size));
+  }
+
+ private:
+  std::size_t size_;
+};
+
+inline transfer_exactly_t transfer_exactly(std::size_t size)
+{
+  return transfer_exactly_t(size);
+}
+#endif
+
+/// @endcond
 
 
 /** Constructor.
@@ -84,7 +121,7 @@ CruizCoreXG1010AcquisitionThread::init()
   }
 
   // wait up to two expected packets
-  receive_timeout_ = (1000 / cfg_freq_) * 2;
+  receive_timeout_ = (1000 / cfg_freq_) * 20;
 
   // No acceleration data available, set to -1
   linear_acceleration_[0] = -1.;
@@ -113,25 +150,49 @@ CruizCoreXG1010AcquisitionThread::loop()
     try {
       deadline_.expires_from_now(boost::posix_time::milliseconds(receive_timeout_));
 
-      boost::system::error_code ec = boost::asio::error::would_block;
-      size_t bytes_read = 0;
+      ec_ = boost::asio::error::would_block;
+      bytes_read_ = 0;
+
+      size_t to_read = CRUIZCORE_XG1010_PACKET_SIZE;
+      // if there is partial data in the buffer we are running behind
+      // read off more data skipping the old packet
+      if (input_buffer_.size() > 0) {
+	const size_t bsize = input_buffer_.size();
+	size_t full_frames = bsize / CRUIZCORE_XG1010_PACKET_SIZE;
+	size_t remaining = bsize - full_frames * CRUIZCORE_XG1010_PACKET_SIZE;
+	to_read += full_frames * CRUIZCORE_XG1010_PACKET_SIZE + remaining;
+      }
+
+      printf("Buffer: %zu   read: %zu\n", input_buffer_.size(), to_read);
 
       boost::asio::async_read(serial_, input_buffer_,
-			      boost::asio::transfer_exactly(CRUIZCORE_XG1010_PACKET_SIZE),
-			      (boost::lambda::var(ec) = boost::lambda::_1,
-			       boost::lambda::var(bytes_read) = boost::lambda::_2));
+#if BOOST_VERSION >= 104800
+			      boost::asio::transfer_exactly(to_read),
+			      (boost::lambda::var(ec_) = boost::lambda::_1,
+			       boost::lambda::var(bytes_read_) = boost::lambda::_2));
+#else
+			      transfer_exactly(to_read),
+			      boost::bind(
+				&CruizCoreXG1010AcquisitionThread::handle_read,
+				this,
+				boost::asio::placeholders::error,
+				boost::asio::placeholders::bytes_transferred
+			      ));
+#endif
 
-      do io_service_.run_one(); while (ec == boost::asio::error::would_block);
-      
+      do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
+
+      deadline_.expires_at(boost::posix_time::pos_infin);
+
       // reset data for the case that we timeout or fail
       angular_velocity_[2] = 0;
       orientation_[0] = orientation_[1] = orientation_[2] = orientation_[3] = 0.;
 
-      if (ec) {
-	if (ec.value() == boost::system::errc::operation_canceled) {
+      if (ec_) {
+	if (ec_.value() == boost::system::errc::operation_canceled) {
 	  logger->log_error(name(), "Data timeout, will try to reconnect");
 	} else {
-	  logger->log_warn(name(), "Data read error: %s\n", ec.message().c_str());
+	  logger->log_warn(name(), "Data read error: %s\n", ec_.message().c_str());
 	}
 	data_mutex_->lock();
 	timestamp_->stamp();
@@ -140,7 +201,10 @@ CruizCoreXG1010AcquisitionThread::loop()
 	close_device();
 
       } else {
-	if (bytes_read == 8) {
+	if (bytes_read_ >= CRUIZCORE_XG1010_PACKET_SIZE) {
+	  if (input_buffer_.size() > CRUIZCORE_XG1010_PACKET_SIZE) {
+	    input_buffer_.consume(input_buffer_.size() - CRUIZCORE_XG1010_PACKET_SIZE);
+	  }
 	  std::istream in_stream(&input_buffer_);
 	  in_stream.read((char *)in_packet_, CRUIZCORE_XG1010_PACKET_SIZE);
 
@@ -156,10 +220,16 @@ CruizCoreXG1010AcquisitionThread::loop()
 	    parse_packet();
 	  } catch (Exception &e) {
 	    logger->log_warn(name(), e);
-	    resync();
+	    try {
+	      resync();
+	      logger->log_info(name(), "Successfully resynced");
+	    } catch (Exception &e) {
+	      logger->log_warn(name(), "Resync failed, trying to re-open");
+	      close_device();
+	    }
 	  }
 	} else {
-	  logger->log_warn(name(), "*** INVALID number of bytes: %zu\n", bytes_read);
+	  logger->log_warn(name(), "*** INVALID number of bytes: %zu\n", bytes_read_);
 	}
       }
     } catch (boost::system::system_error &e) {
@@ -168,7 +238,7 @@ CruizCoreXG1010AcquisitionThread::loop()
 	logger->log_warn(name(),
 			 "CruizCoreXG1010 connection lost, trying to re-open");
       } else {
-	logger->log_warn(name(), "CruitCore failed read: %s", e.what());
+	logger->log_warn(name(), "CruizCore failed read: %s", e.what());
       }
     }
   } else {
@@ -191,99 +261,195 @@ void
 CruizCoreXG1010AcquisitionThread::open_device()
 {
   try {
+    input_buffer_.consume(input_buffer_.size());
+
     serial_.open(cfg_serial_);
     // according to CruiuCore R1050K (sensor in XG1010) technical manual
     serial_.set_option(boost::asio::serial_port::stop_bits(boost::asio::serial_port::stop_bits::one));
     serial_.set_option(boost::asio::serial_port::parity(boost::asio::serial_port::parity::none));
     serial_.set_option(boost::asio::serial_port::baud_rate(cfg_baud_rate_));
-
-    /* Format according to Technical Manual of R1050K for XG1010
-       Field		Command		Separator	Example
-       INIT		$MIA		COMMA (,)	$MIA,
-       FORMAT		F, I or A	COMMA (,)	I,
-       BAUD RATE	B,BAUDRATE	COMMA (,)	B,115200,
-       OUTPUT RATE	R		COMMA (,)	R,100,
-       TYPE		D or R		COMMA (,)	D,
-       OUTPUT		Y or N		COMMA (,)	Y,
-       FLASH		Y or N		COMMA (,)	Y,
-       CHECKSUM		SUM of COMMAND	ASTERISK(*)	*C4
-    */
-    char *cmd_packet;
-    if (asprintf(&cmd_packet, "$MIA,I,B,%u,R,%u,D,Y,N*  ", cfg_baud_rate_, cfg_freq_) == -1) {
-      throw Exception("Failed to create command packet");
-    }
-
-    size_t cmd_packet_len = strlen(cmd_packet);
-
-    // calculate checksum
-    unsigned int checksum = 0;
-    for(size_t i = 1; i < cmd_packet_len - 3; ++i )  checksum += cmd_packet[i];
-    checksum &= 0xFF;
-
-    char checksum_str[3];
-    snprintf(checksum_str, 3, "%X", checksum);
-    cmd_packet[cmd_packet_len - 2] = checksum_str[0];
-    cmd_packet[cmd_packet_len - 1] = checksum_str[1];
-
-    std::string cmd_packet_s(cmd_packet, cmd_packet_len);
-    free(cmd_packet);
-
-    logger->log_debug(name(), "Sending init packet: %s", cmd_packet_s.c_str());
-
-    boost::asio::write(serial_, boost::asio::buffer(cmd_packet_s.c_str(), cmd_packet_len));
+    
+    send_init_packet(/* enable transfer */ true);
 
     resync();
   } catch (boost::system::system_error &e) {
-      throw Exception("CruizCore-XG1010 failed I/O: %s", e.what());
+    throw Exception("CruizCore-XG1010 failed I/O: %s", e.what());
   }
 }
 
 
 void
+CruizCoreXG1010AcquisitionThread::send_init_packet(bool enable_transfer)
+{
+  /* Format according to Technical Manual of R1050K for XG1010
+     Field		Command		Separator	Example
+     INIT		$MIA		COMMA (,)	$MIA,
+     FORMAT		F, I or A	COMMA (,)	I,
+     BAUD RATE	B,BAUDRATE	COMMA (,)	B,115200,
+     OUTPUT RATE	R		COMMA (,)	R,100,
+     TYPE		D or R		COMMA (,)	D,
+     OUTPUT		Y or N		COMMA (,)	Y,
+     FLASH		Y or N		COMMA (,)	Y,
+     CHECKSUM		SUM of COMMAND	ASTERISK(*)	*C4
+  */
+  char *cmd_packet;
+  if (asprintf(&cmd_packet, "$MIA,I,B,%u,R,%u,D,%s,N*  ", cfg_baud_rate_, cfg_freq_,
+	       enable_transfer ? "Y" : "N") == -1)
+  {
+    throw Exception("Failed to create command packet");
+  }
+
+  size_t cmd_packet_len = strlen(cmd_packet);
+
+  // calculate checksum
+  unsigned int checksum = 0;
+  for(size_t i = 1; i < cmd_packet_len - 3; ++i )  checksum += cmd_packet[i];
+  checksum &= 0xFF;
+
+  char checksum_str[3];
+  snprintf(checksum_str, 3, "%X", checksum);
+  cmd_packet[cmd_packet_len - 2] = checksum_str[0];
+  cmd_packet[cmd_packet_len - 1] = checksum_str[1];
+
+  std::string cmd_packet_s(cmd_packet, cmd_packet_len);
+  free(cmd_packet);
+
+  logger->log_debug(name(), "Sending init packet: %s", cmd_packet_s.c_str());
+
+  boost::asio::write(serial_, boost::asio::buffer(cmd_packet_s.c_str(), cmd_packet_len));
+
+}
+
+void
 CruizCoreXG1010AcquisitionThread::resync()
 {
-  boost::system::error_code ec = boost::asio::error::would_block;
-  size_t bytes_read = 0;
+  /*
+  // the idea here would be to:
+  // 1. stop data transfer
+  // 2. read all remaining data, i.e. flush serial line
+  // 3. start data transfer again
+  // 4. synchronize with packet stream
+  // the only problem being that once the transfer has been stopped it
+  // cannot be enabled again, this seems to be a bug in the CruizCore XG1010.
 
-  deadline_.expires_from_now(boost::posix_time::milliseconds(receive_timeout_ * 10));
-  boost::asio::async_read_until(serial_, input_buffer_, std::string("\xff\xff"),
-				(boost::lambda::var(ec) = boost::lambda::_1,
-				 boost::lambda::var(bytes_read) = boost::lambda::_2));
+  // stop transfer and sniff off any data still arriving
+  send_init_packet(/ enable transfer / false);
+  try {
+    do {
+      ec_ = boost::asio::error::would_block;
+      deadline_.expires_from_now(boost::posix_time::milliseconds(receive_timeout_));
+      bytes_read_ = 0;
+
+      boost::asio::async_read(serial_, input_buffer_,
+#if BOOST_VERSION >= 104800
+			      (boost::lambda::var(ec_) = boost::lambda::_1,
+			       boost::lambda::var(bytes_read_) = boost::lambda::_2));
+#else
+       			      boost::bind(
+				&CruizCoreXG1010AcquisitionThread::handle_read,
+				this,
+				boost::asio::placeholders::error,
+				boost::asio::placeholders::bytes_transferred
+			      ));
+#endif
+
+      do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
+
+      input_buffer_.consume(input_buffer_.size());
+
+      logger->log_warn(name(), "EC: %s\n", ec_.message().c_str());
+    } while (!ec_ && bytes_read_ > 0);
+  } catch (boost::system::system_error &e) {
+    // ignore, just assume done, if there really is an error we'll                   
+    // catch it later on                                                             
+  }
+
+  send_init_packet(/ enable transfer / true);
+  */
+
+#if BOOST_VERSION >= 104700
+  tcflush(serial_.lowest_layer().native_handle(), TCIOFLUSH);
+#else
+  tcflush(serial_.lowest_layer().native(), TCIOFLUSH);
+#endif
+
+  // Try 10 times
+  const int NUM_TRIES = 10;
+  for (int t = 1; t <= NUM_TRIES; ++t) {
+    try {
+      ec_ = boost::asio::error::would_block;
+      bytes_read_ = 0;
+
+      deadline_.expires_from_now(boost::posix_time::milliseconds(receive_timeout_ * 10));
+      boost::asio::async_read_until(serial_, input_buffer_, std::string("\xff\xff"),
+#if BOOST_VERSION >= 104800
+				    (boost::lambda::var(ec_) = boost::lambda::_1,
+				     boost::lambda::var(bytes_read_) = boost::lambda::_2));
+#else
+       				    boost::bind(
+				      &CruizCoreXG1010AcquisitionThread::handle_read,
+				      this,
+				      boost::asio::placeholders::error,
+				      boost::asio::placeholders::bytes_transferred
+				    ));
+#endif
     
-  do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+      do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
 
-  if (ec) {
-    if (ec.value() == boost::system::errc::operation_canceled) {
-      throw Exception("Timeout (1) on initial synchronization");
-    } else {
-      throw Exception("Error (1) on initial synchronization: %s", ec.message().c_str());
+      if (ec_) {
+        if (ec_.value() == boost::system::errc::operation_canceled) {
+          throw Exception("Timeout (1) on initial synchronization");
+        } else {
+          throw Exception("Error (1) on initial synchronization: %s", ec_.message().c_str());
+        }
+      }
+
+      input_buffer_.consume(bytes_read_ - 2);
+
+      deadline_.expires_from_now(boost::posix_time::milliseconds(receive_timeout_));
+      ec_ = boost::asio::error::would_block;
+      bytes_read_ = 0;
+      boost::asio::async_read(serial_, input_buffer_,
+#if BOOST_VERSION >= 104800
+			      boost::asio::transfer_exactly(CRUIZCORE_XG1010_PACKET_SIZE - 2),
+			      (boost::lambda::var(ec_) = boost::lambda::_1,
+			       boost::lambda::var(bytes_read_) = boost::lambda::_2));
+#else
+			      transfer_exactly(CRUIZCORE_XG1010_PACKET_SIZE - 2),
+			      boost::bind(
+			        &CruizCoreXG1010AcquisitionThread::handle_read,
+			        this,
+			        boost::asio::placeholders::error,
+			        boost::asio::placeholders::bytes_transferred
+			      ));
+#endif
+
+      do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
+
+      if (ec_) {
+        if (ec_.value() == boost::system::errc::operation_canceled) {
+          throw Exception("Timeout (2) on initial synchronization");
+        } else {
+          throw Exception("Error (2) on initial synchronization: %s", ec_.message().c_str());
+        }
+      }
+
+      std::istream in_stream(&input_buffer_);
+      in_stream.read((char *)in_packet_, CRUIZCORE_XG1010_PACKET_SIZE);
+
+      parse_packet();
+    } catch (Exception &e) {
+      if (t == NUM_TRIES) {
+	e.append("Resync failed after %d tries", NUM_TRIES);
+	throw;
+      }
+      //else {
+	//logger->log_warn(name(), "Resync retry %i failed, retrying %i more time%s",
+	//		 t, NUM_TRIES - t, (NUM_TRIES - t == 1) ? "" : "s");
+      //}
     }
   }
-
-  input_buffer_.consume(bytes_read - 2);
-
-  deadline_.expires_from_now(boost::posix_time::milliseconds(receive_timeout_));
-  ec = boost::asio::error::would_block;
-  bytes_read = 0;
-  boost::asio::async_read(serial_, input_buffer_,
-			  boost::asio::transfer_exactly(CRUIZCORE_XG1010_PACKET_SIZE - 2),
-			  (boost::lambda::var(ec) = boost::lambda::_1,
-			   boost::lambda::var(bytes_read) = boost::lambda::_2));
-
-  do io_service_.run_one(); while (ec == boost::asio::error::would_block);
-
-  if (ec) {
-    if (ec.value() == boost::system::errc::operation_canceled) {
-      throw Exception("Timeout (2) on initial synchronization");
-    } else {
-      throw Exception("Error (2) on initial synchronization: %s", ec.message().c_str());
-    }
-  }
-
-  std::istream in_stream(&input_buffer_);
-  in_stream.read((char *)in_packet_, CRUIZCORE_XG1010_PACKET_SIZE);
-
-  parse_packet();
+  deadline_.expires_at(boost::posix_time::pos_infin);
 }
 
 
@@ -296,8 +462,16 @@ CruizCoreXG1010AcquisitionThread::close_device()
 void
 CruizCoreXG1010AcquisitionThread::parse_packet()
 {
+  /*
+  printf("Packet: ");
+  for (size_t i = 0; i < CRUIZCORE_XG1010_PACKET_SIZE; ++i) {
+    printf("%x ", in_packet_[i] & 0xff);
+  }
+  printf("\n");
+  */
+
   if( in_packet_[0] != 0xFF || in_packet_[1] != 0xFF ) {
-    throw Exception("%s: failed to parse packet, invalid header", name());
+    throw Exception("Failed to parse packet, invalid header");
   }
 
   short int rate  = ( in_packet_[2] & 0xFF) | ((in_packet_[3] << 8) & 0xFF00);
@@ -307,7 +481,14 @@ CruizCoreXG1010AcquisitionThread::parse_packet()
   if(((unsigned char)(checksum & 0xFF) != in_packet_[6]) ||
      ((unsigned char)((checksum>>8) & 0xFF) != in_packet_[7]))
   {
-    throw Exception("%s: failed to parse packet, checksum mismatch", name());
+    /*
+    printf("Packet: ");
+    for (size_t i = 0; i < CRUIZCORE_XG1010_PACKET_SIZE; ++i) {
+      printf("%x ", in_packet_[i] & 0xff);
+    }
+    printf("\n");
+    */
+    throw Exception("Failed to parse packet, checksum mismatch");
   }
 
   data_mutex_->lock();
@@ -335,9 +516,13 @@ void
 CruizCoreXG1010AcquisitionThread::check_deadline()
 {
   if (deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now()) {
-    serial_.close();
+    serial_.cancel();
     deadline_.expires_at(boost::posix_time::pos_infin);
   }
 
+#if BOOST_VERSION >= 104800
   deadline_.async_wait(boost::lambda::bind(&CruizCoreXG1010AcquisitionThread::check_deadline, this));
+#else
+  deadline_.async_wait(boost::bind(&CruizCoreXG1010AcquisitionThread::check_deadline, this));
+#endif
 }

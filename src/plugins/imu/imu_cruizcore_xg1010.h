@@ -52,9 +52,18 @@ class CruizCoreXG1010AcquisitionThread : public IMUAcquisitionThread
   void open_device();
   void close_device();
   void resync();
+  void send_init_packet(bool enable_transfer);
 
   void parse_packet();
   void check_deadline();
+
+#if BOOST_VERSION < 104800
+  void handle_read(boost::system::error_code ec, size_t bytes_read)
+  {
+    ec_ = ec;
+    bytes_read_ = bytes_read;
+  }
+#endif
 
  private:
   std::string  cfg_serial_;
@@ -69,6 +78,9 @@ class CruizCoreXG1010AcquisitionThread : public IMUAcquisitionThread
 
   unsigned int  receive_timeout_;
   unsigned char in_packet_[CRUIZCORE_XG1010_PACKET_SIZE];
+
+  boost::system::error_code ec_;
+  size_t bytes_read_;
 };
 
 
