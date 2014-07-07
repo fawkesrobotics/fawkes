@@ -24,7 +24,7 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "relgoto"
-fsm                = SkillHSM:new{name=name, start="RELGOTO", debug=false}
+fsm                = SkillHSM:new{name=name, start="INIT", debug=false}
 depends_skills     = nil
 depends_interfaces = {
    {v = "navigator", type = "NavigatorInterface"}
@@ -43,9 +43,9 @@ There are several forms to call this skill:
 1. relgoto(x, y[, ori[, margin]])
    This will goto the position giving in the relative cartesian coordinates, optionally with
    the given orientation.
-2. relgoto{x=X, y=Y[, ori=ORI][, margin=MARGIN]}
+2. relgoto{x=X, y=Y[, ori=ORI][, margin=MARGIN][, backwards=true]}
    Go to the relative cartesian coordinates (X,Y) with the optional final orientation ORI.
-3. relgoto{phi=PHI, dist=DIST[, ori=ORI], [margin=MARGIN]}
+3. relgoto{phi=PHI, dist=DIST[, ori=ORI][, margin=MARGIN][, backwards=true]}
    Same as 1., but with named arguments.
 
 Parameters:
@@ -55,6 +55,7 @@ ori:       orientation of robot at destination, radian offset from current value
            clock-wise positive
 margin:    radius of a circle around the destination point, if the robot is within
            that circle the goto is considered final.
+backwards: allow backwards driving for this command
 
 The skill is S_RUNNING as long as the target can still be reached, S_FINAL if the target
 has been reached (at least once, the robot might move afterwards for example if it did not
@@ -65,16 +66,19 @@ the navigator started processing another goto message.
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+-- Constants
+TIMEOUT_NAVI = 2.0
 
 -- Jumpconditions
-function jumpcond_navifail(state)
-   return (state.fsm.vars.msgid == 0
-	   or (state.fsm.vars.msgid ~= navigator:msgid() and state.wait_start > 25)
-	   or not navigator:has_writer()
-	   or state.failed)
+function jc_msgidfail(state)
+   return state.fsm.vars.msgid ~= navigator:msgid()
 end
 
-function jumpcond_navifinal(state)
+function jc_navifail(state)
+   return state.fsm.vars.msgid == 0 or not navigator:has_writer()
+end
+
+function jc_navifinal(state)
    --printf("msgid: %d/%d  final: %s", self.fsm.vars.msgid, navigator:msgid(), tostring(navigator:is_final()))
    return state.fsm.vars.msgid == navigator:msgid() and navigator:is_final()
 end
@@ -83,53 +87,84 @@ end
 -- States
 fsm:define_states{
    export_to=_M,
+   closure={navigator=navigator},
 
-   {"RELGOTO", JumpState}
+   {"INIT", JumpState},
+   {"RELGOTO", JumpState},
+
+   {"CHECK", JumpState},
+   {"CHECK_MSGFAIL", JumpState},
 }
 
 -- Transitions
 fsm:add_transitions{
-   {"RELGOTO", "FAILED", cond="vars.param_fail", desc="Invalid/insufficient parameters"},
-   {"RELGOTO", "FAILED", cond=jumpcond_navifail,  desc="Navigator failure"},
-   {"RELGOTO", "FINAL",  cond=jumpcond_navifinal, desc="Position reached"}
+   {"INIT", "FAILED", precond="not navigator:has_writer()", desc="No writer for navigator interface"},
+   {"INIT", "FAILED", cond="vars.param_fail", desc="Invalid/insufficient parameteres"},
+   {"INIT", "RELGOTO", cond=true, desc="Initialized"},
+
+   {"RELGOTO", "CHECK", cond=true, desc="sent message"},
+
+   {"CHECK", "CHECK_MSGFAIL", timeout=TIMEOUT_NAVI, desc="check msgid"},
+   {"CHECK", "FAILED", cond=jc_navifail,  desc="Navigator failure"},
+   {"CHECK", "FINAL",  cond=jc_navifinal, desc="Position reached"},
+
+   {"CHECK_MSGFAIL", "FAILED", precond=jc_msgidfail, desc="msgid mismatch"},
+   {"CHECK_MSGFAIL", "CHECK", precond=true, desc="msgid ok"}
 }
 
-function RELGOTO:init()
-   if navigator:has_writer() then
-      local vm = navigator.SetMaxVelocityMessage:new(2.0)
-      if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil or
-         self.fsm.vars[1] ~= nil and self.fsm.vars[2] ~= nil then
-         -- cartesian goto
-         local x = self.fsm.vars.x or self.fsm.vars[1]
-         local y = self.fsm.vars.y or self.fsm.vars[2]
-         local ori = self.fsm.vars.ori or self.fsm.vars[3] or math.atan2(y, x)
-         if math.sqrt(x*x + y*y) <= 0.5 then
-            vm = navigator.SetMaxVelocityMessage:new(1.0)
-         end
-         navigator:msgq_enqueue_copy(vm)
-         local m = navigator.CartesianGotoMessage:new(x, y, ori)
-         printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
-         self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
-      elseif self.fsm.vars.phi ~= nil and self.fsm.vars.dist ~= nil then
-         -- polar goto
-         local phi, dist = self.fsm.vars.phi, self.fsm.vars.dist
-         local ori = self.fsm.vars.ori or phi
-         if tonumber(dist) <= 0.5 then
-            vm = navigator.SetMaxVelocityMessage:new(1.0)
-         end
-         navigator:msgq_enqueue_copy(vm)
-         local m = navigator.PolarGotoMessage:new(phi, dist, ori)
-         printf("Sending PolarGotoMessage(%f, %f, %f)", phi, dist, ori)
-         self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
-      else
-         self.fsm.vars.param_fail = true
-      end
+function INIT:init()
+   if self.fsm.vars.x ~= nil and self.fsm.vars.y ~= nil or
+	  self.fsm.vars[1] ~= nil and self.fsm.vars[2] ~= nil then
+      local x = self.fsm.vars.x or self.fsm.vars[1]
+      local y = self.fsm.vars.y or self.fsm.vars[2]
+      -- cartesian goto
+	  self.fsm.vars.params = {x = x,
+	                          y = y,
+	                          ori = self.fsm.vars.ori or self.fsm.vars[3] or math.atan2(y, x)}
+   elseif self.fsm.vars.phi ~= nil and self.fsm.vars.dist ~= nil then
+
+	  -- polar goto
+	  local phi = self.fsm.vars.phi
+	  self.fsm.vars.params = {phi = phi,
+	                          dist = self.fsm.vars.dist,
+	                          ori = self.fsm.vars.ori or phi }
+   else
+	  self.fsm.vars.param_fail = true
    end
-   self.wait_start = 1
+
+   self.fsm.vars.drive_mode = navigator:drive_mode()
 end
 
-function RELGOTO:loop()
-   self.wait_start = self.wait_start + 1
+function RELGOTO:init()
+   if self.fsm.vars.backwards then
+      navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(navigator.SlowAllowBackward))
+   end
+
+   if self.fsm.vars.params.x ~= nil then
+	  local m = navigator.CartesianGotoMessage:new(self.fsm.vars.params.x,
+												   self.fsm.vars.params.y,
+												   self.fsm.vars.params.ori)
+	  printf("Sending CartesianGotoMessage(%f, %f, %f)", self.fsm.vars.params.x,
+														 self.fsm.vars.params.y,
+														 self.fsm.vars.params.ori)
+	  self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+   else
+	  local m = navigator.PolarGotoMessage:new(self.fsm.vars.params.phi,
+											   self.fsm.vars.params.dist,
+											   self.fsm.vars.params.ori)
+	  printf("Sending PolarGotoMessage(%f, %f, %f)", self.fsm.vars.params.phi,
+													 self.fsm.vars.params.dist,
+													 self.fsm.vars.params.ori)
+	  self.fsm.vars.msgid = navigator:msgq_enqueue_copy(m)
+   end
+
+end
+
+function CHECK:exit()
+   if self.fsm.vars.backwards then
+      --printf("resetting drive-mode to "..tostring(self.fsm.vars.drive_mode))
+      navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(self.fsm.vars.drive_mode))
+   end
 end
 
 function RELGOTO:reset()
