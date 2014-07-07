@@ -104,6 +104,14 @@ class YUVSpaceDemo
     }
   }
 
+  /** Get Brightness.
+   * @return current brightness
+   */
+  int get_brightness() const
+  {
+    return brightness;
+  }
+
  private:
   unsigned char *buffer;
   int brightness;
@@ -154,12 +162,24 @@ main( int argc, char **argv )
 	} else if ( event.key.keysym.sym == SDLK_PAGEDOWN ) {
 	  yuvspace->brightness_down(20);
 	  display->show(yuv_buffer);
+
 	} else if ( event.key.keysym.sym == SDLK_ESCAPE ) {
 	  quit = true;
 	} else if ( event.key.keysym.sym == SDLK_q ) {
 	  quit = true;
 	}
 	break;
+
+      case SDL_MOUSEBUTTONDOWN:
+	{
+	  int x = event.button.x;
+	  int y = event.button.y;
+
+	  printf("YUV: %i %u %u\n", yuvspace->get_brightness(),
+		 x / 2, y / 2);
+	}
+	break;
+
       default:
 	break;
       }
