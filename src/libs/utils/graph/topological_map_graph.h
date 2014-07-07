@@ -45,6 +45,20 @@ class TopologicalMapGraph
   const std::vector<TopologicalMapNode> &  nodes() const;
   const std::vector<TopologicalMapEdge> &  edges() const;
 
+  const std::map<std::string, std::string> &  default_properties() const;
+  bool has_default_property(std::string property) const;
+
+  std::string default_property(std::string prop) const;
+  float default_property_as_float(std::string prop) const;
+  int   default_property_as_int(std::string prop) const;
+  bool  default_property_as_bool(std::string prop) const;
+
+  void set_default_property(std::string property, std::string value);
+  void set_default_property(std::string property, float value);
+  void set_default_property(std::string property, int value);
+  void set_default_property(std::string property, bool value);
+  void set_default_properties(std::map<std::string, std::string> &properties);
+
   TopologicalMapNode node(std::string name) const;
   bool node_exists(std::string name) const;
   TopologicalMapNode root_node() const;
@@ -102,6 +116,7 @@ class TopologicalMapGraph
   std::vector<TopologicalMapNode> nodes_;
   std::vector<TopologicalMapEdge> edges_;
   std::list<ChangeListener *>     change_listeners_;
+  std::map<std::string, std::string> default_properties_;
 
 };
 

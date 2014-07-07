@@ -31,10 +31,12 @@
 #include <utils/graph/topological_map_node.h>
 
 #include <ros/publisher.h>
+#include <visualization_msgs/MarkerArray.h>
 
 namespace fawkes {
   class TopologicalMapGraph;
 }
+
 
 class NavGraphVisualizationThread
 : public fawkes::Thread,
@@ -56,6 +58,9 @@ class NavGraphVisualizationThread
 
  private:
   void publish();
+  void add_circle_markers(visualization_msgs::MarkerArray &m, size_t &id_num,
+			  float center_x, float center_y, float radius, unsigned int arc_length,
+			  float r, float g, float b, float alpha, float line_width = 0.03);
 
  private:
   size_t last_id_num_;
