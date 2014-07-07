@@ -35,6 +35,7 @@
 #include <protobuf_comm/message_register.h>
 #include <list>
 
+
 namespace protobuf_comm {
   class ProtobufStreamClient;
 }
@@ -56,20 +57,29 @@ class GazsimCommThread
   void receive_msg(boost::asio::ip::udp::endpoint &endpoint,
 		       uint16_t component_id, uint16_t msg_type,
 		       std::shared_ptr<google::protobuf::Message> msg);
+  void receive_raw_msg(boost::asio::ip::udp::endpoint &endpoint,
+		       protobuf_comm::frame_header_t &header, void * data,
+		       size_t length);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
   std::vector<protobuf_comm::ProtobufBroadcastPeer*> peers_;
+  std::vector<protobuf_comm::ProtobufBroadcastPeer*> peers_crypto1_;
+  std::vector<protobuf_comm::ProtobufBroadcastPeer*> peers_crypto2_;
 
   //config values
   std::vector<std::string> addresses_;
   std::vector<unsigned int> send_ports_;
   std::vector<unsigned int> recv_ports_;
-  //std::string address_;
-  //unsigned int send_port_;
-  //unsigned int recv_port_;
+  std::vector<unsigned int> send_ports_crypto1_;
+  std::vector<unsigned int> recv_ports_crypto1_;
+  std::vector<unsigned int> send_ports_crypto2_;
+  std::vector<unsigned int> recv_ports_crypto2_;
+  
+  bool use_crypto1_, use_crypto2_;
+
   std::vector<std::string> proto_dirs_;
   double package_loss_;
 
