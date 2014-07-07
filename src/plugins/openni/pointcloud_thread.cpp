@@ -157,6 +157,21 @@ OpenNiPointCloudThread::init()
   __image_gen->WaitAndUpdateData();
 
   if (__cfg_register_depth_image) {
+    // RegistrationType should be 2 (software) for Kinect, 1 (hardware) for PS
+    // (from ROS openni_camera)
+    unsigned short usb_vendor = 0, usb_product = 0;
+    fawkes::openni::get_usb_info(*__depth_gen, usb_vendor, usb_product);
+
+    if ( (usb_vendor == 0x045e) && (usb_product == 0x02ae) ) {
+      if (__depth_gen->SetIntProperty("RegistrationType", 2) != XN_STATUS_OK) {
+	throw Exception("Failed to set registration type");
+      }
+    } else {
+      if (__depth_gen->SetIntProperty("RegistrationType", 1) != XN_STATUS_OK) {
+	throw Exception("Failed to set registration type");
+      }
+    }
+
     logger->log_info(name(), "Setting depth alternate viewpoint to image");
     fawkes::openni::setup_alternate_viewpoint(*__depth_gen, *__image_gen);
   }

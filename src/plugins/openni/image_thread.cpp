@@ -29,6 +29,7 @@
 #include <fvutils/color/bayer.h>
 #include <fvutils/color/yuv.h>
 #include <fvutils/color/yuvrgb.h>
+#include <fvutils/color/rgbyuv.h>
 
 #include <memory>
 
@@ -73,29 +74,7 @@ OpenNiImageThread::init()
 
   fawkes::openni::setup_map_generator(*__image_gen, config);
 
-  __usb_vendor = 0;
-  __usb_product = 0;
-
-  xn::NodeInfo image_info = __image_gen->GetInfo();
-  xn::NodeInfoList &depnodes = image_info.GetNeededNodes();
-  for (xn::NodeInfoList::Iterator n = depnodes.Begin(); n != depnodes.End(); ++n) {
-    const XnProductionNodeDescription &pnd = (*n).GetDescription();
-
-    if ((pnd.Type == XN_NODE_TYPE_DEVICE) &&
-        (strcmp(pnd.strVendor, "PrimeSense") == 0) &&
-	(strcmp(pnd.strName, "SensorV2") == 0) )
-    {
-      // it's the primesense device node and we can check for USB vendor/product
-      unsigned short int vendor = 0, product = 0;
-      unsigned char bus = 0, addr = 0;
-      if (sscanf((*n).GetCreationInfo(), "%04hx/%04hx@%hhu/%hhu", &vendor, &product, &bus, &addr) == 4) {
-	logger->log_debug(name(), "Detected USB device (vendor: %04hx  product: %04hx  bus: %hhu  addr: %hhu)",
-			  vendor, product, bus, addr);
-	__usb_vendor  = vendor;
-	__usb_product = product;
-      }
-    }
-  }
+  fawkes::openni::get_usb_info(*__image_gen, __usb_vendor, __usb_product);
 
   if ( (__usb_vendor == 0x045e) && (__usb_product == 0x02ae) ) {
     // from OpenNI-PrimeSense/XnStreamParams.h:
@@ -138,13 +117,6 @@ OpenNiImageThread::init()
     if (__image_gen->SetPixelFormat(XN_PIXEL_FORMAT_YUV422) != XN_STATUS_OK) {
       throw Exception("Failed to set pixel format");
     }
-    /*
-    // RegistrationType should be 2 (software) for Kinect, 1 (hardware) for PS
-    // (from ROS openni_camera)
-    if (__depth_gen->SetIntProperty ("RegistrationType", 1) != XN_STATUS_OK) {
-      throw Exception("Failed to set registration type");
-    }
-    */
     __cfg_copy_mode = CONVERT_YUV;
   }
 
@@ -158,10 +130,11 @@ OpenNiImageThread::init()
   /*
   const char *pixel_format = "unknown";
   switch (__image_gen->GetPixelFormat()) {
-  case XN_PIXEL_FORMAT_RGB24:            pixel_format = "RGB24"; break;
+  case XN_PIXEL_FORMAT_RGB24:            pixel_format = "RGB24"; __cfg_copy_mode = CONVERT_RGB; break;
   case XN_PIXEL_FORMAT_YUV422:           pixel_format = "YUV422"; break;
   case XN_PIXEL_FORMAT_GRAYSCALE_8_BIT:  pixel_format = "Gray8"; break;
   case XN_PIXEL_FORMAT_GRAYSCALE_16_BIT: pixel_format = "Gray16"; break; 	
+  case XN_PIXEL_FORMAT_MJPEG:            pixel_format = "MJPEG"; break; 	
   }
 
   XnUInt64 input_format;
@@ -219,31 +192,41 @@ OpenNiImageThread::loop()
   lock.unlock();
 
   if (is_image_new && (__image_buf_yuv->num_attached() > 1)) {
+    __image_buf_yuv->lock_for_write();
     if (__cfg_copy_mode == DEBAYER_BILINEAR) {
       bayerGRBG_to_yuv422planar_bilinear(image_data, __image_buf_yuv->buffer(),
 					 __image_width, __image_height);
     } else if (__cfg_copy_mode == CONVERT_YUV) {
       yuv422packed_to_yuv422planar(image_data, __image_buf_yuv->buffer(),
 				   __image_width, __image_height);
+    } else if (__cfg_copy_mode == CONVERT_RGB) {
+      rgb_to_yuv422planar_plainc(image_data, __image_buf_yuv->buffer(),
+				 __image_width, __image_height);
     } else if (__cfg_copy_mode == DEBAYER_NEAREST_NEIGHBOR) {
       bayerGRBG_to_yuv422planar_nearest_neighbour(image_data,
 						  __image_buf_yuv->buffer(),
 						  __image_width, __image_height);
     }
     __image_buf_yuv->set_capture_time(&ts);
+    __image_buf_yuv->unlock();
   }
 
   if (is_image_new && (__image_buf_rgb->num_attached() > 1)) {
+    __image_buf_rgb->lock_for_write();
     if (__cfg_copy_mode == DEBAYER_BILINEAR) {
       bayerGRBG_to_rgb_bilinear(image_data, __image_buf_rgb->buffer(),
                                 __image_width, __image_height);
     } else if (__cfg_copy_mode == CONVERT_YUV) {
       yuv422packed_to_rgb_plainc(image_data, __image_buf_rgb->buffer(),
                                  __image_width, __image_height);
+    } else if (__cfg_copy_mode == CONVERT_RGB) {
+      memcpy(__image_buf_rgb->buffer(), image_data,
+	     colorspace_buffer_size(RGB, __image_width, __image_height));
     } else if (__cfg_copy_mode == DEBAYER_NEAREST_NEIGHBOR) {
       bayerGRBG_to_rgb_nearest_neighbour(image_data, __image_buf_rgb->buffer(),
                                          __image_width, __image_height);
     }
     __image_buf_rgb->set_capture_time(&ts);
+    __image_buf_rgb->unlock();
   }
 }

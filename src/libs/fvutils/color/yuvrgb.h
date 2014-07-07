@@ -91,7 +91,7 @@ void yuv422planar_to_rgb_plainc(const unsigned char *planar, unsigned char *RGB,
 				unsigned int width, unsigned int height);
 
 void yuv422packed_to_rgb_plainc(const unsigned char *planar, unsigned char *RGB,
-				unsigned int width, unsigned int height);
+				const unsigned int width, const unsigned int height);
 
 void yuv422planar_to_bgr_plainc(const unsigned char *planar, unsigned char *BGR,
 				unsigned int width, unsigned int height);
