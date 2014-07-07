@@ -91,6 +91,8 @@ class CLaserOccupancyGrid : public OccupancyGrid
 
   void updateLaser();
 
+  void validate_old_laser_points(cart_coord_2d_t pos_robot, cart_coord_2d_t pos_new_laser_point);
+
   std::vector< LaserPoint >* transformLaserPoints(std::vector< LaserPoint >& laserPoints, tf::StampedTransform& transform);
 
   /** Integrate historical readings to the current occgrid. */
@@ -139,6 +141,12 @@ class CLaserOccupancyGrid : public OccupancyGrid
 
   bool cfg_obstacle_inc_ ;          /**< increasing obstacles or not */
   bool cfg_force_elipse_obstacle_;  /**< the used shape for obstacles */
+
+  bool  cfg_delete_invisible_old_obstacles_; /**< delete old invalid obstables or not */
+  int   cfg_delete_invisible_old_obstacles_angle_min_ ;  /**< the min angle for old obstacles */
+  int   cfg_delete_invisible_old_obstacles_angle_max_ ;  /**< the max angle for old obstacles */
+  float m_angle_min_;   /**< the angle min in rad */
+  float m_angle_range_; /**< the angle range from min - max */
 
   /** Offsets to robot center */
   cart_coord_2d_t offset_laser_; /**< in meters */

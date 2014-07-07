@@ -37,6 +37,8 @@
 
 #include <cmath>
 
+#include <pcl/common/distances.h>
+
 namespace fawkes
 {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -72,6 +74,26 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
   m_MaxHistoryLength    = config->get_float((cfg_prefix + "laser_occupancy_grid/history/max_length").c_str());
   m_MinHistoryLength    = config->get_float((cfg_prefix + "laser_occupancy_grid/history/min_length").c_str());
   m_MinimumLaserLength  = config->get_float((cfg_prefix + "laser/min_reading_length").c_str());
+
+  cfg_delete_invisible_old_obstacles_           = config->get_bool((cfg_prefix + "laser_occupancy_grid/history/delete_invisible_old_obstacles/enable").c_str());
+  cfg_delete_invisible_old_obstacles_angle_min_ = config->get_int((cfg_prefix + "laser_occupancy_grid/history/delete_invisible_old_obstacles/angle_min").c_str());
+  cfg_delete_invisible_old_obstacles_angle_max_ = config->get_int((cfg_prefix + "laser_occupancy_grid/history/delete_invisible_old_obstacles/angle_max").c_str());
+  if ( cfg_delete_invisible_old_obstacles_angle_min_ >= 360 ) {
+    logger_->log_warn("CLaserOccupancyGrid", "Min angle out of bounce, use 0");
+    cfg_delete_invisible_old_obstacles_angle_min_ = 0;
+  }
+  if ( cfg_delete_invisible_old_obstacles_angle_min_ >= 360 ) {
+    logger_->log_warn("CLaserOccupancyGrid", "Max angle out of bounce, use 360");
+    cfg_delete_invisible_old_obstacles_angle_min_ = 360;
+  }
+
+  if (cfg_delete_invisible_old_obstacles_angle_max_ > cfg_delete_invisible_old_obstacles_angle_min_) {
+    m_angle_range_ = deg2rad((unsigned int)abs(cfg_delete_invisible_old_obstacles_angle_max_ - cfg_delete_invisible_old_obstacles_angle_min_));
+  } else {
+    m_angle_range_ = deg2rad((360 - cfg_delete_invisible_old_obstacles_angle_min_) + cfg_delete_invisible_old_obstacles_angle_max_);
+  }
+  m_angle_min_ = deg2rad( cfg_delete_invisible_old_obstacles_angle_min_ );
+
 
   m_reference_frame     = config->get_string((cfg_prefix + "frame/odometry").c_str());
   m_laser_frame         = config->get_string((cfg_prefix + "frame/laser").c_str());       //TODO change to base_link => search in base_link instead base_laser
@@ -185,6 +207,9 @@ CLaserOccupancyGrid::updateLaser()
       try {
         tf_listener->lookup_transform(m_reference_frame, laser_frame, laser_time, transform);
 
+        tf::Vector3 pos_robot_tf = transform.getOrigin();
+        cart_coord_2d_t pos_robot(pos_robot_tf.getX(), pos_robot_tf.getY());
+
         double angle_inc = M_PI * 2. / 360.;
         tf::Point p;
         //Save all Points in refernce Frame
@@ -208,6 +233,13 @@ CLaserOccupancyGrid::updateLaser()
             point.timestamp = Time(laser_time);
 
             m_vNewReadings.push_back(point);
+
+            if ( cfg_delete_invisible_old_obstacles_ ) {
+              float angle_dist = angle_distance( m_angle_min_, point_polar.phi );
+              if ( angle_dist >= 0 && angle_dist <= m_angle_range_ ) {
+                validate_old_laser_points(pos_robot, point.coord);
+              }
+            }
           }
         }
       } catch(Exception &e) {
@@ -216,6 +248,54 @@ CLaserOccupancyGrid::updateLaser()
                 laser_frame.c_str(), m_reference_frame.c_str());
       }
     }
+  }
+}
+
+/**
+ * compare the given point with all old points to delete old-wrong-obstacles
+ * @param pos_robot           the robot pose where the point to compare with where taken
+ * @param pos_new_laser_point the position of the point to compare with
+ */
+void
+CLaserOccupancyGrid::validate_old_laser_points(cart_coord_2d_t pos_robot, cart_coord_2d_t pos_new_laser_point)
+{
+  std::vector< LaserPoint > old_readings_tmp;
+
+  Eigen::Vector4f pol(pos_robot.x, pos_robot.y, 0, 0);
+  Eigen::Vector4f ld(pos_new_laser_point.x - pos_robot.x , pos_new_laser_point.y - pos_robot.y, 0, 0);
+  double d_new = sqrt(ld[0]*ld[0] + ld[1]*ld[1]);
+
+  for ( std::vector< LaserPoint >::iterator it = m_vOldReadings.begin();
+      it != m_vOldReadings.end(); ++it ) {
+
+    //calculate distance between "old point" and "ray trace line of new point"
+    Eigen::Vector4f point((*it).coord.x, (*it).coord.y, 0, 0);
+
+    double d = sqrt( pcl::sqrPointToLineDistance( point, pol, ld ) );
+
+    cart_coord_2d_t point_old = (*it).coord;
+
+    if ( d < 0.003 ) {                                                          // if distance to line is in a threashold. ( arcsin(1°) * 0.2 > 0.003 (interferiance with next laser))
+      float x_p, y_p;                                                           //   calculate if old point is before or behind new point
+      x_p = point_old.x - pos_robot.x;                                          //   (from the view of the actual robot possition)
+      y_p = point_old.y - pos_robot.y;
+      float d_old = sqrt(x_p*x_p + y_p*y_p);
+
+      if ( ( d_new <= d_old + m_ObstacleDistance )                              // if d new < d old => old in shaddow, so keep it
+          || (x_p >= 0) != (ld[0] >= 0)                                         // or x or y are not in the same directions of the robot
+          || (y_p >= 0) != (ld[1] >= 0) ) {                                     // ( opposite beams => no realation)
+        old_readings_tmp.push_back( *it );
+      }                                                                         // non existing else: old not in shaddow => you can see throu it, so don't keep it
+    } else {                                                                    // if the old point is not close to the line (no relation)
+      old_readings_tmp.push_back( *it );
+    }
+  }
+
+  m_vOldReadings.clear();
+  m_vOldReadings.reserve( old_readings_tmp.size() );
+
+  for (unsigned int i = 0; i < old_readings_tmp.size(); ++i) {
+    m_vOldReadings.push_back( old_readings_tmp[i] );
   }
 }
 
@@ -389,7 +469,6 @@ void
 CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY, float inc, float vel,
                                            tf::StampedTransform& transform )
 {
-  //TODO: for all in list
   std::vector< CLaserOccupancyGrid::LaserPoint >* pointsTransformed = transformLaserPoints(m_vNewReadings, transform);
 
   int numberOfReadings = pointsTransformed->size();
@@ -427,6 +506,7 @@ CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY, float inc, float 
     }
   }
   delete pointsTransformed;
+  //TODO shoud " m_vNewReadings.clear(); " be called here, since the data was used and will not be used again?
 }
 
 void

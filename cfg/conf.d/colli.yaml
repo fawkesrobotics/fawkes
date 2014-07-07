@@ -186,6 +186,18 @@ plugins/colli:
       # the min time difference of the laser reading history for the search in seconds
       min_length: 1.5
 
+      # this enables the compare between old and new laser readings.
+      # if this is enabled, the colli checks if new obstacles can see through old obstacles,
+      # if this is the case, the old obstacles are deleted
+      delete_invisible_old_obstacles:
+        enable: true
+
+        # The angle inbetween old obstacles been deleted.
+        # The angle area is always from min -> max, where 0 is the front
+        # Unit is deg as int (360° if).
+        angle_min: 280
+        angle_max: 80
+
     buffer_size: 2
 
     # costs of the cells in the occupancy grid
