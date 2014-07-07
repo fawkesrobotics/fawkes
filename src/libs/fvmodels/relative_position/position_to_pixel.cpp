@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "pixelFromPosition.h"
+#include "position_to_pixel.h"
 
 #include <utils/math/coord.h>
 #include <core/exceptions/software.h>
@@ -29,7 +29,7 @@ namespace firevision {
 /**
  *
  */
-PixelFromPosition::PixelFromPosition(  fawkes::tf::Transformer* tf, std::string cam_frame,
+PositionToPixel::PositionToPixel(  fawkes::tf::Transformer* tf, std::string cam_frame,
                               float cam_aperture_x, float cam_aperture_y,
                               unsigned int cam_width_x, unsigned int cam_height_y, float cam_angle_y )
 {
@@ -69,7 +69,7 @@ PixelFromPosition::~PixelFromPosition()
  *          LookupException
  */
 fawkes::upoint_t
-PixelFromPosition::get_pixel_position(fawkes::cart_coord_3d_t& position, std::string& frame, const fawkes::Time& time)
+PositionToPixel::get_pixel_position(fawkes::cart_coord_3d_t& position, std::string& frame, const fawkes::Time& time)
 {
   fawkes::upoint_t pixel_in_cam;
 

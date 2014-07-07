@@ -29,14 +29,15 @@
 #include <string>
 
 namespace firevision {
-class PixelFromPosition
+
+class PositionToPixel
 {
 public:
-  PixelFromPosition(  fawkes::tf::Transformer* tf, std::string cam_frame,
+  PositionToPixel(  fawkes::tf::Transformer* tf, std::string cam_frame,
                   float cam_aperture_x, float cam_aperture_y,
                   unsigned int cam_width_x, unsigned int cam_height_y, float cam_angle_y = 0 );
   virtual
-  ~PixelFromPosition();
+  ~PositionToPixel();
 
   fawkes::upoint_t get_pixel_position(fawkes::cart_coord_3d_t& position, std::string& frame, const fawkes::Time& time);
 
