@@ -1,5 +1,6 @@
 HumanSkeletonProjectionInterface.h
 KatanaInterface.h
+LaserLineInterface.h
 NaoJointPositionInterface.h
 NaoJointStiffnessInterface.h
 NaoSensorInterface.h

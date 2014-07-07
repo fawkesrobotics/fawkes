@@ -1,12 +1,9 @@
 
 /***************************************************************************
- *  laserht_plugin.h - Fawkes Laser Hough Transform plugin
+ *  cluster_colors.h - Visualization cluster colors
  *
- *  Created: Sat Jul 04 21:34:07 2009 (RoboCup 2009, Graz)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
- *  $Id: laser_plugin.h 1486 2008-10-29 18:08:45Z tim $
- *
+ *  Created: Mon Nov 14 12:06:39 2011 (from tabletop-objects)
+ *  Copyright  2011-2013  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -22,16 +19,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASERHT_LASERHT_PLUGIN_H_
-#define __PLUGINS_LASERHT_LASERHT_PLUGIN_H_
+#ifndef __PLUGINS_LASER_CLUSTER_CLUSTER_COLORS_H_
+#define __PLUGINS_LASER_CLUSTER_CLUSTER_COLORS_H_
 
-#include <core/plugin.h>
+#include <stdint.h>
 
-class LaserHoughTransformPlugin : public fawkes::Plugin
-{
- public:
-  LaserHoughTransformPlugin(fawkes::Configuration *config);
-};
+#define MAX_LINES 12
+
+static const uint8_t line_colors[MAX_LINES][3] =
+  { {255, 0, 0}, {176, 0, 30}, {255, 90, 0}, {137, 82, 39}, {56, 23, 90}, {99, 0, 30},
+    {0, 255, 0}, {0, 0, 255}, {255, 255, 0}, {255, 0, 255}, {0, 255, 255}, {27, 117, 196}};
 
 #endif
-

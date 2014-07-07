@@ -1,0 +1,33 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/laser-cluster
+---
+laser-lines:
+
+  # Automatically start, i.e. set enabled to true?
+  auto-start: true
+
+  # Maximum number of iterations to perform for line segmentation
+  line_segmentation_max_iterations: 250
+
+  # Segmentation distance threshold; m
+  line_segmentation_distance_threshold: 0.1
+
+  # Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0
+  line_segmentation_min_inliers: 20
+
+  line_min_size: 20
+
+  # The maximum number of clusters to publish on the blackboard
+  # The interfaces will be named "Laser Cluster N" for N=1..max_num_clusters
+  max_num_lines: 3
+  
+  # The frame in which the result should be published; frame
+  result_frame: /base_link
+
+  switch_tolerance: 0.3
+
+  # input laser cloud
+  input_cloud: lase_edl-360
+  #input_cloud: Line-Sector

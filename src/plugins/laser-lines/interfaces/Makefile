@@ -1,8 +1,8 @@
 #*****************************************************************************
-#         Makefile Build System for Fawkes : Laser Hough Transform QA
+#              Makefile Build System for Fawkes: laser-lines interfaces
 #                            -------------------
-#   Created on Wed Dec 30 12:00:00 2009
-#   Copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Fri May 23 18:19:56 2014
+#   Copyright (C) 2006-2014 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -14,12 +14,11 @@
 #*****************************************************************************
 
 BASEDIR = ../../../..
+
 include $(BASEDIR)/etc/buildsys/config.mk
 
-OBJS_qa_lineht := qa_lineht.o ../hough_transform.o
-LIBS_qa_lineht := fawkescore fawkesutils
-
-OBJS_all = $(OBJS_qa_lineht)
-BINS_all = $(BINDIR)/qa_lineht
+INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
+include $(BUILDSYSDIR)/interface.mk
 
 include $(BUILDSYSDIR)/base.mk
+
