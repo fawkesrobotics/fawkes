@@ -62,6 +62,9 @@ ProtobufStreamClient::ProtobufStreamClient()
   connected_ = false;
   outbound_active_ = false;
   in_data_size_ = 1024;
+  frame_header_version_ = PB_FRAME_V2;
+  in_frame_header_size_ = sizeof(frame_header_t);
+  in_frame_header_ = malloc(in_frame_header_size_);
   in_data_ = malloc(in_data_size_);
   run_asio();
 }
@@ -80,21 +83,33 @@ ProtobufStreamClient::ProtobufStreamClient(std::vector<std::string> &proto_path)
   outbound_active_ = false;
   in_data_size_ = 1024;
   in_data_ = malloc(in_data_size_);
+  frame_header_version_ = PB_FRAME_V2;
+  in_frame_header_size_ = sizeof(frame_header_t);
+  in_frame_header_ = malloc(in_frame_header_size_);
   run_asio();
 }
 
 
 /** Constructor.
  * @param mr message register to use to (de)serialize messages
+ * @param header_version protobuf protocol frame header version to use,
  */
-ProtobufStreamClient::ProtobufStreamClient(MessageRegister *mr)
+ProtobufStreamClient::ProtobufStreamClient(MessageRegister *mr,
+					   frame_header_version_t header_version)
   : resolver_(io_service_), socket_(io_service_), io_service_work_(io_service_),
-    message_register_(mr), own_message_register_(false)
+    message_register_(mr), own_message_register_(false),
+    frame_header_version_(header_version)
 {
   connected_ = false;
   outbound_active_ = false;
   in_data_size_ = 1024;
   in_data_ = malloc(in_data_size_);
+  if (frame_header_version_ == PB_FRAME_V1) {
+    in_frame_header_size_ = sizeof(frame_header_v1_t);
+  } else {
+    in_frame_header_size_ = sizeof(frame_header_t);
+  }
+  in_frame_header_ = malloc(in_frame_header_size_);
   run_asio();
 }
 
@@ -106,6 +121,7 @@ ProtobufStreamClient::~ProtobufStreamClient()
   io_service_.stop();
   asio_thread_.join();
   free(in_data_);
+  free(in_frame_header_);
   if (own_message_register_) {
     delete message_register_;
   }
@@ -196,7 +212,7 @@ void
 ProtobufStreamClient::start_recv()
 {
   boost::asio::async_read(socket_,
-			  boost::asio::buffer(&in_frame_header_, sizeof(frame_header_t)),
+			  boost::asio::buffer(in_frame_header_, in_frame_header_size_),
 			  boost::bind(&ProtobufStreamClient::handle_read_header,
 				      this, boost::asio::placeholders::error));
 }
@@ -205,7 +221,14 @@ void
 ProtobufStreamClient::handle_read_header(const boost::system::error_code& error)
 {
   if (! error) {
-    size_t to_read = ntohl(in_frame_header_.payload_size);
+    size_t to_read;
+    if (frame_header_version_ == PB_FRAME_V1) {
+      frame_header_v1_t *frame_header = (frame_header_v1_t *)in_frame_header_;
+      to_read = ntohl(frame_header->payload_size);
+    } else {
+      frame_header_t *frame_header = (frame_header_t *)in_frame_header_;
+      to_read = ntohl(frame_header->payload_size);
+    }
     if (to_read > in_data_size_) {
       void *new_data = realloc(in_data_, to_read);
       if (new_data) {
@@ -231,14 +254,36 @@ void
 ProtobufStreamClient::handle_read_message(const boost::system::error_code& error)
 {
   if (! error) {
-    uint16_t comp_id   = ntohs(in_frame_header_.component_id);
-    uint16_t msg_type  = ntohs(in_frame_header_.msg_type);
+    frame_header_t frame_header;
+    message_header_t message_header;
+    void *data;
+
+    if (frame_header_version_ == PB_FRAME_V1) {
+      frame_header_v1_t *frame_header_v1 = (frame_header_v1_t *)in_frame_header_;
+      frame_header.header_version = PB_FRAME_V1;
+      frame_header.cipher         = PB_ENCRYPTION_NONE;
+      frame_header.payload_size   = htonl(ntohl(frame_header_v1->payload_size) + sizeof(message_header_t));
+      message_header.component_id = frame_header_v1->component_id;
+      message_header.msg_type     = frame_header_v1->msg_type;
+      data = in_data_;
+    } else {
+      memcpy(&frame_header, in_frame_header_, sizeof(frame_header_t));
+
+      message_header_t *msg_header = static_cast<message_header_t *>(in_data_);
+      message_header.component_id = msg_header->component_id;
+      message_header.msg_type     = msg_header->msg_type;
+
+      data = (char *)in_data_ + sizeof(message_header);
+    }
+
+    uint16_t comp_id   = ntohs(message_header.component_id);
+    uint16_t msg_type  = ntohs(message_header.msg_type);
     try {
       std::shared_ptr<google::protobuf::Message> m =
-	message_register_->deserialize(in_frame_header_, in_data_);
+	message_register_->deserialize(frame_header, message_header, data);
+
       sig_rcvd_(comp_id, msg_type, m);
     } catch (std::runtime_error &e) {
-      //printf("Deserializing of message failed: %s\n", e.what());
       sig_recv_failed_(comp_id, msg_type, e.what());
     }
 
@@ -291,10 +336,22 @@ ProtobufStreamClient::send(uint16_t component_id, uint16_t msg_type,
 
   QueueEntry *entry = new QueueEntry();
   message_register_->serialize(component_id, msg_type, m,
-			       entry->frame_header, entry->serialized_message);
+			       entry->frame_header, entry->message_header,
+			       entry->serialized_message);
 
-  entry->buffers[0] = boost::asio::buffer(&entry->frame_header, sizeof(frame_header_t));
-  entry->buffers[1] = boost::asio::buffer(entry->serialized_message);
+  if (frame_header_version_ == PB_FRAME_V1) {
+    entry->frame_header_v1.component_id = entry->message_header.component_id;
+    entry->frame_header_v1.msg_type     = entry->message_header.msg_type;
+    entry->frame_header_v1.payload_size =
+      htonl(ntohl(entry->frame_header.payload_size) - sizeof(message_header_t));
+
+    entry->buffers[0] = boost::asio::buffer(&entry->frame_header_v1, sizeof(frame_header_v1_t));
+    entry->buffers[1] = boost::asio::const_buffer();
+  } else {
+    entry->buffers[0] = boost::asio::buffer(&entry->frame_header, sizeof(frame_header_t));
+    entry->buffers[1] = boost::asio::buffer(&entry->message_header, sizeof(message_header_t));
+  }
+  entry->buffers[2] = boost::asio::buffer(entry->serialized_message);
  
   std::lock_guard<std::mutex> lock(outbound_mutex_);
   if (outbound_active_) {

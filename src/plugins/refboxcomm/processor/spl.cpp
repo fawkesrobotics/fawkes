@@ -53,8 +53,10 @@ static const uint8_t   SPL_STATE_SET      = 2;
 static const uint8_t   SPL_STATE_PLAYING  = 3;
 static const uint8_t   SPL_STATE_FINISHED = 4;
 
+/*
 static const uint8_t   SPL_STATE2_NORMAL       = 0;
 static const uint8_t   SPL_STATE2_PENALTYSHOOT = 1;
+*/
 
 static const uint8_t   SPL_PENALTY_NONE               =  0;
 #ifdef USE_SPL_GC6
@@ -69,6 +71,7 @@ static const uint8_t   SPL_PENALTY_LEAVING            =  8;
 static const uint8_t   SPL_PENALTY_DAMAGE             =  9;
 static const uint8_t   SPL_PENALTY_MANUAL             = 10;
 #else
+/*
 static const uint8_t   SPL_PENALTY_BALL_HOLDING       =  1;
 static const uint8_t   SPL_PENALTY_PLAYER_PUSHING     =  2;
 static const uint8_t   SPL_PENALTY_OBSTRUCTION        =  3;
@@ -78,14 +81,17 @@ static const uint8_t   SPL_PENALTY_LEAVING_THE_FIELD  =  6;
 static const uint8_t   SPL_PENALTY_PLAYING_WITH_HANDS =  7;
 static const uint8_t   SPL_PENALTY_REQ_FOR_PICKUP     =  8;
 static const uint8_t   SPL_PENALTY_MANUAL             = 15;
+*/
 #endif
 
 // team numbers
 static const uint8_t   SPL_TEAM_BLUE                  =  0;
 static const uint8_t   SPL_TEAM_RED                   =  1;
 
+/*
 static const uint8_t   SPL_GOAL_BLUE                  =  0;
 static const uint8_t   SPL_GOAL_YELLOW                =  1;
+*/
 
 static const char    SPL_GAMECONTROL_HEADER[SPL_HEADER_SIZE] = {'R','G','m','e'};
 

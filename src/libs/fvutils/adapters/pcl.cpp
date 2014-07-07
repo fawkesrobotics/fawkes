@@ -51,7 +51,7 @@ convert_buffer_to_pcl(const SharedMemoryImageBuffer *buffer,
   pcl.is_dense = false;
   pcl.points.resize(width * height);
 
-  for (register unsigned int i = 0; i < width * height; ++i) {
+  for (unsigned int i = 0; i < width * height; ++i) {
     pcl::PointXYZ &p = pcl.points[i];
     const pcl_point_t &pt = pclbuf[i];
     p.x = pt.x;
@@ -80,7 +80,7 @@ convert_buffer_to_pcl(const SharedMemoryImageBuffer *buffer,
   pcl.is_dense = false;
   pcl.points.resize(width * height);
 
-  for (register unsigned int i = 0; i < width * height; ++i) {
+  for (unsigned int i = 0; i < width * height; ++i) {
     pcl::PointXYZRGB &p = pcl.points[i];
     const pcl_point_t &pt = pclbuf[i];
     p.x = pt.x;

@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_INTERFACE_PROXY_H
+#ifndef __BLACKBOARD_INTERFACE_PROXY_H_
 #define __BLACKBOARD_INTERFACE_PROXY_H_
 
 #include <interface/mediators/interface_mediator.h>

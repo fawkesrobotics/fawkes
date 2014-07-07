@@ -267,17 +267,21 @@ MessageRegister::new_message_for(std::string &full_name)
  * @param msg message to seialize
  * @param frame_header upon return, the frame header is filled out according to
  * the given information and message.
+ * @param message_header upon return, the frame header is filled out according to
+ * the given information and message.
  * @param data upon return, contains the serialized message
  */ 
 void
 MessageRegister::serialize(uint16_t component_id, uint16_t msg_type,
 			   google::protobuf::Message &msg,
-			   frame_header_t &frame_header, std::string &data)
+			   frame_header_t &frame_header,
+			   message_header_t &message_header, 
+			   std::string &data)
 {
   if (msg.SerializeToString(&data)) {
-    frame_header.component_id = htons(component_id);
-    frame_header.msg_type     = htons(msg_type);
-    frame_header.payload_size = htonl(data.size());
+    message_header.component_id = htons(component_id);
+    message_header.msg_type     = htons(msg_type);
+    frame_header.payload_size   = htonl(sizeof(message_header) + data.size());
   } else {
     throw std::runtime_error("Cannot serialize message");
   }
@@ -286,6 +290,7 @@ MessageRegister::serialize(uint16_t component_id, uint16_t msg_type,
 
 /** Deserialize message.
  * @param frame_header incoming message's frame header
+ * @param message_header incoming message's message header
  * @param data incoming message's data buffer
  * @return new instance of a protobuf message type that has been registered
  * for the given type.
@@ -294,15 +299,17 @@ MessageRegister::serialize(uint16_t component_id, uint16_t msg_type,
  * for the given component ID and message type.
  */
 std::shared_ptr<google::protobuf::Message>
-MessageRegister::deserialize(frame_header_t &frame_header, void *data)
+MessageRegister::deserialize(frame_header_t &frame_header, message_header_t &message_header, void *data)
 {
-  uint16_t comp_id   = ntohs(frame_header.component_id);
-  uint16_t msg_type  = ntohs(frame_header.msg_type);
-  size_t   data_size = ntohl(frame_header.payload_size);
+  uint16_t comp_id   = ntohs(message_header.component_id);
+  uint16_t msg_type  = ntohs(message_header.msg_type);
+  size_t   data_size = ntohl(frame_header.payload_size) - sizeof(message_header);
 
   std::shared_ptr<google::protobuf::Message> m =
     new_message_for(comp_id, msg_type);
-  m->ParseFromArray(data, data_size);
+  if (! m->ParseFromArray(data, data_size)) {
+    throw std::runtime_error("Failed to parse message");
+  }
 
   return m;
 }

@@ -243,7 +243,7 @@ AvahiThread::publish_service(NetworkService *service)
 void
 AvahiThread::unpublish_service(NetworkService *service)
 {
-  if ( __services.find(service) != __services.end() ) {
+  if ( __services.find(*service) != __services.end() ) {
     __pending_remove_services.push_locked(service);
   } else {
     throw Exception("Service not registered");
@@ -278,15 +278,9 @@ AvahiThread::create_service(const NetworkService &service, AvahiEntryGroup *exgr
     al = avahi_string_list_add(al, j->c_str());
   }
 
-  // only IPv4 for now
   int rv = AVAHI_ERR_COLLISION;
+  std::string name = service.modified_name() ? service.modified_name() : service.name();
   for (int i = 1; (i <= 100) && (rv == AVAHI_ERR_COLLISION); ++i) {
-    std::string name = service.name();
-    if (i > 1) {
-      name += " ";
-      name += StringConversions::to_string(i);
-    }
-    
     rv = avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC,
 					      AVAHI_PROTO_INET,
 					      AVAHI_PUBLISH_USE_MULTICAST,
@@ -295,8 +289,11 @@ AvahiThread::create_service(const NetworkService &service, AvahiEntryGroup *exgr
 					      service.host(),
 					      service.port(), al);
 
-    if ((i > 1) && (rv >= 0)) {
-      service.set_modified_name(name.c_str());
+    if (rv == AVAHI_ERR_COLLISION) {
+      char *n = avahi_alternative_service_name(name.c_str());
+      service.set_modified_name(n);
+      name = n;
+      avahi_free(n);
     }
   }
 
@@ -412,15 +409,16 @@ AvahiThread::name_collision(AvahiEntryGroup *g)
 {
   for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
     if ( (*__sit).second == g ) {
-      NetworkService alternate_service((*__sit).first);
+      NetworkService service = __sit->first;
+      std::string name = service.modified_name() ? service.modified_name() : service.name();
 
       /* A service name collision happened. Let's pick a new name */
       char *n = avahi_alternative_service_name((*__sit).first.name());
-      alternate_service.set_name(n);
+      service.set_modified_name(n);
       avahi_free(n);
 
-      __pending_remove_services.push_locked((*__sit).first);
-      __pending_services.push_locked(alternate_service);
+      __pending_remove_services.push_locked(service);
+      __pending_services.push_locked(service);
     }
   }
 }

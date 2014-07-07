@@ -112,10 +112,12 @@ ProtobufStreamServer::Session::send(uint16_t component_id, uint16_t msg_type,
 {
   QueueEntry *entry = new QueueEntry();
   parent_->message_register().serialize(component_id, msg_type, m,
-					entry->frame_header, entry->serialized_message);
+					entry->frame_header, entry->message_header,
+					entry->serialized_message);
 
   entry->buffers[0] = boost::asio::buffer(&entry->frame_header, sizeof(frame_header_t));
-  entry->buffers[1] = boost::asio::buffer(entry->serialized_message);
+  entry->buffers[1] = boost::asio::buffer(&entry->message_header, sizeof(message_header_t));
+  entry->buffers[2] = boost::asio::buffer(entry->serialized_message);
  
   std::lock_guard<std::mutex> lock(outbound_mutex_);
   if (outbound_active_) {
@@ -215,11 +217,14 @@ void
 ProtobufStreamServer::Session::handle_read_message(const boost::system::error_code& error)
 {
   if (! error) {
-    uint16_t comp_id   = ntohs(in_frame_header_.component_id);
-    uint16_t msg_type  = ntohs(in_frame_header_.msg_type);
+    message_header_t *message_header = static_cast<message_header_t *>(in_data_);
+
+    uint16_t comp_id   = ntohs(message_header->component_id);
+    uint16_t msg_type  = ntohs(message_header->msg_type);
     try {
       std::shared_ptr<google::protobuf::Message> m =
-	parent_->message_register().deserialize(in_frame_header_, in_data_);
+	parent_->message_register().deserialize(in_frame_header_, *message_header,
+						(char *)in_data_ + sizeof(message_header_t));
       parent_->sig_rcvd_(id_, comp_id, msg_type, m);
     } catch (std::runtime_error &e) {
       // ignored, most likely unknown message tpye
@@ -245,7 +250,7 @@ ProtobufStreamServer::Session::handle_read_message(const boost::system::error_co
  */
 ProtobufStreamServer::ProtobufStreamServer(unsigned short port)
   : io_service_(),
-    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v4(), port))
+    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v6(), port))
 {
   message_register_ = new MessageRegister();
   own_message_register_ = true;
@@ -267,7 +272,7 @@ ProtobufStreamServer::ProtobufStreamServer(unsigned short port)
 ProtobufStreamServer::ProtobufStreamServer(unsigned short port,
 					   std::vector<std::string> &proto_path)
   : io_service_(),
-    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v4(), port))
+    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v6(), port))
 {
   message_register_ = new MessageRegister(proto_path);
   own_message_register_ = true;
@@ -286,7 +291,7 @@ ProtobufStreamServer::ProtobufStreamServer(unsigned short port,
 ProtobufStreamServer::ProtobufStreamServer(unsigned short port,
 					   MessageRegister *mr)
   : io_service_(),
-    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v4(), port)),
+    acceptor_(io_service_, ip::tcp::endpoint(ip::tcp::v6(), port)),
     message_register_(mr), own_message_register_(false)
 {
   next_cid_ = 1;

@@ -200,9 +200,9 @@ convert_line_yuv422planar_to_yuv444packed(const unsigned char *src, unsigned cha
 					  unsigned int width, unsigned int height,
 					  unsigned int src_line, unsigned int dst_line)
 {
-  register unsigned int i = 0;
-  register YUV_t *y1, *y2;
-  register const unsigned char *yp, *up, *vp;
+  unsigned int i = 0;
+  YUV_t *y1, *y2;
+  const unsigned char *yp, *up, *vp;
 
   yp = src + (width * src_line);
   up = YUV422_PLANAR_U_PLANE(src, width, height) + (width * src_line / 2);

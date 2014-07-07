@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  decrypt.h - WorldInfo decryption routine
+ *  decrypt.h - Message decryption routine
  *
  *  Created: Thu May 03 15:53:20 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_WORLDINFO_DECRYPT_H_
-#define __NETCOMM_WORLDINFO_DECRYPT_H_
+#ifndef __NETCOMM_CRYPTO_DECRYPT_H_
+#define __NETCOMM_CRYPTO_DECRYPT_H_
 
 #include <core/exception.h>
 #include <cstddef>
@@ -36,11 +35,11 @@ class MessageDecryptionException : public Exception
 };
 
 
-class WorldInfoMessageDecryptor
+class MessageDecryptor
 {
  public:
-  WorldInfoMessageDecryptor(const unsigned char *key, const unsigned char *iv);
-  ~WorldInfoMessageDecryptor();
+  MessageDecryptor(const unsigned char *key, const unsigned char *iv);
+  ~MessageDecryptor();
 
   void set_plain_buffer(void *buffer, size_t buffer_length);
   void set_crypt_buffer(void *buffer, size_t buffer_length);

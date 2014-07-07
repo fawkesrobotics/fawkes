@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_RRDWEB_RRDEWB_PROCESSOR_H_
+#ifndef __PLUGINS_RRDWEB_RRDWEB_PROCESSOR_H_
 #define __PLUGINS_RRDWEB_RRDWEB_PROCESSOR_H_
 
 #include <webview/request_processor.h>

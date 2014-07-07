@@ -37,7 +37,7 @@ warn_avahi:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting mDNS/DNS-SD support$(TNORMAL) (Avahi not installed)"
 .PHONY: warning_libcrypto
 warning_libcrypto:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Building WorldInfo proto without encryption$(TNORMAL) (No OpenSSL/libcrypto installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting encryption support$(TNORMAL) (OpenSSL/libcrypto not found)"
 endif
 
 LIBS_libfawkesnetcomm = stdc++ m fawkescore fawkesutils

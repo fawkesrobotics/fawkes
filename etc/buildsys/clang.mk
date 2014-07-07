@@ -26,6 +26,10 @@ CLANG_VERSION_SPLITTED=$(call split,.,$(CLANG_VERSION))
 CLANG_VERSION_MAJOR=$(word 1,$(CLANG_VERSION_SPLITTED))
 CLANG_VERSION_MINOR=$(word 2,$(CLANG_VERSION_SPLITTED))
 
+clang_atleast_version = $(strip $(if $(call gt,$(CLANG_VERSION_MAJOR),$1),1,	\
+			  $(if $(call eq,$(CLANG_VERSION_MAJOR),$1),		\
+			    $(if $(call gte,$(CLANG_VERSION_MINOR),$2),1))))
+
 HAVE_CPP11=1
 CFLAGS_CPP11=-std=c++11
 

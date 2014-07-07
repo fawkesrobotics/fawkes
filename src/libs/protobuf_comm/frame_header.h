@@ -46,7 +46,65 @@ namespace protobuf_comm {
 
 #pragma pack(push,4)
 
-/** Network message framing header.
+#define PB_ENCRYPTION_NONE         0x00
+#define PB_ENCRYPTION_AES_128_ECB  0x01
+#define PB_ENCRYPTION_AES_128_CBC  0x02
+#define PB_ENCRYPTION_AES_256_ECB  0x03
+#define PB_ENCRYPTION_AES_256_CBC  0x04
+
+/** Network frame header version to use.
+ * V1 is the old version which for example is required to communicate with the
+ * LLSF Referee Box before RC2014
+ * V2 supports data encryption.
+ */
+typedef enum {
+  PB_FRAME_V1 = 1,	///< Version 1
+  PB_FRAME_V2 = 2	///< Version 2
+} frame_header_version_t;
+
+/** Network framing header.
+ * Header that is prepended to all messages. The payload size does
+ * not include the size of the header. All numbers are given in
+ * network byte order (big endian). The encryption type can be set if
+ * encryption is used. If the mode requires an initialization vector
+ * (IV) it is appended directly after the frame header (and not
+ * counted in the payload size).
+ * @author Tim Niemueller
+ */
+typedef struct {
+  /// Frame header version
+  uint8_t  header_version;
+  /// One of PB_ENCRYPTION_*
+  uint8_t  cipher;
+  /// reserved for future use
+  uint8_t  reserved_2;
+  /// reserved for future use
+  uint8_t  reserved_3;
+  /// payload size in bytes
+  /// includes message and
+  /// header, _not_ IV
+  uint32_t  payload_size;
+} frame_header_t;
+
+/** Network message header.
+ * Header that is prepended to all messages.
+ * The component ID can be used to route a message to a particular
+ * software component. The component then can use the message type to
+ * determine how the message must be parse the payload. It is appended
+ * immediately following the header. The payload size does not include
+ * the size of the header.
+ * All numbers are given in network byte order (big endian).
+ * @author Tim Niemueller
+ */
+typedef struct {
+  /// component id
+  uint16_t  component_id;
+  /// message type
+  uint16_t  msg_type;
+} message_header_t;
+
+
+/** Old network message framing header.
  * Header that is prepended to all messages.
  * The component ID can be used to route a message to a particular
  * software component. The component then can use the message type to
@@ -63,7 +121,7 @@ typedef struct {
   uint16_t  msg_type;
   /** payload size in bytes */
   uint32_t  payload_size;
-} frame_header_t;
+} frame_header_v1_t;
 
 #pragma pack(pop)
 

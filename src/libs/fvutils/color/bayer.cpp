@@ -812,9 +812,9 @@ void
 bayerGRBG_to_rgb_nearest_neighbour(const unsigned char *bayer, unsigned char *rgb,
                                    unsigned int width, unsigned int height)
 {
-  for (register unsigned int h = 0; h < height; h += 2) {
+  for (unsigned int h = 0; h < height; h += 2) {
     // g  r  ... line
-    for (register unsigned int w = 0; w < width; w += 2) {
+    for (unsigned int w = 0; w < width; w += 2) {
       *rgb++ = bayer[1];
       *rgb++ = bayer[width];
       *rgb++ = *bayer;
@@ -827,7 +827,7 @@ bayerGRBG_to_rgb_nearest_neighbour(const unsigned char *bayer, unsigned char *rg
     }
 
     // b  g  ... line
-    for (register unsigned int w = 0; w < width; w += 2) {
+    for (unsigned int w = 0; w < width; w += 2) {
       *rgb++ = *(bayer-width+1);
       *rgb++ = bayer[1];
       *rgb++ = *bayer;

@@ -38,8 +38,8 @@ void
 rgb_to_yuy2(const unsigned char *RGB, unsigned char *YUV, unsigned int width, unsigned int height)
 {
   unsigned int i, j;
-  register int y0, y1, u0, u1, v0, v1 ;
-  register int r, g, b;
+  int y0, y1, u0, u1, v0, v1 ;
+  int r, g, b;
 
   for (i = 0, j = 0; i < 3 * width * height; i += 6, j += 4) {
     r = RGB[i + 0];
@@ -78,15 +78,15 @@ void
 rgb_to_yuv411packed_plainc(const unsigned char *RGB, unsigned char *YUV,
 			   unsigned int width, unsigned int height)
 {
-  register unsigned int i = 0, j = 0;
-  register int y[4] = {0, 0, 0, 0}, u, v;
-  register RGB_t *r;
-  register unsigned int su = 0;
-  register unsigned int sv = 0;
+  unsigned int i = 0, j = 0;
+  int y[4] = {0, 0, 0, 0}, u, v;
+  RGB_t *r;
+  unsigned int su = 0;
+  unsigned int sv = 0;
 
   while (i < (width * height)) {
     r = (RGB_t *)RGB;
-    for (register unsigned int k = 0; j <= 4; ++j) {
+    for (unsigned int k = 0; j <= 4; ++j) {
       RGB2YUV(r->R, r->G, r->B, y[k], u, v);
       su += u;
       sv += v;
@@ -118,10 +118,10 @@ convert_line_rgb_to_yuv422planar(const unsigned char *RGB, unsigned char *YUV,
 				 unsigned int width, unsigned int height,
 				 unsigned int rgb_line, unsigned int yuv_line)
 {
-  register unsigned int i = 0;
-  register int y1, y2, u1, u2, v1, v2;
-  register RGB_t *r1, *r2;
-  register unsigned char *yp, *up, *vp;
+  unsigned int i = 0;
+  int y1, y2, u1, u2, v1, v2;
+  RGB_t *r1, *r2;
+  unsigned char *yp, *up, *vp;
 
   yp = YUV + (width * yuv_line);
   up = YUV422_PLANAR_U_PLANE(YUV, width, height) + (width * yuv_line / 2);
@@ -161,10 +161,10 @@ void
 rgb_to_yuv422planar_plainc(const unsigned char *RGB, unsigned char *YUV,
 			   unsigned int width, unsigned int height)
 {
-  register unsigned int i = 0;
-  register int y1, y2, u1, u2, v1, v2;
-  register RGB_t *r1, *r2;
-  register unsigned char *yp, *up, *vp;
+  unsigned int i = 0;
+  int y1, y2, u1, u2, v1, v2;
+  RGB_t *r1, *r2;
+  unsigned char *yp, *up, *vp;
 
   yp = YUV;
   up = YUV422_PLANAR_U_PLANE(YUV, width, height);
@@ -204,10 +204,10 @@ convert_line_rgb_to_yuv422packed(const unsigned char *RGB, unsigned char *YUV,
 				 unsigned int width, unsigned int height,
 				 unsigned int rgb_line, unsigned int yuv_line)
 {
-  register unsigned int i = 0;
-  register int y1, y2, u1, u2, v1, v2;
-  register RGB_t *r1, *r2;
-  register unsigned char *p;
+  unsigned int i = 0;
+  int y1, y2, u1, u2, v1, v2;
+  RGB_t *r1, *r2;
+  unsigned char *p;
 
   p = YUV + (width * yuv_line) * 2;
 
@@ -245,10 +245,10 @@ void
 rgb_to_yuv422packed_plainc(const unsigned char *RGB, unsigned char *YUV,
 			   unsigned int width, unsigned int height)
 {
-  register unsigned int i = 0;
-  register int y1, y2, u1, u2, v1, v2;
-  register RGB_t *r1, *r2;
-  register unsigned char *p;
+  unsigned int i = 0;
+  int y1, y2, u1, u2, v1, v2;
+  RGB_t *r1, *r2;
+  unsigned char *p;
 
   p = YUV;
 
@@ -275,14 +275,14 @@ void
 rgb_planar_to_yuv422packed_plainc(const unsigned char *rgb_planar, unsigned char *YUV,
 				  unsigned int width, unsigned int height)
 {
-  register const unsigned char *r = rgb_planar;
-  register const unsigned char *g = rgb_planar + (width * height);
-  register const unsigned char *b = rgb_planar + (width * height * 2);
+  const unsigned char *r = rgb_planar;
+  const unsigned char *g = rgb_planar + (width * height);
+  const unsigned char *b = rgb_planar + (width * height * 2);
 
-  register unsigned int i = 0;
-  register int y1, y2, u1, u2, v1, v2;
-  register unsigned char *p;
-  register unsigned char r1, r2, g1, g2, b1, b2;
+  unsigned int i = 0;
+  int y1, y2, u1, u2, v1, v2;
+  unsigned char *p;
+  unsigned char r1, r2, g1, g2, b1, b2;
 
   p = YUV;
 
@@ -319,10 +319,10 @@ void
 bgr_to_yuv422planar_plainc(const unsigned char *BGR, unsigned char *YUV,
 			   unsigned int width, unsigned int height)
 {
-  register unsigned int i = 0;
-  register int y1, y2, u1, u2, v1, v2;
-  register BGR_t *r1, *r2;
-  register unsigned char *yp, *up, *vp;
+  unsigned int i = 0;
+  int y1, y2, u1, u2, v1, v2;
+  BGR_t *r1, *r2;
+  unsigned char *yp, *up, *vp;
 
   yp = YUV;
   up = YUV422_PLANAR_U_PLANE(YUV, width, height);

@@ -21,7 +21,18 @@ include $(BUILDSYSDIR)/boost.mk
 REQ_BOOST_LIBS = thread asio system signals2
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-CFLAGS += $(CFLAGS_CPP11)
+ifneq ($(PKGCONFIG),)
+  HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --exists 'libcrypto'; echo $${?/1/}),1,0)
+  LIBCRYPTO_PKG  := libcrypto
+  ifneq ($(HAVE_LIBCRYPTO),1)
+    HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --exists 'openssl'; echo $${?/1/}),1,0)
+    LIBCRYPTO_PKG  := openssl
+  endif
+endif
+ifeq ($(HAVE_LIBCRYPTO),1)
+  CFLAGS_LIBCRYPTO  += -DHAVE_LIBCRYPTO $(shell $(PKGCONFIG) --cflags $(LIBCRYPTO_PKG))
+  LDFLAGS_LIBCRYPTO += $(shell $(PKGCONFIG) --libs $(LIBCRYPTO_PKG))
+endif
 
 LIBS_libfawkes_protobuf_comm = stdc++ m
 OBJS_libfawkes_protobuf_comm = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
@@ -29,9 +40,9 @@ HDRS_libfawkes_protobuf_comm = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SR
 
 OBJS_all = $(OBJS_libfawkes_protobuf_comm)
 
-ifeq ($(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),11)
-  CFLAGS  += $(CFLAGS_PROTOBUF) $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
-  LDFLAGS += $(LDFLAGS_PROTOBUF) $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
+ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),111)
+  CFLAGS  += $(CFLAGS_PROTOBUF) $(call boost-libs-cflags,$(REQ_BOOST_LIBS)) $(CFLAGS_CPP11) $(CFLAGS_LIBCRYPTO)
+  LDFLAGS += $(LDFLAGS_PROTOBUF) $(call boost-libs-ldflags,$(REQ_BOOST_LIBS)) $(LDFLAGS_LIBCRYPTO)
 
   LIBS_all  = $(LIBDIR)/libfawkes_protobuf_comm.so
 else

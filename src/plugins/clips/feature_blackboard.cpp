@@ -21,6 +21,7 @@
  */
 
 #include "feature_blackboard.h"
+#include <core/threading/mutex_locker.h>
 #include <blackboard/blackboard.h>
 #include <logging/logger.h>
 #include <utils/misc/string_conversions.h>
@@ -146,6 +147,8 @@ BlackboardCLIPSFeature::clips_blackboard_enable_time_read(std::string env_name)
     "  =>\n"
     "  (blackboard-read)\n"
     ")";
+
+  fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
   envs_[env_name]->build(bb_read_defrule);
 }
 
@@ -216,6 +219,7 @@ BlackboardCLIPSFeature::clips_assert_interface_type(std::string &env_name, std::
     "  (retract ?f)\n"
     ")";
 
+  fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
   if (envs_[env_name]->build(deftemplate) && envs_[env_name]->build(defrule)) {
     logger_->log_info(log_name.c_str(), "Deftemplate:\n%s", deftemplate.c_str());
     logger_->log_info(log_name.c_str(), "Defrule:\n%s", defrule.c_str());
@@ -351,6 +355,7 @@ BlackboardCLIPSFeature::clips_blackboard_read(std::string env_name)
     return;
   }
 
+  fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
   for (auto &iface_map : interfaces_[env_name]) {
     for (auto i : iface_map.second) {
       i->read();
@@ -404,6 +409,7 @@ BlackboardCLIPSFeature::clips_blackboard_get_info(std::string env_name)
 
   InterfaceInfoList *iil = blackboard_->list_all();
 
+  fawkes::MutexLocker lock(clips.objmutex_ptr());
   for (auto ii : *iil) {
     const Time *timestamp = ii.timestamp();
     clips->assert_fact_f("(blackboard-interface-info (id \"%s\") (type \"%s\") "

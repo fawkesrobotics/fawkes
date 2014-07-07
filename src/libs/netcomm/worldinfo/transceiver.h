@@ -39,8 +39,8 @@
 namespace fawkes {
 
 class Socket;
-class WorldInfoMessageEncryptor;
-class WorldInfoMessageDecryptor;
+class MessageEncryptor;
+class MessageDecryptor;
 class NetworkNameResolver;
 
 class WorldInfoException : public Exception
@@ -111,8 +111,8 @@ class WorldInfoTransceiver
   Socket *s;
   bool    loop;
 
-  WorldInfoMessageEncryptor *encryptor;
-  WorldInfoMessageDecryptor *decryptor;
+  MessageEncryptor *encryptor;
+  MessageDecryptor *decryptor;
 
   NetworkNameResolver       *resolver;
   bool                       resolver_delete;

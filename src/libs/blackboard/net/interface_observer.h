@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_NET_INTERFACE_OBSERVER
+#ifndef __BLACKBOARD_NET_INTERFACE_OBSERVER_H_
 #define __BLACKBOARD_NET_INTERFACE_OBSERVER_H_
 
 #include <blackboard/interface_observer.h>

@@ -21,6 +21,7 @@
 
 #include "clips_ros_thread.h"
 
+#include <core/threading/mutex_locker.h>
 #include <ros/this_node.h>
 #include <ros/master.h>
 #include <ros/network.h>
@@ -160,6 +161,7 @@ ClipsROSThread::clips_ros_get_nodes(std::string env_name)
     }
   }
 
+  fawkes::MutexLocker lock(clips.objmutex_ptr());
   CLIPS::Template::pointer temp = clips->get_template("ros-node");
   if (temp) {
     for (auto n : nodes) {
@@ -208,6 +210,7 @@ ClipsROSThread::clips_ros_get_topics(std::string env_name)
     return;
   }
 
+  fawkes::MutexLocker lock(clips.objmutex_ptr());
   CLIPS::Template::pointer temp = clips->get_template("ros-topic");
   if (temp) {
     for (auto t : topics) {
@@ -234,6 +237,7 @@ ClipsROSThread::clips_ros_get_topic_connections(std::string env_name)
   }
 
   LockPtr<CLIPS::Environment> &clips = envs_[env_name];
+  fawkes::MutexLocker lock(clips.objmutex_ptr());
 
   CLIPS::Template::pointer temp = clips->get_template("ros-topic-connection");
   if (! temp) {

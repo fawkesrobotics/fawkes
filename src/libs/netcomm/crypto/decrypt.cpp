@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  decrypt.cpp - WorldInfo decryption routine
+ *  decrypt.cpp - Message decryption routine
  *
  *  Created: Thu May 03 15:54:24 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -22,7 +21,7 @@
  */
 
 #include <core/exceptions/software.h>
-#include <netcomm/worldinfo/decrypt.h>
+#include <netcomm/crypto/decrypt.h>
 #ifdef HAVE_LIBCRYPTO
 #  include <openssl/evp.h>
 #else
@@ -31,7 +30,7 @@
 
 namespace fawkes {
 
-/** @class MessageDecryptionException <netcomm/worldinfo/decrypt.h>
+/** @class MessageDecryptionException <netcomm/crypto/decrypt.h>
  * Message decryption failed.
  * This exception shall be thrown if there was a problem decrypting a
  * world info message.
@@ -47,18 +46,18 @@ MessageDecryptionException::MessageDecryptionException(const char *msg)
 }
 
 
-/** @class WorldInfoMessageDecryptor <netcomm/worldinfo/decrypt.h>
- * WorldInfo message decryptor.
+/** @class MessageDecryptor <netcomm/crypto/decrypt.h>
+ * Message decryptor.
  * This class is used to decrypt world info message after they have been
  * received.
  *
- * This is the opposite part of WorldInfoMessageEncryptor.
+ * This is the opposite part of MessageEncryptor.
  *
  * This implementation uses OpenSSL for the AES encryption (in fact it uses the
  * accompanying libcrypto that comes with OpenSSL, not libopenssl itself). It is
  * almost everywhere available and easy to use.
  * 
- * @see WorldInfoMessageEncryptor
+ * @see MessageEncryptor
  * @ingroup NetComm
  * @author Tim Niemueller
  */
@@ -68,7 +67,7 @@ MessageDecryptionException::MessageDecryptionException(const char *msg)
  * @param key encryption key
  * @param iv initialisation vector
  */
-WorldInfoMessageDecryptor::WorldInfoMessageDecryptor(const unsigned char *key, const unsigned char *iv)
+MessageDecryptor::MessageDecryptor(const unsigned char *key, const unsigned char *iv)
 {
   plain_buffer = NULL;
   plain_buffer_length = 0;
@@ -81,7 +80,7 @@ WorldInfoMessageDecryptor::WorldInfoMessageDecryptor(const unsigned char *key, c
 
 
 /** Empty destructor. */
-WorldInfoMessageDecryptor::~WorldInfoMessageDecryptor()
+MessageDecryptor::~MessageDecryptor()
 {
 }
 
@@ -92,7 +91,7 @@ WorldInfoMessageDecryptor::~WorldInfoMessageDecryptor()
  * @param buffer_length plain text buffer length
  */
 void
-WorldInfoMessageDecryptor::set_plain_buffer(void *buffer, size_t buffer_length)
+MessageDecryptor::set_plain_buffer(void *buffer, size_t buffer_length)
 {
   plain_buffer        = buffer;
   plain_buffer_length = buffer_length;
@@ -105,7 +104,7 @@ WorldInfoMessageDecryptor::set_plain_buffer(void *buffer, size_t buffer_length)
  * @param buffer_length crypted text buffer length
  */
 void
-WorldInfoMessageDecryptor::set_crypt_buffer(void *buffer, size_t buffer_length)
+MessageDecryptor::set_crypt_buffer(void *buffer, size_t buffer_length)
 {
   crypt_buffer        = buffer;
   crypt_buffer_length = buffer_length;
@@ -117,7 +116,7 @@ WorldInfoMessageDecryptor::set_crypt_buffer(void *buffer, size_t buffer_length)
  * @return size of the plain text message.
  */
 size_t
-WorldInfoMessageDecryptor::decrypt()
+MessageDecryptor::decrypt()
 {
   if ( (plain_buffer == NULL) || (plain_buffer_length == 0) ||
        (crypt_buffer == NULL) || (crypt_buffer_length == 0) ) {
@@ -146,8 +145,9 @@ WorldInfoMessageDecryptor::decrypt()
   return outl;
 #else
   // Plain-text copy-through for debugging.
-  memcpy(plain_buffer, crypt_buffer, crypt_buffer_length);
-  return crypt_buffer_length;
+  //memcpy(plain_buffer, crypt_buffer, crypt_buffer_length);
+  //return crypt_buffer_length;
+  throw Exception("Decryption support not available");
 #endif
 }
 

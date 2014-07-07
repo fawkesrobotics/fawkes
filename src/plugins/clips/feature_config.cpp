@@ -21,6 +21,7 @@
  */
 
 #include "feature_config.h"
+#include <core/threading/mutex_locker.h>
 #include <config/config.h>
 #include <logging/logger.h>
 
@@ -84,6 +85,7 @@ ConfigCLIPSFeature::clips_config_load(std::string env_name, std::string cfg_pref
     return;
   }
 
+  fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
   std::auto_ptr<Configuration::ValueIterator> v(config_->search(cfg_prefix.c_str()));
   while (v->next()) {
     std::string type = "";

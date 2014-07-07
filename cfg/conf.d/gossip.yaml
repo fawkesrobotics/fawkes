@@ -1,0 +1,19 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/gossip
+---
+gossip:
+  # Name of the local peer, e.g. robot identifier
+  name: R1
+
+  groups:
+    example:
+      active: true
+      broadcast-address: 137.226.233.255
+      broadcast-port: 6000
+      # Encryption key, must be shared secret among all group members
+      encryption-key: Use_aSafe_Key!
+      # Possible ciphers: aes-128-ecb, aes-128-cbc, aes-256-ecb, aes-256-cbc
+      # cbc variantes increase package size by 16 bytes for IV
+      encryption-cipher: aes-128-ecb
