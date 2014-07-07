@@ -59,6 +59,7 @@ namespace fawkes {
   class IMUInterface;
 }
 
+class RobotinoSensorComHandler;
 class RobotinoSensorThread;
 
 class RobotinoActThread
@@ -90,7 +91,7 @@ class RobotinoActThread
 
  private:
   RobotinoSensorThread           *sensor_thread_;
-  rec::robotino::com::Com        *com_;
+  RobotinoSensorComHandler       *com_;
   rec::robotino::com::OmniDrive  *omni_drive_;
   rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State> *statemem_;
   rec::iocontrol::robotstate::State *state_;
@@ -99,6 +100,10 @@ class RobotinoActThread
   fawkes::MotorInterface         *motor_if_;
   fawkes::GripperInterface       *gripper_if_;
   fawkes::IMUInterface           *imu_if_;
+  unsigned int                    imu_if_nochange_loops_;
+  bool                            imu_if_writer_warning_printed_;
+  bool                            imu_if_invquat_warning_printed_;
+  bool                            imu_if_changed_warning_printed_;
   bool        			  msg_received_;
   bool        			  msg_zero_vel_;
   fawkes::Time 			  last_msg_time_;
@@ -109,6 +114,7 @@ class RobotinoActThread
   std::string                     cfg_odom_frame_;
   std::string                     cfg_base_frame_;
   OdometryMode                    cfg_odom_mode_;
+  unsigned int                    cfg_imu_deadman_loops_;
 
   float                           des_vx_;
   float                           des_vy_;

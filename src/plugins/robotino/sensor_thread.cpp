@@ -4,7 +4,6 @@
  *
  *  Created: Sun Nov 13 15:35:24 2011
  *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,6 +20,7 @@
  */
 
 #include "sensor_thread.h"
+#include "sensor_com_handler.h"
 #include <rec/robotino/com/Com.h>
 #include <rec/sharedmemory/sharedmemory.h>
 #include <rec/iocontrol/remotestate/SensorState.h>
@@ -34,6 +34,7 @@
 #include <interfaces/IMUInterface.h>
 
 using namespace fawkes;
+
 
 /** @class RobotinoSensorThread "sensor_thread.h"
  * Robotino sensor hook integration thread.
@@ -57,9 +58,12 @@ RobotinoSensorThread::init()
   cfg_quit_on_disconnect_ = config->get_bool("/hardware/robotino/quit_on_disconnect");
   cfg_enable_gyro_ = config->get_bool("/hardware/robotino/gyro/enable");
   cfg_imu_iface_id_ = config->get_string("/hardware/robotino/gyro/interface_id");
+  cfg_sensor_update_cycle_time_ =
+    config->get_uint("/hardware/robotino/sensor_update_cycle_time");
 
-  com_ = new rec::robotino::com::Com();
+  com_ = new RobotinoSensorComHandler(clock);
   com_->setAddress(cfg_hostname_.c_str());
+  com_->setMinimumUpdateCycleTime(cfg_sensor_update_cycle_time_);
   com_->connect(/* blocking */ false);
 
   last_seqnum_ = 0;
@@ -95,11 +99,13 @@ RobotinoSensorThread::init()
   voltage_to_dist_dps_.push_back(std::make_pair(2.35, 0.05));
   voltage_to_dist_dps_.push_back(std::make_pair(2.55, 0.04));
 
-  // Assume that the gyro is the CruizCore XG1010 and thus set data
-  // from datasheet
-  imu_if_->set_linear_acceleration(0, -1.);
-  imu_if_->set_angular_velocity_covariance(8, deg2rad(0.1));
-  imu_if_->write();
+  if (imu_if_) {
+    // Assume that the gyro is the CruizCore XG1010 and thus set data
+    // from datasheet
+    imu_if_->set_linear_acceleration(0, -1.);
+    imu_if_->set_angular_velocity_covariance(8, deg2rad(0.1));
+    imu_if_->write();
+  }
 }
 
 
@@ -117,7 +123,8 @@ void
 RobotinoSensorThread::loop()
 {
   if (com_->isConnected()) {
-    rec::iocontrol::remotestate::SensorState sensor_state = com_->sensorState();
+    fawkes::Time sensor_time;
+    rec::iocontrol::remotestate::SensorState sensor_state = com_->sensor_state(sensor_time);
     if (sensor_state.sequenceNumber != last_seqnum_) {
       last_seqnum_ = sensor_state.sequenceNumber;
 
@@ -132,10 +139,12 @@ RobotinoSensorThread::loop()
 	if (state_->gyro.port == rec::serialport::UNDEFINED) {
 	  if (fabs(imu_if_->angular_velocity(0) + 1.) > 0.00001) {
 	    imu_if_->set_angular_velocity(0, -1.);
+	    imu_if_->set_angular_velocity(2,  0.);
 	    imu_if_->set_orientation(0, -1.);
 	    imu_if_->write();
 	  }
 	} else {
+	  imu_if_->set_angular_velocity(0, 0.);
 	  imu_if_->set_angular_velocity(2, state_->gyro.rate);
 
 	  tf::Quaternion q = tf::create_quaternion_from_yaw(state_->gyro.angle);

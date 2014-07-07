@@ -17,7 +17,7 @@ OPENROBOTINOAPI_DIR=/usr/local/OpenRobotinoAPI
 
 ifneq ($(wildcard $(OPENROBOTINOAPI_DIR)/1/include/robotinoapi_version.h),)
   HAVE_OPENROBOTINO=1
-  CFLAGS_OPENROBOTINO  = -I$(OPENROBOTINOAPI_DIR)/1/include -I$(OPENROBOTINOAPI_DIR)/share/include
+  CFLAGS_OPENROBOTINO  = -Wno-reorder -Wno-unused-function -Wno-delete-non-virtual-dtor -I$(OPENROBOTINOAPI_DIR)/1/include -I$(OPENROBOTINOAPI_DIR)/share/include
   LDFLAGS_OPENROBOTINO = -L$(OPENROBOTINOAPI_DIR)/1/lib/linux -L$(OPENROBOTINOAPI_DIR)/share/lib \
 			 -lrec_robotino_com -lrec_core_lt
 endif

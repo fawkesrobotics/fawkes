@@ -17,6 +17,11 @@ hardware/robotino:
   # Base coordinate frame
   base_frame: !frame /base_link
 
+  # Minimum time in milliseconds between two Robotino sensor readings.
+  # Lower values increase the machine load (considerably) but decrease
+  # the average sensor data age. Zero means receive as fast as possible
+  # without waiting between receive calls
+  sensor_update_cycle_time: 5
 
   gyro:
     # Enable Gyro publishing? This creates an IMUInterface and publishes
@@ -52,6 +57,11 @@ hardware/robotino:
     # Interface ID of the IMU interface for the gyro.
     calc/imu_interface_id:
 
+      # Number of loops after which the IMU is considered dead if no
+      # change has been made to the interface (but it still has a writer).
+      # In that case the odometry will be based solely on wheel odometry.
+      imu_deadman_loops: 3
+    
   gripper:
     # Enable gripper {ENABLED=true / DISABLED=false}
     enable_gripper: true
