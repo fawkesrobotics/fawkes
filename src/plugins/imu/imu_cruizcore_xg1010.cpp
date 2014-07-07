@@ -26,6 +26,10 @@
 
 #include <tf/types.h>
 #include <utils/math/angle.h>
+#ifdef USE_TIMETRACKER
+#  include <utils/time/tracker.h>
+#endif
+#include <utils/time/tracker_macros.h>
 
 #include <boost/bind.hpp>
 
@@ -133,6 +137,15 @@ CruizCoreXG1010AcquisitionThread::init()
   open_device();
 
   if (cfg_continuous_)  IMUAcquisitionThread::init();
+
+#ifdef USE_TIMETRACKER
+  tt_ = new TimeTracker();
+  tt_loopcount_ = 0;
+  ttc_full_loop_       = tt_->add_class("Full Loop");
+  ttc_read_            = tt_->add_class("Read");
+  ttc_catch_up_        = tt_->add_class("Catch up");
+  ttc_parse_           = tt_->add_class("Parse");
+#endif
 }
 
 
@@ -141,12 +154,17 @@ CruizCoreXG1010AcquisitionThread::finalize()
 {
   close_device();
   if (cfg_continuous_)  IMUAcquisitionThread::finalize();
+#ifdef USE_TIMETRACKER
+  delete tt_;
+#endif
 }
 
 
 void
 CruizCoreXG1010AcquisitionThread::loop()
 {
+  TIMETRACK_START(ttc_full_loop_);
+
   if (serial_.is_open()) {
 
     // reset data for the case that we timeout or fail
@@ -154,6 +172,7 @@ CruizCoreXG1010AcquisitionThread::loop()
     orientation_[0] = orientation_[1] = orientation_[2] = orientation_[3] = 0.;
 
     try {
+      TIMETRACK_START(ttc_read_);
       deadline_.expires_from_now(boost::posix_time::milliseconds(receive_timeout_));
 
       ec_ = boost::asio::error::would_block;
@@ -190,6 +209,8 @@ CruizCoreXG1010AcquisitionThread::loop()
 
       //logger->log_debug(name(), "Done");
 
+      TIMETRACK_END(ttc_read_);
+
       data_mutex_->lock();
       timestamp_->stamp();
       data_mutex_->unlock();
@@ -205,6 +226,7 @@ CruizCoreXG1010AcquisitionThread::loop()
 	data_mutex_->unlock();
 	close_device();
       } else {
+	TIMETRACK_START(ttc_catch_up_);
 	bytes_read_ = 0;
 	bool catch_up = false;
 	size_t read_size = 0;
@@ -250,6 +272,8 @@ CruizCoreXG1010AcquisitionThread::loop()
         } while (bytes_read_ > 0);
       }
 
+      TIMETRACK_END(ttc_catch_up_);
+
       if (ec_ && ec_.value() != boost::system::errc::operation_canceled) {
 	logger->log_warn(name(), "Data read error: %s\n", ec_.message().c_str());
 
@@ -259,6 +283,7 @@ CruizCoreXG1010AcquisitionThread::loop()
 	close_device();
       } else {
 	if (input_buffer_.size() >= CRUIZCORE_XG1010_PACKET_SIZE) {
+	  TIMETRACK_START(ttc_parse_);
 	  if (input_buffer_.size() > CRUIZCORE_XG1010_PACKET_SIZE) {
 	    input_buffer_.consume(input_buffer_.size() - CRUIZCORE_XG1010_PACKET_SIZE);
 	  }
@@ -285,6 +310,7 @@ CruizCoreXG1010AcquisitionThread::loop()
 	      close_device();
 	    }
 	  }
+	  TIMETRACK_END(ttc_parse_);
 	} else {
 	  logger->log_warn(name(), "*** INVALID number of bytes in buffer: %zu\n", input_buffer_.size());
 	}
@@ -311,6 +337,13 @@ CruizCoreXG1010AcquisitionThread::loop()
   if (cfg_continuous_)  IMUAcquisitionThread::loop();
 
   yield();
+  TIMETRACK_END(ttc_full_loop_);
+#ifdef USE_TIMETRACKER
+  if (++tt_loopcount_ >= 50) {
+    tt_loopcount_ = 0;
+    tt_->print_to_stdout();
+  }
+#endif
 }
 
 

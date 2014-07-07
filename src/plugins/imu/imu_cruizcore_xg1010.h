@@ -36,6 +36,10 @@
 
 namespace fawkes {
   class Mutex;
+  class Time;
+#ifdef USE_TIMETRACKER
+  class TimeTracker;
+#endif
 }
 
 class CruizCoreXG1010AcquisitionThread : public IMUAcquisitionThread
@@ -81,6 +85,15 @@ class CruizCoreXG1010AcquisitionThread : public IMUAcquisitionThread
 
   boost::system::error_code ec_;
   size_t bytes_read_;
+
+#ifdef USE_TIMETRACKER
+  fawkes::TimeTracker  *tt_;
+  unsigned int tt_loopcount_;
+  unsigned int ttc_full_loop_;
+  unsigned int ttc_read_;
+  unsigned int ttc_catch_up_;
+  unsigned int ttc_parse_;
+#endif
 };
 
 

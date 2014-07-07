@@ -21,6 +21,9 @@ LIBS_imu = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
 
 CFLAGS  += $(CFLAGS_CPP11)
 
+# Enable for time measurements
+#CFLAGS += -DUSE_TIMETRACKER
+
 OBJS_imu = imu_plugin.o acquisition_thread.o sensor_thread.o
 
 OBJS_all = $(OBJS_imu)
