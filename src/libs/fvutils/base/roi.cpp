@@ -302,9 +302,9 @@ bool
 ROI::contains(unsigned int x, unsigned int y)
 {
   if ( (x >= start.x) &&
-       (x <= start.x+width) &&
+       (x < start.x+width) &&
        (y >= start.y) &&
-       (y <= start.y+height) ) {
+       (y < start.y+height) ) {
 
     num_hint_points += 1;
     return true;
@@ -404,8 +404,8 @@ ROI::extend(unsigned int x, unsigned int y)
 
   if (x < start.x) { width  += start.x - x; start.x = x; }
   if (y < start.y) { height += start.y - y; start.y = y; }
-  if (x > start.x + width)  { width  += (x - (start.x + width)); }
-  if (y > start.y + height) { height += (y - (start.y + height)); }
+  if (x >= start.x + width)  { width  += (x - (start.x + width) + 1); }
+  if (y >= start.y + height) { height += (y - (start.y + height) + 1); }
 
   num_hint_points += 1;
 }
