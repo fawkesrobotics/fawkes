@@ -322,10 +322,10 @@ ROI*
 ROI::intersect(ROI const &roi) const
 {
   ROI *rv;
-  if (start.x + width < roi.start.x
-      || roi.start.x + roi.width < start.x
-      || start.y + height < roi.start.y
-      || roi.start.y + roi.width < start.y) {
+  if (start.x + width <= roi.start.x
+      || roi.start.x + roi.width <= start.x
+      || start.y + height <= roi.start.y
+      || roi.start.y + roi.width <= start.y) {
 
     rv = NULL;
 
