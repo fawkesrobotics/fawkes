@@ -47,7 +47,7 @@ ifeq ($(HAVE_TF),1)
   LIBS_libfvmodels += fawkestf
 else
   WARN_TARGETS += warning_tf
-  MODELS_FILTEROUT += pixel_position/%
+  MODELS_FILTEROUT += relative_position/position_to_pixel.%
 endif
 
 
