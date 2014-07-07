@@ -28,7 +28,7 @@
 #ifndef __FIREVISION_UTILS_COLOR_THRESHOLD_H_
 #define __FIREVISION_UTILS_COLOR_THRESHOLD_H_
 
-#include <math.h>
+#include <cmath>
 #include <sys/types.h>
 
 namespace firevision {
@@ -64,8 +64,13 @@ inline bool is_similar(int u, int v, int ref_u, int ref_v, int ref_length, int c
 inline bool is_similar_y(int y, int u, int v,
   int ref_y, int ref_u, int ref_v,
   int ref_length, int chroma_thresh, int sat_thresh, int y_thresh) {
+
   return is_similar(u, v, ref_u, ref_v, ref_length, chroma_thresh, sat_thresh)
-      && std::abs(y - ref_y) < 255 - y_thresh;
+#if defined(__GNUC__) && ((__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || (__GNUC__ > 4))
+      && std::abs(y - ref_y) < (255 - y_thresh);
+#else
+      && ((y-ref_y) < 0 ? -1*(y-ref_y) : (y-ref_y)) < (255 - y_thresh);
+#endif
 }
 }
 
