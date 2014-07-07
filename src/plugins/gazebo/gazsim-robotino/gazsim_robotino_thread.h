@@ -117,7 +117,12 @@ class RobotinoSimThread
  
   //RobotinoSensorInterface values (stored here to write the interfaces only in the loop)
   bool gyro_available_;
-  float gyro_angle_;
+  int gyro_buffer_size_;
+  int gyro_buffer_index_new_;
+  int gyro_buffer_index_delayed_;
+  fawkes::Time *gyro_timestamp_buffer_;
+  float *gyro_angle_buffer_;
+  float gyro_delay_;
   float infrared_puck_sensor_dist_;
   float analog_in_left_;
   float analog_in_right_;
