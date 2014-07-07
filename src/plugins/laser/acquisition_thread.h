@@ -64,6 +64,8 @@ class LaserAcquisitionThread
  protected:
   void alloc_distances(unsigned int num_distances);
   void alloc_echoes(unsigned int num_echoes);
+  void reset_distances();
+  void reset_echoes();
 
  protected:
   fawkes::Mutex    *_data_mutex;

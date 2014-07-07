@@ -206,3 +206,30 @@ LaserAcquisitionThread::alloc_echoes(unsigned int num_echoes)
   _echoes      = (float *)malloc(sizeof(float) * _echoes_size);
   memset(_echoes, 0, sizeof(float) * _echoes_size);
 }
+
+
+/** Reset all distance values to NaN. */
+void
+LaserAcquisitionThread::reset_distances()
+{
+  _data_mutex->lock();
+  if (! _distances)  return;
+
+  for (size_t i = 0; i < _distances_size; ++i) {
+    _distances[i] = std::numeric_limits<float>::quiet_NaN();
+  }
+  _new_data = true;
+  _data_mutex->unlock();
+}
+
+
+/** Reset all distance values to NaN. */
+void
+LaserAcquisitionThread::reset_echoes()
+{
+  if (! _echoes)  return;
+
+  for (size_t i = 0; i < _echoes_size; ++i) {
+    _echoes[i] = std::numeric_limits<float>::quiet_NaN();
+  }
+}

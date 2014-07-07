@@ -103,3 +103,38 @@ hardware/laser:
 
     # If true, the fflaser_calibrate tool must be used to gain information about dead spots, which are then extracted with a filter
     use_dead_spots_filter: false
+
+  tim55x-usb:
+    # Enable this configuration?
+    active: false
+
+    # Configuration is for Sick TiM55x over USB
+    type: TiM55x-USB
+
+    # Device file
+    #serial: 14200190
+
+    # Frame ID
+    frame: !frame /base_laser
+
+    # Offset added to measurement timestamp in interface. Can be used to
+    # account for latencies.
+    # time_offset: -0.001
+    
+  tim55x-ethernet:
+    # Enable this configuration?
+    active: false
+
+    # Configuration is for Sick TiM55x over Ethernet
+    type: TiM55x-Ethernet
+
+    # Host or IP address of device, TCP port to communicate to
+    host: 192.168.0.1
+    port: 2112
+
+    # Frame ID
+    frame: !frame /base_laser
+
+    # Offset added to measurement timestamp in interface. Can be used to
+    # account for latencies.
+    # time_offset: -0.001

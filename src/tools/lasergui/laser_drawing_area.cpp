@@ -543,7 +543,7 @@ LaserDrawingArea::draw_beams(const fawkes::Interface *itf,
     // re-arrange to clockwise
     revdists = (float *)new float[nd];
     for (size_t i = 0; i < nd; ++i) {
-      revdists[nd - i] = distances[i];
+      revdists[nd - i - 1] = distances[i];
     }
     distances = revdists;
   }

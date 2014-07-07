@@ -13,6 +13,8 @@
 #
 #*****************************************************************************
 
+include $(BUILDSYSDIR)/boost.mk
+
 ifneq ($(wildcard $(SYSROOT)/usr/include/libpcan.h),)
   HAVE_LIBPCAN=1
   LIBS_LIBPCAN=pcan
@@ -54,3 +56,17 @@ ifeq ($(HAVE_LIBUDEV),1)
   LDFLAGS_LIBUDEV = $(shell $(PKGCONFIG) --libs 'libudev')
 endif
 
+HAVE_LIBUSB=$(if $(shell $(PKGCONFIG) --exists 'libusb-1.0'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBUSB),1)
+  CFLAGS_LIBUSB  = -DHAVE_LIBUSB $(shell $(PKGCONFIG) --cflags 'libusb-1.0')
+  LDFLAGS_LIBUSB = $(shell $(PKGCONFIG) --libs 'libusb-1.0')
+endif
+
+SICK_TIM55X_REQ_BOOST_LIBS = thread asio system
+HAVE_SICK_TIM55X_BOOST_LIBS = $(call boost-have-libs,$(SICK_TIM55X_REQ_BOOST_LIBS))
+ifeq ($(HAVE_SICK_TIM55X_BOOST_LIBS),1)
+  CFLAGS_SICK_TIM55X_BOOST  = -DHAVE_SICK55X_BOOST \
+			      $(call boost-libs-cflags,$(SICK_TIM55X_REQ_BOOST_LIBS))
+  LDFLAGS_SICK_TIM55X_BOOST = $(call boost-libs-ldflags,$(SICK_TIM55X_REQ_BOOST_LIBS)) \
+			      -lpthread
+endif

@@ -32,6 +32,12 @@
 #ifdef HAVE_URG_GBX
 #  include "urg_gbx_aqt.h"
 #endif
+#ifdef HAVE_LIBUSB
+#  include "sick_tim55x_usb_aqt.h"
+#endif
+#ifdef HAVE_SICK55X_BOOST
+#  include "sick_tim55x_ethernet_aqt.h"
+#endif
 
 #include <set>
 #include <memory>
@@ -93,6 +99,18 @@ LaserPlugin::LaserPlugin(Configuration *config)
 #ifdef HAVE_URG_GBX
 	  if ( type == "urg_gbx" ) {
 	    aqt = new HokuyoUrgGbxAcquisitionThread(cfg_name, cfg_prefix);
+	  } else 
+#endif
+
+#ifdef HAVE_LIBUSB
+	  if ( type == "TiM55x-USB" ) {
+	    aqt = new SickTiM55xUSBAcquisitionThread(cfg_name, cfg_prefix);
+	  } else 
+#endif
+
+#ifdef HAVE_SICK55X_BOOST
+	  if ( type == "TiM55x-Ethernet" ) {
+	    aqt = new SickTiM55xEthernetAcquisitionThread(cfg_name, cfg_prefix);
 	  } else 
 #endif
 
