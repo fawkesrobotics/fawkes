@@ -743,8 +743,8 @@ AmclThread::loop()
       double yaw, pitch, roll;
       map_pose.getBasis().getEulerYPR(yaw, pitch, roll);
 
-      logger->log_debug(name(), "Saving pose (%f,%f,%f) as initial pose to host config",
-			map_pose.getOrigin().x(), map_pose.getOrigin().y(), yaw);
+      //logger->log_debug(name(), "Saving pose (%f,%f,%f) as initial pose to host config",
+      //		map_pose.getOrigin().x(), map_pose.getOrigin().y(), yaw);
 
       try {
 	config->set_float(CFG_PREFIX"init_pose_x", map_pose.getOrigin().x());

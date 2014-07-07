@@ -212,7 +212,8 @@ NavGraphThread::loop()
 
       if (! plan_.empty()) {
         try {
-          logger->log_info(name(), "Sending next goal after node reached");
+          logger->log_info(name(), "Sending next goal %s after node reached",
+			   plan_[0].name().c_str());
           send_next_goal();
         } catch (Exception &e) {
           logger->log_warn(name(), "Failed to send next goal (node reached)");
@@ -532,8 +533,8 @@ NavGraphThread::node_reached()
 size_t
 NavGraphThread::shortcut_possible()
 {
-  if (plan_.size() <= 1) {
-    logger->log_debug(name(), "Cannot shortcut for last node or if plan empty");
+  if (plan_.size() < 1) {
+    logger->log_debug(name(), "Cannot shortcut if plan empty");
     return 0;
   }
 

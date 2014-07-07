@@ -211,7 +211,7 @@ NavGraphVisualizationThread::publish()
 
     if (nodes[i].has_property("orientation")) {
       float ori = nodes[i].property_as_float("orientation");
-      logger->log_debug(name(), "Node %s has orientation %f", nodes[i].name().c_str(), ori);
+      //logger->log_debug(name(), "Node %s has orientation %f", nodes[i].name().c_str(), ori);
       visualization_msgs::Marker arrow;
       arrow.header.frame_id = "/map";
       arrow.header.stamp = ros::Time::now();
@@ -229,7 +229,7 @@ NavGraphVisualizationThread::publish()
       arrow.pose.orientation.w = q.w();
       arrow.scale.x = 0.1;
       arrow.scale.y = 0.5;
-      arrow.scale.z = 0.07;
+      arrow.scale.z = 0.10;
       if (std::find(plan_.begin(), plan_.end(), nodes[i]) != plan_.end()) {
 	if (plan_to_ == nodes[i].name()) {
 	  arrow.color.r = arrow.color.g = 1.f;
@@ -310,6 +310,34 @@ NavGraphVisualizationThread::publish()
     text.text = "Free Target";
     m.markers.push_back(text);
 
+    if (target_node.has_property("orientation")) {
+      float ori = target_node.property_as_float("orientation");
+      visualization_msgs::Marker ori_arrow;
+      ori_arrow.header.frame_id = "/map";
+      ori_arrow.header.stamp = ros::Time::now();
+      ori_arrow.ns = "navgraph";
+      ori_arrow.id = id_num++;
+      ori_arrow.type = visualization_msgs::Marker::ARROW;
+      ori_arrow.action = visualization_msgs::Marker::ADD;
+      ori_arrow.pose.position.x =  target_node.x();
+      ori_arrow.pose.position.y =  target_node.y();
+      ori_arrow.pose.position.z = 0.;
+      tf::Quaternion q = tf::create_quaternion_from_yaw(ori);
+      ori_arrow.pose.orientation.x = q.x();
+      ori_arrow.pose.orientation.y = q.y();
+      ori_arrow.pose.orientation.z = q.z();
+      ori_arrow.pose.orientation.w = q.w();
+      ori_arrow.scale.x = 0.1;
+      ori_arrow.scale.y = 0.5;
+      ori_arrow.scale.z = 0.10;
+      ori_arrow.color.r = 1.f;
+      ori_arrow.color.g = 0.5f;
+      ori_arrow.color.b = 0.f;
+      ori_arrow.color.a = 1.0;
+      ori_arrow.lifetime = ros::Duration(0, 0);
+      m.markers.push_back(ori_arrow);
+    }
+
     if (plan_.size() >= 2) {
       TopologicalMapNode &last_graph_node = plan_[plan_.size() - 2];
       
@@ -335,7 +363,8 @@ NavGraphVisualizationThread::publish()
       arrow.points.push_back(p1);
       arrow.points.push_back(p2);
 
-      if (plan_from_ == last_graph_node.name() && plan_to_ == target_node.name())
+      
+      if (plan_to_ == target_node.name())
       {
         // it's the current line
         arrow.color.r = arrow.color.g = 1.f;

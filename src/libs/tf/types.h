@@ -137,7 +137,9 @@ class Stamped : public T{
   /** Default constructor.
    * Default constructor used only for preallocation.
    */
-  Stamped() :frame_id ("NO_ID_STAMPED_DEFAULT_CONSTRUCTION"){};
+  Stamped()
+    : stamp(0,0), frame_id("NO_ID_STAMPED_DEFAULT_CONSTRUCTION")
+  {};
 
   /** Constructor.
    * @param input transform
