@@ -86,3 +86,12 @@ end
 function math.vec_length(x, y)
    return math.sqrt(x^2 + y^2)
 end
+
+math.nan = 0/0
+
+--- Check if given value is nan
+-- @param v the value to check
+-- @return true if the value is nan, false otherwise
+function math.isnan( v )
+   return v ~= v
+end
