@@ -121,7 +121,8 @@ CruizCoreXG1010AcquisitionThread::init()
   }
 
   // wait up to two expected packets
-  receive_timeout_ = (1000 / cfg_freq_) * 20;
+  receive_timeout_ = (1000 / cfg_freq_) * 2;
+  //logger->log_debug(name(), "Receive timeout: %u ms", receive_timeout_);
 
   // No acceleration data available, set to -1
   linear_acceleration_[0] = -1.;
@@ -147,6 +148,11 @@ void
 CruizCoreXG1010AcquisitionThread::loop()
 {
   if (serial_.is_open()) {
+
+    // reset data for the case that we timeout or fail
+    angular_velocity_[2] = 0;
+    orientation_[0] = orientation_[1] = orientation_[2] = orientation_[3] = 0.;
+
     try {
       deadline_.expires_from_now(boost::posix_time::milliseconds(receive_timeout_));
 
@@ -155,16 +161,16 @@ CruizCoreXG1010AcquisitionThread::loop()
 
       size_t to_read = CRUIZCORE_XG1010_PACKET_SIZE;
       // if there is partial data in the buffer we are running behind
-      // read off more data skipping the old packet
+      // read off old packet, catch up later will trigger if we had more data
       if (input_buffer_.size() > 0) {
 	const size_t bsize = input_buffer_.size();
 	size_t full_frames = bsize / CRUIZCORE_XG1010_PACKET_SIZE;
-	size_t remaining = bsize - full_frames * CRUIZCORE_XG1010_PACKET_SIZE;
-	to_read += full_frames * CRUIZCORE_XG1010_PACKET_SIZE + remaining;
+	size_t remaining =
+	  CRUIZCORE_XG1010_PACKET_SIZE - (bsize - full_frames * CRUIZCORE_XG1010_PACKET_SIZE);
+	to_read = remaining;
       }
 
-      printf("Buffer: %zu   read: %zu\n", input_buffer_.size(), to_read);
-
+      //logger->log_debug(name(), "Read %zu bytes", to_read);
       boost::asio::async_read(serial_, input_buffer_,
 #if BOOST_VERSION >= 104800
 			      boost::asio::transfer_exactly(to_read),
@@ -182,11 +188,11 @@ CruizCoreXG1010AcquisitionThread::loop()
 
       do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
 
-      deadline_.expires_at(boost::posix_time::pos_infin);
+      //logger->log_debug(name(), "Done");
 
-      // reset data for the case that we timeout or fail
-      angular_velocity_[2] = 0;
-      orientation_[0] = orientation_[1] = orientation_[2] = orientation_[3] = 0.;
+      data_mutex_->lock();
+      timestamp_->stamp();
+      data_mutex_->unlock();
 
       if (ec_) {
 	if (ec_.value() == boost::system::errc::operation_canceled) {
@@ -195,13 +201,64 @@ CruizCoreXG1010AcquisitionThread::loop()
 	  logger->log_warn(name(), "Data read error: %s\n", ec_.message().c_str());
 	}
 	data_mutex_->lock();
-	timestamp_->stamp();
 	new_data_ = true;
 	data_mutex_->unlock();
 	close_device();
-
       } else {
-	if (bytes_read_ >= CRUIZCORE_XG1010_PACKET_SIZE) {
+	bytes_read_ = 0;
+	bool catch_up = false;
+	size_t read_size = 0;
+	do {
+	  ec_ = boost::asio::error::would_block;
+
+	  size_t to_read = CRUIZCORE_XG1010_PACKET_SIZE;
+	  if (catch_up) {
+	    deadline_.expires_from_now(boost::posix_time::milliseconds(receive_timeout_));
+	    size_t full_frames = read_size / CRUIZCORE_XG1010_PACKET_SIZE;
+	    size_t remaining = CRUIZCORE_XG1010_PACKET_SIZE - (read_size - full_frames * CRUIZCORE_XG1010_PACKET_SIZE);
+	    to_read = remaining;
+	  } else {
+	    deadline_.expires_from_now(boost::posix_time::microseconds(10));
+	  }
+	  catch_up = false;
+
+	  bytes_read_ = 0;
+
+	  //logger->log_debug(name(), "Catch up read %zu bytes", to_read);
+	  boost::asio::async_read(serial_, input_buffer_,
+#if BOOST_VERSION >= 104800
+	    boost::asio::transfer_exactly(to_read),
+	    (boost::lambda::var(ec_) = boost::lambda::_1,
+	     boost::lambda::var(bytes_read_) = boost::lambda::_2));
+#else
+	    transfer_exactly(to_read),
+	    boost::bind(
+		        &CruizCoreXG1010AcquisitionThread::handle_read,
+		        this,
+		        boost::asio::placeholders::error,
+		        boost::asio::placeholders::bytes_transferred
+		        ));
+#endif
+
+          do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
+
+	  if (bytes_read_ > 0) {
+	    read_size += bytes_read_;
+	    catch_up = (read_size % CRUIZCORE_XG1010_PACKET_SIZE != 0);
+	    ec_ = boost::system::error_code();
+	  }
+        } while (bytes_read_ > 0);
+      }
+
+      if (ec_ && ec_.value() != boost::system::errc::operation_canceled) {
+	logger->log_warn(name(), "Data read error: %s\n", ec_.message().c_str());
+
+	data_mutex_->lock();
+	new_data_ = true;
+	data_mutex_->unlock();
+	close_device();
+      } else {
+	if (input_buffer_.size() >= CRUIZCORE_XG1010_PACKET_SIZE) {
 	  if (input_buffer_.size() > CRUIZCORE_XG1010_PACKET_SIZE) {
 	    input_buffer_.consume(input_buffer_.size() - CRUIZCORE_XG1010_PACKET_SIZE);
 	  }
@@ -209,8 +266,8 @@ CruizCoreXG1010AcquisitionThread::loop()
 	  in_stream.read((char *)in_packet_, CRUIZCORE_XG1010_PACKET_SIZE);
 
 	  /*
-	  printf("Packet (%zu): ", bytes_read);
-	  for (size_t i = 0; i < bytes_read; ++i) {
+	  printf("Packet (%zu): ", bytes_read_);
+	  for (size_t i = 0; i < bytes_read_; ++i) {
 	    printf("%x ", in_packet_[i] & 0xff);
 	  }
 	  printf("\n");
@@ -229,7 +286,7 @@ CruizCoreXG1010AcquisitionThread::loop()
 	    }
 	  }
 	} else {
-	  logger->log_warn(name(), "*** INVALID number of bytes: %zu\n", bytes_read_);
+	  logger->log_warn(name(), "*** INVALID number of bytes in buffer: %zu\n", input_buffer_.size());
 	}
       }
     } catch (boost::system::system_error &e) {
@@ -264,7 +321,7 @@ CruizCoreXG1010AcquisitionThread::open_device()
     input_buffer_.consume(input_buffer_.size());
 
     serial_.open(cfg_serial_);
-    // according to CruiuCore R1050K (sensor in XG1010) technical manual
+    // according to CruizCore R1050K (sensor in XG1010) technical manual
     serial_.set_option(boost::asio::serial_port::stop_bits(boost::asio::serial_port::stop_bits::one));
     serial_.set_option(boost::asio::serial_port::parity(boost::asio::serial_port::parity::none));
     serial_.set_option(boost::asio::serial_port::baud_rate(cfg_baud_rate_));
@@ -493,7 +550,6 @@ CruizCoreXG1010AcquisitionThread::parse_packet()
 
   data_mutex_->lock();
   new_data_ = true;
-  timestamp_->stamp();
 
   angular_velocity_[2] = -deg2rad(rate / 100.f);
 
