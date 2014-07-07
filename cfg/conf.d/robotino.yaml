@@ -52,10 +52,12 @@ hardware/robotino:
 
     # Odom TF offset. This time is added to the current time when the
     # odometry <- base_link TF is published
-    time_offset: 0.25
+    time_offset: 0.0
 
-    # Interface ID of the IMU interface for the gyro.
-    calc/imu_interface_id:
+    # Parameters for calc odometry mode
+    calc:
+      # Interface ID of the IMU interface for the gyro.
+      imu_interface_id: IMU xg1010
 
       # Number of loops after which the IMU is considered dead if no
       # change has been made to the interface (but it still has a writer).
