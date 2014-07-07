@@ -46,7 +46,8 @@ const char *  WebPageReply::PAGE_HEADER =
   "<html>\n"
   " <head>\n"
   "  <title>%s</title>\n"
-  "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/webview.css\" />\n"
+  "  <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/webview.css\" />\n"
+  "%s"
   " </head>\n"
   " <body>\n";
 
@@ -63,6 +64,8 @@ WebPageReply::WebPageReply(std::string title, std::string body)
   : StaticWebReply(WebReply::HTTP_OK, body)
 {
   _title = title;
+  navbar_enabled_ = true;
+  footer_enabled_ = true;
 }
 
 
@@ -73,6 +76,8 @@ WebPageReply::WebPageReply(std::string title, std::string body)
 WebPageReply::WebPageReply(Code code)
   : StaticWebReply(code)
 {
+  navbar_enabled_ = true;
+  footer_enabled_ = true;
 }
 
 
@@ -101,12 +106,12 @@ WebPageReply::pack(std::string active_baseurl,
 		   WebPageHeaderGenerator *headergen,
 		   WebPageFooterGenerator *footergen)
 {
-  if (headergen)
+  if (headergen && navbar_enabled_)
     __merged_body += headergen->html_header(_title, active_baseurl, __html_header);
   else {
     fawkes::HostInfo hi;
     char *s;
-    if ( asprintf(&s, PAGE_HEADER, _title.c_str(), hi.short_name()) != -1 ) {
+    if ( asprintf(&s, PAGE_HEADER, _title.c_str(), __html_header.c_str(), hi.short_name()) != -1 ) {
       __merged_body += s;
       free(s);
     }
@@ -114,7 +119,7 @@ WebPageReply::pack(std::string active_baseurl,
 
   __merged_body  += _body;
 
-  if (footergen)  __merged_body += footergen->html_footer();
+  if (footergen && footer_enabled_)  __merged_body += footergen->html_footer();
   else            __merged_body += PAGE_FOOTER;
 }
 
@@ -130,5 +135,39 @@ WebPageReply::body()
 {
   return __merged_body;
 }
+
+/** 
+ * Enable or disable the Fawkes Navigationbar (default enabled)
+ * @param enabled enabled
+ */
+void WebPageReply::set_navbar_enabled(bool enabled)
+{
+  navbar_enabled_ = enabled;
+}
+/**
+ * Is the Fawkes Navigation bar enabled?
+ * @return enabled
+ */
+bool WebPageReply::get_navbar_enabled()
+{
+  return navbar_enabled_;
+}
+/** 
+ * Enable or disable the Fawkes Webview footer (default enabled)
+ * @param enabled enabled
+ */
+void WebPageReply::set_footer_enabled(bool enabled)
+{
+  footer_enabled_ = enabled;
+}
+/**
+ * Is the Fawkes Webview footer enabled?
+ * @return enabled
+ */
+bool WebPageReply::get_footer_enabled()
+{
+  return footer_enabled_;
+}
+
 
 } // end namespace fawkes

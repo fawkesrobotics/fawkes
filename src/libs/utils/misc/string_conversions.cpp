@@ -30,6 +30,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <map>
 
 namespace fawkes {
 
@@ -273,6 +274,46 @@ StringConversions::trim(std::string &s)
   std::string::size_type p2 = s.find_last_not_of(' ');
   return s.substr(p1 == std::string::npos ? 0 : p1, 
 		  p2 == std::string::npos ? s.length() - 1 : p2 - p1 + 1);
+}
+
+/** Resolves path-string with \@...\@ tags
+ * @param s string to resolve
+ * @return path
+ */
+std::string
+StringConversions::resolve_path(std::string s)
+{
+  std::map<std::string, std::string> resolve_map;
+  resolve_map["@BASEDIR@"] = BASEDIR;
+  resolve_map["@RESDIR@"] = RESDIR;
+  resolve_map["@CONFDIR@"] = CONFDIR;
+  resolve_map["@SRCDIR@"] = SRCDIR;
+  resolve_map["@FAWKES_BASEDIR@"] = FAWKES_BASEDIR;
+  std::string res = s;
+  for(std::map<std::string, std::string>::iterator it = resolve_map.begin(); it != resolve_map.end(); it++)
+  {
+    std::size_t start_pos = res.find(it->first);
+    if(start_pos != std::string::npos)
+    {
+      res.replace(start_pos, it->first.size(), it->second);
+    }
+  }
+  return res;
+}
+
+/** Resolves vector of path-string with \@...\@ tags
+ * @param s strings to resolve
+ * @return vector of resolved paths
+ */
+std::vector<std::string>
+StringConversions::resolve_paths(std::vector<std::string> s)
+{
+  std::vector<std::string> res = std::vector<std::string>(s.size());
+  for(unsigned int i = 0; i < s.size(); i++)
+  {
+    res[i] = resolve_path(s[i]);
+  }
+  return res;
 }
 
 

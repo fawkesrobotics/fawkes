@@ -25,6 +25,7 @@
 #define __UTILS_MISC_STRINGTOOLS_H_
 
 #include <string>
+#include <vector>
 
 namespace fawkes {
 
@@ -53,6 +54,9 @@ class StringConversions
 
   static void        trim_inplace(std::string &s);
   static std::string trim(std::string &s);
+
+  static std::string  resolve_path(std::string s);
+  static std::vector<std::string>  resolve_paths(std::vector<std::string> s);
 
  private:
   // may not be instantiated!

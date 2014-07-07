@@ -46,6 +46,11 @@ class WebPageReply : public StaticWebReply
 		    WebPageFooterGenerator *footergen);
 
   virtual void set_html_header(std::string h);
+  
+  void set_navbar_enabled(bool enabled);
+  bool get_navbar_enabled();
+  void set_footer_enabled(bool enabled);
+  bool get_footer_enabled();
 
  protected:
   WebPageReply(Code code);
@@ -60,6 +65,8 @@ class WebPageReply : public StaticWebReply
 
   std::string __merged_body;
   std::string __html_header;
+  bool navbar_enabled_;
+  bool footer_enabled_;
 };
 
 } // end namespace fawkes
