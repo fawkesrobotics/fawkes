@@ -145,7 +145,7 @@ CEscapePotentialFieldOmniDriveModule::Update()
   logger_->log_warn("CEscapePotentialFieldOmniDriveModule","Target vector: phi: %f\t%f", target.phi, target.r);
 
   // decide route
-  float angle_difference = M_PI_4 - 0.1;
+  float angle_difference = M_PI_2 - 0.2;
   float angle     = normalize_mirror_rad(target.phi);
   float angle_abs = fabs( angle );
 
@@ -177,6 +177,9 @@ CEscapePotentialFieldOmniDriveModule::Update()
     logger_->log_warn("CEscapePotentialFieldOmniDriveModule","Drive ( %f , %f )", drive_part_x, drive_part_y);
     m_ProposedTranslationX = drive_part_x * m_MaxTranslation;
     m_ProposedTranslationY = drive_part_y * m_MaxTranslation;
+    if ( fabs(turn_direction) > 0.2 ) {
+      m_ProposedRotation = turn_direction * m_MaxRotation;
+    }
   }
 }
 
