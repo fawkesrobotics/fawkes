@@ -139,6 +139,17 @@ class NavigatorInterface : public Interface
     int maxlenof_max_velocity() const;
   };
 
+  class SetMaxRotationMessage : public Message
+  {
+    SetMaxRotationMessage(float ini_max_rotation);
+    SetMaxRotationMessage();
+    ~SetMaxRotationMessage();
+
+    float max_rotation();
+    void set_max_rotation(const float new_max_rotation);
+    int maxlenof_max_rotation() const;
+  };
+
   class SetEscapingMessage : public Message
   {
     SetEscapingMessage(bool ini_escaping_enabled);
@@ -170,6 +181,35 @@ class NavigatorInterface : public Interface
     DriveMode drive_mode();
     void set_drive_mode(const DriveMode new_drive_mode);
     int maxlenof_drive_mode() const;
+  };
+
+  class SetStopAtTargetMessage : public Message
+  {
+    SetStopAtTargetMessage(bool ini_stop_at_target);
+    SetStopAtTargetMessage();
+    ~SetStopAtTargetMessage();
+
+    bool is_stop_at_target();
+    void set_stop_at_target(const bool new_stop_at_target);
+    int maxlenof_stop_at_target() const;
+  };
+
+  class SetOrientAtTargetMessage : public Message
+  {
+    SetOrientAtTargetMessage(bool ini_orient_at_target);
+    SetOrientAtTargetMessage();
+    ~SetOrientAtTargetMessage();
+
+    bool is_orient_at_target();
+    void set_orient_at_target(const bool new_orient_at_target);
+    int maxlenof_orient_at_target() const;
+  };
+
+  class ResetParametersMessage : public Message
+  {
+    ResetParametersMessage();
+    ~ResetParametersMessage();
+
   };
 
   unsigned int flags();
@@ -205,6 +245,9 @@ class NavigatorInterface : public Interface
   float max_velocity();
   void set_max_velocity(const float new_max_velocity);
   int maxlenof_max_velocity() const;
+  float max_rotation();
+  void set_max_rotation(const float new_max_rotation);
+  int maxlenof_max_rotation() const;
   float security_distance();
   void set_security_distance(const float new_security_distance);
   int maxlenof_security_distance() const;
@@ -214,6 +257,15 @@ class NavigatorInterface : public Interface
   DriveMode drive_mode();
   void set_drive_mode(const DriveMode new_drive_mode);
   int maxlenof_drive_mode() const;
+  bool is_auto_drive_mode();
+  void set_auto_drive_mode(const bool new_auto_drive_mode);
+  int maxlenof_auto_drive_mode() const;
+  bool is_stop_at_target();
+  void set_stop_at_target(const bool new_stop_at_target);
+  int maxlenof_stop_at_target() const;
+  bool is_orient_at_target();
+  void set_orient_at_target(const bool new_orient_at_target);
+  int maxlenof_orient_at_target() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

@@ -22,7 +22,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  katana pantilt roomba nao robotino \
 	  bumblebee2 perception amcl \
 	  skiller luaagent worldmodel laserht laser-filter laser-pointclouds \
-	  static_transforms navgraph \
+	  static_transforms navgraph colli \
 	  clips clips-agent clips-protobuf clips-webview clips-navgraph clips-ros \
 	  mongodb mongodb_log \
 	  openni refboxcomm ros player xmlrpc \

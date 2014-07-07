@@ -131,8 +131,8 @@ FieldLines::get_name() const
 void
 FieldLines::calc_offsets()
 {
-  cart_coord_2d_t mins = { 0, 0 };
-  cart_coord_2d_t maxs = { 0, 0 };
+  cart_coord_2d_t mins(0, 0);
+  cart_coord_2d_t maxs(0, 0);
 
   float f;
 

@@ -91,9 +91,13 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_UINT32, "error_code", 1, &data->error_code);
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
+  add_fieldinfo(IFT_FLOAT, "max_rotation", 1, &data->max_rotation);
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
   add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode");
+  add_fieldinfo(IFT_BOOL, "auto_drive_mode", 1, &data->auto_drive_mode);
+  add_fieldinfo(IFT_BOOL, "stop_at_target", 1, &data->stop_at_target);
+  add_fieldinfo(IFT_BOOL, "orient_at_target", 1, &data->orient_at_target);
   add_messageinfo("StopMessage");
   add_messageinfo("TurnMessage");
   add_messageinfo("CartesianGotoMessage");
@@ -102,10 +106,14 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("ObstacleMessage");
   add_messageinfo("ResetOdometryMessage");
   add_messageinfo("SetMaxVelocityMessage");
+  add_messageinfo("SetMaxRotationMessage");
   add_messageinfo("SetEscapingMessage");
   add_messageinfo("SetSecurityDistanceMessage");
   add_messageinfo("SetDriveModeMessage");
-  unsigned char tmp_hash[] = {0xfb, 0xb8, 0x77, 0x94, 0x41, 0xdb, 0x47, 0xaf, 0xb3, 0xbe, 0x56, 0x14, 0x1f, 0x49, 0x77, 0x7f};
+  add_messageinfo("SetStopAtTargetMessage");
+  add_messageinfo("SetOrientAtTargetMessage");
+  add_messageinfo("ResetParametersMessage");
+  unsigned char tmp_hash[] = {0x18, 0x12, 0x5a, 0x5c, 0x33, 0xb7, 0x54, 0x78, 0x2f, 0x3a, 0x8c, 0x58, 0x59, 0x63, 0x7c, 0x19};
   set_hash(tmp_hash);
 }
 
@@ -495,9 +503,39 @@ NavigatorInterface::set_max_velocity(const float new_max_velocity)
   data_changed = true;
 }
 
+/** Get max_rotation value.
+ * Maximum rotation velocity
+ * @return max_rotation value
+ */
+float
+NavigatorInterface::max_rotation() const
+{
+  return data->max_rotation;
+}
+
+/** Get maximum length of max_rotation value.
+ * @return length of max_rotation value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_max_rotation() const
+{
+  return 1;
+}
+
+/** Set max_rotation value.
+ * Maximum rotation velocity
+ * @param new_max_rotation new max_rotation value
+ */
+void
+NavigatorInterface::set_max_rotation(const float new_max_rotation)
+{
+  data->max_rotation = new_max_rotation;
+  data_changed = true;
+}
+
 /** Get security_distance value.
- * Security distance to
-    keep to obstacles
+ * Security distance to keep to obstacles
  * @return security_distance value
  */
 float
@@ -517,8 +555,7 @@ NavigatorInterface::maxlenof_security_distance() const
 }
 
 /** Set security_distance value.
- * Security distance to
-    keep to obstacles
+ * Security distance to keep to obstacles
  * @param new_security_distance new security_distance value
  */
 void
@@ -529,10 +566,8 @@ NavigatorInterface::set_security_distance(const float new_security_distance)
 }
 
 /** Get escaping_enabled value.
- * This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape.
+ * This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape.
  * @return escaping_enabled value
  */
 bool
@@ -552,10 +587,8 @@ NavigatorInterface::maxlenof_escaping_enabled() const
 }
 
 /** Set escaping_enabled value.
- * This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape.
+ * This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape.
  * @param new_escaping_enabled new escaping_enabled value
  */
 void
@@ -596,6 +629,103 @@ NavigatorInterface::set_drive_mode(const DriveMode new_drive_mode)
   data_changed = true;
 }
 
+/** Get auto_drive_mode value.
+ * True, if the drive mode should be automatically decided each time.
+      False, if the drive mode should not automatically change, which is the case when sending
+      a SetAutoDriveMode-message (otherwise the navigator might ignore that value).
+ * @return auto_drive_mode value
+ */
+bool
+NavigatorInterface::is_auto_drive_mode() const
+{
+  return data->auto_drive_mode;
+}
+
+/** Get maximum length of auto_drive_mode value.
+ * @return length of auto_drive_mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_auto_drive_mode() const
+{
+  return 1;
+}
+
+/** Set auto_drive_mode value.
+ * True, if the drive mode should be automatically decided each time.
+      False, if the drive mode should not automatically change, which is the case when sending
+      a SetAutoDriveMode-message (otherwise the navigator might ignore that value).
+ * @param new_auto_drive_mode new auto_drive_mode value
+ */
+void
+NavigatorInterface::set_auto_drive_mode(const bool new_auto_drive_mode)
+{
+  data->auto_drive_mode = new_auto_drive_mode;
+  data_changed = true;
+}
+
+/** Get stop_at_target value.
+ * Stop when target is reached?
+ * @return stop_at_target value
+ */
+bool
+NavigatorInterface::is_stop_at_target() const
+{
+  return data->stop_at_target;
+}
+
+/** Get maximum length of stop_at_target value.
+ * @return length of stop_at_target value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_stop_at_target() const
+{
+  return 1;
+}
+
+/** Set stop_at_target value.
+ * Stop when target is reached?
+ * @param new_stop_at_target new stop_at_target value
+ */
+void
+NavigatorInterface::set_stop_at_target(const bool new_stop_at_target)
+{
+  data->stop_at_target = new_stop_at_target;
+  data_changed = true;
+}
+
+/** Get orient_at_target value.
+ * Adjust orientation when target position is reached?
+ * @return orient_at_target value
+ */
+bool
+NavigatorInterface::is_orient_at_target() const
+{
+  return data->orient_at_target;
+}
+
+/** Get maximum length of orient_at_target value.
+ * @return length of orient_at_target value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::maxlenof_orient_at_target() const
+{
+  return 1;
+}
+
+/** Set orient_at_target value.
+ * Adjust orientation when target position is reached?
+ * @param new_orient_at_target new orient_at_target value
+ */
+void
+NavigatorInterface::set_orient_at_target(const bool new_orient_at_target)
+{
+  data->orient_at_target = new_orient_at_target;
+  data_changed = true;
+}
+
 /* =========== message create =========== */
 Message *
 NavigatorInterface::create_message(const char *type) const
@@ -616,12 +746,20 @@ NavigatorInterface::create_message(const char *type) const
     return new ResetOdometryMessage();
   } else if ( strncmp("SetMaxVelocityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetMaxVelocityMessage();
+  } else if ( strncmp("SetMaxRotationMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetMaxRotationMessage();
   } else if ( strncmp("SetEscapingMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetEscapingMessage();
   } else if ( strncmp("SetSecurityDistanceMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetSecurityDistanceMessage();
   } else if ( strncmp("SetDriveModeMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetDriveModeMessage();
+  } else if ( strncmp("SetStopAtTargetMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetStopAtTargetMessage();
+  } else if ( strncmp("SetOrientAtTargetMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetOrientAtTargetMessage();
+  } else if ( strncmp("ResetParametersMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new ResetParametersMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -1525,6 +1663,96 @@ NavigatorInterface::SetMaxVelocityMessage::clone() const
 {
   return new NavigatorInterface::SetMaxVelocityMessage(this);
 }
+/** @class NavigatorInterface::SetMaxRotationMessage <interfaces/NavigatorInterface.h>
+ * SetMaxRotationMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_max_rotation initial value for max_rotation
+ */
+NavigatorInterface::SetMaxRotationMessage::SetMaxRotationMessage(const float ini_max_rotation) : Message("SetMaxRotationMessage")
+{
+  data_size = sizeof(SetMaxRotationMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMaxRotationMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->max_rotation = ini_max_rotation;
+  add_fieldinfo(IFT_FLOAT, "max_rotation", 1, &data->max_rotation);
+}
+/** Constructor */
+NavigatorInterface::SetMaxRotationMessage::SetMaxRotationMessage() : Message("SetMaxRotationMessage")
+{
+  data_size = sizeof(SetMaxRotationMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetMaxRotationMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_FLOAT, "max_rotation", 1, &data->max_rotation);
+}
+
+/** Destructor */
+NavigatorInterface::SetMaxRotationMessage::~SetMaxRotationMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::SetMaxRotationMessage::SetMaxRotationMessage(const SetMaxRotationMessage *m) : Message("SetMaxRotationMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetMaxRotationMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get max_rotation value.
+ * Maximum rotation velocity
+ * @return max_rotation value
+ */
+float
+NavigatorInterface::SetMaxRotationMessage::max_rotation() const
+{
+  return data->max_rotation;
+}
+
+/** Get maximum length of max_rotation value.
+ * @return length of max_rotation value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::SetMaxRotationMessage::maxlenof_max_rotation() const
+{
+  return 1;
+}
+
+/** Set max_rotation value.
+ * Maximum rotation velocity
+ * @param new_max_rotation new max_rotation value
+ */
+void
+NavigatorInterface::SetMaxRotationMessage::set_max_rotation(const float new_max_rotation)
+{
+  data->max_rotation = new_max_rotation;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::SetMaxRotationMessage::clone() const
+{
+  return new NavigatorInterface::SetMaxRotationMessage(this);
+}
 /** @class NavigatorInterface::SetEscapingMessage <interfaces/NavigatorInterface.h>
  * SetEscapingMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1576,10 +1804,8 @@ NavigatorInterface::SetEscapingMessage::SetEscapingMessage(const SetEscapingMess
 
 /* Methods */
 /** Get escaping_enabled value.
- * This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape.
+ * This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape.
  * @return escaping_enabled value
  */
 bool
@@ -1599,10 +1825,8 @@ NavigatorInterface::SetEscapingMessage::maxlenof_escaping_enabled() const
 }
 
 /** Set escaping_enabled value.
- * This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape.
+ * This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape.
  * @param new_escaping_enabled new escaping_enabled value
  */
 void
@@ -1672,8 +1896,7 @@ NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage(const
 
 /* Methods */
 /** Get security_distance value.
- * Security distance to
-    keep to obstacles
+ * Security distance to keep to obstacles
  * @return security_distance value
  */
 float
@@ -1693,8 +1916,7 @@ NavigatorInterface::SetSecurityDistanceMessage::maxlenof_security_distance() con
 }
 
 /** Set security_distance value.
- * Security distance to
-    keep to obstacles
+ * Security distance to keep to obstacles
  * @param new_security_distance new security_distance value
  */
 void
@@ -1803,6 +2025,232 @@ NavigatorInterface::SetDriveModeMessage::clone() const
 {
   return new NavigatorInterface::SetDriveModeMessage(this);
 }
+/** @class NavigatorInterface::SetStopAtTargetMessage <interfaces/NavigatorInterface.h>
+ * SetStopAtTargetMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_stop_at_target initial value for stop_at_target
+ */
+NavigatorInterface::SetStopAtTargetMessage::SetStopAtTargetMessage(const bool ini_stop_at_target) : Message("SetStopAtTargetMessage")
+{
+  data_size = sizeof(SetStopAtTargetMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetStopAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->stop_at_target = ini_stop_at_target;
+  add_fieldinfo(IFT_BOOL, "stop_at_target", 1, &data->stop_at_target);
+}
+/** Constructor */
+NavigatorInterface::SetStopAtTargetMessage::SetStopAtTargetMessage() : Message("SetStopAtTargetMessage")
+{
+  data_size = sizeof(SetStopAtTargetMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetStopAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "stop_at_target", 1, &data->stop_at_target);
+}
+
+/** Destructor */
+NavigatorInterface::SetStopAtTargetMessage::~SetStopAtTargetMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::SetStopAtTargetMessage::SetStopAtTargetMessage(const SetStopAtTargetMessage *m) : Message("SetStopAtTargetMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetStopAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get stop_at_target value.
+ * Stop when target is reached?
+ * @return stop_at_target value
+ */
+bool
+NavigatorInterface::SetStopAtTargetMessage::is_stop_at_target() const
+{
+  return data->stop_at_target;
+}
+
+/** Get maximum length of stop_at_target value.
+ * @return length of stop_at_target value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::SetStopAtTargetMessage::maxlenof_stop_at_target() const
+{
+  return 1;
+}
+
+/** Set stop_at_target value.
+ * Stop when target is reached?
+ * @param new_stop_at_target new stop_at_target value
+ */
+void
+NavigatorInterface::SetStopAtTargetMessage::set_stop_at_target(const bool new_stop_at_target)
+{
+  data->stop_at_target = new_stop_at_target;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::SetStopAtTargetMessage::clone() const
+{
+  return new NavigatorInterface::SetStopAtTargetMessage(this);
+}
+/** @class NavigatorInterface::SetOrientAtTargetMessage <interfaces/NavigatorInterface.h>
+ * SetOrientAtTargetMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_orient_at_target initial value for orient_at_target
+ */
+NavigatorInterface::SetOrientAtTargetMessage::SetOrientAtTargetMessage(const bool ini_orient_at_target) : Message("SetOrientAtTargetMessage")
+{
+  data_size = sizeof(SetOrientAtTargetMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetOrientAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->orient_at_target = ini_orient_at_target;
+  add_fieldinfo(IFT_BOOL, "orient_at_target", 1, &data->orient_at_target);
+}
+/** Constructor */
+NavigatorInterface::SetOrientAtTargetMessage::SetOrientAtTargetMessage() : Message("SetOrientAtTargetMessage")
+{
+  data_size = sizeof(SetOrientAtTargetMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetOrientAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "orient_at_target", 1, &data->orient_at_target);
+}
+
+/** Destructor */
+NavigatorInterface::SetOrientAtTargetMessage::~SetOrientAtTargetMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::SetOrientAtTargetMessage::SetOrientAtTargetMessage(const SetOrientAtTargetMessage *m) : Message("SetOrientAtTargetMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetOrientAtTargetMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get orient_at_target value.
+ * Adjust orientation when target position is reached?
+ * @return orient_at_target value
+ */
+bool
+NavigatorInterface::SetOrientAtTargetMessage::is_orient_at_target() const
+{
+  return data->orient_at_target;
+}
+
+/** Get maximum length of orient_at_target value.
+ * @return length of orient_at_target value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::SetOrientAtTargetMessage::maxlenof_orient_at_target() const
+{
+  return 1;
+}
+
+/** Set orient_at_target value.
+ * Adjust orientation when target position is reached?
+ * @param new_orient_at_target new orient_at_target value
+ */
+void
+NavigatorInterface::SetOrientAtTargetMessage::set_orient_at_target(const bool new_orient_at_target)
+{
+  data->orient_at_target = new_orient_at_target;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::SetOrientAtTargetMessage::clone() const
+{
+  return new NavigatorInterface::SetOrientAtTargetMessage(this);
+}
+/** @class NavigatorInterface::ResetParametersMessage <interfaces/NavigatorInterface.h>
+ * ResetParametersMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+NavigatorInterface::ResetParametersMessage::ResetParametersMessage() : Message("ResetParametersMessage")
+{
+  data_size = sizeof(ResetParametersMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ResetParametersMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+NavigatorInterface::ResetParametersMessage::~ResetParametersMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::ResetParametersMessage::ResetParametersMessage(const ResetParametersMessage *m) : Message("ResetParametersMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ResetParametersMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::ResetParametersMessage::clone() const
+{
+  return new NavigatorInterface::ResetParametersMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -1842,16 +2290,32 @@ NavigatorInterface::message_valid(const Message *message) const
   if ( m7 != NULL ) {
     return true;
   }
-  const SetEscapingMessage *m8 = dynamic_cast<const SetEscapingMessage *>(message);
+  const SetMaxRotationMessage *m8 = dynamic_cast<const SetMaxRotationMessage *>(message);
   if ( m8 != NULL ) {
     return true;
   }
-  const SetSecurityDistanceMessage *m9 = dynamic_cast<const SetSecurityDistanceMessage *>(message);
+  const SetEscapingMessage *m9 = dynamic_cast<const SetEscapingMessage *>(message);
   if ( m9 != NULL ) {
     return true;
   }
-  const SetDriveModeMessage *m10 = dynamic_cast<const SetDriveModeMessage *>(message);
+  const SetSecurityDistanceMessage *m10 = dynamic_cast<const SetSecurityDistanceMessage *>(message);
   if ( m10 != NULL ) {
+    return true;
+  }
+  const SetDriveModeMessage *m11 = dynamic_cast<const SetDriveModeMessage *>(message);
+  if ( m11 != NULL ) {
+    return true;
+  }
+  const SetStopAtTargetMessage *m12 = dynamic_cast<const SetStopAtTargetMessage *>(message);
+  if ( m12 != NULL ) {
+    return true;
+  }
+  const SetOrientAtTargetMessage *m13 = dynamic_cast<const SetOrientAtTargetMessage *>(message);
+  if ( m13 != NULL ) {
+    return true;
+  }
+  const ResetParametersMessage *m14 = dynamic_cast<const ResetParametersMessage *>(message);
+  if ( m14 != NULL ) {
     return true;
   }
   return false;

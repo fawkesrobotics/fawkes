@@ -3,7 +3,7 @@
 <interface name="NavigatorInterface" author="Martin Liebenberg, Daniel Beck, Tim Niemueller" year="2007-2009">
   <constants>
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
-	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
+   the equation f = 2^n holds, for f being the flag value and n a natural number. -->
     <constant type="uint32" value="0" name="ERROR_NONE">No error.</constant>
     <constant type="uint32" value="1" name="ERROR_MOTOR">Cannot
       communicate with motor.</constant>
@@ -16,7 +16,7 @@
     </constant>
 
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
-	 the equation f = 2^n holds, for f being the flag value and n a natural number. -->
+   the equation f = 2^n holds, for f being the flag value and n a natural number. -->
     <constant type="uint32" value="0" name="FLAG_NONE">No flags set.</constant>
     <constant type="uint32" value="1" name="FLAG_CART_GOTO">
       Navigator component supports cartesian goto commands.
@@ -96,15 +96,18 @@
     constants otherwise (or a bit-wise combination).</field>
 
     <field type="float" name="max_velocity">Maximum velocity</field>
-    <field type="float" name="security_distance">Security distance to
-    keep to obstacles</field>
-    <field type="bool" name="escaping_enabled">This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape.</field>
+    <field type="float" name="max_rotation">Maximum rotation velocity</field>
+    <field type="float" name="security_distance">Security distance to keep to obstacles</field>
+    <field type="bool" name="escaping_enabled">This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape.</field>
 
     <field type="DriveMode" name="drive_mode">Current drive mode</field>
-  
+    <field type="bool" name="auto_drive_mode">True, if the drive mode should be automatically decided each time.
+      False, if the drive mode should not automatically change, which is the case when sending
+      a SetAutoDriveMode-message (otherwise the navigator might ignore that value).</field>
+
+    <field type="bool" name="stop_at_target">Stop when target is reached?</field>
+    <field type="bool" name="orient_at_target">Adjust orientation when target position is reached?</field>
   </data>
   <message name="Stop">
     <comment>Stop motion immediately.</comment>
@@ -146,17 +149,31 @@
     <comment>States the maximum velocity of the robot for driving/walking, but not for turning.</comment>
     <ref>max_velocity</ref>
   </message>
+  <message name="SetMaxRotation">
+    <comment>States the maximum velocity of the robot for rotating/turning.</comment>
+    <ref>max_rotation</ref>
+  </message>
   <message name="SetEscaping">
     <comment>Sets if escaping is allowed (true) or not (false).</comment>
     <ref>escaping_enabled</ref>
   </message>
   <message name="SetSecurityDistance">
-    <comment>Sets the desired security distance (in meters) for
-    collision avoidance.</comment>
+    <comment>Sets the desired security distance (in meters) for collision avoidance.</comment>
     <ref>security_distance</ref>
   </message>
-  <message name="SetDriveModeMessage">
+  <message name="SetDriveMode">
     <comment>Sets the desired drive modefor collision avoidance.</comment>
     <ref>drive_mode</ref>
+  </message>
+  <message name="SetStopAtTarget">
+    <comment>Decide if robot should explicily stop when the target is reached.</comment>
+    <ref>stop_at_target</ref>
+  </message>
+    <message name="SetOrientAtTarget">
+    <comment>Decide if robot should adjust orientation when target is reached.</comment>
+    <ref>orient_at_target</ref>
+  </message>
+  <message name="ResetParameters">
+    <comment>Reset the settable parameters to default values.</comment>
   </message>
 </interface>

@@ -1,0 +1,213 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+
+plugins/colli:
+
+  # Frequency in Hz of how often calli is called (deprecated; this is defined by fawkes main loop)
+  frequency: 10
+
+  # The maximum robot increasement of laser readings
+  max_robo_increase: 0.04
+
+  # If you want to visualize the data continuously and not just when colli receives a new target, set this to true
+  visualize_idle: false
+
+  # Define if obstacles should be increased depending on robot's speed
+  obstacle_increasement: true
+
+  # Default security distance to keep to obstacles
+  security_distance: 0.2
+
+  # Default maximum translation velocity (in m/s)
+  max_velocity: 1.5
+
+  # Default maximum rotation velocity (in rad/s)
+  max_rotation: 2.0
+
+  # Default escaping behaviour (just enabled/disabled)
+  escaping_enabled: true
+
+  # Default behaviour, deciding if colli should stop at target (not used in implementation atm though)
+  stop_at_target: true
+
+  # Default behaviour, deciding if colli should adjust orientation when target is reached
+  orient_at_target: true
+
+  # The minimum rotation speed (in rad/s). Used for rotating at target
+  min_rot: 0.1
+
+  # The minimum distance to target, such that colli decides to drive straight to target.
+  # This is the lowest threshold, anything below this and the colli won't move. This will also
+  # be used to check whether the colli has reached its target position.
+  min_drive_distance: 0.1
+
+  # The minimum distance to target in long distance, such that colli decides to drive straight to target.
+  min_long_dist_drive: 0.15
+
+  # The minimum distance to target in long distance, such that colli drives to a pre-position AND orients
+  # towards the target, so that the robot can approach the target with the front.
+  min_long_dist_prepos: 2.1
+
+  # The minimum orientation difference, such that colli rotates when robot is at target position(in rad)
+  # No translation is executed at this point anymore.
+  min_rot_distance: 0.1
+
+  # If the target is "far" away (>= min_drive_rot_distance), we approach a pre-position to
+  #  already adjust the orientation a little. This defines the distance to that pre-position.
+  pre_position_distance: 0.8
+
+  interface:
+    # ID of main navigator interface (this handles the incoming messages)
+    navigator: Navigator
+    # ID of motor interface
+    motor: Motor
+    # ID of laser interface
+    laser: Laser laser merged
+    # ID of colli target interface
+    colli: Colli target
+    # Maximum age (in seconds) of data for reading interfaces. If data is older than this, the colli_thread
+    #  assumes that there main_loop is delayed => abort movement
+    read_timeout: 0.5
+
+  frame:
+    # base_link frame
+    base: !frame /base_link
+    # laser frame
+    laser: !frame /base_laser
+    # odometry frame
+    odometry: !frame /odom
+
+  ros:
+    # subscribe to this topic to be able to set the target via rviz
+    target_topic: /move_base_simple/goal
+
+  occ_grid:
+    # Grid Dimensions (in m)
+    width: 6.5
+    height: 6.5
+    # Cell dimensions (in cm)
+    cell_width: 5
+    cell_height: 5
+
+  motor_instruct:
+    #set the used motor instruct. This sets the calculation for acc and dec.
+    #You can choose between linear or quadratic
+    mode: "linear"
+
+    # Translation acceleration/deceleration
+    trans_acc: 0.23
+    trans_dec: 0.42
+    # Rotation acceleration/deceleration
+    rot_acc: 0.23
+    rot_dec: 0.42
+
+  drive_mode:
+    # Default drive mode. It's an enum, see NavigatorInterface for details.
+    default: "SlowForward"
+
+    # Default drive mode for escaping. You can choose between potential_field and basic
+    default_escape: "potential_field"
+
+    slow:
+      # Max translation/rotation velocities
+      max_trans: 1.0
+      max_rot: 2.0
+
+    medium:
+      # Max translation/rotation velocities
+      max_trans: 2.0
+      max_rot: 6.0
+
+    fast:
+      # Max translation/rotation velocities
+      max_trans: 2.99
+      max_rot: 7.0
+
+    escape:
+      # Max translation/rotation velocities for escape-mode
+      max_trans: 0.3
+      max_rot: 0.8
+
+    # Modifies the values used to calculate when to start breaking to stop at the target
+    stopping_adjustment:
+      # Add this distance to the calculated distance required for stopping stop, given the current speed.
+      # Higher values mean "stop earlier". Might cause bocking if too high.
+      distance_addition: 0.0
+      # This value is multiplied with the expected deceleration per loop. Should relate to how
+      #  much the speed actually drops compared to what is desired. So use a value in [0..1], anything
+      #  higher will be cropped to 1.
+      # Lower values mean "breaking effect is delayed more" (or "only x% of deceleration is actually
+      #  noticable in 1 iteration"), so it will "stop earlier".
+      deceleration_factor: 1.0
+
+  roboshape:
+    # Define the roboshape: 1 is angular (default), 2 is round
+    shape: 1
+
+    angular:
+      # Dimensions of angular robot
+      width_x: 0.38
+      width_y: 0.4
+      # The Lasers offset from back/left, seen from behind left
+      laser_offset_x_from_back: 0.062
+      laser_offset_y_from_left: 0.2
+
+    round:
+      # For round roboter
+      radius: 0.3
+      # The Lasers offset from center
+      laser_offset_x_from_middle: 0.0
+      laser_offset_y_from_middle: 0.0
+
+    extension:
+      # Extension of the shape
+      front: 0.2
+      right: 0.02
+      back: 0.05
+      left: 0.02
+
+
+  laser:
+    # Minimum laser reading length for that the reading is taken as valid
+    min_reading_length: 0.02
+
+
+  laser_occupancy_grid:
+    # This is the distance in which laser readings are ignored for putting a new obstacle into the grid
+    distance_account: 0.1
+
+    # Define if elipse obsticles shoudl be used with angular robots
+    force_ellipse_obstacle: false
+
+    history:
+      # the history vector size with number of saved elements
+      # Note: This is the initial size. If the history grows bigger, elements have to be appended
+      #  and this costs time. But to many elements result in page faults ;-)
+      initial_size: 500
+
+      # the max time difference of the laser reading history for the search in seconds
+      max_length: 6.0
+
+      # the min time difference of the laser reading history for the search in seconds
+      min_length: 1.5
+
+    buffer_size: 2
+
+    # costs of the cells in the occupancy grid
+    cell_cost:
+      # occupied cell
+      occupied: 1000
+      # cell near an obstacle
+      near: 4
+      # cell still relatively near on obstacle
+      mid: 3
+      # cell further away from obstacle
+      far: 2
+      # free cell
+      free: 1
+
+  a_star:
+    # maximum number of states the colli uses to search for a path.
+    # The more states the better the search, but the slower the algorithm
+    max_states: 15000
+

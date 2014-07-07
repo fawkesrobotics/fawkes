@@ -94,13 +94,16 @@ class NavigatorInterface : public Interface
     final is true. 0 if no error occured, an error code from ERROR_*
     constants otherwise (or a bit-wise combination). */
     float max_velocity; /**< Maximum velocity */
-    float security_distance; /**< Security distance to
-    keep to obstacles */
-    bool escaping_enabled; /**< This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape. */
+    float max_rotation; /**< Maximum rotation velocity */
+    float security_distance; /**< Security distance to keep to obstacles */
+    bool escaping_enabled; /**< This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape. */
     int32_t drive_mode; /**< Current drive mode */
+    bool auto_drive_mode; /**< True, if the drive mode should be automatically decided each time.
+      False, if the drive mode should not automatically change, which is the case when sending
+      a SetAutoDriveMode-message (otherwise the navigator might ignore that value). */
+    bool stop_at_target; /**< Stop when target is reached? */
+    bool orient_at_target; /**< Adjust orientation when target position is reached? */
   } NavigatorInterface_data_t;
 #pragma pack(pop)
 
@@ -343,6 +346,33 @@ class NavigatorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetMaxRotationMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float max_rotation; /**< Maximum rotation velocity */
+    } SetMaxRotationMessage_data_t;
+#pragma pack(pop)
+
+    SetMaxRotationMessage_data_t *data;
+
+   public:
+    SetMaxRotationMessage(const float ini_max_rotation);
+    SetMaxRotationMessage();
+    ~SetMaxRotationMessage();
+
+    SetMaxRotationMessage(const SetMaxRotationMessage *m);
+    /* Methods */
+    float max_rotation() const;
+    void set_max_rotation(const float new_max_rotation);
+    size_t maxlenof_max_rotation() const;
+    virtual Message * clone() const;
+  };
+
   class SetEscapingMessage : public Message
   {
    private:
@@ -351,10 +381,8 @@ class NavigatorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      bool escaping_enabled; /**< This is used for
-	navigation components with integrated collision avoidance, to
-	check whether the navigator should stop when an obstacle
-	obstructs the path, or if it should escape. */
+      bool escaping_enabled; /**< This is used for navigation components with integrated collision avoidance,
+      to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape. */
     } SetEscapingMessage_data_t;
 #pragma pack(pop)
 
@@ -381,8 +409,7 @@ class NavigatorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      float security_distance; /**< Security distance to
-    keep to obstacles */
+      float security_distance; /**< Security distance to keep to obstacles */
     } SetSecurityDistanceMessage_data_t;
 #pragma pack(pop)
 
@@ -428,6 +455,82 @@ class NavigatorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetStopAtTargetMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool stop_at_target; /**< Stop when target is reached? */
+    } SetStopAtTargetMessage_data_t;
+#pragma pack(pop)
+
+    SetStopAtTargetMessage_data_t *data;
+
+   public:
+    SetStopAtTargetMessage(const bool ini_stop_at_target);
+    SetStopAtTargetMessage();
+    ~SetStopAtTargetMessage();
+
+    SetStopAtTargetMessage(const SetStopAtTargetMessage *m);
+    /* Methods */
+    bool is_stop_at_target() const;
+    void set_stop_at_target(const bool new_stop_at_target);
+    size_t maxlenof_stop_at_target() const;
+    virtual Message * clone() const;
+  };
+
+  class SetOrientAtTargetMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool orient_at_target; /**< Adjust orientation when target position is reached? */
+    } SetOrientAtTargetMessage_data_t;
+#pragma pack(pop)
+
+    SetOrientAtTargetMessage_data_t *data;
+
+   public:
+    SetOrientAtTargetMessage(const bool ini_orient_at_target);
+    SetOrientAtTargetMessage();
+    ~SetOrientAtTargetMessage();
+
+    SetOrientAtTargetMessage(const SetOrientAtTargetMessage *m);
+    /* Methods */
+    bool is_orient_at_target() const;
+    void set_orient_at_target(const bool new_orient_at_target);
+    size_t maxlenof_orient_at_target() const;
+    virtual Message * clone() const;
+  };
+
+  class ResetParametersMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } ResetParametersMessage_data_t;
+#pragma pack(pop)
+
+    ResetParametersMessage_data_t *data;
+
+   public:
+    ResetParametersMessage();
+    ~ResetParametersMessage();
+
+    ResetParametersMessage(const ResetParametersMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   NavigatorInterface();
@@ -468,6 +571,9 @@ class NavigatorInterface : public Interface
   float max_velocity() const;
   void set_max_velocity(const float new_max_velocity);
   size_t maxlenof_max_velocity() const;
+  float max_rotation() const;
+  void set_max_rotation(const float new_max_rotation);
+  size_t maxlenof_max_rotation() const;
   float security_distance() const;
   void set_security_distance(const float new_security_distance);
   size_t maxlenof_security_distance() const;
@@ -477,6 +583,15 @@ class NavigatorInterface : public Interface
   DriveMode drive_mode() const;
   void set_drive_mode(const DriveMode new_drive_mode);
   size_t maxlenof_drive_mode() const;
+  bool is_auto_drive_mode() const;
+  void set_auto_drive_mode(const bool new_auto_drive_mode);
+  size_t maxlenof_auto_drive_mode() const;
+  bool is_stop_at_target() const;
+  void set_stop_at_target(const bool new_stop_at_target);
+  size_t maxlenof_stop_at_target() const;
+  bool is_orient_at_target() const;
+  void set_orient_at_target(const bool new_orient_at_target);
+  size_t maxlenof_orient_at_target() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

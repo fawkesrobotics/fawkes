@@ -37,15 +37,41 @@ typedef struct {
 } upoint_t;
 
 /** Point with cartesian coordinates as signed integers. */
-typedef struct {
+typedef struct point_struct {
   int x;       /**< x coordinate */
   int y;       /**< y coordinate */
+
+  /** Default constructor */
+  point_struct() {}
+
+  /** Constructor.
+   * @param x The x coordinate
+   * @param y The y coordinate
+   */
+  point_struct(int x, int y) {
+    this->x = x;
+    this->y = y;
+  }
+
 } point_t;
 
 /** Cartesian coordinates (2D). */
-typedef struct {
+typedef struct cart_coord_2d_struct {
   float x;      /**< x coordinate */
   float y;      /**< y coordinate */
+
+  /** Default constructor */
+  cart_coord_2d_struct() {}
+
+  /** Constructor.
+   * @param x The x coordinate.
+   * @param y The y coordinate.
+   */
+  cart_coord_2d_struct(float x, float y) {
+    this->x = x;
+    this->y = y;
+  }
+
 } cart_coord_2d_t;
 
 /** Cartesian coordinates (3D). */
@@ -134,6 +160,27 @@ typedef struct arc_struct {
   float start_phi;        /**< The start angle of the arc */
   float end_phi;          /**< The end angle of the arc */
 } arc_t;
+
+/** Defines an ellipse */
+typedef struct ellipse_struct {
+  cart_coord_2d_t center; /**< The center point of the ellipse */
+  float width;            /**< The total width of the ellipse */
+  float height;           /**< The total height of the ellipse */
+
+  /** Constructur.
+   * @param x The x-coordinate of the center of the ellipse
+   * @param y The y-coordinate of the center of the ellipse
+   * @param w The total width of the ellipse
+   * @param h The total height of the ellipse
+   */
+  ellipse_struct(float x, float y, float w, float h) {
+    this->center.x = x;
+    this->center.y = y;
+    this->width = w;
+    this->height = h;
+  }
+
+} ellipse_t;
 
 /** Defines a point with 6-degrees of freedom */
 typedef struct point_6D_struct {
