@@ -98,8 +98,7 @@ void RobotStatePublisherThread::init()
   }
   ifstream urdf_file(cfg_urdf_path_);
   if (!urdf_file.is_open()) {
-    logger->log_error(name(), "failed to open URDF File %s", cfg_urdf_path_.c_str());
-    throw;
+    throw Exception("Failed to open URDF File %s", cfg_urdf_path_.c_str()) ;
   }
   while ( getline(urdf_file, line)) {
     urdf += line;
