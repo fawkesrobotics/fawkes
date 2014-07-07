@@ -27,7 +27,19 @@
 
 namespace firevision {
 /**
- *
+ * @class PositionToPixel
+ * Compute a pixel position in the camera image from a cartesian world coordinate.
+ */
+
+/**
+ * Construct a PositionToPixel model with the required camera geometry
+ * @param tf The transform listener used by the calling code
+ * @param cam_frame Reference frame of the camera coordinate system
+ * @param cam_aperture_x Horizontal opening angle (rad)
+ * @param cam_aperture_y Vertical opening angle (rad)
+ * @param cam_width_x Horizontal pixel resolution
+ * @param cam_height_y Vertical pixel resolution
+ * @param cam_angle_y Vertical camera mounting angle
  */
 PositionToPixel::PositionToPixel(  fawkes::tf::Transformer* tf, std::string cam_frame,
                               float cam_aperture_x, float cam_aperture_y,
@@ -52,10 +64,6 @@ PositionToPixel::PositionToPixel(  fawkes::tf::Transformer* tf, std::string cam_
   cam_angle_min_vertical_ = cam_angle_y - cam_aperture_vertical_ / 2.0;
 }
 
-PixelFromPosition::~PixelFromPosition()
-{
-  // TODO Auto-generated destructor stub
-}
 
 /**
  * @param   position  the 3dimential position (x, y, z) in the given frame
