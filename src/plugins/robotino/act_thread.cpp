@@ -86,7 +86,8 @@ RobotinoActThread::init()
   cfg_odom_frame_        = config->get_string("/hardware/robotino/odometry/frame");
   cfg_base_frame_        = config->get_string("/hardware/robotino/base_frame");
   std::string odom_mode  = config->get_string("/hardware/robotino/odometry/mode");
-
+  cfg_odom_corr_phi_     =
+    config->get_float("/hardware/robotino/odometry/calc/correction/phi");
 
   std::string imu_if_id;
 
@@ -268,10 +269,11 @@ RobotinoActThread::loop()
       // div by 1000 to convert from mm to m
       vx /= 1000.;
       vy /= 1000.;
+      omega = deg2rad(omega);
 
       motor_if_->set_vx(vx);
       motor_if_->set_vy(vy);
-      motor_if_->set_omega(deg2rad(omega));
+      motor_if_->set_omega(omega);
 
       motor_if_->set_des_vx(des_vx_);
       motor_if_->set_des_vy(des_vy_);
@@ -349,7 +351,8 @@ RobotinoActThread::loop()
 				 "falling back to wheel odometry",
 				 ori_q[0], ori_q[1], ori_q[2], ori_q[3]);
 	      }
-	      odom_phi_ = normalize_mirror_rad(odom_phi_ + omega * diff_sec);
+	      odom_phi_ =
+		normalize_mirror_rad(odom_phi_ + omega * diff_sec * cfg_odom_corr_phi_);
 	    }
 	  } else {
 	    if (++imu_if_nochange_loops_ > cfg_imu_deadman_loops_) {
@@ -358,7 +361,8 @@ RobotinoActThread::loop()
 		logger->log_warn(name(), "IMU interface not changed, "
 				 "falling back to wheel odometry");
 	      }
-	      odom_phi_ = normalize_mirror_rad(odom_phi_ + omega * diff_sec);
+	      odom_phi_ =
+		normalize_mirror_rad(odom_phi_ + omega * diff_sec * cfg_odom_corr_phi_);
 	    } // else use previous odometry yaw value
 	  }
 	} else {
@@ -368,7 +372,8 @@ RobotinoActThread::loop()
 	    imu_if_writer_warning_printed_ = true;
 	  }
 
-	  odom_phi_ = normalize_mirror_rad(odom_phi_ + omega * diff_sec);
+	  odom_phi_ =
+	    normalize_mirror_rad(odom_phi_ + omega * diff_sec * cfg_odom_corr_phi_);
 	}
 
 	odom_x_ += cos(odom_phi_) * vx * diff_sec - sin(odom_phi_) * vy * diff_sec;

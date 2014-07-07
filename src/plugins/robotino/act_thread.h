@@ -115,6 +115,7 @@ class RobotinoActThread
   std::string                     cfg_base_frame_;
   OdometryMode                    cfg_odom_mode_;
   unsigned int                    cfg_imu_deadman_loops_;
+  float                           cfg_odom_corr_phi_;
 
   float                           des_vx_;
   float                           des_vy_;
