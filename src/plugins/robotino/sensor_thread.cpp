@@ -123,6 +123,23 @@ void
 RobotinoSensorThread::loop()
 {
   if (com_->isConnected()) {
+
+    // process command messages
+    while (! sens_if_->msgq_empty()) {
+
+      if (RobotinoSensorInterface::SetBumperEStopEnabledMessage *msg =
+	  sens_if_->msgq_first_safe(msg))
+      {
+        logger->log_info(name(), "%sabling motor on request",
+			 msg->is_enabled() ? "En" : "Dis");
+	state_->emergencyStop.isEnabled = msg->is_enabled();
+      }
+
+      sens_if_->msgq_pop();
+    } // while sensor msgq
+
+
+
     fawkes::Time sensor_time;
     rec::iocontrol::remotestate::SensorState sensor_state = com_->sensor_state(sensor_time);
     if (sensor_state.sequenceNumber != last_seqnum_) {
@@ -133,6 +150,7 @@ RobotinoSensorThread::loop()
       sens_if_->set_mot_position(sensor_state.actualPosition);
       sens_if_->set_mot_current(sensor_state.motorCurrent);
       sens_if_->set_bumper(sensor_state.bumper);
+      sens_if_->set_bumper_estop_enabled(state_->emergencyStop.isEnabled);
       sens_if_->set_digital_in(sensor_state.dIn);
       sens_if_->set_analog_in(sensor_state.aIn);
       if (cfg_enable_gyro_) {

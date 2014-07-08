@@ -80,13 +80,14 @@ RobotinoActThread::init()
   com_->setSetState(set_state);
 
   //get config values
-  cfg_deadman_threshold_ = config->get_float("/hardware/robotino/deadman_time_threshold");
-  cfg_gripper_enabled_   = config->get_bool("/hardware/robotino/gripper/enable_gripper");
-  cfg_odom_time_offset_  = config->get_float("/hardware/robotino/odometry/time_offset");
-  cfg_odom_frame_        = config->get_string("/hardware/robotino/odometry/frame");
-  cfg_base_frame_        = config->get_string("/hardware/robotino/base_frame");
-  std::string odom_mode  = config->get_string("/hardware/robotino/odometry/mode");
-  cfg_odom_corr_phi_     =
+  cfg_deadman_threshold_    = config->get_float("/hardware/robotino/deadman_time_threshold");
+  cfg_gripper_enabled_      = config->get_bool("/hardware/robotino/gripper/enable_gripper");
+  cfg_bumper_estop_enabled_ = config->get_bool("/hardware/robotino/bumper/estop_enabled");
+  cfg_odom_time_offset_     = config->get_float("/hardware/robotino/odometry/time_offset");
+  cfg_odom_frame_           = config->get_string("/hardware/robotino/odometry/frame");
+  cfg_base_frame_           = config->get_string("/hardware/robotino/base_frame");
+  std::string odom_mode     = config->get_string("/hardware/robotino/odometry/mode");
+  cfg_odom_corr_phi_        =
     config->get_float("/hardware/robotino/odometry/calc/correction/phi");
 
   std::string imu_if_id;
@@ -126,6 +127,8 @@ RobotinoActThread::init()
     imu_if_invquat_warning_printed_ = false;
     imu_if_nochange_loops_          = 0;
   }
+
+  state_->emergencyStop.isEnabled = cfg_bumper_estop_enabled_;
 
   motor_if_->set_motor_state(MotorInterface::MOTOR_ENABLED);
   motor_if_->write();

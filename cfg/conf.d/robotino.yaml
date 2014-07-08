@@ -23,6 +23,12 @@ hardware/robotino:
   # without waiting between receive calls
   sensor_update_cycle_time: 5
 
+  bumper:
+    # Set to true to enable the emergency stop on bumper contact (provided
+    # by OpenRobotino, or false to keep going (warning, you should handle
+    # bumper contact by yourself then!).
+    estop_enabled: true
+
   gyro:
     # Enable Gyro publishing? This creates an IMUInterface and publishes
     # the gyro data if available via OpenRobotino. If enabled and the gyro

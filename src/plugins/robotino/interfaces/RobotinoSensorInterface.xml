@@ -10,5 +10,17 @@
     <field type="float" name="distance" length="9">Distance sensor values.</field>
     <field type="bool" name="digital_in" length="8">Digital input values.</field>
     <field type="float" name="analog_in" length="8">Analog input values.</field>
+    <field type="bool" name="bumper_estop_enabled">
+      True if emergency stop on bumper contact is enabled, false otherwise.
+    </field>
   </data>
+
+  <message name="SetBumperEStopEnabled">
+    <comment>Sets the bumper state.</comment>
+    <field type="bool" name="enabled">
+      True to enable emergency stop on bumper contact, false to
+      disable. This will persist over OpenRobotino stated restarts.
+    </field>
+  </message>
+
 </interface>
