@@ -142,7 +142,7 @@ CEscapePotentialFieldDriveModule::Update()
   target.r   = sqrt( target_x*target_x + target_y*target_y );
   target.phi = atan2(target_y, target_x);
 
-  logger_->log_warn("CEscapePotentialFieldDriveModule","Target vector: phi: %f\t%f", target.phi, target.r);
+  logger_->log_debug("CEscapePotentialFieldDriveModule","Target vector: phi: %f\t%f", target.phi, target.r);
 
   // decide route
   float angle_difference = 0.2;
@@ -185,42 +185,42 @@ CEscapePotentialFieldDriveModule::Update()
   }
 
   if ( turn ) {
-    logger_->log_warn("CEscapePotentialFieldDriveModule","Turn %f", turn_direction);
+    logger_->log_debug("CEscapePotentialFieldDriveModule","Turn %f", turn_direction);
     m_ProposedRotation = turn_direction * m_MaxRotation;
   } else {
-    logger_->log_warn("CEscapePotentialFieldDriveModule","Drive %f", drive_direction);
+    logger_->log_debug("CEscapePotentialFieldDriveModule","Drive %f", drive_direction);
     m_ProposedTranslationX = drive_direction * m_MaxTranslation;
   }
 
 //  if ( angle_abs > angle_difference && angle_abs < M_PI - angle_difference ) {    //just turn
 //    if (angle_abs <= M_PI_2) {      //turn to 0
-//      logger_->log_warn("CEscapePotentialFieldDriveModule","Turn to 0");
+//      logger_->log_debug("CEscapePotentialFieldDriveModule","Turn to 0");
 //      if (angle < 0) {
-//        logger_->log_warn("CEscapePotentialFieldDriveModule","negative");
+//        logger_->log_debug("CEscapePotentialFieldDriveModule","negative");
 //        m_ProposedRotation = -m_MaxRotation;
 //      } else {
-//        logger_->log_warn("CEscapePotentialFieldDriveModule","positive");
+//        logger_->log_debug("CEscapePotentialFieldDriveModule","positive");
 //        m_ProposedRotation =  m_MaxRotation;
 //      }
 //    } else {                        //turn to PI
-//      logger_->log_warn("CEscapePotentialFieldDriveModule","Turn to PI");
+//      logger_->log_debug("CEscapePotentialFieldDriveModule","Turn to PI");
 //      if (angle < 0) {
-//        logger_->log_warn("CEscapePotentialFieldDriveModule","positive");
+//        logger_->log_debug("CEscapePotentialFieldDriveModule","positive");
 //        m_ProposedRotation =  m_MaxRotation;
 //      } else {
-//        logger_->log_warn("CEscapePotentialFieldDriveModule","negative");
+//        logger_->log_debug("CEscapePotentialFieldDriveModule","negative");
 //        m_ProposedRotation = -m_MaxRotation;
 //      }
 //    }
 //  } else {                                                                          //drive and turn
 //    if (angle_abs <= angle_difference) {                 //forward
-//      logger_->log_warn("CEscapePotentialFieldDriveModule","Drive forward");
+//      logger_->log_debug("CEscapePotentialFieldDriveModule","Drive forward");
 //      m_ProposedTranslation =  m_MaxTranslation;
 //    } else if (angle_abs >= M_PI - angle_difference){    //backward
-//      logger_->log_warn("CEscapePotentialFieldDriveModule","Drive backward");
+//      logger_->log_debug("CEscapePotentialFieldDriveModule","Drive backward");
 //      m_ProposedTranslation = -m_MaxTranslation;
 //    } else {
-//      logger_->log_warn("CEscapePotentialFieldDriveModule","Should drive, but don't know the direction");
+//      logger_->log_debug("CEscapePotentialFieldDriveModule","Should drive, but don't know the direction");
 //    }
 //  }
 

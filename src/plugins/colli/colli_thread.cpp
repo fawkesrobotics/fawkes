@@ -487,10 +487,10 @@ ColliThread::colli_execute_()
         else {
           int rnd = (int)((rand())/(float)(RAND_MAX)) * 10; // + 5;
           escape_count = rnd;
-          logger->log_warn(name(), "Escape: new round with %i", rnd);
+          logger->log_debug(name(), "Escape: new round with %i", rnd);
         }
 
-        logger->log_warn(name(), "Escape mode, escaping!");
+        logger->log_debug(name(), "Escape mode, escaping!");
         m_pSelectDriveMode->SetLocalTarget( m_LocalTarget.x, m_LocalTarget.y );
         if ( cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field ) {
           m_pSelectDriveMode->setGridInformation(m_pLaserOccGrid, m_RoboGridPos.x, m_RoboGridPos.y);

@@ -104,28 +104,28 @@ CEscapeDriveModule::Update()
   bool turnRightAllowed = TurnRightAllowed();
 
   if (dangerFront)
-    logger_->log_warn("CEscapeDriveModule", "DANGER IN FRONT");
+    logger_->log_debug("CEscapeDriveModule", "DANGER IN FRONT");
 
   if (dangerBack)
-    logger_->log_warn("CEscapeDriveModule", "DANGER IN BACK");
+    logger_->log_debug("CEscapeDriveModule", "DANGER IN BACK");
 
   if (CheckDanger(m_vLeftFront))
-    logger_->log_warn("CEscapeDriveModule", "DANGER IN LEFT FRONT");
+    logger_->log_debug("CEscapeDriveModule", "DANGER IN LEFT FRONT");
 
   if (CheckDanger(m_vLeftBack))
-    logger_->log_warn("CEscapeDriveModule", "DANGER IN LEFT BACK");
+    logger_->log_debug("CEscapeDriveModule", "DANGER IN LEFT BACK");
 
   if (CheckDanger(m_vRightFront))
-    logger_->log_warn("CEscapeDriveModule", "DANGER IN RIGHT FRONT");
+    logger_->log_debug("CEscapeDriveModule", "DANGER IN RIGHT FRONT");
 
   if (CheckDanger(m_vRightBack))
-    logger_->log_warn("CEscapeDriveModule", "DANGER IN RIGHT BACK");
+    logger_->log_debug("CEscapeDriveModule", "DANGER IN RIGHT BACK");
 
   if (!turnLeftAllowed)
-    logger_->log_warn("CEscapeDriveModule", "DANGER IF TURNING LEFT!!!");
+    logger_->log_debug("CEscapeDriveModule", "DANGER IF TURNING LEFT!!!");
 
   if (!turnRightAllowed)
-    logger_->log_warn("CEscapeDriveModule", "DANGER IF TURNING RIGHT!!!");
+    logger_->log_debug("CEscapeDriveModule", "DANGER IF TURNING RIGHT!!!");
 
 
   if ( dangerFront && dangerBack && turnRightAllowed ) {
