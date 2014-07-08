@@ -60,26 +60,45 @@ CForwardOmniDriveModule::~CForwardOmniDriveModule()
 }
 
 void
-CForwardOmniDriveModule::calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target)
+CForwardOmniDriveModule::calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target, float angle_next_target)
 {
   // first calculate desired angle
   float des_alpha;
   if ( /*dist_to_target >= 0.5 ||*/ isnanf( ori_alpha_next_target ) ) { // at the last 50cm rotate to new angle
     des_alpha = ori_alpha_target;
   } else {
-    float angle_min = ori_alpha_target - M_PI_4;
-    float angle_max = ori_alpha_target + M_PI_4;
+    float angle_min = ori_alpha_target - angle_next_target;
+    float angle_max = ori_alpha_target + angle_next_target;
     des_alpha = normalize_mirror_rad( std::max( angle_min, std::min(ori_alpha_next_target, angle_max) ) );
   }
 
   // then choose rotation speed, depending on desired angle
-  const float _TURN_MAX_SPEED_LIMIT_ = 0.3;
+  const float _TURN_MAX_SPEED_LIMIT_ = M_PI_4;
   if        ( des_alpha > _TURN_MAX_SPEED_LIMIT_ ) {
     m_ProposedRotation = m_MaxRotation;
   } else if ( des_alpha < -_TURN_MAX_SPEED_LIMIT_ ) {
     m_ProposedRotation = -m_MaxRotation;
   } else {
     m_ProposedRotation = des_alpha * ( m_MaxRotation / _TURN_MAX_SPEED_LIMIT_ );
+  }
+}
+
+void
+CForwardOmniDriveModule::calculateTranslation(float dist_to_target, float ori_alpha_target, float dec_factor)
+{
+  float part_x = 0;
+  float part_y = 0;
+  if ( ! (m_LocalTargetX == 0 && m_LocalTargetY == 0) ) {
+    part_x   = m_LocalTargetX / (fabs(m_LocalTargetX) + fabs(m_LocalTargetY));
+    part_y   = m_LocalTargetY / (fabs(m_LocalTargetX) + fabs(m_LocalTargetY));
+  }
+  m_ProposedTranslationX = part_x * m_MaxTranslation * dec_factor;
+  m_ProposedTranslationY = part_y * m_MaxTranslation * dec_factor;
+
+  // Check translation limits
+  if ( m_ProposedTranslationX < 0. || fabs(ori_alpha_target) >= M_PI_2 - 0.2 ) {
+    m_ProposedTranslationX = 0.;
+    m_ProposedTranslationY = 0.;
   }
 }
 
@@ -129,22 +148,16 @@ CForwardOmniDriveModule::Update()
     m_ProposedRotation     = 0.0;
 
   } else {
-    float part_x = 0;
-    float part_y = 0;
-    if ( ! (m_LocalTargetX == 0 && m_LocalTargetY == 0) ) {
-      part_x   = m_LocalTargetX / (fabs(m_LocalTargetX) + fabs(m_LocalTargetY));
-      part_y   = m_LocalTargetY / (fabs(m_LocalTargetX) + fabs(m_LocalTargetY));
-    }
-    m_ProposedTranslationX = part_x * m_MaxTranslation;
-    m_ProposedTranslationY = part_y * m_MaxTranslation;
 
-    calculateRotation(alpha_target, alpha_next_target, dist_to_target);
+    float angle_tollerance = M_PI_4;
+    calculateRotation(alpha_target, alpha_next_target, dist_to_target, angle_tollerance / 2.);
 
-    // Check translation limits
-    if ( m_ProposedTranslationX < 0. || fabs(alpha_target) >= M_PI_2 - 0.2 ) {
-      m_ProposedTranslationX = 0.;
-      m_ProposedTranslationY = 0.;
+    float dec_factor = 1;
+    if ( fabs(alpha_target) >= angle_tollerance ) {                             // if we need to turn a lot => drive slower
+      dec_factor = 0.5;
     }
+
+    calculateTranslation(dist_to_target, alpha_target, dec_factor);
 
     if ( m_StopAtTarget ) {
       float target_rel    = std::sqrt( sqr(m_TargetX - m_RoboX) + sqr(m_TargetY - m_RoboY) );
