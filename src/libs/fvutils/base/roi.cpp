@@ -332,7 +332,7 @@ ROI::intersect(ROI const &roi) const
 
   } else {
 
-    rv = new ROI();
+    rv = new ROI(this);
     rv.start.x = start.x <= roi.start.x ? roi.start.x : start.x;
     rv.start.y = start.y <= roi.start.y ? roi.start.y : start.y;
     if (start.x + width < roi.start.x + roi.width) {
