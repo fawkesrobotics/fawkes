@@ -339,6 +339,22 @@ void AmclThread::init()
   pos3d_if_ =
     blackboard->open_for_writing<Position3DInterface>(cfg_pose_ifname_.c_str());
 
+  cfg_buffer_enable_ = true;
+  try {
+    cfg_buffer_enable_ = config->get_bool(CFG_PREFIX"buffering/enable");
+  } catch (Exception &e) {} // ignored, use default
+
+  cfg_buffer_debug_ = true;
+  try {
+    cfg_buffer_debug_ = config->get_bool(CFG_PREFIX"buffering/debug");
+  } catch (Exception &e) {} // ignored, use default
+
+  laser_buffered_ = false;
+
+  if (cfg_buffer_enable_) {
+    laser_if_->resize_buffers(1);
+  }
+
   pos3d_if_->set_frame(global_frame_id_.c_str());
   pos3d_if_->write();
 
@@ -360,27 +376,86 @@ AmclThread::loop()
   }
 
   laser_if_->read();
-  if (! laser_if_->changed()) {
-    //logger->log_warn(name(), "Laser data unchanged, skipping loop");
-    return;
-  }
-  float* laser_distances = laser_if_->distances();
+  //if (! laser_if_->changed() && ! laser_buffered_) {
+  //  logger->log_warn(name(), "Laser data unchanged, skipping loop");
+  //  return;
+  //}
 
   MutexLocker lock(conf_mutex_);
 
   // Where was the robot when this scan was taken?
   tf::Stamped<tf::Pose> odom_pose;
   pf_vector_t pose;
-  Time latest(0, 0);
-  // cannot use laser_if_->timestamp() here, since odometry is updated in
-  // last cycle of main loop while laser is newer -> tf extrapolation
-  if (!get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
-                     &latest, base_frame_id_)) 
-  {
-    logger->log_error(name(), "Couldn't determine robot's pose "
-                      "associated with laser scan");
+
+  if (laser_if_->changed()) {
+    if (!get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
+                       laser_if_->timestamp(), base_frame_id_))
+    {
+      if (cfg_buffer_debug_) {
+	logger->log_warn(name(), "Couldn't determine robot's pose "
+			 "associated with current laser scan");
+      }
+      if (laser_buffered_) {
+	Time buffer_timestamp(laser_if_->buffer_timestamp(0));
+	if (!get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
+			   &buffer_timestamp, base_frame_id_))
+	{
+	  // could not even use the buffered scan, buffer current one
+	  // and try that one next time
+	  if (cfg_buffer_debug_) {
+	    logger->log_warn(name(), "Couldn't determine robot's pose "
+			     "associated with buffered laser scan, re-buffering");
+	  }
+	  laser_if_->copy_private_to_buffer(0);
+	  return;
+	} else {
+	  // yay, that worked, use that one, re-buffer current data
+	  if (cfg_buffer_debug_) {
+	    logger->log_warn(name(), "Using buffered laser data, re-buffering current");
+	  }
+	  laser_if_->read_from_buffer(0);
+	  laser_if_->copy_shared_to_buffer(0);
+	}
+      } else if (cfg_buffer_enable_) {
+	if (cfg_buffer_debug_) {
+	  logger->log_warn(name(), "Buffering current data for next loop");
+	}
+	laser_if_->copy_private_to_buffer(0);
+	laser_buffered_ = true;
+	return;
+      } else {
+	return;
+      }
+    } else {
+      //logger->log_info(name(), "Fresh data is good, using that");
+      laser_buffered_ = false;
+    }
+  } else if (laser_buffered_) {
+    // either data is good to use now or there is no fresh we can buffer
+    laser_buffered_ = false;
+
+    Time buffer_timestamp(laser_if_->buffer_timestamp(0));
+    if (get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
+		       &buffer_timestamp, base_frame_id_))
+    {
+      // yay, that worked, use that one
+      if (cfg_buffer_debug_) {
+	logger->log_info(name(), "Using buffered laser data (no changed data)");
+      }
+      laser_if_->read_from_buffer(0);
+    } else {
+      if (cfg_buffer_debug_) {
+	logger->log_error(name(), "Couldn't determine robot's pose "
+			  "associated with buffered laser scan (2)");
+      }
+      return;
+    }
+  } else {
+    //logger->log_error(name(), "Neither changed nor buffered data, skipping loop");
     return;
   }
+
+  float* laser_distances = laser_if_->distances();
 
   pf_vector_t delta = pf_vector_zero();
 
@@ -746,6 +821,8 @@ AmclThread::loop()
       //logger->log_debug(name(), "Saving pose (%f,%f,%f) as initial pose to host config",
       //		map_pose.getOrigin().x(), map_pose.getOrigin().y(), yaw);
 
+      // Make sure we write the config only once by locking/unlocking it
+      config->lock();
       try {
 	config->set_float(CFG_PREFIX"init_pose_x", map_pose.getOrigin().x());
 	config->set_float(CFG_PREFIX"init_pose_y", map_pose.getOrigin().y());
@@ -758,6 +835,7 @@ AmclThread::loop()
 	logger->log_warn(name(), e);
 	save_pose_period_ = 0.0; 
       }
+      config->unlock();
       save_pose_last_time = now;
     }
   } else {
@@ -805,7 +883,8 @@ AmclThread::get_odom_pose(tf::Stamped<tf::Pose>& odom_pose, double& x,
     tf_listener->transform_pose(odom_frame_id_, ident, odom_pose);
   } catch (Exception &e) {
     logger->log_warn(name(),
-		     "Failed to compute odom pose, skipping scan (%s)", e.what());
+		     "Failed to compute odom pose (%s)",
+		     e.what_no_backtrace());
     return false;
   }
   x = odom_pose.getOrigin().x();
@@ -1017,7 +1096,7 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
     // startup condition doesn't really cost us anything.
     if(sent_first_transform_)
       logger->log_warn(name(), "Failed to transform initial pose "
-		       "in time (%s)", e.what());
+		       "in time (%s)", e.what_no_backtrace());
     tx_odom.setIdentity();
   } catch (Exception &e) {
     logger->log_warn(name(), "Failed to transform initial pose in time");
