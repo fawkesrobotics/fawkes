@@ -326,9 +326,17 @@ NavGraphThread::generate_plan(std::string goal_name)
   plan_.clear();
   
   constraint_repo_.lock();
+
   NavGraphSearchState *initial_state =
-    new NavGraphSearchState(init, goal, 0, NULL, *graph_, *constraint_repo_);
+    new NavGraphSearchState(init, goal, 0, NULL, *graph_, *constraint_repo_, true);
   std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
+
+  if( a_star_solution.size() == 0){
+	  logger->log_warn(name(), "Failed to generate Plan, will try without constraints");
+	  NavGraphSearchState *initial_state =
+	      new NavGraphSearchState(init, goal, 0, NULL, *graph_, *constraint_repo_, false);
+	  std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
+  }
   constraint_repo_.unlock();
 
   NavGraphSearchState *solstate;
