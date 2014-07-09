@@ -6,6 +6,17 @@ namespace fawkes {
 class RobotinoSensorInterface : public Interface
 {
 
+  class SetBumperEStopEnabledMessage : public Message
+  {
+    SetBumperEStopEnabledMessage(bool ini_enabled);
+    SetBumperEStopEnabledMessage();
+    ~SetBumperEStopEnabledMessage();
+
+    bool is_enabled();
+    void set_enabled(const bool new_enabled);
+    int maxlenof_enabled() const;
+  };
+
   float mot_velocity(int index);
   void set_mot_velocity(unsigned int index, const float new_mot_velocity);
   int maxlenof_mot_velocity() const;
@@ -27,6 +38,9 @@ class RobotinoSensorInterface : public Interface
   float analog_in(int index);
   void set_analog_in(unsigned int index, const float new_analog_in);
   int maxlenof_analog_in() const;
+  bool is_bumper_estop_enabled();
+  void set_bumper_estop_enabled(const bool new_bumper_estop_enabled);
+  int maxlenof_bumper_estop_enabled() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

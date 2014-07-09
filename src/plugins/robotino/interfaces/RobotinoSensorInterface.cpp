@@ -53,7 +53,9 @@ RobotinoSensorInterface::RobotinoSensorInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "distance", 9, &data->distance);
   add_fieldinfo(IFT_BOOL, "digital_in", 8, &data->digital_in);
   add_fieldinfo(IFT_FLOAT, "analog_in", 8, &data->analog_in);
-  unsigned char tmp_hash[] = {0x84, 0x8c, 0x96, 0x4b, 0x78, 0xf9, 0x3f, 0xd, 0x2b, 0x4c, 0x70, 0x5a, 0x3e, 0x3, 0x2a, 0x82};
+  add_fieldinfo(IFT_BOOL, "bumper_estop_enabled", 1, &data->bumper_estop_enabled);
+  add_messageinfo("SetBumperEStopEnabledMessage");
+  unsigned char tmp_hash[] = {0x3f, 0x22, 0xb4, 0xc5, 0xe8, 0x9c, 0xd9, 0xa8, 0x90, 0x80, 0x23, 0xb2, 0x55, 0xed, 0xfd, 0x52};
   set_hash(tmp_hash);
 }
 
@@ -454,12 +456,51 @@ RobotinoSensorInterface::set_analog_in(unsigned int index, const float new_analo
   data->analog_in[index] = new_analog_in;
   data_changed = true;
 }
+/** Get bumper_estop_enabled value.
+ * 
+      True if emergency stop on bumper contact is enabled, false otherwise.
+    
+ * @return bumper_estop_enabled value
+ */
+bool
+RobotinoSensorInterface::is_bumper_estop_enabled() const
+{
+  return data->bumper_estop_enabled;
+}
+
+/** Get maximum length of bumper_estop_enabled value.
+ * @return length of bumper_estop_enabled value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+RobotinoSensorInterface::maxlenof_bumper_estop_enabled() const
+{
+  return 1;
+}
+
+/** Set bumper_estop_enabled value.
+ * 
+      True if emergency stop on bumper contact is enabled, false otherwise.
+    
+ * @param new_bumper_estop_enabled new bumper_estop_enabled value
+ */
+void
+RobotinoSensorInterface::set_bumper_estop_enabled(const bool new_bumper_estop_enabled)
+{
+  data->bumper_estop_enabled = new_bumper_estop_enabled;
+  data_changed = true;
+}
+
 /* =========== message create =========== */
 Message *
 RobotinoSensorInterface::create_message(const char *type) const
 {
-  throw UnknownTypeException("The given type '%s' does not match any known "
-                             "message type for this interface type.", type);
+  if ( strncmp("SetBumperEStopEnabledMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetBumperEStopEnabledMessage();
+  } else {
+    throw UnknownTypeException("The given type '%s' does not match any known "
+                               "message type for this interface type.", type);
+  }
 }
 
 
@@ -484,6 +525,102 @@ RobotinoSensorInterface::enum_tostring(const char *enumtype, int val) const
 }
 
 /* =========== messages =========== */
+/** @class RobotinoSensorInterface::SetBumperEStopEnabledMessage <interfaces/RobotinoSensorInterface.h>
+ * SetBumperEStopEnabledMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_enabled initial value for enabled
+ */
+RobotinoSensorInterface::SetBumperEStopEnabledMessage::SetBumperEStopEnabledMessage(const bool ini_enabled) : Message("SetBumperEStopEnabledMessage")
+{
+  data_size = sizeof(SetBumperEStopEnabledMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetBumperEStopEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->enabled = ini_enabled;
+  add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
+}
+/** Constructor */
+RobotinoSensorInterface::SetBumperEStopEnabledMessage::SetBumperEStopEnabledMessage() : Message("SetBumperEStopEnabledMessage")
+{
+  data_size = sizeof(SetBumperEStopEnabledMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetBumperEStopEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
+}
+
+/** Destructor */
+RobotinoSensorInterface::SetBumperEStopEnabledMessage::~SetBumperEStopEnabledMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+RobotinoSensorInterface::SetBumperEStopEnabledMessage::SetBumperEStopEnabledMessage(const SetBumperEStopEnabledMessage *m) : Message("SetBumperEStopEnabledMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetBumperEStopEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get enabled value.
+ * 
+      True to enable emergency stop on bumper contact, false to
+      disable. This will persist over OpenRobotino stated restarts.
+    
+ * @return enabled value
+ */
+bool
+RobotinoSensorInterface::SetBumperEStopEnabledMessage::is_enabled() const
+{
+  return data->enabled;
+}
+
+/** Get maximum length of enabled value.
+ * @return length of enabled value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+RobotinoSensorInterface::SetBumperEStopEnabledMessage::maxlenof_enabled() const
+{
+  return 1;
+}
+
+/** Set enabled value.
+ * 
+      True to enable emergency stop on bumper contact, false to
+      disable. This will persist over OpenRobotino stated restarts.
+    
+ * @param new_enabled new enabled value
+ */
+void
+RobotinoSensorInterface::SetBumperEStopEnabledMessage::set_enabled(const bool new_enabled)
+{
+  data->enabled = new_enabled;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+RobotinoSensorInterface::SetBumperEStopEnabledMessage::clone() const
+{
+  return new RobotinoSensorInterface::SetBumperEStopEnabledMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -491,6 +628,10 @@ RobotinoSensorInterface::enum_tostring(const char *enumtype, int val) const
 bool
 RobotinoSensorInterface::message_valid(const Message *message) const
 {
+  const SetBumperEStopEnabledMessage *m0 = dynamic_cast<const SetBumperEStopEnabledMessage *>(message);
+  if ( m0 != NULL ) {
+    return true;
+  }
   return false;
 }
 
