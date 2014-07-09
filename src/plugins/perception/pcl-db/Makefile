@@ -20,9 +20,6 @@ include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
-PRESUBDIRS = interfaces
-SUBDIRS = ros
-
 # Add -DUSE_TIMETRACKER to enable time tracking
 CFLAGS += -DUSE_TIMETRACKER
 
@@ -60,6 +57,9 @@ ifeq ($(HAVE_MONGODB)$(HAVE_PCL)$(HAVE_TF),111)
   LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(LDFLAGS_MONGODB)
 
   PLUGINS_all = $(PLUGINDIR)/pcl-db-store.so $(PLUGINDIR)/pcl-db-retrieve.so
+
+  PRESUBDIRS = interfaces
+  SUBDIRS = ros
 
   ifeq ($(call pcl-have-libs,$(REQUIRED_PCL_LIBS_MERGE)),1)
     CFLAGS += $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS_MERGE)) \
