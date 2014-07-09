@@ -29,7 +29,7 @@
 namespace fawkes {
 
 
-/** Convert a 2D polar coordinate to a 2D cartesian coordinate.
+/** Convert a 2D cartesian coordinate to a 2D polar coordinate.
  * @param polar_phi Phi of the polar coordinate
  * @param polar_dist distnace of the polar coordinate
  * @param cart_x upon return contains X of the cartesian coordinate
@@ -43,6 +43,22 @@ cart2polar2d(float cart_x, float cart_y,
   *polar_dist = sqrtf(cart_x * cart_x + cart_y * cart_y);
 }
 
+/** Convert a 3D cartesian coordinate (x, y, z) to a 3D polar coordinate.
+ * @param cart_x      in
+ * @param cart_y      in
+ * @param cart_z      in
+ * @param polar_phi   out
+ * @param polar_theta out
+ * @param polar_r     out
+ */
+inline void
+cart2polar3d( float cart_x, float cart_y, float cart_z,
+              float& polar_phi, float& polar_theta, float& polar_r)
+{
+  polar_r      = sqrtf( cart_x*cart_x + cart_y*cart_y + cart_z*cart_z );
+  polar_phi    = atan2f( cart_y, cart_x );
+  polar_theta  = -1.0 * atan2f( cart_z, sqrtf( cart_x*cart_x + cart_y*cart_y ) );
+}
 
 /** Convert a 2D polar coordinate to a 2D cartesian coordinate.
  * @param polar_phi Phi of the polar coordinate
