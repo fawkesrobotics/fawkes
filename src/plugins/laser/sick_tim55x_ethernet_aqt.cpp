@@ -97,22 +97,31 @@ SickTiM55xEthernetAcquisitionThread::loop()
     try {
       deadline_.expires_from_now(boost::posix_time::milliseconds(RECEIVE_TIMEOUT));
 
-      boost::system::error_code ec = boost::asio::error::would_block;
-      size_t bytes_read = 0;
+      ec_ = boost::asio::error::would_block;
+      bytes_read_ = 0;
       boost::asio::async_read_until(socket_, input_buffer_, '\03',
-				    (boost::lambda::var(ec) = boost::lambda::_1,
-				     boost::lambda::var(bytes_read) = boost::lambda::_2));
+#if BOOST_VERSION >= 104800
+				    (boost::lambda::var(ec_) = boost::lambda::_1,
+				     boost::lambda::var(bytes_read_) = boost::lambda::_2));
+#else
+				    boost::bind(
+				      &SickTiM55xEthernetAcquisitionThread::handle_read,
+				      this,
+				      boost::asio::placeholders::error,
+				      boost::asio::placeholders::bytes_transferred
+				    ));
+#endif
 
-      do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+      do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
 
       reset_distances();
       reset_echoes();
 
-      if (ec) {
-	if (ec.value() == boost::system::errc::operation_canceled) {
+      if (ec_) {
+	if (ec_.value() == boost::system::errc::operation_canceled) {
 	  logger->log_error(name(), "Data timeout, will try to reconnect");
 	} else {
-	  logger->log_warn(name(), "Data read error: %s\n", ec.message().c_str());
+	  logger->log_warn(name(), "Data read error: %s\n", ec_.message().c_str());
 	}
 	_data_mutex->lock();
 	_timestamp->stamp();
@@ -121,13 +130,13 @@ SickTiM55xEthernetAcquisitionThread::loop()
 	close_device();
 
       } else {
-	unsigned char recv_buf[bytes_read];
+	unsigned char recv_buf[bytes_read_];
 	std::istream in_stream(&input_buffer_);
-	in_stream.read((char *)recv_buf, bytes_read);
+	in_stream.read((char *)recv_buf, bytes_read_);
 
-	if (bytes_read > 0) {
+	if (bytes_read_ > 0) {
 	  try {
-	    parse_datagram(recv_buf, bytes_read);
+	    parse_datagram(recv_buf, bytes_read_);
 	  } catch (Exception &e) {
 	    logger->log_warn(name(), "Failed to parse datagram, resyncing, exception follows");
 	    logger->log_warn(name(), e);
@@ -177,18 +186,24 @@ SickTiM55xEthernetAcquisitionThread::open_device()
 
     for (; iter != boost::asio::ip::tcp::resolver::iterator(); ++iter) {
       socket_.close();
-      ec = boost::asio::error::would_block;
-      socket_.async_connect(iter->endpoint(), boost::lambda::var(ec) = boost::lambda::_1);
+      ec_ = boost::asio::error::would_block;
+#if BOOST_VERSION >= 104800
+      socket_.async_connect(iter->endpoint(), boost::lambda::var(ec_) = boost::lambda::_1);
+#else
+      socket_.async_connect(iter->endpoint(),
+			    boost::bind(&SickTiM55xEthernetAcquisitionThread::handle_read, this,
+					boost::asio::placeholders::error, 0));
+#endif
 
       // Block until the asynchronous operation has completed.
-      do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+      do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
 
       // Determine whether a connection was successfully established.
-      if (ec || ! socket_.is_open()) {
-	if (ec.value() == boost::system::errc::operation_canceled) {
+      if (ec_ || ! socket_.is_open()) {
+	if (ec_.value() == boost::system::errc::operation_canceled) {
 	  throw Exception("Sick TiM55X Ethernet: connection timed out");
 	} else {
-	  throw Exception("Connection failed: %s", ec.message().c_str());
+	  throw Exception("Connection failed: %s", ec_.message().c_str());
 	}
       }				       
     }
@@ -214,20 +229,27 @@ SickTiM55xEthernetAcquisitionThread::flush_device()
 {
   if (socket_.is_open()) {
     try {
-      boost::system::error_code ec;
-      size_t bytes_read = 0;
       do {
-	ec = boost::asio::error::would_block;
+	ec_ = boost::asio::error::would_block;
 	deadline_.expires_from_now(boost::posix_time::milliseconds(RECEIVE_TIMEOUT));
-	bytes_read = 0;
+	bytes_read_ = 0;
 
 	boost::asio::async_read_until(socket_, input_buffer_, '\03',
-				      (boost::lambda::var(ec) = boost::lambda::_1,
-				       boost::lambda::var(bytes_read) = boost::lambda::_2));
+#if BOOST_VERSION >= 104800
+				      (boost::lambda::var(ec_) = boost::lambda::_1,
+				       boost::lambda::var(bytes_read_) = boost::lambda::_2));
+#else
+				      boost::bind(
+				        &SickTiM55xEthernetAcquisitionThread::handle_read,
+				        this,
+				        boost::asio::placeholders::error,
+				        boost::asio::placeholders::bytes_transferred
+				      ));
+#endif
 
-	do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+	do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
 
-      } while (ec || bytes_read > 0);
+      } while (ec_ || bytes_read_ > 0);
     } catch (boost::system::system_error &e) {
       // ignore, just assume done, if there really is an error we'll
       // catch it later on
@@ -248,29 +270,38 @@ SickTiM55xEthernetAcquisitionThread::send_with_reply(const char *request,
 
     deadline_.expires_from_now(boost::posix_time::milliseconds(RECEIVE_TIMEOUT));
 
-    boost::system::error_code ec = boost::asio::error::would_block;
-    size_t bytes_read = 0;
+    ec_ = boost::asio::error::would_block;
+    bytes_read_ = 0;
     boost::asio::async_read_until(socket_, input_buffer_, '\03',
-				  (boost::lambda::var(ec) = boost::lambda::_1,
-				   boost::lambda::var(bytes_read) = boost::lambda::_2));
+#if BOOST_VERSION >= 104800
+				  (boost::lambda::var(ec_) = boost::lambda::_1,
+				   boost::lambda::var(bytes_read_) = boost::lambda::_2));
+#else
+				  boost::bind(
+				    &SickTiM55xEthernetAcquisitionThread::handle_read,
+				    this,
+				    boost::asio::placeholders::error,
+				    boost::asio::placeholders::bytes_transferred
+				  ));
+#endif
 
-    do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+    do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
 
-    if (ec) {
-      if (ec.value() == boost::system::errc::operation_canceled) {
+    if (ec_) {
+      if (ec_.value() == boost::system::errc::operation_canceled) {
 	throw Exception("Timeout waiting for message reply");
       } else {
-	throw Exception("Failed to read reply: %s", ec.message().c_str());
+	throw Exception("Failed to read reply: %s", ec_.message().c_str());
       }
     }
 
     if (reply) {
-      char recv_buf[bytes_read];
+      char recv_buf[bytes_read_];
       std::istream in_stream(&input_buffer_);
-      in_stream.read(recv_buf, bytes_read);
-      *reply = std::string(recv_buf, bytes_read);
+      in_stream.read(recv_buf, bytes_read_);
+      *reply = std::string(recv_buf, bytes_read_);
     } else {
-      input_buffer_.consume(bytes_read);
+      input_buffer_.consume(bytes_read_);
     }
   } catch (boost::system::system_error &e) {
     throw Exception("Sick TiM55x/Ethernet failed I/O: %s", e.what());
@@ -291,5 +322,9 @@ SickTiM55xEthernetAcquisitionThread::check_deadline()
     deadline_.expires_at(boost::posix_time::pos_infin);
   }
 
+#if BOOST_VERSION >= 104800
   deadline_.async_wait(boost::lambda::bind(&SickTiM55xEthernetAcquisitionThread::check_deadline, this));
+#else
+  deadline_.async_wait(boost::bind(&SickTiM55xEthernetAcquisitionThread::check_deadline, this));
+#endif
 }

@@ -49,6 +49,14 @@ class SickTiM55xEthernetAcquisitionThread : public SickTiM55xCommonAcquisitionTh
 
   void check_deadline();
 
+#if BOOST_VERSION < 104800
+  void handle_read(boost::system::error_code ec, size_t bytes_read)
+  {
+    ec_ = ec;
+    bytes_read_ = bytes_read;
+  }
+#endif
+
  private:
   std::string  cfg_host_;
   std::string  cfg_port_;
@@ -61,6 +69,8 @@ class SickTiM55xEthernetAcquisitionThread : public SickTiM55xCommonAcquisitionTh
   boost::asio::deadline_timer   deadline_;
   boost::asio::streambuf        input_buffer_;
 
+  boost::system::error_code ec_;
+  size_t bytes_read_;
 };
 
 
