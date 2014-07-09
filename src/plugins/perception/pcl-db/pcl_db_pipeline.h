@@ -133,6 +133,7 @@ class PointCloudDBPipeline
    * \p times and checks if this pipeline (depending on the template
    * parameter) is suitable for the processing of these pipelines.
    * @param times times for which to check the point clouds
+   * @param database ddatabase from which to retrieve the information
    * @param collection collection from which to retrieve the information
    * @return applicability status
    */
@@ -213,6 +214,7 @@ class PointCloudDBPipeline
   /** Read a file from MongoDB GridFS.
    * @param dataptr Pointer to buffer to read data to. Make sure it is of
    * sufficient size.
+   * @param database database from which to read the file
    * @param filename name of file to read from GridFS.
    */
   void
@@ -247,6 +249,7 @@ class PointCloudDBPipeline
    * desired and actual times.
    * @param actual_times upon return contains the actual times of the point
    * clouds retrieved based on the desired @p times.
+   * @param database name of the database to retrieve data from
    * @param collection name of the collection to retrieve data from.
    * @return vector of shared pointers to retrieved point clouds
    */
