@@ -22,12 +22,19 @@ namespace firevision
 #endif
 
 /** @class ColorModelBlack <fvmodels/color/thresholds_black.h>
- * Really simple thresholds-based model with variable thresholds. 
- * just for initial development of color models.
+ * Detect configurable shades/hues of "black" as a cuboid in YUV space.
  */
 
-/** Constructor.
- * @param threshold maximum luminance value
+/**
+ * Initialize black colormodel. The Y reference component is always 0,
+ * i.e. the accepted cuboid extends from Y=0 to Y=y_thresh, by u_thresh
+ * around ref_u, and by v_thresh around ref_v.
+ *
+ * @param y_thresh maximum brightness
+ * @param u_thresh maximum difference from ref_u
+ * @param v_thresh maximum difference from ref_v
+ * @param ref_u U component of the "black" reference color (default 128)
+ * @param ref_v V component of the "black" reference color (default 128)
  */
 ColorModelBlack::ColorModelBlack(unsigned int y_thresh, unsigned int u_thresh, unsigned int v_thresh,
   unsigned int ref_u, unsigned int ref_v) :
