@@ -55,8 +55,8 @@ ColorModelBlack::determine(unsigned int y,
 #if defined(__GNUC__) && ((__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || (__GNUC__ > 4))
       && std::abs(diff_u) < u_thresh_ && std::abs(diff_v) < v_thresh_
 #else
-      && (diff_u < 0) ? (diff_u > -1*u_thresh_) : (diff_u < u_thresh_)
-      && (diff_v < 0) ? (diff_v > -1*v_thresh_) : (diff_v < v_thresh_)
+      && (diff_u < 0) ? (diff_u > -1*(int)u_thresh_) : (diff_u < (int)u_thresh_)
+      && (diff_v < 0) ? (diff_v > -1*(int)v_thresh_) : (diff_v < (int)v_thresh_)
 #endif
   )
   {
