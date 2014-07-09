@@ -409,9 +409,9 @@ LaserClusterThread::loop()
       // color points of cluster
       for (auto ci : cluster.indices) {
 	ColorPointType &out_point = clusters_->points[ci];
-	out_point.r = cluster_colors[i+1][0];
-	out_point.g = cluster_colors[i+1][1];;
-	out_point.b = cluster_colors[i+1][2];;
+	out_point.r = ignored_cluster_color[0];
+	out_point.g = ignored_cluster_color[1];;
+	out_point.b = ignored_cluster_color[2];;
       }
 
       ++i;
@@ -471,9 +471,9 @@ LaserClusterThread::loop()
 	// color points of cluster
 	for (auto ci : cluster_indices[cinfos[i].index].indices) {
 	  ColorPointType &out_point = clusters_->points[ci];
-	  out_point.r = cluster_colors[0][0];
-	  out_point.g = cluster_colors[0][1];;
-	  out_point.b = cluster_colors[0][2];;
+	  out_point.r = cluster_colors[i][0];
+	  out_point.g = cluster_colors[i][1];;
+	  out_point.b = cluster_colors[i][2];;
 	}
 
 	set_position(cluster_pos_ifs_[i], true, cinfos[i].centroid);	
