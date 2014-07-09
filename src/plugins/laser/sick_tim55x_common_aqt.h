@@ -27,12 +27,6 @@
 
 #include <string>
 #include <map>
-#include <libusb.h>
-
-#if LIBUSBX_API_VERSION < 0x01000102
-   // libusb before 1.0.16 does not have libusb_strerror
-#  define libusb_strerror libusb_error_name
-#endif
 
 namespace fawkes {
   class Mutex;

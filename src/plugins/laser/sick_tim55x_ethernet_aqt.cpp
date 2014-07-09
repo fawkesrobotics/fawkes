@@ -30,7 +30,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/lambda.hpp>
-
+#if BOOST_VERSION < 104800
+#  include <boost/bind.hpp>
+#endif
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>

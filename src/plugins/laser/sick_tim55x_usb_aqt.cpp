@@ -33,6 +33,16 @@
 #include <unistd.h>
 #include <libusb.h>
 
+#ifndef LIBUSB_API_VERSION
+#  define libusb_error_name(error) ""
+#  define LIBUSB_LOG_LEVEL_ERROR 1
+#endif
+
+#if LIBUSBX_API_VERSION < 0x01000102
+   // libusb before 1.0.16 does not have libusb_strerror
+#  define libusb_strerror libusb_error_name
+#endif
+
 using namespace fawkes;
 
 #define USB_VENDOR  0x19A2
