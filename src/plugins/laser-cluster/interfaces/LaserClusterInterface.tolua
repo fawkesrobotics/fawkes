@@ -1,4 +1,6 @@
 $#include <interfaces/LaserClusterInterface.h>
+$#include <utils/time/time.h>
+$#include <utils/time/clock.h>
 $using namespace fawkes;
 namespace fawkes {
 class LaserClusterInterface : public Interface
@@ -37,6 +39,11 @@ class LaserClusterInterface : public Interface
   void          write();
   bool          has_writer() const;
   unsigned int  num_readers() const;
+  bool          changed() const;
+  const fawkes::Time *  timestamp() const;
+  void          set_auto_timestamping(bool enabled);
+  void          set_timestamp(const fawkes::Time *t);
+  void          set_clock(fawkes::Clock *clock);
   unsigned int  msgq_enqueue_copy(Message *message);
   void          msgq_remove(Message *message);
   void          msgq_remove(unsigned int message_id);
