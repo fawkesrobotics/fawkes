@@ -63,6 +63,7 @@ ScanlineGrid::ScanlineGrid(unsigned int width, unsigned int height,
  */
 ScanlineGrid::~ScanlineGrid()
 {
+  delete this->roi;
 }
 
 upoint_t
@@ -186,7 +187,11 @@ ScanlineGrid::set_roi(ROI *roi)
   if (!roi) this->roi = new ROI(0, 0, this->width, this->height, this->width, this->height);
   else
   {
-    this->roi = roi;
+    if (!this->roi) {
+      this->roi = new ROI(roi);
+    } else {
+      *(this->roi) = *roi;
+    }
     //Use roi's image width/height as grid boundary (to simplify the "exceeds-boundaries"-test)
     this->roi->image_width  = this->roi->start.x + this->roi->width;
     this->roi->image_height = this->roi->start.y + this->roi->height;
