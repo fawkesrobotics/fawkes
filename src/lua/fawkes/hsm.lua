@@ -306,7 +306,7 @@ end
 function HSM:add_default_transition(state, jumpcond, description)
    if self.debug then
       printf("%s: Adding default transition -> %s on %s (%s)",
-             self.name, tostring(state), tostring(jumpcond), tostring(description))
+             self.name, tostring(state), tostring(jumpcond), tostring(description or ""))
    end
    table.insert(self.default_transitions, {state=state, jumpcond=jumpcond, description=description})
    for _,st in pairs(self.states) do
@@ -335,7 +335,7 @@ function HSM:apply_deftrans(state)
          end
          if not exists then
             printf("Adding transition %s -> %s (%s, %s)", state.name, tostring(t.state),
-                   tostring(t.jumpcond), tostring(t.description))
+                   tostring(t.jumpcond), tostring(t.description or ""))
             local tr = state:add_new_transition(t.state, t.jumpcond, t.description)
             tr.deftransindex = i
          end
