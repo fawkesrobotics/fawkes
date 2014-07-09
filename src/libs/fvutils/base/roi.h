@@ -90,6 +90,7 @@ class ROI {
   void         set_hint(unsigned int);
 
   bool         contains(unsigned int x, unsigned int y);
+  ROI          intersect(ROI const &roi) const;
 
   bool         neighbours(unsigned int x, unsigned int y, unsigned int margin) const;
   bool         neighbours(ROI *roi, unsigned int margin) const;

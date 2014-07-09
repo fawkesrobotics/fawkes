@@ -302,15 +302,52 @@ bool
 ROI::contains(unsigned int x, unsigned int y)
 {
   if ( (x >= start.x) &&
-       (x <= start.x+width) &&
+       (x < start.x+width) &&
        (y >= start.y) &&
-       (y <= start.y+height) ) {
+       (y < start.y+height) ) {
 
     num_hint_points += 1;
     return true;
   } else {
     return false;
   }
+}
+
+
+/** Intersect this ROI with another.
+ * @param roi The other roi
+ * @return A new ROI that covers the intersection of this and the other ROI.
+ * If there's no intersection, width = height = 0.
+ */
+ROI
+ROI::intersect(ROI const &roi) const
+{
+  ROI rv;
+  if (start.x + width <= roi.start.x
+      || roi.start.x + roi.width <= start.x
+      || start.y + height <= roi.start.y
+      || roi.start.y + roi.width <= start.y) {
+
+    return rv;
+
+  } else {
+
+    rv = new ROI(this);
+    rv.start.x = start.x <= roi.start.x ? roi.start.x : start.x;
+    rv.start.y = start.y <= roi.start.y ? roi.start.y : start.y;
+    if (start.x + width < roi.start.x + roi.width) {
+      rv.width = start.x + width - rv.start.x;
+    } else {
+      rv.width = roi.start.x + roi.width - rv.start.x;
+    }
+    if (start.y + height < roi.start.y + roi.height) {
+      rv.height = start.y + height - rv.start.y;
+    } else {
+      rv.height = roi.start.y + roi.height - rv.start.y;
+    }
+
+  }
+  return rv;
 }
 
 
@@ -368,8 +405,8 @@ ROI::extend(unsigned int x, unsigned int y)
 
   if (x < start.x) { width  += start.x - x; start.x = x; }
   if (y < start.y) { height += start.y - y; start.y = y; }
-  if (x > start.x + width)  { width  += (x - (start.x + width)); }
-  if (y > start.y + height) { height += (y - (start.y + height)); }
+  if (x >= start.x + width)  { width  += (x - (start.x + width) + 1); }
+  if (y >= start.y + height) { height += (y - (start.y + height) + 1); }
 
   num_hint_points += 1;
 }
