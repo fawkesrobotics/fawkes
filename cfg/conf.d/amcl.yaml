@@ -126,6 +126,17 @@ plugins/amcl:
   # position to the host config. Set to 0.0 to disable.
   save_pose_period: 2.0
 
+  buffering:
+    # Set to true to enable buffering of data if it cannot be currently
+    # transformed. In that case we use the previous data with proper
+    # transforms available (in particular odometry). This problem arises
+    # in particular if laser data is newer than odometry data.
+    enable: true
+
+    # Enable to get log messages about buffering of data, can sometimes be
+    # helpful to debug buffering issues or to check if data is used at all
+    debug: false
+
   # Parameters for fake laser generation
   map-lasergen:
     # Generate laser data for the current position, if set to false use

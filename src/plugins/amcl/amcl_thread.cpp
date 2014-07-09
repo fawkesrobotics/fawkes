@@ -168,7 +168,11 @@ void AmclThread::init()
   } catch (Exception &e) {
     angle_max_idx_ = 359;
   }
-  angle_range_ = (unsigned int)abs(angle_max_idx_ - angle_min_idx_);
+  if (angle_max_idx_ > angle_min_idx_) {
+    angle_range_ = (unsigned int)abs(angle_max_idx_ - angle_min_idx_);
+  } else {
+    angle_range_ = (360 - angle_min_idx_) + angle_max_idx_;
+  }
   angle_min_ = deg2rad(angle_min_idx_);
 
   max_beams_ = config->get_uint(CFG_PREFIX"max_beams");
@@ -335,8 +339,21 @@ void AmclThread::init()
   pos3d_if_ =
     blackboard->open_for_writing<Position3DInterface>(cfg_pose_ifname_.c_str());
 
+  cfg_buffer_enable_ = true;
+  try {
+    cfg_buffer_enable_ = config->get_bool(CFG_PREFIX"buffering/enable");
+  } catch (Exception &e) {} // ignored, use default
+
+  cfg_buffer_debug_ = true;
+  try {
+    cfg_buffer_debug_ = config->get_bool(CFG_PREFIX"buffering/debug");
+  } catch (Exception &e) {} // ignored, use default
+
   laser_buffered_ = false;
-  laser_if_->resize_buffers(1);
+
+  if (cfg_buffer_enable_) {
+    laser_if_->resize_buffers(1);
+  }
 
   pos3d_if_->set_frame(global_frame_id_.c_str());
   pos3d_if_->write();
@@ -374,28 +391,39 @@ AmclThread::loop()
     if (!get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
                        laser_if_->timestamp(), base_frame_id_))
     {
-      logger->log_warn(name(), "Couldn't determine robot's pose "
-		       "associated with current laser scan");
+      if (cfg_buffer_debug_) {
+	logger->log_warn(name(), "Couldn't determine robot's pose "
+			 "associated with current laser scan");
+      }
       if (laser_buffered_) {
 	Time buffer_timestamp(laser_if_->buffer_timestamp(0));
 	if (!get_odom_pose(odom_pose, pose.v[0], pose.v[1], pose.v[2],
 			   &buffer_timestamp, base_frame_id_))
 	{
-	  // could not even use the buffered scan, buffer current one and try that one next time
-	  logger->log_warn(name(), "Couldn't determine robot's pose "
-			    "associated with buffered laser scan, re-buffering");
+	  // could not even use the buffered scan, buffer current one
+	  // and try that one next time
+	  if (cfg_buffer_debug_) {
+	    logger->log_warn(name(), "Couldn't determine robot's pose "
+			     "associated with buffered laser scan, re-buffering");
+	  }
 	  laser_if_->copy_private_to_buffer(0);
 	  return;
 	} else {
 	  // yay, that worked, use that one, re-buffer current data
-	  logger->log_warn(name(), "Using buffered laser data, re-buffering current");
+	  if (cfg_buffer_debug_) {
+	    logger->log_warn(name(), "Using buffered laser data, re-buffering current");
+	  }
 	  laser_if_->read_from_buffer(0);
 	  laser_if_->copy_shared_to_buffer(0);
 	}
-      } else {
-	logger->log_warn(name(), "Buffering current data for next loop");
+      } else if (cfg_buffer_enable_) {
+	if (cfg_buffer_debug_) {
+	  logger->log_warn(name(), "Buffering current data for next loop");
+	}
 	laser_if_->copy_private_to_buffer(0);
 	laser_buffered_ = true;
+	return;
+      } else {
 	return;
       }
     } else {
@@ -411,11 +439,15 @@ AmclThread::loop()
 		       &buffer_timestamp, base_frame_id_))
     {
       // yay, that worked, use that one
-      logger->log_info(name(), "Using buffered laser data (no changed data)");
+      if (cfg_buffer_debug_) {
+	logger->log_info(name(), "Using buffered laser data (no changed data)");
+      }
       laser_if_->read_from_buffer(0);
     } else {
-      logger->log_error(name(), "Couldn't determine robot's pose "
-			"associated with buffered laser scan (2)");
+      if (cfg_buffer_debug_) {
+	logger->log_error(name(), "Couldn't determine robot's pose "
+			  "associated with buffered laser scan (2)");
+      }
       return;
     }
   } else {
@@ -555,7 +587,7 @@ AmclThread::loop()
         ldata.ranges[i][0] = laser_distances[idx];
 
       // Compute bearing
-      ldata.ranges[i][1] = angle_min + (idx * angle_increment);
+      ldata.ranges[i][1] = fmod(angle_min_ + (i * angle_increment), 2 * M_PI);
     }
 
     try {
@@ -786,9 +818,11 @@ AmclThread::loop()
       double yaw, pitch, roll;
       map_pose.getBasis().getEulerYPR(yaw, pitch, roll);
 
-      logger->log_debug(name(), "Saving pose (%f,%f,%f) as initial pose to host config",
-			map_pose.getOrigin().x(), map_pose.getOrigin().y(), yaw);
+      //logger->log_debug(name(), "Saving pose (%f,%f,%f) as initial pose to host config",
+      //		map_pose.getOrigin().x(), map_pose.getOrigin().y(), yaw);
 
+      // Make sure we write the config only once by locking/unlocking it
+      config->lock();
       try {
 	config->set_float(CFG_PREFIX"init_pose_x", map_pose.getOrigin().x());
 	config->set_float(CFG_PREFIX"init_pose_y", map_pose.getOrigin().y());
@@ -801,6 +835,7 @@ AmclThread::loop()
 	logger->log_warn(name(), e);
 	save_pose_period_ = 0.0; 
       }
+      config->unlock();
       save_pose_last_time = now;
     }
   } else {
@@ -848,7 +883,8 @@ AmclThread::get_odom_pose(tf::Stamped<tf::Pose>& odom_pose, double& x,
     tf_listener->transform_pose(odom_frame_id_, ident, odom_pose);
   } catch (Exception &e) {
     logger->log_warn(name(),
-		     "Failed to compute odom pose, skipping scan (%s)", e.what());
+		     "Failed to compute odom pose (%s)",
+		     e.what_no_backtrace());
     return false;
   }
   x = odom_pose.getOrigin().x();
@@ -1060,7 +1096,7 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
     // startup condition doesn't really cost us anything.
     if(sent_first_transform_)
       logger->log_warn(name(), "Failed to transform initial pose "
-		       "in time (%s)", e.what());
+		       "in time (%s)", e.what_no_backtrace());
     tx_odom.setIdentity();
   } catch (Exception &e) {
     logger->log_warn(name(), "Failed to transform initial pose in time");

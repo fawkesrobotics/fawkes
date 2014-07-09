@@ -114,6 +114,8 @@ private:
   float        cfg_occupied_thresh_;
   float        cfg_free_thresh_;
   bool         cfg_read_init_cov_;
+  bool         cfg_buffer_enable_;
+  bool         cfg_buffer_debug_;
 
   std::string cfg_laser_ifname_;
   std::string cfg_pose_ifname_;
