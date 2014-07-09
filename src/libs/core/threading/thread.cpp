@@ -524,7 +524,7 @@ Thread::start(bool wait)
     // An error occured
     throw Exception("Could not start thread", err);
   }
-#ifdef _GNU_SOURCE
+#if defined(_GNU_SOURCE) && defined(__GLIBC__) && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 12) || __GLIBC__ > 2)
   char tmpname[16];
   strncpy(tmpname, __name, 15);
   tmpname[15] = 0;
@@ -768,7 +768,7 @@ Thread::set_name(const char *format, ...)
     free(old_name);
   }
   va_end(va);
-#ifdef _GNU_SOURCE
+#if defined(_GNU_SOURCE) && defined(__GLIBC__) && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 12) || __GLIBC__ > 2)
   if (__thread_id) {
     char tmpname[16];
     strncpy(tmpname, __name, 15);

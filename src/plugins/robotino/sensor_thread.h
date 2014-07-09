@@ -26,6 +26,7 @@
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
+#include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 
@@ -53,12 +54,16 @@ namespace rec {
 namespace fawkes {
   class BatteryInterface;
   class RobotinoSensorInterface;
+  class IMUInterface;
 }
+
+class RobotinoSensorComHandler;
 
 class RobotinoSensorThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
+  public fawkes::ClockAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect
 {
@@ -77,15 +82,20 @@ class RobotinoSensorThread
   void update_distances(float *distances);
 
  private: // members
-  std::string cfg_hostname_;
-  bool        cfg_quit_on_disconnect_;
-  rec::robotino::com::Com *com_;
+  std::string  cfg_hostname_;
+  bool         cfg_quit_on_disconnect_;
+  bool         cfg_enable_gyro_;
+  std::string  cfg_imu_iface_id_;
+  unsigned int cfg_sensor_update_cycle_time_;
+
+  RobotinoSensorComHandler *com_;
   unsigned int last_seqnum_;
   rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State> *statemem_;
   rec::iocontrol::robotstate::State *state_;
 
   fawkes::BatteryInterface        *batt_if_;
   fawkes::RobotinoSensorInterface *sens_if_;
+  fawkes::IMUInterface            *imu_if_;
 
   // Voltage to distance data points
   std::vector<std::pair<double, double> > voltage_to_dist_dps_;

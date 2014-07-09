@@ -1,0 +1,31 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/imu
+---
+hardware/imu:
+
+  # CruizCore XG1010 (possibly others, untested)
+  xg1010:
+    # Enable this configuration?
+    active: true
+
+    # If continuous operation is enabled, data will be written to
+    # blackboard as soon as it is available, otherwise only once per
+    # loop during the sensor hook
+    continuous: false
+    
+    # Configuration is for CruizCore Gyro
+    type: CruizCore-XG1010
+
+    # Coordinate frame at which origin the IMU is positioned
+    frame: !frame /imu
+    
+    # Device file
+    device: /dev/ttyUSB0
+
+    # Baud rate, one of 115200, 57600, 38400, 28800, 19200, 9600, 4800
+    baud_rate: 115200
+
+    # Data update frequency, one of 25, 50, 100
+    data_frequency: 100

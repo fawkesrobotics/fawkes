@@ -14,14 +14,62 @@ hardware/robotino:
   # Time threshold after all motor velocities are set to zero if no new messages arrived inbetween
   deadman_time_threshold: 0.5
 
-  # Odom TF offset. This time is added to the current time when the odometry <- base_link TF is published
-  odom_time_offset: 0.25
-
-  # Odometry coordinate frame
-  odom_frame: !frame /odom
-
   # Base coordinate frame
   base_frame: !frame /base_link
+
+  # Minimum time in milliseconds between two Robotino sensor readings.
+  # Lower values increase the machine load (considerably) but decrease
+  # the average sensor data age. Zero means receive as fast as possible
+  # without waiting between receive calls
+  sensor_update_cycle_time: 5
+
+  gyro:
+    # Enable Gyro publishing? This creates an IMUInterface and publishes
+    # the gyro data if available via OpenRobotino. If enabled and the gyro
+    # is not available, properly writes "-1 invalid indicator" (cf. IMUInterface)
+    # If disabled, no interface will be opened and written. Recommended if you
+    # intend to use the imu plugin for gyro access
+    # If you enable this, you should also set the odometry mode to copy
+    enable: true
+    
+    # Gyro coordinate frame
+    frame: !frame /gyro
+
+    interface_id: IMU Robotino
+
+  odometry:
+
+    # Odometry mode, one of "calc" or "copy"
+    # calc: calculate on our own based on IMUInterface and velocity data
+    # copy: copy values as-is from OpenRobotino
+    # If you set this to calc, you should disable the gyro support in the
+    # robotino plugin and instead use the imu plugin with the gyro connected
+    # directly to the Fawkes machine.
+    mode: calc
+
+    # Odometry coordinate frame
+    frame: !frame /odom
+
+    # Odom TF offset. This time is added to the current time when the
+    # odometry <- base_link TF is published
+    time_offset: 0.0
+
+    # Parameters for calc odometry mode
+    calc:
+      # Interface ID of the IMU interface for the gyro.
+      imu_interface_id: IMU xg1010
+
+      # Number of loops after which the IMU is considered dead if no
+      # change has been made to the interface (but it still has a writer).
+      # In that case the odometry will be based solely on wheel odometry.
+      imu_deadman_loops: 3
+
+      # Correction factors for odometry calculation
+      correction:
+        # If wheel odometry is used (not the gyro) multiple the odometry delta
+        # with this factor, that is an empirical value that you need to
+        # adjust to your specific robot. Default (1.0) means no adjustment.
+        phi: 1.0
 
   gripper:
     # Enable gripper {ENABLED=true / DISABLED=false}

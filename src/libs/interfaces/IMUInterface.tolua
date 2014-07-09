@@ -1,32 +1,32 @@
-$#include <interfaces/RobotinoSensorInterface.h>
+$#include <interfaces/IMUInterface.h>
 $#include <utils/time/time.h>
 $#include <utils/time/clock.h>
 $using namespace fawkes;
 namespace fawkes {
-class RobotinoSensorInterface : public Interface
+class IMUInterface : public Interface
 {
 
-  float mot_velocity(int index);
-  void set_mot_velocity(unsigned int index, const float new_mot_velocity);
-  int maxlenof_mot_velocity() const;
-  int mot_position(int index);
-  void set_mot_position(unsigned int index, const int new_mot_position);
-  int maxlenof_mot_position() const;
-  float mot_current(int index);
-  void set_mot_current(unsigned int index, const float new_mot_current);
-  int maxlenof_mot_current() const;
-  bool is_bumper();
-  void set_bumper(const bool new_bumper);
-  int maxlenof_bumper() const;
-  float distance(int index);
-  void set_distance(unsigned int index, const float new_distance);
-  int maxlenof_distance() const;
-  bool is_digital_in(int index);
-  void set_digital_in(unsigned int index, const bool new_digital_in);
-  int maxlenof_digital_in() const;
-  float analog_in(int index);
-  void set_analog_in(unsigned int index, const float new_analog_in);
-  int maxlenof_analog_in() const;
+  char * frame();
+  void set_frame(const char * new_frame);
+  int maxlenof_frame() const;
+  float orientation(int index);
+  void set_orientation(unsigned int index, const float new_orientation);
+  int maxlenof_orientation() const;
+  double orientation_covariance(int index);
+  void set_orientation_covariance(unsigned int index, const double new_orientation_covariance);
+  int maxlenof_orientation_covariance() const;
+  float angular_velocity(int index);
+  void set_angular_velocity(unsigned int index, const float new_angular_velocity);
+  int maxlenof_angular_velocity() const;
+  double angular_velocity_covariance(int index);
+  void set_angular_velocity_covariance(unsigned int index, const double new_angular_velocity_covariance);
+  int maxlenof_angular_velocity_covariance() const;
+  float linear_acceleration(int index);
+  void set_linear_acceleration(unsigned int index, const float new_linear_acceleration);
+  int maxlenof_linear_acceleration() const;
+  double linear_acceleration_covariance(int index);
+  void set_linear_acceleration_covariance(unsigned int index, const double new_linear_acceleration_covariance);
+  int maxlenof_linear_acceleration_covariance() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
