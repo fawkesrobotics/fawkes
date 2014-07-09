@@ -26,6 +26,7 @@
 #include "yaml_node.h"
 
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/exceptions/software.h>
 #include <logging/liblogger.h>
 #include <utils/system/fam_thread.h>
@@ -317,6 +318,8 @@ YamlConfiguration::YamlConfiguration()
   root_ = host_root_ = NULL;
   fam_thread_ = NULL;
   mutex = new Mutex();
+  write_pending_ = false;
+  write_pending_mutex_ = new Mutex();
 
   __sysconfdir   = NULL;
   __userconfdir  = NULL;
@@ -353,6 +356,8 @@ YamlConfiguration::YamlConfiguration(const char *sysconfdir,
   root_ = host_root_ = NULL;
   fam_thread_ = NULL;
   mutex = new Mutex();
+  write_pending_ = false;
+  write_pending_mutex_ = new Mutex();
 
   __sysconfdir   = strdup(sysconfdir);
 
@@ -389,6 +394,10 @@ YamlConfiguration::YamlConfiguration(const char *sysconfdir,
 /** Destructor. */
 YamlConfiguration::~YamlConfiguration()
 {
+  if (write_pending_) {
+    write_host_file();
+  }
+
   delete root_;
   delete host_root_;
   root_ = host_root_ = NULL;
@@ -407,6 +416,7 @@ YamlConfiguration::~YamlConfiguration()
   regfree(&__frame_regex);
 #endif
   delete mutex;
+  delete write_pending_mutex_;
 }
 
 
@@ -589,6 +599,7 @@ YamlConfiguration::read_yaml_config(std::string filename, std::string &host_file
 void
 YamlConfiguration::fam_event(const char *filename, unsigned int mask)
 {
+  MutexLocker lock(mutex);
   try {
     std::string host_file = "";
     std::list<std::string> files, dirs;
@@ -866,7 +877,19 @@ YamlConfiguration::write_host_file()
   if (host_file_ == "") {
     throw Exception("YamlConfig: no host config file specified");
   }
-  host_root_->emit(host_file_);
+  if (mutex->try_lock()) {
+    try {
+      host_root_->emit(host_file_);
+    } catch (...) {
+      write_pending_mutex_->unlock();
+      mutex->unlock();
+      throw;
+    }
+  } else {
+    write_pending_mutex_->lock();
+    write_pending_ = true;
+    write_pending_mutex_->unlock();
+  }
 }
 
 
@@ -1300,6 +1323,12 @@ YamlConfiguration::try_lock()
 void
 YamlConfiguration::unlock()
 {
+  write_pending_mutex_->lock();
+  if (write_pending_) {
+    host_root_->emit(host_file_);
+    write_pending_ = false;
+  }
+  write_pending_mutex_->unlock();
   mutex->unlock();
 }
 

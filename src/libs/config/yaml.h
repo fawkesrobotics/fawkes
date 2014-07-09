@@ -197,6 +197,9 @@ class YamlConfiguration
   YamlConfigurationNode  *root_;
   YamlConfigurationNode  *host_root_;
 
+  bool   write_pending_;
+  Mutex *write_pending_mutex_;
+
  private:
   Mutex *mutex;
 
