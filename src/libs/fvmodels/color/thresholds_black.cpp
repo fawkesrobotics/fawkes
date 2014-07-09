@@ -13,6 +13,7 @@
  */
 
 #include "thresholds_black.h"
+#include <cmath>
 
 namespace firevision
 {
@@ -21,26 +22,43 @@ namespace firevision
 #endif
 
 /** @class ColorModelBlack <fvmodels/color/thresholds_black.h>
- * Really simple thresholds-based model with variable thresholds. 
- * just for initial development of color models.
+ * Detect configurable shades/hues of "black" as a cuboid in YUV space.
  */
 
-/** Constructor.
- * @param threshold maximum luminance value
+/**
+ * Initialize black colormodel. The Y reference component is always 0,
+ * i.e. the accepted cuboid extends from Y=0 to Y=y_thresh, by u_thresh
+ * around ref_u, and by v_thresh around ref_v.
+ *
+ * @param y_thresh maximum brightness
+ * @param u_thresh maximum difference from ref_u
+ * @param v_thresh maximum difference from ref_v
+ * @param ref_u U component of the "black" reference color (default 128)
+ * @param ref_v V component of the "black" reference color (default 128)
  */
-ColorModelBlack::ColorModelBlack(unsigned int threshold)
-{
-  threshold_ = threshold;
-}
+ColorModelBlack::ColorModelBlack(unsigned int y_thresh, unsigned int u_thresh, unsigned int v_thresh,
+  unsigned int ref_u, unsigned int ref_v) :
+    y_thresh_(y_thresh),
+    u_thresh_(u_thresh),
+    v_thresh_(v_thresh),
+    ref_u_ (ref_u),
+    ref_v_ (ref_v) {}
 
 color_t
 ColorModelBlack::determine(unsigned int y,
 			   unsigned int u,
 			   unsigned int v) const
 {
-  if ( y <= this->threshold_
-       && u >= 90 && u <= 150
-       && v >= 90 && v <= 150)
+  int diff_u = ref_u_ - u;
+  int diff_v = ref_v_ - v;
+  if ( y <= y_thresh_
+#if defined(__GNUC__) && ((__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || (__GNUC__ > 4))
+      && std::abs(diff_u) < u_thresh_ && std::abs(diff_v) < v_thresh_
+#else
+      && (diff_u < 0) ? (diff_u > -1*u_thresh_) : (diff_u < u_thresh_)
+      && (diff_v < 0) ? (diff_v > -1*v_thresh_) : (diff_v < v_thresh_)
+#endif
+  )
   {
     return C_BLACK;
   } else {
