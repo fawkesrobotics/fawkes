@@ -8,16 +8,25 @@ class PclDatabaseRetrieveInterface : public Interface
 
   class RetrieveMessage : public Message
   {
-    RetrieveMessage(long ini_timestamp, char * ini_collection);
+    RetrieveMessage(long ini_timestamp, char * ini_database, char * ini_collection, char * ini_target_frame, bool ini_original_timestamp);
     RetrieveMessage();
     ~RetrieveMessage();
 
     long timestamp();
     void set_timestamp(const long new_timestamp);
     int maxlenof_timestamp() const;
+    char * database();
+    void set_database(const char * new_database);
+    int maxlenof_database() const;
     char * collection();
     void set_collection(const char * new_collection);
     int maxlenof_collection() const;
+    char * target_frame();
+    void set_target_frame(const char * new_target_frame);
+    int maxlenof_target_frame() const;
+    bool is_original_timestamp();
+    void set_original_timestamp(const bool new_original_timestamp);
+    int maxlenof_original_timestamp() const;
   };
 
   unsigned int msgid();

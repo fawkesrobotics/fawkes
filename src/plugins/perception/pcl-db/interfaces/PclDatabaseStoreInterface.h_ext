@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  PclDatabaseRetrieveInterface.h - Fawkes BlackBoard Interface - PclDatabaseRetrieveInterface
+ *  PclDatabaseStoreInterface.h - Fawkes BlackBoard Interface - PclDatabaseStoreInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2012-2013  Tim Niemueller
+ *  Copyright  2012-2014  Tim Niemueller
  *
  ****************************************************************************/
 
@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACES_PCLDATABASERETRIEVEINTERFACE_H_
-#define __INTERFACES_PCLDATABASERETRIEVEINTERFACE_H_
+#ifndef __INTERFACES_PCLDATABASESTOREINTERFACE_H_
+#define __INTERFACES_PCLDATABASESTOREINTERFACE_H_
 
 #include <interface/interface.h>
 #include <interface/message.h>
@@ -30,10 +30,10 @@
 
 namespace fawkes {
 
-class PclDatabaseRetrieveInterface : public Interface
+class PclDatabaseStoreInterface : public Interface
 {
  /// @cond INTERNALS
- INTERFACE_MGMT_FRIENDS(PclDatabaseRetrieveInterface)
+ INTERFACE_MGMT_FRIENDS(PclDatabaseStoreInterface)
  /// @endcond
  public:
   /* constants */
@@ -55,14 +55,14 @@ class PclDatabaseRetrieveInterface : public Interface
     char error[256]; /**< 
       Error description if reconstruction fails.
      */
-  } PclDatabaseRetrieveInterface_data_t;
+  } PclDatabaseStoreInterface_data_t;
 #pragma pack(pop)
 
-  PclDatabaseRetrieveInterface_data_t *data;
+  PclDatabaseStoreInterface_data_t *data;
 
  public:
   /* messages */
-  class RetrieveMessage : public Message
+  class StoreMessage : public Message
   {
    private:
 #pragma pack(push,4)
@@ -70,8 +70,8 @@ class PclDatabaseRetrieveInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      int64_t timestamp; /**< 
-      Timestamp for which to retrieve the most recent point clouds.
+      char pcl_id[64]; /**< 
+      ID of the point cloud to store.
      */
       char database[64]; /**< 
       Database name from which to read the point clouds. If empty will
@@ -81,51 +81,34 @@ class PclDatabaseRetrieveInterface : public Interface
       Collection name from which to read the point clouds. May NOT
       include the database name.
      */
-      char target_frame[64]; /**< 
-      Coordinate frame to which to transform the output point cloud.
-      The transformation will be done through a fixed frame specified
-      in the plugin config. If empty, no transformation is
-      performed. If set to "SENSOR" will convert to the sensor frame
-      specified in the plugin config.
-     */
-      bool original_timestamp; /**< 
-      Set to true to set the original timestamp on the point cloud,
-      false (default) to publish with current time.
-     */
-    } RetrieveMessage_data_t;
+    } StoreMessage_data_t;
 #pragma pack(pop)
 
-    RetrieveMessage_data_t *data;
+    StoreMessage_data_t *data;
 
    public:
-    RetrieveMessage(const int64_t ini_timestamp, const char * ini_database, const char * ini_collection, const char * ini_target_frame, const bool ini_original_timestamp);
-    RetrieveMessage();
-    ~RetrieveMessage();
+    StoreMessage(const char * ini_pcl_id, const char * ini_database, const char * ini_collection);
+    StoreMessage();
+    ~StoreMessage();
 
-    RetrieveMessage(const RetrieveMessage *m);
+    StoreMessage(const StoreMessage *m);
     /* Methods */
-    int64_t timestamp() const;
-    void set_timestamp(const int64_t new_timestamp);
-    size_t maxlenof_timestamp() const;
+    char * pcl_id() const;
+    void set_pcl_id(const char * new_pcl_id);
+    size_t maxlenof_pcl_id() const;
     char * database() const;
     void set_database(const char * new_database);
     size_t maxlenof_database() const;
     char * collection() const;
     void set_collection(const char * new_collection);
     size_t maxlenof_collection() const;
-    char * target_frame() const;
-    void set_target_frame(const char * new_target_frame);
-    size_t maxlenof_target_frame() const;
-    bool is_original_timestamp() const;
-    void set_original_timestamp(const bool new_original_timestamp);
-    size_t maxlenof_original_timestamp() const;
     virtual Message * clone() const;
   };
 
   virtual bool message_valid(const Message *message) const;
  private:
-  PclDatabaseRetrieveInterface();
-  ~PclDatabaseRetrieveInterface();
+  PclDatabaseStoreInterface();
+  ~PclDatabaseStoreInterface();
 
  public:
   /* Methods */

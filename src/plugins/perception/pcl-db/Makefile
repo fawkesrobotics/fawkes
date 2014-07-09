@@ -47,14 +47,19 @@ LIBS_pcl_db_retrieve = fawkescore fawkesaspects fawkesblackboard fawkesinterface
 OBJS_pcl_db_retrieve = pcl_db_retrieve_plugin.o pcl_db_retrieve_thread.o \
 			mongodb_tf_transformer.o
 
-OBJS_all    = $(OBJS_pcl_db_merge) $(OBJS_pcl_db_retrieve)
+LIBS_pcl_db_store = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
+		   fawkesutils fawkeslogging fawkesmongodbaspect fawkespcl_utils \
+		   PclDatabaseStoreInterface
+OBJS_pcl_db_store = pcl_db_store_plugin.o pcl_db_store_thread.o
+
+OBJS_all    = $(OBJS_pcl_db_merge) $(OBJS_pcl_db_retrieve) $(OBJS_pcl_db_store)
 
 
 ifeq ($(HAVE_MONGODB)$(HAVE_PCL)$(HAVE_TF),111)
   CFLAGS += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS_MONGODB)
   LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(LDFLAGS_MONGODB)
 
-  PLUGINS_all = $(PLUGINDIR)/pcl-db-retrieve.so
+  PLUGINS_all = $(PLUGINDIR)/pcl-db-store.so $(PLUGINDIR)/pcl-db-retrieve.so
 
   ifeq ($(call pcl-have-libs,$(REQUIRED_PCL_LIBS_MERGE)),1)
     CFLAGS += $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS_MERGE)) \

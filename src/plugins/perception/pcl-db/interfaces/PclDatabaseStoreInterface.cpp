@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  PclDatabaseMergeInterface.cpp - Fawkes BlackBoard Interface - PclDatabaseMergeInterface
+ *  PclDatabaseStoreInterface.cpp - Fawkes BlackBoard Interface - PclDatabaseStoreInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2012  Tim Niemueller
+ *  Copyright  2012-2014  Tim Niemueller
  *
  ****************************************************************************/
 
@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interfaces/PclDatabaseMergeInterface.h>
+#include <interfaces/PclDatabaseStoreInterface.h>
 
 #include <core/exceptions/software.h>
 
@@ -30,10 +30,10 @@
 
 namespace fawkes {
 
-/** @class PclDatabaseMergeInterface <interfaces/PclDatabaseMergeInterface.h>
- * PclDatabaseMergeInterface Fawkes BlackBoard Interface.
+/** @class PclDatabaseStoreInterface <interfaces/PclDatabaseStoreInterface.h>
+ * PclDatabaseStoreInterface Fawkes BlackBoard Interface.
  * 
-      Instruct the pcl-db-merge plugin and receive information.
+      Instruct the pcl-db-store plugin.
     
  * @ingroup FawkesInterfaces
  */
@@ -41,23 +41,23 @@ namespace fawkes {
 
 
 /** Constructor */
-PclDatabaseMergeInterface::PclDatabaseMergeInterface() : Interface()
+PclDatabaseStoreInterface::PclDatabaseStoreInterface() : Interface()
 {
-  data_size = sizeof(PclDatabaseMergeInterface_data_t);
+  data_size = sizeof(PclDatabaseStoreInterface_data_t);
   data_ptr  = malloc(data_size);
-  data      = (PclDatabaseMergeInterface_data_t *)data_ptr;
+  data      = (PclDatabaseStoreInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_STRING, "error", 256, data->error);
-  add_messageinfo("MergeMessage");
-  unsigned char tmp_hash[] = {0x1a, 0xb, 0xb8, 0x5a, 0x7, 0x88, 0x93, 0x55, 0x9e, 0x7e, 0xcb, 0x96, 0x46, 0x8f, 0x97, 0xb1};
+  add_messageinfo("StoreMessage");
+  unsigned char tmp_hash[] = {0x80, 0xe0, 0x2f, 0x81, 0x4a, 0x5, 0x5c, 0xec, 0xd8, 0x64, 0xed, 0x5c, 0xee, 0x17, 0x19, 0xa6};
   set_hash(tmp_hash);
 }
 
 /** Destructor */
-PclDatabaseMergeInterface::~PclDatabaseMergeInterface()
+PclDatabaseStoreInterface::~PclDatabaseStoreInterface()
 {
   free(data_ptr);
 }
@@ -70,7 +70,7 @@ PclDatabaseMergeInterface::~PclDatabaseMergeInterface()
  * @return msgid value
  */
 uint32_t
-PclDatabaseMergeInterface::msgid() const
+PclDatabaseStoreInterface::msgid() const
 {
   return data->msgid;
 }
@@ -80,7 +80,7 @@ PclDatabaseMergeInterface::msgid() const
  * maximum number of characters for a string
  */
 size_t
-PclDatabaseMergeInterface::maxlenof_msgid() const
+PclDatabaseStoreInterface::maxlenof_msgid() const
 {
   return 1;
 }
@@ -93,7 +93,7 @@ PclDatabaseMergeInterface::maxlenof_msgid() const
  * @param new_msgid new msgid value
  */
 void
-PclDatabaseMergeInterface::set_msgid(const uint32_t new_msgid)
+PclDatabaseStoreInterface::set_msgid(const uint32_t new_msgid)
 {
   data->msgid = new_msgid;
   data_changed = true;
@@ -107,7 +107,7 @@ PclDatabaseMergeInterface::set_msgid(const uint32_t new_msgid)
  * @return final value
  */
 bool
-PclDatabaseMergeInterface::is_final() const
+PclDatabaseStoreInterface::is_final() const
 {
   return data->final;
 }
@@ -117,7 +117,7 @@ PclDatabaseMergeInterface::is_final() const
  * maximum number of characters for a string
  */
 size_t
-PclDatabaseMergeInterface::maxlenof_final() const
+PclDatabaseStoreInterface::maxlenof_final() const
 {
   return 1;
 }
@@ -130,7 +130,7 @@ PclDatabaseMergeInterface::maxlenof_final() const
  * @param new_final new final value
  */
 void
-PclDatabaseMergeInterface::set_final(const bool new_final)
+PclDatabaseStoreInterface::set_final(const bool new_final)
 {
   data->final = new_final;
   data_changed = true;
@@ -143,7 +143,7 @@ PclDatabaseMergeInterface::set_final(const bool new_final)
  * @return error value
  */
 char *
-PclDatabaseMergeInterface::error() const
+PclDatabaseStoreInterface::error() const
 {
   return data->error;
 }
@@ -153,7 +153,7 @@ PclDatabaseMergeInterface::error() const
  * maximum number of characters for a string
  */
 size_t
-PclDatabaseMergeInterface::maxlenof_error() const
+PclDatabaseStoreInterface::maxlenof_error() const
 {
   return 256;
 }
@@ -165,7 +165,7 @@ PclDatabaseMergeInterface::maxlenof_error() const
  * @param new_error new error value
  */
 void
-PclDatabaseMergeInterface::set_error(const char * new_error)
+PclDatabaseStoreInterface::set_error(const char * new_error)
 {
   strncpy(data->error, new_error, sizeof(data->error));
   data_changed = true;
@@ -173,10 +173,10 @@ PclDatabaseMergeInterface::set_error(const char * new_error)
 
 /* =========== message create =========== */
 Message *
-PclDatabaseMergeInterface::create_message(const char *type) const
+PclDatabaseStoreInterface::create_message(const char *type) const
 {
-  if ( strncmp("MergeMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new MergeMessage();
+  if ( strncmp("StoreMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new StoreMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -188,64 +188,64 @@ PclDatabaseMergeInterface::create_message(const char *type) const
  * @param other other interface to copy values from
  */
 void
-PclDatabaseMergeInterface::copy_values(const Interface *other)
+PclDatabaseStoreInterface::copy_values(const Interface *other)
 {
-  const PclDatabaseMergeInterface *oi = dynamic_cast<const PclDatabaseMergeInterface *>(other);
+  const PclDatabaseStoreInterface *oi = dynamic_cast<const PclDatabaseStoreInterface *>(other);
   if (oi == NULL) {
     throw TypeMismatchException("Can only copy values from interface of same type (%s vs. %s)",
                                 type(), other->type());
   }
-  memcpy(data, oi->data, sizeof(PclDatabaseMergeInterface_data_t));
+  memcpy(data, oi->data, sizeof(PclDatabaseStoreInterface_data_t));
 }
 
 const char *
-PclDatabaseMergeInterface::enum_tostring(const char *enumtype, int val) const
+PclDatabaseStoreInterface::enum_tostring(const char *enumtype, int val) const
 {
   throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
 /* =========== messages =========== */
-/** @class PclDatabaseMergeInterface::MergeMessage <interfaces/PclDatabaseMergeInterface.h>
- * MergeMessage Fawkes BlackBoard Interface Message.
+/** @class PclDatabaseStoreInterface::StoreMessage <interfaces/PclDatabaseStoreInterface.h>
+ * StoreMessage Fawkes BlackBoard Interface Message.
  * 
     
  */
 
 
 /** Constructor with initial values.
- * @param ini_timestamps initial value for timestamps
+ * @param ini_pcl_id initial value for pcl_id
  * @param ini_database initial value for database
  * @param ini_collection initial value for collection
  */
-PclDatabaseMergeInterface::MergeMessage::MergeMessage(const int64_t * ini_timestamps, const char * ini_database, const char * ini_collection) : Message("MergeMessage")
+PclDatabaseStoreInterface::StoreMessage::StoreMessage(const char * ini_pcl_id, const char * ini_database, const char * ini_collection) : Message("StoreMessage")
 {
-  data_size = sizeof(MergeMessage_data_t);
+  data_size = sizeof(StoreMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (MergeMessage_data_t *)data_ptr;
+  data      = (StoreMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  memcpy(data->timestamps, ini_timestamps, sizeof(int64_t) * 12);
+  strncpy(data->pcl_id, ini_pcl_id, 64);
   strncpy(data->database, ini_database, 64);
   strncpy(data->collection, ini_collection, 128);
-  add_fieldinfo(IFT_INT64, "timestamps", 12, &data->timestamps);
+  add_fieldinfo(IFT_STRING, "pcl_id", 64, data->pcl_id);
   add_fieldinfo(IFT_STRING, "database", 64, data->database);
   add_fieldinfo(IFT_STRING, "collection", 128, data->collection);
 }
 /** Constructor */
-PclDatabaseMergeInterface::MergeMessage::MergeMessage() : Message("MergeMessage")
+PclDatabaseStoreInterface::StoreMessage::StoreMessage() : Message("StoreMessage")
 {
-  data_size = sizeof(MergeMessage_data_t);
+  data_size = sizeof(StoreMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (MergeMessage_data_t *)data_ptr;
+  data      = (StoreMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_INT64, "timestamps", 12, &data->timestamps);
+  add_fieldinfo(IFT_STRING, "pcl_id", 64, data->pcl_id);
   add_fieldinfo(IFT_STRING, "database", 64, data->database);
   add_fieldinfo(IFT_STRING, "collection", 128, data->collection);
 }
 
 /** Destructor */
-PclDatabaseMergeInterface::MergeMessage::~MergeMessage()
+PclDatabaseStoreInterface::StoreMessage::~StoreMessage()
 {
   free(data_ptr);
 }
@@ -253,86 +253,50 @@ PclDatabaseMergeInterface::MergeMessage::~MergeMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-PclDatabaseMergeInterface::MergeMessage::MergeMessage(const MergeMessage *m) : Message("MergeMessage")
+PclDatabaseStoreInterface::StoreMessage::StoreMessage(const StoreMessage *m) : Message("StoreMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (MergeMessage_data_t *)data_ptr;
+  data      = (StoreMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
-/** Get timestamps value.
+/** Get pcl_id value.
  * 
-      Timestamps for which to retrieve the most recent point clouds
-      and merge them.
+      ID of the point cloud to store.
     
- * @return timestamps value
+ * @return pcl_id value
  */
-int64_t *
-PclDatabaseMergeInterface::MergeMessage::timestamps() const
+char *
+PclDatabaseStoreInterface::StoreMessage::pcl_id() const
 {
-  return data->timestamps;
+  return data->pcl_id;
 }
 
-/** Get timestamps value at given index.
- * 
-      Timestamps for which to retrieve the most recent point clouds
-      and merge them.
-    
- * @param index index of value
- * @return timestamps value
- * @exception Exception thrown if index is out of bounds
- */
-int64_t
-PclDatabaseMergeInterface::MergeMessage::timestamps(unsigned int index) const
-{
-  if (index > 12) {
-    throw Exception("Index value %u out of bounds (0..12)", index);
-  }
-  return data->timestamps[index];
-}
-
-/** Get maximum length of timestamps value.
- * @return length of timestamps value, can be length of the array or number of 
+/** Get maximum length of pcl_id value.
+ * @return length of pcl_id value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-PclDatabaseMergeInterface::MergeMessage::maxlenof_timestamps() const
+PclDatabaseStoreInterface::StoreMessage::maxlenof_pcl_id() const
 {
-  return 12;
+  return 64;
 }
 
-/** Set timestamps value.
+/** Set pcl_id value.
  * 
-      Timestamps for which to retrieve the most recent point clouds
-      and merge them.
+      ID of the point cloud to store.
     
- * @param new_timestamps new timestamps value
+ * @param new_pcl_id new pcl_id value
  */
 void
-PclDatabaseMergeInterface::MergeMessage::set_timestamps(const int64_t * new_timestamps)
+PclDatabaseStoreInterface::StoreMessage::set_pcl_id(const char * new_pcl_id)
 {
-  memcpy(data->timestamps, new_timestamps, sizeof(int64_t) * 12);
+  strncpy(data->pcl_id, new_pcl_id, sizeof(data->pcl_id));
 }
 
-/** Set timestamps value at given index.
- * 
-      Timestamps for which to retrieve the most recent point clouds
-      and merge them.
-    
- * @param new_timestamps new timestamps value
- * @param index index for of the value
- */
-void
-PclDatabaseMergeInterface::MergeMessage::set_timestamps(unsigned int index, const int64_t new_timestamps)
-{
-  if (index > 12) {
-    throw Exception("Index value %u out of bounds (0..12)", index);
-  }
-  data->timestamps[index] = new_timestamps;
-}
 /** Get database value.
  * 
       Database name from which to read the point clouds. If empty will
@@ -341,7 +305,7 @@ PclDatabaseMergeInterface::MergeMessage::set_timestamps(unsigned int index, cons
  * @return database value
  */
 char *
-PclDatabaseMergeInterface::MergeMessage::database() const
+PclDatabaseStoreInterface::StoreMessage::database() const
 {
   return data->database;
 }
@@ -351,7 +315,7 @@ PclDatabaseMergeInterface::MergeMessage::database() const
  * maximum number of characters for a string
  */
 size_t
-PclDatabaseMergeInterface::MergeMessage::maxlenof_database() const
+PclDatabaseStoreInterface::StoreMessage::maxlenof_database() const
 {
   return 64;
 }
@@ -364,7 +328,7 @@ PclDatabaseMergeInterface::MergeMessage::maxlenof_database() const
  * @param new_database new database value
  */
 void
-PclDatabaseMergeInterface::MergeMessage::set_database(const char * new_database)
+PclDatabaseStoreInterface::StoreMessage::set_database(const char * new_database)
 {
   strncpy(data->database, new_database, sizeof(data->database));
 }
@@ -377,7 +341,7 @@ PclDatabaseMergeInterface::MergeMessage::set_database(const char * new_database)
  * @return collection value
  */
 char *
-PclDatabaseMergeInterface::MergeMessage::collection() const
+PclDatabaseStoreInterface::StoreMessage::collection() const
 {
   return data->collection;
 }
@@ -387,7 +351,7 @@ PclDatabaseMergeInterface::MergeMessage::collection() const
  * maximum number of characters for a string
  */
 size_t
-PclDatabaseMergeInterface::MergeMessage::maxlenof_collection() const
+PclDatabaseStoreInterface::StoreMessage::maxlenof_collection() const
 {
   return 128;
 }
@@ -400,7 +364,7 @@ PclDatabaseMergeInterface::MergeMessage::maxlenof_collection() const
  * @param new_collection new collection value
  */
 void
-PclDatabaseMergeInterface::MergeMessage::set_collection(const char * new_collection)
+PclDatabaseStoreInterface::StoreMessage::set_collection(const char * new_collection)
 {
   strncpy(data->collection, new_collection, sizeof(data->collection));
 }
@@ -411,18 +375,18 @@ PclDatabaseMergeInterface::MergeMessage::set_collection(const char * new_collect
  * @return clone of this message
  */
 Message *
-PclDatabaseMergeInterface::MergeMessage::clone() const
+PclDatabaseStoreInterface::StoreMessage::clone() const
 {
-  return new PclDatabaseMergeInterface::MergeMessage(this);
+  return new PclDatabaseStoreInterface::StoreMessage(this);
 }
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
  */
 bool
-PclDatabaseMergeInterface::message_valid(const Message *message) const
+PclDatabaseStoreInterface::message_valid(const Message *message) const
 {
-  const MergeMessage *m0 = dynamic_cast<const MergeMessage *>(message);
+  const StoreMessage *m0 = dynamic_cast<const StoreMessage *>(message);
   if ( m0 != NULL ) {
     return true;
   }
@@ -430,7 +394,7 @@ PclDatabaseMergeInterface::message_valid(const Message *message) const
 }
 
 /// @cond INTERNALS
-EXPORT_INTERFACE(PclDatabaseMergeInterface)
+EXPORT_INTERFACE(PclDatabaseStoreInterface)
 /// @endcond
 
 

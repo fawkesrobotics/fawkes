@@ -53,8 +53,9 @@ PointCloudDBRetrieveThread::init()
   retrieve_if_ = NULL;
   msg_waker_ = NULL;
 
-  cfg_output_id_     = config->get_string(CFG_PREFIX_RETRV"output-pcl-id");
-  cfg_original_id_     = config->get_string(CFG_PREFIX_RETRV"original-pcl-id");
+  cfg_database_    = config->get_string(CFG_PREFIX"database-name");
+  cfg_output_id_   = config->get_string(CFG_PREFIX_RETRV"output-pcl-id");
+  cfg_original_id_ = config->get_string(CFG_PREFIX_RETRV"original-pcl-id");
 
   foutput_ = new pcl::PointCloud<pcl::PointXYZRGB>();
   foutput_->is_dense = false;
@@ -112,7 +113,10 @@ PointCloudDBRetrieveThread::loop()
 {
   long long timestamp = 0;
   std::vector<long long> times(1);
+  std::string database;
   std::string collection;
+  std::string target_frame;
+  bool        original_timestamp;
 
   if (retrieve_if_->msgq_empty()) return;
 
@@ -124,9 +128,13 @@ PointCloudDBRetrieveThread::loop()
     retrieve_if_->set_error("");
     retrieve_if_->write();
 
-    timestamp = msg->timestamp();
-    times[0] = timestamp;
-    collection = msg->collection();
+    timestamp    = msg->timestamp();
+    times[0]     = timestamp;
+    database     =
+      (strcmp(msg->database(), "") != 0) ? msg->database() : cfg_database_;
+    collection   = msg->collection();
+    target_frame = msg->target_frame();
+    original_timestamp = msg->is_original_timestamp();
   } else {
     logger->log_warn(name(), "Unhandled message received");
     retrieve_if_->msgq_pop();
@@ -138,21 +146,39 @@ PointCloudDBRetrieveThread::loop()
 		   collection.c_str(), timestamp);
 
   ApplicabilityStatus st_xyz, st_xyzrgb;
+  long long actual_time = 0;
 
-  pl_xyz_->applicable(times, collection);
-  if ((st_xyz = pl_xyz_->applicable(times, collection)) == APPLICABLE) {
-    pl_xyz_->retrieve(timestamp, collection);
-  } else if ((st_xyzrgb = pl_xyzrgb_->applicable(times, collection)) == APPLICABLE) {
-    pl_xyzrgb_->retrieve(timestamp, collection);
+  pl_xyz_->applicable(times, database, collection);
+  if ((st_xyz = pl_xyz_->applicable(times, database, collection)) == APPLICABLE) {
+    logger->log_info(name(), "Restoring XYZ");
+    pl_xyz_->retrieve(timestamp, database, collection, target_frame, actual_time);
+  } else if ((st_xyzrgb = pl_xyzrgb_->applicable(times, database, collection)) == APPLICABLE) {
+    logger->log_info(name(), "Restoring XYZRGB");
+    pl_xyzrgb_->retrieve(timestamp, database, collection, target_frame, actual_time);
+    if (! original_timestamp) {
+      Time now(clock);
+      pcl_utils::set_time(foutput_, now);
+    }
   } else {
     logger->log_warn(name(), "No applicable merging pipeline known:");
     logger->log_warn(name(), "  XYZ:     %s", to_string(st_xyz));
     logger->log_warn(name(), "  XYZ/RGB: %s", to_string(st_xyzrgb));
-    retrieve_if_->set_error("Retrieve failed, see pcl-db-retrieve log");
+    retrieve_if_->set_error("No applicable merging pipeline known (for details see log)");
   }
 
-  Time now(clock);
-  pcl_utils::set_time(foutput_, now);
+  if (actual_time != 0) {
+    if (original_timestamp) {
+      Time now((long)actual_time);
+      Time last;
+      pcl_utils::get_time(foutput_, last);
+      // force sending with one microsecond offset if same than last time
+      if (last == now)	now += 1L;
+      pcl_utils::set_time(foutput_, now);
+    } else {
+      Time now(clock);
+      pcl_utils::set_time(foutput_, now);
+    }
+  }
 
   retrieve_if_->set_final(true);
   retrieve_if_->write();

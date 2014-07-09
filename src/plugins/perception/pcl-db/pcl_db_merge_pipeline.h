@@ -162,10 +162,11 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
 
   /** Merge point clouds.
    * @param times times for which to retrieve the point clouds.
+   * @param database database to retrieve from
    * @param collection collection from which to retrieve the data
    */
   void
-  merge(std::vector<long long> &times, std::string &collection)
+  merge(std::vector<long long> &times, std::string &database, std::string &collection)
   {
     TIMETRACK_START(ttc_merge_);
     const unsigned int num_clouds = times.size();
@@ -201,7 +202,7 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
 
     TIMETRACK_START(ttc_retrieval_);
 
-    pcls = PointCloudDBPipeline<PointType>::retrieve_clouds(times, actual_times, collection);
+    pcls = PointCloudDBPipeline<PointType>::retrieve_clouds(times, actual_times, database, collection);
     if (pcls.empty()) {
       this->logger_->log_warn(this->name_, "No point clouds found for desired timestamps");
       TIMETRACK_ABORT(ttc_retrieval_);
@@ -214,7 +215,7 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
     for (unsigned int i = 0; i < num_clouds; ++i) {
       // retrieve transforms
       fawkes::tf::MongoDBTransformer
-	transformer(this->mongodb_client_, this->cfg_database_name_);
+	transformer(this->mongodb_client_, database);
 
       transformer.restore(/* start */  actual_times[i] + this->cfg_transform_range_[0],
 			  /* end */    actual_times[i] + this->cfg_transform_range_[1]);
@@ -352,28 +353,28 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
 #ifdef DEBUG_OUTPUT
     fawkes::Time now;
 
-    merge_output(non_transformed, num_clouds);
+    merge_output(database, non_transformed, num_clouds);
     now.stamp(); fawkes::pcl_utils::set_time(this->output_, now);
     usleep(1000000);
 
-    merge_output(non_aligned, num_clouds);
+    merge_output(database, non_aligned, num_clouds);
     now.stamp(); fawkes::pcl_utils::set_time(this->output_, now);
     usleep(1000000);
 
-    merge_output(non_aligned_downsampled, num_clouds);
+    merge_output(database, non_aligned_downsampled, num_clouds);
     now.stamp(); fawkes::pcl_utils::set_time(this->output_, now);
     usleep(1000000);
 
-    merge_output(aligned_downsampled, num_clouds);
+    merge_output(database, aligned_downsampled, num_clouds);
     now.stamp(); fawkes::pcl_utils::set_time(this->output_, now);
     usleep(1000000);
 
-    merge_output(aligned_downsampled_remplane, num_clouds);
+    merge_output(database, aligned_downsampled_remplane, num_clouds);
     now.stamp(); fawkes::pcl_utils::set_time(this->output_, now);
     usleep(1000000);
 #endif
 
-    merge_output(pcls, actual_times);
+    merge_output(database, pcls, actual_times);
 
     TIMETRACK_END(ttc_output_);
 
@@ -529,7 +530,8 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
 #endif
 
   void
-  merge_output(std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> clouds,
+  merge_output(std::string &database,
+	       std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> clouds,
 	       std::vector<long long> &actual_times)
   {
     size_t num_points = 0;
@@ -566,7 +568,7 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
     if (cfg_transform_to_sensor_frame_) {
       // retrieve transforms
       fawkes::tf::MongoDBTransformer
-	transformer(this->mongodb_client_, this->cfg_database_name_);
+	transformer(this->mongodb_client_, database);
 
       unsigned int ref_pos = clouds.size() - 1;
 

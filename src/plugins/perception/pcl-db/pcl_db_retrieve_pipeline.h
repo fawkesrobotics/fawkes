@@ -97,10 +97,16 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
 
   /** Retrieve point clouds.
    * @param timestamp time for which to retrieve the point cloud
+   * @param database database to retrieve from
    * @param collection collection from which to retrieve the data
+   * @param target_frame coordinate frame to transform to
+   * @param actual_time upon return contains the actual time for
+   * which a point cloud was retrieved
    */
   void
-  retrieve(long long timestamp, std::string &collection)
+  retrieve(long long timestamp, std::string &database,
+	   std::string &collection, std::string &target_frame,
+	   long long &actual_time)
   {
     TIMETRACK_START(ttc_retrieve_);
 
@@ -115,7 +121,7 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
 
     TIMETRACK_START(ttc_retrieval_);
 
-    pcls = PointCloudDBPipeline<PointType>::retrieve_clouds(times, actual_times, collection);
+    pcls = PointCloudDBPipeline<PointType>::retrieve_clouds(times, actual_times, database, collection);
     if (pcls.empty()) {
       this->logger_->log_warn(this->name_, "No point clouds found for desired timestamp");
       TIMETRACK_ABORT(ttc_retrieval_);
@@ -124,43 +130,51 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
     }
 
     copy_output(pcls[0], original_, 128, 128, 128);
+    actual_time = actual_times[0];
 
-    TIMETRACK_INTER(ttc_retrieval_, ttc_transforms_);
-
-    // retrieve transforms
-    fawkes::tf::MongoDBTransformer
-      transformer(this->mongodb_client_, this->cfg_database_name_);
-
-    transformer.restore(/* start */  actual_times[0] + this->cfg_transform_range_[0],
-			/* end */    actual_times[0] + this->cfg_transform_range_[1]);
-    this->logger_->log_debug(this->name_,
-			     "Restored transforms for %zu frames for range (%li..%li)",
-			     transformer.get_frame_caches().size(),
-			     /* start */  actual_times[0] + this->cfg_transform_range_[0],
-			     /* end */    actual_times[0] + this->cfg_transform_range_[1]);
-
-    fawkes::Time source_time;
-    fawkes::pcl_utils::get_time(pcls[0], source_time);
-    fawkes::tf::StampedTransform transform_recorded;
-    transformer.lookup_transform(cfg_fixed_frame_, pcls[0]->header.frame_id,
-				 source_time, transform_recorded);
-
-    fawkes::tf::StampedTransform transform_current;
-    tf_->lookup_transform(cfg_sensor_frame_, cfg_fixed_frame_, transform_current);
-
-    fawkes::tf::Transform transform = transform_current * transform_recorded;
-
-    try {
-      fawkes::pcl_utils::transform_pointcloud(*pcls[0], transform);
-    } catch (fawkes::Exception &e) {
-      this->logger_->log_warn(this->name_,
-			      "Failed to transform point cloud, exception follows");
-      this->logger_->log_warn(this->name_, e);
+    if (target_frame == "SENSOR") {
+      target_frame == cfg_sensor_frame_;
     }
 
-    // retrieve point clouds
+    if (target_frame != "") {
+      // perform transformation
+ 
+      TIMETRACK_INTER(ttc_retrieval_, ttc_transforms_);
 
-    TIMETRACK_END(ttc_transforms_);
+      // retrieve transforms
+      fawkes::tf::MongoDBTransformer
+	transformer(this->mongodb_client_, database);
+
+      transformer.restore(/* start */  actual_times[0] + this->cfg_transform_range_[0],
+			  /* end */    actual_times[0] + this->cfg_transform_range_[1]);
+      this->logger_->log_debug(this->name_,
+			       "Restored transforms for %zu frames for range (%li..%li)",
+			       transformer.get_frame_caches().size(),
+			       /* start */  actual_times[0] + this->cfg_transform_range_[0],
+			       /* end */    actual_times[0] + this->cfg_transform_range_[1]);
+
+      fawkes::Time source_time;
+      fawkes::pcl_utils::get_time(pcls[0], source_time);
+      fawkes::tf::StampedTransform transform_recorded;
+      transformer.lookup_transform(cfg_fixed_frame_, pcls[0]->header.frame_id,
+				   source_time, transform_recorded);
+
+      fawkes::tf::StampedTransform transform_current;
+      tf_->lookup_transform(cfg_sensor_frame_, cfg_fixed_frame_, transform_current);
+
+      fawkes::tf::Transform transform = transform_current * transform_recorded;
+
+      try {
+	fawkes::pcl_utils::transform_pointcloud(*pcls[0], transform);
+      } catch (fawkes::Exception &e) {
+	this->logger_->log_warn(this->name_,
+				"Failed to transform point cloud, exception follows");
+	this->logger_->log_warn(this->name_, e);
+      }
+
+      // retrieve point clouds
+      TIMETRACK_END(ttc_transforms_);
+    }
 
     copy_output(pcls[0], this->output_);
 
@@ -179,7 +193,7 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
 		    pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out)
    {
      size_t num_points = in->points.size();
-     out->header.frame_id = cfg_sensor_frame_;
+     out->header.frame_id = in->header.frame_id;
      out->points.resize(num_points);
      out->height = 1;
      out->width = num_points;
@@ -203,7 +217,7 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
 		    const int r, const int g, const int b)
    {
      size_t num_points = in->points.size();
-     out->header.frame_id = cfg_sensor_frame_;
+     out->header.frame_id = in->header.frame_id;
      out->points.resize(num_points);
      out->height = 1;
      out->width = num_points;
@@ -227,7 +241,7 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
 		    const int r = 255, const int g = 255, const int b = 255)
    {
      size_t num_points = in->points.size();
-     out->header.frame_id = cfg_sensor_frame_;
+     out->header.frame_id = in->header.frame_id;
      out->points.resize(num_points);
      out->height = 1;
      out->width = num_points;

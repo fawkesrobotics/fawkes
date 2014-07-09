@@ -53,7 +53,8 @@ PointCloudDBMergeThread::init()
   merge_if_ = NULL;
   msg_waker_ = NULL;
 
-  cfg_output_id_     = config->get_string(CFG_PREFIX_MERGE"output-pcl-id");
+  cfg_database_    = config->get_string(CFG_PREFIX"database-name");
+  cfg_output_id_   = config->get_string(CFG_PREFIX_MERGE"output-pcl-id");
 
   foutput_ = new pcl::PointCloud<pcl::PointXYZRGB>();
   //foutput_->header.frame_id = finput_->header.frame_id;
@@ -102,6 +103,7 @@ void
 PointCloudDBMergeThread::loop()
 {
   std::vector<long long> times;
+  std::string database;
   std::string collection;
   //= "PointClouds.openni_pointcloud_xyz";
 
@@ -121,7 +123,9 @@ PointCloudDBMergeThread::loop()
 	times.push_back(timestamps[i]);
       }
     }
-    collection = msg->collection();
+    database     =
+      (strcmp(msg->database(), "") != 0) ? msg->database() : cfg_database_;
+    collection   = msg->collection();
   }
 
   merge_if_->msgq_pop();
@@ -151,20 +155,21 @@ PointCloudDBMergeThread::loop()
 
   ApplicabilityStatus st_xyz, st_xyzrgb;
 
-  pl_xyz_->applicable(times, collection);
-  if ((st_xyz = pl_xyz_->applicable(times, collection)) == APPLICABLE) {
-    pl_xyz_->merge(times, collection);
-  } else if ((st_xyzrgb = pl_xyzrgb_->applicable(times, collection)) == APPLICABLE) {
-    pl_xyzrgb_->merge(times, collection);
+  pl_xyz_->applicable(times, database, collection);
+  if ((st_xyz = pl_xyz_->applicable(times, database, collection)) == APPLICABLE) {
+    pl_xyz_->merge(times, database, collection);
+    Time now(clock);
+    pcl_utils::set_time(foutput_, now);
+  } else if ((st_xyzrgb = pl_xyzrgb_->applicable(times, database, collection)) == APPLICABLE) {
+    pl_xyzrgb_->merge(times, database, collection);
+    Time now(clock);
+    pcl_utils::set_time(foutput_, now);
   } else {
     logger->log_warn(name(), "No applicable merging pipeline known:");
     logger->log_warn(name(), "  XYZ:     %s", to_string(st_xyz));
     logger->log_warn(name(), "  XYZ/RGB: %s", to_string(st_xyzrgb));
     merge_if_->set_error("Merge failed, see pcl-db-merge log");
   }
-
-  Time now(clock);
-  pcl_utils::set_time(foutput_, now);
 
   merge_if_->set_final(true);
   merge_if_->write();

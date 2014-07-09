@@ -136,10 +136,10 @@ fill_info(const fawkes::RefPtr<const pcl::PointCloud<PointT> > &p,
  * @param pfi upon return contains data type information
  */
 void
-PointCloudAdapter::get_info(std::string &id,
-                               unsigned int &width, unsigned int &height,
-                               std::string &frame_id, bool &is_dense,
-                               V_PointFieldInfo &pfi)
+PointCloudAdapter::get_info(const std::string &id,
+			    unsigned int &width, unsigned int &height,
+			    std::string &frame_id, bool &is_dense,
+			    V_PointFieldInfo &pfi)
 {
   if (__sas.find(id) == __sas.end()) {
     __sas[id] = new StorageAdapter(__pcl_manager->get_storage_adapter(id.c_str()));
@@ -188,6 +188,29 @@ PointCloudAdapter::get_data(const std::string &id, std::string &frame_id,
   point_size = sa->point_size();
   num_points = sa->num_points();
   sa->get_time(time);
+}
+
+
+/** Get data and info of point cloud.
+ * @param id ID of point cloud to get info from
+ * @param frame_id upon return contains frame ID of the point cloud
+ * @param is_dense upon return contains true if point cloud is dense and false otherwise
+ * @param width upon return contains width of point cloud
+ * @param height upon return contains width of point cloud
+ * @param time capture time for which to get the data and info
+ * @param pfi upon return contains data type information
+ * @param data_ptr upon return contains pointer to point cloud data
+ * @param point_size upon return contains size of a single point
+ * @param num_points upon return contains number of points
+ */
+void
+PointCloudAdapter::get_data_and_info(const std::string &id, std::string &frame_id, bool &is_dense,
+				     unsigned int &width, unsigned int &height, fawkes::Time &time,
+				     V_PointFieldInfo &pfi,
+				     void **data_ptr, size_t &point_size, size_t &num_points)
+{
+  get_info(id, width, height, frame_id, is_dense, pfi);
+  get_data(id, frame_id, width, height, time, data_ptr, point_size, num_points);
 }
 
 

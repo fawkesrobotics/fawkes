@@ -27,15 +27,18 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/pointcloud.h>
 #include <plugins/ros/aspect/ros.h>
 
 #include <hybris_c1_msgs/MergePointClouds.h>
 #include <hybris_c1_msgs/RetrievePointCloud.h>
+#include <hybris_c1_msgs/StorePointCloud.h>
 #include <hybris_c1_msgs/RecordData.h>
 
 namespace fawkes {
   class PclDatabaseMergeInterface;
   class PclDatabaseRetrieveInterface;
+  class PclDatabaseStoreInterface;
   class BlackBoardOnUpdateWaker;
   class WaitCondition;
 }
@@ -50,7 +53,8 @@ class PointCloudDBROSCommThread
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::BlockedTimingAspect,
-  public fawkes::ROSAspect
+  public fawkes::ROSAspect,
+  public fawkes::PointCloudAspect
 {
  public:
   PointCloudDBROSCommThread();
@@ -65,6 +69,8 @@ class PointCloudDBROSCommThread
 		hybris_c1_msgs::MergePointClouds::Response &resp);
   bool retrieve_cb(hybris_c1_msgs::RetrievePointCloud::Request  &req,
 		   hybris_c1_msgs::RetrievePointCloud::Response &resp);
+  bool store_cb(hybris_c1_msgs::StorePointCloud::Request  &req,
+		hybris_c1_msgs::StorePointCloud::Response &resp);
   bool record_cb(hybris_c1_msgs::RecordData::Request  &req,
 		 hybris_c1_msgs::RecordData::Response &resp);
 
@@ -75,6 +81,7 @@ class PointCloudDBROSCommThread
  private: // members
   fawkes::PclDatabaseMergeInterface *merge_if_;
   fawkes::PclDatabaseRetrieveInterface *retrieve_if_;
+  fawkes::PclDatabaseStoreInterface *store_if_;
 
   fawkes::BlackBoardOnUpdateWaker *merge_update_waker_;
   fawkes::WaitCondition *merge_waitcond_;
@@ -82,12 +89,19 @@ class PointCloudDBROSCommThread
   fawkes::BlackBoardOnUpdateWaker *retrieve_update_waker_;
   fawkes::WaitCondition *retrieve_waitcond_;
 
+  fawkes::BlackBoardOnUpdateWaker *store_update_waker_;
+  fawkes::WaitCondition *store_waitcond_;
+
   ros::ServiceServer *srv_merge_;
   ros::ServiceServer *srv_retrieve_;
+  ros::ServiceServer *srv_store_;
   ros::ServiceServer *srv_record_;
 
   unsigned int merge_msg_id_;
   unsigned int retrieve_msg_id_;
+  unsigned int store_msg_id_;
+
+  std::string cfg_store_pcl_id_;
 };
 
 #endif

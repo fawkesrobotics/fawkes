@@ -1,20 +1,20 @@
-$#include <interfaces/PclDatabaseMergeInterface.h>
+$#include <interfaces/PclDatabaseStoreInterface.h>
 $#include <utils/time/time.h>
 $#include <utils/time/clock.h>
 $using namespace fawkes;
 namespace fawkes {
-class PclDatabaseMergeInterface : public Interface
+class PclDatabaseStoreInterface : public Interface
 {
 
-  class MergeMessage : public Message
+  class StoreMessage : public Message
   {
-    MergeMessage(long * ini_timestamps, char * ini_database, char * ini_collection);
-    MergeMessage();
-    ~MergeMessage();
+    StoreMessage(char * ini_pcl_id, char * ini_database, char * ini_collection);
+    StoreMessage();
+    ~StoreMessage();
 
-    long timestamps(int index);
-    void set_timestamps(unsigned int index, const long new_timestamps);
-    int maxlenof_timestamps() const;
+    char * pcl_id();
+    void set_pcl_id(const char * new_pcl_id);
+    int maxlenof_pcl_id() const;
     char * database();
     void set_database(const char * new_database);
     int maxlenof_database() const;
