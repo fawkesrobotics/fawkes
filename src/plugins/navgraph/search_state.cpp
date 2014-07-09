@@ -40,7 +40,7 @@ using namespace fawkes;
  */
 NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMapNode goal,
 					 double new_cost, NavGraphSearchState * parent,
-					 TopologicalMapGraph *map_graph, fawkes::ConstraintRepo *constraint_repo)
+					 TopologicalMapGraph *map_graph, fawkes::ConstraintRepo *constraint_repo, bool constrained_search)
 {
   node_ = node;
   goal_ = goal;
@@ -54,6 +54,8 @@ NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMap
   key_ = h(node_.name());
 
   constraint_repo_ = constraint_repo;
+  constrained_search_ = constrained_search;
+
 }
 
 
@@ -115,13 +117,13 @@ NavGraphSearchState::children()
 		}
 	}
 
-	if( !constrained ){
+	if( ( !constrained ) || ( !constrained_search_ ) ){
 
 		distance = sqrt(pow(node_.x() - d.x(), 2) +
 				pow(node_.y() - d.y(), 2) );
 		children.push_back(new NavGraphSearchState(d, goal_,
 							   past_cost + distance, this,
-							   map_graph_, constraint_repo_) );
+							   map_graph_, constraint_repo_, constrained_search_) );
 	}
   }
 

@@ -38,7 +38,7 @@ public:
   //
   NavGraphSearchState(fawkes::TopologicalMapNode node, fawkes::TopologicalMapNode goal,
 		      double new_cost, NavGraphSearchState * parent,
-		      fawkes::TopologicalMapGraph *map_graph, fawkes::ConstraintRepo *constraint_repo);
+		      fawkes::TopologicalMapGraph *map_graph, fawkes::ConstraintRepo *constraint_repo, bool constrained_search = false);
 
   /// standard destructor
   ~NavGraphSearchState();
@@ -64,6 +64,8 @@ public:
   fawkes::TopologicalMapGraph *map_graph_;
 
   fawkes::ConstraintRepo *constraint_repo_;
+  bool constrained_search_;
+
   size_t key_;
 };
 
