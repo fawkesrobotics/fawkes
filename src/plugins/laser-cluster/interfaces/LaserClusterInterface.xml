@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="LaserClusterInterface" author="Tim Niemueller" year="2013">
+  <data>
+    <comment>Laser cluster parameterization.</comment>
+    <field type="float" name="max_x">Maximum distance in X coordinate
+    of sensor frame.</field>
+  </data>
+  <message name="SetMaxX">
+    <comment>Set maximum distance in X coordinate of sensor frame.</comment>
+    <ref>max_x</ref>
+  </message>
+</interface>
