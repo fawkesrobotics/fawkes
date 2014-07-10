@@ -156,7 +156,7 @@ CLaserOccupancyGrid::ResetOld()
 }
 
 /**
- * Gets data from laser (does not read it) and transforms them into the reference-frame (odom)
+ * Gets data from laser (does! read it) and transforms them into the reference-frame (odom)
  */
 void
 CLaserOccupancyGrid::updateLaser()
@@ -299,17 +299,49 @@ CLaserOccupancyGrid::validate_old_laser_points(cart_coord_2d_t pos_robot, cart_c
   }
 }
 
+float
+CLaserOccupancyGrid::obstacle_in_path_distance( float vx, float vy )
+{
+  if_laser_->read();
+  int angle = roundf( rad2deg( normalize_rad( atan2f(vy, vx) ) ) );
+
+  float distance_min = 10;
+
+  int cfg_beams = 11;
+
+  int beams_start = angle - int( cfg_beams / 2 );
+  if ( beams_start < 0 )  { beams_start += 360; }
+
+  int beams_end   = beams_start + cfg_beams;
+  if ( beams_end >= 360 ) { beams_end -= 360; }
+
+  for (int i = beams_start; i != beams_end; i = (i+1) % 360 ) {
+    float dist = if_laser_->distances(i);
+    if ( dist != 0 && std::isfinite(dist) ) {
+      distance_min = std::min( distance_min, dist );
+    }
+  }
+
+  return distance_min;
+}
+
 /** Put the laser readings in the occupancy grid
  *  Also, every reading gets a radius according to the relative direction
  *  of this reading to the robot.
  * @param midX is the current x position of the robot in the grid.
  * @param midY is the current y position of the robot in the grid.
  * @param inc is the current constant to increase the obstacles.
- * @param vel Translation velocity of the motor
+ * @param vx Translation x velocity of the motor
+ * @param vy Translation y velocity of the motor
+ * @return distance to next obstacle in pathdirection
  */
-void
-CLaserOccupancyGrid::UpdateOccGrid( int midX, int midY, float inc, float vel )
+float
+CLaserOccupancyGrid::UpdateOccGrid( int midX, int midY, float inc, float vx, float vy )
 {
+  float vel = std::sqrt(vx*vx + vy*vy);
+
+  float next_obstacle = obstacle_in_path_distance( vx, vy );
+
   m_LaserPosition.x = midX;
   m_LaserPosition.y = midY;
 
@@ -327,11 +359,13 @@ CLaserOccupancyGrid::UpdateOccGrid( int midX, int midY, float inc, float vel )
   } catch(Exception &e) {
     logger_->log_error("CLaserOccupancyGrid", "Unable to transform %s to %s. Can't put obstacles into the grid",
         m_reference_frame.c_str(), m_laser_frame.c_str());
-    return;
+    return 0.;
   }
 
   IntegrateOldReadings( midX, midY, inc, vel, transform );
   IntegrateNewReadings( midX, midY, inc, vel, transform );
+
+  return next_obstacle;
 }
 
 /**
@@ -506,7 +540,6 @@ CLaserOccupancyGrid::IntegrateNewReadings( int midX, int midY, float inc, float 
     }
   }
   delete pointsTransformed;
-  //TODO shoud " m_vNewReadings.clear(); " be called here, since the data was used and will not be used again?
 }
 
 void

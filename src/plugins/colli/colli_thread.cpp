@@ -27,6 +27,7 @@
 #endif
 
 #include "drive_modes/select_drive_mode.h"
+#include "drive_realization/emergency_motor_instruct.h"
 #include "drive_realization/linear_motor_instruct.h"
 #include "drive_realization/quadratic_motor_instruct.h"
 #include "search/og_laser.h"
@@ -82,6 +83,8 @@ ColliThread::init()
   cfg_min_rot_dist_         = config->get_float((cfg_prefix + "min_rot_distance").c_str());
   cfg_target_pre_pos_       = config->get_float((cfg_prefix + "pre_position_distance").c_str());
 
+  cfg_max_velocity_         = config->get_float((cfg_prefix + "max_velocity").c_str());
+
   cfg_frame_base_  = config->get_string((cfg_prefix + "frame/base").c_str());
   cfg_frame_laser_ = config->get_string((cfg_prefix + "frame/laser").c_str());
 
@@ -120,6 +123,7 @@ ColliThread::init()
     m_oldAnglesToTarget.push_back( 0.0 );
 
   srand( time( NULL ) );
+  distance_to_next_target_ = 1000;
 
   logger->log_debug(name(), "(init): Entering initialization ..." );
 
@@ -586,8 +590,28 @@ ColliThread::colli_execute_()
 
   logger->log_debug(name(), "I want to realize %f , %f , %f", m_ProposedTranslationX, m_ProposedTranslationY, m_ProposedRotation);
 
-  // Realize drive mode proposal with realization module
-  m_pMotorInstruct->Drive( m_ProposedTranslationX, m_ProposedTranslationY, m_ProposedRotation );
+  // calculate if emergency stop is needed
+  if ( distance_to_next_target_ < std::min(1.2f, cfg_max_velocity_)
+      && m_pMotorInstruct->GetMotorCurrentTranslation() > cfg_max_velocity_ / 4 ) {
+    float max_v = cfg_max_velocity_ / 8;
+
+    float part_x = 0;
+    float part_y = 0;
+    if ( ! (m_ProposedTranslationX == 0 && m_ProposedTranslationY == 0) ) {
+      part_x = m_ProposedTranslationX / ( ( fabs(m_ProposedTranslationX) + fabs(m_ProposedTranslationY) ) );
+      part_y = m_ProposedTranslationY / ( ( fabs(m_ProposedTranslationX) + fabs(m_ProposedTranslationY) ) );
+    }
+
+    m_ProposedTranslationX = part_x * max_v;
+    m_ProposedTranslationY = part_y * max_v;
+
+    logger->log_error(name(), "Emergency slow down: %f , %f , %f", m_ProposedTranslationX, m_ProposedTranslationY, m_ProposedRotation);
+
+    m_pEmergencyMotorInstruct->Drive( m_ProposedTranslationX, m_ProposedTranslationY, m_ProposedRotation );
+  } else {  // else send normal message
+    // Realize drive mode proposal with realization module
+    m_pMotorInstruct->Drive( m_ProposedTranslationX, m_ProposedTranslationY, m_ProposedRotation );
+  }
 }
 
 
@@ -645,6 +669,11 @@ ColliThread::InitializeModules()
                                                                        logger,
                                                                        config );
   }
+
+  m_pEmergencyMotorInstruct = (CBaseMotorInstruct *)new CEmergencyMotorInstruct( if_motor_,
+                                                                                 m_ColliFrequency,
+                                                                                 logger,
+                                                                                 config );
 
   // AFTER MOTOR INSTRUCT: the motor propose values object
   m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, if_colli_target_, logger, config, cfg_escape_mode );
@@ -721,7 +750,7 @@ ColliThread::UpdateColliStateMachine()
   float targetO = if_colli_target_->dest_ori();
 
   bool  orient = ( if_colli_target_->orientation_mode() == fawkes::NavigatorInterface::OrientationMode::OrientAtTarget
-                && ! isnan(if_colli_target_->dest_ori()) );
+                && std::isfinite(if_colli_target_->dest_ori()) );
 
   float targetDist = distance(targetX, targetY, curPosX, curPosY);
 
@@ -841,7 +870,6 @@ ColliThread::UpdateOwnModules()
   float vx, vy, v;
   vx = m_pMotorInstruct->GetMotorDesiredTranslationX();
   vy = m_pMotorInstruct->GetMotorDesiredTranslationY();
-  v  = std::sqrt( vx*vx + vy*vy );
 
   if ( !cfg_obstacle_inc_ ) {
     // do not increase cell size
@@ -925,7 +953,8 @@ ColliThread::UpdateOwnModules()
   }
 
   // update the occgrid...
-  m_pLaserOccGrid->UpdateOccGrid( laserpos_x, laserpos_y, m_RoboIncrease, v );
+  distance_to_next_target_ = 1000;
+  distance_to_next_target_ = m_pLaserOccGrid->UpdateOccGrid( laserpos_x, laserpos_y, m_RoboIncrease, vx, vy );
 
   // update the positions
   m_LaserGridPos.x = laserpos_x;

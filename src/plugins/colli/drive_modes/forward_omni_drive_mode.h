@@ -44,7 +44,7 @@ class CForwardOmniDriveModule : public CAbstractDriveMode
 
   float m_MaxTranslation, m_MaxRotation;
 
-  void calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target, float angle_next_target);
+  void calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target, float angle_allowed_to_next_target);
   void calculateTranslation(float dist_to_target, float ori_alpha_target, float dec_factor);
 };
 

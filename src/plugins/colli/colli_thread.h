@@ -106,6 +106,7 @@ class ColliThread
 
   fawkes::CSelectDriveMode*       m_pSelectDriveMode;  // the drive mode selection module
   fawkes::CBaseMotorInstruct*     m_pMotorInstruct;    // the motor instructor module
+  fawkes::CBaseMotorInstruct*     m_pEmergencyMotorInstruct;  // the emergency motor instructor module
 
   ColliVisualizationThread*       vis_thread_;         // the VisualizationThread
 
@@ -151,6 +152,8 @@ class ColliThread
   fawkes::colli_escape_mode_t         cfg_escape_mode;
   fawkes::colli_motor_instruct_mode_t cfg_motor_instruct_mode;
 
+  float cfg_max_velocity_; /**< The maximum allowd velocity */
+
   std::string cfg_frame_base_;    /**< The frame of the robot's base */
   std::string cfg_frame_laser_;   /**< The frame of the laser */
 
@@ -164,6 +167,13 @@ class ColliThread
 
   fawkes::cart_coord_2d_t laser_to_base_; /**< The distance from laser to base */
   bool laser_to_base_valid_;              /**< Do we have a valid distance from laser to base? */
+
+  // manually adjust the frequency on how often the loop should be processed
+  unsigned int loop_count_;
+  unsigned int loop_count_trigger_;
+
+  float distance_to_next_target_; /**< the distance to the next target in drive direction*/
+
 
   /* ************************************************************************ */
   /* PRIVATE METHODS                                                          */

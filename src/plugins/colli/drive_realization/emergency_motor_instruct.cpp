@@ -1,11 +1,9 @@
 
 /***************************************************************************
- *  linear_motor_instruct.cpp - Motor instructor with linear approximation
+ *  emergency_motor_instruct.cpp - Motor instructor with quadratic approximation
  *
- *  Created: Fri Oct 18 15:16:23 2013
- *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
- *             2014  Tobias Neumann
+ *  Created: Thu Jul 10:35:23 2014
+ *  Copyright  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "linear_motor_instruct.h"
+#include "emergency_motor_instruct.h"
 
 #include <interfaces/MotorInterface.h>
 #include <logging/logger.h>
@@ -38,7 +36,7 @@ namespace fawkes
 
 using namespace std;
 
-/** @class CLinearMotorInstruct <plugins/colli/drive_realization/linear_motor_instruct.h>
+/** @class CEmergencyMotorInstruct <plugins/colli/drive_realization/emergency_motor_instruct.h>
  * This module is a class for validity checks of drive
  * commands and sets those things with respect to the physical
  * borders of the robot.
@@ -52,14 +50,14 @@ using namespace std;
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CLinearMotorInstruct::CLinearMotorInstruct( fawkes::MotorInterface* motor,
+CEmergencyMotorInstruct::CEmergencyMotorInstruct( fawkes::MotorInterface* motor,
                                                   float frequency,
                                                   fawkes::Logger* logger,
                                                   fawkes::Configuration* config )
  : CBaseMotorInstruct( motor, frequency, logger ),
    config_( config )
 {
-  logger_->log_debug("CLinearMotorInstruct", "(Constructor): Entering");
+  logger_->log_debug("CEmergencyMotorInstruct", "(Constructor): Entering");
 
   string cfg_prefix = "/plugins/colli/motor_instruct/";
 
@@ -68,16 +66,16 @@ CLinearMotorInstruct::CLinearMotorInstruct( fawkes::MotorInterface* motor,
   basic_rot_acc   = config_->get_float((cfg_prefix + "rot_acc").c_str());
   basic_rot_dec   = config_->get_float((cfg_prefix + "rot_dec").c_str());
 
-  logger_->log_debug("CLinearMotorInstruct", "(Constructor): Exiting");
+  logger_->log_debug("CEmergencyMotorInstruct", "(Constructor): Exiting");
 }
 
 /**
  * destructor
  */
-CLinearMotorInstruct::~CLinearMotorInstruct()
+CEmergencyMotorInstruct::~CEmergencyMotorInstruct()
 {
-  logger_->log_debug("CLinearMotorInstruct", "(Destructor): Entering");
-  logger_->log_debug("CLinearMotorInstruct", "(Destructor): Exiting");
+  logger_->log_debug("CEmergencyMotorInstruct", "(Destructor): Entering");
+  logger_->log_debug("CEmergencyMotorInstruct", "(Destructor): Exiting");
 }
 
 
@@ -93,7 +91,7 @@ CLinearMotorInstruct::~CLinearMotorInstruct()
  * @param time_factor         The time_factor (should become deprecated!)
  * @return the new translation
  */
-float CLinearMotorInstruct::CalculateTranslation( float currentTranslation,
+float CEmergencyMotorInstruct::CalculateTranslation( float currentTranslation,
                  float desiredTranslation,
                  float time_factor )
 {
@@ -103,8 +101,7 @@ float CLinearMotorInstruct::CalculateTranslation( float currentTranslation,
 
     if (currentTranslation > 0.0) {
       // decrease forward speed
-      execTranslation = currentTranslation - basic_trans_dec;
-      execTranslation = max( execTranslation, desiredTranslation );
+      execTranslation = desiredTranslation;
 
     } else if (currentTranslation < 0.0) {
       // increase backward speed
@@ -125,8 +122,7 @@ float CLinearMotorInstruct::CalculateTranslation( float currentTranslation,
 
     } else if (currentTranslation < 0.0) {
       // decrease backward speed
-      execTranslation = currentTranslation + basic_trans_dec;
-      execTranslation = min( execTranslation, desiredTranslation );
+      execTranslation = desiredTranslation;
 
     } else {
       // currentTranslation == 0
@@ -154,7 +150,7 @@ float CLinearMotorInstruct::CalculateTranslation( float currentTranslation,
  * @param time_factor     The time_factor (should become deprecated!)
  * @return the new rotation
  */
-float CLinearMotorInstruct::CalculateRotation( float currentRotation,
+float CEmergencyMotorInstruct::CalculateRotation( float currentRotation,
               float desiredRotation,
               float time_factor  )
 {

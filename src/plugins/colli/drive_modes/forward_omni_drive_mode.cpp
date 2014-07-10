@@ -23,6 +23,8 @@
 #include <utils/math/common.h>
 #include <utils/math/angle.h>
 
+#include <cmath>
+
 namespace fawkes
 {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -60,15 +62,15 @@ CForwardOmniDriveModule::~CForwardOmniDriveModule()
 }
 
 void
-CForwardOmniDriveModule::calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target, float angle_next_target)
+CForwardOmniDriveModule::calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target, float angle_allowed_to_next_target)
 {
   // first calculate desired angle
   float des_alpha;
-  if ( /*dist_to_target >= 0.5 ||*/ isnanf( ori_alpha_next_target ) ) { // at the last 50cm rotate to new angle
+  if ( ! std::isfinite( ori_alpha_next_target ) ) {
     des_alpha = ori_alpha_target;
   } else {
-    float angle_min = ori_alpha_target - angle_next_target;
-    float angle_max = ori_alpha_target + angle_next_target;
+    float angle_min = ori_alpha_target - angle_allowed_to_next_target;
+    float angle_max = ori_alpha_target + angle_allowed_to_next_target;
     des_alpha = normalize_mirror_rad( std::max( angle_min, std::min(ori_alpha_next_target, angle_max) ) );
   }
 

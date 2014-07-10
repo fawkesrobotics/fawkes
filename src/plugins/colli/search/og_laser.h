@@ -56,7 +56,7 @@ class CLaserOccupancyGrid : public OccupancyGrid
   ~CLaserOccupancyGrid();
 
   ///\brief Put the laser readings in the occupancy grid
-  void UpdateOccGrid( int midX, int midY, float inc, float vel );
+  float UpdateOccGrid( int midX, int midY, float inc, float vx, float vy );
 
   ///\brief Reset all old readings and forget about the world state!
   void ResetOld();
@@ -90,6 +90,8 @@ class CLaserOccupancyGrid : public OccupancyGrid
   };
 
   void updateLaser();
+
+  float obstacle_in_path_distance( float vx, float vy );
 
   void validate_old_laser_points(cart_coord_2d_t pos_robot, cart_coord_2d_t pos_new_laser_point);
 
