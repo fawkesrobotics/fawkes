@@ -57,6 +57,12 @@ namespace gazebo
     ///name of the gyro and the communication channel
     std::string name_;
 
+    ///time variable to send in intervals
+    double last_sent_time_;
+
+    ///time interval between to gyro msgs
+    double send_interval_;
+
 
     //Gyro Stuff:
     ///Sending Gyro-angle to fawkes:
