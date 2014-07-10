@@ -882,9 +882,10 @@ AmclThread::get_odom_pose(tf::Stamped<tf::Pose>& odom_pose, double& x,
   try {
     tf_listener->transform_pose(odom_frame_id_, ident, odom_pose);
   } catch (Exception &e) {
-    logger->log_warn(name(),
-		     "Failed to compute odom pose (%s)",
-		     e.what_no_backtrace());
+    if (cfg_buffer_debug_) {
+      logger->log_warn(name(), "Failed to compute odom pose (%s)",
+		       e.what_no_backtrace());
+    }
     return false;
   }
   x = odom_pose.getOrigin().x();
