@@ -25,10 +25,11 @@ include $(BUILDSYSDIR)/protobuf.mk
 SUBDIRS = gazebo-plugin-motor gazebo-plugin-gyro
 
 LIBS_gazsim_robotino = fawkescore fawkesutils fawkesaspects fvutils \
-	       fawkestf fawkesinterface fawkesblackboard \
-	       BatteryInterface RobotinoSensorInterface MotorInterface \
-	       Position3DInterface fawkesgazeboaspect gazsim_msgs \
-	       SwitchInterface
+		fawkestf fawkesinterface fawkesblackboard \
+		BatteryInterface RobotinoSensorInterface MotorInterface \
+		Position3DInterface IMUInterface SwitchInterface \
+		fawkesgazeboaspect gazsim_msgs \
+
 OBJS_gazsim_robotino = gazsim_robotino_plugin.o gazsim_robotino_thread.o
 
 OBJS_all    = $(OBJS_gazsim_robotino)

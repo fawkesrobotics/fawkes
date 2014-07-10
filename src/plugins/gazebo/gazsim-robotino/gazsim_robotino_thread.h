@@ -1,5 +1,7 @@
 /***************************************************************************
- *  gazsim_robotino_thread.h - Thread simulate the Robotino in Gazebo by sending needed informations to the Robotino-plugin in Gazebo and recieving sensordata from Gazebo
+ *  gazsim_robotino_thread.h - Thread simulate the Robotino in Gazebo
+ *  by sending needed informations to the Robotino-plugin in Gazebo
+ *  and recieving sensordata from Gazebo
  *
  *  Created: Fr 3. Mai 21:20:08 CEST 2013
  *  Copyright  2013  Frederik Zwilling
@@ -32,9 +34,6 @@
 #include <plugins/gazebo/aspect/gazebo.h>
 #include <aspect/tf.h>
 #include "../msgs/Float.pb.h"
-#include <interfaces/MotorInterface.h>
-#include <interfaces/RobotinoSensorInterface.h>
-#include <interfaces/SwitchInterface.h>
 
 //from Gazebo
 #include <gazebo/transport/TransportTypes.hh>
@@ -46,6 +45,10 @@ typedef const boost::shared_ptr<gazsim_msgs::Float const> ConstFloatPtr;
 
 namespace fawkes {
   class BatteryInterface;
+  class IMUInterface;
+  class MotorInterface;
+  class RobotinoSensorInterface;
+  class SwitchInterface;
 }
 
 class RobotinoSimThread
@@ -85,8 +88,9 @@ class RobotinoSimThread
 
   //provided interfaces
   fawkes::RobotinoSensorInterface *sens_if_;
-  fawkes::MotorInterface *motor_if_;
-  fawkes::SwitchInterface *switch_if_;
+  fawkes::MotorInterface          *motor_if_;
+  fawkes::SwitchInterface         *switch_if_;
+  fawkes::IMUInterface            *imu_if_;
 
   //config values
   double gripper_laser_threshold_;

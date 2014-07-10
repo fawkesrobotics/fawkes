@@ -21,8 +21,6 @@
 #include "gazsim_robotino_thread.h"
 
 #include <tf/types.h>
-#include <stdio.h>
-#include <list>
 #include <core/threading/mutex_locker.h>
 
 #include <gazebo/transport/Node.hh>
@@ -30,8 +28,17 @@
 #include <gazebo/transport/transport.hh>
 #include <aspect/logging.h>
 
+#include <interfaces/MotorInterface.h>
+#include <interfaces/RobotinoSensorInterface.h>
+#include <interfaces/SwitchInterface.h>
+#include <interfaces/IMUInterface.h>
+
 #include <tf/transform_publisher.h>
 #include <utils/time/clock.h>
+#include <utils/math/angle.h>
+
+#include <cstdio>
+#include <list>
 
 using namespace fawkes;
 using namespace gazebo;
@@ -76,9 +83,10 @@ RobotinoSimThread::init()
   gyro_delay_ = config->get_float("/gazsim/robotino/gyro-delay");
   
   //Open interfaces
-  motor_if_ = blackboard->open_for_writing<MotorInterface>("Robotino");
+  motor_if_  = blackboard->open_for_writing<MotorInterface>("Robotino");
   switch_if_ = blackboard->open_for_writing<fawkes::SwitchInterface>("Robotino Motor");
-  sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
+  sens_if_   = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
+  imu_if_    = blackboard->open_for_writing<IMUInterface>("IMU Robotino");
 
   //Create suscribers
   pos_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gps"), &RobotinoSimThread::on_pos_msg, this);
@@ -97,6 +105,12 @@ RobotinoSimThread::init()
   //enable motor by default
   switch_if_->set_enabled(true);
   switch_if_->write();
+
+  imu_if_->set_linear_acceleration(0, -1.);
+  //imu_if_->set_angular_velocity_covariance(8, deg2rad(0.1));
+  // set as not available as we do not currently provide angular velocities.
+  imu_if_->set_angular_velocity_covariance(0, -1.);
+  imu_if_->write();
 
   //init motor variables
   x_ = 0.0;
@@ -133,6 +147,7 @@ void
 RobotinoSimThread::finalize()
 {
   //close interfaces
+  blackboard->close(imu_if_);
   blackboard->close(sens_if_);
   blackboard->close(motor_if_);
   blackboard->close(switch_if_);
@@ -160,12 +175,26 @@ RobotinoSimThread::loop()
     {
       //update gyro (with delay)
       fawkes::Time now(clock);
-      while((now - gyro_timestamp_buffer_[(gyro_buffer_index_delayed_ + 1) % gyro_buffer_size_]).in_sec() >= gyro_delay_
-	&& gyro_buffer_index_delayed_ < gyro_buffer_index_new_)
+      while ((now - gyro_timestamp_buffer_[(gyro_buffer_index_delayed_ + 1) % gyro_buffer_size_]).in_sec() >= gyro_delay_
+	     && gyro_buffer_index_delayed_ < gyro_buffer_index_new_)
+      {
 	gyro_buffer_index_delayed_++;
-      sens_if_->set_gyro_angle(gyro_angle_buffer_[gyro_buffer_index_delayed_]);
+      }
+	  
+      tf::Quaternion q =
+	tf::create_quaternion_from_yaw(gyro_angle_buffer_[gyro_buffer_index_delayed_]);
+      imu_if_->set_orientation(0, q.x());
+      imu_if_->set_orientation(1, q.y());
+      imu_if_->set_orientation(2, q.z());
+      imu_if_->set_orientation(3, q.w());
+    } else {
+      imu_if_->set_angular_velocity(0, -1.);
+      imu_if_->set_orientation(0, -1.);
+      imu_if_->set_orientation(1,  0.);
+      imu_if_->set_orientation(2,  0.);
+      imu_if_->set_orientation(3,  0.);
     }
-    sens_if_->set_gyro_available(gyro_available_);
+    imu_if_->write();
 
     if(have_gripper_sensors_)
     {
