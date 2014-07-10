@@ -59,7 +59,7 @@ class NavGraphThread
   public fawkes::AspectProviderAspect,
   public fawkes::FamListener
 {
-public:
+ public:
 #ifdef HAVE_VISUALIZATION
   NavGraphThread(NavGraphVisualizationThread *vt);
 #endif

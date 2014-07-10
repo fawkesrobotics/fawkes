@@ -21,11 +21,11 @@
 #ifndef __NAVGRAPH_RESERVED_NODES_CONSTRAINT_H_
 #define __NAVGRAPH_RESERVED_NODES_CONSTRAINT_H_
 
-#include "abstract_node_constraint.h"
+#include <plugins/navgraph/constraints/node_constraint.h>
 
-namespace fawkes{
+namespace fawkes {
 
-class ReservedNodeConstraint : AbstractNodeConstraint {
+class ReservedNodeConstraint : public NavGraphNodeConstraint {
 
 public:
 	ReservedNodeConstraint(Logger *logger, std::string name);

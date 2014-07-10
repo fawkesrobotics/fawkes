@@ -18,7 +18,8 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/utils/utils.mk
 
-LIBS_libfawkesnavgraphaspect = fawkescore fawkesaspects fawkesutils fawkesconstraintrepo
+LIBS_libfawkesnavgraphaspect = fawkescore fawkesaspects fawkesutils \
+			       fawkesnavgraphconstraints
 OBJS_libfawkesnavgraphaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_libfawkesnavgraphaspect)

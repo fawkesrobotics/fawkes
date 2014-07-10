@@ -23,15 +23,14 @@
 namespace fawkes{
 
 
-ReservedNodeConstraint::ReservedNodeConstraint(Logger *logger, std::string name) :
-		AbstractNodeConstraint( logger, name)	{
-
-	reserveLogger = logger;
-	constraintName = name;
+ReservedNodeConstraint::ReservedNodeConstraint(Logger *logger, std::string name)
+  : NavGraphNodeConstraint( logger, name)
+{
+  reserveLogger = logger;
+  name_ = name;
 }
 
 ReservedNodeConstraint::~ReservedNodeConstraint(){
 }
-
 
 }

@@ -60,7 +60,7 @@ NavGraphAspectIniFin::set_navgraph(LockPtr<TopologicalMapGraph> &navgraph)
 void
 NavGraphAspectIniFin::set_constraint_repo(LockPtr<ConstraintRepo> &constraint_repo)
 {
-	constraint_repo_ = constraint_repo;
+  constraint_repo_ = constraint_repo;
 }
 
 void

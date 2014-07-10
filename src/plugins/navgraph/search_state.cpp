@@ -102,29 +102,30 @@ NavGraphSearchState::children()
   for (unsigned int i = 0; i < descendants.size(); ++i) {
     TopologicalMapNode d = map_graph_->node(descendants[i]);
 
-    std::vector<fawkes::AbstractNodeConstraint*> constraint_list = constraint_repo_->constraints();
-	std::vector<fawkes::AbstractNodeConstraint*>::const_iterator it = constraint_list.begin();
-	bool constrained = false;
+    std::vector<fawkes::NavGraphNodeConstraint*> constraint_list =
+      constraint_repo_->constraints();
+    std::vector<fawkes::NavGraphNodeConstraint*>::const_iterator it =
+      constraint_list.begin();
+    bool constrained = false;
 
-	while( it != constraint_list.end() ){
+    while( it != constraint_list.end() ) {
+      if( (*it)->has_node( d ) ){
+	constrained = true;
+	break;
+      } else {
+	++it;
+      }
+    }
 
-		if( (*it)->has_node( d ) ){
-			constrained = true;
-			break;
-		}
-		else{
-			++it;
-		}
-	}
+    if( ( !constrained ) || ( !constrained_search_ ) ){
 
-	if( ( !constrained ) || ( !constrained_search_ ) ){
-
-		distance = sqrt(pow(node_.x() - d.x(), 2) +
-				pow(node_.y() - d.y(), 2) );
-		children.push_back(new NavGraphSearchState(d, goal_,
-							   past_cost + distance, this,
-							   map_graph_, constraint_repo_, constrained_search_) );
-	}
+      distance = sqrt(pow(node_.x() - d.x(), 2) +
+		      pow(node_.y() - d.y(), 2) );
+      children.push_back(
+	new NavGraphSearchState(d, goal_,
+				past_cost + distance, this,
+				map_graph_, constraint_repo_, constrained_search_) );
+    }
   }
 
   return children;

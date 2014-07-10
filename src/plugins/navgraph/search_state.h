@@ -29,7 +29,7 @@
 
 class NavGraphSearchState : public fawkes::AStarState
 {
-public:
+ public:
   /// special constructor for easy users interface
   //     state is the mapnode (the current state)
   //     goal is the mapnode to search to
@@ -38,7 +38,8 @@ public:
   //
   NavGraphSearchState(fawkes::TopologicalMapNode node, fawkes::TopologicalMapNode goal,
 		      double new_cost, NavGraphSearchState * parent,
-		      fawkes::TopologicalMapGraph *map_graph, fawkes::ConstraintRepo *constraint_repo, bool constrained_search = false);
+		      fawkes::TopologicalMapGraph *map_graph,
+		      fawkes::ConstraintRepo *constraint_repo, bool constrained_search = false);
 
   /// standard destructor
   ~NavGraphSearchState();

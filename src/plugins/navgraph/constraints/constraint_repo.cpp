@@ -1,8 +1,9 @@
 /***************************************************************************
- *  constraint_repo.h
+ *  constraint_repo.cpp - navgraph constraint repository
  *
  *  Created: Fr Mar 14 10:47:35 2014
  *  Copyright  2014  Sebastian Reuter
+ *             2014  Tim Niemueller
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -17,121 +18,136 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
-#include "constraint_repo.h"
+#include <plugins/navgraph/constraints/constraint_repo.h>
+
+#include <logging/logger.h>
 
 using namespace std;
 
 namespace fawkes{
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-ConstraintRepo::ConstraintRepo(Logger *logger){
-	this->logger_ = logger;
+ConstraintRepo::ConstraintRepo(Logger *logger)
+{
+  logger_ = logger;
 }
 
-ConstraintRepo::~ConstraintRepo(){
-	delete logger_;
-}
-
-void
-ConstraintRepo::register_constraint(AbstractNodeConstraint* constraint){
-
-	constraintList_.push_back( constraint );
-
-	logger_->log_info("Constraint Repo", "New Constraint %s registered.", constraint->get_constraint_name().c_str());
+ConstraintRepo::~ConstraintRepo()
+{
 }
 
 void
-ConstraintRepo::unregister_constraint(std::string name){
+ConstraintRepo::register_constraint(NavGraphNodeConstraint* constraint)
+{
+  constraints_.push_back( constraint );
 
-	std::vector<fawkes::AbstractNodeConstraint*>::iterator it = constraintList_.begin();
-	bool found = false;
+  logger_->log_info("Constraint Repo", "New Constraint %s registered.",
+		    constraint->name().c_str());
+}
 
-	while( it != constraintList_.end() ){
-		if( (*it)->get_constraint_name() == name ){
-			logger_->log_info( "Constraint Repo", "Unregistering %s from ConstraintList.", (*it)->get_constraint_name().c_str() );
-			found = true;
-			it = constraintList_.erase(it);
-			break;
-		}
-		else{
-			++it;
-		}
-	}
+void
+ConstraintRepo::unregister_constraint(std::string name)
+{
 
-	if(!found){
-		logger_->log_error( "Constraint Repo", "Trying to unregister constraint %s from ConstraintList which is not in list", name.c_str() );
-	}
+  std::vector<fawkes::NavGraphNodeConstraint*>::iterator it = constraints_.begin();
+  bool found = false;
+
+  while( it != constraints_.end() ) {
+    if( (*it)->name() == name ) {
+      logger_->log_info( "Constraint Repo", "Unregistering %s from ConstraintList.",
+			 (*it)->name().c_str() );
+      found = true;
+      it = constraints_.erase(it);
+      break;
+    } else {
+      ++it;
+    }
+  }
+
+  if(!found) {
+    logger_->log_error( "Constraint Repo", "Trying to unregister constraint %s "
+			"from ConstraintList which is not in list", name.c_str() );
+  }
 }
 
 bool
-ConstraintRepo::has_constraint(std::string name){
+ConstraintRepo::has_constraint(std::string name)
+{
 
-	for(unsigned int i=0; i< constraintList_.size(); i++){
-		if( constraintList_[i]->get_constraint_name() == name ){
-			return true;
-		}
-	}
-	return false;
+  for(unsigned int i=0; i< constraints_.size(); i++) {
+    if( constraints_[i]->name() == name ) {
+      return true;
+    }
+  }
+  return false;
 
 }
 
 void
-ConstraintRepo::add_node(std::string constraint_name, fawkes::TopologicalMapNode node){
+ConstraintRepo::add_node(std::string constraint_name, fawkes::TopologicalMapNode node)
+{
 
-	for(unsigned int i=0; i< constraintList_.size(); i++){
-		if( constraintList_[i]->get_constraint_name() == constraint_name ){
-			constraintList_[i]->add_node(node);
-			break;
-		}
-	}
+  for(unsigned int i=0; i< constraints_.size(); i++) {
+    if( constraints_[i]->name() == constraint_name ) {
+      constraints_[i]->add_node(node);
+      break;
+    }
+  }
 }
 
 void
-ConstraintRepo::add_nodes(std::string constraint_name, std::vector<fawkes::TopologicalMapNode> nodes){
+ConstraintRepo::add_nodes(std::string constraint_name,
+			  std::vector<fawkes::TopologicalMapNode> nodes)
+{
 
-	for(unsigned int i=0; i< constraintList_.size(); i++){
-		if( constraintList_[i]->get_constraint_name() == constraint_name ){
-			constraintList_[i]->add_nodes(nodes);
-			break;
-		}
-	}
-
-
+  for(unsigned int i=0; i< constraints_.size(); i++) {
+    if( constraints_[i]->name() == constraint_name ) {
+      constraints_[i]->add_nodes(nodes);
+      break;
+    }
+  }
 }
 
 
-fawkes::AbstractNodeConstraint*
-ConstraintRepo::get_constraint(std::string name){
+fawkes::NavGraphNodeConstraint*
+ConstraintRepo::get_constraint(std::string name)
+{
 
-	for(unsigned int i=0; i< constraintList_.size(); i++){
-		if( constraintList_[i]->get_constraint_name() == name ){
-			return constraintList_[i];
-		}
-	}
-	return NULL;
+  for(unsigned int i=0; i< constraints_.size(); i++) {
+    if( constraints_[i]->name() == name ) {
+      return constraints_[i];
+    }
+  }
+  return NULL;
 }
 
 void
-ConstraintRepo::override_nodes(std::string constraint_name, std::vector<fawkes::TopologicalMapNode> nodes){
+ConstraintRepo::override_nodes(std::string constraint_name,
+			       std::vector<fawkes::TopologicalMapNode> &nodes)
+{
 
-	if( has_constraint(constraint_name) ){
-		logger_->log_error( "Constraint Repo", "Updating nodeList of constraint '%s'", constraint_name.c_str() );
+  if( has_constraint(constraint_name) ) {
+    logger_->log_error( "Constraint Repo", "Updating nodeList of constraint '%s'",
+			constraint_name.c_str() );
 
-		fawkes::AbstractNodeConstraint *constraint = get_constraint(constraint_name);
+    fawkes::NavGraphNodeConstraint *constraint = get_constraint(constraint_name);
 
-		constraint->clear_nodes();
-		for(unsigned int i=0; i< nodes.size(); i++){
-			constraint->add_node(nodes[i]);
-		}
-	}
-	else {
-		logger_->log_error( "Constraint Repo", "Trying to override constraint '%s' which is not registered yet", constraint_name.c_str() );
-	}
+    constraint->clear_nodes();
+    for(unsigned int i=0; i< nodes.size(); i++) {
+      constraint->add_node(nodes[i]);
+    }
+  } else {
+    logger_->log_error( "Constraint Repo", "Trying to override constraint '%s' "
+			"which is not registered yet", constraint_name.c_str() );
+  }
 }
 
-const std::vector<fawkes::AbstractNodeConstraint*> &
-ConstraintRepo::constraints() const{
-
-	return constraintList_;
+const std::vector<fawkes::NavGraphNodeConstraint*> &
+ConstraintRepo::constraints() const
+{
+  return constraints_;
 }
 
 } // namespace

@@ -45,7 +45,7 @@ class NavGraphAspect : public virtual Aspect
 
  protected:
   fawkes::LockPtr<TopologicalMapGraph> navgraph;
-  fawkes::LockPtr<ConstraintRepo> constraint_repo;
+  fawkes::LockPtr<ConstraintRepo>      constraint_repo;
 };
 
 } // end namespace fawkes
