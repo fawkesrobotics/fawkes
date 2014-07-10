@@ -348,6 +348,8 @@ ColliThread::loop()
       } else {
         // movement has stopped, we are "final" now
         colli_data_.final = true;
+        // send one final stop, just to make sure we really stop
+        m_pMotorInstruct->Drive( 0.0, 0.0, 0.0 );
       }
     }
 
