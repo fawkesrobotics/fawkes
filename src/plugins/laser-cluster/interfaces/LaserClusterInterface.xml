@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <interface name="LaserClusterInterface" author="Tim Niemueller" year="2013">
+  <constants>
+    <enum name="SelectionMode">
+      <comment>
+        Enumeration defining the possible cluster selection modes.
+      </comment>
+      <item name="SELMODE_MIN_ANGLE">
+	Choose the cluster with the minimum angle difference from 0 degrees.
+      </item>
+      <item name="SELMODE_MIN_DIST">
+	Choose the cluster with the minimum distance in X direction of
+	the reference frame (typically forward).
+      </item>
+    </enum>
+  </constants>
+
   <data>
     <comment>Laser cluster parameterization.</comment>
     <field type="float" name="max_x">Maximum distance in X coordinate
     of sensor frame.</field>
+    <field type="SelectionMode" name="selection_mode">
+      Current cluster selection mode.
+    </field>
   </data>
   <message name="SetMaxX">
     <comment>Set maximum distance in X coordinate of sensor frame.</comment>
     <ref>max_x</ref>
+  </message>
+  <message name="SetSelectionMode">
+    <comment>Set desired cluster selection mode.</comment>
+    <ref>selection_mode</ref>
   </message>
 </interface>

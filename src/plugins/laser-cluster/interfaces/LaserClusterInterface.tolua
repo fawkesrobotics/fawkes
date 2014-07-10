@@ -6,6 +6,11 @@ namespace fawkes {
 class LaserClusterInterface : public Interface
 {
 
+  typedef enum {
+    SELMODE_MIN_ANGLE,
+    SELMODE_MIN_DIST
+  } SelectionMode;
+
   class SetMaxXMessage : public Message
   {
     SetMaxXMessage(float ini_max_x);
@@ -17,9 +22,23 @@ class LaserClusterInterface : public Interface
     int maxlenof_max_x() const;
   };
 
+  class SetSelectionModeMessage : public Message
+  {
+    SetSelectionModeMessage(SelectionMode ini_selection_mode);
+    SetSelectionModeMessage();
+    ~SetSelectionModeMessage();
+
+    SelectionMode selection_mode();
+    void set_selection_mode(const SelectionMode new_selection_mode);
+    int maxlenof_selection_mode() const;
+  };
+
   float max_x();
   void set_max_x(const float new_max_x);
   int maxlenof_max_x() const;
+  SelectionMode selection_mode();
+  void set_selection_mode(const SelectionMode new_selection_mode);
+  int maxlenof_selection_mode() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
