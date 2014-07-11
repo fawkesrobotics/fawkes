@@ -324,20 +324,25 @@ NavGraphThread::generate_plan(std::string goal_name)
 		    pose_.getOrigin().x(), pose_.getOrigin().y(), init.name().c_str());
 
   plan_.clear();
-  
+
+  std::vector<AStarState *> a_star_solution;
+
   constraint_repo_.lock();
+  if (constraint_repo_->has_constraints()) {
+    constraint_repo_->compute();
 
-  NavGraphSearchState *initial_state =
-    new NavGraphSearchState(init, goal, 0, NULL, *graph_, *constraint_repo_, true);
-  std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
-
-  if( a_star_solution.size() == 0){
-    logger->log_warn(name(), "Failed to generate Plan, will try without constraints");
     NavGraphSearchState *initial_state =
-      new NavGraphSearchState(init, goal, 0, NULL, *graph_, *constraint_repo_, false);
-    std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
+      new NavGraphSearchState(init, goal, 0, NULL, *graph_, *constraint_repo_);
+    a_star_solution =  astar_->solve(initial_state);
   }
   constraint_repo_.unlock();
+  
+  if (a_star_solution.empty()) {
+    logger->log_warn(name(), "Failed to generate plan, will try without constraints");
+    NavGraphSearchState *initial_state =
+      new NavGraphSearchState(init, goal, 0, NULL, *graph_);
+    a_star_solution =  astar_->solve(initial_state);
+  }
 
   NavGraphSearchState *solstate;
   for (unsigned int i = 0; i < a_star_solution.size(); ++i ) {

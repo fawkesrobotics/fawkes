@@ -25,7 +25,6 @@
 #include <vector>
 
 #include <plugins/navgraph/constraints/node_constraint.h>
-#include <plugins/navgraph/constraints/reserved_node_constraint.h>
 
 
 namespace fawkes{
@@ -37,26 +36,27 @@ class Logger;
 
 class ConstraintRepo
 {
-  
  public:
+  /** List of navgraph node constraints. */
+  typedef std::vector<fawkes::NavGraphNodeConstraint*> ConstraintList;
+
   ConstraintRepo(Logger *logger);
   ~ConstraintRepo();
 
- public:
   void register_constraint(NavGraphNodeConstraint *constraint);
-  void unregister_constraint(std::string name);
-  bool has_constraint(std::string name);
+  void unregister_constraint(std::string &name);
 
-  void add_node(std::string constraint_name, fawkes::TopologicalMapNode node);
-  void add_nodes(std::string constraint_name, std::vector<fawkes::TopologicalMapNode> node);
-  fawkes::NavGraphNodeConstraint* get_constraint(std::string name);
+  bool has_constraint(std::string &name);
+  fawkes::NavGraphNodeConstraint *  get_constraint(std::string &name);
 
-  void override_nodes(std::string constraint_name, std::vector<fawkes::TopologicalMapNode> &nodes);
+  const ConstraintList &  constraints() const;
 
-  const std::vector<fawkes::NavGraphNodeConstraint*> &constraints() const;
+  bool has_constraints() const;
+
+  void compute();
 
  private:
-  std::vector<fawkes::NavGraphNodeConstraint*> constraints_;
+  ConstraintList constraints_;
   Logger *logger_;
 
 };

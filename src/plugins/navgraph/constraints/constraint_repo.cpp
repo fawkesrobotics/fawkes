@@ -21,6 +21,7 @@
 #include <plugins/navgraph/constraints/constraint_repo.h>
 
 #include <logging/logger.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -29,125 +30,126 @@ namespace fawkes{
 }
 #endif
 
+/** @class ConstraintRepo <plugins/navgraph/constraints/constraint_repo.h>
+ * Constraint repository to maintain blocks on nodes.
+ * @author Sebastian Reuter
+ * @author Tim Niemueller
+ */
+
+
+/** Constructor.
+ * @param logger logger used for debug output
+ */
 ConstraintRepo::ConstraintRepo(Logger *logger)
 {
   logger_ = logger;
 }
 
+/** Destructor. */
 ConstraintRepo::~ConstraintRepo()
 {
 }
 
+
+/** Register a constraint.
+ * @param constraint constraint to register
+ */
 void
 ConstraintRepo::register_constraint(NavGraphNodeConstraint* constraint)
 {
-  constraints_.push_back( constraint );
+  constraints_.push_back(constraint);
 
   logger_->log_info("Constraint Repo", "New Constraint %s registered.",
 		    constraint->name().c_str());
 }
 
+
+/** Unregister a constraint by name.
+ * @param name name of constraint to remove.
+ */
 void
-ConstraintRepo::unregister_constraint(std::string name)
+ConstraintRepo::unregister_constraint(std::string &name)
 {
-
-  std::vector<fawkes::NavGraphNodeConstraint*>::iterator it = constraints_.begin();
-  bool found = false;
-
-  while( it != constraints_.end() ) {
-    if( (*it)->name() == name ) {
-      logger_->log_info( "Constraint Repo", "Unregistering %s from ConstraintList.",
-			 (*it)->name().c_str() );
-      found = true;
-      it = constraints_.erase(it);
-      break;
-    } else {
-      ++it;
-    }
-  }
-
-  if(!found) {
-    logger_->log_error( "Constraint Repo", "Trying to unregister constraint %s "
-			"from ConstraintList which is not in list", name.c_str() );
+  ConstraintList::iterator it =
+    std::find_if(constraints_.begin(), constraints_.end(),
+		 [&name](const NavGraphNodeConstraint *c) {
+		   return *c == name;
+		 });
+  if (it != constraints_.end()) {
+    logger_->log_info("ConstraintRepo", "Unregistering constraint %s",
+		      (*it)->name().c_str());
+    constraints_.erase(it);
+  } else {
+    logger_->log_error("ConstraintRepo", "Failed to unregister constraint %s, "
+			"not registered", name.c_str());
   }
 }
 
+
+/** Check by name if a constraint has been registered.
+ * @param name name of constraint to look for
+ * @return true if a constraint with the given name has been registered,
+ * false otherwise
+ */
 bool
-ConstraintRepo::has_constraint(std::string name)
+ConstraintRepo::has_constraint(std::string &name)
 {
-
-  for(unsigned int i=0; i< constraints_.size(); i++) {
-    if( constraints_[i]->name() == name ) {
-      return true;
-    }
-  }
-  return false;
-
-}
-
-void
-ConstraintRepo::add_node(std::string constraint_name, fawkes::TopologicalMapNode node)
-{
-
-  for(unsigned int i=0; i< constraints_.size(); i++) {
-    if( constraints_[i]->name() == constraint_name ) {
-      constraints_[i]->add_node(node);
-      break;
-    }
-  }
-}
-
-void
-ConstraintRepo::add_nodes(std::string constraint_name,
-			  std::vector<fawkes::TopologicalMapNode> nodes)
-{
-
-  for(unsigned int i=0; i< constraints_.size(); i++) {
-    if( constraints_[i]->name() == constraint_name ) {
-      constraints_[i]->add_nodes(nodes);
-      break;
-    }
-  }
+  ConstraintList::iterator it =
+    std::find_if(constraints_.begin(), constraints_.end(),
+		 [&name](const NavGraphNodeConstraint *c) {
+		   return *c == name;
+		 });
+  return (it != constraints_.end());
 }
 
 
-fawkes::NavGraphNodeConstraint*
-ConstraintRepo::get_constraint(std::string name)
+/** Get a constraint by name.
+ * @param name name of constraint to retrieve
+ * @return if found returns a pointer to the constrained, NULL if not found
+ */
+fawkes::NavGraphNodeConstraint *
+ConstraintRepo::get_constraint(std::string &name)
 {
-
-  for(unsigned int i=0; i< constraints_.size(); i++) {
-    if( constraints_[i]->name() == name ) {
-      return constraints_[i];
-    }
+  ConstraintList::iterator it =
+    std::find_if(constraints_.begin(), constraints_.end(),
+		 [&name](const NavGraphNodeConstraint *c) {
+		   return *c == name;
+		 });
+  if (it != constraints_.end()) {
+    return *it;
   }
+
   return NULL;
 }
 
-void
-ConstraintRepo::override_nodes(std::string constraint_name,
-			       std::vector<fawkes::TopologicalMapNode> &nodes)
-{
 
-  if( has_constraint(constraint_name) ) {
-    logger_->log_error( "Constraint Repo", "Updating nodeList of constraint '%s'",
-			constraint_name.c_str() );
-
-    fawkes::NavGraphNodeConstraint *constraint = get_constraint(constraint_name);
-
-    constraint->clear_nodes();
-    for(unsigned int i=0; i< nodes.size(); i++) {
-      constraint->add_node(nodes[i]);
-    }
-  } else {
-    logger_->log_error( "Constraint Repo", "Trying to override constraint '%s' "
-			"which is not registered yet", constraint_name.c_str() );
-  }
-}
-
-const std::vector<fawkes::NavGraphNodeConstraint*> &
+/** Get a list of registered constraints.
+ * @return list of constraints
+ */
+const ConstraintRepo::ConstraintList &
 ConstraintRepo::constraints() const
 {
   return constraints_;
+}
+
+
+/** Check if there are any constraints at all.
+ * @return true if constraints have been registered, false otherwise
+ */
+bool
+ConstraintRepo::has_constraints() const
+{
+  return (! constraints_.empty());
+}
+
+
+/** Call compute method on all registered constraints. */
+void
+ConstraintRepo::compute()
+{
+  for (fawkes::NavGraphNodeConstraint *c : constraints_) {
+    c->compute();
+  }
 }
 
 } // namespace

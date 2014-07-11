@@ -39,7 +39,7 @@ class NavGraphSearchState : public fawkes::AStarState
   NavGraphSearchState(fawkes::TopologicalMapNode node, fawkes::TopologicalMapNode goal,
 		      double new_cost, NavGraphSearchState * parent,
 		      fawkes::TopologicalMapGraph *map_graph,
-		      fawkes::ConstraintRepo *constraint_repo, bool constrained_search = false);
+		      fawkes::ConstraintRepo *constraint_repo = NULL);
 
   /// standard destructor
   ~NavGraphSearchState();

@@ -37,28 +37,17 @@ class Logger;
 class NavGraphNodeConstraint
 {
  public:
-  NavGraphNodeConstraint(Logger *logger, std::string name);
-
-  NavGraphNodeConstraint(Logger *logger, std::string name,
-			 std::vector<fawkes::TopologicalMapNode> node_list);
-
+  NavGraphNodeConstraint(std::string &name);
   virtual ~NavGraphNodeConstraint();
 
   std::string name();
-  const std::vector<fawkes::TopologicalMapNode> &  node_list() const;
 
-  void add_node(fawkes::TopologicalMapNode &node);
-  void add_nodes(std::vector<fawkes::TopologicalMapNode> &nodes);
-  void remove_node(fawkes::TopologicalMapNode &node);
-  void clear_nodes();
+  virtual void compute(void) throw();
+  virtual bool blocks(const fawkes::TopologicalMapNode &node) throw() = 0;
 
-  bool has_node(fawkes::TopologicalMapNode &node);
-
- private:
-  Logger *logger_;
+  bool operator==(const std::string &name) const;
 
  protected:
-  std::vector<fawkes::TopologicalMapNode> node_list_;
   std::string name_;
 
 };

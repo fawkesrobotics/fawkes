@@ -21,112 +21,42 @@
 
 #include <plugins/navgraph/constraints/node_constraint.h>
 
-#include <logging/logger.h>
-
 namespace fawkes{
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
+/** @class NavGraphNodeConstraint <plugins/navgraph/constraints/node_constraint.h>
+ * Constraint that can be queried to check if a node is blocked.
+ * @author Sebastian Reuter
+ * @author Tim Niemueller
+ *
+ * @fn bool NavGraphNodeConstraint::blocks(fawkes::TopologicalMapNode &node) throw() = 0
+ * Check if constraint blocks a node.
+ * This method must be implemented by constraint classes. It is called
+ * to determine if a node should be considered blocked and therefore
+ * cannot be expanded during path search. Note that the method may not
+ * throw an exception. Handle this internally appropriately.
+ * @param node node to check for expansion
+ * @return true if the node should be considered blocked, false otherwise
+ *
+ * @var std::string NavGraphNodeConstraint::name_
+ * Name of constraint.
+ */
+
 
 /** Constructor.
- * @param logger logger for debugging
  * @param name name of node constraint
  */
-NavGraphNodeConstraint::NavGraphNodeConstraint(Logger *logger, std::string name)
+NavGraphNodeConstraint::NavGraphNodeConstraint(std::string &name)
 {
-  logger_ = logger;
   name_   = name;
 }
 
 
-
-/** Constructor.
- * @param logger logger for debugging
- * @param name name of node constraint
- * @param node_list list of nodes to block
- */
-NavGraphNodeConstraint::NavGraphNodeConstraint(Logger *logger, std::string name,
-					       std::vector<fawkes::TopologicalMapNode> node_list)
-{
-  logger_    = logger;
-  name_      = name;
-  node_list_ = node_list;
-}
-
 /** Virtual empty destructor. */
 NavGraphNodeConstraint::~NavGraphNodeConstraint()
 {
-}
-
-
-/** Add a single node to constraint list.
- * @param node node to add to constraint list
- */
-void
-NavGraphNodeConstraint::add_node(fawkes::TopologicalMapNode &node)
-{
-  if (! has_node(node)) {
-    node_list_.push_back(node);
-    logger_->log_info("abstract_node_constraint", "Added Node %s to '%s'.",
-		     node.name().c_str(), name_.c_str() );
-  } else {
-    logger_->log_info("abstract_node_constraint", "Node %s is already in '%s'",
-		     node.name().c_str(), name_.c_str() );
-  }
-}
-
-/** Add multiple nodes to constraint list.
- * @param nodes nodes to add to constraint list
- */
-void
-NavGraphNodeConstraint::add_nodes(std::vector<fawkes::TopologicalMapNode> &nodes)
-{
-  for (unsigned int i = 0; i < nodes.size(); i++) {
-    logger_->log_info("abstract_node_constraint", "Added Node %s to '%s'",
-		      nodes[i].name().c_str(), name_.c_str() );
-    add_node(nodes[i]);
-  }
-}
-
-/** Remove a single node from the constraint list.
- * @param node node to remote
- */
-void
-NavGraphNodeConstraint::remove_node(fawkes::TopologicalMapNode &node)
-{
-  if( ! node_list_.empty()) {
-    std::vector<TopologicalMapNode>::iterator i;
-    for( i = node_list_.begin(); i != node_list_.end(); ++i){
-      if( i->name() == node.name() ){
-	node_list_.erase(i);
-	logger_->log_info("abstract_node_constraint",
-			  "removed node %s from constraint node_list_", node.name().c_str() );
-      }
-    }
-  }
-
-  logger_->log_error("abstract_node_constraint",
-		     "Tried to remove not existing node %s from constraint list",
-		     node.name().c_str() );
-}
-
-/** Check if constraint has a specific node.
- * @param node node to check
- */
-bool
-NavGraphNodeConstraint::has_node(fawkes::TopologicalMapNode &node)
-{
-  if ( !node_list_.empty()) {
-
-    std::vector<TopologicalMapNode>::const_iterator i;
-    for( i = node_list_.begin(); i != node_list_.end(); ++i){
-      if( i->name() == node.name() ){
-	return true;
-      }
-    }
-  }
-  return false;
 }
 
 /** Get name of constraint.
@@ -138,16 +68,31 @@ NavGraphNodeConstraint::name()
   return name_;
 }
 
-const std::vector<fawkes::TopologicalMapNode> &
-NavGraphNodeConstraint::node_list() const
+
+/** Perform compuations before graph search.
+ * The compute method is called on all constraints just before a path
+ * search is performed. It can be used for example to cache results
+ * for the coming search run. The search guarantees that for each
+ * complete search run compute() is called once and only once and that
+ * no two search runs overlap, i.e., compute() will not be called
+ * while another search is still running.  If not implemented, this
+ * method simply does nothing.
+ */
+void
+NavGraphNodeConstraint::compute(void) throw()
 {
-  return node_list_;
 }
 
-void
-NavGraphNodeConstraint::clear_nodes()
+
+/** Check if constraint matches name.
+ * @param name name string to compare this constraints name to
+ * @return true if the given name is the same as this constraint's name,
+ * false otherwise
+ */
+bool
+NavGraphNodeConstraint::operator==(const std::string &name) const
 {
-  node_list_.clear();
+  return name_ == name;
 }
 
 

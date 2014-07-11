@@ -37,10 +37,12 @@ using namespace fawkes;
  * @param new_cost the cost until to this node from the start
  * @param parent parent search state
  * @param map_graph map graph
+ * @param constraint_repo constraint repository, null to plan only without constraints
  */
 NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMapNode goal,
 					 double new_cost, NavGraphSearchState * parent,
-					 TopologicalMapGraph *map_graph, fawkes::ConstraintRepo *constraint_repo, bool constrained_search)
+					 TopologicalMapGraph *map_graph,
+					 fawkes::ConstraintRepo *constraint_repo)
 {
   node_ = node;
   goal_ = goal;
@@ -54,8 +56,6 @@ NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMap
   key_ = h(node_.name());
 
   constraint_repo_ = constraint_repo;
-  constrained_search_ = constrained_search;
-
 }
 
 
@@ -102,29 +102,28 @@ NavGraphSearchState::children()
   for (unsigned int i = 0; i < descendants.size(); ++i) {
     TopologicalMapNode d = map_graph_->node(descendants[i]);
 
-    std::vector<fawkes::NavGraphNodeConstraint*> constraint_list =
-      constraint_repo_->constraints();
-    std::vector<fawkes::NavGraphNodeConstraint*>::const_iterator it =
-      constraint_list.begin();
-    bool constrained = false;
+    bool expand = true;
+    if (constraint_repo_) {
+      const std::vector<fawkes::NavGraphNodeConstraint*> &constraints =
+	constraint_repo_->constraints();
 
-    while( it != constraint_list.end() ) {
-      if( (*it)->has_node( d ) ){
-	constrained = true;
-	break;
-      } else {
-	++it;
+      std::vector<fawkes::NavGraphNodeConstraint*>::const_iterator it;
+
+      for (it = constraints.begin(); it != constraints.end(); ++it) {
+	if( (*it)->blocks(d) ){
+	  expand = false;
+	  break;
+	}
       }
     }
 
-    if( ( !constrained ) || ( !constrained_search_ ) ){
-
+    if (expand) {
       distance = sqrt(pow(node_.x() - d.x(), 2) +
 		      pow(node_.y() - d.y(), 2) );
       children.push_back(
 	new NavGraphSearchState(d, goal_,
 				past_cost + distance, this,
-				map_graph_, constraint_repo_, constrained_search_) );
+				map_graph_, constraint_repo_) );
     }
   }
 
