@@ -155,6 +155,51 @@ ConstraintRepo::compute()
   }
 }
 
+
+/** Check if any constraint in the repo blocks the node.
+ * @param node Node to check for a block
+ * @return the (first) node constraint that blocked the node,
+ * NULL if the node is not blocked
+ */
+fawkes::NavGraphNodeConstraint *
+ConstraintRepo::blocks(const fawkes::TopologicalMapNode &node)
+{
+  for (fawkes::NavGraphNodeConstraint *c : constraints_) {
+    if (c->blocks(node)) {
+      return c;
+    }
+  }
+
+  return NULL;
+}
+
+
+/** Check if any constraint in the repo blocks (some) nodes.
+ * @param nodes vector of nodes to check for a block
+ * @return map of blocked nodes, first element is the node name,
+ * second element is the name of the constraint that blocks the node.
+ * Nodes from @p nodes that are not blocked will not appear in the map.
+ */
+std::map<std::string, std::string>
+ConstraintRepo::blocks(const std::vector<fawkes::TopologicalMapNode> &nodes)
+{
+  std::map<std::string, std::string> rv;
+  for (const fawkes::TopologicalMapNode &n : nodes) {
+    for (fawkes::NavGraphNodeConstraint *c : constraints_) {
+      if (c->blocks(n)) {
+	rv[n.name()] = c->name();
+      }
+    }
+  }
+
+  return rv;
+}
+
+
+/** Check if the constraint repo has been modified.
+ * @param reset_modified true to reset the modified flag, false to leave it
+ * @return true if the constraint repo has been modified, false otherwise
+ */
 bool
 ConstraintRepo::modified(bool reset_modified)
 {

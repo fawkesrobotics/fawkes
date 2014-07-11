@@ -54,6 +54,10 @@ class ConstraintRepo
 
   void compute();
 
+  NavGraphNodeConstraint *    blocks(const fawkes::TopologicalMapNode &node);
+  std::map<std::string, std::string>
+    blocks(const std::vector<fawkes::TopologicalMapNode> &nodes);
+
 
   bool modified(bool reset_modified = false);
 
