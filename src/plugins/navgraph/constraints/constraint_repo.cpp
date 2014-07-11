@@ -59,8 +59,8 @@ ConstraintRepo::register_constraint(NavGraphNodeConstraint* constraint)
 {
   constraints_.push_back(constraint);
 
-  logger_->log_info("Constraint Repo", "New Constraint %s registered.",
-		    constraint->name().c_str());
+  logger_->log_debug("Constraint Repo", "New Constraint %s registered.",
+		     constraint->name().c_str());
 }
 
 
@@ -76,12 +76,9 @@ ConstraintRepo::unregister_constraint(std::string &name)
 		   return *c == name;
 		 });
   if (it != constraints_.end()) {
-    logger_->log_info("ConstraintRepo", "Unregistering constraint %s",
-		      (*it)->name().c_str());
+    logger_->log_debug("ConstraintRepo", "Unregistering constraint %s",
+		       (*it)->name().c_str());
     constraints_.erase(it);
-  } else {
-    logger_->log_error("ConstraintRepo", "Failed to unregister constraint %s, "
-			"not registered", name.c_str());
   }
 }
 

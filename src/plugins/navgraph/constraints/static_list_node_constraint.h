@@ -35,23 +35,21 @@ namespace fawkes{
 }
 #endif
 
-class Logger;
-
 class NavGraphStaticListNodeConstraint : public NavGraphNodeConstraint
 {
  public:
-  NavGraphStaticListNodeConstraint(Logger *logger, std::string &name);
+  NavGraphStaticListNodeConstraint(std::string name);
 
-  NavGraphStaticListNodeConstraint(Logger *logger, std::string &name,
+  NavGraphStaticListNodeConstraint(std::string name,
 				   std::vector<fawkes::TopologicalMapNode> &node_list);
 
   virtual ~NavGraphStaticListNodeConstraint();
 
   const std::vector<fawkes::TopologicalMapNode> &  node_list() const;
 
-  void add_node(fawkes::TopologicalMapNode &node);
-  void add_nodes(std::vector<fawkes::TopologicalMapNode> &nodes);
-  void remove_node(fawkes::TopologicalMapNode &node);
+  void add_node(const fawkes::TopologicalMapNode &node);
+  void add_nodes(const std::vector<fawkes::TopologicalMapNode> &nodes);
+  void remove_node(const fawkes::TopologicalMapNode &node);
   void clear_nodes();
   bool has_node(const fawkes::TopologicalMapNode &node);
 
@@ -59,7 +57,6 @@ class NavGraphStaticListNodeConstraint : public NavGraphNodeConstraint
   { return has_node(node); }
 
  private:
-  Logger *logger_;
   std::vector<fawkes::TopologicalMapNode> node_list_;
 
 };

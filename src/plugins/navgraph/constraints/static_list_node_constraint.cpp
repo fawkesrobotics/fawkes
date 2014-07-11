@@ -22,7 +22,6 @@
 
 #include <plugins/navgraph/constraints/static_list_node_constraint.h>
 
-#include <logging/logger.h>
 #include <algorithm>
 
 namespace fawkes{
@@ -37,29 +36,24 @@ namespace fawkes{
 
 
 /** Constructor.
- * @param logger logger for debugging
  * @param name name of node constraint
  */
-NavGraphStaticListNodeConstraint::NavGraphStaticListNodeConstraint(Logger *logger,
-								   std::string &name)
+NavGraphStaticListNodeConstraint::NavGraphStaticListNodeConstraint(std::string name)
   : NavGraphNodeConstraint(name)
 {
-  logger_ = logger;
 }
 
 
 
 /** Constructor.
- * @param logger logger for debugging
  * @param name name of node constraint
  * @param node_list list of nodes to block
  */
 NavGraphStaticListNodeConstraint::NavGraphStaticListNodeConstraint(
-    Logger *logger, std::string &name,
+    std::string name,
     std::vector<fawkes::TopologicalMapNode> &node_list)
   : NavGraphNodeConstraint(name)
 {
-  logger_    = logger;
   node_list_ = node_list;
 }
 
@@ -73,15 +67,10 @@ NavGraphStaticListNodeConstraint::~NavGraphStaticListNodeConstraint()
  * @param node node to add to constraint list
  */
 void
-NavGraphStaticListNodeConstraint::add_node(fawkes::TopologicalMapNode &node)
+NavGraphStaticListNodeConstraint::add_node(const fawkes::TopologicalMapNode &node)
 {
   if (! has_node(node)) {
     node_list_.push_back(node);
-    logger_->log_info("abstract_node_constraint", "Added Node %s to '%s'.",
-		     node.name().c_str(), name_.c_str() );
-  } else {
-    logger_->log_info("abstract_node_constraint", "Node %s is already in '%s'",
-		     node.name().c_str(), name_.c_str() );
   }
 }
 
@@ -89,12 +78,11 @@ NavGraphStaticListNodeConstraint::add_node(fawkes::TopologicalMapNode &node)
  * @param nodes nodes to add to constraint list
  */
 void
-NavGraphStaticListNodeConstraint::add_nodes(std::vector<fawkes::TopologicalMapNode> &nodes)
+NavGraphStaticListNodeConstraint::add_nodes(
+  const std::vector<fawkes::TopologicalMapNode> &nodes)
 {
-  for (unsigned int i = 0; i < nodes.size(); i++) {
-    logger_->log_info("abstract_node_constraint", "Added Node %s to '%s'",
-		      nodes[i].name().c_str(), name_.c_str() );
-    add_node(nodes[i]);
+  for (const TopologicalMapNode &n : nodes) {
+    add_node(n);
   }
 }
 
@@ -102,22 +90,16 @@ NavGraphStaticListNodeConstraint::add_nodes(std::vector<fawkes::TopologicalMapNo
  * @param node node to remote
  */
 void
-NavGraphStaticListNodeConstraint::remove_node(fawkes::TopologicalMapNode &node)
+NavGraphStaticListNodeConstraint::remove_node(const fawkes::TopologicalMapNode &node)
 {
   if( ! node_list_.empty()) {
     std::vector<TopologicalMapNode>::iterator i;
     for( i = node_list_.begin(); i != node_list_.end(); ++i){
       if( i->name() == node.name() ){
 	node_list_.erase(i);
-	logger_->log_info("abstract_node_constraint",
-			  "removed node %s from constraint node_list_", node.name().c_str() );
       }
     }
   }
-
-  logger_->log_error("abstract_node_constraint",
-		     "Tried to remove not existing node %s from constraint list",
-		     node.name().c_str() );
 }
 
 /** Check if constraint has a specific node.
