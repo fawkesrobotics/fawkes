@@ -38,6 +38,20 @@ class LaserClusterInterface : public Interface
  public:
   /* constants */
 
+  /** 
+        Enumeration defining the possible cluster selection modes.
+       */
+  typedef enum {
+    SELMODE_MIN_ANGLE /**< 
+	Choose the cluster with the minimum angle difference from 0 degrees.
+       */,
+    SELMODE_MIN_DIST /**< 
+	Choose the cluster with the minimum distance in X direction of
+	the reference frame (typically forward).
+       */
+  } SelectionMode;
+  const char * tostring_SelectionMode(SelectionMode value) const;
+
  private:
 #pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
@@ -46,6 +60,9 @@ class LaserClusterInterface : public Interface
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     float max_x; /**< Maximum distance in X coordinate
     of sensor frame. */
+    int32_t selection_mode; /**< 
+      Current cluster selection mode.
+     */
   } LaserClusterInterface_data_t;
 #pragma pack(pop)
 
@@ -81,6 +98,35 @@ class LaserClusterInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetSelectionModeMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      int32_t selection_mode; /**< 
+      Current cluster selection mode.
+     */
+    } SetSelectionModeMessage_data_t;
+#pragma pack(pop)
+
+    SetSelectionModeMessage_data_t *data;
+
+   public:
+    SetSelectionModeMessage(const SelectionMode ini_selection_mode);
+    SetSelectionModeMessage();
+    ~SetSelectionModeMessage();
+
+    SetSelectionModeMessage(const SetSelectionModeMessage *m);
+    /* Methods */
+    SelectionMode selection_mode() const;
+    void set_selection_mode(const SelectionMode new_selection_mode);
+    size_t maxlenof_selection_mode() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   LaserClusterInterface();
@@ -91,6 +137,9 @@ class LaserClusterInterface : public Interface
   float max_x() const;
   void set_max_x(const float new_max_x);
   size_t maxlenof_max_x() const;
+  SelectionMode selection_mode() const;
+  void set_selection_mode(const SelectionMode new_selection_mode);
+  size_t maxlenof_selection_mode() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

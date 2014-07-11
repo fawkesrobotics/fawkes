@@ -47,8 +47,10 @@ LaserClusterInterface::LaserClusterInterface() : Interface()
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_FLOAT, "max_x", 1, &data->max_x);
+  add_fieldinfo(IFT_ENUM, "selection_mode", 1, &data->selection_mode, "SelectionMode");
   add_messageinfo("SetMaxXMessage");
-  unsigned char tmp_hash[] = {0xa6, 0x6a, 0xdb, 0xa, 0x3, 0x63, 0x9a, 0x99, 0x95, 0x1f, 0x45, 0x4b, 0xb8, 0xe4, 0xb2, 0x33};
+  add_messageinfo("SetSelectionModeMessage");
+  unsigned char tmp_hash[] = {0xad, 0xf8, 0x6e, 0xe7, 0x17, 0x56, 0x8a, 0xfb, 0xf9, 0xad, 0x3e, 0xba, 0xd, 0x15, 0xce, 0xde};
   set_hash(tmp_hash);
 }
 
@@ -56,6 +58,19 @@ LaserClusterInterface::LaserClusterInterface() : Interface()
 LaserClusterInterface::~LaserClusterInterface()
 {
   free(data_ptr);
+}
+/** Convert SelectionMode constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+LaserClusterInterface::tostring_SelectionMode(SelectionMode value) const
+{
+  switch (value) {
+  case SELMODE_MIN_ANGLE: return "SELMODE_MIN_ANGLE";
+  case SELMODE_MIN_DIST: return "SELMODE_MIN_DIST";
+  default: return "UNKNOWN";
+  }
 }
 /* Methods */
 /** Get max_x value.
@@ -91,12 +106,49 @@ LaserClusterInterface::set_max_x(const float new_max_x)
   data_changed = true;
 }
 
+/** Get selection_mode value.
+ * 
+      Current cluster selection mode.
+    
+ * @return selection_mode value
+ */
+LaserClusterInterface::SelectionMode
+LaserClusterInterface::selection_mode() const
+{
+  return (LaserClusterInterface::SelectionMode)data->selection_mode;
+}
+
+/** Get maximum length of selection_mode value.
+ * @return length of selection_mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+LaserClusterInterface::maxlenof_selection_mode() const
+{
+  return 1;
+}
+
+/** Set selection_mode value.
+ * 
+      Current cluster selection mode.
+    
+ * @param new_selection_mode new selection_mode value
+ */
+void
+LaserClusterInterface::set_selection_mode(const SelectionMode new_selection_mode)
+{
+  data->selection_mode = new_selection_mode;
+  data_changed = true;
+}
+
 /* =========== message create =========== */
 Message *
 LaserClusterInterface::create_message(const char *type) const
 {
   if ( strncmp("SetMaxXMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetMaxXMessage();
+  } else if ( strncmp("SetSelectionModeMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetSelectionModeMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -121,6 +173,9 @@ LaserClusterInterface::copy_values(const Interface *other)
 const char *
 LaserClusterInterface::enum_tostring(const char *enumtype, int val) const
 {
+  if (strcmp(enumtype, "SelectionMode") == 0) {
+    return tostring_SelectionMode((SelectionMode)val);
+  }
   throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
@@ -217,6 +272,100 @@ LaserClusterInterface::SetMaxXMessage::clone() const
 {
   return new LaserClusterInterface::SetMaxXMessage(this);
 }
+/** @class LaserClusterInterface::SetSelectionModeMessage <interfaces/LaserClusterInterface.h>
+ * SetSelectionModeMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_selection_mode initial value for selection_mode
+ */
+LaserClusterInterface::SetSelectionModeMessage::SetSelectionModeMessage(const SelectionMode ini_selection_mode) : Message("SetSelectionModeMessage")
+{
+  data_size = sizeof(SetSelectionModeMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetSelectionModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->selection_mode = ini_selection_mode;
+  add_fieldinfo(IFT_ENUM, "selection_mode", 1, &data->selection_mode, "SelectionMode");
+}
+/** Constructor */
+LaserClusterInterface::SetSelectionModeMessage::SetSelectionModeMessage() : Message("SetSelectionModeMessage")
+{
+  data_size = sizeof(SetSelectionModeMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetSelectionModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_ENUM, "selection_mode", 1, &data->selection_mode, "SelectionMode");
+}
+
+/** Destructor */
+LaserClusterInterface::SetSelectionModeMessage::~SetSelectionModeMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+LaserClusterInterface::SetSelectionModeMessage::SetSelectionModeMessage(const SetSelectionModeMessage *m) : Message("SetSelectionModeMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetSelectionModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get selection_mode value.
+ * 
+      Current cluster selection mode.
+    
+ * @return selection_mode value
+ */
+LaserClusterInterface::SelectionMode
+LaserClusterInterface::SetSelectionModeMessage::selection_mode() const
+{
+  return (LaserClusterInterface::SelectionMode)data->selection_mode;
+}
+
+/** Get maximum length of selection_mode value.
+ * @return length of selection_mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+LaserClusterInterface::SetSelectionModeMessage::maxlenof_selection_mode() const
+{
+  return 1;
+}
+
+/** Set selection_mode value.
+ * 
+      Current cluster selection mode.
+    
+ * @param new_selection_mode new selection_mode value
+ */
+void
+LaserClusterInterface::SetSelectionModeMessage::set_selection_mode(const SelectionMode new_selection_mode)
+{
+  data->selection_mode = new_selection_mode;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+LaserClusterInterface::SetSelectionModeMessage::clone() const
+{
+  return new LaserClusterInterface::SetSelectionModeMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -226,6 +375,10 @@ LaserClusterInterface::message_valid(const Message *message) const
 {
   const SetMaxXMessage *m0 = dynamic_cast<const SetMaxXMessage *>(message);
   if ( m0 != NULL ) {
+    return true;
+  }
+  const SetSelectionModeMessage *m1 = dynamic_cast<const SetSelectionModeMessage *>(message);
+  if ( m1 != NULL ) {
     return true;
   }
   return false;

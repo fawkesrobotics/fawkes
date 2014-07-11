@@ -173,6 +173,14 @@ LaserClusterThread::init()
     config_if_ = NULL;
     config_if_ = blackboard->open_for_writing<LaserClusterInterface>("laser-cluster");
 
+    config_if_->set_max_x(current_max_x_);
+    if (cfg_selection_mode_ == SELECT_MIN_DIST) {
+      config_if_->set_selection_mode(LaserClusterInterface::SELMODE_MIN_DIST);
+    } else {
+      config_if_->set_selection_mode(LaserClusterInterface::SELMODE_MIN_ANGLE);
+    }
+    config_if_->write();
+
     bool autostart = true;
     try {
       autostart = config->get_bool(CFG_PREFIX"auto-start");
@@ -268,6 +276,20 @@ LaserClusterThread::loop()
       } else {
 	current_max_x_ = msg->max_x();
       }
+    }
+
+    else if (LaserClusterInterface::SetSelectionModeMessage *msg =
+	     config_if_->msgq_first_safe(msg))
+    {
+      if (msg->selection_mode() == LaserClusterInterface::SELMODE_MIN_DIST) {
+	cfg_selection_mode_ = SELECT_MIN_DIST;
+      } else if (msg->selection_mode() == LaserClusterInterface::SELMODE_MIN_ANGLE) {
+	cfg_selection_mode_ = SELECT_MIN_ANGLE;
+      } else {
+	logger->log_error(name(), "Unknown cluster selection mode received, ignoring");
+      }
+      config_if_->set_selection_mode(msg->selection_mode());
+      config_if_->write();
     }
 
     config_if_->msgq_pop();
