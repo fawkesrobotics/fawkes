@@ -59,3 +59,8 @@ plugins/navgraph:
   # Write graph information to log on (re-)loading?
   log_graph: false
 
+
+  # navgraph-static-constraints plugin configuration
+  static-constraints:
+    # A list of names of nodes that should be statically blocked
+    nodes: ["NodeA", "NodeB"]

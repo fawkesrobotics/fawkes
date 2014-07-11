@@ -21,6 +21,8 @@ include $(BUILDSYSDIR)/ros.mk
 ENABLE_VISUALIZATION = 1
 
 PRESUBDIRS = constraints aspect
+SUBDIRS = static-constraints
+
 CFLAGS += $(CFLAGS_CPP11)
 
 LIBS_navgraph = fawkescore fawkesutils fawkesaspects fawkesinterface \
