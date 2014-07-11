@@ -109,9 +109,8 @@ void LaserSimThread::on_laser_data_msg(ConstLaserScanStampedPtr &msg)
   
   int number_beams = scan.ranges_size();
 
-  laser_time_->set_time(msg->time().sec(), msg->time().nsec() / 1000);
-  *laser_time_ = clock->native_to_time(*laser_time_);
-
+  *laser_time_ = clock->now();
+  
   //copy laser data
   for(int i = 0; i < number_beams; i++)
   {
