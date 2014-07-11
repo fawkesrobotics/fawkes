@@ -315,7 +315,7 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
   double offsety = 0.0;
   double rotate  = 0.0;
 
-  if ( (obj->type == EDGE_OBJTYPE) && (strcmp(para->str, obj->headlabel) == 0) ) {
+  if ((obj->type == EDGE_OBJTYPE) && obj->headlabel && (strcmp(para->str, obj->headlabel) == 0) ) {
     char *labelrotate = agget(obj->u.e, (char *)"labelrotate");
     if (labelrotate && (strlen(labelrotate) > 0)) {
       rotate = fawkes::deg2rad(atof(labelrotate));

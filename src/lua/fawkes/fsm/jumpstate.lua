@@ -122,7 +122,7 @@ function JumpState:create_transition(state, jumpcond, description, errmsg)
    local jc
    if type(jumpcond) == "function" then
       jc = jumpcond
-      description = description or ""
+      description = description
    elseif type(jumpcond) == "string" then
       jc = assert(loadstring("return " .. jumpcond),
 		  self.name .. ": compiling jump condition '" .. jumpcond ..
@@ -260,7 +260,7 @@ function JumpState:try_transitions(precond)
 			   self.name);
 	    else
 	       print_error("Transition %s -> %s (%s) does not have a valid jump condition",
-			   self.name, t.state.name, t.description)
+			   self.name, t.state.name, tostring(t.description or ""))
 	    end
 	 else
 	    local rv = { t.jumpcond(self) }
@@ -269,7 +269,7 @@ function JumpState:try_transitions(precond)
 	    if jcfires then
 	       if self.fsm then
 		  if self.fsm.debug then
-		     print("Jump condition '" .. tostring(t.description) .. "' FIRES, returning " .. t.state.name)
+		     print("Jump condition '" .. tostring(t.description or "") .. "' FIRES, returning " .. t.state.name)
 		  end
 		  if t.error then
 		     local sep = ""

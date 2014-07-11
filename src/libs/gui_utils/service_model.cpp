@@ -241,8 +241,8 @@ ServiceModel::on_service_removed()
 	       (row[m_service_record.type]   == s.type) &&
 	       (row[m_service_record.domain] == s.domain) )
 	    {
-	      iter = m_service_list->erase(iter);
 	      m_service_list->row_deleted( m_service_list->get_path(iter) );
+	      iter = m_service_list->erase(iter);
 	    }
 	  else
 	    { ++iter; }
