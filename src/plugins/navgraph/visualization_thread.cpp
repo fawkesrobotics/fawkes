@@ -22,6 +22,7 @@
 #include "visualization_thread.h"
 
 #include <utils/graph/topological_map_graph.h>
+#include <plugins/navgraph/constraints/constraint_repo.h>
 #include <tf/types.h>
 #include <utils/math/angle.h>
 #include <utils/math/coord.h>
@@ -42,6 +43,7 @@ NavGraphVisualizationThread::NavGraphVisualizationThread()
   : fawkes::Thread("NavGraphVisualizationThread", Thread::OPMODE_WAITFORWAKEUP)
 {
   graph_ = NULL;
+  crepo_ = NULL;
 }
 
 
@@ -81,6 +83,18 @@ void
 NavGraphVisualizationThread::set_graph(fawkes::LockPtr<TopologicalMapGraph> &graph)
 {
   graph_ = graph;
+  plan_.clear();
+  plan_to_ = plan_from_ = "";
+  wakeup();
+}
+
+/** Set the constraint repo.
+ * @param crepo constraint repo
+ */
+void
+NavGraphVisualizationThread::set_constraint_repo(fawkes::LockPtr<ConstraintRepo> &crepo)
+{
+  crepo_ = crepo;
   plan_.clear();
   plan_to_ = plan_from_ = "";
   wakeup();
@@ -168,6 +182,11 @@ NavGraphVisualizationThread::publish()
 
   std::vector<fawkes::TopologicalMapNode> nodes = graph_->nodes();
   std::vector<fawkes::TopologicalMapEdge> edges = graph_->edges();
+
+  crepo_.lock();
+  std::map<std::string, std::string> blocked = crepo_->blocks(nodes);
+  crepo_.unlock();
+
   size_t id_num = 0;
 
   visualization_msgs::MarkerArray m;
@@ -196,6 +215,18 @@ NavGraphVisualizationThread::publish()
   plan_lines.color.a = 1.0;
   plan_lines.scale.x = 0.035;
   plan_lines.lifetime = ros::Duration(0, 0);
+
+  visualization_msgs::Marker blocked_lines;
+  blocked_lines.header.frame_id = "/map";
+  blocked_lines.header.stamp = ros::Time::now();
+  blocked_lines.ns = "navgraph";
+  blocked_lines.id = id_num++;
+  blocked_lines.type = visualization_msgs::Marker::LINE_LIST;
+  blocked_lines.action = visualization_msgs::Marker::ADD;
+  blocked_lines.color.r = blocked_lines.color.g = blocked_lines.color.b = 0.5;
+  blocked_lines.color.a = 1.0;
+  blocked_lines.scale.x = 0.02;
+  blocked_lines.lifetime = ros::Duration(0, 0);
 
   visualization_msgs::Marker cur_line;
   cur_line.header.frame_id = "/map";
@@ -238,11 +269,35 @@ NavGraphVisualizationThread::publish()
         sphere.color.r = 1.f;
         sphere.color.g = 0.f;
       }
+      sphere.color.b = 0.f;
+    } else if (blocked.find(nodes[i].name()) != blocked.end()) {
+      sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.05;
+      sphere.color.r = sphere.color.g = sphere.color.b = 0.5;
+
+      visualization_msgs::Marker text;
+      text.header.frame_id = "/map";
+      text.header.stamp = ros::Time::now();
+      text.ns = "navgraph";
+      text.id = id_num++;
+      text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+      text.action = visualization_msgs::Marker::ADD;
+      text.pose.position.x =  nodes[i].x();
+      text.pose.position.y =  nodes[i].y();
+      text.pose.position.z = 0.3;
+      text.pose.orientation.w = 1.;
+      text.scale.z = 0.12;
+      text.color.r = 1.0;
+      text.color.g = text.color.b = 0.f;
+      text.color.a = 1.0;
+      text.lifetime = ros::Duration(0, 0);
+      text.text = blocked[nodes[i].name()];
+      m.markers.push_back(text);
+
     } else {
       sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.05;
       sphere.color.r = 0.5;
+      sphere.color.b = 0.f;
     }
-    sphere.color.b = 0.f;
     sphere.color.a = 1.0;
     sphere.lifetime = ros::Duration(0, 0);
     m.markers.push_back(sphere);
@@ -535,6 +590,12 @@ NavGraphVisualizationThread::publish()
             arrow.color.g = arrow.color.b = 0.f;
             arrow.scale.x = 0.07; // shaft radius
             arrow.scale.y = 0.2; // head radius
+	  } else if (blocked.find(from.name()) != blocked.end() ||
+		     blocked.find(to.name()) != blocked.end())
+	  {
+            arrow.color.r = arrow.color.g = arrow.color.b = 0.5;
+            arrow.scale.x = 0.04; // shaft radius
+            arrow.scale.y = 0.15; // head radius
           } else {
             // regular
             arrow.color.r = 0.5;
@@ -566,6 +627,11 @@ NavGraphVisualizationThread::publish()
             // it's in the current plan
             plan_lines.points.push_back(p1);
             plan_lines.points.push_back(p2);
+	  } else if (blocked.find(from.name()) != blocked.end() ||
+		     blocked.find(to.name()) != blocked.end())
+	  {
+            blocked_lines.points.push_back(p1);
+            blocked_lines.points.push_back(p2);
           } else {
             lines.points.push_back(p1);
             lines.points.push_back(p2);
@@ -577,6 +643,7 @@ NavGraphVisualizationThread::publish()
 
   m.markers.push_back(lines);
   m.markers.push_back(plan_lines);
+  m.markers.push_back(blocked_lines);
   m.markers.push_back(cur_line);
 
   for (size_t i = id_num; i < last_id_num_; ++i) {

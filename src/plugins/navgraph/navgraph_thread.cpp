@@ -154,7 +154,10 @@ void
 NavGraphThread::once()
 {
 #ifdef HAVE_VISUALIZATION
-  if (vt_)  vt_->set_graph(graph_);
+  if (vt_) {
+    vt_->set_graph(graph_);
+    vt_->set_constraint_repo(constraint_repo_);
+  }
 #endif
 }
 
@@ -280,7 +283,11 @@ NavGraphThread::loop()
         }
       }
     }
-  }//exec_active
+  } else if (constraint_repo_->modified(/* reset */true)) {
+#ifdef HAVE_VISUALIZATION
+    if (vt_)  vt_->wakeup();
+#endif
+  }
 
   if (needs_write) {
     pp_nav_if_->write();

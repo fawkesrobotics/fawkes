@@ -22,10 +22,9 @@
 #ifndef __NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
 #define __NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
 
-#include <vector>
-
 #include <plugins/navgraph/constraints/node_constraint.h>
 
+#include <vector>
 
 namespace fawkes{
 #if 0 /* just to make Emacs auto-indent happy */
@@ -44,7 +43,7 @@ class ConstraintRepo
   ~ConstraintRepo();
 
   void register_constraint(NavGraphNodeConstraint *constraint);
-  void unregister_constraint(std::string &name);
+  void unregister_constraint(std::string name);
 
   bool has_constraint(std::string &name);
   fawkes::NavGraphNodeConstraint *  get_constraint(std::string &name);
@@ -55,10 +54,13 @@ class ConstraintRepo
 
   void compute();
 
+
+  bool modified(bool reset_modified = false);
+
  private:
   ConstraintList constraints_;
   Logger *logger_;
-
+  bool    modified_;
 };
 } // namespace
 

@@ -43,6 +43,7 @@ namespace fawkes{
 ConstraintRepo::ConstraintRepo(Logger *logger)
 {
   logger_ = logger;
+  modified_ = false;
 }
 
 /** Destructor. */
@@ -57,6 +58,8 @@ ConstraintRepo::~ConstraintRepo()
 void
 ConstraintRepo::register_constraint(NavGraphNodeConstraint* constraint)
 {
+  modified_ = true;
+
   constraints_.push_back(constraint);
 
   logger_->log_debug("Constraint Repo", "New Constraint %s registered.",
@@ -68,8 +71,10 @@ ConstraintRepo::register_constraint(NavGraphNodeConstraint* constraint)
  * @param name name of constraint to remove.
  */
 void
-ConstraintRepo::unregister_constraint(std::string &name)
+ConstraintRepo::unregister_constraint(std::string name)
 {
+  modified_ = true;
+
   ConstraintList::iterator it =
     std::find_if(constraints_.begin(), constraints_.end(),
 		 [&name](const NavGraphNodeConstraint *c) {
@@ -144,8 +149,21 @@ ConstraintRepo::has_constraints() const
 void
 ConstraintRepo::compute()
 {
+  modified_ = true;
   for (fawkes::NavGraphNodeConstraint *c : constraints_) {
     c->compute();
+  }
+}
+
+bool
+ConstraintRepo::modified(bool reset_modified)
+{
+  if (reset_modified) {
+    bool rv = modified_;
+    modified_ =false;
+    return rv;
+  } else {
+    return modified_;
   }
 }
 

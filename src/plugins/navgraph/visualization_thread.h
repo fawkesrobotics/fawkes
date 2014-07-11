@@ -35,6 +35,7 @@
 
 namespace fawkes {
   class TopologicalMapGraph;
+  class ConstraintRepo;
 }
 
 
@@ -52,6 +53,8 @@ class NavGraphVisualizationThread
   virtual void finalize();
 
   void set_graph(fawkes::LockPtr<fawkes::TopologicalMapGraph> &graph);
+  void set_constraint_repo(fawkes::LockPtr<fawkes::ConstraintRepo> &crepo);
+
   void set_plan(std::vector<fawkes::TopologicalMapNode> plan);
   void set_current_edge(std::string from, std::string to);
   void reset_plan();
@@ -71,6 +74,7 @@ class NavGraphVisualizationThread
   std::string plan_from_;
 
   fawkes::LockPtr<fawkes::TopologicalMapGraph> graph_;
+  fawkes::LockPtr<fawkes::ConstraintRepo>      crepo_;
 };
 
 
