@@ -34,7 +34,7 @@ using namespace fawkes;
 /** Constructor. */
 RosPointCloudThread::RosPointCloudThread()
   : Thread("RosPointCloudThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
 }
 
