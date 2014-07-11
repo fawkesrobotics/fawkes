@@ -32,6 +32,9 @@
 #include <vector>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 class ConfigurationChangeHandler;
 
@@ -178,6 +181,102 @@ class Configuration
   virtual void            unlock()                                        = 0;
 
   virtual void            try_dump()                                      = 0;
+
+  /// @cond CONVENIENCE_METHODS
+  virtual bool          exists(const std::string &path)
+  { return exists(path.c_str()); }
+
+  virtual bool          is_float(const std::string &path)  { return is_float(path.c_str()); }
+  virtual bool          is_uint(const std::string &path)   { return is_uint(path.c_str()); }
+  virtual bool          is_int(const std::string &path)    { return is_int(path.c_str()); }
+  virtual bool          is_bool(const std::string &path)   { return is_bool(path.c_str()); }
+  virtual bool          is_string(const std::string &path) { return is_string(path.c_str()); }
+  virtual bool          is_list(const std::string &path)   { return is_list(path.c_str()); }
+
+  virtual bool          is_default(const std::string &path) { return is_default(path.c_str()); }
+
+  virtual float           get_float(const std::string &path) { return get_float(path.c_str()); }
+  virtual unsigned int    get_uint(const std::string &path)  { return get_uint(path.c_str()); }
+  virtual int             get_int(const std::string &path)   { return get_int(path.c_str()); }
+  virtual bool            get_bool(const std::string &path)  { return get_bool(path.c_str()); }
+  virtual std::string     get_string(const std::string &path)
+  { return get_string(path.c_str()); }
+  virtual std::vector<float>         get_floats(const std::string &path)
+  { return get_floats(path.c_str()); }
+  virtual std::vector<unsigned int>  get_uints(const std::string &path)
+  { return get_uints(path.c_str()); }
+  virtual std::vector<int>           get_ints(const std::string &path)
+  { return get_ints(path.c_str()); }
+  virtual std::vector<bool>          get_bools(const std::string &path)
+  { return get_bools(path.c_str()); }
+  virtual std::vector<std::string>   get_strings(const std::string &path)
+  { return get_strings(path.c_str()); }
+  virtual ValueIterator * get_value(const std::string &path)
+  { return get_value(path.c_str()); }
+  virtual std::string     get_type(const std::string &path)
+  { return get_type(path.c_str()); }
+  virtual std::string     get_comment(const std::string &path)
+  { return get_comment(path.c_str()); }
+  virtual std::string     get_default_comment(const std::string &path)
+  { return get_default_comment(path.c_str()); }
+
+  virtual void          set_float(const std::string &path, float f)
+  { set_float(path.c_str(), f); }
+  virtual void          set_uint(const std::string &path, unsigned int uint)
+  { set_uint(path.c_str(), uint); }
+  virtual void          set_int(const std::string &path, int i)
+  { set_int(path.c_str(), i); }
+  virtual void          set_bool(const std::string &path, bool b)
+  { set_bool(path.c_str(), b); }
+  virtual void          set_string(const std::string &path, std::string &s)
+  { set_string(path.c_str(), s); }
+  virtual void          set_string(const std::string &path, const char *s)
+  { set_string(path.c_str(), s); }
+  virtual void          set_floats(const std::string &path, std::vector<float> &f)
+  { set_floats(path.c_str(), f); }
+  virtual void          set_uints(const std::string &path, std::vector<unsigned int> &uint)
+  { set_uints(path.c_str(), uint); }
+  virtual void          set_ints(const std::string &path, std::vector<int> &i)
+  { set_ints(path.c_str(), i); }
+  virtual void          set_bools(const std::string &path, std::vector<bool> &b)
+  { set_bools(path.c_str(), b); }
+  virtual void          set_strings(const std::string &path, std::vector<std::string> &s)
+  { set_strings(path.c_str(), s); }
+  virtual void          set_strings(const std::string &path, std::vector<const char *> &s)
+  { set_strings(path.c_str(), s); }
+  virtual void          set_comment(const std::string &path, const char *comment)
+  { set_comment(path.c_str(), comment); }
+  virtual void          set_comment(const std::string &path, std::string &comment)
+  { set_comment(path.c_str(), comment); }
+
+  virtual void          erase(const std::string &path) { erase(path.c_str()); }
+
+  virtual void          set_default_float(const std::string &path, float f)
+  { set_default_float(path.c_str(), f); }
+  virtual void          set_default_uint(const std::string &path, unsigned int uint)
+  { set_default_uint(path.c_str(), uint); }
+  virtual void          set_default_int(const std::string &path, int i)
+  { set_default_int(path.c_str(), i); }
+  virtual void          set_default_bool(const std::string &path, bool b)
+  { set_default_bool(path.c_str(), b); }
+  virtual void          set_default_string(const std::string &path, std::string &s)
+  { set_default_string(path.c_str(), s); }
+  virtual void          set_default_string(const std::string &path, const char *s)
+  { set_default_string(path.c_str(), s); }
+
+  virtual void          set_default_comment(const std::string &path,
+					    const char *comment)
+  { set_default_comment(path.c_str(), comment); }
+  virtual void          set_default_comment(const std::string &path,
+					    std::string &comment)
+  { set_default_comment(path.c_str(), comment); }
+
+  virtual void          erase_default(const std::string &path)
+  { erase_default(path.c_str()); }
+
+  virtual ValueIterator * search(const std::string &path)
+  { return search(path.c_str()); }
+  /// @endcond
 
  protected:
   /** List that contains pointers to ConfigurationChangeHandler */
