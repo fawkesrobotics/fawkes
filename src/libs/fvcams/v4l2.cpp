@@ -1097,7 +1097,6 @@ V4L2Camera::stop()
       // stop streaming
       int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
       if (v4l2_ioctl(_dev, VIDIOC_STREAMOFF, &type)) {
-        close();
         throw Exception("V4L2Cam: Stopping stream failed");
       }
       break;
