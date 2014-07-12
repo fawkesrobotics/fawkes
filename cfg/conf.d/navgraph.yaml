@@ -47,7 +47,11 @@ plugins/navgraph:
   visualization: true
 
   # Interval in which the resend the goto command; sec
-  resend_interval: 6.0
+  resend_interval: 1.0
+
+  # Interval in which to replan if constraints have been modified
+  # since the last path planning.
+  replan_interval: 2.0
 
   # Time to keep moving after the target tolerance has been reached; sec
   # NOTE: it is recommended to set this as graph default property

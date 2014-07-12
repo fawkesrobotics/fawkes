@@ -133,6 +133,7 @@ NavGraphThread::init()
   exec_active_       = false;
   target_reached_    = false;
   last_node_         = "";
+  constrained_plan_  = false;
   cmd_sent_at_       = new Time(clock);
   path_planned_at_   = new Time(clock);
   target_reached_at_ = new Time(clock);
@@ -274,7 +275,30 @@ NavGraphThread::loop()
 
     } else {
       fawkes::Time now(clock);
-      if ((now - cmd_sent_at_) > cfg_resend_interval_) {
+      bool new_plan = false;
+
+      if (constrained_plan_ && plan_.size() > 2 &&
+	  (now - path_planned_at_) > cfg_replan_interval_)
+      {
+	*path_planned_at_ = now;
+	constraint_repo_.lock();
+	if (constraint_repo_->compute() || constraint_repo_->modified(/* reset */ true)) {
+	  TopologicalMapNode goal = plan_.back();
+
+	  if (replan(plan_[0], goal)) {
+	    logger->log_debug(name(), "Executing after re-planning from '%s' to '%s'",
+			      plan_[0].name().c_str(), goal.name().c_str());
+	    // do not optimize here, we know that we do want to travel
+	    // to the first node, we are already on the way...
+	    //optimize_plan();
+	    start_plan();
+	    new_plan = true;
+	  }
+	}
+	constraint_repo_.unlock();
+      }
+
+      if (! new_plan && (now - cmd_sent_at_) > cfg_resend_interval_) {
         try {
           //logger->log_info(name(), "Re-sending goal");
 	  send_next_goal();
@@ -345,7 +369,10 @@ NavGraphThread::generate_plan(std::string goal_name)
   }
   constraint_repo_.unlock();
   
-  if (a_star_solution.empty()) {
+  if (! a_star_solution.empty()) {
+    constrained_plan_ = true;
+  } else {
+    constrained_plan_ = false;
     logger->log_warn(name(), "Failed to generate plan, will try without constraints");
     NavGraphSearchState *initial_state =
       new NavGraphSearchState(init, goal, 0, NULL, *graph_);
@@ -373,6 +400,51 @@ NavGraphThread::generate_plan(float x, float y, float ori)
   TopologicalMapNode n("free-target", x, y);
   n.set_property("orientation", ori);
   plan_.push_back(n);
+}
+
+
+bool
+NavGraphThread::replan(const TopologicalMapNode &start, const TopologicalMapNode &goal)
+{
+  logger->log_debug(name(), "Starting at node '%s'", start.name().c_str());
+
+  TopologicalMapNode act_goal = goal;
+
+  TopologicalMapNode close_to_goal;
+  if (goal.name() == "free-target") {
+    close_to_goal = graph_->closest_node(goal.x(), goal.y());
+    act_goal = close_to_goal;
+  }
+
+  NavGraphSearchState *initial_state =
+    new NavGraphSearchState(start, act_goal, 0, NULL, *graph_, *constraint_repo_);
+  std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
+  
+  if (! a_star_solution.empty()) {
+    if (a_star_solution.size() <= plan_.size()) {
+      constrained_plan_ = true;
+      plan_.clear();
+      NavGraphSearchState *solstate;
+      for (unsigned int i = 0; i < a_star_solution.size(); ++i ) {
+	solstate = dynamic_cast<NavGraphSearchState *>(a_star_solution[i]);
+	plan_.push_back(solstate->node());
+      }
+      if (goal.name() == "free-target") {
+	// add free target node again
+	plan_.push_back(goal);
+      }
+      return true;
+    } else {
+      logger->log_warn(name(), "Re-planning from '%s' to '%s' resulted in "
+		       "longer plan, keeping old plan",
+		       start.name().c_str(), goal.name().c_str());
+      return false;
+    }
+  } else {
+    logger->log_error(name(), "Failed to re-plan from '%s' to '%s'",
+		      start.name().c_str(), goal.name().c_str());
+    return false;
+  }
 }
 
 
@@ -408,6 +480,8 @@ NavGraphThread::optimize_plan()
 void
 NavGraphThread::start_plan()
 {
+  path_planned_at_->stamp();
+
   target_reached_ = false;
   if (plan_.empty()) {
     exec_active_ = false;

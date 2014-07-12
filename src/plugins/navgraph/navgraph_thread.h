@@ -79,6 +79,8 @@ class NavGraphThread
  private:
   void generate_plan(std::string goal);
   void generate_plan(float x, float y, float ori);
+  bool replan(const fawkes::TopologicalMapNode &start,
+	      const fawkes::TopologicalMapNode &goal);
   void optimize_plan();
   void stop_motion();
   void start_plan();
@@ -102,6 +104,7 @@ class NavGraphThread
   float        cfg_orientation_tolerance_; 
   float        cfg_shortcut_tolerance_; 
   float        cfg_resend_interval_; 
+  float        cfg_replan_interval_; 
   bool         cfg_monitor_file_;
   float        cfg_target_time_;
   bool         cfg_log_graph_;
@@ -120,10 +123,12 @@ class NavGraphThread
   fawkes::Time *target_reached_at_;
   std::string last_node_;
   std::vector<fawkes::TopologicalMapNode> plan_;
+  bool constrained_plan_;
 
   fawkes::LockPtr<fawkes::ConstraintRepo> constraint_repo_;
 
   fawkes::Time *cmd_sent_at_;
+  fawkes::Time *path_planned_at_;
 
   fawkes::FileAlterationMonitor *fam_;
 
