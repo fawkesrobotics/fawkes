@@ -38,8 +38,7 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/surface/convex_hull.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/search/kdtree.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/conditional_removal.h>
@@ -97,6 +96,8 @@ LaserClusterThread::init()
       config->get_float(cfg_prefix_+"line_removal/segmentation_distance_threshold");
     cfg_segm_min_inliers_ =
       config->get_uint(cfg_prefix_+"line_removal/segmentation_min_inliers");
+    cfg_segm_sample_max_dist_ =
+      config->get_float(cfg_prefix_+"line_removal/segmentation_sample_max_dist");
     cfg_line_min_length_ =
       config->get_float(cfg_prefix_+"line_removal/min_length");
   }
@@ -291,8 +292,6 @@ LaserClusterThread::loop()
   TIMETRACK_INTER(ttc_msgproc_, ttc_extract_lines_);
 
 
-  //pcl::search::KdTree<PointType> kdtree;
-
   if (input_->points.size() <= 10) {
     // this can happen if run at startup. Since tabletop threads runs continuous
     // and not synchronized with main loop, but point cloud acquisition thread is
@@ -327,7 +326,11 @@ LaserClusterThread::loop()
       //logger->log_info(name(), "[L %u] %zu points left",
       //	               loop_count_, noline_cloud->points.size());
       
-      seg_.setInputCloud (noline_cloud);
+      pcl::search::KdTree<PointType>::Ptr
+	search(new pcl::search::KdTree<PointType>);
+      search->setInputCloud(noline_cloud);
+      seg_.setSamplesMaxDist(cfg_segm_sample_max_dist_, search); 
+      seg_.setInputCloud(noline_cloud);
       seg_.segment(*inliers, *coeff);
       if (inliers->indices.size () == 0) {
 	// no line found
@@ -354,6 +357,7 @@ LaserClusterThread::loop()
 	extract.setNegative(false);
 	extract.filter(*cloud_line);
 	restore_pcls.push_back(cloud_line);
+
       }
 
       // Remove the linear inliers, extract the rest

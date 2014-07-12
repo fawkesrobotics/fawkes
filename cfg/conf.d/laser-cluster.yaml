@@ -45,6 +45,13 @@ laser-cluster:
       # Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0
       segmentation_min_inliers: 30
 
+      # Maximum distance between samples drawn from the cloud
+      # This distance is important for the separation of lines if they are close.
+      segmentation_sample_max_dist: 0.08
+
+      # Minimum length of line to remove it
+      min_length: 0.8
+
     clustering:
       # Clustering inter-point distance tolerance; m
       tolerance: 0.1

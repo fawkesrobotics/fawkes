@@ -115,6 +115,7 @@ class LaserClusterThread
   unsigned int cfg_segm_max_iterations_;
   float        cfg_segm_distance_threshold_;
   unsigned int cfg_segm_min_inliers_;
+  float        cfg_segm_sample_max_dist_;
   float        cfg_line_min_length_;
   float        cfg_cluster_tolerance_;
   unsigned int cfg_cluster_min_size_;
