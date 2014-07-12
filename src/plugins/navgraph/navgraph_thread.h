@@ -87,7 +87,7 @@ class NavGraphThread
   size_t shortcut_possible();
   fawkes::LockPtr<fawkes::TopologicalMapGraph> load_graph(std::string filename);
   void log_graph();
-  void write_new_path(std::vector<fawkes::TopologicalMapNode> path);
+  void publish_path(std::vector<fawkes::TopologicalMapNode> path);
 
 
  private:

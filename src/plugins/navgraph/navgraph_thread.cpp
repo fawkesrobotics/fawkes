@@ -186,7 +186,6 @@ NavGraphThread::loop()
       generate_plan(msg->x(), msg->y(), msg->orientation());
       optimize_plan();
       start_plan();
-      write_new_path(plan_);
 
     } else if (pp_nav_if_->msgq_first_is<NavigatorInterface::PlaceGotoMessage>()) {
       NavigatorInterface::PlaceGotoMessage *msg = pp_nav_if_->msgq_first(msg);
@@ -196,7 +195,6 @@ NavGraphThread::loop()
       generate_plan(msg->place());
       optimize_plan();
       start_plan();
-      write_new_path(plan_);
     }
 
     pp_nav_if_->msgq_pop();
@@ -250,7 +248,7 @@ NavGraphThread::loop()
         try {
           logger->log_info(name(), "Sending next goal %s after node reached",
 			   plan_[0].name().c_str());
-          write_new_path(plan_);
+          publish_path(plan_);
           send_next_goal();
         } catch (Exception &e) {
           logger->log_warn(name(), "Failed to send next goal (node reached)");
@@ -449,6 +447,8 @@ NavGraphThread::start_plan()
       logger->log_warn(name(), e);
     }
   }
+
+  publish_path(plan_);
 }
 
 
@@ -688,45 +688,54 @@ NavGraphThread::log_graph()
 }
 
 void
-NavGraphThread::write_new_path(std::vector<fawkes::TopologicalMapNode> path){
+NavGraphThread::publish_path(std::vector<fawkes::TopologicalMapNode> path)
+{
+  std::vector<std::string> vpath(40, "");
 
-  std::string vpath[40];
-  int path_length;
-
-  unsigned int i;
-  for(i=0; i<path.size() && i<39; i++){
+  for (unsigned int i = 0; i < path.size() && i < vpath.size(); ++i) {
     vpath[i] = path[i].name();
   }
-  path_length = i;
-  for(; i<39; i++){
-    vpath[i] = "";
-  }
 
-  path_if_->set_path_node_1( vpath[0].c_str() ); 		path_if_->set_path_node_2( vpath[1].c_str() );
-  path_if_->set_path_node_3( vpath[2].c_str() );		path_if_->set_path_node_4( vpath[3].c_str() );
-  path_if_->set_path_node_5( vpath[4].c_str() );		path_if_->set_path_node_6( vpath[5].c_str() );
-  path_if_->set_path_node_7( vpath[6].c_str() );		path_if_->set_path_node_8( vpath[7].c_str() );
-  path_if_->set_path_node_9( vpath[8].c_str() );		path_if_->set_path_node_10( vpath[9].c_str() );
-  path_if_->set_path_node_11( vpath[10].c_str() );	path_if_->set_path_node_12( vpath[11].c_str() );
-  path_if_->set_path_node_13( vpath[12].c_str() );	path_if_->set_path_node_14( vpath[13].c_str() );
-  path_if_->set_path_node_15( vpath[14].c_str() );	path_if_->set_path_node_16( vpath[15].c_str() );
-  path_if_->set_path_node_17( vpath[16].c_str() );	path_if_->set_path_node_18( vpath[17].c_str() );
-  path_if_->set_path_node_19( vpath[18].c_str() );	path_if_->set_path_node_20( vpath[19].c_str() );
-  path_if_->set_path_node_21( vpath[20].c_str() );	path_if_->set_path_node_22( vpath[21].c_str() );
-  path_if_->set_path_node_23( vpath[22].c_str() );	path_if_->set_path_node_24( vpath[23].c_str() );
-  path_if_->set_path_node_25( vpath[24].c_str() );	path_if_->set_path_node_26( vpath[25].c_str() );
-  path_if_->set_path_node_27( vpath[26].c_str() );	path_if_->set_path_node_28( vpath[27].c_str() );
-  path_if_->set_path_node_29( vpath[28].c_str() );	path_if_->set_path_node_30( vpath[29].c_str() );
-  path_if_->set_path_node_31( vpath[30].c_str() );	path_if_->set_path_node_32( vpath[31].c_str() );
-  path_if_->set_path_node_33( vpath[32].c_str() );	path_if_->set_path_node_34( vpath[33].c_str() );
-  path_if_->set_path_node_35( vpath[34].c_str() );	path_if_->set_path_node_36( vpath[35].c_str() );
-  path_if_->set_path_node_37( vpath[36].c_str() );	path_if_->set_path_node_38( vpath[37].c_str() );
-  path_if_->set_path_node_39( vpath[38].c_str() );	path_if_->set_path_node_40( vpath[39].c_str() );
-
-  path_if_->set_path_length(path_length);
-
-  logger->log_info(name(), "Knoten Nummer 1: %s !",  vpath[0].c_str()  );
-
+  path_if_->set_path_node_1(vpath[0].c_str());
+  path_if_->set_path_node_2(vpath[1].c_str());
+  path_if_->set_path_node_3(vpath[2].c_str());
+  path_if_->set_path_node_4(vpath[3].c_str());
+  path_if_->set_path_node_5(vpath[4].c_str());
+  path_if_->set_path_node_6(vpath[5].c_str());
+  path_if_->set_path_node_7(vpath[6].c_str());
+  path_if_->set_path_node_8(vpath[7].c_str());
+  path_if_->set_path_node_9(vpath[8].c_str());
+  path_if_->set_path_node_10(vpath[9].c_str());
+  path_if_->set_path_node_11(vpath[10].c_str());
+  path_if_->set_path_node_12(vpath[11].c_str());
+  path_if_->set_path_node_13(vpath[12].c_str());
+  path_if_->set_path_node_14(vpath[13].c_str());
+  path_if_->set_path_node_15(vpath[14].c_str());
+  path_if_->set_path_node_16(vpath[15].c_str());
+  path_if_->set_path_node_17(vpath[16].c_str());
+  path_if_->set_path_node_18(vpath[17].c_str());
+  path_if_->set_path_node_19(vpath[18].c_str());
+  path_if_->set_path_node_20(vpath[19].c_str());
+  path_if_->set_path_node_21(vpath[20].c_str());
+  path_if_->set_path_node_22(vpath[21].c_str());
+  path_if_->set_path_node_23(vpath[22].c_str());
+  path_if_->set_path_node_24(vpath[23].c_str());
+  path_if_->set_path_node_25(vpath[24].c_str());
+  path_if_->set_path_node_26(vpath[25].c_str());
+  path_if_->set_path_node_27(vpath[26].c_str());
+  path_if_->set_path_node_28(vpath[27].c_str());
+  path_if_->set_path_node_29(vpath[28].c_str());
+  path_if_->set_path_node_30(vpath[29].c_str());
+  path_if_->set_path_node_31(vpath[30].c_str());
+  path_if_->set_path_node_32(vpath[31].c_str());
+  path_if_->set_path_node_33(vpath[32].c_str());
+  path_if_->set_path_node_34(vpath[33].c_str());
+  path_if_->set_path_node_35(vpath[34].c_str());
+  path_if_->set_path_node_36(vpath[35].c_str());
+  path_if_->set_path_node_37(vpath[36].c_str());
+  path_if_->set_path_node_38(vpath[37].c_str());
+  path_if_->set_path_node_39(vpath[38].c_str());
+  path_if_->set_path_node_40(vpath[39].c_str());
+  path_if_->set_path_length(path.size());
   path_if_->write();
-
 }
