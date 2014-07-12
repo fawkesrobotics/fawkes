@@ -25,6 +25,8 @@
 
 #include <utils/misc/string_conversions.h>
 
+#include <utils/graph/topological_map_node.h>
+
 #include <map>
 #include <string>
 
@@ -34,6 +36,8 @@ namespace fawkes {
 #endif
 
 class TopologicalMapEdge {
+  friend class TopologicalMapGraph;
+
  public:
   TopologicalMapEdge();
 
@@ -53,6 +57,17 @@ class TopologicalMapEdge {
    * @return edge target node name */
   const std::string &  to() const
   { return to_; }
+
+
+  /** Get edge originating node.
+   * @return edge originating node */
+  const TopologicalMapNode &  from_node() const
+  { return from_node_; }
+
+  /** Get edge target node.
+   * @return edge target node */
+  const TopologicalMapNode &  to_node() const
+  { return to_node_; }
 
   void set_from(std::string from);
   void set_to(std::string to);
@@ -126,11 +141,17 @@ class TopologicalMapEdge {
   bool operator<(const TopologicalMapEdge &e) const
   { return (from_ == e.from_ && to_ < e.to_) || (from_ < e.from_); }
 
+
+  void set_nodes(const TopologicalMapNode &from_node, const TopologicalMapNode &to_node);
+
  private:
   std::string from_;
   std::string to_;
   bool directed_;
   std::map<std::string, std::string> properties_;
+
+  TopologicalMapNode from_node_;
+  TopologicalMapNode to_node_;
 };
 
 } // end of namespace fawkes

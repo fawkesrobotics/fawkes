@@ -22,6 +22,8 @@
 
 #include <utils/graph/topological_map_edge.h>
 
+#include <core/exception.h>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -87,6 +89,27 @@ TopologicalMapEdge::set_to(std::string to)
   to_ = to;
 }
 
+
+/** Set nodes.
+ * @param from_node originating node
+ * @param to_node target node
+ */
+void
+TopologicalMapEdge::set_nodes(const TopologicalMapNode &from_node,
+			      const TopologicalMapNode &to_node)
+{
+  if (from_node.name() != from_) {
+    throw Exception("Conflicting originating node names: %s vs. %s",
+		    from_node.name().c_str(), from_.c_str());
+  }
+  if (to_node.name() != to_) {
+    throw Exception("Conflicting target node names: %s vs. %s",
+		    to_node.name().c_str(), to_.c_str());
+  }
+
+  from_node_ = from_node;
+  to_node_   = to_node;
+}
 
 /** Set directed state.
  * @param directed true if the edge is directed, false for bidirectional edges
