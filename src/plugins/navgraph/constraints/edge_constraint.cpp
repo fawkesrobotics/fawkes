@@ -77,18 +77,28 @@ NavGraphEdgeConstraint::name()
 }
 
 
-/** Perform compuations before graph search.
+/** Perform compuations before graph search and to indicate re-planning.
  * The compute method is called on all constraints just before a path
- * search is performed. It can be used for example to cache results
- * for the coming search run. The search guarantees that for each
- * complete search run compute() is called once and only once and that
- * no two search runs overlap, i.e., compute() will not be called
- * while another search is still running.  If not implemented, this
- * method simply does nothing.
+ * search is performed and to check if re-planning should be tried.
+ * 
+ * It can be used for example to cache results for the coming search
+ * run. The search guarantees that for each complete search run
+ * compute() is called once and only once and that no two search runs
+ * overlap, i.e., compute() will not be called while another search is
+ * still running.
+ *
+ * Constraints must indicate whether any change has occured during
+ * computation or since the last compute() call through the return
+ * value. This is used to determine if re-planning should be
+ * attempted.
+ *
+ * @return true if a change has occured during computation or since
+ * the last call, false otherwise
  */
-void
+bool
 NavGraphEdgeConstraint::compute(void) throw()
 {
+  return false;
 }
 
 

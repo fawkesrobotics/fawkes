@@ -42,7 +42,7 @@ class NavGraphNodeConstraint
 
   std::string name();
 
-  virtual void compute(void) throw();
+  virtual bool compute(void) throw();
   virtual bool blocks(const fawkes::TopologicalMapNode &node) throw() = 0;
 
   bool operator==(const std::string &name) const;

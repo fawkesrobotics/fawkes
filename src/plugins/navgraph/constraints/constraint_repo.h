@@ -60,7 +60,7 @@ class ConstraintRepo
 
   bool has_constraints() const;
 
-  void compute();
+  bool compute();
 
   NavGraphNodeConstraint *    blocks(const fawkes::TopologicalMapNode &node);
   NavGraphEdgeConstraint *    blocks(const fawkes::TopologicalMapNode &from,

@@ -42,7 +42,7 @@ class NavGraphEdgeConstraint
 
   std::string name();
 
-  virtual void compute(void) throw();
+  virtual bool compute(void) throw();
   virtual bool blocks(const fawkes::TopologicalMapNode &from,
 		      const fawkes::TopologicalMapNode &to) throw() = 0;
 

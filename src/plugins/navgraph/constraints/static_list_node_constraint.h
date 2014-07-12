@@ -53,11 +53,14 @@ class NavGraphStaticListNodeConstraint : public NavGraphNodeConstraint
   void clear_nodes();
   bool has_node(const fawkes::TopologicalMapNode &node);
 
+  virtual bool compute(void) throw();
+
   virtual bool blocks(const fawkes::TopologicalMapNode &node) throw()
   { return has_node(node); }
 
  protected:
   std::vector<fawkes::TopologicalMapNode> node_list_;	///< Node list
+  bool modified_;	///< Set to true if changes are made to the constraint.
 
 };
 

@@ -42,6 +42,7 @@ namespace fawkes{
 NavGraphStaticListEdgeConstraint::NavGraphStaticListEdgeConstraint(std::string name)
   : NavGraphEdgeConstraint(name)
 {
+  modified_ = false;
 }
 
 
@@ -56,11 +57,24 @@ NavGraphStaticListEdgeConstraint::NavGraphStaticListEdgeConstraint(
   : NavGraphEdgeConstraint(name)
 {
   edge_list_ = edge_list;
+  modified_ = false;
 }
 
 /** Virtual empty destructor. */
 NavGraphStaticListEdgeConstraint::~NavGraphStaticListEdgeConstraint()
 {
+}
+
+
+bool
+NavGraphStaticListEdgeConstraint::compute(void) throw()
+{
+  if (modified_) {
+    modified_ = false;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 
@@ -71,6 +85,7 @@ void
 NavGraphStaticListEdgeConstraint::add_edge(const fawkes::TopologicalMapEdge &edge)
 {
   if (! has_edge(edge)) {
+    modified_ = false;
     edge_list_.push_back(edge);
   }
 }
@@ -95,7 +110,10 @@ NavGraphStaticListEdgeConstraint::remove_edge(const fawkes::TopologicalMapEdge &
 {
   std::vector<TopologicalMapEdge>::iterator e
     = std::find(edge_list_.begin(), edge_list_.end(), edge);
-  if (e != edge_list_.end())  edge_list_.erase(e);
+  if (e != edge_list_.end()) {
+    modified_ = false;
+    edge_list_.erase(e);
+  }
 }
 
 /** Check if constraint has a specific edge.
@@ -123,7 +141,10 @@ NavGraphStaticListEdgeConstraint::edge_list() const
 void
 NavGraphStaticListEdgeConstraint::clear_edges()
 {
-  edge_list_.clear();
+  if (! edge_list_.empty()) {
+    modified_ = false;
+    edge_list_.clear();
+  }
 }
 
 

@@ -76,6 +76,7 @@ NavGraphThread::init()
   cfg_orientation_tolerance_ = config->get_float("/plugins/navgraph/orientation_tolerance");
   cfg_shortcut_tolerance_ = config->get_float("/plugins/navgraph/shortcut_tolerance");
   cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
+  cfg_replan_interval_ = config->get_float("/plugins/navgraph/replan_interval");
   cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
   cfg_log_graph_       = config->get_bool("/plugins/navgraph/log_graph");
 
@@ -133,6 +134,7 @@ NavGraphThread::init()
   target_reached_    = false;
   last_node_         = "";
   cmd_sent_at_       = new Time(clock);
+  path_planned_at_   = new Time(clock);
   target_reached_at_ = new Time(clock);
 
   constraint_repo_   = new ConstraintRepo(logger);
@@ -143,6 +145,7 @@ void
 NavGraphThread::finalize()
 {
   delete cmd_sent_at_;
+  delete path_planned_at_;
   delete astar_;
   delete target_reached_at_;
   graph_.clear();

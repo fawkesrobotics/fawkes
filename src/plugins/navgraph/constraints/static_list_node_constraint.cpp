@@ -41,6 +41,7 @@ namespace fawkes{
 NavGraphStaticListNodeConstraint::NavGraphStaticListNodeConstraint(std::string name)
   : NavGraphNodeConstraint(name)
 {
+  modified_ = false;
 }
 
 
@@ -55,11 +56,24 @@ NavGraphStaticListNodeConstraint::NavGraphStaticListNodeConstraint(
   : NavGraphNodeConstraint(name)
 {
   node_list_ = node_list;
+  modified_  = false;
 }
 
 /** Virtual empty destructor. */
 NavGraphStaticListNodeConstraint::~NavGraphStaticListNodeConstraint()
 {
+}
+
+
+bool
+NavGraphStaticListNodeConstraint::compute(void) throw()
+{
+  if (modified_) {
+    modified_ = false;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 
@@ -70,6 +84,7 @@ void
 NavGraphStaticListNodeConstraint::add_node(const fawkes::TopologicalMapNode &node)
 {
   if (! has_node(node)) {
+    modified_ = true;
     node_list_.push_back(node);
   }
 }
@@ -92,13 +107,11 @@ NavGraphStaticListNodeConstraint::add_nodes(
 void
 NavGraphStaticListNodeConstraint::remove_node(const fawkes::TopologicalMapNode &node)
 {
-  if( ! node_list_.empty()) {
-    std::vector<TopologicalMapNode>::iterator i;
-    for( i = node_list_.begin(); i != node_list_.end(); ++i){
-      if( i->name() == node.name() ){
-	node_list_.erase(i);
-      }
-    }
+  std::vector<TopologicalMapNode>::iterator n =
+    std::find(node_list_.begin(), node_list_.end(), node);
+  if (n != node_list_.end()) {
+    modified_ = true;
+    node_list_.erase(n);
   }
 }
 
@@ -127,7 +140,10 @@ NavGraphStaticListNodeConstraint::node_list() const
 void
 NavGraphStaticListNodeConstraint::clear_nodes()
 {
-  node_list_.clear();
+  if (! node_list_.empty()) {
+    modified_ = true;
+    node_list_.clear();
+  }
 }
 
 

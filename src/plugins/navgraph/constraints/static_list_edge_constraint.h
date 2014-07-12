@@ -53,11 +53,14 @@ class NavGraphStaticListEdgeConstraint : public NavGraphEdgeConstraint
   void clear_edges();
   bool has_edge(const fawkes::TopologicalMapEdge &edge);
 
+  virtual bool compute(void) throw();
+
   virtual bool blocks(const fawkes::TopologicalMapNode &from,
 		      const fawkes::TopologicalMapNode &to) throw();
 
  private:
   std::vector<fawkes::TopologicalMapEdge> edge_list_;
+  bool modified_;
 
 };
 

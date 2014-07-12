@@ -200,17 +200,21 @@ ConstraintRepo::has_constraints() const
 }
 
 
-/** Call compute method on all registered constraints. */
-void
+/** Call compute method on all registered constraints.
+ * @return true if any constraint reported a change, false otherwise
+ */
+bool
 ConstraintRepo::compute()
 {
-  modified_ = true;
+  bool modified = false;
   for (fawkes::NavGraphNodeConstraint *c : node_constraints_) {
-    c->compute();
+    if (c->compute())  modified = true;
   }
   for (fawkes::NavGraphEdgeConstraint *c : edge_constraints_) {
-    c->compute();
+    if (c->compute())  modified = true;
   }
+
+  return modified;
 }
 
 
