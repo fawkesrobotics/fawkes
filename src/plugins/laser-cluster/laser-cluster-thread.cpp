@@ -89,8 +89,6 @@ LaserClusterThread::~LaserClusterThread()
 void
 LaserClusterThread::init()
 {
-  logger->log_info(name(), "Initializing for prefix %s", cfg_prefix_.c_str());
-
   cfg_line_removal_ = config->get_bool(cfg_prefix_+"line_removal/enable");
   if (cfg_line_removal_) {
     cfg_segm_max_iterations_ =
@@ -304,19 +302,17 @@ LaserClusterThread::loop()
 
   CloudPtr noline_cloud(new Cloud());
 
+  // Erase non-finite points
+  pcl::PassThrough<PointType> passthrough;
   if (current_max_x_ > 0.) {
-    // Erase non-finite points
-    pcl::PassThrough<PointType> passthrough;
     passthrough.setFilterFieldName("x");
     passthrough.setFilterLimits(0.0, current_max_x_);
-    passthrough.setInputCloud(input_);
-    passthrough.filter(*noline_cloud);
-  } else {
-    *noline_cloud = *input_;
   }
+  passthrough.setInputCloud(input_);
+  passthrough.filter(*noline_cloud);
 
-  logger->log_info(name(), "[L %u] total: %zu   finite: %zu",
-  		     loop_count_, input_->points.size(), noline_cloud->points.size());
+  //logger->log_info(name(), "[L %u] total: %zu   finite: %zu",
+  //		     loop_count_, input_->points.size(), noline_cloud->points.size());
 
   pcl::ModelCoefficients::Ptr coeff(new pcl::ModelCoefficients());
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
@@ -336,13 +332,10 @@ LaserClusterThread::loop()
 
       // check for a minimum number of expected inliers
       if ((double)inliers->indices.size() < cfg_segm_min_inliers_) {
-	logger->log_warn(name(), "[L %u] no more lines (%zu inliers, required %u)",
-			   loop_count_, inliers->indices.size(), cfg_segm_min_inliers_);
+	//logger->log_warn(name(), "[L %u] no more lines (%zu inliers, required %u)",
+	//		   loop_count_, inliers->indices.size(), cfg_segm_min_inliers_);
 	break;
       }
-
-      logger->log_info(name(), "[L %u] Removing line with %zu inliers",
-      	         loop_count_, inliers->indices.size());
 
       // Remove the linear inliers, extract the rest
       CloudPtr cloud_f(new Cloud());
@@ -354,9 +347,6 @@ LaserClusterThread::loop()
       *noline_cloud = *cloud_f;
     }
   }
-
-  logger->log_info(name(), "[L %u] Continuing with %zu points",
-      	         loop_count_, noline_cloud->points.size());
 
   {
     CloudPtr tmp_cloud(new Cloud());
