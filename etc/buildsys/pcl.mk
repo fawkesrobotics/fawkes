@@ -72,6 +72,8 @@ ifeq ($(HAVE_PCL),1)
   # 		  -DHAVE_ROS_SENSOR_MSGS
   # endif
 
+  PCL_VERSION  = $(shell $(PKGCONFIG) --modversion 'pcl_common$(PCL_VERSION_SUFFIX)')
+
   CFLAGS_PCL  += -DHAVE_PCL $(CFLAGS_EIGEN3) \
 		 $(shell $(PKGCONFIG) --cflags 'pcl_common$(PCL_VERSION_SUFFIX)') \
 		 -Wno-unknown-pragmas -Wno-deprecated-declarations
@@ -106,6 +108,9 @@ ifeq ($(HAVE_PCL),1)
     endif
   endif
 
+  pcl-version-atleast = $(if $(shell $(PKGCONFIG) --atleast-version=$1 'pcl_common$(PCL_VERSION_SUFFIX)'; echo $${?/1/}),1,)
+  pcl-version-exact = $(if $(shell $(PKGCONFIG) --exact-version=$1 'pcl_common$(PCL_VERSION_SUFFIX)'; echo $${?/1/}),1,)
+  pcl-version-max = $(if $(shell $(PKGCONFIG) --max-version=$1 'pcl_common$(PCL_VERSION_SUFFIX)'; echo $${?/1/}),1,)
   pcl-have-lib    = $(if $(shell $(PKGCONFIG) --exists 'pcl_$1$(PCL_VERSION_SUFFIX)'; echo $${?/1/}),1,0)
   pcl-lib-cflags  = $(shell $(PKGCONFIG) --cflags 'pcl_$1$(PCL_VERSION_SUFFIX)')
   pcl-lib-ldflags = $(shell $(PKGCONFIG) --libs 'pcl_$1$(PCL_VERSION_SUFFIX)')
