@@ -97,6 +97,8 @@ LaserClusterThread::init()
       config->get_float(cfg_prefix_+"line_removal/segmentation_distance_threshold");
     cfg_segm_min_inliers_ =
       config->get_uint(cfg_prefix_+"line_removal/segmentation_min_inliers");
+    cfg_line_min_length_ =
+      config->get_float(cfg_prefix_+"line_removal/min_length");
   }
   cfg_switch_tolerance_      = config->get_float(cfg_prefix_+"switch_tolerance");
   cfg_cluster_tolerance_     = config->get_float(cfg_prefix_+"clustering/tolerance");
@@ -318,6 +320,8 @@ LaserClusterThread::loop()
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
 
   if (cfg_line_removal_) {
+    std::list<CloudPtr> restore_pcls;
+
     while (noline_cloud->points.size () > cfg_cluster_min_size_) {
       // Segment the largest planar component from the remaining cloud
       //logger->log_info(name(), "[L %u] %zu points left",
@@ -337,6 +341,21 @@ LaserClusterThread::loop()
 	break;
       }
 
+      float length = calc_line_length(noline_cloud, inliers, coeff);
+
+      if (length < cfg_line_min_length_) {
+	// we must remove the points for now to continue filtering,
+	// but must restore them later
+	// Remove the linear inliers, extract the rest
+	CloudPtr cloud_line(new Cloud());
+	pcl::ExtractIndices<PointType> extract;
+	extract.setInputCloud(noline_cloud);
+	extract.setIndices(inliers);
+	extract.setNegative(false);
+	extract.filter(*cloud_line);
+	restore_pcls.push_back(cloud_line);
+      }
+
       // Remove the linear inliers, extract the rest
       CloudPtr cloud_f(new Cloud());
       pcl::ExtractIndices<PointType> extract;
@@ -345,6 +364,10 @@ LaserClusterThread::loop()
       extract.setNegative(true);
       extract.filter(*cloud_f);
       *noline_cloud = *cloud_f;
+    }
+
+    for (CloudPtr cloud : restore_pcls) {
+      *noline_cloud += *cloud;
     }
   }
 
@@ -588,4 +611,69 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
     }
   }
   iface->write();  
+}
+
+
+float
+LaserClusterThread::calc_line_length(CloudPtr cloud, pcl::PointIndices::Ptr inliers,
+				     pcl::ModelCoefficients::Ptr coeff)
+{
+  if (inliers->indices.size() < 2)  return 0.;
+
+  CloudPtr cloud_line(new Cloud());
+  CloudPtr cloud_line_proj(new Cloud());
+
+  pcl::ExtractIndices<PointType> extract;
+  extract.setInputCloud(cloud);
+  extract.setIndices(inliers);
+  extract.setNegative(false);
+  extract.filter(*cloud_line);
+
+  // Project the model inliers
+  pcl::ProjectInliers<PointType> proj;
+  proj.setModelType(pcl::SACMODEL_LINE);
+  proj.setInputCloud(cloud_line);
+  proj.setModelCoefficients(coeff);
+  proj.filter(*cloud_line_proj);
+
+  Eigen::Vector3f point_on_line, line_dir;
+  point_on_line[0]  = cloud_line_proj->points[0].x;
+  point_on_line[1]  = cloud_line_proj->points[0].y;
+  point_on_line[2]  = cloud_line_proj->points[0].z;
+  line_dir[0]       = coeff->values[3];
+  line_dir[1]       = coeff->values[4];
+  line_dir[2]       = coeff->values[5];
+
+  ssize_t idx_1 = 0, idx_2 = 0;
+  float max_dist_1 = 0.f, max_dist_2 = 0.f;
+
+  for (size_t i = 1; i < cloud_line_proj->points.size(); ++i) {
+    const PointType &pt = cloud_line_proj->points[i];
+    Eigen::Vector3f ptv(pt.x, pt.y, pt.z);
+    float dist = (ptv - point_on_line).norm();
+    if (line_dir.dot(ptv) >= 0) {
+      if (dist > max_dist_1) {
+	max_dist_1 = dist;
+	idx_1 = i;
+      }
+    }
+    if (line_dir.dot(ptv) <= 0) {
+      if (dist > max_dist_2) {
+	max_dist_2 = dist;
+	idx_2 = i;
+      }
+    }
+  }
+
+  if (idx_1 >= 0 && idx_2 >= 0) {
+    const PointType &pt_1 = cloud_line_proj->points[idx_1];
+    const PointType &pt_2 = cloud_line_proj->points[idx_2];
+
+    Eigen::Vector3f ptv_1(pt_1.x, pt_1.y, pt_1.z);
+    Eigen::Vector3f ptv_2(pt_2.x, pt_2.y, pt_2.z);
+
+    return (ptv_1 - ptv_2).norm();
+  } else {
+    return 0.f;
+  }
 }
