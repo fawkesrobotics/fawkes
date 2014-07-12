@@ -52,7 +52,7 @@ NavGraphVisualizationThread::init()
 {
   vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100, /* latching */ true);
 
-  last_id_num_ = 0;
+  last_id_num_ = constraints_last_id_num_ = 0;
   publish();
 }
 
@@ -66,6 +66,15 @@ NavGraphVisualizationThread::finalize()
     delop.header.frame_id = "/map";
     delop.header.stamp = ros::Time::now();
     delop.ns = "navgraph";
+    delop.id = i;
+    delop.action = visualization_msgs::Marker::DELETE;
+    m.markers.push_back(delop);
+  }
+  for (size_t i = 0; i < constraints_last_id_num_; ++i) {
+    visualization_msgs::Marker delop;
+    delop.header.frame_id = "/map";
+    delop.header.stamp = ros::Time::now();
+    delop.ns = "navgraph-constraints";
     delop.id = i;
     delop.action = visualization_msgs::Marker::DELETE;
     m.markers.push_back(delop);
@@ -184,10 +193,13 @@ NavGraphVisualizationThread::publish()
   std::vector<fawkes::TopologicalMapEdge> edges = graph_->edges();
 
   crepo_.lock();
-  std::map<std::string, std::string> blocked = crepo_->blocks(nodes);
+  std::map<std::string, std::string> bl_nodes = crepo_->blocks(nodes);
+  std::map<std::pair<std::string, std::string>, std::string> bl_edges =
+    crepo_->blocks(edges);
   crepo_.unlock();
 
   size_t id_num = 0;
+  size_t constraints_id_num = 0;
 
   visualization_msgs::MarkerArray m;
   visualization_msgs::Marker lines;
@@ -270,15 +282,15 @@ NavGraphVisualizationThread::publish()
         sphere.color.g = 0.f;
       }
       sphere.color.b = 0.f;
-    } else if (blocked.find(nodes[i].name()) != blocked.end()) {
+    } else if (bl_nodes.find(nodes[i].name()) != bl_nodes.end()) {
       sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.05;
       sphere.color.r = sphere.color.g = sphere.color.b = 0.5;
 
       visualization_msgs::Marker text;
       text.header.frame_id = "/map";
       text.header.stamp = ros::Time::now();
-      text.ns = "navgraph";
-      text.id = id_num++;
+      text.ns = "navgraph-constraints";
+      text.id = constraints_id_num++;
       text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
       text.action = visualization_msgs::Marker::ADD;
       text.pose.position.x =  nodes[i].x();
@@ -290,7 +302,7 @@ NavGraphVisualizationThread::publish()
       text.color.g = text.color.b = 0.f;
       text.color.a = 1.0;
       text.lifetime = ros::Duration(0, 0);
-      text.text = blocked[nodes[i].name()];
+      text.text = bl_nodes[nodes[i].name()];
       m.markers.push_back(text);
 
     } else {
@@ -590,8 +602,10 @@ NavGraphVisualizationThread::publish()
             arrow.color.g = arrow.color.b = 0.f;
             arrow.scale.x = 0.07; // shaft radius
             arrow.scale.y = 0.2; // head radius
-	  } else if (blocked.find(from.name()) != blocked.end() ||
-		     blocked.find(to.name()) != blocked.end())
+	  } else if (bl_nodes.find(from.name()) != bl_nodes.end() ||
+		     bl_nodes.find(to.name()) != bl_nodes.end() ||
+		     bl_edges.find(std::make_pair(to.name(), from.name())) != bl_edges.end() ||
+		     bl_edges.find(std::make_pair(from.name(), to.name())) != bl_edges.end())
 	  {
             arrow.color.r = arrow.color.g = arrow.color.b = 0.5;
             arrow.scale.x = 0.04; // shaft radius
@@ -627,11 +641,55 @@ NavGraphVisualizationThread::publish()
             // it's in the current plan
             plan_lines.points.push_back(p1);
             plan_lines.points.push_back(p2);
-	  } else if (blocked.find(from.name()) != blocked.end() ||
-		     blocked.find(to.name()) != blocked.end())
+	  } else if (bl_nodes.find(from.name()) != bl_nodes.end() ||
+		     bl_nodes.find(to.name()) != bl_nodes.end())
 	  {
             blocked_lines.points.push_back(p1);
             blocked_lines.points.push_back(p2);
+
+	  } else if (bl_edges.find(std::make_pair(to.name(), from.name())) != bl_edges.end() ||
+		     bl_edges.find(std::make_pair(from.name(), to.name())) != bl_edges.end())
+	  {
+            blocked_lines.points.push_back(p1);
+            blocked_lines.points.push_back(p2);
+
+	    tf::Vector3 p1v(p1.x, p1.y, p1.z);
+	    tf::Vector3 p2v(p2.x, p2.y, p2.z);
+
+	    tf::Vector3 p = p1v + (p2v - p1v) * 0.5;
+
+	    std::string text_s = "";
+
+	    std::map<std::pair<std::string, std::string>, std::string>::iterator e =
+	      bl_edges.find(std::make_pair(to.name(), from.name()));
+	    if (e != bl_edges.end()) {
+	      text_s = e->second;
+	    } else {
+	      e = bl_edges.find(std::make_pair(from.name(), to.name()));
+	      if (e != bl_edges.end()) {
+		text_s = e->second;
+	      }
+	    }
+
+	    visualization_msgs::Marker text;
+	    text.header.frame_id = "/map";
+	    text.header.stamp = ros::Time::now();
+	    text.ns = "navgraph-constraints";
+	    text.id = constraints_id_num++;
+	    text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+	    text.action = visualization_msgs::Marker::ADD;
+	    text.pose.position.x =  p[0];
+	    text.pose.position.y =  p[1];
+	    text.pose.position.z = 0.3;
+	    text.pose.orientation.w = 1.;
+	    text.scale.z = 0.12;
+	    text.color.r = 1.0;
+	    text.color.g = text.color.b = 0.f;
+	    text.color.a = 1.0;
+	    text.lifetime = ros::Duration(0, 0);
+	    text.text = text_s;
+	    m.markers.push_back(text);
+
           } else {
             lines.points.push_back(p1);
             lines.points.push_back(p2);
@@ -656,7 +714,18 @@ NavGraphVisualizationThread::publish()
     m.markers.push_back(delop);
   }
 
+  for (size_t i = constraints_id_num; i < constraints_last_id_num_; ++i) {
+    visualization_msgs::Marker delop;
+    delop.header.frame_id = "/map";
+    delop.header.stamp = ros::Time::now();
+    delop.ns = "navgraph-constraints";
+    delop.id = i;
+    delop.action = visualization_msgs::Marker::DELETE;
+    m.markers.push_back(delop);
+  }
+
   last_id_num_ = id_num;
+  constraints_last_id_num_ = constraints_id_num;
 
   vispub_.publish(m);
 }

@@ -23,6 +23,9 @@
 #define __NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
 
 #include <plugins/navgraph/constraints/node_constraint.h>
+#include <plugins/navgraph/constraints/edge_constraint.h>
+
+#include <utils/graph/topological_map_edge.h>
 
 #include <vector>
 
@@ -37,32 +40,43 @@ class ConstraintRepo
 {
  public:
   /** List of navgraph node constraints. */
-  typedef std::vector<fawkes::NavGraphNodeConstraint*> ConstraintList;
+  typedef std::vector<fawkes::NavGraphNodeConstraint*> NodeConstraintList;
+  /** List of navgraph edge constraints. */
+  typedef std::vector<fawkes::NavGraphEdgeConstraint*> EdgeConstraintList;
 
   ConstraintRepo(Logger *logger);
   ~ConstraintRepo();
 
   void register_constraint(NavGraphNodeConstraint *constraint);
+  void register_constraint(NavGraphEdgeConstraint *constraint);
   void unregister_constraint(std::string name);
 
   bool has_constraint(std::string &name);
-  fawkes::NavGraphNodeConstraint *  get_constraint(std::string &name);
+  fawkes::NavGraphNodeConstraint *  get_node_constraint(std::string &name);
+  fawkes::NavGraphEdgeConstraint *  get_edge_constraint(std::string &name);
 
-  const ConstraintList &  constraints() const;
+  const NodeConstraintList &  node_constraints() const;
+  const EdgeConstraintList &  edge_constraints() const;
 
   bool has_constraints() const;
 
   void compute();
 
   NavGraphNodeConstraint *    blocks(const fawkes::TopologicalMapNode &node);
+  NavGraphEdgeConstraint *    blocks(const fawkes::TopologicalMapNode &from,
+				     const fawkes::TopologicalMapNode &to);
+
   std::map<std::string, std::string>
     blocks(const std::vector<fawkes::TopologicalMapNode> &nodes);
 
+  std::map<std::pair<std::string, std::string>, std::string>
+    blocks(const std::vector<fawkes::TopologicalMapEdge> &edges);
 
   bool modified(bool reset_modified = false);
 
  private:
-  ConstraintList constraints_;
+  NodeConstraintList node_constraints_;
+  EdgeConstraintList edge_constraints_;
   Logger *logger_;
   bool    modified_;
 };

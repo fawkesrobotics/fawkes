@@ -67,6 +67,7 @@ class NavGraphVisualizationThread
 
  private:
   size_t last_id_num_;
+  size_t constraints_last_id_num_;
   ros::Publisher vispub_;
 
   std::vector<fawkes::TopologicalMapNode> plan_;

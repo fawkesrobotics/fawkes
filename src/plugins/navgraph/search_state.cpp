@@ -104,16 +104,10 @@ NavGraphSearchState::children()
 
     bool expand = true;
     if (constraint_repo_) {
-      const std::vector<fawkes::NavGraphNodeConstraint*> &constraints =
-	constraint_repo_->constraints();
-
-      std::vector<fawkes::NavGraphNodeConstraint*>::const_iterator it;
-
-      for (it = constraints.begin(); it != constraints.end(); ++it) {
-	if( (*it)->blocks(d) ){
-	  expand = false;
-	  break;
-	}
+      if (constraint_repo_->blocks(d)) {
+	expand = false;
+      } else if (constraint_repo_->blocks(node_, d)) {
+	expand = false;
       }
     }
 

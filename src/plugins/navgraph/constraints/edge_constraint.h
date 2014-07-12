@@ -1,7 +1,7 @@
 /***************************************************************************
- *  node_constraint.h - base class for nod constraints
+ *  edge_constraint.h - base class for edge constraints
  *
- *  Created: Sun Mar 02 10:47:35 2014
+ *  Created: Sat Jul 12 14:40:01 2014
  *  Copyright  2014  Sebastian Reuter
  *             2014  Tim Niemueller
  ****************************************************************************/
@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __NAVGRAPH_CONSTRAINTS_NODE_CONSTRAINT_H_
-#define __NAVGRAPH_CONSTRAINTS_NODE_CONSTRAINT_H_
+#ifndef __NAVGRAPH_CONSTRAINTS_EDGE_CONSTRAINT_H_
+#define __NAVGRAPH_CONSTRAINTS_EDGE_CONSTRAINT_H_
 
 #include <vector>
 #include <string>
@@ -34,16 +34,17 @@ namespace fawkes{
 
 class Logger;
 
-class NavGraphNodeConstraint
+class NavGraphEdgeConstraint
 {
  public:
-  NavGraphNodeConstraint(std::string &name);
-  virtual ~NavGraphNodeConstraint();
+  NavGraphEdgeConstraint(std::string &name);
+  virtual ~NavGraphEdgeConstraint();
 
   std::string name();
 
   virtual void compute(void) throw();
-  virtual bool blocks(const fawkes::TopologicalMapNode &node) throw() = 0;
+  virtual bool blocks(const fawkes::TopologicalMapNode &from,
+		      const fawkes::TopologicalMapNode &to) throw() = 0;
 
   bool operator==(const std::string &name) const;
 

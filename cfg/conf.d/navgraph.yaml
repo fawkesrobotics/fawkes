@@ -64,3 +64,4 @@ plugins/navgraph:
   static-constraints:
     # A list of names of nodes that should be statically blocked
     nodes: ["NodeA", "NodeB"]
+    edges: ["NodeA--NodeB"]

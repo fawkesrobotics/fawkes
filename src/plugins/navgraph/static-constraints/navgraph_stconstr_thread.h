@@ -31,6 +31,7 @@
 
 namespace fawkes {
   class NavGraphStaticListNodeConstraint;
+  class NavGraphStaticListEdgeConstraint;
 }
 
 class NavGraphStaticConstraintsThread
@@ -51,7 +52,8 @@ class NavGraphStaticConstraintsThread
  protected: virtual void run() { Thread::run();}
 
  private:
-  fawkes::NavGraphStaticListNodeConstraint *constraint_;
+  fawkes::NavGraphStaticListNodeConstraint *node_constraint_;
+  fawkes::NavGraphStaticListEdgeConstraint *edge_constraint_;
 };
 
 #endif

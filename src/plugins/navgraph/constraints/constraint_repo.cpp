@@ -53,17 +53,23 @@ ConstraintRepo::~ConstraintRepo()
 
 
 /** Register a constraint.
- * @param constraint constraint to register
+ * @param constraint node constraint to register
  */
 void
 ConstraintRepo::register_constraint(NavGraphNodeConstraint* constraint)
 {
   modified_ = true;
+  node_constraints_.push_back(constraint);
+}
 
-  constraints_.push_back(constraint);
-
-  logger_->log_debug("Constraint Repo", "New Constraint %s registered.",
-		     constraint->name().c_str());
+/** Register a constraint.
+ * @param constraint edge constraint to register
+ */
+void
+ConstraintRepo::register_constraint(NavGraphEdgeConstraint* constraint)
+{
+  modified_ = true;
+  edge_constraints_.push_back(constraint);
 }
 
 
@@ -75,15 +81,26 @@ ConstraintRepo::unregister_constraint(std::string name)
 {
   modified_ = true;
 
-  ConstraintList::iterator it =
-    std::find_if(constraints_.begin(), constraints_.end(),
+  NodeConstraintList::iterator nc =
+    std::find_if(node_constraints_.begin(), node_constraints_.end(),
 		 [&name](const NavGraphNodeConstraint *c) {
 		   return *c == name;
 		 });
-  if (it != constraints_.end()) {
-    logger_->log_debug("ConstraintRepo", "Unregistering constraint %s",
-		       (*it)->name().c_str());
-    constraints_.erase(it);
+  if (nc != node_constraints_.end()) {
+    logger_->log_debug("ConstraintRepo", "Unregistering node constraint %s",
+		       (*nc)->name().c_str());
+    node_constraints_.erase(nc);
+  }
+
+  EdgeConstraintList::iterator ec =
+    std::find_if(edge_constraints_.begin(), edge_constraints_.end(),
+		 [&name](const NavGraphEdgeConstraint *c) {
+		   return *c == name;
+		 });
+  if (ec != edge_constraints_.end()) {
+    logger_->log_debug("ConstraintRepo", "Unregistering edge constraint %s",
+		       (*ec)->name().c_str());
+    edge_constraints_.erase(ec);
   }
 }
 
@@ -96,28 +113,56 @@ ConstraintRepo::unregister_constraint(std::string name)
 bool
 ConstraintRepo::has_constraint(std::string &name)
 {
-  ConstraintList::iterator it =
-    std::find_if(constraints_.begin(), constraints_.end(),
+  NodeConstraintList::iterator nc =
+    std::find_if(node_constraints_.begin(), node_constraints_.end(),
 		 [&name](const NavGraphNodeConstraint *c) {
 		   return *c == name;
 		 });
-  return (it != constraints_.end());
+  if (nc != node_constraints_.end()) return true;
+
+  EdgeConstraintList::iterator ec =
+    std::find_if(edge_constraints_.begin(), edge_constraints_.end(),
+		 [&name](const NavGraphEdgeConstraint *c) {
+		   return *c == name;
+		 });
+  if (ec != edge_constraints_.end()) return true;
+
+  return false;
 }
 
 
-/** Get a constraint by name.
+/** Get a node constraint by name.
  * @param name name of constraint to retrieve
- * @return if found returns a pointer to the constrained, NULL if not found
+ * @return if found returns a pointer to the node constraint, NULL if not found
  */
 fawkes::NavGraphNodeConstraint *
-ConstraintRepo::get_constraint(std::string &name)
+ConstraintRepo::get_node_constraint(std::string &name)
 {
-  ConstraintList::iterator it =
-    std::find_if(constraints_.begin(), constraints_.end(),
+  NodeConstraintList::iterator it =
+    std::find_if(node_constraints_.begin(), node_constraints_.end(),
 		 [&name](const NavGraphNodeConstraint *c) {
 		   return *c == name;
 		 });
-  if (it != constraints_.end()) {
+  if (it != node_constraints_.end()) {
+    return *it;
+  }
+
+  return NULL;
+}
+
+/** Get an edge constraint by name.
+ * @param name name of constraint to retrieve
+ * @return if found returns a pointer to the edge constraint, NULL if not found
+ */
+fawkes::NavGraphEdgeConstraint *
+ConstraintRepo::get_edge_constraint(std::string &name)
+{
+  EdgeConstraintList::iterator it =
+    std::find_if(edge_constraints_.begin(), edge_constraints_.end(),
+		 [&name](const NavGraphEdgeConstraint *c) {
+		   return *c == name;
+		 });
+  if (it != edge_constraints_.end()) {
     return *it;
   }
 
@@ -125,13 +170,23 @@ ConstraintRepo::get_constraint(std::string &name)
 }
 
 
-/** Get a list of registered constraints.
- * @return list of constraints
+/** Get a list of registered node constraints.
+ * @return list of node constraints
  */
-const ConstraintRepo::ConstraintList &
-ConstraintRepo::constraints() const
+const ConstraintRepo::NodeConstraintList &
+ConstraintRepo::node_constraints() const
 {
-  return constraints_;
+  return node_constraints_;
+}
+
+
+/** Get a list of registered edge constraints.
+ * @return list of edge constraints
+ */
+const ConstraintRepo::EdgeConstraintList &
+ConstraintRepo::edge_constraints() const
+{
+  return edge_constraints_;
 }
 
 
@@ -141,7 +196,7 @@ ConstraintRepo::constraints() const
 bool
 ConstraintRepo::has_constraints() const
 {
-  return (! constraints_.empty());
+  return (! (node_constraints_.empty() && edge_constraints_.empty()));
 }
 
 
@@ -150,7 +205,10 @@ void
 ConstraintRepo::compute()
 {
   modified_ = true;
-  for (fawkes::NavGraphNodeConstraint *c : constraints_) {
+  for (fawkes::NavGraphNodeConstraint *c : node_constraints_) {
+    c->compute();
+  }
+  for (fawkes::NavGraphEdgeConstraint *c : edge_constraints_) {
     c->compute();
   }
 }
@@ -164,7 +222,7 @@ ConstraintRepo::compute()
 fawkes::NavGraphNodeConstraint *
 ConstraintRepo::blocks(const fawkes::TopologicalMapNode &node)
 {
-  for (fawkes::NavGraphNodeConstraint *c : constraints_) {
+  for (fawkes::NavGraphNodeConstraint *c : node_constraints_) {
     if (c->blocks(node)) {
       return c;
     }
@@ -185,9 +243,51 @@ ConstraintRepo::blocks(const std::vector<fawkes::TopologicalMapNode> &nodes)
 {
   std::map<std::string, std::string> rv;
   for (const fawkes::TopologicalMapNode &n : nodes) {
-    for (fawkes::NavGraphNodeConstraint *c : constraints_) {
+    for (fawkes::NavGraphNodeConstraint *c : node_constraints_) {
       if (c->blocks(n)) {
 	rv[n.name()] = c->name();
+      }
+    }
+  }
+
+  return rv;
+}
+
+
+/** Check if any constraint in the repo blocks the edge.
+ * @param from node from which the edge originates
+ * @param to node to which the edge leads
+ * @return the (first) edge constraint that blocked the node,
+ * NULL if the node is not blocked
+ */
+fawkes::NavGraphEdgeConstraint *
+ConstraintRepo::blocks(const fawkes::TopologicalMapNode &from,
+		       const fawkes::TopologicalMapNode &to)
+{
+  for (fawkes::NavGraphEdgeConstraint *c : edge_constraints_) {
+    if (c->blocks(from, to)) {
+      return c;
+    }
+  }
+
+  return NULL;
+}
+
+
+/** Check if any constraint in the repo blocks (some) edges.
+ * @param edges vector of edges to check for a block
+ * @return map of blocked edges, first element is a pair of the node names,
+ * second element is the name of the constraint that blocks the edge.
+ * Edges from @p edges that are not blocked will not appear in the map.
+ */
+std::map<std::pair<std::string, std::string>, std::string>
+ConstraintRepo::blocks(const std::vector<fawkes::TopologicalMapEdge> &edges)
+{
+  std::map<std::pair<std::string, std::string>, std::string> rv;
+  for (const fawkes::TopologicalMapEdge &e : edges) {
+    for (fawkes::NavGraphEdgeConstraint *c : edge_constraints_) {
+      if (c->blocks(e.from_node(), e.to_node()) ){
+	rv[std::make_pair(e.from(), e.to())] = c->name();
       }
     }
   }
