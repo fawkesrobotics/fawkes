@@ -23,7 +23,7 @@ include $(BUILDCONFDIR)/tf/tf.mk
 
 PRESUBDIRS = interfaces
 
-REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface
+REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface search
 
 ifeq ($(CC),gcc)
   ifneq ($(call gcc_atleast_version,4,6),1)
