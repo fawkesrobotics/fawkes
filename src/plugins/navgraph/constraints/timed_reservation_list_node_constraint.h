@@ -23,7 +23,7 @@
 #ifndef __NAVGRAPH_CONSTRAINTS_RESERVATION_LIST_NODE_CONSTRAINT_H_
 #define __NAVGRAPH_CONSTRAINTS_RESERVATION_LIST_NODE_CONSTRAINT_H_
 
-#include <plugins/navgraph/constraints/node_constraint.h>
+#include <plugins/navgraph/constraints/static_list_node_constraint.h>
 
 #include <vector>
 #include <string>
@@ -36,30 +36,18 @@ namespace fawkes{
 }
 #endif
 
-class NavGraphTmpReservationListNodeConstraint : public NavGraphNodeConstraint
+class NavGraphTimedReservationListNodeConstraint : public NavGraphStaticListNodeConstraint
 {
  public:
-  NavGraphTmpReservationListNodeConstraint(Logger *logger, std::string name);
+  NavGraphTimedReservationListNodeConstraint(Logger *logger, std::string name);
 
-  NavGraphTmpReservationListNodeConstraint(Logger *logger, std::string name,
-				   std::vector<fawkes::TopologicalMapNode> &node_list);
-
-  virtual ~NavGraphTmpReservationListNodeConstraint();
-
-  const std::vector<fawkes::TopologicalMapNode> &  node_list() const;
-
-  void add_node(const fawkes::TopologicalMapNode &node);
-  void add_nodes(const std::vector<fawkes::TopologicalMapNode> &nodes);
-  void remove_node(const fawkes::TopologicalMapNode &node);
-  void clear_nodes();
-  bool has_node(const fawkes::TopologicalMapNode &node);
-
-  virtual bool blocks(const fawkes::TopologicalMapNode &node) throw()
-  { return has_node(node); }
+  NavGraphTimedReservationListNodeConstraint(Logger *logger, std::string name,
+					     std::vector<fawkes::TopologicalMapNode> &node_list);
+  
+  virtual ~NavGraphTimedReservationListNodeConstraint();
 
  private:
-  std::vector<fawkes::TopologicalMapNode> node_list_;
-  Logger* logger_;
+  Logger *logger_;
 
 };
 

@@ -56,8 +56,8 @@ class NavGraphStaticListNodeConstraint : public NavGraphNodeConstraint
   virtual bool blocks(const fawkes::TopologicalMapNode &node) throw()
   { return has_node(node); }
 
- private:
-  std::vector<fawkes::TopologicalMapNode> node_list_;
+ protected:
+  std::vector<fawkes::TopologicalMapNode> node_list_;	///< Node list
 
 };
 
