@@ -117,7 +117,6 @@ class LaserLinesThread
     SELECT_MIN_DIST
   } selection_mode_t;
 
-  unsigned int cfg_line_min_size_;
   unsigned int cfg_segm_max_iterations_;
   float        cfg_segm_distance_threshold_;
   float        cfg_segm_sample_max_dist_;

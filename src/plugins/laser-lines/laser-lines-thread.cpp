@@ -89,8 +89,6 @@ LaserLinesThread::~LaserLinesThread()
 void
 LaserLinesThread::init()
 {
-  cfg_line_min_size_ =
-    config->get_uint(CFG_PREFIX"line_min_size");
   cfg_segm_max_iterations_ =
     config->get_uint(CFG_PREFIX"line_segmentation_max_iterations");
   cfg_segm_distance_threshold_ =
@@ -268,7 +266,7 @@ LaserLinesThread::loop()
 
   std::vector<LineInfo> linfos;
 
-  while (in_cloud->points.size () > cfg_line_min_size_) {
+  while (in_cloud->points.size () > cfg_segm_min_inliers_) {
     // Segment the largest linear component from the remaining cloud
     //logger->log_info(name(), "[L %u] %zu points left",
     //		     loop_count_, in_cloud->points.size());
