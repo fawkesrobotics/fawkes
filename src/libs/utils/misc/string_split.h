@@ -48,6 +48,27 @@ std::vector<std::string> str_split(const std::string &s, char delim = '/')
   return elems;
 }
 
+
+/** Split string by delimiter string.
+ * @param s string to split
+ * @param delim delimiter
+ * @return vector of split strings
+ */
+static inline
+std::vector<std::string> str_split(const std::string &s, std::string delim)
+{
+  std::vector<std::string> elems;
+  std::string::size_type pos = 0;
+  do {
+    std::string::size_type dpos = s.find(delim, pos);
+    std::string sub = s.substr(pos, dpos);
+    elems.push_back(sub);
+    if (dpos != std::string::npos) pos = dpos + delim.length();
+    else                           pos = dpos;
+  } while (pos != std::string::npos);
+  return elems;
+}
+
 /** Split string by delimiter.
  * @param s string to split
  * @param delim delimiter
