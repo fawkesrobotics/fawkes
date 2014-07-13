@@ -23,25 +23,15 @@ __buildsys_pcl_mk_ := 1
 
 # It might be a ROS PCL installation, we need to pull in std_msgs
 include $(BUILDSYSDIR)/ros.mk
+include $(BUILDSYSDIR)/eigen3.mk
 
 PCL_LIB_DIRS=$(shell ld --verbose 2>&1 | grep SEARCH | sed 's/SEARCH_DIR("\([^"]*\)");/\1/g')
 
 ifneq ($(PKGCONFIG),)
   HAVE_PCL = $(if $(shell $(PKGCONFIG) --exists 'pcl_common'; echo $${?/1/}),1,0)
-  HAVE_EIGEN3 = $(if $(shell $(PKGCONFIG) --exists 'eigen3'; echo $${?/1/}),1,0)
 endif
 
-ifeq ($(HAVE_EIGEN3),1)
-  CFLAGS_EIGEN3  = -DHAVE_EIGEN3 $(shell $(PKGCONFIG) --cflags 'eigen3') \
-		   -DEIGEN_USE_NEW_STDVECTOR \
-		   -DEIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
-  LDFLAGS_EIGEN3 = $(shell $(PKGCONFIG) --libs 'eigen3')
-  ifeq ($(CC),clang)
-    ifeq ($(call clang_atleast_version,3,4),1)
-      CFLAGS_EIGEN3 += -Wno-deprecated-register
-    endif
-  endif
-else
+ifneq ($(HAVE_EIGEN3),1)
   HAVE_PCL = 0
 endif
 
