@@ -88,6 +88,7 @@ class CSearch: public CAbstractSearch
 
   point_t m_RoboPosition, m_TargetPosition;
   bool m_UpdatedSuccessful;
+  int cfg_search_line_allowed_cost_max; /**< the config value for the max allowed costs on the line search on the a-star result */
 
   fawkes::Logger* logger_;
 };

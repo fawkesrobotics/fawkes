@@ -57,7 +57,7 @@ CAStar::CAStar( CLaserOccupancyGrid * occGrid, Logger* logger, Configuration* co
 {
   logger_->log_debug("AStar", "(Constructor): Initializing AStar");
 
-  m_MaxStates = config->get_int( "/plugins/colli/a_star/max_states" );
+  m_MaxStates = config->get_int( "/plugins/colli/search/a_star/max_states" );
 
   m_pOccGrid = occGrid;
   m_Width = m_pOccGrid->getWidth() - 1;

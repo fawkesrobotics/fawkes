@@ -213,8 +213,13 @@ plugins/colli:
       # free cell
       free: 1
 
-  a_star:
-    # maximum number of states the colli uses to search for a path.
-    # The more states the better the search, but the slower the algorithm
-    max_states: 15000
+  search:
+    a_star:
+      # maximum number of states the colli uses to search for a path.
+      # The more states the better the search, but the slower the algorithm
+      max_states: 15000
 
+    # the line search is executed after a-star and searches for a obstacle free line
+    line:
+      # this are the maximum allowed costs on this line
+      cost_max: 5

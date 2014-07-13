@@ -50,6 +50,8 @@ CSearch::CSearch( CLaserOccupancyGrid * occGrid, Logger* logger, Configuration* 
    logger_( logger )
 {
   logger_->log_debug("CSearch", "(Constructor): Entering");
+  std::string cfg_prefix = "/plugins/colli/search/";
+  cfg_search_line_allowed_cost_max  = config->get_int((cfg_prefix + "line/cost_max").c_str());
   m_pAStar = new CAStar( occGrid, logger, config );
   logger_->log_debug("CSearch", "(Constructor): Exiting");
 }
@@ -145,15 +147,16 @@ CSearch::CalculateLocalTarget()
   point_t target = m_RoboPosition;
   point_t prev   = m_RoboPosition;
 
-  if( m_vPlan.size() > 2 ) {
-    for (std::vector<point_t>::iterator it=m_vPlan.begin()+1; it!=m_vPlan.end()-1; ++it ) {
+  if( m_vPlan.size() >= 2 ) {
+    for ( std::vector<point_t>::iterator it = m_vPlan.begin()+1; it != m_vPlan.end(); ++it ) {
       prev = target;
       target = *it;
 
-      if( IsObstacleBetween( m_RoboPosition, *it, 5 ) && IsObstacleBetween( m_RoboPosition, *(it+1), 5 ) )
+      if( IsObstacleBetween( m_RoboPosition, target, cfg_search_line_allowed_cost_max ) ) {
         return prev;
+      }
     }
-    return point_t( *(m_vPlan.end()-1) );
+    return point_t( m_vPlan.back() );
 
   } else {
     // return the current position if there is no plan.
