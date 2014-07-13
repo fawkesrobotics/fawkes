@@ -1,0 +1,18 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/navgraph-clusters
+---
+navgraph-clusters:
+
+  # Prefix for position interfaces that will be opened with cluster
+  # centroid information.
+  interface-prefix: "/laser-cluster/robots/"
+
+  # If a cluster centroid is as close or closer than this threshold
+  # to an edge that very edge will be marked as blocke.
+  close-threshold: 0.5
+
+  # Minimum visibility history value a cluster must have before it is
+  # considered for determining blockade information
+  min-visibility-history: 5
