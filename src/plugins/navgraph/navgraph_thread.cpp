@@ -421,7 +421,15 @@ NavGraphThread::replan(const TopologicalMapNode &start, const TopologicalMapNode
   std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
   
   if (! a_star_solution.empty()) {
-    if (a_star_solution.size() <= plan_.size()) {
+    // get cost of current plan
+    TopologicalMapNode prev("current-pose", pose_.getOrigin().x(), pose_.getOrigin().y());
+    float plan_cost = 0.;
+    for (const TopologicalMapNode &n : plan_) {
+      plan_cost += sqrtf(powf(n.x() - prev.x(), 2) + powf(n.y() - prev.y(), 2));
+      prev = n;
+    }
+
+    if (a_star_solution[a_star_solution.size() - 1]->total_estimated_cost <= plan_cost) {
       constrained_plan_ = true;
       plan_.clear();
       NavGraphSearchState *solstate;
@@ -436,8 +444,10 @@ NavGraphThread::replan(const TopologicalMapNode &start, const TopologicalMapNode
       return true;
     } else {
       logger->log_warn(name(), "Re-planning from '%s' to '%s' resulted in "
-		       "longer plan, keeping old plan",
-		       start.name().c_str(), goal.name().c_str());
+		       "more expensive plan(%f > %f), keeping old",
+		       start.name().c_str(), goal.name().c_str(),
+		       a_star_solution[a_star_solution.size() - 1]->total_estimated_cost,
+		       plan_cost);
       return false;
     }
   } else {
