@@ -79,6 +79,7 @@ NavGraphThread::init()
   cfg_replan_interval_ = config->get_float("/plugins/navgraph/replan_interval");
   cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
   cfg_log_graph_       = config->get_bool("/plugins/navgraph/log_graph");
+  cfg_abort_on_error_  = config->get_bool("/plugins/navgraph/abort_on_error");
 
   cfg_monitor_file_ = false;
   try {
@@ -133,10 +134,12 @@ NavGraphThread::init()
   exec_active_       = false;
   target_reached_    = false;
   last_node_         = "";
+  error_reason_      = "";
   constrained_plan_  = false;
   cmd_sent_at_       = new Time(clock);
   path_planned_at_   = new Time(clock);
   target_reached_at_ = new Time(clock);
+  error_at_          = new Time(clock);
 
   constraint_repo_   = new ConstraintRepo(logger);
   navgraph_aspect_inifin_.set_constraint_repo(constraint_repo_);
@@ -149,6 +152,7 @@ NavGraphThread::finalize()
   delete path_planned_at_;
   delete astar_;
   delete target_reached_at_;
+  delete error_at_;
   graph_.clear();
   blackboard->close(pp_nav_if_);
   blackboard->close(nav_if_);
@@ -592,31 +596,51 @@ NavGraphThread::send_next_goal()
     throw;
   }
 
-  logger->log_debug(name(), "Sending goto(x=%f,y=%f,ori=%f) for node '%s'",
-		    tpose.getOrigin().x(), tpose.getOrigin().y(),
-		    tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
-
   NavigatorInterface::CartesianGotoMessage *gotomsg =
     new NavigatorInterface::CartesianGotoMessage(tpose.getOrigin().x(),
 						 tpose.getOrigin().y(),
 						 tf::get_yaw(tpose.getRotation()));
   try {
+    if (! nav_if_->has_writer()) {
+      throw Exception("No writer for navigator interface");
+    }
+
+    logger->log_debug(name(), "Sending goto(x=%f,y=%f,ori=%f) for node '%s'",
+		      tpose.getOrigin().x(), tpose.getOrigin().y(),
+		      tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
+
     nav_if_->msgq_enqueue(gotomsg);
     cmd_sent_at_->stamp();
+
+    error_at_->stamp();
+    error_reason_ = "";
 
 #ifdef HAVE_VISUALIZATION
     if (vt_)  vt_->set_current_edge(last_node_, next_target.name());
 #endif
   } catch (Exception &e) {
-    logger->log_warn(name(), "Failed to send cartesian goto for next goal, exception follows");
-    logger->log_warn(name(), e);
-    exec_active_ = false;
-    pp_nav_if_->set_final(true);
-    pp_nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
-    pp_nav_if_->write();
+    if (cfg_abort_on_error_) {
+      logger->log_warn(name(), "Failed to send cartesian goto for "
+		       "next goal, exception follows");
+      logger->log_warn(name(), e);
+      exec_active_ = false;
+      pp_nav_if_->set_final(true);
+      pp_nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
+      pp_nav_if_->write();
 #ifdef HAVE_VISUALIZATION
-    if (vt_)  vt_->reset_plan();
+      if (vt_)  vt_->reset_plan();
 #endif
+    } else {
+      fawkes::Time now(clock);
+      if (error_reason_ != e.what_no_backtrace() || (now - error_at_) > 4.0) {
+	error_reason_ = e.what_no_backtrace();
+	*error_at_ = now;
+	logger->log_warn(name(), "Failed to send cartesian goto for "
+			 "next goal, exception follows");
+	logger->log_warn(name(), e);
+	logger->log_warn(name(), "*** NOT aborting goal (as per config)");
+      }
+    }
   }
 }
 

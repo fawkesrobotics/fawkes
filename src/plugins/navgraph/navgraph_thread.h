@@ -108,6 +108,7 @@ class NavGraphThread
   bool         cfg_monitor_file_;
   float        cfg_target_time_;
   bool         cfg_log_graph_;
+  bool         cfg_abort_on_error_;
 
   fawkes::NavigatorInterface *nav_if_;
   fawkes::NavigatorInterface *pp_nav_if_;
@@ -129,6 +130,9 @@ class NavGraphThread
 
   fawkes::Time *cmd_sent_at_;
   fawkes::Time *path_planned_at_;
+
+  fawkes::Time *error_at_;
+  std::string   error_reason_;
 
   fawkes::FileAlterationMonitor *fam_;
 
