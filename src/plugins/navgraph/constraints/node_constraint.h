@@ -38,6 +38,7 @@ class NavGraphNodeConstraint
 {
  public:
   NavGraphNodeConstraint(std::string &name);
+  NavGraphNodeConstraint(const char *name);
   virtual ~NavGraphNodeConstraint();
 
   std::string name();
