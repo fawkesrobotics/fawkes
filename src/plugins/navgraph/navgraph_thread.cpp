@@ -80,7 +80,9 @@ NavGraphThread::init()
   cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
   cfg_log_graph_       = config->get_bool("/plugins/navgraph/log_graph");
   cfg_abort_on_error_  = config->get_bool("/plugins/navgraph/abort_on_error");
-
+#ifdef HAVE_VISUALIZATION
+  cfg_visual_interval_ = config->get_float("/plugins/navgraph/visualization_interval");
+#endif
   cfg_monitor_file_ = false;
   try {
     cfg_monitor_file_ = config->get_bool("/plugins/navgraph/monitor_file");
@@ -140,6 +142,9 @@ NavGraphThread::init()
   path_planned_at_   = new Time(clock);
   target_reached_at_ = new Time(clock);
   error_at_          = new Time(clock);
+#ifdef HAVE_VISUALIZATION
+  visualized_at_     = new Time(clock);
+#endif
 
   constraint_repo_   = new ConstraintRepo(logger);
   navgraph_aspect_inifin_.set_constraint_repo(constraint_repo_);
@@ -153,6 +158,9 @@ NavGraphThread::finalize()
   delete astar_;
   delete target_reached_at_;
   delete error_at_;
+#ifdef HAVE_VISUALIZATION
+  delete visualized_at_;
+#endif
   graph_.clear();
   blackboard->close(pp_nav_if_);
   blackboard->close(nav_if_);
@@ -312,11 +320,21 @@ NavGraphThread::loop()
         }
       }
     }
-  } else if (constraint_repo_->modified(/* reset */true)) {
-#ifdef HAVE_VISUALIZATION
-    if (vt_)  vt_->wakeup();
-#endif
   }
+
+#ifdef HAVE_VISUALIZATION
+  if (vt_) {
+    fawkes::Time now(clock);
+    if (now - visualized_at_ >= cfg_visual_interval_) {
+      *visualized_at_ = now;
+      constraint_repo_.lock();
+      if (constraint_repo_->compute() || constraint_repo_->modified(/* reset */true)) {
+	vt_->wakeup();
+      }
+      constraint_repo_.unlock();
+    }
+  }
+#endif
 
   if (needs_write) {
     pp_nav_if_->write();
@@ -504,7 +522,10 @@ NavGraphThread::start_plan()
     logger->log_warn(name(), "Cannot start empty plan.");
 
 #ifdef HAVE_VISUALIZATION
-    if (vt_)  vt_->reset_plan();
+    if (vt_) {
+      vt_->reset_plan();
+      visualized_at_->stamp();
+    }
 #endif
 
   } else {    
@@ -515,7 +536,10 @@ NavGraphThread::start_plan()
     }
     logger->log_info(name(), "Starting route: %s", m.c_str());
 #ifdef HAVE_VISUALIZATION
-    if (vt_)  vt_->set_plan(plan_);
+    if (vt_) {
+      vt_->set_plan(plan_);
+      visualized_at_->stamp();
+    }
 #endif
 
     exec_active_ = true;
@@ -556,7 +580,10 @@ NavGraphThread::stop_motion()
   pp_nav_if_->set_final(true);
 
 #ifdef HAVE_VISUALIZATION
-  if (vt_)  vt_->reset_plan();
+  if (vt_) {
+    vt_->reset_plan();
+    visualized_at_->stamp();
+  }
 #endif
 
 }
@@ -602,7 +629,10 @@ NavGraphThread::send_next_goal()
 						 tf::get_yaw(tpose.getRotation()));
   try {
 #ifdef HAVE_VISUALIZATION
-    if (vt_)  vt_->set_current_edge(last_node_, next_target.name());
+    if (vt_)  {
+      vt_->set_current_edge(last_node_, next_target.name());
+      visualized_at_->stamp();
+    }
 #endif
 
     if (! nav_if_->has_writer()) {
@@ -629,7 +659,10 @@ NavGraphThread::send_next_goal()
       pp_nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
       pp_nav_if_->write();
 #ifdef HAVE_VISUALIZATION
-      if (vt_)  vt_->reset_plan();
+      if (vt_) {
+	vt_->reset_plan();
+	visualized_at_->stamp();
+      }
 #endif
     } else {
       fawkes::Time now(clock);
@@ -742,7 +775,10 @@ NavGraphThread::fam_event(const char *filename, unsigned int mask)
     }
 
 #ifdef HAVE_VISUALIZATION
-    if (vt_)  vt_->set_graph(graph_);
+    if (vt_) {
+      vt_->set_graph(graph_);
+      visualized_at_->stamp();
+    }
 #endif
 
     if (exec_active_) {
