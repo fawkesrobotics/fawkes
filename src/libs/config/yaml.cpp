@@ -562,9 +562,9 @@ YamlConfiguration::read_yaml_config(std::string filename, std::string &host_file
     if (qe.is_dir) {
       dirs.push_back(qe.filename);
     } else {
-      LibLogger::log_debug("YamlConfiguration",
-                           "Reading YAML file '%s' (ignore missing: %s)",
-                           qe.filename.c_str(), qe.ignore_missing ? "yes" : "no");
+      //LibLogger::log_debug("YamlConfiguration",
+      //                     "Reading YAML file '%s' (ignore missing: %s)",
+      //                     qe.filename.c_str(), qe.ignore_missing ? "yes" : "no");
 
       YamlConfigurationNode *sub_root = read_yaml_file(qe.filename, qe.ignore_missing, load_queue, host_file);
 
@@ -579,8 +579,8 @@ YamlConfiguration::read_yaml_config(std::string filename, std::string &host_file
   }
 
   if (host_file != "") {
-    LibLogger::log_debug("YamlConfiguration",
-			 "Reading Host YAML file '%s'", host_file.c_str());
+    //LibLogger::log_debug("YamlConfiguration",
+    //			 "Reading Host YAML file '%s'", host_file.c_str());
     std::queue<LoadQueueEntry> host_load_queue;
     host_root = read_yaml_file(host_file, true, host_load_queue, host_file);
     if (! host_load_queue.empty()) {
