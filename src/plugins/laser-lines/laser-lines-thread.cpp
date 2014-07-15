@@ -319,7 +319,7 @@ LaserLinesThread::loop()
     Eigen::Vector3f x_axis(1,0,0);
     info.bearing = acosf(x_axis.dot(P) / P.norm());
     // we also want to encode the direction of the angle
-    if (coeff->values[1] < 0)  info.bearing *= -1.;
+    if (P[1] < 0)  info.bearing = fabs(info.bearing)*-1.;
 
     info.base_point = P;
 
