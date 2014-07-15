@@ -514,14 +514,16 @@ ColliThread::colli_execute_()
         } else {
           if_laser_->read();
 
-          std::vector<CEscapeDriveModule::LaserPoint> laser_points;
+          std::vector<polar_coord_2d_t> laser_points;
           laser_points.reserve(if_laser_->maxlenof_distances());
 
           float angle_inc = 2.0 * M_PI / if_laser_->maxlenof_distances();
 
+          polar_coord_2d_t laser_point;
           for ( unsigned int i = 0; i < if_laser_->maxlenof_distances(); ++i ) {
-            CEscapeDriveModule::LaserPoint point( if_laser_->distances(i), angle_inc * i );
-            laser_points.push_back(point);
+            laser_point.r = if_laser_->distances(i);
+            laser_point.phi = angle_inc * i;
+            laser_points.push_back(laser_point);
           }
           m_pSelectDriveMode->setLaserData(laser_points);
         }

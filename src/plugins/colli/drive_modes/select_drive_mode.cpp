@@ -235,12 +235,12 @@ CSelectDriveMode::setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, i
  * @param laser_point vector of laser points
  */
 void
-CSelectDriveMode::setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_point )
+CSelectDriveMode::setLaserData( std::vector<fawkes::polar_coord_2d_t>& laser_points )
 {
   for ( unsigned int i = 0; i < m_vDriveModeList.size(); i++ ) {
       // drive mode checking
       if ( m_vDriveModeList[i]->GetDriveModeName() == NavigatorInterface::ESCAPE ) {
-        ((CEscapeDriveModule*)m_vDriveModeList[i])->setLaserData( laser_point );
+        ((CEscapeDriveModule*)m_vDriveModeList[i])->setLaserData( laser_points );
 
         return;
       }

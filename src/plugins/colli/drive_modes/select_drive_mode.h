@@ -72,7 +72,7 @@ public:
 
   void setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, int roboY );
 
-  void setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_point );
+  void setLaserData( std::vector<fawkes::polar_coord_2d_t>& laser_points );
 
 private:
 

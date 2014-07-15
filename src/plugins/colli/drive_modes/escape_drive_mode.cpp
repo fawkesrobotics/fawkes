@@ -171,9 +171,9 @@ CEscapeDriveModule::Update()
  * @param laser_points vector of laser points
  */
 void
-CEscapeDriveModule::setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_points )
+CEscapeDriveModule::setLaserData( std::vector<polar_coord_2d_t>& laser_points )
 {
-  m_laser_points = laser_points;
+  laser_points_ = laser_points;
 }
 
 /* ************************************************************************** */
@@ -185,10 +185,10 @@ CEscapeDriveModule::FillNormalizedReadings()
 {
   m_vNormalizedReadings.clear();
 
-  for ( unsigned int i = 0; i < m_laser_points.size(); i++ ) {
-    float rad    = normalize_rad( m_laser_points.at( i ).angle );
+  for ( unsigned int i = 0; i < laser_points_.size(); i++ ) {
+    float rad    = normalize_rad( laser_points_.at( i ).phi );
     float sub    = m_pRoboShape->GetRobotLengthforRad( rad );
-    float length = m_laser_points.at( i ).length;
+    float length = laser_points_.at( i ).r;
     m_vNormalizedReadings.push_back( length - sub );
   }
 }
@@ -215,12 +215,12 @@ CEscapeDriveModule::SortNormalizedReadings()
      &&(ang_br < ang_mr) && (ang_mr < ang_fr) ))
     logger_->log_error("RoboShape", "Angles are bad!!!");
 
-  int i = 0;
+  unsigned int i = 0;
   float rad = 0.f;
 
-  while ( i < (int)m_laser_points.size() ) {
-    if( m_laser_points.at(i).length > 0.01f ) {
-      rad = normalize_rad( m_laser_points.at(i).angle );
+  while ( i < laser_points_.size() ) {
+    if( laser_points_.at(i).r > 0.01f ) {
+      rad = normalize_rad( laser_points_.at(i).phi );
 
       if( rad < ang_fl || rad >= ang_fr )
         m_vFront.push_back( m_vNormalizedReadings[i] );
