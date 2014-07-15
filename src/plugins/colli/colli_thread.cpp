@@ -511,15 +511,15 @@ ColliThread::colli_execute_()
         m_pSelectDriveMode->SetLocalTarget( m_LocalTarget.x, m_LocalTarget.y );
         if ( cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field ) {
           m_pSelectDriveMode->setGridInformation(m_pLaserOccGrid, m_RoboGridPos.x, m_RoboGridPos.y);
-        } else if ( cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field ) {
+        } else {
           if_laser_->read();
 
           std::vector<CEscapeDriveModule::LaserPoint> laser_points;
           laser_points.reserve(if_laser_->maxlenof_distances());
 
-          int angle_inc = 2.0 * M_PI / if_laser_->maxlenof_distances();
+          float angle_inc = 2.0 * M_PI / if_laser_->maxlenof_distances();
 
-          for ( int i = 0; (int)if_laser_->maxlenof_distances() > i; ++i ) {
+          for ( unsigned int i = 0; i < if_laser_->maxlenof_distances(); ++i ) {
             CEscapeDriveModule::LaserPoint point( if_laser_->distances(i), angle_inc * i );
             laser_points.push_back(point);
           }

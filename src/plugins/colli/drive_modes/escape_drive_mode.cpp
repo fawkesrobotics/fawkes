@@ -185,7 +185,7 @@ CEscapeDriveModule::FillNormalizedReadings()
 {
   m_vNormalizedReadings.clear();
 
-  for ( int i = 0; i < (int)m_laser_points.size(); i++ ) {
+  for ( unsigned int i = 0; i < m_laser_points.size(); i++ ) {
     float rad    = normalize_rad( m_laser_points.at( i ).angle );
     float sub    = m_pRoboShape->GetRobotLengthforRad( rad );
     float length = m_laser_points.at( i ).length;
@@ -219,7 +219,7 @@ CEscapeDriveModule::SortNormalizedReadings()
   float rad = 0.f;
 
   while ( i < (int)m_laser_points.size() ) {
-    if( m_laser_points.at(i).length > 0. ) {
+    if( m_laser_points.at(i).length > 0.01f ) {
       rad = normalize_rad( m_laser_points.at(i).angle );
 
       if( rad < ang_fl || rad >= ang_fr )
