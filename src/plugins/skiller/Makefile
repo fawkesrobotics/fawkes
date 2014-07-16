@@ -33,6 +33,7 @@ endif
 
 LIBS_skiller = fawkescore fawkesutils fawkesaspects fawkesnetcomm fawkeslua \
 	       fawkesblackboard fawkesinterface fawkeslogging \
+	       fawkesnavgraphaspect \
 	       SkillerInterface SkillerDebugInterface
 OBJS_skiller = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
