@@ -44,5 +44,5 @@ SkillerPlugin::SkillerPlugin(Configuration *config)
 }
 
 
-PLUGIN_DESCRIPTION("Behavior engine based on Lua")
+PLUGIN_DESCRIPTION("Lua-based Behavior Engine")
 EXPORT_PLUGIN(SkillerPlugin)

@@ -68,4 +68,10 @@ function module_init(m)
    --Export some important Fawkes utils to the module
    m.Time  = fawkes.Time
    m.Clock = fawkes.Clock
+
+   if features_env_template then
+      for k,v in pairs(features_env_template) do
+	 m[k] = v
+      end
+   end
 end

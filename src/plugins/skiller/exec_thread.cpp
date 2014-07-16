@@ -21,6 +21,7 @@
  */
 
 #include "exec_thread.h"
+#include "skiller_feature.h"
 
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
@@ -167,7 +168,15 @@ SkillerExecutionThread::init()
     __lua->set_usertype("tf", tf_listener, "Transformer", "fawkes::tf");
 #endif
 
+    __lua->create_table();
+    __lua->set_global("features_env_template");
+
     __lua_ifi->push_interfaces();
+
+    std::list<SkillerFeature *>::iterator f;
+    for (f = __features.begin(); f != __features.end(); ++f) {
+      (*f)->init_lua_context(__lua);
+    }
 
     __lua->set_start_script(LUADIR"/skiller/fawkes/start.lua");
   
@@ -205,6 +214,11 @@ SkillerExecutionThread::init()
 void
 SkillerExecutionThread::finalize()
 {
+  std::list<SkillerFeature *>::iterator f;
+  for (f = __features.begin(); f != __features.end(); ++f) {
+    (*f)->finalize_lua_context(__lua);
+  }
+
 #ifdef SKILLER_TIMETRACKING
   delete __tt;
 #endif
@@ -217,6 +231,18 @@ SkillerExecutionThread::finalize()
 
   delete __lua;
   delete __clog;
+}
+
+
+/** Add a skiller feature.
+ * Note that this has to be done before the SkillerExecutionThread is initialized
+ * at this time (an extension to do this at run-time might follow later).
+ * @param feature feature to add
+ */
+void
+SkillerExecutionThread::add_skiller_feature(SkillerFeature *feature)
+{
+  __features.push_back(feature);
 }
 
 

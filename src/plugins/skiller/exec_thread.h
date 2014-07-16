@@ -35,6 +35,7 @@
 #include <utils/system/fam.h>
 #include <blackboard/interface_listener.h>
 
+#include <list>
 #include <string>
 #include <cstdlib>
 
@@ -50,6 +51,7 @@ namespace fawkes {
   class TimeTracker;
 #endif
 }
+class SkillerFeature;
 
 class SkillerExecutionThread
 : public fawkes::Thread,
@@ -70,6 +72,8 @@ class SkillerExecutionThread
   virtual void init();
   virtual void loop();
   virtual void finalize();
+
+  void add_skiller_feature(SkillerFeature *feature);
 
   /* BlackBoardInterfaceListener */
   void bb_interface_reader_removed(fawkes::Interface *interface,
@@ -111,6 +115,8 @@ class SkillerExecutionThread
 
   fawkes::LuaContext  *__lua;
   fawkes::LuaInterfaceImporter  *__lua_ifi;
+
+  std::list<SkillerFeature *> __features;
 
 #ifdef SKILLER_TIMETRACKING
   fawkes::TimeTracker *__tt;
