@@ -34,23 +34,46 @@ using namespace fawkes;
 /** Constructor.
  * @param node graph node this search state represents
  * @param goal graph node of the goal
- * @param new_cost the cost until to this node from the start
+ * @param cost_sofar the cost until to this node from the start
  * @param parent parent search state
  * @param map_graph map graph
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
 NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMapNode goal,
-					 double new_cost, NavGraphSearchState * parent,
+					 double cost_sofar, NavGraphSearchState *parent,
 					 TopologicalMapGraph *map_graph,
 					 fawkes::ConstraintRepo *constraint_repo)
+  : AStarState(cost_sofar, parent)
 {
   node_ = node;
   goal_ = goal;
   map_graph_ = map_graph;
 
-  past_cost = new_cost;
-  this->parent = parent;
-  total_estimated_cost = past_cost + estimate();
+  total_estimated_cost = path_cost + estimate();
+
+  std::hash<std::string> h;
+  key_ = h(node_.name());
+
+  constraint_repo_ = constraint_repo;
+}
+
+
+/** Constructor.
+ * @param node graph node this search state represents
+ * @param goal graph node of the goal
+ * @param map_graph map graph
+ * @param constraint_repo constraint repository, null to plan only without constraints
+ */
+NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMapNode goal,
+					 TopologicalMapGraph *map_graph,
+					 fawkes::ConstraintRepo *constraint_repo)
+  : AStarState(0, NULL)
+{
+  node_ = node;
+  goal_ = goal;
+  map_graph_ = map_graph;
+
+  total_estimated_cost = path_cost + estimate();
 
   std::hash<std::string> h;
   key_ = h(node_.name());
@@ -75,7 +98,7 @@ NavGraphSearchState::node()
 }
 
 
-double
+float
 NavGraphSearchState::estimate()
 {
   return sqrtf(powf(node_.x() - goal_.x(), 2) +
@@ -93,7 +116,6 @@ NavGraphSearchState::is_goal()
 std::vector<AStarState *>
 NavGraphSearchState::children()
 {
-  double distance = -1.0;
   std::vector< AStarState * > children;
   children.clear();
 
@@ -112,12 +134,8 @@ NavGraphSearchState::children()
     }
 
     if (expand) {
-      distance = sqrt(pow(node_.x() - d.x(), 2) +
-		      pow(node_.y() - d.y(), 2) );
-      children.push_back(
-	new NavGraphSearchState(d, goal_,
-				past_cost + distance, this,
-				map_graph_, constraint_repo_) );
+      children.push_back(new NavGraphSearchState(d, goal_, cost(d), this,
+						 map_graph_, constraint_repo_));
     }
   }
 

@@ -27,32 +27,32 @@
 #include <plugins/navgraph/constraints/constraint_repo.h>
 #include <core/utils/lockptr.h>
 
+#include <cmath>
+
 class NavGraphSearchState : public fawkes::AStarState
 {
- public:
-  /// special constructor for easy users interface
-  //     state is the mapnode (the current state)
-  //     goal is the mapnode to search to
-  //     newCost is the new cost of this generated state
-  //     map_graphs is the collection of all graphs
-  //
+public:
   NavGraphSearchState(fawkes::TopologicalMapNode node, fawkes::TopologicalMapNode goal,
-		      double new_cost, NavGraphSearchState * parent,
 		      fawkes::TopologicalMapGraph *map_graph,
 		      fawkes::ConstraintRepo *constraint_repo = NULL);
 
-  /// standard destructor
+  NavGraphSearchState(fawkes::TopologicalMapNode node, fawkes::TopologicalMapNode goal,
+		      double cost_sofar, NavGraphSearchState *parent_state,
+		      fawkes::TopologicalMapGraph *map_graph,
+		      fawkes::ConstraintRepo *constraint_repo = NULL);
   ~NavGraphSearchState();
 
   fawkes::TopologicalMapNode & node();
 
  private:
-  fawkes::TopologicalMapNode * next_node_to(double x, double y);
-
   size_t key() { return key_; }
+  inline float  cost(const fawkes::TopologicalMapNode &d) {
+    return path_cost + sqrtf(powf(node_.x() - d.x(), 2) +
+			     powf(node_.y() - d.y(), 2) );
+  }
 
-  double estimate();
-  bool is_goal();
+  float estimate();
+  bool  is_goal();
 
   std::vector<AStarState *> children();
 

@@ -368,7 +368,7 @@ NavGraphThread::generate_plan(std::string goal_name)
     constraint_repo_->compute();
 
     NavGraphSearchState *initial_state =
-      new NavGraphSearchState(init, goal, 0, NULL, *graph_, *constraint_repo_);
+      new NavGraphSearchState(init, goal, *graph_, *constraint_repo_);
     a_star_solution =  astar_->solve(initial_state);
   }
   constraint_repo_.unlock();
@@ -379,7 +379,7 @@ NavGraphThread::generate_plan(std::string goal_name)
     constrained_plan_ = false;
     logger->log_warn(name(), "Failed to generate plan, will try without constraints");
     NavGraphSearchState *initial_state =
-      new NavGraphSearchState(init, goal, 0, NULL, *graph_);
+      new NavGraphSearchState(init, goal, *graph_);
     a_star_solution =  astar_->solve(initial_state);
   }
 
@@ -421,7 +421,7 @@ NavGraphThread::replan(const TopologicalMapNode &start, const TopologicalMapNode
   }
 
   NavGraphSearchState *initial_state =
-    new NavGraphSearchState(start, act_goal, 0, NULL, *graph_, *constraint_repo_);
+    new NavGraphSearchState(start, act_goal, *graph_, *constraint_repo_);
   std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
   
   if (! a_star_solution.empty()) {
