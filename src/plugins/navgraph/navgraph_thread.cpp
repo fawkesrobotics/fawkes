@@ -601,6 +601,10 @@ NavGraphThread::send_next_goal()
 						 tpose.getOrigin().y(),
 						 tf::get_yaw(tpose.getRotation()));
   try {
+#ifdef HAVE_VISUALIZATION
+    if (vt_)  vt_->set_current_edge(last_node_, next_target.name());
+#endif
+
     if (! nav_if_->has_writer()) {
       throw Exception("No writer for navigator interface");
     }
@@ -615,9 +619,6 @@ NavGraphThread::send_next_goal()
     error_at_->stamp();
     error_reason_ = "";
 
-#ifdef HAVE_VISUALIZATION
-    if (vt_)  vt_->set_current_edge(last_node_, next_target.name());
-#endif
   } catch (Exception &e) {
     if (cfg_abort_on_error_) {
       logger->log_warn(name(), "Failed to send cartesian goto for "

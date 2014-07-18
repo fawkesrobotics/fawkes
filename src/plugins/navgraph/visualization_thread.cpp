@@ -52,6 +52,15 @@ NavGraphVisualizationThread::init()
 {
   vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100, /* latching */ true);
 
+  cfg_cost_scale_max_ = config->get_float("/plugins/navgraph/visualization/cost_scale_max");
+  if (cfg_cost_scale_max_ < 1.0) {
+    throw Exception("Visualization cost max scale must greater or equal to 1.0");
+  }
+
+  // subtract one because 1.0 is the minimum value where we want the
+  // resulting value to be zero.
+  cfg_cost_scale_max_ -= 1.0;
+
   last_id_num_ = constraints_last_id_num_ = 0;
   publish();
 }
@@ -149,6 +158,23 @@ NavGraphVisualizationThread::loop()
 }
 
 
+float
+NavGraphVisualizationThread::edge_cost_factor(
+  std::list<std::tuple<std::string, std::string, std::string, float>> &costs,
+  const std::string &from, const std::string &to, std::string &constraint_name)
+{
+  for (const std::tuple<std::string, std::string, std::string, float> &c : costs) {
+    if ((std::get<0>(c) == from && std::get<1>(c) == to) ||
+	(std::get<0>(c) == to   && std::get<1>(c) == from))
+    {
+      constraint_name = std::get<2>(c);
+      return std::get<3>(c);
+    }
+  }
+
+  return 0.;
+}
+
 void
 NavGraphVisualizationThread::add_circle_markers(visualization_msgs::MarkerArray &m, size_t &id_num,
 						float center_x, float center_y, float radius,
@@ -193,6 +219,8 @@ NavGraphVisualizationThread::publish()
   std::map<std::string, std::string> bl_nodes = crepo_->blocks(nodes);
   std::map<std::pair<std::string, std::string>, std::string> bl_edges =
     crepo_->blocks(edges);
+  std::list<std::tuple<std::string, std::string, std::string, float>> edge_cfs =
+    crepo_->cost_factor(edges);
   crepo_.unlock();
 
   size_t id_num = 0;
@@ -244,8 +272,8 @@ NavGraphVisualizationThread::publish()
   cur_line.id = id_num++;
   cur_line.type = visualization_msgs::Marker::LINE_LIST;
   cur_line.action = visualization_msgs::Marker::ADD;
-  cur_line.color.r = cur_line.color.g = 1.f;
-  cur_line.color.b = 0.f;
+  cur_line.color.g = 1.f;
+  cur_line.color.r = cur_line.color.b = 0.f;
   cur_line.color.a = 1.0;
   cur_line.scale.x = 0.05;
   cur_line.lifetime = ros::Duration(0, 0);
@@ -273,7 +301,8 @@ NavGraphVisualizationThread::publish()
     if (is_in_plan) {
       sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.1;
       if (is_last) {
-        sphere.color.r = sphere.color.g = 1.f;
+	sphere.color.r = 0.f;
+        sphere.color.g = 1.f;
       } else {
         sphere.color.r = 1.f;
         sphere.color.g = 0.f;
@@ -563,6 +592,8 @@ NavGraphVisualizationThread::publish()
       p2.y =  to.y();
       p2.z = 0.;
 
+      std::string cost_cstr_name;
+      float cost_factor = edge_cost_factor(edge_cfs, from.name(), to.name(), cost_cstr_name);
 
       if (edge.is_directed()) {
         visualization_msgs::Marker arrow;
@@ -580,8 +611,8 @@ NavGraphVisualizationThread::publish()
         if (plan_from_ == from.name() && plan_to_ == to.name())
         {
           // it's the current line
-          arrow.color.r = arrow.color.g = 1.f;
-          arrow.color.b = 0.f;
+          arrow.color.g = 1.f;
+          arrow.color.r = arrow.color.b = 0.f;
           arrow.scale.x = 0.1; // shaft radius
           arrow.scale.y = 0.3; // head radius
         } else {
@@ -596,7 +627,12 @@ NavGraphVisualizationThread::publish()
           if (in_plan) {
             // it's in the current plan
             arrow.color.r = 1.0;
-            arrow.color.g = arrow.color.b = 0.f;
+	    if (cost_factor >= 1.00001) {
+	      arrow.color.g = std::min(1.0, (cost_factor - 1.0) / cfg_cost_scale_max_);
+	    } else {
+	      arrow.color.g = 0.f;
+	    }
+	    arrow.color.b = 0.f;
             arrow.scale.x = 0.07; // shaft radius
             arrow.scale.y = 0.2; // head radius
 	  } else if (bl_nodes.find(from.name()) != bl_nodes.end() ||
@@ -609,8 +645,14 @@ NavGraphVisualizationThread::publish()
             arrow.scale.y = 0.15; // head radius
           } else {
             // regular
-            arrow.color.r = 0.5;
-            arrow.color.g = arrow.color.b = 0.f;
+            arrow.color.r = 0.66666;
+	    if (cost_factor >= 1.00001) {
+	      arrow.color.g =
+		std::min(1.0, (cost_factor - 1.0) / cfg_cost_scale_max_) * 0.66666;
+	    } else {
+	      arrow.color.g = 0.f;
+	    }
+	    arrow.color.b = 0.f;
             arrow.scale.x = 0.04; // shaft radius
             arrow.scale.y = 0.15; // head radius
           }
@@ -636,8 +678,27 @@ NavGraphVisualizationThread::publish()
 
           if (in_plan) {
             // it's in the current plan
-            plan_lines.points.push_back(p1);
-            plan_lines.points.push_back(p2);
+	    if (cost_factor >= 1.00001) {
+	      visualization_msgs::Marker line;
+	      line.header.frame_id = "/map";
+	      line.header.stamp = ros::Time::now();
+	      line.ns = "navgraph";
+	      line.id = id_num++;
+	      line.type = visualization_msgs::Marker::LINE_STRIP;
+	      line.action = visualization_msgs::Marker::ADD;
+	      line.color.a = 1.0;
+	      line.lifetime = ros::Duration(0, 0);
+	      line.points.push_back(p1);
+	      line.points.push_back(p2);
+	      line.color.r = 1.f;
+	      line.color.g = std::min(1.0, (cost_factor - 1.0) / cfg_cost_scale_max_);
+	      line.color.b = 0.f;
+	      line.scale.x = 0.035;
+	      m.markers.push_back(line);
+	    } else {
+	      plan_lines.points.push_back(p1);
+	      plan_lines.points.push_back(p2);
+	    }
 	  } else if (bl_nodes.find(from.name()) != bl_nodes.end() ||
 		     bl_nodes.find(to.name()) != bl_nodes.end())
 	  {
@@ -688,8 +749,28 @@ NavGraphVisualizationThread::publish()
 	    m.markers.push_back(text);
 
           } else {
-            lines.points.push_back(p1);
-            lines.points.push_back(p2);
+	    if (cost_factor >= 1.00001) {
+	      visualization_msgs::Marker line;
+	      line.header.frame_id = "/map";
+	      line.header.stamp = ros::Time::now();
+	      line.ns = "navgraph";
+	      line.id = id_num++;
+	      line.type = visualization_msgs::Marker::LINE_STRIP;
+	      line.action = visualization_msgs::Marker::ADD;
+	      line.color.a = 1.0;
+	      line.lifetime = ros::Duration(0, 0);
+	      line.points.push_back(p1);
+	      line.points.push_back(p2);
+	      line.color.r = 0.66666;
+	      line.color.g =
+		std::min(1.0, (cost_factor - 1.0) / cfg_cost_scale_max_) * 0.66666;
+	      line.color.b = 0.f;
+	      line.scale.x = 0.02;
+	      m.markers.push_back(line);
+	    } else {
+	      lines.points.push_back(p1);
+	      lines.points.push_back(p2);
+	    }
           }
         }
       }

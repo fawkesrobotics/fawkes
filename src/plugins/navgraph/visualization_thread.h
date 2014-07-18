@@ -64,11 +64,16 @@ class NavGraphVisualizationThread
   void add_circle_markers(visualization_msgs::MarkerArray &m, size_t &id_num,
 			  float center_x, float center_y, float radius, unsigned int arc_length,
 			  float r, float g, float b, float alpha, float line_width = 0.03);
+  float edge_cost_factor(
+    std::list<std::tuple<std::string, std::string, std::string, float>> &costs,
+    const std::string &from, const std::string &to, std::string &constraint_name);
 
  private:
   size_t last_id_num_;
   size_t constraints_last_id_num_;
   ros::Publisher vispub_;
+
+  float  cfg_cost_scale_max_;
 
   std::vector<fawkes::TopologicalMapNode> plan_;
   std::string plan_to_;

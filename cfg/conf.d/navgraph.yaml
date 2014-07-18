@@ -43,9 +43,6 @@ plugins/navgraph:
   # NOTE: it is recommended to set this as graph default property
   shortcut_tolerance: 0.0
 
-  # Visualize graph and current actions?
-  visualization: true
-
   # Interval in which the resend the goto command; sec
   resend_interval: 1.0
 
@@ -75,6 +72,18 @@ plugins/navgraph:
   # Write graph information to log on (re-)loading?
   log_graph: false
 
+  visualization:
+
+    # Set to true to enable visualization by publishing messages for rviz
+    enable: true
+
+    # The color for the cost factors (from constraints) of an edge is
+    # scaled from red over orange to yellow (from 0.0 to 1.0). The
+    # maximum scale value for the cost denotes when this should be
+    # saturated and thus yellow, i.e.  a setting of 2.0 means that a
+    # cost factor of 1.0 will be drawn as red, 1.5 as orange, and
+    # anything greater or equal to 2.0 as yellow.
+    cost_scale_max: 2.0
 
   # navgraph-static-constraints plugin configuration
   static-constraints:
