@@ -134,7 +134,16 @@ NavGraphSearchState::children()
     }
 
     if (expand) {
-      children.push_back(new NavGraphSearchState(d, goal_, cost(d), this,
+      float d_cost = cost(d);
+
+      if (constraint_repo_) {
+	float cost_factor = 0.;
+	if (constraint_repo_->increases_cost(node_, d, cost_factor)) {
+	  d_cost *= cost_factor;
+	}
+      }
+
+      children.push_back(new NavGraphSearchState(d, goal_, path_cost + d_cost, this,
 						 map_graph_, constraint_repo_));
     }
   }

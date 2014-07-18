@@ -72,6 +72,16 @@ ConstraintRepo::register_constraint(NavGraphEdgeConstraint* constraint)
   edge_constraints_.push_back(constraint);
 }
 
+/** Register an edge cost constraint.
+ * @param constraint edge cost constraint to register
+ */
+void
+ConstraintRepo::register_constraint(NavGraphEdgeCostConstraint* constraint)
+{
+  modified_ = true;
+  edge_cost_constraints_.push_back(constraint);
+}
+
 
 /** Unregister a constraint by name.
  * @param name name of constraint to remove.
@@ -102,6 +112,17 @@ ConstraintRepo::unregister_constraint(std::string name)
 		       (*ec)->name().c_str());
     edge_constraints_.erase(ec);
   }
+
+  EdgeCostConstraintList::iterator ecc =
+    std::find_if(edge_cost_constraints_.begin(), edge_cost_constraints_.end(),
+		 [&name](const NavGraphEdgeCostConstraint *c) {
+		   return *c == name;
+		 });
+  if (ecc != edge_cost_constraints_.end()) {
+    logger_->log_debug("ConstraintRepo", "Unregistering edge cost constraint %s",
+		       (*ecc)->name().c_str());
+    edge_cost_constraints_.erase(ecc);
+  }
 }
 
 
@@ -126,6 +147,13 @@ ConstraintRepo::has_constraint(std::string &name)
 		   return *c == name;
 		 });
   if (ec != edge_constraints_.end()) return true;
+
+  EdgeCostConstraintList::iterator ecc =
+    std::find_if(edge_cost_constraints_.begin(), edge_cost_constraints_.end(),
+		 [&name](const NavGraphEdgeCostConstraint *c) {
+		   return *c == name;
+		 });
+  if (ecc != edge_cost_constraints_.end()) return true;
 
   return false;
 }
@@ -170,6 +198,26 @@ ConstraintRepo::get_edge_constraint(std::string &name)
 }
 
 
+/** Get an edge cost constraint by name.
+ * @param name name of constraint to retrieve
+ * @return if found returns a pointer to the edge cost constraint, NULL if not found
+ */
+fawkes::NavGraphEdgeCostConstraint *
+ConstraintRepo::get_edge_cost_constraint(std::string &name)
+{
+  EdgeCostConstraintList::iterator it =
+    std::find_if(edge_cost_constraints_.begin(), edge_cost_constraints_.end(),
+		 [&name](const NavGraphEdgeCostConstraint *c) {
+		   return *c == name;
+		 });
+  if (it != edge_cost_constraints_.end()) {
+    return *it;
+  }
+
+  return NULL;
+}
+
+
 /** Get a list of registered node constraints.
  * @return list of node constraints
  */
@@ -189,6 +237,15 @@ ConstraintRepo::edge_constraints() const
   return edge_constraints_;
 }
 
+/** Get a list of registered edge cost constraints.
+ * @return list of edge cost constraints
+ */
+const ConstraintRepo::EdgeCostConstraintList &
+ConstraintRepo::edge_cost_constraints() const
+{
+  return edge_cost_constraints_;
+}
+
 
 /** Check if there are any constraints at all.
  * @return true if constraints have been registered, false otherwise
@@ -196,7 +253,9 @@ ConstraintRepo::edge_constraints() const
 bool
 ConstraintRepo::has_constraints() const
 {
-  return (! (node_constraints_.empty() && edge_constraints_.empty()));
+  return (! (node_constraints_.empty() &&
+	     edge_constraints_.empty() &&
+	     edge_cost_constraints_.empty()));
 }
 
 
@@ -211,6 +270,9 @@ ConstraintRepo::compute()
     if (c->compute())  modified = true;
   }
   for (fawkes::NavGraphEdgeConstraint *c : edge_constraints_) {
+    if (c->compute())  modified = true;
+  }
+  for (fawkes::NavGraphEdgeCostConstraint *c : edge_cost_constraints_) {
     if (c->compute())  modified = true;
   }
 
@@ -277,6 +339,56 @@ ConstraintRepo::blocks(const fawkes::TopologicalMapNode &from,
   return NULL;
 }
 
+/** Check if any constraint in the repo increases the cost of the edge.
+ * @param from node from which the edge originates
+ * @param to node to which the edge leads
+ * @return the (first) edge cost constraint that increases the cost of
+ * the node, i.e. that returns a cost factor >= 1.00001.
+ */
+fawkes::NavGraphEdgeCostConstraint *
+ConstraintRepo::increases_cost(const fawkes::TopologicalMapNode &from,
+			       const fawkes::TopologicalMapNode &to)
+{
+  for (fawkes::NavGraphEdgeCostConstraint *c : edge_cost_constraints_) {
+    if (c->cost_factor(from, to) >= 1.00001) {
+      return c;
+    }
+  }
+
+  return NULL;
+}
+
+
+/** Check if any constraint in the repo increases the cost of the edge.
+ * @param from node from which the edge originates
+ * @param to node to which the edge leads
+ * @param cost_factor upon return with a non-NULL edge cost constraints
+ * contains the cost increase.
+ * @return the edge cost constraint that returns the highest increase
+ * in cost of the node (and by a cost factor of at least >= 1.00001).
+ */
+fawkes::NavGraphEdgeCostConstraint *
+ConstraintRepo::increases_cost(const fawkes::TopologicalMapNode &from,
+			       const fawkes::TopologicalMapNode &to,
+			       float & cost_factor)
+{
+  float max_cost = 1.0;
+  fawkes::NavGraphEdgeCostConstraint *max_c;
+  for (fawkes::NavGraphEdgeCostConstraint *c : edge_cost_constraints_) {
+    float cost_factor = c->cost_factor(from, to);
+    if (cost_factor > max_cost) {
+      max_cost = cost_factor;
+      max_c    = c;
+    }
+  }
+  if (max_cost >= 1.00001) {
+    cost_factor = max_cost;
+    return max_c;
+  }
+
+  return NULL;
+}
+
 
 /** Check if any constraint in the repo blocks (some) edges.
  * @param edges vector of edges to check for a block
@@ -297,6 +409,72 @@ ConstraintRepo::blocks(const std::vector<fawkes::TopologicalMapEdge> &edges)
   }
 
   return rv;
+}
+
+
+
+/** Get the highest increasing cost factor for an edge.
+ * This methods goes through all of the given edges and queries all
+ * edge cost constraints. If any constraint increases the cost of an
+ * edge (cost >= 1.00001), it adds a tuple of the start node name, end
+ * node name, constraint name, and cost factor of the constraint that
+ * returned the highest cost factor to the list.
+ *
+ * @param edges vector of edges to check for a block
+ * @return tuple of edges with increased costs consisting of start node name,
+ * target node name, name and cost factor of constraint returning the highest
+ * cost increase factor.
+ * Edges for which no increase has been indicated will not be returned in the
+ * list of tuples.
+ */
+std::list<std::tuple<std::string, std::string, std::string, float>>
+ConstraintRepo::cost_factor(const std::vector<fawkes::TopologicalMapEdge> &edges)
+{
+  std::list<std::tuple<std::string, std::string, std::string, float>> rv;
+  for (const fawkes::TopologicalMapEdge &e : edges) {
+    float max_cost = 1.0;
+    fawkes::NavGraphEdgeCostConstraint *max_c;
+    for (fawkes::NavGraphEdgeCostConstraint *c : edge_cost_constraints_) {
+      float cost_factor = c->cost_factor(e.from_node(), e.to_node());
+      if (cost_factor > max_cost) {
+	max_cost = cost_factor;
+	max_c    = c;
+      }
+    }
+    if (max_cost >= 1.00001) {
+      rv.push_back(std::make_tuple(e.from(), e.to(), max_c->name(), max_cost));
+    }
+  }
+
+  return rv;
+}
+
+
+/** Get the highest increasing cost factor for an edge.
+ * This methods goes through all of the given edges and queries all
+ * edge cost constraints. If any constraint increases the cost of an
+ * edge (cost >= 1.00001), it adds a tuple of the start node name, end
+ * node name, constraint name, and cost factor of the constraint that
+ * returned the highest cost factor to the list.
+ *
+ * @param from start node of the edge
+ * @param to destination node of edge
+ * @return highest cost factor denoted by any edge or 1.0 if no constraint
+ * has been specified.
+ */
+float
+ConstraintRepo::cost_factor(const fawkes::TopologicalMapNode &from,
+			    const fawkes::TopologicalMapNode &to)
+{
+  float max_cost = 1.0;
+  for (fawkes::NavGraphEdgeCostConstraint *c : edge_cost_constraints_) {
+    float cost_factor = c->cost_factor(from, to);
+    if (cost_factor > max_cost) {
+      max_cost = cost_factor;
+    }
+  }
+
+  return max_cost;
 }
 
 

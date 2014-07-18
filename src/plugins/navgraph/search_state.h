@@ -47,8 +47,8 @@ public:
  private:
   size_t key() { return key_; }
   inline float  cost(const fawkes::TopologicalMapNode &d) {
-    return path_cost + sqrtf(powf(node_.x() - d.x(), 2) +
-			     powf(node_.y() - d.y(), 2) );
+    return sqrtf(powf(node_.x() - d.x(), 2) +
+		 powf(node_.y() - d.y(), 2) );
   }
 
   float estimate();
