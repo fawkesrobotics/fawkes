@@ -79,5 +79,11 @@ plugins/navgraph:
   # navgraph-static-constraints plugin configuration
   static-constraints:
     # A list of names of nodes that should be statically blocked
-    nodes: ["NodeA", "NodeB"]
-    edges: ["NodeA--NodeB"]
+    nodes: ["P24"]
+    # Static edge blocks. Format is "OriginNode--TargetNode". Node names
+    # may not contain "--".
+    edges: ["P32--P33"]
+    # Static costs for specific edges. Format is
+    # OriginNode--TargetNode:cost (node names may not contain "--" or
+    # ":"). Use an empty list to not post any edge cost constraints.
+    edge-costs: ["P11--P21:1.5", "P12--P22:2.0", "P21--P22:1.75"]
