@@ -85,7 +85,7 @@ void
 NavGraphStaticListEdgeConstraint::add_edge(const fawkes::TopologicalMapEdge &edge)
 {
   if (! has_edge(edge)) {
-    modified_ = false;
+    modified_ = true;
     edge_list_.push_back(edge);
   }
 }
@@ -111,7 +111,7 @@ NavGraphStaticListEdgeConstraint::remove_edge(const fawkes::TopologicalMapEdge &
   std::vector<TopologicalMapEdge>::iterator e
     = std::find(edge_list_.begin(), edge_list_.end(), edge);
   if (e != edge_list_.end()) {
-    modified_ = false;
+    modified_ = true;
     edge_list_.erase(e);
   }
 }
@@ -142,7 +142,7 @@ void
 NavGraphStaticListEdgeConstraint::clear_edges()
 {
   if (! edge_list_.empty()) {
-    modified_ = false;
+    modified_ = true;
     edge_list_.clear();
   }
 }
