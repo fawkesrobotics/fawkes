@@ -163,8 +163,8 @@ NavGraphThread::once()
 {
 #ifdef HAVE_VISUALIZATION
   if (vt_) {
-    vt_->set_graph(graph_);
     vt_->set_constraint_repo(constraint_repo_);
+    vt_->set_graph(graph_);
   }
 #endif
 }

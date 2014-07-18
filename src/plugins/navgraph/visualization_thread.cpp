@@ -104,9 +104,6 @@ void
 NavGraphVisualizationThread::set_constraint_repo(fawkes::LockPtr<ConstraintRepo> &crepo)
 {
   crepo_ = crepo;
-  plan_.clear();
-  plan_to_ = plan_from_ = "";
-  wakeup();
 }
 
 /** Set current plan.
