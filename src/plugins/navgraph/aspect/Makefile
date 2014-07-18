@@ -18,13 +18,30 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/utils/utils.mk
 
+CFLAGS += $(CFLAGS_CPP11)
+
 LIBS_libfawkesnavgraphaspect = fawkescore fawkesaspects fawkesutils \
 			       fawkesnavgraphconstraints
 OBJS_libfawkesnavgraphaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_libfawkesnavgraphaspect)
 
-LIBS_all = $(LIBDIR)/libfawkesnavgraphaspect.$(SOEXT)
+ifeq ($(HAVE_CPP11),1)
+  LIBS_all = $(LIBDIR)/libfawkesnavgraphaspect.$(SOEXT)
+else
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS = warning_tf
+  endif
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+
+.PHONY: warning_cpp11
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting navgraph plugin$(TNORMAL) (C++11 support required)"
+endif
+
 
 include $(BUILDSYSDIR)/base.mk
 
