@@ -34,14 +34,14 @@ LIBS_libfawkes_amcl_utils = fawkescore fawkesconfig fvutils fawkes_amcl_map
 OBJS_libfawkes_amcl_utils = amcl_utils.o
 
 LIBS_amcl = fawkescore fawkesutils fawkesaspects fawkesinterface \
-	    fawkesblackboard  \
+	    fawkesblackboard fawkesbaseapp \
 	    Laser360Interface Position3DInterface \
 	    fawkes_amcl_pf fawkes_amcl_map fawkes_amcl_sensors \
 	    fawkes_amcl_utils
 OBJS_amcl = amcl_plugin.o amcl_thread.o
 
 LIBS_map_lasergen = fawkescore fawkesutils fawkesaspects fawkesinterface \
-		    fawkesblackboard  \
+		    fawkesblackboard  fawkesbaseapp \
 		    Laser360Interface Position3DInterface \
 		    fawkes_amcl_map fawkes_amcl_utils
 OBJS_map_lasergen = map_lasergen_plugin.o map_lasergen_thread.o
