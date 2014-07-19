@@ -613,6 +613,7 @@ LaserLinesThread::calc_line_length(CloudPtr cloud_line, pcl::ModelCoefficients::
   line_dir[0]       = coeff->values[3];
   line_dir[1]       = coeff->values[4];
   line_dir[2]       = coeff->values[5];
+  line_dir.normalize();
 
   ssize_t idx_1 = 0, idx_2 = 0;
   float max_dist_1 = 0.f, max_dist_2 = 0.f;
@@ -620,14 +621,16 @@ LaserLinesThread::calc_line_length(CloudPtr cloud_line, pcl::ModelCoefficients::
   for (size_t i = 1; i < cloud_line_proj->points.size(); ++i) {
     const PointType &pt = cloud_line_proj->points[i];
     Eigen::Vector3f ptv(pt.x, pt.y, pt.z);
-    float dist = (ptv - point_on_line).norm();
-    if (line_dir.dot(ptv) >= 0) {
+    Eigen::Vector3f diff(ptv - point_on_line);
+    float dist = diff.norm();
+    float dir  = line_dir.dot(diff);
+    if (dir >= 0) {
       if (dist > max_dist_1) {
 	max_dist_1 = dist;
 	idx_1 = i;
       }
     }
-    if (line_dir.dot(ptv) <= 0) {
+    if (dir <= 0) {
       if (dist > max_dist_2) {
 	max_dist_2 = dist;
 	idx_2 = i;
