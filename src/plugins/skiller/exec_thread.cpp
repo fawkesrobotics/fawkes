@@ -179,6 +179,8 @@ SkillerExecutionThread::init()
     }
 
     __lua->set_start_script(LUADIR"/skiller/fawkes/start.lua");
+
+    __lua->add_watcher(this);
   
     __skiller_if->set_skill_string("");
     __skiller_if->set_status(SkillerInterface::S_INACTIVE);
@@ -214,6 +216,8 @@ SkillerExecutionThread::init()
 void
 SkillerExecutionThread::finalize()
 {
+  __lua->remove_watcher(this);
+
   std::list<SkillerFeature *>::iterator f;
   for (f = __features.begin(); f != __features.end(); ++f) {
     (*f)->finalize_lua_context(__lua);
@@ -243,6 +247,19 @@ void
 SkillerExecutionThread::add_skiller_feature(SkillerFeature *feature)
 {
   __features.push_back(feature);
+}
+
+
+void
+SkillerExecutionThread::lua_restarted(LuaContext *context)
+{
+  context->create_table();
+  context->set_global("features_env_template");
+
+  std::list<SkillerFeature *>::iterator f;
+  for (f = __features.begin(); f != __features.end(); ++f) {
+    (*f)->init_lua_context(context);
+  }
 }
 
 
