@@ -875,6 +875,7 @@ Thread::waiting() const
   if (__op_mode != OPMODE_WAITFORWAKEUP) {
     return false;
   } else {
+    MutexLocker lock(__sleep_mutex);
     return __waiting_for_wakeup;
   }
 }
