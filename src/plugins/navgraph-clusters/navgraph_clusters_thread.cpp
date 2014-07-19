@@ -20,6 +20,7 @@
 
 #include "navgraph_clusters_thread.h"
 #include "clusters_block_constraint.h"
+#include "clusters_static_cost_constraint.h"
 
 #include <core/threading/mutex_locker.h>
 #include <utils/graph/topological_map_graph.h>
@@ -81,6 +82,13 @@ NavGraphClustersThread::init()
   if (cfg_mode_ == "block") {
     edge_constraint_ = new NavGraphClustersBlockConstraint("clusters", this);
     constraint_repo->register_constraint(edge_constraint_);
+  } else if (cfg_mode_ == "static-cost") {
+    float cost_factor = config->get_float("/navgraph-clusters/static-cost/cost-factor");
+    edge_cost_constraint_ =
+      new NavGraphClustersStaticCostConstraint("clusters", this, cost_factor);
+    constraint_repo->register_constraint(edge_cost_constraint_);
+  } else {
+    throw Exception("Unknown constraint mode '%s'", cfg_mode_.c_str());
   }
 }
 
@@ -90,6 +98,11 @@ NavGraphClustersThread::finalize()
   if (edge_constraint_) {
     constraint_repo->unregister_constraint(edge_constraint_->name());
     delete edge_constraint_;
+  }
+
+  if (edge_cost_constraint_) {
+    constraint_repo->unregister_constraint(edge_cost_constraint_->name());
+    delete edge_cost_constraint_;
   }
 
   blackboard->unregister_listener(this);

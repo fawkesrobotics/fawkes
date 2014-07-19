@@ -20,4 +20,9 @@ navgraph-clusters:
   # Set the mode to enforce the constraints.
   # block: use an edge constraint to block edges close to clusters from
   #        expansion during A* search
-  constraint-mode: block
+  # static-cost:  apply a static cost factor to edges close to clusters
+  constraint-mode: static-cost
+
+  static-cost:
+    # Cost factor to apply to edges close to clusters
+    cost-factor: 2.0
