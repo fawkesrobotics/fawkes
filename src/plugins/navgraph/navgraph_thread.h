@@ -105,6 +105,7 @@ class NavGraphThread
   float        cfg_shortcut_tolerance_; 
   float        cfg_resend_interval_; 
   float        cfg_replan_interval_; 
+  float        cfg_replan_factor_; 
 #ifdef HAVE_VISUALIZATION
   float        cfg_visual_interval_; 
 #endif

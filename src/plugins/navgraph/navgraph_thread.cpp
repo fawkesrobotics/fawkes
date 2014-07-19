@@ -77,6 +77,7 @@ NavGraphThread::init()
   cfg_shortcut_tolerance_ = config->get_float("/plugins/navgraph/shortcut_tolerance");
   cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
   cfg_replan_interval_ = config->get_float("/plugins/navgraph/replan_interval");
+  cfg_replan_factor_   = config->get_float("/plugins/navgraph/replan_cost_factor");
   cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
   cfg_log_graph_       = config->get_bool("/plugins/navgraph/log_graph");
   cfg_abort_on_error_  = config->get_bool("/plugins/navgraph/abort_on_error");
@@ -289,8 +290,7 @@ NavGraphThread::loop()
       fawkes::Time now(clock);
       bool new_plan = false;
 
-      if (constrained_plan_ && plan_.size() > 2 &&
-	  (now - path_planned_at_) > cfg_replan_interval_)
+      if (plan_.size() > 2 && (now - path_planned_at_) > cfg_replan_interval_)
       {
 	*path_planned_at_ = now;
 	constraint_repo_.lock();
@@ -298,8 +298,6 @@ NavGraphThread::loop()
 	  TopologicalMapNode goal = plan_.back();
 
 	  if (replan(plan_[0], goal)) {
-	    logger->log_debug(name(), "Executing after re-planning from '%s' to '%s'",
-			      plan_[0].name().c_str(), goal.name().c_str());
 	    // do not optimize here, we know that we do want to travel
 	    // to the first node, we are already on the way...
 	    //optimize_plan();
@@ -328,7 +326,7 @@ NavGraphThread::loop()
     if (now - visualized_at_ >= cfg_visual_interval_) {
       *visualized_at_ = now;
       constraint_repo_.lock();
-      if (constraint_repo_->compute() || constraint_repo_->modified(/* reset */true)) {
+      if (constraint_repo_->compute() || constraint_repo_->modified(/* reset */ false)) {
 	vt_->wakeup();
       }
       constraint_repo_.unlock();
@@ -444,14 +442,21 @@ NavGraphThread::replan(const TopologicalMapNode &start, const TopologicalMapNode
   
   if (! a_star_solution.empty()) {
     // get cost of current plan
-    TopologicalMapNode prev("current-pose", pose_.getOrigin().x(), pose_.getOrigin().y());
-    float plan_cost = 0.;
+    TopologicalMapNode pose("current-pose", pose_.getOrigin().x(), pose_.getOrigin().y());
+    TopologicalMapNode prev(pose);
+    float old_cost = 0.;
     for (const TopologicalMapNode &n : plan_) {
-      plan_cost += sqrtf(powf(n.x() - prev.x(), 2) + powf(n.y() - prev.y(), 2));
+      old_cost += NavGraphSearchState::cost(prev, n);
       prev = n;
     }
 
-    if (a_star_solution[a_star_solution.size() - 1]->total_estimated_cost <= plan_cost) {
+    NavGraphSearchState *ngss = dynamic_cast<NavGraphSearchState *>(a_star_solution[0]);
+
+    float new_cost =
+      NavGraphSearchState::cost(pose, ngss->node())
+      + a_star_solution[a_star_solution.size() - 1]->total_estimated_cost;
+
+    if (new_cost <= old_cost * cfg_replan_factor_) {
       constrained_plan_ = true;
       plan_.clear();
       NavGraphSearchState *solstate;
@@ -463,13 +468,16 @@ NavGraphThread::replan(const TopologicalMapNode &start, const TopologicalMapNode
 	// add free target node again
 	plan_.push_back(goal);
       }
+      logger->log_info(name(), "Executing after re-planning from '%s' to '%s', "
+		       "old cost: %f  new cost: %f (%f * %f)",
+		       plan_[0].name().c_str(), goal.name().c_str(),
+		       old_cost, new_cost * cfg_replan_factor_, new_cost, cfg_replan_factor_);
       return true;
     } else {
       logger->log_warn(name(), "Re-planning from '%s' to '%s' resulted in "
-		       "more expensive plan(%f > %f), keeping old",
+		       "more expensive plan: %f > %f (%f * %f), keeping old",
 		       start.name().c_str(), goal.name().c_str(),
-		       a_star_solution[a_star_solution.size() - 1]->total_estimated_cost,
-		       plan_cost);
+		       new_cost, old_cost * cfg_replan_factor_, old_cost, cfg_replan_factor_);
       return false;
     }
   } else {
@@ -629,10 +637,7 @@ NavGraphThread::send_next_goal()
 						 tf::get_yaw(tpose.getRotation()));
   try {
 #ifdef HAVE_VISUALIZATION
-    if (vt_)  {
-      vt_->set_current_edge(last_node_, next_target.name());
-      visualized_at_->stamp();
-    }
+    if (vt_)  vt_->set_current_edge(last_node_, next_target.name());
 #endif
 
     if (! nav_if_->has_writer()) {
@@ -659,10 +664,7 @@ NavGraphThread::send_next_goal()
       pp_nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
       pp_nav_if_->write();
 #ifdef HAVE_VISUALIZATION
-      if (vt_) {
-	vt_->reset_plan();
-	visualized_at_->stamp();
-      }
+      if (vt_)  vt_->reset_plan();
 #endif
     } else {
       fawkes::Time now(clock);
