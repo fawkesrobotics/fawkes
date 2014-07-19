@@ -19,6 +19,7 @@
  */
 
 #include "navgraph_clusters_thread.h"
+#include "clusters_block_constraint.h"
 
 #include <core/threading/mutex_locker.h>
 #include <utils/graph/topological_map_graph.h>
@@ -42,8 +43,7 @@ using std::make_pair;
 /** Constructor. */
 NavGraphClustersThread::NavGraphClustersThread()
   : Thread("NavGraphClustersThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlackBoardInterfaceListener("NavGraphClustersThread"),
-    NavGraphEdgeConstraint("clusters")
+    BlackBoardInterfaceListener("NavGraphClustersThread")
 {
 }
 
@@ -59,6 +59,7 @@ NavGraphClustersThread::init()
   cfg_close_threshold_ = config->get_float("/navgraph-clusters/close-threshold");
   cfg_fixed_frame_     = config->get_string("/frames/fixed");
   cfg_min_vishistory_  = config->get_int("/navgraph-clusters/min-visibility-history");
+  cfg_mode_            = config->get_string("/navgraph-clusters/constraint-mode");
 
   std::string pattern = cfg_iface_prefix_ + "*";
 
@@ -75,13 +76,21 @@ NavGraphClustersThread::init()
   bbio_add_observed_create("Position3DInterface", pattern.c_str());
   blackboard->register_observer(this);
 
-  constraint_repo->register_constraint(this);
+  edge_constraint_ = NULL;
+  edge_cost_constraint_ = NULL;
+  if (cfg_mode_ == "block") {
+    edge_constraint_ = new NavGraphClustersBlockConstraint("clusters", this);
+    constraint_repo->register_constraint(edge_constraint_);
+  }
 }
 
 void
 NavGraphClustersThread::finalize()
 {
-  constraint_repo->unregister_constraint(NavGraphEdgeConstraint::name());
+  if (edge_constraint_) {
+    constraint_repo->unregister_constraint(edge_constraint_->name());
+    delete edge_constraint_;
+  }
 
   blackboard->unregister_listener(this);
   blackboard->unregister_observer(this);
@@ -179,12 +188,14 @@ NavGraphClustersThread::conditional_close(Interface *interface) throw()
 }
 
 
-bool
-NavGraphClustersThread::compute(void) throw()
+/** Get a list of edges close to a clusters considered blocked.
+ * @return list of pairs of blocked edges' start and end name.
+ */
+std::list<std::pair<std::string, std::string>>
+NavGraphClustersThread::blocked_edges() throw()
 {
   MutexLocker lock(cluster_ifs_.mutex());
-  blocked_.clear();
-
+  std::list<std::pair<std::string, std::string>> blocked;
 
   const std::vector<TopologicalMapEdge> &graph_edges = navgraph->edges();
 
@@ -209,7 +220,7 @@ NavGraphClustersThread::compute(void) throw()
 	    // projection of the centroid onto the edge is within the line segment
 	    float distance = (diff - direction_norm.dot(diff) * direction_norm).norm();
 	    if (distance < cfg_close_threshold_) {
-	      blocked_.push_back(make_pair(edge.from(), edge.to()));
+	      blocked.push_back(make_pair(edge.from(), edge.to()));
 	    }
 	  }
 	}
@@ -218,21 +229,10 @@ NavGraphClustersThread::compute(void) throw()
       }
     }
   }
-  blocked_.sort();
-  blocked_.unique();
+  blocked.sort();
+  blocked.unique();
 
-  return true;
-}
-
-bool
-NavGraphClustersThread::blocks(const fawkes::TopologicalMapNode &from,
-			       const fawkes::TopologicalMapNode &to) throw()
-{
-  std::string to_n = to.name();
-  std::string from_n = from.name();
-  return
-    ((find(blocked_.begin(), blocked_.end(), make_pair(from_n, to_n)) != blocked_.end()) ||
-     (find(blocked_.begin(), blocked_.end(), make_pair(to_n, from_n)) != blocked_.end()) );
+  return blocked;
 }
 
 

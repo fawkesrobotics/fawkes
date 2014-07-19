@@ -31,7 +31,6 @@
 #include <plugins/navgraph/aspect/navgraph.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
-#include <plugins/navgraph/constraints/edge_constraint.h>
 
 #include <Eigen/Geometry>
 
@@ -41,6 +40,8 @@
 namespace fawkes {
   class Position3DInterface;
   class Time;
+  class NavGraphEdgeConstraint;
+  class NavGraphEdgeCostConstraint;
 }
 
 class NavGraphClustersThread
@@ -52,19 +53,17 @@ class NavGraphClustersThread
   public fawkes::TransformAspect,
   public fawkes::NavGraphAspect,
   public fawkes::BlackBoardInterfaceObserver,
-  public fawkes::BlackBoardInterfaceListener,
-  public fawkes::NavGraphEdgeConstraint
+  public fawkes::BlackBoardInterfaceListener
 {
  public:
   NavGraphClustersThread();
   virtual ~NavGraphClustersThread();
 
-  // ambiguous, choose Thread::name() instead of NavGraphEdgeConstraint::name()
-  using Thread::name;
-
   virtual void init();
   virtual void loop();
   virtual void finalize();
+
+  std::list<std::pair<std::string, std::string>> blocked_edges() throw();
 
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run();}
@@ -79,11 +78,6 @@ class NavGraphClustersThread
   virtual void bb_interface_reader_removed(fawkes::Interface *interface,
                                            unsigned int instance_serial) throw();
 
-  // for NavGraphEdgeConstraint
-  virtual bool compute(void) throw();
-  virtual bool blocks(const fawkes::TopologicalMapNode &from,
-		      const fawkes::TopologicalMapNode &to) throw();
-
   void conditional_close(fawkes::Interface *interface) throw();
 
   Eigen::Vector2f fixed_frame_pose(std::string frame, const fawkes::Time &timestamp,
@@ -94,9 +88,12 @@ class NavGraphClustersThread
   float        cfg_close_threshold_;
   std::string  cfg_fixed_frame_;
   int          cfg_min_vishistory_;
+  std::string  cfg_mode_;
 
   fawkes::LockList<fawkes::Position3DInterface *>  cluster_ifs_;
-  std::list<std::pair<std::string, std::string>>   blocked_;
+
+  fawkes::NavGraphEdgeConstraint *edge_constraint_;
+  fawkes::NavGraphEdgeCostConstraint *edge_cost_constraint_;
 };
 
 #endif
