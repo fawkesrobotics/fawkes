@@ -40,6 +40,7 @@
 #include <logging/factory.h>
 #include <logging/network.h>
 #include <utils/time/clock.h>
+#include <utils/time/time.h>
 #include <netcomm/fawkes/network_manager.h>
 #include <plugin/manager.h>
 #include <plugin/net/handler.h>
@@ -82,6 +83,7 @@ Clock                     * clock = NULL;
 SharedMemoryRegistry      * shm_registry;
 InitOptions               * init_options = NULL;
 tf::Transformer           * tf_listener = NULL;
+Time                      * start_time = NULL;
 
 // this is NOT shared to the outside
 FawkesMainThread::Runner  * runner = NULL;
@@ -347,6 +349,7 @@ init(InitOptions options, int & retval)
   logger->add_logger(network_logger);
 
   clock = Clock::instance();
+  start_time = new Time(clock);
 
   lbb->start_nethandler(network_manager->hub());
 
@@ -425,6 +428,8 @@ cleanup()
   LibLogger::finalize();
   logger = NULL;
 
+  delete start_time;
+  start_time = NULL;
   Clock::finalize();
   clock = NULL;
 
@@ -513,6 +518,22 @@ print_usage(const char *progname)
 	 "\n", progname);
 }
 
+
+/** Get Fawkes uptime.
+ * Returns the time in seconds since Fawkes was started.
+ * This creates a new time for the system clock and subtracts the start time.
+ * @return time in seconds since Fawkes was started
+ */
+float
+uptime()
+{
+  if (start_time) {
+    fawkes::Time now(clock);
+    return now - start_time;
+  } else {
+    return 0.0;
+  }
+}
 
 } // end namespace runtime
 } // end namespace fawkes
