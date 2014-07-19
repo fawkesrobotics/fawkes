@@ -37,6 +37,7 @@ class NavGraphEdgeCostConstraint
 {
  public:
   NavGraphEdgeCostConstraint(std::string &name);
+  NavGraphEdgeCostConstraint(const char *name);
   virtual ~NavGraphEdgeCostConstraint();
 
   std::string name();
