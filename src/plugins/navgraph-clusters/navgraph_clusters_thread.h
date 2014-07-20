@@ -36,6 +36,7 @@
 
 #include <list>
 #include <string>
+#include <tuple>
 
 namespace fawkes {
   class Position3DInterface;
@@ -65,6 +66,11 @@ class NavGraphClustersThread
 
   std::list<std::pair<std::string, std::string>> blocked_edges() throw();
 
+  std::list<std::tuple<std::string, std::string, Eigen::Vector2f>>
+    blocked_edges_centroids() throw();
+
+  bool robot_pose(Eigen::Vector2f &pose) throw();
+
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run();}
 
@@ -87,6 +93,7 @@ class NavGraphClustersThread
   std::string  cfg_iface_prefix_;
   float        cfg_close_threshold_;
   std::string  cfg_fixed_frame_;
+  std::string  cfg_base_frame_;
   int          cfg_min_vishistory_;
   std::string  cfg_mode_;
 

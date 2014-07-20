@@ -26,7 +26,8 @@ LIBS_navgraph_clusters = fawkescore fawkesutils fawkesaspects fawkesinterface \
 		Position3DInterface
 OBJS_navgraph_clusters = navgraph_clusters_plugin.o navgraph_clusters_thread.o \
 			 clusters_block_constraint.o \
-			 clusters_static_cost_constraint.o
+			 clusters_static_cost_constraint.o \
+			 clusters_distance_cost_constraint.o
 OBJS_all    = $(OBJS_navgraph_clusters)
 
 ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_EIGEN3),111)

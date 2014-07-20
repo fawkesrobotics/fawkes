@@ -21,6 +21,7 @@
 #include "navgraph_clusters_thread.h"
 #include "clusters_block_constraint.h"
 #include "clusters_static_cost_constraint.h"
+#include "clusters_distance_cost_constraint.h"
 
 #include <core/threading/mutex_locker.h>
 #include <utils/graph/topological_map_graph.h>
@@ -34,7 +35,7 @@
 using namespace fawkes;
 
 using std::find;
-using std::make_pair;
+using std::make_tuple;
 
 /** @class NavGraphClustersThread "navgraph_clusters_thread.h"
  * Block navgraph paths based on laser clusters.
@@ -59,6 +60,7 @@ NavGraphClustersThread::init()
   cfg_iface_prefix_    = config->get_string("/navgraph-clusters/interface-prefix");
   cfg_close_threshold_ = config->get_float("/navgraph-clusters/close-threshold");
   cfg_fixed_frame_     = config->get_string("/frames/fixed");
+  cfg_base_frame_      = config->get_string("/frames/base");
   cfg_min_vishistory_  = config->get_int("/navgraph-clusters/min-visibility-history");
   cfg_mode_            = config->get_string("/navgraph-clusters/constraint-mode");
 
@@ -86,6 +88,15 @@ NavGraphClustersThread::init()
     float cost_factor = config->get_float("/navgraph-clusters/static-cost/cost-factor");
     edge_cost_constraint_ =
       new NavGraphClustersStaticCostConstraint("clusters", this, cost_factor);
+    constraint_repo->register_constraint(edge_cost_constraint_);
+  } else if (cfg_mode_ == "distance-cost") {
+    float cost_min = config->get_float("/navgraph-clusters/distance-cost/cost-min");
+    float cost_max = config->get_float("/navgraph-clusters/distance-cost/cost-max");
+    float dist_min = config->get_float("/navgraph-clusters/distance-cost/dist-min");
+    float dist_max = config->get_float("/navgraph-clusters/distance-cost/dist-max");
+    edge_cost_constraint_ =
+      new NavGraphClustersDistanceCostConstraint("clusters", this,
+						 cost_min, cost_max, dist_min, dist_max);
     constraint_repo->register_constraint(edge_cost_constraint_);
   } else {
     throw Exception("Unknown constraint mode '%s'", cfg_mode_.c_str());
@@ -207,8 +218,28 @@ NavGraphClustersThread::conditional_close(Interface *interface) throw()
 std::list<std::pair<std::string, std::string>>
 NavGraphClustersThread::blocked_edges() throw()
 {
-  MutexLocker lock(cluster_ifs_.mutex());
   std::list<std::pair<std::string, std::string>> blocked;
+  std::list<std::tuple<std::string, std::string, Eigen::Vector2f>> blocked_c =
+    blocked_edges_centroids();
+
+  std::for_each(blocked_c.begin(), blocked_c.end(),
+		[&blocked](std::tuple<std::string, std::string, Eigen::Vector2f> &b) {
+		  blocked.push_back(std::make_pair(std::get<0>(b), std::get<1>(b)));
+		});
+
+  return blocked;
+}
+
+
+/** Get a list of edges close to a clusters and its centroid considered blocked.
+ * @return list of tuples of blocked edges' start and end name and the centroid
+ * of the object close to the edge.
+ */
+std::list<std::tuple<std::string, std::string, Eigen::Vector2f>>
+NavGraphClustersThread::blocked_edges_centroids() throw()
+{
+  MutexLocker lock(cluster_ifs_.mutex());
+  std::list<std::tuple<std::string, std::string, Eigen::Vector2f>> blocked;
 
   const std::vector<TopologicalMapEdge> &graph_edges = navgraph->edges();
 
@@ -233,7 +264,7 @@ NavGraphClustersThread::blocked_edges() throw()
 	    // projection of the centroid onto the edge is within the line segment
 	    float distance = (diff - direction_norm.dot(diff) * direction_norm).norm();
 	    if (distance < cfg_close_threshold_) {
-	      blocked.push_back(make_pair(edge.from(), edge.to()));
+	      blocked.push_back(make_tuple(edge.from(), edge.to(), centroid));
 	    }
 	  }
 	}
@@ -242,7 +273,12 @@ NavGraphClustersThread::blocked_edges() throw()
       }
     }
   }
-  blocked.sort();
+  blocked.sort([](const std::tuple<std::string, std::string, Eigen::Vector2f> &a,
+		  const std::tuple<std::string, std::string, Eigen::Vector2f> &b) {
+		 return
+		   (std::get<0>(a) < std::get<0>(b) ||
+		    (std::get<0>(a) == std::get<0>(b) && std::get<1>(a) < std::get<1>(b)));
+	       });
   blocked.unique();
 
   return blocked;
@@ -271,5 +307,25 @@ NavGraphClustersThread::fixed_frame_pose(std::string frame, const fawkes::Time &
       //	       "Failed to transform cluster pose: %s", e.what_no_backtrace());
       throw;
     }
+  }
+}
+
+
+/** Determine current robot pose.
+ * @param pose upon returning true contains the current pose of the robot
+ * @return true if the pose could be determined, false otherwise
+ */
+bool
+NavGraphClustersThread::robot_pose(Eigen::Vector2f &pose) throw()
+{
+  tf::Stamped<tf::Point> tpose;
+  tf::Stamped<tf::Point> input(tf::Point(0, 0, 0), fawkes::Time(0,0), cfg_base_frame_);
+  try {
+    tf_listener->transform_point(cfg_fixed_frame_, input, tpose);
+    pose[0] = tpose.x();
+    pose[1] = tpose.y();
+    return true;
+  } catch (Exception &e) {
+    return false;
   }
 }

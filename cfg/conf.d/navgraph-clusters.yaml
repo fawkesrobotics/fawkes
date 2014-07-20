@@ -21,8 +21,19 @@ navgraph-clusters:
   # block: use an edge constraint to block edges close to clusters from
   #        expansion during A* search
   # static-cost:  apply a static cost factor to edges close to clusters
-  constraint-mode: static-cost
+  constraint-mode: distance-cost
 
   static-cost:
     # Cost factor to apply to edges close to clusters
     cost-factor: 2.0
+
+  # Parameters for the distance cost mode.
+  # Any obstacle closer than dist-min will be assigned cost-max,
+  # farther away than dist-max will ignored. In between the cost span
+  # is scaled linearly to the distance range, with closer obstacles
+  # getting higher costs.
+  distance-cost:
+    cost-min: 2
+    cost-max: 4
+    dist-min: 2
+    dist-max: 4
