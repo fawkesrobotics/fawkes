@@ -70,6 +70,8 @@ else
   endif
 endif
 
+aspect: constraints
+static-constraints: aspect constraints
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
