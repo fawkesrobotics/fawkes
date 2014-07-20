@@ -48,6 +48,11 @@ public:
   virtual float  estimate();
   virtual bool   is_goal();
 
+  /** Determine cost between two nodes.
+   * @param from originating node
+   * @param to destination node
+   * @return cost from @p from to @p to.
+   */
   static inline float
     cost(const fawkes::TopologicalMapNode &from,
 	 const fawkes::TopologicalMapNode &to)
@@ -56,6 +61,10 @@ public:
 		 powf(to.y() - from.y(), 2) );
   }
 
+  /** Determine cost between the node of this search state and a given node.
+   * @param d destination node
+   * @return cost from this node to @p d.
+   */
   inline float cost(const fawkes::TopologicalMapNode &d) {
     return cost(node_, d);
   }
