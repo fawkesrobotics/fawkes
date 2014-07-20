@@ -1,8 +1,8 @@
 /***************************************************************************
- *  reservation_list_node_constraint.h - node constraint that holds a list
- *                                  of reserved nodes
+ *  timed_reservation_list_node_constraint.h - node constraint that holds a static
+ *                                   list of nodes and a duration to block
  *
- *  Created: Sun Mar 02 10:47:35 2014
+ *  Created: Sat Jul 12 16:48:23 2014
  *  Copyright  2014  Sebastian Reuter
  *             2014  Tim Niemueller
  ****************************************************************************/
@@ -20,37 +20,52 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __NAVGRAPH_CONSTRAINTS_RESERVATION_LIST_NODE_CONSTRAINT_H_
-#define __NAVGRAPH_CONSTRAINTS_RESERVATION_LIST_NODE_CONSTRAINT_H_
+#ifndef __NAVGRAPH_CONSTRAINTS_TIMED_RESERVATION_LIST_NODE_CONSTRAINT_H_
+#define __NAVGRAPH_CONSTRAINTS_TIMED_RESERVATION_LIST_NODE_CONSTRAINT_H_
 
 #include <plugins/navgraph/constraints/static_list_node_constraint.h>
 
 #include <vector>
 #include <string>
 
+#include <utils/time/time.h>
 #include <utils/graph/topological_map_graph.h>
 #include <logging/logger.h>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
-class NavGraphTimedReservationListNodeConstraint : public NavGraphStaticListNodeConstraint
+
+class NavGraphTimedReservationListNodeConstraint : public NavGraphNodeConstraint
 {
  public:
-  NavGraphTimedReservationListNodeConstraint(Logger *logger, std::string name);
+   NavGraphTimedReservationListNodeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock);
 
-  NavGraphTimedReservationListNodeConstraint(Logger *logger, std::string name,
-					     std::vector<fawkes::TopologicalMapNode> &node_list);
-  
+   NavGraphTimedReservationListNodeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock,
+		   std::vector<std::pair<fawkes::TopologicalMapNode, fawkes::Time>> node_time_list );
+
   virtual ~NavGraphTimedReservationListNodeConstraint();
 
+  const std::vector<std::pair<fawkes::TopologicalMapNode, fawkes::Time>> &  node_time_list() const;
+
+  void add_node(const fawkes::TopologicalMapNode &node, const fawkes::Time valid_time);
+  void add_nodes(const std::vector<std::pair<fawkes::TopologicalMapNode, fawkes::Time>> &timed_nodes);
+  void remove_node(const fawkes::TopologicalMapNode &node);
+  void clear_nodes();
+  bool has_node(const fawkes::TopologicalMapNode &node);
+
+  virtual bool compute(void) throw();
+  virtual bool blocks(const fawkes::TopologicalMapNode &node) throw();
+
  private:
+  std::vector<std::pair<fawkes::TopologicalMapNode, fawkes::Time>> node_time_list_;
+  bool modified_;
   Logger *logger_;
+  fawkes::Clock *clock_;
+  std::string constraint_name_;
 
 };
 
 } // end namespace fawkes
 
 #endif
+
