@@ -1,8 +1,8 @@
 /***************************************************************************
- *  static_list_edge_constraint.h - edge constraint that holds a static list
- *                                  of edges to block
+ *  timed_reservation_list_edge_constraint.h - edge constraint that holds a static
+ *                                   list of edges and a duration to block
  *
- *  Created: Fri Jul 18 21:00:48 2014
+ *  Created: Sat Jul 12 16:48:23 2014
  *  Copyright  2014  Sebastian Reuter
  *             2014  Tim Niemueller
  ****************************************************************************/
@@ -28,29 +28,45 @@
 #include <vector>
 #include <string>
 
+#include <utils/time/time.h>
 #include <utils/graph/topological_map_graph.h>
 #include <logging/logger.h>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
-class NavGraphTimedReservationListEdgeConstraint : public NavGraphStaticListEdgeConstraint
+
+class NavGraphTimedReservationListEdgeConstraint : public NavGraphEdgeConstraint
 {
  public:
-   NavGraphTimedReservationListEdgeConstraint(Logger *logger, std::string name);
+   NavGraphTimedReservationListEdgeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock);
 
-   NavGraphTimedReservationListEdgeConstraint(Logger *logger, std::string name,
-					      std::vector<fawkes::TopologicalMapEdge> &edge_list);
+   NavGraphTimedReservationListEdgeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock,
+		   std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> edge_time_list );
 
   virtual ~NavGraphTimedReservationListEdgeConstraint();
 
+  const std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> &  edge_time_list() const;
+
+  void add_edge(const fawkes::TopologicalMapEdge &edge, const fawkes::Time valid_time);
+  void add_edges(const std::vector<std::pair<fawkes::TopologicalMapEdge, float>> &edge_costs);
+  void remove_edge(const fawkes::TopologicalMapEdge &edge);
+  void clear_edges();
+  bool has_edge(const fawkes::TopologicalMapEdge &edge);
+
+  virtual bool compute(void) throw();
+  virtual bool blocks(const fawkes::TopologicalMapNode &from,
+ 		      const fawkes::TopologicalMapNode &to) throw();
+
  private:
-  Logger* logger_;
+  std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> edge_time_list_;
+  bool modified_;
+  Logger *logger_;
+  fawkes::Clock *clock_;
+  std::string constraint_name_;
 
 };
 
 } // end namespace fawkes
 
 #endif
+
