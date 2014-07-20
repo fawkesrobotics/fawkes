@@ -229,12 +229,13 @@ NavGraphThread::loop()
       // reached the target, check if colli/navi/local planner is final
       nav_if_->read();
       fawkes::Time now(clock);
-      if (nav_if_->is_final() || ((now - target_reached_at_) >= target_time_)) {
-	stop_motion();
+      if (nav_if_->is_final()) {
 	pp_nav_if_->set_final(true);
 	needs_write = true;
+      } else if ((now - target_reached_at_) >= target_time_) {
+	stop_motion();
+	needs_write = true;
       }
-
     } else if (node_reached()) {
       logger->log_info(name(), "Node '%s' has been reached", plan_[0].name().c_str());
       last_node_ = plan_[0].name();
@@ -245,24 +246,16 @@ NavGraphThread::loop()
 	}
 	if (target_time_ == 0)  target_time_ = cfg_target_time_;
 
-	nav_if_->read();
-	if (nav_if_->is_final()) {
-	  exec_active_ = false;
-	  target_reached_ = false;
-	  pp_nav_if_->set_final(true);
-	  needs_write = true;
-	} else {
-	  target_reached_ = true;
-	  target_reached_at_->stamp();
-	}
+	target_reached_ = true;
+	target_reached_at_->stamp();
       }
       plan_.erase(plan_.begin());
+      publish_path(plan_);
 
       if (! plan_.empty()) {
         try {
           logger->log_info(name(), "Sending next goal %s after node reached",
 			   plan_[0].name().c_str());
-          publish_path(plan_);
           send_next_goal();
         } catch (Exception &e) {
           logger->log_warn(name(), "Failed to send next goal (node reached)");
