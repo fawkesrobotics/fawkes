@@ -127,7 +127,7 @@ NavGraphTimedReservationListEdgeConstraint::add_edge(const fawkes::TopologicalMa
  */
 void
 NavGraphTimedReservationListEdgeConstraint::add_edges(
-  const std::vector<std::pair<fawkes::TopologicalMapEdge, float>> &edges)
+  const std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> &edges)
 {
   std::string txt = "{";
   for (const std::pair<TopologicalMapEdge, fawkes::Time> &ec : edges) {

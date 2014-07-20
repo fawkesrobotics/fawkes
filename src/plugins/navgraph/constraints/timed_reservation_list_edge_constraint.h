@@ -48,7 +48,7 @@ class NavGraphTimedReservationListEdgeConstraint : public NavGraphEdgeConstraint
   const std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> &  edge_time_list() const;
 
   void add_edge(const fawkes::TopologicalMapEdge &edge, const fawkes::Time valid_time);
-  void add_edges(const std::vector<std::pair<fawkes::TopologicalMapEdge, float>> &edge_costs);
+  void add_edges(const std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> &edges);
   void remove_edge(const fawkes::TopologicalMapEdge &edge);
   void clear_edges();
   bool has_edge(const fawkes::TopologicalMapEdge &edge);
