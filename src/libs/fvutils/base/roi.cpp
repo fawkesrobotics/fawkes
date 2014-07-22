@@ -326,7 +326,7 @@ ROI::intersect(ROI const &roi) const
   if (start.x + width <= roi.start.x
       || roi.start.x + roi.width <= start.x
       || start.y + height <= roi.start.y
-      || roi.start.y + roi.width <= start.y) {
+      || roi.start.y + roi.height <= start.y) {
 
     return rv;
 
