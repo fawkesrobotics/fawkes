@@ -117,6 +117,7 @@ class CLaserOccupancyGrid : public OccupancyGrid
   std::string m_reference_frame;
   std::string m_laser_frame;
   Logger* logger_;
+  bool cfg_write_spam_debug;
 
   fawkes::Laser360Interface *if_laser_;
   CRoboShape_Colli *m_pRoboShape; /**< my roboshape */

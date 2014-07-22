@@ -54,6 +54,8 @@ class CEscapePotentialFieldOmniDriveModule : public CAbstractDriveMode
   float m_MaxTranslation;
   float m_MaxRotation;
 
+  bool cfg_write_spam_debug;
+
   int   m_turn;
 };
 

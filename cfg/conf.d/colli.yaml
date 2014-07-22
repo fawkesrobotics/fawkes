@@ -12,6 +12,9 @@ plugins/colli:
   # If you want to visualize the data continuously and not just when colli receives a new target, set this to true
   visualize_idle: false
 
+  # This disables/enales the (spam-) debug msgs
+  write_spam_debug: false
+
   # Define if obstacles should be increased depending on robot's speed
   obstacle_increasement: true
 

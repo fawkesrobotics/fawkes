@@ -53,6 +53,8 @@ CEscapePotentialFieldOmniDriveModule::CEscapePotentialFieldOmniDriveModule( Logg
   m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/escape/max_trans" );
   m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/escape/max_rot" );
 
+  cfg_write_spam_debug = config_->get_bool( "/plugins/colli/write_spam_debug" );
+
   logger_->log_debug("CEscapePotentialFieldOmniDriveModule", "(Constructor): Exiting...");
 }
 
@@ -106,7 +108,9 @@ CEscapePotentialFieldOmniDriveModule::Update()
   static unsigned int cell_cost_occ = m_pOccGrid->get_cell_costs().occ;
 
   // This is only called, if we recently stopped...
-  logger_->log_debug("CEscapePotentialFieldOmniDriveModule", "CEscapePotentialFieldOmniDriveModule( Update ): Calculating ESCAPING...");
+  if (cfg_write_spam_debug) {
+    logger_->log_debug("CEscapePotentialFieldOmniDriveModule", "CEscapePotentialFieldOmniDriveModule( Update ): Calculating ESCAPING...");
+  }
 
   m_ProposedTranslationX  = 0.;
   m_ProposedTranslationY  = 0.;
@@ -142,7 +146,9 @@ CEscapePotentialFieldOmniDriveModule::Update()
   target.r   = sqrt( target_x*target_x + target_y*target_y );
   target.phi = atan2(target_y, target_x);
 
-  logger_->log_debug("CEscapePotentialFieldOmniDriveModule","Target vector: phi: %f\t%f", target.phi, target.r);
+  if (cfg_write_spam_debug) {
+    logger_->log_debug("CEscapePotentialFieldOmniDriveModule","Target vector: phi: %f\t%f", target.phi, target.r);
+  }
 
   // decide route
   float angle_difference = M_PI_2 - 0.2;
@@ -171,10 +177,14 @@ CEscapePotentialFieldOmniDriveModule::Update()
   }
 
   if ( turn ) {
-    logger_->log_debug("CEscapePotentialFieldOmniDriveModule","Turn %f", turn_direction);
+    if (cfg_write_spam_debug) {
+      logger_->log_debug("CEscapePotentialFieldOmniDriveModule","Turn %f", turn_direction);
+    }
     m_ProposedRotation = turn_direction * m_MaxRotation;
   } else {
-    logger_->log_debug("CEscapePotentialFieldOmniDriveModule","Drive ( %f , %f )", drive_part_x, drive_part_y);
+    if (cfg_write_spam_debug) {
+      logger_->log_debug("CEscapePotentialFieldOmniDriveModule","Drive ( %f , %f )", drive_part_x, drive_part_y);
+    }
     m_ProposedTranslationX = drive_part_x * m_MaxTranslation;
     m_ProposedTranslationY = drive_part_y * m_MaxTranslation;
     if ( fabs(turn_direction) > 0.2 ) {

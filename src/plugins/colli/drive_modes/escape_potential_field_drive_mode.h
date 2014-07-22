@@ -54,6 +54,7 @@ class CEscapePotentialFieldDriveModule : public CAbstractDriveMode
   /// absolute values are the maximum values. do not act faster!
   float m_MaxTranslation;
   float m_MaxRotation;
+  bool cfg_write_spam_debug;
 
   int   m_turn;
 };

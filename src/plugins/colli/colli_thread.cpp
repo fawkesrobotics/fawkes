@@ -93,6 +93,8 @@ ColliThread::init()
   cfg_iface_colli_        = config->get_string((cfg_prefix + "interface/colli").c_str());
   cfg_iface_read_timeout_ = config->get_float((cfg_prefix + "interface/read_timeout").c_str());
 
+  cfg_write_spam_debug    = config->get_bool((cfg_prefix + "write_spam_debug").c_str());
+
   std::string escape_mode = config->get_string((cfg_prefix + "drive_mode/default_escape").c_str());
   if ( escape_mode.compare("potential_field") == 0 ) {
     cfg_escape_mode = fawkes::colli_escape_mode_t::potential_field;
@@ -491,10 +493,14 @@ ColliThread::colli_execute_()
         else {
           int rnd = (int)((rand())/(float)(RAND_MAX)) * 10; // + 5;
           escape_count = rnd;
-          logger->log_debug(name(), "Escape: new round with %i", rnd);
+          if (cfg_write_spam_debug) {
+            logger->log_debug(name(), "Escape: new round with %i", rnd);
+          }
         }
 
-        logger->log_debug(name(), "Escape mode, escaping!");
+        if (cfg_write_spam_debug) {
+          logger->log_debug(name(), "Escape mode, escaping!");
+        }
         m_pSelectDriveMode->SetLocalTarget( m_LocalTarget.x, m_LocalTarget.y );
         if ( cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field ) {
           m_pSelectDriveMode->setGridInformation(m_pLaserOccGrid, m_RoboGridPos.x, m_RoboGridPos.y);
@@ -588,7 +594,9 @@ ColliThread::colli_execute_()
 
   }
 
-  logger->log_debug(name(), "I want to realize %f , %f , %f", m_ProposedTranslationX, m_ProposedTranslationY, m_ProposedRotation);
+  if (cfg_write_spam_debug) {
+    logger->log_debug(name(), "I want to realize %f , %f , %f", m_ProposedTranslationX, m_ProposedTranslationY, m_ProposedRotation);
+  }
 
   // calculate if emergency stop is needed
   if ( distance_to_next_target_ < std::min(1.2f, cfg_max_velocity_)

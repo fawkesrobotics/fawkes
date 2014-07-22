@@ -126,6 +126,7 @@ class ColliThread
   float m_ProposedTranslationX;   // the proposed x translation that should be realized in MotorInstruct
   float m_ProposedTranslationY;   // the proposed y translation that should be realized in MotorInstruct
   float m_ProposedRotation;       // the proposed rotation that should be realized in MotorInstruct
+  bool cfg_write_spam_debug;
 
   fawkes::colli_state_t m_ColliStatus;     // representing current colli status
   bool target_new_;
