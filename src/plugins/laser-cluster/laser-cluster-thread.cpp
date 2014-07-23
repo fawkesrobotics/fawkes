@@ -654,14 +654,16 @@ LaserClusterThread::calc_line_length(CloudPtr cloud, pcl::PointIndices::Ptr inli
   for (size_t i = 1; i < cloud_line_proj->points.size(); ++i) {
     const PointType &pt = cloud_line_proj->points[i];
     Eigen::Vector3f ptv(pt.x, pt.y, pt.z);
-    float dist = (ptv - point_on_line).norm();
-    if (line_dir.dot(ptv) >= 0) {
+    Eigen::Vector3f diff(ptv - point_on_line);
+    float dist = diff.norm();
+    float dir  = line_dir.dot(diff);
+    if (dir >= 0) {
       if (dist > max_dist_1) {
 	max_dist_1 = dist;
 	idx_1 = i;
       }
     }
-    if (line_dir.dot(ptv) <= 0) {
+    if (dir <= 0) {
       if (dist > max_dist_2) {
 	max_dist_2 = dist;
 	idx_2 = i;
