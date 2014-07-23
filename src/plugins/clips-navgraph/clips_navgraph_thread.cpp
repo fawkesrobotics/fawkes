@@ -22,6 +22,8 @@
 #include "clips_navgraph_thread.h"
 
 #include <utils/graph/topological_map_graph.h>
+#include <plugins/navgraph/constraints/static_list_edge_constraint.h>
+#include <plugins/navgraph/constraints/constraint_repo.h>
 
 #include <clipsmm.h>
 
@@ -50,12 +52,18 @@ void
 ClipsNavGraphThread::init()
 {
   navgraph->add_change_listener(this);
+
+  edge_constraint_ = new NavGraphStaticListEdgeConstraint("clips");
+  constraint_repo->register_constraint(edge_constraint_);
 }
 
 
 void
 ClipsNavGraphThread::finalize()
 {
+  constraint_repo->unregister_constraint(edge_constraint_->name());
+  delete edge_constraint_;
+
   navgraph->remove_change_listener(this);
   envs_.clear();
 }
@@ -71,6 +79,23 @@ ClipsNavGraphThread::clips_context_init(const std::string &env_name,
   clips.lock();
   clips->batch_evaluate(SRCDIR"/clips/navgraph.clp");
   clips_navgraph_load(clips);
+
+  clips->add_function("navgraph-block-edge",
+    sigc::slot<void, std::string, std::string>(
+      sigc::bind<0>(
+        sigc::mem_fun(*this, &ClipsNavGraphThread::clips_navgraph_block_edge),
+	env_name)
+    )
+  );
+
+  clips->add_function("navgraph-unblock-edge",
+    sigc::slot<void, std::string, std::string>(
+      sigc::bind<0>(
+        sigc::mem_fun(*this, &ClipsNavGraphThread::clips_navgraph_unblock_edge),
+	env_name)
+    )
+  );
+
   clips.unlock();
 }
 
@@ -119,6 +144,44 @@ ClipsNavGraphThread::clips_navgraph_load(LockPtr<CLIPS::Environment> &clips)
     logger->log_warn(name(), e);
     clips->assert_fact_f("(navgraph-load-fail %s)", *(e.begin()));
   }
+}
+
+
+void
+ClipsNavGraphThread::clips_navgraph_block_edge(std::string env_name,
+					       std::string from, std::string to)
+{
+  const std::vector<TopologicalMapEdge> &graph_edges = navgraph->edges();
+
+  for (const TopologicalMapEdge &edge : graph_edges) {
+    if (edge.from() == from && edge.to() == to) {
+      edge_constraint_->add_edge(edge);
+      return;
+    }
+  }
+
+  logger->log_warn(name(), "Environment %s tried to block edge %s--%s, "
+		   "which does not exist in graph", env_name.c_str(),
+		   from.c_str(), to.c_str());
+}
+
+
+void
+ClipsNavGraphThread::clips_navgraph_unblock_edge(std::string env_name,
+						 std::string from, std::string to)
+{
+  const std::vector<TopologicalMapEdge> &graph_edges = navgraph->edges();
+
+  for (const TopologicalMapEdge &edge : graph_edges) {
+    if (edge.from() == from && edge.to() == to) {
+      edge_constraint_->remove_edge(edge);
+      return;
+    }
+  }
+
+  logger->log_warn(name(), "Environment %s tried to unblock edge %s--%s, "
+		   "which does not exist in graph", env_name.c_str(),
+		   from.c_str(), to.c_str());
 }
 
 void
