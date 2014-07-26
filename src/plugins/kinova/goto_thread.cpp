@@ -21,7 +21,8 @@
  */
 
 #include "goto_thread.h"
-#include "kinova_api.h"
+
+#include <libkindrv/kindrv.h>
 
 #include <interfaces/JacoInterface.h>
 #include <utils/math/angle.h>
@@ -29,6 +30,7 @@
 #include <unistd.h>
 
 using namespace fawkes;
+using namespace KinDrv;
 
 /** @class KinovaGotoThread "goto_thread.h"
  * Jaco Arm movement thread.
@@ -87,7 +89,7 @@ KinovaGotoThread::set_interface(JacoInterface *if_jaco)
 
 void
 KinovaGotoThread::set_target(float x, float y, float z,
-			     float e1, float e2, float e3,
+                             float e1, float e2, float e3,
                              float f1, float f2, float f3)
 {
   __x     = x;

@@ -21,7 +21,8 @@
  */
 
 #include "openrave_thread.h"
-#include "kinova_api.h"
+
+#include <libkindrv/kindrv.h>
 
 #include <interfaces/JacoInterface.h>
 
@@ -38,6 +39,7 @@
 #endif
 
 using namespace fawkes;
+using namespace KinDrv;
 
 /** @class JacoOpenraveThread "jaco_thread.h"
  * Jaco Arm control thread.

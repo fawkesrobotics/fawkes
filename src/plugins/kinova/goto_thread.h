@@ -33,8 +33,10 @@
 
 #include <string>
 
-namespace fawkes {
+namespace KinDrv {
   class JacoArm;
+}
+namespace fawkes {
   class JacoInterface;
 }
 
@@ -53,7 +55,7 @@ class KinovaGotoThread
   virtual void finalize();
   virtual void loop();
 
-  virtual void register_arm(fawkes::JacoArm *arm);
+  virtual void register_arm(KinDrv::JacoArm *arm);
   virtual void unregister_arm();
   virtual void set_interface(fawkes::JacoInterface *if_jaco);
 
@@ -72,7 +74,7 @@ class KinovaGotoThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JacoArm         *__arm;
+  KinDrv::JacoArm         *__arm;
   fawkes::JacoInterface   *__if_jaco;
 
   float __x, __y, __z;

@@ -21,11 +21,13 @@
  */
 
 #include "jaco_thread.h"
-#include "kinova_api.h"
+
+#include <libkindrv/kindrv.h>
 
 #include <interfaces/JacoInterface.h>
 
 using namespace fawkes;
+using namespace KinDrv;
 
 /** @class KinovaJacoThread "jaco_thread.h"
  * Jaco Arm control thread.
@@ -63,7 +65,7 @@ KinovaJacoThread::init()
   __cfg_auto_calib      = config->get_bool("/hardware/jaco/auto_calibrate");
 
   try {
-    // create new JacoArm object (connects to arm via libusb)
+    // create new JacoArm object
     __arm = new JacoArm();
 
     // register arm in other threads

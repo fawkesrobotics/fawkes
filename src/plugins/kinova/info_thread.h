@@ -23,7 +23,7 @@
 #ifndef __PLUGINS_KINOVA_KINOVA_INFO_THREAD_H_
 #define __PLUGINS_KINOVA_KINOVA_INFO_THREAD_H_
 
-#include "types.h"
+#include <libkindrv/types.h>
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -33,8 +33,10 @@
 
 #include <string>
 
-namespace fawkes {
+namespace KinDrv {
   class JacoArm;
+}
+namespace fawkes {
   class JacoInterface;
 }
 
@@ -53,7 +55,7 @@ class KinovaInfoThread
   virtual void finalize();
   virtual void loop();
 
-  virtual void register_arm(fawkes::JacoArm *arm);
+  virtual void register_arm(KinDrv::JacoArm *arm);
   virtual void unregister_arm();
   virtual void set_interface(fawkes::JacoInterface *if_jaco);
 
@@ -61,11 +63,11 @@ class KinovaInfoThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JacoArm         *__arm;
+  KinDrv::JacoArm         *__arm;
   fawkes::JacoInterface   *__if_jaco;
 
-  fawkes::jaco_position_t    __cpos;
-  fawkes::jaco_position_t    __apos;
+  KinDrv::jaco_position_t    __cpos;
+  KinDrv::jaco_position_t    __apos;
 };
 
 

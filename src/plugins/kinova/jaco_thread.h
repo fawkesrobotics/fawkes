@@ -35,7 +35,7 @@
 
 #include <string>
 
-namespace fawkes {
+namespace KinDrv {
   class JacoArm;
 }
 
@@ -58,7 +58,7 @@ class KinovaJacoThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JacoArm        *__arm;
+  KinDrv::JacoArm        *__arm;
   fawkes::JacoInterface  *__if_jaco;
 
   bool  __cfg_auto_init;

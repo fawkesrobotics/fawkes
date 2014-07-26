@@ -13,11 +13,11 @@
 #
 #*****************************************************************************
 
-#Check for libusb-1.0
+#Check for libkindrv
 ifneq ($(PKGCONFIG),)
-  HAVE_LIBUSB = $(if $(shell $(PKGCONFIG) --exists 'libusb-1.0'; echo $${?/1/}),1,0)
+  HAVE_LIBKINDRV = $(if $(shell $(PKGCONFIG) --exists 'libkindrv'; echo $${?/1/}),1,0)
 endif
-ifeq ($(HAVE_LIBUSB), 1)
-  CFLAGS_LIBUSB  = $(shell $(PKGCONFIG) --cflags 'libusb-1.0')
-  LDFLAGS_LIBUSB = $(shell $(PKGCONFIG) --libs 'libusb-1.0')
+ifeq ($(HAVE_LIBKINDRV), 1)
+  CFLAGS_LIBKINDRV  = $(shell $(PKGCONFIG) --cflags 'libkindrv')
+  LDFLAGS_LIBKINDRV = $(shell $(PKGCONFIG) --libs 'libkindrv')
 endif

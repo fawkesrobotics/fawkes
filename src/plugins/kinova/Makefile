@@ -24,9 +24,9 @@ PRESUBDIRS = interfaces
 LIBS_kinova = fawkescore fawkesaspects fawkesblackboard fawkesutils fawkesinterface JacoInterface m pthread
 OBJS_kinova = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
-ifeq ($(HAVE_LIBUSB),1)
-  CFLAGS  += $(CFLAGS_LIBUSB)
-  LDFLAGS += $(LDFLAGS_LIBUSB)
+ifeq ($(HAVE_LIBKINDRV),1)
+  CFLAGS  += $(CFLAGS_LIBKINDRV)
+  LDFLAGS += $(LDFLAGS_LIBKINDRV)
   PLUGINS_all = $(PLUGINDIR)/kinova.so
   ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
     LIBS_kinova += fawkesopenrave fawkesopenraveaspect
@@ -36,7 +36,7 @@ ifeq ($(HAVE_LIBUSB),1)
     WARN_TARGETS += warning_openrave
   endif
 else
-  WARN_TARGETS += warning_libusb
+  WARN_TARGETS += warning_libkindrv
 endif
 
 OBJS_all    = $(OBJS_kinova)
@@ -44,9 +44,9 @@ OBJS_all    = $(OBJS_kinova)
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_libusb
-warning_libusb:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Kinova Plugin$(TNORMAL) (libusb-1.0 not found)"
+.PHONY: warning_libkindrv
+warning_libkindrv:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Kinova Plugin$(TNORMAL) (libkindrv found)"
 
 .PHONY: warning_openrave
 warning_openrave:

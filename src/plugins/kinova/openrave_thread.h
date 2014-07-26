@@ -34,8 +34,10 @@
 
 #include <string>
 
-namespace fawkes {
+namespace KinDrv {
   class JacoArm;
+}
+namespace fawkes {
   class JacoInterface;
 }
 
@@ -57,7 +59,7 @@ class JacoOpenraveThread
   virtual void finalize();
   virtual void loop();
 
-  virtual void register_arm(fawkes::JacoArm *arm);
+  virtual void register_arm(KinDrv::JacoArm *arm);
   virtual void unregister_arm();
   virtual void set_interface(fawkes::JacoInterface *if_jaco);
 
@@ -66,13 +68,13 @@ class JacoOpenraveThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JacoArm       *__arm;
+  KinDrv::JacoArm       *__arm;
   fawkes::JacoInterface *__if_jaco;
 
 #ifdef HAVE_OPENRAVE
-  fawkes::OpenRaveEnvironment*		__OR_env;
-  fawkes::OpenRaveRobot*		__OR_robot;
-  fawkes::OpenRaveManipulator*		__OR_manip;
+  fawkes::OpenRaveEnvironment* __OR_env;
+  fawkes::OpenRaveRobot*       __OR_robot;
+  fawkes::OpenRaveManipulator* __OR_manip;
 
   bool          __cfg_OR_use_viewer;
   std::string   __cfg_OR_robot_file;

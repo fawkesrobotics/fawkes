@@ -21,11 +21,13 @@
  */
 
 #include "info_thread.h"
-#include "kinova_api.h"
+
+#include <libkindrv/kindrv.h>
 
 #include <interfaces/JacoInterface.h>
 
 using namespace fawkes;
+using namespace KinDrv;
 
 /** @class KinovaInfoThread "info_thread.h"
  * Jaco Arm information thread.
@@ -90,20 +92,20 @@ KinovaInfoThread::loop()
 
   try {
     __cpos = __arm->get_cart_pos();
-    __if_jaco->set_x(-__cpos.Position[1]);
-    __if_jaco->set_y( __cpos.Position[0]);
-    __if_jaco->set_z( __cpos.Position[2]);
+    __if_jaco->set_x(-__cpos.position[1]);
+    __if_jaco->set_y( __cpos.position[0]);
+    __if_jaco->set_z( __cpos.position[2]);
 
-    __if_jaco->set_euler1(__cpos.Rotation[0]);
-    __if_jaco->set_euler2(__cpos.Rotation[1]);
-    __if_jaco->set_euler3(__cpos.Rotation[2]);
+    __if_jaco->set_euler1(__cpos.rotation[0]);
+    __if_jaco->set_euler2(__cpos.rotation[1]);
+    __if_jaco->set_euler3(__cpos.rotation[2]);
 
-    __if_jaco->set_finger1(__cpos.FingerPosition[0]);
-    __if_jaco->set_finger2(__cpos.FingerPosition[1]);
-    __if_jaco->set_finger3(__cpos.FingerPosition[2]);
+    __if_jaco->set_finger1(__cpos.finger_position[0]);
+    __if_jaco->set_finger2(__cpos.finger_position[1]);
+    __if_jaco->set_finger3(__cpos.finger_position[2]);
 
     __apos = __arm->get_ang_pos();
-    __if_jaco->set_joints(__apos.Joints);
+    __if_jaco->set_joints(__apos.joints);
 
   } catch(fawkes::Exception &e) {
     logger->log_warn(name(), "Could not get position and joint values. Er: %s", e.what());
