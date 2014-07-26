@@ -297,28 +297,30 @@
   </Joint>
 
   <!-- Gripper Joints -->
-  <Joint name="j_FingerSingle" type="hinge" enable="false">
+  <Joint name="j_FingerSingle" type="hinge">
     <Body>HandRoll</Body>
     <Body>FingerSingle</Body>
     <offsetfrom>FingerSingle</offsetfrom>
     <weight>1</weight>
-    <limitsdeg>0 0</limitsdeg>
+    <limitsdeg>-25 25</limitsdeg>
+    <axis>0 1 0</axis>
+    <maxvel>1</maxvel>
     <resolution>1</resolution>
   </Joint>
-  <Joint name="j_FingerDualLeft" type="hinge" enable="false">
+  <Joint name="j_FingerDualLeft" type="hinge" mimic_pos="j_FingerSingle" mimic_vel="|j_FingerSingle" mimic_accel="|j_FingerSingle">
     <Body>HandRoll</Body>
     <Body>FingerDualLeft</Body>
     <offsetfrom>FingerDualLeft</offsetfrom>
     <weight>1</weight>
-    <limitsdeg>0 0</limitsdeg>
+    <axis>0 1 0</axis>
     <resolution>1</resolution>
   </Joint>
-  <Joint name="j_FingerDualRight" type="hinge" enable="false">
+  <Joint name="j_FingerDualRight" type="hinge" mimic_pos="j_FingerSingle" mimic_vel="|j_FingerSingle" mimic_accel="|j_FingerSingle">
     <Body>HandRoll</Body>
     <Body>FingerDualRight</Body>
     <offsetfrom>FingerDualRight</offsetfrom>
     <weight>1</weight>
-    <limitsdeg>0 0</limitsdeg>
+    <axis>0 1 0</axis>
     <resolution>1</resolution>
   </Joint>
 
