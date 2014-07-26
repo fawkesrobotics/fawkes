@@ -187,7 +187,7 @@
        The 3 fingers. The position is estimated, but the IK position should be correct
        (188mm from HandRoll)
   -->
-  <Body name="FingerSingle" type="dynamic">
+  <Body name="FingerDualLeft" type="dynamic">
     <offsetfrom>HandRoll</offsetfrom>
     <Translation>-0.04 0 0.115</Translation>
     <RotationAxis>0 1 0 8</RotationAxis>
@@ -195,10 +195,11 @@
       <Data>jaco_finger_joint.stl</Data>
       <Render>jaco_finger_joint.stl</Render>
       <RotationAxis>0 0 0 180</RotationAxis>
+      <RotationAxis>0 0 1 -15</RotationAxis>
       <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
     </Geom>
   </Body>
-  <Body name="FingerDualLeft" type="dynamic">
+  <Body name="FingerDualRight" type="dynamic">
     <offsetfrom>HandRoll</offsetfrom>
     <Translation>0.037 -0.021 0.115</Translation>
     <RotationAxis>0 1 0 8</RotationAxis>
@@ -210,11 +211,11 @@
       <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
     </Geom>
   </Body>
-  <Body name="FingerDualRight" type="dynamic">
+  <Body name="FingerSingle" type="dynamic">
     <offsetfrom>HandRoll</offsetfrom>
     <Translation>0.037 0.021 0.115</Translation>
     <RotationAxis>0 1 0 8</RotationAxis>
-    <RotationAxis>0 0 1 195</RotationAxis>
+    <RotationAxis>0 0 1 180</RotationAxis>
     <Geom type="trimesh">
       <Data>jaco_finger_joint.stl</Data>
       <Render>jaco_finger_joint.stl</Render>
@@ -302,7 +303,7 @@
     <Body>FingerSingle</Body>
     <offsetfrom>FingerSingle</offsetfrom>
     <weight>1</weight>
-    <limitsdeg>-25 25</limitsdeg>
+    <limitsdeg>-40 20</limitsdeg>
     <axis>0 1 0</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>
