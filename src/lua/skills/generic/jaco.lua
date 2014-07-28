@@ -27,7 +27,9 @@ name               = "jaco"
 fsm                = SkillHSM:new{name=name, start="INIT", debug=true}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "jacoarm", type = "JacoInterface"}
+   {v = "jacoarm", type = "JacoInterface"},
+   {v = "jaco_left", type = "JacoInterface"},
+   {v = "jaco_right", type = "JacoInterface"}
 }
 
 documentation      = [==[
@@ -36,77 +38,98 @@ documentation      = [==[
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+-- Set interface to use --
+local iface = jacoarm
 
 --- Check if arm motion is final.
 -- @return true if motion is final, false otherwise
 function jc_arm_is_final(state)
-   jacoarm:read()
-   return state.fsm.vars.msgid == jacoarm:msgid() and
-          jacoarm:is_final()
+   iface:read()
+   return state.fsm.vars.msgid == iface:msgid() and
+          iface:is_final()
 end
 
 --- Check if kinova plugin skipped our message
 -- @return true if kinova plugin skipped our message, false otherwise
 function jc_next_msg(state)
-   jacoarm:read()
-   return  jacoarm:msgid() > state.fsm.vars.msgid
+   iface:read()
+   return  iface:msgid() > state.fsm.vars.msgid
 end
 
+--- Check if the used interface is withour writer.
+-- We use a dedicated method for this check, because we have multiple interfaces.
+-- This is a lot easier than considering each in the fsm, using closure etc.
+-- @return true if interface has no writer.
+function jc_iface_no_writer(state)
+   return not iface:has_writer()
+end
 
 -- States
 fsm:define_states{
    export_to=_M,
-   closure={jacoarm=jacoarm},
 
    {"INIT", JumpState},
+   {"READY", JumpState},
    {"MODE_READY", JumpState},
    {"MODE_RETRACT", JumpState},
    {"GOTO_HOME", JumpState},
    {"GOTO_RETRACT", JumpState},
    {"STOP", JumpState},
    {"GOTO", JumpState},
-   {"GRIPPER", JumpState}
+   {"GRIPPER", JumpState},
+
+   {"CHECK_FINAL", JumpState}
 }
 
 -- Transitions
 fsm:add_transitions{
-   {"INIT", "FAILED", precond_only="not jacoarm:has_writer()", desc="no writer"},
-   {"INIT", "MODE_READY", precond_only="vars.mode == 'init'", desc="initialize arm"},
-   {"INIT", "MODE_RETRACT", precond_only="vars.mode == 'retract'", desc="initialize arm"},
-   {"INIT", "GOTO_HOME", precond_only="vars.pos == 'home'", desc="goto home pos"},
-   {"INIT", "GOTO_RETRACT", precond_only="vars.pos == 'retract'", desc="goto retract pos"},
-   {"INIT", "STOP", precond_only="vars.pos == 'stop'", desc="stop"},
-   {"INIT", "GOTO", precond_only="vars.x ~= nil and vars.y ~= nil and vars.z ~= nil", desc="goto parms"},
-   {"INIT", "GRIPPER", precond_only="vars.gripper", desc="move gripper"},
+   {"INIT", "READY", cond=true, desc="initialized"},
 
-   {"MODE_READY", "FINAL", cond=jc_arm_is_final, desc="gripper moved"},
-   {"MODE_READY", "FAILED", cond=jc_next_msg, desc="next msg"},
-
-   {"MODE_RETRACT", "FINAL", cond=jc_arm_is_final, desc="gripper moved"},
-   {"MODE_RETRACT", "FAILED", cond=jc_next_msg, desc="next msg"},
+   {"READY", "FAILED", precond=jc_iface_no_writer, desc="no writer"},
+   {"READY", "MODE_READY", precond="vars.mode == 'init'", desc="initialize arm"},
+   {"READY", "MODE_RETRACT", precond="vars.mode == 'retract'", desc="initialize arm"},
+   {"READY", "GOTO_HOME", precond="vars.pos == 'home'", desc="goto home pos"},
+   {"READY", "GOTO_RETRACT", precond="vars.pos == 'retract'", desc="goto retract pos"},
+   {"READY", "STOP", precond="vars.pos == 'stop'", desc="stop"},
+   {"READY", "GOTO", precond="vars.x ~= nil and vars.y ~= nil and vars.z ~= nil", desc="goto parms"},
+   {"READY", "GRIPPER", precond="vars.gripper", desc="move gripper"},
 
    {"GOTO_HOME", "GOTO", cond=true, desc="params set"},
    {"GOTO_RETRACT", "GOTO", cond=true, desc="params set"},
 
-   {"GRIPPER", "FINAL", cond=jc_arm_is_final, desc="gripper moved"},
-   {"GRIPPER", "FAILED", cond=jc_next_msg, desc="next msg"},
+   {"GOTO", "FAILED", precond="vars.x == nil or vars.y == nil or vars.z == nil", desc="insufficient params"},
    {"GRIPPER", "FAILED", cond="self.error", desc="bad error!!"},
 
-   {"STOP", "FINAL", cond=jc_arm_is_final, desc="stopped"},
-   {"STOP", "FAILED", cond=jc_next_msg, desc="next msg"},
+   {"MODE_READY", "CHECK_FINAL", cond=true, desc="msg sent"},
+   {"MODE_RETRACT", "CHECK_FINAL", cond=true, desc="msg sent"},
+   {"STOP", "CHECK_FINAL", cond=true, desc="msg sent"},
+   {"GOTO", "CHECK_FINAL", cond=true, desc="msg sent"},
+   {"GRIPPER", "CHECK_FINAL", cond=true, desc="msg sent"},
 
-   {"GOTO", "FAILED", precond_only="vars.x == nil or vars.y == nil or vars.z == nil", desc="insufficient params"},
-   {"GOTO", "FINAL", cond=jc_arm_is_final, desc="goto final"},
-   {"GOTO", "FAILED", cond=jc_next_msg, desc="next msg"}
+   {"CHECK_FINAL", "FINAL", cond=jc_arm_is_final, desc="arm moved"},
+   {"CHECK_FINAL", "FINAL", precond="vars.no_wait", desc="skip final checking"},
+   {"CHECK_FINAL", "FAILED", cond=jc_next_msg, desc="next msg"}
 }
+
+function INIT:init()
+   iface = jacoarm
+   if self.fsm.vars.arm == nil then
+      return
+   elseif self.fsm.vars.arm == 'left' then
+      iface = jaco_left
+   elseif self.fsm.vars.arm == 'right' then
+      iface = jaco_right
+   end
+end
+
 function MODE_READY:init()
-   local m = jacoarm.CalibrateMessage:new()
-   self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
+   local m = iface.CalibrateMessage:new()
+   self.fsm.vars.msgid = iface:msgq_enqueue_copy(m)
 end
 
 function MODE_RETRACT:init()
-   local m = jacoarm.RetractMessage:new()
-   self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
+   local m = iface.RetractMessage:new()
+   self.fsm.vars.msgid = iface:msgq_enqueue_copy(m)
 end
 
 function GOTO_HOME:init()
@@ -164,20 +187,20 @@ function GRIPPER:init()
    end
 
    if not self.error then
-      local m = jacoarm.MoveGripperMessage:new(f1, f2, f3)
-      self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
+      local m = iface.MoveGripperMessage:new(f1, f2, f3)
+      self.fsm.vars.msgid = iface:msgq_enqueue_copy(m)
    end
 end
 
 function STOP:init()
-   local m = jacoarm.StopMessage:new()
-   self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
+   local m = iface.StopMessage:new()
+   self.fsm.vars.msgid = iface:msgq_enqueue_copy(m)
 end
 
 function GOTO:init()
    local x, y, z = self.fsm.vars.x, self.fsm.vars.y, self.fsm.vars.z
 
-   jacoarm:read()
+   iface:read()
    local e1             = self.fsm.vars.e1      or math.pi/2 + math.atan2(y,x)
    local e2             = self.fsm.vars.e2      or math.pi/2
    local e3             = self.fsm.vars.e3      or 0
@@ -185,9 +208,9 @@ function GOTO:init()
 
    local m
    if self.fsm.vars.type == "ang" then
-      m = jacoarm.AngularGotoMessage:new(x, y, z, e1, e2, e3)
+      m = iface.AngularGotoMessage:new(x, y, z, e1, e2, e3)
    else
-      m = jacoarm.CartesianGotoMessage:new(x, y, z, e1, e2, e3)
+      m = iface.CartesianGotoMessage:new(x, y, z, e1, e2, e3)
    end
-   self.fsm.vars.msgid = jacoarm:msgq_enqueue_copy(m)
+   self.fsm.vars.msgid = iface:msgq_enqueue_copy(m)
 end
