@@ -21,10 +21,11 @@
  */
 
 #include "info_thread.h"
-
-#include <libkindrv/kindrv.h>
+#include "types.h"
 
 #include <interfaces/JacoInterface.h>
+
+#include <libkindrv/kindrv.h>
 
 using namespace fawkes;
 using namespace KinDrv;
@@ -43,8 +44,7 @@ KinovaInfoThread::KinovaInfoThread()
   : Thread("KinovaInfoThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
 {
-  __arm = NULL;
-  __if_jaco = NULL;
+  __arms = NULL;
 }
 
 
@@ -56,58 +56,55 @@ KinovaInfoThread::~KinovaInfoThread()
 void
 KinovaInfoThread::init()
 {
+  __arms = new std::list<jaco_arm_t*>();
 }
 
 void
 KinovaInfoThread::finalize()
 {
+  delete(__arms);
 }
 
 void
-KinovaInfoThread::register_arm(JacoArm *arm) {
-  __arm = arm;
+KinovaInfoThread::register_arm(jaco_arm_t *arm) {
+  __arms->push_back(arm);
 }
 
 void
-KinovaInfoThread::unregister_arm() {
-  __arm = NULL;
-}
-
-void
-KinovaInfoThread::set_interface(JacoInterface *if_jaco)
-{
-  __if_jaco = if_jaco;
+KinovaInfoThread::unregister_arms() {
+  for(__arm=__arms->begin(); __arm!=__arms->end(); ++__arm)
+    (*__arm) = NULL;
 }
 
 void
 KinovaInfoThread::loop()
 {
-  if(__arm == NULL || __if_jaco == NULL) {
-    __if_jaco->set_connected(false);
+  if( __arms->size() == 0 )
     return;
-  }
 
+  for(__arm=__arms->begin(); __arm!=__arms->end(); ++__arm) {
 
-  __if_jaco->set_connected(true);
+    (*__arm)->iface->set_connected(true);
 
-  try {
-    __cpos = __arm->get_cart_pos();
-    __if_jaco->set_x(-__cpos.position[1]);
-    __if_jaco->set_y( __cpos.position[0]);
-    __if_jaco->set_z( __cpos.position[2]);
+    try {
+      __cpos = (*__arm)->arm->get_cart_pos();
+      (*__arm)->iface->set_x(-__cpos.position[1]);
+      (*__arm)->iface->set_y( __cpos.position[0]);
+      (*__arm)->iface->set_z( __cpos.position[2]);
 
-    __if_jaco->set_euler1(__cpos.rotation[0]);
-    __if_jaco->set_euler2(__cpos.rotation[1]);
-    __if_jaco->set_euler3(__cpos.rotation[2]);
+      (*__arm)->iface->set_euler1(__cpos.rotation[0]);
+      (*__arm)->iface->set_euler2(__cpos.rotation[1]);
+      (*__arm)->iface->set_euler3(__cpos.rotation[2]);
 
-    __if_jaco->set_finger1(__cpos.finger_position[0]);
-    __if_jaco->set_finger2(__cpos.finger_position[1]);
-    __if_jaco->set_finger3(__cpos.finger_position[2]);
+      (*__arm)->iface->set_finger1(__cpos.finger_position[0]);
+      (*__arm)->iface->set_finger2(__cpos.finger_position[1]);
+      (*__arm)->iface->set_finger3(__cpos.finger_position[2]);
 
-    __apos = __arm->get_ang_pos();
-    __if_jaco->set_joints(__apos.joints);
+      __apos = (*__arm)->arm->get_ang_pos();
+      (*__arm)->iface->set_joints(__apos.joints);
 
-  } catch(fawkes::Exception &e) {
-    logger->log_warn(name(), "Could not get position and joint values. Er: %s", e.what());
+    } catch(fawkes::Exception &e) {
+      logger->log_warn(name(), "Could not get position and joint values. Er: %s", e.what());
+    }
   }
 }

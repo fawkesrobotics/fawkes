@@ -134,6 +134,10 @@ KinovaActThread::init()
       logger->log_warn(name(), "Could not open JacoInterfaces interface for writing. Er:%s", e.what());
     }
 
+    // register arms in info_thread
+    __info_thread->register_arm(&__dual_arm.left);
+    __info_thread->register_arm(&__dual_arm.right);
+
     // initialize arms
     _initialize_dual();
 
@@ -147,7 +151,6 @@ KinovaActThread::init()
       __arm.arm = new JacoArm();
 
       // register arm in other threads
-      __info_thread->register_arm(__arm.arm);
       __goto_thread->register_arm(__arm.arm);
       __openrave_thread->register_arm(__arm.arm);
 
@@ -160,13 +163,15 @@ KinovaActThread::init()
       __arm.iface = blackboard->open_for_writing<JacoInterface>("JacoArm");
 
       // set interface in other threads
-      __info_thread->set_interface(__arm.iface);
       __goto_thread->set_interface(__arm.iface);
       __openrave_thread->set_interface(__arm.iface);
 
     } catch(fawkes::Exception &e) {
       logger->log_warn(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
     }
+
+    // register arm in info_thread
+    __info_thread->register_arm(&__arm);
 
     // initalize arms
     _initialize_single();

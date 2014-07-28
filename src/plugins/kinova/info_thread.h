@@ -33,11 +33,8 @@
 
 #include <string>
 
-namespace KinDrv {
-  class JacoArm;
-}
 namespace fawkes {
-  class JacoInterface;
+  typedef struct jaco_arm_struct jaco_arm_t;
 }
 
 class KinovaInfoThread
@@ -55,16 +52,15 @@ class KinovaInfoThread
   virtual void finalize();
   virtual void loop();
 
-  virtual void register_arm(KinDrv::JacoArm *arm);
-  virtual void unregister_arm();
-  virtual void set_interface(fawkes::JacoInterface *if_jaco);
+  virtual void register_arm(fawkes::jaco_arm_t *arm);
+  virtual void unregister_arms();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  KinDrv::JacoArm         *__arm;
-  fawkes::JacoInterface   *__if_jaco;
+  std::list<fawkes::jaco_arm_t*>           *__arms;
+  std::list<fawkes::jaco_arm_t*>::iterator  __arm;
 
   KinDrv::jaco_position_t    __cpos;
   KinDrv::jaco_position_t    __apos;
