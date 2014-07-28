@@ -39,8 +39,9 @@ using namespace KinDrv;
  * @param thread_name thread name
  */
 KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
-                                   KinovaGotoThread *goto_thread,
-                                   JacoOpenraveThread *openrave_thread)
+                                 KinovaGotoThread *goto_thread,
+                                 KinovaGotoThread *goto_thread_2nd,
+                                 JacoOpenraveThread *openrave_thread)
   : Thread("KinovaActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
@@ -53,6 +54,7 @@ KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
 
   __info_thread = info_thread;
   __goto_thread = goto_thread;
+  __goto_thread_2nd = goto_thread_2nd;
   __openrave_thread = openrave_thread;
 
   _submit_iface_changes = NULL;
@@ -122,6 +124,10 @@ KinovaActThread::init()
         logger->log_error(name(), "Could not associate %u arms! Check arm names in config, first unassociated is '%s'",
                           arms.size(), arms[0]->get_client_config(false).name);
 
+      // register JacoArm in goto_threads
+      __goto_thread->register_arm(__dual_arm.left.arm);
+      __goto_thread_2nd->register_arm(__dual_arm.right.arm);
+
     } catch(fawkes::Exception &e) {
       logger->log_error(name(), "Could not connect to both JacoArms. Ex:%s", e.what());
     }
@@ -130,6 +136,11 @@ KinovaActThread::init()
     try {
       __dual_arm.left.iface  = blackboard->open_for_writing<JacoInterface>(l_iface.c_str());
       __dual_arm.right.iface = blackboard->open_for_writing<JacoInterface>(r_iface.c_str());
+
+      // set interface in goto_threads
+      __goto_thread->set_interface(__dual_arm.left.iface);
+      __goto_thread_2nd->set_interface(__dual_arm.right.iface);
+
     } catch(fawkes::Exception &e) {
       logger->log_warn(name(), "Could not open JacoInterfaces interface for writing. Er:%s", e.what());
     }

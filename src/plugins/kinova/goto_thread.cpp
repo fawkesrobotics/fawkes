@@ -42,8 +42,8 @@ using namespace KinDrv;
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaGotoThread::KinovaGotoThread()
-  : Thread("KinovaGotoThread", Thread::OPMODE_WAITFORWAKEUP),
+KinovaGotoThread::KinovaGotoThread(const char name[])
+  : Thread(name, Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
 {
   __arm = NULL;

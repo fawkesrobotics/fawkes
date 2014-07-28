@@ -52,7 +52,10 @@ class KinovaActThread
   public fawkes::BlackBoardAspect
 {
  public:
-  KinovaActThread(KinovaInfoThread *info_thread, KinovaGotoThread *goto_thread, JacoOpenraveThread *openrave_thread);
+  KinovaActThread(KinovaInfoThread *info_thread,
+                  KinovaGotoThread *goto_thread,
+                  KinovaGotoThread *goto_thread_2nd,
+                  JacoOpenraveThread *openrave_thread);
   virtual ~KinovaActThread();
 
   virtual void init();
@@ -85,6 +88,7 @@ class KinovaActThread
 
   KinovaInfoThread   *__info_thread;
   KinovaGotoThread   *__goto_thread;
+  KinovaGotoThread   *__goto_thread_2nd;
   JacoOpenraveThread *__openrave_thread;
 };
 

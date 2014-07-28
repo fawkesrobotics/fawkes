@@ -44,8 +44,14 @@ KinovaPlugin::KinovaPlugin(Configuration *config)
   KinovaInfoThread *info_thread = new KinovaInfoThread();
   thread_list.push_back(info_thread);
 
-  KinovaGotoThread *goto_thread = new KinovaGotoThread();
+  KinovaGotoThread *goto_thread = new KinovaGotoThread("KinovaGotoThread");
   thread_list.push_back(goto_thread);
+
+  KinovaGotoThread *goto_thread_2nd = NULL;
+  if( config->get_bool("/hardware/jaco/dual_arm/active") ) {
+    goto_thread_2nd = new KinovaGotoThread("KinovaGotoThread2");
+    thread_list.push_back(goto_thread_2nd);
+  }
 
   JacoOpenraveThread *openrave_thread = NULL;
 #ifdef HAVE_OPENRAVE
@@ -53,7 +59,7 @@ KinovaPlugin::KinovaPlugin(Configuration *config)
   thread_list.push_back(openrave_thread);
 #endif
 
-  thread_list.push_back(new KinovaActThread(info_thread, goto_thread, openrave_thread));
+  thread_list.push_back(new KinovaActThread(info_thread, goto_thread, goto_thread_2nd, openrave_thread));
 }
 
 

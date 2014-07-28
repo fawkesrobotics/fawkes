@@ -48,7 +48,7 @@ class KinovaGotoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  KinovaGotoThread();
+  KinovaGotoThread(const char name[]);
   virtual ~KinovaGotoThread();
 
   virtual void init();
