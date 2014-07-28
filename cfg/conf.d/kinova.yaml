@@ -47,3 +47,6 @@ hardware/jaco:
 
     # robot/xml file to be loaded into OpenRAVE
     robot_file: ../res/openrave/jaco.robot.xml
+
+    # robot/xml file for dual-arm setup
+    robot_dual_file: ../res/openrave/jaco_dual.robot.xml
