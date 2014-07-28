@@ -428,14 +428,10 @@ KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
       logger->log_debug(name(), "%s: CartesianGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f", arm.iface->id(),
                         msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
     #ifdef HAVE_OPENRAVE
-      if(!__cfg_is_dual_arm) {
-        logger->log_debug(name(), "%s: CartesianGotoMessage is being passed to openrave", arm.iface->id());
-        std::vector<float> v = __openrave_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
-        if( v.size() == 6 )
-          arm.goto_thread->set_target_ang(v.at(0), v.at(1), v.at(2), v.at(3), v.at(4), v.at(5));
-      } else {
-        arm.goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
-      }
+      logger->log_debug(name(), "%s: CartesianGotoMessage is being passed to openrave", arm.iface->id());
+      std::vector<float> v = __openrave_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3(), &arm);
+      if( v.size() == 6 )
+        arm.goto_thread->set_target_ang(v.at(0), v.at(1), v.at(2), v.at(3), v.at(4), v.at(5));
     #else
       arm.goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
     #endif

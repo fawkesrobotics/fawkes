@@ -58,7 +58,7 @@ class KinovaOpenraveBaseThread
   virtual void register_arm(fawkes::jaco_arm_t *arm) = 0;
   virtual void unregister_arms() = 0;
 
-  virtual std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3);
+  virtual std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3, fawkes::jaco_arm_t *arm = NULL);
 
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */

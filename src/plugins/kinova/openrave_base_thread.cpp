@@ -75,7 +75,7 @@ KinovaOpenraveBaseThread::~KinovaOpenraveBaseThread()
 }
 
 std::vector<float>
-KinovaOpenraveBaseThread::set_target(float x, float y, float z, float e1, float e2, float e3)
+KinovaOpenraveBaseThread::set_target(float x, float y, float z, float e1, float e2, float e3, jaco_arm_t *arm)
 {
   std::vector<float> v;
 
