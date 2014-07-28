@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  jaco_thread.h - Kinova plugin Jaco thread
+ *  act_thread.h - Kinova plugin Jaco thread
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_JACO_THREAD_H_
-#define __PLUGINS_KINOVA_JACO_THREAD_H_
+#ifndef __PLUGINS_KINOVA_ACT_THREAD_H_
+#define __PLUGINS_KINOVA_ACT_THREAD_H_
 
 #include "info_thread.h"
 #include "goto_thread.h"
@@ -39,7 +39,7 @@ namespace KinDrv {
   class JacoArm;
 }
 
-class KinovaJacoThread
+class KinovaActThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -47,8 +47,8 @@ class KinovaJacoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  KinovaJacoThread(KinovaInfoThread *info_thread, KinovaGotoThread *goto_thread, JacoOpenraveThread *openrave_thread);
-  virtual ~KinovaJacoThread();
+  KinovaActThread(KinovaInfoThread *info_thread, KinovaGotoThread *goto_thread, JacoOpenraveThread *openrave_thread);
+  virtual ~KinovaActThread();
 
   virtual void init();
   virtual void finalize();

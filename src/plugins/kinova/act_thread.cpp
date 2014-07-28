@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  jaco_thread.cpp - Kinova plugin Jaco Thread
+ *  act_thread.cpp - Kinova plugin Act Thread
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "jaco_thread.h"
+#include "act_thread.h"
 
 #include <libkindrv/kindrv.h>
 
@@ -29,7 +29,7 @@
 using namespace fawkes;
 using namespace KinDrv;
 
-/** @class KinovaJacoThread "jaco_thread.h"
+/** @class KinovaActThread "act_thread.h"
  * Jaco Arm control thread.
  *
  * @author Bahram Maleki-Fard
@@ -38,10 +38,10 @@ using namespace KinDrv;
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaJacoThread::KinovaJacoThread(KinovaInfoThread *info_thread,
+KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
                                    KinovaGotoThread *goto_thread,
                                    JacoOpenraveThread *openrave_thread)
-  : Thread("KinovaJacoThread", Thread::OPMODE_WAITFORWAKEUP),
+  : Thread("KinovaActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
   __arm = NULL;
@@ -54,12 +54,12 @@ KinovaJacoThread::KinovaJacoThread(KinovaInfoThread *info_thread,
 
 
 /** Destructor. */
-KinovaJacoThread::~KinovaJacoThread()
+KinovaActThread::~KinovaActThread()
 {
 }
 
 void
-KinovaJacoThread::init()
+KinovaActThread::init()
 {
   __cfg_auto_init       = config->get_bool("/hardware/jaco/auto_initialize");
   __cfg_auto_calib      = config->get_bool("/hardware/jaco/auto_calibrate");
@@ -112,7 +112,7 @@ KinovaJacoThread::init()
 }
 
 void
-KinovaJacoThread::finalize()
+KinovaActThread::finalize()
 {
   try {
     blackboard->close(__if_jaco);
@@ -124,7 +124,7 @@ KinovaJacoThread::finalize()
 }
 
 void
-KinovaJacoThread::loop()
+KinovaActThread::loop()
 {
   if( !__initialized && __cfg_auto_init ) {
     logger->log_debug(name(), "wait for arm to calibrate");

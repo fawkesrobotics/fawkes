@@ -23,7 +23,7 @@
 #include "kinova_plugin.h"
 
 #include "info_thread.h"
-#include "jaco_thread.h"
+#include "act_thread.h"
 #include "goto_thread.h"
 #include "openrave_thread.h"
 
@@ -53,7 +53,7 @@ KinovaPlugin::KinovaPlugin(Configuration *config)
   thread_list.push_back(openrave_thread);
 #endif
 
-  thread_list.push_back(new KinovaJacoThread(info_thread, goto_thread, openrave_thread));
+  thread_list.push_back(new KinovaActThread(info_thread, goto_thread, openrave_thread));
 }
 
 
