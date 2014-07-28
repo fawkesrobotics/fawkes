@@ -100,9 +100,12 @@ KinovaActThread::init()
     std::string r_iface = config->get_string("/hardware/jaco/dual_arm/right/interface");
 
     // copy names to struct fields
-    l_name.resize(sizeof(__dual_arm.left.name) - 1);
+    // we need to resize the string we get from config (name of arm) to
+    //  19, as the entry in JacoArm is a char[20]. Therefore we must not
+    //  forget to add a empty character as filler to the resize command.
+    l_name.resize(sizeof(__dual_arm.left.name) - 1, ' ');
     memcpy(__dual_arm.left.name, l_name.data(), l_name.size());
-    r_name.resize(sizeof(__dual_arm.right.name) - 1);
+    r_name.resize(sizeof(__dual_arm.right.name) - 1, ' ');
     memcpy(__dual_arm.right.name, r_name.data(), r_name.size());
 
     // create the two JacoArm objects and assign left/right correctly
@@ -115,7 +118,7 @@ KinovaActThread::init()
         if( strcmp(arms[i]->get_client_config(false).name , __dual_arm.left.name) == 0) {
           __dual_arm.left.arm = arms[i];
           arms.erase(arms.begin() + i);
-          logger->log_info("Successfully connected arm '%s' as left arm", __dual_arm.left.name);
+          logger->log_info(name(), "Successfully connected arm '%s' as left arm", __dual_arm.left.name);
           break;
         }
       }
@@ -123,7 +126,7 @@ KinovaActThread::init()
         if( strcmp(arms[i]->get_client_config(false).name , __dual_arm.right.name) == 0) {
           __dual_arm.right.arm = arms[i];
           arms.erase(arms.begin() + i);
-          logger->log_info("Successfully connected arm '%s' as right arm", __dual_arm.right.name);
+          logger->log_info(name(), "Successfully connected arm '%s' as right arm", __dual_arm.right.name);
           break;
         }
       }
