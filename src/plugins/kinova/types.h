@@ -27,10 +27,16 @@
 #include <vector>
 #include <string>
 
+namespace KinDrv {
+  class JacoArm;
+}
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
+class JacoInterface;
 
 typedef enum jaco_target_type_enum {
   TARGET_CARTESIAN,
@@ -38,6 +44,19 @@ typedef enum jaco_target_type_enum {
   TARGET_READY,
   TARGET_RETRACT
 } jaco_target_type_t;
+
+typedef struct jaco_arm_struct {
+  KinDrv::JacoArm *arm;
+  fawkes::JacoInterface *iface;
+  char name[20];
+  bool initialized;
+} jaco_arm_t;
+
+typedef struct jaco_dual_arm_struct {
+  jaco_arm_t left;
+  jaco_arm_t right;
+} jaco_dual_arm_t;
+
 
 } // end namespace fawkes
 
