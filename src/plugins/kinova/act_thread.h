@@ -39,6 +39,10 @@ namespace KinDrv {
   class JacoArm;
 }
 
+namespace fawkes {
+  typedef struct jaco_arm_struct jaco_arm_t;
+}
+
 class KinovaActThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
@@ -58,13 +62,10 @@ class KinovaActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  KinDrv::JacoArm        *__arm;
-  fawkes::JacoInterface  *__if_jaco;
+  fawkes::jaco_arm_t __arm;
 
-  bool  __cfg_auto_init;
-  bool  __cfg_auto_calib;
-
-  bool __initialized;
+  bool __cfg_auto_init;
+  bool __cfg_auto_calib;
 
   KinovaInfoThread   *__info_thread;
   KinovaGotoThread   *__goto_thread;
