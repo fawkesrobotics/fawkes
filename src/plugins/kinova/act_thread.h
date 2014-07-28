@@ -87,8 +87,6 @@ class KinovaActThread
   bool __cfg_is_dual_arm;
 
   KinovaInfoThread   *__info_thread;
-  KinovaGotoThread   *__goto_thread;
-  KinovaGotoThread   *__goto_thread_2nd;
   JacoOpenraveThread *__openrave_thread;
 };
 

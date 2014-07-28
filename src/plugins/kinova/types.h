@@ -31,6 +31,8 @@ namespace KinDrv {
   class JacoArm;
 }
 
+class KinovaGotoThread;
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -48,6 +50,7 @@ typedef enum jaco_target_type_enum {
 typedef struct jaco_arm_struct {
   KinDrv::JacoArm *arm;
   fawkes::JacoInterface *iface;
+  KinovaGotoThread *goto_thread;
   char name[20];
   bool initialized;
 } jaco_arm_t;

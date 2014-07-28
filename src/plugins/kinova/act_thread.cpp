@@ -53,9 +53,15 @@ KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
   __dual_arm.right.iface = NULL;
 
   __info_thread = info_thread;
-  __goto_thread = goto_thread;
-  __goto_thread_2nd = goto_thread_2nd;
   __openrave_thread = openrave_thread;
+  if( goto_thread_2nd == NULL ) {
+    // single-arm config
+    __arm.goto_thread = goto_thread;
+  } else {
+    // dual-arm config
+    __dual_arm.left.goto_thread = goto_thread;
+    __dual_arm.right.goto_thread = goto_thread_2nd;
+  }
 
   _submit_iface_changes = NULL;
   _is_initializing = NULL;
@@ -125,8 +131,8 @@ KinovaActThread::init()
                           arms.size(), arms[0]->get_client_config(false).name);
 
       // register JacoArm in goto_threads
-      __goto_thread->register_arm(__dual_arm.left.arm);
-      __goto_thread_2nd->register_arm(__dual_arm.right.arm);
+      __dual_arm.left.goto_thread->register_arm(__dual_arm.left.arm);
+      __dual_arm.right.goto_thread->register_arm(__dual_arm.right.arm);
 
     } catch(fawkes::Exception &e) {
       logger->log_error(name(), "Could not connect to both JacoArms. Ex:%s", e.what());
@@ -138,8 +144,8 @@ KinovaActThread::init()
       __dual_arm.right.iface = blackboard->open_for_writing<JacoInterface>(r_iface.c_str());
 
       // set interface in goto_threads
-      __goto_thread->set_interface(__dual_arm.left.iface);
-      __goto_thread_2nd->set_interface(__dual_arm.right.iface);
+      __dual_arm.left.goto_thread->set_interface(__dual_arm.left.iface);
+      __dual_arm.right.goto_thread->set_interface(__dual_arm.right.iface);
 
     } catch(fawkes::Exception &e) {
       logger->log_warn(name(), "Could not open JacoInterfaces interface for writing. Er:%s", e.what());
@@ -162,7 +168,7 @@ KinovaActThread::init()
       __arm.arm = new JacoArm();
 
       // register arm in other threads
-      __goto_thread->register_arm(__arm.arm);
+      __arm.goto_thread->register_arm(__arm.arm);
       __openrave_thread->register_arm(__arm.arm);
 
     } catch(fawkes::Exception &e) {
@@ -174,7 +180,7 @@ KinovaActThread::init()
       __arm.iface = blackboard->open_for_writing<JacoInterface>("JacoArm");
 
       // set interface in other threads
-      __goto_thread->set_interface(__arm.iface);
+      __arm.goto_thread->set_interface(__arm.iface);
       __openrave_thread->set_interface(__arm.iface);
 
     } catch(fawkes::Exception &e) {
@@ -256,13 +262,13 @@ KinovaActThread::_initialize_single()
     if( __cfg_auto_init ) {
       logger->log_debug(name(), "Initializing arm, wait until finished");
       __arm.iface->set_final(false);
-      __goto_thread->pos_ready();
+      __arm.goto_thread->pos_ready();
     }
 
   } else {
     __arm.initialized = true;
     if( __cfg_auto_calib )
-      __goto_thread->pos_ready();
+      __arm.goto_thread->pos_ready();
   }
 
   __arm.iface->set_initialized(__arm.initialized);
@@ -376,19 +382,19 @@ KinovaActThread::_process_msgs_single()
       JacoInterface::StopMessage *msg = __arm.iface->msgq_first(msg);
       logger->log_debug(name(), "StopMessage rcvd");
 
-      __goto_thread->stop();
+      __arm.goto_thread->stop();
 
     } else if( __arm.iface->msgq_first_is<JacoInterface::CalibrateMessage>() ) {
       JacoInterface::CalibrateMessage *msg = __arm.iface->msgq_first(msg);
       logger->log_debug(name(), "CalibrateMessage rcvd");
 
-      __goto_thread->pos_ready();
+      __arm.goto_thread->pos_ready();
 
     } else if( __arm.iface->msgq_first_is<JacoInterface::RetractMessage>() ) {
       JacoInterface::RetractMessage *msg = __arm.iface->msgq_first(msg);
       logger->log_debug(name(), "RetractMessage rcvd");
 
-      __goto_thread->pos_retract();
+      __arm.goto_thread->pos_retract();
 
     } else if( __arm.iface->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {
       JacoInterface::CartesianGotoMessage *msg = __arm.iface->msgq_first(msg);
@@ -398,9 +404,9 @@ KinovaActThread::_process_msgs_single()
       logger->log_debug(name(), "CartesianGotoMessage is being passed to openrave");
       std::vector<float> v = __openrave_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
       if( v.size() == 6 )
-        __goto_thread->set_target_ang(v.at(0), v.at(1), v.at(2), v.at(3), v.at(4), v.at(5));
+        __arm.goto_thread->set_target_ang(v.at(0), v.at(1), v.at(2), v.at(3), v.at(4), v.at(5));
     #else
-      __goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+      __arm.goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
     #endif
 
     } else if( __arm.iface->msgq_first_is<JacoInterface::AngularGotoMessage>() ) {
@@ -408,14 +414,14 @@ KinovaActThread::_process_msgs_single()
 
       logger->log_debug(name(), "AngularGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
                         msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
-      __goto_thread->set_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
+      __arm.goto_thread->set_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
 
     } else if( __arm.iface->msgq_first_is<JacoInterface::MoveGripperMessage>() ) {
       JacoInterface::MoveGripperMessage *msg = __arm.iface->msgq_first(msg);
       logger->log_debug(name(), "MoveGripperMessage rcvd. f1:%f  f2:%f  f3:%f",
                         msg->finger1(), msg->finger2(), msg->finger3());
 
-      __goto_thread->move_gripper(msg->finger1(), msg->finger2(), msg->finger3());
+      __arm.goto_thread->move_gripper(msg->finger1(), msg->finger2(), msg->finger3());
 
     } else if( __arm.iface->msgq_first_is<JacoInterface::JoystickPushMessage>() ) {
       JacoInterface::JoystickPushMessage *msg = __arm.iface->msgq_first(msg);
