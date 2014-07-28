@@ -41,6 +41,7 @@ namespace KinDrv {
 
 namespace fawkes {
   typedef struct jaco_arm_struct jaco_arm_t;
+  typedef struct jaco_dual_arm_struct jaco_dual_arm_t;
 }
 
 class KinovaActThread
@@ -62,10 +63,25 @@ class KinovaActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::jaco_arm_t __arm;
+  void (KinovaActThread::*_submit_iface_changes)();
+  bool (KinovaActThread::*_is_initializing)();
+  void (KinovaActThread::*_process_msgs)();
+
+  void _initialize_single();
+  void _initialize_dual();
+  bool _is_initializing_single();
+  bool _is_initializing_dual();
+  void _submit_iface_single();
+  void _submit_iface_dual();
+  void _process_msgs_single();
+  void _process_msgs_dual();
+
+  fawkes::jaco_arm_t      __arm;
+  fawkes::jaco_dual_arm_t __dual_arm;
 
   bool __cfg_auto_init;
   bool __cfg_auto_calib;
+  bool __cfg_is_dual_arm;
 
   KinovaInfoThread   *__info_thread;
   KinovaGotoThread   *__goto_thread;
