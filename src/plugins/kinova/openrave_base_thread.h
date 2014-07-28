@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  openrave_thread.h - Kinova plugin OpenRAVE thread
+ *  openrave_thread.h - Kinova plugin OpenRAVE base thread
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_OPENRAVE_THREAD_H_
-#define __PLUGINS_KINOVA_OPENRAVE_THREAD_H_
+#ifndef __PLUGINS_KINOVA_OPENRAVE_BASE_THREAD_H_
+#define __PLUGINS_KINOVA_OPENRAVE_BASE_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -34,14 +34,11 @@
 
 #include <string>
 
-namespace KinDrv {
-  class JacoArm;
-}
 namespace fawkes {
-  class JacoInterface;
+  typedef struct jaco_arm_struct jaco_arm_t;
 }
 
-class JacoOpenraveThread
+class KinovaOpenraveBaseThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -52,24 +49,22 @@ class JacoOpenraveThread
   public fawkes::BlackBoardAspect
 {
  public:
-  JacoOpenraveThread();
-  virtual ~JacoOpenraveThread();
+  KinovaOpenraveBaseThread(const char *name);
+  virtual ~KinovaOpenraveBaseThread();
 
   virtual void init();
   virtual void finalize();
-  virtual void loop();
 
-  virtual void register_arm(KinDrv::JacoArm *arm);
-  virtual void unregister_arm();
-  virtual void set_interface(fawkes::JacoInterface *if_jaco);
+  virtual void register_arm(fawkes::jaco_arm_t *arm) = 0;
+  virtual void unregister_arms() = 0;
 
-  std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3);
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+  virtual std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3);
 
- private:
-  KinDrv::JacoArm       *__arm;
-  fawkes::JacoInterface *__if_jaco;
+ protected:
+  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+  virtual void run() { Thread::run(); }
+  virtual void _init() {}
+  virtual void _load_robot() = 0;
 
 #ifdef HAVE_OPENRAVE
   fawkes::OpenRaveEnvironment* __OR_env;

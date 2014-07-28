@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  openrave_thread.cpp - Kinova plugin OpenRAVE Thread
+ *  openrave_single_thread.cpp - Kinova plugin OpenRAVE Thread for single-arm setup
  *
- *  Created: Tue Jun 04 13:13:20 2013
- *  Copyright  2013  Bahram Maleki-Fard
+ *  Created: Mon Jul 28 19:43:20 2014
+ *  Copyright  2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -20,7 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "openrave_thread.h"
+#include "openrave_single_thread.h"
+#include "types.h"
 
 #include <libkindrv/kindrv.h>
 
@@ -41,8 +42,8 @@
 using namespace fawkes;
 using namespace KinDrv;
 
-/** @class JacoOpenraveThread "jaco_thread.h"
- * Jaco Arm control thread.
+/** @class KinovaOpenraveSingleThread "openrave_single_thread.h"
+ * Jaco Arm thread for single-arm setup, integrating OpenRAVE
  *
  * @author Bahram Maleki-Fard
  */
@@ -50,51 +51,27 @@ using namespace KinDrv;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoOpenraveThread::JacoOpenraveThread()
-  : Thread("JacoOpenraveThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+KinovaOpenraveSingleThread::KinovaOpenraveSingleThread()
+  : KinovaOpenraveBaseThread("KinovaOpenraveSingleThread")
 {
   __arm = NULL;
-  __if_jaco = NULL;
 #ifdef HAVE_OPENRAVE
-  __OR_env   = NULL;
-  __OR_robot = NULL;
-  __OR_manip = NULL;
-
-  __cfg_OR_auto_load_ik = false;
-#endif
-}
-
-
-/** Destructor. */
-JacoOpenraveThread::~JacoOpenraveThread()
-{
-#ifdef HAVE_OPENRAVE
-  __OR_env   = NULL;
-  __OR_robot = NULL;
-  __OR_manip = NULL;
 #endif
 }
 
 void
-JacoOpenraveThread::register_arm(JacoArm *arm)
+KinovaOpenraveSingleThread::register_arm(jaco_arm_t *arm)
 {
   __arm = arm;
 }
 
 void
-JacoOpenraveThread::unregister_arm() {
+KinovaOpenraveSingleThread::unregister_arms() {
   __arm = NULL;
 }
 
-void
-JacoOpenraveThread::set_interface(JacoInterface *if_jaco)
-{
-  __if_jaco = if_jaco;
-}
-
 std::vector<float>
-JacoOpenraveThread::set_target(float x, float y, float z, float e1, float e2, float e3)
+KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, float e2, float e3)
 {
   std::vector<float> v;
 
@@ -123,13 +100,42 @@ JacoOpenraveThread::set_target(float x, float y, float z, float e1, float e2, fl
 }
 
 void
-JacoOpenraveThread::init()
+KinovaOpenraveSingleThread::loop()
+{
+  if( __arm == NULL )
+    return;
+
+#ifdef HAVE_OPENRAVE
+//*
+  try {
+    std::vector<dReal> joints;
+    joints.push_back(__arm->iface->joints(0));
+    joints.push_back(__arm->iface->joints(1));
+    joints.push_back(__arm->iface->joints(2));
+    joints.push_back(__arm->iface->joints(3));
+    joints.push_back(__arm->iface->joints(4));
+    joints.push_back(__arm->iface->joints(5));
+
+    // get target IK values in openrave format
+    __OR_manip->set_angles_device(joints);
+    __OR_manip->get_angles(joints);
+
+    //EnvironmentMutex::scoped_lock lock(__OR_env->get_env_ptr()->GetMutex());
+    __OR_robot->get_robot_ptr()->SetActiveDOFValues(joints);
+    //usleep(2000);
+  } catch( openrave_exception &e) {
+    throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
+  }
+//*/
+#endif
+}
+
+
+void
+KinovaOpenraveSingleThread::_load_robot()
 {
 #ifdef HAVE_OPENRAVE
-  __cfg_OR_use_viewer    = config->get_bool("/hardware/jaco/openrave/use_viewer");
   __cfg_OR_robot_file    = config->get_string("/hardware/jaco/openrave/robot_file");
-  __cfg_OR_auto_load_ik  = config->get_bool("/hardware/jaco/openrave/auto_load_ik");
-
 
   try {
     __OR_robot = openrave->add_robot(__cfg_OR_robot_file, false);
@@ -153,51 +159,5 @@ JacoOpenraveThread::init()
     // TODO: not just simple throw....
     throw;
   }
-
-  if( __cfg_OR_use_viewer )
-    openrave->start_viewer();
-#endif
-}
-
-void
-JacoOpenraveThread::finalize()
-{
-#ifdef HAVE_OPENRAVE
-  delete(__OR_robot);
-  __OR_robot = NULL;
-
-  delete(__OR_manip);
-  __OR_manip = NULL;
-#endif
-}
-
-void
-JacoOpenraveThread::loop()
-{
-  if( __arm == NULL )
-    return;
-
-#ifdef HAVE_OPENRAVE
-//*
-  try {
-    std::vector<dReal> joints;
-    joints.push_back(__if_jaco->joints(0));
-    joints.push_back(__if_jaco->joints(1));
-    joints.push_back(__if_jaco->joints(2));
-    joints.push_back(__if_jaco->joints(3));
-    joints.push_back(__if_jaco->joints(4));
-    joints.push_back(__if_jaco->joints(5));
-
-    // get target IK values in openrave format
-    __OR_manip->set_angles_device(joints);
-    __OR_manip->get_angles(joints);
-
-    //EnvironmentMutex::scoped_lock lock(__OR_env->get_env_ptr()->GetMutex());
-    __OR_robot->get_robot_ptr()->SetActiveDOFValues(joints);
-    //usleep(2000);
-  } catch( openrave_exception &e) {
-    throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
-  }
-//*/
 #endif
 }

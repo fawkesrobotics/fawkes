@@ -25,7 +25,8 @@
 #include "info_thread.h"
 #include "act_thread.h"
 #include "goto_thread.h"
-#include "openrave_thread.h"
+#include "openrave_single_thread.h"
+#include "openrave_dual_thread.h"
 
 using namespace fawkes;
 
@@ -47,15 +48,20 @@ KinovaPlugin::KinovaPlugin(Configuration *config)
   KinovaGotoThread *goto_thread = new KinovaGotoThread("KinovaGotoThread");
   thread_list.push_back(goto_thread);
 
+  bool is_dual_arm = config->get_bool("/hardware/jaco/dual_arm/active");
+
   KinovaGotoThread *goto_thread_2nd = NULL;
-  if( config->get_bool("/hardware/jaco/dual_arm/active") ) {
+  if( is_dual_arm ) {
     goto_thread_2nd = new KinovaGotoThread("KinovaGotoThread2");
     thread_list.push_back(goto_thread_2nd);
   }
 
-  JacoOpenraveThread *openrave_thread = NULL;
+  KinovaOpenraveBaseThread *openrave_thread = NULL;
 #ifdef HAVE_OPENRAVE
-  openrave_thread = new JacoOpenraveThread();
+  if( is_dual_arm )
+    openrave_thread = new KinovaOpenraveDualThread();
+  else
+    openrave_thread = new KinovaOpenraveSingleThread();
   thread_list.push_back(openrave_thread);
 #endif
 

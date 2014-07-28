@@ -25,7 +25,7 @@
 
 #include "info_thread.h"
 #include "goto_thread.h"
-#include "openrave_thread.h"
+#include "openrave_base_thread.h"
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -55,7 +55,7 @@ class KinovaActThread
   KinovaActThread(KinovaInfoThread *info_thread,
                   KinovaGotoThread *goto_thread,
                   KinovaGotoThread *goto_thread_2nd,
-                  JacoOpenraveThread *openrave_thread);
+                  KinovaOpenraveBaseThread *openrave_thread);
   virtual ~KinovaActThread();
 
   virtual void init();
@@ -87,8 +87,8 @@ class KinovaActThread
   bool __cfg_auto_calib;
   bool __cfg_is_dual_arm;
 
-  KinovaInfoThread   *__info_thread;
-  JacoOpenraveThread *__openrave_thread;
+  KinovaInfoThread         *__info_thread;
+  KinovaOpenraveBaseThread *__openrave_thread;
 };
 
 

@@ -42,7 +42,7 @@ using namespace KinDrv;
 KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
                                  KinovaGotoThread *goto_thread,
                                  KinovaGotoThread *goto_thread_2nd,
-                                 JacoOpenraveThread *openrave_thread)
+                                 KinovaOpenraveBaseThread *openrave_thread)
   : Thread("KinovaActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
@@ -155,9 +155,11 @@ KinovaActThread::init()
       logger->log_warn(name(), "Could not open JacoInterfaces interface for writing. Er:%s", e.what());
     }
 
-    // register arms in info_thread
+    // register arms in other threads
     __info_thread->register_arm(&__dual_arm.left);
     __info_thread->register_arm(&__dual_arm.right);
+    __openrave_thread->register_arm(&__dual_arm.left);
+    __openrave_thread->register_arm(&__dual_arm.right);
 
     // initialize arms
     _initialize_dual();
@@ -171,9 +173,8 @@ KinovaActThread::init()
     try {
       __arm.arm = new JacoArm();
 
-      // register arm in other threads
+      // register arm in goto_thread
       __arm.goto_thread->register_arm(__arm.arm);
-      __openrave_thread->register_arm(__arm.arm);
 
     } catch(fawkes::Exception &e) {
       logger->log_warn(name(), "Could not connect to JacoArm. Ex:%s", e.what());
@@ -183,16 +184,16 @@ KinovaActThread::init()
     try {
       __arm.iface = blackboard->open_for_writing<JacoInterface>("JacoArm");
 
-      // set interface in other threads
+      // set interface in goto_thread
       __arm.goto_thread->set_interface(__arm.iface);
-      __openrave_thread->set_interface(__arm.iface);
 
     } catch(fawkes::Exception &e) {
       logger->log_warn(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
     }
 
-    // register arm in info_thread
+    // register arm in other threads
     __info_thread->register_arm(&__arm);
+    __openrave_thread->register_arm(&__arm);
 
     // initalize arms
     _initialize_single();
