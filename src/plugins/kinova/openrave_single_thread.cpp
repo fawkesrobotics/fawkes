@@ -70,35 +70,6 @@ KinovaOpenraveSingleThread::unregister_arms() {
   __arm = NULL;
 }
 
-std::vector<float>
-KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, float e2, float e3)
-{
-  std::vector<float> v;
-
-  try {
-    std::vector<dReal> joints;
-    // get IK from openrave
-    bool success = __OR_robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3);
-
-    if( !success ) {
-      logger->log_warn(name(), "Initiating goto failed, no IK solution found");
-      return v;
-    }
-    logger->log_debug(name(), "IK successful!");
-
-    // get target IK valoues
-    __OR_robot->get_target().manip->get_angles(joints);
-    //need next lines, as "target" only stores a OpenRaveManipulator* , so it stores values in OR only!!
-    __OR_manip->set_angles(joints);
-    __OR_manip->get_angles_device(v);
-
-  } catch( openrave_exception &e) {
-    throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
-  }
-
-  return v;
-}
-
 void
 KinovaOpenraveSingleThread::loop()
 {
