@@ -287,13 +287,13 @@ KinovaActThread::_initialize_dual()
     if( __cfg_auto_init ) {
       logger->log_debug(name(), "Initializing left arm, wait until finished");
       __dual_arm.left.iface->set_final(false);
-      // TODO: actually init the arm
+      __dual_arm.left.goto_thread->pos_ready();
     }
 
   } else {
     __dual_arm.left.initialized = true;
-    //if( __cfg_auto_calib )
-      // TODO: actually calibrate the arm
+    if( __cfg_auto_calib )
+      __dual_arm.left.goto_thread->pos_ready();
   }
 
   mode = __dual_arm.right.arm->get_status();
@@ -302,13 +302,13 @@ KinovaActThread::_initialize_dual()
     if( __cfg_auto_init ) {
       logger->log_debug(name(), "Initializing right arm, wait until finished");
       __dual_arm.right.iface->set_final(false);
-      // TODO: actually init the arm
+      __dual_arm.right.goto_thread->pos_ready();
     }
 
   } else {
     __dual_arm.right.iface->set_initialized(true);
-    //if( __cfg_auto_calib )
-      // TODO: actually calibrate the arm
+    if( __cfg_auto_calib )
+      __dual_arm.right.goto_thread->pos_ready();
   }
 
   __dual_arm.left.iface->set_initialized(__dual_arm.left.initialized);
