@@ -78,6 +78,7 @@ class KinovaActThread
   void _submit_iface_dual();
   void _process_msgs_single();
   void _process_msgs_dual();
+  void _process_msgs_arm(fawkes::jaco_arm_t &arm);
 
   fawkes::jaco_arm_t      __arm;
   fawkes::jaco_dual_arm_t __dual_arm;

@@ -21,10 +21,11 @@
  */
 
 #include "act_thread.h"
-
-#include <libkindrv/kindrv.h>
+#include "types.h"
 
 #include <interfaces/JacoInterface.h>
+
+#include <libkindrv/kindrv.h>
 
 using namespace fawkes;
 using namespace KinDrv;
@@ -368,90 +369,106 @@ KinovaActThread::_submit_iface_dual()
 }
 
 
-/** Process messages received for single arm. */
+/** Process messages received for single-arm setup. */
 void
 KinovaActThread::_process_msgs_single()
 {
-  while( ! __arm.iface->msgq_empty() ) {
-    Message *m = __arm.iface->msgq_first(m);
-    __arm.iface->set_msgid(m->id());
-    __arm.iface->set_final(false);
-    __arm.iface->write();
-
-    if( __arm.iface->msgq_first_is<JacoInterface::StopMessage>() ) {
-      JacoInterface::StopMessage *msg = __arm.iface->msgq_first(msg);
-      logger->log_debug(name(), "StopMessage rcvd");
-
-      __arm.goto_thread->stop();
-
-    } else if( __arm.iface->msgq_first_is<JacoInterface::CalibrateMessage>() ) {
-      JacoInterface::CalibrateMessage *msg = __arm.iface->msgq_first(msg);
-      logger->log_debug(name(), "CalibrateMessage rcvd");
-
-      __arm.goto_thread->pos_ready();
-
-    } else if( __arm.iface->msgq_first_is<JacoInterface::RetractMessage>() ) {
-      JacoInterface::RetractMessage *msg = __arm.iface->msgq_first(msg);
-      logger->log_debug(name(), "RetractMessage rcvd");
-
-      __arm.goto_thread->pos_retract();
-
-    } else if( __arm.iface->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {
-      JacoInterface::CartesianGotoMessage *msg = __arm.iface->msgq_first(msg);
-      logger->log_debug(name(), "CartesianGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
-                        msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
-    #ifdef HAVE_OPENRAVE
-      logger->log_debug(name(), "CartesianGotoMessage is being passed to openrave");
-      std::vector<float> v = __openrave_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
-      if( v.size() == 6 )
-        __arm.goto_thread->set_target_ang(v.at(0), v.at(1), v.at(2), v.at(3), v.at(4), v.at(5));
-    #else
-      __arm.goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
-    #endif
-
-    } else if( __arm.iface->msgq_first_is<JacoInterface::AngularGotoMessage>() ) {
-      JacoInterface::AngularGotoMessage *msg = __arm.iface->msgq_first(msg);
-
-      logger->log_debug(name(), "AngularGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
-                        msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
-      __arm.goto_thread->set_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
-
-    } else if( __arm.iface->msgq_first_is<JacoInterface::MoveGripperMessage>() ) {
-      JacoInterface::MoveGripperMessage *msg = __arm.iface->msgq_first(msg);
-      logger->log_debug(name(), "MoveGripperMessage rcvd. f1:%f  f2:%f  f3:%f",
-                        msg->finger1(), msg->finger2(), msg->finger3());
-
-      __arm.goto_thread->move_gripper(msg->finger1(), msg->finger2(), msg->finger3());
-
-    } else if( __arm.iface->msgq_first_is<JacoInterface::JoystickPushMessage>() ) {
-      JacoInterface::JoystickPushMessage *msg = __arm.iface->msgq_first(msg);
-      logger->log_debug(name(), "JoystickPush %u rcvd", msg->button());
-
-      __arm.arm->start_api_ctrl();
-      __arm.arm->push_joystick_button(msg->button());
-
-    } else if( __arm.iface->msgq_first_is<JacoInterface::JoystickReleaseMessage>() ) {
-      JacoInterface::JoystickReleaseMessage *msg = __arm.iface->msgq_first(msg);
-      logger->log_debug(name(), "JoystickRelease rcvd");
-
-      __arm.arm->start_api_ctrl();
-      __arm.arm->release_joystick();
-      __arm.iface->set_final(true);
-
-    } else {
-      logger->log_warn(name(), "Unknown message received");
-    }
-
-    __arm.iface->msgq_pop();
-  }
+  _process_msgs_arm(__arm);
 }
 
 
-/** Process messages received for dual_arm.
+/** Process messages received for dual-arm setup.
  * No performance yet, as it needs appropriate goto_thread, and probably even
  * a new Interface or new fields for JacoInterface.
 */
 void
 KinovaActThread::_process_msgs_dual()
 {
+  _process_msgs_arm(__dual_arm.left);
+  _process_msgs_arm(__dual_arm.right);
+}
+
+/** Process messages for a given arm.
+ * At the moment, only use OpenRAVE for single-arm movement
+ * @param arm The struct for the currently using arm
+*/
+void
+KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
+{
+  while( ! arm.iface->msgq_empty() ) {
+    Message *m = arm.iface->msgq_first(m);
+    arm.iface->set_msgid(m->id());
+    arm.iface->set_final(false);
+    arm.iface->write();
+
+    if( arm.iface->msgq_first_is<JacoInterface::StopMessage>() ) {
+      JacoInterface::StopMessage *msg = arm.iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: StopMessage rcvd", arm.iface->id());
+
+      arm.goto_thread->stop();
+
+    } else if( arm.iface->msgq_first_is<JacoInterface::CalibrateMessage>() ) {
+      JacoInterface::CalibrateMessage *msg = arm.iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: CalibrateMessage rcvd", arm.iface->id());
+
+      arm.goto_thread->pos_ready();
+
+    } else if( arm.iface->msgq_first_is<JacoInterface::RetractMessage>() ) {
+      JacoInterface::RetractMessage *msg = arm.iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: RetractMessage rcvd", arm.iface->id());
+
+      arm.goto_thread->pos_retract();
+
+    } else if( arm.iface->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {
+      JacoInterface::CartesianGotoMessage *msg = arm.iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: CartesianGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f", arm.iface->id(),
+                        msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+    #ifdef HAVE_OPENRAVE
+      if(!__cfg_is_dual_arm) {
+        logger->log_debug(name(), "%s: CartesianGotoMessage is being passed to openrave", arm.iface->id());
+        std::vector<float> v = __openrave_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+        if( v.size() == 6 )
+          arm.goto_thread->set_target_ang(v.at(0), v.at(1), v.at(2), v.at(3), v.at(4), v.at(5));
+      } else {
+        arm.goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+      }
+    #else
+      arm.goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+    #endif
+
+    } else if( arm.iface->msgq_first_is<JacoInterface::AngularGotoMessage>() ) {
+      JacoInterface::AngularGotoMessage *msg = arm.iface->msgq_first(msg);
+
+      logger->log_debug(name(), "%s: AngularGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f", arm.iface->id(),
+                        msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
+      arm.goto_thread->set_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
+
+    } else if( arm.iface->msgq_first_is<JacoInterface::MoveGripperMessage>() ) {
+      JacoInterface::MoveGripperMessage *msg = arm.iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: MoveGripperMessage rcvd. f1:%f  f2:%f  f3:%f", arm.iface->id(),
+                        msg->finger1(), msg->finger2(), msg->finger3());
+
+      arm.goto_thread->move_gripper(msg->finger1(), msg->finger2(), msg->finger3());
+
+    } else if( arm.iface->msgq_first_is<JacoInterface::JoystickPushMessage>() ) {
+      JacoInterface::JoystickPushMessage *msg = arm.iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: JoystickPush %u rcvd", arm.iface->id(), msg->button());
+
+      arm.arm->start_api_ctrl();
+      arm.arm->push_joystick_button(msg->button());
+
+    } else if( arm.iface->msgq_first_is<JacoInterface::JoystickReleaseMessage>() ) {
+      JacoInterface::JoystickReleaseMessage *msg = arm.iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: JoystickRelease rcvd", arm.iface->id());
+
+      arm.arm->start_api_ctrl();
+      arm.arm->release_joystick();
+      arm.iface->set_final(true);
+
+    } else {
+      logger->log_warn(name(), "%s: Unknown message received", arm.iface->id());
+    }
+
+    arm.iface->msgq_pop();
+  }
 }
