@@ -32,10 +32,8 @@
 #include <aspect/blackboard.h>
 
 #include <string>
+#include <vector>
 
-namespace KinDrv {
-  class JacoArm;
-}
 namespace fawkes {
   class JacoInterface;
 }
@@ -55,9 +53,8 @@ class KinovaGotoThread
   virtual void finalize();
   virtual void loop();
 
-  virtual void register_arm(KinDrv::JacoArm *arm);
+  virtual void register_arm(fawkes::jaco_arm_t *arm);
   virtual void unregister_arm();
-  virtual void set_interface(fawkes::JacoInterface *if_jaco);
 
   virtual void set_target(float x, float y, float z, float e1, float e2, float e3, float f1=0.f, float f2=0.f, float f3=0.f);
   virtual void set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float f1=0.f, float f2=0.f, float f3=0.f);
@@ -74,14 +71,15 @@ class KinovaGotoThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  KinDrv::JacoArm         *__arm;
-  fawkes::JacoInterface   *__if_jaco;
+  fawkes::jaco_arm_t  *__arm;
 
-  float __x, __y, __z;
-  float __e1, __e2, __e3;
-  float __f1, __f2, __f3;
-  float __joints[6];
+  //float __x, __y, __z;
+  //float __e1, __e2, __e3;
   float __finger_last[4]; // 3 positions + 1 counter
+
+  std::vector<float> __joints;
+  std::vector<float> __coords;
+  std::vector<float> __fingers;
 
   bool __new_target;
   fawkes::jaco_target_type_t __target_type;

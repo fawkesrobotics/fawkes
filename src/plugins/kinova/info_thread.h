@@ -23,8 +23,6 @@
 #ifndef __PLUGINS_KINOVA_KINOVA_INFO_THREAD_H_
 #define __PLUGINS_KINOVA_KINOVA_INFO_THREAD_H_
 
-#include <libkindrv/types.h>
-
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
@@ -62,8 +60,8 @@ class KinovaInfoThread
   std::list<fawkes::jaco_arm_t*>           *__arms;
   std::list<fawkes::jaco_arm_t*>::iterator  __arm;
 
-  KinDrv::jaco_position_t    __cpos;
-  KinDrv::jaco_position_t    __apos;
+  std::vector<float> __cpos;
+  std::vector<float> __apos;
 };
 
 

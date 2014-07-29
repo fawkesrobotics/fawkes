@@ -22,8 +22,7 @@
 
 #include "openrave_dual_thread.h"
 #include "types.h"
-
-#include <libkindrv/kindrv.h>
+#include "arm.h"
 
 #include <interfaces/JacoInterface.h>
 
@@ -44,7 +43,6 @@
 #define ARM_L "arm_left"
 #define ARM_R "arm_right"
 
-using namespace KinDrv;
 using namespace fawkes;
 
 /** @class KinovaOpenraveDualThread "openrave_dual_thread.h"
@@ -64,12 +62,12 @@ KinovaOpenraveDualThread::KinovaOpenraveDualThread()
 void
 KinovaOpenraveDualThread::register_arm(fawkes::jaco_arm_t *arm)
 {
-  if( strcmp(arm->name, __cfg_left_arm_name.c_str()) == 0 ) {
+  if( __cfg_left_arm_name.compare(arm->arm->get_name()) == 0 ) {
     __arms.left = arm;
-    logger->log_debug(name(), "Set arm '%s' as left arm.", arm->name);
+    logger->log_debug(name(), "Set arm '%s' as left arm.", arm->arm->get_name().c_str());
   } else {
     __arms.right = arm;
-    logger->log_debug(name(), "Set arm '%s' as right arm.", arm->name);
+    logger->log_debug(name(), "Set arm '%s' as right arm.", arm->arm->get_name().c_str());
   }
 }
 

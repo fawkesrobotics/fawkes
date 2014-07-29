@@ -27,10 +27,6 @@
 #include <vector>
 #include <string>
 
-namespace KinDrv {
-  class JacoArm;
-}
-
 class KinovaGotoThread;
 
 namespace fawkes {
@@ -38,6 +34,7 @@ namespace fawkes {
 }
 #endif
 
+class KinovaArm;
 class JacoInterface;
 
 typedef enum jaco_target_type_enum {
@@ -48,11 +45,9 @@ typedef enum jaco_target_type_enum {
 } jaco_target_type_t;
 
 typedef struct jaco_arm_struct {
-  KinDrv::JacoArm *arm;
+  fawkes::KinovaArm *arm;
   fawkes::JacoInterface *iface;
   KinovaGotoThread *goto_thread;
-  char name[20];
-  bool initialized;
 } jaco_arm_t;
 
 typedef struct jaco_dual_arm_struct {

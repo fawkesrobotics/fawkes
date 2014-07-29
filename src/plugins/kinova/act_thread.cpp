@@ -22,13 +22,11 @@
 
 #include "act_thread.h"
 #include "types.h"
+#include "arm_kindrv.h"
 
 #include <interfaces/JacoInterface.h>
 
-#include <libkindrv/kindrv.h>
-
 using namespace fawkes;
-using namespace KinDrv;
 
 /** @class KinovaActThread "act_thread.h"
  * Jaco Arm control thread.
@@ -99,44 +97,31 @@ KinovaActThread::init()
     std::string r_name  = config->get_string("/hardware/jaco/dual_arm/right/name");
     std::string r_iface = config->get_string("/hardware/jaco/dual_arm/right/interface");
 
-    // copy names to struct fields
-    // we need to resize the string we get from config (name of arm) to
-    //  19, as the entry in JacoArm is a char[20]. Therefore we must not
-    //  forget to add a empty character as filler to the resize command.
-    l_name.resize(sizeof(__dual_arm.left.name) - 1, ' ');
-    memcpy(__dual_arm.left.name, l_name.data(), l_name.size());
-    r_name.resize(sizeof(__dual_arm.right.name) - 1, ' ');
-    memcpy(__dual_arm.right.name, r_name.data(), r_name.size());
-
     // create the two JacoArm objects and assign left/right correctly
     try {
-      std::vector<JacoArm*> arms;
-      arms.push_back( new JacoArm() );
-      arms.push_back( new JacoArm() );
+      std::vector<KinovaArm*> arms;
+      arms.push_back( new KinovaArmKindrv() );
+      arms.push_back( new KinovaArmKindrv() );
 
       for( unsigned int i=0; i<arms.size(); ++i) {
-        if( strcmp(arms[i]->get_client_config(false).name , __dual_arm.left.name) == 0) {
+        if( l_name.compare(arms[i]->get_name()) == 0) {
           __dual_arm.left.arm = arms[i];
           arms.erase(arms.begin() + i);
-          logger->log_info(name(), "Successfully connected arm '%s' as left arm", __dual_arm.left.name);
+          logger->log_info(name(), "Successfully connected arm '%s' as left arm", __dual_arm.left.arm->get_name().c_str());
           break;
         }
       }
       for( unsigned int i=0; i<arms.size(); ++i) {
-        if( strcmp(arms[i]->get_client_config(false).name , __dual_arm.right.name) == 0) {
+        if( r_name.compare(arms[i]->get_name()) == 0) {
           __dual_arm.right.arm = arms[i];
           arms.erase(arms.begin() + i);
-          logger->log_info(name(), "Successfully connected arm '%s' as right arm", __dual_arm.right.name);
+          logger->log_info(name(), "Successfully connected arm '%s' as right arm", __dual_arm.right.arm->get_name().c_str());
           break;
         }
       }
       if( arms.size() > 0 )
         logger->log_error(name(), "Could not associate %u arms! Check arm names in config, first unassociated is '%s'",
-                          arms.size(), arms[0]->get_client_config(false).name);
-
-      // register JacoArm in goto_threads
-      __dual_arm.left.goto_thread->register_arm(__dual_arm.left.arm);
-      __dual_arm.right.goto_thread->register_arm(__dual_arm.right.arm);
+                          arms.size(), arms[0]->get_name().c_str());
 
     } catch(fawkes::Exception &e) {
       logger->log_error(name(), "Could not connect to both JacoArms. Ex:%s", e.what());
@@ -147,10 +132,6 @@ KinovaActThread::init()
       __dual_arm.left.iface  = blackboard->open_for_writing<JacoInterface>(l_iface.c_str());
       __dual_arm.right.iface = blackboard->open_for_writing<JacoInterface>(r_iface.c_str());
 
-      // set interface in goto_threads
-      __dual_arm.left.goto_thread->set_interface(__dual_arm.left.iface);
-      __dual_arm.right.goto_thread->set_interface(__dual_arm.right.iface);
-
     } catch(fawkes::Exception &e) {
       logger->log_warn(name(), "Could not open JacoInterfaces interface for writing. Er:%s", e.what());
     }
@@ -160,6 +141,8 @@ KinovaActThread::init()
     __info_thread->register_arm(&__dual_arm.right);
     __openrave_thread->register_arm(&__dual_arm.left);
     __openrave_thread->register_arm(&__dual_arm.right);
+    __dual_arm.left.goto_thread->register_arm(&__dual_arm.left);
+    __dual_arm.right.goto_thread->register_arm(&__dual_arm.right);
 
     // initialize arms
     _initialize_dual();
@@ -171,11 +154,7 @@ KinovaActThread::init()
     _process_msgs = &KinovaActThread::_process_msgs_single;
 
     try {
-      __arm.arm = new JacoArm();
-
-      // register arm in goto_thread
-      __arm.goto_thread->register_arm(__arm.arm);
-
+      __arm.arm = new KinovaArmKindrv();
     } catch(fawkes::Exception &e) {
       logger->log_warn(name(), "Could not connect to JacoArm. Ex:%s", e.what());
     }
@@ -183,10 +162,6 @@ KinovaActThread::init()
     // open interface for writing
     try {
       __arm.iface = blackboard->open_for_writing<JacoInterface>("JacoArm");
-
-      // set interface in goto_thread
-      __arm.goto_thread->set_interface(__arm.iface);
-
     } catch(fawkes::Exception &e) {
       logger->log_warn(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
     }
@@ -194,6 +169,7 @@ KinovaActThread::init()
     // register arm in other threads
     __info_thread->register_arm(&__arm);
     __openrave_thread->register_arm(&__arm);
+    __arm.goto_thread->register_arm(&__arm);
 
     // initalize arms
     _initialize_single();
@@ -261,22 +237,17 @@ void
 KinovaActThread::_initialize_single()
 {
   //check if we need to initialize arm
-  jaco_retract_mode_t mode = __arm.arm->get_status();
-  if( mode == MODE_NOINIT ) {
-    __arm.initialized = false;
-    if( __cfg_auto_init ) {
-      logger->log_debug(name(), "Initializing arm, wait until finished");
-      __arm.iface->set_final(false);
-      __arm.goto_thread->pos_ready();
-    }
+  if( !__arm.arm->initialized() && __cfg_auto_init ) {
+    logger->log_debug(name(), "Initializing arm, wait until finished");
+    __arm.arm->initialize();
+    __arm.iface->set_final(false);
+    //__arm.goto_thread->pos_ready();
 
-  } else {
-    __arm.initialized = true;
-    if( __cfg_auto_calib )
-      __arm.goto_thread->pos_ready();
+  } else if( __arm.arm->initialized() &&  __cfg_auto_calib ) {
+    __arm.goto_thread->pos_ready();
   }
 
-  __arm.iface->set_initialized(__arm.initialized);
+  __arm.iface->set_initialized(__arm.arm->initialized());
   __arm.iface->write();
 }
 
@@ -286,39 +257,29 @@ void
 KinovaActThread::_initialize_dual()
 {
   //check initialization status
-  jaco_retract_mode_t mode = __dual_arm.left.arm->get_status();
-  if( mode == MODE_NOINIT ) {
-    __dual_arm.left.initialized = false;
-    if( __cfg_auto_init ) {
-      logger->log_debug(name(), "Initializing left arm, wait until finished");
-      __dual_arm.left.iface->set_final(false);
-      __dual_arm.left.goto_thread->pos_ready();
-    }
+  if( !__dual_arm.left.arm->initialized() && __cfg_auto_init ) {
+    logger->log_debug(name(), "Initializing left arm, wait until finished");
+    __dual_arm.left.arm->initialize();
+    __dual_arm.left.iface->set_final(false);
+    //__dual_arm.left.goto_thread->pos_ready();
 
-  } else {
-    __dual_arm.left.initialized = true;
-    if( __cfg_auto_calib )
-      __dual_arm.left.goto_thread->pos_ready();
+  } else if( __dual_arm.left.arm->initialized() && __cfg_auto_calib ) {
+    __dual_arm.left.goto_thread->pos_ready();
   }
 
-  mode = __dual_arm.right.arm->get_status();
-  if( mode == MODE_NOINIT ) {
-    __dual_arm.right.initialized = false;
-    if( __cfg_auto_init ) {
-      logger->log_debug(name(), "Initializing right arm, wait until finished");
-      __dual_arm.right.iface->set_final(false);
-      __dual_arm.right.goto_thread->pos_ready();
-    }
+  if( !__dual_arm.right.arm->initialized() && __cfg_auto_init ) {
+    logger->log_debug(name(), "Initializing right arm, wait until finished");
+    __dual_arm.right.arm->initialize();
+    __dual_arm.right.iface->set_final(false);
+    __dual_arm.right.goto_thread->pos_ready();
 
-  } else {
-    __dual_arm.right.iface->set_initialized(true);
-    if( __cfg_auto_calib )
-      __dual_arm.right.goto_thread->pos_ready();
+  } else if( __dual_arm.right.arm->initialized() && __cfg_auto_calib ) {
+    __dual_arm.right.goto_thread->pos_ready();
   }
 
-  __dual_arm.left.iface->set_initialized(__dual_arm.left.initialized);
+  __dual_arm.left.iface->set_initialized(__dual_arm.left.arm->initialized());
   __dual_arm.left.iface->write();
-  __dual_arm.right.iface->set_initialized(__dual_arm.right.initialized);
+  __dual_arm.right.iface->set_initialized(__dual_arm.right.arm->initialized());
   __dual_arm.right.iface->write();
 }
 
@@ -327,11 +288,11 @@ KinovaActThread::_initialize_dual()
 bool
 KinovaActThread::_is_initializing_single()
 {
-  __arm.iface->set_initialized(__arm.initialized);
+  __arm.iface->set_initialized(__arm.arm->initialized());
 
-  if( !__arm.initialized && __cfg_auto_init ) {
+  if( !__arm.arm->initialized() && __cfg_auto_init ) {
     logger->log_debug(name(), "wait for arm to calibrate");
-    __arm.initialized = __arm.iface->is_final();
+    //__arm.initialized = __arm.iface->is_final();
     return true;
   }
 
@@ -342,13 +303,13 @@ KinovaActThread::_is_initializing_single()
 bool
 KinovaActThread::_is_initializing_dual()
 {
-  __dual_arm.left.iface->set_initialized(__dual_arm.left.initialized);
-  __dual_arm.right.iface->set_initialized(__dual_arm.right.initialized);
+  __dual_arm.left.iface->set_initialized(__dual_arm.left.arm->initialized());
+  __dual_arm.right.iface->set_initialized(__dual_arm.right.arm->initialized());
 
-  if( !(__dual_arm.left.initialized && __dual_arm.right.initialized) && __cfg_auto_init ) {
+  if( !(__dual_arm.left.arm->initialized() && __dual_arm.right.arm->initialized()) && __cfg_auto_init ) {
     logger->log_debug(name(), "wait for arms to calibrate");
-    __dual_arm.left.initialized = __dual_arm.left.iface->is_final();
-    __dual_arm.right.initialized = __dual_arm.right.iface->is_final();
+    //__dual_arm.left.initialized = __dual_arm.left.iface->is_final();
+    //__dual_arm.right.initialized = __dual_arm.right.iface->is_final();
     return true;
   }
 
@@ -454,14 +415,12 @@ KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
       JacoInterface::JoystickPushMessage *msg = arm.iface->msgq_first(msg);
       logger->log_debug(name(), "%s: JoystickPush %u rcvd", arm.iface->id(), msg->button());
 
-      arm.arm->start_api_ctrl();
-      arm.arm->push_joystick_button(msg->button());
+      arm.arm->push_joystick(msg->button());
 
     } else if( arm.iface->msgq_first_is<JacoInterface::JoystickReleaseMessage>() ) {
       JacoInterface::JoystickReleaseMessage *msg = arm.iface->msgq_first(msg);
       logger->log_debug(name(), "%s: JoystickRelease rcvd", arm.iface->id());
 
-      arm.arm->start_api_ctrl();
       arm.arm->release_joystick();
       arm.iface->set_final(true);
 

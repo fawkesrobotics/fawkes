@@ -21,8 +21,7 @@
  */
 
 #include "goto_thread.h"
-
-#include <libkindrv/kindrv.h>
+#include "arm.h"
 
 #include <interfaces/JacoInterface.h>
 #include <utils/math/angle.h>
@@ -30,7 +29,6 @@
 #include <unistd.h>
 
 using namespace fawkes;
-using namespace KinDrv;
 
 /** @class KinovaGotoThread "goto_thread.h"
  * Jaco Arm movement thread.
@@ -47,7 +45,6 @@ KinovaGotoThread::KinovaGotoThread(const char name[])
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
 {
   __arm = NULL;
-  __if_jaco = NULL;
 
   __new_target = false;
   __final = true;
@@ -72,19 +69,15 @@ KinovaGotoThread::finalize()
 }
 
 void
-KinovaGotoThread::register_arm(JacoArm *arm) {
+KinovaGotoThread::register_arm(fawkes::jaco_arm_t *arm)
+{
   __arm = arm;
 }
 
 void
-KinovaGotoThread::unregister_arm() {
-  __arm = NULL;
-}
-
-void
-KinovaGotoThread::set_interface(JacoInterface *if_jaco)
+KinovaGotoThread::unregister_arm()
 {
-  __if_jaco = if_jaco;
+  __arm = NULL;
 }
 
 void
@@ -92,21 +85,25 @@ KinovaGotoThread::set_target(float x, float y, float z,
                              float e1, float e2, float e3,
                              float f1, float f2, float f3)
 {
-  __x     = x;
-  __y     = y;
-  __z     = z;
-  __e1   = e1;
-  __e2   = e2;
-  __e3   = e3;
+  __coords.clear();
+  __coords.push_back(x);
+  __coords.push_back(y);
+  __coords.push_back(z);
+  __coords.push_back(e1);
+  __coords.push_back(e2);
+  __coords.push_back(e3);
+
+  __fingers.clear();
   if( f1 > 0.f && f2 > 0.f && f3 > 0.f ) {
-    __f1 = f1;
-    __f2 = f2;
-    __f3 = f3;
+    __fingers.push_back(f1);
+    __fingers.push_back(f2);
+    __fingers.push_back(f3);
   } else {
-    __f1 = __if_jaco->finger1();
-    __f2 = __if_jaco->finger2();
-    __f3 = __if_jaco->finger3();
+    __fingers.push_back(__arm->iface->finger1());
+    __fingers.push_back(__arm->iface->finger2());
+    __fingers.push_back(__arm->iface->finger3());
   }
+
   __new_target = true;
   __target_type = TARGET_CARTESIAN;
 }
@@ -116,21 +113,23 @@ KinovaGotoThread::set_target_ang(float j1, float j2, float j3,
                                  float j4, float j5, float j6,
                                  float f1, float f2, float f3)
 {
-  __joints[0] = j1;
-  __joints[1] = j2;
-  __joints[2] = j3;
-  __joints[3] = j4;
-  __joints[4] = j5;
-  __joints[5] = j6;
+  __joints.clear();
+  __joints.push_back(j1);
+  __joints.push_back(j2);
+  __joints.push_back(j3);
+  __joints.push_back(j4);
+  __joints.push_back(j5);
+  __joints.push_back(j6);
 
+  __fingers.clear();
   if( f1 > 0.f && f2 > 0.f && f3 > 0.f ) {
-    __f1 = f1;
-    __f2 = f2;
-    __f3 = f3;
+    __fingers.push_back(f1);
+    __fingers.push_back(f2);
+    __fingers.push_back(f3);
   } else {
-    __f1 = __if_jaco->finger1();
-    __f2 = __if_jaco->finger2();
-    __f3 = __if_jaco->finger3();
+    __fingers.push_back(__arm->iface->finger1());
+    __fingers.push_back(__arm->iface->finger2());
+    __fingers.push_back(__arm->iface->finger3());
   }
 
   __new_target = true;
@@ -155,16 +154,18 @@ KinovaGotoThread::pos_retract()
 void
 KinovaGotoThread::move_gripper(float f1, float f2 ,float f3)
 {
-  __joints[0] = __if_jaco->joints(0);
-  __joints[1] = __if_jaco->joints(1);
-  __joints[2] = __if_jaco->joints(2);
-  __joints[3] = __if_jaco->joints(3);
-  __joints[4] = __if_jaco->joints(4);
-  __joints[5] = __if_jaco->joints(5);
+  __joints.clear();
+  __joints.push_back(__arm->iface->joints(0));
+  __joints.push_back(__arm->iface->joints(1));
+  __joints.push_back(__arm->iface->joints(2));
+  __joints.push_back(__arm->iface->joints(3));
+  __joints.push_back(__arm->iface->joints(4));
+  __joints.push_back(__arm->iface->joints(5));
 
-  __f1 = f1;
-  __f2 = f2;
-  __f3 = f3;
+  __fingers.clear();
+  __fingers.push_back(f1);
+  __fingers.push_back(f2);
+  __fingers.push_back(f3);
 
   __new_target = true;
   __target_type = TARGET_ANGULAR;
@@ -175,7 +176,7 @@ void
 KinovaGotoThread::stop()
 {
   try {
-    __arm->release_joystick();
+    __arm->arm->stop();
 
     __final = true;
     __new_target = false;
@@ -188,77 +189,47 @@ KinovaGotoThread::stop()
 void
 KinovaGotoThread::check_final()
 {
-  __final = true;
   bool check_fingers = false;
 
   //logger->log_debug(name(), "check final");
   switch( __target_type ) {
+
+    case TARGET_READY:
+    case TARGET_RETRACT:
+      if( __wait_status_check == 0 ) {
+        __final = __arm->arm->final();
+      } else if( __wait_status_check >= 10 ) {
+          __wait_status_check = 0;
+      } else {
+          ++__wait_status_check;
+      }
+      break;
+
+
+    default: //TARGET_ANGULAR, TARGET_CARTESIAN
+      __final = __arm->arm->final();
+/*
     case TARGET_ANGULAR:
       //logger->log_debug(name(), "check final for TARGET ANGULAR");
       for( unsigned int i=0; i<6; ++i ) {
-        __final &= (std::abs(normalize_mirror_rad(deg2rad(__joints[i] - __if_jaco->joints(i)))) < 0.01);
+        __final &= (std::abs(normalize_mirror_rad(deg2rad(__joints[i] - __arm->iface->joints(i)))) < 0.01);
       }
       check_fingers = true;
       break;
-
-    case TARGET_READY:
-      //logger->log_debug(name(), "check final for TARGET READY");
-      if( __wait_status_check == 0 ) {
-        //logger->log_debug(name(), "check final for TARGET READY now");
-        //__wait_status_check = 0;
-        jaco_retract_mode_t mode = __arm->get_status();
-        logger->log_debug(name(), "current mode: %u", mode);
-        ++__wait_status_check;
-        __final = (mode == MODE_READY_STANDBY);
-
-        if( __final )
-          __arm->release_joystick();
-        else if( mode == MODE_READY_TO_RETRACT ) {
-          __arm->release_joystick();
-          __arm->push_joystick_button(2);
-        }
-      } else {
-        //logger->log_debug(name(), "check final for TARGET READY not yet");
-        __final = false;
-        if( __wait_status_check >= 10 )
-          __wait_status_check = 0;
-        else
-          ++__wait_status_check;
-      }
-      break;
-
-    case TARGET_RETRACT:
-      //logger->log_debug(name(), "check final for TARGET RETRACT");
-      if( __wait_status_check == 0 ) {
-        //logger->log_debug(name(), "check final for TARGET RETRACT now");
-        jaco_retract_mode_t mode = __arm->get_status();
-        //logger->log_debug(name(), "current mode: %u", mode);
-        ++__wait_status_check;
-        __final = (mode == MODE_RETRACT_STANDBY);
-        if( __final )
-          __arm->release_joystick();
-      } else {
-        //logger->log_debug(name(), "check final for TARGET RETRACT");
-        __final = false;
-        if( __wait_status_check >= 10 )
-          __wait_status_check = 0;
-        else
-          ++__wait_status_check;
-      }
-      break;
-
 
     default: //TARGET_CARTESIAN
       //logger->log_debug(name(), "check final for TARGET CARTESIAN");
-      __final &= (std::abs(angle_distance(__x , __if_jaco->x())) < 0.01);
-      __final &= (std::abs(angle_distance(__y , __if_jaco->y())) < 0.01);
-      __final &= (std::abs(angle_distance(__z , __if_jaco->z())) < 0.01);
-      __final &= (std::abs(angle_distance(__e1 , __if_jaco->euler1())) < 0.1);
-      __final &= (std::abs(angle_distance(__e2 , __if_jaco->euler2())) < 0.1);
-      __final &= (std::abs(angle_distance(__e3 , __if_jaco->euler3())) < 0.1);
+      __final &= (std::abs(angle_distance(__x , __arm->iface->x())) < 0.01);
+      __final &= (std::abs(angle_distance(__y , __arm->iface->y())) < 0.01);
+      __final &= (std::abs(angle_distance(__z , __arm->iface->z())) < 0.01);
+      __final &= (std::abs(angle_distance(__e1 , __arm->iface->euler1())) < 0.1);
+      __final &= (std::abs(angle_distance(__e2 , __arm->iface->euler2())) < 0.1);
+      __final &= (std::abs(angle_distance(__e3 , __arm->iface->euler3())) < 0.1);
 
       check_fingers = true;
       break;
+*/
+
   }
 
   //logger->log_debug(name(), "check final: %u", __final);
@@ -267,14 +238,14 @@ KinovaGotoThread::check_final()
     //logger->log_debug(name(), "check fingeres for final");
 
     // also check fingeres
-    if( __finger_last[0] == __if_jaco->finger1() &&
-        __finger_last[1] == __if_jaco->finger2() &&
-        __finger_last[2] == __if_jaco->finger3() ) {
+    if( __finger_last[0] == __arm->iface->finger1() &&
+        __finger_last[1] == __arm->iface->finger2() &&
+        __finger_last[2] == __arm->iface->finger3() ) {
       __finger_last[3] += 1;
     } else {
-      __finger_last[0] = __if_jaco->finger1();
-      __finger_last[1] = __if_jaco->finger2();
-      __finger_last[2] = __if_jaco->finger3();
+      __finger_last[0] = __arm->iface->finger1();
+      __finger_last[1] = __arm->iface->finger2();
+      __finger_last[2] = __arm->iface->finger3();
       __finger_last[3] = 0; // counter
     }
 
@@ -285,16 +256,16 @@ KinovaGotoThread::check_final()
 void
 KinovaGotoThread::loop()
 {
-  if(__arm == NULL || __if_jaco == NULL) {
+  if(__arm == NULL) {
     return;
   }
 
   if( __new_target ) {
     logger->log_debug(name(), "rcvd new target. skip old one, set this. using current finger positions");
 
-    __finger_last[0] = __if_jaco->finger1();
-    __finger_last[1] = __if_jaco->finger2();
-    __finger_last[2] = __if_jaco->finger3();
+    __finger_last[0] = __arm->iface->finger1();
+    __finger_last[1] = __arm->iface->finger2();
+    __finger_last[2] = __arm->iface->finger3();
     __finger_last[3] = 0; // counter
 
     logger->log_debug(name(), "loop: set final=false");
@@ -303,97 +274,30 @@ KinovaGotoThread::loop()
 
     // process new target
     try {
-      __arm->release_joystick(); // stop old movement
-      __arm->start_api_ctrl();
+      __arm->arm->stop(); // stop old movement
+      //__arm->arm->start_api_ctrl();
 
       switch( __target_type ) {
         case TARGET_ANGULAR:
           logger->log_debug(name(), "target_type: TARGET_ANGULAR");
-          { __arm->set_control_ang();
-            usleep(500);
-            float fing[3] = {__f1, __f2, __f3};
-            __arm->set_target_ang(__joints, fing);
-            break;
-          }
+          __arm->arm->goto_joints(__joints, __fingers);
+          break;
 
         case TARGET_READY:
-          { logger->log_debug(name(), "loop: target_type: TARGET_READY");
-            jaco_retract_mode_t mode = __arm->get_status();
-            __wait_status_check = 0;
-            logger->log_debug(name(), "loop: current mode: %u", mode);
-            switch( mode ) {
-              case MODE_RETRACT_TO_READY:
-                logger->log_debug(name(), "loop: 2 buttons needed");
-                __arm->push_joystick_button(2);
-                __arm->release_joystick();
-                __arm->push_joystick_button(2);
-                break;
-
-              case MODE_NORMAL_TO_READY:
-              case MODE_READY_TO_RETRACT:
-              case MODE_RETRACT_STANDBY:
-              case MODE_NORMAL:
-              case MODE_NOINIT:
-                logger->log_debug(name(), "loop: 1 button needed");
-                __arm->push_joystick_button(2);
-                break;
-
-              case MODE_ERROR:
-                logger->log_error(name(), "some error occured!!");
-                break;
-
-              case MODE_READY_STANDBY:
-                logger->log_debug(name(), "loop: no action. error?");
-                __final = true;
-                break;
-            }
-            break;
-          }
-
+          logger->log_debug(name(), "loop: target_type: TARGET_READY");
+          __wait_status_check = 0;
+          __arm->arm->goto_ready();
+          break;
 
         case TARGET_RETRACT:
-          { logger->log_debug(name(), "target_type: TARGET_RETRACT");
-            jaco_retract_mode_t mode = __arm->get_status();
-            __wait_status_check = 0;
-            logger->log_debug(name(), "loop: current mode: %u", mode);
-            switch( mode ) {
-              case MODE_READY_TO_RETRACT:
-                logger->log_debug(name(), "loop: 2 buttons needed");
-                __arm->push_joystick_button(2);
-                __arm->release_joystick();
-                __arm->push_joystick_button(2);
-                break;
-
-              case MODE_READY_STANDBY:
-              case MODE_RETRACT_TO_READY:
-                logger->log_debug(name(), "loop: 1 button needed");
-                __arm->push_joystick_button(2);
-                break;
-
-              case MODE_NORMAL_TO_READY:
-              case MODE_NORMAL:
-              case MODE_NOINIT:
-                logger->log_warn(name(), "loop: cannot go from NORMAL/NOINIT to RETRACT");
-                __final = true;
-                break;
-
-              case MODE_ERROR:
-                logger->log_error(name(), "some error occured!!");
-                break;
-
-              case MODE_RETRACT_STANDBY:
-                logger->log_debug(name(), "loop: no action. error?");
-                __final = true;
-                break;
-            }
-            break;
-          }
+          logger->log_debug(name(), "target_type: TARGET_RETRACT");
+          __wait_status_check = 0;
+          __arm->arm->goto_retract();
+          break;
 
         default: //TARGET_CARTESIAN
           logger->log_debug(name(), "target_type: TARGET_CARTESIAN");
-          __arm->set_control_cart();
-          usleep(500);
-          __arm->set_target_cart(__y, -__x, __z, __e1, __e2, __e3, __f1, __f2, __f3);
+          __arm->arm->goto_coords(__coords, __fingers);
           break;
       }
 
@@ -404,14 +308,7 @@ KinovaGotoThread::loop()
   } else if( !__final ) {
     // check for final position
     check_final();
-
-    /*
-    if( __final ) {
-      __arm->stop_api_ctrl(); // need to do this to be able to send a command next time
-      usleep(500);
-    }
-    //*/
   }
 
-  __if_jaco->set_final(__final);
+  __arm->iface->set_final(__final);
 }

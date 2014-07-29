@@ -23,8 +23,6 @@
 #include "openrave_single_thread.h"
 #include "types.h"
 
-#include <libkindrv/kindrv.h>
-
 #include <interfaces/JacoInterface.h>
 
 #include <cmath>
@@ -40,7 +38,6 @@
 #endif
 
 using namespace fawkes;
-using namespace KinDrv;
 
 /** @class KinovaOpenraveSingleThread "openrave_single_thread.h"
  * Jaco Arm thread for single-arm setup, integrating OpenRAVE

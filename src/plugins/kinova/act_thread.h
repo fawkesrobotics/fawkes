@@ -35,10 +35,6 @@
 
 #include <string>
 
-namespace KinDrv {
-  class JacoArm;
-}
-
 namespace fawkes {
   typedef struct jaco_arm_struct jaco_arm_t;
   typedef struct jaco_dual_arm_struct jaco_dual_arm_t;
