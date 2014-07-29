@@ -124,11 +124,15 @@ KinovaOpenraveBaseThread::init()
 void
 KinovaOpenraveBaseThread::finalize()
 {
+  unregister_arms();
+
 #ifdef HAVE_OPENRAVE
   delete(__OR_robot);
   __OR_robot = NULL;
 
   delete(__OR_manip);
   __OR_manip = NULL;
+
+  __OR_env = NULL;
 #endif
 }

@@ -110,7 +110,11 @@ KinovaOpenraveSingleThread::_load_robot()
 
   try {
     __OR_robot = openrave->add_robot(__cfg_OR_robot_file, false);
+  } catch (Exception& e) {
+    throw fawkes::Exception("Could not add robot '%s' to openrave environment. (Error: %s)", __cfg_OR_robot_file.c_str(), e.what_no_backtrace());
+  }
 
+  try {
     __OR_manip = new OpenRaveManipulatorKinovaJaco(6, 6);
     __OR_manip->add_motor(0,0);
     __OR_manip->add_motor(1,1);
@@ -127,7 +131,7 @@ KinovaOpenraveSingleThread::_load_robot()
     }
 
   } catch (Exception& e) {
-    // TODO: not just simple throw....
+    finalize();
     throw;
   }
 #endif
