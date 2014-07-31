@@ -24,6 +24,8 @@
 
 #include <libkindrv/kindrv.h>
 
+#include <cstdio>
+
 using namespace KinDrv;
 
 namespace fawkes {
@@ -41,9 +43,11 @@ KinovaArmKindrv::KinovaArmKindrv()
 {
   __arm = new JacoArm();
   __name = __arm->get_client_config(true).name;
+  // trim tailing whitespaces
+  __name.erase(__name.find_last_not_of(" ")+1);
 
   __initialized = false;
-  __final = false;
+  __final = true;
 }
 
 /** Destructor. */
@@ -113,7 +117,7 @@ KinovaArmKindrv::final()
 bool
 KinovaArmKindrv::initialized()
 {
-  if( !__initialized) {
+  if( !__initialized ) {
     jaco_retract_mode_t mode = __arm->get_status();
     __initialized = (mode != MODE_NOINIT);
   }

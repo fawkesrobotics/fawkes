@@ -165,7 +165,6 @@ void
 KinovaOpenraveDualThread::_init()
 {
   __cfg_left_arm_name = config->get_string("/hardware/jaco/dual_arm/left/name");
-  __cfg_left_arm_name.resize(19, ' ');
 }
 
 void
