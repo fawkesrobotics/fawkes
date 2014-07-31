@@ -197,6 +197,7 @@ KinovaGotoThread::check_final()
     case TARGET_READY:
     case TARGET_RETRACT:
       if( __wait_status_check == 0 ) {
+        //logger->log_debug(name(), "check final for TARGET_MODE");
         __final = __arm->arm->final();
       } else if( __wait_status_check >= 10 ) {
           __wait_status_check = 0;
@@ -205,30 +206,33 @@ KinovaGotoThread::check_final()
       }
       break;
 
-
+/*
     default: //TARGET_ANGULAR, TARGET_CARTESIAN
       __final = __arm->arm->final();
-/*
+//*/
+//*
     case TARGET_ANGULAR:
       //logger->log_debug(name(), "check final for TARGET ANGULAR");
+      __final = true; //__arm->arm->final();
       for( unsigned int i=0; i<6; ++i ) {
-        __final &= (std::abs(normalize_mirror_rad(deg2rad(__joints[i] - __arm->iface->joints(i)))) < 0.01);
+        __final &= (std::abs(normalize_mirror_rad(deg2rad(__joints.at(i) - __arm->iface->joints(i)))) < 0.01);
       }
       check_fingers = true;
       break;
 
     default: //TARGET_CARTESIAN
       //logger->log_debug(name(), "check final for TARGET CARTESIAN");
-      __final &= (std::abs(angle_distance(__x , __arm->iface->x())) < 0.01);
-      __final &= (std::abs(angle_distance(__y , __arm->iface->y())) < 0.01);
-      __final &= (std::abs(angle_distance(__z , __arm->iface->z())) < 0.01);
-      __final &= (std::abs(angle_distance(__e1 , __arm->iface->euler1())) < 0.1);
-      __final &= (std::abs(angle_distance(__e2 , __arm->iface->euler2())) < 0.1);
-      __final &= (std::abs(angle_distance(__e3 , __arm->iface->euler3())) < 0.1);
+      __final = true; //__arm->arm->final();
+      __final &= (std::abs(angle_distance(__coords.at(0) , __arm->iface->x())) < 0.01);
+      __final &= (std::abs(angle_distance(__coords.at(1) , __arm->iface->y())) < 0.01);
+      __final &= (std::abs(angle_distance(__coords.at(2) , __arm->iface->z())) < 0.01);
+      __final &= (std::abs(angle_distance(__coords.at(3) , __arm->iface->euler1())) < 0.1);
+      __final &= (std::abs(angle_distance(__coords.at(4) , __arm->iface->euler2())) < 0.1);
+      __final &= (std::abs(angle_distance(__coords.at(5) , __arm->iface->euler3())) < 0.1);
 
       check_fingers = true;
       break;
-*/
+//*/
 
   }
 
