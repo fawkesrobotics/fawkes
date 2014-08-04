@@ -23,6 +23,7 @@
 #include "act_thread.h"
 #include "types.h"
 #include "arm_kindrv.h"
+#include "arm_dummy.h"
 
 #include <interfaces/JacoInterface.h>
 
@@ -85,6 +86,12 @@ KinovaActThread::init()
   __cfg_auto_calib      = config->get_bool("/hardware/jaco/auto_calibrate");
   __cfg_is_dual_arm     = config->get_bool("/hardware/jaco/dual_arm/active");
 
+  std::string cfg_arm = config->get_string("/hardware/jaco/arm");
+
+  if( cfg_arm.compare("libkindrv")
+   && cfg_arm.compare("dummy") )
+    throw fawkes::Exception("Bad config entry /hardware/jaco/arm '%s'", cfg_arm.c_str());
+
   if(__cfg_is_dual_arm) {
     // set function pointers for dual-arm setup
     _submit_iface_changes = &KinovaActThread::_submit_iface_dual;
@@ -100,31 +107,40 @@ KinovaActThread::init()
     // create the two JacoArm objects and assign left/right correctly
     try {
       std::vector<KinovaArm*> arms;
-      arms.push_back( new KinovaArmKindrv() );
-      arms.push_back( new KinovaArmKindrv() );
+      if( !cfg_arm.compare("dummy") ) {
+        __dual_arm.left.arm  = new KinovaArmDummy(l_name.c_str());
+        __dual_arm.right.arm = new KinovaArmDummy(r_name.c_str());
 
-      for( unsigned int i=0; i<arms.size(); ++i) {
-        if( l_name.compare(arms[i]->get_name()) == 0) {
-          __dual_arm.left.arm = arms[i];
-          arms.erase(arms.begin() + i);
-          logger->log_info(name(), "Successfully connected arm '%s' as left arm", __dual_arm.left.arm->get_name().c_str());
-          break;
-        }
-      }
-      for( unsigned int i=0; i<arms.size(); ++i) {
-        if( r_name.compare(arms[i]->get_name()) == 0) {
-          __dual_arm.right.arm = arms[i];
-          arms.erase(arms.begin() + i);
-          logger->log_info(name(), "Successfully connected arm '%s' as right arm", __dual_arm.right.arm->get_name().c_str());
-          break;
-        }
-      }
-      if( arms.size() > 0 )
-        logger->log_error(name(), "Could not associate %u arms! Check arm names in config, first unassociated is '%s'",
-                          arms.size(), arms[0]->get_name().c_str());
+      } else {
+        arms.push_back( new KinovaArmKindrv() );
+        arms.push_back( new KinovaArmKindrv() );
 
+        for( unsigned int i=0; i<arms.size(); ++i) {
+          logger->log_debug(name(), "compare l_name '%s' to '%s' ...", l_name.c_str(), arms[i]->get_name().c_str());
+          if( l_name.compare(arms[i]->get_name()) == 0) {
+            __dual_arm.left.arm = arms[i];
+            arms.erase(arms.begin() + i);
+            logger->log_info(name(), "Successfully connected arm '%s' as left arm", __dual_arm.left.arm->get_name().c_str());
+            break;
+          }
+        }
+        for( unsigned int i=0; i<arms.size(); ++i) {
+          logger->log_debug(name(), "compare r_name '%s' to '%s' ...", r_name.c_str(), arms[i]->get_name().c_str());
+          if( r_name.compare(arms[i]->get_name()) == 0) {
+            __dual_arm.right.arm = arms[i];
+            arms.erase(arms.begin() + i);
+            logger->log_info(name(), "Successfully connected arm '%s' as right arm", __dual_arm.right.arm->get_name().c_str());
+            break;
+          }
+        }
+        if( arms.size() > 0 )
+          logger->log_error(name(), "Could not associate %u arms! Check arm names in config, first unassociated is '%s'",
+                            arms.size(), arms[0]->get_name().c_str());
+
+      }
     } catch(fawkes::Exception &e) {
-      logger->log_error(name(), "Could not connect to both JacoArms. Ex:%s", e.what());
+      logger->log_error(name(), "Could not connect to both JacoArms. Exception follows.");
+      throw;
     }
 
     // open interface for writing
@@ -133,7 +149,11 @@ KinovaActThread::init()
       __dual_arm.right.iface = blackboard->open_for_writing<JacoInterface>(r_iface.c_str());
 
     } catch(fawkes::Exception &e) {
-      logger->log_warn(name(), "Could not open JacoInterfaces interface for writing. Er:%s", e.what());
+      logger->log_warn(name(), "Could not open JacoInterfaces interface for writing. Exception follows.");
+      delete __dual_arm.left.arm;
+      delete __dual_arm.right.arm;
+      throw;
+
     }
 
     // register arms in other threads
@@ -154,16 +174,24 @@ KinovaActThread::init()
     _process_msgs = &KinovaActThread::_process_msgs_single;
 
     try {
-      __arm.arm = new KinovaArmKindrv();
+      if( !cfg_arm.compare("dummy") ) {
+        __arm.arm = new KinovaArmDummy("JacoDummy");
+      } else {
+        __arm.arm = new KinovaArmKindrv();
+      }
+
     } catch(fawkes::Exception &e) {
-      logger->log_warn(name(), "Could not connect to JacoArm. Ex:%s", e.what());
+      logger->log_error(name(), "Could not connect to JacoArm. Exception follows.");
+      throw;
     }
 
     // open interface for writing
     try {
       __arm.iface = blackboard->open_for_writing<JacoInterface>("JacoArm");
     } catch(fawkes::Exception &e) {
-      logger->log_warn(name(), "Could not open JacoInterface interface for writing. Er:%s", e.what());
+      logger->log_error(name(), "Could not open JacoInterface interface for writing. Exception follows.");
+      delete __arm.arm;
+      throw;
     }
 
     // register arm in other threads
@@ -187,7 +215,7 @@ KinovaActThread::finalize()
       blackboard->close(__dual_arm.left.iface);
       blackboard->close(__dual_arm.right.iface);
     } catch(fawkes::Exception& e) {
-      logger->log_warn(name(), "Could not close JacoInterface interfaces. Er:%s", e.what());
+      logger->log_warn(name(), "Could not close JacoInterface interfaces. Er:%s", e.what_no_backtrace());
     }
 
     delete __dual_arm.left.arm;
@@ -197,7 +225,7 @@ KinovaActThread::finalize()
     try {
       blackboard->close(__arm.iface);
     } catch(fawkes::Exception& e) {
-      logger->log_warn(name(), "Could not close JacoInterface interface. Er:%s", e.what());
+      logger->log_warn(name(), "Could not close JacoInterface interface. Er:%s", e.what_no_backtrace());
     }
 
     delete __arm.arm;
@@ -243,7 +271,7 @@ KinovaActThread::_initialize_single()
     __arm.iface->set_final(false);
     //__arm.goto_thread->pos_ready();
 
-  } else if( __arm.arm->initialized() &&  __cfg_auto_calib ) {
+  } else if( __arm.arm->initialized() && __cfg_auto_calib ) {
     __arm.goto_thread->pos_ready();
   }
 
@@ -291,7 +319,7 @@ KinovaActThread::_is_initializing_single()
   __arm.iface->set_initialized(__arm.arm->initialized());
 
   if( !__arm.arm->initialized() && __cfg_auto_init ) {
-    logger->log_debug(name(), "wait for arm to calibrate");
+    logger->log_debug(name(), "wait for arm to initialize");
     //__arm.initialized = __arm.iface->is_final();
     return true;
   }
@@ -307,7 +335,7 @@ KinovaActThread::_is_initializing_dual()
   __dual_arm.right.iface->set_initialized(__dual_arm.right.arm->initialized());
 
   if( !(__dual_arm.left.arm->initialized() && __dual_arm.right.arm->initialized()) && __cfg_auto_init ) {
-    logger->log_debug(name(), "wait for arms to calibrate");
+    logger->log_debug(name(), "wait for arms to initialize");
     //__dual_arm.left.initialized = __dual_arm.left.iface->is_final();
     //__dual_arm.right.initialized = __dual_arm.right.iface->is_final();
     return true;
