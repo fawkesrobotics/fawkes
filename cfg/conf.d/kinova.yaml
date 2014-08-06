@@ -4,6 +4,11 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/kinova
 ---
 hardware/jaco:
+  # What arm are we controlling (or what is our library to control the arm)?
+  # Currently supported:
+  #   libkindrv: use libkindrv to control a real arm
+  #   dummy: control a dummy arm. Not a real arm, but useful for rudimentary "simulation"
+  arm: libkindrv
 
   # Should arm be automatically initialized after plugin loaded? This puts the arm into
   #  READY position, only if the arm has just been turned on, which means we cannot
@@ -50,3 +55,11 @@ hardware/jaco:
 
     # robot/xml file for dual-arm setup
     robot_dual_file: ../res/openrave/jaco_dual.robot.xml
+
+    # the names of the manipulator define in the OpenRAVE robot model
+    manipname:
+      # manipulator names when using a single arm
+      single: fingertip
+      #manipulator names for l/r when using a dual-arm setup
+      dual_left: arm_left
+      dual_right: arm_right
