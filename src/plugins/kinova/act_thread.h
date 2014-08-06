@@ -50,8 +50,13 @@ class KinovaActThread
  public:
   KinovaActThread(KinovaInfoThread *info_thread,
                   KinovaGotoThread *goto_thread,
-                  KinovaGotoThread *goto_thread_2nd,
                   KinovaOpenraveBaseThread *openrave_thread);
+  KinovaActThread(KinovaInfoThread *info_thread,
+                  KinovaGotoThread *goto_thread_l,
+                  KinovaGotoThread *goto_thread_r,
+                  KinovaOpenraveBaseThread *openrave_thread_l,
+                  KinovaOpenraveBaseThread *openrave_thread_r,
+                  KinovaOpenraveBaseThread *openrave_thread_dual);
   virtual ~KinovaActThread();
 
   virtual void init();
@@ -84,7 +89,6 @@ class KinovaActThread
   bool __cfg_is_dual_arm;
 
   KinovaInfoThread         *__info_thread;
-  KinovaOpenraveBaseThread *__openrave_thread;
 };
 
 

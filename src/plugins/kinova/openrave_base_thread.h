@@ -24,7 +24,6 @@
 #define __PLUGINS_KINOVA_OPENRAVE_BASE_THREAD_H_
 
 #include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
@@ -40,7 +39,6 @@ namespace fawkes {
 
 class KinovaOpenraveBaseThread
 : public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
 #ifdef HAVE_OPENRAVE
@@ -58,13 +56,15 @@ class KinovaOpenraveBaseThread
   virtual void register_arm(fawkes::jaco_arm_t *arm) = 0;
   virtual void unregister_arms() = 0;
 
-  virtual std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3, fawkes::jaco_arm_t *arm = NULL);
+  virtual void update_openrave() = 0;
+
+  virtual std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3) = 0;
 
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
   virtual void run() { Thread::run(); }
   virtual void _init() {}
-  virtual void _load_robot() = 0;
+  virtual void _load_robot() {}
 
 #ifdef HAVE_OPENRAVE
   fawkes::OpenRaveEnvironment* __OR_env;

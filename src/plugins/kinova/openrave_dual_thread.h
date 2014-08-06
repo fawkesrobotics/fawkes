@@ -25,13 +25,7 @@
 
 #include "openrave_base_thread.h"
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/blackboard.h>
 #ifdef HAVE_OPENRAVE
- #include <plugins/openrave/aspect/openrave.h>
  #include <openrave/openrave.h>
 #endif
 
@@ -42,12 +36,12 @@ class KinovaOpenraveDualThread : public KinovaOpenraveBaseThread
  public:
   KinovaOpenraveDualThread();
 
-  virtual void loop();
-
   virtual void register_arm(fawkes::jaco_arm_t *arm);
   virtual void unregister_arms();
 
-  virtual std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3, fawkes::jaco_arm_t *arm);
+  virtual void update_openrave();
+
+  virtual std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3);
 
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -68,8 +62,8 @@ class KinovaOpenraveDualThread : public KinovaOpenraveBaseThread
   struct {
     OpenRAVE::RobotBase::ManipulatorPtr left;
     OpenRAVE::RobotBase::ManipulatorPtr right;
-    std::vector<double> joints_l;
-    std::vector<double> joints_r;
+    std::vector<OpenRAVE::dReal> joints_l;
+    std::vector<OpenRAVE::dReal> joints_r;
   } __manips;
 #endif
 

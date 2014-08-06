@@ -57,109 +57,9 @@ using namespace fawkes;
 KinovaOpenraveDualThread::KinovaOpenraveDualThread()
   : KinovaOpenraveBaseThread("KinovaOpenraveDualThread")
 {
-}
-
-void
-KinovaOpenraveDualThread::register_arm(fawkes::jaco_arm_t *arm)
-{
-  if( __cfg_left_arm_name.compare(arm->arm->get_name()) == 0 ) {
-    __arms.left = arm;
-    logger->log_debug(name(), "Set arm '%s' as left arm.", arm->arm->get_name().c_str());
-  } else {
-    __arms.right = arm;
-    logger->log_debug(name(), "Set arm '%s' as right arm.", arm->arm->get_name().c_str());
-  }
-}
-
-void
-KinovaOpenraveDualThread::unregister_arms()
-{
   __arms.left = NULL;
   __arms.right = NULL;
 }
-
-std::vector<float>
-KinovaOpenraveDualThread::set_target(float x, float y, float z, float e1, float e2, float e3, jaco_arm_t *arm)
-{
-  std::vector<float> v;
-
-  try {
-    if( arm == __arms.left ) {
-      __OR_robot->get_robot_ptr()->SetActiveManipulator(ARM_L);
-      __OR_robot->get_robot_ptr()->SetActiveDOFs(__manips.left->GetArmIndices());
-    } else {
-      __OR_robot->get_robot_ptr()->SetActiveManipulator(ARM_R);
-      __OR_robot->get_robot_ptr()->SetActiveDOFs(__manips.right->GetArmIndices());
-    }
-    // update planner params; set correct DOF and stuff
-    __OR_robot->get_planner_params()->SetRobotActiveJoints(__OR_robot->get_robot_ptr());
-    __OR_robot->get_planner_params()->vgoalconfig.resize(__OR_robot->get_robot_ptr()->GetActiveDOF());
-
-    // get IK from openrave
-    bool success = __OR_robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3);
-
-    if( !success ) {
-      logger->log_warn(name(), "Initiating goto failed, no IK solution found");
-      return v;
-    }
-    logger->log_debug(name(), "IK successful!");
-
-    // get target IK values
-    std::vector<dReal> joints;
-    __OR_robot->get_target().manip->get_angles(joints);
-    //need next lines, as "target" only stores a OpenRaveManipulator* , so it stores values in OR only!!
-    __OR_manip->set_angles(joints);
-    __OR_manip->get_angles_device(v);
-
-  } catch( openrave_exception &e) {
-    throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
-  }
-
-  return v;
-}
-
-void
-KinovaOpenraveDualThread::loop()
-{
-  if( (__arms.left == NULL) || (__arms.right == NULL))
-    return;
-
-#ifdef HAVE_OPENRAVE
-//*
-  try {
-    __manips.joints_l.clear();
-    __manips.joints_l.push_back(__arms.left->iface->joints(0));
-    __manips.joints_l.push_back(__arms.left->iface->joints(1));
-    __manips.joints_l.push_back(__arms.left->iface->joints(2));
-    __manips.joints_l.push_back(__arms.left->iface->joints(3));
-    __manips.joints_l.push_back(__arms.left->iface->joints(4));
-    __manips.joints_l.push_back(__arms.left->iface->joints(5));
-    __manips.joints_r.clear();
-    __manips.joints_r.push_back(__arms.right->iface->joints(0));
-    __manips.joints_r.push_back(__arms.right->iface->joints(1));
-    __manips.joints_r.push_back(__arms.right->iface->joints(2));
-    __manips.joints_r.push_back(__arms.right->iface->joints(3));
-    __manips.joints_r.push_back(__arms.right->iface->joints(4));
-    __manips.joints_r.push_back(__arms.right->iface->joints(5));
-
-    // get target IK values in openrave format
-    __OR_manip->set_angles_device(__manips.joints_l);
-    __OR_manip->get_angles(__manips.joints_l);
-    __OR_manip->set_angles_device(__manips.joints_r);
-    __OR_manip->get_angles(__manips.joints_r);
-
-    //EnvironmentMutex::scoped_lock lock(__OR_env->get_env_ptr()->GetMutex());
-    __OR_robot->get_robot_ptr()->SetDOFValues(__manips.joints_l, 1, __manips.left->GetArmIndices());
-    __OR_robot->get_robot_ptr()->SetDOFValues(__manips.joints_r, 1, __manips.right->GetArmIndices());
-    //usleep(2000);
-
-  } catch( openrave_exception &e) {
-    throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
-  }
-//*/
-#endif
-}
-
 
 void
 KinovaOpenraveDualThread::_init()
@@ -183,6 +83,7 @@ KinovaOpenraveDualThread::_load_robot()
     __OR_robot->load(__cfg_OR_robot_file, __OR_env);
     __OR_env->add_robot(__OR_robot);
     __OR_robot->set_ready();
+    openrave->set_active_robot(__OR_robot);
   } catch (Exception& e) {
     throw fawkes::Exception("Could not add robot '%s' to openrave environment. (Error: %s)", __cfg_OR_robot_file.c_str(), e.what_no_backtrace());
   }
@@ -219,4 +120,37 @@ KinovaOpenraveDualThread::_load_robot()
   }
 
 #endif
+}
+
+
+void
+KinovaOpenraveDualThread::register_arm(fawkes::jaco_arm_t *arm)
+{
+  if( __cfg_left_arm_name.compare(arm->arm->get_name()) == 0 ) {
+    __arms.left = arm;
+    logger->log_debug(name(), "Set arm '%s' as left arm.", arm->arm->get_name().c_str());
+  } else {
+    __arms.right = arm;
+    logger->log_debug(name(), "Set arm '%s' as right arm.", arm->arm->get_name().c_str());
+  }
+}
+
+void
+KinovaOpenraveDualThread::unregister_arms()
+{
+  __arms.left = NULL;
+  __arms.right = NULL;
+}
+
+std::vector<float>
+KinovaOpenraveDualThread::set_target(float x, float y, float z, float e1, float e2, float e3)
+{
+  return std::vector<float>(0);
+  // no symmetric planning implemented yet
+}
+
+void
+KinovaOpenraveDualThread::update_openrave()
+{
+  // do nothing, this thread is only for plannning!
 }

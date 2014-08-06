@@ -45,29 +45,49 @@ KinovaPlugin::KinovaPlugin(Configuration *config)
   KinovaInfoThread *info_thread = new KinovaInfoThread();
   thread_list.push_back(info_thread);
 
-  KinovaGotoThread *goto_thread = new KinovaGotoThread("KinovaGotoThread");
-  thread_list.push_back(goto_thread);
-
+  // load different/multiple threads if using dual-arm setup
   bool is_dual_arm = config->get_bool("/hardware/jaco/dual_arm/active");
+  if( !is_dual_arm ) {
+    KinovaGotoThread *goto_thread = new KinovaGotoThread("KinovaGotoThread");
+    thread_list.push_back(goto_thread);
 
-  KinovaGotoThread *goto_thread_2nd = NULL;
-  if( is_dual_arm ) {
-    goto_thread_2nd = new KinovaGotoThread("KinovaGotoThread2");
-    thread_list.push_back(goto_thread_2nd);
-  }
-
-  KinovaOpenraveBaseThread *openrave_thread = NULL;
+    KinovaOpenraveBaseThread *openrave_thread = NULL;
 #ifdef HAVE_OPENRAVE
-  if( is_dual_arm )
-    openrave_thread = new KinovaOpenraveDualThread();
-  else
-    openrave_thread = new KinovaOpenraveSingleThread();
-  thread_list.push_back(openrave_thread);
+    openrave_thread = new KinovaOpenraveSingleThread("KinovaOpenraveThread", "fingertip");
+    thread_list.push_back(openrave_thread);
 #endif
 
-  thread_list.push_back(new KinovaActThread(info_thread, goto_thread, goto_thread_2nd, openrave_thread));
-}
+    thread_list.push_back(new KinovaActThread(info_thread, goto_thread, openrave_thread));
 
+  } else {
+    // each arm gets 1 goto-thread.
+    KinovaGotoThread *goto_thread_l = new KinovaGotoThread("KinovaGotoThreadLeft");
+    KinovaGotoThread *goto_thread_r = new KinovaGotoThread("KinovaGotoThreadRight");
+    thread_list.push_back(goto_thread_l);
+    thread_list.push_back(goto_thread_r);
+
+    // each arm gets 1 openrave-thread, providing planning and updating the openrave-model of that arm.
+    // additionally we need a separate openrave thread for planning symmetric bimanual manipulation.
+    KinovaOpenraveSingleThread *openrave_thread_l = NULL;
+    KinovaOpenraveSingleThread *openrave_thread_r = NULL;
+    KinovaOpenraveDualThread   *openrave_thread_dual = NULL;
+
+#ifdef HAVE_OPENRAVE
+    openrave_thread_dual = new KinovaOpenraveDualThread();
+    thread_list.push_back(openrave_thread_dual);
+
+    openrave_thread_l = new KinovaOpenraveSingleThread("KinovaOpenraveThreadLeft", "arm_left", /*load_robot=*/false);
+    openrave_thread_r = new KinovaOpenraveSingleThread("KinovaOpenraveThreadRight", "arm_right", /*load_robot=*/false);
+    thread_list.push_back(openrave_thread_l);
+    thread_list.push_back(openrave_thread_r);
+#endif
+
+    thread_list.push_back(new KinovaActThread(info_thread,
+                                              goto_thread_l, goto_thread_r,
+                                              openrave_thread_l, openrave_thread_r,
+                                              openrave_thread_dual));
+  }
+}
 
 PLUGIN_DESCRIPTION("Kinova Plugin")
 EXPORT_PLUGIN(KinovaPlugin)

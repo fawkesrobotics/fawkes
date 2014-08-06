@@ -40,28 +40,42 @@ using namespace fawkes;
  */
 KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
                                  KinovaGotoThread *goto_thread,
-                                 KinovaGotoThread *goto_thread_2nd,
                                  KinovaOpenraveBaseThread *openrave_thread)
   : Thread("KinovaActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
   __arm.arm = NULL;
   __arm.iface = NULL;
+
+  __info_thread = info_thread;
+  __arm.goto_thread = goto_thread;
+  __arm.openrave_thread = openrave_thread;
+
+  _submit_iface_changes = NULL;
+  _is_initializing = NULL;
+  _process_msgs = NULL;
+}
+
+KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
+                                 KinovaGotoThread *goto_thread_l,
+                                 KinovaGotoThread *goto_thread_r,
+                                 KinovaOpenraveBaseThread *openrave_thread_l,
+                                 KinovaOpenraveBaseThread *openrave_thread_r,
+                                 KinovaOpenraveBaseThread *openrave_thread_dual)
+  : Thread("KinovaActThread", Thread::OPMODE_WAITFORWAKEUP),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+{
   __dual_arm.left.arm = NULL;
   __dual_arm.left.iface = NULL;
   __dual_arm.right.arm = NULL;
   __dual_arm.right.iface = NULL;
 
   __info_thread = info_thread;
-  __openrave_thread = openrave_thread;
-  if( goto_thread_2nd == NULL ) {
-    // single-arm config
-    __arm.goto_thread = goto_thread;
-  } else {
-    // dual-arm config
-    __dual_arm.left.goto_thread = goto_thread;
-    __dual_arm.right.goto_thread = goto_thread_2nd;
-  }
+  __dual_arm.left.goto_thread = goto_thread_l;
+  __dual_arm.right.goto_thread = goto_thread_r;
+  __dual_arm.left.openrave_thread = openrave_thread_l;
+  __dual_arm.right.openrave_thread = openrave_thread_r;
+  __dual_arm.openrave_thread = openrave_thread_dual;
 
   _submit_iface_changes = NULL;
   _is_initializing = NULL;
@@ -159,10 +173,10 @@ KinovaActThread::init()
     // register arms in other threads
     __info_thread->register_arm(&__dual_arm.left);
     __info_thread->register_arm(&__dual_arm.right);
-    __openrave_thread->register_arm(&__dual_arm.left);
-    __openrave_thread->register_arm(&__dual_arm.right);
     __dual_arm.left.goto_thread->register_arm(&__dual_arm.left);
     __dual_arm.right.goto_thread->register_arm(&__dual_arm.right);
+    __dual_arm.left.openrave_thread->register_arm(&__dual_arm.left);
+    __dual_arm.right.openrave_thread->register_arm(&__dual_arm.right);
 
     // initialize arms
     _initialize_dual();
@@ -196,8 +210,8 @@ KinovaActThread::init()
 
     // register arm in other threads
     __info_thread->register_arm(&__arm);
-    __openrave_thread->register_arm(&__arm);
     __arm.goto_thread->register_arm(&__arm);
+    __arm.openrave_thread->register_arm(&__arm);
 
     // initalize arms
     _initialize_single();
@@ -418,9 +432,12 @@ KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
                         msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
     #ifdef HAVE_OPENRAVE
       logger->log_debug(name(), "%s: CartesianGotoMessage is being passed to openrave", arm.iface->id());
-      std::vector<float> v = __openrave_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3(), &arm);
+      std::vector<float> v = arm.openrave_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
       if( v.size() == 6 )
         arm.goto_thread->set_target_ang(v.at(0), v.at(1), v.at(2), v.at(3), v.at(4), v.at(5));
+      else
+        logger->log_warn(name(), "Failed executing CartesianGotoMessage, arm %s and/or thread %s could not find IK solution",
+                         arm.arm->get_name().c_str(), arm.openrave_thread->name());
     #else
       arm.goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
     #endif
@@ -458,4 +475,8 @@ KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
 
     arm.iface->msgq_pop();
   }
+
+#ifdef HAVE_OPENRAVE
+  arm.openrave_thread->update_openrave();
+#endif
 }

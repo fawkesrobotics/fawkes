@@ -28,6 +28,7 @@
 #include <string>
 
 class KinovaGotoThread;
+class KinovaOpenraveBaseThread;
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -48,11 +49,13 @@ typedef struct jaco_arm_struct {
   fawkes::KinovaArm *arm;
   fawkes::JacoInterface *iface;
   KinovaGotoThread *goto_thread;
+  KinovaOpenraveBaseThread *openrave_thread;
 } jaco_arm_t;
 
 typedef struct jaco_dual_arm_struct {
   jaco_arm_t left;
   jaco_arm_t right;
+  KinovaOpenraveBaseThread *openrave_thread;
 } jaco_dual_arm_t;
 
 

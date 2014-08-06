@@ -25,13 +25,9 @@
 
 #include "openrave_base_thread.h"
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/blackboard.h>
 #ifdef HAVE_OPENRAVE
  #include <plugins/openrave/aspect/openrave.h>
+ #include <openrave/openrave.h>
 #endif
 
 #include <string>
@@ -39,12 +35,18 @@
 class KinovaOpenraveSingleThread : public KinovaOpenraveBaseThread
 {
  public:
-  KinovaOpenraveSingleThread();
+  KinovaOpenraveSingleThread(const char *manipname, bool load_robot=true);
+  KinovaOpenraveSingleThread(const char *name, const char *manipname, bool load_robot=true);
 
-  virtual void loop();
+  virtual void once();
+  virtual void finalize();
 
   virtual void register_arm(fawkes::jaco_arm_t *arm);
   virtual void unregister_arms();
+
+  virtual void update_openrave();
+
+  virtual std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3);
 
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -54,6 +56,15 @@ class KinovaOpenraveSingleThread : public KinovaOpenraveBaseThread
   void _load_robot();
 
   fawkes::jaco_arm_t  *__arm;
+
+  std::string __manipname;
+  bool        __load_robot;
+
+#ifdef HAVE_OPENRAVE
+  OpenRAVE::RobotBasePtr              __robot;
+  OpenRAVE::RobotBase::ManipulatorPtr __manip;
+  std::vector<OpenRAVE::dReal>        __joints;
+#endif
 };
 
 
