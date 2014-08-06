@@ -67,7 +67,7 @@ class OpenRaveRobot
   virtual bool set_target_euler(euler_rotation_t type, float trans_x, float trans_y, float trans_z, float phi, float theta, float psi, bool no_offset = false);
   virtual bool set_target_ikparam(OpenRAVE::IkParameterization ik_param);
   virtual void set_target_plannerparams(std::string& params);
-  virtual void set_target_angles( std::vector<float>& angles ); // just temporary
+  virtual void set_target_angles( std::vector<float>& angles );
 
   virtual bool set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x);
 
@@ -88,12 +88,12 @@ class OpenRaveRobot
   bool set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool no_offset = false);
   OpenRAVE::IkParameterization get_5dof_ikparam(OpenRAVE::Transform& trans);
 
-  fawkes::Logger*	                __logger;
+  fawkes::Logger*                 __logger;
 
   std::string                           __name;
   OpenRAVE::RobotBasePtr                __robot;
   OpenRAVE::RobotBase::ManipulatorPtr   __arm;
-  OpenRaveManipulator*	                __manip;
+  OpenRaveManipulator*                  __manip;
   target_t                              __target;
 
 

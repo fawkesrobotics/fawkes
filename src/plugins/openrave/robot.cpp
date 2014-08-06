@@ -468,7 +468,6 @@ OpenRaveRobot::set_target_plannerparams(std::string& params)
   __target.plannerparams = params;
 }
 
-// just temporary! no IK check etc involved
 /** Set target angles directly.
  * @param angles vector with angle values
  */
@@ -476,6 +475,8 @@ void
 OpenRaveRobot::set_target_angles( std::vector<float>& angles )
 {
   __target.manip->set_angles(angles);
+  __target.type = TARGET_JOINTS;
+  __target.solvable = true; //no IK check done though!
 }
 
 
