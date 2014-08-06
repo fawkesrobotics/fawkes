@@ -25,6 +25,7 @@
 #include "arm.h"
 
 #include <interfaces/JacoInterface.h>
+#include <core/threading/mutex.h>
 
 #include <cmath>
 #include <stdio.h>
@@ -142,12 +143,25 @@ KinovaOpenraveDualThread::unregister_arms()
   __arms.right = NULL;
 }
 
-std::vector<float>
-KinovaOpenraveDualThread::set_target(float x, float y, float z, float e1, float e2, float e3)
+bool
+KinovaOpenraveDualThread::add_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {
-  return std::vector<float>(0);
-  // no symmetric planning implemented yet
+  // no IK-solving for coordinated bimanual movement implemented yet
+  return false;
 }
+
+bool
+KinovaOpenraveDualThread::set_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
+{
+  __target_mutex->lock();
+  __target_queue->clear();
+  __target_mutex->unlock();
+  __trajec_mutex->lock();
+  __trajec_queue->clear();
+  __trajec_mutex->unlock();
+  return add_target(x, y, z, e1, e2, e3, plan);
+}
+
 
 void
 KinovaOpenraveDualThread::update_openrave()

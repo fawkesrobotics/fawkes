@@ -21,6 +21,7 @@
  */
 
 #include "goto_thread.h"
+#include "openrave_base_thread.h"
 #include "arm.h"
 
 #include <interfaces/JacoInterface.h>
@@ -312,7 +313,28 @@ KinovaGotoThread::loop()
   } else if( !__final ) {
     // check for final position
     check_final();
-  }
+
+  } else {
+      // all current trajecs have been processed. check for new
+      if( __arm->openrave_thread->trajec_ready() ) {
+        //logger->log_debug(name(), "new trajectory ready! processing now...");
+        std::vector< std::vector<float> >* trajec = __arm->openrave_thread->pop_trajec();
+
+        if( trajec != NULL ) {
+          if( !trajec->empty() ) {
+            //logger->log_debug(name(), "...setting new target now.");
+            // TODO: no planning yet, so use last trajec point
+            std::vector<float> target = trajec->back();
+            set_target_ang(target.at(0), target.at(1), target.at(2),
+                           target.at(3), target.at(4), target.at(5));
+          }
+
+          // delete the trajectory, it is not needed anywhere anymore
+          delete trajec;
+          trajec = NULL;
+        }
+      }
+    }
 
   __arm->iface->set_final(__final);
 }

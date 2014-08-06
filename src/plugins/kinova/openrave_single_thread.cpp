@@ -24,6 +24,7 @@
 #include "types.h"
 
 #include <interfaces/JacoInterface.h>
+#include <core/threading/mutex.h>
 
 #include <cmath>
 #include <stdio.h>
@@ -38,6 +39,7 @@
 #endif
 
 using namespace fawkes;
+using namespace std;
 
 /** @class KinovaOpenraveSingleThread "openrave_single_thread.h"
  * Jaco Arm thread for single-arm setup, integrating OpenRAVE
@@ -185,10 +187,10 @@ KinovaOpenraveSingleThread::update_openrave()
 #endif
 }
 
-std::vector<float>
-KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, float e2, float e3)
+bool
+KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {
-  std::vector<float> v;
+  bool solvable = false;
 
 #ifdef HAVE_OPENRAVE
   try {
@@ -200,25 +202,57 @@ KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, floa
     __OR_robot->get_planner_params()->vgoalconfig.resize(__OR_robot->get_robot_ptr()->GetActiveDOF());
 
     // get IK from openrave
-    bool success = __OR_robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3);
+    solvable = __OR_robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3);
 
-    if( !success ) {
-      logger->log_warn(name(), "Initiating goto failed, no IK solution found");
-      return v;
+    if( solvable ) {
+      logger->log_debug(name(), "IK successful!");
+
+      // get target IK valoues
+      vector<float> joints;
+      __OR_robot->get_target().manip->get_angles(joints);
+      //need next lines, as "target" only stores a OpenRaveManipulator* , so it stores values in OR only!!
+      __OR_manip->set_angles(joints);
+      __OR_manip->get_angles_device(joints);
+
+      if( plan ) {
+        // add this to the target queue for planning
+         logger->log_debug(name(), "Adding to target_queue for later planning");
+        __target_mutex->lock();
+        __target_queue->push_back(joints);
+        __target_mutex->unlock();
+
+       } else {
+         // don't plan, consider this the final configuration, i.e. a trajectory with only 1 point
+         logger->log_debug(name(), "Skip planning, add this to trajec_queue");
+         vector< vector<float> > *trajec = new vector< vector<float> >();
+         trajec->push_back(joints);
+         __trajec_mutex->lock();
+         __trajec_queue->push_back(trajec);
+         __trajec_mutex->unlock();
+       }
+
+    } else {
+      logger->log_warn(name(), "No IK solution found for target.");
+      return solvable;
     }
-    logger->log_debug(name(), "IK successful!");
 
-    // get target IK valoues
-    std::vector<dReal> joints;
-    __OR_robot->get_target().manip->get_angles(joints);
-    //need next lines, as "target" only stores a OpenRaveManipulator* , so it stores values in OR only!!
-    __OR_manip->set_angles(joints);
-    __OR_manip->get_angles_device(v);
 
   } catch( openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
 #endif
 
-  return v;
+  return solvable;
+}
+
+bool
+KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
+{
+  __target_mutex->lock();
+  __target_queue->clear();
+  __target_mutex->unlock();
+  __trajec_mutex->lock();
+  __trajec_queue->clear();
+  __trajec_mutex->unlock();
+  return add_target(x, y, z, e1, e2, e3, plan);
 }

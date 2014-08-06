@@ -32,8 +32,11 @@
 #endif
 
 #include <string>
+#include <list>
+#include <vector>
 
 namespace fawkes {
+  class Mutex;
   typedef struct jaco_arm_struct jaco_arm_t;
 }
 
@@ -58,13 +61,23 @@ class KinovaOpenraveBaseThread
 
   virtual void update_openrave() = 0;
 
-  virtual std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3) = 0;
+  virtual bool add_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true) = 0;
+  virtual bool set_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true) = 0;
+
+  virtual bool trajec_ready();
+  virtual std::vector< std::vector<float> >* pop_trajec();
 
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
   virtual void run() { Thread::run(); }
   virtual void _init() {}
   virtual void _load_robot() {}
+
+  fawkes::Mutex *__target_mutex;
+  fawkes::Mutex *__trajec_mutex;
+
+  std::list< std::vector<float> > *__target_queue;
+  std::list< std::vector< std::vector<float> >* > *__trajec_queue; // list of trajectories. trajectory is a vector of configurations(=vector).
 
 #ifdef HAVE_OPENRAVE
   fawkes::OpenRaveEnvironment* __OR_env;

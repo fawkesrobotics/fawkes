@@ -432,12 +432,12 @@ KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
                         msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
     #ifdef HAVE_OPENRAVE
       logger->log_debug(name(), "%s: CartesianGotoMessage is being passed to openrave", arm.iface->id());
-      std::vector<float> v = arm.openrave_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
-      if( v.size() == 6 )
-        arm.goto_thread->set_target_ang(v.at(0), v.at(1), v.at(2), v.at(3), v.at(4), v.at(5));
-      else
+      // add target to OpenRAVE queue, but skip planning for now (not implemented yet)
+      bool solvable = arm.openrave_thread->add_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3(), false);
+      if( !solvable ) {
         logger->log_warn(name(), "Failed executing CartesianGotoMessage, arm %s and/or thread %s could not find IK solution",
                          arm.arm->get_name().c_str(), arm.openrave_thread->name());
+      }
     #else
       arm.goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
     #endif

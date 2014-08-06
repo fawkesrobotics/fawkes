@@ -23,6 +23,7 @@
 #include "openrave_base_thread.h"
 
 #include <interfaces/JacoInterface.h>
+#include <core/threading/mutex.h>
 
 #include <cmath>
 #include <stdio.h>
@@ -37,6 +38,7 @@
 #endif
 
 using namespace fawkes;
+using namespace std;
 
 /** @class KinovaOpenraveBaseThread "openrave_base_thread.h"
  * Base Jaco Arm thread, integrating OpenRAVE
@@ -73,6 +75,12 @@ KinovaOpenraveBaseThread::~KinovaOpenraveBaseThread()
 void
 KinovaOpenraveBaseThread::init()
 {
+  __target_mutex = new Mutex();
+  __trajec_mutex = new Mutex();
+
+  __target_queue = new list< vector<float> >();
+  __trajec_queue = new list< vector< vector<float> >* >();
+
 #ifdef HAVE_OPENRAVE
   __cfg_OR_use_viewer    = config->get_bool("/hardware/jaco/openrave/use_viewer");
   __cfg_OR_auto_load_ik  = config->get_bool("/hardware/jaco/openrave/auto_load_ik");
@@ -93,6 +101,11 @@ KinovaOpenraveBaseThread::finalize()
 {
   unregister_arms();
 
+  delete __target_mutex;
+  delete __trajec_mutex;
+  delete __target_queue;
+  delete __trajec_queue;
+
 #ifdef HAVE_OPENRAVE
   delete(__OR_robot);
   __OR_robot = NULL;
@@ -102,4 +115,26 @@ KinovaOpenraveBaseThread::finalize()
 
   __OR_env = NULL;
 #endif
+}
+
+bool
+KinovaOpenraveBaseThread::trajec_ready()
+{
+  __trajec_mutex->lock();
+  bool ready = !__trajec_queue->empty();
+  __trajec_mutex->unlock();
+  return ready;
+}
+
+vector< vector<float> >*
+KinovaOpenraveBaseThread::pop_trajec()
+{
+  __trajec_mutex->lock();
+  vector< vector<float> >* trajec = NULL;
+  if( !__trajec_queue->empty() ) {
+    trajec = __trajec_queue->front();
+    __trajec_queue->pop_front();
+  }
+  __trajec_mutex->unlock();
+  return trajec;
 }

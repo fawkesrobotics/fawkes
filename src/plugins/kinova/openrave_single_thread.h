@@ -46,7 +46,8 @@ class KinovaOpenraveSingleThread : public KinovaOpenraveBaseThread
 
   virtual void update_openrave();
 
-  virtual std::vector<float> set_target(float x, float y, float z, float e1, float e2, float e3);
+  virtual bool add_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true);
+  virtual bool set_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true);
 
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
