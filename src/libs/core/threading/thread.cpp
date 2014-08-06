@@ -1067,6 +1067,7 @@ Thread::loop()
   if ( __delete_on_exit ) {
     delete this;
   }
+  loop_mutex->unlock();
   pthread_exit(NULL);
 }
 
