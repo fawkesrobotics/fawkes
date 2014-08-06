@@ -67,6 +67,7 @@ class OpenRaveRobot
   virtual bool set_target_euler(euler_rotation_t type, float trans_x, float trans_y, float trans_z, float phi, float theta, float psi, bool no_offset = false);
   virtual bool set_target_ikparam(OpenRAVE::IkParameterization ik_param);
   virtual void set_target_plannerparams(std::string& params);
+  virtual void set_target_plannerparams(const char* params);
   virtual void set_target_angles( std::vector<float>& angles );
 
   virtual bool set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x);

@@ -468,6 +468,15 @@ OpenRaveRobot::set_target_plannerparams(std::string& params)
   __target.plannerparams = params;
 }
 
+/** Set additional planner parameters.
+ * @param params complete string of additional arguments.
+ */
+void
+OpenRaveRobot::set_target_plannerparams(const char* params)
+{
+  __target.plannerparams = params;
+}
+
 /** Set target angles directly.
  * @param angles vector with angle values
  */
