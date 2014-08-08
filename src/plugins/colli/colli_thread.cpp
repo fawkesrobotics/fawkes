@@ -135,7 +135,14 @@ ColliThread::init()
   logger->log_debug(name(), "(init): Entering initialization ..." );
 
   RegisterAtBlackboard();
-  InitializeModules();
+  try {
+    InitializeModules();
+  } catch(Exception &e) {
+    blackboard->close( if_colli_target_ );
+    blackboard->close( if_laser_ );
+    blackboard->close( if_motor_ );
+    throw;
+  }
 
 #ifdef HAVE_VISUAL_DEBUGGING
   vis_thread_->setup(m_pLaserOccGrid, m_pSearch);
@@ -344,12 +351,12 @@ ColliThread::loop()
        || abs(if_motor_->vy()) > 0.01f
        || abs(if_motor_->omega()) > 0.01f ) {
         // only stop movement, if we are moving
-        m_pMotorInstruct->Drive( 0.0, 0.0, 0.0 );
+        m_pMotorInstruct->Drive( 0.f, 0.f, 0.f );
       } else {
         // movement has stopped, we are "final" now
         colli_data_.final = true;
         // send one final stop, just to make sure we really stop
-        m_pMotorInstruct->Drive( 0.0, 0.0, 0.0 );
+        m_pMotorInstruct->Drive( 0.f, 0.f, 0.f);
       }
     }
 
@@ -666,35 +673,65 @@ ColliThread::InitializeModules()
   m_pLaserOccGrid->setCellHeight( m_OccGridCellHeight );
   m_pLaserOccGrid->setHeight( (int)((m_OccGridHeight*100)/m_pLaserOccGrid->getCellHeight()) );
 
-  // THIRD(!): the search component (it uses the occ grid (without the laser)
-  m_pSearch = new CSearch( m_pLaserOccGrid, logger, config );
-
-  // BEFORE DRIVE MODE: the motorinstruction set
-  if ( cfg_motor_instruct_mode == fawkes::colli_motor_instruct_mode_t::linear ) {
-    m_pMotorInstruct = (CBaseMotorInstruct *)new CLinearMotorInstruct( if_motor_,
-                                                                       m_ColliFrequency,
-                                                                       logger,
-                                                                       config );
-  } else if ( cfg_motor_instruct_mode == fawkes::colli_motor_instruct_mode_t::quadratic ) {
-    m_pMotorInstruct = (CBaseMotorInstruct *)new CQuadraticMotorInstruct( if_motor_,
-                                                                          m_ColliFrequency,
-                                                                          logger,
-                                                                          config );
-  } else {
-    logger->log_error(name(), "Motor instruct not implemented, use linear");
-    m_pMotorInstruct = (CBaseMotorInstruct *)new CLinearMotorInstruct( if_motor_,
-                                                                       m_ColliFrequency,
-                                                                       logger,
-                                                                       config );
+  try {
+    // THIRD(!): the search component (it uses the occ grid (without the laser)
+    m_pSearch = new CSearch( m_pLaserOccGrid, logger, config );
+  } catch(Exception &e) {
+    logger->log_error(name(), "Could not created new Search (%s)", e.what_no_backtrace());
+    delete m_pLaserOccGrid;
+    throw;
   }
 
-  m_pEmergencyMotorInstruct = (CBaseMotorInstruct *)new CEmergencyMotorInstruct( if_motor_,
-                                                                                 m_ColliFrequency,
-                                                                                 logger,
-                                                                                 config );
+  try {
+    // BEFORE DRIVE MODE: the motorinstruction set
+    if ( cfg_motor_instruct_mode == fawkes::colli_motor_instruct_mode_t::linear ) {
+      m_pMotorInstruct = (CBaseMotorInstruct *)new CLinearMotorInstruct( if_motor_,
+                                                                         m_ColliFrequency,
+                                                                         logger,
+                                                                         config );
+    } else if ( cfg_motor_instruct_mode == fawkes::colli_motor_instruct_mode_t::quadratic ) {
+      m_pMotorInstruct = (CBaseMotorInstruct *)new CQuadraticMotorInstruct( if_motor_,
+                                                                            m_ColliFrequency,
+                                                                            logger,
+                                                                            config );
+    } else {
+      logger->log_error(name(), "Motor instruct not implemented, use linear");
+      m_pMotorInstruct = (CBaseMotorInstruct *)new CLinearMotorInstruct( if_motor_,
+                                                                         m_ColliFrequency,
+                                                                         logger,
+                                                                         config );
+    }
+  } catch(Exception &e) {
+    logger->log_error(name(), "Could not create MotorInstruct (%s", e.what_no_backtrace());
+    delete m_pLaserOccGrid;
+    delete m_pSearch;
+    throw;
+  }
 
-  // AFTER MOTOR INSTRUCT: the motor propose values object
-  m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, if_colli_target_, logger, config, cfg_escape_mode );
+  try {
+    m_pEmergencyMotorInstruct = (CBaseMotorInstruct *)new CEmergencyMotorInstruct( if_motor_,
+                                                                                   m_ColliFrequency,
+                                                                                   logger,
+                                                                                   config );
+  } catch(Exception &e) {
+    logger->log_error(name(), "Could not create EmergencyMotorInstruct (%s", e.what_no_backtrace());
+    delete m_pLaserOccGrid;
+    delete m_pSearch;
+    delete m_pMotorInstruct;
+    throw;
+  }
+
+  try {
+    // AFTER MOTOR INSTRUCT: the motor propose values object
+    m_pSelectDriveMode = new CSelectDriveMode( m_pMotorInstruct, if_colli_target_, logger, config, cfg_escape_mode );
+  } catch(Exception &e) {
+    logger->log_error(name(), "Could not create SelectDriveMode (%s", e.what_no_backtrace());
+    delete m_pLaserOccGrid;
+    delete m_pSearch;
+    delete m_pMotorInstruct;
+    delete m_pEmergencyMotorInstruct;
+    throw;
+  }
 
   // Initialization of colli state machine:
   // Currently nothing is to accomplish
