@@ -73,6 +73,7 @@ class KinovaOpenraveBaseThread
   virtual void _init() {}
   virtual void _load_robot() {}
 
+  fawkes::Mutex *__planning_mutex;
   fawkes::Mutex *__target_mutex;
   fawkes::Mutex *__trajec_mutex;
 

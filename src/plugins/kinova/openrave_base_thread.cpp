@@ -75,8 +75,9 @@ KinovaOpenraveBaseThread::~KinovaOpenraveBaseThread()
 void
 KinovaOpenraveBaseThread::init()
 {
-  __target_mutex = new Mutex();
-  __trajec_mutex = new Mutex();
+  __planning_mutex = new Mutex();
+  __target_mutex   = new Mutex();
+  __trajec_mutex   = new Mutex();
 
   __target_queue = new list< vector<float> >();
   __trajec_queue = new list< vector< vector<float> >* >();
@@ -101,10 +102,22 @@ KinovaOpenraveBaseThread::finalize()
 {
   unregister_arms();
 
+  delete __planning_mutex;
   delete __target_mutex;
   delete __trajec_mutex;
+  __planning_mutex = NULL;
+  __target_mutex = NULL;
+  __trajec_mutex = NULL;
+
   delete __target_queue;
+  __target_queue = NULL;
+
+  for( list< vector< vector<float> >* >::iterator it=__trajec_queue->begin(); it!=__trajec_queue->end(); ++it) {
+    delete *it;
+    *it = NULL;
+  }
   delete __trajec_queue;
+  __trajec_queue = NULL;
 
 #ifdef HAVE_OPENRAVE
   delete(__OR_robot);

@@ -31,6 +31,7 @@
 #endif
 
 #include <string>
+#include <vector>
 
 class KinovaOpenraveSingleThread : public KinovaOpenraveBaseThread
 {
@@ -39,6 +40,7 @@ class KinovaOpenraveSingleThread : public KinovaOpenraveBaseThread
   KinovaOpenraveSingleThread(const char *name, const char *manipname, bool load_robot=true);
 
   virtual void once();
+  virtual void loop();
   virtual void finalize();
 
   virtual void register_arm(fawkes::jaco_arm_t *arm);
@@ -55,6 +57,7 @@ class KinovaOpenraveSingleThread : public KinovaOpenraveBaseThread
 
  private:
   void _load_robot();
+  void _plan_path(std::vector<float> &target);
 
   fawkes::jaco_arm_t  *__arm;
 

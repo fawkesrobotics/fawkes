@@ -21,6 +21,7 @@
  */
 
 #include "openrave_single_thread.h"
+#include "arm.h"
 #include "types.h"
 
 #include <interfaces/JacoInterface.h>
@@ -149,6 +150,28 @@ KinovaOpenraveSingleThread::finalize() {
 }
 
 void
+KinovaOpenraveSingleThread::loop()
+{
+  __planning_mutex->lock();
+  __target_mutex->lock();
+  if( !__target_queue->empty() ) {
+    // get the target
+    std::vector<float> target = __target_queue->front();
+    __target_queue->pop_front();
+    __target_mutex->unlock();
+
+    // run planner
+    _plan_path(target);
+    __planning_mutex->unlock();
+
+  } else {
+    __target_mutex->unlock();
+    __planning_mutex->unlock();
+    usleep(30e3); // TODO: make this configurable
+  }
+}
+
+void
 KinovaOpenraveSingleThread::register_arm(jaco_arm_t *arm)
 {
   __arm = arm;
@@ -166,23 +189,27 @@ KinovaOpenraveSingleThread::update_openrave()
     return;
 
 #ifdef HAVE_OPENRAVE
-  try {
-    __joints.clear();
-    __joints.push_back(__arm->iface->joints(0));
-    __joints.push_back(__arm->iface->joints(1));
-    __joints.push_back(__arm->iface->joints(2));
-    __joints.push_back(__arm->iface->joints(3));
-    __joints.push_back(__arm->iface->joints(4));
-    __joints.push_back(__arm->iface->joints(5));
+  if( __planning_mutex->try_lock() ) {
+    try {
+      __joints.clear();
+      __joints.push_back(__arm->iface->joints(0));
+      __joints.push_back(__arm->iface->joints(1));
+      __joints.push_back(__arm->iface->joints(2));
+      __joints.push_back(__arm->iface->joints(3));
+      __joints.push_back(__arm->iface->joints(4));
+      __joints.push_back(__arm->iface->joints(5));
 
-    // get target IK values in openrave format
-    __OR_manip->set_angles_device(__joints);
-    __OR_manip->get_angles(__joints);
+      // get target IK values in openrave format
+      __OR_manip->set_angles_device(__joints);
+      __OR_manip->get_angles(__joints);
 
-    __robot->SetDOFValues(__joints, 1, __manip->GetArmIndices());
+      __robot->SetDOFValues(__joints, 1, __manip->GetArmIndices());
+      __planning_mutex->unlock();
 
-  } catch( openrave_exception &e) {
-    throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
+    } catch( openrave_exception &e) {
+      __planning_mutex->unlock();
+      throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
+    }
   }
 #endif
 }
@@ -255,4 +282,41 @@ KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, floa
   __trajec_queue->clear();
   __trajec_mutex->unlock();
   return add_target(x, y, z, e1, e2, e3, plan);
+}
+
+void
+KinovaOpenraveSingleThread::_plan_path(std::vector<float> &target)
+{
+  // Set active manipulator
+  __robot->SetActiveManipulator(__manip);
+
+  // Set target point for planner (has already passed IK check previously!)
+  __OR_manip->set_angles_device(target);
+  __OR_manip->get_angles(target);
+  //logger->log_debug(name(), "setting target %f %f %f %f %f %f",
+  //                  target.at(0), target.at(1), target.at(2), target.at(3), target.at(4), target.at(5));
+  __OR_robot->set_target_angles(target);
+
+  // Set starting point for planner, convert encoder values to angles if necessary
+  std::vector<float> joints;
+  __arm->arm->get_joints(joints);
+  __OR_manip->set_angles_device(joints);
+
+  // Set planning parameters (none yet)
+  __OR_robot->set_target_plannerparams("");
+
+  // Run planner
+  float sampling = 0.01f; //maybe catch from config? or "learning" depending on performance?
+  try {
+    openrave->run_planner(__OR_robot, sampling);
+  } catch (fawkes::Exception &e) {
+    logger->log_warn(name(), "Planning failed (ignoring): %s", e.what_no_backtrace());
+  }
+
+  // add trajectory to queue
+  //logger->log_debug(name(), "plan successful, adding to queue");
+  __trajec_mutex->lock();
+  std::vector< std::vector<float> > *trajec = __OR_robot->get_trajectory_device();
+  __trajec_queue->push_back(trajec);
+  __trajec_mutex->unlock();
 }
