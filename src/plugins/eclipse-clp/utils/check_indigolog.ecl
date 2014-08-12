@@ -93,6 +93,8 @@ basic_check(M) :-
     debug_action(M),
     log_info("GologChecker: checking fluents..."),
     debug_fluent(M),
+    log_info("GologChecker: checking procs..."),
+    debug_proc(M),
     log_info("GologChecker: basic check finished."),
     % change fluents from dynamic to static
     dynamic_to_static_(execute/2, M),
@@ -110,8 +112,8 @@ dynamic_to_static_(F/N, Module) :-
     functor(Head, F, N),
     findall(Head:-Body, clause(Head, Body), Clauses)@Module,
     abolish(F/N)@Module,
-    compile_term(Clauses)@Module,
-    log_debug("Compiled Clauses %D_w", [Clauses]).
+    compile_term(Clauses)@Module.
+    %log_debug("Compiled Clauses %D_w", [Clauses]).
 
 debug_action(M) :- has_action(A, M), assert(action(A)), check_action(A,M), fail.
 debug_action(M) :- has_execute(A, M), check_action2(A, M), fail.
@@ -228,10 +230,63 @@ has_fluent(F, M) :- clause(prim_fluent(F), _body)@M.
 has_initially(F, M) :- clause(initially(F, _))@M.
 has_senses(F, M) :- clause(senses(_, F))@M.
 has_causes(F, M) :- clause(causes_val(_, F, _, _))@M.
-
+has_proc(Name, Proc, M) :- clause(proc(Name, Proc),_body)@M.
 
 subv(_,_,T1,T2) :- (var(T1);integer(T1)), !, T2 = T1.
 subv(X1,X2,T1,T2) :- T1 = X1, !, T2 = X2.
 subv(X1,X2,T1,T2) :- T1 =..[F|L1], subvl(X1,X2,L1,L2), T2 =..[F|L2].
 subvl(_,_,[],[]).
 subvl(X1,X2,[T1|L1],[T2|L2]) :- subv(X1,X2,T1,T2), subvl(X1,X2,L1,L2).
+
+debug_proc(M) :-
+	has_proc(Name, Proc, M),
+	log_info("GologChecker: checking proc \"%w\"", [Name]),
+	log_debug("GologChecker: proc \"%w\" has the body:\n\t %w ", [Name, Proc]),
+	check_proc(Name, Proc, M),
+	fail.
+debug_proc(M) :- log_info("GologChecker: finished checking procs.").
+
+check_proc(Name, X, M) :- var(X), !,log_debug("GologChecker: Found var %w in proc %w", [X, Name]).
+check_proc(Name, conc(E1,E2), M) :- !, check_proc(Name, E1, M), check_proc(Name, E2, M).
+check_proc(Name, pconc(E1,E2), M) :- !, check_proc(Name, E1, M), check_proc(Name, E2, M).
+check_proc(Name, iconc(E1), M) :- !, check_proc(Name, E1, M).
+check_proc(Name, ndet(E1,E2), M) :- !, check_proc(Name, E1, M), check_proc(Name, E2, M).
+check_proc(Name, if(P,E1,E2), M) :- !, check_condition(Name, P, M), check_proc(Name, E1, M), check_proc(Name, E2, M).
+check_proc(Name, star(E1), M) :- !, check_proc(Name, E1, M).
+check_proc(Name, while(P,E), M) :- !,  check_condition(Name, P, M), check_proc(Name, E, M).
+check_proc(Name, pi(V,E), M) :- !, check_proc(Name, E, M).
+check_proc(Name, ?(P), M) :- !, check_condition(Name, P, M).
+check_proc(Name, search(E), M) :- !, check_proc(Name, E, M).
+check_proc(Name, [], M) :- !.
+check_proc(Name, [Head|Tail], M) :- !, check_proc(Name, Head, M), check_proc(Name, Tail, M).
+check_proc(Name, Proc, M) :-
+	has_proc(Proc, _, M),
+	!,
+	call(proc(Proc, E))@M,
+	%log_debug("GologChecker: proc \"%w\" uses proc:\n  \"%w\"\n With body:\n %w", [Name, Proc, E]),
+	check_proc(Proc, E, M).
+check_proc(Name, Action, M) :- has_action(Action, M), !.
+check_proc(Name, Cond, M) :- check_condition(Name, Cond, M), !, log_info("GologChecker: \t -> condition").
+check_proc(Name, X, M) :- !, log_warn("GologChecker: WARNING: could not parse \"%w\" (undefined proc or prim_action?); was called by proc \"%w\"", [X, Name]).
+% TODO proc with variables not neccessarily recognized correctly, e.g. control in demo2014
+
+check_condition(N, X, M) :- var(X), !, log_debug("Found a var in condition from proc %w", [N]).
+check_condition(N, and(P1, P2), M) :- !, check_condition(N, P1, M), check_condition(N, P2, M).
+check_condition(N, or(P1, P2), M) :- !, check_condition(N, P1, M), check_condition(N, P2, M).
+check_condition(N, neg(P), M) :- !, check_condition(N, P, M).
+check_condition(N, some(V, P), M) :- !, check_condition(N, P, M).
+check_condition(CallingProc, Name, M) :- has_proc(Name, Cond, M), !, log_debug("The condition \"%w\" uses proc \"%w\"", [CallingProc, Name]), check_proc_as_condition(CallingProc, Name, Cond, M).
+check_condition(N, P, M) :- \+ has_proc(P, _, M), !, check_subf(N, P, M).
+check_condition(N, P, M) :- !, log_warn("GologChecker: WARNING: unable to parse \"%w\" as condition in proc \"%w\"", [P, N]).
+
+check_subf(N, P, M) :- (var(P) ; integer(P)), !.
+check_subf(N, P, M) :- has_fluent(P, M), !.
+check_subf(N, P, M) :- \+ has_fluent(P, M), !, P=..[F|L1], check_subfl(N, F, L1, M).
+check_subf(N, P, M) :- !, log_warn("GologChecker: WARNING: unable to substitue \"%w\" for a fluent in proc \"%w\"", [P, N]).
+
+check_subfl(_, _, [], _) :- !.
+check_subfl(N, F, [H|T], M) :- !, check_subf(N, H, M), check_subfl(N, F, T, M).
+check_subfl(N, F, P, M) :- !, log_warn("GologChecker: WARNING: unable to substitue \"%w(%w)\" for fluents in proc \"%w\"", [F, P, N]).
+
+check_proc_as_condition(CallingProc, Name, Cond, M) :- check_condition(Name, Cond, M), !.
+check_proc_as_condition(CallingProc, Name, _, _) :- !, log_warn("GologChecker: WARNING: proc \"%w\" is called as condition by proc \"%w\", but cannot be parsed as condition.", [Name, CallingProc]).
