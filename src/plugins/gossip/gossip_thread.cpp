@@ -77,13 +77,32 @@ GossipThread::init()
       try {
 	if (active) {
 	  std::string  addr = config->get_string((cfg_prefix + "broadcast-address").c_str());
-	  unsigned int port = config->get_uint((cfg_prefix + "broadcast-port").c_str());
 
-	  if (port > 0xFFFF) {
-	    throw Exception("Port number too high: %u > %u", port, 0xFFFF);
+	  if (config->exists((cfg_prefix + "broadcast-send-port").c_str()) &&
+	      config->exists((cfg_prefix + "broadcast-recv-port").c_str()) )
+	  {
+	    unsigned int send_port =
+	      config->get_uint((cfg_prefix + "broadcast-send-port").c_str());
+	    unsigned int recv_port =
+	      config->get_uint((cfg_prefix + "broadcast-recv-port").c_str());
+
+	    if (send_port > 0xFFFF) {
+	      throw Exception("Port number too high: %u > %u", send_port, 0xFFFF);
+	    }
+	    if (recv_port > 0xFFFF) {
+	      throw Exception("Port number too high: %u > %u", recv_port, 0xFFFF);
+	    }
+	    groups[cfg_name] = GossipGroupConfiguration(cfg_name, addr, send_port, recv_port);
+
+	  } else {
+	    unsigned int port = config->get_uint((cfg_prefix + "broadcast-port").c_str());
+
+	    if (port > 0xFFFF) {
+	      throw Exception("Port number too high: %u > %u", port, 0xFFFF);
+	    }
+
+	    groups[cfg_name] = GossipGroupConfiguration(cfg_name, addr, port);
 	  }
-
-	  groups[cfg_name] = GossipGroupConfiguration(cfg_name, addr, port);
 
 	  try {
 	    groups[cfg_name].crypto_key =

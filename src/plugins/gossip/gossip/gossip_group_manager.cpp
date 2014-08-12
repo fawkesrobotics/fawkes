@@ -37,7 +37,7 @@ namespace fawkes {
 
 /** Constructor. */
 GossipGroupConfiguration::GossipGroupConfiguration()
-  : broadcast_port(0)
+  : send_port(0), recv_port(0)
 {
 }
 
@@ -49,7 +49,23 @@ GossipGroupConfiguration::GossipGroupConfiguration()
 GossipGroupConfiguration::GossipGroupConfiguration(std::string &name,
 						   std::string &broadcast_address,
 						   unsigned short broadcast_port)
-  : name(name), broadcast_addr(broadcast_address), broadcast_port(broadcast_port)
+  : name(name), broadcast_addr(broadcast_address),
+    send_port(broadcast_port), recv_port(broadcast_port)
+{
+}
+
+/** Constructor.
+ * @param name name of the group
+ * @param broadcast_address IPv4 address to broadcast to
+ * @param send_port UDP port to send messages to
+ * @param recv_port UDP port to listen on for the group
+ */
+GossipGroupConfiguration::GossipGroupConfiguration(std::string &name,
+						   std::string &broadcast_address,
+						   unsigned short send_port,
+						   unsigned short recv_port)
+  : name(name), broadcast_addr(broadcast_address),
+    send_port(send_port), recv_port(recv_port)
 {
 }
 
@@ -57,8 +73,8 @@ GossipGroupConfiguration::GossipGroupConfiguration(std::string &name,
  * @param c group configuration to copy
  */
 GossipGroupConfiguration::GossipGroupConfiguration(const GossipGroupConfiguration &c)
-  : name(c.name), broadcast_addr(c.broadcast_addr), broadcast_port(c.broadcast_port),
-    crypto_key(c.crypto_key), crypto_cipher(c.crypto_cipher)
+  : name(c.name), broadcast_addr(c.broadcast_addr), send_port(c.send_port),
+    recv_port(c.recv_port), crypto_key(c.crypto_key), crypto_cipher(c.crypto_cipher)
 {
 }
 
@@ -131,9 +147,17 @@ GossipGroupManager::leave_group(fawkes::RefPtr<fawkes::GossipGroup> &group)
 void
 GossipGroupManager::create_group(GossipGroupConfiguration &gc)
 {
-  groups_[gc.name] = new GossipGroup(gc.name, service_name_,
-				     gc.broadcast_addr, gc.broadcast_port,
-				     service_publisher_, gc.crypto_key, gc.crypto_cipher);
+  if (gc.send_port == gc.recv_port) {
+    groups_[gc.name] = new GossipGroup(gc.name, service_name_,
+				       gc.broadcast_addr, gc.recv_port,
+				       service_publisher_,
+				       gc.crypto_key, gc.crypto_cipher);
+  } else {
+    groups_[gc.name] = new GossipGroup(gc.name, service_name_,
+				       gc.broadcast_addr, gc.send_port,
+				       gc.recv_port, service_publisher_,
+				       gc.crypto_key, gc.crypto_cipher);
+  }
 }
 
 

@@ -71,6 +71,37 @@ GossipGroup::GossipGroup(std::string &group_name, std::string &peer_name,
 }
 
 
+/** Constructor.
+ * @param group_name name of the group to join
+ * @param peer_name local peer name to announce on the network, i.e. robot identifier
+ * @param send_port UDP port to send messages to
+ * @param recv_port UDP port to listen on for messages
+ * @param service_publisher service publisher to announce group membership with
+ * @param crypto_key encryption key
+ * @param crypto_cipher cipher to use
+ */
+GossipGroup::GossipGroup(std::string &group_name, std::string &peer_name,
+			 std::string &broadcast_address,
+			 unsigned short send_port, unsigned short recv_port,
+			 ServicePublisher *service_publisher,
+			 const std::string &crypto_key, const std::string &crypto_cipher)
+  : name_(group_name), service_publisher_(service_publisher)
+{
+  pb_peer_ =
+    std::shared_ptr<protobuf_comm::ProtobufBroadcastPeer>(
+      new protobuf_comm::ProtobufBroadcastPeer(broadcast_address, send_port, recv_port,
+					       crypto_key, crypto_cipher));
+
+  service_ =
+    std::shared_ptr<NetworkService>(new NetworkService(peer_name.c_str(),
+						       GOSSIP_MDNSSD_SERVICE_NAME,
+						       recv_port));
+
+  service_->add_txt("group=%s", group_name.c_str());
+  service_publisher_->publish_service(service_.get());
+}
+
+
 /** Destructor. */
 GossipGroup::~GossipGroup()
 {
