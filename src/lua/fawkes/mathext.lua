@@ -44,22 +44,12 @@ function math.polar2cart2d(polar_phi, polar_dist)
 end
 
 
-function math.round(r)
-  if r >= 0 then
-    local rf = math.floor(r)
-    if r - rf >= 0.5 then
-      return rf + 1
-    else
-      return rf
-    end
-  else
-    local rf = math.ceil(r)
-    if r - rf < -0.5 then
-      return rf + 1
-    else
-      return rf
-    end
-  end
+--- These  functions round x to the nearest integer, but round halfway cases away from zero.
+-- @param r number to round
+-- @return rounded number
+function math.round(r) 
+  if r >= 0 then return math.floor(r + .5) 
+  else return math.ceil(r - .5) end
 end
 
 function math.normalize_mirror_rad(angle_rad)
