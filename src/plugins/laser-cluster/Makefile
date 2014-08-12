@@ -36,7 +36,7 @@ CFLAGS += $(CFLAGS_CPP11) -Wno-unknown-pragmas
 # Enable for time measurements
 #CFLAGS += -DUSE_TIMETRACKER
 
-LIBS_laser_cluster = fawkescore fawkesutils fawkesaspects fvutils \
+LIBS_laser_cluster = fawkescore fawkesutils fawkesaspects fvutils fawkesbaseapp \
 			fawkestf fawkesinterface fawkesblackboard fawkespcl_utils \
 			Position3DInterface SwitchInterface LaserClusterInterface
 OBJS_laser_cluster = laser-cluster-plugin.o laser-cluster-thread.o

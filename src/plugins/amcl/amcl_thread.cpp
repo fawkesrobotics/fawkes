@@ -33,6 +33,7 @@
 #include <utils/math/angle.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
+#include <baseapp/run.h>
 #include <cstdlib>
 #include <cstdio>
 
@@ -370,7 +371,9 @@ AmclThread::loop()
       laser_pose_set_ = true;
       apply_initial_pose();
     } else {
-      logger->log_warn(name(), "Could not determine laser pose, skipping loop");
+      if (fawkes::runtime::uptime() >= tf_listener->get_cache_time()) {
+	logger->log_warn(name(), "Could not determine laser pose, skipping loop");
+      }
       return;
     }
   }
@@ -970,9 +973,11 @@ AmclThread::set_laser_pose()
     //logger->log_error(name(), e);
     return false;
   } catch (fawkes::Exception& e) {
-    logger->log_error(name(), "Generic exception for transform from %s to %s.",
-                      laser_frame_id_.c_str(), base_frame_id_.c_str());
-    logger->log_error(name(), e);
+    if (fawkes::runtime::uptime() >= tf_listener->get_cache_time()) {
+      logger->log_error(name(), "Generic exception for transform from %s to %s.",
+			laser_frame_id_.c_str(), base_frame_id_.c_str());
+      logger->log_error(name(), e);
+    }
     return false;
   }
 

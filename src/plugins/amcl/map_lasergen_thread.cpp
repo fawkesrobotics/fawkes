@@ -22,6 +22,7 @@
 #include "amcl_utils.h"
 
 #include <utils/math/angle.h>
+#include <baseapp/run.h>
 
 using namespace fawkes;
 
@@ -139,7 +140,9 @@ MapLaserGenThread::loop()
 	laser_pos_theta_ = pos_theta_ + tf::get_yaw(laser_pose_.getRotation());
       }
     } else {
-      logger->log_warn(name(), "Could not determine laser pose, skipping loop");
+      if (fawkes::runtime::uptime() >= tf_listener->get_cache_time()) {
+	logger->log_warn(name(), "Could not determine laser pose, skipping loop");
+      }
       return;
     }
   }

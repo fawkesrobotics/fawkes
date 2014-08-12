@@ -33,6 +33,7 @@
 #include "search/astar_search.h"
 
 #include <core/threading/mutex.h>
+#include <baseapp/run.h>
 #include <utils/time/wait.h>
 #include <interfaces/MotorInterface.h>
 #include <interfaces/Laser360Interface.h>
@@ -137,12 +138,15 @@ ColliThread::init()
     tf_listener->transform_point(cfg_frame_laser_, p_base, p_laser);
     laser_to_base_.x = p_laser.x();
     laser_to_base_.y = p_laser.y();
-    logger->log_info(name(), "distance from laser to base: x:%f  y:%f", laser_to_base_.x, laser_to_base_.y);
+    logger->log_info(name(), "distance from laser to base: x:%f  y:%f",
+		     laser_to_base_.x, laser_to_base_.y);
     laser_to_base_valid_ = true;
     m_pLaserOccGrid->set_base_offset(laser_to_base_.x, laser_to_base_.y);
   } catch(Exception &e) {
-    logger->log_warn(name(), "Unable to transform %s to %s.\n%s",
-                     cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what() );
+    if (fawkes::runtime::uptime() >= tf_listener->get_cache_time()) {
+      logger->log_warn(name(), "Unable to transform %s to %s.\n%s",
+		       cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what() );
+    }
   }
 
   // setup timer for colli-frequency
@@ -270,12 +274,16 @@ ColliThread::loop()
       tf_listener->transform_point(cfg_frame_laser_, p_base, p_laser);
       laser_to_base_.x = p_laser.x();
       laser_to_base_.y = p_laser.y();
-      logger->log_info(name(), "distance from laser to base: x:%f  y:%f", laser_to_base_.x, laser_to_base_.y);
+      logger->log_info(name(), "distance from laser to base: x:%f  y:%f",
+		       laser_to_base_.x, laser_to_base_.y);
       laser_to_base_valid_ = true;
       m_pLaserOccGrid->set_base_offset(laser_to_base_.x, laser_to_base_.y);
     } catch(Exception &e) {
-      logger->log_warn(name(), "Unable to transform %s to %s.\n%s",
-                      cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(), e.what());
+      if (fawkes::runtime::uptime() >= tf_listener->get_cache_time()) {
+	logger->log_warn(name(), "Unable to transform %s to %s.\n%s",
+			 cfg_frame_base_.c_str(), cfg_frame_laser_.c_str(),
+			 e.what_no_backtrace());
+      }
       timer_->wait();
       return;
     }

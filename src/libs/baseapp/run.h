@@ -38,6 +38,7 @@ namespace fawkes {
   class ThreadManager;
   class FawkesNetworkManager;
   class Clock;
+  class Time;
   class ConfigNetworkHandler;
   class PluginNetworkHandler;
 
@@ -65,12 +66,14 @@ extern FawkesNetworkManager  *network_manager;
 extern ConfigNetworkHandler  *nethandler_config;
 extern PluginNetworkHandler  *nethandler_plugin;
 extern tf::Transformer       *tf_listener; 
+extern Time                  *start_time;
 
 bool init(int argc, char **argv, int & retval);
 bool init(InitOptions options, int & retval);
 void run();
 void cleanup();
 void quit();
+float uptime();
 
 void print_usage(const char *progname);
 
