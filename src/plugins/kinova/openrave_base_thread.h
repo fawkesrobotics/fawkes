@@ -31,13 +31,16 @@
  #include <plugins/openrave/aspect/openrave.h>
 #endif
 
+#include <core/utils/refptr.h>
+
+#include "types.h"
+
 #include <string>
 #include <list>
 #include <vector>
 
 namespace fawkes {
   class Mutex;
-  typedef struct jaco_arm_struct jaco_arm_t;
 }
 
 class KinovaOpenraveBaseThread
@@ -64,9 +67,6 @@ class KinovaOpenraveBaseThread
   virtual bool add_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true) = 0;
   virtual bool set_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true) = 0;
 
-  virtual bool trajec_ready();
-  virtual std::vector< std::vector<float> >* pop_trajec();
-
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
   virtual void run() { Thread::run(); }
@@ -74,11 +74,12 @@ class KinovaOpenraveBaseThread
   virtual void _load_robot() {}
 
   fawkes::Mutex *__planning_mutex;
-  fawkes::Mutex *__target_mutex;
-  fawkes::Mutex *__trajec_mutex;
 
-  std::list< std::vector<float> > *__target_queue;
-  std::list< std::vector< std::vector<float> >* > *__trajec_queue; // list of trajectories. trajectory is a vector of configurations(=vector).
+  // keep these refptrs here for convenience, so we do not need to dereference __arm all the time
+  fawkes::RefPtr< fawkes::Mutex > __target_mutex;
+  fawkes::RefPtr< fawkes::Mutex > __trajec_mutex;
+  fawkes::RefPtr< fawkes::jaco_target_queue_t > __target_queue;
+  fawkes::RefPtr< fawkes::jaco_trajec_queue_t > __trajec_queue;
 
 #ifdef HAVE_OPENRAVE
   fawkes::OpenRaveEnvironment* __OR_env;

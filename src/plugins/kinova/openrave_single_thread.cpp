@@ -160,7 +160,7 @@ KinovaOpenraveSingleThread::loop()
   __target_mutex->lock();
   if( !__target_queue->empty() ) {
     // get the target
-    std::vector<float> target = __target_queue->front();
+    jaco_trajec_point_t target = __target_queue->front();
     __target_queue->pop_front();
     __target_mutex->unlock();
 
@@ -179,6 +179,10 @@ void
 KinovaOpenraveSingleThread::register_arm(jaco_arm_t *arm)
 {
   __arm = arm;
+  __target_mutex = __arm->target_mutex;
+  __trajec_mutex = __arm->trajec_mutex;
+  __target_queue = __arm->target_queue;
+  __trajec_queue = __arm->trajec_queue;
 }
 
 void
@@ -255,7 +259,7 @@ KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, floa
        } else {
          // don't plan, consider this the final configuration, i.e. a trajectory with only 1 point
          logger->log_debug(name(), "Skip planning, add this to trajec_queue");
-         vector< vector<float> > *trajec = new vector< vector<float> >();
+         RefPtr<jaco_trajec_t> trajec(new jaco_trajec_t());
          trajec->push_back(joints);
          __trajec_mutex->lock();
          __trajec_queue->push_back(trajec);
@@ -289,7 +293,7 @@ KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, floa
 }
 
 void
-KinovaOpenraveSingleThread::_plan_path(std::vector<float> &target)
+KinovaOpenraveSingleThread::_plan_path(jaco_trajec_point_t &target)
 {
 
   // Set active manipulator
@@ -325,7 +329,9 @@ KinovaOpenraveSingleThread::_plan_path(std::vector<float> &target)
   // add trajectory to queue
   //logger->log_debug(name(), "plan successful, adding to queue");
   __trajec_mutex->lock();
-  std::vector< std::vector<float> > *trajec = __OR_robot->get_trajectory_device();
+  // we can do the following becaouse get_trajectory_device() returns a new object, thus
+  //  can be safely deleted by RefPtr auto-deletion
+  RefPtr<jaco_trajec_t> trajec( __OR_robot->get_trajectory_device() );
   __trajec_queue->push_back(trajec);
   __trajec_mutex->unlock();
 }

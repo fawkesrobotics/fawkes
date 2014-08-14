@@ -71,7 +71,7 @@ class KinovaGotoThread
 
  private:
   void _goto_target();
-  void _exec_trajec(std::vector< std::vector<float> >* trajec);
+  void _exec_trajec(fawkes::jaco_trajec_t* trajec);
 
   fawkes::jaco_arm_t  *__arm;
   fawkes::Mutex       *__final_mutex;

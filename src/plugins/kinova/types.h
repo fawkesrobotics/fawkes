@@ -24,8 +24,11 @@
 #ifndef __PLUGINS_KINOVA_TYPES_H_
 #define __PLUGINS_KINOVA_TYPES_H_
 
-#include <vector>
+#include <core/utils/refptr.h>
+
 #include <string>
+#include <vector>
+#include <list>
 
 class KinovaGotoThread;
 class KinovaOpenraveBaseThread;
@@ -35,8 +38,15 @@ namespace fawkes {
 }
 #endif
 
+class Mutex;
 class KinovaArm;
 class JacoInterface;
+
+typedef std::vector<float>               jaco_trajec_point_t;
+typedef std::vector<jaco_trajec_point_t> jaco_trajec_t;
+
+typedef std::list<jaco_trajec_point_t>             jaco_target_queue_t;
+typedef std::list< fawkes::RefPtr<jaco_trajec_t> > jaco_trajec_queue_t;
 
 typedef enum jaco_target_type_enum {
   TARGET_CARTESIAN,
@@ -49,8 +59,15 @@ typedef enum jaco_target_type_enum {
 typedef struct jaco_arm_struct {
   fawkes::KinovaArm *arm;
   fawkes::JacoInterface *iface;
+
   KinovaGotoThread *goto_thread;
   KinovaOpenraveBaseThread *openrave_thread;
+
+  fawkes::RefPtr< fawkes::Mutex > target_mutex;
+  fawkes::RefPtr< fawkes::Mutex > trajec_mutex; // very shortly locked mutex
+
+  fawkes::RefPtr< jaco_target_queue_t > target_queue;
+  fawkes::RefPtr< jaco_trajec_queue_t > trajec_queue; // list of trajectories
 } jaco_arm_t;
 
 typedef struct jaco_dual_arm_struct {

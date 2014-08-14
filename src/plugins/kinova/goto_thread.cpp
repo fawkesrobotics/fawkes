@@ -297,20 +297,27 @@ KinovaGotoThread::loop()
     _goto_target();
 
   } else if( __final) {
-    // all current targets have been processed. check for new
-    if( __arm->openrave_thread->trajec_ready() ) {
+    // all current trajectories have been processed. check for new ones
+    __arm->trajec_mutex->lock();
+    bool new_trajec = !__arm->trajec_queue->empty();
+    __arm->trajec_mutex->unlock();
+
+    if( new_trajec ) {
       logger->log_debug(name(), "new trajectory ready! processing now...");
-      std::vector< std::vector<float> >* trajec = __arm->openrave_thread->pop_trajec();
+      // get RefPtr to first trajectory in queue
+      __arm->trajec_mutex->lock();
+      RefPtr<jaco_trajec_t> trajec = __arm->trajec_queue->front();
+      __arm->trajec_mutex->unlock();
 
-      if( trajec != NULL ) {
-        if( !trajec->empty() ) {
-          _exec_trajec(trajec);
-        }
-
-        // delete the trajectory, it is not needed anywhere anymore
-        delete trajec;
-        trajec = NULL;
+      // process trajectory if it is "valid"
+      if( trajec && !trajec->empty() ) {
+        _exec_trajec(*trajec);
       }
+
+      // trajectory has been processed. remove from queue
+      __arm->trajec_mutex->lock();
+      __arm->trajec_queue->pop_front();
+      __arm->trajec_mutex->unlock();
     }
 
   } else {
@@ -369,7 +376,7 @@ KinovaGotoThread::_goto_target()
 }
 
 void
-KinovaGotoThread::_exec_trajec(std::vector< std::vector<float> >* trajec)
+KinovaGotoThread::_exec_trajec(jaco_trajec_t* trajec)
 {
   // set last trajec point as TARGET_ANGULAR, need for final-check
   std::vector<float> target = trajec->back();

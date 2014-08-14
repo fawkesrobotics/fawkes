@@ -26,6 +26,7 @@
 #include "arm_dummy.h"
 
 #include <interfaces/JacoInterface.h>
+#include <core/utils/refptr.h>
 
 using namespace fawkes;
 
@@ -170,6 +171,16 @@ KinovaActThread::init()
 
     }
 
+    // create target/trajectory queues and mutexes
+    __dual_arm.left.target_mutex = RefPtr<Mutex>(new Mutex());
+    __dual_arm.left.trajec_mutex = RefPtr<Mutex>(new Mutex());
+    __dual_arm.left.target_queue = RefPtr<jaco_target_queue_t>(new jaco_target_queue_t());
+    __dual_arm.left.trajec_queue = RefPtr<jaco_trajec_queue_t>(new jaco_trajec_queue_t());
+    __dual_arm.right.target_mutex = RefPtr<Mutex>(new Mutex());
+    __dual_arm.right.trajec_mutex = RefPtr<Mutex>(new Mutex());
+    __dual_arm.right.target_queue = RefPtr<jaco_target_queue_t>(new jaco_target_queue_t());
+    __dual_arm.right.trajec_queue = RefPtr<jaco_trajec_queue_t>(new jaco_trajec_queue_t());
+
     // register arms in other threads
     __info_thread->register_arm(&__dual_arm.left);
     __info_thread->register_arm(&__dual_arm.right);
@@ -207,6 +218,12 @@ KinovaActThread::init()
       delete __arm.arm;
       throw;
     }
+
+    // create target/trajectory queues and mutexes
+    __arm.target_mutex = RefPtr<Mutex>(new Mutex());
+    __arm.trajec_mutex = RefPtr<Mutex>(new Mutex());
+    __arm.target_queue = RefPtr<jaco_target_queue_t>(new jaco_target_queue_t());
+    __arm.trajec_queue = RefPtr<jaco_trajec_queue_t>(new jaco_trajec_queue_t());
 
     // register arm in other threads
     __info_thread->register_arm(&__arm);
