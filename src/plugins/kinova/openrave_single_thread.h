@@ -57,7 +57,7 @@ class KinovaOpenraveSingleThread : public KinovaOpenraveBaseThread
 
  private:
   void _load_robot();
-  void _plan_path(fawkes::jaco_trajec_point_t &target);
+  void _plan_path(fawkes::RefPtr<fawkes::jaco_target_t> &from, fawkes::RefPtr<fawkes::jaco_target_t> &to);
 
   fawkes::jaco_arm_t  *__arm;
 

@@ -76,16 +76,9 @@ class KinovaGotoThread
   fawkes::jaco_arm_t  *__arm;
   fawkes::Mutex       *__final_mutex;
 
-  //float __x, __y, __z;
-  //float __e1, __e2, __e3;
+  fawkes::RefPtr<fawkes::jaco_target_t> __target;
   float __finger_last[4]; // 3 positions + 1 counter
 
-  std::vector<float> __joints;
-  std::vector<float> __coords;
-  std::vector<float> __fingers;
-
-  bool __new_target;
-  fawkes::jaco_target_type_t __target_type;
   bool __final;
 
   unsigned int __wait_status_check;

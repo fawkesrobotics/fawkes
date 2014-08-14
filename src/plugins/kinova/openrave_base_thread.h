@@ -79,7 +79,6 @@ class KinovaOpenraveBaseThread
   fawkes::RefPtr< fawkes::Mutex > __target_mutex;
   fawkes::RefPtr< fawkes::Mutex > __trajec_mutex;
   fawkes::RefPtr< fawkes::jaco_target_queue_t > __target_queue;
-  fawkes::RefPtr< fawkes::jaco_trajec_queue_t > __trajec_queue;
 
 #ifdef HAVE_OPENRAVE
   fawkes::OpenRaveEnvironment* __OR_env;

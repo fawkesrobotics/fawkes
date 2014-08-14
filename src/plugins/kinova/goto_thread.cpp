@@ -48,7 +48,6 @@ KinovaGotoThread::KinovaGotoThread(const char name[])
   __arm = NULL;
   __final_mutex = NULL;
 
-  __new_target = false;
   __final = true;
 
   __wait_status_check = 0; //wait loops to check for jaco_retract_mode_t again
@@ -76,10 +75,18 @@ KinovaGotoThread::finalize()
 bool
 KinovaGotoThread::final()
 {
-  check_final();
   __final_mutex->lock();
   bool final = __final;
   __final_mutex->unlock();
+
+  if( final )
+    return true;
+
+  check_final();
+  __final_mutex->lock();
+  final = __final;
+  __final_mutex->unlock();
+
   return final;
 }
 
@@ -100,27 +107,29 @@ KinovaGotoThread::set_target(float x, float y, float z,
                              float e1, float e2, float e3,
                              float f1, float f2, float f3)
 {
-  __coords.clear();
-  __coords.push_back(x);
-  __coords.push_back(y);
-  __coords.push_back(z);
-  __coords.push_back(e1);
-  __coords.push_back(e2);
-  __coords.push_back(e3);
+  RefPtr<jaco_target_t> target(new jaco_target_t());
+  target->type = TARGET_CARTESIAN;
 
-  __fingers.clear();
+  target->pos.push_back(x);
+  target->pos.push_back(y);
+  target->pos.push_back(z);
+  target->pos.push_back(e1);
+  target->pos.push_back(e2);
+  target->pos.push_back(e3);
+
   if( f1 > 0.f && f2 > 0.f && f3 > 0.f ) {
-    __fingers.push_back(f1);
-    __fingers.push_back(f2);
-    __fingers.push_back(f3);
+    target->fingers.push_back(f1);
+    target->fingers.push_back(f2);
+    target->fingers.push_back(f3);
   } else {
-    __fingers.push_back(__arm->iface->finger1());
-    __fingers.push_back(__arm->iface->finger2());
-    __fingers.push_back(__arm->iface->finger3());
+    target->fingers.push_back(__arm->iface->finger1());
+    target->fingers.push_back(__arm->iface->finger2());
+    target->fingers.push_back(__arm->iface->finger3());
   }
 
-  __new_target = true;
-  __target_type = TARGET_CARTESIAN;
+  __arm->target_mutex->lock();
+  __arm->target_queue->push_back(target);
+  __arm->target_mutex->unlock();
 }
 
 void
@@ -128,75 +137,83 @@ KinovaGotoThread::set_target_ang(float j1, float j2, float j3,
                                  float j4, float j5, float j6,
                                  float f1, float f2, float f3)
 {
-  __joints.clear();
-  __joints.push_back(j1);
-  __joints.push_back(j2);
-  __joints.push_back(j3);
-  __joints.push_back(j4);
-  __joints.push_back(j5);
-  __joints.push_back(j6);
+  RefPtr<jaco_target_t> target(new jaco_target_t());
+  target->type = TARGET_ANGULAR;
 
-  __fingers.clear();
+  target->pos.push_back(j1);
+  target->pos.push_back(j2);
+  target->pos.push_back(j3);
+  target->pos.push_back(j4);
+  target->pos.push_back(j5);
+  target->pos.push_back(j6);
+
   if( f1 > 0.f && f2 > 0.f && f3 > 0.f ) {
-    __fingers.push_back(f1);
-    __fingers.push_back(f2);
-    __fingers.push_back(f3);
+    target->fingers.push_back(f1);
+    target->fingers.push_back(f2);
+    target->fingers.push_back(f3);
   } else {
-    __fingers.push_back(__arm->iface->finger1());
-    __fingers.push_back(__arm->iface->finger2());
-    __fingers.push_back(__arm->iface->finger3());
+    target->fingers.push_back(__arm->iface->finger1());
+    target->fingers.push_back(__arm->iface->finger2());
+    target->fingers.push_back(__arm->iface->finger3());
   }
 
-  __new_target = true;
-  __target_type = TARGET_ANGULAR;
+  __arm->target_mutex->lock();
+  __arm->target_queue->push_back(target);
+  __arm->target_mutex->unlock();
 }
 
 void
 KinovaGotoThread::pos_ready()
 {
-  __new_target = true;
-  __target_type = TARGET_READY;
+  RefPtr<jaco_target_t> target(new jaco_target_t());
+  target->type = TARGET_READY;
+  __arm->target_mutex->lock();
+  __arm->target_queue->push_back(target);
+  __arm->target_mutex->unlock();
 }
 
 void
 KinovaGotoThread::pos_retract()
 {
-  __new_target = true;
-  __target_type = TARGET_RETRACT;
+  RefPtr<jaco_target_t> target(new jaco_target_t());
+  target->type = TARGET_RETRACT;
+  __arm->target_mutex->lock();
+  __arm->target_queue->push_back(target);
+  __arm->target_mutex->unlock();
 }
 
 
 void
 KinovaGotoThread::move_gripper(float f1, float f2 ,float f3)
 {
-  __joints.clear();
-  __joints.push_back(__arm->iface->joints(0));
-  __joints.push_back(__arm->iface->joints(1));
-  __joints.push_back(__arm->iface->joints(2));
-  __joints.push_back(__arm->iface->joints(3));
-  __joints.push_back(__arm->iface->joints(4));
-  __joints.push_back(__arm->iface->joints(5));
+  RefPtr<jaco_target_t> target(new jaco_target_t());
+  target->type = TARGET_GRIPPER;
 
-  __fingers.clear();
-  __fingers.push_back(f1);
-  __fingers.push_back(f2);
-  __fingers.push_back(f3);
+  target->fingers.push_back(f1);
+  target->fingers.push_back(f2);
+  target->fingers.push_back(f3);
 
-  __new_target = true;
-  __target_type = TARGET_ANGULAR;
+  __arm->target_mutex->lock();
+  __arm->target_queue->push_back(target);
+  __arm->target_mutex->unlock();
 }
 
-
+/** Stops the current movement.
+ * This also stops any currently enqueued motion.
+ */
 void
 KinovaGotoThread::stop()
 {
   try {
     __arm->arm->stop();
 
+    __arm->target_mutex->lock();
+    __arm->target_queue->clear();
+    __arm->target_mutex->unlock();
+
     __final_mutex->lock();
     __final = true;
     __final_mutex->unlock();
-    __new_target = false;
 
   } catch( Exception &e ) {
     logger->log_warn(name(), "Error sending stop command to arm. Ex:%s", e.what());
@@ -210,7 +227,7 @@ KinovaGotoThread::check_final()
   bool final = true;
 
   //logger->log_debug(name(), "check final");
-  switch( __target_type ) {
+  switch( __target->type ) {
 
     case TARGET_READY:
     case TARGET_RETRACT:
@@ -231,11 +248,12 @@ KinovaGotoThread::check_final()
       __final = __arm->arm->final();
 //*/
 //*
+    case TARGET_TRAJEC:
     case TARGET_ANGULAR:
       //logger->log_debug(name(), "check final for TARGET ANGULAR");
       //final = __arm->arm->final();
       for( unsigned int i=0; i<6; ++i ) {
-        final &= (std::abs(normalize_mirror_rad(deg2rad(__joints.at(i) - __arm->iface->joints(i)))) < 0.01);
+        final &= (std::abs(normalize_mirror_rad(deg2rad(__target->pos.at(i) - __arm->iface->joints(i)))) < 0.01);
       }
       __final_mutex->lock();
       __final = final;
@@ -246,12 +264,12 @@ KinovaGotoThread::check_final()
     default: //TARGET_CARTESIAN
       //logger->log_debug(name(), "check final for TARGET CARTESIAN");
       //final = __arm->arm->final();
-      final &= (std::abs(angle_distance(__coords.at(0) , __arm->iface->x())) < 0.01);
-      final &= (std::abs(angle_distance(__coords.at(1) , __arm->iface->y())) < 0.01);
-      final &= (std::abs(angle_distance(__coords.at(2) , __arm->iface->z())) < 0.01);
-      final &= (std::abs(angle_distance(__coords.at(3) , __arm->iface->euler1())) < 0.1);
-      final &= (std::abs(angle_distance(__coords.at(4) , __arm->iface->euler2())) < 0.1);
-      final &= (std::abs(angle_distance(__coords.at(5) , __arm->iface->euler3())) < 0.1);
+      final &= (std::abs(angle_distance(__target->pos.at(0) , __arm->iface->x())) < 0.01);
+      final &= (std::abs(angle_distance(__target->pos.at(1) , __arm->iface->y())) < 0.01);
+      final &= (std::abs(angle_distance(__target->pos.at(2) , __arm->iface->z())) < 0.01);
+      final &= (std::abs(angle_distance(__target->pos.at(3) , __arm->iface->euler1())) < 0.1);
+      final &= (std::abs(angle_distance(__target->pos.at(4) , __arm->iface->euler2())) < 0.1);
+      final &= (std::abs(angle_distance(__target->pos.at(5) , __arm->iface->euler3())) < 0.1);
       __final_mutex->lock();
       __final = final;
       __final_mutex->unlock();
@@ -292,32 +310,61 @@ KinovaGotoThread::loop()
     return;
   }
 
-  if( __new_target ) {
-    logger->log_debug(name(), "rcvd new target. skip old one, set this. using current finger positions");
-    _goto_target();
+  if( __final) {
+   // Current target has been processed. Unref, if still refed
+    if(__target) {
+      __target.clear();
+    }
 
-  } else if( __final) {
-    // all current trajectories have been processed. check for new ones
-    __arm->trajec_mutex->lock();
-    bool new_trajec = !__arm->trajec_queue->empty();
-    __arm->trajec_mutex->unlock();
+    // Check for new targets
+    __arm->target_mutex->lock();
+    if( !__arm->target_queue->empty() ) {
+      // get RefPtr to first target in queue
+      __target = __arm->target_queue->front();
+    }
+    __arm->target_mutex->unlock();
 
-    if( new_trajec ) {
-      logger->log_debug(name(), "new trajectory ready! processing now...");
-      // get RefPtr to first trajectory in queue
-      __arm->trajec_mutex->lock();
-      RefPtr<jaco_trajec_t> trajec = __arm->trajec_queue->front();
-      __arm->trajec_mutex->unlock();
+    if( __target ) {
+      if( __target->type == TARGET_TRAJEC ) {
+        logger->log_debug(name(), "next target is a trajectory...");
 
-      // process trajectory if it is "valid"
-      if( trajec && !trajec->empty() ) {
-        _exec_trajec(*trajec);
+        __arm->trajec_mutex->lock();
+        if( __target->trajec ) {
+          __arm->trajec_mutex->unlock();
+
+          logger->log_debug(name(), "... and ready! processing now.");
+
+          // process trajectory only if it actually "exists"
+          if( !__target->trajec->empty() ) {
+            _exec_trajec(*(__target->trajec));
+          }
+
+          // trajectory has been processed. remove that target from queue.
+          // This will automatically delete the trajectory as well as soon
+          // as we leave this block (thanks to refptr)
+          __arm->target_mutex->lock();
+          __arm->target_queue->pop_front();
+          __arm->target_mutex->unlock();
+
+        } else {
+          __arm->trajec_mutex->unlock();
+          logger->log_debug(name(), "... but not ready yet!");
+          usleep(30e3);
+        }
+
+      } else {
+        // "regular" target
+        logger->log_debug(name(), "Process new target. using current finger positions");
+        _goto_target();
+
+        __arm->target_mutex->lock();
+        __arm->target_queue->pop_front();
+        __arm->target_mutex->unlock();
       }
 
-      // trajectory has been processed. remove from queue
-      __arm->trajec_mutex->lock();
-      __arm->trajec_queue->pop_front();
-      __arm->trajec_mutex->unlock();
+    } else {
+      //no new target in queue
+      usleep(30e3);
     }
 
   } else {
@@ -339,17 +386,31 @@ KinovaGotoThread::_goto_target()
   __finger_last[3] = 0; // counter
 
   __final = false;
-  __new_target = false;
 
   // process new target
   try {
-    __arm->arm->stop(); // stop old movement
+    __arm->arm->stop(); // stop old movement, if there was any
     //__arm->arm->start_api_ctrl();
 
-    switch( __target_type ) {
+   if( __target->type == TARGET_GRIPPER ) {
+     // only fingers moving. use current joint values for that
+     // we do this here and not in "move_gripper()" because we enqueue values. This ensures
+     // that we move the gripper with the current joint values, not with the ones we had
+     // when the target was enqueued!
+     __target->pos.clear(); // just in case; should be empty anyway
+     __target->pos.push_back(__arm->iface->joints(0));
+     __target->pos.push_back(__arm->iface->joints(1));
+     __target->pos.push_back(__arm->iface->joints(2));
+     __target->pos.push_back(__arm->iface->joints(3));
+     __target->pos.push_back(__arm->iface->joints(4));
+     __target->pos.push_back(__arm->iface->joints(5));
+     __target->type = TARGET_ANGULAR;
+   }
+
+    switch( __target->type ) {
       case TARGET_ANGULAR:
         logger->log_debug(name(), "target_type: TARGET_ANGULAR");
-        __arm->arm->goto_joints(__joints, __fingers);
+        __arm->arm->goto_joints(__target->pos, __target->fingers);
         break;
 
       case TARGET_READY:
@@ -366,7 +427,7 @@ KinovaGotoThread::_goto_target()
 
       default: //TARGET_CARTESIAN
         logger->log_debug(name(), "target_type: TARGET_CARTESIAN");
-        __arm->arm->goto_coords(__coords, __fingers);
+        __arm->arm->goto_coords(__target->pos, __target->fingers);
         break;
     }
 
@@ -378,11 +439,12 @@ KinovaGotoThread::_goto_target()
 void
 KinovaGotoThread::_exec_trajec(jaco_trajec_t* trajec)
 {
-  // set last trajec point as TARGET_ANGULAR, need for final-check
-  std::vector<float> target = trajec->back();
-  set_target_ang(target.at(0), target.at(1), target.at(2),
-                 target.at(3), target.at(4), target.at(5));
-  __new_target = false;
+  if( __target->fingers.empty() ) {
+    // have no finger values. use current ones
+    __target->fingers.push_back(__arm->iface->finger1());
+    __target->fingers.push_back(__arm->iface->finger2());
+    __target->fingers.push_back(__arm->iface->finger3());
+  }
 
   try {
      // stop old movement
@@ -391,7 +453,7 @@ KinovaGotoThread::_exec_trajec(jaco_trajec_t* trajec)
     logger->log_debug(name(), "exec traj: send traj commands...");
     // execute the trajectory
     for( unsigned int i=0; i<trajec->size(); ++i ) {
-      __arm->arm->goto_joints(trajec->at(i), __fingers);
+      __arm->arm->goto_joints(trajec->at(i), __target->fingers);
       usleep(10e3);
     }
     logger->log_debug(name(), "exec traj: ... DONE");

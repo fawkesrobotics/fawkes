@@ -157,19 +157,39 @@ KinovaOpenraveSingleThread::loop()
   }
 
   __planning_mutex->lock();
+  RefPtr<jaco_target_t> from, to;
+  // get first target with type TARGET_TRAJEC that needs a planner
   __target_mutex->lock();
-  if( !__target_queue->empty() ) {
-    // get the target
-    jaco_trajec_point_t target = __target_queue->front();
-    __target_queue->pop_front();
-    __target_mutex->unlock();
+  for( jaco_target_queue_t::iterator it=__target_queue->begin(); it!=__target_queue->end(); ++it ) {
+    if( (*it)->type == TARGET_TRAJEC && !(*it)->trajec ) {
+      // have found a new target for path planning!
+      to = *it;
+
+      // check if there is a prior target that needs to be considered in planning
+      if( it!=__target_queue->begin() ) {
+        --it;
+        from = *it;
+        ++it;
+      }
+
+      break;
+    }
+  }
+  __target_mutex->unlock();
+
+  if( to ) {
+    if( !from )
+      from = RefPtr<jaco_target_t>(new jaco_target_t());
+
+    if( from->pos.size() != 6 ) {
+      __arm->arm->get_joints(from->pos);
+    }
 
     // run planner
-    _plan_path(target);
+    _plan_path(from, to);
     __planning_mutex->unlock();
 
   } else {
-    __target_mutex->unlock();
     __planning_mutex->unlock();
     usleep(30e3); // TODO: make this configurable
   }
@@ -182,7 +202,6 @@ KinovaOpenraveSingleThread::register_arm(jaco_arm_t *arm)
   __target_mutex = __arm->target_mutex;
   __trajec_mutex = __arm->trajec_mutex;
   __target_queue = __arm->target_queue;
-  __trajec_queue = __arm->trajec_queue;
 }
 
 void
@@ -242,29 +261,28 @@ KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, floa
     if( solvable ) {
       logger->log_debug(name(), "IK successful!");
 
+      RefPtr<jaco_target_t> target(new jaco_target_t());
+
       // get target IK valoues
       vector<float> joints;
       __OR_robot->get_target().manip->get_angles(joints);
       //need next lines, as "target" only stores a OpenRaveManipulator* , so it stores values in OR only!!
       __OR_manip->set_angles(joints);
-      __OR_manip->get_angles_device(joints);
+      __OR_manip->get_angles_device(target->pos);
 
       if( plan ) {
         // add this to the target queue for planning
-         logger->log_debug(name(), "Adding to target_queue for later planning");
-        __target_mutex->lock();
-        __target_queue->push_back(joints);
-        __target_mutex->unlock();
+        logger->log_debug(name(), "Adding to target_queue for later planning");
+        target->type = TARGET_TRAJEC;
 
-       } else {
-         // don't plan, consider this the final configuration, i.e. a trajectory with only 1 point
-         logger->log_debug(name(), "Skip planning, add this to trajec_queue");
-         RefPtr<jaco_trajec_t> trajec(new jaco_trajec_t());
-         trajec->push_back(joints);
-         __trajec_mutex->lock();
-         __trajec_queue->push_back(trajec);
-         __trajec_mutex->unlock();
-       }
+      } else {
+        // don't plan, consider this the final configuration
+        logger->log_debug(name(), "Skip planning, add this as TARGET_ANGULAR");
+        target->type = TARGET_ANGULAR;
+      }
+      __target_mutex->lock();
+      __target_queue->push_back(target);
+      __target_mutex->unlock();
 
     } else {
       logger->log_warn(name(), "No IK solution found for target.");
@@ -286,14 +304,11 @@ KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, floa
   __target_mutex->lock();
   __target_queue->clear();
   __target_mutex->unlock();
-  __trajec_mutex->lock();
-  __trajec_queue->clear();
-  __trajec_mutex->unlock();
   return add_target(x, y, z, e1, e2, e3, plan);
 }
 
 void
-KinovaOpenraveSingleThread::_plan_path(jaco_trajec_point_t &target)
+KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
 {
 
   // Set active manipulator
@@ -301,18 +316,16 @@ KinovaOpenraveSingleThread::_plan_path(jaco_trajec_point_t &target)
   __robot->SetActiveDOFs(__manip->GetArmIndices());
 
   // Set target point for planner (has already passed IK check previously!)
-  __OR_manip->set_angles_device(target);
-  __OR_manip->get_angles(target);
+  __OR_manip->set_angles_device(to->pos);
+  __OR_manip->get_angles(to->pos);
   //logger->log_debug(name(), "setting target %f %f %f %f %f %f",
-  //                  target.at(0), target.at(1), target.at(2), target.at(3), target.at(4), target.at(5));
-  __OR_robot->set_target_angles(target);
+  //                  to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5));
+  __OR_robot->set_target_angles(to->pos);
 
   // Set starting point for planner, convert encoder values to angles if necessary
-  std::vector<float> joints;
-  __arm->arm->get_joints(joints);
   //logger->log_debug(name(), "setting start %f %f %f %f %f %f",
-  //                  joints.at(0), joints.at(1), joints.at(2), joints.at(3), joints.at(4), joints.at(5));
-  __OR_manip->set_angles_device(joints);
+  //                  from->pos.at(0), from->pos.at(1), from->pos.at(2), from->pos.at(3), from->pos.at(4), from->pos.at(5));
+  __OR_manip->set_angles_device(from->pos);
 
   // Set planning parameters (none yet)
   __OR_robot->set_target_plannerparams("");
@@ -331,7 +344,6 @@ KinovaOpenraveSingleThread::_plan_path(jaco_trajec_point_t &target)
   __trajec_mutex->lock();
   // we can do the following becaouse get_trajectory_device() returns a new object, thus
   //  can be safely deleted by RefPtr auto-deletion
-  RefPtr<jaco_trajec_t> trajec( __OR_robot->get_trajectory_device() );
-  __trajec_queue->push_back(trajec);
+  to->trajec = RefPtr<jaco_trajec_t>( __OR_robot->get_trajectory_device() );
   __trajec_mutex->unlock();
 }

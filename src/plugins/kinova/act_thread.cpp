@@ -175,11 +175,9 @@ KinovaActThread::init()
     __dual_arm.left.target_mutex = RefPtr<Mutex>(new Mutex());
     __dual_arm.left.trajec_mutex = RefPtr<Mutex>(new Mutex());
     __dual_arm.left.target_queue = RefPtr<jaco_target_queue_t>(new jaco_target_queue_t());
-    __dual_arm.left.trajec_queue = RefPtr<jaco_trajec_queue_t>(new jaco_trajec_queue_t());
     __dual_arm.right.target_mutex = RefPtr<Mutex>(new Mutex());
     __dual_arm.right.trajec_mutex = RefPtr<Mutex>(new Mutex());
     __dual_arm.right.target_queue = RefPtr<jaco_target_queue_t>(new jaco_target_queue_t());
-    __dual_arm.right.trajec_queue = RefPtr<jaco_trajec_queue_t>(new jaco_trajec_queue_t());
 
     // register arms in other threads
     __info_thread->register_arm(&__dual_arm.left);
@@ -223,7 +221,6 @@ KinovaActThread::init()
     __arm.target_mutex = RefPtr<Mutex>(new Mutex());
     __arm.trajec_mutex = RefPtr<Mutex>(new Mutex());
     __arm.target_queue = RefPtr<jaco_target_queue_t>(new jaco_target_queue_t());
-    __arm.trajec_queue = RefPtr<jaco_trajec_queue_t>(new jaco_trajec_queue_t());
 
     // register arm in other threads
     __info_thread->register_arm(&__arm);
@@ -435,12 +432,16 @@ KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
       JacoInterface::CalibrateMessage *msg = arm.iface->msgq_first(msg);
       logger->log_debug(name(), "%s: CalibrateMessage rcvd", arm.iface->id());
 
+      // Stop all (current and planned) motion. Then calibrate
+      arm.goto_thread->stop();
       arm.goto_thread->pos_ready();
 
     } else if( arm.iface->msgq_first_is<JacoInterface::RetractMessage>() ) {
       JacoInterface::RetractMessage *msg = arm.iface->msgq_first(msg);
       logger->log_debug(name(), "%s: RetractMessage rcvd", arm.iface->id());
 
+      // Stop all (current and planned) motion. Then retract
+      arm.goto_thread->stop();
       arm.goto_thread->pos_retract();
 
     } else if( arm.iface->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {

@@ -45,16 +45,23 @@ class JacoInterface;
 typedef std::vector<float>               jaco_trajec_point_t;
 typedef std::vector<jaco_trajec_point_t> jaco_trajec_t;
 
-typedef std::list<jaco_trajec_point_t>             jaco_target_queue_t;
-typedef std::list< fawkes::RefPtr<jaco_trajec_t> > jaco_trajec_queue_t;
-
 typedef enum jaco_target_type_enum {
   TARGET_CARTESIAN,
   TARGET_ANGULAR,
+  TARGET_GRIPPER,
   TARGET_TRAJEC,
   TARGET_READY,
   TARGET_RETRACT
 } jaco_target_type_t;
+
+typedef struct jaco_target_struct_t {
+  jaco_target_type_t            type;
+  jaco_trajec_point_t           pos;
+  jaco_trajec_point_t           fingers;
+  fawkes::RefPtr<jaco_trajec_t> trajec;
+} jaco_target_t;
+
+typedef std::list< fawkes::RefPtr<jaco_target_t> > jaco_target_queue_t;
 
 typedef struct jaco_arm_struct {
   fawkes::KinovaArm *arm;
@@ -67,7 +74,6 @@ typedef struct jaco_arm_struct {
   fawkes::RefPtr< fawkes::Mutex > trajec_mutex; // very shortly locked mutex
 
   fawkes::RefPtr< jaco_target_queue_t > target_queue;
-  fawkes::RefPtr< jaco_trajec_queue_t > trajec_queue; // list of trajectories
 } jaco_arm_t;
 
 typedef struct jaco_dual_arm_struct {

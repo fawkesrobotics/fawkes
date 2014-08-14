@@ -156,9 +156,6 @@ KinovaOpenraveDualThread::set_target(float x, float y, float z, float e1, float 
   __target_mutex->lock();
   __target_queue->clear();
   __target_mutex->unlock();
-  __trajec_mutex->lock();
-  __trajec_queue->clear();
-  __trajec_mutex->unlock();
   return add_target(x, y, z, e1, e2, e3, plan);
 }
 
