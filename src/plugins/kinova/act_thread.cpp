@@ -479,4 +479,5 @@ KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
 #ifdef HAVE_OPENRAVE
   arm.openrave_thread->update_openrave();
 #endif
+  arm.iface->set_final(arm.goto_thread->final());
 }

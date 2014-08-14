@@ -26,7 +26,6 @@
 #include "types.h"
 
 #include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
@@ -36,11 +35,11 @@
 
 namespace fawkes {
   class JacoInterface;
+  class Mutex;
 }
 
 class KinovaGotoThread
 : public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect
@@ -53,6 +52,8 @@ class KinovaGotoThread
   virtual void finalize();
   virtual void loop();
 
+  virtual bool final();
+
   virtual void register_arm(fawkes::jaco_arm_t *arm);
   virtual void unregister_arm();
 
@@ -63,15 +64,17 @@ class KinovaGotoThread
   virtual void pos_ready();
   virtual void pos_retract();
 
-
-
   virtual void stop();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
+  void _goto_target();
+  void _exec_trajec(std::vector< std::vector<float> >* trajec);
+
   fawkes::jaco_arm_t  *__arm;
+  fawkes::Mutex       *__final_mutex;
 
   //float __x, __y, __z;
   //float __e1, __e2, __e3;

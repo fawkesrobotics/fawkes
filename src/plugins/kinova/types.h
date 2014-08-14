@@ -41,6 +41,7 @@ class JacoInterface;
 typedef enum jaco_target_type_enum {
   TARGET_CARTESIAN,
   TARGET_ANGULAR,
+  TARGET_TRAJEC,
   TARGET_READY,
   TARGET_RETRACT
 } jaco_target_type_t;

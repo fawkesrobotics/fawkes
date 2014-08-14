@@ -26,6 +26,7 @@
 
 #include <interfaces/JacoInterface.h>
 #include <utils/math/angle.h>
+#include <core/threading/mutex.h>
 
 #include <unistd.h>
 
@@ -42,10 +43,10 @@ using namespace fawkes;
  * @param thread_name thread name
  */
 KinovaGotoThread::KinovaGotoThread(const char name[])
-  : Thread(name, Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
+  : Thread(name, Thread::OPMODE_CONTINUOUS)
 {
   __arm = NULL;
+  __final_mutex = NULL;
 
   __new_target = false;
   __final = true;
@@ -62,11 +63,24 @@ KinovaGotoThread::~KinovaGotoThread()
 void
 KinovaGotoThread::init()
 {
+  __final_mutex = new Mutex();
 }
 
 void
 KinovaGotoThread::finalize()
 {
+  delete __final_mutex;
+  __final_mutex = NULL;
+}
+
+bool
+KinovaGotoThread::final()
+{
+  check_final();
+  __final_mutex->lock();
+  bool final = __final;
+  __final_mutex->unlock();
+  return final;
 }
 
 void
@@ -179,7 +193,9 @@ KinovaGotoThread::stop()
   try {
     __arm->arm->stop();
 
+    __final_mutex->lock();
     __final = true;
+    __final_mutex->unlock();
     __new_target = false;
 
   } catch( Exception &e ) {
@@ -191,6 +207,7 @@ void
 KinovaGotoThread::check_final()
 {
   bool check_fingers = false;
+  bool final = true;
 
   //logger->log_debug(name(), "check final");
   switch( __target_type ) {
@@ -199,7 +216,9 @@ KinovaGotoThread::check_final()
     case TARGET_RETRACT:
       if( __wait_status_check == 0 ) {
         //logger->log_debug(name(), "check final for TARGET_MODE");
+        __final_mutex->lock();
         __final = __arm->arm->final();
+        __final_mutex->unlock();
       } else if( __wait_status_check >= 10 ) {
           __wait_status_check = 0;
       } else {
@@ -214,22 +233,28 @@ KinovaGotoThread::check_final()
 //*
     case TARGET_ANGULAR:
       //logger->log_debug(name(), "check final for TARGET ANGULAR");
-      __final = true; //__arm->arm->final();
+      //final = __arm->arm->final();
       for( unsigned int i=0; i<6; ++i ) {
-        __final &= (std::abs(normalize_mirror_rad(deg2rad(__joints.at(i) - __arm->iface->joints(i)))) < 0.01);
+        final &= (std::abs(normalize_mirror_rad(deg2rad(__joints.at(i) - __arm->iface->joints(i)))) < 0.01);
       }
+      __final_mutex->lock();
+      __final = final;
+      __final_mutex->unlock();
       check_fingers = true;
       break;
 
     default: //TARGET_CARTESIAN
       //logger->log_debug(name(), "check final for TARGET CARTESIAN");
-      __final = true; //__arm->arm->final();
-      __final &= (std::abs(angle_distance(__coords.at(0) , __arm->iface->x())) < 0.01);
-      __final &= (std::abs(angle_distance(__coords.at(1) , __arm->iface->y())) < 0.01);
-      __final &= (std::abs(angle_distance(__coords.at(2) , __arm->iface->z())) < 0.01);
-      __final &= (std::abs(angle_distance(__coords.at(3) , __arm->iface->euler1())) < 0.1);
-      __final &= (std::abs(angle_distance(__coords.at(4) , __arm->iface->euler2())) < 0.1);
-      __final &= (std::abs(angle_distance(__coords.at(5) , __arm->iface->euler3())) < 0.1);
+      //final = __arm->arm->final();
+      final &= (std::abs(angle_distance(__coords.at(0) , __arm->iface->x())) < 0.01);
+      final &= (std::abs(angle_distance(__coords.at(1) , __arm->iface->y())) < 0.01);
+      final &= (std::abs(angle_distance(__coords.at(2) , __arm->iface->z())) < 0.01);
+      final &= (std::abs(angle_distance(__coords.at(3) , __arm->iface->euler1())) < 0.1);
+      final &= (std::abs(angle_distance(__coords.at(4) , __arm->iface->euler2())) < 0.1);
+      final &= (std::abs(angle_distance(__coords.at(5) , __arm->iface->euler3())) < 0.1);
+      __final_mutex->lock();
+      __final = final;
+      __final_mutex->unlock();
 
       check_fingers = true;
       break;
@@ -253,8 +278,9 @@ KinovaGotoThread::check_final()
       __finger_last[2] = __arm->iface->finger3();
       __finger_last[3] = 0; // counter
     }
-
+    __final_mutex->lock();
     __final &= __finger_last[3] > 10;
+    __final_mutex->unlock();
   }
 }
 
@@ -262,79 +288,108 @@ void
 KinovaGotoThread::loop()
 {
   if(__arm == NULL) {
+    usleep(30e3);
     return;
   }
 
   if( __new_target ) {
     logger->log_debug(name(), "rcvd new target. skip old one, set this. using current finger positions");
+    _goto_target();
 
-    __finger_last[0] = __arm->iface->finger1();
-    __finger_last[1] = __arm->iface->finger2();
-    __finger_last[2] = __arm->iface->finger3();
-    __finger_last[3] = 0; // counter
+  } else if( __final) {
+    // all current targets have been processed. check for new
+    if( __arm->openrave_thread->trajec_ready() ) {
+      logger->log_debug(name(), "new trajectory ready! processing now...");
+      std::vector< std::vector<float> >* trajec = __arm->openrave_thread->pop_trajec();
 
-    logger->log_debug(name(), "loop: set final=false");
-    __final = false;
-    __new_target = false;
+      if( trajec != NULL ) {
+        if( !trajec->empty() ) {
+          _exec_trajec(trajec);
+        }
 
-    // process new target
-    try {
-      __arm->arm->stop(); // stop old movement
-      //__arm->arm->start_api_ctrl();
-
-      switch( __target_type ) {
-        case TARGET_ANGULAR:
-          logger->log_debug(name(), "target_type: TARGET_ANGULAR");
-          __arm->arm->goto_joints(__joints, __fingers);
-          break;
-
-        case TARGET_READY:
-          logger->log_debug(name(), "loop: target_type: TARGET_READY");
-          __wait_status_check = 0;
-          __arm->arm->goto_ready();
-          break;
-
-        case TARGET_RETRACT:
-          logger->log_debug(name(), "target_type: TARGET_RETRACT");
-          __wait_status_check = 0;
-          __arm->arm->goto_retract();
-          break;
-
-        default: //TARGET_CARTESIAN
-          logger->log_debug(name(), "target_type: TARGET_CARTESIAN");
-          __arm->arm->goto_coords(__coords, __fingers);
-          break;
+        // delete the trajectory, it is not needed anywhere anymore
+        delete trajec;
+        trajec = NULL;
       }
-
-    } catch( Exception &e ) {
-      logger->log_warn(name(), "Error sending command to arm. Ex:%s", e.what());
     }
-
-  } else if( !__final ) {
-    // check for final position
-    check_final();
 
   } else {
-      // all current trajecs have been processed. check for new
-      if( __arm->openrave_thread->trajec_ready() ) {
-        //logger->log_debug(name(), "new trajectory ready! processing now...");
-        std::vector< std::vector<float> >* trajec = __arm->openrave_thread->pop_trajec();
+    usleep(30e3);
+  }
 
-        if( trajec != NULL ) {
-          if( !trajec->empty() ) {
-            //logger->log_debug(name(), "...setting new target now.");
-            // TODO: no planning yet, so use last trajec point
-            std::vector<float> target = trajec->back();
-            set_target_ang(target.at(0), target.at(1), target.at(2),
-                           target.at(3), target.at(4), target.at(5));
-          }
+//  __arm->iface->set_final(__final);
+}
 
-          // delete the trajectory, it is not needed anywhere anymore
-          delete trajec;
-          trajec = NULL;
-        }
-      }
+
+
+void
+KinovaGotoThread::_goto_target()
+{
+
+  __finger_last[0] = __arm->iface->finger1();
+  __finger_last[1] = __arm->iface->finger2();
+  __finger_last[2] = __arm->iface->finger3();
+  __finger_last[3] = 0; // counter
+
+  __final = false;
+  __new_target = false;
+
+  // process new target
+  try {
+    __arm->arm->stop(); // stop old movement
+    //__arm->arm->start_api_ctrl();
+
+    switch( __target_type ) {
+      case TARGET_ANGULAR:
+        logger->log_debug(name(), "target_type: TARGET_ANGULAR");
+        __arm->arm->goto_joints(__joints, __fingers);
+        break;
+
+      case TARGET_READY:
+        logger->log_debug(name(), "loop: target_type: TARGET_READY");
+        __wait_status_check = 0;
+        __arm->arm->goto_ready();
+        break;
+
+      case TARGET_RETRACT:
+        logger->log_debug(name(), "target_type: TARGET_RETRACT");
+        __wait_status_check = 0;
+        __arm->arm->goto_retract();
+        break;
+
+      default: //TARGET_CARTESIAN
+        logger->log_debug(name(), "target_type: TARGET_CARTESIAN");
+        __arm->arm->goto_coords(__coords, __fingers);
+        break;
     }
 
-  __arm->iface->set_final(__final);
+  } catch( Exception &e ) {
+    logger->log_warn(name(), "Error sending command to arm. Ex:%s", e.what_no_backtrace());
+  }
+}
+
+void
+KinovaGotoThread::_exec_trajec(std::vector< std::vector<float> >* trajec)
+{
+  // set last trajec point as TARGET_ANGULAR, need for final-check
+  std::vector<float> target = trajec->back();
+  set_target_ang(target.at(0), target.at(1), target.at(2),
+                 target.at(3), target.at(4), target.at(5));
+  __new_target = false;
+
+  try {
+     // stop old movement
+    __arm->arm->stop();
+
+    logger->log_debug(name(), "exec traj: send traj commands...");
+    // execute the trajectory
+    for( unsigned int i=0; i<trajec->size(); ++i ) {
+      __arm->arm->goto_joints(trajec->at(i), __fingers);
+      usleep(10e3);
+    }
+    logger->log_debug(name(), "exec traj: ... DONE");
+
+  } catch( Exception &e ) {
+    logger->log_warn(name(), "Error executing trajectory. Ex:%s", e.what_no_backtrace());
+  }
 }
