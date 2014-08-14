@@ -36,6 +36,7 @@
  #include <plugins/openrave/robot.h>
  #include <plugins/openrave/manipulator.h>
  #include <plugins/openrave/manipulators/kinova_jaco.h>
+
  using namespace OpenRAVE;
 #endif
 
@@ -116,8 +117,6 @@ KinovaOpenraveSingleThread::once()
   if(!__load_robot) {
     // robot was not loaded by this thread. So get them from openrave-environment now
     try {
-      __OR_env = openrave->get_environment();
-      __OR_env->enable_debug();
       __OR_robot = openrave->get_active_robot();
       __OR_manip = __OR_robot->get_manipulator(); //TODO: use new(), copy constructor!
 
@@ -126,11 +125,11 @@ KinovaOpenraveSingleThread::once()
     }
   }
 
-  while( __robot == NULL ) {
+  while( !__robot ) {
     __robot = __OR_robot->get_robot_ptr();
     usleep(100);
   }
-  while( __manip == NULL ) {
+  while( !__manip ) {
     __manip = __robot->SetActiveManipulator(__manipname);
     usleep(100);
   }
@@ -152,6 +151,11 @@ KinovaOpenraveSingleThread::finalize() {
 void
 KinovaOpenraveSingleThread::loop()
 {
+  if( __arm == NULL ) {
+    usleep(30e3);
+    return;
+  }
+
   __planning_mutex->lock();
   __target_mutex->lock();
   if( !__target_queue->empty() ) {
@@ -287,8 +291,10 @@ KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, floa
 void
 KinovaOpenraveSingleThread::_plan_path(std::vector<float> &target)
 {
+
   // Set active manipulator
   __robot->SetActiveManipulator(__manip);
+  __robot->SetActiveDOFs(__manip->GetArmIndices());
 
   // Set target point for planner (has already passed IK check previously!)
   __OR_manip->set_angles_device(target);
@@ -300,6 +306,8 @@ KinovaOpenraveSingleThread::_plan_path(std::vector<float> &target)
   // Set starting point for planner, convert encoder values to angles if necessary
   std::vector<float> joints;
   __arm->arm->get_joints(joints);
+  //logger->log_debug(name(), "setting start %f %f %f %f %f %f",
+  //                  joints.at(0), joints.at(1), joints.at(2), joints.at(3), joints.at(4), joints.at(5));
   __OR_manip->set_angles_device(joints);
 
   // Set planning parameters (none yet)
@@ -310,7 +318,8 @@ KinovaOpenraveSingleThread::_plan_path(std::vector<float> &target)
   try {
     openrave->run_planner(__OR_robot, sampling);
   } catch (fawkes::Exception &e) {
-    logger->log_warn(name(), "Planning failed (ignoring): %s", e.what_no_backtrace());
+    logger->log_warn(name(), "Planning failed: %s", e.what_no_backtrace());
+    return;
   }
 
   // add trajectory to queue

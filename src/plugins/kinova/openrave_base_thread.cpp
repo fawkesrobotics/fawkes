@@ -52,6 +52,11 @@ using namespace std;
 KinovaOpenraveBaseThread::KinovaOpenraveBaseThread(const char *name)
   : Thread(name, Thread::OPMODE_CONTINUOUS)
 {
+  __target_mutex = NULL;
+  __trajec_mutex = NULL;
+  __target_queue = NULL;
+  __trajec_queue = NULL;
+
 #ifdef HAVE_OPENRAVE
   __OR_env   = NULL;
   __OR_robot = NULL;
@@ -88,6 +93,9 @@ KinovaOpenraveBaseThread::init()
 
   // perform other initialization stuff (for child classes, that do not want to overload "init()")
   _init();
+
+  __OR_env = openrave->get_environment();
+  __OR_env->enable_debug();
 
   // load robot
   _load_robot();
