@@ -36,6 +36,7 @@
 #ifdef HAVE_TF
 #  include <aspect/tf.h>
 #endif
+#include <aspect/syncpoint_manager.h>
 
 #include <logging/cache.h>
 
@@ -59,6 +60,7 @@ class WebviewTfRequestProcessor;
 #ifdef HAVE_JPEG
 class WebviewImageRequestProcessor;
 #endif
+class WebviewSyncPointRequestProcessor;
 
 class WebviewThread
 : public fawkes::Thread,
@@ -74,6 +76,7 @@ class WebviewThread
 #ifdef HAVE_TF
   public fawkes::TransformAspect,
 #endif
+  public fawkes::SyncPointManagerAspect,
   public fawkes::WebviewAspect
 {
  public:
@@ -89,6 +92,7 @@ class WebviewThread
   static const char *PLUGINS_URL_PREFIX;
   static const char *TF_URL_PREFIX;
   static const char *IMAGE_URL_PREFIX;
+  static const char *SYNCPOINT_URL_PREFIX;
 
  private:
   void ssl_create(const char *ssl_key_file, const char *ssl_cert_file);
@@ -115,6 +119,7 @@ class WebviewThread
   WebviewHeaderGenerator             *__header_gen;
   WebviewFooterGenerator             *__footer_gen;
   WebviewUserVerifier                *__user_verifier;
+  WebviewSyncPointRequestProcessor   *__syncpoint_processor;
 
   unsigned int __cfg_port;
   bool         __cfg_use_ipv4;
@@ -127,6 +132,7 @@ class WebviewThread
   bool         __cfg_use_basic_auth;
   std::string  __cfg_basic_auth_realm;
   std::string  __cfg_access_log;
+  float        __cfg_syncpoint_max_age;
 
   fawkes::CacheLogger     __cache_logger;
   fawkes::NetworkService *__webview_service;
