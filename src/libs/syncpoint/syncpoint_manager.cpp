@@ -22,7 +22,10 @@
 #include <syncpoint/syncpoint_manager.h>
 #include <syncpoint/exceptions.h>
 
+#include "syncpoint_call_stats.h"
+
 #include <string.h>
+#include <sstream>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -145,6 +148,74 @@ SyncPointSetLessThan::operator()(const RefPtr<SyncPoint> sp1, const RefPtr<SyncP
 std::set<RefPtr<SyncPoint>, SyncPointSetLessThan >
 SyncPointManager::get_syncpoints() {
   return syncpoints_;
+}
+
+/**
+ * Get DOT graph for all SyncPoints
+ * @param max_age Show only SyncPoint calls which are younger than max_age
+ * @return string representation of DOT graph
+ */
+std::string
+SyncPointManager::all_syncpoints_as_dot(float max_age)
+{
+  std::stringstream graph;
+  graph << std::fixed; //fixed point notation
+  graph.precision(3); //3 decimal places
+  graph << "digraph { graph [fontsize=14]; "
+      << "node [fontsize=12]; edge [fontsize=12]; ";
+  graph.setf(std::ios::fixed, std::ios::floatfield);
+
+  for (std::set<RefPtr<SyncPoint>, SyncPointSetLessThan>::const_iterator sp_it = syncpoints_.begin();
+      sp_it != syncpoints_.end(); sp_it++) {
+    Time lifetime = Time() - (*sp_it)->creation_time_;
+    graph << "\"" << (*sp_it)->get_identifier() << "\";";
+
+    // EMIT CALLS
+    CircularBuffer<SyncPointCall> emit_calls = (*sp_it)->get_emit_calls();
+    // generate call stats
+    std::map<const char *, SyncPointCallStats> emit_call_stats;
+    for (CircularBuffer<SyncPointCall>::iterator emitcalls_it = emit_calls.begin();
+        emitcalls_it != emit_calls.end(); emitcalls_it++) {
+      emit_call_stats[emitcalls_it->get_caller()].update_calls(emitcalls_it->get_call_time());
+    }
+
+    for (std::map<const char *, SyncPointCallStats>::iterator emit_call_stats_it = emit_call_stats.begin();
+        emit_call_stats_it != emit_call_stats.end(); emit_call_stats_it++) {
+      float age = (Time() - emit_call_stats_it->second.get_last_call()).in_sec();
+      if (age < max_age) {
+      graph << "\"" << emit_call_stats_it->first << "\" -> \""
+          <<  (*sp_it)->get_identifier()
+          << "\"" << " [label=\""
+          << " freq=" << emit_call_stats_it->second.get_call_frequency() << "Hz"
+          << " age=" << age << "s"
+          << "\"" << "];";
+      }
+    }
+
+    // WAIT CALLS
+    CircularBuffer<SyncPointCall> wait_calls = (*sp_it)->get_wait_calls();
+    // generate call stats
+    std::map<const char *, SyncPointCallStats> wait_call_stats;
+    for (CircularBuffer<SyncPointCall>::iterator waitcalls_it = wait_calls.begin();
+        waitcalls_it != wait_calls.end(); waitcalls_it++) {
+      wait_call_stats[waitcalls_it->get_caller()].update_calls(*waitcalls_it);
+    }
+
+    for (std::map<const char *, SyncPointCallStats>::iterator wait_call_stats_it = wait_call_stats.begin();
+        wait_call_stats_it != wait_call_stats.end(); wait_call_stats_it++) {
+      float age = (Time() - wait_call_stats_it->second.get_last_call()).in_sec();
+      if (age < max_age) {
+      graph << "\"" << (*sp_it)->get_identifier() << "\"" << " -> "
+          << "\"" << wait_call_stats_it->first << "\"" << " [label=" << "\""
+          << " avg=" << wait_call_stats_it->second.get_waittime_average() <<  "s"
+          << " age=" << age << "s"
+          //<< " max=" << max_wait_time << "s"
+          << "\"" << "];";
+      }
+    }
+  }
+  graph << "}";
+  return graph.str();
 }
 
 } // namespace fawkes

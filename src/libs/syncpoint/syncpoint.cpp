@@ -22,12 +22,15 @@
 #include <syncpoint/syncpoint.h>
 #include <syncpoint/exceptions.h>
 
+#include <utils/time/time.h>
+
 #include <string.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
 
 /** @class SyncPoint <syncpoint/syncpoint.h>
  * The SyncPoint class.
@@ -49,6 +52,9 @@ namespace fawkes {
  */
 SyncPoint::SyncPoint(const char * identifier)
     : identifier_(identifier),
+      emit_calls_(CircularBuffer<SyncPointCall>(1000)),
+      wait_calls_(CircularBuffer<SyncPointCall>(1000)),
+      creation_time_(Time()),
       mutex(new Mutex()),
       wait_condition(new WaitCondition(mutex))
 {
@@ -112,6 +118,7 @@ SyncPoint::emit(const char * component)
     throw SyncPointNonWatcherCalledEmitException(component, get_identifier());
   }
   waiting_watchers.clear();
+  emit_calls_.push_back(SyncPointCall(component));
   wait_condition->wake_all();
   mutex->unlock();
 }
@@ -133,8 +140,45 @@ SyncPoint::wait(const char * component) {
     throw SyncPointMultipleWaitCallsException(component, get_identifier());
   }
   waiting_watchers.insert(component);
+  Time start;
   wait_condition->wait();
+  Time wait_time = Time() - start;
+  wait_calls_.push_back(SyncPointCall(component, start, wait_time));
   mutex->unlock();
+}
+
+/**
+ * @return all watchers of the SyncPoint
+ */
+std::set<const char *>
+SyncPoint::get_watchers() const {
+  mutex->lock();
+  std::set<const char *> ret = watchers;
+  mutex->unlock();
+  return ret;
+}
+
+/**
+ * @return a copy of the wait call buffer
+ */
+CircularBuffer<SyncPointCall>
+SyncPoint::get_wait_calls() const {
+  mutex->lock();
+  CircularBuffer<SyncPointCall> ret(wait_calls_);
+  mutex->unlock();
+  return ret;
+}
+
+
+/**
+ * @return a copy of the emit call buffer
+ */
+CircularBuffer<SyncPointCall>
+SyncPoint::get_emit_calls() const {
+  mutex->lock();
+  CircularBuffer<SyncPointCall> ret(emit_calls_);
+  mutex->unlock();
+  return ret;
 }
 
 } // namespace fawkes

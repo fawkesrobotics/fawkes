@@ -23,6 +23,7 @@
 #define __SYNCPOINT_SYNCPOINT_MANAGER_H_
 
 #include <set>
+#include <string>
 
 #include <syncpoint/syncpoint.h>
 #include <core/utils/refptr.h>
@@ -50,6 +51,8 @@ class SyncPointManager
     void release_syncpoint(const char * component, RefPtr<SyncPoint> syncpoint);
 
     std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > get_syncpoints();
+
+    std::string all_syncpoints_as_dot(float max_age);
 
   protected:
     /**

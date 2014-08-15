@@ -24,10 +24,15 @@
 
 #include <interface/interface.h>
 #include <syncpoint/syncpoint_manager.h>
+#include <syncpoint/syncpoint_call.h>
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
+#include <utils/time/time.h>
+
+#include <core/utils/circular_buffer.h>
 
 #include <set>
+#include <map>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -35,6 +40,8 @@ namespace fawkes {
 #endif
 
 class SyncPointManager;
+class SyncPointCall;
+
 
 class SyncPoint
 {
@@ -52,15 +59,24 @@ class SyncPoint
     bool operator==(const SyncPoint & other) const;
     bool operator<(const SyncPoint & other) const;
 
+    std::set<const char *> get_watchers() const;
+    CircularBuffer<SyncPointCall> get_wait_calls() const;
+    CircularBuffer<SyncPointCall> get_emit_calls() const;
+
+
     /**
      * allow Syncpoint Manager to edit
      */
     friend SyncPointManager;
 
   private:
-    const char * identifier_;
+    const char * const identifier_;
     std::set<const char *> watchers;
     std::set<const char *> waiting_watchers;
+
+    CircularBuffer<SyncPointCall> emit_calls_;
+    CircularBuffer<SyncPointCall> wait_calls_;
+    const Time creation_time_;
 
     Mutex *mutex;
     WaitCondition *wait_condition;
