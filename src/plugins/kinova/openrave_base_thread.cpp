@@ -53,9 +53,9 @@ KinovaOpenraveBaseThread::KinovaOpenraveBaseThread(const char *name)
   : Thread(name, Thread::OPMODE_CONTINUOUS)
 {
 #ifdef HAVE_OPENRAVE
-  __OR_env   = NULL;
-  __OR_robot = NULL;
-  __OR_manip = NULL;
+  __viewer_env.env   = NULL;
+  __viewer_env.robot = NULL;
+  __viewer_env.manip = NULL;
 
   __cfg_OR_auto_load_ik = false;
 #endif
@@ -66,9 +66,9 @@ KinovaOpenraveBaseThread::KinovaOpenraveBaseThread(const char *name)
 KinovaOpenraveBaseThread::~KinovaOpenraveBaseThread()
 {
 #ifdef HAVE_OPENRAVE
-  __OR_env   = NULL;
-  __OR_robot = NULL;
-  __OR_manip = NULL;
+  __viewer_env.env   = NULL;
+  __viewer_env.robot = NULL;
+  __viewer_env.manip = NULL;
 #endif
 }
 
@@ -84,8 +84,8 @@ KinovaOpenraveBaseThread::init()
   // perform other initialization stuff (for child classes, that do not want to overload "init()")
   _init();
 
-  __OR_env = openrave->get_environment();
-  __OR_env->enable_debug();
+  __viewer_env.env = openrave->get_environment();
+  __viewer_env.env->enable_debug();
 
   // load robot
   _load_robot();
@@ -104,12 +104,12 @@ KinovaOpenraveBaseThread::finalize()
   __planning_mutex = NULL;
 
 #ifdef HAVE_OPENRAVE
-  delete(__OR_robot);
-  __OR_robot = NULL;
+  delete(__viewer_env.robot);
+  __viewer_env.robot = NULL;
 
-  delete(__OR_manip);
-  __OR_manip = NULL;
+  delete(__viewer_env.manip);
+  __viewer_env.manip = NULL;
 
-  __OR_env = NULL;
+  __viewer_env.env = NULL;
 #endif
 }

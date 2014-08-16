@@ -58,6 +58,11 @@ KinovaOpenraveSingleThread::KinovaOpenraveSingleThread(const char *manipname, bo
   __arm = NULL;
   __manipname = manipname;
   __load_robot = load_robot;
+#ifdef HAVE_OPENRAVE
+  __planner_env.env   = NULL;
+  __planner_env.robot = NULL;
+  __planner_env.manip = NULL;
+#endif
 }
 
 /** Constructor.
@@ -69,6 +74,11 @@ KinovaOpenraveSingleThread::KinovaOpenraveSingleThread(const char *name, const c
   __arm = NULL;
   __manipname = manipname;
   __load_robot = load_robot;
+#ifdef HAVE_OPENRAVE
+  __planner_env.env   = NULL;
+  __planner_env.robot = NULL;
+  __planner_env.manip = NULL;
+#endif
 }
 
 
@@ -81,25 +91,25 @@ KinovaOpenraveSingleThread::_load_robot()
     __cfg_OR_robot_file    = config->get_string("/hardware/jaco/openrave/robot_file");
 
     try {
-      __OR_robot = openrave->add_robot(__cfg_OR_robot_file, false);
+      __viewer_env.robot = openrave->add_robot(__cfg_OR_robot_file, false);
     } catch (Exception& e) {
       throw fawkes::Exception("Could not add robot '%s' to openrave environment. (Error: %s)", __cfg_OR_robot_file.c_str(), e.what_no_backtrace());
     }
 
     try {
-      __OR_manip = new OpenRaveManipulatorKinovaJaco(6, 6);
-      __OR_manip->add_motor(0,0);
-      __OR_manip->add_motor(1,1);
-      __OR_manip->add_motor(2,2);
-      __OR_manip->add_motor(3,3);
-      __OR_manip->add_motor(4,4);
-      __OR_manip->add_motor(5,5);
+      __viewer_env.manip = new OpenRaveManipulatorKinovaJaco(6, 6);
+      __viewer_env.manip->add_motor(0,0);
+      __viewer_env.manip->add_motor(1,1);
+      __viewer_env.manip->add_motor(2,2);
+      __viewer_env.manip->add_motor(3,3);
+      __viewer_env.manip->add_motor(4,4);
+      __viewer_env.manip->add_motor(5,5);
 
       // Set manipulator and offsets.
-      openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
+      openrave->set_manipulator(__viewer_env.robot, __viewer_env.manip, 0.f, 0.f, 0.f);
 
       if( __cfg_OR_auto_load_ik ) {
-        openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_Transform6D);
+        openrave->get_environment()->load_IK_solver(__viewer_env.robot, OpenRAVE::IKP_Transform6D);
       }
 
     } catch (Exception& e) {
@@ -117,8 +127,8 @@ KinovaOpenraveSingleThread::once()
   if(!__load_robot) {
     // robot was not loaded by this thread. So get them from openrave-environment now
     try {
-      __OR_robot = openrave->get_active_robot();
-      __OR_manip = __OR_robot->get_manipulator(); //TODO: use new(), copy constructor!
+      __viewer_env.robot = openrave->get_active_robot();
+      __viewer_env.manip = __viewer_env.robot->get_manipulator(); //TODO: use new(), copy constructor!
 
     } catch (Exception& e) {
       throw fawkes::Exception("Could not add robot '%s' to openrave environment. (Error: %s)", __cfg_OR_robot_file.c_str(), e.what_no_backtrace());
@@ -126,26 +136,52 @@ KinovaOpenraveSingleThread::once()
   }
 
   while( !__robot ) {
-    __robot = __OR_robot->get_robot_ptr();
+    __robot = __viewer_env.robot->get_robot_ptr();
     usleep(100);
   }
   while( !__manip ) {
     __manip = __robot->SetActiveManipulator(__manipname);
     usleep(100);
   }
+
+  // create cloned environment for planning
+  logger->log_debug(name(), "Clone environment for planning");
+  openrave->clone(&__planner_env.env, &__planner_env.robot, &__planner_env.manip);
+
+  if( __planner_env.env == NULL
+   || __planner_env.robot == NULL
+   || __planner_env.manip == NULL) {
+    throw fawkes::Exception("Could not clone properly, received a NULL pointer");
+  }
+
+  // set active manipulator in planning environment. This won't change anymore!
+  RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__manipname);
+  __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
+
 #endif //HAVE_OPENRAVE
 }
 
 void
 KinovaOpenraveSingleThread::finalize() {
+#ifdef HAVE_OPENRAVE
+  delete(__planner_env.robot);
+  __planner_env.robot = NULL;
+
+  delete(__planner_env.manip);
+  __planner_env.manip = NULL;
+
+  delete(__planner_env.env);
+  __planner_env.env = NULL;
+
   if(!__load_robot) {
     // avoid implicit deletes or anything the like
-    __OR_robot = NULL;
-    __OR_manip = NULL;
-    __OR_env = NULL;
+    __viewer_env.robot = NULL;
+    __viewer_env.manip = NULL;
+    __viewer_env.env = NULL;
   } else {
     KinovaOpenraveBaseThread::finalize();
   }
+#endif
 }
 
 void
@@ -227,8 +263,8 @@ KinovaOpenraveSingleThread::update_openrave()
       __joints.push_back(__arm->iface->joints(5));
 
       // get target IK values in openrave format
-      __OR_manip->set_angles_device(__joints);
-      __OR_manip->get_angles(__joints);
+      __viewer_env.manip->set_angles_device(__joints);
+      __viewer_env.manip->get_angles(__joints);
 
       __robot->SetDOFValues(__joints, 1, __manip->GetArmIndices());
       __planning_mutex->unlock();
@@ -248,27 +284,21 @@ KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, floa
 
 #ifdef HAVE_OPENRAVE
   try {
-    __OR_robot->get_robot_ptr()->SetActiveManipulator(__manip);
-    __OR_robot->get_robot_ptr()->SetActiveDOFs(__manip->GetArmIndices());
-
     // update planner params; set correct DOF and stuff
-    __OR_robot->get_planner_params()->SetRobotActiveJoints(__OR_robot->get_robot_ptr());
-    __OR_robot->get_planner_params()->vgoalconfig.resize(__OR_robot->get_robot_ptr()->GetActiveDOF());
+    __planner_env.robot->get_planner_params()->SetRobotActiveJoints(__planner_env.robot->get_robot_ptr());
+    __planner_env.robot->get_planner_params()->vgoalconfig.resize(__planner_env.robot->get_robot_ptr()->GetActiveDOF());
 
     // get IK from openrave
-    solvable = __OR_robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3);
+    solvable = __planner_env.robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3);
 
     if( solvable ) {
       logger->log_debug(name(), "IK successful!");
 
+      // create new target for the queue
       RefPtr<jaco_target_t> target(new jaco_target_t());
 
       // get target IK valoues
-      vector<float> joints;
-      __OR_robot->get_target().manip->get_angles(joints);
-      //need next lines, as "target" only stores a OpenRaveManipulator* , so it stores values in OR only!!
-      __OR_manip->set_angles(joints);
-      __OR_manip->get_angles_device(target->pos);
+      __planner_env.robot->get_target().manip->get_angles_device(target->pos);
 
       if( plan ) {
         // add this to the target queue for planning
@@ -288,7 +318,6 @@ KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, floa
       logger->log_warn(name(), "No IK solution found for target.");
       return solvable;
     }
-
 
   } catch( openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
@@ -310,32 +339,34 @@ KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, floa
 void
 KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
 {
-
-  // Set active manipulator
-  __robot->SetActiveManipulator(__manip);
-  __robot->SetActiveDOFs(__manip->GetArmIndices());
-
   // Set target point for planner (has already passed IK check previously!)
-  __OR_manip->set_angles_device(to->pos);
-  __OR_manip->get_angles(to->pos);
+  __planner_env.manip->set_angles_device(to->pos);
+  std::vector<float> target;
+  __planner_env.manip->get_angles(target);
+
   //logger->log_debug(name(), "setting target %f %f %f %f %f %f",
   //                  to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5));
-  __OR_robot->set_target_angles(to->pos);
+  __planner_env.robot->set_target_angles(target);
 
   // Set starting point for planner, convert encoder values to angles if necessary
   //logger->log_debug(name(), "setting start %f %f %f %f %f %f",
   //                  from->pos.at(0), from->pos.at(1), from->pos.at(2), from->pos.at(3), from->pos.at(4), from->pos.at(5));
-  __OR_manip->set_angles_device(from->pos);
+  __planner_env.manip->set_angles_device(from->pos);
 
   // Set planning parameters (none yet)
-  __OR_robot->set_target_plannerparams("");
+  __planner_env.robot->set_target_plannerparams("");
 
   // Run planner
   float sampling = 0.01f; //maybe catch from config? or "learning" depending on performance?
   try {
-    openrave->run_planner(__OR_robot, sampling);
+    __planner_env.env->run_planner(__planner_env.robot, sampling);
   } catch (fawkes::Exception &e) {
     logger->log_warn(name(), "Planning failed: %s", e.what_no_backtrace());
+    // TODO: better handling!
+    // for now just skip planning, so the target_queue can be processed
+    __target_mutex->lock();
+    to->type = TARGET_ANGULAR;
+    __target_mutex->unlock();
     return;
   }
 
@@ -344,6 +375,6 @@ KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_
   __trajec_mutex->lock();
   // we can do the following becaouse get_trajectory_device() returns a new object, thus
   //  can be safely deleted by RefPtr auto-deletion
-  to->trajec = RefPtr<jaco_trajec_t>( __OR_robot->get_trajectory_device() );
+  to->trajec = RefPtr<jaco_trajec_t>( __planner_env.robot->get_trajectory_device() );
   __trajec_mutex->unlock();
 }

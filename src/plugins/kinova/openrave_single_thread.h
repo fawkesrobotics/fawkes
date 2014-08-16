@@ -65,6 +65,8 @@ class KinovaOpenraveSingleThread : public KinovaOpenraveBaseThread
   bool        __load_robot;
 
 #ifdef HAVE_OPENRAVE
+  fawkes::jaco_openrave_set_t __planner_env;
+
   OpenRAVE::RobotBasePtr              __robot;
   OpenRAVE::RobotBase::ManipulatorPtr __manip;
   std::vector<OpenRAVE::dReal>        __joints;

@@ -41,6 +41,14 @@
 
 namespace fawkes {
   class Mutex;
+
+#ifdef HAVE_OPENRAVE
+  typedef struct {
+    OpenRaveEnvironment* env;
+    OpenRaveRobot*       robot;
+    OpenRaveManipulator* manip;
+  } jaco_openrave_set_t;
+#endif
 }
 
 class KinovaOpenraveBaseThread
@@ -81,9 +89,7 @@ class KinovaOpenraveBaseThread
   fawkes::RefPtr< fawkes::jaco_target_queue_t > __target_queue;
 
 #ifdef HAVE_OPENRAVE
-  fawkes::OpenRaveEnvironment* __OR_env;
-  fawkes::OpenRaveRobot*       __OR_robot;
-  fawkes::OpenRaveManipulator* __OR_manip;
+  fawkes::jaco_openrave_set_t __viewer_env;
 
   bool          __cfg_OR_use_viewer;
   std::string   __cfg_OR_robot_file;
