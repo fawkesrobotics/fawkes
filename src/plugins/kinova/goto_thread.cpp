@@ -121,12 +121,7 @@ KinovaGotoThread::set_target(float x, float y, float z,
     target->fingers.push_back(f1);
     target->fingers.push_back(f2);
     target->fingers.push_back(f3);
-  } else {
-    target->fingers.push_back(__arm->iface->finger1());
-    target->fingers.push_back(__arm->iface->finger2());
-    target->fingers.push_back(__arm->iface->finger3());
   }
-
   __arm->target_mutex->lock();
   __arm->target_queue->push_back(target);
   __arm->target_mutex->unlock();
@@ -151,12 +146,7 @@ KinovaGotoThread::set_target_ang(float j1, float j2, float j3,
     target->fingers.push_back(f1);
     target->fingers.push_back(f2);
     target->fingers.push_back(f3);
-  } else {
-    target->fingers.push_back(__arm->iface->finger1());
-    target->fingers.push_back(__arm->iface->finger2());
-    target->fingers.push_back(__arm->iface->finger3());
   }
-
   __arm->target_mutex->lock();
   __arm->target_queue->push_back(target);
   __arm->target_mutex->unlock();
@@ -410,6 +400,12 @@ KinovaGotoThread::_goto_target()
     switch( __target->type ) {
       case TARGET_ANGULAR:
         logger->log_debug(name(), "target_type: TARGET_ANGULAR");
+        if( __target->fingers.empty() ) {
+          // have no finger values. use current ones
+          __target->fingers.push_back(__arm->iface->finger1());
+          __target->fingers.push_back(__arm->iface->finger2());
+          __target->fingers.push_back(__arm->iface->finger3());
+        }
         __arm->arm->goto_joints(__target->pos, __target->fingers);
         break;
 
@@ -427,6 +423,12 @@ KinovaGotoThread::_goto_target()
 
       default: //TARGET_CARTESIAN
         logger->log_debug(name(), "target_type: TARGET_CARTESIAN");
+        if( __target->fingers.empty() ) {
+          // have no finger values. use current ones
+          __target->fingers.push_back(__arm->iface->finger1());
+          __target->fingers.push_back(__arm->iface->finger2());
+          __target->fingers.push_back(__arm->iface->finger3());
+        }
         __arm->arm->goto_coords(__target->pos, __target->fingers);
         break;
     }
