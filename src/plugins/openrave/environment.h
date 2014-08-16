@@ -46,7 +46,9 @@ class OpenRaveEnvironment
 {
  public:
   OpenRaveEnvironment(fawkes::Logger* logger = 0);
-  ~OpenRaveEnvironment();
+  OpenRaveEnvironment(const OpenRaveEnvironment& src);
+  virtual ~OpenRaveEnvironment();
+
 
   virtual void create();
   virtual void destroy();
@@ -75,9 +77,9 @@ class OpenRaveEnvironment
   virtual OpenRAVE::EnvironmentBasePtr get_env_ptr() const;
 
  private:
-  fawkes::Logger*	__logger;
+  fawkes::Logger* __logger;
 
-  OpenRAVE::EnvironmentBasePtr	__env;
+  OpenRAVE::EnvironmentBasePtr  __env;
   OpenRAVE::PlannerBasePtr      __planner;
   OpenRAVE::ModuleBasePtr       __mod_ikfast;
 

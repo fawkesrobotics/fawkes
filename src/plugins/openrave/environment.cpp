@@ -78,6 +78,27 @@ OpenRaveEnvironment::OpenRaveEnvironment(fawkes::Logger* logger) :
 {
 }
 
+/** Copy constructor.
+ * This also clones the environment in OpenRAVE, including all bodies!
+ * BiRRT planner and IKFast module are also created.
+ * @param src The OpenRaveEnvironment to clone
+ */
+OpenRaveEnvironment::OpenRaveEnvironment(const OpenRaveEnvironment& src)
+ : __logger( src.__logger ),
+   __viewer_enabled( 0 )
+{
+  __env = src.__env->CloneSelf(OpenRAVE::Clone_Bodies);
+
+  // create planner
+  __planner = RaveCreatePlanner(__env,"birrt");
+  if(!__planner)
+    {throw fawkes::Exception("OpenRAVE Environment: Could not create planner. Error in OpenRAVE.");}
+
+  // create ikfast module
+  __mod_ikfast = RaveCreateModule(__env,"ikfast");
+  __env->AddModule(__mod_ikfast,"");
+}
+
 /** Destructor. */
 OpenRaveEnvironment::~OpenRaveEnvironment()
 {
