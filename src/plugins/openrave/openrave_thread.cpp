@@ -92,6 +92,23 @@ OpenRaveThread::loop()
 /* ##########################################################
  * #    methods form OpenRaveConnector (openrave_connector.h)     #
  * ########################################################*/
+/** Clone basically everything
+ * We pass pointers to pointer as parameters, so the pointers we create before calling this clone()
+ *  method will point to the new objects.
+ * @param env Pointer to pointer of the copied environment
+ * @param robot Pointer to pointer of the copied robot
+ * @param manip Pointer to pointer of the copied manipulator
+ */
+void
+OpenRaveThread::clone(OpenRaveEnvironment** env, OpenRaveRobot** robot, OpenRaveManipulator** manip) const
+{
+  *env = new OpenRaveEnvironment(*__OR_env);
+  *robot = new OpenRaveRobot(*__OR_robot, *env);
+  *manip = (*robot)->get_manipulator(); // cloned by OpenRaveRobot copy-ctor
+
+  (*env)->load_IK_solver(*robot);
+}
+
 /** Get pointer to OpenRaveEnvironment object.
  * @return pointer
  */

@@ -56,12 +56,19 @@ class OpenRaveThread
 
   //for OpenRaveConnector
   //virtual void testDebug();
-  virtual fawkes::OpenRaveEnvironment*	get_environment() const;
-  virtual fawkes::OpenRaveRobot*	get_active_robot() const;
-  virtual void				set_active_robot(fawkes::OpenRaveRobot* robot);
-  virtual fawkes::OpenRaveRobot*	add_robot(const std::string& filename_robot, bool autogenerate_IK);
-  virtual void 				set_manipulator(fawkes::OpenRaveManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0);
-  virtual void 				set_manipulator(fawkes::OpenRaveRobot* robot, fawkes::OpenRaveManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0);
+  virtual void clone(fawkes::OpenRaveEnvironment** env,
+                     fawkes::OpenRaveRobot** robot,
+                     fawkes::OpenRaveManipulator** manip) const;
+
+  virtual fawkes::OpenRaveEnvironment* get_environment() const;
+  virtual fawkes::OpenRaveRobot*       get_active_robot() const;
+  virtual void                         set_active_robot(fawkes::OpenRaveRobot* robot);
+  virtual fawkes::OpenRaveRobot*       add_robot(const std::string& filename_robot, bool autogenerate_IK);
+
+  virtual void set_manipulator(fawkes::OpenRaveManipulator* manip,
+                               float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0);
+  virtual void set_manipulator(fawkes::OpenRaveRobot* robot, fawkes::OpenRaveManipulator* manip,
+                               float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0);
 
   virtual void start_viewer() const;
   virtual void run_planner(fawkes::OpenRaveRobot* = NULL, float sampling=0.01f);

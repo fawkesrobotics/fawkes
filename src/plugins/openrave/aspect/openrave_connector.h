@@ -45,6 +45,15 @@ class OpenRaveConnector
   /** Virtual empty destructor. */
   virtual ~OpenRaveConnector() {}
 
+  /** Clone basically everything
+   * We pass pointers to pointer as parameters, so the pointers we create before calling this clone()
+   *  method will point to the new objects.
+   * @param env Pointer to pointer of the copied environment
+   * @param robot Pointer to pointer of the copied robot
+   * @param manip Pointer to pointer of the copied manipulator
+   */
+  virtual void clone(OpenRaveEnvironment** env, OpenRaveRobot** robot, OpenRaveManipulator** manip) const = 0;
+
   /** Start OpenRave viewer */
   virtual void start_viewer() const = 0;
 
