@@ -66,6 +66,50 @@ OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnviro
   this->load(filename, env);
 }
 
+/** Copy Constructor.
+ * @param src The OpenRaveRobot to clone
+ * @param new_env Pointer to the new OpenRaveEnvironment. We need this to set __robot
+ *  to the correct robot in the new OpenRAVE-environment.
+ */
+OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnvironment* new_env) :
+  __logger( src.__logger ),
+  __name( src.__name )
+{
+  __traj = new std::vector< std::vector<dReal> >();
+
+  __trans_offset_x = src.__trans_offset_x;
+  __trans_offset_y = src.__trans_offset_y;
+  __trans_offset_z = src.__trans_offset_z;
+
+  // Get correct robot from environment.
+  EnvironmentMutex::scoped_lock lock(new_env->get_env_ptr()->GetMutex());
+  std::string name = src.get_robot_ptr()->GetName();
+  __robot = new_env->get_env_ptr()->GetRobot( name );
+
+  if(!__robot)
+    {throw fawkes::IllegalArgumentException("OpenRAVE Robot: Robot '%s' could not be loaded. Check name.", name.c_str());}
+  else if(__logger)
+    {__logger->log_debug("OpenRAVE Robot", "Robot '%s' loaded.", name.c_str());}
+
+  // Initialize robot
+  set_ready();
+
+  // Set the same manipulator "active" as it was in previous environment
+  // "set_ready()" just takes the first manipulator it finds
+  {
+    EnvironmentMutex::scoped_lock lock(src.get_robot_ptr()->GetEnv()->GetMutex());
+    __arm = __robot->SetActiveManipulator( src.get_robot_ptr()->GetActiveManipulator()->GetName() );
+  }
+  __robot->SetActiveDOFs(__arm->GetArmIndices());
+
+  __manip = src.get_manipulator()->copy();
+  __target.manip = __manip->copy();
+  __display_planned_movements = false;
+
+  if(__logger)
+    {__logger->log_debug("OpenRAVE Robot", "Robot '%s' cloned.", __name.c_str());}
+}
+
 /** Destructor */
 OpenRaveRobot::~OpenRaveRobot()
 {
@@ -110,7 +154,6 @@ OpenRaveRobot::load(const std::string& filename, fawkes::OpenRaveEnvironment* en
   else if(__logger)
     {__logger->log_debug("OpenRAVE Robot", "Robot loaded.");}
 }
-
 
 /** Set robot ready for usage.
  * Here: Set active DOFs and create plannerParameters.
@@ -527,6 +570,9 @@ OpenRAVE::PlannerBase::PlannerParametersPtr
 OpenRaveRobot::get_planner_params() const
 {
   EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+  // set planning configuration space to current active dofs
+  __planner_params->SetRobotActiveJoints(__robot);
+  __planner_params->vgoalconfig.resize(__robot->GetActiveDOF());
 
   __manip->get_angles(__planner_params->vinitialconfig);
   __target.manip->get_angles(__planner_params->vgoalconfig);

@@ -43,6 +43,7 @@ class OpenRaveRobot
  public:
   OpenRaveRobot(fawkes::Logger* logger = 0);
   OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironment* env, fawkes::Logger* logger = 0);
+  OpenRaveRobot(const fawkes::OpenRaveRobot& src, const fawkes::OpenRaveEnvironment* new_env);
   virtual ~OpenRaveRobot();
 
   // build/load robot parts
