@@ -50,7 +50,14 @@ OpenRaveManipulatorKatana6M180::~OpenRaveManipulatorKatana6M180()
 {
 }
 
-
+/** Create a new copy of this OpenRaveManipulator instance.
+ * @return A pointer to the copied instance
+ */
+OpenRaveManipulator*
+OpenRaveManipulatorKatana6M180::copy()
+{
+  return new OpenRaveManipulatorKatana6M180(*this);
+}
 
 
 /* ########## various ######### */

@@ -51,7 +51,14 @@ OpenRaveManipulatorNeuronicsKatana::~OpenRaveManipulatorNeuronicsKatana()
 {
 }
 
-
+/** Create a new copy of this OpenRaveManipulator instance.
+ * @return A pointer to the copied instance
+ */
+OpenRaveManipulator*
+OpenRaveManipulatorNeuronicsKatana::copy()
+{
+  return new OpenRaveManipulatorNeuronicsKatana(*this);
+}
 
 
 /* ########## various ######### */

@@ -65,38 +65,4 @@ OpenRaveManipulator::add_motor(unsigned int number, unsigned int number_device)
   __motors.push_back(motor);
 }
 
-
-
-
-
-
-
-
-/* ########## various ########## */
-/** Transform single OpenRAVE motor angle to real device angle
- * @param number motor number of real device
- * @param angle motor angle of OpenRAVE model
- * @return transformed angle
- */
-float
-OpenRaveManipulator::angle_OR_to_device(unsigned int number, float angle) const
-{
-  // Transformations should be implemented in subclasses, as these depend on
-  // the attached manipulator device.
-  return angle;
-}
-
-/** Transform single device motor angle to OpenRAVE angle
- * @param number motor number of real device
- * @param angle motor angle of real device
- * @return transformed angle
- */
-float
-OpenRaveManipulator::angle_device_to_OR(unsigned int number, float angle) const
-{
-  // Transformations should be implemented in subclasses, as these depend on
-  // the attached manipulator device.
-  return angle;
-}
-
 } // end of namespace fawkes

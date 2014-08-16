@@ -38,7 +38,10 @@ class OpenRaveManipulator
   OpenRaveManipulator(unsigned int count, unsigned int count_device);
   virtual ~OpenRaveManipulator();
 
-  virtual void add_motor(unsigned int number, unsigned int number_device);
+  ///\brief Create a new copy of this OpenRaveManipulator instance
+  virtual OpenRaveManipulator* copy() = 0;
+
+  void add_motor(unsigned int number, unsigned int number_device);
 
   template <typename T_from, typename T_to> void angles_or_to_device(std::vector<T_from>& from, std::vector<T_to>& to) const;
   template <typename T> void get_angles(std::vector<T>& to) const; // angles of OpenRAVE model
@@ -49,8 +52,8 @@ class OpenRaveManipulator
 
 
  protected:
-  virtual float angle_OR_to_device(unsigned int number, float angle) const;
-  virtual float angle_device_to_OR(unsigned int number, float angle) const;
+  virtual float angle_OR_to_device(unsigned int number, float angle) const = 0;
+  virtual float angle_device_to_OR(unsigned int number, float angle) const = 0;
 
   std::vector<motor_t>  __motors;       /**< vector of motors */
   unsigned int          __cnt;          /**< number of motors on OpenRAVE model */

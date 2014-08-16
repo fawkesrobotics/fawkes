@@ -36,6 +36,7 @@ class OpenRaveManipulatorKinovaJaco : public OpenRaveManipulator
   OpenRaveManipulatorKinovaJaco(unsigned int count, unsigned int countDevice);
   virtual ~OpenRaveManipulatorKinovaJaco();
 
+  virtual OpenRaveManipulator* copy();
 
  private:
   virtual float angle_OR_to_device(unsigned int number, float angle) const;

@@ -111,6 +111,7 @@ OpenRaveRobot::load(const std::string& filename, fawkes::OpenRaveEnvironment* en
     {__logger->log_debug("OpenRAVE Robot", "Robot loaded.");}
 }
 
+
 /** Set robot ready for usage.
  * Here: Set active DOFs and create plannerParameters.
  * CAUTION: Only successful after added to environment. Otherwise no active DOF will be recognized. */
@@ -201,7 +202,7 @@ void
 OpenRaveRobot::set_manipulator(fawkes::OpenRaveManipulator* manip, bool display_movements)
 {
   __manip = manip;
-  __target.manip = new OpenRaveManipulator(*__manip);
+  __target.manip = __manip->copy();
 
   __display_planned_movements = display_movements;
 }
@@ -526,6 +527,7 @@ OpenRAVE::PlannerBase::PlannerParametersPtr
 OpenRaveRobot::get_planner_params() const
 {
   EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+
   __manip->get_angles(__planner_params->vinitialconfig);
   __target.manip->get_angles(__planner_params->vgoalconfig);
 

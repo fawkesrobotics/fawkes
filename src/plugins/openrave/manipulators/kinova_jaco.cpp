@@ -52,6 +52,14 @@ OpenRaveManipulatorKinovaJaco::~OpenRaveManipulatorKinovaJaco()
 {
 }
 
+/** Create a new copy of this OpenRaveManipulator instance.
+ * @return A pointer to the copied instance
+ */
+OpenRaveManipulator*
+OpenRaveManipulatorKinovaJaco::copy()
+{
+  return new OpenRaveManipulatorKinovaJaco(*this);
+}
 
 
 
