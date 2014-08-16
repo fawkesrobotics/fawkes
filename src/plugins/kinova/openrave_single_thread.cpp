@@ -252,27 +252,23 @@ KinovaOpenraveSingleThread::update_openrave()
     return;
 
 #ifdef HAVE_OPENRAVE
-  if( __planning_mutex->try_lock() ) {
-    try {
-      __joints.clear();
-      __joints.push_back(__arm->iface->joints(0));
-      __joints.push_back(__arm->iface->joints(1));
-      __joints.push_back(__arm->iface->joints(2));
-      __joints.push_back(__arm->iface->joints(3));
-      __joints.push_back(__arm->iface->joints(4));
-      __joints.push_back(__arm->iface->joints(5));
+  try {
+    __joints.clear();
+    __joints.push_back(__arm->iface->joints(0));
+    __joints.push_back(__arm->iface->joints(1));
+    __joints.push_back(__arm->iface->joints(2));
+    __joints.push_back(__arm->iface->joints(3));
+    __joints.push_back(__arm->iface->joints(4));
+    __joints.push_back(__arm->iface->joints(5));
 
-      // get target IK values in openrave format
-      __viewer_env.manip->set_angles_device(__joints);
-      __viewer_env.manip->get_angles(__joints);
+    // get target IK values in openrave format
+    __viewer_env.manip->set_angles_device(__joints);
+    __viewer_env.manip->get_angles(__joints);
 
-      __robot->SetDOFValues(__joints, 1, __manip->GetArmIndices());
-      __planning_mutex->unlock();
+    __robot->SetDOFValues(__joints, 1, __manip->GetArmIndices());
 
-    } catch( openrave_exception &e) {
-      __planning_mutex->unlock();
-      throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
-    }
+  } catch( openrave_exception &e) {
+    throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
 #endif
 }
