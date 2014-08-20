@@ -914,6 +914,8 @@ p_send_message()
 	}
 
 	(*it)->msgq_enqueue( msg );
+	// return the msgID as 4th argument
+	EC_arg( 4 ).unify((long)(msg->id()));
       }
       catch (Exception& e)
       {

@@ -35,6 +35,7 @@
 :- export bb_read_interface/3.
 :- export bb_write_interface/3.
 :- export bb_send_message/3.
+:- export bb_send_message/4.
 :- export bb_recv_messages/2.
 
 :- export bb_ensure_connected_remote/1.
@@ -53,7 +54,7 @@
 :- external(bb_write_interfaces/0, p_write_interfaces).
 :- external(bb_read_interface/3, p_read_from_interface).
 :- external(bb_write_interface/3, p_write_to_interface).
-:- external(bb_send_message/3, p_send_message).
+:- external(bb_send_message/4, p_send_message).
 :- external(bb_recv_messages/2, p_recv_messages).
 
 %% definition of errors
@@ -72,3 +73,6 @@ bb_open_interface_reading(Type, Id) :-
 
 bb_ensure_connected_remote(Host) :- bb_is_connected ; bb_connect_remote(Host).
 bb_ensure_connected :- bb_is_connected ; error('Connection error',_).
+
+%% bb_send_message/3 with the MsgID omitted
+bb_send_message(Interface, MessageType, Args) :- bb_send_message(Interface, MessageType, Args, _).
