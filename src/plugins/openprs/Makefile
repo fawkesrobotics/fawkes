@@ -18,11 +18,11 @@ include $(BASEDIR)/etc/buildsys/config.mk
 # include $(BUILDSYSDIR)/openprs.mk
 include $(BUILDSYSDIR)/boost.mk
 
-REQ_BOOST_LIBS = asio system
+REQ_BOOST_LIBS = asio system thread
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-LIBS_openprs = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-               fawkesinterface fawkesclipsaspect
+LIBS_openprs = pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
+               fawkesinterface fawkesopenprsaspect fawkesopenprsutils
 OBJS_openprs = openprs_plugin.o openprs_thread.o
 
 OBJS_all = $(OBJS_openprs)
@@ -43,9 +43,11 @@ endif
 
 ifneq ($(GCC_TOO_OLD),1)
   ifeq ($(HAVE_LIBDAEMON)$(HAVE_BOOST_LIBS),11)
-    #PRESUBDIRS += aspect
+    PRESUBDIRS += utils aspect
+    SUBDIRS    += example
 
-    CFLAGS  += $(CFLAGS_CPP11) $(CFLAGS_OPENPRS)  $(CFLAGS_LIBDAEMON) \
+    CFLAGS  += $(CFLAGS_CPP11) \
+	       $(CFLAGS_OPENPRS)  $(CFLAGS_LIBDAEMON) \
 	       $(call boost-libs-cflags,$(REQ_BOOST_LIBS)) 
     LDFLAGS += $(LDFLAGS_OPENPRS) $(LDFLAGS_LIBDAEMON) \
 	       $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
@@ -62,6 +64,9 @@ ifneq ($(GCC_TOO_OLD),1)
 else
   WARN_TARGETS += warning_old_gcc
 endif
+
+aspect: utils
+example: aspect utils
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)  $(WARN_TARGETS_BOOST)

@@ -2,7 +2,7 @@
 /***************************************************************************
  *  openprs_thread.h - OpenPRS aspect provider thread
  *
- *  Created: Sat Jun 16 14:38:21 2012 (Mexico City)
+ *  Created: Thu Aug 14 15:52:35 2014
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
@@ -32,13 +32,13 @@
 #include <aspect/blocked_timing.h>
 // include <plugins/openprs/aspect/openprs_inifin.h>
 
-#include <boost/asio.hpp>
-#include <thread>
 #include <string>
 
 namespace fawkes {
   class AspectIniFin;
 }
+
+class SubProcess;
 
 class OpenPRSThread
 : public fawkes::Thread,
@@ -60,42 +60,7 @@ class OpenPRSThread
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
- private: // types
-  class SubProc
-  {
-   public:
-    SubProc(std::string progname, boost::asio::io_service &io_service)
-    : progname(progname),
-      sd_stdin(io_service), sd_stdout(io_service), sd_stderr(io_service) {}
-
-    std::string  progname;
-
-    pid_t        pid;
-    int          pipe_stdin_w;
-    int          pipe_stdout_r;
-    int          pipe_stderr_r;
-
-    boost::asio::posix::stream_descriptor sd_stdin;
-    boost::asio::posix::stream_descriptor sd_stdout;
-    boost::asio::posix::stream_descriptor sd_stderr;
-
-    boost::asio::streambuf buf_stdout;
-    boost::asio::streambuf buf_stderr;
-  };
-
  private: // methods
-  pid_t run_proc(const char *file, const char *argv[], const char *envp[],
-		 int & pipe_stdin_w, int & pipe_stdout_r, int & pipe_stderr_r);
-
-  void  run_proc(const char *file, const char *argv[], const char *envp[],
-		 SubProc &proc_info);
-  void  check_proc(SubProc &proc);
-
-  void start_log(const char *logname, fawkes::Logger::LogLevel log_level,
-		 boost::asio::posix::stream_descriptor &sd, boost::asio::streambuf &buf);
-  void handle_log_line(const char *logname, fawkes::Logger::LogLevel log_level,
-		       boost::asio::posix::stream_descriptor &sd, boost::asio::streambuf &buf,
-		       boost::system::error_code ec, size_t bytes_read);
 
  private: // members
   bool         cfg_mp_run_;
@@ -107,12 +72,9 @@ class OpenPRSThread
 
   //fawkes::OpenPRSAspectIniFin openprs_aspect_inifin_;
 
-  boost::asio::io_service               io_service_;
-  std::thread                           io_service_thread_;
-  boost::asio::io_service::work         io_service_work_;
+  SubProcess *proc_mp_;
+  SubProcess *proc_srv_;
 
-  SubProc proc_mp_;
-  SubProc proc_srv_;
 
 };
 
