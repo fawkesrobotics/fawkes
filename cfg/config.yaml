@@ -26,6 +26,11 @@ fawkes:
     # run fawkes independent of the log level.
     #loggers: console;file/debug:debug.log
 
+    # Enable to redirect stderr to the log. If you have mis-behaving
+    # third-party code this can come in handy to keep records of what's
+    # going on for later analysis.
+    log_stderr_as_warn: true
+
     net:
       # Port for Fawkes Network Protocol service; TCP port
       tcp_port: !tcp-port 1910
