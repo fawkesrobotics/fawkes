@@ -54,31 +54,32 @@ wait_for_skiller :-
     bb_read_interface("Skiller", "status", Status),
     not_running(Status).
 
-%% wait until skiller is running
-%% use with caution:
-%% This will only work if the skill is either
-%% still running or hasn't started to run.
-%% If the skiller is already done, this will end in a deadlock.
-wait_for_running :-
+%% wait until the skiller started to process the message with the given MsgID
+%% use with caution: If the message has been processed and the skiller has
+%% already started to process a new message, this will end in a deadlock.
+wait_until_processed(MsgID) :-
     bb_read_interfaces,
-    bb_read_interface("Skiller", "status", Status),
-    not_running(Status), sleep(0.1),
-    wait_for_running.
-wait_for_running :-
-    bb_read_interface("Skiller", "status", Status),
-    is_running(Status).
+    bb_read_interface("Skiller", "msgid", CurrentMsgID),
+    MsgID \= CurrentMsgID,
+    sleep(0.1),
+    wait_until_processed(MsgID).
+wait_until_processed(MsgID) :-
+    bb_read_interfaces,
+    bb_read_interface("Skiller", "msgid", CurrentMsgID),
+    MsgID == CurrentMsgID.
 
 
 %% auxiliary predicates to execute skills
 exec_skill(Skill, Arguments) :-
     append_strings(Skill, "{", Str1),
     append_strings(Str1, Arguments, Str2),
-    append_strings(Str2, "}", Str3),
-    log_info("Executing skill '%w'", Str3),
-    bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", Str3]]),
-    %wait_for_running,
-    sleep(0.5),
-    log_info("Sent Skiller Message").
+    append_strings(Str2, "}", Skillmsg),
+    exec_skill2(Skillmsg).
 
-exec_skill2(Skillmsg) :- bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", Skillmsg]]).
+exec_skill2(Skillmsg) :-
+    log_info("Executing skill '%w'", Skillmsg),
+    bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", Skillmsg]], MsgID),
+    log_info("Sending message with ID %w", [MsgID]),
+    wait_until_processed(MsgID),
+    log_info("Sent Skiller Message").
 
