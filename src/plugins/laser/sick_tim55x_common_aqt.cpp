@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "sick_tim55x_usb_aqt.h"
+#include "sick_tim55x_common_aqt.h"
 
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
@@ -31,13 +31,8 @@
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
-#include <libusb.h>
 
 using namespace fawkes;
-
-#define USB_VENDOR  0x19A2
-#define USB_PRODUCT 0x5001
-#define USB_TIMEOUT 500
 
 
 /** @class SickTiM55xCommonAcquisitionThread "sick_tim55x_common_aqt.h"

@@ -50,7 +50,7 @@ endif
 
 # Yes, only a single zero, boost.mk returns empty string on fail
 ifneq ($(HAVE_LIBUSB)$(HAVE_SICK_TIM55X_BOOST_LIBS),0)
-  OBJS_laser += sick_tim55x_common_aqt.o sick_tim55x_usb_aqt.o
+  OBJS_laser += sick_tim55x_common_aqt.o
 endif
 ifeq ($(HAVE_LIBUSB),1)
   OBJS_laser += sick_tim55x_usb_aqt.o
