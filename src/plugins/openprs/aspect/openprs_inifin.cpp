@@ -1,0 +1,116 @@
+
+/***************************************************************************
+ *  openprs_inifin.cpp - Fawkes OpenPRSAspect initializer/finalizer
+ *
+ *  Created: Mon Aug 18 15:32:20 2014
+ *  Copyright  2014  Tim Niemueller [www.niemueller.de]
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
+ */
+
+#include <plugins/openprs/aspect/openprs_inifin.h>
+#include <plugins/openprs/aspect/openprs_kernel_manager.h>
+#include <plugins/openprs/utils/openprs_comm.h>
+#include <core/threading/thread_finalizer.h>
+
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** @class OpenPRSAspectIniFin <plugins/openprs/aspect/openprs_inifin.h>
+ * OpenPRSAspect initializer/finalizer.
+ * This initializer/finalizer will provide the OpenPRS node handle to
+ * threads with the OpenPRSAspect.
+ * @author Tim Niemueller
+ */
+
+/** Constructor. */
+OpenPRSAspectIniFin::OpenPRSAspectIniFin()
+  : AspectIniFin("OpenPRSAspect")
+{
+}
+
+/** Destructor. */
+OpenPRSAspectIniFin::~OpenPRSAspectIniFin()
+{
+}
+
+
+
+void
+OpenPRSAspectIniFin::init(Thread *thread)
+{
+  OpenPRSAspect *openprs_thread;
+  openprs_thread = dynamic_cast<OpenPRSAspect *>(thread);
+  if (openprs_thread == NULL) {
+    throw CannotInitializeThreadException("Thread '%s' claims to have the "
+					  "OpenPRSAspect, but RTTI says it "
+					  "has not. ", thread->name());
+  }
+
+  openprs_kernel_mgr_->create_kernel(openprs_thread->openprs_kernel_name,
+				     openprs_thread->openprs_kernel_mode == OpenPRSAspect::XOPRS);
+
+  try {
+    openprs_thread->openprs = new OpenPRSComm(openprs_thread->openprs_local_name.c_str(),
+					      openprs_kernel_mgr_->mp_host().c_str(),
+					      openprs_kernel_mgr_->mp_port(),
+					      openprs_server_proxy_);
+  } catch (Exception &e) {
+    openprs_kernel_mgr_->destroy_kernel(openprs_thread->openprs_kernel_name);
+    throw;
+  }
+}
+
+void
+OpenPRSAspectIniFin::finalize(Thread *thread)
+{
+  OpenPRSAspect *openprs_thread;
+  openprs_thread = dynamic_cast<OpenPRSAspect *>(thread);
+  if (openprs_thread == NULL) {
+    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+					"OpenPRSAspect, but RTTI says it "
+					"has not. ", thread->name());
+  }
+
+  openprs_kernel_mgr_->destroy_kernel(openprs_thread->openprs_kernel_name);
+  openprs_thread->finalize_OpenPRSAspect();
+}
+
+
+
+/** Set OpenPRS kernel manager.
+ * @param openprs_kernel_mgr OpenPRS kernel manager
+ */
+void
+OpenPRSAspectIniFin::set_manager(LockPtr<OpenPRSKernelManager> &openprs_kernel_mgr)
+{
+  openprs_kernel_mgr_ = openprs_kernel_mgr;
+}
+
+/** Set OpenPRS server proxy.
+ * @param openprs_server_proxy OpenPRS server proxy
+ * @param openprs_mp_proxy OpenPRS Message Passer proxy
+ */
+void
+OpenPRSAspectIniFin::set_proxies(OpenPRSServerProxy *openprs_server_proxy,
+				 OpenPRSMessagePasserProxy *openprs_mp_proxy)
+{
+  openprs_server_proxy_ = openprs_server_proxy;
+  openprs_mp_proxy_     = openprs_mp_proxy;
+}
+
+} // end namespace fawkes

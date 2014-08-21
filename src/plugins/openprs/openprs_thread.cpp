@@ -20,6 +20,8 @@
  */
 
 #include "openprs_thread.h"
+#include "utils/openprs_server_proxy.h"
+#include "utils/openprs_mp_proxy.h"
 #include "utils/proc.h"
 
 #include <logging/logger.h>
@@ -44,6 +46,7 @@ using namespace fawkes;
 OpenPRSThread::OpenPRSThread()
   : Thread("OpenPRSThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE),
+    AspectProviderAspect(inifin_list())
 {
 }
 
@@ -57,14 +60,33 @@ OpenPRSThread::~OpenPRSThread()
 void
 OpenPRSThread::init()
 {
+  char hostname[HOST_NAME_MAX];
+  if (gethostname(hostname, HOST_NAME_MAX) == -1) {
+    strcpy(hostname, "localhost");
+  }
+
   cfg_mp_run_      = config->get_bool("/openprs/message-passer/run");
   cfg_mp_bin_      = config->get_string("/openprs/message-passer/binary");
-  cfg_mp_port_     = boost::str(boost::format("%u") % config->get_uint("/openprs/message-passer/tcp-port"));
-  cfg_server_run_  = config->get_bool("/openprs/server/run");
-  cfg_server_bin_  = config->get_string("/openprs/server/binary");
-  cfg_server_port_ = boost::str(boost::format("%u") % config->get_uint("/openprs/server/tcp-port"));
+  try {
+    cfg_mp_host_     = config->get_string("/openprs/message-passer/hostname");
+  } catch (Exception &e) {
+    cfg_mp_host_ = hostname;
+  }
+  cfg_mp_port_       = config->get_uint("/openprs/message-passer/tcp-port");
+  cfg_mp_port_s_     = boost::str(boost::format("%u") % cfg_mp_port_);
+  cfg_mp_use_proxy_  = config->get_bool("/openprs/message-passer/use-proxy");
+  cfg_mp_proxy_port_ = config->get_uint("/openprs/message-passer/proxy-tcp-port");
 
-  io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
+  cfg_server_run_    = config->get_bool("/openprs/server/run");
+  cfg_server_bin_    = config->get_string("/openprs/server/binary");
+  try {
+    cfg_server_host_ = config->get_string("/openprs/server/hostname");
+  } catch (Exception &e) {
+    cfg_server_host_ = hostname;
+  }
+  cfg_server_port_   = config->get_uint("/openprs/server/tcp-port");
+  cfg_server_port_s_ = boost::str(boost::format("%u") % cfg_server_port_);
+  cfg_server_proxy_port_ = config->get_uint("/openprs/server/proxy-tcp-port");
 
   if (cfg_mp_run_) {
     logger->log_warn(name(), "Running OPRS-mp");
@@ -89,9 +111,25 @@ OpenPRSThread::init()
 
   logger->log_info(name(), "Starting OpenPRS server proxy");
 
+  openprs_server_proxy_ = new OpenPRSServerProxy(cfg_server_proxy_port_,
+						 cfg_server_host_, cfg_server_port_, logger);
 
+  if (cfg_mp_use_proxy_) {
+    logger->log_info(name(), "Starting OpenPRS message passer proxy");
+    openprs_mp_proxy_     = new OpenPRSMessagePasserProxy(cfg_mp_proxy_port_,
+							  cfg_mp_host_, cfg_mp_port_, logger);
   } else {
+    openprs_mp_proxy_ = NULL;
   }
+
+  logger->log_warn(name(), "Initializing kernel manager");
+  openprs_kernel_mgr_ = new OpenPRSKernelManager(hostname, cfg_server_proxy_port_,
+						 cfg_mp_use_proxy_ ? hostname : cfg_mp_host_,
+						 cfg_mp_use_proxy_ ? cfg_mp_proxy_port_ : cfg_mp_port_,
+						 logger, clock);
+  openprs_aspect_inifin_.set_manager(openprs_kernel_mgr_);
+  openprs_aspect_inifin_.set_proxies(openprs_server_proxy_, openprs_mp_proxy_);
+  openprs_manager_aspect_inifin_.set_manager(openprs_kernel_mgr_);
 }
 
 void
@@ -102,6 +140,10 @@ OpenPRSThread::finalize()
 
   delete proc_srv_;
   delete proc_mp_;
+
+  delete openprs_server_proxy_;
+  delete openprs_mp_proxy_;
+  openprs_kernel_mgr_.clear();
 }
 
 
@@ -112,3 +154,11 @@ OpenPRSThread::loop()
   if (proc_mp_)  proc_mp_->check_proc();
 }
 
+const std::list<AspectIniFin *>
+OpenPRSThread::inifin_list()
+{
+  std::list<AspectIniFin *> rv;
+  rv.push_back(&openprs_aspect_inifin_);
+  rv.push_back(&openprs_manager_aspect_inifin_);
+  return rv;
+}
