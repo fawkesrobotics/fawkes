@@ -26,6 +26,7 @@
 
 #include <logging/logger.h>
 #include <ctime>
+#include <cstdio>
 
 namespace fawkes {
 
@@ -76,6 +77,7 @@ class ConsoleLogger : public Logger
  private:
   struct ::tm  *now_s;
   Mutex        *mutex;
+  FILE         *outf_;
 };
 
 
