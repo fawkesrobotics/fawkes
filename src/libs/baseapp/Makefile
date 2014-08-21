@@ -16,6 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
+include $(BUILDSYSDIR)/boost.mk
 
 CFLAGS  += $(CFLAGS_LIBDAEMON) $(CFLAGS_TF)
 LDFLAGS += $(LDFLAGS_LIBDAEMON) $(LDFLAGS_TF)
@@ -24,10 +25,18 @@ LIBS_libfawkesbaseapp = stdc++ fawkescore fawkesutils fawkesconfig \
 			fawkesblackboard fawkesplugin fawkesnetcomm \
 			fawkesaspects fawkeslogging
 
+REQ_BOOST_LIBS = system
+HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
+
 ifeq ($(HAVE_TF),1)
   LIBS_libfawkesbaseapp += fawkestf
 else
   WARN_TARGETS += warning_tf
+endif
+
+ifeq ($(HAVE_CPP11)$(HAVE_BOOST_LIBS),11)
+  CFLAGS  += -DHAVE_BOOST -DHAVE_CPP11 $(CFLAGS_CPP11) $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
+  LDFLAGS += $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 endif
 
 OBJS_libfawkesbaseapp =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
