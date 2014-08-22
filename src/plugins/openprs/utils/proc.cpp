@@ -25,7 +25,9 @@
 
 #include <boost/bind.hpp>
 
-#include <libdaemon/dfork.h>
+#ifdef HAVE_LIBDAEMON
+#  include <libdaemon/dfork.h>
+#endif
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string>
