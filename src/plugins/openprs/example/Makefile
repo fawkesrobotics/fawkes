@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDSYSDIR)/boost.mk
+include $(BUILDSYSDIR)/openprs.mk
 
 LIBS_openprs_example = fawkescore fawkesutils fawkesaspects fawkesblackboard \
                        fawkesinterface fawkesopenprsaspect fawkesopenprsutils
@@ -23,35 +23,21 @@ OBJS_openprs_example = openprs_example_plugin.o openprs_example_thread.o
 
 OBJS_all = $(OBJS_openprs_example)
 
-ifeq ($(CC),gcc)
-  ifneq ($(call gcc_atleast_version,4,6),1)
-    GCC_TOO_OLD=1
-  endif
-endif
+ifeq ($(HAVE_OPENPRS),1)
+  CFLAGS  += $(CFLAGS_OPENPRS)
+  LDFLAGS += $(LDFLAGS_OPENPRS)
 
-ifneq ($(GCC_TOO_OLD),1)
-  ifeq (1,1)
-    CFLAGS  += $(CFLAGS_CPP11)
-
-    PLUGINS_all = $(PLUGINDIR)/openprs-example.so
-  else
-  endif
+  PLUGINS_all = $(PLUGINDIR)/openprs-example.so
 else
-  WARN_TARGETS += warning_old_gcc
+  WARN_TARGETS += warning_openprs
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS)  $(WARN_TARGETS_BOOST)
+all: $(WARN_TARGETS)
 
-.PHONY: warning_openprs warning_old_gcc $(WARN_TARGETS_BOOST)
-warning_clips:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS Plugins$(TNORMAL) ($(OPENPRS_ERROR))"
-warning_old_gcc:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS Plugins$(TNORMAL) (GCC too old, have $(GCC_VERSION), required 4.6)"
-warning_libdaemon:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS Plugins$(TNORMAL) (libdaemon not found)"
-$(WARN_TARGETS_BOOST): warning_boost_%:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS Plugin$(TNORMAL) (Boost library $* not found)"
+.PHONY: warning_openprs
+warning_openprs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS Aspects$(TNORMAL) ($(OPENPRS_ERROR))"
 endif
 
 include $(BUILDSYSDIR)/base.mk

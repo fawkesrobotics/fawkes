@@ -16,61 +16,38 @@
 BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(LIBSRCDIR)/utils/utils.mk
-include $(BUILDSYSDIR)/boost.mk
+include $(BUILDSYSDIR)/openprs.mk
 
-REQ_BOOST_LIBS = asio system
-HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
-
-HAVE_OPENPRS_MP = $(if $(shell $(PKGCONFIG) --exists 'mp-openprs'; echo $${?/1/}),1,0)
-ifeq ($(HAVE_OPENPRS_MP),1)
-  CFLAGS_OPENPRS_MP  += -DHAVE_OPENPRS_MP $(shell $(PKGCONFIG) --cflags 'mp-openprs')
-  LDFLAGS_OPENPRS_MP += $(shell $(PKGCONFIG) --libs 'mp-openprs')
+HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBDAEMON),1)
+  CFLAGS_LIBDAEMON  += -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
+  LDFLAGS_LIBDAEMON += $(shell $(PKGCONFIG) --libs 'libdaemon')
+else
+  WARN_TARGETS += warning_libdaemon
 endif
-
-
-CFLAGS  += $(CFLAGS_CPP11) $(CFLAGS_OPENPRS_MP)
-LDFLAGS += $(LDFLAGS_OPENPRS_MP)
 
 LIBS_libfawkesopenprsutils = stdc++ pthread fawkescore fawkesutils
 OBJS_libfawkesopenprsutils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_libfawkesopenprsutils)
 
-ifeq ($(CC),gcc)
-  ifneq ($(call gcc_atleast_version,4,6),1)
-    GCC_TOO_OLD=1
-  endif
-endif
+ifeq ($(HAVE_OPENPRS),1)
+  CFLAGS  += $(CFLAGS_OPENPRS)  $(CFLAGS_OPENPRS_MP)  $(CFLAGS_LIBDAEMON)
+  LDFLAGS += $(LDFLAGS_OPENPRS) $(LDFLAGS_OPENPRS_MP) $(LDFLAGS_LIBDAEMON)
 
-ifneq ($(GCC_TOO_OLD),1)
-  ifeq ($(HAVE_OPENPRS_MP)$(HAVE_BOOST_LIBS),11)
-    CFLAGS  += $(call boost-libs-cflags,$(REQ_BOOST_LIBS)) 
-    LDFLAGS += $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
-
-    LIBS_all = $(LIBDIR)/libfawkesopenprsutils.so
-  else
-    ifneq ($(HAVE_OPENPRS_MP),1)
-      WARN_TARGETS += warning_openprs_mp
-    endif
-    ifneq ($(HAVE_BOOST_LIBS),1)
-      WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
-    endif
-  endif
+  LIBS_all = $(LIBDIR)/libfawkesopenprsutils.so
 else
-  WARN_TARGETS += warning_old_gcc
+  WARN_TARGETS += warning_openprs
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS) $(WARN_TARGETS_BOOST)
+all: $(WARN_TARGETS)
 
-.PHONY: warning_openprs warning_old_gcc $(WARN_TARGETS_BOOST)
+.PHONY: warning_openprs warning_libdaemon
 warning_openprs:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS utils$(TNORMAL) (OpenPRS MP libs not found)"
-warning_old_gcc:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS utils$(TNORMAL) (GCC too old, have $(GCC_VERSION), required 4.6)"
-$(WARN_TARGETS_BOOST): warning_boost_%:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS utils$(TNORMAL) (Boost library $* not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS utils$(TNORMAL) ($(OPENPRS_ERROR))"
+warning_libdaemon:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Sub-process cannot close all file handles$(TNORMAL) (libdaemon not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

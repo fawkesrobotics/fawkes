@@ -15,71 +15,35 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-# include $(BUILDSYSDIR)/openprs.mk
-include $(BUILDSYSDIR)/boost.mk
+include $(BUILDSYSDIR)/openprs.mk
 
-REQ_BOOST_LIBS = asio system thread
-HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
-
-LIBS_openprs = pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_openprs = fawkescore fawkesutils fawkesaspects fawkesblackboard \
                fawkesinterface fawkesopenprsaspect fawkesopenprsutils
 OBJS_openprs = openprs_plugin.o openprs_thread.o
 
 OBJS_all = $(OBJS_openprs)
 
-ifeq ($(CC),gcc)
-  ifneq ($(call gcc_atleast_version,4,6),1)
-    GCC_TOO_OLD=1
-  endif
-endif
+ifeq ($(HAVE_OPENPRS),1)
+  PRESUBDIRS += utils aspect
+  SUBDIRS    += example
 
-HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),1,0)
-ifeq ($(HAVE_LIBDAEMON),1)
-  CFLAGS_LIBDAEMON  += -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
-  LDFLAGS_LIBDAEMON += $(shell $(PKGCONFIG) --libs 'libdaemon')
+  CFLAGS  += $(CFLAGS_OPENPRS)  $(CFLAGS_OPENPRS_MP) 
+  LDFLAGS += $(LDFLAGS_OPENPRS) $(LDFLAGS_OPENPRS_MP)
+
+  PLUGINS_all = $(PLUGINDIR)/openprs.so
 else
-  WARN_TARGETS += warning_libdaemon
-endif
-
-ifneq ($(GCC_TOO_OLD),1)
-  ifeq ($(HAVE_LIBDAEMON)$(HAVE_BOOST_LIBS),11)
-    PRESUBDIRS += utils aspect
-    SUBDIRS    += example
-
-    CFLAGS  += $(CFLAGS_CPP11) \
-	       $(CFLAGS_OPENPRS)  $(CFLAGS_LIBDAEMON) \
-	       $(call boost-libs-cflags,$(REQ_BOOST_LIBS)) 
-    LDFLAGS += $(LDFLAGS_OPENPRS) $(LDFLAGS_LIBDAEMON) \
-	       $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
-
-    PLUGINS_all = $(PLUGINDIR)/openprs.so
-  else
-    ifneq ($(HAVE_LIBDAEMON),1)
-      WARN_TARGETS += warning_libdaemon
-    endif
-    ifneq ($(HAVE_BOOST_LIBS),1)
-      WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
-    endif
-  endif
-else
-  WARN_TARGETS += warning_old_gcc
+  WARN_TARGETS += warning_openprs
 endif
 
 aspect: utils
 example: aspect utils
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS)  $(WARN_TARGETS_BOOST)
+all: $(WARN_TARGETS)
 
-.PHONY: warning_openprs warning_old_gcc $(WARN_TARGETS_BOOST)
-warning_clips:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS Plugins$(TNORMAL) ($(OPENPRS_ERROR))"
-warning_old_gcc:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS Plugins$(TNORMAL) (GCC too old, have $(GCC_VERSION), required 4.6)"
-warning_libdaemon:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS Plugins$(TNORMAL) (libdaemon not found)"
-$(WARN_TARGETS_BOOST): warning_boost_%:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS Plugin$(TNORMAL) (Boost library $* not found)"
+.PHONY: warning_openprs
+warning_openprs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS Aspects$(TNORMAL) ($(OPENPRS_ERROR))"
 endif
 
 include $(BUILDSYSDIR)/base.mk
