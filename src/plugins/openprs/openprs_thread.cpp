@@ -102,7 +102,10 @@ OpenPRSThread::init()
   if (cfg_server_run_) {
     logger->log_warn(name(), "Running OPRS-server");
     const char *filename = cfg_server_bin_.c_str();
-    const char *argv[] = { filename, "-j", cfg_mp_port_s_.c_str(), "-i", cfg_server_port_s_.c_str(), NULL };
+    const char *argv[] = { filename,
+			   "-j", cfg_mp_port_s_.c_str(),
+			   "-i", cfg_server_port_s_.c_str(),
+			   "-l", "none", NULL };
     proc_srv_ = new SubProcess("OPRS-server", filename, argv, NULL, logger);
   } else {
     proc_srv_ = NULL;
