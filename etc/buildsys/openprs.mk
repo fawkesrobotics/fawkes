@@ -31,6 +31,10 @@ OPENPRS_GCC_MINV_MIN = 6
 
 OPENPRS_ERROR=
 
+OPENPRS_MOD_DIR       = $(abspath $(LIBDIR)/openprs)
+OPENPRS_EXEC_MOD_DIR  = $(abspath $(EXEC_LIBDIR)/openprs)
+OPENPRS_EXEC_DATA_DIR = $(abspath $(BASEDIR)/src/plugins/openprs/data)
+
 ifneq ($(PKGCONFIG),)
   HAVE_OPENPRS_MP = $(if $(shell $(PKGCONFIG) --exists 'mp-openprs'; echo $${?/1/}),1,0)
   ifeq ($(HAVE_OPENPRS_MP),1)
@@ -53,7 +57,9 @@ ifneq ($(PKGCONFIG),)
   ifeq ($(HAVE_OPENPRS_MP)$(HAVE_OPENPRS_UTIL)$(HAVE_OPENPRS_MOD)$(HAVE_OPENPRS_BOOST_LIBS),1111)
     HAVE_OPENPRS = 1
 
-    CFLAGS_OPENPRS  = -DHAVE_OPENPRS $(CFLAGS_CPP11) $(call boost-libs-cflags,$(OPENPRS_REQ_BOOST_LIBS))
+    CFLAGS_OPENPRS  = -DHAVE_OPENPRS -DOPENPRS_MOD_DIR=\"$(OPENPRS_EXEC_MOD_DIR)\" \
+		      -DOPENPRS_DATA_DIR=\"$(OPENPRS_EXEC_DATA_DIR)\" \
+		      $(CFLAGS_CPP11) $(call boost-libs-cflags,$(OPENPRS_REQ_BOOST_LIBS))
     LDFLAGS_OPENPRS = -lpthread $(call boost-libs-ldflags,$(OPENPRS_REQ_BOOST_LIBS))
   endif
 
