@@ -54,6 +54,7 @@ SkillerInterface::SkillerInterface() : Interface()
   add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
   add_fieldinfo(IFT_STRING, "error", 128, data->error);
   add_fieldinfo(IFT_UINT32, "exclusive_controller", 1, &data->exclusive_controller);
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_ENUM, "status", 1, &data->status, "SkillStatusEnum");
   add_fieldinfo(IFT_BOOL, "continuous", 1, &data->continuous);
   add_messageinfo("ExecSkillMessage");
@@ -62,7 +63,7 @@ SkillerInterface::SkillerInterface() : Interface()
   add_messageinfo("StopExecMessage");
   add_messageinfo("AcquireControlMessage");
   add_messageinfo("ReleaseControlMessage");
-  unsigned char tmp_hash[] = {0x36, 0x80, 0x24, 0x37, 0x4d, 0x96, 0x6e, 0xb4, 0xf9, 0x73, 0xb0, 0x83, 0x4b, 0xb5, 0xa5, 0xd1};
+  unsigned char tmp_hash[] = {0xf4, 0x84, 0xd2, 0xd3, 0xdf, 0xfb, 0x6b, 0x9a, 0xe7, 0x6f, 0x64, 0xdf, 0xd9, 0xf0, 0x4f, 0xa2};
   set_hash(tmp_hash);
 }
 
@@ -195,6 +196,43 @@ void
 SkillerInterface::set_exclusive_controller(const uint32_t new_exclusive_controller)
 {
   data->exclusive_controller = new_exclusive_controller;
+  data_changed = true;
+}
+
+/** Get msgid value.
+ * 
+      The ID of the message that is currently being processed,
+      or 0 if no message is being processed.
+    
+ * @return msgid value
+ */
+uint32_t
+SkillerInterface::msgid() const
+{
+  return data->msgid;
+}
+
+/** Get maximum length of msgid value.
+ * @return length of msgid value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+SkillerInterface::maxlenof_msgid() const
+{
+  return 1;
+}
+
+/** Set msgid value.
+ * 
+      The ID of the message that is currently being processed,
+      or 0 if no message is being processed.
+    
+ * @param new_msgid new msgid value
+ */
+void
+SkillerInterface::set_msgid(const uint32_t new_msgid)
+{
+  data->msgid = new_msgid;
   data_changed = true;
 }
 

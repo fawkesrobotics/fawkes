@@ -31,6 +31,10 @@
       carry your instance serial your exec messages will be ignored. Aquire control with
       the AquireControlMessage. Make sure you release control before exiting.
     </field>
+    <field type="uint32" name="msgid">
+      The ID of the message that is currently being processed,
+      or 0 if no message is being processed.
+    </field>
     <field type="SkillStatusEnum" name="status">
       The status of the current skill execution.
     </field>
