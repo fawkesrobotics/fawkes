@@ -89,7 +89,7 @@ class SkillerExecutionThread
 
  private: /* methods */
   void init_failure_cleanup();
-  void publish_skill_status(std::string &curss);
+  void publish_skill_status(std::string &curss, unsigned int cur_msgid);
   void publish_skdbg();
   void publish_error();
   void process_skdbg_messages();

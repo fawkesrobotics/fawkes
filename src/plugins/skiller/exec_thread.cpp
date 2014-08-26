@@ -183,6 +183,7 @@ SkillerExecutionThread::init()
     __lua->add_watcher(this);
   
     __skiller_if->set_skill_string("");
+    __skiller_if->set_msgid(0);
     __skiller_if->set_status(SkillerInterface::S_INACTIVE);
     __skiller_if->write();
 
@@ -284,9 +285,10 @@ SkillerExecutionThread::bb_interface_reader_removed(Interface *interface,
 /** Determines the skill status and writes it to the BB.
  * This method assumes that it is called from within loop() and lua_mutex is locked.
  * @param curss current skill string
+ * @param cur_msgid ID of message for which we currently execute @p curss
  */
 void
-SkillerExecutionThread::publish_skill_status(std::string &curss)
+SkillerExecutionThread::publish_skill_status(std::string &curss, unsigned int cur_msgid)
 {
   //const char *sst = "Unknown";
   LUA_INTEGER running = 0, final = 0, failed = 0;
@@ -344,6 +346,7 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
       */
 
       __skiller_if->set_skill_string(curss.c_str());
+      __skiller_if->set_msgid(cur_msgid);
       __skiller_if->set_continuous(__continuous_run);
 
       __skiller_if->set_status(new_status);
@@ -454,6 +457,7 @@ SkillerExecutionThread::loop()
 
   // Current skill string
   std::string curss = "";
+  unsigned int cur_msgid = 0;
 
   unsigned int excl_ctrl   = __skiller_if->exclusive_controller();
   bool write_skiller_if    = false;
@@ -524,6 +528,7 @@ SkillerExecutionThread::loop()
 	  __continuous_reset = true;
 	}
 	curss = m->skill_string();
+	cur_msgid = m->id();
       } else {
 	logger->log_debug("SkillerExecutionThread", "%s tries to exec while not controller",
 			  m->sender_thread_name());
@@ -541,6 +546,7 @@ SkillerExecutionThread::loop()
 			    m->sender_thread_name(), m->skill_string());
 
 	  curss = m->skill_string();
+	  cur_msgid = m->id();
 	  __continuous_reset = last_was_continuous; // reset if cont exec was in progress
 	  __continuous_run = true;
 	}
@@ -559,6 +565,7 @@ SkillerExecutionThread::loop()
 	  __continuous_run = false;
 	  __continuous_reset = true;
 	  curss = "";
+	  cur_msgid = 0;
 	}
       } else {
 	logger->log_debug("SkillerExecutionThread", "%s tries to stop exec while not controller",
@@ -574,6 +581,7 @@ SkillerExecutionThread::loop()
 
   if ( __continuous_run && (curss == "") ) {
     curss = __skiller_if->skill_string();
+    cur_msgid = __skiller_if->msgid();
   }
 
 #ifdef SKILLER_TIMETRACKING
@@ -594,6 +602,7 @@ SkillerExecutionThread::loop()
 
     __skiller_if->set_status(SkillerInterface::S_INACTIVE);
     __skiller_if->set_skill_string("");
+    __skiller_if->set_msgid(0);
 
     //We're not resetting, because this is information someone might need...
     //__skiller_if->set_error("");
@@ -669,7 +678,7 @@ SkillerExecutionThread::loop()
 #ifdef SKILLER_TIMETRACKING
     __tt->ping_start(__ttc_publish);
 #endif
-  publish_skill_status(curss);
+    publish_skill_status(curss, cur_msgid);
   publish_skdbg();
   lua_loop_reset();
 
