@@ -24,6 +24,7 @@
 #include <plugins/openprs/aspect/openprs_kernel_manager.h>
 #include <plugins/openprs/utils/openprs_comm.h>
 #include <core/threading/thread_finalizer.h>
+#include <unistd.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -41,11 +42,13 @@ namespace fawkes {
 OpenPRSAspectIniFin::OpenPRSAspectIniFin()
   : AspectIniFin("OpenPRSAspect")
 {
+  openprs_comm_ = NULL;
 }
 
 /** Destructor. */
 OpenPRSAspectIniFin::~OpenPRSAspectIniFin()
 {
+  delete openprs_comm_;
 }
 
 
@@ -73,6 +76,15 @@ OpenPRSAspectIniFin::init(Thread *thread)
     openprs_kernel_mgr_->destroy_kernel(openprs_thread->openprs_kernel_name);
     throw;
   }
+
+  openprs_comm_->transmit_command_f(openprs_thread->openprs_kernel_name,
+				    "add (! (= @@FAWKES_MOD_DIR \"%s\"))", OPENPRS_MOD_DIR);
+  openprs_comm_->transmit_command_f(openprs_thread->openprs_kernel_name,
+				    "add (! (= @@FAWKES_HOST \"%s\"))", fawkes_host_.c_str());
+  openprs_comm_->transmit_command_f(openprs_thread->openprs_kernel_name,
+				    "add (! (= @@FAWKES_PORT \"%u\"))", fawkes_port_);
+
+  usleep(200000);
 }
 
 void
@@ -91,26 +103,29 @@ OpenPRSAspectIniFin::finalize(Thread *thread)
 }
 
 
-
-/** Set OpenPRS kernel manager.
+/** Prepare OpenPRS aspect initializer.
+ * @param fawkes_host Hostname where Fawkes is running
+ * @param fawkes_port TCP port where Fawkes listens on
  * @param openprs_kernel_mgr OpenPRS kernel manager
- */
-void
-OpenPRSAspectIniFin::set_manager(LockPtr<OpenPRSKernelManager> &openprs_kernel_mgr)
-{
-  openprs_kernel_mgr_ = openprs_kernel_mgr;
-}
-
-/** Set OpenPRS server proxy.
  * @param openprs_server_proxy OpenPRS server proxy
  * @param openprs_mp_proxy OpenPRS Message Passer proxy
  */
 void
-OpenPRSAspectIniFin::set_proxies(OpenPRSServerProxy *openprs_server_proxy,
-				 OpenPRSMessagePasserProxy *openprs_mp_proxy)
+OpenPRSAspectIniFin::prepare(const std::string &fawkes_host, unsigned short fawkes_port,
+			     LockPtr<OpenPRSKernelManager> &openprs_kernel_mgr,
+			     OpenPRSServerProxy *openprs_server_proxy,
+			     OpenPRSMessagePasserProxy *openprs_mp_proxy)
 {
+  fawkes_host_ = fawkes_host;
+  fawkes_port_ = fawkes_port;
+  openprs_kernel_mgr_ = openprs_kernel_mgr;
   openprs_server_proxy_ = openprs_server_proxy;
   openprs_mp_proxy_     = openprs_mp_proxy;
+
+  openprs_comm_ = new OpenPRSComm("OpenPRSAspect",
+				  openprs_kernel_mgr_->mp_host().c_str(),
+				  openprs_kernel_mgr_->mp_port(),
+				  openprs_server_proxy_);
 }
 
 } // end namespace fawkes

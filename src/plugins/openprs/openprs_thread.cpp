@@ -25,6 +25,8 @@
 #include "utils/proc.h"
 
 #include <logging/logger.h>
+#include <baseapp/run.h>
+#include <netcomm/fawkes/network_manager.h>
 
 #include <unistd.h>
 #include <cstdio>
@@ -126,9 +128,9 @@ OpenPRSThread::init()
   openprs_kernel_mgr_ = new OpenPRSKernelManager(hostname, cfg_server_proxy_port_,
 						 cfg_mp_use_proxy_ ? hostname : cfg_mp_host_,
 						 cfg_mp_use_proxy_ ? cfg_mp_proxy_port_ : cfg_mp_port_,
-						 logger, clock);
-  openprs_aspect_inifin_.set_manager(openprs_kernel_mgr_);
-  openprs_aspect_inifin_.set_proxies(openprs_server_proxy_, openprs_mp_proxy_);
+						 logger, clock, config);
+  openprs_aspect_inifin_.prepare("localhost", fawkes::runtime::network_manager->fawkes_port(),
+				 openprs_kernel_mgr_, openprs_server_proxy_, openprs_mp_proxy_);
   openprs_manager_aspect_inifin_.set_manager(openprs_kernel_mgr_);
 }
 

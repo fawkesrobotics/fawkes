@@ -18,7 +18,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/openprs.mk
 
 LIBS_openprs = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-               fawkesinterface fawkesopenprsaspect fawkesopenprsutils
+               fawkesinterface fawkesopenprsaspect fawkesopenprsutils \
+	       fawkesbaseapp fawkesnetcomm
 OBJS_openprs = openprs_plugin.o openprs_thread.o
 
 OBJS_all = $(OBJS_openprs)

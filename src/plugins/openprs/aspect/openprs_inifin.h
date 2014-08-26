@@ -48,12 +48,16 @@ class OpenPRSAspectIniFin : public AspectIniFin
   virtual void init(Thread *thread);
   virtual void finalize(Thread *thread);
 
-  void set_manager(LockPtr<OpenPRSKernelManager> &openprs_kernel_mgr);
-  void set_proxies(OpenPRSServerProxy *openprs_server_proxy,
-		   OpenPRSMessagePasserProxy *openprs_mp_proxy);
+  void prepare(const std::string &fawkes_host, unsigned short fawkes_port,
+	       LockPtr<OpenPRSKernelManager> &openprs_kernel_mgr,
+	       OpenPRSServerProxy *openprs_server_proxy,
+	       OpenPRSMessagePasserProxy *openprs_mp_proxy);
 
  private:
+  std::string                    fawkes_host_;
+  unsigned short                 fawkes_port_;
   LockPtr<OpenPRSKernelManager>  openprs_kernel_mgr_;
+  OpenPRSComm                   *openprs_comm_;
   OpenPRSServerProxy            *openprs_server_proxy_;
   OpenPRSMessagePasserProxy     *openprs_mp_proxy_;
 };
