@@ -36,9 +36,8 @@
 
 namespace fawkes {
   class AspectIniFin;
+  class SubProcess;
 }
-
-class SubProcess;
 
 class OpenPRSThread
 : public fawkes::Thread,
@@ -72,8 +71,8 @@ class OpenPRSThread
 
   //fawkes::OpenPRSAspectIniFin openprs_aspect_inifin_;
 
-  SubProcess *proc_mp_;
-  SubProcess *proc_srv_;
+  fawkes::SubProcess *proc_mp_;
+  fawkes::SubProcess *proc_srv_;
 
 
 };
