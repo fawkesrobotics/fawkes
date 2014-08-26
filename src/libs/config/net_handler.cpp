@@ -68,6 +68,7 @@ ConfigNetworkHandler::ConfigNetworkHandler(Configuration *config,
 /** Destructor. */
 ConfigNetworkHandler::~ConfigNetworkHandler()
 {
+  __hub->remove_handler(this);
   cancel();
   join();
   __config->rem_change_handler(this);
