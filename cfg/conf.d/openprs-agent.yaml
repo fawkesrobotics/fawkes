@@ -1,0 +1,11 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/openprs
+---
+openprs-agent:
+
+  # In which mode should the agent kernel run? One of:
+  # - OPRS:  run in console mode
+  # - XOPRS: run in graphical mode
+  oprs-mode: OPRS
