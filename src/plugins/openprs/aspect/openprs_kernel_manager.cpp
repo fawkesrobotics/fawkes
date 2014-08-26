@@ -97,18 +97,28 @@ OpenPRSKernelManager::create_kernel(const std::string &kernel_name, bool use_xop
   }
   logger_->log_info("OpenPRSKernelMgr", "Running: %s", command.c_str());
 
+  std::string command = command_args_tostring(argv);
+  logger_->log_info("OpenPRSKernelMgr", "Running:  %s", command.c_str());
 
   std::string progname = std::string(use_xoprs ? "XOPRS" : "OPRS") + "-" + kernel_name;
 
-  SubProcess *oprs = new SubProcess(progname.c_str(), argv[0], argv, NULL, logger_);
-
-  // give some time for OpenPRS to come up
-  usleep(500000);
+  SubProcess *oprs = NULL;
+  std::string oprs_error;
+  try {
+    oprs = new SubProcess(progname.c_str(), argv[0], argv, (const char **)envp, logger_);
+  } catch (Exception &e) {
+    oprs = NULL;
+    oprs_error = e.what_no_backtrace();
+  }
 
   if (oprs) {
+    // give some time for OpenPRS to come up
+    usleep(500000);
+
     kernels_[kernel_name] = oprs;
   } else {
-    throw Exception("Failed to initialize OpenPRS kernel '%s'", kernel_name.c_str());
+    throw Exception("Failed to initialize OpenPRS kernel '%s' (%s)",
+		    kernel_name.c_str(), oprs_error.c_str());
   }
 }
 
