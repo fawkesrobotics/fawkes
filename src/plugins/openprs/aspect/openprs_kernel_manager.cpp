@@ -22,8 +22,11 @@
 
 #include <plugins/openprs/aspect/openprs_kernel_manager.h>
 #include <plugins/openprs/utils/proc.h>
+#include <plugins/openprs/utils/string.h>
 #include <logging/logger.h>
+#include <config/config.h>
 #include <utils/time/time.h>
+#include <utils/misc/string_split.h>
 
 #include <boost/format.hpp>
 
@@ -49,15 +52,17 @@ namespace fawkes {
  * @param mp_tcp_port TCP port where OpenPRS message passer listens on
  * @param logger logger to log messages from created kernels
  * @param clock clock to get time from for (now)
+ * @param config configuration
  */
 OpenPRSKernelManager::OpenPRSKernelManager(const std::string &server_host, unsigned short server_tcp_port,
 					   const std::string &mp_host, unsigned short mp_tcp_port,
-					   Logger *logger, Clock *clock)
+					   Logger *logger, Clock *clock, Configuration *config)
   : server_host_(server_host), server_port_(server_tcp_port),
     mp_host_(mp_host), mp_port_(mp_tcp_port)
 {
   logger_ = logger;
   clock_  = clock;
+  config_ = config;
 }
 
 /** Destructor. */
@@ -73,9 +78,12 @@ OpenPRSKernelManager::~OpenPRSKernelManager()
  * @param kernel_name name by which to register kernel
  * @param use_xoprs run X-OPRS (with graphical user interface) instead
  * of oprs.
+ * @param extra_data_path extra directories to add to the OPRS_DATA_PATH
+ * environment variable which should be searched for files.
  */
 void
-OpenPRSKernelManager::create_kernel(const std::string &kernel_name, bool use_xoprs)
+OpenPRSKernelManager::create_kernel(const std::string &kernel_name, bool use_xoprs,
+				    std::list<std::string> &extra_data_path)
 {
   if (kernels_.find(kernel_name) != kernels_.end()) {
     throw Exception("OpenPRS kernel '%s' already exists", kernel_name.c_str());
@@ -87,15 +95,49 @@ OpenPRSKernelManager::create_kernel(const std::string &kernel_name, bool use_xop
   const char *argv[] = { use_xoprs ? "xoprs" : "oprs",
 			 "-s", server_host_.c_str(), "-i", server_port.c_str(),
 			 "-m", mp_host_.c_str(), "-j", mp_port.c_str(),
+			 "-l", "none",
 			 "-n", kernel_name.c_str(),
 			 NULL };
 
-  std::string command = "";
-  for (int i = 0; argv[i]; ++i) {
-    if (i > 0)  command += " ";
-    command += argv[i];
+  std::list<std::string> data_path;
+  try {
+    if (config_->is_list("/openprs/kernels/data-path")) {
+      std::vector<std::string> pl =
+	config_->get_strings("/openprs/kernels/data-path");
+      std::for_each(pl.begin(), pl.end(), [&data_path](std::string &p){ data_path.push_back(p); });
+    } else {
+      std::string cfg_data_path =
+	config_->get_string("/openprs/kernels/data-path");
+      data_path = str_split_list(cfg_data_path, ':');
+    }
+  } catch (Exception &e) {} // ignored
+  std::list<std::string>::iterator ins_pos = data_path.begin();
+  for (auto p : extra_data_path) {
+    logger_->log_error("**", "Inserting %s", p.c_str());
+    ins_pos = data_path.insert(ins_pos, p);
   }
-  logger_->log_info("OpenPRSKernelMgr", "Running: %s", command.c_str());
+  const std::string env_HOME = getenv("HOME");
+  for (auto &p : data_path) {
+    std::string::size_type pos = 0;
+    while ((pos = p.find("$HOME", pos)) != std::string::npos) {
+      p.replace(pos, 5, env_HOME);
+      pos += env_HOME.length();
+    }
+  }
+  std::string oprs_data_path = str_join(data_path, ':');
+
+  const char *envp_path_ext[] = { "LD_LIBRARY_PATH", OPENPRS_MOD_DIR,
+				  "OPRS_DATA_PATH", oprs_data_path.c_str(), NULL };
+  std::vector<std::string> envp_v = envp_copy_expand(environ, envp_path_ext);
+
+  const char *envp[envp_v.size() + 1];
+  for (unsigned int i = 0; i < envp_v.size(); ++i) {
+    envp[i] = envp_v[i].c_str();
+    if (envp_v[i].find("OPRS_DATA_PATH=") == 0) {
+      logger_->log_info("OpenPRSKernelMgr", "%s data path: %s", kernel_name.c_str(), envp[i]);
+    }
+  }
+  envp[envp_v.size()] = NULL;
 
   std::string command = command_args_tostring(argv);
   logger_->log_info("OpenPRSKernelMgr", "Running:  %s", command.c_str());

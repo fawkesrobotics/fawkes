@@ -23,6 +23,7 @@
 
 #include <plugins/openprs/aspect/openprs.h>
 #include <plugins/openprs/utils/openprs_comm.h>
+#include <core/exception.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -77,6 +78,22 @@ OpenPRSAspect::~OpenPRSAspect()
 {
 }
 
+
+/** Add an OpenPRS data path.
+ * The paths are added to the kernel on intialization and are
+ * then searched when including and loading files.
+ * Note that this method may only be called in the constructor,
+ * i.e. before the aspect is initialized.
+ * @param path path to add to search list
+ */
+void
+OpenPRSAspect::add_openprs_data_path(const std::string &path)
+{
+  if (openprs) {
+    throw Exception("OpenPRS kernel has already been intialized");
+  }
+  openprs_data_paths_.push_back(path);
+}
 
 /** Init OpenPRS aspect.
  * This sets the OpenPRS kernel communication wrapper.

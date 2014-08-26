@@ -27,6 +27,7 @@
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
 #include <string>
+#include <list>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -49,6 +50,8 @@ class OpenPRSAspect : public virtual Aspect
   OpenPRSAspect(const char *kernel_name, Mode mode = OPRS, const char *local_name = NULL);
   virtual ~OpenPRSAspect();
 
+  void add_openprs_data_path(const std::string &path);
+
  protected:
   LockPtr<OpenPRSComm>   openprs;
   const std::string      openprs_kernel_name;
@@ -58,6 +61,8 @@ class OpenPRSAspect : public virtual Aspect
  private:
   void init_OpenPRSAspect(LockPtr<OpenPRSComm> oprs_comm);
   void finalize_OpenPRSAspect();
+
+  std::list<std::string> openprs_data_paths_;
 
 };
 

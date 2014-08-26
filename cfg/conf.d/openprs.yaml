@@ -63,3 +63,10 @@ openprs:
     # The oprs-server proxy is always needed as it is the only way
     # to inject commands for OpenPRS kernels.
     proxy-tcp-port: !tcp-port 3401
+
+  kernels:
+    # This will be posted as OPRS_DATA_PATH environment variable for
+    # newly instantiated kernels. The special string $HOME will be
+    # replaced by the user's home directory (or whatever is set as
+    # the fawkes process' HOME environment variable).
+    data-path: ["/usr/share/openprs/data", "$HOME/openprs", "$HOME/robotics/openprs"]
