@@ -24,6 +24,7 @@
 #include "proc.h"
 #include "openprs_server_proxy.h"
 #include <core/exception.h>
+#include <core/exceptions/system.h>
 
 #include <opaque-pub.h>
 #include <mp-pub.h>
@@ -144,6 +145,67 @@ OpenPRSComm::multicast_message(const std::vector<std::string> &recipients, const
     recs[i] = recipients[i].c_str();
   }
   multicast_message_string_socket(mp_socket_, recs.size(), &(recs[0]), (char *)message.c_str());
+}
+
+
+/** Send a formatted message to an OpenPRS kernel.
+ * @param recipient OpenPRS kernel name to send to
+ * @param format format for message to send according to sprintf()
+ */
+void
+OpenPRSComm::send_message_f(const std::string &recipient, const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  char *msg;
+  if (vasprintf(&msg, format, arg) == -1) {
+    throw OutOfMemoryException("Cannot format OpenPRS client command string");
+  }
+  va_end(arg);
+  send_message_string_socket(mp_socket_, recipient.c_str(), msg);
+  free(msg);
+}
+
+
+/** Send a formatted message to all OpenPRS kernels.
+ * @param format format for message to send according to sprintf()
+ */
+void
+OpenPRSComm::broadcast_message_f(const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  char *msg;
+  if (vasprintf(&msg, format, arg) == -1) {
+    throw OutOfMemoryException("Cannot format OpenPRS client command string");
+  }
+  va_end(arg);
+  broadcast_message_string_socket(mp_socket_, msg);
+  free(msg);
+}
+
+
+/** Send a message to multiple OpenPRS kernel.
+ * @param recipients Vector of OpenPRS kernel names to send to
+ * @param format format for message to send according to sprintf()
+ */
+void
+OpenPRSComm::multicast_message_f(const std::vector<std::string> &recipients, const char *format, ...)
+{
+  std::vector<const char *> recs;
+  recs.resize(recipients.size());
+  for (size_t i = 0; i < recipients.size(); ++i) {
+    recs[i] = recipients[i].c_str();
+  }
+  va_list arg;
+  va_start(arg, format);
+  char *msg;
+  if (vasprintf(&msg, format, arg) == -1) {
+    throw OutOfMemoryException("Cannot format OpenPRS client command string");
+  }
+  va_end(arg);
+  multicast_message_string_socket(mp_socket_, recs.size(), &(recs[0]), msg);
+  free(msg);
 }
 
 

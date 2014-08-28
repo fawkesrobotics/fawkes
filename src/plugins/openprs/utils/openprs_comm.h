@@ -53,6 +53,10 @@ class OpenPRSComm
   void broadcast_message(const std::string &message);
   void multicast_message(const std::vector<std::string> &recipients, const std::string &message);
 
+  void send_message_f(const std::string &recipient, const char *format, ...);
+  void broadcast_message_f(const char *format, ...);
+  void multicast_message_f(const std::vector<std::string> &recipients, const char *format, ...);
+
   void transmit_command(const char *recipient, const char *message);
   void transmit_command(const std::string &recipient, const std::string &message);
   void transmit_command_f(const std::string &recipient, const char *format, ...);
