@@ -19,89 +19,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include "mod_utils.h"
+
 #include <blackboard/remote.h>
 #include <interfaces/SkillerInterface.h>
 #include <utils/misc/string_conversions.h>
 
-#include <opaque-pub.h>
-#include <oprs-type-pub.h>
-#include <oprs-type_f-pub.h>
-#include <macro-pub.h>
-#include <slistPack-pub.h>
-#include <shashPack_f.h>
-#include <user-end-hook_f-pub.h>
-#include <action_f-pub.h>
-#include <intention_f-pub.h>
-
-#include <cstring>
-#include <unistd.h>
-
 using namespace fawkes;
-
-/// @cond EXTERNAL
-extern "C" {
-  typedef Slist *List_Envar;
-  List_Envar global_var_list;
-  Shash *id_hash;
-
-  typedef struct type Type;
-  typedef Slist *TypeList;
-  typedef Slist *SymList;
-  Symbol wait_sym;
-
-  /* type de Variable */
-  typedef enum {LOGICAL_VARIABLE, PROGRAM_VARIABLE} Variable_Type;
-
-  struct envar {			/* Un envar */
-    Symbol name;		/* son name */
-    Term *value;		/* le term sur lequel elle pointe */
-    Type *unif_type;		
-    Variable_Type type BITFIELDS(:8);	/* Le type de la variable */
-  };
-
-  struct type {
-    Symbol name;
-    Type *father;
-    TypeList sur_types;	/* Plus itself */
-    SymList elts;
-  };
-}
-/// @endcond
-
-/** Get Fawkes host and port.
- * This goes through the list of global variables and extracts the
- * parent Fawkes hostname from @@FAWKES_HOST and the TCP port from
- * @@FAWKES_PORT.
- * @return true if the data could be gathered successfully, false otherwise
- */
-bool
-get_fawkes_host_port(std::string &fawkes_host, unsigned short &fawkes_port)
-{
-  Envar *env;
-  sl_loop_through_slist(global_var_list, env,  Envar *) {
-    if (strcmp(env->name, "@@FAWKES_HOST") == 0) {
-      if (env->value->type != STRING) {
-	fprintf(stderr, "Error: @@FAWKES_HOST is not of type STRING\n");
-	return false;
-      }
-      fawkes_host = env->value->u.string;
-    } else if (strcmp(env->name, "@@FAWKES_PORT") == 0) {
-      if (env->value->type != STRING) {
-	fprintf(stderr, "Error: @@FAWKES_PORT is not of type STRING\n");
-	return false;
-      }
-      fawkes_port = atoi(env->value->u.string);
-    }
-  }
-
-  return (! fawkes_host.empty() && fawkes_port != 0);
-}
-
-#define ACTION_RETURN(value)						\
-  { Term *res = MAKE_OBJECT(Term); res->type = ATOM; res->u.id = value; return res; }
-#define ACTION_FAIL()  ACTION_RETURN(nil_sym);
-#define ACTION_WAIT()  ACTION_RETURN(wait_sym);
-#define ACTION_FINAL() ACTION_RETURN(lisp_t_sym);
 
 extern "C" void finalize();
 
@@ -270,7 +194,7 @@ void init()
 
   skiller_if = blackboard->open_for_reading<SkillerInterface>("Skiller");
 
-  printf("Acquiring exclusive skiller control");
+  printf("Acquiring exclusive skiller control\n");
   SkillerInterface::AcquireControlMessage *msg =
     new SkillerInterface::AcquireControlMessage(/* steal control */ true);
   skiller_if->msgq_enqueue(msg);
