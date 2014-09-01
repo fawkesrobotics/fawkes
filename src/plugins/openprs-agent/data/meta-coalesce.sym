@@ -1,0 +1,11 @@
+
+;---------------------------------------------------------------------------
+;  meta-coalesce.sym - Symbols for Meta OP to handle COALESCE property
+;
+;  Created: Fri Aug 29 14:10:54 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+declare predicate COALESCE
+declare predicate META-SELECTOR

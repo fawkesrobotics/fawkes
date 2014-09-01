@@ -1,0 +1,65 @@
+
+;---------------------------------------------------------------------------
+;  meta-coalesce.opf - Meta OP to handle COALESCE property
+;
+;  Created: Fri Aug 29 14:10:54 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+(
+
+(defop meta-coalesce
+  :invocation (SOAK $X)
+  :context (> (length $X) 1)
+  :body (
+    ;(! (printf (format "Number of OPS: %d\n" (length $X))))
+    (! (= @OPS $X))
+    (! (= @COALESCED-OPS (. .)))
+    (! (= @EXEC-OPS (. .)))
+
+    (while (? (~ (null @OPS)))
+      (if (? (property-p COALESCE (car @OPS)))
+        (if (? (> (length (list-intersection @COALESCED-OPS (. (op-name (car @OPS)) .) )) 0))
+          ;(! (printf (format "*** COALESCE OP -> no exec: %s\n"  (op-name (car @OPS)))))
+         else
+          ;(! (printf (format "*** COALESCE OP -> === EXECUTING ===: %s\n"  (op-name (car @OPS)))))
+          (! (= @COALESCED-OPS (cons (op-name (car @OPS)) @COALESCED-OPS)))
+	  (! (= @EXEC-OPS (cons-tail (car @OPS) @EXEC-OPS)))
+        )
+      else
+        ;(! (printf (format "INTENT straight: %s\n" (op-name (car @OPS)))))
+ 	(! (= @EXEC-OPS (cons-tail (car @OPS) @EXEC-OPS)))
+      )
+      (! (= @OPS (cdr @OPS)))
+    )
+
+    ;(! (= @EXEC-OPS-P @EXEC-OPS))
+    ;(! (= @PRINT-OPS (. .) ))
+    ;(while (? (~ (null @EXEC-OPS-P)))
+    ;  (! (= @PRINT-OPS (cons-tail (op-name (car @EXEC-OPS-P)) @PRINT-OPS)))
+    ;  (! (= @EXEC-OPS-P (cdr @EXEC-OPS-P)))
+    ;)
+    ;(! (print @PRINT-OPS))
+    (if (? (~ (null @EXEC-OPS)))
+      (! (INTENDED-ALL-OPS-AS-ROOT (current @EXEC-OPS)))
+    )
+  )
+  :properties ((DECISION-PROCEDURE T) (META-SELECTOR T))
+  :effects ()
+  :documentation "Meta OP to coalesce marked OP instances of the same OP.
+    Sometimes it is desirable to activate only a single OP even if multiple
+    facts for which the OP triggers have been added, e.g. if the OP itself
+    performs steps of reduction of the data.
+    This is achieved by this meta OP. To use it, the OPs which should be
+    coalesced must have the property COALESCE set to T."
+)
+
+; alternative for only fact-invoked OPs:
+;  :invocation (FACT-INVOKED-OPS $X)
+;  :context ((? (|| (> (length $X) 1)
+;                   (& (equal (length $X) 1)
+;                      (~ (property-p META-SELECTOR (first $x)))))))
+
+)
+
