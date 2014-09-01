@@ -25,6 +25,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  laser-filter laser-lines laser-cluster laser-pointclouds \
 	  static_transforms navgraph colli \
 	  clips clips-agent clips-protobuf clips-webview clips-navgraph clips-ros \
+	  openprs openprs-agent \
 	  mongodb mongodb_log \
 	  openni refboxcomm ros player xmlrpc gossip \
 	  robot_state_publisher gazebo
@@ -44,3 +45,4 @@ clips-webview: clips webview
 clips-ros: clips ros
 gazebo: robotino
 skiller: navgraph
+openprs-agent: openprs
