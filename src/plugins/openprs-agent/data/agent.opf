@@ -1,25 +1,31 @@
-;;;
-;;; File: /home/tim/robotics/fawkes/src/plugins/openprs-agent/agent.opf
-;;; $Id$
-;;; Date: Mon Aug 25 13:20:02 2014
-;;; Host: voyager.kbsg.rwth-aachen.de
-;;; OP Editor Version: 1.1b10
-;;; Compiled on voyager.kbsg.rwth-aachen.de (Di 12. Aug 11:57:03 CEST 2014)
-;;; OP File Format: 2
-;;;
-(2 
+
+;---------------------------------------------------------------------------
+;  agent-init.inc - OpenPRS agent initialization file
+;
+;  Created: Mon Aug 25 13:20:02 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
 (
+(defop say
+  :invocation (! (say $text))
+  :call (say $text)
+  :context ()
+  :action (skill-call "say" "text" $text "wait" true)
+  :documentation "Invoke skiller to synthesize given text as speech."
 )
-(say (
-(INVOCATION INVOCATION (! (say $text)) 10 50 1 80 0 )
-(CONTEXT CONTEXT  10 250 1 60 0 )
-(CALL CALL_NODE  10 150 1 60 0 )
-(SETTING SETTING  10 350 1 60 0 )
-(EFFECTS EFFECTS  10 450 1 60 0 )
-(ACTION ACTION (skill-call "say" "text" $text "wait" true) 310 50 1 60 0 )
-(DOCUMENTATION DOCUMENTATION  10 650 1 60 0 )
-(PROPERTIES PROPERTIES  10 550 1 60 0 )
-) (
-) (
-) )
+
+(defop agent-init
+  :invocation (agent-init)
+  :context ()
+  :setting (& (setting "idle-looptime-sec" $ilt_sec) (setting "idle-looptime-usec" $ilt_usec)
+              (setting "busy-looptime-sec" $blt_sec) (setting "busy-looptime-usec" $blt_usec))
+  :body (
+    (! (time-set-idle-looptime $ilt_sec $ilt_usec))
+    (! (time-set-busy-looptime $blt_sec $blt_usec))
+    (! (say "Agent loaded and ready to run")))
+  :effects ((~> (agent-init)))
+)
+
 )
