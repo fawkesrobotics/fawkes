@@ -105,7 +105,7 @@ OpenPRSThread::init()
     const char *argv[] = { filename,
 			   "-j", cfg_mp_port_s_.c_str(),
 			   "-i", cfg_server_port_s_.c_str(),
-			   "-l", "none", NULL };
+			   "-l", "lower", NULL };
     proc_srv_ = new SubProcess("OPRS-server", filename, argv, NULL, logger);
   } else {
     proc_srv_ = NULL;

@@ -95,7 +95,7 @@ OpenPRSKernelManager::create_kernel(const std::string &kernel_name, bool use_xop
   const char *argv[] = { use_xoprs ? "xoprs" : "oprs",
 			 "-s", server_host_.c_str(), "-i", server_port.c_str(),
 			 "-m", mp_host_.c_str(), "-j", mp_port.c_str(),
-			 "-l", "none",
+			 "-l", "lower",
 			 "-n", kernel_name.c_str(),
 			 NULL };
 
