@@ -23,6 +23,7 @@
 
 #include <logging/logger.h>
 #include <plugins/openprs/utils/openprs_comm.h>
+#include <utils/time/time.h>
 
 #include <unistd.h>
 
@@ -68,4 +69,11 @@ OpenPRSAgentThread::finalize()
 void
 OpenPRSAgentThread::loop()
 {
+  openprs.lock();
+  fawkes::Time now, now_sys;
+  clock->get_time(now);
+  clock->get_systime(now_sys);
+  openprs->send_message_f(openprs_kernel_name, "(fawkes-time %li %li %li %li)",
+  			  now.get_sec(), now.get_usec(), now_sys.get_sec(), now_sys.get_usec());
+  openprs.unlock();
 }

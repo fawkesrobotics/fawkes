@@ -24,6 +24,7 @@
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
+#include <aspect/clock.h>
 #include <aspect/blocked_timing.h>
 #include <plugins/openprs/aspect/openprs.h>
 
@@ -32,6 +33,7 @@
 class OpenPRSAgentThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
+  public fawkes::ClockAspect,
   public fawkes::BlockedTimingAspect,
   public fawkes::OpenPRSAspect
 {
