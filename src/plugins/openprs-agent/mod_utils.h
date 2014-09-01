@@ -100,8 +100,20 @@ get_fawkes_host_port(std::string &fawkes_host, unsigned short &fawkes_port)
   return (! fawkes_host.empty() && fawkes_port != 0);
 }
 
-#define ACTION_RETURN(value)						\
-  { Term *res = MAKE_OBJECT(Term); res->type = ATOM; res->u.id = value; return res; }
+//define ACTION_DEBUG
+
+#ifdef ACTION_DEBUG
+#  define ACTION_RETURN(value)						\
+  do {									\
+    if (value == nil_sym || value == lisp_t_sym) {			\
+      printf("Action returns: %s\n", value == nil_sym ? "FAIL" : (value == wait_sym ? ":WAIT" : "FINAL")); \
+    }									\
+    Term *res = MAKE_OBJECT(Term); res->type = ATOM; res->u.id = value; return res; \
+  } while (0);
+#else
+#  define ACTION_RETURN(value)						\
+  do { Term *res = MAKE_OBJECT(Term); res->type = ATOM; res->u.id = value; return res; } while (0);
+#endif
 #define ACTION_FAIL()  ACTION_RETURN(nil_sym);
 #define ACTION_WAIT()  ACTION_RETURN(wait_sym);
 #define ACTION_FINAL() ACTION_RETURN(lisp_t_sym);
