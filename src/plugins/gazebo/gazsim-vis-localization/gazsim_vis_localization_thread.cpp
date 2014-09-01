@@ -59,6 +59,7 @@ void VisLocalizationThread::init()
   location_scripts_ = config->get_string("/gazsim/visualization/location-scripts");
   location_textures_ = config->get_string("/gazsim/visualization/location-textures");
   parent_name_ = config->get_string("/gazsim/visualization/localization/parent-name");
+  label_size_ = config->get_float("/gazsim/visualization/localization/label-size");
 
   last_update_time_ = clock->now().in_sec();
 
@@ -102,7 +103,7 @@ void VisLocalizationThread::loop()
     msgs::Geometry *geomMsg = msg_number.mutable_geometry();
     geomMsg->set_type(msgs::Geometry::PLANE);
     msgs::Set(geomMsg->mutable_plane()->mutable_normal(), math::Vector3(0.0, 0.0, 1.0));
-    msgs::Set(geomMsg->mutable_plane()->mutable_size(), math::Vector2d(0.2, 0.2));
+    msgs::Set(geomMsg->mutable_plane()->mutable_size(), math::Vector2d(label_size_, label_size_));
     msg_number.set_transparency(0.2);  
     msg_number.set_cast_shadows(false);
     msgs::Set(msg_number.mutable_pose(), math::Pose(x, y, 0.5, 0, 0, 0));
