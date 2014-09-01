@@ -82,13 +82,13 @@ get_fawkes_host_port(std::string &fawkes_host, unsigned short &fawkes_port)
 {
   Envar *env;
   sl_loop_through_slist(global_var_list, env,  Envar *) {
-    if (strcmp(env->name, "@@FAWKES_HOST") == 0) {
+    if (strcmp(env->name, "@@FAWKES_HOST") == 0 || strcmp(env->name, "@@fawkes_host") == 0) {
       if (env->value->type != STRING) {
 	fprintf(stderr, "Error: @@FAWKES_HOST is not of type STRING\n");
 	return false;
       }
       fawkes_host = env->value->u.string;
-    } else if (strcmp(env->name, "@@FAWKES_PORT") == 0) {
+    } else if (strcmp(env->name, "@@FAWKES_PORT") == 0 || strcmp(env->name, "@@fawkes_port") == 0) {
       if (env->value->type != STRING) {
 	fprintf(stderr, "Error: @@FAWKES_PORT is not of type STRING\n");
 	return false;
