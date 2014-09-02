@@ -284,8 +284,8 @@ KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, floa
     __planner_env.robot->get_planner_params()->SetRobotActiveJoints(__planner_env.robot->get_robot_ptr());
     __planner_env.robot->get_planner_params()->vgoalconfig.resize(__planner_env.robot->get_robot_ptr()->GetActiveDOF());
 
-    // get IK from openrave
-    solvable = __planner_env.robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3);
+    // get IK from openrave. Ignore collisions with env though, as this is only for IK check!
+    solvable = __planner_env.robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3, IKFO_IgnoreEndEffectorEnvCollisions);
 
     if( solvable ) {
       logger->log_debug(name(), "IK successful!");
