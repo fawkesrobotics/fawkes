@@ -8,6 +8,19 @@
 ;---------------------------------------------------------------------------
 
 (
+(defop agent-init
+  :invocation (agent-init)
+  :context ()
+  :setting (& (setting "idle-looptime-sec" $ilt_sec) (setting "idle-looptime-usec" $ilt_usec)
+              (setting "busy-looptime-sec" $blt_sec) (setting "busy-looptime-usec" $blt_usec))
+  :body (
+    (! (bb-open "SkillerInterface" "Skiller" BB-READ))
+    (! (time-set-idle-looptime $ilt_sec $ilt_usec))
+    (! (time-set-busy-looptime $blt_sec $blt_usec))
+    (! (say "Agent loaded and ready to run")))
+  :effects ((~> (agent-init)))
+)
+
 (defop say
   :invocation (! (say $text))
   :call (say $text)
@@ -16,16 +29,10 @@
   :documentation "Invoke skiller to synthesize given text as speech."
 )
 
-(defop agent-init
-  :invocation (agent-init)
-  :context ()
-  :setting (& (setting "idle-looptime-sec" $ilt_sec) (setting "idle-looptime-usec" $ilt_usec)
-              (setting "busy-looptime-sec" $blt_sec) (setting "busy-looptime-usec" $blt_usec))
-  :body (
-    (! (time-set-idle-looptime $ilt_sec $ilt_usec))
-    (! (time-set-busy-looptime $blt_sec $blt_usec))
-    (! (say "Agent loaded and ready to run")))
-  :effects ((~> (agent-init)))
+(defop agent-print-skiller-iface
+  :invocation (bb-data "type" "SkillerInterface" "id" "Skiller" "time" $t_sec $t_usec $data)
+  :context (blackboard-interface "SkillerInterface" "Skiller" BB-READ)
+  :body ((! (bb-print "SkillerInterface" "Skiller")))
 )
 
 )

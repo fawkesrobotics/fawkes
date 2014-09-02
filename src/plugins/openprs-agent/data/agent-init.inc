@@ -9,23 +9,31 @@
 
 include "new-default.inc"
 
+; Settings for the various features
 declare predicate setting
-
-include "meta-coalesce.inc"
-include "time.inc"
-
-load external "mod_skiller" "init"
-
-declare op_predicate say
-declare predicate agent-init
-
 add (setting "idle-looptime-sec" 0)
 add (setting "idle-looptime-usec" 25000)
 add (setting "busy-looptime-sec" 0)
 add (setting "busy-looptime-usec" 5000)
+add (setting "bb-auto-read" T)
+add (setting "bb-auto-cleanup" T)
+
+; debug tracing configuration
+trace receive off
+trace intend off
+
+
+; Including feature files and load external modules
+include "meta-coalesce.inc"
+include "time.inc"
+include "blackboard.inc"
+
+load external "mod_skiller" "init"
+
+; declare and load agent-specific elements
+declare op_predicate say
+declare predicate agent-init
+
 add (agent-init)
 
 load opf "agent.opf"
-
-trace receive off
-trace intend off
