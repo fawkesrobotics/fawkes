@@ -56,7 +56,7 @@ class InterfaceFieldIterator
   const char *           get_typename() const;
   const char *           get_name() const;
   const void *           get_value() const;
-  const char *           get_value_string();
+  const char *           get_value_string(const char *array_sep = ", ");
   size_t                 get_length() const;
   bool                   get_bool(unsigned int index = 0) const;
   int8_t                 get_int8(unsigned int index = 0) const;
