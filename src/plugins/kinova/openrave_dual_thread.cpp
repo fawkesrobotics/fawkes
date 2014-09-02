@@ -165,3 +165,9 @@ KinovaOpenraveDualThread::update_openrave()
 {
   // do nothing, this thread is only for plannning!
 }
+
+/** Plot the first target of the queue in the viewer_env */
+void
+KinovaOpenraveDualThread::plot_first()
+{
+}

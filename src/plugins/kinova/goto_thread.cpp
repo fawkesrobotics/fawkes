@@ -326,6 +326,10 @@ KinovaGotoThread::loop()
 
           // process trajectory only if it actually "exists"
           if( !__target->trajec->empty() ) {
+            // first let the openrave_thread show the trajectory in the viewer
+            __arm->openrave_thread->plot_first();
+
+            // then execute the trajectory
             _exec_trajec(*(__target->trajec));
           }
 

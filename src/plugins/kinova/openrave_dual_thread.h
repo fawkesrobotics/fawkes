@@ -40,6 +40,7 @@ class KinovaOpenraveDualThread : public KinovaOpenraveBaseThread
   virtual void unregister_arms();
 
   virtual void update_openrave();
+  virtual void plot_first();
 
   virtual bool add_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true);
   virtual bool set_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true);

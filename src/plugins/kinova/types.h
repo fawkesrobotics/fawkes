@@ -74,6 +74,8 @@ typedef struct jaco_arm_struct {
   fawkes::RefPtr< fawkes::Mutex > trajec_mutex; // very shortly locked mutex
 
   fawkes::RefPtr< jaco_target_queue_t > target_queue;
+
+  float trajec_color[4]; // RGBA values, each from 0-1
 } jaco_arm_t;
 
 typedef struct jaco_dual_arm_struct {

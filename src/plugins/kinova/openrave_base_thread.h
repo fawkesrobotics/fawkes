@@ -71,6 +71,7 @@ class KinovaOpenraveBaseThread
   virtual void unregister_arms() = 0;
 
   virtual void update_openrave() = 0;
+  virtual void plot_first() = 0;
 
   virtual bool add_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true) = 0;
   virtual bool set_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true) = 0;

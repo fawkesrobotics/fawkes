@@ -187,6 +187,16 @@ KinovaActThread::init()
     __dual_arm.left.openrave_thread->register_arm(&__dual_arm.left);
     __dual_arm.right.openrave_thread->register_arm(&__dual_arm.right);
 
+    // set trajectory colors
+    __dual_arm.left.trajec_color[0] = 1.f;
+    __dual_arm.left.trajec_color[1] = 0.f;
+    __dual_arm.left.trajec_color[2] = 0.f;
+    __dual_arm.left.trajec_color[3] = 1.f;
+    __dual_arm.right.trajec_color[0] = 0.f;
+    __dual_arm.right.trajec_color[1] = 0.f;
+    __dual_arm.right.trajec_color[2] = 1.f;
+    __dual_arm.right.trajec_color[3] = 1.f;
+
     // initialize arms
     _initialize_dual();
 
@@ -226,6 +236,12 @@ KinovaActThread::init()
     __info_thread->register_arm(&__arm);
     __arm.goto_thread->register_arm(&__arm);
     __arm.openrave_thread->register_arm(&__arm);
+
+    // set trajectory colors
+    __arm.trajec_color[0] = 0.f;
+    __arm.trajec_color[1] = 0.f;
+    __arm.trajec_color[2] = 1.f;
+    __arm.trajec_color[3] = 1.f;
 
     // initalize arms
     _initialize_single();

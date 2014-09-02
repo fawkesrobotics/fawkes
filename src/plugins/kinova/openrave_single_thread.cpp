@@ -374,3 +374,67 @@ KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_
   to->trajec = RefPtr<jaco_trajec_t>( __planner_env.robot->get_trajectory_device() );
   __trajec_mutex->unlock();
 }
+
+
+
+/** Plot the first target of the queue in the viewer_env */
+void
+KinovaOpenraveSingleThread::plot_first()
+{
+#ifdef HAVE_OPENRAVE
+  if( !__cfg_OR_use_viewer )
+    return;
+
+  // check if there is a target to be plotted
+  __target_mutex->lock();
+  if( __target_queue->empty() ) {
+    __target_mutex->unlock();
+    return;
+  }
+
+  // get RefPtr to first target in queue
+  RefPtr<jaco_target_t> target = __target_queue->front();
+  __target_mutex->unlock();
+
+
+  // only plot trajectories
+  if( target->type != TARGET_TRAJEC )
+    return;
+
+  // plot the trajectory (if possible)
+  __trajec_mutex->lock();
+  if( !target->trajec ) {
+    __trajec_mutex->unlock();
+    return;
+  }
+
+  // remove all GraphHandlerPtr and currently drawn plots
+  __graph_handle.clear();
+  {
+    // save the state, do not modifiy currently active robot!
+    RobotBasePtr tmp_robot = __viewer_env.robot->get_robot_ptr();
+    RobotBase::RobotStateSaver saver(tmp_robot);
+
+    OpenRAVE::Vector color(__arm->trajec_color[0],
+                           __arm->trajec_color[1],
+                           __arm->trajec_color[2],
+                           __arm->trajec_color[3]);
+    std::vector<dReal> joints;
+    OpenRaveManipulator* manip = __viewer_env.manip->copy();
+
+    for(jaco_trajec_t::iterator it = target->trajec->begin(); it!=target->trajec->end(); ++it) {
+      manip->set_angles_device((*it));
+      manip->get_angles(joints);
+
+      tmp_robot->SetDOFValues(joints, 1, __manip->GetArmIndices());
+
+      const OpenRAVE::Vector &trans = __manip->GetEndEffectorTransform().trans;
+      float transa[4] = { (float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w };
+      __graph_handle.push_back( __viewer_env.env->get_env_ptr()->plot3(transa,1, 0, 2.f, color));
+    }
+  } // robot state is restored
+
+  __trajec_mutex->unlock();
+
+#endif //HAVE_OPENRAVE
+}
