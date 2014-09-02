@@ -335,6 +335,22 @@ KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, floa
 void
 KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
 {
+  // Update bodies in planner-environment
+  // clone robot state, ignoring grabbed bodies
+  {
+    RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
+                                     0xffffffff&~KinBody::Save_GrabbedBodies);
+    saver.Restore( __planner_env.robot->get_robot_ptr() );
+  }
+  // then clone all objects
+  __planner_env.env->clone_objects( __viewer_env.env );
+  // restore robot state with attached objects
+  {
+    RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
+                                     KinBody::Save_GrabbedBodies|KinBody::Save_LinkVelocities|KinBody::Save_ActiveDOF|KinBody::Save_ActiveManipulator);
+    saver.Restore( __planner_env.robot->get_robot_ptr() );
+  }
+
   // Set target point for planner (has already passed IK check previously!)
   __planner_env.manip->set_angles_device(to->pos);
   std::vector<float> target;
