@@ -339,12 +339,14 @@ OpenRaveRobot::set_target_straight(float trans_x, float trans_y, float trans_z)
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_quat(float trans_x, float trans_y, float trans_z, float quat_w, float quat_x, float quat_y, float quat_z, bool no_offset)
+OpenRaveRobot::set_target_quat(float trans_x, float trans_y, float trans_z,
+                               float quat_w, float quat_x, float quat_y, float quat_z,
+                               IkFilterOptions filter, bool no_offset)
 {
   Vector trans(trans_x, trans_y, trans_z);
   Vector   rot(quat_w, quat_x, quat_y, quat_z);
 
-  return set_target_transform(trans, rot, no_offset);
+  return set_target_transform(trans, rot, filter, no_offset);
 }
 
 /** Set target, given transition, and rotation as axis-angle.
@@ -359,13 +361,15 @@ OpenRaveRobot::set_target_quat(float trans_x, float trans_y, float trans_z, floa
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_axis_angle(float trans_x, float trans_y, float trans_z, float angle, float axisX, float axisY, float axisZ, bool no_offset)
+OpenRaveRobot::set_target_axis_angle(float trans_x, float trans_y, float trans_z,
+                                     float angle, float axisX, float axisY, float axisZ,
+                                     IkFilterOptions filter, bool no_offset)
 {
   Vector trans(trans_x, trans_y, trans_z);
   Vector aa(angle, axisX, axisY, axisZ);
   Vector rot = quatFromAxisAngle(aa);
 
-  return set_target_transform(trans, rot, no_offset);
+  return set_target_transform(trans, rot, filter, no_offset);
 }
 
 /** Set target, given transition, and Euler-rotation.
@@ -380,7 +384,10 @@ OpenRaveRobot::set_target_axis_angle(float trans_x, float trans_y, float trans_z
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_euler(euler_rotation_t type, float trans_x, float trans_y, float trans_z, float phi, float theta, float psi, bool no_offset)
+OpenRaveRobot::set_target_euler(euler_rotation_t type,
+                                float trans_x, float trans_y, float trans_z,
+                                float phi, float theta, float psi,
+                                IkFilterOptions filter, bool no_offset)
 {
   Vector trans(trans_x, trans_y, trans_z);
   std::vector<float> rot(9, 0.f); //rotations vector
@@ -412,7 +419,7 @@ OpenRaveRobot::set_target_euler(euler_rotation_t type, float trans_x, float tran
         return false;
   }
 
-  return set_target_euler(trans, rot, no_offset);
+  return set_target_euler(trans, rot, filter, no_offset);
 }
 
 /** Set target by giving position of an object.
@@ -427,7 +434,7 @@ OpenRaveRobot::set_target_euler(euler_rotation_t type, float trans_x, float tran
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x)
+OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x, IkFilterOptions filter)
 {
   // This is about 2 times faster than using setTargetEuler each time, especially when it comes
   // to the while loop (whole loop: ~56ms vs ~99ms)
@@ -446,7 +453,7 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
 
   Vector trans(trans_x, trans_y, trans_z);
 
-  if( set_target_transform(trans, quat_xYZ, true) )
+  if( set_target_transform(trans, quat_xYZ, filter, true) )
     return true;
 
   //try varying 2nd rotation (quat_y) until a valid IK is found. Max angle: 45° (~0.79 rad)
@@ -466,10 +473,10 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
     quatNeg = quatMultiply(quatNeg, quatNegY);  //move down ~1°
 
     quat_xYZ = quatMultiply(quatPos, quat_z);     //apply wrist rotation
-    foundIK = set_target_transform(trans, quat_xYZ, true);
+    foundIK = set_target_transform(trans, quat_xYZ, filter, true);
     if( !foundIK ) {
       quat_xYZ = quatMultiply(quatNeg, quat_z);
-      foundIK = set_target_transform(trans, quat_xYZ, true);
+      foundIK = set_target_transform(trans, quat_xYZ, filter, true);
     }
   }
 
@@ -485,7 +492,7 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_ikparam(OpenRAVE::IkParameterization ik_param)
+OpenRaveRobot::set_target_ikparam(IkParameterization ik_param, IkFilterOptions filter)
 {
   EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   __arm = __robot->GetActiveManipulator();
@@ -493,7 +500,7 @@ OpenRaveRobot::set_target_ikparam(OpenRAVE::IkParameterization ik_param)
 
   __target.ikparam = ik_param;
   __target.type = TARGET_IKPARAM;
-  __target.solvable = __arm->FindIKSolution(ik_param,target_angles,true);
+  __target.solvable = __arm->FindIKSolution(ik_param,target_angles,filter);
   __target.manip->set_angles(target_angles);
 
   return __target.solvable;
@@ -716,7 +723,7 @@ OpenRaveRobot::release_all_objects()
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, bool no_offset)
+OpenRaveRobot::set_target_transform(Vector& trans, OpenRAVE::Vector& rotQuat, IkFilterOptions filter, bool no_offset)
 {
   Transform target;
   target.trans = trans;
@@ -746,7 +753,7 @@ OpenRaveRobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& r
     std::vector<OpenRAVE::dReal> target_angles;
 
     __target.ikparam = IkParameterization(target);
-    __target.solvable = __arm->FindIKSolution(__target.ikparam,target_angles,true);
+    __target.solvable = __arm->FindIKSolution(__target.ikparam,target_angles,filter);
     __target.manip->set_angles(target_angles);
 
   } else if( __arm->GetIkSolver()->Supports(IKP_TranslationDirection5D) ) {
@@ -779,7 +786,7 @@ OpenRaveRobot::set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& r
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, bool no_offset)
+OpenRaveRobot::set_target_euler(Vector& trans, std::vector<float>& rotations, IkFilterOptions filter, bool no_offset)
 {
   if( rotations.size() != 9 ) {
     __target.type = TARGET_NONE;
@@ -805,7 +812,7 @@ OpenRaveRobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rot
   Vector q12  = quatMultiply (q1, q2);
   Vector quat = quatMultiply (q12, q3);
 
-  return set_target_transform(trans, quat, no_offset);
+  return set_target_transform(trans, quat, filter, no_offset);
 }
 
 /** Get IkParameterization for a 5DOF arm given a 6D Transform.
