@@ -73,6 +73,8 @@ class OpenRaveEnvironment
   virtual bool rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w);
   virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z);
 
+  virtual void clone_objects(OpenRaveEnvironment* env);
+
   //virtual RobotBasePtr getRobot() const;
   virtual OpenRAVE::EnvironmentBasePtr get_env_ptr() const;
 

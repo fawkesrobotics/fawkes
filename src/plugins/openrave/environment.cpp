@@ -700,4 +700,79 @@ OpenRaveEnvironment::rotate_object(const std::string& name, float rot_x, float r
   return rotate_object(name, quat[1], quat[2], quat[3], quat[0]);
 }
 
+
+/** Clone all non-robot objects from a referenced OpenRaveEnvironment to this one.
+ * The environments should contain the same objects afterwards. Therefore objects in current
+ *  environment that do not exist in the reference environment are deleted as well.
+ * @param env The reference environment
+ */
+void
+OpenRaveEnvironment::clone_objects(OpenRaveEnvironment* env)
+{
+  // lock environments
+  EnvironmentMutex::scoped_lock lockold(env->get_env_ptr()->GetMutex());
+  EnvironmentMutex::scoped_lock lock(__env->GetMutex());
+
+  // get kinbodies
+  std::vector<KinBodyPtr> old_bodies, bodies;
+  env->get_env_ptr()->GetBodies( old_bodies );
+  __env->GetBodies( bodies );
+
+  // check for existing bodies in this environment
+  std::vector<KinBodyPtr>::iterator old_body, body;
+  for(old_body=old_bodies.begin(); old_body!=old_bodies.end(); ++old_body ) {
+    if( (*old_body)->IsRobot() )
+      continue;
+
+    KinBodyPtr new_body;
+    for( body=bodies.begin(); body!=bodies.end(); ++body ) {
+      if( (*body)->IsRobot() )
+        continue;
+
+      if( (*body)->GetName() == (*old_body)->GetName() && (*body)->GetKinematicsGeometryHash() == (*old_body)->GetKinematicsGeometryHash() ) {
+        new_body = *body;
+        break;
+      }
+    }
+
+    if( body != bodies.end() ) {
+      // remove this one from the list
+      bodies.erase( body );
+    }
+
+    if( !new_body ) {
+      // this is a new kinbody!
+
+      // create new empty KinBody, then clone from old
+      KinBodyPtr empty;
+      new_body = __env->ReadKinBodyData(empty, "<KinBody></KinBody>");
+      new_body->Clone(*old_body, 0);
+
+      // add kinbody to environment
+      __env->Add(new_body);
+
+      // update collisison-checker and physics-engine to consider new kinbody
+      __env->GetCollisionChecker()->InitKinBody(new_body);
+      __env->GetPhysicsEngine()->InitKinBody(new_body);
+
+      // clone kinbody state
+      KinBody::KinBodyStateSaver saver(*old_body, KinBody::Save_LinkVelocities);
+      saver.Restore(new_body);
+
+    } else {
+      // this kinbody already exists. just clone the state
+      KinBody::KinBodyStateSaver saver(*old_body, 0xffffffff);
+      saver.Restore(new_body);
+    }
+  }
+
+  // remove bodies that are not in old_env anymore
+  for( body=bodies.begin(); body!=bodies.end(); ++body ) {
+    if( (*body)->IsRobot() )
+      continue;
+
+    __env->Remove( *body );
+  }
+}
+
 } // end of namespace fawkes
