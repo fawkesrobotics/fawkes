@@ -46,19 +46,28 @@ typedef std::vector<float>               jaco_trajec_point_t;
 typedef std::vector<jaco_trajec_point_t> jaco_trajec_t;
 
 typedef enum jaco_target_type_enum {
-  TARGET_CARTESIAN,
-  TARGET_ANGULAR,
-  TARGET_GRIPPER,
-  TARGET_TRAJEC,
-  TARGET_READY,
-  TARGET_RETRACT
+  TARGET_CARTESIAN,     /**< direct target, with cartesian coordinates. */
+  TARGET_ANGULAR,       /**< direct target, with angular coordinates. */
+  TARGET_GRIPPER,       /**< only gripper movement. */
+  TARGET_TRAJEC,        /**< need to plan a trajectory for this target. */
+  TARGET_READY,         /**< target is the READY position of the Jaco arm. */
+  TARGET_RETRACT        /**< target is the RETRACT position of the Jaco arm. */
 } jaco_target_type_t;
 
+typedef enum jaco_trajec_state_enum {
+  TRAJEC_WAITING,       /**< new trajectory target, wait for planner to process. */
+  TRAJEC_PLANNING,      /**< planner is planning the trajectory. */
+  TRAJEC_READY,         /**< trajectory has been planned and is ready for execution. */
+  TRAJEC_EXECUTING,     /**< trajectory is being executed. */
+  TRAJEC_PLANNING_ERROR /**< planner could not plan a collision-free trajectory. */
+} jaco_trajec_state_t;
+
 typedef struct jaco_target_struct_t {
-  jaco_target_type_t            type;
-  jaco_trajec_point_t           pos;
-  jaco_trajec_point_t           fingers;
-  fawkes::RefPtr<jaco_trajec_t> trajec;
+  jaco_target_type_t            type;           /**< target type. */
+  jaco_trajec_point_t           pos;            /**< target position (interpreted depending on target type). */
+  jaco_trajec_point_t           fingers;        /**< target finger values. */
+  fawkes::RefPtr<jaco_trajec_t> trajec;         /**< trajectory, if target is TARGET_TRAJEC. */
+  jaco_trajec_state_t           trajec_state;   /**< state of the trajectory, if target is TARGET_TRAJEC. */
 } jaco_target_t;
 
 typedef std::list< fawkes::RefPtr<jaco_target_t> > jaco_target_queue_t;

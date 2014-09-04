@@ -39,6 +39,14 @@ namespace fawkes {
  */
 
 
+/** ERROR_NONE constant */
+const uint32_t JacoInterface::ERROR_NONE = 0u;
+/** ERROR_UNSPECIFIC constant */
+const uint32_t JacoInterface::ERROR_UNSPECIFIC = 1u;
+/** ERROR_NO_IK constant */
+const uint32_t JacoInterface::ERROR_NO_IK = 2u;
+/** ERROR_PLANNING constant */
+const uint32_t JacoInterface::ERROR_PLANNING = 4u;
 
 /** Constructor */
 JacoInterface::JacoInterface() : Interface()
@@ -62,6 +70,7 @@ JacoInterface::JacoInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "finger3", 1, &data->finger3);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
+  add_fieldinfo(IFT_UINT32, "error_code", 1, &data->error_code);
   add_messageinfo("CalibrateMessage");
   add_messageinfo("RetractMessage");
   add_messageinfo("StopMessage");
@@ -70,7 +79,7 @@ JacoInterface::JacoInterface() : Interface()
   add_messageinfo("MoveGripperMessage");
   add_messageinfo("JoystickPushMessage");
   add_messageinfo("JoystickReleaseMessage");
-  unsigned char tmp_hash[] = {0x9d, 0x13, 0xd0, 0x57, 0xac, 0x94, 0x3, 0xfe, 0x1b, 0x70, 0x46, 0x37, 0x4, 0x24, 0x57, 0xf6};
+  unsigned char tmp_hash[] = {0xbc, 0xfd, 0x89, 0x32, 0x5b, 0x75, 0x37, 0x16, 0x6f, 0x8, 0xbd, 0x72, 0xc, 0x1c, 0x51, 0x65};
   set_hash(tmp_hash);
 }
 
@@ -544,6 +553,41 @@ void
 JacoInterface::set_final(const bool new_final)
 {
   data->final = new_final;
+  data_changed = true;
+}
+
+/** Get error_code value.
+ * Error code, set if
+      final is true. 0 if no error occured, an error code from ERROR_*
+      constants otherwise.
+ * @return error_code value
+ */
+uint32_t
+JacoInterface::error_code() const
+{
+  return data->error_code;
+}
+
+/** Get maximum length of error_code value.
+ * @return length of error_code value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::maxlenof_error_code() const
+{
+  return 1;
+}
+
+/** Set error_code value.
+ * Error code, set if
+      final is true. 0 if no error occured, an error code from ERROR_*
+      constants otherwise.
+ * @param new_error_code new error_code value
+ */
+void
+JacoInterface::set_error_code(const uint32_t new_error_code)
+{
+  data->error_code = new_error_code;
   data_changed = true;
 }
 

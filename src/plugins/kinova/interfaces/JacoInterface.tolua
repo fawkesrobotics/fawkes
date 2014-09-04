@@ -5,6 +5,10 @@ $using namespace fawkes;
 namespace fawkes {
 class JacoInterface : public Interface
 {
+  static const unsigned int ERROR_NONE;
+  static const unsigned int ERROR_UNSPECIFIC;
+  static const unsigned int ERROR_NO_IK;
+  static const unsigned int ERROR_PLANNING;
 
   class CalibrateMessage : public Message
   {
@@ -156,6 +160,9 @@ class JacoInterface : public Interface
   bool is_final();
   void set_final(const bool new_final);
   int maxlenof_final() const;
+  unsigned int error_code();
+  void set_error_code(const unsigned int new_error_code);
+  int maxlenof_error_code() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

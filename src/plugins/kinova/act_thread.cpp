@@ -436,6 +436,7 @@ KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
     Message *m = arm.iface->msgq_first(m);
     arm.iface->set_msgid(m->id());
     arm.iface->set_final(false);
+    arm.iface->set_error_code(JacoInterface::ERROR_NONE);
     arm.iface->write();
 
     if( arm.iface->msgq_first_is<JacoInterface::StopMessage>() ) {
@@ -469,6 +470,7 @@ KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
       // add target to OpenRAVE queue for planning
       bool solvable = arm.openrave_thread->add_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
       if( !solvable ) {
+        arm.iface->set_error_code(JacoInterface::ERROR_NO_IK);
         logger->log_warn(name(), "Failed executing CartesianGotoMessage, arm %s and/or thread %s could not find IK solution",
                          arm.arm->get_name().c_str(), arm.openrave_thread->name());
       }
@@ -504,7 +506,7 @@ KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
       arm.iface->set_final(true);
 
     } else {
-      logger->log_warn(name(), "%s: Unknown message received", arm.iface->id());
+      logger->log_warn(name(), "%s: Unknown message received. Skipping", arm.iface->id());
     }
 
     arm.iface->msgq_pop();

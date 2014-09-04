@@ -37,6 +37,10 @@ class JacoInterface : public Interface
  /// @endcond
  public:
   /* constants */
+  static const uint32_t ERROR_NONE;
+  static const uint32_t ERROR_UNSPECIFIC;
+  static const uint32_t ERROR_NO_IK;
+  static const uint32_t ERROR_PLANNING;
 
  private:
 #pragma pack(push,4)
@@ -60,6 +64,9 @@ class JacoInterface : public Interface
       processed, or 0 if no message is being processed. */
     bool final; /**< True, if the last goto command has been finished,
       false if it is still running */
+    uint32_t error_code; /**< Error code, set if
+      final is true. 0 if no error occured, an error code from ERROR_*
+      constants otherwise. */
   } JacoInterface_data_t;
 #pragma pack(pop)
 
@@ -362,6 +369,9 @@ class JacoInterface : public Interface
   bool is_final() const;
   void set_final(const bool new_final);
   size_t maxlenof_final() const;
+  uint32_t error_code() const;
+  void set_error_code(const uint32_t new_error_code);
+  size_t maxlenof_error_code() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

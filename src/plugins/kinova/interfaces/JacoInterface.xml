@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <interface name="JacoInterface" author="Bahram Maleki-Fard" year="2013">
+  <constants>
+    <constant type="uint32" value="0" name="ERROR_NONE">No error</constant>
+    <constant type="uint32" value="1" name="ERROR_UNSPECIFIC">Some unspecified error</constant>
+    <constant type="uint32" value="2" name="ERROR_NO_IK">No IK solution found</constant>
+    <constant type="uint32" value="4" name="ERROR_PLANNING">Planning error</constant>
+  </constants>
+
   <data>
     <comment>
       Interface providing access to a Kinova Jaco arm.
@@ -27,6 +34,9 @@
       processed, or 0 if no message is being processed.</field>
     <field type="bool" name="final">True, if the last goto command has been finished,
       false if it is still running</field>
+    <field type="uint32" name="error_code">Error code, set if
+      final is true. 0 if no error occured, an error code from ERROR_*
+      constants otherwise.</field>
   </data>
 
   <message name="Calibrate">

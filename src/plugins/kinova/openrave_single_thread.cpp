@@ -276,7 +276,7 @@ KinovaOpenraveSingleThread::update_openrave()
 bool
 KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {
-  bool solvable = false;
+  bool solvable = false;  // need to define it here outside the ifdef-scope
 
 #ifdef HAVE_OPENRAVE
   try {
@@ -293,13 +293,14 @@ KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, floa
       // create new target for the queue
       RefPtr<jaco_target_t> target(new jaco_target_t());
 
-      // get target IK valoues
+      // get target IK values
       __planner_env.robot->get_target().manip->get_angles_device(target->pos);
 
       if( plan ) {
         // add this to the target queue for planning
         logger->log_debug(name(), "Adding to target_queue for later planning");
         target->type = TARGET_TRAJEC;
+        target->trajec_state = TRAJEC_WAITING;
 
       } else {
         // don't plan, consider this the final configuration
@@ -312,7 +313,7 @@ KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, floa
 
     } else {
       logger->log_warn(name(), "No IK solution found for target.");
-      return solvable;
+      return false;
     }
 
   } catch( openrave_exception &e) {
@@ -335,6 +336,11 @@ KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, floa
 void
 KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
 {
+  // update state of the trajectory
+  __target_mutex->lock();
+  to->trajec_state = TRAJEC_PLANNING;
+  __target_mutex->unlock();
+
   // Update bodies in planner-environment
   // clone robot state, ignoring grabbed bodies
   {
@@ -377,10 +383,16 @@ KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_
     // TODO: better handling!
     // for now just skip planning, so the target_queue can be processed
     __target_mutex->lock();
-    to->type = TARGET_ANGULAR;
+    //to->type = TARGET_ANGULAR;
+    to->trajec_state = TRAJEC_PLANNING_ERROR;
     __target_mutex->unlock();
     return;
   }
+
+  // update trajectory state
+  __target_mutex->lock();
+  to->trajec_state = TRAJEC_READY;
+  __target_mutex->unlock();
 
   // add trajectory to queue
   //logger->log_debug(name(), "plan successful, adding to queue");

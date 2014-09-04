@@ -75,13 +75,21 @@ KinovaGotoThread::finalize()
 bool
 KinovaGotoThread::final()
 {
+  // check if all targets have been processed
+  __arm->target_mutex->lock();
+  bool final = __arm->target_queue->empty();
+  __arm->target_mutex->unlock();
+  if( !final )
+    return false; // still targets in queue
+
+  // queue is empty. Now check if any movement has startet (__final would be false then)
   __final_mutex->lock();
-  bool final = __final;
+  final = __final;
   __final_mutex->unlock();
-
   if( final )
-    return true;
+    return true; // no movement
 
+  // There was some movement initiated. Check if it has finished
   check_final();
   __final_mutex->lock();
   final = __final;
@@ -318,11 +326,12 @@ KinovaGotoThread::loop()
       if( __target->type == TARGET_TRAJEC ) {
         logger->log_debug(name(), "next target is a trajectory...");
 
-        __arm->trajec_mutex->lock();
-        if( __target->trajec ) {
-          __arm->trajec_mutex->unlock();
-
+        if( __target->trajec_state == TRAJEC_READY ) {
           logger->log_debug(name(), "... and ready! processing now.");
+          // update trajectory state
+          __arm->target_mutex->lock();
+          __target->trajec_state = TRAJEC_EXECUTING;
+          __arm->target_mutex->unlock();
 
           // process trajectory only if it actually "exists"
           if( !__target->trajec->empty() ) {
@@ -340,8 +349,13 @@ KinovaGotoThread::loop()
           __arm->target_queue->pop_front();
           __arm->target_mutex->unlock();
 
+        } else if (__target->trajec_state == TRAJEC_PLANNING_ERROR ) {
+          logger->log_debug(name(), "... but the trajectory could not be planned. Abort!");
+          // stop the current and remaining queue, with appropriate error_code. This also sets "final" to true.
+          stop();
+          __arm->iface->set_error_code( JacoInterface::ERROR_PLANNING );
+
         } else {
-          __arm->trajec_mutex->unlock();
           logger->log_debug(name(), "... but not ready yet!");
           usleep(30e3);
         }
