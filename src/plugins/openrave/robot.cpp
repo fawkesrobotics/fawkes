@@ -528,6 +528,30 @@ OpenRaveRobot::set_target_plannerparams(const char* params)
   __target.plannerparams = params;
 }
 
+/** Set raw command for BaseManipulation module.
+ * BaseManipulation module accepts many arguments that can be passed.
+ * Basic commands are covered by the other set_target_ methods. In case something
+ * is not covered, or you want to send a custom command, use this method.
+ * Remember that plannerparams set by "set_target_plannerparams" are still added
+ * to the planner, so make sure you don't send duplicate entries both in plannerparams
+ * and in the raw command string.
+ * @param cmd complete command string.
+ */
+void
+OpenRaveRobot::set_target_raw(std::string& cmd)
+{
+  __target.raw_cmd = cmd;
+}
+
+/** Set raw command for BaseManipulation module.
+ * @param cmd complete command string.
+ */
+void
+OpenRaveRobot::set_target_raw(const char* cmd)
+{
+  __target.raw_cmd = cmd;
+}
+
 /** Set target angles directly.
  * @param angles vector with angle values
  */

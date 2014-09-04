@@ -77,6 +77,8 @@ class OpenRaveRobot
   virtual bool set_target_ikparam(OpenRAVE::IkParameterization ik_param, OpenRAVE::IkFilterOptions filter = OpenRAVE::IKFO_CheckEnvCollisions);
   virtual void set_target_plannerparams(std::string& params);
   virtual void set_target_plannerparams(const char* params);
+  virtual void set_target_raw(std::string& cmd);
+  virtual void set_target_raw(const char* cmd);
   virtual void set_target_angles( std::vector<float>& angles );
 
 

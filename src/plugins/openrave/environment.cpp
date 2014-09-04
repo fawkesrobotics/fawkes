@@ -297,6 +297,10 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
   }
 
   switch(target.type) {
+    case (TARGET_RAW) :
+      cmdin << target.raw_cmd;
+      break;
+
     case (TARGET_JOINTS) :
       cmdin << "MoveActiveJoints goal";
       {
