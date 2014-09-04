@@ -192,7 +192,7 @@ JacoOpenraveSingleThread::loop()
   // get first target with type TARGET_TRAJEC that needs a planner
   __target_mutex->lock();
   for( jaco_target_queue_t::iterator it=__target_queue->begin(); it!=__target_queue->end(); ++it ) {
-    if( (*it)->type == TARGET_TRAJEC && !(*it)->trajec ) {
+    if( (*it)->type==TARGET_TRAJEC && (*it)->trajec_state==TRAJEC_WAITING ) {
       // have found a new target for path planning!
       to = *it;
 
