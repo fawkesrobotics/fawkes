@@ -26,6 +26,7 @@
 
 #include <interfaces/JacoInterface.h>
 #include <core/threading/mutex.h>
+#include <utils/math/angle.h>
 
 #include <cmath>
 #include <stdio.h>
@@ -261,6 +262,11 @@ JacoOpenraveSingleThread::update_openrave()
 
     __robot->SetDOFValues(__joints, 1, __manip->GetArmIndices());
 
+    __joints.clear();
+    __joints.push_back( deg2rad(__arm->iface->finger1() - 40.f) );
+    __joints.push_back( deg2rad(__arm->iface->finger2() - 40.f) );
+    __joints.push_back( deg2rad(__arm->iface->finger3() - 40.f)) ;
+    __robot->SetDOFValues(__joints, 1, __manip->GetGripperIndices());
   } catch( openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }

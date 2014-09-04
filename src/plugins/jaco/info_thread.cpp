@@ -94,9 +94,9 @@ JacoInfoThread::loop()
       (*__arm)->iface->set_euler3(__cpos.at(5));
 
       (*__arm)->arm->get_fingers(__cpos);
-      (*__arm)->iface->set_finger1(__cpos.at(0));
-      (*__arm)->iface->set_finger2(__cpos.at(1));
-      (*__arm)->iface->set_finger3(__cpos.at(2));
+      (*__arm)->iface->set_finger1( std::max(0.f, std::min(60.f, __cpos.at(0))) );
+      (*__arm)->iface->set_finger2( std::max(0.f, std::min(60.f, __cpos.at(1))) );
+      (*__arm)->iface->set_finger3( std::max(0.f, std::min(60.f, __cpos.at(2))) );
 
       (*__arm)->arm->get_joints(__apos);
       for(unsigned int i=0; i<__apos.size(); i++) {
