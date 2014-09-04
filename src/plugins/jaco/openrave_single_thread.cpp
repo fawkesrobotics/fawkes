@@ -188,31 +188,35 @@ JacoOpenraveSingleThread::loop()
   }
 
   __planning_mutex->lock();
-  RefPtr<jaco_target_t> from, to;
+  RefPtr<jaco_target_t> to;
   // get first target with type TARGET_TRAJEC that needs a planner
   __target_mutex->lock();
-  for( jaco_target_queue_t::iterator it=__target_queue->begin(); it!=__target_queue->end(); ++it ) {
+  jaco_target_queue_t::iterator it;
+  for( it=__target_queue->begin(); it!=__target_queue->end(); ++it ) {
     if( (*it)->type==TARGET_TRAJEC && (*it)->trajec_state==TRAJEC_WAITING ) {
       // have found a new target for path planning!
       to = *it;
-
-      // check if there is a prior target that needs to be considered in planning
-      if( it!=__target_queue->begin() ) {
-        --it;
-        from = *it;
-        ++it;
-      }
-
       break;
     }
   }
-  __target_mutex->unlock();
 
   if( to ) {
-    if( !from )
-      from = RefPtr<jaco_target_t>(new jaco_target_t());
+    // Check if there is a prior target that can be usd as the starting position in planning.
+    //  The only target-types that can be used for that are those that contain joint positions,
+    //  i.e. TARGET_ANGULAR and TARGET_TRAJEC
+    RefPtr<jaco_target_t> from;
+    while( it!=__target_queue->begin() ) {
+      --it;
+      if( (*it)->type == TARGET_ANGULAR || (*it)->type == TARGET_TRAJEC ) {
+        from = *it;
+        break;
+      }
+    }
+    __target_mutex->unlock();
 
-    if( from->pos.size() != 6 ) {
+    // if there was no prior target that can be used as a starting position, create one
+    if( !from ) {
+      from = RefPtr<jaco_target_t>(new jaco_target_t());
       __arm->arm->get_joints(from->pos);
     }
 
@@ -221,6 +225,7 @@ JacoOpenraveSingleThread::loop()
     __planning_mutex->unlock();
 
   } else {
+    __target_mutex->unlock();
     __planning_mutex->unlock();
     usleep(30e3); // TODO: make this configurable
   }
