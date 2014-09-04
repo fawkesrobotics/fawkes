@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  info_thread.h - Kinova plugin Jaco information thread
+ *  info_thread.h - Kinova Jaco plugin information thread
  *
  *  Created: Thu Jun 13 19:14:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_KINOVA_INFO_THREAD_H_
-#define __PLUGINS_KINOVA_KINOVA_INFO_THREAD_H_
+#ifndef __PLUGINS_JACO_INFO_THREAD_H_
+#define __PLUGINS_JACO_INFO_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -35,7 +35,7 @@ namespace fawkes {
   typedef struct jaco_arm_struct jaco_arm_t;
 }
 
-class KinovaInfoThread
+class JacoInfoThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -43,8 +43,8 @@ class KinovaInfoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  KinovaInfoThread();
-  virtual ~KinovaInfoThread();
+  JacoInfoThread();
+  virtual ~JacoInfoThread();
 
   virtual void init();
   virtual void finalize();

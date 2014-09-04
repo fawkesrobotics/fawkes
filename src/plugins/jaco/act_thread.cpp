@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  act_thread.cpp - Kinova plugin Act Thread
+ *  act_thread.cpp - Kinova Jaco plugin act-thread
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -30,7 +30,7 @@
 
 using namespace fawkes;
 
-/** @class KinovaActThread "act_thread.h"
+/** @class JacoActThread "act_thread.h"
  * Jaco Arm control thread.
  *
  * @author Bahram Maleki-Fard
@@ -39,10 +39,10 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
-                                 KinovaGotoThread *goto_thread,
-                                 KinovaOpenraveBaseThread *openrave_thread)
-  : Thread("KinovaActThread", Thread::OPMODE_WAITFORWAKEUP),
+JacoActThread::JacoActThread(JacoInfoThread *info_thread,
+                             JacoGotoThread *goto_thread,
+                             JacoOpenraveBaseThread *openrave_thread)
+  : Thread("JacoActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
   __arm.arm = NULL;
@@ -57,13 +57,13 @@ KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
   _process_msgs = NULL;
 }
 
-KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
-                                 KinovaGotoThread *goto_thread_l,
-                                 KinovaGotoThread *goto_thread_r,
-                                 KinovaOpenraveBaseThread *openrave_thread_l,
-                                 KinovaOpenraveBaseThread *openrave_thread_r,
-                                 KinovaOpenraveBaseThread *openrave_thread_dual)
-  : Thread("KinovaActThread", Thread::OPMODE_WAITFORWAKEUP),
+JacoActThread::JacoActThread(JacoInfoThread *info_thread,
+                             JacoGotoThread *goto_thread_l,
+                             JacoGotoThread *goto_thread_r,
+                             JacoOpenraveBaseThread *openrave_thread_l,
+                             JacoOpenraveBaseThread *openrave_thread_r,
+                             JacoOpenraveBaseThread *openrave_thread_dual)
+  : Thread("JacoActThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
   __dual_arm.left.arm = NULL;
@@ -85,7 +85,7 @@ KinovaActThread::KinovaActThread(KinovaInfoThread *info_thread,
 
 
 /** Destructor. */
-KinovaActThread::~KinovaActThread()
+JacoActThread::~JacoActThread()
 {
 }
 
@@ -95,7 +95,7 @@ KinovaActThread::~KinovaActThread()
  * This method also sets the correct function pointers that are used in
  * the main loop() method. */
 void
-KinovaActThread::init()
+JacoActThread::init()
 {
   __cfg_auto_init       = config->get_bool("/hardware/jaco/auto_initialize");
   __cfg_auto_calib      = config->get_bool("/hardware/jaco/auto_calibrate");
@@ -109,9 +109,9 @@ KinovaActThread::init()
 
   if(__cfg_is_dual_arm) {
     // set function pointers for dual-arm setup
-    _submit_iface_changes = &KinovaActThread::_submit_iface_dual;
-    _is_initializing = &KinovaActThread::_is_initializing_dual;
-    _process_msgs = &KinovaActThread::_process_msgs_dual;
+    _submit_iface_changes = &JacoActThread::_submit_iface_dual;
+    _is_initializing = &JacoActThread::_is_initializing_dual;
+    _process_msgs = &JacoActThread::_process_msgs_dual;
 
     // dual-arm setup needs additional setup and config entries
     std::string l_name  = config->get_string("/hardware/jaco/dual_arm/left/name");
@@ -121,14 +121,14 @@ KinovaActThread::init()
 
     // create the two JacoArm objects and assign left/right correctly
     try {
-      std::vector<KinovaArm*> arms;
+      std::vector<JacoArm*> arms;
       if( !cfg_arm.compare("dummy") ) {
-        __dual_arm.left.arm  = new KinovaArmDummy(l_name.c_str());
-        __dual_arm.right.arm = new KinovaArmDummy(r_name.c_str());
+        __dual_arm.left.arm  = new JacoArmDummy(l_name.c_str());
+        __dual_arm.right.arm = new JacoArmDummy(r_name.c_str());
 
       } else {
-        arms.push_back( new KinovaArmKindrv() );
-        arms.push_back( new KinovaArmKindrv() );
+        arms.push_back( new JacoArmKindrv() );
+        arms.push_back( new JacoArmKindrv() );
 
         for( unsigned int i=0; i<arms.size(); ++i) {
           logger->log_debug(name(), "compare l_name '%s' to '%s' ...", l_name.c_str(), arms[i]->get_name().c_str());
@@ -202,15 +202,15 @@ KinovaActThread::init()
 
   } else {
     // single arm setup; need less considerations, just connect to first arm
-    _submit_iface_changes = &KinovaActThread::_submit_iface_single;
-    _is_initializing = &KinovaActThread::_is_initializing_single;
-    _process_msgs = &KinovaActThread::_process_msgs_single;
+    _submit_iface_changes = &JacoActThread::_submit_iface_single;
+    _is_initializing = &JacoActThread::_is_initializing_single;
+    _process_msgs = &JacoActThread::_process_msgs_single;
 
     try {
       if( !cfg_arm.compare("dummy") ) {
-        __arm.arm = new KinovaArmDummy("JacoDummy");
+        __arm.arm = new JacoArmDummy("JacoDummy");
       } else {
-        __arm.arm = new KinovaArmKindrv();
+        __arm.arm = new JacoArmKindrv();
       }
 
     } catch(fawkes::Exception &e) {
@@ -252,7 +252,7 @@ KinovaActThread::init()
  * Close all writing interfaces and delete JacoArm instances.
  */
 void
-KinovaActThread::finalize()
+JacoActThread::finalize()
 {
   if( __cfg_is_dual_arm ) {
     try {
@@ -281,7 +281,7 @@ KinovaActThread::finalize()
  * action based on what kind of setup we have (single_arm or dual_arm).
  */
 void
-KinovaActThread::loop()
+JacoActThread::loop()
 {
   // firts of all, submit interface updates (that other threads might have done)!
   (this->*_submit_iface_changes)();
@@ -306,7 +306,7 @@ KinovaActThread::loop()
  * ########################################################################## */
 /** Initialize and/or calibrate single arm, if requested by config flags */
 void
-KinovaActThread::_initialize_single()
+JacoActThread::_initialize_single()
 {
   //check if we need to initialize arm
   if( !__arm.arm->initialized() && __cfg_auto_init ) {
@@ -326,7 +326,7 @@ KinovaActThread::_initialize_single()
 
 /** Initialize and/or calibrate both arms, if requested by config flags */
 void
-KinovaActThread::_initialize_dual()
+JacoActThread::_initialize_dual()
 {
   //check initialization status
   if( !__dual_arm.left.arm->initialized() && __cfg_auto_init ) {
@@ -358,7 +358,7 @@ KinovaActThread::_initialize_dual()
 
 /** Check if arm is being initialized. */
 bool
-KinovaActThread::_is_initializing_single()
+JacoActThread::_is_initializing_single()
 {
   __arm.iface->set_initialized(__arm.arm->initialized());
 
@@ -373,7 +373,7 @@ KinovaActThread::_is_initializing_single()
 
 /** Check if any of the two arms is being initialized. */
 bool
-KinovaActThread::_is_initializing_dual()
+JacoActThread::_is_initializing_dual()
 {
   __dual_arm.left.iface->set_initialized(__dual_arm.left.arm->initialized());
   __dual_arm.right.iface->set_initialized(__dual_arm.right.arm->initialized());
@@ -391,7 +391,7 @@ KinovaActThread::_is_initializing_dual()
 /** Submit changes made to JacoInterface for the single arm.
  * Not much done here. */
 void
-KinovaActThread::_submit_iface_single()
+JacoActThread::_submit_iface_single()
 {
   __arm.iface->write();
 }
@@ -399,7 +399,7 @@ KinovaActThread::_submit_iface_single()
 /** Submit changes made to JacoInterfaces for the both left and right arm.
  * Not much done here. */
 void
-KinovaActThread::_submit_iface_dual()
+JacoActThread::_submit_iface_dual()
 {
   __dual_arm.left.iface->write();
   __dual_arm.right.iface->write();
@@ -408,7 +408,7 @@ KinovaActThread::_submit_iface_dual()
 
 /** Process messages received for single-arm setup. */
 void
-KinovaActThread::_process_msgs_single()
+JacoActThread::_process_msgs_single()
 {
   _process_msgs_arm(__arm);
 }
@@ -419,7 +419,7 @@ KinovaActThread::_process_msgs_single()
  * a new Interface or new fields for JacoInterface.
 */
 void
-KinovaActThread::_process_msgs_dual()
+JacoActThread::_process_msgs_dual()
 {
   _process_msgs_arm(__dual_arm.left);
   _process_msgs_arm(__dual_arm.right);
@@ -430,7 +430,7 @@ KinovaActThread::_process_msgs_dual()
  * @param arm The struct for the currently using arm
 */
 void
-KinovaActThread::_process_msgs_arm(jaco_arm_t &arm)
+JacoActThread::_process_msgs_arm(jaco_arm_t &arm)
 {
   while( ! arm.iface->msgq_empty() ) {
     Message *m = arm.iface->msgq_first(m);

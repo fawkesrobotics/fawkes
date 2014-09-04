@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  kinova_plugin.h - Fawkes Kinova Plugin
+ *  jaco_plugin.h - Fawkes Kinova Jaco Plugin
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,15 +20,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_KINOVA_PLUGIN_H_
-#define __PLUGINS_KINOVA_KINOVA_PLUGIN_H_
+#ifndef __PLUGINS_JACO_JACO_PLUGIN_H_
+#define __PLUGINS_JACO_JACO_PLUGIN_H_
 
 #include <core/plugin.h>
 
-class KinovaPlugin : public fawkes::Plugin
+class JacoPlugin : public fawkes::Plugin
 {
  public:
-  KinovaPlugin(fawkes::Configuration *config);
+  JacoPlugin(fawkes::Configuration *config);
 };
 
 #endif

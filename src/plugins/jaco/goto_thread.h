@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  goto_thread.h - Kinova plugin Jaco movement thread
+ *  goto_thread.h - Kinova Jaco plugin movement thread
  *
  *  Created: Thu Jun 20 15:04:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_KINOVA_GOTO_THREAD_H_
-#define __PLUGINS_KINOVA_KINOVA_GOTO_THREAD_H_
+#ifndef __PLUGINS_JACO_GOTO_THREAD_H_
+#define __PLUGINS_JACO_GOTO_THREAD_H_
 
 #include "types.h"
 
@@ -38,15 +38,15 @@ namespace fawkes {
   class Mutex;
 }
 
-class KinovaGotoThread
+class JacoGotoThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect
 {
  public:
-  KinovaGotoThread(const char name[]);
-  virtual ~KinovaGotoThread();
+  JacoGotoThread(const char name[]);
+  virtual ~JacoGotoThread();
 
   virtual void init();
   virtual void finalize();

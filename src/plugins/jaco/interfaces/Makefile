@@ -1,5 +1,5 @@
 #*****************************************************************************
-#        Makefile Build System for Fawkes: Kinova-specific interfaces
+#        Makefile Build System for Fawkes: Jaco-specific interfaces
 #                            -------------------
 #   Created on Thu Jun 13 19:12:21 2013
 #   Copyright (C) 2011 by Bahram Maleki-Fard, AllemaniACs RoboCup Team

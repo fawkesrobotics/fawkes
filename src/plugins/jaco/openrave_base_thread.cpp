@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  openrave_thread.cpp - Kinova plugin OpenRAVE base Thread
+ *  openrave_thread.cpp - Kinova Jaco plugin OpenRAVE base Thread
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -40,7 +40,7 @@
 using namespace fawkes;
 using namespace std;
 
-/** @class KinovaOpenraveBaseThread "openrave_base_thread.h"
+/** @class JacoOpenraveBaseThread "openrave_base_thread.h"
  * Base Jaco Arm thread, integrating OpenRAVE
  *
  * @author Bahram Maleki-Fard
@@ -49,7 +49,7 @@ using namespace std;
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaOpenraveBaseThread::KinovaOpenraveBaseThread(const char *name)
+JacoOpenraveBaseThread::JacoOpenraveBaseThread(const char *name)
   : Thread(name, Thread::OPMODE_CONTINUOUS)
 {
 #ifdef HAVE_OPENRAVE
@@ -63,7 +63,7 @@ KinovaOpenraveBaseThread::KinovaOpenraveBaseThread(const char *name)
 
 
 /** Destructor. */
-KinovaOpenraveBaseThread::~KinovaOpenraveBaseThread()
+JacoOpenraveBaseThread::~JacoOpenraveBaseThread()
 {
 #ifdef HAVE_OPENRAVE
   __viewer_env.env   = NULL;
@@ -73,7 +73,7 @@ KinovaOpenraveBaseThread::~KinovaOpenraveBaseThread()
 }
 
 void
-KinovaOpenraveBaseThread::init()
+JacoOpenraveBaseThread::init()
 {
   __planning_mutex = new Mutex();
 
@@ -96,7 +96,7 @@ KinovaOpenraveBaseThread::init()
 }
 
 void
-KinovaOpenraveBaseThread::finalize()
+JacoOpenraveBaseThread::finalize()
 {
   unregister_arms();
 

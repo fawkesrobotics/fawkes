@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  info_thread.cpp - Kinova plugin Jaco information thread
+ *  info_thread.cpp - Kinova Jaco plugin information thread
  *
  *  Created: Thu Jun 13 19:14:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -28,7 +28,7 @@
 
 using namespace fawkes;
 
-/** @class KinovaInfoThread "info_thread.h"
+/** @class JacoInfoThread "info_thread.h"
  * Jaco Arm information thread.
  * This thread basically provides all informationen to interfaces.
  *
@@ -38,8 +38,8 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaInfoThread::KinovaInfoThread()
-  : Thread("KinovaInfoThread", Thread::OPMODE_WAITFORWAKEUP),
+JacoInfoThread::JacoInfoThread()
+  : Thread("JacoInfoThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
 {
   __arms = NULL;
@@ -47,35 +47,35 @@ KinovaInfoThread::KinovaInfoThread()
 
 
 /** Destructor. */
-KinovaInfoThread::~KinovaInfoThread()
+JacoInfoThread::~JacoInfoThread()
 {
 }
 
 void
-KinovaInfoThread::init()
+JacoInfoThread::init()
 {
   __arms = new std::list<jaco_arm_t*>();
 }
 
 void
-KinovaInfoThread::finalize()
+JacoInfoThread::finalize()
 {
   delete(__arms);
 }
 
 void
-KinovaInfoThread::register_arm(jaco_arm_t *arm) {
+JacoInfoThread::register_arm(jaco_arm_t *arm) {
   __arms->push_back(arm);
 }
 
 void
-KinovaInfoThread::unregister_arms() {
+JacoInfoThread::unregister_arms() {
   for(__arm=__arms->begin(); __arm!=__arms->end(); ++__arm)
     (*__arm) = NULL;
 }
 
 void
-KinovaInfoThread::loop()
+JacoInfoThread::loop()
 {
   if( __arms->size() == 0 )
     return;

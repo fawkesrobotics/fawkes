@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  act_thread.h - Kinova plugin Jaco thread
+ *  act_thread.h - Kinova Jaco plugin act-thread
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_ACT_THREAD_H_
-#define __PLUGINS_KINOVA_ACT_THREAD_H_
+#ifndef __PLUGINS_JACO_ACT_THREAD_H_
+#define __PLUGINS_JACO_ACT_THREAD_H_
 
 #include "info_thread.h"
 #include "goto_thread.h"
@@ -40,7 +40,7 @@ namespace fawkes {
   typedef struct jaco_dual_arm_struct jaco_dual_arm_t;
 }
 
-class KinovaActThread
+class JacoActThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -48,16 +48,16 @@ class KinovaActThread
   public fawkes::BlackBoardAspect
 {
  public:
-  KinovaActThread(KinovaInfoThread *info_thread,
-                  KinovaGotoThread *goto_thread,
-                  KinovaOpenraveBaseThread *openrave_thread);
-  KinovaActThread(KinovaInfoThread *info_thread,
-                  KinovaGotoThread *goto_thread_l,
-                  KinovaGotoThread *goto_thread_r,
-                  KinovaOpenraveBaseThread *openrave_thread_l,
-                  KinovaOpenraveBaseThread *openrave_thread_r,
-                  KinovaOpenraveBaseThread *openrave_thread_dual);
-  virtual ~KinovaActThread();
+  JacoActThread(JacoInfoThread *info_thread,
+                JacoGotoThread *goto_thread,
+                JacoOpenraveBaseThread *openrave_thread);
+  JacoActThread(JacoInfoThread *info_thread,
+                JacoGotoThread *goto_thread_l,
+                JacoGotoThread *goto_thread_r,
+                JacoOpenraveBaseThread *openrave_thread_l,
+                JacoOpenraveBaseThread *openrave_thread_r,
+                JacoOpenraveBaseThread *openrave_thread_dual);
+  virtual ~JacoActThread();
 
   virtual void init();
   virtual void finalize();
@@ -67,9 +67,9 @@ class KinovaActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void (KinovaActThread::*_submit_iface_changes)();
-  bool (KinovaActThread::*_is_initializing)();
-  void (KinovaActThread::*_process_msgs)();
+  void (JacoActThread::*_submit_iface_changes)();
+  bool (JacoActThread::*_is_initializing)();
+  void (JacoActThread::*_process_msgs)();
 
   void _initialize_single();
   void _initialize_dual();
@@ -88,7 +88,7 @@ class KinovaActThread
   bool __cfg_auto_calib;
   bool __cfg_is_dual_arm;
 
-  KinovaInfoThread         *__info_thread;
+  JacoInfoThread         *__info_thread;
 };
 
 

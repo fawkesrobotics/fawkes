@@ -1,5 +1,5 @@
 #*****************************************************************************
-#              Makefile Build System for Fawkes: Kinova Plugin
+#              Makefile Build System for Fawkes: Kinova Jaco Plugin
 #                            -------------------
 #   Created on Tue Jun 04 13:13:20 2013
 #   Copyright (C) 2013 by Bahram Maleki-Fard, AllemaniACs RoboCup Team

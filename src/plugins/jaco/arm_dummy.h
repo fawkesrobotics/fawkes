@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  arm_kindrv.h - Class for a Kinova arm, using libkindrv
+ *  arm_dummy.h - Class for a Kinova Jaco arm, simulating a dummy arm
  *
- *  Created: Tue Jul 29 14:58:32 2014
+ *  Created: Mon Aug 04 19:58:22 2014
  *  Copyright  2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
@@ -20,15 +20,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_ARM_KINDRV_H_
-#define __PLUGINS_KINOVA_ARM_KINDRV_H_
+#ifndef __PLUGINS_JACO_ARM_DUMMY_H_
+#define __PLUGINS_JACO_ARM_DUMMY_H_
 
 #include "arm.h"
 #include "types.h"
 
-namespace KinDrv {
-  class JacoArm;
-}
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -37,11 +34,11 @@ namespace fawkes {
 
 //class RefPtr;
 
-class KinovaArmKindrv : public KinovaArm
+class JacoArmDummy : public JacoArm
 {
  public:
-  KinovaArmKindrv();
-  virtual ~KinovaArmKindrv();
+  JacoArmDummy(const char *name);
+  virtual ~JacoArmDummy();
 
   virtual void initialize();
 
@@ -62,12 +59,15 @@ class KinovaArmKindrv : public KinovaArm
   virtual void goto_retract();
 
  private:
-  KinDrv::JacoArm  *__arm;
 
-  fawkes::jaco_target_type_t __target_type;
-  bool __final;
+  std::vector<float> __coords;
+  std::vector<float> __joints;
+  std::vector<float> __fingers;
+
+  std::vector<float> __pos_ready;
+  std::vector<float> __pos_retract;
+
 };
-
 
 
 } // end of namespace fawkes

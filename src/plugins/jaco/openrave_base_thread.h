@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  openrave_thread.h - Kinova plugin OpenRAVE base thread
+ *  openrave_thread.h - Kinova Jaco plugin OpenRAVE base thread
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_OPENRAVE_BASE_THREAD_H_
-#define __PLUGINS_KINOVA_OPENRAVE_BASE_THREAD_H_
+#ifndef __PLUGINS_JACO_OPENRAVE_BASE_THREAD_H_
+#define __PLUGINS_JACO_OPENRAVE_BASE_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
@@ -51,7 +51,7 @@ namespace fawkes {
 #endif
 }
 
-class KinovaOpenraveBaseThread
+class JacoOpenraveBaseThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
@@ -61,8 +61,8 @@ class KinovaOpenraveBaseThread
   public fawkes::BlackBoardAspect
 {
  public:
-  KinovaOpenraveBaseThread(const char *name);
-  virtual ~KinovaOpenraveBaseThread();
+  JacoOpenraveBaseThread(const char *name);
+  virtual ~JacoOpenraveBaseThread();
 
   void init();
   virtual void finalize();

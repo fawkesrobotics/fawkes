@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  arm_dummy.cpp - Class for a Kinova arm, simulating a dummy
+ *  arm_dummy.cpp - Class for a Kinova Jaco arm, simulating a dummy
  *
  *  Created: Mon Aug 04 19:58:22 2014
  *  Copyright  2014  Bahram Maleki-Fard
@@ -41,8 +41,8 @@ namespace fawkes {
 }
 #endif
 
-/** @class KinovaArmDummy <plugins/kinova/arm_dummy.h>
- * Class for simulating a dummy Kinova Arm.
+/** @class JacoArmDummy <plugins/jaco/arm_dummy.h>
+ * Class for simulating a dummy Kinova Jaco Arm.
  * Each command is accepted, simply storing its values and returning them
  * when a getter is called. This class does not operate any actual arm
  * (whether a real one nor even a simulated 3D model).
@@ -51,7 +51,7 @@ namespace fawkes {
  */
 
 /** Constructor. */
-KinovaArmDummy::KinovaArmDummy(const char *name)
+JacoArmDummy::JacoArmDummy(const char *name)
 {
   __name = name;
   __initialized = true;
@@ -77,88 +77,88 @@ KinovaArmDummy::KinovaArmDummy(const char *name)
 }
 
 /** Destructor. */
-KinovaArmDummy::~KinovaArmDummy()
+JacoArmDummy::~JacoArmDummy()
 {
 }
 
 void
-KinovaArmDummy::initialize()
+JacoArmDummy::initialize()
 {
   goto_ready();
 }
 
 
 bool
-KinovaArmDummy::final()
+JacoArmDummy::final()
 {
   return true;
 }
 
 bool
-KinovaArmDummy::initialized()
+JacoArmDummy::initialized()
 {
   return __initialized;
 }
 
 
 void
-KinovaArmDummy::get_coords(std::vector<float> &to) const
+JacoArmDummy::get_coords(std::vector<float> &to) const
 {
   to = __coords;
 }
 
 void
-KinovaArmDummy::get_joints(std::vector<float> &to) const
+JacoArmDummy::get_joints(std::vector<float> &to) const
 {
   to = __joints;
 }
 
 void
-KinovaArmDummy::get_fingers(std::vector<float> &to) const
+JacoArmDummy::get_fingers(std::vector<float> &to) const
 {
   to = __fingers;
 }
 
 
 void
-KinovaArmDummy::stop()
+JacoArmDummy::stop()
 {
 }
 
 void
-KinovaArmDummy::push_joystick(unsigned int button)
+JacoArmDummy::push_joystick(unsigned int button)
 {
 }
 
 void
-KinovaArmDummy::release_joystick()
+JacoArmDummy::release_joystick()
 {
   stop();
 }
 
 
 void
-KinovaArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &fingers)
+JacoArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &fingers)
 {
   __joints = joints;
   __fingers = fingers;
 }
 
 void
-KinovaArmDummy::goto_coords(std::vector<float> &coords, std::vector<float> &fingers)
+JacoArmDummy::goto_coords(std::vector<float> &coords, std::vector<float> &fingers)
 {
   __coords = coords;
   __fingers = fingers;
 }
 
 void
-KinovaArmDummy::goto_ready()
+JacoArmDummy::goto_ready()
 {
   goto_joints(__pos_ready, __fingers);
 }
 
 void
-KinovaArmDummy::goto_retract()
+JacoArmDummy::goto_retract()
 {
   goto_joints(__pos_retract, __fingers);
 }

@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  kinova_plugin.cpp - Fawkes Kinova Plugin
+ *  jaco_plugin.cpp - Fawkes Kinova Jaco Plugin
  *
  *  Created: Tue Jun 04 13:13:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "kinova_plugin.h"
+#include "jaco_plugin.h"
 
 #include "info_thread.h"
 #include "act_thread.h"
@@ -30,7 +30,7 @@
 
 using namespace fawkes;
 
-/** @class KinovaPlugin <plugins/kinova/kinova_plugin.h>
+/** @class JacoPlugin <plugins/jaco/jaco_plugin.h>
  * Kinova Jaco Arm plugin.
  *
  * @author Bahram Maleki-Fard
@@ -39,55 +39,55 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-KinovaPlugin::KinovaPlugin(Configuration *config)
+JacoPlugin::JacoPlugin(Configuration *config)
   : Plugin(config)
 {
-  KinovaInfoThread *info_thread = new KinovaInfoThread();
+  JacoInfoThread *info_thread = new JacoInfoThread();
   thread_list.push_back(info_thread);
 
   // load different/multiple threads if using dual-arm setup
   bool is_dual_arm = config->get_bool("/hardware/jaco/dual_arm/active");
   if( !is_dual_arm ) {
-    KinovaGotoThread *goto_thread = new KinovaGotoThread("KinovaGotoThread");
+    JacoGotoThread *goto_thread = new JacoGotoThread("JacoGotoThread");
     thread_list.push_back(goto_thread);
 
-    KinovaOpenraveBaseThread *openrave_thread = NULL;
+    JacoOpenraveBaseThread *openrave_thread = NULL;
 #ifdef HAVE_OPENRAVE
-    openrave_thread = new KinovaOpenraveSingleThread("KinovaOpenraveThread", "fingertip");
+    openrave_thread = new JacoOpenraveSingleThread("JacoOpenraveThread", "fingertip");
     thread_list.push_back(openrave_thread);
 #endif
 
-    thread_list.push_back(new KinovaActThread(info_thread, goto_thread, openrave_thread));
+    thread_list.push_back(new JacoActThread(info_thread, goto_thread, openrave_thread));
 
   } else {
     // each arm gets 1 goto-thread.
-    KinovaGotoThread *goto_thread_l = new KinovaGotoThread("KinovaGotoThreadLeft");
-    KinovaGotoThread *goto_thread_r = new KinovaGotoThread("KinovaGotoThreadRight");
+    JacoGotoThread *goto_thread_l = new JacoGotoThread("JacoGotoThreadLeft");
+    JacoGotoThread *goto_thread_r = new JacoGotoThread("JacoGotoThreadRight");
     thread_list.push_back(goto_thread_l);
     thread_list.push_back(goto_thread_r);
 
     // each arm gets 1 openrave-thread, providing planning and updating the openrave-model of that arm.
     // additionally we need a separate openrave thread for planning symmetric bimanual manipulation.
-    KinovaOpenraveSingleThread *openrave_thread_l = NULL;
-    KinovaOpenraveSingleThread *openrave_thread_r = NULL;
-    KinovaOpenraveDualThread   *openrave_thread_dual = NULL;
+    JacoOpenraveSingleThread *openrave_thread_l = NULL;
+    JacoOpenraveSingleThread *openrave_thread_r = NULL;
+    JacoOpenraveDualThread   *openrave_thread_dual = NULL;
 
 #ifdef HAVE_OPENRAVE
-    openrave_thread_dual = new KinovaOpenraveDualThread();
+    openrave_thread_dual = new JacoOpenraveDualThread();
     thread_list.push_back(openrave_thread_dual);
 
-    openrave_thread_l = new KinovaOpenraveSingleThread("KinovaOpenraveThreadLeft", "arm_left", /*load_robot=*/false);
-    openrave_thread_r = new KinovaOpenraveSingleThread("KinovaOpenraveThreadRight", "arm_right", /*load_robot=*/false);
+    openrave_thread_l = new JacoOpenraveSingleThread("JacoOpenraveThreadLeft", "arm_left", /*load_robot=*/false);
+    openrave_thread_r = new JacoOpenraveSingleThread("JacoOpenraveThreadRight", "arm_right", /*load_robot=*/false);
     thread_list.push_back(openrave_thread_l);
     thread_list.push_back(openrave_thread_r);
 #endif
 
-    thread_list.push_back(new KinovaActThread(info_thread,
+    thread_list.push_back(new JacoActThread(info_thread,
                                               goto_thread_l, goto_thread_r,
                                               openrave_thread_l, openrave_thread_r,
                                               openrave_thread_dual));
   }
 }
 
-PLUGIN_DESCRIPTION("Kinova Plugin")
-EXPORT_PLUGIN(KinovaPlugin)
+PLUGIN_DESCRIPTION("Jaco Plugin")
+EXPORT_PLUGIN(JacoPlugin)

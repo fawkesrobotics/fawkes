@@ -1,6 +1,6 @@
 
 #*****************************************************************************
-#              Makefile Build System for Fawkes: Kinova Plugin
+#              Makefile Build System for Fawkes: Kinova Jaco Plugin
 #                            -------------------
 #   Created on Tue Jun 04 13:13:20 2013
 #   Copyright (C) 2011 by Bahram Maleki-Fard, AllemaniACs RoboCup Team
@@ -21,15 +21,15 @@ include $(BASEDIR)/src/plugins/openrave/openrave.mk
 
 PRESUBDIRS = interfaces
 
-LIBS_kinova = fawkescore fawkesaspects fawkesblackboard fawkesutils fawkesinterface JacoInterface m pthread
-OBJS_kinova = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
+LIBS_jaco = fawkescore fawkesaspects fawkesblackboard fawkesutils fawkesinterface JacoInterface m pthread
+OBJS_jaco = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 ifeq ($(HAVE_LIBKINDRV),1)
   CFLAGS  += $(CFLAGS_LIBKINDRV)
   LDFLAGS += $(LDFLAGS_LIBKINDRV)
-  PLUGINS_all = $(PLUGINDIR)/kinova.so
+  PLUGINS_all = $(PLUGINDIR)/jaco.so
   ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
-    LIBS_kinova += fawkesopenrave fawkesopenraveaspect
+    LIBS_jaco += fawkesopenrave fawkesopenraveaspect
     CFLAGS += $(CFLAGS_OPENRAVE)
     LDFLAGS += $(LDFLAGS_OPENRAVE)
   else
@@ -39,18 +39,18 @@ else
   WARN_TARGETS += warning_libkindrv
 endif
 
-OBJS_all    = $(OBJS_kinova)
+OBJS_all    = $(OBJS_jaco)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
 .PHONY: warning_libkindrv
 warning_libkindrv:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Kinova Plugin$(TNORMAL) (libkindrv found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Jaco Plugin$(TNORMAL) (libkindrv not found)"
 
 .PHONY: warning_openrave
 warning_openrave:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE support for Kinova Plugin$(TNORMAL) (openrave plugin not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE support for Jaco Plugin$(TNORMAL) (openrave plugin not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

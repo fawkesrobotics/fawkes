@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  types.h - Definition of types for Kinova Jaco
+ *  types.h - Definition of types for Kinova Jaco Plugin
  *
  *  Created: Thu Jun 13 19:14:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_TYPES_H_
-#define __PLUGINS_KINOVA_TYPES_H_
+#ifndef __PLUGINS_JACO_TYPES_H_
+#define __PLUGINS_JACO_TYPES_H_
 
 #include <core/utils/refptr.h>
 
@@ -30,8 +30,8 @@
 #include <vector>
 #include <list>
 
-class KinovaGotoThread;
-class KinovaOpenraveBaseThread;
+class JacoGotoThread;
+class JacoOpenraveBaseThread;
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -39,7 +39,7 @@ namespace fawkes {
 #endif
 
 class Mutex;
-class KinovaArm;
+class JacoArm;
 class JacoInterface;
 
 typedef std::vector<float>               jaco_trajec_point_t;
@@ -73,11 +73,11 @@ typedef struct jaco_target_struct_t {
 typedef std::list< fawkes::RefPtr<jaco_target_t> > jaco_target_queue_t;
 
 typedef struct jaco_arm_struct {
-  fawkes::KinovaArm *arm;
+  fawkes::JacoArm *arm;
   fawkes::JacoInterface *iface;
 
-  KinovaGotoThread *goto_thread;
-  KinovaOpenraveBaseThread *openrave_thread;
+  JacoGotoThread *goto_thread;
+  JacoOpenraveBaseThread *openrave_thread;
 
   fawkes::RefPtr< fawkes::Mutex > target_mutex;
   fawkes::RefPtr< fawkes::Mutex > trajec_mutex; // very shortly locked mutex
@@ -90,7 +90,7 @@ typedef struct jaco_arm_struct {
 typedef struct jaco_dual_arm_struct {
   jaco_arm_t left;
   jaco_arm_t right;
-  KinovaOpenraveBaseThread *openrave_thread;
+  JacoOpenraveBaseThread *openrave_thread;
 } jaco_dual_arm_t;
 
 

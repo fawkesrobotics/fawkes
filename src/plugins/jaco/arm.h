@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  arm.h - Abstract arm class for a kinova arm
+ *  arm.h - Abstract arm class for a Kinova Jaco arm
  *
  *  Created: Tue Jul 29 14:58:32 2014
  *  Copyright  2014  Bahram Maleki-Fard
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KINOVA_ARM_H_
-#define __PLUGINS_KINOVA_ARM_H_
+#ifndef __PLUGINS_JACO_ARM_H_
+#define __PLUGINS_JACO_ARM_H_
 
 #include <string>
 #include <vector>
@@ -31,15 +31,15 @@ namespace fawkes {
 }
 #endif
 
-/** @class KinovaArm <plugins/kinova/arm.h>
- * Abstract class for a Kinova Arm that we want to control.
+/** @class JacoArm <plugins/jaco/arm.h>
+ * Abstract class for a Kinova Jaco Arm that we want to control.
  * @author Bahram Maleki-Fard
  */
-class KinovaArm
+class JacoArm
 {
  public:
   /** Virtual empty destructor. */
-  virtual ~KinovaArm() {}
+  virtual ~JacoArm() {}
 
   /** Initialize the arm. */
   virtual void initialize() = 0;
@@ -81,12 +81,12 @@ class KinovaArm
   /** Stop the current movement. */
   virtual void stop() = 0;
 
-  /** Simulate a push of a button on the joystick of the Kinova arm.
+  /** Simulate a push of a button on the joystick of the Kinova Jaco arm.
    * @param button the id of the joystick button (from 0 to 15).
    */
   virtual void push_joystick(unsigned int button) = 0;
 
-  /** Simulate releasing the joystick of the Kinova arm. */
+  /** Simulate releasing the joystick of the Kinova Jaco arm. */
   virtual void release_joystick() = 0;
 
   /** Move the arm to given configuration.
@@ -121,7 +121,7 @@ class KinovaArm
 
 inline
 std::string
-KinovaArm::get_name() const
+JacoArm::get_name() const
 {
   return __name;
 }

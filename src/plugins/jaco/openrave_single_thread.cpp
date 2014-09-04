@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  openrave_single_thread.cpp - Kinova plugin OpenRAVE Thread for single-arm setup
+ *  openrave_single_thread.cpp - Kinova Jaco plugin OpenRAVE Thread for single-arm setup
  *
  *  Created: Mon Jul 28 19:43:20 2014
  *  Copyright  2014  Bahram Maleki-Fard
@@ -43,7 +43,7 @@
 using namespace fawkes;
 using namespace std;
 
-/** @class KinovaOpenraveSingleThread "openrave_single_thread.h"
+/** @class JacoOpenraveSingleThread "openrave_single_thread.h"
  * Jaco Arm thread for single-arm setup, integrating OpenRAVE
  *
  * @author Bahram Maleki-Fard
@@ -52,8 +52,8 @@ using namespace std;
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaOpenraveSingleThread::KinovaOpenraveSingleThread(const char *manipname, bool load_robot)
-  : KinovaOpenraveBaseThread("KinovaOpenraveSingleThread")
+JacoOpenraveSingleThread::JacoOpenraveSingleThread(const char *manipname, bool load_robot)
+  : JacoOpenraveBaseThread("JacoOpenraveSingleThread")
 {
   __arm = NULL;
   __manipname = manipname;
@@ -68,8 +68,8 @@ KinovaOpenraveSingleThread::KinovaOpenraveSingleThread(const char *manipname, bo
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaOpenraveSingleThread::KinovaOpenraveSingleThread(const char *name, const char *manipname, bool load_robot)
-  : KinovaOpenraveBaseThread(name)
+JacoOpenraveSingleThread::JacoOpenraveSingleThread(const char *name, const char *manipname, bool load_robot)
+  : JacoOpenraveBaseThread(name)
 {
   __arm = NULL;
   __manipname = manipname;
@@ -83,7 +83,7 @@ KinovaOpenraveSingleThread::KinovaOpenraveSingleThread(const char *name, const c
 
 
 void
-KinovaOpenraveSingleThread::_load_robot()
+JacoOpenraveSingleThread::_load_robot()
 {
 #ifdef HAVE_OPENRAVE
 
@@ -121,7 +121,7 @@ KinovaOpenraveSingleThread::_load_robot()
 }
 
 void
-KinovaOpenraveSingleThread::once()
+JacoOpenraveSingleThread::once()
 {
 #ifdef HAVE_OPENRAVE
   if(!__load_robot) {
@@ -168,18 +168,18 @@ KinovaOpenraveSingleThread::once()
 }
 
 void
-KinovaOpenraveSingleThread::finalize() {
+JacoOpenraveSingleThread::finalize() {
 #ifdef HAVE_OPENRAVE
   __planner_env.robot = NULL;
   __planner_env.manip = NULL;
   __planner_env.env = NULL;
 
-  KinovaOpenraveBaseThread::finalize();
+  JacoOpenraveBaseThread::finalize();
 #endif
 }
 
 void
-KinovaOpenraveSingleThread::loop()
+JacoOpenraveSingleThread::loop()
 {
   if( __arm == NULL ) {
     usleep(30e3);
@@ -226,7 +226,7 @@ KinovaOpenraveSingleThread::loop()
 }
 
 void
-KinovaOpenraveSingleThread::register_arm(jaco_arm_t *arm)
+JacoOpenraveSingleThread::register_arm(jaco_arm_t *arm)
 {
   __arm = arm;
   __target_mutex = __arm->target_mutex;
@@ -235,12 +235,12 @@ KinovaOpenraveSingleThread::register_arm(jaco_arm_t *arm)
 }
 
 void
-KinovaOpenraveSingleThread::unregister_arms() {
+JacoOpenraveSingleThread::unregister_arms() {
   __arm = NULL;
 }
 
 void
-KinovaOpenraveSingleThread::update_openrave()
+JacoOpenraveSingleThread::update_openrave()
 {
   if( __arm == NULL || __robot == NULL || __manip == NULL )
     return;
@@ -268,7 +268,7 @@ KinovaOpenraveSingleThread::update_openrave()
 }
 
 bool
-KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
+JacoOpenraveSingleThread::add_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {
   bool solvable = false;  // need to define it here outside the ifdef-scope
 
@@ -319,7 +319,7 @@ KinovaOpenraveSingleThread::add_target(float x, float y, float z, float e1, floa
 }
 
 bool
-KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
+JacoOpenraveSingleThread::set_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {
   __target_mutex->lock();
   __target_queue->clear();
@@ -328,7 +328,7 @@ KinovaOpenraveSingleThread::set_target(float x, float y, float z, float e1, floa
 }
 
 void
-KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
+JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
 {
   // update state of the trajectory
   __target_mutex->lock();
@@ -401,7 +401,7 @@ KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_
 
 /** Plot the first target of the queue in the viewer_env */
 void
-KinovaOpenraveSingleThread::plot_first()
+JacoOpenraveSingleThread::plot_first()
 {
 #ifdef HAVE_OPENRAVE
   if( !__cfg_OR_use_viewer )

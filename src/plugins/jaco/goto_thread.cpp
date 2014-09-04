@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  goto_thread.cpp - Kinova plugin Jaco movement thread
+ *  goto_thread.cpp - Kinova Jaco plugin movement thread
  *
  *  Created: Thu Jun 20 15:04:20 2013
  *  Copyright  2013  Bahram Maleki-Fard
@@ -32,7 +32,7 @@
 
 using namespace fawkes;
 
-/** @class KinovaGotoThread "goto_thread.h"
+/** @class JacoGotoThread "goto_thread.h"
  * Jaco Arm movement thread.
  * This thread handles the movement of the arm.
  *
@@ -42,7 +42,7 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-KinovaGotoThread::KinovaGotoThread(const char name[])
+JacoGotoThread::JacoGotoThread(const char name[])
   : Thread(name, Thread::OPMODE_CONTINUOUS)
 {
   __arm = NULL;
@@ -55,25 +55,25 @@ KinovaGotoThread::KinovaGotoThread(const char name[])
 
 
 /** Destructor. */
-KinovaGotoThread::~KinovaGotoThread()
+JacoGotoThread::~JacoGotoThread()
 {
 }
 
 void
-KinovaGotoThread::init()
+JacoGotoThread::init()
 {
   __final_mutex = new Mutex();
 }
 
 void
-KinovaGotoThread::finalize()
+JacoGotoThread::finalize()
 {
   delete __final_mutex;
   __final_mutex = NULL;
 }
 
 bool
-KinovaGotoThread::final()
+JacoGotoThread::final()
 {
   // check if all targets have been processed
   __arm->target_mutex->lock();
@@ -99,21 +99,21 @@ KinovaGotoThread::final()
 }
 
 void
-KinovaGotoThread::register_arm(fawkes::jaco_arm_t *arm)
+JacoGotoThread::register_arm(fawkes::jaco_arm_t *arm)
 {
   __arm = arm;
 }
 
 void
-KinovaGotoThread::unregister_arm()
+JacoGotoThread::unregister_arm()
 {
   __arm = NULL;
 }
 
 void
-KinovaGotoThread::set_target(float x, float y, float z,
-                             float e1, float e2, float e3,
-                             float f1, float f2, float f3)
+JacoGotoThread::set_target(float x, float y, float z,
+                           float e1, float e2, float e3,
+                           float f1, float f2, float f3)
 {
   RefPtr<jaco_target_t> target(new jaco_target_t());
   target->type = TARGET_CARTESIAN;
@@ -136,9 +136,9 @@ KinovaGotoThread::set_target(float x, float y, float z,
 }
 
 void
-KinovaGotoThread::set_target_ang(float j1, float j2, float j3,
-                                 float j4, float j5, float j6,
-                                 float f1, float f2, float f3)
+JacoGotoThread::set_target_ang(float j1, float j2, float j3,
+                               float j4, float j5, float j6,
+                               float f1, float f2, float f3)
 {
   RefPtr<jaco_target_t> target(new jaco_target_t());
   target->type = TARGET_ANGULAR;
@@ -161,7 +161,7 @@ KinovaGotoThread::set_target_ang(float j1, float j2, float j3,
 }
 
 void
-KinovaGotoThread::pos_ready()
+JacoGotoThread::pos_ready()
 {
   RefPtr<jaco_target_t> target(new jaco_target_t());
   target->type = TARGET_READY;
@@ -171,7 +171,7 @@ KinovaGotoThread::pos_ready()
 }
 
 void
-KinovaGotoThread::pos_retract()
+JacoGotoThread::pos_retract()
 {
   RefPtr<jaco_target_t> target(new jaco_target_t());
   target->type = TARGET_RETRACT;
@@ -182,7 +182,7 @@ KinovaGotoThread::pos_retract()
 
 
 void
-KinovaGotoThread::move_gripper(float f1, float f2 ,float f3)
+JacoGotoThread::move_gripper(float f1, float f2 ,float f3)
 {
   RefPtr<jaco_target_t> target(new jaco_target_t());
   target->type = TARGET_GRIPPER;
@@ -200,7 +200,7 @@ KinovaGotoThread::move_gripper(float f1, float f2 ,float f3)
  * This also stops any currently enqueued motion.
  */
 void
-KinovaGotoThread::stop()
+JacoGotoThread::stop()
 {
   try {
     __arm->arm->stop();
@@ -219,7 +219,7 @@ KinovaGotoThread::stop()
 }
 
 void
-KinovaGotoThread::check_final()
+JacoGotoThread::check_final()
 {
   bool check_fingers = false;
   bool final = true;
@@ -301,7 +301,7 @@ KinovaGotoThread::check_final()
 }
 
 void
-KinovaGotoThread::loop()
+JacoGotoThread::loop()
 {
   if(__arm == NULL) {
     usleep(30e3);
@@ -385,7 +385,7 @@ KinovaGotoThread::loop()
 
 
 void
-KinovaGotoThread::_goto_target()
+JacoGotoThread::_goto_target()
 {
 
   __finger_last[0] = __arm->iface->finger1();
@@ -457,7 +457,7 @@ KinovaGotoThread::_goto_target()
 }
 
 void
-KinovaGotoThread::_exec_trajec(jaco_trajec_t* trajec)
+JacoGotoThread::_exec_trajec(jaco_trajec_t* trajec)
 {
   if( __target->fingers.empty() ) {
     // have no finger values. use current ones

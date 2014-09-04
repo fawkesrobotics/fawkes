@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  arm_kindrv.cpp - Class for a Kinova arm, using libkindrv
+ *  arm_kindrv.cpp - Class for a Kinova Jaco arm, using libkindrv
  *
  *  Created: Tue Jul 29 14:58:32 2014
  *  Copyright  2014  Bahram Maleki-Fard
@@ -33,15 +33,15 @@ namespace fawkes {
 }
 #endif
 
-/** @class KinovaArmKindrv <plugins/kinova/arm_kindrv.h>
- * Class for commanding a Kinova Arm, using libkindrv.
+/** @class JacoArmKindrv <plugins/jaco/arm_kindrv.h>
+ * Class for commanding a Kinova Jaco Arm, using libkindrv.
  * @author Bahram Maleki-Fard
  */
 
 /** Constructor. */
-KinovaArmKindrv::KinovaArmKindrv()
+JacoArmKindrv::JacoArmKindrv()
 {
-  __arm = new JacoArm();
+  __arm = new KinDrv::JacoArm();
   __name = __arm->get_client_config(true).name;
   // trim tailing whitespaces
   __name.erase(__name.find_last_not_of(" ")+1);
@@ -51,13 +51,13 @@ KinovaArmKindrv::KinovaArmKindrv()
 }
 
 /** Destructor. */
-KinovaArmKindrv::~KinovaArmKindrv()
+JacoArmKindrv::~JacoArmKindrv()
 {
   delete(__arm);
 }
 
 void
-KinovaArmKindrv::initialize()
+JacoArmKindrv::initialize()
 {
   goto_ready();
 }
@@ -66,7 +66,7 @@ KinovaArmKindrv::initialize()
 
 
 bool
-KinovaArmKindrv::final()
+JacoArmKindrv::final()
 {
   if( __final )
     return true;
@@ -115,7 +115,7 @@ KinovaArmKindrv::final()
 }
 
 bool
-KinovaArmKindrv::initialized()
+JacoArmKindrv::initialized()
 {
   if( !__initialized ) {
     jaco_retract_mode_t mode = __arm->get_status();
@@ -129,7 +129,7 @@ KinovaArmKindrv::initialized()
 
 
 void
-KinovaArmKindrv::get_coords(std::vector<float> &to) const
+JacoArmKindrv::get_coords(std::vector<float> &to) const
 {
   jaco_position_t pos = __arm->get_cart_pos();
 
@@ -143,7 +143,7 @@ KinovaArmKindrv::get_coords(std::vector<float> &to) const
 }
 
 void
-KinovaArmKindrv::get_joints(std::vector<float> &to) const
+JacoArmKindrv::get_joints(std::vector<float> &to) const
 {
   jaco_position_t pos = __arm->get_ang_pos();
 
@@ -157,7 +157,7 @@ KinovaArmKindrv::get_joints(std::vector<float> &to) const
 }
 
 void
-KinovaArmKindrv::get_fingers(std::vector<float> &to) const
+JacoArmKindrv::get_fingers(std::vector<float> &to) const
 {
   jaco_position_t pos = __arm->get_cart_pos();
 
@@ -171,14 +171,14 @@ KinovaArmKindrv::get_fingers(std::vector<float> &to) const
 
 
 void
-KinovaArmKindrv::stop()
+JacoArmKindrv::stop()
 {
   __arm->release_joystick();
   __final = true;
 }
 
 void
-KinovaArmKindrv::push_joystick(unsigned int button)
+JacoArmKindrv::push_joystick(unsigned int button)
 {
   __arm->start_api_ctrl();
   __arm->push_joystick_button(button);
@@ -186,7 +186,7 @@ KinovaArmKindrv::push_joystick(unsigned int button)
 }
 
 void
-KinovaArmKindrv::release_joystick()
+JacoArmKindrv::release_joystick()
 {
   __arm->start_api_ctrl();
   __arm->release_joystick();
@@ -197,7 +197,7 @@ KinovaArmKindrv::release_joystick()
 
 
 void
-KinovaArmKindrv::goto_joints(std::vector<float> &joints, std::vector<float> &fingers)
+JacoArmKindrv::goto_joints(std::vector<float> &joints, std::vector<float> &fingers)
 {
   __target_type = TARGET_ANGULAR;
   __final = false;
@@ -210,7 +210,7 @@ KinovaArmKindrv::goto_joints(std::vector<float> &joints, std::vector<float> &fin
 }
 
 void
-KinovaArmKindrv::goto_coords(std::vector<float> &coords, std::vector<float> &fingers)
+JacoArmKindrv::goto_coords(std::vector<float> &coords, std::vector<float> &fingers)
 {
   __target_type = TARGET_CARTESIAN;
   __final = false;
@@ -224,7 +224,7 @@ KinovaArmKindrv::goto_coords(std::vector<float> &coords, std::vector<float> &fin
 }
 
 void
-KinovaArmKindrv::goto_ready()
+JacoArmKindrv::goto_ready()
 {
   __target_type = TARGET_READY;
   __final = false;
@@ -261,7 +261,7 @@ KinovaArmKindrv::goto_ready()
 }
 
 void
-KinovaArmKindrv::goto_retract()
+JacoArmKindrv::goto_retract()
 {
   __target_type = TARGET_RETRACT;
   __final = false;
