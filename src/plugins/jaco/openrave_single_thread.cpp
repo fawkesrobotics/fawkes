@@ -146,15 +146,13 @@ JacoOpenraveSingleThread::once()
 
   // create cloned environment for planning
   logger->log_debug(name(), "Clone environment for planning");
-  OpenRaveEnvironment* tmp_env;
   OpenRaveRobot* tmp_robot;
   OpenRaveManipulator* tmp_manip;
-  openrave->clone(&tmp_env, &tmp_robot, &tmp_manip);
-  __planner_env.env = tmp_env;
+  openrave->clone(&__planner_env.env, &tmp_robot, &tmp_manip);
   __planner_env.robot = tmp_robot;
   __planner_env.manip = tmp_manip;
 
-  if( *__planner_env.env == NULL
+  if( __planner_env.env == NULL
    || *__planner_env.robot == NULL
    || *__planner_env.manip == NULL) {
     throw fawkes::Exception("Could not clone properly, received a NULL pointer");
@@ -172,6 +170,8 @@ JacoOpenraveSingleThread::finalize() {
 #ifdef HAVE_OPENRAVE
   __planner_env.robot = NULL;
   __planner_env.manip = NULL;
+
+  delete __planner_env.env;
   __planner_env.env = NULL;
 
   JacoOpenraveBaseThread::finalize();
@@ -343,7 +343,7 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
     saver.Restore( __planner_env.robot->get_robot_ptr() );
   }
   // then clone all objects
-  __planner_env.env->clone_objects( *__viewer_env.env );
+  __planner_env.env->clone_objects( __viewer_env.env );
   // restore robot state with attached objects
   {
     RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),

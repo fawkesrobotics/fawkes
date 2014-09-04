@@ -78,7 +78,7 @@ JacoOpenraveDualThread::_load_robot()
     //__viewer_env.robot = openrave->add_robot(__cfg_OR_robot_file, false);
     // manually add robot; the automatic needs to be altered
     __viewer_env.robot = new OpenRaveRobot(logger);
-    __viewer_env.robot->load(__cfg_OR_robot_file, *__viewer_env.env);
+    __viewer_env.robot->load(__cfg_OR_robot_file, __viewer_env.env);
     __viewer_env.env->add_robot(*__viewer_env.robot);
     __viewer_env.robot->set_ready();
     openrave->set_active_robot(*__viewer_env.robot);

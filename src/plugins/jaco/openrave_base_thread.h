@@ -44,7 +44,7 @@ namespace fawkes {
 
 #ifdef HAVE_OPENRAVE
   typedef struct {
-    RefPtr<OpenRaveEnvironment> env;
+    OpenRaveEnvironment*        env;
     RefPtr<OpenRaveRobot>       robot;
     RefPtr<OpenRaveManipulator> manip;
   } jaco_openrave_set_t;
