@@ -56,6 +56,13 @@ function jc_next_msg(state)
    return  iface:msgid() > state.fsm.vars.msgid
 end
 
+--- Check if there was some error for our message
+-- @return true if there was no error, false otherwise
+function jc_error_none(state)
+   iface:read()
+   return  iface:error_code() == iface.ERROR_NONE
+end
+
 --- Check if the used interface is withour writer.
 -- We use a dedicated method for this check, because we have multiple interfaces.
 -- This is a lot easier than considering each in the fsm, using closure etc.
@@ -78,7 +85,8 @@ fsm:define_states{
    {"GOTO", JumpState},
    {"GRIPPER", JumpState},
 
-   {"CHECK_FINAL", JumpState}
+   {"CHECK_FINAL", JumpState},
+   {"CHECK_ERROR", JumpState}
 }
 
 -- Transitions
@@ -106,9 +114,12 @@ fsm:add_transitions{
    {"GOTO", "CHECK_FINAL", cond=true, desc="msg sent"},
    {"GRIPPER", "CHECK_FINAL", cond=true, desc="msg sent"},
 
-   {"CHECK_FINAL", "FINAL", cond=jc_arm_is_final, desc="arm moved"},
    {"CHECK_FINAL", "FINAL", precond="vars.no_wait", desc="skip final checking"},
-   {"CHECK_FINAL", "FAILED", cond=jc_next_msg, desc="next msg"}
+   {"CHECK_FINAL", "CHECK_ERROR", cond=jc_arm_is_final, desc="arm final"},
+   {"CHECK_FINAL", "FAILED", cond=jc_next_msg, desc="next msg"},
+
+   {"CHECK_ERROR", "FINAL", cond=jc_error_none, desc="no error"},
+   {"CHECK_ERROR", "FAILED", cond=true, desc="have an error"}
 }
 
 function INIT:init()
