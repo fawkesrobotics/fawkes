@@ -12,8 +12,8 @@
     <effector>arm_HandRoll</effector>
     <translation>0 0 0.188</translation>
     <RotationAxis>0 0 1 -90</RotationAxis>
-    <joints>arm_j_FingerSingle</joints>
-    <closingdirection>-1</closingdirection>
+    <joints>arm_j_FingerDualLeft arm_j_FingerDualRight arm_j_FingerSingle</joints>
+    <closingdirection>1 1 1</closingdirection>
     <direction>0 0 1</direction>
   </Manipulator>
 

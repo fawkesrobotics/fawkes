@@ -190,36 +190,33 @@
   <Body name="FingerDualLeft" type="dynamic">
     <offsetfrom>HandRoll</offsetfrom>
     <Translation>-0.04 0 0.115</Translation>
-    <RotationAxis>0 1 0 8</RotationAxis>
+    <RotationAxis>0 1 0 10</RotationAxis>
+    <RotationAxis>0 0 1 -15</RotationAxis>
     <Geom type="trimesh">
       <Data>jaco_finger_joint.stl</Data>
       <Render>jaco_finger_joint.stl</Render>
-      <RotationAxis>0 0 0 180</RotationAxis>
-      <RotationAxis>0 0 1 -15</RotationAxis>
       <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
     </Geom>
   </Body>
   <Body name="FingerDualRight" type="dynamic">
     <offsetfrom>HandRoll</offsetfrom>
     <Translation>0.037 -0.021 0.115</Translation>
-    <RotationAxis>0 1 0 8</RotationAxis>
+    <RotationAxis>0 1 0 10</RotationAxis>
     <RotationAxis>0 0 1 165</RotationAxis>
     <Geom type="trimesh">
       <Data>jaco_finger_joint.stl</Data>
       <Render>jaco_finger_joint.stl</Render>
-      <RotationAxis>0 0 0 180</RotationAxis>
       <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
     </Geom>
   </Body>
   <Body name="FingerSingle" type="dynamic">
     <offsetfrom>HandRoll</offsetfrom>
     <Translation>0.037 0.021 0.115</Translation>
-    <RotationAxis>0 1 0 8</RotationAxis>
-    <RotationAxis>0 0 1 180</RotationAxis>
+    <RotationAxis>0 1 0 10</RotationAxis>
+    <RotationAxis>0 0 1 190</RotationAxis>
     <Geom type="trimesh">
       <Data>jaco_finger_joint.stl</Data>
       <Render>jaco_finger_joint.stl</Render>
-      <RotationAxis>0 0 0 180</RotationAxis>
       <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
     </Geom>
   </Body>
@@ -308,19 +305,21 @@
     <maxvel>1</maxvel>
     <resolution>1</resolution>
   </Joint>
-  <Joint name="j_FingerDualLeft" type="hinge" mimic_pos="j_FingerSingle" mimic_vel="|j_FingerSingle" mimic_accel="|j_FingerSingle">
+  <Joint name="j_FingerDualLeft" type="hinge">
     <Body>HandRoll</Body>
     <Body>FingerDualLeft</Body>
     <offsetfrom>FingerDualLeft</offsetfrom>
     <weight>1</weight>
+    <limitsdeg>-40 20</limitsdeg>
     <axis>0 1 0</axis>
     <resolution>1</resolution>
   </Joint>
-  <Joint name="j_FingerDualRight" type="hinge" mimic_pos="j_FingerSingle" mimic_vel="|j_FingerSingle" mimic_accel="|j_FingerSingle">
+  <Joint name="j_FingerDualRight" type="hinge">
     <Body>HandRoll</Body>
     <Body>FingerDualRight</Body>
     <offsetfrom>FingerDualRight</offsetfrom>
     <weight>1</weight>
+    <limitsdeg>-40 20</limitsdeg>
     <axis>0 1 0</axis>
     <resolution>1</resolution>
   </Joint>
