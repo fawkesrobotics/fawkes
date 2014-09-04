@@ -44,9 +44,9 @@ namespace fawkes {
 
 #ifdef HAVE_OPENRAVE
   typedef struct {
-    OpenRaveEnvironment* env;
-    OpenRaveRobot*       robot;
-    OpenRaveManipulator* manip;
+    RefPtr<OpenRaveEnvironment> env;
+    RefPtr<OpenRaveRobot>       robot;
+    RefPtr<OpenRaveManipulator> manip;
   } jaco_openrave_set_t;
 #endif
 }
@@ -64,7 +64,7 @@ class KinovaOpenraveBaseThread
   KinovaOpenraveBaseThread(const char *name);
   virtual ~KinovaOpenraveBaseThread();
 
-  virtual void init();
+  void init();
   virtual void finalize();
 
   virtual void register_arm(fawkes::jaco_arm_t *arm) = 0;

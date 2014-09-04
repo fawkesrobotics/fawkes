@@ -104,12 +104,8 @@ KinovaOpenraveBaseThread::finalize()
   __planning_mutex = NULL;
 
 #ifdef HAVE_OPENRAVE
-  delete(__viewer_env.robot);
   __viewer_env.robot = NULL;
-
-  delete(__viewer_env.manip);
   __viewer_env.manip = NULL;
-
   __viewer_env.env = NULL;
 #endif
 }

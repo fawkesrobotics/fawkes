@@ -106,10 +106,10 @@ KinovaOpenraveSingleThread::_load_robot()
       __viewer_env.manip->add_motor(5,5);
 
       // Set manipulator and offsets.
-      openrave->set_manipulator(__viewer_env.robot, __viewer_env.manip, 0.f, 0.f, 0.f);
+      openrave->set_manipulator(*__viewer_env.robot, *__viewer_env.manip, 0.f, 0.f, 0.f);
 
       if( __cfg_OR_auto_load_ik ) {
-        openrave->get_environment()->load_IK_solver(__viewer_env.robot, OpenRAVE::IKP_Transform6D);
+        openrave->get_environment()->load_IK_solver(*__viewer_env.robot, OpenRAVE::IKP_Transform6D);
       }
 
     } catch (Exception& e) {
@@ -146,11 +146,17 @@ KinovaOpenraveSingleThread::once()
 
   // create cloned environment for planning
   logger->log_debug(name(), "Clone environment for planning");
-  openrave->clone(&__planner_env.env, &__planner_env.robot, &__planner_env.manip);
+  OpenRaveEnvironment* tmp_env;
+  OpenRaveRobot* tmp_robot;
+  OpenRaveManipulator* tmp_manip;
+  openrave->clone(&tmp_env, &tmp_robot, &tmp_manip);
+  __planner_env.env = tmp_env;
+  __planner_env.robot = tmp_robot;
+  __planner_env.manip = tmp_manip;
 
-  if( __planner_env.env == NULL
-   || __planner_env.robot == NULL
-   || __planner_env.manip == NULL) {
+  if( *__planner_env.env == NULL
+   || *__planner_env.robot == NULL
+   || *__planner_env.manip == NULL) {
     throw fawkes::Exception("Could not clone properly, received a NULL pointer");
   }
 
@@ -164,23 +170,11 @@ KinovaOpenraveSingleThread::once()
 void
 KinovaOpenraveSingleThread::finalize() {
 #ifdef HAVE_OPENRAVE
-  delete(__planner_env.robot);
   __planner_env.robot = NULL;
-
-  delete(__planner_env.manip);
   __planner_env.manip = NULL;
-
-  delete(__planner_env.env);
   __planner_env.env = NULL;
 
-  if(!__load_robot) {
-    // avoid implicit deletes or anything the like
-    __viewer_env.robot = NULL;
-    __viewer_env.manip = NULL;
-    __viewer_env.env = NULL;
-  } else {
-    KinovaOpenraveBaseThread::finalize();
-  }
+  KinovaOpenraveBaseThread::finalize();
 #endif
 }
 
@@ -349,7 +343,7 @@ KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_
     saver.Restore( __planner_env.robot->get_robot_ptr() );
   }
   // then clone all objects
-  __planner_env.env->clone_objects( __viewer_env.env );
+  __planner_env.env->clone_objects( *__viewer_env.env );
   // restore robot state with attached objects
   {
     RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
@@ -377,7 +371,7 @@ KinovaOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_
   // Run planner
   float sampling = 0.01f; //maybe catch from config? or "learning" depending on performance?
   try {
-    __planner_env.env->run_planner(__planner_env.robot, sampling);
+    __planner_env.env->run_planner(*__planner_env.robot, sampling);
   } catch (fawkes::Exception &e) {
     logger->log_warn(name(), "Planning failed: %s", e.what_no_backtrace());
     // TODO: better handling!

@@ -75,16 +75,13 @@ KinovaOpenraveDualThread::_load_robot()
   __cfg_OR_robot_file  = config->get_string("/hardware/jaco/openrave/robot_dual_file");
 
   try {
-    __viewer_env.env = openrave->get_environment();
-    __viewer_env.env->enable_debug();
-
     //__viewer_env.robot = openrave->add_robot(__cfg_OR_robot_file, false);
     // manually add robot; the automatic needs to be altered
     __viewer_env.robot = new OpenRaveRobot(logger);
-    __viewer_env.robot->load(__cfg_OR_robot_file, __viewer_env.env);
-    __viewer_env.env->add_robot(__viewer_env.robot);
+    __viewer_env.robot->load(__cfg_OR_robot_file, *__viewer_env.env);
+    __viewer_env.env->add_robot(*__viewer_env.robot);
     __viewer_env.robot->set_ready();
-    openrave->set_active_robot(__viewer_env.robot);
+    openrave->set_active_robot(*__viewer_env.robot);
   } catch (Exception& e) {
     throw fawkes::Exception("Could not add robot '%s' to openrave environment. (Error: %s)", __cfg_OR_robot_file.c_str(), e.what_no_backtrace());
   }
@@ -99,20 +96,20 @@ KinovaOpenraveDualThread::_load_robot()
     __viewer_env.manip->add_motor(5,5);
 
     // Set manipulator and offsets.
-    openrave->set_manipulator(__viewer_env.robot, __viewer_env.manip, 0.f, 0.f, 0.f);
+    openrave->set_manipulator(*__viewer_env.robot, *__viewer_env.manip, 0.f, 0.f, 0.f);
 
     __viewer_env.robot->get_robot_ptr()->SetActiveManipulator(ARM_R);
     __manips.right = __viewer_env.robot->get_robot_ptr()->GetActiveManipulator();
     if( __cfg_OR_auto_load_ik ) {
       logger->log_debug(name(), "load IK for right arm");
-      __viewer_env.env->load_IK_solver(__viewer_env.robot, OpenRAVE::IKP_Transform6D);
+      __viewer_env.env->load_IK_solver(*__viewer_env.robot, OpenRAVE::IKP_Transform6D);
     }
 
     __viewer_env.robot->get_robot_ptr()->SetActiveManipulator(ARM_L);
     __manips.left = __viewer_env.robot->get_robot_ptr()->GetActiveManipulator();
     if( __cfg_OR_auto_load_ik ) {
       logger->log_debug(name(), "load IK for left arm");
-      __viewer_env.env->load_IK_solver(__viewer_env.robot, OpenRAVE::IKP_Transform6D);
+      __viewer_env.env->load_IK_solver(*__viewer_env.robot, OpenRAVE::IKP_Transform6D);
     }
 
   } catch (Exception& e) {
