@@ -1,7 +1,7 @@
 %YAML 1.2
 %TAG ! tag:fawkesrobotics.org,cfg/
 ---
-doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/kinova
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/jaco
 ---
 hardware/jaco:
   # What arm are we controlling (or what is our library to control the arm)?
