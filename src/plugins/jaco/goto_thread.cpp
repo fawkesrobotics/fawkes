@@ -75,25 +75,25 @@ JacoGotoThread::finalize()
 bool
 JacoGotoThread::final()
 {
-  // check if all targets have been processed
-  __arm->target_mutex->lock();
-  bool final = __arm->target_queue->empty();
-  __arm->target_mutex->unlock();
+  // Check if any movement has startet (__final would be false then)
+  __final_mutex->lock();
+  bool final = __final;
+  __final_mutex->unlock();
+  if( !final ) {
+    // There was some movement initiated. Check if it has finished
+    check_final();
+    __final_mutex->lock();
+    final = __final;
+    __final_mutex->unlock();
+  }
+
   if( !final )
-    return false; // still targets in queue
+    return false; // still moving
 
-  // queue is empty. Now check if any movement has startet (__final would be false then)
-  __final_mutex->lock();
-  final = __final;
-  __final_mutex->unlock();
-  if( final )
-    return true; // no movement
-
-  // There was some movement initiated. Check if it has finished
-  check_final();
-  __final_mutex->lock();
-  final = __final;
-  __final_mutex->unlock();
+  // arm is not moving right now. Check if all targets have been processed
+  __arm->target_mutex->lock();
+  final = __arm->target_queue->empty();
+  __arm->target_mutex->unlock();
 
   return final;
 }
@@ -362,12 +362,14 @@ JacoGotoThread::loop()
 
       } else {
         // "regular" target
-        logger->log_debug(name(), "Process new target. using current finger positions");
+        logger->log_debug(name(), "Process new target. using current finger positions...");
         _goto_target();
 
         __arm->target_mutex->lock();
         __arm->target_queue->pop_front();
         __arm->target_mutex->unlock();
+
+        logger->log_debug(name(), "...target processed");
       }
 
     } else {
