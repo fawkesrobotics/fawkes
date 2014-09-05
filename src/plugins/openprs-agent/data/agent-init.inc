@@ -25,6 +25,7 @@ trace intend off
 include "meta-coalesce.inc"
 include "time.inc"
 include "blackboard.inc"
+include "protobuf.inc"
 
 load external "mod_skiller" "init"
 

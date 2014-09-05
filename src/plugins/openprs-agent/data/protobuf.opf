@@ -1,0 +1,136 @@
+
+;---------------------------------------------------------------------------
+;  protobuf.opf - OpenPRS protobuf OPs
+;
+;  Created: Tue Sep 02 11:18:23 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+(
+(defop pb-setup
+  :invocation (! (pb-setup))
+  :setting (setting "protobuf-paths" $paths)
+  :action (pb-setup $paths)
+  :effects ((=> (protobuf-initialized)))
+  :documentation "Initially setup the protobuf module.
+    Any pb-* OP, predicate, or function may only be used after this action
+    has been called."
+)
+
+(defop pb-destroy
+  :invocation (! (pb-destroy $msg))
+  :context (protobuf-initialized)
+  :action (pb-destroy $msg)
+  :documentation "Destroy a protobuf message."
+)
+
+(defop pb-set-field
+  :invocation (! (pb-set-field $msg $field $value))
+  :context (protobuf-initialized)
+  :action (pb-set-field $msg $field $value)
+  :documentation "Set field named $field to $value in $msg."
+)
+
+(defop pb-add-list
+  :invocation (! (pb-add-list $msg $field $value))
+  :context (protobuf-initialized)
+  :action (pb-add-list $msg $field $value)
+  :documentation "Add $value to repeated field named $field in $msg."
+)
+
+(defop pb-disconnect
+  :invocation (! (pb-disconnect $client-id))
+  :context (protobuf-initialized)
+  :action (pb-disconnect $client-id)
+  :documentation "Disconnect client $client-id"
+)
+
+(defop pb-peer-destroy
+  :invocation (! (pb-peer-destroy $peer-id))
+  :context (protobuf-initialized)
+  :action (pb-peer-destroy $peer-id)
+  :documentation "Tear down peer $peer-id."
+)
+
+(defop pb-send
+  :invocation (! (pb-send $remote-id $msg))
+  :context (protobuf-initialized)
+  :action (pb-send $remote-id $msg)
+  :documentation "Send message message $msg to remote $remote-id."
+)
+
+(defop pb-broadcast
+  :invocation (! (pb-broadcast $peer-id $msg))
+  :context (protobuf-initialized)
+  :action (pb-broadcast $peer-id $msg)
+  :documentation "Broadcast message message $msg via peer $peer-id."
+)
+
+(defop pb-client-connect
+  :invocation (! (pb-client-connect $host $port))
+  :context (protobuf-initialized)
+  :action (pb-client-connect $host $port)
+  :documentation "Connect as client to $host:$port."
+)
+
+(defop pb-enable-server
+  :invocation (! (pb-enable-server $port))
+  :context (protobuf-initialized)
+  :action (pb-enable-server $port)
+  :documentation "Create server listening on TCP port $port."
+)
+
+(defop pb-peer-create
+  :invocation (! (pb-peer-create $baddr $port $peer-id))
+  :context (protobuf-initialized)
+  :action (*=* $peer-id (pb-peer-create $baddr $port))
+  :documentation "Create peer listening on UDP port $port using the broadcast address $baddr."
+)
+
+(defop pb-peer-create-local
+  :invocation (! (pb-peer-create-local $baddr $send-port $recv-port $peer-id))
+  :context (protobuf-initialized)
+  :action (*=* $peer-id (pb-peer-create-local $baddr $send-port $recv-port))
+  :documentation "Create peer listening on UDP port $recv-port and sending on $send-port.
+    The address $baddr is the broadcast address used for sending."
+)
+
+(defop pb-peer-create-crypto
+  :invocation (! (pb-peer-create-crypto $baddr $port $crypto-key $cipher $peer-id))
+  :context (protobuf-initialized)
+  :action (*=* $peer-id (pb-peer-create-crypto $baddr $port $crypto-key $cipher))
+  :documentation "Create encrypted peer listening on UDP port $port using the broadcast address $baddr."
+)
+
+(defop pb-peer-create-local-crypto
+  :invocation (! (pb-peer-create-local-crypto $baddr $send-port $recv-port $crypto-key $cipher $peer-id))
+  :context (protobuf-initialized)
+  :action (*=* $peer-id (pb-peer-create-local-crypto $baddr $send-port $recv-port $crypto-key $cipher))
+  :documentation "Create encrypted peer listening on UDP port $recv-port and sending on $send-port.
+    The address $baddr is the broadcast address used for sending."
+)
+
+(defop pb-peer-setup-crypto
+  :invocation (! (pb-peer-setup-crypto $peer-id $crypto-key $cipher))
+  :context (protobuf-initialized)
+  :action (pb-peer-setup-crypto $peer-id $crypto-key $cipher)
+  :documentation "Create encrypted peer listening on UDP port $port using the broadcast address $baddr."
+)
+
+(defop pb-process
+  :invocation (! (pb-process))
+  :context (& (protobuf-initialized) (pb-events-pending))
+  :action (pb-process)
+  :documentation "Run one processing loop."
+)
+
+(defop pb-auto-process
+  :invocation (time $sec $usec)
+  :setting (setting "protobuf-auto-process" t)
+  :context (& (protobuf-initialized) (pb-events-pending))
+  :action (pb-process)
+  :documentation "If enabled automatically process protobuf on each time update."
+)
+
+)
