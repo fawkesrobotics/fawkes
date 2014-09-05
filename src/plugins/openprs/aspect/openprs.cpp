@@ -67,7 +67,8 @@ namespace fawkes {
  */
 OpenPRSAspect::OpenPRSAspect(const char *kernel_name, OpenPRSAspect::Mode mode, const char *local_name)
   : openprs_kernel_name(kernel_name), openprs_kernel_mode(mode),
-    openprs_local_name(local_name ? local_name : std::string("fawkes-") + kernel_name)
+    openprs_local_name(local_name ? local_name : std::string("fawkes-") + kernel_name),
+    openprs_gdb_delay_(false)
 {
   add_aspect("OpenPRSAspect");
 }
@@ -93,6 +94,21 @@ OpenPRSAspect::add_openprs_data_path(const std::string &path)
     throw Exception("OpenPRS kernel has already been intialized");
   }
   openprs_data_paths_.push_back(path);
+}
+
+
+/** Enable/disable GDB delay.
+ * This can be used to order mod_utils to wait for a few seconds to allow
+ * for connecting to the OPRS kernel before it is actually running.
+ * @param enable_gdb_delay true to enable delay, false to disable (default)
+ */
+void
+OpenPRSAspect::set_openprs_gdb_delay(const bool enable_gdb_delay)
+{
+  if (openprs) {
+    throw Exception("OpenPRS kernel has already been intialized");
+  }
+  openprs_gdb_delay_ = enable_gdb_delay;
 }
 
 /** Init OpenPRS aspect.

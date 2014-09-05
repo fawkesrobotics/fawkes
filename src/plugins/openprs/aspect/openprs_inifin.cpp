@@ -66,7 +66,8 @@ OpenPRSAspectIniFin::init(Thread *thread)
 
   openprs_kernel_mgr_->create_kernel(openprs_thread->openprs_kernel_name,
 				     openprs_thread->openprs_kernel_mode == OpenPRSAspect::XOPRS,
-				     openprs_thread->openprs_data_paths_);
+				     openprs_thread->openprs_data_paths_,
+				     openprs_thread->openprs_gdb_delay_);
 
   try {
     openprs_thread->openprs = new OpenPRSComm(openprs_thread->openprs_local_name.c_str(),

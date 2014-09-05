@@ -51,6 +51,7 @@ class OpenPRSAspect : public virtual Aspect
   virtual ~OpenPRSAspect();
 
   void add_openprs_data_path(const std::string &path);
+  void set_openprs_gdb_delay(const bool enable_gdb_delay);
 
  protected:
   LockPtr<OpenPRSComm>   openprs;
@@ -63,6 +64,7 @@ class OpenPRSAspect : public virtual Aspect
   void finalize_OpenPRSAspect();
 
   std::list<std::string> openprs_data_paths_;
+  bool                   openprs_gdb_delay_;
 
 };
 

@@ -65,4 +65,15 @@ void init()
 {
   printf("*** LOADING mod_utils\n");
   make_and_declare_eval_funct("op-name", func_op_name, 1);
+
+  const char *gdb_delay_env = getenv("FAWKES_OPRS_GDB_DELAY");
+  if (gdb_delay_env && strcmp(gdb_delay_env, "true") == 0) {
+    fprintf(stderr,
+            "\n============================================================================\n\n"
+            "GDB delay enabled. Waiting for 10 seconds. Connect with GDB using:\n\n"
+            "gdb -p %i\n\n"
+            "============================================================================\n\n",
+            getpid());
+    sleep(10);
+  }
 }

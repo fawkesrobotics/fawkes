@@ -80,10 +80,13 @@ OpenPRSKernelManager::~OpenPRSKernelManager()
  * of oprs.
  * @param extra_data_path extra directories to add to the OPRS_DATA_PATH
  * environment variable which should be searched for files.
+ * @param utils_gdb_delay if true, will set the FAWKES_OPRS_GDB_DELAY environment
+ * variable to "true". If mod_utils is loaded it will wait for 10 seconds
+ * and print a gdb command to start debugging the kernel process.
  */
 void
 OpenPRSKernelManager::create_kernel(const std::string &kernel_name, bool use_xoprs,
-				    std::list<std::string> &extra_data_path)
+				    std::list<std::string> &extra_data_path, bool utils_gdb_delay)
 {
   if (kernels_.find(kernel_name) != kernels_.end()) {
     throw Exception("OpenPRS kernel '%s' already exists", kernel_name.c_str());
@@ -141,6 +144,9 @@ OpenPRSKernelManager::create_kernel(const std::string &kernel_name, bool use_xop
   const char *envp_path_ext[] = { "LD_LIBRARY_PATH", OPENPRS_MOD_DIR,
 				  "OPRS_DATA_PATH", oprs_data_path.c_str(), NULL };
   std::vector<std::string> envp_v = envp_copy_expand(environ, envp_path_ext);
+
+  envp_v.push_back(boost::str(boost::format("FAWKES_OPRS_GDB_DELAY=%s") %
+			      (utils_gdb_delay ? "true" : "false")));
 
   const char *envp[envp_v.size() + 1];
   for (unsigned int i = 0; i < envp_v.size(); ++i) {

@@ -47,7 +47,7 @@ class OpenPRSKernelManager
   virtual ~OpenPRSKernelManager();
 
   void create_kernel(const std::string &kernel_name, bool use_xoprs,
-		     std::list<std::string> &extra_data_path);
+		     std::list<std::string> &extra_data_path, bool utils_gdb_delay);
   void destroy_kernel(const std::string &kernel_name);
 
   std::list<std::string> kernels() const;
