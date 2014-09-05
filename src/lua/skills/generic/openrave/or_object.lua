@@ -38,7 +38,7 @@ It basically allows all the object manipulation posiibilities provided in
 to be called from the skill level.
 
 
-Arguments needed for every call:
+Arguments needed for most calls:
  NAME: name of the object (string)
 
 Possible call modes:
@@ -50,6 +50,9 @@ or_object{add=true,  name=NAME, path=PATH}
 
 or_object{delete=true,  name=NAME}
  Deletes object from environment
+
+or_object{delete_all=true}
+ Deletes all objects from environment (except robot parts)
 
 or_object{attach=true,  name=NAME}
  Attaches object to the currently active robot
@@ -102,6 +105,7 @@ fsm:define_states{
 
    {"ADD",         JumpState},
    {"DELETE",      JumpState},
+   {"DELETE_ALL",  JumpState},
    {"ATTACH",      JumpState},
    {"RELEASE",     JumpState},
    {"RELEASE_ALL", JumpState},
@@ -116,6 +120,8 @@ fsm:define_states{
 -- Transitions
 fsm:add_transitions {
    {"INIT", "RELEASE_ALL", cond="vars.release_all", desc="release all"}, -- put here, because do not need name for it
+   {"INIT", "DELETE_ALL", cond="vars.delete_all", desc="delete all"},
+
    {"INIT", "FAILED", cond="not vars.name", desc="no object name given"},
 
    {"INIT", "ADD", cond="vars.add", desc="add"},
@@ -133,6 +139,7 @@ fsm:add_transitions {
 
    {"ADD", "CHECK", cond=jc_msg_final, desc="final"},
    {"DELETE", "CHECK_DELETE", cond=jc_msg_final, desc="final"},
+   {"DELETE_ALL", "CHECK", cond=jc_msg_final, desc="final"},
    {"ATTACH", "CHECK", cond=jc_msg_final, desc="final"},
    {"RELEASE", "CHECK", cond=jc_msg_final, desc="final"},
    {"RELEASE_ALL", "CHECK", cond=jc_msg_final, desc="final"},
@@ -168,6 +175,10 @@ function DELETE:init()
 end
 function DELETE:exit()
    self.fsm.vars.success = self.fsm.vars.success and if_openrave:is_success()
+end
+
+function DELETE_ALL:init()
+   self.fsm.vars.msgid = if_openrave:msgq_enqueue_copy(if_openrave.DeleteAllObjectsMessage:new())
 end
 
 function ATTACH:init()
