@@ -6,6 +6,13 @@ namespace fawkes {
 class OpenRaveInterface : public Interface
 {
 
+  class StartViewerMessage : public Message
+  {
+    StartViewerMessage();
+    ~StartViewerMessage();
+
+  };
+
   class AddObjectMessage : public Message
   {
     AddObjectMessage(char * ini_name, char * ini_path);

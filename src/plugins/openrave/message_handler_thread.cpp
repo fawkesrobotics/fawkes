@@ -82,7 +82,12 @@ OpenRaveMessageHandlerThread::loop()
     __if_openrave->set_msgid(m->id());
     __if_openrave->write();
 
-    if (__if_openrave->msgq_first_is<OpenRaveInterface::AddObjectMessage>()) {
+    if (__if_openrave->msgq_first_is<OpenRaveInterface::StartViewerMessage>()) {
+      __or_thread->start_viewer();
+      __if_openrave->set_success(true);
+      __if_openrave->set_final(true);
+
+    } else if (__if_openrave->msgq_first_is<OpenRaveInterface::AddObjectMessage>()) {
       OpenRaveInterface::AddObjectMessage *msg = __if_openrave->msgq_first(msg);
       if( __or_thread->add_object(msg->name(), msg->path()) )
         { __if_openrave->set_success(true); }
