@@ -99,11 +99,8 @@ action_skill_call(TermList terms)
     ACTION_FAIL();
   }
 
-  Term *name = (Term *)get_list_pos(terms, 1);
-  if (name->type != STRING) {
-    fprintf(stderr, "Error: Skill name is not a STRING\n");
-    ACTION_FAIL();
-  }
+  Term *name;
+  ACTION_SET_AND_ASSERT_ARG_TYPE("skill-call", name, terms, 1, STRING);
 
   if (terms_len % 2 == 0) {
     fprintf(stderr, "Error: invalid number of arguments (%i) to skill call for %s\n",

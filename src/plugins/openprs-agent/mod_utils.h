@@ -118,4 +118,74 @@ get_fawkes_host_port(std::string &fawkes_host, unsigned short &fawkes_port)
 #define ACTION_WAIT()  ACTION_RETURN(wait_sym);
 #define ACTION_FINAL() ACTION_RETURN(lisp_t_sym);
 
+bool
+assert_arg_type(const char *func_name, TermList &tl, int index, Term_Type t_type)
+{
+  Term *t = (Term *)get_list_pos(tl, index);
+  if (t->type != t_type) {
+    const char *type = "UNKNOWN";
+    switch (t_type) {
+    case INTEGER:        type = "INTEGER";        break;
+    case LONG_LONG:      type = "LONG_LONG";      break;
+    case TT_FLOAT:       type = "TT_FLOAT";       break;
+    case STRING:         type = "STRING";         break;
+    case TT_ATOM:        type = "TT_ATOM";        break;
+    case EXPRESSION:     type = "EXPRESSION";     break;
+    case VARIABLE:       type = "VARIABLE";       break;
+    case LISP_LIST:      type = "LISP_LIST";      break;
+    case INT_ARRAY:      type = "INT_ARRAY";      break;
+    case FLOAT_ARRAY:    type = "FLOAT_ARRAY";    break;
+    case C_LIST:         type = "C_LIST";         break;
+    case TT_FACT:        type = "TT_FACT";        break;
+    case TT_GOAL:        type = "FF_GOAL";        break; 
+    case TT_INTENTION:   type = "TT_INTENTION";   break;
+    case TT_OP_INSTANCE: type = "TT_OP_INSTANCE"; break;
+    case U_POINTER:      type = "U_POINTER";      break;
+    case U_MEMORY:       type = "U_MEMORY";       break;
+    }
+    fprintf(stderr, "Error[%s]: argument type is not a %s\n",
+	    func_name, type);
+    return false;
+  } else {
+    return true;
+  }
+}
+
+#define ACTION_ASSERT_ARG_LENGTH(func_name, tl, length)			\
+  do {									\
+    int terms_len = sl_slist_length(tl);				\
+    if (terms_len != length) {						\
+      fprintf(stderr, "Error[%s]: invalid number of arguments:"		\
+	      " req %i, got %i\n", func_name, length, terms_len);	\
+      ACTION_FAIL();							\
+    }									\
+  } while (0);
+
+#define ACTION_SET_AND_ASSERT_ARG_TYPE(func_name, var, tl, index, t_type) \
+  do {									\
+    if (! assert_arg_type(func_name, tl, index, t_type)) ACTION_FAIL();	\
+    var = (Term *)get_list_pos(tl, index);				\
+  } while (0);
+
+
+// Boolean return versions
+#define ACTION_ASSERT_B_ARG_LENGTH(func_name, tl, length)		\
+  do {									\
+    int terms_len = sl_slist_length(tl);				\
+    if (terms_len != length) {						\
+      fprintf(stderr, "Error[%s]: invalid number of arguments:"		\
+	      " req %i, got %i\n", func_name, length, terms_len);	\
+      return false;							\
+    }									\
+  } while (0);
+
+#define ACTION_SET_AND_ASSERT_B_ARG_TYPE(func_name, var, tl, index, t_type) \
+  do {									\
+    if (! assert_arg_type(func_name, tl, index, t_type)) return false;	\
+    var = (Term *)get_list_pos(tl, index);				\
+  } while (0);
+
+#define ACTION_ASSERT_B_ARG_TYPE(func_name, var, tl, index, t_type) \
+  do { if (! assert_arg_type(func_name, tl, index, t_type)) return false; } while (0);
+
 #endif
