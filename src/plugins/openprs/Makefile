@@ -32,9 +32,13 @@ LIBS_openprs_mod_blackboard = fawkescore fawkesutils fawkesblackboard \
 			      fawkesinterface
 OBJS_openprs_mod_blackboard = mod_blackboard.o
 
+LIBS_openprs_mod_config = fawkescore fawkesutils fawkesconfig
+OBJS_openprs_mod_config = mod_config.o
+
 
 OBJS_all = $(OBJS_openprs) $(OBJS_openprs_mod_utils) \
-	   $(OBJS_openprs_mod_time) $(OBJS_openprs_mod_blackboard)
+	   $(OBJS_openprs_mod_time) $(OBJS_openprs_mod_blackboard) \
+	   $(OBJS_openprs_mod_config)
 
 ifeq ($(HAVE_OPENPRS),1)
   PRESUBDIRS += utils aspect
@@ -49,14 +53,18 @@ ifeq ($(HAVE_OPENPRS),1)
   LDFLAGS_openprs_mod_time = $(LDFLAGS_openprs_mod_skiller)
   CFLAGS_mod_blackboard = $(CFLAGS_mod_skiller)
   LDFLAGS_openprs_mod_blackboard = $(LDFLAGS_openprs_mod_skiller)
+  CFLAGS_mod_config = $(CFLAGS_mod_skiller)
+  LDFLAGS_openprs_mod_config = $(LDFLAGS_openprs_mod_skiller)
   ALLOW_UNDEF_openprs_mod_utils = 1
   ALLOW_UNDEF_openprs_mod_time = 1
   ALLOW_UNDEF_openprs_mod_blackboard = 1
+  ALLOW_UNDEF_openprs_mod_config = 1
 
   PLUGINS_all = $(PLUGINDIR)/openprs.so
   LIBS_all   += $(OPENPRS_MOD_DIR)/mod_utils.so \
 		$(OPENPRS_MOD_DIR)/mod_time.so \
-		$(OPENPRS_MOD_DIR)/mod_blackboard.so
+		$(OPENPRS_MOD_DIR)/mod_blackboard.so \
+		$(OPENPRS_MOD_DIR)/mod_config.so
 else
   WARN_TARGETS += warning_openprs
 endif
