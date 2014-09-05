@@ -28,8 +28,11 @@ OBJS_openprs_mod_skiller = mod_skiller.o
 LIBS_openprs_mod_protobuf = fawkescore fawkesutils fawkes_protobuf_comm
 OBJS_openprs_mod_protobuf = oprs_protobuf.o mod_protobuf.o
 
+LIBS_openprs_mod_navgraph = fawkescore fawkesutils fawkesconfig
+OBJS_openprs_mod_navgraph = mod_navgraph.o
+
 OBJS_all = $(OBJS_openprs_agent) $(OBJS_openprs_mod_skiller) \
-	   $(OBJS_openprs_mod_protobuf)
+	   $(OBJS_openprs_mod_protobuf) $(OBJS_openprs_mod_navgraph)
 
 ifeq ($(HAVE_OPENPRS),1)
   CFLAGS  += $(CFLAGS_OPENPRS)
@@ -39,13 +42,17 @@ ifeq ($(HAVE_OPENPRS),1)
   LDFLAGS_openprs_mod_skiller = $(LDFLAGS_OPENPRS) $(LDFLAGS_OPENPRS_MOD)
   CFLAGS_mod_protobuf = $(CFLAGS_mod_skiller)
   CFLAGS_oprs_protobuf = $(CFLAGS_mod_skiller)
+  CFLAGS_mod_navgraph = $(CFLAGS_mod_skiller)
+  CFLAGS_oprs_navgraph = $(CFLAGS_mod_skiller)
   LDFLAGS_openprs_mod_protobuf = $(LDFLAGS_openprs_mod_skiller)
   ALLOW_UNDEF_openprs_mod_skiller = 1
   ALLOW_UNDEF_openprs_mod_protobuf = 1
+  ALLOW_UNDEF_openprs_mod_navgraph = 1
 
   PLUGINS_all = $(PLUGINDIR)/openprs-agent.so
   LIBS_all   += $(OPENPRS_MOD_DIR)/mod_skiller.so \
-		$(OPENPRS_MOD_DIR)/mod_protobuf.so
+		$(OPENPRS_MOD_DIR)/mod_protobuf.so \
+		$(OPENPRS_MOD_DIR)/mod_navgraph.so
 else
   WARN_TARGETS += warning_openprs
 endif

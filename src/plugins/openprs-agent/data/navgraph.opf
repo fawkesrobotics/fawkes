@@ -1,0 +1,53 @@
+
+;---------------------------------------------------------------------------
+;  navgraph.opf - OpenPRS navgraph OPs
+;
+;  Created: Fri Sep 05 16:42:17 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+(
+(defop navgraph-load
+  :invocation (! (navgraph-load))
+  :context ()
+  :action (navgraph-load)
+  :documentation "Load the navgraph configured for the navgraph plugin.
+    This will assert (navgraph), (navgraph-node), and (navgraph-edge) facts
+    that carry the information about the graph."
+)
+
+(defop navgraph-cleanup
+  :invocation (! (navgraph-cleanup))
+  :context (navgraph $graph-name $root-name)
+  :body (
+    (! (= @nodes (n-all (. @name @x @y @props .) (navgraph-node @name @x @y @props))))
+    (! (= @edges (n-all (. @from @to @dir @props .) (navgraph-edge @from @to @dir @props))))
+
+    (while (? (~ (null @nodes)))
+      (! (= @n (car @nodes)))
+      (~> (navgraph-node (car @n) (cadr @n) (caddr @n) (last @n)))
+      (! (= @nodes (cdr @nodes)))
+    )
+    (while (? (~ (null @edges)))
+      (! (= @e (car @edges)))
+      (~> (navgraph-edge (car @e) (cadr @e) (caddr @e) (last @e)))
+      (! (= @edges (cdr @edges)))
+    )
+  )
+  :effects ((~> (navgraph $graph-name $root-name)))
+  :documentation "Removes all navgraph-related facts."
+)
+
+
+(defop navgraph-reload
+  :invocation (! (navgraph-reload))
+  :context ()
+  :body (
+    (! (navgraph-cleanup))
+    (! (navgraph-load))
+  )
+  :documentation "Load or reload the navgraph."
+)
+
+)
