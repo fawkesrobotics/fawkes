@@ -50,16 +50,6 @@
      for loops when no intention is active."
 )
 
-(defop time-set-busy-looptime
-  :invocation (! (time-set-busy-looptime $sec $usec))
-  :call (time-set-busy-looptime $sec $usec)
-  :action (time-set-busy-looptime $sec $usec)
-  :documentation
-    "Sets the busy loop time.
-     The time (given as split sec/microseconds) is set as the new time interval
-     for loops when at least one intention is active."
-)
-
 (defop time-print
   :invocation (time $t_sec $t_usec)
   :context ()

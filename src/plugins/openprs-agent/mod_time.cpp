@@ -152,7 +152,7 @@ action_set_idle_looptime(TermList terms)
 
 extern "C"
 Term *
-action_set_busy_looptime(TermList terms)
+action_set_idle_looptime(TermList terms)
 {
   Term *t_sec, *t_usec;
 
@@ -168,21 +168,20 @@ action_set_busy_looptime(TermList terms)
   }
 
   if (t_sec->type == INTEGER) {
-    main_loop_busy_sec = t_sec->u.intval;
-  } else if (t_sec->type == INTEGER) {
-    main_loop_busy_sec = t_sec->u.llintval;
+    main_loop_pool_sec = t_sec->u.intval;
+  } else if (t_sec->type == LONG_LONG) {
+    main_loop_pool_sec = t_sec->u.llintval;
   }
 
   if (t_usec->type == INTEGER) {
-    main_loop_busy_usec = t_usec->u.intval;
-  } else if (t_usec->type == INTEGER) {
-    main_loop_busy_usec = t_usec->u.llintval;
+    main_loop_pool_usec = t_usec->u.intval;
+  } else if (t_usec->type == LONG_LONG) {
+    main_loop_pool_usec = t_usec->u.llintval;
   }
 
-  printf("Setting busy loop time: %li sec  %li usec\n", main_loop_busy_sec, main_loop_busy_usec);
+  printf("Setting idle loop time: %li sec  %li usec\n", main_loop_pool_sec, main_loop_pool_usec);
   ACTION_FINAL();
 }
-
 
 
 /** Entry function for the OpenPRS module. */
@@ -194,5 +193,4 @@ void init()
   make_and_declare_eval_pred("time-eq", pred_time_eq, 4, TRUE);
   make_and_declare_eval_pred("time-neq", pred_time_neq, 4, TRUE);
   make_and_declare_action("time-set-idle-looptime", action_set_idle_looptime, 2);
-  make_and_declare_action("time-set-busy-looptime", action_set_busy_looptime, 2);
 }

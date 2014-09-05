@@ -13,8 +13,6 @@ include "new-default.inc"
 declare predicate setting
 add (setting "idle-looptime-sec" 0)
 add (setting "idle-looptime-usec" 25000)
-add (setting "busy-looptime-sec" 0)
-add (setting "busy-looptime-usec" 5000)
 add (setting "bb-auto-read" T)
 add (setting "bb-auto-cleanup" T)
 

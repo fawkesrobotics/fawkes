@@ -12,11 +12,9 @@
   :invocation (agent-init)
   :context ()
   :setting (& (setting "idle-looptime-sec" $ilt_sec) (setting "idle-looptime-usec" $ilt_usec)
-              (setting "busy-looptime-sec" $blt_sec) (setting "busy-looptime-usec" $blt_usec))
   :body (
     (! (bb-open "SkillerInterface" "Skiller" BB-READ))
     (! (time-set-idle-looptime $ilt_sec $ilt_usec))
-    (! (time-set-busy-looptime $blt_sec $blt_usec))
     (! (say "Agent loaded and ready to run")))
   :effects ((~> (agent-init)))
 )
