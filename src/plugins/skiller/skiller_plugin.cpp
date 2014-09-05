@@ -22,6 +22,7 @@
 
 #include "skiller_plugin.h"
 #include "exec_thread.h"
+#include "skiller_navgraph_feature.h"
 
 using namespace fawkes;
 
@@ -40,9 +41,20 @@ using namespace fawkes;
 SkillerPlugin::SkillerPlugin(Configuration *config)
   : Plugin(config)
 {
-  thread_list.push_back(new SkillerExecutionThread());
+  bool navgraph_enable = false;
+  try {
+    navgraph_enable = config->get_bool("/skiller/features/navgraph/enable");
+  } catch (Exception &e) {} // ignore, use default
+
+  SkillerExecutionThread *exec_thread = new SkillerExecutionThread();
+  if (navgraph_enable) {
+    SkillerNavGraphFeature *navgraph_feature = new SkillerNavGraphFeature();
+    exec_thread->add_skiller_feature(navgraph_feature);
+    thread_list.push_back(navgraph_feature);
+  }
+  thread_list.push_back(exec_thread);
 }
 
 
-PLUGIN_DESCRIPTION("Behavior engine based on Lua")
+PLUGIN_DESCRIPTION("Lua-based Behavior Engine")
 EXPORT_PLUGIN(SkillerPlugin)

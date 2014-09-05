@@ -11,6 +11,14 @@ skiller:
   # Lua if files have been changed; true to enable
   watch_files: true
 
+  # Feature-specific configuration
+  features:
+    
+    navgraph:
+      # Enable access to navgraph, adds a dependency on the navgraph
+      # plugin such that a valid graph must be loaded first
+      enable: false
+  
   interfaces:
     test:
       reading:

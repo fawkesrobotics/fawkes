@@ -43,3 +43,4 @@ clips-navgraph: navgraph
 clips-webview: clips webview
 clips-ros: clips ros
 gazebo: robotino
+skiller: navgraph

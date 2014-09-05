@@ -179,6 +179,9 @@ function gensandbox()
    for k,v in pairs(skill_env_template) do
       rv[k] = v
    end
+   for k,v in pairs(features_env_template) do
+      rv[k] = v
+   end
    for k,v in pairs(skillstati) do
       if string.match(k, "^S_([%a_]+)$") then rv[k] = v end
    end
