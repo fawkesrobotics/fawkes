@@ -38,7 +38,7 @@ class OpenPRSAgentThread
   public fawkes::OpenPRSAspect
 {
  public:
-  OpenPRSAgentThread(OpenPRSAspect::Mode oprs_mode);
+  OpenPRSAgentThread(OpenPRSAspect::Mode oprs_mode, bool gdb_delay);
   virtual ~OpenPRSAgentThread();
 
   virtual void init();

@@ -37,11 +37,15 @@ class OpenPRSAgentPlugin : public fawkes::Plugin
   OpenPRSAgentPlugin(Configuration *config) : Plugin(config)
   {
     OpenPRSAspect::Mode mode = OpenPRSAspect::OPRS;
+    bool gdb_delay = false;
     try {
       std::string mode_s = config->get_string("/openprs-agent/oprs-mode");
       if (mode_s == "XOPRS")  mode = OpenPRSAspect::XOPRS;
     } catch (Exception &e) {} // ignored, use default
-    thread_list.push_back(new OpenPRSAgentThread(mode));
+    try {
+      gdb_delay = config->get_bool("/openprs-agent/gdb-delay");
+    } catch (Exception &e) {} // ignored, use default
+    thread_list.push_back(new OpenPRSAgentThread(mode, gdb_delay));
   }
 };
 

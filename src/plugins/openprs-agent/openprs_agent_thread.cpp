@@ -36,13 +36,16 @@ using namespace fawkes;
 
 /** Constructor.
  * @param oprs_mode whether to operate in console or graphical mode
+ * @param gdb_delay whether to instruct mod_utils to wait for a while for
+ * a gdb connection or not.
  */
-OpenPRSAgentThread::OpenPRSAgentThread(OpenPRSAspect::Mode oprs_mode)
+OpenPRSAgentThread::OpenPRSAgentThread(OpenPRSAspect::Mode oprs_mode, bool gdb_delay)
   : Thread("OpenPRSAgentThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
     OpenPRSAspect("openprs-agent", oprs_mode)
 {
   add_openprs_data_path(SRCDIR"/data");
+  set_openprs_gdb_delay(gdb_delay);
 }
 
 

@@ -9,3 +9,9 @@ openprs-agent:
   # - OPRS:  run in console mode
   # - XOPRS: run in graphical mode
   oprs-mode: OPRS
+
+  # Whether to wait for a GDB connection for a short time at startup
+  # or not. Use this to debug problems in OpenPRS modules. It will
+  # instruct mod_utils to wait 10 seconds on startup to allow for a
+  # gdb connection being made in that time.
+  gdb-delay: false
