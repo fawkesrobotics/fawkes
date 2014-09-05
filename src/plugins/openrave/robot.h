@@ -34,31 +34,29 @@ namespace fawkes {
 #endif
 
 class Logger;
-class OpenRaveManipulator;
-class OpenRaveEnvironment;
 
 /** OpenRAVE Robot class */
 class OpenRaveRobot
 {
  public:
   OpenRaveRobot(fawkes::Logger* logger = 0);
-  OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironment* env, fawkes::Logger* logger = 0);
-  OpenRaveRobot(const fawkes::OpenRaveRobot& src, const fawkes::OpenRaveEnvironment* new_env);
+  OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironmentPtr& env, fawkes::Logger* logger = 0);
+  OpenRaveRobot(const fawkes::OpenRaveRobot& src, const fawkes::OpenRaveEnvironmentPtr& new_env);
   virtual ~OpenRaveRobot();
 
   // build/load robot parts
-  virtual void load(const std::string& filename, fawkes::OpenRaveEnvironment* env);
+  virtual void load(const std::string& filename, fawkes::OpenRaveEnvironmentPtr& env);
   virtual void set_ready();
   virtual void set_offset(float trans_x, float trans_y, float trans_z);
   virtual void calibrate(float device_trans_x, float device_trans_y, float device_trans_z);
-  virtual void set_manipulator(fawkes::OpenRaveManipulator* manip, bool display_movements = false);
+  virtual void set_manipulator(fawkes::OpenRaveManipulatorPtr& manip, bool display_movements = false);
   virtual void update_manipulator();
   virtual void update_model();
 
   virtual bool attach_object(OpenRAVE::KinBodyPtr object);
-  virtual bool attach_object(const std::string& name, fawkes::OpenRaveEnvironment* env);
+  virtual bool attach_object(const std::string& name, fawkes::OpenRaveEnvironmentPtr& env);
   virtual bool release_object(OpenRAVE::KinBodyPtr object);
-  virtual bool release_object(const std::string& name, fawkes::OpenRaveEnvironment* env);
+  virtual bool release_object(const std::string& name, fawkes::OpenRaveEnvironmentPtr& env);
   virtual bool release_all_objects();
 
   virtual bool set_target_rel(float trans_x, float trans_y, float trans_z, bool is_extension=false);
@@ -84,7 +82,7 @@ class OpenRaveRobot
 
   virtual OpenRAVE::RobotBasePtr get_robot_ptr() const;
   virtual target_t get_target() const;
-  virtual OpenRaveManipulator* get_manipulator() const;
+  virtual OpenRaveManipulatorPtr get_manipulator() const;
   virtual OpenRAVE::PlannerBase::PlannerParametersPtr get_planner_params() const;
   virtual std::vector< std::vector<OpenRAVE::dReal> >* get_trajectory() const;
   virtual std::vector< std::vector<float> >* get_trajectory_device() const;
@@ -104,7 +102,7 @@ class OpenRaveRobot
   std::string                           __name;
   OpenRAVE::RobotBasePtr                __robot;
   OpenRAVE::RobotBase::ManipulatorPtr   __arm;
-  OpenRaveManipulator*                  __manip;
+  OpenRaveManipulatorPtr                __manip;
   target_t                              __target;
 
 

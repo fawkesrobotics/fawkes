@@ -205,7 +205,7 @@ OpenRaveEnvironment::add_robot(const std::string& filename)
  * @return 1 if succeeded, 0 if not able to add robot
  */
 void
-OpenRaveEnvironment::add_robot(OpenRaveRobot* robot)
+OpenRaveEnvironment::add_robot(OpenRaveRobotPtr& robot)
 {
   add_robot(robot->get_robot_ptr());
 }
@@ -245,7 +245,7 @@ OpenRaveEnvironment::start_viewer()
  * @param iktype IK type of solver (default: Transform6D; use TranslationDirection5D for 5DOF arms)
  */
 void
-OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot, OpenRAVE::IkParameterizationType iktype)
+OpenRaveEnvironment::load_IK_solver(OpenRaveRobotPtr& robot, OpenRAVE::IkParameterizationType iktype)
 {
   RobotBasePtr robotBase = robot->get_robot_ptr();
 
@@ -263,7 +263,7 @@ OpenRaveEnvironment::load_IK_solver(OpenRaveRobot* robot, OpenRAVE::IkParameteri
  * @param sampling sampling time between each trajectory point (in seconds)
  */
 void
-OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
+OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
 {
   bool success;
   EnvironmentMutex::scoped_lock lock(__env->GetMutex()); // lock environment
@@ -414,7 +414,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobot* robot, float sampling)
  * @param sampling sampling time between each trajectory point (in seconds)
  */
 void
-OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveRobot* robot, float sampling)
+OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveRobotPtr& robot, float sampling)
 {
   std::string filename = SRCDIR"/python/graspplanning.py";
   std::string funcname = "runGrasp";
@@ -649,11 +649,10 @@ OpenRaveEnvironment::rename_object(const std::string& name, const std::string& n
  * @param trans_x transition along x-axis
  * @param trans_y transition along y-axis
  * @param trans_z transition along z-axis
- * @param robot if given, move relatively to robot (in most simple cases robot is at position (0,0,0) anyway, so this has no effect)
  * @return true if successful
  */
 bool
-OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot)
+OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z)
 {
   try {
     EnvironmentMutex::scoped_lock lock(__env->GetMutex());
@@ -661,11 +660,6 @@ OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float t
 
     Transform transform = kb->GetTransform();
     transform.trans = Vector(trans_x, trans_y, trans_z);
-
-    if( robot ) {
-      Transform robotTrans = robot->get_robot_ptr()->GetTransform();
-      transform.trans += robotTrans.trans;
-    }
 
     kb->SetTransform(transform);
   } catch(const OpenRAVE::openrave_exception &e) {
@@ -675,6 +669,23 @@ OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float t
   }
 
   return true;
+}
+
+/** Move object in the environment.
+ * Distances are given in meters
+ * @param name name of the object
+ * @param trans_x transition along x-axis
+ * @param trans_y transition along y-axis
+ * @param trans_z transition along z-axis
+ * @param robot move relatively to robot (in most simple cases robot is at position (0,0,0) anyway, so this has no effect)
+ * @return true if successful
+ */
+bool
+OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobotPtr& robot)
+{
+  // remember, OpenRAVE Vector is 4-tuple (w,x,y,z)
+  Transform t = robot->get_robot_ptr()->GetTransform();
+  return move_object(name, trans_x+t.trans[1], trans_y+t.trans[2], trans_z+t.trans[3]);
 }
 
 /** Rotate object by a quaternion.
@@ -735,7 +746,7 @@ OpenRaveEnvironment::rotate_object(const std::string& name, float rot_x, float r
  * @param env The reference environment
  */
 void
-OpenRaveEnvironment::clone_objects(OpenRaveEnvironment* env)
+OpenRaveEnvironment::clone_objects(OpenRaveEnvironmentPtr& env)
 {
   // lock environments
   EnvironmentMutex::scoped_lock lockold(env->get_env_ptr()->GetMutex());

@@ -25,6 +25,7 @@
 #define __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_CONNECTOR_H_
 
 #include <string>
+#include <core/utils/refptr.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -34,6 +35,11 @@ namespace fawkes {
 class OpenRaveEnvironment;
 class OpenRaveRobot;
 class OpenRaveManipulator;
+
+typedef RefPtr<OpenRaveEnvironment> OpenRaveEnvironmentPtr;
+typedef RefPtr<OpenRaveRobot>       OpenRaveRobotPtr;
+typedef RefPtr<OpenRaveManipulator> OpenRaveManipulatorPtr;
+
 
 /** @class OpenRaveConnector <plugins/openrave/aspect/openrave_connector.h>
  * Interface for a OpenRave connection creator.
@@ -52,7 +58,7 @@ class OpenRaveConnector
    * @param robot Pointer to pointer of the copied robot
    * @param manip Pointer to pointer of the copied manipulator
    */
-  virtual void clone(OpenRaveEnvironment** env, OpenRaveRobot** robot, OpenRaveManipulator** manip) const = 0;
+  virtual void clone(OpenRaveEnvironmentPtr& env, OpenRaveRobotPtr& robot, OpenRaveManipulatorPtr& manip) const = 0;
 
   /** Start OpenRave viewer */
   virtual void start_viewer() const = 0;
@@ -61,23 +67,38 @@ class OpenRaveConnector
   * @param robot robot to use planner on. If none is given, the currently used robot is taken
   * @param sampling sampling time between each trajectory point (in seconds)
   */
-  virtual void run_planner(OpenRaveRobot* robot = NULL, float sampling=0.01f) = 0;
+  virtual void run_planner(OpenRaveRobotPtr& robot, float sampling=0.01f) = 0;
+
+  /** Run planner on previously set target. Uses currently active robot.
+  * @param sampling sampling time between each trajectory point (in seconds)
+  */
+  virtual void run_planner(float sampling=0.01f) = 0;
 
   /** Run graspplanning script for a given target.
   * @param target_name name of targeted object (KinBody)
   * @param robot robot to use planner on. If none is given, the currently used robot is taken
   */
-  virtual void run_graspplanning(const std::string& target_name, OpenRaveRobot* robot = NULL) = 0;
+  virtual void run_graspplanning(const std::string& target_name, OpenRaveRobotPtr& robot) = 0;
+
+  /** Run graspplanning script for a given target. Uses currently active robot.
+  * @param target_name name of targeted object (KinBody)
+  */
+  virtual void run_graspplanning(const std::string& target_name) = 0;
 
   /** Get pointer to OpenRaveEnvironment object.
   * @return pointer
   */
-  virtual OpenRaveEnvironment* get_environment() const = 0;
+  virtual OpenRaveEnvironmentPtr get_environment() const = 0;
 
   /** Get pointer to currently used OpenRaveRobot object.
   * @return pointer
   */
-  virtual OpenRaveRobot* get_active_robot() const = 0;
+  virtual OpenRaveRobotPtr get_active_robot() const = 0;
+
+  /** Set robot to be used
+  * @param robot OpenRaveRobot that should be used implicitly in other methods
+  */
+  virtual void set_active_robot(OpenRaveRobotPtr robot) = 0;
 
   /** Set robot to be used
   * @param robot OpenRaveRobot that should be used implicitly in other methods
@@ -89,7 +110,7 @@ class OpenRaveConnector
   * @param autogenerate_IK if true: autogenerate IKfast IK solver for robot
   * @return pointer to new OpenRaveRobot object
   */
-  virtual OpenRaveRobot* add_robot(const std::string& filename_robot, bool autogenerate_IK)  = 0;
+  virtual OpenRaveRobotPtr add_robot(const std::string& filename_robot, bool autogenerate_IK)  = 0;
 
 /** Set OpenRaveManipulator object for robot, and calculate
  * coordinate-system offsets or set them directly.
@@ -101,7 +122,7 @@ class OpenRaveConnector
  * @param trans_z transition offset on z-axis
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
-  virtual void set_manipulator(OpenRaveRobot* robot, OpenRaveManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0)  = 0;
+  virtual void set_manipulator(OpenRaveRobotPtr& robot, OpenRaveManipulatorPtr& manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0)  = 0;
 
 /** Set OpenRaveManipulator object for robot, and calculate
  * coordinate-system offsets or set them directly.
@@ -113,7 +134,7 @@ class OpenRaveConnector
  * @param trans_z transition offset on z-axis
  * @param calibrate decides whether to calculate offset (true )or set them directly (false; default)
  */
-  virtual void set_manipulator(OpenRaveManipulator* manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0)  = 0;
+  virtual void set_manipulator(OpenRaveManipulatorPtr& manip, float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0)  = 0;
 
   // object handling methods
   /** Add an object to the environment.
@@ -145,7 +166,17 @@ class OpenRaveConnector
   * @param robot if given, move relatively to robot (in most simple cases robot is at position (0,0,0) anyway, so this has no effect)
   * @return true if successful
   */
-  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot=NULL) = 0;
+  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobotPtr& robot) = 0;
+
+  /** Move object in the environment. Uses currently active robot.
+  * Distances are given in meters
+  * @param name name of the object
+  * @param trans_x transition along x-axis
+  * @param trans_y transition along y-axis
+  * @param trans_z transition along z-axis
+  * @return true if successful
+  */
+  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z) = 0;
 
   /** Rotate object by a quaternion.
   * @param name name of the object
@@ -172,20 +203,37 @@ class OpenRaveConnector
   * @param robot pointer to OpenRaveRobot that the target is set for
   * @return true if successful
   */
-  virtual bool attach_object(const std::string& name, OpenRaveRobot* robot=NULL) = 0;
+  virtual bool attach_object(const std::string& name, OpenRaveRobotPtr& robot) = 0;
+
+  /** Attach a kinbody to the robot. Uses currently active robot.
+  * @param name name of the object
+  * @return true if successful
+  */
+  virtual bool attach_object(const std::string& name) = 0;
 
   /** Release a kinbody from the robot.
   * @param name name of the object
   * @param robot pointer to OpenRaveRobot that object is released from
   * @return true if successful
   */
-  virtual bool release_object(const std::string& name, OpenRaveRobot* robot=NULL) = 0;
+  virtual bool release_object(const std::string& name, OpenRaveRobotPtr& robot) = 0;
+
+  /** Release a kinbody from the robot. Uses currently active robot.
+  * @param name name of the object
+  * @return true if successful
+  */
+  virtual bool release_object(const std::string& name) = 0;
 
   /** Release all grabbed kinbodys from the robot.
   * @param robot pointer to OpenRaveRobot that objects are released from
   * @return true if successful
   */
-  virtual bool release_all_objects(OpenRaveRobot* robot) = 0;
+  virtual bool release_all_objects(OpenRaveRobotPtr& robot) = 0;
+
+  /** Release all grabbed kinbodys from the robot. Uses currently active robot.
+  * @return true if successful
+  */
+  virtual bool release_all_objects() = 0;
 
   /** Set an object as the target.
   * Currently the object should be cylindric, and stand upright. It may
@@ -197,7 +245,7 @@ class OpenRaveConnector
   * @param rot_x rotation of object on x-axis (radians)
   * @return true if IK solvable
   */
-  virtual bool set_target_object(const std::string& name, OpenRaveRobot* robot, float rot_x = 0) = 0;
+  virtual bool set_target_object(const std::string& name, OpenRaveRobotPtr& robot, float rot_x = 0) = 0;
 };
 
 } // end namespace fawkes

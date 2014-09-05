@@ -25,6 +25,7 @@
 #define __PLUGINS_OPENRAVE_TYPES_H_
 
 #include <openrave/openrave.h>
+#include <core/utils/refptr.h>
 
 #include <vector>
 #include <string>
@@ -34,7 +35,13 @@ namespace fawkes {
 }
 #endif
 
+class OpenRaveEnvironment;
+class OpenRaveRobot;
 class OpenRaveManipulator;
+
+typedef RefPtr<OpenRaveEnvironment> OpenRaveEnvironmentPtr;
+typedef RefPtr<OpenRaveRobot>       OpenRaveRobotPtr;
+typedef RefPtr<OpenRaveManipulator> OpenRaveManipulatorPtr;
 
 /** Euler rotations. */
 typedef enum {
@@ -73,12 +80,12 @@ typedef struct {
   float qy;  /**< y value of quaternion */
   float qz;  /**< z value of quaternion */
   float qw;  /**< w value of quaternion */
-  bool solvable;               /**< target IK solvable */
-  OpenRaveManipulator* manip;  /**< target manipulator configuration */
-  target_type_t        type;   /**< target type */
+  bool solvable;                /**< target IK solvable */
+  OpenRaveManipulatorPtr manip; /**< target manipulator configuration */
+  target_type_t          type;  /**< target type */
   OpenRAVE::IkParameterization ikparam;  /**< OpenRAVE::IkParameterization; each target is implicitly transformed to one by OpenRAVE */
-  std::string plannerparams;   /**< additional string to be passed to planner, i.e. BaseManipulation module */
-  std::string raw_cmd;         /**< raw command passed to the BaseManipulator module, e.g. for anything that is not covered */
+  std::string plannerparams;    /**< additional string to be passed to planner, i.e. BaseManipulation module */
+  std::string raw_cmd;          /**< raw command passed to the BaseManipulator module, e.g. for anything that is not covered */
 } target_t;
 
 } // end namespace firevision

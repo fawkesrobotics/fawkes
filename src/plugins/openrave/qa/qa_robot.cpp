@@ -24,6 +24,8 @@
 // Do not include in api reference
 ///@cond QA
 
+
+#include <plugins/openrave/types.h>
 #include <plugins/openrave/environment.h>
 #include <plugins/openrave/robot.h>
 #include <plugins/openrave/manipulators/katana6M180.h>
@@ -58,9 +60,9 @@ main(int argc, char **argv)
 
   ConsoleLogger* cl = new ConsoleLogger();
 
-  OpenRaveManipulator* manip = new OpenRaveManipulatorKatana6M180(6, 5);
-  OpenRaveRobot* robot = new OpenRaveRobot(cl);
-  OpenRaveEnvironment* env = new OpenRaveEnvironment(cl);
+  OpenRaveManipulatorPtr manip( new OpenRaveManipulatorKatana6M180(6, 5) );
+  OpenRaveRobotPtr robot( new OpenRaveRobot(cl) );
+  OpenRaveEnvironmentPtr env( new OpenRaveEnvironment(cl) );
 
   env->create();
 

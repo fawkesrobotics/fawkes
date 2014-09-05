@@ -55,10 +55,10 @@ OpenRaveManipulatorKinovaJaco::~OpenRaveManipulatorKinovaJaco()
 /** Create a new copy of this OpenRaveManipulator instance.
  * @return A pointer to the copied instance
  */
-OpenRaveManipulator*
+OpenRaveManipulatorPtr
 OpenRaveManipulatorKinovaJaco::copy()
 {
-  return new OpenRaveManipulatorKinovaJaco(*this);
+  return RefPtr<OpenRaveManipulatorKinovaJaco>( new OpenRaveManipulatorKinovaJaco(*this) );
 }
 
 

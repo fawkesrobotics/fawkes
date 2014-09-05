@@ -39,7 +39,7 @@ class OpenRaveManipulator
   virtual ~OpenRaveManipulator();
 
   ///\brief Create a new copy of this OpenRaveManipulator instance
-  virtual OpenRaveManipulator* copy() = 0;
+  virtual OpenRaveManipulatorPtr copy() = 0;
 
   void add_motor(unsigned int number, unsigned int number_device);
 

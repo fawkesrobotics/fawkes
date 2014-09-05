@@ -57,7 +57,7 @@ OpenRaveRobot::OpenRaveRobot(fawkes::Logger* logger) :
  * @param env pointer to OpenRaveEnvironment object
  * @param logger pointer to fawkes logger
  */
-OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironment* env, fawkes::Logger* logger) :
+OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironmentPtr& env, fawkes::Logger* logger) :
   __logger( logger ),
   __name( "" ),
   __manip( 0 )
@@ -71,7 +71,7 @@ OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnviro
  * @param new_env Pointer to the new OpenRaveEnvironment. We need this to set __robot
  *  to the correct robot in the new OpenRAVE-environment.
  */
-OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnvironment* new_env) :
+OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnvironmentPtr& new_env) :
   __logger( src.__logger ),
   __name( src.__name )
 {
@@ -113,13 +113,15 @@ OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnv
 /** Destructor */
 OpenRaveRobot::~OpenRaveRobot()
 {
-  delete __target.manip;
+  __target.manip = NULL;
 
   //unload everything related to this robot from environment
   try {
     EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
     __robot->GetEnv()->Remove(__mod_basemanip);
     __robot->GetEnv()->Remove(__robot);
+    if(__logger)
+      {__logger->log_warn("OpenRAVE Robot", "Robot unloaded from environment");}
   } catch(const openrave_exception &e) {
     if(__logger)
       {__logger->log_warn("OpenRAVE Robot", "Could not unload robot properly from environment. Ex:%s", e.what());}
@@ -143,7 +145,7 @@ OpenRaveRobot::init()
  * @param env pointer to OpenRaveEnvironment object
  */
 void
-OpenRaveRobot::load(const std::string& filename, fawkes::OpenRaveEnvironment* env)
+OpenRaveRobot::load(const std::string& filename, fawkes::OpenRaveEnvironmentPtr& env)
 {
   // TODO: implementing without usage of 'environment'
   // openrave_exception handling is done in OpenRAVE (see environment-core.h)
@@ -242,7 +244,7 @@ OpenRaveRobot::calibrate(float device_trans_x, float device_trans_y, float devic
  *  Better be "false" if want to sync OpenRAVE models with device
  */
 void
-OpenRaveRobot::set_manipulator(fawkes::OpenRaveManipulator* manip, bool display_movements)
+OpenRaveRobot::set_manipulator(fawkes::OpenRaveManipulatorPtr& manip, bool display_movements)
 {
   __manip = manip;
   __target.manip = __manip->copy();
@@ -588,7 +590,7 @@ OpenRaveRobot::get_target() const
 /** Get manipulator.
  * @return pointer to currentl used OpenRaveManipulator
  */
-OpenRaveManipulator*
+OpenRaveManipulatorPtr
 OpenRaveRobot::get_manipulator() const
 {
   return __manip;
@@ -677,7 +679,7 @@ OpenRaveRobot::attach_object(OpenRAVE::KinBodyPtr object)
  * @return true if successful
  */
 bool
-OpenRaveRobot::attach_object(const std::string& name, fawkes::OpenRaveEnvironment* env)
+OpenRaveRobot::attach_object(const std::string& name, fawkes::OpenRaveEnvironmentPtr& env)
 {
   OpenRAVE::KinBodyPtr body = env->get_env_ptr()->GetKinBody(name);
 
@@ -707,7 +709,7 @@ OpenRaveRobot::release_object(OpenRAVE::KinBodyPtr object)
  * @return true if successful
  */
 bool
-OpenRaveRobot::release_object(const std::string& name, fawkes::OpenRaveEnvironment* env)
+OpenRaveRobot::release_object(const std::string& name, fawkes::OpenRaveEnvironmentPtr& env)
 {
   OpenRAVE::KinBodyPtr body = env->get_env_ptr()->GetKinBody(name);
 

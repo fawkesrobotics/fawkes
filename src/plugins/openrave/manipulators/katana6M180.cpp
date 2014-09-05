@@ -53,10 +53,10 @@ OpenRaveManipulatorKatana6M180::~OpenRaveManipulatorKatana6M180()
 /** Create a new copy of this OpenRaveManipulator instance.
  * @return A pointer to the copied instance
  */
-OpenRaveManipulator*
+OpenRaveManipulatorPtr
 OpenRaveManipulatorKatana6M180::copy()
 {
-  return new OpenRaveManipulatorKatana6M180(*this);
+  return RefPtr<OpenRaveManipulatorKatana6M180>( new OpenRaveManipulatorKatana6M180(*this) );
 }
 
 

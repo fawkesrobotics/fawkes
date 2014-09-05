@@ -23,6 +23,8 @@
 #ifndef __PLUGINS_OPENRAVE_OPENRAVE_THREAD_H_
 #define __PLUGINS_OPENRAVE_OPENRAVE_THREAD_H_
 
+#include "types.h"
+
 #include <plugins/openrave/aspect/openrave_connector.h>
 #include <plugins/openrave/aspect/openrave_inifin.h>
 
@@ -31,12 +33,6 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/aspect_provider.h>
-
-namespace fawkes {
-  class OpenRaveEnvironment;
-  class OpenRaveRobot;
-  class OpenRaveManipulator;
-}
 
 class OpenRaveThread
 : public fawkes::Thread,
@@ -56,46 +52,53 @@ class OpenRaveThread
 
   //for OpenRaveConnector
   //virtual void testDebug();
-  virtual void clone(fawkes::OpenRaveEnvironment** env,
-                     fawkes::OpenRaveRobot** robot,
-                     fawkes::OpenRaveManipulator** manip) const;
+  virtual void clone(fawkes::OpenRaveEnvironmentPtr& env,
+                     fawkes::OpenRaveRobotPtr& robot,
+                     fawkes::OpenRaveManipulatorPtr& manip) const;
 
-  virtual fawkes::OpenRaveEnvironment* get_environment() const;
-  virtual fawkes::OpenRaveRobot*       get_active_robot() const;
-  virtual void                         set_active_robot(fawkes::OpenRaveRobot* robot);
-  virtual fawkes::OpenRaveRobot*       add_robot(const std::string& filename_robot, bool autogenerate_IK);
+  virtual fawkes::OpenRaveEnvironmentPtr get_environment() const;
+  virtual fawkes::OpenRaveRobotPtr       get_active_robot() const;
+  virtual void                           set_active_robot(fawkes::OpenRaveRobotPtr robot);
+  virtual void                           set_active_robot(fawkes::OpenRaveRobot* robot);
+  virtual fawkes::OpenRaveRobotPtr       add_robot(const std::string& filename_robot, bool autogenerate_IK);
 
-  virtual void set_manipulator(fawkes::OpenRaveManipulator* manip,
+  virtual void set_manipulator(fawkes::OpenRaveManipulatorPtr& manip,
                                float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0);
-  virtual void set_manipulator(fawkes::OpenRaveRobot* robot, fawkes::OpenRaveManipulator* manip,
+  virtual void set_manipulator(fawkes::OpenRaveRobotPtr& robot, fawkes::OpenRaveManipulatorPtr& manip,
                                float trans_x=0.f, float trans_y=0.f, float trans_z=0.f, bool calibrate=0);
 
   virtual void start_viewer() const;
-  virtual void run_planner(fawkes::OpenRaveRobot* = NULL, float sampling=0.01f);
-  virtual void run_graspplanning(const std::string& target_name, fawkes::OpenRaveRobot* robot = NULL);
+  virtual void run_planner(fawkes::OpenRaveRobotPtr& robot, float sampling=0.01f);
+  virtual void run_planner(float sampling=0.01f);
+  virtual void run_graspplanning(const std::string& target_name, fawkes::OpenRaveRobotPtr& robot);
+  virtual void run_graspplanning(const std::string& target_name);
 
   //handling objects; mainly from environment.h
   virtual bool add_object(const std::string& name, const std::string& filename);
   virtual bool delete_object(const std::string& name);
   virtual bool delete_all_objects();
   virtual bool rename_object(const std::string& name, const std::string& new_name);
-  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, fawkes::OpenRaveRobot* robot=NULL);
+  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, fawkes::OpenRaveRobotPtr& robot);
+  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z);
   virtual bool rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w);
   virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z);
-  virtual bool set_target_object(const std::string& name, fawkes::OpenRaveRobot* robot, float rot_x = 0);
+  virtual bool set_target_object(const std::string& name, fawkes::OpenRaveRobotPtr& robot, float rot_x = 0);
 
-  virtual bool attach_object(const std::string& name, fawkes::OpenRaveRobot* robot=NULL);
-  virtual bool release_object(const std::string& name, fawkes::OpenRaveRobot* robot=NULL);
-  virtual bool release_all_objects(fawkes::OpenRaveRobot* robot=NULL);
+  virtual bool attach_object(const std::string& name, fawkes::OpenRaveRobotPtr& robot);
+  virtual bool attach_object(const std::string& name);
+  virtual bool release_object(const std::string& name, fawkes::OpenRaveRobotPtr& robot);
+  virtual bool release_object(const std::string& name);
+  virtual bool release_all_objects(fawkes::OpenRaveRobotPtr& robot);
+  virtual bool release_all_objects();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::OpenRaveAspectIniFin     __or_aspectIniFin;
+  fawkes::OpenRaveAspectIniFin   __or_aspectIniFin;
 
-  fawkes::OpenRaveEnvironment*  __OR_env;
-  fawkes::OpenRaveRobot*        __OR_robot;
+  fawkes::OpenRaveEnvironmentPtr __OR_env;
+  fawkes::OpenRaveRobotPtr       __OR_robot;
 };
 
 #endif
