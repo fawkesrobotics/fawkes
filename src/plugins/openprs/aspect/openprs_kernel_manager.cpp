@@ -113,7 +113,6 @@ OpenPRSKernelManager::create_kernel(const std::string &kernel_name, bool use_xop
   } catch (Exception &e) {} // ignored
   std::list<std::string>::iterator ins_pos = data_path.begin();
   for (auto p : extra_data_path) {
-    logger_->log_error("**", "Inserting %s", p.c_str());
     ins_pos = data_path.insert(ins_pos, p);
   }
   const std::string env_HOME = getenv("HOME");
@@ -122,6 +121,19 @@ OpenPRSKernelManager::create_kernel(const std::string &kernel_name, bool use_xop
     while ((pos = p.find("$HOME", pos)) != std::string::npos) {
       p.replace(pos, 5, env_HOME);
       pos += env_HOME.length();
+    }
+
+    if ((pos = p.find("@BASEDIR@")) != std::string::npos) {
+      p.replace(pos, 9, BASEDIR);
+    }
+    if ((pos = p.find("@FAWKES_BASEDIR@")) != std::string::npos) {
+      p.replace(pos, 16, FAWKES_BASEDIR);
+    }
+    if ((pos = p.find("@RESDIR@")) != std::string::npos) {
+      p.replace(pos, 8, RESDIR);
+    }
+    if ((pos = p.find("@CONFDIR@")) != std::string::npos) {
+      p.replace(pos, 9, CONFDIR);
     }
   }
   std::string oprs_data_path = str_join(data_path, ':');

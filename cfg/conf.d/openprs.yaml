@@ -69,4 +69,6 @@ openprs:
     # newly instantiated kernels. The special string $HOME will be
     # replaced by the user's home directory (or whatever is set as
     # the fawkes process' HOME environment variable).
-    data-path: ["/usr/share/openprs/data", "$HOME/openprs", "$HOME/robotics/openprs"]
+    data-path: ["@FAWKES_BASEDIR@/src/plugins/openprs/data",
+                "/usr/share/openprs/data",
+                "$HOME/openprs", "$HOME/robotics/openprs"]
