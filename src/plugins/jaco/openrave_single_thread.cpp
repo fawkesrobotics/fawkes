@@ -107,10 +107,10 @@ JacoOpenraveSingleThread::_load_robot()
       __viewer_env.manip->add_motor(5,5);
 
       // Set manipulator and offsets.
-      openrave->set_manipulator(*__viewer_env.robot, *__viewer_env.manip, 0.f, 0.f, 0.f);
+      openrave->set_manipulator(__viewer_env.robot, __viewer_env.manip, 0.f, 0.f, 0.f);
 
       if( __cfg_OR_auto_load_ik ) {
-        openrave->get_environment()->load_IK_solver(*__viewer_env.robot, OpenRAVE::IKP_Transform6D);
+        openrave->get_environment()->load_IK_solver(__viewer_env.robot, OpenRAVE::IKP_Transform6D);
       }
 
     } catch (Exception& e) {
@@ -147,15 +147,9 @@ JacoOpenraveSingleThread::once()
 
   // create cloned environment for planning
   logger->log_debug(name(), "Clone environment for planning");
-  OpenRaveRobot* tmp_robot;
-  OpenRaveManipulator* tmp_manip;
-  openrave->clone(&__planner_env.env, &tmp_robot, &tmp_manip);
-  __planner_env.robot = tmp_robot;
-  __planner_env.manip = tmp_manip;
+  openrave->clone(__planner_env.env, __planner_env.robot, __planner_env.manip);
 
-  if( __planner_env.env == NULL
-   || *__planner_env.robot == NULL
-   || *__planner_env.manip == NULL) {
+  if( !__planner_env.env || !__planner_env.robot || !__planner_env.manip) {
     throw fawkes::Exception("Could not clone properly, received a NULL pointer");
   }
 
@@ -169,10 +163,11 @@ JacoOpenraveSingleThread::once()
 void
 JacoOpenraveSingleThread::finalize() {
 #ifdef HAVE_OPENRAVE
+  if( __load_robot )
+    openrave->set_active_robot( NULL );
+
   __planner_env.robot = NULL;
   __planner_env.manip = NULL;
-
-  delete __planner_env.env;
   __planner_env.env = NULL;
 
   JacoOpenraveBaseThread::finalize();
@@ -386,7 +381,7 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
   // Run planner
   float sampling = 0.01f; //maybe catch from config? or "learning" depending on performance?
   try {
-    __planner_env.env->run_planner(*__planner_env.robot, sampling);
+    __planner_env.env->run_planner(__planner_env.robot, sampling);
   } catch (fawkes::Exception &e) {
     logger->log_warn(name(), "Planning failed: %s", e.what_no_backtrace());
     // TODO: better handling!
@@ -457,7 +452,7 @@ JacoOpenraveSingleThread::plot_first()
                            __arm->trajec_color[2],
                            __arm->trajec_color[3]);
     std::vector<dReal> joints;
-    OpenRaveManipulator* manip = __viewer_env.manip->copy();
+    OpenRaveManipulatorPtr manip = __viewer_env.manip->copy();
 
     for(jaco_trajec_t::iterator it = target->trajec->begin(); it!=target->trajec->end(); ++it) {
       manip->set_angles_device((*it));

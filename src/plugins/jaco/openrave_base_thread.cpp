@@ -53,10 +53,6 @@ JacoOpenraveBaseThread::JacoOpenraveBaseThread(const char *name)
   : Thread(name, Thread::OPMODE_CONTINUOUS)
 {
 #ifdef HAVE_OPENRAVE
-  __viewer_env.env   = NULL;
-  __viewer_env.robot = NULL;
-  __viewer_env.manip = NULL;
-
   __cfg_OR_auto_load_ik = false;
 #endif
 }

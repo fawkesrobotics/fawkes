@@ -36,6 +36,8 @@ class JacoOpenraveDualThread : public JacoOpenraveBaseThread
  public:
   JacoOpenraveDualThread();
 
+  virtual void finalize();
+
   virtual void register_arm(fawkes::jaco_arm_t *arm);
   virtual void unregister_arms();
 
