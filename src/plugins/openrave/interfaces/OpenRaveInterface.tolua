@@ -38,6 +38,13 @@ class OpenRaveInterface : public Interface
     int maxlenof_name() const;
   };
 
+  class DeleteAllObjectsMessage : public Message
+  {
+    DeleteAllObjectsMessage();
+    ~DeleteAllObjectsMessage();
+
+  };
+
   class AttachObjectMessage : public Message
   {
     AttachObjectMessage(char * ini_name);

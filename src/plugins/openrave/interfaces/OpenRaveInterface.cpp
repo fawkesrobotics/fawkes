@@ -55,6 +55,7 @@ OpenRaveInterface::OpenRaveInterface() : Interface()
   add_messageinfo("StartViewerMessage");
   add_messageinfo("AddObjectMessage");
   add_messageinfo("DeleteObjectMessage");
+  add_messageinfo("DeleteAllObjectsMessage");
   add_messageinfo("AttachObjectMessage");
   add_messageinfo("ReleaseObjectMessage");
   add_messageinfo("ReleaseAllObjectsMessage");
@@ -62,7 +63,7 @@ OpenRaveInterface::OpenRaveInterface() : Interface()
   add_messageinfo("RotateObjectQuatMessage");
   add_messageinfo("RotateObjectMessage");
   add_messageinfo("RenameObjectMessage");
-  unsigned char tmp_hash[] = {0xa4, 0xf8, 0x30, 0x99, 0x5c, 0x3a, 0x47, 0x80, 0xd6, 0x64, 0x34, 0x5, 0x7, 0xca, 0xc5, 0x1f};
+  unsigned char tmp_hash[] = {0x94, 0x4, 0x79, 0x39, 0xe7, 0xee, 0xc, 0x63, 0x75, 0x90, 0xae, 0x6f, 0xdd, 0x6e, 0x5e, 0xd5};
   set_hash(tmp_hash);
 }
 
@@ -214,6 +215,8 @@ OpenRaveInterface::create_message(const char *type) const
     return new AddObjectMessage();
   } else if ( strncmp("DeleteObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new DeleteObjectMessage();
+  } else if ( strncmp("DeleteAllObjectsMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new DeleteAllObjectsMessage();
   } else if ( strncmp("AttachObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new AttachObjectMessage();
   } else if ( strncmp("ReleaseObjectMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -516,6 +519,52 @@ Message *
 OpenRaveInterface::DeleteObjectMessage::clone() const
 {
   return new OpenRaveInterface::DeleteObjectMessage(this);
+}
+/** @class OpenRaveInterface::DeleteAllObjectsMessage <interfaces/OpenRaveInterface.h>
+ * DeleteAllObjectsMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+OpenRaveInterface::DeleteAllObjectsMessage::DeleteAllObjectsMessage() : Message("DeleteAllObjectsMessage")
+{
+  data_size = sizeof(DeleteAllObjectsMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (DeleteAllObjectsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/** Destructor */
+OpenRaveInterface::DeleteAllObjectsMessage::~DeleteAllObjectsMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+OpenRaveInterface::DeleteAllObjectsMessage::DeleteAllObjectsMessage(const DeleteAllObjectsMessage *m) : Message("DeleteAllObjectsMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (DeleteAllObjectsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+OpenRaveInterface::DeleteAllObjectsMessage::clone() const
+{
+  return new OpenRaveInterface::DeleteAllObjectsMessage(this);
 }
 /** @class OpenRaveInterface::AttachObjectMessage <interfaces/OpenRaveInterface.h>
  * AttachObjectMessage Fawkes BlackBoard Interface Message.
@@ -1496,32 +1545,36 @@ OpenRaveInterface::message_valid(const Message *message) const
   if ( m2 != NULL ) {
     return true;
   }
-  const AttachObjectMessage *m3 = dynamic_cast<const AttachObjectMessage *>(message);
+  const DeleteAllObjectsMessage *m3 = dynamic_cast<const DeleteAllObjectsMessage *>(message);
   if ( m3 != NULL ) {
     return true;
   }
-  const ReleaseObjectMessage *m4 = dynamic_cast<const ReleaseObjectMessage *>(message);
+  const AttachObjectMessage *m4 = dynamic_cast<const AttachObjectMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const ReleaseAllObjectsMessage *m5 = dynamic_cast<const ReleaseAllObjectsMessage *>(message);
+  const ReleaseObjectMessage *m5 = dynamic_cast<const ReleaseObjectMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const MoveObjectMessage *m6 = dynamic_cast<const MoveObjectMessage *>(message);
+  const ReleaseAllObjectsMessage *m6 = dynamic_cast<const ReleaseAllObjectsMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const RotateObjectQuatMessage *m7 = dynamic_cast<const RotateObjectQuatMessage *>(message);
+  const MoveObjectMessage *m7 = dynamic_cast<const MoveObjectMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const RotateObjectMessage *m8 = dynamic_cast<const RotateObjectMessage *>(message);
+  const RotateObjectQuatMessage *m8 = dynamic_cast<const RotateObjectQuatMessage *>(message);
   if ( m8 != NULL ) {
     return true;
   }
-  const RenameObjectMessage *m9 = dynamic_cast<const RenameObjectMessage *>(message);
+  const RotateObjectMessage *m9 = dynamic_cast<const RotateObjectMessage *>(message);
   if ( m9 != NULL ) {
+    return true;
+  }
+  const RenameObjectMessage *m10 = dynamic_cast<const RenameObjectMessage *>(message);
+  if ( m10 != NULL ) {
     return true;
   }
   return false;

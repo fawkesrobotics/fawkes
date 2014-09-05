@@ -242,6 +242,11 @@ bool OpenRaveThread::add_object(const std::string& name, const std::string& file
 bool OpenRaveThread::delete_object(const std::string& name) {
   return __OR_env->delete_object(name); }
 
+/** Remove all objects from environment.
+ * @return true if successful */
+bool OpenRaveThread::delete_all_objects() {
+  return __OR_env->delete_all_objects(); }
+
 /** Rename object.
  * @param name current name of the object
  * @param new_name new name of the object

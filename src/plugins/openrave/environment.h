@@ -68,6 +68,7 @@ class OpenRaveEnvironment
 
   virtual bool add_object(const std::string& name, const std::string& filename);
   virtual bool delete_object(const std::string& name);
+  virtual bool delete_all_objects();
   virtual bool rename_object(const std::string& name, const std::string& new_name);
   virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobot* robot=NULL);
   virtual bool rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w);

@@ -598,6 +598,30 @@ OpenRaveEnvironment::delete_object(const std::string& name)
   return true;
 }
 
+/** Remove all objects from environment.
+ * @return true if successful
+ */
+bool
+OpenRaveEnvironment::delete_all_objects()
+{
+  try {
+    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
+    std::vector<KinBodyPtr> bodies;
+    __env->GetBodies( bodies );
+
+    for( std::vector<KinBodyPtr>::iterator it=bodies.begin(); it!=bodies.end(); ++it ) {
+      if( !(*it)->IsRobot() )
+        __env->Remove(*it);
+    }
+  } catch(const OpenRAVE::openrave_exception &e) {
+    if(__logger)
+      __logger->log_warn("OpenRAVE Environment", "Could not delete all objects. Ex:%s", e.what());
+    return false;
+  }
+
+  return true;
+}
+
 /** Rename object.
  * @param name current name of the object
  * @param new_name new name of the object

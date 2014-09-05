@@ -31,6 +31,9 @@
     <comment>Delete object from current environment.</comment>
     <field type="string" length="30" name="name">Name of object</field>
   </message>
+  <message name="DeleteAllObjects">
+    <comment>Delete all objects from current environment.</comment>
+  </message>
   <message name="AttachObject">
     <comment>Attaches the object to the active robot</comment>
     <field type="string" length="30" name="name">Name of object</field>
