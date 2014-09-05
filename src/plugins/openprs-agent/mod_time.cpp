@@ -20,6 +20,9 @@
  */
 
 #include "mod_utils.h"
+
+#include <utils/time/time.h>
+
 #include <default-hook.h>
 #include <oprs-rerror_f-pub.h>
 
@@ -33,8 +36,8 @@ pred_time_lt(TermList terms)
   t2_sec  = (Term *)get_list_pos(terms, 3);
   t2_usec = (Term *)get_list_pos(terms, 4);
 
-  if (t1_sec->type != INTEGER || t1_usec->type != INTEGER ||
-      t2_sec->type != INTEGER || t2_usec->type != INTEGER)
+  if (t1_sec->type != LONG_LONG || t1_usec->type != LONG_LONG ||
+      t2_sec->type != LONG_LONG || t2_usec->type != LONG_LONG)
   {
     fprintf(stderr, "time-lt: time values not (all) of type integer (types %i %i %i %i)\n",
     	    t1_sec->type, t1_usec->type, t2_sec->type, t2_usec->type);
@@ -65,8 +68,8 @@ pred_time_eq(TermList terms)
   t2_sec  = (Term *)get_list_pos(terms, 3);
   t2_usec = (Term *)get_list_pos(terms, 4);
 
-  if (t1_sec->type != INTEGER || t1_usec->type != INTEGER ||
-      t2_sec->type != INTEGER || t2_usec->type != INTEGER)
+  if (t1_sec->type != LONG_LONG || t1_usec->type != LONG_LONG ||
+      t2_sec->type != LONG_LONG || t2_usec->type != LONG_LONG)
   {
     fprintf(stderr, "time-eq: time values not (all) of type integer (types %i %i %i %i)\n",
     	    t1_sec->type, t1_usec->type, t2_sec->type, t2_usec->type);
@@ -95,8 +98,8 @@ pred_time_neq(TermList terms)
   t2_sec  = (Term *)get_list_pos(terms, 3);
   t2_usec = (Term *)get_list_pos(terms, 4);
 
-  if (t1_sec->type != INTEGER || t1_usec->type != INTEGER ||
-      t2_sec->type != INTEGER || t2_usec->type != INTEGER)
+  if (t1_sec->type != LONG_LONG || t1_usec->type != LONG_LONG ||
+      t2_sec->type != LONG_LONG || t2_usec->type != LONG_LONG)
   {
     fprintf(stderr, "time-neq: time values not (all) of type integer (types %i %i %i %i)\n",
     	    t1_sec->type, t1_usec->type, t2_sec->type, t2_usec->type);
@@ -117,37 +120,38 @@ pred_time_neq(TermList terms)
   }
 }
 
+
 extern "C"
-Term *
-action_set_idle_looptime(TermList terms)
+PBoolean
+pred_timeout(TermList terms)
 {
-  Term *t_sec, *t_usec;
+  Term *t1_sec, *t1_usec, *t2_sec, *t2_usec, *interval;
+  t1_sec   = (Term *)get_list_pos(terms, 1);
+  t1_usec  = (Term *)get_list_pos(terms, 2);
+  t2_sec   = (Term *)get_list_pos(terms, 3);
+  t2_usec  = (Term *)get_list_pos(terms, 4);
+  interval = (Term *)get_list_pos(terms, 5);
 
-  t_sec  = (Term *)get_list_pos(terms, 1);
-  t_usec = (Term *)get_list_pos(terms, 2);
-
-  if ((t_sec->type != INTEGER && t_sec->type != LONG_LONG) ||
-      (t_usec->type != INTEGER && t_usec->type != LONG_LONG))
+  if (t1_sec->type != LONG_LONG || t1_usec->type != LONG_LONG ||
+      t2_sec->type != LONG_LONG || t2_usec->type != LONG_LONG ||
+      (interval->type != LONG_LONG && interval->type != FLOAT && interval->type != INTEGER))
   {
-    fprintf(stderr, "time-set-looptime: time values not (all) of type "
-	    "integer (types %i %i)\n", t_sec->type, t_usec->type);
-    ACTION_FAIL();
+    fprintf(stderr, "timeout: time values not (all) of type LONG_LONG (types %i %i %i %i)\n",
+    	    t1_sec->type, t1_usec->type, t2_sec->type, t2_usec->type);
+    return FALSE;
   }
 
-  if (t_sec->type == INTEGER) {
-    main_loop_pool_sec = t_sec->u.intval;
-  } else if (t_sec->type == INTEGER) {
-    main_loop_pool_sec = t_sec->u.llintval;
+  double compare_val = 0;
+  if (interval->type == LONG_LONG) {
+    compare_val = interval->u.llintval;
+  } else if (interval->type == INTEGER) {
+    compare_val = interval->u.intval;
+  } else if (interval->type == FLOAT) {
+    compare_val = *interval->u.doubleptr;
   }
 
-  if (t_usec->type == INTEGER) {
-    main_loop_pool_usec = t_usec->u.intval;
-  } else if (t_usec->type == INTEGER) {
-    main_loop_pool_usec = t_usec->u.llintval;
-  }
-
-  printf("Setting idle loop time: %li sec  %li usec\n", main_loop_pool_sec, main_loop_pool_usec);
-  ACTION_FINAL();
+  return (fawkes::time_diff_sec(t1_sec->u.llintval, t1_usec->u.llintval,
+				t2_sec->u.llintval, t2_usec->u.llintval) > compare_val);
 }
 
 extern "C"
@@ -192,5 +196,6 @@ void init()
   make_and_declare_eval_pred("time-lt", pred_time_lt, 4, TRUE);
   make_and_declare_eval_pred("time-eq", pred_time_eq, 4, TRUE);
   make_and_declare_eval_pred("time-neq", pred_time_neq, 4, TRUE);
+  make_and_declare_eval_pred("timeout", pred_timeout, 5, TRUE);
   make_and_declare_action("time-set-idle-looptime", action_set_idle_looptime, 2);
 }

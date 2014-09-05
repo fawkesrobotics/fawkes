@@ -73,7 +73,7 @@ OpenPRSAgentThread::loop()
   fawkes::Time now, now_sys;
   clock->get_time(now);
   clock->get_systime(now_sys);
-  openprs->send_message_f(openprs_kernel_name, "(fawkes-time %li %li %li %li)",
+  openprs->send_message_f(openprs_kernel_name, "(fawkes-time %lill %lill %lill %lill)",
   			  now.get_sec(), now.get_usec(), now_sys.get_sec(), now_sys.get_usec());
   openprs.unlock();
 }
