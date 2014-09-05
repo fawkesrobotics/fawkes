@@ -159,7 +159,7 @@ JacoOpenraveSingleThread::once()
     throw fawkes::Exception("Could not clone properly, received a NULL pointer");
   }
 
-  // set active manipulator in planning environment. This won't change anymore!
+  // set active manipulator in planning environment
   RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__manipname);
   __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
 
@@ -358,9 +358,13 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
   // restore robot state with attached objects
   {
     RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
-                                     KinBody::Save_GrabbedBodies|KinBody::Save_LinkVelocities|KinBody::Save_ActiveDOF|KinBody::Save_ActiveManipulator);
+                                     KinBody::Save_GrabbedBodies);
     saver.Restore( __planner_env.robot->get_robot_ptr() );
   }
+
+  // Set active manipulator and active DOFs (need for planner and IK solver!)
+  RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__manipname);
+  __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
 
   // Set target point for planner (has already passed IK check previously!)
   __planner_env.manip->set_angles_device(to->pos);
