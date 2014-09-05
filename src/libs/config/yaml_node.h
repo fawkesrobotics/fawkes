@@ -633,7 +633,7 @@ class YamlConfigurationNode
 	T rv;
 	return (yaml_utils::convert(list_values_[0], rv));
       } else {
-	return false;
+	return true;
       }
     } else {
       return (yaml_utils::convert(scalar_value_, rv));

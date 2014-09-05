@@ -978,7 +978,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 	      {
 		float *msg_values =
 		  (float *)((char *)cle + sizeof(config_list_entity_header_t));
-		if (cle->cp.num_values > 1) {
+		if (cle->cp.num_values > 0) {
 		  std::vector<float> values(cle->cp.num_values, 0);
 		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
 		    values[j] = msg_values[j];
@@ -998,7 +998,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 	      {
 		int32_t *msg_values =
 		  (int32_t *)((char *)cle + sizeof(config_list_entity_header_t));
-		if (cle->cp.num_values > 1) {
+		if (cle->cp.num_values > 0) {
 		  std::vector<int32_t> values(cle->cp.num_values, 0);
 		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
 		    values[j] = msg_values[j];
@@ -1018,7 +1018,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 	      {
 		uint32_t *msg_values =
 		  (uint32_t *)((char *)cle + sizeof(config_list_entity_header_t));
-		if (cle->cp.num_values > 1) {
+		if (cle->cp.num_values > 0) {
 		  std::vector<uint32_t> values(cle->cp.num_values, 0);
 		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
 		    values[j] = msg_values[j];
@@ -1038,7 +1038,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 	      {
 		int32_t *msg_values =
 		  (int32_t *)((char *)cle + sizeof(config_list_entity_header_t));
-		if (cle->cp.num_values > 1) {
+		if (cle->cp.num_values > 0) {
 		  std::vector<bool> values(cle->cp.num_values, 0);
 		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
 		    values[j] = (msg_values[j] != 0);
@@ -1057,7 +1057,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 	    case MSG_CONFIG_STRING_VALUE:
 	      {
 		char *tmpdata = (char *)cle + sizeof(config_list_entity_header_t);
-		if (cle->cp.num_values > 1) {
+		if (cle->cp.num_values > 0) {
 		  std::vector<std::string> values(cle->cp.num_values, "");
 		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
 		    config_string_value_t *csv = (config_string_value_t *)tmpdata;
@@ -1117,7 +1117,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
       case MSG_CONFIG_FLOAT_VALUE:
 	try {
 	  config_descriptor_t *cd = m->msgge<config_descriptor_t>();
-	  if (cd->num_values > 1) {
+	  if (cd->num_values > 0) {
 	    float *fs = (float *)((char *)msg->payload() + sizeof(config_descriptor_t));
 	    std::vector<float> floats(cd->num_values, 0.0);
 	    for (unsigned int i = 0; i < cd->num_values; ++i) {
@@ -1141,7 +1141,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
       case MSG_CONFIG_UINT_VALUE:
 	try {
 	  config_descriptor_t *cd = m->msgge<config_descriptor_t>();
-	  if (cd->num_values > 1) {
+	  if (cd->num_values > 0) {
 	    uint32_t *vs = (uint32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
 	    std::vector<unsigned int> values(cd->num_values, 0);
 	    for (unsigned int i = 0; i < cd->num_values; ++i) {
@@ -1167,7 +1167,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
       case MSG_CONFIG_INT_VALUE:
 	try {
 	  config_descriptor_t *cd = m->msgge<config_descriptor_t>();
-	  if (cd->num_values > 1) {
+	  if (cd->num_values > 0) {
 	    int32_t *vs = (int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
 	    std::vector<int> values(cd->num_values, 0);
 	    for (unsigned int i = 0; i < cd->num_values; ++i) {
@@ -1193,7 +1193,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
       case MSG_CONFIG_BOOL_VALUE:
 	try {
 	  config_descriptor_t *cd = m->msgge<config_descriptor_t>();
-	  if (cd->num_values > 1) {
+	  if (cd->num_values > 0) {
 	    int32_t *vs = (int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
 	    std::vector<bool> values(cd->num_values, 0);
 	    for (unsigned int i = 0; i < cd->num_values; ++i) {
@@ -1219,7 +1219,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
       case MSG_CONFIG_STRING_VALUE:
 	try {
 	  config_descriptor_t *cd = m->msgge<config_descriptor_t>();
-	  if (cd->num_values > 1) {
+	  if (cd->num_values > 0) {
 	    std::vector<std::string> values(cd->num_values, "");
 	    size_t pos = sizeof(config_descriptor_t);
 	    for (unsigned int i = 0; i < cd->num_values; ++i) {
@@ -1720,7 +1720,7 @@ NetworkConfiguration::NetConfValueIterator::get_float() const
     }
     if (msg->msgid() == MSG_CONFIG_FLOAT_VALUE) {
       config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
-      if (cd->num_values > 1) {
+      if (cd->num_values > 0) {
 	throw TypeMismatchException("NetConfValueIterator::get_float: list received");
       }
       return *(float *)((char *)msg->payload() + sizeof(config_descriptor_t));
@@ -1742,7 +1742,7 @@ NetworkConfiguration::NetConfValueIterator::get_uint() const
     }
     if (msg->msgid() == MSG_CONFIG_UINT_VALUE) {
       config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
-      if (cd->num_values > 1) {
+      if (cd->num_values > 0) {
 	throw TypeMismatchException("NetConfValueIterator::get_uint: list received");
       }
       return *(uint32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
@@ -1764,7 +1764,7 @@ NetworkConfiguration::NetConfValueIterator::get_int() const
     }
     if (msg->msgid() == MSG_CONFIG_INT_VALUE) {
       config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
-      if (cd->num_values > 1) {
+      if (cd->num_values > 0) {
 	throw TypeMismatchException("NetConfValueIterator::get_int: list received");
       }
       return *(int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
@@ -1786,7 +1786,7 @@ NetworkConfiguration::NetConfValueIterator::get_bool() const
     }
     if (msg->msgid() == MSG_CONFIG_BOOL_VALUE) {
       config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
-      if (cd->num_values > 1) {
+      if (cd->num_values > 0) {
 	throw TypeMismatchException("NetConfValueIterator::get_int: list received");
       }
       return (*(int32_t *)((char *)msg->payload() + sizeof(config_descriptor_t)) != 0);
@@ -1808,7 +1808,7 @@ NetworkConfiguration::NetConfValueIterator::get_string() const
     }
     if (msg->msgid() == MSG_CONFIG_STRING_VALUE) {
       config_descriptor_t *cd = msg->msgge<config_descriptor_t>();
-      if (cd->num_values > 1) {
+      if (cd->num_values > 0) {
 	throw TypeMismatchException("NetConfValueIterator::get_int: list received");
       }
       config_string_value_t *sv =
