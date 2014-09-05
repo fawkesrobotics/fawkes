@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "mod_utils.h"
+#include <plugins/openprs/mod_utils.h>
 
 #include <blackboard/remote.h>
 #include <interfaces/SkillerInterface.h>

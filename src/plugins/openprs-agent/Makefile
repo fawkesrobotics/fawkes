@@ -25,19 +25,8 @@ LIBS_openprs_mod_skiller = fawkescore fawkesutils fawkesblackboard \
 	                  fawkesinterface SkillerInterface
 OBJS_openprs_mod_skiller = mod_skiller.o
 
-LIBS_openprs_mod_time = fawkescore fawkesutils
-OBJS_openprs_mod_time = mod_time.o
 
-LIBS_openprs_mod_utils = fawkescore fawkesutils
-OBJS_openprs_mod_utils = mod_utils.o
-
-LIBS_openprs_mod_blackboard = fawkescore fawkesutils fawkesblackboard \
-			      fawkesinterface
-OBJS_openprs_mod_blackboard = mod_blackboard.o
-
-OBJS_all = $(OBJS_openprs_agent) $(OBJS_openprs_mod_skiller) \
-	   $(OBJS_openprs_mod_time) $(OBJS_openprs_mod_utils) \
-	   $(OBJS_openprs_mod_blackboard)
+OBJS_all = $(OBJS_openprs_agent) $(OBJS_openprs_mod_skiller)
 
 ifeq ($(HAVE_OPENPRS),1)
   CFLAGS  += $(CFLAGS_OPENPRS)
@@ -45,20 +34,10 @@ ifeq ($(HAVE_OPENPRS),1)
 
   CFLAGS_mod_skiller = $(CFLAGS_OPENPRS) $(CFLAGS_OPENPRS_MOD)
   LDFLAGS_openprs_mod_skiller = $(LDFLAGS_OPENPRS) $(LDFLAGS_OPENPRS_MOD)
-  CFLAGS_mod_time    = $(CFLAGS_mod_skiller)
-  LDFLAGS_openprs_mod_time = $(LDFLAGS_openprs_mod_skiller)
-  CFLAGS_mod_utils    = $(CFLAGS_mod_skiller)
-  LDFLAGS_openprs_mod_utils = $(LDFLAGS_openprs_mod_skiller)
-  CFLAGS_mod_blackboard = $(CFLAGS_mod_skiller)
-  LDFLAGS_openprs_mod_blackboard = $(LDFLAGS_openprs_mod_skiller)
   ALLOW_UNDEF_openprs_mod_skiller = 1
-  ALLOW_UNDEF_openprs_mod_time = 1
-  ALLOW_UNDEF_openprs_mod_utils = 1
-  ALLOW_UNDEF_openprs_mod_blackboard = 1
 
   PLUGINS_all = $(PLUGINDIR)/openprs-agent.so
-  LIBS_all   += $(OPENPRS_MOD_DIR)/mod_skiller.so $(OPENPRS_MOD_DIR)/mod_time.so \
-		$(OPENPRS_MOD_DIR)/mod_utils.so $(OPENPRS_MOD_DIR)/mod_blackboard.so
+  LIBS_all   += $(OPENPRS_MOD_DIR)/mod_skiller.so
 else
   WARN_TARGETS += warning_openprs
 endif

@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "mod_utils.h"
+#include <plugins/openprs/mod_utils.h>
 
 #include <utils/time/time.h>
 
@@ -192,7 +192,7 @@ action_set_idle_looptime(TermList terms)
 extern "C"
 void init()
 {
-  printf("*** LOADING mod_time  !!!\n");
+  printf("*** LOADING mod_time\n");
   make_and_declare_eval_pred("time-lt", pred_time_lt, 4, TRUE);
   make_and_declare_eval_pred("time-eq", pred_time_eq, 4, TRUE);
   make_and_declare_eval_pred("time-neq", pred_time_neq, 4, TRUE);
