@@ -39,8 +39,8 @@
     <Effector>l_HandRoll</Effector>
     <translation>0 0 0.188</translation>
     <RotationAxis>0 0 1 -90</RotationAxis>
-    <joints>l_j_FingerSingle</joints>
-    <closingdirection>-1</closingdirection>
+    <joints>l_j_FingerDualLeft l_j_FingerDualRight l_j_FingerSingle</joints>
+    <closingdirection>1 1 1</closingdirection>
     <direction>0 0 1</direction>
   </Manipulator>
 
@@ -49,8 +49,8 @@
     <effector>r_HandRoll</effector>
     <translation>0 0 0.188</translation>
     <RotationAxis>0 0 1 -90</RotationAxis>
-    <joints>r_j_FingerSingle</joints>
-    <closingdirection>-1</closingdirection>
+    <joints>r_j_FingerDualLeft r_j_FingerDualRight r_j_FingerSingle</joints>
+    <closingdirection>1 1 1</closingdirection>
     <direction>0 0 1</direction>
   </Manipulator>
   </Robot>
