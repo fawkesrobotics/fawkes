@@ -54,9 +54,12 @@ all the names in one table:
    Deletes objects from environment.
    Each obj_ is a string: name of the object to be deleted.
 
-  or_object{attach={"obj1", "obj2", ...}}
+  or_object{attach={"obj1", obj2, ...}}
    Attaches object to the currently active robot
-   Each obj_ is a string: name of the object to be attached.
+   Each obj_ can be a string: name of the object to be attached.
+                 or a table: {name="NAME", manip_name="MANIP_NAME"}
+                     with   NAME: name of the object to be attached
+                      MANIP_NAME: name of the manipulator to attach to
 
   or_object{release={"obj1", "obj2", ...}}
    Releases object from the currently active robot
@@ -123,10 +126,13 @@ function delete_object(o)
    return if_openrave:msgq_enqueue_copy(if_openrave.DeleteObjectMessage:new( o ))
 end
 function attach_object(o)
-   if not type(o)=="string" then
+   if type(o)=="string" then
+      return if_openrave:msgq_enqueue_copy(if_openrave.AttachObjectMessage:new( o ))
+   elseif type(o)=="table" and o.name and o.manip_name then
+      return if_openrave:msgq_enqueue_copy(if_openrave.AttachObjectMessage:new( o.name, o.manip_name ))
+   else
       return 0
    end
-   return if_openrave:msgq_enqueue_copy(if_openrave.AttachObjectMessage:new( o ))
 end
 function release_object(o)
    if not type(o)=="string" then
