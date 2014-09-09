@@ -85,6 +85,12 @@ OpenPRSAspectIniFin::init(Thread *thread)
 				    "add (! (= @@FAWKES_HOST \"%s\"))", fawkes_host_.c_str());
   openprs_comm_->transmit_command_f(openprs_thread->openprs_kernel_name,
 				    "add (! (= @@FAWKES_PORT \"%u\"))", fawkes_port_);
+  openprs_comm_->transmit_command_f(openprs_thread->openprs_kernel_name,
+				    "declare symbol %s",
+				    openprs_thread->openprs_local_name.c_str());
+  openprs_comm_->transmit_command_f(openprs_thread->openprs_kernel_name,
+				    "add (! (= @@FAWKES_MP_NAME %s))",
+				    openprs_thread->openprs_local_name.c_str());
 
   usleep(200000);
 }
