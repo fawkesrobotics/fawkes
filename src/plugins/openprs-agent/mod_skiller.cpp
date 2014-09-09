@@ -183,6 +183,7 @@ action_skill_call(TermList terms)
 	ACTION_FINAL();
 
       case SkillerInterface::S_FAILED:
+      case SkillerInterface::S_INACTIVE:
 	printf("Skill %s has FAILED\n", name->u.string);
 	ACTION_FAIL();
 
