@@ -121,6 +121,10 @@ action_config_load(TermList terms)
     add_external_fact((char *)"confval", tl);
   }
 
+  TermList tl = sl_make_slist();
+  tl = build_term_list(tl, build_string(prefix->u.string));
+  add_external_fact((char *)"config-loaded", tl);
+
   ACTION_FINAL();
 }
 
