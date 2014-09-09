@@ -324,7 +324,7 @@ JacoGotoThread::loop()
 
     if( __target ) {
       if( __target->type == TARGET_TRAJEC ) {
-        logger->log_debug(name(), "next target is a trajectory...");
+        //logger->log_debug(name(), "next target is a trajectory...");
 
         if( __target->trajec_state == TRAJEC_READY ) {
           logger->log_debug(name(), "... and ready! processing now.");
@@ -356,7 +356,7 @@ JacoGotoThread::loop()
           __arm->iface->set_error_code( JacoInterface::ERROR_PLANNING );
 
         } else {
-          logger->log_debug(name(), "... but not ready yet!");
+          //logger->log_debug(name(), "... but not ready yet!");
           usleep(30e3);
         }
 
