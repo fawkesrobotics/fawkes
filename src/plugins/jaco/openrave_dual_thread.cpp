@@ -98,6 +98,8 @@ JacoOpenraveDualThread::_load_robot()
     // Set manipulator and offsets.
     openrave->set_manipulator(__viewer_env.robot, __viewer_env.manip, 0.f, 0.f, 0.f);
 
+    EnvironmentMutex::scoped_lock lock(__viewer_env.env->get_env_ptr()->GetMutex());
+
     __viewer_env.robot->get_robot_ptr()->SetActiveManipulator(ARM_R);
     __manips.right = __viewer_env.robot->get_robot_ptr()->GetActiveManipulator();
     if( __cfg_OR_auto_load_ik ) {

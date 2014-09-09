@@ -129,7 +129,7 @@ JacoOpenraveSingleThread::once()
     // robot was not loaded by this thread. So get them from openrave-environment now
     try {
       __viewer_env.robot = openrave->get_active_robot();
-      __viewer_env.manip = __viewer_env.robot->get_manipulator(); //TODO: use new(), copy constructor!
+      __viewer_env.manip = __viewer_env.robot->get_manipulator()->copy();
 
     } catch (Exception& e) {
       throw fawkes::Exception("Could not add robot '%s' to openrave environment. (Error: %s)", __cfg_OR_robot_file.c_str(), e.what_no_backtrace());
@@ -141,6 +141,7 @@ JacoOpenraveSingleThread::once()
     usleep(100);
   }
   while( !__manip ) {
+    EnvironmentMutex::scoped_lock lock(__viewer_env.env->get_env_ptr()->GetMutex());
     __manip = __robot->SetActiveManipulator(__manipname);
     usleep(100);
   }
@@ -154,8 +155,11 @@ JacoOpenraveSingleThread::once()
   }
 
   // set active manipulator in planning environment
-  RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__manipname);
-  __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
+  {
+    EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
+    RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__manipname);
+    __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
+  }
 
 #endif //HAVE_OPENRAVE
 }
@@ -260,13 +264,19 @@ JacoOpenraveSingleThread::update_openrave()
     __viewer_env.manip->set_angles_device(__joints);
     __viewer_env.manip->get_angles(__joints);
 
-    __robot->SetDOFValues(__joints, 1, __manip->GetArmIndices());
+    {
+      EnvironmentMutex::scoped_lock lock(__viewer_env.env->get_env_ptr()->GetMutex());
+      __robot->SetDOFValues(__joints, 1, __manip->GetArmIndices());
+    }
 
     __joints.clear();
     __joints.push_back( deg2rad(__arm->iface->finger1() - 40.f) );
     __joints.push_back( deg2rad(__arm->iface->finger2() - 40.f) );
     __joints.push_back( deg2rad(__arm->iface->finger3() - 40.f)) ;
-    __robot->SetDOFValues(__joints, 1, __manip->GetGripperIndices());
+    {
+      EnvironmentMutex::scoped_lock lock(__viewer_env.env->get_env_ptr()->GetMutex());
+      __robot->SetDOFValues(__joints, 1, __manip->GetGripperIndices());
+    }
   } catch( openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
@@ -281,8 +291,11 @@ JacoOpenraveSingleThread::add_target(float x, float y, float z, float e1, float 
 #ifdef HAVE_OPENRAVE
   try {
     // update planner params; set correct DOF and stuff
-    __planner_env.robot->get_planner_params()->SetRobotActiveJoints(__planner_env.robot->get_robot_ptr());
-    __planner_env.robot->get_planner_params()->vgoalconfig.resize(__planner_env.robot->get_robot_ptr()->GetActiveDOF());
+    {
+      EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
+      __planner_env.robot->get_planner_params()->SetRobotActiveJoints(__planner_env.robot->get_robot_ptr());
+      __planner_env.robot->get_planner_params()->vgoalconfig.resize(__planner_env.robot->get_robot_ptr()->GetActiveDOF());
+    }
 
     // get IK from openrave. Ignore collisions with env though, as this is only for IK check!
     solvable = __planner_env.robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3, IKFO_IgnoreEndEffectorEnvCollisions);
@@ -344,22 +357,31 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
   // Update bodies in planner-environment
   // clone robot state, ignoring grabbed bodies
   {
+    EnvironmentMutex::scoped_lock view_lock(__viewer_env.env->get_env_ptr()->GetMutex());
+    EnvironmentMutex::scoped_lock plan_lock(__planner_env.env->get_env_ptr()->GetMutex());
     RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
                                      0xffffffff&~KinBody::Save_GrabbedBodies);
     saver.Restore( __planner_env.robot->get_robot_ptr() );
   }
   // then clone all objects
   __planner_env.env->clone_objects( __viewer_env.env );
-  // restore robot state with attached objects
-  {
-    RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
-                                     KinBody::Save_GrabbedBodies);
-    saver.Restore( __planner_env.robot->get_robot_ptr() );
-  }
 
-  // Set active manipulator and active DOFs (need for planner and IK solver!)
-  RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__manipname);
-  __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
+  // restore robot state
+  {
+    EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
+
+    // update robot state with attached objects
+    {
+      EnvironmentMutex::scoped_lock view_lock(__viewer_env.env->get_env_ptr()->GetMutex());
+      RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
+                                       KinBody::Save_GrabbedBodies);
+      saver.Restore( __planner_env.robot->get_robot_ptr() );
+    }
+
+    // Set active manipulator and active DOFs (need for planner and IK solver!)
+    RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__manipname);
+    __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
+  }
 
   // Set target point for planner (has already passed IK check previously!)
   __planner_env.manip->set_angles_device(to->pos);
@@ -443,6 +465,8 @@ JacoOpenraveSingleThread::plot_first()
   // remove all GraphHandlerPtr and currently drawn plots
   __graph_handle.clear();
   {
+    EnvironmentMutex::scoped_lock lock(__viewer_env.env->get_env_ptr()->GetMutex());
+
     // save the state, do not modifiy currently active robot!
     RobotBasePtr tmp_robot = __viewer_env.robot->get_robot_ptr();
     RobotBase::RobotStateSaver saver(tmp_robot);
