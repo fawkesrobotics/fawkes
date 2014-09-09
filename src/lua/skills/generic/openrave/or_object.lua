@@ -127,7 +127,7 @@ function delete_object(o)
 end
 function attach_object(o)
    if type(o)=="string" then
-      return if_openrave:msgq_enqueue_copy(if_openrave.AttachObjectMessage:new( o ))
+      return if_openrave:msgq_enqueue_copy(if_openrave.AttachObjectMessage:new( o, "" ))
    elseif type(o)=="table" and o.name and o.manip_name then
       return if_openrave:msgq_enqueue_copy(if_openrave.AttachObjectMessage:new( o.name, o.manip_name ))
    else
