@@ -8,6 +8,11 @@
 ;---------------------------------------------------------------------------
 
 declare cwp confval
+declare cwp config-loaded
+declare cwp settings-loaded
+declare op_predicate config-load-to-settings
+declare op_predicate config-to-settings
+declare op_predicate config-cleanup
 
 load external "mod_config" "init"
 load opf "config.opf"

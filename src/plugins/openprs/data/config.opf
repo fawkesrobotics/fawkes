@@ -16,6 +16,7 @@
     (! (config-to-settings $prefix))
     (! (config-cleanup))
   )
+  :effects ((~> (config-loaded $prefix)) (=> (settings-loaded $prefix)))
   :documentation "Load all config values below given prefix into settings.
     This will load all settings for the given config prefix and eventually
     assert them as (settings) facts where the name of the setting is the
