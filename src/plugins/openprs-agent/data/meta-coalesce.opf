@@ -10,40 +10,46 @@
 (
 
 (defop meta-coalesce
-  :invocation (SOAK $X)
-  :context (> (length $X) 1)
+  :invocation (FACT-INVOKED-OPS $X)
+  :context ((? (& (null (list-intersection (op-names (get-all-intentions)) (. meta-coalesce .)))
+                  (|| (> (length $X) 1)
+                      (& (equal (length $X) 1)
+                         (~ (property-p META-SELECTOR (first $x))))))))
   :body (
-    ;(! (printf (format "Number of OPS: %d\n" (length $X))))
+    (! (start-critical-section))
+    (! (printf (format "OPs: %s -- %d\n" (op-names $X) (length $X))))
     (! (= @OPS $X))
     (! (= @COALESCED-OPS (. .)))
     (! (= @EXEC-OPS (. .)))
+    (! (= @ACTIVE-OPS (op-names (get-all-intentions))))
+    (! (printf (format "Active OPs: %s\n" @ACTIVE-OPS)))
 
     (while (? (~ (null @OPS)))
+      (! (= @op-name (op-name (car @OPS))))
+      (! (printf (format "   *** Working on op %s  Remaining %d\n"  @op-name (length (cdr @OPS)))))
       (if (? (property-p COALESCE (car @OPS)))
-        (if (? (> (length (list-intersection @COALESCED-OPS (. (op-name (car @OPS)) .) )) 0))
-          ;(! (printf (format "*** COALESCE OP -> no exec: %s\n"  (op-name (car @OPS)))))
+        (! (printf (format "*** OP %s is coalescing\n"  @op-name)))
+        (if (? (> (length (list-intersection @ACTIVE-OPS (. (val @op-name) .) )) 0))
+          (! (printf (format "   *** COALESCE OP -> already executed: %s\n" @op-name)))
+         elseif (? (> (length (list-intersection @COALESCED-OPS (. @op-name .) )) 0))
+          (! (printf (format "   *** COALESCE OP -> no exec: %s\n"  (op-name (car @OPS)))))
          else
-          ;(! (printf (format "*** COALESCE OP -> === EXECUTING ===: %s\n"  (op-name (car @OPS)))))
-          (! (= @COALESCED-OPS (cons (op-name (car @OPS)) @COALESCED-OPS)))
+          (! (printf (format "   *** COALESCE OP -> === EXECUTING ===: %s\n"  @op-name)))
+          (! (= @COALESCED-OPS (cons @op-name @COALESCED-OPS)))
 	  (! (= @EXEC-OPS (cons-tail (car @OPS) @EXEC-OPS)))
         )
       else
-        ;(! (printf (format "INTENT straight: %s\n" (op-name (car @OPS)))))
+        (! (printf (format "   INTENT straight: %s\n" @op-name)))
  	(! (= @EXEC-OPS (cons-tail (car @OPS) @EXEC-OPS)))
       )
       (! (= @OPS (cdr @OPS)))
     )
 
-    ;(! (= @EXEC-OPS-P @EXEC-OPS))
-    ;(! (= @PRINT-OPS (. .) ))
-    ;(while (? (~ (null @EXEC-OPS-P)))
-    ;  (! (= @PRINT-OPS (cons-tail (op-name (car @EXEC-OPS-P)) @PRINT-OPS)))
-    ;  (! (= @EXEC-OPS-P (cdr @EXEC-OPS-P)))
-    ;)
-    ;(! (print @PRINT-OPS))
     (if (? (~ (null @EXEC-OPS)))
+      (! (printf (format "   Running OPs: %s\n" (op-names (current @EXEC-OPS)))))
       (! (INTENDED-ALL-OPS-AS-ROOT (current @EXEC-OPS)))
     )
+    (! (end-critical-section))
   )
   :properties ((DECISION-PROCEDURE T) (META-SELECTOR T))
   :effects ()
@@ -55,6 +61,9 @@
     coalesced must have the property COALESCE set to T."
 )
 
+; alternative for soak ops
+;  :invocation (SOAK $X)
+;  :context (> (length $X) 1)
 ; alternative for only fact-invoked OPs:
 ;  :invocation (FACT-INVOKED-OPS $X)
 ;  :context ((? (|| (> (length $X) 1)
