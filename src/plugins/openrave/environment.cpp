@@ -116,6 +116,8 @@ OpenRaveEnvironment::create()
   else if (__logger)
     {__logger->log_debug("OpenRAVE Environment", "Environment created");}
 
+  EnvironmentMutex::scoped_lock( __env->GetMutex());
+
   // create planner
   __planner = RaveCreatePlanner(__env,"birrt");
   if(!__planner)
@@ -138,13 +140,6 @@ OpenRaveEnvironment::destroy()
     if(__logger)
       {__logger->log_warn("OpenRAVE Environment", "Could not destroy Environment. Ex:%s", e.what());}
   }
-}
-
-/** Lock the environment to prevent changes. */
-void
-OpenRaveEnvironment::lock()
-{
-  EnvironmentMutex::scoped_lock lock(__env->GetMutex());
 }
 
 /** Enable debugging messages of OpenRAVE.
@@ -171,6 +166,7 @@ void
 OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
 {
   try{
+    EnvironmentMutex::scoped_lock( __env->GetMutex());
     __env->Add(robot);
     if(__logger)
       {__logger->log_debug("OpenRAVE Environment", "Robot added to environment.");}
@@ -187,8 +183,12 @@ OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
 void
 OpenRaveEnvironment::add_robot(const std::string& filename)
 {
-  // load the robot
-  RobotBasePtr robot = __env->ReadRobotXMLFile(filename);
+  RobotBasePtr robot;
+  {
+    // load the robot
+    EnvironmentMutex::scoped_lock( __env->GetMutex());
+    robot = __env->ReadRobotXMLFile(filename);
+  }
 
   // if could not load robot file: Check file path, and test file itself for correct syntax and semantics
   // by loading it directly into openrave with "openrave robotfile.xml"
@@ -247,6 +247,8 @@ OpenRaveEnvironment::start_viewer()
 void
 OpenRaveEnvironment::load_IK_solver(OpenRaveRobotPtr& robot, OpenRAVE::IkParameterizationType iktype)
 {
+  EnvironmentMutex::scoped_lock( __env->GetMutex());
+
   RobotBasePtr robotBase = robot->get_robot_ptr();
 
   std::stringstream ssin,ssout;
@@ -684,7 +686,11 @@ bool
 OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobotPtr& robot)
 {
   // remember, OpenRAVE Vector is 4-tuple (w,x,y,z)
-  Transform t = robot->get_robot_ptr()->GetTransform();
+  Transform t;
+  {
+    EnvironmentMutex::scoped_lock( __env->GetMutex());
+    t = robot->get_robot_ptr()->GetTransform();
+  }
   return move_object(name, trans_x+t.trans[1], trans_y+t.trans[2], trans_z+t.trans[3]);
 }
 

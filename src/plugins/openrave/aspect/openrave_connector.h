@@ -203,13 +203,13 @@ class OpenRaveConnector
   * @param robot pointer to OpenRaveRobot that the target is set for
   * @return true if successful
   */
-  virtual bool attach_object(const std::string& name, OpenRaveRobotPtr& robot) = 0;
+  virtual bool attach_object(const char* name, OpenRaveRobotPtr& robot, const char* manip_name) = 0;
 
   /** Attach a kinbody to the robot. Uses currently active robot.
   * @param name name of the object
   * @return true if successful
   */
-  virtual bool attach_object(const std::string& name) = 0;
+  virtual bool attach_object(const char* name, const char* manip_name) = 0;
 
   /** Release a kinbody from the robot.
   * @param name name of the object

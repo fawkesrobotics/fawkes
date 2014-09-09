@@ -72,8 +72,6 @@ OpenRaveThread::init()
 
   __OR_env->create();
   __OR_env->enable_debug(); // TODO: cfg
-
-  __OR_env->lock();
 }
 
 
@@ -340,9 +338,9 @@ OpenRaveThread::set_target_object(const std::string& name, OpenRaveRobotPtr& rob
  * @return true if successfull
  */
 bool
-OpenRaveThread::attach_object(const std::string& name, OpenRaveRobotPtr& robot)
+OpenRaveThread::attach_object(const char* name, OpenRaveRobotPtr& robot, const char* manip_name)
 {
-  return robot->attach_object(name, __OR_env);
+  return robot->attach_object(name, __OR_env, manip_name);
 }
 
 /** Attach a kinbody to the robot. Uses currently active robot.
@@ -350,9 +348,9 @@ OpenRaveThread::attach_object(const std::string& name, OpenRaveRobotPtr& robot)
  * @return true if successfull
  */
 bool
-OpenRaveThread::attach_object(const std::string& name)
+OpenRaveThread::attach_object(const char* name, const char* manip_name)
 {
-  return attach_object(name, __OR_robot);
+  return attach_object(name, __OR_robot, manip_name);
 }
 
 /** Release a kinbody from the robot.

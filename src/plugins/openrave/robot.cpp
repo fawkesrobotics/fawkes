@@ -147,6 +147,8 @@ OpenRaveRobot::init()
 void
 OpenRaveRobot::load(const std::string& filename, fawkes::OpenRaveEnvironmentPtr& env)
 {
+  EnvironmentMutex::scoped_lock lock(env->get_env_ptr()->GetMutex());
+
   // TODO: implementing without usage of 'environment'
   // openrave_exception handling is done in OpenRAVE (see environment-core.h)
   __robot = env->get_env_ptr()->ReadRobotXMLFile(filename);
@@ -165,6 +167,8 @@ OpenRaveRobot::set_ready()
 {
   if(!__robot)
     {throw fawkes::Exception("OpenRAVE Robot: Robot not loaded properly yet.");}
+
+  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
 
   __name = __robot->GetName();
   __robot->SetActiveManipulator(__robot->GetManipulators().at(0)->GetName());
@@ -320,9 +324,12 @@ OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z, bool 
 bool
 OpenRaveRobot::set_target_straight(float trans_x, float trans_y, float trans_z)
 {
-  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
-  __arm = __robot->GetActiveManipulator();
-  Transform trans = __arm->GetEndEffectorTransform();
+  Transform trans;
+  {
+    EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+    __arm = __robot->GetActiveManipulator();
+    trans = __arm->GetEndEffectorTransform();
+  }
 
   return set_target_rel( trans_x - trans.trans[0],
                          trans_y - trans.trans[1],
@@ -442,7 +449,10 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
   // to the while loop (whole loop: ~56ms vs ~99ms)
 
   // release all attached/grabbed bodys
-  __robot->ReleaseAllGrabbed();
+  {
+    EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+    __robot->ReleaseAllGrabbed();
+  }
 
   // quaternion defining consecutiv rotations on axis
   float alpha = atan2(trans_y - __trans_offset_y, trans_x - __trans_offset_x);      //angle to rotate left/right when manipulator points to +x
@@ -660,11 +670,28 @@ OpenRaveRobot::get_basemanip() const
  * @return true if successful
  */
 bool
-OpenRaveRobot::attach_object(OpenRAVE::KinBodyPtr object)
+OpenRaveRobot::attach_object(OpenRAVE::KinBodyPtr object, const char* manip_name)
 {
+  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+
   bool success = false;
   try{
-    success = __robot->Grab(object);
+    if( manip_name ) {
+      // try attaching to given manipulator
+      RobotBase::ManipulatorPtr manip = __robot->SetActiveManipulator(manip_name);
+      if( !manip ) {
+        if(__logger)
+          __logger->log_warn("OpenRAVE Robot", "Could not attach Object, could not get manipulator '%s'", manip_name);
+        return false;
+
+      } else {
+        success = __robot->Grab(object, manip->GetEndEffector());
+      }
+
+    } else {
+      // use currently active manipulator
+      success = __robot->Grab(object);
+    }
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
       __logger->log_warn("OpenRAVE Robot", "Could not attach Object. Ex:%s", e.what());
@@ -679,11 +706,15 @@ OpenRaveRobot::attach_object(OpenRAVE::KinBodyPtr object)
  * @return true if successful
  */
 bool
-OpenRaveRobot::attach_object(const std::string& name, fawkes::OpenRaveEnvironmentPtr& env)
+OpenRaveRobot::attach_object(const char* name, fawkes::OpenRaveEnvironmentPtr& env, const char* manip_name)
 {
-  OpenRAVE::KinBodyPtr body = env->get_env_ptr()->GetKinBody(name);
+  OpenRAVE::KinBodyPtr body;
+  {
+    EnvironmentMutex::scoped_lock lock(env->get_env_ptr()->GetMutex());
+    body = env->get_env_ptr()->GetKinBody(name);
+  }
 
-  return attach_object(body);
+  return attach_object(body, manip_name);
 }
 
 /** Release a kinbody from the robot.
@@ -694,6 +725,7 @@ bool
 OpenRaveRobot::release_object(OpenRAVE::KinBodyPtr object)
 {
   try{
+    EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
     __robot->Release(object);
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
@@ -711,7 +743,11 @@ OpenRaveRobot::release_object(OpenRAVE::KinBodyPtr object)
 bool
 OpenRaveRobot::release_object(const std::string& name, fawkes::OpenRaveEnvironmentPtr& env)
 {
-  OpenRAVE::KinBodyPtr body = env->get_env_ptr()->GetKinBody(name);
+  OpenRAVE::KinBodyPtr body;
+  {
+    EnvironmentMutex::scoped_lock lock(env->get_env_ptr()->GetMutex());
+    body = env->get_env_ptr()->GetKinBody(name);
+  }
 
   return release_object(body);
 }
@@ -723,6 +759,7 @@ bool
 OpenRaveRobot::release_all_objects()
 {
   try{
+    EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
     __robot->ReleaseAllGrabbed();
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)

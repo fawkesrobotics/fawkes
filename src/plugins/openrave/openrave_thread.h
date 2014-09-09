@@ -84,8 +84,8 @@ class OpenRaveThread
   virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z);
   virtual bool set_target_object(const std::string& name, fawkes::OpenRaveRobotPtr& robot, float rot_x = 0);
 
-  virtual bool attach_object(const std::string& name, fawkes::OpenRaveRobotPtr& robot);
-  virtual bool attach_object(const std::string& name);
+  virtual bool attach_object(const char* name, fawkes::OpenRaveRobotPtr& robot, const char* manip_name = NULL);
+  virtual bool attach_object(const char* name, const char* manip_name = NULL);
   virtual bool release_object(const std::string& name, fawkes::OpenRaveRobotPtr& robot);
   virtual bool release_object(const std::string& name);
   virtual bool release_all_objects(fawkes::OpenRaveRobotPtr& robot);

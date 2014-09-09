@@ -53,8 +53,8 @@ class OpenRaveRobot
   virtual void update_manipulator();
   virtual void update_model();
 
-  virtual bool attach_object(OpenRAVE::KinBodyPtr object);
-  virtual bool attach_object(const std::string& name, fawkes::OpenRaveEnvironmentPtr& env);
+  virtual bool attach_object(OpenRAVE::KinBodyPtr object, const char* manip_name = NULL);
+  virtual bool attach_object(const char* name, fawkes::OpenRaveEnvironmentPtr& env, const char* manip_name = NULL);
   virtual bool release_object(OpenRAVE::KinBodyPtr object);
   virtual bool release_object(const std::string& name, fawkes::OpenRaveEnvironmentPtr& env);
   virtual bool release_all_objects();

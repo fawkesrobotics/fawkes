@@ -63,7 +63,7 @@ OpenRaveInterface::OpenRaveInterface() : Interface()
   add_messageinfo("RotateObjectQuatMessage");
   add_messageinfo("RotateObjectMessage");
   add_messageinfo("RenameObjectMessage");
-  unsigned char tmp_hash[] = {0x94, 0x4, 0x79, 0x39, 0xe7, 0xee, 0xc, 0x63, 0x75, 0x90, 0xae, 0x6f, 0xdd, 0x6e, 0x5e, 0xd5};
+  unsigned char tmp_hash[] = {0xac, 0x95, 0xde, 0xc, 0xea, 0xa4, 0x97, 0x56, 0x5c, 0x46, 0x11, 0x5b, 0xf7, 0x60, 0x41, 0xb};
   set_hash(tmp_hash);
 }
 
@@ -575,8 +575,9 @@ OpenRaveInterface::DeleteAllObjectsMessage::clone() const
 
 /** Constructor with initial values.
  * @param ini_name initial value for name
+ * @param ini_manip_name initial value for manip_name
  */
-OpenRaveInterface::AttachObjectMessage::AttachObjectMessage(const char * ini_name) : Message("AttachObjectMessage")
+OpenRaveInterface::AttachObjectMessage::AttachObjectMessage(const char * ini_name, const char * ini_manip_name) : Message("AttachObjectMessage")
 {
   data_size = sizeof(AttachObjectMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -584,7 +585,9 @@ OpenRaveInterface::AttachObjectMessage::AttachObjectMessage(const char * ini_nam
   data      = (AttachObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->name, ini_name, 30);
+  strncpy(data->manip_name, ini_manip_name, 30);
   add_fieldinfo(IFT_STRING, "name", 30, data->name);
+  add_fieldinfo(IFT_STRING, "manip_name", 30, data->manip_name);
 }
 /** Constructor */
 OpenRaveInterface::AttachObjectMessage::AttachObjectMessage() : Message("AttachObjectMessage")
@@ -595,6 +598,7 @@ OpenRaveInterface::AttachObjectMessage::AttachObjectMessage() : Message("AttachO
   data      = (AttachObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "name", 30, data->name);
+  add_fieldinfo(IFT_STRING, "manip_name", 30, data->manip_name);
 }
 
 /** Destructor */
@@ -644,6 +648,36 @@ void
 OpenRaveInterface::AttachObjectMessage::set_name(const char * new_name)
 {
   strncpy(data->name, new_name, sizeof(data->name));
+}
+
+/** Get manip_name value.
+ * Name of manipulator
+ * @return manip_name value
+ */
+char *
+OpenRaveInterface::AttachObjectMessage::manip_name() const
+{
+  return data->manip_name;
+}
+
+/** Get maximum length of manip_name value.
+ * @return length of manip_name value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+OpenRaveInterface::AttachObjectMessage::maxlenof_manip_name() const
+{
+  return 30;
+}
+
+/** Set manip_name value.
+ * Name of manipulator
+ * @param new_manip_name new manip_name value
+ */
+void
+OpenRaveInterface::AttachObjectMessage::set_manip_name(const char * new_manip_name)
+{
+  strncpy(data->manip_name, new_manip_name, sizeof(data->manip_name));
 }
 
 /** Clone this message.

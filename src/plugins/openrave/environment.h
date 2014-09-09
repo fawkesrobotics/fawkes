@@ -54,7 +54,6 @@ class OpenRaveEnvironment
 
   virtual void create();
   virtual void destroy();
-  virtual void lock();
 
   virtual void enable_debug(OpenRAVE::DebugLevel level=OpenRAVE::Level_Debug);
   virtual void disable_debug();
