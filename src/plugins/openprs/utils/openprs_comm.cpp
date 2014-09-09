@@ -58,21 +58,31 @@ namespace fawkes {
  * @param hostname host where the message passer runs
  * @param port TCP port where the message passer listens
  * @param server_proxy server proxy to use to send commands to kernels
+ * @param logger logger for informational messages (optional)
  */
 OpenPRSComm::OpenPRSComm(const char *local_name,
-			 const char *hostname, unsigned short port, OpenPRSServerProxy *server_proxy)
-  : name_(local_name), server_proxy_(server_proxy)
+			 const char *hostname, unsigned short port, OpenPRSServerProxy *server_proxy,
+			 Logger *logger)
+  : name_(local_name), server_proxy_(server_proxy), logger_(logger),
+    io_service_work_(io_service_), sd_mp_socket_(io_service_)
+
 {
+  // Protocol MUST be STRINGS_PT or otherwise our message reception code will break
   mp_socket_ = external_register_to_the_mp_host_prot(local_name, hostname, port, STRINGS_PT);
   if (mp_socket_ == -1) {
     throw Exception("Failed to connect to OpenPRS as '%s'", local_name);
   }
+  io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
+  sd_mp_socket_.assign(dup(mp_socket_));
+  start_recv();
 }
 
 
 /** Destructor. */
 OpenPRSComm::~OpenPRSComm()
 {
+  io_service_.stop();
+  io_service_thread_.join();
   if (mp_socket_ >= 0) {
     ::close(mp_socket_);
   }
@@ -247,6 +257,58 @@ OpenPRSComm::transmit_command_f(const std::string &recipient, const char *format
   va_start(arg, format);
   server_proxy_->transmit_command_v(recipient, format, arg);
   va_end(arg);
+}
+
+
+void
+OpenPRSComm::start_recv()
+{
+  sd_mp_socket_.async_read_some(boost::asio::null_buffers(),
+				boost::bind(&OpenPRSComm::handle_recv, this,
+					    boost::asio::placeholders::error));
+}
+
+
+void
+OpenPRSComm::handle_recv(const boost::system::error_code &err)
+{
+  if (! err) {
+    try {
+      std::string sender  = read_string_from_socket(sd_mp_socket_);
+      std::string message = read_string_from_socket(sd_mp_socket_);
+
+      sig_rcvd_(sender, message);
+    } catch (Exception &e) {
+      if (logger_) {
+	logger_->log_warn(name_.c_str(), "Failed to receive message: %s", e.what_no_backtrace());
+      }
+    }
+  } else if (logger_) {
+    logger_->log_warn(name_.c_str(), "Failed to receive message: %s", err.message().c_str());
+  }
+  start_recv();
+}
+
+
+std::string
+OpenPRSComm::read_string_from_socket(boost::asio::posix::stream_descriptor &socket)
+{
+  uint32_t s_size = 0;
+  boost::system::error_code ec;
+  boost::asio::read(socket, boost::asio::buffer(&s_size, sizeof(s_size)), ec);
+  if (ec) {
+    throw Exception("Failed to read string size from socket: %s", ec.message().c_str());
+  }
+  s_size = ntohl(s_size);
+
+  char s[s_size + 1];
+  boost::asio::read(socket, boost::asio::buffer(s, s_size), ec);
+  if (ec) {
+    throw Exception("Failed to read string content from socket: %s", ec.message().c_str());
+  }
+  s[s_size] = 0;
+
+  return s;
 }
 
 
