@@ -36,25 +36,41 @@ pred_time_lt(TermList terms)
   t2_sec  = (Term *)get_list_pos(terms, 3);
   t2_usec = (Term *)get_list_pos(terms, 4);
 
-  if (t1_sec->type != LONG_LONG || t1_usec->type != LONG_LONG ||
-      t2_sec->type != LONG_LONG || t2_usec->type != LONG_LONG)
-  {
-    fprintf(stderr, "time-lt: time values not (all) of type integer (types %i %i %i %i)\n",
-    	    t1_sec->type, t1_usec->type, t2_sec->type, t2_usec->type);
-    return FALSE;
-  }
-
-  //printf("time-lt: %i %i < %i %i? %s\n", t1_sec->u.intval, t1_usec->u.intval, t2_sec->u.intval, t2_usec->u.intval,
-  //	 (t1_sec->u.intval < t2_sec->u.intval) || (t1_sec->u.intval == t2_sec->u.intval &&
-  //						   t1_usec->u.intval < t2_usec->u.intval) ? "YES" : "NO");
-
-  if ((t1_sec->u.intval < t2_sec->u.intval) ||
-      (t1_sec->u.intval == t2_sec->u.intval && t1_usec->u.intval < t2_usec->u.intval))
-  {
-    return TRUE;
+  long long int t1_sec_val, t1_usec_val, t2_sec_val, t2_usec_val;
+  if (t1_sec->type == LONG_LONG) {
+    t1_sec_val = t1_sec->u.llintval;
+  } else if (t1_sec->type == INTEGER) {
+    t1_sec_val = t1_sec->u.intval;
   } else {
-    return FALSE;
+    fprintf(stderr, "time-lt: t1_sec neither of type integer nor long long\n");
+    return false;
   }
+  if (t1_usec->type == LONG_LONG) {
+    t1_usec_val = t1_usec->u.llintval;
+  } else if (t1_usec->type == INTEGER) {
+    t1_usec_val = t1_usec->u.intval;
+  } else {
+    fprintf(stderr, "time-lt: t1_usec neither of type integer nor long long\n");
+    return false;
+  }
+  if (t2_sec->type == LONG_LONG) {
+    t2_sec_val = t2_sec->u.llintval;
+  } else if (t2_sec->type == INTEGER) {
+    t2_sec_val = t2_sec->u.intval;
+  } else {
+    fprintf(stderr, "time-lt: t2_sec neither of type integer nor long long\n");
+    return false;
+  }
+  if (t2_usec->type == LONG_LONG) {
+    t2_usec_val = t2_usec->u.llintval;
+  } else if (t2_usec->type == INTEGER) {
+    t2_usec_val = t2_usec->u.intval;
+  } else {
+    fprintf(stderr, "time-lt: t2_usec neither of type integer nor long long\n");
+    return false;
+  }
+
+  return ((t1_sec_val < t2_sec_val) || (t1_sec_val == t2_sec_val && t1_usec_val < t2_usec_val));
 }
 
 
