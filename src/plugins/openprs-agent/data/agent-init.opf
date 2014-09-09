@@ -1,0 +1,11 @@
+
+;---------------------------------------------------------------------------
+;  agent-init.opf - OpenPRS agent initialization file
+;
+;  Created: Mon Aug 25 13:20:02 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+(
+)

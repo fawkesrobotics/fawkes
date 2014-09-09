@@ -26,6 +26,7 @@
 #include <aspect/logging.h>
 #include <aspect/clock.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
 #include <plugins/openprs/aspect/openprs.h>
 
 #include <string>
@@ -34,6 +35,7 @@ class OpenPRSAgentThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ClockAspect,
+  public fawkes::ConfigurableAspect,
   public fawkes::BlockedTimingAspect,
   public fawkes::OpenPRSAspect
 {
@@ -49,9 +51,11 @@ class OpenPRSAgentThread
  protected: virtual void run() { Thread::run(); }
 
  private: // methods
+  void handle_message(std::string sender, std::string message);
 
  private: // members
-
+  std::string cfg_agent_;
+  bool        agent_alive_;
 };
 
 #endif

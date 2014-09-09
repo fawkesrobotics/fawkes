@@ -7,32 +7,24 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
-include "new-default.inc"
-
-; Settings for the various features
-declare predicate setting
-add (setting "idle-looptime-sec" 0)
-add (setting "idle-looptime-usec" 25000)
-add (setting "bb-auto-read" T)
-add (setting "bb-auto-cleanup" T)
-
 ; debug tracing configuration
 trace receive off
 trace intend off
-
+;trace intention failure on
+;trace suc_fail on
 
 ; Including feature files and load external modules
-include "meta-coalesce.inc"
+;include "meta-coalesce.inc"
+load external "mod_utils" "init"
 include "time.inc"
 include "blackboard.inc"
 include "protobuf.inc"
+include "navgraph.inc"
 
 load external "mod_skiller" "init"
 
 ; declare and load agent-specific elements
-declare op_predicate say
-declare predicate agent-init
+declare predicate  agent-init
 
-add (agent-init)
+load opf "agent-init.opf"
 
-load opf "agent.opf"

@@ -58,8 +58,13 @@ OpenPRSAgentThread::~OpenPRSAgentThread()
 void
 OpenPRSAgentThread::init()
 {
+  agent_alive_ = false;
+  cfg_agent_ = config->get_string("/openprs-agent/agent");
   openprs.lock();
-  openprs->transmit_command(openprs_kernel_name, "include \"agent-init.inc\"");
+  openprs->signal_msg_rcvd()
+      .connect(boost::bind(&OpenPRSAgentThread::handle_message, this, _1, _2));
+  openprs->transmit_command_f(openprs_kernel_name, "add (! (= @@AGENT_NAME \"%s\"))", cfg_agent_.c_str());
+  openprs->transmit_command(openprs_kernel_name, "include \"agent-settings.inc\"");
   openprs.unlock();
 }
 
@@ -72,11 +77,35 @@ OpenPRSAgentThread::finalize()
 void
 OpenPRSAgentThread::loop()
 {
-  openprs.lock();
-  fawkes::Time now, now_sys;
-  clock->get_time(now);
-  clock->get_systime(now_sys);
-  openprs->send_message_f(openprs_kernel_name, "(fawkes-time %lill %lill %lill %lill)",
-  			  now.get_sec(), now.get_usec(), now_sys.get_sec(), now_sys.get_usec());
-  openprs.unlock();
+  if (agent_alive_) {
+    openprs.lock();
+    fawkes::Time now, now_sys;
+    clock->get_time(now);
+    clock->get_systime(now_sys);
+    openprs->send_message_f(openprs_kernel_name, "(fawkes-time %lill %lill %lill %lill)",
+			    now.get_sec(), now.get_usec(), now_sys.get_sec(), now_sys.get_usec());
+    //openprs->transmit_command(openprs_kernel_name, "show intention");
+    openprs.unlock();
+  }
+}
+
+
+void
+OpenPRSAgentThread::handle_message(std::string sender, std::string message)
+{
+  // remove newlines and anything beyond
+  message.erase(std::remove(message.begin(), message.end(), '\n'), message.end());
+
+  logger->log_debug(name(), "Received message from %s: %s", sender.c_str(), message.c_str());
+  if (sender == openprs_kernel_name && message == "openprs-agent-init-done") {
+      openprs.lock();
+      openprs->transmit_command(openprs_kernel_name, "include \"agent-init.inc\"");
+      openprs->transmit_command_f(openprs_kernel_name, "include \"%s.inc\"", cfg_agent_.c_str());
+      openprs->transmit_command(openprs_kernel_name, "add (agent-init)");
+      openprs.unlock();
+      agent_alive_ = true;
+  } else if (sender == "mp-oprs" && message == ("(unknown " + openprs_kernel_name + ")")) {
+    logger->log_error(name(), "OpenPRS kernel has died, agent no longer alive");
+    agent_alive_ = false;
+  }
 }
