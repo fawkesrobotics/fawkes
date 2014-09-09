@@ -12,33 +12,48 @@
 
 (defop time-update
   :invocation (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)
-  :context ()
+  :context (time @sec @usec)
   :body (
-     (! (= @times (n-all (. $o_sec $o_usec $so_sec $so_usec .) (fawkes-time $o_sec $o_usec $so_sec $so_usec))))
-     ;(! (print "Start times"))
-     ;(! (print @times))
-     (! (= @latest (. $t_sec $t_usec .)))
-
-     (while (? (~ (null @times)))
-       (! (= @t (car @times)))
-       (if (? (time-lt (car @latest) (cadr @latest) (car @t) (cadr @t)))
-         (! (= @latest @t))
-       )
-       (~> (fawkes-time (car @t) (cadr @t) (caddr @t) (last @t)))
-       (! (= @times (cdr @times)))
+     (! (start-critical-section))
+     (if (? (time-lt @sec @usec $t_sec $t_usec))
+       (! (= @sec  $t_sec))
+       (! (= @usec $t_usec))
      )
-     ;(! (printf (format "*** Final latest (%d %d)\n" (car @latest) (cadr @latest))))
-     
+     (! (end-critical-section))
   )
-  :properties ((COALESCE T))
-  :effects ((=> (time (first @latest) (second @latest))))
-  :documentation "OP to update the (time) fact from incoming fawkes-time messages.
-    This OP is triggered by a fawkes-time message. It requires to be coalesced to
-    guarantee that the latest time is posted to the database, otherwise parallel
-    OP execution would lead to unpredictable results.
-    The OP iterates through all received time messages and sets the time to the
-    latest such message that has been received."
+  :effects ((=> (time @sec @usec)))
+  :documentation "OP to update the (time) fact from incoming fawkes-time messages."
 )
+
+;(defop time-update
+;  :invocation (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)
+;  :context ()
+;  :body (
+;     (! (= @times (n-all (. $o_sec $o_usec $so_sec $so_usec .) (fawkes-time $o_sec $o_usec $so_sec $so_usec))))
+;     ;(! (print "Start times"))
+;     ;(! (print @times))
+;     (! (= @latest (. $t_sec $t_usec .)))
+;
+;     (while (? (~ (null @times)))
+;       (! (= @t (car @times)))
+;       (if (? (time-lt (car @latest) (cadr @latest) (car @t) (cadr @t)))
+;         (! (= @latest @t))
+;       )
+;       (~> (fawkes-time (car @t) (cadr @t) (caddr @t) (last @t)))
+;       (! (= @times (cdr @times)))
+;     )
+;     ;(! (printf (format "*** Final latest (%d %d)\n" (car @latest) (cadr @latest))))
+;     
+;  )
+;  :properties ((COALESCE T))
+;  :effects ((=> (time (first @latest) (second @latest))))
+;  :documentation "OP to update the (time) fact from incoming fawkes-time messages.
+;    This OP is triggered by a fawkes-time message. It requires to be coalesced to
+;    guarantee that the latest time is posted to the database, otherwise parallel
+;    OP execution would lead to unpredictable results.
+;    The OP iterates through all received time messages and sets the time to the
+;    latest such message that has been received."
+;)
 
 (defop time-set-idle-looptime
   :invocation (! (time-set-idle-looptime $sec $usec))
@@ -52,7 +67,6 @@
 
 (defop time-print
   :invocation (time $t_sec $t_usec)
-  :context ()
   :setting (setting "print-time" T)
   :body ((! (printf (format "=== Time %d %d\n" $t_sec $t_usec))))
   :effects ()

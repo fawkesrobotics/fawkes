@@ -12,8 +12,8 @@ load external "mod_time" "init"
 
 declare ff time 0
 declare predicate time-update
-declare predicate fawkes-time
-declare predicate timer
-load opf "time.opf"
+declare be fawkes-time
+declare ff timer 1
 
 add (time 0 0)
+load opf "time.opf"
