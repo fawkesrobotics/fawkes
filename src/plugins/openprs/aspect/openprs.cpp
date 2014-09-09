@@ -71,6 +71,9 @@ OpenPRSAspect::OpenPRSAspect(const char *kernel_name, OpenPRSAspect::Mode mode, 
     openprs_gdb_delay_(false)
 {
   add_aspect("OpenPRSAspect");
+  if (openprs_local_name.find_first_of(" \t\n") != std::string::npos) {
+    throw Exception("Local name may not contains spaces");
+  }
 }
 
 
