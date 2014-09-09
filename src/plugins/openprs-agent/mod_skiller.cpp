@@ -89,6 +89,29 @@ gen_skill_string(TermList terms)
 }
 
 
+bool
+assert_exclusive_controller(unsigned int num_tries, unsigned int delay_msec)
+{
+  skiller_if->read();
+  if (skiller_if->exclusive_controller() == skiller_if->serial())  return true;
+
+  for (unsigned int i = 0; i < num_tries; ++i) {
+    if (!skiller_if->has_writer())  return false;
+
+    skiller_if->read();
+    if (skiller_if->exclusive_controller() != skiller_if->serial()) {
+      SkillerInterface::AcquireControlMessage *msg =
+	new SkillerInterface::AcquireControlMessage(/* steal control */ false);
+      skiller_if->msgq_enqueue(msg);
+      usleep(delay_msec * 1000);
+    } else {
+      break;
+    }
+  }
+  skiller_if->read();
+  return (skiller_if->exclusive_controller() == skiller_if->serial());
+}
+
 extern "C"
 Term *
 action_skill_call(TermList terms)
@@ -113,12 +136,12 @@ action_skill_call(TermList terms)
   usleep(500);
   if (action_first_call()) {
     skiller_if->read();
-    if (skiller_if->exclusive_controller() != skiller_if->serial()) {
-      fprintf(stderr, "Cannot send skill, not exclusive controller\n");
-      ACTION_FAIL();
-    }
     if (!skiller_if->has_writer()) {
       fprintf(stderr, "Cannot send skill, interface has no writer\n");
+      ACTION_FAIL();
+    }
+    if (! assert_exclusive_controller(20, 100)) {
+      fprintf(stderr, "Cannot send skill, not exclusive controller\n");
       ACTION_FAIL();
     }
 
@@ -195,12 +218,6 @@ void init()
   SkillerInterface::AcquireControlMessage *msg =
     new SkillerInterface::AcquireControlMessage(/* steal control */ true);
   skiller_if->msgq_enqueue(msg);
-  usleep(500000);
-  skiller_if->read();
-  if (skiller_if->exclusive_controller() != skiller_if->serial()) {
-    fprintf(stderr, "Failed to acquire exclusive control\n");
-  }
-  
 
   declare_atom("true");
   declare_atom("false");
