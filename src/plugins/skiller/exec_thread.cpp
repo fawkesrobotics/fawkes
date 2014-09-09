@@ -565,7 +565,6 @@ SkillerExecutionThread::loop()
 	  __continuous_run = false;
 	  __continuous_reset = true;
 	  curss = "";
-	  cur_msgid = 0;
 	}
       } else {
 	logger->log_debug("SkillerExecutionThread", "%s tries to stop exec while not controller",
@@ -602,7 +601,6 @@ SkillerExecutionThread::loop()
 
     __skiller_if->set_status(SkillerInterface::S_INACTIVE);
     __skiller_if->set_skill_string("");
-    __skiller_if->set_msgid(0);
 
     //We're not resetting, because this is information someone might need...
     //__skiller_if->set_error("");
