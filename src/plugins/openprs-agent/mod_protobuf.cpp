@@ -150,14 +150,14 @@ action_pb_client_connect(TermList terms)
   Term *host, *port;
   ACTION_ASSERT_ARG_LENGTH("pb-client-connect", terms, 2);
   ACTION_SET_AND_ASSERT_ARG_TYPE("pb-client-connect", host, terms, 1, STRING);
-  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-client-connect", port, terms, 2, INTEGER);
+  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-client-connect", port, terms, 2, LONG_LONG);
 
-  if (port->u.intval < 0 || port->u.intval > 65535) {
-    fprintf(stderr, "Error[pb-client-connect]: invalid port %i\n", port->u.intval);
+  if (port->u.llintval < 0 || port->u.llintval > 65535) {
+    fprintf(stderr, "Error[pb-client-connect]: invalid port %lli\n", port->u.llintval);
     ACTION_FAIL();
   }
 
-  return g_oprs_pb->oprs_pb_client_connect(host->u.string, port->u.intval);
+  return g_oprs_pb->oprs_pb_client_connect(host->u.string, port->u.llintval);
 }
 
 
@@ -169,15 +169,15 @@ action_pb_enable_server(TermList terms)
 
   Term *port;
   ACTION_ASSERT_ARG_LENGTH("pb-enable-server", terms, 1);
-  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-enable-server", port, terms, 1, INTEGER);
+  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-enable-server", port, terms, 1, LONG_LONG);
 
-  if (port->u.intval < 0 || port->u.intval > 65535) {
-    fprintf(stderr, "Error[pb-enable-server]: invalid port %i\n", port->u.intval);
+  if (port->u.llintval < 0 || port->u.llintval > 65535) {
+    fprintf(stderr, "Error[pb-enable-server]: invalid port %lli\n", port->u.llintval);
     ACTION_FAIL();
   }
 
   try {
-    g_oprs_pb->oprs_pb_enable_server(port->u.intval);
+    g_oprs_pb->oprs_pb_enable_server(port->u.llintval);
     ACTION_FINAL();
   } catch (fawkes::Exception &e) {
     fprintf(stderr, "Error[pb-enable-server]: %s\n", e.what_no_backtrace());
@@ -213,14 +213,14 @@ action_pb_peer_create(TermList terms)
   Term *host, *port;
   ACTION_ASSERT_ARG_LENGTH("pb-peer-create", terms, 2);
   ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create", host, terms, 1, STRING);
-  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create", port, terms, 2, INTEGER);
+  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create", port, terms, 2, LONG_LONG);
 
-  if (port->u.intval < 0 || port->u.intval > 65535) {
-    fprintf(stderr, "Error[pb-peer-create]: invalid port %i\n", port->u.intval);
+  if (port->u.llintval < 0 || port->u.llintval > 65535) {
+    fprintf(stderr, "Error[pb-peer-create]: invalid port %lli\n", port->u.llintval);
     ACTION_FAIL();
   }
 
-  return g_oprs_pb->oprs_pb_peer_create(host->u.string, port->u.intval);
+  return g_oprs_pb->oprs_pb_peer_create(host->u.string, port->u.llintval);
 }
 
 
@@ -233,20 +233,20 @@ action_pb_peer_create_local(TermList terms)
   Term *host, *send_port, *recv_port;
   ACTION_ASSERT_ARG_LENGTH("pb-peer-create-local", terms, 3);
   ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local", host, terms, 1, STRING);
-  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local", send_port, terms, 2, INTEGER);
-  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local", recv_port, terms, 3, INTEGER);
+  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local", send_port, terms, 2, LONG_LONG);
+  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local", recv_port, terms, 3, LONG_LONG);
 
-  if (send_port->u.intval < 0 || send_port->u.intval > 65535) {
-    fprintf(stderr, "Error[pb-peer-create-local]: invalid send port %i\n", send_port->u.intval);
+  if (send_port->u.llintval < 0 || send_port->u.llintval > 65535) {
+    fprintf(stderr, "Error[pb-peer-create-local]: invalid send port %lli\n", send_port->u.llintval);
     ACTION_FAIL();
   }
-  if (recv_port->u.intval < 0 || recv_port->u.intval > 65535) {
-    fprintf(stderr, "Error[pb-peer-create-local]: invalid recv port %i\n", recv_port->u.intval);
+  if (recv_port->u.llintval < 0 || recv_port->u.llintval > 65535) {
+    fprintf(stderr, "Error[pb-peer-create-local]: invalid recv port %lli\n", recv_port->u.llintval);
     ACTION_FAIL();
   }
 
   return g_oprs_pb->oprs_pb_peer_create_local(host->u.string,
-					      send_port->u.intval, recv_port->u.intval);
+					      send_port->u.llintval, recv_port->u.llintval);
 }
 
 
@@ -259,16 +259,16 @@ action_pb_peer_create_crypto(TermList terms)
   Term *host, *port, *crypto_key, *cipher;
   ACTION_ASSERT_ARG_LENGTH("pb-peer-create-local", terms, 4);
   ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-crypto", host, terms, 1, STRING);
-  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-crypto", port, terms, 2, INTEGER);
+  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-crypto", port, terms, 2, LONG_LONG);
   ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-crypto", crypto_key, terms, 3, STRING);
   ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-crypto", cipher, terms, 4, STRING);
 
-  if (port->u.intval < 0 || port->u.intval > 65535) {
-    fprintf(stderr, "Error[pb-peer-create-local]: invalid port %i\n", port->u.intval);
+  if (port->u.llintval < 0 || port->u.llintval > 65535) {
+    fprintf(stderr, "Error[pb-peer-create-local]: invalid port %lli\n", port->u.llintval);
     ACTION_FAIL();
   }
 
-  return g_oprs_pb->oprs_pb_peer_create_crypto(host->u.string, port->u.intval,
+  return g_oprs_pb->oprs_pb_peer_create_crypto(host->u.string, port->u.llintval,
 					       crypto_key->u.string, cipher->u.string);
 }
 
@@ -282,24 +282,24 @@ action_pb_peer_create_local_crypto(TermList terms)
   Term *host, *send_port, *recv_port, *crypto_key, *cipher;
   ACTION_ASSERT_ARG_LENGTH("pb-peer-create-local-crypto", terms, 5);
   ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local-crypto", host, terms, 1, STRING);
-  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local-crypto", send_port, terms, 2, INTEGER);
-  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local-crypto", recv_port, terms, 3, INTEGER);
+  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local-crypto", send_port, terms, 2, LONG_LONG);
+  ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local-crypto", recv_port, terms, 3, LONG_LONG);
   ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local-crypto", crypto_key, terms, 4, STRING);
   ACTION_SET_AND_ASSERT_ARG_TYPE("pb-peer-create-local-crypto", cipher, terms, 5, STRING);
 
-  if (send_port->u.intval < 0 || send_port->u.intval > 65535) {
-    fprintf(stderr, "Error[pb-peer-create-local]: invalid send port %i\n", send_port->u.intval);
+  if (send_port->u.llintval < 0 || send_port->u.llintval > 65535) {
+    fprintf(stderr, "Error[pb-peer-create-local]: invalid send port %lli\n", send_port->u.llintval);
     ACTION_FAIL();
   }
-  if (recv_port->u.intval < 0 || recv_port->u.intval > 65535) {
-    fprintf(stderr, "Error[pb-peer-create-local]: invalid recv port %i\n", recv_port->u.intval);
+  if (recv_port->u.llintval < 0 || recv_port->u.llintval > 65535) {
+    fprintf(stderr, "Error[pb-peer-create-local]: invalid recv port %lli\n", recv_port->u.llintval);
     ACTION_FAIL();
   }
 
-  printf("Creating local peer. %s:%i %i %s %s\n",
-	 host->u.string, send_port->u.intval, recv_port->u.intval, crypto_key->u.string, cipher->u.string);
-  return g_oprs_pb->oprs_pb_peer_create_local_crypto(host->u.string, send_port->u.intval,
-						     recv_port->u.intval,
+  printf("Creating local peer. %s:%lli %lli %s %s\n",
+	 host->u.string, send_port->u.llintval, recv_port->u.llintval, crypto_key->u.string, cipher->u.string);
+  return g_oprs_pb->oprs_pb_peer_create_local_crypto(host->u.string, send_port->u.llintval,
+						     recv_port->u.llintval,
 						     crypto_key->u.string, cipher->u.string);
 }
 
@@ -327,13 +327,13 @@ action_pb_peer_setup_crypto(TermList terms)
 }
 
 
-extern "C"								\
-PBoolean								\
-pred_pb_events_pending(TermList terms)					\
-{									\
-  ASSERT_B_PB;								\
-									\
-  return g_oprs_pb->oprs_pb_events_pending();				\
+extern "C"
+PBoolean
+pred_pb_events_pending(TermList terms)
+{
+  ASSERT_B_PB;
+
+  return g_oprs_pb->oprs_pb_events_pending();
 }
 
 
