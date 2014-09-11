@@ -100,13 +100,13 @@ RobotinoJoystickThread::loop()
 {
   joystick_if_->read();
 
-  if (joystick_if_->changed()) {
-    if (joystick_if_->num_axes() == 0) {
-      logger->log_debug(name(), "Joystick disconnected, stopping");
-      stop();
-    } else if (fabsf(joystick_if_->axis(cfg_axis_forward_)) < 0.2 &&
-               fabsf(joystick_if_->axis(cfg_axis_sideward_)) < 0.2 &&
-               fabsf(joystick_if_->axis(cfg_axis_rotation_)) < 0.2) {
+  if (joystick_if_->num_axes() == 0) {
+    logger->log_debug(name(), "Joystick disconnected, stopping");
+    stop();
+  } else if (joystick_if_->pressed_buttons() != 0 || joystick_if_->axis(5) < 0.) {
+    if (fabsf(joystick_if_->axis(cfg_axis_forward_)) < 0.2 &&
+	fabsf(joystick_if_->axis(cfg_axis_sideward_)) < 0.2 &&
+	fabsf(joystick_if_->axis(cfg_axis_rotation_)) < 0.2) {
       stop();
     } else {
       float vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_max_vx_;
@@ -115,5 +115,7 @@ RobotinoJoystickThread::loop()
 
       send_transrot(vx, vy, omega);
     }
+  } else {
+    stop();
   }
 }
