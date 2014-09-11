@@ -36,6 +36,7 @@
 
 #include <string>
 
+#ifdef HAVE_OPENROBOTINO_API_1
 namespace rec {
   namespace robotino {
     namespace com {
@@ -52,6 +53,15 @@ namespace rec {
     }
   }
 }
+#else
+namespace rec {
+  namespace robotino {
+    namespace api2 {
+      class OmniDriveModel;
+    }
+  }
+}
+#endif
 
 namespace fawkes {
   class MotorInterface;
@@ -59,8 +69,7 @@ namespace fawkes {
   class IMUInterface;
 }
 
-class RobotinoSensorComHandler;
-class RobotinoSensorThread;
+class RobotinoComThread;
 
 class RobotinoActThread
 : public fawkes::Thread,
@@ -74,7 +83,7 @@ class RobotinoActThread
   public fawkes::BlackBoardAspect
 {
  public:
-  RobotinoActThread(RobotinoSensorThread *sensor_thread);
+  RobotinoActThread(RobotinoComThread *com_thread);
 
   virtual void init();
   virtual void loop();
@@ -89,12 +98,19 @@ class RobotinoActThread
     ODOM_CALC
   } OdometryMode;
 
+  void publish_odometry();
+  void publish_gripper();
+
  private:
-  RobotinoSensorThread           *sensor_thread_;
-  RobotinoSensorComHandler       *com_;
+  RobotinoComThread              *com_;
+
+#ifdef HAVE_OPENROBOTINO_API_1
   rec::robotino::com::OmniDrive  *omni_drive_;
   rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State> *statemem_;
   rec::iocontrol::robotstate::State *state_;
+#else
+  rec::robotino::api2::OmniDriveModel *omni_drive_;
+#endif
 
   unsigned int                    last_seqnum_;
   fawkes::MotorInterface         *motor_if_;

@@ -22,6 +22,7 @@
 
 #include <core/plugin.h>
 
+#include "com_thread.h"
 #include "sensor_thread.h"
 #include "act_thread.h"
 
@@ -39,9 +40,10 @@ class RobotinoPlugin : public fawkes::Plugin
   RobotinoPlugin(Configuration *config)
     : Plugin(config)
   {
-    RobotinoSensorThread *sensor_thread = new RobotinoSensorThread();
-    thread_list.push_back(sensor_thread);
-    thread_list.push_back(new RobotinoActThread(sensor_thread));
+    RobotinoComThread *com_thread = new RobotinoComThread();
+    thread_list.push_back(com_thread);
+    thread_list.push_back(new RobotinoSensorThread(com_thread));
+    thread_list.push_back(new RobotinoActThread(com_thread));
   }
 };
 
