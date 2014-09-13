@@ -359,10 +359,14 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
   {
     EnvironmentMutex::scoped_lock view_lock(__viewer_env.env->get_env_ptr()->GetMutex());
     EnvironmentMutex::scoped_lock plan_lock(__planner_env.env->get_env_ptr()->GetMutex());
+    __planner_env.robot->get_robot_ptr()->ReleaseAllGrabbed();
+    __planner_env.env->delete_all_objects();
+
     RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
-                                     0xffffffff&~KinBody::Save_GrabbedBodies);
+                                     0xffffffff&~KinBody::Save_GrabbedBodies&~KinBody::Save_ActiveManipulator&~KinBody::Save_ActiveDOF);
     saver.Restore( __planner_env.robot->get_robot_ptr() );
   }
+
   // then clone all objects
   __planner_env.env->clone_objects( __viewer_env.env );
 
@@ -374,7 +378,7 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
     {
       EnvironmentMutex::scoped_lock view_lock(__viewer_env.env->get_env_ptr()->GetMutex());
       RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
-                                       KinBody::Save_GrabbedBodies);
+                                       KinBody::Save_LinkTransformation|KinBody::Save_LinkEnable|KinBody::Save_GrabbedBodies);
       saver.Restore( __planner_env.robot->get_robot_ptr() );
     }
 
