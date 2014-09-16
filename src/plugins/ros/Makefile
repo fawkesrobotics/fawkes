@@ -74,7 +74,8 @@ OBJS_ros_move_base = move_base_plugin.o move_base_thread.o
 
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
-	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) $(OBJS_ros_robot_description)
+	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) \
+	   $(OBJS_ros_robot_description) $(OBJS_ros_move_base)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
