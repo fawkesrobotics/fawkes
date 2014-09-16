@@ -270,6 +270,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
   bool success;
   EnvironmentMutex::scoped_lock lock(__env->GetMutex()); // lock environment
 
+  /*
   // init planner. This is automatically done by BaseManipulation, but putting it here
   // helps to identify problem source if any occurs.
   success = __planner->InitPlan(robot->get_robot_ptr(),robot->get_planner_params());
@@ -277,7 +278,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
     {throw fawkes::Exception("OpenRAVE Environment: Planner: init failed");}
   else if(__logger)
     {__logger->log_debug("OpenRAVE Environment", "Planner: initialized");}
-
+  //*/
   // plan path with basemanipulator
   ModuleBasePtr basemanip = robot->get_basemanip();
   target_t target = robot->get_target();
