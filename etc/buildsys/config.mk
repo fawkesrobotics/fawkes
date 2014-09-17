@@ -141,6 +141,11 @@ else
     $(error Only bash is supported as shell, but it cannot be found.)
   endif
 endif
+# On FreeBSD, use clang by default
+ifeq ($(OS),FreeBSD)
+  CC = clang
+  LD = clang
+endif
 
 FAWKES_VERSION_MAJOR = $(lastword $(shell grep "\#define FAWKES_VERSION_MAJOR" $(LIBSRCDIR)/core/version.h))
 FAWKES_VERSION_MINOR = $(lastword $(shell grep "\#define FAWKES_VERSION_MINOR" $(LIBSRCDIR)/core/version.h))
