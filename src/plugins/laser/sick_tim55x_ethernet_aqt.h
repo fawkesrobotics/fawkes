@@ -60,7 +60,6 @@ class SickTiM55xEthernetAcquisitionThread : public SickTiM55xCommonAcquisitionTh
  private:
   std::string  cfg_host_;
   std::string  cfg_port_;
-  float        cfg_time_offset_;
 
   fawkes::Mutex  *socket_mutex_;
 

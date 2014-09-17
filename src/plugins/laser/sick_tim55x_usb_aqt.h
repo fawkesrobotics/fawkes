@@ -49,7 +49,6 @@ class SickTiM55xUSBAcquisitionThread : public SickTiM55xCommonAcquisitionThread
 
  private:
   std::string  cfg_serial_;
-  float        cfg_time_offset_;
 
   libusb_context *usb_ctx_;
   libusb_device_handle  *usb_device_handle_;
