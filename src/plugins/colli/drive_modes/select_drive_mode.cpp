@@ -86,64 +86,64 @@ CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
 
   // MISC MODES
   // stop drive mode
-  m_vDriveModeList.push_back( (CAbstractDriveMode *)new CStopDriveModule(logger, config) );
+  m_vDriveModeList.push_back( (CAbstractDriveMode *)new CStopDriveModule(logger_, config_) );
 
   // and here an example of using extra data, e.g. the laser for escape...
   // escape drive mode
   if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldDriveModule( logger, config) );
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldDriveModule( logger_, config_) );
   } else if (cfg_escape_mode == fawkes::colli_escape_mode_t::basic) {
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger, config) );
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );
   } else {
     logger_->log_error("CSelectDriveMode", "Unknown escape drive mode. Using basic as default");
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger, config) );
+    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );
   }
 
 
   // SLOW MODES
   // slow forward drive mode (have to remember for biward driving!
-  CSlowForwardDriveModule* slow_forward = new CSlowForwardDriveModule(logger, config);
+  CSlowForwardDriveModule* slow_forward = new CSlowForwardDriveModule(logger_, config_);
   m_vDriveModeList.push_back( (CAbstractDriveMode *) slow_forward );
 
   // slow backward drive mode (have to remember for biward driving!
-  CSlowBackwardDriveModule* slow_backward = new CSlowBackwardDriveModule(logger, config);
+  CSlowBackwardDriveModule* slow_backward = new CSlowBackwardDriveModule(logger_, config_);
   m_vDriveModeList.push_back( (CAbstractDriveMode *) slow_backward );
 
   // slow biward drive mode (takes both forward and backward drive modes as argument!
   m_vDriveModeList.push_back( (CAbstractDriveMode *) new CSlowBiwardDriveModule(slow_forward,
                                                                                 slow_backward,
-                                                                                logger,
-                                                                                config) );
+                                                                                logger_,
+                                                                                config_) );
 
   // MEDIUM MODES
   // medium forward drive mode (have to remember for biward driving!
-  CMediumForwardDriveModule* medium_forward = new CMediumForwardDriveModule(logger, config);
+  CMediumForwardDriveModule* medium_forward = new CMediumForwardDriveModule(logger_, config_);
   m_vDriveModeList.push_back( (CAbstractDriveMode *) medium_forward );
 
   // medium backward drive mode (have to remember for biward driving!
-  CMediumBackwardDriveModule* medium_backward = new CMediumBackwardDriveModule(logger, config);
+  CMediumBackwardDriveModule* medium_backward = new CMediumBackwardDriveModule(logger_, config_);
   m_vDriveModeList.push_back( (CAbstractDriveMode *) medium_backward );
 
   // medium biward drive mode (takes both forward and backward drive modes as argument!
   m_vDriveModeList.push_back( (CAbstractDriveMode *) new CMediumBiwardDriveModule(medium_forward,
                                                                                   medium_backward,
-                                                                                  logger,
-                                                                                  config) );
+                                                                                  logger_,
+                                                                                  config_) );
 
   // FAST MODES
   // fast forward drive mode (have to remember for biward driving!
-  CFastForwardDriveModule* fast_forward = new CFastForwardDriveModule(logger, config);
+  CFastForwardDriveModule* fast_forward = new CFastForwardDriveModule(logger_, config_);
   m_vDriveModeList.push_back( (CAbstractDriveMode *) fast_forward );
 
   // fast backward drive mode (have to remember for biward driving!
-  CFastBackwardDriveModule* fast_backward = new CFastBackwardDriveModule(logger, config);
+  CFastBackwardDriveModule* fast_backward = new CFastBackwardDriveModule(logger_, config_);
   m_vDriveModeList.push_back( (CAbstractDriveMode *) fast_backward );
 
   // fast biward drive mode (takes both forward and backward drive modes as argument!
   m_vDriveModeList.push_back( (CAbstractDriveMode *) new CFastBiwardDriveModule(fast_forward,
                                                                                 fast_backward,
-                                                                                logger,
-                                                                                config) );
+                                                                                logger_,
+                                                                                config_) );
 
   // YOUR CHANGES SHOULD END HERE!
   // =============================
