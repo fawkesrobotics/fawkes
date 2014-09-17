@@ -44,6 +44,8 @@ ifeq ($(call gcc_atleast_version,4,3),1)
   endif
 endif
 
+CFLAGS_MTUNE_NATIVE=-march=native -mtune=native
+
 OPENMP_LIBRARY = gomp
 CFLAGS_OPENMP  = -fopenmp
 LDFLAGS_OPENMP = -l$(OPENMP_LIBRARY)

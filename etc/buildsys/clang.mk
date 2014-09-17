@@ -33,6 +33,14 @@ clang_atleast_version = $(strip $(if $(call gt,$(CLANG_VERSION_MAJOR),$1),1,	\
 HAVE_CPP11=1
 CFLAGS_CPP11=-std=c++11
 
+CFLAGS_MTUNE_NATIVE=-march=native -mtune=native
+ifeq ($(OS),FreeBSD)
+  ifneq ($(findstring QEMU,$(shell sysctl hw.model)),)
+    # When virtualized, clang picks the wrong architecture with march=native
+    CFLAGS_MTUNE_NATIVE=-mtune=native
+  endif
+endif
+
 ifeq ($(USE_OPENMP),1)
   $(warning clang has no support for OpenMP at this time)
   CFLAGS_OPENMP  =
