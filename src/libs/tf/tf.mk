@@ -32,7 +32,7 @@ else
   ifneq ($(PKGCONFIG),)
     HAVE_BULLET = $(if $(shell $(PKGCONFIG) --exists 'bullet'; echo $${?/1/}),1,0)
     ifeq ($(HAVE_BULLET),1)
-      CFLAGS_BULLET  = $(shell $(PKGCONFIG) --cflags 'bullet')
+      CFLAGS_BULLET  = $(shell $(PKGCONFIG) --cflags 'bullet') -DBT_INFINITY
       # we're only interested in the math part
       LDFLAGS_BULLET = -lLinearMath
     endif
