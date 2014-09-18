@@ -98,7 +98,14 @@ ifeq ($(HAVE_LUA),1)
   ifneq ($(wildcard $(SYSROOT)/usr/local/include/lua$(subst .,,$(LUA_VERSION))/tolua++.h),)
     # FreeBSD
     HAVE_TOLUA = 1
-    TOLUAPP=/usr/local/bin/lua$(subst .,,$(LUA_VERSION))/tolua++
+    ifneq ($(wildcard $(SYSROOT)/usr/local/bin/lua$(subst .,,$(LUA_VERSION))/tolua++),)
+      _HAVE_TOLUA_BIN=1
+      TOLUAPP=/usr/local/bin/lua$(subst .,,$(LUA_VERSION))/tolua++
+    endif
+    ifneq ($(wildcard $(SYSROOT)/usr/local/bin/tolua++),)
+      _HAVE_TOLUA_BIN=1
+      TOLUAPP=/usr/local/bin/tolua++
+    endif
     TOLUA_LIBS=tolua++ stdc++
   endif
   CLEAN_FILES=*_tolua.{pkg,cpp}
