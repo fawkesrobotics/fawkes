@@ -184,6 +184,8 @@ namespace fawkes {
 #define SQL_SELECT_MODIFIED_ALL						\
   "SELECT * FROM modified.config"
 
+#define MEMORY_DUMP_DB_NAME "file:tmp_dump_db?mode=memory&cache=shared"
+
 /** @class SQLiteConfiguration <config/sqlite.h>
  * Configuration storage using SQLite.
  * This implementation of the Configuration interface uses SQLite to store the
@@ -446,15 +448,9 @@ SQLiteConfiguration::import(::sqlite3 *tdb, const char *dumpfile)
 void
 SQLiteConfiguration::import_default(const char *default_sql)
 {
-  char *tmpfile = strdup(TMPDIR"/tmp_default_XXXXXX");
-  tmpfile = mktemp(tmpfile);
-  if ( tmpfile[0] == 0 ) {
-    throw CouldNotOpenConfigException("Failed to create temp file for default DB import");
-  }
-
   // Import .sql file into dump database (temporary file)
   sqlite3 *dump_db;
-  if ( sqlite3_open(tmpfile, &dump_db) == SQLITE_OK ) {
+  if ( sqlite3_open(MEMORY_DUMP_DB_NAME, &dump_db) == SQLITE_OK ) {
     import(dump_db, default_sql);
     sqlite3_close(dump_db);
   } else {
@@ -464,7 +460,7 @@ SQLiteConfiguration::import_default(const char *default_sql)
   // Attach dump database as "dumped"
   char *attach_sql;
   char *errmsg;
-  if ( asprintf(&attach_sql, SQL_ATTACH_DUMPED, tmpfile) == -1 ) {
+  if ( asprintf(&attach_sql, SQL_ATTACH_DUMPED, MEMORY_DUMP_DB_NAME) == -1 ) {
     throw CouldNotOpenConfigException("Could not create attachment SQL in merge");
   }
   if ( sqlite3_exec(db, attach_sql, NULL, NULL, &errmsg) != SQLITE_OK ) {
@@ -505,9 +501,6 @@ SQLiteConfiguration::import_default(const char *default_sql)
     sqlite3_free(errmsg);
     throw e;
   }
-
-  unlink(tmpfile);
-  free(tmpfile);
 }
 
 
