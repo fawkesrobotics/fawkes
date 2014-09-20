@@ -251,10 +251,18 @@ JacoGotoThread::check_final()
       //logger->log_debug(name(), "check final for TARGET ANGULAR");
       //final = __arm->arm->final();
       for( unsigned int i=0; i<6; ++i ) {
-        final &= (std::abs(normalize_mirror_rad(deg2rad(__target->pos.at(i) - __arm->iface->joints(i)))) < 0.01);
+        final &= std::abs( angle_distance(deg2rad(__target->pos.at(i)), deg2rad(__arm->iface->joints(i))) ) < 0.05;
       }
       __final_mutex->lock();
       __final = final;
+      __final_mutex->unlock();
+      check_fingers = true;
+      break;
+
+    case TARGET_GRIPPER:
+      //logger->log_debug(name(), "check final for TARGET GRIPPER");
+      __final_mutex->lock();
+      __final = __arm->arm->final();
       __final_mutex->unlock();
       check_fingers = true;
       break;
@@ -395,7 +403,9 @@ JacoGotoThread::_goto_target()
   __finger_last[2] = __arm->iface->finger3();
   __finger_last[3] = 0; // counter
 
+  __final_mutex->lock();
   __final = false;
+  __final_mutex->unlock();
 
   // process new target
   try {
@@ -461,6 +471,10 @@ JacoGotoThread::_goto_target()
 void
 JacoGotoThread::_exec_trajec(jaco_trajec_t* trajec)
 {
+  __final_mutex->lock();
+  __final = false;
+  __final_mutex->unlock();
+
   if( __target->fingers.empty() ) {
     // have no finger values. use current ones
     __target->fingers.push_back(__arm->iface->finger1());
