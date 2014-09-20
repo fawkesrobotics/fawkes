@@ -95,6 +95,7 @@ class JacoOpenraveBaseThread
   bool          __cfg_OR_use_viewer;
   std::string   __cfg_OR_robot_file;
   bool          __cfg_OR_auto_load_ik;
+  float         __cfg_OR_sampling;
 #endif
 };
 

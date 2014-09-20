@@ -76,6 +76,7 @@ JacoOpenraveBaseThread::init()
 #ifdef HAVE_OPENRAVE
   __cfg_OR_use_viewer    = config->get_bool("/hardware/jaco/openrave/use_viewer");
   __cfg_OR_auto_load_ik  = config->get_bool("/hardware/jaco/openrave/auto_load_ik");
+  __cfg_OR_sampling      = config->get_float("/hardware/jaco/openrave/sampling");
 
   // perform other initialization stuff (for child classes, that do not want to overload "init()")
   _init();

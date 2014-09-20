@@ -405,9 +405,8 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
   __planner_env.robot->set_target_plannerparams("");
 
   // Run planner
-  float sampling = 0.01f; //maybe catch from config? or "learning" depending on performance?
   try {
-    __planner_env.env->run_planner(__planner_env.robot, sampling);
+    __planner_env.env->run_planner(__planner_env.robot, __cfg_OR_sampling);
   } catch (fawkes::Exception &e) {
     logger->log_warn(name(), "Planning failed: %s", e.what_no_backtrace());
     // TODO: better handling!

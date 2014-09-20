@@ -50,6 +50,9 @@ hardware/jaco:
     # Automatically generate IK database for OpenRAVE robot model?
     auto_load_ik: true
 
+    # Trajectory sampling distance (in seconds)
+    sampling: 0.04
+
     # robot/xml file to be loaded into OpenRAVE
     robot_file: ../res/openrave/jaco.robot.xml
 
