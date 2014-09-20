@@ -56,6 +56,7 @@ class JacoArmKindrv : public JacoArm
   virtual void push_joystick(unsigned int button);
   virtual void release_joystick();
 
+  virtual void goto_trajec(std::vector< std::vector<float> >* trajec, std::vector<float> &fingers);
   virtual void goto_joints(std::vector<float> &joints, std::vector<float> &fingers);
   virtual void goto_coords(std::vector<float> &coords, std::vector<float> &fingers);
   virtual void goto_ready();

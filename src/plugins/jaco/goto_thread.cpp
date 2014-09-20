@@ -486,12 +486,9 @@ JacoGotoThread::_exec_trajec(jaco_trajec_t* trajec)
      // stop old movement
     __arm->arm->stop();
 
-    logger->log_debug(name(), "exec traj: send traj commands...");
     // execute the trajectory
-    for( unsigned int i=0; i<trajec->size(); ++i ) {
-      __arm->arm->goto_joints(trajec->at(i), __target->fingers);
-      usleep(10e3);
-    }
+    logger->log_debug(name(), "exec traj: send traj commands...");
+    __arm->arm->goto_trajec(trajec, __target->fingers);
     logger->log_debug(name(), "exec traj: ... DONE");
 
   } catch( Exception &e ) {

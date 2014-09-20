@@ -194,7 +194,18 @@ JacoArmKindrv::release_joystick()
 }
 
 
-
+void
+JacoArmKindrv::goto_trajec(std::vector< std::vector<float> >* trajec, std::vector<float> &fingers)
+{
+  __arm->start_api_ctrl();
+  __arm->set_control_ang();
+  usleep(500);
+  for( unsigned int i=0; i<trajec->size(); ++i ) {
+    __arm->set_target_ang(trajec->at(i).at(0), trajec->at(i).at(1), trajec->at(i).at(2),
+                          trajec->at(i).at(3), trajec->at(i).at(4), trajec->at(i).at(5),
+                          fingers.at(0), fingers.at(1), fingers.at(2));
+  }
+}
 
 void
 JacoArmKindrv::goto_joints(std::vector<float> &joints, std::vector<float> &fingers)

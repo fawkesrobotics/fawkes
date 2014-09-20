@@ -89,6 +89,12 @@ class JacoArm
   /** Simulate releasing the joystick of the Kinova Jaco arm. */
   virtual void release_joystick() = 0;
 
+  /** Move the arm along the given trajectory.
+   * @param trajec the trajectory
+   * @param fingers target finger positions
+   */
+  virtual void goto_trajec(std::vector< std::vector<float> >* trajec, std::vector<float> &fingers) = 0;
+
   /** Move the arm to given configuration.
    * @param joints target joint angles
    * @param fingers target finger positions

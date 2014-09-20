@@ -22,6 +22,8 @@
 
 #include "arm_dummy.h"
 
+#include <unistd.h>
+
 #define READY_J0 (282.522400)
 #define READY_J1 (154.470856)
 #define READY_J2 (44.191490)
@@ -136,6 +138,15 @@ JacoArmDummy::release_joystick()
   stop();
 }
 
+
+void
+JacoArmDummy::goto_trajec(std::vector< std::vector<float> >* trajec, std::vector<float> &fingers)
+{
+  for( unsigned int i=0; i<trajec->size(); ++i ) {
+    goto_joints(trajec->at(i), fingers);
+    usleep(10e3);
+  }
+}
 
 void
 JacoArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &fingers)
