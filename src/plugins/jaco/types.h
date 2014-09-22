@@ -45,6 +45,12 @@ class JacoInterface;
 typedef std::vector<float>               jaco_trajec_point_t;
 typedef std::vector<jaco_trajec_point_t> jaco_trajec_t;
 
+typedef enum jaco_arm_config_enum {
+  CONFIG_SINGLE,    /**< we only have one arm. */
+  CONFIG_LEFT,      /**< this arm is the left one out of two. */
+  CONFIG_RIGHT      /**< this arm is the right one out of two. */
+} jaco_arm_config_t;
+
 typedef enum jaco_target_type_enum {
   TARGET_CARTESIAN,     /**< target with cartesian coordinates. */
   TARGET_ANGULAR,       /**< target with angular coordinates. */
@@ -73,6 +79,7 @@ typedef struct jaco_target_struct_t {
 typedef std::list< fawkes::RefPtr<jaco_target_t> > jaco_target_queue_t;
 
 typedef struct jaco_arm_struct {
+  jaco_arm_config_t config;
   fawkes::JacoArm *arm;
   fawkes::JacoInterface *iface;
 

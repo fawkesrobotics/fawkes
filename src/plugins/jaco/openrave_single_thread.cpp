@@ -53,26 +53,10 @@ using namespace std;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoOpenraveSingleThread::JacoOpenraveSingleThread(const char *manipname, bool load_robot)
-  : JacoOpenraveBaseThread("JacoOpenraveSingleThread")
-{
-  __arm = NULL;
-  __manipname = manipname;
-  __load_robot = load_robot;
-#ifdef HAVE_OPENRAVE
-  __planner_env.env   = NULL;
-  __planner_env.robot = NULL;
-  __planner_env.manip = NULL;
-#endif
-}
-
-/** Constructor.
- * @param thread_name thread name
- */
-JacoOpenraveSingleThread::JacoOpenraveSingleThread(const char *name, const char *manipname, bool load_robot)
+JacoOpenraveSingleThread::JacoOpenraveSingleThread(const char *name, const char *manipname, jaco_arm_t* arm, bool load_robot)
   : JacoOpenraveBaseThread(name)
 {
-  __arm = NULL;
+  __arm = arm;
   __manipname = manipname;
   __load_robot = load_robot;
 #ifdef HAVE_OPENRAVE
@@ -170,6 +154,7 @@ JacoOpenraveSingleThread::once()
 
 void
 JacoOpenraveSingleThread::finalize() {
+  __arm = NULL;
 #ifdef HAVE_OPENRAVE
   if( __load_robot )
     openrave->set_active_robot( NULL );
@@ -185,7 +170,7 @@ JacoOpenraveSingleThread::finalize() {
 void
 JacoOpenraveSingleThread::loop()
 {
-  if( __arm == NULL ) {
+  if( __arm == NULL || __arm->arm == NULL ) {
     usleep(30e3);
     return;
   }
@@ -193,9 +178,9 @@ JacoOpenraveSingleThread::loop()
   __planning_mutex->lock();
   RefPtr<jaco_target_t> to;
   // get first target with type TARGET_TRAJEC that needs a planner
-  __target_mutex->lock();
+  __arm->target_mutex->lock();
   jaco_target_queue_t::iterator it;
-  for( it=__target_queue->begin(); it!=__target_queue->end(); ++it ) {
+  for( it=__arm->target_queue->begin(); it!=__arm->target_queue->end(); ++it ) {
     if( (*it)->trajec_state==TRAJEC_WAITING ) {
       // have found a new target for path planning!
       to = *it;
@@ -208,7 +193,7 @@ JacoOpenraveSingleThread::loop()
     //  The only target-types that can be used for that are those that contain joint positions,
     //  i.e. TARGET_ANGULAR and TARGET_TRAJEC
     RefPtr<jaco_target_t> from;
-    while( it!=__target_queue->begin() ) {
+    while( it!=__arm->target_queue->begin() ) {
       --it;
       if( (*it)->trajec_state==TRAJEC_READY || (*it)->trajec_state==TRAJEC_EXECUTING ) {
         from->pos = (*it)->trajec->back();
@@ -218,7 +203,7 @@ JacoOpenraveSingleThread::loop()
         break;
       }
     }
-    __target_mutex->unlock();
+    __arm->target_mutex->unlock();
 
     // if there was no prior target that can be used as a starting position, create one
     if( !from ) {
@@ -231,30 +216,16 @@ JacoOpenraveSingleThread::loop()
     __planning_mutex->unlock();
 
   } else {
-    __target_mutex->unlock();
+    __arm->target_mutex->unlock();
     __planning_mutex->unlock();
     usleep(30e3); // TODO: make this configurable
   }
 }
 
 void
-JacoOpenraveSingleThread::register_arm(jaco_arm_t *arm)
-{
-  __arm = arm;
-  __target_mutex = __arm->target_mutex;
-  __trajec_mutex = __arm->trajec_mutex;
-  __target_queue = __arm->target_queue;
-}
-
-void
-JacoOpenraveSingleThread::unregister_arms() {
-  __arm = NULL;
-}
-
-void
 JacoOpenraveSingleThread::update_openrave()
 {
-  if( __arm == NULL || __robot == NULL || __manip == NULL )
+  if( __arm == NULL || __arm->iface == NULL || __robot == NULL || __manip == NULL )
     return;
 
 #ifdef HAVE_OPENRAVE
@@ -324,9 +295,9 @@ JacoOpenraveSingleThread::add_target(float x, float y, float z, float e1, float 
         target->pos.push_back(e2);
         target->pos.push_back(e3);
 
-        __target_mutex->lock();
-        __target_queue->push_back(target);
-        __target_mutex->unlock();
+        __arm->target_mutex->lock();
+        __arm->target_queue->push_back(target);
+        __arm->target_mutex->unlock();
       } else {
         logger->log_warn(name(), "No IK solution found for target.");
       }
@@ -347,9 +318,9 @@ JacoOpenraveSingleThread::add_target(float x, float y, float z, float e1, float 
         // get target IK values
         __planner_env.robot->get_target().manip->get_angles_device(target->pos);
 
-        __target_mutex->lock();
-        __target_queue->push_back(target);
-        __target_mutex->unlock();
+        __arm->target_mutex->lock();
+        __arm->target_queue->push_back(target);
+        __arm->target_mutex->unlock();
       } else {
         logger->log_warn(name(), "No IK solution found for target.");
       }
@@ -366,9 +337,9 @@ JacoOpenraveSingleThread::add_target(float x, float y, float z, float e1, float 
 bool
 JacoOpenraveSingleThread::set_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {
-  __target_mutex->lock();
-  __target_queue->clear();
-  __target_mutex->unlock();
+  __arm->target_mutex->lock();
+  __arm->target_queue->clear();
+  __arm->target_mutex->unlock();
   return add_target(x, y, z, e1, e2, e3, plan);
 }
 
@@ -376,9 +347,9 @@ void
 JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
 {
   // update state of the trajectory
-  __target_mutex->lock();
+  __arm->target_mutex->lock();
   to->trajec_state = TRAJEC_PLANNING;
-  __target_mutex->unlock();
+  __arm->target_mutex->unlock();
 
   // Update bodies in planner-environment
   // clone robot state, ignoring grabbed bodies
@@ -418,9 +389,9 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
   //                  to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5));
   if( !__planner_env.robot->set_target_euler(EULER_ZXZ, to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5)) ) {
     logger->log_warn(name(), "Planning failed, second IK check failed");
-    __target_mutex->lock();
+    __arm->target_mutex->lock();
     to->trajec_state = TRAJEC_PLANNING_ERROR;
-    __target_mutex->unlock();
+    __arm->target_mutex->unlock();
     return;
   }
 
@@ -439,30 +410,30 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
     logger->log_warn(name(), "Planning failed: %s", e.what_no_backtrace());
     // TODO: better handling!
     // for now just skip planning, so the target_queue can be processed
-    __target_mutex->lock();
+    __arm->target_mutex->lock();
     //to->type = TARGET_ANGULAR;
     to->trajec_state = TRAJEC_PLANNING_ERROR;
-    __target_mutex->unlock();
+    __arm->target_mutex->unlock();
     return;
   }
 
   // add trajectory to queue
   //logger->log_debug(name(), "plan successful, adding to queue");
-  __trajec_mutex->lock();
+  __arm->trajec_mutex->lock();
   // we can do the following becaouse get_trajectory_device() returns a new object, thus
   //  can be safely deleted by RefPtr auto-deletion
   to->trajec = RefPtr<jaco_trajec_t>( __planner_env.robot->get_trajectory_device() );
-  __trajec_mutex->unlock();
+  __arm->trajec_mutex->unlock();
 
   // update target.
-  __target_mutex->lock();
+  __arm->target_mutex->lock();
   //change target type to ANGULAR and set target->pos accordingly. This makes final-checking
   // in goto_thread much easier
   to->type = TARGET_ANGULAR;
   to->pos = to->trajec->back();
   // update trajectory state
   to->trajec_state = TRAJEC_READY;
-  __target_mutex->unlock();
+  __arm->target_mutex->unlock();
 }
 
 
@@ -476,15 +447,15 @@ JacoOpenraveSingleThread::plot_first()
     return;
 
   // check if there is a target to be plotted
-  __target_mutex->lock();
-  if( __target_queue->empty() ) {
-    __target_mutex->unlock();
+  __arm->target_mutex->lock();
+  if( __arm->target_queue->empty() ) {
+    __arm->target_mutex->unlock();
     return;
   }
 
   // get RefPtr to first target in queue
-  RefPtr<jaco_target_t> target = __target_queue->front();
-  __target_mutex->unlock();
+  RefPtr<jaco_target_t> target = __arm->target_queue->front();
+  __arm->target_mutex->unlock();
 
 
   // only plot trajectories
@@ -492,9 +463,9 @@ JacoOpenraveSingleThread::plot_first()
     return;
 
   // plot the trajectory (if possible)
-  __trajec_mutex->lock();
+  __arm->trajec_mutex->lock();
   if( !target->trajec ) {
-    __trajec_mutex->unlock();
+    __arm->trajec_mutex->unlock();
     return;
   }
 
@@ -526,7 +497,7 @@ JacoOpenraveSingleThread::plot_first()
     }
   } // robot state is restored
 
-  __trajec_mutex->unlock();
+  __arm->trajec_mutex->unlock();
 
 #endif //HAVE_OPENRAVE
 }

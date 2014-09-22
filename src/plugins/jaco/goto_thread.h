@@ -45,7 +45,7 @@ class JacoGotoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  JacoGotoThread(const char name[]);
+  JacoGotoThread(const char *name, fawkes::jaco_arm_t* arm);
   virtual ~JacoGotoThread();
 
   virtual void init();
@@ -53,9 +53,6 @@ class JacoGotoThread
   virtual void loop();
 
   virtual bool final();
-
-  virtual void register_arm(fawkes::jaco_arm_t *arm);
-  virtual void unregister_arm();
 
   virtual void set_target(float x, float y, float z, float e1, float e2, float e3, float f1=0.f, float f2=0.f, float f3=0.f);
   virtual void set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float f1=0.f, float f2=0.f, float f3=0.f);

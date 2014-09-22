@@ -22,9 +22,12 @@
 
 #include "arm_kindrv.h"
 
+#include <core/exception.h>
+
 #include <libkindrv/kindrv.h>
 
 #include <cstdio>
+#include <vector>
 
 using namespace KinDrv;
 
@@ -39,12 +42,37 @@ namespace fawkes {
  */
 
 /** Constructor. */
-JacoArmKindrv::JacoArmKindrv()
+JacoArmKindrv::JacoArmKindrv(const char *name)
 {
+  // take the first arm we can connect to
   __arm = new KinDrv::JacoArm();
   __name = __arm->get_client_config(true).name;
   // trim tailing whitespaces
   __name.erase(__name.find_last_not_of(" ")+1);
+
+  if( name!=NULL ) {
+    // Check all connected arms until the right one is found.
+    std::vector<KinDrv::JacoArm*> arms;
+    while( __name.compare(name)!=0 ) {
+      arms.push_back(__arm);
+      try {
+        __arm = new KinDrv::JacoArm();
+        __name = __arm->get_client_config(true).name;
+        __name.erase(__name.find_last_not_of(" ")+1);
+      } catch(KinDrvException& e) {
+        // don't throw yet, we need to delete the occupied arms first.
+        __arm = NULL;
+      }
+    }
+
+    for(unsigned int i=0; i<=arms.size(); ++i) {
+      delete arms[i];
+      arms[i] = NULL;
+    }
+  }
+
+  if( __arm==NULL )
+    throw fawkes::Exception("Could not connect to Jaco arm with libkindrv");
 
   __initialized = false;
   __final = true;

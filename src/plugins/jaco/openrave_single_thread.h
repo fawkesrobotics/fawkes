@@ -36,15 +36,11 @@
 class JacoOpenraveSingleThread : public JacoOpenraveBaseThread
 {
  public:
-  JacoOpenraveSingleThread(const char *manipname, bool load_robot=true);
-  JacoOpenraveSingleThread(const char *name, const char *manipname, bool load_robot=true);
+  JacoOpenraveSingleThread(const char *name, const char *manipname, fawkes::jaco_arm_t* arm, bool load_robot=true);
 
   virtual void once();
   virtual void loop();
   virtual void finalize();
-
-  virtual void register_arm(fawkes::jaco_arm_t *arm);
-  virtual void unregister_arms();
 
   virtual void update_openrave();
   virtual void plot_first();

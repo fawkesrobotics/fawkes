@@ -43,22 +43,18 @@ class JacoInfoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  JacoInfoThread();
+  JacoInfoThread(const char *name, fawkes::jaco_arm_t* arm);
   virtual ~JacoInfoThread();
 
   virtual void init();
   virtual void finalize();
   virtual void loop();
 
-  virtual void register_arm(fawkes::jaco_arm_t *arm);
-  virtual void unregister_arms();
-
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  std::list<fawkes::jaco_arm_t*>           *__arms;
-  std::list<fawkes::jaco_arm_t*>::iterator  __arm;
+  fawkes::jaco_arm_t *__arm;
 
   std::vector<float> __cpos;
   std::vector<float> __apos;

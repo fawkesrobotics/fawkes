@@ -42,10 +42,10 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoGotoThread::JacoGotoThread(const char name[])
+JacoGotoThread::JacoGotoThread(const char *name, jaco_arm_t* arm)
   : Thread(name, Thread::OPMODE_CONTINUOUS)
 {
-  __arm = NULL;
+  __arm = arm;
   __final_mutex = NULL;
 
   __final = true;
@@ -70,6 +70,7 @@ JacoGotoThread::finalize()
 {
   delete __final_mutex;
   __final_mutex = NULL;
+  __arm = NULL;
 }
 
 bool
@@ -96,18 +97,6 @@ JacoGotoThread::final()
   __arm->target_mutex->unlock();
 
   return final;
-}
-
-void
-JacoGotoThread::register_arm(fawkes::jaco_arm_t *arm)
-{
-  __arm = arm;
-}
-
-void
-JacoGotoThread::unregister_arm()
-{
-  __arm = NULL;
 }
 
 void
@@ -305,7 +294,7 @@ JacoGotoThread::check_final()
 void
 JacoGotoThread::loop()
 {
-  if(__arm == NULL || !__final) {
+  if(__arm == NULL || __arm->arm == NULL || !__final) {
     usleep(30e3);
     return;
   }

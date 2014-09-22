@@ -34,12 +34,9 @@
 class JacoOpenraveDualThread : public JacoOpenraveBaseThread
 {
  public:
-  JacoOpenraveDualThread();
+  JacoOpenraveDualThread(fawkes::jaco_arm_t *arm_l, fawkes::jaco_arm_t *arm_r);
 
   virtual void finalize();
-
-  virtual void register_arm(fawkes::jaco_arm_t *arm);
-  virtual void unregister_arms();
 
   virtual void update_openrave();
   virtual void plot_first();
@@ -54,8 +51,6 @@ class JacoOpenraveDualThread : public JacoOpenraveBaseThread
  private:
   void _init();
   void _load_robot();
-
-  std::string __cfg_left_arm_name;
 
   struct {
     fawkes::jaco_arm_t *left;

@@ -70,9 +70,6 @@ class JacoOpenraveBaseThread
   virtual void set_plannerparams(const std::string &params);
   virtual void set_plannerparams(const char* params);
 
-  virtual void register_arm(fawkes::jaco_arm_t *arm) = 0;
-  virtual void unregister_arms() = 0;
-
   virtual void update_openrave() = 0;
   virtual void plot_first() = 0;
 
@@ -86,11 +83,6 @@ class JacoOpenraveBaseThread
   virtual void _load_robot() {}
 
   fawkes::Mutex *__planning_mutex;
-
-  // keep these refptrs here for convenience, so we do not need to dereference __arm all the time
-  fawkes::RefPtr< fawkes::Mutex > __target_mutex;
-  fawkes::RefPtr< fawkes::Mutex > __trajec_mutex;
-  fawkes::RefPtr< fawkes::jaco_target_queue_t > __target_queue;
 
 #ifdef HAVE_OPENRAVE
   fawkes::jaco_openrave_set_t __viewer_env;

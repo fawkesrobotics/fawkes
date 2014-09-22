@@ -96,8 +96,6 @@ JacoOpenraveBaseThread::init()
 void
 JacoOpenraveBaseThread::finalize()
 {
-  unregister_arms();
-
   delete __planning_mutex;
   __planning_mutex = NULL;
 

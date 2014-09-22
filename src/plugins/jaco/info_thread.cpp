@@ -38,11 +38,11 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoInfoThread::JacoInfoThread()
-  : Thread("JacoInfoThread", Thread::OPMODE_WAITFORWAKEUP),
+JacoInfoThread::JacoInfoThread(const char *name, jaco_arm_t* arm)
+  : Thread(name, Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
 {
-  __arms = NULL;
+  __arm = arm;
 }
 
 
@@ -54,57 +54,42 @@ JacoInfoThread::~JacoInfoThread()
 void
 JacoInfoThread::init()
 {
-  __arms = new std::list<jaco_arm_t*>();
 }
 
 void
 JacoInfoThread::finalize()
 {
-  delete(__arms);
-}
-
-void
-JacoInfoThread::register_arm(jaco_arm_t *arm) {
-  __arms->push_back(arm);
-}
-
-void
-JacoInfoThread::unregister_arms() {
-  for(__arm=__arms->begin(); __arm!=__arms->end(); ++__arm)
-    (*__arm) = NULL;
+  __arm = NULL;
 }
 
 void
 JacoInfoThread::loop()
 {
-  if( __arms->size() == 0 )
+  if( __arm == NULL || __arm->arm == NULL || __arm->iface == NULL )
     return;
 
-  for(__arm=__arms->begin(); __arm!=__arms->end(); ++__arm) {
+  __arm->iface->set_connected(true);
 
-    (*__arm)->iface->set_connected(true);
+  try {
+    __arm->arm->get_coords(__cpos);
+    __arm->iface->set_x(__cpos.at(0));
+    __arm->iface->set_y(__cpos.at(1));
+    __arm->iface->set_z(__cpos.at(2));
+    __arm->iface->set_euler1(__cpos.at(3));
+    __arm->iface->set_euler2(__cpos.at(4));
+    __arm->iface->set_euler3(__cpos.at(5));
 
-    try {
-      (*__arm)->arm->get_coords(__cpos);
-      (*__arm)->iface->set_x(__cpos.at(0));
-      (*__arm)->iface->set_y(__cpos.at(1));
-      (*__arm)->iface->set_z(__cpos.at(2));
-      (*__arm)->iface->set_euler1(__cpos.at(3));
-      (*__arm)->iface->set_euler2(__cpos.at(4));
-      (*__arm)->iface->set_euler3(__cpos.at(5));
+    __arm->arm->get_fingers(__cpos);
+    __arm->iface->set_finger1( std::max(0.f, std::min(60.f, __cpos.at(0))) );
+    __arm->iface->set_finger2( std::max(0.f, std::min(60.f, __cpos.at(1))) );
+    __arm->iface->set_finger3( std::max(0.f, std::min(60.f, __cpos.at(2))) );
 
-      (*__arm)->arm->get_fingers(__cpos);
-      (*__arm)->iface->set_finger1( std::max(0.f, std::min(60.f, __cpos.at(0))) );
-      (*__arm)->iface->set_finger2( std::max(0.f, std::min(60.f, __cpos.at(1))) );
-      (*__arm)->iface->set_finger3( std::max(0.f, std::min(60.f, __cpos.at(2))) );
-
-      (*__arm)->arm->get_joints(__apos);
-      for(unsigned int i=0; i<__apos.size(); i++) {
-        (*__arm)->iface->set_joints(i, __apos.at(i));
-      }
-
-    } catch(fawkes::Exception &e) {
-      logger->log_warn(name(), "Could not get position and joint values. Er: %s", e.what());
+    __arm->arm->get_joints(__apos);
+    for(unsigned int i=0; i<__apos.size(); i++) {
+      __arm->iface->set_joints(i, __apos.at(i));
     }
+
+  } catch(fawkes::Exception &e) {
+    logger->log_warn(name(), "Could not get position and joint values. Er: %s", e.what());
   }
 }

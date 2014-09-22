@@ -55,17 +55,16 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoOpenraveDualThread::JacoOpenraveDualThread()
+JacoOpenraveDualThread::JacoOpenraveDualThread(jaco_arm_t *arm_l, jaco_arm_t *arm_r)
   : JacoOpenraveBaseThread("JacoOpenraveDualThread")
 {
-  __arms.left = NULL;
-  __arms.right = NULL;
+  __arms.left = arm_l;
+  __arms.right = arm_r;
 }
 
 void
 JacoOpenraveDualThread::_init()
 {
-  __cfg_left_arm_name = config->get_string("/hardware/jaco/dual_arm/left/name");
 }
 
 void
@@ -124,31 +123,13 @@ JacoOpenraveDualThread::_load_robot()
 
 void
 JacoOpenraveDualThread::finalize() {
+  __arms.left = NULL;
+  __arms.right = NULL;
 #ifdef HAVE_OPENRAVE
   openrave->set_active_robot( NULL );
 
   JacoOpenraveBaseThread::finalize();
 #endif
-}
-
-
-void
-JacoOpenraveDualThread::register_arm(fawkes::jaco_arm_t *arm)
-{
-  if( __cfg_left_arm_name.compare(arm->arm->get_name()) == 0 ) {
-    __arms.left = arm;
-    logger->log_debug(name(), "Set arm '%s' as left arm.", arm->arm->get_name().c_str());
-  } else {
-    __arms.right = arm;
-    logger->log_debug(name(), "Set arm '%s' as right arm.", arm->arm->get_name().c_str());
-  }
-}
-
-void
-JacoOpenraveDualThread::unregister_arms()
-{
-  __arms.left = NULL;
-  __arms.right = NULL;
 }
 
 bool
@@ -161,9 +142,6 @@ JacoOpenraveDualThread::add_target(float x, float y, float z, float e1, float e2
 bool
 JacoOpenraveDualThread::set_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {
-  __target_mutex->lock();
-  __target_queue->clear();
-  __target_mutex->unlock();
   return add_target(x, y, z, e1, e2, e3, plan);
 }
 

@@ -23,10 +23,6 @@
 #ifndef __PLUGINS_JACO_ACT_THREAD_H_
 #define __PLUGINS_JACO_ACT_THREAD_H_
 
-#include "info_thread.h"
-#include "goto_thread.h"
-#include "openrave_base_thread.h"
-
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
@@ -37,7 +33,6 @@
 
 namespace fawkes {
   typedef struct jaco_arm_struct jaco_arm_t;
-  typedef struct jaco_dual_arm_struct jaco_dual_arm_t;
 }
 
 class JacoActThread
@@ -48,47 +43,27 @@ class JacoActThread
   public fawkes::BlackBoardAspect
 {
  public:
-  JacoActThread(JacoInfoThread *info_thread,
-                JacoGotoThread *goto_thread,
-                JacoOpenraveBaseThread *openrave_thread);
-  JacoActThread(JacoInfoThread *info_thread,
-                JacoGotoThread *goto_thread_l,
-                JacoGotoThread *goto_thread_r,
-                JacoOpenraveBaseThread *openrave_thread_l,
-                JacoOpenraveBaseThread *openrave_thread_r,
-                JacoOpenraveBaseThread *openrave_thread_dual);
+  JacoActThread(const char *name, fawkes::jaco_arm_t* arm);
   virtual ~JacoActThread();
 
   virtual void init();
   virtual void finalize();
   virtual void loop();
 
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void (JacoActThread::*_submit_iface_changes)();
-  bool (JacoActThread::*_is_initializing)();
-  void (JacoActThread::*_process_msgs)();
+  void _initialize();
+  bool _is_initializing();
+  void _submit_iface();
+  void _process_msgs();
 
-  void _initialize_single();
-  void _initialize_dual();
-  bool _is_initializing_single();
-  bool _is_initializing_dual();
-  void _submit_iface_single();
-  void _submit_iface_dual();
-  void _process_msgs_single();
-  void _process_msgs_dual();
-  void _process_msgs_arm(fawkes::jaco_arm_t &arm);
-
-  fawkes::jaco_arm_t      __arm;
-  fawkes::jaco_dual_arm_t __dual_arm;
+  fawkes::jaco_arm_t* __arm;
 
   bool __cfg_auto_init;
   bool __cfg_auto_calib;
-  bool __cfg_is_dual_arm;
-
-  JacoInfoThread         *__info_thread;
 };
 
 

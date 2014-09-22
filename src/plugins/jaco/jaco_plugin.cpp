@@ -28,6 +28,8 @@
 #include "openrave_single_thread.h"
 #include "openrave_dual_thread.h"
 
+#include "types.h"
+
 using namespace fawkes;
 
 /** @class JacoPlugin <plugins/jaco/jaco_plugin.h>
@@ -42,50 +44,71 @@ using namespace fawkes;
 JacoPlugin::JacoPlugin(Configuration *config)
   : Plugin(config)
 {
-  JacoInfoThread *info_thread = new JacoInfoThread();
-  thread_list.push_back(info_thread);
-
   // load different/multiple threads if using dual-arm setup
-  bool is_dual_arm = config->get_bool("/hardware/jaco/dual_arm/active");
+  bool is_dual_arm = config->get_bool("/hardware/jaco/config/dual_arm");
   if( !is_dual_arm ) {
-    JacoGotoThread *goto_thread = new JacoGotoThread("JacoGotoThread");
-    thread_list.push_back(goto_thread);
+    jaco_arm_t* arm = new jaco_arm_t();
+    arm->config=CONFIG_SINGLE;
 
-    JacoOpenraveBaseThread *openrave_thread = NULL;
+    JacoActThread* act_thread = new JacoActThread("JacoActThread", arm);
+    JacoInfoThread* info_thread = new JacoInfoThread("JacoInfoThread", arm);
+    JacoGotoThread* goto_thread = new JacoGotoThread("JacoGotoThread", arm);
 #ifdef HAVE_OPENRAVE
-    openrave_thread = new JacoOpenraveSingleThread("JacoOpenraveThread", "fingertip");
-    thread_list.push_back(openrave_thread);
+    JacoOpenraveSingleThread* openrave_thread = new JacoOpenraveSingleThread("JacoOpenraveThread", "fingertip", arm);
 #endif
 
-    thread_list.push_back(new JacoActThread(info_thread, goto_thread, openrave_thread));
+    arm->goto_thread = goto_thread;
+    arm->openrave_thread = openrave_thread;
+
+    thread_list.push_back( act_thread );
+    thread_list.push_back( info_thread );
+    thread_list.push_back( goto_thread );
+#ifdef HAVE_OPENRAVE
+    thread_list.push_back( openrave_thread );
+#endif
 
   } else {
-    // each arm gets 1 goto-thread.
-    JacoGotoThread *goto_thread_l = new JacoGotoThread("JacoGotoThreadLeft");
-    JacoGotoThread *goto_thread_r = new JacoGotoThread("JacoGotoThreadRight");
-    thread_list.push_back(goto_thread_l);
-    thread_list.push_back(goto_thread_r);
+    jaco_arm_t* arm_l = new jaco_arm_t();
+    jaco_arm_t* arm_r = new jaco_arm_t();
+    arm_l->config=CONFIG_LEFT;
+    arm_r->config=CONFIG_RIGHT;
 
-    // each arm gets 1 openrave-thread, providing planning and updating the openrave-model of that arm.
-    // additionally we need a separate openrave thread for planning symmetric bimanual manipulation.
-    JacoOpenraveSingleThread *openrave_thread_l = NULL;
-    JacoOpenraveSingleThread *openrave_thread_r = NULL;
-    JacoOpenraveDualThread   *openrave_thread_dual = NULL;
+    // each arm gets a separate set of threads for independent manipulation.
+    JacoActThread* act_thread_l = new JacoActThread("JacoActThreadLeft", arm_l);
+    JacoInfoThread* info_thread_l = new JacoInfoThread("JacoInfoThreadLeft", arm_l);
+    JacoGotoThread* goto_thread_l = new JacoGotoThread("JacoGotoThreadLeft", arm_l);
+
+    JacoActThread* act_thread_r =  new JacoActThread("JacoActThreadRight", arm_r);
+    JacoInfoThread* info_thread_r = new JacoInfoThread("JacoInfoThreadRight", arm_r);
+    JacoGotoThread* goto_thread_r = new JacoGotoThread("JacoGotoThreadRight", arm_r);
 
 #ifdef HAVE_OPENRAVE
-    openrave_thread_dual = new JacoOpenraveDualThread();
-    thread_list.push_back(openrave_thread_dual);
-
-    openrave_thread_l = new JacoOpenraveSingleThread("JacoOpenraveThreadLeft", "arm_left", /*load_robot=*/false);
-    openrave_thread_r = new JacoOpenraveSingleThread("JacoOpenraveThreadRight", "arm_right", /*load_robot=*/false);
-    thread_list.push_back(openrave_thread_l);
-    thread_list.push_back(openrave_thread_r);
+    // each arm gets 1 openrave-thread, providing planning and updating the openrave-model of that arm.
+    // additionally we need a separate openrave thread for planning symmetric bimanual manipulation.
+    JacoOpenraveSingleThread* openrave_thread_l = new JacoOpenraveSingleThread("JacoOpenraveThreadLeft", "arm_left", arm_l, /*load_robot=*/false);
+    JacoOpenraveSingleThread* openrave_thread_r = new JacoOpenraveSingleThread("JacoOpenraveThreadRight", "arm_right", arm_r, /*load_robot=*/false);
 #endif
 
-    thread_list.push_back(new JacoActThread(info_thread,
-                                              goto_thread_l, goto_thread_r,
-                                              openrave_thread_l, openrave_thread_r,
-                                              openrave_thread_dual));
+    arm_l->goto_thread = goto_thread_l;
+    arm_l->openrave_thread = openrave_thread_l;
+
+    arm_r->goto_thread = goto_thread_r;
+    arm_r->openrave_thread = openrave_thread_r;
+
+    thread_list.push_back( act_thread_l );
+    thread_list.push_back( info_thread_l );
+    thread_list.push_back( goto_thread_l );
+
+    thread_list.push_back( act_thread_r );
+    thread_list.push_back( info_thread_r );
+    thread_list.push_back( goto_thread_r );
+
+#ifdef HAVE_OPENRAVE
+    thread_list.push_back( openrave_thread_l );
+    thread_list.push_back( openrave_thread_r );
+    thread_list.push_back( new JacoOpenraveDualThread(arm_l, arm_r) );
+#endif
+
   }
 }
 

@@ -40,7 +40,7 @@ namespace fawkes {
 class JacoArmKindrv : public JacoArm
 {
  public:
-  JacoArmKindrv();
+  JacoArmKindrv(const char *name = NULL);
   virtual ~JacoArmKindrv();
 
   virtual void initialize();
