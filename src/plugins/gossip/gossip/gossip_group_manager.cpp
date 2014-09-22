@@ -95,9 +95,16 @@ GossipGroupManager::GossipGroupManager(std::string &service_name,
 				       std::map<std::string, GossipGroupConfiguration> &initial_groups)
   : service_name_(service_name), service_publisher_(service_publisher)
 {
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
   for (auto g : initial_groups) {
     create_group(g.second);
   }
+#else
+  std::map<std::string, GossipGroupConfiguration>::iterator g;
+  for (g = initial_groups.begin(); g != initial_groups.end(); ++g) {
+    create_group(g->second);
+  }
+#endif
 }
 
 
