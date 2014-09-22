@@ -161,6 +161,10 @@ JacoOpenraveSingleThread::once()
     __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
   }
 
+  //~ if(__manipname=="arm_left")
+    //~ __planner_env.env->start_viewer();
+
+  __planner_env.env->enable_debug(Level_Verbose);
 #endif //HAVE_OPENRAVE
 }
 
@@ -192,7 +196,7 @@ JacoOpenraveSingleThread::loop()
   __target_mutex->lock();
   jaco_target_queue_t::iterator it;
   for( it=__target_queue->begin(); it!=__target_queue->end(); ++it ) {
-    if( (*it)->type==TARGET_TRAJEC && (*it)->trajec_state==TRAJEC_WAITING ) {
+    if( (*it)->trajec_state==TRAJEC_WAITING ) {
       // have found a new target for path planning!
       to = *it;
       break;
@@ -206,7 +210,10 @@ JacoOpenraveSingleThread::loop()
     RefPtr<jaco_target_t> from;
     while( it!=__target_queue->begin() ) {
       --it;
-      if( (*it)->type == TARGET_ANGULAR || (*it)->type == TARGET_TRAJEC ) {
+      if( (*it)->trajec_state==TRAJEC_READY || (*it)->trajec_state==TRAJEC_EXECUTING ) {
+        from->pos = (*it)->trajec->back();
+        break;
+      } else if( (*it)->trajec_state==TRAJEC_SKIP && (*it)->type == TARGET_ANGULAR ) {
         from = *it;
         break;
       }
@@ -297,36 +304,55 @@ JacoOpenraveSingleThread::add_target(float x, float y, float z, float e1, float 
       __planner_env.robot->get_planner_params()->vgoalconfig.resize(__planner_env.robot->get_robot_ptr()->GetActiveDOF());
     }
 
-    // get IK from openrave. Ignore collisions with env though, as this is only for IK check!
-    solvable = __planner_env.robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3, IKFO_IgnoreEndEffectorEnvCollisions);
+    if( plan ) {
+      // get IK from openrave. Ignore collisions with env though, as this is only for IK check and env might change at the
+      //  time we start planning. There will be separate IK checks though for planning!
+      solvable = __planner_env.robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3, IKFO_IgnoreEndEffectorEnvCollisions);
 
-    if( solvable ) {
-      logger->log_debug(name(), "IK successful!");
-
-      // create new target for the queue
-      RefPtr<jaco_target_t> target(new jaco_target_t());
-
-      // get target IK values
-      __planner_env.robot->get_target().manip->get_angles_device(target->pos);
-
-      if( plan ) {
+      if( solvable ) {
         // add this to the target queue for planning
         logger->log_debug(name(), "Adding to target_queue for later planning");
-        target->type = TARGET_TRAJEC;
-        target->trajec_state = TRAJEC_WAITING;
 
+        // create new target for the queue
+        RefPtr<jaco_target_t> target(new jaco_target_t());
+        target->type = TARGET_CARTESIAN;
+        target->trajec_state = TRAJEC_WAITING;
+        target->pos.push_back(x);
+        target->pos.push_back(y);
+        target->pos.push_back(z);
+        target->pos.push_back(e1);
+        target->pos.push_back(e2);
+        target->pos.push_back(e3);
+
+        __target_mutex->lock();
+        __target_queue->push_back(target);
+        __target_mutex->unlock();
       } else {
-        // don't plan, consider this the final configuration
-        logger->log_debug(name(), "Skip planning, add this as TARGET_ANGULAR");
-        target->type = TARGET_ANGULAR;
+        logger->log_warn(name(), "No IK solution found for target.");
       }
-      __target_mutex->lock();
-      __target_queue->push_back(target);
-      __target_mutex->unlock();
 
     } else {
-      logger->log_warn(name(), "No IK solution found for target.");
-      return false;
+      // don't plan, consider this the final configuration
+
+      // get IK from openrave. Do not ignore collisions this time, because we skip planning
+      //  and go straight to this configuration!
+      solvable = __planner_env.robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3);
+
+      if( solvable ) {
+        logger->log_debug(name(), "Skip planning, add this as TARGET_ANGULAR");
+
+        // create new target for the queue
+        RefPtr<jaco_target_t> target(new jaco_target_t());
+        target->type = TARGET_ANGULAR;
+        // get target IK values
+        __planner_env.robot->get_target().manip->get_angles_device(target->pos);
+
+        __target_mutex->lock();
+        __target_queue->push_back(target);
+        __target_mutex->unlock();
+      } else {
+        logger->log_warn(name(), "No IK solution found for target.");
+      }
     }
 
   } catch( openrave_exception &e) {
@@ -387,21 +413,23 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
     __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
   }
 
-  // Set target point for planner (has already passed IK check previously!)
-  __planner_env.manip->set_angles_device(to->pos);
-  std::vector<float> target;
-  __planner_env.manip->get_angles(target);
-
+  // Set target point for planner. Check again for IK, avoiding collisions with the environment
   //logger->log_debug(name(), "setting target %f %f %f %f %f %f",
   //                  to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5));
-  __planner_env.robot->set_target_angles(target);
+  if( !__planner_env.robot->set_target_euler(EULER_ZXZ, to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5)) ) {
+    logger->log_warn(name(), "Planning failed, second IK check failed");
+    __target_mutex->lock();
+    to->trajec_state = TRAJEC_PLANNING_ERROR;
+    __target_mutex->unlock();
+    return;
+  }
 
-  // Set starting point for planner, convert encoder values to angles if necessary
+  // Set starting point for planner
   //logger->log_debug(name(), "setting start %f %f %f %f %f %f",
   //                  from->pos.at(0), from->pos.at(1), from->pos.at(2), from->pos.at(3), from->pos.at(4), from->pos.at(5));
   __planner_env.manip->set_angles_device(from->pos);
 
-  // Set planning parameters (none yet)
+  // Set planning parameters
   __planner_env.robot->set_target_plannerparams(__plannerparams);
 
   // Run planner
@@ -418,11 +446,6 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
     return;
   }
 
-  // update trajectory state
-  __target_mutex->lock();
-  to->trajec_state = TRAJEC_READY;
-  __target_mutex->unlock();
-
   // add trajectory to queue
   //logger->log_debug(name(), "plan successful, adding to queue");
   __trajec_mutex->lock();
@@ -430,6 +453,16 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
   //  can be safely deleted by RefPtr auto-deletion
   to->trajec = RefPtr<jaco_trajec_t>( __planner_env.robot->get_trajectory_device() );
   __trajec_mutex->unlock();
+
+  // update target.
+  __target_mutex->lock();
+  //change target type to ANGULAR and set target->pos accordingly. This makes final-checking
+  // in goto_thread much easier
+  to->type = TARGET_ANGULAR;
+  to->pos = to->trajec->back();
+  // update trajectory state
+  to->trajec_state = TRAJEC_READY;
+  __target_mutex->unlock();
 }
 
 
@@ -455,7 +488,7 @@ JacoOpenraveSingleThread::plot_first()
 
 
   // only plot trajectories
-  if( target->type != TARGET_TRAJEC )
+  if( target->trajec_state != TRAJEC_READY && target->trajec_state != TRAJEC_EXECUTING )
     return;
 
   // plot the trajectory (if possible)

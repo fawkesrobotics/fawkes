@@ -46,15 +46,15 @@ typedef std::vector<float>               jaco_trajec_point_t;
 typedef std::vector<jaco_trajec_point_t> jaco_trajec_t;
 
 typedef enum jaco_target_type_enum {
-  TARGET_CARTESIAN,     /**< direct target, with cartesian coordinates. */
-  TARGET_ANGULAR,       /**< direct target, with angular coordinates. */
+  TARGET_CARTESIAN,     /**< target with cartesian coordinates. */
+  TARGET_ANGULAR,       /**< target with angular coordinates. */
   TARGET_GRIPPER,       /**< only gripper movement. */
-  TARGET_TRAJEC,        /**< need to plan a trajectory for this target. */
   TARGET_READY,         /**< target is the READY position of the Jaco arm. */
   TARGET_RETRACT        /**< target is the RETRACT position of the Jaco arm. */
 } jaco_target_type_t;
 
 typedef enum jaco_trajec_state_enum {
+  TRAJEC_SKIP,          /**< skip trajectory planning for this target. */
   TRAJEC_WAITING,       /**< new trajectory target, wait for planner to process. */
   TRAJEC_PLANNING,      /**< planner is planning the trajectory. */
   TRAJEC_READY,         /**< trajectory has been planned and is ready for execution. */

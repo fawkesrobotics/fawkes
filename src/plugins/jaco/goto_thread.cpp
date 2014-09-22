@@ -241,12 +241,6 @@ JacoGotoThread::check_final()
       }
       break;
 
-/*
-    default: //TARGET_ANGULAR, TARGET_CARTESIAN
-      __final = __arm->arm->final();
-//*/
-//*
-    case TARGET_TRAJEC:
     case TARGET_ANGULAR:
       //logger->log_debug(name(), "check final for TARGET ANGULAR");
       //final = __arm->arm->final();
@@ -311,85 +305,79 @@ JacoGotoThread::check_final()
 void
 JacoGotoThread::loop()
 {
-  if(__arm == NULL) {
+  if(__arm == NULL || !__final) {
     usleep(30e3);
     return;
   }
 
-  if( __final) {
-   // Current target has been processed. Unref, if still refed
-    if(__target) {
-      __target.clear();
-    }
-
-    // Check for new targets
-    __arm->target_mutex->lock();
-    if( !__arm->target_queue->empty() ) {
-      // get RefPtr to first target in queue
-      __target = __arm->target_queue->front();
-    }
-    __arm->target_mutex->unlock();
-
-    if( __target ) {
-      if( __target->type == TARGET_TRAJEC ) {
-        //logger->log_debug(name(), "next target is a trajectory...");
-
-        if( __target->trajec_state == TRAJEC_READY ) {
-          logger->log_debug(name(), "... and ready! processing now.");
-          // update trajectory state
-          __arm->target_mutex->lock();
-          __target->trajec_state = TRAJEC_EXECUTING;
-          __arm->target_mutex->unlock();
-
-          // process trajectory only if it actually "exists"
-          if( !__target->trajec->empty() ) {
-            // first let the openrave_thread show the trajectory in the viewer
-            __arm->openrave_thread->plot_first();
-
-            // then execute the trajectory
-            _exec_trajec(*(__target->trajec));
-          }
-
-          // trajectory has been processed. remove that target from queue.
-          // This will automatically delete the trajectory as well as soon
-          // as we leave this block (thanks to refptr)
-          __arm->target_mutex->lock();
-          __arm->target_queue->pop_front();
-          __arm->target_mutex->unlock();
-
-        } else if (__target->trajec_state == TRAJEC_PLANNING_ERROR ) {
-          logger->log_debug(name(), "... but the trajectory could not be planned. Abort!");
-          // stop the current and remaining queue, with appropriate error_code. This also sets "final" to true.
-          stop();
-          __arm->iface->set_error_code( JacoInterface::ERROR_PLANNING );
-
-        } else {
-          //logger->log_debug(name(), "... but not ready yet!");
-          usleep(30e3);
-        }
-
-      } else {
-        // "regular" target
-        logger->log_debug(name(), "Process new target. using current finger positions...");
-        _goto_target();
-
-        __arm->target_mutex->lock();
-        __arm->target_queue->pop_front();
-        __arm->target_mutex->unlock();
-
-        logger->log_debug(name(), "...target processed");
-      }
-
-    } else {
-      //no new target in queue
-      usleep(30e3);
-    }
-
-  } else {
-    usleep(30e3);
+ // Current target has been processed. Unref, if still refed
+  if(__target) {
+    __target.clear();
   }
 
-//  __arm->iface->set_final(__final);
+  // Check for new targets
+  __arm->target_mutex->lock();
+  if( !__arm->target_queue->empty() ) {
+    // get RefPtr to first target in queue
+    __target = __arm->target_queue->front();
+  }
+  __arm->target_mutex->unlock();
+  if( !__target ) {
+    //no new target in queue
+    usleep(30e3);
+    return;
+  }
+
+  switch( __target->trajec_state ) {
+    case TRAJEC_SKIP:
+      // "regular" target
+      logger->log_debug(name(), "No planning for this new target. Process, using current finger positions...");
+      _goto_target();
+
+      __arm->target_mutex->lock();
+      __arm->target_queue->pop_front();
+      __arm->target_mutex->unlock();
+
+      logger->log_debug(name(), "...target processed");
+      break;
+
+    case TRAJEC_READY:
+      logger->log_debug(name(), "Trajectory ready! Processing now.");
+      // update trajectory state
+      __arm->target_mutex->lock();
+      __target->trajec_state = TRAJEC_EXECUTING;
+      __arm->target_mutex->unlock();
+
+      // process trajectory only if it actually "exists"
+      if( !__target->trajec->empty() ) {
+        // first let the openrave_thread show the trajectory in the viewer
+        __arm->openrave_thread->plot_first();
+
+        // then execute the trajectory
+        _exec_trajec(*(__target->trajec));
+      }
+
+      // trajectory has been processed. remove that target from queue.
+      // This will automatically delete the trajectory as well as soon
+      // as we leave this block (thanks to refptr)
+      __arm->target_mutex->lock();
+      __arm->target_queue->pop_front();
+      __arm->target_mutex->unlock();
+      break;
+
+    case TRAJEC_PLANNING_ERROR:
+      logger->log_debug(name(), "Trajectory could not be planned. Abort!");
+      // stop the current and remaining queue, with appropriate error_code. This also sets "final" to true.
+      stop();
+      __arm->iface->set_error_code( JacoInterface::ERROR_PLANNING );
+      break;
+
+    default:
+      //logger->log_debug("Target is trajectory, but not ready yet!");
+      usleep(30e3);
+      break;
+  }
+
 }
 
 
@@ -397,7 +385,6 @@ JacoGotoThread::loop()
 void
 JacoGotoThread::_goto_target()
 {
-
   __finger_last[0] = __arm->iface->finger1();
   __finger_last[1] = __arm->iface->finger2();
   __finger_last[2] = __arm->iface->finger3();
