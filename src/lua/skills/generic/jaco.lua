@@ -84,6 +84,7 @@ fsm:define_states{
    {"STOP", JumpState},
    {"GOTO", JumpState},
    {"GRIPPER", JumpState},
+   {"PARAMS", JumpState},
 
    {"CHECK_FINAL", JumpState},
    {"CHECK_ERROR", JumpState}
@@ -101,6 +102,7 @@ fsm:add_transitions{
    {"READY", "STOP", precond="vars.pos == 'stop'", desc="stop"},
    {"READY", "GOTO", precond="vars.x ~= nil and vars.y ~= nil and vars.z ~= nil", desc="goto parms"},
    {"READY", "GRIPPER", precond="vars.gripper", desc="move gripper"},
+   {"READY", "PARAMS", precond="vars.params", desc="set planner params"},
 
    {"GOTO_HOME", "GOTO", cond=true, desc="params set"},
    {"GOTO_RETRACT", "GOTO", cond=true, desc="params set"},
@@ -113,6 +115,7 @@ fsm:add_transitions{
    {"STOP", "CHECK_FINAL", cond=true, desc="msg sent"},
    {"GOTO", "CHECK_FINAL", cond=true, desc="msg sent"},
    {"GRIPPER", "CHECK_FINAL", cond=true, desc="msg sent"},
+   {"PARAMS", "CHECK_FINAL", cond=true, desc="msg sent"},
 
    {"CHECK_FINAL", "FINAL", precond="vars.no_wait", desc="skip final checking"},
    {"CHECK_FINAL", "CHECK_ERROR", cond=jc_arm_is_final, desc="arm final"},
@@ -223,5 +226,10 @@ function GOTO:init()
    else
       m = iface.CartesianGotoMessage:new(x, y, z, e1, e2, e3)
    end
+   self.fsm.vars.msgid = iface:msgq_enqueue_copy(m)
+end
+
+function PARAMS:init()
+   local m = iface.SetPlannerParamsMessage:new( self.fsm.vars.params )
    self.fsm.vars.msgid = iface:msgq_enqueue_copy(m)
 end
