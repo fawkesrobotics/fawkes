@@ -35,6 +35,10 @@ gcc_atleast_version = $(strip $(if $(call gt,$(GCC_VERSION_MAJOR),$1),1,	\
                          $(if $(call eq,$(GCC_VERSION_MAJOR),$1),		\
                            $(if $(call gte,$(GCC_VERSION_MINOR),$2),1))))
 
+gcc_lessthan_version = $(strip $(if $(call lt,$(GCC_VERSION_MAJOR),$1),1,	\
+                         $(if $(call eq,$(GCC_VERSION_MAJOR),$1),		\
+                           $(if $(call lt,$(GCC_VERSION_MINOR),$2),1))))
+
 # Check für C++0x/C++11 availability
 ifeq ($(call gcc_atleast_version,4,3),1)
   HAVE_CPP11=1
@@ -44,7 +48,29 @@ ifeq ($(call gcc_atleast_version,4,3),1)
   endif
 endif
 
-CFLAGS_MTUNE_NATIVE=-march=native -mtune=native
+ifeq ($(call gcc_lessthan_version,4,7),1)
+  # Older GCC version can screw up CPU identification when running in QEMU KVM
+  IS_QEMU=
+  ifeq ($(OS),FreeBSD)
+    ifneq ($(findstring QEMU,$(shell sysctl hw.model)),)
+      IS_QEMU=1
+    endif
+  endif
+  ifeq ($(OS),Linux)
+    ifneq ($(findstring QEMU,$(shell grep "^model name" /proc/cpuinfo)),)
+      IS_QEMU=1
+    endif
+  endif
+
+  ifeq ($(IS_QEMU),1)
+    CFLAGS_MTUNE_NATIVE=$(shell gcc -march=native -E -v - </dev/null 2>&1 | sed -n 's/.* -v - //p' | sed -e 's/-march=[^ ]*//g' -e 's/-mbmi//g') \
+			-mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-avx
+  else
+    CFLAGS_MTUNE_NATIVE=-march=native -mtune=native
+  endif
+else
+  CFLAGS_MTUNE_NATIVE=-march=native -mtune=native
+endif
 
 OPENMP_LIBRARY = gomp
 CFLAGS_OPENMP  = -fopenmp
