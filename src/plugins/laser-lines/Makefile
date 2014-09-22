@@ -97,7 +97,7 @@ warning_pcl:
 warning_pcl_components:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting laser-lines plugin$(TNORMAL) (missing PCL components: $(call pcl-missing-libs,$(REQUIRED_PCL_LIBS)))"
 warning_old_gcc:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting CLIPS Plugins$(TNORMAL) (GCC too old, have $(GCC_VERSION), required 4.6)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting laser-lines plugin$(TNORMAL) (GCC too old, have $(GCC_VERSION), required 4.6)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
