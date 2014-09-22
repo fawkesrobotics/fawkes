@@ -67,6 +67,9 @@ class JacoOpenraveBaseThread
   void init();
   virtual void finalize();
 
+  virtual void set_plannerparams(const std::string &params);
+  virtual void set_plannerparams(const char* params);
+
   virtual void register_arm(fawkes::jaco_arm_t *arm) = 0;
   virtual void unregister_arms() = 0;
 
@@ -96,6 +99,8 @@ class JacoOpenraveBaseThread
   std::string   __cfg_OR_robot_file;
   bool          __cfg_OR_auto_load_ik;
   float         __cfg_OR_sampling;
+
+  std::string   __plannerparams;
 #endif
 };
 

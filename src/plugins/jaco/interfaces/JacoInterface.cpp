@@ -77,9 +77,10 @@ JacoInterface::JacoInterface() : Interface()
   add_messageinfo("CartesianGotoMessage");
   add_messageinfo("AngularGotoMessage");
   add_messageinfo("MoveGripperMessage");
+  add_messageinfo("SetPlannerParamsMessage");
   add_messageinfo("JoystickPushMessage");
   add_messageinfo("JoystickReleaseMessage");
-  unsigned char tmp_hash[] = {0xbc, 0xfd, 0x89, 0x32, 0x5b, 0x75, 0x37, 0x16, 0x6f, 0x8, 0xbd, 0x72, 0xc, 0x1c, 0x51, 0x65};
+  unsigned char tmp_hash[] = {0xff, 0x31, 0x58, 0x1c, 0x31, 0x7a, 0xc5, 0xb4, 0x2a, 0x56, 0x87, 0x5, 0x34, 0xfe, 0x6, 0x93};
   set_hash(tmp_hash);
 }
 
@@ -607,6 +608,8 @@ JacoInterface::create_message(const char *type) const
     return new AngularGotoMessage();
   } else if ( strncmp("MoveGripperMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new MoveGripperMessage();
+  } else if ( strncmp("SetPlannerParamsMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetPlannerParamsMessage();
   } else if ( strncmp("JoystickPushMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new JoystickPushMessage();
   } else if ( strncmp("JoystickReleaseMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -1455,6 +1458,96 @@ JacoInterface::MoveGripperMessage::clone() const
 {
   return new JacoInterface::MoveGripperMessage(this);
 }
+/** @class JacoInterface::SetPlannerParamsMessage <interfaces/JacoInterface.h>
+ * SetPlannerParamsMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_params initial value for params
+ */
+JacoInterface::SetPlannerParamsMessage::SetPlannerParamsMessage(const char * ini_params) : Message("SetPlannerParamsMessage")
+{
+  data_size = sizeof(SetPlannerParamsMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetPlannerParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->params, ini_params, 1024);
+  add_fieldinfo(IFT_STRING, "params", 1024, data->params);
+}
+/** Constructor */
+JacoInterface::SetPlannerParamsMessage::SetPlannerParamsMessage() : Message("SetPlannerParamsMessage")
+{
+  data_size = sizeof(SetPlannerParamsMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetPlannerParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "params", 1024, data->params);
+}
+
+/** Destructor */
+JacoInterface::SetPlannerParamsMessage::~SetPlannerParamsMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoInterface::SetPlannerParamsMessage::SetPlannerParamsMessage(const SetPlannerParamsMessage *m) : Message("SetPlannerParamsMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetPlannerParamsMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get params value.
+ * Planner parameters
+ * @return params value
+ */
+char *
+JacoInterface::SetPlannerParamsMessage::params() const
+{
+  return data->params;
+}
+
+/** Get maximum length of params value.
+ * @return length of params value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoInterface::SetPlannerParamsMessage::maxlenof_params() const
+{
+  return 1024;
+}
+
+/** Set params value.
+ * Planner parameters
+ * @param new_params new params value
+ */
+void
+JacoInterface::SetPlannerParamsMessage::set_params(const char * new_params)
+{
+  strncpy(data->params, new_params, sizeof(data->params));
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoInterface::SetPlannerParamsMessage::clone() const
+{
+  return new JacoInterface::SetPlannerParamsMessage(this);
+}
 /** @class JacoInterface::JoystickPushMessage <interfaces/JacoInterface.h>
  * JoystickPushMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1622,12 +1715,16 @@ JacoInterface::message_valid(const Message *message) const
   if ( m5 != NULL ) {
     return true;
   }
-  const JoystickPushMessage *m6 = dynamic_cast<const JoystickPushMessage *>(message);
+  const SetPlannerParamsMessage *m6 = dynamic_cast<const SetPlannerParamsMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const JoystickReleaseMessage *m7 = dynamic_cast<const JoystickReleaseMessage *>(message);
+  const JoystickPushMessage *m7 = dynamic_cast<const JoystickPushMessage *>(message);
   if ( m7 != NULL ) {
+    return true;
+  }
+  const JoystickReleaseMessage *m8 = dynamic_cast<const JoystickReleaseMessage *>(message);
+  if ( m8 != NULL ) {
     return true;
   }
   return false;

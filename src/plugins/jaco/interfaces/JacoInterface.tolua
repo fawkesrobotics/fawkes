@@ -100,6 +100,17 @@ class JacoInterface : public Interface
     int maxlenof_finger3() const;
   };
 
+  class SetPlannerParamsMessage : public Message
+  {
+    SetPlannerParamsMessage(char * ini_params);
+    SetPlannerParamsMessage();
+    ~SetPlannerParamsMessage();
+
+    char * params();
+    void set_params(const char * new_params);
+    int maxlenof_params() const;
+  };
+
   class JoystickPushMessage : public Message
   {
     JoystickPushMessage(unsigned int ini_button);

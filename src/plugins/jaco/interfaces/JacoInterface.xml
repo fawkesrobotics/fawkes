@@ -78,6 +78,11 @@
     <field type="float" name="finger3">Value of finger 3. Range [0,60]</field>
   </message>
 
+  <message name="SetPlannerParams">
+    <comment>Set plannerparams that can be added to OpenRAVE's BaseManipulation module.</comment>
+    <field type="string" length="1024" name="params">Planner parameters</field>
+  </message>
+
   <message name="JoystickPush">
     <comment>Push and hold(!) a joystick button</comment>
     <field type="uint32" name="button">Button ID to push.</field>

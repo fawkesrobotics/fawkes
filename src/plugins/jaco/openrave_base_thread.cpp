@@ -54,6 +54,7 @@ JacoOpenraveBaseThread::JacoOpenraveBaseThread(const char *name)
 {
 #ifdef HAVE_OPENRAVE
   __cfg_OR_auto_load_ik = false;
+  __plannerparams = "";
 #endif
 }
 
@@ -105,4 +106,16 @@ JacoOpenraveBaseThread::finalize()
   __viewer_env.manip = NULL;
   __viewer_env.env = NULL;
 #endif
+}
+
+void
+JacoOpenraveBaseThread::set_plannerparams(const std::string &params)
+{
+  __plannerparams = params;
+}
+
+void
+JacoOpenraveBaseThread::set_plannerparams(const char* params)
+{
+  __plannerparams = params;
 }

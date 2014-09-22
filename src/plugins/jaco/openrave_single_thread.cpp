@@ -402,7 +402,7 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
   __planner_env.manip->set_angles_device(from->pos);
 
   // Set planning parameters (none yet)
-  __planner_env.robot->set_target_plannerparams("");
+  __planner_env.robot->set_target_plannerparams(__plannerparams);
 
   // Run planner
   try {

@@ -461,6 +461,14 @@ JacoActThread::_process_msgs_arm(jaco_arm_t &arm)
       arm.goto_thread->stop();
       arm.goto_thread->pos_retract();
 
+    } else if( arm.iface->msgq_first_is<JacoInterface::SetPlannerParamsMessage>() ) {
+      JacoInterface::SetPlannerParamsMessage *msg = arm.iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: SetPlannerParamsMessage rcvd. params:%s", arm.iface->id(), msg->params());
+
+    #ifdef HAVE_OPENRAVE
+      arm.openrave_thread->set_plannerparams(msg->params());
+    #endif
+
     } else if( arm.iface->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {
       JacoInterface::CartesianGotoMessage *msg = arm.iface->msgq_first(msg);
       logger->log_debug(name(), "%s: CartesianGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f", arm.iface->id(),
