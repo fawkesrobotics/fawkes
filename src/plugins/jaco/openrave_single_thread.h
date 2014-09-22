@@ -36,7 +36,7 @@
 class JacoOpenraveSingleThread : public JacoOpenraveBaseThread
 {
  public:
-  JacoOpenraveSingleThread(const char *name, const char *manipname, fawkes::jaco_arm_t* arm, bool load_robot=true);
+  JacoOpenraveSingleThread(const char *name, fawkes::jaco_arm_t* arm, bool load_robot=true);
 
   virtual void once();
   virtual void loop();
@@ -53,12 +53,14 @@ class JacoOpenraveSingleThread : public JacoOpenraveBaseThread
   virtual void run() { Thread::run(); }
 
  private:
+  void _init();
   void _load_robot();
+
   void _plan_path(fawkes::RefPtr<fawkes::jaco_target_t> &from, fawkes::RefPtr<fawkes::jaco_target_t> &to);
 
   fawkes::jaco_arm_t  *__arm;
 
-  std::string __manipname;
+  std::string __cfg_manipname;
   bool        __load_robot;
 
 #ifdef HAVE_OPENRAVE

@@ -40,10 +40,6 @@
  using namespace OpenRAVE;
 #endif
 
-// manipulator names in OpenRAVE
-#define ARM_L "arm_left"
-#define ARM_R "arm_right"
-
 using namespace fawkes;
 
 /** @class JacoOpenraveDualThread "openrave_dual_thread.h"
@@ -58,13 +54,22 @@ using namespace fawkes;
 JacoOpenraveDualThread::JacoOpenraveDualThread(jaco_arm_t *arm_l, jaco_arm_t *arm_r)
   : JacoOpenraveBaseThread("JacoOpenraveDualThread")
 {
-  __arms.left = arm_l;
-  __arms.right = arm_r;
+  __arms.left.arm = arm_l;
+  __arms.right.arm = arm_r;
+#ifdef HAVE_OPENRAVE
+  __planner_env.env   = NULL;
+  __planner_env.robot = NULL;
+  __planner_env.manip = NULL;
+#endif
 }
 
 void
 JacoOpenraveDualThread::_init()
 {
+#ifdef HAVE_OPENRAVE
+  __arms.left.manipname  = config->get_string("/hardware/jaco/openrave/manipname/dual_left");
+  __arms.right.manipname = config->get_string("/hardware/jaco/openrave/manipname/dual_right");
+#endif
 }
 
 void
@@ -99,15 +104,13 @@ JacoOpenraveDualThread::_load_robot()
 
     EnvironmentMutex::scoped_lock lock(__viewer_env.env->get_env_ptr()->GetMutex());
 
-    __viewer_env.robot->get_robot_ptr()->SetActiveManipulator(ARM_R);
-    __manips.right = __viewer_env.robot->get_robot_ptr()->GetActiveManipulator();
+    __arms.right.manip = __viewer_env.robot->get_robot_ptr()->SetActiveManipulator(__arms.right.manipname);
     if( __cfg_OR_auto_load_ik ) {
       logger->log_debug(name(), "load IK for right arm");
       __viewer_env.env->load_IK_solver(__viewer_env.robot, OpenRAVE::IKP_Transform6D);
     }
 
-    __viewer_env.robot->get_robot_ptr()->SetActiveManipulator(ARM_L);
-    __manips.left = __viewer_env.robot->get_robot_ptr()->GetActiveManipulator();
+    __arms.left.manip = __viewer_env.robot->get_robot_ptr()->SetActiveManipulator(__arms.left.manipname);
     if( __cfg_OR_auto_load_ik ) {
       logger->log_debug(name(), "load IK for left arm");
       __viewer_env.env->load_IK_solver(__viewer_env.robot, OpenRAVE::IKP_Transform6D);
@@ -123,8 +126,8 @@ JacoOpenraveDualThread::_load_robot()
 
 void
 JacoOpenraveDualThread::finalize() {
-  __arms.left = NULL;
-  __arms.right = NULL;
+  __arms.left.arm = NULL;
+  __arms.right.arm = NULL;
 #ifdef HAVE_OPENRAVE
   openrave->set_active_robot( NULL );
 

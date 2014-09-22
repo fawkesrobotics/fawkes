@@ -54,7 +54,7 @@ JacoPlugin::JacoPlugin(Configuration *config)
     JacoInfoThread* info_thread = new JacoInfoThread("JacoInfoThread", arm);
     JacoGotoThread* goto_thread = new JacoGotoThread("JacoGotoThread", arm);
 #ifdef HAVE_OPENRAVE
-    JacoOpenraveSingleThread* openrave_thread = new JacoOpenraveSingleThread("JacoOpenraveThread", "fingertip", arm);
+    JacoOpenraveSingleThread* openrave_thread = new JacoOpenraveSingleThread("JacoOpenraveThread", arm);
 #endif
 
     arm->goto_thread = goto_thread;
@@ -85,8 +85,8 @@ JacoPlugin::JacoPlugin(Configuration *config)
 #ifdef HAVE_OPENRAVE
     // each arm gets 1 openrave-thread, providing planning and updating the openrave-model of that arm.
     // additionally we need a separate openrave thread for planning symmetric bimanual manipulation.
-    JacoOpenraveSingleThread* openrave_thread_l = new JacoOpenraveSingleThread("JacoOpenraveThreadLeft", "arm_left", arm_l, /*load_robot=*/false);
-    JacoOpenraveSingleThread* openrave_thread_r = new JacoOpenraveSingleThread("JacoOpenraveThreadRight", "arm_right", arm_r, /*load_robot=*/false);
+    JacoOpenraveSingleThread* openrave_thread_l = new JacoOpenraveSingleThread("JacoOpenraveThreadLeft", arm_l, /*load_robot=*/false);
+    JacoOpenraveSingleThread* openrave_thread_r = new JacoOpenraveSingleThread("JacoOpenraveThreadRight", arm_r, /*load_robot=*/false);
 #endif
 
     arm_l->goto_thread = goto_thread_l;

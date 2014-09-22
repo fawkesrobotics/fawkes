@@ -52,18 +52,22 @@ class JacoOpenraveDualThread : public JacoOpenraveBaseThread
   void _init();
   void _load_robot();
 
+  typedef struct arm_struct {
+    fawkes::jaco_arm_t *arm;
+#ifdef HAVE_OPENRAVE
+    std::string manipname;
+    OpenRAVE::RobotBase::ManipulatorPtr manip;
+    std::vector<OpenRAVE::dReal> joints;
+#endif
+  } arm_struct_t;
+
   struct {
-    fawkes::jaco_arm_t *left;
-    fawkes::jaco_arm_t *right;
+    arm_struct_t left;
+    arm_struct_t right;
   } __arms;
 
 #ifdef HAVE_OPENRAVE
-  struct {
-    OpenRAVE::RobotBase::ManipulatorPtr left;
-    OpenRAVE::RobotBase::ManipulatorPtr right;
-    std::vector<OpenRAVE::dReal> joints_l;
-    std::vector<OpenRAVE::dReal> joints_r;
-  } __manips;
+  fawkes::jaco_openrave_set_t __planner_env;
 #endif
 
 };

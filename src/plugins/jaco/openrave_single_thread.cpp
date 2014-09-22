@@ -53,11 +53,10 @@ using namespace std;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoOpenraveSingleThread::JacoOpenraveSingleThread(const char *name, const char *manipname, jaco_arm_t* arm, bool load_robot)
+JacoOpenraveSingleThread::JacoOpenraveSingleThread(const char *name, jaco_arm_t* arm, bool load_robot)
   : JacoOpenraveBaseThread(name)
 {
   __arm = arm;
-  __manipname = manipname;
   __load_robot = load_robot;
 #ifdef HAVE_OPENRAVE
   __planner_env.env   = NULL;
@@ -66,6 +65,27 @@ JacoOpenraveSingleThread::JacoOpenraveSingleThread(const char *name, const char 
 #endif
 }
 
+void
+JacoOpenraveSingleThread::_init()
+{
+  switch( __arm->config ) {
+    case CONFIG_SINGLE:
+      __cfg_manipname = config->get_string("/hardware/jaco/openrave/manipname/single");
+      break;
+
+    case CONFIG_LEFT:
+      __cfg_manipname = config->get_string("/hardware/jaco/openrave/manipname/dual_left");
+      break;
+
+    case CONFIG_RIGHT:
+      __cfg_manipname = config->get_string("/hardware/jaco/openrave/manipname/dual_right");
+      break;
+
+    default:
+      throw fawkes::Exception("Could not read manipname from config.");
+      break;
+  }
+}
 
 void
 JacoOpenraveSingleThread::_load_robot()
@@ -126,7 +146,7 @@ JacoOpenraveSingleThread::once()
   }
   while( !__manip ) {
     EnvironmentMutex::scoped_lock lock(__viewer_env.env->get_env_ptr()->GetMutex());
-    __manip = __robot->SetActiveManipulator(__manipname);
+    __manip = __robot->SetActiveManipulator(__cfg_manipname);
     usleep(100);
   }
 
@@ -141,14 +161,9 @@ JacoOpenraveSingleThread::once()
   // set active manipulator in planning environment
   {
     EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
-    RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__manipname);
+    RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__cfg_manipname);
     __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
   }
-
-  //~ if(__manipname=="arm_left")
-    //~ __planner_env.env->start_viewer();
-
-  __planner_env.env->enable_debug(Level_Verbose);
 #endif //HAVE_OPENRAVE
 }
 
@@ -380,7 +395,7 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
     }
 
     // Set active manipulator and active DOFs (need for planner and IK solver!)
-    RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__manipname);
+    RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__cfg_manipname);
     __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
   }
 
