@@ -22,9 +22,11 @@ __buildsys_protobuf_mk_ := 1
 
 PROTOBUF_PROTOC = protoc
 
+__PROTOBUF_INCLUDE_PATHS=/usr/include /usr/local/include
+
 ifneq ($(PKGCONFIG),)
   HAVE_PROTOBUF_LIB = $(if $(shell $(PKGCONFIG) --exists 'protobuf'; echo $${?/1/}),1,0)
-  HAVE_PROTOBUF_COMPLIB = $(if $(wildcard /usr/include/google/protobuf/compiler/importer.h),1)
+  HAVE_PROTOBUF_COMPLIB = $(if $(wildcard $(addsuffix /google/protobuf/compiler/importer.h,$(__PROTOBUF_INCLUDE_PATHS))),1)
   HAVE_PROTOBUF_COMP = $(if $(shell type -p $(PROTOBUF_PROTOC); echo $${?/1/}),1,0)
   ifeq ($(HAVE_PROTOBUF_LIB)$(HAVE_PROTOBUF_COMP)$(HAVE_PROTOBUF_COMPLIB),111)
     HAVE_PROTOBUF = 1
