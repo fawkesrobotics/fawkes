@@ -87,8 +87,13 @@ class MessageRegister : boost::noncopyable
   {
     KeyType key(component_id, msg_type);
     if (message_by_comp_type_.find(key) != message_by_comp_type_.end()) {
+#if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
+      std::string msg = "Message type " + std::to_string((long long)component_id) + ":" +
+	std::to_string((long long)msg_type) + " already registered";
+#else
       std::string msg = "Message type " + std::to_string(component_id) + ":" +
 	std::to_string(msg_type) + " already registered";
+#endif
       throw std::runtime_error(msg);
     }
     MT *m = new MT();
@@ -108,8 +113,13 @@ class MessageRegister : boost::noncopyable
     const google::protobuf::Descriptor *desc = m.GetDescriptor();
     KeyType key = key_from_desc(desc);
     if (message_by_comp_type_.find(key) != message_by_comp_type_.end()) {
+#if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
+      std::string msg = "Message type " + std::to_string((long long int)key.first) + ":" +
+	std::to_string((long long int)key.second) + " already registered";
+#else
       std::string msg = "Message type " + std::to_string(key.first) + ":" +
 	std::to_string(key.second) + " already registered";
+#endif
       throw std::runtime_error(msg);
     }
     MT *new_m = new MT();

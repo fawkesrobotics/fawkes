@@ -459,6 +459,9 @@ ProtobufStreamServer::disconnect(ClientID client)
 void
 ProtobufStreamServer::start_accept()
 {
+#if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7))
+  std::lock_guard<std::mutex> lock(next_cid_mutex_);
+#endif
   Session::Ptr new_session(new Session(next_cid_++, this, io_service_));
   acceptor_.async_accept(new_session->socket(),
 			 boost::bind(&ProtobufStreamServer::handle_accept, this,

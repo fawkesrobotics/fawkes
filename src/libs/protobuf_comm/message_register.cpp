@@ -160,8 +160,13 @@ MessageRegister::add_message_type(std::string msg_type)
     KeyType key = key_from_desc(m->GetDescriptor());
     std::lock_guard<std::mutex> lock(maps_mutex_);
     if (message_by_comp_type_.find(key) != message_by_comp_type_.end()) {
+#if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
+      std::string msg = "Message type " + std::to_string((long long)key.first) + ":" +
+	std::to_string((long long)key.second) + " already registered";
+#else
       std::string msg = "Message type " + std::to_string(key.first) + ":" +
 	std::to_string(key.second) + " already registered";
+#endif
       throw std::runtime_error(msg);
     }
     //printf("Registering %s (%u:%u)\n", msg_type.c_str(), key.first, key.second);
@@ -227,8 +232,13 @@ MessageRegister::new_message_for(uint16_t component_id, uint16_t msg_type)
 
   std::lock_guard<std::mutex> lock(maps_mutex_);
   if (message_by_comp_type_.find(key) == message_by_comp_type_.end()) {
+#if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
+    std::string msg = "Message type " + std::to_string((long long)component_id) + ":" +
+      std::to_string((long long)msg_type) + " not registered";
+#else
     std::string msg = "Message type " + std::to_string(component_id) + ":" +
       std::to_string(msg_type) + " not registered";
+#endif
     throw std::runtime_error(msg);
   }
 

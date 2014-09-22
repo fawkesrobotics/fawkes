@@ -127,11 +127,19 @@ ProtobufStreamClient::~ProtobufStreamClient()
   }
 }
 
+#if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
+static void run_asio_thread(boost::asio::io_service &io_service)
+{ io_service.run(); }
+#endif
 
 void
 ProtobufStreamClient::run_asio()
 {
+#if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
+  asio_thread_ = std::thread(run_asio_thread, std::ref(io_service_));
+#else
   asio_thread_ = std::thread([this]() { this->io_service_.run(); });
+#endif
 }
 
 

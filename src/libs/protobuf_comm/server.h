@@ -52,7 +52,9 @@
 #include <thread>
 #include <mutex>
 #include <queue>
-#include <atomic>
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
+#  include <atomic>
+#endif
 
 namespace protobuf_comm {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -189,7 +191,12 @@ class ProtobufStreamServer
 
   std::map<ClientID, boost::shared_ptr<Session>> sessions_;
 
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
   std::atomic<ClientID> next_cid_;
+#else
+  ClientID next_cid_;
+  std::mutex next_cid_mutex_;
+#endif
 
   MessageRegister *message_register_;
   bool             own_message_register_;
