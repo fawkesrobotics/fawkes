@@ -45,12 +45,8 @@ namespace fawkes {
   class CRoboShape_Colli;
   typedef struct point_struct point_t;
 }
-#endif
 
 class ColliVisualizationThread
-#ifndef HAVE_VISUAL_DEBUGGING
-{
-#else
 : public fawkes::Thread,
   public fawkes::TransformAspect,
   public fawkes::ConfigurableAspect,
@@ -90,7 +86,7 @@ class ColliVisualizationThread
   std::vector<fawkes::point_t> cells_far_;
   std::vector<fawkes::point_t> cells_free_;
 
-#endif
 };
 
+#endif
 #endif
