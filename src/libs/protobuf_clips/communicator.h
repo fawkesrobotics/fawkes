@@ -98,7 +98,8 @@ class ClipsProtobufCommunicator
   /** Signal invoked for a message that has been sent via broadcast.
    * @return signal
    */
-  boost::signals2::signal<void (long int, std::shared_ptr<google::protobuf::Message>)> &
+  boost::signals2::signal<void (long,
+				std::shared_ptr<google::protobuf::Message>)> &
     signal_peer_sent() { return sig_peer_sent_; }
 
  private:
