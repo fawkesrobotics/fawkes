@@ -10,20 +10,38 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
   # Configuration settings for the joystick-teleop plugin
   # The example configuration is suitable for an Xbox 360 controller
   teleop:
-    # Axis index for forward/backward movement
-    axis_forward: 1
-
-    # Axis index for sideward movement
+    # Axes index for forward/backward, sideward, and rotational movement
+    # To find out the proper axes for your joystick run:
+    # jstest /dev/input/js0
+    # (replace the device path with the device_file configured above)
+    # Then move the axis you want to use and note and set its index here
+    axis_forward:  1
     axis_sideward: 0
-
-    # Axis index for rotational movement
     axis_rotation: 3
 
-    # Maximum velocity forward; m/s
-    max_vx: 1.5
+    # Accept axis value if its absolute value is above this threshold
+    axis_threshold: 0.2
 
-    # Maximum velocity sideward; m/s
-    max_vy: 1.5
+    # Use a joystick axis as deadman switch. To disable this, simply
+    # comment out the following line. Determine the axis the same way
+    # as above, but additionally note above or below which value the
+    # deadman switch should activate. If you set the threshold to a
+    # negative value, the robot will only move if the axis value is
+    # less than this value. If it is positive, the axis value must be
+    # greater than this value.
+    # Pressing any button will always allow movement.
+    axis_deadman: 5
+    axis_deadman_threshold: -0.1
+
+    # Maximum velocity forward and sideward; m/s
+    max_vx: 0.6
+    max_vy: 0.6
 
     # Maximum rotation; rad/s
     max_omega: 1.57
+
+    # Interface ID for MotorInterface to send TransRotMessages to.
+    motor_interface_id: Motor
+
+    # Interface ID for JoystickInterface to read data from
+    joystick_interface_id: Joystick

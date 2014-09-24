@@ -64,9 +64,17 @@ class JoystickTeleOpThread
   unsigned int cfg_axis_forward_;
   unsigned int cfg_axis_sideward_;
   unsigned int cfg_axis_rotation_;
+  bool         cfg_use_axis_deadman_;
+  unsigned int cfg_axis_deadman_;
+  float        cfg_axis_threshold_;
+  float        cfg_deadman_threshold_;
   float        cfg_max_vx_;
   float        cfg_max_vy_;
   float        cfg_max_omega_;
+  std::string  cfg_ifid_motor_;
+  std::string  cfg_ifid_joystick_;
+
+  bool         stopped_;
 };
 
 
