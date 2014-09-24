@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  joystick_thread.h - Robotino joystick thread
+ *  joystick_teleop_thread.h - Joystick teleop thread
  *
- *  Created: Sun Nov 13 23:22:29 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Created: Sun Nov 13 23:22:29 2011 (as part of the robotino plugin)
+ *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROBOTINO_ACT_THREAD_H_
-#define __PLUGINS_ROBOTINO_ACT_THREAD_H_
+#ifndef __PLUGINS_JOYSTICK_JOYSTICK_TELEOP_THREAD_H_
+#define __PLUGINS_JOYSTICK_JOYSTICK_TELEOP_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -36,7 +35,7 @@ namespace fawkes {
   class JoystickInterface;
 }
 
-class RobotinoJoystickThread
+class JoystickTeleOpThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -44,7 +43,7 @@ class RobotinoJoystickThread
   public fawkes::BlackBoardAspect
 {
  public:
-  RobotinoJoystickThread();
+  JoystickTeleOpThread();
 
   virtual void init();
   virtual void loop();

@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  joystick_thread.cpp - Robotino joystick thread
+ *  joystick_teleop_thread.cpp - Joystick teleop thread
  *
- *  Created: Sun Nov 13 16:07:40 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Created: Sun Nov 13 16:07:40 2011 (as part of the robotino plugin)
+ *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,37 +19,35 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "joystick_thread.h"
+#include "joystick_teleop_thread.h"
 
 #include <interfaces/MotorInterface.h>
 #include <interfaces/JoystickInterface.h>
 
 #include <cmath>
 
-#define CFG_PREFIX "/hardware/robotino/joystick/"
+#define CFG_PREFIX "/hardware/joystick/teleop/"
 #define CFG_AXIS_FORWARD   CFG_PREFIX"axis_forward"
 #define CFG_AXIS_SIDEWARD  CFG_PREFIX"axis_sideward"
 #define CFG_AXIS_ROTATION  CFG_PREFIX"axis_rotation"
 
 using namespace fawkes;
 
-/** @class RobotinoJoystickThread "joystick_thread.h"
- * Robotino act hook integration thread.
- * This thread integrates into the Fawkes main loop at the ACT hook and
- * executes motion commands.
+/** @class JoystickTeleOpThread "joystick_teleop_thread.h"
+ * Remotely control a robot using a joystick.
  * @author Tim Niemueller
  */
 
 /** Constructor. */
-RobotinoJoystickThread::RobotinoJoystickThread()
-  : Thread("RobotinoJoystickThread", Thread::OPMODE_WAITFORWAKEUP),
+JoystickTeleOpThread::JoystickTeleOpThread()
+  : Thread("JoystickTeleOpThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL)
 {
 }
 
 
 void
-RobotinoJoystickThread::init()
+JoystickTeleOpThread::init()
 {
   cfg_axis_forward_   = config->get_uint(CFG_AXIS_FORWARD);
   cfg_axis_sideward_  = config->get_uint(CFG_AXIS_SIDEWARD);
@@ -67,21 +64,21 @@ RobotinoJoystickThread::init()
 
 
 bool
-RobotinoJoystickThread::prepare_finalize_user()
+JoystickTeleOpThread::prepare_finalize_user()
 {
   stop();
   return true;
 }
 
 void
-RobotinoJoystickThread::finalize()
+JoystickTeleOpThread::finalize()
 {
   blackboard->close(motor_if_);
   blackboard->close(joystick_if_);
 }
 
 void
-RobotinoJoystickThread::send_transrot(float vx, float vy, float omega)
+JoystickTeleOpThread::send_transrot(float vx, float vy, float omega)
 {
   MotorInterface::TransRotMessage *msg =
     new MotorInterface::TransRotMessage(vx, vy, omega);
@@ -90,13 +87,13 @@ RobotinoJoystickThread::send_transrot(float vx, float vy, float omega)
 
 
 void
-RobotinoJoystickThread::stop()
+JoystickTeleOpThread::stop()
 {
   send_transrot(0., 0., 0.);
 }
 
 void
-RobotinoJoystickThread::loop()
+JoystickTeleOpThread::loop()
 {
   joystick_if_->read();
 
