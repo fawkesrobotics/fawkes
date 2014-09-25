@@ -96,16 +96,24 @@ JoystickTeleOpThread::finalize()
 void
 JoystickTeleOpThread::send_transrot(float vx, float vy, float omega)
 {
-  MotorInterface::TransRotMessage *msg =
-    new MotorInterface::TransRotMessage(vx, vy, omega);
-  motor_if_->msgq_enqueue(msg);
-  stopped_ = false;
+  if (! motor_if_->has_writer())  return;
+
+  try {
+    MotorInterface::TransRotMessage *msg =
+      new MotorInterface::TransRotMessage(vx, vy, omega);
+    motor_if_->msgq_enqueue(msg);
+    stopped_ = false;
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Failed to send transrot: %s", e.what_no_backtrace());
+  }
 }
 
 
 void
 JoystickTeleOpThread::stop()
 {
+  if (! motor_if_->has_writer())  return;
+
   send_transrot(0., 0., 0.);
   stopped_ = true;
 }
