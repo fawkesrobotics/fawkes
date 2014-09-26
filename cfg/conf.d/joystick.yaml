@@ -22,17 +22,28 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
     # Accept axis value if its absolute value is above this threshold
     axis_threshold: 0.2
 
-    # Use a joystick axis as deadman switch. To disable this, simply
-    # comment out the following line. Determine the axis the same way
-    # as above, but additionally note above or below which value the
-    # deadman switch should activate. If you set the threshold to a
-    # negative value, the robot will only move if the axis value is
-    # less than this value. If it is positive, the axis value must be
-    # greater than this value.
-    # Pressing any button will always allow movement.
-    axis_deadman: 5
-    axis_deadman_threshold: -0.1
+    # Deadman settings, only if the button or axis is active movement
+    # commands are executed. As soon as they are released the robot stops.
+    # At least one of the two methods must be configured, or the robot
+    # won't move at all.
+    
+    # Deadman axis
+    # Configure an axis and a threshold. For a negative threshold,
+    # movement is allowed if the axis value is less than the given value.
+    # If positive, movements are executed if the axis value is greater
+    # than the configured value. To disable using an axis as deadman
+    # switch comment out the following line.
+    deadman_axis: 5
+    deadman_axis_threshold: -0.1
 
+    # Deadman button
+    # The button mask is AND'ed to the JoystickInterface::pressed_buttons
+    # field. If the resulting value is non-zero, the robot executes
+    # movement commands. To get the appropriate value sum up values of
+    # the appropriate BUTTON_* constants of the JoystickInterface.
+    # To react to all buttons, set value to 4294967295.
+    deadman_button_mask: 4294967295
+    
     # Maximum velocity forward and sideward; m/s
     max_vx: 0.6
     max_vy: 0.6

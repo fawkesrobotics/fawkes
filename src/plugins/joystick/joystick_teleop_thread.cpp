@@ -54,21 +54,23 @@ JoystickTeleOpThread::init()
   cfg_axis_rotation_  = config->get_uint(CFG_PREFIX"axis_rotation");
   cfg_axis_threshold_ = config->get_float(CFG_PREFIX"axis_threshold");
 
-  cfg_use_axis_deadman_ = false;
+  cfg_deadman_use_axis_ = false;
   try {
-    cfg_axis_deadman_      = config->get_uint(CFG_PREFIX"axis_deadman");
-    cfg_deadman_threshold_ = config->get_float(CFG_PREFIX"axis_deadman_threshold");
-    cfg_use_axis_deadman_ = true;
+    cfg_deadman_axis_      = config->get_uint(CFG_PREFIX"deadman_axis");
+    cfg_deadman_ax_thresh_ = config->get_float(CFG_PREFIX"deadman_axis_threshold");
+    cfg_deadman_use_axis_  = true;
   } catch (Exception &e) {
     logger->log_debug(name(), "No deadman axis configured, ignoring");
   }
 
-  cfg_max_vx_         = config->get_float(CFG_PREFIX"max_vx");
-  cfg_max_vy_         = config->get_float(CFG_PREFIX"max_vy");
-  cfg_max_omega_      = config->get_float(CFG_PREFIX"max_omega");
+  cfg_deadman_butmask_ = config->get_uint(CFG_PREFIX"deadman_button_mask");
 
-  cfg_ifid_motor_     = config->get_string(CFG_PREFIX"motor_interface_id");
-  cfg_ifid_joystick_  = config->get_string(CFG_PREFIX"joystick_interface_id");
+  cfg_max_vx_          = config->get_float(CFG_PREFIX"max_vx");
+  cfg_max_vy_          = config->get_float(CFG_PREFIX"max_vy");
+  cfg_max_omega_       = config->get_float(CFG_PREFIX"max_omega");
+
+  cfg_ifid_motor_      = config->get_string(CFG_PREFIX"motor_interface_id");
+  cfg_ifid_joystick_   = config->get_string(CFG_PREFIX"joystick_interface_id");
 
 
   motor_if_ = blackboard->open_for_reading<MotorInterface>(cfg_ifid_motor_.c_str());
@@ -129,15 +131,15 @@ JoystickTeleOpThread::loop()
   } else if ((cfg_axis_forward_ > joystick_if_->num_axes() ||
 	      cfg_axis_sideward_ > joystick_if_->num_axes() ||
 	      cfg_axis_rotation_ > joystick_if_->num_axes() ||
-	      (cfg_use_axis_deadman_ && cfg_axis_deadman_ > joystick_if_->num_axes()))
+	      (cfg_deadman_use_axis_ && cfg_deadman_axis_ > joystick_if_->num_axes()))
 	     && ! stopped_)
   {
     logger->log_warn(name(), "Axis number out of range, stopping");
     stop();
-  } else if (joystick_if_->pressed_buttons() != 0 ||
-	     (cfg_use_axis_deadman_ &&
-	      ((cfg_deadman_threshold_ >= 0 && joystick_if_->axis(cfg_axis_deadman_) > cfg_deadman_threshold_) ||
-	       (cfg_deadman_threshold_ <  0 && joystick_if_->axis(cfg_axis_deadman_) < cfg_deadman_threshold_))))
+  } else if ((joystick_if_->pressed_buttons() & cfg_deadman_butmask_) ||
+	     (cfg_deadman_use_axis_ &&
+	      ((cfg_deadman_ax_thresh_ >= 0 && joystick_if_->axis(cfg_deadman_axis_) > cfg_deadman_ax_thresh_) ||
+	       (cfg_deadman_ax_thresh_ <  0 && joystick_if_->axis(cfg_deadman_axis_) < cfg_deadman_ax_thresh_))))
   {
     if (fabsf(joystick_if_->axis(cfg_axis_forward_)) < cfg_axis_threshold_ &&
 	fabsf(joystick_if_->axis(cfg_axis_sideward_)) < cfg_axis_threshold_ &&

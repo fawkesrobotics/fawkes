@@ -64,10 +64,11 @@ class JoystickTeleOpThread
   unsigned int cfg_axis_forward_;
   unsigned int cfg_axis_sideward_;
   unsigned int cfg_axis_rotation_;
-  bool         cfg_use_axis_deadman_;
-  unsigned int cfg_axis_deadman_;
   float        cfg_axis_threshold_;
-  float        cfg_deadman_threshold_;
+  bool         cfg_deadman_use_axis_;
+  unsigned int cfg_deadman_axis_;
+  float        cfg_deadman_ax_thresh_;
+  unsigned int cfg_deadman_butmask_;
   float        cfg_max_vx_;
   float        cfg_max_vy_;
   float        cfg_max_omega_;
