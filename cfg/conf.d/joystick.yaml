@@ -43,13 +43,35 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
     # the appropriate BUTTON_* constants of the JoystickInterface.
     # To react to all buttons, set value to 4294967295.
     deadman_button_mask: 4294967295
-    
-    # Maximum velocity forward and sideward; m/s
-    max_vx: 0.6
-    max_vy: 0.6
 
+    # Drive mode switching
+    # Certain button or an axis can be configured that will allow to
+    # use a different drive mode as long as the button is pushed.
+    # The initial drive mode is "normal". As long as any of the
+    # drive mode switching conditions below applies, the "special"
+    # drive mode is used.
+    # For example, during demos you can default to a slow "normal"
+    # mode and allow for a faster special for more experienced users.
+    # The other way around can be used for normal cruising speed and
+    # special slower speed for fine movement.
+    # The conditions work the same way as the deadman switch documented
+    # above.
+    drive_mode_button_mask: 0
+    drive_mode_axis: 6
+    drive_mode_axis_threshold: -0.2
+
+    # Maximum velocity forward and sideward; m/s
     # Maximum rotation; rad/s
-    max_omega: 1.57
+    drive_modes:
+      normal:
+        max_vx: 0.6
+        max_vy: 0.6
+        max_omega: 1.57
+
+      special:
+        max_vx: 0.3
+        max_vy: 0.3
+        max_omega: 1.0
 
     # Interface ID for MotorInterface to send TransRotMessages to.
     motor_interface_id: Motor

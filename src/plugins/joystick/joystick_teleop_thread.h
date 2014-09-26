@@ -69,9 +69,16 @@ class JoystickTeleOpThread
   unsigned int cfg_deadman_axis_;
   float        cfg_deadman_ax_thresh_;
   unsigned int cfg_deadman_butmask_;
-  float        cfg_max_vx_;
-  float        cfg_max_vy_;
-  float        cfg_max_omega_;
+  bool         cfg_drive_mode_use_axis_;
+  unsigned int cfg_drive_mode_axis_;
+  float        cfg_drive_mode_ax_thresh_;
+  unsigned int cfg_drive_mode_butmask_;
+  float        cfg_normal_max_vx_;
+  float        cfg_normal_max_vy_;
+  float        cfg_normal_max_omega_;
+  float        cfg_special_max_vx_;
+  float        cfg_special_max_vy_;
+  float        cfg_special_max_omega_;
   std::string  cfg_ifid_motor_;
   std::string  cfg_ifid_joystick_;
 

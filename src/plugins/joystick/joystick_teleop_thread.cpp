@@ -62,16 +62,28 @@ JoystickTeleOpThread::init()
   } catch (Exception &e) {
     logger->log_debug(name(), "No deadman axis configured, ignoring");
   }
+  cfg_deadman_butmask_   = config->get_uint(CFG_PREFIX"deadman_button_mask");
 
-  cfg_deadman_butmask_ = config->get_uint(CFG_PREFIX"deadman_button_mask");
+  cfg_drive_mode_use_axis_ = false;
+  try {
+    cfg_drive_mode_axis_      = config->get_uint(CFG_PREFIX"drive_mode_axis");
+    cfg_drive_mode_ax_thresh_ = config->get_float(CFG_PREFIX"drive_mode_axis_threshold");
+    cfg_drive_mode_use_axis_  = true;
+  } catch (Exception &e) {
+    logger->log_debug(name(), "No drive_mode axis configured, ignoring");
+  }
+  cfg_drive_mode_butmask_   = config->get_uint(CFG_PREFIX"drive_mode_button_mask");
 
-  cfg_max_vx_          = config->get_float(CFG_PREFIX"max_vx");
-  cfg_max_vy_          = config->get_float(CFG_PREFIX"max_vy");
-  cfg_max_omega_       = config->get_float(CFG_PREFIX"max_omega");
+  cfg_normal_max_vx_     = config->get_float(CFG_PREFIX"drive_modes/normal/max_vx");
+  cfg_normal_max_vy_     = config->get_float(CFG_PREFIX"drive_modes/normal/max_vy");
+  cfg_normal_max_omega_  = config->get_float(CFG_PREFIX"drive_modes/normal/max_omega");
 
-  cfg_ifid_motor_      = config->get_string(CFG_PREFIX"motor_interface_id");
-  cfg_ifid_joystick_   = config->get_string(CFG_PREFIX"joystick_interface_id");
+  cfg_special_max_vx_    = config->get_float(CFG_PREFIX"drive_modes/special/max_vx");
+  cfg_special_max_vy_    = config->get_float(CFG_PREFIX"drive_modes/special/max_vy");
+  cfg_special_max_omega_ = config->get_float(CFG_PREFIX"drive_modes/special/max_omega");
 
+  cfg_ifid_motor_        = config->get_string(CFG_PREFIX"motor_interface_id");
+  cfg_ifid_joystick_     = config->get_string(CFG_PREFIX"joystick_interface_id");
 
   motor_if_ = blackboard->open_for_reading<MotorInterface>(cfg_ifid_motor_.c_str());
   joystick_if_ =
@@ -146,9 +158,23 @@ JoystickTeleOpThread::loop()
 	fabsf(joystick_if_->axis(cfg_axis_rotation_)) < cfg_axis_threshold_) {
       stop();
     } else {
-      float vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_max_vx_;
-      float vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_max_vy_;
-      float omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_max_omega_;
+      float vx = 0, vy = 0, omega = 0;
+
+      if ((joystick_if_->pressed_buttons() & cfg_drive_mode_butmask_) ||
+	  (cfg_drive_mode_use_axis_ &&
+	   ((cfg_drive_mode_ax_thresh_ >= 0 &&
+	     joystick_if_->axis(cfg_drive_mode_axis_) > cfg_drive_mode_ax_thresh_) ||
+	    (cfg_drive_mode_ax_thresh_ <  0 &&
+	     joystick_if_->axis(cfg_drive_mode_axis_) < cfg_drive_mode_ax_thresh_))))
+      {
+	vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_special_max_vx_;
+	vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_special_max_vy_;
+	omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_special_max_omega_;
+      } else {
+	vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_normal_max_vx_;
+	vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_normal_max_vy_;
+	omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_normal_max_omega_;
+      }
 
       send_transrot(vx, vy, omega);
     }
