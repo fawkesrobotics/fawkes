@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  openrave_dual_thread.h - Kinova Jaco plugin OpenRAVE thread for dual-arm setup
+ *  openrave_thread.h - Jaco plugin OpenRAVE thread for single arm
  *
  *  Created: Mon Jul 28 19:43:20 2014
  *  Copyright  2014  Bahram Maleki-Fard
@@ -20,23 +20,26 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_OPENRAVE_DUAL_THREAD_H_
-#define __PLUGINS_JACO_OPENRAVE_DUAL_THREAD_H_
+#ifndef __PLUGINS_JACO_OPENRAVE_THREAD_H_
+#define __PLUGINS_JACO_OPENRAVE_THREAD_H_
 
 #include "openrave_base_thread.h"
 
 #ifdef HAVE_OPENRAVE
+ #include <plugins/openrave/aspect/openrave.h>
  #include <openrave/openrave.h>
 #endif
 
 #include <string>
+#include <vector>
 
-class JacoOpenraveDualThread : public JacoOpenraveBaseThread
+class JacoOpenraveThread : public JacoOpenraveBaseThread
 {
  public:
-  JacoOpenraveDualThread(fawkes::jaco_arm_t *arm_l, fawkes::jaco_arm_t *arm_r);
+  JacoOpenraveThread(const char *name, fawkes::jaco_arm_t* arm, bool load_robot=true);
 
   virtual void once();
+  virtual void loop();
   virtual void finalize();
 
   virtual void update_openrave();
@@ -53,32 +56,22 @@ class JacoOpenraveDualThread : public JacoOpenraveBaseThread
   void _init();
   void _load_robot();
 
-  bool _solve_multi_ik(std::vector<OpenRAVE::dReal> &left,
-                       std::vector<OpenRAVE::dReal> &right);
-  bool _plan_path();
+  void _plan_path(fawkes::RefPtr<fawkes::jaco_target_t> &from, fawkes::RefPtr<fawkes::jaco_target_t> &to);
 
-  typedef struct arm_struct {
-    fawkes::jaco_arm_t                    *arm;
-#ifdef HAVE_OPENRAVE
-    std::string                           manipname;
-    OpenRAVE::RobotBase::ManipulatorPtr   manip;
-    fawkes::RefPtr<fawkes::jaco_target_t> target;
-#endif
-  } arm_struct_t;
+  fawkes::jaco_arm_t  *__arm;
 
-  struct {
-    arm_struct_t left;
-    arm_struct_t right;
-  } __arms;
+  std::string __cfg_manipname;
+  bool        __load_robot;
 
 #ifdef HAVE_OPENRAVE
   fawkes::jaco_openrave_set_t __planner_env;
-  OpenRAVE::ModuleBasePtr __mod_dualmanip;
 
-  std::set<OpenRAVE::KinBody::LinkPtr> links_left_;
-  std::set<OpenRAVE::KinBody::LinkPtr> links_right_;
+  OpenRAVE::RobotBasePtr              __robot;
+  OpenRAVE::RobotBase::ManipulatorPtr __manip;
+  std::vector<OpenRAVE::dReal>        __joints;
+
+  std::vector<OpenRAVE::GraphHandlePtr> __graph_handle;
 #endif
-
 };
 
 

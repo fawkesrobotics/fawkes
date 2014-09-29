@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  openrave_dual_thread.cpp - Kinova Jaco plugin OpenRAVE Thread for dual-arm setup
+ *  bimanual_openrave_thread.cpp - Jaco plugin OpenRAVE Thread for bimanual manipulation
  *
  *  Created: Mon Jul 28 19:43:20 2014
  *  Copyright  2014  Bahram Maleki-Fard
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "openrave_dual_thread.h"
+#include "bimanual_openrave_thread.h"
 #include "types.h"
 #include "arm.h"
 
@@ -44,7 +44,7 @@
 using namespace fawkes;
 using namespace std;
 
-/** @class JacoOpenraveDualThread "openrave_dual_thread.h"
+/** @class JacoBimanualOpenraveThread "bimanual_openrave_thread.h"
  * Jaco Arm thread for dual-arm setup, integrating OpenRAVE
  *
  * @author Bahram Maleki-Fard
@@ -53,8 +53,8 @@ using namespace std;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoOpenraveDualThread::JacoOpenraveDualThread(jaco_arm_t *arm_l, jaco_arm_t *arm_r)
-  : JacoOpenraveBaseThread("JacoOpenraveDualThread")
+JacoBimanualOpenraveThread::JacoBimanualOpenraveThread(jaco_arm_t *arm_l, jaco_arm_t *arm_r)
+  : JacoOpenraveBaseThread("JacoBimanualOpenraveThread")
 {
   __arms.left.arm = arm_l;
   __arms.right.arm = arm_r;
@@ -66,7 +66,7 @@ JacoOpenraveDualThread::JacoOpenraveDualThread(jaco_arm_t *arm_l, jaco_arm_t *ar
 }
 
 void
-JacoOpenraveDualThread::_init()
+JacoBimanualOpenraveThread::_init()
 {
 #ifdef HAVE_OPENRAVE
   __arms.left.manipname  = config->get_string("/hardware/jaco/openrave/manipname/dual_left");
@@ -75,7 +75,7 @@ JacoOpenraveDualThread::_init()
 }
 
 void
-JacoOpenraveDualThread::_load_robot()
+JacoBimanualOpenraveThread::_load_robot()
 {
 #ifdef HAVE_OPENRAVE
   __cfg_OR_robot_file  = config->get_string("/hardware/jaco/openrave/robot_dual_file");
@@ -127,7 +127,7 @@ JacoOpenraveDualThread::_load_robot()
 
 
 void
-JacoOpenraveDualThread::once()
+JacoBimanualOpenraveThread::once()
 {
 #ifdef HAVE_OPENRAVE
   // create cloned environment for planning
@@ -184,7 +184,7 @@ JacoOpenraveDualThread::once()
 }
 
 void
-JacoOpenraveDualThread::finalize() {
+JacoBimanualOpenraveThread::finalize() {
   __arms.left.arm = NULL;
   __arms.right.arm = NULL;
 #ifdef HAVE_OPENRAVE
@@ -200,39 +200,33 @@ JacoOpenraveDualThread::finalize() {
 }
 
 bool
-JacoOpenraveDualThread::add_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
+JacoBimanualOpenraveThread::add_target(float l_x, float l_y, float l_z, float l_e1, float l_e2, float l_e3,
+                                       float r_x, float r_y, float r_z, float r_e1, float r_e2, float r_e3)
 {
   // no IK-solving for coordinated bimanual movement implemented yet
   return false;
 }
 
-bool
-JacoOpenraveDualThread::set_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
-{
-  return add_target(x, y, z, e1, e2, e3, plan);
-}
-
-
 void
-JacoOpenraveDualThread::update_openrave()
+JacoBimanualOpenraveThread::update_openrave()
 {
   // do nothing, this thread is only for plannning!
 }
 
 /** Plot the first target of the queue in the viewer_env */
 void
-JacoOpenraveDualThread::plot_first()
+JacoBimanualOpenraveThread::plot_first()
 {
 }
 
 bool
-JacoOpenraveDualThread::_plan_path()
+JacoBimanualOpenraveThread::_plan_path()
 {
   return true;
 }
 
 bool
-JacoOpenraveDualThread::_solve_multi_ik(vector<dReal> &left, vector<dReal> &right)
+JacoBimanualOpenraveThread::_solve_multi_ik(vector<dReal> &left, vector<dReal> &right)
 {
   EnvironmentMutex::scoped_lock plan_lock(__planner_env.env->get_env_ptr()->GetMutex());
 

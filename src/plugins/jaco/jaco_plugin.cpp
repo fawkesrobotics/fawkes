@@ -25,8 +25,11 @@
 #include "info_thread.h"
 #include "act_thread.h"
 #include "goto_thread.h"
-#include "openrave_single_thread.h"
-#include "openrave_dual_thread.h"
+#include "openrave_thread.h"
+
+#include "bimanual_act_thread.h"
+#include "bimanual_goto_thread.h"
+#include "bimanual_openrave_thread.h"
 
 #include "types.h"
 
@@ -54,7 +57,7 @@ JacoPlugin::JacoPlugin(Configuration *config)
     JacoInfoThread* info_thread = new JacoInfoThread("JacoInfoThread", arm);
     JacoGotoThread* goto_thread = new JacoGotoThread("JacoGotoThread", arm);
 #ifdef HAVE_OPENRAVE
-    JacoOpenraveSingleThread* openrave_thread = new JacoOpenraveSingleThread("JacoOpenraveThread", arm);
+    JacoOpenraveThread* openrave_thread = new JacoOpenraveThread("JacoOpenraveThread", arm);
 #endif
 
     arm->goto_thread = goto_thread;
@@ -85,8 +88,8 @@ JacoPlugin::JacoPlugin(Configuration *config)
 #ifdef HAVE_OPENRAVE
     // each arm gets 1 openrave-thread, providing planning and updating the openrave-model of that arm.
     // additionally we need a separate openrave thread for planning symmetric bimanual manipulation.
-    JacoOpenraveSingleThread* openrave_thread_l = new JacoOpenraveSingleThread("JacoOpenraveThreadLeft", arm_l, /*load_robot=*/false);
-    JacoOpenraveSingleThread* openrave_thread_r = new JacoOpenraveSingleThread("JacoOpenraveThreadRight", arm_r, /*load_robot=*/false);
+    JacoOpenraveThread* openrave_thread_l = new JacoOpenraveThread("JacoOpenraveThreadLeft", arm_l, /*load_robot=*/false);
+    JacoOpenraveThread* openrave_thread_r = new JacoOpenraveThread("JacoOpenraveThreadRight", arm_r, /*load_robot=*/false);
 #endif
 
     arm_l->goto_thread = goto_thread_l;
@@ -106,9 +109,17 @@ JacoPlugin::JacoPlugin(Configuration *config)
 #ifdef HAVE_OPENRAVE
     thread_list.push_back( openrave_thread_l );
     thread_list.push_back( openrave_thread_r );
-    thread_list.push_back( new JacoOpenraveDualThread(arm_l, arm_r) );
 #endif
 
+    // we also need a set of threads for coordinated bimanual manipulation
+    JacoBimanualOpenraveThread* openrave_thread = NULL;
+#ifdef HAVE_OPENRAVE
+    openrave_thread = new JacoBimanualOpenraveThread(arm_l, arm_r);
+    thread_list.push_back( openrave_thread );
+#endif
+    JacoBimanualGotoThread* goto_thread = new JacoBimanualGotoThread(arm_l, arm_r);
+    thread_list.push_back( goto_thread );
+    thread_list.push_back( new JacoBimanualActThread(goto_thread, openrave_thread) );
   }
 }
 

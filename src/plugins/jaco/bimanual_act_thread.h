@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  act_thread.h - Kinova Jaco plugin act-thread
+ *  bimanual_act_thread.h - Jaco plugin act-thread for coordinated bimanual manipulation
  *
- *  Created: Tue Jun 04 13:13:20 2013
- *  Copyright  2013  Bahram Maleki-Fard
+ *  Created: Mon Sep 29 03:13:20 2014
+ *  Copyright  2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_ACT_THREAD_H_
-#define __PLUGINS_JACO_ACT_THREAD_H_
+#ifndef __PLUGINS_JACO_BIMANUAL_ACT_THREAD_H_
+#define __PLUGINS_JACO_BIMANUAL_ACT_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -30,10 +30,14 @@
 #include <aspect/blackboard.h>
 
 namespace fawkes {
+  class JacoBimanualInterface;
   typedef struct jaco_arm_struct jaco_arm_t;
 }
 
-class JacoActThread
+class JacoBimanualGotoThread;
+class JacoBimanualOpenraveThread;
+
+class JacoBimanualActThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
@@ -41,8 +45,9 @@ class JacoActThread
   public fawkes::BlackBoardAspect
 {
  public:
-  JacoActThread(const char *name, fawkes::jaco_arm_t* arm);
-  virtual ~JacoActThread();
+  JacoBimanualActThread(JacoBimanualGotoThread* goto_thread,
+                        JacoBimanualOpenraveThread* openrave_thread);
+  virtual ~JacoBimanualActThread();
 
   virtual void init();
   virtual void finalize();
@@ -53,15 +58,10 @@ class JacoActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void _initialize();
-  bool _is_initializing();
-  void _submit_iface();
-  void _process_msgs();
+  fawkes::JacoBimanualInterface* __iface;
 
-  fawkes::jaco_arm_t* __arm;
-
-  bool __cfg_auto_init;
-  bool __cfg_auto_calib;
+  JacoBimanualGotoThread*     __goto_thread;
+  JacoBimanualOpenraveThread* __openrave_thread;
 };
 
 

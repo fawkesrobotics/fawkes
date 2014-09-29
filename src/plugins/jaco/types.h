@@ -31,7 +31,7 @@
 #include <list>
 
 class JacoGotoThread;
-class JacoOpenraveBaseThread;
+class JacoOpenraveThread;
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -84,7 +84,7 @@ typedef struct jaco_arm_struct {
   fawkes::JacoInterface *iface;
 
   JacoGotoThread *goto_thread;
-  JacoOpenraveBaseThread *openrave_thread;
+  JacoOpenraveThread *openrave_thread;
 
   fawkes::RefPtr< fawkes::Mutex > target_mutex;
   fawkes::RefPtr< fawkes::Mutex > trajec_mutex; // very shortly locked mutex
@@ -97,7 +97,7 @@ typedef struct jaco_arm_struct {
 typedef struct jaco_dual_arm_struct {
   jaco_arm_t left;
   jaco_arm_t right;
-  JacoOpenraveBaseThread *openrave_thread;
+  JacoOpenraveThread *openrave_thread;
 } jaco_dual_arm_t;
 
 

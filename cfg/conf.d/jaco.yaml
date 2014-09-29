@@ -29,7 +29,7 @@ hardware/jaco:
     dual_arm: false
 
     single:
-      # Name of right JacoArm.
+      # Name of JacoArm.
       name: Jaco 1
 
       # JacoInterface ID string for left arm

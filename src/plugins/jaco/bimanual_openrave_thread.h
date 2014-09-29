@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  openrave_single_thread.h - Kinova Jaco plugin OpenRAVE thread for single-arm setup
+ *  bimanual_openrave_thread.h - Jaco plugin OpenRAVE thread for bimanual manipulatin
  *
  *  Created: Mon Jul 28 19:43:20 2014
  *  Copyright  2014  Bahram Maleki-Fard
@@ -20,33 +20,30 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_OPENRAVE_SINGLE_THREAD_H_
-#define __PLUGINS_JACO_OPENRAVE_SINGLE_THREAD_H_
+#ifndef __PLUGINS_JACO_BIMANUAL_OPENRAVE_THREAD_H_
+#define __PLUGINS_JACO_BIMANUAL_OPENRAVE_THREAD_H_
 
 #include "openrave_base_thread.h"
 
 #ifdef HAVE_OPENRAVE
- #include <plugins/openrave/aspect/openrave.h>
  #include <openrave/openrave.h>
 #endif
 
 #include <string>
-#include <vector>
 
-class JacoOpenraveSingleThread : public JacoOpenraveBaseThread
+class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
 {
  public:
-  JacoOpenraveSingleThread(const char *name, fawkes::jaco_arm_t* arm, bool load_robot=true);
+  JacoBimanualOpenraveThread(fawkes::jaco_arm_t *arm_l, fawkes::jaco_arm_t *arm_r);
 
   virtual void once();
-  virtual void loop();
   virtual void finalize();
 
   virtual void update_openrave();
   virtual void plot_first();
 
-  virtual bool add_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true);
-  virtual bool set_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true);
+  virtual bool add_target(float l_x, float l_y, float l_z, float l_e1, float l_e2, float l_e3,
+                          float r_x, float r_y, float r_z, float r_e1, float r_e2, float r_e3);
 
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -56,22 +53,32 @@ class JacoOpenraveSingleThread : public JacoOpenraveBaseThread
   void _init();
   void _load_robot();
 
-  void _plan_path(fawkes::RefPtr<fawkes::jaco_target_t> &from, fawkes::RefPtr<fawkes::jaco_target_t> &to);
+  bool _solve_multi_ik(std::vector<OpenRAVE::dReal> &left,
+                       std::vector<OpenRAVE::dReal> &right);
+  bool _plan_path();
 
-  fawkes::jaco_arm_t  *__arm;
+  typedef struct arm_struct {
+    fawkes::jaco_arm_t                    *arm;
+#ifdef HAVE_OPENRAVE
+    std::string                           manipname;
+    OpenRAVE::RobotBase::ManipulatorPtr   manip;
+    fawkes::RefPtr<fawkes::jaco_target_t> target;
+#endif
+  } arm_struct_t;
 
-  std::string __cfg_manipname;
-  bool        __load_robot;
+  struct {
+    arm_struct_t left;
+    arm_struct_t right;
+  } __arms;
 
 #ifdef HAVE_OPENRAVE
   fawkes::jaco_openrave_set_t __planner_env;
+  OpenRAVE::ModuleBasePtr __mod_dualmanip;
 
-  OpenRAVE::RobotBasePtr              __robot;
-  OpenRAVE::RobotBase::ManipulatorPtr __manip;
-  std::vector<OpenRAVE::dReal>        __joints;
-
-  std::vector<OpenRAVE::GraphHandlePtr> __graph_handle;
+  std::set<OpenRAVE::KinBody::LinkPtr> links_left_;
+  std::set<OpenRAVE::KinBody::LinkPtr> links_right_;
 #endif
+
 };
 
 

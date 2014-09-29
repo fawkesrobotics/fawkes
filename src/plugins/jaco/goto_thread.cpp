@@ -21,7 +21,7 @@
  */
 
 #include "goto_thread.h"
-#include "openrave_base_thread.h"
+#include "openrave_thread.h"
 #include "arm.h"
 
 #include <interfaces/JacoInterface.h>

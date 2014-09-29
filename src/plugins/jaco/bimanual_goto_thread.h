@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  act_thread.h - Kinova Jaco plugin act-thread
+ *  bimaual_goto_thread.h - Jaco plugin movement thread for coordinated bimanual manipulation
  *
- *  Created: Tue Jun 04 13:13:20 2013
- *  Copyright  2013  Bahram Maleki-Fard
+ *  Created: Mon Sep 29 23:17:12 2014
+ *  Copyright  2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -20,48 +20,40 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_ACT_THREAD_H_
-#define __PLUGINS_JACO_ACT_THREAD_H_
+#ifndef __PLUGINS_JACO_BIMANUAL_GOTO_THREAD_H_
+#define __PLUGINS_JACO_BIMANUAL_GOTO_THREAD_H_
+
+#include "types.h"
 
 #include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 
-namespace fawkes {
-  typedef struct jaco_arm_struct jaco_arm_t;
-}
-
-class JacoActThread
+class JacoBimanualGotoThread
 : public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect
 {
  public:
-  JacoActThread(const char *name, fawkes::jaco_arm_t* arm);
-  virtual ~JacoActThread();
+  JacoBimanualGotoThread(fawkes::jaco_arm_t *arm_l, fawkes::jaco_arm_t *arm_r);
+  virtual ~JacoBimanualGotoThread();
 
   virtual void init();
   virtual void finalize();
   virtual void loop();
 
+  virtual bool final();
+
+  virtual void move_gripper(float l_f1, float l_f2, float l_f3, float r_f1, float r_f2, float r_f3);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void _initialize();
-  bool _is_initializing();
-  void _submit_iface();
-  void _process_msgs();
+  bool __final;
 
-  fawkes::jaco_arm_t* __arm;
-
-  bool __cfg_auto_init;
-  bool __cfg_auto_calib;
 };
 
 

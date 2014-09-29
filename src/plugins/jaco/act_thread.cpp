@@ -22,7 +22,7 @@
 
 #include "act_thread.h"
 #include "goto_thread.h"
-#include "openrave_base_thread.h"
+#include "openrave_thread.h"
 
 #include "types.h"
 #include "arm_kindrv.h"
@@ -155,8 +155,10 @@ JacoActThread::finalize()
 }
 
 /** Main loop.
- * The structure is pretty obvious, as it uses function pointers to perform the
- * action based on what kind of setup we have (single_arm or dual_arm).
+ * The structure is pretty obvious. We first submit changes made to the interface
+ * from threads before the ACT-hook (they might be used by other threads lateron).
+ * Then we make sure the arm is initialized, before processing incoming messages
+ * and submiting interface changes once again.
  */
 void
 JacoActThread::loop()

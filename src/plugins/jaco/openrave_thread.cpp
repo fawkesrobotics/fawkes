@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  openrave_single_thread.cpp - Kinova Jaco plugin OpenRAVE Thread for single-arm setup
+ *  openrave_thread.cpp - Jaco plugin OpenRAVE Thread for single arm
  *
  *  Created: Mon Jul 28 19:43:20 2014
  *  Copyright  2014  Bahram Maleki-Fard
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "openrave_single_thread.h"
+#include "openrave_thread.h"
 #include "arm.h"
 #include "types.h"
 
@@ -44,7 +44,7 @@
 using namespace fawkes;
 using namespace std;
 
-/** @class JacoOpenraveSingleThread "openrave_single_thread.h"
+/** @class JacoOpenraveThread "openrave_thread.h"
  * Jaco Arm thread for single-arm setup, integrating OpenRAVE
  *
  * @author Bahram Maleki-Fard
@@ -53,7 +53,7 @@ using namespace std;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoOpenraveSingleThread::JacoOpenraveSingleThread(const char *name, jaco_arm_t* arm, bool load_robot)
+JacoOpenraveThread::JacoOpenraveThread(const char *name, jaco_arm_t* arm, bool load_robot)
   : JacoOpenraveBaseThread(name)
 {
   __arm = arm;
@@ -66,7 +66,7 @@ JacoOpenraveSingleThread::JacoOpenraveSingleThread(const char *name, jaco_arm_t*
 }
 
 void
-JacoOpenraveSingleThread::_init()
+JacoOpenraveThread::_init()
 {
   switch( __arm->config ) {
     case CONFIG_SINGLE:
@@ -88,7 +88,7 @@ JacoOpenraveSingleThread::_init()
 }
 
 void
-JacoOpenraveSingleThread::_load_robot()
+JacoOpenraveThread::_load_robot()
 {
 #ifdef HAVE_OPENRAVE
 
@@ -126,7 +126,7 @@ JacoOpenraveSingleThread::_load_robot()
 }
 
 void
-JacoOpenraveSingleThread::once()
+JacoOpenraveThread::once()
 {
 #ifdef HAVE_OPENRAVE
   if(!__load_robot) {
@@ -168,7 +168,7 @@ JacoOpenraveSingleThread::once()
 }
 
 void
-JacoOpenraveSingleThread::finalize() {
+JacoOpenraveThread::finalize() {
   __arm = NULL;
 #ifdef HAVE_OPENRAVE
   if( __load_robot )
@@ -183,7 +183,7 @@ JacoOpenraveSingleThread::finalize() {
 }
 
 void
-JacoOpenraveSingleThread::loop()
+JacoOpenraveThread::loop()
 {
   if( __arm == NULL || __arm->arm == NULL ) {
     usleep(30e3);
@@ -238,7 +238,7 @@ JacoOpenraveSingleThread::loop()
 }
 
 void
-JacoOpenraveSingleThread::update_openrave()
+JacoOpenraveThread::update_openrave()
 {
   if( __arm == NULL || __arm->iface == NULL || __robot == NULL || __manip == NULL )
     return;
@@ -277,7 +277,7 @@ JacoOpenraveSingleThread::update_openrave()
 }
 
 bool
-JacoOpenraveSingleThread::add_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
+JacoOpenraveThread::add_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {
   bool solvable = false;  // need to define it here outside the ifdef-scope
 
@@ -350,7 +350,7 @@ JacoOpenraveSingleThread::add_target(float x, float y, float z, float e1, float 
 }
 
 bool
-JacoOpenraveSingleThread::set_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
+JacoOpenraveThread::set_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {
   __arm->target_mutex->lock();
   __arm->target_queue->clear();
@@ -359,7 +359,7 @@ JacoOpenraveSingleThread::set_target(float x, float y, float z, float e1, float 
 }
 
 void
-JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
+JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
 {
   // update state of the trajectory
   __arm->target_mutex->lock();
@@ -455,7 +455,7 @@ JacoOpenraveSingleThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_ta
 
 /** Plot the first target of the queue in the viewer_env */
 void
-JacoOpenraveSingleThread::plot_first()
+JacoOpenraveThread::plot_first()
 {
 #ifdef HAVE_OPENRAVE
   if( !__cfg_OR_use_viewer )

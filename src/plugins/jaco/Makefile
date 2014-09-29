@@ -21,7 +21,7 @@ include $(BASEDIR)/src/plugins/openrave/openrave.mk
 
 PRESUBDIRS = interfaces
 
-LIBS_jaco = fawkescore fawkesaspects fawkesblackboard fawkesutils fawkesinterface JacoInterface m pthread
+LIBS_jaco = fawkescore fawkesaspects fawkesblackboard fawkesutils fawkesinterface JacoInterface JacoBimanualInterface m pthread
 OBJS_jaco = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 ifeq ($(HAVE_LIBKINDRV),1)
