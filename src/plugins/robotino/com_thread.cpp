@@ -87,17 +87,6 @@ RobotinoComThread::init()
     config->get_uint("/hardware/robotino/sensor_update_cycle_time");
   cfg_gripper_enabled_ = config->get_bool("/hardware/robotino/gripper/enable_gripper");
 
-#ifdef HAVE_OPENROBOTINO_API_1
-  com_->setAddress(cfg_hostname_.c_str());
-  com_->setMinimumUpdateCycleTime(cfg_sensor_update_cycle_time_);
-  com_->connect(/* blocking */ false);
-#else
-  com_ = new rec::robotino::api2::Com("Fawkes");
-  com_->setAddress(cfg_hostname_.c_str());
-  com_->setAutoReconnectEnabled(false);
-  com_->connectToServer(/* blocking */ true);
-#endif
-
   batt_if_ = NULL;
   sens_if_ = NULL;
   imu_if_ = NULL;
@@ -132,7 +121,31 @@ RobotinoComThread::init()
   state_mutex_ = new Mutex();
   set_state_ = new rec::iocontrol::remotestate::SetState();
   set_state_->gripper_isEnabled = cfg_gripper_enabled_;
+#endif
+
+  if (imu_if_) {
+    // Assume that the gyro is the CruizCore XG1010 and thus set data
+    // from datasheet
+    imu_if_->set_linear_acceleration(0, -1.);
+    imu_if_->set_angular_velocity_covariance(8, deg2rad(0.1));
+    imu_if_->write();
+  }
+
+  data_mutex_  = new Mutex();
+  new_data_    = false;
+  last_seqnum_ = 0;
+  time_wait_   = new TimeWait(clock, cfg_sensor_update_cycle_time_);
+
+#ifdef HAVE_OPENROBOTINO_API_1
+  com_->setAddress(cfg_hostname_.c_str());
+  com_->setMinimumUpdateCycleTime(cfg_sensor_update_cycle_time_);
+  com_->connect(/* blocking */ false);
 #else
+  com_ = new rec::robotino::api2::Com("Fawkes");
+  com_->setAddress(cfg_hostname_.c_str());
+  com_->setAutoReconnectEnabled(false);
+  com_->connectToServer(/* blocking */ true);
+
   analog_inputs_com_  = new rec::robotino::api2::AnalogInputArray();
   bumper_com_         = new rec::robotino::api2::Bumper();
   digital_inputs_com_ = new rec::robotino::api2::DigitalInputArray();
@@ -154,18 +167,6 @@ RobotinoComThread::init()
   power_com_->setComId(com_->id());
 #endif
 
-  if (imu_if_) {
-    // Assume that the gyro is the CruizCore XG1010 and thus set data
-    // from datasheet
-    imu_if_->set_linear_acceleration(0, -1.);
-    imu_if_->set_angular_velocity_covariance(8, deg2rad(0.1));
-    imu_if_->write();
-  }
-
-  data_mutex_  = new Mutex();
-  new_data_    = false;
-  last_seqnum_ = 0;
-  time_wait_   = new TimeWait(clock, cfg_sensor_update_cycle_time_);
 }
 
 
