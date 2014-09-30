@@ -75,7 +75,6 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
 
   builder->get_widget_derived("trv_log", __logview);
   builder->get_widget("tb_connection", tb_connection);
-  builder->get_widget("but_continuous", but_continuous);
   builder->get_widget("but_clearlog", but_clearlog);
   builder->get_widget("tb_exit", tb_exit);
   builder->get_widget("cbe_skillstring", cbe_skillstring);
@@ -83,7 +82,6 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   builder->get_widget("but_stop", but_stop);
   builder->get_widget("lab_status", lab_status);
   builder->get_widget("lab_alive", lab_alive);
-  builder->get_widget("lab_continuous", lab_continuous);
   builder->get_widget("lab_skillstring", lab_skillstring);
   builder->get_widget("lab_error", lab_error);
   builder->get_widget("scw_graph", scw_graph);
@@ -173,7 +171,6 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   tb_controller->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_controller_clicked));
   tb_exit->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_exit_clicked));
   but_stop->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_stop_clicked));
-  but_continuous->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_contexec_toggled));
   but_clearlog->signal_clicked().connect(sigc::mem_fun(*__logview, &LogView::clear));
   tb_skiller->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_skdbg_data_changed));
   tb_skiller->signal_toggled().connect(sigc::bind(sigc::mem_fun(*cb_graphlist, &Gtk::ComboBoxText::set_sensitive),true));
@@ -231,14 +228,11 @@ SkillGuiGtkWindow::on_config_changed()
   }
 
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
-  bool continuous = __gconf->get_bool(GCONF_PREFIX"/continuous_exec");
   bool colored    = __gconf->get_bool(GCONF_PREFIX"/graph_colored");
 #else
   std::auto_ptr<Glib::Error> error;
-  bool continuous = __gconf->get_bool(GCONF_PREFIX"/continuous_exec", error);
   bool colored    = __gconf->get_bool(GCONF_PREFIX"/graph_colored", error);
 #endif
-  but_continuous->set_active(continuous);
   tb_graphcolored->set_active(colored);
 #endif
 }
@@ -255,14 +249,6 @@ SkillGuiGtkWindow::on_skill_changed()
   }
   SkillerDebugInterface::SetGraphMessage *sgm = new SkillerDebugInterface::SetGraphMessage(skill.c_str());
   __skdbg_if->msgq_enqueue(sgm);
-}
-
-void
-SkillGuiGtkWindow::on_contexec_toggled()
-{
-#ifdef HAVE_GCONFMM
-  __gconf->set(GCONF_PREFIX"/continuous_exec", but_continuous->get_active());
-#endif
 }
 
 /** Event handler for connection button. */
@@ -384,7 +370,6 @@ SkillGuiGtkWindow::on_connect()
     tb_connection->set_stock_id(Gtk::Stock::DISCONNECT);
     __logview->set_client(connection_dispatcher.get_client());
 
-    but_continuous->set_sensitive(true);
     tb_controller->set_sensitive(true);
     cbe_skillstring->set_sensitive(true);
 
@@ -406,7 +391,6 @@ SkillGuiGtkWindow::on_connect()
 void
 SkillGuiGtkWindow::on_disconnect()
 {
-  but_continuous->set_sensitive(false);
   tb_controller->set_sensitive(false);
   cbe_skillstring->set_sensitive(false);
   but_exec->set_sensitive(false);
@@ -446,13 +430,8 @@ SkillGuiGtkWindow::on_exec_clicked()
     if (__skiller_if && __skiller_if->is_valid() && __skiller_if->has_writer() &&
 	__skiller_if->exclusive_controller() == __skiller_if->serial()) {
 
-      if ( but_continuous->get_active() ) {
-	SkillerInterface::ExecSkillContinuousMessage *escm = new SkillerInterface::ExecSkillContinuousMessage(sks.c_str());
-	__skiller_if->msgq_enqueue(escm);
-      } else {
-	SkillerInterface::ExecSkillMessage *esm = new SkillerInterface::ExecSkillMessage(sks.c_str());
-	__skiller_if->msgq_enqueue(esm);
-      }
+      SkillerInterface::ExecSkillMessage *esm = new SkillerInterface::ExecSkillMessage(sks.c_str());
+      __skiller_if->msgq_enqueue(esm);
 
       Gtk::TreeModel::Children children = __sks_list->children();
       bool ok = true;
@@ -530,7 +509,6 @@ SkillGuiGtkWindow::on_skiller_data_changed()
     lab_skillstring->set_tooltip_text(__skiller_if->skill_string());
     lab_error->set_tooltip_text(__skiller_if->error());
 #endif
-    lab_continuous->set_text(__skiller_if->is_continuous() ? "Yes" : "No");
     lab_alive->set_text(__skiller_if->has_writer() ? "Yes" : "No");
 
     if ( __skiller_if->exclusive_controller() == __skiller_if->serial() ) {
