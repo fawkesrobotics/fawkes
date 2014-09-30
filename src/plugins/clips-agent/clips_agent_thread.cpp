@@ -279,8 +279,8 @@ ClipsAgentThread::clips_skill_call_ext(std::string skill_name, std::string skill
   } else {
     logger->log_info(name(), "Calling skill %s", skill_string.c_str());
 
-    SkillerInterface::ExecSkillContinuousMessage *msg =
-      new SkillerInterface::ExecSkillContinuousMessage(skill_string.c_str());
+    SkillerInterface::ExecSkillMessage *msg =
+      new SkillerInterface::ExecSkillMessage(skill_string.c_str());
       
     skiller_if_->msgq_enqueue(msg);
   }
