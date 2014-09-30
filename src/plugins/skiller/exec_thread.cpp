@@ -60,7 +60,6 @@ SkillerExecutionThread::SkillerExecutionThread()
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL),
     BlackBoardInterfaceListener("SkillerExecutionThread")
 {
-  __continuous_run   = false;
   __continuous_reset = false;
   __error_written    = false;
 
@@ -103,7 +102,6 @@ SkillerExecutionThread::init()
 {
   __last_exclusive_controller = 0;
   __reader_just_left = false;
-  __continuous_run   = false;
   __continuous_reset = false;
   __skdbg_what = "ACTIVE";
   __skdbg_graphdir = "TB";
@@ -334,8 +332,7 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
     }
 
     if ( (old_status != new_status) ||
-	 (curss != __skiller_if->skill_string()) ||
-	 (__skiller_if->is_continuous() != __continuous_run) ) {
+	 (curss != __skiller_if->skill_string()) ) {
 
       /*
       logger->log_debug("SkillerExecutionThread", "Status is %s (%i vs. %i)"
@@ -344,13 +341,11 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
       */
 
       __skiller_if->set_skill_string(curss.c_str());
-      __skiller_if->set_continuous(__continuous_run);
-
       __skiller_if->set_status(new_status);
 
       if ( ! __error_written && (new_status == SkillerInterface::S_FAILED) ) {
 	publish_error();
-	__error_written = __continuous_run;
+	__error_written = true;
       } else if (new_status == SkillerInterface::S_RUNNING ||
 		 new_status == SkillerInterface::S_FINAL) {
 	__skiller_if->set_error("");
@@ -453,11 +448,11 @@ SkillerExecutionThread::loop()
   __lua_ifi->read();
 
   // Current skill string
-  std::string curss = "";
+  std::string curss = __skiller_if->skill_string();
 
   unsigned int excl_ctrl   = __skiller_if->exclusive_controller();
   bool write_skiller_if    = false;
-  bool last_was_continuous = __continuous_run;
+  bool skill_enqueued      = false;
 
 #ifdef SKILLER_TIMETRACKING
   __tt->ping_start(__ttc_msgproc);
@@ -494,10 +489,7 @@ SkillerExecutionThread::loop()
 	logger->log_debug("SkillerExecutionThread", "%s releases exclusive control",
 			  m->sender_thread_name());
 	
-	if ( __continuous_run ) {
-	  __continuous_run = false;
-	  __continuous_reset = true;
-	}
+	__continuous_reset = true;
 	__last_exclusive_controller = __skiller_if->exclusive_controller();
 	__skiller_if->set_exclusive_controller(0);
 	write_skiller_if = true;
@@ -508,41 +500,21 @@ SkillerExecutionThread::loop()
 			   "it's not the controller", m->sender_thread_name());
 	}
       }
+
     } else if ( __skiller_if->msgq_first_is<SkillerInterface::ExecSkillMessage>() ) {
       SkillerInterface::ExecSkillMessage *m = __skiller_if->msgq_first<SkillerInterface::ExecSkillMessage>();
 
       if ( m->sender_id() == excl_ctrl ) {
-	if ( curss != "" ) {
-	  logger->log_warn("SkillerExecutionThread", "More than one skill string enqueued, "
-			   "ignoring previous string (%s).", curss.c_str());
-	}
-	logger->log_debug("SkillerExecutionThread", "%s wants me to execute '%s'",
-			  m->sender_thread_name(), m->skill_string());
-
-	if ( __continuous_run ) {
-	  __continuous_run = false;
-	  __continuous_reset = true;
-	}
-	curss = m->skill_string();
-      } else {
-	logger->log_debug("SkillerExecutionThread", "%s tries to exec while not controller",
-			  m->sender_thread_name());
-      }
-
-    } else if ( __skiller_if->msgq_first_is<SkillerInterface::ExecSkillContinuousMessage>() ) {
-      SkillerInterface::ExecSkillContinuousMessage *m = __skiller_if->msgq_first<SkillerInterface::ExecSkillContinuousMessage>();
-
-      if ( m->sender_id() == excl_ctrl ) {
-	if ( curss != "" ) {
+	if (skill_enqueued) {
 	  logger->log_warn("SkillerExecutionThread", "More than one skill string enqueued, "
 			   "ignoring successive string (%s).", m->skill_string());
 	} else {	  
-	  logger->log_debug("SkillerExecutionThread", "%s wants me to continuously execute '%s'",
+	  logger->log_debug("SkillerExecutionThread", "%s wants me to execute '%s'",
 			    m->sender_thread_name(), m->skill_string());
 
+	  skill_enqueued = true;
 	  curss = m->skill_string();
-	  __continuous_reset = last_was_continuous; // reset if cont exec was in progress
-	  __continuous_run = true;
+	  __continuous_reset = true;
 	}
       } else {
 	logger->log_debug("SkillerExecutionThread", "%s tries to exec while not controller",
@@ -555,11 +527,8 @@ SkillerExecutionThread::loop()
       if ( (m->sender_id() == excl_ctrl) ||
 	   (__reader_just_left && (m->sender_id() == __last_exclusive_controller)) ) {
 	logger->log_debug("SkillerExecutionThread", "Stopping continuous execution");
-	if ( __continuous_run ) {
-	  __continuous_run = false;
-	  __continuous_reset = true;
-	  curss = "";
-	}
+	__continuous_reset = true;
+	curss = "";
       } else {
 	logger->log_debug("SkillerExecutionThread", "%s tries to stop exec while not controller",
 			  m->sender_thread_name());
@@ -570,10 +539,6 @@ SkillerExecutionThread::loop()
     }
 
     __skiller_if->msgq_pop();
-  }
-
-  if ( __continuous_run && (curss == "") ) {
-    curss = __skiller_if->skill_string();
   }
 
 #ifdef SKILLER_TIMETRACKING
@@ -611,16 +576,13 @@ SkillerExecutionThread::loop()
       __tt->ping_start(__ttc_luaprep);
 #endif
 
-    // we're in continuous mode, reset status for this new loop
-    if ( __continuous_run ) {
-      // was continuous execution, status has to be cleaned up anyway
-      //logger->log_debug("SkillerExecutionThread", "Resetting skill status in continuous mode");
-      try {
-	__lua->do_string("skillenv.reset_status()");
-      } catch (Exception &e) {
-	logger->log_warn("SkillerExecutionThread", "Caught exception while resetting status, ignored, output follows");
-	logger->log_warn("SkillerExecutionThread", e);
-      }
+    // was continuous execution, status has to be cleaned up anyway
+    //logger->log_debug("SkillerExecutionThread", "Resetting skill status in continuous mode");
+    try {
+      __lua->do_string("skillenv.reset_status()");
+    } catch (Exception &e) {
+      logger->log_warn("SkillerExecutionThread", "Caught exception while resetting status, ignored, output follows");
+      logger->log_warn("SkillerExecutionThread", e);
     }
 
     try {
@@ -643,26 +605,10 @@ SkillerExecutionThread::loop()
       __skiller_if->set_error("Skill string execution failed with Lua error, see log");
       __skiller_if->write();
       __continuous_reset = true;
-      __continuous_run   = false;
     }
 #ifdef SKILLER_TIMETRACKING
     __tt->ping_end(__ttc_luaexec);
 #endif
-
-    if ( ! __continuous_run ) {
-      // was one-shot execution, cleanup
-      logger->log_debug("SkillerExecutionThread", "Resetting skills");
-      try {
-	if (__sksf_pushed) {
-	  __sksf_pushed = false;
-	  __lua->pop(1);			  // ---
-	}
-	__lua->do_string("skillenv.reset_all()");
-      } catch (Exception &e) {
-	logger->log_warn("SkillerExecutionThread", "Caught exception while resetting skills, ignored, output follows");
-	logger->log_warn("SkillerExecutionThread", e);
-      }
-    }
 
   } // end if (curss != "")
 
