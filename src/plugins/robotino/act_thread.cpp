@@ -279,13 +279,6 @@ RobotinoActThread::publish_odometry()
     float vx, vy, omega;
     omni_drive_->unproject(&vx, &vy, &omega, a1, a2, a3);
 
-#ifdef HAVE_OPENROBOTINO_API_1
-    // div by 1000 to convert from mm to m
-    vx /= 1000.;
-    vy /= 1000.;
-    omega = deg2rad(omega);
-#endif
-
     motor_if_->set_vx(vx);
     motor_if_->set_vy(vy);
     motor_if_->set_omega(omega);
