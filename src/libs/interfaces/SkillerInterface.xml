@@ -34,18 +34,13 @@
     <field type="SkillStatusEnum" name="status">
       The status of the current skill execution.
     </field>
-    <field type="bool" name="continuous">
-      True if continuous execution is in progress, false if no skill string is executed
-      at all or it is executed one-shot with ExecSkillMessage.
-    </field>
   </data>
   <message name="ExecSkill">
-    <comment>Sets the skill string and orders execution of this skill string.</comment>
-    <ref>skill_string</ref>
-  </message>
-  <message name="ExecSkillContinuous">
-    <comment>Executes the given skill exactly continuously until a new skill is set
-      or a StopExec message is received.</comment>
+    <comment>
+      Sets the skill string and orders execution of this skill string.
+      Execution stops on success or failure of execution, if another
+      skill is commanded, or if a StopExecMessage is received.
+    </comment>
     <ref>skill_string</ref>
   </message>
   <message name="RestartInterpreter">

@@ -70,10 +70,6 @@ class SkillerInterface : public Interface
     int32_t status; /**< 
       The status of the current skill execution.
      */
-    bool continuous; /**< 
-      True if continuous execution is in progress, false if no skill string is executed
-      at all or it is executed one-shot with ExecSkillMessage.
-     */
   } SkillerInterface_data_t;
 #pragma pack(pop)
 
@@ -104,36 +100,6 @@ class SkillerInterface : public Interface
     ~ExecSkillMessage();
 
     ExecSkillMessage(const ExecSkillMessage *m);
-    /* Methods */
-    char * skill_string() const;
-    void set_skill_string(const char * new_skill_string);
-    size_t maxlenof_skill_string() const;
-    virtual Message * clone() const;
-  };
-
-  class ExecSkillContinuousMessage : public Message
-  {
-   private:
-#pragma pack(push,4)
-    /** Internal data storage, do NOT modify! */
-    typedef struct {
-      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
-      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      char skill_string[1024]; /**< 
-      Currently executed skill string, at least the first 1023 bytes of it.
-      Must be properly null-terminated.
-     */
-    } ExecSkillContinuousMessage_data_t;
-#pragma pack(pop)
-
-    ExecSkillContinuousMessage_data_t *data;
-
-   public:
-    ExecSkillContinuousMessage(const char * ini_skill_string);
-    ExecSkillContinuousMessage();
-    ~ExecSkillContinuousMessage();
-
-    ExecSkillContinuousMessage(const ExecSkillContinuousMessage *m);
     /* Methods */
     char * skill_string() const;
     void set_skill_string(const char * new_skill_string);
@@ -258,9 +224,6 @@ class SkillerInterface : public Interface
   SkillStatusEnum status() const;
   void set_status(const SkillStatusEnum new_status);
   size_t maxlenof_status() const;
-  bool is_continuous() const;
-  void set_continuous(const bool new_continuous);
-  size_t maxlenof_continuous() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
