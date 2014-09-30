@@ -95,9 +95,9 @@ JacoBimanualActThread::loop()
 
     } else if( __iface->msgq_first_is<JacoBimanualInterface::CartesianGotoMessage>() ) {
       JacoBimanualInterface::CartesianGotoMessage *msg = __iface->msgq_first(msg);
-      logger->log_debug(name(), "CartesianGotoMessage rcvd. left : x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
+      logger->log_debug(name(), "CartesianGotoMessage rcvd. left: x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
                         msg->l_x(), msg->l_y(), msg->l_z(), msg->l_e1(), msg->l_e2(), msg->l_e3());
-      logger->log_debug(name(), "CartesianGotoMessage rcvd. right: x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
+      logger->log_debug(name(), "CartesianGotoMessage      right: x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",
                         msg->r_x(), msg->r_y(), msg->r_z(), msg->r_e1(), msg->r_e2(), msg->r_e3());
     #ifdef HAVE_OPENRAVE
       logger->log_debug(name(), "CartesianGotoMessage is being passed to openrave", __iface->id());
@@ -114,9 +114,9 @@ JacoBimanualActThread::loop()
 
     } else if( __iface->msgq_first_is<JacoBimanualInterface::MoveGripperMessage>() ) {
       JacoBimanualInterface::MoveGripperMessage *msg = __iface->msgq_first(msg);
-      logger->log_debug(name(), "MoveGripperMessage rcvd. left : f1:%f  f2:%f  f3:%f",
+      logger->log_debug(name(), "MoveGripperMessage rcvd. left: f1:%f  f2:%f  f3:%f",
                         msg->l_finger1(), msg->l_finger2(), msg->l_finger3());
-      logger->log_debug(name(), "MoveGripperMessage rcvd. right: f1:%f  f2:%f  f3:%f",
+      logger->log_debug(name(), "MoveGripperMessage      right: f1:%f  f2:%f  f3:%f",
                         msg->r_finger1(), msg->r_finger2(), msg->r_finger3());
 
       __goto_thread->move_gripper(msg->l_finger1(), msg->l_finger2(), msg->l_finger3(),
