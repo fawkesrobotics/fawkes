@@ -65,6 +65,7 @@ typedef enum jaco_trajec_state_enum {
   TRAJEC_PLANNING,      /**< planner is planning the trajectory. */
   TRAJEC_READY,         /**< trajectory has been planned and is ready for execution. */
   TRAJEC_EXECUTING,     /**< trajectory is being executed. */
+  TRAJEC_IK_ERROR,      /**< planner could not find IK solution for target */
   TRAJEC_PLANNING_ERROR /**< planner could not plan a collision-free trajectory. */
 } jaco_trajec_state_t;
 
@@ -74,6 +75,7 @@ typedef struct jaco_target_struct_t {
   jaco_trajec_point_t           fingers;        /**< target finger values. */
   fawkes::RefPtr<jaco_trajec_t> trajec;         /**< trajectory, if target is TARGET_TRAJEC. */
   jaco_trajec_state_t           trajec_state;   /**< state of the trajectory, if target is TARGET_TRAJEC. */
+  bool                          coord;          /**< this target needs to be coordinated with targets of other arms. */
 } jaco_target_t;
 
 typedef std::list< fawkes::RefPtr<jaco_target_t> > jaco_target_queue_t;

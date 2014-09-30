@@ -199,12 +199,100 @@ JacoBimanualOpenraveThread::finalize() {
   JacoOpenraveBaseThread::finalize();
 }
 
+
+void
+JacoBimanualOpenraveThread::loop()
+{
+#ifndef HAVE_OPENRAVE
+  usleep(30e3);
+#else
+  if( __arms.left.arm == NULL || __arms.right.arm == NULL ) {
+    usleep(30e3);
+    return;
+  }
+
+  // get first target in queues
+  __arms.left.arm->target_mutex->lock();
+  __arms.right.arm->target_mutex->lock();
+  if( !__arms.left.arm->target_queue->empty() && !__arms.right.arm->target_queue->empty() ) {
+    __arms.left.target  = __arms.left.arm->target_queue->front();
+    __arms.right.target = __arms.right.arm->target_queue->front();
+  }
+  __arms.left.arm->target_mutex->unlock();
+  __arms.right.arm->target_mutex->unlock();
+
+  if( !__arms.left.target || !__arms.right.target
+   || !__arms.left.target->coord || !__arms.right.target->coord
+   || __arms.left.target->trajec_state !=TRAJEC_WAITING
+   || __arms.right.target->trajec_state!=TRAJEC_WAITING ) {
+    //no new target in queue, or target is not meant for coordinated bimanual manipulation
+    usleep(30e3);
+    return;
+  }
+
+  // get suiting IK solutions
+  vector<float> sol_l, sol_r;
+  bool solvable = _solve_multi_ik(sol_l, sol_r);
+  __arms.left.arm->target_mutex->lock();
+  __arms.right.arm->target_mutex->lock();
+  if( !solvable ) {
+    __arms.left.target->trajec_state=TRAJEC_IK_ERROR;
+    __arms.right.target->trajec_state=TRAJEC_IK_ERROR;
+    __arms.left.arm->target_mutex->unlock();
+    __arms.right.arm->target_mutex->unlock();
+    usleep(30e3);
+    return;
+  } else {
+    __arms.left.target->type=TARGET_ANGULAR;
+    __arms.left.target->pos = sol_l;
+    __arms.right.target->type=TARGET_ANGULAR;
+    __arms.right.target->pos = sol_r;
+    __arms.left.arm->target_mutex->unlock();
+    __arms.right.arm->target_mutex->unlock();
+
+    // run path planner
+    _plan_path();
+  }
+
+#endif
+}
+
 bool
 JacoBimanualOpenraveThread::add_target(float l_x, float l_y, float l_z, float l_e1, float l_e2, float l_e3,
                                        float r_x, float r_y, float r_z, float r_e1, float r_e2, float r_e3)
 {
-  // no IK-solving for coordinated bimanual movement implemented yet
-  return false;
+  // no IK checking yet, just enqueue until they can be processed
+  // create new targets for the queues
+  RefPtr<jaco_target_t> target_l(new jaco_target_t());
+  target_l->type = TARGET_CARTESIAN;
+  target_l->trajec_state = TRAJEC_WAITING;
+  target_l->coord=true;
+  target_l->pos.push_back(l_x);
+  target_l->pos.push_back(l_y);
+  target_l->pos.push_back(l_z);
+  target_l->pos.push_back(l_e1);
+  target_l->pos.push_back(l_e2);
+  target_l->pos.push_back(l_e3);
+
+  RefPtr<jaco_target_t> target_r(new jaco_target_t());
+  target_r->type = TARGET_CARTESIAN;
+  target_r->trajec_state = TRAJEC_WAITING;
+  target_r->coord=true;
+  target_r->pos.push_back(r_x);
+  target_r->pos.push_back(r_y);
+  target_r->pos.push_back(r_z);
+  target_r->pos.push_back(r_e1);
+  target_r->pos.push_back(r_e2);
+  target_r->pos.push_back(r_e3);
+
+  __arms.left.arm->target_mutex->lock();
+  __arms.right.arm->target_mutex->lock();
+  __arms.left.arm->target_queue->push_back(target_l);
+  __arms.right.arm->target_queue->push_back(target_r);
+  __arms.left.arm->target_mutex->unlock();
+  __arms.right.arm->target_mutex->unlock();
+
+  return true;
 }
 
 void
@@ -222,11 +310,20 @@ JacoBimanualOpenraveThread::plot_first()
 bool
 JacoBimanualOpenraveThread::_plan_path()
 {
-  return true;
+  __arms.left.arm->target_mutex->lock();
+  __arms.right.arm->target_mutex->lock();
+  __arms.left.target->trajec_state=TRAJEC_PLANNING_ERROR;
+  __arms.right.target->trajec_state=TRAJEC_PLANNING_ERROR;
+  __arms.left.target->coord=false;
+  __arms.right.target->coord=false;
+  __arms.left.arm->target_mutex->unlock();
+  __arms.right.arm->target_mutex->unlock();
+
+  return false;
 }
 
 bool
-JacoBimanualOpenraveThread::_solve_multi_ik(vector<dReal> &left, vector<dReal> &right)
+JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &right)
 {
   EnvironmentMutex::scoped_lock plan_lock(__planner_env.env->get_env_ptr()->GetMutex());
 
@@ -268,6 +365,8 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<dReal> &left, vector<dReal> &
     if( solutions_l.empty() ) {
       logger->log_warn(name(), "No IK solutions found for left arm");
       return false;
+    } else {
+      logger->log_debug(name(), "IK solution found for left arm");
     }
 
     // now same for right arm. but enable links of right manipulator first
@@ -291,6 +390,8 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<dReal> &left, vector<dReal> &
     if( solutions_r.empty() ) {
       logger->log_warn(name(), "No IK solutions found for right arm");
       return false;
+    } else {
+      logger->log_debug(name(), "IK solution found for right arm");
     }
   } // robot state-saver destroyed
 
@@ -315,11 +416,16 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<dReal> &left, vector<dReal> &
 
         // check for collisions
         if( !robot->CheckSelfCollision() && !robot->GetEnv()->CheckCollision(robot) ) {
+          logger->log_debug(name(), "Collision-free solution found!");
           left.clear();
           right.clear();
-          left = *sol_l;
-          right = *sol_r;
+          __planner_env.manip->set_angles(*sol_l);
+          __planner_env.manip->get_angles_device(left);
+          __planner_env.manip->set_angles(*sol_r);
+          __planner_env.manip->get_angles_device(right);
           return true;
+        } else {
+          logger->log_debug(name(), "Skipping solution because of collision!");
         }
       }
     }

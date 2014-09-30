@@ -37,6 +37,7 @@ class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
   JacoBimanualOpenraveThread(fawkes::jaco_arm_t *arm_l, fawkes::jaco_arm_t *arm_r);
 
   virtual void once();
+  virtual void loop();
   virtual void finalize();
 
   virtual void update_openrave();
@@ -53,8 +54,8 @@ class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
   void _init();
   void _load_robot();
 
-  bool _solve_multi_ik(std::vector<OpenRAVE::dReal> &left,
-                       std::vector<OpenRAVE::dReal> &right);
+  bool _solve_multi_ik(std::vector<float> &left,
+                       std::vector<float> &right);
   bool _plan_path();
 
   typedef struct arm_struct {

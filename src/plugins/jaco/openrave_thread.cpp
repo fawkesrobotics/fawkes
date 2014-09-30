@@ -185,6 +185,9 @@ JacoOpenraveThread::finalize() {
 void
 JacoOpenraveThread::loop()
 {
+#ifndef HAVE_OPENRAVE
+    usleep(30e3);
+#else
   if( __arm == NULL || __arm->arm == NULL ) {
     usleep(30e3);
     return;
@@ -196,7 +199,7 @@ JacoOpenraveThread::loop()
   __arm->target_mutex->lock();
   jaco_target_queue_t::iterator it;
   for( it=__arm->target_queue->begin(); it!=__arm->target_queue->end(); ++it ) {
-    if( (*it)->trajec_state==TRAJEC_WAITING ) {
+    if( (*it)->trajec_state==TRAJEC_WAITING && !(*it)->coord) {
       // have found a new target for path planning!
       to = *it;
       break;
@@ -216,6 +219,12 @@ JacoOpenraveThread::loop()
       } else if( (*it)->trajec_state==TRAJEC_SKIP && (*it)->type == TARGET_ANGULAR ) {
         from = *it;
         break;
+      } else if( !(*it)->type==TARGET_GRIPPER ) {
+        // A previous target has unknown final configuration. Cannot plan for our target yet. Abort.
+        //  TARGET_GRIPPER would be the only one we could skip without problems.
+        __arm->target_mutex->unlock();
+        usleep(30e3);
+        return;
       }
     }
     __arm->target_mutex->unlock();
@@ -235,6 +244,7 @@ JacoOpenraveThread::loop()
     __planning_mutex->unlock();
     usleep(30e3); // TODO: make this configurable
   }
+#endif
 }
 
 void
@@ -303,6 +313,7 @@ JacoOpenraveThread::add_target(float x, float y, float z, float e1, float e2, fl
         RefPtr<jaco_target_t> target(new jaco_target_t());
         target->type = TARGET_CARTESIAN;
         target->trajec_state = TRAJEC_WAITING;
+        target->coord=false;
         target->pos.push_back(x);
         target->pos.push_back(y);
         target->pos.push_back(z);
@@ -330,6 +341,8 @@ JacoOpenraveThread::add_target(float x, float y, float z, float e1, float e2, fl
         // create new target for the queue
         RefPtr<jaco_target_t> target(new jaco_target_t());
         target->type = TARGET_ANGULAR;
+        target->trajec_state = TRAJEC_SKIP;
+        target->coord=false;
         // get target IK values
         __planner_env.robot->get_target().manip->get_angles_device(target->pos);
 

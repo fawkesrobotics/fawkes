@@ -106,6 +106,8 @@ JacoGotoThread::set_target(float x, float y, float z,
 {
   RefPtr<jaco_target_t> target(new jaco_target_t());
   target->type = TARGET_CARTESIAN;
+  target->trajec_state = TRAJEC_SKIP;
+  target->coord = false;
 
   target->pos.push_back(x);
   target->pos.push_back(y);
@@ -131,6 +133,8 @@ JacoGotoThread::set_target_ang(float j1, float j2, float j3,
 {
   RefPtr<jaco_target_t> target(new jaco_target_t());
   target->type = TARGET_ANGULAR;
+  target->trajec_state = TRAJEC_SKIP;
+  target->coord = false;
 
   target->pos.push_back(j1);
   target->pos.push_back(j2);
@@ -311,8 +315,9 @@ JacoGotoThread::loop()
     __target = __arm->target_queue->front();
   }
   __arm->target_mutex->unlock();
-  if( !__target ) {
-    //no new target in queue
+  if( !__target || __target->coord ) {
+    //no new target in queue, or target needs coordination of both arms,
+    // which is not what this thread does
     usleep(30e3);
     return;
   }
