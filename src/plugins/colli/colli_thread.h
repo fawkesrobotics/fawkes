@@ -127,6 +127,10 @@ class ColliThread
   float m_ProposedTranslationY;   // the proposed y translation that should be realized in MotorInstruct
   float m_ProposedRotation;       // the proposed rotation that should be realized in MotorInstruct
   bool cfg_write_spam_debug;
+  bool cfg_emergency_stop_used;    // true if emergency stop is used
+  float cfg_emergency_threshold_distance; // threshold distance if emergency stop triggers
+  float cfg_emergency_threshold_velocity; // threshold velocity if emergency stop triggers
+  float cfg_emergency_velocity_max;       // if emergency stop triggers, this is the max velocity
 
   fawkes::colli_state_t m_ColliStatus;     // representing current colli status
   bool target_new_;

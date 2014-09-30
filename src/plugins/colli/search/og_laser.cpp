@@ -76,6 +76,8 @@ CLaserOccupancyGrid::CLaserOccupancyGrid( Laser360Interface * laser, Logger* log
   m_MinimumLaserLength  = config->get_float((cfg_prefix + "laser/min_reading_length").c_str());
   cfg_write_spam_debug   = config->get_bool((cfg_prefix + "write_spam_debug").c_str());
 
+  cfg_emergency_stop_beams_used = config->get_float((cfg_prefix + "emergency_stopping/beams_used").c_str());
+
   cfg_delete_invisible_old_obstacles_           = config->get_bool((cfg_prefix + "laser_occupancy_grid/history/delete_invisible_old_obstacles/enable").c_str());
   cfg_delete_invisible_old_obstacles_angle_min_ = config->get_int((cfg_prefix + "laser_occupancy_grid/history/delete_invisible_old_obstacles/angle_min").c_str());
   cfg_delete_invisible_old_obstacles_angle_max_ = config->get_int((cfg_prefix + "laser_occupancy_grid/history/delete_invisible_old_obstacles/angle_max").c_str());
@@ -308,9 +310,9 @@ CLaserOccupancyGrid::obstacle_in_path_distance( float vx, float vy )
   if_laser_->read();
   int angle = roundf( rad2deg( normalize_rad( atan2f(vy, vx) ) ) );
 
-  float distance_min = 10;
+  float distance_min = 1000;
 
-  int cfg_beams = 11;
+  int cfg_beams = cfg_emergency_stop_beams_used;
 
   int beams_start = angle - int( cfg_beams / 2 );
   if ( beams_start < 0 )  { beams_start += 360; }

@@ -142,6 +142,8 @@ class CLaserOccupancyGrid : public OccupancyGrid
   /** Laser concerned settings */
   float m_MinimumLaserLength, m_ObstacleDistance;
 
+  int cfg_emergency_stop_beams_used;  /**< number of beams that are used to calculate the min distance to obstacle */
+
   bool cfg_obstacle_inc_ ;          /**< increasing obstacles or not */
   bool cfg_force_elipse_obstacle_;  /**< the used shape for obstacles */
 

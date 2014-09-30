@@ -95,6 +95,11 @@ ColliThread::init()
 
   cfg_write_spam_debug    = config->get_bool((cfg_prefix + "write_spam_debug").c_str());
 
+  cfg_emergency_stop_used           = config->get_bool((cfg_prefix + "emergency_stopping/enabled").c_str());
+  cfg_emergency_threshold_distance  = config->get_float((cfg_prefix + "emergency_stopping/threshold_distance").c_str());
+  cfg_emergency_threshold_velocity  = config->get_float((cfg_prefix + "emergency_stopping/threshold_velocity").c_str());
+  cfg_emergency_velocity_max        = config->get_float((cfg_prefix + "emergency_stopping/max_vel").c_str());
+
   std::string escape_mode = config->get_string((cfg_prefix + "drive_mode/default_escape").c_str());
   if ( escape_mode.compare("potential_field") == 0 ) {
     cfg_escape_mode = fawkes::colli_escape_mode_t::potential_field;
@@ -599,9 +604,10 @@ ColliThread::colli_execute_()
   }
 
   // calculate if emergency stop is needed
-  if ( distance_to_next_target_ < std::min(1.2f, cfg_max_velocity_)
-      && m_pMotorInstruct->GetMotorCurrentTranslation() > cfg_max_velocity_ / 4 ) {
-    float max_v = cfg_max_velocity_ / 8;
+  if (    cfg_emergency_stop_used
+      &&  distance_to_next_target_ < cfg_emergency_threshold_distance
+      &&  m_pMotorInstruct->GetMotorCurrentTranslation() > cfg_emergency_threshold_velocity ) {
+    float max_v = cfg_emergency_velocity_max;
 
     float part_x = 0;
     float part_y = 0;

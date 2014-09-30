@@ -106,6 +106,19 @@ plugins/colli:
     rot_acc: 0.23
     rot_dec: 0.42
 
+  # Config values for emergency stopping
+  emergency_stopping:
+    # this activates the emrgency stop
+    enabled: false
+    # obstacle distance that triggers the emergency stop
+    threshold_distance: 1.2
+    # min velocity that triggers the emergency stop
+    threshold_velocity: 0.2
+    # max velocity if emergency stop triggers
+    max_vel: 0.2
+    # number of beams that are used to check for distance (beams in directions of robot)
+    beams_used: 11
+
   drive_mode:
     # Used drive restriction. Options are: differential or omnidirectional
     restriction: "omnidirectional"
