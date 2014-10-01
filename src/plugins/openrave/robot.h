@@ -96,6 +96,7 @@ class OpenRaveRobot
   bool set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, OpenRAVE::IkFilterOptions filter, bool no_offset = false);
   bool set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, OpenRAVE::IkFilterOptions filter, bool no_offset = false);
   OpenRAVE::IkParameterization get_5dof_ikparam(OpenRAVE::Transform& trans);
+  bool solve_ik(OpenRAVE::IkFilterOptions filter);
 
   fawkes::Logger*                 __logger;
 

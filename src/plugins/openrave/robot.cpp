@@ -508,12 +508,10 @@ OpenRaveRobot::set_target_ikparam(IkParameterization ik_param, IkFilterOptions f
 {
   EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   __arm = __robot->GetActiveManipulator();
-  std::vector<OpenRAVE::dReal> target_angles;
 
   __target.ikparam = ik_param;
   __target.type = TARGET_IKPARAM;
-  __target.solvable = __arm->FindIKSolution(ik_param,target_angles,filter);
-  __target.manip->set_angles(target_angles);
+  solve_ik(filter);
 
   return __target.solvable;
 }
@@ -813,19 +811,14 @@ OpenRaveRobot::set_target_transform(Vector& trans, OpenRAVE::Vector& rotQuat, Ik
   if( __arm->GetIkSolver()->Supports(IKP_Transform6D) ) {
     __logger->log_debug("OR TMP", "6D suppport");
     // arm supports 6D ik. Perfect!
-    std::vector<OpenRAVE::dReal> target_angles;
-
     __target.ikparam = IkParameterization(target);
-    __target.solvable = __arm->FindIKSolution(__target.ikparam,target_angles,filter);
-    __target.manip->set_angles(target_angles);
+    solve_ik(filter);
 
   } else if( __arm->GetIkSolver()->Supports(IKP_TranslationDirection5D) ) {
     __logger->log_debug("OR TMP", "5D suppport");
     // arm has only 5 DOF.
-    std::vector<OpenRAVE::dReal> target_angles;
-
     __target.ikparam = get_5dof_ikparam(target);
-    __target.solvable = set_target_ikparam(__target.ikparam);
+    __target.solvable = set_target_ikparam(__target.ikparam, filter);
 
   } else {
     __logger->log_debug("OR TMP", "No IK suppport");
@@ -929,6 +922,39 @@ OpenRaveRobot::get_5dof_ikparam(OpenRAVE::Transform& trans)
   ikparam.SetTranslationDirection5D(RAY(trans.trans, dir));
 
   return ikparam;
+}
+
+/** Find IK solution that is closest to current configuration.
+ * This method checks and updates the internal __target variable.
+ * @return true if solvable, false otherwise.
+ */
+bool
+OpenRaveRobot::solve_ik(IkFilterOptions filter)
+{
+  std::vector< std::vector<dReal> > solutions;
+  std::vector< std::vector<dReal> >::iterator sol;
+
+  // get all IK solutions
+  __target.solvable = __arm->FindIKSolutions(__target.ikparam,solutions,filter);
+
+  // pick closest solution to current configuration
+  float dist = 100.f;
+  std::vector<dReal> cur;
+  __arm->GetArmDOFValues(cur);
+  for( sol=solutions.begin(); sol!=solutions.end(); ++sol ) {
+    float sol_dist = 0.f;
+    for( unsigned int i=0; i<cur.size(); ++i ) {
+      sol_dist += fabs(cur[i] - (*sol)[i]);
+    }
+    if( sol_dist < dist ) {
+      // found a solution that is closer
+      dist = sol_dist;
+      __target.manip->set_angles(*sol);
+    }
+  }
+
+  return __target.solvable;
+
 }
 
 } // end of namespace fawkes
