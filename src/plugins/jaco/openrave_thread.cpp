@@ -421,6 +421,13 @@ JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t
     to->trajec_state = TRAJEC_PLANNING_ERROR;
     __arm->target_mutex->unlock();
     return;
+  } else {
+    // set target angles. This changes the internal target type to ANGLES (see openrave/robot.*)
+    //  and will use BaseManipulation's MoveActiveJoints. Otherwise it will use MoveToHandPosition,
+    //  which does not have the filtering of IK solutions for the closest one as we have.
+    vector<float> target;
+    __planner_env.robot->get_target().manip->get_angles(target);
+    __planner_env.robot->set_target_angles(target);
   }
 
   // Set starting point for planner
