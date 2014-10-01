@@ -36,7 +36,6 @@ class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
  public:
   JacoBimanualOpenraveThread(fawkes::jaco_arm_t *arm_l, fawkes::jaco_arm_t *arm_r);
 
-  virtual void once();
   virtual void loop();
   virtual void finalize();
 
@@ -53,7 +52,9 @@ class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
  private:
   void _init();
   void _load_robot();
+  void _init_dualmanipulation();
 
+  void _set_trajec_state(fawkes::jaco_trajec_state_t state);
   bool _solve_multi_ik(std::vector<float> &left,
                        std::vector<float> &right);
   bool _plan_path();

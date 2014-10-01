@@ -122,14 +122,7 @@ JacoBimanualOpenraveThread::_load_robot()
     finalize();
     throw;
   }
-#endif
-}
 
-
-void
-JacoBimanualOpenraveThread::once()
-{
-#ifdef HAVE_OPENRAVE
   // create cloned environment for planning
   logger->log_debug(name(), "Clone environment for planning");
   openrave->clone(__planner_env.env, __planner_env.robot, __planner_env.manip);
@@ -138,10 +131,20 @@ JacoBimanualOpenraveThread::once()
     throw fawkes::Exception("Could not clone properly, received a NULL pointer");
   }
 
+  // initial modules for dualmanipulation
+  _init_dualmanipulation();
+#endif
+}
+
+
+void
+JacoBimanualOpenraveThread::_init_dualmanipulation()
+{
+#ifdef HAVE_OPENRAVE
   // load dualmanipulation module
   EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
   __mod_dualmanip = RaveCreateModule(__planner_env.env->get_env_ptr(), "dualmanipulation");
-  __planner_env.env->get_env_ptr()->Add( __mod_dualmanip, true, "");
+  __planner_env.env->get_env_ptr()->Add( __mod_dualmanip, true, __planner_env.robot->get_robot_ptr()->GetName());
 
   // load MultiManipIkSolver stuff
   // Get all the links that are affecte by left/right manipulator
@@ -307,17 +310,152 @@ JacoBimanualOpenraveThread::plot_first()
 {
 }
 
-bool
-JacoBimanualOpenraveThread::_plan_path()
+void
+JacoBimanualOpenraveThread::_set_trajec_state(jaco_trajec_state_t state)
 {
   __arms.left.arm->target_mutex->lock();
   __arms.right.arm->target_mutex->lock();
-  __arms.left.target->trajec_state=TRAJEC_PLANNING_ERROR;
-  __arms.right.target->trajec_state=TRAJEC_PLANNING_ERROR;
-  __arms.left.target->coord=false;
-  __arms.right.target->coord=false;
+  __arms.left.target->trajec_state=state;
+  __arms.right.target->trajec_state=state;
   __arms.left.arm->target_mutex->unlock();
   __arms.right.arm->target_mutex->unlock();
+}
+
+bool
+JacoBimanualOpenraveThread::_plan_path()
+{
+#ifdef HAVE_OPENRAVE
+  _set_trajec_state(TRAJEC_PLANNING);
+
+  // Update bodies in planner-environment
+  // clone robot state, ignoring grabbed bodies
+  {
+    EnvironmentMutex::scoped_lock view_lock(__viewer_env.env->get_env_ptr()->GetMutex());
+    EnvironmentMutex::scoped_lock plan_lock(__planner_env.env->get_env_ptr()->GetMutex());
+    __planner_env.robot->get_robot_ptr()->ReleaseAllGrabbed();
+    __planner_env.env->delete_all_objects();
+
+    RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
+                                     0xffffffff&~KinBody::Save_GrabbedBodies&~KinBody::Save_ActiveManipulator&~KinBody::Save_ActiveDOF);
+    saver.Restore( __planner_env.robot->get_robot_ptr() );
+  }
+
+  // then clone all objects
+  __planner_env.env->clone_objects( __viewer_env.env );
+
+  // restore robot state
+  {
+    EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
+
+    // update robot state with attached objects
+    {
+      EnvironmentMutex::scoped_lock view_lock(__viewer_env.env->get_env_ptr()->GetMutex());
+      RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
+                                       KinBody::Save_LinkTransformation|KinBody::Save_LinkEnable|KinBody::Save_GrabbedBodies);
+      saver.Restore( __planner_env.robot->get_robot_ptr() );
+    }
+  }
+
+  EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
+
+  // Set  active DOFs
+  vector<int> dofs   = __arms.left.manip->GetArmIndices();
+  vector<int> dofs_r = __arms.right.manip->GetArmIndices();
+  dofs.reserve(dofs.size() + dofs_r.size());
+  dofs.insert(dofs.end(), dofs_r.begin(), dofs_r.end());
+  __planner_env.robot->get_robot_ptr()->SetActiveDOFs(dofs);
+
+  // setup command for dualmanipulation module
+  stringstream cmdin,cmdout;
+  cmdin << std::setprecision(numeric_limits<dReal>::digits10+1);
+  cmdout << std::setprecision(numeric_limits<dReal>::digits10+1);
+
+  vector<dReal> sol;
+  cmdin << "MoveAllJoints goal";
+  __planner_env.manip->set_angles_device(__arms.left.target->pos);
+  __planner_env.manip->get_angles(sol);
+  for(size_t i = 0; i < sol.size(); ++i) {
+    cmdin << " " << sol[i];
+  }
+  __planner_env.manip->set_angles_device(__arms.right.target->pos);
+  __planner_env.manip->get_angles(sol);
+  for(size_t i = 0; i < sol.size(); ++i) {
+    cmdin << " " << sol[i];
+  }
+
+  //add additional planner parameters
+  if( !__plannerparams.empty() ) {
+    cmdin << " " << __plannerparams;
+  }
+  cmdin << " execute 0";
+  cmdin << " outputtraj";
+  //logger->log_debug(name(), "Planner: dualmanip cmdin:%s", cmdin.str().c_str());
+
+  // plan path
+  bool success = false;
+  try {
+    success = __mod_dualmanip->SendCommand(cmdout,cmdin);
+  } catch(openrave_exception &e) {
+    //logger->log_debug(name(), "Planner: dualmanip command failed. Ex:%s", e.what());
+  }
+
+  if(!success) {
+    logger->log_warn(name(),"Planner: planning failed");
+    _set_trajec_state(TRAJEC_PLANNING_ERROR);
+    return false;
+
+  } else {
+    //logger->log_debug(name(), "Planner: path planned. cmdout:%s", cmdout.str().c_str());
+
+    // read returned trajectory
+    ConfigurationSpecification cfg_spec = __planner_env.robot->get_robot_ptr()->GetActiveConfigurationSpecification();
+    TrajectoryBasePtr traj = RaveCreateTrajectory(__planner_env.env->get_env_ptr(), "");
+    traj->Init(cfg_spec);
+    if( !traj->deserialize(cmdout) ) {
+      logger->log_warn(name(), "Planner: Cannot read trajectory data.");
+      _set_trajec_state(TRAJEC_PLANNING_ERROR);
+      return false;
+
+    } else {
+      // sampling trajectory and setting target trajectory
+      jaco_trajec_t* trajec_l = new jaco_trajec_t();
+      jaco_trajec_t* trajec_r = new jaco_trajec_t();
+      jaco_trajec_point_t p; // point we will add to trajectories
+      vector<dReal> tmp_p;
+      int arm_dof = cfg_spec.GetDOF() / 2;
+
+      for(dReal time = 0; time <= traj->GetDuration(); time += (dReal)__cfg_OR_sampling) {
+        vector<dReal> point;
+        traj->Sample(point,time);
+
+        tmp_p = vector<dReal>(point.begin(), point.begin()+arm_dof);
+        __planner_env.manip->angles_or_to_device( tmp_p, p);
+        trajec_l->push_back(p);
+
+        tmp_p = vector<dReal>(point.begin()+arm_dof, point.begin()+2*arm_dof);
+        __planner_env.manip->angles_or_to_device( tmp_p, p);
+        trajec_r->push_back(p);
+      }
+
+      __arms.left.arm->target_mutex->lock();
+      __arms.right.arm->target_mutex->lock();
+      __arms.left.target->trajec = RefPtr<jaco_trajec_t>( trajec_l );
+      __arms.right.target->trajec = RefPtr<jaco_trajec_t>( trajec_r );
+      // update target.
+      // set target->pos accordingly. This makes final-checking in goto_thread much easier
+      __arms.left.target->pos = trajec_l->back();
+      __arms.right.target->pos = trajec_r->back();
+      __arms.left.target->trajec_state=TRAJEC_READY;
+      __arms.right.target->trajec_state=TRAJEC_READY;
+      __arms.left.target->coord=false; // TODO: just for testing, as no bimanua_goto_thread yet
+      __arms.right.target->coord=false;
+      __arms.left.arm->target_mutex->unlock();
+      __arms.right.arm->target_mutex->unlock();
+
+      return true;
+    }
+  }
+#endif
 
   return false;
 }
@@ -400,14 +538,19 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &
     (*s).Restore();
   }
 
-  // finally find the solutions without collision and store them
-  // TODO: sort by distance first?
+  // finally find the closest solutions without collision and store them
+  bool solution_found = false;
   {
     // save state of robot
     RobotBase::RobotStateSaver robot_saver(robot);
     vector< vector<dReal> >::iterator sol_l, sol_r;
 
-    // try each combination to find first non-colliding
+    float dist = 100.f;
+    vector<dReal> cur_l, cur_r;
+    __arms.left.manip->GetArmDOFValues(cur_l);
+    __arms.right.manip->GetArmDOFValues(cur_r);
+
+    // try each combination to find closest non-colliding
     for( sol_l=solutions_l.begin(); sol_l!=solutions_l.end(); ++sol_l ) {
       for( sol_r=solutions_r.begin(); sol_r!=solutions_r.end(); ++sol_r ) {
         // set joints for robot model
@@ -416,21 +559,36 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &
 
         // check for collisions
         if( !robot->CheckSelfCollision() && !robot->GetEnv()->CheckCollision(robot) ) {
-          logger->log_debug(name(), "Collision-free solution found!");
-          left.clear();
-          right.clear();
-          __planner_env.manip->set_angles(*sol_l);
-          __planner_env.manip->get_angles_device(left);
-          __planner_env.manip->set_angles(*sol_r);
-          __planner_env.manip->get_angles_device(right);
-          return true;
+          //logger->log_debug(name(), "Collision-free solution found!");
+          // calculate distance
+          float dist_l = 0.f;
+          float dist_r = 0.f;
+          for(unsigned int i=0; i<cur_l.size(); ++i) {
+            dist_l += fabs(cur_l[i] - (*sol_l)[i]);
+          }
+          //logger->log_debug(name(), "Distance left: %f", dist_l);
+          for(unsigned int i=0; i<cur_r.size(); ++i) {
+            dist_r += fabs(cur_r[i] - (*sol_r)[i]);
+          }
+          //logger->log_debug(name(), "Distance right: %f", dist_r);
+          if( dist_l+dist_r < dist ) {
+            //logger->log_debug(name(), "Dist %f is closer that previous one (%f). Take this!", dist_l+dist_r, dist);
+            dist = dist_l + dist_r;
+            solution_found = true;
+            left.clear();
+            right.clear();
+            __planner_env.manip->set_angles(*sol_l);
+            __planner_env.manip->get_angles_device(left);
+            __planner_env.manip->set_angles(*sol_r);
+            __planner_env.manip->get_angles_device(right);
+          }
         } else {
-          logger->log_debug(name(), "Skipping solution because of collision!");
+          //logger->log_debug(name(), "Skipping solution because of collision!");
         }
       }
     }
   } // robot state-saver destroyed
 
 
-  return false;
+  return solution_found;
 }
