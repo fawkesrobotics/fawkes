@@ -87,6 +87,8 @@ RobotinoActThread::init()
   std::string odom_mode     = config->get_string("/hardware/robotino/odometry/mode");
   cfg_odom_corr_phi_        =
     config->get_float("/hardware/robotino/odometry/calc/correction/phi");
+  cfg_odom_corr_trans_      =
+    config->get_float("/hardware/robotino/odometry/calc/correction/trans");
 
   std::string imu_if_id;
 
@@ -392,8 +394,8 @@ RobotinoActThread::publish_odometry()
 	  normalize_mirror_rad(odom_phi_ + omega * diff_sec * cfg_odom_corr_phi_);
       }
 
-      odom_x_ += cos(odom_phi_) * vx * diff_sec - sin(odom_phi_) * vy * diff_sec;
-      odom_y_ += sin(odom_phi_) * vx * diff_sec + cos(odom_phi_) * vy * diff_sec;
+      odom_x_ += cos(odom_phi_) * vx * diff_sec * cfg_odom_corr_trans_ - sin(odom_phi_) * vy * diff_sec * cfg_odom_corr_trans_;
+      odom_y_ += sin(odom_phi_) * vx * diff_sec * cfg_odom_corr_trans_ + cos(odom_phi_) * vy * diff_sec * cfg_odom_corr_trans_;
     }
 
 

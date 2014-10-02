@@ -132,6 +132,7 @@ class RobotinoActThread
   OdometryMode                    cfg_odom_mode_;
   unsigned int                    cfg_imu_deadman_loops_;
   float                           cfg_odom_corr_phi_;
+  float                           cfg_odom_corr_trans_;
   bool                            cfg_bumper_estop_enabled_;
 
   float                           des_vx_;
