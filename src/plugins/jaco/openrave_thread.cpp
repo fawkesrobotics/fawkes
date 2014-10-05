@@ -113,9 +113,7 @@ JacoOpenraveThread::_load_robot()
       // Set manipulator and offsets.
       openrave->set_manipulator(__viewer_env.robot, __viewer_env.manip, 0.f, 0.f, 0.f);
 
-      if( __cfg_OR_auto_load_ik ) {
-        openrave->get_environment()->load_IK_solver(__viewer_env.robot, OpenRAVE::IKP_Transform6D);
-      }
+      openrave->get_environment()->load_IK_solver(__viewer_env.robot, OpenRAVE::IKP_Transform6D);
 
     } catch (Exception& e) {
       finalize();
@@ -303,6 +301,7 @@ JacoOpenraveThread::add_target(float x, float y, float z, float e1, float e2, fl
     if( plan ) {
       // get IK from openrave. Ignore collisions with env though, as this is only for IK check and env might change at the
       //  time we start planning. There will be separate IK checks though for planning!
+      __planner_env.robot->enable_ik_comparison(false);
       solvable = __planner_env.robot->set_target_euler(EULER_ZXZ, x, y, z, e1, e2, e3, IKFO_IgnoreEndEffectorEnvCollisions);
 
       if( solvable ) {
@@ -387,9 +386,18 @@ JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t
     __planner_env.robot->get_robot_ptr()->ReleaseAllGrabbed();
     __planner_env.env->delete_all_objects();
 
+    /*
+    // Old method. Somehow we encountered problems. OpenRAVE internal bug?
     RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
                                      0xffffffff&~KinBody::Save_GrabbedBodies&~KinBody::Save_ActiveManipulator&~KinBody::Save_ActiveDOF);
     saver.Restore( __planner_env.robot->get_robot_ptr() );
+    //*/
+    //*
+    // New method. Simply set the DOF values as they are in __viewer_env
+    vector<dReal> dofs;
+    __viewer_env.robot->get_robot_ptr()->GetDOFValues(dofs);
+    __planner_env.robot->get_robot_ptr()->SetDOFValues(dofs);
+    //*/
   }
 
   // then clone all objects
@@ -399,22 +407,39 @@ JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t
   {
     EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
 
-    // update robot state with attached objects
-    {
-      EnvironmentMutex::scoped_lock view_lock(__viewer_env.env->get_env_ptr()->GetMutex());
-      RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
-                                       KinBody::Save_LinkTransformation|KinBody::Save_LinkEnable|KinBody::Save_GrabbedBodies);
-      saver.Restore( __planner_env.robot->get_robot_ptr() );
-    }
-
     // Set active manipulator and active DOFs (need for planner and IK solver!)
     RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__cfg_manipname);
     __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
+
+    // update robot state with attached objects
+    {
+      EnvironmentMutex::scoped_lock view_lock(__viewer_env.env->get_env_ptr()->GetMutex());
+      /*
+      // Old method. Somehow we encountered problems. OpenRAVE internal bug?
+      RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
+                                       KinBody::Save_LinkTransformation|KinBody::Save_LinkEnable|KinBody::Save_GrabbedBodies);
+      saver.Restore( __planner_env.robot->get_robot_ptr() );
+      //*/
+      //*
+      // New method. Grab all bodies in __planner_env that are grabbed in __viewer_env by this manipulator
+      vector<RobotBase::GrabbedInfoPtr> grabbed;
+      __viewer_env.robot->get_robot_ptr()->GetGrabbedInfo(grabbed);
+      for( vector<RobotBase::GrabbedInfoPtr>::iterator it=grabbed.begin(); it!=grabbed.end(); ++it ) {
+        logger->log_debug(name(), "compare _robotlinkname '%s' with our manip link '%s'",
+                          (*it)->_robotlinkname.c_str(), manip->GetEndEffector()->GetName().c_str());
+        if( (*it)->_robotlinkname == manip->GetEndEffector()->GetName() ) {
+          logger->log_debug(name(), "attach '%s'!", (*it)->_grabbedname.c_str());
+          __planner_env.robot->attach_object((*it)->_grabbedname.c_str(), __planner_env.env);
+        }
+      }
+      //*/
+    }
   }
 
   // Set target point for planner. Check again for IK, avoiding collisions with the environment
   //logger->log_debug(name(), "setting target %f %f %f %f %f %f",
   //                  to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5));
+  __planner_env.robot->enable_ik_comparison(true);
   if( !__planner_env.robot->set_target_euler(EULER_ZXZ, to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5)) ) {
     logger->log_warn(name(), "Planning failed, second IK check failed");
     __arm->target_mutex->lock();
