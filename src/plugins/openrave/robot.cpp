@@ -48,7 +48,8 @@ namespace fawkes {
 OpenRaveRobot::OpenRaveRobot(fawkes::Logger* logger) :
   __logger( logger ),
   __name( "" ),
-  __manip( 0 )
+  __manip( 0 ),
+  __find_best_ik( 1 )
 {
   init();
 }
@@ -60,7 +61,8 @@ OpenRaveRobot::OpenRaveRobot(fawkes::Logger* logger) :
 OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironmentPtr& env, fawkes::Logger* logger) :
   __logger( logger ),
   __name( "" ),
-  __manip( 0 )
+  __manip( 0 ),
+  __find_best_ik( 1 )
 {
   init();
   this->load(filename, env);
@@ -73,7 +75,8 @@ OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnviro
  */
 OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnvironmentPtr& new_env) :
   __logger( src.__logger ),
-  __name( src.__name )
+  __name( src.__name ),
+  __find_best_ik( src.__find_best_ik )
 {
   __traj = new std::vector< std::vector<dReal> >();
 
@@ -284,6 +287,18 @@ bool
 OpenRaveRobot::display_planned_movements() const
 {
   return __display_planned_movements;
+}
+
+/** Activate/Deactive IK comparison.
+ * When activated, we don't just take the first returned IK solution, but
+ * compare them all to find the best, i.e. the one that is "closest" to our
+ * current configuration.
+ * @param enable Sets the state of the comparison. Enabled by default.
+ */
+void
+OpenRaveRobot::enable_ik_comparison(bool enable)
+{
+  __find_best_ik = enable;
 }
 
 /** Set target, given relative transition.
@@ -809,7 +824,7 @@ OpenRaveRobot::set_target_transform(Vector& trans, OpenRAVE::Vector& rotQuat, Ik
   EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   __arm = __robot->GetActiveManipulator();
   if( __arm->GetIkSolver()->Supports(IKP_Transform6D) ) {
-    __logger->log_debug("OR TMP", "6D suppport");
+    __logger->log_debug("OR TMP", "6D suppport for arm %s", __arm->GetName().c_str());
     // arm supports 6D ik. Perfect!
     __target.ikparam = IkParameterization(target);
     solve_ik(filter);
@@ -931,30 +946,40 @@ OpenRaveRobot::get_5dof_ikparam(OpenRAVE::Transform& trans)
 bool
 OpenRaveRobot::solve_ik(IkFilterOptions filter)
 {
-  std::vector< std::vector<dReal> > solutions;
-  std::vector< std::vector<dReal> >::iterator sol;
+  if( !__find_best_ik ) {
+      std::vector<dReal> solution(6,0);
+    __target.solvable = __arm->FindIKSolution(__target.ikparam,solution,filter);
+    __target.manip->set_angles(solution);
 
-  // get all IK solutions
-  __target.solvable = __arm->FindIKSolutions(__target.ikparam,solutions,filter);
+  } else {
+    std::vector< std::vector<dReal> > solutions;
+    std::vector< std::vector<dReal> >::iterator sol;
 
-  // pick closest solution to current configuration
-  float dist = 100.f;
-  std::vector<dReal> cur;
-  __arm->GetArmDOFValues(cur);
-  for( sol=solutions.begin(); sol!=solutions.end(); ++sol ) {
-    float sol_dist = 0.f;
-    for( unsigned int i=0; i<cur.size(); ++i ) {
-      sol_dist += fabs(cur[i] - (*sol)[i]);
-    }
-    if( sol_dist < dist ) {
-      // found a solution that is closer
-      dist = sol_dist;
-      __target.manip->set_angles(*sol);
+    // get all IK solutions
+    __target.solvable = __arm->FindIKSolutions(__target.ikparam,solutions,filter);
+    if(!__target.solvable)
+      return false;
+
+    // pick closest solution to current configuration
+    float dist = 100.f;
+    std::vector<dReal> cur;
+    for( sol=solutions.begin(); sol!=solutions.end(); ++sol ) {
+      __arm->GetArmDOFValues(cur);
+      __robot->SubtractActiveDOFValues(cur, *sol);
+      float sol_dist = 0.f;
+      for( unsigned int i=0; i<cur.size(); ++i ) {
+        sol_dist += fabs(cur[i]);
+      }
+
+      if( sol_dist < dist ) {
+        // found a solution that is closer
+        dist = sol_dist;
+        __target.manip->set_angles(*sol);
+      }
     }
   }
 
   return __target.solvable;
-
 }
 
 } // end of namespace fawkes

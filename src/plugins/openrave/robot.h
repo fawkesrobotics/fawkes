@@ -79,6 +79,7 @@ class OpenRaveRobot
   virtual void set_target_raw(const char* cmd);
   virtual void set_target_angles( std::vector<float>& angles );
 
+  virtual void enable_ik_comparison(bool enable);
 
   virtual OpenRAVE::RobotBasePtr get_robot_ptr() const;
   virtual target_t get_target() const;
@@ -117,6 +118,7 @@ class OpenRaveRobot
   float         __trans_offset_z;
 
   bool          __display_planned_movements;
+  bool          __find_best_ik;
 };
 
 } // end of namespace fawkes
