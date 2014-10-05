@@ -55,6 +55,8 @@ class OpenRaveEnvironment
   virtual void create();
   virtual void destroy();
 
+  virtual void set_name(const char* name);
+
   virtual void enable_debug(OpenRAVE::DebugLevel level=OpenRAVE::Level_Debug);
   virtual void disable_debug();
 
@@ -84,6 +86,9 @@ class OpenRaveEnvironment
  private:
   fawkes::Logger* __logger;
 
+  std::string __name;
+  std::string __name_str;
+
   OpenRAVE::EnvironmentBasePtr  __env;
   OpenRAVE::PlannerBasePtr      __planner;
   OpenRAVE::ModuleBasePtr       __mod_ikfast;
@@ -91,6 +96,8 @@ class OpenRaveEnvironment
   std::vector<OpenRAVE::GraphHandlePtr> __graph_handle;
 
   bool  __viewer_enabled;
+
+  virtual const char* name() const;
 };
 } // end of namespace fawkes
 

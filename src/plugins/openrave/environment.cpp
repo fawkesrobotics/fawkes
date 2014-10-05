@@ -76,6 +76,7 @@ OpenRaveEnvironment::OpenRaveEnvironment(fawkes::Logger* logger) :
   __logger( logger ),
   __viewer_enabled( 0 )
 {
+  set_name("");
 }
 
 /** Copy constructor.
@@ -89,14 +90,20 @@ OpenRaveEnvironment::OpenRaveEnvironment(const OpenRaveEnvironment& src)
 {
   __env = src.__env->CloneSelf(OpenRAVE::Clone_Bodies);
 
+  // update name string
+  set_name( src.__name.c_str() );
+
   // create planner
   __planner = RaveCreatePlanner(__env,"birrt");
   if(!__planner)
-    {throw fawkes::Exception("OpenRAVE Environment: Could not create planner. Error in OpenRAVE.");}
+    throw fawkes::Exception("%s: Could not create planner. Error in OpenRAVE.", name());
 
   // create ikfast module
   __mod_ikfast = RaveCreateModule(__env,"ikfast");
   __env->AddModule(__mod_ikfast,"");
+
+  if (__logger)
+    __logger->log_debug(name(), "Environment cloned from %s", src.__name.c_str());
 }
 
 /** Destructor. */
@@ -111,17 +118,21 @@ OpenRaveEnvironment::create()
 {
   // create environment
   __env = RaveCreateEnvironment();
-  if(!__env)
-    {throw fawkes::Exception("OpenRAVE Environment: Could not create environment. Error in OpenRAVE.");}
-  else if (__logger)
-    {__logger->log_debug("OpenRAVE Environment", "Environment created");}
+  if(!__env) {
+    throw fawkes::Exception("%s: Could not create environment. Error in OpenRAVE.", name());
+  } else {
+    // update name_string
+    set_name(__name.c_str());
+    if (__logger)
+      __logger->log_debug(name(), "Environment created");
+  }
 
   EnvironmentMutex::scoped_lock( __env->GetMutex());
 
   // create planner
   __planner = RaveCreatePlanner(__env,"birrt");
   if(!__planner)
-    {throw fawkes::Exception("OpenRAVE Environment: Could not create planner. Error in OpenRAVE.");}
+    throw fawkes::Exception("%s: Could not create planner. Error in OpenRAVE.", name());
 
   // create ikfast module
   __mod_ikfast = RaveCreateModule(__env,"ikfast");
@@ -135,11 +146,37 @@ OpenRaveEnvironment::destroy()
   try {
     __env->Destroy();
     if(__logger)
-      {__logger->log_debug("OpenRAVE Environment", "Environment destroyed");}
+      __logger->log_debug(name(), "Environment destroyed");
   } catch(const openrave_exception& e) {
     if(__logger)
-      {__logger->log_warn("OpenRAVE Environment", "Could not destroy Environment. Ex:%s", e.what());}
+      __logger->log_warn(name(), "Could not destroy Environment. Ex:%s", e.what());
   }
+}
+
+/** Get the name string to use in logging messages etc. */
+const char*
+OpenRaveEnvironment::name() const
+{
+  return __name_str.c_str();
+}
+
+/** Set name of environment.
+ * Nothing important, but helpful for debugging etc.
+ * @param name The name of the environment. Can be an empty string.
+ */
+void
+OpenRaveEnvironment::set_name(const char* name)
+{
+  std::stringstream n;
+  n << "OpenRaveEnvironment" << "[";
+  if( __env )
+    n << RaveGetEnvironmentId(__env) << ":";
+  n << name << "]";
+  __name_str = n.str();
+
+  if (__logger)
+    __logger->log_debug(__name_str.c_str(), "Set environment name (previously '%s')", __name.c_str());
+  __name = name;
 }
 
 /** Enable debugging messages of OpenRAVE.
@@ -169,10 +206,10 @@ OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
     EnvironmentMutex::scoped_lock( __env->GetMutex());
     __env->Add(robot);
     if(__logger)
-      {__logger->log_debug("OpenRAVE Environment", "Robot added to environment.");}
+      __logger->log_debug(name(), "Robot '%s' added to environment.", robot->GetName().c_str());
   } catch(openrave_exception &e) {
     if(__logger)
-      {__logger->log_debug("OpenRAVE Environment", "Could not add robot to environment. OpenRAVE error:%s", e.message().c_str());}
+      __logger->log_debug(name(), "Could not add robot '%s' to environment. OpenRAVE error:%s", robot->GetName().c_str(), e.message().c_str());
   }
 }
 
@@ -193,9 +230,9 @@ OpenRaveEnvironment::add_robot(const std::string& filename)
   // if could not load robot file: Check file path, and test file itself for correct syntax and semantics
   // by loading it directly into openrave with "openrave robotfile.xml"
   if( !robot )
-    {throw fawkes::IllegalArgumentException("OpenRAVE Environment: Robot could not be loaded. Check xml file/path.");}
+    throw fawkes::IllegalArgumentException("%s: Robot '%s' could not be loaded. Check xml file/path.", name(), filename.c_str());
   else if(__logger)
-    {__logger->log_debug("OpenRAVE Environment", "Robot loaded.");}
+    __logger->log_debug(name(), "Robot '%s' loaded.", robot->GetName().c_str());
 
   add_robot(robot);
 }
@@ -232,7 +269,7 @@ OpenRaveEnvironment::start_viewer()
       boost::thread thviewer(boost::bind(SetViewer,__env,"qtcoin"));
     } catch( const openrave_exception &e) {
       if(__logger)
-        {__logger->log_error("OpenRAVE Environment", "Could not load viewr. Ex:%s", e.what());}
+        __logger->log_error(name(), "Could not load viewr. Ex:%s", e.what());
       throw;
     }
   }
@@ -256,7 +293,7 @@ OpenRaveEnvironment::load_IK_solver(OpenRaveRobotPtr& robot, OpenRAVE::IkParamet
   // if necessary, add free inc for degrees of freedom
   //ssin << " " << 0.04f;
   if( !__mod_ikfast->SendCommand(ssout,ssin) )
-    {throw fawkes::Exception("OpenRAVE Environment: Could not load ik solver");}
+    throw fawkes::Exception("%s: Could not load ik solver", name());
 }
 
 /** Plan collision-free path for current and target manipulator
@@ -277,9 +314,9 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
   // helps to identify problem source if any occurs.
   success = __planner->InitPlan(robot->get_robot_ptr(),robot->get_planner_params());
   if(!success)
-    {throw fawkes::Exception("OpenRAVE Environment: Planner: init failed");}
+    {throw fawkes::Exception("%s: Planner: init failed", name());}
   else if(__logger)
-    {__logger->log_debug("OpenRAVE Environment", "Planner: initialized");}
+    {__logger->log_debug(name(), "Planner: initialized");}
   //*/
   // plan path with basemanipulator
   ModuleBasePtr basemanip = robot->get_basemanip();
@@ -346,7 +383,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
       break;
 
     default :
-      throw fawkes::Exception("OpenRAVE Environment: Planner: Invalid target type");
+      throw fawkes::Exception("%s: Planner: Invalid target type", name());
   }
 
   //add additional planner parameters
@@ -355,28 +392,27 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
   }
   cmdin << " execute 0";
   cmdin << " outputtraj";
-  //if(__logger)
-  //  __logger->log_debug("OpenRAVE Environment", "Planner: basemanip cmdin:%s", cmdin.str().c_str());
+  if(__logger)
+    __logger->log_debug(name(), "Planner: basemanip cmdin:%s", cmdin.str().c_str());
 
   try {
     success = basemanip->SendCommand(cmdout,cmdin);
   } catch(openrave_exception &e) {
-    throw fawkes::Exception("OpenRAVE Environment: Planner: basemanip command failed. Ex%s", e.what());
+    throw fawkes::Exception("%s: Planner: basemanip command failed. Ex%s", name(), e.what());
   }
   if(!success)
-    {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
+    throw fawkes::Exception("%s: Planner: planning failed", name());
   else if(__logger)
-    {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
+    __logger->log_debug(name(), "Planner: path planned");
 
-  //if(__logger)
-  //  __logger->log_debug("OpenRAVE Environment", "Planner: planned. cmdout:%s", cmdout.str().c_str());
+  if(__logger)
+    __logger->log_debug(name(), "Planner: planned. cmdout:%s", cmdout.str().c_str());
 
   // read returned trajectory
   TrajectoryBasePtr traj = RaveCreateTrajectory(__env, "");
   traj->Init(robot->get_robot_ptr()->GetActiveConfigurationSpecification());
-  if( !traj->deserialize(cmdout) ) {
-    {throw fawkes::Exception("OpenRAVE Environment: Planner: Cannot read trajectory data.");}
-  }
+  if( !traj->deserialize(cmdout) )
+    throw fawkes::Exception("%s: Planner: Cannot read trajectory data.", name());
 
   // sampling trajectory and setting robots trajectory
   std::vector< std::vector<dReal> >* trajRobot = robot->get_trajectory();
@@ -432,7 +468,7 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
 
   FILE* py_file = fopen(filename.c_str(), "r");
   if (py_file == NULL)
-    {throw fawkes::Exception("OpenRAVE Environment: Graspplanning: opening python file failed");}
+    throw fawkes::Exception("%s: Graspplanning: opening python file failed", name());
 
   Py_Initialize();
 
@@ -452,14 +488,14 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
     PyThreadState_Swap(cur_state);
     PyGILState_Release(gil_state); // release GIL
     Py_Finalize();
-    throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Python reference '__main__' does not exist.");
+    throw fawkes::Exception("%s: Graspplanning: Python reference '__main__' does not exist.", name());
   }
   PyObject* py_dict = PyModule_GetDict(py_main);      // borrowed reference
   if( !py_dict ) {
     // __main__ should have a dictionary
     fclose(py_file);
     Py_Finalize();
-    throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Python reference '__main__' does not have a dictionary.");
+    throw fawkes::Exception("%s: Graspplanning: Python reference '__main__' does not have a dictionary.", name());
   }
 
   // load file
@@ -487,7 +523,7 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
           Py_DECREF(py_value);
           Py_DECREF(py_func);
           Py_Finalize();
-          throw fawkes::Exception("OpenRAVE Environment: Graspplanning: No grasping path found.");
+          throw fawkes::Exception("%s: Graspplanning: No grasping path found.", name());
         }
         std::stringstream resval;
         resval << std::setprecision(std::numeric_limits<dReal>::digits10+1);
@@ -496,27 +532,27 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
           Py_DECREF(py_value);
           Py_DECREF(py_func);
           Py_Finalize();
-          throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Reading trajectory data failed.");
+          throw fawkes::Exception("%s: Graspplanning: Reading trajectory data failed.", name());
         }
         Py_DECREF(py_value);
       } else { // if calling function failed
         Py_DECREF(py_func);
         PyErr_Print();
         Py_Finalize();
-        throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Calling function failed.");
+        throw fawkes::Exception("%s: Graspplanning: Calling function failed.", name());
       }
     } else { // if loading func failed
       if (PyErr_Occurred())
         PyErr_Print();
       Py_XDECREF(py_func);
       Py_Finalize();
-      throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Loading function failed.");
+      throw fawkes::Exception("%s: Graspplanning: Loading function failed.", name());
     }
     Py_XDECREF(py_func);
   } else { // if loading module failed
     PyErr_Print();
     Py_Finalize();
-    throw fawkes::Exception("OpenRAVE Environment: Graspplanning: Loading python file failed.");
+    throw fawkes::Exception("%s: Graspplanning: Loading python file failed.", name());
   }
 
   Py_EndInterpreter(int_state); // close sub-interpreter
@@ -526,7 +562,7 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
   Py_Finalize(); // should be careful with that, as it closes global interpreter; Other threads running python may fail
 
   if(__logger)
-    {__logger->log_debug("OpenRAVE Environment", "Graspplanning: path planned");}
+    __logger->log_debug(name(), "Graspplanning: path planned");
 
   // re-timing the trajectory with
   planningutils::RetimeActiveDOFTrajectory(traj, robot->get_robot_ptr());
@@ -579,7 +615,7 @@ OpenRaveEnvironment::add_object(const std::string& name, const std::string& file
     __env->Add(kb);
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Environment", "Could not add Object '%s'. Ex:%s", name.c_str(), e.what());
+      __logger->log_warn(this->name(), "Could not add Object '%s'. Ex:%s", name.c_str(), e.what());
     return false;
   }
 
@@ -599,7 +635,7 @@ OpenRaveEnvironment::delete_object(const std::string& name)
     __env->Remove(kb);
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Environment", "Could not delete Object '%s'. Ex:%s", name.c_str(), e.what());
+      __logger->log_warn(this->name(), "Could not delete Object '%s'. Ex:%s", name.c_str(), e.what());
     return false;
   }
 
@@ -623,7 +659,7 @@ OpenRaveEnvironment::delete_all_objects()
     }
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Environment", "Could not delete all objects. Ex:%s", e.what());
+      __logger->log_warn(this->name(), "Could not delete all objects. Ex:%s", e.what());
     return false;
   }
 
@@ -644,7 +680,7 @@ OpenRaveEnvironment::rename_object(const std::string& name, const std::string& n
     kb->SetName(new_name);
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Environment", "Could not rename Object '%s' to '%s'. Ex:%s", name.c_str(), new_name.c_str(), e.what());
+      __logger->log_warn(this->name(), "Could not rename Object '%s' to '%s'. Ex:%s", name.c_str(), new_name.c_str(), e.what());
     return false;
   }
 
@@ -672,7 +708,7 @@ OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float t
     kb->SetTransform(transform);
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Environment", "Could not move Object '%s'. Ex:%s", name.c_str(), e.what());
+      __logger->log_warn(this->name(), "Could not move Object '%s'. Ex:%s", name.c_str(), e.what());
     return false;
   }
 
@@ -723,7 +759,7 @@ OpenRaveEnvironment::rotate_object(const std::string& name, float quat_x, float 
     kb->SetTransform(transform);
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Environment", "Could not rotate Object '%s'. Ex:%s", name.c_str(), e.what());
+      __logger->log_warn(this->name(), "Could not rotate Object '%s'. Ex:%s", name.c_str(), e.what());
     return false;
   }
 

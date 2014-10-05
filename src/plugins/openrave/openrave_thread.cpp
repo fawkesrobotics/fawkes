@@ -72,6 +72,8 @@ OpenRaveThread::init()
 
   __OR_env->create();
   __OR_env->enable_debug(); // TODO: cfg
+
+  __OR_env->set_name("viewer");
 }
 
 
