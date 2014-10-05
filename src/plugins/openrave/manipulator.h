@@ -112,6 +112,9 @@ template <typename T>
 void
 OpenRaveManipulator::set_angles(std::vector<T>& angles)
 {
+  if( angles.size() < __motors.size() ) {
+    angles.reserve(__motors.size());
+  }
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = (float)angles[__motors[i].no];
   }
@@ -124,6 +127,9 @@ template <typename T>
 void
 OpenRaveManipulator::set_angles_device(std::vector<T>& angles)
 {
+  if( angles.size() < __motors.size() ) {
+    angles.reserve(__motors.size());
+  }
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = angle_device_to_OR(__motors[i].no_device, (float)angles[__motors[i].no_device]);
   }
