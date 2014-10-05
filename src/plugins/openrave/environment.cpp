@@ -270,6 +270,8 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
   bool success;
   EnvironmentMutex::scoped_lock lock(__env->GetMutex()); // lock environment
 
+  robot->get_planner_params(); // also updates internal __manip
+
   /*
   // init planner. This is automatically done by BaseManipulation, but putting it here
   // helps to identify problem source if any occurs.
@@ -365,6 +367,9 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
     {throw fawkes::Exception("OpenRAVE Environment: Planner: planning failed");}
   else if(__logger)
     {__logger->log_debug("OpenRAVE Environment", "Planner: path planned");}
+
+  //if(__logger)
+  //  __logger->log_debug("OpenRAVE Environment", "Planner: planned. cmdout:%s", cmdout.str().c_str());
 
   // read returned trajectory
   TrajectoryBasePtr traj = RaveCreateTrajectory(__env, "");
@@ -782,7 +787,8 @@ OpenRaveEnvironment::clone_objects(OpenRaveEnvironmentPtr& env)
     }
 
     if( body != bodies.end() ) {
-      // remove this one from the list
+      // remove this one from the list, to reduce checking
+      // (this one has already been found a match)
       bodies.erase( body );
     }
 
@@ -802,7 +808,7 @@ OpenRaveEnvironment::clone_objects(OpenRaveEnvironmentPtr& env)
       __env->GetPhysicsEngine()->InitKinBody(new_body);
 
       // clone kinbody state
-      KinBody::KinBodyStateSaver saver(*old_body, KinBody::Save_LinkVelocities);
+      KinBody::KinBodyStateSaver saver(*old_body, KinBody::Save_LinkTransformation|KinBody::Save_LinkEnable|KinBody::Save_LinkVelocities);
       saver.Restore(new_body);
 
     } else {
