@@ -147,8 +147,8 @@ SkillerExecutionThread::init()
     __lua_ifi->add_interface("skdbg_layouted", __skdbg_if_layouted);
     __lua_ifi->add_interface("skiller", __skiller_if);
 
-    __lua->add_package_dir(LUADIR);
-    __lua->add_cpackage_dir(LUALIBDIR);
+    __lua->add_package_dir(LUADIR, /* prefix */ true);
+    __lua->add_cpackage_dir(LUALIBDIR, /* prefix */ true);
 
     __lua->add_package("fawkesutils");
     __lua->add_package("fawkesconfig");
@@ -159,6 +159,7 @@ SkillerExecutionThread::init()
 #endif
 
     __lua->set_string("SKILLSPACE", __cfg_skillspace.c_str());
+    __lua->set_string("LUADIR", LUADIR);
     __lua->set_usertype("config", config, "Configuration", "fawkes");
     __lua->set_usertype("logger", __clog, "ComponentLogger", "fawkes");
     __lua->set_usertype("clock", clock, "Clock", "fawkes");
