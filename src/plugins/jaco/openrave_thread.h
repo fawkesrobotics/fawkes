@@ -38,7 +38,6 @@ class JacoOpenraveThread : public JacoOpenraveBaseThread
  public:
   JacoOpenraveThread(const char *name, fawkes::jaco_arm_t* arm, bool load_robot=true);
 
-  virtual void once();
   virtual void loop();
   virtual void finalize();
 
@@ -55,6 +54,7 @@ class JacoOpenraveThread : public JacoOpenraveBaseThread
  private:
   void _init();
   void _load_robot();
+  void _post_init();
 
   void _plan_path(fawkes::RefPtr<fawkes::jaco_target_t> &from, fawkes::RefPtr<fawkes::jaco_target_t> &to);
 

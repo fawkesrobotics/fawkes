@@ -163,18 +163,32 @@ JacoActThread::finalize()
 void
 JacoActThread::loop()
 {
+  if( __arm==NULL || __arm->iface==NULL || __arm->openrave_thread==NULL)
+    return;
+
   // firts of all, submit interface updates (that other threads might have done)!
-  _submit_iface();
+  __arm->iface->write();
 
   // check if still initializing
   if( _is_initializing() )
     return;
 
+#ifdef HAVE_OPENRAVE
+  // make sure openrave-thread is ready!
+  if( !__arm->openrave_thread->started() )
+    return;
+#endif
+
   // process incoming interface messages
   _process_msgs();
 
   // finally, again submit interface updates
-  _submit_iface();
+  __arm->iface->write();
+
+#ifdef HAVE_OPENRAVE
+  __arm->openrave_thread->update_openrave();
+#endif
+  __arm->iface->set_final(__arm->goto_thread->final());
 }
 
 
@@ -216,14 +230,6 @@ JacoActThread::_is_initializing()
   }
 
   return false;
-}
-
-/** Submit changes made to JacoInterface.
- * Not much done here. */
-void
-JacoActThread::_submit_iface()
-{
-  __arm->iface->write();
 }
 
 /** Process interface messages. */
@@ -317,9 +323,4 @@ JacoActThread::_process_msgs()
 
     __arm->iface->msgq_pop();
   }
-
-#ifdef HAVE_OPENRAVE
-  __arm->openrave_thread->update_openrave();
-#endif
-  __arm->iface->set_final(__arm->goto_thread->final());
 }

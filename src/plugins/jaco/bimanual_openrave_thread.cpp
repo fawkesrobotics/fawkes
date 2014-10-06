@@ -131,6 +131,9 @@ JacoBimanualOpenraveThread::_load_robot()
     throw fawkes::Exception("Could not clone properly, received a NULL pointer");
   }
 
+  // set name of env
+  __planner_env.env->set_name("Planner_Bimanual");
+
   // initial modules for dualmanipulation
   _init_dualmanipulation();
 #endif

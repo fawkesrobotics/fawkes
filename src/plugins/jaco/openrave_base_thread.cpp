@@ -84,12 +84,15 @@ JacoOpenraveBaseThread::init()
 
   __viewer_env.env = openrave->get_environment();
   __viewer_env.env->enable_debug();
+  __viewer_env.env->set_name("Viewer");
 
   // load robot
   _load_robot();
 
   if( __cfg_OR_use_viewer )
     openrave->start_viewer();
+
+  _post_init();
 #endif
 }
 

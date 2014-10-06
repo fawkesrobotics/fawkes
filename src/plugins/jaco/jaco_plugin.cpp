@@ -106,11 +106,6 @@ JacoPlugin::JacoPlugin(Configuration *config)
     thread_list.push_back( info_thread_r );
     thread_list.push_back( goto_thread_r );
 
-#ifdef HAVE_OPENRAVE
-    thread_list.push_back( openrave_thread_l );
-    thread_list.push_back( openrave_thread_r );
-#endif
-
     // we also need a set of threads for coordinated bimanual manipulation
     JacoBimanualOpenraveThread* openrave_thread = NULL;
 #ifdef HAVE_OPENRAVE
@@ -120,6 +115,11 @@ JacoPlugin::JacoPlugin(Configuration *config)
     JacoBimanualGotoThread* goto_thread = new JacoBimanualGotoThread(arm_l, arm_r);
     thread_list.push_back( goto_thread );
     thread_list.push_back( new JacoBimanualActThread(goto_thread, openrave_thread) );
+
+#ifdef HAVE_OPENRAVE
+    thread_list.push_back( openrave_thread_l );
+    thread_list.push_back( openrave_thread_r );
+#endif
   }
 }
 

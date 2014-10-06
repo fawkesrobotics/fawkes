@@ -119,25 +119,24 @@ JacoOpenraveThread::_load_robot()
       finalize();
       throw;
     }
-  }
-#endif //HAVE_OPENRAVE
-}
 
-void
-JacoOpenraveThread::once()
-{
-#ifdef HAVE_OPENRAVE
-  if(!__load_robot) {
+  } else {
     // robot was not loaded by this thread. So get them from openrave-environment now
     try {
       __viewer_env.robot = openrave->get_active_robot();
       __viewer_env.manip = __viewer_env.robot->get_manipulator()->copy();
-
     } catch (Exception& e) {
-      throw fawkes::Exception("Could not add robot '%s' to openrave environment. (Error: %s)", __cfg_OR_robot_file.c_str(), e.what_no_backtrace());
+      throw fawkes::Exception("%s: Could not get robot '%s' from openrave environment. (Error: %s)", name(), __cfg_OR_robot_file.c_str(), e.what_no_backtrace());
     }
   }
 
+#endif //HAVE_OPENRAVE
+}
+
+void
+JacoOpenraveThread::_post_init()
+{
+#ifdef HAVE_OPENRAVE
   while( !__robot ) {
     __robot = __viewer_env.robot->get_robot_ptr();
     usleep(100);
@@ -154,6 +153,21 @@ JacoOpenraveThread::once()
 
   if( !__planner_env.env || !__planner_env.robot || !__planner_env.manip) {
     throw fawkes::Exception("Could not clone properly, received a NULL pointer");
+  }
+
+  // set name of environment
+  switch( __arm->config ) {
+    case CONFIG_SINGLE:
+      __planner_env.env->set_name("Planner");
+      break;
+
+    case CONFIG_LEFT:
+      __planner_env.env->set_name("Planner_Left");
+      break;
+
+    case CONFIG_RIGHT:
+      __planner_env.env->set_name("Planner_Right");
+      break;
   }
 
   // set active manipulator in planning environment

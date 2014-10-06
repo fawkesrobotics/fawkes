@@ -55,7 +55,6 @@ class JacoActThread
  private:
   void _initialize();
   bool _is_initializing();
-  void _submit_iface();
   void _process_msgs();
 
   fawkes::jaco_arm_t* __arm;

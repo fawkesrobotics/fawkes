@@ -78,6 +78,7 @@ class JacoOpenraveBaseThread
   virtual void run() { Thread::run(); }
   virtual void _init() {}
   virtual void _load_robot() {}
+  virtual void _post_init() {}
 
   fawkes::Mutex *__planning_mutex;
 
