@@ -37,20 +37,32 @@ local nodemon
 print_fail  = fawkes.logprint.print_warn
 print_final = fawkes.logprint.print_info
 
-function init()
-   roslua.init_node{node_name="skiller"}
+function init(args)
+   local args = args or {}
+   roslua.init_node{node_name="skiller",
+		    no_signal_handler=args.no_signal_handler}
 
-   local ok, nodemonmod = pcall(require, "nodemon")
-   if ok then
-      nodemon = nodemonmod.NodeStatePublisher:new("skiller", "skiller")
-   else
-      print_warn("Node monitoring disabled (module nodemon not found):\n%s",
-		 nodemonmod)
+   local run_nodemon = args.run_nodemon or false
+   if roslua.has_param("skiller/nodemon") then
+      run_nodemon = roslua.get_param("skiller/nodemon")
    end
 
-   skiller_as = actionlib.action_server("~exec", "skiller/ExecSkill",
-					goal_cb, spin_cb, cancel_cb)
-   skiller.ros.graph.init()
+   if run_nodemon then
+      local ok, nodemonmod = pcall(require, "nodemon")
+      if ok then
+	 nodemon = nodemonmod.NodeStatePublisher:new("skiller", "skiller")
+      else
+	 print_warn("Node monitoring disabled (module nodemon not found):\n%s",
+		    nodemonmod)
+      end
+   end
+
+   if not args.no_action_server then
+      skiller_as = actionlib.action_server("~exec", "skiller/ExecSkill",
+					   goal_cb, spin_cb, cancel_cb)
+      skiller.ros.graph.init()
+   end
+
    skillenv = require("skiller.skillenv")
 
    if nodemon then nodemon:set_running() end

@@ -18,7 +18,10 @@ skiller:
       # Enable access to navgraph, adds a dependency on the navgraph
       # plugin such that a valid graph must be loaded first
       enable: false
-  
+
+    ros:
+      enable: true
+
   interfaces:
     test:
       reading:

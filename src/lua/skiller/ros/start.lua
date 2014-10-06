@@ -22,7 +22,7 @@
 require("roslua.logging")
 require("fawkes.logprint")
 require("fawkes.depinit")
-roslua.logging.register_print_funcs(fawkes.logprint)
+--roslua.logging.register_print_funcs(fawkes.logprint)
 
 require("actionlib")
 require("fawkes.mathext")
@@ -33,12 +33,16 @@ local actinitmod = require("skiller.ros.action_initializer")
 local topinitmod = require("skiller.ros.topic_initializer")
 local srvinitmod = require("skiller.ros.service_initializer")
 
-skiller.ros.init()
+skiller.ros.init{no_signal_handler = true,
+		 no_action_server  = true,
+		 no_print_funcs    = true}
 
-skillenv = require("skiller.skillenv")
+_G.skillenv = require("skiller.skillenv")
 skillenv.add_export("ActionJumpState", actjsmod.ActionJumpState)
 skillenv.add_export("ServiceJumpState", srvjsmod.ServiceJumpState)
 fawkes.depinit.add_module_initializer(actinitmod.init_actions)
 fawkes.depinit.add_module_initializer(topinitmod.init_topics)
 fawkes.depinit.add_module_initializer(srvinitmod.init_services)
-skillenv.init(SKILLSPACE)
+--skillenv.init(SKILLSPACE)
+
+skillenv.add_loop_callback("roslua", roslua.spin)
