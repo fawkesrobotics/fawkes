@@ -20,20 +20,30 @@ endif
 ifndef __buildsys_lua_mk_
 __buildsys_lua_mk_ := 1
 
-LUA_VERSION = 5.1
+# List of acceptable Lua versions
+LUA_VERSIONS= 5.2 5.1
 
 # Check for Lua (Fedora packages lua and lua-devel)
 ifneq ($(PKGCONFIG),)
-  LUA_PACKAGE = $(firstword $(foreach P,lua$(LUA_VERSION) lua-$(LUA_VERSION) lua,$(if $(shell $(PKGCONFIG) --atleast-version $(LUA_VERSION) $(P); echo $${?/1/}),$(P))))
-  HAVE_LUA = $(if $(LUA_PACKAGE),1,0)
+  __LUA_TRY_P = lua $(foreach V,$(LUA_VERSIONS),lua$V lua-$V )
+  __LUA_MIN_V = $(lastword $(LUA_VERSIONS))
+
+  LUA_PACKAGE = $(firstword $(foreach P,$(__LUA_TRY_P),$(if $(shell $(PKGCONFIG) --atleast-version $(__LUA_MIN_V) $P; echo $${?/1/}),$P )))
+  HAVE_LUA = $(if $(LUA_PACKAGE),1,)
 endif
 
 ifeq ($(HAVE_LUA),1)
+  LUA_VERSION_SPLITTED=$(call split,.,$(shell $(PKGCONFIG) --modversion '$(LUA_PACKAGE)'))
+  LUA_VERSION_MAJOR=$(word 1,$(LUA_VERSION_SPLITTED))
+  LUA_VERSION_MINOR=$(word 2,$(LUA_VERSION_SPLITTED))
+  LUA_VERSION = $(LUA_VERSION_MAJOR).$(LUA_VERSION_MINOR)
+
   LUADIR = $(abspath $(BASEDIR)/src/lua)
   LUALIBDIR = $(abspath $(LIBDIR)/lua)
   EXEC_LUADIR    ?= $(abspath $(EXEC_BASEDIR)/src/lua)
   EXEC_LUALIBDIR ?= $(abspath $(EXEC_LIBDIR)/lua)
-  CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags '$(LUA_PACKAGE)') -DHAVE_LUA -DLUADIR=\"$(EXEC_LUADIR)\" -DLUALIBDIR=\"$(EXEC_LUALIBDIR)\"
+  CFLAGS_LUA = $(shell $(PKGCONFIG) --cflags '$(LUA_PACKAGE)') \
+	       -DHAVE_LUA -DLUADIR=\"$(EXEC_LUADIR)\" -DLUALIBDIR=\"$(EXEC_LUALIBDIR)\"
   LDFLAGS_LUA = $(shell $(PKGCONFIG) --libs '$(LUA_PACKAGE)')
   ifneq ($(wildcard $(SYSROOT)/usr/include/tolua++.h),)
 
