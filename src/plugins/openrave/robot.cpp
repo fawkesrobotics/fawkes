@@ -986,13 +986,12 @@ bool
 OpenRaveRobot::solve_ik(IkFilterOptions filter)
 {
   if( !__find_best_ik ) {
-      std::vector<dReal> solution(6,0);
+    std::vector<dReal> solution;
     __target.solvable = __arm->FindIKSolution(__target.ikparam,solution,filter);
     __target.manip->set_angles(solution);
 
   } else {
     std::vector< std::vector<dReal> > solutions;
-    std::vector< std::vector<dReal> >::iterator sol;
 
     // get all IK solutions
     __target.solvable = __arm->FindIKSolutions(__target.ikparam,solutions,filter);
@@ -1000,14 +999,22 @@ OpenRaveRobot::solve_ik(IkFilterOptions filter)
       return false;
 
     // pick closest solution to current configuration
-    float dist = 100.f;
+    std::vector< std::vector<dReal> >::iterator sol;
     std::vector<dReal> cur;
+    std::vector<dReal> diff;
+    float dist = 100.f;
+    __arm->GetArmDOFValues(cur);
+
     for( sol=solutions.begin(); sol!=solutions.end(); ++sol ) {
-      __arm->GetArmDOFValues(cur);
-      __robot->SubtractActiveDOFValues(cur, *sol);
+      diff = cur;
+      __robot->SubtractActiveDOFValues(diff, *sol);
+
       float sol_dist = 0.f;
-      for( unsigned int i=0; i<cur.size(); ++i ) {
-        sol_dist += fabs(cur[i]);
+      for( unsigned int i=0; i<diff.size(); ++i ) {
+        sol_dist += fabs(diff[i]);
+        // use cur+diff instead of sol, to have better angles
+        // for circular joints. Otherwise planner might have problems
+        (*sol)[i] = cur[i] - diff[i];
       }
 
       if( sol_dist < dist ) {
