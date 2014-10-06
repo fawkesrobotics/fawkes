@@ -134,6 +134,10 @@ JacoBimanualOpenraveThread::_load_robot()
   // set name of env
   __planner_env.env->set_name("Planner_Bimanual");
 
+  // set manips to those of planner env
+  __arms.right.manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__arms.right.manipname);
+  __arms.left.manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__arms.left.manipname);
+
   // initial modules for dualmanipulation
   _init_dualmanipulation();
 #endif
@@ -236,6 +240,9 @@ JacoBimanualOpenraveThread::loop()
     return;
   }
 
+  // copy environment first
+  _copy_env();
+
   // get suiting IK solutions
   vector<float> sol_l, sol_r;
   bool solvable = _solve_multi_ik(sol_l, sol_r);
@@ -324,12 +331,10 @@ JacoBimanualOpenraveThread::_set_trajec_state(jaco_trajec_state_t state)
   __arms.right.arm->target_mutex->unlock();
 }
 
-bool
-JacoBimanualOpenraveThread::_plan_path()
+void
+JacoBimanualOpenraveThread::_copy_env()
 {
 #ifdef HAVE_OPENRAVE
-  _set_trajec_state(TRAJEC_PLANNING);
-
   // Update bodies in planner-environment
   // clone robot state, ignoring grabbed bodies
   {
@@ -338,26 +343,61 @@ JacoBimanualOpenraveThread::_plan_path()
     __planner_env.robot->get_robot_ptr()->ReleaseAllGrabbed();
     __planner_env.env->delete_all_objects();
 
+    /*
+    // Old method. Somehow we encountered problems. OpenRAVE internal bug?
     RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
                                      0xffffffff&~KinBody::Save_GrabbedBodies&~KinBody::Save_ActiveManipulator&~KinBody::Save_ActiveDOF);
     saver.Restore( __planner_env.robot->get_robot_ptr() );
+    //*/
+    //*
+    // New method. Simply set the DOF values as they are in __viewer_env
+    vector<dReal> dofs;
+    __viewer_env.robot->get_robot_ptr()->GetDOFValues(dofs);
+    __planner_env.robot->get_robot_ptr()->SetDOFValues(dofs);
+    //*/
   }
 
   // then clone all objects
   __planner_env.env->clone_objects( __viewer_env.env );
 
-  // restore robot state
+  // update robot state with attached objects
   {
     EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
+    EnvironmentMutex::scoped_lock view_lock(__viewer_env.env->get_env_ptr()->GetMutex());
+    /*
+    // Old method. Somehow we encountered problems. OpenRAVE internal bug?
+    RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
+                                     KinBody::Save_LinkTransformation|KinBody::Save_LinkEnable|KinBody::Save_GrabbedBodies);
+    saver.Restore( __planner_env.robot->get_robot_ptr() );
+    //*/
+    //*
+    // New method. Grab all bodies in __planner_env that are grabbed in __viewer_env by this manipulator
+    vector<RobotBase::GrabbedInfoPtr> grabbed;
+    __viewer_env.robot->get_robot_ptr()->GetGrabbedInfo(grabbed);
+    for( vector<RobotBase::GrabbedInfoPtr>::iterator it=grabbed.begin(); it!=grabbed.end(); ++it ) {
+      logger->log_debug(name(), "compare _robotlinkname '%s' with our manip links '%s' and '%s'",
+                        (*it)->_robotlinkname.c_str(),
+                        __arms.left.manip->GetEndEffector()->GetName().c_str(),
+                        __arms.right.manip->GetEndEffector()->GetName().c_str());
+      if( (*it)->_robotlinkname == __arms.left.manip->GetEndEffector()->GetName() ) {
+        logger->log_debug(name(), "attach '%s' to '%s'!", (*it)->_grabbedname.c_str(), __arms.left.manip->GetEndEffector()->GetName().c_str());
+        __planner_env.robot->attach_object((*it)->_grabbedname.c_str(), __planner_env.env, __arms.left.manipname.c_str());
 
-    // update robot state with attached objects
-    {
-      EnvironmentMutex::scoped_lock view_lock(__viewer_env.env->get_env_ptr()->GetMutex());
-      RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
-                                       KinBody::Save_LinkTransformation|KinBody::Save_LinkEnable|KinBody::Save_GrabbedBodies);
-      saver.Restore( __planner_env.robot->get_robot_ptr() );
+      } else if( (*it)->_robotlinkname == __arms.right.manip->GetEndEffector()->GetName() ) {
+        logger->log_debug(name(), "attach '%s' to '%s'!", (*it)->_grabbedname.c_str(), __arms.right.manip->GetEndEffector()->GetName().c_str());
+        __planner_env.robot->attach_object((*it)->_grabbedname.c_str(), __planner_env.env, __arms.right.manipname.c_str());
+      }
     }
+    //*/
   }
+#endif
+}
+
+bool
+JacoBimanualOpenraveThread::_plan_path()
+{
+#ifdef HAVE_OPENRAVE
+  _set_trajec_state(TRAJEC_PLANNING);
 
   EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
 
@@ -405,6 +445,12 @@ JacoBimanualOpenraveThread::_plan_path()
   if(!success) {
     logger->log_warn(name(),"Planner: planning failed");
     _set_trajec_state(TRAJEC_PLANNING_ERROR);
+    __arms.left.arm->target_mutex->lock();
+    __arms.right.arm->target_mutex->lock();
+    __arms.left.target->coord=false; // TODO: just for testing, as no bimanua_goto_thread yet
+    __arms.right.target->coord=false;
+    __arms.left.arm->target_mutex->unlock();
+    __arms.right.arm->target_mutex->unlock();
     return false;
 
   } else {
@@ -417,6 +463,12 @@ JacoBimanualOpenraveThread::_plan_path()
     if( !traj->deserialize(cmdout) ) {
       logger->log_warn(name(), "Planner: Cannot read trajectory data.");
       _set_trajec_state(TRAJEC_PLANNING_ERROR);
+      __arms.left.arm->target_mutex->lock();
+      __arms.right.arm->target_mutex->lock();
+      __arms.left.target->coord=false; // TODO: just for testing, as no bimanua_goto_thread yet
+      __arms.right.target->coord=false;
+      __arms.left.arm->target_mutex->unlock();
+      __arms.right.arm->target_mutex->unlock();
       return false;
 
     } else {
@@ -498,6 +550,8 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &
       (*body)->Enable(__arms.left.manip->IsGrabbing(*body));
     }
     // Get Ik Solutions.
+    robot->SetActiveManipulator(__arms.left.manip);
+    robot->SetActiveDOFs(__arms.left.manip->GetArmIndices());
     __planner_env.robot->set_target_euler(EULER_ZXZ,
                                           __arms.left.target->pos.at(0), __arms.left.target->pos.at(1), __arms.left.target->pos.at(2),
                                           __arms.left.target->pos.at(3), __arms.left.target->pos.at(4), __arms.left.target->pos.at(5));
@@ -523,6 +577,8 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &
       (*body)->Enable(__arms.right.manip->IsGrabbing(*body));
     }
     // Get Ik Solutions.
+    robot->SetActiveManipulator(__arms.right.manip);
+    robot->SetActiveDOFs(__arms.right.manip->GetArmIndices());
     __planner_env.robot->set_target_euler(EULER_ZXZ,
                                           __arms.right.target->pos.at(0), __arms.right.target->pos.at(1), __arms.right.target->pos.at(2),
                                           __arms.right.target->pos.at(3), __arms.right.target->pos.at(4), __arms.right.target->pos.at(5));
@@ -550,6 +606,7 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &
 
     float dist = 100.f;
     vector<dReal> cur_l, cur_r;
+    vector<dReal> diff_l, diff_r;
     __arms.left.manip->GetArmDOFValues(cur_l);
     __arms.right.manip->GetArmDOFValues(cur_r);
 
@@ -566,14 +623,23 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &
           // calculate distance
           float dist_l = 0.f;
           float dist_r = 0.f;
-          for(unsigned int i=0; i<cur_l.size(); ++i) {
-            dist_l += fabs(cur_l[i] - (*sol_l)[i]);
+          diff_l = cur_l;
+          diff_r = cur_r;
+          robot->SubtractDOFValues(diff_l, (*sol_l), __arms.left.manip->GetArmIndices());
+          robot->SubtractDOFValues(diff_r, (*sol_r), __arms.right.manip->GetArmIndices());
+          for(unsigned int i=0; i<diff_l.size(); ++i) {
+            dist_l += fabs(diff_l[i]);
+            // use cur+diff instead of sol, to have better angles
+            // for circular joints. Otherwise planner might have problems
+            (*sol_l)[i] = cur_l[i] - diff_l[i];
           }
           //logger->log_debug(name(), "Distance left: %f", dist_l);
-          for(unsigned int i=0; i<cur_r.size(); ++i) {
-            dist_r += fabs(cur_r[i] - (*sol_r)[i]);
+          for(unsigned int i=0; i<diff_r.size(); ++i) {
+            dist_r += fabs(diff_r[i]);
+            (*sol_r)[i] = cur_r[i] - diff_r[i];
           }
           //logger->log_debug(name(), "Distance right: %f", dist_r);
+
           if( dist_l+dist_r < dist ) {
             //logger->log_debug(name(), "Dist %f is closer that previous one (%f). Take this!", dist_l+dist_r, dist);
             dist = dist_l + dist_r;

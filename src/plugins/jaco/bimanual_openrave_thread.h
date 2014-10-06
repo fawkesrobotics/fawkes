@@ -55,6 +55,7 @@ class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
   void _init_dualmanipulation();
 
   void _set_trajec_state(fawkes::jaco_trajec_state_t state);
+  void _copy_env();
   bool _solve_multi_ik(std::vector<float> &left,
                        std::vector<float> &right);
   bool _plan_path();
