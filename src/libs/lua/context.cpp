@@ -290,15 +290,27 @@ LuaContext::restart()
  * The directory is added to the search path for lua packages. Files with
  * a .lua suffix will be considered as Lua modules.
  * @param path path to add
+ * @param prefix if true, insert path at the beginning of the search path,
+ * append to end otherwise
  */
 void
-LuaContext::add_package_dir(const char *path)
+LuaContext::add_package_dir(const char *path, bool prefix)
 {
   MutexLocker lock(__lua_mutex);
 
-  do_string(__L, "package.path = package.path .. \";%s/?.lua;%s/?/init.lua\"", path, path);
+  if (prefix) {
+    do_string(__L,
+	      "package.path = \"%s/?.lua;%s/?/init.lua;\""
+	      ".. package.path", path, path);
 
-  __package_dirs.push_back(path);
+    __package_dirs.push_front(path);
+  } else {
+    do_string(__L,
+	      "package.path = package.path .. "
+	      "\";%s/?.lua;%s/?/init.lua\"", path, path);
+
+    __package_dirs.push_back(path);
+  }
   if ( __fam )  __fam->watch_dir(path);
 }
 
@@ -307,15 +319,23 @@ LuaContext::add_package_dir(const char *path)
  * The directory is added to the search path for lua C packages. Files
  * with a .so suffix will be considered as Lua modules.
  * @param path path to add
+ * @param prefix if true, insert path at the beginning of the search path,
+ * append to end otherwise
  */
 void
-LuaContext::add_cpackage_dir(const char *path)
+LuaContext::add_cpackage_dir(const char *path, bool prefix)
 {
   MutexLocker lock(__lua_mutex);
 
-  do_string(__L, "package.cpath = package.cpath .. \";%s/?.so\"", path);
+  if (prefix) {
+    do_string(__L, "package.cpath = \"%s/?.so;\" .. package.cpath", path);
 
-  __cpackage_dirs.push_back(path);
+    __cpackage_dirs.push_front(path);
+  } else {
+    do_string(__L, "package.cpath = package.cpath .. \";%s/?.so\"", path);
+
+    __cpackage_dirs.push_back(path);
+  }
   if ( __fam )  __fam->watch_dir(path);
 }
 
