@@ -46,6 +46,8 @@ local module_exports = {
 }
 
 
+local loop_callbacks = {}
+
 --- Add an export for module initialization.
 -- All exports are exported to modules when they are initialized.
 -- @param key key of the export, i.e. the name with which the value will be
@@ -262,6 +264,27 @@ end
 -- continuous or one-show and independent of the status.
 function reset_loop()
    predlib.reset()
+   for _, cb in pairs(loop_callbacks) do
+      cb()
+   end
+end
+
+--- Add a loop callback.
+-- A loop callback is called in each loop regardless if a skill is running
+-- or not.
+-- @param name name of the callback, used for later identification on removal
+-- @param cb callback function to call
+function add_loop_callback(name, cb)
+   if (type(name) ~= "string") then error("Loop callback name must be a string") end
+   if (type(cb) ~= "function") then error("Loop callback must be a function") end
+
+   loop_callbacks[name] = cb
+end
+
+--- Remove loop callback.
+-- @param name name of callback to remove
+function remove_loop_callback(name)
+   loop_callbacks[name] = nil
 end
 
 --- Get current skill status.
