@@ -38,8 +38,6 @@ namespace fawkes {
 }
 #endif
 
-void SetViewer(OpenRAVE::EnvironmentBasePtr penv, const std::string& viewername);
-
 class Logger;
 class OpenRaveRobot;
 
@@ -93,11 +91,13 @@ class OpenRaveEnvironment
   OpenRAVE::PlannerBasePtr      __planner;
   OpenRAVE::ModuleBasePtr       __mod_ikfast;
 
+  boost::thread*                __viewer_thread;
+  bool                          __viewer_running;
+
   std::vector<OpenRAVE::GraphHandlePtr> __graph_handle;
 
-  bool  __viewer_enabled;
-
   virtual const char* name() const;
+
 };
 } // end of namespace fawkes
 

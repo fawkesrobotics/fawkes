@@ -50,15 +50,15 @@ namespace fawkes {
  * @param viewername name of the viewr, usually "qtcoin"
  */
 void
-SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
+run_viewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername, bool* running)
 {
   ViewerBasePtr viewer = RaveCreateViewer(env, viewername);
-
-  // attach it to the environment:
-  env->AddViewer(viewer);
-
-  // finally you call the viewer's infinite loop (this is why you need a separate thread):
+  env->Add(viewer);
+  //call the viewer's infinite loop (this is why you need a separate thread):
+  *running = true;
   viewer->main(/*showGUI=*/true);
+  *running = false;
+  env->Remove(viewer);
 }
 
 
@@ -74,7 +74,8 @@ SetViewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername)
  */
 OpenRaveEnvironment::OpenRaveEnvironment(fawkes::Logger* logger) :
   __logger( logger ),
-  __viewer_enabled( 0 )
+  __viewer_thread( 0 ),
+  __viewer_running( 0 )
 {
   set_name("");
 }
@@ -86,7 +87,8 @@ OpenRaveEnvironment::OpenRaveEnvironment(fawkes::Logger* logger) :
  */
 OpenRaveEnvironment::OpenRaveEnvironment(const OpenRaveEnvironment& src)
  : __logger( src.__logger ),
-   __viewer_enabled( 0 )
+   __viewer_thread( 0 ),
+   __viewer_running( 0 )
 {
   __env = src.__env->CloneSelf(OpenRAVE::Clone_Bodies);
 
@@ -143,6 +145,13 @@ OpenRaveEnvironment::create()
 void
 OpenRaveEnvironment::destroy()
 {
+  if( __viewer_thread ) {
+    __viewer_thread->detach();
+    __viewer_thread->join();
+    delete __viewer_thread;
+    __viewer_thread=NULL;
+  }
+
   try {
     __env->Destroy();
     if(__logger)
@@ -264,18 +273,29 @@ OpenRaveEnvironment::get_env_ptr() const
 void
 OpenRaveEnvironment::start_viewer()
 {
-  if( !__viewer_enabled ) {
-    try {
-      boost::thread thviewer(boost::bind(SetViewer,__env,"qtcoin"));
-    } catch( const openrave_exception &e) {
-      if(__logger)
-        __logger->log_error(name(), "Could not load viewr. Ex:%s", e.what());
-      throw;
-    }
+  if( __viewer_running )
+    return;
+
+  if( __viewer_thread ) {
+    __viewer_thread->join();
+    delete __viewer_thread;
+    __viewer_thread = NULL;
   }
 
-  __viewer_enabled = true;
+  try {
+    // set this variable to true here already. Otherwise we would have to wait for the upcoming
+    // boost thread to start, create viewer and add viewer to environment to get this variable set
+    // to "true". Another call to "start_viewer()" would get stuck then, waiting for "join()"!
+    __viewer_running = true;
+    __viewer_thread = new boost::thread(boost::bind(run_viewer, __env, "qtcoin", &__viewer_running));
+  } catch( const openrave_exception &e) {
+    __viewer_running = false;
+    if(__logger)
+      __logger->log_error(name(), "Could not load viewr. Ex:%s", e.what());
+    throw;
+  }
 }
+
 
 /** Autogenerate IKfast IK solver for robot.
  * @param robot pointer to OpenRaveRobot object
@@ -424,7 +444,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
   }
 
   // viewer options
-  if( __viewer_enabled ) {
+  if( __viewer_running ) {
 
     // display trajectory in viewer
     __graph_handle.clear(); // remove all GraphHandlerPtr and currently drawn plots
@@ -577,7 +597,7 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
   }
 
   // viewer options
-  if( __viewer_enabled ) {
+  if( __viewer_running ) {
 
     // display trajectory in viewer
     __graph_handle.clear(); // remove all GraphHandlerPtr and currently drawn plots
