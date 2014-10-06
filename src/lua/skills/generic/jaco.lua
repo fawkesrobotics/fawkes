@@ -103,6 +103,7 @@ fsm:add_transitions{
    {"READY", "GOTO", precond="vars.x ~= nil and vars.y ~= nil and vars.z ~= nil", desc="goto parms"},
    {"READY", "GRIPPER", precond="vars.gripper", desc="move gripper"},
    {"READY", "PARAMS", precond="vars.params", desc="set planner params"},
+   {"READY", "FAILED", precond=true, desc="bad params"},
 
    {"GOTO_HOME", "GOTO", cond=true, desc="params set"},
    {"GOTO_RETRACT", "GOTO", cond=true, desc="params set"},
