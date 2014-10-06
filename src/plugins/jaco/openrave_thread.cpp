@@ -306,11 +306,7 @@ JacoOpenraveThread::add_target(float x, float y, float z, float e1, float e2, fl
 #ifdef HAVE_OPENRAVE
   try {
     // update planner params; set correct DOF and stuff
-    {
-      EnvironmentMutex::scoped_lock lock(__planner_env.env->get_env_ptr()->GetMutex());
-      __planner_env.robot->get_planner_params()->SetRobotActiveJoints(__planner_env.robot->get_robot_ptr());
-      __planner_env.robot->get_planner_params()->vgoalconfig.resize(__planner_env.robot->get_robot_ptr()->GetActiveDOF());
-    }
+    __planner_env.robot->get_planner_params();
 
     if( plan ) {
       // get IK from openrave. Ignore collisions with env though, as this is only for IK check and env might change at the
