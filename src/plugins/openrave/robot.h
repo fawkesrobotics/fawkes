@@ -94,6 +94,9 @@ class OpenRaveRobot
 
  private:
   void init();
+  void build_name_str();
+  const char* name() const;
+
   bool set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, OpenRAVE::IkFilterOptions filter, bool no_offset = false);
   bool set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, OpenRAVE::IkFilterOptions filter, bool no_offset = false);
   OpenRAVE::IkParameterization get_5dof_ikparam(OpenRAVE::Transform& trans);
@@ -102,6 +105,7 @@ class OpenRaveRobot
   fawkes::Logger*                 __logger;
 
   std::string                           __name;
+  std::string                           __name_str;
   OpenRAVE::RobotBasePtr                __robot;
   OpenRAVE::RobotBase::ManipulatorPtr   __arm;
   OpenRaveManipulatorPtr                __manip;

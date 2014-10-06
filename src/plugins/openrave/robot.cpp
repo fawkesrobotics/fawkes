@@ -78,6 +78,7 @@ OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnv
   __name( src.__name ),
   __find_best_ik( src.__find_best_ik )
 {
+  build_name_str();
   __traj = new std::vector< std::vector<dReal> >();
 
   __trans_offset_x = src.__trans_offset_x;
@@ -90,9 +91,11 @@ OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnv
   __robot = new_env->get_env_ptr()->GetRobot( name );
 
   if(!__robot)
-    {throw fawkes::IllegalArgumentException("OpenRAVE Robot: Robot '%s' could not be loaded. Check name.", name.c_str());}
-  else if(__logger)
-    {__logger->log_debug("OpenRAVE Robot", "Robot '%s' loaded.", name.c_str());}
+    throw fawkes::IllegalArgumentException("%s: Robot '%s' could not be loaded. Check name.", this->name(), name.c_str());
+
+  build_name_str();
+  if(__logger)
+    __logger->log_debug(this->name(), "Robot loaded.");
 
   // Initialize robot
   set_ready();
@@ -110,7 +113,7 @@ OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnv
   __display_planned_movements = false;
 
   if(__logger)
-    {__logger->log_debug("OpenRAVE Robot", "Robot '%s' cloned.", __name.c_str());}
+    __logger->log_debug(this->name(), "Robot '%s' cloned.", name.c_str());
 }
 
 /** Destructor */
@@ -120,15 +123,37 @@ OpenRaveRobot::~OpenRaveRobot()
 
   //unload everything related to this robot from environment
   try {
-    EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
-    __robot->GetEnv()->Remove(__mod_basemanip);
-    __robot->GetEnv()->Remove(__robot);
+    EnvironmentBasePtr env = __robot->GetEnv();
+    EnvironmentMutex::scoped_lock lock(env->GetMutex());
+    env->Remove(__mod_basemanip);
+    env->Remove(__robot);
     if(__logger)
-      {__logger->log_warn("OpenRAVE Robot", "Robot unloaded from environment");}
+      __logger->log_warn(name(), "Robot unloaded from environment");
   } catch(const openrave_exception &e) {
     if(__logger)
-      {__logger->log_warn("OpenRAVE Robot", "Could not unload robot properly from environment. Ex:%s", e.what());}
+      __logger->log_warn(name(), "Could not unload robot properly from environment. Ex:%s", e.what());
   }
+}
+
+/** Build name string to use in logging messages.
+ * Nothing important, but helpful for debugging etc.
+ */
+void
+OpenRaveRobot::build_name_str()
+{
+  std::stringstream n;
+  n << "OpenRaveRobot" << "[";
+  if( __robot )
+    n << RaveGetEnvironmentId(__robot->GetEnv()) << ":";
+  n << __name << "]";
+  __name_str = n.str();
+}
+
+/** Get the name string to use in logging messages etc. */
+const char*
+OpenRaveRobot::name() const
+{
+  return __name_str.c_str();
 }
 
 /** Inittialize object attributes */
@@ -140,6 +165,8 @@ OpenRaveRobot::init()
   __trans_offset_x = 0.f;
   __trans_offset_y = 0.f;
   __trans_offset_z = 0.f;
+
+  build_name_str();
 }
 
 
@@ -157,9 +184,13 @@ OpenRaveRobot::load(const std::string& filename, fawkes::OpenRaveEnvironmentPtr&
   __robot = env->get_env_ptr()->ReadRobotXMLFile(filename);
 
   if(!__robot)
-    {throw fawkes::IllegalArgumentException("OpenRAVE Robot: Robot could not be loaded. Check xml file/path.");}
-  else if(__logger)
-    {__logger->log_debug("OpenRAVE Robot", "Robot loaded.");}
+    throw fawkes::IllegalArgumentException("%s: Robot could not be loaded. Check xml file/path '%s'.", name(), filename.c_str());
+
+  __name = __robot->GetName();
+  build_name_str();
+
+  if(__logger)
+    __logger->log_debug(name(), "Robot loaded.");
 }
 
 /** Set robot ready for usage.
@@ -169,17 +200,16 @@ void
 OpenRaveRobot::set_ready()
 {
   if(!__robot)
-    {throw fawkes::Exception("OpenRAVE Robot: Robot not loaded properly yet.");}
+    throw fawkes::Exception("%s: Robot not loaded properly yet.", name());
 
   EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
 
-  __name = __robot->GetName();
   __robot->SetActiveManipulator(__robot->GetManipulators().at(0)->GetName());
   __arm = __robot->GetActiveManipulator();
   __robot->SetActiveDOFs(__arm->GetArmIndices());
 
   if(__robot->GetActiveDOF() == 0)
-    {throw fawkes::Exception("OpenRAVE Robot: Robot not added to environment yet. Need to do that first, otherwise planner will fail.");}
+    throw fawkes::Exception("%s: Robot not added to environment yet. Need to do that first, otherwise planner will fail.", name());
 
   // create planner parameters
   try {
@@ -189,7 +219,7 @@ OpenRaveRobot::set_ready()
     __planner_params->SetRobotActiveJoints(__robot); // set planning configuration space to current active dofs
     __planner_params->vgoalconfig.resize(__robot->GetActiveDOF());
   } catch(const openrave_exception &e) {
-    throw fawkes::Exception("OpenRAVE Robot: Could not create PlannerParameters. Ex:%s", e.what());
+    throw fawkes::Exception("%s: Could not create PlannerParameters. Ex:%s", name(), e.what());
   }
 
   // create and load BaseManipulation module
@@ -197,11 +227,11 @@ OpenRaveRobot::set_ready()
     __mod_basemanip = RaveCreateModule(__robot->GetEnv(), "basemanipulation");
     __robot->GetEnv()->AddModule( __mod_basemanip, __robot->GetName());
   } catch(const openrave_exception &e) {
-    throw fawkes::Exception("OpenRAVE Robot: Cannot load BaseManipulation Module. Ex:%s", e.what());
+    throw fawkes::Exception("%s: Cannot load BaseManipulation Module. Ex:%s", name(), e.what());
   }
 
   if(__logger)
-    {__logger->log_debug("OpenRAVE Robot", "Robot ready.");}
+    __logger->log_debug(name(), "Robot ready.");
 }
 
 /** Directly set transition offset between coordinate systems
@@ -418,20 +448,24 @@ OpenRaveRobot::set_target_euler(euler_rotation_t type,
 
   switch(type) {
     case (EULER_ZXZ) :
-        __logger->log_debug("TEST ZXZ", "%f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
+        if(__logger)
+          __logger->log_debug(name(), "Target EULER_ZXZ: %f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
         rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
         rot.at(3) = theta; //2nd row, 1st value; rotation on x-axis
         rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
         break;
 
     case (EULER_ZYZ) :
-        __logger->log_debug("TEST ZYZ", "%f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
+        if(__logger)
+          __logger->log_debug(name(), "Target EULER_ZYZ:", "%f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
         rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
         rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
         rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
         break;
 
     case (EULER_ZYX) :
+        if(__logger)
+          __logger->log_debug(name(), "Target EULER_ZYX:", "%f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
         rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
         rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
         rot.at(6) = psi;   //3rd row, 1st value; rotation on x-axis
@@ -694,7 +728,7 @@ OpenRaveRobot::attach_object(OpenRAVE::KinBodyPtr object, const char* manip_name
       RobotBase::ManipulatorPtr manip = __robot->SetActiveManipulator(manip_name);
       if( !manip ) {
         if(__logger)
-          __logger->log_warn("OpenRAVE Robot", "Could not attach Object, could not get manipulator '%s'", manip_name);
+          __logger->log_warn(name(), "Could not attach Object, could not get manipulator '%s'", manip_name);
         return false;
 
       } else {
@@ -707,7 +741,7 @@ OpenRaveRobot::attach_object(OpenRAVE::KinBodyPtr object, const char* manip_name
     }
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Robot", "Could not attach Object. Ex:%s", e.what());
+      __logger->log_warn(name(), "Could not attach Object. Ex:%s", e.what());
     return false;
   }
 
@@ -742,7 +776,7 @@ OpenRaveRobot::release_object(OpenRAVE::KinBodyPtr object)
     __robot->Release(object);
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Robot", "Could not release Object. Ex:%s", e.what());
+      __logger->log_warn(name(), "Could not release Object. Ex:%s", e.what());
     return false;
   }
 
@@ -776,7 +810,7 @@ OpenRaveRobot::release_all_objects()
     __robot->ReleaseAllGrabbed();
   } catch(const OpenRAVE::openrave_exception &e) {
     if(__logger)
-      __logger->log_warn("OpenRAVE Robot", "Could not release all objects. Ex:%s", e.what());
+      __logger->log_warn(name(), "Could not release all objects. Ex:%s", e.what());
     return false;
   }
 
@@ -824,19 +858,22 @@ OpenRaveRobot::set_target_transform(Vector& trans, OpenRAVE::Vector& rotQuat, Ik
   EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
   __arm = __robot->GetActiveManipulator();
   if( __arm->GetIkSolver()->Supports(IKP_Transform6D) ) {
-    __logger->log_debug("OR TMP", "6D suppport for arm %s", __arm->GetName().c_str());
+    if(__logger)
+      __logger->log_debug(name(), "6D suppport for arm %s", __arm->GetName().c_str());
     // arm supports 6D ik. Perfect!
     __target.ikparam = IkParameterization(target);
     solve_ik(filter);
 
   } else if( __arm->GetIkSolver()->Supports(IKP_TranslationDirection5D) ) {
-    __logger->log_debug("OR TMP", "5D suppport");
+    if(__logger)
+      __logger->log_debug(name(), "5D suppport");
     // arm has only 5 DOF.
     __target.ikparam = get_5dof_ikparam(target);
     __target.solvable = set_target_ikparam(__target.ikparam, filter);
 
   } else {
-    __logger->log_debug("OR TMP", "No IK suppport");
+    if(__logger)
+      __logger->log_debug(name(), "No IK suppport");
     //other IK types not supported yet
     __target.solvable = false;
   }
@@ -864,7 +901,7 @@ OpenRaveRobot::set_target_euler(Vector& trans, std::vector<float>& rotations, Ik
     __target.solvable = false;
 
     if(__logger)
-      {__logger->log_error("OpenRAVE Robot", "Bad size of rotations vector. Is %i, expected 9", rotations.size());}
+      __logger->log_error(name(), "Bad size of rotations vector. Is %i, expected 9", rotations.size());
     return false;
   }
 
@@ -872,9 +909,11 @@ OpenRaveRobot::set_target_euler(Vector& trans, std::vector<float>& rotations, Ik
   Vector r2(rotations.at(3), rotations.at(4), rotations.at(5));
   Vector r3(rotations.at(6), rotations.at(7), rotations.at(8));
 
-  __logger->log_debug("TEST", "Rot1: %f %f %f", r1[0], r1[1], r1[2]);
-  __logger->log_debug("TEST", "Rot2: %f %f %f", r2[0], r2[1], r2[2]);
-  __logger->log_debug("TEST", "Rot3: %f %f %f", r3[0], r3[1], r3[2]);
+  if(__logger) {
+    __logger->log_debug(name(), "TEST Rot1: %f %f %f", r1[0], r1[1], r1[2]);
+    __logger->log_debug(name(), "TEST Rot2: %f %f %f", r2[0], r2[1], r2[2]);
+    __logger->log_debug(name(), "TEST Rot3: %f %f %f", r3[0], r3[1], r3[2]);
+  }
 
   Vector q1 = quatFromAxisAngle(r1);
   Vector q2 = quatFromAxisAngle(r2);
