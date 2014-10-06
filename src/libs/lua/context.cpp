@@ -1204,7 +1204,36 @@ LuaContext::objlen(int idx)
 void
 LuaContext::setfenv(int idx)
 {
+#if LUA_VERSION_NUM > 501
+  //                                         stack: ... func@idx ... env
+  // find _ENV
+  int n = 0;
+  const char *val_name;
+  while ((val_name = lua_getupvalue(__L, idx, ++n)) != NULL) {  // ... env upval
+    if (strcmp(val_name, "_ENV") == 0) {
+      // found environment
+      break;
+    } else {
+      // we're not interested, remove value from stack
+      lua_pop(__L, 1);                                          // ... env
+    }
+  }
+
+  // found an environment
+  if (val_name != NULL) {                                       // ... env upval
+    // create a new simple up value
+    luaL_loadstring(__L, "");                                   // ... env upval chunk
+    lua_pushvalue(__L, -3);                                     // ... env upval chunk env
+    lua_setupvalue(__L, -2, 1);                                 // ... env upval func
+    int act_idx = idx > 0 ? idx : idx - 2;
+    lua_upvaluejoin(__L, act_idx, n, -1, 1);                        // ... env upval chunk
+    lua_pop(__L, 3);                                            // ...
+  } else {
+    throw Exception("No environment found");
+  }
+#else
   lua_setfenv(__L, idx);
+#endif
 }
 
 
