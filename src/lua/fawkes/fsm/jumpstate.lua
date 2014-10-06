@@ -29,6 +29,7 @@ local fsmmod = require("fawkes.fsm")
 assert(fsmmod, "fsmmod is nil")
 local State = fsmmod.State
 assert(State, "State for JumpState is nil")
+local envext = require("fawkes.envext")
 
 
 --- JumpState
@@ -135,7 +136,7 @@ function JumpState:create_transition(state, jumpcond, description, errmsg)
       if self.closure then
 	 for k,v in pairs(self.closure) do fe[k] = v end
       end
-      setfenv(jc, fe)
+      envext.setfenv(jc, fe)
       description = description or jumpcond
    elseif type(jumpcond) == "boolean" then
       assert(jumpcond == true, self.name .. ": adding a jump condition for "..
