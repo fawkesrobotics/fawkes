@@ -614,8 +614,8 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &
     for( sol_l=solutions_l.begin(); sol_l!=solutions_l.end(); ++sol_l ) {
       for( sol_r=solutions_r.begin(); sol_r!=solutions_r.end(); ++sol_r ) {
         // set joints for robot model
-        robot->SetDOFValues(*sol_l, 1, __arms.left.manip->GetGripperIndices());
-        robot->SetDOFValues(*sol_r, 1, __arms.right.manip->GetGripperIndices());
+        robot->SetDOFValues(*sol_l, 1, __arms.left.manip->GetArmIndices());
+        robot->SetDOFValues(*sol_r, 1, __arms.right.manip->GetArmIndices());
 
         // check for collisions
         if( !robot->CheckSelfCollision() && !robot->GetEnv()->CheckCollision(robot) ) {
