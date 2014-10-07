@@ -860,8 +860,8 @@ OpenRaveEnvironment::clone_objects(OpenRaveEnvironmentPtr& env)
       __env->Add(new_body);
 
       // update collisison-checker and physics-engine to consider new kinbody
-      __env->GetCollisionChecker()->InitKinBody(new_body);
-      __env->GetPhysicsEngine()->InitKinBody(new_body);
+      //__env->GetCollisionChecker()->InitKinBody(new_body);
+      //__env->GetPhysicsEngine()->InitKinBody(new_body);
 
       // clone kinbody state
       KinBody::KinBodyStateSaver saver(*old_body, KinBody::Save_LinkTransformation|KinBody::Save_LinkEnable|KinBody::Save_LinkVelocities);
