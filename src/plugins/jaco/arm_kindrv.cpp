@@ -65,7 +65,7 @@ JacoArmKindrv::JacoArmKindrv(const char *name)
       }
     }
 
-    for(unsigned int i=0; i<=arms.size(); ++i) {
+    for(unsigned int i=0; i<arms.size(); ++i) {
       delete arms[i];
       arms[i] = NULL;
     }
