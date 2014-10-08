@@ -19,9 +19,19 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
+local _G = _G
+
 require("fawkes.modinit")
 module(..., fawkes.modinit.register_all);
 
 --skillenv.use_skill("skills.generic.relgoto")
 --skillenv.use_skill("skills.generic.goto")
 skillenv.use_skill("skills.generic.say")
+
+if _G.HAVE_ROS then
+   local action_skill = require("skiller.ros.action_skill")
+   local service_skill = require("skiller.ros.service_skill")
+
+   action_skill.use("test.fibo", "/fibonacci", "actionlib_tutorials/Fibonacci")
+end
+
