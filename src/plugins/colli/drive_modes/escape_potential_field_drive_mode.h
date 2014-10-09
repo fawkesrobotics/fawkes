@@ -33,30 +33,26 @@ namespace fawkes
 }
 #endif
 
-class CLaserOccupancyGrid;
+class LaserOccupancyGrid;
 
-class CEscapePotentialFieldDriveModule : public CAbstractDriveMode
+class EscapePotentialFieldDriveModule : public AbstractDriveMode
 {
  public:
+  EscapePotentialFieldDriveModule( Logger* logger, Configuration* config );
+  ~EscapePotentialFieldDriveModule();
 
-  CEscapePotentialFieldDriveModule( Logger* logger, Configuration* config );
-  ~CEscapePotentialFieldDriveModule();
-
-  void setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, int roboY );
-  virtual void Update();
+  void set_grid_information( LaserOccupancyGrid* occ_grid, int robo_x, int robo_y );
+  virtual void update();
 
  private:
 
   /// our pointer to the laserinterface.... lets escape ;-)
-  CLaserOccupancyGrid*  m_pOccGrid;
-  point_t m_robot_pos;
+  LaserOccupancyGrid*  occ_grid_;
+  point_t robot_pos_;
 
-  /// absolute values are the maximum values. do not act faster!
-  float m_MaxTranslation;
-  float m_MaxRotation;
-  bool cfg_write_spam_debug;
+  bool cfg_write_spam_debug_;
 
-  int   m_turn;
+  int turn_;
 };
 
 } // end namespace fawkes

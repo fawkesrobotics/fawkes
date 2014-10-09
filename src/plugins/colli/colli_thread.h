@@ -46,11 +46,11 @@ namespace fawkes
   class Laser360Interface;
   class NavigatorInterface;
 
-  class CLaserOccupancyGrid;
-  class CSearch;
+  class LaserOccupancyGrid;
+  class Search;
 
-  class CSelectDriveMode;
-  class CBaseMotorInstruct;
+  class SelectDriveMode;
+  class BaseMotorInstruct;
 }
 
 class ColliVisualizationThread;
@@ -96,54 +96,53 @@ class ColliThread
    *
    * Point                ->  cart_coord_2d_t     (point with 2 floats)
    */
-  fawkes::MotorInterface*         if_motor_;           // MotorObject
-  fawkes::Laser360Interface*      if_laser_;           // LaserScannerObject
-  fawkes::NavigatorInterface*     if_colli_target_;    // TargetObject
-  fawkes::colli_data_t            colli_data_;         // Colli Data Object
+  fawkes::MotorInterface*        if_motor_;           // MotorObject
+  fawkes::Laser360Interface*     if_laser_;           // LaserScannerObject
+  fawkes::NavigatorInterface*    if_colli_target_;    // TargetObject
+  fawkes::colli_data_t           colli_data_;         // Colli Data Object
 
-  fawkes::CLaserOccupancyGrid*    m_pLaserOccGrid;     // the grid to drive on
-  fawkes::CSearch*                m_pSearch;           // our plan module which calculates the info
+  fawkes::LaserOccupancyGrid*    occ_grid_;     // the grid to drive on
+  fawkes::Search*                search_;           // our plan module which calculates the info
 
-  fawkes::CSelectDriveMode*       m_pSelectDriveMode;  // the drive mode selection module
-  fawkes::CBaseMotorInstruct*     m_pMotorInstruct;    // the motor instructor module
-  fawkes::CBaseMotorInstruct*     m_pEmergencyMotorInstruct;  // the emergency motor instructor module
+  fawkes::SelectDriveMode*       select_drive_mode_;  // the drive mode selection module
+  fawkes::BaseMotorInstruct*     motor_instruct_;    // the motor instructor module
+  fawkes::BaseMotorInstruct*     emergency_motor_instruct_;  // the emergency motor instructor module
 
-  ColliVisualizationThread*       vis_thread_;         // the VisualizationThread
+  ColliVisualizationThread*      vis_thread_;         // the VisualizationThread
 
   /* ************************************************************************ */
   /* PRIVATE VARIABLES THAT HAVE TO BE HANDLED ALL OVER THE MODULE            */
   /* ************************************************************************ */
-  fawkes::point_t  m_RoboGridPos;           // the robots position in the grid
-  fawkes::point_t  m_LaserGridPos;          // the laser its position in the grid ( not equal to robopos!!! )
-  fawkes::point_t  m_TargetGridPos;         // the targets position in the grid
+  fawkes::point_t  robo_grid_pos_;           // the robots position in the grid
+  fawkes::point_t  laser_grid_pos_;          // the laser its position in the grid ( not equal to robopos!!! )
+  fawkes::point_t  target_grid_pos_;         // the targets position in the grid
 
-  fawkes::point_t m_LocalGridTarget;        // the local target in grid
-  fawkes::point_t m_LocalGridTrajec;        // the local trajec in grid
+  fawkes::point_t local_grid_target_;        // the local target in grid
+  fawkes::point_t local_grid_trajec_;        // the local trajec in grid
 
-  fawkes::cart_coord_2d_t  m_LocalTarget;   // the local target (relative)
-  fawkes::cart_coord_2d_t  m_LocalTrajec;   // the local trajec (relative)
+  fawkes::cart_coord_2d_t  local_target_;   // the local target (relative)
+  fawkes::cart_coord_2d_t  local_trajec_;   // the local trajec (relative)
 
-  float m_ProposedTranslationX;   // the proposed x translation that should be realized in MotorInstruct
-  float m_ProposedTranslationY;   // the proposed y translation that should be realized in MotorInstruct
-  float m_ProposedRotation;       // the proposed rotation that should be realized in MotorInstruct
-  bool cfg_write_spam_debug;
-  bool cfg_emergency_stop_used;    // true if emergency stop is used
-  float cfg_emergency_threshold_distance; // threshold distance if emergency stop triggers
-  float cfg_emergency_threshold_velocity; // threshold velocity if emergency stop triggers
-  float cfg_emergency_velocity_max;       // if emergency stop triggers, this is the max velocity
+  fawkes::colli_trans_rot_t proposed_; // the proposed trans-rot that should be realized in MotorInstruct
 
-  fawkes::colli_state_t m_ColliStatus;     // representing current colli status
+  bool cfg_write_spam_debug_;
+  bool cfg_emergency_stop_used_;    // true if emergency stop is used
+  float cfg_emergency_threshold_distance_; // threshold distance if emergency stop triggers
+  float cfg_emergency_threshold_velocity_; // threshold velocity if emergency stop triggers
+  float cfg_emergency_velocity_max_;       // if emergency stop triggers, this is the max velocity
+
+  fawkes::colli_state_t colli_state_;     // representing current colli status
   bool target_new_;
 
-  float m_TargetPointX, m_TargetPointY;               // for Update
+  fawkes::cart_coord_2d_t target_point_;  // for update
 
-  int escape_count;                // count escaping behaviour
+  int escape_count_;                // count escaping behaviour
 
   // Config file constants that are read at the beginning
-  int m_ColliFrequency;                          // frequency of the colli
-  float m_OccGridHeight, m_OccGridWidth;         // occgrid field sizes
-  int m_OccGridCellHeight, m_OccGridCellWidth;   // occgrid cell sizes
-  float m_MaximumRoboIncrease;                   // maximum increasement of the robots size
+  int frequency_;                          // frequency of the colli
+  float occ_grid_height_, occ_grid_width_;         // occgrid field sizes
+  int occ_grid_cell_height_, occ_grid_cell_width_;   // occgrid cell sizes
+  float max_robo_inc_;                   // maximum increasement of the robots size
   bool cfg_obstacle_inc_;                        // indicator if obstacles should be increased or not
 
   bool  cfg_visualize_idle_;      /**< Defines if visualization should run when robot is idle without a target. */
@@ -154,8 +153,8 @@ class ColliThread
   float cfg_min_long_dist_prepos_;/**< The minimum distance to drive to a pre-positino of a target in long distance */
   float cfg_min_rot_dist_;        /**< The minimum rotation distance to rotate, when at target */
   float cfg_target_pre_pos_;      /**< Distance to target pre-position (only if colli_state_t == DriveToOrientPoint) */
-  fawkes::colli_escape_mode_t         cfg_escape_mode;
-  fawkes::colli_motor_instruct_mode_t cfg_motor_instruct_mode;
+  fawkes::colli_escape_mode_t         cfg_escape_mode_;
+  fawkes::colli_motor_instruct_mode_t cfg_motor_instruct_mode_;
 
   float cfg_max_velocity_; /**< The maximum allowd velocity */
 
@@ -166,9 +165,6 @@ class ColliThread
   std::string cfg_iface_laser_;   /**< The ID of the LaserInterface */
   std::string cfg_iface_colli_;   /**< The ID of the NavigatorInterface for colli target*/
   float cfg_iface_read_timeout_;  /**< Maximum age (in seconds) of required data from reading interfaces*/
-
-  // stop on target stuff
-  std::vector< float > m_oldAnglesToTarget;      // the old angles to the target
 
   fawkes::cart_coord_2d_t laser_to_base_; /**< The distance from laser to base */
   bool laser_to_base_valid_;              /**< Do we have a valid distance from laser to base? */
@@ -190,25 +186,25 @@ class ColliThread
   void colli_goto_(float x, float y, float ori, fawkes::NavigatorInterface* iface);
 
   /// Register all BB-Interfaces at the Blackboard.
-  void RegisterAtBlackboard();
+  void open_interfaces();
 
   /// Initialize all modules used by the Colli
-  void InitializeModules();
+  void initialize_modules();
 
-  /// Update interface values
+  /// update interface values
   void interfaces_read();
 
   /// Check if the interface data is valid, i.e. not outdated
   bool interfaces_valid();
 
   /// Check, in what state the colli is, and what to do
-  void UpdateColliStateMachine();
+  void update_colli_state();
 
   /// Calculate all information out of the updated blackboard data
-  void UpdateOwnModules();
+  void update_modules();
 
   /// Check, if we have to do escape mode, or if we have to drive the ordinary way ;-)
-  bool CheckEscape();
+  bool check_escape();
 
 };
 

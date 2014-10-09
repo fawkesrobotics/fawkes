@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -47,83 +47,83 @@ namespace fawkes
  * @param config Pointer to the fawkes configuration.
  */
 RoboShape::RoboShape( const char * cfg_prefix,
-                      fawkes::Logger* logger,
-                      fawkes::Configuration* config)
+                      Logger* logger,
+                      Configuration* config)
 {
   logger_ = logger;
   std::string cfg = cfg_prefix;
 
-  m_isRound = m_isAngular = false;
-  m_radius = m_widthX = m_widthY   = HUGE_VAL;
-  m_laserOffsetX = m_laserOffsetY  = HUGE_VAL;
-  m_widthAddFront = m_widthAddBack = HUGE_VAL;
-  m_widthAddRight = m_widthAddLeft = HUGE_VAL;
+  is_round_ = is_angular_ = false;
+  radius_ = width_x_ = width_y_   = HUGE_VAL;
+  laser_offset_x_ = laser_offset_y_  = HUGE_VAL;
+  width_add_front_ = width_add_back_ = HUGE_VAL;
+  width_add_right_ = width_add_left_ = HUGE_VAL;
 
-  if( (isinf(m_laserOffsetX) )
-   && (isinf(m_laserOffsetY) )
-   && (isinf(m_radius) )
-   && (isinf(m_widthX) )
-   && (isinf(m_widthY) )
-   && (isinf(m_widthAddLeft) )
-   && (isinf(m_widthAddRight) )
-   && (isinf(m_widthAddFront) )
-   && (isinf(m_widthAddBack) ) ) {
+  if( (isinf(laser_offset_x_) )
+   && (isinf(laser_offset_y_) )
+   && (isinf(radius_) )
+   && (isinf(width_x_) )
+   && (isinf(width_y_) )
+   && (isinf(width_add_left_) )
+   && (isinf(width_add_right_) )
+   && (isinf(width_add_front_) )
+   && (isinf(width_add_back_) ) ) {
     // go on, everything is fine, cause all are infinity
 
   } else {
     throw fawkes::Exception("RoboShape: Initializing Infinity-Values failed!");
   }
 
-  m_widthAddFront = config->get_float((cfg + "extension/front").c_str());
-  m_widthAddRight = config->get_float((cfg + "extension/right").c_str());
-  m_widthAddBack  = config->get_float((cfg + "extension/back").c_str());
-  m_widthAddLeft  = config->get_float((cfg + "extension/left").c_str());
+  width_add_front_ = config->get_float((cfg + "extension/front").c_str());
+  width_add_right_ = config->get_float((cfg + "extension/right").c_str());
+  width_add_back_  = config->get_float((cfg + "extension/back").c_str());
+  width_add_left_  = config->get_float((cfg + "extension/left").c_str());
 
   int shape = config->get_int((cfg + "shape").c_str());
   if( shape == 1 ) {
     // ANGULAR
-    m_isAngular = true;
-    m_isRound = false;
-    m_widthX        = config->get_float((cfg + "angular/width_x").c_str());
-    m_widthY        = config->get_float((cfg + "angular/width_y").c_str());
-    m_laserOffsetX  = config->get_float((cfg + "angular/laser_offset_x_from_back").c_str());
-    m_laserOffsetY  = config->get_float((cfg + "angular/laser_offset_y_from_left").c_str());
+    is_angular_ = true;
+    is_round_ = false;
+    width_x_        = config->get_float((cfg + "angular/width_x").c_str());
+    width_y_        = config->get_float((cfg + "angular/width_y").c_str());
+    laser_offset_x_  = config->get_float((cfg + "angular/laser_offset_x_from_back").c_str());
+    laser_offset_y_  = config->get_float((cfg + "angular/laser_offset_y_from_left").c_str());
 
-    float laserToBack  = m_laserOffsetX;
-    float laserToLeft  = m_laserOffsetY;
-    float laserToRight = m_widthY - m_laserOffsetY;
-    float laserToFront = m_widthX - m_laserOffsetX;
+    float laser_to_back  = laser_offset_x_;
+    float laser_to_left  = laser_offset_y_;
+    float laser_to_right = width_y_ - laser_offset_y_;
+    float laser_to_front = width_x_ - laser_offset_x_;
 
-    m_robotToBack  =  laserToBack  + m_widthAddBack;
-    m_robotToLeft  =  laserToLeft  + m_widthAddLeft;
-    m_robotToRight =  laserToRight + m_widthAddRight;
-    m_robotToFront =  laserToFront + m_widthAddFront;
+    robot_to_back_  =  laser_to_back  + width_add_back_;
+    robot_to_left_  =  laser_to_left  + width_add_left_;
+    robot_to_right_ =  laser_to_right + width_add_right_;
+    robot_to_front_ =  laser_to_front + width_add_front_;
 
   // angles from laser to the edges of real robot dimension
   //  (might be more precise than the calculation below. TODO: check this)
-  //m_angFrontLeft  = normalize_mirror_rad( atan2(  laserToLeft,   laserToFront ) );
-  //m_angFrontRight = normalize_mirror_rad( atan2( -laserToRight,  laserToFront ) );
-  //m_angBackLeft   = normalize_mirror_rad( atan2(  laserToLeft,  -laserToBack ) );
-  //m_angBackRight  = normalize_mirror_rad( atan2( -laserToRight, -laserToBack ) );
-  //m_angLeft  = normalize_mirror_rad( atan2(  laserToLeft,  laserToFront - m_widthX/2.f ) );
-  //m_angRight = normalize_mirror_rad( atan2( -laserToRight, laserToFront - m_widthX/2.f ) );
-  //m_angFront = normalize_mirror_rad( atan2(  laserToLeft - m_widthY/2.f,  laserToFront ) );
-  //m_angBack  = normalize_mirror_rad( atan2(  laserToLeft - m_widthY/2.f, -laserToBack ) );
+  //ang_front_left_  = normalize_mirror_rad( atan2(  laser_to_left,   laser_to_front ) );
+  //ang_front_right_ = normalize_mirror_rad( atan2( -laser_to_right,  laser_to_front ) );
+  //ang_back_left_   = normalize_mirror_rad( atan2(  laser_to_left,  -laser_to_back ) );
+  //ang_back_right_  = normalize_mirror_rad( atan2( -laser_to_right, -laser_to_back ) );
+  //ang_left_  = normalize_mirror_rad( atan2(  laser_to_left,  laser_to_front - width_x_/2.f ) );
+  //ang_right_ = normalize_mirror_rad( atan2( -laser_to_right, laser_to_front - width_x_/2.f ) );
+  //ang_front_ = normalize_mirror_rad( atan2(  laser_to_left - width_y_/2.f,  laser_to_front ) );
+  //ang_back_  = normalize_mirror_rad( atan2(  laser_to_left - width_y_/2.f, -laser_to_back ) );
 
     logger_->log_info("RoboShape", "Shape is angular!");
 
   } else if ( shape == 2 ) {
     // ROUND
-    m_isAngular = false;
-    m_isRound = true;
-    m_radius        = config->get_float((cfg + "round/radius").c_str());
-    m_laserOffsetX  = config->get_float((cfg + "round/laser_offset_x_from_middle").c_str());
-    m_laserOffsetY  = config->get_float((cfg + "round/laser_offset_y_from_middle").c_str());
+    is_angular_ = false;
+    is_round_ = true;
+    radius_        = config->get_float((cfg + "round/radius").c_str());
+    laser_offset_x_  = config->get_float((cfg + "round/laser_offset_x_from_middle").c_str());
+    laser_offset_y_  = config->get_float((cfg + "round/laser_offset_y_from_middle").c_str());
 
-    m_robotToBack  = m_radius + m_laserOffsetX + m_widthAddBack;
-    m_robotToFront = m_radius - m_laserOffsetX + m_widthAddFront;
-    m_robotToLeft  = m_radius - m_laserOffsetY + m_widthAddLeft;
-    m_robotToRight = m_radius + m_laserOffsetY + m_widthAddRight;
+    robot_to_back_  = radius_ + laser_offset_x_ + width_add_back_;
+    robot_to_front_ = radius_ - laser_offset_x_ + width_add_front_;
+    robot_to_left_  = radius_ - laser_offset_y_ + width_add_left_;
+    robot_to_right_ = radius_ + laser_offset_y_ + width_add_right_;
 
     logger_->log_info("RoboShape", "Shape is round!");
 
@@ -132,20 +132,20 @@ RoboShape::RoboShape( const char * cfg_prefix,
     throw fawkes::Exception("RoboShape: Loading RoboShape from ConfigFile failed! Invalid config value for roboshape");
   }
 
-  logger_->log_info("RoboShape", "|#-->  (m)  is to front: %f", m_robotToFront);
-  logger_->log_info("RoboShape", "|#-->  (m)  is to right: %f", m_robotToRight);
-  logger_->log_info("RoboShape", "|#-->  (m)  is to left : %f", m_robotToLeft);
-  logger_->log_info("RoboShape", "+#-->  (m)  is to back : %f", m_robotToBack);
+  logger_->log_info("RoboShape", "|#-->  (m)  is to front: %f", robot_to_front_);
+  logger_->log_info("RoboShape", "|#-->  (m)  is to right: %f", robot_to_right_);
+  logger_->log_info("RoboShape", "|#-->  (m)  is to left : %f", robot_to_left_);
+  logger_->log_info("RoboShape", "+#-->  (m)  is to back : %f", robot_to_back_);
 
   // angles from laser to edges of the robot extension
-  m_angFrontLeft  = normalize_mirror_rad( atan2(  m_robotToLeft,   m_robotToFront ) );
-  m_angFrontRight = normalize_mirror_rad( atan2( -m_robotToRight,  m_robotToFront ) );
-  m_angBackLeft   = normalize_mirror_rad( atan2(  m_robotToLeft,  -m_robotToBack ) );
-  m_angBackRight  = normalize_mirror_rad( atan2( -m_robotToRight, -m_robotToBack ) );
-  m_angLeft  = normalize_mirror_rad( atan2(  m_robotToLeft,  m_robotToFront - m_widthX/2.f ) );
-  m_angRight = normalize_mirror_rad( atan2( -m_robotToRight, m_robotToFront - m_widthX/2.f ) );
-  m_angFront = normalize_mirror_rad( atan2(  m_robotToLeft - m_widthY/2.f,  m_robotToFront ) );
-  m_angBack  = normalize_mirror_rad( atan2(  m_robotToLeft - m_widthY/2.f, -m_robotToBack ) );
+  ang_front_left_  = normalize_mirror_rad( atan2(  robot_to_left_,   robot_to_front_ ) );
+  ang_front_right_ = normalize_mirror_rad( atan2( -robot_to_right_,  robot_to_front_ ) );
+  ang_back_left_   = normalize_mirror_rad( atan2(  robot_to_left_,  -robot_to_back_ ) );
+  ang_back_right_  = normalize_mirror_rad( atan2( -robot_to_right_, -robot_to_back_ ) );
+  ang_left_  = normalize_mirror_rad( atan2(  robot_to_left_,  robot_to_front_ - width_x_/2.f ) );
+  ang_right_ = normalize_mirror_rad( atan2( -robot_to_right_, robot_to_front_ - width_x_/2.f ) );
+  ang_front_ = normalize_mirror_rad( atan2(  robot_to_left_ - width_y_/2.f,  robot_to_front_ ) );
+  ang_back_  = normalize_mirror_rad( atan2(  robot_to_left_ - width_y_/2.f, -robot_to_back_ ) );
 }
 
 
@@ -158,18 +158,18 @@ RoboShape::~RoboShape()
  * @return bool indicating if the robot is round.
  */
 bool
-RoboShape::IsRoundRobot()
+RoboShape::is_round_robot()
 {
-  return m_isRound;
+  return is_round_;
 }
 
 /** Returns if the robot is angular.
  * @return bool indicating if the robot is angular.
  */
 bool
-RoboShape::IsAngularRobot()
+RoboShape::is_angular_robot()
 {
-  return m_isAngular;
+  return is_angular_;
 }
 
 /** Returns, if a reading length is _in_ the robot.
@@ -178,9 +178,9 @@ RoboShape::IsAngularRobot()
  * @return if the reading is in the robot.
  */
 bool
-RoboShape::IsRobotReadingforRad( float anglerad, float length )
+RoboShape::is_robot_reading_for_rad( float anglerad, float length )
 {
-  return (length < GetRobotLengthforRad( anglerad ));
+  return (length < get_robot_length_for_rad( anglerad ));
 }
 
 /** Returns, if a reading length is _in_ the robot.
@@ -189,81 +189,81 @@ RoboShape::IsRobotReadingforRad( float anglerad, float length )
  * @return if the reading is in the robot.
  */
 bool
-RoboShape::IsRobotReadingforDegree( float angledeg, float length )
+RoboShape::is_robot_reading_for_deg( float angledeg, float length )
 {
-  return IsRobotReadingforRad( deg2rad( angledeg ), length );
+  return is_robot_reading_for_rad( deg2rad( angledeg ), length );
 }
 
 /** Get angle to the front left corner of the robot
  * @return angle in radians
  */
 float
-RoboShape::GetAngleFrontLeft() const
+RoboShape::get_angle_front_left() const
 {
-  return m_angFrontLeft;
+  return ang_front_left_;
 }
 
 /** Get angle to the front right corner of the robot
  * @return angle in radians
  */
 float
-RoboShape::GetAngleFrontRight() const
+RoboShape::get_angle_front_right() const
 {
-  return m_angFrontRight;
+  return ang_front_right_;
 }
 
 /** Get angle to the rear left corner of the robot
  * @return angle in radians
  */
 float
-RoboShape::GetAngleBackLeft() const
+RoboShape::get_angle_back_left() const
 {
-  return m_angBackLeft;
+  return ang_back_left_;
 }
 
 /** Get angle to the rear right corner of the robot
  * @return angle in radians
  */
 float
-RoboShape::GetAngleBackRight() const
+RoboShape::get_angle_back_right() const
 {
-  return m_angBackRight;
+  return ang_back_right_;
 }
 
 /** Get angle to middle of the left side of the robot
  * @return angle in radians
  */
 float
-RoboShape::GetAngleLeft() const
+RoboShape::get_angle_left() const
 {
-  return m_angLeft;
+  return ang_left_;
 }
 
 /** Get angle to middle of the right side of the robot
  * @return angle in radians
  */
 float
-RoboShape::GetAngleRight() const
+RoboShape::get_angle_right() const
 {
-  return m_angRight;
+  return ang_right_;
 }
 
 /** Get angle to middle of the front side of the robot
  * @return angle in radians
  */
 float
-RoboShape::GetAngleFront() const
+RoboShape::get_angle_front() const
 {
-  return m_angFront;
+  return ang_front_;
 }
 
 /** Get angle to middle of the rear side of the robot
  * @return angle in radians
  */
 float
-RoboShape::GetAngleBack() const
+RoboShape::get_angle_back() const
 {
-  return m_angBack;
+  return ang_back_;
 }
 
 /** Returns the robots length for a specific angle.
@@ -271,16 +271,16 @@ RoboShape::GetAngleBack() const
  * @return the length in this direction.
  */
 float
-RoboShape::GetRobotLengthforRad( float anglerad )
+RoboShape::get_robot_length_for_rad( float anglerad )
 {
   anglerad = normalize_mirror_rad( anglerad );
 
-  if( IsRoundRobot() ) {
+  if( is_round_robot() ) {
     /* use quadratic equation to get intersection point of ray to circle.
      * The ray origins at the laser with angle "anglerad" and is a unit_vector.
      * Consider robot-center as (0,0), we have an equation of:
      *    length(v_laser + k*ray) = radius + expansion
-     * with v_laser = vector(m_laserOffsetX, m_laserOffsetY).
+     * with v_laser = vector(laser_offset_x_, laser_offset_y_).
      * "k" is the length from the laser to the robot edge at angle "anglerad".
      *
      * Transform that equation, i.e. resolve "length(..)" and you get a
@@ -290,31 +290,31 @@ RoboShape::GetRobotLengthforRad( float anglerad )
     float ray_y = sin(anglerad);
 
     float a = ray_x*ray_x + ray_y*ray_y;
-    float b = ray_x*m_laserOffsetX + ray_y*m_laserOffsetY;
-    static float c = m_laserOffsetX*m_laserOffsetX + m_laserOffsetY*m_laserOffsetY - GetCompleteRadius()*GetCompleteRadius();
+    float b = ray_x*laser_offset_x_ + ray_y*laser_offset_y_;
+    static float c = laser_offset_x_*laser_offset_x_ + laser_offset_y_*laser_offset_y_ - get_complete_radius()*get_complete_radius();
 
     return ( -b + sqrt(b*b - a*c) ) / a;
 
-  } else if( IsAngularRobot() ) {
+  } else if( is_angular_robot() ) {
     /* check all the quadrants in which the target angles lies. The quadrants are spanned
      * by the angles from the center of the robot to its 4 corners. Use "cos(a) = adjacent / hypothenuse",
      * we are looking for the length of the hypothenuse here.
      */
-    if( anglerad >= m_angBackLeft || anglerad < m_angBackRight ) {
+    if( anglerad >= ang_back_left_ || anglerad < ang_back_right_ ) {
       // bottom quadrant; fabs(anglerad) > M_PI_2
-      return m_robotToBack  / cos( M_PI - fabs(anglerad) );
+      return robot_to_back_  / cos( M_PI - fabs(anglerad) );
 
-    } else if( anglerad < m_angFrontRight ) {
+    } else if( anglerad < ang_front_right_ ) {
       // right quadrant; -M_PI < anglerad < 0
-      return m_robotToRight / cos( M_PI_2 + anglerad );
+      return robot_to_right_ / cos( M_PI_2 + anglerad );
 
-    } else if( anglerad < m_angFrontLeft ) {
+    } else if( anglerad < ang_front_left_ ) {
       // top quadrant; -M_PI_2 < anglerad < M_PI_2
-      return m_robotToFront / cos( anglerad );
+      return robot_to_front_ / cos( anglerad );
 
-    } else if( anglerad < m_angBackLeft ) {
+    } else if( anglerad < ang_back_left_ ) {
       // left quadrant; 0 < anglerad < M_PI
-      return m_robotToLeft  / cos( M_PI_2 - anglerad);
+      return robot_to_left_  / cos( M_PI_2 - anglerad);
 
     } else {
       throw fawkes::Exception("RoboShape: Angles to corners of robot-shape do not cover the whole robot!");
@@ -330,79 +330,79 @@ RoboShape::GetRobotLengthforRad( float anglerad )
  * @return the length in this direction.
  */
 float
-RoboShape::GetRobotLengthforDegree( float angledeg )
+RoboShape::get_robot_length_for_deg( float angledeg )
 {
-  return GetRobotLengthforRad( deg2rad( angledeg ) );
+  return get_robot_length_for_rad( deg2rad( angledeg ) );
 }
 
 /** Returns the radius of the robot if its round.
  * @return radius of the round robot
  */
 float
-RoboShape::GetRadius()
+RoboShape::get_radius()
 {
-  if ( IsRoundRobot() )
-    return m_radius;
+  if ( is_round_robot() )
+    return radius_;
   else
     logger_->log_error("RoboShape", "The Robot is not round!");
 
-  return 0.0;
+  return 0.f;
 }
 
 /** Returns the maximum radius of the robot if its round.
  * @return maximum radius of the round robot
  */
 float
-RoboShape::GetCompleteRadius()
+RoboShape::get_complete_radius()
 {
-  if ( IsRoundRobot() )
-    return ( m_radius + std::max( std::max(m_widthAddFront, m_widthAddBack),
-                                  std::max(m_widthAddRight, m_widthAddLeft) ) );
+  if ( is_round_robot() )
+    return ( radius_ + std::max( std::max(width_add_front_, width_add_back_),
+                                  std::max(width_add_right_, width_add_left_) ) );
   else
     logger_->log_error("RoboShape", "Error: The Robot is not round!");
 
-  return 0.0;
+  return 0.f;
 }
 /** Returns the width-x of the angular robot.
  * @return only the robot x width.
  */
 float
-RoboShape::GetWidthX()
+RoboShape::get_width_x()
 {
-  if ( IsAngularRobot() )
-    return m_widthX;
+  if ( is_angular_robot() )
+    return width_x_;
   else
     logger_->log_error("RoboShape", "The Robot is not angular!");
 
-  return 0.0;
+  return 0.f;
 }
 
 /** Returns the width-y of the angular robot.
  * @return only the robot y width.
  */
 float
-RoboShape::GetWidthY()
+RoboShape::get_width_y()
 {
-  if ( IsAngularRobot() )
-    return m_widthY;
+  if ( is_angular_robot() )
+    return width_y_;
   else
     logger_->log_error("RoboShape", "The Robot is not angular!");
 
-  return 0.0;
+  return 0.f;
 }
 
 /** Returns the complete x width of the angular robot.
  * @return the complete x width.
  */
 float
-RoboShape::GetCompleteWidthX()
+RoboShape::get_complete_width_x()
 {
-  if ( IsAngularRobot() )
-    return ( m_widthX + m_widthAddFront + m_widthAddBack );
+  if ( is_angular_robot() )
+    return ( width_x_ + width_add_front_ + width_add_back_ );
   else
-    return 2.f*GetCompleteRadius();
+    return 2.f*get_complete_radius();
 
-  return 0.0;
+  return 0.f;
 }
 
 
@@ -410,32 +410,32 @@ RoboShape::GetCompleteWidthX()
  * @return the complete y width.
  */
 float
-RoboShape::GetCompleteWidthY()
+RoboShape::get_complete_width_y()
 {
-  if ( IsAngularRobot() )
-    return ( m_widthY + m_widthAddRight + m_widthAddLeft );
+  if ( is_angular_robot() )
+    return ( width_y_ + width_add_right_ + width_add_left_ );
   else
-    return 2.f*GetCompleteRadius();
+    return 2.f*get_complete_radius();
 
-  return 0.0;
+  return 0.f;
 }
 
 /** Returns the laser offset in x direction of the robot.
  * @return the laser offset in x direction.
  */
 float
-RoboShape::GetLaserOffsetX()
+RoboShape::get_laser_offset_x()
 {
-  return m_laserOffsetX;
+  return laser_offset_x_;
 }
 
 /** Returns the laser offset in y direction of the robot.
  * @return the laser offset in y direction.
  */
 float
-RoboShape::GetLaserOffsetY()
+RoboShape::get_laser_offset_y()
 {
-  return m_laserOffsetY;
+  return laser_offset_y_;
 }
 
 } // namespace fawkes

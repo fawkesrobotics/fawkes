@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  *             2014  Tobias Neumann
  ****************************************************************************/
 
@@ -25,7 +25,6 @@
 #define __PLUGINS_COLLI_ESCAPE_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
-#include "../utils/rob/roboshape_colli.h"
 
 #include <utils/math/types.h>
 
@@ -37,40 +36,36 @@ namespace fawkes
 }
 #endif
 
-class CEscapeDriveModule : public CAbstractDriveMode
+class RoboShapeColli;
+
+class EscapeDriveModule : public AbstractDriveMode
 {
  public:
-  CEscapeDriveModule( Logger* logger, Configuration* config );
-  ~CEscapeDriveModule();
+  EscapeDriveModule( Logger* logger, Configuration* config );
+  ~EscapeDriveModule();
 
-  virtual void Update();
+  virtual void update();
 
-  void setLaserData( std::vector<fawkes::polar_coord_2d_t>& laser_points );
+  void set_laser_data( std::vector<polar_coord_2d_t>& laser_points );
 
  private:
+  std::vector<polar_coord_2d_t> laser_points_;
 
-  std::vector<fawkes::polar_coord_2d_t> laser_points_;
-
-  CRoboShape_Colli*  m_pRoboShape;
+  RoboShapeColli*  robo_shape_;
 
   /// Readings without robolength in it
-  std::vector< float > m_vNormalizedReadings;
-  std::vector< float > m_vFront, m_vBack;
-  std::vector< float > m_vLeftFront,  m_vLeftBack;
-  std::vector< float > m_vRightFront, m_vRightBack;
+  std::vector< float > readings_normalized_;
+  std::vector< float > readings_front_, readings_back_;
+  std::vector< float > readings_left_front_,  readings_left_back_;
+  std::vector< float > readings_right_front_, readings_right_back_;
 
 
-  /// absolute values are the maximum values. do not act faster!
-  float m_MaxTranslation;
-  float m_MaxRotation;
+  void fill_normalized_readings();
+  void sort_normalized_readings();
 
-
-  void FillNormalizedReadings();
-  void SortNormalizedReadings();
-
-  bool CheckDanger( std::vector< float > readings );
-  bool TurnLeftAllowed();
-  bool TurnRightAllowed();
+  bool check_danger( std::vector< float > readings );
+  bool turn_left_allowed();
+  bool turn_right_allowed();
 };
 
 } // end namespace fawkes

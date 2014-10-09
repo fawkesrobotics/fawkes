@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  *             2014  Tobias Neumann
  ****************************************************************************/
 
@@ -21,8 +21,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-
 #include "escape_drive_mode.h"
+
+#include "../utils/rob/roboshape_colli.h"
 
 namespace fawkes
 {
@@ -30,7 +31,7 @@ namespace fawkes
 }
 #endif
 
-/** @class CEscapeDriveModule <plugins/colli/drive_modes/escape_drive_mode.h>
+/** @class EscapeDriveModule <plugins/colli/drive_modes/escape_drive_mode.h>
  * Class Escape-Drive-Module. This module is called, if an escape is neccessary.
  * It should try to maximize distance to the disturbing obstacle.
  */
@@ -39,29 +40,27 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CEscapeDriveModule::CEscapeDriveModule( Logger* logger, Configuration* config )
- : CAbstractDriveMode(logger, config)
+EscapeDriveModule::EscapeDriveModule( Logger* logger, Configuration* config )
+ : AbstractDriveMode(logger, config)
 {
-  logger_->log_info("CEscapeDriveModule", "(Constructor): Entering...");
-  m_DriveModeName = NavigatorInterface::ESCAPE;
+  logger_->log_info("EscapeDriveModule", "(Constructor): Entering...");
+  drive_mode_ = NavigatorInterface::ESCAPE;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/escape/max_trans" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/escape/max_rot" );
+  max_trans_ = config_->get_float( "/plugins/colli/drive_mode/escape/max_trans" );
+  max_rot_    = config_->get_float( "/plugins/colli/drive_mode/escape/max_rot" );
 
-  m_pRoboShape = new CRoboShape_Colli( "/plugins/colli/roboshape/", logger, config, 2 );
+  robo_shape_ = new RoboShapeColli( "/plugins/colli/roboshape/", logger, config, 2 );
 
-  logger_->log_info("CEscapeDriveModule", "(Constructor): Exiting...");
+  logger_->log_info("EscapeDriveModule", "(Constructor): Exiting...");
 }
 
 
-/** Destruct your local values here.
- */
-CEscapeDriveModule::~CEscapeDriveModule()
+/** Destructor. Destruct your local values here. */
+EscapeDriveModule::~EscapeDriveModule()
 {
-  logger_->log_info("CEscapeDriveModule", "(Destructor): Entering...");
-  logger_->log_info("CEscapeDriveModule", "(Destructor): Exiting...");
+  logger_->log_info("EscapeDriveModule", "(Destructor): Entering...");
+  logger_->log_info("EscapeDriveModule", "(Destructor): Exiting...");
 }
-
 
 
 /* ************************************************************************** */
@@ -79,137 +78,133 @@ CEscapeDriveModule::~CEscapeDriveModule()
  *
  *  Afterwards filled should be:
  *
- *     m_ProposedTranslation              --> Desired Translation speed
- *     m_ProposedRotation                 --> Desired Rotation speed
+*     proposed_          --> Desired translation and rotation speed
  *
- *  Those values are questioned after an Update() was called.
+ *  Those values are questioned after an update() was called.
  */
 void
-CEscapeDriveModule::Update()
+EscapeDriveModule::update()
 {
   // This is only called, if we recently stopped...
-  logger_->log_debug("CEscapeDriveModule", "CEscapeDriveModule( Update ): Calculating ESCAPING...");
+  logger_->log_debug("EscapeDriveModule", "EscapeDriveModule( update ): Calculating ESCAPING...");
 
-  m_ProposedTranslationX  = 0.;
-  m_ProposedTranslationY  = 0.;
-  m_ProposedRotation      = 0.;
+  proposed_.x = proposed_.y = proposed_.rot = 0.f;
 
-  FillNormalizedReadings();
-  SortNormalizedReadings();
+  fill_normalized_readings();
+  sort_normalized_readings();
 
-  bool dangerFront = CheckDanger( m_vFront );
-  bool dangerBack  = CheckDanger( m_vBack  );
+  bool danger_front = check_danger( readings_front_ );
+  bool danger_back  = check_danger( readings_back_  );
 
-  bool turnLeftAllowed = TurnLeftAllowed();
-  bool turnRightAllowed = TurnRightAllowed();
+  bool can_turn_left = turn_left_allowed();
+  bool can_turn_right = turn_right_allowed();
 
-  if (dangerFront)
-    logger_->log_debug("CEscapeDriveModule", "DANGER IN FRONT");
+  if (danger_front)
+    logger_->log_debug("EscapeDriveModule", "DANGER IN FRONT");
 
-  if (dangerBack)
-    logger_->log_debug("CEscapeDriveModule", "DANGER IN BACK");
+  if (danger_back)
+    logger_->log_debug("EscapeDriveModule", "DANGER IN BACK");
 
-  if (CheckDanger(m_vLeftFront))
-    logger_->log_debug("CEscapeDriveModule", "DANGER IN LEFT FRONT");
+  if (check_danger(readings_left_front_))
+    logger_->log_debug("EscapeDriveModule", "DANGER IN LEFT FRONT");
 
-  if (CheckDanger(m_vLeftBack))
-    logger_->log_debug("CEscapeDriveModule", "DANGER IN LEFT BACK");
+  if (check_danger(readings_left_back_))
+    logger_->log_debug("EscapeDriveModule", "DANGER IN LEFT BACK");
 
-  if (CheckDanger(m_vRightFront))
-    logger_->log_debug("CEscapeDriveModule", "DANGER IN RIGHT FRONT");
+  if (check_danger(readings_right_front_))
+    logger_->log_debug("EscapeDriveModule", "DANGER IN RIGHT FRONT");
 
-  if (CheckDanger(m_vRightBack))
-    logger_->log_debug("CEscapeDriveModule", "DANGER IN RIGHT BACK");
+  if (check_danger(readings_right_back_))
+    logger_->log_debug("EscapeDriveModule", "DANGER IN RIGHT BACK");
 
-  if (!turnLeftAllowed)
-    logger_->log_debug("CEscapeDriveModule", "DANGER IF TURNING LEFT!!!");
+  if (!can_turn_left)
+    logger_->log_debug("EscapeDriveModule", "DANGER IF TURNING LEFT!!!");
 
-  if (!turnRightAllowed)
-    logger_->log_debug("CEscapeDriveModule", "DANGER IF TURNING RIGHT!!!");
+  if (!can_turn_right)
+    logger_->log_debug("EscapeDriveModule", "DANGER IF TURNING RIGHT!!!");
 
 
-  if ( dangerFront && dangerBack && turnRightAllowed ) {
-    m_ProposedTranslationX = 0.0;
-    m_ProposedRotation = -m_MaxRotation;
+  if ( danger_front && danger_back && can_turn_right ) {
+    proposed_.rot = -max_rot_;
 
-  } else if ( dangerFront && dangerBack && turnLeftAllowed ) {
-    m_ProposedTranslationX = 0.0;
-    m_ProposedRotation = m_MaxRotation;
+  } else if ( danger_front && danger_back && can_turn_left ) {
+    proposed_.rot = max_rot_;
 
-  } else if (!dangerFront && dangerBack) {
-    m_ProposedTranslationX = m_MaxTranslation;
+  } else if (!danger_front && danger_back) {
+    proposed_.x = max_trans_;
 
-    if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
-      m_ProposedRotation =  -m_MaxRotation;
-    else if ( (turnLeftAllowed) && (m_LocalTargetY >= m_RoboY) )
-      m_ProposedRotation = m_MaxRotation;
+    if ( (can_turn_right) && (local_target_.y <= robot_.y) )
+      proposed_.rot =  -max_rot_;
+    else if ( (can_turn_left) && (local_target_.y >= robot_.y) )
+      proposed_.rot = max_rot_;
 
-  } else if (dangerFront && !dangerBack) {
-    m_ProposedTranslationX = -m_MaxTranslation;
+  } else if (danger_front && !danger_back) {
+    proposed_.x = -max_trans_;
 
-    if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
-      m_ProposedRotation =  -m_MaxRotation;
-    else if ( (turnLeftAllowed) && (m_LocalTargetY >= m_RoboY) )
-      m_ProposedRotation = m_MaxRotation;
+    if ( (can_turn_right) && (local_target_.y <= robot_.y) )
+      proposed_.rot =  -max_rot_;
+    else if ( (can_turn_left) && (local_target_.y >= robot_.y) )
+      proposed_.rot = max_rot_;
 
-  } else if ( !dangerFront && !dangerBack ) {
+  } else if ( !danger_front && !danger_back ) {
     // depending on target coordinates, decide which direction to escape to
-    if ( m_TargetX > m_RoboX )
-      m_ProposedTranslationX = m_MaxTranslation;
+    if ( target_.x > robot_.x )
+      proposed_.x = max_trans_;
     else
-      m_ProposedTranslationX = -m_MaxTranslation;
+      proposed_.x = -max_trans_;
 
-    if ( (turnRightAllowed) && (m_LocalTargetY <= m_RoboY) )
-      m_ProposedRotation =  -m_MaxRotation;
-    else if ( (turnLeftAllowed) && (m_LocalTargetY >= m_RoboY) )
-      m_ProposedRotation = m_MaxRotation;
+    if ( (can_turn_right) && (local_target_.y <= robot_.y) )
+      proposed_.rot =  -max_rot_;
+    else if ( (can_turn_left) && (local_target_.y >= robot_.y) )
+      proposed_.rot = max_rot_;
   }
 }
+
 
 /**
  * This function sets the laser points for one escape round
  * @param laser_points vector of laser points
  */
 void
-CEscapeDriveModule::setLaserData( std::vector<polar_coord_2d_t>& laser_points )
+EscapeDriveModule::set_laser_data( std::vector<polar_coord_2d_t>& laser_points )
 {
   laser_points_ = laser_points;
 }
 
+
 /* ************************************************************************** */
 /* ***********************     Private Methods      ************************* */
 /* ************************************************************************** */
-
 void
-CEscapeDriveModule::FillNormalizedReadings()
+EscapeDriveModule::fill_normalized_readings()
 {
-  m_vNormalizedReadings.clear();
+  readings_normalized_.clear();
 
   for ( unsigned int i = 0; i < laser_points_.size(); i++ ) {
     float rad    = normalize_rad( laser_points_.at( i ).phi );
-    float sub    = m_pRoboShape->GetRobotLengthforRad( rad );
+    float sub    = robo_shape_->get_robot_length_for_rad( rad );
     float length = laser_points_.at( i ).r;
-    m_vNormalizedReadings.push_back( length - sub );
+    readings_normalized_.push_back( length - sub );
   }
 }
 
 
 void
-CEscapeDriveModule::SortNormalizedReadings()
+EscapeDriveModule::sort_normalized_readings()
 {
-  m_vFront.clear();
-  m_vBack.clear();
-  m_vLeftFront.clear();
-  m_vLeftBack.clear();
-  m_vRightFront.clear();
-  m_vRightBack.clear();
+  readings_front_.clear();
+  readings_back_.clear();
+  readings_left_front_.clear();
+  readings_left_back_.clear();
+  readings_right_front_.clear();
+  readings_right_back_.clear();
 
-  float ang_fl = normalize_rad(m_pRoboShape->GetAngleFrontLeft());
-  float ang_fr = normalize_rad(m_pRoboShape->GetAngleFrontRight());
-  float ang_bl = normalize_rad(m_pRoboShape->GetAngleBackLeft());
-  float ang_br = normalize_rad(m_pRoboShape->GetAngleBackRight());
-  float ang_ml = normalize_rad(m_pRoboShape->GetAngleLeft());
-  float ang_mr = normalize_rad(m_pRoboShape->GetAngleRight());
+  float ang_fl = normalize_rad(robo_shape_->get_angle_front_left());
+  float ang_fr = normalize_rad(robo_shape_->get_angle_front_right());
+  float ang_bl = normalize_rad(robo_shape_->get_angle_back_left());
+  float ang_br = normalize_rad(robo_shape_->get_angle_back_right());
+  float ang_ml = normalize_rad(robo_shape_->get_angle_left());
+  float ang_mr = normalize_rad(robo_shape_->get_angle_right());
 
   if(!( (ang_fl < ang_ml) && (ang_ml < ang_bl) && (ang_bl < ang_br)
      &&(ang_br < ang_mr) && (ang_mr < ang_fr) ))
@@ -223,22 +218,22 @@ CEscapeDriveModule::SortNormalizedReadings()
       rad = normalize_rad( laser_points_.at(i).phi );
 
       if( rad < ang_fl || rad >= ang_fr )
-        m_vFront.push_back( m_vNormalizedReadings[i] );
+        readings_front_.push_back( readings_normalized_[i] );
 
       else if( rad < ang_ml )
-        m_vLeftFront.push_back( m_vNormalizedReadings[i] );
+        readings_left_front_.push_back( readings_normalized_[i] );
 
       else if( rad < ang_bl )
-        m_vLeftBack.push_back( m_vNormalizedReadings[i] );
+        readings_left_back_.push_back( readings_normalized_[i] );
 
       else if( rad < ang_br )
-        m_vBack.push_back( m_vNormalizedReadings[i] );
+        readings_back_.push_back( readings_normalized_[i] );
 
       else if( rad < ang_mr )
-        m_vRightBack.push_back( m_vNormalizedReadings[i] );
+        readings_right_back_.push_back( readings_normalized_[i] );
 
       else if( rad < ang_fr )
-        m_vRightFront.push_back( m_vNormalizedReadings[i] );
+        readings_right_front_.push_back( readings_normalized_[i] );
     }
 
     ++i;
@@ -247,11 +242,11 @@ CEscapeDriveModule::SortNormalizedReadings()
 
 
 bool
-CEscapeDriveModule::CheckDanger( std::vector< float > readings )
+EscapeDriveModule::check_danger( std::vector< float > readings )
 {
   // if something is smaller than 5 cm, you have to flee.......
   for ( unsigned int i = 0; i < readings.size(); i++ )
-    if ( readings[i] < 0.06 )
+    if ( readings[i] < 0.06f )
       return true;
 
   return false;
@@ -259,22 +254,22 @@ CEscapeDriveModule::CheckDanger( std::vector< float > readings )
 
 
 bool
-CEscapeDriveModule::TurnLeftAllowed()
+EscapeDriveModule::turn_left_allowed()
 {
-  for ( unsigned int i = 0; i < m_vFront.size(); i++ )
-    if ( m_vFront[i] < 0.12 )
+  for ( unsigned int i = 0; i < readings_front_.size(); i++ )
+    if ( readings_front_[i] < 0.12f )
       return false;
 
-  for ( unsigned int i = 0; i < m_vRightFront.size(); i++ )
-    if ( m_vRightFront[i] < 0.06 )
+  for ( unsigned int i = 0; i < readings_right_front_.size(); i++ )
+    if ( readings_right_front_[i] < 0.06f )
       return false;
 
-  for ( unsigned int i = 0; i < m_vBack.size(); i++ )
-    if ( m_vBack[i] < 0.07 )
+  for ( unsigned int i = 0; i < readings_back_.size(); i++ )
+    if ( readings_back_[i] < 0.07f )
       return false;
 
-  for ( unsigned int i = 0; i < m_vLeftBack.size(); i++ )
-    if ( m_vLeftBack[i] < 0.13 )
+  for ( unsigned int i = 0; i < readings_left_back_.size(); i++ )
+    if ( readings_left_back_[i] < 0.13f )
       return false;
 
   return true;
@@ -283,22 +278,22 @@ CEscapeDriveModule::TurnLeftAllowed()
 
 
 bool
-CEscapeDriveModule::TurnRightAllowed()
+EscapeDriveModule::turn_right_allowed()
 {
-  for ( unsigned int i = 0; i < m_vFront.size(); i++ )
-    if ( m_vFront[i] < 0.12 )
+  for ( unsigned int i = 0; i < readings_front_.size(); i++ )
+    if ( readings_front_[i] < 0.12f )
       return false;
 
-  for ( unsigned int i = 0; i < m_vLeftFront.size(); i++ )
-    if ( m_vLeftFront[i] < 0.06 )
+  for ( unsigned int i = 0; i < readings_left_front_.size(); i++ )
+    if ( readings_left_front_[i] < 0.06f )
       return false;
 
-  for ( unsigned int i = 0; i < m_vBack.size(); i++ )
-    if ( m_vBack[i] < 0.07 )
+  for ( unsigned int i = 0; i < readings_back_.size(); i++ )
+    if ( readings_back_[i] < 0.07f )
       return false;
 
-  for ( unsigned int i = 0; i < m_vRightBack.size(); i++ )
-    if ( m_vRightBack[i] < 0.13 )
+  for ( unsigned int i = 0; i < readings_right_back_.size(); i++ )
+    if ( readings_right_back_[i] < 0.13f )
       return false;
 
   return true;

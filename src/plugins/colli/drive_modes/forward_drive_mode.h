@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -31,25 +31,20 @@ namespace fawkes
 }
 #endif
 
-class CForwardDriveModule : public CAbstractDriveMode
+class ForwardDriveModule : public AbstractDriveMode
 {
  public:
+  ForwardDriveModule(Logger* logger, Configuration* config);
+  ~ForwardDriveModule();
 
-  CForwardDriveModule(Logger* logger, Configuration* config);
-  ~CForwardDriveModule();
-
-  virtual void Update();
-
+  virtual void update();
 
  private:
+  float forward_curvature( float dist_to_target, float dist_to_trajec, float alpha,
+                           float cur_trans, float cur_rot );
 
-  float Forward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-             float cur_trans, float cur_rot );
-  float Forward_Translation( float dist_to_target, float dist_to_front, float alpha,
-         float cur_trans, float cur_rot, float des_rot );
-
-  float m_MaxTranslation, m_MaxRotation;
-
+  float forward_translation( float dist_to_target, float dist_to_front, float alpha,
+                             float cur_trans, float cur_rot, float des_rot );
 };
 
 } // namespace fawkes

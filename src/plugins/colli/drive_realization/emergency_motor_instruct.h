@@ -30,45 +30,23 @@ namespace fawkes
 }
 #endif
 
-class MotorInterface;
-class Logger;
-class Configuration;
-
-
-class CEmergencyMotorInstruct: public CBaseMotorInstruct
+class EmergencyMotorInstruct: public BaseMotorInstruct
 {
  public:
-
-  CEmergencyMotorInstruct( fawkes::MotorInterface* motor,
-                           float frequency,
-                           fawkes::Logger* logger,
-                           fawkes::Configuration* config );
-
-  virtual ~CEmergencyMotorInstruct();
-
+  EmergencyMotorInstruct( MotorInterface* motor,
+                          float frequency,
+                          Logger* logger,
+                          Configuration* config );
+  virtual ~EmergencyMotorInstruct();
 
  private:
+  ///\brief linear implementation of velocity constraints
+  float calculate_rotation( float current, float desired,float time_factor );
 
   ///\brief linear implementation of velocity constraints
-  float CalculateRotation( float currentRotation, float desiredRotation,
-         float time_factor );
-
-  ///\brief linear implementation of velocity constraints
-  float CalculateTranslation( float currentTranslation, float desiredTranslation,
-            float time_factor );
-
-
-  /// maximum acceleration and deceleration values for translation and rotation
-  float basic_trans_acc;
-  float basic_trans_dec;
-  float basic_rot_acc;
-  float basic_rot_dec;
-
-  fawkes::Configuration* config_;
-
+  float calculate_translation( float current, float desired,float time_factor );
 };
 
 } // namespace fawkes
 
 #endif
-

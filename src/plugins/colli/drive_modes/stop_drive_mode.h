@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -31,15 +31,13 @@ namespace fawkes
 }
 #endif
 
-class CStopDriveModule : public CAbstractDriveMode
+class StopDriveModule : public AbstractDriveMode
 {
  public:
+  StopDriveModule(Logger* logger, Configuration* config);
+  ~StopDriveModule();
 
-  CStopDriveModule(Logger* logger, Configuration* config);
-  ~CStopDriveModule();
-
-  virtual void Update();
-
+  virtual void update();
 
  private:
 

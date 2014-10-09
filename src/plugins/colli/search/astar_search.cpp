@@ -34,73 +34,73 @@ namespace fawkes
 }
 #endif
 
-/** @class CSearch <plugins/colli/search/astar_search.h>
+/** @class search <plugins/colli/search/astar_search.h>
  * This class tries to translate the found plan to interpreteable
  * data for the rest of the program.
  */
 
 /** Constructor. Constructs the plan, initializes an A* Object and
  *  makes a reference to the OccupancyGrid.
- * @param occGrid The laser occupancy-grid
+ * @param occ_grid The laser occupancy-grid
  * @param logger The fawkes logger
  * @param config The fawkes configuration.
  */
-CSearch::CSearch( CLaserOccupancyGrid * occGrid, Logger* logger, Configuration* config)
- : CAbstractSearch( occGrid, logger ),
+Search::Search( LaserOccupancyGrid * occ_grid, Logger* logger, Configuration* config)
+ : AbstractSearch( occ_grid, logger ),
    logger_( logger )
 {
-  logger_->log_debug("CSearch", "(Constructor): Entering");
+  logger_->log_debug("search", "(Constructor): Entering");
   std::string cfg_prefix = "/plugins/colli/search/";
-  cfg_search_line_allowed_cost_max  = config->get_int((cfg_prefix + "line/cost_max").c_str());
-  m_pAStar = new CAStar( occGrid, logger, config );
-  logger_->log_debug("CSearch", "(Constructor): Exiting");
+  cfg_search_line_allowed_cost_max_  = config->get_int((cfg_prefix + "line/cost_max").c_str());
+  astar_ = new AStar( occ_grid, logger, config );
+  logger_->log_debug("search", "(Constructor): Exiting");
 }
 
 /** Destructor */
-CSearch::~CSearch()
+Search::~Search()
 {
-  delete m_pAStar;
+  delete astar_;
 }
 
-/** Perform an Update by searching in the occgrid for a plan from robopos to targetpos.
+/** Perform an update by searching in the occgrid for a plan from robopos to targetpos.
  * precondition: the occupancy grid has to be updated previously!
- * @param roboX Robot x position in grid
- * @param roboY Robot y position in grid
- * @param targetX Target x position in grid
- * @param targetY Target y position in grid
+ * @param robo_x Robot x position in grid
+ * @param robo_y Robot y position in grid
+ * @param target_x Target x position in grid
+ * @param target_y Target y position in grid
    */
 void
-CSearch::Update( int roboX, int roboY, int targetX, int targetY )
+Search::update( int robo_x, int robo_y, int target_x, int target_y )
 {
-  m_UpdatedSuccessful = false;
+  updated_successful_ = false;
 
   // check, if a position is in an obstacle
-  m_RoboPosition    = point_t( roboX, roboY );
-  m_LocalTarget     = point_t( roboX, roboY );
-  m_LocalTrajectory = point_t( roboX, roboY );
+  robo_position_    = point_t( robo_x, robo_y );
+  local_target_     = point_t( robo_x, robo_y );
+  local_trajec_ = point_t( robo_x, robo_y );
 
-  if ( m_pOccGrid->getProb( targetX, targetY ) == cell_costs_.occ ) {
-    int stepX = 1;  // initializing to 1
-    int stepY = 1;
-    if ( roboX < targetX ) // if we search in the other direction, inverse it!
-      stepX = -1;
+  if ( occ_grid_->get_prob( target_x, target_y ) == cell_costs_.occ ) {
+    int step_x = 1;  // initializing to 1
+    int step_y = 1;
+    if ( robo_x < target_x ) // if we search in the other direction, inverse it!
+      step_x = -1;
 
-    if ( roboY < targetY )
-      stepY = -1;
+    if ( robo_y < target_y )
+      step_y = -1;
 
-    m_TargetPosition = m_pAStar->RemoveTargetFromObstacle( targetX, targetY, stepX, stepY );
+    target_position_ = astar_->remove_target_from_obstacle( target_x, target_y, step_x, step_y );
 
   } else {
-    m_TargetPosition = point_t( targetX, targetY );
+    target_position_ = point_t( target_x, target_y );
   }
 
-  m_pAStar->Solve( m_RoboPosition, m_TargetPosition, m_vPlan );
+  astar_->solve( robo_position_, target_position_, plan_ );
 
-  if (m_vPlan.size() > 0) {
-    m_UpdatedSuccessful = true;
-    m_LocalTarget     = CalculateLocalTarget();
-    m_LocalTarget     = AdjustWaypoint( m_LocalTarget );
-    m_LocalTrajectory = CalculateLocalTrajectoryPoint();
+  if (plan_.size() > 0) {
+    updated_successful_ = true;
+    local_target_     = calculate_local_target();
+    local_target_     = adjust_waypoint( local_target_ );
+    local_trajec_ = calculate_local_trajec_point();
   }
 }
 
@@ -110,27 +110,27 @@ CSearch::Update( int roboX, int roboY, int targetX, int targetY )
  * @return true, if update was successfule.
  */
 bool
-CSearch::UpdatedSuccessful()
+Search::updated_successful()
 {
-  return m_UpdatedSuccessful;
+  return updated_successful_;
 }
 
 /** Get the current plan
  * @return vector containing all the points in the grid along the plan
  */
 std::vector<point_t>*
-CSearch::GetPlan()
+Search::get_plan()
 {
-  return &m_vPlan;
+  return &plan_;
 }
 
 /** Get the robot's position in the grid, used for the plan
  * @return Robot's position in the grid
  */
 point_t
-CSearch::GetRoboPosition()
+Search::get_robot_position()
 {
-  return m_RoboPosition;
+  return robo_position_;
 }
 
 /* **************************************************************************** */
@@ -142,31 +142,31 @@ CSearch::GetRoboPosition()
 
 
 point_t
-CSearch::CalculateLocalTarget()
+Search::calculate_local_target()
 {
-  point_t target = m_RoboPosition;
-  point_t prev   = m_RoboPosition;
+  point_t target = robo_position_;
+  point_t prev   = robo_position_;
 
-  if( m_vPlan.size() >= 2 ) {
-    for ( std::vector<point_t>::iterator it = m_vPlan.begin()+1; it != m_vPlan.end(); ++it ) {
+  if( plan_.size() >= 2 ) {
+    for ( std::vector<point_t>::iterator it = plan_.begin()+1; it != plan_.end(); ++it ) {
       prev = target;
       target = *it;
 
-      if( IsObstacleBetween( m_RoboPosition, target, cfg_search_line_allowed_cost_max ) ) {
+      if( is_obstacle_between( robo_position_, target, cfg_search_line_allowed_cost_max_ ) ) {
         return prev;
       }
     }
-    return point_t( m_vPlan.back() );
+    return point_t( plan_.back() );
 
   } else {
     // return the current position if there is no plan.
-    return m_RoboPosition;
+    return robo_position_;
   }
 }
 
 
 point_t
-CSearch::AdjustWaypoint( const point_t &local_target )
+Search::adjust_waypoint( const point_t &local_target )
 {
   return local_target;
 }
@@ -176,24 +176,24 @@ CSearch::AdjustWaypoint( const point_t &local_target )
 // forward and backward plans should no longer make a difference in
 //   trajectory searching
 point_t
-CSearch::CalculateLocalTrajectoryPoint( )
+Search::calculate_local_trajec_point( )
 {
-  int x = m_RoboPosition.x;
-  int y = m_RoboPosition.y;
+  int x = robo_position_.x;
+  int y = robo_position_.y;
 
   int max_occ = 10;
 
-  if( x < m_LocalTarget.x ) {
+  if( x < local_target_.x ) {
     ++x;
-    while( ( x < (int)m_pOccGrid->getWidth() )
-        && ( x <= m_LocalTarget.x )
-        && (!IsObstacleBetween( point_t(x, y), m_LocalTarget, max_occ ))
-        && (!IsObstacleBetween( m_RoboPosition, point_t(x, y), max_occ ) ) )
+    while( ( x < (int)occ_grid_->get_width() )
+        && ( x <= local_target_.x )
+        && (!is_obstacle_between( point_t(x, y), local_target_, max_occ ))
+        && (!is_obstacle_between( robo_position_, point_t(x, y), max_occ ) ) )
     {
       ++x;
     }
 
-    if ( x == m_LocalTarget.x && y == m_LocalTarget.y )
+    if ( x == local_target_.x && y == local_target_.y )
       return point_t( x, y );
     else
       return point_t( x-1, y );
@@ -201,14 +201,14 @@ CSearch::CalculateLocalTrajectoryPoint( )
   } else {
     --x;
     while( ( x > 0 )
-        && ( x >= (int)m_LocalTarget.x )
-        && (!IsObstacleBetween( point_t(x, y), m_LocalTarget, max_occ ))
-        && (!IsObstacleBetween( m_RoboPosition, point_t(x, y), max_occ ) ) )
+        && ( x >= (int)local_target_.x )
+        && (!is_obstacle_between( point_t(x, y), local_target_, max_occ ))
+        && (!is_obstacle_between( robo_position_, point_t(x, y), max_occ ) ) )
     {
       --x;
     }
 
-    if ( (x == m_LocalTarget.x) && (y == m_LocalTarget.y) )
+    if ( (x == local_target_.x) && (y == local_target_.y) )
       return point_t( x, y );
     else
       return point_t( x+1, y );
@@ -218,7 +218,7 @@ CSearch::CalculateLocalTrajectoryPoint( )
 
 // checks per raytracing, if an obstacle is between two points.
 bool
-CSearch::IsObstacleBetween( const point_t &a, const point_t &b, const int maxcount )
+Search::is_obstacle_between( const point_t &a, const point_t &b, const int maxcount )
 {
   if (a.x == b.x && a.y == b.y)
     return false;
@@ -244,13 +244,13 @@ CSearch::IsObstacleBetween( const point_t &a, const point_t &b, const int maxcou
     _P    = _dPr - dX; // decision variable start value
 
     for ( ; (_actXGrid != endXGrid) && (_actYGrid != endYGrid); _actXGrid += _xDirInt ) {
-      if( _actXGrid < 0 || _actXGrid > m_pOccGrid->getWidth()
-       || _actYGrid < 0 || _actXGrid > m_pOccGrid->getHeight() )
+      if( _actXGrid < 0 || _actXGrid > occ_grid_->get_width()
+       || _actYGrid < 0 || _actXGrid > occ_grid_->get_height() )
       {
         return false;
       }
 
-      prob = m_pOccGrid->getProb( _actXGrid, _actYGrid );
+      prob = occ_grid_->get_prob( _actXGrid, _actYGrid );
 
       if ( prob == cell_costs_.free )
         ;
@@ -263,7 +263,7 @@ CSearch::IsObstacleBetween( const point_t &a, const point_t &b, const int maxcou
       else if ( prob == cell_costs_.near )
         count += 4;
       else
-        logger_->log_warn("AStar_Search", "(line 261) ERROR IN RAYTRACER!");
+        logger_->log_warn("AStar_search", "(line 261) ERROR IN RAYTRACER!");
 
       if ( count > maxcount )
         return true;
@@ -278,13 +278,13 @@ CSearch::IsObstacleBetween( const point_t &a, const point_t &b, const int maxcou
     _P           = _dPr - dY; // decision variable start value
 
     for ( ; (_actXGrid != endXGrid) && (_actYGrid != endYGrid); _actYGrid += _yDirInt ) {
-      if( _actXGrid < 0 || _actXGrid > m_pOccGrid->getWidth()
-       || _actYGrid < 0 || _actXGrid > m_pOccGrid->getHeight() )
+      if( _actXGrid < 0 || _actXGrid > occ_grid_->get_width()
+       || _actYGrid < 0 || _actXGrid > occ_grid_->get_height() )
       {
         return false;
       }
 
-      prob = m_pOccGrid->getProb( _actXGrid, _actYGrid );
+      prob = occ_grid_->get_prob( _actXGrid, _actYGrid );
 
       if ( prob == cell_costs_.free )
         ;
@@ -297,7 +297,7 @@ CSearch::IsObstacleBetween( const point_t &a, const point_t &b, const int maxcou
       else if ( prob == cell_costs_.near )
         count += 4;
       else
-        logger_->log_warn("AStar_Search", "(line 295) ERROR IN RAYTRACER!");
+        logger_->log_warn("AStar_search", "(line 295) ERROR IN RAYTRACER!");
 
       if ( count > maxcount )
         return true;

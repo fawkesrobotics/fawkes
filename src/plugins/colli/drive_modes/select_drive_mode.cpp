@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  *             2014  Tobias Neumann
  ****************************************************************************/
 
@@ -23,7 +23,6 @@
 
 #include "../common/types.h"
 #include "select_drive_mode.h"
-#include "abstract_drive_mode.h"
 
 // INCLUDE HERE YOUR DRIVE MODES!!!
 #include "stop_drive_mode.h"
@@ -37,12 +36,13 @@
 #include "escape_potential_field_omni_drive_mode.h"
 // YOUR CHANGES SHOULD END HERE!!!
 
-#include "../utils/rob/robo_motorcontrol.h"
 #include "../search/og_laser.h"
 
+#include <interfaces/MotorInterface.h>
 #include <interfaces/NavigatorInterface.h>
 #include <logging/logger.h>
 #include <config/config.h>
+#include <utils/math/angle.h>
 
 namespace fawkes
 {
@@ -50,202 +50,199 @@ namespace fawkes
 }
 #endif
 
-/** @class CSelectDriveMode <plugins/colli/drive_modes/select_drive_mode.h>
+/** @class SelectDriveMode <plugins/colli/drive_modes/select_drive_mode.h>
  * This class selects the correct drive mode and calls the appopriate drive component
  */
 
 /** Constructor.
- * @param motor       The motor controller object
+ * @param motor       The motor interface
  * @param target      The "colli target" NavigatorInterface
  * @param logger      The fawkes logger
  * @param config      The fawkes configuration
  * @param escape_mode The chosen escape mode
  */
-CSelectDriveMode::CSelectDriveMode( MotorControl* motor,
-                                    NavigatorInterface* target,
-                                    Logger* logger,
-                                    Configuration* config,
-                                    fawkes::colli_escape_mode_t escape_mode )
+SelectDriveMode::SelectDriveMode( MotorInterface* motor,
+                                  NavigatorInterface* target,
+                                  Logger* logger,
+                                  Configuration* config,
+                                  colli_escape_mode_t escape_mode )
  : logger_( logger ),
    config_( config ),
-   cfg_escape_mode( escape_mode )
+   if_colli_target_( target ),
+   if_motor_( motor ),
+   cfg_escape_mode_( escape_mode ),
+   escape_flag_( 0 ) // no escaping at the beginning
 {
-  logger_->log_debug("CSelectDriveMode", "(Constructor): Entering");
-  m_EscapeFlag   = 0;       // no escaping at the beginning
-  m_pMotor       = motor;
-  m_pColliTarget = target;
-  m_vDriveModeList.clear();
+  logger_->log_debug("SelectDriveMode", "(Constructor): Entering");
+  drive_modes_.clear();
 
   std::string drive_restriction = config->get_string("/plugins/colli/drive_mode/restriction");
 
-  if (        drive_restriction == "omnidirectional" ) {
-    drive_restriction_ = fawkes::colli_drive_restriction_t::omnidirectional;
+  if ( drive_restriction == "omnidirectional" ) {
+    drive_restriction_ = colli_drive_restriction_t::omnidirectional;
   } else if ( drive_restriction == "differential" ) {
-    drive_restriction_ = fawkes::colli_drive_restriction_t::differential;
+    drive_restriction_ = colli_drive_restriction_t::differential;
   } else {
-    drive_restriction_ = fawkes::colli_drive_restriction_t::differential;
-    throw fawkes::Exception("Drive restriction is unknown");
+    throw fawkes::Exception("Drive restriction '%s' is unknown", drive_restriction.c_str());
   }
 
-  logger_->log_debug("CSelectDriveMode", "Creating Drive Mode Objects");
+  logger_->log_debug("SelectDriveMode", "(Constructor): Creating Drive Mode Objects");
 
   // Add generic drive modes
-  m_vDriveModeList.push_back( (CAbstractDriveMode *)new CStopDriveModule(logger_, config_) );
+  drive_modes_.push_back( (AbstractDriveMode *)new StopDriveModule(logger_, config_) );
 
   // Add specific drive modes
-  if (        drive_restriction_ == fawkes::colli_drive_restriction_t::omnidirectional ) {
-    addDriveModesOmnidirectional();
-  } else if ( drive_restriction_ == fawkes::colli_drive_restriction_t::differential ) {
-    addDriveModesDifferential();
+  if ( drive_restriction_ == colli_drive_restriction_t::omnidirectional ) {
+    load_drive_modes_omnidirectional();
   } else {
-    throw fawkes::Exception("Unknown drive restriction, needs to be implemented");
+    load_drive_modes_differential();
   }
 
-  logger_->log_debug("CSelectDriveMode", "(Constructor): Exiting");
+  logger_->log_debug("SelectDriveMode", "(Constructor): Exiting");
 }
 
-CSelectDriveMode::~CSelectDriveMode()
+/** Desctructor. */
+SelectDriveMode::~SelectDriveMode()
 {
-  logger_->log_debug("CSelectDriveMode", "(Destructor): Entering");
-  for ( unsigned int i = 0; i < m_vDriveModeList.size(); i++ )
-    delete m_vDriveModeList[i];
-  logger_->log_debug("CSelectDriveMode", "(Destructor): Exiting");
+  logger_->log_debug("SelectDriveMode", "(Destructor): Entering");
+  for ( unsigned int i = 0; i < drive_modes_.size(); i++ )
+    delete drive_modes_[i];
+  logger_->log_debug("SelectDriveMode", "(Destructor): Exiting");
 }
+
 
 void
-CSelectDriveMode::addDriveModesDifferential()
+SelectDriveMode::load_drive_modes_differential()
 {
   // escape drive mode
-  if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldDriveModule( logger_, config_) );
-  } else if (cfg_escape_mode == fawkes::colli_escape_mode_t::basic) {
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );
+  if (cfg_escape_mode_ == colli_escape_mode_t::potential_field) {
+    drive_modes_.push_back( (AbstractDriveMode *)new EscapePotentialFieldDriveModule( logger_, config_) );
+  } else if (cfg_escape_mode_ == colli_escape_mode_t::basic) {
+    drive_modes_.push_back( (AbstractDriveMode *)new EscapeDriveModule( logger_, config_) );
   } else {
-    logger_->log_error("CSelectDriveMode", "Unknown escape drive mode. Using basic as default");
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );
+    logger_->log_error("SelectDriveMode", "Unknown escape drive mode. Using basic as default");
+    drive_modes_.push_back( (AbstractDriveMode *)new EscapeDriveModule( logger_, config_) );
   }
 
   // forward drive mode (have to remember for biward driving!
-  CForwardDriveModule* forward = new CForwardDriveModule(logger_, config_);
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) forward );
+  ForwardDriveModule* forward = new ForwardDriveModule(logger_, config_);
+  drive_modes_.push_back( (AbstractDriveMode *)forward );
 
   // backward drive mode (have to remember for biward driving!
-  CBackwardDriveModule* backward = new CBackwardDriveModule(logger_, config_);
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) backward );
+  BackwardDriveModule* backward = new BackwardDriveModule(logger_, config_);
+  drive_modes_.push_back( (AbstractDriveMode *)backward );
 
   // biward drive mode (takes both forward and backward drive modes as argument!
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) new CBiwardDriveModule(forward,
-                                                                            backward,
-                                                                            logger_,
-                                                                            config_) );
-
+  drive_modes_.push_back( (AbstractDriveMode *)new BiwardDriveModule(forward, backward, logger_, config_) );
 }
 
 
 void
-CSelectDriveMode::addDriveModesOmnidirectional()
+SelectDriveMode::load_drive_modes_omnidirectional()
 {
   // escape drive mode
-  if (cfg_escape_mode == fawkes::colli_escape_mode_t::potential_field) {
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldOmniDriveModule( logger_, config_) );
-  } else if (cfg_escape_mode == fawkes::colli_escape_mode_t::basic) {
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapeDriveModule( logger_, config_) );                    // This is an differential drive mode
+  if (cfg_escape_mode_ == colli_escape_mode_t::potential_field) {
+    drive_modes_.push_back( (AbstractDriveMode *)new EscapePotentialFieldOmniDriveModule( logger_, config_) );
+  } else if (cfg_escape_mode_ == colli_escape_mode_t::basic) {
+     // CAUTION: This is an differential drive mode!
+    drive_modes_.push_back( (AbstractDriveMode *)new EscapeDriveModule( logger_, config_) );
   } else {
-    logger_->log_error("CSelectDriveMode", "Unknown escape drive mode. Using potential field omni as default");
-    m_vDriveModeList.push_back( (CAbstractDriveMode *)new CEscapePotentialFieldOmniDriveModule( logger_, config_) );
+    logger_->log_error("SelectDriveMode", "Unknown escape drive mode. Using potential field omni as default");
+    drive_modes_.push_back( (AbstractDriveMode *)new EscapePotentialFieldOmniDriveModule( logger_, config_) );
   }
 
-  CForwardOmniDriveModule* forward = new CForwardOmniDriveModule(logger_, config_);
-  m_vDriveModeList.push_back( (CAbstractDriveMode *) forward );
+  ForwardOmniDriveModule* forward = new ForwardOmniDriveModule(logger_, config_);
+  drive_modes_.push_back( (AbstractDriveMode *)forward );
 }
 
+
 /** Set local target point before update!
- * @param localTargetX x-coordinate
- * @param localTargetY y-coordinate
+ * @param x x-coordinate
+ * @param y y-coordinate
  */
 void
-CSelectDriveMode::SetLocalTarget( float localTargetX, float localTargetY )
+SelectDriveMode::set_local_target( float x, float y )
 {
-  m_LocalTargetX = localTargetX;
-  m_LocalTargetY = localTargetY;
+  local_target_.x = x;
+  local_target_.y = y;
 }
 
 /** Set local target trajectory before update!
- * @param localTrajecX x-coordinate
- * @param localTrajecY y-coordinate
+ * @param x x-coordinate
+ * @param y y-coordinate
  */
 void
-CSelectDriveMode::SetLocalTrajec( float localTrajecX, float localTrajecY )
+SelectDriveMode::set_local_trajec( float x, float y )
 {
-  m_LocalTrajecX = localTrajecX;
-  m_LocalTrajecY = localTrajecY;
+  local_trajec_.x = x;
+  local_trajec_.y = y;
 }
 
-/** Returns the proposed x translation which was previously calculated in Update()
+/** Returns the proposed x translation which was previously calculated in update()
  * @return The proposed translation
  */
 float
-CSelectDriveMode::GetProposedTranslationX()
+SelectDriveMode::get_proposed_trans_x()
 {
-  return m_ProposedTranslationX;
+  return proposed_.x;
 }
 
-/** Returns the proposed y translation which was previously calculated in Update()
+/** Returns the proposed y translation which was previously calculated in update()
  * @return The proposed translation
  */
 float
-CSelectDriveMode::GetProposedTranslationY()
+SelectDriveMode::get_proposed_trans_y()
 {
-  return m_ProposedTranslationY;
+  return proposed_.y;
 }
 
-/** Returns the proposed rotation which was previously calculated in Update()
+/** Returns the proposed rotation which was previously calculated in update()
  * @return The proposed rotation
  */
 float
-CSelectDriveMode::GetProposedRotation()
+SelectDriveMode::get_proposed_rot()
 {
-  return m_ProposedRotation;
+  return proposed_.rot;
 }
 
 /**
- * Search for the escape drive mode and hands over the given information to the escape drive mode
+ * search for the escape drive mode and hands over the given information to the escape drive mode
  * This should just be called if potential-field-escape mode is used!
- * @param occGrid pointer to the occGrid
- * @param roboX   robot position on the grid in x
- * @param roboY   robot position on the grid in y
+ * @param occ_grid pointer to the occ_grid
+ * @param robo_x   robot position on the grid in x
+ * @param robo_y   robot position on the grid in y
  */
 void
-CSelectDriveMode::setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, int roboY )
+SelectDriveMode::set_grid_information( LaserOccupancyGrid* occ_grid, int robo_x, int robo_y )
 {
-  for ( unsigned int i = 0; i < m_vDriveModeList.size(); i++ ) {
+  for ( unsigned int i = 0; i < drive_modes_.size(); i++ ) {
     // drive mode checking
-    if ( m_vDriveModeList[i]->GetDriveModeName() == NavigatorInterface::ESCAPE ) {
-      ((CEscapePotentialFieldDriveModule*)m_vDriveModeList[i])->setGridInformation( occGrid, roboX, roboY );
+    if ( drive_modes_[i]->get_drive_mode_name() == NavigatorInterface::ESCAPE ) {
+      ((EscapePotentialFieldDriveModule*)drive_modes_[i])->set_grid_information( occ_grid, robo_x, robo_y );
 
       return;
     }
   }
-  logger_->log_error("CSelectDriveMode", "Can't find escape drive mode to set grid information");
+  logger_->log_error("SelectDriveMode", "Can't find escape drive mode to set grid information");
 }
 
 /**
- * Search for the escape drive mode and hands over the given information to the escape drive mode
+ * search for the escape drive mode and hands over the given information to the escape drive mode
  * This should just be called if basic-escape mode is used!
  * @param laser_points vector of laser points
  */
 void
-CSelectDriveMode::setLaserData( std::vector<fawkes::polar_coord_2d_t>& laser_points )
+SelectDriveMode::set_laser_data( std::vector<polar_coord_2d_t>& laser_points )
 {
-  for ( unsigned int i = 0; i < m_vDriveModeList.size(); i++ ) {
-      // drive mode checking
-      if ( m_vDriveModeList[i]->GetDriveModeName() == NavigatorInterface::ESCAPE ) {
-        ((CEscapeDriveModule*)m_vDriveModeList[i])->setLaserData( laser_points );
+  for ( unsigned int i = 0; i < drive_modes_.size(); i++ ) {
+    // drive mode checking
+    if ( drive_modes_[i]->get_drive_mode_name() == NavigatorInterface::ESCAPE ) {
+      ((EscapeDriveModule*)drive_modes_[i])->set_laser_data( laser_points );
 
-        return;
-      }
+      return;
     }
-    logger_->log_error("CSelectDriveMode", "Can't find escape drive mode to set laser information");
+  }
+  logger_->log_error("SelectDriveMode", "Can't find escape drive mode to set laser information");
 }
 
 /* ****************************************************************************** */
@@ -255,116 +252,111 @@ CSelectDriveMode::setLaserData( std::vector<fawkes::polar_coord_2d_t>& laser_poi
 /* ****************************************************************************** */
 
 /** Pick the drive-mode that should be used and calculate the proposed translation
- * and rotation for the current target (which is set by SetLocalTarget() and
- * SetLocalTrajec(), so make sure to call them beforehand).
- * Update() has to be called before the proposed values are fetched.
+ * and rotation for the current target (which is set by set_local_target() and
+ * set_local_trajec(), so make sure to call them beforehand).
+ * update() has to be called before the proposed values are fetched.
  * @param escape Set to true if we want to enter escape-mode
  */
 void
-CSelectDriveMode::Update( bool escape )
+SelectDriveMode::update( bool escape )
 {
-  CAbstractDriveMode * m_pDriveMode = 0;
-  m_ProposedTranslationX  = 0.;
-  m_ProposedTranslationY  = 0.;
-  m_ProposedRotation      = 0.;
+  AbstractDriveMode * drive_mode = NULL;
+  proposed_.x = proposed_.y = proposed_.rot = 0.f;
 
   // choose the correct drive mode!
-  NavigatorInterface::DriveMode desiredMode = NavigatorInterface::MovingNotAllowed;
+  NavigatorInterface::DriveMode desired_mode = NavigatorInterface::MovingNotAllowed;
   if ( escape == true ) {
-    if( m_EscapeFlag == 0
-     && m_pMotor->GetMotorDesiredTranslationX() != 0
-     && m_pMotor->GetMotorDesiredTranslationY() != 0
-     && m_pMotor->GetMotorDesiredRotation() != 0 ) {
-      desiredMode = NavigatorInterface::MovingNotAllowed;
+    if( escape_flag_ == 0
+     && if_motor_->des_vx() != 0.f
+     && if_motor_->des_vx() != 0.f
+     && if_motor_->des_omega() != 0.f ) {
+      desired_mode = NavigatorInterface::MovingNotAllowed;
       // we have not yet stopped!
 
     } else {
       // we have stopped recently, so do escape!
-      m_EscapeFlag = 1;
-      desiredMode = NavigatorInterface::ESCAPE;
+      escape_flag_ = 1;
+      desired_mode = NavigatorInterface::ESCAPE;
     }
 
   } else {
-    m_EscapeFlag = 0;
-    desiredMode  = m_pColliTarget->drive_mode();
+    escape_flag_ = 0;
+    desired_mode  = if_colli_target_->drive_mode();
   }
 
   // now search this specific drive mode in the list
-  for ( unsigned int i = 0; i < m_vDriveModeList.size(); i++ ) {
+  for ( unsigned int i = 0; i < drive_modes_.size(); i++ ) {
     // error checking
-    if ( m_vDriveModeList[i]->GetDriveModeName() == desiredMode
-     &&  m_pDriveMode != 0 ) {
-      logger_->log_error("CSelectDriveMode", "Error while selecting drive mode. There is more than one mode with the same name!!! Stopping!");
-      m_pDriveMode = 0;
+    if ( drive_modes_[i]->get_drive_mode_name() == desired_mode
+     &&  drive_mode != 0 ) {
+      logger_->log_error("SelectDriveMode", "Error while selecting drive mode. There is more than one mode with the same name!!! Stopping!");
+      drive_mode = 0;
       break;
     }
 
     // drive mode checking
-    if ( m_vDriveModeList[i]->GetDriveModeName() == desiredMode
-     &&  m_pDriveMode == 0 ) {
-      m_pDriveMode = m_vDriveModeList[i];
+    if ( drive_modes_[i]->get_drive_mode_name() == desired_mode
+     &&  drive_mode == 0 ) {
+      drive_mode = drive_modes_[i];
     }
   }
 
 
-  if ( m_pDriveMode == 0 ) {
+  if ( drive_mode == 0 ) {
     // invalid pointer
-    logger_->log_error("CSelectDriveMode", "INVALID DRIVE MODE POINTER, stopping!");
-    m_ProposedTranslationX  = 0.;
-    m_ProposedTranslationY  = 0.;
-    m_ProposedRotation      = 0.;
+    logger_->log_error("SelectDriveMode", "INVALID DRIVE MODE POINTER, stopping!");
+    proposed_.x = proposed_.y = proposed_.rot = 0.f;
 
   } else {
     // valid drive mode!
     // set the values for the drive mode
-    m_pDriveMode->SetCurrentRoboPos( m_pMotor->GetCurrentX(),
-                                     m_pMotor->GetCurrentY(),
-                                     m_pMotor->GetCurrentOri() );
+    drive_mode->set_current_robo_pos( if_motor_->odometry_position_x(),
+                                      if_motor_->odometry_position_y(),
+                                      normalize_mirror_rad(if_motor_->odometry_orientation()) );
 
-    m_pDriveMode->SetCurrentRoboSpeed( m_pMotor->GetMotorCurrentTranslation(),
-                                       m_pMotor->GetMotorCurrentTranslationX(),
-                                       m_pMotor->GetMotorCurrentTranslationY(),
-                                       m_pMotor->GetMotorCurrentRotation() );
+    drive_mode->set_current_robo_speed( if_motor_->vx(),
+                                        if_motor_->vy(),
+                                        if_motor_->omega() );
 
-    m_pDriveMode->SetCurrentTarget( m_pColliTarget->dest_x(),
-                                    m_pColliTarget->dest_y(),
-                                    m_pColliTarget->dest_ori() );
+    drive_mode->set_current_target( if_colli_target_->dest_x(),
+                                    if_colli_target_->dest_y(),
+                                    if_colli_target_->dest_ori() );
 
-    m_pDriveMode->SetLocalTarget( m_LocalTargetX, m_LocalTargetY );
-    m_pDriveMode->SetLocalTrajec( m_LocalTrajecX, m_LocalTrajecY );
-    m_pDriveMode->SetCurrentColliMode( m_pColliTarget->orientation_mode(), m_pColliTarget->is_stop_at_target() );
+    drive_mode->set_local_target( local_target_.x, local_target_.y );
+    drive_mode->set_local_trajec( local_trajec_.x, local_trajec_.y );
+    drive_mode->set_current_colli_mode( if_colli_target_->orientation_mode(), if_colli_target_->is_stop_at_target() );
 
     // update the drive mode
-    m_pDriveMode->Update();
+    drive_mode->update();
 
     // get the values from the drive mode
-    m_ProposedTranslationX  = m_pDriveMode->GetProposedTranslationX();
-    m_ProposedTranslationY  = m_pDriveMode->GetProposedTranslationY();
-    m_ProposedRotation      = m_pDriveMode->GetProposedRotation();
+    proposed_.x   = drive_mode->get_proposed_trans_x();
+    proposed_.y   = drive_mode->get_proposed_trans_y();
+    proposed_.rot = drive_mode->get_proposed_rot();
 
     // recheck with targetobj maximum settings
-    if( (m_pColliTarget->max_velocity() != 0.0)
-     && (fabs( m_ProposedTranslationX ) > fabs( m_pColliTarget->max_velocity() )) ) {
-      if ( m_ProposedTranslationX > 0.0 )
-        m_ProposedTranslationX = m_pColliTarget->max_velocity();
+    if( (if_colli_target_->max_velocity() != 0.0)
+     && (fabs( proposed_.x ) > fabs( if_colli_target_->max_velocity() )) ) {
+      if ( proposed_.x > 0.0 )
+        proposed_.x = if_colli_target_->max_velocity();
       else
-        m_ProposedTranslationX = -m_pColliTarget->max_velocity();
+        proposed_.x = -if_colli_target_->max_velocity();
     }
 
-    if( (m_pColliTarget->max_velocity() != 0.0)
-     && (fabs( m_ProposedTranslationY ) > fabs( m_pColliTarget->max_velocity() )) ) {
-      if ( m_ProposedTranslationY > 0.0 )
-        m_ProposedTranslationY = m_pColliTarget->max_velocity();
+    if( (if_colli_target_->max_velocity() != 0.0)
+     && (fabs( proposed_.y ) > fabs( if_colli_target_->max_velocity() )) ) {
+      if ( proposed_.y > 0.0 )
+        proposed_.y = if_colli_target_->max_velocity();
       else
-        m_ProposedTranslationY = -m_pColliTarget->max_velocity();
+        proposed_.y = -if_colli_target_->max_velocity();
     }
 
-    if( ( m_pColliTarget->max_rotation() != 0.0 )
-     && (fabs( m_ProposedRotation ) > fabs( m_pColliTarget->max_rotation() )) ) {
-      if ( m_ProposedRotation > 0.0 )
-        m_ProposedRotation = m_pColliTarget->max_rotation();
+    if( ( if_colli_target_->max_rotation() != 0.0 )
+     && (fabs( proposed_.rot ) > fabs( if_colli_target_->max_rotation() )) ) {
+      if ( proposed_.rot > 0.0 )
+        proposed_.rot = if_colli_target_->max_rotation();
       else
-        m_ProposedRotation = -m_pColliTarget->max_rotation();
+        proposed_.rot = -if_colli_target_->max_rotation();
     }
 
   }

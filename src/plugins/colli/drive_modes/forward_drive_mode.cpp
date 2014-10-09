@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ namespace fawkes
 }
 #endif
 
-/** @class CForwardDriveModule <plugins/colli/drive_modes/forward_drive_mode.h>
+/** @class ForwardDriveModule <plugins/colli/drive_modes/forward_drive_mode.h>
  * This is the Forward drive-module, for forward only movements.
  */
 
@@ -37,28 +37,26 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CForwardDriveModule::CForwardDriveModule(Logger* logger, Configuration* config)
- : CAbstractDriveMode(logger, config)
+ForwardDriveModule::ForwardDriveModule(Logger* logger, Configuration* config)
+ : AbstractDriveMode(logger, config)
 {
-  logger_->log_debug("CForwardDriveModule", "(Constructor): Entering...");
-  m_DriveModeName = NavigatorInterface::Forward;
+  logger_->log_debug("ForwardDriveModule", "(Constructor): Entering...");
+  drive_mode_ = NavigatorInterface::Forward;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
+  max_trans_ = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
+  max_rot_    = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
 
-  logger_->log_debug("CForwardDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("ForwardDriveModule", "(Constructor): Exiting...");
 }
 
 
-/** Destruct your local values here.
- */
-CForwardDriveModule::~CForwardDriveModule()
+/** Destructor. Destruct your local values here. */
+ForwardDriveModule::~ForwardDriveModule()
 {
-  logger_->log_debug("CForwardDriveModule", "(Destructor): Entering...");
-  m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_debug("CForwardDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("ForwardDriveModule", "(Destructor): Entering...");
+  drive_mode_ = NavigatorInterface::MovingNotAllowed;
+  logger_->log_debug("ForwardDriveModule", "(Destructor): Exiting...");
 }
-
 
 
 /** Calculate by given variables a new rotation to give for the motor to minimize curvature.
@@ -77,12 +75,11 @@ CForwardDriveModule::~CForwardDriveModule()
  *  @return A desired rotation.
  */
 float
-CForwardDriveModule::Forward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-                                                float cur_trans, float cur_rot )
+ForwardDriveModule::forward_curvature( float dist_to_target, float dist_to_trajec, float alpha,
+                                       float cur_trans, float cur_rot )
 {
-  return 1.2*alpha;
+  return 1.2f*alpha;
 }
-
 
 
 /** Calculate by given variables a new translation to give for the motor to
@@ -95,20 +92,20 @@ CForwardDriveModule::Forward_Curvature( float dist_to_target, float dist_to_traj
  *  @return A desired translation.
  */
 float
-CForwardDriveModule::Forward_Translation( float dist_to_target, float dist_to_front, float alpha,
-                                                  float cur_trans, float cur_rot, float des_rot )
+ForwardDriveModule::forward_translation( float dist_to_target, float dist_to_front, float alpha,
+                                         float cur_trans, float cur_rot, float des_rot )
 {
   if( fabs(alpha) >= M_PI_2 ) {
     // target is more than +-90° away. Turn without driving first
     return 0.f;
   }
 
-  float des_trans = 0.0;
+  float des_trans = 0.f;
   /*
   if ( fabs( des_rot ) >= 0.0 && fabs( des_rot ) <= 1.0 )
-    des_trans = LinInterpol( fabs( des_rot ), 1.0, 0.0, 0.7, m_MaxTranslation+0.1 );
+    des_trans = lin_interpol( fabs( des_rot ), 1.0, 0.0, 0.7, max_trans_+0.1 );
   else if ( fabs( des_rot ) > 1.0 )
-    des_trans = LinInterpol( fabs( des_rot ), M_PI, 1.0, 0.0, 0.7 );
+    des_trans = lin_interpol( fabs( des_rot ), M_PI, 1.0, 0.0, 0.7 );
   */
   /* We only translate if the target is in angle of +-90° (checked above!)
    * With this interpolation: The higher the rotation, the lower the translation.
@@ -116,13 +113,13 @@ CForwardDriveModule::Forward_Translation( float dist_to_target, float dist_to_fr
    * lies ahead, i.e. rotation is low, we can drive faster. If the rotation needs
    * to be high to reach the target, we assume that it is better to drive slower.
    */
-  des_trans = LinInterpol( fabs(des_rot), 0.f, M_PI_2, m_MaxTranslation, 0.0);
+  des_trans = lin_interpol( fabs(des_rot), 0.f, M_PI_2, max_trans_, 0.f);
 
   // OLD STUFF!!!
   //   // check stopping on target and compare distances with choosen velocities
   //   if ( fabs( dist_to_target - dist_to_front ) < 0.2 )
   //     {
-  //       if (m_StopAtTarget == true)
+  //       if (stop_at_target_ == true)
   //  des_trans = min( des_trans, dist_to_target*1.5 );
   //       else
   //  ;  // do not stop, so drive behind the target with full power
@@ -135,24 +132,21 @@ CForwardDriveModule::Forward_Translation( float dist_to_target, float dist_to_fr
 
 
   // NEW STUFF
-  float trans_target = 10000.0;
-  float trans_front  = 10000.0;
+  float trans_target = 10000.f;
+  float trans_front  = 10000.f;
 
-  if ( m_StopAtTarget == true )
-    trans_target = GuaranteeTransStop( dist_to_target, cur_trans, des_trans );
+  if ( stop_at_target_ == true )
+    trans_target = guarantee_trans_stop( dist_to_target, cur_trans, des_trans );
 
   // And the next collision point
   if ( dist_to_front > 0.f && dist_to_front < dist_to_target )
-    trans_front = GuaranteeTransStop( dist_to_front, cur_trans, des_trans );
+    trans_front = guarantee_trans_stop( dist_to_front, cur_trans, des_trans );
   // NEW STUFF END HERE
 
   des_trans = std::min( des_trans, std::min( trans_target, trans_front ) );
 
   return des_trans;
 }
-
-
-
 
 
 /* ************************************************************************** */
@@ -166,67 +160,59 @@ CForwardDriveModule::Forward_Translation( float dist_to_target, float dist_to_fr
  *
  *  Available are:
  *
- *     m_TargetX, m_TargetY, m_TargetOri  --> current Target to drive to
- *     m_RoboX, m_RoboY, m_RoboOri        --> current Robot coordinates
- *     m_RoboTrans, m_RoboRot             --> current Motor values
+ *     target_     --> current target coordinates to drive to
+ *     robot_      --> current robot coordinates
+ *     robot_vel_  --> current Motor velocities
  *
- *     m_LocalTargetX, m_LocalTargetY     --> our local target found by the search component we want to reach
- *     m_LocalTrajecX, m_LocalTrajecY     --> The point we would collide with, if we would drive WITHOUT Rotation
+ *     local_target_      --> our local target found by the search component we want to reach
+ *     local_trajec_      --> The point we would collide with, if we would drive WITHOUT Rotation
  *
- *     m_OrientAtTarget                   --> Do we have to orient ourself at the target?
- *     m_StopAtTarget                     --> Do we have to stop really ON the target?
+ *     orient_at_target_  --> Do we have to orient ourself at the target?
+ *     stop_at_target_    --> Do we have to stop really ON the target?
  *
  *  Afterwards filled should be:
  *
- *     m_ProposedTranslation              --> Desired Translation speed
- *     m_ProposedRotation                 --> Desired Rotation speed
+ *     proposed_          --> Desired translation and rotation speed
  *
- *  Those values are questioned after an Update() was called.
+ *  Those values are questioned after an update() was called.
  */
 void
-CForwardDriveModule::Update()
+ForwardDriveModule::update()
 {
-  m_ProposedTranslationX = 0.;
-  m_ProposedTranslationY = 0.;
-  m_ProposedRotation     = 0.;
+  proposed_.x = proposed_.y = proposed_.rot = 0.f;
 
-  float dist_to_target = sqrt( sqr(m_LocalTargetX) + sqr(m_LocalTargetY) );
-  float alpha          = atan2( m_LocalTargetY, m_LocalTargetX );
-  float dist_to_trajec = sqrt( sqr(m_LocalTrajecX) + sqr(m_LocalTrajecY) );
-
+  float dist_to_target = sqrt( sqr(local_target_.x) + sqr(local_target_.y) );
+  float alpha          = atan2( local_target_.y, local_target_.x );
+  float dist_to_trajec = sqrt( sqr(local_trajec_.x) + sqr(local_trajec_.y) );
 
   // last time border check............. IMPORTANT!!!
   // because the motorinstructor just tests robots physical borders.
-  if ( dist_to_target < 0.04 ) {
-    m_ProposedTranslationX = 0.0;
-    m_ProposedRotation    = 0.0;
-
-  } else {
+  if ( dist_to_target >= 0.04 ) {
     // Calculate ideal rotation and translation
-    m_ProposedRotation = Forward_Curvature( dist_to_target, dist_to_trajec, alpha,
-                                                m_RoboTrans, m_RoboRot );
+    proposed_.rot = forward_curvature( dist_to_target, dist_to_trajec, alpha,
+                                                robot_speed_, robot_vel_.rot );
 
-    m_ProposedTranslationX = Forward_Translation( dist_to_target, dist_to_trajec, alpha,
-                                                     m_RoboTrans, m_RoboRot, m_ProposedRotation );
+    proposed_.x = forward_translation( dist_to_target, dist_to_trajec, alpha,
+                                                     robot_speed_, robot_vel_.rot, proposed_.rot );
 
     // Track relation between proposed-rotation and max-rotation. Use this to adjust the
     // proposed-translation. Only required if the value is smaller than 1, otherwise we are not
     // reducing the proposed-rotation, because it is smaller than max-rotaion
-    float trans_correction = fabs( m_MaxRotation / m_ProposedRotation );
+    float trans_correction = fabs( max_rot_ / proposed_.rot );
     if( trans_correction < 1.f ) {
       // for now we simply reduce the translation quadratically to how much the rotation has been reduced
-      m_ProposedTranslationX *= trans_correction * trans_correction;
+      proposed_.x *= trans_correction * trans_correction;
     }
 
     // Check rotation limits.
     // Remember, possible reduction of rotation has been considered already (trans_correction)
-    if (m_ProposedRotation >  m_MaxRotation)
-      m_ProposedRotation =  m_MaxRotation;
-    else if (m_ProposedRotation < -m_MaxRotation)
-      m_ProposedRotation = -m_MaxRotation;
+    if (proposed_.rot >  max_rot_)
+      proposed_.rot =  max_rot_;
+    else if (proposed_.rot < -max_rot_)
+      proposed_.rot = -max_rot_;
 
     // Check translation limits
-    m_ProposedTranslationX = std::max( 0.f, std::min (m_ProposedTranslationX, m_MaxTranslation) );
+    proposed_.x = std::max( 0.f, std::min (proposed_.x, max_trans_) );
     // maybe consider adjusting rotation again, in case we had to reduce the translation
   }
 }

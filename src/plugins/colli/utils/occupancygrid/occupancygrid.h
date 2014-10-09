@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  AllemaniACs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -34,63 +34,61 @@ namespace fawkes
 #endif
 
 /** Occupancy threshold. */
-const float OCCUPANCY_THRESHOLD = 0.45;
+const float OCCUPANCY_THRESHOLD = 0.45f;
 
 class OccupancyGrid
 {
  public:
-
   OccupancyGrid(int width, int height, int cell_width=5, int cell_height=5);
   virtual ~OccupancyGrid();
 
   ///\brief Get the cell width (in cm)
-  int getCellWidth();
+  int get_cell_width();
 
    ///\brief Get the cell height (in cm)
-  int getCellHeight();
+  int get_cell_height();
 
   ///\brief Get the width of the grid
-  int getWidth();
+  int get_width();
 
   ///\brief Get the height of the grid
-  int getHeight();
+  int get_height();
 
   ///\brief Resets the cell width (in cm)
-  void setCellWidth(int cell_width);
+  void set_cell_width(int cell_width);
 
   ///\brief Resets the cell height (in cm)
-  void setCellHeight(int cell_height);
+  void set_cell_height(int cell_height);
 
   ///\brief Resets the width of the grid and constructs a new empty grid
-  void setWidth(int width);
+  void set_width(int width);
 
   ///\brief Resets the height of the grid and constructs a new empty grid
-  void setHeight(int height);
+  void set_height(int height);
 
   ///\brief Reset the occupancy probability of a cell
-  virtual void setProb(int x, int y, Probability prob);
+  virtual void set_prob(int x, int y, Probability prob);
 
   ///\brief Resets all occupancy probabilities
   void fill(Probability prob);
 
   ///\brief Get the occupancy probability of a cell
-  Probability getProb(int x, int y);
+  Probability get_prob(int x, int y);
 
   ///\brief Get the occupancy probability of a cell
   Probability& operator () (const int x, const int y);
 
   ///\brief Init a new empty grid with the predefined parameters */
-  void initGrid();
+  void init_grid();
 
   /// The occupancy probability of the cells in a 2D array
-  std::vector<std::vector<Probability> > m_OccupancyProb;
-
+  std::vector<std::vector<Probability> > occupancy_probs_;
 
  protected:
-  int m_CellWidth;   /**< Cell width in cm */
-  int m_CellHeight;  /**< Cell height in cm */
-  int m_Width;       /**< Width of the grid in # cells */
-  int m_Height;      /**< Height of the grid in # cells */
+  int cell_width_;   /**< Cell width in cm */
+  int cell_height_;  /**< Cell height in cm */
+  int width_;       /**< Width of the grid in # cells */
+  int height_;      /**< Height of the grid in # cells */
 
 };
 

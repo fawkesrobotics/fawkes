@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,8 +24,6 @@
 #define __PLUGINS_COLLI_BIWARD_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
-#include "forward_drive_mode.h"
-#include "backward_drive_mode.h"
 
 namespace fawkes
 {
@@ -33,29 +31,25 @@ namespace fawkes
 }
 #endif
 
-class CBiwardDriveModule : public CAbstractDriveMode
+class ForwardDriveModule;
+class BackwardDriveModule;
+
+class BiwardDriveModule : public AbstractDriveMode
 {
  public:
+  BiwardDriveModule( ForwardDriveModule*  forward,
+                     BackwardDriveModule* backward,
+                     Logger* logger,
+                     Configuration* config);
+  ~BiwardDriveModule();
 
-  CBiwardDriveModule( CForwardDriveModule*  forward,
-                          CBackwardDriveModule* backward,
-                          Logger* logger,
-                          Configuration* config);
-  ~CBiwardDriveModule();
-
-  void Update();
-
+  void update();
 
  private:
+  ForwardDriveModule*  mod_forward_;
+  BackwardDriveModule* mod_backward_;
 
-  CForwardDriveModule*  m_pForwardDriveModule;
-  CBackwardDriveModule* m_pBackwardDriveModule;
-
-  float m_MaxTranslation, m_MaxRotation;
-
-
-  int   m_CountForward;
-
+  int   count_forward_;
 };
 
 } // namespace fawkes

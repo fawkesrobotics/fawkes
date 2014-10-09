@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -31,25 +31,20 @@ namespace fawkes
 }
 #endif
 
-class CBackwardDriveModule : public CAbstractDriveMode
+class BackwardDriveModule : public AbstractDriveMode
 {
  public:
+  BackwardDriveModule(Logger* logger, Configuration* config);
+  ~BackwardDriveModule();
 
-  CBackwardDriveModule(Logger* logger, Configuration* config);
-  ~CBackwardDriveModule();
-
-  void Update();
-
+  void update();
 
  private:
+  float backward_curvature( float dist_to_target, float dist_to_trajec, float alpha,
+                            float cur_trans, float cur_rot );
 
-  float Backward_Translation ( float dist_to_target, float dist_to_front, float alpha,
-           float trans_0, float rot_0, float rot_1 );
-
-  float Backward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-        float trans_0, float rot_0 );
-
-  float m_MaxTranslation, m_MaxRotation;
+  float backward_translation( float dist_to_target, float dist_to_front, float alpha,
+                              float cur_trans, float cur_rot, float des_rot );
 
 };
 

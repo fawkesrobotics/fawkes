@@ -105,7 +105,7 @@ ColliActThread::init()
 #ifdef HAVE_ROS
   std::string ros_target_topic = config->get_string((cfg_prefix + "ros/target_topic").c_str());
   sub_ = new ros::Subscriber();
-  *sub_ = rosnode->subscribe(ros_target_topic.c_str(), 1, &ColliActThread::callbackSimpleGoal, this);
+  *sub_ = rosnode->subscribe(ros_target_topic.c_str(), 1, &ColliActThread::callback_simple_goal, this);
 #endif
 
   if_navi_->set_max_velocity(cfg_max_velocity_);
@@ -236,13 +236,6 @@ ColliActThread::loop()
 
       thread_colli_->colli_relgoto(msg->x(), msg->y(), msg->orientation(), if_navi_);
 
-      //~ __colli_cmd_sent = true;
-
-      //~ if (__pathplan_mode != PP_GOTO_NONE) {
-        //~ m_pMonaco->pathplan_release_colli_control();
-        //~ __pathplan_mode = PP_GOTO_NONE;
-      //~ }
-
     } else if( motion_msg->is_of_type<NavigatorInterface::PolarGotoMessage>() ) {
       NavigatorInterface::PolarGotoMessage* msg = dynamic_cast<NavigatorInterface::PolarGotoMessage*>(motion_msg);
       logger->log_debug(name(), "PolarGotoMessage received, phi:%f  dist:%f", msg->phi(), msg->dist());
@@ -259,13 +252,6 @@ ColliActThread::loop()
       if_navi_->set_final(false);
 
       thread_colli_->colli_relgoto(cart_x, cart_y, msg->orientation(), if_navi_);
-
-      //~ __colli_cmd_sent = true;
-
-      //~ if (__pathplan_mode != PP_GOTO_NONE) {
-        //~ m_pMonaco->pathplan_release_colli_control();
-        //~ __pathplan_mode = PP_GOTO_NONE;
-      //~ }
     }
 
     motion_msg->unref();
@@ -296,7 +282,7 @@ ColliActThread::colli_final()
 
 #ifdef HAVE_ROS
 void
-ColliActThread::callbackSimpleGoal(const geometry_msgs::PoseStamped::ConstPtr& msg)
+ColliActThread::callback_simple_goal(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
   //calculate transform
   std::string from = msg->header.frame_id;  //maybe get this as well from the config ?? Should both be /map anyways

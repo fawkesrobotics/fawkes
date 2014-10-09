@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,8 @@
  */
 
 #include "biward_drive_mode.h"
+#include "forward_drive_mode.h"
+#include "backward_drive_mode.h"
 
 namespace fawkes
 {
@@ -28,7 +30,7 @@ namespace fawkes
 }
 #endif
 
-/** @class CBiwardDriveModule <plugins/colli/drive_modes/biward_drive_mode.h>
+/** @class BiwardDriveModule <plugins/colli/drive_modes/biward_drive_mode.h>
  * This is the SlowBiward drive-module. It is inherited from  the abstract drive mode
  * and uses the other both modes.  If the target is in front, it drives forward
  * to the target, else it drives backward to the target.
@@ -40,35 +42,33 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CBiwardDriveModule::CBiwardDriveModule( CForwardDriveModule*  forward,
-                                                CBackwardDriveModule* backward,
-                                                Logger* logger,
-                                                Configuration* config )
- : CAbstractDriveMode(logger, config)
+BiwardDriveModule::BiwardDriveModule( ForwardDriveModule*  forward,
+                                      BackwardDriveModule* backward,
+                                      Logger* logger,
+                                      Configuration* config )
+ : AbstractDriveMode(logger, config)
 {
-  logger_->log_debug("CBiwardDriveModule", "(Constructor): Entering...");
-  m_DriveModeName = NavigatorInterface::AllowBackward;
-  m_pForwardDriveModule  = forward;
-  m_pBackwardDriveModule = backward;
+  logger_->log_debug("BiwardDriveModule", "(Constructor): Entering...");
+  drive_mode_ = NavigatorInterface::AllowBackward;
+  mod_forward_  = forward;
+  mod_backward_ = backward;
 
-  m_CountForward = 1;
+  count_forward_ = 1;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
+  max_trans_ = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
+  max_rot_    = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
 
-  logger_->log_debug("CBiwardDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("BiwardDriveModule", "(Constructor): Exiting...");
 }
 
 
 /** Destruct your local values here.
  */
-CBiwardDriveModule::~CBiwardDriveModule()
+BiwardDriveModule::~BiwardDriveModule()
 {
-  logger_->log_debug("CBiwardDriveModule", "(Destructor): Entering...");
-  logger_->log_debug("CBiwardDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("BiwardDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("BiwardDriveModule", "(Destructor): Exiting...");
 }
-
-
 
 
 /* ************************************************************************** */
@@ -82,73 +82,70 @@ CBiwardDriveModule::~CBiwardDriveModule()
  *
  *  Available are:
  *
- *     m_TargetX, m_TargetY, m_TargetOri  --> current Target to drive to
- *     m_RoboX, m_RoboY, m_RoboOri        --> current Robot coordinates
- *     m_RoboTrans, m_RoboRot             --> current Motor values
+ *     target_     --> current target coordinates to drive to
+ *     robot_      --> current robot coordinates
+ *     robot_vel_  --> current Motor velocities
  *
- *     m_LocalTargetX, m_LocalTargetY     --> our local target found by the search component we want to reach
- *     m_LocalTrajecX, m_LocalTrajecY     --> The point we would collide with, if we would drive WITHOUT Rotation
+ *     local_target_      --> our local target found by the search component we want to reach
+ *     local_trajec_      --> The point we would collide with, if we would drive WITHOUT Rotation
  *
- *     m_OrientAtTarget                   --> Do we have to orient ourself at the target?
- *     m_StopAtTarget                     --> Do we have to stop really ON the target?
+ *     orient_at_target_  --> Do we have to orient ourself at the target?
+ *     stop_at_target_    --> Do we have to stop really ON the target?
  *
  *  Afterwards filled should be:
  *
- *     m_ProposedTranslation              --> Desired Translation speed
- *     m_ProposedRotation                 --> Desired Rotation speed
+ *     proposed_          --> Desired translation and rotation speed
  *
- *  Those values are questioned after an Update() was called.
+ *  Those values are questioned after an update() was called.
  */
 void
-CBiwardDriveModule::Update()
+BiwardDriveModule::update()
 {
   // Just to take care.
-  m_ProposedTranslationX = 0.;
-  m_ProposedTranslationY = 0.;
-  m_ProposedRotation     = 0.;
+  proposed_.x = proposed_.y = proposed_.rot = 0.f;
 
   // Our drive mode (choose between forward and backward)
-  CAbstractDriveMode * driveMode = 0;
+  AbstractDriveMode * drive_mode = NULL;
 
-  // Search the correct drive mode
-  float angle_to_target = atan2( m_LocalTargetY, m_LocalTargetX );
+  // search the correct drive mode
+  float angle_to_target = atan2( local_target_.y, local_target_.x );
 
-  if ( m_CountForward == 1 && fabs( angle_to_target ) > M_PI_2+0.1 )
-    m_CountForward = -1;
+  if ( count_forward_ == 1 && fabs( angle_to_target ) > M_PI_2+0.1 )
+    count_forward_ = -1;
 
-  else if ( m_CountForward == 1 )
-    m_CountForward = 1;
+  else if ( count_forward_ == 1 )
+    count_forward_ = 1;
 
-  else if ( m_CountForward == -1 && fabs( angle_to_target ) < M_PI_2-0.1 )
-    m_CountForward = 1;
+  else if ( count_forward_ == -1 && fabs( angle_to_target ) < M_PI_2-0.1 )
+    count_forward_ = 1;
 
-  else if ( m_CountForward == -1 )
-    m_CountForward = -1;
+  else if ( count_forward_ == -1 )
+    count_forward_ = -1;
 
   else {
-    logger_->log_debug("CBiwardDriveModule", "Undefined state");
-    m_CountForward = 0;
+    logger_->log_debug("BiwardDriveModule", "Undefined state");
+    count_forward_ = 0;
   }
 
-  if ( m_CountForward == 1 )
-    driveMode = m_pForwardDriveModule;
+  if ( count_forward_ == 1 )
+    drive_mode = mod_forward_;
   else
-    driveMode = m_pBackwardDriveModule;
+    drive_mode = mod_backward_;
 
   // set the current info to the drive mode
-  driveMode->SetCurrentRoboPos( m_RoboX, m_RoboY, m_RoboOri );
-  driveMode->SetCurrentRoboSpeed( m_RoboTrans, m_RoboTransX, m_RoboTransY, m_RoboRot );
-  driveMode->SetCurrentTarget( m_TargetX, m_TargetY, m_TargetOri );
-  driveMode->SetLocalTarget( m_LocalTargetX, m_LocalTargetY );
-  driveMode->SetLocalTrajec( m_LocalTrajecX, m_LocalTrajecY );
-  driveMode->SetCurrentColliMode( m_OrientMode, m_StopAtTarget );
+  drive_mode->set_current_robo_pos( robot_.x, robot_.y, robot_.ori );
+  drive_mode->set_current_robo_speed( robot_vel_.x, robot_vel_.y, robot_vel_.rot );
+  drive_mode->set_current_target( target_.x, target_.y, target_.ori );
+  drive_mode->set_local_target( local_target_.x, local_target_.y );
+  drive_mode->set_local_trajec( local_trajec_.x, local_trajec_.y );
+  drive_mode->set_current_colli_mode( orient_mode_, stop_at_target_ );
 
   // update the drive mode
-  driveMode->Update();
+  drive_mode->update();
 
   // get the values from the drive mode
-  m_ProposedTranslationX = driveMode->GetProposedTranslationX();
-  m_ProposedRotation    = driveMode->GetProposedRotation();
+  proposed_.x   = drive_mode->get_proposed_trans_x();
+  proposed_.rot = drive_mode->get_proposed_rot();
 }
 
 } // namespace fawkes

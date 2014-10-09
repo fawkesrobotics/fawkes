@@ -90,7 +90,7 @@ class ColliActThread
   fawkes::NavigatorInterface::DriveMode       cfg_drive_mode_;
 
 #ifdef HAVE_ROS
-  void callbackSimpleGoal(const geometry_msgs::PoseStamped::ConstPtr& msg);
+  void callback_simple_goal(const geometry_msgs::PoseStamped::ConstPtr& msg);
 #endif
 
   // methods mainly transfered from libmonaco

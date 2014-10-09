@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -29,27 +29,24 @@ namespace fawkes
 }
 #endif
 
-/** @class CAStarState <plugins/colli/search/astar_state.h>
+/** @class AStarState <plugins/colli/search/astar_state.h>
  *  This is the class for an A* State.
  */
-
-class CAStarState
+class AStarState
 {
  public:
+  AStarState( );
+  AStarState( int x, int y, int past_cost, AStarState * father );
+  ~AStarState();
 
-  CAStarState( );
-  CAStarState( int x, int y, int pastCost, CAStarState * father );
-  ~CAStarState();
+  int x_;  /**< x coordinate of the state */
+  int y_;  /**< y coordinate of the state */
 
-  int m_X;  /**< x coordinate of the state */
-  int m_Y;  /**< y coordinate of the state */
+  AStarState * father_; /**< The predecessor state */
 
-  CAStarState * m_pFather; /**< The predecessor state */
-
-  int m_PastCost;  /**< The past cost */
-  int m_TotalCost; /**< The total cost */
+  int past_cost_;  /**< The past cost */
+  int total_cost_; /**< The total cost */
 };
-
 
 
 /* ************************************************************************** */
@@ -58,32 +55,32 @@ class CAStarState
 
 /**  This is the standard constructor. */
 inline
-CAStarState::CAStarState( )
+AStarState::AStarState( )
 {
-  m_pFather =  0;
-  m_X = m_Y = 0;
-  m_TotalCost = 0;
-  m_PastCost = 0;
+  father_ =  0;
+  x_ = y_ = 0;
+  total_cost_ = 0;
+  past_cost_ = 0;
 }
 
 /**  This is another standard constuctor, this time parametrized.
  * @param x is the x coordinate.
  * @param y is the y coordinate.
- * @param pastCost is the total left cost.
+ * @param past_cost is the total left cost.
  * @param father is a pointer to the predecessor of this AStarState.
  */
 inline
-CAStarState::CAStarState( int x, int y, int pastCost, CAStarState * father )
+AStarState::AStarState( int x, int y, int past_cost, AStarState * father )
 {
-  m_X = x;
-  m_Y = y;
-  m_PastCost = pastCost;
-  m_pFather = father;
+  x_ = x;
+  y_ = y;
+  past_cost_ = past_cost;
+  father_ = father;
 }
 
 /** Standard Destructor */
 inline
-CAStarState::~CAStarState( )
+AStarState::~AStarState( )
 {
 }
 

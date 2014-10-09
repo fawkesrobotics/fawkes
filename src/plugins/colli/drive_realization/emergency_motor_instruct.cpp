@@ -36,12 +36,12 @@ namespace fawkes
 
 using namespace std;
 
-/** @class CEmergencyMotorInstruct <plugins/colli/drive_realization/emergency_motor_instruct.h>
+/** @class EmergencyMotorInstruct <plugins/colli/drive_realization/emergency_motor_instruct.h>
  * This module is a class for validity checks of drive
  * commands and sets those things with respect to the physical
  * borders of the robot.
- * For this purpose the two functions CalculateRotation and
- * CalculateTranslation are implemented linear ;-)
+ * For this purpose the two functions calculate_rotation and
+ * calculate_translation are implemented linear ;-)
  */
 
 /** Constructor.
@@ -50,35 +50,23 @@ using namespace std;
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CEmergencyMotorInstruct::CEmergencyMotorInstruct( fawkes::MotorInterface* motor,
-                                                  float frequency,
-                                                  fawkes::Logger* logger,
-                                                  fawkes::Configuration* config )
- : CBaseMotorInstruct( motor, frequency, logger ),
-   config_( config )
+EmergencyMotorInstruct::EmergencyMotorInstruct( fawkes::MotorInterface* motor,
+                                                float frequency,
+                                                fawkes::Logger* logger,
+                                                fawkes::Configuration* config )
+ : BaseMotorInstruct( motor, frequency, logger, config )
 {
-  logger_->log_debug("CEmergencyMotorInstruct", "(Constructor): Entering");
-
-  string cfg_prefix = "/plugins/colli/motor_instruct/";
-
-  basic_trans_acc = config_->get_float((cfg_prefix + "trans_acc").c_str());
-  basic_trans_dec = config_->get_float((cfg_prefix + "trans_dec").c_str());
-  basic_rot_acc   = config_->get_float((cfg_prefix + "rot_acc").c_str());
-  basic_rot_dec   = config_->get_float((cfg_prefix + "rot_dec").c_str());
-
-  logger_->log_debug("CEmergencyMotorInstruct", "(Constructor): Exiting");
-}
-
-/**
- * destructor
- */
-CEmergencyMotorInstruct::~CEmergencyMotorInstruct()
-{
-  logger_->log_debug("CEmergencyMotorInstruct", "(Destructor): Entering");
-  logger_->log_debug("CEmergencyMotorInstruct", "(Destructor): Exiting");
+  logger_->log_debug("EmergencyMotorInstruct", "(Constructor): Entering");
+  logger_->log_debug("EmergencyMotorInstruct", "(Constructor): Exiting");
 }
 
 
+/** Destructor. */
+EmergencyMotorInstruct::~EmergencyMotorInstruct()
+{
+  logger_->log_debug("EmergencyMotorInstruct", "(Destructor): Entering");
+  logger_->log_debug("EmergencyMotorInstruct", "(Destructor): Exiting");
+}
 
 
 /** Implementation of Calculate Translation Function.
@@ -86,58 +74,54 @@ CEmergencyMotorInstruct::~CEmergencyMotorInstruct()
  *   or too much may result in non predictable motor behaviour!!!!
  * THIS FUNCTION IS THE LAST BORDER TO THE MOTOR, TAKE CARE AND PAY ATTENTION!!!
  *
- * @param currentTranslation  The current translation of the robot
- * @param desiredTranslation  The desired translation of the robot
- * @param time_factor         The time_factor (should become deprecated!)
+ * @param current The current translation of the robot
+ * @param desired The desired translation of the robot
+ * @param time_factor The time_factor (should become deprecated!)
  * @return the new translation
  */
-float CEmergencyMotorInstruct::CalculateTranslation( float currentTranslation,
-                 float desiredTranslation,
-                 float time_factor )
+float EmergencyMotorInstruct::calculate_translation( float current, float desired, float time_factor )
 {
-  float execTranslation = 0.0;
+  float exec_trans = 0.0;
 
-  if (desiredTranslation < currentTranslation) {
+  if (desired < current) {
 
-    if (currentTranslation > 0.0) {
+    if (current > 0.0) {
       // decrease forward speed
-      execTranslation = desiredTranslation;
+      exec_trans = desired;
 
-    } else if (currentTranslation < 0.0) {
+    } else if (current < 0.0) {
       // increase backward speed
-      execTranslation = currentTranslation - basic_trans_acc;
-      execTranslation = max( execTranslation, desiredTranslation );
+      exec_trans = current - trans_acc_;
+      exec_trans = max( exec_trans, desired );
 
     }  else {
-      // currentTranslation == 0;
-      execTranslation = max( -basic_trans_acc, desiredTranslation );
+      // current == 0;
+      exec_trans = max( -trans_acc_, desired );
     }
 
-  } else if (desiredTranslation > currentTranslation) {
+  } else if (desired > current) {
 
-    if (currentTranslation > 0.0) {
+    if (current > 0.0) {
       // increase forward speed
-      execTranslation = currentTranslation + basic_trans_acc;
-      execTranslation = min( execTranslation, desiredTranslation );
+      exec_trans = current + trans_acc_;
+      exec_trans = min( exec_trans, desired );
 
-    } else if (currentTranslation < 0.0) {
+    } else if (current < 0.0) {
       // decrease backward speed
-      execTranslation = desiredTranslation;
+      exec_trans = desired;
 
     } else {
-      // currentTranslation == 0
-      execTranslation = min( basic_trans_acc, desiredTranslation );
+      // current == 0
+      exec_trans = min( trans_acc_, desired );
     }
 
   } else {
     // nothing to change!!!
-    execTranslation = desiredTranslation;
+    exec_trans = desired;
   }
 
-  return execTranslation*time_factor;
+  return exec_trans*time_factor;
 }
-
-
 
 
 /** Implementation of Calculate Rotation Function.
@@ -145,56 +129,54 @@ float CEmergencyMotorInstruct::CalculateTranslation( float currentTranslation,
  *   or too much may result in non predictable motor behaviour!!!!
  * THIS FUNCTION IS THE LAST BORDER TO THE MOTOR, TAKE CARE AND PAY ATTENTION!!!
  *
- * @param currentRotation The current rotation of the robot
- * @param desiredRotation The desired rotation of the robot
+ * @param current The current rotation of the robot
+ * @param desired The desired rotation of the robot
  * @param time_factor     The time_factor (should become deprecated!)
  * @return the new rotation
  */
-float CEmergencyMotorInstruct::CalculateRotation( float currentRotation,
-              float desiredRotation,
-              float time_factor  )
+float EmergencyMotorInstruct::calculate_rotation( float current, float desired, float time_factor )
 {
-  float execRotation = 0.0;
+  float exec_rot = 0.0;
 
-  if (desiredRotation < currentRotation) {
+  if (desired < current) {
 
-    if (currentRotation > 0.0) {
+    if (current > 0.0) {
       // decrease right rot
-      execRotation = currentRotation - basic_rot_dec;
-      execRotation = max( execRotation, desiredRotation );
+      exec_rot = current - rot_dec_;
+      exec_rot = max( exec_rot, desired );
 
-    } else if (currentRotation < 0.0) {
+    } else if (current < 0.0) {
       // increase left rot
-      execRotation = currentRotation - basic_rot_acc;
-      execRotation = max( execRotation, desiredRotation );
+      exec_rot = current - rot_acc_;
+      exec_rot = max( exec_rot, desired );
 
     } else {
-      // currentRotation == 0;
-      execRotation = max( -basic_rot_acc, desiredRotation );
+      // current == 0;
+      exec_rot = max( -rot_acc_, desired );
     }
 
-  } else if (desiredRotation > currentRotation) {
-    if (currentRotation > 0.0) {
+  } else if (desired > current) {
+    if (current > 0.0) {
       // increase right rot
-      execRotation = currentRotation + basic_rot_acc;
-      execRotation = min( execRotation, desiredRotation );
+      exec_rot = current + rot_acc_;
+      exec_rot = min( exec_rot, desired );
 
-    } else if (currentRotation < 0.0) {
+    } else if (current < 0.0) {
       // decrease left rot
-      execRotation = currentRotation + basic_rot_dec;
-      execRotation = min( execRotation, desiredRotation );
+      exec_rot = current + rot_dec_;
+      exec_rot = min( exec_rot, desired );
 
     } else {
-      // currentRotation == 0
-      execRotation = min( basic_rot_acc, desiredRotation );
+      // current == 0
+      exec_rot = min( rot_acc_, desired );
     }
 
   } else {
     // nothing to change!!!
-    execRotation = desiredRotation;
+    exec_rot = desired;
   }
 
-  return execRotation*time_factor;
+  return exec_rot*time_factor;
 }
 
 } // namespace fawkes

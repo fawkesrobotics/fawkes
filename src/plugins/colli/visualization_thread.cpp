@@ -73,7 +73,7 @@ ColliVisualizationThread::init()
   pub_search_path_ = new ros::Publisher();
   *pub_search_path_ = rosnode->advertise< nav_msgs::GridCells >("colli_search_path", 1);
 
-  roboshape_ = new CRoboShape_Colli( "/plugins/colli/roboshape/", logger, config );
+  roboshape_ = new RoboShapeColli( "/plugins/colli/roboshape/", logger, config );
 }
 
 void
@@ -119,7 +119,7 @@ ColliVisualizationThread::loop()
   float rad = 0;
   float radinc = M_PI/180.f;
   for( unsigned int i=0; i<360; ++i ) {
-    float len = roboshape_->GetRobotLengthforRad( rad );
+    float len = roboshape_->get_robot_length_for_rad( rad );
     geometry_msgs::Point p;
     p.x = len * cos(rad);
     p.y = len * sin(rad);
@@ -138,15 +138,15 @@ ColliVisualizationThread::loop()
   nav_msgs::GridCells grid_cells_far(grid);
   nav_msgs::GridCells grid_cells_free(grid);
   Probability prob;
-  point_t gridpos_laser = occ_grid_->GetLaserPosition();
-  for( int y=0; y < occ_grid_->getHeight(); ++y ) {
-    for( int x=0; x < occ_grid_->getWidth(); ++x ) {
+  point_t gridpos_laser = occ_grid_->get_laser_position();
+  for( int y=0; y < occ_grid_->get_height(); ++y ) {
+    for( int x=0; x < occ_grid_->get_width(); ++x ) {
       geometry_msgs::Point p;
       p.x =  (x - gridpos_laser.x) * grid.cell_width;
       p.y =  (y - gridpos_laser.y) * grid.cell_height;
       p.z = 0;
 
-      prob = occ_grid_->getProb(x,y);
+      prob = occ_grid_->get_prob(x,y);
       if( prob == cell_costs_.occ) {
         grid_cells_occ.cells.push_back( p );
 
@@ -173,8 +173,8 @@ ColliVisualizationThread::loop()
   // publish path
   grid.cells.clear();
   grid.header.frame_id = "/base_link";
-  std::vector< point_t >* plan = search_->GetPlan();
-  point_t gridpos_robo = search_->GetRoboPosition();
+  std::vector< point_t >* plan = search_->get_plan();
+  point_t gridpos_robo = search_->get_robot_position();
   for( std::vector<point_t>::iterator it=plan->begin(); it!=plan->end(); ++it ) {
     geometry_msgs::Point p;
     p.x =  ((*it).x - gridpos_robo.x) * grid.cell_width;
@@ -188,8 +188,8 @@ ColliVisualizationThread::loop()
 }
 
 void
-ColliVisualizationThread::setup(CLaserOccupancyGrid* occ_grid,
-                               CSearch* search)
+ColliVisualizationThread::setup(LaserOccupancyGrid* occ_grid,
+                                Search* search)
 {
   MutexLocker lock(&mutex_);
   search_   = search;

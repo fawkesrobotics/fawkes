@@ -31,7 +31,7 @@ namespace fawkes
 }
 #endif
 
-/** @class CForwardOmniDriveModule <plugins/colli/drive_modes/forward_drive_mode.h>
+/** @class ForwardOmniDriveModule <plugins/colli/drive_modes/forward_drive_mode.h>
  * This is the SlowForward drive-module, for slow forward only movements.
  */
 
@@ -39,30 +39,30 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CForwardOmniDriveModule::CForwardOmniDriveModule(Logger* logger, Configuration* config)
- : CAbstractDriveMode(logger, config)
+ForwardOmniDriveModule::ForwardOmniDriveModule(Logger* logger, Configuration* config)
+ : AbstractDriveMode(logger, config)
 {
-  logger_->log_debug("CForwardOmniDriveModule", "(Constructor): Entering...");
-  m_DriveModeName = NavigatorInterface::Forward;
+  logger_->log_debug("ForwardOmniDriveModule", "(Constructor): Entering...");
+  drive_mode_ = NavigatorInterface::Forward;
 
-  m_MaxTranslation = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
-  m_MaxRotation    = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
+  max_trans_ = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
+  max_rot_    = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
 
-  logger_->log_debug("CForwardOmniDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("ForwardOmniDriveModule", "(Constructor): Exiting...");
 }
 
 
-/** Destruct your local values here.
- */
-CForwardOmniDriveModule::~CForwardOmniDriveModule()
+/** Descturctor. Destruct your local values here. */
+ForwardOmniDriveModule::~ForwardOmniDriveModule()
 {
-  logger_->log_debug("CForwardOmniDriveModule", "(Destructor): Entering...");
-  m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_debug("CForwardOmniDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("ForwardOmniDriveModule", "(Destructor): Entering...");
+  drive_mode_ = NavigatorInterface::MovingNotAllowed;
+  logger_->log_debug("ForwardOmniDriveModule", "(Destructor): Exiting...");
 }
 
 void
-CForwardOmniDriveModule::calculateRotation(float ori_alpha_target, float ori_alpha_next_target, float dist_to_target, float angle_allowed_to_next_target)
+ForwardOmniDriveModule::calculate_rotation(float ori_alpha_target, float ori_alpha_next_target,
+                                           float dist_to_target, float angle_allowed_to_next_target)
 {
   // first calculate desired angle
   float des_alpha;
@@ -77,30 +77,30 @@ CForwardOmniDriveModule::calculateRotation(float ori_alpha_target, float ori_alp
   // then choose rotation speed, depending on desired angle
   const float _TURN_MAX_SPEED_LIMIT_ = M_PI_4;
   if        ( des_alpha > _TURN_MAX_SPEED_LIMIT_ ) {
-    m_ProposedRotation = m_MaxRotation;
+    proposed_.rot = max_rot_;
   } else if ( des_alpha < -_TURN_MAX_SPEED_LIMIT_ ) {
-    m_ProposedRotation = -m_MaxRotation;
+    proposed_.rot = -max_rot_;
   } else {
-    m_ProposedRotation = des_alpha * ( m_MaxRotation / _TURN_MAX_SPEED_LIMIT_ );
+    proposed_.rot = des_alpha * ( max_rot_ / _TURN_MAX_SPEED_LIMIT_ );
   }
 }
 
 void
-CForwardOmniDriveModule::calculateTranslation(float dist_to_target, float ori_alpha_target, float dec_factor)
+ForwardOmniDriveModule::calculate_translation(float dist_to_target, float ori_alpha_target, float dec_factor)
 {
   float part_x = 0;
   float part_y = 0;
-  if ( ! (m_LocalTargetX == 0 && m_LocalTargetY == 0) ) {
-    part_x   = m_LocalTargetX / (fabs(m_LocalTargetX) + fabs(m_LocalTargetY));
-    part_y   = m_LocalTargetY / (fabs(m_LocalTargetX) + fabs(m_LocalTargetY));
+  if ( ! (local_target_.x == 0 && local_target_.y == 0) ) {
+    part_x   = local_target_.x / (fabs(local_target_.x) + fabs(local_target_.y));
+    part_y   = local_target_.y / (fabs(local_target_.x) + fabs(local_target_.y));
   }
-  m_ProposedTranslationX = part_x * m_MaxTranslation * dec_factor;
-  m_ProposedTranslationY = part_y * m_MaxTranslation * dec_factor;
+  proposed_.x = part_x * max_trans_ * dec_factor;
+  proposed_.y = part_y * max_trans_ * dec_factor;
 
   // Check translation limits
-  if ( m_ProposedTranslationX < 0. || fabs(ori_alpha_target) >= M_PI_2 - 0.2 ) {
-    m_ProposedTranslationX = 0.;
-    m_ProposedTranslationY = 0.;
+  if ( proposed_.x < 0. || fabs(ori_alpha_target) >= M_PI_2 - 0.2 ) {
+    proposed_.x = 0.;
+    proposed_.y = 0.;
   }
 }
 
@@ -115,63 +115,59 @@ CForwardOmniDriveModule::calculateTranslation(float dist_to_target, float ori_al
  *
  *  Available are:
  *
- *     m_TargetX, m_TargetY, m_TargetOri  --> current Target to drive to
- *     m_RoboX, m_RoboY, m_RoboOri        --> current Robot coordinates
- *     m_RoboTrans, m_RoboRot             --> current Motor values
+ *     target_     --> current target coordinates to drive to
+ *     robot_      --> current robot coordinates
+ *     robot_vel_  --> current Motor velocities
  *
- *     m_LocalTargetX, m_LocalTargetY     --> our local target found by the search component we want to reach
- *     m_LocalTrajecX, m_LocalTrajecY     --> The point we would collide with, if we would drive WITHOUT Rotation
+ *     local_target_      --> our local target found by the search component we want to reach
+ *     local_trajec_      --> The point we would collide with, if we would drive WITHOUT Rotation
  *
- *     m_OrientAtTarget                   --> Do we have to orient ourself at the target?
- *     m_StopAtTarget                     --> Do we have to stop really ON the target?
+ *     orient_at_target_  --> Do we have to orient ourself at the target?
+ *     stop_at_target_    --> Do we have to stop really ON the target?
  *
  *  Afterwards filled should be:
  *
- *     m_ProposedTranslation              --> Desired Translation speed
- *     m_ProposedRotation                 --> Desired Rotation speed
+ *     proposed_          --> Desired translation and rotation speed
  *
- *  Those values are questioned after an Update() was called.
+ *  Those values are questioned after an update() was called.
  */
 void
-CForwardOmniDriveModule::Update()
+ForwardOmniDriveModule::update()
 {
-  m_ProposedTranslationX = 0.0;
-  m_ProposedRotation    = 0.0;
+  proposed_.x   = 0.f;
+  proposed_.rot = 0.f;
 
-  float dist_to_target    = sqrt( sqr(m_LocalTargetX) + sqr(m_LocalTargetY) );
-  float alpha_target      = normalize_mirror_rad( atan2( m_LocalTargetY, m_LocalTargetX ) );
-  float alpha_next_target = angle_distance(m_RoboOri, m_TargetOri);
+  float dist_to_target    = sqrt( sqr(local_target_.x) + sqr(local_target_.y) );
+  float alpha_target      = normalize_mirror_rad( atan2( local_target_.y, local_target_.x ) );
+  float alpha_next_target = angle_distance(robot_.ori, target_.ori);
 
   // last time border check............. IMPORTANT!!!
   // because the motorinstructor just tests robots physical borders.
   if ( dist_to_target < 0.04 ) {
-    m_ProposedTranslationX = 0.0;
-    m_ProposedTranslationY = 0.0;
-    m_ProposedRotation     = 0.0;
+    proposed_.x = proposed_.y = proposed_.rot = 0.f;
 
   } else {
-
     float angle_tollerance = M_PI_4;
-    calculateRotation(alpha_target, alpha_next_target, dist_to_target, angle_tollerance / 2.);
+    calculate_rotation(alpha_target, alpha_next_target, dist_to_target, angle_tollerance / 2.);
 
     float dec_factor = 1;
     if ( fabs(alpha_target) >= angle_tollerance ) {                             // if we need to turn a lot => drive slower
       dec_factor = 0.5;
     }
 
-    calculateTranslation(dist_to_target, alpha_target, dec_factor);
+    calculate_translation(dist_to_target, alpha_target, dec_factor);
 
-    if ( m_StopAtTarget ) {
-      float target_rel    = std::sqrt( sqr(m_TargetX - m_RoboX) + sqr(m_TargetY - m_RoboY) );
-      float roboTrans     = std::sqrt( sqr(m_RoboTransX) + sqr(m_RoboTransY) );
-      float proposedTrans = std::sqrt( sqr(m_ProposedTranslationX) + sqr(m_ProposedTranslationY) );
-      float targetTrans   = GuaranteeTransStop(target_rel, roboTrans, proposedTrans);
+    if ( stop_at_target_ ) {
+      float target_rel     = std::sqrt( sqr(target_.x - robot_.x) + sqr(target_.y - robot_.y) );
+      float robo_trans     = std::sqrt( sqr(robot_vel_.x) + sqr(robot_vel_.y) );
+      float proposed_trans = std::sqrt( sqr(proposed_.x) + sqr(proposed_.y) );
+      float target_trans   = guarantee_trans_stop(target_rel, robo_trans, proposed_trans);
 
-      float des = fabs(targetTrans / proposedTrans);
-      if      ( proposedTrans == 0 ) { des = 0; }
+      float des = fabs(target_trans / proposed_trans);
+      if      ( proposed_trans == 0 ) { des = 0; }
 
-      m_ProposedTranslationX *= des;
-      m_ProposedTranslationY *= des;
+      proposed_.x *= des;
+      proposed_.y *= des;
     }
   }
 }
