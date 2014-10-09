@@ -37,8 +37,6 @@
 
 #include <cmath>
 
-#include <pcl/common/distances.h>
-
 namespace fawkes
 {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -266,34 +264,50 @@ CLaserOccupancyGrid::validate_old_laser_points(cart_coord_2d_t pos_robot, cart_c
 {
   std::vector< LaserPoint > old_readings_tmp;
 
-  Eigen::Vector4f pol(pos_robot.x, pos_robot.y, 0, 0);
-  Eigen::Vector4f ld(pos_new_laser_point.x - pos_robot.x , pos_new_laser_point.y - pos_robot.y, 0, 0);
-  double d_new = sqrt(ld[0]*ld[0] + ld[1]*ld[1]);
+  // vectors from robot to new and old laser-points
+  cart_coord_2d_t v_new(pos_new_laser_point.x - pos_robot.x , pos_new_laser_point.y - pos_robot.y);
+  cart_coord_2d_t v_old;
+
+  // distances from robot to new and old laser-points (i.e. length of v_new and v_old)
+  float d_new = sqrt(v_new.x*v_new.x + v_new.y + v_new.y);
+  float d_old = 0.f;
+
+  // angle between the two vectors v_new and v_old. Use to determine whether they
+  // belong to the same laser-beam
+  float angle = 0.f;
+
+  static const float deg_unit = M_PI / 180.f; // 1 degree
 
   for ( std::vector< LaserPoint >::iterator it = m_vOldReadings.begin();
       it != m_vOldReadings.end(); ++it ) {
 
-    //calculate distance between "old point" and "ray trace line of new point"
-    Eigen::Vector4f point((*it).coord.x, (*it).coord.y, 0, 0);
+    v_old.x = (*it).coord.x - pos_robot.x;
+    v_old.y = (*it).coord.y - pos_robot.y;
 
-    double d = sqrt( pcl::sqrPointToLineDistance( point, pol, ld ) );
+    // need to calculate distance here, needed for angle calculation
+    d_old = sqrt(v_old.x*v_old.x + v_old.y + v_old.y);
 
-    cart_coord_2d_t point_old = (*it).coord;
-
-    if ( d < 0.003 ) {                                                          // if distance to line is in a threashold. ( arcsin(1°) * 0.2 > 0.003 (interferiance with next laser))
-      float x_p, y_p;                                                           //   calculate if old point is before or behind new point
-      x_p = point_old.x - pos_robot.x;                                          //   (from the view of the actual robot possition)
-      y_p = point_old.y - pos_robot.y;
-      float d_old = sqrt(x_p*x_p + y_p*y_p);
-
-      if ( ( d_new <= d_old + m_ObstacleDistance )                              // if d new < d old => old in shaddow, so keep it
-          || (x_p >= 0) != (ld[0] >= 0)                                         // or x or y are not in the same directions of the robot
-          || (y_p >= 0) != (ld[1] >= 0) ) {                                     // ( opposite beams => no realation)
-        old_readings_tmp.push_back( *it );
-      }                                                                         // non existing else: old not in shaddow => you can see throu it, so don't keep it
-    } else {                                                                    // if the old point is not close to the line (no relation)
+    // we already have the distances, so already make the distance-check here
+    if( d_new <= d_old + m_ObstacleDistance ) {
+      // in case both points belonged to the same laser-beam, p_old
+      // would be in shadow of p_new => keep p_old anyway
       old_readings_tmp.push_back( *it );
+      continue;
     }
+
+    // angle a between to vectors v,w: cos(a) = dot(v,w) / (|v|*|w|)
+    angle = acos( (v_old.x*v_new.x + v_old.y*v_new.y) / (d_new*d_old) );
+    if( angle > deg_unit ) {
+      // p_old is not the range of this laser-beam. Keep it.
+      old_readings_tmp.push_back( *it );
+
+      /* No "else" here. It would mean that p_old is in the range of the
+       * same laser beam. And we already know that
+       * "d_new > d_old + m_ObstacleDistance" => this laser beam can see
+       * through p_old => discard p_old. In other words, do not add to
+       * old_readings_tmp.
+       */
+     }
   }
 
   m_vOldReadings.clear();

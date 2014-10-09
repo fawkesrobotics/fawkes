@@ -74,7 +74,7 @@ class CLaserOccupancyGrid : public OccupancyGrid
 
   class LaserPoint {
   public:
-    cart_coord_2d_struct coord;
+    cart_coord_2d_t coord;
     Time timestamp;
 
     LaserPoint() { }
