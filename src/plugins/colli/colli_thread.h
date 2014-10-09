@@ -126,7 +126,7 @@ class ColliThread
   fawkes::colli_trans_rot_t proposed_; // the proposed trans-rot that should be realized in MotorInstruct
 
   bool cfg_write_spam_debug_;
-  bool cfg_emergency_stop_used_;    // true if emergency stop is used
+  bool cfg_emergency_stop_enabled_;    // true if emergency stop is used
   float cfg_emergency_threshold_distance_; // threshold distance if emergency stop triggers
   float cfg_emergency_threshold_velocity_; // threshold velocity if emergency stop triggers
   float cfg_emergency_velocity_max_;       // if emergency stop triggers, this is the max velocity

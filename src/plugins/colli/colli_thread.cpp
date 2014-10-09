@@ -95,7 +95,7 @@ ColliThread::init()
 
   cfg_write_spam_debug_    = config->get_bool((cfg_prefix + "write_spam_debug").c_str());
 
-  cfg_emergency_stop_used_           = config->get_bool((cfg_prefix + "emergency_stopping/enabled").c_str());
+  cfg_emergency_stop_enabled_        = config->get_bool((cfg_prefix + "emergency_stopping/enabled").c_str());
   cfg_emergency_threshold_distance_  = config->get_float((cfg_prefix + "emergency_stopping/threshold_distance").c_str());
   cfg_emergency_threshold_velocity_  = config->get_float((cfg_prefix + "emergency_stopping/threshold_velocity").c_str());
   cfg_emergency_velocity_max_        = config->get_float((cfg_prefix + "emergency_stopping/max_vel").c_str());
@@ -592,8 +592,14 @@ ColliThread::colli_execute_()
     logger->log_debug(name(), "I want to realize %f , %f , %f", proposed_.x, proposed_.y, proposed_.rot);
   }
 
-  // calculate if emergency stop is needed
-  if (    cfg_emergency_stop_used_
+  // check if occ-grid has been updated successfully
+  if( distance_to_next_target_ == 0.f ) {
+    logger->log_error(name(), "Cccupancy-grid update failed! Stop immediately");
+    proposed_.x = proposed_.y = proposed_.rot = 0.f;
+    motor_instruct_->stop();
+
+  } else if( // check if emergency stop is needed
+      cfg_emergency_stop_enabled_
       &&  distance_to_next_target_ < cfg_emergency_threshold_distance_
       &&  if_motor_->vx() > cfg_emergency_threshold_velocity_ ) {
     float max_v = cfg_emergency_velocity_max_;
@@ -611,8 +617,9 @@ ColliThread::colli_execute_()
     logger->log_error(name(), "Emergency slow down: %f , %f , %f", proposed_.x, proposed_.y, proposed_.rot);
 
     emergency_motor_instruct_->drive( proposed_.x, proposed_.y, proposed_.rot );
-  } else {  // else send normal message
-    // Realize drive mode proposal with realization module
+
+  } else {
+    // Realize trans-rot proposal with realization module
     motor_instruct_->drive( proposed_.x, proposed_.y, proposed_.rot );
   }
 }
