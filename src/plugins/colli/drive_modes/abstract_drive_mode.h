@@ -239,6 +239,8 @@ CAbstractDriveMode::SetCurrentRoboPos( float roboX, float roboY, float roboOri )
 /** Sets the current robo speed.
  *  Has to be set before Update!
  * @param roboTrans The robot translation velocity
+ * @param roboTransX The robot translation velocity in x-direction only
+ * @param roboTransY The robot translation velocity in y-direction only
  * @param roboRot The robot rotation velocity
  */
 inline void

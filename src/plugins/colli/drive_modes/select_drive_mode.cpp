@@ -232,7 +232,7 @@ CSelectDriveMode::setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, i
 /**
  * Search for the escape drive mode and hands over the given information to the escape drive mode
  * This should just be called if basic-escape mode is used!
- * @param laser_point vector of laser points
+ * @param laser_points vector of laser points
  */
 void
 CSelectDriveMode::setLaserData( std::vector<fawkes::polar_coord_2d_t>& laser_points )
