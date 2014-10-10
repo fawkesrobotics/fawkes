@@ -195,7 +195,7 @@ class ColliThread
   void interfaces_read();
 
   /// Check if the interface data is valid, i.e. not outdated
-  bool interfaces_valid();
+  bool interface_data_valid();
 
   /// Check, in what state the colli is, and what to do
   void update_colli_state();

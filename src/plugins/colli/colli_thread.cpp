@@ -40,6 +40,7 @@
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/NavigatorInterface.h>
 #include <utils/math/common.h>
+#include <tf/time_cache.h>
 
 #include <string>
 
@@ -309,7 +310,7 @@ ColliThread::loop()
 
   // check if we need to abort for some reason
   bool abort = false;
-  if( !interfaces_valid() ) {
+  if( !interface_data_valid() ) {
     escape_count_ = 0;
     abort = true;
 
@@ -740,7 +741,7 @@ ColliThread::interfaces_read()
 
 /// Check if the interface data is valid, i.e. not outdated
 bool
-ColliThread::interfaces_valid()
+ColliThread::interface_data_valid()
 {
   Time now(clock);
 
@@ -748,6 +749,7 @@ ColliThread::interfaces_valid()
    * a) laser or motor interface have no writer
    * b) there is no new laser data for a while, or
    * c) there is no motor data for a while and colli is currently moving
+   * d) transforms have not been updated in a while
    */
   if( !if_laser_->has_writer() || !if_motor_->has_writer() ) {
     logger->log_warn(name(), "Laser or Motor dead, no writing instance for interfaces!!!");
@@ -764,8 +766,17 @@ ColliThread::interfaces_valid()
     return false;
 
   } else {
+    // check if transforms are up to date
+    float diff = (now - tf_listener->get_frame( tf_listener->lookup_frame_number(cfg_frame_laser_) )->get_latest_timestamp()).in_sec();
+    if( diff > 2.f* cfg_iface_read_timeout_) {
+      logger->log_warn(name(), "Transform to laser_frame '%s' is too old (%f > %f)",
+                              cfg_frame_laser_.c_str(), diff, 2.f*cfg_iface_read_timeout_);
+      return false;
 
-    return true;
+    } else {
+      // everything OK
+      return true;
+    }
   }
 }
 
