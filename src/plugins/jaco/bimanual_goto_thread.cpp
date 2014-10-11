@@ -26,6 +26,7 @@
 #include "arm.h"
 
 #include <interfaces/JacoInterface.h>
+#include <interfaces/JacoBimanualInterface.h>
 #include <utils/math/angle.h>
 #include <core/threading/mutex.h>
 
@@ -43,12 +44,10 @@ using namespace fawkes;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoBimanualGotoThread::JacoBimanualGotoThread(fawkes::jaco_arm_t *arm_l, fawkes::jaco_arm_t *arm_r)
+JacoBimanualGotoThread::JacoBimanualGotoThread(jaco_dual_arm_t *arms)
   : Thread("JacoBimanualGotoThread", Thread::OPMODE_CONTINUOUS)
 {
-  __arms.l.arm = arm_l;
-  __arms.r.arm = arm_r;
-
+  __dual_arms = arms;
   __final_mutex = NULL;
   __final = true;
 }
@@ -62,6 +61,9 @@ JacoBimanualGotoThread::~JacoBimanualGotoThread()
 void
 JacoBimanualGotoThread::init()
 {
+  __arms.l.arm = __dual_arms->left;
+  __arms.r.arm = __dual_arms->right;
+
   __final_mutex = new Mutex();
   __v_arms[0] = &(__arms.l);
   __v_arms[1] = &(__arms.r);
@@ -70,6 +72,8 @@ JacoBimanualGotoThread::init()
 void
 JacoBimanualGotoThread::finalize()
 {
+  __dual_arms = NULL;
+
   __v_arms[0] = NULL;
   __v_arms[1] = NULL;
 
@@ -127,13 +131,14 @@ JacoBimanualGotoThread::loop()
     return;
   }
 
-  if( __arms.l.target->trajec_state == TRAJEC_PLANNING_ERROR
+  if( __arms.l.target->trajec_state == TRAJEC_IK_ERROR
+   || __arms.r.target->trajec_state == TRAJEC_IK_ERROR
+   || __arms.l.target->trajec_state == TRAJEC_PLANNING_ERROR
    || __arms.r.target->trajec_state == TRAJEC_PLANNING_ERROR ) {
       logger->log_warn(name(), "Trajectory could not be planned. Abort!");
     // stop the current target and empty remaining queue, with appropriate error_code. This also sets "final" to true.
+    __dual_arms->iface->set_error_code( __arms.l.target->trajec_state );
     stop();
-    __arms.l.arm->iface->set_error_code( JacoInterface::ERROR_PLANNING );
-    __arms.r.arm->iface->set_error_code( JacoInterface::ERROR_PLANNING );
     return;
   }
 
@@ -152,8 +157,7 @@ JacoBimanualGotoThread::loop()
       if(__arms.l.target->type != TARGET_GRIPPER) {
         logger->log_warn(name(), "Unknown target type %i, cannot process without planning!", __arms.l.target->type);
         stop();
-        __arms.l.arm->iface->set_error_code( JacoInterface::ERROR_UNSPECIFIC );
-        __arms.r.arm->iface->set_error_code( JacoInterface::ERROR_UNSPECIFIC );
+        __dual_arms->iface->set_error_code( JacoInterface::ERROR_UNSPECIFIC );
       } else {
         _move_grippers();
         logger->log_debug(name(), "...targets processed");

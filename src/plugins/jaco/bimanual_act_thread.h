@@ -30,12 +30,8 @@
 #include <aspect/blackboard.h>
 
 namespace fawkes {
-  class JacoBimanualInterface;
-  typedef struct jaco_arm_struct jaco_arm_t;
+  typedef struct jaco_dual_arm_struct jaco_dual_arm_t;
 }
-
-class JacoBimanualGotoThread;
-class JacoBimanualOpenraveThread;
 
 class JacoBimanualActThread
 : public fawkes::Thread,
@@ -45,8 +41,7 @@ class JacoBimanualActThread
   public fawkes::BlackBoardAspect
 {
  public:
-  JacoBimanualActThread(JacoBimanualGotoThread* goto_thread,
-                        JacoBimanualOpenraveThread* openrave_thread);
+  JacoBimanualActThread(fawkes::jaco_dual_arm_t *arms);
   virtual ~JacoBimanualActThread();
 
   virtual void init();
@@ -58,10 +53,7 @@ class JacoBimanualActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JacoBimanualInterface* __iface;
-
-  JacoBimanualGotoThread*     __goto_thread;
-  JacoBimanualOpenraveThread* __openrave_thread;
+  fawkes::jaco_dual_arm_t* __arms;
 };
 
 

@@ -34,7 +34,7 @@
 class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
 {
  public:
-  JacoBimanualOpenraveThread(fawkes::jaco_arm_t *arm_l, fawkes::jaco_arm_t *arm_r);
+  JacoBimanualOpenraveThread(fawkes::jaco_dual_arm_t *arms);
 
   virtual void loop();
   virtual void finalize();

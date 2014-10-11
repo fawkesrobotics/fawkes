@@ -24,7 +24,6 @@
 #include "types.h"
 #include "arm.h"
 
-#include <interfaces/JacoInterface.h>
 #include <core/threading/mutex.h>
 
 #include <cmath>
@@ -53,11 +52,11 @@ using namespace std;
 /** Constructor.
  * @param thread_name thread name
  */
-JacoBimanualOpenraveThread::JacoBimanualOpenraveThread(jaco_arm_t *arm_l, jaco_arm_t *arm_r)
+JacoBimanualOpenraveThread::JacoBimanualOpenraveThread(jaco_dual_arm_t *arms)
   : JacoOpenraveBaseThread("JacoBimanualOpenraveThread")
 {
-  __arms.left.arm = arm_l;
-  __arms.right.arm = arm_r;
+  __arms.left.arm = arms->left;
+  __arms.right.arm = arms->right;
 #ifdef HAVE_OPENRAVE
   __planner_env.env   = NULL;
   __planner_env.robot = NULL;

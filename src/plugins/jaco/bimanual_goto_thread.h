@@ -40,7 +40,7 @@ class JacoBimanualGotoThread
   public fawkes::BlackBoardAspect
 {
  public:
-  JacoBimanualGotoThread(fawkes::jaco_arm_t *arm_l, fawkes::jaco_arm_t *arm_r);
+  JacoBimanualGotoThread(fawkes::jaco_dual_arm_t *arms);
   virtual ~JacoBimanualGotoThread();
 
   virtual void init();
@@ -78,6 +78,8 @@ class JacoBimanualGotoThread
   } __arms;
 
   arm_struct_t* __v_arms[2]; // just a helper, to be able to iterate over both arms
+
+  fawkes::jaco_dual_arm_t *__dual_arms; // have redundancy now, but keep this just to be sure
 
   fawkes::Mutex* __final_mutex;
   bool __final;

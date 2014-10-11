@@ -32,6 +32,8 @@
 
 class JacoGotoThread;
 class JacoOpenraveThread;
+class JacoBimanualGotoThread;
+class JacoBimanualOpenraveThread;
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -98,9 +100,11 @@ typedef struct jaco_arm_struct {
 } jaco_arm_t;
 
 typedef struct jaco_dual_arm_struct {
-  jaco_arm_t* left;
-  jaco_arm_t* right;
-  JacoBimanualInterface *iface;
+  jaco_arm_t *left;
+  jaco_arm_t *right;
+  JacoBimanualInterface      *iface;
+  JacoBimanualGotoThread     *goto_thread;
+  JacoBimanualOpenraveThread *openrave_thread;
 } jaco_dual_arm_t;
 
 
