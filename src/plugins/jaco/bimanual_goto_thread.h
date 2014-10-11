@@ -30,6 +30,9 @@
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 
+namespace fawkes {
+  class Mutex;
+}
 class JacoBimanualGotoThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
@@ -46,14 +49,38 @@ class JacoBimanualGotoThread
 
   virtual bool final();
 
+  virtual void stop();
   virtual void move_gripper(float l_f1, float l_f2, float l_f3, float r_f1, float r_f2, float r_f3);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  bool __final;
+  void _lock_queues() const;
+  void _unlock_queues() const;
+  void _enqueue_targets(fawkes::RefPtr<fawkes::jaco_target_t> l,
+                        fawkes::RefPtr<fawkes::jaco_target_t> r);
 
+  void _move_grippers();
+  void _exec_trajecs();
+
+  void _check_final();
+
+  typedef struct arm_struct {
+    fawkes::jaco_arm_t                    *arm;
+    fawkes::RefPtr<fawkes::jaco_target_t> target;
+    float                                 finger_last[4]; // 3 positions + 1 counter
+  } arm_struct_t;
+
+  struct {
+    arm_struct_t l;
+    arm_struct_t r;
+  } __arms;
+
+  arm_struct_t* __v_arms[2]; // just a helper, to be able to iterate over both arms
+
+  fawkes::Mutex* __final_mutex;
+  bool __final;
 };
 
 

@@ -447,8 +447,6 @@ JacoBimanualOpenraveThread::_plan_path()
     _set_trajec_state(TRAJEC_PLANNING_ERROR);
     __arms.left.arm->target_mutex->lock();
     __arms.right.arm->target_mutex->lock();
-    __arms.left.target->coord=false; // TODO: just for testing, as no bimanua_goto_thread yet
-    __arms.right.target->coord=false;
     __arms.left.arm->target_mutex->unlock();
     __arms.right.arm->target_mutex->unlock();
     return false;
@@ -465,8 +463,6 @@ JacoBimanualOpenraveThread::_plan_path()
       _set_trajec_state(TRAJEC_PLANNING_ERROR);
       __arms.left.arm->target_mutex->lock();
       __arms.right.arm->target_mutex->lock();
-      __arms.left.target->coord=false; // TODO: just for testing, as no bimanua_goto_thread yet
-      __arms.right.target->coord=false;
       __arms.left.arm->target_mutex->unlock();
       __arms.right.arm->target_mutex->unlock();
       return false;
@@ -502,8 +498,6 @@ JacoBimanualOpenraveThread::_plan_path()
       __arms.right.target->pos = trajec_r->back();
       __arms.left.target->trajec_state=TRAJEC_READY;
       __arms.right.target->trajec_state=TRAJEC_READY;
-      __arms.left.target->coord=false; // TODO: just for testing, as no bimanua_goto_thread yet
-      __arms.right.target->coord=false;
       __arms.left.arm->target_mutex->unlock();
       __arms.right.arm->target_mutex->unlock();
 
