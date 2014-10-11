@@ -41,6 +41,7 @@ namespace fawkes {
 class Mutex;
 class JacoArm;
 class JacoInterface;
+class JacoBimanualInterface;
 
 typedef std::vector<float>               jaco_trajec_point_t;
 typedef std::vector<jaco_trajec_point_t> jaco_trajec_t;
@@ -78,28 +79,28 @@ typedef struct jaco_target_struct_t {
   bool                          coord;          /**< this target needs to be coordinated with targets of other arms. */
 } jaco_target_t;
 
-typedef std::list< fawkes::RefPtr<jaco_target_t> > jaco_target_queue_t;
+typedef std::list< RefPtr<jaco_target_t> > jaco_target_queue_t;
 
 typedef struct jaco_arm_struct {
   jaco_arm_config_t config;
   fawkes::JacoArm *arm;
-  fawkes::JacoInterface *iface;
+  JacoInterface *iface;
 
   JacoGotoThread *goto_thread;
   JacoOpenraveThread *openrave_thread;
 
-  fawkes::RefPtr< fawkes::Mutex > target_mutex;
-  fawkes::RefPtr< fawkes::Mutex > trajec_mutex; // very shortly locked mutex
+  RefPtr< Mutex > target_mutex;
+  RefPtr< Mutex > trajec_mutex; // very shortly locked mutex
 
-  fawkes::RefPtr< jaco_target_queue_t > target_queue;
+  RefPtr< jaco_target_queue_t > target_queue;
 
   float trajec_color[4]; // RGBA values, each from 0-1
 } jaco_arm_t;
 
 typedef struct jaco_dual_arm_struct {
-  jaco_arm_t left;
-  jaco_arm_t right;
-  JacoOpenraveThread *openrave_thread;
+  jaco_arm_t* left;
+  jaco_arm_t* right;
+  JacoBimanualInterface *iface;
 } jaco_dual_arm_t;
 
 
