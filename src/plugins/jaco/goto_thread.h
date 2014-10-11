@@ -34,7 +34,6 @@
 #include <vector>
 
 namespace fawkes {
-  class JacoInterface;
   class Mutex;
 }
 

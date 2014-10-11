@@ -202,6 +202,8 @@ JacoGotoThread::stop()
     __arm->target_queue->clear();
     __arm->target_mutex->unlock();
 
+    __target.clear();
+
     __final_mutex->lock();
     __final = true;
     __final_mutex->unlock();
@@ -306,6 +308,12 @@ JacoGotoThread::loop()
  // Current target has been processed. Unref, if still refed
   if(__target) {
     __target.clear();
+    // trajectory has been processed. remove that target from queue.
+    // This will automatically delete the trajectory as well as soon
+    // as we leave this block (thanks to refptr)
+    __arm->target_mutex->lock();
+    __arm->target_queue->pop_front();
+    __arm->target_mutex->unlock();
   }
 
   // Check for new targets
@@ -318,6 +326,7 @@ JacoGotoThread::loop()
   if( !__target || __target->coord ) {
     //no new target in queue, or target needs coordination of both arms,
     // which is not what this thread does
+    __target.clear();
     usleep(30e3);
     return;
   }
@@ -327,11 +336,6 @@ JacoGotoThread::loop()
       // "regular" target
       logger->log_debug(name(), "No planning for this new target. Process, using current finger positions...");
       _goto_target();
-
-      __arm->target_mutex->lock();
-      __arm->target_queue->pop_front();
-      __arm->target_mutex->unlock();
-
       logger->log_debug(name(), "...target processed");
       break;
 
@@ -350,13 +354,6 @@ JacoGotoThread::loop()
         // then execute the trajectory
         _exec_trajec(*(__target->trajec));
       }
-
-      // trajectory has been processed. remove that target from queue.
-      // This will automatically delete the trajectory as well as soon
-      // as we leave this block (thanks to refptr)
-      __arm->target_mutex->lock();
-      __arm->target_queue->pop_front();
-      __arm->target_mutex->unlock();
       break;
 
     case TRAJEC_PLANNING_ERROR:
@@ -368,6 +365,7 @@ JacoGotoThread::loop()
 
     default:
       //logger->log_debug("Target is trajectory, but not ready yet!");
+      __target.clear();
       usleep(30e3);
       break;
   }
