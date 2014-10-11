@@ -98,8 +98,11 @@ class JacoArm
   /** Move the arm to given configuration.
    * @param joints target joint angles
    * @param fingers target finger positions
+   * @param follow defines if this is a singular trajectory-point, or a consecutive one. Setting to "false"
+   *                acuires control of the arm and sets the mode to "angular" each time. Because of that,
+   *                it needs to be "true" if it is a "followup" trajectory point.
    */
-  virtual void goto_joints(std::vector<float> &joints, std::vector<float> &fingers) = 0;
+  virtual void goto_joints(std::vector<float> &joints, std::vector<float> &fingers, bool followup=false) = 0;
 
   /** Move the arm to given configuration.
    * @param coords target fingertip coordinations

@@ -236,14 +236,17 @@ JacoArmKindrv::goto_trajec(std::vector< std::vector<float> >* trajec, std::vecto
 }
 
 void
-JacoArmKindrv::goto_joints(std::vector<float> &joints, std::vector<float> &fingers)
+JacoArmKindrv::goto_joints(std::vector<float> &joints, std::vector<float> &fingers, bool followup)
 {
   __target_type = TARGET_ANGULAR;
   __final = false;
 
-  __arm->start_api_ctrl();
-  __arm->set_control_ang();
-  usleep(500);
+  if(!followup) {
+    __arm->start_api_ctrl();
+    __arm->set_control_ang();
+    usleep(500);
+  }
+
   __arm->set_target_ang(joints.at(0), joints.at(1), joints.at(2), joints.at(3), joints.at(4), joints.at(5),
                         fingers.at(0), fingers.at(1), fingers.at(2));
 }

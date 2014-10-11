@@ -149,8 +149,11 @@ JacoArmDummy::goto_trajec(std::vector< std::vector<float> >* trajec, std::vector
 }
 
 void
-JacoArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &fingers)
+JacoArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &fingers, bool followup)
 {
+  if(followup)
+    usleep(10e3);
+
   __joints = joints;
   __fingers = fingers;
 }
