@@ -72,14 +72,16 @@ local function set_params(msg, input)
    for _, f in ipairs(msg.spec.fields) do
       if f.is_array then
 	 local a = {}
-	 if f.is_builtin then
-	    for i, v in ipairs(input[f.name]) do
-	       a[i] = v
-	    end
-	 else
-	    for i, v in ipairs(input[f.name]) do
-	       a[i] = f.spec:instantiate()
-	       set_params(a[i], v)
+	 if input[f.name] ~= nil then
+	    if f.is_builtin then
+	       for i, v in ipairs(input[f.name]) do
+		  a[i] = v
+	       end
+	    else
+	       for i, v in ipairs(input[f.name]) do
+		  a[i] = f.spec:instantiate()
+		  set_params(a[i], v)
+	       end
 	    end
 	 end
 	 msg.values[f.name] = a
@@ -87,9 +89,11 @@ local function set_params(msg, input)
 	 if f.is_builtin then
 	    msg.values[f.name] = input[f.name]
 	 else
-	    assert(type(input[f.name]) == "table",
-		   "Input value for " .. f.name .. " is not a table")
-	    set_params(msg.values[f.name], input[f.name])
+	    if input[f.name] ~= nil then
+	       assert(type(input[f.name]) == "table",
+		      "Input value for " .. f.name .. " is not a table")
+	       set_params(msg.values[f.name], input[f.name])
+	    end
 	 end
       end
    end
