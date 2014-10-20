@@ -3,8 +3,9 @@
  *  eclipse_thread.cpp - Fawkes ECLiPSe Thread
  *
  *  Created: Wed Jul 16 10:42:49 2009
- *  Copyright  2009  Daniel Beck
- *
+ *  Copyright  2009      Daniel Beck
+ *             2013-2014 Gesche Gierse
+ *             2014      Tim Niemueller
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -104,20 +105,32 @@ EclipseAgentThread::init()
 
   m_initialized = true;
 
+  std::vector<std::string> paths = config->get_strings("/eclipse-clp/file_path");
 
   // initialise pathfinding utility
   EclipsePath::create_initial_object();
-  EclipsePath::instance()->add_path("@fawkesdir@/src/plugins/eclipse-clp/interpreter/");
-  EclipsePath::instance()->add_path("@fawkesdir@/src/plugins/eclipse-clp/utils/");
-  EclipsePath::instance()->add_path("@basedir@/src/plugins/eclipse-clp/interpreter/");
-  
+  EclipsePath::instance()->add_regex(boost::regex("@AGENT@"), agent);
+  for (size_t i = 0; i < paths.size(); ++i) {
+    EclipsePath::instance()->add_path(paths[i]);
+  }
+
   EclipsePath::instance()->apply_regexes();
 
   // debug
   EclipsePath::instance()->print_all_paths();
 
+  // make locate_file/2 available
+  std::string filepath_path = EclipsePath::instance()->locate_file("filepath.ecl");
+  if (filepath_path.empty()) {
+    throw Exception("Failed to determine path to filepath module");
+  }
+  load_file(filepath_path.c_str());
+
   // load interpreter and agent
   std::string agent_path = EclipsePath::instance()->locate_file(agent + ".ecl");
+  if (agent_path.empty()) {
+    throw Exception("Failed to determine path to agent module");
+  }
   load_file( agent_path.c_str() );
 
   // check if navgraph is used and pass config value
