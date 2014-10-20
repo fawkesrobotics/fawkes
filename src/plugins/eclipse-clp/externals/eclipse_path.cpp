@@ -24,21 +24,9 @@ EclipsePath::EclipsePath()
 void
 EclipsePath::create_initial_object(){
 	m_instance = new EclipsePath();
-	m_instance->add_regex(boost::regex("@basedir@"), BASEDIR);
-	m_instance->add_regex(boost::regex("@confdir@"), CONFDIR);
-	
-	m_instance->add_path("@basedir@/");
-	m_instance->apply_regexes();
-	std::string fawkes_path = m_instance->locate_file("fawkes");
-	m_instance->paths.clear(); // remove basedir from paths
-	//std::cout << "searched for fawkes folder" << fawkes_path << '\n';
-	if (not fawkes_path.empty()){
-		//std::cout << "found fawkes folder!\n";
-		m_instance->add_regex(boost::regex("@fawkesdir@"), fawkes_path);
-	}else{
-		// for convinience, if only fawkes exists, replace @fawkesdir@ with BASEDIR
-		m_instance->add_regex(boost::regex("@fawkesdir@"), BASEDIR);
-	}
+	m_instance->add_regex(boost::regex("@BASEDIR@"), BASEDIR);
+	m_instance->add_regex(boost::regex("@CONFDIR@"), CONFDIR);
+	m_instance->add_regex(boost::regex("@FAWKESDIR@"), FAWKES_BASEDIR);
 }
 
 EclipsePath* EclipsePath::instance()
