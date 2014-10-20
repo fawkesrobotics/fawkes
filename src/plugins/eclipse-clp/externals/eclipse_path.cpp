@@ -124,10 +124,10 @@ p_locate_file(...)
 	}
 	std::string p = EclipsePath::instance()->locate_file(filename);
 	if (EC_succeed != EC_arg(2).unify( EC_word(p.c_str()) ) ){
-		printf( "p_locate_file(): could not bind return valie\n" );
-		return EC_fail;
-	}	
-	return EC_succeed;
+	  printf( "p_locate_file(): could not bind return valie\n" );
+	  return EC_fail;
+	}
+	return p.empty() ? EC_fail : EC_succeed;
 }
 
 
