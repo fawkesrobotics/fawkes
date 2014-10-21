@@ -39,8 +39,9 @@ print_final = fawkes.logprint.print_info
 
 function init(args)
    local args = args or {}
-   roslua.init_node{node_name="skiller",
-		    no_signal_handler=args.no_signal_handler}
+   roslua.init_node{node_name = args.node_name or "skiller",
+		    no_signal_handler = args.no_signal_handler,
+                    no_print_funcs    = args.no_print_funcs}
 
    local run_nodemon = args.run_nodemon or false
    if roslua.has_param("skiller/nodemon") then
