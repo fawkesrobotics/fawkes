@@ -37,8 +37,10 @@
 #include <unistd.h>
 #include <algorithm>
 #include <yaml-cpp/traits.h>
+#include <limits>
 
 #ifndef HAVE_YAMLCPP_0_5
+#  ifdef HAVE_YAMLCPP_ATLEAST_0_3
 // older versions of yaml-cpp had these functions in the
 // YAML, rather than in the YAML::conversion namespace.
 namespace YAML {
@@ -48,6 +50,24 @@ namespace YAML {
     using YAML::IsNaN;
   }
 }
+#  else
+// older versions do not have this at all
+namespace YAML {
+  namespace conversion {
+    inline bool IsInfinity(const std::string& input) {
+      return input == ".inf" || input == ".Inf" || input == ".INF" || input == "+.inf" || input == "+.Inf" || input == "+.INF";
+    }
+
+    inline bool IsNegativeInfinity(const std::string& input) {
+      return input == "-.inf" || input == "-.Inf" || input == "-.INF";
+    }
+
+    inline bool IsNaN(const std::string& input) {
+      return input == ".nan" || input == ".NaN" || input == ".NAN";
+    }
+  }
+}
+#  endif
 #endif
 
 namespace fawkes {
