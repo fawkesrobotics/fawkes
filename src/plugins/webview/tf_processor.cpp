@@ -81,7 +81,7 @@ WebviewTfRequestProcessor::process_request(const fawkes::WebRequest *request)
       GVC_t* gvc = gvContext(); 
       Agraph_t* G = agmemread((char *)graph.c_str());
       gvLayout(gvc, G, (char *)"dot");
-      gvRender(gvc, G, "png", f);
+      gvRender(gvc, G, (char *)"png", f);
       gvFreeLayout(gvc, G);
       agclose(G);    
       gvFreeContext(gvc);
