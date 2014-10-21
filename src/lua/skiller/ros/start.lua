@@ -46,3 +46,4 @@ fawkes.depinit.add_module_initializer(srvinitmod.init_services)
 --skillenv.init(SKILLSPACE)
 
 skillenv.add_loop_callback("roslua", roslua.spin)
+skillenv.add_finalize_callback("roslua", roslua.finalize)

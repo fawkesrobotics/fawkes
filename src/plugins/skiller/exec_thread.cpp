@@ -217,6 +217,8 @@ SkillerExecutionThread::finalize()
 {
   __lua->remove_watcher(this);
 
+  __lua->do_string("skillenv.finalize()");
+
   std::list<SkillerFeature *>::iterator f;
   for (f = __features.begin(); f != __features.end(); ++f) {
     (*f)->finalize_lua_context(__lua);
