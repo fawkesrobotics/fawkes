@@ -81,12 +81,14 @@ EclipsePath::locate_file(std::string filename)
     path p (*it);
     p /= filename;
     //std::cout << "locate file: created path for:" << p.native() << '\n' ;
-    try
-    {
-      if (exists(p))
-      {
+    try {
+      if (exists(p)) {
 	//std::cout << "found file " << filename << " at:" << '\n'; 
+#ifdef BOOST_FILESYSTEM_VERSION
 	return p.native();
+#else
+	return p.string();
+#endif
       }
     }
     catch (const filesystem_error& ex)

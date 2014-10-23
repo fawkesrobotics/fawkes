@@ -20,6 +20,10 @@ include $(BUILDCONFDIR)/navgraph/navgraph.mk
 
 CFLAGS += $(ECLIPSE_CFLAGS)
 LDFLAGS += $(ECLIPSE_LDFLAGS)
+include $(BUILDSYSDIR)/boost.mk
+
+REQ_BOOST_LIBS = system filesystem regex
+HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 LIBS_eclipse_clp = fawkescore fawkesinterface fawkesblackboard \
                      fawkesaspects fawkesutils eclipse TestInterface \
@@ -39,27 +43,34 @@ else
   WARN_TARGETS += warning_navgraph
 endif
 
-#LIBS_eclipse_path = fawkescore eclipse
-#OBJS_eclipse_path = externals/eclipse_path.o
 
 OBJS_all = $(OBJS_eclipse_clp)
 
-ifeq ($(HAVE_ECLIPSE),1)
+ifeq ($(HAVE_ECLIPSE)$(HAVE_BOOST_LIBS),11)
   PLUGINS_all = $(PLUGINDIR)/eclipse-clp.so
-  # debug
-  #BINS_all = $(BINDIR)/eclipse_path
+
+  CFLAGS  += $(ECLIPSE_CFLAGS)  $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
+  LDFLAGS += $(ECLIPSE_LDFLAGS) $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 else
-  WARN_TARGETS += warning_eclipse
+  ifneq ($(HAVE_ECLIPSE),1)
+    WARN_TARGETS += warning_eclipse
+  endif
+  ifneq ($(HAVE_BOOST_LIBS),1)
+    WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS)
+all: $(WARN_TARGETS) $(WARN_TARGETS_BOOST)
 
-.PHONY: warning_eclipse
+.PHONY: warning_eclipse warning_navgraph warning_boost_%
 warning_eclipse:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe CLP Plugin$(TNORMAL) ($(ECLIPSE_FAIL_REASON))"
 warning_navgraph:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe navgraph support$(TNORMAL) ($(NAVGRAPH_ERROR))"
+$(WARN_TARGETS_BOOST): warning_boost_%:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build ECLiPSe CLP Plugin $(TNORMAL) (Boost library $* not found)"
+
 endif
 
 include $(BUILDSYSDIR)/base.mk
