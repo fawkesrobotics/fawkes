@@ -19,8 +19,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 :- module(skiller).
-:- use_module("../externals/blackboard").
-:- use_module("../utils/logging").
+
+:- use_module(filepath).
+
+?- locate_module("blackboard", F), use_module(F).
+?- locate_module("logging", F), use_module(F).
 
 :- export(exec_skill/2).
 :- export(exec_skill2/1).
@@ -78,7 +81,7 @@ exec_skill(Skill, Arguments) :-
 
 exec_skill2(Skillmsg) :-
     log_info("Executing skill '%w'", Skillmsg),
-    bb_send_message("Skiller", "ExecSkillContinuousMessage", [["skill_string", Skillmsg]], MsgID),
+    bb_send_message("Skiller", "ExecSkillMessage", [["skill_string", Skillmsg]], MsgID),
     log_info("Sending message with ID %w", [MsgID]),
     wait_until_processed(MsgID),
     log_info("Sent Skiller Message").
