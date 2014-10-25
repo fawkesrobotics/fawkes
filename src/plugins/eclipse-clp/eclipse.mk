@@ -65,7 +65,7 @@ ifeq ($(HAVE_ECLIPSE),1)
     ECLIPSE_LIBDIR = $(shell $(ECLIPSE_BINARY) -e "get_flag(installation_directory,D),printf(\"%p\", [D])")/lib/$(HOSTARCH)
     ECLIPSE_INCDIR = $(shell $(ECLIPSE_BINARY) -e "get_flag(installation_directory,D),printf(\"%p\", [D])")/include/$(HOSTARCH)
 
-    ifeq ($(wildcard $ECLIPSE_INCDIR),)
+    ifeq ($(wildcard $(ECLIPSE_INCDIR)),)
       # Includes are not in the installation directory,
       # might be in system path, check there.
       ifneq ($(wildcard $(SYSROOT)/usr/include/eclipse-clp),)
