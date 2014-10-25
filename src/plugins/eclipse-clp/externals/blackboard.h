@@ -42,48 +42,52 @@ private:
   /** Constructor. */
   EclExternalBlackBoard();
 
-  /** Constructor. */
-  EclExternalBlackBoard( BlackBoard* );
+  /** Constructor.
+   * @param blackboard blackboard to use to open interfaces
+   */
+  EclExternalBlackBoard(BlackBoard *blackboard);
 public:
   /** Destructor. */
   ~EclExternalBlackBoard();
 
-
   static void create_initial_object(BlackBoard *bb);
   static EclExternalBlackBoard* instance();
-  void connect( const char* );
+
+  void connect(const char *host);
   bool connected();
   void disconnect();
   static BlackBoard* blackboard_instance();
-  std::vector< Interface* >& interfaces();
+  std::map<std::string, Interface *> & interfaces();
 
 private:
-  static EclExternalBlackBoard*  m_instance;
-  std::vector< Interface* >      m_interfaces;
-  static BlackBoard*             m_blackboard;
+  static EclExternalBlackBoard *      m_instance;
+  std::map<std::string, Interface *>  m_interfaces;
+  static BlackBoard *                 m_blackboard;
 };
 }
 
 
-extern "C" int p_connect_to_remote_blackboard();
-extern "C" int p_disconnect_from_blackboard();
-extern "C" int p_is_alive();
-extern "C" int p_is_connected();
+extern "C" int p_bb_connect_to_remote_blackboard();
+extern "C" int p_bb_disconnect_from_blackboard();
+extern "C" int p_bb_is_alive();
+extern "C" int p_bb_is_connected();
 
-extern "C" int p_open_interface();
-extern "C" int p_close_interface();
+extern "C" int p_bb_open_interface();
+extern "C" int p_bb_close_interface();
 
-extern "C" int p_has_writer();
-extern "C" int p_instance_serial();
+extern "C" int p_bb_has_writer();
+extern "C" int p_bb_instance_serial();
 
-extern "C" int p_read_interfaces();
-extern "C" int p_write_interfaces();
+extern "C" int p_bb_read_interfaces();
+extern "C" int p_bb_read_interface();
+extern "C" int p_bb_write_interfaces();
+extern "C" int p_bb_write_interface();
 
-extern "C" int p_read_from_interface();
-extern "C" int p_write_to_interface();
+extern "C" int p_bb_get();
+extern "C" int p_bb_set();
 
-extern "C" int p_send_message();
-extern "C" int p_recv_messages();
+extern "C" int p_bb_send_message();
+extern "C" int p_bb_recv_messages();
 
 #endif
 

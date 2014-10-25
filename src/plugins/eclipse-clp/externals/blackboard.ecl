@@ -27,13 +27,17 @@
 :- export bb_disconnect/0.
 :- export bb_is_alive/0.
 :- export bb_open_interface/3.
+:- export bb_open_interface_reading/2.
+:- export bb_open_interface_writing/2.
 :- export bb_close_interface/1.
 :- export bb_has_writer/1.
 :- export bb_instance_serial/2.
 :- export bb_read_interfaces/0.
 :- export bb_write_interfaces/0.
-:- export bb_read_interface/3.
-:- export bb_write_interface/3.
+:- export bb_read_interface/1.
+:- export bb_write_interface/1.
+:- export bb_get/3.
+:- export bb_set/3.
 :- export bb_send_message/3.
 :- export bb_send_message/4.
 :- export bb_recv_messages/2.
@@ -42,20 +46,22 @@
 :- export bb_ensure_connected/0.
 
 %% definition of external predicates
-:- external(bb_connect_remote/1, p_connect_to_remote_blackboard).
-:- external(bb_disconnect/0, p_disconnect_from_blackboard).
-:- external(bb_is_alive/0, p_is_alive).
-:- external(bb_is_connected/0, p_is_connected).
-:- external(bb_open_interface/3, p_open_interface).
-:- external(bb_close_interface/1, p_close_interface).
-:- external(bb_has_writer/1, p_has_writer).
-:- external(bb_instance_serial/2, p_instance_serial).
-:- external(bb_read_interfaces/0, p_read_interfaces).
-:- external(bb_write_interfaces/0, p_write_interfaces).
-:- external(bb_read_interface/3, p_read_from_interface).
-:- external(bb_write_interface/3, p_write_to_interface).
-:- external(bb_send_message/4, p_send_message).
-:- external(bb_recv_messages/2, p_recv_messages).
+:- external(bb_connect_remote/1, p_bb_connect_to_remote_blackboard).
+:- external(bb_disconnect/0, p_bb_disconnect_from_blackboard).
+:- external(bb_is_alive/0, p_bb_is_alive).
+:- external(bb_is_connected/0, p_bb_is_connected).
+:- external(bb_open_interface/3, p_bb_open_interface).
+:- external(bb_close_interface/1, p_bb_close_interface).
+:- external(bb_has_writer/1, p_bb_has_writer).
+:- external(bb_instance_serial/2, p_bb_instance_serial).
+:- external(bb_read_interfaces/0, p_bb_read_interfaces).
+:- external(bb_write_interfaces/0, p_bb_write_interfaces).
+:- external(bb_read_interface/1, p_bb_read_interface).
+:- external(bb_write_interface/1, p_bb_write_interface).
+:- external(bb_get/3, p_bb_get).
+:- external(bb_set/3, p_bb_set).
+:- external(bb_send_message/4, p_bb_send_message).
+:- external(bb_recv_messages/2, p_bb_recv_messages).
 
 %% definition of errors
 connection_error_handler(_, _) :-
