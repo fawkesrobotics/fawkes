@@ -36,12 +36,12 @@
 
 init :- bb_ensure_connected,
         bb_open_interface(w,"EclipseDebuggerInterface","eclipse_clp_connect").
-fin :- bb_close_interface("eclipse_clp_connect"),
+fin :- bb_close_interface("EclipseDebuggerInterface::eclipse_clp_connect"),
 	log_info("Closing eclipse_clp_connect").
 
 %% event handlers
 handle_check_debug_msg(check_debug_msg) :- bb_read_interfaces,
-                               bb_recv_messages("eclipse_clp_connect", List),
+                               bb_recv_messages("EclipseDebuggerInterface::eclipse_clp_connect", List),
                                eval_list(List). 
 %% set event handlers
 :- set_event_handler(check_debug_msg, handle_check_debug_msg/1).
@@ -62,9 +62,9 @@ attach_tktools :- log_debug("Attaching tktools, using the following host and por
 
 
 connecting(H, P) :- log_debug( "%s / %d", [H, P]),
-                    bb_write_interface("eclipse_clp_connect", "port", P),
-                    bb_write_interface("eclipse_clp_connect", "host", H),
-                    bb_write_interfaces.
+                    bb_set("EclipseDebuggerInterface::eclipse_clp_connect", "port", P),
+                    bb_set("EclipseDebuggerInterface::eclipse_clp_connect", "host", H),
+                    bb_write_interface("EclipseDebuggerInterface::eclipse_clp_connect").
 
 %after this succeeds, trace/1 and other debug predicates can be called
 ensure_attached :- log_info("Waiting for eclipsedebugger to connect, please start eclipsedebugger"), ensure_attached_.
