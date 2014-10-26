@@ -164,8 +164,9 @@ EclipseAgentThread::once()
   if(EC_yield == res){
     //terminate
   } else { 
-    if ( EC_succeed != res)
-    { throw Exception( "Error running agent program" ); }
+    if ( EC_succeed != res) {
+      logger->log_error(name(), "Running the agent program failed");
+    }
   }
 }
 
