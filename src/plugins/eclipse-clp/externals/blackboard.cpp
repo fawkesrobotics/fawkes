@@ -5,7 +5,7 @@
  *
  *  Created: Wed Mar 09 17:10:54 2011
  *  Copyright  2011  Daniel Beck
- *
+ *             2014  Tim Niemueller
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -149,7 +149,7 @@ p_bb_connect_to_remote_blackboard()
 {
   if (EclExternalBlackBoard::instance()->connected())
   {
-    printf("p_bb_connect_to_remote_blackboard(): already connected\n");
+    fprintf(stderr, "p_bb_connect_to_remote_blackboard(): already connected\n");
     return EC_fail;
   }
 
@@ -158,7 +158,7 @@ p_bb_connect_to_remote_blackboard()
 
   if (EC_succeed != EC_arg(2).is_string(&hostname))
   {
-    printf("p_bb_connect_to_remote_blackboard(): first argument is not a string\n");
+    fprintf(stderr, "p_bb_connect_to_remote_blackboard(): first argument is not a string\n");
     return EC_fail;
   }
 
@@ -168,7 +168,7 @@ p_bb_connect_to_remote_blackboard()
   }
   catch (Exception& e)
   {
-    e.print_trace();
+    fprintf(stderr, "p_bb_connect_to_remote_blacboard() failed: %s\n", e.what_no_backtrace());
     return EC_fail;
   }
 
@@ -181,7 +181,7 @@ p_bb_disconnect_from_blackboard()
 {
   if (!EclExternalBlackBoard::instance()->connected())
   {
-    printf("p_bb_disconnect_from_blackboard(): not connected\n");
+    fprintf(stderr, "p_bb_disconnect_from_blackboard(): not connected\n");
     return EC_fail;
   }
 
@@ -196,7 +196,7 @@ p_bb_is_alive()
 {
   if (!EclExternalBlackBoard::instance()->connected())
   {
-    printf("p_bb_is_alive(): not connected\n");
+    fprintf(stderr, "p_bb_is_alive(): not connected\n");
     return EC_fail;
   }
 
@@ -221,7 +221,7 @@ p_bb_open_interface()
 {
   if (!EclExternalBlackBoard::instance()->connected())
   {
-    printf("p_bb_open_interface(): not connected\n");
+    fprintf(stderr, "p_bb_open_interface(): not connected\n");
     return EC_fail;
   }
 
@@ -231,19 +231,19 @@ p_bb_open_interface()
 
   if (EC_succeed != EC_arg(1).is_atom(&mode))
   {
-    printf("p_bb_open_interface(): no mode given\n");
+    fprintf(stderr, "p_bb_open_interface(): no mode given\n");
     return EC_fail;
   }
 
   if (EC_succeed != EC_arg(2).is_string(&interface_type))
   {
-    printf("p_bb_open_interface(): no type given\n");
+    fprintf(stderr, "p_bb_open_interface(): no type given\n");
     return EC_fail;
   }
 
   if (EC_succeed != EC_arg (3).is_string(&interface_id))
   {
-    printf("p_bb_open_interface(): no id given\n");
+    fprintf(stderr, "p_bb_open_interface(): no id given\n");
     return EC_fail;
   }
 
@@ -266,7 +266,7 @@ p_bb_open_interface()
 
       interfaces[iface->uid()] = iface;
     } catch (Exception& e) {
-      e.print_trace();
+      fprintf(stderr, "p_bb_open_interface() failed: %s\n", e.what_no_backtrace());
       return EC_fail;
     }
   }
@@ -284,7 +284,7 @@ p_bb_close_interface()
 {
   if (!EclExternalBlackBoard::instance()->connected())
   {
-    printf("p_bb_close_interface(): not connected\n");
+    fprintf(stderr, "p_bb_close_interface(): not connected\n");
     return EC_fail;
   }
 
@@ -293,7 +293,7 @@ p_bb_close_interface()
 
   if (EC_succeed != EC_arg(1).is_string(&uid))
   {
-    printf("p_bb_close_interface(): no id given\n");
+    fprintf(stderr, "p_bb_close_interface(): no id given\n");
     return EC_fail;
   }
 
@@ -315,7 +315,7 @@ p_bb_has_writer()
   char* uid;
 
   if (EC_succeed != EC_arg(1).is_string(&uid)) {
-    printf("p_bb_has_writer(): no uid given\n");
+    fprintf(stderr, "p_bb_has_writer(): no uid given\n");
     return EC_fail;
   }
 
@@ -335,14 +335,14 @@ p_bb_instance_serial()
 {
   if (!EclExternalBlackBoard::instance()->connected())
   {
-    printf("p_bb_instance_serial(): not connected to blackboard\n");
+    fprintf(stderr, "p_bb_instance_serial(): not connected to blackboard\n");
     return EC_fail;
   }
 
   char* uid;
   if (EC_succeed != EC_arg(1).is_string(&uid))
   {
-    printf("p_bb_instance_serial(): no interface uid given\n");
+    fprintf(stderr, "p_bb_instance_serial(): no interface uid given\n");
     return EC_fail;
   }
 
@@ -352,7 +352,7 @@ p_bb_instance_serial()
   if (interfaces.find(uid) != interfaces.end()) {
 
     if (EC_succeed != EC_arg(2).unify(interfaces[uid]->serial()))  {
-      printf("p_bb_instance_serial(): could not bind return value\n");
+      fprintf(stderr, "p_bb_instance_serial(): could not bind return value\n");
       return EC_fail;
     } else {
       return EC_succeed;
@@ -382,7 +382,7 @@ p_bb_read_interface()
   char *uid;
   if (EC_succeed != EC_arg(1).is_string(&uid))
   {
-    printf("p_read_interface(): no interface UID given\n");
+    fprintf(stderr, "p_read_interface(): no interface UID given\n");
     return EC_fail;
   }
 
@@ -390,7 +390,7 @@ p_bb_read_interface()
     EclExternalBlackBoard::instance()->interfaces();
 
   if (interfaces.find(uid) == interfaces.end()) {
-    printf("p_bb_read_interface: interface %s has not been opened\n", uid);
+    fprintf(stderr, "p_bb_read_interface: interface %s has not been opened\n", uid);
     return EC_fail;
   }
 
@@ -418,7 +418,7 @@ p_bb_write_interface()
   char *uid;
   if (EC_succeed != EC_arg(1).is_string(&uid))
   {
-    printf("p_read_interface(): no interface UID given\n");
+    fprintf(stderr, "p_read_interface(): no interface UID given\n");
     return EC_fail;
   }
 
@@ -426,12 +426,12 @@ p_bb_write_interface()
     EclExternalBlackBoard::instance()->interfaces();
 
   if (interfaces.find(uid) == interfaces.end()) {
-    printf("p_bb_read_interface: interface %s has not been opened\n", uid);
+    fprintf(stderr, "p_bb_read_interface: interface %s has not been opened\n", uid);
     return EC_fail;
   }
 
   if (! interfaces[uid]->is_writer()) {
-    printf("p_bb_set(): interface %s not a writer\n", uid);
+    fprintf(stderr, "p_bb_set(): interface %s not a writer\n", uid);
     return EC_fail;
   }
 
@@ -447,13 +447,13 @@ p_bb_get()
 
   if (EC_succeed != EC_arg(1).is_string(&uid))
   {
-    printf("p_bb_get(): no interface uid given\n");
+    fprintf(stderr, "p_bb_get(): no interface uid given\n");
     return EC_fail;
   }
 
   if (EC_succeed != EC_arg(2).is_string(&field))
   {
-    printf("p_bb_get(): no field given\n");
+    fprintf(stderr, "p_bb_get(): no field given\n");
     return EC_fail;
   }
 
@@ -470,12 +470,12 @@ p_bb_get()
 	case IFT_BOOL:
 	  if (fit.get_bool()) {
 	    if (EC_succeed != EC_arg(3).unify(EC_atom((char*) "true"))) {
-	      printf("p_bb_get(): could not bind return value\n");
+	      fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	      return EC_fail;
 	    }
 	  } else {
 	    if (EC_succeed != EC_arg(3).unify(EC_atom((char*) "false"))) {
-	      printf("p_bb_get(): could not bind return value\n");
+	      fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	      return EC_fail;
 	    }
 	  }
@@ -483,56 +483,56 @@ p_bb_get()
 	    
 	case IFT_INT8:
 	  if (EC_succeed != EC_arg(3).unify(EC_word((long) fit.get_int8()))) {
-	    printf("p_bb_get(): could not bind return value\n");
+	    fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	    return EC_fail;
 	  }
 	  break;
 	    
 	case IFT_UINT8:
 	  if (EC_succeed != EC_arg(3).unify(EC_word((long) fit.get_uint8()))) {
-	    printf("p_bb_get(): could not bind return value\n");
+	    fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	    return EC_fail;
 	  }
 	  break;
 	    
 	case IFT_INT16:
 	  if (EC_succeed != EC_arg(3).unify(EC_word((long) fit.get_int16()))) {
-	    printf("p_bb_get(): could not bind return value\n");
+	    fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	    return EC_fail;
 	  }
 	  break;
 	    
 	case IFT_UINT16:
 	  if (EC_succeed != EC_arg(3).unify(EC_word((long) fit.get_uint16()))) {
-	    printf("p_bb_get(): could not bind return value\n");
+	    fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	    return EC_fail;
 	  }
 	  break;
 	    
 	case IFT_INT32:
 	  if (EC_succeed != EC_arg(3).unify(EC_word((long) fit.get_int32()))) {
-	    printf("p_bb_get: could not bind value\n");
+	    fprintf(stderr, "p_bb_get: could not bind value\n");
 	    return EC_fail;
 	  }
 	  break;
 	    
 	case IFT_UINT32:
 	  if (EC_succeed != EC_arg(3).unify(EC_word((long) fit.get_uint32()))) {
-	    printf("p_bb_get(): could not bind return value\n");
+	    fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	    return EC_fail;
 	  }
 	  break;
 	    
 	case IFT_INT64:
 	  if (EC_succeed != EC_arg(3).unify(EC_word((long) fit.get_int64()))) {
-	    printf("p_bb_get(): could not bind return value\n");
+	    fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	    return EC_fail;
 	  }
 	  break;
 	    
 	case IFT_UINT64:
 	  if (EC_succeed != EC_arg(3).unify(EC_word((long) fit.get_uint64()))) {
-	    printf("p_bb_get(): could not bind return value\n");
+	    fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	    return EC_fail;
 	  }
 	  break;
@@ -544,12 +544,12 @@ p_bb_get()
 	    for (int i=fit.get_length() - 1; i >= 0; --i)
 	      res = list(EC_word(f_array[i]), res);
 	    if (EC_succeed != EC_arg(3).unify(res)) {
-	      printf("p_bb_get(): could not bind return value\n");
+	      fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	      return EC_fail;
 	    }
 	  } else {
 	    if (EC_succeed != EC_arg(3).unify(EC_word((double) fit.get_float()))) {
-	      printf("p_bb_get(): could not bind return value\n");
+	      fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	      return EC_fail;
 	    }
 	  }
@@ -562,12 +562,12 @@ p_bb_get()
 	    for (int i=fit.get_length() - 1; i >= 0; --i)
 	      res = list(EC_word(double_array[i]), res);
 	    if (EC_succeed != EC_arg(3).unify(res)) {
-	      printf("p_bb_get(): could not bind return value\n");
+	      fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	      return EC_fail;
 	    }
 	  } else {
 	    if (EC_succeed != EC_arg(3).unify(EC_word((double) fit.get_double()))) {
-	      printf("p_bb_get(): could not bind return value\n");
+	      fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	      return EC_fail;
 	    }
 	  }
@@ -575,24 +575,24 @@ p_bb_get()
 
 	case IFT_STRING:
 	  if (EC_succeed != EC_arg(3).unify(EC_word(fit.get_string()))) {
-	    printf("p_bb_get(): could not bind return value\n");
+	    fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	    return EC_fail;
 	  }
 	  break;
 	    
 	case IFT_BYTE:
-	  printf("p_bb_get(): NOT YET IMPLEMENTED\n");
+	  fprintf(stderr, "p_bb_get(): NOT YET IMPLEMENTED\n");
 	  break;
 
 	case IFT_ENUM:
 	  if (EC_succeed != EC_arg(3).unify(fit.get_value_string())) {
-	    printf("p_bb_get(): could not bind return value\n");
+	    fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	    return EC_fail;
 	  }
 	  break;
 
 	default:
-	  printf("p_bb_get(): could not find type of interface! Type: %s (%d)", fit.get_typename(), fit.get_type());
+	  fprintf(stderr, "p_bb_get(): could not find type of interface! Type: %s (%d)", fit.get_typename(), fit.get_type());
 	  break;
 	}
 	break;
@@ -600,12 +600,12 @@ p_bb_get()
     }
 
     if (fit == iface->fields_end()) {
-      printf("p_bb_get(): interface %s has no field %s\n", uid, field);
+      fprintf(stderr, "p_bb_get(): interface %s has no field %s\n", uid, field);
       return EC_fail;
     }
 
   } else {
-    printf("p_bb_get(): no interface with id %s found\n", uid);
+    fprintf(stderr, "p_bb_get(): no interface with id %s found\n", uid);
     return EC_fail;
   }
 
@@ -620,12 +620,12 @@ p_bb_set()
   char* field;
 
   if (EC_succeed != EC_arg(1).is_string(&uid)) {
-    printf("p_bb_set(): no interface id given\n");
+    fprintf(stderr, "p_bb_set(): no interface id given\n");
     return EC_fail;
   }
 
   if (EC_succeed != EC_arg(2).is_string(&field)) {
-    printf("p_bb_set(): no field given\n");
+    fprintf(stderr, "p_bb_set(): no field given\n");
     return EC_fail;
   }
 
@@ -636,7 +636,7 @@ p_bb_set()
     Interface *iface = interfaces[uid];
 
     if (!iface->is_writer()) {
-      printf("p_bb_set(): interface %s not a writer\n", uid);
+      fprintf(stderr, "p_bb_set(): interface %s not a writer\n", uid);
       return EC_fail;
     }
 
@@ -648,7 +648,7 @@ p_bb_set()
 	  {
 	    EC_atom val;
 	    if (EC_succeed != EC_arg(3).is_atom(&val)) {
-	      printf("p_bb_set(): no value_given\n");
+	      fprintf(stderr, "p_bb_set(): no value_given\n");
 	      return EC_fail;
 	    }
 
@@ -658,7 +658,7 @@ p_bb_set()
 	    { fit.set_bool(false); }
 	    else
 	    {
-	      printf("p_bb_set(): boolean value neither true nor false\n");
+	      fprintf(stderr, "p_bb_set(): boolean value neither true nor false\n");
 	      return EC_fail;
 	    }
 	  }
@@ -669,7 +669,7 @@ p_bb_set()
 	    long val;
 	    if (EC_succeed != EC_arg(3).is_long(&val))
 	    {
-	      printf("p_bb_set(): no value given\n");
+	      fprintf(stderr, "p_bb_set(): no value given\n");
 	      return EC_fail;
 	    }
 
@@ -682,7 +682,7 @@ p_bb_set()
 	    long val;
 	    if (EC_succeed != EC_arg(3).is_long(&val))
 	    {
-	      printf("p_bb_set(): no value given\n");
+	      fprintf(stderr, "p_bb_set(): no value given\n");
 	      return EC_fail;
 	    }
 
@@ -695,7 +695,7 @@ p_bb_set()
 	    long val;
 	    if (EC_succeed != EC_arg(3).is_long(&val))
 	    {
-	      printf("p_bb_set(): no value given\n");
+	      fprintf(stderr, "p_bb_set(): no value given\n");
 	      return EC_fail;
 	    }
 
@@ -708,7 +708,7 @@ p_bb_set()
 	    long val;
 	    if (EC_succeed != EC_arg(3).is_long(&val))
 	    {
-	      printf("p_bb_set(): no value given\n");
+	      fprintf(stderr, "p_bb_set(): no value given\n");
 	      return EC_fail;
 	    }
 
@@ -721,7 +721,7 @@ p_bb_set()
 	    long val;
 	    if (EC_succeed != EC_arg(3).is_long(&val))
 	    {
-	      printf("p_bb_set(): no value given\n");
+	      fprintf(stderr, "p_bb_set(): no value given\n");
 	      return EC_fail;
 	    }
 
@@ -734,7 +734,7 @@ p_bb_set()
 	    long val;
 	    if (EC_succeed != EC_arg(3).is_long(&val))
 	    {
-	      printf("p_bb_set(): no value given\n");
+	      fprintf(stderr, "p_bb_set(): no value given\n");
 	      return EC_fail;
 	    }
 
@@ -747,7 +747,7 @@ p_bb_set()
 	    long val;
 	    if (EC_succeed != EC_arg(3).is_long(&val))
 	    {
-	      printf("p_bb_set(): no value given\n");
+	      fprintf(stderr, "p_bb_set(): no value given\n");
 	      return EC_fail;
 	    }
 
@@ -760,7 +760,7 @@ p_bb_set()
 	    long val;
 	    if (EC_succeed != EC_arg(3).is_long(&val))
 	    {
-	      printf("p_bb_set(): no value given\n");
+	      fprintf(stderr, "p_bb_set(): no value given\n");
 	      return EC_fail;
 	    }
 
@@ -773,7 +773,7 @@ p_bb_set()
 	    double val;
 	    if (EC_succeed != EC_arg(3).is_double(&val))
 	    {
-	      printf("p_bb_set(): no value given\n");
+	      fprintf(stderr, "p_bb_set(): no value given\n");
 	      return EC_fail;
 	    }
 
@@ -786,7 +786,7 @@ p_bb_set()
 	    char* val;
 	    if (EC_succeed != EC_arg(3).is_string(&val))
 	    {
-	      printf("p_bb_set(): no value given\n");
+	      fprintf(stderr, "p_bb_set(): no value given\n");
 	      return EC_fail;
 	    }
 
@@ -796,7 +796,7 @@ p_bb_set()
 	    
 	case IFT_BYTE:
 	case IFT_ENUM:
-	  printf("p_bb_set(): NOT YET IMPLEMENTET\n");
+	  fprintf(stderr, "p_bb_set(): NOT YET IMPLEMENTET\n");
 	  break;
 
 	default:
@@ -807,12 +807,12 @@ p_bb_set()
     }
 
     if (fit == iface->fields_end()) {
-      printf("p_bb_set(): interface %s has no field %s\n", uid, field);
+      fprintf(stderr, "p_bb_set(): interface %s has no field %s\n", uid, field);
       return EC_fail;
     }
 
   } else {
-   printf("p_bb_set(): no interface with id %s found\n", uid);
+   fprintf(stderr, "p_bb_set(): no interface with id %s found\n", uid);
     
    return EC_fail;
   }
@@ -828,13 +828,13 @@ p_bb_send_message()
   char* message_type;
 
   if (EC_succeed != EC_arg(1).is_string(&uid)) {
-    printf("p_bb_send_message(): no interface id given\n");
+    fprintf(stderr, "p_bb_send_message(): no interface id given\n");
     return EC_fail;
   }
 
   if (EC_succeed != EC_arg(2).is_string(&message_type))
   {
-    printf("p_bb_send_message(): no message type given\n");
+    fprintf(stderr, "p_bb_send_message(): no message type given\n");
     return EC_fail;
   }
 
@@ -845,7 +845,7 @@ p_bb_send_message()
     Interface *iface = interfaces[uid];
 
     if (iface->is_writer()) {
-      printf("p_bb_send_message(): interface with uid %s is a writer\n", uid);
+      fprintf(stderr, "p_bb_send_message(): interface with uid %s is a writer\n", uid);
       return EC_fail;
     }
 
@@ -864,11 +864,11 @@ p_bb_send_message()
       // return the msgID as 4th argument
       EC_arg(4).unify((long)(msg->id()));
     } catch (Exception& e) {
-      e.print_trace();
+      fprintf(stderr, "p_bb_send_message() failed: %s\n", e.what_no_backtrace());
       return EC_fail;
     }
   } else {
-    printf("p_bb_send_message(): no interface with name %s\n", uid);
+    fprintf(stderr, "p_bb_send_message(): no interface with name %s\n", uid);
     return EC_fail;
   }
 
@@ -882,7 +882,7 @@ p_bb_recv_messages()
   char* uid;
 
   if (EC_succeed != EC_arg(1).is_string(&uid)) {
-    printf("p_bb_recv_messages(): no interface uid given\n");
+    fprintf(stderr, "p_bb_recv_messages(): no interface uid given\n");
     return EC_fail;
   }
 
@@ -893,7 +893,7 @@ p_bb_recv_messages()
     Interface *iface = interfaces[uid];
 
     if (! iface->is_writer()) {
-      printf("p_bb_recv_messages(): interface with uid %s is not a writer\n", uid);
+      fprintf(stderr, "p_bb_recv_messages(): interface with uid %s is not a writer\n", uid);
       return EC_fail;
     }
 
@@ -958,11 +958,11 @@ p_bb_recv_messages()
 
 	case IFT_BYTE:
 	case IFT_ENUM:
-	  printf("p_bb_recv_messages(): NOT YET IMPLEMENTED\n");
+	  fprintf(stderr, "p_bb_recv_messages(): NOT YET IMPLEMENTED\n");
 	  break;
 
 	default:
-	  printf("p_bb_recv_messages(): unknown field type\n");
+	  fprintf(stderr, "p_bb_recv_messages(): unknown field type\n");
 	}
 
 	EC_word field = ::list(EC_word(fit.get_name()),
@@ -979,12 +979,12 @@ p_bb_recv_messages()
     }
 
     if (EC_succeed != EC_arg(2).unify(msg_list)) {
-      printf("p_bb_recv_messages(): could not bind return value\n");
+      fprintf(stderr, "p_bb_recv_messages(): could not bind return value\n");
       return EC_fail;
     }
 
   } else {
-    printf("p_bb_recv_messages(): no interface with id %s found\n", uid);
+    fprintf(stderr, "p_bb_recv_messages(): no interface with id %s found\n", uid);
     return EC_fail;
   }
 
@@ -1009,14 +1009,14 @@ process_message_args(Message* msg, EC_word arg_list)
     if (EC_succeed != head.is_list(field, t1) ||
 	 EC_succeed != t1.is_list(value, t2)       )
     {
-      printf("p_bb_send_messge(): could not parse argument list\n");
+      fprintf(stderr, "p_bb_send_messge(): could not parse argument list\n");
       return false;
     }
 
     char* field_name;
     if (EC_succeed != field.is_string(&field_name))
     {
-      printf("p_bb_send_message(): malformed argument list\n");
+      fprintf(stderr, "p_bb_send_message(): malformed argument list\n");
       return false;
     }
 
@@ -1034,7 +1034,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    EC_atom val;
 	    if (EC_succeed != value.is_atom(&val))
 	    {
-	      printf("p_bb_send_message(): no value_given (bool)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value_given (bool)\n");
 	      return false;
 	    }
 
@@ -1044,7 +1044,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    { fit.set_bool(false); }
 	    else
 	    {
-	      printf("p_bb_send_message(): boolean value neither true nor false\n");
+	      fprintf(stderr, "p_bb_send_message(): boolean value neither true nor false\n");
 	      return false;
 	    }
 	  }
@@ -1056,7 +1056,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    long val;
 	    if (EC_succeed != value.is_long(&val))
 	    {
-	      printf("p_bb_send_message(): no value given (int8)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value given (int8)\n");
 	      return false;
 	    }
 
@@ -1070,7 +1070,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    long val;
 	    if (EC_succeed != value.is_long(&val))
 	    {
-	      printf("p_bb_send_message(): no value given (uint8)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value given (uint8)\n");
 	      return false;
 	    }
 
@@ -1084,7 +1084,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    long val;
 	    if (EC_succeed != value.is_long(&val))
 	    {
-	      printf("p_bb_send_message(): no value given (int16)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value given (int16)\n");
 	      return false;
 	    }
 
@@ -1098,7 +1098,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    long val;
 	    if (EC_succeed != value.is_long(&val))
 	    {
-	      printf("p_bb_send_message(): no value given (uint16)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value given (uint16)\n");
 	      return false;
 	    }
 
@@ -1112,7 +1112,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    long val;
 	    if (EC_succeed != value.is_long(&val))
 	    {
-	      printf("p_bb_send_message(): no value given (int32)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value given (int32)\n");
 	      return false;
 	    }
 
@@ -1126,7 +1126,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    long val;
 	    if (EC_succeed != value.is_long(&val))
 	    {
-	      printf("p_bb_send_message(): no value given (uint32)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value given (uint32)\n");
 	      return false;
 	    }
 
@@ -1140,7 +1140,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    long val;
 	    if (EC_succeed != value.is_long(&val))
 	    {
-	      printf("p_bb_send_message(): no value given (int64)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value given (int64)\n");
 	      return false;
 	    }
 
@@ -1154,7 +1154,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    long val;
 	    if (EC_succeed != value.is_long(&val))
 	    {
-	      printf("p_bb_send_message(): no value given (uint64)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value given (uint64)\n");
 	      return false;
 	    }
 
@@ -1168,7 +1168,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    double val;
 	    if (EC_succeed != value.is_double(&val))
 	    {
-	      printf("p_bb_send_message(): no value given (float)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value given (float)\n");
 	      return false;
 	    }
 
@@ -1182,7 +1182,7 @@ process_message_args(Message* msg, EC_word arg_list)
 	    char* val;
 	    if (EC_succeed != value.is_string(&val))
 	    {
-	      printf("p_bb_send_message(): no value given (string)\n");
+	      fprintf(stderr, "p_bb_send_message(): no value given (string)\n");
 	      return false;
 	    }
 
@@ -1193,7 +1193,7 @@ process_message_args(Message* msg, EC_word arg_list)
 
 	case IFT_BYTE:
 	case IFT_ENUM:
-	  printf("p_bb_send_message(): NOT YET IMPLEMENTET\n");
+	  fprintf(stderr, "p_bb_send_message(): NOT YET IMPLEMENTET\n");
 	  break;
 
 	default:
@@ -1206,7 +1206,7 @@ process_message_args(Message* msg, EC_word arg_list)
 
     if (fit == msg->fields_end())
     {
-      printf("p_bb_send_message(): message has no field with name %s\n",
+      fprintf(stderr, "p_bb_send_message(): message has no field with name %s\n",
 	      field_name);
       return false;
     }
