@@ -440,6 +440,28 @@ p_bb_write_interface()
 }
 
 int
+p_bb_interface_changed()
+{
+  char *uid;
+  if (EC_succeed != EC_arg(1).is_string(&uid))
+  {
+    fprintf(stderr, "p_interface_changed(): no interface UID given\n");
+    return EC_fail;
+  }
+
+  std::map<std::string, Interface *> &interfaces =
+    EclExternalBlackBoard::instance()->interfaces();
+
+  if (interfaces.find(uid) == interfaces.end()) {
+    fprintf(stderr, "p_bb_interface_changed: interface %s has not been opened\n", uid);
+    return EC_fail;
+  }
+
+  return interfaces[uid]->changed() ? EC_succeed : EC_fail;
+}
+
+
+int
 p_bb_get()
 {
   char* uid;

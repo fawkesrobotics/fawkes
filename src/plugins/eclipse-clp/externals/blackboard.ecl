@@ -36,6 +36,7 @@
 :- export bb_write_interfaces/0.
 :- export bb_read_interface/1.
 :- export bb_write_interface/1.
+:- export bb_interface_changed/1.
 :- export bb_get/3.
 :- export bb_set/3.
 :- export bb_send_message/3.
@@ -58,6 +59,7 @@
 :- external(bb_write_interfaces/0, p_bb_write_interfaces).
 :- external(bb_read_interface/1, p_bb_read_interface).
 :- external(bb_write_interface/1, p_bb_write_interface).
+:- external(bb_interface_changed/1, p_bb_interface_changed).
 :- external(bb_get/3, p_bb_get).
 :- external(bb_set/3, p_bb_set).
 :- external(bb_send_message/4, p_bb_send_message).

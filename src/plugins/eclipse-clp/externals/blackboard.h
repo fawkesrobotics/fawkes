@@ -82,6 +82,7 @@ extern "C" int p_bb_read_interfaces();
 extern "C" int p_bb_read_interface();
 extern "C" int p_bb_write_interfaces();
 extern "C" int p_bb_write_interface();
+extern "C" int p_bb_interface_changed();
 
 extern "C" int p_bb_get();
 extern "C" int p_bb_set();
