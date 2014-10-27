@@ -98,7 +98,7 @@ AgentControlThread::loop()
   m_test_iface->write();
 
 
-  m_eclipse_thread->post_event( "update" );
+  //m_eclipse_thread->post_event( "update" );
 
   /* call eclipse thread (that thread has no blocked timing aspect
    * and is therefore not called by the mainapp, so this has to be
