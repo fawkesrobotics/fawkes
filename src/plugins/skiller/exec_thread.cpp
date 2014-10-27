@@ -676,13 +676,14 @@ SkillerExecutionThread::loop()
 #ifdef SKILLER_TIMETRACKING
     __tt->ping_start(__ttc_publish);
 #endif
-    publish_skill_status(curss, cur_msgid);
+  __lua_ifi->write();
+
+  publish_skill_status(curss, cur_msgid);
   publish_skdbg();
   lua_loop_reset();
 
   __reader_just_left = false;
 
-  __lua_ifi->write();
 #ifdef SKILLER_TIMETRACKING
   __tt->ping_end(__ttc_publish);
   __tt->ping_end(__ttc_total);
