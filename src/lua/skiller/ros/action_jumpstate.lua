@@ -101,7 +101,7 @@ end
 
 local function WAIT_GOAL_ACK_init(self)
    local goal = self.fsm.action_client.actspec.goal_spec:instantiate()
-   set_params(goal, self.fsm.vars)
+   set_params(goal, self.args or self.fsm.vars)
    self.fsm.vars.goal = self.fsm.action_client:send_goal(goal)
 end
 
