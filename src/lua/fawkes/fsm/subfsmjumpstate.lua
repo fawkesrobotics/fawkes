@@ -54,6 +54,8 @@ function SubFSMJumpState:new(o)
 
    o.transitions   = o.transitions or {}
    o.dotattr       = o.dotattr or {}
+   o.loops         = o.loops or {}
+   o.inits         = o.inits or {}
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
    assert(type(o.dotattr) == "table", "Dot attributes for " .. o.name .. " not a table")
 
@@ -87,6 +89,9 @@ function SubFSMJumpState:do_init(...)
    if next(rv) then return unpack(rv) end
    self.subfsm:reset()
    self:init(...)
+   for _,i in ipairs(self.inits) do
+      i(self)
+   end
    for k, v in pairs(self.fsm.vars) do self.subfsm.vars[k] = v end
 end
 
@@ -94,6 +99,9 @@ end
 function SubFSMJumpState:do_loop()
    self:loop()
    self.subfsm:loop()
+   for _,l in ipairs(self.loops) do
+      l(self)
+   end
    self.fsm:set_changed(self.subfsm:changed())
    return self:try_transitions()
 end
