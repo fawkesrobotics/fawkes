@@ -44,9 +44,9 @@ function init_actions(module, table)
       local id = t.name .. "::" .. t.type
       if not action_clients[id] then
 	 local flags
-	 if t.reduced then
-	    flags = {no_feedback=true, no_cancel=true}
-	    print_debug("ActionClient %s::%s ignores feedback and cancelling", t.name, t.type)
+	 if not t.full or t.reduced then
+	    flags = {no_feedback=true, delayed_cancel=true}
+	    print_debug("ActionClient %s::%s ignores feedback, delayed cancelling", t.name, t.type)
 	 end
 	 printf("Registering action client %s::%s for %s", t.name, t.type, t.v)
 	 action_clients[id] = actionlib.action_client(t.name, t.type, flags)
