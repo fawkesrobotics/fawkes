@@ -206,6 +206,7 @@ SkillerExecutionThread::init()
   __ttc_msgproc  = __tt->add_class("Message Processing");
   __ttc_luaprep  = __tt->add_class("Lua Preparation");
   __ttc_luaexec  = __tt->add_class("Lua Execution");
+  __ttc_looprst  = __tt->add_class("Loop Reset");
   __ttc_publish  = __tt->add_class("Publishing");
   __tt_loopcount = 0;
 #endif
@@ -620,13 +621,18 @@ SkillerExecutionThread::loop()
 #endif
   publish_skill_status(curss);
   publish_skdbg();
+#ifdef SKILLER_TIMETRACKING
+  __tt->ping_end(__ttc_publish);
+  __tt->ping_start(__ttc_looprst);
+#endif
+
   lua_loop_reset();
 
   __reader_just_left = false;
 
   __lua_ifi->write();
 #ifdef SKILLER_TIMETRACKING
-  __tt->ping_end(__ttc_publish);
+  __tt->ping_end(__ttc_looprst);
   __tt->ping_end(__ttc_total);
   if (++__tt_loopcount >= SKILLER_TT_MOD) {
     //logger->log_debug("Lua", "Stack size: %i", __lua->stack_size());

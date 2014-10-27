@@ -128,6 +128,7 @@ class SkillerExecutionThread
   unsigned int         __ttc_msgproc;
   unsigned int         __ttc_luaprep;
   unsigned int         __ttc_luaexec;
+  unsigned int         __ttc_looprst;
   unsigned int         __ttc_publish;
   unsigned int         __tt_loopcount;
 #endif
