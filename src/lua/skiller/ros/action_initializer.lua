@@ -48,6 +48,7 @@ function init_actions(module, table)
 	    flags = {no_feedback=true, no_cancel=true}
 	    print_debug("ActionClient %s::%s ignores feedback and cancelling", t.name, t.type)
 	 end
+	 printf("Registering action client %s::%s for %s", t.name, t.type, t.v)
 	 action_clients[id] = actionlib.action_client(t.name, t.type, flags)
       end
       table[t.v] = action_clients[id]
