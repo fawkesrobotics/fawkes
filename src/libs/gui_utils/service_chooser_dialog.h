@@ -31,6 +31,9 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/expander.h>
 #include <gtkmm/scrolledwindow.h>
+#ifdef HAVE_GCONFMM
+#  include <gconfmm.h>
+#endif
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -73,6 +76,9 @@ class ServiceChooserDialog
   Gtk::Entry           __entry;
   Gtk::Expander        __expander;
   Gtk::ScrolledWindow  __scrollwin;
+#ifdef HAVE_GCONFMM
+  Glib::RefPtr<Gnome::Conf::Client> __gconf;
+#endif
 
   ServiceModel *__service_model;
 };
