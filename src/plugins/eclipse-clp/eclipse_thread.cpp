@@ -58,6 +58,7 @@ EclipseAgentThread::EclipseAgentThread()
   : Thread( "ECLiPSe thread", fawkes::Thread::OPMODE_CONTINUOUS ),
     m_initialized( false )
 {
+  set_prepfin_conc_loop(true);
   m_instance = this;
   mutex = new fawkes::Mutex();
 }
