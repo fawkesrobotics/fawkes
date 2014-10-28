@@ -130,14 +130,7 @@ inline float
 angle_distance(float angle_rad1,
 	       float angle_rad2)
 {
-  if(angle_rad2 > angle_rad1)
-    {
-      return angle_rad2 - angle_rad1 < M_PI ? angle_rad2 - angle_rad1 : - 2.0 * M_PI + angle_rad2 - angle_rad1; 
-    }
-  else
-    {
-      return angle_rad1 - angle_rad2 < M_PI ? angle_rad2 - angle_rad1 : 2.0 * M_PI - angle_rad1 + angle_rad2;   
-    }
+  return normalize_mirror_rad(angle_rad2 - angle_rad1);
 }
 
 
