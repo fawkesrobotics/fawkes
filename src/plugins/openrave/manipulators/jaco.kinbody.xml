@@ -239,23 +239,23 @@
     <resolution>1</resolution>
   </Joint>
 
-  <Joint name="j_ShoulderPitch" type="hinge" circular="true">
+  <Joint name="j_ShoulderPitch" type="hinge" circular="false">
     <Body>ShoulderYaw</Body>
     <Body>ShoulderPitch</Body>
     <offsetfrom>ShoulderPitch</offsetfrom>
     <weight>1</weight>
-    <limitsdeg>-180 180</limitsdeg>
+    <limitsdeg>-140 140</limitsdeg>
     <axis>1 0 0</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>
   </Joint>
 
-  <Joint name="j_ElbowPitch" type="hinge" circular="true">
+  <Joint name="j_ElbowPitch" type="hinge" circular="false">
     <Body>ShoulderPitch</Body>
     <Body>ElbowPitch</Body>
     <offsetfrom>ElbowPitch</offsetfrom>
     <weight>1</weight>
-    <limitsdeg>-180 180</limitsdeg>
+    <limitsdeg>-160 160</limitsdeg>
     <axis>-1 0 0</axis>
     <maxvel>1</maxvel>
     <resolution>1</resolution>
