@@ -92,6 +92,10 @@ function jc_params(state)
    return type(state.fsm.vars.params)=="string"
 end
 
+function jc_constrain(state)
+   return type(state.fsm.vars.constrain)=="boolean"
+end
+
 -- States
 fsm:define_states{
    export_to=_M,
@@ -101,6 +105,7 @@ fsm:define_states{
    {"GOTO", JumpState},
    {"GRIPPER", JumpState},
    {"PARAMS", JumpState},
+   {"CONSTRAIN", JumpState},
 
    {"CHECK_FINAL", JumpState},
    {"CHECK_ERROR", JumpState}
@@ -114,6 +119,7 @@ fsm:add_transitions{
    {"READY", "GOTO", precond=jc_goto, desc="move arms"},
    {"READY", "GRIPPER", precond=jc_gripper, desc="move gripper"},
    {"READY", "PARAMS", precond=jc_params, desc="set planner params"},
+   {"READY", "CONSTRAIN", precond=jc_constrain, desc="set planning constraint"},
    {"READY", "FAILED", precond=true, desc="insufficient params"},
 
    {"GRIPPER", "FAILED", cond="self.error", desc="bad error!!"},
@@ -121,6 +127,7 @@ fsm:add_transitions{
    {"GOTO", "CHECK_FINAL", cond=true, desc="msg sent"},
    {"GRIPPER", "CHECK_FINAL", cond=true, desc="msg sent"},
    {"PARAMS", "CHECK_FINAL", cond=true, desc="msg sent"},
+   {"CONSTRAIN", "CHECK_FINAL", cond=true, desc="msg sent"},
 
    {"CHECK_FINAL", "CHECK_ERROR", cond=jc_arm_is_final, desc="arm final"},
    {"CHECK_FINAL", "FAILED", cond=jc_next_msg, desc="next msg"},
@@ -188,5 +195,10 @@ end
 
 function PARAMS:init()
    local m = jaco_bi.SetPlannerParamsMessage:new( self.fsm.vars.params )
+   self.fsm.vars.msgid = jaco_bi:msgq_enqueue_copy(m)
+end
+
+function CONSTRAIN:init()
+   local m = jaco_bi.SetConstrainedMessage:new( self.fsm.vars.constrain )
    self.fsm.vars.msgid = jaco_bi:msgq_enqueue_copy(m)
 end
