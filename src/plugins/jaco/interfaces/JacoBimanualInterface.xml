@@ -20,6 +20,8 @@
     <field type="uint32" name="error_code">Error code, set if
       final is true. 0 if no error occured, an error code from ERROR_*
       constants otherwise.</field>
+    <field type="bool" name="constrained">Wheter planning is using constraint-function.
+      This is an OpenRAVE internal constraint function.</field>
   </data>
 
   <message name="CartesianGoto">
@@ -51,6 +53,11 @@
   <message name="SetPlannerParams">
     <comment>Set plannerparams that can be added to OpenRAVE's DualManipulation module.</comment>
     <field type="string" length="1024" name="params">Planner parameters</field>
+  </message>
+
+  <message name="SetConstrained">
+    <comment>Enable/Disable planning constraint that are used by OpenRAVE's DualManipulation module.</comment>
+    <ref>constrained</ref>
   </message>
 
 </interface>

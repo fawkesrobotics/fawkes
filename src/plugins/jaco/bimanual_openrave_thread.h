@@ -45,6 +45,8 @@ class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
   virtual bool add_target(float l_x, float l_y, float l_z, float l_e1, float l_e2, float l_e3,
                           float r_x, float r_y, float r_z, float r_e1, float r_e2, float r_e3);
 
+  virtual void set_constrained(bool enable);
+
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
   virtual void run() { Thread::run(); }
@@ -82,6 +84,7 @@ class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
   std::set<OpenRAVE::KinBody::LinkPtr> links_right_;
 #endif
 
+  bool __constrained;
 };
 
 

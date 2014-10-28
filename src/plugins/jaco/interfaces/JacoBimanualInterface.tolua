@@ -91,6 +91,17 @@ class JacoBimanualInterface : public Interface
     int maxlenof_params() const;
   };
 
+  class SetConstrainedMessage : public Message
+  {
+    SetConstrainedMessage(bool ini_constrained);
+    SetConstrainedMessage();
+    ~SetConstrainedMessage();
+
+    bool is_constrained();
+    void set_constrained(const bool new_constrained);
+    int maxlenof_constrained() const;
+  };
+
   unsigned int msgid();
   void set_msgid(const unsigned int new_msgid);
   int maxlenof_msgid() const;
@@ -100,6 +111,9 @@ class JacoBimanualInterface : public Interface
   unsigned int error_code();
   void set_error_code(const unsigned int new_error_code);
   int maxlenof_error_code() const;
+  bool is_constrained();
+  void set_constrained(const bool new_constrained);
+  int maxlenof_constrained() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

@@ -62,6 +62,8 @@ JacoBimanualOpenraveThread::JacoBimanualOpenraveThread(jaco_dual_arm_t *arms)
   __planner_env.robot = NULL;
   __planner_env.manip = NULL;
 #endif
+
+  __constrained = false;
 }
 
 void
@@ -269,6 +271,13 @@ JacoBimanualOpenraveThread::loop()
 #endif
 }
 
+
+void
+JacoBimanualOpenraveThread::set_constrained(bool enable)
+{
+  __constrained = enable;
+}
+
 bool
 JacoBimanualOpenraveThread::add_target(float l_x, float l_y, float l_z, float l_e1, float l_e2, float l_e3,
                                        float r_x, float r_y, float r_z, float r_e1, float r_e2, float r_e3)
@@ -429,6 +438,12 @@ JacoBimanualOpenraveThread::_plan_path()
   if( !__plannerparams.empty() ) {
     cmdin << " " << __plannerparams;
   }
+
+  //constrain planning if required
+  if( __constrained ) {
+    cmdin << " constrainterrorthresh 1";
+  }
+
   cmdin << " execute 0";
   cmdin << " outputtraj";
   //logger->log_debug(name(), "Planner: dualmanip cmdin:%s", cmdin.str().c_str());
@@ -438,7 +453,7 @@ JacoBimanualOpenraveThread::_plan_path()
   try {
     success = __mod_dualmanip->SendCommand(cmdout,cmdin);
   } catch(openrave_exception &e) {
-    //logger->log_debug(name(), "Planner: dualmanip command failed. Ex:%s", e.what());
+    logger->log_debug(name(), "Planner: dualmanip command failed. Ex:%s", e.what());
   }
 
   if(!success) {

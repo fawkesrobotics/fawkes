@@ -93,6 +93,14 @@ JacoBimanualActThread::loop()
       __arms->openrave_thread->set_plannerparams(msg->params());
     #endif
 
+    } else if( __arms->iface->msgq_first_is<JacoBimanualInterface::SetConstrainedMessage>() ) {
+      JacoBimanualInterface::SetConstrainedMessage *msg = __arms->iface->msgq_first(msg);
+      logger->log_debug(name(), "SetConstrainedMessage rcvd. Enabled:%u", msg->is_constrained());
+
+    #ifdef HAVE_OPENRAVE
+      __arms->openrave_thread->set_constrained(msg->is_constrained());
+    #endif
+
     } else if( __arms->iface->msgq_first_is<JacoBimanualInterface::CartesianGotoMessage>() ) {
       JacoBimanualInterface::CartesianGotoMessage *msg = __arms->iface->msgq_first(msg);
       logger->log_debug(name(), "CartesianGotoMessage rcvd. left: x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f",

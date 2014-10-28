@@ -59,10 +59,12 @@ JacoBimanualInterface::JacoBimanualInterface() : Interface()
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_UINT32, "error_code", 1, &data->error_code);
+  add_fieldinfo(IFT_BOOL, "constrained", 1, &data->constrained);
   add_messageinfo("CartesianGotoMessage");
   add_messageinfo("MoveGripperMessage");
   add_messageinfo("SetPlannerParamsMessage");
-  unsigned char tmp_hash[] = {0x2d, 0x82, 0x55, 0x2, 0xeb, 0x2d, 0xcb, 0xba, 0x57, 0x5f, 0xf4, 0xbc, 0x5, 0xbc, 0xe7, 0x5b};
+  add_messageinfo("SetConstrainedMessage");
+  unsigned char tmp_hash[] = {0x7c, 0x62, 0x7a, 0x5a, 0xc6, 0xc1, 0xb4, 0x12, 0x6f, 0xa4, 0x89, 0x89, 0xb8, 0xe5, 0x1, 0x66};
   set_hash(tmp_hash);
 }
 
@@ -173,6 +175,39 @@ JacoBimanualInterface::set_error_code(const uint32_t new_error_code)
   data_changed = true;
 }
 
+/** Get constrained value.
+ * Wheter planning is using constraint-function.
+      This is an OpenRAVE internal constraint function.
+ * @return constrained value
+ */
+bool
+JacoBimanualInterface::is_constrained() const
+{
+  return data->constrained;
+}
+
+/** Get maximum length of constrained value.
+ * @return length of constrained value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoBimanualInterface::maxlenof_constrained() const
+{
+  return 1;
+}
+
+/** Set constrained value.
+ * Wheter planning is using constraint-function.
+      This is an OpenRAVE internal constraint function.
+ * @param new_constrained new constrained value
+ */
+void
+JacoBimanualInterface::set_constrained(const bool new_constrained)
+{
+  data->constrained = new_constrained;
+  data_changed = true;
+}
+
 /* =========== message create =========== */
 Message *
 JacoBimanualInterface::create_message(const char *type) const
@@ -183,6 +218,8 @@ JacoBimanualInterface::create_message(const char *type) const
     return new MoveGripperMessage();
   } else if ( strncmp("SetPlannerParamsMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetPlannerParamsMessage();
+  } else if ( strncmp("SetConstrainedMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetConstrainedMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -1025,6 +1062,98 @@ JacoBimanualInterface::SetPlannerParamsMessage::clone() const
 {
   return new JacoBimanualInterface::SetPlannerParamsMessage(this);
 }
+/** @class JacoBimanualInterface::SetConstrainedMessage <interfaces/JacoBimanualInterface.h>
+ * SetConstrainedMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_constrained initial value for constrained
+ */
+JacoBimanualInterface::SetConstrainedMessage::SetConstrainedMessage(const bool ini_constrained) : Message("SetConstrainedMessage")
+{
+  data_size = sizeof(SetConstrainedMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetConstrainedMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->constrained = ini_constrained;
+  add_fieldinfo(IFT_BOOL, "constrained", 1, &data->constrained);
+}
+/** Constructor */
+JacoBimanualInterface::SetConstrainedMessage::SetConstrainedMessage() : Message("SetConstrainedMessage")
+{
+  data_size = sizeof(SetConstrainedMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetConstrainedMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "constrained", 1, &data->constrained);
+}
+
+/** Destructor */
+JacoBimanualInterface::SetConstrainedMessage::~SetConstrainedMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+JacoBimanualInterface::SetConstrainedMessage::SetConstrainedMessage(const SetConstrainedMessage *m) : Message("SetConstrainedMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetConstrainedMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get constrained value.
+ * Wheter planning is using constraint-function.
+      This is an OpenRAVE internal constraint function.
+ * @return constrained value
+ */
+bool
+JacoBimanualInterface::SetConstrainedMessage::is_constrained() const
+{
+  return data->constrained;
+}
+
+/** Get maximum length of constrained value.
+ * @return length of constrained value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+JacoBimanualInterface::SetConstrainedMessage::maxlenof_constrained() const
+{
+  return 1;
+}
+
+/** Set constrained value.
+ * Wheter planning is using constraint-function.
+      This is an OpenRAVE internal constraint function.
+ * @param new_constrained new constrained value
+ */
+void
+JacoBimanualInterface::SetConstrainedMessage::set_constrained(const bool new_constrained)
+{
+  data->constrained = new_constrained;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+JacoBimanualInterface::SetConstrainedMessage::clone() const
+{
+  return new JacoBimanualInterface::SetConstrainedMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -1042,6 +1171,10 @@ JacoBimanualInterface::message_valid(const Message *message) const
   }
   const SetPlannerParamsMessage *m2 = dynamic_cast<const SetPlannerParamsMessage *>(message);
   if ( m2 != NULL ) {
+    return true;
+  }
+  const SetConstrainedMessage *m3 = dynamic_cast<const SetConstrainedMessage *>(message);
+  if ( m3 != NULL ) {
     return true;
   }
   return false;
