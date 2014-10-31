@@ -22,6 +22,9 @@
 #include "skiller_thread.h"
 
 #include <core/threading/mutex_locker.h>
+#include <utils/time/time.h>
+
+#include <fawkes_msgs/SkillStatus.h>
 
 using namespace fawkes;
 
@@ -57,9 +60,10 @@ RosSkillerThread::init()
       boost::bind(&RosSkillerThread::action_cancel_cb, this, _1),
       /* auto_start */ false);
 
-  subscriber_ = rosnode->subscribe<std_msgs::String>
+  sub_cmd_ = rosnode->subscribe<std_msgs::String>
     ("skiller", 1, boost::bind(&RosSkillerThread::message_cb, this, _1));
 
+  pub_status_ = rosnode->advertise<fawkes_msgs::SkillStatus>("skiller_status", true);
 }
 
 void
@@ -153,7 +157,6 @@ RosSkillerThread::create_feedback()
 void
 RosSkillerThread::loop()
 {
-
   skiller_if_->read();
 
   // currently idle, release skiller control
@@ -165,7 +168,6 @@ RosSkillerThread::loop()
   }
 
   if (exec_request_) {
-
     if (!skiller_if_->has_writer()) {
       logger->log_warn(name(), "no writer for skiller, cannot execute skill");
       stop();
@@ -180,8 +182,8 @@ RosSkillerThread::loop()
     }
     exec_request_ = false;
 
-    SkillerInterface::ExecSkillMessage *msg
-    = new SkillerInterface::ExecSkillMessage(goal_.c_str());
+    SkillerInterface::ExecSkillMessage *msg =
+      new SkillerInterface::ExecSkillMessage(goal_.c_str());
 
     logger->log_debug(name(), "Creating goal '%s'", goal_.c_str());
 
@@ -195,10 +197,8 @@ RosSkillerThread::loop()
       logger->log_warn(name(), "Failed to execute skill, exception follows");
       logger->log_warn(name(), e);
     }
-  }
 
-  else if (exec_running_) {
-
+  } else if (exec_running_) {
     if (exec_as_) as_goal_.publishFeedback(create_feedback());
 
     if (skiller_if_->status() == SkillerInterface::S_INACTIVE) {
@@ -231,5 +231,15 @@ RosSkillerThread::loop()
         }
       }
     }
+  }
+
+  if (skiller_if_->changed()) {
+    fawkes_msgs::SkillStatus msg;
+    const Time *time = skiller_if_->timestamp();
+    msg.stamp        = ros::Time(time->get_sec(), time->get_nsec());
+    msg.skill_string = skiller_if_->skill_string();
+    msg.error        = skiller_if_->error();
+    msg.status       = skiller_if_->status();
+    pub_status_.publish(msg);
   }
 }

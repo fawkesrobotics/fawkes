@@ -84,8 +84,9 @@ class RosSkillerThread
 
   fawkes::SkillerInterface *skiller_if_;
 
-  SkillerServer  *server_;
-  ros::Subscriber  subscriber_;
+  SkillerServer   *server_;
+  ros::Subscriber  sub_cmd_;
+  ros::Publisher   pub_status_;
 
   SkillerServer::GoalHandle as_goal_;
   std::string goal_;
