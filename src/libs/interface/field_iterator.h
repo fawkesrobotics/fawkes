@@ -113,13 +113,13 @@ class InterfaceFieldIterator
   void                   set_string(const char* s);
   
  protected:
-  InterfaceFieldIterator(const Interface *interface,
+  InterfaceFieldIterator(Interface *interface,
 			 const interface_fieldinfo_t *info_list);
   
  private:
   const interface_fieldinfo_t   *__infol;
   char                          *__value_string;
-  const Interface               *__interface;
+  Interface                     *__interface;
 };
 
 }

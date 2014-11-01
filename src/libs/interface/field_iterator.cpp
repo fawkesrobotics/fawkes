@@ -59,7 +59,7 @@ InterfaceFieldIterator::InterfaceFieldIterator()
  * @param interface interface this field iterator is assigned to
  * @param info_list pointer to info list entry to start from
  */
-  InterfaceFieldIterator::InterfaceFieldIterator(const Interface *interface,
+InterfaceFieldIterator::InterfaceFieldIterator(Interface *interface,
 						 const interface_fieldinfo_t *info_list)
 {
   __interface = interface;
@@ -956,6 +956,7 @@ InterfaceFieldIterator::set_bool(bool v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(bool);
     memcpy((void *) dst, &v, sizeof(bool));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -979,6 +980,7 @@ InterfaceFieldIterator::set_int8(int8_t v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(int8_t);
     memcpy((void *) dst, &v, sizeof(int8_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1002,6 +1004,7 @@ InterfaceFieldIterator::set_uint8(uint8_t v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(uint8_t);
     memcpy((void *) dst, &v, sizeof(uint8_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1025,6 +1028,7 @@ InterfaceFieldIterator::set_int16(int16_t v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(int16_t);
     memcpy((void *) dst, &v, sizeof(int16_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1048,6 +1052,7 @@ InterfaceFieldIterator::set_uint16(uint16_t v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(uint16_t);
     memcpy((void *) dst, &v, sizeof(uint16_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1071,6 +1076,7 @@ InterfaceFieldIterator::set_int32(int32_t v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(int32_t);
     memcpy((void *) dst, &v, sizeof(int32_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1094,6 +1100,7 @@ InterfaceFieldIterator::set_uint32(uint32_t v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(uint32_t);
     memcpy((void *) dst, &v, sizeof(uint32_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1117,6 +1124,7 @@ InterfaceFieldIterator::set_int64(int64_t v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(int64_t);
     memcpy((void *) dst, &v, sizeof(int64_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1140,6 +1148,7 @@ InterfaceFieldIterator::set_uint64(uint64_t v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(uint64_t);
     memcpy((void *) dst, &v, sizeof(uint64_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1163,6 +1172,7 @@ InterfaceFieldIterator::set_float(float v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(float);
     memcpy((void *) dst, &v, sizeof(float));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1186,6 +1196,7 @@ InterfaceFieldIterator::set_double(double v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(double);
     memcpy((void *) dst, &v, sizeof(double));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1209,6 +1220,7 @@ InterfaceFieldIterator::set_byte(uint8_t v, unsigned int index)
   } else {
     char* dst = (char *) __infol->value + index * sizeof(uint8_t);
     memcpy((void *) dst, &v, sizeof(uint8_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1230,6 +1242,7 @@ InterfaceFieldIterator::set_bools(bool *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(bool));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1251,6 +1264,7 @@ InterfaceFieldIterator::set_int8s(int8_t *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(int8_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1272,6 +1286,7 @@ InterfaceFieldIterator::set_uint8s(uint8_t *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(uint8_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1293,6 +1308,7 @@ InterfaceFieldIterator::set_int16s(int16_t *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(int16_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1314,6 +1330,7 @@ InterfaceFieldIterator::set_uint16s(uint16_t *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(uint16_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1335,6 +1352,7 @@ InterfaceFieldIterator::set_int32s(int32_t *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(int32_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1356,6 +1374,7 @@ InterfaceFieldIterator::set_uint32s(uint32_t *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(uint32_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1377,6 +1396,7 @@ InterfaceFieldIterator::set_int64s(int64_t *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(int64_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1398,6 +1418,7 @@ InterfaceFieldIterator::set_uint64s(uint64_t *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(uint64_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1419,6 +1440,7 @@ InterfaceFieldIterator::set_floats(float *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(float));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1439,6 +1461,7 @@ InterfaceFieldIterator::set_doubles(double *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(double));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1460,6 +1483,7 @@ InterfaceFieldIterator::set_bytes(uint8_t *v)
     throw TypeMismatchException("Field %s is not an array", __infol->name);
   } else {
     memcpy(__infol->value, v, __infol->length * sizeof(uint8_t));
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 
@@ -1478,6 +1502,7 @@ InterfaceFieldIterator::set_string(const char *v)
     throw TypeMismatchException("Field to be written is not of type string");
   } else {
     strncpy((char *) __infol->value, v, __infol->length);
+    if (__interface)  __interface->mark_data_changed();
   }
 }
 

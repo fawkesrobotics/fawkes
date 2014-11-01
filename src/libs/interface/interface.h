@@ -129,6 +129,7 @@ class Interface
   void          set_auto_timestamping(bool enabled);
   void          set_timestamp(const Time *t = NULL);
   void          set_clock(Clock *clock);
+  void          mark_data_changed();
 
   std::list<const char *> get_message_types();
 

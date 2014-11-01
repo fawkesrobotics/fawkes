@@ -737,6 +737,19 @@ Interface::set_auto_timestamping(bool enabled)
 }
 
 
+/** Mark data as changed.
+ * This m will mark the data as changed for a writing instance. One the
+ * next write, the data will be written with an updated timestamp (if
+ * auto timestamping is enabled), irregardless of whether new data was
+ * actually set.
+ */
+void
+Interface::mark_data_changed()
+{
+  data_changed = true;
+}
+
+
 /** Check if data has been changed.
  * Note that if the data has been modified this method will return
  * true at least until the next call to read. From then on it will
