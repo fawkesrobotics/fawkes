@@ -320,6 +320,7 @@ JacoBimanualGotoThread::_move_grippers()
       __v_arms[i]->target->pos.push_back(__v_arms[i]->arm->iface->joints(3));
       __v_arms[i]->target->pos.push_back(__v_arms[i]->arm->iface->joints(4));
       __v_arms[i]->target->pos.push_back(__v_arms[i]->arm->iface->joints(5));
+      __v_arms[i]->target->type = TARGET_ANGULAR;
     }
 
     // just send the messages to the arm. nothing special here
