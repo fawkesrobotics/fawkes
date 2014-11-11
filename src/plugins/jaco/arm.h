@@ -68,7 +68,7 @@ class JacoArm
   /** Get the cartesian coordinates of the arm
    * @param to vector to be filled with coordinates.
    */
-  virtual void get_coords(std::vector<float> &to) const = 0;
+  virtual void get_coords(std::vector<float> &to) = 0;
 
   /** Get the position values of the fingers
    * @param to vector to be filled with finger positions.

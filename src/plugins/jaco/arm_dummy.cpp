@@ -104,7 +104,7 @@ JacoArmDummy::initialized()
 
 
 void
-JacoArmDummy::get_coords(std::vector<float> &to) const
+JacoArmDummy::get_coords(std::vector<float> &to)
 {
   to = __coords;
 }

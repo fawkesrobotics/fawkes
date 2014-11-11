@@ -71,13 +71,15 @@ JacoInfoThread::loop()
   __arm->iface->set_connected(true);
 
   try {
-    __arm->arm->get_coords(__cpos);
-    __arm->iface->set_x(__cpos.at(0));
-    __arm->iface->set_y(__cpos.at(1));
-    __arm->iface->set_z(__cpos.at(2));
-    __arm->iface->set_euler1(__cpos.at(3));
-    __arm->iface->set_euler2(__cpos.at(4));
-    __arm->iface->set_euler3(__cpos.at(5));
+    if( __arm->iface->is_final() ) {
+      __arm->arm->get_coords(__cpos);
+      __arm->iface->set_x(__cpos.at(0));
+      __arm->iface->set_y(__cpos.at(1));
+      __arm->iface->set_z(__cpos.at(2));
+      __arm->iface->set_euler1(__cpos.at(3));
+      __arm->iface->set_euler2(__cpos.at(4));
+      __arm->iface->set_euler3(__cpos.at(5));
+    }
 
     __arm->arm->get_fingers(__cpos);
     __arm->iface->set_finger1( std::max(0.f, std::min(60.f, __cpos.at(0))) );

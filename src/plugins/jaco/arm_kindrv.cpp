@@ -76,6 +76,7 @@ JacoArmKindrv::JacoArmKindrv(const char *name)
 
   __initialized = false;
   __final = true;
+  __ctrl_ang = true;
 }
 
 /** Destructor. */
@@ -157,8 +158,13 @@ JacoArmKindrv::initialized()
 
 
 void
-JacoArmKindrv::get_coords(std::vector<float> &to) const
+JacoArmKindrv::get_coords(std::vector<float> &to)
 {
+  if( __ctrl_ang ) {
+    // nedd to set control to cart, otherwise we will not get updated data
+    __arm->set_control_cart();
+    __ctrl_ang = false;
+  }
   jaco_position_t pos = __arm->get_cart_pos();
 
   to.clear();
@@ -227,6 +233,7 @@ JacoArmKindrv::goto_trajec(std::vector< std::vector<float> >* trajec, std::vecto
 {
   __arm->start_api_ctrl();
   __arm->set_control_ang();
+  __ctrl_ang = true;
   usleep(500);
   for( unsigned int i=0; i<trajec->size(); ++i ) {
     __arm->set_target_ang(trajec->at(i).at(0), trajec->at(i).at(1), trajec->at(i).at(2),
@@ -244,6 +251,7 @@ JacoArmKindrv::goto_joints(std::vector<float> &joints, std::vector<float> &finge
   if(!followup) {
     __arm->start_api_ctrl();
     __arm->set_control_ang();
+    __ctrl_ang = true;
     usleep(500);
   }
 
@@ -259,6 +267,7 @@ JacoArmKindrv::goto_coords(std::vector<float> &coords, std::vector<float> &finge
 
   __arm->start_api_ctrl();
   __arm->set_control_cart();
+  __ctrl_ang = false;
   usleep(500);
   //__arm->arm->set_target_cart(__y, -__x, __z, __e1, __e2, __e3, __f1, __f2, __f3);
   __arm->set_target_cart(coords.at(1), -coords.at(0), coords.at(2), coords.at(3), coords.at(4), coords.at(5),

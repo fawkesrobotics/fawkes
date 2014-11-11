@@ -49,7 +49,7 @@ class JacoArmKindrv : public JacoArm
   virtual bool initialized();
 
   virtual void get_joints(std::vector<float> &to) const;
-  virtual void get_coords(std::vector<float> &to) const;
+  virtual void get_coords(std::vector<float> &to);
   virtual void get_fingers(std::vector<float> &to) const;
 
   virtual void stop();
@@ -67,6 +67,8 @@ class JacoArmKindrv : public JacoArm
 
   fawkes::jaco_target_type_t __target_type;
   bool __final;
+
+  bool __ctrl_ang;
 };
 
 

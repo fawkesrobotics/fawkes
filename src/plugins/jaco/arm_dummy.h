@@ -46,7 +46,7 @@ class JacoArmDummy : public JacoArm
   virtual bool initialized();
 
   virtual void get_joints(std::vector<float> &to) const;
-  virtual void get_coords(std::vector<float> &to) const;
+  virtual void get_coords(std::vector<float> &to);
   virtual void get_fingers(std::vector<float> &to) const;
 
   virtual void stop();
