@@ -38,7 +38,9 @@ class OpenRaveManipulator
   OpenRaveManipulator(unsigned int count, unsigned int count_device);
   virtual ~OpenRaveManipulator();
 
-  ///\brief Create a new copy of this OpenRaveManipulator instance
+  /** Create a new copy of this OpenRaveManipulator instance
+   * @return RefPtr to the copied OpenRaveManipulator
+   */
   virtual OpenRaveManipulatorPtr copy() = 0;
 
   void add_motor(unsigned int number, unsigned int number_device);
@@ -52,7 +54,18 @@ class OpenRaveManipulator
 
 
  protected:
+  /** Transform single OpenRAVE motor angle to real device angle
+   * @param number motor number of real device
+   * @param angle motor angle of OpenRAVE model
+   * @return transformed angle
+   */
   virtual float angle_OR_to_device(unsigned int number, float angle) const = 0;
+
+  /** Transform single device motor angle to OpenRAVE angle
+   * @param number motor number of real device
+   * @param angle motor angle of real device
+   * @return transformed angle
+   */
   virtual float angle_device_to_OR(unsigned int number, float angle) const = 0;
 
   std::vector<motor_t>  __motors;       /**< vector of motors */

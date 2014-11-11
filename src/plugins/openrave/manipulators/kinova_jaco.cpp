@@ -64,11 +64,6 @@ OpenRaveManipulatorKinovaJaco::copy()
 
 
 /* ########## various ######### */
-/** Transform single OpenRAVE motor angle to real device angle
- * @param number motor number of real device
- * @param angle motor angle of OpenRAVE model
- * @return transformed angle
- */
 float
 OpenRaveManipulatorKinovaJaco::angle_OR_to_device(unsigned int number, float angle) const
 {
@@ -102,11 +97,6 @@ OpenRaveManipulatorKinovaJaco::angle_OR_to_device(unsigned int number, float ang
   return _angle;
 }
 
-/** Transform single device motor angle to OpenRAVE angle
- * @param number motor number of real device
- * @param angle motor angle of real device
- * @return transformed angle
- */
 float
 OpenRaveManipulatorKinovaJaco::angle_device_to_OR(unsigned int number, float angle) const
 {

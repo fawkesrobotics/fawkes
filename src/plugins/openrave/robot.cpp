@@ -389,6 +389,7 @@ OpenRaveRobot::set_target_straight(float trans_x, float trans_y, float trans_z)
  * @param quat_x quaternion 1st value
  * @param quat_y quaternion 2nd value
  * @param quat_z quaternion 3rd value
+ * @param filter IK filter options (see OpenRAVE doc for details)
  * @param no_offset if true, do not include manipulator offset (default: false)
  * @return true if solvable, false otherwise
  */
@@ -411,6 +412,7 @@ OpenRaveRobot::set_target_quat(float trans_x, float trans_y, float trans_z,
  * @param axisX axis-angle x-axis value
  * @param axisY axis-angle y-axis value
  * @param axisZ axis-angle z-axis value
+ * @param filter IK filter options (see OpenRAVE doc for details)
  * @param no_offset if true, do not include manipulator offset (default: false)
  * @return true if solvable, false otherwise
  */
@@ -434,6 +436,7 @@ OpenRaveRobot::set_target_axis_angle(float trans_x, float trans_y, float trans_z
  * @param phi 1st rotation
  * @param theta 2nd rotation
  * @param psi 3rd rotation
+ * @param filter IK filter options (see OpenRAVE doc for details)
  * @param no_offset if true, do not include manipulator offset (default: false)
  * @return true if solvable, false otherwise
  */
@@ -441,7 +444,7 @@ bool
 OpenRaveRobot::set_target_euler(euler_rotation_t type,
                                 float trans_x, float trans_y, float trans_z,
                                 float phi, float theta, float psi,
-                                IkFilterOptions filter, bool no_offset)
+                                OpenRAVE::IkFilterOptions filter, bool no_offset)
 {
   Vector trans(trans_x, trans_y, trans_z);
   std::vector<float> rot(9, 0.f); //rotations vector
@@ -489,6 +492,7 @@ OpenRaveRobot::set_target_euler(euler_rotation_t type,
  * @param trans_y y-transition of object
  * @param trans_z z-transition of object
  * @param rot_x rotation of object on x-axis (radians) (default: 0.f, i.e. upright)
+ * @param filter IK filter options (see OpenRAVE doc for details)
  * @return true if solvable, false otherwise
  */
 bool
@@ -550,6 +554,7 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
  * to an IkParameterization before continuing to check for Ik solution and
  * planning, i.e. by the BaseManipulation module.
  * @param ik_param the OpenRAVE::IkParameterization of the target
+ * @param filter IK filter options (see OpenRAVE doc for details)
  * @return true if solvable, false otherwise
  */
 bool
@@ -714,6 +719,8 @@ OpenRaveRobot::get_basemanip() const
 /* ###### attach / release kinbodys ###### */
 /** Attach a kinbody to the robot.
  * @param object KinbodyPtr of object to be attached
+ * @param manip_name name of the manipulator to attach the object to.
+ *  If non given, the currently active manipulator is taken.
  * @return true if successful
  */
 bool
@@ -750,6 +757,7 @@ OpenRaveRobot::attach_object(OpenRAVE::KinBodyPtr object, const char* manip_name
 /** Attach a kinbody to the robot.
  * @param name name of the object
  * @param env pointer to OpenRaveEnvironment object
+ * @param manip_name name of the manipulator to attach the object to
  * @return true if successful
  */
 bool
@@ -890,11 +898,12 @@ OpenRaveRobot::set_target_transform(Vector& trans, OpenRAVE::Vector& rotQuat, Ik
  * Check IK solvability for target Transform. If solvable,
  * then set target angles to manipulator configuration __target.manip
  * @param rotations 3x3 matrix given as one row.
+ * @param filter IK filter options (see OpenRAVE doc for details)
  * @param no_offset if true, do not include manipulator offset (default: false)
  * @return true if solvable, false otherwise
  */
 bool
-OpenRaveRobot::set_target_euler(Vector& trans, std::vector<float>& rotations, IkFilterOptions filter, bool no_offset)
+OpenRaveRobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, OpenRAVE::IkFilterOptions filter, bool no_offset)
 {
   if( rotations.size() != 9 ) {
     __target.type = TARGET_NONE;

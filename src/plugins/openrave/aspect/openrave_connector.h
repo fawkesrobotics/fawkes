@@ -36,8 +36,11 @@ class OpenRaveEnvironment;
 class OpenRaveRobot;
 class OpenRaveManipulator;
 
+///\brief RefPtr to OpenRaveEnvironment
 typedef RefPtr<OpenRaveEnvironment> OpenRaveEnvironmentPtr;
+///\brief RefPtr to OpenRaveRobot
 typedef RefPtr<OpenRaveRobot>       OpenRaveRobotPtr;
+///\brief RefPtr to OpenRaveManipulator
 typedef RefPtr<OpenRaveManipulator> OpenRaveManipulatorPtr;
 
 
@@ -201,12 +204,14 @@ class OpenRaveConnector
   /** Attach a kinbody to the robot.
   * @param name name of the object
   * @param robot pointer to OpenRaveRobot that the target is set for
+  * @param manip_name name of the manipulator to attach the object to
   * @return true if successful
   */
   virtual bool attach_object(const char* name, OpenRaveRobotPtr& robot, const char* manip_name) = 0;
 
   /** Attach a kinbody to the robot. Uses currently active robot.
   * @param name name of the object
+  * @param manip_name name of the manipulator to attach the object to
   * @return true if successful
   */
   virtual bool attach_object(const char* name, const char* manip_name) = 0;

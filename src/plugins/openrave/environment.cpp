@@ -48,6 +48,8 @@ namespace fawkes {
 /** Sets and loads a viewer for OpenRAVE.
  * @param env OpenRAVE environment to be attached
  * @param viewername name of the viewr, usually "qtcoin"
+ * @param running pointer to a local variable, which will be set to "true"
+ *  as long as the viewer thread runs, and "false" when the GUI closes.
  */
 void
 run_viewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername, bool* running)
@@ -337,7 +339,7 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
     {throw fawkes::Exception("%s: Planner: init failed", name());}
   else if(__logger)
     {__logger->log_debug(name(), "Planner: initialized");}
-  //*/
+  */
   // plan path with basemanipulator
   ModuleBasePtr basemanip = robot->get_basemanip();
   target_t target = robot->get_target();

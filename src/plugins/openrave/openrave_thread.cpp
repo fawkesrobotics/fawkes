@@ -337,6 +337,7 @@ OpenRaveThread::set_target_object(const std::string& name, OpenRaveRobotPtr& rob
 /** Attach a kinbody to the robot.
  * @param name name of the object
  * @param robot pointer to OpenRaveRobot that object is attached to
+ * @param manip_name name of the manipulator to attach the object to
  * @return true if successfull
  */
 bool
@@ -347,6 +348,7 @@ OpenRaveThread::attach_object(const char* name, OpenRaveRobotPtr& robot, const c
 
 /** Attach a kinbody to the robot. Uses currently active robot.
  * @param name name of the object
+ * @param manip_name name of the manipulator to attach the object to
  * @return true if successfull
  */
 bool
