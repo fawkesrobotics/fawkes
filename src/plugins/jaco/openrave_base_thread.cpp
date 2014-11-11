@@ -55,6 +55,7 @@ JacoOpenraveBaseThread::JacoOpenraveBaseThread(const char *name)
 #ifdef HAVE_OPENRAVE
   __cfg_OR_auto_load_ik = false;
   __plannerparams = "";
+  __plot_current = false;
 #endif
 }
 
@@ -78,6 +79,11 @@ JacoOpenraveBaseThread::init()
   __cfg_OR_use_viewer    = config->get_bool("/hardware/jaco/openrave/use_viewer");
   __cfg_OR_auto_load_ik  = config->get_bool("/hardware/jaco/openrave/auto_load_ik");
   __cfg_OR_sampling      = config->get_float("/hardware/jaco/openrave/sampling");
+
+  __cfg_OR_plot_traj_manip  = config->get_bool("/hardware/jaco/openrave/plotting/planned_manipulator");
+  __cfg_OR_plot_traj_joints = config->get_bool("/hardware/jaco/openrave/plotting/planned_joints");
+  __cfg_OR_plot_cur_manip   = config->get_bool("/hardware/jaco/openrave/plotting/current_manipulator");
+  __cfg_OR_plot_cur_joints  = config->get_bool("/hardware/jaco/openrave/plotting/current_joints");
 
   // perform other initialization stuff (for child classes, that do not want to overload "init()")
   _init();
@@ -112,11 +118,24 @@ JacoOpenraveBaseThread::finalize()
 void
 JacoOpenraveBaseThread::set_plannerparams(const std::string &params)
 {
+#ifdef HAVE_OPENRAVE
   __plannerparams = params;
+#endif
 }
 
 void
 JacoOpenraveBaseThread::set_plannerparams(const char* params)
 {
+#ifdef HAVE_OPENRAVE
   __plannerparams = params;
+#endif
 }
+
+void
+JacoOpenraveBaseThread::plot_current(bool enable)
+{
+#ifdef HAVE_OPENRAVE
+  __plot_current = enable;
+#endif
+}
+

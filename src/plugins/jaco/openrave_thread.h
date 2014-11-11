@@ -71,6 +71,11 @@ class JacoOpenraveThread : public JacoOpenraveBaseThread
   std::vector<OpenRAVE::dReal>        __joints;
 
   std::vector<OpenRAVE::GraphHandlePtr> __graph_handle;
+  std::vector<OpenRAVE::GraphHandlePtr> __graph_current;
+
+  std::vector<OpenRAVE::KinBody::LinkPtr> __links;
+
+  bool __plotted_current;   // keep track of plotting
 #endif
 };
 

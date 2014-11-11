@@ -62,6 +62,8 @@ JacoOpenraveThread::JacoOpenraveThread(const char *name, jaco_arm_t* arm, bool l
   __planner_env.env   = NULL;
   __planner_env.robot = NULL;
   __planner_env.manip = NULL;
+
+  __plotted_current = false;
 #endif
 }
 
@@ -176,6 +178,10 @@ JacoOpenraveThread::_post_init()
     RobotBase::ManipulatorPtr manip = __planner_env.robot->get_robot_ptr()->SetActiveManipulator(__cfg_manipname);
     __planner_env.robot->get_robot_ptr()->SetActiveDOFs(manip->GetArmIndices());
   }
+
+  // Get chain of links from arm base to manipulator in viewer_env. Used for plotting joints
+  __robot->GetChain( __manip->GetBase()->GetIndex(), __manip->GetEndEffector()->GetIndex(), __links);
+
 #endif //HAVE_OPENRAVE
 }
 
@@ -292,6 +298,33 @@ JacoOpenraveThread::update_openrave()
       EnvironmentMutex::scoped_lock lock(__viewer_env.env->get_env_ptr()->GetMutex());
       __robot->SetDOFValues(__joints, 1, __manip->GetGripperIndices());
     }
+
+    if( __plot_current ) {
+      EnvironmentMutex::scoped_lock lock(__viewer_env.env->get_env_ptr()->GetMutex());
+
+      if( !__plotted_current ) {
+        // new plotting command. Erase previous plot
+        __graph_current.clear();
+      }
+
+      if( __cfg_OR_plot_cur_manip ) {
+        OpenRAVE::Vector color(0.f, 1.f, 0.f, 1.f);
+        const OpenRAVE::Vector &trans = __manip->GetEndEffectorTransform().trans;
+        float transa[4] = { (float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w };
+        __graph_current.push_back( __viewer_env.env->get_env_ptr()->plot3(transa,1, 0, 2.f, color));
+      }
+
+      if( __cfg_OR_plot_cur_joints ) {
+        OpenRAVE::Vector color(0.2f, 1.f, 0.f, 1.f);
+        for(unsigned int i=0; i<__links.size(); ++i) {
+          const OpenRAVE::Vector &trans = __links[i]->GetTransform().trans;
+          float transa[4] = { (float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w };
+          __graph_current.push_back( __viewer_env.env->get_env_ptr()->plot3(transa,1, 0, 2.f, color));
+        }
+      }
+    }
+    __plotted_current = __plot_current;
+
   } catch( openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
@@ -513,8 +546,10 @@ void
 JacoOpenraveThread::plot_first()
 {
 #ifdef HAVE_OPENRAVE
-  if( !__cfg_OR_use_viewer )
+  if( !__cfg_OR_use_viewer || (!__cfg_OR_plot_traj_manip && !__cfg_OR_plot_traj_joints))
     return;
+
+  __graph_handle.clear();
 
   // check if there is a target to be plotted
   __arm->target_mutex->lock();
@@ -548,12 +583,17 @@ JacoOpenraveThread::plot_first()
     RobotBasePtr tmp_robot = __viewer_env.robot->get_robot_ptr();
     RobotBase::RobotStateSaver saver(tmp_robot);
 
-    OpenRAVE::Vector color(__arm->trajec_color[0],
-                           __arm->trajec_color[1],
-                           __arm->trajec_color[2],
-                           __arm->trajec_color[3]);
     std::vector<dReal> joints;
     OpenRaveManipulatorPtr manip = __viewer_env.manip->copy();
+
+    OpenRAVE::Vector color_m(__arm->trajec_color[0],
+                             __arm->trajec_color[1],
+                             __arm->trajec_color[2],
+                             __arm->trajec_color[3]);
+    OpenRAVE::Vector color_j(__arm->trajec_color[0] / 1.4f,
+                             0.2f,
+                             __arm->trajec_color[2] / 1.4f,
+                             __arm->trajec_color[3] / 1.4f);
 
     for(jaco_trajec_t::iterator it = target->trajec->begin(); it!=target->trajec->end(); ++it) {
       manip->set_angles_device((*it));
@@ -561,9 +601,19 @@ JacoOpenraveThread::plot_first()
 
       tmp_robot->SetDOFValues(joints, 1, __manip->GetArmIndices());
 
-      const OpenRAVE::Vector &trans = __manip->GetEndEffectorTransform().trans;
-      float transa[4] = { (float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w };
-      __graph_handle.push_back( __viewer_env.env->get_env_ptr()->plot3(transa,1, 0, 2.f, color));
+      if( __cfg_OR_plot_traj_manip ) {
+        const OpenRAVE::Vector &trans = __manip->GetEndEffectorTransform().trans;
+        float transa[4] = { (float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w };
+        __graph_handle.push_back( __viewer_env.env->get_env_ptr()->plot3(transa,1, 0, 3.f, color_m));
+      }
+
+      if( __cfg_OR_plot_traj_joints ) {
+        for(unsigned int i=0; i<__links.size(); ++i) {
+          const OpenRAVE::Vector &trans = __links[i]->GetTransform().trans;
+          float transa[4] = { (float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w };
+          __graph_handle.push_back( __viewer_env.env->get_env_ptr()->plot3(transa,1, 0, 3.f, color_j));
+        }
+      }
     }
   } // robot state is restored
 

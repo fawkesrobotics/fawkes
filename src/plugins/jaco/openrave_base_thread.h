@@ -73,6 +73,8 @@ class JacoOpenraveBaseThread
   virtual void update_openrave() = 0;
   virtual void plot_first() = 0;
 
+  virtual void plot_current(bool enable);
+
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
   virtual void run() { Thread::run(); }
@@ -89,8 +91,13 @@ class JacoOpenraveBaseThread
   std::string   __cfg_OR_robot_file;
   bool          __cfg_OR_auto_load_ik;
   float         __cfg_OR_sampling;
+  bool          __cfg_OR_plot_traj_manip;
+  bool          __cfg_OR_plot_traj_joints;
+  bool          __cfg_OR_plot_cur_manip;
+  bool          __cfg_OR_plot_cur_joints;
 
   std::string   __plannerparams;
+  bool          __plot_current;
 #endif
 };
 

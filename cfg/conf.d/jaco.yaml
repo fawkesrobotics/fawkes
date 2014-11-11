@@ -73,3 +73,15 @@ hardware/jaco:
       #manipulator names for l/r when using a dual-arm setup
       dual_left: arm_left
       dual_right: arm_right
+
+    # plotting options
+    plotting:
+      # plot the planned trajectory of the manipulator
+      planned_manipulator: true
+      # plot the planned trajectory of all joints
+      planned_joints: false
+
+      # plot the current position of manipulator, while trajectory is being executed.
+      current_manipulator: false
+      # plot the current position of joints, while trajectory is being executed.
+      current_joints: false
