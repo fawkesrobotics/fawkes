@@ -50,7 +50,7 @@ using namespace std;
  */
 
 /** Constructor.
- * @param thread_name thread name
+ * @param arms pointer to jaco_dual_arm_t struct, to be used in this thread
  */
 JacoBimanualOpenraveThread::JacoBimanualOpenraveThread(jaco_dual_arm_t *arms)
   : JacoOpenraveBaseThread("JacoBimanualOpenraveThread")
@@ -271,13 +271,41 @@ JacoBimanualOpenraveThread::loop()
 #endif
 }
 
-
+/** Enable/Disable constrained planning.
+ * Enabling it will constrain the movement, which means it is tried to
+ * maintain the distance of the grippers to each other. This should be
+ * activated when moving an object with both hands, but disabled in
+ * situations when the arms do not need to hold the object simultaneously
+ * at all times.
+ *
+ * @param enable Enables/Disables the state.
+ */
 void
 JacoBimanualOpenraveThread::set_constrained(bool enable)
 {
   __constrained = enable;
 }
 
+/** Add target for coordinated manipulation to the queue.
+ *
+ * This adds targets to the queues for both left and right arms. It sets
+ * the target->coord flag to "true", which means it will not be processed
+ * by the threads for uncoordinated manipulation!
+ *
+ * @param l_x x-coordinate of target position of left arm
+ * @param l_y y-coordinate of target position of left arm
+ * @param l_z z-coordinate of target position of left arm
+ * @param l_e1 1st euler rotation of target orientation of left arm
+ * @param l_e2 2nd euler rotation of target orientation of left arm
+ * @param l_e3 3rd euler rotation of target orientation of left arm
+ * @param r_x x-coordinate of target position of right arm
+ * @param r_y y-coordinate of target position of right arm
+ * @param r_z z-coordinate of target position of right arm
+ * @param r_e1 1st euler rotation of target orientation of right arm
+ * @param r_e2 2nd euler rotation of target orientation of right arm
+ * @param r_e3 3rd euler rotation of target orientation of right arm
+ * @return "true", if target could be added to queue.
+ */
 bool
 JacoBimanualOpenraveThread::add_target(float l_x, float l_y, float l_z, float l_e1, float l_e2, float l_e3,
                                        float r_x, float r_y, float r_z, float r_e1, float r_e2, float r_e3)
@@ -322,7 +350,6 @@ JacoBimanualOpenraveThread::update_openrave()
   // do nothing, this thread is only for plannning!
 }
 
-/** Plot the first target of the queue in the viewer_env */
 void
 JacoBimanualOpenraveThread::plot_first()
 {

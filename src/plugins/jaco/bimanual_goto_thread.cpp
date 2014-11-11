@@ -42,7 +42,7 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param thread_name thread name
+ * @param arms pointer to jaco_dual_arm_t struct, to be used in this thread
  */
 JacoBimanualGotoThread::JacoBimanualGotoThread(jaco_dual_arm_t *arms)
   : Thread("JacoBimanualGotoThread", Thread::OPMODE_CONTINUOUS)
@@ -84,6 +84,9 @@ JacoBimanualGotoThread::finalize()
   __final_mutex = NULL;
 }
 
+/** The main loop of this thread.
+ * @see JacoGotoThread::loop
+ */
 void
 JacoBimanualGotoThread::loop()
 {
@@ -201,6 +204,10 @@ JacoBimanualGotoThread::loop()
 }
 
 
+/** Check if arm is final.
+ * @see JacoGotoThread::final
+ * @return "true" if arm is not moving anymore, "false" otherwise
+ */
 bool
 JacoBimanualGotoThread::final()
 {
@@ -245,6 +252,14 @@ JacoBimanualGotoThread::stop()
 }
 
 
+/** Moves only the gripper of both arms
+ * @param l_f1 value of 1st finger of left arm
+ * @param l_f2 value of 2nd finger of left arm
+ * @param l_f3 value of 3rd finger of left arm
+ * @param r_f1 value of 1st finger of right arm
+ * @param r_f2 value of 2nd finger of right arm
+ * @param r_f3 value of 3rd finger of right arm
+ */
 void
 JacoBimanualGotoThread::move_gripper(float l_f1, float l_f2, float l_f3, float r_f1, float r_f2, float r_f3)
 {

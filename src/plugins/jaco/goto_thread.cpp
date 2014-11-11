@@ -40,7 +40,8 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param thread_name thread name
+ * @param name thread name
+ * @param arm pointer to jaco_arm_t struct, to be used in this thread
  */
 JacoGotoThread::JacoGotoThread(const char *name, jaco_arm_t* arm)
   : Thread(name, Thread::OPMODE_CONTINUOUS)
@@ -59,12 +60,14 @@ JacoGotoThread::~JacoGotoThread()
 {
 }
 
+/** Initialize. */
 void
 JacoGotoThread::init()
 {
   __final_mutex = new Mutex();
 }
 
+/** Finalize. */
 void
 JacoGotoThread::finalize()
 {
@@ -73,6 +76,13 @@ JacoGotoThread::finalize()
   __arm = NULL;
 }
 
+/** Check if arm is final.
+ * Checks if the movements started by this thread have finished, and
+ * if the target_queue has been fully processed. Otherwise the arm
+ * is probably still moving and therefore not final.
+ *
+ * @return "true" if arm is not moving anymore, "false" otherwise
+ */
 bool
 JacoGotoThread::final()
 {
@@ -82,7 +92,7 @@ JacoGotoThread::final()
   __final_mutex->unlock();
   if( !final ) {
     // There was some movement initiated. Check if it has finished
-    check_final();
+    _check_final();
     __final_mutex->lock();
     final = __final;
     __final_mutex->unlock();
@@ -102,6 +112,20 @@ JacoGotoThread::final()
   return final;
 }
 
+/** Set new target, given cartesian coordinates.
+ * This target is added to the queue, skipping trajectory planning.
+ * CAUTION: This also means: no collision avoidance!
+ *
+ * @param x x-coordinate of target position
+ * @param y y-coordinate of target position
+ * @param z z-coordinate of target position
+ * @param e1 1st euler rotation of target orientation
+ * @param e2 2nd euler rotation of target orientation
+ * @param e3 3rd euler rotation of target orientation
+ * @param f1 value of 1st finger
+ * @param f2 value of 2nd finger
+ * @param f3 value of 3rd finger
+ */
 void
 JacoGotoThread::set_target(float x, float y, float z,
                            float e1, float e2, float e3,
@@ -129,6 +153,20 @@ JacoGotoThread::set_target(float x, float y, float z,
   __arm->target_mutex->unlock();
 }
 
+/** Set new target, given joint positions
+ * This target is added to the queue, skipping trajectory planning.
+ * CAUTION: This also means: no collision avoidance!
+ *
+ * @param j1 angular position of 1st joint (in degree)
+ * @param j2 angular position of 2nd joint (in degree)
+ * @param j3 angular position of 3rd joint (in degree)
+ * @param j4 angular position of 4th joint (in degree)
+ * @param j5 angular position of 5th joint (in degree)
+ * @param j6 angular position of 6th joint (in degree)
+ * @param f1 value of 1st finger
+ * @param f2 value of 2nd finger
+ * @param f3 value of 3rd finger
+ */
 void
 JacoGotoThread::set_target_ang(float j1, float j2, float j3,
                                float j4, float j5, float j6,
@@ -156,6 +194,10 @@ JacoGotoThread::set_target_ang(float j1, float j2, float j3,
   __arm->target_mutex->unlock();
 }
 
+/** Moves the arm to the "READY" position.
+ * This target is added to the queue, skipping trajectory planning.
+ * CAUTION: This also means: no collision avoidance!
+ */
 void
 JacoGotoThread::pos_ready()
 {
@@ -166,6 +208,10 @@ JacoGotoThread::pos_ready()
   __arm->target_mutex->unlock();
 }
 
+/** Moves the arm to the "RETRACT" position.
+ * This target is added to the queue, skipping trajectory planning.
+ * CAUTION: This also means: no collision avoidance!
+ */
 void
 JacoGotoThread::pos_retract()
 {
@@ -176,7 +222,11 @@ JacoGotoThread::pos_retract()
   __arm->target_mutex->unlock();
 }
 
-
+/** Moves only the gripper.
+ * @param f1 value of 1st finger
+ * @param f2 value of 2nd finger
+ * @param f3 value of 3rd finger
+ */
 void
 JacoGotoThread::move_gripper(float f1, float f2 ,float f3)
 {
@@ -216,90 +266,12 @@ JacoGotoThread::stop()
   }
 }
 
-void
-JacoGotoThread::check_final()
-{
-  bool check_fingers = false;
-  bool final = true;
-
-  //logger->log_debug(name(), "check final");
-  switch( __target->type ) {
-
-    case TARGET_READY:
-    case TARGET_RETRACT:
-      if( __wait_status_check == 0 ) {
-        //logger->log_debug(name(), "check final for TARGET_MODE");
-        __final_mutex->lock();
-        __final = __arm->arm->final();
-        __final_mutex->unlock();
-      } else if( __wait_status_check >= 10 ) {
-          __wait_status_check = 0;
-      } else {
-          ++__wait_status_check;
-      }
-      break;
-
-    case TARGET_ANGULAR:
-      //logger->log_debug(name(), "check final for TARGET ANGULAR");
-      //final = __arm->arm->final();
-      for( unsigned int i=0; i<6; ++i ) {
-        final &= std::abs( angle_distance(deg2rad(__target->pos.at(i)), deg2rad(__arm->iface->joints(i))) ) < 0.05;
-      }
-      __final_mutex->lock();
-      __final = final;
-      __final_mutex->unlock();
-      check_fingers = true;
-      break;
-
-    case TARGET_GRIPPER:
-      //logger->log_debug(name(), "check final for TARGET GRIPPER");
-      __final_mutex->lock();
-      __final = __arm->arm->final();
-      __final_mutex->unlock();
-      check_fingers = true;
-      break;
-
-    default: //TARGET_CARTESIAN
-      //logger->log_debug(name(), "check final for TARGET CARTESIAN");
-      //final = __arm->arm->final();
-      final &= (std::abs(angle_distance(__target->pos.at(0) , __arm->iface->x())) < 0.01);
-      final &= (std::abs(angle_distance(__target->pos.at(1) , __arm->iface->y())) < 0.01);
-      final &= (std::abs(angle_distance(__target->pos.at(2) , __arm->iface->z())) < 0.01);
-      final &= (std::abs(angle_distance(__target->pos.at(3) , __arm->iface->euler1())) < 0.1);
-      final &= (std::abs(angle_distance(__target->pos.at(4) , __arm->iface->euler2())) < 0.1);
-      final &= (std::abs(angle_distance(__target->pos.at(5) , __arm->iface->euler3())) < 0.1);
-      __final_mutex->lock();
-      __final = final;
-      __final_mutex->unlock();
-
-      check_fingers = true;
-      break;
-//*/
-
-  }
-
-  //logger->log_debug(name(), "check final: %u", __final);
-
-  if( check_fingers && __final ) {
-    //logger->log_debug(name(), "check fingeres for final");
-
-    // also check fingeres
-    if( __finger_last[0] == __arm->iface->finger1() &&
-        __finger_last[1] == __arm->iface->finger2() &&
-        __finger_last[2] == __arm->iface->finger3() ) {
-      __finger_last[3] += 1;
-    } else {
-      __finger_last[0] = __arm->iface->finger1();
-      __finger_last[1] = __arm->iface->finger2();
-      __finger_last[2] = __arm->iface->finger3();
-      __finger_last[3] = 0; // counter
-    }
-    __final_mutex->lock();
-    __final &= __finger_last[3] > 10;
-    __final_mutex->unlock();
-  }
-}
-
+/** The main loop of this thread.
+ * It gets the first target in the target_queue and checks if it is ready
+ * to be processed. The target is removed from the queue if the movement is
+ * "final" (see final()), which is when this method starts processing
+ * the queue again.
+ */
 void
 JacoGotoThread::loop()
 {
@@ -387,6 +359,90 @@ JacoGotoThread::loop()
 }
 
 
+/* PRIVATE METHODS */
+void
+JacoGotoThread::_check_final()
+{
+  bool check_fingers = false;
+  bool final = true;
+
+  //logger->log_debug(name(), "check final");
+  switch( __target->type ) {
+
+    case TARGET_READY:
+    case TARGET_RETRACT:
+      if( __wait_status_check == 0 ) {
+        //logger->log_debug(name(), "check final for TARGET_MODE");
+        __final_mutex->lock();
+        __final = __arm->arm->final();
+        __final_mutex->unlock();
+      } else if( __wait_status_check >= 10 ) {
+          __wait_status_check = 0;
+      } else {
+          ++__wait_status_check;
+      }
+      break;
+
+    case TARGET_ANGULAR:
+      //logger->log_debug(name(), "check final for TARGET ANGULAR");
+      //final = __arm->arm->final();
+      for( unsigned int i=0; i<6; ++i ) {
+        final &= std::abs( angle_distance(deg2rad(__target->pos.at(i)), deg2rad(__arm->iface->joints(i))) ) < 0.05;
+      }
+      __final_mutex->lock();
+      __final = final;
+      __final_mutex->unlock();
+      check_fingers = true;
+      break;
+
+    case TARGET_GRIPPER:
+      //logger->log_debug(name(), "check final for TARGET GRIPPER");
+      __final_mutex->lock();
+      __final = __arm->arm->final();
+      __final_mutex->unlock();
+      check_fingers = true;
+      break;
+
+    default: //TARGET_CARTESIAN
+      //logger->log_debug(name(), "check final for TARGET CARTESIAN");
+      //final = __arm->arm->final();
+      final &= (std::abs(angle_distance(__target->pos.at(0) , __arm->iface->x())) < 0.01);
+      final &= (std::abs(angle_distance(__target->pos.at(1) , __arm->iface->y())) < 0.01);
+      final &= (std::abs(angle_distance(__target->pos.at(2) , __arm->iface->z())) < 0.01);
+      final &= (std::abs(angle_distance(__target->pos.at(3) , __arm->iface->euler1())) < 0.1);
+      final &= (std::abs(angle_distance(__target->pos.at(4) , __arm->iface->euler2())) < 0.1);
+      final &= (std::abs(angle_distance(__target->pos.at(5) , __arm->iface->euler3())) < 0.1);
+      __final_mutex->lock();
+      __final = final;
+      __final_mutex->unlock();
+
+      check_fingers = true;
+      break;
+//*/
+
+  }
+
+  //logger->log_debug(name(), "check final: %u", __final);
+
+  if( check_fingers && __final ) {
+    //logger->log_debug(name(), "check fingeres for final");
+
+    // also check fingeres
+    if( __finger_last[0] == __arm->iface->finger1() &&
+        __finger_last[1] == __arm->iface->finger2() &&
+        __finger_last[2] == __arm->iface->finger3() ) {
+      __finger_last[3] += 1;
+    } else {
+      __finger_last[0] = __arm->iface->finger1();
+      __finger_last[1] = __arm->iface->finger2();
+      __finger_last[2] = __arm->iface->finger3();
+      __finger_last[3] = 0; // counter
+    }
+    __final_mutex->lock();
+    __final &= __finger_last[3] > 10;
+    __final_mutex->unlock();
+  }
+}
 
 void
 JacoGotoThread::_goto_target()

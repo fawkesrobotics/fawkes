@@ -51,7 +51,11 @@ using namespace std;
  */
 
 /** Constructor.
- * @param thread_name thread name
+ * @param name thread name
+ * @param arm pointer to jaco_arm_t struct, to be used in this thread
+ * @param load_robot decide if this thread should load a robot. This should only
+ *  be set to "true" if a separate OpenRaveRobot should be loaded (e.g. not the
+ *  case when using 1 robot with 2 manipulators!)
  */
 JacoOpenraveThread::JacoOpenraveThread(const char *name, jaco_arm_t* arm, bool load_robot)
   : JacoOpenraveBaseThread(name)
@@ -67,6 +71,7 @@ JacoOpenraveThread::JacoOpenraveThread(const char *name, jaco_arm_t* arm, bool l
 #endif
 }
 
+/** Get additional config entries. */
 void
 JacoOpenraveThread::_init()
 {
@@ -89,6 +94,7 @@ JacoOpenraveThread::_init()
   }
 }
 
+/** Load the robot into the environment. */
 void
 JacoOpenraveThread::_load_robot()
 {
@@ -135,6 +141,9 @@ JacoOpenraveThread::_load_robot()
 #endif //HAVE_OPENRAVE
 }
 
+/** Get pointers to the robot and manipulator in the viewer_env, and
+ * clone the environment.
+ */
 void
 JacoOpenraveThread::_post_init()
 {
@@ -200,6 +209,16 @@ JacoOpenraveThread::finalize() {
 #endif
 }
 
+/** Mani loop.
+ * It iterates over the target_queue to find the first target that needs
+ * trajectory planning. This can be done if it is the first target,
+ * or if the previous target has a known final configuration, which can
+ * be used as the current starting configuration.
+ * The result is stored in the struct of the current target, which can
+ * then be processed by the goto_thread
+ *
+ * @see JacoGotoThread#loop to see how goto_thread processes the queue
+ */
 void
 JacoOpenraveThread::loop()
 {
@@ -331,6 +350,23 @@ JacoOpenraveThread::update_openrave()
 #endif
 }
 
+/** Solve IK and add target to the queue.
+ *
+ * The IK is solved, ignoring collisions of the end-effector with the environment.
+ * We do this to generally decide if IK is generally solvable. Collision checking
+ * is done in a later step in JacoOpenraveThread::_plan_path .
+ *
+ * If IK is solvable, the target is enqueued in the target_queue.
+ *
+ * @param x x-coordinate of target position
+ * @param y y-coordinate of target position
+ * @param z z-coordinate of target position
+ * @param e1 1st euler rotation of target orientation
+ * @param e2 2nd euler rotation of target orientation
+ * @param e3 3rd euler rotation of target orientation
+ * @param plan decide if we want to plan a trajectory for this or not
+ * @return "true", if IK could be solved. "false" otherwise
+ */
 bool
 JacoOpenraveThread::add_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {
@@ -404,6 +440,18 @@ JacoOpenraveThread::add_target(float x, float y, float z, float e1, float e2, fl
   return solvable;
 }
 
+/** Flush the target_queue and add this one.
+ * see JacoOpenraveThread#add_target for that.
+ *
+ * @param x x-coordinate of target position
+ * @param y y-coordinate of target position
+ * @param z z-coordinate of target position
+ * @param e1 1st euler rotation of target orientation
+ * @param e2 2nd euler rotation of target orientation
+ * @param e3 3rd euler rotation of target orientation
+ * @param plan decide if we want to plan a trajectory for this or not
+ * @return "true", if IK could be solved. "false" otherwise
+ */
 bool
 JacoOpenraveThread::set_target(float x, float y, float z, float e1, float e2, float e3, bool plan)
 {

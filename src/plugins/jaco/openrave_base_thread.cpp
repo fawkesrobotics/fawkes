@@ -47,7 +47,7 @@ using namespace std;
  */
 
 /** Constructor.
- * @param thread_name thread name
+ * @param name thread name
  */
 JacoOpenraveBaseThread::JacoOpenraveBaseThread(const char *name)
   : Thread(name, Thread::OPMODE_CONTINUOUS)
@@ -70,6 +70,12 @@ JacoOpenraveBaseThread::~JacoOpenraveBaseThread()
 #endif
 }
 
+/** Initializer.
+ * Reads common config entries, and loads the viewer-environment.
+ * It calls the _init() and _load_robot() methods from inherited classes,
+ * which can be used to initialize additional data, and load the robot
+ * into the OpenRAVE environment.
+ */
 void
 JacoOpenraveBaseThread::init()
 {
@@ -115,6 +121,12 @@ JacoOpenraveBaseThread::finalize()
 #endif
 }
 
+/** Set planner parameters.
+ * The parameter string is passed as is to OpenRAVE's BaseManipulator
+ * or DualManipulation module. Errors in the string will result in
+ * planning failures.
+ * @param params parameters string
+ */
 void
 JacoOpenraveBaseThread::set_plannerparams(const std::string &params)
 {
@@ -123,6 +135,12 @@ JacoOpenraveBaseThread::set_plannerparams(const std::string &params)
 #endif
 }
 
+/** Set planner parameters.
+ * The parameter string is passed as is to OpenRAVE's BaseManipulator
+ * or DualManipulation module. Errors in the string will result in
+ * planning failures.
+ * @param params parameters string
+ */
 void
 JacoOpenraveBaseThread::set_plannerparams(const char* params)
 {
@@ -131,6 +149,9 @@ JacoOpenraveBaseThread::set_plannerparams(const char* params)
 #endif
 }
 
+/** Enable/Disable plotting of the current arm position.
+ * @param enable Set the "enabled" state
+ */
 void
 JacoOpenraveBaseThread::plot_current(bool enable)
 {

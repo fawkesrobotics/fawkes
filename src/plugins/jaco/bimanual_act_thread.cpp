@@ -35,7 +35,7 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param thread_name thread name
+ * @param arms pointer to jaco_dual_arm_t struct, to be used in this thread
  */
 JacoBimanualActThread::JacoBimanualActThread(jaco_dual_arm_t *arms)
   : Thread("JacoBimanualActThread", Thread::OPMODE_WAITFORWAKEUP),

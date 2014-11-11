@@ -79,7 +79,7 @@ class JacoGotoThread
 
   unsigned int __wait_status_check;
 
-  void check_final();
+  void _check_final();
 };
 
 

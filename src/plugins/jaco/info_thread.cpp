@@ -36,7 +36,8 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param thread_name thread name
+ * @param name thread name
+ * @param arm pointer to jaco_arm_t struct, to be used in this thread
  */
 JacoInfoThread::JacoInfoThread(const char *name, jaco_arm_t* arm)
   : Thread(name, Thread::OPMODE_WAITFORWAKEUP),

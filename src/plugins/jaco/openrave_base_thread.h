@@ -70,7 +70,12 @@ class JacoOpenraveBaseThread
   virtual void set_plannerparams(const std::string &params);
   virtual void set_plannerparams(const char* params);
 
+  /** Update the openrave environment to represent the current situation.
+   * This includes updating the model and plotting current positions.
+   */
   virtual void update_openrave() = 0;
+
+  /** Plot the first target of the target_queue, if it is a trajectory. */
   virtual void plot_first() = 0;
 
   virtual void plot_current(bool enable);
@@ -78,11 +83,17 @@ class JacoOpenraveBaseThread
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
   virtual void run() { Thread::run(); }
+
+  /** Use this in inheriting classes for additiona initializations. */
   virtual void _init() {}
+
+  /** Use this in inheriting classes to load the OpenRaveRobot */
   virtual void _load_robot() {}
+
+  /** Use this in inheriting classes for post_init stuff, e.g. env-cloning */
   virtual void _post_init() {}
 
-  fawkes::Mutex *__planning_mutex;
+  fawkes::Mutex *__planning_mutex;      /**< mutex, used to lock when planning. */
 
 #ifdef HAVE_OPENRAVE
   fawkes::jaco_openrave_set_t __viewer_env;

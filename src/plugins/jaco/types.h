@@ -45,15 +45,19 @@ class JacoArm;
 class JacoInterface;
 class JacoBimanualInterface;
 
+/// \brief A trajectory point
 typedef std::vector<float>               jaco_trajec_point_t;
+/// \brief A trajectory
 typedef std::vector<jaco_trajec_point_t> jaco_trajec_t;
 
+/// \brief The setup-configuration of the arm
 typedef enum jaco_arm_config_enum {
   CONFIG_SINGLE,    /**< we only have one arm. */
   CONFIG_LEFT,      /**< this arm is the left one out of two. */
   CONFIG_RIGHT      /**< this arm is the right one out of two. */
 } jaco_arm_config_t;
 
+/// \brief The type of a target
 typedef enum jaco_target_type_enum {
   TARGET_CARTESIAN,     /**< target with cartesian coordinates. */
   TARGET_ANGULAR,       /**< target with angular coordinates. */
@@ -62,6 +66,7 @@ typedef enum jaco_target_type_enum {
   TARGET_RETRACT        /**< target is the RETRACT position of the Jaco arm. */
 } jaco_target_type_t;
 
+/// \brief The state of a trajectory
 typedef enum jaco_trajec_state_enum {
   TRAJEC_SKIP,          /**< skip trajectory planning for this target. */
   TRAJEC_WAITING,       /**< new trajectory target, wait for planner to process. */
@@ -72,6 +77,7 @@ typedef enum jaco_trajec_state_enum {
   TRAJEC_PLANNING_ERROR /**< planner could not plan a collision-free trajectory. */
 } jaco_trajec_state_t;
 
+/// \brief Jaco target struct, holding information on a target.
 typedef struct jaco_target_struct_t {
   jaco_target_type_t            type;           /**< target type. */
   jaco_trajec_point_t           pos;            /**< target position (interpreted depending on target type). */
@@ -81,30 +87,34 @@ typedef struct jaco_target_struct_t {
   bool                          coord;          /**< this target needs to be coordinated with targets of other arms. */
 } jaco_target_t;
 
+
+/// \brief FIFO target queue, holding RefPtr to targets.
 typedef std::list< RefPtr<jaco_target_t> > jaco_target_queue_t;
 
+/// \brief Jaco struct containing all components required for one arm
 typedef struct jaco_arm_struct {
-  jaco_arm_config_t config;
-  fawkes::JacoArm *arm;
-  JacoInterface *iface;
+  jaco_arm_config_t config; /**< configuration for this arm */
+  fawkes::JacoArm *arm;     /**< pointer to actual JacoArm instance, controlling this arm */
+  JacoInterface *iface;     /**< pointer to JacoInterface, assigned to this arm */
 
-  JacoGotoThread *goto_thread;
-  JacoOpenraveThread *openrave_thread;
+  JacoGotoThread *goto_thread;          /**< the GotoThread of this arm. */
+  JacoOpenraveThread *openrave_thread;  /**< the OpenraveThread of this arm. */
 
-  RefPtr< Mutex > target_mutex;
-  RefPtr< Mutex > trajec_mutex; // very shortly locked mutex
+  RefPtr< Mutex > target_mutex; /**< mutex, used for accessing the target_queue */
+  RefPtr< Mutex > trajec_mutex; /**< mutex, used for modifying trajectory of a target. Only locked shortly. */
 
-  RefPtr< jaco_target_queue_t > target_queue;
+  RefPtr< jaco_target_queue_t > target_queue; /**< queue of targets, which is processed FIFO. */
 
-  float trajec_color[4]; // RGBA values, each from 0-1
+  float trajec_color[4]; /**< the color used for plotting the trajectory. RGBA values, each from 0-1. */
 } jaco_arm_t;
 
+/// \brief Jaco struct containing all components required for a dual-arm setup
 typedef struct jaco_dual_arm_struct {
-  jaco_arm_t *left;
-  jaco_arm_t *right;
-  JacoBimanualInterface      *iface;
-  JacoBimanualGotoThread     *goto_thread;
-  JacoBimanualOpenraveThread *openrave_thread;
+  jaco_arm_t *left;   /**< the struct with all the data for the left arm. */
+  jaco_arm_t *right;  /**< the struct with all the data for the right arm. */
+  JacoBimanualInterface      *iface;            /**< interface used for coordinated manipulation. */
+  JacoBimanualGotoThread     *goto_thread;      /**< GotoThread for coordinated manipulation. */
+  JacoBimanualOpenraveThread *openrave_thread;  /**< OpenraveThread for coordinated manipulation. */
 } jaco_dual_arm_t;
 
 

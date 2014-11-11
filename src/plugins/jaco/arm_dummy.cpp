@@ -52,7 +52,9 @@ namespace fawkes {
  * @author Bahram Maleki-Fard
  */
 
-/** Constructor. */
+/** Constructor.
+ * @param name The name of the arm we want to connect to
+ */
 JacoArmDummy::JacoArmDummy(const char *name)
 {
   __name = name;
@@ -135,10 +137,15 @@ JacoArmDummy::push_joystick(unsigned int button)
 void
 JacoArmDummy::release_joystick()
 {
-  stop();
 }
 
-
+/** Move the arm along the given trajectory.
+ * Calls goto_joints() 33Hz (default Fawkes loop time)
+ * @see #goto_joints
+ *
+ * @param trajec the trajectory
+ * @param fingers target finger positions
+ */
 void
 JacoArmDummy::goto_trajec(std::vector< std::vector<float> >* trajec, std::vector<float> &fingers)
 {
@@ -148,6 +155,16 @@ JacoArmDummy::goto_trajec(std::vector< std::vector<float> >* trajec, std::vector
   }
 }
 
+/** Move the arm to given configuration.
+ * No real movement for "dummy" arm though, it just sets these values to the
+ * current ones.
+ *
+ * @param joints target joint angles
+ * @param fingers target finger positions
+ * @param followup defines if this is a singular trajectory-point, or a consecutive one. Setting to "false"
+ *                 acuires control of the arm and sets the mode to "angular" each time. Because of that,
+ *                 it needs to be "true" if it is a "followup" trajectory point.
+ */
 void
 JacoArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &fingers, bool followup)
 {
@@ -158,6 +175,13 @@ JacoArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &finger
   __fingers = fingers;
 }
 
+/** Move the arm to given configuration.
+ * No real movement for "dummy" arm though, it just sets these values to the
+ * current ones.
+ *
+ * @param coords target fingertip coordinations
+ * @param fingers target finger positions
+ */
 void
 JacoArmDummy::goto_coords(std::vector<float> &coords, std::vector<float> &fingers)
 {

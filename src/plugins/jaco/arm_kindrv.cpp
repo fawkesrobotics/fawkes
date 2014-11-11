@@ -41,7 +41,9 @@ namespace fawkes {
  * @author Bahram Maleki-Fard
  */
 
-/** Constructor. */
+/** Constructor.
+ * @param name The name of the arm we want to connect to.
+ */
 JacoArmKindrv::JacoArmKindrv(const char *name)
 {
   // take the first arm we can connect to
