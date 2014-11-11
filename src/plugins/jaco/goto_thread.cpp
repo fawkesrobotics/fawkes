@@ -96,6 +96,9 @@ JacoGotoThread::final()
   final = __arm->target_queue->empty();
   __arm->target_mutex->unlock();
 
+  if( final )
+    __arm->openrave_thread->plot_current(false);
+
   return final;
 }
 
@@ -335,6 +338,14 @@ JacoGotoThread::loop()
     case TRAJEC_SKIP:
       // "regular" target
       logger->log_debug(name(), "No planning for this new target. Process, using current finger positions...");
+
+      if( __target->type != TARGET_GRIPPER ) {
+        // arm moves! clear previously drawn trajectory plot
+        __arm->openrave_thread->plot_first();
+
+        // also enable ploting current joint positions
+        __arm->openrave_thread->plot_current(true);
+      }
       _goto_target();
       logger->log_debug(name(), "...target processed");
       break;
@@ -350,6 +361,9 @@ JacoGotoThread::loop()
       if( !__target->trajec->empty() ) {
         // first let the openrave_thread show the trajectory in the viewer
         __arm->openrave_thread->plot_first();
+
+        // enable plotting current positions
+        __arm->openrave_thread->plot_current(true);
 
         // then execute the trajectory
         _exec_trajec(*(__target->trajec));

@@ -152,8 +152,10 @@ JacoBimanualGotoThread::loop()
 
   switch( __arms.l.target->trajec_state ) {
     case TRAJEC_SKIP:
-      // "regular" target
+      // "regular" target. For now, we just process "GRIPPER", therefore do not
+      //  change plotting
       logger->log_debug(name(), "No planning for these targets. Process, using current finger positions...");
+
       if(__arms.l.target->type != TARGET_GRIPPER) {
         logger->log_warn(name(), "Unknown target type %i, cannot process without planning!", __arms.l.target->type);
         stop();
@@ -177,6 +179,10 @@ JacoBimanualGotoThread::loop()
         // first let the openrave_thread show the trajectory in the viewer
         __arms.l.arm->openrave_thread->plot_first();
         __arms.r.arm->openrave_thread->plot_first();
+
+        // enable plotting of current positions
+        __arms.l.arm->openrave_thread->plot_current(true);
+        __arms.r.arm->openrave_thread->plot_current(true);
 
         // then execute the trajectories
         _exec_trajecs();
