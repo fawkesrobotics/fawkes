@@ -891,7 +891,7 @@ ColliThread::update_modules()
 {
   float vx, vy, v;
   vx = if_motor_->des_vx();
-  vy = if_motor_->des_vx();
+  vy = if_motor_->des_vy();
   v  = std::sqrt( vx*vx + vy*vy );
 
   if ( !cfg_obstacle_inc_ ) {
