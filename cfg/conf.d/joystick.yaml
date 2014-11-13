@@ -84,3 +84,6 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
 
     # Interface ID for JoystickInterface to read data from
     joystick_interface_id: Joystick
+
+    # Interface ID for Laser360Interface
+    laser_interface_id: Laser urg filtered

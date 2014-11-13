@@ -23,6 +23,10 @@
 
 #include <interfaces/MotorInterface.h>
 #include <interfaces/JoystickInterface.h>
+#include <interfaces/Laser360Interface.h>
+#include <utils/math/angle.h>
+#include <utils/math/coord.h>
+
 
 #include <cmath>
 
@@ -84,10 +88,13 @@ JoystickTeleOpThread::init()
 
   cfg_ifid_motor_        = config->get_string(CFG_PREFIX"motor_interface_id");
   cfg_ifid_joystick_     = config->get_string(CFG_PREFIX"joystick_interface_id");
+  cfg_ifid_laser_        = config->get_string(CFG_PREFIX"laser_interface_id");
 
   motor_if_ = blackboard->open_for_reading<MotorInterface>(cfg_ifid_motor_.c_str());
   joystick_if_ =
     blackboard->open_for_reading<JoystickInterface>(cfg_ifid_joystick_.c_str());
+  laser_if_ =
+    blackboard->open_for_reading<Laser360Interface>(cfg_ifid_laser_.c_str());
 
   stopped_ = false;
 }
@@ -105,6 +112,7 @@ JoystickTeleOpThread::finalize()
 {
   blackboard->close(motor_if_);
   blackboard->close(joystick_if_);
+  blackboard->close(laser_if_);
 }
 
 void
@@ -132,10 +140,32 @@ JoystickTeleOpThread::stop()
   stopped_ = true;
 }
 
+bool
+JoystickTeleOpThread::is_area_free(float theta)
+{
+  for (int i = -20; i <= 20; ++i) // scan 41 degree in front for obstacles
+  {
+    int angle = ((int)theta) + i;
+    if (angle < 0)
+    {
+      angle = angle + 359;
+    }
+    if (laser_if_->distances(angle) > 0. && laser_if_->distances(angle) < 0.4)
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void
 JoystickTeleOpThread::loop()
 {
   joystick_if_->read();
+  laser_if_->read();
+
+
 
   if ((! joystick_if_->has_writer() || joystick_if_->num_axes() == 0) && ! stopped_) {
     logger->log_warn(name(), "Joystick disconnected, stopping");
@@ -176,7 +206,17 @@ JoystickTeleOpThread::loop()
 	omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_normal_max_omega_;
       }
 
-      send_transrot(vx, vy, omega);
+      float theta, distance;
+      cart2polar2d(vx, vy, &theta, &distance);
+      if (is_area_free(rad2deg(theta)))
+      {  
+        send_transrot(vx, vy, omega);
+      }
+      else // If area is not free, only allow rotation
+      {
+        logger->log_warn(name(),"obstacle reached");
+        send_transrot(0.,0.,omega);
+      }
     }
   } else if (! stopped_) {
     stop();

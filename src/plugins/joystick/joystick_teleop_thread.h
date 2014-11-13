@@ -33,6 +33,7 @@
 namespace fawkes {
   class MotorInterface;
   class JoystickInterface;
+  class Laser360Interface;
 }
 
 class JoystickTeleOpThread
@@ -55,11 +56,13 @@ class JoystickTeleOpThread
 
  private:
   void stop();
+  bool is_area_free(float theta);
   void send_transrot(float vx, float vy, float omega);
 
  private:
   fawkes::MotorInterface     *motor_if_;
   fawkes::JoystickInterface  *joystick_if_;
+  fawkes::Laser360Interface  *laser_if_;
 
   unsigned int cfg_axis_forward_;
   unsigned int cfg_axis_sideward_;
@@ -81,6 +84,7 @@ class JoystickTeleOpThread
   float        cfg_special_max_omega_;
   std::string  cfg_ifid_motor_;
   std::string  cfg_ifid_joystick_;
+  std::string  cfg_ifid_laser_;
 
   bool         stopped_;
 };

@@ -32,7 +32,7 @@ OBJS_ffkbjoystick = ffkbjoystick.o remote_bb_poster.o bb_handler.o
 
 LIBS_joystick_teleop = m fawkescore fawkesutils fawkesaspects \
 		       fawkesblackboard fawkesinterface \
-		       JoystickInterface MotorInterface
+		       JoystickInterface MotorInterface Laser360Interface
 OBJS_joystick_teleop = joystick_teleop_plugin.o joystick_teleop_thread.o
 
 OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick) $(OBJS_ffkbjoystick) $(OBJS_joystick_teleop) 
