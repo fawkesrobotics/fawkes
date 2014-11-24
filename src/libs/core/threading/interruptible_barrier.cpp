@@ -267,12 +267,21 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
   }
 
   bool local_timeout = false;
+  
+  //Am I the last thread the interruptable  barrier is waiting for? Then I can wake the others up.
   bool waker = (__data->threads_left == 0);
 
   while ( __data->threads_left && !__interrupted && !__timeout && ! local_timeout) {
+    //Here, the threads are waiting for the barrier
+    //pthread_cond_timedwait releases __data->mutex if it is not external
     local_timeout = ! __data->waitcond->reltimed_wait(timeout_sec, timeout_nanosec);
+    //before continuing, pthread_cond_timedwait locks __data->mutex again if it is not external
   }
-  if (local_timeout)  __timeout = true;
+
+  if (local_timeout){
+    //set timeout flag of the interruptable barrier so the other threads can continue
+    __timeout = true;
+  }
 
   if ( __interrupted ) {
     if (likely(__data->own_mutex))  __data->mutex->unlock();
@@ -281,14 +290,20 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
 			       _count - __data->threads_left, _count);
   }
 
+  if (waker){
+    //all threads of this barrier have to synchronize at the standard Barrier
+    __wait_at_barrier = true;
+  }
+  
   if (waker || local_timeout) {
-    __wait_at_barrier = waker;
+    //the other threads can stop waiting in th while-loop
     __data->waitcond->wake_all();
   }
 
   if (likely(__data->own_mutex))  __data->mutex->unlock();
 
   if (__wait_at_barrier) {
+    //hard synchronization
     Barrier::wait();
   }
 
