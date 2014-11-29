@@ -33,6 +33,8 @@
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/transport/transport.hh>
 #include <aspect/logging.h>
+#include <tf/transform_publisher.h>
+#include <utils/time/clock.h>
 
 using namespace fawkes;
 using namespace gazebo;
@@ -45,7 +47,8 @@ using namespace gazebo;
 /** Constructor. */
 LocalizationSimThread::LocalizationSimThread()
   : Thread("LocalizationSimThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
+    TransformAspect(TransformAspect::BOTH, "Pose")
 {
 }
 
@@ -58,6 +61,9 @@ void LocalizationSimThread::init()
 
   //read cofig values
   gps_topic_ = config->get_string("/gazsim/topics/gps");
+  transform_tolerance_ = config->get_float("/plugins/amcl/transform_tolerance");
+  global_frame_id_ = config->get_string("/plugins/amcl/global_frame_id");
+  odom_frame_id_ = config->get_string("/plugins/amcl/odom_frame_id");
 
   //subscribing to gazebo publisher
   localization_sub_ = gazebonode->Subscribe(gps_topic_, &LocalizationSimThread::on_localization_msg, this);
@@ -75,6 +81,8 @@ void LocalizationSimThread::loop()
   if(new_data_)
   {
     //write interface
+    localization_if_->set_frame(global_frame_id_.c_str());
+    localization_if_->set_visibility_history(100);
     localization_if_->set_translation(0, x_);
     localization_if_->set_translation(1, y_);
     localization_if_->set_translation(2, z_);
@@ -83,6 +91,15 @@ void LocalizationSimThread::loop()
     localization_if_->set_rotation(2, quat_z_);
     localization_if_->set_rotation(3, quat_w_);
     localization_if_->write();
+
+    //publish transform (similar as in amcl_thread.cpp)
+    tf::Quaternion rotation = tf::Quaternion(quat_x_, quat_y_, quat_z_, quat_w_);
+    tf::Point position = tf::Point(x_, y_, z_);
+    tf::Transform latest_tf_ = tf::Transform(rotation,position);
+    Time transform_expiration =
+      (clock->now() + transform_tolerance_);
+    tf_publisher->send_transform(latest_tf_, transform_expiration,
+				 global_frame_id_, odom_frame_id_);
 
     new_data_ = false;
   }
