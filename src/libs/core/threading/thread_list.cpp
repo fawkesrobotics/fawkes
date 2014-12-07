@@ -313,6 +313,10 @@ ThreadList::set_maintain_barrier(bool maintain_barrier)
 {
   MutexLocker lock(mutex());
 
+  if (__wnw_barrier != NULL && !__wnw_barrier->no_threads_in_wait()) {
+    throw Exception("InterruptibleBarrier cannot be destroyed "
+		    "when there still are threads in the wait() function");
+  }
   delete __wnw_barrier;
   __wnw_barrier = NULL;
   if ( maintain_barrier )  update_barrier();
@@ -347,7 +351,7 @@ ThreadList::try_recover(std::list<std::string> &recovered_threads)
 	++i;
       }
     }
-    if ( __wnw_bbit->second.empty() ) {
+    if ( __wnw_bbit->second.empty() && __wnw_bbit->first->no_threads_in_wait()) {
       delete __wnw_bbit->first;
       __wnw_bbit = __wnw_bad_barriers.erase(__wnw_bbit);
     } else {
@@ -881,7 +885,14 @@ ThreadList::update_barrier()
   for (iterator i = begin(); i != end(); ++i) {
     if (! (*i)->flagged_bad() )  ++num;
   }
-  delete __wnw_barrier;
+  if(__wnw_barrier == NULL || __wnw_barrier->no_threads_in_wait()){
+    delete __wnw_barrier;
+  }
+  else{
+    //delete the barrier later in try_recover
+    ThreadList empty_list;
+    __wnw_bad_barriers.push_back(make_pair(__wnw_barrier, empty_list));
+  }
   __wnw_barrier = new InterruptibleBarrier(num);
 }
 

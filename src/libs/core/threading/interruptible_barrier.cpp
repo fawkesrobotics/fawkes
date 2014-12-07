@@ -100,6 +100,7 @@ InterruptibleBarrier::InterruptibleBarrier(unsigned int count)
 
   __interrupted = false;
   __timeout     = false;
+  __num_threads_in_wait_function = 0;
 }
 
 
@@ -124,6 +125,7 @@ InterruptibleBarrier::InterruptibleBarrier(Mutex *mutex, unsigned int count)
 
   __interrupted = false;
   __timeout     = false;
+  __num_threads_in_wait_function = 0;
 }
 
 /** Invalid constructor.
@@ -243,6 +245,7 @@ bool
 InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanosec)
 {
   if (likely(__data->own_mutex))  __data->mutex->lock();
+  __num_threads_in_wait_function++;
 
   if ( __data->threads_left == 0 ) {
     // first to come
@@ -252,6 +255,7 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
   } else {
     if ( __interrupted || __timeout ) {
       // interrupted or timed out threads need to be reset if they should be reused
+      __num_threads_in_wait_function--;
       if (likely(__data->own_mutex))  __data->mutex->unlock();
       return true;
     }
@@ -307,7 +311,26 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
     Barrier::wait();
   }
 
+  if (likely(__data->own_mutex))  __data->mutex->lock();
+  //increment is not threadsafe
+  __num_threads_in_wait_function--;
+  if (likely(__data->own_mutex))  __data->mutex->unlock();
+
   return ! __timeout;
 }
+
+/** Checks if there are no more threads in the wait() function.
+ * This method is used to prevent the destruction of the barrier
+ * while there are threads in wait().
+ * @return true, if no thread currently is in wait()
+ */
+bool InterruptibleBarrier::no_threads_in_wait(){
+  if (likely(__data->own_mutex))  __data->mutex->lock();
+  bool res = __num_threads_in_wait_function == 0;
+  if (likely(__data->own_mutex))  __data->mutex->unlock();
+  
+  return res;
+}
+
 
 } // end namespace fawkes
