@@ -268,7 +268,7 @@ LaserOccupancyGrid::validate_old_laser_points(cart_coord_2d_t pos_robot, cart_co
   cart_coord_2d_t v_old;
 
   // distances from robot to new and old laser-points (i.e. length of v_new and v_old)
-  float d_new = sqrt(v_new.x*v_new.x + v_new.y + v_new.y);
+  float d_new = sqrt(v_new.x*v_new.x + v_new.y*v_new.y);
   float d_old = 0.f;
 
   // angle between the two vectors v_new and v_old. Use to determine whether they
@@ -284,7 +284,7 @@ LaserOccupancyGrid::validate_old_laser_points(cart_coord_2d_t pos_robot, cart_co
     v_old.y = (*it).coord.y - pos_robot.y;
 
     // need to calculate distance here, needed for angle calculation
-    d_old = sqrt(v_old.x*v_old.x + v_old.y + v_old.y);
+    d_old = sqrt(v_old.x*v_old.x + v_old.y*v_old.y);
 
     // we already have the distances, so already make the distance-check here
     if( d_new <= d_old + obstacle_distance_ ) {
@@ -296,7 +296,7 @@ LaserOccupancyGrid::validate_old_laser_points(cart_coord_2d_t pos_robot, cart_co
 
     // angle a between to vectors v,w: cos(a) = dot(v,w) / (|v|*|w|)
     angle = acos( (v_old.x*v_new.x + v_old.y*v_new.y) / (d_new*d_old) );
-    if( angle > deg_unit ) {
+    if( isnan(angle) || angle > deg_unit ) {
       // p_old is not the range of this laser-beam. Keep it.
       old_readings_tmp.push_back( *it );
 
