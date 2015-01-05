@@ -4,6 +4,7 @@
  *
  *  Created: Tue Oct 25 16:36:04 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
+ *             2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,6 +25,7 @@
 #include <utils/time/time.h>
 #include <set>
 #include <memory>
+#include <core/threading/mutex_locker.h>
 
 using namespace fawkes;
 
@@ -36,11 +38,14 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
+#define CFG_PREFIX "/plugins/static-transforms/"
+
 /** Constructor. */
 StaticTransformsThread::StaticTransformsThread()
   : Thread("StaticTransformsThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-    TransformAspect(TransformAspect::ONLY_PUBLISHER, "static")
+    TransformAspect(TransformAspect::ONLY_PUBLISHER, "static"),
+    ConfigurationChangeHandler(CFG_PREFIX)
 {
   __last_update = new Time();
 }
@@ -56,15 +61,34 @@ StaticTransformsThread::~StaticTransformsThread()
 void
 StaticTransformsThread::init()
 {
+  entries_get_from_config();
+
+  __last_update->set_clock(clock);
+  __last_update->set_time(0, 0);
+
+  config->add_change_handler(this);
+}
+
+
+void
+StaticTransformsThread::finalize()
+{
+  config->rem_change_handler(this);
+  entries_delete();
+}
+
+void
+StaticTransformsThread::entries_get_from_config()
+{
   std::set<std::string> transforms;
   std::set<std::string> ignored_transforms;
 
   __cfg_update_interval = 1.0;
   try  {
-    __cfg_update_interval = config->get_float("/plugins/static-transforms/update-interval");
+    __cfg_update_interval = config->get_float(CFG_PREFIX"update-interval");
   } catch (Exception &e) {} // ignored, use default
 
-  std::string prefix = "/plugins/static-transforms/transforms/";
+  std::string prefix = CFG_PREFIX"transforms/";
   std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
   while (i->next()) {
     std::string cfg_name = std::string(i->path()).substr(prefix.length());
@@ -77,7 +101,7 @@ StaticTransformsThread::init()
       
       bool active = true;
       try {
-	active = config->get_bool((cfg_prefix + "active").c_str());
+        active = config->get_bool((cfg_prefix + "active").c_str());
       } catch (Exception &e) {} // ignored, assume enabled
 
       if (active) {
@@ -153,17 +177,12 @@ StaticTransformsThread::init()
 
             __entries.push_back(e);
           } catch (Exception &e) {
-            std::list<Entry>::iterator i;
-            for (i = __entries.begin(); i != __entries.end(); ++i) {
-              delete i->transform;
-            }
-            __entries.clear();
+            entries_delete();
             throw;
           }
           
         } catch (Exception &e) {
-          e.prepend("Transform %s: wrong or incomplete transform data",
-		    cfg_name.c_str());
+          e.prepend("Transform %s: wrong or incomplete transform data", cfg_name.c_str());
           throw;
         }
         
@@ -178,14 +197,10 @@ StaticTransformsThread::init()
   if ( __entries.empty() ) {
     throw Exception("No transforms configured");
   }
-
-  __last_update->set_clock(clock);
-  __last_update->set_time(0, 0);
 }
 
-
 void
-StaticTransformsThread::finalize()
+StaticTransformsThread::entries_delete()
 {
   std::list<Entry>::iterator i;
   for (i = __entries.begin(); i != __entries.end(); ++i) {
@@ -194,6 +209,14 @@ StaticTransformsThread::finalize()
   __entries.clear();
 }
 
+void
+StaticTransformsThread::config_value_changed(const fawkes::Configuration::ValueIterator *v)
+{
+  MutexLocker lock(loop_mutex);
+
+  entries_delete();
+  entries_get_from_config();
+}
 
 void
 StaticTransformsThread::loop()

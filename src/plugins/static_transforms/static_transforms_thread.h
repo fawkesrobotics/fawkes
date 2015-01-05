@@ -4,6 +4,7 @@
  *
  *  Created: Tue Oct 25 16:32:04 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
+ *             2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -29,6 +30,7 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/tf.h>
+#include <config/change_handler.h>
 
 namespace fawkes {
   class Time;
@@ -41,7 +43,8 @@ class StaticTransformsThread
   public fawkes::ConfigurableAspect,
   public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect,
-  public fawkes::TransformAspect
+  public fawkes::TransformAspect,
+  public fawkes::ConfigurationChangeHandler
 {
  public:
   StaticTransformsThread();
@@ -65,6 +68,14 @@ class StaticTransformsThread
 
   float __cfg_update_interval;
   fawkes::Time *__last_update;
+
+  void entries_delete();
+  void entries_get_from_config();
+
+  virtual void config_tag_changed(const char *new_tag) { };
+  virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *v) { };
+  virtual void config_value_changed(const fawkes::Configuration::ValueIterator *v);
+  virtual void config_value_erased(const char *path) {};
 };
 
 #endif

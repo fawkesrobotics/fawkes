@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_static_transforms = fawkescore fawkesutils fawkesaspects fawkesinterface \
-			 fawkesblackboard fawkestf
+			 fawkesblackboard fawkestf fawkesconfig
 OBJS_static_transforms = static_transforms_plugin.o static_transforms_thread.o
 
 OBJS_all    = $(OBJS_static_transforms)
