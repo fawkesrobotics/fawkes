@@ -72,10 +72,15 @@ LIBS_ros_move_base = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkestf fawkesrosaspect NavigatorInterface
 OBJS_ros_move_base = move_base_plugin.o move_base_thread.o
 
+LIBS_ros_skiller = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	      fawkesinterface fawkesrosaspect SkillerInterface
+OBJS_ros_skiller = skiller_plugin.o skiller_thread.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
 	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) \
-	   $(OBJS_ros_robot_description) $(OBJS_ros_move_base)
+	   $(OBJS_ros_robot_description) $(OBJS_ros_move_base) \
+	   $(OBJS_ros_skiller)
 
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
@@ -212,6 +217,26 @@ ifeq ($(HAVE_ROS),1)
 
   PLUGINS_all += $(PLUGINDIR)/ros-robot-description.so
 
+  ifeq ($(call ros-have-pkg,fawkes_msgs),1)
+    ifeq ($(call ros-have-pkg,actionlib),1)
+      CFLAGS_skiller_thread += $(call ros-pkg-cflags,fawkes_msgs) \
+      $(call ros-pkg-cflags,actionlib) \
+      $(call boost-lib-cflags,thread) \
+      $(call boost-lib-cflags,system) \
+      $(CFLAGS)
+      CFLAGS_skiller_plugin += $(CFLAGS_skiller_thread)
+      LDFLAGS_ros_skiller += $(call ros-pkg-lflags,fawkes_msgs) \
+      $(call ros-pkg-lflags,actionlib) \
+      $(call boost-lib-ldflags,thread) \
+      $(call boost-lib-ldflags,system) \
+      $(LDFLAGS) -lpthread
+      PLUGINS_all += $(PLUGINDIR)/ros-skiller.so
+    else
+      WARN_TARGETS += warning_actionlib      
+    endif
+  else
+    WARN_TARGETS += warning_fawkes_msgs
+  endif
 else
   WARN_TARGETS += warning_ros
 endif
@@ -247,9 +272,11 @@ warning_move_base_msgs:
 warning_navigator_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator and move_base plugins$(TNORMAL) (Fawkes TF library not available)"
 warning_actionlib:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator and move_base plugins$(TNORMAL) (ROS package actionlib not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator, move_base and skiller plugins$(TNORMAL) (ROS package actionlib not found)"
 warning_sensor_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS JointState Plugin$(TNORMAL) (ROS package sensor_msgs not found)"
+warning_fawkes_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS skiller plugin$(TNORMAL) (ROS package fawkes_msgs not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
