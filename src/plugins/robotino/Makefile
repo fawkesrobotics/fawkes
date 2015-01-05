@@ -27,14 +27,8 @@ PRESUBDIRS = interfaces
 
 LIBS_robotino = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 		fawkesblackboard fawkesinterface MotorInterface GripperInterface \
-		BatteryInterface RobotinoSensorInterface IMUInterface \
-		rec_iocontrol_robotstate rec_iocontrol_remotestate
-OBJS_robotino = robotino_plugin.o sensor_thread.o act_thread.o sensor_com_handler.o
-
-LIBS_robotino_joystick = m fawkescore fawkesutils fawkesaspects \
-			 fawkesblackboard fawkesinterface \
-			 JoystickInterface MotorInterface
-OBJS_robotino_joystick = robotino_joystick_plugin.o joystick_thread.o
+		BatteryInterface RobotinoSensorInterface IMUInterface
+OBJS_robotino = robotino_plugin.o com_thread.o sensor_thread.o act_thread.o 
 
 LIBS_robotino_ir_pcl = m fawkescore fawkesutils fawkesaspects fawkestf \
 			 fawkesblackboard fawkesinterface fawkespcl_utils \
@@ -55,12 +49,13 @@ ifeq ($(HAVE_OPENROBOTINO),1)
   ifeq ($(HAVE_TF),1)
     CFLAGS_robotino_plugin  = $(CFLAGS) $(CFLAGS_TF)
     CFLAGS_act_thread       = $(CFLAGS_robotino_plugin)
-    CFLAGS_sensor_thread   += $(CFLAGS_TF)
+    CFLAGS_sensor_thread   += $(CFLAGS) $(CFLAGS_TF)
+    CFLAGS_com_thread      += $(CFLAGS) $(CFLAGS_TF)
     LDFLAGS_robotino += $(LDFLAGS_TF)
     LIBS_robotino    += fawkestf
   endif
 
-  PLUGINS_all = $(PLUGINDIR)/robotino.so $(PLUGINDIR)/robotino-joystick.so
+  PLUGINS_all = $(PLUGINDIR)/robotino.so
 
   ifeq ($(HAVE_PCL),1)
     CFLAGS_robotino_ir_pcl_plugin = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
@@ -89,7 +84,7 @@ else
   WARN_TARGETS += warning_ros
 endif
 
-OBJS_all = $(OBJS_robotino) $(OBJS_robotino_joystick) $(OBJS_robotino_ir_pcl) \
+OBJS_all = $(OBJS_robotino) $(OBJS_robotino_ir_pcl) \
 	   $(OBJS_robotino_ros_joints)
 
 ifeq ($(OBJSSUBMAKE),1)

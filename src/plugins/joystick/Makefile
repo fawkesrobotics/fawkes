@@ -30,9 +30,15 @@ LIBS_ffkbjoystick = stdc++ fawkescore fawkesutils fawkesaspects fawkesblackboard
 		    fawkesinterface fawkeslogging JoystickInterface
 OBJS_ffkbjoystick = ffkbjoystick.o remote_bb_poster.o bb_handler.o
 
-OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick) $(OBJS_ffkbjoystick)
+LIBS_joystick_teleop = m fawkescore fawkesutils fawkesaspects \
+		       fawkesblackboard fawkesinterface \
+		       JoystickInterface MotorInterface
+OBJS_joystick_teleop = joystick_teleop_plugin.o joystick_teleop_thread.o
+
+OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick) $(OBJS_ffkbjoystick) $(OBJS_joystick_teleop) 
 
 BINS_all     += $(BINDIR)/ffkbjoystick
+PLUGINS_all  += $(PLUGINDIR)/joystick-teleop.so
 MANPAGES_all += $(MANDIR)/man1/ffkbjoystick.1
 
 ifeq ($(OS),Linux)

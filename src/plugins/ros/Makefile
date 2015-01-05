@@ -176,16 +176,19 @@ ifeq ($(HAVE_ROS),1)
         LDFLAGS_ros_navigator += $(call ros-pkg-lflags,move_base_msgs) \
 				 $(call ros-pkg-lflags,actionlib) \
 				 $(call boost-lib-ldflags,thread) \
+				 $(call boost-lib-ldflags,system) \
 				 $(LDFLAGS_TF)
 
         CFLAGS_move_base_thread += $(call ros-pkg-cflags,move_base_msgs) \
 				   $(call ros-pkg-cflags,actionlib) \
 				   $(call boost-lib-cflags,thread) \
+				   $(call boost-lib-cflags,system) \
 				   $(CFLAGS) $(CFLAGS_TF)
         CFLAGS_move_base_plugin = $(CFLAGS_move_base_thread)
         LDFLAGS_ros_move_base += $(call ros-pkg-lflags,move_base_msgs) \
 				 $(call ros-pkg-lflags,actionlib) \
 				 $(call boost-lib-ldflags,thread) -lpthread \
+				 $(call boost-lib-ldflags,system)  \
 				 $(LDFLAGS_TF)
 
         PLUGINS_all += $(PLUGINDIR)/ros-navigator.so $(PLUGINDIR)/ros-move-base.so

@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  robotino_joystick_plugin.cpp - Plugin for Robotino joystick control
+ *  joystick_teleop_plugin.cpp - Plugin for joystick remote control
  *
- *  Created: Sun Nov 13 23:20:35 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Created: Sun Nov 13 23:20:35 2011 (as part of the robotino plugin)
+ *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -22,25 +21,25 @@
 
 #include <core/plugin.h>
 
-#include "joystick_thread.h"
+#include "joystick_teleop_thread.h"
 
 using namespace fawkes;
 
-/** Plugin to remote control a Robotino using a joystick.
+/** Plugin to remote control a robot using a joystick.
  * @author Tim Niemueller
  */
-class RobotinoJoystickPlugin : public fawkes::Plugin
+class JoystickTeleOpPlugin : public fawkes::Plugin
 {
  public:
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RobotinoJoystickPlugin(Configuration *config)
+  JoystickTeleOpPlugin(Configuration *config)
     : Plugin(config)
   {
-    thread_list.push_back(new RobotinoJoystickThread());
+    thread_list.push_back(new JoystickTeleOpThread());
   }
 };
 
-PLUGIN_DESCRIPTION("Robotino joystick control")
-EXPORT_PLUGIN(RobotinoJoystickPlugin)
+PLUGIN_DESCRIPTION("Joystick remote control")
+EXPORT_PLUGIN(JoystickTeleOpPlugin)

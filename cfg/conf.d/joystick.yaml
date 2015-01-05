@@ -6,3 +6,75 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
 /hardware/joystick:
   # Joystick device file
   device_file: /dev/input/js0
+
+  # Configuration settings for the joystick-teleop plugin
+  # The example configuration is suitable for an Xbox 360 controller
+  teleop:
+    # Axes index for forward/backward, sideward, and rotational movement
+    # To find out the proper axes for your joystick run:
+    # jstest /dev/input/js0
+    # (replace the device path with the device_file configured above)
+    # Then move the axis you want to use and note and set its index here
+    axis_forward:  1
+    axis_sideward: 0
+    axis_rotation: 3
+
+    # Accept axis value if its absolute value is above this threshold
+    axis_threshold: 0.2
+
+    # Deadman settings, only if the button or axis is active movement
+    # commands are executed. As soon as they are released the robot stops.
+    # At least one of the two methods must be configured, or the robot
+    # won't move at all.
+    
+    # Deadman axis
+    # Configure an axis and a threshold. For a negative threshold,
+    # movement is allowed if the axis value is less than the given value.
+    # If positive, movements are executed if the axis value is greater
+    # than the configured value. To disable using an axis as deadman
+    # switch comment out the following line.
+    deadman_axis: 5
+    deadman_axis_threshold: -0.1
+
+    # Deadman button
+    # The button mask is AND'ed to the JoystickInterface::pressed_buttons
+    # field. If the resulting value is non-zero, the robot executes
+    # movement commands. To get the appropriate value sum up values of
+    # the appropriate BUTTON_* constants of the JoystickInterface.
+    # To react to all buttons, set value to 4294967295.
+    deadman_button_mask: 4294967295
+
+    # Drive mode switching
+    # Certain button or an axis can be configured that will allow to
+    # use a different drive mode as long as the button is pushed.
+    # The initial drive mode is "normal". As long as any of the
+    # drive mode switching conditions below applies, the "special"
+    # drive mode is used.
+    # For example, during demos you can default to a slow "normal"
+    # mode and allow for a faster special for more experienced users.
+    # The other way around can be used for normal cruising speed and
+    # special slower speed for fine movement.
+    # The conditions work the same way as the deadman switch documented
+    # above.
+    drive_mode_button_mask: 0
+    drive_mode_axis: 6
+    drive_mode_axis_threshold: -0.2
+
+    # Maximum velocity forward and sideward; m/s
+    # Maximum rotation; rad/s
+    drive_modes:
+      normal:
+        max_vx: 0.6
+        max_vy: 0.6
+        max_omega: 1.57
+
+      special:
+        max_vx: 0.3
+        max_vy: 0.3
+        max_omega: 1.0
+
+    # Interface ID for MotorInterface to send TransRotMessages to.
+    motor_interface_id: Motor
+
+    # Interface ID for JoystickInterface to read data from
+    joystick_interface_id: Joystick

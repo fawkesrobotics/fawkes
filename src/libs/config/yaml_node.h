@@ -683,11 +683,16 @@ class YamlConfigurationNode
   Type::value determine_scalar_type() const
   {
     if (is_type<unsigned int>()) {
-      int v = get_int();
-      if (v >= 0) {
+      try {
+	int v = get_int();
+	if (v >= 0) {
+	  return Type::UINT32;
+	} else {
+	  return Type::INT32;
+	}
+      } catch (Exception &e) {
+	// can happen if value > MAX_INT
 	return Type::UINT32;
-      } else {
-	return Type::INT32;
       }
     } else if (is_type<int>()) {
       return Type::INT32;
