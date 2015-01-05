@@ -58,6 +58,31 @@ skillenv = require("skiller.skillenv")
 
 fawkes.depinit.add_module_initializer(ifinitmod.init_interfaces)
 
+if config:exists("/skiller/features/ros/enable")
+   and config:get_bool("/skiller/features/ros/enable")
+then
+   logger:log_debug("ROS feature enabled, checking for roslua availability")
+   local ros_available = require("skiller.ros.available")
+   if ros_available() then
+      logger:log_debug("Starting internal ROS node (roslua)")
+      local uri = os.getenv("ROS_MASTER_URI")
+      if uri then
+	 ROS_MASTER_URI = uri
+      else
+	 error("ROS_MASTER_URI environment variable not defined")
+      end
+
+      dofile(LUADIR .. "/skiller/ros/start.lua")
+
+      _G.HAVE_ROS = true
+
+      logger:log_debug("ROS startup complete")
+   else
+      logger:log_error("ROS feature requested but roslua not available")
+      error("ROS feature requested but roslua not available")
+   end
+end
+
 skillenv.init(SKILLSPACE)
 
 --skiller.skillhsm.SkillHSM:set_debug(true)

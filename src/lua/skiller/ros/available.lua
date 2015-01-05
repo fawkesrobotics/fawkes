@@ -1,10 +1,9 @@
 
 ----------------------------------------------------------------------------
---  test.lua - Skiller test skill space
+--  cond_start.lua - Skiller conditional startup script -- ROS version
 --
---  Created: Thu Aug 14 17:30:45 2008
---  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
---
+--  Created: Tue Sep 30 18:00:17 2014
+--  Copyright  2014  Tim Niemueller [www.niemueller.de]
 ----------------------------------------------------------------------------
 
 --  This program is free software; you can redistribute it and/or modify
@@ -19,19 +18,14 @@
 --
 --  Read the full text in the LICENSE.GPL file in the doc directory.
 
-local _G = _G
+local require = require
 
-require("fawkes.modinit")
-module(..., fawkes.modinit.register_all);
+local _M = {}
 
---skillenv.use_skill("skills.generic.relgoto")
---skillenv.use_skill("skills.generic.goto")
-skillenv.use_skill("skills.generic.say")
-
-if _G.HAVE_ROS then
-   local action_skill = require("skiller.ros.action_skill")
-   local service_skill = require("skiller.ros.service_skill")
-
-   action_skill.use("test.fibo", "/fibonacci", "actionlib_tutorials/Fibonacci")
+function check_availability()
+   local ok, errmsg = require("roslua")
+   return ok, errmsg
 end
 
+setmetatable(_M, { __call = check_availability })
+return _M

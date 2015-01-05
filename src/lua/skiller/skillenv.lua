@@ -46,6 +46,9 @@ local module_exports = {
 }
 
 
+local loop_callbacks = {}
+local finalize_callbacks = {}
+
 --- Add an export for module initialization.
 -- All exports are exported to modules when they are initialized.
 -- @param key key of the export, i.e. the name with which the value will be
@@ -170,6 +173,13 @@ function init(skillspace)
    require("skills." .. SKILLSPACE)
 end
 
+--- Finalize the skill environment.
+function finalize()
+   for _, cb in pairs(finalize_callbacks) do
+      cb()
+   end
+end
+
 --- Generate a sandbox for skill execution.
 -- The sandbox is used in the execution thread to create a new safe environment each
 -- time a skill string is executed.
@@ -262,6 +272,46 @@ end
 -- continuous or one-show and independent of the status.
 function reset_loop()
    predlib.reset()
+   for _, cb in pairs(loop_callbacks) do
+      cb()
+   end
+end
+
+--- Add a loop callback.
+-- A loop callback is called in each loop regardless if a skill is running
+-- or not.
+-- @param name name of the callback, used for later identification on removal
+-- @param cb callback function to call
+function add_loop_callback(name, cb)
+   if (type(name) ~= "string") then error("Loop callback name must be a string") end
+   if (type(cb) ~= "function") then error("Loop callback must be a function") end
+
+   loop_callbacks[name] = cb
+end
+
+--- Remove loop callback.
+-- @param name name of callback to remove
+function remove_loop_callback(name)
+   loop_callbacks[name] = nil
+end
+
+
+--- Add a finalize callback.
+-- A finalize callback is called upon finalization of the skiller just
+-- before shutdown. Only quick operations should be performed.
+-- @param name name of the callback, used for later identification on removal
+-- @param cb callback function to call
+function add_finalize_callback(name, cb)
+   if (type(name) ~= "string") then error("Finalize callback name must be a string") end
+   if (type(cb) ~= "function") then error("Finalize callback must be a function") end
+
+   finalize_callbacks[name] = cb
+end
+
+--- Remove finalization callback.
+-- @param name name of callback to remove
+function remove_finalize_callback(name)
+   finalize_callbacks[name] = nil
 end
 
 --- Get current skill status.

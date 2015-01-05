@@ -55,7 +55,7 @@ end
 function use(module_name, action_name, action_type)
    local M = {}
    local skill_name  = module_name:match(".([%w%d_]+)$")
-   local action_var  = action_name:match("/([%w%d_]+)$")
+   local action_var  = action_name:match("/?([%w%d_]+)$")
    local action_spec = actionlib.get_actionspec(action_type)
    local start_state = skill_name:upper()
 

@@ -147,8 +147,8 @@ SkillerExecutionThread::init()
     __lua_ifi->add_interface("skdbg_layouted", __skdbg_if_layouted);
     __lua_ifi->add_interface("skiller", __skiller_if);
 
-    __lua->add_package_dir(LUADIR);
-    __lua->add_cpackage_dir(LUALIBDIR);
+    __lua->add_package_dir(LUADIR, /* prefix */ true);
+    __lua->add_cpackage_dir(LUALIBDIR, /* prefix */ true);
 
     __lua->add_package("fawkesutils");
     __lua->add_package("fawkesconfig");
@@ -159,6 +159,7 @@ SkillerExecutionThread::init()
 #endif
 
     __lua->set_string("SKILLSPACE", __cfg_skillspace.c_str());
+    __lua->set_string("LUADIR", LUADIR);
     __lua->set_usertype("config", config, "Configuration", "fawkes");
     __lua->set_usertype("logger", __clog, "ComponentLogger", "fawkes");
     __lua->set_usertype("clock", clock, "Clock", "fawkes");
@@ -205,6 +206,7 @@ SkillerExecutionThread::init()
   __ttc_msgproc  = __tt->add_class("Message Processing");
   __ttc_luaprep  = __tt->add_class("Lua Preparation");
   __ttc_luaexec  = __tt->add_class("Lua Execution");
+  __ttc_looprst  = __tt->add_class("Loop Reset");
   __ttc_publish  = __tt->add_class("Publishing");
   __tt_loopcount = 0;
 #endif
@@ -215,6 +217,8 @@ void
 SkillerExecutionThread::finalize()
 {
   __lua->remove_watcher(this);
+
+  __lua->do_string("skillenv.finalize()");
 
   std::list<SkillerFeature *>::iterator f;
   for (f = __features.begin(); f != __features.end(); ++f) {
@@ -617,13 +621,18 @@ SkillerExecutionThread::loop()
 #endif
   publish_skill_status(curss);
   publish_skdbg();
+#ifdef SKILLER_TIMETRACKING
+  __tt->ping_end(__ttc_publish);
+  __tt->ping_start(__ttc_looprst);
+#endif
+
   lua_loop_reset();
 
   __reader_just_left = false;
 
   __lua_ifi->write();
 #ifdef SKILLER_TIMETRACKING
-  __tt->ping_end(__ttc_publish);
+  __tt->ping_end(__ttc_looprst);
   __tt->ping_end(__ttc_total);
   if (++__tt_loopcount >= SKILLER_TT_MOD) {
     //logger->log_debug("Lua", "Stack size: %i", __lua->stack_size());
