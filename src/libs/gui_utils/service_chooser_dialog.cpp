@@ -35,6 +35,10 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#ifdef HAVE_GCONFMM
+#  define GCONF_PREFIX "/apps/fawkes/service_chooser_dialog/"
+#endif
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -87,6 +91,14 @@ ServiceChooserDialog::ServiceChooserDialog(Gtk::Window &parent,
 /** Destructor. */
 ServiceChooserDialog::~ServiceChooserDialog()
 {
+#ifdef HAVE_GCONFMM
+  if (__expander.get_expanded() && ! __treeview.has_focus() && __entry.get_text_length() > 0 ) {
+    __gconf->set(GCONF_PREFIX"manual_host", __entry.get_text());
+    __gconf->set(GCONF_PREFIX"manual_expanded", true);
+  } else {
+    __gconf->set(GCONF_PREFIX"manual_expanded", false);
+  }
+#endif
   delete __service_model;
 }
 
@@ -106,9 +118,20 @@ ServiceChooserDialog::ctor()
   __entry.show();
   __entry.set_activates_default(true);
 
+  Glib::ustring default_host("localhost");
+#ifdef HAVE_GCONFMM
+  __gconf = Gnome::Conf::Client::get_default_client();
+  __gconf->add_dir(GCONF_PREFIX);
+  Gnome::Conf::Value host_val =
+    __gconf->get_without_default(GCONF_PREFIX"manual_host");
+  if (host_val.get_type() == Gnome::Conf::VALUE_STRING) {
+    default_host = host_val.get_string();
+  }
+#endif
+
   char * fawkes_ip = getenv("FAWKES_IP");
   if (fawkes_ip) __entry.set_text(fawkes_ip);
-  else __entry.set_text("localhost");
+  else __entry.set_text(default_host);
 
   Gtk::Box *vbox = get_vbox();
   vbox->pack_start(__scrollwin);
@@ -123,8 +146,15 @@ ServiceChooserDialog::ctor()
 
   __treeview.signal_row_activated().connect(sigc::bind(sigc::hide<0>(sigc::hide<0>(sigc::mem_fun(*this, &ServiceChooserDialog::response))), 1));
 
+
 #ifdef GLIBMM_PROPERTIES_ENABLED
   __expander.property_expanded().signal_changed().connect(sigc::mem_fun(*this, &ServiceChooserDialog::on_expander_changed));
+#endif
+
+#ifdef HAVE_GCONFMM
+  if (__gconf->get_bool(GCONF_PREFIX"manual_expanded")) {
+    __expander.set_expanded(true);
+  }
 #endif
 }
 
