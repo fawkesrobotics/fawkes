@@ -28,11 +28,13 @@
 #include <blackboard/utils/on_update_waker.h>
 
 #include <ros/ros.h>
-#include <pcl_conversions/pcl_conversions.h>
 
 #include <pcl/pcl_config.h>
-#include <pcl/PCLPointCloud2.h>
-#include <pcl/common/conversions.h>
+#if PCL_VERSION_COMPARE(>=,1,7,0)
+#  include <pcl/PCLPointCloud2.h>
+#  include <pcl/common/conversions.h>
+#  include <pcl_conversions/pcl_conversions.h>
+#endif
 
 using namespace fawkes;
 
