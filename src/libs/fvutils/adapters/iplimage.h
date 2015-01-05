@@ -37,6 +37,7 @@ class IplImageAdapter
 {
  public:
   static void convert_image_bgr(unsigned char *buffer, IplImage *image);
+  static void convert_image_yuv422_planar(IplImage *image, unsigned char *buffer);
 
   //static IplImage *  create_image_from_roi(unsigned char *buffer, ROI *roi);
 
