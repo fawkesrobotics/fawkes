@@ -30,19 +30,8 @@ the skiller.
 
 Commands
 ~~~~~~~~
- *cont*::
-	Order any consecutively entered command in continuous mode,
-	that is keep executing the skill string until it succeeds or
-	fails, until an explicit stop is send, or until another skill
-	stirng is executed.
-
- *oneshot*::
-	Any consecutively executed skill string is executed as a
-	one-shot skill, i.e. only one iteration is performed with the
-	given skill string.
-
  *stop*::
-	Stop a currently running continuous skill string.
+	Stop a currently running skill.
 
 OPTIONS
 -------

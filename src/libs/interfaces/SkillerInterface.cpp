@@ -55,14 +55,12 @@ SkillerInterface::SkillerInterface() : Interface()
   add_fieldinfo(IFT_STRING, "error", 128, data->error);
   add_fieldinfo(IFT_UINT32, "exclusive_controller", 1, &data->exclusive_controller);
   add_fieldinfo(IFT_ENUM, "status", 1, &data->status, "SkillStatusEnum");
-  add_fieldinfo(IFT_BOOL, "continuous", 1, &data->continuous);
   add_messageinfo("ExecSkillMessage");
-  add_messageinfo("ExecSkillContinuousMessage");
   add_messageinfo("RestartInterpreterMessage");
   add_messageinfo("StopExecMessage");
   add_messageinfo("AcquireControlMessage");
   add_messageinfo("ReleaseControlMessage");
-  unsigned char tmp_hash[] = {0x36, 0x80, 0x24, 0x37, 0x4d, 0x96, 0x6e, 0xb4, 0xf9, 0x73, 0xb0, 0x83, 0x4b, 0xb5, 0xa5, 0xd1};
+  unsigned char tmp_hash[] = {0x85, 0xe6, 0xef, 0x71, 0xff, 0x6b, 0xe2, 0x3a, 0xdc, 0xb4, 0xca, 0xd9, 0xc4, 0xfe, 0xe4, 0x18};
   set_hash(tmp_hash);
 }
 
@@ -233,51 +231,12 @@ SkillerInterface::set_status(const SkillStatusEnum new_status)
   data_changed = true;
 }
 
-/** Get continuous value.
- * 
-      True if continuous execution is in progress, false if no skill string is executed
-      at all or it is executed one-shot with ExecSkillMessage.
-    
- * @return continuous value
- */
-bool
-SkillerInterface::is_continuous() const
-{
-  return data->continuous;
-}
-
-/** Get maximum length of continuous value.
- * @return length of continuous value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-SkillerInterface::maxlenof_continuous() const
-{
-  return 1;
-}
-
-/** Set continuous value.
- * 
-      True if continuous execution is in progress, false if no skill string is executed
-      at all or it is executed one-shot with ExecSkillMessage.
-    
- * @param new_continuous new continuous value
- */
-void
-SkillerInterface::set_continuous(const bool new_continuous)
-{
-  data->continuous = new_continuous;
-  data_changed = true;
-}
-
 /* =========== message create =========== */
 Message *
 SkillerInterface::create_message(const char *type) const
 {
   if ( strncmp("ExecSkillMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new ExecSkillMessage();
-  } else if ( strncmp("ExecSkillContinuousMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new ExecSkillContinuousMessage();
   } else if ( strncmp("RestartInterpreterMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new RestartInterpreterMessage();
   } else if ( strncmp("StopExecMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -412,102 +371,6 @@ Message *
 SkillerInterface::ExecSkillMessage::clone() const
 {
   return new SkillerInterface::ExecSkillMessage(this);
-}
-/** @class SkillerInterface::ExecSkillContinuousMessage <interfaces/SkillerInterface.h>
- * ExecSkillContinuousMessage Fawkes BlackBoard Interface Message.
- * 
-    
- */
-
-
-/** Constructor with initial values.
- * @param ini_skill_string initial value for skill_string
- */
-SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage(const char * ini_skill_string) : Message("ExecSkillContinuousMessage")
-{
-  data_size = sizeof(ExecSkillContinuousMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
-  data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->skill_string, ini_skill_string, 1024);
-  add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
-}
-/** Constructor */
-SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage() : Message("ExecSkillContinuousMessage")
-{
-  data_size = sizeof(ExecSkillContinuousMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
-  data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_STRING, "skill_string", 1024, data->skill_string);
-}
-
-/** Destructor */
-SkillerInterface::ExecSkillContinuousMessage::~ExecSkillContinuousMessage()
-{
-  free(data_ptr);
-}
-
-/** Copy constructor.
- * @param m message to copy from
- */
-SkillerInterface::ExecSkillContinuousMessage::ExecSkillContinuousMessage(const ExecSkillContinuousMessage *m) : Message("ExecSkillContinuousMessage")
-{
-  data_size = m->data_size;
-  data_ptr  = malloc(data_size);
-  memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (ExecSkillContinuousMessage_data_t *)data_ptr;
-  data_ts   = (message_data_ts_t *)data_ptr;
-}
-
-/* Methods */
-/** Get skill_string value.
- * 
-      Currently executed skill string, at least the first 1023 bytes of it.
-      Must be properly null-terminated.
-    
- * @return skill_string value
- */
-char *
-SkillerInterface::ExecSkillContinuousMessage::skill_string() const
-{
-  return data->skill_string;
-}
-
-/** Get maximum length of skill_string value.
- * @return length of skill_string value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-SkillerInterface::ExecSkillContinuousMessage::maxlenof_skill_string() const
-{
-  return 1024;
-}
-
-/** Set skill_string value.
- * 
-      Currently executed skill string, at least the first 1023 bytes of it.
-      Must be properly null-terminated.
-    
- * @param new_skill_string new skill_string value
- */
-void
-SkillerInterface::ExecSkillContinuousMessage::set_skill_string(const char * new_skill_string)
-{
-  strncpy(data->skill_string, new_skill_string, sizeof(data->skill_string));
-}
-
-/** Clone this message.
- * Produces a message of the same type as this message and copies the
- * data to the new message.
- * @return clone of this message
- */
-Message *
-SkillerInterface::ExecSkillContinuousMessage::clone() const
-{
-  return new SkillerInterface::ExecSkillContinuousMessage(this);
 }
 /** @class SkillerInterface::RestartInterpreterMessage <interfaces/SkillerInterface.h>
  * RestartInterpreterMessage Fawkes BlackBoard Interface Message.
@@ -758,24 +621,20 @@ SkillerInterface::message_valid(const Message *message) const
   if ( m0 != NULL ) {
     return true;
   }
-  const ExecSkillContinuousMessage *m1 = dynamic_cast<const ExecSkillContinuousMessage *>(message);
+  const RestartInterpreterMessage *m1 = dynamic_cast<const RestartInterpreterMessage *>(message);
   if ( m1 != NULL ) {
     return true;
   }
-  const RestartInterpreterMessage *m2 = dynamic_cast<const RestartInterpreterMessage *>(message);
+  const StopExecMessage *m2 = dynamic_cast<const StopExecMessage *>(message);
   if ( m2 != NULL ) {
     return true;
   }
-  const StopExecMessage *m3 = dynamic_cast<const StopExecMessage *>(message);
+  const AcquireControlMessage *m3 = dynamic_cast<const AcquireControlMessage *>(message);
   if ( m3 != NULL ) {
     return true;
   }
-  const AcquireControlMessage *m4 = dynamic_cast<const AcquireControlMessage *>(message);
+  const ReleaseControlMessage *m4 = dynamic_cast<const ReleaseControlMessage *>(message);
   if ( m4 != NULL ) {
-    return true;
-  }
-  const ReleaseControlMessage *m5 = dynamic_cast<const ReleaseControlMessage *>(message);
-  if ( m5 != NULL ) {
     return true;
   }
   return false;

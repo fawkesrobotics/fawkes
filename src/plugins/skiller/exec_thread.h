@@ -101,7 +101,6 @@ class SkillerExecutionThread
   unsigned int __last_exclusive_controller;
   bool         __reader_just_left;
 
-  bool        __continuous_run;
   bool        __continuous_reset;
   bool        __error_written;
   bool        __sksf_pushed;

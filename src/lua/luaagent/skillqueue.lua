@@ -174,7 +174,7 @@ function SkillQueue:execute()
    assert(skiller, "SkillQueue:execute: Interface not set")
 
    self.skillstring = self:skill_string()
-   local msg = skiller.ExecSkillContinuousMessage:new(self.skillstring)
+   local msg = skiller.ExecSkillMessage:new(self.skillstring)
    skiller:msgq_enqueue_copy(msg)
    self.skills = self:baseskills()
 end

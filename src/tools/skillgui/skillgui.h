@@ -71,7 +71,6 @@ class SkillGuiGtkWindow : public Gtk::Window
   void on_controller_clicked();
   void on_stop_clicked();
   void on_config_changed();
-  void on_contexec_toggled();
   void on_skill_changed();
   void on_graphupd_clicked();
   void on_update_disabled();
@@ -103,7 +102,6 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::ToolButton        *tb_exit;
   Gtk::Button            *but_exec;
   Gtk::Button            *but_stop;
-  Gtk::ToggleButton      *but_continuous;
   Gtk::Button            *but_clearlog;
 #if GTK_VERSION_GE(3,0)
   Gtk::ComboBox          *cbe_skillstring;
@@ -112,7 +110,6 @@ class SkillGuiGtkWindow : public Gtk::Window
 #endif
   Gtk::Label             *lab_status;
   Gtk::Label             *lab_alive;
-  Gtk::Label             *lab_continuous;
   Gtk::Label             *lab_skillstring;
   Gtk::Label             *lab_error;
   Gtk::ScrolledWindow    *scw_graph;

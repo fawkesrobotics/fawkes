@@ -82,8 +82,6 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
     // this is needed to get rl_done working
     rl_event_hook = event_hook;
 
-    continuous = false;
-
     char *host = (char *)"localhost";
     unsigned short int port = 1910;
     bool free_host = argp->parse_hostport("r", &host, &port);
@@ -157,25 +155,14 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
 	if ( line ) {
 	  if (strcmp(line, "") != 0) {
 
-	    if ( strcmp(line, "cont") == 0 ) {
-	      printf("Switching to continuous skill execution mode\n");
-	      continuous = true;
-	    } else if (strcmp(line, "oneshot") == 0 ) {
-	      printf("Switching to one-shot skill execution mode\n");
-	      continuous = false;
-	    } else if (strcmp(line, "stop") == 0 ) {
-	      printf("Stopping continuous skill execution\n");
+	    if (strcmp(line, "stop") == 0 ) {
+	      printf("Stopping skill execution\n");
 	      SkillerInterface::StopExecMessage *sm = new SkillerInterface::StopExecMessage();
 	      sif->msgq_enqueue(sm);
 	    } else {
 	      printf("Executing: %s\n", line);
-	      if ( continuous ) {
-		SkillerInterface::ExecSkillContinuousMessage *escm = new SkillerInterface::ExecSkillContinuousMessage(line);
-		sif->msgq_enqueue(escm);
-	      } else {
-		SkillerInterface::ExecSkillMessage *esm = new SkillerInterface::ExecSkillMessage(line);
-		sif->msgq_enqueue(esm);
-	      }
+	      SkillerInterface::ExecSkillMessage *esm = new SkillerInterface::ExecSkillMessage(line);
+	      sif->msgq_enqueue(esm);
 	    }
 
 	    add_history(line);
@@ -247,8 +234,6 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
   const char *prompt;
   bool just_connected;
   bool connection_died_recently;
-
-  bool continuous;
 };
 
 

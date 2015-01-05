@@ -24,17 +24,6 @@ class SkillerInterface : public Interface
     int maxlenof_skill_string() const;
   };
 
-  class ExecSkillContinuousMessage : public Message
-  {
-    ExecSkillContinuousMessage(char * ini_skill_string);
-    ExecSkillContinuousMessage();
-    ~ExecSkillContinuousMessage();
-
-    char * skill_string();
-    void set_skill_string(const char * new_skill_string);
-    int maxlenof_skill_string() const;
-  };
-
   class RestartInterpreterMessage : public Message
   {
     RestartInterpreterMessage();
@@ -79,9 +68,6 @@ class SkillerInterface : public Interface
   SkillStatusEnum status();
   void set_status(const SkillStatusEnum new_status);
   int maxlenof_status() const;
-  bool is_continuous();
-  void set_continuous(const bool new_continuous);
-  int maxlenof_continuous() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
