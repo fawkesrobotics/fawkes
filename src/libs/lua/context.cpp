@@ -290,15 +290,27 @@ LuaContext::restart()
  * The directory is added to the search path for lua packages. Files with
  * a .lua suffix will be considered as Lua modules.
  * @param path path to add
+ * @param prefix if true, insert path at the beginning of the search path,
+ * append to end otherwise
  */
 void
-LuaContext::add_package_dir(const char *path)
+LuaContext::add_package_dir(const char *path, bool prefix)
 {
   MutexLocker lock(__lua_mutex);
 
-  do_string(__L, "package.path = package.path .. \";%s/?.lua;%s/?/init.lua\"", path, path);
+  if (prefix) {
+    do_string(__L,
+	      "package.path = \"%s/?.lua;%s/?/init.lua;\""
+	      ".. package.path", path, path);
 
-  __package_dirs.push_back(path);
+    __package_dirs.push_front(path);
+  } else {
+    do_string(__L,
+	      "package.path = package.path .. "
+	      "\";%s/?.lua;%s/?/init.lua\"", path, path);
+
+    __package_dirs.push_back(path);
+  }
   if ( __fam )  __fam->watch_dir(path);
 }
 
@@ -307,15 +319,23 @@ LuaContext::add_package_dir(const char *path)
  * The directory is added to the search path for lua C packages. Files
  * with a .so suffix will be considered as Lua modules.
  * @param path path to add
+ * @param prefix if true, insert path at the beginning of the search path,
+ * append to end otherwise
  */
 void
-LuaContext::add_cpackage_dir(const char *path)
+LuaContext::add_cpackage_dir(const char *path, bool prefix)
 {
   MutexLocker lock(__lua_mutex);
 
-  do_string(__L, "package.cpath = package.cpath .. \";%s/?.so\"", path);
+  if (prefix) {
+    do_string(__L, "package.cpath = \"%s/?.so;\" .. package.cpath", path);
 
-  __cpackage_dirs.push_back(path);
+    __cpackage_dirs.push_front(path);
+  } else {
+    do_string(__L, "package.cpath = package.cpath .. \";%s/?.so\"", path);
+
+    __cpackage_dirs.push_back(path);
+  }
   if ( __fam )  __fam->watch_dir(path);
 }
 
@@ -1204,7 +1224,36 @@ LuaContext::objlen(int idx)
 void
 LuaContext::setfenv(int idx)
 {
+#if LUA_VERSION_NUM > 501
+  //                                         stack: ... func@idx ... env
+  // find _ENV
+  int n = 0;
+  const char *val_name;
+  while ((val_name = lua_getupvalue(__L, idx, ++n)) != NULL) {  // ... env upval
+    if (strcmp(val_name, "_ENV") == 0) {
+      // found environment
+      break;
+    } else {
+      // we're not interested, remove value from stack
+      lua_pop(__L, 1);                                          // ... env
+    }
+  }
+
+  // found an environment
+  if (val_name != NULL) {                                       // ... env upval
+    // create a new simple up value
+    luaL_loadstring(__L, "");                                   // ... env upval chunk
+    lua_pushvalue(__L, -3);                                     // ... env upval chunk env
+    lua_setupvalue(__L, -2, 1);                                 // ... env upval func
+    int act_idx = idx > 0 ? idx : idx - 2;
+    lua_upvaluejoin(__L, act_idx, n, -1, 1);                        // ... env upval chunk
+    lua_pop(__L, 3);                                            // ...
+  } else {
+    throw Exception("No environment found");
+  }
+#else
   lua_setfenv(__L, idx);
+#endif
 }
 
 

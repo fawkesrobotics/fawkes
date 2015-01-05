@@ -58,8 +58,8 @@ class LuaContext : public FamListener
 
   void restart();
 
-  void add_package_dir(const char *path);
-  void add_cpackage_dir(const char *path);
+  void add_package_dir(const char *path, bool prefix = false);
+  void add_cpackage_dir(const char *path, bool prefix = false);
   void add_package(const char *package);
 
   lua_State *  get_lua_state();
