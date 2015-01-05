@@ -76,6 +76,7 @@ hardware/robotino:
         # with this factor, that is an empirical value that you need to
         # adjust to your specific robot. Default (1.0) means no adjustment.
         phi: 1.0
+        trans: 1.0
 
   gripper:
     # Enable gripper {ENABLED=true / DISABLED=false}
