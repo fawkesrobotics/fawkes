@@ -3,8 +3,7 @@
  *  mongodb_thread.h - MongoDB thread
  *
  *  Created: Sun Dec 05 23:25:20 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

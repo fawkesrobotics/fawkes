@@ -278,7 +278,7 @@ MongoRRDThread::init()
     }
 
     std::string dbname = i->get_string();
-    if (dbname.find(".") != string::npos) {
+    if (dbname.find(".") != std::string::npos) {
       logger->log_warn(name(), "Database name %s contains dot, ignoring",
 		       dbname.c_str());
       continue;

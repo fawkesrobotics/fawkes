@@ -3,8 +3,7 @@
  *  mongodb_thread.cpp - MongoDB Thread
  *
  *  Created: Sun Dec 05 23:32:13 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -22,8 +21,6 @@
 
 #include "mongodb_thread.h"
 
-#include <mongo/client/syncclusterconnection.h>
-
 using namespace mongo;
 using namespace fawkes;
 
@@ -35,7 +32,6 @@ class MongoDBThread::ClientConf
   typedef enum {
     CONNECTION,		/**< connect to single node */
     REPLICA_SET,	/**< connect to replica set */
-    SYNC_CLUSTER	/**< connect to sync cluster */
   } ConnectionMode;
 
   ClientConf(fawkes::Configuration *config, fawkes::Logger *logger,
@@ -59,7 +55,6 @@ class MongoDBThread::ClientConf
   ConnectionMode                  __mode;
   mongo::HostAndPort              __conn_hostport;
   std::vector<mongo::HostAndPort> __replicaset_hostports;
-  std::list<mongo::HostAndPort>   __synccluster_hostports;
 
   /// @cond INTERNALS
   typedef struct _AuthInfo {
@@ -266,15 +261,7 @@ MongoDBThread::ClientConf::ClientConf(Configuration *config, Logger *logger,
     }
 
   } else if (mode == "sync_cluster" || mode == "synccluster") {
-    __mode = SYNC_CLUSTER;
-
-    std::auto_ptr<Configuration::ValueIterator>
-      i(config->search((prefix + "hosts/").c_str()));
-    while (i->next()) {
-      if (i->is_string()) {
-	__synccluster_hostports.push_back(HostAndPort(i->get_string()));
-      }
-    }
+    throw Exception("sync_cluster connections are no longer supported");
 
   } else {
     __mode = CONNECTION;
@@ -308,18 +295,6 @@ MongoDBThread::ClientConf::create_client()
 			  ai->dbname.c_str(), ai->username.c_str(),
 			  errmsg.c_str());
 	}
-      }
-    }
-    break;
-
-  case SYNC_CLUSTER:
-    {
-      SyncClusterConnection *synccluster =
-	new SyncClusterConnection(__synccluster_hostports);
-      client = synccluster;
-      if (! synccluster->prepare(errmsg)) {
-	throw Exception("Failed to prepare sync cluster connection: %s",
-			errmsg.c_str());
       }
     }
     break;
@@ -379,17 +354,6 @@ MongoDBThread::ClientConf::log(Logger *logger, const char *component,
 	  logger->log_info(component, "%s  - %s @ %s", indent, a->username.c_str(),
 			   a->dbname.c_str());
 	}
-      }
-    }
-    break;
-
-  case SYNC_CLUSTER:
-    {
-      logger->log_info(component, "%smode:   sync cluster", indent);
-      logger->log_info(component, "%shosts:", indent);
-      std::list<mongo::HostAndPort>::iterator i;
-      for (i = __synccluster_hostports.begin(); i != __synccluster_hostports.end(); ++i) {
-	logger->log_info(component, "%s  - %s:", indent, i->toString().c_str());
       }
     }
     break;
