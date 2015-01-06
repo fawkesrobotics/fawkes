@@ -60,8 +60,25 @@ ifeq ($(MAKECMDGOALS),clean)
   endif
 endif
 
+ifeq ($(MAKECMDGOALS),clean)
+  DISABLE_OBJS_all_WARNING = 1
+  ifneq ($(wildcard $(SRCDIR)/tests),)
+    ifneq ($(findstring tests,$(SUBDIRS)),tests)
+      SUBDIRS += tests
+    endif
+  endif
+endif
+
+ifeq ($(findstring test,$(MAKECMDGOALS)),test)
+  ifneq ($(wildcard $(SRCDIR)/tests),)
+    ifneq ($(findstring tests,$(SUBDIRS)),tests)
+      SUBDIRS += tests
+    endif
+  endif
+endif
+
 # If SOVER for lib was not set (SOVER_libname empty), set it to DEFAULT_SOVER
-$(foreach L,$(LIBS_all:$(LIBDIR)/%.so=%) $(LIBS_gui:$(LIBDIR)/%.so=%),$(if $(SOVER_$(subst /,_,$L)),,$(eval SOVER_$(subst /,_,$L) = $(DEFAULT_SOVER))))
+$(foreach L,$(LIBS_all:$(LIBDIR)/%.so=%) $(LIBS_gui:$(LIBDIR)/%.so=%) $(LIBS_test:$(LIBDIR)/%.so=%),$(if $(SOVER_$(subst /,_,$L)),,$(eval SOVER_$(subst /,_,$L) = $(DEFAULT_SOVER))))
 
 ifdef __buildsys_lua_mk_
 # Lua libraries do not set an SOVER, it's not checked anyway
@@ -72,22 +89,28 @@ endif
 -include $(DEPDIR)/*.d
 
 # One to build 'em all
-.PHONY: all gui
+.PHONY: all gui test
 ifeq ($(MAKELEVEL),1)
   EXTRA_ALL = $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui) $(MANPAGES_gui)
 endif
 all: presubdirs $(LIBS_all:%.so=%.$(SOEXT)) $(PLUGINS_all:%.so=%.$(SOEXT)) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs | silent-nothing-to-do-all
 gui: presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs | silent-nothing-to-do-gui
+test: presubdirs $(LIBS_test:%.so=%.$(SOEXT)) $(PLUGINS_test:%.so=%.$(SOEXT)) $(BINS_test) $(TARGETS_test) subdirs | silent-nothing-to-do-test
 uncolored-all: all
 uncolored-gui: gui
+uncolored-test: test
 
 BUILT_PARTS=
-.PHONY: silent-nothing-to-do-gui silent-nothing-to-do-all
+.PHONY: silent-nothing-to-do-gui silent-nothing-to-do-all silent-nothing-to-do-test
 silent-nothing-to-do-all:
 	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
 	$(eval BUILT_PARTS += $@)
 
 silent-nothing-to-do-gui:
+	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
+	$(eval BUILT_PARTS += $@)
+
+silent-nothing-to-do-test:
 	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
 	$(eval BUILT_PARTS += $@)
 
@@ -99,7 +122,7 @@ ifneq ($(OBJS_all),)
 $(OBJS_all): $(SRCDIR)/Makefile
 endif
 else
-  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(LIBS_gui)$(PLUGINS_gui)$(BINS_gui),)
+  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(LIBS_gui)$(PLUGINS_gui)$(BINS_gui)$(LIBS_test)$(PLUGINS_test)$(BINS_test),)
     ifneq ($(DISABLE_OBJS_all_WARNING),1)
       $(warning OBJS_all is not set. This is probably a bug. If you intended this set DISABLE_OBJS_all_WARNING to 1 to get rid of this warning.)
     endif
@@ -121,6 +144,11 @@ clean: presubdirs subdirs
 	$(SILENT)$(foreach P,$(PLUGINS_gui:%.so=%.$(SOEXT)),rm -f $(P);)
 	$(SILENT)$(foreach M,$(MANPAGES_gui),rm -f $(M);)
 	$(SILENT)$(foreach T,$(TARGETS_gui),rm -rf $(T);)
+	$(SILENT)$(foreach B,$(BINS_test),rm -f $(B);)
+	$(SILENT)$(foreach L,$(LIBS_test:%.so=%.$(SOEXT)),rm -f $(addsuffix *,$(L));)
+	$(SILENT)$(foreach P,$(PLUGINS_test:%.so=%.$(SOEXT)),rm -f $(P);)
+	$(SILENT)$(foreach M,$(MANPAGES_test),rm -f $(M);)
+	$(SILENT)$(foreach T,$(TARGETS_test),rm -rf $(T);)
 	$(SILENT)$(foreach E,$(CLEAN_FILES),rm -rf $(E);)
 
 .PHONY: presubdirs $(PRESUBDIRS) subdirs $(SUBDIRS)
@@ -253,6 +281,10 @@ else
     endif
   endif
 endif
+
+.PHONY:
+test:
+	$(foreach B, $(BINS_test), $(B))
 
 endif # __buildsys_rules_mk_
 
