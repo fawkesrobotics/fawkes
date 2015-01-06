@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_SLOW_BIWARD_DRIVE_MODE_H_
-#define __PLUGINS_COLLI_SLOW_BIWARD_DRIVE_MODE_H_
+#ifndef __PLUGINS_COLLI_BIWARD_DRIVE_MODE_H_
+#define __PLUGINS_COLLI_BIWARD_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
-#include "slow_forward_drive_mode.h"
-#include "slow_backward_drive_mode.h"
 
 namespace fawkes
 {
@@ -33,29 +31,25 @@ namespace fawkes
 }
 #endif
 
-class CSlowBiwardDriveModule : public CAbstractDriveMode
+class ForwardDriveModule;
+class BackwardDriveModule;
+
+class BiwardDriveModule : public AbstractDriveMode
 {
  public:
+  BiwardDriveModule( ForwardDriveModule*  forward,
+                     BackwardDriveModule* backward,
+                     Logger* logger,
+                     Configuration* config);
+  ~BiwardDriveModule();
 
-  CSlowBiwardDriveModule( CSlowForwardDriveModule*  slow_forward,
-                          CSlowBackwardDriveModule* slow_backward,
-                          Logger* logger,
-                          Configuration* config);
-  ~CSlowBiwardDriveModule();
-
-  void Update();
-
+  void update();
 
  private:
+  ForwardDriveModule*  mod_forward_;
+  BackwardDriveModule* mod_backward_;
 
-  CSlowForwardDriveModule*  m_pSlowForwardDriveModule;
-  CSlowBackwardDriveModule* m_pSlowBackwardDriveModule;
-
-  float m_MaxTranslation, m_MaxRotation;
-
-
-  int   m_CountForward;
-
+  int   count_forward_;
 };
 
 } // namespace fawkes

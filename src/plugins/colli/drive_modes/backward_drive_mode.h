@@ -1,10 +1,10 @@
 
 /***************************************************************************
- *  slow_backward_drive_mode.h - Implementation of drive-mode "slow backward"
+ *  backward_drive_mode.h - Implementation of drive-mode "backward"
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_SLOW_BACKWARD_DRIVE_MODE_H_
-#define __PLUGINS_COLLI_SLOW_BACKWARD_DRIVE_MODE_H_
+#ifndef __PLUGINS_COLLI_BACKWARD_DRIVE_MODE_H_
+#define __PLUGINS_COLLI_BACKWARD_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
 
@@ -31,25 +31,20 @@ namespace fawkes
 }
 #endif
 
-class CSlowBackwardDriveModule : public CAbstractDriveMode
+class BackwardDriveModule : public AbstractDriveMode
 {
  public:
+  BackwardDriveModule(Logger* logger, Configuration* config);
+  ~BackwardDriveModule();
 
-  CSlowBackwardDriveModule(Logger* logger, Configuration* config);
-  ~CSlowBackwardDriveModule();
-
-  void Update();
-
+  void update();
 
  private:
+  float backward_curvature( float dist_to_target, float dist_to_trajec, float alpha,
+                            float cur_trans, float cur_rot );
 
-  float SlowBackward_Translation ( float dist_to_target, float dist_to_front, float alpha,
-           float trans_0, float rot_0, float rot_1 );
-
-  float SlowBackward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-        float trans_0, float rot_0 );
-
-  float m_MaxTranslation, m_MaxRotation;
+  float backward_translation( float dist_to_target, float dist_to_front, float alpha,
+                              float cur_trans, float cur_rot, float des_rot );
 
 };
 

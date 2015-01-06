@@ -4,6 +4,7 @@
  *
  *  Created: Thu Oct 17 16:58:00 2013
  *  Copyright  2013-2014  Bahram Maleki-Fard
+ *                  2014  Tobias Neumann
  *
  ****************************************************************************/
 
@@ -66,48 +67,31 @@ ColliActThread::init()
   cfg_max_rotation_      = config->get_float((cfg_prefix + "max_rotation").c_str());
   cfg_escaping_enabled_  = config->get_bool((cfg_prefix + "escaping_enabled").c_str());
   cfg_stop_at_target_    = config->get_bool((cfg_prefix + "stop_at_target").c_str());
-  cfg_orient_at_target_  = config->get_bool((cfg_prefix + "orient_at_target").c_str());
+
+  std::string cfg_orient_mode = config->get_string((cfg_prefix + "orient_mode/default").c_str());
+  if ( cfg_orient_mode == "OrientAtTarget" ) {
+    cfg_orient_mode_ = fawkes::NavigatorInterface::OrientationMode::OrientAtTarget;
+  } else if ( cfg_orient_mode == "OrientDuringTravel" ) {
+    cfg_orient_mode_ = fawkes::NavigatorInterface::OrientationMode::OrientDuringTravel;
+  } else {
+    cfg_orient_mode_ = fawkes::NavigatorInterface::OrientationMode::OrientAtTarget;
+    throw fawkes::Exception("Default orient_mode is unknown");
+  }
 
   std::string cfg_drive_mode = config->get_string((cfg_prefix + "drive_mode/default").c_str());
-  if ( cfg_drive_mode.compare("MovingNotAllowed") == 0 ) {
+  if (        cfg_drive_mode == "MovingNotAllowed" ) {
     cfg_drive_mode_ = NavigatorInterface::MovingNotAllowed;
-  } else if ( cfg_drive_mode.compare("CarefulForward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::CarefulForward;
-  } else if ( cfg_drive_mode.compare("SlowForward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::SlowForward;
-  } else if ( cfg_drive_mode.compare("ModerateForward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::ModerateForward;
-  } else if ( cfg_drive_mode.compare("FastForward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::FastForward;
-  } else if ( cfg_drive_mode.compare("CarefulAllowBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::CarefulAllowBackward;
-  } else if ( cfg_drive_mode.compare("SlowAllowBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::SlowAllowBackward;
-  } else if ( cfg_drive_mode.compare("ModerateAllowBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::ModerateAllowBackward;
-  } else if ( cfg_drive_mode.compare("FastAllowBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::FastAllowBackward;
-  } else if ( cfg_drive_mode.compare("CarefulBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::CarefulBackward;
-  } else if ( cfg_drive_mode.compare("SlowBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::SlowBackward;
-  } else if ( cfg_drive_mode.compare("ModerateBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::ModerateBackward;
-  } else if ( cfg_drive_mode.compare("FastBackward") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::FastBackward;
-  } else if ( cfg_drive_mode.compare("ESCAPE") == 0 ) {
+  } else if ( cfg_drive_mode == "Forward" ) {
+    cfg_drive_mode_ = NavigatorInterface::Forward;
+  } else if ( cfg_drive_mode == "AllowBackward" ) {
+    cfg_drive_mode_ = NavigatorInterface::AllowBackward;
+  } else if ( cfg_drive_mode == "Backward" ) {
+    cfg_drive_mode_ = NavigatorInterface::Backward;
+  } else if ( cfg_drive_mode == "ESCAPE" ) {
     cfg_drive_mode_ = NavigatorInterface::ESCAPE;
-  } else if ( cfg_drive_mode.compare("SlowDribbleBall") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::SlowDribbleBall;
-  } else if ( cfg_drive_mode.compare("ModerateDribbleBall") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::ModerateDribbleBall;
-  } else if ( cfg_drive_mode.compare("FastDribbleBall") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::FastDribbleBall;
-  } else if ( cfg_drive_mode.compare("OVERRIDE") == 0 ) {
-    cfg_drive_mode_ = NavigatorInterface::OVERRIDE;
   } else {
-      cfg_drive_mode_ = NavigatorInterface::MovingNotAllowed;
-      throw fawkes::Exception("Default drive_mode is unknown");
+    cfg_drive_mode_ = NavigatorInterface::MovingNotAllowed;
+    throw fawkes::Exception("Default drive_mode is unknown");
   }
 
   logger->log_debug(name(), "Default drive_mode: %i (%s)", cfg_drive_mode_, if_navi_->tostring_DriveMode(cfg_drive_mode_));
@@ -121,7 +105,7 @@ ColliActThread::init()
 #ifdef HAVE_ROS
   std::string ros_target_topic = config->get_string((cfg_prefix + "ros/target_topic").c_str());
   sub_ = new ros::Subscriber();
-  *sub_ = rosnode->subscribe(ros_target_topic.c_str(), 1, &ColliActThread::callbackSimpleGoal, this);
+  *sub_ = rosnode->subscribe(ros_target_topic.c_str(), 1, &ColliActThread::callback_simple_goal, this);
 #endif
 
   if_navi_->set_max_velocity(cfg_max_velocity_);
@@ -129,7 +113,7 @@ ColliActThread::init()
   if_navi_->set_escaping_enabled(cfg_escaping_enabled_);
   if_navi_->set_security_distance(cfg_security_distance_);
   if_navi_->set_stop_at_target(cfg_stop_at_target_);
-  if_navi_->set_orient_at_target(cfg_orient_at_target_);
+  if_navi_->set_orientation_mode(cfg_orient_mode_);
   if_navi_->set_drive_mode(cfg_drive_mode_);
   if_navi_->set_final(true);
   if_navi_->write();
@@ -203,11 +187,11 @@ ColliActThread::loop()
       logger->log_debug(name(), "setting stop_at_target to %u", msg->is_stop_at_target());
       if_navi_->set_stop_at_target(msg->is_stop_at_target());
 
-    } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetOrientAtTargetMessage>() ) {
-      NavigatorInterface::SetOrientAtTargetMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetOrientAtTargetMessage>();
+    } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetOrientationModeMessage>() ) {
+      NavigatorInterface::SetOrientationModeMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetOrientationModeMessage>();
 
-      logger->log_debug(name(), "setting orient_at_target to %u", msg->is_orient_at_target());
-      if_navi_->set_orient_at_target(msg->is_orient_at_target());
+      logger->log_debug(name(), "setting orient_at_target to %s", if_navi_->tostring_OrientationMode( msg->orientation_mode() ) );
+      if_navi_->set_orientation_mode( msg->orientation_mode() );
 
     } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetDriveModeMessage>() ) {
       NavigatorInterface::SetDriveModeMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetDriveModeMessage>();
@@ -223,7 +207,7 @@ ColliActThread::loop()
       if_navi_->set_escaping_enabled(cfg_escaping_enabled_);
       if_navi_->set_security_distance(cfg_security_distance_);
       if_navi_->set_stop_at_target(cfg_stop_at_target_);
-      if_navi_->set_orient_at_target(cfg_orient_at_target_);
+      if_navi_->set_orientation_mode(cfg_orient_mode_);
       if_navi_->set_drive_mode(cfg_drive_mode_);
 
     } else {
@@ -252,13 +236,6 @@ ColliActThread::loop()
 
       thread_colli_->colli_relgoto(msg->x(), msg->y(), msg->orientation(), if_navi_);
 
-      //~ __colli_cmd_sent = true;
-
-      //~ if (__pathplan_mode != PP_GOTO_NONE) {
-        //~ m_pMonaco->pathplan_release_colli_control();
-        //~ __pathplan_mode = PP_GOTO_NONE;
-      //~ }
-
     } else if( motion_msg->is_of_type<NavigatorInterface::PolarGotoMessage>() ) {
       NavigatorInterface::PolarGotoMessage* msg = dynamic_cast<NavigatorInterface::PolarGotoMessage*>(motion_msg);
       logger->log_debug(name(), "PolarGotoMessage received, phi:%f  dist:%f", msg->phi(), msg->dist());
@@ -275,13 +252,6 @@ ColliActThread::loop()
       if_navi_->set_final(false);
 
       thread_colli_->colli_relgoto(cart_x, cart_y, msg->orientation(), if_navi_);
-
-      //~ __colli_cmd_sent = true;
-
-      //~ if (__pathplan_mode != PP_GOTO_NONE) {
-        //~ m_pMonaco->pathplan_release_colli_control();
-        //~ __pathplan_mode = PP_GOTO_NONE;
-      //~ }
     }
 
     motion_msg->unref();
@@ -312,7 +282,7 @@ ColliActThread::colli_final()
 
 #ifdef HAVE_ROS
 void
-ColliActThread::callbackSimpleGoal(const geometry_msgs::PoseStamped::ConstPtr& msg)
+ColliActThread::callback_simple_goal(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
   //calculate transform
   std::string from = msg->header.frame_id;  //maybe get this as well from the config ?? Should both be /map anyways

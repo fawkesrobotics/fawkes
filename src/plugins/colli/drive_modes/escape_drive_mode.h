@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  *             2014  Tobias Neumann
  ****************************************************************************/
 
@@ -25,7 +25,8 @@
 #define __PLUGINS_COLLI_ESCAPE_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
-#include "../utils/rob/roboshape_colli.h"
+
+#include <utils/math/types.h>
 
 #include <vector>
 
@@ -35,66 +36,36 @@ namespace fawkes
 }
 #endif
 
-class CEscapeDriveModule : public CAbstractDriveMode
+class RoboShapeColli;
+
+class EscapeDriveModule : public AbstractDriveMode
 {
  public:
-  /**
-   * Class to save one laser point with the needed information for the CEscapeDriveModule
-   */
-  class LaserPoint {
-  public:
-    double length;  /**< length of the laser reading in meter */
-    double angle;   /**< angle of the laser reading in rad [-pi, pi] */
+  EscapeDriveModule( Logger* logger, Configuration* config );
+  ~EscapeDriveModule();
 
-    /**
-     * constructor
-     */
-    LaserPoint() {
-      length  = 0.;
-      angle   = 0.;
-    }
-    /**
-     * constructor
-     * @param l the length of the laser reading in m
-     * @param a the angle of the laser reading in rad
-     */
-    LaserPoint(double l, double a) {
-      length  = l;
-      angle   = a;
-    }
-  };
+  virtual void update();
 
-  CEscapeDriveModule( Logger* logger, Configuration* config );
-  ~CEscapeDriveModule();
-
-  virtual void Update();
-
-  void setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_points );
+  void set_laser_data( std::vector<polar_coord_2d_t>& laser_points );
 
  private:
+  std::vector<polar_coord_2d_t> laser_points_;
 
-  std::vector<LaserPoint> m_laser_points;
-
-  CRoboShape_Colli*  m_pRoboShape;
+  RoboShapeColli*  robo_shape_;
 
   /// Readings without robolength in it
-  std::vector< float > m_vNormalizedReadings;
-  std::vector< float > m_vFront, m_vBack;
-  std::vector< float > m_vLeftFront,  m_vLeftBack;
-  std::vector< float > m_vRightFront, m_vRightBack;
+  std::vector< float > readings_normalized_;
+  std::vector< float > readings_front_, readings_back_;
+  std::vector< float > readings_left_front_,  readings_left_back_;
+  std::vector< float > readings_right_front_, readings_right_back_;
 
 
-  /// absolute values are the maximum values. do not act faster!
-  float m_MaxTranslation;
-  float m_MaxRotation;
+  void fill_normalized_readings();
+  void sort_normalized_readings();
 
-
-  void FillNormalizedReadings();
-  void SortNormalizedReadings();
-
-  bool CheckDanger( std::vector< float > readings );
-  bool TurnLeftAllowed();
-  bool TurnRightAllowed();
+  bool check_danger( std::vector< float > readings );
+  bool turn_left_allowed();
+  bool turn_right_allowed();
 };
 
 } // end namespace fawkes

@@ -19,24 +19,16 @@ class NavigatorInterface : public Interface
 
   typedef enum {
     MovingNotAllowed,
-    CarefulForward,
-    SlowForward,
-    ModerateForward,
-    FastForward,
-    CarefulAllowBackward,
-    SlowAllowBackward,
-    ModerateAllowBackward,
-    FastAllowBackward,
-    CarefulBackward,
-    SlowBackward,
-    ModerateBackward,
-    FastBackward,
-    ESCAPE,
-    SlowDribbleBall,
-    ModerateDribbleBall,
-    FastDribbleBall,
-    OVERRIDE
+    Forward,
+    AllowBackward,
+    Backward,
+    ESCAPE
   } DriveMode;
+
+  typedef enum {
+    OrientAtTarget,
+    OrientDuringTravel
+  } OrientationMode;
 
   class StopMessage : public Message
   {
@@ -194,15 +186,15 @@ class NavigatorInterface : public Interface
     int maxlenof_stop_at_target() const;
   };
 
-  class SetOrientAtTargetMessage : public Message
+  class SetOrientationModeMessage : public Message
   {
-    SetOrientAtTargetMessage(bool ini_orient_at_target);
-    SetOrientAtTargetMessage();
-    ~SetOrientAtTargetMessage();
+    SetOrientationModeMessage(OrientationMode ini_orientation_mode);
+    SetOrientationModeMessage();
+    ~SetOrientationModeMessage();
 
-    bool is_orient_at_target();
-    void set_orient_at_target(const bool new_orient_at_target);
-    int maxlenof_orient_at_target() const;
+    OrientationMode orientation_mode();
+    void set_orientation_mode(const OrientationMode new_orientation_mode);
+    int maxlenof_orientation_mode() const;
   };
 
   class ResetParametersMessage : public Message
@@ -263,9 +255,9 @@ class NavigatorInterface : public Interface
   bool is_stop_at_target();
   void set_stop_at_target(const bool new_stop_at_target);
   int maxlenof_stop_at_target() const;
-  bool is_orient_at_target();
-  void set_orient_at_target(const bool new_orient_at_target);
-  int maxlenof_orient_at_target() const;
+  OrientationMode orientation_mode();
+  void set_orientation_mode(const OrientationMode new_orientation_mode);
+  int maxlenof_orientation_mode() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

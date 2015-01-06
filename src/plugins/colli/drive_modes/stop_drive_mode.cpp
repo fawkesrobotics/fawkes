@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@ namespace fawkes
 }
 #endif
 
-/** @class CStopDriveModule <plugins/colli/drive_modes/stop_drive_mode.h>
+/** @class StopDriveModule <plugins/colli/drive_modes/stop_drive_mode.h>
  * Stop-Drive-Module. This module is called, if something goes wrong, or is not recognized.
  * It is a fairly easy one, because it sets all to zero.
  */
@@ -37,22 +37,21 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CStopDriveModule::CStopDriveModule(Logger* logger, Configuration* config)
- : CAbstractDriveMode(logger, config)
+StopDriveModule::StopDriveModule(Logger* logger, Configuration* config)
+ : AbstractDriveMode(logger, config)
 {
-  logger_->log_debug("CStopDriveModule", "(Constructor): Entering...");
-  m_DriveModeName = NavigatorInterface::MovingNotAllowed;
-  logger_->log_debug("CStopDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("StopDriveModule", "(Constructor): Entering...");
+  drive_mode_ = NavigatorInterface::MovingNotAllowed;
+  logger_->log_debug("StopDriveModule", "(Constructor): Exiting...");
 }
 
 
 /** Destruct your local values here. */
-CStopDriveModule::~CStopDriveModule()
+StopDriveModule::~StopDriveModule()
 {
-  logger_->log_debug("CStopDriveModule", "(Destructor): Entering...");
-  logger_->log_debug("CStopDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("StopDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("StopDriveModule", "(Destructor): Exiting...");
 }
-
 
 
 /* ************************************************************************** */
@@ -66,28 +65,26 @@ CStopDriveModule::~CStopDriveModule()
  *
  *  Available are:
  *
- *     m_TargetX, m_TargetY, m_TargetOri  --> current Target to drive to
- *     m_RoboX, m_RoboY, m_RoboOri        --> current Robot coordinates
- *     m_RoboTrans, m_RoboRot             --> current Motor values
+ *     target_     --> current target coordinates to drive to
+ *     robot_      --> current robot coordinates
+ *     robot_vel_  --> current Motor velocities
  *
- *     m_LocalTargetX, m_LocalTargetY     --> our local target found by the search component we want to reach
- *     m_LocalTrajecX, m_LocalTrajecY     --> The point we would collide with, if we would drive WITHOUT Rotation
+ *     local_target_      --> our local target found by the search component we want to reach
+ *     local_trajec_      --> The point we would collide with, if we would drive WITHOUT Rotation
  *
- *     m_OrientAtTarget                   --> Do we have to orient ourself at the target?
- *     m_StopAtTarget                     --> Do we have to stop really ON the target?
+ *     orient_at_target_  --> Do we have to orient ourself at the target?
+ *     stop_at_target_    --> Do we have to stop really ON the target?
  *
  *  Afterwards filled should be:
  *
- *     m_ProposedTranslation              --> Desired Translation speed
- *     m_ProposedRotation                 --> Desired Rotation speed
+ *     proposed_          --> Desired translation and rotation speed
  *
- *  Those values are questioned after an Update() was called.
+ *  Those values are questioned after an update() was called.
  */
 void
-CStopDriveModule::Update()
+StopDriveModule::update()
 {
-  m_ProposedTranslation = 0.0;
-  m_ProposedRotation    = 0.0;
+  proposed_.x = proposed_.y = proposed_.rot = 0.f;
 }
 
 } // namespace fawkes

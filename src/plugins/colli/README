@@ -135,7 +135,7 @@ If the Search->Update was successfull, the two routines GetLocalTarget
 and GetLocalTrajec return two valid points. These points and the
 current values are given to the drive-mode selection component. This
 component calculates for the given current values a proposed speed
-vector during the call of m_pDriveMode->Update(). This component has
+vector during the call of drive_mode->update(). This component has
 an abstract interface which has to be extended if you implement your
 own mode. How this values are calculated is rather equal to me, but
 notice that here the behaviour of the robot is defined. If you do
@@ -268,12 +268,12 @@ In SEARCH there is the abstract class defined in 'abstract_search.h'.
                                 coordinates in the occ-grid.
       Postcondition: UpdatedSuccessful() has to return true, if the
                      functions GetLocalTarget and GetLocalTrajec are allowed
-                     to be called. m_LocalTarget and m_LocalTrajec are filled.
+                     to be called. local_target_ and local_trajec_ are filled.
 
     bool
     UpdatedSuccessful()
-      Precondition: The method Update() has been called. m_LocalTarget,
-                    m_LocalTrajec have to be filled.
+      Precondition: The method Update() has been called. local_target_,
+                    local_trajec_ have to be filled.
       Documentation: Returns, if a plan was found and the Points are
                      valid ones.
 
@@ -302,21 +302,20 @@ In DRIVE_MODES there is the abstract class 'abstract_drive_mode'. By
         *  How you do this is up to you, but be careful, our hardware is expensive!!!!
         *
         *  Available are:
-        *     m_TargetX, m_TargetY, m_TargetOri  --> current Target to drive to
-        *     m_RoboX, m_RoboY, m_RoboOri        --> current Robot coordinates
-        *     m_RoboTrans, m_RoboRot             --> current Motor values
         *
-        *     m_LocalTargetX, m_LocalTargetY     --> our local target found by the search component we want to reach
-        *     m_LocalTrajecX, m_LocalTrajecY     --> The point we would collide with, if we would drive WITHOUT Rotation
+        *     target_     --> current target coordinates to drive to
+        *     robot_      --> current robot coordinates
+        *     robot_vel_  --> current Motor velocities
         *
-        *     m_OrientAtTarget                   --> Do we have to orient ourself at the target?
-        *     m_StopAtTarget                     --> Do we have to stop really ON the target?
+        *     local_target_      --> our local target found by the search component we want to reach
+        *     local_trajec_      --> The point we would collide with, if we would drive WITHOUT Rotation
+        *
+        *     orient_at_target_  --> Do we have to orient ourself at the target?
+        *     stop_at_target_    --> Do we have to stop really ON the target?
         *
         *  Afterwards filled should be:
-        *     m_ProposedTranslation              --> Desired Translation speed
-        *     m_ProposedRotation                 --> Desired Rotation speed
         *
-        *  Those values are questioned after an Update() was called.
+        *     proposed_          --> Desired translation and rotation speed
         */
 
    If you implement one of those, you have to integrate it in select_drive_mode.

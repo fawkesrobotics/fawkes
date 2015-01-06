@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  *             2014  Tobias Neumann
  ****************************************************************************/
 
@@ -40,29 +40,27 @@ namespace fawkes
 #endif
 
 class Laser360Interface;
-class CRoboShape_Colli;
+class RoboShapeColli;
 class ColliObstacleMap;
 
 class Logger;
 class Configuration;
 
-class CLaserOccupancyGrid : public OccupancyGrid
+class LaserOccupancyGrid : public OccupancyGrid
 {
  public:
-  CLaserOccupancyGrid( Laser360Interface * laser, Logger* logger, Configuration* config, tf::Transformer* listener,
-                       int width = 150, int height = 150,
-                       int cell_width = 5, int cell_height = 5);
-
-  ~CLaserOccupancyGrid();
+  LaserOccupancyGrid( Laser360Interface * laser, Logger* logger, Configuration* config, tf::Transformer* listener,
+                      int width = 150, int height = 150, int cell_width = 5, int cell_height = 5);
+  ~LaserOccupancyGrid();
 
   ///\brief Put the laser readings in the occupancy grid
-  void UpdateOccGrid( int midX, int midY, float inc, float vel );
+  float update_occ_grid( int mid_x, int mid_y, float inc, float vx, float vy );
 
   ///\brief Reset all old readings and forget about the world state!
-  void ResetOld();
+  void reset_old();
 
   ///\brief Get the laser's position in the grid
-  point_t GetLaserPosition();
+  point_t get_laser_position();
 
   ///\brief Set the offset of base_link from laser
   void set_base_offset(float x, float y);
@@ -71,10 +69,9 @@ class CLaserOccupancyGrid : public OccupancyGrid
   colli_cell_cost_t get_cell_costs() const;
 
  private:
-
   class LaserPoint {
   public:
-    cart_coord_2d_struct coord;
+    cart_coord_2d_t coord;
     Time timestamp;
 
     LaserPoint() { }
@@ -89,17 +86,21 @@ class CLaserOccupancyGrid : public OccupancyGrid
 //    }
   };
 
-  void updateLaser();
+  void update_laser();
 
-  std::vector< LaserPoint >* transformLaserPoints(std::vector< LaserPoint >& laserPoints, tf::StampedTransform& transform);
+  float obstacle_in_path_distance( float vx, float vy );
+
+  void validate_old_laser_points(cart_coord_2d_t pos_robot, cart_coord_2d_t pos_new_laser_point);
+
+  std::vector< LaserPoint >* transform_laser_points(std::vector< LaserPoint >& laser_points, tf::StampedTransform& transform);
 
   /** Integrate historical readings to the current occgrid. */
-  void IntegrateOldReadings( int midX, int midY, float inc, float vel,
-                             tf::StampedTransform& transform );
+  void integrate_old_readings( int mid_x, int mid_y, float inc, float vel,
+                               tf::StampedTransform& transform );
 
   /** Integrate the current readings to the current occgrid. */
-  void IntegrateNewReadings( int midX, int midY, float inc, float vel,
-                             tf::StampedTransform& transform );
+  void integrate_new_readings( int mid_x, int mid_y, float inc, float vel,
+                               tf::StampedTransform& transform );
 
   /** Integrate a single obstacle
    * @param x x coordinate of obstacle center
@@ -107,38 +108,48 @@ class CLaserOccupancyGrid : public OccupancyGrid
    * @param width total width of obstacle
    * @param height total height of obstacle
    */
-  void integrateObstacle( int x, int y, int width, int height );
+  void integrate_obstacle( int x, int y, int width, int height );
 
-  tf::Transformer* tf_listener;
-  std::string m_reference_frame;
-  std::string m_laser_frame;
+  tf::Transformer* tf_listener_;
+  std::string reference_frame_;
+  std::string laser_frame_;
+  bool cfg_write_spam_debug_;
+
   Logger* logger_;
+  Laser360Interface* if_laser_;
+  RoboShapeColli*    robo_shape_; /**< my roboshape */
+  ColliObstacleMap*  obstacle_map;  /**< fast obstacle map */
 
-  fawkes::Laser360Interface *if_laser_;
-  CRoboShape_Colli *m_pRoboShape; /**< my roboshape */
-  ColliObstacleMap *obstacle_map;  /**< fast obstacle map */
+  std::vector< LaserPoint > new_readings_;
+  std::vector< LaserPoint > old_readings_; /**< readings history */
 
-  std::vector< LaserPoint > m_vNewReadings;
-  std::vector< LaserPoint > m_vOldReadings; /**< readings history */
-
-  point_t m_LaserPosition; /**< the laser's position in the grid */
+  point_t laser_pos_; /**< the laser's position in the grid */
 
   /** Costs for the cells in grid */
   colli_cell_cost_t cell_costs_;
 
   /* interface buffer history */
-  int m_if_buffer_size;
-  std::vector<bool> m_if_buffer_filled;
+  int if_buffer_size_;
+  std::vector<bool> if_buffer_filled_;
 
   /** History concerned constants */
-  float m_MaxHistoryLength, m_MinHistoryLength;
-  int m_InitialHistorySize;
+  float max_history_length_, min_history_length_;
+  int initial_history_size_;
 
   /** Laser concerned settings */
-  float m_MinimumLaserLength, m_ObstacleDistance;
+  float min_laser_length_;
+  float obstacle_distance_;
+
+  int cfg_emergency_stop_beams_used_;  /**< number of beams that are used to calculate the min distance to obstacle */
 
   bool cfg_obstacle_inc_ ;          /**< increasing obstacles or not */
   bool cfg_force_elipse_obstacle_;  /**< the used shape for obstacles */
+
+  bool  cfg_delete_invisible_old_obstacles_; /**< delete old invalid obstables or not */
+  int   cfg_delete_invisible_old_obstacles_angle_min_ ;  /**< the min angle for old obstacles */
+  int   cfg_delete_invisible_old_obstacles_angle_max_ ;  /**< the max angle for old obstacles */
+  float angle_min_;   /**< the angle min in rad */
+  float angle_range_; /**< the angle range from min - max */
 
   /** Offsets to robot center */
   cart_coord_2d_t offset_laser_; /**< in meters */

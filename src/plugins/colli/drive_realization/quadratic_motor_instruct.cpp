@@ -22,9 +22,6 @@
 
 #include "quadratic_motor_instruct.h"
 
-#include <interfaces/MotorInterface.h>
-#include <logging/logger.h>
-#include <config/config.h>
 #include <utils/math/common.h>
 
 #include <string>
@@ -37,7 +34,7 @@ namespace fawkes
 
 using namespace std;
 
-/** @class CQuadraticMotorInstruct <plugins/colli/drive_realization/quadratic_motor_instruct.h>
+/** @class QuadraticMotorInstruct <plugins/colli/drive_realization/quadratic_motor_instruct.h>
  * This module is a class for validity checks of drive
  * commands and sets those things with respect to the physical
  * borders of the robot.
@@ -45,39 +42,29 @@ using namespace std;
  * CalculateTranslation are implemented quadratically ;-)
  */
 
+
 /** Constructor.
  * @param motor The MotorInterface with all the motor information
  * @param frequency The frequency of the colli (should become deprecated!)
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-CQuadraticMotorInstruct::CQuadraticMotorInstruct( fawkes::MotorInterface* motor,
-                                                  float frequency,
-                                                  fawkes::Logger* logger,
-                                                  fawkes::Configuration* config )
- : CBaseMotorInstruct( motor, frequency, logger ),
-   config_( config )
+QuadraticMotorInstruct::QuadraticMotorInstruct( MotorInterface* motor,
+                                                float frequency,
+                                                Logger* logger,
+                                                Configuration* config )
+ : BaseMotorInstruct( motor, frequency, logger, config )
 {
-  logger_->log_debug("CQuadraticMotorInstruct", "(Constructor): Entering");
-
-  string cfg_prefix = "/plugins/colli/motor_instruct/";
-
-  basic_trans_acc = config_->get_float((cfg_prefix + "trans_acc").c_str());
-  basic_trans_dec = config_->get_float((cfg_prefix + "trans_dec").c_str());
-  basic_rot_acc   = config_->get_float((cfg_prefix + "rot_acc").c_str());
-  basic_rot_dec   = config_->get_float((cfg_prefix + "rot_dec").c_str());
-
-  logger_->log_debug("CQuadraticMotorInstruct", "(Constructor): Exiting");
+  logger_->log_debug("QuadraticMotorInstruct", "(Constructor): Entering");
+  logger_->log_debug("QuadraticMotorInstruct", "(Constructor): Exiting");
 }
 
-
-CQuadraticMotorInstruct::~CQuadraticMotorInstruct()
+/** Destructor. */
+QuadraticMotorInstruct::~QuadraticMotorInstruct()
 {
-  logger_->log_debug("CQuadraticMotorInstruct", "(Destructor): Entering");
-  logger_->log_debug("CQuadraticMotorInstruct", "(Destructor): Exiting");
+  logger_->log_debug("QuadraticMotorInstruct", "(Destructor): Entering");
+  logger_->log_debug("QuadraticMotorInstruct", "(Destructor): Exiting");
 }
-
-
 
 
 /** Implementation of Calculate Translation Function.
@@ -85,55 +72,52 @@ CQuadraticMotorInstruct::~CQuadraticMotorInstruct()
  *   or too much may result in non predictable motor behaviour!!!!
  * THIS FUNCTION IS THE LAST BORDER TO THE MOTOR, TAKE CARE AND PAY ATTENTION!!!
  */
-float CQuadraticMotorInstruct::CalculateTranslation( float currentTranslation,
-                 float desiredTranslation,
-                 float time_factor )
+float
+QuadraticMotorInstruct::calculate_translation( float current, float desired, float time_factor )
 {
-  float execTranslation = 0.0;
+  float exec_trans = 0.0;
 
-  if (desiredTranslation < currentTranslation) {
+  if (desired < current) {
 
-    if (currentTranslation > 0.0) {
+    if (current > 0.0) {
       // decrease forward speed
-      execTranslation = currentTranslation - basic_trans_dec - ((sqr( fabs(currentTranslation) + 1.0 ) * basic_trans_dec) / 8.0);
-      execTranslation = max( execTranslation, desiredTranslation );
+      exec_trans = current - trans_dec_ - ((sqr( fabs(current) + 1.0 ) * trans_dec_) / 8.0);
+      exec_trans = max( exec_trans, desired );
 
-    } else if (currentTranslation < 0.0) {
+    } else if (current < 0.0) {
       // increase backward speed
-      execTranslation = currentTranslation - basic_trans_acc - ((sqr( fabs(currentTranslation) + 1.0 ) * basic_trans_acc) / 8.0);
-      execTranslation = max( execTranslation, desiredTranslation );
+      exec_trans = current - trans_acc_ - ((sqr( fabs(current) + 1.0 ) * trans_acc_) / 8.0);
+      exec_trans = max( exec_trans, desired );
 
     }  else {
-      // currentTranslation == 0;
-      execTranslation = max( -basic_trans_acc, desiredTranslation );
+      // current == 0;
+      exec_trans = max( -trans_acc_, desired );
     }
 
-  } else if (desiredTranslation > currentTranslation) {
+  } else if (desired > current) {
 
-    if (currentTranslation > 0.0) {
+    if (current > 0.0) {
       // increase forward speed
-      execTranslation = currentTranslation + basic_trans_acc + ((sqr( fabs(currentTranslation) + 1.0 ) * basic_trans_acc) / 8.0);
-      execTranslation = min( execTranslation, desiredTranslation );
+      exec_trans = current + trans_acc_ + ((sqr( fabs(current) + 1.0 ) * trans_acc_) / 8.0);
+      exec_trans = min( exec_trans, desired );
 
-    } else if (currentTranslation < 0.0) {
+    } else if (current < 0.0) {
       // decrease backward speed
-      execTranslation = currentTranslation + basic_trans_dec + ((sqr( fabs(currentTranslation) + 1.0 ) * basic_trans_dec) / 8.0);
-      execTranslation = min( execTranslation, desiredTranslation );
+      exec_trans = current + trans_dec_ + ((sqr( fabs(current) + 1.0 ) * trans_dec_) / 8.0);
+      exec_trans = min( exec_trans, desired );
 
     } else {
-      // currentTranslation == 0
-      execTranslation = min( basic_trans_acc, desiredTranslation );
+      // current == 0
+      exec_trans = min( trans_acc_, desired );
     }
 
   } else {
     // nothing to change!!!
-    execTranslation = desiredTranslation;
+    exec_trans = desired;
   }
 
-  return execTranslation*time_factor;
+  return exec_trans*time_factor;
 }
-
-
 
 
 /** Implementation of Calculate Rotation Function.
@@ -141,51 +125,49 @@ float CQuadraticMotorInstruct::CalculateTranslation( float currentTranslation,
  *   or too much may result in non predictable motor behaviour!!!!
  * THIS FUNCTION IS THE LAST BORDER TO THE MOTOR, TAKE CARE AND PAY ATTENTION!!!
  */
-float CQuadraticMotorInstruct::CalculateRotation( float currentRotation,
-              float desiredRotation,
-              float time_factor  )
+float QuadraticMotorInstruct::calculate_rotation( float current, float desired, float time_factor  )
 {
-  float execRotation = 0.0;
+  float exec_rot = 0.0;
 
-  if (desiredRotation < currentRotation) {
+  if (desired < current) {
 
-    if (currentRotation > 0.0) {
+    if (current > 0.0) {
       // decrease right rot
-      execRotation = currentRotation - basic_rot_dec - ((sqr( fabs(currentRotation) + 1.0 ) * basic_rot_dec) / 8.0);
-      execRotation = max( execRotation, desiredRotation );
+      exec_rot = current - rot_dec_ - ((sqr( fabs(current) + 1.0 ) * rot_dec_) / 8.0);
+      exec_rot = max( exec_rot, desired );
 
-    } else if (currentRotation < 0.0) {
+    } else if (current < 0.0) {
       // increase left rot
-      execRotation = currentRotation - basic_rot_acc - ((sqr( fabs(currentRotation) + 1.0 ) * basic_rot_acc) / 8.0);
-      execRotation = max( execRotation, desiredRotation );
+      exec_rot = current - rot_acc_ - ((sqr( fabs(current) + 1.0 ) * rot_acc_) / 8.0);
+      exec_rot = max( exec_rot, desired );
 
     } else {
-      // currentRotation == 0;
-      execRotation = max( -basic_rot_acc, desiredRotation );
+      // current == 0;
+      exec_rot = max( -rot_acc_, desired );
     }
 
-  } else if (desiredRotation > currentRotation) {
-    if (currentRotation > 0.0) {
+  } else if (desired > current) {
+    if (current > 0.0) {
       // increase right rot
-      execRotation = currentRotation + basic_rot_acc + ((sqr( fabs(currentRotation) + 1.0 ) * basic_rot_acc) / 8.0);
-      execRotation = min( execRotation, desiredRotation );
+      exec_rot = current + rot_acc_ + ((sqr( fabs(current) + 1.0 ) * rot_acc_) / 8.0);
+      exec_rot = min( exec_rot, desired );
 
-    } else if (currentRotation < 0.0) {
+    } else if (current < 0.0) {
       // decrease left rot
-      execRotation = currentRotation + basic_rot_dec + ((sqr( fabs(currentRotation) + 1.0 ) * basic_rot_dec) / 8.0);
-      execRotation = min( execRotation, desiredRotation );
+      exec_rot = current + rot_dec_ + ((sqr( fabs(current) + 1.0 ) * rot_dec_) / 8.0);
+      exec_rot = min( exec_rot, desired );
 
     } else {
-      // currentRotation == 0
-      execRotation = min( basic_rot_acc, desiredRotation );
+      // current == 0
+      exec_rot = min( rot_acc_, desired );
     }
 
   } else {
     // nothing to change!!!
-    execRotation = desiredRotation;
+    exec_rot = desired;
   }
 
-  return execRotation*time_factor;
+  return exec_rot*time_factor;
 }
 
 } // namespace fawkes

@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  slow_forward_drive_mode.h - Implementation of drive-mode "slow forward"
+ *  forward_omni_drive_mode.h - Implementation of drive-mode "forward"
  *
  *  Created: Fri Oct 18 15:16:23 2013
- *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *  Copyright  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_SLOW_FORWARD_DRIVE_MODE_H_
-#define __PLUGINS_COLLI_SLOW_FORWARD_DRIVE_MODE_H_
+#ifndef __PLUGINS_COLLI_FORWARD_OMNI_DRIVE_MODE_H_
+#define __PLUGINS_COLLI_FORWARD_OMNI_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
 
@@ -31,25 +30,19 @@ namespace fawkes
 }
 #endif
 
-class CSlowForwardDriveModule : public CAbstractDriveMode
+class ForwardOmniDriveModule : public AbstractDriveMode
 {
  public:
+  ForwardOmniDriveModule(Logger* logger, Configuration* config);
+  ~ForwardOmniDriveModule();
 
-  CSlowForwardDriveModule(Logger* logger, Configuration* config);
-  ~CSlowForwardDriveModule();
-
-  virtual void Update();
-
+  virtual void update();
 
  private:
+  void calculate_rotation(float ori_alpha_target, float ori_alpha_next_target,
+                          float dist_to_target, float angle_allowed_to_next_target);
 
-  float SlowForward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-             float cur_trans, float cur_rot );
-  float SlowForward_Translation( float dist_to_target, float dist_to_front, float alpha,
-         float cur_trans, float cur_rot, float des_rot );
-
-  float m_MaxTranslation, m_MaxRotation;
-
+  void calculate_translation(float dist_to_target, float ori_alpha_target, float dec_factor);
 };
 
 } // namespace fawkes

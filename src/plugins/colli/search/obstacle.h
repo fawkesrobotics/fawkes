@@ -142,10 +142,10 @@ ColliFastRectangle::ColliFastRectangle( int width, int height, colli_cell_cost_t
 inline
 ColliFastEllipse::ColliFastEllipse( int width, int height, colli_cell_cost_t &costs, bool obstacle_increasement )
 {
-  float dist = 1000.0;
-  float dist_near = 1000.0;
-  float dist_middle = 1000.0;
-  float dist_far = 1000.0;
+  float dist = 1000.f;
+  float dist_near = 1000.f;
+  float dist_middle = 1000.f;
+  float dist_far = 1000.f;
 
   int radius_width  = round(width/2.f);
   int radius_height = round(height/2.f);
@@ -159,30 +159,30 @@ ColliFastEllipse::ColliFastEllipse( int width, int height, colli_cell_cost_t &co
       dist_middle = sqr((float)y/(float)(radius_width+2)) + sqr((float)x/(float)(radius_height+2));
       dist_far    = sqr((float)x/(float)(radius_width+3)) +  sqr((float)y/(float)(radius_height+3));
 
-      if( (dist > 1.0) && (dist_near > 1.0)
-       && (dist_middle > 1.0) && (dist_far > 1.0) ) {
+      if( (dist > 1.f) && (dist_near > 1.f)
+       && (dist_middle > 1.f) && (dist_far > 1.f) ) {
         // not in grid!
 
-      } else if( (dist > 1.0) && (dist_near > 1.0)
-              && (dist_middle > 1.0) && (dist_far <= 1.0) ) {
+      } else if( (dist > 1.f) && (dist_near > 1.f)
+              && (dist_middle > 1.f) && (dist_far <= 1.f) ) {
         occupied_cells_.push_back( x );
         occupied_cells_.push_back( y );
         occupied_cells_.push_back( costs.far );
 
-      } else if( (dist > 1.0) && (dist_near > 1.0)
-              && (dist_middle <= 1.0) ) {
+      } else if( (dist > 1.f) && (dist_near > 1.f)
+              && (dist_middle <= 1.f) ) {
         occupied_cells_.push_back( x );
         occupied_cells_.push_back( y );
         occupied_cells_.push_back( costs.mid );
 
-      } else if( (dist > 1.0) && (dist_near <= 1.0)
-              && (dist_middle <= 1.0) ) {
+      } else if( (dist > 1.f) && (dist_near <= 1.f)
+              && (dist_middle <= 1.f) ) {
         occupied_cells_.push_back( x );
         occupied_cells_.push_back( y );
         occupied_cells_.push_back( costs.near );
 
-      } else if( (dist <= 1.0) && (dist_near <= 1.0)
-              && (dist_middle <= 1.0) ) {
+      } else if( (dist <= 1.f) && (dist_near <= 1.f)
+              && (dist_middle <= 1.f) ) {
         occupied_cells_.push_back( x );
         occupied_cells_.push_back( y );
         occupied_cells_.push_back( costs.occ );

@@ -36,7 +36,7 @@ namespace fawkes
 }
 #endif
 
-class CLaserOccupancyGrid;
+class LaserOccupancyGrid;
 class Logger;
 class Configuration;
 
@@ -46,25 +46,24 @@ typedef struct point_struct point_t;
  *  This is an implementation of the A* search algorithm in a
  *    highly efficient way (I hope ;-).
  */
-class CAStar
+class AStar
 {
  public:
-
-  CAStar( CLaserOccupancyGrid * occGrid, Logger* logger, Configuration* config );
-  ~CAStar();
+  AStar( LaserOccupancyGrid * occGrid, Logger* logger, Configuration* config );
+  ~AStar();
 
   /* =========================================== */
   /* ************* PUBLIC METHODS ************** */
   /* =========================================== */
-  /** Solves the given assignment.
+  /** solves the given assignment.
    *  This starts the search for a path through the occupance grid to the
    *    target point.
    *  Performing astar search over the occupancy grid and returning the solution.
    */
-  void Solve( const point_t &RoboPos, const point_t &TargetPos, std::vector<point_t> &solution );
+  void solve( const point_t &robo_pos, const point_t &target_pos, std::vector<point_t> &solution );
 
   ///\brief Method, returning the nearest point outside of an obstacle.
-  point_t RemoveTargetFromObstacle( int targetX, int targetY, int stepX, int stepY );
+  point_t remove_target_from_obstacle( int target_x, int target_y, int step_x, int step_y );
 
  private:
   /* =========================================== */
@@ -73,60 +72,60 @@ class CAStar
   fawkes::Logger* logger_;
 
   // this is the local reference to the occupancy grid.
-  CLaserOccupancyGrid * m_pOccGrid;
-  unsigned int m_Width;
-  unsigned int m_Height;
+  LaserOccupancyGrid * occ_grid_;
+  unsigned int width_;
+  unsigned int height_;
 
   // Costs for the cells in grid
   colli_cell_cost_t cell_costs_;
 
   // this is the local robot position and target point.
-  CAStarState m_pRoboPos;
-  CAStarState m_pTargetState;
+  AStarState robo_pos_;
+  AStarState target_state_;
 
   // This is a state vector...
   // It is for speed purposes. So I do not have to do a new each time
   //   I have to malloc a new one each time.
-  std::vector< CAStarState * > m_vAStarStates;
+  std::vector< AStarState * > astar_states_;
 
   // maximum number of states available for a* and current index
-  int m_MaxStates;
-  int m_AStarStateCount;
+  int max_states_;
+  int astar_state_count_;
 
   // this is AStars openlist
   struct cmp {
-    bool operator() ( CAStarState * a1, CAStarState * a2 ) const
+    bool operator() ( AStarState * a1, AStarState * a2 ) const
     {
-      return (a1->m_TotalCost > a2->m_TotalCost);
+      return (a1->total_cost_ > a2->total_cost_);
     }
   };
 
-  std::priority_queue< CAStarState *, std::vector< CAStarState * >, cmp > m_pOpenList;
+  std::priority_queue< AStarState *, std::vector< AStarState * >, cmp > open_list_;
 
   // this is AStars closedList
-  std::map< int, int > m_hClosedList;
+  std::map< int, int > closed_list_;
 
   /* =========================================== */
   /* ************ PRIVATE METHODS ************** */
   /* =========================================== */
 
-  // Search with AStar through the OccGrid
-  CAStarState * Search();
+  // search with AStar through the OccGrid
+  AStarState * search();
 
   // Calculate a unique key for a given coordinate
-  int CalculateKey( int x, int y );
+  int calculate_key( int x, int y );
 
   // Check if the state is a goal
-  bool IsGoal( CAStarState * state );
+  bool is_goal( AStarState * state );
 
   // Calculate heuristic for a given state
-  int Heuristic( CAStarState * state );
+  int heuristic( AStarState * state );
 
   // Generate all children for a given State
-  void GenerateChildren( CAStarState * father );
+  void generate_children( AStarState * father );
 
   // Generates a solution sequence for a given state
-  void GetSolutionSequence( CAStarState * node, std::vector<point_t> &solution );
+  void get_solution_sequence( AStarState * node, std::vector<point_t> &solution );
 
 };
 

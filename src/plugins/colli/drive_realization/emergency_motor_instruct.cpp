@@ -1,11 +1,9 @@
 
 /***************************************************************************
- *  linear_motor_instruct.cpp - Motor instructor with linear approximation
+ *  emergency_motor_instruct.cpp - Motor instructor with quadratic approximation
  *
- *  Created: Fri Oct 18 15:16:23 2013
- *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
- *             2014  Tobias Neumann
+ *  Created: Thu Jul 10:35:23 2014
+ *  Copyright  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,8 +19,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "linear_motor_instruct.h"
+#include "emergency_motor_instruct.h"
 
+#include <interfaces/MotorInterface.h>
+#include <logging/logger.h>
+#include <config/config.h>
 #include <utils/math/common.h>
 
 #include <string>
@@ -35,7 +36,7 @@ namespace fawkes
 
 using namespace std;
 
-/** @class LinearMotorInstruct <plugins/colli/drive_realization/linear_motor_instruct.h>
+/** @class EmergencyMotorInstruct <plugins/colli/drive_realization/emergency_motor_instruct.h>
  * This module is a class for validity checks of drive
  * commands and sets those things with respect to the physical
  * borders of the robot.
@@ -49,22 +50,22 @@ using namespace std;
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-LinearMotorInstruct::LinearMotorInstruct( MotorInterface* motor,
-                                          float frequency,
-                                          Logger* logger,
-                                          Configuration* config )
+EmergencyMotorInstruct::EmergencyMotorInstruct( fawkes::MotorInterface* motor,
+                                                float frequency,
+                                                fawkes::Logger* logger,
+                                                fawkes::Configuration* config )
  : BaseMotorInstruct( motor, frequency, logger, config )
 {
-  logger_->log_debug("LinearMotorInstruct", "(Constructor): Entering");
-  logger_->log_debug("LinearMotorInstruct", "(Constructor): Exiting");
+  logger_->log_debug("EmergencyMotorInstruct", "(Constructor): Entering");
+  logger_->log_debug("EmergencyMotorInstruct", "(Constructor): Exiting");
 }
 
 
 /** Destructor. */
-LinearMotorInstruct::~LinearMotorInstruct()
+EmergencyMotorInstruct::~EmergencyMotorInstruct()
 {
-  logger_->log_debug("LinearMotorInstruct", "(Destructor): Entering");
-  logger_->log_debug("LinearMotorInstruct", "(Destructor): Exiting");
+  logger_->log_debug("EmergencyMotorInstruct", "(Destructor): Entering");
+  logger_->log_debug("EmergencyMotorInstruct", "(Destructor): Exiting");
 }
 
 
@@ -78,7 +79,7 @@ LinearMotorInstruct::~LinearMotorInstruct()
  * @param time_factor The time_factor (should become deprecated!)
  * @return the new translation
  */
-float LinearMotorInstruct::calculate_translation( float current, float desired, float time_factor )
+float EmergencyMotorInstruct::calculate_translation( float current, float desired, float time_factor )
 {
   float exec_trans = 0.0;
 
@@ -86,8 +87,7 @@ float LinearMotorInstruct::calculate_translation( float current, float desired, 
 
     if (current > 0.0) {
       // decrease forward speed
-      exec_trans = current - trans_dec_;
-      exec_trans = max( exec_trans, desired );
+      exec_trans = desired;
 
     } else if (current < 0.0) {
       // increase backward speed
@@ -108,8 +108,7 @@ float LinearMotorInstruct::calculate_translation( float current, float desired, 
 
     } else if (current < 0.0) {
       // decrease backward speed
-      exec_trans = current + trans_dec_;
-      exec_trans = min( exec_trans, desired );
+      exec_trans = desired;
 
     } else {
       // current == 0
@@ -132,10 +131,10 @@ float LinearMotorInstruct::calculate_translation( float current, float desired, 
  *
  * @param current The current rotation of the robot
  * @param desired The desired rotation of the robot
- * @param time_factor The time_factor (should become deprecated!)
+ * @param time_factor     The time_factor (should become deprecated!)
  * @return the new rotation
  */
-float LinearMotorInstruct::calculate_rotation( float current, float desired, float time_factor  )
+float EmergencyMotorInstruct::calculate_rotation( float current, float desired, float time_factor )
 {
   float exec_rot = 0.0;
 

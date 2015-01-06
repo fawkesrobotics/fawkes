@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  medium_forward_drive_mode.h - Implementation of drive-mode "medium forward"
+ *  emergency_motor_instruct.h - Motor instructor with quadratic approximation
  *
- *  Created: Fri Oct 18 15:16:23 2013
- *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *  Created: Thu Jul 10:35:23 2014
+ *  Copyright  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,10 +19,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_MEDIUM_FORWARD_DRIVE_MODE_H_
-#define __PLUGINS_COLLI_MEDIUM_FORWARD_DRIVE_MODE_H_
+#ifndef __PLUGINS_COLLI_DRIVE_REALIZATION_EMERGENCY_MOTORINSTRUCT_H_
+#define __PLUGINS_COLLI_DRIVE_REALIZATION_EMERGENCY_MOTORINSTRUCT_H_
 
-#include "abstract_drive_mode.h"
+#include "base_motor_instruct.h"
 
 namespace fawkes
 {
@@ -31,26 +30,21 @@ namespace fawkes
 }
 #endif
 
-class CMediumForwardDriveModule : public CAbstractDriveMode
+class EmergencyMotorInstruct: public BaseMotorInstruct
 {
  public:
-
-  CMediumForwardDriveModule(Logger* logger, Configuration* config);
-  ~CMediumForwardDriveModule();
-
-  virtual void Update();
-
+  EmergencyMotorInstruct( MotorInterface* motor,
+                          float frequency,
+                          Logger* logger,
+                          Configuration* config );
+  virtual ~EmergencyMotorInstruct();
 
  private:
+  ///\brief linear implementation of velocity constraints
+  float calculate_rotation( float current, float desired,float time_factor );
 
-  float MediumForward_Translation ( float dist_to_target, float dist_to_front, float alpha,
-            float trans_0, float rot_0, float rot_1 );
-
-  float MediumForward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-         float trans_0, float rot_0 );
-
-  float m_MaxTranslation, m_MaxRotation;
-
+  ///\brief linear implementation of velocity constraints
+  float calculate_translation( float current, float desired,float time_factor );
 };
 
 } // namespace fawkes

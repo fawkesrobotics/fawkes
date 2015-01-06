@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  medium_backward_drive_mode.h - Implementation of drive-mode "medium backward"
+ *  escape_potential_field_omni_drive_mode.h - Implementation of drive-mode "escape"
  *
- *  Created: Fri Oct 18 15:16:23 2013
- *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *  Created: Tue Mar 25 17:24:18 2014
+ *  Copyright  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,10 +19,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_MEDIUM_BACKWARD_DRIVE_MODE_H_
-#define __PLUGINS_COLLI_MEDIUM_BACKWARD_DRIVE_MODE_H_
+#ifndef __PLUGINS_COLLI_ESCAPE_POTENTIAL_FIELD_OMNI_DRIVE_MODE_H_
+#define __PLUGINS_COLLI_ESCAPE_POTENTIAL_FIELD_OMNI_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
+#include <utils/math/types.h>
+
+#include <vector>
 
 namespace fawkes
 {
@@ -31,27 +33,26 @@ namespace fawkes
 }
 #endif
 
-class CMediumBackwardDriveModule : public CAbstractDriveMode
+class LaserOccupancyGrid;
+
+class EscapePotentialFieldOmniDriveModule : public AbstractDriveMode
 {
  public:
+  EscapePotentialFieldOmniDriveModule( Logger* logger, Configuration* config );
+  ~EscapePotentialFieldOmniDriveModule();
 
-  CMediumBackwardDriveModule(Logger* logger, Configuration* config);
-  ~CMediumBackwardDriveModule();
-
-  virtual void Update();
+  void set_grid_information( LaserOccupancyGrid* occ_grid, int robo_x, int robo_y );
+  virtual void update();
 
  private:
+  LaserOccupancyGrid*  occ_grid_;
+  point_t robot_pos_;
 
-  float MediumBackward_Translation ( float dist_to_target, float dist_to_front, float alpha,
-             float trans_0, float rot_0, float rot_1 );
+  bool cfg_write_spam_debug_;
 
-  float MediumBackward_Curvature( float dist_to_target, float dist_to_trajec, float alpha,
-          float trans_0, float rot_0 );
-
-  float m_MaxTranslation, m_MaxRotation;
-
+  int turn_;
 };
 
-} // namespace fawkes
+} // end namespace fawkes
 
 #endif

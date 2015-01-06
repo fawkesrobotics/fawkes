@@ -3,6 +3,7 @@
  *
  *  Created: Tue Sep 18 16:00:34 2012
  *  Copyright  2012-2014  Tim Niemueller [www.niemueller.de]
+ *                  2014  Tobias Neumann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -444,21 +445,42 @@ NavGraphThread::stop_motion()
 void
 NavGraphThread::send_next_goal()
 {
+  bool stop_at_target   = false;
+  bool orient_at_target = false;
+
   if (plan_.empty()) {
     throw Exception("Cannot send next goal if plan is empty");
   }
 
   TopologicalMapNode &next_target = plan_.front();
 
-  float ori = 0.;
-  if (plan_.size() == 1 && next_target.has_property("orientation")) {
-    // take the given orientation for the final node
-    ori = next_target.property_as_float("orientation");
+  if (plan_.size() == 1) {
+    stop_at_target = true;
   } else {
-    // set direction facing from current to next target position, best
-    // chance to reach the destination without turning at the end
-    ori = atan2f(next_target.y() - pose_.getOrigin().y(),
-		 next_target.x() - pose_.getOrigin().x());
+    stop_at_target = false;
+  }
+
+  float ori = 0.;
+  if ( plan_.size() == 1 ) {
+    if ( next_target.has_property("orientation") ) {
+      orient_at_target  = true;
+
+      // take the given orientation for the final node
+      ori = next_target.property_as_float("orientation");
+    } else {
+      orient_at_target  = false;
+      ori = NAN;
+    }
+  } else {
+    orient_at_target  = false;
+
+    // set direction facing from next_target (what is the actual point to drive to) to next point to drive to.
+    // So orientation is the direction from next_target to the target after that
+
+    TopologicalMapNode &next_next_target = plan_[1];//*(++plan_.begin());
+
+    ori = atan2f( next_next_target.y() - next_target.y(),
+                  next_next_target.x() - next_target.x());
   }
 
   // get target position in map frame
@@ -483,7 +505,21 @@ NavGraphThread::send_next_goal()
     new NavigatorInterface::CartesianGotoMessage(tpose.getOrigin().x(),
 						 tpose.getOrigin().y(),
 						 tf::get_yaw(tpose.getRotation()));
+
+  NavigatorInterface::SetStopAtTargetMessage* stop_at_target_msg      = new NavigatorInterface::SetStopAtTargetMessage(stop_at_target);
+  NavigatorInterface::SetOrientationModeMessage* orient_mode_msg;
+  if ( orient_at_target ) {
+    orient_mode_msg = new NavigatorInterface::SetOrientationModeMessage(
+        fawkes::NavigatorInterface::OrientationMode::OrientAtTarget );
+  } else {
+    orient_mode_msg = new NavigatorInterface::SetOrientationModeMessage(
+            fawkes::NavigatorInterface::OrientationMode::OrientDuringTravel );
+  }
+
   try {
+    nav_if_->msgq_enqueue(stop_at_target_msg);
+    nav_if_->msgq_enqueue(orient_mode_msg);
+
     nav_if_->msgq_enqueue(gotomsg);
     cmd_sent_at_->stamp();
 

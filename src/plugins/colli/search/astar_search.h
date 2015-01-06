@@ -33,8 +33,8 @@ namespace fawkes
 }
 #endif
 
-class CLaserOccupancyGrid;
-class CAStar;
+class LaserOccupancyGrid;
+class AStar;
 class Logger;
 class Configuration;
 
@@ -44,50 +44,45 @@ typedef struct point_struct point_t;
  *  Here the plan from A* is managed and cut into small pieces.
  *    Also usable methods for managing the plan are implemented here.
  */
-class CSearch: public CAbstractSearch
+class Search: public AbstractSearch
 {
  public:
-
-  CSearch( CLaserOccupancyGrid * occGrid , Logger* logger, Configuration* config);
-  virtual ~CSearch();
+  Search( LaserOccupancyGrid * occ_grid , Logger* logger, Configuration* config);
+  virtual ~Search();
 
   ///\brief update complete plan things
-  void Update( int roboX, int roboY, int targetX, int targetY );
+  void update( int robo_x, int robo_y, int target_x, int target_y );
 
   ///\brief returns, if the update was successful or not.
-  bool UpdatedSuccessful();
+  bool updated_successful();
 
   ///\brief Get the current plan
-  std::vector<point_t>* GetPlan();
+  std::vector<point_t>* get_plan();
 
   ///\brief Get the robot's position in the grid, used for the plan
-  point_t GetRoboPosition();
+  point_t get_robot_position();
 
  private:
 
   /** Returns the current, modified waypoint to drive to. */
-  point_t CalculateLocalTarget();
+  point_t calculate_local_target();
 
   /** Adjust the waypoint if it is not the final point. */
-  point_t AdjustWaypoint( const point_t &local_target );
+  point_t adjust_waypoint( const point_t &local_target );
 
   /** Returns the current trajectory point to drive to. */
-  point_t CalculateLocalTrajectoryPoint( );
+  point_t calculate_local_trajec_point( );
 
   /** Method for checking if an obstacle is between two points. */
-  bool IsObstacleBetween( const point_t &a, const point_t &b, const int maxcount );
+  bool is_obstacle_between( const point_t &a, const point_t &b, const int maxcount );
 
 
+  AStar * astar_;              /**< the A* search algorithm */
+  std::vector< point_t > plan_; /**< the local representation of the plan */
 
-  // --------------------------------- //
-  //    VARIABLES
-  // --------------------------------- //
-
-  CAStar * m_pAStar;              /**< the A* search algorithm */
-  std::vector< point_t > m_vPlan; /**< the local representation of the plan */
-
-  point_t m_RoboPosition, m_TargetPosition;
-  bool m_UpdatedSuccessful;
+  point_t robo_position_, target_position_;
+  bool updated_successful_;
+  int cfg_search_line_allowed_cost_max_; /**< the config value for the max allowed costs on the line search on the a-star result */
 
   fawkes::Logger* logger_;
 };

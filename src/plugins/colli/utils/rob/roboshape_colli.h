@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -39,35 +39,32 @@ namespace fawkes
 class Logger;
 class Configuration;
 
-/** @class CRoboShape_Colli <plugins/colli/utils/rob/roboshape_colli.h>
+/** @class RoboShapeColli <plugins/colli/utils/rob/roboshape_colli.h>
  *  This class is mainly the same as the basic class with the difference
  *    that all data is precalculated or estimated.
  */
 
-class CRoboShape_Colli : public RoboShape
+class RoboShapeColli : public RoboShape
 {
  public:
-
-  CRoboShape_Colli( const char * cfg_prefix,
-                    Logger* logger,
-                    Configuration* config,
-                    int readings_per_degree = 1 ) throw (int);
- ~CRoboShape_Colli();
-
-  ///\brief Returns the robots length for a specific angle.
-  float GetRobotLengthforRad( float anglerad );
+  RoboShapeColli( const char * cfg_prefix,
+                  Logger* logger,
+                  Configuration* config,
+                  int readings_per_degree = 1 ) throw (int);
+ ~RoboShapeColli();
 
   ///\brief Returns the robots length for a specific angle.
-  float GetRobotLengthforDegree( float angledeg );
+  float get_robot_length_for_rad( float anglerad );
+
+  ///\brief Returns the robots length for a specific angle.
+  float get_robot_length_for_deg( float angledeg );
 
  private:
-
   // precalculated robot size data
-  std::vector< float > m_vRobotLength;
+  std::vector< float > robot_lengths_;
 
-  unsigned int m_Resolution;
+  unsigned int resolution_;
 };
-
 
 
 /* ************************************************************************************************* */
@@ -81,24 +78,24 @@ class CRoboShape_Colli : public RoboShape
  * @param readings_per_degree Readings per degree constant (default=1)
  */
 inline
-CRoboShape_Colli::CRoboShape_Colli( const char * cfg_prefix,
-                                    Logger* logger,
-                                    Configuration* config,
-                                    int readings_per_degree ) throw (int)
+RoboShapeColli::RoboShapeColli( const char * cfg_prefix,
+                                Logger* logger,
+                                Configuration* config,
+                                int readings_per_degree ) throw (int)
  : RoboShape( cfg_prefix, logger, config)
 {
-  m_Resolution = readings_per_degree;
+  resolution_ = readings_per_degree;
   for ( int i = 0; i < 360*readings_per_degree; i++ ) {
-    float anglerad = (i / readings_per_degree) * M_PI / 180;
-    m_vRobotLength.push_back( this->RoboShape::GetRobotLengthforRad( anglerad ) );
+    float anglerad = (i / readings_per_degree) * M_PI / 180.f;
+    robot_lengths_.push_back( this->RoboShape::get_robot_length_for_rad( anglerad ) );
   }
 }
 
-  /** Destructor */
-  inline
-CRoboShape_Colli::~CRoboShape_Colli()
+/** Destructor */
+inline
+RoboShapeColli::~RoboShapeColli()
 {
-  m_vRobotLength.clear();
+  robot_lengths_.clear();
 }
 
 /** Returns the robots length for a specific angle.
@@ -106,9 +103,9 @@ CRoboShape_Colli::~CRoboShape_Colli()
  * @return the length in this direction.
  */
 inline float
-CRoboShape_Colli::GetRobotLengthforRad( float anglerad )
+RoboShapeColli::get_robot_length_for_rad( float anglerad )
 {
-  return (this->GetRobotLengthforDegree( rad2deg( anglerad ) ));
+  return (this->get_robot_length_for_deg( rad2deg( anglerad ) ));
 }
 
 /** Returns the robots length for a specific angle.
@@ -116,10 +113,10 @@ CRoboShape_Colli::GetRobotLengthforRad( float anglerad )
  * @return the length in this direction.
  */
 inline float
-CRoboShape_Colli::GetRobotLengthforDegree( float angledeg )
+RoboShapeColli::get_robot_length_for_deg( float angledeg )
 {
-  int number = (int)(angledeg*m_Resolution);
-  return m_vRobotLength[number];
+  int number = (int)(angledeg*resolution_);
+  return robot_lengths_[number];
 }
 
 } // namespace fawkes

@@ -56,6 +56,13 @@ typedef struct {
   unsigned int free; /**< The cost for a free cell */
 } colli_cell_cost_t;
 
+/** Storing Translation and rotation */
+typedef struct {
+  float x;          /**< Translation in x-direction */
+  float y;          /**< Translation in y-direction */
+  float rot;         /**< Rotation around z-axis */
+} colli_trans_rot_t;
+
 /** Colli Escape modes */
 typedef enum {
   potential_field,
@@ -67,6 +74,13 @@ typedef enum {
   linear,               // The enum for the linear motor instruct
   quadratic             // The enum for the quadratic motor instruct
 } colli_motor_instruct_mode_t;
+
+/** Colli drive restrictions */
+typedef enum {
+  differential,               // The enum for the differential drive restriction
+  omnidirectional             // The enum for the omnidirectional drive restriction
+} colli_drive_restriction_t;
+
 
 } // end namespace firevision
 

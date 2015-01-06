@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  escape_potential_field_drive_mode.cpp - Implementation of drive-mode "escape"
+ *  escape_potential_field_omni_drive_mode.cpp - Implementation of drive-mode "escape"
  *
  *  Created: Tue Mar 25 17:24:18 2014
  *  Copyright  2014  Tobias Neumann
@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "escape_potential_field_drive_mode.h"
+#include "escape_potential_field_omni_drive_mode.h"
 #include "../search/og_laser.h"
 #include "../common/types.h"
 
@@ -31,7 +31,7 @@ namespace fawkes
 }
 #endif
 
-/** @class EscapePotentialFieldDriveModule <plugins/colli/drive_modes/escape_potential_field_drive_mode.h>
+/** @class EscapePotentialFieldOmniDriveModule <plugins/colli/drive_modes/escape_potential_field_omni_drive_mode.h>
  * Class Escape-Drive-Module. This module is called, if an escape is neccessary.
  * It should try to maximize distance to the disturbing obstacle.
  */
@@ -40,10 +40,10 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-EscapePotentialFieldDriveModule::EscapePotentialFieldDriveModule( Logger* logger, Configuration* config )
+EscapePotentialFieldOmniDriveModule::EscapePotentialFieldOmniDriveModule( Logger* logger, Configuration* config )
  : AbstractDriveMode(logger, config)
 {
-  logger_->log_debug("EscapeDriveModule", "(Constructor): Entering...");
+  logger_->log_debug("EscapePotentialFieldOmniDriveModule", "(Constructor): Entering...");
   drive_mode_ = NavigatorInterface::ESCAPE;
   occ_grid_ = NULL;
   robot_pos_.x = 0.f;
@@ -55,16 +55,16 @@ EscapePotentialFieldDriveModule::EscapePotentialFieldDriveModule( Logger* logger
 
   cfg_write_spam_debug_ = config_->get_bool( "/plugins/colli/write_spam_debug" );
 
-  logger_->log_debug("EscapeDriveModule", "(Constructor): Exiting...");
+  logger_->log_debug("EscapePotentialFieldOmniDriveModule", "(Constructor): Exiting...");
 }
 
 
 /** Destruct your local values here.
  */
-EscapePotentialFieldDriveModule::~EscapePotentialFieldDriveModule()
+EscapePotentialFieldOmniDriveModule::~EscapePotentialFieldOmniDriveModule()
 {
-  logger_->log_debug("EscapeDriveModule", "(Destructor): Entering...");
-  logger_->log_debug("EscapeDriveModule", "(Destructor): Exiting...");
+  logger_->log_debug("EscapePotentialFieldOmniDriveModule", "(Destructor): Entering...");
+  logger_->log_debug("EscapePotentialFieldOmniDriveModule", "(Destructor): Exiting...");
 }
 
 /**
@@ -74,7 +74,7 @@ EscapePotentialFieldDriveModule::~EscapePotentialFieldDriveModule()
  * @param robo_y   robot position on the grid in y
  */
 void
-EscapePotentialFieldDriveModule::set_grid_information( LaserOccupancyGrid* occ_grid, int robo_x, int robo_y )
+EscapePotentialFieldOmniDriveModule::set_grid_information( LaserOccupancyGrid* occ_grid, int robo_x, int robo_y )
 {
   occ_grid_ = occ_grid;
   robot_pos_.x = robo_x;
@@ -102,13 +102,13 @@ EscapePotentialFieldDriveModule::set_grid_information( LaserOccupancyGrid* occ_g
  *  Those values are questioned after an update() was called.
  */
 void
-EscapePotentialFieldDriveModule::update()
+EscapePotentialFieldOmniDriveModule::update()
 {
   static unsigned int cell_cost_occ = occ_grid_->get_cell_costs().occ;
 
   // This is only called, if we recently stopped...
   if (cfg_write_spam_debug_) {
-    logger_->log_debug("EscapeDriveModule", "EscapeDriveModule( update ): Calculating ESCAPING...");
+    logger_->log_debug("EscapePotentialFieldOmniDriveModule", "EscapePotentialFieldOmniDriveModule( update ): Calculating ESCAPING...");
   }
 
   proposed_.x = proposed_.y = proposed_.rot = 0.f;
@@ -144,93 +144,50 @@ EscapePotentialFieldDriveModule::update()
   target.phi = atan2(target_y, target_x);
 
   if (cfg_write_spam_debug_) {
-    logger_->log_debug("EscapePotentialFieldDriveModule","Target vector: phi: %f\t%f", target.phi, target.r);
+    logger_->log_debug("EscapePotentialFieldOmniDriveModule","Target vector: phi: %f\t%f", target.phi, target.r);
   }
 
   // decide route
-  float angle_difference = 0.2f;
+  float angle_difference = M_PI_2 - 0.2f;
   float angle     = normalize_mirror_rad(target.phi);
   float angle_abs = fabs( angle );
 
   bool turn = true;
   float turn_direction  = 0.f;
-  float drive_direction = 0.f;
+  float drive_part_x    = 1.f;
+  float drive_part_y    = 0.f;
 
-  if ( angle_abs > angle_difference/* && angle_abs < M_PI - angle_difference*/ ) {    //just turn
+  if ( angle_abs > angle_difference ) {                 // just turn
     turn = true;
 
-//    if (angle_abs <= (M_PI_2 + 0.2 * turn_)) {      //turn to 0
-      turn_ =  1;
-      if (angle < 0.f) {
-        turn_direction = -1.f;
-      } else {
-        turn_direction =  1.f;
-      }
-/*    } else {                                        //turn to PI
-      turn_ = -1.0;
-      if (angle < 0) {
-        turn_direction =  1.f;
-      } else {
-        turn_direction = -1.f;
-      }
-    }*/
-  } else {                                                                        //drive
+    turn_ =  1;
+    if (angle < 0.f) {
+      turn_direction = -1.f;
+    } else {
+      turn_direction =  1.f;
+    }
+  } else {                                              // drive
     turn = false;
 
-//    if (angle_abs <= angle_difference) {                 //forward
-      drive_direction =  1.f;
-/*    } else if (angle_abs >= M_PI - angle_difference){    //backward
-      drive_direction = -1.f;
-    } else {
-      drive_direction = 0.f;
-      logger_->log_error("EscapePotentialFieldDriveModule","Should drive, but don't know the direction");
-    }*/
+    drive_part_x = std::cos( target.phi );
+    drive_part_y = std::sin( target.phi );
   }
 
   if ( turn ) {
     if (cfg_write_spam_debug_) {
-      logger_->log_debug("EscapePotentialFieldDriveModule","Turn %f", turn_direction);
+      logger_->log_debug("EscapePotentialFieldOmniDriveModule","Turn %f", turn_direction);
     }
     proposed_.rot = turn_direction * max_rot_;
   } else {
     if (cfg_write_spam_debug_) {
-      logger_->log_debug("EscapePotentialFieldDriveModule","Drive %f", drive_direction);
+      logger_->log_debug("EscapePotentialFieldOmniDriveModule","Drive ( %f , %f )", drive_part_x, drive_part_y);
     }
-    proposed_.x = drive_direction * max_trans_;
+    proposed_.x = drive_part_x * max_trans_;
+    proposed_.y = drive_part_y * max_trans_;
+    if ( fabs(turn_direction) > 0.2f ) {
+      proposed_.rot = turn_direction * max_rot_;
+    }
   }
-
-//  if ( angle_abs > angle_difference && angle_abs < M_PI - angle_difference ) {    //just turn
-//    if (angle_abs <= M_PI_2) {      //turn to 0
-//      logger_->log_debug("EscapePotentialFieldDriveModule","Turn to 0");
-//      if (angle < 0) {
-//        logger_->log_debug("EscapePotentialFieldDriveModule","negative");
-//        proposed_.rot = -max_rot_;
-//      } else {
-//        logger_->log_debug("EscapePotentialFieldDriveModule","positive");
-//        proposed_.rot =  max_rot_;
-//      }
-//    } else {                        //turn to PI
-//      logger_->log_debug("EscapePotentialFieldDriveModule","Turn to PI");
-//      if (angle < 0) {
-//        logger_->log_debug("EscapePotentialFieldDriveModule","positive");
-//        proposed_.rot =  max_rot_;
-//      } else {
-//        logger_->log_debug("EscapePotentialFieldDriveModule","negative");
-//        proposed_.rot = -max_rot_;
-//      }
-//    }
-//  } else {                                                                          //drive and turn
-//    if (angle_abs <= angle_difference) {                 //forward
-//      logger_->log_debug("EscapePotentialFieldDriveModule","Drive forward");
-//      m_ProposedTranslation =  max_trans_;
-//    } else if (angle_abs >= M_PI - angle_difference){    //backward
-//      logger_->log_debug("EscapePotentialFieldDriveModule","Drive backward");
-//      m_ProposedTranslation = -max_trans_;
-//    } else {
-//      logger_->log_debug("EscapePotentialFieldDriveModule","Should drive, but don't know the direction");
-//    }
-//  }
-
 }
 
 

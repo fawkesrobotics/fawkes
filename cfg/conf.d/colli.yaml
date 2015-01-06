@@ -12,6 +12,9 @@ plugins/colli:
   # If you want to visualize the data continuously and not just when colli receives a new target, set this to true
   visualize_idle: false
 
+  # This disables/enales the (spam-) debug msgs
+  write_spam_debug: false
+
   # Define if obstacles should be increased depending on robot's speed
   obstacle_increasement: true
 
@@ -30,8 +33,10 @@ plugins/colli:
   # Default behaviour, deciding if colli should stop at target (not used in implementation atm though)
   stop_at_target: true
 
-  # Default behaviour, deciding if colli should adjust orientation when target is reached
-  orient_at_target: true
+  # Behaviour, deciding how/when colli should adjust orientation
+  orient_mode:
+    # default behaviour options are: OrientAtTarget or OrientDuringTravel
+    default: OrientAtTarget
 
   # The minimum rotation speed (in rad/s). Used for rotating at target
   min_rot: 0.1
@@ -101,27 +106,33 @@ plugins/colli:
     rot_acc: 0.23
     rot_dec: 0.42
 
+  # Config values for emergency stopping
+  emergency_stopping:
+    # this activates the emrgency stop
+    enabled: false
+    # obstacle distance that triggers the emergency stop
+    threshold_distance: 1.2
+    # min velocity that triggers the emergency stop
+    threshold_velocity: 0.2
+    # max velocity if emergency stop triggers
+    max_vel: 0.2
+    # number of beams that are used to check for distance (beams in directions of robot)
+    beams_used: 11
+
   drive_mode:
+    # Used drive restriction. Options are: differential or omnidirectional
+    restriction: "omnidirectional"
+
     # Default drive mode. It's an enum, see NavigatorInterface for details.
-    default: "SlowForward"
+    default: "Forward"
 
     # Default drive mode for escaping. You can choose between potential_field and basic
     default_escape: "potential_field"
 
-    slow:
+    normal:
       # Max translation/rotation velocities
       max_trans: 1.0
       max_rot: 2.0
-
-    medium:
-      # Max translation/rotation velocities
-      max_trans: 2.0
-      max_rot: 6.0
-
-    fast:
-      # Max translation/rotation velocities
-      max_trans: 2.99
-      max_rot: 7.0
 
     escape:
       # Max translation/rotation velocities for escape-mode
@@ -191,6 +202,18 @@ plugins/colli:
       # the min time difference of the laser reading history for the search in seconds
       min_length: 1.5
 
+      # this enables the compare between old and new laser readings.
+      # if this is enabled, the colli checks if new obstacles can see through old obstacles,
+      # if this is the case, the old obstacles are deleted
+      delete_invisible_old_obstacles:
+        enable: true
+
+        # The angle inbetween old obstacles been deleted.
+        # The angle area is always from min -> max, where 0 is the front
+        # Unit is deg as int (360° if).
+        angle_min: 280
+        angle_max: 80
+
     buffer_size: 2
 
     # costs of the cells in the occupancy grid
@@ -206,8 +229,13 @@ plugins/colli:
       # free cell
       free: 1
 
-  a_star:
-    # maximum number of states the colli uses to search for a path.
-    # The more states the better the search, but the slower the algorithm
-    max_states: 15000
+  search:
+    a_star:
+      # maximum number of states the colli uses to search for a path.
+      # The more states the better the search, but the slower the algorithm
+      max_states: 15000
 
+    # the line search is executed after a-star and searches for a obstacle free line
+    line:
+      # this are the maximum allowed costs on this line
+      cost_max: 5

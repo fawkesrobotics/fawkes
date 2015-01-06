@@ -97,7 +97,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode");
   add_fieldinfo(IFT_BOOL, "auto_drive_mode", 1, &data->auto_drive_mode);
   add_fieldinfo(IFT_BOOL, "stop_at_target", 1, &data->stop_at_target);
-  add_fieldinfo(IFT_BOOL, "orient_at_target", 1, &data->orient_at_target);
+  add_fieldinfo(IFT_ENUM, "orientation_mode", 1, &data->orientation_mode, "OrientationMode");
   add_messageinfo("StopMessage");
   add_messageinfo("TurnMessage");
   add_messageinfo("CartesianGotoMessage");
@@ -111,9 +111,9 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("SetSecurityDistanceMessage");
   add_messageinfo("SetDriveModeMessage");
   add_messageinfo("SetStopAtTargetMessage");
-  add_messageinfo("SetOrientAtTargetMessage");
+  add_messageinfo("SetOrientationModeMessage");
   add_messageinfo("ResetParametersMessage");
-  unsigned char tmp_hash[] = {0x18, 0x12, 0x5a, 0x5c, 0x33, 0xb7, 0x54, 0x78, 0x2f, 0x3a, 0x8c, 0x58, 0x59, 0x63, 0x7c, 0x19};
+  unsigned char tmp_hash[] = {0xd6, 0xd6, 0x2e, 0x31, 0xfe, 0x38, 0xf0, 0x8, 0x16, 0x18, 0x53, 0x75, 0x13, 0xb1, 0xb9, 0xff};
   set_hash(tmp_hash);
 }
 
@@ -131,23 +131,23 @@ NavigatorInterface::tostring_DriveMode(DriveMode value) const
 {
   switch (value) {
   case MovingNotAllowed: return "MovingNotAllowed";
-  case CarefulForward: return "CarefulForward";
-  case SlowForward: return "SlowForward";
-  case ModerateForward: return "ModerateForward";
-  case FastForward: return "FastForward";
-  case CarefulAllowBackward: return "CarefulAllowBackward";
-  case SlowAllowBackward: return "SlowAllowBackward";
-  case ModerateAllowBackward: return "ModerateAllowBackward";
-  case FastAllowBackward: return "FastAllowBackward";
-  case CarefulBackward: return "CarefulBackward";
-  case SlowBackward: return "SlowBackward";
-  case ModerateBackward: return "ModerateBackward";
-  case FastBackward: return "FastBackward";
+  case Forward: return "Forward";
+  case AllowBackward: return "AllowBackward";
+  case Backward: return "Backward";
   case ESCAPE: return "ESCAPE";
-  case SlowDribbleBall: return "SlowDribbleBall";
-  case ModerateDribbleBall: return "ModerateDribbleBall";
-  case FastDribbleBall: return "FastDribbleBall";
-  case OVERRIDE: return "OVERRIDE";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert OrientationMode constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+NavigatorInterface::tostring_OrientationMode(OrientationMode value) const
+{
+  switch (value) {
+  case OrientAtTarget: return "OrientAtTarget";
+  case OrientDuringTravel: return "OrientDuringTravel";
   default: return "UNKNOWN";
   }
 }
@@ -695,34 +695,34 @@ NavigatorInterface::set_stop_at_target(const bool new_stop_at_target)
   data_changed = true;
 }
 
-/** Get orient_at_target value.
- * Adjust orientation when target position is reached?
- * @return orient_at_target value
+/** Get orientation_mode value.
+ * Mode how/when to orientate if orientation is given
+ * @return orientation_mode value
  */
-bool
-NavigatorInterface::is_orient_at_target() const
+NavigatorInterface::OrientationMode
+NavigatorInterface::orientation_mode() const
 {
-  return data->orient_at_target;
+  return (NavigatorInterface::OrientationMode)data->orientation_mode;
 }
 
-/** Get maximum length of orient_at_target value.
- * @return length of orient_at_target value, can be length of the array or number of 
+/** Get maximum length of orientation_mode value.
+ * @return length of orientation_mode value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NavigatorInterface::maxlenof_orient_at_target() const
+NavigatorInterface::maxlenof_orientation_mode() const
 {
   return 1;
 }
 
-/** Set orient_at_target value.
- * Adjust orientation when target position is reached?
- * @param new_orient_at_target new orient_at_target value
+/** Set orientation_mode value.
+ * Mode how/when to orientate if orientation is given
+ * @param new_orientation_mode new orientation_mode value
  */
 void
-NavigatorInterface::set_orient_at_target(const bool new_orient_at_target)
+NavigatorInterface::set_orientation_mode(const OrientationMode new_orientation_mode)
 {
-  data->orient_at_target = new_orient_at_target;
+  data->orientation_mode = new_orientation_mode;
   data_changed = true;
 }
 
@@ -756,8 +756,8 @@ NavigatorInterface::create_message(const char *type) const
     return new SetDriveModeMessage();
   } else if ( strncmp("SetStopAtTargetMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetStopAtTargetMessage();
-  } else if ( strncmp("SetOrientAtTargetMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
-    return new SetOrientAtTargetMessage();
+  } else if ( strncmp("SetOrientationModeMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetOrientationModeMessage();
   } else if ( strncmp("ResetParametersMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new ResetParametersMessage();
   } else {
@@ -786,6 +786,9 @@ NavigatorInterface::enum_tostring(const char *enumtype, int val) const
 {
   if (strcmp(enumtype, "DriveMode") == 0) {
     return tostring_DriveMode((DriveMode)val);
+  }
+  if (strcmp(enumtype, "OrientationMode") == 0) {
+    return tostring_OrientationMode((OrientationMode)val);
   }
   throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
@@ -2115,39 +2118,39 @@ NavigatorInterface::SetStopAtTargetMessage::clone() const
 {
   return new NavigatorInterface::SetStopAtTargetMessage(this);
 }
-/** @class NavigatorInterface::SetOrientAtTargetMessage <interfaces/NavigatorInterface.h>
- * SetOrientAtTargetMessage Fawkes BlackBoard Interface Message.
+/** @class NavigatorInterface::SetOrientationModeMessage <interfaces/NavigatorInterface.h>
+ * SetOrientationModeMessage Fawkes BlackBoard Interface Message.
  * 
     
  */
 
 
 /** Constructor with initial values.
- * @param ini_orient_at_target initial value for orient_at_target
+ * @param ini_orientation_mode initial value for orientation_mode
  */
-NavigatorInterface::SetOrientAtTargetMessage::SetOrientAtTargetMessage(const bool ini_orient_at_target) : Message("SetOrientAtTargetMessage")
+NavigatorInterface::SetOrientationModeMessage::SetOrientationModeMessage(const OrientationMode ini_orientation_mode) : Message("SetOrientationModeMessage")
 {
-  data_size = sizeof(SetOrientAtTargetMessage_data_t);
+  data_size = sizeof(SetOrientationModeMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (SetOrientAtTargetMessage_data_t *)data_ptr;
+  data      = (SetOrientationModeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  data->orient_at_target = ini_orient_at_target;
-  add_fieldinfo(IFT_BOOL, "orient_at_target", 1, &data->orient_at_target);
+  data->orientation_mode = ini_orientation_mode;
+  add_fieldinfo(IFT_ENUM, "orientation_mode", 1, &data->orientation_mode, "OrientationMode");
 }
 /** Constructor */
-NavigatorInterface::SetOrientAtTargetMessage::SetOrientAtTargetMessage() : Message("SetOrientAtTargetMessage")
+NavigatorInterface::SetOrientationModeMessage::SetOrientationModeMessage() : Message("SetOrientationModeMessage")
 {
-  data_size = sizeof(SetOrientAtTargetMessage_data_t);
+  data_size = sizeof(SetOrientationModeMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
-  data      = (SetOrientAtTargetMessage_data_t *)data_ptr;
+  data      = (SetOrientationModeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_BOOL, "orient_at_target", 1, &data->orient_at_target);
+  add_fieldinfo(IFT_ENUM, "orientation_mode", 1, &data->orientation_mode, "OrientationMode");
 }
 
 /** Destructor */
-NavigatorInterface::SetOrientAtTargetMessage::~SetOrientAtTargetMessage()
+NavigatorInterface::SetOrientationModeMessage::~SetOrientationModeMessage()
 {
   free(data_ptr);
 }
@@ -2155,44 +2158,44 @@ NavigatorInterface::SetOrientAtTargetMessage::~SetOrientAtTargetMessage()
 /** Copy constructor.
  * @param m message to copy from
  */
-NavigatorInterface::SetOrientAtTargetMessage::SetOrientAtTargetMessage(const SetOrientAtTargetMessage *m) : Message("SetOrientAtTargetMessage")
+NavigatorInterface::SetOrientationModeMessage::SetOrientationModeMessage(const SetOrientationModeMessage *m) : Message("SetOrientationModeMessage")
 {
   data_size = m->data_size;
   data_ptr  = malloc(data_size);
   memcpy(data_ptr, m->data_ptr, data_size);
-  data      = (SetOrientAtTargetMessage_data_t *)data_ptr;
+  data      = (SetOrientationModeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
 }
 
 /* Methods */
-/** Get orient_at_target value.
- * Adjust orientation when target position is reached?
- * @return orient_at_target value
+/** Get orientation_mode value.
+ * Mode how/when to orientate if orientation is given
+ * @return orientation_mode value
  */
-bool
-NavigatorInterface::SetOrientAtTargetMessage::is_orient_at_target() const
+NavigatorInterface::OrientationMode
+NavigatorInterface::SetOrientationModeMessage::orientation_mode() const
 {
-  return data->orient_at_target;
+  return (NavigatorInterface::OrientationMode)data->orientation_mode;
 }
 
-/** Get maximum length of orient_at_target value.
- * @return length of orient_at_target value, can be length of the array or number of 
+/** Get maximum length of orientation_mode value.
+ * @return length of orientation_mode value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NavigatorInterface::SetOrientAtTargetMessage::maxlenof_orient_at_target() const
+NavigatorInterface::SetOrientationModeMessage::maxlenof_orientation_mode() const
 {
   return 1;
 }
 
-/** Set orient_at_target value.
- * Adjust orientation when target position is reached?
- * @param new_orient_at_target new orient_at_target value
+/** Set orientation_mode value.
+ * Mode how/when to orientate if orientation is given
+ * @param new_orientation_mode new orientation_mode value
  */
 void
-NavigatorInterface::SetOrientAtTargetMessage::set_orient_at_target(const bool new_orient_at_target)
+NavigatorInterface::SetOrientationModeMessage::set_orientation_mode(const OrientationMode new_orientation_mode)
 {
-  data->orient_at_target = new_orient_at_target;
+  data->orientation_mode = new_orientation_mode;
 }
 
 /** Clone this message.
@@ -2201,9 +2204,9 @@ NavigatorInterface::SetOrientAtTargetMessage::set_orient_at_target(const bool ne
  * @return clone of this message
  */
 Message *
-NavigatorInterface::SetOrientAtTargetMessage::clone() const
+NavigatorInterface::SetOrientationModeMessage::clone() const
 {
-  return new NavigatorInterface::SetOrientAtTargetMessage(this);
+  return new NavigatorInterface::SetOrientationModeMessage(this);
 }
 /** @class NavigatorInterface::ResetParametersMessage <interfaces/NavigatorInterface.h>
  * ResetParametersMessage Fawkes BlackBoard Interface Message.
@@ -2310,7 +2313,7 @@ NavigatorInterface::message_valid(const Message *message) const
   if ( m12 != NULL ) {
     return true;
   }
-  const SetOrientAtTargetMessage *m13 = dynamic_cast<const SetOrientAtTargetMessage *>(message);
+  const SetOrientationModeMessage *m13 = dynamic_cast<const SetOrientationModeMessage *>(message);
   if ( m13 != NULL ) {
     return true;
   }

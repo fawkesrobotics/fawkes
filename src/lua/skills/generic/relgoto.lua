@@ -137,7 +137,7 @@ end
 
 function RELGOTO:init()
    if self.fsm.vars.backwards then
-      navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(navigator.SlowAllowBackward))
+      navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(navigator.AllowBackward))
    end
 
    if self.fsm.vars.params.x ~= nil then

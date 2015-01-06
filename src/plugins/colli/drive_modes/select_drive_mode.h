@@ -4,7 +4,7 @@
  *
  *  Created: Fri Oct 18 15:16:23 2013
  *  Copyright  2002  Stefan Jacobs
- *             2013  Bahram Maleki-Fard
+ *             2013-2014  Bahram Maleki-Fard
  *             2014  Tobias Neumann
  ****************************************************************************/
 
@@ -25,7 +25,6 @@
 #define __PLUGINS_COLLI_SELECT_DRIVE_MODE_H_
 
 #include <vector>
-#include "escape_drive_mode.h"
 
 namespace fawkes
 {
@@ -33,74 +32,76 @@ namespace fawkes
 }
 #endif
 
-class CAbstractDriveMode;
+class AbstractDriveMode;
+class MotorInterface;
 class NavigatorInterface;
-class MotorControl;
 class Logger;
 class Configuration;
-class CLaserOccupancyGrid;
+class LaserOccupancyGrid;
 
-
-class CSelectDriveMode
+class SelectDriveMode
 {
 public:
-
-  CSelectDriveMode( MotorControl* motor,
-                    NavigatorInterface* target,
-                    Logger* logger,
-                    Configuration* config,
-                    fawkes::colli_escape_mode_t escape_mode = fawkes::colli_escape_mode_t::basic);
-  ~CSelectDriveMode( );
+  SelectDriveMode( MotorInterface* motor,
+                   NavigatorInterface* colli_target,
+                   Logger* logger,
+                   Configuration* config,
+                   colli_escape_mode_t escape_mode = colli_escape_mode_t::basic);
+  ~SelectDriveMode( );
 
   ///\brief Set local target point before update!
-  void SetLocalTarget( float localTargetX, float localTargetY );
+  void set_local_target( float x, float y );
 
   ///\brief Set local trajectory point before update!
-  void SetLocalTrajec( float localTrajecX, float localTrajecY );
+  void set_local_trajec( float x, float y );
 
   ///\brief Has to be called before the proposed values are called.
-  void Update( bool escape = false );
+  void update( bool escape = false );
 
   ///\brief Returns the proposed translation. After an update.
-  float GetProposedTranslation();
+  float get_proposed_trans_x();
+
+  ///\brief Returns the proposed translation. After an update.
+  float get_proposed_trans_y();
 
   ///\brief Returns the proposed rotation. After an update.
-  float GetProposedRotation();
+  float get_proposed_rot();
 
-  void setGridInformation( CLaserOccupancyGrid* occGrid, int roboX, int roboY );
+  void set_grid_information( LaserOccupancyGrid* occ_grid, int robo_x, int robo_y );
 
-  void setLaserData( std::vector<CEscapeDriveModule::LaserPoint>& laser_point );
+  void set_laser_data( std::vector<fawkes::polar_coord_2d_t>& laser_points );
 
 private:
+  Logger*        logger_;
+  Configuration* config_;
 
-  // local pointers to bb client objects
-  fawkes::NavigatorInterface*      m_pColliTarget;
-  MotorControl*                    m_pMotor;       // USE ONLY AS GETTER!!!
+  // local pointers to interfaces
+  NavigatorInterface*  if_colli_target_;
+  MotorInterface*      if_motor_;
 
-  fawkes::Logger* logger_;
-  fawkes::Configuration* config_;
-  fawkes::colli_escape_mode_t cfg_escape_mode;
+  colli_escape_mode_t cfg_escape_mode_;
 
   // Vector of drive modes
-  std::vector< fawkes::CAbstractDriveMode * > m_vDriveModeList;
-
+  std::vector< AbstractDriveMode * > drive_modes_;
 
   // local copies of current local target values
-  float m_LocalTargetX, m_LocalTargetY;
-  float m_LocalTrajecX, m_LocalTrajecY;
+  cart_coord_2d_t local_target_;
+  cart_coord_2d_t local_trajec_;
 
   // local copies of the proposed values
-  float m_ProposedTranslation;
-  float m_ProposedRotation;
+  colli_trans_rot_t proposed_;
 
   // an escape flag
-  int m_EscapeFlag;
+  int escape_flag_;
 
+  colli_drive_restriction_t drive_restriction_;
 
   /* ************************************************************************ */
   /* PRIVATE METHODS                                                          */
   /* ************************************************************************ */
 
+  void load_drive_modes_differential();
+  void load_drive_modes_omnidirectional();
 };
 
 } // namespace fawkes

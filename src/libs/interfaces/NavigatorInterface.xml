@@ -41,24 +41,16 @@
    <enum name="DriveMode">
      <comment>Drive modes enum</comment>
      <item name="MovingNotAllowed">Moving not allowed constant</item>
-     <item name="CarefulForward">Moving careful forward constant</item>
-     <item name="SlowForward">Moving slow forward constant</item>
-     <item name="ModerateForward">Moving moderate forward constant</item>
-     <item name="FastForward">Moving fast forward constant</item>
-     <item name="CarefulAllowBackward">Moving careful allow backward conatant</item>
-     <item name="SlowAllowBackward">Moving slow allow backward constant</item>
-     <item name="ModerateAllowBackward">Moving moderate allow backward constant</item>
-     <item name="FastAllowBackward">Moving fast allow backward constant</item>
-     <item name="CarefulBackward">Moving careful backward constant</item>
-     <item name="SlowBackward">Moving slow backward constant</item>
-     <item name="ModerateBackward">Moving moderate backward constant</item>
-     <item name="FastBackward">Moving fast backward constant</item>
+     <item name="Forward">Moving forward constant</item>
+     <item name="AllowBackward">Moving allow backward constant</item>
+     <item name="Backward">Moving backward constant</item>
      <item name="ESCAPE">Escape constant</item>
-     <item name="SlowDribbleBall">Moving slow dribble ball constant</item>
-     <item name="ModerateDribbleBall">Moving moderate dribble ball constant</item>
-     <item name="FastDribbleBall">Moving fast dribble ball constant</item>
-     <item name="OVERRIDE">Override constant</item>
-  </enum>
+  </enum> 
+  <enum name="OrientationMode">
+     <comment>Orientation mode enum</comment>
+     <item name="OrientAtTarget">Orient when at target, if orientation is given</item> 
+     <item name="OrientDuringTravel">Orient during travel BUT NOT at target, if omnidirectional platform and orientation is given</item> 
+  </enum> 
   </constants>
   <data>
     <comment>
@@ -107,7 +99,7 @@
       a SetAutoDriveMode-message (otherwise the navigator might ignore that value).</field>
 
     <field type="bool" name="stop_at_target">Stop when target is reached?</field>
-    <field type="bool" name="orient_at_target">Adjust orientation when target position is reached?</field>
+    <field type="OrientationMode" name="orientation_mode">Mode how/when to orientate if orientation is given</field>
   </data>
   <message name="Stop">
     <comment>Stop motion immediately.</comment>
@@ -169,9 +161,9 @@
     <comment>Decide if robot should explicily stop when the target is reached.</comment>
     <ref>stop_at_target</ref>
   </message>
-    <message name="SetOrientAtTarget">
-    <comment>Decide if robot should adjust orientation when target is reached.</comment>
-    <ref>orient_at_target</ref>
+    <message name="SetOrientationMode">
+    <comment>Decide how/when the robot should orientate if orientation is given</comment>
+    <ref>orientation_mode</ref>
   </message>
   <message name="ResetParameters">
     <comment>Reset the settable parameters to default values.</comment>
