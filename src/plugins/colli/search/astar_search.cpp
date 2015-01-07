@@ -226,19 +226,19 @@ Search::is_obstacle_between( const point_t &a, const point_t &b, const int maxco
   int count = 0;
   float prob = 0.0;
 
-  register int _xDirInt, _yDirInt;
-  register int _actXGrid = a.x;
+  int _xDirInt, _yDirInt;
+  int _actXGrid = a.x;
   int endXGrid = b.x;
   int dX = abs(endXGrid - _actXGrid);
   ( endXGrid > _actXGrid ? _xDirInt = 1 : _xDirInt = -1 );
-  register int _actYGrid = a.y;
+  int _actYGrid = a.y;
   int endYGrid = b.y;
   ( endYGrid > _actYGrid ? _yDirInt = 1 : _yDirInt = -1 );
   int dY = abs(endYGrid - _actYGrid);
 
   // decide whether direction is more x or more y, and run the algorithm
   if (dX > dY) {
-    register int _P, _dPr, _dPru;
+    int _P, _dPr, _dPru;
     _dPr  = dY<<1; // amount to increment decision if right is chosen (always)
     _dPru = _dPr - (dX<<1); // amount to increment decision if up is chosen
     _P    = _dPr - dX; // decision variable start value
@@ -272,7 +272,7 @@ Search::is_obstacle_between( const point_t &a, const point_t &b, const int maxco
     }
 
   } else {
-    register int _P, _dPr, _dPru;
+    int _P, _dPr, _dPru;
     _dPr         = dX<<1; // amount to increment decision if right is chosen (always)
     _dPru        = _dPr - (dY<<1); // amount to increment decision if up is chosen
     _P           = _dPr - dY; // decision variable start value

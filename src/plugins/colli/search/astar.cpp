@@ -148,7 +148,7 @@ AStar::solve( const point_t &robo_pos, const point_t &target_pos, vector<point_t
 AStarState*
 AStar::search( )
 {
-  register AStarState * best = 0;
+  AStarState * best = 0;
 
   // while the openlist not is empty
   while ( open_list_.size() > 0 ) {
@@ -211,10 +211,10 @@ AStar::calculate_key( int x, int y )
 void
 AStar::generate_children( AStarState * father )
 {
-  register AStarState * child;
-  register int key;
+  AStarState * child;
+  int key;
 
-  register float prob;
+  float prob;
 
   if ( father->y_ > 0 ) {
     prob = occ_grid_->get_prob( father->x_, father->y_-1 );
@@ -327,7 +327,7 @@ AStar::is_goal( AStarState * state )
 void
 AStar::get_solution_sequence( AStarState * node, vector<point_t> &solution )
 {
-  register AStarState * state = node;
+  AStarState * state = node;
   while ( state != 0 ) {
     solution.insert( solution.begin(), point_t( state->x_, state->y_ ) );
     state = state->father_;
@@ -365,9 +365,9 @@ AStar::remove_target_from_obstacle( int target_x, int target_y, int step_x, int 
   initial_state->total_cost_ = 0;
   open_list_.push( initial_state );
   // search algorithm by gridfilling
-  register AStarState * child;
-  register AStarState * father;
-  register int key;
+  AStarState * child;
+  AStarState * father;
+  int key;
 
   while ( !(open_list_.empty()) && (astar_state_count_ < max_states_ - 6) ) {
     father = open_list_.top();
