@@ -30,6 +30,11 @@ using namespace firevision;
 using namespace mongo;
 using namespace fawkes;
 
+#ifdef HAVE_MONGODB_VERSION_H
+// we are using mongo-cxx-driver which renamed QUERY to MONGO_QUERY
+#  define QUERY MONGO_QUERY
+#endif
+
 
 void
 print_usage(const char *progname)
@@ -87,7 +92,7 @@ main(int argc, char **argv)
   query_coll = database + "." + collection;
 
   if (items.empty()) {
-    times.push_back(make_pair(0L, std::numeric_limits<long long>::max()));
+    times.push_back(std::make_pair(0L, std::numeric_limits<long long>::max()));
   } else {
     for (unsigned int i = 0; i < items.size(); ++i) {
       std::string item = items[i];
@@ -95,14 +100,14 @@ main(int argc, char **argv)
       if (dotpos == std::string::npos) {
 	// singular timestamp
 	long int ts = argp.parse_item_int(i);
-	times.push_back(make_pair(ts, ts));	
+	times.push_back(std::make_pair(ts, ts));	
       } else {
 	// range
 	std::string first_ts, second_ts;
 	first_ts = item.substr(0, dotpos);
 	second_ts = item.substr(dotpos + 2);
-	times.push_back(make_pair(StringConversions::to_long(first_ts),
-				  StringConversions::to_long(second_ts)));
+	times.push_back(std::make_pair(StringConversions::to_long(first_ts),
+				       StringConversions::to_long(second_ts)));
       }
     }
   }

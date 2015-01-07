@@ -195,7 +195,7 @@ MongoLogBlackboardThread::InterfaceListener::InterfaceListener(BlackBoard *black
   // sanitize interface ID to be suitable for MongoDB
   std::string id = interface->id();
   size_t pos = 0;
-  while((pos = id.find_first_of(" -", pos)) != string::npos) {
+  while((pos = id.find_first_of(" -", pos)) != std::string::npos) {
     id.replace(pos, 1, "_");
     pos = pos + 1;
   }
