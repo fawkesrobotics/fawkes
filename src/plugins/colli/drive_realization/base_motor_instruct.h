@@ -90,7 +90,6 @@ class BaseMotorInstruct
   colli_trans_rot_t current_;
   colli_trans_rot_t desired_;
   colli_trans_rot_t exec_;
-  float frequency_;
 
   ///\brief setCommand sets the executable commands and sends them
   void set_command( );
@@ -114,8 +113,7 @@ BaseMotorInstruct::BaseMotorInstruct( MotorInterface* motor,
                                       Configuration* config )
  : logger_( logger ),
    config_( config ),
-   motor_( motor ),
-   frequency_( frequency )
+   motor_( motor )
 {
   logger_->log_debug("BaseMotorInstruct", "(Constructor): Entering");
 

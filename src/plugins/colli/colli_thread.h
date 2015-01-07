@@ -169,10 +169,6 @@ class ColliThread
   fawkes::cart_coord_2d_t laser_to_base_; /**< The distance from laser to base */
   bool laser_to_base_valid_;              /**< Do we have a valid distance from laser to base? */
 
-  // manually adjust the frequency on how often the loop should be processed
-  unsigned int loop_count_;
-  unsigned int loop_count_trigger_;
-
   float distance_to_next_target_; /**< the distance to the next target in drive direction*/
 
 
