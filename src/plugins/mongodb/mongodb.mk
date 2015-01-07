@@ -22,6 +22,10 @@ ifneq ($(wildcard /usr/include/mongo/client/dbclient.h /usr/local/include/mongo/
     LDFLAGS_MONGODB = -lmongoclient -lm -lpthread \
 		      $(call boost-libs-ldflags,thread system filesystem)
 
+    ifneq ($(wildcard $(SYSROOT)/usr/include/mongo/version.h $(SYSROOT)/usr/local/include/mongo/version.h),)
+      CFLAGS_MONGODB += -DHAVE_MONGODB_VERSION_H
+    endif
+
     ifeq ($(DISTRO),ubuntu)
       LDFLAGS_MONGODB += -lssl -lcrypto
     endif
