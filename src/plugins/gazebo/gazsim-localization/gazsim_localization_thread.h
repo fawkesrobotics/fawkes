@@ -28,6 +28,7 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/tf.h>
 #include <plugins/gazebo/aspect/gazebo.h>
 
 //from Gazebo
@@ -47,7 +48,8 @@ class LocalizationSimThread
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::BlockedTimingAspect,
-  public fawkes::GazeboAspect
+  public fawkes::GazeboAspect,
+  public fawkes::TransformAspect
 {
  public:
   LocalizationSimThread();
@@ -78,6 +80,13 @@ class LocalizationSimThread
   double quat_y_;
   double quat_z_;
   double quat_w_;
+
+  //time the transform should be up to date
+  double transform_tolerance_;
+
+  //frame ids for transform
+  std::string odom_frame_id_;
+  std::string global_frame_id_;
 };
 
 #endif

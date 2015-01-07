@@ -72,7 +72,7 @@ void Gps::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   //Send position information to Fawkes
   double time = model_->GetWorld()->GetSimTime().Double();
-  if(time - last_sent_time_ > (1.0 / 5.0))
+  if(time - last_sent_time_ > (1.0 / 10.0))
   {
     last_sent_time_ = time;
     send_position();

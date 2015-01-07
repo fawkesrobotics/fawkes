@@ -65,4 +65,5 @@ gazsim:
     localization:
       #parent model::link to attach visuals on
       parent-name: "ground_plane::link"
-      update-rate: 2.0 #in Hz
+      update-rate: 5.0 #in Hz
+      label-size: 0.3

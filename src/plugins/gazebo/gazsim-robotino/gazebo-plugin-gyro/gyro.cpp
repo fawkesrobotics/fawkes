@@ -60,6 +60,10 @@ void Gyro::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
 
   //create publisher
   this->gyro_pub_ = this->node_->Advertise<msgs::Vector3d>("~/RobotinoSim/Gyro/");
+
+  //init last sent time
+  last_sent_time_ = model_->GetWorld()->GetSimTime().Double();
+  this->send_interval_ = 0.05;
 }
 
 /** Called by the world update start event
@@ -67,7 +71,12 @@ void Gyro::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
 void Gyro::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   //Send gyro information to Fawkes
-  send_gyro();
+  double time = model_->GetWorld()->GetSimTime().Double();
+  if(time - last_sent_time_ > send_interval_)
+  {
+    last_sent_time_ = time;
+    send_gyro();
+  }
 }
 
 /** on Gazebo reset
