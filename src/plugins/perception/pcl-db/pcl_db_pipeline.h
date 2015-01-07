@@ -59,6 +59,11 @@
 #include <mongo/client/dbclient.h>
 #include <mongo/client/gridfs.h>
 
+#ifdef HAVE_MONGODB_VERSION_H
+// we are using mongo-cxx-driver which renamed QUERY to MONGO_QUERY
+#  define QUERY MONGO_QUERY
+#endif
+
 static const uint8_t cluster_colors[12][3] =
   { {176, 0, 30}, {0, 0, 255}, {255, 90, 0}, {137, 82, 39}, {56, 23, 90}, {99, 0, 30},
     {255, 0, 0}, {0, 255, 0}, {255, 255, 0}, {255, 0, 255}, {0, 255, 255}, {27, 117, 196}};
@@ -257,8 +262,14 @@ class PointCloudDBPipeline
   retrieve_clouds(std::vector<long long> &times, std::vector<long long> &actual_times,
 		  std::string &database, std::string &collection)
   {
+#ifdef HAVE_MONGODB_VERSION_H
+    // mongodb-cxx-driver dropped ensureIndex and names it createIndex
+    mongodb_client_->createIndex(database + "." + collection,
+				 mongo::fromjson("{timestamp:1}"));
+#else
     mongodb_client_->ensureIndex(database + "." + collection,
 				 mongo::fromjson("{timestamp:1}"));
+#endif
 
     const unsigned int num_clouds = times.size();
     std::vector<CloudPtr> pcls(num_clouds);

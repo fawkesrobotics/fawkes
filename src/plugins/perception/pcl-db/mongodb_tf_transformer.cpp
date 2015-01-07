@@ -23,6 +23,11 @@
 
 #include <list>
 
+#ifdef HAVE_MONGODB_VERSION_H
+// we are using mongo-cxx-driver which renamed QUERY to MONGO_QUERY
+#  define QUERY MONGO_QUERY
+#endif
+
 using namespace mongo;
 
 namespace fawkes {
@@ -47,9 +52,16 @@ MongoDBTransformer::MongoDBTransformer(mongo::DBClientBase *mongodb_client,
   : mongodb_client_(mongodb_client), database_(database_name)
 {
   if (ensure_index) {
+#ifdef HAVE_MONGODB_VERSION_H
+    // mongodb-cxx-driver dropped ensureIndex and names it createIndex
+    mongodb_client_->createIndex(database_ + ".tf", mongo::fromjson("{timestamp:1}"));
+    mongodb_client_->createIndex(database_ + ".TransformInterface",
+				 mongo::fromjson("{timestamp:1}"));
+#else
     mongodb_client_->ensureIndex(database_ + ".tf", mongo::fromjson("{timestamp:1}"));
     mongodb_client_->ensureIndex(database_ + ".TransformInterface",
 				 mongo::fromjson("{timestamp:1}"));
+#endif
   }
 }
 
