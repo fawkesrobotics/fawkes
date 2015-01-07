@@ -118,7 +118,7 @@ ifeq ($(HAVE_OPENCV),1)
   VERSION_MAJOR_OPENCV    = $(word 1,$(VERSION_SPLITTED_OPENCV))
   VERSION_MINOR_OPENCV    = $(word 2,$(VERSION_SPLITTED_OPENCV))
   CFLAGS_OPENCV      = -DHAVE_OPENCV $(shell $(PKGCONFIG) --cflags 'opencv$(OPENCV_VERSION_SUFFIX)') \
-		       -Wno-unused-local-typedefs
+		       $(CFLAG_W_NO_UNUSED_LOCAL_TYPEDEFS)
   ifeq ($(filter-out 2.0 2.1,$(VERSION_MAJOR_OPENCV).$(VERSION_MINOR_OPENCV)),)
     LDFLAGS_OPENCV     = -lcxcore -lcv
     LDFLAGS_OPENCV_GUI = -lhighgui

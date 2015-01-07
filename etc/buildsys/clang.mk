@@ -50,5 +50,8 @@ ifeq ($(USE_OPENMP),1)
   LDFLAGS_MINIMUM += $(LDFLAGS_OPENMP)
 endif
 
+# unsupported flags (which are supported on GCC)
+CFLAG_W_NO_UNUSED_LOCAL_TYPEDEFS=
+
 endif # __buildsys_clang_mk_
 

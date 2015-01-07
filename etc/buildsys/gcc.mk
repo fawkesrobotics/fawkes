@@ -86,5 +86,7 @@ ifeq ($(ARCH),armv6l)
   CFLAGS_MINIMUM += -Wno-psabi
 endif
 
+CFLAG_W_NO_UNUSED_LOCAL_TYPEDEFS=-Wno-unused-local-typedefs
+
 endif # __buildsys_gcc_mk_
 
