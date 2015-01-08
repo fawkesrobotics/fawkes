@@ -25,6 +25,7 @@
 #include <utils/search/astar.h>
 #include <utils/math/angle.h>
 #include <tf/utils.h>
+#include <core/utils/lockptr.h>
 
 #include "search_state.h"
 
@@ -76,8 +77,10 @@ NavGraphThread::init()
   cfg_orientation_tolerance_ = config->get_float("/plugins/navgraph/orientation_tolerance");
   cfg_shortcut_tolerance_ = config->get_float("/plugins/navgraph/shortcut_tolerance");
   cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
+  cfg_replan_interval_ = config->get_float("/plugins/navgraph/replan_interval");
   cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
   cfg_log_graph_       = config->get_bool("/plugins/navgraph/log_graph");
+  cfg_abort_on_error_  = config->get_bool("/plugins/navgraph/abort_on_error");
 
   cfg_monitor_file_ = false;
   try {
@@ -86,6 +89,8 @@ NavGraphThread::init()
 
   pp_nav_if_ = blackboard->open_for_writing<NavigatorInterface>("Pathplan");
   nav_if_    = blackboard->open_for_reading<NavigatorInterface>(cfg_nav_if_id_.c_str());
+  path_if_ = blackboard->open_for_writing<NavPathInterface>("NavPath");
+
 
   if (cfg_graph_file_[0] != '/') {
     cfg_graph_file_ = std::string(CONFDIR) + "/" + cfg_graph_file_;
@@ -130,16 +135,25 @@ NavGraphThread::init()
   exec_active_       = false;
   target_reached_    = false;
   last_node_         = "";
+  error_reason_      = "";
+  constrained_plan_  = false;
   cmd_sent_at_       = new Time(clock);
+  path_planned_at_   = new Time(clock);
   target_reached_at_ = new Time(clock);
+  error_at_          = new Time(clock);
+
+  constraint_repo_   = new ConstraintRepo(logger);
+  navgraph_aspect_inifin_.set_constraint_repo(constraint_repo_);
 }
 
 void
 NavGraphThread::finalize()
 {
   delete cmd_sent_at_;
+  delete path_planned_at_;
   delete astar_;
   delete target_reached_at_;
+  delete error_at_;
   graph_.clear();
   blackboard->close(pp_nav_if_);
   blackboard->close(nav_if_);
@@ -149,7 +163,10 @@ void
 NavGraphThread::once()
 {
 #ifdef HAVE_VISUALIZATION
-    if (vt_)  vt_->set_graph(graph_);
+  if (vt_) {
+    vt_->set_constraint_repo(constraint_repo_);
+    vt_->set_graph(graph_);
+  }
 #endif
 }
 
@@ -237,6 +254,7 @@ NavGraphThread::loop()
         try {
           logger->log_info(name(), "Sending next goal %s after node reached",
 			   plan_[0].name().c_str());
+          publish_path(plan_);
           send_next_goal();
         } catch (Exception &e) {
           logger->log_warn(name(), "Failed to send next goal (node reached)");
@@ -262,7 +280,30 @@ NavGraphThread::loop()
 
     } else {
       fawkes::Time now(clock);
-      if ((now - cmd_sent_at_) > cfg_resend_interval_) {
+      bool new_plan = false;
+
+      if (constrained_plan_ && plan_.size() > 2 &&
+	  (now - path_planned_at_) > cfg_replan_interval_)
+      {
+	*path_planned_at_ = now;
+	constraint_repo_.lock();
+	if (constraint_repo_->compute() || constraint_repo_->modified(/* reset */ true)) {
+	  TopologicalMapNode goal = plan_.back();
+
+	  if (replan(plan_[0], goal)) {
+	    logger->log_debug(name(), "Executing after re-planning from '%s' to '%s'",
+			      plan_[0].name().c_str(), goal.name().c_str());
+	    // do not optimize here, we know that we do want to travel
+	    // to the first node, we are already on the way...
+	    //optimize_plan();
+	    start_plan();
+	    new_plan = true;
+	  }
+	}
+	constraint_repo_.unlock();
+      }
+
+      if (! new_plan && (now - cmd_sent_at_) > cfg_resend_interval_) {
         try {
           //logger->log_info(name(), "Re-sending goal");
 	  send_next_goal();
@@ -272,6 +313,10 @@ NavGraphThread::loop()
         }
       }
     }
+  } else if (constraint_repo_->modified(/* reset */true)) {
+#ifdef HAVE_VISUALIZATION
+    if (vt_)  vt_->wakeup();
+#endif
   }
 
   if (needs_write) {
@@ -316,11 +361,28 @@ NavGraphThread::generate_plan(std::string goal_name)
 		    pose_.getOrigin().x(), pose_.getOrigin().y(), init.name().c_str());
 
   plan_.clear();
-  
-  NavGraphSearchState *initial_state =
-    new NavGraphSearchState(init, goal, 0, NULL, *graph_);
 
-  std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
+  std::vector<AStarState *> a_star_solution;
+
+  constraint_repo_.lock();
+  if (constraint_repo_->has_constraints()) {
+    constraint_repo_->compute();
+
+    NavGraphSearchState *initial_state =
+      new NavGraphSearchState(init, goal, *graph_, *constraint_repo_);
+    a_star_solution =  astar_->solve(initial_state);
+  }
+  constraint_repo_.unlock();
+  
+  if (! a_star_solution.empty()) {
+    constrained_plan_ = true;
+  } else {
+    constrained_plan_ = false;
+    logger->log_warn(name(), "Failed to generate plan, will try without constraints");
+    NavGraphSearchState *initial_state =
+      new NavGraphSearchState(init, goal, *graph_);
+    a_star_solution =  astar_->solve(initial_state);
+  }
 
   NavGraphSearchState *solstate;
   for (unsigned int i = 0; i < a_star_solution.size(); ++i ) {
@@ -343,6 +405,61 @@ NavGraphThread::generate_plan(float x, float y, float ori)
   TopologicalMapNode n("free-target", x, y);
   n.set_property("orientation", ori);
   plan_.push_back(n);
+}
+
+
+bool
+NavGraphThread::replan(const TopologicalMapNode &start, const TopologicalMapNode &goal)
+{
+  logger->log_debug(name(), "Starting at node '%s'", start.name().c_str());
+
+  TopologicalMapNode act_goal = goal;
+
+  TopologicalMapNode close_to_goal;
+  if (goal.name() == "free-target") {
+    close_to_goal = graph_->closest_node(goal.x(), goal.y());
+    act_goal = close_to_goal;
+  }
+
+  NavGraphSearchState *initial_state =
+    new NavGraphSearchState(start, act_goal, *graph_, *constraint_repo_);
+  std::vector<AStarState *> a_star_solution =  astar_->solve(initial_state);
+  
+  if (! a_star_solution.empty()) {
+    // get cost of current plan
+    TopologicalMapNode prev("current-pose", pose_.getOrigin().x(), pose_.getOrigin().y());
+    float plan_cost = 0.;
+    for (const TopologicalMapNode &n : plan_) {
+      plan_cost += sqrtf(powf(n.x() - prev.x(), 2) + powf(n.y() - prev.y(), 2));
+      prev = n;
+    }
+
+    if (a_star_solution[a_star_solution.size() - 1]->total_estimated_cost <= plan_cost) {
+      constrained_plan_ = true;
+      plan_.clear();
+      NavGraphSearchState *solstate;
+      for (unsigned int i = 0; i < a_star_solution.size(); ++i ) {
+	solstate = dynamic_cast<NavGraphSearchState *>(a_star_solution[i]);
+	plan_.push_back(solstate->node());
+      }
+      if (goal.name() == "free-target") {
+	// add free target node again
+	plan_.push_back(goal);
+      }
+      return true;
+    } else {
+      logger->log_warn(name(), "Re-planning from '%s' to '%s' resulted in "
+		       "more expensive plan(%f > %f), keeping old",
+		       start.name().c_str(), goal.name().c_str(),
+		       a_star_solution[a_star_solution.size() - 1]->total_estimated_cost,
+		       plan_cost);
+      return false;
+    }
+  } else {
+    logger->log_error(name(), "Failed to re-plan from '%s' to '%s'",
+		      start.name().c_str(), goal.name().c_str());
+    return false;
+  }
 }
 
 
@@ -378,6 +495,8 @@ NavGraphThread::optimize_plan()
 void
 NavGraphThread::start_plan()
 {
+  path_planned_at_->stamp();
+
   target_reached_ = false;
   if (plan_.empty()) {
     exec_active_ = false;
@@ -386,7 +505,7 @@ NavGraphThread::start_plan()
     logger->log_warn(name(), "Cannot start empty plan.");
 
 #ifdef HAVE_VISUALIZATION
-  if (vt_)  vt_->reset_plan();
+    if (vt_)  vt_->reset_plan();
 #endif
 
   } else {    
@@ -417,6 +536,8 @@ NavGraphThread::start_plan()
       logger->log_warn(name(), e);
     }
   }
+
+  publish_path(plan_);
 }
 
 
@@ -488,7 +609,7 @@ NavGraphThread::send_next_goal()
   tf::Stamped<tf::Pose>
     tposeglob(tf::Transform(tf::create_quaternion_from_yaw(ori),
 			    tf::Vector3(next_target.x(), next_target.y(), 0)),
-	  Time(0,0), cfg_global_frame_);
+	      Time(0,0), cfg_global_frame_);
   try {
     tf_listener->transform_pose(cfg_base_frame_, tposeglob, tpose);
   } catch (Exception &e) {
@@ -496,10 +617,6 @@ NavGraphThread::send_next_goal()
 		     "Failed to compute pose, cannot generate plan", e.what());
     throw;
   }
-
-  logger->log_debug(name(), "Sending goto(x=%f,y=%f,ori=%f) for node '%s'",
-		    tpose.getOrigin().x(), tpose.getOrigin().y(),
-		    tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
 
   NavigatorInterface::CartesianGotoMessage *gotomsg =
     new NavigatorInterface::CartesianGotoMessage(tpose.getOrigin().x(),
@@ -526,16 +643,44 @@ NavGraphThread::send_next_goal()
 #ifdef HAVE_VISUALIZATION
     if (vt_)  vt_->set_current_edge(last_node_, next_target.name());
 #endif
+
+    if (! nav_if_->has_writer()) {
+      throw Exception("No writer for navigator interface");
+    }
+
+    logger->log_debug(name(), "Sending goto(x=%f,y=%f,ori=%f) for node '%s'",
+		      tpose.getOrigin().x(), tpose.getOrigin().y(),
+		      tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
+
+    nav_if_->msgq_enqueue(gotomsg);
+    cmd_sent_at_->stamp();
+
+    error_at_->stamp();
+    error_reason_ = "";
+
   } catch (Exception &e) {
-    logger->log_warn(name(), "Failed to send cartesian goto for next goal, exception follows");
-    logger->log_warn(name(), e);
-    exec_active_ = false;
-    pp_nav_if_->set_final(true);
-    pp_nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
-    pp_nav_if_->write();
+    if (cfg_abort_on_error_) {
+      logger->log_warn(name(), "Failed to send cartesian goto for "
+		       "next goal, exception follows");
+      logger->log_warn(name(), e);
+      exec_active_ = false;
+      pp_nav_if_->set_final(true);
+      pp_nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
+      pp_nav_if_->write();
 #ifdef HAVE_VISUALIZATION
-    if (vt_)  vt_->reset_plan();
+      if (vt_)  vt_->reset_plan();
 #endif
+    } else {
+      fawkes::Time now(clock);
+      if (error_reason_ != e.what_no_backtrace() || (now - error_at_) > 4.0) {
+	error_reason_ = e.what_no_backtrace();
+	*error_at_ = now;
+	logger->log_warn(name(), "Failed to send cartesian goto for "
+			 "next goal, exception follows");
+	logger->log_warn(name(), e);
+	logger->log_warn(name(), "*** NOT aborting goal (as per config)");
+      }
+    }
   }
 }
 
@@ -688,4 +833,57 @@ NavGraphThread::log_graph()
       logger->log_info(name(), "  - %s: %s", p->first.c_str(), p->second.c_str());
     }
   }
+}
+
+void
+NavGraphThread::publish_path(std::vector<fawkes::TopologicalMapNode> path)
+{
+  std::vector<std::string> vpath(40, "");
+
+  for (unsigned int i = 0; i < path.size() && i < vpath.size(); ++i) {
+    vpath[i] = path[i].name();
+  }
+
+  path_if_->set_path_node_1(vpath[0].c_str());
+  path_if_->set_path_node_2(vpath[1].c_str());
+  path_if_->set_path_node_3(vpath[2].c_str());
+  path_if_->set_path_node_4(vpath[3].c_str());
+  path_if_->set_path_node_5(vpath[4].c_str());
+  path_if_->set_path_node_6(vpath[5].c_str());
+  path_if_->set_path_node_7(vpath[6].c_str());
+  path_if_->set_path_node_8(vpath[7].c_str());
+  path_if_->set_path_node_9(vpath[8].c_str());
+  path_if_->set_path_node_10(vpath[9].c_str());
+  path_if_->set_path_node_11(vpath[10].c_str());
+  path_if_->set_path_node_12(vpath[11].c_str());
+  path_if_->set_path_node_13(vpath[12].c_str());
+  path_if_->set_path_node_14(vpath[13].c_str());
+  path_if_->set_path_node_15(vpath[14].c_str());
+  path_if_->set_path_node_16(vpath[15].c_str());
+  path_if_->set_path_node_17(vpath[16].c_str());
+  path_if_->set_path_node_18(vpath[17].c_str());
+  path_if_->set_path_node_19(vpath[18].c_str());
+  path_if_->set_path_node_20(vpath[19].c_str());
+  path_if_->set_path_node_21(vpath[20].c_str());
+  path_if_->set_path_node_22(vpath[21].c_str());
+  path_if_->set_path_node_23(vpath[22].c_str());
+  path_if_->set_path_node_24(vpath[23].c_str());
+  path_if_->set_path_node_25(vpath[24].c_str());
+  path_if_->set_path_node_26(vpath[25].c_str());
+  path_if_->set_path_node_27(vpath[26].c_str());
+  path_if_->set_path_node_28(vpath[27].c_str());
+  path_if_->set_path_node_29(vpath[28].c_str());
+  path_if_->set_path_node_30(vpath[29].c_str());
+  path_if_->set_path_node_31(vpath[30].c_str());
+  path_if_->set_path_node_32(vpath[31].c_str());
+  path_if_->set_path_node_33(vpath[32].c_str());
+  path_if_->set_path_node_34(vpath[33].c_str());
+  path_if_->set_path_node_35(vpath[34].c_str());
+  path_if_->set_path_node_36(vpath[35].c_str());
+  path_if_->set_path_node_37(vpath[36].c_str());
+  path_if_->set_path_node_38(vpath[37].c_str());
+  path_if_->set_path_node_39(vpath[38].c_str());
+  path_if_->set_path_node_40(vpath[39].c_str());
+  path_if_->set_path_length(path.size());
+  path_if_->write();
 }

@@ -4,7 +4,7 @@
  *
  *  Created: Mon Dec 06 22:33:03 2010
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *             2014       Sebastian Reuter
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 #include <plugins/navgraph/aspect/navgraph.h>
 #include <core/threading/thread_finalizer.h>
 #include <utils/graph/topological_map_graph.h>
+#include <plugins/navgraph/constraints/constraint_repo.h>
 #include <cstddef>
 
 namespace fawkes {
@@ -53,6 +54,15 @@ NavGraphAspectIniFin::set_navgraph(LockPtr<TopologicalMapGraph> &navgraph)
   navgraph_ = navgraph;
 }
 
+/** Set Constraint Repository.
+ * @param constraint_repo to pass to thread with the NavGraphAspect
+ */
+void
+NavGraphAspectIniFin::set_constraint_repo(LockPtr<ConstraintRepo> &constraint_repo)
+{
+  constraint_repo_ = constraint_repo;
+}
+
 void
 NavGraphAspectIniFin::init(Thread *thread)
 {
@@ -65,6 +75,7 @@ NavGraphAspectIniFin::init(Thread *thread)
   }
 
   navgraph_thread->navgraph = navgraph_;
+  navgraph_thread->constraint_repo = constraint_repo_;
 }
 
 void
@@ -79,6 +90,7 @@ NavGraphAspectIniFin::finalize(Thread *thread)
   }
 
   navgraph_thread->navgraph.clear();
+  navgraph_thread->constraint_repo.clear();
 }
 
 

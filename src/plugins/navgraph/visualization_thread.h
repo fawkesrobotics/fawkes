@@ -35,6 +35,7 @@
 
 namespace fawkes {
   class TopologicalMapGraph;
+  class ConstraintRepo;
 }
 
 
@@ -52,6 +53,8 @@ class NavGraphVisualizationThread
   virtual void finalize();
 
   void set_graph(fawkes::LockPtr<fawkes::TopologicalMapGraph> &graph);
+  void set_constraint_repo(fawkes::LockPtr<fawkes::ConstraintRepo> &crepo);
+
   void set_plan(std::vector<fawkes::TopologicalMapNode> plan);
   void set_current_edge(std::string from, std::string to);
   void reset_plan();
@@ -61,16 +64,23 @@ class NavGraphVisualizationThread
   void add_circle_markers(visualization_msgs::MarkerArray &m, size_t &id_num,
 			  float center_x, float center_y, float radius, unsigned int arc_length,
 			  float r, float g, float b, float alpha, float line_width = 0.03);
+  float edge_cost_factor(
+    std::list<std::tuple<std::string, std::string, std::string, float>> &costs,
+    const std::string &from, const std::string &to, std::string &constraint_name);
 
  private:
   size_t last_id_num_;
+  size_t constraints_last_id_num_;
   ros::Publisher vispub_;
+
+  float  cfg_cost_scale_max_;
 
   std::vector<fawkes::TopologicalMapNode> plan_;
   std::string plan_to_;
   std::string plan_from_;
 
   fawkes::LockPtr<fawkes::TopologicalMapGraph> graph_;
+  fawkes::LockPtr<fawkes::ConstraintRepo>      crepo_;
 };
 
 

@@ -673,6 +673,11 @@ TopologicalMapGraph::calc_reachability()
     i->set_reachable_nodes(reachable_nodes(i->name()));
   }
   assert_connected();
+
+  std::vector<TopologicalMapEdge>::iterator e;
+  for (e = edges_.begin(); e != edges_.end(); ++e) {
+    e->set_nodes(node(e->from()), node(e->to()));
+  }
 }
 
 

@@ -4,7 +4,7 @@
  *
  *  Created: Tue Oct 08 18:13:41 2013
  *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *             2014       Sebastian Reuter
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 
 #include <plugins/navgraph/aspect/navgraph.h>
 #include <utils/graph/topological_map_graph.h>
+#include <plugins/navgraph/constraints/constraint_repo.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -44,6 +45,10 @@ namespace fawkes {
 
 /** @var fawkes::LockPtr<fawkes::TopologicalMapGraph>  NavGraphAspect::navgraph
  * NavGraph instance shared in framework.
+ */
+
+/** @var fawkes::LockPtr<fawkes::ConstraintRepo>  NavGraphAspect::constraint_repo
+ * Constraint repository used for path planning.
  */
 
 /** Constructor. */

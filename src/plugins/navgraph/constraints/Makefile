@@ -20,18 +20,15 @@ include $(LIBSRCDIR)/utils/utils.mk
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_libfawkesnavgraphaspect = fawkescore fawkesaspects fawkesutils \
-			       fawkesnavgraphconstraints
-OBJS_libfawkesnavgraphaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+LIBS_libfawkesnavgraphconstraints = fawkescore fawkesaspects fawkesutils
+OBJS_libfawkesnavgraphconstraints = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesnavgraphaspect)
+OBJS_all    = $(OBJS_libfawkesnavgraphconstraints)
 
 ifeq ($(HAVE_CPP11),1)
-  LIBS_all = $(LIBDIR)/libfawkesnavgraphaspect.$(SOEXT)
+  LIBS_all = $(LIBDIR)/libfawkesnavgraphconstraints.$(SOEXT)
 else
-  ifneq ($(HAVE_TF),1)
-    WARN_TARGETS = warning_tf
-  endif
+  WARN_TARGETS += warning_cpp11
 endif
 
 ifeq ($(OBJSSUBMAKE),1)

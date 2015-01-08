@@ -43,19 +43,56 @@ plugins/navgraph:
   # NOTE: it is recommended to set this as graph default property
   shortcut_tolerance: 0.0
 
-  # Visualize graph and current actions?
-  visualization: true
-
   # Interval in which the resend the goto command; sec
-  resend_interval: 6.0
+  resend_interval: 1.0
 
+  # Interval in which to replan if constraints have been modified
+  # since the last path planning.
+  replan_interval: 2.0
+
+  # Update the visualization at this interval. This will trigger a compuation
+  # of all constraints and if any change occurs the graph will be published
+  # again. This is done whether the robot is currently driving or standing still.
+  visualization_interval: 0.5
+  
   # Time to keep moving after the target tolerance has been reached; sec
   # NOTE: it is recommended to set this as graph default property
   target_time: 2.5
 
+  # If set to true, aborts traveling on error, e.g. if no writer exists for
+  # the NavigatorInterface. If false, keeps trying and re-sending.
+  # Setting this to false is risky, because skills then cannot react to an
+  # error because none is reported. It is recommended to set this to false
+  # only if you really know what you are doing.
+  abort_on_error: true
+  
   # Monitor graph file and automatically reload on changes?
   monitor_file: true
 
   # Write graph information to log on (re-)loading?
   log_graph: false
 
+  visualization:
+
+    # Set to true to enable visualization by publishing messages for rviz
+    enable: true
+
+    # The color for the cost factors (from constraints) of an edge is
+    # scaled from red over orange to yellow (from 0.0 to 1.0). The
+    # maximum scale value for the cost denotes when this should be
+    # saturated and thus yellow, i.e.  a setting of 2.0 means that a
+    # cost factor of 1.0 will be drawn as red, 1.5 as orange, and
+    # anything greater or equal to 2.0 as yellow.
+    cost_scale_max: 2.0
+
+  # navgraph-static-constraints plugin configuration
+  static-constraints:
+    # A list of names of nodes that should be statically blocked
+    nodes: ["P24"]
+    # Static edge blocks. Format is "OriginNode--TargetNode". Node names
+    # may not contain "--".
+    edges: ["P32--P33"]
+    # Static costs for specific edges. Format is
+    # OriginNode--TargetNode:cost (node names may not contain "--" or
+    # ":"). Use an empty list to not post any edge cost constraints.
+    edge-costs: ["P11--P21:1.5", "P12--P22:2.0", "P21--P22:1.75"]
