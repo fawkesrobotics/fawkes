@@ -34,6 +34,10 @@
 #include <string>
 #include <map>
 
+namespace fawkes {
+  class NavGraphStaticListEdgeConstraint;
+}
+
 class ClipsNavGraphThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
@@ -63,10 +67,13 @@ class ClipsNavGraphThread
 
  private:
   void clips_navgraph_load(fawkes::LockPtr<CLIPS::Environment> &clips);
+  void clips_navgraph_block_edge(std::string env_name, std::string from, std::string to);
+  void clips_navgraph_unblock_edge(std::string env_name, std::string from, std::string to);
 
  private:
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
 
+  fawkes::NavGraphStaticListEdgeConstraint  *edge_constraint_;
 };
 
 #endif
