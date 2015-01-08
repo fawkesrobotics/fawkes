@@ -23,6 +23,7 @@
 #include <default-hook.h>
 #include <oprs-rerror_f-pub.h>
 
+/// @cond external
 extern "C" {
   typedef struct op_structure Op_Structure;
 
@@ -45,6 +46,7 @@ extern "C" {
      OPRS_LIST failed_goal_stack;
   };
 }
+/// @endcond
 
 #include <op-instance_f-pub.h>
 #include <op-structure_f-pub.h>
