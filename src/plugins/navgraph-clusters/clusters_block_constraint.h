@@ -1,9 +1,8 @@
 /***************************************************************************
- *  edge_constraint.h - base class for edge constraints
+ *  clusters_block_constraint.h - block edges close to clusters
  *
- *  Created: Sat Jul 12 14:40:01 2014
- *  Copyright  2014  Sebastian Reuter
- *             2014  Tim Niemueller
+ *  Created: Fri Jul 18 21:52:40 2014
+ *  Copyright  2014  Tim Niemueller
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -19,41 +18,30 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __NAVGRAPH_CONSTRAINTS_EDGE_CONSTRAINT_H_
-#define __NAVGRAPH_CONSTRAINTS_EDGE_CONSTRAINT_H_
+#ifndef __NAVGRAPH_CLUSTERS_CLUSTERS_BLOCK_CONSTRAINT_H_
+#define __NAVGRAPH_CLUSTERS_CLUSTERS_BLOCK_CONSTRAINT_H_
 
-#include <vector>
+#include <plugins/navgraph/constraints/edge_constraint.h>
+
+#include <list>
 #include <string>
 
-#include <utils/graph/topological_map_node.h>
+class NavGraphClustersThread; 
 
-namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
-
-class Logger;
-
-class NavGraphEdgeConstraint
+class NavGraphClustersBlockConstraint : public fawkes::NavGraphEdgeConstraint
 {
  public:
-  NavGraphEdgeConstraint(std::string &name);
-  NavGraphEdgeConstraint(const char *name);
-  virtual ~NavGraphEdgeConstraint();
-
-  std::string name();
+  NavGraphClustersBlockConstraint(const char *name, NavGraphClustersThread *parent);
+  virtual ~NavGraphClustersBlockConstraint();
 
   virtual bool compute(void) throw();
   virtual bool blocks(const fawkes::TopologicalMapNode &from,
-		      const fawkes::TopologicalMapNode &to) throw() = 0;
+		      const fawkes::TopologicalMapNode &to) throw();
 
-  bool operator==(const std::string &name) const;
-
- protected:
-  std::string name_;
+ private:
+  NavGraphClustersThread *parent_;
+  std::list<std::pair<std::string, std::string>> blocked_;
 
 };
-
-} // end namespace fawkes
 
 #endif

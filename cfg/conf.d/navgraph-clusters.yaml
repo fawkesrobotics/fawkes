@@ -1,0 +1,39 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/navgraph-clusters
+---
+navgraph-clusters:
+
+  # Prefix for position interfaces that will be opened with cluster
+  # centroid information.
+  interface-prefix: "/laser-cluster/robots/"
+
+  # If a cluster centroid is as close or closer than this threshold
+  # to an edge that very edge will be marked as blocke.
+  close-threshold: 0.5
+
+  # Minimum visibility history value a cluster must have before it is
+  # considered for determining blockade information
+  min-visibility-history: 5
+
+  # Set the mode to enforce the constraints.
+  # block: use an edge constraint to block edges close to clusters from
+  #        expansion during A* search
+  # static-cost:  apply a static cost factor to edges close to clusters
+  constraint-mode: distance-cost
+
+  static-cost:
+    # Cost factor to apply to edges close to clusters
+    cost-factor: 2.0
+
+  # Parameters for the distance cost mode.
+  # Any obstacle closer than dist-min will be assigned cost-max,
+  # farther away than dist-max will ignored. In between the cost span
+  # is scaled linearly to the distance range, with closer obstacles
+  # getting higher costs.
+  distance-cost:
+    cost-min: 2
+    cost-max: 4
+    dist-min: 2
+    dist-max: 4

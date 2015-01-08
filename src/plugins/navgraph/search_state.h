@@ -44,15 +44,32 @@ public:
 
   fawkes::TopologicalMapNode & node();
 
- private:
-  size_t key() { return key_; }
-  inline float  cost(const fawkes::TopologicalMapNode &d) {
-    return sqrtf(powf(node_.x() - d.x(), 2) +
-		 powf(node_.y() - d.y(), 2) );
+  virtual size_t key() { return key_; }
+  virtual float  estimate();
+  virtual bool   is_goal();
+
+  /** Determine cost between two nodes.
+   * @param from originating node
+   * @param to destination node
+   * @return cost from @p from to @p to.
+   */
+  static inline float
+    cost(const fawkes::TopologicalMapNode &from,
+	 const fawkes::TopologicalMapNode &to)
+  {
+    return sqrtf(powf(to.x() - from.x(), 2) +
+		 powf(to.y() - from.y(), 2) );
   }
 
-  float estimate();
-  bool  is_goal();
+  /** Determine cost between the node of this search state and a given node.
+   * @param d destination node
+   * @return cost from this node to @p d.
+   */
+  inline float cost(const fawkes::TopologicalMapNode &d) {
+    return cost(node_, d);
+  }
+
+ private:
 
   std::vector<AStarState *> children();
 

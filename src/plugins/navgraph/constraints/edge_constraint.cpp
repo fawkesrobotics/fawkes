@@ -61,6 +61,14 @@ NavGraphEdgeConstraint::NavGraphEdgeConstraint(std::string &name)
   name_   = name;
 }
 
+/** Constructor.
+ * @param name name of edge constraint
+ */
+NavGraphEdgeConstraint::NavGraphEdgeConstraint(const char *name)
+{
+  name_   = name;
+}
+
 
 /** Virtual empty destructor. */
 NavGraphEdgeConstraint::~NavGraphEdgeConstraint()

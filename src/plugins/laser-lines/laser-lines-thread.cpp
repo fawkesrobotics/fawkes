@@ -39,11 +39,10 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/surface/convex_hull.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/conditional_removal.h>
+#include <pcl/search/kdtree.h>
 #include <pcl/common/centroid.h>
 #include <pcl/common/transforms.h>
 #include <pcl/common/distances.h>
@@ -91,14 +90,16 @@ LaserLinesThread::~LaserLinesThread()
 void
 LaserLinesThread::init()
 {
-  cfg_line_min_size_ =
-    config->get_uint(CFG_PREFIX"line_min_size");
   cfg_segm_max_iterations_ =
     config->get_uint(CFG_PREFIX"line_segmentation_max_iterations");
   cfg_segm_distance_threshold_ =
     config->get_float(CFG_PREFIX"line_segmentation_distance_threshold");
+  cfg_segm_sample_max_dist_ =
+    config->get_float(CFG_PREFIX"line_segmentation_sample_max_dist");
   cfg_segm_min_inliers_ =
     config->get_uint(CFG_PREFIX"line_segmentation_min_inliers");
+  cfg_min_length_ =
+    config->get_float(CFG_PREFIX"line_min_length");
 
   cfg_switch_tolerance_ =
     config->get_float(CFG_PREFIX"switch_tolerance");
@@ -236,8 +237,6 @@ LaserLinesThread::loop()
 
   TIMETRACK_INTER(ttc_msgproc_, ttc_extract_lines_);
 
-  //pcl::search::KdTree<PointType> kdtree;
-
   if (input_->points.size() <= 10) {
     // this can happen if run at startup. Since thread runs continuous
     // and not synchronized with main loop, but point cloud acquisition thread is
@@ -268,11 +267,15 @@ LaserLinesThread::loop()
 
   std::vector<LineInfo> linfos;
 
-  while (in_cloud->points.size () > cfg_line_min_size_) {
+  while (in_cloud->points.size () > cfg_segm_min_inliers_) {
     // Segment the largest linear component from the remaining cloud
     //logger->log_info(name(), "[L %u] %zu points left",
     //		     loop_count_, in_cloud->points.size());
       
+    pcl::search::KdTree<PointType>::Ptr
+      search(new pcl::search::KdTree<PointType>);
+    search->setInputCloud(in_cloud);
+    seg_.setSamplesMaxDist(cfg_segm_sample_max_dist_, search); 
     seg_.setInputCloud (in_cloud);
     seg_.segment(*inliers, *coeff);
     if (inliers->indices.size () == 0) {
@@ -306,6 +309,12 @@ LaserLinesThread::loop()
     extract.setNegative(true);
     extract.filter(*cloud_f);
     *in_cloud = *cloud_f;
+
+    // Check if this line has the requested minimum length
+    float length = calc_line_length(cloud_line, coeff);
+    if (length < cfg_min_length_) {
+      continue;
+    }
 
     info.point_on_line[0]  = coeff->values[0];
     info.point_on_line[1]  = coeff->values[1];
@@ -574,4 +583,73 @@ LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
     }
   }
   iface->write();  
+}
+
+
+float
+LaserLinesThread::calc_line_length(CloudPtr cloud_line, pcl::ModelCoefficients::Ptr coeff)
+{
+  if (cloud_line->points.size() < 2)  return 0.;
+
+  //CloudPtr cloud_line(new Cloud());
+  CloudPtr cloud_line_proj(new Cloud());
+
+  /*
+  pcl::ExtractIndices<PointType> extract;
+  extract.setInputCloud(cloud);
+  extract.setIndices(inliers);
+  extract.setNegative(false);
+  extract.filter(*cloud_line);
+  */
+
+  // Project the model inliers
+  pcl::ProjectInliers<PointType> proj;
+  proj.setModelType(pcl::SACMODEL_LINE);
+  proj.setInputCloud(cloud_line);
+  proj.setModelCoefficients(coeff);
+  proj.filter(*cloud_line_proj);
+
+  Eigen::Vector3f point_on_line, line_dir;
+  point_on_line[0]  = cloud_line_proj->points[0].x;
+  point_on_line[1]  = cloud_line_proj->points[0].y;
+  point_on_line[2]  = cloud_line_proj->points[0].z;
+  line_dir[0]       = coeff->values[3];
+  line_dir[1]       = coeff->values[4];
+  line_dir[2]       = coeff->values[5];
+  line_dir.normalize();
+
+  ssize_t idx_1 = 0, idx_2 = 0;
+  float max_dist_1 = 0.f, max_dist_2 = 0.f;
+
+  for (size_t i = 1; i < cloud_line_proj->points.size(); ++i) {
+    const PointType &pt = cloud_line_proj->points[i];
+    Eigen::Vector3f ptv(pt.x, pt.y, pt.z);
+    Eigen::Vector3f diff(ptv - point_on_line);
+    float dist = diff.norm();
+    float dir  = line_dir.dot(diff);
+    if (dir >= 0) {
+      if (dist > max_dist_1) {
+	max_dist_1 = dist;
+	idx_1 = i;
+      }
+    }
+    if (dir <= 0) {
+      if (dist > max_dist_2) {
+	max_dist_2 = dist;
+	idx_2 = i;
+      }
+    }
+  }
+
+  if (idx_1 >= 0 && idx_2 >= 0) {
+    const PointType &pt_1 = cloud_line_proj->points[idx_1];
+    const PointType &pt_2 = cloud_line_proj->points[idx_2];
+
+    Eigen::Vector3f ptv_1(pt_1.x, pt_1.y, pt_1.z);
+    Eigen::Vector3f ptv_2(pt_2.x, pt_2.y, pt_2.z);
+
+    return (ptv_1 - ptv_2).norm();
+  } else {
+    return 0.f;
+  }
 }

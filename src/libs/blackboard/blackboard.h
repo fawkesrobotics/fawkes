@@ -58,6 +58,12 @@ class BlackBoard
                                         const char *identifier) = 0;
   virtual void         close(Interface *interface) = 0;
 
+  virtual Interface *  open_for_reading_f(const char *interface_type,
+					  const char *identifier, ...);
+  virtual Interface *  open_for_writing_f(const char *interface_type,
+					  const char *identifier, ...);
+
+
   virtual InterfaceInfoList *  list_all() = 0;
   virtual InterfaceInfoList *  list(const char *type_pattern,
 				    const char *id_pattern) = 0;
@@ -78,6 +84,12 @@ class BlackBoard
   template <class InterfaceType>
     InterfaceType * open_for_writing(const char *identifier);
 
+  template <class InterfaceType>
+    InterfaceType * open_for_reading_f(const char *identifier, ...);
+
+  template <class InterfaceType>
+    InterfaceType * open_for_writing_f(const char *identifier, ...);
+
   /** Flags to constrain listener registraion/updates. */
   typedef enum {
     BBIL_FLAG_DATA = 1,		///< consider data events
@@ -97,6 +109,7 @@ class BlackBoard
   virtual void unregister_observer(BlackBoardInterfaceObserver *observer);
 
   std::string  demangle_fawkes_interface_name(const char *type);
+  std::string  format_identifier(const char *identifier_format, va_list arg);
 
  protected:
   BlackBoardNotifier *__notifier;	///< Notifier for BB events.
@@ -123,6 +136,34 @@ BlackBoard::open_for_reading(const char *identifier)
   std::string type_name =
     demangle_fawkes_interface_name(typeid(InterfaceType).name());
   Interface *interface = open_for_reading(type_name.c_str(), identifier);
+  return static_cast<InterfaceType *>(interface);
+}
+
+
+/** Get interface of given type with identifier format string.
+ * This will open a new interface for reading just like the
+ * non-template version of open_for_reading(). But with the template
+ * method you will get a correctly typed object that you can use. An
+ * TypeMismatchException is thrown if the string representation of the
+ * type and the actual class type of the interface do not match.
+ * @param identifier identifier of the interface
+ * @return new fully initialized interface instance of requested type
+ * @exception OutOfMemoryException thrown if there is not enough free space for
+ * the requested interface.
+ * @exception TypeMismatchException thrown if type in interface_type
+ * and the actual class type do not fit.
+ */
+template <class InterfaceType>
+InterfaceType *
+BlackBoard::open_for_reading_f(const char *identifier, ...)
+{
+  va_list arg;
+  va_start(arg, identifier);
+  std::string type_name =
+    demangle_fawkes_interface_name(typeid(InterfaceType).name());
+  std::string identifier_s = format_identifier(identifier, arg);
+  va_end(arg);
+  Interface *interface = open_for_reading(type_name.c_str(), identifier_s.c_str());
   return static_cast<InterfaceType *>(interface);
 }
 
@@ -175,6 +216,36 @@ BlackBoard::open_for_writing(const char *identifier)
   std::string type_name =
     demangle_fawkes_interface_name(typeid(InterfaceType).name());
   Interface *interface = open_for_writing(type_name.c_str(), identifier);
+  return static_cast<InterfaceType *>(interface);;
+}
+
+
+/** Get writer interface of given type with identifier format string.
+ * This will open a new interface for writing just like the
+ * non-template version of open_for_writing(). But with the template
+ * method you will get a correctly typed object that you can use. An
+ * TypeMismatchException is thrown if the string representation of the
+ * type and the actual class type of the interface do not match.
+ * @param identifier identifier of the interface
+ * @return new fully initialized interface instance of requested type
+ * @exception OutOfMemoryException thrown if there is not enough free space for
+ * the requested interface.
+ * @exception BlackBoardWriterActiveException thrown if there is already a writing
+ * instance with the same type/id
+ * @exception TypeMismatchException thrown if type in interface_type
+ * and the actual class type do not fit.
+ */
+template <class InterfaceType>
+InterfaceType *
+BlackBoard::open_for_writing_f(const char *identifier, ...)
+{
+  va_list arg;
+  va_start(arg, identifier);
+  std::string type_name =
+    demangle_fawkes_interface_name(typeid(InterfaceType).name());
+  std::string identifier_s = format_identifier(identifier, arg);
+  va_end(arg);
+  Interface *interface = open_for_writing(type_name.c_str(), identifier_s.c_str());
   return static_cast<InterfaceType *>(interface);;
 }
 

@@ -25,6 +25,8 @@
 
 #include <string>
 #include <cstring>
+#include <cstdio>
+#include <cstdlib>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -243,6 +245,75 @@ BlackBoard::demangle_fawkes_interface_name(const char *type)
   t = t.substr( t.find_first_not_of("0123456789") );
   t = t.substr(0, t.length() - 1); // Hack to remove trailing letter
   return t;
+}
+
+
+/** Get formatted identifier string.
+ * @param identifier_format identifier format string (sprintf syntax)
+ * @param arg arguments for format string
+ * @return formatted string
+ */
+std::string
+BlackBoard::format_identifier(const char *identifier_format, va_list arg)
+{
+  char *id;
+  if (vasprintf(&id, identifier_format, arg) != -1 ) {
+    std::string id_s(id);
+    free(id);
+    return id_s;
+  } else {
+    throw Exception("Failed to generate identifier from format");
+  }
+}
+
+/** Open interface for reading with identifier format string.
+ * This will create a new interface instance of the given type. The result can be
+ * casted to the appropriate type.
+ * @param interface_type type of the interface
+ * @param identifier identifier format string of the interface
+ * @param ... arguments for identifier format
+ * @return new fully initialized interface instance of requested type
+ * @exception OutOfMemoryException thrown if there is not enough free space for
+ * the requested interface.
+ */
+Interface *
+BlackBoard::open_for_reading_f(const char *interface_type,
+			       const char *identifier, ...)
+{
+  va_list arg;
+  va_start(arg, identifier);
+  Interface *iface = open_for_reading(interface_type,
+				      format_identifier(identifier, arg).c_str());
+
+  va_end(arg);
+  return iface;
+}
+
+
+/** Open interface for writing with identifier format string.
+ * This will create a new interface instance of the given type. The result can be
+ * casted to the appropriate type. This will only succeed if there is not already
+ * a writer for the given interface type/id!
+ * @param interface_type type of the interface
+ * @param identifier identifier format string of the interface
+ * @param ... arguments for identifier format
+ * @return new fully initialized interface instance of requested type
+ * @exception OutOfMemoryException thrown if there is not enough free space for
+ * the requested interface.
+ * @exception BlackBoardWriterActiveException thrown if there is already a writing
+ * instance with the same type/id
+ */
+Interface *
+BlackBoard::open_for_writing_f(const char *interface_type,
+			       const char *identifier, ...)
+{
+  va_list arg;
+  va_start(arg, identifier);
+  Interface *iface = open_for_writing(interface_type,
+				      format_identifier(identifier, arg).c_str());
+
+  va_end(arg);
+  return iface;
 }
 
 

@@ -23,7 +23,7 @@ include $(BUILDCONFDIR)/tf/tf.mk
 
 PRESUBDIRS = interfaces
 
-REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface
+REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface search
 
 ifeq ($(CC),gcc)
   ifneq ($(call gcc_atleast_version,4,6),1)
@@ -76,6 +76,12 @@ LDFLAGS += $(call boost-lib-ldflags,thread)
 CFLAGS  += $(call boost-lib-cflags,system)
 LDFLAGS += $(call boost-lib-ldflags,system)
 
+ifneq ($(call pcl-version-atleast,1.7.0),1)
+  ifeq ($(HAVE_ROS),1)
+    CFLAGS  += $(call ros-pkg-cflags,rostime)
+    LDFLAGS += $(call ros-pkg-lflags,rostime)
+   endif
+endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)

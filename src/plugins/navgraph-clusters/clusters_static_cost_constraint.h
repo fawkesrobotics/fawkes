@@ -1,7 +1,7 @@
 /***************************************************************************
- *  edge_cost_constraint.h - base class for edge cost constraints
+ *  clusters_static_cost_constraint.h - static cost factor for blocked edges
  *
- *  Created: Fri Jul 18 12:08:41 2014
+ *  Created: Fri Jul 18 22:36:37 2014
  *  Copyright  2014  Tim Niemueller
  ****************************************************************************/
 
@@ -18,41 +18,32 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __NAVGRAPH_CONSTRAINTS_EDGE_COST_CONSTRAINT_H_
-#define __NAVGRAPH_CONSTRAINTS_EDGE_COST_CONSTRAINT_H_
+#ifndef __NAVGRAPH_CLUSTERS_CLUSTERS_STATIC_COST_CONSTRAINT_H_
+#define __NAVGRAPH_CLUSTERS_CLUSTERS_STATIC_COST_CONSTRAINT_H_
 
-#include <vector>
+#include <plugins/navgraph/constraints/edge_cost_constraint.h>
+
+#include <list>
 #include <string>
 
-#include <utils/graph/topological_map_node.h>
+class NavGraphClustersThread; 
 
-namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
-
-class Logger;
-
-class NavGraphEdgeCostConstraint
+class NavGraphClustersStaticCostConstraint : public fawkes::NavGraphEdgeCostConstraint
 {
  public:
-  NavGraphEdgeCostConstraint(std::string &name);
-  NavGraphEdgeCostConstraint(const char *name);
-  virtual ~NavGraphEdgeCostConstraint();
-
-  std::string name();
+  NavGraphClustersStaticCostConstraint(const char *name, NavGraphClustersThread *parent,
+				       float cost_factor);
+  virtual ~NavGraphClustersStaticCostConstraint();
 
   virtual bool compute(void) throw();
   virtual float cost_factor(const fawkes::TopologicalMapNode &from,
-			    const fawkes::TopologicalMapNode &to) throw() = 0;
+			    const fawkes::TopologicalMapNode &to) throw();
 
-  bool operator==(const std::string &name) const;
-
- protected:
-  std::string name_;
+ private:
+  NavGraphClustersThread *parent_;
+  float cost_factor_;
+  std::list<std::pair<std::string, std::string>> blocked_;
 
 };
-
-} // end namespace fawkes
 
 #endif

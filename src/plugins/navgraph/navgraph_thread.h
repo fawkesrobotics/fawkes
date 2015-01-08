@@ -105,6 +105,10 @@ class NavGraphThread
   float        cfg_shortcut_tolerance_; 
   float        cfg_resend_interval_; 
   float        cfg_replan_interval_; 
+  float        cfg_replan_factor_; 
+#ifdef HAVE_VISUALIZATION
+  float        cfg_visual_interval_; 
+#endif
   bool         cfg_monitor_file_;
   float        cfg_target_time_;
   bool         cfg_log_graph_;
@@ -138,6 +142,7 @@ class NavGraphThread
 
 
 #ifdef HAVE_VISUALIZATION
+  fawkes::Time *visualized_at_;
   NavGraphVisualizationThread *vt_;
 #endif
 };

@@ -58,7 +58,7 @@ class LaserClusterThread
   public fawkes::PointCloudAspect
 {
  public:
-  LaserClusterThread();
+  LaserClusterThread(std::string &cfg_name, std::string &cfg_prefix);
   virtual ~LaserClusterThread();
 
   virtual void init();
@@ -82,6 +82,9 @@ class LaserClusterThread
 		    const Eigen::Vector4f &centroid = Eigen::Vector4f(0, 0, 0, 0),
                     const Eigen::Quaternionf &rotation = Eigen::Quaternionf(1, 0, 0, 0));
 
+  float calc_line_length(CloudPtr cloud, pcl::PointIndices::Ptr inliers,
+			 pcl::ModelCoefficients::Ptr coeff);
+
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
@@ -94,7 +97,6 @@ class LaserClusterThread
   pcl::SACSegmentation<PointType> seg_;
 
   std::vector<fawkes::Position3DInterface *> cluster_pos_ifs_;
-  fawkes::Position3DInterface * cluster_pos_if_;
 
   fawkes::SwitchInterface *switch_if_;
   fawkes::LaserClusterInterface *config_if_;
@@ -104,25 +106,35 @@ class LaserClusterThread
     SELECT_MIN_DIST
   } selection_mode_t;
 
+  std::string  cfg_name_;
+  std::string  cfg_prefix_;
+
   bool         cfg_line_removal_;
   float        cfg_depth_filter_min_x_;
   float        cfg_depth_filter_max_x_;
   unsigned int cfg_segm_max_iterations_;
   float        cfg_segm_distance_threshold_;
   unsigned int cfg_segm_min_inliers_;
+  float        cfg_segm_sample_max_dist_;
+  float        cfg_line_min_length_;
   float        cfg_cluster_tolerance_;
   unsigned int cfg_cluster_min_size_;
   unsigned int cfg_cluster_max_size_;
   std::string  cfg_input_pcl_;
   std::string  cfg_result_frame_;
-  float        cfg_cluster_min_x_;
-  float        cfg_cluster_max_x_;
-  float        cfg_cluster_min_y_;
-  float        cfg_cluster_max_y_;
-  float        cfg_cluster_switch_tolerance_;
+  float        cfg_bbox_min_x_;
+  float        cfg_bbox_max_x_;
+  float        cfg_bbox_min_y_;
+  float        cfg_bbox_max_y_;
+  bool         cfg_use_bbox_;
+  float        cfg_switch_tolerance_;
   float        cfg_offset_x_;
+  float        cfg_offset_y_;
+  float        cfg_offset_z_;
   selection_mode_t cfg_selection_mode_;
   unsigned int cfg_max_num_clusters_;
+
+  std::string  output_cluster_name_;
 
   float        current_max_x_;
 

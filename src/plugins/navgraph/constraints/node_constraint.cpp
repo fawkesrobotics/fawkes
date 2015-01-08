@@ -53,6 +53,14 @@ NavGraphNodeConstraint::NavGraphNodeConstraint(std::string &name)
   name_   = name;
 }
 
+/** Constructor.
+ * @param name name of node constraint
+ */
+NavGraphNodeConstraint::NavGraphNodeConstraint(const char *name)
+{
+  name_   = name;
+}
+
 
 /** Virtual empty destructor. */
 NavGraphNodeConstraint::~NavGraphNodeConstraint()

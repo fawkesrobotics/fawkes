@@ -50,6 +50,16 @@ plugins/navgraph:
   # since the last path planning.
   replan_interval: 2.0
 
+  # Cost factor to decide whether to use new or old plan after re-planning.
+  # The cost of the old (remaining partial) plan is multiplied with this
+  # factor and then compared to the new plan's cost. Only if the new plan
+  # is not more expensive than this result, it is used.
+  # For example, when setting this to 1.0, the new plan is only considered
+  # if it is at most as expensive as the current plan. When setting this to
+  # 2.0, the new plan may be up to twice as expensive as the current plan
+  # to switch.
+  replan_cost_factor: 1.5
+
   # Update the visualization at this interval. This will trigger a compuation
   # of all constraints and if any change occurs the graph will be published
   # again. This is done whether the robot is currently driving or standing still.
@@ -83,7 +93,7 @@ plugins/navgraph:
     # saturated and thus yellow, i.e.  a setting of 2.0 means that a
     # cost factor of 1.0 will be drawn as red, 1.5 as orange, and
     # anything greater or equal to 2.0 as yellow.
-    cost_scale_max: 2.0
+    cost_scale_max: 4.0
 
   # navgraph-static-constraints plugin configuration
   static-constraints:
