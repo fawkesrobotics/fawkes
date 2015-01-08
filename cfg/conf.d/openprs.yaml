@@ -64,6 +64,12 @@ openprs:
     # to inject commands for OpenPRS kernels.
     proxy-tcp-port: !tcp-port 3401
 
+    # Time in seconds to wait for the server to be reachable on
+    # initializing the plugin. This is particularly relevant when
+    # run is set to true as on a loaded system it may take some
+    # time for the server to be actually up.
+    timeout: 15
+
   kernels:
     # This will be posted as OPRS_DATA_PATH environment variable for
     # newly instantiated kernels. The special string $HOME will be

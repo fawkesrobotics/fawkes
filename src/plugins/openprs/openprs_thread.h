@@ -3,8 +3,7 @@
  *  openprs_thread.h - OpenPRS aspect provider thread
  *
  *  Created: Thu Aug 14 15:52:35 2014
- *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2014-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -34,6 +33,8 @@
 #include <plugins/openprs/aspect/openprs_manager_inifin.h>
 
 #include <string>
+#include <thread>
+#include <boost/asio.hpp>
 
 namespace fawkes {
   class AspectIniFin;
@@ -64,6 +65,9 @@ class OpenPRSThread
 
  private: // methods
   const std::list<fawkes::AspectIniFin *>  inifin_list();
+  bool server_alive();
+  void check_deadline(boost::asio::deadline_timer &deadline,
+		      boost::asio::ip::tcp::socket &socket);
 
  private: // members
   bool         cfg_mp_run_;
@@ -79,6 +83,7 @@ class OpenPRSThread
   unsigned int cfg_server_port_;
   std::string  cfg_server_port_s_;
   unsigned int cfg_server_proxy_port_;
+  float        cfg_server_timeout_;
 
   fawkes::SubProcess *proc_mp_;
   fawkes::SubProcess *proc_srv_;
@@ -89,6 +94,12 @@ class OpenPRSThread
 
   fawkes::OpenPRSServerProxy                    *openprs_server_proxy_;
   fawkes::OpenPRSMessagePasserProxy             *openprs_mp_proxy_;
+
+  boost::asio::io_service        io_service_;
+  std::thread                    io_service_thread_;
+  boost::asio::ip::tcp::socket   server_socket_;
+  boost::asio::deadline_timer    deadline_;
+
 };
 
 #endif

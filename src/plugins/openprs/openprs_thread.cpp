@@ -3,7 +3,7 @@
  *  openprs_thread.cpp -  OpenPRS environment providing Thread
  *
  *  Created: Thu Aug 14 15:52:35 2014
- *  Copyright  2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2014-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -35,6 +35,9 @@
 #include <csignal>
 
 #include <boost/format.hpp>
+#include <boost/bind.hpp>
+#include <boost/lambda/lambda.hpp>
+#include <boost/lambda/bind.hpp>
 
 using namespace fawkes;
 
@@ -48,7 +51,8 @@ using namespace fawkes;
 OpenPRSThread::OpenPRSThread()
   : Thread("OpenPRSThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE),
-    AspectProviderAspect(inifin_list())
+    AspectProviderAspect(inifin_list()),
+    server_socket_(io_service_), deadline_(io_service_)
 {
 }
 
@@ -62,6 +66,11 @@ OpenPRSThread::~OpenPRSThread()
 void
 OpenPRSThread::init()
 {
+  proc_srv_ = NULL;
+  proc_mp_  = NULL;
+  openprs_server_proxy_ = NULL;
+  openprs_mp_proxy_ = NULL;
+
   char hostname[HOST_NAME_MAX];
   if (gethostname(hostname, HOST_NAME_MAX) == -1) {
     strcpy(hostname, "localhost");
@@ -90,6 +99,8 @@ OpenPRSThread::init()
   cfg_server_port_s_ = boost::str(boost::format("%u") % cfg_server_port_);
   cfg_server_proxy_port_ = config->get_uint("/openprs/server/proxy-tcp-port");
 
+  cfg_server_timeout_ = config->get_float("/openprs/server/timeout");
+
   if (cfg_mp_run_) {
     logger->log_warn(name(), "Running OPRS-mp");
     const char *filename = cfg_mp_bin_.c_str();
@@ -111,8 +122,62 @@ OpenPRSThread::init()
     proc_srv_ = NULL;
   }
 
-  // give some time for OpenPRS to come up
-  usleep(500000);
+#if BOOST_VERSION >= 104800
+  logger->log_info(name(), "Verifying OPRS-server availability");
+
+  boost::asio::ip::tcp::resolver resolver(io_service_);
+  boost::asio::ip::tcp::resolver::query query(cfg_server_host_, cfg_server_port_s_);
+  boost::asio::ip::tcp::resolver::iterator iter = resolver.resolve(query);
+
+  // this is just the overly complicated way to get a timeout on
+  // a synchronous connect, cf.
+  // http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/example/cpp03/timeouts/blocking_tcp_client.cpp
+  deadline_.expires_at(boost::posix_time::pos_infin);
+  check_deadline(deadline_, server_socket_);
+
+  deadline_.expires_from_now(boost::posix_time::seconds(cfg_server_timeout_));
+
+  boost::system::error_code ec = boost::asio::error::would_block;
+  server_socket_.async_connect(iter->endpoint(),
+  			       boost::lambda::var(ec) = boost::lambda::_1);
+
+  // Block until the asynchronous operation has completed.
+  do {
+    io_service_.run_one();
+#if BOOST_VERSION >= 105400 && BOOST_VERSION < 105500
+    // Boost 1.54 has a bug that causes async_connect to report success
+    // if it cannot connect at all to the other side, cf.
+    // https://svn.boost.org/trac/boost/ticket/8795
+    // Work around by explicitly checking for connected status
+    if (! ec) {
+      server_socket_.remote_endpoint(ec);
+      if (ec == boost::system::errc::not_connected) {
+        // continue waiting for timeout
+        ec = boost::asio::error::would_block;
+	server_socket_.async_connect(iter->endpoint(),
+                                     boost::lambda::var(ec) = boost::lambda::_1);
+      }
+    }
+#endif
+  } while (ec == boost::asio::error::would_block);
+
+  // Determine whether a connection was successfully established.
+  if (ec || ! server_socket_.is_open()) {
+    finalize();
+    if (ec.value() == boost::system::errc::operation_canceled) {
+      throw Exception("OpenPRS waiting for server to come up timed out");
+    } else {
+      throw Exception("OpenPRS waiting for server failed: %s", ec.message().c_str());
+    }
+  }
+#else
+  logger->log_warn(name(), "Cannot verify server aliveness, Boost too old");
+#endif
+
+  boost::asio::socket_base::keep_alive keep_alive_option(true);
+  server_socket_.set_option(keep_alive_option);
+
+  io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
 
   logger->log_info(name(), "Starting OpenPRS server proxy");
 
@@ -140,6 +205,12 @@ OpenPRSThread::init()
 void
 OpenPRSThread::finalize()
 {
+  server_socket_.close();
+  io_service_.stop();
+  if (io_service_thread_.joinable()) {
+    io_service_thread_.join();
+  }
+
   if (proc_srv_)  proc_srv_->kill(SIGINT);
   if (proc_mp_)   proc_mp_->kill(SIGINT);
 
@@ -166,4 +237,36 @@ OpenPRSThread::inifin_list()
   rv.push_back(&openprs_aspect_inifin_);
   rv.push_back(&openprs_manager_aspect_inifin_);
   return rv;
+}
+
+
+bool
+OpenPRSThread::server_alive()
+{
+  if (server_socket_.is_open()) {
+    boost::system::error_code ec;
+    server_socket_.remote_endpoint(ec);
+    return !ec;
+  } else {
+    return false;
+  }
+}
+
+
+void
+OpenPRSThread::check_deadline(boost::asio::deadline_timer &deadline,
+			      boost::asio::ip::tcp::socket &socket)
+{
+  if (deadline.expires_at() <= boost::asio::deadline_timer::traits_type::now()) {
+    socket.close();
+    deadline.expires_at(boost::posix_time::pos_infin);
+  }
+
+#if BOOST_VERSION >= 104800
+  deadline.async_wait(boost::lambda::bind(&OpenPRSThread::check_deadline, this,
+					   boost::ref(deadline), boost::ref(socket)));
+#else
+  deadline.async_wait(boost::bind(&OpenPRSThread::check_deadline, this,
+				   boost::ref(deadline), boost::ref(socket)));
+#endif
 }
