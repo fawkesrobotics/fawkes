@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  topological_map_node.h - Topological graph node
+ *  navgraph_edge.h - Topological graph edge
  *
- *  Created: Fri Sep 21 16:01:26 2012
+ *  Created: Fri Sep 21 16:08:27 2012
  *  Copyright  2012  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
@@ -20,13 +20,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_GRAPH_TOPOLOGICAL_MAP_NODE_H_
-#define __UTILS_GRAPH_TOPOLOGICAL_MAP_NODE_H_
+#ifndef __UTILS_GRAPH_TOPOLOGICAL_MAP_EDGE_H_
+#define __UTILS_GRAPH_TOPOLOGICAL_MAP_EDGE_H_
 
 #include <utils/misc/string_conversions.h>
 
+#include <navgraph/navgraph_node.h>
+
 #include <map>
-#include <vector>
 #include <string>
 
 namespace fawkes {
@@ -34,39 +35,43 @@ namespace fawkes {
 }
 #endif
 
-class TopologicalMapNode {
+class NavGraphEdge {
+  friend class NavGraph;
+
  public:
-  TopologicalMapNode();
+  NavGraphEdge();
 
-  TopologicalMapNode(std::string name, float x, float y,
-                     std::map<std::string, std::string> properties);
+  NavGraphEdge(std::string from, std::string to,
+                     std::map<std::string, std::string> properties,
+                     bool directed = false);
 
-  TopologicalMapNode(std::string name, float x, float y);
+  NavGraphEdge(std::string from, std::string to,
+                     bool directed = false);
 
-  /** Get name of node.
-   * @return name of node */
-  const std::string &  name() const
-  { return name_; }
+  /** Get edge originating node name.
+   * @return edge originating node name */
+  const std::string &  from() const
+  { return from_; }
 
-  /** Get X coordinate in global frame.
-   * @return X coordinate in global frame */
-  float x() const
-  { return x_; }
+  /** Get edge target node name.
+   * @return edge target node name */
+  const std::string &  to() const
+  { return to_; }
 
-  /** Get Y coordinate in global frame.
-   * @return Y coordinate in global frame */
-  float y() const
-  { return y_; }
 
-  /** Check if this node shall be unconnected.
-   * @return true if the node is unconnected, false otherwise */
-  bool unconnected() const
-  { return unconnected_; }
+  /** Get edge originating node.
+   * @return edge originating node */
+  const NavGraphNode &  from_node() const
+  { return from_node_; }
 
-  void set_x(float x);
-  void set_y(float y);
-  void set_name(std::string name);
-  void set_unconnected(bool unconnected);
+  /** Get edge target node.
+   * @return edge target node */
+  const NavGraphNode &  to_node() const
+  { return to_node_; }
+
+  void set_from(std::string from);
+  void set_to(std::string to);
+  void set_directed(bool directed);
 
   /** Get all properties.
    * @return property map
@@ -81,16 +86,19 @@ class TopologicalMapNode {
   bool has_property(std::string property)
   { return properties_.find(property) != properties_.end(); }
 
-  /** Check if node is valid, i.e. it has a name.
-   * @return true if node is valid, false otherwise
+  /** Check if edge is valid.
+   * An edge is valid iff it has originating and target node name values.
+   * @return true if edge is valid, false otherwise
    */
   bool is_valid() const
-  { return name_ != ""; }
+  { return from_ != "" && to_ != ""; }
 
-  void set_property(std::string property, std::string value);
-  void set_property(std::string property, float value);
-  void set_property(std::string property, int value);
-  void set_property(std::string property, bool value);
+  /** Check if edge is directed.
+   * @return true if edge is directed, false otherwise.
+   */
+  bool is_directed() const
+  { return directed_; }
+
 
   std::string property(std::string prop);
 
@@ -115,31 +123,36 @@ class TopologicalMapNode {
   bool property_as_bool(std::string prop)
   { return StringConversions::to_bool(property(prop)); }
 
-  /** Check nodes for equality.
-   * Nodes are equal if they have the same name.
-   * @param n node to compare with
+  /** Check edges for equality.
+   * Edges are equal if they have the same origination and destination
+   * nodes and the same directed status.
+   * @param e edge to compare with
    * @return true if the node is the same as this one, false otherwise
    */
-  bool operator==(const TopologicalMapNode &n) const
-  { return name_ == n.name_; }
+  bool operator==(const NavGraphEdge &e) const
+  { return from_ == e.from_ && to_ == e.to_ && directed_ == e.directed_; }
 
-  void set_reachable_nodes(std::vector<std::string> reachable_nodes);
 
-  /** Get reachable nodes.
-   * @return vector of directly reachable nodes.
+  /** Less than operator based on node from and to names.
+   * One edge is less than another if this is true for their respective names.
+   * @param e edge to compare with
+   * @return true if this edge is less than the given one
    */
-  const std::vector<std::string> &  reachable_nodes() const
-  { return reachable_nodes_; }
-    
- private:
-  std::string name_;
-  float       x_;
-  float       y_;
-  bool        unconnected_;
-  std::map<std::string, std::string> properties_;
-  std::vector<std::string> reachable_nodes_;
-};
+  bool operator<(const NavGraphEdge &e) const
+  { return (from_ == e.from_ && to_ < e.to_) || (from_ < e.from_); }
 
+
+  void set_nodes(const NavGraphNode &from_node, const NavGraphNode &to_node);
+
+ private:
+  std::string from_;
+  std::string to_;
+  bool directed_;
+  std::map<std::string, std::string> properties_;
+
+  NavGraphNode from_node_;
+  NavGraphNode to_node_;
+};
 
 } // end of namespace fawkes
 

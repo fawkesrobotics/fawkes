@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  topological_map_node.cpp - Topological graph node
+ *  navgraph_node.cpp - Topological graph node
  *
  *  Created: Fri Sep 21 16:11:20 2012
  *  Copyright  2012  Tim Niemueller [www.niemueller.de]
@@ -20,20 +20,20 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <navgraph/topological_map_node.h>
+#include <navgraph/navgraph_node.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class TopologicalMapNode <navgraph/topological_map_node.h>
+/** @class NavGraphNode <navgraph/navgraph_node.h>
  * Topological graph node.
  * @author Tim Niemueller
  */
 
 /** Constructor for invalid node. */
-TopologicalMapNode::TopologicalMapNode()
+NavGraphNode::NavGraphNode()
   : unconnected_(false)
 {
 }
@@ -45,7 +45,7 @@ TopologicalMapNode::TopologicalMapNode()
  * @param y y coordinate in global frame of node
  * @param properties properties for the new node
  */
-TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y,
+NavGraphNode::NavGraphNode(std::string name, float x, float y,
                                        std::map<std::string, std::string> properties)
   : unconnected_(false)
 {
@@ -61,7 +61,7 @@ TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y,
  * @param x x coordinate in global frame of node
  * @param y y coordinate in global frame of node
  */
-TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y)
+NavGraphNode::NavGraphNode(std::string name, float x, float y)
   : unconnected_(false)
 {
   name_ = name;
@@ -74,7 +74,7 @@ TopologicalMapNode::TopologicalMapNode(std::string name, float x, float y)
  * @param x X coordinate in global frame for node.
  */
 void
-TopologicalMapNode::set_x(float x)
+NavGraphNode::set_x(float x)
 {
   x_ = x;
 }
@@ -83,7 +83,7 @@ TopologicalMapNode::set_x(float x)
  * @param y Y coordinate in global frame for node.
  */
 void
-TopologicalMapNode::set_y(float y)
+NavGraphNode::set_y(float y)
 {
   y_ = y;
 }
@@ -93,7 +93,7 @@ TopologicalMapNode::set_y(float y)
  * @param name new name for node
  */
 void
-TopologicalMapNode::set_name(std::string name)
+NavGraphNode::set_name(std::string name)
 {
   name_ = name;
 }
@@ -108,7 +108,7 @@ TopologicalMapNode::set_name(std::string name)
  * false otherwise
  */
 void
-TopologicalMapNode::set_unconnected(bool unconnected)
+NavGraphNode::set_unconnected(bool unconnected)
 {
   unconnected_ = unconnected;
 }
@@ -119,7 +119,7 @@ TopologicalMapNode::set_unconnected(bool unconnected)
  * @return property value as string
  */
 std::string
-TopologicalMapNode::property(std::string prop)
+NavGraphNode::property(std::string prop)
 {
   if (properties_.find(prop) != properties_.end()) {
     return properties_[prop];
@@ -134,7 +134,7 @@ TopologicalMapNode::property(std::string prop)
  * @param value property value
  */
 void
-TopologicalMapNode::set_property(std::string property, std::string value)
+NavGraphNode::set_property(std::string property, std::string value)
 {
   properties_[property] = value;
 }
@@ -145,7 +145,7 @@ TopologicalMapNode::set_property(std::string property, std::string value)
  * @param value property value
  */
 void
-TopologicalMapNode::set_property(std::string property, float value)
+NavGraphNode::set_property(std::string property, float value)
 {
   properties_[property] = StringConversions::to_string(value);
 }
@@ -155,7 +155,7 @@ TopologicalMapNode::set_property(std::string property, float value)
  * @param value property value
  */
 void
-TopologicalMapNode::set_property(std::string property, int value)
+NavGraphNode::set_property(std::string property, int value)
 {
   properties_[property] = StringConversions::to_string(value);
 }
@@ -165,7 +165,7 @@ TopologicalMapNode::set_property(std::string property, int value)
  * @param value property value
  */
 void
-TopologicalMapNode::set_property(std::string property, bool value)
+NavGraphNode::set_property(std::string property, bool value)
 {
   properties_[property] = value ? "true" : "false";
 }
@@ -175,7 +175,7 @@ TopologicalMapNode::set_property(std::string property, bool value)
  * @param reachable_nodes vector of directly reachable nodes
  */
 void
-TopologicalMapNode::set_reachable_nodes(std::vector<std::string> reachable_nodes)
+NavGraphNode::set_reachable_nodes(std::vector<std::string> reachable_nodes)
 {
   reachable_nodes_ = reachable_nodes;
 }

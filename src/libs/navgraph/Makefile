@@ -41,11 +41,11 @@ ifeq ($(HAVE_YAMLCPP),1)
 endif
 
 LIBS_libfawkesnavgraph = stdc++ m fawkescore fawkesutils
-OBJS_libfawkesnavgraph = topological_map_graph.o topological_map_node.o topological_map_edge.o yaml_navgraph.o
+OBJS_libfawkesnavgraph = navgraph.o navgraph_node.o navgraph_edge.o yaml_navgraph.o
 HDRS_libfawkesnavgraph = $(OBJS_libfawkesnavgraph:%.o=%.h)
 
 CFLAGS_fawkesnavgraph_tolua = -Wno-unused-function $(CFLAGS_LUA)
-TOLUA_fawkesnavgraph = topological_map_graph.tolua topological_map_node.tolua
+TOLUA_fawkesnavgraph = navgraph.tolua navgraph_node.tolua
 LDFLAGS_lua_fawkesnavgraph = $(LDFLAGS_LUA)
 LIBS_lua_fawkesnavgraph = fawkescore fawkesutils fawkesnavgraph $(TOLUA_LIBS)
 OBJS_lua_fawkesnavgraph = fawkesnavgraph_tolua.o

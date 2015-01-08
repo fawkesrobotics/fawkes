@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  topological_map_graph.h - Topological graph
+ *  navgraph.h - Topological graph
  *
  *  Created: Fri Sep 21 15:48:00 2012
  *  Copyright  2012  Tim Niemueller [www.niemueller.de]
@@ -23,8 +23,8 @@
 #ifndef __UTILS_GRAPH_TOPOLOGICAL_MAP_GRAPH_H_
 #define __UTILS_GRAPH_TOPOLOGICAL_MAP_GRAPH_H_
 
-#include <navgraph/topological_map_node.h>
-#include <navgraph/topological_map_edge.h>
+#include <navgraph/navgraph_node.h>
+#include <navgraph/navgraph_edge.h>
 
 #include <vector>
 #include <list>
@@ -35,15 +35,15 @@ namespace fawkes {
 }
 #endif
 
-class TopologicalMapGraph
+class NavGraph
 {
  public:
-  TopologicalMapGraph(std::string graph_name);
-  virtual ~TopologicalMapGraph();
+  NavGraph(std::string graph_name);
+  virtual ~NavGraph();
   
   std::string                              name() const;
-  const std::vector<TopologicalMapNode> &  nodes() const;
-  const std::vector<TopologicalMapEdge> &  edges() const;
+  const std::vector<NavGraphNode> &  nodes() const;
+  const std::vector<NavGraphEdge> &  edges() const;
 
   const std::map<std::string, std::string> &  default_properties() const;
   bool has_default_property(std::string property) const;
@@ -59,39 +59,39 @@ class TopologicalMapGraph
   void set_default_property(std::string property, bool value);
   void set_default_properties(std::map<std::string, std::string> &properties);
 
-  TopologicalMapNode node(std::string name) const;
+  NavGraphNode node(std::string name) const;
   bool node_exists(std::string name) const;
-  TopologicalMapNode root_node() const;
+  NavGraphNode root_node() const;
 
-  TopologicalMapNode closest_node(float pos_x, float pos_y,
+  NavGraphNode closest_node(float pos_x, float pos_y,
                                   std::string property = "");
 
-  TopologicalMapNode closest_node_to(std::string node_name,
+  NavGraphNode closest_node_to(std::string node_name,
 				     std::string property = "");
 
-  TopologicalMapNode closest_node(float pos_x, float pos_y, bool consider_unconnected,
+  NavGraphNode closest_node(float pos_x, float pos_y, bool consider_unconnected,
                                   std::string property = "");
   
-  TopologicalMapNode closest_node_to(std::string node_name, bool consider_unconnected,
+  NavGraphNode closest_node_to(std::string node_name, bool consider_unconnected,
 				     std::string property = "");
 
-  TopologicalMapNode closest_node_with_unconnected(float pos_x, float pos_y,
+  NavGraphNode closest_node_with_unconnected(float pos_x, float pos_y,
 						   std::string property = "");
 
-  TopologicalMapNode closest_node_to_with_unconnected(std::string node_name,
+  NavGraphNode closest_node_to_with_unconnected(std::string node_name,
 						      std::string property = "");
 
-  std::vector<TopologicalMapNode> search_nodes(std::string property);
+  std::vector<NavGraphNode> search_nodes(std::string property);
 
   std::vector<std::string>  reachable_nodes(std::string node_name) const;
 
   void set_root(std::string node_id);
-  void add_node(TopologicalMapNode node);
-  void add_edge(TopologicalMapEdge edge);
+  void add_node(NavGraphNode node);
+  void add_edge(NavGraphEdge edge);
 
   void calc_reachability();
 
-  TopologicalMapGraph & operator=(const TopologicalMapGraph &g);
+  NavGraph & operator=(const NavGraph &g);
 
   void notify_of_change() throw();
 
@@ -111,10 +111,10 @@ class TopologicalMapGraph
   void assert_connected();
 
  private:
-  TopologicalMapNode              root_node_;
+  NavGraphNode              root_node_;
   std::string                     graph_name_;
-  std::vector<TopologicalMapNode> nodes_;
-  std::vector<TopologicalMapEdge> edges_;
+  std::vector<NavGraphNode> nodes_;
+  std::vector<NavGraphEdge> edges_;
   std::list<ChangeListener *>     change_listeners_;
   std::map<std::string, std::string> default_properties_;
 

@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  topological_map_node.tolua - Node used in TopologicalMapGraph (tolua++)
+ *  navgraph_node.tolua - Node used in NavGraph (tolua++)
  *
  *  Created: Tue Jun 30 12:12:44 2009 (RoboCup 2009, Graz)
  *  Copyright  2009  Tim Niemueller [www.niemueller.de]
@@ -20,13 +20,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-$#include <navgraph/topological_map_node.h>
+$#include <navgraph/navgraph_node.h>
 $#include <string>
 $#include <vector>
 $using namespace std;
 
 class vector {
-  TOLUA_TEMPLATE_BIND(T, string, fawkes::TopologicalMapNode)
+  TOLUA_TEMPLATE_BIND(T, string, fawkes::NavGraphNode)
 
   void clear();
   int size() const;
@@ -41,11 +41,11 @@ class vector {
 
 namespace fawkes {
 
-class TopologicalMapNode
+class NavGraphNode
 {
  public:
-  TopologicalMapNode();
-  TopologicalMapNode(string name, double x, double y);
+  NavGraphNode();
+  NavGraphNode(string name, double x, double y);
 
 
   string name() const;

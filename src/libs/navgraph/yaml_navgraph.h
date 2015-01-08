@@ -30,9 +30,9 @@ namespace fawkes {
 }
 #endif
 
-class TopologicalMapGraph;
+class NavGraph;
 
-extern TopologicalMapGraph *  load_yaml_navgraph(std::string filename);
+extern NavGraph *  load_yaml_navgraph(std::string filename);
 
 } // end of namespace fawkes
 

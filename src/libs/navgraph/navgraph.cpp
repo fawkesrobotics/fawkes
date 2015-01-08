@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  topological_map_graph.cpp - Topological graph
+ *  navgraph.cpp - Topological graph
  *
  *  Created: Fri Sep 21 15:55:49 2012
  *  Copyright  2012  Tim Niemueller [www.niemueller.de]
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <navgraph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 #include <core/exception.h>
 
 #include <algorithm>
@@ -35,7 +35,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class TopologicalMapGraph <navgraph/topological_map_graph.h>
+/** @class NavGraph <navgraph/navgraph.h>
  * Topological map graph.
  * This class represents a topological graph using 2D map coordinates
  * with nodes and edges. Both can be annotated with certain free-form
@@ -55,14 +55,14 @@ namespace fawkes {
  * @param graph_name Name of the graph, for example to handle multiple
  * graphs, e.g. for multiple levels of a building.
  */
-TopologicalMapGraph::TopologicalMapGraph(std::string graph_name)
+NavGraph::NavGraph(std::string graph_name)
 {
   graph_name_ = graph_name;
 }
 
 
 /** Virtual empty destructor. */
-TopologicalMapGraph::~TopologicalMapGraph()
+NavGraph::~NavGraph()
 {
 }
 
@@ -75,8 +75,8 @@ TopologicalMapGraph::~TopologicalMapGraph()
  * @param g graph from which to copy the data
  * @return reference to this instance
  */
-TopologicalMapGraph &
-TopologicalMapGraph::operator=(const TopologicalMapGraph &g)
+NavGraph &
+NavGraph::operator=(const NavGraph &g)
 {
   root_node_  = g.root_node_;
   graph_name_ = g.graph_name_;
@@ -94,7 +94,7 @@ TopologicalMapGraph::operator=(const TopologicalMapGraph &g)
  * @return graph name
  */
 std::string
-TopologicalMapGraph::name() const
+NavGraph::name() const
 {
   return graph_name_;
 }
@@ -103,8 +103,8 @@ TopologicalMapGraph::name() const
 /** Get nodes of the graph.
  * @return const reference to vector of nodes of this graph
  */
-const std::vector<TopologicalMapNode> &
-TopologicalMapGraph::nodes() const
+const std::vector<NavGraphNode> &
+NavGraph::nodes() const
 {
   return nodes_;
 }
@@ -113,8 +113,8 @@ TopologicalMapGraph::nodes() const
 /** Get edges of the graph.
  * @return const reference to vector of edges of this graph
  */
-const std::vector<TopologicalMapEdge> &
-TopologicalMapGraph::edges() const
+const std::vector<NavGraphEdge> &
+NavGraph::edges() const
 {
   return edges_;
 }
@@ -125,22 +125,22 @@ TopologicalMapGraph::edges() const
  * @return the node representation of the searched node, if not
  * found returns an invalid node.
  */
-TopologicalMapNode
-TopologicalMapGraph::node(std::string name) const
+NavGraphNode
+NavGraph::node(std::string name) const
 {
-  std::vector<TopologicalMapNode>::const_iterator i;
+  std::vector<NavGraphNode>::const_iterator i;
   for (i = nodes_.begin(); i != nodes_.end(); ++i) {
     if (i->name() == name)  return *i;
   }
-  return TopologicalMapNode();
+  return NavGraphNode();
 }
 
 
 /** Get the root node of the graph.
  * @return root node
  */
-TopologicalMapNode
-TopologicalMapGraph::root_node() const
+NavGraphNode
+NavGraph::root_node() const
 {
   return root_node_;
 }
@@ -155,8 +155,8 @@ TopologicalMapGraph::root_node() const
  * @return node closest to the given point in the global frame, or an
  * invalid node if such a node cannot be found
  */
-TopologicalMapNode
-TopologicalMapGraph::closest_node(float pos_x, float pos_y, std::string property)
+NavGraphNode
+NavGraph::closest_node(float pos_x, float pos_y, std::string property)
 {
   return closest_node(pos_x, pos_y, false, property);
 }
@@ -171,8 +171,8 @@ TopologicalMapGraph::closest_node(float pos_x, float pos_y, std::string property
  * @return node closest to the given point in the global frame, or an
  * invalid node if such a node cannot be found
  */
-TopologicalMapNode
-TopologicalMapGraph::closest_node_with_unconnected(float pos_x, float pos_y,
+NavGraphNode
+NavGraph::closest_node_with_unconnected(float pos_x, float pos_y,
 						   std::string property)
 {
   return closest_node(pos_x, pos_y, true, property);
@@ -187,8 +187,8 @@ TopologicalMapGraph::closest_node_with_unconnected(float pos_x, float pos_y,
  * invalid node if such a node cannot be found. The node will obviously
  * not be the node with the name @p node_name.
  */
-TopologicalMapNode
-TopologicalMapGraph::closest_node_to(std::string node_name,
+NavGraphNode
+NavGraph::closest_node_to(std::string node_name,
 						      std::string property)
 {
   return closest_node_to(node_name, false, property);
@@ -203,8 +203,8 @@ TopologicalMapGraph::closest_node_to(std::string node_name,
  * invalid node if such a node cannot be found. The node will obviously
  * not be the node with the name @p node_name.
  */
-TopologicalMapNode
-TopologicalMapGraph::closest_node_to_with_unconnected(std::string node_name,
+NavGraphNode
+NavGraph::closest_node_to_with_unconnected(std::string node_name,
 						      std::string property)
 {
   return closest_node_to(node_name, true, property);
@@ -220,16 +220,16 @@ TopologicalMapGraph::closest_node_to_with_unconnected(std::string node_name,
  * @return node closest to the given point in the global frame, or an
  * invalid node if such a node cannot be found
  */
-TopologicalMapNode
-TopologicalMapGraph::closest_node(float pos_x, float pos_y, bool consider_unconnected,
+NavGraphNode
+NavGraph::closest_node(float pos_x, float pos_y, bool consider_unconnected,
                                   std::string property)
 {
-  std::vector<TopologicalMapNode> nodes = search_nodes(property);
+  std::vector<NavGraphNode> nodes = search_nodes(property);
 
   float min_dist = HUGE;
 
-  std::vector<TopologicalMapNode>::iterator i;
-  std::vector<TopologicalMapNode>::iterator elem = nodes.begin();
+  std::vector<NavGraphNode>::iterator i;
+  std::vector<NavGraphNode>::iterator elem = nodes.begin();
   for (i = nodes.begin(); i != nodes.end(); ++i) {
     if (! consider_unconnected && i->unconnected())  continue;
 
@@ -243,7 +243,7 @@ TopologicalMapGraph::closest_node(float pos_x, float pos_y, bool consider_unconn
   }
 
   if (elem == nodes.end()) {
-    return TopologicalMapNode();
+    return NavGraphNode();
   } else {
     return *elem;
   }
@@ -259,17 +259,17 @@ TopologicalMapGraph::closest_node(float pos_x, float pos_y, bool consider_unconn
  * invalid node if such a node cannot be found. The node will obviously
  * not be the node with the name @p node_name.
  */
-TopologicalMapNode
-TopologicalMapGraph::closest_node_to(std::string node_name, bool consider_unconnected,
+NavGraphNode
+NavGraph::closest_node_to(std::string node_name, bool consider_unconnected,
 				     std::string property)
 {
-  TopologicalMapNode n = node(node_name);
-  std::vector<TopologicalMapNode> nodes = search_nodes(property);
+  NavGraphNode n = node(node_name);
+  std::vector<NavGraphNode> nodes = search_nodes(property);
 
   float min_dist = HUGE;
 
-  std::vector<TopologicalMapNode>::iterator i;
-  std::vector<TopologicalMapNode>::iterator elem = nodes.begin();
+  std::vector<NavGraphNode>::iterator i;
+  std::vector<NavGraphNode>::iterator elem = nodes.begin();
   for (i = nodes.begin(); i != nodes.end(); ++i) {
     if (! consider_unconnected && i->unconnected())  continue;
 
@@ -283,7 +283,7 @@ TopologicalMapGraph::closest_node_to(std::string node_name, bool consider_unconn
   }
 
   if (elem == nodes.end()) {
-    return TopologicalMapNode();
+    return NavGraphNode();
   } else {
     return *elem;
   }
@@ -295,9 +295,9 @@ TopologicalMapGraph::closest_node_to(std::string node_name, bool consider_unconn
  * @return true if a node with the given name exists, false otherwise
  */
 bool
-TopologicalMapGraph::node_exists(std::string name) const
+NavGraph::node_exists(std::string name) const
 {
-  std::vector<TopologicalMapNode>::const_iterator i;
+  std::vector<NavGraphNode>::const_iterator i;
   for (i = nodes_.begin(); i != nodes_.end(); ++i) {
     if (i->name() == name)  return true;
   }
@@ -308,15 +308,15 @@ TopologicalMapGraph::node_exists(std::string name) const
  * @param property property name to look for
  * @return vector of nodes having the specified property
  */
-std::vector<TopologicalMapNode>
-TopologicalMapGraph::search_nodes(std::string property)
+std::vector<NavGraphNode>
+NavGraph::search_nodes(std::string property)
 {
   if (property == "") {
     return nodes();
   } else {
-    std::vector<TopologicalMapNode> rv;
+    std::vector<NavGraphNode> rv;
 
-    std::vector<TopologicalMapNode>::iterator i;
+    std::vector<NavGraphNode>::iterator i;
     for (i = nodes_.begin(); i != nodes_.end(); ++i) {
       if ( i->has_property(property) )  rv.push_back(*i);
     }
@@ -330,7 +330,7 @@ TopologicalMapGraph::search_nodes(std::string property)
  * @param node_id name of the root node
  */
 void
-TopologicalMapGraph::set_root(std::string node_id)
+NavGraph::set_root(std::string node_id)
 {
   root_node_ = node(node_id);
   notify_of_change();
@@ -341,7 +341,7 @@ TopologicalMapGraph::set_root(std::string node_id)
  * @param node node to add
  */
 void
-TopologicalMapGraph::add_node(TopologicalMapNode node)
+NavGraph::add_node(NavGraphNode node)
 {
   nodes_.push_back(node);
   notify_of_change();
@@ -351,7 +351,7 @@ TopologicalMapGraph::add_node(TopologicalMapNode node)
  * @param edge edge to add
  */
 void
-TopologicalMapGraph::add_edge(TopologicalMapEdge edge)
+NavGraph::add_edge(NavGraphEdge edge)
 {
   edges_.push_back(edge);
   notify_of_change();
@@ -362,7 +362,7 @@ TopologicalMapGraph::add_edge(TopologicalMapEdge edge)
  * @return property map
  */
 const std::map<std::string, std::string> &
-TopologicalMapGraph::default_properties() const
+NavGraph::default_properties() const
 {
   return default_properties_;
 }
@@ -372,7 +372,7 @@ TopologicalMapGraph::default_properties() const
  * @return true if node has specified property, false otherwise
  */
 bool
-TopologicalMapGraph::has_default_property(std::string property) const
+NavGraph::has_default_property(std::string property) const
 {
   return default_properties_.find(property) != default_properties_.end();
 }
@@ -382,7 +382,7 @@ TopologicalMapGraph::has_default_property(std::string property) const
  * @return default property value as string
  */
 std::string
-TopologicalMapGraph::default_property(std::string prop) const
+NavGraph::default_property(std::string prop) const
 {
   std::map<std::string, std::string>::const_iterator p;
   if ((p = default_properties_.find(prop)) != default_properties_.end()) {
@@ -397,7 +397,7 @@ TopologicalMapGraph::default_property(std::string prop) const
  * @return property value
  */
 float
-TopologicalMapGraph::default_property_as_float(std::string prop) const
+NavGraph::default_property_as_float(std::string prop) const
 {
   return StringConversions::to_float(default_property(prop));
 }
@@ -407,7 +407,7 @@ TopologicalMapGraph::default_property_as_float(std::string prop) const
  * @return property value
  */
 int
-TopologicalMapGraph::default_property_as_int(std::string prop) const
+NavGraph::default_property_as_int(std::string prop) const
 {
   return StringConversions::to_int(default_property(prop));
 }
@@ -417,7 +417,7 @@ TopologicalMapGraph::default_property_as_int(std::string prop) const
  * @return property value
  */
 bool
-TopologicalMapGraph::default_property_as_bool(std::string prop) const
+NavGraph::default_property_as_bool(std::string prop) const
 {
   return StringConversions::to_bool(default_property(prop));
 }
@@ -427,7 +427,7 @@ TopologicalMapGraph::default_property_as_bool(std::string prop) const
  * @param value property value
  */
 void
-TopologicalMapGraph::set_default_property(std::string property, std::string value)
+NavGraph::set_default_property(std::string property, std::string value)
 {
   default_properties_[property] = value;
 }
@@ -437,7 +437,7 @@ TopologicalMapGraph::set_default_property(std::string property, std::string valu
  * @param properties map of property name to value as string
  */
 void
-TopologicalMapGraph::set_default_properties(std::map<std::string, std::string> &properties)
+NavGraph::set_default_properties(std::map<std::string, std::string> &properties)
 {
   default_properties_ = properties;
 }
@@ -448,7 +448,7 @@ TopologicalMapGraph::set_default_properties(std::map<std::string, std::string> &
  * @param value property value
  */
 void
-TopologicalMapGraph::set_default_property(std::string property, float value)
+NavGraph::set_default_property(std::string property, float value)
 {
   default_properties_[property] = StringConversions::to_string(value);
 }
@@ -458,7 +458,7 @@ TopologicalMapGraph::set_default_property(std::string property, float value)
  * @param value property value
  */
 void
-TopologicalMapGraph::set_default_property(std::string property, int value)
+NavGraph::set_default_property(std::string property, int value)
 {
   default_properties_[property] = StringConversions::to_string(value);
 }
@@ -468,7 +468,7 @@ TopologicalMapGraph::set_default_property(std::string property, int value)
  * @param value property value
  */
 void
-TopologicalMapGraph::set_default_property(std::string property, bool value)
+NavGraph::set_default_property(std::string property, bool value)
 {
   default_properties_[property] = value ? "true" : "false";
 }
@@ -480,14 +480,14 @@ TopologicalMapGraph::set_default_property(std::string property, bool value)
  * @return vector of names of nodes reachable from the specified node
  */
 std::vector<std::string>
-TopologicalMapGraph::reachable_nodes(std::string node_name) const
+NavGraph::reachable_nodes(std::string node_name) const
 {
   std::vector<std::string> rv;
 
-  TopologicalMapNode n = node(node_name);
+  NavGraphNode n = node(node_name);
   if (! n.is_valid())  return rv;
 
-  std::vector<TopologicalMapEdge>::const_iterator i;
+  std::vector<NavGraphEdge>::const_iterator i;
   for (i = edges_.begin(); i != edges_.end(); ++i) {
     if (i->is_directed()) {
       if (i->from() == node_name) {
@@ -510,10 +510,10 @@ TopologicalMapGraph::reachable_nodes(std::string node_name) const
 
 /** Make sure each node exists only once. */
 void
-TopologicalMapGraph::assert_unique_nodes()
+NavGraph::assert_unique_nodes()
 {
   std::list<std::string> names;
-  std::vector<TopologicalMapNode>::iterator i;
+  std::vector<NavGraphNode>::iterator i;
   for (i = nodes_.begin(); i != nodes_.end(); ++i) {
     names.push_back(i->name());
   }
@@ -530,7 +530,7 @@ TopologicalMapGraph::assert_unique_nodes()
 
 /** Make sure each edge exists only once. */
 void
-TopologicalMapGraph::assert_unique_edges()
+NavGraph::assert_unique_edges()
 {
   for (size_t i = 0; i < edges_.size(); ++i) {
     for (size_t j = i+1; j < edges_.size(); ++j) {
@@ -555,7 +555,7 @@ TopologicalMapGraph::assert_unique_edges()
 
 /** Make sure each node in the edges exists. */
 void
-TopologicalMapGraph::assert_valid_edges()
+NavGraph::assert_valid_edges()
 {
   for (size_t i = 0; i < edges_.size(); ++i) {
     if (! node_exists(edges_[i].from())) {
@@ -575,15 +575,15 @@ TopologicalMapGraph::assert_valid_edges()
 
 
 void
-TopologicalMapGraph::assert_connected()
+NavGraph::assert_connected()
 {
   std::set<std::string> traversed;
   std::set<std::string> nodeset;
-  std::queue<TopologicalMapNode> q;
+  std::queue<NavGraphNode> q;
   q.push(nodes_.front());
 
   while (! q.empty()) {
-    TopologicalMapNode &n = q.front();
+    NavGraphNode &n = q.front();
     traversed.insert(n.name());
 
     const std::vector<std::string> & reachable = n.reachable_nodes();
@@ -594,7 +594,7 @@ TopologicalMapGraph::assert_connected()
     }
     std::vector<std::string>::const_iterator r;
     for (r = reachable.begin(); r != reachable.end(); ++r) {
-      TopologicalMapNode target(node(*r));
+      NavGraphNode target(node(*r));
       if (target.unconnected()) {
 	throw Exception("Node %s is marked unconnected but is reachable from node %s\n",
 			target.name().c_str(), n.name().c_str());
@@ -604,7 +604,7 @@ TopologicalMapGraph::assert_connected()
     q.pop();
   }
 
-  std::vector<TopologicalMapNode>::iterator n;
+  std::vector<NavGraphNode>::iterator n;
   for (n = nodes_.begin(); n != nodes_.end(); ++n) {
     nodeset.insert(n->name());
   }
@@ -621,7 +621,7 @@ TopologicalMapGraph::assert_connected()
     // unconnected node, which we couldn't have spotted earlier
     std::set<std::string>::const_iterator ud = nodediff.begin();
     while (ud != nodediff.end()) {
-      TopologicalMapNode udnode(node(*ud));
+      NavGraphNode udnode(node(*ud));
       if (udnode.unconnected()) {
 	// it's ok to be in the disconnected set, but check if it has any
 	// reachable nodes which is forbidden
@@ -661,20 +661,20 @@ TopologicalMapGraph::assert_connected()
  * of the graph nodes. 
  */
 void
-TopologicalMapGraph::calc_reachability()
+NavGraph::calc_reachability()
 {
   if (nodes_.empty())  return;
 
   assert_unique_nodes();
   assert_unique_edges();
   assert_valid_edges();
-  std::vector<TopologicalMapNode>::iterator i;
+  std::vector<NavGraphNode>::iterator i;
   for (i = nodes_.begin(); i != nodes_.end(); ++i) {
     i->set_reachable_nodes(reachable_nodes(i->name()));
   }
   assert_connected();
 
-  std::vector<TopologicalMapEdge>::iterator e;
+  std::vector<NavGraphEdge>::iterator e;
   for (e = edges_.begin(); e != edges_.end(); ++e) {
     e->set_nodes(node(e->from()), node(e->to()));
   }
@@ -685,7 +685,7 @@ TopologicalMapGraph::calc_reachability()
  * @param listener listener to add
  */
 void
-TopologicalMapGraph::add_change_listener(ChangeListener *listener)
+NavGraph::add_change_listener(ChangeListener *listener)
 {
   change_listeners_.push_back(listener);
 }
@@ -694,14 +694,14 @@ TopologicalMapGraph::add_change_listener(ChangeListener *listener)
  * @param listener listener to remove
  */
 void
-TopologicalMapGraph::remove_change_listener(ChangeListener *listener)
+NavGraph::remove_change_listener(ChangeListener *listener)
 {
   change_listeners_.remove(listener);
 }
 
 /** Notify all listeners of a change. */
 void
-TopologicalMapGraph::notify_of_change() throw()
+NavGraph::notify_of_change() throw()
 {
   std::list<ChangeListener *> tmp_listeners = change_listeners_;
 
@@ -711,16 +711,16 @@ TopologicalMapGraph::notify_of_change() throw()
   }
 }
 
-/** @class TopologicalMapGraph::ChangeListener <navgraph/topological_map_graph.h>
+/** @class NavGraph::ChangeListener <navgraph/navgraph.h>
  * Topological graph change listener.
  * @author Tim Niemueller
  *
- * @fn void TopologicalMapGraph::ChangeListener::graph_changed() throw() = 0
+ * @fn void NavGraph::ChangeListener::graph_changed() throw() = 0
  * Function called if the graph has been changed.
  */
 
 /** Virtual empty destructor. */
-TopologicalMapGraph::ChangeListener::~ChangeListener()
+NavGraph::ChangeListener::~ChangeListener()
 {
 }
 

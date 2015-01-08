@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  topological_map_edge.cpp - Topological graph
+ *  navgraph_edge.cpp - Topological graph
  *
  *  Created: Fri Sep 21 16:11:50 2012
  *  Copyright  2012  Tim Niemueller [www.niemueller.de]
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <navgraph/topological_map_edge.h>
+#include <navgraph/navgraph_edge.h>
 
 #include <core/exception.h>
 
@@ -29,13 +29,13 @@ namespace fawkes {
 }
 #endif
 
-/** @class TopologicalMapEdge <navgraph/topological_map_edge.h>
+/** @class NavGraphEdge <navgraph/navgraph_edge.h>
  * Topological graph edge.
  * @author Tim Niemueller
  */
 
 /** Constructor for an invalid edge. */
-TopologicalMapEdge::TopologicalMapEdge()
+NavGraphEdge::NavGraphEdge()
 {
   directed_ = false;
 }
@@ -47,7 +47,7 @@ TopologicalMapEdge::TopologicalMapEdge()
  * @param properties properties of the new node
  * @param directed true if the edge is directed, false for bidirectional edges
  */
-TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to,
+NavGraphEdge::NavGraphEdge(std::string from, std::string to,
                                        std::map<std::string, std::string> properties,
                                        bool directed)
 {
@@ -63,7 +63,7 @@ TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to,
  * @param to target node name
  * @param directed true if the edge is directed, false for bidirectional edges
  */
-TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to, bool directed)
+NavGraphEdge::NavGraphEdge(std::string from, std::string to, bool directed)
 {
   from_ = from;
   to_ = to;
@@ -74,7 +74,7 @@ TopologicalMapEdge::TopologicalMapEdge(std::string from, std::string to, bool di
  * @param from originating node name
  */
 void
-TopologicalMapEdge::set_from(std::string from)
+NavGraphEdge::set_from(std::string from)
 {
   from_ = from;
 }
@@ -84,7 +84,7 @@ TopologicalMapEdge::set_from(std::string from)
  * @param to target node name
  */
 void
-TopologicalMapEdge::set_to(std::string to)
+NavGraphEdge::set_to(std::string to)
 {
   to_ = to;
 }
@@ -95,8 +95,8 @@ TopologicalMapEdge::set_to(std::string to)
  * @param to_node target node
  */
 void
-TopologicalMapEdge::set_nodes(const TopologicalMapNode &from_node,
-			      const TopologicalMapNode &to_node)
+NavGraphEdge::set_nodes(const NavGraphNode &from_node,
+			      const NavGraphNode &to_node)
 {
   if (from_node.name() != from_) {
     throw Exception("Conflicting originating node names: %s vs. %s",
@@ -115,7 +115,7 @@ TopologicalMapEdge::set_nodes(const TopologicalMapNode &from_node,
  * @param directed true if the edge is directed, false for bidirectional edges
  */
 void
-TopologicalMapEdge::set_directed(bool directed)
+NavGraphEdge::set_directed(bool directed)
 {
   directed_ = directed;
 }
@@ -125,7 +125,7 @@ TopologicalMapEdge::set_directed(bool directed)
  * @return property value as string
  */
 std::string
-TopologicalMapEdge::property(std::string prop)
+NavGraphEdge::property(std::string prop)
 {
   if (properties_.find(prop) != properties_.end()) {
     return properties_[prop];

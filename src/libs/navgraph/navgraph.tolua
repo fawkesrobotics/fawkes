@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  topological_map_graph.tolua - Topolocial Map graph (tolua++)
+ *  navgraph.tolua - Topolocial Map graph (tolua++)
  *
  *  Created: Tue Jun 30 12:08:58 2009 (RoboCup 2009, Graz)
  *  Copyright  2009  Tim Niemueller [www.niemueller.de]
@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-$#include <navgraph/topological_map_graph.h>
+$#include <navgraph/navgraph.h>
 $#include <navgraph/yaml_navgraph.h>
 $#include <vector>
 $#include <string>
@@ -29,33 +29,33 @@ $using namespace fawkes;
 
 namespace fawkes {
 
-class TopologicalMapGraph
+class NavGraph
 {
  public:
-  TopologicalMapGraph(string graph_name);
-  ~TopologicalMapGraph();
+  NavGraph(string graph_name);
+  ~NavGraph();
 
   string                              name();
-  vector<fawkes::TopologicalMapNode>  nodes();
-  TopologicalMapNode                  node(string name_or_alias);
-  TopologicalMapNode                  root_node();
+  vector<fawkes::NavGraphNode>  nodes();
+  NavGraphNode                  node(string name_or_alias);
+  NavGraphNode                  root_node();
 
-  fawkes::TopologicalMapNode          closest_node(float pos_x, float pos_y,
+  fawkes::NavGraphNode          closest_node(float pos_x, float pos_y,
 				 	           string property);
 
-  fawkes::TopologicalMapNode          closest_node_to(std::string node_name,
+  fawkes::NavGraphNode          closest_node_to(std::string node_name,
 				 	              string property);
 
-  fawkes::TopologicalMapNode          closest_node_with_unconnected(float pos_x,
+  fawkes::NavGraphNode          closest_node_with_unconnected(float pos_x,
                                         float pos_y, string property);
 
-  fawkes::TopologicalMapNode          closest_node_to_with_unconnected(
+  fawkes::NavGraphNode          closest_node_to_with_unconnected(
                                         std::string node_name, string property);
 
-  vector<fawkes::TopologicalMapNode>  search_nodes(string property);
+  vector<fawkes::NavGraphNode>  search_nodes(string property);
 };
 
-TopologicalMapGraph *  load_yaml_navgraph(std::string filename);
+NavGraph *  load_yaml_navgraph(std::string filename);
 
 }
 

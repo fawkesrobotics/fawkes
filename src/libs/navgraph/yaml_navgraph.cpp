@@ -21,7 +21,7 @@
  */
 
 #include <navgraph/yaml_navgraph.h>
-#include <navgraph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 #include <core/exception.h>
 
 #include <yaml-cpp/yaml.h>
@@ -37,7 +37,7 @@ namespace fawkes {
  * @param node node to fill
  */
 static void
-operator >> (const YAML::Node& n, TopologicalMapNode &node) {
+operator >> (const YAML::Node& n, NavGraphNode &node) {
 #ifdef HAVE_YAMLCPP_0_5
   const std::string name = n["name"].as<std::string>();
 #else
@@ -154,7 +154,7 @@ operator >> (const YAML::Node& n, TopologicalMapNode &node) {
  * @param edge edge to fill
  */
 static void
-operator >> (const YAML::Node& n, TopologicalMapEdge &edge) {
+operator >> (const YAML::Node& n, NavGraphEdge &edge) {
 #ifdef HAVE_OLD_YAMLCPP
   if (n.GetType() != YAML::CT_SEQUENCE || n.size() != 2) {
 #else
@@ -188,7 +188,7 @@ operator >> (const YAML::Node& n, TopologicalMapEdge &edge) {
  * @param doc the root document of the YAML graph definition
  */
 void
-read_default_properties(TopologicalMapGraph *graph, YAML::Node &doc)
+read_default_properties(NavGraph *graph, YAML::Node &doc)
 {
   bool has_properties = true;
   try {
@@ -263,7 +263,7 @@ read_default_properties(TopologicalMapGraph *graph, YAML::Node &doc)
  * @return topological map graph read from file
  * @exception Exception thrown on any error to read the graph file
  */
-TopologicalMapGraph *
+NavGraph *
 load_yaml_navgraph(std::string filename)
 {
   //try to fix use of relative paths
@@ -289,7 +289,7 @@ load_yaml_navgraph(std::string filename)
   doc["graph-name"] >> graph_name;
 #endif
 
-  TopologicalMapGraph *graph = new TopologicalMapGraph(graph_name);
+  NavGraph *graph = new NavGraph(graph_name);
 
   read_default_properties(graph, doc);
 
@@ -299,7 +299,7 @@ load_yaml_navgraph(std::string filename)
 #else
   for (YAML::Iterator n = nodes.begin(); n != nodes.end(); ++n) {
 #endif
-    TopologicalMapNode node;
+    NavGraphNode node;
     *n >> node;
     graph->add_node(node);
   }
@@ -310,7 +310,7 @@ load_yaml_navgraph(std::string filename)
 #else
   for (YAML::Iterator e = edges.begin(); e != edges.end(); ++e) {
 #endif
-    TopologicalMapEdge edge;
+    NavGraphEdge edge;
     *e >> edge;
     graph->add_edge(edge);
   }
