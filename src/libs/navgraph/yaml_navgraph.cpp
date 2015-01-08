@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/graph/yaml_navgraph.h>
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/yaml_navgraph.h>
+#include <navgraph/topological_map_graph.h>
 #include <core/exception.h>
 
 #include <yaml-cpp/yaml.h>

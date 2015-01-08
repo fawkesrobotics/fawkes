@@ -23,8 +23,8 @@
 #ifndef __UTILS_GRAPH_TOPOLOGICAL_MAP_GRAPH_H_
 #define __UTILS_GRAPH_TOPOLOGICAL_MAP_GRAPH_H_
 
-#include <utils/graph/topological_map_node.h>
-#include <utils/graph/topological_map_edge.h>
+#include <navgraph/topological_map_node.h>
+#include <navgraph/topological_map_edge.h>
 
 #include <vector>
 #include <list>

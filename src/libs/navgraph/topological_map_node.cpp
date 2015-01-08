@@ -20,14 +20,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/graph/topological_map_node.h>
+#include <navgraph/topological_map_node.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class TopologicalMapNode <utils/graph/topological_map_node.h>
+/** @class TopologicalMapNode <navgraph/topological_map_node.h>
  * Topological graph node.
  * @author Tim Niemueller
  */

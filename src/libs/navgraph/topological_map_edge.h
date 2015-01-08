@@ -25,7 +25,7 @@
 
 #include <utils/misc/string_conversions.h>
 
-#include <utils/graph/topological_map_node.h>
+#include <navgraph/topological_map_node.h>
 
 #include <map>
 #include <string>

@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-$#include <utils/graph/topological_map_node.h>
+$#include <navgraph/topological_map_node.h>
 $#include <string>
 $#include <vector>
 $using namespace std;

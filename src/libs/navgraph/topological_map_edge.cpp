@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/graph/topological_map_edge.h>
+#include <navgraph/topological_map_edge.h>
 
 #include <core/exception.h>
 
@@ -29,7 +29,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class TopologicalMapEdge <utils/graph/topological_map_edge.h>
+/** @class TopologicalMapEdge <navgraph/topological_map_edge.h>
  * Topological graph edge.
  * @author Tim Niemueller
  */

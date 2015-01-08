@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/topological_map_graph.h>
 #include <core/exception.h>
 
 #include <algorithm>
@@ -35,7 +35,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class TopologicalMapGraph <utils/graph/topological_map_graph.h>
+/** @class TopologicalMapGraph <navgraph/topological_map_graph.h>
  * Topological map graph.
  * This class represents a topological graph using 2D map coordinates
  * with nodes and edges. Both can be annotated with certain free-form
@@ -711,7 +711,7 @@ TopologicalMapGraph::notify_of_change() throw()
   }
 }
 
-/** @class TopologicalMapGraph::ChangeListener <utils/graph/topological_map_graph.h>
+/** @class TopologicalMapGraph::ChangeListener <navgraph/topological_map_graph.h>
  * Topological graph change listener.
  * @author Tim Niemueller
  *
