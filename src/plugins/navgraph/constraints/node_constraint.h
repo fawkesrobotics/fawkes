@@ -25,7 +25,7 @@
 #include <vector>
 #include <string>
 
-#include <utils/graph/topological_map_node.h>
+#include <navgraph/navgraph_node.h>
 
 namespace fawkes{
 #if 0 /* just to make Emacs auto-indent happy */
@@ -44,7 +44,7 @@ class NavGraphNodeConstraint
   std::string name();
 
   virtual bool compute(void) throw();
-  virtual bool blocks(const fawkes::TopologicalMapNode &node) throw() = 0;
+  virtual bool blocks(const fawkes::NavGraphNode &node) throw() = 0;
 
   bool operator==(const std::string &name) const;
 

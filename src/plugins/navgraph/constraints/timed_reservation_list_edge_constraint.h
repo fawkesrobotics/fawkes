@@ -29,7 +29,7 @@
 #include <string>
 
 #include <utils/time/time.h>
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 #include <logging/logger.h>
 
 namespace fawkes{
@@ -41,24 +41,24 @@ class NavGraphTimedReservationListEdgeConstraint : public NavGraphEdgeConstraint
    NavGraphTimedReservationListEdgeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock);
 
    NavGraphTimedReservationListEdgeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock,
-		   std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> edge_time_list );
+		   std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> edge_time_list );
 
   virtual ~NavGraphTimedReservationListEdgeConstraint();
 
-  const std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> &  edge_time_list() const;
+  const std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> &  edge_time_list() const;
 
-  void add_edge(const fawkes::TopologicalMapEdge &edge, const fawkes::Time valid_time);
-  void add_edges(const std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> &edges);
-  void remove_edge(const fawkes::TopologicalMapEdge &edge);
+  void add_edge(const fawkes::NavGraphEdge &edge, const fawkes::Time valid_time);
+  void add_edges(const std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> &edges);
+  void remove_edge(const fawkes::NavGraphEdge &edge);
   void clear_edges();
-  bool has_edge(const fawkes::TopologicalMapEdge &edge);
+  bool has_edge(const fawkes::NavGraphEdge &edge);
 
   virtual bool compute(void) throw();
-  virtual bool blocks(const fawkes::TopologicalMapNode &from,
- 		      const fawkes::TopologicalMapNode &to) throw();
+  virtual bool blocks(const fawkes::NavGraphNode &from,
+ 		      const fawkes::NavGraphNode &to) throw();
 
  private:
-  std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> edge_time_list_;
+  std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> edge_time_list_;
   bool modified_;
   Logger *logger_;
   fawkes::Clock *clock_;

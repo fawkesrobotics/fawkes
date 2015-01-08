@@ -27,7 +27,7 @@
 #include <vector>
 #include <string>
 
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 
 namespace fawkes{
 #if 0 /* just to make Emacs auto-indent happy */
@@ -41,21 +41,21 @@ class NavGraphStaticListEdgeCostConstraint : public NavGraphEdgeCostConstraint
 
   virtual ~NavGraphStaticListEdgeCostConstraint();
 
-  const std::vector<std::pair<fawkes::TopologicalMapEdge, float>> &  edge_cost_list() const;
+  const std::vector<std::pair<fawkes::NavGraphEdge, float>> &  edge_cost_list() const;
 
-  void add_edge(const fawkes::TopologicalMapEdge &edge, const float cost_factor);
-  void add_edges(const std::vector<std::pair<fawkes::TopologicalMapEdge, float>> &edge_costs);
-  void remove_edge(const fawkes::TopologicalMapEdge &edge);
+  void add_edge(const fawkes::NavGraphEdge &edge, const float cost_factor);
+  void add_edges(const std::vector<std::pair<fawkes::NavGraphEdge, float>> &edge_costs);
+  void remove_edge(const fawkes::NavGraphEdge &edge);
   void clear_edges();
-  bool has_edge(const fawkes::TopologicalMapEdge &edge);
+  bool has_edge(const fawkes::NavGraphEdge &edge);
 
   virtual bool compute(void) throw();
 
-  virtual float cost_factor(const fawkes::TopologicalMapNode &from,
-			    const fawkes::TopologicalMapNode &to) throw();
+  virtual float cost_factor(const fawkes::NavGraphNode &from,
+			    const fawkes::NavGraphNode &to) throw();
 
  private:
-  std::vector<std::pair<fawkes::TopologicalMapEdge, float>> edge_cost_list_;
+  std::vector<std::pair<fawkes::NavGraphEdge, float>> edge_cost_list_;
   bool modified_;
 
 };

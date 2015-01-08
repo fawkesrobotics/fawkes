@@ -23,8 +23,8 @@
 #define __PLUGINS_NAVGRAPH_SEARCH_STATE_THREAD_H_
 
 #include <utils/search/astar_state.h>
-#include <utils/graph/rcsoft_map_graph.h>
 #include <plugins/navgraph/constraints/constraint_repo.h>
+#include <navgraph/navgraph.h>
 #include <core/utils/lockptr.h>
 
 #include <cmath>
@@ -32,17 +32,17 @@
 class NavGraphSearchState : public fawkes::AStarState
 {
 public:
-  NavGraphSearchState(fawkes::TopologicalMapNode node, fawkes::TopologicalMapNode goal,
-		      fawkes::TopologicalMapGraph *map_graph,
+  NavGraphSearchState(fawkes::NavGraphNode node, fawkes::NavGraphNode goal,
+		      fawkes::NavGraph *map_graph,
 		      fawkes::ConstraintRepo *constraint_repo = NULL);
 
-  NavGraphSearchState(fawkes::TopologicalMapNode node, fawkes::TopologicalMapNode goal,
+  NavGraphSearchState(fawkes::NavGraphNode node, fawkes::NavGraphNode goal,
 		      double cost_sofar, NavGraphSearchState *parent_state,
-		      fawkes::TopologicalMapGraph *map_graph,
+		      fawkes::NavGraph *map_graph,
 		      fawkes::ConstraintRepo *constraint_repo = NULL);
   ~NavGraphSearchState();
 
-  fawkes::TopologicalMapNode & node();
+  fawkes::NavGraphNode & node();
 
   virtual size_t key() { return key_; }
   virtual float  estimate();
@@ -54,8 +54,8 @@ public:
    * @return cost from @p from to @p to.
    */
   static inline float
-    cost(const fawkes::TopologicalMapNode &from,
-	 const fawkes::TopologicalMapNode &to)
+    cost(const fawkes::NavGraphNode &from,
+	 const fawkes::NavGraphNode &to)
   {
     return sqrtf(powf(to.x() - from.x(), 2) +
 		 powf(to.y() - from.y(), 2) );
@@ -65,7 +65,7 @@ public:
    * @param d destination node
    * @return cost from this node to @p d.
    */
-  inline float cost(const fawkes::TopologicalMapNode &d) {
+  inline float cost(const fawkes::NavGraphNode &d) {
     return cost(node_, d);
   }
 
@@ -74,12 +74,12 @@ public:
   std::vector<AStarState *> children();
 
   // state information
-  fawkes::TopologicalMapNode  node_;
+  fawkes::NavGraphNode  node_;
 
   // goal information
-  fawkes::TopologicalMapNode  goal_;
+  fawkes::NavGraphNode  goal_;
 
-  fawkes::TopologicalMapGraph *map_graph_;
+  fawkes::NavGraph *map_graph_;
 
   fawkes::ConstraintRepo *constraint_repo_;
   bool constrained_search_;

@@ -286,7 +286,7 @@ ConstraintRepo::compute()
  * NULL if the node is not blocked
  */
 fawkes::NavGraphNodeConstraint *
-ConstraintRepo::blocks(const fawkes::TopologicalMapNode &node)
+ConstraintRepo::blocks(const fawkes::NavGraphNode &node)
 {
   for (fawkes::NavGraphNodeConstraint *c : node_constraints_) {
     if (c->blocks(node)) {
@@ -305,10 +305,10 @@ ConstraintRepo::blocks(const fawkes::TopologicalMapNode &node)
  * Nodes from @p nodes that are not blocked will not appear in the map.
  */
 std::map<std::string, std::string>
-ConstraintRepo::blocks(const std::vector<fawkes::TopologicalMapNode> &nodes)
+ConstraintRepo::blocks(const std::vector<fawkes::NavGraphNode> &nodes)
 {
   std::map<std::string, std::string> rv;
-  for (const fawkes::TopologicalMapNode &n : nodes) {
+  for (const fawkes::NavGraphNode &n : nodes) {
     for (fawkes::NavGraphNodeConstraint *c : node_constraints_) {
       if (c->blocks(n)) {
 	rv[n.name()] = c->name();
@@ -327,8 +327,8 @@ ConstraintRepo::blocks(const std::vector<fawkes::TopologicalMapNode> &nodes)
  * NULL if the node is not blocked
  */
 fawkes::NavGraphEdgeConstraint *
-ConstraintRepo::blocks(const fawkes::TopologicalMapNode &from,
-		       const fawkes::TopologicalMapNode &to)
+ConstraintRepo::blocks(const fawkes::NavGraphNode &from,
+		       const fawkes::NavGraphNode &to)
 {
   for (fawkes::NavGraphEdgeConstraint *c : edge_constraints_) {
     if (c->blocks(from, to)) {
@@ -346,8 +346,8 @@ ConstraintRepo::blocks(const fawkes::TopologicalMapNode &from,
  * the node, i.e. that returns a cost factor >= 1.00001.
  */
 fawkes::NavGraphEdgeCostConstraint *
-ConstraintRepo::increases_cost(const fawkes::TopologicalMapNode &from,
-			       const fawkes::TopologicalMapNode &to)
+ConstraintRepo::increases_cost(const fawkes::NavGraphNode &from,
+			       const fawkes::NavGraphNode &to)
 {
   for (fawkes::NavGraphEdgeCostConstraint *c : edge_cost_constraints_) {
     if (c->cost_factor(from, to) >= 1.00001) {
@@ -368,8 +368,8 @@ ConstraintRepo::increases_cost(const fawkes::TopologicalMapNode &from,
  * in cost of the node (and by a cost factor of at least >= 1.00001).
  */
 fawkes::NavGraphEdgeCostConstraint *
-ConstraintRepo::increases_cost(const fawkes::TopologicalMapNode &from,
-			       const fawkes::TopologicalMapNode &to,
+ConstraintRepo::increases_cost(const fawkes::NavGraphNode &from,
+			       const fawkes::NavGraphNode &to,
 			       float & cost_factor)
 {
   float max_cost = 1.0;
@@ -397,10 +397,10 @@ ConstraintRepo::increases_cost(const fawkes::TopologicalMapNode &from,
  * Edges from @p edges that are not blocked will not appear in the map.
  */
 std::map<std::pair<std::string, std::string>, std::string>
-ConstraintRepo::blocks(const std::vector<fawkes::TopologicalMapEdge> &edges)
+ConstraintRepo::blocks(const std::vector<fawkes::NavGraphEdge> &edges)
 {
   std::map<std::pair<std::string, std::string>, std::string> rv;
-  for (const fawkes::TopologicalMapEdge &e : edges) {
+  for (const fawkes::NavGraphEdge &e : edges) {
     for (fawkes::NavGraphEdgeConstraint *c : edge_constraints_) {
       if (c->blocks(e.from_node(), e.to_node()) ){
 	rv[std::make_pair(e.from(), e.to())] = c->name();
@@ -428,10 +428,10 @@ ConstraintRepo::blocks(const std::vector<fawkes::TopologicalMapEdge> &edges)
  * list of tuples.
  */
 std::list<std::tuple<std::string, std::string, std::string, float>>
-ConstraintRepo::cost_factor(const std::vector<fawkes::TopologicalMapEdge> &edges)
+ConstraintRepo::cost_factor(const std::vector<fawkes::NavGraphEdge> &edges)
 {
   std::list<std::tuple<std::string, std::string, std::string, float>> rv;
-  for (const fawkes::TopologicalMapEdge &e : edges) {
+  for (const fawkes::NavGraphEdge &e : edges) {
     float max_cost = 1.0;
     fawkes::NavGraphEdgeCostConstraint *max_c;
     for (fawkes::NavGraphEdgeCostConstraint *c : edge_cost_constraints_) {
@@ -463,8 +463,8 @@ ConstraintRepo::cost_factor(const std::vector<fawkes::TopologicalMapEdge> &edges
  * has been specified.
  */
 float
-ConstraintRepo::cost_factor(const fawkes::TopologicalMapNode &from,
-			    const fawkes::TopologicalMapNode &to)
+ConstraintRepo::cost_factor(const fawkes::NavGraphNode &from,
+			    const fawkes::NavGraphNode &to)
 {
   float max_cost = 1.0;
   for (fawkes::NavGraphEdgeCostConstraint *c : edge_cost_constraints_) {

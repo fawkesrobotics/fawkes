@@ -24,7 +24,7 @@
 #include <plugins/navgraph/aspect/navgraph_inifin.h>
 #include <plugins/navgraph/aspect/navgraph.h>
 #include <core/threading/thread_finalizer.h>
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 #include <plugins/navgraph/constraints/constraint_repo.h>
 #include <cstddef>
 
@@ -49,7 +49,7 @@ NavGraphAspectIniFin::NavGraphAspectIniFin()
  * @param navgraph navgraph to pass to thread with the NavGraphAspect
  */
 void
-NavGraphAspectIniFin::set_navgraph(LockPtr<TopologicalMapGraph> &navgraph)
+NavGraphAspectIniFin::set_navgraph(LockPtr<NavGraph> &navgraph)
 {
   navgraph_ = navgraph;
 }

@@ -68,7 +68,7 @@ NavGraphStaticListEdgeCostConstraint::compute(void) throw()
  * @param cost_factor cost factor for this edge, must be >= 1.00001
  */
 void
-NavGraphStaticListEdgeCostConstraint::add_edge(const fawkes::TopologicalMapEdge &edge,
+NavGraphStaticListEdgeCostConstraint::add_edge(const fawkes::NavGraphEdge &edge,
 					       float cost_factor)
 {
   if (cost_factor < 1.00001) {
@@ -85,9 +85,9 @@ NavGraphStaticListEdgeCostConstraint::add_edge(const fawkes::TopologicalMapEdge 
  */
 void
 NavGraphStaticListEdgeCostConstraint::add_edges(
-  const std::vector<std::pair<fawkes::TopologicalMapEdge, float>> &edges)
+  const std::vector<std::pair<fawkes::NavGraphEdge, float>> &edges)
 {
-  for (const std::pair<TopologicalMapEdge, float> &ec : edges) {
+  for (const std::pair<NavGraphEdge, float> &ec : edges) {
     add_edge(ec.first, ec.second);
   }
 }
@@ -96,11 +96,11 @@ NavGraphStaticListEdgeCostConstraint::add_edges(
  * @param edge edge to remote
  */
 void
-NavGraphStaticListEdgeCostConstraint::remove_edge(const fawkes::TopologicalMapEdge &edge)
+NavGraphStaticListEdgeCostConstraint::remove_edge(const fawkes::NavGraphEdge &edge)
 {
-  std::vector<std::pair<TopologicalMapEdge, float>>::iterator ec
+  std::vector<std::pair<NavGraphEdge, float>>::iterator ec
     = std::find_if(edge_cost_list_.begin(), edge_cost_list_.end(),
-		   [&edge](const std::pair<fawkes::TopologicalMapEdge, float> &p) {
+		   [&edge](const std::pair<fawkes::NavGraphEdge, float> &p) {
 		     return p.first == edge;
 		   });
 
@@ -115,10 +115,10 @@ NavGraphStaticListEdgeCostConstraint::remove_edge(const fawkes::TopologicalMapEd
  * @return true if edge is in list, false otherwise
  */
 bool
-NavGraphStaticListEdgeCostConstraint::has_edge(const fawkes::TopologicalMapEdge &edge)
+NavGraphStaticListEdgeCostConstraint::has_edge(const fawkes::NavGraphEdge &edge)
 {
   return (std::find_if(edge_cost_list_.begin(), edge_cost_list_.end(),
-		       [&edge](const std::pair<fawkes::TopologicalMapEdge, float> &p) {
+		       [&edge](const std::pair<fawkes::NavGraphEdge, float> &p) {
 			 return p.first == edge;
 		       })
 	  != edge_cost_list_.end());
@@ -128,7 +128,7 @@ NavGraphStaticListEdgeCostConstraint::has_edge(const fawkes::TopologicalMapEdge 
 /** Get list of blocked edges.
  * @return list of blocked edges
  */
-const std::vector<std::pair<fawkes::TopologicalMapEdge, float>> &
+const std::vector<std::pair<fawkes::NavGraphEdge, float>> &
 NavGraphStaticListEdgeCostConstraint::edge_cost_list() const
 {
   return edge_cost_list_;
@@ -147,10 +147,10 @@ NavGraphStaticListEdgeCostConstraint::clear_edges()
 
 
 float
-NavGraphStaticListEdgeCostConstraint::cost_factor(const fawkes::TopologicalMapNode &from,
-						  const fawkes::TopologicalMapNode &to) throw()
+NavGraphStaticListEdgeCostConstraint::cost_factor(const fawkes::NavGraphNode &from,
+						  const fawkes::NavGraphNode &to) throw()
 {
-  for (std::pair<TopologicalMapEdge, float> &ec : edge_cost_list_) {
+  for (std::pair<NavGraphEdge, float> &ec : edge_cost_list_) {
     if ((ec.first.from() == from.name() && ec.first.to() == to.name()) || 
 	(ec.first.from() == to.name() && ec.first.to() == from.name()) )
     {

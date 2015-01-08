@@ -31,7 +31,7 @@ namespace fawkes{
  * @author Sebastian Reuter
  * @author Tim Niemueller
  *
- * @fn bool NavGraphEdgeConstraint::blocks(const fawkes::TopologicalMapNode &from, const fawkes::TopologicalMapNode &to) throw() = 0
+ * @fn bool NavGraphEdgeConstraint::blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) throw() = 0
  * Check if constraint blocks an edge.
  * This method must be implemented by constraint classes. It is called
  * to determine if an edge should be considered blocked and therefore

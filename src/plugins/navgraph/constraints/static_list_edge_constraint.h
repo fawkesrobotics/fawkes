@@ -28,7 +28,7 @@
 #include <vector>
 #include <string>
 
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 
 namespace fawkes{
 #if 0 /* just to make Emacs auto-indent happy */
@@ -41,25 +41,25 @@ class NavGraphStaticListEdgeConstraint : public NavGraphEdgeConstraint
   NavGraphStaticListEdgeConstraint(std::string name);
 
   NavGraphStaticListEdgeConstraint(std::string name,
-				   std::vector<fawkes::TopologicalMapEdge> &edge_list);
+				   std::vector<fawkes::NavGraphEdge> &edge_list);
 
   virtual ~NavGraphStaticListEdgeConstraint();
 
-  const std::vector<fawkes::TopologicalMapEdge> &  edge_list() const;
+  const std::vector<fawkes::NavGraphEdge> &  edge_list() const;
 
-  void add_edge(const fawkes::TopologicalMapEdge &edge);
-  void add_edges(const std::vector<fawkes::TopologicalMapEdge> &edges);
-  void remove_edge(const fawkes::TopologicalMapEdge &edge);
+  void add_edge(const fawkes::NavGraphEdge &edge);
+  void add_edges(const std::vector<fawkes::NavGraphEdge> &edges);
+  void remove_edge(const fawkes::NavGraphEdge &edge);
   void clear_edges();
-  bool has_edge(const fawkes::TopologicalMapEdge &edge);
+  bool has_edge(const fawkes::NavGraphEdge &edge);
 
   virtual bool compute(void) throw();
 
-  virtual bool blocks(const fawkes::TopologicalMapNode &from,
-		      const fawkes::TopologicalMapNode &to) throw();
+  virtual bool blocks(const fawkes::NavGraphNode &from,
+		      const fawkes::NavGraphNode &to) throw();
 
  private:
-  std::vector<fawkes::TopologicalMapEdge> edge_list_;
+  std::vector<fawkes::NavGraphEdge> edge_list_;
   bool modified_;
 
 };

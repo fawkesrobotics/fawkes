@@ -39,9 +39,9 @@ using namespace fawkes;
  * @param map_graph map graph
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMapNode goal,
+NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
 					 double cost_sofar, NavGraphSearchState *parent,
-					 TopologicalMapGraph *map_graph,
+					 NavGraph *map_graph,
 					 fawkes::ConstraintRepo *constraint_repo)
   : AStarState(cost_sofar, parent)
 {
@@ -64,8 +64,8 @@ NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMap
  * @param map_graph map graph
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(TopologicalMapNode node, TopologicalMapNode goal,
-					 TopologicalMapGraph *map_graph,
+NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
+					 NavGraph *map_graph,
 					 fawkes::ConstraintRepo *constraint_repo)
   : AStarState(0, NULL)
 {
@@ -91,7 +91,7 @@ NavGraphSearchState::~NavGraphSearchState()
 /** Get graph node corresponding to this search state.
  * @return graph node corresponding to this search state
  */
-fawkes::TopologicalMapNode &
+fawkes::NavGraphNode &
 NavGraphSearchState::node()
 {
   return node_;
@@ -122,7 +122,7 @@ NavGraphSearchState::children()
   std::vector<std::string> descendants = node_.reachable_nodes();
 
   for (unsigned int i = 0; i < descendants.size(); ++i) {
-    TopologicalMapNode d = map_graph_->node(descendants[i]);
+    NavGraphNode d = map_graph_->node(descendants[i]);
 
     bool expand = true;
     if (constraint_repo_) {

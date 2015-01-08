@@ -32,7 +32,7 @@ namespace fawkes {
 }
 #endif
 
-class TopologicalMapGraph;
+class NavGraph;
 class ConstraintRepo;
 
 class NavGraphAspectIniFin : public AspectIniFin
@@ -43,11 +43,11 @@ class NavGraphAspectIniFin : public AspectIniFin
   virtual void init(Thread *thread);
   virtual void finalize(Thread *thread);
 
-  void set_navgraph(LockPtr<TopologicalMapGraph> &navgraph);
+  void set_navgraph(LockPtr<NavGraph> &navgraph);
   void set_constraint_repo(LockPtr<ConstraintRepo> &constraint_repo);
 
  private:
-  LockPtr<TopologicalMapGraph> navgraph_;
+  LockPtr<NavGraph> navgraph_;
   LockPtr<ConstraintRepo> constraint_repo_;
 
 };

@@ -55,7 +55,7 @@ NavGraphTimedReservationListEdgeConstraint::NavGraphTimedReservationListEdgeCons
  */
 NavGraphTimedReservationListEdgeConstraint::NavGraphTimedReservationListEdgeConstraint(
   Logger *logger, std::string name, fawkes::Clock *clock,
-  std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> edge_time_list)
+  std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> edge_time_list)
   : NavGraphEdgeConstraint(name)
 {
   logger_ = logger;
@@ -79,13 +79,13 @@ NavGraphTimedReservationListEdgeConstraint::compute(void) throw()
 {
 
   fawkes::Time now(clock_);
-  std::vector<std::pair<TopologicalMapEdge, fawkes::Time>> erase_list;
-  for (const std::pair<TopologicalMapEdge, fawkes::Time> &ec : edge_time_list_) {
+  std::vector<std::pair<NavGraphEdge, fawkes::Time>> erase_list;
+  for (const std::pair<NavGraphEdge, fawkes::Time> &ec : edge_time_list_) {
 	  if(now > ec.second){
 	    erase_list.push_back(ec);
 	  }
   }
-  for (const std::pair<TopologicalMapEdge, fawkes::Time> &ec : erase_list) {
+  for (const std::pair<NavGraphEdge, fawkes::Time> &ec : erase_list) {
 	  edge_time_list_.erase(std::remove(edge_time_list_.begin(), edge_time_list_.end(), ec), edge_time_list_.end());
       modified_ = true;
       logger_->log_info("Timed Edge Constraint", "Deleted edge '%s_%s' from '%s' because it validity duration ran out", ec.first.from().c_str(),ec.first.to().c_str(), name_.c_str() );
@@ -105,7 +105,7 @@ NavGraphTimedReservationListEdgeConstraint::compute(void) throw()
  * @param valid_time valid time for this edge
  */
 void
-NavGraphTimedReservationListEdgeConstraint::add_edge(const fawkes::TopologicalMapEdge &edge,
+NavGraphTimedReservationListEdgeConstraint::add_edge(const fawkes::NavGraphEdge &edge,
 					       fawkes::Time valid_time)
 {
   fawkes::Time now(clock_);
@@ -127,10 +127,10 @@ NavGraphTimedReservationListEdgeConstraint::add_edge(const fawkes::TopologicalMa
  */
 void
 NavGraphTimedReservationListEdgeConstraint::add_edges(
-  const std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> &edges)
+  const std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> &edges)
 {
   std::string txt = "{";
-  for (const std::pair<TopologicalMapEdge, fawkes::Time> &ec : edges) {
+  for (const std::pair<NavGraphEdge, fawkes::Time> &ec : edges) {
     add_edge(ec.first, ec.second);
     txt += ec.first.from(); txt += "_"; txt += ec.first.to(); txt += ",";
   }
@@ -143,11 +143,11 @@ NavGraphTimedReservationListEdgeConstraint::add_edges(
  * @param edge edge to remote
  */
 void
-NavGraphTimedReservationListEdgeConstraint::remove_edge(const fawkes::TopologicalMapEdge &edge)
+NavGraphTimedReservationListEdgeConstraint::remove_edge(const fawkes::NavGraphEdge &edge)
 {
-  std::vector<std::pair<TopologicalMapEdge, fawkes::Time>>::iterator ec
+  std::vector<std::pair<NavGraphEdge, fawkes::Time>>::iterator ec
     = std::find_if(edge_time_list_.begin(), edge_time_list_.end(),
-		   [&edge](const std::pair<fawkes::TopologicalMapEdge, fawkes::Time> &p) {
+		   [&edge](const std::pair<fawkes::NavGraphEdge, fawkes::Time> &p) {
 		     return p.first == edge;
 		   });
 
@@ -163,10 +163,10 @@ NavGraphTimedReservationListEdgeConstraint::remove_edge(const fawkes::Topologica
  * @return true if edge is in list, false otherwise
  */
 bool
-NavGraphTimedReservationListEdgeConstraint::has_edge(const fawkes::TopologicalMapEdge &edge)
+NavGraphTimedReservationListEdgeConstraint::has_edge(const fawkes::NavGraphEdge &edge)
 {
   return (std::find_if(edge_time_list_.begin(), edge_time_list_.end(),
-		       [&edge](const std::pair<fawkes::TopologicalMapEdge, fawkes::Time> &p) {
+		       [&edge](const std::pair<fawkes::NavGraphEdge, fawkes::Time> &p) {
 			 return p.first == edge;
 		       })
 	  != edge_time_list_.end());
@@ -177,10 +177,10 @@ NavGraphTimedReservationListEdgeConstraint::has_edge(const fawkes::TopologicalMa
  * @return to destinating-node
  */
 bool
-NavGraphTimedReservationListEdgeConstraint::blocks(const fawkes::TopologicalMapNode &from,
-		      const fawkes::TopologicalMapNode &to) throw()
+NavGraphTimedReservationListEdgeConstraint::blocks(const fawkes::NavGraphNode &from,
+		      const fawkes::NavGraphNode &to) throw()
 {
-  for (const std::pair<fawkes::TopologicalMapEdge, fawkes::Time> &te : edge_time_list_){
+  for (const std::pair<fawkes::NavGraphEdge, fawkes::Time> &te : edge_time_list_){
 	  if( (( te.first.from() == from.name()) && (te.first.to() == to.name())) ||
 			 ((te.first.to() == from.name()) && (te.first.from() == to.name())))
 	  {
@@ -194,7 +194,7 @@ NavGraphTimedReservationListEdgeConstraint::blocks(const fawkes::TopologicalMapN
 /** Get list of blocked edges.
  * @return list of blocked edges
  */
-const std::vector<std::pair<fawkes::TopologicalMapEdge, fawkes::Time>> &
+const std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> &
 NavGraphTimedReservationListEdgeConstraint::edge_time_list() const
 {
   return edge_time_list_;

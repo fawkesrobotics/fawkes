@@ -21,7 +21,7 @@
 
 #include "visualization_thread.h"
 
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 #include <plugins/navgraph/constraints/constraint_repo.h>
 #include <tf/types.h>
 #include <utils/math/angle.h>
@@ -98,7 +98,7 @@ NavGraphVisualizationThread::finalize()
  * @param graph graph to use
  */
 void
-NavGraphVisualizationThread::set_graph(fawkes::LockPtr<TopologicalMapGraph> &graph)
+NavGraphVisualizationThread::set_graph(fawkes::LockPtr<NavGraph> &graph)
 {
   graph_ = graph;
   plan_.clear();
@@ -119,7 +119,7 @@ NavGraphVisualizationThread::set_constraint_repo(fawkes::LockPtr<ConstraintRepo>
  * @param plan current plan
  */
 void
-NavGraphVisualizationThread::set_plan(std::vector<fawkes::TopologicalMapNode> plan)
+NavGraphVisualizationThread::set_plan(std::vector<fawkes::NavGraphNode> plan)
 {
   plan_ = plan;
   plan_to_ = plan_from_ = "";
@@ -212,8 +212,8 @@ NavGraphVisualizationThread::publish()
 {
   if (! graph_) return;
 
-  std::vector<fawkes::TopologicalMapNode> nodes = graph_->nodes();
-  std::vector<fawkes::TopologicalMapEdge> edges = graph_->edges();
+  std::vector<fawkes::NavGraphNode> nodes = graph_->nodes();
+  std::vector<fawkes::NavGraphEdge> edges = graph_->edges();
 
   crepo_.lock();
   std::map<std::string, std::string> bl_nodes = crepo_->blocks(nodes);
@@ -437,7 +437,7 @@ NavGraphVisualizationThread::publish()
   }
 
   if (! plan_.empty() && plan_.back().name() == "free-target") {
-    TopologicalMapNode &target_node = plan_[plan_.size() - 1];
+    NavGraphNode &target_node = plan_[plan_.size() - 1];
 
     // we are traveling to a free target
     visualization_msgs::Marker sphere;
@@ -531,7 +531,7 @@ NavGraphVisualizationThread::publish()
     }
 
     if (plan_.size() >= 2) {
-      TopologicalMapNode &last_graph_node = plan_[plan_.size() - 2];
+      NavGraphNode &last_graph_node = plan_[plan_.size() - 2];
       
       geometry_msgs::Point p1;
       p1.x =  last_graph_node.x();
@@ -577,10 +577,10 @@ NavGraphVisualizationThread::publish()
     
 
   for (size_t i = 0; i < edges.size(); ++i) {
-    TopologicalMapEdge &edge = edges[i];
+    NavGraphEdge &edge = edges[i];
     if (graph_->node_exists(edge.from()) && graph_->node_exists(edge.to())) {
-      TopologicalMapNode from = graph_->node(edge.from());
-      TopologicalMapNode to   = graph_->node(edge.to());
+      NavGraphNode from = graph_->node(edge.from());
+      NavGraphNode to   = graph_->node(edge.to());
 
       geometry_msgs::Point p1;
       p1.x =  from.x();

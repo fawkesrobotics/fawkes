@@ -28,13 +28,13 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <plugins/ros/aspect/ros.h>
-#include <utils/graph/topological_map_node.h>
+#include <navgraph/navgraph_node.h>
 
 #include <ros/publisher.h>
 #include <visualization_msgs/MarkerArray.h>
 
 namespace fawkes {
-  class TopologicalMapGraph;
+  class NavGraph;
   class ConstraintRepo;
 }
 
@@ -52,10 +52,10 @@ class NavGraphVisualizationThread
   virtual void loop();
   virtual void finalize();
 
-  void set_graph(fawkes::LockPtr<fawkes::TopologicalMapGraph> &graph);
+  void set_graph(fawkes::LockPtr<fawkes::NavGraph> &graph);
   void set_constraint_repo(fawkes::LockPtr<fawkes::ConstraintRepo> &crepo);
 
-  void set_plan(std::vector<fawkes::TopologicalMapNode> plan);
+  void set_plan(std::vector<fawkes::NavGraphNode> plan);
   void set_current_edge(std::string from, std::string to);
   void reset_plan();
 
@@ -75,11 +75,11 @@ class NavGraphVisualizationThread
 
   float  cfg_cost_scale_max_;
 
-  std::vector<fawkes::TopologicalMapNode> plan_;
+  std::vector<fawkes::NavGraphNode> plan_;
   std::string plan_to_;
   std::string plan_from_;
 
-  fawkes::LockPtr<fawkes::TopologicalMapGraph> graph_;
+  fawkes::LockPtr<fawkes::NavGraph> graph_;
   fawkes::LockPtr<fawkes::ConstraintRepo>      crepo_;
 };
 

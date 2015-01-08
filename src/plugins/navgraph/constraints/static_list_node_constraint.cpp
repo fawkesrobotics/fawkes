@@ -52,7 +52,7 @@ NavGraphStaticListNodeConstraint::NavGraphStaticListNodeConstraint(std::string n
  */
 NavGraphStaticListNodeConstraint::NavGraphStaticListNodeConstraint(
     std::string name,
-    std::vector<fawkes::TopologicalMapNode> &node_list)
+    std::vector<fawkes::NavGraphNode> &node_list)
   : NavGraphNodeConstraint(name)
 {
   node_list_ = node_list;
@@ -81,7 +81,7 @@ NavGraphStaticListNodeConstraint::compute(void) throw()
  * @param node node to add to constraint list
  */
 void
-NavGraphStaticListNodeConstraint::add_node(const fawkes::TopologicalMapNode &node)
+NavGraphStaticListNodeConstraint::add_node(const fawkes::NavGraphNode &node)
 {
   if (! has_node(node)) {
     modified_ = true;
@@ -94,9 +94,9 @@ NavGraphStaticListNodeConstraint::add_node(const fawkes::TopologicalMapNode &nod
  */
 void
 NavGraphStaticListNodeConstraint::add_nodes(
-  const std::vector<fawkes::TopologicalMapNode> &nodes)
+  const std::vector<fawkes::NavGraphNode> &nodes)
 {
-  for (const TopologicalMapNode &n : nodes) {
+  for (const NavGraphNode &n : nodes) {
     add_node(n);
   }
 }
@@ -105,9 +105,9 @@ NavGraphStaticListNodeConstraint::add_nodes(
  * @param node node to remote
  */
 void
-NavGraphStaticListNodeConstraint::remove_node(const fawkes::TopologicalMapNode &node)
+NavGraphStaticListNodeConstraint::remove_node(const fawkes::NavGraphNode &node)
 {
-  std::vector<TopologicalMapNode>::iterator n =
+  std::vector<NavGraphNode>::iterator n =
     std::find(node_list_.begin(), node_list_.end(), node);
   if (n != node_list_.end()) {
     modified_ = true;
@@ -120,7 +120,7 @@ NavGraphStaticListNodeConstraint::remove_node(const fawkes::TopologicalMapNode &
  * @return true if node is in list, false otherwise
  */
 bool
-NavGraphStaticListNodeConstraint::has_node(const fawkes::TopologicalMapNode &node)
+NavGraphStaticListNodeConstraint::has_node(const fawkes::NavGraphNode &node)
 {
   return (std::find(node_list_.begin(), node_list_.end(), node) != node_list_.end());
 }
@@ -129,7 +129,7 @@ NavGraphStaticListNodeConstraint::has_node(const fawkes::TopologicalMapNode &nod
 /** Get list of blocked nodes.
  * @return list of blocked nodes
  */
-const std::vector<fawkes::TopologicalMapNode> &
+const std::vector<fawkes::NavGraphNode> &
 NavGraphStaticListNodeConstraint::node_list() const
 {
   return node_list_;

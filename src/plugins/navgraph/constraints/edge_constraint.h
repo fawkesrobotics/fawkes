@@ -25,7 +25,7 @@
 #include <vector>
 #include <string>
 
-#include <utils/graph/topological_map_node.h>
+#include <navgraph/navgraph_node.h>
 
 namespace fawkes{
 #if 0 /* just to make Emacs auto-indent happy */
@@ -44,8 +44,8 @@ class NavGraphEdgeConstraint
   std::string name();
 
   virtual bool compute(void) throw();
-  virtual bool blocks(const fawkes::TopologicalMapNode &from,
-		      const fawkes::TopologicalMapNode &to) throw() = 0;
+  virtual bool blocks(const fawkes::NavGraphNode &from,
+		      const fawkes::NavGraphNode &to) throw() = 0;
 
   bool operator==(const std::string &name) const;
 

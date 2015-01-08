@@ -25,7 +25,7 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 #include <plugins/navgraph/aspect/navgraph.h>
 #include <plugins/navgraph/constraints/constraint_repo.h>
 

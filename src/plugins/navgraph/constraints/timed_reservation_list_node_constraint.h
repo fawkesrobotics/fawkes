@@ -29,7 +29,7 @@
 #include <string>
 
 #include <utils/time/time.h>
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 #include <logging/logger.h>
 
 namespace fawkes{
@@ -41,23 +41,23 @@ class NavGraphTimedReservationListNodeConstraint : public NavGraphNodeConstraint
    NavGraphTimedReservationListNodeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock);
 
    NavGraphTimedReservationListNodeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock,
-		   std::vector<std::pair<fawkes::TopologicalMapNode, fawkes::Time>> node_time_list );
+		   std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> node_time_list );
 
   virtual ~NavGraphTimedReservationListNodeConstraint();
 
-  const std::vector<std::pair<fawkes::TopologicalMapNode, fawkes::Time>> &  node_time_list() const;
+  const std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> &  node_time_list() const;
 
-  void add_node(const fawkes::TopologicalMapNode &node, const fawkes::Time valid_time);
-  void add_nodes(const std::vector<std::pair<fawkes::TopologicalMapNode, fawkes::Time>> &timed_nodes);
-  void remove_node(const fawkes::TopologicalMapNode &node);
+  void add_node(const fawkes::NavGraphNode &node, const fawkes::Time valid_time);
+  void add_nodes(const std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> &timed_nodes);
+  void remove_node(const fawkes::NavGraphNode &node);
   void clear_nodes();
-  bool has_node(const fawkes::TopologicalMapNode &node);
+  bool has_node(const fawkes::NavGraphNode &node);
 
   virtual bool compute(void) throw();
-  virtual bool blocks(const fawkes::TopologicalMapNode &node) throw();
+  virtual bool blocks(const fawkes::NavGraphNode &node) throw();
 
  private:
-  std::vector<std::pair<fawkes::TopologicalMapNode, fawkes::Time>> node_time_list_;
+  std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> node_time_list_;
   bool modified_;
   Logger *logger_;
   fawkes::Clock *clock_;

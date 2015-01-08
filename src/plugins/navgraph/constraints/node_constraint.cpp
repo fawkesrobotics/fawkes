@@ -31,7 +31,7 @@ namespace fawkes{
  * @author Sebastian Reuter
  * @author Tim Niemueller
  *
- * @fn bool NavGraphNodeConstraint::blocks(fawkes::TopologicalMapNode &node) throw() = 0
+ * @fn bool NavGraphNodeConstraint::blocks(fawkes::NavGraphNode &node) throw() = 0
  * Check if constraint blocks a node.
  * This method must be implemented by constraint classes. It is called
  * to determine if a node should be considered blocked and therefore

@@ -26,7 +26,7 @@
 #include <plugins/navgraph/constraints/edge_constraint.h>
 #include <plugins/navgraph/constraints/edge_cost_constraint.h>
 
-#include <utils/graph/topological_map_edge.h>
+#include <navgraph/navgraph_edge.h>
 
 #include <vector>
 #include <tuple>
@@ -71,28 +71,28 @@ class ConstraintRepo
 
   bool compute();
 
-  NavGraphNodeConstraint *     blocks(const fawkes::TopologicalMapNode &node);
-  NavGraphEdgeConstraint *     blocks(const fawkes::TopologicalMapNode &from,
-				      const fawkes::TopologicalMapNode &to);
+  NavGraphNodeConstraint *     blocks(const fawkes::NavGraphNode &node);
+  NavGraphEdgeConstraint *     blocks(const fawkes::NavGraphNode &from,
+				      const fawkes::NavGraphNode &to);
 
-  NavGraphEdgeCostConstraint * increases_cost(const fawkes::TopologicalMapNode &from,
-					      const fawkes::TopologicalMapNode &to);
+  NavGraphEdgeCostConstraint * increases_cost(const fawkes::NavGraphNode &from,
+					      const fawkes::NavGraphNode &to);
 
-  NavGraphEdgeCostConstraint * increases_cost(const fawkes::TopologicalMapNode &from,
-					      const fawkes::TopologicalMapNode &to,
+  NavGraphEdgeCostConstraint * increases_cost(const fawkes::NavGraphNode &from,
+					      const fawkes::NavGraphNode &to,
 					      float & cost_factor);
 
-  float                        cost_factor(const fawkes::TopologicalMapNode &from,
-					   const fawkes::TopologicalMapNode &to);
+  float                        cost_factor(const fawkes::NavGraphNode &from,
+					   const fawkes::NavGraphNode &to);
 
   std::map<std::string, std::string>
-    blocks(const std::vector<fawkes::TopologicalMapNode> &nodes);
+    blocks(const std::vector<fawkes::NavGraphNode> &nodes);
 
   std::map<std::pair<std::string, std::string>, std::string>
-    blocks(const std::vector<fawkes::TopologicalMapEdge> &edges);
+    blocks(const std::vector<fawkes::NavGraphEdge> &edges);
 
   std::list<std::tuple<std::string, std::string, std::string, float>>
-    cost_factor(const std::vector<fawkes::TopologicalMapEdge> &edges);
+    cost_factor(const std::vector<fawkes::NavGraphEdge> &edges);
 
   bool modified(bool reset_modified = false);
 

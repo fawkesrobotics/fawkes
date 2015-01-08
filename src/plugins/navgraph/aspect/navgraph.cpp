@@ -22,7 +22,7 @@
  */
 
 #include <plugins/navgraph/aspect/navgraph.h>
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 #include <plugins/navgraph/constraints/constraint_repo.h>
 
 #include <cstring>
@@ -37,13 +37,13 @@ namespace fawkes {
  * Thread aspect to access NavGraph.
  * Give this aspect to your thread to gain access to NavGraph. This will
  * setup the navgraph member with the globally shared instance of
- * TopologicalMapGraph.
+ * NavGraph.
  *
  * @ingroup Aspects
  * @author Tim Niemueller
  */
 
-/** @var fawkes::LockPtr<fawkes::TopologicalMapGraph>  NavGraphAspect::navgraph
+/** @var fawkes::LockPtr<fawkes::NavGraph>  NavGraphAspect::navgraph
  * NavGraph instance shared in framework.
  */
 

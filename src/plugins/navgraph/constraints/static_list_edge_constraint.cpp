@@ -53,7 +53,7 @@ NavGraphStaticListEdgeConstraint::NavGraphStaticListEdgeConstraint(std::string n
  */
 NavGraphStaticListEdgeConstraint::NavGraphStaticListEdgeConstraint(
     std::string name,
-    std::vector<fawkes::TopologicalMapEdge> &edge_list)
+    std::vector<fawkes::NavGraphEdge> &edge_list)
   : NavGraphEdgeConstraint(name)
 {
   edge_list_ = edge_list;
@@ -82,7 +82,7 @@ NavGraphStaticListEdgeConstraint::compute(void) throw()
  * @param edge edge to add to constraint list
  */
 void
-NavGraphStaticListEdgeConstraint::add_edge(const fawkes::TopologicalMapEdge &edge)
+NavGraphStaticListEdgeConstraint::add_edge(const fawkes::NavGraphEdge &edge)
 {
   if (! has_edge(edge)) {
     modified_ = true;
@@ -95,9 +95,9 @@ NavGraphStaticListEdgeConstraint::add_edge(const fawkes::TopologicalMapEdge &edg
  */
 void
 NavGraphStaticListEdgeConstraint::add_edges(
-  const std::vector<fawkes::TopologicalMapEdge> &edges)
+  const std::vector<fawkes::NavGraphEdge> &edges)
 {
-  for (const TopologicalMapEdge &n : edges) {
+  for (const NavGraphEdge &n : edges) {
     add_edge(n);
   }
 }
@@ -106,9 +106,9 @@ NavGraphStaticListEdgeConstraint::add_edges(
  * @param edge edge to remote
  */
 void
-NavGraphStaticListEdgeConstraint::remove_edge(const fawkes::TopologicalMapEdge &edge)
+NavGraphStaticListEdgeConstraint::remove_edge(const fawkes::NavGraphEdge &edge)
 {
-  std::vector<TopologicalMapEdge>::iterator e
+  std::vector<NavGraphEdge>::iterator e
     = std::find(edge_list_.begin(), edge_list_.end(), edge);
   if (e != edge_list_.end()) {
     modified_ = true;
@@ -121,7 +121,7 @@ NavGraphStaticListEdgeConstraint::remove_edge(const fawkes::TopologicalMapEdge &
  * @return true if edge is in list, false otherwise
  */
 bool
-NavGraphStaticListEdgeConstraint::has_edge(const fawkes::TopologicalMapEdge &edge)
+NavGraphStaticListEdgeConstraint::has_edge(const fawkes::NavGraphEdge &edge)
 {
   return (std::find(edge_list_.begin(), edge_list_.end(), edge) != edge_list_.end());
 }
@@ -130,7 +130,7 @@ NavGraphStaticListEdgeConstraint::has_edge(const fawkes::TopologicalMapEdge &edg
 /** Get list of blocked edges.
  * @return list of blocked edges
  */
-const std::vector<fawkes::TopologicalMapEdge> &
+const std::vector<fawkes::NavGraphEdge> &
 NavGraphStaticListEdgeConstraint::edge_list() const
 {
   return edge_list_;
@@ -149,10 +149,10 @@ NavGraphStaticListEdgeConstraint::clear_edges()
 
 
 bool
-NavGraphStaticListEdgeConstraint::blocks(const fawkes::TopologicalMapNode &from,
-					 const fawkes::TopologicalMapNode &to) throw()
+NavGraphStaticListEdgeConstraint::blocks(const fawkes::NavGraphNode &from,
+					 const fawkes::NavGraphNode &to) throw()
 {
-  for (TopologicalMapEdge &e : edge_list_) {
+  for (NavGraphEdge &e : edge_list_) {
     if ((e.from() == from.name() && e.to() == to.name()) || 
 	(e.from() == to.name() && e.to() == from.name()) )
     {

@@ -20,7 +20,7 @@ include $(BUILDSYSDIR)/ros.mk
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_navgraph_static_constraints = fawkescore fawkesutils fawkesaspects \
+LIBS_navgraph_static_constraints = fawkescore fawkesutils fawkesnavgraph fawkesaspects \
 				fawkesnavgraphaspect fawkesnavgraphconstraints
 OBJS_navgraph_static_constraints = navgraph_stconstr_plugin.o navgraph_stconstr_thread.o
 OBJS_all    = $(OBJS_navgraph_static_constraints)
