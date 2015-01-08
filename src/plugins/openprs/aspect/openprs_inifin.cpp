@@ -23,7 +23,9 @@
 #include <plugins/openprs/aspect/openprs_inifin.h>
 #include <plugins/openprs/aspect/openprs_kernel_manager.h>
 #include <plugins/openprs/utils/openprs_comm.h>
+#include <plugins/openprs/utils/openprs_server_proxy.h>
 #include <core/threading/thread_finalizer.h>
+#include <utils/time/time.h>
 #include <unistd.h>
 
 namespace fawkes {
@@ -43,6 +45,8 @@ OpenPRSAspectIniFin::OpenPRSAspectIniFin()
   : AspectIniFin("OpenPRSAspect")
 {
   openprs_comm_ = NULL;
+  // conservative default, better wait a little longer than fail
+  kernel_timeout_sec_ = 30.;
 }
 
 /** Destructor. */
@@ -77,6 +81,16 @@ OpenPRSAspectIniFin::init(Thread *thread)
   } catch (Exception &e) {
     openprs_kernel_mgr_->destroy_kernel(openprs_thread->openprs_kernel_name);
     throw;
+  }
+
+  fawkes::Time now, start;
+  while (! openprs_server_proxy_->has_kernel(openprs_thread->openprs_kernel_name)) {
+    now.stamp();
+    if ((now - &start) > kernel_timeout_sec_) {
+      openprs_kernel_mgr_->destroy_kernel(openprs_thread->openprs_kernel_name);
+      throw Exception("OpenPRSAspect: timeout waiting for kernel startup");
+    }
+    usleep(100000);
   }
 
   openprs_comm_->transmit_command_f(openprs_thread->openprs_kernel_name,
@@ -134,6 +148,17 @@ OpenPRSAspectIniFin::prepare(const std::string &fawkes_host, unsigned short fawk
 				  openprs_kernel_mgr_->mp_host().c_str(),
 				  openprs_kernel_mgr_->mp_port(),
 				  openprs_server_proxy_);
+}
+
+
+/** Set timeout for kernel creation.
+ * @param timeout_sec timeout in seconds after which kernel creation
+ * is assumed to have failed.
+ */
+void
+OpenPRSAspectIniFin::set_kernel_timeout(float timeout_sec)
+{
+  kernel_timeout_sec_ = timeout_sec;
 }
 
 } // end namespace fawkes

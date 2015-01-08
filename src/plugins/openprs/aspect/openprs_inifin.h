@@ -53,6 +53,8 @@ class OpenPRSAspectIniFin : public AspectIniFin
 	       OpenPRSServerProxy *openprs_server_proxy,
 	       OpenPRSMessagePasserProxy *openprs_mp_proxy);
 
+  void set_kernel_timeout(float timeout_sec);
+
  private:
   std::string                    fawkes_host_;
   unsigned short                 fawkes_port_;
@@ -60,6 +62,8 @@ class OpenPRSAspectIniFin : public AspectIniFin
   OpenPRSComm                   *openprs_comm_;
   OpenPRSServerProxy            *openprs_server_proxy_;
   OpenPRSMessagePasserProxy     *openprs_mp_proxy_;
+
+  float                          kernel_timeout_sec_;
 };
 
 } // end namespace fawkes

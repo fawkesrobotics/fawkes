@@ -87,6 +87,7 @@ SubProcess::SubProcess(const char *progname, const char *file, const char *argv[
 /** Destructor. */
 SubProcess::~SubProcess()
 {
+  this->kill(SIGTERM);
   io_service_.stop();
   io_service_thread_.join();
 }

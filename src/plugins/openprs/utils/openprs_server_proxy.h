@@ -50,6 +50,8 @@ class OpenPRSServerProxy
   void transmit_command_f(const std::string &client_name, const char *format, ...);
   void transmit_command_v(const std::string &client_name, const char *format, va_list arg);
 
+  bool has_kernel(const std::string &kernel_name);
+
  private:
   class Mapping {
   public:

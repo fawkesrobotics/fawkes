@@ -100,6 +100,9 @@ OpenPRSThread::init()
   cfg_server_proxy_port_ = config->get_uint("/openprs/server/proxy-tcp-port");
 
   cfg_server_timeout_ = config->get_float("/openprs/server/timeout");
+  cfg_kernel_timeout_ = config->get_float("/openprs/kernels/start-timeout");
+
+  openprs_aspect_inifin_.set_kernel_timeout(cfg_kernel_timeout_);
 
   if (cfg_mp_run_) {
     logger->log_warn(name(), "Running OPRS-mp");

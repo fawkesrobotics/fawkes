@@ -79,6 +79,20 @@ OpenPRSServerProxy::~OpenPRSServerProxy()
 }
 
 
+/** Check if a kernel connected to the proxy.
+ * @param kernel_name name of the kernel to look for
+ * @return true if the kernel connected, false otherwise
+ */
+bool
+OpenPRSServerProxy::has_kernel(const std::string &kernel_name)
+{
+  auto map_it = find_if(mappings_.begin(), mappings_.end(),
+			[&kernel_name] (const Mapping::Ptr &mapping)
+			  { return mapping->client_name == kernel_name; });
+  return (map_it != mappings_.end());
+}
+
+
 OpenPRSServerProxy::Mapping::Ptr
 OpenPRSServerProxy::find_mapping(const std::string &recipient)
 {

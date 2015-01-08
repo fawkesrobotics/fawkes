@@ -84,6 +84,7 @@ class OpenPRSThread
   std::string  cfg_server_port_s_;
   unsigned int cfg_server_proxy_port_;
   float        cfg_server_timeout_;
+  float        cfg_kernel_timeout_;
 
   fawkes::SubProcess *proc_mp_;
   fawkes::SubProcess *proc_srv_;

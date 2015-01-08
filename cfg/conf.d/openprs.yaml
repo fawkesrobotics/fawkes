@@ -78,3 +78,10 @@ openprs:
     data-path: ["@FAWKES_BASEDIR@/src/plugins/openprs/data",
                 "/usr/share/openprs/data",
                 "$HOME/openprs", "$HOME/robotics/openprs"]
+
+    # Timeout for the kernel process to come up after starting it.
+    # This is relevant especially on loaded system, e.g. running
+    # multiple robot instances for simulation on a single machine.
+    # The timeout is given in seconds.
+    start-timeout: 30.0
+
