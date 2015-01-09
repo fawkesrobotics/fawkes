@@ -44,6 +44,7 @@ endif
 
 LIBS_libfawkesnavgraph = stdc++ m fawkescore fawkesutils
 OBJS_libfawkesnavgraph = navgraph.o navgraph_node.o navgraph_edge.o yaml_navgraph.o \
+			 search_state.o \
                          $(subst $(SRCDIR)/,,$(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/constraints/*.cpp)))
 HDRS_libfawkesnavgraph = $(OBJS_libfawkesnavgraph:%.o=%.h)
 

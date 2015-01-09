@@ -27,7 +27,7 @@ CFLAGS += $(CFLAGS_CPP11)
 LIBS_navgraph = fawkescore fawkesutils fawkesaspects fawkesinterface \
 		fawkesblackboard fawkesnavgraph \
 		NavigatorInterface NavPathInterface
-OBJS_navgraph = navgraph_plugin.o navgraph_thread.o search_state.o
+OBJS_navgraph = navgraph_plugin.o navgraph_thread.o
 OBJS_all    = $(OBJS_navgraph)
 
 ifeq ($(HAVE_CPP11)$(HAVE_TF),11)

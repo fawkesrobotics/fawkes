@@ -19,14 +19,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "search_state.h"
+#include <navgraph/search_state.h>
 
 #include <functional>
 #include <cmath>
 
 using namespace fawkes;
 
-/** @class NavGraphSearchState "search_state.h"
+/** @class NavGraphSearchState <navgraph/search_state.h>
  * Graph-based path planner A* search state.
  * @author Tim Niemueller
  */

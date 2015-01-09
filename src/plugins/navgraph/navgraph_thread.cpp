@@ -28,7 +28,7 @@
 #include <tf/utils.h>
 #include <core/utils/lockptr.h>
 
-#include "search_state.h"
+#include <navgraph/search_state.h>
 
 #include <fstream>
 
