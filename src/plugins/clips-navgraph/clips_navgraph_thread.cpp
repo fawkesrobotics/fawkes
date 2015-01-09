@@ -54,14 +54,14 @@ ClipsNavGraphThread::init()
   navgraph->add_change_listener(this);
 
   edge_constraint_ = new NavGraphStaticListEdgeConstraint("clips");
-  constraint_repo->register_constraint(edge_constraint_);
+  navgraph->constraint_repo()->register_constraint(edge_constraint_);
 }
 
 
 void
 ClipsNavGraphThread::finalize()
 {
-  constraint_repo->unregister_constraint(edge_constraint_->name());
+  navgraph->constraint_repo()->unregister_constraint(edge_constraint_->name());
   delete edge_constraint_;
 
   navgraph->remove_change_listener(this);
