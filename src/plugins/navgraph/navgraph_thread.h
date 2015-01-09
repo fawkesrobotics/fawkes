@@ -130,7 +130,7 @@ class NavGraphThread
   std::vector<fawkes::NavGraphNode> plan_;
   bool constrained_plan_;
 
-  fawkes::LockPtr<fawkes::ConstraintRepo> constraint_repo_;
+  fawkes::LockPtr<fawkes::NavGraphConstraintRepo> constraint_repo_;
 
   fawkes::Time *cmd_sent_at_;
   fawkes::Time *path_planned_at_;

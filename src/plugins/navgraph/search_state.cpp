@@ -42,7 +42,7 @@ using namespace fawkes;
 NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
 					 double cost_sofar, NavGraphSearchState *parent,
 					 NavGraph *map_graph,
-					 fawkes::ConstraintRepo *constraint_repo)
+					 fawkes::NavGraphConstraintRepo *constraint_repo)
   : AStarState(cost_sofar, parent)
 {
   node_ = node;
@@ -66,7 +66,7 @@ NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
  */
 NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
 					 NavGraph *map_graph,
-					 fawkes::ConstraintRepo *constraint_repo)
+					 fawkes::NavGraphConstraintRepo *constraint_repo)
   : AStarState(0, NULL)
 {
   node_ = node;

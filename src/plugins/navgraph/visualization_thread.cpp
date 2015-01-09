@@ -110,7 +110,7 @@ NavGraphVisualizationThread::set_graph(fawkes::LockPtr<NavGraph> &graph)
  * @param crepo constraint repo
  */
 void
-NavGraphVisualizationThread::set_constraint_repo(fawkes::LockPtr<ConstraintRepo> &crepo)
+NavGraphVisualizationThread::set_constraint_repo(fawkes::LockPtr<NavGraphConstraintRepo> &crepo)
 {
   crepo_ = crepo;
 }

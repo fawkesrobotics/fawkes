@@ -178,17 +178,17 @@ NavGraphStaticConstraintsThread::init()
     throw Exception("Some edges for cost factors are not in graph: %s", err_str.c_str());
   }
 
-  constraint_repo->register_constraint(node_constraint_);
-  constraint_repo->register_constraint(edge_constraint_);
-  constraint_repo->register_constraint(edge_cost_constraint_);
+  navgraph->constraint_repo()->register_constraint(node_constraint_);
+  navgraph->constraint_repo()->register_constraint(edge_constraint_);
+  navgraph->constraint_repo()->register_constraint(edge_cost_constraint_);
 }
 
 void
 NavGraphStaticConstraintsThread::finalize()
 {
-  constraint_repo->unregister_constraint(node_constraint_->name());
-  constraint_repo->unregister_constraint(edge_constraint_->name());
-  constraint_repo->unregister_constraint(edge_cost_constraint_->name());
+  navgraph->constraint_repo()->unregister_constraint(node_constraint_->name());
+  navgraph->constraint_repo()->unregister_constraint(edge_constraint_->name());
+  navgraph->constraint_repo()->unregister_constraint(edge_cost_constraint_->name());
   delete node_constraint_;
   delete edge_constraint_;
   delete edge_cost_constraint_;

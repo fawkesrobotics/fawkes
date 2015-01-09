@@ -34,12 +34,12 @@ class NavGraphSearchState : public fawkes::AStarState
 public:
   NavGraphSearchState(fawkes::NavGraphNode node, fawkes::NavGraphNode goal,
 		      fawkes::NavGraph *map_graph,
-		      fawkes::ConstraintRepo *constraint_repo = NULL);
+		      fawkes::NavGraphConstraintRepo *constraint_repo = NULL);
 
   NavGraphSearchState(fawkes::NavGraphNode node, fawkes::NavGraphNode goal,
 		      double cost_sofar, NavGraphSearchState *parent_state,
 		      fawkes::NavGraph *map_graph,
-		      fawkes::ConstraintRepo *constraint_repo = NULL);
+		      fawkes::NavGraphConstraintRepo *constraint_repo = NULL);
   ~NavGraphSearchState();
 
   fawkes::NavGraphNode & node();
@@ -81,7 +81,7 @@ public:
 
   fawkes::NavGraph *map_graph_;
 
-  fawkes::ConstraintRepo *constraint_repo_;
+  fawkes::NavGraphConstraintRepo *constraint_repo_;
   bool constrained_search_;
 
   size_t key_;

@@ -22,6 +22,7 @@
 #include "navgraph_thread.h"
 
 #include <navgraph/yaml_navgraph.h>
+#include <navgraph/constraints/constraint_repo.h>
 #include <utils/search/astar.h>
 #include <utils/math/angle.h>
 #include <tf/utils.h>
@@ -148,8 +149,7 @@ NavGraphThread::init()
   visualized_at_     = new Time(clock);
 #endif
 
-  constraint_repo_   = new ConstraintRepo(logger);
-  navgraph_aspect_inifin_.set_constraint_repo(constraint_repo_);
+  constraint_repo_   = graph_->constraint_repo();
 }
 
 void

@@ -35,7 +35,7 @@
 
 namespace fawkes {
   class NavGraph;
-  class ConstraintRepo;
+  class NavGraphConstraintRepo;
 }
 
 
@@ -53,7 +53,7 @@ class NavGraphVisualizationThread
   virtual void finalize();
 
   void set_graph(fawkes::LockPtr<fawkes::NavGraph> &graph);
-  void set_constraint_repo(fawkes::LockPtr<fawkes::ConstraintRepo> &crepo);
+  void set_constraint_repo(fawkes::LockPtr<fawkes::NavGraphConstraintRepo> &crepo);
 
   void set_plan(std::vector<fawkes::NavGraphNode> plan);
   void set_current_edge(std::string from, std::string to);
@@ -80,7 +80,7 @@ class NavGraphVisualizationThread
   std::string plan_from_;
 
   fawkes::LockPtr<fawkes::NavGraph> graph_;
-  fawkes::LockPtr<fawkes::ConstraintRepo>      crepo_;
+  fawkes::LockPtr<fawkes::NavGraphConstraintRepo>      crepo_;
 };
 
 
