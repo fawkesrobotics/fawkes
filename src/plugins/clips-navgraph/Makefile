@@ -19,7 +19,7 @@ include $(BUILDSYSDIR)/clips.mk
 
 LIBS_clips_navgraph = fawkescore fawkesutils fawkesaspects \
 		      fawkesclipsaspect fawkesnavgraphaspect \
-		      fawkesnavgraphconstraints
+		      fawkesnavgraph
 OBJS_clips_navgraph = clips_navgraph_plugin.o clips_navgraph_thread.o
 
 OBJS_all = $(OBJS_clips_navgraph)

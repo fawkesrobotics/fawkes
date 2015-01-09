@@ -21,9 +21,9 @@
 
 #include "clips_navgraph_thread.h"
 
-#include <utils/graph/topological_map_graph.h>
-#include <plugins/navgraph/constraints/static_list_edge_constraint.h>
-#include <plugins/navgraph/constraints/constraint_repo.h>
+#include <navgraph/navgraph.h>
+#include <navgraph/constraints/static_list_edge_constraint.h>
+#include <navgraph/constraints/constraint_repo.h>
 
 #include <clipsmm.h>
 
@@ -110,9 +110,9 @@ void
 ClipsNavGraphThread::clips_navgraph_load(LockPtr<CLIPS::Environment> &clips)
 {
   try {
-    TopologicalMapNode root_node                 = navgraph->root_node();
-    const std::vector<TopologicalMapNode> &nodes = navgraph->nodes();
-    const std::vector<TopologicalMapEdge> &edges = navgraph->edges();
+    NavGraphNode root_node                 = navgraph->root_node();
+    const std::vector<NavGraphNode> &nodes = navgraph->nodes();
+    const std::vector<NavGraphEdge> &edges = navgraph->edges();
 
     clips->assert_fact_f("(navgraph (name \"%s\") (root \"%s\"))",
 			 navgraph->name().c_str(), root_node.name().c_str());
@@ -151,9 +151,9 @@ void
 ClipsNavGraphThread::clips_navgraph_block_edge(std::string env_name,
 					       std::string from, std::string to)
 {
-  const std::vector<TopologicalMapEdge> &graph_edges = navgraph->edges();
+  const std::vector<NavGraphEdge> &graph_edges = navgraph->edges();
 
-  for (const TopologicalMapEdge &edge : graph_edges) {
+  for (const NavGraphEdge &edge : graph_edges) {
     if (edge.from() == from && edge.to() == to) {
       edge_constraint_->add_edge(edge);
       return;
@@ -170,9 +170,9 @@ void
 ClipsNavGraphThread::clips_navgraph_unblock_edge(std::string env_name,
 						 std::string from, std::string to)
 {
-  const std::vector<TopologicalMapEdge> &graph_edges = navgraph->edges();
+  const std::vector<NavGraphEdge> &graph_edges = navgraph->edges();
 
-  for (const TopologicalMapEdge &edge : graph_edges) {
+  for (const NavGraphEdge &edge : graph_edges) {
     if (edge.from() == from && edge.to() == to) {
       edge_constraint_->remove_edge(edge);
       return;

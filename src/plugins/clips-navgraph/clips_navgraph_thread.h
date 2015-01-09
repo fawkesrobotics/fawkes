@@ -27,8 +27,8 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <plugins/clips/aspect/clips_feature.h>
-#include <plugins/navgraph/aspect/navgraph.h>
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/aspect/navgraph.h>
+#include <navgraph/navgraph.h>
 
 #include <vector>
 #include <string>
@@ -45,7 +45,7 @@ class ClipsNavGraphThread
   public fawkes::NavGraphAspect,
   public fawkes::CLIPSFeature,
   public fawkes::CLIPSFeatureAspect,
-  public fawkes::TopologicalMapGraph::ChangeListener
+  public fawkes::NavGraph::ChangeListener
 {
  public:
   ClipsNavGraphThread();
