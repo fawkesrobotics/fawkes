@@ -52,8 +52,8 @@ NavGraphClustersBlockConstraint::compute(void) throw()
 
 
 bool
-NavGraphClustersBlockConstraint::blocks(const fawkes::TopologicalMapNode &from,
-					const fawkes::TopologicalMapNode &to) throw()
+NavGraphClustersBlockConstraint::blocks(const fawkes::NavGraphNode &from,
+					const fawkes::NavGraphNode &to) throw()
 {
   std::string to_n = to.name();
   std::string from_n = from.name();

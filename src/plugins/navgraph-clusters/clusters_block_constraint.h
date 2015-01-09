@@ -21,7 +21,7 @@
 #ifndef __NAVGRAPH_CLUSTERS_CLUSTERS_BLOCK_CONSTRAINT_H_
 #define __NAVGRAPH_CLUSTERS_CLUSTERS_BLOCK_CONSTRAINT_H_
 
-#include <plugins/navgraph/constraints/edge_constraint.h>
+#include <navgraph/constraints/edge_constraint.h>
 
 #include <list>
 #include <string>
@@ -35,8 +35,8 @@ class NavGraphClustersBlockConstraint : public fawkes::NavGraphEdgeConstraint
   virtual ~NavGraphClustersBlockConstraint();
 
   virtual bool compute(void) throw();
-  virtual bool blocks(const fawkes::TopologicalMapNode &from,
-		      const fawkes::TopologicalMapNode &to) throw();
+  virtual bool blocks(const fawkes::NavGraphNode &from,
+		      const fawkes::NavGraphNode &to) throw();
 
  private:
   NavGraphClustersThread *parent_;

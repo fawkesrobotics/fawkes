@@ -80,8 +80,8 @@ NavGraphClustersDistanceCostConstraint::compute(void) throw()
 
 
 float
-NavGraphClustersDistanceCostConstraint::cost_factor(const fawkes::TopologicalMapNode &from,
-						  const fawkes::TopologicalMapNode &to) throw()
+NavGraphClustersDistanceCostConstraint::cost_factor(const fawkes::NavGraphNode &from,
+						  const fawkes::NavGraphNode &to) throw()
 {
   if (valid_) {
     std::string to_n = to.name();

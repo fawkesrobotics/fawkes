@@ -56,8 +56,8 @@ NavGraphClustersStaticCostConstraint::compute(void) throw()
 
 
 float
-NavGraphClustersStaticCostConstraint::cost_factor(const fawkes::TopologicalMapNode &from,
-						  const fawkes::TopologicalMapNode &to) throw()
+NavGraphClustersStaticCostConstraint::cost_factor(const fawkes::NavGraphNode &from,
+						  const fawkes::NavGraphNode &to) throw()
 {
   std::string to_n = to.name();
   std::string from_n = from.name();

@@ -21,7 +21,7 @@
 #ifndef __NAVGRAPH_CLUSTERS_CLUSTERS_STATIC_COST_CONSTRAINT_H_
 #define __NAVGRAPH_CLUSTERS_CLUSTERS_STATIC_COST_CONSTRAINT_H_
 
-#include <plugins/navgraph/constraints/edge_cost_constraint.h>
+#include <navgraph/constraints/edge_cost_constraint.h>
 
 #include <list>
 #include <string>
@@ -36,8 +36,8 @@ class NavGraphClustersStaticCostConstraint : public fawkes::NavGraphEdgeCostCons
   virtual ~NavGraphClustersStaticCostConstraint();
 
   virtual bool compute(void) throw();
-  virtual float cost_factor(const fawkes::TopologicalMapNode &from,
-			    const fawkes::TopologicalMapNode &to) throw();
+  virtual float cost_factor(const fawkes::NavGraphNode &from,
+			    const fawkes::NavGraphNode &to) throw();
 
  private:
   NavGraphClustersThread *parent_;

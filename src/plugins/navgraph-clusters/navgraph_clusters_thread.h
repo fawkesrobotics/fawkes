@@ -28,7 +28,7 @@
 #include <aspect/logging.h>
 #include <aspect/tf.h>
 #include <aspect/blackboard.h>
-#include <plugins/navgraph/aspect/navgraph.h>
+#include <navgraph/aspect/navgraph.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
 

@@ -22,7 +22,7 @@ CFLAGS += $(CFLAGS_CPP11)
 
 LIBS_navgraph_clusters = fawkescore fawkesutils fawkesaspects fawkesinterface \
 		fawkesblackboard fawkestf \
-		fawkesnavgraphconstraints fawkesnavgraphaspect \
+		fawkesnavgraph fawkesnavgraphaspect \
 		Position3DInterface
 OBJS_navgraph_clusters = navgraph_clusters_plugin.o navgraph_clusters_thread.o \
 			 clusters_block_constraint.o \
