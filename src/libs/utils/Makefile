@@ -38,7 +38,7 @@ ifeq ($(HAVE_LIBXMLPP),1)
   CFLAGS  += $(CFLAGS_LIBXMLPP) $(CFLAGS_LIBMAGIC)
   LDFLAGS += $(LDFLAGS_LIBXMLPP) $(LDFLAGS_LIBMAGIC)
 else
-  FILTER_OUT += graph/rcsoft_graph_map.o
+  FILTER_OUT += graph/rcsoft_map_graph.o
   WARN_TARGETS += warning_libxmlpp
 endif
 ifeq ($(HAVE_YAMLCPP),1)
