@@ -70,7 +70,7 @@ NavGraph::~NavGraph()
 
 
 /** Assign/copy structures from another graph.
- * This method will remove internal data like root node, nodes, and edges
+ * This method will remove internal data like nodes, and edges
  * and copy the data from the passed instance. The change listeners will
  * not be copied. The assignment operator will trigger all registered
  * change listeners to be called.
@@ -80,7 +80,6 @@ NavGraph::~NavGraph()
 NavGraph &
 NavGraph::operator=(const NavGraph &g)
 {
-  root_node_  = g.root_node_;
   graph_name_ = g.graph_name_;
   nodes_.clear();
   nodes_      = g.nodes_;
@@ -145,16 +144,6 @@ NavGraph::node(std::string name) const
     if (i->name() == name)  return *i;
   }
   return NavGraphNode();
-}
-
-
-/** Get the root node of the graph.
- * @return root node
- */
-NavGraphNode
-NavGraph::root_node() const
-{
-  return root_node_;
 }
 
 
@@ -335,17 +324,6 @@ NavGraph::search_nodes(std::string property)
 
     return rv;
   }
-}
-
-
-/** Set root node name.
- * @param node_id name of the root node
- */
-void
-NavGraph::set_root(std::string node_id)
-{
-  root_node_ = node(node_id);
-  notify_of_change();
 }
 
 

@@ -65,7 +65,6 @@ class NavGraph
 
   NavGraphNode node(std::string name) const;
   bool node_exists(std::string name) const;
-  NavGraphNode root_node() const;
 
   NavGraphNode closest_node(float pos_x, float pos_y,
                                   std::string property = "");
@@ -89,7 +88,6 @@ class NavGraph
 
   std::vector<std::string>  reachable_nodes(std::string node_name) const;
 
-  void set_root(std::string node_id);
   void add_node(NavGraphNode node);
   void add_edge(NavGraphEdge edge);
 
@@ -115,7 +113,6 @@ class NavGraph
   void assert_connected();
 
  private:
-  NavGraphNode                            root_node_;
   std::string                             graph_name_;
   std::vector<NavGraphNode>               nodes_;
   std::vector<NavGraphEdge>               edges_;
