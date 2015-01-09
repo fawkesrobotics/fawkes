@@ -21,11 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/navgraph/aspect/navgraph_inifin.h>
-#include <plugins/navgraph/aspect/navgraph.h>
+#include <navgraph/aspect/navgraph_inifin.h>
+#include <navgraph/aspect/navgraph.h>
 #include <core/threading/thread_finalizer.h>
 #include <navgraph/navgraph.h>
-#include <plugins/navgraph/constraints/constraint_repo.h>
+#include <navgraph/constraints/constraint_repo.h>
 #include <cstddef>
 
 namespace fawkes {
@@ -33,7 +33,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class NavGraphAspectIniFin <plugins/navgraph/aspect/navgraph_inifin.h>
+/** @class NavGraphAspectIniFin <navgraph/aspect/navgraph_inifin.h>
  * NavGraphAspect initializer/finalizer.
  * @author Tim Niemueller
  */

@@ -19,7 +19,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/navgraph/constraints/static_list_edge_cost_constraint.h>
+#include <navgraph/constraints/static_list_edge_cost_constraint.h>
 #include <core/exception.h>
 
 #include <algorithm>
@@ -29,7 +29,7 @@ namespace fawkes{
 }
 #endif
 
-/** @class NavGraphStaticListEdgeCostConstraint <plugins/navgraph/constraints/static_list_edge_cost_constraint.h>
+/** @class NavGraphStaticListEdgeCostConstraint <navgraph/constraints/static_list_edge_cost_constraint.h>
  * Constraint that hold cost factors for a static list of edges.
  * @author Tim Niemueller
  */

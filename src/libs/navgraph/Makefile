@@ -19,6 +19,8 @@ include $(BUILDSYSDIR)/lua.mk
 
 FILTER_OUT=%_tolua.o
 
+SUBDIRS=aspect
+
 ifneq ($(PKGCONFIG),)
   HAVE_YAMLCPP   = $(if $(shell $(PKGCONFIG) --exists 'yaml-cpp'; echo $${?/1/}),1,0)
 endif
@@ -41,7 +43,8 @@ ifeq ($(HAVE_YAMLCPP),1)
 endif
 
 LIBS_libfawkesnavgraph = stdc++ m fawkescore fawkesutils
-OBJS_libfawkesnavgraph = navgraph.o navgraph_node.o navgraph_edge.o yaml_navgraph.o
+OBJS_libfawkesnavgraph = navgraph.o navgraph_node.o navgraph_edge.o yaml_navgraph.o \
+                         $(subst $(SRCDIR)/,,$(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/constraints/*.cpp)))
 HDRS_libfawkesnavgraph = $(OBJS_libfawkesnavgraph:%.o=%.h)
 
 CFLAGS_fawkesnavgraph_tolua = -Wno-unused-function $(CFLAGS_LUA)
@@ -52,7 +55,9 @@ OBJS_lua_fawkesnavgraph = fawkesnavgraph_tolua.o
 
 OBJS_all = $(OBJS_libfawkesnavgraph) $(OBJS_lua_fawkesnavgraph)
 
-ifeq ($(HAVE_YAMLCPP),1)
+ifeq ($(HAVE_YAMLCPP)$(HAVE_CPP11),11)
+  CFLAGS += $(CFLAGS_CPP11)
+
   LIBS_all  = $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
 
   ifeq ($(HAVE_TOLUA),1)
@@ -62,14 +67,21 @@ ifeq ($(HAVE_YAMLCPP),1)
     WARN_TARGETS += warning_tolua_wrapper
   endif
 else
-  WARN_TARGETS += warning_yamlcpp
+  ifneq ($(HAVE_YAMLCPP),1)
+    WARN_TARGETS += warning_yamlcpp
+  endif
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_yamlcpp
+.PHONY: warning_yamlcpp warning_cpp11
 warning_yamlcpp:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)YAML navgraph utils cannot be built$(TNORMAL) (yaml-cpp[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)navgraph library cannot be built$(TNORMAL) (yaml-cpp[-devel] not installed)"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)navgraph library cannot be built$(TNORMAL) (compiler does not support C++11)"
 endif
 
 $(LUALIBDIR)/fawkesnavgraph.$(SOEXT): | $(LIBDIR)/libfawkesnavgraph.$(SOEXT)

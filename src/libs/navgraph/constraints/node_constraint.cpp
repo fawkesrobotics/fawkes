@@ -19,14 +19,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/navgraph/constraints/node_constraint.h>
+#include <navgraph/constraints/node_constraint.h>
 
 namespace fawkes{
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class NavGraphNodeConstraint <plugins/navgraph/constraints/node_constraint.h>
+/** @class NavGraphNodeConstraint <navgraph/constraints/node_constraint.h>
  * Constraint that can be queried to check if a node is blocked.
  * @author Sebastian Reuter
  * @author Tim Niemueller

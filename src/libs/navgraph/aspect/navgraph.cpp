@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/navgraph/aspect/navgraph.h>
+#include <navgraph/aspect/navgraph.h>
 #include <navgraph/navgraph.h>
-#include <plugins/navgraph/constraints/constraint_repo.h>
+#include <navgraph/constraints/constraint_repo.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -33,7 +33,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class NavGraphAspect <plugins/navgraph/aspect/navgraph.h>
+/** @class NavGraphAspect <navgraph/aspect/navgraph.h>
  * Thread aspect to access NavGraph.
  * Give this aspect to your thread to gain access to NavGraph. This will
  * setup the navgraph member with the globally shared instance of

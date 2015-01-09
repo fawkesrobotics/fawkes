@@ -22,9 +22,9 @@
 #ifndef __NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
 #define __NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
 
-#include <plugins/navgraph/constraints/node_constraint.h>
-#include <plugins/navgraph/constraints/edge_constraint.h>
-#include <plugins/navgraph/constraints/edge_cost_constraint.h>
+#include <navgraph/constraints/node_constraint.h>
+#include <navgraph/constraints/edge_constraint.h>
+#include <navgraph/constraints/edge_cost_constraint.h>
 
 #include <navgraph/navgraph_edge.h>
 

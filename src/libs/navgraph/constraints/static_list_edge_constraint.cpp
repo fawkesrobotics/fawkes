@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/navgraph/constraints/static_list_edge_constraint.h>
+#include <navgraph/constraints/static_list_edge_constraint.h>
 
 #include <algorithm>
 
@@ -29,7 +29,7 @@ namespace fawkes{
 }
 #endif
 
-/** @class NavGraphStaticListEdgeConstraint <plugins/navgraph/constraints/static_list_edge_constraint.h>
+/** @class NavGraphStaticListEdgeConstraint <navgraph/constraints/static_list_edge_constraint.h>
  * Constraint that holds a list of edges to block.
  * @author Sebastian Reuter
  * @author Tim Niemueller

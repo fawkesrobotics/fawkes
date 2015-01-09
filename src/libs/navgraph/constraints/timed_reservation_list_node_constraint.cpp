@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/navgraph/constraints/timed_reservation_list_node_constraint.h>
+#include <navgraph/constraints/timed_reservation_list_node_constraint.h>
 
 #include <algorithm>
 
@@ -29,7 +29,7 @@ namespace fawkes{
 }
 #endif
 
-/** @class NavGraphTimedReservationListNodeConstraint <plugins/navgraph/constraints/timed_reservation_list_node_constraint.h>
+/** @class NavGraphTimedReservationListNodeConstraint <navgraph/constraints/timed_reservation_list_node_constraint.h>
  * Constraint that holds a list of nodes to block with timeouts.
  * @author Sebastian Reuter
  * @author Tim Niemueller

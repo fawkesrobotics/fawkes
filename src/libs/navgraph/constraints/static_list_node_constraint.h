@@ -23,7 +23,7 @@
 #ifndef __NAVGRAPH_CONSTRAINTS_STATIC_LIST_NODE_CONSTRAINT_H_
 #define __NAVGRAPH_CONSTRAINTS_STATIC_LIST_NODE_CONSTRAINT_H_
 
-#include <plugins/navgraph/constraints/node_constraint.h>
+#include <navgraph/constraints/node_constraint.h>
 
 #include <vector>
 #include <string>

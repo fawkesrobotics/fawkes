@@ -19,14 +19,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/navgraph/constraints/edge_constraint.h>
+#include <navgraph/constraints/edge_constraint.h>
 
 namespace fawkes{
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class NavGraphEdgeConstraint <plugins/navgraph/constraints/edge_constraint.h>
+/** @class NavGraphEdgeConstraint <navgraph/constraints/edge_constraint.h>
  * Constraint that can be queried to check if an edge is blocked.
  * @author Sebastian Reuter
  * @author Tim Niemueller

@@ -44,7 +44,7 @@ class NavGraphPlugin : public fawkes::Plugin
 #ifdef HAVE_VISUALIZATION
     bool use_vis = false;
     try {
-      use_vis = config->get_bool("/plugins/navgraph/visualization/enable");
+      use_vis = config->get_bool("/navgraph/visualization/enable");
     } catch (Exception &e) {} // ignored, use default
     if (use_vis) {
       NavGraphVisualizationThread *vt = new NavGraphVisualizationThread();

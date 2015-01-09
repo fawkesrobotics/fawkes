@@ -20,13 +20,12 @@ include $(BUILDSYSDIR)/ros.mk
 
 ENABLE_VISUALIZATION = 1
 
-PRESUBDIRS = constraints aspect
 SUBDIRS = static-constraints
 
 CFLAGS += $(CFLAGS_CPP11)
 
 LIBS_navgraph = fawkescore fawkesutils fawkesaspects fawkesinterface \
-		fawkesblackboard fawkesnavgraph fawkesnavgraphconstraints \
+		fawkesblackboard fawkesnavgraph \
 		NavigatorInterface NavPathInterface
 OBJS_navgraph = navgraph_plugin.o navgraph_thread.o search_state.o
 OBJS_all    = $(OBJS_navgraph)
@@ -69,9 +68,6 @@ else
     WARN_TARGETS = warning_tf
   endif
 endif
-
-aspect: constraints
-static-constraints: aspect constraints
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)

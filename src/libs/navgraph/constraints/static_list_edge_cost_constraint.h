@@ -22,7 +22,7 @@
 #ifndef __NAVGRAPH_CONSTRAINTS_STATIC_LIST_EDGE_COST_CONSTRAINT_H_
 #define __NAVGRAPH_CONSTRAINTS_STATIC_LIST_EDGE_COST_CONSTRAINT_H_
 
-#include <plugins/navgraph/constraints/edge_cost_constraint.h>
+#include <navgraph/constraints/edge_cost_constraint.h>
 
 #include <vector>
 #include <string>

@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/navgraph/constraints/static_list_node_constraint.h>
+#include <navgraph/constraints/static_list_node_constraint.h>
 
 #include <algorithm>
 
@@ -29,7 +29,7 @@ namespace fawkes{
 }
 #endif
 
-/** @class NavGraphStaticListNodeConstraint <plugins/navgraph/constraints/static_list_node_constraint.h>
+/** @class NavGraphStaticListNodeConstraint <navgraph/constraints/static_list_node_constraint.h>
  * Constraint that holds a list of nodes to block.
  * @author Sebastian Reuter
  */

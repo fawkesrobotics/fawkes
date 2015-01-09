@@ -18,7 +18,7 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
-#include <plugins/navgraph/constraints/constraint_repo.h>
+#include <navgraph/constraints/constraint_repo.h>
 
 #include <logging/logger.h>
 #include <algorithm>
@@ -30,7 +30,7 @@ namespace fawkes{
 }
 #endif
 
-/** @class ConstraintRepo <plugins/navgraph/constraints/constraint_repo.h>
+/** @class ConstraintRepo <navgraph/constraints/constraint_repo.h>
  * Constraint repository to maintain blocks on nodes.
  * @author Sebastian Reuter
  * @author Tim Niemueller

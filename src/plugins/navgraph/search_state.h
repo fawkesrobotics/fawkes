@@ -23,7 +23,7 @@
 #define __PLUGINS_NAVGRAPH_SEARCH_STATE_THREAD_H_
 
 #include <utils/search/astar_state.h>
-#include <plugins/navgraph/constraints/constraint_repo.h>
+#include <navgraph/constraints/constraint_repo.h>
 #include <navgraph/navgraph.h>
 #include <core/utils/lockptr.h>
 

@@ -20,9 +20,9 @@
 
 #include "navgraph_stconstr_thread.h"
 
-#include <plugins/navgraph/constraints/static_list_node_constraint.h>
-#include <plugins/navgraph/constraints/static_list_edge_constraint.h>
-#include <plugins/navgraph/constraints/static_list_edge_cost_constraint.h>
+#include <navgraph/constraints/static_list_node_constraint.h>
+#include <navgraph/constraints/static_list_edge_constraint.h>
+#include <navgraph/constraints/static_list_edge_cost_constraint.h>
 #include <utils/misc/string_split.h>
 
 using namespace fawkes;
@@ -47,13 +47,13 @@ void
 NavGraphStaticConstraintsThread::init()
 {
   std::vector<std::string> nodes =
-    config->get_strings("/plugins/navgraph/static-constraints/nodes");
+    config->get_strings("/navgraph/static-constraints/nodes");
 
   std::vector<std::string> c_edges =
-    config->get_strings("/plugins/navgraph/static-constraints/edges");
+    config->get_strings("/navgraph/static-constraints/edges");
 
   std::vector<std::string> c_edge_costs =
-    config->get_strings("/plugins/navgraph/static-constraints/edge-costs");
+    config->get_strings("/navgraph/static-constraints/edge-costs");
 
   std::vector<std::pair<std::string, std::string>> edges;
   for (std::string & ce : c_edges) {

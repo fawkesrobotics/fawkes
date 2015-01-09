@@ -22,7 +22,7 @@
 #include "visualization_thread.h"
 
 #include <navgraph/navgraph.h>
-#include <plugins/navgraph/constraints/constraint_repo.h>
+#include <navgraph/constraints/constraint_repo.h>
 #include <tf/types.h>
 #include <utils/math/angle.h>
 #include <utils/math/coord.h>
@@ -52,7 +52,7 @@ NavGraphVisualizationThread::init()
 {
   vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100, /* latching */ true);
 
-  cfg_cost_scale_max_ = config->get_float("/plugins/navgraph/visualization/cost_scale_max");
+  cfg_cost_scale_max_ = config->get_float("/navgraph/visualization/cost_scale_max");
   if (cfg_cost_scale_max_ < 1.0) {
     throw Exception("Visualization cost max scale must greater or equal to 1.0");
   }

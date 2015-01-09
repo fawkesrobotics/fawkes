@@ -18,14 +18,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/navgraph/constraints/edge_cost_constraint.h>
+#include <navgraph/constraints/edge_cost_constraint.h>
 
 namespace fawkes{
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class NavGraphEdgeCostConstraint <plugins/navgraph/constraints/edge_cost_constraint.h>
+/** @class NavGraphEdgeCostConstraint <navgraph/constraints/edge_cost_constraint.h>
  * Constraint that can be queried for an edge cost factor.
  * @author Tim Niemueller
  *

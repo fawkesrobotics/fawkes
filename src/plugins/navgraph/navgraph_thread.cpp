@@ -68,26 +68,26 @@ NavGraphThread::~NavGraphThread()
 void
 NavGraphThread::init()
 {
-  cfg_graph_file_      = config->get_string("/plugins/navgraph/graph_file");
-  cfg_base_frame_      = config->get_string("/plugins/navgraph/base_frame");
-  cfg_global_frame_    = config->get_string("/plugins/navgraph/global_frame");
-  cfg_nav_if_id_       = config->get_string("/plugins/navgraph/navigator_interface_id");
-  cfg_travel_tolerance_ = config->get_float("/plugins/navgraph/travel_tolerance");
-  cfg_target_tolerance_ = config->get_float("/plugins/navgraph/target_tolerance");
-  cfg_orientation_tolerance_ = config->get_float("/plugins/navgraph/orientation_tolerance");
-  cfg_shortcut_tolerance_ = config->get_float("/plugins/navgraph/shortcut_tolerance");
-  cfg_resend_interval_ = config->get_float("/plugins/navgraph/resend_interval");
-  cfg_replan_interval_ = config->get_float("/plugins/navgraph/replan_interval");
-  cfg_replan_factor_   = config->get_float("/plugins/navgraph/replan_cost_factor");
-  cfg_target_time_     = config->get_float("/plugins/navgraph/target_time");
-  cfg_log_graph_       = config->get_bool("/plugins/navgraph/log_graph");
-  cfg_abort_on_error_  = config->get_bool("/plugins/navgraph/abort_on_error");
+  cfg_graph_file_      = config->get_string("/navgraph/graph_file");
+  cfg_base_frame_      = config->get_string("/navgraph/base_frame");
+  cfg_global_frame_    = config->get_string("/navgraph/global_frame");
+  cfg_nav_if_id_       = config->get_string("/navgraph/navigator_interface_id");
+  cfg_travel_tolerance_ = config->get_float("/navgraph/travel_tolerance");
+  cfg_target_tolerance_ = config->get_float("/navgraph/target_tolerance");
+  cfg_orientation_tolerance_ = config->get_float("/navgraph/orientation_tolerance");
+  cfg_shortcut_tolerance_ = config->get_float("/navgraph/shortcut_tolerance");
+  cfg_resend_interval_ = config->get_float("/navgraph/resend_interval");
+  cfg_replan_interval_ = config->get_float("/navgraph/replan_interval");
+  cfg_replan_factor_   = config->get_float("/navgraph/replan_cost_factor");
+  cfg_target_time_     = config->get_float("/navgraph/target_time");
+  cfg_log_graph_       = config->get_bool("/navgraph/log_graph");
+  cfg_abort_on_error_  = config->get_bool("/navgraph/abort_on_error");
 #ifdef HAVE_VISUALIZATION
-  cfg_visual_interval_ = config->get_float("/plugins/navgraph/visualization_interval");
+  cfg_visual_interval_ = config->get_float("/navgraph/visualization_interval");
 #endif
   cfg_monitor_file_ = false;
   try {
-    cfg_monitor_file_ = config->get_bool("/plugins/navgraph/monitor_file");
+    cfg_monitor_file_ = config->get_bool("/navgraph/monitor_file");
   } catch (Exception &e) {} // ignored
 
   pp_nav_if_ = blackboard->open_for_writing<NavigatorInterface>("Pathplan");

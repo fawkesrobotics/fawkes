@@ -33,7 +33,7 @@
 #include <aspect/tf.h>
 #include <aspect/blackboard.h>
 #include <aspect/aspect_provider.h>
-#include <plugins/navgraph/aspect/navgraph_inifin.h>
+#include <navgraph/aspect/navgraph_inifin.h>
 
 #include <interfaces/NavigatorInterface.h>
 #include <interfaces/NavPathInterface.h>
@@ -41,7 +41,7 @@
 #include <navgraph/navgraph.h>
 #include <utils/system/fam.h>
 
-#include <plugins/navgraph/constraints/constraint_repo.h>
+#include <navgraph/constraints/constraint_repo.h>
 
 namespace fawkes {
   class AStar;

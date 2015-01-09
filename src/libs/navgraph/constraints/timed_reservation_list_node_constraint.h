@@ -23,7 +23,7 @@
 #ifndef __NAVGRAPH_CONSTRAINTS_TIMED_RESERVATION_LIST_NODE_CONSTRAINT_H_
 #define __NAVGRAPH_CONSTRAINTS_TIMED_RESERVATION_LIST_NODE_CONSTRAINT_H_
 
-#include <plugins/navgraph/constraints/static_list_node_constraint.h>
+#include <navgraph/constraints/static_list_node_constraint.h>
 
 #include <vector>
 #include <string>
