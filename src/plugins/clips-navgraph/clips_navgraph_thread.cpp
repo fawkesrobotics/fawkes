@@ -110,12 +110,10 @@ void
 ClipsNavGraphThread::clips_navgraph_load(LockPtr<CLIPS::Environment> &clips)
 {
   try {
-    NavGraphNode root_node                 = navgraph->root_node();
     const std::vector<NavGraphNode> &nodes = navgraph->nodes();
     const std::vector<NavGraphEdge> &edges = navgraph->edges();
 
-    clips->assert_fact_f("(navgraph (name \"%s\") (root \"%s\"))",
-			 navgraph->name().c_str(), root_node.name().c_str());
+    clips->assert_fact_f("(navgraph (name \"%s\"))", navgraph->name().c_str());
 
     for (auto n : nodes) {
       std::string props_string;
