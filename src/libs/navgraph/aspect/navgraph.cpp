@@ -23,7 +23,6 @@
 
 #include <navgraph/aspect/navgraph.h>
 #include <navgraph/navgraph.h>
-#include <navgraph/constraints/constraint_repo.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -45,10 +44,6 @@ namespace fawkes {
 
 /** @var fawkes::LockPtr<fawkes::NavGraph>  NavGraphAspect::navgraph
  * NavGraph instance shared in framework.
- */
-
-/** @var fawkes::LockPtr<fawkes::ConstraintRepo>  NavGraphAspect::constraint_repo
- * Constraint repository used for path planning.
  */
 
 /** Constructor. */

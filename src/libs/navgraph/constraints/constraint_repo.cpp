@@ -20,7 +20,6 @@
  */
 #include <navgraph/constraints/constraint_repo.h>
 
-#include <logging/logger.h>
 #include <algorithm>
 
 using namespace std;
@@ -30,24 +29,21 @@ namespace fawkes{
 }
 #endif
 
-/** @class ConstraintRepo <navgraph/constraints/constraint_repo.h>
+/** @class NavGraphConstraintRepo <navgraph/constraints/constraint_repo.h>
  * Constraint repository to maintain blocks on nodes.
  * @author Sebastian Reuter
  * @author Tim Niemueller
  */
 
 
-/** Constructor.
- * @param logger logger used for debug output
- */
-ConstraintRepo::ConstraintRepo(Logger *logger)
+/** Constructor. */
+NavGraphConstraintRepo::NavGraphConstraintRepo()
 {
-  logger_ = logger;
   modified_ = false;
 }
 
 /** Destructor. */
-ConstraintRepo::~ConstraintRepo()
+NavGraphConstraintRepo::~NavGraphConstraintRepo()
 {
 }
 
@@ -56,7 +52,7 @@ ConstraintRepo::~ConstraintRepo()
  * @param constraint node constraint to register
  */
 void
-ConstraintRepo::register_constraint(NavGraphNodeConstraint* constraint)
+NavGraphConstraintRepo::register_constraint(NavGraphNodeConstraint* constraint)
 {
   modified_ = true;
   node_constraints_.push_back(constraint);
@@ -66,7 +62,7 @@ ConstraintRepo::register_constraint(NavGraphNodeConstraint* constraint)
  * @param constraint edge constraint to register
  */
 void
-ConstraintRepo::register_constraint(NavGraphEdgeConstraint* constraint)
+NavGraphConstraintRepo::register_constraint(NavGraphEdgeConstraint* constraint)
 {
   modified_ = true;
   edge_constraints_.push_back(constraint);
@@ -76,7 +72,7 @@ ConstraintRepo::register_constraint(NavGraphEdgeConstraint* constraint)
  * @param constraint edge cost constraint to register
  */
 void
-ConstraintRepo::register_constraint(NavGraphEdgeCostConstraint* constraint)
+NavGraphConstraintRepo::register_constraint(NavGraphEdgeCostConstraint* constraint)
 {
   modified_ = true;
   edge_cost_constraints_.push_back(constraint);
@@ -87,7 +83,7 @@ ConstraintRepo::register_constraint(NavGraphEdgeCostConstraint* constraint)
  * @param name name of constraint to remove.
  */
 void
-ConstraintRepo::unregister_constraint(std::string name)
+NavGraphConstraintRepo::unregister_constraint(std::string name)
 {
   modified_ = true;
 
@@ -97,8 +93,6 @@ ConstraintRepo::unregister_constraint(std::string name)
 		   return *c == name;
 		 });
   if (nc != node_constraints_.end()) {
-    logger_->log_debug("ConstraintRepo", "Unregistering node constraint %s",
-		       (*nc)->name().c_str());
     node_constraints_.erase(nc);
   }
 
@@ -108,8 +102,6 @@ ConstraintRepo::unregister_constraint(std::string name)
 		   return *c == name;
 		 });
   if (ec != edge_constraints_.end()) {
-    logger_->log_debug("ConstraintRepo", "Unregistering edge constraint %s",
-		       (*ec)->name().c_str());
     edge_constraints_.erase(ec);
   }
 
@@ -119,8 +111,6 @@ ConstraintRepo::unregister_constraint(std::string name)
 		   return *c == name;
 		 });
   if (ecc != edge_cost_constraints_.end()) {
-    logger_->log_debug("ConstraintRepo", "Unregistering edge cost constraint %s",
-		       (*ecc)->name().c_str());
     edge_cost_constraints_.erase(ecc);
   }
 }
@@ -132,7 +122,7 @@ ConstraintRepo::unregister_constraint(std::string name)
  * false otherwise
  */
 bool
-ConstraintRepo::has_constraint(std::string &name)
+NavGraphConstraintRepo::has_constraint(std::string &name)
 {
   NodeConstraintList::iterator nc =
     std::find_if(node_constraints_.begin(), node_constraints_.end(),
@@ -164,7 +154,7 @@ ConstraintRepo::has_constraint(std::string &name)
  * @return if found returns a pointer to the node constraint, NULL if not found
  */
 fawkes::NavGraphNodeConstraint *
-ConstraintRepo::get_node_constraint(std::string &name)
+NavGraphConstraintRepo::get_node_constraint(std::string &name)
 {
   NodeConstraintList::iterator it =
     std::find_if(node_constraints_.begin(), node_constraints_.end(),
@@ -183,7 +173,7 @@ ConstraintRepo::get_node_constraint(std::string &name)
  * @return if found returns a pointer to the edge constraint, NULL if not found
  */
 fawkes::NavGraphEdgeConstraint *
-ConstraintRepo::get_edge_constraint(std::string &name)
+NavGraphConstraintRepo::get_edge_constraint(std::string &name)
 {
   EdgeConstraintList::iterator it =
     std::find_if(edge_constraints_.begin(), edge_constraints_.end(),
@@ -203,7 +193,7 @@ ConstraintRepo::get_edge_constraint(std::string &name)
  * @return if found returns a pointer to the edge cost constraint, NULL if not found
  */
 fawkes::NavGraphEdgeCostConstraint *
-ConstraintRepo::get_edge_cost_constraint(std::string &name)
+NavGraphConstraintRepo::get_edge_cost_constraint(std::string &name)
 {
   EdgeCostConstraintList::iterator it =
     std::find_if(edge_cost_constraints_.begin(), edge_cost_constraints_.end(),
@@ -221,8 +211,8 @@ ConstraintRepo::get_edge_cost_constraint(std::string &name)
 /** Get a list of registered node constraints.
  * @return list of node constraints
  */
-const ConstraintRepo::NodeConstraintList &
-ConstraintRepo::node_constraints() const
+const NavGraphConstraintRepo::NodeConstraintList &
+NavGraphConstraintRepo::node_constraints() const
 {
   return node_constraints_;
 }
@@ -231,8 +221,8 @@ ConstraintRepo::node_constraints() const
 /** Get a list of registered edge constraints.
  * @return list of edge constraints
  */
-const ConstraintRepo::EdgeConstraintList &
-ConstraintRepo::edge_constraints() const
+const NavGraphConstraintRepo::EdgeConstraintList &
+NavGraphConstraintRepo::edge_constraints() const
 {
   return edge_constraints_;
 }
@@ -240,8 +230,8 @@ ConstraintRepo::edge_constraints() const
 /** Get a list of registered edge cost constraints.
  * @return list of edge cost constraints
  */
-const ConstraintRepo::EdgeCostConstraintList &
-ConstraintRepo::edge_cost_constraints() const
+const NavGraphConstraintRepo::EdgeCostConstraintList &
+NavGraphConstraintRepo::edge_cost_constraints() const
 {
   return edge_cost_constraints_;
 }
@@ -251,7 +241,7 @@ ConstraintRepo::edge_cost_constraints() const
  * @return true if constraints have been registered, false otherwise
  */
 bool
-ConstraintRepo::has_constraints() const
+NavGraphConstraintRepo::has_constraints() const
 {
   return (! (node_constraints_.empty() &&
 	     edge_constraints_.empty() &&
@@ -263,7 +253,7 @@ ConstraintRepo::has_constraints() const
  * @return true if any constraint reported a change, false otherwise
  */
 bool
-ConstraintRepo::compute()
+NavGraphConstraintRepo::compute()
 {
   bool modified = false;
   for (fawkes::NavGraphNodeConstraint *c : node_constraints_) {
@@ -286,7 +276,7 @@ ConstraintRepo::compute()
  * NULL if the node is not blocked
  */
 fawkes::NavGraphNodeConstraint *
-ConstraintRepo::blocks(const fawkes::NavGraphNode &node)
+NavGraphConstraintRepo::blocks(const fawkes::NavGraphNode &node)
 {
   for (fawkes::NavGraphNodeConstraint *c : node_constraints_) {
     if (c->blocks(node)) {
@@ -305,7 +295,7 @@ ConstraintRepo::blocks(const fawkes::NavGraphNode &node)
  * Nodes from @p nodes that are not blocked will not appear in the map.
  */
 std::map<std::string, std::string>
-ConstraintRepo::blocks(const std::vector<fawkes::NavGraphNode> &nodes)
+NavGraphConstraintRepo::blocks(const std::vector<fawkes::NavGraphNode> &nodes)
 {
   std::map<std::string, std::string> rv;
   for (const fawkes::NavGraphNode &n : nodes) {
@@ -327,7 +317,7 @@ ConstraintRepo::blocks(const std::vector<fawkes::NavGraphNode> &nodes)
  * NULL if the node is not blocked
  */
 fawkes::NavGraphEdgeConstraint *
-ConstraintRepo::blocks(const fawkes::NavGraphNode &from,
+NavGraphConstraintRepo::blocks(const fawkes::NavGraphNode &from,
 		       const fawkes::NavGraphNode &to)
 {
   for (fawkes::NavGraphEdgeConstraint *c : edge_constraints_) {
@@ -346,7 +336,7 @@ ConstraintRepo::blocks(const fawkes::NavGraphNode &from,
  * the node, i.e. that returns a cost factor >= 1.00001.
  */
 fawkes::NavGraphEdgeCostConstraint *
-ConstraintRepo::increases_cost(const fawkes::NavGraphNode &from,
+NavGraphConstraintRepo::increases_cost(const fawkes::NavGraphNode &from,
 			       const fawkes::NavGraphNode &to)
 {
   for (fawkes::NavGraphEdgeCostConstraint *c : edge_cost_constraints_) {
@@ -368,7 +358,7 @@ ConstraintRepo::increases_cost(const fawkes::NavGraphNode &from,
  * in cost of the node (and by a cost factor of at least >= 1.00001).
  */
 fawkes::NavGraphEdgeCostConstraint *
-ConstraintRepo::increases_cost(const fawkes::NavGraphNode &from,
+NavGraphConstraintRepo::increases_cost(const fawkes::NavGraphNode &from,
 			       const fawkes::NavGraphNode &to,
 			       float & cost_factor)
 {
@@ -397,7 +387,7 @@ ConstraintRepo::increases_cost(const fawkes::NavGraphNode &from,
  * Edges from @p edges that are not blocked will not appear in the map.
  */
 std::map<std::pair<std::string, std::string>, std::string>
-ConstraintRepo::blocks(const std::vector<fawkes::NavGraphEdge> &edges)
+NavGraphConstraintRepo::blocks(const std::vector<fawkes::NavGraphEdge> &edges)
 {
   std::map<std::pair<std::string, std::string>, std::string> rv;
   for (const fawkes::NavGraphEdge &e : edges) {
@@ -428,7 +418,7 @@ ConstraintRepo::blocks(const std::vector<fawkes::NavGraphEdge> &edges)
  * list of tuples.
  */
 std::list<std::tuple<std::string, std::string, std::string, float>>
-ConstraintRepo::cost_factor(const std::vector<fawkes::NavGraphEdge> &edges)
+NavGraphConstraintRepo::cost_factor(const std::vector<fawkes::NavGraphEdge> &edges)
 {
   std::list<std::tuple<std::string, std::string, std::string, float>> rv;
   for (const fawkes::NavGraphEdge &e : edges) {
@@ -463,7 +453,7 @@ ConstraintRepo::cost_factor(const std::vector<fawkes::NavGraphEdge> &edges)
  * has been specified.
  */
 float
-ConstraintRepo::cost_factor(const fawkes::NavGraphNode &from,
+NavGraphConstraintRepo::cost_factor(const fawkes::NavGraphNode &from,
 			    const fawkes::NavGraphNode &to)
 {
   float max_cost = 1.0;
@@ -483,7 +473,7 @@ ConstraintRepo::cost_factor(const fawkes::NavGraphNode &from,
  * @return true if the constraint repo has been modified, false otherwise
  */
 bool
-ConstraintRepo::modified(bool reset_modified)
+NavGraphConstraintRepo::modified(bool reset_modified)
 {
   if (reset_modified) {
     bool rv = modified_;

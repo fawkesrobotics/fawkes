@@ -33,7 +33,6 @@ namespace fawkes {
 #endif
 
 class NavGraph;
-class ConstraintRepo;
 
 class NavGraphAspectIniFin : public AspectIniFin
 {
@@ -44,11 +43,9 @@ class NavGraphAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
   void set_navgraph(LockPtr<NavGraph> &navgraph);
-  void set_constraint_repo(LockPtr<ConstraintRepo> &constraint_repo);
 
  private:
   LockPtr<NavGraph> navgraph_;
-  LockPtr<ConstraintRepo> constraint_repo_;
 
 };
 

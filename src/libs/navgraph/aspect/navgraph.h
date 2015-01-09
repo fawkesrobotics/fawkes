@@ -33,7 +33,6 @@ namespace fawkes {
 #endif
 
 class NavGraph;
-class ConstraintRepo;
 
 class NavGraphAspect : public virtual Aspect
 {
@@ -45,7 +44,6 @@ class NavGraphAspect : public virtual Aspect
 
  protected:
   fawkes::LockPtr<NavGraph> navgraph;
-  fawkes::LockPtr<ConstraintRepo>      constraint_repo;
 };
 
 } // end namespace fawkes

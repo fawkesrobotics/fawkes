@@ -21,6 +21,7 @@
  */
 
 #include <navgraph/navgraph.h>
+#include <navgraph/constraints/constraint_repo.h>
 #include <core/exception.h>
 
 #include <algorithm>
@@ -58,6 +59,7 @@ namespace fawkes {
 NavGraph::NavGraph(std::string graph_name)
 {
   graph_name_ = graph_name;
+  constraint_repo_ = new NavGraphConstraintRepo();
 }
 
 
@@ -119,6 +121,16 @@ NavGraph::edges() const
   return edges_;
 }
 
+
+/** Get locked pointer to constraint repository.
+ * @return locked pointer to navgraph constraint repo. Note that you must
+ * lock it when invoking operations on the repo.
+ */
+fawkes::LockPtr<NavGraphConstraintRepo>
+NavGraph::constraint_repo() const
+{
+  return constraint_repo_;
+}
 
 /** Get a specified node.
  * @param name name of the node to get

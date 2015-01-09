@@ -25,6 +25,7 @@
 
 #include <navgraph/navgraph_node.h>
 #include <navgraph/navgraph_edge.h>
+#include <core/utils/lockptr.h>
 
 #include <vector>
 #include <list>
@@ -35,6 +36,8 @@ namespace fawkes {
 }
 #endif
 
+class NavGraphConstraintRepo;
+
 class NavGraph
 {
  public:
@@ -42,8 +45,9 @@ class NavGraph
   virtual ~NavGraph();
   
   std::string                              name() const;
-  const std::vector<NavGraphNode> &  nodes() const;
-  const std::vector<NavGraphEdge> &  edges() const;
+  const std::vector<NavGraphNode> &        nodes() const;
+  const std::vector<NavGraphEdge> &        edges() const;
+  fawkes::LockPtr<NavGraphConstraintRepo>  constraint_repo() const;
 
   const std::map<std::string, std::string> &  default_properties() const;
   bool has_default_property(std::string property) const;
@@ -111,12 +115,13 @@ class NavGraph
   void assert_connected();
 
  private:
-  NavGraphNode              root_node_;
-  std::string                     graph_name_;
-  std::vector<NavGraphNode> nodes_;
-  std::vector<NavGraphEdge> edges_;
-  std::list<ChangeListener *>     change_listeners_;
-  std::map<std::string, std::string> default_properties_;
+  NavGraphNode                            root_node_;
+  std::string                             graph_name_;
+  std::vector<NavGraphNode>               nodes_;
+  std::vector<NavGraphEdge>               edges_;
+  fawkes::LockPtr<NavGraphConstraintRepo> constraint_repo_;
+  std::list<ChangeListener *>             change_listeners_;
+  std::map<std::string, std::string>      default_properties_;
 
 };
 

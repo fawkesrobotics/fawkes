@@ -38,9 +38,7 @@ namespace fawkes{
 }
 #endif
 
-class Logger;
-
-class ConstraintRepo
+class NavGraphConstraintRepo
 {
  public:
   /** List of navgraph node constraints. */
@@ -50,8 +48,8 @@ class ConstraintRepo
   /** List of navgraph edge cost constraints. */
   typedef std::vector<fawkes::NavGraphEdgeCostConstraint*> EdgeCostConstraintList;
 
-  ConstraintRepo(Logger *logger);
-  ~ConstraintRepo();
+  NavGraphConstraintRepo();
+  ~NavGraphConstraintRepo();
 
   void register_constraint(NavGraphNodeConstraint *constraint);
   void register_constraint(NavGraphEdgeConstraint *constraint);
@@ -101,7 +99,6 @@ class ConstraintRepo
   NodeConstraintList node_constraints_;
   EdgeConstraintList edge_constraints_;
   EdgeCostConstraintList edge_cost_constraints_;
-  Logger *logger_;
   bool    modified_;
 };
 } // namespace
