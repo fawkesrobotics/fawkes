@@ -93,7 +93,7 @@ NavGraphThread::init()
 
   pp_nav_if_ = blackboard->open_for_writing<NavigatorInterface>("Pathplan");
   nav_if_    = blackboard->open_for_reading<NavigatorInterface>(cfg_nav_if_id_.c_str());
-  path_if_ = blackboard->open_for_writing<NavPathInterface>("NavPath");
+  path_if_   = blackboard->open_for_writing<NavPathInterface>("NavPath");
 
 
   if (cfg_graph_file_[0] != '/') {
@@ -166,6 +166,7 @@ NavGraphThread::finalize()
   graph_.clear();
   blackboard->close(pp_nav_if_);
   blackboard->close(nav_if_);
+  blackboard->close(path_if_);
 }
 
 void
