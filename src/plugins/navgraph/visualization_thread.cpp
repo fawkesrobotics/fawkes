@@ -101,7 +101,7 @@ void
 NavGraphVisualizationThread::set_graph(fawkes::LockPtr<NavGraph> &graph)
 {
   graph_ = graph;
-  plan_.clear();
+  traversal_.invalidate();
   plan_to_ = plan_from_ = "";
   wakeup();
 }
@@ -115,13 +115,13 @@ NavGraphVisualizationThread::set_constraint_repo(fawkes::LockPtr<NavGraphConstra
   crepo_ = crepo;
 }
 
-/** Set current plan.
- * @param plan current plan
+/** Set current path.
+ * @param traversal currently active path traversal
  */
 void
-NavGraphVisualizationThread::set_plan(std::vector<fawkes::NavGraphNode> plan)
+NavGraphVisualizationThread::set_traversal(NavGraphPath::Traversal &traversal)
 {
-  plan_ = plan;
+  traversal_ = traversal;
   plan_to_ = plan_from_ = "";
   wakeup();
 }
@@ -130,7 +130,7 @@ NavGraphVisualizationThread::set_plan(std::vector<fawkes::NavGraphNode> plan)
 void
 NavGraphVisualizationThread::reset_plan()
 {
-  plan_.clear();
+  traversal_.invalidate();
   plan_to_ = plan_from_ = "";
   wakeup();
 }
@@ -280,8 +280,9 @@ NavGraphVisualizationThread::publish()
 
 
   for (size_t i = 0; i < nodes.size(); ++i) {
-    bool is_in_plan = (std::find(plan_.begin(), plan_.end(), nodes[i]) != plan_.end());
-    bool is_last    = (plan_.size() >= 1) && (plan_.back().name() == nodes[i].name());
+    bool is_in_plan = traversal_ && traversal_.path().contains(nodes[i]);
+    bool is_last    = traversal_ &&
+      (traversal_.path().size() >= 1) && (traversal_.path().goal() == nodes[i]);
     //bool is_next    = (plan_.size() >= 2) && (plan_[1].name() == nodes[i].name());
     bool is_active  = (plan_to_ == nodes[i].name());
 
@@ -436,8 +437,10 @@ NavGraphVisualizationThread::publish()
 
   }
 
-  if (! plan_.empty() && plan_.back().name() == "free-target") {
-    NavGraphNode &target_node = plan_[plan_.size() - 1];
+  if (traversal_ &&
+      ! traversal_.path().empty() && traversal_.path().goal().name() == "free-target")
+  {
+    const NavGraphNode &target_node = traversal_.path().goal();
 
     // we are traveling to a free target
     visualization_msgs::Marker sphere;
@@ -508,30 +511,33 @@ NavGraphVisualizationThread::publish()
     }
 
     float target_tolerance = 0.;
-    if (plan_.back().has_property("target_tolerance")) {
-      target_tolerance = plan_.back().property_as_float("target_tolerance");
+    if (traversal_.path().goal().has_property("target_tolerance")) {
+      target_tolerance = traversal_.path().goal().property_as_float("target_tolerance");
     } else if (graph_->has_default_property("target_tolerance")) {
       target_tolerance = graph_->default_property_as_float("target_tolerance");
     }
     if (target_tolerance > 0.) {
-      add_circle_markers(m, id_num, plan_.back().x(), plan_.back().y(), target_tolerance, 10,
+      add_circle_markers(m, id_num, traversal_.path().goal().x(), traversal_.path().goal().y(),
+			 target_tolerance, 10,
 			 sphere.color.r, sphere.color.g, sphere.color.b,
-			 (plan_.size() == 1) ? sphere.color.a : 0.5);
+			 (traversal_.last()) ? sphere.color.a : 0.5);
     }
 
     float shortcut_tolerance = 0.;
-    if (plan_.back().has_property("shortcut_tolerance")) {
-      shortcut_tolerance = plan_.back().property_as_float("shortcut_tolerance");
+    if (traversal_.path().goal().has_property("shortcut_tolerance")) {
+      shortcut_tolerance = traversal_.path().goal().property_as_float("shortcut_tolerance");
     } else if (graph_->has_default_property("shortcut_tolerance")) {
       shortcut_tolerance = graph_->default_property_as_float("shortcut_tolerance");
     }
     if (shortcut_tolerance > 0.) {
-      add_circle_markers(m, id_num, plan_.back().x(), plan_.back().y(), shortcut_tolerance, 30,
+      add_circle_markers(m, id_num, traversal_.path().goal().x(), traversal_.path().goal().y(),
+			 shortcut_tolerance, 30,
 			 sphere.color.r, sphere.color.g, sphere.color.b, 0.3);
     }
 
-    if (plan_.size() >= 2) {
-      NavGraphNode &last_graph_node = plan_[plan_.size() - 2];
+    if (traversal_.remaining() >= 2) {
+      const NavGraphNode &last_graph_node =
+	traversal_.path().nodes()[traversal_.path().size() - 2];
       
       geometry_msgs::Point p1;
       p1.x =  last_graph_node.x();
@@ -617,12 +623,16 @@ NavGraphVisualizationThread::publish()
           arrow.scale.y = 0.3; // head radius
         } else {
           bool in_plan = false;
-          for (size_t p = 0; p < plan_.size(); ++p) {
-            if (plan_[p] == from && (p < plan_.size() - 1 && plan_[p+1] == to)) {
-              in_plan = true;
-              break;
-            }
-          }
+	  if (traversal_) {
+	    for (size_t p = 0; p < traversal_.path().nodes().size(); ++p) {
+	      if (traversal_.path().nodes()[p] == from &&
+		  (p < traversal_.path().nodes().size() - 1 && traversal_.path().nodes()[p+1] == to))
+	      {
+		in_plan = true;
+		break;
+	      }
+	    }
+	  }
 
           if (in_plan) {
             // it's in the current plan
@@ -667,14 +677,18 @@ NavGraphVisualizationThread::publish()
           cur_line.points.push_back(p2);
         } else {
           bool in_plan = false;
-          for (size_t p = 0; p < plan_.size(); ++p) {
-            if (plan_[p] == from &&
-                ((p > 0 && plan_[p-1] == to) || (p < plan_.size() - 1 && plan_[p+1] == to)))
-            {
-              in_plan = true;
-              break;
-            }
-          }
+	  if (traversal_) {
+	    for (size_t p = 0; p < traversal_.path().nodes().size(); ++p) {
+	      if (traversal_.path().nodes()[p] == from &&
+		  ((p > 0 && traversal_.path().nodes()[p-1] == to) ||
+		   (p < traversal_.path().nodes().size() - 1 &&
+		    traversal_.path().nodes()[p+1] == to)))
+	      {
+		in_plan = true;
+		break;
+	      }
+	    }
+	  }
 
           if (in_plan) {
             // it's in the current plan

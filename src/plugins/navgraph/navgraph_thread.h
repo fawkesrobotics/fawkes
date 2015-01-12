@@ -44,7 +44,6 @@
 #include <navgraph/constraints/constraint_repo.h>
 
 namespace fawkes {
-  class AStar;
   class Time;
 }
 
@@ -89,7 +88,7 @@ class NavGraphThread
   size_t shortcut_possible();
   fawkes::LockPtr<fawkes::NavGraph> load_graph(std::string filename);
   void log_graph();
-  void publish_path(std::vector<fawkes::NavGraphNode> path);
+  void publish_path();
 
 
  private:
@@ -119,7 +118,6 @@ class NavGraphThread
   fawkes::NavPathInterface *path_if_;
 
   fawkes::LockPtr<fawkes::NavGraph> graph_;
-  fawkes::AStar *astar_;
 
   fawkes::tf::Stamped<fawkes::tf::Pose> pose_;
   bool exec_active_;
@@ -127,7 +125,8 @@ class NavGraphThread
   float target_time_;
   fawkes::Time *target_reached_at_;
   std::string last_node_;
-  std::vector<fawkes::NavGraphNode> plan_;
+  fawkes::NavGraphPath path_;
+  fawkes::NavGraphPath::Traversal traversal_;
   bool constrained_plan_;
 
   fawkes::LockPtr<fawkes::NavGraphConstraintRepo> constraint_repo_;
