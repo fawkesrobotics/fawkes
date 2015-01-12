@@ -24,6 +24,7 @@ $#include <navgraph/navgraph.h>
 $#include <navgraph/yaml_navgraph.h>
 $#include <vector>
 $#include <string>
+$#include <functional>
 $using namespace std;
 $using namespace fawkes;
 

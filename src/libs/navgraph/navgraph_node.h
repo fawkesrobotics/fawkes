@@ -78,7 +78,7 @@ class NavGraphNode {
    * @param property property key
    * @return true if node has specified property, false otherwise
    */
-  bool has_property(std::string property)
+  bool has_property(std::string property) const
   { return properties_.find(property) != properties_.end(); }
 
   /** Check if node is valid, i.e. it has a name.
@@ -92,27 +92,27 @@ class NavGraphNode {
   void set_property(std::string property, int value);
   void set_property(std::string property, bool value);
 
-  std::string property(std::string prop);
+  std::string property(std::string prop) const;
 
   /** Get property converted to float.
    * @param prop property key
    * @return property value
    */
-  float property_as_float(std::string prop)
+  float property_as_float(std::string prop) const
   { return StringConversions::to_float(property(prop)); }
 
   /** Get property converted to int.
    * @param prop property key
    * @return property value
    */
-  int property_as_int(std::string prop)
+  int property_as_int(std::string prop) const
   { return StringConversions::to_int(property(prop)); }
 
   /** Get property converted to bol.
    * @param prop property key
    * @return property value
    */
-  bool property_as_bool(std::string prop)
+  bool property_as_bool(std::string prop) const
   { return StringConversions::to_bool(property(prop)); }
 
   /** Check nodes for equality.
@@ -122,6 +122,14 @@ class NavGraphNode {
    */
   bool operator==(const NavGraphNode &n) const
   { return name_ == n.name_; }
+
+  /** Check nodes for inequality.
+   * Nodes are inequal if they have different names.
+   * @param n node to compare with
+   * @return true if the node is different from this one, false otherwise
+   */
+  bool operator!=(const NavGraphNode &n) const
+  { return name_ != n.name_; }
 
   void set_reachable_nodes(std::vector<std::string> reachable_nodes);
 

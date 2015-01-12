@@ -24,7 +24,10 @@
 #include <functional>
 #include <cmath>
 
-using namespace fawkes;
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class NavGraphSearchState <navgraph/search_state.h>
  * Graph-based path planner A* search state.
@@ -37,13 +40,24 @@ using namespace fawkes;
  * @param cost_sofar the cost until to this node from the start
  * @param parent parent search state
  * @param map_graph map graph
+ * @param estimate_func function to estimate the cost from any node to the goal.
+ * Note that the estimate function must be admissible for optimal A* search. That
+ * means that for no query may the calculated estimate be higher than the actual
+ * cost.
+ * @param cost_func function to calculate the cost from a node to another adjacent
+ * node. Note that the cost function is directly related to the estimate function.
+ * For example, the cost can be calculated in terms of distance between nodes, or in
+ * time that it takes to travel from one node to the other. The estimate function must
+ * match the cost function to be admissible.
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
 NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
 					 double cost_sofar, NavGraphSearchState *parent,
 					 NavGraph *map_graph,
+					 navgraph::EstimateFunction estimate_func,
+					 navgraph::CostFunction cost_func,
 					 fawkes::NavGraphConstraintRepo *constraint_repo)
-  : AStarState(cost_sofar, parent)
+  : AStarState(cost_sofar, parent), estimate_func_(estimate_func), cost_func_(cost_func)
 {
   node_ = node;
   goal_ = goal;
@@ -68,6 +82,44 @@ NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
 					 NavGraph *map_graph,
 					 fawkes::NavGraphConstraintRepo *constraint_repo)
   : AStarState(0, NULL)
+{
+  node_ = node;
+  goal_ = goal;
+  map_graph_ = map_graph;
+
+  estimate_func_ = straight_line_estimate;
+  cost_func_ = euclidean_cost;
+
+  total_estimated_cost = path_cost + estimate();
+
+  std::hash<std::string> h;
+  key_ = h(node_.name());
+
+  constraint_repo_ = constraint_repo;
+}
+
+
+/** Constructor.
+ * @param node graph node this search state represents
+ * @param goal graph node of the goal
+ * @param map_graph map graph
+ * @param estimate_func function to estimate the cost from any node to the goal.
+ * Note that the estimate function must be admissible for optimal A* search. That
+ * means that for no query may the calculated estimate be higher than the actual
+ * cost.
+ * @param cost_func function to calculate the cost from a node to another adjacent
+ * node. Note that the cost function is directly related to the estimate function.
+ * For example, the cost can be calculated in terms of distance between nodes, or in
+ * time that it takes to travel from one node to the other. The estimate function must
+ * match the cost function to be admissible.
+ * @param constraint_repo constraint repository, null to plan only without constraints
+ */
+NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
+					 NavGraph *map_graph,
+					 navgraph::EstimateFunction estimate_func,
+					 navgraph::CostFunction cost_func,
+					 fawkes::NavGraphConstraintRepo *constraint_repo)
+  : AStarState(0, NULL), estimate_func_(estimate_func), cost_func_(cost_func)
 {
   node_ = node;
   goal_ = goal;
@@ -101,8 +153,7 @@ NavGraphSearchState::node()
 float
 NavGraphSearchState::estimate()
 {
-  return sqrtf(powf(node_.x() - goal_.x(), 2) +
-               powf(node_.y() - goal_.y(), 2));
+  return estimate_func_(node_, goal_);
 }
 
 
@@ -134,7 +185,7 @@ NavGraphSearchState::children()
     }
 
     if (expand) {
-      float d_cost = cost(d);
+      float d_cost = cost_func_(node_, d);
 
       if (constraint_repo_) {
 	float cost_factor = 0.;
@@ -144,10 +195,12 @@ NavGraphSearchState::children()
       }
 
       children.push_back(new NavGraphSearchState(d, goal_, path_cost + d_cost, this,
-						 map_graph_, constraint_repo_));
+						 map_graph_, estimate_func_, cost_func_,
+						 constraint_repo_));
     }
   }
 
   return children;
 }
 
+} // end of namespace fawkes

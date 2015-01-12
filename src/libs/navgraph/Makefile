@@ -43,12 +43,12 @@ ifeq ($(HAVE_YAMLCPP),1)
 endif
 
 LIBS_libfawkesnavgraph = stdc++ m fawkescore fawkesutils
-OBJS_libfawkesnavgraph = navgraph.o navgraph_node.o navgraph_edge.o yaml_navgraph.o \
-			 search_state.o \
+OBJS_libfawkesnavgraph = navgraph.o navgraph_node.o navgraph_edge.o navgraph_path.o \
+			 yaml_navgraph.o search_state.o \
                          $(subst $(SRCDIR)/,,$(patsubst %.cpp,%.o,$(wildcard $(SRCDIR)/constraints/*.cpp)))
 HDRS_libfawkesnavgraph = $(OBJS_libfawkesnavgraph:%.o=%.h)
 
-CFLAGS_fawkesnavgraph_tolua = -Wno-unused-function $(CFLAGS_LUA)
+CFLAGS_fawkesnavgraph_tolua = -Wno-unused-function $(CFLAGS_LUA) $(CFLAGS_CPP11)
 TOLUA_fawkesnavgraph = navgraph.tolua navgraph_node.tolua
 LDFLAGS_lua_fawkesnavgraph = $(LDFLAGS_LUA)
 LIBS_lua_fawkesnavgraph = fawkescore fawkesutils fawkesnavgraph $(TOLUA_LIBS)

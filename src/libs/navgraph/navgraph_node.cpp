@@ -119,10 +119,11 @@ NavGraphNode::set_unconnected(bool unconnected)
  * @return property value as string
  */
 std::string
-NavGraphNode::property(std::string prop)
+NavGraphNode::property(std::string prop) const
 {
-  if (properties_.find(prop) != properties_.end()) {
-    return properties_[prop];
+  std::map<std::string, std::string>::const_iterator p;
+  if ((p = properties_.find(prop)) != properties_.end()) {
+    return p->second;
   } else {
     return "";
   }

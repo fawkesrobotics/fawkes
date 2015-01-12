@@ -20,21 +20,35 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_GRAPH_TOPOLOGICAL_MAP_GRAPH_H_
-#define __UTILS_GRAPH_TOPOLOGICAL_MAP_GRAPH_H_
+#ifndef __LIBS_NAVGRAPH_NAVGRAPH_H_
+#define __LIBS_NAVGRAPH_NAVGRAPH_H_
 
 #include <navgraph/navgraph_node.h>
 #include <navgraph/navgraph_edge.h>
+#include <navgraph/navgraph_path.h>
 #include <core/utils/lockptr.h>
 
 #include <vector>
 #include <list>
 #include <string>
+#include <functional>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
+namespace navgraph {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+  typedef
+  std::function<float (const fawkes::NavGraphNode &, const fawkes::NavGraphNode &)>
+      EstimateFunction;
+  typedef
+  std::function<float (const fawkes::NavGraphNode &, const fawkes::NavGraphNode &)>
+      CostFunction;
+}
 
 class NavGraphConstraintRepo;
 
@@ -64,7 +78,7 @@ class NavGraph
   void set_default_properties(std::map<std::string, std::string> &properties);
 
   NavGraphNode node(std::string name) const;
-  bool node_exists(std::string name) const;
+  bool         node_exists(std::string name) const;
 
   NavGraphNode closest_node(float pos_x, float pos_y,
                                   std::string property = "");
@@ -88,6 +102,24 @@ class NavGraph
 
   std::vector<std::string>  reachable_nodes(std::string node_name) const;
 
+  fawkes::NavGraphPath search_path(const std::string &from, const std::string &to,
+				   bool use_constraints = true, bool compute_constraints = true);
+
+  fawkes::NavGraphPath search_path(const std::string &from, const std::string &to,
+				   navgraph::EstimateFunction estimate_func,
+				   navgraph::CostFunction cost_func,
+				   bool use_constraints = true, bool compute_constraints = true);
+
+  fawkes::NavGraphPath search_path(const NavGraphNode &from,
+				   const NavGraphNode &to,
+				   bool use_constraints = true, bool compute_constraints = true);
+
+  fawkes::NavGraphPath search_path(const NavGraphNode &from,
+				   const NavGraphNode &to,
+				   navgraph::EstimateFunction estimate_func,
+				   navgraph::CostFunction cost_func,
+				   bool use_constraints = true, bool compute_constraints = true);
+
   void add_node(NavGraphNode node);
   void add_edge(NavGraphEdge edge);
 
@@ -106,6 +138,21 @@ class NavGraph
   void add_change_listener(ChangeListener *listener);
   void remove_change_listener(ChangeListener *listener);
 
+
+  /** Check if the default euclidean distance search is used.
+   * @return true if the default cost and cost estimation functions
+   * are used, false of custom ones have been set.
+   */
+  bool uses_default_search() const
+  { return search_default_funcs_; }
+
+  void set_search_funcs(navgraph::EstimateFunction estimate_func,
+			navgraph::CostFunction     cost_func);
+
+  void unset_search_funcs();
+
+  float cost(const NavGraphNode &from, const NavGraphNode &to) const;
+
  private:
   void assert_unique_edges();
   void assert_valid_edges();
@@ -120,6 +167,9 @@ class NavGraph
   std::list<ChangeListener *>             change_listeners_;
   std::map<std::string, std::string>      default_properties_;
 
+  bool                                    search_default_funcs_;
+  navgraph::EstimateFunction              search_estimate_func_;
+  navgraph::CostFunction                  search_cost_func_;
 };
 
 
