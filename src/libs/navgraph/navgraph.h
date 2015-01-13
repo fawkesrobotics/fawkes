@@ -120,8 +120,10 @@ class NavGraph
 				   navgraph::CostFunction cost_func,
 				   bool use_constraints = true, bool compute_constraints = true);
 
-  void add_node(NavGraphNode node);
-  void add_edge(NavGraphEdge edge);
+  void add_node(const NavGraphNode &node);
+  void add_edge(const NavGraphEdge &edge);
+  void remove_node(const NavGraphNode &node);
+  void remove_edge(const NavGraphEdge &edge);
   void clear();
 
   void calc_reachability();
@@ -153,6 +155,8 @@ class NavGraph
   void unset_search_funcs();
 
   float cost(const NavGraphNode &from, const NavGraphNode &to) const;
+
+  static std::string format_name(const char *format, ...);
 
  private:
   void assert_unique_edges();

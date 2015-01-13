@@ -337,7 +337,7 @@ NavGraph::search_nodes(std::string property)
  * @param node node to add
  */
 void
-NavGraph::add_node(NavGraphNode node)
+NavGraph::add_node(const NavGraphNode &node)
 {
   nodes_.push_back(node);
   notify_of_change();
@@ -347,9 +347,30 @@ NavGraph::add_node(NavGraphNode node)
  * @param edge edge to add
  */
 void
-NavGraph::add_edge(NavGraphEdge edge)
+NavGraph::add_edge(const NavGraphEdge &edge)
 {
   edges_.push_back(edge);
+  notify_of_change();
+}
+
+
+/** Remove a node.
+ * @param node node to remove
+ */
+void
+NavGraph::remove_node(const NavGraphNode &node)
+{
+  std::remove(nodes_.begin(), nodes_.end(), node);
+  notify_of_change();
+}
+
+/** Remove an edge
+ * @param edge edge to remove
+ */
+void
+NavGraph::remove_edge(const NavGraphEdge &edge)
+{
+  std::remove(edges_.begin(), edges_.end(), edge);
   notify_of_change();
 }
 
@@ -895,6 +916,25 @@ NavGraph::calc_reachability()
   }
 }
 
+/** Create node name from a format string.
+ * @param format format for the name according to sprintf arguments
+ * @param ... parameters according to format
+ * @return generated name
+ */
+std::string
+NavGraph::format_name(const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  char *tmp;
+  std::string rv;
+  if (vasprintf(&tmp, format, arg) != -1) {
+    rv = tmp;
+    free(tmp);
+  }
+  va_end(arg);
+  return rv;
+}
 
 /** Add a change listener.
  * @param listener listener to add
