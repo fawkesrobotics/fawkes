@@ -131,6 +131,13 @@ class NavGraphNode {
   bool operator!=(const NavGraphNode &n) const
   { return name_ != n.name_; }
 
+  /** Check if node is valid.
+   * A node is valid if it has a name set.
+   * @return true if the node is valid, false otherwise
+   */
+  operator bool() const
+  { return name_ != ""; }
+
   void set_reachable_nodes(std::vector<std::string> reachable_nodes);
 
   /** Get reachable nodes.

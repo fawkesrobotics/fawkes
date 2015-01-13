@@ -145,6 +145,14 @@ class NavGraphEdge {
   { return (from_ == e.from_ && to_ < e.to_) || (from_ < e.from_); }
 
 
+  /** Check of edge is valid.
+   * An edge is valid if both the originating and the target node
+   * name is set to a non-empty string.
+   * @return true if the node is valid, false otherwise
+   */
+  operator bool() const
+  { return from_ != "" && to_ != ""; }
+
   void set_nodes(const NavGraphNode &from_node, const NavGraphNode &to_node);
 
  private:
