@@ -66,7 +66,11 @@ NavGraphThread::~NavGraphThread()
 void
 NavGraphThread::init()
 {
-  cfg_graph_file_      = config->get_string("/navgraph/graph_file");
+  try {
+    cfg_graph_file_      = config->get_string("/navgraph/graph_file");
+  } catch (Exception &e) {
+    logger->log_warn(name(), "No graph file given, will create empty one");
+  }
   cfg_base_frame_      = config->get_string("/navgraph/base_frame");
   cfg_global_frame_    = config->get_string("/navgraph/global_frame");
   cfg_nav_if_id_       = config->get_string("/navgraph/navigator_interface_id");
@@ -93,11 +97,14 @@ NavGraphThread::init()
   path_if_   = blackboard->open_for_writing<NavPathInterface>("NavPath");
 
 
-  if (cfg_graph_file_[0] != '/') {
-    cfg_graph_file_ = std::string(CONFDIR) + "/" + cfg_graph_file_;
+  if (! cfg_graph_file_.empty()) {
+    if (cfg_graph_file_[0] != '/') {
+      cfg_graph_file_ = std::string(CONFDIR) + "/" + cfg_graph_file_;
+    }
+    graph_ = load_graph(cfg_graph_file_);
+  } else {
+    graph_ = new NavGraph("generated");
   }
-
-  graph_ = load_graph(cfg_graph_file_);
 
   if (graph_->has_default_property("travel_tolerance")) {
     cfg_travel_tolerance_ = graph_->default_property_as_float("travel_tolerance");
