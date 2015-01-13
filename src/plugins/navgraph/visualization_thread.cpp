@@ -152,6 +152,13 @@ NavGraphVisualizationThread::set_current_edge(std::string from, std::string to)
 
 
 void
+NavGraphVisualizationThread::graph_changed() throw()
+{
+  wakeup();
+}
+
+
+void
 NavGraphVisualizationThread::loop()
 {
   publish();

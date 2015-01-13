@@ -28,23 +28,19 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <plugins/ros/aspect/ros.h>
-#include <navgraph/navgraph_node.h>
+#include <navgraph/navgraph.h>
 #include <navgraph/navgraph_path.h>
 
 #include <ros/publisher.h>
 #include <visualization_msgs/MarkerArray.h>
-
-namespace fawkes {
-  class NavGraph;
-  class NavGraphConstraintRepo;
-}
 
 
 class NavGraphVisualizationThread
 : public fawkes::Thread,
   public fawkes::ConfigurableAspect,
   public fawkes::LoggingAspect,
-  public fawkes::ROSAspect
+  public fawkes::ROSAspect,
+  public fawkes::NavGraph::ChangeListener
 {
  public:
   NavGraphVisualizationThread();
@@ -59,6 +55,8 @@ class NavGraphVisualizationThread
   void set_traversal(fawkes::NavGraphPath::Traversal &traversal);
   void set_current_edge(std::string from, std::string to);
   void reset_plan();
+
+  virtual void graph_changed() throw();
 
  private:
   void publish();

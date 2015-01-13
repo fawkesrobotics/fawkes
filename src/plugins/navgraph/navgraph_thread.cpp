@@ -143,6 +143,9 @@ NavGraphThread::init()
   error_at_          = new Time(clock);
 #ifdef HAVE_VISUALIZATION
   visualized_at_     = new Time(clock);
+  if (vt_) {
+    graph_->add_change_listener(vt_);
+  }
 #endif
 
   constraint_repo_   = graph_->constraint_repo();
@@ -157,6 +160,9 @@ NavGraphThread::finalize()
   delete error_at_;
 #ifdef HAVE_VISUALIZATION
   delete visualized_at_;
+  if (vt_) {
+    graph_->remove_change_listener(vt_);
+  }
 #endif
   graph_.clear();
   blackboard->close(pp_nav_if_);
