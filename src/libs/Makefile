@@ -42,7 +42,7 @@ utils: core
 interface: core utils
 blackboard: core utils interface netcomm logging
 netcomm: core utils
-navgraph: core utils
+navgraph: core utils aspect
 interfaces: core interface
 config: core netcomm utils logging
 plugin: core netcomm utils config logging
