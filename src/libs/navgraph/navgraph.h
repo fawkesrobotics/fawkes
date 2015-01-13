@@ -122,6 +122,7 @@ class NavGraph
 
   void add_node(NavGraphNode node);
   void add_edge(NavGraphEdge edge);
+  void clear();
 
   void calc_reachability();
 

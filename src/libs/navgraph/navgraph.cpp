@@ -354,6 +354,18 @@ NavGraph::add_edge(NavGraphEdge edge)
 }
 
 
+/** Remove all nodes and edges from navgraph.
+ * Use with caution, this means that no more searches etc. are possible.
+ */
+void
+NavGraph::clear()
+{
+  nodes_.clear();
+  edges_.clear();
+  default_properties_.clear();
+  notify_of_change();
+}
+
 /** Get all default properties.
  * @return property map
  */
