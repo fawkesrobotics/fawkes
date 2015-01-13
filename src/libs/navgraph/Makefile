@@ -20,8 +20,7 @@ include $(BUILDSYSDIR)/eigen3.mk
 
 FILTER_OUT=%_tolua.o
 
-SUBDIRS=aspect
-
+SUBDIRS=aspect generators
 
 LIBS_libfawkesnavgraph = stdc++ m fawkescore fawkesutils
 OBJS_libfawkesnavgraph = navgraph.o navgraph_node.o navgraph_edge.o navgraph_path.o \
