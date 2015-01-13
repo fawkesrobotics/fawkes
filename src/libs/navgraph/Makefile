@@ -1,8 +1,8 @@
 #*****************************************************************************
-#              Makefile Build System for Fawkes: Utility Library
+#              Makefile Build System for Fawkes: NavGraph Library
 #                            -------------------
 #   Created on Sun Sep 03 14:14:14 2006
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2015 by Tim Niemueller, AllemaniACs RoboCup Team
 #
 #*****************************************************************************
 #
@@ -21,26 +21,6 @@ FILTER_OUT=%_tolua.o
 
 SUBDIRS=aspect
 
-ifneq ($(PKGCONFIG),)
-  HAVE_YAMLCPP   = $(if $(shell $(PKGCONFIG) --exists 'yaml-cpp'; echo $${?/1/}),1,0)
-endif
-ifeq ($(HAVE_YAMLCPP),1)
-  HAVE_YAMLCPP_0_2_6 = $(if $(shell $(PKGCONFIG) --atleast-version='0.2.6' 'yaml-cpp'; echo $${?/1/}),1,0)
-
-  CFLAGS_YAMLCPP  = -DHAVE_YAMLCPP $(shell $(PKGCONFIG) --cflags 'yaml-cpp')
-  LDFLAGS_YAMLCPP = $(shell $(PKGCONFIG) --libs 'yaml-cpp')
-  ifneq ($(HAVE_YAMLCPP_0_2_6),1)
-    CFLAGS_YAMLCPP += -DHAVE_OLD_YAMLCPP
-  endif
-
-  HAVE_YAMLCPP_0_5 = $(if $(shell $(PKGCONFIG) --atleast-version='0.5' 'yaml-cpp'; echo $${?/1/}),1,0)
-  ifeq ($(HAVE_YAMLCPP_0_5),1)
-    CFLAGS_YAMLCPP += -DHAVE_YAMLCPP_0_5
-  endif
-
-  CFLAGS  += $(CFLAGS_YAMLCPP)
-  LDFLAGS += $(LDFLAGS_YAMLCPP)
-endif
 
 LIBS_libfawkesnavgraph = stdc++ m fawkescore fawkesutils
 OBJS_libfawkesnavgraph = navgraph.o navgraph_node.o navgraph_edge.o navgraph_path.o \
@@ -56,8 +36,8 @@ OBJS_lua_fawkesnavgraph = fawkesnavgraph_tolua.o
 
 OBJS_all = $(OBJS_libfawkesnavgraph) $(OBJS_lua_fawkesnavgraph)
 
-ifeq ($(HAVE_YAMLCPP)$(HAVE_CPP11),11)
-  CFLAGS += $(CFLAGS_CPP11)
+ifeq ($(HAVE_NAVGRAPH),1)
+  CFLAGS += $(CFLAGS_NAVGRAPH)
 
   LIBS_all  = $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
 
@@ -68,21 +48,14 @@ ifeq ($(HAVE_YAMLCPP)$(HAVE_CPP11),11)
     WARN_TARGETS += warning_tolua_wrapper
   endif
 else
-  ifneq ($(HAVE_YAMLCPP),1)
-    WARN_TARGETS += warning_yamlcpp
-  endif
-  ifneq ($(HAVE_CPP11),1)
-    WARN_TARGETS += warning_cpp11
-  endif
+  WARN_TARGETS += warning_navgraph
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: warning_yamlcpp warning_cpp11
-warning_yamlcpp:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)navgraph library cannot be built$(TNORMAL) (yaml-cpp[-devel] not installed)"
-warning_cpp11:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)navgraph library cannot be built$(TNORMAL) (compiler does not support C++11)"
+.PHONY: warning_navgraph
+warning_navgraph:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)navgraph library cannot be built$(TNORMAL) ($(NAVGRAPH_ERROR))"
 endif
 
 $(LUALIBDIR)/fawkesnavgraph.$(SOEXT): | $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
