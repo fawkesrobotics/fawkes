@@ -26,6 +26,7 @@
 #include <utils/misc/string_conversions.h>
 
 #include <navgraph/navgraph_node.h>
+#include <utils/math/types.h>
 
 #include <map>
 #include <string>
@@ -68,6 +69,8 @@ class NavGraphEdge {
    * @return edge target node */
   const NavGraphNode &  to_node() const
   { return to_node_; }
+
+  fawkes::cart_coord_2d_t closest_point_on_edge(float x, float y);
 
   void set_from(std::string from);
   void set_to(std::string to);

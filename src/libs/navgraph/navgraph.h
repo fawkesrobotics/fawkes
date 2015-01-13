@@ -81,22 +81,24 @@ class NavGraph
   bool         node_exists(std::string name) const;
 
   NavGraphNode closest_node(float pos_x, float pos_y,
-                                  std::string property = "");
+			    std::string property = "");
 
   NavGraphNode closest_node_to(std::string node_name,
-				     std::string property = "");
+			       std::string property = "");
 
   NavGraphNode closest_node(float pos_x, float pos_y, bool consider_unconnected,
-                                  std::string property = "");
+			    std::string property = "");
   
   NavGraphNode closest_node_to(std::string node_name, bool consider_unconnected,
-				     std::string property = "");
+			       std::string property = "");
 
   NavGraphNode closest_node_with_unconnected(float pos_x, float pos_y,
-						   std::string property = "");
+					     std::string property = "");
 
   NavGraphNode closest_node_to_with_unconnected(std::string node_name,
-						      std::string property = "");
+						std::string property = "");
+
+  NavGraphEdge closest_edge(float pos_x, float pos_y);
 
   std::vector<NavGraphNode> search_nodes(std::string property);
 

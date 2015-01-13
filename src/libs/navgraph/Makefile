@@ -16,6 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/lua.mk
+include $(BUILDSYSDIR)/eigen3.mk
 
 FILTER_OUT=%_tolua.o
 
@@ -37,7 +38,8 @@ OBJS_lua_fawkesnavgraph = fawkesnavgraph_tolua.o
 OBJS_all = $(OBJS_libfawkesnavgraph) $(OBJS_lua_fawkesnavgraph)
 
 ifeq ($(HAVE_NAVGRAPH),1)
-  CFLAGS += $(CFLAGS_NAVGRAPH)
+  CFLAGS  += $(CFLAGS_NAVGRAPH)  $(CFLAGS_EIGEN3)
+  LDFLAGS += $(LDFLAGS_NAVGRAPH) $(LDFLAGS_EIGEN3)
 
   LIBS_all  = $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
 
