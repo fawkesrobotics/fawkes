@@ -15,13 +15,24 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/src/libs/eclipse_externals/eclipse.mk
+include $(BUILDCONFDIR)/eclipse_externals/eclipse.mk
+include $(BUILDCONFDIR)/navgraph/navgraph.mk
 
-CFLAGS += $(ECLIPSE_CFLAGS)
+CFLAGS  += $(ECLIPSE_CFLAGS)
 LDFLAGS += $(ECLIPSE_LDFLAGS)
 
-LIBS_eclipse_externals = fawkescore fawkesblackboard fawkesinterface fawkesutils eclipse
-OBJS_eclipse_externals = blackboard.o rcsoft_map_graph.o
+LIBS_eclipse_externals = fawkescore fawkesblackboard fawkesinterface \
+			 fawkesutils eclipse
+OBJS_eclipse_externals = blackboard.o
+
+ifeq ($(HAVE_NAVGRAPH),1)
+  CFLAGS +=  $(CFLAGS_NAVGRAPH)
+  LDFLAGS += $(LDFLAGS_NAVGRAPH)
+  LIBS_eclipse_externals +=fawkesnavgraph 
+  OBJS_eclipse_externals += rcsoft_map_graph.o
+else
+  WARN_TARGETS += warning_navgraph
+endif
 
 OBJS_all = $(OBJS_eclipse_externals)
 
@@ -34,9 +45,11 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_eclipse
+.PHONY: warning_eclipse warning_navgraph
 warning_eclipse:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe externals$(TNORMAL) ($(ECLIPSE_FAIL_REASON))"
+warning_navgraph:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe externals navgraph support$(TNORMAL) ($(NAVGRAPH_ERROR))"
 endif
 
 include $(BUILDSYSDIR)/base.mk
