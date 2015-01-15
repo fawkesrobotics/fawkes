@@ -103,7 +103,7 @@ NavGraphThread::init()
     }
     graph_ = load_graph(cfg_graph_file_);
   } else {
-    graph_ = new NavGraph("generated");
+    graph_ = LockPtr<NavGraph>(new NavGraph("generated"), /* recursive mutex */ true);
   }
 
   if (graph_->has_default_property("travel_tolerance")) {
@@ -360,7 +360,7 @@ NavGraphThread::load_graph(std::string filename)
 
   if (firstword == "%YAML") {
     logger->log_info(name(), "Loading YAML graph from %s", filename.c_str());
-    return fawkes::LockPtr<NavGraph>(load_yaml_navgraph(filename));
+    return fawkes::LockPtr<NavGraph>(load_yaml_navgraph(filename), /* recursive mutex */ true);
   } else {
     throw Exception("Unknown graph format");
   }
