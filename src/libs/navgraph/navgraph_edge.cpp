@@ -137,6 +137,46 @@ NavGraphEdge::property(const std::string &prop) const
   }
 }
 
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
+void
+NavGraphEdge::set_property(const std::string &property, const std::string &value)
+{
+  properties_[property] = value;
+}
+
+
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
+void
+NavGraphEdge::set_property(const std::string &property, float value)
+{
+  properties_[property] = StringConversions::to_string(value);
+}
+
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
+void
+NavGraphEdge::set_property(const std::string &property, int value)
+{
+  properties_[property] = StringConversions::to_string(value);
+}
+
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
+void
+NavGraphEdge::set_property(const std::string &property, bool value)
+{
+  properties_[property] = value ? "true" : "false";
+}
 
 /** Get the point on edge closest to a given point.
  * The method determines a line perpendicular to the edge which goes through

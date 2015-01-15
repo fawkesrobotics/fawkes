@@ -89,6 +89,32 @@ class NavGraphEdge {
   bool has_property(const std::string &property) const
   { return properties_.find(property) != properties_.end(); }
 
+  void set_property(const std::string &property, const std::string &value);
+  void set_property(const std::string &property, float value);
+  void set_property(const std::string &property, int value);
+  void set_property(const std::string &property, bool value);
+
+  /** Get property converted to float.
+   * @param prop property key
+   * @return property value
+   */
+  float property_as_float(const std::string &prop) const
+  { return StringConversions::to_float(property(prop)); }
+
+  /** Get property converted to int.
+   * @param prop property key
+   * @return property value
+   */
+  int property_as_int(const std::string &prop) const
+  { return StringConversions::to_int(property(prop)); }
+
+  /** Get property converted to bol.
+   * @param prop property key
+   * @return property value
+   */
+  bool property_as_bool(const std::string &prop) const
+  { return StringConversions::to_bool(property(prop)); }
+
   /** Check if edge is valid.
    * An edge is valid iff it has originating and target node name values.
    * @return true if edge is valid, false otherwise
