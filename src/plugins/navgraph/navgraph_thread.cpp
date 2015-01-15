@@ -633,12 +633,6 @@ NavGraphThread::send_next_goal()
   }
 
   try {
-    nav_if_->msgq_enqueue(stop_at_target_msg);
-    nav_if_->msgq_enqueue(orient_mode_msg);
-
-    nav_if_->msgq_enqueue(gotomsg);
-    cmd_sent_at_->stamp();
-
 #ifdef HAVE_VISUALIZATION
     if (vt_)  vt_->set_current_edge(last_node_, next_target.name());
 #endif
@@ -646,6 +640,9 @@ NavGraphThread::send_next_goal()
     if (! nav_if_->has_writer()) {
       throw Exception("No writer for navigator interface");
     }
+
+    nav_if_->msgq_enqueue(stop_at_target_msg);
+    nav_if_->msgq_enqueue(orient_mode_msg);
 
     logger->log_debug(name(), "Sending goto(x=%f,y=%f,ori=%f) for node '%s'",
 		      tpose.getOrigin().x(), tpose.getOrigin().y(),
