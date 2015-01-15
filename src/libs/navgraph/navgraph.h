@@ -127,6 +127,9 @@ class NavGraph
   void remove_edge(const NavGraphEdge &edge);
   void clear();
 
+  void update_node(const NavGraphNode &node);
+  void update_edge(const NavGraphEdge &edge);
+
   bool node_exists(const NavGraphNode &node) const;
   bool node_exists(const std::string &name) const;
   bool edge_exists(const NavGraphEdge &edge) const;

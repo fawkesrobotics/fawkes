@@ -478,6 +478,44 @@ NavGraph::remove_edge(const NavGraphEdge &edge)
 }
 
 
+/** Update a given node.
+ * Will search for a node with the same name as the given node and will then
+ * call the assignment operator. This is intended to update properties of a node.
+ * @param node node to update
+ */
+void
+NavGraph::update_node(const NavGraphNode &node)
+{
+  std::vector<NavGraphNode>::iterator n =
+    std::find(nodes_.begin(), nodes_.end(), node);
+  if (n != nodes_.end()) {
+    *n = node;
+  } else {
+    throw Exception("No node with name %s known", node.name().c_str());
+  }
+}
+
+
+/** Update a given edge.
+ * Will search for an edge with the same originating and target node as the
+ * given edge and will then call the assignment operator. This is intended
+ * to update properties of an edge.
+ * @param edge edge to update
+ */
+void
+NavGraph::update_edge(const NavGraphEdge &edge)
+{
+  std::vector<NavGraphEdge>::iterator e =
+    std::find(edges_.begin(), edges_.end(), edge);
+  if (e != edges_.end()) {
+    *e = edge;
+  } else {
+    throw Exception("No edge from %s to %s is known",
+		    edge.from().c_str(), edge.to().c_str());
+  }
+}
+
+
 /** Remove all nodes and edges from navgraph.
  * Use with caution, this means that no more searches etc. are possible.
  */
