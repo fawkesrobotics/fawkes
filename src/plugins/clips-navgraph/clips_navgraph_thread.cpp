@@ -115,7 +115,7 @@ ClipsNavGraphThread::clips_navgraph_load(LockPtr<CLIPS::Environment> &clips)
 
     clips->assert_fact_f("(navgraph (name \"%s\"))", navgraph->name().c_str());
 
-    for (auto n : nodes) {
+    for (const NavGraphNode &n : nodes) {
       std::string props_string;
       const std::map<std::string, std::string> &properties = n.properties();
       for (auto p : properties) {
@@ -125,14 +125,14 @@ ClipsNavGraphThread::clips_navgraph_load(LockPtr<CLIPS::Environment> &clips)
 			   n.name().c_str(), n.x(), n.y(), props_string.c_str());
     }
 
-    for (auto e : edges) {
+    for (const NavGraphEdge &e : edges) {
       std::string props_string;
       const std::map<std::string, std::string> &properties = e.properties();
       for (auto p : properties) {
 	props_string += " \"" + p.first + "\" \"" + p.second + "\"";
       }
       clips->assert_fact_f("(navgraph-edge (from \"%s\") (to \"%s\") (directed %s) "
-			   "(properties \"%s\"))",
+			   "(properties %s))",
 			   e.from().c_str(), e.to().c_str(),
 			   e.is_directed() ? "TRUE" : "FALSE", props_string.c_str());
     }
