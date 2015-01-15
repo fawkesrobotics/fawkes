@@ -68,6 +68,7 @@ NavGraph::NavGraph(const std::string &graph_name)
   search_default_funcs_ = true;
   search_estimate_func_ = NavGraphSearchState::straight_line_estimate;
   search_cost_func_     = NavGraphSearchState::euclidean_cost;
+  reachability_calced_  = false;
 }
 
 
@@ -401,6 +402,7 @@ void
 NavGraph::remove_node(const NavGraphNode &node)
 {
   std::remove(nodes_.begin(), nodes_.end(), node);
+  reachability_calced_ = false;
   notify_of_change();
 }
 
@@ -411,6 +413,7 @@ void
 NavGraph::remove_edge(const NavGraphEdge &edge)
 {
   std::remove(edges_.begin(), edges_.end(), edge);
+  reachability_calced_ = false;
   notify_of_change();
 }
 
@@ -732,6 +735,8 @@ NavGraph::search_path(const NavGraphNode &from, const NavGraphNode &to,
 		      navgraph::CostFunction cost_func,
 		      bool use_constraints, bool compute_constraints)
 {
+  if (! reachability_calced_)  calc_reachability();
+
   AStar astar;
 
   std::vector<AStarState *> a_star_solution;
@@ -949,6 +954,7 @@ NavGraph::calc_reachability()
     i->set_reachable_nodes(reachable_nodes(i->name()));
   }
   assert_connected();
+  reachability_calced_ = true;
 
   std::vector<NavGraphEdge>::iterator e;
   for (e = edges_.begin(); e != edges_.end(); ++e) {

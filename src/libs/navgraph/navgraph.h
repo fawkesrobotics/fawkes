@@ -177,6 +177,8 @@ class NavGraph
   bool                                    search_default_funcs_;
   navgraph::EstimateFunction              search_estimate_func_;
   navgraph::CostFunction                  search_cost_func_;
+
+  bool                                    reachability_calced_;
 };
 
 
