@@ -165,9 +165,7 @@ class NavGraph
   static std::string format_name(const char *format, ...);
 
  private:
-  void assert_unique_edges();
   void assert_valid_edges();
-  void assert_unique_nodes();
   void assert_connected();
 
  private:

@@ -423,12 +423,18 @@ NavGraph::edge_exists(const std::string &from, const std::string &to) const
 
 /** Add a node.
  * @param node node to add
+ * @throw Exception thrown if node with the same name as @p node already exists
  */
 void
 NavGraph::add_node(const NavGraphNode &node)
 {
-  nodes_.push_back(node);
-  notify_of_change();
+  if (node_exists(node)) {
+    throw Exception("Node with name %s already exists", node.name().c_str());
+  } else {
+    nodes_.push_back(node);
+    reachability_calced_ = false;
+    notify_of_change();
+  }
 }
 
 /** Add an edge
@@ -437,8 +443,15 @@ NavGraph::add_node(const NavGraphNode &node)
 void
 NavGraph::add_edge(const NavGraphEdge &edge)
 {
-  edges_.push_back(edge);
-  notify_of_change();
+  if (edge_exists(edge)) {
+    throw Exception("Edge from %s to %s already exists",
+		    edge.from().c_str(), edge.to().c_str());
+  } else {
+    edges_.push_back(edge);
+    edges_.back().set_nodes(node(edge.from()), node(edge.to()));
+    reachability_calced_ = false;
+    notify_of_change();
+  }
 }
 
 
@@ -836,51 +849,6 @@ NavGraph::cost(const NavGraphNode &from, const NavGraphNode &to) const
 }
 
 
-/** Make sure each node exists only once. */
-void
-NavGraph::assert_unique_nodes()
-{
-  std::list<std::string> names;
-  std::vector<NavGraphNode>::iterator i;
-  for (i = nodes_.begin(); i != nodes_.end(); ++i) {
-    names.push_back(i->name());
-  }
-  names.sort();
-  std::list<std::string>::iterator n;
-  std::string last_name = "";
-  for (n = names.begin(); n != names.end(); ++n) {
-    if (*n == last_name) {
-      throw Exception("Node '%s' exists at least twice", last_name.c_str());
-    }
-    last_name = *n;
-  }
-}
-
-/** Make sure each edge exists only once. */
-void
-NavGraph::assert_unique_edges()
-{
-  for (size_t i = 0; i < edges_.size(); ++i) {
-    for (size_t j = i+1; j < edges_.size(); ++j) {
-      if (edges_[i].from() == edges_[j].from() &&
-          edges_[i].to() == edges_[j].to())
-      {
-        throw Exception("Edge '%s - %s' is defined twice",
-                        edges_[i].from().c_str(), edges_[i].to().c_str());
-      }
-      if (edges_[i].from() == edges_[j].to() &&
-          edges_[i].to() == edges_[j].from() &&
-          (!edges_[i].is_directed() || !edges_[j].is_directed()))
-      {
-        throw Exception("Edge '%s - %s' and '%s - %s' both exist "
-                        "and at least one is not directed",
-                        edges_[i].from().c_str(), edges_[i].to().c_str(),
-                        edges_[j].from().c_str(), edges_[j].to().c_str());
-      }
-    }
-  }
-}
-
 /** Make sure each node in the edges exists. */
 void
 NavGraph::assert_valid_edges()
@@ -993,8 +961,6 @@ NavGraph::calc_reachability()
 {
   if (nodes_.empty())  return;
 
-  assert_unique_nodes();
-  assert_unique_edges();
   assert_valid_edges();
   std::vector<NavGraphNode>::iterator i;
   for (i = nodes_.begin(); i != nodes_.end(); ++i) {
