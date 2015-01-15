@@ -38,8 +38,8 @@ OBJS_lua_fawkesnavgraph = fawkesnavgraph_tolua.o
 OBJS_all = $(OBJS_libfawkesnavgraph) $(OBJS_lua_fawkesnavgraph)
 
 ifeq ($(HAVE_NAVGRAPH),1)
-  CFLAGS  += $(CFLAGS_NAVGRAPH)  $(CFLAGS_EIGEN3)
-  LDFLAGS += $(LDFLAGS_NAVGRAPH) $(LDFLAGS_EIGEN3)
+  CFLAGS  += $(CFLAGS_NAVGRAPH)  $(CFLAGS_EIGEN3)  $(CFLAGS_YAMLCPP)
+  LDFLAGS += $(LDFLAGS_NAVGRAPH) $(LDFLAGS_EIGEN3) $(LDFLAGS_YAMLCPP)
 
   LIBS_all  = $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
 
