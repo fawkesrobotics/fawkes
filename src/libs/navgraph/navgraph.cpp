@@ -60,7 +60,7 @@ namespace fawkes {
  * @param graph_name Name of the graph, for example to handle multiple
  * graphs, e.g. for multiple levels of a building.
  */
-NavGraph::NavGraph(std::string graph_name)
+NavGraph::NavGraph(const std::string &graph_name)
 {
   graph_name_ = graph_name;
   constraint_repo_ = LockPtr<NavGraphConstraintRepo>(new NavGraphConstraintRepo(),
@@ -145,7 +145,7 @@ NavGraph::constraint_repo() const
  * found returns an invalid node.
  */
 NavGraphNode
-NavGraph::node(std::string name) const
+NavGraph::node(const std::string &name) const
 {
   std::vector<NavGraphNode>::const_iterator i;
   for (i = nodes_.begin(); i != nodes_.end(); ++i) {
@@ -165,7 +165,7 @@ NavGraph::node(std::string name) const
  * invalid node if such a node cannot be found
  */
 NavGraphNode
-NavGraph::closest_node(float pos_x, float pos_y, std::string property)
+NavGraph::closest_node(float pos_x, float pos_y, const std::string &property) const
 {
   return closest_node(pos_x, pos_y, false, property);
 }
@@ -182,7 +182,7 @@ NavGraph::closest_node(float pos_x, float pos_y, std::string property)
  */
 NavGraphNode
 NavGraph::closest_node_with_unconnected(float pos_x, float pos_y,
-						   std::string property)
+					const std::string &property) const
 {
   return closest_node(pos_x, pos_y, true, property);
 }
@@ -197,8 +197,8 @@ NavGraph::closest_node_with_unconnected(float pos_x, float pos_y,
  * not be the node with the name @p node_name.
  */
 NavGraphNode
-NavGraph::closest_node_to(std::string node_name,
-						      std::string property)
+NavGraph::closest_node_to(const std::string &node_name,
+			  const std::string &property) const
 {
   return closest_node_to(node_name, false, property);
 }
@@ -213,8 +213,8 @@ NavGraph::closest_node_to(std::string node_name,
  * not be the node with the name @p node_name.
  */
 NavGraphNode
-NavGraph::closest_node_to_with_unconnected(std::string node_name,
-						      std::string property)
+NavGraph::closest_node_to_with_unconnected(const std::string &node_name,
+					   const std::string &property) const
 {
   return closest_node_to(node_name, true, property);
 }
@@ -231,7 +231,7 @@ NavGraph::closest_node_to_with_unconnected(std::string node_name,
  */
 NavGraphNode
 NavGraph::closest_node(float pos_x, float pos_y, bool consider_unconnected,
-                                  std::string property)
+		       const std::string &property) const
 {
   std::vector<NavGraphNode> nodes = search_nodes(property);
 
@@ -269,8 +269,8 @@ NavGraph::closest_node(float pos_x, float pos_y, bool consider_unconnected,
  * not be the node with the name @p node_name.
  */
 NavGraphNode
-NavGraph::closest_node_to(std::string node_name, bool consider_unconnected,
-				     std::string property)
+NavGraph::closest_node_to(const std::string &node_name, bool consider_unconnected,
+			  const std::string &property) const
 {
   NavGraphNode n = node(node_name);
   std::vector<NavGraphNode> nodes = search_nodes(property);
@@ -309,7 +309,7 @@ NavGraph::closest_node_to(std::string node_name, bool consider_unconnected,
  * such an edge does not exist.
  */
 NavGraphEdge
-NavGraph::closest_edge(float pos_x, float pos_y)
+NavGraph::closest_edge(float pos_x, float pos_y) const
 {
   float min_dist = std::numeric_limits<float>::max();
 
@@ -356,14 +356,14 @@ NavGraph::node_exists(std::string name) const
  * @return vector of nodes having the specified property
  */
 std::vector<NavGraphNode>
-NavGraph::search_nodes(std::string property)
+NavGraph::search_nodes(const std::string &property) const
 {
   if (property == "") {
     return nodes();
   } else {
     std::vector<NavGraphNode> rv;
 
-    std::vector<NavGraphNode>::iterator i;
+    std::vector<NavGraphNode>::const_iterator i;
     for (i = nodes_.begin(); i != nodes_.end(); ++i) {
       if ( i->has_property(property) )  rv.push_back(*i);
     }
@@ -441,7 +441,7 @@ NavGraph::default_properties() const
  * @return true if node has specified property, false otherwise
  */
 bool
-NavGraph::has_default_property(std::string property) const
+NavGraph::has_default_property(const std::string &property) const
 {
   return default_properties_.find(property) != default_properties_.end();
 }
@@ -451,7 +451,7 @@ NavGraph::has_default_property(std::string property) const
  * @return default property value as string
  */
 std::string
-NavGraph::default_property(std::string prop) const
+NavGraph::default_property(const std::string &prop) const
 {
   std::map<std::string, std::string>::const_iterator p;
   if ((p = default_properties_.find(prop)) != default_properties_.end()) {
@@ -466,7 +466,7 @@ NavGraph::default_property(std::string prop) const
  * @return property value
  */
 float
-NavGraph::default_property_as_float(std::string prop) const
+NavGraph::default_property_as_float(const std::string &prop) const
 {
   return StringConversions::to_float(default_property(prop));
 }
@@ -476,7 +476,7 @@ NavGraph::default_property_as_float(std::string prop) const
  * @return property value
  */
 int
-NavGraph::default_property_as_int(std::string prop) const
+NavGraph::default_property_as_int(const std::string &prop) const
 {
   return StringConversions::to_int(default_property(prop));
 }
@@ -486,7 +486,7 @@ NavGraph::default_property_as_int(std::string prop) const
  * @return property value
  */
 bool
-NavGraph::default_property_as_bool(std::string prop) const
+NavGraph::default_property_as_bool(const std::string &prop) const
 {
   return StringConversions::to_bool(default_property(prop));
 }
@@ -496,7 +496,7 @@ NavGraph::default_property_as_bool(std::string prop) const
  * @param value property value
  */
 void
-NavGraph::set_default_property(std::string property, std::string value)
+NavGraph::set_default_property(const std::string &property, const std::string &value)
 {
   default_properties_[property] = value;
 }
@@ -506,7 +506,7 @@ NavGraph::set_default_property(std::string property, std::string value)
  * @param properties map of property name to value as string
  */
 void
-NavGraph::set_default_properties(std::map<std::string, std::string> &properties)
+NavGraph::set_default_properties(const std::map<std::string, std::string> &properties)
 {
   default_properties_ = properties;
 }
@@ -517,7 +517,7 @@ NavGraph::set_default_properties(std::map<std::string, std::string> &properties)
  * @param value property value
  */
 void
-NavGraph::set_default_property(std::string property, float value)
+NavGraph::set_default_property(const std::string &property, float value)
 {
   default_properties_[property] = StringConversions::to_string(value);
 }
@@ -527,7 +527,7 @@ NavGraph::set_default_property(std::string property, float value)
  * @param value property value
  */
 void
-NavGraph::set_default_property(std::string property, int value)
+NavGraph::set_default_property(const std::string &property, int value)
 {
   default_properties_[property] = StringConversions::to_string(value);
 }
@@ -537,7 +537,7 @@ NavGraph::set_default_property(std::string property, int value)
  * @param value property value
  */
 void
-NavGraph::set_default_property(std::string property, bool value)
+NavGraph::set_default_property(const std::string &property, bool value)
 {
   default_properties_[property] = value ? "true" : "false";
 }
@@ -549,7 +549,7 @@ NavGraph::set_default_property(std::string property, bool value)
  * @return vector of names of nodes reachable from the specified node
  */
 std::vector<std::string>
-NavGraph::reachable_nodes(std::string node_name) const
+NavGraph::reachable_nodes(const std::string &node_name) const
 {
   std::vector<std::string> rv;
 

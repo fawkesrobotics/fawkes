@@ -42,11 +42,11 @@ class NavGraphEdge {
  public:
   NavGraphEdge();
 
-  NavGraphEdge(std::string from, std::string to,
+  NavGraphEdge(const std::string &from, const std::string &to,
                      std::map<std::string, std::string> properties,
                      bool directed = false);
 
-  NavGraphEdge(std::string from, std::string to,
+  NavGraphEdge(const std::string &from, const std::string &to,
                      bool directed = false);
 
   /** Get edge originating node name.
@@ -72,8 +72,8 @@ class NavGraphEdge {
 
   fawkes::cart_coord_2d_t closest_point_on_edge(float x, float y);
 
-  void set_from(std::string from);
-  void set_to(std::string to);
+  void set_from(const std::string &from);
+  void set_to(const std::string &to);
   void set_directed(bool directed);
 
   /** Get all properties.
@@ -86,7 +86,7 @@ class NavGraphEdge {
    * @param property property key
    * @return true if node has specified property, false otherwise
    */
-  bool has_property(std::string property)
+  bool has_property(const std::string &property) const
   { return properties_.find(property) != properties_.end(); }
 
   /** Check if edge is valid.
@@ -103,27 +103,27 @@ class NavGraphEdge {
   { return directed_; }
 
 
-  std::string property(std::string prop);
+  std::string property(const std::string &prop) const;
 
   /** Get property converted to float.
    * @param prop property key
    * @return property value
    */
-  float property_as_float(std::string prop)
+  float property_as_float(const std::string &prop)
   { return StringConversions::to_float(property(prop)); }
 
   /** Get property converted to int.
    * @param prop property key
    * @return property value
    */
-  int property_as_int(std::string prop)
+  int property_as_int(const std::string &prop)
   { return StringConversions::to_int(property(prop)); }
 
   /** Get property converted to bol.
    * @param prop property key
    * @return property value
    */
-  bool property_as_bool(std::string prop)
+  bool property_as_bool(const std::string &prop)
   { return StringConversions::to_bool(property(prop)); }
 
   /** Check edges for equality.

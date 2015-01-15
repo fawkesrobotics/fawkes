@@ -55,7 +55,7 @@ class NavGraphConstraintRepo;
 class NavGraph
 {
  public:
-  NavGraph(std::string graph_name);
+  NavGraph(const std::string &graph_name);
   virtual ~NavGraph();
   
   std::string                              name() const;
@@ -64,45 +64,45 @@ class NavGraph
   fawkes::LockPtr<NavGraphConstraintRepo>  constraint_repo() const;
 
   const std::map<std::string, std::string> &  default_properties() const;
-  bool has_default_property(std::string property) const;
+  bool has_default_property(const std::string &property) const;
 
-  std::string default_property(std::string prop) const;
-  float default_property_as_float(std::string prop) const;
-  int   default_property_as_int(std::string prop) const;
-  bool  default_property_as_bool(std::string prop) const;
+  std::string default_property(const std::string &prop) const;
+  float default_property_as_float(const std::string &prop) const;
+  int   default_property_as_int(const std::string &prop) const;
+  bool  default_property_as_bool(const std::string &prop) const;
 
-  void set_default_property(std::string property, std::string value);
-  void set_default_property(std::string property, float value);
-  void set_default_property(std::string property, int value);
-  void set_default_property(std::string property, bool value);
-  void set_default_properties(std::map<std::string, std::string> &properties);
+  void set_default_property(const std::string &property, const std::string &value);
+  void set_default_property(const std::string &property, float value);
+  void set_default_property(const std::string &property, int value);
+  void set_default_property(const std::string &property, bool value);
+  void set_default_properties(const std::map<std::string, std::string> &properties);
 
-  NavGraphNode node(std::string name) const;
+  NavGraphNode node(const std::string &name) const;
   bool         node_exists(std::string name) const;
 
   NavGraphNode closest_node(float pos_x, float pos_y,
-			    std::string property = "");
+			    const std::string &property = "") const;
 
-  NavGraphNode closest_node_to(std::string node_name,
-			       std::string property = "");
+  NavGraphNode closest_node_to(const std::string &node_name,
+			       const std::string &property = "") const;
 
   NavGraphNode closest_node(float pos_x, float pos_y, bool consider_unconnected,
-			    std::string property = "");
+			    const std::string &property = "") const;
   
-  NavGraphNode closest_node_to(std::string node_name, bool consider_unconnected,
-			       std::string property = "");
+  NavGraphNode closest_node_to(const std::string &node_name, bool consider_unconnected,
+			       const std::string &property = "") const;
 
   NavGraphNode closest_node_with_unconnected(float pos_x, float pos_y,
-					     std::string property = "");
+					     const std::string &property = "") const;
 
-  NavGraphNode closest_node_to_with_unconnected(std::string node_name,
-						std::string property = "");
+  NavGraphNode closest_node_to_with_unconnected(const std::string &node_name,
+						const std::string &property = "") const;
 
-  NavGraphEdge closest_edge(float pos_x, float pos_y);
+  NavGraphEdge closest_edge(float pos_x, float pos_y) const;
 
-  std::vector<NavGraphNode> search_nodes(std::string property);
+  std::vector<NavGraphNode> search_nodes(const std::string &property) const;
 
-  std::vector<std::string>  reachable_nodes(std::string node_name) const;
+  std::vector<std::string>  reachable_nodes(const std::string &node_name) const;
 
   fawkes::NavGraphPath search_path(const std::string &from, const std::string &to,
 				   bool use_constraints = true, bool compute_constraints = true);

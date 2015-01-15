@@ -38,10 +38,10 @@ class NavGraphNode {
  public:
   NavGraphNode();
 
-  NavGraphNode(std::string name, float x, float y,
+  NavGraphNode(const std::string &name, float x, float y,
                      std::map<std::string, std::string> properties);
 
-  NavGraphNode(std::string name, float x, float y);
+  NavGraphNode(const std::string &name, float x, float y);
 
   /** Get name of node.
    * @return name of node */
@@ -65,7 +65,7 @@ class NavGraphNode {
 
   void set_x(float x);
   void set_y(float y);
-  void set_name(std::string name);
+  void set_name(const std::string &name);
   void set_unconnected(bool unconnected);
 
   /** Get all properties.
@@ -78,7 +78,7 @@ class NavGraphNode {
    * @param property property key
    * @return true if node has specified property, false otherwise
    */
-  bool has_property(std::string property) const
+  bool has_property(const std::string &property) const
   { return properties_.find(property) != properties_.end(); }
 
   /** Check if node is valid, i.e. it has a name.
@@ -87,32 +87,32 @@ class NavGraphNode {
   bool is_valid() const
   { return name_ != ""; }
 
-  void set_property(std::string property, std::string value);
-  void set_property(std::string property, float value);
-  void set_property(std::string property, int value);
-  void set_property(std::string property, bool value);
+  void set_property(const std::string &property, const std::string &value);
+  void set_property(const std::string &property, float value);
+  void set_property(const std::string &property, int value);
+  void set_property(const std::string &property, bool value);
 
-  std::string property(std::string prop) const;
+  std::string property(const std::string &prop) const;
 
   /** Get property converted to float.
    * @param prop property key
    * @return property value
    */
-  float property_as_float(std::string prop) const
+  float property_as_float(const std::string &prop) const
   { return StringConversions::to_float(property(prop)); }
 
   /** Get property converted to int.
    * @param prop property key
    * @return property value
    */
-  int property_as_int(std::string prop) const
+  int property_as_int(const std::string &prop) const
   { return StringConversions::to_int(property(prop)); }
 
   /** Get property converted to bol.
    * @param prop property key
    * @return property value
    */
-  bool property_as_bool(std::string prop) const
+  bool property_as_bool(const std::string &prop) const
   { return StringConversions::to_bool(property(prop)); }
 
   /** Check nodes for equality.

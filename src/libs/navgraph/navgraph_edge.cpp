@@ -49,9 +49,9 @@ NavGraphEdge::NavGraphEdge()
  * @param properties properties of the new node
  * @param directed true if the edge is directed, false for bidirectional edges
  */
-NavGraphEdge::NavGraphEdge(std::string from, std::string to,
-                                       std::map<std::string, std::string> properties,
-                                       bool directed)
+NavGraphEdge::NavGraphEdge(const std::string &from, const std::string &to,
+			   std::map<std::string, std::string> properties,
+			   bool directed)
 {
   from_ = from;
   to_ = to;
@@ -65,7 +65,7 @@ NavGraphEdge::NavGraphEdge(std::string from, std::string to,
  * @param to target node name
  * @param directed true if the edge is directed, false for bidirectional edges
  */
-NavGraphEdge::NavGraphEdge(std::string from, std::string to, bool directed)
+NavGraphEdge::NavGraphEdge(const std::string &from, const std::string &to, bool directed)
 {
   from_ = from;
   to_ = to;
@@ -76,7 +76,7 @@ NavGraphEdge::NavGraphEdge(std::string from, std::string to, bool directed)
  * @param from originating node name
  */
 void
-NavGraphEdge::set_from(std::string from)
+NavGraphEdge::set_from(const std::string &from)
 {
   from_ = from;
 }
@@ -86,7 +86,7 @@ NavGraphEdge::set_from(std::string from)
  * @param to target node name
  */
 void
-NavGraphEdge::set_to(std::string to)
+NavGraphEdge::set_to(const std::string &to)
 {
   to_ = to;
 }
@@ -127,10 +127,11 @@ NavGraphEdge::set_directed(bool directed)
  * @return property value as string
  */
 std::string
-NavGraphEdge::property(std::string prop)
+NavGraphEdge::property(const std::string &prop) const
 {
-  if (properties_.find(prop) != properties_.end()) {
-    return properties_[prop];
+  std::map<std::string, std::string>::const_iterator p;
+  if ((p = properties_.find(prop)) != properties_.end()) {
+    return p->second;
   } else {
     return "";
   }

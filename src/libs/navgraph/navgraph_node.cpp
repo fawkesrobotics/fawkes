@@ -45,8 +45,8 @@ NavGraphNode::NavGraphNode()
  * @param y y coordinate in global frame of node
  * @param properties properties for the new node
  */
-NavGraphNode::NavGraphNode(std::string name, float x, float y,
-                                       std::map<std::string, std::string> properties)
+NavGraphNode::NavGraphNode(const std::string &name, float x, float y,
+			   std::map<std::string, std::string> properties)
   : unconnected_(false)
 {
   name_ = name;
@@ -61,7 +61,7 @@ NavGraphNode::NavGraphNode(std::string name, float x, float y,
  * @param x x coordinate in global frame of node
  * @param y y coordinate in global frame of node
  */
-NavGraphNode::NavGraphNode(std::string name, float x, float y)
+NavGraphNode::NavGraphNode(const std::string &name, float x, float y)
   : unconnected_(false)
 {
   name_ = name;
@@ -93,7 +93,7 @@ NavGraphNode::set_y(float y)
  * @param name new name for node
  */
 void
-NavGraphNode::set_name(std::string name)
+NavGraphNode::set_name(const std::string &name)
 {
   name_ = name;
 }
@@ -119,7 +119,7 @@ NavGraphNode::set_unconnected(bool unconnected)
  * @return property value as string
  */
 std::string
-NavGraphNode::property(std::string prop) const
+NavGraphNode::property(const std::string &prop) const
 {
   std::map<std::string, std::string>::const_iterator p;
   if ((p = properties_.find(prop)) != properties_.end()) {
@@ -135,7 +135,7 @@ NavGraphNode::property(std::string prop) const
  * @param value property value
  */
 void
-NavGraphNode::set_property(std::string property, std::string value)
+NavGraphNode::set_property(const std::string &property, const std::string &value)
 {
   properties_[property] = value;
 }
@@ -146,7 +146,7 @@ NavGraphNode::set_property(std::string property, std::string value)
  * @param value property value
  */
 void
-NavGraphNode::set_property(std::string property, float value)
+NavGraphNode::set_property(const std::string &property, float value)
 {
   properties_[property] = StringConversions::to_string(value);
 }
@@ -156,7 +156,7 @@ NavGraphNode::set_property(std::string property, float value)
  * @param value property value
  */
 void
-NavGraphNode::set_property(std::string property, int value)
+NavGraphNode::set_property(const std::string &property, int value)
 {
   properties_[property] = StringConversions::to_string(value);
 }
@@ -166,7 +166,7 @@ NavGraphNode::set_property(std::string property, int value)
  * @param value property value
  */
 void
-NavGraphNode::set_property(std::string property, bool value)
+NavGraphNode::set_property(const std::string &property, bool value)
 {
   properties_[property] = value ? "true" : "false";
 }
