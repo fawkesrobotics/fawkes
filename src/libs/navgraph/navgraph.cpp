@@ -148,11 +148,16 @@ NavGraph::constraint_repo() const
 NavGraphNode
 NavGraph::node(const std::string &name) const
 {
-  std::vector<NavGraphNode>::const_iterator i;
-  for (i = nodes_.begin(); i != nodes_.end(); ++i) {
-    if (i->name() == name)  return *i;
+  std::vector<NavGraphNode>::const_iterator n =
+    std::find_if(nodes_.begin(), nodes_.end(), 
+		 [&name](const NavGraphNode &node) {
+		   return node.name() == name;
+		 });
+  if (n != nodes_.end()) {
+    return *n;
+  } else {
+    return NavGraphNode();
   }
-  return NavGraphNode();
 }
 
 
@@ -338,20 +343,6 @@ NavGraph::closest_edge(float pos_x, float pos_y) const
   return rv;
 }
 
-/** Check if a certain node exists.
- * @param name name of the node to look for
- * @return true if a node with the given name exists, false otherwise
- */
-bool
-NavGraph::node_exists(std::string name) const
-{
-  std::vector<NavGraphNode>::const_iterator i;
-  for (i = nodes_.begin(); i != nodes_.end(); ++i) {
-    if (i->name() == name)  return true;
-  }
-  return false;
-}
-
 /** Search nodes for given property.
  * @param property property name to look for
  * @return vector of nodes having the specified property
@@ -373,6 +364,62 @@ NavGraph::search_nodes(const std::string &property) const
   }
 }
 
+
+/** Check if a certain node exists.
+ * @param node node to look for (will check for a node with the same name)
+ * @return true if a node with the same name as the given node exists, false otherwise
+ */
+bool
+NavGraph::node_exists(const NavGraphNode &node) const
+{
+  std::vector<NavGraphNode>::const_iterator n =
+    std::find(nodes_.begin(), nodes_.end(), node);
+  return (n != nodes_.end());
+}
+
+
+/** Check if a certain node exists.
+ * @param name name of the node to look for
+ * @return true if a node with the given name exists, false otherwise
+ */
+bool
+NavGraph::node_exists(const std::string &name) const
+{
+  std::vector<NavGraphNode>::const_iterator n =
+    std::find_if(nodes_.begin(), nodes_.end(),
+		 [&name](const NavGraphNode &node) {
+		   return node.name() == name;
+		 });
+  return (n != nodes_.end());
+}
+
+/** Check if a certain edge exists.
+ * @param edge edge to look for (will check for a node with the same originating and target node)
+ * @return true if an edge with the same originating and target node exists, false otherwise
+ */
+bool
+NavGraph::edge_exists(const NavGraphEdge &edge) const
+{
+  std::vector<NavGraphEdge>::const_iterator e =
+    std::find(edges_.begin(), edges_.end(), edge);
+  return (e != edges_.end());
+}
+
+/** Check if a certain edge exists.
+ * @param from originating node name
+ * @param to target node name
+ * @return true if an edge with the same originating and target node exists, false otherwise
+ */
+bool
+NavGraph::edge_exists(const std::string &from, const std::string &to) const
+{
+  std::vector<NavGraphEdge>::const_iterator e =
+    std::find_if(edges_.begin(), edges_.end(), 
+		 [&from, &to](const NavGraphEdge &edge) {
+		   return edge.from() == from && edge.to() == to;
+		 });
+  return (e != edges_.end());
+}
 
 /** Add a node.
  * @param node node to add

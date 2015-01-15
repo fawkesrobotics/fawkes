@@ -78,7 +78,6 @@ class NavGraph
   void set_default_properties(const std::map<std::string, std::string> &properties);
 
   NavGraphNode node(const std::string &name) const;
-  bool         node_exists(std::string name) const;
 
   NavGraphNode closest_node(float pos_x, float pos_y,
 			    const std::string &property = "") const;
@@ -127,6 +126,11 @@ class NavGraph
   void remove_node(const NavGraphNode &node);
   void remove_edge(const NavGraphEdge &edge);
   void clear();
+
+  bool node_exists(const NavGraphNode &node) const;
+  bool node_exists(const std::string &name) const;
+  bool edge_exists(const NavGraphEdge &edge) const;
+  bool edge_exists(const std::string &from, const std::string &to) const;
 
   void calc_reachability();
 
