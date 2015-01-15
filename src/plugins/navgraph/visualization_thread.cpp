@@ -42,6 +42,7 @@ typedef std::multimap<std::string, std::string> ConnMap;
 NavGraphVisualizationThread::NavGraphVisualizationThread()
   : fawkes::Thread("NavGraphVisualizationThread", Thread::OPMODE_WAITFORWAKEUP)
 {
+  set_coalesce_wakeups(true);
   graph_ = NULL;
   crepo_ = NULL;
 }
@@ -219,8 +220,10 @@ NavGraphVisualizationThread::publish()
 {
   if (! graph_) return;
 
+  graph_.lock();
   std::vector<fawkes::NavGraphNode> nodes = graph_->nodes();
   std::vector<fawkes::NavGraphEdge> edges = graph_->edges();
+  graph_.unlock();
 
   crepo_.lock();
   std::map<std::string, std::string> bl_nodes = crepo_->blocks(nodes);
