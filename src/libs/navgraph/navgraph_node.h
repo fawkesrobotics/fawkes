@@ -28,6 +28,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <cmath>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -67,6 +68,19 @@ class NavGraphNode {
   void set_y(float y);
   void set_name(const std::string &name);
   void set_unconnected(bool unconnected);
+
+  /** Get euclidean distance from this node to another.
+   * @param n node to get distance to
+   * @return distance */
+  float distance(const NavGraphNode &n)
+  { return sqrtf(powf(x_ - n.x_, 2) + powf(y_ - n.y_, 2)); }
+
+  /** Get euclidean distance from this node to a point.
+   * @param x point X coordinate
+   * @param y point Y coordinate
+   * @return distance */
+  float distance(float x, float y)
+  { return sqrtf(powf(x_ - x, 2) + powf(y_ - y, 2)); }
 
   /** Get all properties.
    * @return property map
