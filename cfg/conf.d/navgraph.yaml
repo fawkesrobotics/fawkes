@@ -106,3 +106,6 @@ navgraph:
     # OriginNode--TargetNode:cost (node names may not contain "--" or
     # ":"). Use an empty list to not post any edge cost constraints.
     edge-costs: ["P11--P21:1.5", "P12--P22:2.0", "P21--P22:1.75"]
+
+  interactive:
+    out-file: navgraph-interactive-saved.yaml
