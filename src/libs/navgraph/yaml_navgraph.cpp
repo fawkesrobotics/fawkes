@@ -319,4 +319,81 @@ load_yaml_navgraph(std::string filename)
   return graph;
 }
 
+
+/** Save navgraph to YAML file.
+ * @param filename name of file to save to
+ * @param graph graph to save to
+ */
+void
+save_yaml_navgraph(std::string filename, NavGraph *graph)
+{
+  if (filename[0] != '/') {
+    filename = std::string(CONFDIR) + "/" + filename;
+  }
+
+  YAML::Emitter out;
+  out << YAML::TrueFalseBool
+      << YAML::BeginMap
+      << YAML::Key   << "graph-name"
+      << YAML::Value << graph->name();
+
+  const std::map<std::string, std::string> &def_props = graph->default_properties();
+  if (! def_props.empty()) {
+    out << YAML::Key   << "default-properties"
+	<< YAML::Value << YAML::BeginSeq;
+    for (auto &p : def_props) {
+      out << YAML::BeginMap
+	  << YAML::Key << p.first
+	  << YAML::Value << p.second
+	  << YAML::EndMap;
+    }
+    out << YAML::EndSeq;
+  }
+
+  out << YAML::Key   << "nodes"
+      << YAML::Value << YAML::BeginSeq;
+
+  const std::vector<NavGraphNode> &nodes = graph->nodes();
+  for (const NavGraphNode &node : nodes) {
+    out << YAML::BeginMap
+	<< YAML::Key   << "name"
+	<< YAML::Value << node.name()
+	<< YAML::Key   << "pos"
+	<< YAML::Value << YAML::Flow << YAML::BeginSeq << node.x() << node.y() << YAML::EndSeq;
+
+    const std::map<std::string, std::string> &props = node.properties();
+    if (! props.empty()) {
+      out << YAML::Key   << "properties"
+	  << YAML::Value << YAML::BeginSeq;
+      for (auto &p : props) {
+	out << YAML::BeginMap
+	    << YAML::Key << p.first
+	    << YAML::Value << p.second
+	    << YAML::EndMap;
+      }
+      out << YAML::EndSeq;
+    }
+
+    out << YAML::EndMap;
+  }
+  out << YAML::EndSeq
+      << YAML::Key   << "connections"
+      << YAML::Value << YAML::BeginSeq;
+
+  const std::vector<NavGraphEdge> &edges = graph->edges();
+  for (const NavGraphEdge &edge : edges) {
+    if (edge.is_directed())  out << YAML::LocalTag("dir");
+    out << YAML::Flow << YAML::BeginSeq << edge.from() << edge.to() << YAML::EndSeq;
+  }
+
+  out << YAML::EndSeq
+      << YAML::EndMap;
+
+  std::ofstream s(filename);
+  s << "%YAML 1.2" << std::endl
+    << "%TAG ! tag:fawkesrobotics.org,navgraph/" << std::endl
+    << "---" << std::endl
+    << out.c_str();
+}
+
 } // end of namespace fawkes

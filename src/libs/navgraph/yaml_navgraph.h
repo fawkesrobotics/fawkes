@@ -33,6 +33,7 @@ namespace fawkes {
 class NavGraph;
 
 extern NavGraph *  load_yaml_navgraph(std::string filename);
+extern void        save_yaml_navgraph(std::string filename, NavGraph *graph);
 
 } // end of namespace fawkes
 
