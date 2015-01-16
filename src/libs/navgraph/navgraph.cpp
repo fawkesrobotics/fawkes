@@ -40,6 +40,11 @@ namespace fawkes {
 }
 #endif
 
+namespace navgraph {
+  const char *PROP_ORIENTATION = "orientation";
+} // end of namespace fawkes::navgraph
+
+
 /** @class NavGraph <navgraph/navgraph.h>
  * Topological map graph.
  * This class represents a topological graph using 2D map coordinates

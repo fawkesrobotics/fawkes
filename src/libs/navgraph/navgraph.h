@@ -48,6 +48,8 @@ namespace navgraph {
   typedef
   std::function<float (const fawkes::NavGraphNode &, const fawkes::NavGraphNode &)>
       CostFunction;
+
+  extern const char *PROP_ORIENTATION;
 }
 
 class NavGraphConstraintRepo;
