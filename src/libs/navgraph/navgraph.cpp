@@ -592,6 +592,31 @@ void
 NavGraph::remove_node(const NavGraphNode &node)
 {
   std::remove(nodes_.begin(), nodes_.end(), node);
+  edges_.erase(
+    std::remove_if(edges_.begin(), edges_.end(),
+		   [&node](const NavGraphEdge &edge)->bool {
+		     return edge.from() == node.name() || edge.to() == node.name();
+		   }), edges_.end());
+  reachability_calced_ = false;
+  notify_of_change();
+}
+
+/** Remove a node.
+ * @param node_name name of node to remove
+ */
+void
+NavGraph::remove_node(const std::string &node_name)
+{
+  nodes_.erase(
+    std::remove_if(nodes_.begin(), nodes_.end(),
+		   [&node_name](const NavGraphNode &node)->bool {
+		     return node.name() == node_name;
+		   }), nodes_.end());
+  edges_.erase(
+    std::remove_if(edges_.begin(), edges_.end(),
+		   [&node_name](const NavGraphEdge &edge)->bool {
+		     return edge.from() == node_name || edge.to() == node_name;
+		   }), edges_.end());
   reachability_calced_ = false;
   notify_of_change();
 }
@@ -602,7 +627,29 @@ NavGraph::remove_node(const NavGraphNode &node)
 void
 NavGraph::remove_edge(const NavGraphEdge &edge)
 {
-  std::remove(edges_.begin(), edges_.end(), edge);
+  edges_.erase(
+    std::remove_if(edges_.begin(), edges_.end(),
+		   [&edge](const NavGraphEdge &e)->bool {
+		     return (edge.from() == e.from() && edge.to() == e.to()) ||
+		       (! e.is_directed() && (edge.from() == e.to() && edge.to() == e.from()));
+		   }), edges_.end());
+  reachability_calced_ = false;
+  notify_of_change();
+}
+
+/** Remove an edge
+ * @param from originating node name
+ * @param to target node name
+ */
+void
+NavGraph::remove_edge(const std::string &from, const std::string &to)
+{
+  edges_.erase(
+    std::remove_if(edges_.begin(), edges_.end(),
+		   [&from, &to](const NavGraphEdge &edge)->bool {
+		     return (edge.from() == from && edge.to() == to) ||
+		       (! edge.is_directed() && (edge.to() == from && edge.from() == to));
+		   }), edges_.end());
   reachability_calced_ = false;
   notify_of_change();
 }
