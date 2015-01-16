@@ -151,7 +151,7 @@ class NavGraph
   bool edge_exists(const NavGraphEdge &edge) const;
   bool edge_exists(const std::string &from, const std::string &to) const;
 
-  void calc_reachability();
+  void calc_reachability(bool allow_multi_graph = false);
 
   NavGraph & operator=(const NavGraph &g);
 

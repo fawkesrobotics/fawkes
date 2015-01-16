@@ -1168,10 +1168,11 @@ NavGraph::assert_connected()
 
 /** Calculate eachability relations.
  * This will set the directly reachable nodes on each
- * of the graph nodes. 
+ * of the graph nodes.
+ * @param allow_multi_graph if true, allows multiple disconnected graph segments.
  */
 void
-NavGraph::calc_reachability()
+NavGraph::calc_reachability(bool allow_multi_graph)
 {
   if (nodes_.empty())  return;
 
@@ -1187,7 +1188,7 @@ NavGraph::calc_reachability()
     e->set_nodes(node(e->from()), node(e->to()));
   }
 
-  assert_connected();
+  if (! allow_multi_graph)  assert_connected();
   reachability_calced_ = true;
 }
 
