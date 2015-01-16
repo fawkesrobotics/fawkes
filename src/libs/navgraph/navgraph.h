@@ -107,6 +107,7 @@ class NavGraph
   NavGraphNode closest_node_to_with_unconnected(const std::string &node_name,
 						const std::string &property = "") const;
 
+  NavGraphEdge edge(const std::string &from, const std::string &to) const;
   NavGraphEdge closest_edge(float pos_x, float pos_y) const;
 
   std::vector<NavGraphNode> search_nodes(const std::string &property) const;

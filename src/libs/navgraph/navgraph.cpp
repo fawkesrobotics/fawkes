@@ -310,6 +310,30 @@ NavGraph::closest_node_to(const std::string &node_name, bool consider_unconnecte
 }
 
 
+/** Get a specified edge.
+ * @param from originating node name
+ * @param to target node name
+ * @return the edge representation for the edge with the given
+ * originating and target nodes or an invalid edge if the edge
+ * cannot be found
+ */
+NavGraphEdge
+NavGraph::edge(const std::string &from, const std::string &to) const
+{
+  std::vector<NavGraphEdge>::const_iterator e =
+    std::find_if(edges_.begin(), edges_.end(), 
+		 [&from, &to](const NavGraphEdge &edge) {
+		   return (edge.from() == from && edge.to() == to) ||
+		     (! edge.is_directed() && (edge.to() == from && edge.from() == to));
+		 });
+  if (e != edges_.end()) {
+    return *e;
+  } else {
+    return NavGraphEdge();
+  }
+}
+
+
 /** Get edge closest to a specified point.
  * The point must be within an imaginery line segment parallel to
  * the edge, that is a line perpendicular to the edge must go
