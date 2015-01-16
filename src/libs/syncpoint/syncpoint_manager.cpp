@@ -86,7 +86,7 @@ SyncPointManager::get_syncpoint(const char * component, const char * identifier)
   // add component to the set of watchers
   // check if component is already a watcher
   // insert returns a pair whose second element is false if element already exists
-  if (!(*it)->watchers.insert(component).second) {
+  if (!(*it)->watchers_.insert(component).second) {
     mutex->unlock();
     throw SyncPointAlreadyOpenedException(component, identifier);
   }
@@ -115,7 +115,7 @@ SyncPointManager::release_syncpoint(const char * component, RefPtr<SyncPoint> sy
     mutex->unlock();
     throw SyncPointReleasedDoesNotExistException(component, sync_point->get_identifier());
   }
-  if (!(*sp_it)->watchers.erase(component)) {
+  if (!(*sp_it)->watchers_.erase(component)) {
     mutex->unlock();
     throw SyncPointReleasedByNonWatcherException(component, sync_point->get_identifier());
   }

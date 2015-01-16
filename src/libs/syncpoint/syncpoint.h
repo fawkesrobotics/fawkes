@@ -71,15 +71,15 @@ class SyncPoint
 
   private:
     const char * const identifier_;
-    std::set<const char *> watchers;
-    std::set<const char *> waiting_watchers;
+    std::set<const char *> watchers_;
+    std::set<const char *> waiting_watchers_;
 
     CircularBuffer<SyncPointCall> emit_calls_;
     CircularBuffer<SyncPointCall> wait_calls_;
     const Time creation_time_;
 
-    Mutex *mutex;
-    WaitCondition *wait_condition;
+    Mutex *mutex_;
+    WaitCondition *wait_condition_;
 };
 
 } // end namespace fawkes

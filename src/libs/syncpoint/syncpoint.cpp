@@ -55,25 +55,25 @@ SyncPoint::SyncPoint(const char * identifier)
       emit_calls_(CircularBuffer<SyncPointCall>(1000)),
       wait_calls_(CircularBuffer<SyncPointCall>(1000)),
       creation_time_(Time()),
-      mutex(new Mutex()),
-      wait_condition(new WaitCondition(mutex))
+      mutex_(new Mutex()),
+      wait_condition_(new WaitCondition(mutex_))
 {
   if (!strcmp(identifier, "")) {
-    delete wait_condition;
-    delete mutex;
+    delete wait_condition_;
+    delete mutex_;
     throw SyncPointInvalidIdentifierException(identifier);
   }
   if (strncmp(identifier, "/", 1)) {
-    delete wait_condition;
-    delete mutex;
+    delete wait_condition_;
+    delete mutex_;
     throw SyncPointInvalidIdentifierException(identifier);
   }
 }
 
 SyncPoint::~SyncPoint()
 {
-  delete wait_condition;
-  delete mutex;
+  delete wait_condition_;
+  delete mutex_;
 }
 
 /**
@@ -112,15 +112,15 @@ SyncPoint::operator<(const SyncPoint &other) const
 void
 SyncPoint::emit(const char * component)
 {
-  mutex->lock();
-  if (!watchers.count(component)) {
-    mutex->unlock();
+  mutex_->lock();
+  if (!watchers_.count(component)) {
+    mutex_->unlock();
     throw SyncPointNonWatcherCalledEmitException(component, get_identifier());
   }
-  waiting_watchers.clear();
+  waiting_watchers_.clear();
   emit_calls_.push_back(SyncPointCall(component));
-  wait_condition->wake_all();
-  mutex->unlock();
+  wait_condition_->wake_all();
+  mutex_->unlock();
 }
 
 /** Wait until SyncPoint is emitted
@@ -128,23 +128,23 @@ SyncPoint::emit(const char * component)
  */
 void
 SyncPoint::wait(const char * component) {
-  mutex->lock();
+  mutex_->lock();
   // check if calling component is registered for this SyncPoint
-  if (!watchers.count(component)) {
-    mutex->unlock();
+  if (!watchers_.count(component)) {
+    mutex_->unlock();
     throw SyncPointNonWatcherCalledWaitException(component, get_identifier());
   }
   // check if calling component is not already waiting
-  if (waiting_watchers.count(component)) {
-    mutex->unlock();
+  if (waiting_watchers_.count(component)) {
+    mutex_->unlock();
     throw SyncPointMultipleWaitCallsException(component, get_identifier());
   }
-  waiting_watchers.insert(component);
+  waiting_watchers_.insert(component);
   Time start;
-  wait_condition->wait();
+  wait_condition_->wait();
   Time wait_time = Time() - start;
   wait_calls_.push_back(SyncPointCall(component, start, wait_time));
-  mutex->unlock();
+  mutex_->unlock();
 }
 
 /**
@@ -152,9 +152,9 @@ SyncPoint::wait(const char * component) {
  */
 std::set<const char *>
 SyncPoint::get_watchers() const {
-  mutex->lock();
-  std::set<const char *> ret = watchers;
-  mutex->unlock();
+  mutex_->lock();
+  std::set<const char *> ret = watchers_;
+  mutex_->unlock();
   return ret;
 }
 
@@ -163,9 +163,9 @@ SyncPoint::get_watchers() const {
  */
 CircularBuffer<SyncPointCall>
 SyncPoint::get_wait_calls() const {
-  mutex->lock();
+  mutex_->lock();
   CircularBuffer<SyncPointCall> ret(wait_calls_);
-  mutex->unlock();
+  mutex_->unlock();
   return ret;
 }
 
@@ -175,9 +175,9 @@ SyncPoint::get_wait_calls() const {
  */
 CircularBuffer<SyncPointCall>
 SyncPoint::get_emit_calls() const {
-  mutex->lock();
+  mutex_->lock();
   CircularBuffer<SyncPointCall> ret(emit_calls_);
-  mutex->unlock();
+  mutex_->unlock();
   return ret;
 }
 
