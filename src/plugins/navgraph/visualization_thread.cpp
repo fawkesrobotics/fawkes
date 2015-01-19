@@ -663,6 +663,44 @@ NavGraphVisualizationThread::publish()
             arrow.color.r = arrow.color.g = arrow.color.b = 0.5;
             arrow.scale.x = 0.04; // shaft radius
             arrow.scale.y = 0.15; // head radius
+
+	    tf::Vector3 p1v(p1.x, p1.y, p1.z);
+	    tf::Vector3 p2v(p2.x, p2.y, p2.z);
+
+	    tf::Vector3 p = p1v + (p2v - p1v) * 0.5;
+
+	    std::string text_s = "";
+
+	    std::map<std::pair<std::string, std::string>, std::string>::iterator e =
+	      bl_edges.find(std::make_pair(to.name(), from.name()));
+	    if (e != bl_edges.end()) {
+	      text_s = e->second;
+	    } else {
+	      e = bl_edges.find(std::make_pair(from.name(), to.name()));
+	      if (e != bl_edges.end()) {
+		text_s = e->second;
+	      }
+	    }
+
+	    visualization_msgs::Marker text;
+	    text.header.frame_id = "/map";
+	    text.header.stamp = ros::Time::now();
+	    text.ns = "navgraph-constraints";
+	    text.id = constraints_id_num++;
+	    text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+	    text.action = visualization_msgs::Marker::ADD;
+	    text.pose.position.x =  p[0];
+	    text.pose.position.y =  p[1];
+	    text.pose.position.z = 0.3;
+	    text.pose.orientation.w = 1.;
+	    text.scale.z = 0.12;
+	    text.color.r = 1.0;
+	    text.color.g = text.color.b = 0.f;
+	    text.color.a = 1.0;
+	    text.lifetime = ros::Duration(0, 0);
+	    text.text = text_s;
+	    m.markers.push_back(text);
+
           } else {
             // regular
             arrow.color.r = 0.66666;
