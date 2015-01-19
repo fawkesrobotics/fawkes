@@ -23,6 +23,8 @@
 
 #include <navgraph/navgraph.h>
 #include <navgraph/constraints/constraint_repo.h>
+#include <navgraph/constraints/polygon_node_constraint.h>
+#include <navgraph/constraints/polygon_edge_constraint.h>
 #include <tf/types.h>
 #include <utils/math/angle.h>
 #include <utils/math/coord.h>
@@ -843,6 +845,60 @@ NavGraphVisualizationThread::publish()
   m.markers.push_back(plan_lines);
   m.markers.push_back(blocked_lines);
   m.markers.push_back(cur_line);
+
+  crepo_.lock();
+  const NavGraphConstraintRepo::NodeConstraintList &node_constraints =
+    crepo_->node_constraints();
+  const NavGraphConstraintRepo::EdgeConstraintList &edge_constraints =
+    crepo_->edge_constraints();
+  std::list<const NavGraphPolygonConstraint *> poly_constraints;
+
+  std::for_each(node_constraints.begin(), node_constraints.end(),
+		[&poly_constraints](const NavGraphNodeConstraint *c) {
+		  const NavGraphPolygonNodeConstraint *pc =
+		    dynamic_cast<const NavGraphPolygonNodeConstraint *>(c);
+		  if (pc) {
+		    poly_constraints.push_back(pc);
+		  }
+		});
+
+  std::for_each(edge_constraints.begin(), edge_constraints.end(),
+		[&poly_constraints](const NavGraphEdgeConstraint *c) {
+		  const NavGraphPolygonEdgeConstraint *pc =
+		    dynamic_cast<const NavGraphPolygonEdgeConstraint *>(c);
+		  if (pc) {
+		    poly_constraints.push_back(pc);
+		  }
+		});
+
+  for (const NavGraphPolygonConstraint *pc : poly_constraints) {
+    const NavGraphPolygonConstraint::PolygonMap &polygons = pc->polygons();
+    for (auto const &p : polygons) {
+      visualization_msgs::Marker polc_lines;
+      polc_lines.header.frame_id = "/map";
+      polc_lines.header.stamp = ros::Time::now();
+      polc_lines.ns = "navgraph-constraints";
+      polc_lines.id = constraints_id_num++;
+      polc_lines.type = visualization_msgs::Marker::LINE_STRIP;
+      polc_lines.action = visualization_msgs::Marker::ADD;
+      polc_lines.color.r = polc_lines.color.g = 1.0;
+      polc_lines.color.b = 0.f;
+      polc_lines.color.a = 1.0;
+      polc_lines.scale.x = 0.02;
+      polc_lines.lifetime = ros::Duration(0, 0);
+
+      polc_lines.points.resize(p.second.size());
+      for (size_t i = 0; i < p.second.size(); ++i) {
+	polc_lines.points[i].x = p.second[i].x;
+	polc_lines.points[i].y = p.second[i].y;
+	polc_lines.points[i].z = 0.;
+      }
+
+      m.markers.push_back(polc_lines);
+    }
+  }
+  crepo_.unlock();
+
 
   for (size_t i = id_num; i < last_id_num_; ++i) {
     visualization_msgs::Marker delop;
