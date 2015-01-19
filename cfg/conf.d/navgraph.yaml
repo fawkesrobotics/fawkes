@@ -106,3 +106,12 @@ navgraph:
     # OriginNode--TargetNode:cost (node names may not contain "--" or
     # ":"). Use an empty list to not post any edge cost constraints.
     edge-costs: ["P11--P21:1.5", "P12--P22:2.0", "P21--P22:1.75"]
+
+    # Static polygons for which all nodes within the polygons as well as
+    # all edges passing through or ending within the polygon are blocked.
+    # Specification is a string with /-separated points which are again
+    # :-separated X:Y coordinates, e.g. "p1.x:p1.y/p2.x/p2.y...".
+    # The polygons are automatically closed, i.e. if the last node is
+    # different from the first the first is automatically appended.
+    polygons: ["1.2:0.0/1.5:0.0/1.5:1.5/1.2:1.5"]
+

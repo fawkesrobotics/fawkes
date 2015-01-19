@@ -23,6 +23,8 @@
 #include <navgraph/constraints/static_list_node_constraint.h>
 #include <navgraph/constraints/static_list_edge_constraint.h>
 #include <navgraph/constraints/static_list_edge_cost_constraint.h>
+#include <navgraph/constraints/polygon_node_constraint.h>
+#include <navgraph/constraints/polygon_edge_constraint.h>
 #include <utils/misc/string_split.h>
 
 using namespace fawkes;
@@ -55,6 +57,9 @@ NavGraphStaticConstraintsThread::init()
   std::vector<std::string> c_edge_costs =
     config->get_strings("/navgraph/static-constraints/edge-costs");
 
+  std::vector<std::string> c_polygons =
+    config->get_strings("/navgraph/static-constraints/polygons");
+
   std::vector<std::pair<std::string, std::string>> edges;
   for (std::string & ce : c_edges) {
     std::vector<std::string> node_names = str_split(ce, "--");
@@ -78,9 +83,37 @@ NavGraphStaticConstraintsThread::init()
 					 StringConversions::to_float(nodes_cost[1])));
   }
 
+  std::vector<NavGraphPolygonConstraint::Polygon> polygons;
+  for (std::string & ce : c_polygons) {
+    std::vector<std::string> points = str_split(ce);
+    if (points.size() < 2) {
+      throw Exception("Invalid polygon, must have at least two nodes");
+    }
+    NavGraphPolygonConstraint::Polygon polygon;
+    for (const std::string &p : points) {
+      std::vector<std::string> coord = str_split(p, ":");
+      if (coord.size() != 2) {
+	throw Exception("Polygon constraint with invalid point %s", p.c_str());
+      }
+      const NavGraphPolygonConstraint::Point
+	polpoint(StringConversions::to_float(coord[0]),
+		 StringConversions::to_float(coord[1]));
+      polygon.push_back(polpoint);
+    }
+    if (polygon.front().x != polygon.back().x || polygon.front().y != polygon.back().y) {
+      logger->log_info(name(), "Auto-circling constraint polygon %s",
+		       ce.c_str());
+      polygon.push_back(NavGraphPolygonConstraint::Point(polygon.front().x,
+							 polygon.front().y));
+    }
+    polygons.push_back(polygon);
+  }
+
   node_constraint_ = new NavGraphStaticListNodeConstraint("static-nodes");
   edge_constraint_ = new NavGraphStaticListEdgeConstraint("static-edges");
   edge_cost_constraint_ = new NavGraphStaticListEdgeCostConstraint("static-edge-cost");
+  node_poly_constraint_ = new NavGraphPolygonNodeConstraint("static-node-polygon");
+  edge_poly_constraint_ = new NavGraphPolygonEdgeConstraint("static-edge-polygon");
 
   const std::vector<NavGraphNode> &graph_nodes = navgraph->nodes();
 
@@ -178,9 +211,38 @@ NavGraphStaticConstraintsThread::init()
     throw Exception("Some edges for cost factors are not in graph: %s", err_str.c_str());
   }
 
+
+  for (const NavGraphPolygonConstraint::Polygon &p : polygons) {
+    node_poly_constraint_->add_polygon(p);
+    edge_poly_constraint_->add_polygon(p);
+  }
+  
+
+  /*
+  NavGraphPolygonNodeConstraint *pc = new NavGraphPolygonNodeConstraint("Poly");
+  NavGraphPolygonNodeConstraint::Polygon p;
+  p.push_back(NavGraphPolygonNodeConstraint::Point(0.0, 0.0));
+  p.push_back(NavGraphPolygonNodeConstraint::Point(1.0, 0.0));
+  p.push_back(NavGraphPolygonNodeConstraint::Point(1.0, 1.11));
+  p.push_back(NavGraphPolygonNodeConstraint::Point(0.0, 1.11));
+  p.push_back(NavGraphPolygonNodeConstraint::Point(0.0, 0.0));
+  pc->add_polygon(p);
+
+  NavGraphPolygonEdgeConstraint *pc = new NavGraphPolygonEdgeConstraint("Poly");
+  NavGraphPolygonEdgeConstraint::Polygon p;
+  p.push_back(NavGraphPolygonConstraint::Point(0.0, 0.0));
+  p.push_back(NavGraphPolygonConstraint::Point(1.0, 0.0));
+  p.push_back(NavGraphPolygonConstraint::Point(1.0, 1.11));
+  p.push_back(NavGraphPolygonConstraint::Point(0.0, 1.11));
+  p.push_back(NavGraphPolygonConstraint::Point(0.0, 0.0));
+  pc->add_polygon(p);
+  */
+
   navgraph->constraint_repo()->register_constraint(node_constraint_);
   navgraph->constraint_repo()->register_constraint(edge_constraint_);
   navgraph->constraint_repo()->register_constraint(edge_cost_constraint_);
+  navgraph->constraint_repo()->register_constraint(node_poly_constraint_);
+  navgraph->constraint_repo()->register_constraint(edge_poly_constraint_);
 }
 
 void
