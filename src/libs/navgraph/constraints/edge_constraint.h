@@ -37,7 +37,7 @@ class Logger;
 class NavGraphEdgeConstraint
 {
  public:
-  NavGraphEdgeConstraint(std::string &name);
+  NavGraphEdgeConstraint(const std::string &name);
   NavGraphEdgeConstraint(const char *name);
   virtual ~NavGraphEdgeConstraint();
 

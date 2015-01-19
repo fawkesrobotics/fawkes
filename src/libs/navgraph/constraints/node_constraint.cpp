@@ -48,7 +48,7 @@ namespace fawkes{
 /** Constructor.
  * @param name name of node constraint
  */
-NavGraphNodeConstraint::NavGraphNodeConstraint(std::string &name)
+NavGraphNodeConstraint::NavGraphNodeConstraint(const std::string &name)
 {
   name_   = name;
 }

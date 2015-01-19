@@ -37,7 +37,7 @@ class Logger;
 class NavGraphNodeConstraint
 {
  public:
-  NavGraphNodeConstraint(std::string &name);
+  NavGraphNodeConstraint(const std::string &name);
   NavGraphNodeConstraint(const char *name);
   virtual ~NavGraphNodeConstraint();
 
