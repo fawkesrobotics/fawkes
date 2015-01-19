@@ -56,7 +56,7 @@ namespace fawkes{
 /** Constructor.
  * @param name name of edge constraint
  */
-NavGraphEdgeConstraint::NavGraphEdgeConstraint(std::string &name)
+NavGraphEdgeConstraint::NavGraphEdgeConstraint(const std::string &name)
 {
   name_   = name;
 }
