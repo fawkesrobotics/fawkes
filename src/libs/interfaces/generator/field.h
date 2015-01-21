@@ -58,6 +58,9 @@ class InterfaceField
   std::string               getValidFor() const;
   std::string               getDefaultValue() const;
 
+  const std::vector<InterfaceEnumConstant> *  getEnumConstants() const;
+  const InterfaceEnumConstant &               getEnumConstant(const std::string &name) const;
+
   bool operator< (const InterfaceField &f) const;
 
  private:

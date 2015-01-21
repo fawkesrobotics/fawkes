@@ -196,6 +196,37 @@ InterfaceField::getDefaultValue() const
 }
 
 
+/** Get vector of enum constants.
+ * @return const reference to vector of interface enum constants.
+ */
+const std::vector<InterfaceEnumConstant> *
+InterfaceField::getEnumConstants() const
+{
+  return enum_constants;
+}
+
+/** Get specific enum constant.
+ * @param name type name of enum constant
+ * @return const reference on enum constant
+ * @exception Exception thrown if no enum constant of the given name
+ * could be found
+ */
+const InterfaceEnumConstant &
+InterfaceField::getEnumConstant(const std::string &name) const
+{
+  if (! enum_constants) throw fawkes::Exception("No enum constants registered");
+
+  std::vector<InterfaceEnumConstant>::const_iterator i;
+  for (i = enum_constants->begin(); i != enum_constants->end(); ++i) {
+    if ( type == i->get_name() ) {
+      return *i;
+    }
+  }
+
+  throw fawkes::Exception("Enum constant %s not found", name.c_str());
+}
+
+
 /** Get flags.
  * @return flags.
  */

@@ -148,6 +148,19 @@ CppInterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* in
 }
 
 
+/** Write enum maps to header.
+ * @param f file to write to
+ */
+void
+CppInterfaceGenerator::write_enum_maps_h(FILE *f)
+{
+  for (vector<InterfaceEnumConstant>::iterator i = enum_constants.begin(); i != enum_constants.end(); ++i) {
+    fprintf(f, "  interface_enum_map_t enum_map_%s;\n", i->get_name().c_str());
+  }
+}
+
+
+
 /** Write header to file.
  * @param f file to write to
  * @param filename name of file
@@ -207,6 +220,8 @@ CppInterfaceGenerator::write_cpp(FILE *f)
   fprintf(f,
 	  "#include <interfaces/%s>\n\n"
 	  "#include <core/exceptions/software.h>\n\n"
+	  "#include <map>\n"
+	  "#include <string>\n"
 	  "#include <cstring>\n"
 	  "#include <cstdlib>\n\n"
 	  "namespace fawkes {\n\n"
@@ -354,6 +369,8 @@ CppInterfaceGenerator::write_messages_h(FILE *f)
     fprintf(f,
 	    "    %s_data_t *data;\n\n",
 	    (*i).getName().c_str());
+
+    write_enum_maps_h(f);
 
     fprintf(f, "   public:\n");
     write_message_ctor_dtor_h(f, "    ", (*i).getName(), (*i).getFields());
@@ -590,6 +607,25 @@ CppInterfaceGenerator::write_message_clone_method_cpp(FILE *f, std::string class
 	  "}\n", classname.c_str(), classname.c_str());
 }
 
+/** Write enum maps.
+ * @param f file to write to
+ */
+void
+CppInterfaceGenerator::write_enum_map_population(FILE *f)
+{
+  for (vector<InterfaceEnumConstant>::iterator i = enum_constants.begin(); i != enum_constants.end(); ++i) {
+    const std::vector<InterfaceEnumConstant::EnumItem> &enum_values   = i->get_items();
+
+    std::vector<InterfaceEnumConstant::EnumItem>::const_iterator ef;
+    for (ef = enum_values.begin(); ef != enum_values.end(); ++ef) {
+      fprintf(f,
+	      "  enum_map_%s[(int)%s] = \"%s\";\n",
+	      i->get_name().c_str(), ef->name.c_str(), ef->name.c_str());
+    }
+  }
+}
+
+
 /** Write the add_fieldinfo() calls.
  * @param f file to write to
  * @param fields fields to write field info for
@@ -635,13 +671,16 @@ CppInterfaceGenerator::write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceF
       enumtype = i->getType().c_str();
     }
 
-    fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s%s%s%s);\n",
+    fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s%s%s%s%s%s%s);\n",
 	    type, i->getName().c_str(),
 	    (i->getLengthValue() > 0) ? i->getLengthValue() : 1,
 	    dataptr, i->getName().c_str(),
 	    enumtype ? ", \"" : "",
 	    enumtype ? enumtype : "",
-	    enumtype ? "\"" : ""
+	    enumtype ? "\"" : "",
+	    enumtype ? ", " : "",
+	    enumtype ? "&enum_map_" : "",
+	    enumtype ? enumtype : ""
 	    );
   }
 }
@@ -677,6 +716,7 @@ CppInterfaceGenerator::write_ctor_dtor_cpp(FILE *f,
 	  "  memset(data_ptr, 0, data_size);\n",
 	  classname.c_str(), classname.c_str());
 
+  write_enum_map_population(f);
   write_add_fieldinfo_calls(f, fields);
 
   for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
@@ -767,6 +807,7 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
       }
     }
 
+    write_enum_map_population(f);
     write_add_fieldinfo_calls(f, fields);
 
     fprintf(f, "}\n");
@@ -787,6 +828,7 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
 	  "  data_ts   = (message_data_ts_t *)data_ptr;\n",
 	  classname.c_str(), classname.c_str());
 
+  write_enum_map_population(f);
   write_add_fieldinfo_calls(f, fields);
 
   fprintf(f,
@@ -1147,8 +1189,11 @@ CppInterfaceGenerator::write_h(FILE *f)
 
   write_struct(f, class_name + "_data_t", "  ", data_fields);
 
-  fprintf(f, "  %s_data_t *data;\n"
-	  "\n public:\n", class_name.c_str());
+  fprintf(f, "  %s_data_t *data;\n\n", class_name.c_str());
+
+  write_enum_maps_h(f);
+
+  fprintf(f, " public:\n");
 
   write_messages_h(f);
   fprintf(f, " private:\n");

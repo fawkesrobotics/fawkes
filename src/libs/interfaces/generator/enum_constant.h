@@ -40,9 +40,9 @@ class InterfaceEnumConstant
 
   InterfaceEnumConstant(const std::string &name, const std::string &comment);
 
-  std::string get_name();
-  std::string get_comment();
-  std::vector<EnumItem> get_items();
+  const std::string &  get_name() const;
+  const std::string &  get_comment() const;
+  const std::vector<EnumItem> &  get_items() const;
   void add_item(std::string name, std::string comment);
   void add_item(std::string name, std::string comment, int value);
 

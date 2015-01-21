@@ -45,8 +45,8 @@ InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name,
 /** Get name of enum constant.
  * @return name of enum constant.
  */
-std::string
-InterfaceEnumConstant::get_name()
+const std::string &
+InterfaceEnumConstant::get_name() const
 {
   return __name;
 }
@@ -55,8 +55,8 @@ InterfaceEnumConstant::get_name()
 /** Get comment of enum constant.
  * @return comment of enum constant.
  */
-std::string
-InterfaceEnumConstant::get_comment()
+const std::string &
+InterfaceEnumConstant::get_comment() const
 {
   return __comment;
 }
@@ -66,8 +66,8 @@ InterfaceEnumConstant::get_comment()
  * @return vector of enum items. First item in pair contains item name, second item
  * the comment.
  */
-std::vector<InterfaceEnumConstant::EnumItem>
-InterfaceEnumConstant::get_items()
+const std::vector<InterfaceEnumConstant::EnumItem> &
+InterfaceEnumConstant::get_items() const
 {
   return __items;
 }
