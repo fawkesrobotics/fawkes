@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -51,9 +53,13 @@ SkillerDebugInterface::SkillerDebugInterface() : Interface()
   data      = (SkillerDebugInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_GraphDirectionEnum[(int)GD_TOP_BOTTOM] = "GD_TOP_BOTTOM";
+  enum_map_GraphDirectionEnum[(int)GD_BOTTOM_TOP] = "GD_BOTTOM_TOP";
+  enum_map_GraphDirectionEnum[(int)GD_LEFT_RIGHT] = "GD_LEFT_RIGHT";
+  enum_map_GraphDirectionEnum[(int)GD_RIGHT_LEFT] = "GD_RIGHT_LEFT";
   add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
   add_fieldinfo(IFT_STRING, "graph", 8192, data->graph);
-  add_fieldinfo(IFT_ENUM, "graph_dir", 1, &data->graph_dir, "GraphDirectionEnum");
+  add_fieldinfo(IFT_ENUM, "graph_dir", 1, &data->graph_dir, "GraphDirectionEnum", &enum_map_GraphDirectionEnum);
   add_fieldinfo(IFT_BOOL, "graph_colored", 1, &data->graph_colored);
   add_messageinfo("SetGraphMessage");
   add_messageinfo("SetGraphDirectionMessage");
@@ -282,6 +288,10 @@ SkillerDebugInterface::SetGraphMessage::SetGraphMessage(const char * ini_graph_f
   data      = (SetGraphMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->graph_fsm, ini_graph_fsm, 32);
+  enum_map_GraphDirectionEnum[(int)GD_TOP_BOTTOM] = "GD_TOP_BOTTOM";
+  enum_map_GraphDirectionEnum[(int)GD_BOTTOM_TOP] = "GD_BOTTOM_TOP";
+  enum_map_GraphDirectionEnum[(int)GD_LEFT_RIGHT] = "GD_LEFT_RIGHT";
+  enum_map_GraphDirectionEnum[(int)GD_RIGHT_LEFT] = "GD_RIGHT_LEFT";
   add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
 }
 /** Constructor */
@@ -292,6 +302,10 @@ SkillerDebugInterface::SetGraphMessage::SetGraphMessage() : Message("SetGraphMes
   memset(data_ptr, 0, data_size);
   data      = (SetGraphMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_GraphDirectionEnum[(int)GD_TOP_BOTTOM] = "GD_TOP_BOTTOM";
+  enum_map_GraphDirectionEnum[(int)GD_BOTTOM_TOP] = "GD_BOTTOM_TOP";
+  enum_map_GraphDirectionEnum[(int)GD_LEFT_RIGHT] = "GD_LEFT_RIGHT";
+  enum_map_GraphDirectionEnum[(int)GD_RIGHT_LEFT] = "GD_RIGHT_LEFT";
   add_fieldinfo(IFT_STRING, "graph_fsm", 32, data->graph_fsm);
 }
 
@@ -376,7 +390,11 @@ SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage(const 
   data      = (SetGraphDirectionMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->graph_dir = ini_graph_dir;
-  add_fieldinfo(IFT_ENUM, "graph_dir", 1, &data->graph_dir, "GraphDirectionEnum");
+  enum_map_GraphDirectionEnum[(int)GD_TOP_BOTTOM] = "GD_TOP_BOTTOM";
+  enum_map_GraphDirectionEnum[(int)GD_BOTTOM_TOP] = "GD_BOTTOM_TOP";
+  enum_map_GraphDirectionEnum[(int)GD_LEFT_RIGHT] = "GD_LEFT_RIGHT";
+  enum_map_GraphDirectionEnum[(int)GD_RIGHT_LEFT] = "GD_RIGHT_LEFT";
+  add_fieldinfo(IFT_ENUM, "graph_dir", 1, &data->graph_dir, "GraphDirectionEnum", &enum_map_GraphDirectionEnum);
 }
 /** Constructor */
 SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage() : Message("SetGraphDirectionMessage")
@@ -386,7 +404,11 @@ SkillerDebugInterface::SetGraphDirectionMessage::SetGraphDirectionMessage() : Me
   memset(data_ptr, 0, data_size);
   data      = (SetGraphDirectionMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "graph_dir", 1, &data->graph_dir, "GraphDirectionEnum");
+  enum_map_GraphDirectionEnum[(int)GD_TOP_BOTTOM] = "GD_TOP_BOTTOM";
+  enum_map_GraphDirectionEnum[(int)GD_BOTTOM_TOP] = "GD_BOTTOM_TOP";
+  enum_map_GraphDirectionEnum[(int)GD_LEFT_RIGHT] = "GD_LEFT_RIGHT";
+  enum_map_GraphDirectionEnum[(int)GD_RIGHT_LEFT] = "GD_RIGHT_LEFT";
+  add_fieldinfo(IFT_ENUM, "graph_dir", 1, &data->graph_dir, "GraphDirectionEnum", &enum_map_GraphDirectionEnum);
 }
 
 /** Destructor */
@@ -470,6 +492,10 @@ SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage(const bool
   data      = (SetGraphColoredMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->graph_colored = ini_graph_colored;
+  enum_map_GraphDirectionEnum[(int)GD_TOP_BOTTOM] = "GD_TOP_BOTTOM";
+  enum_map_GraphDirectionEnum[(int)GD_BOTTOM_TOP] = "GD_BOTTOM_TOP";
+  enum_map_GraphDirectionEnum[(int)GD_LEFT_RIGHT] = "GD_LEFT_RIGHT";
+  enum_map_GraphDirectionEnum[(int)GD_RIGHT_LEFT] = "GD_RIGHT_LEFT";
   add_fieldinfo(IFT_BOOL, "graph_colored", 1, &data->graph_colored);
 }
 /** Constructor */
@@ -480,6 +506,10 @@ SkillerDebugInterface::SetGraphColoredMessage::SetGraphColoredMessage() : Messag
   memset(data_ptr, 0, data_size);
   data      = (SetGraphColoredMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_GraphDirectionEnum[(int)GD_TOP_BOTTOM] = "GD_TOP_BOTTOM";
+  enum_map_GraphDirectionEnum[(int)GD_BOTTOM_TOP] = "GD_BOTTOM_TOP";
+  enum_map_GraphDirectionEnum[(int)GD_LEFT_RIGHT] = "GD_LEFT_RIGHT";
+  enum_map_GraphDirectionEnum[(int)GD_RIGHT_LEFT] = "GD_RIGHT_LEFT";
   add_fieldinfo(IFT_BOOL, "graph_colored", 1, &data->graph_colored);
 }
 
