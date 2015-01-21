@@ -128,6 +128,7 @@ class NaoJointPositionInterface : public Interface
 
   NaoJointPositionInterface_data_t *data;
 
+  interface_enum_map_t enum_map_RobotType;
  public:
   /* messages */
   class SetServoMessage : public Message
@@ -152,6 +153,7 @@ class NaoJointPositionInterface : public Interface
 
     SetServoMessage_data_t *data;
 
+  interface_enum_map_t enum_map_RobotType;
    public:
     SetServoMessage(const uint32_t ini_servo, const float ini_value, const int32_t ini_time);
     SetServoMessage();
@@ -215,6 +217,7 @@ class NaoJointPositionInterface : public Interface
 
     SetServosMessage_data_t *data;
 
+  interface_enum_map_t enum_map_RobotType;
    public:
     SetServosMessage(const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll, const int32_t ini_time);
     SetServosMessage();
@@ -328,6 +331,7 @@ class NaoJointPositionInterface : public Interface
 
     MoveServoMessage_data_t *data;
 
+  interface_enum_map_t enum_map_RobotType;
    public:
     MoveServoMessage(const uint32_t ini_servo, const float ini_value, const float ini_speed);
     MoveServoMessage();
@@ -389,6 +393,7 @@ class NaoJointPositionInterface : public Interface
 
     MoveServosMessage_data_t *data;
 
+  interface_enum_map_t enum_map_RobotType;
    public:
     MoveServosMessage(const float ini_speed, const float ini_head_yaw, const float ini_head_pitch, const float ini_l_shoulder_pitch, const float ini_l_shoulder_roll, const float ini_l_elbow_yaw, const float ini_l_elbow_roll, const float ini_l_wrist_yaw, const float ini_l_hand, const float ini_l_hip_yaw_pitch, const float ini_l_hip_roll, const float ini_l_hip_pitch, const float ini_l_knee_pitch, const float ini_l_ankle_pitch, const float ini_l_ankle_roll, const float ini_r_shoulder_pitch, const float ini_r_shoulder_roll, const float ini_r_elbow_yaw, const float ini_r_elbow_roll, const float ini_r_wrist_yaw, const float ini_r_hand, const float ini_r_hip_yaw_pitch, const float ini_r_hip_roll, const float ini_r_hip_pitch, const float ini_r_knee_pitch, const float ini_r_ankle_pitch, const float ini_r_ankle_roll);
     MoveServosMessage();

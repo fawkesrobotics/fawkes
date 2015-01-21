@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -48,6 +50,12 @@ NaoSensorInterface::NaoSensorInterface() : Interface()
   data      = (NaoSensorInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_UltrasonicDirection[(int)USD_NONE] = "USD_NONE";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_LEFT] = "USD_LEFT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_RIGHT] = "USD_LEFT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_RIGHT] = "USD_RIGHT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_LEFT] = "USD_RIGHT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_BOTH_BOTH] = "USD_BOTH_BOTH";
   add_fieldinfo(IFT_FLOAT, "accel_x", 1, &data->accel_x);
   add_fieldinfo(IFT_FLOAT, "accel_y", 1, &data->accel_y);
   add_fieldinfo(IFT_FLOAT, "accel_z", 1, &data->accel_z);
@@ -72,7 +80,7 @@ NaoSensorInterface::NaoSensorInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "r_cop_y", 1, &data->r_cop_y);
   add_fieldinfo(IFT_FLOAT, "ultrasonic_distance_left", 4, &data->ultrasonic_distance_left);
   add_fieldinfo(IFT_FLOAT, "ultrasonic_distance_right", 4, &data->ultrasonic_distance_right);
-  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection");
+  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection", &enum_map_UltrasonicDirection);
   add_fieldinfo(IFT_UINT8, "l_foot_bumper_l", 1, &data->l_foot_bumper_l);
   add_fieldinfo(IFT_UINT8, "l_foot_bumper_r", 1, &data->l_foot_bumper_r);
   add_fieldinfo(IFT_UINT8, "r_foot_bumper_l", 1, &data->r_foot_bumper_l);
@@ -1311,7 +1319,13 @@ NaoSensorInterface::EmitUltrasonicWaveMessage::EmitUltrasonicWaveMessage(const U
   data      = (EmitUltrasonicWaveMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->ultrasonic_direction = ini_ultrasonic_direction;
-  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection");
+  enum_map_UltrasonicDirection[(int)USD_NONE] = "USD_NONE";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_LEFT] = "USD_LEFT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_RIGHT] = "USD_LEFT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_RIGHT] = "USD_RIGHT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_LEFT] = "USD_RIGHT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_BOTH_BOTH] = "USD_BOTH_BOTH";
+  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection", &enum_map_UltrasonicDirection);
 }
 /** Constructor */
 NaoSensorInterface::EmitUltrasonicWaveMessage::EmitUltrasonicWaveMessage() : Message("EmitUltrasonicWaveMessage")
@@ -1321,7 +1335,13 @@ NaoSensorInterface::EmitUltrasonicWaveMessage::EmitUltrasonicWaveMessage() : Mes
   memset(data_ptr, 0, data_size);
   data      = (EmitUltrasonicWaveMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection");
+  enum_map_UltrasonicDirection[(int)USD_NONE] = "USD_NONE";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_LEFT] = "USD_LEFT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_RIGHT] = "USD_LEFT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_RIGHT] = "USD_RIGHT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_LEFT] = "USD_RIGHT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_BOTH_BOTH] = "USD_BOTH_BOTH";
+  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection", &enum_map_UltrasonicDirection);
 }
 
 /** Destructor */
@@ -1405,7 +1425,13 @@ NaoSensorInterface::StartUltrasonicMessage::StartUltrasonicMessage(const Ultraso
   data      = (StartUltrasonicMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->ultrasonic_direction = ini_ultrasonic_direction;
-  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection");
+  enum_map_UltrasonicDirection[(int)USD_NONE] = "USD_NONE";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_LEFT] = "USD_LEFT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_RIGHT] = "USD_LEFT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_RIGHT] = "USD_RIGHT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_LEFT] = "USD_RIGHT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_BOTH_BOTH] = "USD_BOTH_BOTH";
+  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection", &enum_map_UltrasonicDirection);
 }
 /** Constructor */
 NaoSensorInterface::StartUltrasonicMessage::StartUltrasonicMessage() : Message("StartUltrasonicMessage")
@@ -1415,7 +1441,13 @@ NaoSensorInterface::StartUltrasonicMessage::StartUltrasonicMessage() : Message("
   memset(data_ptr, 0, data_size);
   data      = (StartUltrasonicMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection");
+  enum_map_UltrasonicDirection[(int)USD_NONE] = "USD_NONE";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_LEFT] = "USD_LEFT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_RIGHT] = "USD_LEFT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_RIGHT] = "USD_RIGHT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_LEFT] = "USD_RIGHT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_BOTH_BOTH] = "USD_BOTH_BOTH";
+  add_fieldinfo(IFT_ENUM, "ultrasonic_direction", 1, &data->ultrasonic_direction, "UltrasonicDirection", &enum_map_UltrasonicDirection);
 }
 
 /** Destructor */
@@ -1496,6 +1528,12 @@ NaoSensorInterface::StopUltrasonicMessage::StopUltrasonicMessage() : Message("St
   memset(data_ptr, 0, data_size);
   data      = (StopUltrasonicMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_UltrasonicDirection[(int)USD_NONE] = "USD_NONE";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_LEFT] = "USD_LEFT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_LEFT_RIGHT] = "USD_LEFT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_RIGHT] = "USD_RIGHT_RIGHT";
+  enum_map_UltrasonicDirection[(int)USD_RIGHT_LEFT] = "USD_RIGHT_LEFT";
+  enum_map_UltrasonicDirection[(int)USD_BOTH_BOTH] = "USD_BOTH_BOTH";
 }
 
 /** Destructor */
