@@ -117,6 +117,7 @@ class JoystickInterface : public Interface
 
   JoystickInterface_data_t *data;
 
+  interface_enum_map_t enum_map_Direction;
  public:
   /* messages */
   class StartRumbleMessage : public Message
@@ -139,6 +140,7 @@ class JoystickInterface : public Interface
 
     StartRumbleMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Direction;
    public:
     StartRumbleMessage(const uint16_t ini_length, const uint16_t ini_delay, const Direction ini_direction, const uint16_t ini_strong_magnitude, const uint16_t ini_weak_magnitude);
     StartRumbleMessage();
@@ -177,6 +179,7 @@ class JoystickInterface : public Interface
 
     StopRumbleMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Direction;
    public:
     StopRumbleMessage();
     ~StopRumbleMessage();
@@ -199,6 +202,7 @@ class JoystickInterface : public Interface
 
     StopAllMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Direction;
    public:
     StopAllMessage();
     ~StopAllMessage();

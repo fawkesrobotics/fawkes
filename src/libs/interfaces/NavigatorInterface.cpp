@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -80,6 +82,13 @@ NavigatorInterface::NavigatorInterface() : Interface()
   data      = (NavigatorInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_UINT32, "flags", 1, &data->flags);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
@@ -94,10 +103,10 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "max_rotation", 1, &data->max_rotation);
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
-  add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode");
+  add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode", &enum_map_DriveMode);
   add_fieldinfo(IFT_BOOL, "auto_drive_mode", 1, &data->auto_drive_mode);
   add_fieldinfo(IFT_BOOL, "stop_at_target", 1, &data->stop_at_target);
-  add_fieldinfo(IFT_ENUM, "orientation_mode", 1, &data->orientation_mode, "OrientationMode");
+  add_fieldinfo(IFT_ENUM, "orientation_mode", 1, &data->orientation_mode, "OrientationMode", &enum_map_OrientationMode);
   add_messageinfo("StopMessage");
   add_messageinfo("TurnMessage");
   add_messageinfo("CartesianGotoMessage");
@@ -809,6 +818,13 @@ NavigatorInterface::StopMessage::StopMessage() : Message("StopMessage")
   memset(data_ptr, 0, data_size);
   data      = (StopMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
 }
 
 /** Destructor */
@@ -860,6 +876,13 @@ NavigatorInterface::TurnMessage::TurnMessage(const float ini_angle, const float 
   data_ts   = (message_data_ts_t *)data_ptr;
   data->angle = ini_angle;
   data->velocity = ini_velocity;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
 }
@@ -871,6 +894,13 @@ NavigatorInterface::TurnMessage::TurnMessage() : Message("TurnMessage")
   memset(data_ptr, 0, data_size);
   data      = (TurnMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
 }
@@ -988,6 +1018,13 @@ NavigatorInterface::CartesianGotoMessage::CartesianGotoMessage(const float ini_x
   data->x = ini_x;
   data->y = ini_y;
   data->orientation = ini_orientation;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
@@ -1000,6 +1037,13 @@ NavigatorInterface::CartesianGotoMessage::CartesianGotoMessage() : Message("Cart
   memset(data_ptr, 0, data_size);
   data      = (CartesianGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
@@ -1146,6 +1190,13 @@ NavigatorInterface::PolarGotoMessage::PolarGotoMessage(const float ini_phi, cons
   data->phi = ini_phi;
   data->dist = ini_dist;
   data->orientation = ini_orientation;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
   add_fieldinfo(IFT_FLOAT, "dist", 1, &data->dist);
   add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
@@ -1158,6 +1209,13 @@ NavigatorInterface::PolarGotoMessage::PolarGotoMessage() : Message("PolarGotoMes
   memset(data_ptr, 0, data_size);
   data      = (PolarGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "phi", 1, &data->phi);
   add_fieldinfo(IFT_FLOAT, "dist", 1, &data->dist);
   add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
@@ -1300,6 +1358,13 @@ NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage(const char * ini_place) :
   data      = (PlaceGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->place, ini_place, 64);
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_STRING, "place", 64, data->place);
 }
 /** Constructor */
@@ -1310,6 +1375,13 @@ NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage() : Message("PlaceGotoMes
   memset(data_ptr, 0, data_size);
   data      = (PlaceGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_STRING, "place", 64, data->place);
 }
 
@@ -1394,6 +1466,13 @@ NavigatorInterface::ObstacleMessage::ObstacleMessage(const float ini_x, const fl
   data->x = ini_x;
   data->y = ini_y;
   data->width = ini_width;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "width", 1, &data->width);
@@ -1406,6 +1485,13 @@ NavigatorInterface::ObstacleMessage::ObstacleMessage() : Message("ObstacleMessag
   memset(data_ptr, 0, data_size);
   data      = (ObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "width", 1, &data->width);
@@ -1545,6 +1631,13 @@ NavigatorInterface::ResetOdometryMessage::ResetOdometryMessage() : Message("Rese
   memset(data_ptr, 0, data_size);
   data      = (ResetOdometryMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
 }
 
 /** Destructor */
@@ -1594,6 +1687,13 @@ NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage(const float ini
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->max_velocity = ini_max_velocity;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
 }
 /** Constructor */
@@ -1604,6 +1704,13 @@ NavigatorInterface::SetMaxVelocityMessage::SetMaxVelocityMessage() : Message("Se
   memset(data_ptr, 0, data_size);
   data      = (SetMaxVelocityMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
 }
 
@@ -1684,6 +1791,13 @@ NavigatorInterface::SetMaxRotationMessage::SetMaxRotationMessage(const float ini
   data      = (SetMaxRotationMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->max_rotation = ini_max_rotation;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "max_rotation", 1, &data->max_rotation);
 }
 /** Constructor */
@@ -1694,6 +1808,13 @@ NavigatorInterface::SetMaxRotationMessage::SetMaxRotationMessage() : Message("Se
   memset(data_ptr, 0, data_size);
   data      = (SetMaxRotationMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "max_rotation", 1, &data->max_rotation);
 }
 
@@ -1774,6 +1895,13 @@ NavigatorInterface::SetEscapingMessage::SetEscapingMessage(const bool ini_escapi
   data      = (SetEscapingMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->escaping_enabled = ini_escaping_enabled;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
 }
 /** Constructor */
@@ -1784,6 +1912,13 @@ NavigatorInterface::SetEscapingMessage::SetEscapingMessage() : Message("SetEscap
   memset(data_ptr, 0, data_size);
   data      = (SetEscapingMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_BOOL, "escaping_enabled", 1, &data->escaping_enabled);
 }
 
@@ -1866,6 +2001,13 @@ NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage(const
   data      = (SetSecurityDistanceMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->security_distance = ini_security_distance;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
 }
 /** Constructor */
@@ -1876,6 +2018,13 @@ NavigatorInterface::SetSecurityDistanceMessage::SetSecurityDistanceMessage() : M
   memset(data_ptr, 0, data_size);
   data      = (SetSecurityDistanceMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_FLOAT, "security_distance", 1, &data->security_distance);
 }
 
@@ -1956,7 +2105,14 @@ NavigatorInterface::SetDriveModeMessage::SetDriveModeMessage(const DriveMode ini
   data      = (SetDriveModeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->drive_mode = ini_drive_mode;
-  add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode");
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
+  add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode", &enum_map_DriveMode);
 }
 /** Constructor */
 NavigatorInterface::SetDriveModeMessage::SetDriveModeMessage() : Message("SetDriveModeMessage")
@@ -1966,7 +2122,14 @@ NavigatorInterface::SetDriveModeMessage::SetDriveModeMessage() : Message("SetDri
   memset(data_ptr, 0, data_size);
   data      = (SetDriveModeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode");
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
+  add_fieldinfo(IFT_ENUM, "drive_mode", 1, &data->drive_mode, "DriveMode", &enum_map_DriveMode);
 }
 
 /** Destructor */
@@ -2046,6 +2209,13 @@ NavigatorInterface::SetStopAtTargetMessage::SetStopAtTargetMessage(const bool in
   data      = (SetStopAtTargetMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->stop_at_target = ini_stop_at_target;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_BOOL, "stop_at_target", 1, &data->stop_at_target);
 }
 /** Constructor */
@@ -2056,6 +2226,13 @@ NavigatorInterface::SetStopAtTargetMessage::SetStopAtTargetMessage() : Message("
   memset(data_ptr, 0, data_size);
   data      = (SetStopAtTargetMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
   add_fieldinfo(IFT_BOOL, "stop_at_target", 1, &data->stop_at_target);
 }
 
@@ -2136,7 +2313,14 @@ NavigatorInterface::SetOrientationModeMessage::SetOrientationModeMessage(const O
   data      = (SetOrientationModeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->orientation_mode = ini_orientation_mode;
-  add_fieldinfo(IFT_ENUM, "orientation_mode", 1, &data->orientation_mode, "OrientationMode");
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
+  add_fieldinfo(IFT_ENUM, "orientation_mode", 1, &data->orientation_mode, "OrientationMode", &enum_map_OrientationMode);
 }
 /** Constructor */
 NavigatorInterface::SetOrientationModeMessage::SetOrientationModeMessage() : Message("SetOrientationModeMessage")
@@ -2146,7 +2330,14 @@ NavigatorInterface::SetOrientationModeMessage::SetOrientationModeMessage() : Mes
   memset(data_ptr, 0, data_size);
   data      = (SetOrientationModeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "orientation_mode", 1, &data->orientation_mode, "OrientationMode");
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
+  add_fieldinfo(IFT_ENUM, "orientation_mode", 1, &data->orientation_mode, "OrientationMode", &enum_map_OrientationMode);
 }
 
 /** Destructor */
@@ -2223,6 +2414,13 @@ NavigatorInterface::ResetParametersMessage::ResetParametersMessage() : Message("
   memset(data_ptr, 0, data_size);
   data      = (ResetParametersMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
 }
 
 /** Destructor */

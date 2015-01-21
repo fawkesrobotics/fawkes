@@ -70,6 +70,7 @@ class CameraControlInterface : public Interface
 
   CameraControlInterface_data_t *data;
 
+  interface_enum_map_t enum_map_Effect;
  public:
   /* messages */
   class SetEffectMessage : public Message
@@ -86,6 +87,7 @@ class CameraControlInterface : public Interface
 
     SetEffectMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Effect;
    public:
     SetEffectMessage(const Effect ini_effect);
     SetEffectMessage();
@@ -113,6 +115,7 @@ class CameraControlInterface : public Interface
 
     SetZoomMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Effect;
    public:
     SetZoomMessage(const uint32_t ini_zoom);
     SetZoomMessage();
@@ -140,6 +143,7 @@ class CameraControlInterface : public Interface
 
     SetMirrorMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Effect;
    public:
     SetMirrorMessage(const bool ini_mirror);
     SetMirrorMessage();

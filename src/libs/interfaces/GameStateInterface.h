@@ -118,6 +118,10 @@ class GameStateInterface : public Interface
 
   GameStateInterface_data_t *data;
 
+  interface_enum_map_t enum_map_if_gamestate_team_t;
+  interface_enum_map_t enum_map_if_gamestate_goalcolor_t;
+  interface_enum_map_t enum_map_if_gamestate_half_t;
+  interface_enum_map_t enum_map_if_gamestate_role_t;
  public:
   /* messages */
   class SetTeamColorMessage : public Message
@@ -134,6 +138,10 @@ class GameStateInterface : public Interface
 
     SetTeamColorMessage_data_t *data;
 
+  interface_enum_map_t enum_map_if_gamestate_team_t;
+  interface_enum_map_t enum_map_if_gamestate_goalcolor_t;
+  interface_enum_map_t enum_map_if_gamestate_half_t;
+  interface_enum_map_t enum_map_if_gamestate_role_t;
    public:
     SetTeamColorMessage(const if_gamestate_team_t ini_our_team);
     SetTeamColorMessage();
@@ -161,6 +169,10 @@ class GameStateInterface : public Interface
 
     SetKickoffMessage_data_t *data;
 
+  interface_enum_map_t enum_map_if_gamestate_team_t;
+  interface_enum_map_t enum_map_if_gamestate_goalcolor_t;
+  interface_enum_map_t enum_map_if_gamestate_half_t;
+  interface_enum_map_t enum_map_if_gamestate_role_t;
    public:
     SetKickoffMessage(const bool ini_kickoff);
     SetKickoffMessage();
@@ -188,6 +200,10 @@ class GameStateInterface : public Interface
 
     SetStateTeamMessage_data_t *data;
 
+  interface_enum_map_t enum_map_if_gamestate_team_t;
+  interface_enum_map_t enum_map_if_gamestate_goalcolor_t;
+  interface_enum_map_t enum_map_if_gamestate_half_t;
+  interface_enum_map_t enum_map_if_gamestate_role_t;
    public:
     SetStateTeamMessage(const if_gamestate_team_t ini_state_team);
     SetStateTeamMessage();

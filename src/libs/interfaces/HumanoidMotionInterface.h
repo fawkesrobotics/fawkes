@@ -72,6 +72,8 @@ class HumanoidMotionInterface : public Interface
 
   HumanoidMotionInterface_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
  public:
   /* messages */
   class StopMessage : public Message
@@ -87,6 +89,8 @@ class HumanoidMotionInterface : public Interface
 
     StopMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     StopMessage();
     ~StopMessage();
@@ -110,6 +114,8 @@ class HumanoidMotionInterface : public Interface
 
     WalkStraightMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     WalkStraightMessage(const float ini_distance);
     WalkStraightMessage();
@@ -137,6 +143,8 @@ class HumanoidMotionInterface : public Interface
 
     WalkSidewaysMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     WalkSidewaysMessage(const float ini_distance);
     WalkSidewaysMessage();
@@ -165,6 +173,8 @@ class HumanoidMotionInterface : public Interface
 
     WalkArcMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     WalkArcMessage(const float ini_angle, const float ini_radius);
     WalkArcMessage();
@@ -206,6 +216,8 @@ class HumanoidMotionInterface : public Interface
 
     WalkVelocityMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     WalkVelocityMessage(const float ini_x, const float ini_y, const float ini_theta, const float ini_speed);
     WalkVelocityMessage();
@@ -242,6 +254,8 @@ class HumanoidMotionInterface : public Interface
 
     TurnMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     TurnMessage(const float ini_angle);
     TurnMessage();
@@ -270,6 +284,8 @@ class HumanoidMotionInterface : public Interface
 
     KickMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     KickMessage(const LegEnum ini_leg, const float ini_strength);
     KickMessage();
@@ -299,6 +315,8 @@ class HumanoidMotionInterface : public Interface
 
     ParkMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     ParkMessage();
     ~ParkMessage();
@@ -321,6 +339,8 @@ class HumanoidMotionInterface : public Interface
 
     GetUpMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     GetUpMessage();
     ~GetUpMessage();
@@ -344,6 +364,8 @@ class HumanoidMotionInterface : public Interface
 
     StandupMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     StandupMessage(const StandupEnum ini_from_pos);
     StandupMessage();
@@ -373,6 +395,8 @@ class HumanoidMotionInterface : public Interface
 
     MoveHeadMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LegEnum;
+  interface_enum_map_t enum_map_StandupEnum;
    public:
     MoveHeadMessage(const float ini_yaw, const float ini_pitch, const float ini_speed);
     MoveHeadMessage();

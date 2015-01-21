@@ -79,6 +79,7 @@ class KickerInterface : public Interface
 
   KickerInterface_data_t *data;
 
+  interface_enum_map_t enum_map_GuideBallSideEnum;
  public:
   /* messages */
   class KickMessage : public Message
@@ -98,6 +99,7 @@ class KickerInterface : public Interface
 
     KickMessage_data_t *data;
 
+  interface_enum_map_t enum_map_GuideBallSideEnum;
    public:
     KickMessage(const bool ini_left, const bool ini_center, const bool ini_right, const uint32_t ini_intensity);
     KickMessage();
@@ -133,6 +135,7 @@ class KickerInterface : public Interface
 
     ResetCounterMessage_data_t *data;
 
+  interface_enum_map_t enum_map_GuideBallSideEnum;
    public:
     ResetCounterMessage();
     ~ResetCounterMessage();
@@ -156,6 +159,7 @@ class KickerInterface : public Interface
 
     GuideBallMessage_data_t *data;
 
+  interface_enum_map_t enum_map_GuideBallSideEnum;
    public:
     GuideBallMessage(const GuideBallSideEnum ini_guide_ball_side);
     GuideBallMessage();

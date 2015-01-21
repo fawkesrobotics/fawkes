@@ -75,6 +75,7 @@ class SkillerInterface : public Interface
 
   SkillerInterface_data_t *data;
 
+  interface_enum_map_t enum_map_SkillStatusEnum;
  public:
   /* messages */
   class ExecSkillMessage : public Message
@@ -94,6 +95,7 @@ class SkillerInterface : public Interface
 
     ExecSkillMessage_data_t *data;
 
+  interface_enum_map_t enum_map_SkillStatusEnum;
    public:
     ExecSkillMessage(const char * ini_skill_string);
     ExecSkillMessage();
@@ -120,6 +122,7 @@ class SkillerInterface : public Interface
 
     RestartInterpreterMessage_data_t *data;
 
+  interface_enum_map_t enum_map_SkillStatusEnum;
    public:
     RestartInterpreterMessage();
     ~RestartInterpreterMessage();
@@ -142,6 +145,7 @@ class SkillerInterface : public Interface
 
     StopExecMessage_data_t *data;
 
+  interface_enum_map_t enum_map_SkillStatusEnum;
    public:
     StopExecMessage();
     ~StopExecMessage();
@@ -170,6 +174,7 @@ class SkillerInterface : public Interface
 
     AcquireControlMessage_data_t *data;
 
+  interface_enum_map_t enum_map_SkillStatusEnum;
    public:
     AcquireControlMessage(const bool ini_steal_control);
     AcquireControlMessage();
@@ -196,6 +201,7 @@ class SkillerInterface : public Interface
 
     ReleaseControlMessage_data_t *data;
 
+  interface_enum_map_t enum_map_SkillStatusEnum;
    public:
     ReleaseControlMessage();
     ~ReleaseControlMessage();

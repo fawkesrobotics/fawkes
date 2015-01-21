@@ -264,6 +264,7 @@ class HumanSkeletonInterface : public Interface
 
   HumanSkeletonInterface_data_t *data;
 
+  interface_enum_map_t enum_map_State;
  public:
   /* messages */
   virtual bool message_valid(const Message *message) const;

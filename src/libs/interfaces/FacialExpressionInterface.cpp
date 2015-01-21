@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -48,10 +50,30 @@ FacialExpressionInterface::FacialExpressionInterface() : Interface()
   data      = (FacialExpressionInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t");
-  add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t");
-  add_fieldinfo(IFT_ENUM, "jowl_action", 1, &data->jowl_action, "jowl_t");
-  add_fieldinfo(IFT_ENUM, "mouth_action", 1, &data->mouth_action, "mouth_t");
+  enum_map_brows_t[(int)BROWS_DEFAULT] = "BROWS_DEFAULT";
+  enum_map_brows_t[(int)BROWS_FROWN] = "BROWS_FROWN";
+  enum_map_brows_t[(int)BROWS_LIFT] = "BROWS_LIFT";
+  enum_map_eyes_t[(int)EYES_DEFAULT] = "EYES_DEFAULT";
+  enum_map_eyes_t[(int)EYES_UP] = "EYES_UP";
+  enum_map_eyes_t[(int)EYES_DOWN] = "EYES_DOWN";
+  enum_map_eyes_t[(int)EYES_LEFT] = "EYES_LEFT";
+  enum_map_eyes_t[(int)EYES_RIGHT] = "EYES_RIGHT";
+  enum_map_eyes_t[(int)EYES_COOL] = "EYES_COOL";
+  enum_map_eyes_t[(int)EYES_CROSS] = "EYES_CROSS";
+  enum_map_eyes_t[(int)EYES_HEART] = "EYES_HEART";
+  enum_map_eyes_t[(int)EYES_DOLLAR] = "EYES_DOLLAR";
+  enum_map_jowl_t[(int)JOWL_DEFAULT] = "JOWL_DEFAULT";
+  enum_map_jowl_t[(int)JOWL_BLUSH] = "JOWL_BLUSH";
+  enum_map_jowl_t[(int)JOWL_TEARS] = "JOWL_TEARS";
+  enum_map_mouth_t[(int)MOUTH_DEFAULT] = "MOUTH_DEFAULT";
+  enum_map_mouth_t[(int)MOUTH_OPEN] = "MOUTH_OPEN";
+  enum_map_mouth_t[(int)MOUTH_CLOSE] = "MOUTH_CLOSE";
+  enum_map_mouth_t[(int)MOUTH_SMILE] = "MOUTH_SMILE";
+  enum_map_mouth_t[(int)MOUTH_SCOWL] = "MOUTH_SCOWL";
+  add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t", &enum_map_brows_t);
+  add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t", &enum_map_eyes_t);
+  add_fieldinfo(IFT_ENUM, "jowl_action", 1, &data->jowl_action, "jowl_t", &enum_map_jowl_t);
+  add_fieldinfo(IFT_ENUM, "mouth_action", 1, &data->mouth_action, "mouth_t", &enum_map_mouth_t);
   add_messageinfo("MoveBrowsMessage");
   add_messageinfo("MoveEyesMessage");
   add_messageinfo("MoveJowlMessage");
@@ -324,7 +346,27 @@ FacialExpressionInterface::MoveBrowsMessage::MoveBrowsMessage(const brows_t ini_
   data      = (MoveBrowsMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->brows_action = ini_brows_action;
-  add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t");
+  enum_map_brows_t[(int)BROWS_DEFAULT] = "BROWS_DEFAULT";
+  enum_map_brows_t[(int)BROWS_FROWN] = "BROWS_FROWN";
+  enum_map_brows_t[(int)BROWS_LIFT] = "BROWS_LIFT";
+  enum_map_eyes_t[(int)EYES_DEFAULT] = "EYES_DEFAULT";
+  enum_map_eyes_t[(int)EYES_UP] = "EYES_UP";
+  enum_map_eyes_t[(int)EYES_DOWN] = "EYES_DOWN";
+  enum_map_eyes_t[(int)EYES_LEFT] = "EYES_LEFT";
+  enum_map_eyes_t[(int)EYES_RIGHT] = "EYES_RIGHT";
+  enum_map_eyes_t[(int)EYES_COOL] = "EYES_COOL";
+  enum_map_eyes_t[(int)EYES_CROSS] = "EYES_CROSS";
+  enum_map_eyes_t[(int)EYES_HEART] = "EYES_HEART";
+  enum_map_eyes_t[(int)EYES_DOLLAR] = "EYES_DOLLAR";
+  enum_map_jowl_t[(int)JOWL_DEFAULT] = "JOWL_DEFAULT";
+  enum_map_jowl_t[(int)JOWL_BLUSH] = "JOWL_BLUSH";
+  enum_map_jowl_t[(int)JOWL_TEARS] = "JOWL_TEARS";
+  enum_map_mouth_t[(int)MOUTH_DEFAULT] = "MOUTH_DEFAULT";
+  enum_map_mouth_t[(int)MOUTH_OPEN] = "MOUTH_OPEN";
+  enum_map_mouth_t[(int)MOUTH_CLOSE] = "MOUTH_CLOSE";
+  enum_map_mouth_t[(int)MOUTH_SMILE] = "MOUTH_SMILE";
+  enum_map_mouth_t[(int)MOUTH_SCOWL] = "MOUTH_SCOWL";
+  add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t", &enum_map_brows_t);
 }
 /** Constructor */
 FacialExpressionInterface::MoveBrowsMessage::MoveBrowsMessage() : Message("MoveBrowsMessage")
@@ -334,7 +376,27 @@ FacialExpressionInterface::MoveBrowsMessage::MoveBrowsMessage() : Message("MoveB
   memset(data_ptr, 0, data_size);
   data      = (MoveBrowsMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t");
+  enum_map_brows_t[(int)BROWS_DEFAULT] = "BROWS_DEFAULT";
+  enum_map_brows_t[(int)BROWS_FROWN] = "BROWS_FROWN";
+  enum_map_brows_t[(int)BROWS_LIFT] = "BROWS_LIFT";
+  enum_map_eyes_t[(int)EYES_DEFAULT] = "EYES_DEFAULT";
+  enum_map_eyes_t[(int)EYES_UP] = "EYES_UP";
+  enum_map_eyes_t[(int)EYES_DOWN] = "EYES_DOWN";
+  enum_map_eyes_t[(int)EYES_LEFT] = "EYES_LEFT";
+  enum_map_eyes_t[(int)EYES_RIGHT] = "EYES_RIGHT";
+  enum_map_eyes_t[(int)EYES_COOL] = "EYES_COOL";
+  enum_map_eyes_t[(int)EYES_CROSS] = "EYES_CROSS";
+  enum_map_eyes_t[(int)EYES_HEART] = "EYES_HEART";
+  enum_map_eyes_t[(int)EYES_DOLLAR] = "EYES_DOLLAR";
+  enum_map_jowl_t[(int)JOWL_DEFAULT] = "JOWL_DEFAULT";
+  enum_map_jowl_t[(int)JOWL_BLUSH] = "JOWL_BLUSH";
+  enum_map_jowl_t[(int)JOWL_TEARS] = "JOWL_TEARS";
+  enum_map_mouth_t[(int)MOUTH_DEFAULT] = "MOUTH_DEFAULT";
+  enum_map_mouth_t[(int)MOUTH_OPEN] = "MOUTH_OPEN";
+  enum_map_mouth_t[(int)MOUTH_CLOSE] = "MOUTH_CLOSE";
+  enum_map_mouth_t[(int)MOUTH_SMILE] = "MOUTH_SMILE";
+  enum_map_mouth_t[(int)MOUTH_SCOWL] = "MOUTH_SCOWL";
+  add_fieldinfo(IFT_ENUM, "brows_action", 1, &data->brows_action, "brows_t", &enum_map_brows_t);
 }
 
 /** Destructor */
@@ -414,7 +476,27 @@ FacialExpressionInterface::MoveEyesMessage::MoveEyesMessage(const eyes_t ini_eye
   data      = (MoveEyesMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->eyes_action = ini_eyes_action;
-  add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t");
+  enum_map_brows_t[(int)BROWS_DEFAULT] = "BROWS_DEFAULT";
+  enum_map_brows_t[(int)BROWS_FROWN] = "BROWS_FROWN";
+  enum_map_brows_t[(int)BROWS_LIFT] = "BROWS_LIFT";
+  enum_map_eyes_t[(int)EYES_DEFAULT] = "EYES_DEFAULT";
+  enum_map_eyes_t[(int)EYES_UP] = "EYES_UP";
+  enum_map_eyes_t[(int)EYES_DOWN] = "EYES_DOWN";
+  enum_map_eyes_t[(int)EYES_LEFT] = "EYES_LEFT";
+  enum_map_eyes_t[(int)EYES_RIGHT] = "EYES_RIGHT";
+  enum_map_eyes_t[(int)EYES_COOL] = "EYES_COOL";
+  enum_map_eyes_t[(int)EYES_CROSS] = "EYES_CROSS";
+  enum_map_eyes_t[(int)EYES_HEART] = "EYES_HEART";
+  enum_map_eyes_t[(int)EYES_DOLLAR] = "EYES_DOLLAR";
+  enum_map_jowl_t[(int)JOWL_DEFAULT] = "JOWL_DEFAULT";
+  enum_map_jowl_t[(int)JOWL_BLUSH] = "JOWL_BLUSH";
+  enum_map_jowl_t[(int)JOWL_TEARS] = "JOWL_TEARS";
+  enum_map_mouth_t[(int)MOUTH_DEFAULT] = "MOUTH_DEFAULT";
+  enum_map_mouth_t[(int)MOUTH_OPEN] = "MOUTH_OPEN";
+  enum_map_mouth_t[(int)MOUTH_CLOSE] = "MOUTH_CLOSE";
+  enum_map_mouth_t[(int)MOUTH_SMILE] = "MOUTH_SMILE";
+  enum_map_mouth_t[(int)MOUTH_SCOWL] = "MOUTH_SCOWL";
+  add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t", &enum_map_eyes_t);
 }
 /** Constructor */
 FacialExpressionInterface::MoveEyesMessage::MoveEyesMessage() : Message("MoveEyesMessage")
@@ -424,7 +506,27 @@ FacialExpressionInterface::MoveEyesMessage::MoveEyesMessage() : Message("MoveEye
   memset(data_ptr, 0, data_size);
   data      = (MoveEyesMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t");
+  enum_map_brows_t[(int)BROWS_DEFAULT] = "BROWS_DEFAULT";
+  enum_map_brows_t[(int)BROWS_FROWN] = "BROWS_FROWN";
+  enum_map_brows_t[(int)BROWS_LIFT] = "BROWS_LIFT";
+  enum_map_eyes_t[(int)EYES_DEFAULT] = "EYES_DEFAULT";
+  enum_map_eyes_t[(int)EYES_UP] = "EYES_UP";
+  enum_map_eyes_t[(int)EYES_DOWN] = "EYES_DOWN";
+  enum_map_eyes_t[(int)EYES_LEFT] = "EYES_LEFT";
+  enum_map_eyes_t[(int)EYES_RIGHT] = "EYES_RIGHT";
+  enum_map_eyes_t[(int)EYES_COOL] = "EYES_COOL";
+  enum_map_eyes_t[(int)EYES_CROSS] = "EYES_CROSS";
+  enum_map_eyes_t[(int)EYES_HEART] = "EYES_HEART";
+  enum_map_eyes_t[(int)EYES_DOLLAR] = "EYES_DOLLAR";
+  enum_map_jowl_t[(int)JOWL_DEFAULT] = "JOWL_DEFAULT";
+  enum_map_jowl_t[(int)JOWL_BLUSH] = "JOWL_BLUSH";
+  enum_map_jowl_t[(int)JOWL_TEARS] = "JOWL_TEARS";
+  enum_map_mouth_t[(int)MOUTH_DEFAULT] = "MOUTH_DEFAULT";
+  enum_map_mouth_t[(int)MOUTH_OPEN] = "MOUTH_OPEN";
+  enum_map_mouth_t[(int)MOUTH_CLOSE] = "MOUTH_CLOSE";
+  enum_map_mouth_t[(int)MOUTH_SMILE] = "MOUTH_SMILE";
+  enum_map_mouth_t[(int)MOUTH_SCOWL] = "MOUTH_SCOWL";
+  add_fieldinfo(IFT_ENUM, "eyes_action", 1, &data->eyes_action, "eyes_t", &enum_map_eyes_t);
 }
 
 /** Destructor */
@@ -504,7 +606,27 @@ FacialExpressionInterface::MoveJowlMessage::MoveJowlMessage(const jowl_t ini_jow
   data      = (MoveJowlMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->jowl_action = ini_jowl_action;
-  add_fieldinfo(IFT_ENUM, "jowl_action", 1, &data->jowl_action, "jowl_t");
+  enum_map_brows_t[(int)BROWS_DEFAULT] = "BROWS_DEFAULT";
+  enum_map_brows_t[(int)BROWS_FROWN] = "BROWS_FROWN";
+  enum_map_brows_t[(int)BROWS_LIFT] = "BROWS_LIFT";
+  enum_map_eyes_t[(int)EYES_DEFAULT] = "EYES_DEFAULT";
+  enum_map_eyes_t[(int)EYES_UP] = "EYES_UP";
+  enum_map_eyes_t[(int)EYES_DOWN] = "EYES_DOWN";
+  enum_map_eyes_t[(int)EYES_LEFT] = "EYES_LEFT";
+  enum_map_eyes_t[(int)EYES_RIGHT] = "EYES_RIGHT";
+  enum_map_eyes_t[(int)EYES_COOL] = "EYES_COOL";
+  enum_map_eyes_t[(int)EYES_CROSS] = "EYES_CROSS";
+  enum_map_eyes_t[(int)EYES_HEART] = "EYES_HEART";
+  enum_map_eyes_t[(int)EYES_DOLLAR] = "EYES_DOLLAR";
+  enum_map_jowl_t[(int)JOWL_DEFAULT] = "JOWL_DEFAULT";
+  enum_map_jowl_t[(int)JOWL_BLUSH] = "JOWL_BLUSH";
+  enum_map_jowl_t[(int)JOWL_TEARS] = "JOWL_TEARS";
+  enum_map_mouth_t[(int)MOUTH_DEFAULT] = "MOUTH_DEFAULT";
+  enum_map_mouth_t[(int)MOUTH_OPEN] = "MOUTH_OPEN";
+  enum_map_mouth_t[(int)MOUTH_CLOSE] = "MOUTH_CLOSE";
+  enum_map_mouth_t[(int)MOUTH_SMILE] = "MOUTH_SMILE";
+  enum_map_mouth_t[(int)MOUTH_SCOWL] = "MOUTH_SCOWL";
+  add_fieldinfo(IFT_ENUM, "jowl_action", 1, &data->jowl_action, "jowl_t", &enum_map_jowl_t);
 }
 /** Constructor */
 FacialExpressionInterface::MoveJowlMessage::MoveJowlMessage() : Message("MoveJowlMessage")
@@ -514,7 +636,27 @@ FacialExpressionInterface::MoveJowlMessage::MoveJowlMessage() : Message("MoveJow
   memset(data_ptr, 0, data_size);
   data      = (MoveJowlMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "jowl_action", 1, &data->jowl_action, "jowl_t");
+  enum_map_brows_t[(int)BROWS_DEFAULT] = "BROWS_DEFAULT";
+  enum_map_brows_t[(int)BROWS_FROWN] = "BROWS_FROWN";
+  enum_map_brows_t[(int)BROWS_LIFT] = "BROWS_LIFT";
+  enum_map_eyes_t[(int)EYES_DEFAULT] = "EYES_DEFAULT";
+  enum_map_eyes_t[(int)EYES_UP] = "EYES_UP";
+  enum_map_eyes_t[(int)EYES_DOWN] = "EYES_DOWN";
+  enum_map_eyes_t[(int)EYES_LEFT] = "EYES_LEFT";
+  enum_map_eyes_t[(int)EYES_RIGHT] = "EYES_RIGHT";
+  enum_map_eyes_t[(int)EYES_COOL] = "EYES_COOL";
+  enum_map_eyes_t[(int)EYES_CROSS] = "EYES_CROSS";
+  enum_map_eyes_t[(int)EYES_HEART] = "EYES_HEART";
+  enum_map_eyes_t[(int)EYES_DOLLAR] = "EYES_DOLLAR";
+  enum_map_jowl_t[(int)JOWL_DEFAULT] = "JOWL_DEFAULT";
+  enum_map_jowl_t[(int)JOWL_BLUSH] = "JOWL_BLUSH";
+  enum_map_jowl_t[(int)JOWL_TEARS] = "JOWL_TEARS";
+  enum_map_mouth_t[(int)MOUTH_DEFAULT] = "MOUTH_DEFAULT";
+  enum_map_mouth_t[(int)MOUTH_OPEN] = "MOUTH_OPEN";
+  enum_map_mouth_t[(int)MOUTH_CLOSE] = "MOUTH_CLOSE";
+  enum_map_mouth_t[(int)MOUTH_SMILE] = "MOUTH_SMILE";
+  enum_map_mouth_t[(int)MOUTH_SCOWL] = "MOUTH_SCOWL";
+  add_fieldinfo(IFT_ENUM, "jowl_action", 1, &data->jowl_action, "jowl_t", &enum_map_jowl_t);
 }
 
 /** Destructor */
@@ -594,7 +736,27 @@ FacialExpressionInterface::MoveMouthMessage::MoveMouthMessage(const mouth_t ini_
   data      = (MoveMouthMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->mouth_action = ini_mouth_action;
-  add_fieldinfo(IFT_ENUM, "mouth_action", 1, &data->mouth_action, "mouth_t");
+  enum_map_brows_t[(int)BROWS_DEFAULT] = "BROWS_DEFAULT";
+  enum_map_brows_t[(int)BROWS_FROWN] = "BROWS_FROWN";
+  enum_map_brows_t[(int)BROWS_LIFT] = "BROWS_LIFT";
+  enum_map_eyes_t[(int)EYES_DEFAULT] = "EYES_DEFAULT";
+  enum_map_eyes_t[(int)EYES_UP] = "EYES_UP";
+  enum_map_eyes_t[(int)EYES_DOWN] = "EYES_DOWN";
+  enum_map_eyes_t[(int)EYES_LEFT] = "EYES_LEFT";
+  enum_map_eyes_t[(int)EYES_RIGHT] = "EYES_RIGHT";
+  enum_map_eyes_t[(int)EYES_COOL] = "EYES_COOL";
+  enum_map_eyes_t[(int)EYES_CROSS] = "EYES_CROSS";
+  enum_map_eyes_t[(int)EYES_HEART] = "EYES_HEART";
+  enum_map_eyes_t[(int)EYES_DOLLAR] = "EYES_DOLLAR";
+  enum_map_jowl_t[(int)JOWL_DEFAULT] = "JOWL_DEFAULT";
+  enum_map_jowl_t[(int)JOWL_BLUSH] = "JOWL_BLUSH";
+  enum_map_jowl_t[(int)JOWL_TEARS] = "JOWL_TEARS";
+  enum_map_mouth_t[(int)MOUTH_DEFAULT] = "MOUTH_DEFAULT";
+  enum_map_mouth_t[(int)MOUTH_OPEN] = "MOUTH_OPEN";
+  enum_map_mouth_t[(int)MOUTH_CLOSE] = "MOUTH_CLOSE";
+  enum_map_mouth_t[(int)MOUTH_SMILE] = "MOUTH_SMILE";
+  enum_map_mouth_t[(int)MOUTH_SCOWL] = "MOUTH_SCOWL";
+  add_fieldinfo(IFT_ENUM, "mouth_action", 1, &data->mouth_action, "mouth_t", &enum_map_mouth_t);
 }
 /** Constructor */
 FacialExpressionInterface::MoveMouthMessage::MoveMouthMessage() : Message("MoveMouthMessage")
@@ -604,7 +766,27 @@ FacialExpressionInterface::MoveMouthMessage::MoveMouthMessage() : Message("MoveM
   memset(data_ptr, 0, data_size);
   data      = (MoveMouthMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "mouth_action", 1, &data->mouth_action, "mouth_t");
+  enum_map_brows_t[(int)BROWS_DEFAULT] = "BROWS_DEFAULT";
+  enum_map_brows_t[(int)BROWS_FROWN] = "BROWS_FROWN";
+  enum_map_brows_t[(int)BROWS_LIFT] = "BROWS_LIFT";
+  enum_map_eyes_t[(int)EYES_DEFAULT] = "EYES_DEFAULT";
+  enum_map_eyes_t[(int)EYES_UP] = "EYES_UP";
+  enum_map_eyes_t[(int)EYES_DOWN] = "EYES_DOWN";
+  enum_map_eyes_t[(int)EYES_LEFT] = "EYES_LEFT";
+  enum_map_eyes_t[(int)EYES_RIGHT] = "EYES_RIGHT";
+  enum_map_eyes_t[(int)EYES_COOL] = "EYES_COOL";
+  enum_map_eyes_t[(int)EYES_CROSS] = "EYES_CROSS";
+  enum_map_eyes_t[(int)EYES_HEART] = "EYES_HEART";
+  enum_map_eyes_t[(int)EYES_DOLLAR] = "EYES_DOLLAR";
+  enum_map_jowl_t[(int)JOWL_DEFAULT] = "JOWL_DEFAULT";
+  enum_map_jowl_t[(int)JOWL_BLUSH] = "JOWL_BLUSH";
+  enum_map_jowl_t[(int)JOWL_TEARS] = "JOWL_TEARS";
+  enum_map_mouth_t[(int)MOUTH_DEFAULT] = "MOUTH_DEFAULT";
+  enum_map_mouth_t[(int)MOUTH_OPEN] = "MOUTH_OPEN";
+  enum_map_mouth_t[(int)MOUTH_CLOSE] = "MOUTH_CLOSE";
+  enum_map_mouth_t[(int)MOUTH_SMILE] = "MOUTH_SMILE";
+  enum_map_mouth_t[(int)MOUTH_SCOWL] = "MOUTH_SCOWL";
+  add_fieldinfo(IFT_ENUM, "mouth_action", 1, &data->mouth_action, "mouth_t", &enum_map_mouth_t);
 }
 
 /** Destructor */

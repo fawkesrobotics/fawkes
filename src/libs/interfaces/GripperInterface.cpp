@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -49,7 +51,9 @@ GripperInterface::GripperInterface() : Interface()
   data      = (GripperInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "gripper_state", 1, &data->gripper_state, "GripperState");
+  enum_map_GripperState[(int)OPEN] = "OPEN";
+  enum_map_GripperState[(int)CLOSED] = "CLOSED";
+  add_fieldinfo(IFT_ENUM, "gripper_state", 1, &data->gripper_state, "GripperState", &enum_map_GripperState);
   add_messageinfo("OpenGripperMessage");
   add_messageinfo("CloseGripperMessage");
   unsigned char tmp_hash[] = {0xf8, 0xd6, 0x88, 0xb4, 0xfc, 0xfa, 0x1f, 0x1b, 0x20, 0x9f, 0xc, 0xd, 0x81, 0x3c, 0xba, 0xdf};
@@ -164,6 +168,8 @@ GripperInterface::OpenGripperMessage::OpenGripperMessage() : Message("OpenGrippe
   memset(data_ptr, 0, data_size);
   data      = (OpenGripperMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_GripperState[(int)OPEN] = "OPEN";
+  enum_map_GripperState[(int)CLOSED] = "CLOSED";
 }
 
 /** Destructor */
@@ -210,6 +216,8 @@ GripperInterface::CloseGripperMessage::CloseGripperMessage() : Message("CloseGri
   memset(data_ptr, 0, data_size);
   data      = (CloseGripperMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_GripperState[(int)OPEN] = "OPEN";
+  enum_map_GripperState[(int)CLOSED] = "CLOSED";
 }
 
 /** Destructor */

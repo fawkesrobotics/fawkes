@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -47,7 +49,11 @@ HumanSkeletonInterface::HumanSkeletonInterface() : Interface()
   data      = (HumanSkeletonInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "state", 1, &data->state, "State");
+  enum_map_State[(int)STATE_INVALID] = "STATE_INVALID";
+  enum_map_State[(int)STATE_DETECTING_POSE] = "STATE_DETECTING_POSE";
+  enum_map_State[(int)STATE_CALIBRATING] = "STATE_CALIBRATING";
+  enum_map_State[(int)STATE_TRACKING] = "STATE_TRACKING";
+  add_fieldinfo(IFT_ENUM, "state", 1, &data->state, "State", &enum_map_State);
   add_fieldinfo(IFT_UINT32, "user_id", 1, &data->user_id);
   add_fieldinfo(IFT_INT32, "visibility_history", 1, &data->visibility_history);
   add_fieldinfo(IFT_STRING, "pose", 32, data->pose);

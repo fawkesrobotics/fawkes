@@ -59,6 +59,7 @@ class GripperInterface : public Interface
 
   GripperInterface_data_t *data;
 
+  interface_enum_map_t enum_map_GripperState;
  public:
   /* messages */
   class OpenGripperMessage : public Message
@@ -74,6 +75,7 @@ class GripperInterface : public Interface
 
     OpenGripperMessage_data_t *data;
 
+  interface_enum_map_t enum_map_GripperState;
    public:
     OpenGripperMessage();
     ~OpenGripperMessage();
@@ -96,6 +98,7 @@ class GripperInterface : public Interface
 
     CloseGripperMessage_data_t *data;
 
+  interface_enum_map_t enum_map_GripperState;
    public:
     CloseGripperMessage();
     ~CloseGripperMessage();
