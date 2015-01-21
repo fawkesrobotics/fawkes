@@ -328,10 +328,12 @@ Interface::set_hash(unsigned char *ihash)
  * @param length length of the field
  * @param value pointer to the value in the data struct
  * @param enumtype name of the enum type, valid only if type == IFT_ENUM.
+ * @param enum_map enum value map
  */
 void
 Interface::add_fieldinfo(interface_fieldtype_t type, const char *name,
-			 size_t length, void *value, const char *enumtype)
+			 size_t length, void *value, const char *enumtype,
+			 const interface_enum_map_t *enum_map)
 {
   interface_fieldinfo_t *infol = __fieldinfo_list;
   interface_fieldinfo_t *newinfo =
@@ -342,6 +344,7 @@ Interface::add_fieldinfo(interface_fieldtype_t type, const char *name,
   newinfo->name     = name;
   newinfo->length   = length;
   newinfo->value    = value;
+  newinfo->enum_map = enum_map;
   newinfo->next     = NULL;
 
   if ( infol == NULL ) {

@@ -26,6 +26,8 @@
 #define __INTERFACE_TYPES_H__
 
 #include <sys/types.h>
+#include <map>
+#include <string>
 
 namespace fawkes {
 
@@ -47,14 +49,18 @@ typedef enum {
   IFT_ENUM		/**< field with interface specific enum type */
 } interface_fieldtype_t;
 
+/** Map of enum integer to string values. */
+typedef std::map<int, std::string> interface_enum_map_t;
+
 /** Interface field info list */
 struct interface_fieldinfo_t {
-  interface_fieldtype_t    type;	/**< type of this field */
-  const char              *enumtype;	/**< text representation of enum type */
-  const char              *name;	/**< Name of this field */
-  size_t                   length;	/**< Length of field (array, string) */
-  void                    *value;	/**< Current value of this field */
-  interface_fieldinfo_t   *next;	/**< next field, NULL if last */
+  interface_fieldtype_t        type;	/**< type of this field */
+  const char                  *enumtype;	/**< text representation of enum type */
+  const char                  *name;	/**< Name of this field */
+  size_t                       length;	/**< Length of field (array, string) */
+  void                        *value;	/**< Current value of this field */
+  const interface_enum_map_t  *enum_map; /**< Map of possible enum values */
+  interface_fieldinfo_t       *next;	/**< next field, NULL if last */
 };
 
 }

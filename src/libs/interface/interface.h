@@ -3,8 +3,7 @@
  *  interface.h - BlackBoard Interface
  *
  *  Created: Mon Oct 09 18:34:11 2006
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -211,7 +210,8 @@ class Interface
 
   void set_hash(unsigned char *ihash);
   void add_fieldinfo(interface_fieldtype_t type, const char *name,
-		     size_t length, void *value, const char *enumtype = 0);
+		     size_t length, void *value,
+		     const char *enumtype = 0, const interface_enum_map_t *enum_map = 0);
   void add_messageinfo(const char *name);
 
   void         *data_ptr;

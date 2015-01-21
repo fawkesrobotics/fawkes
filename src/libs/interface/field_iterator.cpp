@@ -240,6 +240,20 @@ InterfaceFieldIterator::get_typename() const
 }
 
 
+/** Check if field is an enum.
+ * @return true if the value is an enum, false otherwise
+ */
+bool
+InterfaceFieldIterator::is_enum() const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get type of end element");
+  } else {
+    return __infol->type == IFT_ENUM;
+  }
+}
+
+
 /** Get name of current field.
  * @return field name
  */
@@ -667,6 +681,35 @@ InterfaceFieldIterator::get_enum(unsigned int index) const
     throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
   } else {
     return ((int32_t *)__infol->value)[index];
+  }
+}
+
+
+/** Get value of current enum field as string.
+ * @return field value as string
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ * @exception IllegalArgumentException thrown if the value is set to an integer
+ * which is not represented by any of the canonical enum values
+ */
+const char *
+InterfaceFieldIterator::get_enum_string(unsigned int index) const
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot get value of end element");
+  } else if ( __infol->type != IFT_ENUM ) {
+    throw TypeMismatchException("Requested value is not of type enum");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    int32_t int_val = ((int32_t *)__infol->value)[index];
+    interface_enum_map_t::const_iterator ev = __infol->enum_map->find(int_val);
+    if (ev == __infol->enum_map->end()) {
+      throw IllegalArgumentException("Integer value is not a canonical enum value");
+    }
+    return ev->second.c_str();
   }
 }
 
@@ -1221,6 +1264,65 @@ InterfaceFieldIterator::set_byte(uint8_t v, unsigned int index)
     char* dst = (char *) __infol->value + index * sizeof(uint8_t);
     memcpy((void *) dst, &v, sizeof(uint8_t));
     if (__interface)  __interface->mark_data_changed();
+  }
+}
+
+/** Set value of current field as enum (from an integer).
+ * @param e the new value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+void
+InterfaceFieldIterator::set_enum(int32_t e, unsigned int index)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_ENUM ) {
+    throw TypeMismatchException("Field to be written is not of type enum");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    interface_enum_map_t::const_iterator ev = __infol->enum_map->find(e);
+    if (ev == __infol->enum_map->end()) {
+      throw IllegalArgumentException("Integer value is not a canonical enum value");
+    }
+    char* dst = (char *) __infol->value + index * sizeof(int32_t);
+    memcpy((void *) dst, &e, sizeof(int32_t));
+    if (__interface)  __interface->mark_data_changed();
+  }
+}
+
+
+/** Set value of current field as enum (from an integer).
+ * @param e the new value
+ * @param index array index (only use if field is an array)
+ * @exception NullPointerException invalid iterator, possibly end iterator
+ * @exception TypeMismatchException thrown if field is not of type int
+ * @exception OutOfBoundsException thrown if index is out of bounds
+ */
+void
+InterfaceFieldIterator::set_enum_string(const char *e, unsigned int index)
+{
+  if ( __infol == NULL ) {
+    throw NullPointerException("Cannot set value of end element");
+  } else if ( __infol->type != IFT_ENUM ) {
+    throw TypeMismatchException("Field to be written is not of type enum");
+  } else if (index >= __infol->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else {
+    interface_enum_map_t::const_iterator ev;
+    for (ev = __infol->enum_map->begin(); ev != __infol->enum_map->end(); ++ev) {
+      if (ev->second == e) {
+	char* dst = (char *) __infol->value + index * sizeof(int32_t);
+	memcpy((void *) dst, &ev->first, sizeof(int32_t));
+	if (__interface)  __interface->mark_data_changed();
+	return;
+      }
+    }
+    // else value was not found
+    throw IllegalArgumentException("Integer value is not a canonical enum value");
   }
 }
 
