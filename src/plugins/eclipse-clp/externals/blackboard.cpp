@@ -603,8 +603,26 @@ p_bb_get()
 	  break;
 	    
 	case IFT_BYTE:
-	  fprintf(stderr, "p_bb_get(): NOT YET IMPLEMENTED\n");
-	  break;
+	  if (fit.get_length() > 1)
+	  {
+	    EC_word res = nil();
+	    uint8_t* array = fit.get_bytes();
+	    for (int i=fit.get_length()-1; i>= 0; i--)
+	      res = list( EC_word( (long) array[i]), res);
+	    if ( EC_succeed != EC_arg( 3 ).unify( res ) )
+	    {
+	      printf( "p_bb_get(): could not bind return value\n" );
+	      return EC_fail;
+	    }
+	  } else
+	  {
+	    if ( EC_succeed != EC_arg( 3 ).unify( EC_word( (long) fit.get_byte() ) ) )
+	    {
+	      printf( "p_bb_get(): could not bind return value\n" );
+	      return EC_fail;
+	    }
+	 }
+	 break;
 
 	case IFT_ENUM:
 	  if (EC_succeed != EC_arg(3).unify(fit.get_value_string())) {
