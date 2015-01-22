@@ -900,9 +900,18 @@ p_bb_send_message()
 	};
       }
 
-      iface->msgq_enqueue(msg);
-      // return the msgID as 4th argument
-      EC_arg(4).unify((long)(msg->id()));
+	msg->ref();
+	try {
+		(*it)->msgq_enqueue( msg );
+		// return the msgID as 4th argument
+		EC_arg( 4 ).unify((int)(msg->id()));
+		msg->unref();
+	} catch (Exception &e) {
+		msg->unref();
+		e.print_trace();
+		return EC_fail;
+	}
+
     } catch (Exception& e) {
       fprintf(stderr, "p_bb_send_message() failed: %s\n", e.what_no_backtrace());
       return EC_fail;
