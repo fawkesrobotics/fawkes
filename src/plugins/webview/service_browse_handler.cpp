@@ -46,6 +46,13 @@ WebviewServiceBrowseHandler::WebviewServiceBrowseHandler(fawkes::Logger *logger,
   __webview_service = webview_service;
 }
 
+WebviewServiceBrowseHandler::~WebviewServiceBrowseHandler()
+{
+  for (ServiceList::iterator s = __service_list.begin(); s != __service_list.end(); ++s) {
+    delete s->second;
+  }
+  __service_list.clear();
+}
 
 void
 WebviewServiceBrowseHandler::all_for_now()

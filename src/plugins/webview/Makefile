@@ -47,7 +47,7 @@ ifneq ($(PKGCONFIG),)
 endif
 
 ifeq ($(HAVE_LIBMICROHTTPD),1)
-  LIBS_webview = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+  LIBS_webview = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		 fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
 		 fawkeslogging
   OBJS_webview = blackboard_processor.o footer_generator.o header_generator.o \

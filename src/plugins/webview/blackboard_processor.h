@@ -43,6 +43,9 @@ class WebviewBlackBoardRequestProcessor : public fawkes::WebRequestProcessor
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
+  std::string generate_graph();
+
+ private:
   char *__baseurl;
   size_t __baseurl_len;
   fawkes::BlackBoard *__blackboard;

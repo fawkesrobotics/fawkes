@@ -37,6 +37,7 @@ class WebviewServiceBrowseHandler : public fawkes::ServiceBrowseHandler
 {
  public:
   WebviewServiceBrowseHandler(fawkes::Logger *logger, fawkes::NetworkService *webview_service);
+  ~WebviewServiceBrowseHandler();
 
   virtual void all_for_now();
   virtual void cache_exhausted();
