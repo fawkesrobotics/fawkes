@@ -854,6 +854,27 @@ Interface::num_readers() const
 }
 
 
+/** Get owner name of writing interface instance.
+ * @return name of owner of writing interface instance if a local one
+ * exists, an empty string otherwise.
+ */
+std::string
+Interface::writer() const
+{
+  return __interface_mediator->writer(this);
+}
+
+
+/** Get owner names of reading interface instances.
+ * @return list of names of owners of instances opened for reading
+ */
+std::list<std::string>
+Interface::readers() const
+{
+  return __interface_mediator->readers(this);
+}
+
+
 /** Enqueue message at end of queue.
  * This appends the given message to the queue and transmits the
  * message via the message mediator. The message is afterwards owned

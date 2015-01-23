@@ -45,10 +45,13 @@ namespace fawkes {
  * @param has_writer true if there is a writer, false otherwise
  * @param num_readers number of readers
  * @param serial instance serial
+ * @param readers name of readers of interface
+ * @param writer name of writer of interface
  * @param timestamp interface timestamp (time of last write or data timestamp)
  */
 InterfaceInfo::InterfaceInfo(const char *type, const char *id, const unsigned char *hash,
 			     unsigned int serial, bool has_writer, unsigned int num_readers,
+			     const std::list<std::string> &readers, const std::string &writer,
 			     const Time *timestamp)
 {
   __type = strndup(type, __INTERFACE_TYPE_SIZE);
@@ -59,6 +62,8 @@ InterfaceInfo::InterfaceInfo(const char *type, const char *id, const unsigned ch
   __num_readers = num_readers;
   __serial = serial;
   __timestamp = new Time(timestamp);
+  __readers = readers;
+  __writer = writer;
 }
 
 
@@ -75,6 +80,8 @@ InterfaceInfo::InterfaceInfo(const InterfaceInfo &i)
   __num_readers = i.__num_readers;
   __serial = i.__serial;
   __timestamp = new Time(i.__timestamp);
+  __readers = i.__readers;
+  __writer  = i.__writer;
 }
 
 
@@ -152,6 +159,26 @@ InterfaceInfo::num_readers() const
 }
 
 
+/** Get readers of interface.
+ * @return string of names of readers of this interface
+ */
+const std::list<std::string> &
+InterfaceInfo::readers() const
+{
+  return __readers;
+}
+
+
+/** Get name of writer on interface.
+ * @return name of writer owner or empty string of no writer or unknown
+ */
+const std::string &
+InterfaceInfo::writer() const
+{
+  return __writer;
+}
+
+
 /** Get interface instance serial.
  * @return type string
  */
@@ -206,14 +233,17 @@ InterfaceInfo::operator<(const InterfaceInfo &ii) const
  * @param has_writer true if there is a writer, false otherwise
  * @param num_readers number of readers
  * @param serial instance serial
+ * @param readers name of readers of interface
+ * @param writer name of writer of interface
  * @param timestamp interface timestamp (time of last write or data timestamp)
  */
 void
 InterfaceInfoList::append(const char *type, const char *id, const unsigned char *hash,
 			  unsigned int serial, bool has_writer, unsigned int num_readers,
+			  const std::list<std::string> &readers, const std::string &writer,
 			  const Time &timestamp)
 {
-  push_back(InterfaceInfo(type, id, hash, serial, has_writer, num_readers, &timestamp));
+  push_back(InterfaceInfo(type, id, hash, serial, has_writer, num_readers, readers, writer, &timestamp));
 }
 
 } // end namespace fawkes

@@ -123,6 +123,8 @@ class Interface
 
   bool          has_writer() const;
   unsigned int  num_readers() const;
+  std::string   writer() const;
+  std::list<std::string> readers() const;
 
   bool          changed() const;
   const Time *  timestamp() const;
