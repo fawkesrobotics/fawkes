@@ -100,6 +100,25 @@ std::string str_join(const std::list<std::string> &l, char delim = '/')
   return rv;
 }
 
+
+/** Join list of strings string using given delimiter.
+ * @param l list with strings to join
+ * @param delim delimiter
+ * @return string of strings in list separated by given delimiter
+ */
+static inline
+  std::string str_join(const std::list<std::string> &l, std::string delim)
+{
+  std::string rv;
+  bool first = true;
+  for (std::list<std::string>::const_iterator i = l.begin(); i != l.end(); ++i) {
+    if (first)  first = false;
+    else        rv += delim;
+    rv += *i;
+  }
+  return rv;
+}
+
 /** Split string by delimiter.
  * @param s string to split
  * @param delim delimiter
