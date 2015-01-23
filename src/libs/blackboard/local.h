@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  blackboard.h - BlackBoard plugin
+ *  local.h - Local BlackBoard
  *
- *  Generated: Sat Sep 16 17:09:15 2006 (on train to Cologne)
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
- *
+ *  Created: Sat Sep 16 17:09:15 2006 (on train to Cologne)
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -51,9 +50,11 @@ class LocalBlackBoard : public BlackBoard
   virtual ~LocalBlackBoard();
 
   virtual Interface *  open_for_reading(const char *interface_type,
-					const char *identifier);
+					const char *identifier,
+					const char *owner = NULL);
   virtual Interface *  open_for_writing(const char *interface_type,
-					const char *identifier);
+					const char *identifier,
+					const char *owner = NULL);
   virtual void         close(Interface *interface);
 
   virtual InterfaceInfoList *  list_all();
@@ -64,7 +65,8 @@ class LocalBlackBoard : public BlackBoard
 
   virtual std::list<Interface *>
     open_multiple_for_reading(const char *type_pattern,
-			      const char *id_pattern = "*");
+			      const char *id_pattern = "*",
+			      const char *owner = NULL);
 
   virtual void start_nethandler(FawkesNetworkHub *hub);
 

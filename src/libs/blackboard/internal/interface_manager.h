@@ -3,8 +3,7 @@
  *  interface_manager.h - BlackBoard interface manager
  *
  *  Created: Mon Oct 09 19:05:46 2006
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -30,6 +29,7 @@
 #include <utils/misc/string_compare.h>
 
 #include <list>
+#include <string>
 
 namespace fawkes {
 
@@ -54,8 +54,10 @@ class BlackBoardInterfaceManager : public InterfaceMediator
 			     BlackBoardNotifier *bb_notifier);
   virtual ~BlackBoardInterfaceManager();
 
-  Interface *  open_for_reading(const char *interface_type, const char *identifier);
-  Interface *  open_for_writing(const char *interface_type, const char *identifier);
+  Interface *  open_for_reading(const char *interface_type, const char *identifier,
+				const char *owner = NULL);
+  Interface *  open_for_writing(const char *interface_type, const char *identifier,
+				const char *owner = NULL);
   void         close(Interface *interface);
 
   InterfaceInfoList *  list_all() const;
@@ -63,23 +65,29 @@ class BlackBoardInterfaceManager : public InterfaceMediator
 			    const char *id_pattern) const;
 
   std::list<Interface *> open_multiple_for_reading(const char *type_pattern,
-						   const char *id_pattern = "*");
+						   const char *id_pattern = "*",
+						   const char *owner = NULL);
 
   /* InterfaceMediator methods */
   virtual bool exists_writer(const Interface *interface) const;
   virtual unsigned int num_readers(const Interface *interface) const;
   virtual void notify_of_data_change(const Interface *interface);
+  virtual std::list<std::string>  readers(const Interface *interface) const;
+  virtual std::string             writer(const Interface *interface) const;
+
+  std::list<std::string>  readers(const std::string &uid) const;
+  std::string             writer(const std::string &uid) const;
 
  private:
   const BlackBoardMemoryManager *  memory_manager() const;
 
-  Interface *  new_interface_instance(const char *type, const char *identifier);
+  Interface *  new_interface_instance(const char *type, const char *identifier, const char *owner);
   void         delete_interface_instance(Interface *interface);
 
   void *       find_interface_in_memory(const char *type, const char *identifier);
   unsigned int next_mem_serial();
   unsigned int next_instance_serial();
-  void         create_interface(const char *type, const char *identifier,
+  void         create_interface(const char *type, const char *identifier, const char *owner,
 				Interface* &interface, void* &ptr);
 
   Interface *  writer_for_mem_serial(unsigned int mem_serial);
@@ -95,6 +103,13 @@ class BlackBoardInterfaceManager : public InterfaceMediator
 
   LockMap< unsigned int, Interface * >              writer_interfaces;
   LockMap< unsigned int, RefCountRWLock * >         rwlocks;
+
+  typedef struct _OwnerInfo {
+    _OwnerInfo() : writer(NULL) {}
+    Interface              *writer;
+    std::list<Interface *>  readers;
+  } OwnerInfo;
+  LockMap<std::string, OwnerInfo> owner_info_;
 };
 
 } // end namespace fawkes

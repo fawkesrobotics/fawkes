@@ -3,8 +3,7 @@
  *  interface_manager.cpp - BlackBoard interface manager
  *
  *  Created: Mon Oct 09 19:08:29 2006
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -100,12 +99,13 @@ BlackBoardInterfaceManager::~BlackBoardInterfaceManager()
  * for the given interface type could not be found
  */
 Interface *
-BlackBoardInterfaceManager::new_interface_instance(const char *type, const char *identifier)
+BlackBoardInterfaceManager::new_interface_instance(const char *type, const char *identifier, const char *owner)
 {
   Interface *iface = instance_factory->new_interface_instance(type, identifier);
 
   iface->set_instance_serial(next_instance_serial());
   iface->set_mediators(this, msgmgr);
+  if (owner) iface->set_owner(owner);
   return iface;
 }
 
@@ -120,6 +120,16 @@ BlackBoardInterfaceManager::new_interface_instance(const char *type, const char 
 void
 BlackBoardInterfaceManager::delete_interface_instance(Interface *interface)
 {
+  if (owner_info_.find(interface->uid()) != owner_info_.end()) {
+    OwnerInfo &info = owner_info_[interface->uid()];
+    if (interface->is_writer()) {
+      if (info.writer == interface) {
+	info.writer = NULL;
+      }
+    } else {
+      info.readers.remove(interface);
+    }
+  }
   instance_factory->delete_interface_instance(interface);
 }
 
@@ -195,12 +205,13 @@ BlackBoardInterfaceManager::next_instance_serial()
  */
 void
 BlackBoardInterfaceManager::create_interface(const char *type, const char *identifier,
+					     const char *owner,
 					     Interface* &interface, void* &ptr)
 {
   interface_header_t *ih;
 
   // create new interface and allocate appropriate chunk
-  interface = new_interface_instance(type, identifier);
+  interface = new_interface_instance(type, identifier, owner);
   try {
     ptr = memmgr->alloc_nolock(interface->datasize() + sizeof(interface_header_t));
     ih  = (interface_header_t *)ptr;
@@ -231,12 +242,14 @@ BlackBoardInterfaceManager::create_interface(const char *type, const char *ident
  * casted to the appropriate type.
  * @param type type of the interface
  * @param identifier identifier of the interface
+ * @param owner name of entity which opened this interface. If using the BlackBoardAspect
+ * to access the blackboard leave this untouched unless you have a good reason.
  * @return new fully initialized interface instance of requested type
  * @exception OutOfMemoryException thrown if there is not enough free space for
  * the requested interface.
  */
 Interface *
-BlackBoardInterfaceManager::open_for_reading(const char *type, const char *identifier)
+BlackBoardInterfaceManager::open_for_reading(const char *type, const char *identifier, const char *owner)
 {
   mutex->lock();
   Interface *iface = NULL;
@@ -251,7 +264,7 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
   try {
     if ( ptr != NULL ) {
       // found, instantiate new interface for given memory chunk
-      iface = new_interface_instance(type, identifier);
+      iface = new_interface_instance(type, identifier, owner);
       ih  = (interface_header_t *)ptr;
       if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
 	   (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
@@ -261,10 +274,11 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
       rwlocks[ih->serial]->ref();
     } else {
       created = true;
-      create_interface(type, identifier, iface, ptr);
+      create_interface(type, identifier, owner, iface, ptr);
       ih  = (interface_header_t *)ptr;
     }
 
+    owner_info_[iface->uid()].readers.push_back(iface);
     iface->set_readwrite(false, rwlocks[ih->serial]);
     ih->refcount++;
     ih->num_readers++;
@@ -295,13 +309,16 @@ BlackBoardInterfaceManager::open_for_reading(const char *type, const char *ident
  * similar to filenames (*, ?, []), see "man fnmatch" for all supported.
  * @param id_pattern pattern of interface IDs to open, supports wildcards similar
  * to filenames (*, ?, []), see "man fnmatch" for all supported.
+ * @param owner name of entity which opened this interface. If using the BlackBoardAspect
+ * to access the blackboard leave this untouched unless you have a good reason.
  * @return list of new fully initialized interface instances of requested type. The
  * is allocated using new and you have to free it using delete after you are done
  * with it!
  */
 std::list<Interface *>
 BlackBoardInterfaceManager::open_multiple_for_reading(const char *type_pattern,
-						      const char *id_pattern)
+						      const char *id_pattern,
+						      const char *owner)
 {
   mutex->lock();
   memmgr->lock();
@@ -332,7 +349,7 @@ BlackBoardInterfaceManager::open_multiple_for_reading(const char *type_pattern,
       }
 
       void *ptr = *cit;
-      iface = new_interface_instance(ih->type, ih->id);
+      iface = new_interface_instance(ih->type, ih->id, owner);
       iface->set_memory(ih->serial, ptr, (char *)ptr + sizeof(interface_header_t));
 
       if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
@@ -342,6 +359,7 @@ BlackBoardInterfaceManager::open_multiple_for_reading(const char *type_pattern,
 
       rwlocks[ih->serial]->ref();
 
+      owner_info_[iface->uid()].readers.push_back(iface);
       iface->set_readwrite(false, rwlocks[ih->serial]);
       ih->refcount++;
       ih->num_readers++;
@@ -377,6 +395,8 @@ BlackBoardInterfaceManager::open_multiple_for_reading(const char *type_pattern,
  * a writer for the given interface type/id!
  * @param type type of the interface
  * @param identifier identifier of the interface
+ * @param owner name of entity which opened this interface. If using the BlackBoardAspect
+ * to access the blackboard leave this untouched unless you have a good reason.
  * @return new fully initialized interface instance of requested type
  * @exception OutOfMemoryException thrown if there is not enough free space for
  * the requested interface.
@@ -384,7 +404,7 @@ BlackBoardInterfaceManager::open_multiple_for_reading(const char *type_pattern,
  * instance with the same type/id
  */
 Interface *
-BlackBoardInterfaceManager::open_for_writing(const char *type, const char *identifier)
+BlackBoardInterfaceManager::open_for_writing(const char *type, const char *identifier, const char *owner)
 {
   mutex->lock();
   memmgr->lock();
@@ -404,7 +424,7 @@ BlackBoardInterfaceManager::open_for_writing(const char *type, const char *ident
       if ( ih->flag_writer_active ) {
 	throw BlackBoardWriterActiveException(identifier, type);
       }
-      iface = new_interface_instance(type, identifier);
+      iface = new_interface_instance(type, identifier, owner);
       if ( (iface->hash_size() != __INTERFACE_HASH_SIZE ) ||
 	   (memcmp(iface->hash(), ih->hash, __INTERFACE_HASH_SIZE) != 0) ) {
 	throw BlackBoardInterfaceVersionMismatchException();
@@ -413,10 +433,11 @@ BlackBoardInterfaceManager::open_for_writing(const char *type, const char *ident
       rwlocks[ih->serial]->ref();
     } else {
       created = true;
-      create_interface(type, identifier, iface, ptr);
+      create_interface(type, identifier, owner, iface, ptr);
       ih = (interface_header_t *)ptr;
     }
 
+    owner_info_[iface->uid()].writer = iface;
     iface->set_readwrite(true, rwlocks[ih->serial]);
     ih->flag_writer_active = 1;
     ih->refcount++;
@@ -502,8 +523,17 @@ BlackBoardInterfaceManager::list_all() const
     ih = (interface_header_t *)*cit;
     Interface::interface_data_ts_t *data_ts =
       (Interface::interface_data_ts_t *)((char *)*cit + sizeof(interface_header_t));
+    char type[__INTERFACE_TYPE_SIZE + 1];
+    char id[__INTERFACE_ID_SIZE + 1];
+    // ensure NULL-termination
+    type[__INTERFACE_TYPE_SIZE] = 0;
+    id[__INTERFACE_ID_SIZE] = 0;
+    strncpy(type, ih->type, __INTERFACE_TYPE_SIZE);
+    strncpy(id, ih->id, __INTERFACE_ID_SIZE);
+    std::string uid = std::string(type) + "::" + id;
     infl->append(ih->type, ih->id, ih->hash, ih->serial,
 		 ih->flag_writer_active, ih->num_readers,
+		 readers(uid), writer(uid),
 		 Time(data_ts->timestamp_sec, data_ts->timestamp_usec));
   }
 
@@ -545,8 +575,10 @@ BlackBoardInterfaceManager::list(const char *type_pattern,
     if ((fnmatch(type_pattern, type, FNM_NOESCAPE) == 0) &&
 	(fnmatch(id_pattern, id, FNM_NOESCAPE) == 0))
     {
+      std::string uid = std::string(type) + "::" + id;
       infl->append(ih->type, ih->id, ih->hash, ih->serial,
 		   ih->flag_writer_active, ih->num_readers,
+		   readers(uid), writer(uid),
 		   fawkes::Time(data_ts->timestamp_sec, data_ts->timestamp_usec));
     }
   }
@@ -594,5 +626,79 @@ BlackBoardInterfaceManager::num_readers(const Interface *interface) const
   const interface_header_t *ih = (interface_header_t *)interface->__mem_real_ptr;
   return ih->num_readers;
 }
+
+std::list<std::string>
+BlackBoardInterfaceManager::readers(const Interface *interface) const
+{
+  std::list<std::string> rv;
+  owner_info_.lock();
+  LockMap<std::string, OwnerInfo>::const_iterator info;
+  if ((info = owner_info_.find(interface->uid())) != owner_info_.end()) {
+    std::list<Interface *>::const_iterator i;
+    for (i = info->second.readers.begin(); i != info->second.readers.end(); ++i) {
+      rv.push_back((*i)->owner());
+    }
+  }
+  owner_info_.unlock();
+  return rv;
+}
+
+
+std::string
+BlackBoardInterfaceManager::writer(const Interface *interface) const
+{
+  std::string rv;
+  owner_info_.lock();
+  LockMap<std::string, OwnerInfo>::const_iterator info;
+  if ((info = owner_info_.find(interface->uid())) != owner_info_.end()) {
+    if (info->second.writer) {
+      rv = info->second.writer->owner();
+    }
+  }
+  owner_info_.unlock();
+  return rv;
+}
+
+
+/** Get owners of interfaces who opened for reading.
+ * @param uid UID of interface to query for
+ * @return list of readers for this interface
+ */
+std::list<std::string>
+BlackBoardInterfaceManager::readers(const std::string &uid) const
+{
+  std::list<std::string> rv;
+  owner_info_.lock();
+  LockMap<std::string, OwnerInfo>::const_iterator info;
+  if ((info = owner_info_.find(uid)) != owner_info_.end()) {
+    std::list<Interface *>::const_iterator i;
+    for (i = info->second.readers.begin(); i != info->second.readers.end(); ++i) {
+      rv.push_back((*i)->owner());
+    }
+  }
+  owner_info_.unlock();
+  return rv;
+}
+
+
+/** Get writer of interface.
+ * @param uid UID of interface to query for
+ * @return owner name of writing interface instance, or empty string of no writer exists
+ */
+std::string
+BlackBoardInterfaceManager::writer(const std::string &uid) const
+{
+  std::string rv;
+  owner_info_.lock();
+  LockMap<std::string, OwnerInfo>::const_iterator info;
+  if ((info = owner_info_.find(uid)) != owner_info_.end()) {
+    if (info->second.writer) {
+      rv = info->second.writer->owner();
+    }
+  }
+  owner_info_.unlock();
+  return rv;
+}
+
 
 } // end namespace fawkes

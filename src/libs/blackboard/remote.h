@@ -3,8 +3,7 @@
  *  remote.h - Remote BlackBoard using the Fawkes network protocol
  *
  *  Created: Mon Mar 03 10:52:28 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -55,8 +54,10 @@ class RemoteBlackBoard
   RemoteBlackBoard(const char *hostname, unsigned short int port);
   virtual ~RemoteBlackBoard();
 
-  virtual Interface *  open_for_reading(const char *interface_type, const char *identifier);
-  virtual Interface *  open_for_writing(const char *interface_type, const char *identifier);
+  virtual Interface *  open_for_reading(const char *interface_type, const char *identifier,
+					const char *owner = NULL);
+  virtual Interface *  open_for_writing(const char *interface_type, const char *identifier,
+					const char *owner = NULL);
   virtual void         close(Interface *interface);
 
   virtual InterfaceInfoList *  list_all();
@@ -66,7 +67,8 @@ class RemoteBlackBoard
   virtual bool                 try_aliveness_restore() throw();
 
   std::list<Interface *>  open_multiple_for_reading(const char *interface_type,
-						    const char *id_pattern = "*");
+						    const char *id_pattern = "*",
+						    const char *owner = NULL);
 
   /* for FawkesNetworkClientHandler */
   virtual void          deregistered(unsigned int id) throw();
@@ -79,9 +81,9 @@ class RemoteBlackBoard
   /* extensions for RemoteBlackBoard */
 
  private: /* methods */
-  void        open_interface(const char *type, const char *identifier,
+  void        open_interface(const char *type, const char *identifier, const char *owner,
 			     bool writer, Interface *iface);
-  Interface * open_interface(const char *type, const char *identifier, bool writer);
+  Interface * open_interface(const char *type, const char *identifier, const char *owner, bool writer);
   void        reopen_interfaces();
 
 

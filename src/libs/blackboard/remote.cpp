@@ -3,8 +3,7 @@
  *  remote.h - Remote BlackBoard access via Fawkes network protocol
  *
  *  Created: Mon Mar 03 10:53:00 2008
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -149,7 +148,7 @@ RemoteBlackBoard::reopen_interfaces()
   while ( __ipit != __invalid_proxies.end() ) {
     try {
       Interface *iface = (*__ipit)->interface();
-      open_interface(iface->type(), iface->id(), iface->is_writer(), iface);
+      open_interface(iface->type(), iface->id(), iface->owner(), iface->is_writer(), iface);
       iface->set_validity(true);
       __ipit = __invalid_proxies.erase(__ipit);
     } catch (Exception &e) {
@@ -178,7 +177,7 @@ RemoteBlackBoard::try_aliveness_restore() throw()
 
 
 void
-RemoteBlackBoard::open_interface(const char *type, const char *identifier,
+RemoteBlackBoard::open_interface(const char *type, const char *identifier, const char *owner,
 				 bool writer, Interface *iface)
 {
   if ( ! __fnc->connected() ) {
@@ -251,7 +250,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier,
 }
 
 Interface *
-RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool writer)
+RemoteBlackBoard::open_interface(const char *type, const char *identifier, const char *owner, bool writer)
 {
   if ( ! __fnc->connected() ) {
     throw Exception("Cannot instantiate remote interface, connection is dead");
@@ -259,7 +258,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
 
   Interface *iface = __instance_factory->new_interface_instance(type, identifier);
   try {
-    open_interface(type, identifier, writer, iface);
+    open_interface(type, identifier, owner, writer, iface);
   } catch (Exception &e) {
     __instance_factory->delete_interface_instance(iface);
     throw;
@@ -270,22 +269,22 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, bool 
 
 
 Interface *
-RemoteBlackBoard::open_for_reading(const char *type, const char *identifier)
+RemoteBlackBoard::open_for_reading(const char *type, const char *identifier, const char *owner)
 {
-  return open_interface(type, identifier, /* writer? */ false);
+  return open_interface(type, identifier, owner, /* writer? */ false);
 }
 
 
 Interface *
-RemoteBlackBoard::open_for_writing(const char *type, const char *identifier)
+RemoteBlackBoard::open_for_writing(const char *type, const char *identifier, const char *owner)
 {
-  return open_interface(type, identifier, /* writer? */ true);
+  return open_interface(type, identifier, owner, /* writer? */ true);
 }
 
 
 std::list<Interface *>
 RemoteBlackBoard::open_multiple_for_reading(const char *type_pattern,
-					    const char *id_pattern)
+					    const char *id_pattern, const char *owner)
 {
   std::list<Interface *> rv;
 
@@ -306,7 +305,7 @@ RemoteBlackBoard::open_multiple_for_reading(const char *type_pattern,
     }
 
     try {
-      Interface *iface = open_for_reading((*i).type(), (*i).id());
+      Interface *iface = open_for_reading((*i).type(), (*i).id(), owner);
       rv.push_back(iface);
     } catch (Exception &e) {
       for (std::list<Interface *>::iterator j = rv.begin(); j != rv.end(); ++j) {
@@ -384,7 +383,7 @@ RemoteBlackBoard::list_all()
     bool has_writer = ii->writer_readers & htonl(0x80000000);
     unsigned int num_readers = ntohl(ii->writer_readers & htonl(0x7FFFFFFF));
     infl->append(ii->type, ii->id, ii->hash,  ntohl(ii->serial),
-		 has_writer, num_readers,
+		 has_writer, num_readers, std::list<std::string>(), std::string(),
 		 fawkes::Time(ii->timestamp_sec, ii->timestamp_usec));
   }
 
@@ -438,7 +437,7 @@ RemoteBlackBoard::list(const char *type_pattern, const char *id_pattern)
     bool has_writer = ii->writer_readers & htonl(0x80000000);
     unsigned int num_readers = ntohl(ii->writer_readers & htonl(0x7FFFFFFF));
     infl->append(ii->type, ii->id, ii->hash, ntohl(ii->serial),
-		 has_writer, num_readers,
+		 has_writer, num_readers, std::list<std::string>(), std::string(),
 		 fawkes::Time(ii->timestamp_sec, ii->timestamp_usec));
   }
 

@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  blackboard.cpp - BlackBoard plugin
+ *  local.cpp - Local BlackBoard
  *
- *  Generated: Sat Sep 16 17:11:13 2006 (on train to Cologne)
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
- *
+ *  Created: Sat Sep 16 17:11:13 2006 (on train to Cologne)
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -99,10 +98,10 @@ LocalBlackBoard::~LocalBlackBoard()
 
 
 Interface *
-LocalBlackBoard::open_for_reading(const char *type, const char *identifier)
+LocalBlackBoard::open_for_reading(const char *type, const char *identifier, const char *owner)
 {
   try {
-    return __im->open_for_reading(type, identifier);
+    return __im->open_for_reading(type, identifier, owner);
   } catch (Exception &e) {
     throw;
   }
@@ -110,10 +109,10 @@ LocalBlackBoard::open_for_reading(const char *type, const char *identifier)
 
 
 Interface *
-LocalBlackBoard::open_for_writing(const char *type, const char *identifier)
+LocalBlackBoard::open_for_writing(const char *type, const char *identifier, const char *owner)
 {
   try {
-    return __im->open_for_writing(type, identifier);
+    return __im->open_for_writing(type, identifier, owner);
   } catch (Exception &e) {
     throw;
   }
@@ -122,10 +121,11 @@ LocalBlackBoard::open_for_writing(const char *type, const char *identifier)
 
 std::list<Interface *>
 LocalBlackBoard::open_multiple_for_reading(const char *type_pattern,
-					   const char *id_pattern)
+					   const char *id_pattern,
+					   const char *owner)
 {
   try {
-    return __im->open_multiple_for_reading(type_pattern, id_pattern);
+    return __im->open_multiple_for_reading(type_pattern, id_pattern, owner);
   } catch (Exception &e) {
     throw;
   }  
