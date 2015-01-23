@@ -42,10 +42,15 @@ namespace fawkes {
  * BlackBoard. It is set when the thread starts.
  */
 
-/** Constructor. */
-BlackBoardAspect::BlackBoardAspect()
+/** Constructor.
+ * @param owner owner name to set for opened interfaces. Set this to the
+ * plugin name for example. By default, the thread having the BlackBoardAspect
+ * will be used.
+ */
+BlackBoardAspect::BlackBoardAspect(const char *owner)
 {
   add_aspect("BlackBoardAspect");
+  blackboard_owner_name_ = owner;
   blackboard = 0;
 }
 
