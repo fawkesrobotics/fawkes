@@ -26,6 +26,7 @@
 #include <logging/logger.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/time/time.h>
+#include <utils/misc/string_split.h>
 #include <interface/interface_info.h>
 
 #include <clipsmm.h>
@@ -524,10 +525,19 @@ BlackboardCLIPSFeature::clips_blackboard_get_info(std::string env_name)
   fawkes::MutexLocker lock(clips.objmutex_ptr());
   for (auto ii : *iil) {
     const Time *timestamp = ii.timestamp();
+    std::list<std::string> quoted_readers;
+    std::list<std::string> readers = ii.readers();
+    std::for_each(readers.begin(), readers.end(),
+		  [&quoted_readers](const std::string &r) {
+		    quoted_readers.push_back(std::string("\"")+r+"\"");
+		  });
+    std::string quoted_readers_s = str_join(quoted_readers, ' ');
     clips->assert_fact_f("(blackboard-interface-info (id \"%s\") (type \"%s\") "
-			 "(hash \"%s\") (has-writer %s) (num-readers %u) (timestamp %u %u))",
+			 "(hash \"%s\") (has-writer %s) (num-readers %u) "
+			 "(writer \"%s\") (readers %s) (timestamp %u %u))",
 			 ii.id(), ii.type(), ii.hash_printable().c_str(),
 			 ii.has_writer() ? "TRUE" : "FALSE", ii.num_readers(),
+			 ii.writer().c_str(), quoted_readers_s.c_str(),
 			 timestamp->get_sec(), timestamp->get_usec());
   }
 
