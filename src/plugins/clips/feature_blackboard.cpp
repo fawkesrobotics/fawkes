@@ -485,12 +485,8 @@ BlackboardCLIPSFeature::clips_blackboard_write(std::string env_name, std::string
 		      " cannot write interface %s", env_name.c_str(), uid.c_str());
     return;
   }
-  char *c_type, *c_id;
-  Interface::parse_uid(uid.c_str(), &c_type, &c_id);
-  std::string type = c_type;
-  std::string id   = c_id;
-  free(c_type);
-  free(c_id);
+  std::string type, id;
+  Interface::parse_uid(uid.c_str(), type, id);
   if (interfaces_[env_name].writing.find(type) != interfaces_[env_name].writing.end()) {
     auto i = std::find_if(interfaces_[env_name].writing[type].begin(),
 			  interfaces_[env_name].writing[type].end(),
@@ -552,12 +548,8 @@ BlackboardCLIPSFeature::clips_blackboard_set(std::string env_name, std::string u
 		      field.c_str(), uid.c_str());
     return;
   }
-  char *c_type, *c_id;
-  Interface::parse_uid(uid.c_str(), &c_type, &c_id);
-  std::string type = c_type;
-  std::string id   = c_id;
-  free(c_type);
-  free(c_id);
+  std::string type, id;
+  Interface::parse_uid(uid.c_str(), type, id);
   if (interfaces_[env_name].writing.find(type) != interfaces_[env_name].writing.end()) {
     auto i = std::find_if(interfaces_[env_name].writing[type].begin(),
 			  interfaces_[env_name].writing[type].end(),
