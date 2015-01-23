@@ -308,7 +308,8 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(std::string env_name,
 							std::string type, std::string id,
 							bool writing)
 {
-  std::string name = "BBCLIPS|" + env_name;
+  std::string name  = "BBCLIPS|" + env_name;
+  std::string owner = "CLIPS:" + env_name;
 
   if (envs_.find(env_name) == envs_.end()) {
     logger_->log_warn(name.c_str(), "Environment %s has not been registered "
@@ -324,9 +325,9 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(std::string env_name,
     // no interface of this type registered yet, add deftemplate for it
     try {
       if (writing) {
-	iface = blackboard_->open_for_writing(type.c_str(), id.c_str());
+	iface = blackboard_->open_for_writing(type.c_str(), id.c_str(), owner.c_str());
       } else {
-	iface = blackboard_->open_for_reading(type.c_str(), id.c_str());
+	iface = blackboard_->open_for_reading(type.c_str(), id.c_str(), owner.c_str());
       }
     } catch (Exception &e) {
       logger_->log_warn(name.c_str(), "Failed to open interface %s:%s, exception follows",
@@ -351,9 +352,9 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(std::string env_name,
     {
       try {
 	if (writing) {
-	  iface = blackboard_->open_for_writing(type.c_str(), id.c_str());      
+	  iface = blackboard_->open_for_writing(type.c_str(), id.c_str(), owner.c_str());
 	} else {
-	  iface = blackboard_->open_for_reading(type.c_str(), id.c_str());      
+	  iface = blackboard_->open_for_reading(type.c_str(), id.c_str(), owner.c_str());
 	}
 	iface_map[type].push_back(iface);
 	logger_->log_info(name.c_str(), "Added interface %s for %s", iface->uid(),
