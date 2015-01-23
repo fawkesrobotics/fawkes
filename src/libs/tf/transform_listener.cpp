@@ -121,7 +121,7 @@ TransformListener::bb_interface_created(const char *type, const char *id) throw(
 
   TransformInterface *tfif;
   try {
-    tfif = __bb->open_for_reading<TransformInterface>(id);
+    tfif = __bb->open_for_reading<TransformInterface>(id, "TF-Listener");
   } catch (Exception &e) {
     // ignored
     return;
