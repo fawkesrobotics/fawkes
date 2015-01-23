@@ -19,6 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <core/threading/mutex_locker.h>
+
 #include <syncpoint/syncpoint_manager.h>
 #include <syncpoint/exceptions.h>
 
@@ -44,13 +46,13 @@ namespace fawkes {
  */
 
 SyncPointManager::SyncPointManager()
-: mutex(new Mutex())
+: mutex_(new Mutex())
 {
 }
 
 SyncPointManager::~SyncPointManager()
 {
-  delete mutex;
+  delete mutex_;
 }
 
 /**
@@ -66,9 +68,8 @@ SyncPointManager::~SyncPointManager()
 RefPtr<SyncPoint>
 SyncPointManager::get_syncpoint(const std::string & component, const std::string & identifier)
 {
-  mutex->lock();
+  MutexLocker ml(mutex_);
   if (component == "") {
-    mutex->unlock();
     throw SyncPointInvalidComponentException(component.c_str(), identifier.c_str());
   }
   // insert a new SyncPoint if no SyncPoint with the same identifier exists,
@@ -77,7 +78,6 @@ SyncPointManager::get_syncpoint(const std::string & component, const std::string
   try {
   ret = syncpoints_.insert(RefPtr<SyncPoint>(new SyncPoint(identifier)));
   } catch (const SyncPointInvalidIdentifierException &e) {
-    mutex->unlock();
     throw;
   }
 
@@ -87,10 +87,8 @@ SyncPointManager::get_syncpoint(const std::string & component, const std::string
   // check if component is already a watcher
   // insert returns a pair whose second element is false if element already exists
   if (!(*it)->add_watcher(component).second) {
-    mutex->unlock();
     throw SyncPointAlreadyOpenedException(component.c_str(), identifier.c_str());
   }
-  mutex->unlock();
 
   return *it;
 }
@@ -108,19 +106,15 @@ SyncPointManager::get_syncpoint(const std::string & component, const std::string
 void
 SyncPointManager::release_syncpoint(const std::string & component, RefPtr<SyncPoint> sync_point)
 {
-  mutex->lock();
+  MutexLocker ml(mutex_);
   std::set<RefPtr<SyncPoint> >::iterator sp_it = syncpoints_.find(
       sync_point);
   if (sp_it == syncpoints_.end()) {
-    mutex->unlock();
     throw SyncPointReleasedDoesNotExistException(component.c_str(), sync_point->get_identifier().c_str());
   }
   if (!(*sp_it)->watchers_.erase(component)) {
-    mutex->unlock();
     throw SyncPointReleasedByNonWatcherException(component.c_str(), sync_point->get_identifier().c_str());
   }
-
-  mutex->unlock();
 }
 
 
@@ -147,6 +141,7 @@ SyncPointSetLessThan::operator()(const RefPtr<SyncPoint> sp1, const RefPtr<SyncP
  */
 std::set<RefPtr<SyncPoint>, SyncPointSetLessThan >
 SyncPointManager::get_syncpoints() {
+  MutexLocker ml(mutex_);
   return syncpoints_;
 }
 
@@ -165,6 +160,7 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
       << "node [fontsize=12]; edge [fontsize=12]; ";
   graph.setf(std::ios::fixed, std::ios::floatfield);
 
+  MutexLocker ml(mutex_);
   for (std::set<RefPtr<SyncPoint>, SyncPointSetLessThan>::const_iterator sp_it = syncpoints_.begin();
       sp_it != syncpoints_.end(); sp_it++) {
     Time lifetime = Time() - (*sp_it)->creation_time_;

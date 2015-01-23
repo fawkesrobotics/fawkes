@@ -60,7 +60,7 @@ class SyncPointManager
      */
     std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > syncpoints_;
     /** Mutex used for all SyncPointManager calls */
-    Mutex *mutex;
+    Mutex *mutex_;
 
 
 };

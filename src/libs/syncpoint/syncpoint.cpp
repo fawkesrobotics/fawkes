@@ -59,7 +59,7 @@ SyncPoint::SyncPoint(string identifier)
       wait_calls_(CircularBuffer<SyncPointCall>(1000)),
       creation_time_(Time()),
       mutex_(new Mutex()),
-      wait_condition_(new WaitCondition(mutex_))
+      wait_condition_(new WaitCondition())
 {
   if (identifier.empty()) {
     delete wait_condition_;
@@ -122,16 +122,16 @@ SyncPoint::emit(const std::string & component)
   }
   waiting_watchers_.clear();
   emit_calls_.push_back(SyncPointCall(component));
-  wait_condition_->wake_all();
   mutex_->unlock();
+  wait_condition_->wake_all();
 }
 
 /** Wait until SyncPoint is emitted
  * @param component The identifier of the component waiting for the SyncPoint
  */
 void
-  mutex_->lock();
 SyncPoint::wait(const std::string & component) {
+  mutex_->lock();
   // check if calling component is registered for this SyncPoint
   if (!watchers_.count(component)) {
     mutex_->unlock();
@@ -143,9 +143,11 @@ SyncPoint::wait(const std::string & component) {
     throw SyncPointMultipleWaitCallsException(component.c_str(), get_identifier().c_str());
   }
   waiting_watchers_.insert(component);
+  mutex_->unlock();
   Time start;
   wait_condition_->wait();
   Time wait_time = Time() - start;
+  mutex_->lock();
   wait_calls_.push_back(SyncPointCall(component, start, wait_time));
   mutex_->unlock();
 }
@@ -165,10 +167,8 @@ SyncPoint::add_watcher(string watcher)
  */
 std::set<std::string>
 SyncPoint::get_watchers() const {
-  mutex_->lock();
-  std::set<std::string> ret = watchers_;
-  mutex_->unlock();
-  return ret;
+  MutexLocker ml(mutex_);
+  return watchers_;
 }
 
 /**
@@ -176,10 +176,8 @@ SyncPoint::get_watchers() const {
  */
 CircularBuffer<SyncPointCall>
 SyncPoint::get_wait_calls() const {
-  mutex_->lock();
-  CircularBuffer<SyncPointCall> ret(wait_calls_);
-  mutex_->unlock();
-  return ret;
+  MutexLocker ml(mutex_);
+  return wait_calls_;
 }
 
 
@@ -188,10 +186,8 @@ SyncPoint::get_wait_calls() const {
  */
 CircularBuffer<SyncPointCall>
 SyncPoint::get_emit_calls() const {
-  mutex_->lock();
-  CircularBuffer<SyncPointCall> ret(emit_calls_);
-  mutex_->unlock();
-  return ret;
+  MutexLocker ml(mutex_);
+  return emit_calls_;
 }
 
 } // namespace fawkes
