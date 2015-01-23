@@ -101,6 +101,7 @@ class Interface
   bool                    is_writer() const;
   void                    set_validity(bool valid);
   bool                    is_valid() const;
+  const char *            owner() const;
 
   void                    set_from_chunk(void *chunk);
 
@@ -227,6 +228,7 @@ class Interface
 				   MessageMediator *msg_mediator);
   void set_memory(unsigned int serial, void *real_ptr, void *data_ptr);
   void set_readwrite(bool write_access, RefCountRWLock *rwlock);
+  void set_owner(const char *owner);
 
   inline unsigned int next_msg_id()
   {
@@ -238,6 +240,7 @@ class Interface
   char               __uid[__INTERFACE_UID_SIZE + 1];
   unsigned char      __hash[__INTERFACE_HASH_SIZE];
   char               __hash_printable[__INTERFACE_HASH_SIZE * 2 + 1];
+  char              *__owner;
 
   unsigned short     __instance_serial;
   bool               __valid;
