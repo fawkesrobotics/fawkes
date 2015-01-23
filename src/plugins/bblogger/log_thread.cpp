@@ -98,7 +98,7 @@ BBLoggerThread::BBLoggerThread(const char *iface_uid,
   __now = NULL;
 
   // Parse UID
-  Interface::parse_uid(__uid, &__type, &__id);
+  Interface::parse_uid(__uid, __type, __id);
 
   char date[21];
   Time now;
@@ -106,7 +106,7 @@ BBLoggerThread::BBLoggerThread(const char *iface_uid,
   strftime(date, 21, "%F-%H-%M-%S", tmp);
 
   if (asprintf(&__filename, "%s/%s-%s-%s-%s.log", LOGDIR, __scenario,
-	       __type, __id, date) == -1) {
+	       __type.c_str(), __id.c_str(), date) == -1) {
     throw OutOfMemoryException("Cannot generate log name");
   }
 }
@@ -116,8 +116,6 @@ BBLoggerThread::BBLoggerThread(const char *iface_uid,
 BBLoggerThread::~BBLoggerThread()
 {
   free(__uid);
-  free(__type);
-  free(__id);
   free(__logdir);
   free(__scenario);
   free(__filename);
@@ -154,7 +152,7 @@ BBLoggerThread::init()
   }
 
   try {
-    __iface = blackboard->open_for_reading(__type, __id);
+    __iface = blackboard->open_for_reading(__type.c_str(), __id.c_str());
     __data_size = __iface->datasize();
   } catch (Exception &e) {
     fclose(__f_data);
