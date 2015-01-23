@@ -1,3 +1,5 @@
 
 #blackboard-interfaces { float: right; padding: 8px 4px; width: 30%;}
-//border-left: 1px solid #bbbbbb;
+
+.blackboard-writer-none { color: red; }
+.blackboard-writer-exists {};

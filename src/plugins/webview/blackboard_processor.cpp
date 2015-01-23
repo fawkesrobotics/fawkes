@@ -28,6 +28,7 @@
 #include <interface/field_iterator.h>
 #include <interface/interface_info.h>
 #include <utils/time/time.h>
+#include <utils/misc/string_split.h>
 
 #include <string>
 #include <cstring>
@@ -97,7 +98,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
       }
       r->append_body("<tr><td><a href=\"%s/view/%s::%s\">%s::%s</a></td><td>%u</td><td style=\"color:%s\">%s</td></tr>\n",
                      __baseurl, i->type(), i->id(), i->type(), i->id(),
-                     i->num_readers(), i->has_writer() ? "green" : "red", i->has_writer() ? "yes" : "no");
+                     i->num_readers(), i->has_writer() ? "green" : "red", i->has_writer() ? i->writer().c_str() : "no");
     }
     delete iil;
 
@@ -156,19 +157,34 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	  "  <div id=\"blackboard-interface-details\">\n";
 	*/
 
+	std::string writer;
+	if (iface->has_writer()) {
+	  try {
+	    writer = iface->writer();
+	  } catch (Exception &e) {}
+	}
+	std::string readers;
+	try {
+	  readers = str_join(iface->readers(), ", ");
+	} catch (Exception &e) {}
+
 	r->append_body("<table>\n"
 		       " <tr><td><b>Type:</b></td><td>%s</td></tr>\n"
 		       " <tr><td><b>ID:</b></td><td>%s</td></tr>\n"
-		       " <tr><td><b>Has writer?:</b></td><td>%s</td></tr>\n"
-		       " <tr><td><b>Num readers:</b></td><td>%u</td></tr>\n"
+		       " <tr><td><b>Writer:</b></td><td><span class=\"blackboard-writer-%s\">%s</span></td></tr>\n"
+		       " <tr><td><b>Readers:</b></td><td>%s (%u)</td></tr>\n"
 		       " <tr><td><b>Serial:</b></td><td>%u</td></tr>\n"
 		       " <tr><td><b>Data size:</b></td><td>%u</td></tr>\n"
 		       " <tr><td><b>Hash:</b></td><td>%s</td></tr>\n"
 		       " <tr><td><b>Data changed:</b></td>"
 		       "<td>%s (last at %s)</td></tr>\n"
 		       "</table>\n",
-		       iface->type(), iface->id(), iface->has_writer() ? "yes" : "no",
-		       iface->num_readers(), iface->serial(),
+		       iface->type(), iface->id(),
+		       iface->has_writer() ? "exists" : "none",
+		       iface->has_writer() ? writer.c_str() : "none",
+		       iface->num_readers() > 0 ? readers.c_str() : "none",
+		       iface->num_readers(),
+		       iface->serial(),
 		       iface->datasize(), iface->hash_printable(),
 		       iface->changed() ? "yes" : "no", iface->timestamp()->str());
 
