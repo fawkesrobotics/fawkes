@@ -70,6 +70,9 @@ class SyncPoint
     friend SyncPointManager;
 
   private:
+    std::pair<std::set<std::string>::iterator,bool> add_watcher(std::string watcher);
+
+  private:
     const std::string identifier_;
     std::set<std::string> watchers_;
     std::set<std::string> waiting_watchers_;

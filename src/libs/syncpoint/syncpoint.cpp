@@ -22,6 +22,7 @@
 #include <syncpoint/syncpoint.h>
 #include <syncpoint/exceptions.h>
 
+#include <core/threading/mutex_locker.h>
 #include <utils/time/time.h>
 
 #include <string.h>
@@ -147,6 +148,16 @@ SyncPoint::wait(const std::string & component) {
   Time wait_time = Time() - start;
   wait_calls_.push_back(SyncPointCall(component, start, wait_time));
   mutex_->unlock();
+}
+
+/** Add a watcher to the watch list
+ *  @param watcher the new watcher
+ */
+pair<set<string>::iterator,bool>
+SyncPoint::add_watcher(string watcher)
+{
+  MutexLocker ml(mutex_);
+  return watchers_.insert(watcher);
 }
 
 /**

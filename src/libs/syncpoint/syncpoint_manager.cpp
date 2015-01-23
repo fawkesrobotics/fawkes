@@ -86,7 +86,7 @@ SyncPointManager::get_syncpoint(const std::string & component, const std::string
   // add component to the set of watchers
   // check if component is already a watcher
   // insert returns a pair whose second element is false if element already exists
-  if (!(*it)->watchers_.insert(component).second) {
+  if (!(*it)->add_watcher(component).second) {
     mutex->unlock();
     throw SyncPointAlreadyOpenedException(component.c_str(), identifier.c_str());
   }
