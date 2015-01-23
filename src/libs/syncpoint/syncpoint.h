@@ -67,7 +67,7 @@ class SyncPoint
     /**
      * allow Syncpoint Manager to edit
      */
-    friend SyncPointManager;
+    friend class SyncPointManager;
 
   private:
     std::pair<std::set<std::string>::iterator,bool> add_watcher(std::string watcher);

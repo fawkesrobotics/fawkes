@@ -39,7 +39,7 @@ namespace fawkes {
 SyncPointCallStats::SyncPointCallStats()
 : first_call_(TIME_MAX),
   last_call_(TIME_MIN),
-  total_wait_time_(Time(0.d)),
+  total_wait_time_(Time(0.f)),
   num_calls_(0)
 {}
 

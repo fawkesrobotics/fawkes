@@ -35,7 +35,7 @@ class SyncPointCall
 {
   public:
     SyncPointCall(const std::string & caller, Time call_time = Time(), Time wait_time =
-      Time(0.d));
+      Time(0.f));
 
   public:
     Time get_call_time() const;

@@ -35,7 +35,7 @@ class SyncPointCallStats {
   public:
     SyncPointCallStats();
 
-    void update_calls(Time new_call, Time wait_time = Time(0.d));
+    void update_calls(Time new_call, Time wait_time = Time(0.f));
     void update_calls(SyncPointCall call);
     Time get_first_call() const;
     Time get_last_call() const;
