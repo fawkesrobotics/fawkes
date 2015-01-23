@@ -24,7 +24,7 @@
 
 #include "syncpoint_call_stats.h"
 
-#include <string.h>
+#include <string>
 #include <sstream>
 
 namespace fawkes {
@@ -64,12 +64,12 @@ SyncPointManager::~SyncPointManager()
  * by the component
  */
 RefPtr<SyncPoint>
-SyncPointManager::get_syncpoint(const char * component, const char * identifier)
+SyncPointManager::get_syncpoint(const std::string & component, const std::string & identifier)
 {
   mutex->lock();
-  if (!strcmp(component, "")) {
+  if (component == "") {
     mutex->unlock();
-    throw SyncPointInvalidComponentException(component, identifier);
+    throw SyncPointInvalidComponentException(component.c_str(), identifier.c_str());
   }
   // insert a new SyncPoint if no SyncPoint with the same identifier exists,
   // otherwise, use that SyncPoint
@@ -88,7 +88,7 @@ SyncPointManager::get_syncpoint(const char * component, const char * identifier)
   // insert returns a pair whose second element is false if element already exists
   if (!(*it)->watchers_.insert(component).second) {
     mutex->unlock();
-    throw SyncPointAlreadyOpenedException(component, identifier);
+    throw SyncPointAlreadyOpenedException(component.c_str(), identifier.c_str());
   }
   mutex->unlock();
 
@@ -106,18 +106,18 @@ SyncPointManager::get_syncpoint(const char * component, const char * identifier)
  * a watcher of the SyncPoint
  */
 void
-SyncPointManager::release_syncpoint(const char * component, RefPtr<SyncPoint> sync_point)
+SyncPointManager::release_syncpoint(const std::string & component, RefPtr<SyncPoint> sync_point)
 {
   mutex->lock();
   std::set<RefPtr<SyncPoint> >::iterator sp_it = syncpoints_.find(
       sync_point);
   if (sp_it == syncpoints_.end()) {
     mutex->unlock();
-    throw SyncPointReleasedDoesNotExistException(component, sync_point->get_identifier());
+    throw SyncPointReleasedDoesNotExistException(component.c_str(), sync_point->get_identifier().c_str());
   }
   if (!(*sp_it)->watchers_.erase(component)) {
     mutex->unlock();
-    throw SyncPointReleasedByNonWatcherException(component, sync_point->get_identifier());
+    throw SyncPointReleasedByNonWatcherException(component.c_str(), sync_point->get_identifier().c_str());
   }
 
   mutex->unlock();
@@ -173,13 +173,13 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
     // EMIT CALLS
     CircularBuffer<SyncPointCall> emit_calls = (*sp_it)->get_emit_calls();
     // generate call stats
-    std::map<const char *, SyncPointCallStats> emit_call_stats;
+    std::map<std::string, SyncPointCallStats> emit_call_stats;
     for (CircularBuffer<SyncPointCall>::iterator emitcalls_it = emit_calls.begin();
         emitcalls_it != emit_calls.end(); emitcalls_it++) {
       emit_call_stats[emitcalls_it->get_caller()].update_calls(emitcalls_it->get_call_time());
     }
 
-    for (std::map<const char *, SyncPointCallStats>::iterator emit_call_stats_it = emit_call_stats.begin();
+    for (std::map<std::string, SyncPointCallStats>::iterator emit_call_stats_it = emit_call_stats.begin();
         emit_call_stats_it != emit_call_stats.end(); emit_call_stats_it++) {
       float age = (Time() - emit_call_stats_it->second.get_last_call()).in_sec();
       if (age < max_age) {
@@ -195,13 +195,13 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
     // WAIT CALLS
     CircularBuffer<SyncPointCall> wait_calls = (*sp_it)->get_wait_calls();
     // generate call stats
-    std::map<const char *, SyncPointCallStats> wait_call_stats;
+    std::map<std::string, SyncPointCallStats> wait_call_stats;
     for (CircularBuffer<SyncPointCall>::iterator waitcalls_it = wait_calls.begin();
         waitcalls_it != wait_calls.end(); waitcalls_it++) {
       wait_call_stats[waitcalls_it->get_caller()].update_calls(*waitcalls_it);
     }
 
-    for (std::map<const char *, SyncPointCallStats>::iterator wait_call_stats_it = wait_call_stats.begin();
+    for (std::map<std::string, SyncPointCallStats>::iterator wait_call_stats_it = wait_call_stats.begin();
         wait_call_stats_it != wait_call_stats.end(); wait_call_stats_it++) {
       float age = (Time() - wait_call_stats_it->second.get_last_call()).in_sec();
       if (age < max_age) {

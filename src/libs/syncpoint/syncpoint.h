@@ -46,20 +46,20 @@ class SyncPointCall;
 class SyncPoint
 {
   public:
-    SyncPoint(const char * identifier);
+    SyncPoint(std::string identifier);
     virtual ~SyncPoint();
 
     /** send a signal to all waiting threads */
-    virtual void emit(const char * component);
+    virtual void emit(const std::string & component);
 
     /** wait for the sync point to be emitted */
-    virtual void wait(const char * component);
+    virtual void wait(const std::string & component);
 
-    const char * get_identifier() const;
+    std::string get_identifier() const;
     bool operator==(const SyncPoint & other) const;
     bool operator<(const SyncPoint & other) const;
 
-    std::set<const char *> get_watchers() const;
+    std::set<std::string> get_watchers() const;
     CircularBuffer<SyncPointCall> get_wait_calls() const;
     CircularBuffer<SyncPointCall> get_emit_calls() const;
 
@@ -70,9 +70,9 @@ class SyncPoint
     friend SyncPointManager;
 
   private:
-    const char * const identifier_;
-    std::set<const char *> watchers_;
-    std::set<const char *> waiting_watchers_;
+    const std::string identifier_;
+    std::set<std::string> watchers_;
+    std::set<std::string> waiting_watchers_;
 
     CircularBuffer<SyncPointCall> emit_calls_;
     CircularBuffer<SyncPointCall> wait_calls_;

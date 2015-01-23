@@ -24,6 +24,8 @@
 
 #include <utils/time/time.h>
 
+#include <string>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -32,16 +34,16 @@ namespace fawkes {
 class SyncPointCall
 {
   public:
-    SyncPointCall(const char * caller, Time call_time = Time(), Time wait_time =
+    SyncPointCall(const std::string & caller, Time call_time = Time(), Time wait_time =
       Time(0.d));
 
   public:
     Time get_call_time() const;
     Time get_wait_time() const;
-    const char * get_caller() const;
+    std::string get_caller() const;
 
   private:
-    const char * const caller_;
+    const std::string caller_;
     const Time call_time_;
     const Time wait_time_;
 };

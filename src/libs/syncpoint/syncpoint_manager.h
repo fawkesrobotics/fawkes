@@ -47,8 +47,8 @@ class SyncPointManager
     SyncPointManager();
     virtual ~SyncPointManager();
 
-    RefPtr<SyncPoint> get_syncpoint(const char * component, const char * identifier);
-    void release_syncpoint(const char * component, RefPtr<SyncPoint> syncpoint);
+    RefPtr<SyncPoint> get_syncpoint(const std::string & component, const std::string & identifier);
+    void release_syncpoint(const std::string & component, RefPtr<SyncPoint> syncpoint);
 
     std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > get_syncpoints();
 

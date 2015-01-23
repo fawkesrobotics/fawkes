@@ -26,6 +26,8 @@
 
 #include <string.h>
 
+using namespace std;
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -50,7 +52,7 @@ namespace fawkes {
  * @param identifier The identifier of the SyncPoint. This must be in absolute
  * path style, e.g. '/some/syncpoint'.
  */
-SyncPoint::SyncPoint(const char * identifier)
+SyncPoint::SyncPoint(string identifier)
     : identifier_(identifier),
       emit_calls_(CircularBuffer<SyncPointCall>(1000)),
       wait_calls_(CircularBuffer<SyncPointCall>(1000)),
@@ -58,15 +60,15 @@ SyncPoint::SyncPoint(const char * identifier)
       mutex_(new Mutex()),
       wait_condition_(new WaitCondition(mutex_))
 {
-  if (!strcmp(identifier, "")) {
+  if (identifier.empty()) {
     delete wait_condition_;
     delete mutex_;
-    throw SyncPointInvalidIdentifierException(identifier);
+    throw SyncPointInvalidIdentifierException(identifier.c_str());
   }
-  if (strncmp(identifier, "/", 1)) {
+  if (identifier.compare(0,1,"/")) {
     delete wait_condition_;
     delete mutex_;
-    throw SyncPointInvalidIdentifierException(identifier);
+    throw SyncPointInvalidIdentifierException(identifier.c_str());
   }
 }
 
@@ -79,7 +81,7 @@ SyncPoint::~SyncPoint()
 /**
  * @return the identifier of the SyncPoint
  */
-const char *
+string
 SyncPoint::get_identifier() const {
   return identifier_;
 }
@@ -92,7 +94,7 @@ SyncPoint::get_identifier() const {
 bool
 SyncPoint::operator==(const SyncPoint &other) const
 {
-  return strcmp(identifier_, other.get_identifier()) == 0;
+  return identifier_ == other.get_identifier();
 }
 
 /** LessThan Operator.
@@ -103,19 +105,19 @@ SyncPoint::operator==(const SyncPoint &other) const
 bool
 SyncPoint::operator<(const SyncPoint &other) const
 {
-  return strcmp(identifier_, other.get_identifier()) < 0;
+  return identifier_ < other.get_identifier();
 }
 
 /** Wake up all components which are waiting for this SyncPoint
  * @param component The identifier of the component emitting the SyncPoint
  */
 void
-SyncPoint::emit(const char * component)
+SyncPoint::emit(const std::string & component)
 {
   mutex_->lock();
   if (!watchers_.count(component)) {
     mutex_->unlock();
-    throw SyncPointNonWatcherCalledEmitException(component, get_identifier());
+    throw SyncPointNonWatcherCalledEmitException(component.c_str(), get_identifier().c_str());
   }
   waiting_watchers_.clear();
   emit_calls_.push_back(SyncPointCall(component));
@@ -127,17 +129,17 @@ SyncPoint::emit(const char * component)
  * @param component The identifier of the component waiting for the SyncPoint
  */
 void
-SyncPoint::wait(const char * component) {
   mutex_->lock();
+SyncPoint::wait(const std::string & component) {
   // check if calling component is registered for this SyncPoint
   if (!watchers_.count(component)) {
     mutex_->unlock();
-    throw SyncPointNonWatcherCalledWaitException(component, get_identifier());
+    throw SyncPointNonWatcherCalledWaitException(component.c_str(), get_identifier().c_str());
   }
   // check if calling component is not already waiting
   if (waiting_watchers_.count(component)) {
     mutex_->unlock();
-    throw SyncPointMultipleWaitCallsException(component, get_identifier());
+    throw SyncPointMultipleWaitCallsException(component.c_str(), get_identifier().c_str());
   }
   waiting_watchers_.insert(component);
   Time start;
@@ -150,10 +152,10 @@ SyncPoint::wait(const char * component) {
 /**
  * @return all watchers of the SyncPoint
  */
-std::set<const char *>
+std::set<std::string>
 SyncPoint::get_watchers() const {
   mutex_->lock();
-  std::set<const char *> ret = watchers_;
+  std::set<std::string> ret = watchers_;
   mutex_->unlock();
   return ret;
 }
