@@ -19,7 +19,11 @@ include $(BASEDIR)/etc/buildsys/gtest.mk
 
 LIBS_gtest_circular_buffer += stdc++ fawkescore fawkesutils
 OBJS_gtest_circular_buffer += test_circular_buffer.o
-OBJS_all    = $(OBJS_gtest_circular_buffer)
+
+LIBS_gtest_wait_condition += stdc++ fawkescore pthread
+OBJS_gtest_wait_condition += test_wait_condition.o
+
+OBJS_all    = $(OBJS_gtest_circular_buffer) $(OBJS_gtest_wait_condition)
 
 ifeq ($(HAVE_GTEST),1)
   CFLAGS += $(CFLAGS_GTEST)
@@ -27,6 +31,8 @@ ifeq ($(HAVE_GTEST),1)
   LDFLAGS += $(LDFLAGS_GTEST)
   LIBS_test = $(LIBDIR)/test/circular_buffer.so
   BINS_test = $(BINDIR)/gtest_circular_buffer
+  LIBS_test += $(LIBDIR)/test/wait_condition.so
+  BINS_test += $(BINDIR)/gtest_wait_condition
 else
   WARN_TARGETS += warning_gtest
 endif
@@ -36,7 +42,7 @@ test: $(WARN_TARGETS)
 
 .PHONE: warning_gtest
 warning_gtest:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting unit test for CircularBuffer$(TNORMAL) (gtest not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting unit tests for CircularBuffer and WaitCondition$(TNORMAL) (gtest not available)"
 
 endif
 
