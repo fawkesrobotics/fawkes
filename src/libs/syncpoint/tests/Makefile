@@ -15,15 +15,19 @@
 
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/etc/buildsys/gtest.mk
 
-LIBS_gtest_syncpoint += stdc++ fawkescore fawkesutils fawkessyncpoint gtest gtest_main pthread
+CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable
+LIBS_gtest_syncpoint += stdc++ fawkescore fawkesutils fawkessyncpoint pthread
 
 OBJS_gtest_syncpoint += test_syncpoint.o
-OBJS_all    = $(OBJS_gtest_syncpoint)
+OBJS_all = $(OBJS_gtest_syncpoint)
 
-LIBS_test = $(LIBDIR)/test/syncpoint.so
-
-BINS_test		= $(BINDIR)/gtest_syncpoint
-
+ifeq ($(HAVE_GTEST),1)
+  CFLAGS += $(CFLAGS_GTEST)
+  LDFLAGS += $(LDFLAGS_GTEST)
+  LIBS_test = $(LIBDIR)/test/syncpoint.so
+  BINS_test = $(BINDIR)/gtest_syncpoint
+endif
 
 include $(BUILDSYSDIR)/base.mk

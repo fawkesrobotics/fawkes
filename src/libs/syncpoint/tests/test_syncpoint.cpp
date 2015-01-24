@@ -1,8 +1,8 @@
 /***************************************************************************
- *  syncpoint-test.cpp - SyncPoint Unit Test
+ *  test_syncpoint.cpp - SyncPoint Unit Test
  *
  *  Created: Wed Jan 22 11:17:43 2014
- *  Copyright  2014  Till Hofmann
+ *  Copyright  2014-2015  Till Hofmann
  *
  ****************************************************************************/
 
@@ -21,21 +21,21 @@
 
 #include <gtest/gtest.h>
 
-#include <libs/syncpoint/syncpoint.h>
-#include <libs/syncpoint/exceptions.h>
-#include <libs/syncpoint/syncpoint_manager.h>
-
-#include <core/utils/refptr.h>
-
 #include <pthread.h>
-#include <baseapp/run.h>
-
+#include <errno.h>
 #include <unistd.h>
 #include <time.h>
 
-#include <set>
+#include <string>
+
+#include <libs/syncpoint/syncpoint.h>
+#include <libs/syncpoint/syncpoint_manager.h>
+#include <libs/syncpoint/exceptions.h>
+
+#include <core/utils/refptr.h>
 
 using namespace fawkes;
+using namespace std;
 
 /** @class SyncPointTest
  * Test class for SyncPoint
@@ -50,9 +50,8 @@ class SyncPointTest : public ::testing::Test
      */
     virtual void SetUp()
     {
-      const char * id1 = "/id1";
-      const char * id2 = "/id2";
-      //const char * id3 = "/id3";
+      string id1 = "/id1";
+      string id2 = "/id2";
       sp1 = new SyncPoint(id1);
       sp2 = new SyncPoint(id1);
       sp3 = new SyncPoint(id2);
@@ -79,15 +78,29 @@ class SyncPointManagerTest : public ::testing::Test
     /**
      * Initialize the test class
      */
-    virtual void SetUp()
+    SyncPointManagerTest()
     {
       manager = new SyncPointManager();
+
+      pthread_attr_init(&attrs);
+
+    }
+
+    /**
+     * Deinitialize the test class
+     */
+    virtual ~SyncPointManagerTest()
+    {
+      pthread_attr_destroy(&attrs);
     }
 
     /**
      * A Pointer to a SyncPointManager
      */
     RefPtr<SyncPointManager> manager;
+
+    /** Thread attributes */
+    pthread_attr_t attrs;
 };
 
 TEST_F(SyncPointTest, CreateSyncPoint)
@@ -113,7 +126,7 @@ TEST_F(SyncPointTest, LessThan)
   ASSERT_FALSE(**sp2 < **sp1);
 }
 
-TEST_F(SyncPointTest, Sets)
+TEST_F(SyncPointTest, SyncPointSets)
 {
   using namespace std;
   set<RefPtr<SyncPoint>, SyncPointSetLessThan > sp_set;
@@ -142,18 +155,27 @@ TEST_F(SyncPointTest, Sets)
 
 TEST_F(SyncPointManagerTest, SyncPointManager)
 {
-  ASSERT_EQ(manager->get_syncpoints().size(), 0);
+  ASSERT_EQ(manager->get_syncpoints().size(), 0u);
   manager->get_syncpoint("test", "/test/1");
-  ASSERT_EQ(manager->get_syncpoints().size(), 1);
-  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))), 1);
+  ASSERT_EQ(manager->get_syncpoints().size(), 1u);
+  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))), 1u);
   manager->get_syncpoint("test", "/test/2");
-  ASSERT_EQ(manager->get_syncpoints().size(), 2);
-  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))), 1);
-  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/2"))), 1);
+  ASSERT_EQ(manager->get_syncpoints().size(), 2u);
+  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))), 1u);
+  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/2"))), 1u);
   manager->get_syncpoint("test2", "/test/1");
-  ASSERT_EQ(manager->get_syncpoints().size(), 2);
-  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))), 1);
-  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/2"))), 1);
+  ASSERT_EQ(manager->get_syncpoints().size(), 2u);
+  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))), 1u);
+  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/2"))), 1u);
+}
+
+TEST_F(SyncPointManagerTest, WatcherSet)
+{
+  ASSERT_NO_THROW(manager->get_syncpoint("component 1", "/test"));
+  ASSERT_NO_THROW(manager->get_syncpoint("component 2", "/test"));
+  ASSERT_NO_THROW(manager->get_syncpoint("component 3", "/test"));
+  ASSERT_THROW(manager->get_syncpoint("component 1", "/test"), SyncPointAlreadyOpenedException);
+
 }
 
 TEST_F(SyncPointTest, EmptyIdentifier)
@@ -194,11 +216,12 @@ TEST_F(SyncPointManagerTest, MultipleWaits)
   RefPtr<SyncPoint> sp_ref = manager->get_syncpoint("component", "/test/sp1");
   SyncPoint * sp = *sp_ref;
   pthread_t thread1;
-  pthread_create(&thread1, NULL, call_wait, (void *)sp);
+  pthread_create(&thread1, &attrs, call_wait, (void *)sp);
   // make sure the other thread is first
-  usleep(100);
+  usleep(10000);
   ASSERT_THROW(sp_ref->wait("component"), SyncPointMultipleWaitCallsException);
   pthread_cancel(thread1);
+  pthread_join(thread1, NULL);
 }
 
 
@@ -208,33 +231,78 @@ struct waiter_thread_params {
     RefPtr<SyncPointManager> manager;
     /** Thread number */
     uint thread_nr;
+    /** Number of wait calls the thread should make */
+    uint num_wait_calls;
+    /** Name of the SyncPoint */
+    string sp_identifier;
 };
+
 
 /** get a SyncPoint and wait for it */
 void * start_waiter_thread(void * data) {
   waiter_thread_params *params = (waiter_thread_params *)data;
-  char component[40];
-  sprintf(component, "component %u", params->thread_nr);
-  RefPtr<SyncPoint> sp = params->manager->get_syncpoint(component, "/test/sp1");
-  sp->wait(component);
-  return NULL;
+  char *comp;
+  asprintf(&comp, "component %u", params->thread_nr);
+  string component = comp;
+  free(comp);
+  RefPtr<SyncPoint> sp = params->manager->get_syncpoint(component, params->sp_identifier);
+  for (uint i = 0; i < params->num_wait_calls; i++) {
+    sp->wait(component);
+  }
+  pthread_exit(NULL);
 }
-
-TEST_F(SyncPointManagerTest, ParallelWaitCalls)
+/** Create multiple threads which will all call get_syncpoint
+ *  for the same SyncPoint. Do not wait for the SyncPoint but return
+ *  immediately.
+ */
+TEST_F(SyncPointManagerTest, MultipleManagerRequests)
 {
-  uint num_threads = 100;
+  uint num_threads = 50;
   pthread_t threads[num_threads];
   waiter_thread_params *params[num_threads];
+  string sp_identifier = "/test/sp1";
   for (uint i = 0; i < num_threads; i++) {
     params[i] = new waiter_thread_params();
     params[i]->manager = manager;
     params[i]->thread_nr = i;
-    pthread_create(&threads[i], NULL, start_waiter_thread, params[i]);
+    params[i]->num_wait_calls = 0;
+    params[i]->sp_identifier = sp_identifier;
+    pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
+    pthread_yield();
   }
 
-  usleep(100);
+  for (uint i = 0; i < num_threads; i++) {
+    pthread_join(threads[i], NULL);
+    delete params[i];
+  }
+}
+
+
+/** start multiple threads and let them wait.
+ *  This just tests whether there are any segfaults.
+ *  No assertions are made.
+ */
+TEST_F(SyncPointManagerTest, ParallelWaitCalls)
+{
+  uint num_threads = 50;
+  uint num_wait_calls = 10;
+  pthread_t threads[num_threads];
+  waiter_thread_params *params[num_threads];
+  string sp_identifier = "/test/sp1";
+  for (uint i = 0; i < num_threads; i++) {
+    params[i] = new waiter_thread_params();
+    params[i]->manager = manager;
+    params[i]->thread_nr = i;
+    params[i]->num_wait_calls = num_wait_calls;
+    params[i]->sp_identifier = sp_identifier;
+    pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
+    pthread_yield();
+  }
+
+  usleep(10000);
   for (uint i = 0; i < num_threads; i++) {
     pthread_cancel(threads[i]);
+    ASSERT_EQ(0,pthread_join(threads[i], NULL));
     delete params[i];
   }
 }
@@ -244,21 +312,30 @@ TEST_F(SyncPointManagerTest, ParallelWaitCalls)
  */
 TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
 {
-  uint num_threads = 100;
+
+  uint num_threads = 50;
+  uint num_wait_calls = 10;
   pthread_t threads[num_threads];
   waiter_thread_params *params[num_threads];
+  string sp_identifier = "/test/sp1";
   for (uint i = 0; i < num_threads; i++) {
     params[i] = new waiter_thread_params();
     params[i]->manager = manager;
     params[i]->thread_nr = i;
-    pthread_create(&threads[i], NULL, start_waiter_thread, params[i]);
+    params[i]->num_wait_calls = num_wait_calls;
+    params[i]->sp_identifier = sp_identifier;
+    pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
+    usleep(10000);
   }
 
-  usleep(50);
-  RefPtr<SyncPoint> sp =manager->get_syncpoint("main_thread", "/test/sp1");
+  string component = "emitter";
+  RefPtr<SyncPoint> sp = manager->get_syncpoint(component, sp_identifier);
+  for (uint i = 0; i < num_wait_calls; i++) {
+    sp->emit(component);
+    usleep(10000);
+  }
 
-  sp->emit("main_thread");
-  usleep(500);
+  sleep(1);
   for (uint i = 0; i < num_threads; i++) {
     ASSERT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
     delete params[i];
@@ -270,22 +347,23 @@ TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
  */
 TEST_F(SyncPointManagerTest, WaitDoesNotReturnImmediately)
 {
-  uint num_threads = 100;
+  uint num_threads = 50;
   pthread_t threads[num_threads];
   waiter_thread_params *params[num_threads];
   for (uint i = 0; i < num_threads; i++) {
     params[i] = new waiter_thread_params();
     params[i]->manager = manager;
     params[i]->thread_nr = i;
-    pthread_create(&threads[i], NULL, start_waiter_thread, params[i]);
+    params[i]->num_wait_calls = 1;
+    params[i]->sp_identifier = "/test/sp1";
+    pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
   }
 
-  usleep(50);
-  RefPtr<SyncPoint> sp =manager->get_syncpoint("main_thread", "/test/sp1");
-  usleep(500);
-
+  sleep(1);
   for (uint i = 0; i < num_threads; i++) {
-    ASSERT_EQ(16, pthread_tryjoin_np(threads[i], NULL));
+    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    pthread_cancel(threads[i]);
+    ASSERT_EQ(0, pthread_join(threads[i], NULL));
     delete params[i];
   }
 }
