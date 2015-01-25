@@ -171,6 +171,43 @@ class SyncPointMultipleWaitCallsException : public Exception
     }
 };
 
+/** A component tried to register as emitter but is already registered
+ *
+ */
+class SyncBarrierMultipleRegisterCallsException : public Exception
+{
+public:
+  /** Constructor.
+   * @param component The calling component
+   * @param identifier The identifier of the SyncBarrier
+   */
+	SyncBarrierMultipleRegisterCallsException(const char * component,
+    const char * identifier)
+  {
+    append("Component '%s' called register_emitter() on SyncBarrier '%s', but is already registered",
+        component, identifier);
+  }
+};
+
+/** Emit was called on a SyncBarrier but the calling component is not registered
+ *  as emitter
+ */
+class SyncBarrierNonEmitterCalledEmitException : public Exception
+{
+  public:
+    /** Constructor.
+     * @param component The calling component
+     * @param identifier The identifier of the SyncPoint
+     */
+	SyncBarrierNonEmitterCalledEmitException(const char * component,
+      const char *identifier)
+    {
+      append("Component '%s' called emit for SyncBarrier '%s', "
+	  "but is not a registered emitter",
+          component, identifier);
+    }
+};
+
 
 } // namespace fawkes
 

@@ -23,7 +23,6 @@
 #define __SYNCPOINT_SYNCPOINT_H_
 
 #include <interface/interface.h>
-#include <syncpoint/syncpoint_manager.h>
 #include <syncpoint/syncpoint_call.h>
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
@@ -40,7 +39,6 @@ namespace fawkes {
 #endif
 
 class SyncPointManager;
-class SyncPointCall;
 
 
 class SyncPoint
@@ -69,19 +67,27 @@ class SyncPoint
      */
     friend class SyncPointManager;
 
-  private:
+  protected:
     std::pair<std::set<std::string>::iterator,bool> add_watcher(std::string watcher);
 
-  private:
+  protected:
+    /** The unique identifier of the SyncPoint */
     const std::string identifier_;
+    /** Set of all components which use this SyncPoint */
     std::set<std::string> watchers_;
+    /** Set of all components which are currently waiting for the SyncPoint */
     std::set<std::string> waiting_watchers_;
 
+    /** A buffer of the most recent emit calls. */
     CircularBuffer<SyncPointCall> emit_calls_;
+    /** A buffer of the most recent wait calls. */
     CircularBuffer<SyncPointCall> wait_calls_;
+    /** Time when this SyncPoint was created */
     const Time creation_time_;
 
+    /** Mutex used to protect all member variables */
     Mutex *mutex_;
+    /** WaitCondition which is used for wait() and emit() */
     WaitCondition *wait_condition_;
 };
 

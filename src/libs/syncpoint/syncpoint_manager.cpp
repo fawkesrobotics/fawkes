@@ -75,6 +75,7 @@ SyncPointManager::get_syncpoint(const std::string & component, const std::string
   // insert a new SyncPoint if no SyncPoint with the same identifier exists,
   // otherwise, use that SyncPoint
   std::pair<std::set<RefPtr<SyncPoint> >::iterator,bool> ret;
+  // TODO clean this up we don't need to catch the exception
   try {
   ret = syncpoints_.insert(RefPtr<SyncPoint>(new SyncPoint(identifier)));
   } catch (const SyncPointInvalidIdentifierException &e) {
@@ -82,6 +83,40 @@ SyncPointManager::get_syncpoint(const std::string & component, const std::string
   }
 
   std::set<RefPtr<SyncPoint> >::iterator it = ret.first;
+
+  // add component to the set of watchers
+  // check if component is already a watcher
+  // insert returns a pair whose second element is false if element already exists
+  if (!(*it)->add_watcher(component).second) {
+    throw SyncPointAlreadyOpenedException(component.c_str(), identifier.c_str());
+  }
+
+  return *it;
+}
+
+/**
+ * Get a SyncBarrier. This allows accessing the SyncBarrier's wait() and emit() methods
+ * @param component The name of the component calling the method
+ * @param identifier The identifier of the requested SyncBarrier
+ * @return A RefPtr to a SyncBarrier which is shared by all threads with this
+ * SyncBarrier.
+ * @throw SyncPointInvalidComponentException thrown if component name is invalid
+ * @throw SyncPointAlreadyOpenedException thrown if SyncPoint is already opened
+ * by the component
+ */
+RefPtr<SyncBarrier>
+SyncPointManager::get_syncbarrier(const std::string & component, const std::string & identifier)
+{
+  MutexLocker ml(mutex_);
+  if (component == "") {
+    throw SyncPointInvalidComponentException(component.c_str(), identifier.c_str());
+  }
+  // insert a new SyncBarrier if no SyncBarrier with the same identifier exists,
+  // otherwise, use that SyncBarrier
+  std::pair<std::set<RefPtr<SyncBarrier> >::iterator, bool> ret =
+      syncbarriers_.insert(RefPtr<SyncBarrier>(new SyncBarrier(identifier)));
+
+  std::set<RefPtr<SyncBarrier> >::iterator it = ret.first;
 
   // add component to the set of watchers
   // check if component is already a watcher
@@ -117,6 +152,29 @@ SyncPointManager::release_syncpoint(const std::string & component, RefPtr<SyncPo
   }
 }
 
+/**
+ * Release a SyncBarrier. After releasing the SyncBarrier, its wait() and emit()
+ * methods cannot be called anymore by the releasing component
+ * @param component The releasing component
+ * @param sync_barrier A RefPtr to the released SyncBarrier
+ * @throw SyncPointReleasedDoesNotExistException thrown if the SyncBarrier doesn't
+ * exist, i.e. is not in the list of the manager's SyncBarriers.
+ * @throw SyncPointReleasedByNonWatcherException The releasing component is not
+ * a watcher of the SyncBarrier
+ */
+void
+SyncPointManager::release_syncbarrier(const std::string & component, RefPtr<SyncBarrier> sync_barrier)
+{
+  MutexLocker ml(mutex_);
+  std::set<RefPtr<SyncBarrier> >::iterator sp_it = syncbarriers_.find(
+      sync_barrier);
+  if (sp_it == syncbarriers_.end()) {
+    throw SyncPointReleasedDoesNotExistException(component.c_str(), sync_barrier->get_identifier().c_str());
+  }
+  if (!(*sp_it)->watchers_.erase(component)) {
+    throw SyncPointReleasedByNonWatcherException(component.c_str(), sync_barrier->get_identifier().c_str());
+  }
+}
 
 /** @class SyncPointSetLessThan "syncpoint_manager.h"
  * Compare sets of syncpoints
@@ -143,6 +201,31 @@ std::set<RefPtr<SyncPoint>, SyncPointSetLessThan >
 SyncPointManager::get_syncpoints() {
   MutexLocker ml(mutex_);
   return syncpoints_;
+}
+
+/**
+ * Get the current list of all SyncBarriers managed by this SyncPointManager
+ * @return a set of SyncBarriers
+ */
+std::set<RefPtr<SyncBarrier>, SyncPointSetLessThan >
+SyncPointManager::get_syncbarriers() {
+  MutexLocker ml(mutex_);
+  return syncbarriers_;
+}
+
+/**
+ * Reset all SyncBarriers. Resetting the barrier causes all registered emitters
+ * to be pending again, every registered emitter has to emit the barrier before
+ * a waiter unblocks.
+ */
+void
+SyncPointManager::reset_syncbarriers()
+{
+  MutexLocker ml(mutex_);
+  for (std::set<RefPtr<SyncBarrier> >::iterator it = syncbarriers_.begin();
+      it != syncbarriers_.end(); it++) {
+    (*it)->reset_emitters();
+  }
 }
 
 /**

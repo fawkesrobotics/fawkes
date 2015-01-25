@@ -154,6 +154,9 @@ SyncPoint::wait(const std::string & component) {
 
 /** Add a watcher to the watch list
  *  @param watcher the new watcher
+ *  @return A pair, of which the first element is an iterator that points
+ *           to the possibly inserted element, and the second is a bool
+ *           that is true if the element was actually inserted.
  */
 pair<set<string>::iterator,bool>
 SyncPoint::add_watcher(string watcher)
