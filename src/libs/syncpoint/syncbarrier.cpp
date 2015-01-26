@@ -93,22 +93,10 @@ SyncBarrier::emit(const string & component)
   if (pending_emitters_.empty()) {
     waiting_watchers_.clear();
     wait_condition_->wake_all();
+    reset_emitters_();
   }
 }
 
-/** Wait until SyncPoint is emitted
- * @param component The identifier of the component waiting for the SyncPoint
- */
-void
-SyncBarrier::wait(const string & component)
-{
-  if (!is_emitted()) {
-    // TODO
-    // this might actually break if the last emitter emits
-    // right here, between the is_emitter() call and the wait() call
-    SyncPoint::wait(component);
-  }
-}
 
 /** Register an emitter. A thread can only emit the barrier if it has been
  *  registered.
@@ -154,7 +142,15 @@ SyncBarrier::is_emitted() const {
 void
 SyncBarrier::reset_emitters() {
 	MutexLocker ml(mutex_);
-	pending_emitters_ = emitters_;
+	reset_emitters_();
+}
+
+/** Helper function. This allows to reset emitters both with mutex_ locked
+ *  and unlocked.
+ */
+void
+SyncBarrier::reset_emitters_() {
+  pending_emitters_ = emitters_;
 }
 
 } // namespace fawkes

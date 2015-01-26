@@ -47,14 +47,15 @@ class SyncBarrier : public SyncPoint
     /** send a signal to all waiting threads */
     virtual void emit(const std::string & component);
 
-    /** wait for the sync point to be emitted */
-    virtual void wait(const std::string & component);
-
     /** check whether the barrier is already emitted */
     virtual bool is_emitted() const;
 
     /** set all registered emitter as pending */
     void reset_emitters();
+
+  private:
+    void reset_emitters_();
+
   private:
     std::set<std::string> emitters_;
     std::set<std::string> pending_emitters_;

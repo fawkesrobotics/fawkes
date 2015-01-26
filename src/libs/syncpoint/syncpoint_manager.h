@@ -57,8 +57,6 @@ class SyncPointManager
     std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > get_syncpoints();
     std::set<RefPtr<SyncBarrier>, SyncPointSetLessThan > get_syncbarriers();
 
-    void reset_syncbarriers();
-
 
     std::string all_syncpoints_as_dot(float max_age);
 

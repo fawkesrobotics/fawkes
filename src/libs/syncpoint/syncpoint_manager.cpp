@@ -213,20 +213,6 @@ SyncPointManager::get_syncbarriers() {
   return syncbarriers_;
 }
 
-/**
- * Reset all SyncBarriers. Resetting the barrier causes all registered emitters
- * to be pending again, every registered emitter has to emit the barrier before
- * a waiter unblocks.
- */
-void
-SyncPointManager::reset_syncbarriers()
-{
-  MutexLocker ml(mutex_);
-  for (std::set<RefPtr<SyncBarrier> >::iterator it = syncbarriers_.begin();
-      it != syncbarriers_.end(); it++) {
-    (*it)->reset_emitters();
-  }
-}
 
 /**
  * Get DOT graph for all SyncPoints
