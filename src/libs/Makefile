@@ -54,7 +54,7 @@ logging: core utils netcomm
 naoutils: core utils
 webview: core utils logging
 baseapp: core utils aspect config netcomm blackboard plugin logging
-eclipse_externals: blackboard interface utils
+eclipse_externals: blackboard interface utils navgraph
 tf: core utils blackboard interface interfaces
 fvutils: core utils netcomm logging
 fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils logging
