@@ -550,7 +550,7 @@ Interface::set_type_id(const char *type, const char *id)
   __uid[__INTERFACE_UID_SIZE] = 0;
   strncpy(__type, type, __INTERFACE_TYPE_SIZE);
   strncpy(__id, id, __INTERFACE_ID_SIZE);
-  snprintf(__uid, __INTERFACE_UID_SIZE, "%s::%s", type, id);
+  snprintf(__uid, __INTERFACE_UID_SIZE, "%s::%s", __type, __id);
 }
 
 
