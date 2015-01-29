@@ -84,9 +84,10 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
     // It is in our URL prefix range
     std::string subpath = request->url().substr(__baseurl_len);
 
-    if (subpath == "/graph/graph.png") {
+    if (subpath.find("/graph/graph.png") == 0) {
 #ifdef HAVE_GRAPHVIZ
-      std::string graph = generate_graph();
+      std::string graph_node = request->get_value("for");
+      std::string graph = generate_graph(graph_node);
 
       FILE *f = tmpfile();
       if (NULL == f) {
@@ -262,8 +263,11 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	  r->append_body("</table>\n");
 	  r->append_body("<p><a href=\"%s\">Clear detailed</a></p>\n", __baseurl);
 	}
-      } else if (subpath == "/graph") {
-	std::string graph = generate_graph();
+      } else if (subpath.find("/graph") == 0) {
+	std::string graph_baseurl("/graph/");
+	std::string graph_node =
+	  subpath.length() > graph_baseurl.length() ? subpath.substr(graph_baseurl.length()) : "";
+	std::string graph = generate_graph(graph_node);
 #ifdef HAVE_GRAPHVIZ
 	char *map;
 	unsigned int map_length;
@@ -278,10 +282,16 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	agclose(G);    
 	gvFreeContext(gvc);
 
- 	r->append_body("<p><img src=\"%s/graph/graph.png\" usemap=\"#bbmap\" /></p>\n", __baseurl);
+ 	r->append_body("<p><img src=\"%s/graph/graph.png%s%s\" usemap=\"#bbmap\" /></p>\n",
+		       __baseurl,
+		       graph_node.empty() ? "" : "?for=",
+		       graph_node.empty() ? "" : graph_node.c_str());
 #else
 	r->append_body("<p>No graphviz support at compile time</p>\n");
 #endif
+	if (! graph_node.empty()) {
+	  r->append_body("<p><a href=\"%s/graph\">Full Graph</a></p>\n\n", __baseurl);
+	}
 	r->append_body("<!-- DOT Graph:\n\n%s\n\n-->\n\n", graph.c_str());
       }
       return r;
@@ -294,9 +304,10 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 
 
 std::string
-WebviewBlackBoardRequestProcessor::generate_graph()
+WebviewBlackBoardRequestProcessor::generate_graph(std::string for_owner)
 {
   InterfaceInfoList *iil = __blackboard->list_all();
+  iil->sort();
 
   std::stringstream mstream;
   mstream << "digraph bbmap {" << std::endl
@@ -306,14 +317,22 @@ WebviewBlackBoardRequestProcessor::generate_graph()
 
   InterfaceInfoList::iterator ii;
   for (ii = iil->begin(); ii != iil->end(); ++ii) {
-    if (ii->has_writer()) {
-      const std::string writer = ii->writer();
-      if (! writer.empty())  owners.insert(writer);
-    }
     const std::list<std::string> readers = ii->readers();
-    std::list<std::string>::const_iterator r;
-    for (r = readers.begin(); r != readers.end(); ++r) {
-      owners.insert(*r);
+    
+    if (for_owner == "" ||
+	ii->writer() == for_owner ||
+	std::find_if(readers.begin(), readers.end(),
+		     [&for_owner](const std::string &o)->bool { return for_owner == o; })
+	!= readers.end())
+    {
+      if (ii->has_writer()) {
+	const std::string writer = ii->writer();
+	if (! writer.empty())  owners.insert(writer);
+      }
+      std::list<std::string>::const_iterator r;
+      for (r = readers.begin(); r != readers.end(); ++r) {
+	owners.insert(*r);
+      }
     }
   }
 
@@ -321,57 +340,59 @@ WebviewBlackBoardRequestProcessor::generate_graph()
 	  << "  { rank=same; " << std::endl;
   std::set<std::string>::iterator i;
   for (ii = iil->begin(); ii != iil->end(); ++ii) {
-    mstream << "    \"" << ii->type() << "::" << ii->id() << "\""
-	    << " [href=\"" << __baseurl << "/view/" << ii->type() << "::" << ii->id() << "\"";
+    const std::list<std::string> readers = ii->readers();
+    if (for_owner == "" ||
+	ii->writer() == for_owner ||
+	std::find_if(readers.begin(), readers.end(),
+		     [&for_owner](const std::string &o)->bool { return for_owner == o; })
+	!= readers.end())
+    {
+      mstream << "    \"" << ii->type() << "::" << ii->id() << "\""
+	      << " [href=\"" << __baseurl << "/view/" << ii->type() << "::" << ii->id() << "\"";
 
-    
-    if (! ii->has_writer()) {
-      mstream << " color=red";
-    } else if (ii->writer().empty()) {
-      mstream << " color=purple";
+
+      if (! ii->has_writer()) {
+	mstream << " color=red";
+      } else if (ii->writer().empty()) {
+	mstream << " color=purple";
+      }
+      mstream << "];" << std::endl;
     }
-    mstream << "];" << std::endl;
   }
   mstream << "  }" << std::endl;
 
   mstream << "  node [fontsize=12 shape=octagon width=3];" << std::endl;
   for (i = owners.begin(); i != owners.end(); ++i) {
-    mstream << "  \"" << *i << "\";" << std::endl;
+    mstream << "  \"" << *i << "\""
+	    << " [href=\"" << __baseurl << "/graph/" << *i << "\"];"
+	    << std::endl;
   }
 
   for (ii = iil->begin(); ii != iil->end(); ++ii) {
     const std::list<std::string> readers = ii->readers();
-    std::list<std::string> quoted_readers;
-    std::for_each(readers.begin(), readers.end(),
-		  [&quoted_readers](const std::string &r) {
-		    quoted_readers.push_back(std::string("\"")+r+"\"");
-		  });
-    std::string quoted_readers_s = str_join(quoted_readers, ' ');
-    mstream << "  \"" << ii->type() << "::" << ii->id() << "\" -> { "
-	    << quoted_readers_s << " } [style=dashed arrowhead=dot arrowsize=0.5 dir=both];" << std::endl;
+    if (for_owner == "" ||
+	ii->writer() == for_owner ||
+	std::find_if(readers.begin(), readers.end(),
+		     [&for_owner](const std::string &o)->bool { return for_owner == o; })
+	!= readers.end())
+    {
+      std::list<std::string> quoted_readers;
+      std::for_each(readers.begin(), readers.end(),
+		    [&quoted_readers](const std::string &r) {
+		      quoted_readers.push_back(std::string("\"")+r+"\"");
+		    });
+      std::string quoted_readers_s = str_join(quoted_readers, ' ');
+      mstream << "  \"" << ii->type() << "::" << ii->id() << "\" -> { "
+	      << quoted_readers_s << " } [style=dashed arrowhead=dot arrowsize=0.5 dir=both];" << std::endl;
 
-    if (ii->has_writer()) {
-      mstream << "  \"" << (ii->writer().empty() ? "???" : ii->writer()) << "\" -> \""
-	      << ii->type() << "::" << ii->id() << "\""
-	      << (ii->writer().empty() ? " [color=purple]" : " [color=\"#008800\"]")
-	      << ";" << std::endl;
-    }
-  }
-
-
-  /* Simpler but less clear version which does not explicitly represent interfaces
-  InterfaceInfoList::iterator ii;
-  for (ii = iil->begin(); ii != iil->end(); ++ii) {
-    if (ii->has_writer() && ! ii->writer().empty()) {
-      const std::list<std::string> readers = ii->readers();
-      std::list<std::string>::const_iterator r;
-      for (r = readers.begin(); r != readers.end(); ++r) {
-        mstream << "  \"" << *r << "\" -> \"" << ii->writer() << "\" "
-	        << "[label=\"" << ii->type() << "::" << ii->id() << "\"];" << std::endl;
+      if (ii->has_writer()) {
+	mstream << "  \"" << (ii->writer().empty() ? "???" : ii->writer()) << "\" -> \""
+		<< ii->type() << "::" << ii->id() << "\""
+		<< (ii->writer().empty() ? " [color=purple]" : " [color=\"#008800\"]")
+		<< ";" << std::endl;
       }
     }
   }
-  */
 
   delete iil;
 

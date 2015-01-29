@@ -43,7 +43,7 @@ class WebviewBlackBoardRequestProcessor : public fawkes::WebRequestProcessor
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
-  std::string generate_graph();
+  std::string generate_graph(std::string for_owner = "");
 
  private:
   char *__baseurl;
