@@ -25,6 +25,7 @@
 #include "externals/blackboard.h"
 #include "externals/fawkes_logger.h"
 #include "externals/eclipse_path.h"
+#include "externals/eclipseclp_config.h"
 
 #include <interfaces/TestInterface.h>
 #include <core/threading/mutex_locker.h>
@@ -74,6 +75,7 @@ EclipseAgentThread::init()
 {
   _running = false;
   fawkes::EclExternalBlackBoard::create_initial_object(blackboard);
+  fawkes::EclExternalConfig::create_initial_object(config);
   // set ECLiPSe installation directory
   char* eclipse_dir = NULL;
   try

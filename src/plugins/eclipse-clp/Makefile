@@ -32,7 +32,8 @@ OBJS_eclipse_clp = plugin.o control_thread.o eclipse_thread.o \
 		     externals/fawkes_logger.o       \
 		     externals/blackboard.o          \
 		     externals/eclipse_path.o        \
-		     externals/quaternion_helper.o
+		     externals/quaternion_helper.o   \
+		     externals/eclipseclp_config.o
 
 ifeq ($(HAVE_NAVGRAPH),1)
   CFLAGS +=  $(CFLAGS_NAVGRAPH)
