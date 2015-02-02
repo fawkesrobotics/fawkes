@@ -47,6 +47,9 @@ class SyncBarrier : public SyncPoint
     /** send a signal to all waiting threads */
     virtual void emit(const std::string & component);
 
+    /** wait for the barrier */
+    virtual void wait(const std::string & component);
+
     /** check whether the barrier is already emitted */
     virtual bool is_emitted() const;
 

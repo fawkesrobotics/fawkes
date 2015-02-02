@@ -97,6 +97,22 @@ SyncBarrier::emit(const string & component)
   }
 }
 
+/** Wait for the SyncBarrier.
+ *  If no emitters have registered for the barrier, return immediately.
+ *  Otherwise, wait until all registered emitters have emitted the SyncBarrier.
+ *  @param component The identifier of the component waiting for the SyncBarrier
+ */
+void
+SyncBarrier::wait(const string & component)
+{
+  mutex_->lock();
+  bool need_to_wait = !emitters_.empty();
+  mutex_->unlock();
+  if (need_to_wait) {
+    SyncPoint::wait(component);
+  }
+}
+
 
 /** Register an emitter. A thread can only emit the barrier if it has been
  *  registered.
