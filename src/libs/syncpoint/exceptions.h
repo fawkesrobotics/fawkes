@@ -130,7 +130,8 @@ class SyncPointInvalidIdentifierException : public Exception
     SyncPointInvalidIdentifierException(const char * identifier)
     {
       append("Tried to construct a SyncPoint with invalid identifier ('%s'). "
-          "Identifier must be a non-empty absolute path (e.g. '/path/to/syncpoint')",
+          "Identifier must be a non-empty absolute path (e.g. '/path/to/syncpoint')"
+          " and may not end with '/'",
           identifier);
     }
 };

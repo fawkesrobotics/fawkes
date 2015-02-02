@@ -71,6 +71,14 @@ SyncPoint::SyncPoint(string identifier)
     delete mutex_;
     throw SyncPointInvalidIdentifierException(identifier.c_str());
   }
+  // check if last charater is '/'
+  // The identifier may only end in '/' if '/' is the complete identifier.
+  // '/' is allowed, '/some/' is not allowed
+  if (identifier != "/" && !identifier.compare(identifier.size() - 1, 1, "/")) {
+    delete wait_condition_;
+    delete mutex_;
+    throw SyncPointInvalidIdentifierException(identifier.c_str());
+  }
 }
 
 SyncPoint::~SyncPoint()
