@@ -197,8 +197,9 @@ TEST_F(SyncPointTest, EmptyIdentifier)
 
 TEST_F(SyncPointTest, InvalidIdentifier)
 {
-  ASSERT_THROW(sp1 = new SyncPoint("invalid"), SyncPointInvalidIdentifierException);
-
+  EXPECT_THROW(sp1 = new SyncPoint("invalid"), SyncPointInvalidIdentifierException);
+  EXPECT_NO_THROW(sp1 = new SyncPoint("/"));
+  EXPECT_THROW(sp1 = new SyncPoint("/test/"), SyncPointInvalidIdentifierException);
 }
 
 TEST_F(SyncPointManagerTest, SyncPointManagerExceptions) {
