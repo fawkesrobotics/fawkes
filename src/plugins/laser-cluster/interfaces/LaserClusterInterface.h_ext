@@ -68,6 +68,7 @@ class LaserClusterInterface : public Interface
 
   LaserClusterInterface_data_t *data;
 
+  interface_enum_map_t enum_map_SelectionMode;
  public:
   /* messages */
   class SetMaxXMessage : public Message
@@ -85,6 +86,7 @@ class LaserClusterInterface : public Interface
 
     SetMaxXMessage_data_t *data;
 
+  interface_enum_map_t enum_map_SelectionMode;
    public:
     SetMaxXMessage(const float ini_max_x);
     SetMaxXMessage();
@@ -114,6 +116,7 @@ class LaserClusterInterface : public Interface
 
     SetSelectionModeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_SelectionMode;
    public:
     SetSelectionModeMessage(const SelectionMode ini_selection_mode);
     SetSelectionModeMessage();

@@ -103,6 +103,8 @@ class NavigatorInterface : public Interface
 
   NavigatorInterface_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
  public:
   /* messages */
   class StopMessage : public Message
@@ -118,6 +120,8 @@ class NavigatorInterface : public Interface
 
     StopMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     StopMessage();
     ~StopMessage();
@@ -143,6 +147,8 @@ class NavigatorInterface : public Interface
 
     TurnMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     TurnMessage(const float ini_angle, const float ini_velocity);
     TurnMessage();
@@ -175,6 +181,8 @@ class NavigatorInterface : public Interface
 
     CartesianGotoMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     CartesianGotoMessage(const float ini_x, const float ini_y, const float ini_orientation);
     CartesianGotoMessage();
@@ -210,6 +218,8 @@ class NavigatorInterface : public Interface
 
     PolarGotoMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     PolarGotoMessage(const float ini_phi, const float ini_dist, const float ini_orientation);
     PolarGotoMessage();
@@ -243,6 +253,8 @@ class NavigatorInterface : public Interface
 
     PlaceGotoMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     PlaceGotoMessage(const char * ini_place);
     PlaceGotoMessage();
@@ -272,6 +284,8 @@ class NavigatorInterface : public Interface
 
     ObstacleMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     ObstacleMessage(const float ini_x, const float ini_y, const float ini_width);
     ObstacleMessage();
@@ -304,6 +318,8 @@ class NavigatorInterface : public Interface
 
     ResetOdometryMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     ResetOdometryMessage();
     ~ResetOdometryMessage();
@@ -327,6 +343,8 @@ class NavigatorInterface : public Interface
 
     SetMaxVelocityMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     SetMaxVelocityMessage(const float ini_max_velocity);
     SetMaxVelocityMessage();
@@ -354,6 +372,8 @@ class NavigatorInterface : public Interface
 
     SetMaxRotationMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     SetMaxRotationMessage(const float ini_max_rotation);
     SetMaxRotationMessage();
@@ -382,6 +402,8 @@ class NavigatorInterface : public Interface
 
     SetEscapingMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     SetEscapingMessage(const bool ini_escaping_enabled);
     SetEscapingMessage();
@@ -409,6 +431,8 @@ class NavigatorInterface : public Interface
 
     SetSecurityDistanceMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     SetSecurityDistanceMessage(const float ini_security_distance);
     SetSecurityDistanceMessage();
@@ -436,6 +460,8 @@ class NavigatorInterface : public Interface
 
     SetDriveModeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     SetDriveModeMessage(const DriveMode ini_drive_mode);
     SetDriveModeMessage();
@@ -463,6 +489,8 @@ class NavigatorInterface : public Interface
 
     SetStopAtTargetMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     SetStopAtTargetMessage(const bool ini_stop_at_target);
     SetStopAtTargetMessage();
@@ -490,6 +518,8 @@ class NavigatorInterface : public Interface
 
     SetOrientationModeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     SetOrientationModeMessage(const OrientationMode ini_orientation_mode);
     SetOrientationModeMessage();
@@ -516,6 +546,8 @@ class NavigatorInterface : public Interface
 
     ResetParametersMessage_data_t *data;
 
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
    public:
     ResetParametersMessage();
     ~ResetParametersMessage();

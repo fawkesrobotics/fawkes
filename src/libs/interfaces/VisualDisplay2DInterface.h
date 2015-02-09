@@ -80,6 +80,8 @@ class VisualDisplay2DInterface : public Interface
 
   VisualDisplay2DInterface_data_t *data;
 
+  interface_enum_map_t enum_map_LineStyle;
+  interface_enum_map_t enum_map_Anchor;
  public:
   /* messages */
   class AddCartLineMessage : public Message
@@ -100,6 +102,8 @@ class VisualDisplay2DInterface : public Interface
 
     AddCartLineMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LineStyle;
+  interface_enum_map_t enum_map_Anchor;
    public:
     AddCartLineMessage(const float * ini_x, const float * ini_y, const LineStyle ini_style, const uint8_t * ini_color);
     AddCartLineMessage();
@@ -146,6 +150,8 @@ class VisualDisplay2DInterface : public Interface
 
     AddCartCircleMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LineStyle;
+  interface_enum_map_t enum_map_Anchor;
    public:
     AddCartCircleMessage(const float ini_x, const float ini_y, const float ini_radius, const LineStyle ini_style, const uint8_t * ini_color);
     AddCartCircleMessage();
@@ -192,6 +198,8 @@ class VisualDisplay2DInterface : public Interface
 
     AddCartRectMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LineStyle;
+  interface_enum_map_t enum_map_Anchor;
    public:
     AddCartRectMessage(const float ini_x, const float ini_y, const float ini_width, const float ini_height, const LineStyle ini_style, const uint8_t * ini_color);
     AddCartRectMessage();
@@ -242,6 +250,8 @@ class VisualDisplay2DInterface : public Interface
 
     AddCartTextMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LineStyle;
+  interface_enum_map_t enum_map_Anchor;
    public:
     AddCartTextMessage(const float ini_x, const float ini_y, const char * ini_text, const Anchor ini_anchor, const float ini_size, const uint8_t * ini_color);
     AddCartTextMessage();
@@ -287,6 +297,8 @@ class VisualDisplay2DInterface : public Interface
 
     DeleteObjectMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LineStyle;
+  interface_enum_map_t enum_map_Anchor;
    public:
     DeleteObjectMessage(const uint32_t ini_object_id);
     DeleteObjectMessage();
@@ -313,6 +325,8 @@ class VisualDisplay2DInterface : public Interface
 
     DeleteAllMessage_data_t *data;
 
+  interface_enum_map_t enum_map_LineStyle;
+  interface_enum_map_t enum_map_Anchor;
    public:
     DeleteAllMessage();
     ~DeleteAllMessage();

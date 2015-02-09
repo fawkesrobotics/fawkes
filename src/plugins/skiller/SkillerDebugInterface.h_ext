@@ -70,6 +70,7 @@ class SkillerDebugInterface : public Interface
 
   SkillerDebugInterface_data_t *data;
 
+  interface_enum_map_t enum_map_GraphDirectionEnum;
  public:
   /* messages */
   class SetGraphMessage : public Message
@@ -88,6 +89,7 @@ class SkillerDebugInterface : public Interface
 
     SetGraphMessage_data_t *data;
 
+  interface_enum_map_t enum_map_GraphDirectionEnum;
    public:
     SetGraphMessage(const char * ini_graph_fsm);
     SetGraphMessage();
@@ -117,6 +119,7 @@ class SkillerDebugInterface : public Interface
 
     SetGraphDirectionMessage_data_t *data;
 
+  interface_enum_map_t enum_map_GraphDirectionEnum;
    public:
     SetGraphDirectionMessage(const GraphDirectionEnum ini_graph_dir);
     SetGraphDirectionMessage();
@@ -146,6 +149,7 @@ class SkillerDebugInterface : public Interface
 
     SetGraphColoredMessage_data_t *data;
 
+  interface_enum_map_t enum_map_GraphDirectionEnum;
    public:
     SetGraphColoredMessage(const bool ini_graph_colored);
     SetGraphColoredMessage();

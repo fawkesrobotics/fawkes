@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -52,7 +54,11 @@ FacerInterface::FacerInterface() : Interface()
   data      = (FacerInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t");
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t", &enum_map_if_facer_opmode_t);
   add_fieldinfo(IFT_UINT32, "num_identities", 1, &data->num_identities);
   add_fieldinfo(IFT_UINT32, "recognized_identity", 1, &data->recognized_identity);
   add_fieldinfo(IFT_STRING, "recognized_name", 64, data->recognized_name);
@@ -727,6 +733,10 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage(const char * ini_name) : Mess
   data      = (LearnFaceMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->name, ini_name, 64);
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 /** Constructor */
@@ -737,6 +747,10 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage() : Message("LearnFaceMessage
   memset(data_ptr, 0, data_size);
   data      = (LearnFaceMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
@@ -817,7 +831,11 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage(const if_facer_opmode_t ini_o
   data      = (SetOpmodeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->opmode = ini_opmode;
-  add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t");
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t", &enum_map_if_facer_opmode_t);
 }
 /** Constructor */
 FacerInterface::SetOpmodeMessage::SetOpmodeMessage() : Message("SetOpmodeMessage")
@@ -827,7 +845,11 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage() : Message("SetOpmodeMessage
   memset(data_ptr, 0, data_size);
   data      = (SetOpmodeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t");
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t", &enum_map_if_facer_opmode_t);
 }
 
 /** Destructor */
@@ -913,6 +935,10 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const uint32_t ini_
   data_ts   = (message_data_ts_t *)data_ptr;
   data->index = ini_index;
   data->enable = ini_enable;
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
@@ -924,6 +950,10 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage() : Message("Enable
   memset(data_ptr, 0, data_size);
   data      = (EnableIdentityMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
@@ -1037,6 +1067,10 @@ FacerInterface::SetNameMessage::SetNameMessage(const uint32_t ini_index, const c
   data_ts   = (message_data_ts_t *)data_ptr;
   data->index = ini_index;
   strncpy(data->name, ini_name, 64);
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
@@ -1048,6 +1082,10 @@ FacerInterface::SetNameMessage::SetNameMessage() : Message("SetNameMessage")
   memset(data_ptr, 0, data_size);
   data      = (SetNameMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
@@ -1159,6 +1197,10 @@ FacerInterface::GetNameMessage::GetNameMessage(const uint32_t ini_index) : Messa
   data      = (GetNameMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->index = ini_index;
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
 }
 /** Constructor */
@@ -1169,6 +1211,10 @@ FacerInterface::GetNameMessage::GetNameMessage() : Message("GetNameMessage")
   memset(data_ptr, 0, data_size);
   data      = (GetNameMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
 }
 

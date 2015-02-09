@@ -109,7 +109,8 @@ class Message : public RefCount
 
  protected:
   void add_fieldinfo(interface_fieldtype_t type, const char *name,
-		     size_t length, void *value, const char *enumtype = 0);
+		     size_t length, void *value, const char *enumtype = 0,
+		     const interface_enum_map_t *enum_map = 0);
 
   void         *data_ptr;
   unsigned int  data_size;

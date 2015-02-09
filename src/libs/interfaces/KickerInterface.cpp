@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -49,10 +51,12 @@ KickerInterface::KickerInterface() : Interface()
   data      = (KickerInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_LEFT] = "GUIDE_BALL_LEFT";
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_RIGHT] = "GUIDE_BALL_RIGHT";
   add_fieldinfo(IFT_INT32, "num_kicks_left", 1, &data->num_kicks_left);
   add_fieldinfo(IFT_INT32, "num_kicks_center", 1, &data->num_kicks_center);
   add_fieldinfo(IFT_INT32, "num_kicks_right", 1, &data->num_kicks_right);
-  add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum");
+  add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum", &enum_map_GuideBallSideEnum);
   add_fieldinfo(IFT_UINT32, "current_intensity", 1, &data->current_intensity);
   add_messageinfo("KickMessage");
   add_messageinfo("ResetCounterMessage");
@@ -318,6 +322,8 @@ KickerInterface::KickMessage::KickMessage(const bool ini_left, const bool ini_ce
   data->center = ini_center;
   data->right = ini_right;
   data->intensity = ini_intensity;
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_LEFT] = "GUIDE_BALL_LEFT";
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_RIGHT] = "GUIDE_BALL_RIGHT";
   add_fieldinfo(IFT_BOOL, "left", 1, &data->left);
   add_fieldinfo(IFT_BOOL, "center", 1, &data->center);
   add_fieldinfo(IFT_BOOL, "right", 1, &data->right);
@@ -331,6 +337,8 @@ KickerInterface::KickMessage::KickMessage() : Message("KickMessage")
   memset(data_ptr, 0, data_size);
   data      = (KickMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_LEFT] = "GUIDE_BALL_LEFT";
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_RIGHT] = "GUIDE_BALL_RIGHT";
   add_fieldinfo(IFT_BOOL, "left", 1, &data->left);
   add_fieldinfo(IFT_BOOL, "center", 1, &data->center);
   add_fieldinfo(IFT_BOOL, "right", 1, &data->right);
@@ -501,6 +509,8 @@ KickerInterface::ResetCounterMessage::ResetCounterMessage() : Message("ResetCoun
   memset(data_ptr, 0, data_size);
   data      = (ResetCounterMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_LEFT] = "GUIDE_BALL_LEFT";
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_RIGHT] = "GUIDE_BALL_RIGHT";
 }
 
 /** Destructor */
@@ -550,7 +560,9 @@ KickerInterface::GuideBallMessage::GuideBallMessage(const GuideBallSideEnum ini_
   data      = (GuideBallMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->guide_ball_side = ini_guide_ball_side;
-  add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum");
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_LEFT] = "GUIDE_BALL_LEFT";
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_RIGHT] = "GUIDE_BALL_RIGHT";
+  add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum", &enum_map_GuideBallSideEnum);
 }
 /** Constructor */
 KickerInterface::GuideBallMessage::GuideBallMessage() : Message("GuideBallMessage")
@@ -560,7 +572,9 @@ KickerInterface::GuideBallMessage::GuideBallMessage() : Message("GuideBallMessag
   memset(data_ptr, 0, data_size);
   data      = (GuideBallMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum");
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_LEFT] = "GUIDE_BALL_LEFT";
+  enum_map_GuideBallSideEnum[(int)GUIDE_BALL_RIGHT] = "GUIDE_BALL_RIGHT";
+  add_fieldinfo(IFT_ENUM, "guide_ball_side", 1, &data->guide_ball_side, "GuideBallSideEnum", &enum_map_GuideBallSideEnum);
 }
 
 /** Destructor */

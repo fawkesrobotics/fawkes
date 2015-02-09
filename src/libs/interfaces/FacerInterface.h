@@ -111,6 +111,7 @@ class FacerInterface : public Interface
 
   FacerInterface_data_t *data;
 
+  interface_enum_map_t enum_map_if_facer_opmode_t;
  public:
   /* messages */
   class LearnFaceMessage : public Message
@@ -127,6 +128,7 @@ class FacerInterface : public Interface
 
     LearnFaceMessage_data_t *data;
 
+  interface_enum_map_t enum_map_if_facer_opmode_t;
    public:
     LearnFaceMessage(const char * ini_name);
     LearnFaceMessage();
@@ -156,6 +158,7 @@ class FacerInterface : public Interface
 
     SetOpmodeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_if_facer_opmode_t;
    public:
     SetOpmodeMessage(const if_facer_opmode_t ini_opmode);
     SetOpmodeMessage();
@@ -184,6 +187,7 @@ class FacerInterface : public Interface
 
     EnableIdentityMessage_data_t *data;
 
+  interface_enum_map_t enum_map_if_facer_opmode_t;
    public:
     EnableIdentityMessage(const uint32_t ini_index, const bool ini_enable);
     EnableIdentityMessage();
@@ -215,6 +219,7 @@ class FacerInterface : public Interface
 
     SetNameMessage_data_t *data;
 
+  interface_enum_map_t enum_map_if_facer_opmode_t;
    public:
     SetNameMessage(const uint32_t ini_index, const char * ini_name);
     SetNameMessage();
@@ -245,6 +250,7 @@ class FacerInterface : public Interface
 
     GetNameMessage_data_t *data;
 
+  interface_enum_map_t enum_map_if_facer_opmode_t;
    public:
     GetNameMessage(const uint32_t ini_index);
     GetNameMessage();

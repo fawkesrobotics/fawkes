@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -61,6 +63,19 @@ VisualDisplay2DInterface::VisualDisplay2DInterface() : Interface()
   data      = (VisualDisplay2DInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_UINT32, "counter", 1, &data->counter);
   add_messageinfo("AddCartLineMessage");
   add_messageinfo("AddCartCircleMessage");
@@ -218,9 +233,22 @@ VisualDisplay2DInterface::AddCartLineMessage::AddCartLineMessage(const float * i
   memcpy(data->y, ini_y, sizeof(float) * 2);
   data->style = ini_style;
   memcpy(data->color, ini_color, sizeof(uint8_t) * 4);
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_FLOAT, "x", 2, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 2, &data->y);
-  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle", &enum_map_LineStyle);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 /** Constructor */
@@ -231,9 +259,22 @@ VisualDisplay2DInterface::AddCartLineMessage::AddCartLineMessage() : Message("Ad
   memset(data_ptr, 0, data_size);
   data      = (AddCartLineMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_FLOAT, "x", 2, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 2, &data->y);
-  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle", &enum_map_LineStyle);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 
@@ -500,10 +541,23 @@ VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage(const float
   data->radius = ini_radius;
   data->style = ini_style;
   memcpy(data->color, ini_color, sizeof(uint8_t) * 4);
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
-  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle", &enum_map_LineStyle);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 /** Constructor */
@@ -514,10 +568,23 @@ VisualDisplay2DInterface::AddCartCircleMessage::AddCartCircleMessage() : Message
   memset(data_ptr, 0, data_size);
   data      = (AddCartCircleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
-  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle", &enum_map_LineStyle);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 
@@ -756,11 +823,24 @@ VisualDisplay2DInterface::AddCartRectMessage::AddCartRectMessage(const float ini
   data->height = ini_height;
   data->style = ini_style;
   memcpy(data->color, ini_color, sizeof(uint8_t) * 4);
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "width", 1, &data->width);
   add_fieldinfo(IFT_FLOAT, "height", 1, &data->height);
-  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle", &enum_map_LineStyle);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 /** Constructor */
@@ -771,11 +851,24 @@ VisualDisplay2DInterface::AddCartRectMessage::AddCartRectMessage() : Message("Ad
   memset(data_ptr, 0, data_size);
   data      = (AddCartRectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "width", 1, &data->width);
   add_fieldinfo(IFT_FLOAT, "height", 1, &data->height);
-  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle");
+  add_fieldinfo(IFT_ENUM, "style", 1, &data->style, "LineStyle", &enum_map_LineStyle);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
 
@@ -1044,10 +1137,23 @@ VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const float ini
   data->anchor = ini_anchor;
   data->size = ini_size;
   memcpy(data->color, ini_color, sizeof(uint8_t) * 4);
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_STRING, "text", 128, data->text);
-  add_fieldinfo(IFT_ENUM, "anchor", 1, &data->anchor, "Anchor");
+  add_fieldinfo(IFT_ENUM, "anchor", 1, &data->anchor, "Anchor", &enum_map_Anchor);
   add_fieldinfo(IFT_FLOAT, "size", 1, &data->size);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
@@ -1059,10 +1165,23 @@ VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage() : Message("Ad
   memset(data_ptr, 0, data_size);
   data      = (AddCartTextMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_STRING, "text", 128, data->text);
-  add_fieldinfo(IFT_ENUM, "anchor", 1, &data->anchor, "Anchor");
+  add_fieldinfo(IFT_ENUM, "anchor", 1, &data->anchor, "Anchor", &enum_map_Anchor);
   add_fieldinfo(IFT_FLOAT, "size", 1, &data->size);
   add_fieldinfo(IFT_BYTE, "color", 4, &data->color);
 }
@@ -1324,6 +1443,19 @@ VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage(const uint32_
   data      = (DeleteObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->object_id = ini_object_id;
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_UINT32, "object_id", 1, &data->object_id);
 }
 /** Constructor */
@@ -1334,6 +1466,19 @@ VisualDisplay2DInterface::DeleteObjectMessage::DeleteObjectMessage() : Message("
   memset(data_ptr, 0, data_size);
   data      = (DeleteObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
   add_fieldinfo(IFT_UINT32, "object_id", 1, &data->object_id);
 }
 
@@ -1413,6 +1558,19 @@ VisualDisplay2DInterface::DeleteAllMessage::DeleteAllMessage() : Message("Delete
   memset(data_ptr, 0, data_size);
   data      = (DeleteAllMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LineStyle[(int)LS_SOLID] = "LS_SOLID";
+  enum_map_LineStyle[(int)LS_DASHED] = "LS_DASHED";
+  enum_map_LineStyle[(int)LS_DOTTED] = "LS_DOTTED";
+  enum_map_LineStyle[(int)LS_DASH_DOTTED] = "LS_DASH_DOTTED";
+  enum_map_Anchor[(int)CENTERED] = "CENTERED";
+  enum_map_Anchor[(int)NORTH] = "NORTH";
+  enum_map_Anchor[(int)EAST] = "EAST";
+  enum_map_Anchor[(int)SOUTH] = "SOUTH";
+  enum_map_Anchor[(int)WEST] = "WEST";
+  enum_map_Anchor[(int)NORTH_EAST] = "NORTH_EAST";
+  enum_map_Anchor[(int)SOUTH_EAST] = "SOUTH_EAST";
+  enum_map_Anchor[(int)SOUTH_WEST] = "SOUTH_WEST";
+  enum_map_Anchor[(int)NORTH_WEST] = "NORTH_WEST";
 }
 
 /** Destructor */

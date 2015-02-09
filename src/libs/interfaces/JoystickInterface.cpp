@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -130,6 +132,10 @@ JoystickInterface::JoystickInterface() : Interface()
   data      = (JoystickInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_Direction[(int)DIRECTION_DOWN] = "DIRECTION_DOWN";
+  enum_map_Direction[(int)DIRECTION_LEFT] = "DIRECTION_LEFT";
+  enum_map_Direction[(int)DIRECTION_UP] = "DIRECTION_UP";
+  enum_map_Direction[(int)DIRECTION_RIGHT] = "DIRECTION_RIGHT";
   add_fieldinfo(IFT_BYTE, "num_axes", 1, &data->num_axes);
   add_fieldinfo(IFT_BYTE, "num_buttons", 1, &data->num_buttons);
   add_fieldinfo(IFT_BYTE, "supported_ff_effects", 1, &data->supported_ff_effects);
@@ -472,9 +478,13 @@ JoystickInterface::StartRumbleMessage::StartRumbleMessage(const uint16_t ini_len
   data->direction = ini_direction;
   data->strong_magnitude = ini_strong_magnitude;
   data->weak_magnitude = ini_weak_magnitude;
+  enum_map_Direction[(int)DIRECTION_DOWN] = "DIRECTION_DOWN";
+  enum_map_Direction[(int)DIRECTION_LEFT] = "DIRECTION_LEFT";
+  enum_map_Direction[(int)DIRECTION_UP] = "DIRECTION_UP";
+  enum_map_Direction[(int)DIRECTION_RIGHT] = "DIRECTION_RIGHT";
   add_fieldinfo(IFT_UINT16, "length", 1, &data->length);
   add_fieldinfo(IFT_UINT16, "delay", 1, &data->delay);
-  add_fieldinfo(IFT_ENUM, "direction", 1, &data->direction, "Direction");
+  add_fieldinfo(IFT_ENUM, "direction", 1, &data->direction, "Direction", &enum_map_Direction);
   add_fieldinfo(IFT_UINT16, "strong_magnitude", 1, &data->strong_magnitude);
   add_fieldinfo(IFT_UINT16, "weak_magnitude", 1, &data->weak_magnitude);
 }
@@ -486,9 +496,13 @@ JoystickInterface::StartRumbleMessage::StartRumbleMessage() : Message("StartRumb
   memset(data_ptr, 0, data_size);
   data      = (StartRumbleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_Direction[(int)DIRECTION_DOWN] = "DIRECTION_DOWN";
+  enum_map_Direction[(int)DIRECTION_LEFT] = "DIRECTION_LEFT";
+  enum_map_Direction[(int)DIRECTION_UP] = "DIRECTION_UP";
+  enum_map_Direction[(int)DIRECTION_RIGHT] = "DIRECTION_RIGHT";
   add_fieldinfo(IFT_UINT16, "length", 1, &data->length);
   add_fieldinfo(IFT_UINT16, "delay", 1, &data->delay);
-  add_fieldinfo(IFT_ENUM, "direction", 1, &data->direction, "Direction");
+  add_fieldinfo(IFT_ENUM, "direction", 1, &data->direction, "Direction", &enum_map_Direction);
   add_fieldinfo(IFT_UINT16, "strong_magnitude", 1, &data->strong_magnitude);
   add_fieldinfo(IFT_UINT16, "weak_magnitude", 1, &data->weak_magnitude);
 }
@@ -691,6 +705,10 @@ JoystickInterface::StopRumbleMessage::StopRumbleMessage() : Message("StopRumbleM
   memset(data_ptr, 0, data_size);
   data      = (StopRumbleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_Direction[(int)DIRECTION_DOWN] = "DIRECTION_DOWN";
+  enum_map_Direction[(int)DIRECTION_LEFT] = "DIRECTION_LEFT";
+  enum_map_Direction[(int)DIRECTION_UP] = "DIRECTION_UP";
+  enum_map_Direction[(int)DIRECTION_RIGHT] = "DIRECTION_RIGHT";
 }
 
 /** Destructor */
@@ -737,6 +755,10 @@ JoystickInterface::StopAllMessage::StopAllMessage() : Message("StopAllMessage")
   memset(data_ptr, 0, data_size);
   data      = (StopAllMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_Direction[(int)DIRECTION_DOWN] = "DIRECTION_DOWN";
+  enum_map_Direction[(int)DIRECTION_LEFT] = "DIRECTION_LEFT";
+  enum_map_Direction[(int)DIRECTION_UP] = "DIRECTION_UP";
+  enum_map_Direction[(int)DIRECTION_RIGHT] = "DIRECTION_RIGHT";
 }
 
 /** Destructor */

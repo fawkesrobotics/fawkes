@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -48,6 +50,11 @@ HumanoidMotionInterface::HumanoidMotionInterface() : Interface()
   data      = (HumanoidMotionInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_BOOL, "moving", 1, &data->moving);
   add_fieldinfo(IFT_BOOL, "arms_enabled", 1, &data->arms_enabled);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
@@ -277,6 +284,11 @@ HumanoidMotionInterface::StopMessage::StopMessage() : Message("StopMessage")
   memset(data_ptr, 0, data_size);
   data      = (StopMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
 }
 
 /** Destructor */
@@ -326,6 +338,11 @@ HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage(const float in
   data      = (WalkStraightMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->distance = ini_distance;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
 }
 /** Constructor */
@@ -336,6 +353,11 @@ HumanoidMotionInterface::WalkStraightMessage::WalkStraightMessage() : Message("W
   memset(data_ptr, 0, data_size);
   data      = (WalkStraightMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
 }
 
@@ -416,6 +438,11 @@ HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage(const float in
   data      = (WalkSidewaysMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->distance = ini_distance;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
 }
 /** Constructor */
@@ -426,6 +453,11 @@ HumanoidMotionInterface::WalkSidewaysMessage::WalkSidewaysMessage() : Message("W
   memset(data_ptr, 0, data_size);
   data      = (WalkSidewaysMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "distance", 1, &data->distance);
 }
 
@@ -508,6 +540,11 @@ HumanoidMotionInterface::WalkArcMessage::WalkArcMessage(const float ini_angle, c
   data_ts   = (message_data_ts_t *)data_ptr;
   data->angle = ini_angle;
   data->radius = ini_radius;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
 }
@@ -519,6 +556,11 @@ HumanoidMotionInterface::WalkArcMessage::WalkArcMessage() : Message("WalkArcMess
   memset(data_ptr, 0, data_size);
   data      = (WalkArcMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_FLOAT, "radius", 1, &data->radius);
 }
@@ -636,6 +678,11 @@ HumanoidMotionInterface::WalkVelocityMessage::WalkVelocityMessage(const float in
   data->y = ini_y;
   data->theta = ini_theta;
   data->speed = ini_speed;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
@@ -649,6 +696,11 @@ HumanoidMotionInterface::WalkVelocityMessage::WalkVelocityMessage() : Message("W
   memset(data_ptr, 0, data_size);
   data      = (WalkVelocityMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "theta", 1, &data->theta);
@@ -838,6 +890,11 @@ HumanoidMotionInterface::TurnMessage::TurnMessage(const float ini_angle) : Messa
   data      = (TurnMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->angle = ini_angle;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
 }
 /** Constructor */
@@ -848,6 +905,11 @@ HumanoidMotionInterface::TurnMessage::TurnMessage() : Message("TurnMessage")
   memset(data_ptr, 0, data_size);
   data      = (TurnMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
 }
 
@@ -930,7 +992,12 @@ HumanoidMotionInterface::KickMessage::KickMessage(const LegEnum ini_leg, const f
   data_ts   = (message_data_ts_t *)data_ptr;
   data->leg = ini_leg;
   data->strength = ini_strength;
-  add_fieldinfo(IFT_ENUM, "leg", 1, &data->leg, "LegEnum");
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
+  add_fieldinfo(IFT_ENUM, "leg", 1, &data->leg, "LegEnum", &enum_map_LegEnum);
   add_fieldinfo(IFT_FLOAT, "strength", 1, &data->strength);
 }
 /** Constructor */
@@ -941,7 +1008,12 @@ HumanoidMotionInterface::KickMessage::KickMessage() : Message("KickMessage")
   memset(data_ptr, 0, data_size);
   data      = (KickMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "leg", 1, &data->leg, "LegEnum");
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
+  add_fieldinfo(IFT_ENUM, "leg", 1, &data->leg, "LegEnum", &enum_map_LegEnum);
   add_fieldinfo(IFT_FLOAT, "strength", 1, &data->strength);
 }
 
@@ -1049,6 +1121,11 @@ HumanoidMotionInterface::ParkMessage::ParkMessage() : Message("ParkMessage")
   memset(data_ptr, 0, data_size);
   data      = (ParkMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
 }
 
 /** Destructor */
@@ -1095,6 +1172,11 @@ HumanoidMotionInterface::GetUpMessage::GetUpMessage() : Message("GetUpMessage")
   memset(data_ptr, 0, data_size);
   data      = (GetUpMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
 }
 
 /** Destructor */
@@ -1144,7 +1226,12 @@ HumanoidMotionInterface::StandupMessage::StandupMessage(const StandupEnum ini_fr
   data      = (StandupMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->from_pos = ini_from_pos;
-  add_fieldinfo(IFT_ENUM, "from_pos", 1, &data->from_pos, "StandupEnum");
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
+  add_fieldinfo(IFT_ENUM, "from_pos", 1, &data->from_pos, "StandupEnum", &enum_map_StandupEnum);
 }
 /** Constructor */
 HumanoidMotionInterface::StandupMessage::StandupMessage() : Message("StandupMessage")
@@ -1154,7 +1241,12 @@ HumanoidMotionInterface::StandupMessage::StandupMessage() : Message("StandupMess
   memset(data_ptr, 0, data_size);
   data      = (StandupMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "from_pos", 1, &data->from_pos, "StandupEnum");
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
+  add_fieldinfo(IFT_ENUM, "from_pos", 1, &data->from_pos, "StandupEnum", &enum_map_StandupEnum);
 }
 
 /** Destructor */
@@ -1238,6 +1330,11 @@ HumanoidMotionInterface::MoveHeadMessage::MoveHeadMessage(const float ini_yaw, c
   data->yaw = ini_yaw;
   data->pitch = ini_pitch;
   data->speed = ini_speed;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "yaw", 1, &data->yaw);
   add_fieldinfo(IFT_FLOAT, "pitch", 1, &data->pitch);
   add_fieldinfo(IFT_FLOAT, "speed", 1, &data->speed);
@@ -1250,6 +1347,11 @@ HumanoidMotionInterface::MoveHeadMessage::MoveHeadMessage() : Message("MoveHeadM
   memset(data_ptr, 0, data_size);
   data      = (MoveHeadMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_LegEnum[(int)LEG_LEFT] = "LEG_LEFT";
+  enum_map_LegEnum[(int)LEG_RIGHT] = "LEG_RIGHT";
+  enum_map_StandupEnum[(int)STANDUP_DETECT] = "STANDUP_DETECT";
+  enum_map_StandupEnum[(int)STANDUP_BACK] = "STANDUP_BACK";
+  enum_map_StandupEnum[(int)STANDUP_FRONT] = "STANDUP_FRONT";
   add_fieldinfo(IFT_FLOAT, "yaw", 1, &data->yaw);
   add_fieldinfo(IFT_FLOAT, "pitch", 1, &data->pitch);
   add_fieldinfo(IFT_FLOAT, "speed", 1, &data->speed);

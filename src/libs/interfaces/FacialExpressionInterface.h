@@ -93,6 +93,10 @@ class FacialExpressionInterface : public Interface
 
   FacialExpressionInterface_data_t *data;
 
+  interface_enum_map_t enum_map_brows_t;
+  interface_enum_map_t enum_map_eyes_t;
+  interface_enum_map_t enum_map_jowl_t;
+  interface_enum_map_t enum_map_mouth_t;
  public:
   /* messages */
   class MoveBrowsMessage : public Message
@@ -109,6 +113,10 @@ class FacialExpressionInterface : public Interface
 
     MoveBrowsMessage_data_t *data;
 
+  interface_enum_map_t enum_map_brows_t;
+  interface_enum_map_t enum_map_eyes_t;
+  interface_enum_map_t enum_map_jowl_t;
+  interface_enum_map_t enum_map_mouth_t;
    public:
     MoveBrowsMessage(const brows_t ini_brows_action);
     MoveBrowsMessage();
@@ -136,6 +144,10 @@ class FacialExpressionInterface : public Interface
 
     MoveEyesMessage_data_t *data;
 
+  interface_enum_map_t enum_map_brows_t;
+  interface_enum_map_t enum_map_eyes_t;
+  interface_enum_map_t enum_map_jowl_t;
+  interface_enum_map_t enum_map_mouth_t;
    public:
     MoveEyesMessage(const eyes_t ini_eyes_action);
     MoveEyesMessage();
@@ -163,6 +175,10 @@ class FacialExpressionInterface : public Interface
 
     MoveJowlMessage_data_t *data;
 
+  interface_enum_map_t enum_map_brows_t;
+  interface_enum_map_t enum_map_eyes_t;
+  interface_enum_map_t enum_map_jowl_t;
+  interface_enum_map_t enum_map_mouth_t;
    public:
     MoveJowlMessage(const jowl_t ini_jowl_action);
     MoveJowlMessage();
@@ -190,6 +206,10 @@ class FacialExpressionInterface : public Interface
 
     MoveMouthMessage_data_t *data;
 
+  interface_enum_map_t enum_map_brows_t;
+  interface_enum_map_t enum_map_eyes_t;
+  interface_enum_map_t enum_map_jowl_t;
+  interface_enum_map_t enum_map_mouth_t;
    public:
     MoveMouthMessage(const mouth_t ini_mouth_action);
     MoveMouthMessage();

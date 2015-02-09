@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -49,7 +51,9 @@ OpenCVStereoParamsInterface::OpenCVStereoParamsInterface() : Interface()
   data      = (OpenCVStereoParamsInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "pre_filter_type", 1, &data->pre_filter_type, "PreFilterType");
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
+  add_fieldinfo(IFT_ENUM, "pre_filter_type", 1, &data->pre_filter_type, "PreFilterType", &enum_map_PreFilterType);
   add_fieldinfo(IFT_UINT32, "pre_filter_size", 1, &data->pre_filter_size);
   add_fieldinfo(IFT_UINT32, "pre_filter_cap", 1, &data->pre_filter_cap);
   add_fieldinfo(IFT_UINT32, "sad_window_size", 1, &data->sad_window_size);
@@ -554,7 +558,9 @@ OpenCVStereoParamsInterface::SetPreFilterTypeMessage::SetPreFilterTypeMessage(co
   data      = (SetPreFilterTypeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->pre_filter_type = ini_pre_filter_type;
-  add_fieldinfo(IFT_ENUM, "pre_filter_type", 1, &data->pre_filter_type, "PreFilterType");
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
+  add_fieldinfo(IFT_ENUM, "pre_filter_type", 1, &data->pre_filter_type, "PreFilterType", &enum_map_PreFilterType);
 }
 /** Constructor */
 OpenCVStereoParamsInterface::SetPreFilterTypeMessage::SetPreFilterTypeMessage() : Message("SetPreFilterTypeMessage")
@@ -564,7 +570,9 @@ OpenCVStereoParamsInterface::SetPreFilterTypeMessage::SetPreFilterTypeMessage() 
   memset(data_ptr, 0, data_size);
   data      = (SetPreFilterTypeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "pre_filter_type", 1, &data->pre_filter_type, "PreFilterType");
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
+  add_fieldinfo(IFT_ENUM, "pre_filter_type", 1, &data->pre_filter_type, "PreFilterType", &enum_map_PreFilterType);
 }
 
 /** Destructor */
@@ -644,6 +652,8 @@ OpenCVStereoParamsInterface::SetPreFilterSizeMessage::SetPreFilterSizeMessage(co
   data      = (SetPreFilterSizeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->pre_filter_size = ini_pre_filter_size;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "pre_filter_size", 1, &data->pre_filter_size);
 }
 /** Constructor */
@@ -654,6 +664,8 @@ OpenCVStereoParamsInterface::SetPreFilterSizeMessage::SetPreFilterSizeMessage() 
   memset(data_ptr, 0, data_size);
   data      = (SetPreFilterSizeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "pre_filter_size", 1, &data->pre_filter_size);
 }
 
@@ -738,6 +750,8 @@ OpenCVStereoParamsInterface::SetPreFilterCapMessage::SetPreFilterCapMessage(cons
   data      = (SetPreFilterCapMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->pre_filter_cap = ini_pre_filter_cap;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "pre_filter_cap", 1, &data->pre_filter_cap);
 }
 /** Constructor */
@@ -748,6 +762,8 @@ OpenCVStereoParamsInterface::SetPreFilterCapMessage::SetPreFilterCapMessage() : 
   memset(data_ptr, 0, data_size);
   data      = (SetPreFilterCapMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "pre_filter_cap", 1, &data->pre_filter_cap);
 }
 
@@ -832,6 +848,8 @@ OpenCVStereoParamsInterface::SetSADWindowSizeMessage::SetSADWindowSizeMessage(co
   data      = (SetSADWindowSizeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->sad_window_size = ini_sad_window_size;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "sad_window_size", 1, &data->sad_window_size);
 }
 /** Constructor */
@@ -842,6 +860,8 @@ OpenCVStereoParamsInterface::SetSADWindowSizeMessage::SetSADWindowSizeMessage() 
   memset(data_ptr, 0, data_size);
   data      = (SetSADWindowSizeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "sad_window_size", 1, &data->sad_window_size);
 }
 
@@ -926,6 +946,8 @@ OpenCVStereoParamsInterface::SetMinDisparityMessage::SetMinDisparityMessage(cons
   data      = (SetMinDisparityMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->min_disparity = ini_min_disparity;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_INT32, "min_disparity", 1, &data->min_disparity);
 }
 /** Constructor */
@@ -936,6 +958,8 @@ OpenCVStereoParamsInterface::SetMinDisparityMessage::SetMinDisparityMessage() : 
   memset(data_ptr, 0, data_size);
   data      = (SetMinDisparityMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_INT32, "min_disparity", 1, &data->min_disparity);
 }
 
@@ -1016,6 +1040,8 @@ OpenCVStereoParamsInterface::SetNumDisparitiesMessage::SetNumDisparitiesMessage(
   data      = (SetNumDisparitiesMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->num_disparities = ini_num_disparities;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "num_disparities", 1, &data->num_disparities);
 }
 /** Constructor */
@@ -1026,6 +1052,8 @@ OpenCVStereoParamsInterface::SetNumDisparitiesMessage::SetNumDisparitiesMessage(
   memset(data_ptr, 0, data_size);
   data      = (SetNumDisparitiesMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "num_disparities", 1, &data->num_disparities);
 }
 
@@ -1110,6 +1138,8 @@ OpenCVStereoParamsInterface::SetTextureThresholdMessage::SetTextureThresholdMess
   data      = (SetTextureThresholdMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->texture_threshold = ini_texture_threshold;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "texture_threshold", 1, &data->texture_threshold);
 }
 /** Constructor */
@@ -1120,6 +1150,8 @@ OpenCVStereoParamsInterface::SetTextureThresholdMessage::SetTextureThresholdMess
   memset(data_ptr, 0, data_size);
   data      = (SetTextureThresholdMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "texture_threshold", 1, &data->texture_threshold);
 }
 
@@ -1206,6 +1238,8 @@ OpenCVStereoParamsInterface::SetUniquenessRatioMessage::SetUniquenessRatioMessag
   data      = (SetUniquenessRatioMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->uniqueness_ratio = ini_uniqueness_ratio;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "uniqueness_ratio", 1, &data->uniqueness_ratio);
 }
 /** Constructor */
@@ -1216,6 +1250,8 @@ OpenCVStereoParamsInterface::SetUniquenessRatioMessage::SetUniquenessRatioMessag
   memset(data_ptr, 0, data_size);
   data      = (SetUniquenessRatioMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "uniqueness_ratio", 1, &data->uniqueness_ratio);
 }
 
@@ -1304,6 +1340,8 @@ OpenCVStereoParamsInterface::SetSpeckleWindowSizeMessage::SetSpeckleWindowSizeMe
   data      = (SetSpeckleWindowSizeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->speckle_window_size = ini_speckle_window_size;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "speckle_window_size", 1, &data->speckle_window_size);
 }
 /** Constructor */
@@ -1314,6 +1352,8 @@ OpenCVStereoParamsInterface::SetSpeckleWindowSizeMessage::SetSpeckleWindowSizeMe
   memset(data_ptr, 0, data_size);
   data      = (SetSpeckleWindowSizeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "speckle_window_size", 1, &data->speckle_window_size);
 }
 
@@ -1398,6 +1438,8 @@ OpenCVStereoParamsInterface::SetSpeckleRangeMessage::SetSpeckleRangeMessage(cons
   data      = (SetSpeckleRangeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->speckle_range = ini_speckle_range;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "speckle_range", 1, &data->speckle_range);
 }
 /** Constructor */
@@ -1408,6 +1450,8 @@ OpenCVStereoParamsInterface::SetSpeckleRangeMessage::SetSpeckleRangeMessage() : 
   memset(data_ptr, 0, data_size);
   data      = (SetSpeckleRangeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_UINT32, "speckle_range", 1, &data->speckle_range);
 }
 
@@ -1492,6 +1536,8 @@ OpenCVStereoParamsInterface::SetTrySmallerWindowsMessage::SetTrySmallerWindowsMe
   data      = (SetTrySmallerWindowsMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->try_smaller_windows = ini_try_smaller_windows;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_BOOL, "try_smaller_windows", 1, &data->try_smaller_windows);
 }
 /** Constructor */
@@ -1502,6 +1548,8 @@ OpenCVStereoParamsInterface::SetTrySmallerWindowsMessage::SetTrySmallerWindowsMe
   memset(data_ptr, 0, data_size);
   data      = (SetTrySmallerWindowsMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_PreFilterType[(int)PFT_NORMALIZED_RESPONSE] = "PFT_NORMALIZED_RESPONSE";
+  enum_map_PreFilterType[(int)PFT_XSOBEL] = "PFT_XSOBEL";
   add_fieldinfo(IFT_BOOL, "try_smaller_windows", 1, &data->try_smaller_windows);
 }
 

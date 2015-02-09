@@ -54,6 +54,7 @@ class InterfaceFieldIterator
   
   interface_fieldtype_t  get_type() const;
   const char *           get_typename() const;
+  bool                   is_enum() const;
   const char *           get_name() const;
   const void *           get_value() const;
   const char *           get_value_string();
@@ -71,6 +72,7 @@ class InterfaceFieldIterator
   double                 get_double(unsigned int index = 0) const;
   uint8_t                get_byte(unsigned int index = 0) const;
   int32_t                get_enum(unsigned int index = 0) const;
+  const char *           get_enum_string(unsigned int index = 0) const;
   bool *                 get_bools() const;
   int8_t *               get_int8s() const;
   uint8_t *              get_uint8s() const;
@@ -98,6 +100,8 @@ class InterfaceFieldIterator
   void                   set_float(float f, unsigned int index = 0);
   void                   set_double(double f, unsigned int index = 0);
   void                   set_byte(uint8_t b, unsigned int index = 0);
+  void                   set_enum(int32_t e, unsigned int index = 0);
+  void                   set_enum_string(const char* e, unsigned int index = 0);
   void                   set_bools(bool *b);
   void                   set_int8s(int8_t *i);
   void                   set_uint8s(uint8_t *i);

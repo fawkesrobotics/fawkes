@@ -216,6 +216,10 @@ class Roomba500Interface : public Interface
 
   Roomba500Interface_data_t *data;
 
+  interface_enum_map_t enum_map_Mode;
+  interface_enum_map_t enum_map_InfraredCharacter;
+  interface_enum_map_t enum_map_ChargingState;
+  interface_enum_map_t enum_map_BrushState;
  public:
   /* messages */
   class StopMessage : public Message
@@ -231,6 +235,10 @@ class Roomba500Interface : public Interface
 
     StopMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Mode;
+  interface_enum_map_t enum_map_InfraredCharacter;
+  interface_enum_map_t enum_map_ChargingState;
+  interface_enum_map_t enum_map_BrushState;
    public:
     StopMessage();
     ~StopMessage();
@@ -253,6 +261,10 @@ class Roomba500Interface : public Interface
 
     DockMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Mode;
+  interface_enum_map_t enum_map_InfraredCharacter;
+  interface_enum_map_t enum_map_ChargingState;
+  interface_enum_map_t enum_map_BrushState;
    public:
     DockMessage();
     ~DockMessage();
@@ -276,6 +288,10 @@ class Roomba500Interface : public Interface
 
     SetModeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Mode;
+  interface_enum_map_t enum_map_InfraredCharacter;
+  interface_enum_map_t enum_map_ChargingState;
+  interface_enum_map_t enum_map_BrushState;
    public:
     SetModeMessage(const Mode ini_mode);
     SetModeMessage();
@@ -303,6 +319,10 @@ class Roomba500Interface : public Interface
 
     DriveStraightMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Mode;
+  interface_enum_map_t enum_map_InfraredCharacter;
+  interface_enum_map_t enum_map_ChargingState;
+  interface_enum_map_t enum_map_BrushState;
    public:
     DriveStraightMessage(const int16_t ini_velocity);
     DriveStraightMessage();
@@ -331,6 +351,10 @@ class Roomba500Interface : public Interface
 
     DriveMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Mode;
+  interface_enum_map_t enum_map_InfraredCharacter;
+  interface_enum_map_t enum_map_ChargingState;
+  interface_enum_map_t enum_map_BrushState;
    public:
     DriveMessage(const int16_t ini_velocity, const int16_t ini_radius);
     DriveMessage();
@@ -363,6 +387,10 @@ class Roomba500Interface : public Interface
 
     SetMotorsMessage_data_t *data;
 
+  interface_enum_map_t enum_map_Mode;
+  interface_enum_map_t enum_map_InfraredCharacter;
+  interface_enum_map_t enum_map_ChargingState;
+  interface_enum_map_t enum_map_BrushState;
    public:
     SetMotorsMessage(const bool ini_vacuuming, const BrushState ini_main, const BrushState ini_side);
     SetMotorsMessage();

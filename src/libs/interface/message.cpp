@@ -430,10 +430,12 @@ Message::clone() const
  * @param length length of the field
  * @param value pointer to the value in the data struct
  * @param enumtype in case the type parameter is enum the name of the enum type
+ * @param enum_map enum value map
  */
 void
 Message::add_fieldinfo(interface_fieldtype_t type, const char *name,
-		       size_t length, void *value, const char *enumtype)
+		       size_t length, void *value, const char *enumtype,
+		       const interface_enum_map_t *enum_map)
 {
   interface_fieldinfo_t *infol = __fieldinfo_list;
   interface_fieldinfo_t *newinfo = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
@@ -443,6 +445,7 @@ Message::add_fieldinfo(interface_fieldtype_t type, const char *name,
   newinfo->name     = name;
   newinfo->length   = length;
   newinfo->value    = value;
+  newinfo->enum_map = enum_map;
   newinfo->next     = NULL;
 
   if ( infol == NULL ) {
@@ -458,5 +461,6 @@ Message::add_fieldinfo(interface_fieldtype_t type, const char *name,
 
   ++__num_fields;
 }
+
 
 } // end namespace fawkes

@@ -64,6 +64,7 @@ class TestInterface : public Interface
 
   TestInterface_data_t *data;
 
+  interface_enum_map_t enum_map_TestEnum;
  public:
   /* messages */
   class SetTestIntMessage : public Message
@@ -80,6 +81,7 @@ class TestInterface : public Interface
 
     SetTestIntMessage_data_t *data;
 
+  interface_enum_map_t enum_map_TestEnum;
    public:
     SetTestIntMessage(const int32_t ini_test_int);
     SetTestIntMessage();
@@ -107,6 +109,7 @@ class TestInterface : public Interface
 
     SetTestStringMessage_data_t *data;
 
+  interface_enum_map_t enum_map_TestEnum;
    public:
     SetTestStringMessage(const char * ini_test_string);
     SetTestStringMessage();
@@ -135,6 +138,7 @@ class TestInterface : public Interface
 
     CalculateMessage_data_t *data;
 
+  interface_enum_map_t enum_map_TestEnum;
    public:
     CalculateMessage(const int32_t ini_summand, const int32_t ini_addend);
     CalculateMessage();

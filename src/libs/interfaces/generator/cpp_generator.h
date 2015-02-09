@@ -103,11 +103,13 @@ class CppInterfaceGenerator
 
   void write_management_funcs_cpp(FILE *f);
 
+  void write_enum_map_population(FILE *f);
   void write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceField> &fields);
 
 
   void write_struct(FILE *f, std::string name, std::string /* indent space */ is,
 		    std::vector<InterfaceField> fields);
+  void write_enum_maps_h(FILE *f);
 
   void write_header(FILE *f, std::string filename);
   void write_deflector(FILE *f);

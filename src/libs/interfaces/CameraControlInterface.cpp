@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -47,7 +49,12 @@ CameraControlInterface::CameraControlInterface() : Interface()
   data      = (CameraControlInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "effect", 1, &data->effect, "Effect");
+  enum_map_Effect[(int)EFF_NONE] = "EFF_NONE";
+  enum_map_Effect[(int)EFF_PASTEL] = "EFF_PASTEL";
+  enum_map_Effect[(int)EFF_NEGATIVE] = "EFF_NEGATIVE";
+  enum_map_Effect[(int)EFF_BW] = "EFF_BW";
+  enum_map_Effect[(int)EFF_SOLARIZE] = "EFF_SOLARIZE";
+  add_fieldinfo(IFT_ENUM, "effect", 1, &data->effect, "Effect", &enum_map_Effect);
   add_fieldinfo(IFT_BOOL, "effect_supported", 1, &data->effect_supported);
   add_fieldinfo(IFT_UINT32, "zoom", 1, &data->zoom);
   add_fieldinfo(IFT_BOOL, "zoom_supported", 1, &data->zoom_supported);
@@ -391,7 +398,12 @@ CameraControlInterface::SetEffectMessage::SetEffectMessage(const Effect ini_effe
   data      = (SetEffectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->effect = ini_effect;
-  add_fieldinfo(IFT_ENUM, "effect", 1, &data->effect, "Effect");
+  enum_map_Effect[(int)EFF_NONE] = "EFF_NONE";
+  enum_map_Effect[(int)EFF_PASTEL] = "EFF_PASTEL";
+  enum_map_Effect[(int)EFF_NEGATIVE] = "EFF_NEGATIVE";
+  enum_map_Effect[(int)EFF_BW] = "EFF_BW";
+  enum_map_Effect[(int)EFF_SOLARIZE] = "EFF_SOLARIZE";
+  add_fieldinfo(IFT_ENUM, "effect", 1, &data->effect, "Effect", &enum_map_Effect);
 }
 /** Constructor */
 CameraControlInterface::SetEffectMessage::SetEffectMessage() : Message("SetEffectMessage")
@@ -401,7 +413,12 @@ CameraControlInterface::SetEffectMessage::SetEffectMessage() : Message("SetEffec
   memset(data_ptr, 0, data_size);
   data      = (SetEffectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "effect", 1, &data->effect, "Effect");
+  enum_map_Effect[(int)EFF_NONE] = "EFF_NONE";
+  enum_map_Effect[(int)EFF_PASTEL] = "EFF_PASTEL";
+  enum_map_Effect[(int)EFF_NEGATIVE] = "EFF_NEGATIVE";
+  enum_map_Effect[(int)EFF_BW] = "EFF_BW";
+  enum_map_Effect[(int)EFF_SOLARIZE] = "EFF_SOLARIZE";
+  add_fieldinfo(IFT_ENUM, "effect", 1, &data->effect, "Effect", &enum_map_Effect);
 }
 
 /** Destructor */
@@ -481,6 +498,11 @@ CameraControlInterface::SetZoomMessage::SetZoomMessage(const uint32_t ini_zoom) 
   data      = (SetZoomMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->zoom = ini_zoom;
+  enum_map_Effect[(int)EFF_NONE] = "EFF_NONE";
+  enum_map_Effect[(int)EFF_PASTEL] = "EFF_PASTEL";
+  enum_map_Effect[(int)EFF_NEGATIVE] = "EFF_NEGATIVE";
+  enum_map_Effect[(int)EFF_BW] = "EFF_BW";
+  enum_map_Effect[(int)EFF_SOLARIZE] = "EFF_SOLARIZE";
   add_fieldinfo(IFT_UINT32, "zoom", 1, &data->zoom);
 }
 /** Constructor */
@@ -491,6 +513,11 @@ CameraControlInterface::SetZoomMessage::SetZoomMessage() : Message("SetZoomMessa
   memset(data_ptr, 0, data_size);
   data      = (SetZoomMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_Effect[(int)EFF_NONE] = "EFF_NONE";
+  enum_map_Effect[(int)EFF_PASTEL] = "EFF_PASTEL";
+  enum_map_Effect[(int)EFF_NEGATIVE] = "EFF_NEGATIVE";
+  enum_map_Effect[(int)EFF_BW] = "EFF_BW";
+  enum_map_Effect[(int)EFF_SOLARIZE] = "EFF_SOLARIZE";
   add_fieldinfo(IFT_UINT32, "zoom", 1, &data->zoom);
 }
 
@@ -571,6 +598,11 @@ CameraControlInterface::SetMirrorMessage::SetMirrorMessage(const bool ini_mirror
   data      = (SetMirrorMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->mirror = ini_mirror;
+  enum_map_Effect[(int)EFF_NONE] = "EFF_NONE";
+  enum_map_Effect[(int)EFF_PASTEL] = "EFF_PASTEL";
+  enum_map_Effect[(int)EFF_NEGATIVE] = "EFF_NEGATIVE";
+  enum_map_Effect[(int)EFF_BW] = "EFF_BW";
+  enum_map_Effect[(int)EFF_SOLARIZE] = "EFF_SOLARIZE";
   add_fieldinfo(IFT_BOOL, "mirror", 1, &data->mirror);
 }
 /** Constructor */
@@ -581,6 +613,11 @@ CameraControlInterface::SetMirrorMessage::SetMirrorMessage() : Message("SetMirro
   memset(data_ptr, 0, data_size);
   data      = (SetMirrorMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_Effect[(int)EFF_NONE] = "EFF_NONE";
+  enum_map_Effect[(int)EFF_PASTEL] = "EFF_PASTEL";
+  enum_map_Effect[(int)EFF_NEGATIVE] = "EFF_NEGATIVE";
+  enum_map_Effect[(int)EFF_BW] = "EFF_BW";
+  enum_map_Effect[(int)EFF_SOLARIZE] = "EFF_SOLARIZE";
   add_fieldinfo(IFT_BOOL, "mirror", 1, &data->mirror);
 }
 

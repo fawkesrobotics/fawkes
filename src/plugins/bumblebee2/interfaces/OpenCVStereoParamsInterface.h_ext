@@ -92,6 +92,7 @@ class OpenCVStereoParamsInterface : public Interface
 
   OpenCVStereoParamsInterface_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
  public:
   /* messages */
   class SetPreFilterTypeMessage : public Message
@@ -108,6 +109,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetPreFilterTypeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetPreFilterTypeMessage(const PreFilterType ini_pre_filter_type);
     SetPreFilterTypeMessage();
@@ -137,6 +139,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetPreFilterSizeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetPreFilterSizeMessage(const uint32_t ini_pre_filter_size);
     SetPreFilterSizeMessage();
@@ -166,6 +169,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetPreFilterCapMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetPreFilterCapMessage(const uint32_t ini_pre_filter_cap);
     SetPreFilterCapMessage();
@@ -195,6 +199,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetSADWindowSizeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetSADWindowSizeMessage(const uint32_t ini_sad_window_size);
     SetSADWindowSizeMessage();
@@ -222,6 +227,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetMinDisparityMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetMinDisparityMessage(const int32_t ini_min_disparity);
     SetMinDisparityMessage();
@@ -251,6 +257,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetNumDisparitiesMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetNumDisparitiesMessage(const uint32_t ini_num_disparities);
     SetNumDisparitiesMessage();
@@ -281,6 +288,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetTextureThresholdMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetTextureThresholdMessage(const uint32_t ini_texture_threshold);
     SetTextureThresholdMessage();
@@ -312,6 +320,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetUniquenessRatioMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetUniquenessRatioMessage(const uint32_t ini_uniqueness_ratio);
     SetUniquenessRatioMessage();
@@ -341,6 +350,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetSpeckleWindowSizeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetSpeckleWindowSizeMessage(const uint32_t ini_speckle_window_size);
     SetSpeckleWindowSizeMessage();
@@ -370,6 +380,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetSpeckleRangeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetSpeckleRangeMessage(const uint32_t ini_speckle_range);
     SetSpeckleRangeMessage();
@@ -400,6 +411,7 @@ class OpenCVStereoParamsInterface : public Interface
 
     SetTrySmallerWindowsMessage_data_t *data;
 
+  interface_enum_map_t enum_map_PreFilterType;
    public:
     SetTrySmallerWindowsMessage(const bool ini_try_smaller_windows);
     SetTrySmallerWindowsMessage();

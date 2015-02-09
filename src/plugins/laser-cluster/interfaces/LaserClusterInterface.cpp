@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -46,8 +48,10 @@ LaserClusterInterface::LaserClusterInterface() : Interface()
   data      = (LaserClusterInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_SelectionMode[(int)SELMODE_MIN_ANGLE] = "SELMODE_MIN_ANGLE";
+  enum_map_SelectionMode[(int)SELMODE_MIN_DIST] = "SELMODE_MIN_DIST";
   add_fieldinfo(IFT_FLOAT, "max_x", 1, &data->max_x);
-  add_fieldinfo(IFT_ENUM, "selection_mode", 1, &data->selection_mode, "SelectionMode");
+  add_fieldinfo(IFT_ENUM, "selection_mode", 1, &data->selection_mode, "SelectionMode", &enum_map_SelectionMode);
   add_messageinfo("SetMaxXMessage");
   add_messageinfo("SetSelectionModeMessage");
   unsigned char tmp_hash[] = {0xad, 0xf8, 0x6e, 0xe7, 0x17, 0x56, 0x8a, 0xfb, 0xf9, 0xad, 0x3e, 0xba, 0xd, 0x15, 0xce, 0xde};
@@ -198,6 +202,8 @@ LaserClusterInterface::SetMaxXMessage::SetMaxXMessage(const float ini_max_x) : M
   data      = (SetMaxXMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->max_x = ini_max_x;
+  enum_map_SelectionMode[(int)SELMODE_MIN_ANGLE] = "SELMODE_MIN_ANGLE";
+  enum_map_SelectionMode[(int)SELMODE_MIN_DIST] = "SELMODE_MIN_DIST";
   add_fieldinfo(IFT_FLOAT, "max_x", 1, &data->max_x);
 }
 /** Constructor */
@@ -208,6 +214,8 @@ LaserClusterInterface::SetMaxXMessage::SetMaxXMessage() : Message("SetMaxXMessag
   memset(data_ptr, 0, data_size);
   data      = (SetMaxXMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_SelectionMode[(int)SELMODE_MIN_ANGLE] = "SELMODE_MIN_ANGLE";
+  enum_map_SelectionMode[(int)SELMODE_MIN_DIST] = "SELMODE_MIN_DIST";
   add_fieldinfo(IFT_FLOAT, "max_x", 1, &data->max_x);
 }
 
@@ -290,7 +298,9 @@ LaserClusterInterface::SetSelectionModeMessage::SetSelectionModeMessage(const Se
   data      = (SetSelectionModeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->selection_mode = ini_selection_mode;
-  add_fieldinfo(IFT_ENUM, "selection_mode", 1, &data->selection_mode, "SelectionMode");
+  enum_map_SelectionMode[(int)SELMODE_MIN_ANGLE] = "SELMODE_MIN_ANGLE";
+  enum_map_SelectionMode[(int)SELMODE_MIN_DIST] = "SELMODE_MIN_DIST";
+  add_fieldinfo(IFT_ENUM, "selection_mode", 1, &data->selection_mode, "SelectionMode", &enum_map_SelectionMode);
 }
 /** Constructor */
 LaserClusterInterface::SetSelectionModeMessage::SetSelectionModeMessage() : Message("SetSelectionModeMessage")
@@ -300,7 +310,9 @@ LaserClusterInterface::SetSelectionModeMessage::SetSelectionModeMessage() : Mess
   memset(data_ptr, 0, data_size);
   data      = (SetSelectionModeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "selection_mode", 1, &data->selection_mode, "SelectionMode");
+  enum_map_SelectionMode[(int)SELMODE_MIN_ANGLE] = "SELMODE_MIN_ANGLE";
+  enum_map_SelectionMode[(int)SELMODE_MIN_DIST] = "SELMODE_MIN_DIST";
+  add_fieldinfo(IFT_ENUM, "selection_mode", 1, &data->selection_mode, "SelectionMode", &enum_map_SelectionMode);
 }
 
 /** Destructor */

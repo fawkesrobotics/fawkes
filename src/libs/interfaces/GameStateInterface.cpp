@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -80,13 +82,26 @@ GameStateInterface::GameStateInterface() : Interface()
   data      = (GameStateInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_if_gamestate_team_t[(int)TEAM_NONE] = "TEAM_NONE";
+  enum_map_if_gamestate_team_t[(int)TEAM_CYAN] = "TEAM_CYAN";
+  enum_map_if_gamestate_team_t[(int)TEAM_MAGENTA] = "TEAM_MAGENTA";
+  enum_map_if_gamestate_team_t[(int)TEAM_BOTH] = "TEAM_BOTH";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_BLUE] = "GOAL_BLUE";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_YELLOW] = "GOAL_YELLOW";
+  enum_map_if_gamestate_half_t[(int)HALF_FIRST] = "HALF_FIRST";
+  enum_map_if_gamestate_half_t[(int)HALF_SECOND] = "HALF_SECOND";
+  enum_map_if_gamestate_role_t[(int)ROLE_GOALIE] = "ROLE_GOALIE";
+  enum_map_if_gamestate_role_t[(int)ROLE_DEFENDER] = "ROLE_DEFENDER";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_LEFT] = "ROLE_MID_LEFT";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_RIGHT] = "ROLE_MID_RIGHT";
+  enum_map_if_gamestate_role_t[(int)ROLE_ATTACKER] = "ROLE_ATTACKER";
   add_fieldinfo(IFT_UINT32, "game_state", 1, &data->game_state);
-  add_fieldinfo(IFT_ENUM, "state_team", 1, &data->state_team, "if_gamestate_team_t");
-  add_fieldinfo(IFT_ENUM, "our_team", 1, &data->our_team, "if_gamestate_team_t");
-  add_fieldinfo(IFT_ENUM, "our_goal_color", 1, &data->our_goal_color, "if_gamestate_goalcolor_t");
-  add_fieldinfo(IFT_ENUM, "half", 1, &data->half, "if_gamestate_half_t");
+  add_fieldinfo(IFT_ENUM, "state_team", 1, &data->state_team, "if_gamestate_team_t", &enum_map_if_gamestate_team_t);
+  add_fieldinfo(IFT_ENUM, "our_team", 1, &data->our_team, "if_gamestate_team_t", &enum_map_if_gamestate_team_t);
+  add_fieldinfo(IFT_ENUM, "our_goal_color", 1, &data->our_goal_color, "if_gamestate_goalcolor_t", &enum_map_if_gamestate_goalcolor_t);
+  add_fieldinfo(IFT_ENUM, "half", 1, &data->half, "if_gamestate_half_t", &enum_map_if_gamestate_half_t);
   add_fieldinfo(IFT_BOOL, "kickoff", 1, &data->kickoff);
-  add_fieldinfo(IFT_ENUM, "role", 1, &data->role, "if_gamestate_role_t");
+  add_fieldinfo(IFT_ENUM, "role", 1, &data->role, "if_gamestate_role_t", &enum_map_if_gamestate_role_t);
   add_fieldinfo(IFT_UINT32, "score_cyan", 1, &data->score_cyan);
   add_fieldinfo(IFT_UINT32, "score_magenta", 1, &data->score_magenta);
   add_messageinfo("SetTeamColorMessage");
@@ -506,7 +521,20 @@ GameStateInterface::SetTeamColorMessage::SetTeamColorMessage(const if_gamestate_
   data      = (SetTeamColorMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->our_team = ini_our_team;
-  add_fieldinfo(IFT_ENUM, "our_team", 1, &data->our_team, "if_gamestate_team_t");
+  enum_map_if_gamestate_team_t[(int)TEAM_NONE] = "TEAM_NONE";
+  enum_map_if_gamestate_team_t[(int)TEAM_CYAN] = "TEAM_CYAN";
+  enum_map_if_gamestate_team_t[(int)TEAM_MAGENTA] = "TEAM_MAGENTA";
+  enum_map_if_gamestate_team_t[(int)TEAM_BOTH] = "TEAM_BOTH";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_BLUE] = "GOAL_BLUE";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_YELLOW] = "GOAL_YELLOW";
+  enum_map_if_gamestate_half_t[(int)HALF_FIRST] = "HALF_FIRST";
+  enum_map_if_gamestate_half_t[(int)HALF_SECOND] = "HALF_SECOND";
+  enum_map_if_gamestate_role_t[(int)ROLE_GOALIE] = "ROLE_GOALIE";
+  enum_map_if_gamestate_role_t[(int)ROLE_DEFENDER] = "ROLE_DEFENDER";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_LEFT] = "ROLE_MID_LEFT";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_RIGHT] = "ROLE_MID_RIGHT";
+  enum_map_if_gamestate_role_t[(int)ROLE_ATTACKER] = "ROLE_ATTACKER";
+  add_fieldinfo(IFT_ENUM, "our_team", 1, &data->our_team, "if_gamestate_team_t", &enum_map_if_gamestate_team_t);
 }
 /** Constructor */
 GameStateInterface::SetTeamColorMessage::SetTeamColorMessage() : Message("SetTeamColorMessage")
@@ -516,7 +544,20 @@ GameStateInterface::SetTeamColorMessage::SetTeamColorMessage() : Message("SetTea
   memset(data_ptr, 0, data_size);
   data      = (SetTeamColorMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "our_team", 1, &data->our_team, "if_gamestate_team_t");
+  enum_map_if_gamestate_team_t[(int)TEAM_NONE] = "TEAM_NONE";
+  enum_map_if_gamestate_team_t[(int)TEAM_CYAN] = "TEAM_CYAN";
+  enum_map_if_gamestate_team_t[(int)TEAM_MAGENTA] = "TEAM_MAGENTA";
+  enum_map_if_gamestate_team_t[(int)TEAM_BOTH] = "TEAM_BOTH";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_BLUE] = "GOAL_BLUE";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_YELLOW] = "GOAL_YELLOW";
+  enum_map_if_gamestate_half_t[(int)HALF_FIRST] = "HALF_FIRST";
+  enum_map_if_gamestate_half_t[(int)HALF_SECOND] = "HALF_SECOND";
+  enum_map_if_gamestate_role_t[(int)ROLE_GOALIE] = "ROLE_GOALIE";
+  enum_map_if_gamestate_role_t[(int)ROLE_DEFENDER] = "ROLE_DEFENDER";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_LEFT] = "ROLE_MID_LEFT";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_RIGHT] = "ROLE_MID_RIGHT";
+  enum_map_if_gamestate_role_t[(int)ROLE_ATTACKER] = "ROLE_ATTACKER";
+  add_fieldinfo(IFT_ENUM, "our_team", 1, &data->our_team, "if_gamestate_team_t", &enum_map_if_gamestate_team_t);
 }
 
 /** Destructor */
@@ -596,6 +637,19 @@ GameStateInterface::SetKickoffMessage::SetKickoffMessage(const bool ini_kickoff)
   data      = (SetKickoffMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->kickoff = ini_kickoff;
+  enum_map_if_gamestate_team_t[(int)TEAM_NONE] = "TEAM_NONE";
+  enum_map_if_gamestate_team_t[(int)TEAM_CYAN] = "TEAM_CYAN";
+  enum_map_if_gamestate_team_t[(int)TEAM_MAGENTA] = "TEAM_MAGENTA";
+  enum_map_if_gamestate_team_t[(int)TEAM_BOTH] = "TEAM_BOTH";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_BLUE] = "GOAL_BLUE";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_YELLOW] = "GOAL_YELLOW";
+  enum_map_if_gamestate_half_t[(int)HALF_FIRST] = "HALF_FIRST";
+  enum_map_if_gamestate_half_t[(int)HALF_SECOND] = "HALF_SECOND";
+  enum_map_if_gamestate_role_t[(int)ROLE_GOALIE] = "ROLE_GOALIE";
+  enum_map_if_gamestate_role_t[(int)ROLE_DEFENDER] = "ROLE_DEFENDER";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_LEFT] = "ROLE_MID_LEFT";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_RIGHT] = "ROLE_MID_RIGHT";
+  enum_map_if_gamestate_role_t[(int)ROLE_ATTACKER] = "ROLE_ATTACKER";
   add_fieldinfo(IFT_BOOL, "kickoff", 1, &data->kickoff);
 }
 /** Constructor */
@@ -606,6 +660,19 @@ GameStateInterface::SetKickoffMessage::SetKickoffMessage() : Message("SetKickoff
   memset(data_ptr, 0, data_size);
   data      = (SetKickoffMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_if_gamestate_team_t[(int)TEAM_NONE] = "TEAM_NONE";
+  enum_map_if_gamestate_team_t[(int)TEAM_CYAN] = "TEAM_CYAN";
+  enum_map_if_gamestate_team_t[(int)TEAM_MAGENTA] = "TEAM_MAGENTA";
+  enum_map_if_gamestate_team_t[(int)TEAM_BOTH] = "TEAM_BOTH";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_BLUE] = "GOAL_BLUE";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_YELLOW] = "GOAL_YELLOW";
+  enum_map_if_gamestate_half_t[(int)HALF_FIRST] = "HALF_FIRST";
+  enum_map_if_gamestate_half_t[(int)HALF_SECOND] = "HALF_SECOND";
+  enum_map_if_gamestate_role_t[(int)ROLE_GOALIE] = "ROLE_GOALIE";
+  enum_map_if_gamestate_role_t[(int)ROLE_DEFENDER] = "ROLE_DEFENDER";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_LEFT] = "ROLE_MID_LEFT";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_RIGHT] = "ROLE_MID_RIGHT";
+  enum_map_if_gamestate_role_t[(int)ROLE_ATTACKER] = "ROLE_ATTACKER";
   add_fieldinfo(IFT_BOOL, "kickoff", 1, &data->kickoff);
 }
 
@@ -686,7 +753,20 @@ GameStateInterface::SetStateTeamMessage::SetStateTeamMessage(const if_gamestate_
   data      = (SetStateTeamMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->state_team = ini_state_team;
-  add_fieldinfo(IFT_ENUM, "state_team", 1, &data->state_team, "if_gamestate_team_t");
+  enum_map_if_gamestate_team_t[(int)TEAM_NONE] = "TEAM_NONE";
+  enum_map_if_gamestate_team_t[(int)TEAM_CYAN] = "TEAM_CYAN";
+  enum_map_if_gamestate_team_t[(int)TEAM_MAGENTA] = "TEAM_MAGENTA";
+  enum_map_if_gamestate_team_t[(int)TEAM_BOTH] = "TEAM_BOTH";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_BLUE] = "GOAL_BLUE";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_YELLOW] = "GOAL_YELLOW";
+  enum_map_if_gamestate_half_t[(int)HALF_FIRST] = "HALF_FIRST";
+  enum_map_if_gamestate_half_t[(int)HALF_SECOND] = "HALF_SECOND";
+  enum_map_if_gamestate_role_t[(int)ROLE_GOALIE] = "ROLE_GOALIE";
+  enum_map_if_gamestate_role_t[(int)ROLE_DEFENDER] = "ROLE_DEFENDER";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_LEFT] = "ROLE_MID_LEFT";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_RIGHT] = "ROLE_MID_RIGHT";
+  enum_map_if_gamestate_role_t[(int)ROLE_ATTACKER] = "ROLE_ATTACKER";
+  add_fieldinfo(IFT_ENUM, "state_team", 1, &data->state_team, "if_gamestate_team_t", &enum_map_if_gamestate_team_t);
 }
 /** Constructor */
 GameStateInterface::SetStateTeamMessage::SetStateTeamMessage() : Message("SetStateTeamMessage")
@@ -696,7 +776,20 @@ GameStateInterface::SetStateTeamMessage::SetStateTeamMessage() : Message("SetSta
   memset(data_ptr, 0, data_size);
   data      = (SetStateTeamMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_ENUM, "state_team", 1, &data->state_team, "if_gamestate_team_t");
+  enum_map_if_gamestate_team_t[(int)TEAM_NONE] = "TEAM_NONE";
+  enum_map_if_gamestate_team_t[(int)TEAM_CYAN] = "TEAM_CYAN";
+  enum_map_if_gamestate_team_t[(int)TEAM_MAGENTA] = "TEAM_MAGENTA";
+  enum_map_if_gamestate_team_t[(int)TEAM_BOTH] = "TEAM_BOTH";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_BLUE] = "GOAL_BLUE";
+  enum_map_if_gamestate_goalcolor_t[(int)GOAL_YELLOW] = "GOAL_YELLOW";
+  enum_map_if_gamestate_half_t[(int)HALF_FIRST] = "HALF_FIRST";
+  enum_map_if_gamestate_half_t[(int)HALF_SECOND] = "HALF_SECOND";
+  enum_map_if_gamestate_role_t[(int)ROLE_GOALIE] = "ROLE_GOALIE";
+  enum_map_if_gamestate_role_t[(int)ROLE_DEFENDER] = "ROLE_DEFENDER";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_LEFT] = "ROLE_MID_LEFT";
+  enum_map_if_gamestate_role_t[(int)ROLE_MID_RIGHT] = "ROLE_MID_RIGHT";
+  enum_map_if_gamestate_role_t[(int)ROLE_ATTACKER] = "ROLE_ATTACKER";
+  add_fieldinfo(IFT_ENUM, "state_team", 1, &data->state_team, "if_gamestate_team_t", &enum_map_if_gamestate_team_t);
 }
 
 /** Destructor */

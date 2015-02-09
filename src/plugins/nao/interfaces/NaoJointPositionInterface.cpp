@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -104,7 +106,9 @@ NaoJointPositionInterface::NaoJointPositionInterface() : Interface()
   data      = (NaoJointPositionInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
-  add_fieldinfo(IFT_ENUM, "robot_type", 1, &data->robot_type, "RobotType");
+  enum_map_RobotType[(int)ROBOTYPE_ACADEMIC] = "ROBOTYPE_ACADEMIC";
+  enum_map_RobotType[(int)ROBOTYPE_ROBOCUP] = "ROBOTYPE_ROBOCUP";
+  add_fieldinfo(IFT_ENUM, "robot_type", 1, &data->robot_type, "RobotType", &enum_map_RobotType);
   add_fieldinfo(IFT_UINT8, "robot_version", 4, &data->robot_version);
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
   add_fieldinfo(IFT_FLOAT, "head_pitch", 1, &data->head_pitch);
@@ -1177,6 +1181,8 @@ NaoJointPositionInterface::SetServoMessage::SetServoMessage(const uint32_t ini_s
   data->servo = ini_servo;
   data->value = ini_value;
   data->time = ini_time;
+  enum_map_RobotType[(int)ROBOTYPE_ACADEMIC] = "ROBOTYPE_ACADEMIC";
+  enum_map_RobotType[(int)ROBOTYPE_ROBOCUP] = "ROBOTYPE_ROBOCUP";
   add_fieldinfo(IFT_UINT32, "servo", 1, &data->servo);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
   add_fieldinfo(IFT_INT32, "time", 1, &data->time);
@@ -1189,6 +1195,8 @@ NaoJointPositionInterface::SetServoMessage::SetServoMessage() : Message("SetServ
   memset(data_ptr, 0, data_size);
   data      = (SetServoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_RobotType[(int)ROBOTYPE_ACADEMIC] = "ROBOTYPE_ACADEMIC";
+  enum_map_RobotType[(int)ROBOTYPE_ROBOCUP] = "ROBOTYPE_ROBOCUP";
   add_fieldinfo(IFT_UINT32, "servo", 1, &data->servo);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
   add_fieldinfo(IFT_INT32, "time", 1, &data->time);
@@ -1395,6 +1403,8 @@ NaoJointPositionInterface::SetServosMessage::SetServosMessage(const float ini_he
   data->r_ankle_pitch = ini_r_ankle_pitch;
   data->r_ankle_roll = ini_r_ankle_roll;
   data->time = ini_time;
+  enum_map_RobotType[(int)ROBOTYPE_ACADEMIC] = "ROBOTYPE_ACADEMIC";
+  enum_map_RobotType[(int)ROBOTYPE_ROBOCUP] = "ROBOTYPE_ROBOCUP";
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
   add_fieldinfo(IFT_FLOAT, "head_pitch", 1, &data->head_pitch);
   add_fieldinfo(IFT_FLOAT, "l_shoulder_pitch", 1, &data->l_shoulder_pitch);
@@ -1431,6 +1441,8 @@ NaoJointPositionInterface::SetServosMessage::SetServosMessage() : Message("SetSe
   memset(data_ptr, 0, data_size);
   data      = (SetServosMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_RobotType[(int)ROBOTYPE_ACADEMIC] = "ROBOTYPE_ACADEMIC";
+  enum_map_RobotType[(int)ROBOTYPE_ROBOCUP] = "ROBOTYPE_ROBOCUP";
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
   add_fieldinfo(IFT_FLOAT, "head_pitch", 1, &data->head_pitch);
   add_fieldinfo(IFT_FLOAT, "l_shoulder_pitch", 1, &data->l_shoulder_pitch);
@@ -2329,6 +2341,8 @@ NaoJointPositionInterface::MoveServoMessage::MoveServoMessage(const uint32_t ini
   data->servo = ini_servo;
   data->value = ini_value;
   data->speed = ini_speed;
+  enum_map_RobotType[(int)ROBOTYPE_ACADEMIC] = "ROBOTYPE_ACADEMIC";
+  enum_map_RobotType[(int)ROBOTYPE_ROBOCUP] = "ROBOTYPE_ROBOCUP";
   add_fieldinfo(IFT_UINT32, "servo", 1, &data->servo);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
   add_fieldinfo(IFT_FLOAT, "speed", 1, &data->speed);
@@ -2341,6 +2355,8 @@ NaoJointPositionInterface::MoveServoMessage::MoveServoMessage() : Message("MoveS
   memset(data_ptr, 0, data_size);
   data      = (MoveServoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_RobotType[(int)ROBOTYPE_ACADEMIC] = "ROBOTYPE_ACADEMIC";
+  enum_map_RobotType[(int)ROBOTYPE_ROBOCUP] = "ROBOTYPE_ROBOCUP";
   add_fieldinfo(IFT_UINT32, "servo", 1, &data->servo);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
   add_fieldinfo(IFT_FLOAT, "speed", 1, &data->speed);
@@ -2547,6 +2563,8 @@ NaoJointPositionInterface::MoveServosMessage::MoveServosMessage(const float ini_
   data->r_knee_pitch = ini_r_knee_pitch;
   data->r_ankle_pitch = ini_r_ankle_pitch;
   data->r_ankle_roll = ini_r_ankle_roll;
+  enum_map_RobotType[(int)ROBOTYPE_ACADEMIC] = "ROBOTYPE_ACADEMIC";
+  enum_map_RobotType[(int)ROBOTYPE_ROBOCUP] = "ROBOTYPE_ROBOCUP";
   add_fieldinfo(IFT_FLOAT, "speed", 1, &data->speed);
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
   add_fieldinfo(IFT_FLOAT, "head_pitch", 1, &data->head_pitch);
@@ -2583,6 +2601,8 @@ NaoJointPositionInterface::MoveServosMessage::MoveServosMessage() : Message("Mov
   memset(data_ptr, 0, data_size);
   data      = (MoveServosMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_RobotType[(int)ROBOTYPE_ACADEMIC] = "ROBOTYPE_ACADEMIC";
+  enum_map_RobotType[(int)ROBOTYPE_ROBOCUP] = "ROBOTYPE_ROBOCUP";
   add_fieldinfo(IFT_FLOAT, "speed", 1, &data->speed);
   add_fieldinfo(IFT_FLOAT, "head_yaw", 1, &data->head_yaw);
   add_fieldinfo(IFT_FLOAT, "head_pitch", 1, &data->head_pitch);

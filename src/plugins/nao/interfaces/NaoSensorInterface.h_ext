@@ -104,6 +104,7 @@ class NaoSensorInterface : public Interface
 
   NaoSensorInterface_data_t *data;
 
+  interface_enum_map_t enum_map_UltrasonicDirection;
  public:
   /* messages */
   class EmitUltrasonicWaveMessage : public Message
@@ -122,6 +123,7 @@ class NaoSensorInterface : public Interface
 
     EmitUltrasonicWaveMessage_data_t *data;
 
+  interface_enum_map_t enum_map_UltrasonicDirection;
    public:
     EmitUltrasonicWaveMessage(const UltrasonicDirection ini_ultrasonic_direction);
     EmitUltrasonicWaveMessage();
@@ -151,6 +153,7 @@ class NaoSensorInterface : public Interface
 
     StartUltrasonicMessage_data_t *data;
 
+  interface_enum_map_t enum_map_UltrasonicDirection;
    public:
     StartUltrasonicMessage(const UltrasonicDirection ini_ultrasonic_direction);
     StartUltrasonicMessage();
@@ -177,6 +180,7 @@ class NaoSensorInterface : public Interface
 
     StopUltrasonicMessage_data_t *data;
 
+  interface_enum_map_t enum_map_UltrasonicDirection;
    public:
     StopUltrasonicMessage();
     ~StopUltrasonicMessage();

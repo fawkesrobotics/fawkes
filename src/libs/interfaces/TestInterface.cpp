@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -51,6 +53,8 @@ TestInterface::TestInterface() : Interface()
   data      = (TestInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_TestEnum[(int)TEST_ENUM_1] = "TEST_ENUM_1";
+  enum_map_TestEnum[(int)TEST_ENUM_2] = "TEST_ENUM_2";
   add_fieldinfo(IFT_BOOL, "test_bool", 1, &data->test_bool);
   add_fieldinfo(IFT_INT32, "test_int", 1, &data->test_int);
   add_fieldinfo(IFT_BYTE, "flags", 1, &data->flags);
@@ -328,6 +332,8 @@ TestInterface::SetTestIntMessage::SetTestIntMessage(const int32_t ini_test_int) 
   data      = (SetTestIntMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->test_int = ini_test_int;
+  enum_map_TestEnum[(int)TEST_ENUM_1] = "TEST_ENUM_1";
+  enum_map_TestEnum[(int)TEST_ENUM_2] = "TEST_ENUM_2";
   add_fieldinfo(IFT_INT32, "test_int", 1, &data->test_int);
 }
 /** Constructor */
@@ -338,6 +344,8 @@ TestInterface::SetTestIntMessage::SetTestIntMessage() : Message("SetTestIntMessa
   memset(data_ptr, 0, data_size);
   data      = (SetTestIntMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_TestEnum[(int)TEST_ENUM_1] = "TEST_ENUM_1";
+  enum_map_TestEnum[(int)TEST_ENUM_2] = "TEST_ENUM_2";
   add_fieldinfo(IFT_INT32, "test_int", 1, &data->test_int);
 }
 
@@ -418,6 +426,8 @@ TestInterface::SetTestStringMessage::SetTestStringMessage(const char * ini_test_
   data      = (SetTestStringMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->test_string, ini_test_string, 30);
+  enum_map_TestEnum[(int)TEST_ENUM_1] = "TEST_ENUM_1";
+  enum_map_TestEnum[(int)TEST_ENUM_2] = "TEST_ENUM_2";
   add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
 }
 /** Constructor */
@@ -428,6 +438,8 @@ TestInterface::SetTestStringMessage::SetTestStringMessage() : Message("SetTestSt
   memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_TestEnum[(int)TEST_ENUM_1] = "TEST_ENUM_1";
+  enum_map_TestEnum[(int)TEST_ENUM_2] = "TEST_ENUM_2";
   add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
 }
 
@@ -510,6 +522,8 @@ TestInterface::CalculateMessage::CalculateMessage(const int32_t ini_summand, con
   data_ts   = (message_data_ts_t *)data_ptr;
   data->summand = ini_summand;
   data->addend = ini_addend;
+  enum_map_TestEnum[(int)TEST_ENUM_1] = "TEST_ENUM_1";
+  enum_map_TestEnum[(int)TEST_ENUM_2] = "TEST_ENUM_2";
   add_fieldinfo(IFT_INT32, "summand", 1, &data->summand);
   add_fieldinfo(IFT_INT32, "addend", 1, &data->addend);
 }
@@ -521,6 +535,8 @@ TestInterface::CalculateMessage::CalculateMessage() : Message("CalculateMessage"
   memset(data_ptr, 0, data_size);
   data      = (CalculateMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_TestEnum[(int)TEST_ENUM_1] = "TEST_ENUM_1";
+  enum_map_TestEnum[(int)TEST_ENUM_2] = "TEST_ENUM_2";
   add_fieldinfo(IFT_INT32, "summand", 1, &data->summand);
   add_fieldinfo(IFT_INT32, "addend", 1, &data->addend);
 }
