@@ -1,0 +1,167 @@
+$#include <interfaces/NavGraphGeneratorInterface.h>
+$#include <utils/time/time.h>
+$#include <utils/time/clock.h>
+$using namespace fawkes;
+namespace fawkes {
+class NavGraphGeneratorInterface : public Interface
+{
+
+  typedef enum {
+    CLOSEST_NODE,
+    CLOSEST_EDGE,
+    CLOSEST_EDGE_OR_NODE
+  } ConnectionMode;
+
+  class ClearMessage : public Message
+  {
+    ClearMessage();
+    ~ClearMessage();
+
+  };
+
+  class SetBoundingBoxMessage : public Message
+  {
+    SetBoundingBoxMessage(float ini_p1_x, float ini_p1_y, float ini_p2_x, float ini_p2_y);
+    SetBoundingBoxMessage();
+    ~SetBoundingBoxMessage();
+
+    float p1_x();
+    void set_p1_x(const float new_p1_x);
+    int maxlenof_p1_x() const;
+    float p1_y();
+    void set_p1_y(const float new_p1_y);
+    int maxlenof_p1_y() const;
+    float p2_x();
+    void set_p2_x(const float new_p2_x);
+    int maxlenof_p2_x() const;
+    float p2_y();
+    void set_p2_y(const float new_p2_y);
+    int maxlenof_p2_y() const;
+  };
+
+  class AddObstacleMessage : public Message
+  {
+    AddObstacleMessage(char * ini_id, float ini_x, float ini_y);
+    AddObstacleMessage();
+    ~AddObstacleMessage();
+
+    char * id();
+    void set_id(const char * new_id);
+    int maxlenof_id() const;
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+  };
+
+  class RemoveObstacleMessage : public Message
+  {
+    RemoveObstacleMessage(char * ini_id);
+    RemoveObstacleMessage();
+    ~RemoveObstacleMessage();
+
+    char * id();
+    void set_id(const char * new_id);
+    int maxlenof_id() const;
+  };
+
+  class AddPointOfInterestMessage : public Message
+  {
+    AddPointOfInterestMessage(char * ini_id, float ini_x, float ini_y, ConnectionMode ini_mode);
+    AddPointOfInterestMessage();
+    ~AddPointOfInterestMessage();
+
+    char * id();
+    void set_id(const char * new_id);
+    int maxlenof_id() const;
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    ConnectionMode mode();
+    void set_mode(const ConnectionMode new_mode);
+    int maxlenof_mode() const;
+  };
+
+  class SetPointOfInterestPropertyMessage : public Message
+  {
+    SetPointOfInterestPropertyMessage(char * ini_id, char * ini_property_name, char * ini_property_value);
+    SetPointOfInterestPropertyMessage();
+    ~SetPointOfInterestPropertyMessage();
+
+    char * id();
+    void set_id(const char * new_id);
+    int maxlenof_id() const;
+    char * property_name();
+    void set_property_name(const char * new_property_name);
+    int maxlenof_property_name() const;
+    char * property_value();
+    void set_property_value(const char * new_property_value);
+    int maxlenof_property_value() const;
+  };
+
+  class RemovePointOfInterestMessage : public Message
+  {
+    RemovePointOfInterestMessage(char * ini_id);
+    RemovePointOfInterestMessage();
+    ~RemovePointOfInterestMessage();
+
+    char * id();
+    void set_id(const char * new_id);
+    int maxlenof_id() const;
+  };
+
+  class ComputeMessage : public Message
+  {
+    ComputeMessage();
+    ~ComputeMessage();
+
+  };
+
+  unsigned int flags();
+  void set_flags(const unsigned int new_flags);
+  int maxlenof_flags() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  int                     hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual Message *   create_message(const char *type) const = 0;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  bool          changed() const;
+  const fawkes::Time *  timestamp() const;
+  void          set_auto_timestamping(bool enabled);
+  void          set_timestamp(const fawkes::Time *t);
+  void          set_clock(fawkes::Clock *clock);
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  Message *     msgq_first();
+  bool          msgq_empty();
+
+
+};
+
+}

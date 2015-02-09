@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="NavGraphGeneratorInterface" author="Tim Niemueller" year="2015">
+  <constants>
+   <enum name="ConnectionMode">
+     <comment>Drive modes enum</comment>
+     <item name="CLOSEST_NODE">
+       Connect point to the node on the graph closest to the given
+       point.
+     </item>
+     <item name="CLOSEST_EDGE">
+       Connect point to the edge in which segment it lies, i.e. search
+       for an edge where we can find a perpendicular line going
+       through the given point and any point on the edge's line
+       segment. If no such segment is found, the point cannot be
+       added.
+     </item>
+     <item name="CLOSEST_EDGE_OR_NODE">
+       First try the CLOSEST_EDGE method. If that yields no result,
+       use the CLOSEST_NODE method as a fallback.
+     </item>
+  </enum> 
+  </constants>
+  <data>
+    <comment>
+      This interfaces is used to instruct the navgraph-generator.
+      It allows to add obstacles and points of interest and perform
+      a computation run of the graph generation.
+
+      Operations to modify the parameters (clearing, adding/removing
+      obstacles or points of interest etc.) take effect only once a
+      ComputeMessage is sent. This can be used, for example, to first
+      clear the graph, update it with the latest information, and
+      finally generate the graph.
+
+      As soon as any instruction has been received, the generato shall
+      only listen to messages from the same sender. Only after a
+      computation has been performed can another node send messages
+      again.
+    </comment>
+
+    <field type="uint32" name="flags">Bit-wise combination of
+    FLAG_* constants denoting navigator component features.</field>
+
+  </data>
+  <message name="Clear">
+    <comment>
+      Remove all currently know obstacles.
+      Use this operation with care. A graph generation afterwards will
+      yield now results.
+    </comment>
+  </message>
+  <message name="SetBoundingBox">
+    <comment>
+      Set the bounding box to use for graph generation. No edge that
+      leads outside this bounding box is considered for the graph.
+    </comment>
+    <field type="float" name="p1_x">X coordinate of bbox start point in global frame.</field>
+    <field type="float" name="p1_y">Y coordinate of bbox start point in global frame.</field>
+    <field type="float" name="p2_x">X coordinate of bbox end point in global frame.</field>
+    <field type="float" name="p2_y">Y coordinate of bbox end point in global frame.</field>
+  </message>
+  <message name="AddObstacle">
+    <comment>
+      Add an obstacle to be avoided by the graph. The obstacle is
+      given as a centroid in X-Y ground-support plane of global frame,
+      typical /map frame.
+    </comment>
+    <field type="string" name="id" length="64">
+      ID of the obstacle. Can later be used to remove it again.
+    </field>
+    <field type="float" name="x">X coordinate of obstacle in global frame.</field>
+    <field type="float" name="y">Y coordinate of obstacle in global frame.</field>
+  </message>
+  <message name="RemoveObstacle">
+    <comment></comment>
+    <field type="string" name="id" length="64">
+      ID of the obstacle to remove.
+    </field>    
+  </message>
+  <message name="AddPointOfInterest">
+    <comment>
+      Add a point which shall be reachable as a target. The POI is
+      given as a centroid in X-Y ground-support plane of global frame,
+      typical /map frame.
+    </comment>
+    <field type="string" name="id" length="64">
+      ID of the obstacle. Can later be used to remove it again.
+    </field>
+    <field type="float" name="x">X coordinate of obstacle in global frame.</field>
+    <field type="float" name="y">Y coordinate of obstacle in global frame.</field>
+    <field type="ConnectionMode" name="mode">
+      The connection mode to use to connect the POI with the graph.
+    </field>
+  </message>
+  <message name="SetPointOfInterestProperty">
+    <comment>
+      Set a property for an already added point of interest.
+    </comment>
+    <field type="string" name="id" length="64">
+      ID of the point of interest.
+    </field>
+    <field type="string" name="property_name" length="64">Name of the property to set.</field>
+    <field type="string" name="property_value" length="1024">Value of the property
+    to set.</field>
+  </message>
+  <message name="RemovePointOfInterest">
+    <comment></comment>
+    <field type="string" name="id" length="64">
+      ID of the obstacle to remove.
+    </field>    
+  </message>
+  <message name="Compute">
+    <comment>
+      Compute the graph with the currently available information.
+    </comment>
+  </message>
+</interface>
