@@ -55,6 +55,14 @@ class NavGraphConstraintRepo;
 class NavGraph
 {
  public:
+  /** Connect mode enum for connect_node_* methods. */
+  typedef enum {
+    CLOSEST_NODE,		///< Connect to closest node
+    CLOSEST_EDGE,		///< Connect to closest edge
+    CLOSEST_EDGE_OR_NODE	///< try to connect to closest edge,
+				///< if that fails, connect to closest node
+  } ConnectionMode;
+
   NavGraph(const std::string &graph_name);
   virtual ~NavGraph();
   
@@ -122,6 +130,9 @@ class NavGraph
 				   bool use_constraints = true, bool compute_constraints = true);
 
   void add_node(const NavGraphNode &node);
+  void add_node_and_connect(const NavGraphNode &node, ConnectionMode conn_mode);
+  void connect_node_to_closest_node(const NavGraphNode &n);
+  void connect_node_to_closest_edge(const NavGraphNode &n);
   void add_edge(const NavGraphEdge &edge);
   void remove_node(const NavGraphNode &node);
   void remove_edge(const NavGraphEdge &edge);

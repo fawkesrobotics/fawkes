@@ -437,6 +437,107 @@ NavGraph::add_node(const NavGraphNode &node)
   }
 }
 
+///@cond INTERNAL
+template<class T>
+typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+almost_equal(T x, T y, int ulp)
+{
+  // the machine epsilon has to be scaled to the magnitude of the values used
+  // and multiplied by the desired precision in ULPs (units in the last place)
+  return (std::abs(x-y) < std::numeric_limits<T>::epsilon() * std::abs(x+y) * ulp)
+    // unless the result is subnormal
+    || std::abs(x-y) < std::numeric_limits<T>::min();
+}
+///@endcond INTERNAL
+
+/** Add a node and connect it to the graph.
+ * The node is added similar to add_node(). Then, an edge is added connecting the
+ * node to the graph. There are two principal methods available:
+ * CLOSEST_NODE: simply connect to an existing node closest to the given node
+ * CLOSEST_EDGE: connect node to the edge in which segment it lies,
+ *   i.e. search for an edge where we can find a perpendicular line
+ *   going through the given node and any point on the edge's line
+ *   segment. If no such segment is found, the node cannot be added.
+ * CLOSEST_EDGE_OR_NODE: first try CLOSEST_EDGE method, if that fails
+ * use CLOSEST_NODE.
+ * @param node node to add
+ * @param conn_mode connection mode to use
+ */
+void
+NavGraph::add_node_and_connect(const NavGraphNode &node, ConnectionMode conn_mode)
+{
+  add_node(node);
+  switch (conn_mode) {
+  case CLOSEST_NODE:
+    connect_node_to_closest_node(node);
+    break;
+
+  case CLOSEST_EDGE:
+    connect_node_to_closest_edge(node);
+    break;
+
+  case CLOSEST_EDGE_OR_NODE:
+    try {
+      connect_node_to_closest_edge(node);
+    } catch (Exception &e) {
+      connect_node_to_closest_node(node);
+    }
+    break;
+  }
+}
+
+/** Connect node to closest node.
+ * @param n node to connect to closest node
+ */
+void
+NavGraph::connect_node_to_closest_node(const NavGraphNode &n)
+{
+  NavGraphNode closest = closest_node_to(n.name());
+  add_edge(NavGraphEdge(n.name(), closest.name()));
+}
+
+
+/** Connect node to closest edge
+ * @param n node to connect to closest node
+ */
+void
+NavGraph::connect_node_to_closest_edge(const NavGraphNode &n)
+{
+  NavGraphEdge closest = closest_edge(n.x(), n.y());
+  cart_coord_2d_t p = closest.closest_point_on_edge(n.x(), n.y());
+
+  NavGraphNode closest_conn = closest_node(p.x, p.y);
+  NavGraphNode cn;
+  if (almost_equal(closest_conn.distance(p.x, p.y), 0.f, 2)) {
+    cn = closest_conn;
+  } else {
+    cn = NavGraphNode(NavGraph::format_name("C_%s", n.name().c_str()), p.x, p.y);
+  }
+
+  if (closest.from() == cn.name() || closest.to() == cn.name()) {
+    // we actually want to connect to one of the end nodes of the edge,
+    // simply add the new edge and we are done
+    NavGraphEdge new_edge(cn.name(), n.name());
+    new_edge.set_property("generated", true);
+    add_edge(new_edge);
+  } else {
+    // we are inserting a new point into the edge
+    remove_edge(closest);
+    NavGraphEdge new_edge_1(closest.from(), cn.name());
+    NavGraphEdge new_edge_2(closest.to(), cn.name());
+    NavGraphEdge new_edge_3(cn.name(), n.name());
+    new_edge_1.set_property("generated", true);
+    new_edge_2.set_property("generated", true);
+    new_edge_3.set_property("generated", true);
+
+    if (! node_exists(cn))  add_node(cn);
+    add_edge(new_edge_1);
+    add_edge(new_edge_2);
+    add_edge(new_edge_3);
+  }
+}
+
+
 /** Add an edge
  * @param edge edge to add
  */
@@ -494,7 +595,6 @@ NavGraph::update_node(const NavGraphNode &node)
     throw Exception("No node with name %s known", node.name().c_str());
   }
 }
-
 
 /** Update a given edge.
  * Will search for an edge with the same originating and target node as the
