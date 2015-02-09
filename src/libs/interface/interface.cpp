@@ -1400,11 +1400,11 @@ Interface::buffer_timestamp(unsigned int buffer, Time *timestamp)
  * Note that the returned values (type and id) must be freed once they are
  * no longer used. Also verifies lengths of the type and id strings.
  * @param uid UID to parse
- * @param type upon return contains the type part of the UID, must be freed
- * @param id upon return contains the ID part, must be freed
+ * @param type upon return contains the type part of the UID
+ * @param id upon return contains the ID part
  */
 void
-Interface::parse_uid(const char *uid, char **type, char **id)
+Interface::parse_uid(const char *uid, std::string &type, std::string &id)
 {
   regex_t re;
   int ec = 0;
@@ -1426,8 +1426,10 @@ Interface::parse_uid(const char *uid, char **type, char **id)
     throw Exception("Failed to match UID %s, format error.", uid);
   }
 
-  *type = strndup(&(uid[matches[1].rm_so]), matches[1].rm_eo - matches[1].rm_so);
-  *id   = strndup(&(uid[matches[2].rm_so]), matches[2].rm_eo - matches[2].rm_so);
+  type.assign(&(uid[matches[1].rm_so]), matches[1].rm_eo - matches[1].rm_so);
+  id.assign(&(uid[matches[2].rm_so]), matches[2].rm_eo - matches[2].rm_so);
+
+  regfree(&re);
 }
 
 } // end namespace fawkes

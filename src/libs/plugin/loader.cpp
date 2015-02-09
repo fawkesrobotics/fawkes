@@ -264,6 +264,7 @@ PluginLoader::get_string_symbol(const char *plugin_name,
   }
 
   if (gelf_getehdr(elf, &elf_header) == NULL) {
+    elf_end(elf);
     throw Exception("Failed to read ELF header of plugin %s: %s",
 		    plugin_name, elf_errmsg(elf_errno()));    
   }
@@ -300,9 +301,12 @@ PluginLoader::get_string_symbol(const char *plugin_name,
 
 	  if (end != NULL) {
 	    close(fd);
-	    return std::string(start);
+	    std::string rv(start);
+	    elf_end(elf);
+	    return rv;
 	  } else {
 	    close(fd);
+	    elf_end(elf);
 	    throw Exception("Failed to retrieve string for symbol '%s' in section '%s'"
 			    " of plugin '%s'", symbol_name, section_name, plugin_name);
 	  }
@@ -311,6 +315,7 @@ PluginLoader::get_string_symbol(const char *plugin_name,
     }
   }
   close(fd);
+  elf_end(elf);
   throw Exception("Description for plugin %s not found. "
 		  "Forgot PLUGIN_DESCRIPTION?", plugin_name);
 #else

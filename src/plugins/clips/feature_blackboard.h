@@ -29,6 +29,8 @@
 #include <list>
 #include <string>
 
+#include <clipsmm/value.h>
+
 namespace CLIPS {
   class Environment;
 }
@@ -55,19 +57,33 @@ class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
   fawkes::BlackBoard *blackboard_;
 
   typedef std::map<std::string, std::list<fawkes::Interface *> > InterfaceMap;
-  std::map<std::string, InterfaceMap >  interfaces_;
+  typedef struct {
+    InterfaceMap reading;
+    InterfaceMap writing;
+  } Interfaces;
+  std::map<std::string, Interfaces >  interfaces_;
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
 
  private: // methods
-  void clips_blackboard_open_interface(std::string env_name, std::string type, std::string id);
+  void clips_blackboard_open_interface(std::string env_name,
+				       std::string type, std::string id,
+				       bool writing);
+  void clips_blackboard_open_interface_reading(std::string env_name,
+					       std::string type, std::string id);
+  void clips_blackboard_open_interface_writing(std::string env_name,
+					       std::string type, std::string id);
   void clips_blackboard_close_interface(std::string env_name,
 					std::string type, std::string id);
   void clips_blackboard_read(std::string env_name);
+  void clips_blackboard_write(std::string env_name, std::string uid);
+
   void clips_blackboard_enable_time_read(std::string env_name);
   void clips_blackboard_get_info(std::string env_name);
   bool clips_assert_interface_type(std::string &env_name, std::string &log_name,
 				   fawkes::Interface *iface, std::string &type);
   void clips_blackboard_preload(std::string env_name, std::string type);
+  void clips_blackboard_set(std::string env_name, std::string uid,
+			    std::string field, CLIPS::Value value);
 };
 
 #endif

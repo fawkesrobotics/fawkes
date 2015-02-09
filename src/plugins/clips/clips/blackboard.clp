@@ -13,5 +13,7 @@
   (slot hash (type STRING))
   (slot has-writer (type SYMBOL) (allowed-values TRUE FALSE))
   (slot num-readers (type INTEGER))
+  (slot writer  (type STRING))
+  (multislot readers (type STRING))
   (multislot timestamp (type INTEGER) (cardinality 2 2) (default (create$ 0 0)))
 )

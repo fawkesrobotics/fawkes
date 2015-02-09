@@ -95,8 +95,8 @@ class BBLoggerThread
   char               *__filename;
   char               *__logdir;
   char               *__uid;
-  char               *__type;
-  char               *__id;
+  std::string         __type;
+  std::string         __id;
   FILE               *__f_data;
 
   fawkes::Time       *__start;

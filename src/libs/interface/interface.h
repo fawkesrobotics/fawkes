@@ -205,7 +205,7 @@ class Interface
   unsigned int num_fields();
 
   /* Convenience */
-  static void parse_uid(const char *uid, char **type, char **id);
+  static void parse_uid(const char *uid, std::string &type, std::string &id);
 
  protected:
   Interface();
