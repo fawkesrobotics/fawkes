@@ -50,6 +50,8 @@ class InterruptibleBarrier : public Barrier
 
   RefPtr<ThreadList>  passed_threads();
 
+  bool no_threads_in_wait();
+
  private:
   InterruptibleBarrier(const InterruptibleBarrier &b);
   InterruptibleBarrier(const InterruptibleBarrier *b);
@@ -63,6 +65,7 @@ class InterruptibleBarrier : public Barrier
   bool __interrupted;
   bool __timeout;
   bool __wait_at_barrier;
+  int __num_threads_in_wait_function;
 };
 
 

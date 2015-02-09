@@ -100,6 +100,7 @@ InterruptibleBarrier::InterruptibleBarrier(unsigned int count)
 
   __interrupted = false;
   __timeout     = false;
+  __num_threads_in_wait_function = 0;
 }
 
 
@@ -124,6 +125,7 @@ InterruptibleBarrier::InterruptibleBarrier(Mutex *mutex, unsigned int count)
 
   __interrupted = false;
   __timeout     = false;
+  __num_threads_in_wait_function = 0;
 }
 
 /** Invalid constructor.
@@ -243,6 +245,7 @@ bool
 InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanosec)
 {
   if (likely(__data->own_mutex))  __data->mutex->lock();
+  __num_threads_in_wait_function++;
 
   if ( __data->threads_left == 0 ) {
     // first to come
@@ -252,6 +255,7 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
   } else {
     if ( __interrupted || __timeout ) {
       // interrupted or timed out threads need to be reset if they should be reused
+      __num_threads_in_wait_function--;
       if (likely(__data->own_mutex))  __data->mutex->unlock();
       return true;
     }
@@ -267,12 +271,21 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
   }
 
   bool local_timeout = false;
+  
+  //Am I the last thread the interruptable  barrier is waiting for? Then I can wake the others up.
   bool waker = (__data->threads_left == 0);
 
   while ( __data->threads_left && !__interrupted && !__timeout && ! local_timeout) {
+    //Here, the threads are waiting for the barrier
+    //pthread_cond_timedwait releases __data->mutex if it is not external
     local_timeout = ! __data->waitcond->reltimed_wait(timeout_sec, timeout_nanosec);
+    //before continuing, pthread_cond_timedwait locks __data->mutex again if it is not external
   }
-  if (local_timeout)  __timeout = true;
+
+  if (local_timeout){
+    //set timeout flag of the interruptable barrier so the other threads can continue
+    __timeout = true;
+  }
 
   if ( __interrupted ) {
     if (likely(__data->own_mutex))  __data->mutex->unlock();
@@ -281,18 +294,43 @@ InterruptibleBarrier::wait(unsigned int timeout_sec, unsigned int timeout_nanose
 			       _count - __data->threads_left, _count);
   }
 
+  if (waker){
+    //all threads of this barrier have to synchronize at the standard Barrier
+    __wait_at_barrier = true;
+  }
+  
   if (waker || local_timeout) {
-    __wait_at_barrier = waker;
+    //the other threads can stop waiting in th while-loop
     __data->waitcond->wake_all();
   }
 
   if (likely(__data->own_mutex))  __data->mutex->unlock();
 
   if (__wait_at_barrier) {
+    //hard synchronization
     Barrier::wait();
   }
 
+  if (likely(__data->own_mutex))  __data->mutex->lock();
+  //increment is not threadsafe
+  __num_threads_in_wait_function--;
+  if (likely(__data->own_mutex))  __data->mutex->unlock();
+
   return ! __timeout;
 }
+
+/** Checks if there are no more threads in the wait() function.
+ * This method is used to prevent the destruction of the barrier
+ * while there are threads in wait().
+ * @return true, if no thread currently is in wait()
+ */
+bool InterruptibleBarrier::no_threads_in_wait(){
+  if (likely(__data->own_mutex))  __data->mutex->lock();
+  bool res = __num_threads_in_wait_function == 0;
+  if (likely(__data->own_mutex))  __data->mutex->unlock();
+  
+  return res;
+}
+
 
 } // end namespace fawkes
