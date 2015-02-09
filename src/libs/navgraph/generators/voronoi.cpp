@@ -131,6 +131,25 @@ genname(unsigned int &i)
 }
 
 
+/** Set bounding box.
+ * Setting a bounding box will cause compute() to ignore any edge with
+ * a vertex out of the given bounding box area.
+ * @param bbox_p1_x X coordinate of first (lower) bounding box point
+ * @param bbox_p1_y y coordinate of first (lower) bounding box point
+ * @param bbox_p2_x X coordinate of second (upper) bounding box point
+ * @param bbox_p2_y y coordinate of second (upper) bounding box point
+ */
+void
+NavGraphGeneratorVoronoi::set_bounding_box(float bbox_p1_x, float bbox_p1_y,
+					   float bbox_p2_x, float bbox_p2_y)
+{
+  bbox_enabled_ = true;
+  bbox_p1_x_ = bbox_p1_x;
+  bbox_p1_y_ = bbox_p1_y;
+  bbox_p2_x_ = bbox_p2_x;
+  bbox_p2_y_ = bbox_p2_y;  
+}
+
 /** Add an obstacle point.
  * An obstacle point will be the representative for a Voronoi
  * face in the newly generated graph.

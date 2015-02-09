@@ -40,6 +40,8 @@ class NavGraphGeneratorVoronoi
 
   virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph);
 
+  void set_bounding_box(float bbox_p1_x, float bbox_p1_y,
+			float bbox_p2_x, float bbox_p2_y);
   void add_obstacle(float x, float y);
   void clear();
 
