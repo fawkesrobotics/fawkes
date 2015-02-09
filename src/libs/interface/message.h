@@ -27,6 +27,7 @@
 #include <interface/field_iterator.h>
 #include <interface/types.h>
 #include <core/utils/refcount.h>
+#include <core/exceptions/software.h>
 
 #define __INTERFACE_MESSAGE_TYPE_SIZE 32
 
@@ -85,6 +86,14 @@ class Message : public RefCount
   template <class MessageType>
     bool           is_of_type();
 
+  /** Cast message to given type if possible.
+   * Check with is_of_type() first if the message has the requested type.
+   * @return message casted to requested type
+   * @throw TypeMismatchException thrown if the message is not of the requested type
+   */
+  template <class MessageType>
+    MessageType * as_type();
+
  private: // fields
   unsigned int  __message_id;
   unsigned int  __hops;
@@ -129,6 +138,19 @@ bool
 Message::is_of_type()
 {
   return (dynamic_cast<MessageType *>(this) != 0);
+}
+
+
+template <class MessageType>
+MessageType *
+Message::as_type()
+{
+  MessageType *m = dynamic_cast<MessageType *>(this);
+  if (m) {
+    return m;
+  } else {
+    throw fawkes::TypeMismatchException("Message is not of requested type");
+  }
 }
 
 
