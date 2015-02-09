@@ -26,6 +26,9 @@
 #include <cstring>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
 /** @class Configuration <config/config.h>
  * Interface for configuration handling.
@@ -629,5 +632,6 @@ Configuration::notify_handlers(const char *path, bool comment_changed)
   delete value;
   delete h;
 }
+
 
 } // end namespace fawkes

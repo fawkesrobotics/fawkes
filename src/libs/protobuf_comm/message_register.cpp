@@ -288,7 +288,15 @@ MessageRegister::serialize(uint16_t component_id, uint16_t msg_type,
 			   message_header_t &message_header, 
 			   std::string &data)
 {
-  if (msg.SerializeToString(&data)) {
+  bool serialized = false;
+  try {
+    serialized = msg.SerializeToString(&data);
+  } catch (google::protobuf::FatalException &e) {
+    std::string msg = std::string("Failed to serialize message: ") + e.what();
+    throw std::runtime_error(msg);
+  }
+
+  if (serialized) {
     message_header.component_id = htons(component_id);
     message_header.msg_type     = htons(msg_type);
     frame_header.payload_size   = htonl(sizeof(message_header) + data.size());

@@ -27,12 +27,16 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <plugins/clips/aspect/clips_feature.h>
-#include <plugins/navgraph/aspect/navgraph.h>
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/aspect/navgraph.h>
+#include <navgraph/navgraph.h>
 
 #include <vector>
 #include <string>
 #include <map>
+
+namespace fawkes {
+  class NavGraphStaticListEdgeConstraint;
+}
 
 class ClipsNavGraphThread
 : public fawkes::Thread,
@@ -41,7 +45,7 @@ class ClipsNavGraphThread
   public fawkes::NavGraphAspect,
   public fawkes::CLIPSFeature,
   public fawkes::CLIPSFeatureAspect,
-  public fawkes::TopologicalMapGraph::ChangeListener
+  public fawkes::NavGraph::ChangeListener
 {
  public:
   ClipsNavGraphThread();
@@ -63,10 +67,13 @@ class ClipsNavGraphThread
 
  private:
   void clips_navgraph_load(fawkes::LockPtr<CLIPS::Environment> &clips);
+  void clips_navgraph_block_edge(std::string env_name, std::string from, std::string to);
+  void clips_navgraph_unblock_edge(std::string env_name, std::string from, std::string to);
 
  private:
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
 
+  fawkes::NavGraphStaticListEdgeConstraint  *edge_constraint_;
 };
 
 #endif

@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/fvconf.mk
 
 SUBDIRS = core utils interface netcomm blackboard interfaces config logging tf \
-	  plugin lua aspect webview gui_utils baseapp \
+	  plugin lua aspect webview gui_utils baseapp navgraph \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
 	  eclipse_externals kdl_parser protobuf_comm protobuf_clips pcl_utils
 
@@ -42,6 +42,7 @@ utils: core
 interface: core utils
 blackboard: core utils interface netcomm logging
 netcomm: core utils
+navgraph: core utils aspect
 interfaces: core interface
 config: core netcomm utils logging
 plugin: core netcomm utils config logging
@@ -53,7 +54,7 @@ logging: core utils netcomm
 naoutils: core utils
 webview: core utils logging
 baseapp: core utils aspect config netcomm blackboard plugin logging
-eclipse_externals: blackboard interface utils
+eclipse_externals: blackboard interface utils navgraph
 tf: core utils blackboard interface interfaces
 fvutils: core utils netcomm logging
 fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils logging

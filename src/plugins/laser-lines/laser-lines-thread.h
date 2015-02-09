@@ -95,6 +95,7 @@ class LaserLinesThread
 		const Eigen::Vector3f &point_to_line = Eigen::Vector3f(0, 0, 0),
 		const Eigen::Vector3f &line_direction = Eigen::Vector3f(0, 0, 0),
 		const float bearing = 0);
+  float calc_line_length(CloudPtr cloud, pcl::ModelCoefficients::Ptr coeff);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -116,9 +117,10 @@ class LaserLinesThread
     SELECT_MIN_DIST
   } selection_mode_t;
 
-  unsigned int cfg_line_min_size_;
   unsigned int cfg_segm_max_iterations_;
   float        cfg_segm_distance_threshold_;
+  float        cfg_segm_sample_max_dist_;
+  float        cfg_min_length_;
   unsigned int cfg_segm_min_inliers_;
   std::string  cfg_input_pcl_;
   std::string  cfg_result_frame_;

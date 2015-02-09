@@ -23,7 +23,6 @@
 
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
-#include <utils/graph/topological_map_graph.h>
 #include <interfaces/SwitchInterface.h>
 #include <core/threading/mutex_locker.h>
 

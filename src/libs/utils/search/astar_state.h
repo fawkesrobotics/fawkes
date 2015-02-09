@@ -3,9 +3,9 @@
  *  astar_state.h - Abstract class of a astar state.
  *
  *  Generated: Mon Sep 15 18:48:00 2002
- *  Copyright  2002  Stefan Jacobs
- *             2007  Martin Liebenberg
- *             2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2002       Stefan Jacobs
+ *             2007       Martin Liebenberg
+ *             2012-2014  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -39,8 +39,13 @@ class AStarState
 {
  public:
   
-  /** Constructor. */
-  AStarState() {};
+  /** Constructor.
+   * @param cost_sofar costs for the path so far
+   * @param parent parent search state (maybe NULL for first state)
+   */
+  AStarState(float cost_sofar, AStarState *parent)
+    : parent(parent), path_cost(cost_sofar)
+  {};
   
   /** Destructor. */
   virtual ~AStarState() {};
@@ -56,10 +61,10 @@ class AStarState
   virtual size_t key() = 0;
   
   /** Estimate the heuristic cost to the goal.
-   * @return estimated cost as double
+   * @return estimated cost
    */
-  virtual double estimate() = 0;
-  
+  virtual float estimate() = 0;
+
   /** Check, wether we reached a goal or not.
    * @return true, if this state is a goal, else false
    */
@@ -73,10 +78,11 @@ class AStarState
   /** Predecessor. */
   AStarState *parent;
 
-  /** Past cost. */
-  double past_cost;
+  /** Cost of path leading to this search state. */
+  float path_cost;
+
   /** Total estimated cost. */
-  double total_estimated_cost;
+  float total_estimated_cost;
 
 };
 

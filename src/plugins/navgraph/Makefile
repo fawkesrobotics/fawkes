@@ -20,16 +20,17 @@ include $(BUILDSYSDIR)/ros.mk
 
 ENABLE_VISUALIZATION = 1
 
-PRESUBDIRS = aspect
-CFLAGS += -std=c++0x
+SUBDIRS = static-constraints
+
+CFLAGS += $(CFLAGS_CPP11)
 
 LIBS_navgraph = fawkescore fawkesutils fawkesaspects fawkesinterface \
-	    fawkesblackboard NavigatorInterface
-OBJS_navgraph = navgraph_plugin.o navgraph_thread.o search_state.o
-
+		fawkesblackboard fawkesnavgraph \
+		NavigatorInterface NavPathInterface
+OBJS_navgraph = navgraph_plugin.o navgraph_thread.o
 OBJS_all    = $(OBJS_navgraph)
 
-ifeq ($(HAVE_TF),1)
+ifeq ($(HAVE_CPP11)$(HAVE_TF),11)
   CFLAGS_navgraph_thread  = $(CFLAGS) $(CFLAGS_TF)
   CFLAGS_navgraph_plugin  = $(CFLAGS_navgraph_thread)
   LDFLAGS_navgraph       += $(LDFLAGS_TF)
@@ -60,16 +61,22 @@ ifeq ($(HAVE_TF),1)
 endif
 
 else
-  WARN_TARGETS = warning_tf
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS = warning_cpp11
+  endif
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS = warning_tf
+  endif
 endif
-
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_tf warning_ros warning_visualization_msgs
+.PHONY: warning_cpp11 warning_tf warning_ros warning_visualization_msgs
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting navgraph plugin$(TNORMAL) (tf not available)"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting navgraph plugin$(TNORMAL) (C++11 support required)"
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS not available)"
 warning_visualization_msgs:

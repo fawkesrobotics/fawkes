@@ -21,7 +21,7 @@
 
 #include "rcsoft_map_graph.h"
 
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/navgraph.h>
 #include <core/exception.h>
 #include <eclipseclass.h>
 #include <cstdio>
@@ -48,7 +48,7 @@ public:
    */
   void load( const char* file )
   {
-    m_map_graph = new TopologicalMapGraph( std::string(file) );
+    m_map_graph = new NavGraph( std::string(file) );
   }
 
   /** Query status.
@@ -59,16 +59,16 @@ public:
     return m_map_graph ? true : false;
   }
 
-  /** Access the TopologicalMapGraph instance.
-   * @return the TopologicalMapGraph instance
+  /** Access the NavGraph instance.
+   * @return the NavGraph instance
    */
-  TopologicalMapGraph* map_graph()
+  NavGraph* map_graph()
   {
     return m_map_graph;
   }
 
 private:
-  TopologicalMapGraph* m_map_graph;
+  NavGraph* m_map_graph;
 
 };
 
@@ -124,7 +124,7 @@ p_map_graph_get_node_coords3()
     return EC_fail;
   }
 
-  TopologicalMapNode node = g_map_graph.map_graph()->node( string(nodename) );
+  NavGraphNode node = g_map_graph.map_graph()->node( string(nodename) );
   
   // x-coordinate
   if ( EC_succeed != EC_arg( 2 ).unify( EC_word( (double) node.x() ) ) )
@@ -156,7 +156,7 @@ p_map_graph_get_node_coords4()
     return EC_fail;
   }
 
-  TopologicalMapNode node = g_map_graph.map_graph()->node( string(nodename) );
+  NavGraphNode node = g_map_graph.map_graph()->node( string(nodename) );
 
   // check for orientation property
   int result = EC_succeed;
@@ -183,10 +183,10 @@ p_map_graph_get_nodes()
     return EC_fail;
   }
 
-  vector< TopologicalMapNode > nodes = g_map_graph.map_graph()->nodes();
+  vector< NavGraphNode > nodes = g_map_graph.map_graph()->nodes();
   EC_word tail = nil();
 
-  for ( vector< TopologicalMapNode >::iterator nit = nodes.begin();
+  for ( vector< NavGraphNode >::iterator nit = nodes.begin();
 	nit != nodes.end();
 	++nit )
   {
@@ -228,7 +228,7 @@ p_map_graph_get_closest_node()
     return EC_fail;
   }
 
-  TopologicalMapNode node = g_map_graph.map_graph()->closest_node( (float) x,
+  NavGraphNode node = g_map_graph.map_graph()->closest_node( (float) x,
 							      (float) y,
 							      "" );
 
@@ -257,10 +257,10 @@ p_map_graph_search_nodes()
     return EC_fail;
   }
 
-  vector< TopologicalMapNode > nodes = g_map_graph.map_graph()->search_nodes( string(property) );
+  vector< NavGraphNode > nodes = g_map_graph.map_graph()->search_nodes( string(property) );
   EC_word tail = nil();
 
-  for ( vector< TopologicalMapNode >::iterator nit = nodes.begin();
+  for ( vector< NavGraphNode >::iterator nit = nodes.begin();
 	nit != nodes.end();
 	++nit )
   {
@@ -295,7 +295,7 @@ p_map_graph_get_children()
     return EC_fail;
   }
 
-  TopologicalMapNode node = g_map_graph.map_graph()->node( nodename );
+  NavGraphNode node = g_map_graph.map_graph()->node( nodename );
   vector< string > children = node.reachable_nodes();
   EC_word tail = nil();
   for ( vector< string >::iterator nit = children.begin();

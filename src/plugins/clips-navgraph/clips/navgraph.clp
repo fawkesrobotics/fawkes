@@ -33,7 +33,6 @@
 
 (deftemplate navgraph
   (slot name (type STRING))
-  (slot root (type STRING))
 )
 
 (deftemplate navgraph-node

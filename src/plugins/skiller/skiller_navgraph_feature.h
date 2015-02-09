@@ -26,7 +26,7 @@
 #include <core/threading/thread.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <plugins/navgraph/aspect/navgraph.h>
+#include <navgraph/aspect/navgraph.h>
 
 class SkillerNavGraphFeature
 : public fawkes::Thread,

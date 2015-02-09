@@ -30,6 +30,7 @@
 #ifdef USE_TIMETRACKER
 #  include <utils/time/tracker.h>
 #endif
+#include <utils/time/tracker_macros.h>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -38,8 +39,7 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/surface/convex_hull.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/search/kdtree.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/conditional_removal.h>
@@ -57,8 +57,6 @@
 
 using namespace std;
 
-#define CFG_PREFIX "/laser-cluster/"
-
 /** @class LaserClusterThread "laser-cluster-thread.h"
  * Main thread of laser-cluster plugin.
  * @author Tim Niemueller
@@ -67,34 +65,18 @@ using namespace std;
 using namespace fawkes;
 
 
-#ifdef USE_TIMETRACKER
-#define TIMETRACK_START(c)                      \
-  tt_->ping_start(c);				\
-
-#define TIMETRACK_INTER(c1, c2)			\
- tt_->ping_end(c1);				\
- tt_->ping_start(c2);
-
-#define TIMETRACK_END(c)			\
-  tt_->ping_end(c);
-
-#define TIMETRACK_ABORT(c)                      \
-  tt_->ping_abort(c);
-
-#else
-
-#define TIMETRACK_START(c)
-#define TIMETRACK_INTER(c1, c2)
-#define TIMETRACK_END(c)
-#define TIMETRACK_ABORT(c)
-#endif
-
-/** Constructor. */
-LaserClusterThread::LaserClusterThread()
+/** Constructor.
+ * @param cfg_name configuration name
+ * @param cfg_prefix configuration path prefix
+ */
+LaserClusterThread::LaserClusterThread(std::string &cfg_name, std::string &cfg_prefix)
   : Thread("LaserClusterThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
     TransformAspect(TransformAspect::ONLY_LISTENER)
 {
+  set_name("LaserClusterThread(%s)", cfg_name.c_str());
+  cfg_name_   = cfg_name;
+  cfg_prefix_ = cfg_prefix;
 }
 
 
@@ -107,31 +89,41 @@ LaserClusterThread::~LaserClusterThread()
 void
 LaserClusterThread::init()
 {
-  cfg_line_removal_ = config->get_bool(CFG_PREFIX"line_removal");
+  cfg_line_removal_ = config->get_bool(cfg_prefix_+"line_removal/enable");
   if (cfg_line_removal_) {
     cfg_segm_max_iterations_ =
-      config->get_uint(CFG_PREFIX"line_segmentation_max_iterations");
+      config->get_uint(cfg_prefix_+"line_removal/segmentation_max_iterations");
     cfg_segm_distance_threshold_ =
-      config->get_float(CFG_PREFIX"line_segmentation_distance_threshold");
+      config->get_float(cfg_prefix_+"line_removal/segmentation_distance_threshold");
     cfg_segm_min_inliers_ =
-      config->get_uint(CFG_PREFIX"line_segmentation_min_inliers");
+      config->get_uint(cfg_prefix_+"line_removal/segmentation_min_inliers");
+    cfg_segm_sample_max_dist_ =
+      config->get_float(cfg_prefix_+"line_removal/segmentation_sample_max_dist");
+    cfg_line_min_length_ =
+      config->get_float(cfg_prefix_+"line_removal/min_length");
   }
-  cfg_cluster_tolerance_     = config->get_float(CFG_PREFIX"cluster_tolerance");
-  cfg_cluster_min_size_      = config->get_uint(CFG_PREFIX"cluster_min_size");
-  cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
-  cfg_input_pcl_             = config->get_string(CFG_PREFIX"input_cloud");
-  cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
-  cfg_cluster_min_x_         = config->get_float(CFG_PREFIX"cluster_min_x");
-  cfg_cluster_max_x_         = config->get_float(CFG_PREFIX"cluster_max_x");
-  cfg_cluster_min_y_         = config->get_float(CFG_PREFIX"cluster_min_y");
-  cfg_cluster_max_y_         = config->get_float(CFG_PREFIX"cluster_max_y");
-  cfg_cluster_switch_tolerance_ = config->get_float(CFG_PREFIX"cluster_switch_tolerance");
-  cfg_offset_x_               = config->get_float(CFG_PREFIX"offset_x");
-  cfg_max_num_clusters_      = config->get_uint(CFG_PREFIX"max_num_clusters");
+  cfg_switch_tolerance_      = config->get_float(cfg_prefix_+"switch_tolerance");
+  cfg_cluster_tolerance_     = config->get_float(cfg_prefix_+"clustering/tolerance");
+  cfg_cluster_min_size_      = config->get_uint(cfg_prefix_+"clustering/min_size");
+  cfg_cluster_max_size_      = config->get_uint(cfg_prefix_+"clustering/max_size");
+  cfg_input_pcl_             = config->get_string(cfg_prefix_+"input_cloud");
+  cfg_result_frame_          = config->get_string(cfg_prefix_+"result_frame");
+  cfg_use_bbox_ = false;
+  try {
+    cfg_bbox_min_x_   = config->get_float(cfg_prefix_+"bounding-box/min_x");
+    cfg_bbox_max_x_   = config->get_float(cfg_prefix_+"bounding-box/max_x");
+    cfg_bbox_min_y_   = config->get_float(cfg_prefix_+"bounding-box/min_y");
+    cfg_bbox_max_y_   = config->get_float(cfg_prefix_+"bounding-box/max_y");
+    cfg_use_bbox_     = true;
+  } catch (Exception &e) {} // ignored, use default
+  cfg_offset_x_               = config->get_float(cfg_prefix_+"offsets/x");
+  cfg_offset_y_               = config->get_float(cfg_prefix_+"offsets/y");
+  cfg_offset_z_               = config->get_float(cfg_prefix_+"offsets/z");
+  cfg_max_num_clusters_      = config->get_uint(cfg_prefix_+"max_num_clusters");
 
   cfg_selection_mode_ = SELECT_MIN_ANGLE;
   try {
-    std::string selmode = config->get_string(CFG_PREFIX"cluster_selection_mode");
+    std::string selmode = config->get_string(cfg_prefix_+"cluster_selection_mode");
     if (selmode == "min-angle") {
       cfg_selection_mode_ = SELECT_MIN_ANGLE;
     } else if (selmode == "min-dist") {
@@ -141,38 +133,29 @@ LaserClusterThread::init()
     }
   } catch (Exception &e) {} // ignored, use default
 
-  current_max_x_ = cfg_cluster_max_x_;
+  current_max_x_ = cfg_bbox_max_x_;
 
   finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pcl_.c_str());
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
 
   try {
     double rotation[4] = {0., 0., 0., 1.};
-    cluster_pos_if_ = NULL;
     cluster_pos_ifs_.resize(cfg_max_num_clusters_, NULL);
     for (unsigned int i = 0; i < cfg_max_num_clusters_; ++i) {
-      char *tmp;
-      if (asprintf(&tmp, "Laser Cluster %u", i + 1) != -1) {
-        // Copy to get memory freed on exception
-        std::string id = tmp;
-        free(tmp);
-
-	cluster_pos_ifs_[i] =
-	  blackboard->open_for_writing<Position3DInterface>(id.c_str());
-	cluster_pos_ifs_[i]->set_rotation(rotation);
-	cluster_pos_ifs_[i]->write();
-      }
+      cluster_pos_ifs_[i] =
+	blackboard->open_for_writing_f<Position3DInterface>("/laser-cluster/%s/%u",
+							      cfg_name_.c_str(), i + 1);
+      cluster_pos_ifs_[i]->set_rotation(rotation);
+      cluster_pos_ifs_[i]->write();
     }
-    cluster_pos_if_ =
-      blackboard->open_for_writing<Position3DInterface>("Euclidean Laser Cluster");
-    cluster_pos_if_->set_rotation(rotation);
-    cluster_pos_if_->write();
 
     switch_if_ = NULL;
-    switch_if_ = blackboard->open_for_writing<SwitchInterface>("laser-cluster");
+    switch_if_ =
+      blackboard->open_for_writing_f<SwitchInterface>("/laser-cluster/%s", cfg_name_.c_str());
 
     config_if_ = NULL;
-    config_if_ = blackboard->open_for_writing<LaserClusterInterface>("laser-cluster");
+    config_if_ = blackboard->open_for_writing_f<LaserClusterInterface>("/laser-cluster/%s",
+								       cfg_name_.c_str());
 
     config_if_->set_max_x(current_max_x_);
     if (cfg_selection_mode_ == SELECT_MIN_DIST) {
@@ -184,7 +167,7 @@ LaserClusterThread::init()
 
     bool autostart = true;
     try {
-      autostart = config->get_bool(CFG_PREFIX"auto-start");
+      autostart = config->get_bool(cfg_prefix_+"auto-start");
     } catch (Exception &e) {} // ignored, use default
     switch_if_->set_enabled(autostart);
     switch_if_->write();
@@ -192,7 +175,6 @@ LaserClusterThread::init()
     for (size_t i = 0; i < cluster_pos_ifs_.size(); ++i) {
       blackboard->close(cluster_pos_ifs_[i]);
     }
-    blackboard->close(cluster_pos_if_);
     blackboard->close(switch_if_);
     blackboard->close(config_if_);
     throw;
@@ -201,7 +183,12 @@ LaserClusterThread::init()
   fclusters_ = new pcl::PointCloud<ColorPointType>();
   fclusters_->header.frame_id = finput_->header.frame_id;
   fclusters_->is_dense = false;
-  pcl_manager->add_pointcloud<ColorPointType>("laser-cluster", fclusters_);
+  char *output_cluster_name;
+  if (asprintf(&output_cluster_name, "/laser-cluster/%s", cfg_name_.c_str()) != -1) {
+    output_cluster_name_ = output_cluster_name;
+    free(output_cluster_name);
+    pcl_manager->add_pointcloud<ColorPointType>(output_cluster_name_.c_str(), fclusters_);
+  }
   clusters_ = pcl_utils::cloudptr_from_refptr(fclusters_);
 
   seg_.setOptimizeCoefficients(true);
@@ -229,12 +216,11 @@ LaserClusterThread::finalize()
   input_.reset();
   clusters_.reset();
 
-  pcl_manager->remove_pointcloud("laser-cluster");
+  pcl_manager->remove_pointcloud(output_cluster_name_.c_str());
   
   for (size_t i = 0; i < cluster_pos_ifs_.size(); ++i) {
     blackboard->close(cluster_pos_ifs_[i]);
   }
-  blackboard->close(cluster_pos_if_);
   blackboard->close(switch_if_);
   blackboard->close(config_if_);
 
@@ -270,10 +256,10 @@ LaserClusterThread::loop()
   while (! config_if_->msgq_empty()) {
     if (LaserClusterInterface::SetMaxXMessage *msg = config_if_->msgq_first_safe(msg))
     {
-      if (msg->max_x() <= 0.0) {
-	logger->log_info(name(), "Got cluster max X zero, setting config default %f",
-			 cfg_cluster_max_x_);
-	current_max_x_ = cfg_cluster_max_x_;
+      if (msg->max_x() < 0.0) {
+	logger->log_info(name(), "Got cluster max x less than zero, setting config default %f",
+			 cfg_bbox_max_x_);
+	current_max_x_ = cfg_bbox_max_x_;
       } else {
 	current_max_x_ = msg->max_x();
       }
@@ -301,14 +287,11 @@ LaserClusterThread::loop()
     for (unsigned int i = 0; i < cfg_max_num_clusters_; ++i) {
       set_position(cluster_pos_ifs_[i], false);
     }
-    set_position(cluster_pos_if_, false);
     return;
   }
 
   TIMETRACK_INTER(ttc_msgproc_, ttc_extract_lines_);
 
-
-  //pcl::search::KdTree<PointType> kdtree;
 
   if (input_->points.size() <= 10) {
     // this can happen if run at startup. Since tabletop threads runs continuous
@@ -320,14 +303,15 @@ LaserClusterThread::loop()
   }
 
   CloudPtr noline_cloud(new Cloud());
-  {
-    // Erase non-finite points
-    pcl::PassThrough<PointType> passthrough;
+
+  // Erase non-finite points
+  pcl::PassThrough<PointType> passthrough;
+  if (current_max_x_ > 0.) {
     passthrough.setFilterFieldName("x");
     passthrough.setFilterLimits(0.0, current_max_x_);
-    passthrough.setInputCloud(input_);
-    passthrough.filter(*noline_cloud);
   }
+  passthrough.setInputCloud(input_);
+  passthrough.filter(*noline_cloud);
 
   //logger->log_info(name(), "[L %u] total: %zu   finite: %zu",
   //		     loop_count_, input_->points.size(), noline_cloud->points.size());
@@ -336,12 +320,18 @@ LaserClusterThread::loop()
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
 
   if (cfg_line_removal_) {
+    std::list<CloudPtr> restore_pcls;
+
     while (noline_cloud->points.size () > cfg_cluster_min_size_) {
       // Segment the largest planar component from the remaining cloud
       //logger->log_info(name(), "[L %u] %zu points left",
       //	               loop_count_, noline_cloud->points.size());
       
-      seg_.setInputCloud (noline_cloud);
+      pcl::search::KdTree<PointType>::Ptr
+	search(new pcl::search::KdTree<PointType>);
+      search->setInputCloud(noline_cloud);
+      seg_.setSamplesMaxDist(cfg_segm_sample_max_dist_, search); 
+      seg_.setInputCloud(noline_cloud);
       seg_.segment(*inliers, *coeff);
       if (inliers->indices.size () == 0) {
 	// no line found
@@ -355,8 +345,21 @@ LaserClusterThread::loop()
 	break;
       }
 
-      //logger->log_info(name(), "[L %u] Removing line with %zu inliers",
-      //	         loop_count_, inliers->indices.size());
+      float length = calc_line_length(noline_cloud, inliers, coeff);
+
+      if (length < cfg_line_min_length_) {
+	// we must remove the points for now to continue filtering,
+	// but must restore them later
+	// Remove the linear inliers, extract the rest
+	CloudPtr cloud_line(new Cloud());
+	pcl::ExtractIndices<PointType> extract;
+	extract.setInputCloud(noline_cloud);
+	extract.setIndices(inliers);
+	extract.setNegative(false);
+	extract.filter(*cloud_line);
+	restore_pcls.push_back(cloud_line);
+
+      }
 
       // Remove the linear inliers, extract the rest
       CloudPtr cloud_f(new Cloud());
@@ -366,6 +369,10 @@ LaserClusterThread::loop()
       extract.setNegative(true);
       extract.filter(*cloud_f);
       *noline_cloud = *cloud_f;
+    }
+
+    for (CloudPtr cloud : restore_pcls) {
+      *noline_cloud += *cloud;
     }
   }
 
@@ -451,8 +458,9 @@ LaserClusterThread::loop()
     for (unsigned int i = 0; i < cluster_indices.size(); ++i) {
       Eigen::Vector4f centroid;
       pcl::compute3DCentroid(*noline_cloud, cluster_indices[i].indices, centroid);
-      if ( (centroid.x() >= cfg_cluster_min_x_) && (centroid.x() <= cfg_cluster_max_x_) &&
-	   (centroid.y() >= cfg_cluster_min_y_) && (centroid.y() <= cfg_cluster_max_y_))
+      if ( !cfg_use_bbox_ ||
+	   ((centroid.x() >= cfg_bbox_min_x_) && (centroid.x() <= cfg_bbox_max_x_) &&
+	    (centroid.y() >= cfg_bbox_min_y_) && (centroid.y() <= cfg_bbox_max_y_)))
       {
 	ClusterInfo info;
 	info.angle = std::atan2(centroid.y(), centroid.x());
@@ -465,8 +473,8 @@ LaserClusterThread::loop()
 	logger->log_info(name(), "[L %u] Cluster %u out of bounds (%f,%f) "
 			 "not in ((%f,%f),(%f,%f))",
 			 loop_count_, centroid.x(), centroid.y(),
-			 cfg_cluster_min_x_, cfg_cluster_max_x_,
-			 cfg_cluster_min_y_, cfg_cluster_max_y_);
+			 cfg_bbox_min_x_, cfg_bbox_max_x_,
+			 cfg_bbox_min_y_, cfg_bbox_max_y_);
 	*/
       }
     }
@@ -504,14 +512,12 @@ LaserClusterThread::loop()
       for (unsigned int j = i; j < cfg_max_num_clusters_; ++j) {
 	set_position(cluster_pos_ifs_[j], false);
       }
-      set_position(cluster_pos_if_, true, cinfos[0].centroid);	
     } else {
       //logger->log_warn(name(), "No acceptable cluster found, %zu clusters",
       //	         cluster_indices.size());
       for (unsigned int i = 0; i < cfg_max_num_clusters_; ++i) {
 	set_position(cluster_pos_ifs_[i], false);
       }
-      set_position(cluster_pos_if_, false);
     }
   } else {
     //logger->log_warn(name(), "No clusters found, %zu remaining points",
@@ -519,7 +525,6 @@ LaserClusterThread::loop()
     for (unsigned int i = 0; i < cfg_max_num_clusters_; ++i) {
       set_position(cluster_pos_ifs_[i], false);
     }
-    set_position(cluster_pos_if_, false);
   }
 
   //*clusters_ = *tmp_clusters;
@@ -581,10 +586,11 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
     
     //we have to subtract the previously added offset to be
     //able to compare against the current centroid
-    Eigen::Vector4f last_centroid(iface->translation(0) -cfg_offset_x_, iface->translation(1),
-				  iface->translation(2), 0.);
+    Eigen::Vector4f last_centroid(iface->translation(0) - cfg_offset_x_,
+				  iface->translation(1) - cfg_offset_y_,
+				  iface->translation(2) - cfg_offset_z_, 0.);
     bool different_cluster =
-      fabs((last_centroid - baserel_centroid).norm()) > cfg_cluster_switch_tolerance_;
+      fabs((last_centroid - baserel_centroid).norm()) > cfg_switch_tolerance_;
 
     if (! different_cluster && visibility_history >= 0) {
       iface->set_visibility_history(visibility_history + 1);
@@ -593,7 +599,9 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
     }
 
     //add the offset and publish
-    double translation[3] = { origin.x() + cfg_offset_x_, origin.y(), origin.z() };
+    double translation[3] = { origin.x() + cfg_offset_x_,
+			      origin.y() + cfg_offset_y_,
+			      origin.z() + cfg_offset_z_ };
     double rotation[4] = { quat.x(), quat.y(), quat.z(), quat.w() };
     iface->set_translation(translation);
     iface->set_rotation(rotation);
@@ -610,4 +618,71 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
     }
   }
   iface->write();  
+}
+
+
+float
+LaserClusterThread::calc_line_length(CloudPtr cloud, pcl::PointIndices::Ptr inliers,
+				     pcl::ModelCoefficients::Ptr coeff)
+{
+  if (inliers->indices.size() < 2)  return 0.;
+
+  CloudPtr cloud_line(new Cloud());
+  CloudPtr cloud_line_proj(new Cloud());
+
+  pcl::ExtractIndices<PointType> extract;
+  extract.setInputCloud(cloud);
+  extract.setIndices(inliers);
+  extract.setNegative(false);
+  extract.filter(*cloud_line);
+
+  // Project the model inliers
+  pcl::ProjectInliers<PointType> proj;
+  proj.setModelType(pcl::SACMODEL_LINE);
+  proj.setInputCloud(cloud_line);
+  proj.setModelCoefficients(coeff);
+  proj.filter(*cloud_line_proj);
+
+  Eigen::Vector3f point_on_line, line_dir;
+  point_on_line[0]  = cloud_line_proj->points[0].x;
+  point_on_line[1]  = cloud_line_proj->points[0].y;
+  point_on_line[2]  = cloud_line_proj->points[0].z;
+  line_dir[0]       = coeff->values[3];
+  line_dir[1]       = coeff->values[4];
+  line_dir[2]       = coeff->values[5];
+
+  ssize_t idx_1 = 0, idx_2 = 0;
+  float max_dist_1 = 0.f, max_dist_2 = 0.f;
+
+  for (size_t i = 1; i < cloud_line_proj->points.size(); ++i) {
+    const PointType &pt = cloud_line_proj->points[i];
+    Eigen::Vector3f ptv(pt.x, pt.y, pt.z);
+    Eigen::Vector3f diff(ptv - point_on_line);
+    float dist = diff.norm();
+    float dir  = line_dir.dot(diff);
+    if (dir >= 0) {
+      if (dist > max_dist_1) {
+	max_dist_1 = dist;
+	idx_1 = i;
+      }
+    }
+    if (dir <= 0) {
+      if (dist > max_dist_2) {
+	max_dist_2 = dist;
+	idx_2 = i;
+      }
+    }
+  }
+
+  if (idx_1 >= 0 && idx_2 >= 0) {
+    const PointType &pt_1 = cloud_line_proj->points[idx_1];
+    const PointType &pt_2 = cloud_line_proj->points[idx_2];
+
+    Eigen::Vector3f ptv_1(pt_1.x, pt_1.y, pt_1.z);
+    Eigen::Vector3f ptv_2(pt_2.x, pt_2.y, pt_2.z);
+
+    return (ptv_1 - ptv_2).norm();
+  } else {
+    return 0.f;
+  }
 }

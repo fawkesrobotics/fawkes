@@ -5,54 +5,73 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/laser-cluster
 ---
 laser-cluster:
 
-  # Automatically start, i.e. set enabled to true?
-  auto-start: true
+  # Configuration name
+  example:
 
-  line_removal: false
+    # If this configuration is active and should be loaded
+    active: true
+    
+    # Automatically start, i.e. set enabled to true?
+    auto-start: true
+
+    # input laser cloud
+    input_cloud: urg-filtered
+
+    # How to select the best cluster?
+    # min-angle: minimum angle between forward direction and direction to cluster
+    # min-dist: minimum distance from sensor to cluster centroid
+    selection_mode: min-dist
+
+    # The maximum number of clusters to publish on the blackboard
+    # The interfaces will be named "Laser Cluster N" for N=1..max_num_clusters
+    max_num_clusters: 3
+
+    # How much must a cluster detection deviate from the previous to consider
+    # this to be a different cluster (and thus restart the visibility history)
+    switch_tolerance: 0.2
+
+    # The frame in which the result should be published; frame
+    result_frame: /base_link
+
+    line_removal:
+      enable: false
   
-  # Maximum number of iterations to perform for line segmentation
-  line_segmentation_max_iterations: 250
+      # Maximum number of iterations to perform for line segmentation
+      segmentation_max_iterations: 250
 
-  # Segmentation distance threshold; m
-  line_segmentation_distance_threshold: 0.1
+      # Segmentation distance threshold; m
+      segmentation_distance_threshold: 0.1
 
-  # Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0
-  line_segmentation_min_inliers: 30
+      # Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0
+      segmentation_min_inliers: 30
 
-  # Clustering inter-point distance tolerance; m
-  cluster_tolerance: 0.1
+      # Maximum distance between samples drawn from the cloud
+      # This distance is important for the separation of lines if they are close.
+      segmentation_sample_max_dist: 0.08
 
-  # Minimum number of points in cluster to consider
-  cluster_min_size: 4
+      # Minimum length of line to remove it
+      min_length: 0.8
 
-  # Minimum number of points in cluster to consider
-  cluster_max_size: 25
+    clustering:
+      # Clustering inter-point distance tolerance; m
+      tolerance: 0.1
 
-  # not that these values are in the sensor frame!
-  cluster_min_x:  0.02
-  cluster_max_x:  0.8
-  cluster_min_y: -0.7
-  cluster_max_y:  0.7
+      # Minimum number of points in cluster to consider
+      min_size: 4
 
-  # How much must a cluster detection deviate from the previous to consider
-  # this to be a different cluster (and thus restart the visibility history)
-  cluster_switch_tolerance: 0.2
+      # Minimum number of points in cluster to consider
+      max_size: 25
 
-  # How to select the best cluster?
-  # min-angle: minimum angle between forward direction and direction to cluster
-  # min-dist: minimum distance from sensor to cluster centroid
-  cluster_selection_mode: min-dist
+    bounding-box:
+      # not that these values are in the sensor frame!
+      min_x:  0.02
+      max_x:  0.8
+      min_y: -0.7
+      max_y:  0.7
 
-  # The maximum number of clusters to publish on the blackboard
-  # The interfaces will be named "Laser Cluster N" for N=1..max_num_clusters
-  max_num_clusters: 3
-  
-  # The frame in which the result should be published; frame
-  result_frame: /base_link
-
-  # input laser cloud
-  input_cloud: urg-filtered
-
-
-  # transpose the x-position of the detected cluster by the given offset
-  offset_x: 0.0
+    # transpose the x-position of the detected cluster by the given offset
+    # Note that this is in the result frame
+    offsets:
+      x: 0.0
+      y: 0.0
+      z: 0.0

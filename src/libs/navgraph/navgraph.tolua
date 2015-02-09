@@ -1,0 +1,61 @@
+
+/***************************************************************************
+ *  navgraph.tolua - Topolocial Map graph (tolua++)
+ *
+ *  Created: Tue Jun 30 12:08:58 2009 (RoboCup 2009, Graz)
+ *  Copyright  2009  Tim Niemueller [www.niemueller.de]
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
+ */
+
+$#include <navgraph/navgraph.h>
+$#include <navgraph/yaml_navgraph.h>
+$#include <vector>
+$#include <string>
+$#include <functional>
+$using namespace std;
+$using namespace fawkes;
+
+namespace fawkes {
+
+class NavGraph
+{
+ public:
+  NavGraph(string graph_name);
+  ~NavGraph();
+
+  string                              name();
+  vector<fawkes::NavGraphNode>  nodes();
+  NavGraphNode                  node(string name_or_alias);
+
+  fawkes::NavGraphNode          closest_node(float pos_x, float pos_y,
+				 	           string property);
+
+  fawkes::NavGraphNode          closest_node_to(std::string node_name,
+				 	              string property);
+
+  fawkes::NavGraphNode          closest_node_with_unconnected(float pos_x,
+                                        float pos_y, string property);
+
+  fawkes::NavGraphNode          closest_node_to_with_unconnected(
+                                        std::string node_name, string property);
+
+  vector<fawkes::NavGraphNode>  search_nodes(string property);
+};
+
+NavGraph *  load_yaml_navgraph(std::string filename);
+
+}
+

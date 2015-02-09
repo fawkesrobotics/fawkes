@@ -20,7 +20,7 @@
 
 #include "skiller_navgraph_feature.h"
 
-#include <utils/graph/yaml_navgraph.h>
+#include <navgraph/yaml_navgraph.h>
 #include <lua/context.h>
 
 using namespace fawkes;
@@ -64,9 +64,10 @@ void
 SkillerNavGraphFeature::init_lua_context(fawkes::LuaContext *context)
 {
   logger->log_info(name(), "Intializing navgraph for skiller");
+  context->add_package("fawkesnavgraph");
   context->get_global("features_env_template");
   context->push_string("navgraph");
-  context->push_usertype(*navgraph, "TopologicalMapGraph", "fawkes");
+  context->push_usertype(*navgraph, "NavGraph", "fawkes");
   context->set_table();
 }
 
