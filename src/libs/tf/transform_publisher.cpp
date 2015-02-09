@@ -96,7 +96,8 @@ TransformPublisher::TransformPublisher(BlackBoard *bb,
 {
   if (__bb) {
     std::string bbid = std::string("TF ") + bb_iface_id;
-    __tfif = __bb->open_for_writing<TransformInterface>(bbid.c_str());
+    std::string owner = std::string("TF/P:") + bb_iface_id;
+    __tfif = __bb->open_for_writing<TransformInterface>(bbid.c_str(), owner.c_str());
     __tfif->set_auto_timestamping(false);
   }
 }

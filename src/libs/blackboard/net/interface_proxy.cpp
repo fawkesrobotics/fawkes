@@ -282,6 +282,19 @@ BlackBoardInterfaceProxy::num_readers(const Interface *interface) const
   return __num_readers;
 }
 
+std::list<std::string>
+BlackBoardInterfaceProxy::readers(const Interface *interface) const
+{
+  throw NotImplementedException("Reader information not available for remote blackboard");
+}
+
+
+std::string
+BlackBoardInterfaceProxy::writer(const Interface *interface) const
+{
+  throw NotImplementedException("Writer information not available for remote blackboard");
+}
+
 void
 BlackBoardInterfaceProxy::notify_of_data_change(const Interface *interface)
 {

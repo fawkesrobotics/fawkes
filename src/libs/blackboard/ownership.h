@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  local.h - Local BlackBoard
+ *  ownership.h - BlackBoard with traced ownership
  *
- *  Created: Sat Sep 16 17:09:15 2006 (on train to Cologne)
- *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Jan 22 15:16:15 2015
+ *  Copyright  2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,34 +20,22 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_LOCAL_H_
-#define __BLACKBOARD_LOCAL_H_
+#ifndef __BLACKBOARD_OWNERSHIP_H_
+#define __BLACKBOARD_OWNERSHIP_H_
 
 #include <blackboard/blackboard.h>
-#include <core/exceptions/software.h>
 
-#include <list>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class BlackBoardInterfaceManager;
-class BlackBoardMemoryManager;
-class BlackBoardMessageManager;
-class BlackBoardNetworkHandler;
-class BlackBoardNotifier;
-class Interface;
-class InterfaceInfoList;
-class BlackBoardInterfaceListener;
-class BlackBoardInterfaceObserver;
-class FawkesNetworkHub;
-
-class LocalBlackBoard : public BlackBoard
+class BlackBoardWithOwnership : public BlackBoard
 {
  public:
-  LocalBlackBoard(size_t memsize);
-  LocalBlackBoard(size_t memsize, const char *magic_token,
-		  bool master = true);
-  virtual ~LocalBlackBoard();
+  BlackBoardWithOwnership(BlackBoard *parent, const char *owner);
+  virtual ~BlackBoardWithOwnership();
 
   virtual Interface *  open_for_reading(const char *interface_type,
 					const char *identifier,
@@ -68,18 +56,9 @@ class LocalBlackBoard : public BlackBoard
 			      const char *id_pattern = "*",
 			      const char *owner = NULL);
 
-  virtual void start_nethandler(FawkesNetworkHub *hub);
-
-  static void cleanup(const char *magic_token, bool use_lister = false);
-
-  /* for debugging only */
-  const BlackBoardMemoryManager * memory_manager() const;
-
  private: /* members */
-  BlackBoardInterfaceManager *__im;
-  BlackBoardMemoryManager    *__memmgr;
-  BlackBoardMessageManager   *__msgmgr;
-  BlackBoardNetworkHandler   *__nethandler;
+  BlackBoard  *blackboard_;
+  std::string  owner_;
 };
 
 

@@ -163,9 +163,9 @@ BlackBoardNetworkHandler::loop()
 	  Interface *iface;
 
 	  if ( msg->msgid() == MSG_BB_OPEN_FOR_READING ) {
-	    iface = __bb->open_for_reading(type, id);
+	    iface = __bb->open_for_reading(type, id, "remote");
 	  } else {
-	    iface = __bb->open_for_writing(type, id);
+	    iface = __bb->open_for_writing(type, id, "remote");
 	  }
 	  if ( memcmp(iface->hash(), om->hash, __INTERFACE_HASH_SIZE) != 0 ) {
 	    LibLogger::log_warn("BlackBoardNetworkHandler", "Opening interface %s::%s failed, "

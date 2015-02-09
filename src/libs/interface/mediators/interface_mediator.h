@@ -24,6 +24,9 @@
 #ifndef __INTERFACE_MEDIATOR_H_
 #define __INTERFACE_MEDIATOR_H_
 
+#include <list>
+#include <string>
+
 namespace fawkes {
 
 class Interface;
@@ -51,6 +54,18 @@ class InterfaceMediator
    * @return number of readers currently registered for the given interface.
    */
   virtual unsigned int num_readers(const Interface *interface) const     = 0;
+
+  /** Get owners of interfaces who opened for reading.
+   * @param interface an interface to query for the UID
+   * @return list of readers for this interface
+   */
+  virtual std::list<std::string>  readers(const Interface *interface) const = 0;
+
+  /** Get writer of interface.
+   * @param interface an interface to query for the UID
+   * @return owner name of writing interface instance, or empty string of no writer exists
+   */
+  virtual std::string             writer(const Interface *interface) const = 0;
 
   /** Notify of data change.
    * Notify all subscribers of the given interface of a data change.

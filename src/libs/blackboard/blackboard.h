@@ -3,8 +3,7 @@
  *  blackboard.h - BlackBoard Interface
  *
  *  Created: Sat Sep 16 17:09:15 2006 (on train to Cologne)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -53,9 +52,11 @@ class BlackBoard
   virtual ~BlackBoard();
 
   virtual Interface *  open_for_reading(const char *interface_type,
-                                        const char *identifier) = 0;
+                                        const char *identifier,
+					const char *owner = NULL) = 0;
   virtual Interface *  open_for_writing(const char *interface_type,
-                                        const char *identifier) = 0;
+                                        const char *identifier,
+					const char *owner = NULL) = 0;
   virtual void         close(Interface *interface) = 0;
 
   virtual Interface *  open_for_reading_f(const char *interface_type,
@@ -72,17 +73,21 @@ class BlackBoard
 
   virtual std::list<Interface *>
     open_multiple_for_reading(const char *type_pattern,
-                              const char *id_pattern = "*") = 0;
+                              const char *id_pattern = "*",
+			      const char *owner = NULL) = 0;
 
   template <class InterfaceType>
   std::list<InterfaceType *>
-    open_multiple_for_reading(const char *id_pattern = "*");
+    open_multiple_for_reading(const char *id_pattern = "*",
+			      const char *owner = NULL);
 
   template <class InterfaceType>
-    InterfaceType * open_for_reading(const char *identifier);
+    InterfaceType * open_for_reading(const char *identifier,
+				     const char *owner = NULL);
 
   template <class InterfaceType>
-    InterfaceType * open_for_writing(const char *identifier);
+    InterfaceType * open_for_writing(const char *identifier,
+				     const char *owner = NULL);
 
   template <class InterfaceType>
     InterfaceType * open_for_reading_f(const char *identifier, ...);
@@ -90,7 +95,7 @@ class BlackBoard
   template <class InterfaceType>
     InterfaceType * open_for_writing_f(const char *identifier, ...);
 
-  /** Flags to constrain listener registraion/updates. */
+  /** Flags to constrain listener registration/updates. */
   typedef enum {
     BBIL_FLAG_DATA = 1,		///< consider data events
     BBIL_FLAG_MESSAGES = 2,	///< consider message received events
@@ -123,6 +128,8 @@ class BlackBoard
  * TypeMismatchException is thrown if the string representation of the
  * type and the actual class type of the interface do not match.
  * @param identifier identifier of the interface
+ * @param owner name of entity which opened this interface. If using the BlackBoardAspect
+ * to access the blackboard leave this untouched unless you have a good reason.
  * @return new fully initialized interface instance of requested type
  * @exception OutOfMemoryException thrown if there is not enough free space for
  * the requested interface.
@@ -131,11 +138,11 @@ class BlackBoard
  */
 template <class InterfaceType>
 InterfaceType *
-BlackBoard::open_for_reading(const char *identifier)
+BlackBoard::open_for_reading(const char *identifier, const char *owner)
 {
   std::string type_name =
     demangle_fawkes_interface_name(typeid(InterfaceType).name());
-  Interface *interface = open_for_reading(type_name.c_str(), identifier);
+  Interface *interface = open_for_reading(type_name.c_str(), identifier, owner);
   return static_cast<InterfaceType *>(interface);
 }
 
@@ -173,18 +180,20 @@ BlackBoard::open_for_reading_f(const char *identifier, ...)
  * the given type. The result can be casted to the appropriate type.
  * @param id_pattern pattern of interface IDs to open, supports wildcards similar
  * to filenames (*, ?, []), see "man fnmatch" for all supported.
+ * @param owner name of entity which opened this interface. If using the BlackBoardAspect
+ * to access the blackboard leave this untouched unless you have a good reason.
  * @return list of new fully initialized interface instances of requested type. The
  * is allocated using new and you have to free it using delete after you are done
  * with it!
  */
 template <class InterfaceType>
 std::list<InterfaceType *>
-BlackBoard::open_multiple_for_reading(const char *id_pattern)
+BlackBoard::open_multiple_for_reading(const char *id_pattern, const char *owner)
 {
   std::string type_name =
     demangle_fawkes_interface_name(typeid(InterfaceType).name());
   std::list<Interface *> il =
-    open_multiple_for_reading(type_name.c_str(), id_pattern);
+    open_multiple_for_reading(type_name.c_str(), id_pattern, owner);
   std::list<InterfaceType *> rv;
   for (std::list<Interface *>::iterator i = il.begin(); i != il.end(); ++i) {
     rv.push_back(static_cast<InterfaceType *>(*i));
@@ -201,6 +210,8 @@ BlackBoard::open_multiple_for_reading(const char *id_pattern)
  * TypeMismatchException is thrown if the string representation of the
  * type and the actual class type of the interface do not match.
  * @param identifier identifier of the interface
+ * @param owner name of entity which opened this interface. If using the BlackBoardAspect
+ * to access the blackboard leave this untouched unless you have a good reason.
  * @return new fully initialized interface instance of requested type
  * @exception OutOfMemoryException thrown if there is not enough free space for
  * the requested interface.
@@ -211,11 +222,11 @@ BlackBoard::open_multiple_for_reading(const char *id_pattern)
  */
 template <class InterfaceType>
 InterfaceType *
-BlackBoard::open_for_writing(const char *identifier)
+BlackBoard::open_for_writing(const char *identifier, const char *owner)
 {
   std::string type_name =
     demangle_fawkes_interface_name(typeid(InterfaceType).name());
-  Interface *interface = open_for_writing(type_name.c_str(), identifier);
+  Interface *interface = open_for_writing(type_name.c_str(), identifier, owner);
   return static_cast<InterfaceType *>(interface);;
 }
 

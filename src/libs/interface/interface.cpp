@@ -3,8 +3,7 @@
  *  interface.cpp - BlackBoard Interface
  *
  *  Created: Mon Oct 09 18:54:50 2006
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -242,6 +241,7 @@ Interface::Interface()
   __timestamp = new Time(0, 0);
   __local_read_timestamp = new Time(0, 0);
   __auto_timestamping = true;
+  __owner = strdup("?");
   data_changed = false;
   memset(__hash, 0, __INTERFACE_HASH_SIZE);
   memset(__hash_printable, 0, __INTERFACE_HASH_SIZE * 2 + 1);
@@ -280,6 +280,7 @@ Interface::~Interface()
   }
   delete __timestamp;
   delete __local_read_timestamp;
+  if (__owner) free(__owner);
 }
 
 /** Get interface hash.
@@ -549,7 +550,7 @@ Interface::set_type_id(const char *type, const char *id)
   __uid[__INTERFACE_UID_SIZE] = 0;
   strncpy(__type, type, __INTERFACE_TYPE_SIZE);
   strncpy(__id, id, __INTERFACE_ID_SIZE);
-  snprintf(__uid, __INTERFACE_UID_SIZE, "%s::%s", type, id);
+  snprintf(__uid, __INTERFACE_UID_SIZE, "%s::%s", __type, __id);
 }
 
 
@@ -602,6 +603,17 @@ Interface::set_readwrite(bool write_access, RefCountRWLock *rwlock)
 }
 
 
+/** Set owner name for interface.
+ * @param owner name of owner of interface
+ */
+void
+Interface::set_owner(const char *owner)
+{
+  if (__owner) free(__owner);
+  __owner = NULL;
+  if (owner) __owner = strdup(owner);
+}
+
 /** Check equality of two interfaces.
  * Two interfaces are the same if their types and identifiers are
  * equal.  This does not mean that both interfaces are the very same
@@ -651,6 +663,17 @@ Interface::id() const
   return __id;
 }
 
+
+/** Get owner of interface.
+ * The owner is an arbitrary name, usually a thread or plugin name
+ * for the entity which opened this specific interface instance.
+ * @return owner name
+ */
+const char *
+Interface::owner() const
+{
+  return __owner;
+}
 
 /** Get unique identifier of interface.
  * As the name suggests this ID denotes a unique memory instance of
@@ -828,6 +851,27 @@ unsigned int
 Interface::num_readers() const
 {
   return __interface_mediator->num_readers(this);
+}
+
+
+/** Get owner name of writing interface instance.
+ * @return name of owner of writing interface instance if a local one
+ * exists, an empty string otherwise.
+ */
+std::string
+Interface::writer() const
+{
+  return __interface_mediator->writer(this);
+}
+
+
+/** Get owner names of reading interface instances.
+ * @return list of names of owners of instances opened for reading
+ */
+std::list<std::string>
+Interface::readers() const
+{
+  return __interface_mediator->readers(this);
 }
 
 

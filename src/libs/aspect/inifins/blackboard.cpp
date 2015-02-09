@@ -24,6 +24,7 @@
 #include <aspect/inifins/blackboard.h>
 #include <aspect/blackboard.h>
 #include <blackboard/blackboard.h>
+#include <blackboard/ownership.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -55,12 +56,30 @@ BlackBoardAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  blackboard_thread->init_BlackBoardAspect(__blackboard);
+  BlackBoard *bb;
+  if (blackboard_thread->blackboard_owner_name_) {
+    bb = new BlackBoardWithOwnership(__blackboard,
+				     blackboard_thread->blackboard_owner_name_);
+  } else {
+    bb = new BlackBoardWithOwnership(__blackboard, thread->name());
+  }
+
+  blackboard_thread->init_BlackBoardAspect(bb);
 }
 
 void
 BlackBoardAspectIniFin::finalize(Thread *thread)
 {
+  BlackBoardAspect *blackboard_thread;
+  blackboard_thread = dynamic_cast<BlackBoardAspect *>(thread);
+  if (blackboard_thread == NULL) {
+    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+					"BlackBoardAspect, but RTTI says it "
+					"has not. ", thread->name());
+  }
+
+  delete blackboard_thread->blackboard;
+  blackboard_thread->blackboard = NULL;
 }
 
 

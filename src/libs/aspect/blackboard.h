@@ -33,14 +33,18 @@ namespace fawkes {
 
 class BlackBoardAspect : public virtual Aspect
 {
+  friend class BlackBoardAspectIniFin;
  public:
-  BlackBoardAspect();
+  BlackBoardAspect(const char *owner = NULL);
   virtual ~BlackBoardAspect();
 
   void init_BlackBoardAspect(BlackBoard *bb);
 
  protected:
   BlackBoard *blackboard;
+
+ private:
+  const char *blackboard_owner_name_;
 };
 
 } // end namespace fawkes

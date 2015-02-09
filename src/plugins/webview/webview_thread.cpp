@@ -266,6 +266,9 @@ WebviewThread::finalize()
 #ifdef HAVE_TF
   webview_nav_manager->remove_nav_entry(TF_URL_PREFIX);
 #endif
+#ifdef HAVE_JPEG
+  webview_nav_manager->remove_nav_entry(IMAGE_URL_PREFIX);
+#endif
 
   delete __webserver;
 

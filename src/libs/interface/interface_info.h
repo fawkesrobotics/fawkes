@@ -36,18 +36,21 @@ class InterfaceInfo
  public:
   InterfaceInfo(const char *type, const char *id, const unsigned char *hash,
 		unsigned int serial, bool has_writer, unsigned int num_readers,
+		const std::list<std::string> &readers, const std::string &writer,
 		const Time *timestamp);
   InterfaceInfo(const InterfaceInfo &i);
   ~InterfaceInfo();
 
-  const char *           type() const;
-  const char *           id() const;
-  const unsigned char *  hash() const;
-  std::string            hash_printable() const;
-  bool                   has_writer() const;
-  unsigned int           num_readers() const;
-  unsigned int           serial() const;
-  const Time *           timestamp() const;
+  const char *                    type() const;
+  const char *                    id() const;
+  const unsigned char *           hash() const;
+  std::string                     hash_printable() const;
+  bool                            has_writer() const;
+  unsigned int                    num_readers() const;
+  const std::list<std::string> &  readers() const;
+  const std::string &             writer() const;
+  unsigned int                    serial() const;
+  const Time *                    timestamp() const;
 
   bool operator<(const InterfaceInfo &ii) const;
 
@@ -59,6 +62,8 @@ class InterfaceInfo
   unsigned int   __num_readers;
   unsigned int   __serial;
   Time          *__timestamp;
+  std::list<std::string> __readers;
+  std::string    __writer;
 };
 
 
@@ -67,6 +72,7 @@ class InterfaceInfoList : public std::list<InterfaceInfo>
  public:
   void append(const char *type, const char *id, const unsigned char *hash,
 	      unsigned int serial, bool has_writer, unsigned int num_readers,
+	      const std::list<std::string> &readers, const std::string &writer,
 	      const Time &timestamp);
 };
 

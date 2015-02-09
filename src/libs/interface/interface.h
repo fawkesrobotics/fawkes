@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 #define __INTERFACE_TYPE_SIZE   32
-#define __INTERFACE_ID_SIZE     32
+#define __INTERFACE_ID_SIZE     64
 // We use MD5 as interface hash
 #define __INTERFACE_HASH_SIZE   16
 //  UID is:                                   type  ::   id
@@ -101,6 +101,7 @@ class Interface
   bool                    is_writer() const;
   void                    set_validity(bool valid);
   bool                    is_valid() const;
+  const char *            owner() const;
 
   void                    set_from_chunk(void *chunk);
 
@@ -122,6 +123,8 @@ class Interface
 
   bool          has_writer() const;
   unsigned int  num_readers() const;
+  std::string   writer() const;
+  std::list<std::string> readers() const;
 
   bool          changed() const;
   const Time *  timestamp() const;
@@ -227,6 +230,7 @@ class Interface
 				   MessageMediator *msg_mediator);
   void set_memory(unsigned int serial, void *real_ptr, void *data_ptr);
   void set_readwrite(bool write_access, RefCountRWLock *rwlock);
+  void set_owner(const char *owner);
 
   inline unsigned int next_msg_id()
   {
@@ -238,6 +242,7 @@ class Interface
   char               __uid[__INTERFACE_UID_SIZE + 1];
   unsigned char      __hash[__INTERFACE_HASH_SIZE];
   char               __hash_printable[__INTERFACE_HASH_SIZE * 2 + 1];
+  char              *__owner;
 
   unsigned short     __instance_serial;
   bool               __valid;
