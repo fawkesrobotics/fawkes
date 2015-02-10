@@ -520,7 +520,7 @@ JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t
                           (*it)->_robotlinkname.c_str(), manip->GetEndEffector()->GetName().c_str());
         if( (*it)->_robotlinkname == manip->GetEndEffector()->GetName() ) {
           logger->log_debug(name(), "attach '%s'!", (*it)->_grabbedname.c_str());
-          __planner_env.robot->attach_object((*it)->_grabbedname.c_str(), __planner_env.env);
+          __planner_env.robot->attach_object((*it)->_grabbedname.c_str(), __planner_env.env, __cfg_manipname.c_str());
         }
       }
       //*/
