@@ -167,18 +167,20 @@ TEST_F(SyncPointTest, SyncPointSets)
 
 TEST_F(SyncPointManagerTest, SyncPointManager)
 {
-  ASSERT_EQ(manager->get_syncpoints().size(), 0u);
+  ASSERT_EQ(0u, manager->get_syncpoints().size());
   manager->get_syncpoint("test", "/test/1");
-  ASSERT_EQ(manager->get_syncpoints().size(), 1u);
+  ASSERT_EQ(3u, manager->get_syncpoints().size());
   ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))), 1u);
-  manager->get_syncpoint("test", "/test/2");
-  ASSERT_EQ(manager->get_syncpoints().size(), 2u);
-  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))), 1u);
-  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/2"))), 1u);
-  manager->get_syncpoint("test2", "/test/1");
-  ASSERT_EQ(manager->get_syncpoints().size(), 2u);
-  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))), 1u);
-  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/2"))), 1u);
+  manager->get_syncpoint("test2", "/test/2");
+  ASSERT_EQ(4u, manager->get_syncpoints().size());
+  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))));
+  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/2"))));
+  manager->get_syncpoint("test3", "/test/1");
+  ASSERT_EQ(4u, manager->get_syncpoints().size());
+  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))));
+  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/2"))));
+  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/"))));
+  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test"))));
 }
 
 TEST_F(SyncPointManagerTest, WatcherSet)
@@ -188,6 +190,30 @@ TEST_F(SyncPointManagerTest, WatcherSet)
   ASSERT_NO_THROW(manager->get_syncpoint("component 3", "/test"));
   ASSERT_THROW(manager->get_syncpoint("component 1", "/test"), SyncPointAlreadyOpenedException);
 
+}
+
+/** Test what happens if we acquire a SyncPoint, release it, and then acquire it
+ * again. If release_syncpoint works properly, this should not throw. Otherwise,
+ * we would expect a SyncPointAlreadyOpenedException
+ */
+TEST_F(SyncPointManagerTest, ReleaseAndReacquire)
+{
+  string comp = "component";
+  string id = "/test/sp1";
+  RefPtr<SyncPoint> sp = manager->get_syncpoint(comp, id);
+  set<RefPtr<SyncPoint>, SyncPointSetLessThan > syncpoints = manager->get_syncpoints();
+  ASSERT_EQ(1, syncpoints.count(RefPtr<SyncPoint>(new SyncPoint("/test"))));
+  for (set<RefPtr<SyncPoint> >::const_iterator sp_it = syncpoints.begin();
+      sp_it != syncpoints.end(); sp_it++) {
+    EXPECT_EQ(1, (*sp_it)->get_watchers().count(comp)) << "for component " << comp;
+  }
+  manager->release_syncpoint(comp, sp);
+  for (set<RefPtr<SyncPoint> >::const_iterator sp_it = syncpoints.begin();
+      sp_it != syncpoints.end(); sp_it++) {
+    EXPECT_EQ(0, (*sp_it)->get_watchers().count(comp)) << "for component '"
+        << comp << "' and SyncPoint '" << (*sp_it)->get_identifier() << "'";
+  }
+  ASSERT_NO_THROW(manager->get_syncpoint(comp, id));
 }
 
 TEST_F(SyncPointTest, EmptyIdentifier)
@@ -212,8 +238,6 @@ TEST_F(SyncPointManagerTest, SyncPointManagerExceptions) {
       SyncPointInvalidIdentifierException);
   ASSERT_THROW(invalid_sp = manager->get_syncpoint("waiter", "invalid"),
         SyncPointInvalidIdentifierException);
-
-
 }
 
 // helper function used for testing wait()
@@ -264,6 +288,7 @@ void * start_waiter_thread(void * data) {
   }
   pthread_exit(NULL);
 }
+
 /** Create multiple threads which will all call get_syncpoint
  *  for the same SyncPoint. Do not wait for the SyncPoint but return
  *  immediately.
@@ -282,6 +307,7 @@ TEST_F(SyncPointManagerTest, MultipleManagerRequests)
     params[i]->sp_identifier = sp_identifier;
     pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
     pthread_yield();
+    ASSERT_LE(manager->get_syncpoints().size(), 3u);
   }
 
   for (uint i = 0; i < num_threads; i++) {
@@ -310,6 +336,7 @@ TEST_F(SyncPointManagerTest, ParallelWaitCalls)
     params[i]->sp_identifier = sp_identifier;
     pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
     pthread_yield();
+    ASSERT_LE(manager->get_syncpoints().size(), 3u);
   }
 
   usleep(10000);
@@ -379,6 +406,62 @@ TEST_F(SyncPointManagerTest, WaitDoesNotReturnImmediately)
     ASSERT_EQ(0, pthread_join(threads[i], NULL));
     delete params[i];
   }
+}
+
+/**
+ * Test the SyncPoint hierarchy.
+ * This creates a SyncPoint, an emitter and waiters which wait for the
+ * SyncPoint's predecessor, the predecessor's predecessor (grandparent),
+ * and the root SyncPoint ("/").
+ */
+TEST_F(SyncPointManagerTest, SyncPointHierarchy)
+{
+  vector<string> identifiers = { "/test/topic", "/test", "/", "/other/topic" };
+  uint num_threads = identifiers.size();
+  pthread_t threads[num_threads];
+  waiter_thread_params *params[num_threads];
+  for (uint i = 0; i < num_threads; i++) {
+    params[i] = new waiter_thread_params();
+    params[i]->manager = manager;
+    params[i]->thread_nr = i;
+    params[i]->num_wait_calls = 1;
+    params[i]->sp_identifier = identifiers.at(i);
+    pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
+  }
+
+  usleep(10000);
+  RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter", "/test/topic/sp");
+  sp->emit("emitter");
+  usleep(10000);
+
+  /* The first waiters should be unblocked */
+  for (uint i = 0; i < num_threads - 1 ; i++) {
+    ASSERT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    delete params[i];
+  }
+
+  /* The last waiter should still wait */
+  pthread_t last_thread = threads[num_threads-1];
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(last_thread, NULL));
+  pthread_cancel(last_thread);
+  ASSERT_EQ(0, pthread_join(last_thread, NULL));
+}
+
+/** Emit a barrier without registering */
+TEST_F(SyncBarrierTest, EmitWithoutRegister)
+{
+  string component = "emitter";
+  RefPtr<SyncBarrier> barrier = manager->get_syncbarrier(component, "/test/barrier");
+  ASSERT_THROW(barrier->emit(component), SyncBarrierNonEmitterCalledEmitException);
+}
+
+/** Register multiple times */
+TEST_F(SyncBarrierTest, MultipleRegisterCalls)
+{
+  string component = "emitter";
+  RefPtr<SyncBarrier> barrier = manager->get_syncbarrier(component, "/test/barrier");
+  EXPECT_NO_THROW(barrier->register_emitter(component));
+  ASSERT_THROW(barrier->register_emitter(component), SyncBarrierMultipleRegisterCallsException);
 }
 
 /** get a SyncBarrier and wait for it */
@@ -611,20 +694,4 @@ TEST_F(SyncBarrierTest, BarriersAreIndependent)
   }
 }
 
-/** Emit a barrier without registering */
-TEST_F(SyncBarrierTest, EmitWithoutRegister)
-{
-  string component = "emitter";
-  RefPtr<SyncBarrier> barrier = manager->get_syncbarrier(component, "/test/barrier");
-  ASSERT_THROW(barrier->emit(component), SyncBarrierNonEmitterCalledEmitException);
-}
-
-/** Register multiple times */
-TEST_F(SyncBarrierTest, MultipleRegisterCalls)
-{
-  string component = "emitter";
-  RefPtr<SyncBarrier> barrier = manager->get_syncbarrier(component, "/test/barrier");
-  EXPECT_NO_THROW(barrier->register_emitter(component));
-  ASSERT_THROW(barrier->register_emitter(component), SyncBarrierMultipleRegisterCallsException);
-}
 
