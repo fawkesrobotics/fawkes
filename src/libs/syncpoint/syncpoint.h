@@ -28,6 +28,7 @@
 #include <core/threading/wait_condition.h>
 #include <utils/time/time.h>
 
+#include <core/utils/refptr.h>
 #include <core/utils/circular_buffer.h>
 
 #include <set>
@@ -77,6 +78,11 @@ class SyncPoint
     std::set<std::string> watchers_;
     /** Set of all components which are currently waiting for the SyncPoint */
     std::set<std::string> waiting_watchers_;
+
+    /** The predecessor SyncPoint, which is the SyncPoint one level up
+     *  e.g. "/test/sp" -> "/test"
+     */
+    RefPtr<SyncPoint> predecessor_;
 
     /** A buffer of the most recent emit calls. */
     CircularBuffer<SyncPointCall> emit_calls_;

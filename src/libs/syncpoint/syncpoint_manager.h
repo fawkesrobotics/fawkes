@@ -68,6 +68,12 @@ class SyncPointManager
     /** Mutex used for all SyncPointManager calls */
     Mutex *mutex_;
 
+  private:
+    std::string find_prefix(const std::string & identifier) const;
+    RefPtr<SyncPoint> get_syncpoint_no_lock(const std::string & component, const std::string & identifier);
+    void release_syncpoint_no_lock(const std::string & component, RefPtr<SyncPoint> syncpoint);
+
+
 
 };
 

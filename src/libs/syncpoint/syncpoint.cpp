@@ -132,6 +132,9 @@ SyncPoint::emit(const std::string & component)
   emit_calls_.push_back(SyncPointCall(component));
   mutex_->unlock();
   wait_condition_->wake_all();
+  if (predecessor_) {
+    predecessor_->emit(component);
+  }
 }
 
 /** Wait until SyncPoint is emitted

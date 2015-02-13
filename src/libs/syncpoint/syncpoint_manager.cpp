@@ -56,7 +56,9 @@ SyncPointManager::~SyncPointManager()
 }
 
 /**
- * Get a SyncPoint. This allows accessing the SyncPoint's wait() and emit() methods
+ * Get a SyncPoint. This allows accessing the SyncPoint's wait() and emit() methods.
+ * This function creates a SyncPoint with the given identifier if it does not
+ * exist yet and constructs its predecessor.
  * @param component The name of the component calling the method
  * @param identifier The identifier of the requested SyncPoint
  * @return A RefPtr to a SyncPoint which is shared by all threads with this
@@ -69,29 +71,7 @@ RefPtr<SyncPoint>
 SyncPointManager::get_syncpoint(const std::string & component, const std::string & identifier)
 {
   MutexLocker ml(mutex_);
-  if (component == "") {
-    throw SyncPointInvalidComponentException(component.c_str(), identifier.c_str());
-  }
-  // insert a new SyncPoint if no SyncPoint with the same identifier exists,
-  // otherwise, use that SyncPoint
-  std::pair<std::set<RefPtr<SyncPoint> >::iterator,bool> ret;
-  // TODO clean this up we don't need to catch the exception
-  try {
-  ret = syncpoints_.insert(RefPtr<SyncPoint>(new SyncPoint(identifier)));
-  } catch (const SyncPointInvalidIdentifierException &e) {
-    throw;
-  }
-
-  std::set<RefPtr<SyncPoint> >::iterator it = ret.first;
-
-  // add component to the set of watchers
-  // check if component is already a watcher
-  // insert returns a pair whose second element is false if element already exists
-  if (!(*it)->add_watcher(component).second) {
-    throw SyncPointAlreadyOpenedException(component.c_str(), identifier.c_str());
-  }
-
-  return *it;
+  return get_syncpoint_no_lock(component, identifier);
 }
 
 /**
@@ -130,7 +110,8 @@ SyncPointManager::get_syncbarrier(const std::string & component, const std::stri
 
 /**
  * Release a SyncPoint. After releasing the SyncPoint, its wait() and emit()
- * methods cannot be called anymore by the releasing component
+ * methods cannot be called anymore by the releasing component.
+ * This also releases the SyncPoint's predecessor if existent.
  * @param component The releasing component
  * @param sync_point A RefPtr to the released SyncPoint
  * @throw SyncPointReleasedDoesNotExistException thrown if the SyncPoint doesn't
@@ -142,14 +123,7 @@ void
 SyncPointManager::release_syncpoint(const std::string & component, RefPtr<SyncPoint> sync_point)
 {
   MutexLocker ml(mutex_);
-  std::set<RefPtr<SyncPoint> >::iterator sp_it = syncpoints_.find(
-      sync_point);
-  if (sp_it == syncpoints_.end()) {
-    throw SyncPointReleasedDoesNotExistException(component.c_str(), sync_point->get_identifier().c_str());
-  }
-  if (!(*sp_it)->watchers_.erase(component)) {
-    throw SyncPointReleasedByNonWatcherException(component.c_str(), sync_point->get_identifier().c_str());
-  }
+  release_syncpoint_no_lock(component, sync_point);
 }
 
 /**
@@ -281,6 +255,70 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
   }
   graph << "}";
   return graph.str();
+}
+
+/** Find the prefix of the SyncPoint's identifier which is the identifier of
+ *  the direct predecessor SyncPoint.
+ *  The predecessor of a SyncPoint "/some/path" is "/some"
+ *  @param identifier The identifier of the SyncPoint
+ *  @return The identifier of the predecessor SyncPoint
+ */
+std::string
+SyncPointManager::find_prefix(const std::string & identifier) const
+{
+  size_t last_pos = identifier.rfind("/");
+  if (last_pos != 0) {
+    return identifier.substr(0, last_pos);
+  } else {
+    return "/";
+  }
+}
+
+RefPtr<SyncPoint>
+SyncPointManager::get_syncpoint_no_lock(const std::string & component, const std::string & identifier)
+{
+  if (component == "") {
+    throw SyncPointInvalidComponentException(component.c_str(), identifier.c_str());
+  }
+  // insert a new SyncPoint if no SyncPoint with the same identifier exists,
+  // otherwise, use that SyncPoint
+  std::pair<std::set<RefPtr<SyncPoint> >::iterator,bool> insert_ret;
+  insert_ret = syncpoints_.insert(RefPtr<SyncPoint>(new SyncPoint(identifier)));
+  std::set<RefPtr<SyncPoint> >::iterator sp_it = insert_ret.first;
+
+  // add component to the set of watchers
+  // check if component is already a watcher
+  // insert returns a pair whose second element is false if element already exists
+  if (!(*sp_it)->add_watcher(component).second) {
+    throw SyncPointAlreadyOpenedException(component.c_str(), identifier.c_str());
+  }
+
+  if (identifier != "/") {
+    // create prefix SyncPoints.
+    // If this is the root SyncPoint ("/"), there will be no prefix
+    std::string prefix = find_prefix(identifier);
+    RefPtr<SyncPoint> predecessor = get_syncpoint_no_lock(component, prefix);
+    (*sp_it)->predecessor_ = predecessor;
+  }
+
+  return *sp_it;
+}
+
+void
+SyncPointManager::release_syncpoint_no_lock(const std::string & component, RefPtr<SyncPoint> sync_point)
+{
+  std::set<RefPtr<SyncPoint> >::iterator sp_it = syncpoints_.find(
+      sync_point);
+  if (sp_it == syncpoints_.end()) {
+    throw SyncPointReleasedDoesNotExistException(component.c_str(), sync_point->get_identifier().c_str());
+  }
+  if (!(*sp_it)->watchers_.erase(component)) {
+    throw SyncPointReleasedByNonWatcherException(component.c_str(), sync_point->get_identifier().c_str());
+  }
+
+  if (sync_point->predecessor_) {
+    release_syncpoint_no_lock(component, sync_point->predecessor_);
+  }
 }
 
 } // namespace fawkes
