@@ -130,8 +130,7 @@ SyncBarrier::register_emitter(const string & component)
     throw SyncBarrierMultipleRegisterCallsException(component.c_str(),
       get_identifier().c_str());
   }
-  // TODO if a new emitter registers, should it already be part of the barrier
-  // in this iteration? If so, we need to insert it in pending_emitters, too
+  pending_emitters_.insert(component);
   if (predecessor_) {
     predecessor_->register_emitter(component);
   }
