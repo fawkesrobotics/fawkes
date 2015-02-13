@@ -95,6 +95,10 @@ SyncBarrier::emit(const string & component)
     wait_condition_->wake_all();
     reset_emitters_();
   }
+
+  if (predecessor_) {
+    predecessor_->emit(component);
+  }
 }
 
 /** Wait for the SyncBarrier.
@@ -128,6 +132,9 @@ SyncBarrier::register_emitter(const string & component)
   }
   // TODO if a new emitter registers, should it already be part of the barrier
   // in this iteration? If so, we need to insert it in pending_emitters, too
+  if (predecessor_) {
+    predecessor_->register_emitter(component);
+  }
 }
 
 /** Unregister an emitter. This removes the component from the barrier, thus
@@ -140,6 +147,9 @@ SyncBarrier::unregister_emitter(const string & component) {
   MutexLocker ml(mutex_);
   pending_emitters_.erase(component);
   emitters_.erase(component);
+  if (predecessor_) {
+    predecessor_->unregister_emitter(component);
+  }
 }
 
 /** Check if the barrier is already open,

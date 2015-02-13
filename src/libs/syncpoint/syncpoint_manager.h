@@ -70,8 +70,16 @@ class SyncPointManager
 
   private:
     std::string find_prefix(const std::string & identifier) const;
-    RefPtr<SyncPoint> get_syncpoint_no_lock(const std::string & component, const std::string & identifier);
-    void release_syncpoint_no_lock(const std::string & component, RefPtr<SyncPoint> syncpoint);
+    RefPtr<SyncPoint> get_syncpoint_no_lock(const std::string & component,
+      const std::string & identifier);
+    void release_syncpoint_no_lock(const std::string & component,
+      RefPtr<SyncPoint> syncpoint);
+    RefPtr<SyncBarrier> get_syncbarrier_no_lock(const std::string & component,
+      const std::string & identifier);
+    void release_syncbarrier_no_lock(const std::string & component,
+      RefPtr<SyncBarrier> sync_barrier);
+
+
 
 
 

@@ -88,24 +88,7 @@ RefPtr<SyncBarrier>
 SyncPointManager::get_syncbarrier(const std::string & component, const std::string & identifier)
 {
   MutexLocker ml(mutex_);
-  if (component == "") {
-    throw SyncPointInvalidComponentException(component.c_str(), identifier.c_str());
-  }
-  // insert a new SyncBarrier if no SyncBarrier with the same identifier exists,
-  // otherwise, use that SyncBarrier
-  std::pair<std::set<RefPtr<SyncBarrier> >::iterator, bool> ret =
-      syncbarriers_.insert(RefPtr<SyncBarrier>(new SyncBarrier(identifier)));
-
-  std::set<RefPtr<SyncBarrier> >::iterator it = ret.first;
-
-  // add component to the set of watchers
-  // check if component is already a watcher
-  // insert returns a pair whose second element is false if element already exists
-  if (!(*it)->add_watcher(component).second) {
-    throw SyncPointAlreadyOpenedException(component.c_str(), identifier.c_str());
-  }
-
-  return *it;
+  return get_syncbarrier_no_lock(component, identifier);
 }
 
 /**
@@ -304,6 +287,37 @@ SyncPointManager::get_syncpoint_no_lock(const std::string & component, const std
   return *sp_it;
 }
 
+RefPtr<SyncBarrier>
+SyncPointManager::get_syncbarrier_no_lock(const std::string & component, const std::string & identifier)
+{
+  if (component == "") {
+    throw SyncPointInvalidComponentException(component.c_str(), identifier.c_str());
+  }
+  // insert a new SyncBarrier if no SyncBarrier with the same identifier exists,
+  // otherwise, use that SyncBarrier
+  std::pair<std::set<RefPtr<SyncBarrier> >::iterator, bool> ret =
+      syncbarriers_.insert(RefPtr<SyncBarrier>(new SyncBarrier(identifier)));
+
+  std::set<RefPtr<SyncBarrier> >::iterator it = ret.first;
+
+  // add component to the set of watchers
+  // check if component is already a watcher
+  // insert returns a pair whose second element is false if element already exists
+  if (!(*it)->add_watcher(component).second) {
+    throw SyncPointAlreadyOpenedException(component.c_str(), identifier.c_str());
+  }
+
+  if (identifier != "/") {
+    // create prefix SyncBarriers.
+    // If this is the root SyncBarrier ("/"), there will be no prefix
+    std::string prefix = find_prefix(identifier);
+    RefPtr<SyncBarrier> predecessor = get_syncbarrier_no_lock(component, prefix);
+    (*it)->predecessor_ = predecessor;
+  }
+
+  return *it;
+}
+
 void
 SyncPointManager::release_syncpoint_no_lock(const std::string & component, RefPtr<SyncPoint> sync_point)
 {
@@ -321,4 +335,24 @@ SyncPointManager::release_syncpoint_no_lock(const std::string & component, RefPt
   }
 }
 
+void
+SyncPointManager::release_syncbarrier_no_lock(
+  const std::string & component, RefPtr<SyncBarrier> sync_barrier)
+{
+  MutexLocker ml(mutex_);
+  std::set<RefPtr<SyncBarrier> >::iterator sp_it = syncbarriers_.find(
+      sync_barrier);
+  if (sp_it == syncbarriers_.end()) {
+    throw SyncPointReleasedDoesNotExistException(component.c_str(),
+        sync_barrier->get_identifier().c_str());
+  }
+  if (!(*sp_it)->watchers_.erase(component)) {
+    throw SyncPointReleasedByNonWatcherException(component.c_str(),
+        sync_barrier->get_identifier().c_str());
+  }
+
+  if (sync_barrier->predecessor_) {
+    release_syncbarrier_no_lock(component, sync_barrier->predecessor_);
+  }
+}
 } // namespace fawkes

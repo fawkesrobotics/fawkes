@@ -56,12 +56,19 @@ class SyncBarrier : public SyncPoint
     /** set all registered emitter as pending */
     void reset_emitters();
 
+    /**
+     * allow Syncpoint Manager to edit
+     */
+    friend class SyncPointManager;
+
   private:
     void reset_emitters_();
 
   private:
     std::set<std::string> emitters_;
     std::set<std::string> pending_emitters_;
+
+    RefPtr<SyncBarrier> predecessor_;
 };
 
 } // end namespace fawkes

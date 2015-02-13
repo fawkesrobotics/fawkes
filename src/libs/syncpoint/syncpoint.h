@@ -79,11 +79,6 @@ class SyncPoint
     /** Set of all components which are currently waiting for the SyncPoint */
     std::set<std::string> waiting_watchers_;
 
-    /** The predecessor SyncPoint, which is the SyncPoint one level up
-     *  e.g. "/test/sp" -> "/test"
-     */
-    RefPtr<SyncPoint> predecessor_;
-
     /** A buffer of the most recent emit calls. */
     CircularBuffer<SyncPointCall> emit_calls_;
     /** A buffer of the most recent wait calls. */
@@ -95,6 +90,12 @@ class SyncPoint
     Mutex *mutex_;
     /** WaitCondition which is used for wait() and emit() */
     WaitCondition *wait_condition_;
+
+  private:
+    /** The predecessor SyncPoint, which is the SyncPoint one level up
+     *  e.g. "/test/sp" -> "/test"
+     */
+    RefPtr<SyncPoint> predecessor_;
 };
 
 } // end namespace fawkes
