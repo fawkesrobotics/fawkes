@@ -472,7 +472,7 @@ void * start_barrier_waiter_thread(void * data) {
   string component = comp;
   free(comp);
   RefPtr<SyncBarrier> sp;
-  EXPECT_NO_THROW(sp = params->manager->get_syncbarrier(component, params->sp_identifier));
+  sp = params->manager->get_syncbarrier(component, params->sp_identifier);
   for (uint i = 0; i < params->num_wait_calls; i++) {
     sp->wait(component);
   }
@@ -628,11 +628,11 @@ TEST_F(SyncBarrierTest, BarriersAreIndependent)
   Emitter em1("em1", barrier1_id, manager);
   Emitter em2("em2", barrier2_id, manager);
 
-  RefPtr<SyncBarrier> barrier1 = manager->get_syncbarrier("main loop",
+  RefPtr<SyncBarrier> barrier1 = manager->get_syncbarrier("m1",
     barrier1_id);
   barrier1->reset_emitters();
 
-  RefPtr<SyncBarrier> barrier2 = manager->get_syncbarrier("main loop",
+  RefPtr<SyncBarrier> barrier2 = manager->get_syncbarrier("m2",
     barrier2_id);
   barrier2->reset_emitters();
 
@@ -656,7 +656,7 @@ TEST_F(SyncBarrierTest, BarriersAreIndependent)
   for (uint i = 0; i < num_waiter_threads; i++) {
     params2[i] = new waiter_thread_params();
     params2[i]->manager = manager;
-    params2[i]->thread_nr = i;
+    params2[i]->thread_nr = num_waiter_threads + i;
     params2[i]->num_wait_calls = num_wait_calls;
     params2[i]->sp_identifier = barrier2_id;
     pthread_create(&waiter_threads2[i], &attrs, start_barrier_waiter_thread,
@@ -694,4 +694,54 @@ TEST_F(SyncBarrierTest, BarriersAreIndependent)
   }
 }
 
+/**
+ * Test the SyncBarrier hierarchy, similar to the SyncPoint hierarchy test.
+ * This creates a SyncBarrier, an emitter and waiters which wait for the
+ * SyncBarrier's predecessor, the predecessor's predecessor (grandparent),
+ * and the root SyncBarrier ("/").
+ */
+TEST_F(SyncBarrierTest, SyncBarrierHierarchy)
+{
+  Emitter em1("emitter 1", "/test/topic/b1", manager);
+  Emitter em2("emitter 2", "/test/topic/b2", manager);
+  Emitter em3("emitter 3", "/other/topic", manager);
+
+  vector<string> identifiers = { "/test/topic", "/test", "/", "/other/topic" };
+  uint num_threads = identifiers.size();
+  pthread_t threads[num_threads];
+  waiter_thread_params *params[num_threads];
+  for (uint i = 0; i < num_threads; i++) {
+    params[i] = new waiter_thread_params();
+    params[i]->manager = manager;
+    params[i]->thread_nr = i;
+    params[i]->num_wait_calls = 1;
+    params[i]->sp_identifier = identifiers.at(i);
+    pthread_create(&threads[i], &attrs, start_barrier_waiter_thread, params[i]);
+  }
+
+  usleep(10000);
+
+  for (uint i = 0; i < num_threads; i++) {
+    ASSERT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+  }
+  em1.emit();
+  usleep(10000);
+  for (uint i = 0; i < num_threads; i++) {
+    ASSERT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+  }
+  em2.emit();
+  usleep(10000);
+  /* The first waiters should be unblocked */
+  for (uint i = 0; i < num_threads - 2 ; i++) {
+    ASSERT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    delete params[i];
+  }
+  /* The last two waiters should still be waiting */
+  for (uint i = num_threads - 2; i < num_threads; i++) {
+    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    pthread_cancel(threads[i]);
+    ASSERT_EQ(0, pthread_join(threads[i], NULL));
+    delete params[i];
+  }
+}
 
