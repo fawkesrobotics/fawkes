@@ -45,7 +45,7 @@ namespace fawkes {
  * @param owner owner name to record in newly created interfaces
  */
 BlackBoardWithOwnership::BlackBoardWithOwnership(fawkes::BlackBoard *parent, const char *owner)
-  : blackboard_(parent), owner_(owner)
+  : BlackBoard(/* create notifier */ false), blackboard_(parent), owner_(owner)
 {
 }
 
@@ -115,5 +115,44 @@ BlackBoardWithOwnership::try_aliveness_restore() throw()
 {
   return blackboard_->try_aliveness_restore();
 }
+
+void
+BlackBoardWithOwnership::register_listener(BlackBoardInterfaceListener *listener,
+					   ListenerRegisterFlag flag)
+{
+  blackboard_->register_listener(listener, flag);
+}
+
+void
+BlackBoardWithOwnership::update_listener(BlackBoardInterfaceListener *listener,
+                            ListenerRegisterFlag flag)
+{
+  if (! listener)  return;
+  blackboard_->update_listener(listener, flag);
+}
+
+
+void
+BlackBoardWithOwnership::unregister_listener(BlackBoardInterfaceListener *listener)
+{
+  if (! listener) return;
+  blackboard_->unregister_listener(listener);
+}
+
+void
+BlackBoardWithOwnership::register_observer(BlackBoardInterfaceObserver *observer)
+{
+  if (! observer) return;
+  blackboard_->register_observer(observer);
+}
+
+
+void
+BlackBoardWithOwnership::unregister_observer(BlackBoardInterfaceObserver *observer)
+{
+  if (! observer) return;
+  blackboard_->unregister_observer(observer);
+}
+
 
 } // end namespace fawkes

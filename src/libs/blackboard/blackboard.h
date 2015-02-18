@@ -48,7 +48,6 @@ class FawkesNetworkHub;
 class BlackBoard
 {
  public:
-  BlackBoard();
   virtual ~BlackBoard();
 
   virtual Interface *  open_for_reading(const char *interface_type,
@@ -115,6 +114,9 @@ class BlackBoard
 
   std::string  demangle_fawkes_interface_name(const char *type);
   std::string  format_identifier(const char *identifier_format, va_list arg);
+
+ protected:
+  BlackBoard(bool create_notifier = true);
 
  protected:
   BlackBoardNotifier *__notifier;	///< Notifier for BB events.

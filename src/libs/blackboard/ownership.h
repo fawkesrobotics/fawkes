@@ -56,6 +56,15 @@ class BlackBoardWithOwnership : public BlackBoard
 			      const char *id_pattern = "*",
 			      const char *owner = NULL);
 
+  virtual void register_listener(BlackBoardInterfaceListener *listener,
+                                 ListenerRegisterFlag flag = BBIL_FLAG_ALL);
+  virtual void update_listener(BlackBoardInterfaceListener *listener,
+                                 ListenerRegisterFlag flag = BBIL_FLAG_ALL);
+  virtual void unregister_listener(BlackBoardInterfaceListener *listener);
+
+  virtual void register_observer(BlackBoardInterfaceObserver *observer);
+  virtual void unregister_observer(BlackBoardInterfaceObserver *observer);
+
  private: /* members */
   BlackBoard  *blackboard_;
   std::string  owner_;

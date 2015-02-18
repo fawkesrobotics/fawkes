@@ -161,10 +161,18 @@ namespace fawkes {
  */
 
 
-/** Constructor. */
-BlackBoard::BlackBoard()
+/** Constructor.
+ * @param create_notifier true to create the notifier used for event
+ * notification, false not to create. Set to false only if you either
+ * forward notifier related calls or implement custom handling.
+ */
+BlackBoard::BlackBoard(bool create_notifier)
 {
-  __notifier = new BlackBoardNotifier();
+  if (create_notifier) {
+    __notifier = new BlackBoardNotifier();
+  } else {
+    __notifier = NULL;
+  }
 }
 
 /** Destructor. */
@@ -182,6 +190,7 @@ void
 BlackBoard::register_listener(BlackBoardInterfaceListener *listener,
                               ListenerRegisterFlag flag)
 {
+  if (! __notifier) throw NullPointerException("BlackBoard initialized without notifier");
   __notifier->register_listener(listener, flag);
 }
 
@@ -194,6 +203,7 @@ void
 BlackBoard::update_listener(BlackBoardInterfaceListener *listener,
                             ListenerRegisterFlag flag)
 {
+  if (! __notifier) throw NullPointerException("BlackBoard initialized without notifier");
   if (! listener)  return;
   __notifier->update_listener(listener, flag);
 }
@@ -207,6 +217,7 @@ BlackBoard::update_listener(BlackBoardInterfaceListener *listener,
 void
 BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 {
+  if (! __notifier) throw NullPointerException("BlackBoard initialized without notifier");
   if (! listener) return;
   __notifier->unregister_listener(listener);
 }
@@ -218,6 +229,7 @@ BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 void
 BlackBoard::register_observer(BlackBoardInterfaceObserver *observer)
 {
+  if (! __notifier) throw NullPointerException("BlackBoard initialized without notifier");
   if (! observer) return;
   __notifier->register_observer(observer);
 }
@@ -231,6 +243,7 @@ BlackBoard::register_observer(BlackBoardInterfaceObserver *observer)
 void
 BlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
+  if (! __notifier) throw NullPointerException("BlackBoard initialized without notifier");
   if (! observer) return;
   __notifier->unregister_observer(observer);
 }
