@@ -38,6 +38,7 @@
 #include <aspect/inifins/vision_master.h>
 #include <aspect/inifins/vision.h>
 #include <aspect/inifins/syncpoint_manager.h>
+#include <aspect/inifins/syncpoint.h>
 #ifdef HAVE_WEBVIEW
 #  include <aspect/inifins/webview.h>
 #endif
@@ -262,6 +263,7 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
   VisionMasterAspectIniFin *vm_aif = new VisionMasterAspectIniFin();
   VisionAspectIniFin *vis_aif = new VisionAspectIniFin(vm_aif);
   SyncPointManagerAspectIniFin *spm_aif = new SyncPointManagerAspectIniFin(syncpoint_manager);
+  SyncPointAspectIniFin *sp_aif = new SyncPointAspectIniFin(syncpoint_manager);
 #ifdef HAVE_WEBVIEW
   WebviewAspectIniFin *web_aif = new WebviewAspectIniFin();
 #endif
@@ -289,6 +291,7 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
   __default_inifins[vm_aif->get_aspect_name()] = vm_aif;
   __default_inifins[vis_aif->get_aspect_name()] = vis_aif;
   __default_inifins[spm_aif->get_aspect_name()] = spm_aif;
+  __default_inifins[sp_aif->get_aspect_name()] = sp_aif;
 #ifdef HAVE_WEBVIEW
   __default_inifins[web_aif->get_aspect_name()] = web_aif;
 #endif
