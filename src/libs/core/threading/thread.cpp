@@ -29,6 +29,8 @@
 #include <core/threading/read_write_lock.h>
 #include <core/threading/thread_finalizer.h>
 #include <core/threading/thread_notification_listener.h>
+#include <core/threading/thread_loop_listener.h>
+
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
 #include <core/utils/lock_list.h>
@@ -250,6 +252,7 @@ Thread::__constructor(const char *name, OpMode op_mode)
   __op_mode = op_mode;
   __name   = strdup(name);
   __notification_listeners = new LockList<ThreadNotificationListener *>();
+  __loop_listeners         = new LockList<ThreadLoopListener *>();
 
   if ( __op_mode == OPMODE_WAITFORWAKEUP ) {
     __sleep_mutex        = new Mutex();
@@ -295,6 +298,7 @@ Thread::~Thread()
   delete loop_mutex;
   free(__name);
   delete __notification_listeners;
+  delete __loop_listeners;
   delete loopinterrupt_antistarve_mutex;
   delete __startup_barrier;
   delete __prepfin_hold_mutex;
@@ -956,7 +960,20 @@ Thread::run()
     loop_mutex->lock();
     if ( ! finalize_prepared ) {
       __loop_done = false;
+
+      for (LockList<ThreadLoopListener *>::iterator it = __loop_listeners->begin();
+          it != __loop_listeners->end();
+          it++) {
+        (*it)->pre_loop(this);
+      }
+
       loop();
+
+      for (LockList<ThreadLoopListener *>::reverse_iterator it = __loop_listeners->rbegin();
+          it != __loop_listeners->rend();
+          it++) {
+        (*it)->post_loop(this);
+      }
     }
     loop_mutex->unlock();
 
@@ -1180,6 +1197,27 @@ void
 Thread::remove_notification_listener(ThreadNotificationListener *notification_listener)
 {
   __notification_listeners->remove_locked(notification_listener);
+}
+
+
+/** Add loop listener.
+ * Add a loop listener for this thread.
+ * @param loop_listener loop listener to add
+ */
+void
+Thread::add_loop_listener(ThreadLoopListener *loop_listener)
+{
+  __loop_listeners->push_back_locked(loop_listener);
+}
+
+
+/** Remove loop listener.
+ * @param loop_listener loop listener to remove
+ */
+void
+Thread::remove_loop_listener(ThreadLoopListener *loop_listener)
+{
+  __loop_listeners->remove_locked(loop_listener);
 }
 
 

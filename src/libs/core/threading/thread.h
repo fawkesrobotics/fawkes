@@ -36,6 +36,7 @@ class WaitCondition;
 class Mutex;
 class Barrier;
 class ThreadNotificationListener;
+class ThreadLoopListener;
 class ThreadList;
 template <typename Type> class LockList;
 
@@ -116,6 +117,9 @@ class Thread {
 
   void notify_of_failed_init();
 
+  void add_loop_listener(ThreadLoopListener *loop_listener);
+  void remove_loop_listener(ThreadLoopListener *loop_listener);
+
  protected:
   Thread(const char *name);
   Thread(const char *name, OpMode op_mode);
@@ -182,6 +186,8 @@ class Thread {
   uint32_t       __flags;
 
   LockList<ThreadNotificationListener *>  *__notification_listeners;
+
+  LockList<ThreadLoopListener *> *__loop_listeners;
 
   static pthread_key_t   THREAD_KEY;
   static pthread_key_t   MAIN_THREAD_KEY;
