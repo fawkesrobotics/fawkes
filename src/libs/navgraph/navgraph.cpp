@@ -1100,17 +1100,19 @@ NavGraph::calc_reachability()
   if (nodes_.empty())  return;
 
   assert_valid_edges();
+
   std::vector<NavGraphNode>::iterator i;
   for (i = nodes_.begin(); i != nodes_.end(); ++i) {
     i->set_reachable_nodes(reachable_nodes(i->name()));
   }
-  assert_connected();
-  reachability_calced_ = true;
 
   std::vector<NavGraphEdge>::iterator e;
   for (e = edges_.begin(); e != edges_.end(); ++e) {
     e->set_nodes(node(e->from()), node(e->to()));
   }
+
+  assert_connected();
+  reachability_calced_ = true;
 }
 
 /** Create node name from a format string.
