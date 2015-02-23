@@ -73,6 +73,9 @@ class NavGraphGeneratorThread
   PoiMap      pois_;
   ObstacleMap obstacles_;
 
+  bool                                                 copy_default_properties_;
+  std::map<std::string, std::string>                   default_properties_;
+
   bool                    bbox_set_;
   fawkes::cart_coord_2d_t bbox_p1_;
   fawkes::cart_coord_2d_t bbox_p2_;

@@ -47,6 +47,7 @@ void
 NavGraphGeneratorThread::init()
 {
   bbox_set_ = false;
+  copy_default_properties_ = true;
 
   navgen_if_ =
     blackboard->open_for_writing<NavGraphGeneratorInterface>("/navgraph-generator");
@@ -93,7 +94,14 @@ NavGraphGeneratorThread::loop()
   nggv.compute(navgraph);
 
   // restore default properties
-  navgraph->set_default_properties(default_props);
+  if (copy_default_properties_) {
+    navgraph->set_default_properties(default_props);
+  }
+
+  // set propertis received as message
+  for (auto p : default_properties_) {
+    navgraph->set_default_property(p.first, p.second);
+  }
 
   // add POIs
   for (auto p : pois_) {
@@ -150,7 +158,9 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
   if (message->is_of_type<NavGraphGeneratorInterface::ClearMessage>()) {
     obstacles_.clear();
     pois_.clear();
+    default_properties_.clear();
     bbox_set_ = false;
+    copy_default_properties_ = true;
   } else if (message->is_of_type<NavGraphGeneratorInterface::SetBoundingBoxMessage>()) {
     NavGraphGeneratorInterface::SetBoundingBoxMessage *msg =
       message->as_type<NavGraphGeneratorInterface::SetBoundingBoxMessage>();
@@ -196,9 +206,20 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     if ((f = pois_.find(msg->id())) != pois_.end()) {
       f->second.properties[msg->property_name()] = msg->property_value();
     } else {
-      logger->log_warn(name(), "POI %s unknown, cannot set propety %s=%s",
+      logger->log_warn(name(), "POI %s unknown, cannot set property %s=%s",
 		       msg->id(), msg->property_name(), msg->property_value());
     }
+
+  } else if (message->is_of_type<NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage>()) {
+    NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage *msg =
+      message->as_type<NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage>();
+    default_properties_[msg->property_name()] = msg->property_value();
+
+  } else if (message->is_of_type<NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage>()) {
+    NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage *msg =
+      message->as_type<NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage>();
+    copy_default_properties_ = msg->is_enable_copy();
+
   } else if (message->is_of_type<NavGraphGeneratorInterface::ComputeMessage>()) {
     wakeup();
 
