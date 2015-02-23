@@ -5,6 +5,7 @@ LaserLineInterface.h
 NaoJointPositionInterface.h
 NaoJointStiffnessInterface.h
 NaoSensorInterface.h
+NavGraphGeneratorInterface.h
 OpenCVStereoParamsInterface.h
 OpenRaveInterface.h
 PanTiltInterface.h
