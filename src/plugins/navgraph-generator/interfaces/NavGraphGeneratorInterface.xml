@@ -104,6 +104,22 @@
     <field type="string" name="property_value" length="1024">Value of the property
     to set.</field>
   </message>
+  <message name="SetGraphDefaultProperty">
+    <comment>
+      Set a graph default property property.
+    </comment>
+    <field type="string" name="property_name" length="64">Name of the property to set.</field>
+    <field type="string" name="property_value" length="1024">Value of the property
+    to set.</field>
+  </message>
+  <message name="SetCopyGraphDefaultProperties">
+    <comment>
+      Set if the graph default properties should be copied from the
+      previous graph. This defaults to enabled and is reset on Clear.
+    </comment>
+    <field type="bool" name="enable_copy">True to enable copying
+    (default) false to disable).</field>
+  </message>
   <message name="RemovePointOfInterest">
     <comment></comment>
     <field type="string" name="id" length="64">

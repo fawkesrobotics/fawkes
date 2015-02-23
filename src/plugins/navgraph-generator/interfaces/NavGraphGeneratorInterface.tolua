@@ -104,6 +104,31 @@ class NavGraphGeneratorInterface : public Interface
     int maxlenof_property_value() const;
   };
 
+  class SetGraphDefaultPropertyMessage : public Message
+  {
+    SetGraphDefaultPropertyMessage(char * ini_property_name, char * ini_property_value);
+    SetGraphDefaultPropertyMessage();
+    ~SetGraphDefaultPropertyMessage();
+
+    char * property_name();
+    void set_property_name(const char * new_property_name);
+    int maxlenof_property_name() const;
+    char * property_value();
+    void set_property_value(const char * new_property_value);
+    int maxlenof_property_value() const;
+  };
+
+  class SetCopyGraphDefaultPropertiesMessage : public Message
+  {
+    SetCopyGraphDefaultPropertiesMessage(bool ini_enable_copy);
+    SetCopyGraphDefaultPropertiesMessage();
+    ~SetCopyGraphDefaultPropertiesMessage();
+
+    bool is_enable_copy();
+    void set_enable_copy(const bool new_enable_copy);
+    int maxlenof_enable_copy() const;
+  };
+
   class RemovePointOfInterestMessage : public Message
   {
     RemovePointOfInterestMessage(char * ini_id);

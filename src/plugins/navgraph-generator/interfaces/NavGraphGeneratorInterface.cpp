@@ -68,9 +68,11 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   add_messageinfo("RemoveObstacleMessage");
   add_messageinfo("AddPointOfInterestMessage");
   add_messageinfo("SetPointOfInterestPropertyMessage");
+  add_messageinfo("SetGraphDefaultPropertyMessage");
+  add_messageinfo("SetCopyGraphDefaultPropertiesMessage");
   add_messageinfo("RemovePointOfInterestMessage");
   add_messageinfo("ComputeMessage");
-  unsigned char tmp_hash[] = {0xe9, 0x12, 0x77, 0x11, 0x85, 0xa6, 0xca, 0xc8, 0xa6, 0xfa, 0xd2, 0x48, 0xab, 0x3a, 0xd0, 0xad};
+  unsigned char tmp_hash[] = {0x29, 0x70, 0xf9, 0x65, 0xb0, 0xb3, 0x9, 0x59, 0xe9, 0x1c, 0x96, 0xfc, 0x61, 0xac, 0xaf, 0x2e};
   set_hash(tmp_hash);
 }
 
@@ -143,6 +145,10 @@ NavGraphGeneratorInterface::create_message(const char *type) const
     return new AddPointOfInterestMessage();
   } else if ( strncmp("SetPointOfInterestPropertyMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetPointOfInterestPropertyMessage();
+  } else if ( strncmp("SetGraphDefaultPropertyMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetGraphDefaultPropertyMessage();
+  } else if ( strncmp("SetCopyGraphDefaultPropertiesMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetCopyGraphDefaultPropertiesMessage();
   } else if ( strncmp("RemovePointOfInterestMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new RemovePointOfInterestMessage();
   } else if ( strncmp("ComputeMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -1036,6 +1042,224 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::clone() const
 {
   return new NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage(this);
 }
+/** @class NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage <interfaces/NavGraphGeneratorInterface.h>
+ * SetGraphDefaultPropertyMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_property_name initial value for property_name
+ * @param ini_property_value initial value for property_value
+ */
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::SetGraphDefaultPropertyMessage(const char * ini_property_name, const char * ini_property_value) : Message("SetGraphDefaultPropertyMessage")
+{
+  data_size = sizeof(SetGraphDefaultPropertyMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetGraphDefaultPropertyMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->property_name, ini_property_name, 64);
+  strncpy(data->property_value, ini_property_value, 1024);
+  add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
+  add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
+}
+/** Constructor */
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::SetGraphDefaultPropertyMessage() : Message("SetGraphDefaultPropertyMessage")
+{
+  data_size = sizeof(SetGraphDefaultPropertyMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetGraphDefaultPropertyMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
+  add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
+}
+
+/** Destructor */
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::~SetGraphDefaultPropertyMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::SetGraphDefaultPropertyMessage(const SetGraphDefaultPropertyMessage *m) : Message("SetGraphDefaultPropertyMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetGraphDefaultPropertyMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get property_name value.
+ * Name of the property to set.
+ * @return property_name value
+ */
+char *
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::property_name() const
+{
+  return data->property_name;
+}
+
+/** Get maximum length of property_name value.
+ * @return length of property_name value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::maxlenof_property_name() const
+{
+  return 64;
+}
+
+/** Set property_name value.
+ * Name of the property to set.
+ * @param new_property_name new property_name value
+ */
+void
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::set_property_name(const char * new_property_name)
+{
+  strncpy(data->property_name, new_property_name, sizeof(data->property_name));
+}
+
+/** Get property_value value.
+ * Value of the property
+    to set.
+ * @return property_value value
+ */
+char *
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::property_value() const
+{
+  return data->property_value;
+}
+
+/** Get maximum length of property_value value.
+ * @return length of property_value value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::maxlenof_property_value() const
+{
+  return 1024;
+}
+
+/** Set property_value value.
+ * Value of the property
+    to set.
+ * @param new_property_value new property_value value
+ */
+void
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::set_property_value(const char * new_property_value)
+{
+  strncpy(data->property_value, new_property_value, sizeof(data->property_value));
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::clone() const
+{
+  return new NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage(this);
+}
+/** @class NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage <interfaces/NavGraphGeneratorInterface.h>
+ * SetCopyGraphDefaultPropertiesMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_enable_copy initial value for enable_copy
+ */
+NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::SetCopyGraphDefaultPropertiesMessage(const bool ini_enable_copy) : Message("SetCopyGraphDefaultPropertiesMessage")
+{
+  data_size = sizeof(SetCopyGraphDefaultPropertiesMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetCopyGraphDefaultPropertiesMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->enable_copy = ini_enable_copy;
+  add_fieldinfo(IFT_BOOL, "enable_copy", 1, &data->enable_copy);
+}
+/** Constructor */
+NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::SetCopyGraphDefaultPropertiesMessage() : Message("SetCopyGraphDefaultPropertiesMessage")
+{
+  data_size = sizeof(SetCopyGraphDefaultPropertiesMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetCopyGraphDefaultPropertiesMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_BOOL, "enable_copy", 1, &data->enable_copy);
+}
+
+/** Destructor */
+NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::~SetCopyGraphDefaultPropertiesMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::SetCopyGraphDefaultPropertiesMessage(const SetCopyGraphDefaultPropertiesMessage *m) : Message("SetCopyGraphDefaultPropertiesMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetCopyGraphDefaultPropertiesMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get enable_copy value.
+ * True to enable copying
+    (default) false to disable).
+ * @return enable_copy value
+ */
+bool
+NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::is_enable_copy() const
+{
+  return data->enable_copy;
+}
+
+/** Get maximum length of enable_copy value.
+ * @return length of enable_copy value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::maxlenof_enable_copy() const
+{
+  return 1;
+}
+
+/** Set enable_copy value.
+ * True to enable copying
+    (default) false to disable).
+ * @param new_enable_copy new enable_copy value
+ */
+void
+NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::set_enable_copy(const bool new_enable_copy)
+{
+  data->enable_copy = new_enable_copy;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::clone() const
+{
+  return new NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage(this);
+}
 /** @class NavGraphGeneratorInterface::RemovePointOfInterestMessage <interfaces/NavGraphGeneratorInterface.h>
  * RemovePointOfInterestMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1207,12 +1431,20 @@ NavGraphGeneratorInterface::message_valid(const Message *message) const
   if ( m5 != NULL ) {
     return true;
   }
-  const RemovePointOfInterestMessage *m6 = dynamic_cast<const RemovePointOfInterestMessage *>(message);
+  const SetGraphDefaultPropertyMessage *m6 = dynamic_cast<const SetGraphDefaultPropertyMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const ComputeMessage *m7 = dynamic_cast<const ComputeMessage *>(message);
+  const SetCopyGraphDefaultPropertiesMessage *m7 = dynamic_cast<const SetCopyGraphDefaultPropertiesMessage *>(message);
   if ( m7 != NULL ) {
+    return true;
+  }
+  const RemovePointOfInterestMessage *m8 = dynamic_cast<const RemovePointOfInterestMessage *>(message);
+  if ( m8 != NULL ) {
+    return true;
+  }
+  const ComputeMessage *m9 = dynamic_cast<const ComputeMessage *>(message);
+  if ( m9 != NULL ) {
     return true;
   }
   return false;

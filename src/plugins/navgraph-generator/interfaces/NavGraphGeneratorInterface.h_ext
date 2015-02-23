@@ -281,6 +281,66 @@ class NavGraphGeneratorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetGraphDefaultPropertyMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char property_name[64]; /**< Name of the property to set. */
+      char property_value[1024]; /**< Value of the property
+    to set. */
+    } SetGraphDefaultPropertyMessage_data_t;
+#pragma pack(pop)
+
+    SetGraphDefaultPropertyMessage_data_t *data;
+
+   public:
+    SetGraphDefaultPropertyMessage(const char * ini_property_name, const char * ini_property_value);
+    SetGraphDefaultPropertyMessage();
+    ~SetGraphDefaultPropertyMessage();
+
+    SetGraphDefaultPropertyMessage(const SetGraphDefaultPropertyMessage *m);
+    /* Methods */
+    char * property_name() const;
+    void set_property_name(const char * new_property_name);
+    size_t maxlenof_property_name() const;
+    char * property_value() const;
+    void set_property_value(const char * new_property_value);
+    size_t maxlenof_property_value() const;
+    virtual Message * clone() const;
+  };
+
+  class SetCopyGraphDefaultPropertiesMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool enable_copy; /**< True to enable copying
+    (default) false to disable). */
+    } SetCopyGraphDefaultPropertiesMessage_data_t;
+#pragma pack(pop)
+
+    SetCopyGraphDefaultPropertiesMessage_data_t *data;
+
+   public:
+    SetCopyGraphDefaultPropertiesMessage(const bool ini_enable_copy);
+    SetCopyGraphDefaultPropertiesMessage();
+    ~SetCopyGraphDefaultPropertiesMessage();
+
+    SetCopyGraphDefaultPropertiesMessage(const SetCopyGraphDefaultPropertiesMessage *m);
+    /* Methods */
+    bool is_enable_copy() const;
+    void set_enable_copy(const bool new_enable_copy);
+    size_t maxlenof_enable_copy() const;
+    virtual Message * clone() const;
+  };
+
   class RemovePointOfInterestMessage : public Message
   {
    private:
