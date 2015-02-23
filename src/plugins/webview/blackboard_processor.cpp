@@ -277,7 +277,11 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	gvLayout(gvc, G, (char *)"dot");
 	gvRenderData(gvc, G, (char *)"cmapx", &map, &map_length);
  	r->append_body("\n%s\n", map);
+#if GRAPHVIZ_VERSION >= 23200
 	gvFreeRenderData(map);
+#else
+	free(map);
+#endif
 	gvFreeLayout(gvc, G);
 	agclose(G);    
 	gvFreeContext(gvc);

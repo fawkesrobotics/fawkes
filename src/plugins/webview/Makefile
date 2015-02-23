@@ -16,7 +16,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDSYSDIR)/download.mk
+include $(BUILDSYSDIR)/utils.mk
 include $(LIBSRCDIR)/webview/webview.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BUILDSYSDIR)/fvconf.mk
@@ -37,6 +37,9 @@ ifneq ($(PKGCONFIG),)
       # Should be provided by "/usr/include/graphviz/types.h"
       CFLAGS_GRAPHVIZ += -DWITH_CGRAPH
     endif
+
+    VERSION_GRAPHVIZ = $(shell $(PKGCONFIG) --modversion 'libgvc')
+    CFLAGS_GRAPHVIZ += -DGRAPHVIZ_VERSION=$(call version_number,$(VERSION_GRAPHVIZ))
   endif
 
   HAVE_APR_UTIL = $(if $(shell $(PKGCONFIG) --exists 'apr-util-1'; echo $${?/1/}),1,0)
