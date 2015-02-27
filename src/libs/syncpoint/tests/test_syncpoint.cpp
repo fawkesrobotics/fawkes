@@ -188,8 +188,6 @@ TEST_F(SyncPointManagerTest, WatcherSet)
   ASSERT_NO_THROW(manager->get_syncpoint("component 1", "/test"));
   ASSERT_NO_THROW(manager->get_syncpoint("component 2", "/test"));
   ASSERT_NO_THROW(manager->get_syncpoint("component 3", "/test"));
-  ASSERT_THROW(manager->get_syncpoint("component 1", "/test"), SyncPointAlreadyOpenedException);
-
 }
 
 /** Test what happens if we acquire a SyncPoint, release it, and then acquire it

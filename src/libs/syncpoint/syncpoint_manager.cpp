@@ -218,11 +218,7 @@ SyncPointManager::get_syncpoint_no_lock(const std::string & component, const std
   std::set<RefPtr<SyncPoint> >::iterator sp_it = insert_ret.first;
 
   // add component to the set of watchers
-  // check if component is already a watcher
-  // insert returns a pair whose second element is false if element already exists
-  if (!(*sp_it)->add_watcher(component).second) {
-    throw SyncPointAlreadyOpenedException(component.c_str(), identifier.c_str());
-  }
+  (*sp_it)->add_watcher(component);
 
   if (identifier != "/") {
     // create prefix SyncPoints.
