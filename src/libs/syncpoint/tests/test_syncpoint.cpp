@@ -370,6 +370,7 @@ TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
 
   string component = "emitter";
   RefPtr<SyncPoint> sp = manager->get_syncpoint(component, sp_identifier);
+  sp->register_emitter(component);
   for (uint i = 0; i < num_wait_calls; i++) {
     sp->emit(component);
     usleep(10000);
@@ -431,6 +432,7 @@ TEST_F(SyncPointManagerTest, SyncPointHierarchy)
 
   usleep(10000);
   RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter", "/test/topic/sp");
+  sp->register_emitter("emitter");
   sp->emit("emitter");
   usleep(10000);
 
@@ -451,17 +453,17 @@ TEST_F(SyncPointManagerTest, SyncPointHierarchy)
 TEST_F(SyncBarrierTest, EmitWithoutRegister)
 {
   string component = "emitter";
-  RefPtr<SyncBarrier> barrier = manager->get_syncbarrier(component, "/test/barrier");
-  ASSERT_THROW(barrier->emit(component), SyncBarrierNonEmitterCalledEmitException);
+  RefPtr<SyncPoint> barrier = manager->get_syncpoint(component, "/test/barrier");
+  ASSERT_THROW(barrier->emit(component), SyncPointNonEmitterCalledEmitException);
 }
 
 /** Register multiple times */
 TEST_F(SyncBarrierTest, MultipleRegisterCalls)
 {
   string component = "emitter";
-  RefPtr<SyncBarrier> barrier = manager->get_syncbarrier(component, "/test/barrier");
+  RefPtr<SyncPoint> barrier = manager->get_syncpoint(component, "/test/barrier");
   EXPECT_NO_THROW(barrier->register_emitter(component));
-  ASSERT_THROW(barrier->register_emitter(component), SyncBarrierMultipleRegisterCallsException);
+  ASSERT_THROW(barrier->register_emitter(component), SyncPointMultipleRegisterCallsException);
 }
 
 /** get a SyncBarrier and wait for it */
@@ -471,10 +473,10 @@ void * start_barrier_waiter_thread(void * data) {
   asprintf(&comp, "component %u", params->thread_nr);
   string component = comp;
   free(comp);
-  RefPtr<SyncBarrier> sp;
-  sp = params->manager->get_syncbarrier(component, params->sp_identifier);
+  RefPtr<SyncPoint> sp;
+  sp = params->manager->get_syncpoint(component, params->sp_identifier);
   for (uint i = 0; i < params->num_wait_calls; i++) {
-    sp->wait(component);
+    sp->wait(component, SyncPoint::WAIT_FOR_ALL);
   }
   pthread_exit(NULL);
 }
@@ -486,8 +488,8 @@ void * start_barrier_emitter_thread(void * data) {
   asprintf(&comp, "emitter %u", params->thread_nr);
   string component = comp;
   free(comp);
-  RefPtr<SyncBarrier> sp;
-  EXPECT_NO_THROW(sp = params->manager->get_syncbarrier(component, params->sp_identifier));
+  RefPtr<SyncPoint> sp;
+  EXPECT_NO_THROW(sp = params->manager->get_syncpoint(component, params->sp_identifier));
   sp->register_emitter(component);
   for (uint i = 0; i < params->num_wait_calls; i++) {
     sp->emit(component);
@@ -507,7 +509,7 @@ public:
   : identifier_(identifier),
     manager_(manager)
   {
-    barrier_ = manager->get_syncbarrier(identifier_, syncbarrier);
+    barrier_ = manager->get_syncpoint(identifier_, syncbarrier);
     barrier_->register_emitter(identifier_);
   }
 
@@ -515,7 +517,7 @@ public:
   virtual ~Emitter()
   {
     barrier_->unregister_emitter(identifier_);
-    manager_->release_syncbarrier(identifier_, barrier_);
+    manager_->release_syncpoint(identifier_, barrier_);
   }
 
   /** emit the SyncBarrier */
@@ -526,7 +528,7 @@ public:
 
 private:
   string identifier_;
-  RefPtr<SyncBarrier> barrier_;
+  RefPtr<SyncPoint> barrier_;
   RefPtr<SyncPointManager> manager_;
 };
 
@@ -535,8 +537,7 @@ private:
 TEST_F(SyncBarrierTest,WaitWithNoRegisteredEmitter)
 {
   string barrier_id = "/test/barrier";
-  RefPtr<SyncBarrier> barrier = manager->get_syncbarrier("main loop", barrier_id);
-  barrier->reset_emitters();
+  RefPtr<SyncPoint> barrier = manager->get_syncpoint("main loop", barrier_id);
   const uint num_waiter_threads = 1;
   const uint num_wait_calls = 1;
   pthread_t waiter_threads[num_waiter_threads];
@@ -572,8 +573,7 @@ TEST_F(SyncBarrierTest, WaitForAllEmitters)
   Emitter em1("emitter 1", barrier_id, manager);
   Emitter em2("emitter 2", barrier_id, manager);
 
-  RefPtr<SyncBarrier> barrier = manager->get_syncbarrier("main loop", barrier_id);
-  barrier->reset_emitters();
+  RefPtr<SyncPoint> barrier = manager->get_syncpoint("main loop", barrier_id);
 
   const uint num_waiter_threads = 50;
   const uint num_wait_calls = 1;
@@ -628,13 +628,11 @@ TEST_F(SyncBarrierTest, BarriersAreIndependent)
   Emitter em1("em1", barrier1_id, manager);
   Emitter em2("em2", barrier2_id, manager);
 
-  RefPtr<SyncBarrier> barrier1 = manager->get_syncbarrier("m1",
+  RefPtr<SyncPoint> barrier1 = manager->get_syncpoint("m1",
     barrier1_id);
-  barrier1->reset_emitters();
 
-  RefPtr<SyncBarrier> barrier2 = manager->get_syncbarrier("m2",
+  RefPtr<SyncPoint> barrier2 = manager->get_syncpoint("m2",
     barrier2_id);
-  barrier2->reset_emitters();
 
   const uint num_waiter_threads = 50;
   const uint num_wait_calls = 1;
