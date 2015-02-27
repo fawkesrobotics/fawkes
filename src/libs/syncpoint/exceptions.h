@@ -175,14 +175,14 @@ class SyncPointMultipleWaitCallsException : public Exception
 /** A component tried to register as emitter but is already registered
  *
  */
-class SyncBarrierMultipleRegisterCallsException : public Exception
+class SyncPointMultipleRegisterCallsException : public Exception
 {
 public:
   /** Constructor.
    * @param component The calling component
    * @param identifier The identifier of the SyncBarrier
    */
-	SyncBarrierMultipleRegisterCallsException(const char * component,
+	SyncPointMultipleRegisterCallsException(const char * component,
     const char * identifier)
   {
     append("Component '%s' called register_emitter() on SyncBarrier '%s', but is already registered",
@@ -193,20 +193,32 @@ public:
 /** Emit was called on a SyncBarrier but the calling component is not registered
  *  as emitter
  */
-class SyncBarrierNonEmitterCalledEmitException : public Exception
+class SyncPointNonEmitterCalledEmitException : public Exception
 {
   public:
     /** Constructor.
      * @param component The calling component
      * @param identifier The identifier of the SyncPoint
      */
-	SyncBarrierNonEmitterCalledEmitException(const char * component,
+	SyncPointNonEmitterCalledEmitException(const char * component,
       const char *identifier)
     {
       append("Component '%s' called emit for SyncBarrier '%s', "
 	  "but is not a registered emitter",
           component, identifier);
     }
+};
+
+/** Invalid SyncPoint type.
+ */
+class SyncPointInvalidTypeException : public Exception
+{
+public:
+  /** Constructor. */
+  SyncPointInvalidTypeException()
+  {
+    append("Invalid SyncPoint Wakeup type.");
+  }
 };
 
 

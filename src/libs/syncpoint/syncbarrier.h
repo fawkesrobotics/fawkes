@@ -24,9 +24,6 @@
 
 #include <syncpoint/syncpoint.h>
 
-#include <string>
-#include <set>
-
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -38,37 +35,9 @@ class SyncBarrier : public SyncPoint
   public:
     SyncBarrier(std::string identifier);
 
-    /** register as emitter */
-    virtual void register_emitter(const std::string & component);
-
-    /** unregister as emitter */
-    virtual void unregister_emitter(const std::string & component);
-
-    /** send a signal to all waiting threads */
-    virtual void emit(const std::string & component);
-
     /** wait for the barrier */
     virtual void wait(const std::string & component);
 
-    /** check whether the barrier is already emitted */
-    virtual bool is_emitted() const;
-
-    /** set all registered emitter as pending */
-    void reset_emitters();
-
-    /**
-     * allow Syncpoint Manager to edit
-     */
-    friend class SyncPointManager;
-
-  private:
-    void reset_emitters_();
-
-  private:
-    std::set<std::string> emitters_;
-    std::set<std::string> pending_emitters_;
-
-    RefPtr<SyncBarrier> predecessor_;
 };
 
 } // end namespace fawkes

@@ -56,18 +56,22 @@ namespace fawkes {
 SyncPoint::SyncPoint(string identifier)
     : identifier_(identifier),
       emit_calls_(CircularBuffer<SyncPointCall>(1000)),
-      wait_calls_(CircularBuffer<SyncPointCall>(1000)),
+      wait_for_one_calls_(CircularBuffer<SyncPointCall>(1000)),
+      wait_for_all_calls_(CircularBuffer<SyncPointCall>(1000)),
       creation_time_(Time()),
       mutex_(new Mutex()),
-      wait_condition_(new WaitCondition())
+      cond_wait_for_one_(new WaitCondition()),
+      cond_wait_for_all_(new WaitCondition())
 {
   if (identifier.empty()) {
-    delete wait_condition_;
+    delete cond_wait_for_one_;
+    delete cond_wait_for_all_;
     delete mutex_;
     throw SyncPointInvalidIdentifierException(identifier.c_str());
   }
   if (identifier.compare(0,1,"/")) {
-    delete wait_condition_;
+    delete cond_wait_for_one_;
+    delete cond_wait_for_all_;
     delete mutex_;
     throw SyncPointInvalidIdentifierException(identifier.c_str());
   }
@@ -75,7 +79,8 @@ SyncPoint::SyncPoint(string identifier)
   // The identifier may only end in '/' if '/' is the complete identifier.
   // '/' is allowed, '/some/' is not allowed
   if (identifier != "/" && !identifier.compare(identifier.size() - 1, 1, "/")) {
-    delete wait_condition_;
+    delete cond_wait_for_one_;
+    delete cond_wait_for_all_;
     delete mutex_;
     throw SyncPointInvalidIdentifierException(identifier.c_str());
   }
@@ -83,7 +88,8 @@ SyncPoint::SyncPoint(string identifier)
 
 SyncPoint::~SyncPoint()
 {
-  delete wait_condition_;
+  delete cond_wait_for_one_;
+  delete cond_wait_for_all_;
   delete mutex_;
 }
 
@@ -123,44 +129,146 @@ SyncPoint::operator<(const SyncPoint &other) const
 void
 SyncPoint::emit(const std::string & component)
 {
-  mutex_->lock();
+  MutexLocker ml(mutex_);
   if (!watchers_.count(component)) {
-    mutex_->unlock();
     throw SyncPointNonWatcherCalledEmitException(component.c_str(), get_identifier().c_str());
   }
-  waiting_watchers_.clear();
+
+  // unlock all wait_for_one waiters
+  watchers_wait_for_one_.clear();
+  cond_wait_for_one_->wake_all();
+
+  // unlock all wait_for_all waiters if all pending emitters have emitted
+
+  if (!emitters_.count(component)) {
+    throw SyncPointNonEmitterCalledEmitException(component.c_str(),
+      get_identifier().c_str());
+  }
+  // we do NOT expect the component to be pending
+  // a component may call emit multiple times in a loop
+  pending_emitters_.erase(component);
+  if (pending_emitters_.empty()) {
+    // all emitters have emitted the signal, thus wake all waking components
+    watchers_wait_for_all_.clear();
+    cond_wait_for_all_->wake_all();
+    reset_emitters();
+  }
+
   emit_calls_.push_back(SyncPointCall(component));
-  mutex_->unlock();
-  wait_condition_->wake_all();
+
+  ml.unlock();
+
   if (predecessor_) {
     predecessor_->emit(component);
   }
 }
 
-/** Wait until SyncPoint is emitted
+/** Wait until SyncPoint is emitted.
+ * Either wait until a single emitter has emitted the SyncPoint, or wait
+ * until all registered emitters have emitted the SyncPoint.
  * @param component The identifier of the component waiting for the SyncPoint
+ * @param type the wakeup type. If this is set to WAIT_FOR_ONE, wait returns
+ * when a single emitter has emitted the SyncPoint. If set to WAIT_FOR_ALL, wait
+ * until all registered emitters have emitted the SyncPoint.
+ * @see SyncPoint::WakeupType
  */
 void
-SyncPoint::wait(const std::string & component) {
-  mutex_->lock();
+SyncPoint::wait(const std::string & component, WakeupType type /* = WAIT_FOR_ONE */) {
+  MutexLocker ml(mutex_);
+
+  std::set<std::string> *watchers;
+  WaitCondition *cond;
+  CircularBuffer<SyncPointCall> *calls;
+  // set watchers, cond and calls depending of the Wakeup type
+  if (type == WAIT_FOR_ONE) {
+    watchers = &watchers_wait_for_one_;
+    cond = cond_wait_for_one_;
+    calls = &wait_for_one_calls_;
+  } else if (type == WAIT_FOR_ALL) {
+    watchers = &watchers_wait_for_all_;
+    cond = cond_wait_for_all_;
+    calls = &wait_for_all_calls_;
+  } else {
+    throw SyncPointInvalidTypeException();
+  }
+
   // check if calling component is registered for this SyncPoint
   if (!watchers_.count(component)) {
-    mutex_->unlock();
     throw SyncPointNonWatcherCalledWaitException(component.c_str(), get_identifier().c_str());
   }
   // check if calling component is not already waiting
-  if (waiting_watchers_.count(component)) {
-    mutex_->unlock();
+  if (watchers->count(component)) {
     throw SyncPointMultipleWaitCallsException(component.c_str(), get_identifier().c_str());
   }
-  waiting_watchers_.insert(component);
-  mutex_->unlock();
+
+  /* if type == WAIT_FOR_ALL but no emitter has registered, we can
+   * immediately return
+   * if type == WAIT_FOR_ONE, we always wait
+   */
+  bool need_to_wait = !emitters_.empty() || type == WAIT_FOR_ONE;
+  if (need_to_wait) {
+    watchers->insert(component);
+  }
+  ml.unlock();
   Time start;
-  wait_condition_->wait();
+  if (need_to_wait) {
+    cond->wait();
+  }
   Time wait_time = Time() - start;
-  mutex_->lock();
-  wait_calls_.push_back(SyncPointCall(component, start, wait_time));
-  mutex_->unlock();
+  ml.relock();
+  calls->push_back(SyncPointCall(component, start, wait_time));
+}
+
+/** Wait for a single emitter.
+ * @param component The identifier of the calling component.
+ */
+void
+SyncPoint::wait_for_one(const string & component)
+{
+  wait(component, WAIT_FOR_ONE);
+}
+
+/** Wait for all registered emitters.
+ * @param component The identifier of the calling component.
+ */
+void
+SyncPoint::wait_for_all(const string & component)
+{
+  wait(component, WAIT_FOR_ALL);
+}
+
+
+/** Register an emitter. A thread can only emit the barrier if it has been
+ *  registered.
+ *  @param component The identifier of the registering component.
+ */
+void
+SyncPoint::register_emitter(const string & component)
+{
+  MutexLocker ml(mutex_);
+  if (!emitters_.insert(component).second) {
+    throw SyncPointMultipleRegisterCallsException(component.c_str(),
+      get_identifier().c_str());
+  }
+  pending_emitters_.insert(component);
+  if (predecessor_) {
+    predecessor_->register_emitter(component);
+  }
+}
+
+/** Unregister an emitter. This removes the component from the barrier, thus
+ *  other components will not wait for it anymore.
+ *  @param component The identifier of the component which is unregistered.
+ */
+void
+SyncPoint::unregister_emitter(const string & component) {
+  // TODO should this throw if the calling component is not registered?
+  MutexLocker ml(mutex_);
+  pending_emitters_.erase(component);
+  emitters_.erase(component);
+  if (predecessor_) {
+    predecessor_->unregister_emitter(component);
+  }
 }
 
 /** Add a watcher to the watch list
@@ -186,12 +294,19 @@ SyncPoint::get_watchers() const {
 }
 
 /**
- * @return a copy of the wait call buffer
+ * @return a copy of the wait call buffer with the given type
+ * @param type the type of the wait call buffer
  */
 CircularBuffer<SyncPointCall>
-SyncPoint::get_wait_calls() const {
+SyncPoint::get_wait_calls(WakeupType type /* = WAIT_FOR_ONE */) const {
   MutexLocker ml(mutex_);
-  return wait_calls_;
+  if (type == WAIT_FOR_ONE) {
+    return wait_for_one_calls_;
+  } else if (type == WAIT_FOR_ALL) {
+    return wait_for_all_calls_;
+  } else {
+    throw SyncPointInvalidTypeException();
+  }
 }
 
 
@@ -202,6 +317,11 @@ CircularBuffer<SyncPointCall>
 SyncPoint::get_emit_calls() const {
   MutexLocker ml(mutex_);
   return emit_calls_;
+}
+
+void
+SyncPoint::reset_emitters() {
+  pending_emitters_ = emitters_;
 }
 
 } // namespace fawkes
