@@ -581,6 +581,9 @@ int
 main(int argc, char** argv)
 {
    Gtk::Main kit(argc, argv);
+#ifdef HAVE_GCONFMM
+  Gnome::Conf::init();
+#endif
    
    Glib::RefPtr<Gtk::Builder> builder;
    builder = Gtk::Builder::create_from_file(RESDIR"/guis/lasergui/lasergui.ui");
