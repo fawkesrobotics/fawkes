@@ -24,7 +24,6 @@
 
 #include <aspect/aspect.h>
 #include <syncpoint/syncpoint.h>
-#include <syncpoint/syncbarrier.h>
 #include <syncpoint/syncpoint_manager.h>
 #include <core/threading/thread_loop_listener.h>
 
@@ -55,7 +54,7 @@ class SyncPointAspect : public virtual Aspect, public ThreadLoopListener
     bool has_input_syncpoint_;
     bool has_output_syncpoint_;
     RefPtr<SyncPoint> sp_in_;
-    RefPtr<SyncBarrier> sp_out_;
+    RefPtr<SyncPoint> sp_out_;
 };
 
 } // end namespace fawkes

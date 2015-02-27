@@ -84,18 +84,11 @@ void
 SyncPointAspect::init_SyncPointAspect(Thread *thread, SyncPointManager *manager)
 {
   if (has_input_syncpoint_) {
-    if (type_in_ == SyncPoint::WakeupType::WAIT_FOR_ONE) {
-      sp_in_ = manager->get_syncpoint(thread->name(), identifier_in_);
-    } else if (type_in_ == SyncPoint::WakeupType::WAIT_FOR_ALL) {
-      sp_in_ = manager->get_syncbarrier(thread->name(), identifier_in_);
-    } else {
-      // TODO there is an extra exception for this
-      throw Exception("Input syncpoint required but input has invalid syncpoint type.");
-    }
+    sp_in_ = manager->get_syncpoint(thread->name(), identifier_in_);
   }
 
   if (has_output_syncpoint_) {
-    sp_out_ = manager->get_syncbarrier(thread->name(), identifier_out_);
+    sp_out_ = manager->get_syncpoint(thread->name(), identifier_out_);
     sp_out_->register_emitter(thread->name());
   }
 
@@ -113,17 +106,11 @@ void
 SyncPointAspect::finalize_SyncPointAspect(Thread *thread, SyncPointManager *manager)
 {
   if (has_input_syncpoint_) {
-    if (type_in_ == SyncPoint::WakeupType::WAIT_FOR_ONE) {
-      manager->release_syncpoint(thread->name(), sp_in_);
-    } else if (type_in_ == SyncPoint::WakeupType::WAIT_FOR_ALL) {
-      manager->release_syncbarrier(thread->name(), sp_in_);
-    } else {
-      throw Exception("Input syncpoint required but input has invalid syncpoint type.");
-    }
+    manager->release_syncpoint(thread->name(), sp_in_);
   }
 
   if (has_output_syncpoint_) {
-    manager->release_syncbarrier(thread->name(), sp_out_);
+    manager->release_syncpoint(thread->name(), sp_out_);
   }
 
   if (has_input_syncpoint_ || has_output_syncpoint_) {
@@ -138,7 +125,7 @@ void
 SyncPointAspect::pre_loop(Thread *thread)
 {
   if (has_input_syncpoint_) {
-    sp_in_->wait(thread->name());
+    sp_in_->wait(thread->name(), type_in_);
   }
 }
 

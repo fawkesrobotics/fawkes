@@ -26,7 +26,6 @@
 #include <string>
 
 #include <syncpoint/syncpoint.h>
-#include <syncpoint/syncbarrier.h>
 #include <core/utils/refptr.h>
 #include <core/threading/mutex.h>
 
@@ -51,20 +50,13 @@ class SyncPointManager
     RefPtr<SyncPoint> get_syncpoint(const std::string & component, const std::string & identifier);
     void release_syncpoint(const std::string & component, RefPtr<SyncPoint> syncpoint);
 
-    RefPtr<SyncBarrier> get_syncbarrier(const std::string & component, const std::string & identifier);
-    void release_syncbarrier(const std::string & component, RefPtr<SyncBarrier> syncpoint);
-
     std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > get_syncpoints();
-    std::set<RefPtr<SyncBarrier>, SyncPointSetLessThan > get_syncbarriers();
-
 
     std::string all_syncpoints_as_dot(float max_age);
 
   protected:
     /** Set of all existing SyncPoints */
     std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > syncpoints_;
-    /** Set of all existing SyncBarriers */
-    std::set<RefPtr<SyncBarrier>, SyncPointSetLessThan > syncbarriers_;
     /** Mutex used for all SyncPointManager calls */
     Mutex *mutex_;
 
@@ -74,13 +66,6 @@ class SyncPointManager
       const std::string & identifier);
     void release_syncpoint_no_lock(const std::string & component,
       RefPtr<SyncPoint> syncpoint);
-    RefPtr<SyncBarrier> get_syncbarrier_no_lock(const std::string & component,
-      const std::string & identifier);
-    void release_syncbarrier_no_lock(const std::string & component,
-      RefPtr<SyncBarrier> sync_barrier);
-
-
-
 
 
 };
