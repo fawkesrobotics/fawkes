@@ -961,19 +961,23 @@ Thread::run()
     if ( ! finalize_prepared ) {
       __loop_done = false;
 
+      __loop_listeners->lock();
       for (LockList<ThreadLoopListener *>::iterator it = __loop_listeners->begin();
           it != __loop_listeners->end();
           it++) {
         (*it)->pre_loop(this);
       }
+      __loop_listeners->unlock();
 
       loop();
 
+      __loop_listeners->lock();
       for (LockList<ThreadLoopListener *>::reverse_iterator it = __loop_listeners->rbegin();
           it != __loop_listeners->rend();
           it++) {
         (*it)->post_loop(this);
       }
+      __loop_listeners->unlock();
     }
     loop_mutex->unlock();
 
