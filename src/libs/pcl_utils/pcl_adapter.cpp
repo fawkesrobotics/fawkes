@@ -155,6 +155,11 @@ PointCloudAdapter::get_info(const std::string &id,
       __pcl_manager->get_pointcloud<pcl::PointXYZRGB>(id.c_str());
     fill_info(p, width, height, frame_id, is_dense, pfi);
 
+  } else if (__pcl_manager->exists_pointcloud<pcl::PointXYZL>(id.c_str())) {
+    const fawkes::RefPtr<const pcl::PointCloud<pcl::PointXYZL> > p =
+      __pcl_manager->get_pointcloud<pcl::PointXYZL>(id.c_str());
+    fill_info(p, width, height, frame_id, is_dense, pfi);
+
   } else {
     throw Exception("PointCloud '%s' does not exist or unknown type", id.c_str());
   }
