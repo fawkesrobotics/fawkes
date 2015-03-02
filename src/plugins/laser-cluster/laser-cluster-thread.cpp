@@ -3,7 +3,7 @@
  *  laser-cluster-thread.cpp - Thread to detect a cluster in 2D laser data
  *
  *  Created: Sun Apr 21 01:27:10 2013
- *  Copyright  2011-2013  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -191,6 +191,19 @@ LaserClusterThread::init()
   }
   clusters_ = pcl_utils::cloudptr_from_refptr(fclusters_);
 
+  fclusters_labeled_ = new pcl::PointCloud<LabelPointType>();
+  fclusters_labeled_->header.frame_id = finput_->header.frame_id;
+  fclusters_labeled_->is_dense = false;
+  char *output_cluster_labeled_name;
+  if (asprintf(&output_cluster_labeled_name,
+	       "/laser-cluster/%s-labeled", cfg_name_.c_str()) != -1) {
+    output_cluster_labeled_name_ = output_cluster_labeled_name;
+    free(output_cluster_labeled_name);
+    pcl_manager->add_pointcloud<LabelPointType>(output_cluster_labeled_name_.c_str(),
+						fclusters_labeled_);
+  }
+  clusters_labeled_ = pcl_utils::cloudptr_from_refptr(fclusters_labeled_);
+
   seg_.setOptimizeCoefficients(true);
   seg_.setModelType(pcl::SACMODEL_LINE);
   seg_.setMethodType(pcl::SAC_RANSAC);
@@ -215,6 +228,7 @@ LaserClusterThread::finalize()
 {
   input_.reset();
   clusters_.reset();
+  clusters_labeled_.reset();
 
   pcl_manager->remove_pointcloud(output_cluster_name_.c_str());
   
@@ -226,6 +240,7 @@ LaserClusterThread::finalize()
 
   finput_.reset();
   fclusters_.reset();
+  fclusters_labeled_.reset();
 }
 
 void
@@ -398,14 +413,20 @@ LaserClusterThread::loop()
   clusters_->height = 1;
   clusters_->width  = noline_cloud->points.size();
 
+  clusters_labeled_->points.resize(noline_cloud->points.size());
+  clusters_labeled_->height = 1;
+  clusters_labeled_->width  = noline_cloud->points.size();
+
   // copy points and set to white
   for (size_t p = 0; p < clusters_->points.size(); ++p) {
     ColorPointType &out_point = clusters_->points[p];
+    LabelPointType &out_lab_point = clusters_labeled_->points[p];
     PointType &in_point  = noline_cloud->points[p];
-    out_point.x = in_point.x;
-    out_point.y = in_point.y;
-    out_point.z = in_point.z;
+    out_point.x = out_lab_point.x = in_point.x;
+    out_point.y = out_lab_point.y = in_point.y;
+    out_point.z = out_lab_point.z = in_point.z;
     out_point.r = out_point.g = out_point.b = 1.0;
+    out_lab_point.label = 0;
   }
 
   //logger->log_info(name(), "[L %u] remaining: %zu",
@@ -502,9 +523,11 @@ LaserClusterThread::loop()
 	// color points of cluster
 	for (auto ci : cluster_indices[cinfos[i].index].indices) {
 	  ColorPointType &out_point = clusters_->points[ci];
+	  LabelPointType &out_lab_point = clusters_labeled_->points[ci];
 	  out_point.r = cluster_colors[i][0];
 	  out_point.g = cluster_colors[i][1];;
 	  out_point.b = cluster_colors[i][2];;
+	  out_lab_point.label = i;
 	}
 
 	set_position(cluster_pos_ifs_[i], true, cinfos[i].centroid);	
@@ -533,6 +556,8 @@ LaserClusterThread::loop()
   }
   fclusters_->header.frame_id = finput_->header.frame_id;
   pcl_utils::copy_time(finput_, fclusters_);
+  fclusters_labeled_->header.frame_id = finput_->header.frame_id;
+  pcl_utils::copy_time(finput_, fclusters_labeled_);
 
   TIMETRACK_END(ttc_clustering_);
   TIMETRACK_END(ttc_full_loop_);
