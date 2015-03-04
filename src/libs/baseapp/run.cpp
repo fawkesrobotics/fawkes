@@ -418,6 +418,7 @@ init(InitOptions options, int & retval)
   // *** Create main thread, but do not start, yet
   main_thread = new fawkes::FawkesMainThread(config, logger,
 					     thread_manager,
+					     syncpoint_manager,
 					     plugin_manager,
 					     options.load_plugin_list(),
                                              options.default_plugin());

@@ -50,7 +50,7 @@ SyncPointAspect::SyncPointAspect(SyncPoint::WakeupType type_in, std::string iden
     identifier_out_(identifier_out), sp_in_(NULL), sp_out_(NULL)
 {
   add_aspect("SyncPointAspect");
-  has_input_syncpoint_ = true;
+  has_input_syncpoint_ = (identifier_in != "");
   has_output_syncpoint_ = (identifier_out != "");
 }
 
@@ -60,7 +60,7 @@ SyncPointAspect::SyncPointAspect(SyncPoint::WakeupType type_in, std::string iden
  * @param identifier_out identifier of the output syncpoint
  */
 SyncPointAspect::SyncPointAspect(std::string identifier_out)
-  : type_in_(SyncPoint::WakeupType::NONE), identifier_in_(""),
+  : type_in_(SyncPoint::NONE), identifier_in_(""),
     identifier_out_(identifier_out), sp_in_(NULL), sp_out_(NULL)
 {
   add_aspect("SyncPointAspect");

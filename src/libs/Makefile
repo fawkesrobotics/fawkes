@@ -46,7 +46,7 @@ navgraph: core utils aspect
 interfaces: core interface
 config: core netcomm utils logging
 plugin: core netcomm utils config logging
-aspect: core utils blackboard netcomm config plugin webview logging tf pcl_utils
+aspect: core utils blackboard netcomm config plugin webview logging tf pcl_utils syncpoint
 lua: core utils blackboard config logging
 interfaces: core interface
 gui_utils: core netcomm blackboard interface plugin logging utils

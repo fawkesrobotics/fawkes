@@ -24,6 +24,7 @@
 #ifndef __LIBS_BASEAPP_MAIN_THREAD_H_
 #define __LIBS_BASEAPP_MAIN_THREAD_H_
 
+#include <syncpoint/syncpoint_manager.h>
 #include <baseapp/thread_manager.h>
 #include <core/threading/thread.h>
 #include <aspect/mainloop/employer.h>
@@ -33,6 +34,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 #include <getopt.h>
 
 namespace fawkes {
@@ -53,6 +55,7 @@ class InterruptibleBarrier;
 class Barrier;
 class Mutex;
 class ThreadManager;
+class SyncPointManager;
 class FawkesNetworkManager;
 
 class FawkesMainThread
@@ -63,6 +66,7 @@ class FawkesMainThread
   FawkesMainThread(Configuration *config,
 		   MultiLogger *multi_logger,
 		   ThreadManager *thread_manager,
+		   SyncPointManager *syncpoint_manager,
 		   PluginManager *plugin_manager,
 		   const char *load_plugins,
                    const char *default_plugin = 0);
@@ -128,6 +132,7 @@ class FawkesMainThread
   char                 *__load_plugins;
 
   ThreadManager        *__thread_manager;
+  SyncPointManager     *__syncpoint_manager;
   PluginManager        *__plugin_manager;
 
   std::list<std::string>        __recovered_threads;
@@ -138,6 +143,9 @@ class FawkesMainThread
   Time                         *__loop_start;
   Time                         *__loop_end;
   bool                          __enable_looptime_warnings;
+
+  std::vector<RefPtr<SyncPoint> > __syncpoints_start_hook;
+  std::vector<RefPtr<SyncPoint> > __syncpoints_end_hook;
 
 };
 

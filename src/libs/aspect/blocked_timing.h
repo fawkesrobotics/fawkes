@@ -26,12 +26,17 @@
 
 #include <aspect/aspect.h>
 
+#include <aspect/syncpoint.h>
+
+#include <map>
+#include <string>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class BlockedTimingAspect : public virtual Aspect
+class BlockedTimingAspect : public SyncPointAspect
 {
  public:
   /** Type to define at which hook the thread is woken up.
@@ -58,6 +63,9 @@ class BlockedTimingAspect : public virtual Aspect
   virtual ~BlockedTimingAspect();
 
   static const char *  blocked_timing_hook_to_string(WakeupHook hook);
+
+  static std::string blocked_timing_hook_to_start_syncpoint(WakeupHook hook);
+  static std::string blocked_timing_hook_to_end_syncpoint(WakeupHook hook);
 
   WakeupHook blockedTimingAspectHook() const;
 

@@ -54,11 +54,6 @@ BlockedTimingAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  if ( thread->opmode() != Thread::OPMODE_WAITFORWAKEUP ) {
-    throw CannotInitializeThreadException("Thread '%s' not in WAITFORWAKEUP mode"
-					  " (required for BlockedTimingAspect)",
-					  thread->name());
-  }
 }
 
 void
