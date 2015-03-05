@@ -57,7 +57,7 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
   INST_RESDIRS = webview
 
   ifeq ($(HAVE_CPP11)$(HAVE_JPEG),11)
-    LIBS_webview += fvutils fvcams
+    LIBS_webview += m fvutils fvcams
     OBJS_webview += image_processor.o mjpeg_reply.o jpeg_stream_producer.o
     CFLAGS += -DHAVE_JPEG $(CFLAGS_CPP11)
   else
