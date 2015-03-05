@@ -30,7 +30,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  robot-memory clips-robot-memory pddl-robot-memory openrave-robot-memory \
 	  openni refboxcomm ros player xmlrpc gossip \
 	  robot_state_publisher gazebo dynamixel navgraph-interactive \
-	  syncpoint_test-emitter syncpoint_test-waiter \
+	  syncpoint-test \
 	  pddl-planner \
 
 include $(BUILDSYSDIR)/rules.mk
