@@ -461,7 +461,7 @@ TEST_F(SyncBarrierTest, MultipleRegisterCalls)
   string component = "emitter";
   RefPtr<SyncPoint> barrier = manager->get_syncpoint(component, "/test/barrier");
   EXPECT_NO_THROW(barrier->register_emitter(component));
-  ASSERT_THROW(barrier->register_emitter(component), SyncPointMultipleRegisterCallsException);
+  EXPECT_NO_THROW(barrier->register_emitter(component));
 }
 
 /** get a SyncBarrier and wait for it */

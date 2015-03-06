@@ -172,24 +172,6 @@ class SyncPointMultipleWaitCallsException : public Exception
     }
 };
 
-/** A component tried to register as emitter but is already registered
- *
- */
-class SyncPointMultipleRegisterCallsException : public Exception
-{
-public:
-  /** Constructor.
-   * @param component The calling component
-   * @param identifier The identifier of the SyncBarrier
-   */
-	SyncPointMultipleRegisterCallsException(const char * component,
-    const char * identifier)
-  {
-    append("Component '%s' called register_emitter() on SyncBarrier '%s', but is already registered",
-        component, identifier);
-  }
-};
-
 /** Emit was called on a SyncBarrier but the calling component is not registered
  *  as emitter
  */

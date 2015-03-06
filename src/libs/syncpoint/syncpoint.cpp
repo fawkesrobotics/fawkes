@@ -246,10 +246,7 @@ void
 SyncPoint::register_emitter(const string & component)
 {
   MutexLocker ml(mutex_);
-  if (!emitters_.insert(component).second) {
-    throw SyncPointMultipleRegisterCallsException(component.c_str(),
-      get_identifier().c_str());
-  }
+  emitters_.insert(component);
   pending_emitters_.insert(component);
   if (predecessor_) {
     predecessor_->register_emitter(component);
