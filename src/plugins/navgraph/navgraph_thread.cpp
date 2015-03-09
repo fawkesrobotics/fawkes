@@ -127,9 +127,15 @@ NavGraphThread::init()
 
   if (cfg_monitor_file_) {
     logger->log_info(name(), "Enabling graph file monitoring");
-    fam_ = new FileAlterationMonitor();
-    fam_->watch_file(cfg_graph_file_.c_str());
-    fam_->add_listener(this);
+    try {
+      fam_ = new FileAlterationMonitor();
+      fam_->watch_file(cfg_graph_file_.c_str());
+      fam_->add_listener(this);
+    } catch (Exception &e) {
+      logger->log_warn(name(), "Could not enable graph file monitoring");
+      logger->log_warn(name(), e); 
+    }
+
   }
 
   exec_active_       = false;
