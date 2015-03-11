@@ -180,6 +180,14 @@ OpenPRSThread::init()
   boost::asio::socket_base::keep_alive keep_alive_option(true);
   server_socket_.set_option(keep_alive_option);
 
+  // receive greeting
+  std::string greeting = OpenPRSServerProxy::read_string_from_socket(server_socket_);
+  //logger->log_info(name(), "Received server greeting: %s", greeting.c_str());
+  // send our greeting
+  OpenPRSServerProxy::write_string_to_socket(server_socket_, "fawkes");
+  OpenPRSServerProxy::write_int_to_socket(server_socket_, getpid());
+  OpenPRSServerProxy::write_int_to_socket(server_socket_, 0);
+
   io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
 
   logger->log_info(name(), "Starting OpenPRS server proxy");
