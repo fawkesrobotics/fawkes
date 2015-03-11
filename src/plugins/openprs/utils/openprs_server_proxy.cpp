@@ -371,7 +371,7 @@ OpenPRSServerProxy::Mapping::transmit_command(const std::string &command)
 }
 
 int
-OpenPRSServerProxy::Mapping::read_int_from_socket(boost::asio::ip::tcp::socket &socket)
+OpenPRSServerProxy::read_int_from_socket(boost::asio::ip::tcp::socket &socket)
 {
   int32_t value;
   boost::system::error_code ec;
@@ -384,7 +384,7 @@ OpenPRSServerProxy::Mapping::read_int_from_socket(boost::asio::ip::tcp::socket &
 }
 
 std::string
-OpenPRSServerProxy::Mapping::read_string_from_socket(boost::asio::ip::tcp::socket &socket)
+OpenPRSServerProxy::read_string_from_socket(boost::asio::ip::tcp::socket &socket)
 {
   uint32_t s_size = 0;
   boost::system::error_code ec;
@@ -406,7 +406,7 @@ OpenPRSServerProxy::Mapping::read_string_from_socket(boost::asio::ip::tcp::socke
 
 
 void
-OpenPRSServerProxy::Mapping::write_int_to_socket(boost::asio::ip::tcp::socket &socket, int i)
+OpenPRSServerProxy::write_int_to_socket(boost::asio::ip::tcp::socket &socket, int i)
 {
   boost::system::error_code ec;
   int32_t value = htonl(i);
@@ -417,8 +417,8 @@ OpenPRSServerProxy::Mapping::write_int_to_socket(boost::asio::ip::tcp::socket &s
 }
 
 void
-OpenPRSServerProxy::Mapping::write_string_to_socket(boost::asio::ip::tcp::socket &socket,
-						    const std::string &str)
+OpenPRSServerProxy::write_string_to_socket(boost::asio::ip::tcp::socket &socket,
+					   const std::string &str)
 {
   boost::system::error_code ec;
   uint32_t s_size = htonl(str.size());
@@ -434,8 +434,8 @@ OpenPRSServerProxy::Mapping::write_string_to_socket(boost::asio::ip::tcp::socket
 
 
 void
-OpenPRSServerProxy::Mapping::write_string_newline_to_socket(boost::asio::ip::tcp::socket &socket,
-							    const std::string &str)
+OpenPRSServerProxy::write_string_newline_to_socket(boost::asio::ip::tcp::socket &socket,
+						   const std::string &str)
 {
   boost::system::error_code ec;
   std::string s = str + "\n";

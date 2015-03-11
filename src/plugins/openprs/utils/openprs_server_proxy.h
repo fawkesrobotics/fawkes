@@ -52,6 +52,12 @@ class OpenPRSServerProxy
 
   bool has_kernel(const std::string &kernel_name);
 
+  static int         read_int_from_socket(boost::asio::ip::tcp::socket &socket);
+  static std::string read_string_from_socket(boost::asio::ip::tcp::socket &socket);
+  static void        write_int_to_socket(boost::asio::ip::tcp::socket &socket, int i);
+  static void        write_string_to_socket(boost::asio::ip::tcp::socket &socket, const std::string &str);
+  static void        write_string_newline_to_socket(boost::asio::ip::tcp::socket &socket, const std::string &str);
+
  private:
   class Mapping {
   public:
@@ -76,12 +82,6 @@ class OpenPRSServerProxy
     void start_recv_server();
     void handle_recv_client(const boost::system::error_code &err);
     void handle_recv_server(const boost::system::error_code &err);
-
-    int         read_int_from_socket(boost::asio::ip::tcp::socket &socket);
-    std::string read_string_from_socket(boost::asio::ip::tcp::socket &socket);
-    void        write_int_to_socket(boost::asio::ip::tcp::socket &socket, int i);
-    void        write_string_to_socket(boost::asio::ip::tcp::socket &socket, const std::string &str);
-    void        write_string_newline_to_socket(boost::asio::ip::tcp::socket &socket, const std::string &str);
 
   private: // members
     boost::asio::io_service        &io_service_;
