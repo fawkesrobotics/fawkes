@@ -190,6 +190,8 @@ NavGraphThread::loop()
     needs_write = true;
 
     if (pp_nav_if_->msgq_first_is<NavigatorInterface::StopMessage>()) {
+      NavigatorInterface::StopMessage *msg = pp_nav_if_->msgq_first(msg);
+      pp_nav_if_->set_msgid(msg->id());
 
       stop_motion();
       exec_active_ = false;
