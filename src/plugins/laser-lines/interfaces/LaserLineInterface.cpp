@@ -53,7 +53,10 @@ LaserLineInterface::LaserLineInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "point_on_line", 3, &data->point_on_line);
   add_fieldinfo(IFT_FLOAT, "line_direction", 3, &data->line_direction);
   add_fieldinfo(IFT_FLOAT, "bearing", 1, &data->bearing);
-  unsigned char tmp_hash[] = {0xb6, 0xdd, 0xc9, 0x29, 0x18, 0x34, 0xf3, 0x78, 0x4b, 0x77, 0xd, 0xe0, 0x65, 0x81, 0xcc, 0x1a};
+  add_fieldinfo(IFT_FLOAT, "end_point_1", 3, &data->end_point_1);
+  add_fieldinfo(IFT_FLOAT, "end_point_2", 3, &data->end_point_2);
+  add_fieldinfo(IFT_FLOAT, "length", 1, &data->length);
+  unsigned char tmp_hash[] = {0x80, 0xa, 0x8e, 0xab, 0x65, 0xe7, 0x47, 0x3f, 0xc3, 0x8a, 0x44, 0x7b, 0xda, 0xbd, 0xfb, 0x5f};
   set_hash(tmp_hash);
 }
 
@@ -311,6 +314,181 @@ void
 LaserLineInterface::set_bearing(const float new_bearing)
 {
   data->bearing = new_bearing;
+  data_changed = true;
+}
+
+/** Get end_point_1 value.
+ * 
+      3D coordinates in the reference frame of one endpoint of the
+      line. The end points are ordered arbitrarily.
+    
+ * @return end_point_1 value
+ */
+float *
+LaserLineInterface::end_point_1() const
+{
+  return data->end_point_1;
+}
+
+/** Get end_point_1 value at given index.
+ * 
+      3D coordinates in the reference frame of one endpoint of the
+      line. The end points are ordered arbitrarily.
+    
+ * @param index index of value
+ * @return end_point_1 value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+LaserLineInterface::end_point_1(unsigned int index) const
+{
+  if (index > 3) {
+    throw Exception("Index value %u out of bounds (0..3)", index);
+  }
+  return data->end_point_1[index];
+}
+
+/** Get maximum length of end_point_1 value.
+ * @return length of end_point_1 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+LaserLineInterface::maxlenof_end_point_1() const
+{
+  return 3;
+}
+
+/** Set end_point_1 value.
+ * 
+      3D coordinates in the reference frame of one endpoint of the
+      line. The end points are ordered arbitrarily.
+    
+ * @param new_end_point_1 new end_point_1 value
+ */
+void
+LaserLineInterface::set_end_point_1(const float * new_end_point_1)
+{
+  memcpy(data->end_point_1, new_end_point_1, sizeof(float) * 3);
+  data_changed = true;
+}
+
+/** Set end_point_1 value at given index.
+ * 
+      3D coordinates in the reference frame of one endpoint of the
+      line. The end points are ordered arbitrarily.
+    
+ * @param new_end_point_1 new end_point_1 value
+ * @param index index for of the value
+ */
+void
+LaserLineInterface::set_end_point_1(unsigned int index, const float new_end_point_1)
+{
+  if (index > 3) {
+    throw Exception("Index value %u out of bounds (0..3)", index);
+  }
+  data->end_point_1[index] = new_end_point_1;
+  data_changed = true;
+}
+/** Get end_point_2 value.
+ * 
+      3D coordinates in the reference frame of the second endpoint of
+      the line.
+    
+ * @return end_point_2 value
+ */
+float *
+LaserLineInterface::end_point_2() const
+{
+  return data->end_point_2;
+}
+
+/** Get end_point_2 value at given index.
+ * 
+      3D coordinates in the reference frame of the second endpoint of
+      the line.
+    
+ * @param index index of value
+ * @return end_point_2 value
+ * @exception Exception thrown if index is out of bounds
+ */
+float
+LaserLineInterface::end_point_2(unsigned int index) const
+{
+  if (index > 3) {
+    throw Exception("Index value %u out of bounds (0..3)", index);
+  }
+  return data->end_point_2[index];
+}
+
+/** Get maximum length of end_point_2 value.
+ * @return length of end_point_2 value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+LaserLineInterface::maxlenof_end_point_2() const
+{
+  return 3;
+}
+
+/** Set end_point_2 value.
+ * 
+      3D coordinates in the reference frame of the second endpoint of
+      the line.
+    
+ * @param new_end_point_2 new end_point_2 value
+ */
+void
+LaserLineInterface::set_end_point_2(const float * new_end_point_2)
+{
+  memcpy(data->end_point_2, new_end_point_2, sizeof(float) * 3);
+  data_changed = true;
+}
+
+/** Set end_point_2 value at given index.
+ * 
+      3D coordinates in the reference frame of the second endpoint of
+      the line.
+    
+ * @param new_end_point_2 new end_point_2 value
+ * @param index index for of the value
+ */
+void
+LaserLineInterface::set_end_point_2(unsigned int index, const float new_end_point_2)
+{
+  if (index > 3) {
+    throw Exception("Index value %u out of bounds (0..3)", index);
+  }
+  data->end_point_2[index] = new_end_point_2;
+  data_changed = true;
+}
+/** Get length value.
+ * Length of the line.
+ * @return length value
+ */
+float
+LaserLineInterface::length() const
+{
+  return data->length;
+}
+
+/** Get maximum length of length value.
+ * @return length of length value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+LaserLineInterface::maxlenof_length() const
+{
+  return 1;
+}
+
+/** Set length value.
+ * Length of the line.
+ * @param new_length new length value
+ */
+void
+LaserLineInterface::set_length(const float new_length)
+{
+  data->length = new_length;
   data_changed = true;
 }
 

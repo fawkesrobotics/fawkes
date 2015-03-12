@@ -357,8 +357,9 @@ LaserLinesThread::loop()
     if (!line_cluster_index || line_cluster_index->indices.empty())  continue;
 
     // Check if this line has the requested minimum length
-    float length = calc_line_length(cloud_line, coeff);
-    if (length < cfg_min_length_) {
+    Eigen::Vector3f end_point_1, end_point_2;
+    float length = calc_line_length(cloud_line, coeff, end_point_1, end_point_2);
+    if (length == 0 || length < cfg_min_length_) {
       continue;
     }
 
@@ -372,6 +373,10 @@ LaserLinesThread::loop()
     info.line_direction[0] = coeff->values[3];
     info.line_direction[1] = coeff->values[4];
     info.line_direction[2] = coeff->values[5];
+
+    info.length = length;
+    info.end_point_1 = end_point_1;
+    info.end_point_2 = end_point_2;
 
     Eigen::Vector3f ld_unit = info.line_direction / info.line_direction.norm();
     Eigen::Vector3f pol_invert = Eigen::Vector3f(0,0,0)-info.point_on_line;
@@ -433,8 +438,7 @@ LaserLinesThread::loop()
     const LineInfo &info = linfos[i];
 
     if (line_if_idx < cfg_max_num_lines_) {
-      set_line(line_ifs_[line_if_idx++], true, finput_->header.frame_id,
-	       info.base_point, info.line_direction, info.bearing);
+      set_line(line_ifs_[line_if_idx++], true, finput_->header.frame_id, info);
     }
 
     for (size_t p = 0; p < info.cloud->points.size(); ++p) {
@@ -593,17 +597,14 @@ void
 LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
 			   bool is_visible,
 			   const std::string &frame_id,
-			   const Eigen::Vector3f &point_to_line,
-			   const Eigen::Vector3f &line_direction,
-			   const float bearing)
+			   const LineInfo &info)
 {
   int visibility_history = iface->visibility_history();
   if (is_visible) {
-
     Eigen::Vector3f old_point_on_line(iface->point_on_line(0),
 				      iface->point_on_line(1),
 				      iface->point_on_line(2));
-    float diff = (old_point_on_line - point_to_line).norm();
+    float diff = (old_point_on_line - info.base_point).norm();
 
     if (visibility_history >= 0 && (diff <= cfg_switch_tolerance_)) {
       iface->set_visibility_history(visibility_history + 1);
@@ -613,13 +614,20 @@ LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
 
     //add the offset and publish
     float if_point_on_line[3] =
-      { point_to_line[0], point_to_line[1], point_to_line[2] };
+      { info.base_point[0], info.base_point[1], info.base_point[2] };
     float if_line_direction[3] =
-      { line_direction[0], line_direction[1], line_direction[2] };
+      { info.line_direction[0], info.line_direction[1], info.line_direction[2] };
+    float if_end_point_1[3] =
+      { info.end_point_1[0], info.end_point_1[1], info.end_point_1[2] };
+    float if_end_point_2[3] =
+      { info.end_point_2[0], info.end_point_2[1], info.end_point_2[2] };
     iface->set_point_on_line(if_point_on_line);
     iface->set_line_direction(if_line_direction);
     iface->set_frame_id(frame_id.c_str());
-    iface->set_bearing(bearing);
+    iface->set_bearing(info.bearing);
+    iface->set_length(info.length);
+    iface->set_end_point_1(if_end_point_1);
+    iface->set_end_point_2(if_end_point_2);
   } else {
     if (visibility_history <= 0) {
       iface->set_visibility_history(visibility_history - 1);
@@ -628,7 +636,10 @@ LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
       float zero_vector[3] = { 0, 0, 0 };
       iface->set_point_on_line(zero_vector);
       iface->set_line_direction(zero_vector);
+      iface->set_end_point_1(zero_vector);
+      iface->set_end_point_2(zero_vector);
       iface->set_bearing(0);
+      iface->set_length(0);
       iface->set_frame_id("");
     }
   }
@@ -637,7 +648,8 @@ LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
 
 
 float
-LaserLinesThread::calc_line_length(CloudPtr cloud_line, pcl::ModelCoefficients::Ptr coeff)
+LaserLinesThread::calc_line_length(CloudPtr cloud_line, pcl::ModelCoefficients::Ptr coeff,
+				   Eigen::Vector3f &end_point_1, Eigen::Vector3f &end_point_2)
 {
   if (cloud_line->points.size() < 2)  return 0.;
 
@@ -697,6 +709,9 @@ LaserLinesThread::calc_line_length(CloudPtr cloud_line, pcl::ModelCoefficients::
 
     Eigen::Vector3f ptv_1(pt_1.x, pt_1.y, pt_1.z);
     Eigen::Vector3f ptv_2(pt_2.x, pt_2.y, pt_2.z);
+
+    end_point_1 = ptv_1;
+    end_point_2 = ptv_2;
 
     return (ptv_1 - ptv_2).norm();
   } else {

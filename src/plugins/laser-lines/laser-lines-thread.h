@@ -88,17 +88,35 @@ class LaserLinesThread
   typedef ColorCloud::Ptr ColorCloudPtr;
   typedef ColorCloud::ConstPtr ColorCloudConstPtr;
 
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
+
  private:
+  class LineInfo {
+  public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    unsigned int index;
+    float bearing;
+    float length;
+
+    Eigen::Vector3f point_on_line;
+    Eigen::Vector3f line_direction;
+
+    Eigen::Vector3f base_point;
+
+    Eigen::Vector3f end_point_1;
+    Eigen::Vector3f end_point_2;
+
+    CloudPtr cloud;
+  };
+
   void set_line(fawkes::LaserLineInterface *iface,
 		bool is_visible,
 		const std::string &frame_id = "",
-		const Eigen::Vector3f &point_to_line = Eigen::Vector3f(0, 0, 0),
-		const Eigen::Vector3f &line_direction = Eigen::Vector3f(0, 0, 0),
-		const float bearing = 0);
-  float calc_line_length(CloudPtr cloud, pcl::ModelCoefficients::Ptr coeff);
-
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+		const LineInfo &info = LineInfo());
+  float calc_line_length(CloudPtr cloud, pcl::ModelCoefficients::Ptr coeff,
+			 Eigen::Vector3f &end_point_1, Eigen::Vector3f &end_point_2);
 
  private:
   fawkes::RefPtr<const pcl::PointCloud<PointType> > finput_;
@@ -128,21 +146,6 @@ class LaserLinesThread
   float        cfg_cluster_quota_;
 
   unsigned int loop_count_;
-
-  class LineInfo {
-  public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    unsigned int index;
-    float bearing;
-
-    Eigen::Vector3f point_on_line;
-    Eigen::Vector3f line_direction;
-
-    Eigen::Vector3f base_point;
-
-    CloudPtr cloud;
-  };
 
 #ifdef USE_TIMETRACKER
   fawkes::TimeTracker  *tt_;

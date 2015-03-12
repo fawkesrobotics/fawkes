@@ -23,5 +23,14 @@
       Direction towards the line, i.e. if the robot turns by this
       angle the robot will stand parallel to the line.
     </field>
+    <field type="float" length="3" name="end_point_1">
+      3D coordinates in the reference frame of one endpoint of the
+      line. The end points are ordered arbitrarily.
+    </field>
+    <field type="float" length="3" name="end_point_2">
+      3D coordinates in the reference frame of the second endpoint of
+      the line.
+    </field>
+    <field type="float" name="length">Length of the line.</field>
   </data>
 </interface>

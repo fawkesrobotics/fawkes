@@ -21,6 +21,15 @@ class LaserLineInterface : public Interface
   float bearing();
   void set_bearing(const float new_bearing);
   int maxlenof_bearing() const;
+  float end_point_1(int index);
+  void set_end_point_1(unsigned int index, const float new_end_point_1);
+  int maxlenof_end_point_1() const;
+  float end_point_2(int index);
+  void set_end_point_2(unsigned int index, const float new_end_point_2);
+  int maxlenof_end_point_2() const;
+  float length();
+  void set_length(const float new_length);
+  int maxlenof_length() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
