@@ -29,13 +29,13 @@ using namespace fawkes;
 
 extern "C" void finalize();
 
-
 // Global State
 BlackBoard *blackboard;
 SkillerInterface *skiller_if;
 
-std::string  g_skill_string;
-unsigned int g_skill_msgid = 0;
+std::string             g_skill_string;
+unsigned int            g_skill_msgid = 0;
+Thread_Intention_Block *g_skill_tib = NULL;
 
 std::string
 gen_skill_string(TermList terms)
@@ -164,8 +164,15 @@ action_skill_call(TermList terms)
 
     msg->unref();
 
+    g_skill_tib = current_tib;
+
     ACTION_WAIT();
   } else {
+    if (current_tib != g_skill_tib) {
+      fprintf(stderr, "Skill preempted by another skill, returning fail");
+      ACTION_FAIL();
+    }
+
     // we are called again due to :wait
     skiller_if->read();
     if (skiller_if->msgid() > g_skill_msgid) {
