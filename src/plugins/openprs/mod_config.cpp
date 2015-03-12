@@ -184,6 +184,7 @@ void init()
   make_and_declare_action("config-load", action_config_load, 1);
   make_and_declare_eval_pred("string-prefix-p", pred_string_prefix_p, 2, FALSE);
   make_and_declare_eval_funct("string-remove-prefix", func_string_remove_prefix, 2);
+  add_user_end_kernel_hook(finalize);
 }
 
 /** Finalization function for the OpenPRS module. */

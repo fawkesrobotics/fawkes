@@ -32,7 +32,7 @@ LIBS_openprs_mod_blackboard = fawkescore fawkesutils fawkesblackboard \
 			      fawkesinterface
 OBJS_openprs_mod_blackboard = mod_blackboard.o
 
-LIBS_openprs_mod_config = fawkescore fawkesutils fawkesconfig
+LIBS_openprs_mod_config = fawkescore fawkesutils fawkesconfig fawkesnetcomm
 OBJS_openprs_mod_config = mod_config.o
 
 
