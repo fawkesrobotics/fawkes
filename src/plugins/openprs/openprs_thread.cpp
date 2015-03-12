@@ -222,8 +222,14 @@ OpenPRSThread::finalize()
     io_service_thread_.join();
   }
 
-  if (proc_srv_)  proc_srv_->kill(SIGINT);
-  if (proc_mp_)   proc_mp_->kill(SIGINT);
+  if (proc_srv_) {
+    logger->log_info(name(), "Killing OpenPRS server");
+    proc_srv_->kill(SIGINT);
+  }
+  if (proc_mp_) {
+    logger->log_info(name(), "Killing OpenPRS message passer");
+    proc_mp_->kill(SIGINT);
+  }
 
   delete proc_srv_;
   delete proc_mp_;
