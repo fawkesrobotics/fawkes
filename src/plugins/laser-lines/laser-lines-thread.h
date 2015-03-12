@@ -36,7 +36,7 @@
 #include <aspect/pointcloud.h>
 
 #include <Eigen/StdVector>
-#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/ModelCoefficients.h>
 
 #ifdef HAVE_VISUAL_DEBUGGING
 #  include <plugins/ros/aspect/ros.h>
@@ -106,8 +106,6 @@ class LaserLinesThread
   CloudConstPtr input_;
   pcl::PointCloud<ColorPointType>::Ptr lines_;
 
-  pcl::SACSegmentation<PointType> seg_;
-
   std::vector<fawkes::LaserLineInterface *> line_ifs_;
 
   fawkes::SwitchInterface *switch_if_;
@@ -126,6 +124,8 @@ class LaserLinesThread
   std::string  cfg_result_frame_;
   unsigned int cfg_max_num_lines_;
   float        cfg_switch_tolerance_;
+  float        cfg_cluster_tolerance_;
+  float        cfg_cluster_quota_;
 
   unsigned int loop_count_;
 
