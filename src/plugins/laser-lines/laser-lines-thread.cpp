@@ -563,6 +563,73 @@ LaserLinesThread::loop()
       text.text = id;
       m.markers.push_back(text);
     }
+
+    if (cfg_min_length_ >= 0. || cfg_max_length_ >= 0.) {
+      visualization_msgs::Marker sphere_ep_1;
+      sphere_ep_1.header.frame_id = finput_->header.frame_id;
+      sphere_ep_1.header.stamp = ros::Time::now();
+      sphere_ep_1.ns = "laser_lines";
+      sphere_ep_1.id = idnum++;
+      sphere_ep_1.type = visualization_msgs::Marker::SPHERE;
+      sphere_ep_1.action = visualization_msgs::Marker::ADD;
+      sphere_ep_1.pose.position.x = info.end_point_1[0];
+      sphere_ep_1.pose.position.y = info.end_point_1[1];
+      sphere_ep_1.pose.position.z = info.end_point_1[2];
+      sphere_ep_1.pose.orientation.w = 1.;
+      sphere_ep_1.scale.x = 0.05;
+      sphere_ep_1.scale.y = 0.05;
+      sphere_ep_1.scale.z = 0.05;
+      sphere_ep_1.color.r = line_colors[i][0] / 255.;
+      sphere_ep_1.color.g = line_colors[i][1] / 255.;
+      sphere_ep_1.color.b = line_colors[i][2] / 255.;
+      sphere_ep_1.color.a = 1.0;
+      sphere_ep_1.lifetime = ros::Duration(2, 0);
+      m.markers.push_back(sphere_ep_1);
+
+      visualization_msgs::Marker sphere_ep_2;
+      sphere_ep_2.header.frame_id = finput_->header.frame_id;
+      sphere_ep_2.header.stamp = ros::Time::now();
+      sphere_ep_2.ns = "laser_lines";
+      sphere_ep_2.id = idnum++;
+      sphere_ep_2.type = visualization_msgs::Marker::SPHERE;
+      sphere_ep_2.action = visualization_msgs::Marker::ADD;
+      sphere_ep_2.pose.position.x = info.end_point_2[0];
+      sphere_ep_2.pose.position.y = info.end_point_2[1];
+      sphere_ep_2.pose.position.z = info.end_point_2[2];
+      sphere_ep_2.pose.orientation.w = 1.;
+      sphere_ep_2.scale.x = 0.05;
+      sphere_ep_2.scale.y = 0.05;
+      sphere_ep_2.scale.z = 0.05;
+      sphere_ep_2.color.r = line_colors[i][0] / 255.;
+      sphere_ep_2.color.g = line_colors[i][1] / 255.;
+      sphere_ep_2.color.b = line_colors[i][2] / 255.;
+      sphere_ep_2.color.a = 1.0;
+      sphere_ep_2.lifetime = ros::Duration(2, 0);
+      m.markers.push_back(sphere_ep_2);
+
+      visualization_msgs::Marker lineseg;
+      lineseg.header.frame_id = finput_->header.frame_id;
+      lineseg.header.stamp = ros::Time::now();
+      lineseg.ns = "laser_lines";
+      lineseg.id = idnum++;
+      lineseg.type = visualization_msgs::Marker::LINE_LIST;
+      lineseg.action = visualization_msgs::Marker::ADD;
+      lineseg.points.resize(2);
+      lineseg.points[0].x = info.end_point_1[0];
+      lineseg.points[0].y = info.end_point_1[1];
+      lineseg.points[0].z = info.end_point_1[2];
+      lineseg.points[1].x = info.end_point_2[0];
+      lineseg.points[1].y = info.end_point_2[1];
+      lineseg.points[1].z = info.end_point_2[2];
+      lineseg.scale.x = 0.02;
+      lineseg.scale.y = 0.04;
+      lineseg.color.r = line_colors[i][0] / 255.;
+      lineseg.color.g = line_colors[i][1] / 255.;
+      lineseg.color.b = line_colors[i][2] / 255.;
+      lineseg.color.a = 1.0;
+      lineseg.lifetime = ros::Duration(2, 0);
+      m.markers.push_back(lineseg);
+    }
 #endif
   }
 
