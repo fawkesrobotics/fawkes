@@ -46,7 +46,7 @@ action_navgraph_load(TermList terms)
 
   try {
     std::string graph_file =
-      g_config->get_string("/plugins/navgraph/graph_file");
+      g_config->get_string("/navgraph/graph_file");
 
     if (graph_file[0] != '/') {
       graph_file = std::string(CONFDIR) + "/" + graph_file;
