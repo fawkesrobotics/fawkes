@@ -79,6 +79,13 @@ NetworkConfiguration::NetworkConfiguration(FawkesNetworkClient *c,
 					   unsigned int mirror_timeout_sec)
 {
   __mirror_timeout_sec = mirror_timeout_sec;
+  mutex = new Mutex();
+  msg = NULL;
+  __mirror_mode = false;
+  __mirror_mode_before_connection_dead = false;
+  __mirror_init_waiting = false;
+  __mirror_init_barrier = new InterruptibleBarrier(2);
+
   __connected = c->connected();
   this->c = c;
   try {
@@ -87,11 +94,6 @@ NetworkConfiguration::NetworkConfiguration(FawkesNetworkClient *c,
     e.append("Failed to register for config manager component on network client");
     throw;
   }
-  mutex = new Mutex();
-  msg = NULL;
-  __mirror_mode = false;
-  __mirror_mode_before_connection_dead = false;
-  __mirror_init_barrier = NULL;
 }
 
 
@@ -1097,7 +1099,9 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 	  }
 	}
 	// initial answer received -> wake up set_mirror_mode()
-	if (__mirror_init_barrier) __mirror_init_barrier->wait();
+	if (__mirror_init_waiting) {
+	  __mirror_init_barrier->wait();
+	}
 	break;
 
       case MSG_CONFIG_VALUE_ERASED:
@@ -1326,7 +1330,7 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
 
       mirror_config = new MemoryConfiguration();
 
-      __mirror_init_barrier = new InterruptibleBarrier(2);
+      __mirror_init_waiting = true;
       mutex->lock();
 
       __mirror_mode = true;
@@ -1339,15 +1343,13 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
       // wait until all data has been received (or timeout)
       if (! __mirror_init_barrier->wait(__mirror_timeout_sec, 0)) {
         // timeout
+	__mirror_init_waiting = false;
         delete mirror_config;
-	__mirror_init_barrier = NULL;
-	delete __mirror_init_barrier;
         mutex->unlock();
         throw CannotEnableMirroringException("Didn't receive data in time");
       }
+      __mirror_init_waiting = false;
       mutex->unlock();
-      delete __mirror_init_barrier;
-      __mirror_init_barrier = NULL;
     }
   } else {
     if ( __mirror_mode ) {
