@@ -456,7 +456,7 @@ SkillerExecutionThread::loop()
   __lua_ifi->read();
 
   // Current skill string
-  std::string curss = __skiller_if->skill_string();
+  std::string curss = "";
   unsigned int cur_msgid = __skiller_if->msgid();;
 
   unsigned int excl_ctrl   = __skiller_if->exclusive_controller();
