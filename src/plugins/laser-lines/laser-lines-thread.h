@@ -137,6 +137,7 @@ class LaserLinesThread
   float        cfg_segm_distance_threshold_;
   float        cfg_segm_sample_max_dist_;
   float        cfg_min_length_;
+  float        cfg_max_length_;
   unsigned int cfg_segm_min_inliers_;
   std::string  cfg_input_pcl_;
   std::string  cfg_result_frame_;

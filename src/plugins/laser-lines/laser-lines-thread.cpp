@@ -101,6 +101,8 @@ LaserLinesThread::init()
     config->get_uint(CFG_PREFIX"line_segmentation_min_inliers");
   cfg_min_length_ =
     config->get_float(CFG_PREFIX"line_min_length");
+  cfg_max_length_ =
+    config->get_float(CFG_PREFIX"line_max_length");
   cfg_cluster_tolerance_ =
     config->get_float(CFG_PREFIX"line_cluster_tolerance");
   cfg_cluster_quota_ =
@@ -359,7 +361,11 @@ LaserLinesThread::loop()
     // Check if this line has the requested minimum length
     Eigen::Vector3f end_point_1, end_point_2;
     float length = calc_line_length(cloud_line, coeff, end_point_1, end_point_2);
-    if (length == 0 || length < cfg_min_length_) {
+
+    if (length == 0 ||
+	(cfg_min_length_ >= 0 && length < cfg_min_length_) ||
+	(cfg_max_length_ >= 0 && length > cfg_max_length_))
+    {
       continue;
     }
 
