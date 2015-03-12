@@ -38,6 +38,11 @@ laser-lines:
   # than zero.
   line_min_length: 0.8
   line_max_length: -1
+
+  # The minimum and maximum distance of the closest point on a line to
+  # the reference frame origin to consider it. Ignored if less than zero.
+  line_min_dist: 0.1
+  line_max_dist: -1
   
   # The frame in which the result should be published; frame
   result_frame: /base_link

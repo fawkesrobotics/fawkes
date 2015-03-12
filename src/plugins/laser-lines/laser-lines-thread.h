@@ -145,6 +145,8 @@ class LaserLinesThread
   float        cfg_switch_tolerance_;
   float        cfg_cluster_tolerance_;
   float        cfg_cluster_quota_;
+  float        cfg_min_dist_;
+  float        cfg_max_dist_;
 
   unsigned int loop_count_;
 

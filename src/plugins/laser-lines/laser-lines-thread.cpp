@@ -103,6 +103,10 @@ LaserLinesThread::init()
     config->get_float(CFG_PREFIX"line_min_length");
   cfg_max_length_ =
     config->get_float(CFG_PREFIX"line_max_length");
+  cfg_min_dist_ =
+    config->get_float(CFG_PREFIX"line_min_distance");
+  cfg_max_dist_ =
+    config->get_float(CFG_PREFIX"line_max_distance");
   cfg_cluster_tolerance_ =
     config->get_float(CFG_PREFIX"line_cluster_tolerance");
   cfg_cluster_quota_ =
@@ -393,10 +397,13 @@ LaserLinesThread::loop()
     if (P[1] < 0)  info.bearing = fabs(info.bearing)*-1.;
 
     info.base_point = P;
+    float dist = info.base_point.norm();
 
-    if (info.base_point.norm() < 0.25) {
-      //logger->log_warn(name(), "[L %u] line too short (%f, required %f)",
-      //	       loop_count_, info.base_point.norm(), 0.25);
+    if ((cfg_min_dist_ >= 0. && dist < cfg_min_dist_) ||
+	(cfg_max_dist_ >= 0. && dist > cfg_max_dist_))
+    {
+      //logger->log_warn(name(), "[L %u] line too close or too far (%f, min %f, max %f)",
+      //	       loop_count_, dist, cfg_min_distance_, cfg_max_distance_);
       continue;
     }
 
