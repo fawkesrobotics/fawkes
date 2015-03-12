@@ -97,6 +97,13 @@ get_fawkes_host_port(std::string &fawkes_host, unsigned short &fawkes_port)
     }
   }
 
+  if (fawkes_host.empty()) {
+    fawkes_host = getenv("FAWKES_HOST");
+  }
+  if (fawkes_port == 0) {
+    fawkes_port = atoi(getenv("FAWKES_PORT"));
+  }
+
   return (! fawkes_host.empty() && fawkes_port != 0);
 }
 
