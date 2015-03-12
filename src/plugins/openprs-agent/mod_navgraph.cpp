@@ -131,6 +131,7 @@ void init()
   }
 
   make_and_declare_action("navgraph-load", action_navgraph_load, 0);
+  add_user_end_kernel_hook(finalize);
 }
 
 /** Finalization function for the OpenPRS module. */
