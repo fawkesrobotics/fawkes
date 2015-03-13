@@ -186,6 +186,19 @@ void
 ProtobufStreamClient::handle_connect(const boost::system::error_code &err)
 {
   if (! err) {
+#if BOOST_VERSION >= 105400 && BOOST_VERSION < 105500
+    // Boost 1.54 has a bug that causes async_connect to report success
+    // if it cannot connect at all to the other side, cf.
+    // https://svn.boost.org/trac/boost/ticket/8795
+    // Work around by explicitly checking for connected status
+    boost::system::error_code ec;
+    socket_.remote_endpoint(ec);
+    if (ec == boost::system::errc::not_connected) {
+      disconnect_nosig();
+      sig_disconnected_(ec);
+      return;
+    }
+#endif
     connected_ = true;
     start_recv();
     sig_connected_();
