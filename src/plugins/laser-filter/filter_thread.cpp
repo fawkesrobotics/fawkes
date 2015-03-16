@@ -36,6 +36,8 @@
 #include <core/threading/mutex.h>
 #include <core/threading/wait_condition.h>
 
+#include <utils/time/time.h>
+
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Laser720Interface.h>
 

@@ -82,6 +82,10 @@ OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) 
 	   $(OBJS_ros_robot_description) $(OBJS_ros_move_base) \
 	   $(OBJS_ros_skiller)
 
+ifneq ($(PKGCONFIG),)
+  HAVE_TINYXML = $(if $(shell $(PKGCONFIG) --exists 'tinyxml'; echo $${?/1/}),1,0)
+endif
+
 ifeq ($(HAVE_ROS),1)
   PRESUBDIRS += aspect
 
@@ -131,10 +135,14 @@ ifeq ($(HAVE_ROS),1)
     endif
 
     ifeq ($(call ros-have-pkg,image_transport),1)
-      CFLAGS_image_thread += $(call ros-pkg-cflags,image_transport) $(CFLAGS)
-      CFLAGS_image_plugin = $(CFLAGS_image_thread)
-      LDFLAGS_ros_images += $(call ros-pkg-lflags,image_transport)
-      PLUGINS_all += $(PLUGINDIR)/ros-images.so
+      ifeq ($(HAVE_TINYXML),1)
+        CFLAGS_image_thread += $(call ros-pkg-cflags,image_transport) $(CFLAGS)
+        CFLAGS_image_plugin = $(CFLAGS_image_thread)
+        LDFLAGS_ros_images += $(call ros-pkg-lflags,image_transport)
+        PLUGINS_all += $(PLUGINDIR)/ros-images.so
+      else
+        WARN_TARGETS += warning_tinyxml
+    endif
     else
       WARN_TARGETS += warning_images
     endif
@@ -277,6 +285,8 @@ warning_sensor_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS JointState Plugin$(TNORMAL) (ROS package sensor_msgs not found)"
 warning_fawkes_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS skiller plugin$(TNORMAL) (ROS package fawkes_msgs not found)"
+warning_tinyxml:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS images plugin$(TNORMAL) (tinyxml[-devel] not installed)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

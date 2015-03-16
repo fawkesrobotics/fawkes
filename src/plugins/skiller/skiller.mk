@@ -21,7 +21,11 @@ ifneq ($(wildcard /usr/include/readline/readline.h),)
   HAVE_READLINE=1
 endif
 
-ifneq ($(wildcard /usr/include/termcap.h),)
-  HAVE_TERMCAP=1
+ifneq ($(PKGCONFIG),)
+  HAVE_TERMCAP=$(if $(shell $(PKGCONFIG) --exists 'ncurses'; echo $${?/1/}),1,0)
+  ifeq ($(HAVE_TERMCAP),1)
+    CFLAGS_TERMCAP =$(shell $(PKGCONFIG) --cflags 'ncurses')
+    LDFLAGS_TERMCAP=$(shell $(PKGCONFIG) --libs 'ncurses')
+  endif
 endif
 
