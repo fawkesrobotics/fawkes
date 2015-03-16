@@ -20,17 +20,25 @@ endif
 ifndef __buildsys_gtest_mk_
 __buildsys_gtest_mk_ := 1
 
+__GTEST_INCLUDE_PATHS=/usr/include /usr/local/include
+
 # gtest uses its own config tool
-GTESTCONFIG = $(shell which gtest-config)
+GTESTCONFIG = $(shell which gtest-config 2>/dev/null)
 
 ifneq ($(GTESTCONFIG),)
   HAVE_GTEST = 1
+  CFLAGS_GTEST  = $(shell $(GTESTCONFIG) --cppflags --cxxflags)
+  LDFLAGS_GTEST = $(shell $(GTESTCONFIG) --ldflags --libs)
+else
+  # gtest-config not available, but maybe we can still find gtest
+  HAVE_GTEST = $(if $(wildcard $(addsuffix /gtest/gtest.h,$(__GTEST_INCLUDE_PATHS))),1)
+  ifeq ($(HAVE_GTEST),1)
+    # gtest-config not available, we must set the flags manually
+    LDFLAGS_GTEST += -pthread -lgtest
+  endif
 endif
 
 ifeq ($(HAVE_GTEST),1)
-  CFLAGS_GTEST  = $(shell $(GTESTCONFIG) --cppflags --cxxflags)
-  LDFLAGS_GTEST = $(shell $(GTESTCONFIG) --ldflags --libs)
-
   # always link against gtest_main
   # this defines main() for all gtests
   LDFLAGS_GTEST += -lgtest_main
