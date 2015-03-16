@@ -24,15 +24,20 @@ gazsim:
     max_range: 5.5 
     interface-id: "Laser urg"
     frame-id: "/base_laser"
-    
+
   webcam:
-    topic-suffix: "/webcam/link/webcam_sensor/image"
-    width: 320
-    height: 240
-    #Shared Memory Imagebuffer name
-    shm-image-id: "light_front"
-    frame: "/cam_front" #without "" in light_front.yaml?
-    
+    # list of ids for all cameras to simulate
+    # for each id you need to add entries to the following fields 
+    shm-image-ids: ["light_front", "gazsim_puck"]
+    topic-suffixes:
+      light_front: "/carologistics-robotino-3/webcam/link/webcam_sensor/image"
+    widths:
+      light_front: 320
+    heights:
+      light_front: 240
+    frames:
+      light_front: "/cam_front"
+
   robotino:
     gripper-laser-threshold: 0.18
     gripper-laser-value-far: 0.17
