@@ -432,11 +432,6 @@ LaserLinesThread::loop()
   lines_->height = 1;
   lines_->width  = num_points;
 
-#ifdef HAVE_VISUAL_DEBUGGING
-  visualization_msgs::MarkerArray m;
-  unsigned int idnum = 0;
-#endif
-
   // sort lines by bearing to stabilize IDs
   std::sort(linfos.begin(), linfos.end(),
 	    [](const LineInfo &l1, const LineInfo &l2) -> bool
@@ -469,8 +464,174 @@ LaserLinesThread::loop()
 	out_point.r = out_point.g = out_point.b = 1.0;
       }
     }
-    
+  }
+
+  for (unsigned int i = line_if_idx; i < cfg_max_num_lines_; ++i) {
+    set_line(line_ifs_[i], false);
+  }
+
 #ifdef HAVE_VISUAL_DEBUGGING
+  publish_visualization(linfos);
+#endif
+
+  //*lines_ = *tmp_lines;
+  if (finput_->header.frame_id == "" &&
+      fawkes::runtime::uptime() >= tf_listener->get_cache_time())
+  {
+    logger->log_error(name(), "Empty frame ID");
+  }
+  flines_->header.frame_id = finput_->header.frame_id;
+  pcl_utils::copy_time(finput_, flines_);
+
+  TIMETRACK_END(ttc_clustering_);
+  TIMETRACK_END(ttc_full_loop_);
+
+#ifdef USE_TIMETRACKER
+  if (++tt_loopcount_ >= 5) {
+    tt_loopcount_ = 0;
+    tt_->print_to_stdout();
+  }
+#endif
+}
+
+
+void
+LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
+			   bool is_visible,
+			   const std::string &frame_id,
+			   const LineInfo &info)
+{
+  int visibility_history = iface->visibility_history();
+  if (is_visible) {
+    Eigen::Vector3f old_point_on_line(iface->point_on_line(0),
+				      iface->point_on_line(1),
+				      iface->point_on_line(2));
+    float diff = (old_point_on_line - info.base_point).norm();
+
+    if (visibility_history >= 0 && (diff <= cfg_switch_tolerance_)) {
+      iface->set_visibility_history(visibility_history + 1);
+    } else {
+      iface->set_visibility_history(1);
+    }
+
+    //add the offset and publish
+    float if_point_on_line[3] =
+      { info.base_point[0], info.base_point[1], info.base_point[2] };
+    float if_line_direction[3] =
+      { info.line_direction[0], info.line_direction[1], info.line_direction[2] };
+    float if_end_point_1[3] =
+      { info.end_point_1[0], info.end_point_1[1], info.end_point_1[2] };
+    float if_end_point_2[3] =
+      { info.end_point_2[0], info.end_point_2[1], info.end_point_2[2] };
+    iface->set_point_on_line(if_point_on_line);
+    iface->set_line_direction(if_line_direction);
+    iface->set_frame_id(frame_id.c_str());
+    iface->set_bearing(info.bearing);
+    iface->set_length(info.length);
+    iface->set_end_point_1(if_end_point_1);
+    iface->set_end_point_2(if_end_point_2);
+  } else {
+    if (visibility_history <= 0) {
+      iface->set_visibility_history(visibility_history - 1);
+    } else {
+      iface->set_visibility_history(-1);
+      float zero_vector[3] = { 0, 0, 0 };
+      iface->set_point_on_line(zero_vector);
+      iface->set_line_direction(zero_vector);
+      iface->set_end_point_1(zero_vector);
+      iface->set_end_point_2(zero_vector);
+      iface->set_bearing(0);
+      iface->set_length(0);
+      iface->set_frame_id("");
+    }
+  }
+  iface->write();  
+}
+
+
+float
+LaserLinesThread::calc_line_length(CloudPtr cloud_line, pcl::ModelCoefficients::Ptr coeff,
+				   Eigen::Vector3f &end_point_1, Eigen::Vector3f &end_point_2)
+{
+  if (cloud_line->points.size() < 2)  return 0.;
+
+  //CloudPtr cloud_line(new Cloud());
+  CloudPtr cloud_line_proj(new Cloud());
+
+  /*
+  pcl::ExtractIndices<PointType> extract;
+  extract.setInputCloud(cloud);
+  extract.setIndices(inliers);
+  extract.setNegative(false);
+  extract.filter(*cloud_line);
+  */
+
+  // Project the model inliers
+  pcl::ProjectInliers<PointType> proj;
+  proj.setModelType(pcl::SACMODEL_LINE);
+  proj.setInputCloud(cloud_line);
+  proj.setModelCoefficients(coeff);
+  proj.filter(*cloud_line_proj);
+
+  Eigen::Vector3f point_on_line, line_dir;
+  point_on_line[0]  = cloud_line_proj->points[0].x;
+  point_on_line[1]  = cloud_line_proj->points[0].y;
+  point_on_line[2]  = cloud_line_proj->points[0].z;
+  line_dir[0]       = coeff->values[3];
+  line_dir[1]       = coeff->values[4];
+  line_dir[2]       = coeff->values[5];
+  line_dir.normalize();
+
+  ssize_t idx_1 = 0, idx_2 = 0;
+  float max_dist_1 = 0.f, max_dist_2 = 0.f;
+
+  for (size_t i = 1; i < cloud_line_proj->points.size(); ++i) {
+    const PointType &pt = cloud_line_proj->points[i];
+    Eigen::Vector3f ptv(pt.x, pt.y, pt.z);
+    Eigen::Vector3f diff(ptv - point_on_line);
+    float dist = diff.norm();
+    float dir  = line_dir.dot(diff);
+    if (dir >= 0) {
+      if (dist > max_dist_1) {
+	max_dist_1 = dist;
+	idx_1 = i;
+      }
+    }
+    if (dir <= 0) {
+      if (dist > max_dist_2) {
+	max_dist_2 = dist;
+	idx_2 = i;
+      }
+    }
+  }
+
+  if (idx_1 >= 0 && idx_2 >= 0) {
+    const PointType &pt_1 = cloud_line_proj->points[idx_1];
+    const PointType &pt_2 = cloud_line_proj->points[idx_2];
+
+    Eigen::Vector3f ptv_1(pt_1.x, pt_1.y, pt_1.z);
+    Eigen::Vector3f ptv_2(pt_2.x, pt_2.y, pt_2.z);
+
+    end_point_1 = ptv_1;
+    end_point_2 = ptv_2;
+
+    return (ptv_1 - ptv_2).norm();
+  } else {
+    return 0.f;
+  }
+}
+
+
+#ifdef HAVE_VISUAL_DEBUGGING
+void
+LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
+{
+  visualization_msgs::MarkerArray m;
+  unsigned int idnum = 0;
+
+  for (size_t i = 0; i < linfos.size(); ++i) {
+    const LineInfo &info = linfos[i];
+    
     /*
     visualization_msgs::Marker basevec;
     basevec.header.frame_id = finput_->header.frame_id;
@@ -630,14 +791,8 @@ LaserLinesThread::loop()
       lineseg.lifetime = ros::Duration(2, 0);
       m.markers.push_back(lineseg);
     }
-#endif
   }
 
-  for (unsigned int i = line_if_idx; i < cfg_max_num_lines_; ++i) {
-    set_line(line_ifs_[i], false);
-  }
-
-#ifdef HAVE_VISUAL_DEBUGGING
   for (size_t i = idnum; i < last_id_num_; ++i) {
     visualization_msgs::Marker delop;
     delop.header.frame_id = finput_->header.frame_id;
@@ -650,151 +805,5 @@ LaserLinesThread::loop()
   last_id_num_ = idnum;
 
   vispub_->publish(m);
+}
 #endif
-
-  //*lines_ = *tmp_lines;
-  if (finput_->header.frame_id == "" &&
-      fawkes::runtime::uptime() >= tf_listener->get_cache_time())
-  {
-    logger->log_error(name(), "Empty frame ID");
-  }
-  flines_->header.frame_id = finput_->header.frame_id;
-  pcl_utils::copy_time(finput_, flines_);
-
-  TIMETRACK_END(ttc_clustering_);
-  TIMETRACK_END(ttc_full_loop_);
-
-#ifdef USE_TIMETRACKER
-  if (++tt_loopcount_ >= 5) {
-    tt_loopcount_ = 0;
-    tt_->print_to_stdout();
-  }
-#endif
-}
-
-
-void
-LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
-			   bool is_visible,
-			   const std::string &frame_id,
-			   const LineInfo &info)
-{
-  int visibility_history = iface->visibility_history();
-  if (is_visible) {
-    Eigen::Vector3f old_point_on_line(iface->point_on_line(0),
-				      iface->point_on_line(1),
-				      iface->point_on_line(2));
-    float diff = (old_point_on_line - info.base_point).norm();
-
-    if (visibility_history >= 0 && (diff <= cfg_switch_tolerance_)) {
-      iface->set_visibility_history(visibility_history + 1);
-    } else {
-      iface->set_visibility_history(1);
-    }
-
-    //add the offset and publish
-    float if_point_on_line[3] =
-      { info.base_point[0], info.base_point[1], info.base_point[2] };
-    float if_line_direction[3] =
-      { info.line_direction[0], info.line_direction[1], info.line_direction[2] };
-    float if_end_point_1[3] =
-      { info.end_point_1[0], info.end_point_1[1], info.end_point_1[2] };
-    float if_end_point_2[3] =
-      { info.end_point_2[0], info.end_point_2[1], info.end_point_2[2] };
-    iface->set_point_on_line(if_point_on_line);
-    iface->set_line_direction(if_line_direction);
-    iface->set_frame_id(frame_id.c_str());
-    iface->set_bearing(info.bearing);
-    iface->set_length(info.length);
-    iface->set_end_point_1(if_end_point_1);
-    iface->set_end_point_2(if_end_point_2);
-  } else {
-    if (visibility_history <= 0) {
-      iface->set_visibility_history(visibility_history - 1);
-    } else {
-      iface->set_visibility_history(-1);
-      float zero_vector[3] = { 0, 0, 0 };
-      iface->set_point_on_line(zero_vector);
-      iface->set_line_direction(zero_vector);
-      iface->set_end_point_1(zero_vector);
-      iface->set_end_point_2(zero_vector);
-      iface->set_bearing(0);
-      iface->set_length(0);
-      iface->set_frame_id("");
-    }
-  }
-  iface->write();  
-}
-
-
-float
-LaserLinesThread::calc_line_length(CloudPtr cloud_line, pcl::ModelCoefficients::Ptr coeff,
-				   Eigen::Vector3f &end_point_1, Eigen::Vector3f &end_point_2)
-{
-  if (cloud_line->points.size() < 2)  return 0.;
-
-  //CloudPtr cloud_line(new Cloud());
-  CloudPtr cloud_line_proj(new Cloud());
-
-  /*
-  pcl::ExtractIndices<PointType> extract;
-  extract.setInputCloud(cloud);
-  extract.setIndices(inliers);
-  extract.setNegative(false);
-  extract.filter(*cloud_line);
-  */
-
-  // Project the model inliers
-  pcl::ProjectInliers<PointType> proj;
-  proj.setModelType(pcl::SACMODEL_LINE);
-  proj.setInputCloud(cloud_line);
-  proj.setModelCoefficients(coeff);
-  proj.filter(*cloud_line_proj);
-
-  Eigen::Vector3f point_on_line, line_dir;
-  point_on_line[0]  = cloud_line_proj->points[0].x;
-  point_on_line[1]  = cloud_line_proj->points[0].y;
-  point_on_line[2]  = cloud_line_proj->points[0].z;
-  line_dir[0]       = coeff->values[3];
-  line_dir[1]       = coeff->values[4];
-  line_dir[2]       = coeff->values[5];
-  line_dir.normalize();
-
-  ssize_t idx_1 = 0, idx_2 = 0;
-  float max_dist_1 = 0.f, max_dist_2 = 0.f;
-
-  for (size_t i = 1; i < cloud_line_proj->points.size(); ++i) {
-    const PointType &pt = cloud_line_proj->points[i];
-    Eigen::Vector3f ptv(pt.x, pt.y, pt.z);
-    Eigen::Vector3f diff(ptv - point_on_line);
-    float dist = diff.norm();
-    float dir  = line_dir.dot(diff);
-    if (dir >= 0) {
-      if (dist > max_dist_1) {
-	max_dist_1 = dist;
-	idx_1 = i;
-      }
-    }
-    if (dir <= 0) {
-      if (dist > max_dist_2) {
-	max_dist_2 = dist;
-	idx_2 = i;
-      }
-    }
-  }
-
-  if (idx_1 >= 0 && idx_2 >= 0) {
-    const PointType &pt_1 = cloud_line_proj->points[idx_1];
-    const PointType &pt_2 = cloud_line_proj->points[idx_2];
-
-    Eigen::Vector3f ptv_1(pt_1.x, pt_1.y, pt_1.z);
-    Eigen::Vector3f ptv_2(pt_2.x, pt_2.y, pt_2.z);
-
-    end_point_1 = ptv_1;
-    end_point_2 = ptv_2;
-
-    return (ptv_1 - ptv_2).norm();
-  } else {
-    return 0.f;
-  }
-}

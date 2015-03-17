@@ -118,6 +118,11 @@ class LaserLinesThread
   float calc_line_length(CloudPtr cloud, pcl::ModelCoefficients::Ptr coeff,
 			 Eigen::Vector3f &end_point_1, Eigen::Vector3f &end_point_2);
 
+
+#ifdef HAVE_VISUAL_DEBUGGING
+  void publish_visualization(const std::vector<LineInfo> &linfos);
+#endif
+
  private:
   fawkes::RefPtr<const pcl::PointCloud<PointType> > finput_;
   fawkes::RefPtr<pcl::PointCloud<ColorPointType> > flines_;
