@@ -23,6 +23,8 @@
 #define __PLUGINS_LASER_LINES_LINE_INFO_H_
 
 #include <Eigen/Geometry>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
 /** Line information container.
  * All points and angles are in the sensor reference frame

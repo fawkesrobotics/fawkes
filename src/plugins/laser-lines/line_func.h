@@ -124,6 +124,8 @@ calc_line_length(typename pcl::PointCloud<PointType>::Ptr cloud_line,
  * @param max_length maximum length of a line to consider it
  * @param min_dist minimum distance from frame origin to closest point on line to consider it
  * @param max_dist maximum distance from frame origin to closest point on line to consider it
+ * @param remaining_cloud if passed with a valid cloud will be assigned the remaining
+ * points, that is points which have not been accounted to a line, upon return
  * @return vector of info about detected lines
  */
 template <class PointType>
@@ -132,7 +134,8 @@ calc_lines(typename pcl::PointCloud<PointType>::ConstPtr input,
 	   unsigned int segm_min_inliers, unsigned int segm_max_iterations,
 	   float segm_distance_threshold, float segm_sample_max_dist,
 	   float cluster_tolerance, float cluster_quota,
-	   float min_length, float max_length, float min_dist, float max_dist)
+	   float min_length, float max_length, float min_dist, float max_dist,
+	   typename pcl::PointCloud<PointType>::Ptr remaining_cloud = typename pcl::PointCloud<PointType>::Ptr())
 {
   typename pcl::PointCloud<PointType>::Ptr in_cloud(new pcl::PointCloud<PointType>());
 
@@ -294,6 +297,10 @@ calc_lines(typename pcl::PointCloud<PointType>::ConstPtr input,
     proj.filter(*info.cloud);
 
     linfos.push_back(info);
+  }
+
+  if (remaining_cloud) {
+    *remaining_cloud = *in_cloud;
   }
 
   return linfos;
