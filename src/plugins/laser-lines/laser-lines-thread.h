@@ -26,6 +26,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
+#include "line_info.h"
+
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
@@ -92,31 +94,11 @@ class LaserLinesThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  class LineInfo {
-  public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    unsigned int index;
-    float bearing;
-    float length;
-
-    Eigen::Vector3f point_on_line;
-    Eigen::Vector3f line_direction;
-
-    Eigen::Vector3f base_point;
-
-    Eigen::Vector3f end_point_1;
-    Eigen::Vector3f end_point_2;
-
-    CloudPtr cloud;
-  };
 
   void set_line(fawkes::LaserLineInterface *iface,
 		bool is_visible,
 		const std::string &frame_id = "",
 		const LineInfo &info = LineInfo());
-  float calc_line_length(CloudPtr cloud, pcl::ModelCoefficients::Ptr coeff,
-			 Eigen::Vector3f &end_point_1, Eigen::Vector3f &end_point_2);
 
 
 #ifdef HAVE_VISUAL_DEBUGGING
