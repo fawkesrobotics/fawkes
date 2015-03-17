@@ -92,12 +92,14 @@ AmclThread::~AmclThread()
 
 void AmclThread::init()
 {
+  map_ = NULL;
+
   fawkes::amcl::read_map_config(config, cfg_map_file_, cfg_resolution_, cfg_origin_x_,
 				cfg_origin_y_, cfg_origin_theta_, cfg_occupied_thresh_,
 				cfg_free_thresh_);
 
-  cfg_laser_ifname_ = config->get_string(CFG_PREFIX"laser_interface_id");
-  cfg_pose_ifname_ = config->get_string(CFG_PREFIX"pose_interface_id");
+  cfg_laser_ifname_ = config->get_string(AMCL_CFG_PREFIX"laser_interface_id");
+  cfg_pose_ifname_ = config->get_string(AMCL_CFG_PREFIX"pose_interface_id");
 
   map_ = fawkes::amcl::read_map(cfg_map_file_.c_str(),
 				cfg_origin_x_, cfg_origin_y_, cfg_resolution_,
@@ -131,32 +133,32 @@ void AmclThread::init()
   init_cov_[1] = 0.5 * 0.5;
   init_cov_[2] = (M_PI / 12.0) * (M_PI / 12.0);
 
-  save_pose_period_ = config->get_float(CFG_PREFIX"save_pose_period");
-  laser_min_range_ = config->get_float(CFG_PREFIX"laser_min_range");
-  laser_max_range_ = config->get_float(CFG_PREFIX"laser_max_range");
-  pf_err_ = config->get_float(CFG_PREFIX"kld_err");
-  pf_z_ = config->get_float(CFG_PREFIX"kld_z");
-  alpha1_ = config->get_float(CFG_PREFIX"alpha1");
-  alpha2_ = config->get_float(CFG_PREFIX"alpha2");
-  alpha3_ = config->get_float(CFG_PREFIX"alpha3");
-  alpha4_ = config->get_float(CFG_PREFIX"alpha4");
-  alpha5_ = config->get_float(CFG_PREFIX"alpha5");
-  z_hit_ = config->get_float(CFG_PREFIX"z_hit");
-  z_short_ = config->get_float(CFG_PREFIX"z_short");
-  z_max_ = config->get_float(CFG_PREFIX"z_max");
-  z_rand_ = config->get_float(CFG_PREFIX"z_rand");
-  sigma_hit_ = config->get_float(CFG_PREFIX"sigma_hit");
-  lambda_short_ = config->get_float(CFG_PREFIX"lambda_short");
+  save_pose_period_ = config->get_float(AMCL_CFG_PREFIX"save_pose_period");
+  laser_min_range_ = config->get_float(AMCL_CFG_PREFIX"laser_min_range");
+  laser_max_range_ = config->get_float(AMCL_CFG_PREFIX"laser_max_range");
+  pf_err_ = config->get_float(AMCL_CFG_PREFIX"kld_err");
+  pf_z_ = config->get_float(AMCL_CFG_PREFIX"kld_z");
+  alpha1_ = config->get_float(AMCL_CFG_PREFIX"alpha1");
+  alpha2_ = config->get_float(AMCL_CFG_PREFIX"alpha2");
+  alpha3_ = config->get_float(AMCL_CFG_PREFIX"alpha3");
+  alpha4_ = config->get_float(AMCL_CFG_PREFIX"alpha4");
+  alpha5_ = config->get_float(AMCL_CFG_PREFIX"alpha5");
+  z_hit_ = config->get_float(AMCL_CFG_PREFIX"z_hit");
+  z_short_ = config->get_float(AMCL_CFG_PREFIX"z_short");
+  z_max_ = config->get_float(AMCL_CFG_PREFIX"z_max");
+  z_rand_ = config->get_float(AMCL_CFG_PREFIX"z_rand");
+  sigma_hit_ = config->get_float(AMCL_CFG_PREFIX"sigma_hit");
+  lambda_short_ = config->get_float(AMCL_CFG_PREFIX"lambda_short");
   laser_likelihood_max_dist_ =
-    config->get_float(CFG_PREFIX"laser_likelihood_max_dist");
-  d_thresh_ = config->get_float(CFG_PREFIX"d_thresh");
-  a_thresh_ = config->get_float(CFG_PREFIX"a_thresh");
-  t_thresh_ = config->get_float(CFG_PREFIX"t_thresh");
-  alpha_slow_ = config->get_float(CFG_PREFIX"alpha_slow");
-  alpha_fast_ = config->get_float(CFG_PREFIX"alpha_fast");
-  angle_increment_ = deg2rad(config->get_float(CFG_PREFIX"angle_increment"));
+    config->get_float(AMCL_CFG_PREFIX"laser_likelihood_max_dist");
+  d_thresh_ = config->get_float(AMCL_CFG_PREFIX"d_thresh");
+  a_thresh_ = config->get_float(AMCL_CFG_PREFIX"a_thresh");
+  t_thresh_ = config->get_float(AMCL_CFG_PREFIX"t_thresh");
+  alpha_slow_ = config->get_float(AMCL_CFG_PREFIX"alpha_slow");
+  alpha_fast_ = config->get_float(AMCL_CFG_PREFIX"alpha_fast");
+  angle_increment_ = deg2rad(config->get_float(AMCL_CFG_PREFIX"angle_increment"));
   try {
-    angle_min_idx_ = config->get_uint(CFG_PREFIX"angle_min_idx");
+    angle_min_idx_ = config->get_uint(AMCL_CFG_PREFIX"angle_min_idx");
     if (angle_min_idx_ > 359) {
       throw Exception("Angle min index out of bounds");
     }
@@ -164,7 +166,7 @@ void AmclThread::init()
     angle_min_idx_ = 0;
   }
   try {
-    angle_max_idx_ = config->get_uint(CFG_PREFIX"angle_max_idx");
+    angle_max_idx_ = config->get_uint(AMCL_CFG_PREFIX"angle_max_idx");
     if (angle_max_idx_ > 359) {
       throw Exception("Angle max index out of bounds");
     }
@@ -178,18 +180,18 @@ void AmclThread::init()
   }
   angle_min_ = deg2rad(angle_min_idx_);
 
-  max_beams_ = config->get_uint(CFG_PREFIX"max_beams");
-  min_particles_ = config->get_uint(CFG_PREFIX"min_particles");
-  max_particles_ = config->get_uint(CFG_PREFIX"max_particles");
-  resample_interval_ = config->get_uint(CFG_PREFIX"resample_interval");
+  max_beams_ = config->get_uint(AMCL_CFG_PREFIX"max_beams");
+  min_particles_ = config->get_uint(AMCL_CFG_PREFIX"min_particles");
+  max_particles_ = config->get_uint(AMCL_CFG_PREFIX"max_particles");
+  resample_interval_ = config->get_uint(AMCL_CFG_PREFIX"resample_interval");
 
-  odom_frame_id_ = config->get_string(CFG_PREFIX"odom_frame_id");
-  base_frame_id_ = config->get_string(CFG_PREFIX"base_frame_id");
-  laser_frame_id_ = config->get_string(CFG_PREFIX"laser_frame_id");
-  global_frame_id_ = config->get_string(CFG_PREFIX"global_frame_id");
+  odom_frame_id_ = config->get_string(AMCL_CFG_PREFIX"odom_frame_id");
+  base_frame_id_ = config->get_string(AMCL_CFG_PREFIX"base_frame_id");
+  laser_frame_id_ = config->get_string(AMCL_CFG_PREFIX"laser_frame_id");
+  global_frame_id_ = config->get_string(AMCL_CFG_PREFIX"global_frame_id");
 
   std::string tmp_model_type;
-  tmp_model_type = config->get_string(CFG_PREFIX"laser_model_type");
+  tmp_model_type = config->get_string(AMCL_CFG_PREFIX"laser_model_type");
 
   if (tmp_model_type == "beam")
     laser_model_type_ = ::amcl::LASER_MODEL_BEAM;
@@ -203,7 +205,7 @@ void AmclThread::init()
     laser_model_type_ = ::amcl::LASER_MODEL_LIKELIHOOD_FIELD;
   }
 
-  tmp_model_type = config->get_string(CFG_PREFIX"odom_model_type");
+  tmp_model_type = config->get_string(AMCL_CFG_PREFIX"odom_model_type");
   if (tmp_model_type == "diff")
     odom_model_type_ = ::amcl::ODOM_MODEL_DIFF;
   else if (tmp_model_type == "omni")
@@ -216,39 +218,39 @@ void AmclThread::init()
   }
 
   try {
-    init_pose_[0] = config->get_float(CFG_PREFIX"init_pose_x");
+    init_pose_[0] = config->get_float(AMCL_CFG_PREFIX"init_pose_x");
   } catch (Exception &e) {} // ignored, use default
 
   try {
-    init_pose_[1] = config->get_float(CFG_PREFIX"init_pose_y");
+    init_pose_[1] = config->get_float(AMCL_CFG_PREFIX"init_pose_y");
   } catch (Exception &e) {} // ignored, use default
 
   try {
-    init_pose_[2] = config->get_float(CFG_PREFIX"init_pose_a");
+    init_pose_[2] = config->get_float(AMCL_CFG_PREFIX"init_pose_a");
   } catch (Exception &e) {} // ignored, use default
 
   cfg_read_init_cov_ = false;
   try {
-    cfg_read_init_cov_ = config->get_bool(CFG_PREFIX"read_init_cov");
+    cfg_read_init_cov_ = config->get_bool(AMCL_CFG_PREFIX"read_init_cov");
   } catch (Exception &e) {} // ignored, use default
 
   if (cfg_read_init_cov_) {
     try {
-      init_cov_[0] = config->get_float(CFG_PREFIX"init_cov_xx");
+      init_cov_[0] = config->get_float(AMCL_CFG_PREFIX"init_cov_xx");
     } catch (Exception &e) {} // ignored, use default
 
     try {
-      init_cov_[1] = config->get_float(CFG_PREFIX"init_cov_yy");
+      init_cov_[1] = config->get_float(AMCL_CFG_PREFIX"init_cov_yy");
     } catch (Exception &e) {} // ignored, use default
 
     try {
-      init_cov_[2] = config->get_float(CFG_PREFIX"init_cov_aa");
+      init_cov_[2] = config->get_float(AMCL_CFG_PREFIX"init_cov_aa");
     } catch (Exception &e) {} // ignored, use default
   } else {
     logger->log_debug(name(), "Reading initial covariance from config disabled");
   }
 
-  transform_tolerance_ = config->get_float(CFG_PREFIX"transform_tolerance");
+  transform_tolerance_ = config->get_float(AMCL_CFG_PREFIX"transform_tolerance");
 
   if (min_particles_ > max_particles_) {
     logger->log_warn(name(),
@@ -349,12 +351,12 @@ void AmclThread::init()
 
   cfg_buffer_enable_ = true;
   try {
-    cfg_buffer_enable_ = config->get_bool(CFG_PREFIX"buffering/enable");
+    cfg_buffer_enable_ = config->get_bool(AMCL_CFG_PREFIX"buffering/enable");
   } catch (Exception &e) {} // ignored, use default
 
   cfg_buffer_debug_ = true;
   try {
-    cfg_buffer_debug_ = config->get_bool(CFG_PREFIX"buffering/debug");
+    cfg_buffer_debug_ = config->get_bool(AMCL_CFG_PREFIX"buffering/debug");
   } catch (Exception &e) {} // ignored, use default
 
   laser_buffered_ = false;
@@ -853,12 +855,12 @@ AmclThread::loop()
       // Make sure we write the config only once by locking/unlocking it
       config->lock();
       try {
-	config->set_float(CFG_PREFIX"init_pose_x", map_pose.getOrigin().x());
-	config->set_float(CFG_PREFIX"init_pose_y", map_pose.getOrigin().y());
-	config->set_float(CFG_PREFIX"init_pose_a", yaw);
-	config->set_float(CFG_PREFIX"init_cov_xx", last_covariance_[6 * 0 + 0]);
-	config->set_float(CFG_PREFIX"init_cov_yy", last_covariance_[6 * 1 + 1]);
-	config->set_float(CFG_PREFIX"init_cov_aa", last_covariance_[6 * 5 + 5]);
+	config->set_float(AMCL_CFG_PREFIX"init_pose_x", map_pose.getOrigin().x());
+	config->set_float(AMCL_CFG_PREFIX"init_pose_y", map_pose.getOrigin().y());
+	config->set_float(AMCL_CFG_PREFIX"init_pose_a", yaw);
+	config->set_float(AMCL_CFG_PREFIX"init_cov_xx", last_covariance_[6 * 0 + 0]);
+	config->set_float(AMCL_CFG_PREFIX"init_cov_yy", last_covariance_[6 * 1 + 1]);
+	config->set_float(AMCL_CFG_PREFIX"init_cov_aa", last_covariance_[6 * 5 + 5]);
       } catch (Exception &e) {
 	logger->log_warn(name(), "Failed to save pose, exception follows, disabling saving");
 	logger->log_warn(name(), e);

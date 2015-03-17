@@ -51,7 +51,7 @@ void MapLaserGenThread::init()
 
   bool have_custom_map = false;
   try {
-      config->get_string(CFG_PREFIX"map-lasergen/map_file");
+      config->get_string(AMCL_CFG_PREFIX"map-lasergen/map_file");
       have_custom_map = true;
   } catch (Exception &e) {} // ignored, use AMCL map
 
@@ -60,25 +60,25 @@ void MapLaserGenThread::init()
   fawkes::amcl::read_map_config(config, cfg_map_file_, cfg_resolution_, cfg_origin_x_,
 				cfg_origin_y_, cfg_origin_theta_, cfg_occupied_thresh_,
 				cfg_free_thresh_,
-				have_custom_map ? CFG_PREFIX"map-lasergen/" : CFG_PREFIX);
+				have_custom_map ? AMCL_CFG_PREFIX"map-lasergen/" : AMCL_CFG_PREFIX);
 
   cfg_use_current_pose_ = false;
   try {
-    cfg_use_current_pose_ = config->get_bool(CFG_PREFIX"map-lasergen/use_current_pos");
+    cfg_use_current_pose_ = config->get_bool(AMCL_CFG_PREFIX"map-lasergen/use_current_pos");
   } catch (Exception &e) {} // ignored, use default
 
-  cfg_laser_ifname_ = config->get_string(CFG_PREFIX"map-lasergen/laser_interface_id");
-  odom_frame_id_  = config->get_string(CFG_PREFIX"odom_frame_id");
-  base_frame_id_  = config->get_string(CFG_PREFIX"base_frame_id");
-  laser_frame_id_ = config->get_string(CFG_PREFIX"laser_frame_id");
+  cfg_laser_ifname_ = config->get_string(AMCL_CFG_PREFIX"map-lasergen/laser_interface_id");
+  odom_frame_id_  = config->get_string(AMCL_CFG_PREFIX"odom_frame_id");
+  base_frame_id_  = config->get_string(AMCL_CFG_PREFIX"base_frame_id");
+  laser_frame_id_ = config->get_string(AMCL_CFG_PREFIX"laser_frame_id");
 
   if (cfg_use_current_pose_) {
-    cfg_pose_ifname_ = config->get_string(CFG_PREFIX"map-lasergen/pose_interface_id");
+    cfg_pose_ifname_ = config->get_string(AMCL_CFG_PREFIX"map-lasergen/pose_interface_id");
     cur_pose_if_ = blackboard->open_for_reading<Position3DInterface>(cfg_pose_ifname_.c_str());
   } else {
-    pos_x_     = config->get_float(CFG_PREFIX"map-lasergen/pos_x");
-    pos_y_     = config->get_float(CFG_PREFIX"map-lasergen/pos_y");
-    pos_theta_ = config->get_float(CFG_PREFIX"map-lasergen/pos_theta");
+    pos_x_     = config->get_float(AMCL_CFG_PREFIX"map-lasergen/pos_x");
+    pos_y_     = config->get_float(AMCL_CFG_PREFIX"map-lasergen/pos_y");
+    pos_theta_ = config->get_float(AMCL_CFG_PREFIX"map-lasergen/pos_theta");
   }
 
   std::vector<std::pair<int, int> > free_space_indices;
@@ -99,13 +99,13 @@ void MapLaserGenThread::init()
 
   cfg_add_noise_ = false;
   try {
-    cfg_add_noise_ = config->get_bool(CFG_PREFIX"map-lasergen/add_gaussian_noise");
+    cfg_add_noise_ = config->get_bool(AMCL_CFG_PREFIX"map-lasergen/add_gaussian_noise");
   } catch (Exception &e) {}; // ignored
   if (cfg_add_noise_) {
 #ifndef HAVE_RANDOM
     throw Exception("Noise has been enabled but C++11 <random> no available at compile time");
 #else
-    cfg_noise_sigma_ = config->get_float(CFG_PREFIX"map-lasergen/noise_sigma");
+    cfg_noise_sigma_ = config->get_float(AMCL_CFG_PREFIX"map-lasergen/noise_sigma");
     std::random_device rd;
     noise_rg_ = std::mt19937(rd());
     noise_nd_ = std::normal_distribution<float>(0.0, cfg_noise_sigma_);
@@ -114,7 +114,7 @@ void MapLaserGenThread::init()
 
   cfg_send_zero_odom_ = false;
   try {
-    cfg_send_zero_odom_ = config->get_bool(CFG_PREFIX"map-lasergen/send_zero_odom");
+    cfg_send_zero_odom_ = config->get_bool(AMCL_CFG_PREFIX"map-lasergen/send_zero_odom");
   } catch (Exception &e) {}; // ignored
   if (cfg_send_zero_odom_) {
     logger->log_info(name(), "Enabling zero odometry publishing");
