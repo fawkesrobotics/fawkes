@@ -39,6 +39,17 @@ class NavGraphGeneratorInterface : public Interface
     int maxlenof_p2_y() const;
   };
 
+  class AddMapObstaclesMessage : public Message
+  {
+    AddMapObstaclesMessage(float ini_max_line_point_distance);
+    AddMapObstaclesMessage();
+    ~AddMapObstaclesMessage();
+
+    float max_line_point_distance();
+    void set_max_line_point_distance(const float new_max_line_point_distance);
+    int maxlenof_max_line_point_distance() const;
+  };
+
   class AddObstacleMessage : public Message
   {
     AddObstacleMessage(char * ini_id, float ini_x, float ini_y);

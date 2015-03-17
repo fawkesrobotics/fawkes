@@ -60,6 +60,15 @@
     <field type="float" name="p2_x">X coordinate of bbox end point in global frame.</field>
     <field type="float" name="p2_y">Y coordinate of bbox end point in global frame.</field>
   </message>
+  <message name="AddMapObstacles">
+    <comment>
+      Calculate useful obstacle points from the currently configured map.
+    </comment>
+    <field type="float" name="max_line_point_distance">
+      For points generated on lines found in the map, do not exceed
+      this threshold in terms of maximum distance of points on line.
+    </field>
+  </message>
   <message name="AddObstacle">
     <comment>
       Add an obstacle to be avoided by the graph. The obstacle is

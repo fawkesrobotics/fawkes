@@ -25,6 +25,8 @@
 
 #include <core/exceptions/software.h>
 
+#include <map>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -61,9 +63,13 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   data      = (NavGraphGeneratorInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_UINT32, "flags", 1, &data->flags);
   add_messageinfo("ClearMessage");
   add_messageinfo("SetBoundingBoxMessage");
+  add_messageinfo("AddMapObstaclesMessage");
   add_messageinfo("AddObstacleMessage");
   add_messageinfo("RemoveObstacleMessage");
   add_messageinfo("AddPointOfInterestMessage");
@@ -72,7 +78,7 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   add_messageinfo("SetCopyGraphDefaultPropertiesMessage");
   add_messageinfo("RemovePointOfInterestMessage");
   add_messageinfo("ComputeMessage");
-  unsigned char tmp_hash[] = {0x29, 0x70, 0xf9, 0x65, 0xb0, 0xb3, 0x9, 0x59, 0xe9, 0x1c, 0x96, 0xfc, 0x61, 0xac, 0xaf, 0x2e};
+  unsigned char tmp_hash[] = {0xdb, 0x97, 0x45, 0x23, 0x52, 0xa8, 0x59, 0xbd, 0xa4, 0x83, 0x78, 0x46, 0x66, 0xa2, 0x26, 0xd0};
   set_hash(tmp_hash);
 }
 
@@ -137,6 +143,8 @@ NavGraphGeneratorInterface::create_message(const char *type) const
     return new ClearMessage();
   } else if ( strncmp("SetBoundingBoxMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetBoundingBoxMessage();
+  } else if ( strncmp("AddMapObstaclesMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new AddMapObstaclesMessage();
   } else if ( strncmp("AddObstacleMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new AddObstacleMessage();
   } else if ( strncmp("RemoveObstacleMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -199,6 +207,9 @@ NavGraphGeneratorInterface::ClearMessage::ClearMessage() : Message("ClearMessage
   memset(data_ptr, 0, data_size);
   data      = (ClearMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
 }
 
 /** Destructor */
@@ -254,6 +265,9 @@ NavGraphGeneratorInterface::SetBoundingBoxMessage::SetBoundingBoxMessage(const f
   data->p1_y = ini_p1_y;
   data->p2_x = ini_p2_x;
   data->p2_y = ini_p2_y;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_FLOAT, "p1_x", 1, &data->p1_x);
   add_fieldinfo(IFT_FLOAT, "p1_y", 1, &data->p1_y);
   add_fieldinfo(IFT_FLOAT, "p2_x", 1, &data->p2_x);
@@ -267,6 +281,9 @@ NavGraphGeneratorInterface::SetBoundingBoxMessage::SetBoundingBoxMessage() : Mes
   memset(data_ptr, 0, data_size);
   data      = (SetBoundingBoxMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_FLOAT, "p1_x", 1, &data->p1_x);
   add_fieldinfo(IFT_FLOAT, "p1_y", 1, &data->p1_y);
   add_fieldinfo(IFT_FLOAT, "p2_x", 1, &data->p2_x);
@@ -422,6 +439,108 @@ NavGraphGeneratorInterface::SetBoundingBoxMessage::clone() const
 {
   return new NavGraphGeneratorInterface::SetBoundingBoxMessage(this);
 }
+/** @class NavGraphGeneratorInterface::AddMapObstaclesMessage <interfaces/NavGraphGeneratorInterface.h>
+ * AddMapObstaclesMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_max_line_point_distance initial value for max_line_point_distance
+ */
+NavGraphGeneratorInterface::AddMapObstaclesMessage::AddMapObstaclesMessage(const float ini_max_line_point_distance) : Message("AddMapObstaclesMessage")
+{
+  data_size = sizeof(AddMapObstaclesMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AddMapObstaclesMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->max_line_point_distance = ini_max_line_point_distance;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
+  add_fieldinfo(IFT_FLOAT, "max_line_point_distance", 1, &data->max_line_point_distance);
+}
+/** Constructor */
+NavGraphGeneratorInterface::AddMapObstaclesMessage::AddMapObstaclesMessage() : Message("AddMapObstaclesMessage")
+{
+  data_size = sizeof(AddMapObstaclesMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AddMapObstaclesMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
+  add_fieldinfo(IFT_FLOAT, "max_line_point_distance", 1, &data->max_line_point_distance);
+}
+
+/** Destructor */
+NavGraphGeneratorInterface::AddMapObstaclesMessage::~AddMapObstaclesMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavGraphGeneratorInterface::AddMapObstaclesMessage::AddMapObstaclesMessage(const AddMapObstaclesMessage *m) : Message("AddMapObstaclesMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (AddMapObstaclesMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get max_line_point_distance value.
+ * 
+      For points generated on lines found in the map, do not exceed
+      this threshold in terms of maximum distance of points on line.
+    
+ * @return max_line_point_distance value
+ */
+float
+NavGraphGeneratorInterface::AddMapObstaclesMessage::max_line_point_distance() const
+{
+  return data->max_line_point_distance;
+}
+
+/** Get maximum length of max_line_point_distance value.
+ * @return length of max_line_point_distance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::AddMapObstaclesMessage::maxlenof_max_line_point_distance() const
+{
+  return 1;
+}
+
+/** Set max_line_point_distance value.
+ * 
+      For points generated on lines found in the map, do not exceed
+      this threshold in terms of maximum distance of points on line.
+    
+ * @param new_max_line_point_distance new max_line_point_distance value
+ */
+void
+NavGraphGeneratorInterface::AddMapObstaclesMessage::set_max_line_point_distance(const float new_max_line_point_distance)
+{
+  data->max_line_point_distance = new_max_line_point_distance;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavGraphGeneratorInterface::AddMapObstaclesMessage::clone() const
+{
+  return new NavGraphGeneratorInterface::AddMapObstaclesMessage(this);
+}
 /** @class NavGraphGeneratorInterface::AddObstacleMessage <interfaces/NavGraphGeneratorInterface.h>
  * AddObstacleMessage Fawkes BlackBoard Interface Message.
  * 
@@ -444,6 +563,9 @@ NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage(const char * 
   strncpy(data->id, ini_id, 64);
   data->x = ini_x;
   data->y = ini_y;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "id", 64, data->id);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
@@ -456,6 +578,9 @@ NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage() : Message("
   memset(data_ptr, 0, data_size);
   data      = (AddObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "id", 64, data->id);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
@@ -602,6 +727,9 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage(const c
   data      = (RemoveObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->id, ini_id, 64);
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "id", 64, data->id);
 }
 /** Constructor */
@@ -612,6 +740,9 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage() : Mes
   memset(data_ptr, 0, data_size);
   data      = (RemoveObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "id", 64, data->id);
 }
 
@@ -702,10 +833,13 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage
   data->x = ini_x;
   data->y = ini_y;
   data->mode = ini_mode;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "id", 64, data->id);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
-  add_fieldinfo(IFT_ENUM, "mode", 1, &data->mode, "ConnectionMode");
+  add_fieldinfo(IFT_ENUM, "mode", 1, &data->mode, "ConnectionMode", &enum_map_ConnectionMode);
 }
 /** Constructor */
 NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage() : Message("AddPointOfInterestMessage")
@@ -715,10 +849,13 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage
   memset(data_ptr, 0, data_size);
   data      = (AddPointOfInterestMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "id", 64, data->id);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
-  add_fieldinfo(IFT_ENUM, "mode", 1, &data->mode, "ConnectionMode");
+  add_fieldinfo(IFT_ENUM, "mode", 1, &data->mode, "ConnectionMode", &enum_map_ConnectionMode);
 }
 
 /** Destructor */
@@ -900,6 +1037,9 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInteres
   strncpy(data->id, ini_id, 64);
   strncpy(data->property_name, ini_property_name, 64);
   strncpy(data->property_value, ini_property_value, 1024);
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "id", 64, data->id);
   add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
   add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
@@ -912,6 +1052,9 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInteres
   memset(data_ptr, 0, data_size);
   data      = (SetPointOfInterestPropertyMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "id", 64, data->id);
   add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
   add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
@@ -1062,6 +1205,9 @@ NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::SetGraphDefaultPrope
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->property_name, ini_property_name, 64);
   strncpy(data->property_value, ini_property_value, 1024);
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
   add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
 }
@@ -1073,6 +1219,9 @@ NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::SetGraphDefaultPrope
   memset(data_ptr, 0, data_size);
   data      = (SetGraphDefaultPropertyMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
   add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
 }
@@ -1186,6 +1335,9 @@ NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::SetCopyGraphDe
   data      = (SetCopyGraphDefaultPropertiesMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->enable_copy = ini_enable_copy;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_BOOL, "enable_copy", 1, &data->enable_copy);
 }
 /** Constructor */
@@ -1196,6 +1348,9 @@ NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::SetCopyGraphDe
   memset(data_ptr, 0, data_size);
   data      = (SetCopyGraphDefaultPropertiesMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_BOOL, "enable_copy", 1, &data->enable_copy);
 }
 
@@ -1278,6 +1433,9 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestM
   data      = (RemovePointOfInterestMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->id, ini_id, 64);
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "id", 64, data->id);
 }
 /** Constructor */
@@ -1288,6 +1446,9 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestM
   memset(data_ptr, 0, data_size);
   data      = (RemovePointOfInterestMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
   add_fieldinfo(IFT_STRING, "id", 64, data->id);
 }
 
@@ -1369,6 +1530,9 @@ NavGraphGeneratorInterface::ComputeMessage::ComputeMessage() : Message("ComputeM
   memset(data_ptr, 0, data_size);
   data      = (ComputeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
 }
 
 /** Destructor */
@@ -1415,36 +1579,40 @@ NavGraphGeneratorInterface::message_valid(const Message *message) const
   if ( m1 != NULL ) {
     return true;
   }
-  const AddObstacleMessage *m2 = dynamic_cast<const AddObstacleMessage *>(message);
+  const AddMapObstaclesMessage *m2 = dynamic_cast<const AddMapObstaclesMessage *>(message);
   if ( m2 != NULL ) {
     return true;
   }
-  const RemoveObstacleMessage *m3 = dynamic_cast<const RemoveObstacleMessage *>(message);
+  const AddObstacleMessage *m3 = dynamic_cast<const AddObstacleMessage *>(message);
   if ( m3 != NULL ) {
     return true;
   }
-  const AddPointOfInterestMessage *m4 = dynamic_cast<const AddPointOfInterestMessage *>(message);
+  const RemoveObstacleMessage *m4 = dynamic_cast<const RemoveObstacleMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const SetPointOfInterestPropertyMessage *m5 = dynamic_cast<const SetPointOfInterestPropertyMessage *>(message);
+  const AddPointOfInterestMessage *m5 = dynamic_cast<const AddPointOfInterestMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const SetGraphDefaultPropertyMessage *m6 = dynamic_cast<const SetGraphDefaultPropertyMessage *>(message);
+  const SetPointOfInterestPropertyMessage *m6 = dynamic_cast<const SetPointOfInterestPropertyMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const SetCopyGraphDefaultPropertiesMessage *m7 = dynamic_cast<const SetCopyGraphDefaultPropertiesMessage *>(message);
+  const SetGraphDefaultPropertyMessage *m7 = dynamic_cast<const SetGraphDefaultPropertyMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const RemovePointOfInterestMessage *m8 = dynamic_cast<const RemovePointOfInterestMessage *>(message);
+  const SetCopyGraphDefaultPropertiesMessage *m8 = dynamic_cast<const SetCopyGraphDefaultPropertiesMessage *>(message);
   if ( m8 != NULL ) {
     return true;
   }
-  const ComputeMessage *m9 = dynamic_cast<const ComputeMessage *>(message);
+  const RemovePointOfInterestMessage *m9 = dynamic_cast<const RemovePointOfInterestMessage *>(message);
   if ( m9 != NULL ) {
+    return true;
+  }
+  const ComputeMessage *m10 = dynamic_cast<const ComputeMessage *>(message);
+  if ( m10 != NULL ) {
     return true;
   }
   return false;

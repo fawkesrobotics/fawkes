@@ -71,6 +71,7 @@ class NavGraphGeneratorInterface : public Interface
 
   NavGraphGeneratorInterface_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
  public:
   /* messages */
   class ClearMessage : public Message
@@ -86,6 +87,7 @@ class NavGraphGeneratorInterface : public Interface
 
     ClearMessage_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
    public:
     ClearMessage();
     ~ClearMessage();
@@ -112,6 +114,7 @@ class NavGraphGeneratorInterface : public Interface
 
     SetBoundingBoxMessage_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
    public:
     SetBoundingBoxMessage(const float ini_p1_x, const float ini_p1_y, const float ini_p2_x, const float ini_p2_y);
     SetBoundingBoxMessage();
@@ -134,6 +137,37 @@ class NavGraphGeneratorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class AddMapObstaclesMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float max_line_point_distance; /**< 
+      For points generated on lines found in the map, do not exceed
+      this threshold in terms of maximum distance of points on line.
+     */
+    } AddMapObstaclesMessage_data_t;
+#pragma pack(pop)
+
+    AddMapObstaclesMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ConnectionMode;
+   public:
+    AddMapObstaclesMessage(const float ini_max_line_point_distance);
+    AddMapObstaclesMessage();
+    ~AddMapObstaclesMessage();
+
+    AddMapObstaclesMessage(const AddMapObstaclesMessage *m);
+    /* Methods */
+    float max_line_point_distance() const;
+    void set_max_line_point_distance(const float new_max_line_point_distance);
+    size_t maxlenof_max_line_point_distance() const;
+    virtual Message * clone() const;
+  };
+
   class AddObstacleMessage : public Message
   {
    private:
@@ -152,6 +186,7 @@ class NavGraphGeneratorInterface : public Interface
 
     AddObstacleMessage_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
    public:
     AddObstacleMessage(const char * ini_id, const float ini_x, const float ini_y);
     AddObstacleMessage();
@@ -187,6 +222,7 @@ class NavGraphGeneratorInterface : public Interface
 
     RemoveObstacleMessage_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
    public:
     RemoveObstacleMessage(const char * ini_id);
     RemoveObstacleMessage();
@@ -221,6 +257,7 @@ class NavGraphGeneratorInterface : public Interface
 
     AddPointOfInterestMessage_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
    public:
     AddPointOfInterestMessage(const char * ini_id, const float ini_x, const float ini_y, const ConnectionMode ini_mode);
     AddPointOfInterestMessage();
@@ -262,6 +299,7 @@ class NavGraphGeneratorInterface : public Interface
 
     SetPointOfInterestPropertyMessage_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
    public:
     SetPointOfInterestPropertyMessage(const char * ini_id, const char * ini_property_name, const char * ini_property_value);
     SetPointOfInterestPropertyMessage();
@@ -297,6 +335,7 @@ class NavGraphGeneratorInterface : public Interface
 
     SetGraphDefaultPropertyMessage_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
    public:
     SetGraphDefaultPropertyMessage(const char * ini_property_name, const char * ini_property_value);
     SetGraphDefaultPropertyMessage();
@@ -328,6 +367,7 @@ class NavGraphGeneratorInterface : public Interface
 
     SetCopyGraphDefaultPropertiesMessage_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
    public:
     SetCopyGraphDefaultPropertiesMessage(const bool ini_enable_copy);
     SetCopyGraphDefaultPropertiesMessage();
@@ -357,6 +397,7 @@ class NavGraphGeneratorInterface : public Interface
 
     RemovePointOfInterestMessage_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
    public:
     RemovePointOfInterestMessage(const char * ini_id);
     RemovePointOfInterestMessage();
@@ -383,6 +424,7 @@ class NavGraphGeneratorInterface : public Interface
 
     ComputeMessage_data_t *data;
 
+  interface_enum_map_t enum_map_ConnectionMode;
    public:
     ComputeMessage();
     ~ComputeMessage();

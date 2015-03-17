@@ -22,8 +22,18 @@
 
 #include <core/threading/mutex_locker.h>
 #include <navgraph/generators/voronoi.h>
+#include <plugins/laser-lines/line_func.h>
+#include <plugins/amcl/map/map.h>
+#include <plugins/amcl/amcl_utils.h>
+
+#ifdef HAVE_VISUAL_DEBUGGING
+#  include <ros/ros.h>
+#  include <visualization_msgs/MarkerArray.h>
+#endif
 
 using namespace fawkes;
+
+#define CFG_PREFIX "/navgraph-generator/"
 
 /** @class NavGraphGeneratorThread "navgraph_generator_thread.h"
  * Thread to perform graph-based path planning.
@@ -49,15 +59,44 @@ NavGraphGeneratorThread::init()
   bbox_set_ = false;
   copy_default_properties_ = true;
 
+  cfg_map_line_segm_max_iterations_ =
+    config->get_uint(CFG_PREFIX"map/line_segmentation_max_iterations");
+  cfg_map_line_segm_distance_threshold_ =
+    config->get_float(CFG_PREFIX"map/line_segmentation_distance_threshold");
+  cfg_map_line_segm_sample_max_dist_ =
+    config->get_float(CFG_PREFIX"map/line_segmentation_sample_max_dist");
+  cfg_map_line_segm_min_inliers_ =
+    config->get_uint(CFG_PREFIX"map/line_segmentation_min_inliers");
+  cfg_map_line_min_length_ =
+    config->get_float(CFG_PREFIX"map/line_min_length");
+  cfg_map_line_cluster_tolerance_ =
+    config->get_float(CFG_PREFIX"map/line_cluster_tolerance");
+  cfg_map_line_cluster_quota_ =
+    config->get_float(CFG_PREFIX"map/line_cluster_quota");
+
+  cfg_global_frame_ = config->get_string("/frames/fixed");
+
   navgen_if_ =
     blackboard->open_for_writing<NavGraphGeneratorInterface>("/navgraph-generator");
   bbil_add_message_interface(navgen_if_);
   blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+
+#ifdef HAVE_VISUAL_DEBUGGING
+  vispub_ = new ros::Publisher();
+  *vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100,
+								 /* latch */ true);
+  last_id_num_ = 0;
+#endif
 }
 
 void
 NavGraphGeneratorThread::finalize()
 {
+#ifdef HAVE_VISUAL_DEBUGGING
+  vispub_->shutdown();
+  delete vispub_;
+#endif
+
   blackboard->unregister_listener(this);
   bbil_remove_message_interface(navgen_if_);
   blackboard->close(navgen_if_);
@@ -79,6 +118,12 @@ NavGraphGeneratorThread::loop()
 
   for (auto o : obstacles_) {
     logger->log_debug(name(), "  Adding obstacle %s at (%f,%f)",
+		      o.first.c_str(), o.second.x, o.second.y);
+    nggv.add_obstacle(o.second.x, o.second.y);
+  }
+
+  for (auto o : map_obstacles_) {
+    logger->log_debug(name(), "  Adding map obstacle %s at (%f,%f)",
 		      o.first.c_str(), o.second.x, o.second.y);
     nggv.add_obstacle(o.second.x, o.second.y);
   }
@@ -145,6 +190,10 @@ NavGraphGeneratorThread::loop()
 
   logger->log_debug(name(), "  Graph computed, notifying listeners");
   navgraph->notify_of_change();
+
+#ifdef HAVE_VISUAL_DEBUGGING
+  publish_visualization();
+#endif
 }
 
 
@@ -169,6 +218,11 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     bbox_p1_.y = msg->p1_y();
     bbox_p2_.x = msg->p2_x();
     bbox_p2_.y = msg->p2_y();
+
+  } else if (message->is_of_type<NavGraphGeneratorInterface::AddMapObstaclesMessage>()) {
+    NavGraphGeneratorInterface::AddMapObstaclesMessage *msg =
+      message->as_type<NavGraphGeneratorInterface::AddMapObstaclesMessage>();
+    map_obstacles_ = map_obstacles(msg->max_line_point_distance());
 
   } else if (message->is_of_type<NavGraphGeneratorInterface::AddObstacleMessage>()) {
     NavGraphGeneratorInterface::AddObstacleMessage *msg =
@@ -231,3 +285,218 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
   return false;
 }
 
+
+NavGraphGeneratorThread::ObstacleMap
+NavGraphGeneratorThread::map_obstacles(float line_max_dist)
+{
+  ObstacleMap  obstacles;
+  unsigned int obstacle_i = 0;
+
+  std::string  cfg_map_file;
+  float        cfg_resolution;
+  float        cfg_origin_x;
+  float        cfg_origin_y;
+  float        cfg_origin_theta;
+  float        cfg_occupied_thresh;
+  float        cfg_free_thresh;
+
+  fawkes::amcl::read_map_config(config, cfg_map_file, cfg_resolution, cfg_origin_x,
+				cfg_origin_y, cfg_origin_theta, cfg_occupied_thresh,
+				cfg_free_thresh);
+
+  std::vector<std::pair<int, int> > free_space_indices;
+  map_t *map = fawkes::amcl::read_map(cfg_map_file.c_str(),
+				      cfg_origin_x, cfg_origin_y, cfg_resolution,
+				      cfg_occupied_thresh, cfg_free_thresh, free_space_indices);
+
+  logger->log_info(name(), "Map Obstacles: map size: %ux%u (%zu of %u cells free, %.1f%%)",
+                   map->size_x, map->size_y, free_space_indices.size(),
+		   map->size_x * map->size_y,
+                   (float)free_space_indices.size() / (float)(map->size_x * map->size_y) * 100.);
+
+  size_t occ_cells = map->size_x * map->size_y - free_space_indices.size();
+
+  // convert map to point cloud
+  pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud(new pcl::PointCloud<pcl::PointXYZ>());
+  map_cloud->points.resize(occ_cells);
+  size_t pi = 0;
+  for (int x = 0; x < map->size_x; ++x) {
+    for (int y = 0; y < map->size_y; ++y) {
+      if (map->cells[MAP_INDEX(map, x, y)].occ_state > 0) {
+	// cell is occupied, generate point in cloud
+	pcl::PointXYZ p;
+	p.x = MAP_WXGX(map, x) + 0.5 * map->scale;
+	p.y = MAP_WYGY(map, y) + 0.5 * map->scale;
+	p.z = 0.;
+	map_cloud->points[pi++] = p;
+      }
+    }
+  }
+
+  logger->log_info(name(), "Map Obstacles: filled %zu/%zu points", pi, occ_cells);
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr
+    no_line_cloud(new pcl::PointCloud<pcl::PointXYZ>());
+
+  // determine lines
+  std::vector<LineInfo> linfos =
+    calc_lines<pcl::PointXYZ>(map_cloud,
+			      cfg_map_line_segm_min_inliers_, cfg_map_line_segm_max_iterations_,
+			      cfg_map_line_segm_distance_threshold_, cfg_map_line_segm_sample_max_dist_,
+			      cfg_map_line_cluster_tolerance_, cfg_map_line_cluster_quota_,
+			      cfg_map_line_min_length_, -1, -1, -1,
+			      no_line_cloud);
+
+  logger->log_info(name(), "Map Obstacles: found %zu lines, %zu points remaining",
+		   linfos.size(), no_line_cloud->points.size());
+
+
+  // determine line obstacle points
+  for (const LineInfo &line : linfos) {
+    const unsigned int num_points = ceilf(line.length / line_max_dist);
+    float distribution = line.length / num_points;
+
+    // to determine: whether direction vector points from X to Y or from Y to X
+    // assume it is X->Y, then X + k * D = Y <=> Y - X = k * D,
+    //                    then k can be calculated, e.g., from first row
+    // If now k >= 0: X->Y, otherwise X<-Y
+    float k = (line.end_point_1[0] - line.end_point_2[0]) / line.line_direction[0];
+    const Eigen::Vector3f &e1 = (k >= 0) ? line.end_point_2 : line.end_point_1;
+
+    obstacles[NavGraph::format_name("Map_%u", ++obstacle_i)] = cart_coord_2d_t(e1[0], e1[1]);
+    for (unsigned int i = 1; i < num_points; ++i) {
+      Eigen::Vector3f p = e1 + i * distribution * line.line_direction;
+      obstacles[NavGraph::format_name("Map_%d", ++obstacle_i)] =  cart_coord_2d_t(p[0], p[1]);
+    }
+  }
+
+  // cluster in remaining points to find more points of interest
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr
+    kdtree_cluster(new pcl::search::KdTree<pcl::PointXYZ>());
+
+  std::vector<pcl::PointIndices> cluster_indices;
+  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+  ec.setClusterTolerance(2 * map->scale);
+  ec.setMinClusterSize(1);
+  ec.setMaxClusterSize(no_line_cloud->points.size());
+  ec.setSearchMethod(kdtree_cluster);
+  ec.setInputCloud(no_line_cloud);
+  ec.extract(cluster_indices);
+
+  unsigned int i = 0;
+  for (auto cluster : cluster_indices) {
+    Eigen::Vector4f centroid;
+    pcl::compute3DCentroid(*no_line_cloud, cluster.indices, centroid);
+
+    logger->log_info(name(), "Map Obstacles: Cluster %u with %zu points at (%f, %f, %f)",
+		     i, cluster.indices.size(), centroid.x(), centroid.y(), centroid.z());
+
+    obstacles[NavGraph::format_name("MapCluster_%u", ++i)] =  cart_coord_2d_t(centroid.x(), centroid.y());
+  }
+
+  map_free(map);
+
+  return obstacles;
+}
+
+#ifdef HAVE_VISUAL_DEBUGGING
+void
+NavGraphGeneratorThread::publish_visualization()
+{
+  visualization_msgs::MarkerArray m;
+  unsigned int idnum = 0;
+
+  for (auto &o : obstacles_) {
+    visualization_msgs::Marker text;
+    text.header.frame_id = cfg_global_frame_;
+    text.header.stamp = ros::Time::now();
+    text.ns = "navgraph_generator";
+    text.id = idnum++;
+    text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    text.action = visualization_msgs::Marker::ADD;
+    text.pose.position.x = o.second.x;
+    text.pose.position.y = o.second.y;
+    text.pose.position.z = .15;
+    text.pose.orientation.w = 1.;
+    text.scale.z = 0.15;
+    text.color.r = text.color.g = text.color.b = 1.0f;
+    text.color.a = 1.0;
+    text.lifetime = ros::Duration(0, 0);
+    text.text = o.first;
+    m.markers.push_back(text);
+
+    visualization_msgs::Marker sphere;
+    sphere.header.frame_id = cfg_global_frame_;
+    sphere.header.stamp = ros::Time::now();
+    sphere.ns = "navgraph_generator";
+    sphere.id = idnum++;
+    sphere.type = visualization_msgs::Marker::SPHERE;
+    sphere.action = visualization_msgs::Marker::ADD;
+    sphere.pose.position.x = o.second.x;
+    sphere.pose.position.y = o.second.y;
+    sphere.pose.position.z = 0.05;
+    sphere.pose.orientation.w = 1.;
+    sphere.scale.x = 0.05;
+    sphere.scale.y = 0.05;
+    sphere.scale.z = 0.05;
+    sphere.color.r = 1.0;
+    sphere.color.g = sphere.color.b = 0.;
+    sphere.color.a = 1.0;
+    sphere.lifetime = ros::Duration(0, 0);
+    m.markers.push_back(sphere);
+  }      
+
+  for (auto &o : map_obstacles_) {
+    visualization_msgs::Marker text;
+    text.header.frame_id = cfg_global_frame_;
+    text.header.stamp = ros::Time::now();
+    text.ns = "navgraph_generator";
+    text.id = idnum++;
+    text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    text.action = visualization_msgs::Marker::ADD;
+    text.pose.position.x = o.second.x;
+    text.pose.position.y = o.second.y;
+    text.pose.position.z = .15;
+    text.pose.orientation.w = 1.;
+    text.scale.z = 0.15;
+    text.color.r = text.color.g = text.color.b = 1.0f;
+    text.color.a = 1.0;
+    text.lifetime = ros::Duration(0, 0);
+    text.text = o.first;
+    m.markers.push_back(text);
+
+    visualization_msgs::Marker sphere;
+    sphere.header.frame_id = cfg_global_frame_;
+    sphere.header.stamp = ros::Time::now();
+    sphere.ns = "navgraph_generator";
+    sphere.id = idnum++;
+    sphere.type = visualization_msgs::Marker::SPHERE;
+    sphere.action = visualization_msgs::Marker::ADD;
+    sphere.pose.position.x = o.second.x;
+    sphere.pose.position.y = o.second.y;
+    sphere.pose.position.z = 0.05;
+    sphere.pose.orientation.w = 1.;
+    sphere.scale.x = 0.05;
+    sphere.scale.y = 0.05;
+    sphere.scale.z = 0.05;
+    sphere.color.r = sphere.color.g = 1.0;
+    sphere.color.b = 0.;
+    sphere.color.a = 1.0;
+    sphere.lifetime = ros::Duration(0, 0);
+    m.markers.push_back(sphere);
+  }      
+
+  for (size_t i = idnum; i < last_id_num_; ++i) {
+    visualization_msgs::Marker delop;
+    delop.header.frame_id = cfg_global_frame_;
+    delop.header.stamp = ros::Time::now();
+    delop.ns = "navgraph_generator";
+    delop.id = i;
+    delop.action = visualization_msgs::Marker::DELETE;
+    m.markers.push_back(delop);
+  }
+  last_id_num_ = idnum;
+
+  vispub_->publish(m);
+}
+#endif

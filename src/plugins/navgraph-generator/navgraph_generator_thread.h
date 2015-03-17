@@ -36,12 +36,24 @@
 
 #include <interfaces/NavGraphGeneratorInterface.h>
 
+#ifdef HAVE_VISUAL_DEBUGGING
+#  include <plugins/ros/aspect/ros.h>
+
+namespace ros {
+  class Publisher;
+}
+#endif
+
+
 class NavGraphGeneratorThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::NavGraphAspect,
   public fawkes::BlackBoardAspect,
+#ifdef HAVE_VISUAL_DEBUGGING
+  public fawkes::ROSAspect,
+#endif
   public fawkes::BlackBoardInterfaceListener
 {
  public:
@@ -56,12 +68,6 @@ class NavGraphGeneratorThread
  protected: virtual void run() { Thread::run();}
 
  private:
-  virtual bool bb_interface_message_received(fawkes::Interface *interface,
-                                             fawkes::Message *message) throw();
-
- private:
-  fawkes::NavGraphGeneratorInterface *navgen_if_;
-
   typedef struct {
     fawkes::cart_coord_2d_t                            position;
     fawkes::NavGraphGeneratorInterface::ConnectionMode conn_mode;
@@ -70,8 +76,31 @@ class NavGraphGeneratorThread
 
   typedef std::map<std::string, PointOfInterest>         PoiMap;
   typedef std::map<std::string, fawkes::cart_coord_2d_t> ObstacleMap;
+
+  virtual bool bb_interface_message_received(fawkes::Interface *interface,
+                                             fawkes::Message *message) throw();
+
+  ObstacleMap map_obstacles(float line_max_dist);
+
+#ifdef HAVE_VISUAL_DEBUGGING
+  void publish_visualization();
+#endif
+
+ private:
+  std::string  cfg_global_frame_;
+  unsigned int cfg_map_line_segm_max_iterations_;
+  float        cfg_map_line_segm_distance_threshold_;
+  float        cfg_map_line_segm_sample_max_dist_;
+  float        cfg_map_line_min_length_;
+  unsigned int cfg_map_line_segm_min_inliers_;
+  float        cfg_map_line_cluster_tolerance_;
+  float        cfg_map_line_cluster_quota_;
+
+  fawkes::NavGraphGeneratorInterface *navgen_if_;
+
   PoiMap      pois_;
   ObstacleMap obstacles_;
+  ObstacleMap map_obstacles_;
 
   bool                                                 copy_default_properties_;
   std::map<std::string, std::string>                   default_properties_;
@@ -79,6 +108,11 @@ class NavGraphGeneratorThread
   bool                    bbox_set_;
   fawkes::cart_coord_2d_t bbox_p1_;
   fawkes::cart_coord_2d_t bbox_p2_;
+
+#ifdef HAVE_VISUAL_DEBUGGING
+  ros::Publisher *vispub_;
+  size_t last_id_num_;
+#endif
 };
 
 #endif
