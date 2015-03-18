@@ -95,7 +95,7 @@ SyncPointCallStats::get_last_call() const
 float
 SyncPointCallStats::get_call_frequency() const
 {
-  return (last_call_.in_sec() - first_call_.in_sec()) / num_calls_;
+  return num_calls_ / (last_call_.in_sec() - first_call_.in_sec());
 }
 
 /** Get the average wait time. For emit calls, this is 0.
