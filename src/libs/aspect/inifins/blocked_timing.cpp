@@ -54,6 +54,12 @@ BlockedTimingAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
+  if ( thread->opmode() != Thread::OPMODE_CONTINUOUS) {
+    throw CannotInitializeThreadException("Thread '%s' not in CONTINUOUS mode"
+                                          " (required for BlockedTimingAspect)",
+                                          thread->name());
+    )
+
 }
 
 void
