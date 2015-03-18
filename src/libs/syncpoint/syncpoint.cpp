@@ -112,6 +112,18 @@ SyncPoint::operator==(const SyncPoint &other) const
   return identifier_ == other.get_identifier();
 }
 
+/** EqualOperator.
+ * A SyncPoint is equal to a given string iff the string is equal to the
+ * SyncPoint's identifier.
+ * @param other the string to compare
+ * @return true if the identifier of the SyncPoint matches the given string
+ */
+bool
+SyncPoint::operator==(const string & other) const
+{
+  return identifier_ == other;
+}
+
 /** LessThan Operator.
  * Compare two SyncPoints using their identifiers.
  * @param other The other SyncPoint

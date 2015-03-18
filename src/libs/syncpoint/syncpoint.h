@@ -33,6 +33,7 @@
 
 #include <set>
 #include <map>
+#include <string>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -74,6 +75,7 @@ class SyncPoint
 
     std::string get_identifier() const;
     bool operator==(const SyncPoint & other) const;
+    bool operator==(const std::string & other) const;
     bool operator<(const SyncPoint & other) const;
 
     std::set<std::string> get_watchers() const;
