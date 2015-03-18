@@ -902,7 +902,7 @@ p_bb_send_message()
 
 	msg->ref();
 	try {
-		(*it)->msgq_enqueue( msg );
+		(iface)->msgq_enqueue( msg );
 		// return the msgID as 4th argument
 		EC_arg( 4 ).unify((int)(msg->id()));
 		msg->unref();
