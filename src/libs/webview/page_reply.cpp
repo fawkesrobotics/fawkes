@@ -66,6 +66,8 @@ WebPageReply::WebPageReply(std::string title, std::string body)
   _title = title;
   navbar_enabled_ = true;
   footer_enabled_ = true;
+
+  add_header("Content-type", "text/html");
 }
 
 
@@ -78,6 +80,8 @@ WebPageReply::WebPageReply(Code code)
 {
   navbar_enabled_ = true;
   footer_enabled_ = true;
+
+  add_header("Content-type", "text/html");
 }
 
 
