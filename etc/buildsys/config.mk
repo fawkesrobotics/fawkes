@@ -17,6 +17,14 @@ ifndef __buildsys_config_mk_
 __buildsys_config_mk_ := 1
 
 BUILDSYSDIR    ?= $(abspath $(BASEDIR)/etc/buildsys)
+
+# Due to a limitation in GNU Make,
+# cf. http://savannah.gnu.org/bugs/?712
+ifneq ($(words $(abspath $(BUILDSYSDIR))),1)
+  $(error Path to Fawkes may not contain spaces. \
+          Move Fawkes to another location and call make again)
+endif
+
 FAWKES_BASEDIR  = $(BASEDIR)
 TOP_BASEDIR     = $(BASEDIR)
 
