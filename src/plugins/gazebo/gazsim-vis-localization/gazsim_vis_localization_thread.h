@@ -71,5 +71,6 @@ class VisLocalizationThread
   //config values
   std::string robot_name_, label_script_name_, location_scripts_, location_textures_, parent_name_, arrow_script_name_;
   float label_size_;
+  float label_height_;
 };
 #endif

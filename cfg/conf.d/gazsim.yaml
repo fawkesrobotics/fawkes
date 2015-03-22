@@ -67,3 +67,4 @@ gazsim:
       parent-name: "ground_plane::link"
       update-rate: 5.0 #in Hz
       label-size: 0.3
+      label-height: 0.9
