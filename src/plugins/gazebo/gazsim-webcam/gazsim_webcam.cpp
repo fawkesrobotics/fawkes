@@ -43,9 +43,9 @@ GazsimWebcam::GazsimWebcam(std::string shm_id,
 			     Configuration* config)
 {
   shm_buffer_ = NULL;
-  shm_id_ = shm_id;
   //read config values
   std::string robot_name = config->get_string("/gazsim/robot-name");
+  shm_id_ = robot_name + "/" + shm_id;
   topic_name_ = ("~/" 
 		 + robot_name
                  + config->get_string((std::string("/gazsim/webcam/topic-suffixes/")
