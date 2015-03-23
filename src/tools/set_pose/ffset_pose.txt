@@ -1,0 +1,49 @@
+ffset_pose(1)
+=============
+
+NAME
+----
+ffset_pose - Set initial pose for self-localization
+
+SYNOPSIS
+--------
+[verse]
+*ffset_pose* [-r 'host[:port]'] [-i ID] [-t SEC] -- <x y theta|x y z qx qy qz qw>
+
+DESCRIPTION
+-----------
+This tool is used to instruct a self-localization component
+implementing a LocalizationInterface to set an initial pose. Thus, it
+allows to localize a robot in a given map.
+
+The position is either given as a 2D pose as <x y theta> where (x,y)
+is a position on the X/Y ground plane of the reference frame. Theta
+is the orientation around the Z axis in radians. When given as a 3D
+pose, the arguments are a full position (x,y,z) in the reference frame
+and a quaternion in order (qx,qy,qz,qw) representing the orientation.
+
+EXAMPLES
+--------
+
+ *ffset_pose -r localhost:1910 -t 2.0 --  0.0 0.0 0.0*::
+	Set 2D pose at frame origin looking in X axis direction.
+
+ *ffset_pose -r localhost:1910 -t 2.0 --  4.4  0.3 0.0  0.0 0.0 0.7 0.7*::
+	Set full 3D position on local Fawkes and try for 2 seconds.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org
