@@ -35,7 +35,7 @@ OBJS_libfawkes_amcl_utils = amcl_utils.o
 
 LIBS_amcl = fawkescore fawkesutils fawkesaspects fawkesinterface \
 	    fawkesblackboard fawkesbaseapp \
-	    Laser360Interface Position3DInterface \
+	    Laser360Interface Position3DInterface LocalizationInterface \
 	    fawkes_amcl_pf fawkes_amcl_map fawkes_amcl_sensors \
 	    fawkes_amcl_utils
 OBJS_amcl = amcl_plugin.o amcl_thread.o

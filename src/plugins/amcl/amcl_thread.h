@@ -36,9 +36,11 @@
 #include <aspect/logging.h>
 #include <aspect/tf.h>
 #include <aspect/blackboard.h>
+#include <blackboard/interface_listener.h>
 
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Position3DInterface.h>
+#include <interfaces/LocalizationInterface.h>
 
 #include <algorithm>
 #include <vector>
@@ -77,7 +79,9 @@ class AmclThread
 #ifdef HAVE_ROS
   public fawkes::ROSAspect,
 #endif
-  public fawkes::TransformAspect
+  public fawkes::TransformAspect,
+  public fawkes::BlackBoardInterfaceListener
+
 {
 public:
   AmclThread();
@@ -96,12 +100,16 @@ public:
                      const fawkes::Time* t, const std::string& f);
   void apply_initial_pose();
   static pf_vector_t uniform_pose_generator(void* arg);
+  void set_initial_pose(const std::string &frame_id, const fawkes::Time &msg_time,
+			const fawkes::tf::Pose &pose, const double *covariance);
 #ifdef HAVE_ROS
   void initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg);
 #  ifdef USE_MAP_PUB
   void publish_map();
 #  endif
 #endif
+  virtual bool bb_interface_message_received(fawkes::Interface *interface,
+					     fawkes::Message *message) throw();
 
 private:
   fawkes::Mutex *conf_mutex_;
@@ -141,8 +149,9 @@ private:
   double transform_tolerance_;
   fawkes::Time save_pose_last_time;
 
-  fawkes::Laser360Interface* laser_if_;
-  fawkes::Position3DInterface * pos3d_if_;
+  fawkes::Laser360Interface     *laser_if_;
+  fawkes::Position3DInterface   *pos3d_if_;
+  fawkes::LocalizationInterface *loc_if_;
 
 #ifdef HAVE_ROS
   ros::Publisher pose_pub_;
