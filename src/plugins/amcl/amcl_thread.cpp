@@ -2,7 +2,7 @@
  *  amcl_thread.cpp - Thread to perform localization
  *
  *  Created: Wed May 16 16:04:41 2012
- *  Copyright  2012-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2012-2015  Tim Niemueller [www.niemueller.de]
  *             2012       Daniel Ewert
  *             2012       Kathrin Goffart (Robotino Hackathon 2012)
  *             2012       Kilian Hinterwaelder  (Robotino Hackathon 2012)
@@ -36,6 +36,7 @@
 #include <baseapp/run.h>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 
 #ifdef HAVE_ROS
 #  include <ros/node_handle.h>
@@ -76,7 +77,8 @@ std::vector<std::pair<int,int> > AmclThread::free_space_indices;
 AmclThread::AmclThread()
   : Thread("AmclThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
-    TransformAspect(TransformAspect::BOTH, "Pose")
+    TransformAspect(TransformAspect::BOTH, "Pose"),
+    BlackBoardInterfaceListener("AmclThread")
 {
   map_ = NULL;
   conf_mutex_ = new Mutex();
@@ -339,6 +341,11 @@ void AmclThread::init()
     blackboard->open_for_reading<Laser360Interface>(cfg_laser_ifname_.c_str());
   pos3d_if_ =
     blackboard->open_for_writing<Position3DInterface>(cfg_pose_ifname_.c_str());
+  loc_if_ =
+    blackboard->open_for_writing<LocalizationInterface>("AMCL");
+
+  bbil_add_message_interface(loc_if_);
+  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 
   cfg_buffer_enable_ = true;
   try {
@@ -358,6 +365,17 @@ void AmclThread::init()
 
   pos3d_if_->set_frame(global_frame_id_.c_str());
   pos3d_if_->write();
+
+  char *map_file = strdup(cfg_map_file_.c_str());
+  std::string map_name = basename(map_file);
+  free(map_file);
+  std::string::size_type pos;
+  if (((pos = map_name.rfind(".")) != std::string::npos) && (pos > 0)) {
+    map_name = map_name.substr(0, pos-1);
+  }
+
+  loc_if_->set_map(map_name.c_str());
+  loc_if_->write();
 
   apply_initial_pose();
 }
@@ -861,6 +879,9 @@ AmclThread::loop()
 
 void AmclThread::finalize()
 {
+  blackboard->unregister_listener(this);
+  bbil_remove_message_interface(loc_if_);
+
   if (map_) {
     map_free(map_);
     map_ = NULL;
@@ -872,6 +893,7 @@ void AmclThread::finalize()
 
   blackboard->close(laser_if_);
   blackboard->close(pos3d_if_);
+  blackboard->close(loc_if_);
 
 #ifdef HAVE_ROS
   pose_pub_.shutdown();
@@ -1072,29 +1094,25 @@ AmclThread::uniform_pose_generator(void* arg)
   return p;
 }
 
-
-#ifdef HAVE_ROS
 void
-AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg)
+AmclThread::set_initial_pose(const std::string &frame_id, const fawkes::Time &msg_time,
+			     const tf::Pose &pose, const double *covariance)
 {
   MutexLocker lock(conf_mutex_);
-  if(msg->header.frame_id == "") {
+  if(frame_id == "") {
     // This should be removed at some point
     logger->log_warn(name(), "Received initial pose with empty frame_id. "
 		     "You should always supply a frame_id.");
-  } else if (tf_listener->resolve(msg->header.frame_id) != tf_listener->resolve(global_frame_id_))
+  } else if (tf_listener->resolve(frame_id) != tf_listener->resolve(global_frame_id_))
   {
     // We only accept initial pose estimates in the global frame, #5148.
     logger->log_warn(name(),"Ignoring initial pose in frame \"%s\"; "
 		     "initial poses must be in the global frame, \"%s\"",
-		     msg->header.frame_id.c_str(),
-		     global_frame_id_.c_str());
+		     frame_id.c_str(), global_frame_id_.c_str());
     return;
   }
 
   fawkes::Time latest(0, 0);
-  fawkes::Time msg_time(msg->header.stamp.sec,
-			msg->header.stamp.nsec / 1000);
   
   // In case the client sent us a pose estimate in the past, integrate the
   // intervening odometric change.
@@ -1117,16 +1135,8 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
     logger->log_warn(name(), e);
   }
 
-  tf::Pose pose_old, pose_new;
-  pose_old =
-    tf::Transform(tf::Quaternion(msg->pose.pose.orientation.x,
-				 msg->pose.pose.orientation.y,
-				 msg->pose.pose.orientation.z,
-				 msg->pose.pose.orientation.w), 
-		  tf::Vector3(msg->pose.pose.position.x,
-			      msg->pose.pose.position.y,
-			      msg->pose.pose.position.z));
-  pose_new = tx_odom.inverse() * pose_old;
+  tf::Pose pose_new;
+  pose_new = tx_odom.inverse() * pose;
 
   // Transform into the global frame
 
@@ -1143,10 +1153,10 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
   // Copy in the covariance, converting from 6-D to 3-D
   for(int i=0; i<2; i++) {
     for(int j=0; j<2; j++) {
-      pf_init_pose_cov.m[i][j] = msg->pose.covariance[6*i+j];
+      pf_init_pose_cov.m[i][j] = covariance[6*i+j];
     }
   }
-  pf_init_pose_cov.m[2][2] = msg->pose.covariance[6*5+5];
+  pf_init_pose_cov.m[2][2] = covariance[6*5+5];
 
   delete initial_pose_hyp_;
   initial_pose_hyp_ = new amcl_hyp_t();
@@ -1155,5 +1165,51 @@ AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStamped
   apply_initial_pose();
 
   last_move_time_->stamp();
+
+}
+
+
+#ifdef HAVE_ROS
+void
+AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg)
+{
+  fawkes::Time msg_time(msg->header.stamp.sec,
+			msg->header.stamp.nsec / 1000);
+  
+  tf::Pose pose =
+    tf::Transform(tf::Quaternion(msg->pose.pose.orientation.x,
+				 msg->pose.pose.orientation.y,
+				 msg->pose.pose.orientation.z,
+				 msg->pose.pose.orientation.w), 
+		  tf::Vector3(msg->pose.pose.position.x,
+			      msg->pose.pose.position.y,
+			      msg->pose.pose.position.z));
+
+
+  const double *covariance = msg->pose.covariance.data();
+  set_initial_pose(msg->header.frame_id, msg_time, pose, covariance);
 }
 #endif
+
+
+bool
+AmclThread::bb_interface_message_received(Interface *interface,
+					  Message *message) throw()
+{
+  LocalizationInterface::SetInitialPoseMessage *ipm =
+    dynamic_cast<LocalizationInterface::SetInitialPoseMessage *>(message);
+  if (ipm) {
+    fawkes::Time msg_time(ipm->time_enqueued());
+
+    tf::Pose pose =
+      tf::Transform(tf::Quaternion(ipm->rotation(0), ipm->rotation(1),
+				   ipm->rotation(2), ipm->rotation(3)),
+		    tf::Vector3(ipm->translation(0), ipm->translation(1),
+				ipm->translation(2)));
+
+
+    const double *covariance = ipm->covariance();
+    set_initial_pose(ipm->frame(), msg_time, pose, covariance);
+  }
+  return false;
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="LocalizationInterface" author="Tim Niemueller" year="2015">
+  <data>
+    <comment>
+      Information and commands relevant to a self-localization
+      component. This does not contain the pose as it is provided in a
+      Position3DInterface.
+    </comment>
+
+    <field type="string" name="map" length="64">The currently used map.</field>
+  </data>
+  <message name="SetInitialPose">
+    <comment>
+      Set position of the object. Note that this is most likely not
+      supported by the component writing the interface.
+      This is compatible with the ROS' initialpose topic.
+    </comment>
+    <field type="string" length="32" name="frame">
+      Reference coordinate frame for the data.
+    </field>
+    <field type="double" length="4" name="rotation">
+      Rotation quaternion relative to reference frame, ordered as (x, y, z, w).
+    </field>
+    <field type="double" length="3" name="translation">
+      Translation vector from the reference frame's origin, ordered as (x, y, z).
+    </field>o
+    <field type="double" name="covariance" length="36">
+      Row-major representation of the 6x6 covariance matrix. The
+      orientation parameters use a fixed-axis representation. In
+      order, the parameters are: (x, y, z, rotation about X axis,
+      rotation about Y axis, rotation about Z axis).
+    </field>
+  </message>
+</interface>

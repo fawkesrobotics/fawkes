@@ -1,34 +1,34 @@
-$#include <interfaces/LocalizerControlInterface.h>
+$#include <interfaces/LocalizationInterface.h>
 $#include <utils/time/time.h>
 $#include <utils/time/clock.h>
 $using namespace fawkes;
 namespace fawkes {
-class LocalizerControlInterface : public Interface
+class LocalizationInterface : public Interface
 {
 
-  class ResetMessage : public Message
+  class SetInitialPoseMessage : public Message
   {
-    ResetMessage(float ini_x, float ini_y, float ini_ori, float ini_variance);
-    ResetMessage();
-    ~ResetMessage();
+    SetInitialPoseMessage(char * ini_frame, double * ini_rotation, double * ini_translation, double * ini_covariance);
+    SetInitialPoseMessage();
+    ~SetInitialPoseMessage();
 
-    float x();
-    void set_x(const float new_x);
-    int maxlenof_x() const;
-    float y();
-    void set_y(const float new_y);
-    int maxlenof_y() const;
-    float ori();
-    void set_ori(const float new_ori);
-    int maxlenof_ori() const;
-    float variance();
-    void set_variance(const float new_variance);
-    int maxlenof_variance() const;
+    char * frame();
+    void set_frame(const char * new_frame);
+    int maxlenof_frame() const;
+    double rotation(int index);
+    void set_rotation(unsigned int index, const double new_rotation);
+    int maxlenof_rotation() const;
+    double translation(int index);
+    void set_translation(unsigned int index, const double new_translation);
+    int maxlenof_translation() const;
+    double covariance(int index);
+    void set_covariance(unsigned int index, const double new_covariance);
+    int maxlenof_covariance() const;
   };
 
-  char * map_name();
-  void set_map_name(const char * new_map_name);
-  int maxlenof_map_name() const;
+  char * map();
+  void set_map(const char * new_map);
+  int maxlenof_map() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
