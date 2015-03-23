@@ -36,6 +36,7 @@
 #include <baseapp/run.h>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 
 #ifdef HAVE_ROS
 #  include <ros/node_handle.h>
