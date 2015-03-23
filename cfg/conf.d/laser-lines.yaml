@@ -14,14 +14,35 @@ laser-lines:
   # Segmentation distance threshold; m
   line_segmentation_distance_threshold: 0.1
 
-  # Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0
+  # Minimum size of fraction of points that must be inliers to consider a table
+  # This is an absolute number and depends on sensor resolution and min and max
+  # length of considered lines and acceptable occlusions.
   line_segmentation_min_inliers: 20
+  # Maximum inter-sample distance for line segmentation
+  line_segmentation_sample_max_dist: 0.25
 
-  line_min_size: 20
 
-  # The maximum number of clusters to publish on the blackboard
-  # The interfaces will be named "Laser Cluster N" for N=1..max_num_clusters
-  max_num_lines: 3
+  # The maximum number of lines to publish on the blackboard
+  # The interfaces will be named "/laser-lines/N" for N=1..max_num_clusters
+  max_num_lines: 6
+
+  # To have contiguous lines without large holes, a clustering is
+  # applied after the initial line segmentation. The following
+  # specifies the cluster tolerance, i.e. the maximum distance between
+  # a cluster point and any neighbour and the quota of points which
+  # must at least remain after clustering of the original line.
+  line_cluster_tolerance: 0.2
+  line_cluster_quota: 0.1
+  
+  # Minimum and maximum length of line to consider it. Ignored if less
+  # than zero.
+  line_min_length: 0.8
+  line_max_length: -1
+
+  # The minimum and maximum distance of the closest point on a line to
+  # the reference frame origin to consider it. Ignored if less than zero.
+  line_min_dist: 0.1
+  line_max_dist: -1
   
   # The frame in which the result should be published; frame
   result_frame: /base_link
