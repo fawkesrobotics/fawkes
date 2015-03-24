@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="DynamixelServoInterface" author="Tim Niemueller, Nicolas Limpert" year="2015">
+  <constants>
+    <enum name="ErrorCode">
+      <comment>Error code to explain an error</comment>
+      <item name="ERROR_NONE" value="0">No error occured.</item>
+      <item name="ERROR_UNSPECIFIC" value="1">Some unspecified error occured.</item>
+      <item name="ERROR_COMMUNICATION" value="2">
+	Communication with device failed.
+      </item>
+      <item name="ERROR_ANGLE_OUTOFRANGE" value="4">
+	Desired angle is out of range.
+      </item>
+    </enum>
+  </constants>
+  <data>
+    <comment>
+      Interface to access Robotis Dynamixel Servos.
+    </comment>
+    <!-- Raw data output from servo -->
+    <field type="string" name="model" length="8">Model if known</field>
+    <field type="uint32" name="model_number">Model number</field>
+    <field type="uint32" name="cw_angle_limit">Clockwise angle limit</field>
+    <field type="uint32" name="ccw_angle_limit">Counter-clockwise angle limit</field>
+    <field type="uint8"  name="temperature_limit">Temperature limit</field>
+    <field type="uint32" name="max_torque">Max torque</field>
+    <field type="uint8"  name="cw_margin">CW Compliance Margin</field>
+    <field type="uint8"  name="ccw_margin">CCW Compliance Margin</field>
+    <field type="uint8"  name="cw_slope">CW Compliance Slope</field>
+    <field type="uint8"  name="ccw_slope">CCW Compliance Slope</field>
+    <field type="uint32" name="goal_position">Goal position</field>
+    <field type="uint32" name="goal_speed">Goal speed</field>
+    <field type="uint32" name="torque_limit">Torque limit</field>
+    <field type="uint32" name="position">Present position</field>
+    <field type="uint32" name="speed">Present speed</field>
+    <field type="uint32" name="load">Present load</field>
+    <field type="uint8"  name="voltage">Present voltage</field>
+    <field type="uint8"  name="temperature">Present temperature</field>
+    <field type="uint32" name="punch">Punch</field>
+
+    <!-- Values converted to useful units -->
+    <field type="float"  name="angle">Current angle.</field>
+    <field type="bool"   name="enabled">Is the pan/tilt unit enabled?</field>
+    <field type="float"  name="min_angle">Minimum angle allowed.</field>
+    <field type="float"  name="max_angle">Maximum angle allowed.</field>
+    <field type="float"  name="max_velocity">Maximum supported velocity.</field>
+    <field type="float"  name="velocity">Maximum pan velocity currently reached.</field>
+    <field type="float"  name="angle_margin">
+      Margin in radians around a target pan value to consider the
+      motion as final.
+    </field>
+
+    <!-- Actuation command feedback -->
+    <field type="uint32" name="msgid">The ID of the message that is currently being
+      processed, or 0 if no message is being processed.</field>
+    <field type="bool" name="final">True, if the last goto command has been finished,
+      false if it is still running</field>
+    <field type="ErrorCode" name="error_code">Failure code set if
+    final is true. ERROR_NONE if no error occured.</field>
+  </data>
+
+  <!-- Motion commands -->
+  <message name="Stop">
+    <comment>Stop motion immediately.</comment>
+  </message>
+  <message name="Flush">
+    <comment>Flush the message queue. This implicitly stops running motions.</comment>
+  </message>
+  <message name="Goto">
+    <comment>Goto desired pan/tilt values.</comment>
+    <ref>angle</ref>
+  </message>
+  <message name="TimedGoto">
+    <comment>
+      Goto desired pan/tilt values in a specified time. The PTU may
+      adapt the velocities such that two positions are reached at the
+      same time.
+    </comment>
+    <field type="float" name="time_sec">Time in seconds when to reach
+    the final position.</field>
+    <ref>angle</ref>
+  </message>
+
+  <!-- Parameter setting, higher level with SI units -->
+  <message name="SetEnabled">
+    <comment>Enable or disable motors/servos.</comment>
+    <ref>enabled</ref>
+  </message>
+  <message name="SetVelocity">
+    <comment>Set maximum velocity for servo.</comment>
+    <ref>velocity</ref>
+  </message>
+  <message name="SetMargin">
+    <comment>Set margins pan/tilt unit motions.</comment>
+    <ref>angle_margin</ref>
+  </message>
+
+  <!-- Parameter setting, low level -->
+  <message name="SetComplianceValues">
+    <comment>Set compliance values</comment>
+    <field type="uint8" name="cw_margin">New CW compliance margin</field>
+    <field type="uint8" name="ccw_margin">New CCW compliance margin</field>
+    <field type="uint8" name="cw_slope">New CW compliance slope</field>
+    <field type="uint8" name="ccw_slope">New LED enabled value</field>
+  </message>
+  <message name="SetGoalSpeed">
+    <comment>Set goal speed</comment>
+    <field type="uint32" name="goal_speed">New goal speed</field>
+  </message>
+  <message name="SetTorqueLimit">
+    <comment>Set torque limit</comment>
+    <field type="uint32" name="torque_limit">New torque limit</field>
+  </message>
+  <message name="SetPunch">
+    <comment>Set punch</comment>
+    <field type="uint32" name="punch">New punch</field>
+  </message>
+  <message name="GotoPosition">
+    <comment>Goto position</comment>
+    <field type="uint32" name="position">New position</field>
+  </message>
+  <message name="SetAngleLimits">
+    <comment>Set angle limits</comment>
+    <field type="uint32" name="angle_limit_cw">New cw angle limit</field>
+    <field type="uint32" name="angle_limit_ccw">New ccw angle limit</field>
+  </message>
+</interface>
