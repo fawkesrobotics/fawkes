@@ -28,3 +28,7 @@ dynamixel:
     # motion finished; this is a default value and can be overriden
     # via blackboard; rad
     angle_margin: 0.1
+
+    # Echo fix used for faulty firmwares on RX28 which 
+    # echo the given command even though ECHO is switched off
+    enable_echo_fix: false

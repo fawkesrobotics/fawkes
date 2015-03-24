@@ -114,6 +114,7 @@ class DynamixelDriverThread
   unsigned int cfg_cw_compl_slope_;
   unsigned int cfg_ccw_compl_slope_;
   float        cfg_def_angle_margin_;
+  bool         cfg_enable_echo_fix_;
 
   void  goto_angle(unsigned int servo_id, float angle);
   void  goto_angle_timed(unsigned int servo_id, float angle, float time_sec);

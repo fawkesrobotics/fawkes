@@ -74,6 +74,7 @@ DynamixelDriverThread::init()
   cfg_cw_compl_slope_   = config->get_uint((cfg_prefix_ + "cw_compl_slope").c_str());
   cfg_ccw_compl_slope_  = config->get_uint((cfg_prefix_ + "ccw_compl_slope").c_str());
   cfg_def_angle_margin_ = config->get_float((cfg_prefix_ + "angle_margin").c_str());
+  cfg_enable_echo_fix_  = config->get_bool((cfg_prefix_ + "enable_echo_fix").c_str());
 
   chain_ = new DynamixelChain(cfg_device_.c_str(), cfg_read_timeout_ms_);
   DynamixelChain::DeviceList devl = chain_->discover();

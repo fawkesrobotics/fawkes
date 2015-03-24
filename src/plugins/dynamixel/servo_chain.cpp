@@ -148,13 +148,14 @@ using namespace fawkes;
  * @param device_file device file of the serial port
  * @param default_timeout_ms the timeout to apply by default to reading operations
  */
-DynamixelChain::DynamixelChain(const char *device_file, unsigned int default_timeout_ms)
+DynamixelChain::DynamixelChain(const char *device_file, unsigned int default_timeout_ms, bool enable_echo_fix)
 {
   __default_timeout_ms = default_timeout_ms;
   __device_file        = strdup(device_file);
   __fd                 = -1;
   __obuffer_length     = 0;
   __ibuffer_length     = 0;
+  __enable_echo_fix    = enable_echo_fix;
   memset(__control_table, 0, DYNAMIXEL_MAX_NUM_SERVOS * DYNAMIXEL_CONTROL_TABLE_LENGTH);
   try {
     open();
@@ -314,19 +315,20 @@ DynamixelChain::send(const unsigned char id, const unsigned char instruction,
   int written = write(__fd, __obuffer, __obuffer_length);
   //printf("Wrote %d bytes\n", written);
 
-  // For some reason we have to read the shit immediately, although ECHO is off
-  int readd = 0;
-  while (readd < __obuffer_length) {
-    readd += read(__fd, __ibuffer + readd, __obuffer_length - readd);
+  if (__enable_echo_fix) {
+    // For some reason we have to read the shit immediately, although ECHO is off
+    int readd = 0;
+    while (readd < __obuffer_length) {
+      readd += read(__fd, __ibuffer + readd, __obuffer_length - readd);
+    }
+  #ifdef DEBUG_ServoChain_COMM
+    printf("Read %d junk bytes: ", readd);
+    for (int i = 0; i < readd; ++i) {
+      printf("%X ", __ibuffer[i]);
+    }
+    printf("\n");
+  #endif
   }
-#ifdef DEBUG_ServoChain_COMM
-  printf("Read %d junk bytes: ", readd);
-  for (int i = 0; i < readd; ++i) {
-    printf("%X ", __ibuffer[i]);
-  }
-  printf("\n");
-#endif
-
   if ( written < 0 ) {
     throw Exception(errno, "Failed to write ServoChain packet %x for %x", instruction, id);
   } else if (written < __obuffer_length) {
