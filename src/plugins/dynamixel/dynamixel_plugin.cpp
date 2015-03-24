@@ -74,7 +74,7 @@ class DynamixelPlugin : public fawkes::Plugin
 	    thread_list.push_back(drv_thread);
 	    configs.insert(cfg_name);
 	  } else {
-	    //printf("Ignoring laser config %s\n", cfg_name.c_str());
+	    //printf("Ignoring dynamixel config %s\n", cfg_name.c_str());
 	    ignored_configs.insert(cfg_name);
 	  }
 	} catch(Exception &e) {
@@ -92,7 +92,7 @@ class DynamixelPlugin : public fawkes::Plugin
     if ( thread_list.empty() ) {
       delete act_thread;
       delete sensor_thread;
-      throw Exception("No active laser filters configured, aborting");
+      throw Exception("No active servo configs, aborting");
     }
 
     thread_list.push_back(sensor_thread);
