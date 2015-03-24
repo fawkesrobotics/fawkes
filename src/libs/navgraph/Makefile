@@ -20,7 +20,6 @@ include $(BUILDSYSDIR)/eigen3.mk
 
 FILTER_OUT=%_tolua.o
 
-SUBDIRS=aspect
 
 
 LIBS_libfawkesnavgraph = stdc++ m fawkescore fawkesutils
@@ -41,7 +40,9 @@ ifeq ($(HAVE_NAVGRAPH),1)
   CFLAGS  += $(CFLAGS_NAVGRAPH)  $(CFLAGS_EIGEN3)  $(CFLAGS_YAMLCPP)
   LDFLAGS += $(LDFLAGS_NAVGRAPH) $(LDFLAGS_EIGEN3) $(LDFLAGS_YAMLCPP)
 
-  LIBS_all  = $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
+  LIBS_all  += $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
+
+  SUBDIRS = aspect
 
   ifeq ($(HAVE_TOLUA),1)
     LIBS_all += $(LUALIBDIR)/fawkesnavgraph.$(SOEXT)
@@ -63,7 +64,7 @@ endif
 $(LUALIBDIR)/fawkesnavgraph.$(SOEXT): | $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
 
 ifneq ($(MAKECMDGOALS),clean)
-aspect generators: | $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
+aspect: | $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
 endif
 
 include $(BUILDSYSDIR)/base.mk
