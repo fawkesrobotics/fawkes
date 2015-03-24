@@ -1,0 +1,30 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/dynamixel
+---
+dynamixel:
+
+  # Example configuration for a servo chain, choose any name as
+  # top element, e.g. ptu or example.
+  example:
+    active: true
+    device: /dev/ttyUSB0
+
+    read_timeout_ms: 30
+    discover_timeout_ms: 30
+
+    # Turn servos off on unloading the plugin? Go to zero position at start?
+    turn_off: true
+    goto_zero_start: true
+
+    # Default compliance values, can be adjusted via the blackboard
+    cw_compl_margin: 0
+    ccw_compl_margin: 0
+    cw_compl_slope: 96
+    ccw_compl_slope: 96
+
+    # Tolerance between desired and actual angle value to consider
+    # motion finished; this is a default value and can be overriden
+    # via blackboard; rad
+    angle_margin: 0.1
