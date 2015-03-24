@@ -100,5 +100,5 @@ class DynamixelPlugin : public fawkes::Plugin
   }
 };
 
-PLUGIN_DESCRIPTION("Robits Dynamixel servo driver plugin")
+PLUGIN_DESCRIPTION("Robotis Dynamixel servo driver plugin")
 EXPORT_PLUGIN(DynamixelPlugin)
