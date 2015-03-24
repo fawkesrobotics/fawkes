@@ -45,7 +45,7 @@ BlockedTimingAspectIniFin::BlockedTimingAspectIniFin()
 void
 BlockedTimingAspectIniFin::init(Thread *thread)
 {
-  BlockedTimingAspect *blocked_timing_thread __unused;
+  BlockedTimingAspect *blocked_timing_thread;
   blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread);
 
   if (blocked_timing_thread == 0) {
@@ -54,17 +54,28 @@ BlockedTimingAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  if ( thread->opmode() != Thread::OPMODE_CONTINUOUS) {
-    throw CannotInitializeThreadException("Thread '%s' not in CONTINUOUS mode"
+  if ( thread->opmode() != Thread::OPMODE_WAITFORWAKEUP) {
+    throw CannotInitializeThreadException("Thread '%s' not in WAITFORWAKEUP mode"
                                           " (required for BlockedTimingAspect)",
                                           thread->name());
-    )
+  }
 
+  blocked_timing_thread->init_BlockedTimingAspect(thread);
 }
 
 void
 BlockedTimingAspectIniFin::finalize(Thread *thread)
 {
+  BlockedTimingAspect *blocked_timing_thread;
+    blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread);
+
+  if (blocked_timing_thread == 0) {
+    throw CannotInitializeThreadException("Thread '%s' claims to have the "
+      "BlockedTimingAspect, but RTTI says it "
+      "has not. ", thread->name());
+  }
+
+  blocked_timing_thread->finalize_BlockedTimingAspect(thread);
 }
 
 

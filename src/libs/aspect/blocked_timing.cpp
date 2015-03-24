@@ -25,6 +25,7 @@
 #include <core/threading/thread.h>
 #include <core/exception.h>
 
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -58,14 +59,38 @@ BlockedTimingAspect::BlockedTimingAspect(WakeupHook wakeup_hook)
 {
   add_aspect("BlockedTimingAspect");
   __wakeup_hook = wakeup_hook;
+  __loop_listener = new BlockedTimingLoopListener();
 }
 
 
 /** Virtual empty destructor. */
 BlockedTimingAspect::~BlockedTimingAspect()
 {
+  delete __loop_listener;
 }
 
+
+/** Init BlockedTiming aspect.
+ * This intializes the aspect and adds the loop listener to the thread.
+ * @param thread thread which uses this aspect
+ */
+void
+BlockedTimingAspect::init_BlockedTimingAspect(Thread *thread)
+{
+  thread->add_loop_listener(__loop_listener);
+  thread->wakeup();
+}
+
+
+/** Finalize BlockedTiming aspect.
+ * This finalizes the aspect and removes the loop listener from the thread.
+ * @param thread thread which uses this aspect
+ */
+void
+BlockedTimingAspect::finalize_BlockedTimingAspect(Thread *thread)
+{
+  thread->remove_loop_listener(__loop_listener);
+}
 
 /** Get the wakeup hook.
  * The wakeup hook defines when this thread should be woken up. This heavily
@@ -145,6 +170,17 @@ BlockedTimingAspect::blocked_timing_hook_to_start_syncpoint(WakeupHook hook)
     case WAKEUP_HOOK_POST_LOOP:      return "/postloop/start";
     default: throw Exception("Unknown blocked timing wakeup hook");
   }
+}
+
+
+/** The post loop function of the BlockedTimingAspect
+ * This function is called right after the loop of the thread with the aspect.
+ * @param thread thread this loop listener belongs to
+ */
+void
+BlockedTimingLoopListener::post_loop(Thread *thread)
+{
+  thread->wakeup();
 }
 
 } // end namespace fawkes

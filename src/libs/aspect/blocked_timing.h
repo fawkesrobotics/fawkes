@@ -25,8 +25,8 @@
 #define __ASPECT_BLOCKED_TIMING_H_
 
 #include <aspect/aspect.h>
-
 #include <aspect/syncpoint.h>
+#include <core/threading/thread_loop_listener.h>
 
 #include <map>
 #include <string>
@@ -35,6 +35,21 @@ namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
+
+/** @class BlockedTimingLoopListener
+ * Loop Listener of the BlockedTimingAspect.
+ * This loop listener immediately wakes up the thread after loop returned.
+ * The thread will then wait for the syncpoint of the next iteration.
+ * The BlockedTimingAspect cannot be derived from ThreadLoopListener because
+ * the SyncPointAspect is already derived from ThreadLoopListener and we need
+ * another listener. Therefore, use composition instead.
+ */
+class BlockedTimingLoopListener : public ThreadLoopListener
+{
+ public:
+  void post_loop(Thread *thread);
+};
 
 class BlockedTimingAspect : public SyncPointAspect
 {
@@ -67,10 +82,14 @@ class BlockedTimingAspect : public SyncPointAspect
   static std::string blocked_timing_hook_to_start_syncpoint(WakeupHook hook);
   static std::string blocked_timing_hook_to_end_syncpoint(WakeupHook hook);
 
+  void init_BlockedTimingAspect(Thread *thread);
+  void finalize_BlockedTimingAspect(Thread *thread);
+
   WakeupHook blockedTimingAspectHook() const;
 
  private:
   WakeupHook __wakeup_hook;
+  BlockedTimingLoopListener *__loop_listener;
 };
 
 } // end namespace fawkes
