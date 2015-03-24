@@ -34,8 +34,8 @@ class ThreadLoopListener
  public:
   virtual ~ThreadLoopListener();
 
-  virtual void pre_loop(Thread *thread)     = 0;
-  virtual void post_loop(Thread *thread)    = 0;
+  virtual void pre_loop(Thread *thread);
+  virtual void post_loop(Thread *thread);
 };
 
 

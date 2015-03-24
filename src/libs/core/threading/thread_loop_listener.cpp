@@ -46,5 +46,25 @@ ThreadLoopListener::~ThreadLoopListener()
 {
 }
 
+/** Empty stub for the pre loop function of the loop listener.
+ * This function is called right before the loop of the thread with the aspect.
+ * Provide a stub such that not every derived class must implement the function.
+ * @param thread thread this loop listener belongs to
+ */
+void
+ThreadLoopListener::pre_loop(Thread *thread)
+{
+}
+
+/** Empty stub for the post loop function of the loop listener.
+ * This function is called right after the loop of the thread with the aspect.
+ * Provide a stub such that not every derived class must implement the function.
+ * @param thread thread this loop listener belongs to
+ */
+void
+ThreadLoopListener::post_loop(Thread *thread)
+{
+}
+
 
 } // end namespace fawkes
