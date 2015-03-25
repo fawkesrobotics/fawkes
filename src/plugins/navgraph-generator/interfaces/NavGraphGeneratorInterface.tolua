@@ -98,6 +98,29 @@ class NavGraphGeneratorInterface : public Interface
     int maxlenof_mode() const;
   };
 
+  class AddPointOfInterestWithOriMessage : public Message
+  {
+    AddPointOfInterestWithOriMessage(char * ini_id, float ini_x, float ini_y, float ini_ori, ConnectionMode ini_mode);
+    AddPointOfInterestWithOriMessage();
+    ~AddPointOfInterestWithOriMessage();
+
+    char * id();
+    void set_id(const char * new_id);
+    int maxlenof_id() const;
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float ori();
+    void set_ori(const float new_ori);
+    int maxlenof_ori() const;
+    ConnectionMode mode();
+    void set_mode(const ConnectionMode new_mode);
+    int maxlenof_mode() const;
+  };
+
   class SetPointOfInterestPropertyMessage : public Message
   {
     SetPointOfInterestPropertyMessage(char * ini_id, char * ini_property_name, char * ini_property_value);

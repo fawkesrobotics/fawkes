@@ -280,6 +280,54 @@ class NavGraphGeneratorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class AddPointOfInterestWithOriMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char id[64]; /**< 
+      ID of the obstacle. Can later be used to remove it again.
+     */
+      float x; /**< X coordinate of obstacle in global frame. */
+      float y; /**< Y coordinate of obstacle in global frame. */
+      float ori; /**< Orientation for target point (rad). */
+      int32_t mode; /**< 
+      The connection mode to use to connect the POI with the graph.
+     */
+    } AddPointOfInterestWithOriMessage_data_t;
+#pragma pack(pop)
+
+    AddPointOfInterestWithOriMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ConnectionMode;
+   public:
+    AddPointOfInterestWithOriMessage(const char * ini_id, const float ini_x, const float ini_y, const float ini_ori, const ConnectionMode ini_mode);
+    AddPointOfInterestWithOriMessage();
+    ~AddPointOfInterestWithOriMessage();
+
+    AddPointOfInterestWithOriMessage(const AddPointOfInterestWithOriMessage *m);
+    /* Methods */
+    char * id() const;
+    void set_id(const char * new_id);
+    size_t maxlenof_id() const;
+    float x() const;
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y() const;
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float ori() const;
+    void set_ori(const float new_ori);
+    size_t maxlenof_ori() const;
+    ConnectionMode mode() const;
+    void set_mode(const ConnectionMode new_mode);
+    size_t maxlenof_mode() const;
+    virtual Message * clone() const;
+  };
+
   class SetPointOfInterestPropertyMessage : public Message
   {
    private:

@@ -73,12 +73,13 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   add_messageinfo("AddObstacleMessage");
   add_messageinfo("RemoveObstacleMessage");
   add_messageinfo("AddPointOfInterestMessage");
+  add_messageinfo("AddPointOfInterestWithOriMessage");
   add_messageinfo("SetPointOfInterestPropertyMessage");
   add_messageinfo("SetGraphDefaultPropertyMessage");
   add_messageinfo("SetCopyGraphDefaultPropertiesMessage");
   add_messageinfo("RemovePointOfInterestMessage");
   add_messageinfo("ComputeMessage");
-  unsigned char tmp_hash[] = {0xdb, 0x97, 0x45, 0x23, 0x52, 0xa8, 0x59, 0xbd, 0xa4, 0x83, 0x78, 0x46, 0x66, 0xa2, 0x26, 0xd0};
+  unsigned char tmp_hash[] = {0x26, 0x60, 0x8f, 0x9, 0x38, 0xc4, 0x1a, 0xb3, 0x38, 0xe2, 0x16, 0x2d, 0x99, 0x6c, 0xde, 0xe8};
   set_hash(tmp_hash);
 }
 
@@ -151,6 +152,8 @@ NavGraphGeneratorInterface::create_message(const char *type) const
     return new RemoveObstacleMessage();
   } else if ( strncmp("AddPointOfInterestMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new AddPointOfInterestMessage();
+  } else if ( strncmp("AddPointOfInterestWithOriMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new AddPointOfInterestWithOriMessage();
   } else if ( strncmp("SetPointOfInterestPropertyMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetPointOfInterestPropertyMessage();
   } else if ( strncmp("SetGraphDefaultPropertyMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -1015,6 +1018,246 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::clone() const
 {
   return new NavGraphGeneratorInterface::AddPointOfInterestMessage(this);
 }
+/** @class NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage <interfaces/NavGraphGeneratorInterface.h>
+ * AddPointOfInterestWithOriMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_id initial value for id
+ * @param ini_x initial value for x
+ * @param ini_y initial value for y
+ * @param ini_ori initial value for ori
+ * @param ini_mode initial value for mode
+ */
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterestWithOriMessage(const char * ini_id, const float ini_x, const float ini_y, const float ini_ori, const ConnectionMode ini_mode) : Message("AddPointOfInterestWithOriMessage")
+{
+  data_size = sizeof(AddPointOfInterestWithOriMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AddPointOfInterestWithOriMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->id, ini_id, 64);
+  data->x = ini_x;
+  data->y = ini_y;
+  data->ori = ini_ori;
+  data->mode = ini_mode;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
+  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "ori", 1, &data->ori);
+  add_fieldinfo(IFT_ENUM, "mode", 1, &data->mode, "ConnectionMode", &enum_map_ConnectionMode);
+}
+/** Constructor */
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterestWithOriMessage() : Message("AddPointOfInterestWithOriMessage")
+{
+  data_size = sizeof(AddPointOfInterestWithOriMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (AddPointOfInterestWithOriMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
+  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
+  add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
+  add_fieldinfo(IFT_FLOAT, "ori", 1, &data->ori);
+  add_fieldinfo(IFT_ENUM, "mode", 1, &data->mode, "ConnectionMode", &enum_map_ConnectionMode);
+}
+
+/** Destructor */
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::~AddPointOfInterestWithOriMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterestWithOriMessage(const AddPointOfInterestWithOriMessage *m) : Message("AddPointOfInterestWithOriMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (AddPointOfInterestWithOriMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get id value.
+ * 
+      ID of the obstacle. Can later be used to remove it again.
+    
+ * @return id value
+ */
+char *
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::id() const
+{
+  return data->id;
+}
+
+/** Get maximum length of id value.
+ * @return length of id value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::maxlenof_id() const
+{
+  return 64;
+}
+
+/** Set id value.
+ * 
+      ID of the obstacle. Can later be used to remove it again.
+    
+ * @param new_id new id value
+ */
+void
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::set_id(const char * new_id)
+{
+  strncpy(data->id, new_id, sizeof(data->id));
+}
+
+/** Get x value.
+ * X coordinate of obstacle in global frame.
+ * @return x value
+ */
+float
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::x() const
+{
+  return data->x;
+}
+
+/** Get maximum length of x value.
+ * @return length of x value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::maxlenof_x() const
+{
+  return 1;
+}
+
+/** Set x value.
+ * X coordinate of obstacle in global frame.
+ * @param new_x new x value
+ */
+void
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::set_x(const float new_x)
+{
+  data->x = new_x;
+}
+
+/** Get y value.
+ * Y coordinate of obstacle in global frame.
+ * @return y value
+ */
+float
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::y() const
+{
+  return data->y;
+}
+
+/** Get maximum length of y value.
+ * @return length of y value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::maxlenof_y() const
+{
+  return 1;
+}
+
+/** Set y value.
+ * Y coordinate of obstacle in global frame.
+ * @param new_y new y value
+ */
+void
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::set_y(const float new_y)
+{
+  data->y = new_y;
+}
+
+/** Get ori value.
+ * Orientation for target point (rad).
+ * @return ori value
+ */
+float
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::ori() const
+{
+  return data->ori;
+}
+
+/** Get maximum length of ori value.
+ * @return length of ori value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::maxlenof_ori() const
+{
+  return 1;
+}
+
+/** Set ori value.
+ * Orientation for target point (rad).
+ * @param new_ori new ori value
+ */
+void
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::set_ori(const float new_ori)
+{
+  data->ori = new_ori;
+}
+
+/** Get mode value.
+ * 
+      The connection mode to use to connect the POI with the graph.
+    
+ * @return mode value
+ */
+NavGraphGeneratorInterface::ConnectionMode
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::mode() const
+{
+  return (NavGraphGeneratorInterface::ConnectionMode)data->mode;
+}
+
+/** Get maximum length of mode value.
+ * @return length of mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::maxlenof_mode() const
+{
+  return 1;
+}
+
+/** Set mode value.
+ * 
+      The connection mode to use to connect the POI with the graph.
+    
+ * @param new_mode new mode value
+ */
+void
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::set_mode(const ConnectionMode new_mode)
+{
+  data->mode = new_mode;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::clone() const
+{
+  return new NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage(this);
+}
 /** @class NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage <interfaces/NavGraphGeneratorInterface.h>
  * SetPointOfInterestPropertyMessage Fawkes BlackBoard Interface Message.
  * 
@@ -1595,24 +1838,28 @@ NavGraphGeneratorInterface::message_valid(const Message *message) const
   if ( m5 != NULL ) {
     return true;
   }
-  const SetPointOfInterestPropertyMessage *m6 = dynamic_cast<const SetPointOfInterestPropertyMessage *>(message);
+  const AddPointOfInterestWithOriMessage *m6 = dynamic_cast<const AddPointOfInterestWithOriMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const SetGraphDefaultPropertyMessage *m7 = dynamic_cast<const SetGraphDefaultPropertyMessage *>(message);
+  const SetPointOfInterestPropertyMessage *m7 = dynamic_cast<const SetPointOfInterestPropertyMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const SetCopyGraphDefaultPropertiesMessage *m8 = dynamic_cast<const SetCopyGraphDefaultPropertiesMessage *>(message);
+  const SetGraphDefaultPropertyMessage *m8 = dynamic_cast<const SetGraphDefaultPropertyMessage *>(message);
   if ( m8 != NULL ) {
     return true;
   }
-  const RemovePointOfInterestMessage *m9 = dynamic_cast<const RemovePointOfInterestMessage *>(message);
+  const SetCopyGraphDefaultPropertiesMessage *m9 = dynamic_cast<const SetCopyGraphDefaultPropertiesMessage *>(message);
   if ( m9 != NULL ) {
     return true;
   }
-  const ComputeMessage *m10 = dynamic_cast<const ComputeMessage *>(message);
+  const RemovePointOfInterestMessage *m10 = dynamic_cast<const RemovePointOfInterestMessage *>(message);
   if ( m10 != NULL ) {
+    return true;
+  }
+  const ComputeMessage *m11 = dynamic_cast<const ComputeMessage *>(message);
+  if ( m11 != NULL ) {
     return true;
   }
   return false;

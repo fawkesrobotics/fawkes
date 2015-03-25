@@ -245,6 +245,15 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     poi.conn_mode = msg->mode();
     pois_[msg->id()] = poi;
 
+  } else if (message->is_of_type<NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage>()) {
+    NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage *msg =
+      message->as_type<NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage>();
+    PointOfInterest poi;
+    poi.position  = cart_coord_2d_t(msg->x(), msg->y());
+    poi.conn_mode = msg->mode();
+    poi.properties["orientation"] = std::to_string(msg->ori());
+    pois_[msg->id()] = poi;
+
   } else if (message->is_of_type<NavGraphGeneratorInterface::RemovePointOfInterestMessage>()) {
     NavGraphGeneratorInterface::RemovePointOfInterestMessage *msg =
       message->as_type<NavGraphGeneratorInterface::RemovePointOfInterestMessage>();

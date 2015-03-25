@@ -102,6 +102,23 @@
       The connection mode to use to connect the POI with the graph.
     </field>
   </message>
+  <message name="AddPointOfInterestWithOri">
+    <comment>
+      Add a point which shall be reachable as a target. The POI is
+      given as a centroid in X-Y ground-support plane of global frame,
+      typical /map frame. This form also accepts a desired target
+      orientation for the point.
+    </comment>
+    <field type="string" name="id" length="64">
+      ID of the obstacle. Can later be used to remove it again.
+    </field>
+    <field type="float" name="x">X coordinate of obstacle in global frame.</field>
+    <field type="float" name="y">Y coordinate of obstacle in global frame.</field>
+    <field type="float" name="ori">Orientation for target point (rad).</field>
+    <field type="ConnectionMode" name="mode">
+      The connection mode to use to connect the POI with the graph.
+    </field>
+  </message>
   <message name="SetPointOfInterestProperty">
     <comment>
       Set a property for an already added point of interest.
