@@ -957,7 +957,7 @@ Thread::run()
 
     loopinterrupt_antistarve_mutex->stopby();
 
-    loop_mutex->lock();
+
     if ( ! finalize_prepared ) {
       __loop_done = false;
 
@@ -969,7 +969,9 @@ Thread::run()
       }
       __loop_listeners->unlock();
 
+      loop_mutex->lock();
       loop();
+      loop_mutex->unlock();
 
       __loop_listeners->lock();
       for (LockList<ThreadLoopListener *>::reverse_iterator it = __loop_listeners->rbegin();
@@ -979,7 +981,6 @@ Thread::run()
       }
       __loop_listeners->unlock();
     }
-    loop_mutex->unlock();
 
     __loop_done_mutex->lock();
     __loop_done = true;
