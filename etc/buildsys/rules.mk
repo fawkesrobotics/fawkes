@@ -284,7 +284,7 @@ endif
 
 .PHONY:
 test:
-	$(foreach B, $(BINS_test), $(B))
+	@$(foreach B, $(BINS_test), echo "Executing test $(B)"; $(B);)
 
 endif # __buildsys_rules_mk_
 
