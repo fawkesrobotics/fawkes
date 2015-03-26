@@ -70,7 +70,7 @@ class NavGraphEdge {
   const NavGraphNode &  to_node() const
   { return to_node_; }
 
-  fawkes::cart_coord_2d_t closest_point_on_edge(float x, float y);
+  fawkes::cart_coord_2d_t closest_point_on_edge(float x, float y) const;
 
   void set_from(const std::string &from);
   void set_to(const std::string &to);

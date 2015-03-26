@@ -191,7 +191,7 @@ NavGraphEdge::set_property(const std::string &property, bool value)
  * be found.
  */
 cart_coord_2d_t
-NavGraphEdge::closest_point_on_edge(float x, float y)
+NavGraphEdge::closest_point_on_edge(float x, float y) const
 {
   const Eigen::Vector2f point(x, y);
   const Eigen::Vector2f origin(from_node_.x(), from_node_.y());
