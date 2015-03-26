@@ -40,6 +40,11 @@ class NavGraphGeneratorInterface : public Interface
 
   /** Drive modes enum */
   typedef enum {
+    UNCONNECTED /**< 
+       The node is marked as unconnected and will not be connected to
+       another node. This kind of nodes is useful to mark points and
+       possibly assign properties without needing to travel to it.
+      */,
     CLOSEST_NODE /**< 
        Connect point to the node on the graph closest to the given
        point.
@@ -58,6 +63,28 @@ class NavGraphGeneratorInterface : public Interface
   } ConnectionMode;
   const char * tostring_ConnectionMode(ConnectionMode value) const;
 
+  /** Post-processing filtering type. */
+  typedef enum {
+    FILTER_EDGES_BY_MAP /**< 
+       If enabled, filters out all edges after the map generation that
+       pass too close by an occupied cell of the map. Use this to get
+       rid of connections which "pass through walls".
+       Note that this step is done before adding points of interest.
+       Therefore edges going to POIs might still pass through or close
+       by occupied cells.
+
+       Parameters:
+       distance: minimum distance from edges to occupied map grid
+       cells to consider it safe.
+      */,
+    FILTER_ORPHAN_NODES /**< 
+       If enabled, filters out all nodes which are not connected to
+       any other node. These can occur, for example, after performing
+       the FILTER_EDGES_BY_MAP filter.
+      */
+  } FilterType;
+  const char * tostring_FilterType(FilterType value) const;
+
  private:
 #pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
@@ -72,6 +99,7 @@ class NavGraphGeneratorInterface : public Interface
   NavGraphGeneratorInterface_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
  public:
   /* messages */
   class ClearMessage : public Message
@@ -88,6 +116,7 @@ class NavGraphGeneratorInterface : public Interface
     ClearMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     ClearMessage();
     ~ClearMessage();
@@ -115,6 +144,7 @@ class NavGraphGeneratorInterface : public Interface
     SetBoundingBoxMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     SetBoundingBoxMessage(const float ini_p1_x, const float ini_p1_y, const float ini_p2_x, const float ini_p2_y);
     SetBoundingBoxMessage();
@@ -137,6 +167,81 @@ class NavGraphGeneratorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetFilterMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      int32_t filter; /**< Which filter to
+    enable/disable. */
+      bool enable; /**< True to enable, false to
+    disable */
+    } SetFilterMessage_data_t;
+#pragma pack(pop)
+
+    SetFilterMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
+   public:
+    SetFilterMessage(const FilterType ini_filter, const bool ini_enable);
+    SetFilterMessage();
+    ~SetFilterMessage();
+
+    SetFilterMessage(const SetFilterMessage *m);
+    /* Methods */
+    FilterType filter() const;
+    void set_filter(const FilterType new_filter);
+    size_t maxlenof_filter() const;
+    bool is_enable() const;
+    void set_enable(const bool new_enable);
+    size_t maxlenof_enable() const;
+    virtual Message * clone() const;
+  };
+
+  class SetFilterParamFloatMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      int32_t filter; /**< Which filter to
+    enable/disable. */
+      char param[32]; /**< Parameter name, see FilterType
+    description for possible values. */
+      float value; /**< True to enable, false to
+    disable */
+    } SetFilterParamFloatMessage_data_t;
+#pragma pack(pop)
+
+    SetFilterParamFloatMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
+   public:
+    SetFilterParamFloatMessage(const FilterType ini_filter, const char * ini_param, const float ini_value);
+    SetFilterParamFloatMessage();
+    ~SetFilterParamFloatMessage();
+
+    SetFilterParamFloatMessage(const SetFilterParamFloatMessage *m);
+    /* Methods */
+    FilterType filter() const;
+    void set_filter(const FilterType new_filter);
+    size_t maxlenof_filter() const;
+    char * param() const;
+    void set_param(const char * new_param);
+    size_t maxlenof_param() const;
+    float value() const;
+    void set_value(const float new_value);
+    size_t maxlenof_value() const;
+    virtual Message * clone() const;
+  };
+
   class AddMapObstaclesMessage : public Message
   {
    private:
@@ -155,6 +260,7 @@ class NavGraphGeneratorInterface : public Interface
     AddMapObstaclesMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     AddMapObstaclesMessage(const float ini_max_line_point_distance);
     AddMapObstaclesMessage();
@@ -187,6 +293,7 @@ class NavGraphGeneratorInterface : public Interface
     AddObstacleMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     AddObstacleMessage(const char * ini_id, const float ini_x, const float ini_y);
     AddObstacleMessage();
@@ -223,6 +330,7 @@ class NavGraphGeneratorInterface : public Interface
     RemoveObstacleMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     RemoveObstacleMessage(const char * ini_id);
     RemoveObstacleMessage();
@@ -258,6 +366,7 @@ class NavGraphGeneratorInterface : public Interface
     AddPointOfInterestMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     AddPointOfInterestMessage(const char * ini_id, const float ini_x, const float ini_y, const ConnectionMode ini_mode);
     AddPointOfInterestMessage();
@@ -303,6 +412,7 @@ class NavGraphGeneratorInterface : public Interface
     AddPointOfInterestWithOriMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     AddPointOfInterestWithOriMessage(const char * ini_id, const float ini_x, const float ini_y, const float ini_ori, const ConnectionMode ini_mode);
     AddPointOfInterestWithOriMessage();
@@ -348,6 +458,7 @@ class NavGraphGeneratorInterface : public Interface
     SetPointOfInterestPropertyMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     SetPointOfInterestPropertyMessage(const char * ini_id, const char * ini_property_name, const char * ini_property_value);
     SetPointOfInterestPropertyMessage();
@@ -384,6 +495,7 @@ class NavGraphGeneratorInterface : public Interface
     SetGraphDefaultPropertyMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     SetGraphDefaultPropertyMessage(const char * ini_property_name, const char * ini_property_value);
     SetGraphDefaultPropertyMessage();
@@ -416,6 +528,7 @@ class NavGraphGeneratorInterface : public Interface
     SetCopyGraphDefaultPropertiesMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     SetCopyGraphDefaultPropertiesMessage(const bool ini_enable_copy);
     SetCopyGraphDefaultPropertiesMessage();
@@ -446,6 +559,7 @@ class NavGraphGeneratorInterface : public Interface
     RemovePointOfInterestMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     RemovePointOfInterestMessage(const char * ini_id);
     RemovePointOfInterestMessage();
@@ -473,6 +587,7 @@ class NavGraphGeneratorInterface : public Interface
     ComputeMessage_data_t *data;
 
   interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
    public:
     ComputeMessage();
     ~ComputeMessage();

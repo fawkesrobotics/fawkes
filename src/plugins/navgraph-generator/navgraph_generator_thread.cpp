@@ -23,7 +23,6 @@
 #include <core/threading/mutex_locker.h>
 #include <navgraph/generators/voronoi.h>
 #include <plugins/laser-lines/line_func.h>
-#include <plugins/amcl/map/map.h>
 #include <plugins/amcl/amcl_utils.h>
 
 #ifdef HAVE_VISUAL_DEBUGGING
@@ -58,6 +57,13 @@ NavGraphGeneratorThread::init()
 {
   bbox_set_ = false;
   copy_default_properties_ = true;
+
+  filter_["FILTER_EDGES_BY_MAP"] = false;
+  filter_["FILTER_ORPHAN_NODES"] = false;
+
+  filter_params_float_defaults_["FILTER_EDGES_BY_MAP"]["distance"] = 0.3;
+
+  filter_params_float_ = filter_params_float_defaults_;
 
   cfg_map_line_segm_max_iterations_ =
     config->get_uint(CFG_PREFIX"map/line_segmentation_max_iterations");
@@ -138,6 +144,16 @@ NavGraphGeneratorThread::loop()
   logger->log_debug(name(), "  Computing Voronoi");
   nggv.compute(navgraph);
 
+  // post-processing
+  if (filter_["FILTER_EDGES_BY_MAP"]) {
+    logger->log_debug(name(), "  Applying FILTER_EDGES_BY_MAP");
+    filter_edges_from_map(filter_params_float_["FILTER_EDGES_BY_MAP"]["distance"]);
+  }
+  if (filter_["FILTER_ORPHAN_NODES"]) {
+    logger->log_debug(name(), "  Applying FILTER_ORPHAN_NODES");
+    filter_nodes_orphans();
+  }
+
   // restore default properties
   if (copy_default_properties_) {
     navgraph->set_default_properties(default_props);
@@ -213,10 +229,15 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
 
   if (message->is_of_type<NavGraphGeneratorInterface::ClearMessage>()) {
     obstacles_.clear();
+    map_obstacles_.clear();
     pois_.clear();
     default_properties_.clear();
     bbox_set_ = false;
     copy_default_properties_ = true;
+    filter_params_float_ = filter_params_float_defaults_;
+    for (auto &f : filter_) {
+      f.second = false;
+    }
   } else if (message->is_of_type<NavGraphGeneratorInterface::SetBoundingBoxMessage>()) {
     NavGraphGeneratorInterface::SetBoundingBoxMessage *msg =
       message->as_type<NavGraphGeneratorInterface::SetBoundingBoxMessage>();
@@ -225,6 +246,27 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     bbox_p1_.y = msg->p1_y();
     bbox_p2_.x = msg->p2_x();
     bbox_p2_.y = msg->p2_y();
+
+  } else if (message->is_of_type<NavGraphGeneratorInterface::SetFilterMessage>()) {
+    NavGraphGeneratorInterface::SetFilterMessage *msg =
+      message->as_type<NavGraphGeneratorInterface::SetFilterMessage>();
+
+    filter_[navgen_if_->tostring_FilterType(msg->filter())] = msg->is_enable();
+
+  } else if (message->is_of_type<NavGraphGeneratorInterface::SetFilterParamFloatMessage>()) {
+    NavGraphGeneratorInterface::SetFilterParamFloatMessage *msg =
+      message->as_type<NavGraphGeneratorInterface::SetFilterParamFloatMessage>();
+
+    std::map<std::string, float> &param_float =
+      filter_params_float_[navgen_if_->tostring_FilterType(msg->filter())];
+
+    if (param_float.find(msg->param()) != param_float.end()) {
+      param_float[msg->param()] = msg->value();
+    } else {
+      logger->log_warn(name(), "Filter %s has no float parameter named %s, ignoring",
+		       navgen_if_->tostring_FilterType(msg->filter()),
+		       msg->param());
+    }
 
   } else if (message->is_of_type<NavGraphGeneratorInterface::AddMapObstaclesMessage>()) {
     NavGraphGeneratorInterface::AddMapObstaclesMessage *msg =
@@ -302,12 +344,9 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
 }
 
 
-NavGraphGeneratorThread::ObstacleMap
-NavGraphGeneratorThread::map_obstacles(float line_max_dist)
+map_t *
+NavGraphGeneratorThread::load_map(std::vector<std::pair<int, int>> &free_space_indices)
 {
-  ObstacleMap  obstacles;
-  unsigned int obstacle_i = 0;
-
   std::string  cfg_map_file;
   float        cfg_resolution;
   float        cfg_origin_x;
@@ -320,10 +359,19 @@ NavGraphGeneratorThread::map_obstacles(float line_max_dist)
 				cfg_origin_y, cfg_origin_theta, cfg_occupied_thresh,
 				cfg_free_thresh);
 
+  return fawkes::amcl::read_map(cfg_map_file.c_str(),
+				cfg_origin_x, cfg_origin_y, cfg_resolution,
+				cfg_occupied_thresh, cfg_free_thresh, free_space_indices);
+}
+
+NavGraphGeneratorThread::ObstacleMap
+NavGraphGeneratorThread::map_obstacles(float line_max_dist)
+{
+  ObstacleMap  obstacles;
+  unsigned int obstacle_i = 0;
+
   std::vector<std::pair<int, int> > free_space_indices;
-  map_t *map = fawkes::amcl::read_map(cfg_map_file.c_str(),
-				      cfg_origin_x, cfg_origin_y, cfg_resolution,
-				      cfg_occupied_thresh, cfg_free_thresh, free_space_indices);
+  map_t *map = load_map(free_space_indices);
 
   logger->log_info(name(), "Map Obstacles: map size: %ux%u (%zu of %u cells free, %.1f%%)",
                    map->size_x, map->size_y, free_space_indices.size(),
@@ -413,6 +461,72 @@ NavGraphGeneratorThread::map_obstacles(float line_max_dist)
   map_free(map);
 
   return obstacles;
+}
+
+
+void
+NavGraphGeneratorThread::filter_edges_from_map(float max_dist)
+{
+  std::vector<std::pair<int, int> > free_space_indices;
+  map_t *map = load_map(free_space_indices);
+
+  const std::vector<NavGraphEdge> &edges = navgraph->edges();
+
+  for (int x = 0; x < map->size_x; ++x) {
+    for (int y = 0; y < map->size_y; ++y) {
+      if (map->cells[MAP_INDEX(map, x, y)].occ_state > 0) {
+	// cell is occupied, generate point in cloud
+	Eigen::Vector2f gp;
+	gp[0] = MAP_WXGX(map, x) + 0.5 * map->scale;
+	gp[1] = MAP_WYGY(map, y) + 0.5 * map->scale;
+
+	for (const NavGraphEdge &e : edges) {
+	  try {
+	    cart_coord_2d_t poe = e.closest_point_on_edge(gp[0], gp[1]);
+	    Eigen::Vector2f p;
+	    p[0] = poe.x; p[1] = poe.y;
+	    if ((gp - p).norm() <= max_dist) {
+	      // edge too close, remove it!
+	      logger->log_debug(name(),
+				"  Removing edge (%s--%s), too close to occupied map cell (%f,%f)",
+				e.from().c_str(), e.to().c_str(), gp[0], gp[1]);
+	      navgraph->remove_edge(e);
+	      break;
+	    }
+	  } catch (Exception &e) {} // alright, not close
+	}
+      }
+    }
+  }
+  map_free(map);
+}
+
+
+void
+NavGraphGeneratorThread::filter_nodes_orphans()
+{
+  const std::vector<NavGraphEdge> &edges = navgraph->edges();
+  const std::vector<NavGraphNode> &nodes = navgraph->nodes();
+
+  std::list<NavGraphNode> remove_nodes;
+
+  for (const NavGraphNode &n : nodes) {
+    std::string nname = n.name();
+    std::vector<NavGraphEdge>::const_iterator e =
+      std::find_if(edges.begin(), edges.end(),
+		   [nname](const NavGraphEdge &e)->bool{
+		     return (e.from() == nname || e.to() == nname);
+		   });
+    if (e == edges.end() && ! n.unconnected()) {
+      // node is not connected to any other node -> remove
+      remove_nodes.push_back(n);
+    }
+  }
+
+  for (const NavGraphNode &n : remove_nodes) {
+    logger->log_debug(name(), "  Removing unconnected node %s", n.name().c_str());
+    navgraph->remove_node(n);
+  }
 }
 
 #ifdef HAVE_VISUAL_DEBUGGING

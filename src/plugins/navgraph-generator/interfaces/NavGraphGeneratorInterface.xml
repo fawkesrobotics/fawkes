@@ -25,6 +25,26 @@
        use the CLOSEST_NODE method as a fallback.
      </item>
   </enum> 
+   <enum name="FilterType">
+     <comment>Post-processing filtering type.</comment>
+     <item name="FILTER_EDGES_BY_MAP">
+       If enabled, filters out all edges after the map generation that
+       pass too close by an occupied cell of the map. Use this to get
+       rid of connections which "pass through walls".
+       Note that this step is done before adding points of interest.
+       Therefore edges going to POIs might still pass through or close
+       by occupied cells.
+
+       Parameters:
+       distance: minimum distance from edges to occupied map grid
+       cells to consider it safe.
+     </item>
+     <item name="FILTER_ORPHAN_NODES">
+       If enabled, filters out all nodes which are not connected to
+       any other node. These can occur, for example, after performing
+       the FILTER_EDGES_BY_MAP filter.
+     </item>
+   </enum>
   </constants>
   <data>
     <comment>
@@ -64,6 +84,22 @@
     <field type="float" name="p1_y">Y coordinate of bbox start point in global frame.</field>
     <field type="float" name="p2_x">X coordinate of bbox end point in global frame.</field>
     <field type="float" name="p2_y">Y coordinate of bbox end point in global frame.</field>
+  </message>
+  <message name="SetFilter">
+    <comment>Enable or disable a post-processing filter.</comment>
+    <field type="FilterType" name="filter">Which filter to
+    enable/disable.</field>
+    <field type="bool" name="enable">True to enable, false to
+    disable</field>
+  </message>
+  <message name="SetFilterParamFloat">
+    <comment>Enable or disable a post-processing filter.</comment>
+    <field type="FilterType" name="filter">Which filter to
+    enable/disable.</field>
+    <field type="string" name="param" length="32">Parameter name, see FilterType
+    description for possible values.</field>
+    <field type="float" name="value">True to enable, false to
+    disable</field>
   </message>
   <message name="AddMapObstacles">
     <comment>
@@ -152,7 +188,7 @@
     (default) false to disable).</field>
   </message>
   <message name="RemovePointOfInterest">
-    <comment></comment>
+    <comment>Remove a specific point of interest.</comment>
     <field type="string" name="id" length="64">
       ID of the obstacle to remove.
     </field>    

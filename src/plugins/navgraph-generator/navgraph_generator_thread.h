@@ -33,6 +33,7 @@
 #include <navgraph/navgraph.h>
 #include <blackboard/interface_listener.h>
 #include <utils/math/types.h>
+#include <plugins/amcl/map/map.h>
 
 #include <interfaces/NavGraphGeneratorInterface.h>
 
@@ -81,6 +82,10 @@ class NavGraphGeneratorThread
                                              fawkes::Message *message) throw();
 
   ObstacleMap map_obstacles(float line_max_dist);
+  map_t * load_map(std::vector<std::pair<int, int>> &free_space_indices);
+
+  void filter_edges_from_map(float max_dist);
+  void filter_nodes_orphans();
 
 #ifdef HAVE_VISUAL_DEBUGGING
   void publish_visualization();
@@ -102,8 +107,12 @@ class NavGraphGeneratorThread
   ObstacleMap obstacles_;
   ObstacleMap map_obstacles_;
 
-  bool                                                 copy_default_properties_;
-  std::map<std::string, std::string>                   default_properties_;
+  bool                                 copy_default_properties_;
+  std::map<std::string, std::string>   default_properties_;
+
+  std::map<std::string, bool>                         filter_;
+  std::map<std::string, std::map<std::string, float>> filter_params_float_;
+  std::map<std::string, std::map<std::string, float>> filter_params_float_defaults_;
 
   bool                    bbox_set_;
   fawkes::cart_coord_2d_t bbox_p1_;

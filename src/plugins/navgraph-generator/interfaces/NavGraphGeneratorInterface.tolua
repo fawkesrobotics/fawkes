@@ -7,10 +7,16 @@ class NavGraphGeneratorInterface : public Interface
 {
 
   typedef enum {
+    UNCONNECTED,
     CLOSEST_NODE,
     CLOSEST_EDGE,
     CLOSEST_EDGE_OR_NODE
   } ConnectionMode;
+
+  typedef enum {
+    FILTER_EDGES_BY_MAP,
+    FILTER_ORPHAN_NODES
+  } FilterType;
 
   class ClearMessage : public Message
   {
@@ -37,6 +43,37 @@ class NavGraphGeneratorInterface : public Interface
     float p2_y();
     void set_p2_y(const float new_p2_y);
     int maxlenof_p2_y() const;
+  };
+
+  class SetFilterMessage : public Message
+  {
+    SetFilterMessage(FilterType ini_filter, bool ini_enable);
+    SetFilterMessage();
+    ~SetFilterMessage();
+
+    FilterType filter();
+    void set_filter(const FilterType new_filter);
+    int maxlenof_filter() const;
+    bool is_enable();
+    void set_enable(const bool new_enable);
+    int maxlenof_enable() const;
+  };
+
+  class SetFilterParamFloatMessage : public Message
+  {
+    SetFilterParamFloatMessage(FilterType ini_filter, char * ini_param, float ini_value);
+    SetFilterParamFloatMessage();
+    ~SetFilterParamFloatMessage();
+
+    FilterType filter();
+    void set_filter(const FilterType new_filter);
+    int maxlenof_filter() const;
+    char * param();
+    void set_param(const char * new_param);
+    int maxlenof_param() const;
+    float value();
+    void set_value(const float new_value);
+    int maxlenof_value() const;
   };
 
   class AddMapObstaclesMessage : public Message
