@@ -94,8 +94,6 @@ class NavGraphGeneratorThread
  private:
   std::string  cfg_global_frame_;
   unsigned int cfg_map_line_segm_max_iterations_;
-  float        cfg_map_line_segm_distance_threshold_;
-  float        cfg_map_line_segm_sample_max_dist_;
   float        cfg_map_line_min_length_;
   unsigned int cfg_map_line_segm_min_inliers_;
   float        cfg_map_line_cluster_tolerance_;

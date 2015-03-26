@@ -67,10 +67,6 @@ NavGraphGeneratorThread::init()
 
   cfg_map_line_segm_max_iterations_ =
     config->get_uint(CFG_PREFIX"map/line_segmentation_max_iterations");
-  cfg_map_line_segm_distance_threshold_ =
-    config->get_float(CFG_PREFIX"map/line_segmentation_distance_threshold");
-  cfg_map_line_segm_sample_max_dist_ =
-    config->get_float(CFG_PREFIX"map/line_segmentation_sample_max_dist");
   cfg_map_line_segm_min_inliers_ =
     config->get_uint(CFG_PREFIX"map/line_segmentation_min_inliers");
   cfg_map_line_min_length_ =
@@ -406,7 +402,8 @@ NavGraphGeneratorThread::map_obstacles(float line_max_dist)
   std::vector<LineInfo> linfos =
     calc_lines<pcl::PointXYZ>(map_cloud,
 			      cfg_map_line_segm_min_inliers_, cfg_map_line_segm_max_iterations_,
-			      cfg_map_line_segm_distance_threshold_, cfg_map_line_segm_sample_max_dist_,
+			      /* segm distance threshold */ 2 * map->scale,
+			      /* segm sample max dist */  2 * map->scale,
 			      cfg_map_line_cluster_tolerance_, cfg_map_line_cluster_quota_,
 			      cfg_map_line_min_length_, -1, -1, -1,
 			      no_line_cloud);
