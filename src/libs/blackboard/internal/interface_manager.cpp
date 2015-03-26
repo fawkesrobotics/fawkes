@@ -252,6 +252,15 @@ BlackBoardInterfaceManager::create_interface(const char *type, const char *ident
 Interface *
 BlackBoardInterfaceManager::open_for_reading(const char *type, const char *identifier, const char *owner)
 {
+  if (strlen(type) > __INTERFACE_TYPE_SIZE) {
+    throw Exception("Interface type '%s' too long, maximum length is %zu",
+		    type, __INTERFACE_TYPE_SIZE);
+  }
+  if (strlen(identifier) > __INTERFACE_ID_SIZE) {
+    throw Exception("Interface ID '%s' too long, maximum length is %zu",
+		    type, __INTERFACE_ID_SIZE);
+  }
+
   mutex->lock();
   Interface *iface = NULL;
   void *ptr = NULL;
@@ -407,6 +416,15 @@ BlackBoardInterfaceManager::open_multiple_for_reading(const char *type_pattern,
 Interface *
 BlackBoardInterfaceManager::open_for_writing(const char *type, const char *identifier, const char *owner)
 {
+  if (strlen(type) > __INTERFACE_TYPE_SIZE) {
+    throw Exception("Interface type '%s' too long, maximum length is %zu",
+		    type, __INTERFACE_TYPE_SIZE);
+  }
+  if (strlen(identifier) > __INTERFACE_ID_SIZE) {
+    throw Exception("Interface ID '%s' too long, maximum length is %zu",
+		    type, __INTERFACE_ID_SIZE);
+  }
+
   mutex->lock();
   memmgr->lock();
 
