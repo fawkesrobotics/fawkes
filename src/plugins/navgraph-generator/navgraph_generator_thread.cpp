@@ -155,6 +155,13 @@ NavGraphGeneratorThread::loop()
 		      p.second.position.x, p.second.position.y,
 		      p.second.properties);
     switch (p.second.conn_mode) {
+    case NavGraphGeneratorInterface::UNCONNECTED:
+      logger->log_debug(name(), "  Unconnected POI %s at (%f,%f)",
+			p.first.c_str(), p.second.position.x, p.second.position.y);
+      node.set_unconnected(true);
+      navgraph->add_node(node);
+      break;
+
     case NavGraphGeneratorInterface::CLOSEST_NODE:
       logger->log_debug(name(), "  Connecting POI %s at (%f,%f) to closest node",
 			p.first.c_str(), p.second.position.x, p.second.position.y);
