@@ -425,7 +425,7 @@ NavGraphGeneratorThread::map_obstacles(float line_max_dist)
     const Eigen::Vector3f &e1 = (k >= 0) ? line.end_point_2 : line.end_point_1;
 
     obstacles[NavGraph::format_name("Map_%u", ++obstacle_i)] = cart_coord_2d_t(e1[0], e1[1]);
-    for (unsigned int i = 1; i < num_points; ++i) {
+    for (unsigned int i = 1; i <= num_points; ++i) {
       Eigen::Vector3f p = e1 + i * distribution * line.line_direction;
       obstacles[NavGraph::format_name("Map_%d", ++obstacle_i)] =  cart_coord_2d_t(p[0], p[1]);
     }
