@@ -36,6 +36,7 @@
 #include <interface/interface_info.h>
 
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/threading/refc_rwlock.h>
 #include <core/exceptions/system.h>
 #include <utils/system/dynamic_module/module.h>
@@ -501,9 +502,8 @@ BlackBoardInterfaceManager::close(Interface *interface)
     notifier->notify_of_interface_destroyed(interface->__type, interface->__id);
   }
 
-  mutex->lock();
+  MutexLocker lock(mutex);
   delete_interface_instance( interface );
-  mutex->unlock();
 }
 
 
