@@ -2,9 +2,8 @@
 /***************************************************************************
  *  parser.cpp - Interface config parser
  *
- *  Generated: Tue Oct 10 17:41:13 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
- *
+ *  Created: Tue Oct 10 17:41:13 2006
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,6 +23,7 @@
 #include "exceptions.h"
 
 #include <utils/misc/string_conversions.h>
+#include <interface/interface.h>
 
 #include <iostream>
 #include <vector>
@@ -358,6 +358,10 @@ InterfaceParser::parse()
       throw InterfaceGeneratorInvalidContentException("no name for interface");
     }
     name = attr->get_value();
+    if (name.length() > __INTERFACE_TYPE_SIZE) {
+      throw InterfaceGeneratorInvalidContentException("Interface name too long, max length is %u",
+						      __INTERFACE_TYPE_SIZE);
+    }
 
     attr = el->get_attribute("author");
     if ( attr ) {
