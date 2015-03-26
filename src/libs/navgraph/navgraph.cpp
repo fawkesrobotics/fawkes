@@ -591,7 +591,7 @@ NavGraph::add_edge(const NavGraphEdge &edge)
 void
 NavGraph::remove_node(const NavGraphNode &node)
 {
-  std::remove(nodes_.begin(), nodes_.end(), node);
+  nodes_.erase(std::remove(nodes_.begin(), nodes_.end(), node));
   edges_.erase(
     std::remove_if(edges_.begin(), edges_.end(),
 		   [&node](const NavGraphEdge &edge)->bool {
