@@ -263,8 +263,6 @@ calc_lines(typename pcl::PointCloud<PointType>::ConstPtr input,
     info.line_direction[2] = coeff->values[5];
 
     info.length = length;
-    info.end_point_1 = end_point_1;
-    info.end_point_2 = end_point_2;
 
     Eigen::Vector3f ld_unit = info.line_direction / info.line_direction.norm();
     Eigen::Vector3f pol_invert = Eigen::Vector3f(0,0,0)-info.point_on_line;
@@ -283,6 +281,20 @@ calc_lines(typename pcl::PointCloud<PointType>::ConstPtr input,
       //logger->log_warn(name(), "[L %u] line too close or too far (%f, min %f, max %f)",
       //	       loop_count_, dist, min_dist, max_dist);
       continue;
+    }
+
+    // Calculate parameter for e2 with respect to e1 as origin and the
+    // direction vector, i.e. a k such that e1 + k * dir == e2.
+    // If the resulting parameter is >= 0, then the direction vector
+    // points from e1 to e2, otherwise it points from e2 to e1.
+    float line_dir_k = ld_unit.dot(end_point_2 - end_point_1);
+
+    if (line_dir_k >= 0) {
+      info.end_point_1 = end_point_1;
+      info.end_point_2 = end_point_2;
+    } else {
+      info.end_point_1 = end_point_2;
+      info.end_point_2 = end_point_1;
     }
 
     coeff->values[0] = P[0];
