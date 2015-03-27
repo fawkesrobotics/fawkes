@@ -145,6 +145,34 @@ BlackboardCLIPSFeature::clips_context_init(const std::string &env_name,
 	env_name)
     )
   );
+  clips->add_function("blackboard-create-msg",
+    sigc::slot<CLIPS::Value, std::string, std::string>(
+      sigc::bind<0>(
+	sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_create_msg),
+	env_name)
+    )
+  );
+  clips->add_function("blackboard-list-msg-fields",
+    sigc::slot<CLIPS::Values, void *>(
+      sigc::bind<0>(
+	sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_list_msg_fields),
+	env_name)
+    )
+  );
+  clips->add_function("blackboard-set-msg-field",
+    sigc::slot<void, void *, std::string, CLIPS::Value>(
+      sigc::bind<0>(
+	sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_set_msg_field),
+	env_name)
+    )
+  );
+  clips->add_function("blackboard-send-msg",
+    sigc::slot<void, void *>(
+      sigc::bind<0>(
+	sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_send_msg),
+	env_name)
+    )
+  );
 }
 
 void
@@ -567,199 +595,7 @@ BlackboardCLIPSFeature::clips_blackboard_set(std::string env_name, std::string u
 			    return uid == iface->uid();
 			  });
     if (i != interfaces_[env_name].writing[type].end()) {
-      InterfaceFieldIterator fit;
-      for (fit = (*i)->fields(); fit != (*i)->fields_end(); ++fit) {
-	if (field == fit.get_name()) {
-	  switch (fit.get_type()) {
-	  case IFT_BOOL:
-	    if (value.type() != CLIPS::TYPE_SYMBOL) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value (not a symbol)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      std::string val_s = value.as_string();
-	      if (value == "TRUE") {
-		fit.set_bool(true);
-	      } else if (value == "FALSE") {
-		fit.set_bool(false);
-	      } else {
-		logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				   "Cannot set field %s of %s: invalid value %s (not a bool)",
-				   field.c_str(), uid.c_str(), val_s.c_str());
-	      }
-	    }
-	    break;
-
-	  case IFT_INT8:
-	    if (value.type() != CLIPS::TYPE_INTEGER) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value (not an integer)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      long long int val = value.as_integer();
-	      fit.set_int8((int8_t)val);
-	    }
-	    break;
-
-	  case IFT_UINT8:
-	    if (value.type() != CLIPS::TYPE_INTEGER) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value (not an integer)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      long long int val = value.as_integer();
-	      fit.set_uint8((uint8_t)val);
-	    }
-	    break;
-
-	  case IFT_INT16:
-	    if (value.type() != CLIPS::TYPE_INTEGER) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value (not an integer)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      long long int val = value.as_integer();
-	      fit.set_int16((int16_t)val);
-	    }
-	    break;
-
-	  case IFT_UINT16:
-	    if (value.type() != CLIPS::TYPE_INTEGER) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value (not an integer)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      long long int val = value.as_integer();
-	      fit.set_uint16((uint16_t)val);
-	    }
-	    break;
-
-	  case IFT_INT32:
-	    if (value.type() != CLIPS::TYPE_INTEGER) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value (not an integer)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      long long int val = value.as_integer();
-	      fit.set_int32((int32_t)val);
-	    }
-	    break;
-
-	  case IFT_UINT32:
-	    if (value.type() != CLIPS::TYPE_INTEGER) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value (not an integer)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      long long int val = value.as_integer();
-	      fit.set_uint32((uint32_t)val);
-	    }
-	    break;
-
-	  case IFT_INT64:
-	    if (value.type() != CLIPS::TYPE_INTEGER) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value (not an integer)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      long long int val = value.as_integer();
-	      fit.set_int64((int64_t)val);
-	    }
-	    break;
-
-	  case IFT_UINT64:
-	    if (value.type() != CLIPS::TYPE_INTEGER) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value (not an integer)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      long long int val = value.as_integer();
-	      fit.set_uint64((uint64_t)val);
-	    }
-	    break;
-
-	  case IFT_FLOAT:
-	    if (value.type() != CLIPS::TYPE_FLOAT && value.type() != CLIPS::TYPE_INTEGER) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value "
-				 "(neither float nor integer)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      if (value.type() == CLIPS::TYPE_FLOAT) {
-		double val = value.as_float();
-		fit.set_float((float)val);
-	      } else {
-		long long int val = value.as_integer();
-		fit.set_float((float)val);
-	      }
-	    }
-	    break;
-
-	  case IFT_DOUBLE:
-	    if (value.type() != CLIPS::TYPE_FLOAT && value.type() != CLIPS::TYPE_INTEGER) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value "
-				 "(neither double nor integer)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      if (value.type() == CLIPS::TYPE_FLOAT) {
-		double val = value.as_float();
-		fit.set_double((double)val);
-	      } else {
-		long long int val = value.as_integer();
-		fit.set_double((double)val);
-	      }
-	    }
-	    break;
-
-	  case IFT_STRING:
-	    if (value.type() != CLIPS::TYPE_SYMBOL && value.type() != CLIPS::TYPE_STRING) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value "
-				 "(neither symbol nor string)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      std::string val = value.as_string();
-	      fit.set_string(val.c_str());
-	    }
-	    break;
-
-	  case IFT_ENUM:
-	    if (value.type() != CLIPS::TYPE_SYMBOL) {
-	      logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				 "Cannot set field %s of %s: invalid value "
-				 "(not a symbol)",
-				 field.c_str(), uid.c_str());
-	    } else {
-	      try {
-		std::string val = value.as_string();
-		fit.set_enum_string(val.c_str());
-	      } catch (Exception &e) {
-		logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-				   "Failed to set enum field %s of %s to %s, exception follows",
-				   field.c_str(), uid.c_str(), value.as_string().c_str());
-		logger_->log_error(("BBCLIPS|" + env_name).c_str(), e);
-	      }
-	    }
-	    break;
-
-	  default:
-	    logger_->log_error(("BBCLIPS|" + env_name).c_str(),
-			       "Setting of field type %s for %s in %s not supported",
-			       fit.get_typename(), field.c_str(), uid.c_str());
-	    break;
-	  }
-
-	  break;
-	}
-      }
-
-      if (fit == (*i)->fields_end()) {
-	logger_->log_error(("BBCLIPS|" + env_name).c_str(), "Interface %s has no field %s",
-			   uid.c_str(), field.c_str());
-      }
-      
-
+      set_field((*i)->fields(), (*i)->fields_end(), env_name, field, value);
     } else {
       logger_->log_error(("BBCLIPS|" + env_name).c_str(), "Interface %s not opened for writing,"
 			 " in environment %s", uid.c_str(), env_name.c_str());
@@ -772,3 +608,338 @@ BlackboardCLIPSFeature::clips_blackboard_set(std::string env_name, std::string u
   }
 }
 
+CLIPS::Value
+BlackboardCLIPSFeature::clips_blackboard_create_msg(std::string env_name, std::string uid,
+						    std::string msg_type)
+{
+  // no interfaces registered, that's fine
+  if (interfaces_.find(env_name) == interfaces_.end()){
+    return CLIPS::Value(new std::shared_ptr<Message>());
+  }
+  if (envs_.find(env_name) == envs_.end()) {
+    // Environment not registered, big bug
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Environment %s not registered,"
+  		      " cannot read interfaces", env_name.c_str());
+    return CLIPS::Value(new std::shared_ptr<Message>());
+  }
+  fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
+  
+  std::string if_type, id;
+  Interface::parse_uid(uid.c_str(), if_type, id);
+  
+  //get interface
+  if (interfaces_[env_name].reading.find(if_type) == interfaces_[env_name].reading.end()){
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't create message for interface %s, because there is no opened interface with this type", uid.c_str());
+    return CLIPS::Value(new std::shared_ptr<Message>());
+  }
+  auto i = std::find_if(interfaces_[env_name].reading[if_type].begin(),
+			interfaces_[env_name].reading[if_type].end(),
+			[&uid](const Interface *iface)->bool {
+			  return uid == iface->uid();
+			});
+  if (i == interfaces_[env_name].reading[if_type].end()){
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't create message for interface %s, because there is no opened interface with that uid", uid.c_str());
+    return CLIPS::Value(new std::shared_ptr<Message>());
+  }
+ 
+  //check if message type exists
+  std::list<const char *> available_types = (*i)->get_message_types();
+  bool type_exists = false;
+  for(std::list<const char *>::iterator it = available_types.begin(); it != available_types.end() && !type_exists; it++){
+    if(std::string(*it).compare(msg_type) == 0){
+      type_exists = true;
+    }
+  }
+  if(!type_exists){
+     logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't create message for interface %s, because there is no message type %s", uid.c_str(), msg_type.c_str());
+     return CLIPS::Value(new std::shared_ptr<Message>());
+  }
+
+  //create message
+  Message* m = (*i)->create_message(msg_type.c_str());
+
+  //save which interface belongs to the message
+  interface_of_msg_[m] = (*i);
+
+  //send message to clips
+  return CLIPS::Value(new std::shared_ptr<Message>(m));
+}
+
+CLIPS::Values
+BlackboardCLIPSFeature::clips_blackboard_list_msg_fields(std::string env_name, void *msgptr)
+{
+  std::shared_ptr<Message> *m =
+    static_cast<std::shared_ptr<Message> *>(msgptr);
+  if (!*m) {
+     logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't list message fields, the pointer is wrong.");
+    return CLIPS::Values();
+  }
+
+  const int field_count  = (*m)->num_fields();  
+  CLIPS::Values field_names(field_count);
+  int i = 0;
+  for(InterfaceFieldIterator it = (*m)->fields(); it != (*m)->fields_end(); it++){
+    field_names[i].set(it.get_name(), true);
+    logger_->log_info(("BBCLIPS|" + env_name).c_str(), "Message has field %s", it.get_name());
+    i++;
+  }
+  return field_names;
+}
+
+
+void
+BlackboardCLIPSFeature::clips_blackboard_set_msg_field(std::string env_name, void *msgptr, std::string field_name, CLIPS::Value value)
+{
+  std::shared_ptr<Message> *m =
+    static_cast<std::shared_ptr<Message> *>(msgptr);
+  if (!*m) {
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't set message field, the pointer is wrong.");
+    return;
+  }
+
+  bool set_success = set_field((*m)->fields(), (*m)->fields_end(),
+			       env_name, field_name, value);
+  if (!set_success){
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't set message field.");
+  }
+}
+
+
+void
+BlackboardCLIPSFeature::clips_blackboard_send_msg(std::string env_name, void *msgptr)
+{
+  std::shared_ptr<Message> *m =
+    static_cast<std::shared_ptr<Message> *>(msgptr);
+  if (!*m) {
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't set message field, the pointer is wrong.");
+    return;
+  }
+  if (!interface_of_msg_[m->get()]) {
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't send message, was it already sent?");
+    return;
+  }
+
+  //send message about the saved interface
+  interface_of_msg_[m->get()]->msgq_enqueue(m->get());
+
+  //delete saved pointer to interface
+  interface_of_msg_.erase(m->get());
+}
+
+/**
+   Set field of an InterfaceFieldIterator of an Interface or Message.
+   @return if field could successfully be set
+ */
+bool
+BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
+				  InterfaceFieldIterator fit_end,
+				  std::string env_name, std::string field,
+				  CLIPS::Value value)
+{
+  InterfaceFieldIterator fit;
+  for (fit = fit_begin; fit != fit_end; ++fit) {
+    if (field == fit.get_name()) {
+      switch (fit.get_type()) {
+      case IFT_BOOL:
+	if (value.type() != CLIPS::TYPE_SYMBOL) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value (not a symbol)",
+			     field.c_str());
+	  return false;
+	} else {
+	  std::string val_s = value.as_string();
+	  if (value == "TRUE") {
+	    fit.set_bool(true);
+	  } else if (value == "FALSE") {
+	    fit.set_bool(false);
+	  } else {
+	    logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			       "Cannot set field %s: invalid value %s (not a bool)",
+			       field.c_str(), val_s.c_str());
+	    return false;
+	  }
+	}
+	break;
+
+      case IFT_INT8:
+	if (value.type() != CLIPS::TYPE_INTEGER) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value (not an integer)",
+			     field.c_str());
+	  return false;
+	} else {
+	  long long int val = value.as_integer();
+	  fit.set_int8((int8_t)val);
+	}
+	break;
+
+      case IFT_UINT8:
+	if (value.type() != CLIPS::TYPE_INTEGER) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value (not an integer)",
+			     field.c_str());
+	  return false;
+	} else {
+	  long long int val = value.as_integer();
+	  fit.set_uint8((uint8_t)val);
+	}
+	break;
+
+      case IFT_INT16:
+	if (value.type() != CLIPS::TYPE_INTEGER) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value (not an integer)",
+			     field.c_str());
+	  return false;
+	} else {
+	  long long int val = value.as_integer();
+	  fit.set_int16((int16_t)val);
+	}
+	break;
+
+      case IFT_UINT16:
+	if (value.type() != CLIPS::TYPE_INTEGER) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value (not an integer)",
+			     field.c_str());
+	  return false;
+	} else {
+	  long long int val = value.as_integer();
+	  fit.set_uint16((uint16_t)val);
+	}
+	break;
+
+      case IFT_INT32:
+	if (value.type() != CLIPS::TYPE_INTEGER) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value (not an integer)",
+			     field.c_str());
+	  return false;
+	} else {
+	  long long int val = value.as_integer();
+	  fit.set_int32((int32_t)val);
+	}
+	break;
+
+      case IFT_UINT32:
+	if (value.type() != CLIPS::TYPE_INTEGER) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value (not an integer)",
+			     field.c_str());
+	  return false;
+	} else {
+	  long long int val = value.as_integer();
+	  fit.set_uint32((uint32_t)val);
+	}
+	break;
+
+      case IFT_INT64:
+	if (value.type() != CLIPS::TYPE_INTEGER) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value (not an integer)",
+			     field.c_str());
+	  return false;
+	} else {
+	  long long int val = value.as_integer();
+	  fit.set_int64((int64_t)val);
+	}
+	break;
+
+      case IFT_UINT64:
+	if (value.type() != CLIPS::TYPE_INTEGER) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value (not an integer)",
+			     field.c_str());
+	  return false;
+	} else {
+	  long long int val = value.as_integer();
+	  fit.set_uint64((uint64_t)val);
+	}
+	break;
+
+      case IFT_FLOAT:
+	if (value.type() != CLIPS::TYPE_FLOAT && value.type() != CLIPS::TYPE_INTEGER) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value "
+			     "(neither float nor integer)",
+			     field.c_str());
+	  return false;
+	} else {
+	  if (value.type() == CLIPS::TYPE_FLOAT) {
+	    double val = value.as_float();
+	    fit.set_float((float)val);
+	  } else {
+	    long long int val = value.as_integer();
+	    fit.set_float((float)val);
+	  }
+	}
+	break;
+
+      case IFT_DOUBLE:
+	if (value.type() != CLIPS::TYPE_FLOAT && value.type() != CLIPS::TYPE_INTEGER) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value "
+			     "(neither double nor integer)",
+			     field.c_str());
+	  return false;
+	} else {
+	  if (value.type() == CLIPS::TYPE_FLOAT) {
+	    double val = value.as_float();
+	    fit.set_double((double)val);
+	  } else {
+	    long long int val = value.as_integer();
+	    fit.set_double((double)val);
+	  }
+	}
+	break;
+
+      case IFT_STRING:
+	if (value.type() != CLIPS::TYPE_SYMBOL && value.type() != CLIPS::TYPE_STRING) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value "
+			     "(neither symbol nor string)",
+			     field.c_str());
+	  return false;
+	} else {
+	  std::string val = value.as_string();
+	  fit.set_string(val.c_str());
+	}
+	break;
+
+      case IFT_ENUM:
+	if (value.type() != CLIPS::TYPE_SYMBOL) {
+	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			     "Cannot set field %s: invalid value "
+			     "(not a symbol)",
+			     field.c_str());
+	} else {
+	  try {
+	    std::string val = value.as_string();
+	    fit.set_enum_string(val.c_str());
+	  } catch (Exception &e) {
+	    logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			       "Failed to set enum field %s to %s, exception follows",
+			       field.c_str(), value.as_string().c_str());
+	    logger_->log_error(("BBCLIPS|" + env_name).c_str(), e);
+	    return false;
+	  }
+	}
+	break;
+
+      default:
+	logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			   "Setting of field type %s for %s not supported",
+			   fit.get_typename(), field.c_str());
+	return false;
+      }
+
+      break;
+    }
+  }
+
+  if (fit == fit_end) {
+    logger_->log_error(("BBCLIPS|" + env_name).c_str(), "Can't find field %s",
+		       field.c_str());
+  }
+  return true;
+}

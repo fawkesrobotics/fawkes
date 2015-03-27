@@ -39,6 +39,8 @@ namespace fawkes {
   class BlackBoard;
   class Logger;
   class Interface;
+  class Message;
+  class InterfaceFieldIterator;
 }
 
 class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
@@ -63,6 +65,8 @@ class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
   } Interfaces;
   std::map<std::string, Interfaces >  interfaces_;
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+  //which created message belongs to which interface
+  std::map<fawkes::Message*, fawkes::Interface*> interface_of_msg_;
 
  private: // methods
   void clips_blackboard_open_interface(std::string env_name,
@@ -84,6 +88,18 @@ class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
   void clips_blackboard_preload(std::string env_name, std::string type);
   void clips_blackboard_set(std::string env_name, std::string uid,
 			    std::string field, CLIPS::Value value);
+  CLIPS::Value clips_blackboard_create_msg(std::string env_name, std::string uid,
+					   std::string msg_type);
+  CLIPS::Values clips_blackboard_list_msg_fields(std::string env_name, void *msgptr);
+
+  void clips_blackboard_set_msg_field(std::string env_name, void *msgptr,
+				      std::string field_name, CLIPS::Value value);
+  void clips_blackboard_send_msg(std::string env_name, void *msgptr);
+
+  //helper
+  bool set_field(fawkes::InterfaceFieldIterator fit_begin,
+		 fawkes::InterfaceFieldIterator fit_end,
+		 std::string env_name, std::string field, CLIPS::Value value);
 };
 
 #endif
