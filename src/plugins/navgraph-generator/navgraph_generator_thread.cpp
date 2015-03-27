@@ -417,16 +417,10 @@ NavGraphGeneratorThread::map_obstacles(float line_max_dist)
     const unsigned int num_points = ceilf(line.length / line_max_dist);
     float distribution = line.length / num_points;
 
-    // to determine: whether direction vector points from X to Y or from Y to X
-    // assume it is X->Y, then X + k * D = Y <=> Y - X = k * D,
-    //                    then k can be calculated, e.g., from first row
-    // If now k >= 0: X->Y, otherwise X<-Y
-    float k = (line.end_point_1[0] - line.end_point_2[0]) / line.line_direction[0];
-    const Eigen::Vector3f &e1 = (k >= 0) ? line.end_point_2 : line.end_point_1;
-
-    obstacles[NavGraph::format_name("Map_%u", ++obstacle_i)] = cart_coord_2d_t(e1[0], e1[1]);
+    obstacles[NavGraph::format_name("Map_%u", ++obstacle_i)] =
+      cart_coord_2d_t(line.end_point_1[0], line.end_point_1[1]);
     for (unsigned int i = 1; i <= num_points; ++i) {
-      Eigen::Vector3f p = e1 + i * distribution * line.line_direction;
+      Eigen::Vector3f p = line.end_point_1 + i * distribution * line.line_direction;
       obstacles[NavGraph::format_name("Map_%d", ++obstacle_i)] =  cart_coord_2d_t(p[0], p[1]);
     }
   }
