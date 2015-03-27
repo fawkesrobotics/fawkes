@@ -17,6 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/eclipse-clp/eclipse.mk
 include $(BUILDCONFDIR)/navgraph/navgraph.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 
 CFLAGS += $(ECLIPSE_CFLAGS)
 LDFLAGS += $(ECLIPSE_LDFLAGS)
@@ -35,13 +36,18 @@ OBJS_eclipse_clp = plugin.o control_thread.o eclipse_thread.o \
 		     externals/quaternion_helper.o   \
 		     externals/eclipseclp_config.o
 
-ifeq ($(HAVE_NAVGRAPH),1)
-  CFLAGS +=  $(CFLAGS_NAVGRAPH)
-  LDFLAGS += $(LDFLAGS_NAVGRAPH)
-  LIBS_eclipse_clp +=fawkesnavgraph
+ifeq ($(HAVE_NAVGRAPH)$(HAVE_TF),11)
+  CFLAGS +=  $(CFLAGS_NAVGRAPH) $(CFLAGS_TF)
+  LDFLAGS += $(LDFLAGS_NAVGRAPH) $(LDFLAGS_TF)
+  LIBS_eclipse_clp += fawkesnavgraph
   OBJS_eclipse_clp += externals/rcsoft_map_graph.o
 else
-  WARN_TARGETS += warning_navgraph
+  ifneq ($(HAVE_NAVGRAPH),1)
+    WARN_TARGETS += warning_navgraph
+  endif
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS += warning_tf
+  endif
 endif
 
 
@@ -71,6 +77,8 @@ warning_navgraph:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe navgraph support$(TNORMAL) ($(NAVGRAPH_ERROR))"
 $(WARN_TARGETS_BOOST): warning_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build ECLiPSe CLP Plugin $(TNORMAL) (Boost library $* not found)"
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe navgraph support$(TNORMAL) (TF not available))"
 
 endif
 
