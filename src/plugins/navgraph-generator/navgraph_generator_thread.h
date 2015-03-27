@@ -21,10 +21,6 @@
 #ifndef __PLUGINS_NAVGRAPH_GENERATOR_NAVGRAPH_GENERATOR_THREAD_H_
 #define __PLUGINS_NAVGRAPH_GENERATOR_NAVGRAPH_GENERATOR_THREAD_H_
 
-#ifdef HAVE_VISUALIZATION
-#  include "visualization_thread.h"
-#endif
-
 #include <core/threading/thread.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
@@ -37,14 +33,9 @@
 
 #include <interfaces/NavGraphGeneratorInterface.h>
 
-#ifdef HAVE_VISUAL_DEBUGGING
-#  include <plugins/ros/aspect/ros.h>
-
-namespace ros {
-  class Publisher;
-}
+#ifdef HAVE_VISUALIZATION
+class NavGraphGeneratorVisualizationThread;
 #endif
-
 
 class NavGraphGeneratorThread
 : public fawkes::Thread,
@@ -52,13 +43,14 @@ class NavGraphGeneratorThread
   public fawkes::ConfigurableAspect,
   public fawkes::NavGraphAspect,
   public fawkes::BlackBoardAspect,
-#ifdef HAVE_VISUAL_DEBUGGING
-  public fawkes::ROSAspect,
-#endif
   public fawkes::BlackBoardInterfaceListener
 {
+ friend class NavGraphGeneratorVisualizationThread;
  public:
   NavGraphGeneratorThread();
+#ifdef HAVE_VISUALIZATION
+  NavGraphGeneratorThread(NavGraphGeneratorVisualizationThread *vt);
+#endif
   virtual ~NavGraphGeneratorThread();
 
   virtual void init();
@@ -88,7 +80,7 @@ class NavGraphGeneratorThread
   void filter_nodes_orphans();
   void filter_multi_graph();
 
-#ifdef HAVE_VISUAL_DEBUGGING
+#ifdef HAVE_VISUALIZATION
   void publish_visualization();
 #endif
 
@@ -99,6 +91,7 @@ class NavGraphGeneratorThread
   unsigned int cfg_map_line_segm_min_inliers_;
   float        cfg_map_line_cluster_tolerance_;
   float        cfg_map_line_cluster_quota_;
+  bool         cfg_visualization_;
 
   fawkes::NavGraphGeneratorInterface *navgen_if_;
 
@@ -117,9 +110,8 @@ class NavGraphGeneratorThread
   fawkes::cart_coord_2d_t bbox_p1_;
   fawkes::cart_coord_2d_t bbox_p2_;
 
-#ifdef HAVE_VISUAL_DEBUGGING
-  ros::Publisher *vispub_;
-  size_t last_id_num_;
+#ifdef HAVE_VISUALIZATION
+  NavGraphGeneratorVisualizationThread *vt_;
 #endif
 };
 

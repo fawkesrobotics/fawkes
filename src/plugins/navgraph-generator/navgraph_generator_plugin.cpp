@@ -22,6 +22,9 @@
 #include <core/plugin.h>
 
 #include "navgraph_generator_thread.h"
+#ifdef HAVE_VISUALIZATION
+#  include "visualization_thread.h"
+#endif
 
 using namespace fawkes;
 
@@ -37,7 +40,21 @@ class NavGraphGeneratorPlugin : public fawkes::Plugin
   NavGraphGeneratorPlugin(Configuration *config)
     : Plugin(config)
   {
+#ifdef HAVE_VISUALIZATION
+    bool use_vis = false;
+    try {
+      use_vis = config->get_bool("/navgraph-generator/visualization/enable");
+    } catch (Exception &e) {} // ignored, use default
+    if (use_vis) {
+      NavGraphGeneratorVisualizationThread *vt = new NavGraphGeneratorVisualizationThread();
+      thread_list.push_back(new NavGraphGeneratorThread(vt));
+      thread_list.push_back(vt);
+    } else {
+      thread_list.push_back(new NavGraphGeneratorThread());
+    }
+#else
     thread_list.push_back(new NavGraphGeneratorThread());
+#endif
   }
 };
 

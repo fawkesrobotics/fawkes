@@ -19,6 +19,9 @@
  */
 
 #include "navgraph_generator_thread.h"
+#ifdef HAVE_VISUALIZATION
+#  include "visualization_thread.h"
+#endif
 
 #include <core/threading/mutex_locker.h>
 #include <navgraph/generators/voronoi.h>
@@ -26,10 +29,6 @@
 #include <plugins/amcl/amcl_utils.h>
 #include <utils/misc/string_split.h>
 
-#ifdef HAVE_VISUAL_DEBUGGING
-#  include <ros/ros.h>
-#  include <visualization_msgs/MarkerArray.h>
-#endif
 
 using namespace fawkes;
 
@@ -45,7 +44,20 @@ NavGraphGeneratorThread::NavGraphGeneratorThread()
   : Thread("NavGraphGeneratorThread", Thread::OPMODE_WAITFORWAKEUP),
     BlackBoardInterfaceListener("NavGraphGeneratorThread")
 {
+#ifdef HAVE_VISUALIZATION
+  vt_ = NULL;
+#endif
 }
+
+#ifdef HAVE_VISUALIZATION
+/** Constructor. */
+NavGraphGeneratorThread::NavGraphGeneratorThread(NavGraphGeneratorVisualizationThread *vt)
+  : Thread("NavGraphGeneratorThread", Thread::OPMODE_WAITFORWAKEUP),
+    BlackBoardInterfaceListener("NavGraphGeneratorThread")
+{
+  vt_ = vt;
+}
+#endif
 
 
 /** Destructor. */
@@ -78,29 +90,29 @@ NavGraphGeneratorThread::init()
   cfg_map_line_cluster_quota_ =
     config->get_float(CFG_PREFIX"map/line_cluster_quota");
 
-  cfg_global_frame_ = config->get_string("/frames/fixed");
+  cfg_global_frame_  = config->get_string("/frames/fixed");
+
+  cfg_visualization_ = false;
+  try {
+    cfg_visualization_ = config->get_bool(CFG_PREFIX"visualization/enable");
+  } catch (Exception &e) {} // ignore, use default
+
+#ifndef HAVE_VISUALIZATION
+  if (cfg_visualization_) {
+    logger->log_warn(name(), "Visualization enabled, but support not compiled in");
+  }
+#endif
 
   navgen_if_ =
     blackboard->open_for_writing<NavGraphGeneratorInterface>("/navgraph-generator");
   bbil_add_message_interface(navgen_if_);
   blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 
-#ifdef HAVE_VISUAL_DEBUGGING
-  vispub_ = new ros::Publisher();
-  *vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100,
-								 /* latch */ true);
-  last_id_num_ = 0;
-#endif
 }
 
 void
 NavGraphGeneratorThread::finalize()
 {
-#ifdef HAVE_VISUAL_DEBUGGING
-  vispub_->shutdown();
-  delete vispub_;
-#endif
-
   blackboard->unregister_listener(this);
   bbil_remove_message_interface(navgen_if_);
   blackboard->close(navgen_if_);
@@ -216,8 +228,8 @@ NavGraphGeneratorThread::loop()
   logger->log_debug(name(), "  Graph computed, notifying listeners");
   navgraph->notify_of_change();
 
-#ifdef HAVE_VISUAL_DEBUGGING
-  publish_visualization();
+#ifdef HAVE_VISUALIZATION
+  if (cfg_visualization_)  publish_visualization();
 #endif
 }
 
@@ -582,104 +594,12 @@ NavGraphGeneratorThread::filter_multi_graph()
 }
 
 
-#ifdef HAVE_VISUAL_DEBUGGING
+#ifdef HAVE_VISUALIZATION
 void
 NavGraphGeneratorThread::publish_visualization()
 {
-  visualization_msgs::MarkerArray m;
-  unsigned int idnum = 0;
-
-  for (auto &o : obstacles_) {
-    visualization_msgs::Marker text;
-    text.header.frame_id = cfg_global_frame_;
-    text.header.stamp = ros::Time::now();
-    text.ns = "navgraph_generator";
-    text.id = idnum++;
-    text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-    text.action = visualization_msgs::Marker::ADD;
-    text.pose.position.x = o.second.x;
-    text.pose.position.y = o.second.y;
-    text.pose.position.z = .15;
-    text.pose.orientation.w = 1.;
-    text.scale.z = 0.15;
-    text.color.r = text.color.g = text.color.b = 1.0f;
-    text.color.a = 1.0;
-    text.lifetime = ros::Duration(0, 0);
-    text.text = o.first;
-    m.markers.push_back(text);
-
-    visualization_msgs::Marker sphere;
-    sphere.header.frame_id = cfg_global_frame_;
-    sphere.header.stamp = ros::Time::now();
-    sphere.ns = "navgraph_generator";
-    sphere.id = idnum++;
-    sphere.type = visualization_msgs::Marker::SPHERE;
-    sphere.action = visualization_msgs::Marker::ADD;
-    sphere.pose.position.x = o.second.x;
-    sphere.pose.position.y = o.second.y;
-    sphere.pose.position.z = 0.05;
-    sphere.pose.orientation.w = 1.;
-    sphere.scale.x = 0.05;
-    sphere.scale.y = 0.05;
-    sphere.scale.z = 0.05;
-    sphere.color.r = 1.0;
-    sphere.color.g = sphere.color.b = 0.;
-    sphere.color.a = 1.0;
-    sphere.lifetime = ros::Duration(0, 0);
-    m.markers.push_back(sphere);
-  }      
-
-  for (auto &o : map_obstacles_) {
-    visualization_msgs::Marker text;
-    text.header.frame_id = cfg_global_frame_;
-    text.header.stamp = ros::Time::now();
-    text.ns = "navgraph_generator";
-    text.id = idnum++;
-    text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-    text.action = visualization_msgs::Marker::ADD;
-    text.pose.position.x = o.second.x;
-    text.pose.position.y = o.second.y;
-    text.pose.position.z = .15;
-    text.pose.orientation.w = 1.;
-    text.scale.z = 0.15;
-    text.color.r = text.color.g = text.color.b = 1.0f;
-    text.color.a = 1.0;
-    text.lifetime = ros::Duration(0, 0);
-    text.text = o.first;
-    m.markers.push_back(text);
-
-    visualization_msgs::Marker sphere;
-    sphere.header.frame_id = cfg_global_frame_;
-    sphere.header.stamp = ros::Time::now();
-    sphere.ns = "navgraph_generator";
-    sphere.id = idnum++;
-    sphere.type = visualization_msgs::Marker::SPHERE;
-    sphere.action = visualization_msgs::Marker::ADD;
-    sphere.pose.position.x = o.second.x;
-    sphere.pose.position.y = o.second.y;
-    sphere.pose.position.z = 0.05;
-    sphere.pose.orientation.w = 1.;
-    sphere.scale.x = 0.05;
-    sphere.scale.y = 0.05;
-    sphere.scale.z = 0.05;
-    sphere.color.r = sphere.color.g = 1.0;
-    sphere.color.b = 0.;
-    sphere.color.a = 1.0;
-    sphere.lifetime = ros::Duration(0, 0);
-    m.markers.push_back(sphere);
-  }      
-
-  for (size_t i = idnum; i < last_id_num_; ++i) {
-    visualization_msgs::Marker delop;
-    delop.header.frame_id = cfg_global_frame_;
-    delop.header.stamp = ros::Time::now();
-    delop.ns = "navgraph_generator";
-    delop.id = i;
-    delop.action = visualization_msgs::Marker::DELETE;
-    m.markers.push_back(delop);
+  if (vt_) {
+    vt_->publish(obstacles_, map_obstacles_, pois_);
   }
-  last_id_num_ = idnum;
-
-  vispub_->publish(m);
 }
 #endif

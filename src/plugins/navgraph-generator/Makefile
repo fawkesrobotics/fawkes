@@ -24,7 +24,7 @@ include $(BUILDSYSDIR)/ros.mk
 PRESUBDIRS = interfaces
 
 # Set to 1 to publish some markers for map obstacle generation visualization
-USE_VISUAL_DEBUGGING=
+USE_VISUALIZATION=1
 
 # For adding map points
 REQUIRED_PCL_LIBS = sample_consensus segmentation filters surface search
@@ -49,11 +49,12 @@ ifeq ($(HAVE_NAVGRAPH)$(HAVE_CPP11)$(HAVE_PCL)$(HAVE_TF),1111)
 
   PLUGINS_all = $(PLUGINDIR)/navgraph-generator.$(SOEXT)
 
-  ifeq ($(USE_VISUAL_DEBUGGING),1)
+  ifeq ($(USE_VISUALIZATION),1)
     ifeq ($(HAVE_ROS),1)
       ifeq ($(call ros-have-pkg,visualization_msgs),1)
         LIBS_navgraph_generator += fawkesrosaspect
-        CFLAGS  += -DHAVE_VISUAL_DEBUGGING $(CFLAGS_ROS) \
+	OBJS_navgraph_generator += visualization_thread.o
+        CFLAGS  += -DHAVE_VISUALIZATION $(CFLAGS_ROS) \
 	           $(call ros-pkg-cflags,visualization_msgs)
         LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)
       else
