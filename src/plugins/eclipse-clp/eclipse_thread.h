@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  eclipse_thread.h - Fawkes Readylog ECLiPSe Thread
+ *  eclipse_thread.h - Fawkes ECLiPSe Thread
  *
  *  Created: Wed Jul 16 10:20:51 2009
  *  Copyright  2009  Daniel Beck
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_READYLOG_AGENT_ECLIPSE_THREAD_H_
-#define __PLUGINS_READYLOG_AGENT_ECLIPSE_THREAD_H_
+#ifndef __PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H_
+#define __PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
@@ -74,4 +74,4 @@ class EclipseAgentThread
   std::map< std::string, fawkes::Interface* > m_registered_interfaces;
 };
 
-#endif /* __PLUGINS_READYLOG_AGENT_ECLIPSE_THREAD_H_ */
+#endif /* __PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H_ */

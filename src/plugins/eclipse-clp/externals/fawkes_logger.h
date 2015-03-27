@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  readylog_agent.h - Fawkes Readylog Agent Plugin
+ *  fawkes_logger.h - External predicates that allow the usage of the Logger
  *
- *  Created: Wed Jul 15 10:46:31 2009
+ *  Created: Wed Jul 22 09:53:22 2009
  *  Copyright  2009  Daniel Beck
  *
  ****************************************************************************/
@@ -20,15 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_READYLOG_AGENT_PLUGIN_H_
-#define __PLUGINS_READYLOG_AGENT_PLUGIN_H_
+#ifndef __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_LOGGER_H_
+#define __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_LOGGER_H_
 
-#include <core/plugin.h>
+extern "C" int p_log();
 
-class ReadylogAgentPlugin : public fawkes::Plugin
-{
- public:
-  ReadylogAgentPlugin( fawkes::Configuration* config );
-};
-
-#endif /* __PLUGINS_READYLOG_AGENT_PLUGIN_H_ */
+#endif /* __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_LOGGER_H_ */

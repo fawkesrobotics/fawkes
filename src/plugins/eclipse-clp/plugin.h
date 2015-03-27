@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  fawkes_bb_interface.h - External predicates to access Fawkes interfaces
+ *  plugint.h - Fawkes ECLiPSe Plugin
  *
- *  Created: Wed Jul 15 13:54:15 2009
+ *  Created: Wed Jul 15 10:46:31 2009
  *  Copyright  2009  Daniel Beck
  *
  ****************************************************************************/
@@ -20,12 +20,15 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_READYLOG_AGENT_EXTERNALS_FAWKES_BB_INTERFACE_H_
-#define __PLUGINS_READYLOG_AGENT_EXTERNALS_FAWKES_BB_INTERFACE_H_
+#ifndef __PLUGINS_ECLIPSE_CLP_PLUGIN_H_
+#define __PLUGINS_ECLIPSE_CLP_PLUGIN_H_
 
-extern "C" int p_read_interface();
-extern "C" int p_write_interface();
-extern "C" int p_send_message();
-extern "C" int p_recv_messages();
+#include <core/plugin.h>
 
-#endif /* __PLUGINS_READYLOG_AGENT_EXTERNALS_FAWKES_BB_INTERFACE_H_ */
+class EclipseCLPPlugin : public fawkes::Plugin
+{
+ public:
+  EclipseCLPPlugin (fawkes::Configuration* config);
+};
+
+#endif /* __PLUGINS_ECLIPSE_CLP_PLUGIN_H_ */

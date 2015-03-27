@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  readylog_agent.cpp - Fawkes Readylog Agent Plugin
+ *  fawkes_bb_interface.h - External predicates to access Fawkes interfaces
  *
- *  Created: Wed Jul 15 11:33:53 2009
+ *  Created: Wed Jul 15 13:54:15 2009
  *  Copyright  2009  Daniel Beck
  *
  ****************************************************************************/
@@ -20,27 +20,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "plugin.h"
-#include "control_thread.h"
-#include "eclipse_thread.h"
+#ifndef __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_BB_INTERFACE_H_
+#define __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_BB_INTERFACE_H_
 
-/** @class ReadylogAgentPlugin "plugin.h"
- * The Readylog agent plugin.
- * @author Daniel Beck
- */
+extern "C" int p_read_interface();
+extern "C" int p_write_interface();
+extern "C" int p_send_message();
+extern "C" int p_recv_messages();
 
-using namespace fawkes;
-
-/** Constructor.
- * @param config the configuration
- */
-ReadylogAgentPlugin::ReadylogAgentPlugin( Configuration* config )
-  : Plugin( config )
-{
-  EclipseAgentThread* eclipse_thread = new EclipseAgentThread();
-  thread_list.push_back( eclipse_thread );
-  thread_list.push_back( new AgentControlThread( eclipse_thread ) );
-}
-
-PLUGIN_DESCRIPTION( "Runs the Readylog agent" )
-EXPORT_PLUGIN( ReadylogAgentPlugin )
+#endif /* __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_BB_INTERFACE_H_ */

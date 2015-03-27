@@ -21,7 +21,7 @@
  */
 
 #include "fawkes_bb_interface.h"
-#include <plugins/readylogagent/eclipse_thread.h>
+#include <plugins/eclipse-clp/eclipse_thread.h>
 
 #include <core/exceptions/software.h>
 #include <interface/interface.h>

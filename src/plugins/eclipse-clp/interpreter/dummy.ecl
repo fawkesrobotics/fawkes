@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *  dummy.ecl - A dummy interpreter that only implements some event
- *  handlers to test the interaction with the readylog agent plugin
+ *  handlers to test the interaction with the ECLiPSe CLP plugin
  *
  *  Created: Wed Jul 22 11:25:21 2009
  *  Copyright  2009  Daniel Beck
@@ -76,11 +76,11 @@ process_events(Shelf) :-
         ).
 
 read_result(R) :-
-        read_interface("readylog_test", D),
+        read_interface("eclipse_clp_test", D),
         arg(result of data_TestInterface, D, R).
 
 send_calculate_msg(N1, N2) :-
-        send_message("readylog_test",
+        send_message("eclipse_clp_test",
                      data_TestInterface_CalculateMessage{summand:N1, addend:N2}).
 
 :- log_info( "Loading dummy interpreter done" ).

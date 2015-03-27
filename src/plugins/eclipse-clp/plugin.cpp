@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  fawkes_logger.h - External predicates that allow the usage of the Logger
+ *  plugin.cpp - Fawkes ECLiPSe CLP Plugin
  *
- *  Created: Wed Jul 22 09:53:22 2009
+ *  Created: Wed Jul 15 11:33:53 2009
  *  Copyright  2009  Daniel Beck
  *
  ****************************************************************************/
@@ -20,9 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_READYLOG_AGENT_EXTERNALS_FAWKES_LOGGER_H_
-#define __PLUGINS_READYLOG_AGENT_EXTERNALS_FAWKES_LOGGER_H_
+#include "plugin.h"
+#include "control_thread.h"
+#include "eclipse_thread.h"
 
-extern "C" int p_log();
+/** @class EclipseCLPPlugin "plugin.h"
+ * The ECLiPSe CLP plugin.
+ * @author Daniel Beck
+ */
 
-#endif /* __PLUGINS_READYLOG_AGENT_EXTERNALS_FAWKES_LOGGER_H_ */
+using namespace fawkes;
+
+/** Constructor.
+ * @param config the configuration
+ */
+EclipseCLPPlugin::EclipseCLPPlugin( Configuration* config )
+  : Plugin( config )
+{
+  EclipseAgentThread* eclipse_thread = new EclipseAgentThread();
+  thread_list.push_back( eclipse_thread );
+  thread_list.push_back( new AgentControlThread( eclipse_thread ) );
+}
+
+PLUGIN_DESCRIPTION( "Runs the ECLiPSe CLP interpreter" )
+EXPORT_PLUGIN( EclipseCLPPlugin )

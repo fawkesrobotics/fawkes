@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  control_thread.h - Fawkes Readylog Agent Thread
+ *  control_thread.h - Fawkes ECLiPSe Control Thread
  *
  *  Created: Wed Jul 15 15:05:57 2009
  *  Copyright  2009  Daniel Beck
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_READYLOG_AGENT_CONTROL_THREAD_H_
-#define __PLUGINS_READYLOG_AGENT_CONTROL_THREAD_H_
+#ifndef __PLUGINS_ECLIPSE_CLP_CONTROL_THREAD_H_
+#define __PLUGINS_ECLIPSE_CLP_CONTROL_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -55,5 +55,5 @@ class AgentControlThread
   fawkes::TestInterface* m_test_iface;
 };
 
-#endif /* __PLUGINS_READYLOG_AGENT_CONTROL_THREAD_H_ */
+#endif /* __PLUGINS_ECLIPSE_CLP_CONTROL_THREAD_H_ */
 

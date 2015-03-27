@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  control_thread.cpp - Fawkes Readylog Agent Thread
+ *  control_thread.cpp - Fawkes ECLiPSe Control Thread
  *
  *  Created: Wed Jul 15 15:09:09 2009
  *  Copyright  2009  Daniel Beck
@@ -53,7 +53,7 @@ void
 AgentControlThread::init()
 {
   // open & register interfaces
-  m_test_iface = blackboard->open_for_writing< TestInterface >("readylog_test");
+  m_test_iface = blackboard->open_for_writing< TestInterface >("eclipse_clp_test");
 }
 
 bool

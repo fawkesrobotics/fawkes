@@ -21,7 +21,7 @@
  */
 
 #include "fawkes_logger.h"
-#include <plugins/readylogagent/eclipse_thread.h>
+#include <plugins/eclipse-clp/eclipse_thread.h>
 
 #include <logging/logger.h>
 #include <core/exception.h>
@@ -84,7 +84,7 @@ p_log()
     return EC_fail;
   }
 
-  logger->log( ll, "ReadylogAgent", log_string );
+  logger->log( ll, "ECLiPSe CLP", log_string );
 
   return EC_succeed;
 }

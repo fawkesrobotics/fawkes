@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  eclipse_thread.cpp - Fawkes Readylog ECLiPSe Thread
+ *  eclipse_thread.cpp - Fawkes ECLiPSe Thread
  *
  *  Created: Wed Jul 16 10:42:49 2009
  *  Copyright  2009  Daniel Beck
@@ -38,7 +38,7 @@ using namespace std;
 using namespace fawkes;
 
 /** @class EclipseAgentThread "eclipse_thread.h"
- * This thread creates an ECLiPSe context in which the Readylog
+ * This thread creates an ECLiPSe context in which the ECLiPSe
  * interpreter and the program are loaded.
  * @author Daniel Beck
  */
@@ -67,7 +67,7 @@ EclipseAgentThread::init()
   char* eclipse_dir = NULL;
   try
   {
-    eclipse_dir = strdup( config->get_string( "/readylogagent/eclipse_dir" ).c_str() );
+    eclipse_dir = strdup( config->get_string( "/eclipse-clp/eclipse_dir" ).c_str() );
     logger->log_info( name(), "Setting ECLIPSEDIR to %s", eclipse_dir );
     ec_set_option_ptr( EC_OPTION_ECLIPSEDIR, (void*) eclipse_dir );
   }
@@ -100,7 +100,7 @@ EclipseAgentThread::init()
   try
   {
     // open for interfaces reading
-    Configuration::ValueIterator* vit = config->search( "/readylogagent/interfaces/reading" );
+    Configuration::ValueIterator* vit = config->search( "/eclipse-clp/interfaces/reading" );
     while ( vit->next() )
     {
       if ( vit->is_string() )
@@ -122,7 +122,7 @@ EclipseAgentThread::init()
     }
 
     // open interfaces for writing
-    vit = config->search( "/readylogagent/interfaces/writing" );
+    vit = config->search( "/eclipse-clp/interfaces/writing" );
     while ( vit->next() )
     {
       if ( vit->is_string() )

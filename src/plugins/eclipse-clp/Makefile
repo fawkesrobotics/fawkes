@@ -1,5 +1,5 @@
 #*****************************************************************************
-#              Makefile Build System for Fawkes: ReadylogAgent Plugin
+#              Makefile Build System for Fawkes: ECLiPSe CLP Plugin
 #                            -------------------
 #   Created on Wed Jul 15 11:40:13 2009
 #   copyright (C) 2009 by Daniel Beck, AllemaniACs RoboCup Team
@@ -15,23 +15,23 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/src/plugins/readylogagent/eclipse.mk
+include $(BASEDIR)/src/plugins/eclipse-clp/eclipse.mk
 
 CFLAGS += $(ECLIPSE_CFLAGS)
 LDFLAGS += $(ECLIPSE_LDFLAGS)
 
-LIBS_readylogagent = fawkescore fawkesinterface fawkesblackboard \
+LIBS_eclipse_clp = fawkescore fawkesinterface fawkesblackboard \
                      fawkesaspects eclipse TestInterface
-OBJS_readylogagent = plugin.o				\
+OBJS_eclipse_clp = plugin.o				\
 		     control_thread.o			\
 		     eclipse_thread.o			\
 		     externals/fawkes_bb_interface.o	\
 		     externals/fawkes_logger.o
 
-OBJS_all = $(OBJS_readylogagent)
+OBJS_all = $(OBJS_eclipse_clp)
 
 ifeq ($(HAVE_ECLIPSE),1)
-  PLUGINS_all = $(PLUGINDIR)/readylogagent.so
+  PLUGINS_all = $(PLUGINDIR)/eclipse-clp.so
 else
   WARN_TARGETS += warning_eclipse
 endif
@@ -41,7 +41,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_eclipse
 warning_eclipse:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Readylog Agent Plugin$(TNORMAL) ($(ECLIPSE_FAIL_REASON))"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe CLP Plugin$(TNORMAL) ($(ECLIPSE_FAIL_REASON))"
 endif
 
 include $(BUILDSYSDIR)/base.mk
