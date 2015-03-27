@@ -24,6 +24,7 @@
 #include <navgraph/generators/voronoi.h>
 #include <plugins/laser-lines/line_func.h>
 #include <plugins/amcl/amcl_utils.h>
+#include <utils/misc/string_split.h>
 
 #ifdef HAVE_VISUAL_DEBUGGING
 #  include <ros/ros.h>
@@ -60,6 +61,7 @@ NavGraphGeneratorThread::init()
 
   filter_["FILTER_EDGES_BY_MAP"] = false;
   filter_["FILTER_ORPHAN_NODES"] = false;
+  filter_["FILTER_MULTI_GRAPH"] = false;
 
   filter_params_float_defaults_["FILTER_EDGES_BY_MAP"]["distance"] = 0.3;
 
@@ -148,6 +150,10 @@ NavGraphGeneratorThread::loop()
   if (filter_["FILTER_ORPHAN_NODES"]) {
     logger->log_debug(name(), "  Applying FILTER_ORPHAN_NODES");
     filter_nodes_orphans();
+  }
+  if (filter_["FILTER_MULTI_GRAPH"]) {
+    logger->log_debug(name(), "  Applying FILTER_MULTI_GRAPH");
+    filter_multi_graph();
   }
 
   // restore default properties
@@ -519,6 +525,62 @@ NavGraphGeneratorThread::filter_nodes_orphans()
     navgraph->remove_node(n);
   }
 }
+
+
+void
+NavGraphGeneratorThread::filter_multi_graph()
+{
+  navgraph->calc_reachability(/* allow multi graph*/ true);
+
+  std::list<std::set<std::string>> graphs;
+
+  const std::vector<NavGraphNode> &nodes = navgraph->nodes();
+  std::set<std::string> nodeset;
+  std::for_each(nodes.begin(), nodes.end(),
+		[&nodeset](const NavGraphNode &n){ nodeset.insert(n.name()); });
+
+  while (! nodeset.empty()) {
+    std::queue<std::string> q;
+    q.push(* nodeset.begin());
+
+    std::set<std::string> traversed;
+
+    while (! q.empty()) {
+      std::string &nname = q.front();
+      traversed.insert(nname);
+
+      NavGraphNode n = navgraph->node(nname);
+      if (n) {
+	const std::vector<std::string> & reachable = n.reachable_nodes();
+
+	for (const std::string &r : reachable) {
+	  if (traversed.find(r) == traversed.end()) q.push(r);
+	}
+      }
+      q.pop();
+    }
+
+    std::set<std::string> nodediff;
+    std::set_difference(nodeset.begin(), nodeset.end(),
+			traversed.begin(), traversed.end(),
+			std::inserter(nodediff, nodediff.begin()));
+    graphs.push_back(traversed);
+    nodeset = nodediff;
+  }
+
+  // reverse sort, largest set first
+  graphs.sort([](const std::set<std::string> &a, const std::set<std::string> &b)->bool{
+      return b.size() < a.size();   
+    });
+
+  std::for_each(std::next(graphs.begin()), graphs.end(),
+		[&](const std::set<std::string> &g) {
+		  logger->log_debug(name(), "  Removing disconnected sub-graph [%s]",
+				    str_join(g.begin(), g.end(), ", ").c_str());
+		  for (const std::string &n : g)  navgraph->remove_node(n);
+		});
+}
+
 
 #ifdef HAVE_VISUAL_DEBUGGING
 void

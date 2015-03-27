@@ -86,6 +86,7 @@ class NavGraphGeneratorThread
 
   void filter_edges_from_map(float max_dist);
   void filter_nodes_orphans();
+  void filter_multi_graph();
 
 #ifdef HAVE_VISUAL_DEBUGGING
   void publish_visualization();

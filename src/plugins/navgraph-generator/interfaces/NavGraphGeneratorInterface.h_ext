@@ -81,6 +81,12 @@ class NavGraphGeneratorInterface : public Interface
        If enabled, filters out all nodes which are not connected to
        any other node. These can occur, for example, after performing
        the FILTER_EDGES_BY_MAP filter.
+      */,
+    FILTER_MULTI_GRAPH /**< 
+       Sometimes after applying other filters one can end up with
+       multiple disconnected graphs. Enabling this filter will keep
+       only the largest connected graph and simply remove all nodes
+       and edges from smaller graphs not connected to the largest.
       */
   } FilterType;
   const char * tostring_FilterType(FilterType value) const;

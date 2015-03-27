@@ -15,7 +15,8 @@ class NavGraphGeneratorInterface : public Interface
 
   typedef enum {
     FILTER_EDGES_BY_MAP,
-    FILTER_ORPHAN_NODES
+    FILTER_ORPHAN_NODES,
+    FILTER_MULTI_GRAPH
   } FilterType;
 
   class ClearMessage : public Message
