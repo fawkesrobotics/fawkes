@@ -123,6 +123,28 @@ std::string str_join(const std::list<std::string> &l, char delim = '/')
 
 
 /** Join list of strings string using given delimiter.
+ * The iterator must be produce a std::string for operator*().
+ * @param first input iterator to beginning of range
+ * @param last input iterator to end of range
+ * @param delim delimiter
+ * @return string of strings in list separated by given delimiter
+ */
+template <typename InputIterator>
+std::string
+str_join(const InputIterator &first, const InputIterator &last, char delim = '/')
+{
+  std::string rv;
+  bool is_first = true;
+  for (InputIterator i = first; i != last; ++i) {
+    if (is_first)  is_first = false;
+    else           rv += delim;
+    rv += *i;
+  }
+  return rv;
+}
+
+
+/** Join list of strings string using given delimiter.
  * @param l list with strings to join
  * @param delim delimiter
  * @return string of strings in list separated by given delimiter
@@ -139,6 +161,28 @@ static inline
   }
   return rv;
 }
+
+/** Join list of strings string using given delimiter.
+ * The iterator must be produce a std::string for operator*().
+ * @param first input iterator to beginning of range
+ * @param last input iterator to end of range
+ * @param delim delimiter
+ * @return string of strings in list separated by given delimiter
+ */
+template <typename InputIterator>
+std::string
+str_join(const InputIterator &first, const InputIterator &last, std::string delim)
+{
+  std::string rv;
+  bool is_first = true;
+  for (InputIterator i = first; i != last; ++i) {
+    if (is_first)  is_first = false;
+    else           rv += delim;
+    rv += *i;
+  }
+  return rv;
+}
+
 
 /** Split string by delimiter.
  * @param s string to split
