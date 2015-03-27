@@ -36,13 +36,6 @@
 :- export bb_send_message/3.
 :- export bb_recv_messages/2.
 
-%% load the external code from the shared object
-:- ( exists("../../../lib") ->
-       load("../../../lib/eclipse_externals.so")
-   ;
-       load("../../../../lib/eclipse_externals.so")
-   ).
-
 %% definition of external predicates
 :- external(bb_connect/1, p_connect_to_blackboard).
 :- external(bb_disconnect/0, p_disconnect_from_blackboard).

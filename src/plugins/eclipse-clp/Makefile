@@ -16,17 +16,25 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/eclipse-clp/eclipse.mk
+include $(BUILDCONFDIR)/navgraph/navgraph.mk
 
 CFLAGS += $(ECLIPSE_CFLAGS)
 LDFLAGS += $(ECLIPSE_LDFLAGS)
 
 LIBS_eclipse_clp = fawkescore fawkesinterface fawkesblackboard \
-                     fawkesaspects eclipse TestInterface
-OBJS_eclipse_clp = plugin.o				\
-		     control_thread.o			\
-		     eclipse_thread.o			\
-		     externals/fawkes_bb_interface.o	\
-		     externals/fawkes_logger.o
+                     fawkesaspects fawkesutils eclipse TestInterface
+OBJS_eclipse_clp = plugin.o control_thread.o eclipse_thread.o \
+		     externals/fawkes_logger.o       \
+		     externals/blackboard.o
+
+ifeq ($(HAVE_NAVGRAPH),1)
+  CFLAGS +=  $(CFLAGS_NAVGRAPH)
+  LDFLAGS += $(LDFLAGS_NAVGRAPH)
+  LIBS_eclipse_clp +=fawkesnavgraph
+  OBJS_eclipse_clp += externals/rcsoft_map_graph.o
+else
+  WARN_TARGETS += warning_navgraph
+endif
 
 OBJS_all = $(OBJS_eclipse_clp)
 
@@ -42,6 +50,8 @@ all: $(WARN_TARGETS)
 .PHONY: warning_eclipse
 warning_eclipse:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe CLP Plugin$(TNORMAL) ($(ECLIPSE_FAIL_REASON))"
+warning_navgraph:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ECLiPSe navgraph support$(TNORMAL) ($(NAVGRAPH_ERROR))"
 endif
 
 include $(BUILDSYSDIR)/base.mk

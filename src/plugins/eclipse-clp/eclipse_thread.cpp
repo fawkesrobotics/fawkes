@@ -21,7 +21,7 @@
  */
 
 #include "eclipse_thread.h"
-#include "externals/fawkes_bb_interface.h"
+#include "externals/blackboard.h"
 #include "externals/fawkes_logger.h"
 
 #include <interfaces/TestInterface.h>
