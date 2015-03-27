@@ -22,8 +22,8 @@
 #include "rcsoft_map_graph.h"
 
 #include <navgraph/navgraph.h>
-#include <utils/graph/yaml_navgraph.h>
-#include <utils/graph/rcsoft_map_graph.h>
+#include <navgraph/yaml_navgraph.h>
+#include <navgraph/navgraph_node.h>
 #include <core/exception.h>
 #include <eclipseclass.h>
 #include <cstdio>
@@ -59,8 +59,6 @@ public:
 
     if (firstword == "%YAML") {
         m_map_graph = load_yaml_navgraph(file);
-    } else if (firstword == "<Graph>") {
-        m_map_graph = load_rcsoft_graph(file);
     } else {
         throw Exception("Unknown graph format");
     }
