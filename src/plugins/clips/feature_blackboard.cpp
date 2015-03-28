@@ -145,6 +145,13 @@ BlackboardCLIPSFeature::clips_context_init(const std::string &env_name,
 	env_name)
     )
   );
+  clips->add_function("blackboard-set-multifield",
+    sigc::slot<void, std::string, std::string, CLIPS::Values>(
+      sigc::bind<0>(
+	sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_set_multifield),
+	env_name)
+    )
+  );
   clips->add_function("blackboard-create-msg",
     sigc::slot<CLIPS::Value, std::string, std::string>(
       sigc::bind<0>(
@@ -163,6 +170,13 @@ BlackboardCLIPSFeature::clips_context_init(const std::string &env_name,
     sigc::slot<void, void *, std::string, CLIPS::Value>(
       sigc::bind<0>(
 	sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_set_msg_field),
+	env_name)
+    )
+  );
+  clips->add_function("blackboard-set-msg-multifield",
+    sigc::slot<void, void *, std::string, CLIPS::Values>(
+      sigc::bind<0>(
+	sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_set_msg_multifield),
 	env_name)
     )
   );
@@ -608,6 +622,43 @@ BlackboardCLIPSFeature::clips_blackboard_set(std::string env_name, std::string u
   }
 }
 
+void
+BlackboardCLIPSFeature::clips_blackboard_set_multifield(std::string env_name,
+							std::string uid,
+							std::string field,
+							CLIPS::Values values)
+{
+  // no interfaces registered, that's fine
+  if (interfaces_.find(env_name) == interfaces_.end())  return;
+  if (envs_.find(env_name) == envs_.end()) {
+    // Environment not registered, big bug
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Environment %s not registered,"
+		      " cannot set %s on interface %s", env_name.c_str(),
+		      field.c_str(), uid.c_str());
+    return;
+  }
+  std::string type, id;
+  Interface::parse_uid(uid.c_str(), type, id);
+  if (interfaces_[env_name].writing.find(type) != interfaces_[env_name].writing.end()) {
+    auto i = std::find_if(interfaces_[env_name].writing[type].begin(),
+			  interfaces_[env_name].writing[type].end(),
+			  [&uid](const Interface *iface)->bool {
+			    return uid == iface->uid();
+			  });
+    if (i != interfaces_[env_name].writing[type].end()) {
+      set_multifield((*i)->fields(), (*i)->fields_end(), env_name, field, values);
+    } else {
+      logger_->log_error(("BBCLIPS|" + env_name).c_str(), "Interface %s not opened for writing,"
+			 " in environment %s", uid.c_str(), env_name.c_str());
+      return;
+    }
+  } else {
+    logger_->log_error(("BBCLIPS|" + env_name).c_str(), "No interface of type %s opened for,"
+		       " writing in environment %s", type.c_str(), env_name.c_str());
+    return;
+  }
+}
+
 CLIPS::Value
 BlackboardCLIPSFeature::clips_blackboard_create_msg(std::string env_name, std::string uid,
 						    std::string msg_type)
@@ -706,6 +757,24 @@ BlackboardCLIPSFeature::clips_blackboard_set_msg_field(std::string env_name, voi
 
 
 void
+BlackboardCLIPSFeature::clips_blackboard_set_msg_multifield(std::string env_name, void *msgptr, std::string field_name, CLIPS::Values values)
+{
+  std::shared_ptr<Message> *m =
+    static_cast<std::shared_ptr<Message> *>(msgptr);
+  if (!*m) {
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't set message field, the pointer is wrong.");
+    return;
+  }
+
+  bool set_success = set_multifield((*m)->fields(), (*m)->fields_end(),
+			       env_name, field_name, values);
+  if (!set_success){
+    logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't set message field.");
+  }
+}
+
+
+void
 BlackboardCLIPSFeature::clips_blackboard_send_msg(std::string env_name, void *msgptr)
 {
   std::shared_ptr<Message> *m =
@@ -727,14 +796,54 @@ BlackboardCLIPSFeature::clips_blackboard_send_msg(std::string env_name, void *ms
 }
 
 /**
+   Set array of an InterfaceFieldIterator of an Interface or Message
+   to an CLIPS-Multifield.
+   @return if field could successfully be set
+ */
+bool
+BlackboardCLIPSFeature::set_multifield(InterfaceFieldIterator fit_begin,
+				  InterfaceFieldIterator fit_end,
+				  std::string env_name, std::string field,
+				  CLIPS::Values values)
+{
+  //find field and check for length of the interface array/multifield
+  InterfaceFieldIterator fit;
+  for (fit = fit_begin; fit != fit_end; ++fit) {
+    if (field == fit.get_name()) {
+      size_t min_length = fit.get_length();
+      if (values.size() < min_length){
+	min_length = values.size();
+      }
+      //set each entry
+      for (size_t i = 0; i < min_length; i++){
+	bool success = set_field(fit, fit_end, env_name, field, values[i], i);
+	if (!success){
+	  return false;
+	}
+      }
+      break;
+    }
+  }
+  
+  if (fit == fit_end) {
+    logger_->log_error(("BBCLIPS|" + env_name).c_str(), "Can't find field %s",
+		       field.c_str());
+    return false;
+  }
+  return true;
+
+}
+
+/**
    Set field of an InterfaceFieldIterator of an Interface or Message.
+   @index index in an array of the interface (leave default for non array value)
    @return if field could successfully be set
  */
 bool
 BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 				  InterfaceFieldIterator fit_end,
 				  std::string env_name, std::string field,
-				  CLIPS::Value value)
+				  CLIPS::Value value, int index)
 {
   InterfaceFieldIterator fit;
   for (fit = fit_begin; fit != fit_end; ++fit) {
@@ -749,9 +858,9 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	} else {
 	  std::string val_s = value.as_string();
 	  if (value == "TRUE") {
-	    fit.set_bool(true);
+	    fit.set_bool(true, index);
 	  } else if (value == "FALSE") {
-	    fit.set_bool(false);
+	    fit.set_bool(false, index);
 	  } else {
 	    logger_->log_error(("BBCLIPS|" + env_name).c_str(),
 			       "Cannot set field %s: invalid value %s (not a bool)",
@@ -769,7 +878,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	  return false;
 	} else {
 	  long long int val = value.as_integer();
-	  fit.set_int8((int8_t)val);
+	  fit.set_int8((int8_t)val, index);
 	}
 	break;
 
@@ -781,7 +890,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	  return false;
 	} else {
 	  long long int val = value.as_integer();
-	  fit.set_uint8((uint8_t)val);
+	  fit.set_uint8((uint8_t)val, index);
 	}
 	break;
 
@@ -793,7 +902,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	  return false;
 	} else {
 	  long long int val = value.as_integer();
-	  fit.set_int16((int16_t)val);
+	  fit.set_int16((int16_t)val, index);
 	}
 	break;
 
@@ -805,7 +914,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	  return false;
 	} else {
 	  long long int val = value.as_integer();
-	  fit.set_uint16((uint16_t)val);
+	  fit.set_uint16((uint16_t)val, index);
 	}
 	break;
 
@@ -817,7 +926,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	  return false;
 	} else {
 	  long long int val = value.as_integer();
-	  fit.set_int32((int32_t)val);
+	  fit.set_int32((int32_t)val, index);
 	}
 	break;
 
@@ -829,7 +938,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	  return false;
 	} else {
 	  long long int val = value.as_integer();
-	  fit.set_uint32((uint32_t)val);
+	  fit.set_uint32((uint32_t)val, index);
 	}
 	break;
 
@@ -841,7 +950,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	  return false;
 	} else {
 	  long long int val = value.as_integer();
-	  fit.set_int64((int64_t)val);
+	  fit.set_int64((int64_t)val, index);
 	}
 	break;
 
@@ -853,7 +962,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	  return false;
 	} else {
 	  long long int val = value.as_integer();
-	  fit.set_uint64((uint64_t)val);
+	  fit.set_uint64((uint64_t)val, index);
 	}
 	break;
 
@@ -867,10 +976,10 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	} else {
 	  if (value.type() == CLIPS::TYPE_FLOAT) {
 	    double val = value.as_float();
-	    fit.set_float((float)val);
+	    fit.set_float((float)val, index);
 	  } else {
 	    long long int val = value.as_integer();
-	    fit.set_float((float)val);
+	    fit.set_float((float)val, index);
 	  }
 	}
 	break;
@@ -885,10 +994,10 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	} else {
 	  if (value.type() == CLIPS::TYPE_FLOAT) {
 	    double val = value.as_float();
-	    fit.set_double((double)val);
+	    fit.set_double((double)val, index);
 	  } else {
 	    long long int val = value.as_integer();
-	    fit.set_double((double)val);
+	    fit.set_double((double)val, index);
 	  }
 	}
 	break;
@@ -903,6 +1012,12 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	} else {
 	  std::string val = value.as_string();
 	  fit.set_string(val.c_str());
+	  if (index != 0){
+	    logger_->log_error(("BBCLIPS|" + env_name).c_str(),
+			       "Cannot set field %s[%d]: "
+			       "there are no string arrays in interfaces",
+			       field.c_str(), index);
+	  }
 	}
 	break;
 
@@ -915,7 +1030,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
 	} else {
 	  try {
 	    std::string val = value.as_string();
-	    fit.set_enum_string(val.c_str());
+	    fit.set_enum_string(val.c_str(), index);
 	  } catch (Exception &e) {
 	    logger_->log_error(("BBCLIPS|" + env_name).c_str(),
 			       "Failed to set enum field %s to %s, exception follows",
@@ -940,6 +1055,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
   if (fit == fit_end) {
     logger_->log_error(("BBCLIPS|" + env_name).c_str(), "Can't find field %s",
 		       field.c_str());
+    return false;
   }
   return true;
 }
