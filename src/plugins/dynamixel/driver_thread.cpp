@@ -257,6 +257,7 @@ DynamixelDriverThread::exec_sensor()
       s.servo_if->set_enabled(chain_->is_torque_enabled(servo_id));
       s.servo_if->set_final(is_final(servo_id));
       s.servo_if->set_velocity(get_velocity(servo_id));
+      s.servo_if->set_alarm_shutdown(chain_->get_alarm_shutdown(servo_id));
       s.servo_if->write();
 
       s.joint_if->set_position(angle);
