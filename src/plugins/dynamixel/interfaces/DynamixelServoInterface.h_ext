@@ -76,6 +76,16 @@ class DynamixelServoInterface : public Interface
     uint8_t voltage; /**< Present voltage */
     uint8_t temperature; /**< Present temperature */
     uint32_t punch; /**< Punch */
+    uint8_t alarm_shutdown; /**< Alarm Shutdown. The bitmask is set as follows:
+      Bit 7: 0
+      Bit 6: If set to 1, torque off when an Instruction Error occurs
+      Bit 5: If set to 1, torque off when an Overload Error occurs
+      Bit 4: If set to 1, torque off when a Checksum Error occurs
+      Bit 3: If set to 1, torque off when a Range Error occurs
+      Bit 2: If set to 1, torque off when an Overheating Error occurs
+      Bit 1: If set to 1, torque off when an Angle Limit Error occurs
+      Bit 0: If set to 1, torque off when an Input Voltage Error occurs
+     */
     float angle; /**< Current angle. */
     bool enabled; /**< Is the pan/tilt unit enabled? */
     float min_angle; /**< Minimum angle allowed. */
@@ -542,6 +552,9 @@ class DynamixelServoInterface : public Interface
   uint32_t punch() const;
   void set_punch(const uint32_t new_punch);
   size_t maxlenof_punch() const;
+  uint8_t alarm_shutdown() const;
+  void set_alarm_shutdown(const uint8_t new_alarm_shutdown);
+  size_t maxlenof_alarm_shutdown() const;
   float angle() const;
   void set_angle(const float new_angle);
   size_t maxlenof_angle() const;

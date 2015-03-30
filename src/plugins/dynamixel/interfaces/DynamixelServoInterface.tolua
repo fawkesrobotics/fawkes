@@ -220,6 +220,9 @@ class DynamixelServoInterface : public Interface
   unsigned int punch();
   void set_punch(const unsigned int new_punch);
   int maxlenof_punch() const;
+  unsigned char alarm_shutdown();
+  void set_alarm_shutdown(const unsigned char new_alarm_shutdown);
+  int maxlenof_alarm_shutdown() const;
   float angle();
   void set_angle(const float new_angle);
   int maxlenof_angle() const;

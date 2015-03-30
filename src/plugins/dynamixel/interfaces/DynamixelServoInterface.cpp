@@ -73,6 +73,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_fieldinfo(IFT_UINT8, "voltage", 1, &data->voltage);
   add_fieldinfo(IFT_UINT8, "temperature", 1, &data->temperature);
   add_fieldinfo(IFT_UINT32, "punch", 1, &data->punch);
+  add_fieldinfo(IFT_UINT8, "alarm_shutdown", 1, &data->alarm_shutdown);
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_FLOAT, "min_angle", 1, &data->min_angle);
@@ -96,7 +97,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_messageinfo("SetPunchMessage");
   add_messageinfo("GotoPositionMessage");
   add_messageinfo("SetAngleLimitsMessage");
-  unsigned char tmp_hash[] = {0x5e, 0x2b, 0x16, 0x32, 0x4e, 0x5e, 0x60, 0x31, 0x4, 0xfe, 0xa2, 0x73, 0x64, 0x5b, 0x29, 0x63};
+  unsigned char tmp_hash[] = {0x8, 0x3f, 0xc9, 0x4, 0x76, 0x3d, 0x16, 0x4f, 0x5d, 0x97, 0x32, 0xd3, 0x1a, 0x72, 0x87, 0x5b};
   set_hash(tmp_hash);
 }
 
@@ -707,6 +708,55 @@ void
 DynamixelServoInterface::set_punch(const uint32_t new_punch)
 {
   data->punch = new_punch;
+  data_changed = true;
+}
+
+/** Get alarm_shutdown value.
+ * Alarm Shutdown. The bitmask is set as follows:
+      Bit 7: 0
+      Bit 6: If set to 1, torque off when an Instruction Error occurs
+      Bit 5: If set to 1, torque off when an Overload Error occurs
+      Bit 4: If set to 1, torque off when a Checksum Error occurs
+      Bit 3: If set to 1, torque off when a Range Error occurs
+      Bit 2: If set to 1, torque off when an Overheating Error occurs
+      Bit 1: If set to 1, torque off when an Angle Limit Error occurs
+      Bit 0: If set to 1, torque off when an Input Voltage Error occurs
+    
+ * @return alarm_shutdown value
+ */
+uint8_t
+DynamixelServoInterface::alarm_shutdown() const
+{
+  return data->alarm_shutdown;
+}
+
+/** Get maximum length of alarm_shutdown value.
+ * @return length of alarm_shutdown value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+DynamixelServoInterface::maxlenof_alarm_shutdown() const
+{
+  return 1;
+}
+
+/** Set alarm_shutdown value.
+ * Alarm Shutdown. The bitmask is set as follows:
+      Bit 7: 0
+      Bit 6: If set to 1, torque off when an Instruction Error occurs
+      Bit 5: If set to 1, torque off when an Overload Error occurs
+      Bit 4: If set to 1, torque off when a Checksum Error occurs
+      Bit 3: If set to 1, torque off when a Range Error occurs
+      Bit 2: If set to 1, torque off when an Overheating Error occurs
+      Bit 1: If set to 1, torque off when an Angle Limit Error occurs
+      Bit 0: If set to 1, torque off when an Input Voltage Error occurs
+    
+ * @param new_alarm_shutdown new alarm_shutdown value
+ */
+void
+DynamixelServoInterface::set_alarm_shutdown(const uint8_t new_alarm_shutdown)
+{
+  data->alarm_shutdown = new_alarm_shutdown;
   data_changed = true;
 }
 
