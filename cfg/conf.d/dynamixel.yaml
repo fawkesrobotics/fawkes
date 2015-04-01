@@ -32,3 +32,6 @@ dynamixel:
     # Echo fix used for faulty firmwares on RX28 which 
     # echo the given command even though ECHO is switched off
     enable_echo_fix: false
+
+    # temperature limit in degrees celsius - set for each servo found in the particular servo chain 
+    temperature_limit: 80

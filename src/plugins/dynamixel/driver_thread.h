@@ -102,20 +102,22 @@ class DynamixelDriverThread
   fawkes::RefPtr<DynamixelChain>  chain_;
   fawkes::ReadWriteLock          *chain_rwlock_;
 
-  std::string  cfg_prefix_;
-  std::string  cfg_name_;
-  std::string  cfg_device_;
-  unsigned int cfg_read_timeout_ms_;
-  unsigned int cfg_disc_timeout_ms_;
-  bool         cfg_goto_zero_start_;
-  bool         cfg_turn_off_;
-  unsigned int cfg_cw_compl_margin_;
-  unsigned int cfg_ccw_compl_margin_;
-  unsigned int cfg_cw_compl_slope_;
-  unsigned int cfg_ccw_compl_slope_;
-  float        cfg_def_angle_margin_;
-  bool         cfg_enable_echo_fix_;
-
+  std::string   cfg_prefix_;
+  std::string   cfg_name_;
+  std::string   cfg_device_;
+  unsigned int  cfg_read_timeout_ms_;
+  unsigned int  cfg_disc_timeout_ms_;
+  bool          cfg_goto_zero_start_;
+  bool          cfg_turn_off_;
+  unsigned int  cfg_cw_compl_margin_;
+  unsigned int  cfg_ccw_compl_margin_;
+  unsigned int  cfg_cw_compl_slope_;
+  unsigned int  cfg_ccw_compl_slope_;
+  float         cfg_def_angle_margin_;
+  bool          cfg_enable_echo_fix_;
+  float         cfg_torque_limit_;
+  unsigned char cfg_temperature_limit_;
+  
   void  goto_angle(unsigned int servo_id, float angle);
   void  goto_angle_timed(unsigned int servo_id, float angle, float time_sec);
   float get_angle(unsigned int servo_id);
