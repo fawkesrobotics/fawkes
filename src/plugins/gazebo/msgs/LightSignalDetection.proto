@@ -1,0 +1,56 @@
+/***************************************************************************
+ *  SimTime.proto - Message for time synchronization with a simulation
+ *
+ *  Created: Wed Apr 01 18:32:40 2015
+ *  Copyright  2015  Frederik Zwilling
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
+
+
+
+package gazsim_msgs;
+
+
+message LightSignalDetection {
+  enum LightColor {
+    RED = 0;
+    YELLOW = 1;
+    GREEN = 2;
+  }
+
+  enum LightState {
+    OFF = 0;
+    ON = 1;
+    BLINK = 2;
+  }
+
+  message LightSpec {
+    enum CompType {
+      COMP_ID  = 2000;
+      MSG_TYPE = 10;
+    }
+
+    // Color and state of described light
+    required LightColor color = 1;
+    required LightState state = 2;
+  }
+
+  // Is the light currently visible?
+  required bool visible = 1;
+  // Current state of the lights (empty when not visible)
+  repeated LightSpec lights = 2;
+  // How long has the light been visible and steady?
+  required int32 visibility_history = 3;
+ }
