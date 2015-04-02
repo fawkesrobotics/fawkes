@@ -19,6 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/lua.mk
 include $(LIBSRCDIR)/utils/utils.mk
 include $(LIBSRCDIR)/tf/tf.mk
+include $(LIBSRCDIR)/navgraph/navgraph.mk
 
 SUBDIRS = consoletool
 
@@ -33,10 +34,17 @@ endif
 
 LIBS_skiller = fawkescore fawkesutils fawkesaspects fawkesnetcomm fawkeslua \
 	       fawkesblackboard fawkesinterface fawkeslogging \
-	       fawkesnavgraphaspect \
 	       SkillerInterface SkillerDebugInterface
-OBJS_skiller = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
+ifeq ($(HAVE_NAVGRAPH),1)
+  LIBS_SKILLER += fawkesnavgraphaspect
+  CFLAGS += -DHAVE_NAVGRAPH
+else
+  FILTER_OUT += skiller_navgraph_feature.o
+  WARN_TARGETS += warning_navgraph
+endif
+
+OBJS_skiller = $(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 OBJS_all    = $(OBJS_skiller)
 
 ifeq ($(HAVE_LUA),1)
@@ -61,6 +69,9 @@ warning_lua:
 
 warning_tolua:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Skiller Plugin$(TNORMAL) (tolua++[-devel] not installed)"
+
+warning_navgraph:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Navgraph feature for Skiller Plugin$(TNORMAL) (navgraphaspect not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
