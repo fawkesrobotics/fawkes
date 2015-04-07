@@ -163,6 +163,13 @@ class DynamixelServoInterface : public Interface
     int maxlenof_angle_limit_ccw() const;
   };
 
+  class ResetRawErrorMessage : public Message
+  {
+    ResetRawErrorMessage();
+    ~ResetRawErrorMessage();
+
+  };
+
   char * model();
   void set_model(const char * new_model);
   int maxlenof_model() const;
@@ -223,6 +230,9 @@ class DynamixelServoInterface : public Interface
   unsigned char alarm_shutdown();
   void set_alarm_shutdown(const unsigned char new_alarm_shutdown);
   int maxlenof_alarm_shutdown() const;
+  unsigned char error();
+  void set_error(const unsigned char new_error);
+  int maxlenof_error() const;
   float angle();
   void set_angle(const float new_angle);
   int maxlenof_angle() const;

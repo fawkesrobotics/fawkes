@@ -74,6 +74,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_fieldinfo(IFT_UINT8, "temperature", 1, &data->temperature);
   add_fieldinfo(IFT_UINT32, "punch", 1, &data->punch);
   add_fieldinfo(IFT_UINT8, "alarm_shutdown", 1, &data->alarm_shutdown);
+  add_fieldinfo(IFT_UINT8, "error", 1, &data->error);
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_FLOAT, "min_angle", 1, &data->min_angle);
@@ -97,7 +98,8 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_messageinfo("SetPunchMessage");
   add_messageinfo("GotoPositionMessage");
   add_messageinfo("SetAngleLimitsMessage");
-  unsigned char tmp_hash[] = {0x8, 0x3f, 0xc9, 0x4, 0x76, 0x3d, 0x16, 0x4f, 0x5d, 0x97, 0x32, 0xd3, 0x1a, 0x72, 0x87, 0x5b};
+  add_messageinfo("ResetRawErrorMessage");
+  unsigned char tmp_hash[] = {0xd0, 0xe9, 0xe6, 0x4e, 0x5f, 0xc1, 0xc2, 0xeb, 0x53, 0x6a, 0xd0, 0xf9, 0x24, 0xfd, 0x23, 0xb4};
   set_hash(tmp_hash);
 }
 
@@ -712,7 +714,8 @@ DynamixelServoInterface::set_punch(const uint32_t new_punch)
 }
 
 /** Get alarm_shutdown value.
- * Alarm Shutdown. The bitmask is set as follows:
+ * Alarm Shutdown.
+      The bitmask is set as follows (taken from Trossen Robotics PDF "AX-12(English).pdf"):
       Bit 7: 0
       Bit 6: If set to 1, torque off when an Instruction Error occurs
       Bit 5: If set to 1, torque off when an Overload Error occurs
@@ -741,7 +744,8 @@ DynamixelServoInterface::maxlenof_alarm_shutdown() const
 }
 
 /** Set alarm_shutdown value.
- * Alarm Shutdown. The bitmask is set as follows:
+ * Alarm Shutdown.
+      The bitmask is set as follows (taken from Trossen Robotics PDF "AX-12(English).pdf"):
       Bit 7: 0
       Bit 6: If set to 1, torque off when an Instruction Error occurs
       Bit 5: If set to 1, torque off when an Overload Error occurs
@@ -757,6 +761,57 @@ void
 DynamixelServoInterface::set_alarm_shutdown(const uint8_t new_alarm_shutdown)
 {
   data->alarm_shutdown = new_alarm_shutdown;
+  data_changed = true;
+}
+
+/** Get error value.
+ * Raw error code from servo.
+      The bitmask is set as follows (taken from Trossen Robotics PDF "AX-12(English).pdf"):
+      Bit 7: 0
+      Bit 6: Set to 1 if an undefined instruction is sent or an action instruction is sent without a Reg_Write instruction.
+      Bit 5: Set to 1 if the specified maximum torque can't control the applied load.
+      Bit 4: Set to 1 if the checksum of the instruction packet is incorrect.
+      Bit 3: Set to 1 if the instruction sent is out of the defined range.
+      Bit 2: Set to 1 if the internal temperature of the Dynamixel unit is above the operating temperature range as defined in the control table.
+      Bit 1: Set as 1 if the Goal Position is set outside of the range between CW Angle Limit and CCW Angle Limit.
+      Bit 0: Set to 1 if the voltage is out of the operating voltage range as defined in the control table.
+    
+ * @return error value
+ */
+uint8_t
+DynamixelServoInterface::error() const
+{
+  return data->error;
+}
+
+/** Get maximum length of error value.
+ * @return length of error value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+DynamixelServoInterface::maxlenof_error() const
+{
+  return 1;
+}
+
+/** Set error value.
+ * Raw error code from servo.
+      The bitmask is set as follows (taken from Trossen Robotics PDF "AX-12(English).pdf"):
+      Bit 7: 0
+      Bit 6: Set to 1 if an undefined instruction is sent or an action instruction is sent without a Reg_Write instruction.
+      Bit 5: Set to 1 if the specified maximum torque can't control the applied load.
+      Bit 4: Set to 1 if the checksum of the instruction packet is incorrect.
+      Bit 3: Set to 1 if the instruction sent is out of the defined range.
+      Bit 2: Set to 1 if the internal temperature of the Dynamixel unit is above the operating temperature range as defined in the control table.
+      Bit 1: Set as 1 if the Goal Position is set outside of the range between CW Angle Limit and CCW Angle Limit.
+      Bit 0: Set to 1 if the voltage is out of the operating voltage range as defined in the control table.
+    
+ * @param new_error new error value
+ */
+void
+DynamixelServoInterface::set_error(const uint8_t new_error)
+{
+  data->error = new_error;
   data_changed = true;
 }
 
@@ -1112,6 +1167,8 @@ DynamixelServoInterface::create_message(const char *type) const
     return new GotoPositionMessage();
   } else if ( strncmp("SetAngleLimitsMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetAngleLimitsMessage();
+  } else if ( strncmp("ResetRawErrorMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new ResetRawErrorMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -2499,6 +2556,56 @@ DynamixelServoInterface::SetAngleLimitsMessage::clone() const
 {
   return new DynamixelServoInterface::SetAngleLimitsMessage(this);
 }
+/** @class DynamixelServoInterface::ResetRawErrorMessage <interfaces/DynamixelServoInterface.h>
+ * ResetRawErrorMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+DynamixelServoInterface::ResetRawErrorMessage::ResetRawErrorMessage() : Message("ResetRawErrorMessage")
+{
+  data_size = sizeof(ResetRawErrorMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (ResetRawErrorMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ErrorCode[(int)ERROR_NONE] = "ERROR_NONE";
+  enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
+  enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
+  enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+}
+
+/** Destructor */
+DynamixelServoInterface::ResetRawErrorMessage::~ResetRawErrorMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+DynamixelServoInterface::ResetRawErrorMessage::ResetRawErrorMessage(const ResetRawErrorMessage *m) : Message("ResetRawErrorMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (ResetRawErrorMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+DynamixelServoInterface::ResetRawErrorMessage::clone() const
+{
+  return new DynamixelServoInterface::ResetRawErrorMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -2556,6 +2663,10 @@ DynamixelServoInterface::message_valid(const Message *message) const
   }
   const SetAngleLimitsMessage *m12 = dynamic_cast<const SetAngleLimitsMessage *>(message);
   if ( m12 != NULL ) {
+    return true;
+  }
+  const ResetRawErrorMessage *m13 = dynamic_cast<const ResetRawErrorMessage *>(message);
+  if ( m13 != NULL ) {
     return true;
   }
   return false;

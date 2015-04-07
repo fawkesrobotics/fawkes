@@ -263,6 +263,12 @@ DynamixelDriverThread::exec_sensor()
       s.servo_if->set_final(is_final(servo_id));
       s.servo_if->set_velocity(get_velocity(servo_id));
       s.servo_if->set_alarm_shutdown(chain_->get_alarm_shutdown(servo_id));
+      
+      unsigned char cur_error = chain_->get_error(servo_id);
+      s.servo_if->set_error(s.servo_if->error() | cur_error);
+      if (cur_error) {
+        logger->log_error(name(), "Servo with ID: %d has error-flag: %d", servo_id, cur_error);
+      }
       s.servo_if->write();
 
       s.joint_if->set_position(angle);
@@ -318,7 +324,10 @@ DynamixelDriverThread::exec_act()
 
 	set_margin(servo_id, msg->angle_margin());
 	s.servo_if->set_angle_margin(msg->angle_margin());
-	
+
+      } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::ResetRawErrorMessage>()) {
+        s.servo_if->set_error(0);
+        
       } else {
 	logger->log_warn(name(), "Unknown message received");
       }

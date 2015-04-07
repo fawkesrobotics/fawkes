@@ -76,7 +76,8 @@ class DynamixelServoInterface : public Interface
     uint8_t voltage; /**< Present voltage */
     uint8_t temperature; /**< Present temperature */
     uint32_t punch; /**< Punch */
-    uint8_t alarm_shutdown; /**< Alarm Shutdown. The bitmask is set as follows:
+    uint8_t alarm_shutdown; /**< Alarm Shutdown.
+      The bitmask is set as follows (taken from Trossen Robotics PDF "AX-12(English).pdf"):
       Bit 7: 0
       Bit 6: If set to 1, torque off when an Instruction Error occurs
       Bit 5: If set to 1, torque off when an Overload Error occurs
@@ -85,6 +86,17 @@ class DynamixelServoInterface : public Interface
       Bit 2: If set to 1, torque off when an Overheating Error occurs
       Bit 1: If set to 1, torque off when an Angle Limit Error occurs
       Bit 0: If set to 1, torque off when an Input Voltage Error occurs
+     */
+    uint8_t error; /**< Raw error code from servo.
+      The bitmask is set as follows (taken from Trossen Robotics PDF "AX-12(English).pdf"):
+      Bit 7: 0
+      Bit 6: Set to 1 if an undefined instruction is sent or an action instruction is sent without a Reg_Write instruction.
+      Bit 5: Set to 1 if the specified maximum torque can't control the applied load.
+      Bit 4: Set to 1 if the checksum of the instruction packet is incorrect.
+      Bit 3: Set to 1 if the instruction sent is out of the defined range.
+      Bit 2: Set to 1 if the internal temperature of the Dynamixel unit is above the operating temperature range as defined in the control table.
+      Bit 1: Set as 1 if the Goal Position is set outside of the range between CW Angle Limit and CCW Angle Limit.
+      Bit 0: Set to 1 if the voltage is out of the operating voltage range as defined in the control table.
      */
     float angle; /**< Current angle. */
     bool enabled; /**< Is the pan/tilt unit enabled? */
@@ -488,6 +500,29 @@ class DynamixelServoInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class ResetRawErrorMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } ResetRawErrorMessage_data_t;
+#pragma pack(pop)
+
+    ResetRawErrorMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    ResetRawErrorMessage();
+    ~ResetRawErrorMessage();
+
+    ResetRawErrorMessage(const ResetRawErrorMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   DynamixelServoInterface();
@@ -555,6 +590,9 @@ class DynamixelServoInterface : public Interface
   uint8_t alarm_shutdown() const;
   void set_alarm_shutdown(const uint8_t new_alarm_shutdown);
   size_t maxlenof_alarm_shutdown() const;
+  uint8_t error() const;
+  void set_error(const uint8_t new_error);
+  size_t maxlenof_error() const;
   float angle() const;
   void set_angle(const float new_angle);
   size_t maxlenof_angle() const;

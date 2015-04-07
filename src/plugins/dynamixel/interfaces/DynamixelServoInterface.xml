@@ -38,7 +38,8 @@
     <field type="uint8"  name="voltage">Present voltage</field>
     <field type="uint8"  name="temperature">Present temperature</field>
     <field type="uint32" name="punch">Punch</field>
-    <field type="uint8"  name="alarm_shutdown">Alarm Shutdown. The bitmask is set as follows:
+    <field type="uint8"  name="alarm_shutdown">Alarm Shutdown.
+      The bitmask is set as follows (taken from Trossen Robotics PDF "AX-12(English).pdf"):
       Bit 7: 0
       Bit 6: If set to 1, torque off when an Instruction Error occurs
       Bit 5: If set to 1, torque off when an Overload Error occurs
@@ -47,6 +48,17 @@
       Bit 2: If set to 1, torque off when an Overheating Error occurs
       Bit 1: If set to 1, torque off when an Angle Limit Error occurs
       Bit 0: If set to 1, torque off when an Input Voltage Error occurs
+    </field>
+    <field type="uint8"  name="error">Raw error code from servo.
+      The bitmask is set as follows (taken from Trossen Robotics PDF "AX-12(English).pdf"):
+      Bit 7: 0
+      Bit 6: Set to 1 if an undefined instruction is sent or an action instruction is sent without a Reg_Write instruction.
+      Bit 5: Set to 1 if the specified maximum torque can't control the applied load.
+      Bit 4: Set to 1 if the checksum of the instruction packet is incorrect.
+      Bit 3: Set to 1 if the instruction sent is out of the defined range.
+      Bit 2: Set to 1 if the internal temperature of the Dynamixel unit is above the operating temperature range as defined in the control table.
+      Bit 1: Set as 1 if the Goal Position is set outside of the range between CW Angle Limit and CCW Angle Limit.
+      Bit 0: Set to 1 if the voltage is out of the operating voltage range as defined in the control table.
     </field>
 
     <!-- Values converted to useful units -->
@@ -134,5 +146,8 @@
     <comment>Set angle limits</comment>
     <field type="uint32" name="angle_limit_cw">New cw angle limit</field>
     <field type="uint32" name="angle_limit_ccw">New ccw angle limit</field>
+  </message>
+  <message name="ResetRawError">
+    <comment>Reset raw error of servo in interface</comment>
   </message>
 </interface>

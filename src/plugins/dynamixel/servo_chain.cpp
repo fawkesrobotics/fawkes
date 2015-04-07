@@ -806,6 +806,18 @@ DynamixelChain::get_delay_time(unsigned char id, bool refresh)
 }
 
 
+/** Get error flags set by the servo
+ * @param id servo ID, not the broadcast ID
+ * @param refresh if true, will issue a read command for the value
+ * @return error flags
+ */
+unsigned char
+DynamixelChain::get_error(unsigned char id)
+{
+  return __ibuffer[PACKET_OFFSET_ERROR];
+}
+
+
 /** Get angle limits.
  * @param id servo ID, not the broadcast ID
  * @param refresh if true, will issue a read command for the value

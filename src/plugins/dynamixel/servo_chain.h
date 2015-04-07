@@ -67,6 +67,7 @@ class DynamixelChain
   unsigned char get_firmware_version(unsigned char id, bool refresh = false);
   unsigned char get_baudrate(unsigned char id, bool refresh = false);
   unsigned char get_delay_time(unsigned char id, bool refresh = false);
+  unsigned char get_error(unsigned char id);
   void          get_angle_limits(unsigned char id,
 				 unsigned int &cw_limit, unsigned int &ccw_limit,
 				 bool refresh = false);
