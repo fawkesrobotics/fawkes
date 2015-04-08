@@ -153,6 +153,17 @@ NavGraphEdge::set_property(const std::string &property, const std::string &value
  * @param value property value
  */
 void
+NavGraphEdge::set_property(const std::string &property, const char *value)
+{
+  properties_[property] = value;
+}
+
+
+/** Set property.
+ * @param property property key
+ * @param value property value
+ */
+void
 NavGraphEdge::set_property(const std::string &property, float value)
 {
   properties_[property] = StringConversions::to_string(value);
