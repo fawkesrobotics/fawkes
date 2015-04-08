@@ -181,6 +181,31 @@ operator >> (const YAML::Node& n, NavGraphEdge &edge) {
 #endif
     edge.set_directed(true);
   }
+
+#ifdef HAVE_OLD_YAMLCPP
+  if (n.GetTag() == "tag:fawkesrobotics.org,navgraph/allow-intersection") {
+#else
+  if (n.Tag() == "tag:fawkesrobotics.org,navgraph/allow-intersection") {
+#endif
+    edge.set_property("insert-mode", "force");
+  }
+
+#ifdef HAVE_OLD_YAMLCPP
+  if (n.GetTag() == "tag:fawkesrobotics.org,navgraph/no-intersection") {
+#else
+  if (n.Tag() == "tag:fawkesrobotics.org,navgraph/no-intersection") {
+#endif
+    edge.set_property("insert-mode", "no-intersection");
+  }
+
+#ifdef HAVE_OLD_YAMLCPP
+  if (n.GetTag() == "tag:fawkesrobotics.org,navgraph/split-intersection") {
+#else
+  if (n.Tag() == "tag:fawkesrobotics.org,navgraph/split-intersection") {
+#endif
+    edge.set_property("insert-mode", "split-intersection");
+  }
+
 }
 
 /** Read default properties for graph from YAML node.
@@ -312,7 +337,18 @@ load_yaml_navgraph(std::string filename)
 #endif
     NavGraphEdge edge;
     *e >> edge;
-    graph->add_edge(edge);
+    if (edge.has_property("insert-mode")) {
+      std::string mode = edge.property("insert-mode");
+      if (mode == "force") {
+        graph->add_edge(edge, NavGraph::EDGE_FORCE);
+      } else if (mode == "no-intersection") {
+        graph->add_edge(edge, NavGraph::EDGE_NO_INTERSECTION);
+      } else if (mode == "split-intersection") {
+        graph->add_edge(edge, NavGraph::EDGE_SPLIT_INTERSECTION);
+      }
+    } else {
+      graph->add_edge(edge);
+    }
   }
 
   graph->calc_reachability();
