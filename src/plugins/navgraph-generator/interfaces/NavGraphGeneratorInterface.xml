@@ -2,55 +2,73 @@
 <!DOCTYPE interface SYSTEM "interface.dtd">
 <interface name="NavGraphGeneratorInterface" author="Tim Niemueller" year="2015">
   <constants>
-   <enum name="ConnectionMode">
-     <comment>Drive modes enum</comment>
-     <item name="UNCONNECTED">
-       The node is marked as unconnected and will not be connected to
-       another node. This kind of nodes is useful to mark points and
-       possibly assign properties without needing to travel to it.
-     </item>
-     <item name="CLOSEST_NODE">
-       Connect point to the node on the graph closest to the given
-       point.
-     </item>
-     <item name="CLOSEST_EDGE">
-       Connect point to the edge in which segment it lies, i.e. search
-       for an edge where we can find a perpendicular line going
-       through the given point and any point on the edge's line
-       segment. If no such segment is found, the point cannot be
-       added.
-     </item>
-     <item name="CLOSEST_EDGE_OR_NODE">
-       First try the CLOSEST_EDGE method. If that yields no result,
-       use the CLOSEST_NODE method as a fallback.
-     </item>
-  </enum> 
-   <enum name="FilterType">
-     <comment>Post-processing filtering type.</comment>
-     <item name="FILTER_EDGES_BY_MAP">
-       If enabled, filters out all edges after the map generation that
-       pass too close by an occupied cell of the map. Use this to get
-       rid of connections which "pass through walls".
-       Note that this step is done before adding points of interest.
-       Therefore edges going to POIs might still pass through or close
-       by occupied cells.
-
-       Parameters:
-       distance: minimum distance from edges to occupied map grid
+    <enum name="ConnectionMode">
+      <comment>Drive modes enum</comment>
+      <item name="UNCONNECTED">
+	The node is marked as unconnected and will not be connected to
+	another node. This kind of nodes is useful to mark points and
+	possibly assign properties without needing to travel to it.
+      </item>
+      <item name="CLOSEST_NODE">
+	Connect point to the node on the graph closest to the given
+	point.
+      </item>
+      <item name="CLOSEST_EDGE">
+	Connect point to the edge in which segment it lies, i.e. search
+	for an edge where we can find a perpendicular line going
+	through the given point and any point on the edge's line
+	segment. If no such segment is found, the point cannot be
+	added.
+      </item>
+      <item name="CLOSEST_EDGE_OR_NODE">
+	First try the CLOSEST_EDGE method. If that yields no result,
+	use the CLOSEST_NODE method as a fallback.
+      </item>
+    </enum> 
+    <enum name="FilterType">
+      <comment>Post-processing filtering type.</comment>
+      <item name="FILTER_EDGES_BY_MAP">
+	If enabled, filters out all edges after the map generation that
+	pass too close by an occupied cell of the map. Use this to get
+	rid of connections which "pass through walls".
+	Note that this step is done before adding points of interest.
+	Therefore edges going to POIs might still pass through or close
+	by occupied cells.
+	
+	Parameters:
+	distance: minimum distance from edges to occupied map grid
        cells to consider it safe.
-     </item>
-     <item name="FILTER_ORPHAN_NODES">
-       If enabled, filters out all nodes which are not connected to
-       any other node. These can occur, for example, after performing
-       the FILTER_EDGES_BY_MAP filter.
-     </item>
-     <item name="FILTER_MULTI_GRAPH">
-       Sometimes after applying other filters one can end up with
-       multiple disconnected graphs. Enabling this filter will keep
-       only the largest connected graph and simply remove all nodes
-       and edges from smaller graphs not connected to the largest.
-     </item>
-   </enum>
+      </item>
+      <item name="FILTER_ORPHAN_NODES">
+	If enabled, filters out all nodes which are not connected to
+	any other node. These can occur, for example, after performing
+	the FILTER_EDGES_BY_MAP filter.
+      </item>
+      <item name="FILTER_MULTI_GRAPH">
+	Sometimes after applying other filters one can end up with
+	multiple disconnected graphs. Enabling this filter will keep
+	only the largest connected graph and simply remove all nodes
+	and edges from smaller graphs not connected to the largest.
+      </item>
+    </enum>
+    <enum name="EdgeMode">
+      <comment>
+	When adding edges, the mode defines how to add edges.
+      </comment>
+      <item name="NO_INTERSECTION">
+	Only insert edge if it does not intersect with any other
+	existing edge in the graph.
+      </item>
+      <item name="SPLIT_INTERSECTION">
+	If the new edge intersects with one or more edges, add new
+	points at the intersections and split the edges for this
+	point.
+      </item>
+      <item name="FORCE">
+	The edge is added as-is, it may overlap or intersect with
+	other edges.
+      </item>
+    </enum> 
   </constants>
   <data>
     <comment>
@@ -176,6 +194,21 @@
     <field type="string" name="property_name" length="64">Name of the property to set.</field>
     <field type="string" name="property_value" length="1024">Value of the property
     to set.</field>
+  </message>
+  <message name="AddEdge">
+    <comment>
+      Add an edge between two points. Edges for which one of the end
+      points does not exist are silently ignored. The points are given
+      in the X-Y ground-support plane of global frame, typical /map
+      frame.
+    </comment>
+    <field type="string" name="p1" length="64">ID of first node.</field>
+    <field type="string" name="p2" length="64">ID of second node.</field>
+    <field type="bool" name="directed">
+      True to create a directed edge from p1 to p2, otherwise the edge
+      is assumed to be undirected.
+    </field>
+    <field type="EdgeMode" name="mode">The edge insertion mode.</field>
   </message>
   <message name="SetGraphDefaultProperty">
     <comment>

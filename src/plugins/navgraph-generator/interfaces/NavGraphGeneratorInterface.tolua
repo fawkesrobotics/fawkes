@@ -19,6 +19,12 @@ class NavGraphGeneratorInterface : public Interface
     FILTER_MULTI_GRAPH
   } FilterType;
 
+  typedef enum {
+    NO_INTERSECTION,
+    SPLIT_INTERSECTION,
+    FORCE
+  } EdgeMode;
+
   class ClearMessage : public Message
   {
     ClearMessage();
@@ -174,6 +180,26 @@ class NavGraphGeneratorInterface : public Interface
     char * property_value();
     void set_property_value(const char * new_property_value);
     int maxlenof_property_value() const;
+  };
+
+  class AddEdgeMessage : public Message
+  {
+    AddEdgeMessage(char * ini_p1, char * ini_p2, bool ini_directed, EdgeMode ini_mode);
+    AddEdgeMessage();
+    ~AddEdgeMessage();
+
+    char * p1();
+    void set_p1(const char * new_p1);
+    int maxlenof_p1() const;
+    char * p2();
+    void set_p2(const char * new_p2);
+    int maxlenof_p2() const;
+    bool is_directed();
+    void set_directed(const bool new_directed);
+    int maxlenof_directed() const;
+    EdgeMode mode();
+    void set_mode(const EdgeMode new_mode);
+    int maxlenof_mode() const;
   };
 
   class SetGraphDefaultPropertyMessage : public Message

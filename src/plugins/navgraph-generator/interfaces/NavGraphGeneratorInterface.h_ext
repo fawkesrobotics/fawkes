@@ -41,55 +41,75 @@ class NavGraphGeneratorInterface : public Interface
   /** Drive modes enum */
   typedef enum {
     UNCONNECTED /**< 
-       The node is marked as unconnected and will not be connected to
-       another node. This kind of nodes is useful to mark points and
-       possibly assign properties without needing to travel to it.
-      */,
+	The node is marked as unconnected and will not be connected to
+	another node. This kind of nodes is useful to mark points and
+	possibly assign properties without needing to travel to it.
+       */,
     CLOSEST_NODE /**< 
-       Connect point to the node on the graph closest to the given
-       point.
-      */,
+	Connect point to the node on the graph closest to the given
+	point.
+       */,
     CLOSEST_EDGE /**< 
-       Connect point to the edge in which segment it lies, i.e. search
-       for an edge where we can find a perpendicular line going
-       through the given point and any point on the edge's line
-       segment. If no such segment is found, the point cannot be
-       added.
-      */,
+	Connect point to the edge in which segment it lies, i.e. search
+	for an edge where we can find a perpendicular line going
+	through the given point and any point on the edge's line
+	segment. If no such segment is found, the point cannot be
+	added.
+       */,
     CLOSEST_EDGE_OR_NODE /**< 
-       First try the CLOSEST_EDGE method. If that yields no result,
-       use the CLOSEST_NODE method as a fallback.
-      */
+	First try the CLOSEST_EDGE method. If that yields no result,
+	use the CLOSEST_NODE method as a fallback.
+       */
   } ConnectionMode;
   const char * tostring_ConnectionMode(ConnectionMode value) const;
 
   /** Post-processing filtering type. */
   typedef enum {
     FILTER_EDGES_BY_MAP /**< 
-       If enabled, filters out all edges after the map generation that
-       pass too close by an occupied cell of the map. Use this to get
-       rid of connections which "pass through walls".
-       Note that this step is done before adding points of interest.
-       Therefore edges going to POIs might still pass through or close
-       by occupied cells.
-
-       Parameters:
-       distance: minimum distance from edges to occupied map grid
+	If enabled, filters out all edges after the map generation that
+	pass too close by an occupied cell of the map. Use this to get
+	rid of connections which "pass through walls".
+	Note that this step is done before adding points of interest.
+	Therefore edges going to POIs might still pass through or close
+	by occupied cells.
+	
+	Parameters:
+	distance: minimum distance from edges to occupied map grid
        cells to consider it safe.
-      */,
+       */,
     FILTER_ORPHAN_NODES /**< 
-       If enabled, filters out all nodes which are not connected to
-       any other node. These can occur, for example, after performing
-       the FILTER_EDGES_BY_MAP filter.
-      */,
+	If enabled, filters out all nodes which are not connected to
+	any other node. These can occur, for example, after performing
+	the FILTER_EDGES_BY_MAP filter.
+       */,
     FILTER_MULTI_GRAPH /**< 
-       Sometimes after applying other filters one can end up with
-       multiple disconnected graphs. Enabling this filter will keep
-       only the largest connected graph and simply remove all nodes
-       and edges from smaller graphs not connected to the largest.
-      */
+	Sometimes after applying other filters one can end up with
+	multiple disconnected graphs. Enabling this filter will keep
+	only the largest connected graph and simply remove all nodes
+	and edges from smaller graphs not connected to the largest.
+       */
   } FilterType;
   const char * tostring_FilterType(FilterType value) const;
+
+  /** 
+	When adding edges, the mode defines how to add edges.
+       */
+  typedef enum {
+    NO_INTERSECTION /**< 
+	Only insert edge if it does not intersect with any other
+	existing edge in the graph.
+       */,
+    SPLIT_INTERSECTION /**< 
+	If the new edge intersects with one or more edges, add new
+	points at the intersections and split the edges for this
+	point.
+       */,
+    FORCE /**< 
+	The edge is added as-is, it may overlap or intersect with
+	other edges.
+       */
+  } EdgeMode;
+  const char * tostring_EdgeMode(EdgeMode value) const;
 
  private:
 #pragma pack(push,4)
@@ -106,6 +126,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
  public:
   /* messages */
   class ClearMessage : public Message
@@ -123,6 +144,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     ClearMessage();
     ~ClearMessage();
@@ -151,6 +173,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     SetBoundingBoxMessage(const float ini_p1_x, const float ini_p1_y, const float ini_p2_x, const float ini_p2_y);
     SetBoundingBoxMessage();
@@ -192,6 +215,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     SetFilterMessage(const FilterType ini_filter, const bool ini_enable);
     SetFilterMessage();
@@ -229,6 +253,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     SetFilterParamFloatMessage(const FilterType ini_filter, const char * ini_param, const float ini_value);
     SetFilterParamFloatMessage();
@@ -267,6 +292,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     AddMapObstaclesMessage(const float ini_max_line_point_distance);
     AddMapObstaclesMessage();
@@ -300,6 +326,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     AddObstacleMessage(const char * ini_id, const float ini_x, const float ini_y);
     AddObstacleMessage();
@@ -337,6 +364,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     RemoveObstacleMessage(const char * ini_id);
     RemoveObstacleMessage();
@@ -373,6 +401,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     AddPointOfInterestMessage(const char * ini_id, const float ini_x, const float ini_y, const ConnectionMode ini_mode);
     AddPointOfInterestMessage();
@@ -419,6 +448,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     AddPointOfInterestWithOriMessage(const char * ini_id, const float ini_x, const float ini_y, const float ini_ori, const ConnectionMode ini_mode);
     AddPointOfInterestWithOriMessage();
@@ -465,6 +495,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     SetPointOfInterestPropertyMessage(const char * ini_id, const char * ini_property_name, const char * ini_property_value);
     SetPointOfInterestPropertyMessage();
@@ -481,6 +512,51 @@ class NavGraphGeneratorInterface : public Interface
     char * property_value() const;
     void set_property_value(const char * new_property_value);
     size_t maxlenof_property_value() const;
+    virtual Message * clone() const;
+  };
+
+  class AddEdgeMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char p1[64]; /**< ID of first node. */
+      char p2[64]; /**< ID of second node. */
+      bool directed; /**< 
+      True to create a directed edge from p1 to p2, otherwise the edge
+      is assumed to be undirected.
+     */
+      int32_t mode; /**< The edge insertion mode. */
+    } AddEdgeMessage_data_t;
+#pragma pack(pop)
+
+    AddEdgeMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ConnectionMode;
+  interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
+   public:
+    AddEdgeMessage(const char * ini_p1, const char * ini_p2, const bool ini_directed, const EdgeMode ini_mode);
+    AddEdgeMessage();
+    ~AddEdgeMessage();
+
+    AddEdgeMessage(const AddEdgeMessage *m);
+    /* Methods */
+    char * p1() const;
+    void set_p1(const char * new_p1);
+    size_t maxlenof_p1() const;
+    char * p2() const;
+    void set_p2(const char * new_p2);
+    size_t maxlenof_p2() const;
+    bool is_directed() const;
+    void set_directed(const bool new_directed);
+    size_t maxlenof_directed() const;
+    EdgeMode mode() const;
+    void set_mode(const EdgeMode new_mode);
+    size_t maxlenof_mode() const;
     virtual Message * clone() const;
   };
 
@@ -502,6 +578,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     SetGraphDefaultPropertyMessage(const char * ini_property_name, const char * ini_property_value);
     SetGraphDefaultPropertyMessage();
@@ -535,6 +612,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     SetCopyGraphDefaultPropertiesMessage(const bool ini_enable_copy);
     SetCopyGraphDefaultPropertiesMessage();
@@ -566,6 +644,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     RemovePointOfInterestMessage(const char * ini_id);
     RemovePointOfInterestMessage();
@@ -594,6 +673,7 @@ class NavGraphGeneratorInterface : public Interface
 
   interface_enum_map_t enum_map_ConnectionMode;
   interface_enum_map_t enum_map_FilterType;
+  interface_enum_map_t enum_map_EdgeMode;
    public:
     ComputeMessage();
     ~ComputeMessage();
