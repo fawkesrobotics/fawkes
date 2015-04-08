@@ -67,8 +67,16 @@ class NavGraphGeneratorThread
     std::map<std::string, std::string>                 properties;
   } PointOfInterest;
 
+  typedef struct {
+    std::string                                        p1;
+    std::string                                        p2;
+    bool                                               directed;
+    fawkes::NavGraphGeneratorInterface::EdgeMode       edge_mode;
+  } Edge;
+
   typedef std::map<std::string, PointOfInterest>         PoiMap;
   typedef std::map<std::string, fawkes::cart_coord_2d_t> ObstacleMap;
+  typedef std::list<Edge>                                EdgeList;
 
   virtual bool bb_interface_message_received(fawkes::Interface *interface,
                                              fawkes::Message *message) throw();
@@ -98,6 +106,7 @@ class NavGraphGeneratorThread
   PoiMap      pois_;
   ObstacleMap obstacles_;
   ObstacleMap map_obstacles_;
+  EdgeList    edges_;
 
   bool                                 copy_default_properties_;
   std::map<std::string, std::string>   default_properties_;

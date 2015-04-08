@@ -179,7 +179,7 @@ NavGraphGeneratorThread::loop()
   }
 
   // add POIs
-  for (auto p : pois_) {
+  for (const auto &p : pois_) {
     // add poi
     NavGraphNode node(p.first,
 		      p.second.position.x, p.second.position.y,
@@ -212,6 +212,33 @@ NavGraphGeneratorThread::loop()
       logger->log_debug(name(), "  Connecting POI %s at (%f,%f) to closest edge or node",
 			p.first.c_str(), p.second.position.x, p.second.position.y);
       navgraph->add_node_and_connect(node, NavGraph::CLOSEST_EDGE_OR_NODE);
+      break;
+    }
+  }
+
+
+  // add edges
+  for (const auto &e : edges_) {
+    switch (e.edge_mode) {
+    case NavGraphGeneratorInterface::NO_INTERSECTION:
+      logger->log_debug(name(), "  Edge %s-%s%s (no intersection)",
+			e.p1.c_str(), e.directed ? ">" : "-", e.p2.c_str());
+      navgraph->add_edge(NavGraphEdge(e.p1, e.p2, e.directed),
+			 NavGraph::EDGE_NO_INTERSECTION);
+      break;
+
+    case NavGraphGeneratorInterface::SPLIT_INTERSECTION:
+      logger->log_debug(name(), "  Edge %s-%s%s (split intersection)",
+			e.p1.c_str(), e.directed ? ">" : "-", e.p2.c_str());
+      navgraph->add_edge(NavGraphEdge(e.p1, e.p2, e.directed),
+			 NavGraph::EDGE_SPLIT_INTERSECTION);
+      break;
+
+    case NavGraphGeneratorInterface::FORCE:
+      logger->log_debug(name(), "  Edge %s-%s%s (force)",
+			e.p1.c_str(), e.directed ? ">" : "-", e.p2.c_str());
+      navgraph->add_edge(NavGraphEdge(e.p1, e.p2, e.directed),
+			 NavGraph::EDGE_FORCE);
       break;
     }
   }
@@ -307,6 +334,16 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     poi.position  = cart_coord_2d_t(msg->x(), msg->y());
     poi.conn_mode = msg->mode();
     pois_[msg->id()] = poi;
+
+  } else if (message->is_of_type<NavGraphGeneratorInterface::AddEdgeMessage>()) {
+    NavGraphGeneratorInterface::AddEdgeMessage *msg =
+      message->as_type<NavGraphGeneratorInterface::AddEdgeMessage>();
+    Edge edge;
+    edge.p1 = msg->p1();
+    edge.p2 = msg->p2();
+    edge.directed = msg->is_directed();
+    edge.edge_mode = msg->mode();
+    edges_.push_back(edge);
 
   } else if (message->is_of_type<NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage>()) {
     NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage *msg =
