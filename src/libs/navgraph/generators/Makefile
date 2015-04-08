@@ -17,7 +17,7 @@ BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/navgraph/navgraph.mk
-include $(BUILDCONFDIR)/navgraph/navgraph_generators.mk
+include $(BUILDSYSDIR)/cgal.mk
 
 
 LIBS_libfawkesnavgraphgenerators = fawkescore fawkesaspects fawkesutils \
@@ -32,9 +32,11 @@ ifeq ($(HAVE_NAVGRAPH)$(HAVE_CGAL),11)
   LIBS_all = $(LIBDIR)/libfawkesnavgraphgenerators.$(SOEXT)
 else
   ifneq ($(HAVE_NAVGRAPH),1)
-    WARN_TARGETS = warning_navgraph
+    WARN_TARGETS += warning_navgraph
   endif
-  # CGAL gets a warning already in navgraph_generators.mk
+  ifneq ($(HAVE_CGAL),1)
+    WARN_TARGETS += warning_cgal
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
@@ -43,8 +45,9 @@ all: $(WARN_TARGETS)
 .PHONY: warning_navgraph
 warning_navgraph:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)navgraph generators library cannot be built$(TNORMAL) ($(NAVGRAPH_ERROR))"
+warning_cgal:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)navgraph generators library cannot be built$(TNORMAL) (CGAL: $(CGAL_ERROR))"
 endif
 
 
 include $(BUILDSYSDIR)/base.mk
-
