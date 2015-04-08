@@ -23,6 +23,7 @@
 #include <navgraph/navgraph_edge.h>
 
 #include <core/exception.h>
+#include <utils/math/lines.h>
 
 #include <Eigen/Geometry>
 
@@ -220,6 +221,50 @@ NavGraphEdge::closest_point_on_edge(float x, float y) const
 
   throw Exception("Point (%f,%f) is not on edge %s--%s", x, y,
 		  from_.c_str(), to_.c_str());
+}
+
+/** Check if the edge intersects with another line segment.
+ * @param x1 X coordinate of first point of line segment to test
+ * @param y1 Y coordinate of first point of line segment to test
+ * @param x2 X coordinate of first point of line segment to test
+ * @param y2 Y coordinate of first point of line segment to test
+ * @param ip upon returning true contains intersection point,
+ * not modified is return value is false
+ * @return true if the edge intersects with the line segment, false otherwise
+ */
+bool
+NavGraphEdge::intersection(float x1, float y1, float x2, float y2,
+			   fawkes::cart_coord_2d_t &ip) const
+{
+  const Eigen::Vector2f e_from(from_node_.x(), from_node_.y());
+  const Eigen::Vector2f e_to(to_node_.x(), to_node_.y());
+  const Eigen::Vector2f p1(x1, y1);
+  const Eigen::Vector2f p2(x2, y2);
+  const Eigen::Vector2f lip = line_segm_intersection(e_from, e_to, p1, p2);
+  if (lip.allFinite()) {
+    ip.x = lip[0];
+    ip.y = lip[1];
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/** Check if the edge intersects with another line segment.
+ * @param x1 X coordinate of first point of line segment to test
+ * @param y1 Y coordinate of first point of line segment to test
+ * @param x2 X coordinate of first point of line segment to test
+ * @param y2 Y coordinate of first point of line segment to test
+ * @return true if the edge intersects with the line segment, false otherwise
+ */
+bool
+NavGraphEdge::intersects(float x1, float y1, float x2, float y2) const
+{
+  const Eigen::Vector2f e_from(from_node_.x(), from_node_.y());
+  const Eigen::Vector2f e_to(to_node_.x(), to_node_.y());
+  const Eigen::Vector2f p1(x1, y1);
+  const Eigen::Vector2f p2(x2, y2);
+  return line_segm_intersect(e_from, e_to, p1, p2);
 }
 
 } // end of namespace fawkes
