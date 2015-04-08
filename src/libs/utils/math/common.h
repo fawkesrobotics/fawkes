@@ -24,6 +24,9 @@
 #ifndef __UTILS_MATH_COMMON_H_
 #define __UTILS_MATH_COMMON_H_
 
+#include <limits>
+#include <cmath>
+
 namespace fawkes {
 
 /** Fast square multiplication.
@@ -64,6 +67,39 @@ inline unsigned long
 sqr(unsigned long x)
 {
   return (x*x);
+}
+
+/** Get distance of two points.
+ * This is particularly useful if not using a more powerful
+ * representation like Eigen.
+ * @param x1 x coordinate of first point
+ * @param y1 y coordinate of first point
+ * @param x2 x coordinate of second point
+ * @param y2 y coordinate of second point
+ * @return distance
+ */
+inline float
+point_dist(float x1, float y1, float x2, float y2)
+{
+  return sqrtf(powf(x1 - x2, 2) + powf(y1 - y2, 2));
+}
+
+/** Check if two points are different with regard to a given threshold.
+ * This is particularly useful if not using a more powerful
+ * representation like Eigen.
+ * @param x1 x coordinate of first point
+ * @param y1 y coordinate of first point
+ * @param x2 x coordinate of second point
+ * @param y2 y coordinate of second point
+ * @param threshold the threshold to compare the distance between the
+ * points to.
+ * @return true if the distance of the two points is greater than or equal
+ * to the given threshold, false otherwise.
+ */
+inline bool
+points_different(float x1, float y1, float x2, float y2, float threshold = 1e-4)
+{
+  return sqrtf(powf(x1 - x2, 2) + powf(y1 - y2, 2)) >= threshold;
 }
 
 } // end namespace fawkes
