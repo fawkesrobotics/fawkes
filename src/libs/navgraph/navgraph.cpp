@@ -1193,6 +1193,27 @@ NavGraph::calc_reachability(bool allow_multi_graph)
   reachability_calced_ = true;
 }
 
+
+/** Generate a unique node name for the given prefix.
+ * Will simply add a number and tries from 0 to MAXINT.
+ * Note that to add a unique name you must protect the navgraph
+ * from concurrent modification.
+ * @param prefix the node name prefix
+ * @return unique node name
+ */
+std::string
+NavGraph::gen_unique_name(const char *prefix)
+{
+  for (unsigned int i = 0; i < std::numeric_limits<unsigned int>::max(); ++i) {
+    std::string name = format_name("%s%i", prefix, i);
+    if (! node(name)) {
+      return name;
+    }
+  }
+  throw Exception("Cannot generate unique name for given prefix, all taken");
+}
+
+
 /** Create node name from a format string.
  * @param format format for the name according to sprintf arguments
  * @param ... parameters according to format

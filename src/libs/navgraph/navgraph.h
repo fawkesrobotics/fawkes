@@ -182,6 +182,7 @@ class NavGraph
   float cost(const NavGraphNode &from, const NavGraphNode &to) const;
 
   static std::string format_name(const char *format, ...);
+  std::string gen_unique_name(const char *prefix = "U-");
 
  private:
   void assert_valid_edges();
