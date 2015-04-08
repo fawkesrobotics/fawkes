@@ -65,6 +65,17 @@ class NavGraph
 				///< if that fails, connect to closest node
   } ConnectionMode;
 
+  /** Mode to use to add edges. */
+  typedef enum {
+    EDGE_FORCE,		///< add nodes no matter what (be careful)
+    EDGE_NO_INTERSECTION,	///< Only add edge if it does not intersect
+				///< with any existing edge
+    EDGE_SPLIT_INTERSECTION	///< Add the edge, but if it intersects with
+				///< an existing edges add new points at the
+				///< intersection points for both, the conflicting
+				///< edges and the new edge
+  } EdgeMode;
+
   NavGraph(const std::string &graph_name);
   virtual ~NavGraph();
   
@@ -136,7 +147,8 @@ class NavGraph
   void add_node_and_connect(const NavGraphNode &node, ConnectionMode conn_mode);
   void connect_node_to_closest_node(const NavGraphNode &n);
   void connect_node_to_closest_edge(const NavGraphNode &n);
-  void add_edge(const NavGraphEdge &edge);
+  void add_edge(const NavGraphEdge &edge, EdgeMode mode = EDGE_NO_INTERSECTION,
+		bool allow_existing = false);
   void remove_node(const NavGraphNode &node);
   void remove_node(const std::string &node_name);
   void remove_edge(const NavGraphEdge &edge);
@@ -187,6 +199,8 @@ class NavGraph
  private:
   void assert_valid_edges();
   void assert_connected();
+  void edge_add_no_intersection(const NavGraphEdge &edge);
+  void edge_add_split_intersection(const NavGraphEdge &edge);
 
  private:
   std::string                             graph_name_;
