@@ -1091,7 +1091,17 @@ NavGraph::assert_connected()
   std::set<std::string> traversed;
   std::set<std::string> nodeset;
   std::queue<NavGraphNode> q;
-  q.push(nodes_.front());
+
+  // find first connected not
+  auto fcon = std::find_if_not(nodes_.begin(), nodes_.end(),
+			       [](const NavGraphNode &n)
+			       { return n.unconnected(); });
+  if (fcon == nodes_.end()) {
+    // no connected nodes
+    return;
+  }
+
+  q.push(*fcon);
 
   while (! q.empty()) {
     NavGraphNode &n = q.front();
@@ -1160,7 +1170,7 @@ NavGraph::assert_connected()
       }
       throw Exception("The graph is not fully connected, "
 		      "cannot reach (%s) from '%s' for example",
-		      disconnected.c_str(), nodes_[0].name().c_str());
+		      disconnected.c_str(), fcon->name().c_str());
     }
   }
 }
