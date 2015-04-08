@@ -443,9 +443,10 @@ bool
 NavGraph::edge_exists(const std::string &from, const std::string &to) const
 {
   std::vector<NavGraphEdge>::const_iterator e =
-    std::find_if(edges_.begin(), edges_.end(), 
-		 [&from, &to](const NavGraphEdge &edge) {
-		   return edge.from() == from && edge.to() == to;
+    std::find_if(edges_.begin(), edges_.end(),
+		 [&from, &to](const NavGraphEdge &e)->bool {
+		   return (from == e.from() && to == e.to()) ||
+		     (! e.is_directed() && (from == e.to() && to == e.from()));
 		 });
   return (e != edges_.end());
 }
