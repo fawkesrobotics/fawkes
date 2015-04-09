@@ -138,6 +138,15 @@ NavGraphEdge::property(const std::string &prop) const
   }
 }
 
+/** Overwrite properties with given ones.
+ * @param properties map of properties to set
+ */
+void
+NavGraphEdge::set_properties(const std::map<std::string, std::string> &properties)
+{
+  properties_ = properties;
+}
+
 /** Set property.
  * @param property property key
  * @param value property value

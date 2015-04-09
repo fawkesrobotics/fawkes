@@ -101,6 +101,7 @@ class NavGraphNode {
   bool is_valid() const
   { return name_ != ""; }
 
+  void set_properties(const std::map<std::string, std::string> &properties);
   void set_property(const std::string &property, const std::string &value);
   void set_property(const std::string &property, float value);
   void set_property(const std::string &property, int value);

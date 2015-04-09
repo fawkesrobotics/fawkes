@@ -92,6 +92,7 @@ class NavGraphEdge {
   bool has_property(const std::string &property) const
   { return properties_.find(property) != properties_.end(); }
 
+  void set_properties(const std::map<std::string, std::string> &properties);
   void set_property(const std::string &property, const std::string &value);
   void set_property(const std::string &property, const char *value);
   void set_property(const std::string &property, float value);
