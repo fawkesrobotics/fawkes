@@ -860,7 +860,7 @@ BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
     if (field == fit.get_name()) {
       switch (fit.get_type()) {
       case IFT_BOOL:
-	if (value.type() != CLIPS::TYPE_SYMBOL) {
+	if (value.type() != CLIPS::TYPE_SYMBOL && value.type() != CLIPS::TYPE_STRING) {
 	  logger_->log_error(("BBCLIPS|" + env_name).c_str(),
 			     "Cannot set field %s: invalid value (not a symbol)",
 			     field.c_str());
