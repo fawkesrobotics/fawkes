@@ -423,7 +423,7 @@ NavGraphConstraintRepo::cost_factor(const std::vector<fawkes::NavGraphEdge> &edg
   std::list<std::tuple<std::string, std::string, std::string, float>> rv;
   for (const fawkes::NavGraphEdge &e : edges) {
     float max_cost = 1.0;
-    fawkes::NavGraphEdgeCostConstraint *max_c;
+    fawkes::NavGraphEdgeCostConstraint *max_c = NULL;
     for (fawkes::NavGraphEdgeCostConstraint *c : edge_cost_constraints_) {
       float cost_factor = c->cost_factor(e.from_node(), e.to_node());
       if (cost_factor > max_cost) {
@@ -431,7 +431,7 @@ NavGraphConstraintRepo::cost_factor(const std::vector<fawkes::NavGraphEdge> &edg
 	max_c    = c;
       }
     }
-    if (max_cost >= 1.00001) {
+    if (max_c && max_cost >= 1.00001) {
       rv.push_back(std::make_tuple(e.from(), e.to(), max_c->name(), max_cost));
     }
   }
