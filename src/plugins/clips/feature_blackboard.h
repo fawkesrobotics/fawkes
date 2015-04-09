@@ -98,7 +98,7 @@ class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
 				      std::string field_name, CLIPS::Value value);
   void clips_blackboard_set_msg_multifield(std::string env_name, void *msgptr,
 				      std::string field_name, CLIPS::Values values);
-  void clips_blackboard_send_msg(std::string env_name, void *msgptr);
+  CLIPS::Value clips_blackboard_send_msg(std::string env_name, void *msgptr);
 
   //helper
   bool set_field(fawkes::InterfaceFieldIterator fit_begin,

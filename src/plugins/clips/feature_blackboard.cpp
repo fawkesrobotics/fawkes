@@ -181,7 +181,7 @@ BlackboardCLIPSFeature::clips_context_init(const std::string &env_name,
     )
   );
   clips->add_function("blackboard-send-msg",
-    sigc::slot<void, void *>(
+    sigc::slot<CLIPS::Value, void *>(
       sigc::bind<0>(
 	sigc::mem_fun(*this, &BlackboardCLIPSFeature::clips_blackboard_send_msg),
 	env_name)
@@ -774,25 +774,35 @@ BlackboardCLIPSFeature::clips_blackboard_set_msg_multifield(std::string env_name
 }
 
 
-void
+CLIPS::Value
 BlackboardCLIPSFeature::clips_blackboard_send_msg(std::string env_name, void *msgptr)
 {
   std::shared_ptr<Message> *m =
     static_cast<std::shared_ptr<Message> *>(msgptr);
   if (!*m) {
     logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't set message field, the pointer is wrong.");
-    return;
+    return CLIPS::Value(0);
   }
   if (!interface_of_msg_[m->get()]) {
     logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Can't send message, was it already sent?");
-    return;
+    return CLIPS::Value(0);
   }
+
+  //add reference to the message so we can return the message id (otherwise it is changed by sending)
+  m->get()->ref();
 
   //send message about the saved interface
   interface_of_msg_[m->get()]->msgq_enqueue(m->get());
 
+  unsigned int message_id = m->get()->id();
+
   //delete saved pointer to interface
   interface_of_msg_.erase(m->get());
+
+  //remove added refference
+  m->get()->unref();
+
+  return CLIPS::Value(message_id);
 }
 
 /**
