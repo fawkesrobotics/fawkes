@@ -23,6 +23,7 @@
 #define __NAVGRAPH_CONSTRAINTS_STATIC_LIST_EDGE_COST_CONSTRAINT_H_
 
 #include <navgraph/constraints/edge_cost_constraint.h>
+#include <core/utils/lock_vector.h>
 
 #include <vector>
 #include <string>
@@ -56,6 +57,7 @@ class NavGraphStaticListEdgeCostConstraint : public NavGraphEdgeCostConstraint
 
  private:
   std::vector<std::pair<fawkes::NavGraphEdge, float>> edge_cost_list_;
+  fawkes::LockVector<std::pair<fawkes::NavGraphEdge, float>> edge_cost_list_buffer_;
   bool modified_;
 
 };

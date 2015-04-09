@@ -56,6 +56,9 @@ NavGraphStaticListEdgeCostConstraint::compute(void) throw()
 {
   if (modified_) {
     modified_ = false;
+    edge_cost_list_buffer_.lock();
+    edge_cost_list_ = edge_cost_list_buffer_;
+    edge_cost_list_buffer_.unlock();
     return true;
   } else {
     return false;
@@ -76,7 +79,7 @@ NavGraphStaticListEdgeCostConstraint::add_edge(const fawkes::NavGraphEdge &edge,
   }
   if (! has_edge(edge)) {
     modified_ = true;
-    edge_cost_list_.push_back(std::make_pair(edge, cost_factor));
+    edge_cost_list_buffer_.push_back_locked(std::make_pair(edge, cost_factor));
   }
 }
 
@@ -99,14 +102,14 @@ void
 NavGraphStaticListEdgeCostConstraint::remove_edge(const fawkes::NavGraphEdge &edge)
 {
   std::vector<std::pair<NavGraphEdge, float>>::iterator ec
-    = std::find_if(edge_cost_list_.begin(), edge_cost_list_.end(),
+    = std::find_if(edge_cost_list_buffer_.begin(), edge_cost_list_buffer_.end(),
 		   [&edge](const std::pair<fawkes::NavGraphEdge, float> &p) {
 		     return p.first == edge;
 		   });
 
-  if (ec != edge_cost_list_.end()) {
+  if (ec != edge_cost_list_buffer_.end()) {
     modified_ = true;
-    edge_cost_list_.erase(ec);
+    edge_cost_list_buffer_.erase_locked(ec);
   }
 }
 
@@ -117,15 +120,18 @@ NavGraphStaticListEdgeCostConstraint::remove_edge(const fawkes::NavGraphEdge &ed
 bool
 NavGraphStaticListEdgeCostConstraint::has_edge(const fawkes::NavGraphEdge &edge)
 {
-  return (std::find_if(edge_cost_list_.begin(), edge_cost_list_.end(),
+  return (std::find_if(edge_cost_list_buffer_.begin(), edge_cost_list_buffer_.end(),
 		       [&edge](const std::pair<fawkes::NavGraphEdge, float> &p) {
 			 return p.first == edge;
 		       })
-	  != edge_cost_list_.end());
+	  != edge_cost_list_buffer_.end());
 }
 
 
 /** Get list of blocked edges.
+ * Note that this is the list as it is currently used on queries.
+ * Any operations (adding/removing edges) that have been performed
+ * without compute() being called are not reflected.
  * @return list of blocked edges
  */
 const std::vector<std::pair<fawkes::NavGraphEdge, float>> &
@@ -139,9 +145,9 @@ NavGraphStaticListEdgeCostConstraint::edge_cost_list() const
 void
 NavGraphStaticListEdgeCostConstraint::clear_edges()
 {
-  if (! edge_cost_list_.empty()) {
+  if (! edge_cost_list_buffer_.empty()) {
     modified_ = true;
-    edge_cost_list_.clear();
+    edge_cost_list_buffer_.clear();
   }
 }
 
