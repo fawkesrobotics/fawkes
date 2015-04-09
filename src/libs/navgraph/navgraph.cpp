@@ -524,7 +524,10 @@ void
 NavGraph::connect_node_to_closest_node(const NavGraphNode &n)
 {
   NavGraphNode closest = closest_node_to(n.name());
-  add_edge(NavGraphEdge(n.name(), closest.name()));
+  NavGraphEdge new_edge(n.name(), closest.name());
+  new_edge.set_property("created-for", n.name() + "--" + closest.name());
+  new_edge.set_property("generated", true);
+  add_edge(new_edge);
 }
 
 
@@ -542,7 +545,7 @@ NavGraph::connect_node_to_closest_edge(const NavGraphNode &n)
   if (almost_equal(closest_conn.distance(p.x, p.y), 0.f, 2)) {
     cn = closest_conn;
   } else {
-    cn = NavGraphNode(NavGraph::format_name("C_%s", n.name().c_str()), p.x, p.y);
+    cn = NavGraphNode(NavGraph::format_name("C-%s", n.name().c_str()), p.x, p.y);
   }
 
   if (closest.from() == cn.name() || closest.to() == cn.name()) {
@@ -550,6 +553,7 @@ NavGraph::connect_node_to_closest_edge(const NavGraphNode &n)
     // simply add the new edge and we are done
     NavGraphEdge new_edge(cn.name(), n.name());
     new_edge.set_property("generated", true);
+    new_edge.set_property("created-for", cn.name() + "--" + n.name());
     add_edge(new_edge);
   } else {
     // we are inserting a new point into the edge
@@ -557,8 +561,9 @@ NavGraph::connect_node_to_closest_edge(const NavGraphNode &n)
     NavGraphEdge new_edge_1(closest.from(), cn.name());
     NavGraphEdge new_edge_2(closest.to(), cn.name());
     NavGraphEdge new_edge_3(cn.name(), n.name());
-    new_edge_1.set_property("generated", true);
-    new_edge_2.set_property("generated", true);
+    new_edge_1.set_properties(closest.properties());
+    new_edge_2.set_properties(closest.properties());
+    new_edge_3.set_property("created-for", cn.name() + "--" + n.name());
     new_edge_3.set_property("generated", true);
 
     if (! node_exists(cn))  add_node(cn);
@@ -1187,7 +1192,9 @@ NavGraph::edge_add_split_intersection(const NavGraphEdge &edge)
     }
 
     if (intersections.empty()) {
-      add_edge(edge, EDGE_FORCE);
+      NavGraphEdge e(edge);
+      e.set_property("created-for", edge.from() + "--" + edge.to());
+      add_edge(e, EDGE_FORCE);
     } else {
       Eigen::Vector2f e_origin(n1.x(), n1.y());
       Eigen::Vector2f e_target(n2.x(), n2.y());
@@ -1222,6 +1229,8 @@ NavGraph::edge_add_split_intersection(const NavGraphEdge &edge)
 	  NavGraphEdge e1(e.from(), ip.name(), e.is_directed());
 	  NavGraphEdge e2(ip.name(), e.to(), e.is_directed());
 	  remove_edge(e);
+	  e1.set_properties(e.properties());
+	  e2.set_properties(e.properties());
 	  add_edge(e1, EDGE_FORCE, /* allow existing */ true);
 	  add_edge(e2, EDGE_FORCE, /* allow existing */ true);
 
@@ -1235,6 +1244,7 @@ NavGraph::edge_add_split_intersection(const NavGraphEdge &edge)
 	// add segment edge
 	if (en_from != ip.name() && prev_to != ip.name()) {
 	  NavGraphEdge e3(en_from, ip.name(), edge.is_directed());
+	  e3.set_property("created-for", en_from + "--" + ip.name());
 	  add_edge(e3, EDGE_FORCE, /* allow existing */ true);
 
 	}
@@ -1245,6 +1255,7 @@ NavGraph::edge_add_split_intersection(const NavGraphEdge &edge)
 
       if (en_from != edge.to()) {
 	NavGraphEdge e3(en_from, edge.to(), edge.is_directed());
+	e3.set_property("created-for", en_from + "--" + edge.to());
 	add_edge(e3, EDGE_FORCE, /* allow existing */ true);
       }
     }
