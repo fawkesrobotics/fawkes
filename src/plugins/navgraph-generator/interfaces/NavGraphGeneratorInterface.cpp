@@ -63,6 +63,7 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   data      = (NavGraphGeneratorInterface_data_t *)data_ptr;
   data_ts   = (interface_data_ts_t *)data_ptr;
   memset(data_ptr, 0, data_size);
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -89,7 +90,7 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   add_messageinfo("SetCopyGraphDefaultPropertiesMessage");
   add_messageinfo("RemovePointOfInterestMessage");
   add_messageinfo("ComputeMessage");
-  unsigned char tmp_hash[] = {0x6b, 0xb3, 0x14, 0x79, 0xa7, 0x97, 0x51, 0x7e, 0x21, 0x94, 0xe6, 0xf9, 0x8e, 0xbd, 0xf6, 0xb1};
+  unsigned char tmp_hash[] = {0xd9, 0xef, 0x3c, 0x1e, 0x3d, 0x26, 0xa2, 0x70, 0x86, 0x9, 0xa2, 0x51, 0xe7, 0x86, 0x39, 0x9d};
   set_hash(tmp_hash);
 }
 
@@ -106,6 +107,7 @@ const char *
 NavGraphGeneratorInterface::tostring_ConnectionMode(ConnectionMode value) const
 {
   switch (value) {
+  case NOT_CONNECTED: return "NOT_CONNECTED";
   case UNCONNECTED: return "UNCONNECTED";
   case CLOSEST_NODE: return "CLOSEST_NODE";
   case CLOSEST_EDGE: return "CLOSEST_EDGE";
@@ -261,6 +263,7 @@ NavGraphGeneratorInterface::ClearMessage::ClearMessage() : Message("ClearMessage
   memset(data_ptr, 0, data_size);
   data      = (ClearMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -326,6 +329,7 @@ NavGraphGeneratorInterface::SetBoundingBoxMessage::SetBoundingBoxMessage(const f
   data->p1_y = ini_p1_y;
   data->p2_x = ini_p2_x;
   data->p2_y = ini_p2_y;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -349,6 +353,7 @@ NavGraphGeneratorInterface::SetBoundingBoxMessage::SetBoundingBoxMessage() : Mes
   memset(data_ptr, 0, data_size);
   data      = (SetBoundingBoxMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -534,6 +539,7 @@ NavGraphGeneratorInterface::SetFilterMessage::SetFilterMessage(const FilterType 
   data_ts   = (message_data_ts_t *)data_ptr;
   data->filter = ini_filter;
   data->enable = ini_enable;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -555,6 +561,7 @@ NavGraphGeneratorInterface::SetFilterMessage::SetFilterMessage() : Message("SetF
   memset(data_ptr, 0, data_size);
   data      = (SetFilterMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -684,6 +691,7 @@ NavGraphGeneratorInterface::SetFilterParamFloatMessage::SetFilterParamFloatMessa
   data->filter = ini_filter;
   strncpy(data->param, ini_param, 32);
   data->value = ini_value;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -706,6 +714,7 @@ NavGraphGeneratorInterface::SetFilterParamFloatMessage::SetFilterParamFloatMessa
   memset(data_ptr, 0, data_size);
   data      = (SetFilterParamFloatMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -864,6 +873,7 @@ NavGraphGeneratorInterface::AddMapObstaclesMessage::AddMapObstaclesMessage(const
   data      = (AddMapObstaclesMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->max_line_point_distance = ini_max_line_point_distance;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -884,6 +894,7 @@ NavGraphGeneratorInterface::AddMapObstaclesMessage::AddMapObstaclesMessage() : M
   memset(data_ptr, 0, data_size);
   data      = (AddMapObstaclesMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -984,6 +995,7 @@ NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage(const char * 
   strncpy(data->id, ini_id, 64);
   data->x = ini_x;
   data->y = ini_y;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1006,6 +1018,7 @@ NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage() : Message("
   memset(data_ptr, 0, data_size);
   data      = (AddObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1162,6 +1175,7 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage(const c
   data      = (RemoveObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->id, ini_id, 64);
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1182,6 +1196,7 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage() : Mes
   memset(data_ptr, 0, data_size);
   data      = (RemoveObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1282,6 +1297,7 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage
   data->x = ini_x;
   data->y = ini_y;
   data->mode = ini_mode;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1305,6 +1321,7 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage
   memset(data_ptr, 0, data_size);
   data      = (AddPointOfInterestMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1504,6 +1521,7 @@ NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterest
   data->y = ini_y;
   data->ori = ini_ori;
   data->mode = ini_mode;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1528,6 +1546,7 @@ NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterest
   memset(data_ptr, 0, data_size);
   data      = (AddPointOfInterestWithOriMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1754,6 +1773,7 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInteres
   strncpy(data->id, ini_id, 64);
   strncpy(data->property_name, ini_property_name, 64);
   strncpy(data->property_value, ini_property_value, 1024);
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1776,6 +1796,7 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInteres
   memset(data_ptr, 0, data_size);
   data      = (SetPointOfInterestPropertyMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1940,6 +1961,7 @@ NavGraphGeneratorInterface::AddEdgeMessage::AddEdgeMessage(const char * ini_p1, 
   strncpy(data->p2, ini_p2, 64);
   data->directed = ini_directed;
   data->mode = ini_mode;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -1963,6 +1985,7 @@ NavGraphGeneratorInterface::AddEdgeMessage::AddEdgeMessage() : Message("AddEdgeM
   memset(data_ptr, 0, data_size);
   data      = (AddEdgeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -2154,6 +2177,7 @@ NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::SetGraphDefaultPrope
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->property_name, ini_property_name, 64);
   strncpy(data->property_value, ini_property_value, 1024);
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -2175,6 +2199,7 @@ NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::SetGraphDefaultPrope
   memset(data_ptr, 0, data_size);
   data      = (SetGraphDefaultPropertyMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -2298,6 +2323,7 @@ NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::SetCopyGraphDe
   data      = (SetCopyGraphDefaultPropertiesMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->enable_copy = ini_enable_copy;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -2318,6 +2344,7 @@ NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::SetCopyGraphDe
   memset(data_ptr, 0, data_size);
   data      = (SetCopyGraphDefaultPropertiesMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -2410,6 +2437,7 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestM
   data      = (RemovePointOfInterestMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->id, ini_id, 64);
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -2430,6 +2458,7 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestM
   memset(data_ptr, 0, data_size);
   data      = (RemovePointOfInterestMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
@@ -2521,6 +2550,7 @@ NavGraphGeneratorInterface::ComputeMessage::ComputeMessage() : Message("ComputeM
   memset(data_ptr, 0, data_size);
   data      = (ComputeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
   enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";

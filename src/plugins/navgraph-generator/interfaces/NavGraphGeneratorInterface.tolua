@@ -7,6 +7,7 @@ class NavGraphGeneratorInterface : public Interface
 {
 
   typedef enum {
+    NOT_CONNECTED,
     UNCONNECTED,
     CLOSEST_NODE,
     CLOSEST_EDGE,
