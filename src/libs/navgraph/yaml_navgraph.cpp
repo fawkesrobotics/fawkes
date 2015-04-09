@@ -318,22 +318,22 @@ load_yaml_navgraph(std::string filename)
 
   read_default_properties(graph, doc);
 
-  const YAML::Node &nodes = doc["nodes"];
+  const YAML::Node &ynodes = doc["nodes"];
 #ifdef HAVE_YAMLCPP_0_5
-  for (YAML::const_iterator n = nodes.begin(); n != nodes.end(); ++n) {
+  for (YAML::const_iterator n = ynodes.begin(); n != ynodes.end(); ++n) {
 #else
-  for (YAML::Iterator n = nodes.begin(); n != nodes.end(); ++n) {
+  for (YAML::Iterator n = ynodes.begin(); n != ynodes.end(); ++n) {
 #endif
     NavGraphNode node;
     *n >> node;
     graph->add_node(node);
   }
 
-  const YAML::Node &edges = doc["connections"];
+  const YAML::Node &yedges = doc["connections"];
 #ifdef HAVE_YAMLCPP_0_5
-  for (YAML::const_iterator e = edges.begin(); e != edges.end(); ++e) {
+  for (YAML::const_iterator e = yedges.begin(); e != yedges.end(); ++e) {
 #else
-  for (YAML::Iterator e = edges.begin(); e != edges.end(); ++e) {
+  for (YAML::Iterator e = yedges.begin(); e != yedges.end(); ++e) {
 #endif
     NavGraphEdge edge;
     *e >> edge;
@@ -352,6 +352,29 @@ load_yaml_navgraph(std::string filename)
   }
 
   graph->calc_reachability();
+
+  const std::vector<NavGraphNode> &nodes = graph->nodes();
+  for (const NavGraphNode &n : nodes) {
+    if (n.has_property("insert-mode")) {
+      std::string ins_mode = n.property("insert-mode");
+      if (ins_mode == "closest-node" || ins_mode == "CLOSEST_NODE") {
+	graph->connect_node_to_closest_node(n);
+      } else if (ins_mode == "closest-edge" || ins_mode == "CLOSEST_EDGE") {
+	graph->connect_node_to_closest_edge(n);
+      } else if (ins_mode == "closest-edge-or-node" || ins_mode == "CLOSEST_EDGE_OR_NODE") {
+	try {
+	  graph->connect_node_to_closest_edge(n);
+	} catch (Exception &e) {
+	  graph->connect_node_to_closest_node(n);
+	}
+      } else if (ins_mode == "unconnected" || ins_mode == "UNCONNECTED") {
+	NavGraphNode updated_n(n);
+	updated_n.set_unconnected(true);
+	graph->update_node(updated_n);
+      } // else NOT_CONNECTED, the default, do nothing here
+    }
+  }
+
   return graph;
 }
 
