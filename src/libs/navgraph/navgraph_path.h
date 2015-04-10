@@ -91,6 +91,14 @@ class NavGraphPath {
   const std::vector<NavGraphNode> &  nodes() const
   { return nodes_; }
 
+  /** Get nodes along the path as mutable vector.
+   * Use this with caution. Modifying the nodes invalidates any
+   * running traversal.
+   * @return sequence of nodes that compose the path
+   */
+  std::vector<NavGraphNode> &  nodes_mutable()
+  { return nodes_; }
+
   bool contains(const NavGraphNode &node) const;
 
   bool   empty() const;
