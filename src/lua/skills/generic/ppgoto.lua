@@ -43,6 +43,9 @@ There are several forms to call this skill:
    relative goto to reach the final position from there.
 2. ppgoto{place=PLACE}
    Go to the given place.
+2. ppgoto{place=PLACE, ori=ORI}
+   Go to the given place and attain the given orientation.
+   This will override any orientation that might be set for the node.
 3. ppgoto{stop=true}
    Stop the current pathplan goto.
 
@@ -102,9 +105,16 @@ function PPGOTO:init()
    elseif self.fsm.vars.place ~= nil then
       -- place goto
       local place = self.fsm.vars.place
-      local m = ppnavi.PlaceGotoMessage:new(place)
-      printf("Sending PlaceGotoMessage(%s)", place)
-      self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
+      if self.fsm.vars.ori ~= nil then
+	 local ori = self.fsm.vars.ori
+	 local m = ppnavi.PlaceWithOriGotoMessage:new(place, ori)
+	 printf("Sending PlaceWithOriGotoMessage(%s, %f)", place, ori)
+	 self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
+      else
+	 local m = ppnavi.PlaceGotoMessage:new(place)
+	 printf("Sending PlaceGotoMessage(%s)", place)
+	 self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
+      end
    elseif self.fsm.vars.stop ~= nil then
       local m = ppnavi.StopMessage:new()
       printf("Sending StopGotoMessage")
