@@ -268,6 +268,9 @@ NavGraphGeneratorThread::loop()
   logger->log_debug(name(), "  Graph computed, notifying listeners");
   navgraph->notify_of_change();
 
+  navgen_if_->set_final(true);
+  navgen_if_->write();
+
 #ifdef HAVE_VISUALIZATION
   if (cfg_visualization_)  publish_visualization();
 #endif
@@ -397,6 +400,9 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     copy_default_properties_ = msg->is_enable_copy();
 
   } else if (message->is_of_type<NavGraphGeneratorInterface::ComputeMessage>()) {
+    navgen_if_->set_msgid(message->id());
+    navgen_if_->set_final(false);
+    navgen_if_->write();
     wakeup();
 
   } else {
