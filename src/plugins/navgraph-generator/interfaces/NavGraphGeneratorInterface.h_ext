@@ -128,8 +128,15 @@ class NavGraphGeneratorInterface : public Interface
   typedef struct {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-    uint32_t flags; /**< Bit-wise combination of
-    FLAG_* constants denoting navigator component features. */
+    uint32_t msgid; /**< 
+      The ID of the message that is currently being processed or
+      was processed last.
+     */
+    bool final; /**< 
+      True, if the last generation triggered by a ComputeMessage has
+      been completed, false if it is still running. Also check the
+      msgid field if this field applies to the correct message.
+     */
   } NavGraphGeneratorInterface_data_t;
 #pragma pack(pop)
 
@@ -701,9 +708,12 @@ class NavGraphGeneratorInterface : public Interface
 
  public:
   /* Methods */
-  uint32_t flags() const;
-  void set_flags(const uint32_t new_flags);
-  size_t maxlenof_flags() const;
+  uint32_t msgid() const;
+  void set_msgid(const uint32_t new_msgid);
+  size_t maxlenof_msgid() const;
+  bool is_final() const;
+  void set_final(const bool new_final);
+  size_t maxlenof_final() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

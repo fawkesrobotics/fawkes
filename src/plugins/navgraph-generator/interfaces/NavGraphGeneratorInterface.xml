@@ -99,8 +99,15 @@
       again.
     </comment>
 
-    <field type="uint32" name="flags">Bit-wise combination of
-    FLAG_* constants denoting navigator component features.</field>
+    <field type="uint32" name="msgid">
+      The ID of the message that is currently being processed or
+      was processed last.
+    </field>
+    <field type="bool" name="final">
+      True, if the last generation triggered by a ComputeMessage has
+      been completed, false if it is still running. Also check the
+      msgid field if this field applies to the correct message.
+    </field>
 
   </data>
   <message name="Clear">

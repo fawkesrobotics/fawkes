@@ -246,9 +246,12 @@ class NavGraphGeneratorInterface : public Interface
 
   };
 
-  unsigned int flags();
-  void set_flags(const unsigned int new_flags);
-  int maxlenof_flags() const;
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
+  int maxlenof_msgid() const;
+  bool is_final();
+  void set_final(const bool new_final);
+  int maxlenof_final() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

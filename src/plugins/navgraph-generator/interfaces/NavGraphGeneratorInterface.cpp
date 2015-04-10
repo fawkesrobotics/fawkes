@@ -74,7 +74,8 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_UINT32, "flags", 1, &data->flags);
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
+  add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_messageinfo("ClearMessage");
   add_messageinfo("SetBoundingBoxMessage");
   add_messageinfo("SetFilterMessage");
@@ -90,7 +91,7 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   add_messageinfo("SetCopyGraphDefaultPropertiesMessage");
   add_messageinfo("RemovePointOfInterestMessage");
   add_messageinfo("ComputeMessage");
-  unsigned char tmp_hash[] = {0xd9, 0xef, 0x3c, 0x1e, 0x3d, 0x26, 0xa2, 0x70, 0x86, 0x9, 0xa2, 0x51, 0xe7, 0x86, 0x39, 0x9d};
+  unsigned char tmp_hash[] = {0x72, 0xc3, 0x67, 0x5b, 0xf2, 0xe6, 0xa2, 0x71, 0xd8, 0x9d, 0xdc, 0xb6, 0xbe, 0xe5, 0x7, 0xc8};
   set_hash(tmp_hash);
 }
 
@@ -144,36 +145,79 @@ NavGraphGeneratorInterface::tostring_EdgeMode(EdgeMode value) const
   }
 }
 /* Methods */
-/** Get flags value.
- * Bit-wise combination of
-    FLAG_* constants denoting navigator component features.
- * @return flags value
+/** Get msgid value.
+ * 
+      The ID of the message that is currently being processed or
+      was processed last.
+    
+ * @return msgid value
  */
 uint32_t
-NavGraphGeneratorInterface::flags() const
+NavGraphGeneratorInterface::msgid() const
 {
-  return data->flags;
+  return data->msgid;
 }
 
-/** Get maximum length of flags value.
- * @return length of flags value, can be length of the array or number of 
+/** Get maximum length of msgid value.
+ * @return length of msgid value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NavGraphGeneratorInterface::maxlenof_flags() const
+NavGraphGeneratorInterface::maxlenof_msgid() const
 {
   return 1;
 }
 
-/** Set flags value.
- * Bit-wise combination of
-    FLAG_* constants denoting navigator component features.
- * @param new_flags new flags value
+/** Set msgid value.
+ * 
+      The ID of the message that is currently being processed or
+      was processed last.
+    
+ * @param new_msgid new msgid value
  */
 void
-NavGraphGeneratorInterface::set_flags(const uint32_t new_flags)
+NavGraphGeneratorInterface::set_msgid(const uint32_t new_msgid)
 {
-  data->flags = new_flags;
+  data->msgid = new_msgid;
+  data_changed = true;
+}
+
+/** Get final value.
+ * 
+      True, if the last generation triggered by a ComputeMessage has
+      been completed, false if it is still running. Also check the
+      msgid field if this field applies to the correct message.
+    
+ * @return final value
+ */
+bool
+NavGraphGeneratorInterface::is_final() const
+{
+  return data->final;
+}
+
+/** Get maximum length of final value.
+ * @return length of final value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::maxlenof_final() const
+{
+  return 1;
+}
+
+/** Set final value.
+ * 
+      True, if the last generation triggered by a ComputeMessage has
+      been completed, false if it is still running. Also check the
+      msgid field if this field applies to the correct message.
+    
+ * @param new_final new final value
+ */
+void
+NavGraphGeneratorInterface::set_final(const bool new_final)
+{
+  data->final = new_final;
   data_changed = true;
 }
 
