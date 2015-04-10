@@ -147,6 +147,10 @@ NavGraphGeneratorThread::loop()
   // Acquire lock on navgraph, no more searches/modifications until we are done
   MutexLocker lock(navgraph.objmutex_ptr());
 
+  // disable notifications as to not trigger one for all the many
+  // operations we are going to perform
+  navgraph->set_notifications_enabled(false);
+
   // remember default properties
   std::map<std::string, std::string> default_props = navgraph->default_properties();
 
@@ -257,6 +261,9 @@ NavGraphGeneratorThread::loop()
     logger->log_error(name(), "Failed to finalize graph setup, exception follows");
     logger->log_error(name(), e);
   }
+
+  // re-enable notifications
+  navgraph->set_notifications_enabled(true);
 
   logger->log_debug(name(), "  Graph computed, notifying listeners");
   navgraph->notify_of_change();
