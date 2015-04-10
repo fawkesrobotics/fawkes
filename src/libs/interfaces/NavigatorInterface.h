@@ -175,7 +175,7 @@ class NavigatorInterface : public Interface
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X-coordinate of the target, in the robot's coordinate system. */
       float y; /**< Y-coordinate of the target, in the robot's coordinate system. */
-      float orientation; /**< The orientation of the robot at the target. */
+      float orientation; /**< The desired orientation of the robot at the target. */
     } CartesianGotoMessage_data_t;
 #pragma pack(pop)
 
@@ -212,7 +212,7 @@ class NavigatorInterface : public Interface
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float phi; /**< Angle between the robot's front and the target. */
       float dist; /**< Distance to the target. */
-      float orientation; /**< The orientation of the robot at the target. */
+      float orientation; /**< The desired orientation of the robot at the target. */
     } PolarGotoMessage_data_t;
 #pragma pack(pop)
 
@@ -265,6 +265,39 @@ class NavigatorInterface : public Interface
     char * place() const;
     void set_place(const char * new_place);
     size_t maxlenof_place() const;
+    virtual Message * clone() const;
+  };
+
+  class PlaceWithOriGotoMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char place[64]; /**< Place to go to. */
+      float orientation; /**< The desired orientation of the robot at the target. */
+    } PlaceWithOriGotoMessage_data_t;
+#pragma pack(pop)
+
+    PlaceWithOriGotoMessage_data_t *data;
+
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
+   public:
+    PlaceWithOriGotoMessage(const char * ini_place, const float ini_orientation);
+    PlaceWithOriGotoMessage();
+    ~PlaceWithOriGotoMessage();
+
+    PlaceWithOriGotoMessage(const PlaceWithOriGotoMessage *m);
+    /* Methods */
+    char * place() const;
+    void set_place(const char * new_place);
+    size_t maxlenof_place() const;
+    float orientation() const;
+    void set_orientation(const float new_orientation);
+    size_t maxlenof_orientation() const;
     virtual Message * clone() const;
   };
 

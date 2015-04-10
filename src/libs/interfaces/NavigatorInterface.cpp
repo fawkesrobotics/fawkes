@@ -112,6 +112,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("CartesianGotoMessage");
   add_messageinfo("PolarGotoMessage");
   add_messageinfo("PlaceGotoMessage");
+  add_messageinfo("PlaceWithOriGotoMessage");
   add_messageinfo("ObstacleMessage");
   add_messageinfo("ResetOdometryMessage");
   add_messageinfo("SetMaxVelocityMessage");
@@ -122,7 +123,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("SetStopAtTargetMessage");
   add_messageinfo("SetOrientationModeMessage");
   add_messageinfo("ResetParametersMessage");
-  unsigned char tmp_hash[] = {0xd6, 0xd6, 0x2e, 0x31, 0xfe, 0x38, 0xf0, 0x8, 0x16, 0x18, 0x53, 0x75, 0x13, 0xb1, 0xb9, 0xff};
+  unsigned char tmp_hash[] = {0x59, 0x5f, 0xcc, 0x6b, 0xf3, 0xfd, 0xaa, 0x1b, 0x92, 0xbc, 0xcd, 0xc8, 0x50, 0xa4, 0x39, 0x9e};
   set_hash(tmp_hash);
 }
 
@@ -749,6 +750,8 @@ NavigatorInterface::create_message(const char *type) const
     return new PolarGotoMessage();
   } else if ( strncmp("PlaceGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new PlaceGotoMessage();
+  } else if ( strncmp("PlaceWithOriGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new PlaceWithOriGotoMessage();
   } else if ( strncmp("ObstacleMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new ObstacleMessage();
   } else if ( strncmp("ResetOdometryMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -1129,7 +1132,7 @@ NavigatorInterface::CartesianGotoMessage::set_y(const float new_y)
 }
 
 /** Get orientation value.
- * The orientation of the robot at the target.
+ * The desired orientation of the robot at the target.
  * @return orientation value
  */
 float
@@ -1149,7 +1152,7 @@ NavigatorInterface::CartesianGotoMessage::maxlenof_orientation() const
 }
 
 /** Set orientation value.
- * The orientation of the robot at the target.
+ * The desired orientation of the robot at the target.
  * @param new_orientation new orientation value
  */
 void
@@ -1301,7 +1304,7 @@ NavigatorInterface::PolarGotoMessage::set_dist(const float new_dist)
 }
 
 /** Get orientation value.
- * The orientation of the robot at the target.
+ * The desired orientation of the robot at the target.
  * @return orientation value
  */
 float
@@ -1321,7 +1324,7 @@ NavigatorInterface::PolarGotoMessage::maxlenof_orientation() const
 }
 
 /** Set orientation value.
- * The orientation of the robot at the target.
+ * The desired orientation of the robot at the target.
  * @param new_orientation new orientation value
  */
 void
@@ -1443,6 +1446,144 @@ Message *
 NavigatorInterface::PlaceGotoMessage::clone() const
 {
   return new NavigatorInterface::PlaceGotoMessage(this);
+}
+/** @class NavigatorInterface::PlaceWithOriGotoMessage <interfaces/NavigatorInterface.h>
+ * PlaceWithOriGotoMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_place initial value for place
+ * @param ini_orientation initial value for orientation
+ */
+NavigatorInterface::PlaceWithOriGotoMessage::PlaceWithOriGotoMessage(const char * ini_place, const float ini_orientation) : Message("PlaceWithOriGotoMessage")
+{
+  data_size = sizeof(PlaceWithOriGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (PlaceWithOriGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->place, ini_place, 64);
+  data->orientation = ini_orientation;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
+  add_fieldinfo(IFT_STRING, "place", 64, data->place);
+  add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
+}
+/** Constructor */
+NavigatorInterface::PlaceWithOriGotoMessage::PlaceWithOriGotoMessage() : Message("PlaceWithOriGotoMessage")
+{
+  data_size = sizeof(PlaceWithOriGotoMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (PlaceWithOriGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
+  add_fieldinfo(IFT_STRING, "place", 64, data->place);
+  add_fieldinfo(IFT_FLOAT, "orientation", 1, &data->orientation);
+}
+
+/** Destructor */
+NavigatorInterface::PlaceWithOriGotoMessage::~PlaceWithOriGotoMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavigatorInterface::PlaceWithOriGotoMessage::PlaceWithOriGotoMessage(const PlaceWithOriGotoMessage *m) : Message("PlaceWithOriGotoMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (PlaceWithOriGotoMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get place value.
+ * Place to go to.
+ * @return place value
+ */
+char *
+NavigatorInterface::PlaceWithOriGotoMessage::place() const
+{
+  return data->place;
+}
+
+/** Get maximum length of place value.
+ * @return length of place value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::PlaceWithOriGotoMessage::maxlenof_place() const
+{
+  return 64;
+}
+
+/** Set place value.
+ * Place to go to.
+ * @param new_place new place value
+ */
+void
+NavigatorInterface::PlaceWithOriGotoMessage::set_place(const char * new_place)
+{
+  strncpy(data->place, new_place, sizeof(data->place));
+}
+
+/** Get orientation value.
+ * The desired orientation of the robot at the target.
+ * @return orientation value
+ */
+float
+NavigatorInterface::PlaceWithOriGotoMessage::orientation() const
+{
+  return data->orientation;
+}
+
+/** Get maximum length of orientation value.
+ * @return length of orientation value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::PlaceWithOriGotoMessage::maxlenof_orientation() const
+{
+  return 1;
+}
+
+/** Set orientation value.
+ * The desired orientation of the robot at the target.
+ * @param new_orientation new orientation value
+ */
+void
+NavigatorInterface::PlaceWithOriGotoMessage::set_orientation(const float new_orientation)
+{
+  data->orientation = new_orientation;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavigatorInterface::PlaceWithOriGotoMessage::clone() const
+{
+  return new NavigatorInterface::PlaceWithOriGotoMessage(this);
 }
 /** @class NavigatorInterface::ObstacleMessage <interfaces/NavigatorInterface.h>
  * ObstacleMessage Fawkes BlackBoard Interface Message.
@@ -2479,44 +2620,48 @@ NavigatorInterface::message_valid(const Message *message) const
   if ( m4 != NULL ) {
     return true;
   }
-  const ObstacleMessage *m5 = dynamic_cast<const ObstacleMessage *>(message);
+  const PlaceWithOriGotoMessage *m5 = dynamic_cast<const PlaceWithOriGotoMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const ResetOdometryMessage *m6 = dynamic_cast<const ResetOdometryMessage *>(message);
+  const ObstacleMessage *m6 = dynamic_cast<const ObstacleMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const SetMaxVelocityMessage *m7 = dynamic_cast<const SetMaxVelocityMessage *>(message);
+  const ResetOdometryMessage *m7 = dynamic_cast<const ResetOdometryMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const SetMaxRotationMessage *m8 = dynamic_cast<const SetMaxRotationMessage *>(message);
+  const SetMaxVelocityMessage *m8 = dynamic_cast<const SetMaxVelocityMessage *>(message);
   if ( m8 != NULL ) {
     return true;
   }
-  const SetEscapingMessage *m9 = dynamic_cast<const SetEscapingMessage *>(message);
+  const SetMaxRotationMessage *m9 = dynamic_cast<const SetMaxRotationMessage *>(message);
   if ( m9 != NULL ) {
     return true;
   }
-  const SetSecurityDistanceMessage *m10 = dynamic_cast<const SetSecurityDistanceMessage *>(message);
+  const SetEscapingMessage *m10 = dynamic_cast<const SetEscapingMessage *>(message);
   if ( m10 != NULL ) {
     return true;
   }
-  const SetDriveModeMessage *m11 = dynamic_cast<const SetDriveModeMessage *>(message);
+  const SetSecurityDistanceMessage *m11 = dynamic_cast<const SetSecurityDistanceMessage *>(message);
   if ( m11 != NULL ) {
     return true;
   }
-  const SetStopAtTargetMessage *m12 = dynamic_cast<const SetStopAtTargetMessage *>(message);
+  const SetDriveModeMessage *m12 = dynamic_cast<const SetDriveModeMessage *>(message);
   if ( m12 != NULL ) {
     return true;
   }
-  const SetOrientationModeMessage *m13 = dynamic_cast<const SetOrientationModeMessage *>(message);
+  const SetStopAtTargetMessage *m13 = dynamic_cast<const SetStopAtTargetMessage *>(message);
   if ( m13 != NULL ) {
     return true;
   }
-  const ResetParametersMessage *m14 = dynamic_cast<const ResetParametersMessage *>(message);
+  const SetOrientationModeMessage *m14 = dynamic_cast<const SetOrientationModeMessage *>(message);
   if ( m14 != NULL ) {
+    return true;
+  }
+  const ResetParametersMessage *m15 = dynamic_cast<const ResetParametersMessage *>(message);
+  if ( m15 != NULL ) {
     return true;
   }
   return false;

@@ -116,17 +116,22 @@
     <comment>States the next target to navigate to.</comment>
     <field type="float" name="x">X-coordinate of the target, in the robot's coordinate system.</field>
     <field type="float" name="y">Y-coordinate of the target, in the robot's coordinate system.</field>
-    <field type="float" name="orientation">The orientation of the robot at the target.</field>
+    <field type="float" name="orientation">The desired orientation of the robot at the target.</field>
   </message>
   <message name="PolarGoto">
     <comment>States the next target to navigate to.</comment>
     <field type="float" name="phi">Angle between the robot's front and the target.</field>
     <field type="float" name="dist">Distance to the target.</field>
-    <field type="float" name="orientation">The orientation of the robot at the target.</field>
+    <field type="float" name="orientation">The desired orientation of the robot at the target.</field>
   </message>
   <message name="PlaceGoto">
     <comment>States the next target to navigate to.</comment>
     <field type="string" length="64" name="place">Place to go to.</field>
+  </message>
+  <message name="PlaceWithOriGoto">
+    <comment>States the next target to navigate to.</comment>
+    <field type="string" length="64" name="place">Place to go to.</field>
+    <field type="float" name="orientation">The desired orientation of the robot at the target.</field>
   </message>
   <message name="Obstacle">
     <comment>Adds an obstacle within the scan area. It's just for the Navigator GUI.</comment>

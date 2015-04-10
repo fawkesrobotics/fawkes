@@ -96,6 +96,20 @@ class NavigatorInterface : public Interface
     int maxlenof_place() const;
   };
 
+  class PlaceWithOriGotoMessage : public Message
+  {
+    PlaceWithOriGotoMessage(char * ini_place, float ini_orientation);
+    PlaceWithOriGotoMessage();
+    ~PlaceWithOriGotoMessage();
+
+    char * place();
+    void set_place(const char * new_place);
+    int maxlenof_place() const;
+    float orientation();
+    void set_orientation(const float new_orientation);
+    int maxlenof_orientation() const;
+  };
+
   class ObstacleMessage : public Message
   {
     ObstacleMessage(float ini_x, float ini_y, float ini_width);
