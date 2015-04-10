@@ -167,6 +167,7 @@ class NavGraph
 
   NavGraph & operator=(const NavGraph &g);
 
+  void set_notifications_enabled(bool enabled);
   void notify_of_change() throw();
 
   class ChangeListener {
@@ -215,6 +216,9 @@ class NavGraph
   navgraph::CostFunction                  search_cost_func_;
 
   bool                                    reachability_calced_;
+
+
+  bool                                    notifications_enabled_;
 };
 
 

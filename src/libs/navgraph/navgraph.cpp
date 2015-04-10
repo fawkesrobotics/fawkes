@@ -71,10 +71,11 @@ NavGraph::NavGraph(const std::string &graph_name)
   graph_name_ = graph_name;
   constraint_repo_ = LockPtr<NavGraphConstraintRepo>(new NavGraphConstraintRepo(),
 						     /* recursive mutex */ true);
-  search_default_funcs_ = true;
-  search_estimate_func_ = NavGraphSearchState::straight_line_estimate;
-  search_cost_func_     = NavGraphSearchState::euclidean_cost;
-  reachability_calced_  = false;
+  search_default_funcs_  = true;
+  search_estimate_func_  = NavGraphSearchState::straight_line_estimate;
+  search_cost_func_      = NavGraphSearchState::euclidean_cost;
+  reachability_calced_   = false;
+  notifications_enabled_ = true;
 }
 
 
@@ -1446,10 +1447,27 @@ NavGraph::remove_change_listener(ChangeListener *listener)
   change_listeners_.remove(listener);
 }
 
+
+/** Enable or disable notifications.
+ * When performing many operations in a row, processing the individual
+ * events can be overwhelming, especially if there are many
+ * listeners. Therefore, in such situations notifications should be
+ * disabled and later re-enabled, followed by a call to
+ * notify_of_change().
+ * @param enabled true to enable notifications, false to disable
+ */
+void
+NavGraph::set_notifications_enabled(bool enabled)
+{
+  notifications_enabled_ = enabled;
+}
+
 /** Notify all listeners of a change. */
 void
 NavGraph::notify_of_change() throw()
 {
+  if (! notifications_enabled_) return;
+
   std::list<ChangeListener *> tmp_listeners = change_listeners_;
 
   std::list<ChangeListener *>::iterator l;
