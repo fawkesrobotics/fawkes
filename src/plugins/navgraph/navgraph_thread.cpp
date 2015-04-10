@@ -227,7 +227,17 @@ NavGraphThread::loop()
       generate_plan(msg->place());
       optimize_plan();
       start_plan();
+
+    } else if (pp_nav_if_->msgq_first_is<NavigatorInterface::PlaceWithOriGotoMessage>()) {
+      NavigatorInterface::PlaceWithOriGotoMessage *msg = pp_nav_if_->msgq_first(msg);
+      logger->log_info(name(), "goto '%s' with ori %f", msg->place(), msg->orientation());
+
+      pp_nav_if_->set_msgid(msg->id());
+      generate_plan(msg->place(), msg->orientation());
+      optimize_plan();
+      start_plan();
     }
+
 
     pp_nav_if_->msgq_pop();
   }
@@ -396,6 +406,18 @@ NavGraphThread::generate_plan(std::string goal_name)
   if (path_.empty()) {
     logger->log_error(name(), "Failed to generate plan to travel to '%s'",
 		      goal_name.c_str());
+  }
+
+  traversal_ = path_.traversal();
+}
+
+void
+NavGraphThread::generate_plan(std::string goal_name, float ori)
+{
+  generate_plan(goal_name);
+
+  if (! path_.empty()) {
+    path_.nodes_mutable().back().set_property("orientation", ori);
   }
 
   traversal_ = path_.traversal();

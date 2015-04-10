@@ -77,6 +77,7 @@ class NavGraphThread
 
  private:
   void generate_plan(std::string goal);
+  void generate_plan(std::string goal, float ori);
   void generate_plan(float x, float y, float ori);
   bool replan(const fawkes::NavGraphNode &start,
 	      const fawkes::NavGraphNode &goal);
