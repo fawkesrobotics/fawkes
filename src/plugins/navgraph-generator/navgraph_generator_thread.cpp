@@ -285,9 +285,10 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
   MutexLocker lock(loop_mutex);
 
   if (message->is_of_type<NavGraphGeneratorInterface::ClearMessage>()) {
+    pois_.clear();
     obstacles_.clear();
     map_obstacles_.clear();
-    pois_.clear();
+    edges_.clear();
     default_properties_.clear();
     bbox_set_ = false;
     copy_default_properties_ = true;
