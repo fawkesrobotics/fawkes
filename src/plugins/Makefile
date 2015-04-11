@@ -45,4 +45,6 @@ clips-ros: clips ros
 gazebo: robotino
 skiller: navgraph
 perception: mongodb
+navgraph-generator: navgraph amcl
+
 
