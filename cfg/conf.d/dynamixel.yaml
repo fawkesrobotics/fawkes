@@ -34,4 +34,5 @@ dynamixel:
     enable_echo_fix: false
 
     # temperature limit in degrees celsius - set for each servo found in the particular servo chain 
-    temperature_limit: 80
+    temperature_limit: 70
+
