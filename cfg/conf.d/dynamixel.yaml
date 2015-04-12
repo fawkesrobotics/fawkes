@@ -36,3 +36,5 @@ dynamixel:
     # temperature limit in degrees celsius - set for each servo found in the particular servo chain 
     temperature_limit: 70
 
+    prevent_alarm_shutdown: true
+    prevent_alarm_shutdown_threshold: 0.4
