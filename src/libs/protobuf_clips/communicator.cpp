@@ -464,7 +464,14 @@ ClipsProtobufCommunicator::clips_pb_field_value(void *msgptr, std::string field_
   case FieldDescriptor::TYPE_FIXED64:
     return CLIPS::Value((long int)refl->GetUInt64(**m, field));
   case FieldDescriptor::TYPE_FIXED32:  return CLIPS::Value(refl->GetUInt32(**m, field));
-  case FieldDescriptor::TYPE_BOOL:     return CLIPS::Value(refl->GetBool(**m, field));
+  case FieldDescriptor::TYPE_BOOL:
+    //Booleans are represented as Symbols in CLIPS
+    if(refl->GetBool(**m, field)){
+      return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+    }
+    else{
+      return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+    }
   case FieldDescriptor::TYPE_STRING:   return CLIPS::Value(refl->GetString(**m, field));
   case FieldDescriptor::TYPE_MESSAGE:
     {
@@ -777,7 +784,13 @@ ClipsProtobufCommunicator::clips_pb_field_list(void *msgptr, std::string field_n
       rv[i] = CLIPS::Value(refl->GetRepeatedUInt32(**m, field, i));
       break;
     case FieldDescriptor::TYPE_BOOL:
-      rv[i] = CLIPS::Value(refl->GetRepeatedBool(**m, field, i));
+      //Booleans are represented as Symbols in CLIPS
+      if(refl->GetRepeatedBool(**m, field, i)){
+	rv[i] = CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+      }
+      else{
+	rv[i] = CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+      }
       break;
     case FieldDescriptor::TYPE_STRING:
       rv[i] = CLIPS::Value(refl->GetRepeatedString(**m, field, i));
