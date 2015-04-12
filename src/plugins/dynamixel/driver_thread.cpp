@@ -64,19 +64,21 @@ DynamixelDriverThread::DynamixelDriverThread(std::string &cfg_name,
 void
 DynamixelDriverThread::init()
 {
-  cfg_device_            = config->get_string((cfg_prefix_ + "device").c_str());
-  cfg_read_timeout_ms_   = config->get_uint((cfg_prefix_ + "read_timeout_ms").c_str());
-  cfg_disc_timeout_ms_   = config->get_uint((cfg_prefix_ + "discover_timeout_ms").c_str());
-  cfg_goto_zero_start_   = config->get_bool((cfg_prefix_ + "goto_zero_start").c_str());
-  cfg_turn_off_          = config->get_bool((cfg_prefix_ + "turn_off").c_str());
-  cfg_cw_compl_margin_   = config->get_uint((cfg_prefix_ + "cw_compl_margin").c_str());
-  cfg_ccw_compl_margin_  = config->get_uint((cfg_prefix_ + "ccw_compl_margin").c_str());
-  cfg_cw_compl_slope_    = config->get_uint((cfg_prefix_ + "cw_compl_slope").c_str());
-  cfg_ccw_compl_slope_   = config->get_uint((cfg_prefix_ + "ccw_compl_slope").c_str());
-  cfg_def_angle_margin_  = config->get_float((cfg_prefix_ + "angle_margin").c_str());
-  cfg_enable_echo_fix_   = config->get_bool((cfg_prefix_ + "enable_echo_fix").c_str());
-  cfg_torque_limit_      = config->get_float((cfg_prefix_ + "torque_limit").c_str());
-  cfg_temperature_limit_ = config->get_uint((cfg_prefix_ + "temperature_limit").c_str());
+  cfg_device_                           = config->get_string((cfg_prefix_ + "device").c_str());
+  cfg_read_timeout_ms_                  = config->get_uint((cfg_prefix_ + "read_timeout_ms").c_str());
+  cfg_disc_timeout_ms_                  = config->get_uint((cfg_prefix_ + "discover_timeout_ms").c_str());
+  cfg_goto_zero_start_                  = config->get_bool((cfg_prefix_ + "goto_zero_start").c_str());
+  cfg_turn_off_                         = config->get_bool((cfg_prefix_ + "turn_off").c_str());
+  cfg_cw_compl_margin_                  = config->get_uint((cfg_prefix_ + "cw_compl_margin").c_str());
+  cfg_ccw_compl_margin_                 = config->get_uint((cfg_prefix_ + "ccw_compl_margin").c_str());
+  cfg_cw_compl_slope_                   = config->get_uint((cfg_prefix_ + "cw_compl_slope").c_str());
+  cfg_ccw_compl_slope_                  = config->get_uint((cfg_prefix_ + "ccw_compl_slope").c_str());
+  cfg_def_angle_margin_                 = config->get_float((cfg_prefix_ + "angle_margin").c_str());
+  cfg_enable_echo_fix_                  = config->get_bool((cfg_prefix_ + "enable_echo_fix").c_str());
+  cfg_torque_limit_                     = config->get_float((cfg_prefix_ + "torque_limit").c_str());
+  cfg_temperature_limit_                = config->get_uint((cfg_prefix_ + "temperature_limit").c_str());
+  cfg_prevent_alarm_shutdown_           = config->get_bool((cfg_prefix_ + "prevent_alarm_shutdown").c_str());
+  cfg_prevent_alarm_shutdown_threshold_ = config->get_float((cfg_prefix_ + "prevent_alarm_shutdown_threshold").c_str());
 
   chain_ = new DynamixelChain(cfg_device_.c_str(), cfg_read_timeout_ms_);
   DynamixelChain::DeviceList devl = chain_->discover();
@@ -264,6 +266,18 @@ DynamixelDriverThread::exec_sensor()
       s.servo_if->set_velocity(get_velocity(servo_id));
       s.servo_if->set_alarm_shutdown(chain_->get_alarm_shutdown(servo_id));
       
+      if ((chain_->get_load(servo_id) & 0x3ff) > (cfg_prevent_alarm_shutdown_threshold_ * chain_->get_torque_limit(servo_id))) {
+        logger->log_warn(name(), "Servo with ID: %d is in overload condition: torque_limit: %d, load: %d", servo_id, chain_->get_torque_limit(servo_id), chain_->get_load(servo_id) & 0x3ff);
+        if (cfg_prevent_alarm_shutdown_) {
+          // is the current load cw or ccw?
+          if (chain_->get_load(servo_id) & 0x400) {
+            goto_angle(servo_id, get_angle(servo_id) + 0.001);
+          }
+          else {
+            goto_angle(servo_id, get_angle(servo_id) - 0.001);
+          }
+        }
+      }
       unsigned char cur_error = chain_->get_error(servo_id);
       s.servo_if->set_error(s.servo_if->error() | cur_error);
       if (cur_error) {
