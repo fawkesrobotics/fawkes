@@ -39,6 +39,7 @@
 
 #include <cstring>
 #include <string>
+#include <iostream>
 
 #include <gvc.h>
 
@@ -69,8 +70,13 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   __agdbg_if = NULL;
 
 #ifdef HAVE_GCONFMM
-  __gconf = Gnome::Conf::Client::get_default_client();
-  __gconf->add_dir(GCONF_PREFIX);
+  try {
+    __gconf = Gnome::Conf::Client::get_default_client();
+    __gconf->add_dir(GCONF_PREFIX);
+  } catch (Gnome::Conf::Error &e) {
+    std::cerr << e.what() << std::endl;
+	throw;
+  }
 #endif
 
   builder->get_widget_derived("trv_log", __logview);
