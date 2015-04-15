@@ -726,6 +726,11 @@ bool
 NavGraphThread::node_reached()
 {
   if (! traversal_) {
+    logger->log_error(name(), "Cannot check node reached if no traversal given");
+    return true;
+  }
+
+  if (! traversal_.running()) {
     logger->log_error(name(), "Cannot check node reached if no traversal running");
     return true;
   }
