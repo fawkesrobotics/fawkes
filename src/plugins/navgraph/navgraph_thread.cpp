@@ -267,6 +267,7 @@ NavGraphThread::loop()
       fawkes::Time now(clock);
       if (nav_if_->is_final()) {
 	pp_nav_if_->set_final(true);
+	exec_active_ = false;
 	needs_write = true;
       } else if ((now - target_reached_at_) >= target_time_) {
 	stop_motion();
