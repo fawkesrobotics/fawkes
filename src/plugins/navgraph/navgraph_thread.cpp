@@ -148,7 +148,7 @@ NavGraphThread::init()
       fam_->add_listener(this);
     } catch (Exception &e) {
       logger->log_warn(name(), "Could not enable graph file monitoring");
-      logger->log_warn(name(), e); 
+      logger->log_warn(name(), e);
     }
 
   }
@@ -463,7 +463,7 @@ NavGraphThread::replan(const NavGraphNode &start, const NavGraphNode &goal)
   NavGraphPath new_path =
     graph_->search_path(start, act_goal,
 			  /* use constraints */ true, /* compute constraints */ false);
-  
+
   if (! new_path.empty()) {
     // get cost of current plan
     NavGraphNode pose("current-pose", pose_.getOrigin().x(), pose_.getOrigin().y());
@@ -622,36 +622,29 @@ NavGraphThread::send_next_goal()
 
   const NavGraphNode &next_target = traversal_.current();
 
-  if (traversal_.last()) {
-    stop_at_target = true;
-  } else {
-    stop_at_target = false;
-  }
-
-  float ori = 0.;
+  float ori = NAN;
   if ( traversal_.last() ) {
+    stop_at_target = true;
+
     if ( next_target.has_property("orientation") ) {
       orient_at_target  = true;
 
       // take the given orientation for the final node
       ori = next_target.property_as_float("orientation");
-    } else {
-      orient_at_target  = false;
-      ori = NAN;
     }
-  } else {
-    orient_at_target  = false;
 
-    // set direction facing from next_target (what is the actual point
+  } else {
+    // set direction facing from next_target (what is the current point
     // to drive to) to next point to drive to.  So orientation is the
     // direction from next_target to the target after that
     const NavGraphNode &next_next_target = traversal_.peek_next();
 
     ori = atan2f( next_next_target.y() - next_target.y(),
                   next_next_target.x() - next_target.x());
+
   }
 
-  // get target position in map frame
+  // get target position in base frame
   tf::Stamped<tf::Pose> tpose;
   tf::Stamped<tf::Pose>
     tposeglob(tf::Transform(tf::create_quaternion_from_yaw(ori),
@@ -739,7 +732,7 @@ NavGraphThread::node_reached()
 
   const NavGraphNode &cur_target = traversal_.current();
 
-  // get current position of robot in map frame
+  // get distance to current target in map frame
   float dist = sqrt(pow(pose_.getOrigin().x() - cur_target.x(), 2) +
 		    pow( pose_.getOrigin().y() - cur_target.y(), 2));
 
