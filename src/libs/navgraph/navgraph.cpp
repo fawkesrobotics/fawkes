@@ -464,6 +464,7 @@ NavGraph::add_node(const NavGraphNode &node)
     throw Exception("Node with name %s already exists", node.name().c_str());
   } else {
     nodes_.push_back(node);
+    apply_default_properties(nodes_.back());
     reachability_calced_ = false;
     notify_of_change();
   }
@@ -850,6 +851,21 @@ NavGraph::set_default_property(const std::string &property, bool value)
   default_properties_[property] = value ? "true" : "false";
 }
 
+
+/** Set default properties on node for which no local value exists.
+ * This sets all default properties on the node, for which no
+ * property of the same name has been set on the node.
+ * @param node node to apply default properties to
+ */
+void
+NavGraph::apply_default_properties(NavGraphNode &node)
+{
+  for (const auto &p : default_properties_) {
+    if (! node.has_property(p.first)) {
+      node.set_property(p.first, p.second);
+    }
+  }
+}
 
 
 /** Get nodes reachable from specified nodes.

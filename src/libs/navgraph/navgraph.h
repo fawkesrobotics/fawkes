@@ -98,6 +98,8 @@ class NavGraph
   void set_default_property(const std::string &property, bool value);
   void set_default_properties(const std::map<std::string, std::string> &properties);
 
+  void apply_default_properties(NavGraphNode &node);
+
   NavGraphNode node(const std::string &name) const;
 
   NavGraphNode closest_node(float pos_x, float pos_y,
