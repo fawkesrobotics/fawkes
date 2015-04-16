@@ -53,6 +53,11 @@ class NavGraph
                                         std::string node_name, string property);
 
   vector<fawkes::NavGraphNode>  search_nodes(string property);
+
+  string 			default_property(string &prop);
+  float 			default_property_as_float(string &prop);
+  int   			default_property_as_int(string &prop);
+  bool  			default_property_as_bool(string &prop);
 };
 
 NavGraph *  load_yaml_navgraph(std::string filename);
