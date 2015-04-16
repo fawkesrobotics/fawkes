@@ -99,10 +99,6 @@ class NavGraphThread
   std::string  cfg_base_frame_;
   std::string  cfg_global_frame_; 
   std::string  cfg_nav_if_id_; 
-  float        cfg_travel_tolerance_; 
-  float        cfg_target_tolerance_; 
-  float        cfg_orientation_tolerance_; 
-  float        cfg_shortcut_tolerance_; 
   float        cfg_resend_interval_; 
   float        cfg_replan_interval_; 
   float        cfg_replan_factor_; 

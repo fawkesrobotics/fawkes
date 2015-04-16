@@ -74,10 +74,6 @@ NavGraphThread::init()
   cfg_base_frame_      = config->get_string("/navgraph/base_frame");
   cfg_global_frame_    = config->get_string("/navgraph/global_frame");
   cfg_nav_if_id_       = config->get_string("/navgraph/navigator_interface_id");
-  cfg_travel_tolerance_ = config->get_float("/navgraph/travel_tolerance");
-  cfg_target_tolerance_ = config->get_float("/navgraph/target_tolerance");
-  cfg_orientation_tolerance_ = config->get_float("/navgraph/orientation_tolerance");
-  cfg_shortcut_tolerance_ = config->get_float("/navgraph/shortcut_tolerance");
   cfg_resend_interval_ = config->get_float("/navgraph/resend_interval");
   cfg_replan_interval_ = config->get_float("/navgraph/replan_interval");
   cfg_replan_factor_   = config->get_float("/navgraph/replan_cost_factor");
@@ -91,6 +87,21 @@ NavGraphThread::init()
   try {
     cfg_monitor_file_ = config->get_bool("/navgraph/monitor_file");
   } catch (Exception &e) {} // ignored
+
+  if (config->exists("/navgraph/travel_tolerance") ||
+      config->exists("/navgraph/target_tolerance") ||
+      config->exists("/navgraph/orientation_tolerance") ||
+      config->exists("/navgraph/shortcut_tolerance"))
+  {
+    logger->log_error(name(), "Tolerances may no longe rbe set in the config.");
+    logger->log_error(name(), "The must be set as default properties in the graph.");
+    logger->log_error(name(), "Remove the following config values (move to navgraph):");
+    logger->log_error(name(), "  /navgraph/travel_tolerance");
+    logger->log_error(name(), "  /navgraph/target_tolerance");
+    logger->log_error(name(), "  /navgraph/orientation_tolerance");
+    logger->log_error(name(), "  /navgraph/shortcut_tolerance");
+    throw Exception("Navgraph tolerances may no longer be set in the config");
+  }
 
   pp_nav_if_ = blackboard->open_for_writing<NavigatorInterface>("Pathplan");
   nav_if_    = blackboard->open_for_reading<NavigatorInterface>(cfg_nav_if_id_.c_str());
@@ -106,21 +117,17 @@ NavGraphThread::init()
     graph_ = LockPtr<NavGraph>(new NavGraph("generated"), /* recursive mutex */ true);
   }
 
-  if (graph_->has_default_property("travel_tolerance")) {
-    cfg_travel_tolerance_ = graph_->default_property_as_float("travel_tolerance");
-    logger->log_info(name(), "Using travel tolerance %f from graph file", cfg_travel_tolerance_);
+  if (! graph_->has_default_property("travel_tolerance")) {
+    throw Exception("Graph must specify travel tolerance");
   }
-  if (graph_->has_default_property("target_tolerance")) {
-    cfg_target_tolerance_ = graph_->default_property_as_float("target_tolerance");
-    logger->log_info(name(), "Using target tolerance %f from graph file", cfg_target_tolerance_);
+  if (! graph_->has_default_property("target_tolerance")) {
+    throw Exception("Graph must specify target tolerance");
   }
-  if (graph_->has_default_property("orientation_tolerance")) {
-    cfg_orientation_tolerance_ = graph_->default_property_as_float("orientation_tolerance");
-    logger->log_info(name(), "Using orientation tolerance %f from graph file", cfg_orientation_tolerance_);
+  if (! graph_->has_default_property("orientation_tolerance")) {
+    throw Exception("Graph must specify orientation tolerance");
   }
-  if (graph_->has_default_property("shortcut_tolerance")) {
-    cfg_shortcut_tolerance_ = graph_->default_property_as_float("shortcut_tolerance");
-    logger->log_info(name(), "Using shortcut tolerance %f from graph file", cfg_shortcut_tolerance_);
+  if (! graph_->has_default_property("shortcut_tolerance")) {
+    throw Exception("Graph must specify shortcut tolerance");
   }
   if (graph_->has_default_property("target_time")) {
     cfg_target_time_ = graph_->default_property_as_float("target_time");
@@ -732,25 +739,15 @@ NavGraphThread::node_reached()
   float dist = sqrt(pow(pose_.getOrigin().x() - cur_target.x(), 2) +
 		    pow( pose_.getOrigin().y() - cur_target.y(), 2));
 
-  float tolerance = 0.;
-  if (cur_target.has_property("travel_tolerance")) {
-    tolerance = cur_target.property_as_float("travel_tolerance");
-  }
-  float default_tolerance = cfg_travel_tolerance_;
+  float tolerance = cur_target.property_as_float("travel_tolerance");
   // use a different tolerance for the final node
   if (traversal_.last()) {
-    default_tolerance = cfg_target_tolerance_;
-    if (cur_target.has_property("target_tolerance")) {
-      tolerance = cur_target.property_as_float("target_tolerance");
-    }
+    tolerance = cur_target.property_as_float("target_tolerance");
     if (cur_target.has_property("orientation")) {
-      float ori_tolerance = cfg_orientation_tolerance_;
-      //cur_target.property_as_float("orientation_tolerance");
+      float ori_tolerance = cur_target.property_as_float("orientation_tolerance");
       float ori_diff  =
 	fabs( angle_distance( normalize_rad(tf::get_yaw(pose_.getRotation())),
 			      normalize_rad(cur_target.property_as_float("orientation"))));
-      
-      if (tolerance == 0.)  tolerance = default_tolerance;
       
       //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f Tol=%f Dist=%f Tol=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose_.getRotation() ), ori_diff, ori_tolerance, dist, tolerance);
       return (dist <= tolerance) && (ori_diff <= ori_tolerance);
@@ -758,8 +755,12 @@ NavGraphThread::node_reached()
   }
 
 
-  // can be no or invalid tolerance
-  if (tolerance == 0.)  tolerance = default_tolerance;
+  // can be no or invalid tolerance, be very generous
+  if (tolerance == 0.) {
+    logger->log_warn(name(), "Invalid tolerance for node %s, using 1.0",
+		     cur_target.name().c_str());
+    tolerance = 1.0;
+  }
 
   return (dist <= tolerance);
 }
@@ -780,10 +781,7 @@ NavGraphThread::shortcut_possible()
     float dist = sqrt(pow(pose_.getOrigin().x() - node.x(), 2) +
 		      pow(pose_.getOrigin().y() - node.y(), 2));
 
-    float tolerance = cfg_shortcut_tolerance_;
-    if (node.has_property("shortcut_tolerance")) {
-      tolerance = node.property_as_float("shortcut_tolerance");
-    }
+    float tolerance = node.property_as_float("shortcut_tolerance");
 
     if (tolerance == 0.0)  return 0;
     if (dist <= tolerance) return i;
