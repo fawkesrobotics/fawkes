@@ -1,0 +1,40 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/dynamixel
+---
+dynamixel:
+
+  # Example configuration for a servo chain, choose any name as
+  # top element, e.g. ptu or example.
+  example:
+    active: true
+    device: /dev/ttyUSB0
+
+    read_timeout_ms: 30
+    discover_timeout_ms: 30
+
+    # Turn servos off on unloading the plugin? Go to zero position at start?
+    turn_off: true
+    goto_zero_start: true
+
+    # Default compliance values, can be adjusted via the blackboard
+    cw_compl_margin: 0
+    ccw_compl_margin: 0
+    cw_compl_slope: 96
+    ccw_compl_slope: 96
+
+    # Tolerance between desired and actual angle value to consider
+    # motion finished; this is a default value and can be overriden
+    # via blackboard; rad
+    angle_margin: 0.1
+
+    # Echo fix used for faulty firmwares on RX28 which 
+    # echo the given command even though ECHO is switched off
+    enable_echo_fix: false
+
+    # temperature limit in degrees celsius - set for each servo found in the particular servo chain 
+    temperature_limit: 70
+
+    prevent_alarm_shutdown: true
+    prevent_alarm_shutdown_threshold: 0.4

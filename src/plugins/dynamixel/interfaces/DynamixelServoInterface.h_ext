@@ -1,0 +1,635 @@
+
+/***************************************************************************
+ *  DynamixelServoInterface.h - Fawkes BlackBoard Interface - DynamixelServoInterface
+ *
+ *  Templated created:   Thu Oct 12 10:49:19 2006
+ *  Copyright  2015  Tim Niemueller, Nicolas Limpert
+ *
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version. A runtime exception applies to
+ *  this software (see LICENSE.GPL_WRE file mentioned below for details).
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
+ */
+
+#ifndef __INTERFACES_DYNAMIXELSERVOINTERFACE_H_
+#define __INTERFACES_DYNAMIXELSERVOINTERFACE_H_
+
+#include <interface/interface.h>
+#include <interface/message.h>
+#include <interface/field_iterator.h>
+
+namespace fawkes {
+
+class DynamixelServoInterface : public Interface
+{
+ /// @cond INTERNALS
+ INTERFACE_MGMT_FRIENDS(DynamixelServoInterface)
+ /// @endcond
+ public:
+  /* constants */
+
+  /** Error code to explain an error */
+  typedef enum {
+    ERROR_NONE = 0 /**< No error occured. */,
+    ERROR_UNSPECIFIC = 1 /**< Some unspecified error occured. */,
+    ERROR_COMMUNICATION = 2 /**< 
+	Communication with device failed.
+       */,
+    ERROR_ANGLE_OUTOFRANGE = 4 /**< 
+	Desired angle is out of range.
+       */
+  } ErrorCode;
+  const char * tostring_ErrorCode(ErrorCode value) const;
+
+ private:
+#pragma pack(push,4)
+  /** Internal data storage, do NOT modify! */
+  typedef struct {
+    int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+    int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    char model[8]; /**< Model if known */
+    uint32_t model_number; /**< Model number */
+    uint32_t cw_angle_limit; /**< Clockwise angle limit */
+    uint32_t ccw_angle_limit; /**< Counter-clockwise angle limit */
+    uint8_t temperature_limit; /**< Temperature limit */
+    uint32_t max_torque; /**< Max torque */
+    uint8_t cw_margin; /**< CW Compliance Margin */
+    uint8_t ccw_margin; /**< CCW Compliance Margin */
+    uint8_t cw_slope; /**< CW Compliance Slope */
+    uint8_t ccw_slope; /**< CCW Compliance Slope */
+    uint32_t goal_position; /**< Goal position */
+    uint32_t goal_speed; /**< Goal speed */
+    uint32_t torque_limit; /**< Torque limit */
+    uint32_t position; /**< Present position */
+    uint32_t speed; /**< Present speed */
+    uint32_t load; /**< Present load */
+    uint8_t voltage; /**< Present voltage */
+    uint8_t temperature; /**< Present temperature */
+    uint32_t punch; /**< Punch */
+    uint8_t alarm_shutdown; /**< Alarm Shutdown.
+      The bitmask is set as follows (taken from Trossen Robotics PDF "AX-12(English).pdf"):
+      Bit 7: 0
+      Bit 6: If set to 1, torque off when an Instruction Error occurs
+      Bit 5: If set to 1, torque off when an Overload Error occurs
+      Bit 4: If set to 1, torque off when a Checksum Error occurs
+      Bit 3: If set to 1, torque off when a Range Error occurs
+      Bit 2: If set to 1, torque off when an Overheating Error occurs
+      Bit 1: If set to 1, torque off when an Angle Limit Error occurs
+      Bit 0: If set to 1, torque off when an Input Voltage Error occurs
+     */
+    uint8_t error; /**< Raw error code from servo.
+      The bitmask is set as follows (taken from Trossen Robotics PDF "AX-12(English).pdf"):
+      Bit 7: 0
+      Bit 6: Set to 1 if an undefined instruction is sent or an action instruction is sent without a Reg_Write instruction.
+      Bit 5: Set to 1 if the specified maximum torque can't control the applied load.
+      Bit 4: Set to 1 if the checksum of the instruction packet is incorrect.
+      Bit 3: Set to 1 if the instruction sent is out of the defined range.
+      Bit 2: Set to 1 if the internal temperature of the Dynamixel unit is above the operating temperature range as defined in the control table.
+      Bit 1: Set as 1 if the Goal Position is set outside of the range between CW Angle Limit and CCW Angle Limit.
+      Bit 0: Set to 1 if the voltage is out of the operating voltage range as defined in the control table.
+     */
+    float angle; /**< Current angle. */
+    bool enabled; /**< Is the pan/tilt unit enabled? */
+    float min_angle; /**< Minimum angle allowed. */
+    float max_angle; /**< Maximum angle allowed. */
+    float max_velocity; /**< Maximum supported velocity. */
+    float velocity; /**< Maximum pan velocity currently reached. */
+    float angle_margin; /**< 
+      Margin in radians around a target pan value to consider the
+      motion as final.
+     */
+    uint32_t msgid; /**< The ID of the message that is currently being
+      processed, or 0 if no message is being processed. */
+    bool final; /**< True, if the last goto command has been finished,
+      false if it is still running */
+    int32_t error_code; /**< Failure code set if
+    final is true. ERROR_NONE if no error occured. */
+  } DynamixelServoInterface_data_t;
+#pragma pack(pop)
+
+  DynamixelServoInterface_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+ public:
+  /* messages */
+  class StopMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } StopMessage_data_t;
+#pragma pack(pop)
+
+    StopMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    StopMessage();
+    ~StopMessage();
+
+    StopMessage(const StopMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class FlushMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } FlushMessage_data_t;
+#pragma pack(pop)
+
+    FlushMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    FlushMessage();
+    ~FlushMessage();
+
+    FlushMessage(const FlushMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  class GotoMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float angle; /**< Current angle. */
+    } GotoMessage_data_t;
+#pragma pack(pop)
+
+    GotoMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    GotoMessage(const float ini_angle);
+    GotoMessage();
+    ~GotoMessage();
+
+    GotoMessage(const GotoMessage *m);
+    /* Methods */
+    float angle() const;
+    void set_angle(const float new_angle);
+    size_t maxlenof_angle() const;
+    virtual Message * clone() const;
+  };
+
+  class TimedGotoMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float time_sec; /**< Time in seconds when to reach
+    the final position. */
+      float angle; /**< Current angle. */
+    } TimedGotoMessage_data_t;
+#pragma pack(pop)
+
+    TimedGotoMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    TimedGotoMessage(const float ini_time_sec, const float ini_angle);
+    TimedGotoMessage();
+    ~TimedGotoMessage();
+
+    TimedGotoMessage(const TimedGotoMessage *m);
+    /* Methods */
+    float time_sec() const;
+    void set_time_sec(const float new_time_sec);
+    size_t maxlenof_time_sec() const;
+    float angle() const;
+    void set_angle(const float new_angle);
+    size_t maxlenof_angle() const;
+    virtual Message * clone() const;
+  };
+
+  class SetEnabledMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool enabled; /**< Is the pan/tilt unit enabled? */
+    } SetEnabledMessage_data_t;
+#pragma pack(pop)
+
+    SetEnabledMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    SetEnabledMessage(const bool ini_enabled);
+    SetEnabledMessage();
+    ~SetEnabledMessage();
+
+    SetEnabledMessage(const SetEnabledMessage *m);
+    /* Methods */
+    bool is_enabled() const;
+    void set_enabled(const bool new_enabled);
+    size_t maxlenof_enabled() const;
+    virtual Message * clone() const;
+  };
+
+  class SetVelocityMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float velocity; /**< Maximum pan velocity currently reached. */
+    } SetVelocityMessage_data_t;
+#pragma pack(pop)
+
+    SetVelocityMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    SetVelocityMessage(const float ini_velocity);
+    SetVelocityMessage();
+    ~SetVelocityMessage();
+
+    SetVelocityMessage(const SetVelocityMessage *m);
+    /* Methods */
+    float velocity() const;
+    void set_velocity(const float new_velocity);
+    size_t maxlenof_velocity() const;
+    virtual Message * clone() const;
+  };
+
+  class SetMarginMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float angle_margin; /**< 
+      Margin in radians around a target pan value to consider the
+      motion as final.
+     */
+    } SetMarginMessage_data_t;
+#pragma pack(pop)
+
+    SetMarginMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    SetMarginMessage(const float ini_angle_margin);
+    SetMarginMessage();
+    ~SetMarginMessage();
+
+    SetMarginMessage(const SetMarginMessage *m);
+    /* Methods */
+    float angle_margin() const;
+    void set_angle_margin(const float new_angle_margin);
+    size_t maxlenof_angle_margin() const;
+    virtual Message * clone() const;
+  };
+
+  class SetComplianceValuesMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint8_t cw_margin; /**< New CW compliance margin */
+      uint8_t ccw_margin; /**< New CCW compliance margin */
+      uint8_t cw_slope; /**< New CW compliance slope */
+      uint8_t ccw_slope; /**< New LED enabled value */
+    } SetComplianceValuesMessage_data_t;
+#pragma pack(pop)
+
+    SetComplianceValuesMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    SetComplianceValuesMessage(const uint8_t ini_cw_margin, const uint8_t ini_ccw_margin, const uint8_t ini_cw_slope, const uint8_t ini_ccw_slope);
+    SetComplianceValuesMessage();
+    ~SetComplianceValuesMessage();
+
+    SetComplianceValuesMessage(const SetComplianceValuesMessage *m);
+    /* Methods */
+    uint8_t cw_margin() const;
+    void set_cw_margin(const uint8_t new_cw_margin);
+    size_t maxlenof_cw_margin() const;
+    uint8_t ccw_margin() const;
+    void set_ccw_margin(const uint8_t new_ccw_margin);
+    size_t maxlenof_ccw_margin() const;
+    uint8_t cw_slope() const;
+    void set_cw_slope(const uint8_t new_cw_slope);
+    size_t maxlenof_cw_slope() const;
+    uint8_t ccw_slope() const;
+    void set_ccw_slope(const uint8_t new_ccw_slope);
+    size_t maxlenof_ccw_slope() const;
+    virtual Message * clone() const;
+  };
+
+  class SetGoalSpeedMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t goal_speed; /**< New goal speed */
+    } SetGoalSpeedMessage_data_t;
+#pragma pack(pop)
+
+    SetGoalSpeedMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    SetGoalSpeedMessage(const uint32_t ini_goal_speed);
+    SetGoalSpeedMessage();
+    ~SetGoalSpeedMessage();
+
+    SetGoalSpeedMessage(const SetGoalSpeedMessage *m);
+    /* Methods */
+    uint32_t goal_speed() const;
+    void set_goal_speed(const uint32_t new_goal_speed);
+    size_t maxlenof_goal_speed() const;
+    virtual Message * clone() const;
+  };
+
+  class SetTorqueLimitMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t torque_limit; /**< New torque limit */
+    } SetTorqueLimitMessage_data_t;
+#pragma pack(pop)
+
+    SetTorqueLimitMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    SetTorqueLimitMessage(const uint32_t ini_torque_limit);
+    SetTorqueLimitMessage();
+    ~SetTorqueLimitMessage();
+
+    SetTorqueLimitMessage(const SetTorqueLimitMessage *m);
+    /* Methods */
+    uint32_t torque_limit() const;
+    void set_torque_limit(const uint32_t new_torque_limit);
+    size_t maxlenof_torque_limit() const;
+    virtual Message * clone() const;
+  };
+
+  class SetPunchMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t punch; /**< New punch */
+    } SetPunchMessage_data_t;
+#pragma pack(pop)
+
+    SetPunchMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    SetPunchMessage(const uint32_t ini_punch);
+    SetPunchMessage();
+    ~SetPunchMessage();
+
+    SetPunchMessage(const SetPunchMessage *m);
+    /* Methods */
+    uint32_t punch() const;
+    void set_punch(const uint32_t new_punch);
+    size_t maxlenof_punch() const;
+    virtual Message * clone() const;
+  };
+
+  class GotoPositionMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t position; /**< New position */
+    } GotoPositionMessage_data_t;
+#pragma pack(pop)
+
+    GotoPositionMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    GotoPositionMessage(const uint32_t ini_position);
+    GotoPositionMessage();
+    ~GotoPositionMessage();
+
+    GotoPositionMessage(const GotoPositionMessage *m);
+    /* Methods */
+    uint32_t position() const;
+    void set_position(const uint32_t new_position);
+    size_t maxlenof_position() const;
+    virtual Message * clone() const;
+  };
+
+  class SetAngleLimitsMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t angle_limit_cw; /**< New cw angle limit */
+      uint32_t angle_limit_ccw; /**< New ccw angle limit */
+    } SetAngleLimitsMessage_data_t;
+#pragma pack(pop)
+
+    SetAngleLimitsMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    SetAngleLimitsMessage(const uint32_t ini_angle_limit_cw, const uint32_t ini_angle_limit_ccw);
+    SetAngleLimitsMessage();
+    ~SetAngleLimitsMessage();
+
+    SetAngleLimitsMessage(const SetAngleLimitsMessage *m);
+    /* Methods */
+    uint32_t angle_limit_cw() const;
+    void set_angle_limit_cw(const uint32_t new_angle_limit_cw);
+    size_t maxlenof_angle_limit_cw() const;
+    uint32_t angle_limit_ccw() const;
+    void set_angle_limit_ccw(const uint32_t new_angle_limit_ccw);
+    size_t maxlenof_angle_limit_ccw() const;
+    virtual Message * clone() const;
+  };
+
+  class ResetRawErrorMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } ResetRawErrorMessage_data_t;
+#pragma pack(pop)
+
+    ResetRawErrorMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    ResetRawErrorMessage();
+    ~ResetRawErrorMessage();
+
+    ResetRawErrorMessage(const ResetRawErrorMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
+  virtual bool message_valid(const Message *message) const;
+ private:
+  DynamixelServoInterface();
+  ~DynamixelServoInterface();
+
+ public:
+  /* Methods */
+  char * model() const;
+  void set_model(const char * new_model);
+  size_t maxlenof_model() const;
+  uint32_t model_number() const;
+  void set_model_number(const uint32_t new_model_number);
+  size_t maxlenof_model_number() const;
+  uint32_t cw_angle_limit() const;
+  void set_cw_angle_limit(const uint32_t new_cw_angle_limit);
+  size_t maxlenof_cw_angle_limit() const;
+  uint32_t ccw_angle_limit() const;
+  void set_ccw_angle_limit(const uint32_t new_ccw_angle_limit);
+  size_t maxlenof_ccw_angle_limit() const;
+  uint8_t temperature_limit() const;
+  void set_temperature_limit(const uint8_t new_temperature_limit);
+  size_t maxlenof_temperature_limit() const;
+  uint32_t max_torque() const;
+  void set_max_torque(const uint32_t new_max_torque);
+  size_t maxlenof_max_torque() const;
+  uint8_t cw_margin() const;
+  void set_cw_margin(const uint8_t new_cw_margin);
+  size_t maxlenof_cw_margin() const;
+  uint8_t ccw_margin() const;
+  void set_ccw_margin(const uint8_t new_ccw_margin);
+  size_t maxlenof_ccw_margin() const;
+  uint8_t cw_slope() const;
+  void set_cw_slope(const uint8_t new_cw_slope);
+  size_t maxlenof_cw_slope() const;
+  uint8_t ccw_slope() const;
+  void set_ccw_slope(const uint8_t new_ccw_slope);
+  size_t maxlenof_ccw_slope() const;
+  uint32_t goal_position() const;
+  void set_goal_position(const uint32_t new_goal_position);
+  size_t maxlenof_goal_position() const;
+  uint32_t goal_speed() const;
+  void set_goal_speed(const uint32_t new_goal_speed);
+  size_t maxlenof_goal_speed() const;
+  uint32_t torque_limit() const;
+  void set_torque_limit(const uint32_t new_torque_limit);
+  size_t maxlenof_torque_limit() const;
+  uint32_t position() const;
+  void set_position(const uint32_t new_position);
+  size_t maxlenof_position() const;
+  uint32_t speed() const;
+  void set_speed(const uint32_t new_speed);
+  size_t maxlenof_speed() const;
+  uint32_t load() const;
+  void set_load(const uint32_t new_load);
+  size_t maxlenof_load() const;
+  uint8_t voltage() const;
+  void set_voltage(const uint8_t new_voltage);
+  size_t maxlenof_voltage() const;
+  uint8_t temperature() const;
+  void set_temperature(const uint8_t new_temperature);
+  size_t maxlenof_temperature() const;
+  uint32_t punch() const;
+  void set_punch(const uint32_t new_punch);
+  size_t maxlenof_punch() const;
+  uint8_t alarm_shutdown() const;
+  void set_alarm_shutdown(const uint8_t new_alarm_shutdown);
+  size_t maxlenof_alarm_shutdown() const;
+  uint8_t error() const;
+  void set_error(const uint8_t new_error);
+  size_t maxlenof_error() const;
+  float angle() const;
+  void set_angle(const float new_angle);
+  size_t maxlenof_angle() const;
+  bool is_enabled() const;
+  void set_enabled(const bool new_enabled);
+  size_t maxlenof_enabled() const;
+  float min_angle() const;
+  void set_min_angle(const float new_min_angle);
+  size_t maxlenof_min_angle() const;
+  float max_angle() const;
+  void set_max_angle(const float new_max_angle);
+  size_t maxlenof_max_angle() const;
+  float max_velocity() const;
+  void set_max_velocity(const float new_max_velocity);
+  size_t maxlenof_max_velocity() const;
+  float velocity() const;
+  void set_velocity(const float new_velocity);
+  size_t maxlenof_velocity() const;
+  float angle_margin() const;
+  void set_angle_margin(const float new_angle_margin);
+  size_t maxlenof_angle_margin() const;
+  uint32_t msgid() const;
+  void set_msgid(const uint32_t new_msgid);
+  size_t maxlenof_msgid() const;
+  bool is_final() const;
+  void set_final(const bool new_final);
+  size_t maxlenof_final() const;
+  ErrorCode error_code() const;
+  void set_error_code(const ErrorCode new_error_code);
+  size_t maxlenof_error_code() const;
+  virtual Message * create_message(const char *type) const;
+
+  virtual void copy_values(const Interface *other);
+  virtual const char * enum_tostring(const char *enumtype, int val) const;
+
+};
+
+} // end namespace fawkes
+
+#endif
