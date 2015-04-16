@@ -438,6 +438,13 @@ NavGraphInteractiveThread::add_node(const NavGraphNode &node, NavGraph *navgraph
 		    }
 		  }
 		});
+
+  MenuHandler::EntryHandle properties_menu_handle = menu.handler->insert("Properties");
+  for (const auto &p : node.properties()) {
+    std::string p_s = p.first + ": " + p.second;
+    menu.handler->insert(properties_menu_handle, p_s);
+  }
+
   menu.remove_handle =
     menu.handler->insert("Remove Node",
 			 boost::bind(&NavGraphInteractiveThread::process_node_feedback,
