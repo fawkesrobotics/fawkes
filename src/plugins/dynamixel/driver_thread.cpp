@@ -80,7 +80,7 @@ DynamixelDriverThread::init()
   cfg_prevent_alarm_shutdown_           = config->get_bool((cfg_prefix_ + "prevent_alarm_shutdown").c_str());
   cfg_prevent_alarm_shutdown_threshold_ = config->get_float((cfg_prefix_ + "prevent_alarm_shutdown_threshold").c_str());
 
-  chain_ = new DynamixelChain(cfg_device_.c_str(), cfg_read_timeout_ms_);
+  chain_ = new DynamixelChain(cfg_device_.c_str(), cfg_read_timeout_ms_, cfg_enable_echo_fix_);
   DynamixelChain::DeviceList devl = chain_->discover();
   std::list<std::string> found_servos;
   for (DynamixelChain::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
