@@ -82,7 +82,7 @@ DynamixelDriverThread::init()
   cfg_min_voltage_                      = config->get_float((cfg_prefix_ + "min_voltage").c_str());
   cfg_max_voltage_                      = config->get_float((cfg_prefix_ + "max_voltage").c_str());
 
-  chain_ = new DynamixelChain(cfg_device_.c_str(), cfg_read_timeout_ms_, cfg_enable_echo_fix_);
+  chain_ = new DynamixelChain(cfg_device_.c_str(), cfg_read_timeout_ms_, cfg_enable_echo_fix_, cfg_min_voltage_, cfg_max_voltage_);
   DynamixelChain::DeviceList devl = chain_->discover();
   std::list<std::string> found_servos;
   for (DynamixelChain::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
