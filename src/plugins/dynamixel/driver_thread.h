@@ -119,6 +119,8 @@ class DynamixelDriverThread
   unsigned char cfg_temperature_limit_;
   bool          cfg_prevent_alarm_shutdown_;
   float         cfg_prevent_alarm_shutdown_threshold_;
+  float         cfg_min_voltage_;
+  float         cfg_max_voltage_;
   
   void  goto_angle(unsigned int servo_id, float angle);
   void  goto_angle_timed(unsigned int servo_id, float angle, float time_sec);

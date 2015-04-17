@@ -148,7 +148,7 @@ using namespace fawkes;
  * @param device_file device file of the serial port
  * @param default_timeout_ms the timeout to apply by default to reading operations
  */
-DynamixelChain::DynamixelChain(const char *device_file, unsigned int default_timeout_ms, bool enable_echo_fix)
+DynamixelChain::DynamixelChain(const char *device_file, unsigned int default_timeout_ms, bool enable_echo_fix, float min_voltage, float max_voltage)
 {
   __default_timeout_ms = default_timeout_ms;
   __device_file        = strdup(device_file);
@@ -156,6 +156,8 @@ DynamixelChain::DynamixelChain(const char *device_file, unsigned int default_tim
   __obuffer_length     = 0;
   __ibuffer_length     = 0;
   __enable_echo_fix    = enable_echo_fix;
+  __min_voltage        = min_voltage;
+  __max_voltage        = max_voltage;
   memset(__control_table, 0, DYNAMIXEL_MAX_NUM_SERVOS * DYNAMIXEL_CONTROL_TABLE_LENGTH);
   try {
     open();
@@ -1005,7 +1007,7 @@ DynamixelChain::get_max_supported_speed(unsigned char id, bool refresh)
 {
   float voltage = get_voltage(id, refresh) / 10.0;
 
-  if ((voltage < 12.0) || (voltage > 16.0)) {
+  if ((voltage < __min_voltage) || (voltage > __max_voltage)) {
     throw OutOfBoundsException("Voltage is outside of specs", voltage, 12.0, 16.0);
   }
 

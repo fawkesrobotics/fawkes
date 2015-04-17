@@ -79,6 +79,8 @@ DynamixelDriverThread::init()
   cfg_temperature_limit_                = config->get_uint((cfg_prefix_ + "temperature_limit").c_str());
   cfg_prevent_alarm_shutdown_           = config->get_bool((cfg_prefix_ + "prevent_alarm_shutdown").c_str());
   cfg_prevent_alarm_shutdown_threshold_ = config->get_float((cfg_prefix_ + "prevent_alarm_shutdown_threshold").c_str());
+  cfg_min_voltage_                      = config->get_float((cfg_prefix_ + "min_voltage").c_str());
+  cfg_max_voltage_                      = config->get_float((cfg_prefix_ + "max_voltage").c_str());
 
   chain_ = new DynamixelChain(cfg_device_.c_str(), cfg_read_timeout_ms_, cfg_enable_echo_fix_);
   DynamixelChain::DeviceList devl = chain_->discover();
