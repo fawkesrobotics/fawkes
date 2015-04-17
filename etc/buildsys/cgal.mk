@@ -47,11 +47,11 @@ ifeq ($(CGAL_HAVE_BOOST_LIBS),1)
   endif
 else
   ifneq ($(HAVE_BOOST_LIBS),1)
-    CGAL_ERROS += = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, Boost_library_$l_not_found))
+    CGAL_ERRORS += = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, Boost_library_$l_not_found))
   endif
 endif
 
-ifneq ($(CGAL_ERROS),)
+ifneq ($(CGAL_ERRORS),)
   _CGAL_COMMA := ,
   CGAL_ERROR=$(subst _, ,$(subst :,$(_CGAL_COMMA) ,$(call merge,:,$(CGAL_ERRORS))))
 endif
