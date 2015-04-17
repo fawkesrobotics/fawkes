@@ -1008,7 +1008,7 @@ DynamixelChain::get_max_supported_speed(unsigned char id, bool refresh)
   float voltage = get_voltage(id, refresh) / 10.0;
 
   if ((voltage < __min_voltage) || (voltage > __max_voltage)) {
-    throw OutOfBoundsException("Voltage is outside of specs", voltage, 12.0, 16.0);
+    throw OutOfBoundsException("Voltage is outside of specs", voltage, __min_voltage, __max_voltage);
   }
 
   float sec_per_deg_12V = SEC_PER_60DEG_12V / 60.0;
