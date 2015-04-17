@@ -956,7 +956,7 @@ ClipsProtobufCommunicator::clips_assert_message(std::pair<std::string, unsigned 
     fact->set_slot("comp-id", comp_id);
     fact->set_slot("msg-type", msg_type);
     fact->set_slot("rcvd-via",
-      CLIPS::Value((client_id == 0) ? "BROADCAST" : "STREAM", CLIPS::TYPE_SYMBOL));
+		   CLIPS::Value((ct == CT_PEER) ? "BROADCAST" : "STREAM", CLIPS::TYPE_SYMBOL));
     CLIPS::Values rcvd_at(2, CLIPS::Value(CLIPS::TYPE_INTEGER));
     rcvd_at[0] = tv.tv_sec;
     rcvd_at[1] = tv.tv_usec;
