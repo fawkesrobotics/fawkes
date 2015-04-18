@@ -270,7 +270,7 @@ DynamixelDriverThread::exec_sensor()
       
       if ((chain_->get_load(servo_id) & 0x3ff) > (cfg_prevent_alarm_shutdown_threshold_ * chain_->get_torque_limit(servo_id))) {
         logger->log_warn(name(), "Servo with ID: %d is in overload condition: torque_limit: %d, load: %d", servo_id, chain_->get_torque_limit(servo_id), chain_->get_load(servo_id) & 0x3ff);
-        if (cfg_prevent_alarm_shutdown_) {
+        if (s.servo_if->is_enable_prevent_alarm_shutdown()) {
           // is the current load cw or ccw?
           if (chain_->get_load(servo_id) & 0x400) {
             goto_angle(servo_id, get_angle(servo_id) + 0.001);
@@ -343,6 +343,10 @@ DynamixelDriverThread::exec_act()
 
       } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::ResetRawErrorMessage>()) {
         s.servo_if->set_error(0);
+        
+      } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::SetPreventAlarmShutdownMessage>()) {
+        DynamixelServoInterface::SetPreventAlarmShutdownMessage *msg = s.servo_if->msgq_first(msg);
+        s.servo_if->set_enable_prevent_alarm_shutdown(msg->is_enable_prevent_alarm_shutdown());
         
       } else {
 	logger->log_warn(name(), "Unknown message received");
