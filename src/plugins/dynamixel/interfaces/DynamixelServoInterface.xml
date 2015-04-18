@@ -60,6 +60,7 @@
       Bit 1: Set as 1 if the Goal Position is set outside of the range between CW Angle Limit and CCW Angle Limit.
       Bit 0: Set to 1 if the voltage is out of the operating voltage range as defined in the control table.
     </field>
+    <field type="bool" name="enable_prevent_alarm_shutdown">Enable alarm shutdown</field>
 
     <!-- Values converted to useful units -->
     <field type="float"  name="angle">Current angle.</field>
@@ -149,5 +150,9 @@
   </message>
   <message name="ResetRawError">
     <comment>Reset raw error of servo in interface</comment>
+  </message>
+  <message name="SetPreventAlarmShutdown">
+    <comment>Enable or disable the prevent alarm shutdown functionality</comment>
+    <ref>enable_prevent_alarm_shutdown</ref>
   </message>
 </interface>

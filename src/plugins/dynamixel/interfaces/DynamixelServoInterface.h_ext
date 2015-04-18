@@ -98,6 +98,7 @@ class DynamixelServoInterface : public Interface
       Bit 1: Set as 1 if the Goal Position is set outside of the range between CW Angle Limit and CCW Angle Limit.
       Bit 0: Set to 1 if the voltage is out of the operating voltage range as defined in the control table.
      */
+    bool enable_prevent_alarm_shutdown; /**< Enable alarm shutdown */
     float angle; /**< Current angle. */
     bool enabled; /**< Is the pan/tilt unit enabled? */
     float min_angle; /**< Minimum angle allowed. */
@@ -523,6 +524,34 @@ class DynamixelServoInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetPreventAlarmShutdownMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool enable_prevent_alarm_shutdown; /**< Enable alarm shutdown */
+    } SetPreventAlarmShutdownMessage_data_t;
+#pragma pack(pop)
+
+    SetPreventAlarmShutdownMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+   public:
+    SetPreventAlarmShutdownMessage(const bool ini_enable_prevent_alarm_shutdown);
+    SetPreventAlarmShutdownMessage();
+    ~SetPreventAlarmShutdownMessage();
+
+    SetPreventAlarmShutdownMessage(const SetPreventAlarmShutdownMessage *m);
+    /* Methods */
+    bool is_enable_prevent_alarm_shutdown() const;
+    void set_enable_prevent_alarm_shutdown(const bool new_enable_prevent_alarm_shutdown);
+    size_t maxlenof_enable_prevent_alarm_shutdown() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   DynamixelServoInterface();
@@ -593,6 +622,9 @@ class DynamixelServoInterface : public Interface
   uint8_t error() const;
   void set_error(const uint8_t new_error);
   size_t maxlenof_error() const;
+  bool is_enable_prevent_alarm_shutdown() const;
+  void set_enable_prevent_alarm_shutdown(const bool new_enable_prevent_alarm_shutdown);
+  size_t maxlenof_enable_prevent_alarm_shutdown() const;
   float angle() const;
   void set_angle(const float new_angle);
   size_t maxlenof_angle() const;

@@ -75,6 +75,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_fieldinfo(IFT_UINT32, "punch", 1, &data->punch);
   add_fieldinfo(IFT_UINT8, "alarm_shutdown", 1, &data->alarm_shutdown);
   add_fieldinfo(IFT_UINT8, "error", 1, &data->error);
+  add_fieldinfo(IFT_BOOL, "enable_prevent_alarm_shutdown", 1, &data->enable_prevent_alarm_shutdown);
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
   add_fieldinfo(IFT_FLOAT, "min_angle", 1, &data->min_angle);
@@ -99,7 +100,8 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_messageinfo("GotoPositionMessage");
   add_messageinfo("SetAngleLimitsMessage");
   add_messageinfo("ResetRawErrorMessage");
-  unsigned char tmp_hash[] = {0xd0, 0xe9, 0xe6, 0x4e, 0x5f, 0xc1, 0xc2, 0xeb, 0x53, 0x6a, 0xd0, 0xf9, 0x24, 0xfd, 0x23, 0xb4};
+  add_messageinfo("SetPreventAlarmShutdownMessage");
+  unsigned char tmp_hash[] = {0xcc, 0x4f, 0x35, 0x5c, 0xa9, 0xa6, 0xdb, 0xc3, 0xad, 0x5f, 0xa2, 0x7c, 00, 0xda, 0x5d, 0x35};
   set_hash(tmp_hash);
 }
 
@@ -815,6 +817,37 @@ DynamixelServoInterface::set_error(const uint8_t new_error)
   data_changed = true;
 }
 
+/** Get enable_prevent_alarm_shutdown value.
+ * Enable alarm shutdown
+ * @return enable_prevent_alarm_shutdown value
+ */
+bool
+DynamixelServoInterface::is_enable_prevent_alarm_shutdown() const
+{
+  return data->enable_prevent_alarm_shutdown;
+}
+
+/** Get maximum length of enable_prevent_alarm_shutdown value.
+ * @return length of enable_prevent_alarm_shutdown value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+DynamixelServoInterface::maxlenof_enable_prevent_alarm_shutdown() const
+{
+  return 1;
+}
+
+/** Set enable_prevent_alarm_shutdown value.
+ * Enable alarm shutdown
+ * @param new_enable_prevent_alarm_shutdown new enable_prevent_alarm_shutdown value
+ */
+void
+DynamixelServoInterface::set_enable_prevent_alarm_shutdown(const bool new_enable_prevent_alarm_shutdown)
+{
+  data->enable_prevent_alarm_shutdown = new_enable_prevent_alarm_shutdown;
+  data_changed = true;
+}
+
 /** Get angle value.
  * Current angle.
  * @return angle value
@@ -1169,6 +1202,8 @@ DynamixelServoInterface::create_message(const char *type) const
     return new SetAngleLimitsMessage();
   } else if ( strncmp("ResetRawErrorMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new ResetRawErrorMessage();
+  } else if ( strncmp("SetPreventAlarmShutdownMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetPreventAlarmShutdownMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -2606,6 +2641,104 @@ DynamixelServoInterface::ResetRawErrorMessage::clone() const
 {
   return new DynamixelServoInterface::ResetRawErrorMessage(this);
 }
+/** @class DynamixelServoInterface::SetPreventAlarmShutdownMessage <interfaces/DynamixelServoInterface.h>
+ * SetPreventAlarmShutdownMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_enable_prevent_alarm_shutdown initial value for enable_prevent_alarm_shutdown
+ */
+DynamixelServoInterface::SetPreventAlarmShutdownMessage::SetPreventAlarmShutdownMessage(const bool ini_enable_prevent_alarm_shutdown) : Message("SetPreventAlarmShutdownMessage")
+{
+  data_size = sizeof(SetPreventAlarmShutdownMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetPreventAlarmShutdownMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->enable_prevent_alarm_shutdown = ini_enable_prevent_alarm_shutdown;
+  enum_map_ErrorCode[(int)ERROR_NONE] = "ERROR_NONE";
+  enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
+  enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
+  enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  add_fieldinfo(IFT_BOOL, "enable_prevent_alarm_shutdown", 1, &data->enable_prevent_alarm_shutdown);
+}
+/** Constructor */
+DynamixelServoInterface::SetPreventAlarmShutdownMessage::SetPreventAlarmShutdownMessage() : Message("SetPreventAlarmShutdownMessage")
+{
+  data_size = sizeof(SetPreventAlarmShutdownMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetPreventAlarmShutdownMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ErrorCode[(int)ERROR_NONE] = "ERROR_NONE";
+  enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
+  enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
+  enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  add_fieldinfo(IFT_BOOL, "enable_prevent_alarm_shutdown", 1, &data->enable_prevent_alarm_shutdown);
+}
+
+/** Destructor */
+DynamixelServoInterface::SetPreventAlarmShutdownMessage::~SetPreventAlarmShutdownMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+DynamixelServoInterface::SetPreventAlarmShutdownMessage::SetPreventAlarmShutdownMessage(const SetPreventAlarmShutdownMessage *m) : Message("SetPreventAlarmShutdownMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetPreventAlarmShutdownMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get enable_prevent_alarm_shutdown value.
+ * Enable alarm shutdown
+ * @return enable_prevent_alarm_shutdown value
+ */
+bool
+DynamixelServoInterface::SetPreventAlarmShutdownMessage::is_enable_prevent_alarm_shutdown() const
+{
+  return data->enable_prevent_alarm_shutdown;
+}
+
+/** Get maximum length of enable_prevent_alarm_shutdown value.
+ * @return length of enable_prevent_alarm_shutdown value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+DynamixelServoInterface::SetPreventAlarmShutdownMessage::maxlenof_enable_prevent_alarm_shutdown() const
+{
+  return 1;
+}
+
+/** Set enable_prevent_alarm_shutdown value.
+ * Enable alarm shutdown
+ * @param new_enable_prevent_alarm_shutdown new enable_prevent_alarm_shutdown value
+ */
+void
+DynamixelServoInterface::SetPreventAlarmShutdownMessage::set_enable_prevent_alarm_shutdown(const bool new_enable_prevent_alarm_shutdown)
+{
+  data->enable_prevent_alarm_shutdown = new_enable_prevent_alarm_shutdown;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+DynamixelServoInterface::SetPreventAlarmShutdownMessage::clone() const
+{
+  return new DynamixelServoInterface::SetPreventAlarmShutdownMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -2667,6 +2800,10 @@ DynamixelServoInterface::message_valid(const Message *message) const
   }
   const ResetRawErrorMessage *m13 = dynamic_cast<const ResetRawErrorMessage *>(message);
   if ( m13 != NULL ) {
+    return true;
+  }
+  const SetPreventAlarmShutdownMessage *m14 = dynamic_cast<const SetPreventAlarmShutdownMessage *>(message);
+  if ( m14 != NULL ) {
     return true;
   }
   return false;

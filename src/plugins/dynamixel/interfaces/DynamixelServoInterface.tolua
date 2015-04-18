@@ -170,6 +170,17 @@ class DynamixelServoInterface : public Interface
 
   };
 
+  class SetPreventAlarmShutdownMessage : public Message
+  {
+    SetPreventAlarmShutdownMessage(bool ini_enable_prevent_alarm_shutdown);
+    SetPreventAlarmShutdownMessage();
+    ~SetPreventAlarmShutdownMessage();
+
+    bool is_enable_prevent_alarm_shutdown();
+    void set_enable_prevent_alarm_shutdown(const bool new_enable_prevent_alarm_shutdown);
+    int maxlenof_enable_prevent_alarm_shutdown() const;
+  };
+
   char * model();
   void set_model(const char * new_model);
   int maxlenof_model() const;
@@ -233,6 +244,9 @@ class DynamixelServoInterface : public Interface
   unsigned char error();
   void set_error(const unsigned char new_error);
   int maxlenof_error() const;
+  bool is_enable_prevent_alarm_shutdown();
+  void set_enable_prevent_alarm_shutdown(const bool new_enable_prevent_alarm_shutdown);
+  int maxlenof_enable_prevent_alarm_shutdown() const;
   float angle();
   void set_angle(const float new_angle);
   int maxlenof_angle() const;
