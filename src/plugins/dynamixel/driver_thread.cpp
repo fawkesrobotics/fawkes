@@ -178,6 +178,7 @@ DynamixelDriverThread::init()
     s.servo_if->set_ccw_margin(ccw_margin);
     s.servo_if->set_torque_limit(chain_->get_torque_limit(servo_id));
     s.servo_if->set_max_velocity(s.max_speed);
+    s.servo_if->set_enable_prevent_alarm_shutdown(cfg_prevent_alarm_shutdown_);
     s.servo_if->write();
 
     s.servo_if->set_auto_timestamping(false);
