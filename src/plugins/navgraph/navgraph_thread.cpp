@@ -441,6 +441,7 @@ NavGraphThread::generate_plan(float x, float y, float ori)
   if (std::isfinite(ori)) {
     n.set_property("orientation", ori);
   }
+  graph_->apply_default_properties(n);
   path_.add_node(n);
   traversal_ = path_.traversal();
 }
