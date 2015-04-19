@@ -95,7 +95,7 @@ function PPGOTO:init()
       -- cartesian goto
       local x = self.fsm.vars.x or 0 --self.fsm.vars[1]
       local y = self.fsm.vars.y or 0 --self.fsm.vars[2]
-      local ori = self.fsm.vars.ori or math.atan2(y, x)
+      local ori = self.fsm.vars.ori or math.nan
       local m = ppnavi.CartesianGotoMessage:new(x, y, ori)
       printf("Sending CartesianGotoMessage(%f, %f, %f)", x, y, ori)
       self.fsm.vars.msgid = ppnavi:msgq_enqueue_copy(m)
