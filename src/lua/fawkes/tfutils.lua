@@ -46,3 +46,26 @@ function transform(src_pos, src_frame, target_frame)
    }
 end
 
+--- Transform 6D pose with orientation between coordinate frames.
+-- @param src_pos pose in source frame
+-- @param src_frame source coordinate frame
+function transform6D(src_pos, src_frame, target_frame)
+   if not tf:can_transform(src_frame, target_frame, fawkes.Time:new(0,0)) then
+      -- no transform currently available
+      return nil
+   end
+
+   local from_t = fawkes.tf.Vector3:new(src_pos.x, src_pos.y, src_pos.z)
+   local from_r = fawkes.tf.Quaternion:new(src_pos.ori.x, src_pos.ori.y, src_pos.ori.z, src_pos.ori.w)
+   local from_p = fawkes.tf.Pose:new(from_r, from_t)
+   local from_sp = fawkes.tf.StampedPose(from_p, fawkes.Time:new(0,0), src_frame)
+   local to_sp = fawkes.tf.StampedPose:new()
+   tf:transform_pose(target_frame, from_sp, to_sp)
+
+   return { x = to_sp:getOrigin():x(),
+            y = to_sp:getOrigin():y(),
+            z = to_sp:getOrigin():z(),
+            ori = {x=to_sp:getRotation():x(), y=to_sp:getRotation():y(), z=to_sp:getRotation():z(), w=to_sp:getRotation():w()},
+            frame = target_frame
+   }
+end
