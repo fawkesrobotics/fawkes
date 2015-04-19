@@ -28,6 +28,7 @@
 #include <core/utils/lockptr.h>
 
 #include <fstream>
+#include <cmath>
 
 using namespace fawkes;
 
@@ -423,7 +424,7 @@ NavGraphThread::generate_plan(std::string goal_name, float ori)
 {
   generate_plan(goal_name);
 
-  if (! path_.empty()) {
+  if (! path_.empty() && std::isfinite(ori)) {
     path_.nodes_mutable().back().set_property("orientation", ori);
   }
 
@@ -437,7 +438,9 @@ NavGraphThread::generate_plan(float x, float y, float ori)
   generate_plan(close_to_goal.name());
 
   NavGraphNode n("free-target", x, y);
-  n.set_property("orientation", ori);
+  if (std::isfinite(ori)) {
+    n.set_property("orientation", ori);
+  }
   path_.add_node(n);
   traversal_ = path_.traversal();
 }

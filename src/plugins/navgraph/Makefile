@@ -24,7 +24,7 @@ SUBDIRS = static-constraints
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_navgraph = fawkescore fawkesutils fawkesaspects fawkesinterface \
+LIBS_navgraph = m fawkescore fawkesutils fawkesaspects fawkesinterface \
 		fawkesblackboard fawkesnavgraph \
 		NavigatorInterface NavPathInterface
 OBJS_navgraph = navgraph_plugin.o navgraph_thread.o
