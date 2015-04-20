@@ -38,7 +38,7 @@ class DynamixelChain
   /** List of servo IDs. */
   typedef std::list<unsigned char> DeviceList;
 
-  DynamixelChain(const char *device_file, unsigned int default_timeout_ms = 30, bool enable_echo_fix = false, float min_voltage = 12.0, float max_voltage = 16.0);
+  DynamixelChain(const char *device_file, unsigned int default_timeout_ms = 30, bool enable_echo_fix = false, bool enable_connection_stability = false, float min_voltage = 12.0, float max_voltage = 16.0);
   ~DynamixelChain();
 
   void         open();
@@ -242,6 +242,7 @@ class DynamixelChain
   char         *__device_file;
   unsigned int  __default_timeout_ms;
   bool          __enable_echo_fix;
+  bool          __enable_connection_stability;
   float         __min_voltage;
   float         __max_voltage;
 

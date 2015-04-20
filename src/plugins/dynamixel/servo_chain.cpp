@@ -148,16 +148,17 @@ using namespace fawkes;
  * @param device_file device file of the serial port
  * @param default_timeout_ms the timeout to apply by default to reading operations
  */
-DynamixelChain::DynamixelChain(const char *device_file, unsigned int default_timeout_ms, bool enable_echo_fix, float min_voltage, float max_voltage)
+DynamixelChain::DynamixelChain(const char *device_file, unsigned int default_timeout_ms, bool enable_echo_fix, bool enable_connection_stability, float min_voltage, float max_voltage)
 {
-  __default_timeout_ms = default_timeout_ms;
-  __device_file        = strdup(device_file);
-  __fd                 = -1;
-  __obuffer_length     = 0;
-  __ibuffer_length     = 0;
-  __enable_echo_fix    = enable_echo_fix;
-  __min_voltage        = min_voltage;
-  __max_voltage        = max_voltage;
+  __default_timeout_ms          = default_timeout_ms;
+  __device_file                 = strdup(device_file);
+  __fd                          = -1;
+  __obuffer_length              = 0;
+  __ibuffer_length              = 0;
+  __enable_echo_fix             = enable_echo_fix;
+  __enable_connection_stability = enable_connection_stability;
+  __min_voltage                 = min_voltage;
+  __max_voltage                 = max_voltage;
   memset(__control_table, 0, DYNAMIXEL_MAX_NUM_SERVOS * DYNAMIXEL_CONTROL_TABLE_LENGTH);
   try {
     open();
@@ -371,6 +372,17 @@ DynamixelChain::recv(const unsigned char exp_length, unsigned int timeout_ms)
 #ifdef DEBUG_ServoChain_COMM
     printf("Trying to read %d bytes\n", 6 - bytes_read);
 #endif
+    if (__enable_connection_stability) {
+        // select file descriptor again to make sure data is available
+        rv = select(__fd + 1, &read_fds, NULL, NULL, &timeout);
+
+        if ( rv == -1 ) {
+         throw Exception(errno, "Select on FD failed");
+        } else if ( rv == 0 ) {
+          //printf("Timeout, no data :-/\n");
+          throw TimeoutException("Timeout reached while waiting for incoming ServoChain data");
+        }
+    }
     bytes_read += read(__fd, __ibuffer + bytes_read, 6 - bytes_read);
 #ifdef DEBUG_ServoChain_COMM
     printf("%d bytes read  ", bytes_read);
@@ -398,6 +410,17 @@ DynamixelChain::recv(const unsigned char exp_length, unsigned int timeout_ms)
   if (plength > 0) {
     bytes_read = 0;
     while (bytes_read < plength) {
+      if (__enable_connection_stability) {
+          // select file descriptor again to make sure data is available
+          rv = select(__fd + 1, &read_fds, NULL, NULL, &timeout);
+
+          if ( rv == -1 ) {
+           throw Exception(errno, "Select on FD failed");
+          } else if ( rv == 0 ) {
+            //printf("Timeout, no data :-/\n");
+            throw TimeoutException("Timeout reached while waiting for incoming ServoChain data");
+          }
+      }
       bytes_read += read(__fd, &__ibuffer[6] + bytes_read, plength - bytes_read);
     }
     if (bytes_read < plength) {
