@@ -115,6 +115,7 @@ class DynamixelDriverThread
   unsigned int  cfg_ccw_compl_slope_;
   float         cfg_def_angle_margin_;
   bool          cfg_enable_echo_fix_;
+  bool          cfg_enable_connection_stability_;
   float         cfg_torque_limit_;
   unsigned char cfg_temperature_limit_;
   bool          cfg_prevent_alarm_shutdown_;
