@@ -334,8 +334,12 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
   } else if (message->is_of_type<NavGraphGeneratorInterface::AddObstacleMessage>()) {
     NavGraphGeneratorInterface::AddObstacleMessage *msg =
       message->as_type<NavGraphGeneratorInterface::AddObstacleMessage>();
-    obstacles_[msg->id()] = cart_coord_2d_t(msg->x(), msg->y());
-
+    if (std::isfinite(msg->x()) && std::isfinite(msg->x())) {
+      obstacles_[msg->id()] = cart_coord_2d_t(msg->x(), msg->y());
+    } else {
+      logger->log_error(name(), "Received non-finite obstacle (%.2f,%.2f), ignoring",
+			msg->x(), msg->y());
+    }
   } else if (message->is_of_type<NavGraphGeneratorInterface::RemoveObstacleMessage>()) {
     NavGraphGeneratorInterface::RemoveObstacleMessage *msg =
       message->as_type<NavGraphGeneratorInterface::RemoveObstacleMessage>();
@@ -347,10 +351,15 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
   } else if (message->is_of_type<NavGraphGeneratorInterface::AddPointOfInterestMessage>()) {
     NavGraphGeneratorInterface::AddPointOfInterestMessage *msg =
       message->as_type<NavGraphGeneratorInterface::AddPointOfInterestMessage>();
-    PointOfInterest poi;
-    poi.position  = cart_coord_2d_t(msg->x(), msg->y());
-    poi.conn_mode = msg->mode();
-    pois_[msg->id()] = poi;
+    if (std::isfinite(msg->x()) && std::isfinite(msg->x())) {
+      PointOfInterest poi;
+      poi.position  = cart_coord_2d_t(msg->x(), msg->y());
+      poi.conn_mode = msg->mode();
+      pois_[msg->id()] = poi;
+    } else {
+      logger->log_error(name(), "Received non-finite POI (%.2f,%.2f), ignoring",
+			msg->x(), msg->y());
+    }
 
   } else if (message->is_of_type<NavGraphGeneratorInterface::AddEdgeMessage>()) {
     NavGraphGeneratorInterface::AddEdgeMessage *msg =
@@ -365,11 +374,22 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
   } else if (message->is_of_type<NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage>()) {
     NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage *msg =
       message->as_type<NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage>();
-    PointOfInterest poi;
-    poi.position  = cart_coord_2d_t(msg->x(), msg->y());
-    poi.conn_mode = msg->mode();
-    poi.properties["orientation"] = std::to_string(msg->ori());
-    pois_[msg->id()] = poi;
+
+    if (std::isfinite(msg->x()) && std::isfinite(msg->x())) {
+      PointOfInterest poi;
+      poi.position  = cart_coord_2d_t(msg->x(), msg->y());
+      poi.conn_mode = msg->mode();
+      if (std::isfinite(msg->ori())) {
+	poi.properties["orientation"] = std::to_string(msg->ori());
+      } else {
+	logger->log_warn(name(), "Received POI with non-finite ori %f, ignoring ori",
+			 msg->ori());
+      }
+      pois_[msg->id()] = poi;
+    } else {
+      logger->log_error(name(), "Received non-finite POI (%.2f,%.2f), ignoring ori",
+			msg->x(), msg->y());
+    }
 
   } else if (message->is_of_type<NavGraphGeneratorInterface::RemovePointOfInterestMessage>()) {
     NavGraphGeneratorInterface::RemovePointOfInterestMessage *msg =
