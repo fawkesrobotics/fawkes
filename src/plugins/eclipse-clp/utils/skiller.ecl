@@ -44,17 +44,17 @@ decide_on_sensing(false) :- failed.
 inverse_decide(false) :- success.
 inverse_decide(true) :- failed.
 
-success :- bb_read_interface("Skiller", "status", Status), is_final(Status).
-failed :- bb_read_interface("Skiller", "status", Status), is_failed(Status).
+success :- bb_get("SkillerInterface::Skiller", "status", Status), is_final(Status).
+failed :- bb_get("SkillerInterface::Skiller", "status", Status), is_failed(Status).
 
 %% wait until skiller is done
 wait_for_skiller :-
     bb_read_interfaces,
-    bb_read_interface("Skiller", "status", Status),
+    bb_get("SkillerInterface::Skiller", "status", Status),
     is_running(Status), sleep(0.1),
     wait_for_skiller.
 wait_for_skiller :-
-    bb_read_interface("Skiller", "status", Status),
+    bb_get("SkillerInterface::Skiller", "status", Status),
     not_running(Status).
 
 %% wait until the skiller started to process the message with the given MsgID
@@ -62,13 +62,13 @@ wait_for_skiller :-
 %% already started to process a new message, this will end in a deadlock.
 wait_until_processed(MsgID) :-
     bb_read_interfaces,
-    bb_read_interface("Skiller", "msgid", CurrentMsgID),
+    bb_get("SkillerInterface::Skiller", "msgid", CurrentMsgID),
     MsgID \= CurrentMsgID,
     sleep(0.1),
     wait_until_processed(MsgID).
 wait_until_processed(MsgID) :-
     bb_read_interfaces,
-    bb_read_interface("Skiller", "msgid", CurrentMsgID),
+    bb_get("SkillerInterface::Skiller", "msgid", CurrentMsgID),
     MsgID == CurrentMsgID.
 
 
@@ -81,7 +81,7 @@ exec_skill(Skill, Arguments) :-
 
 exec_skill2(Skillmsg) :-
     log_info("Executing skill '%w'", Skillmsg),
-    bb_send_message("Skiller", "ExecSkillMessage", [["skill_string", Skillmsg]], MsgID),
+    bb_send_message("SkillerInterface::Skiller", "ExecSkillMessage", [["skill_string", Skillmsg]], MsgID),
     log_info("Sending message with ID %w", [MsgID]),
     wait_until_processed(MsgID),
     log_info("Sent Skiller Message").
