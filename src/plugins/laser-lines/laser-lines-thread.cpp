@@ -341,6 +341,10 @@ LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
 			   const LineInfo &info)
 {
   int visibility_history = iface->visibility_history();
+  moving_avg_window.push_front(LineInfo(info));
+  if(moving_avg_window.size() > cfg_moving_avg_window_size_) {
+    moving_avg_window.pop_back();
+  }
   if (is_visible) {
     Eigen::Vector3f old_point_on_line(iface->point_on_line(0),
 				      iface->point_on_line(1),
