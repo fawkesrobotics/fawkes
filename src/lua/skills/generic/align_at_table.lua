@@ -180,6 +180,15 @@ function DETECT_TABLE:exit()
    end
 end
 
+function DETECT_TABLE_AGAIN:init()
+   table_detect:msgq_enqueue_copy(table_detect.EnableSwitchMessage:new())
+end
+function DETECT_TABLE_AGAIN:exit()
+   if self.fsm.vars.table_detect == false then
+      table_detect:msgq_enqueue_copy(table_detect.DisableSwitchMessage:new())
+   end
+end
+
 function ALIGN_AT_TABLE:init()
    navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(false))
    self.args["relgoto"] = {x=0, y=0, ori=self.fsm.vars.table_yaw}
