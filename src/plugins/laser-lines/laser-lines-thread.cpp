@@ -112,6 +112,8 @@ LaserLinesThread::init()
   try {
     //double rotation[4] = {0., 0., 0., 1.};
     line_ifs_.resize(cfg_max_num_lines_, NULL);
+    line_avg_ifs_.resize(cfg_max_num_lines_, NULL);
+    moving_average_windows_.resize(cfg_max_num_lines_);
     for (unsigned int i = 0; i < cfg_max_num_lines_; ++i) {
       char *tmp;
       if (asprintf(&tmp, "/laser-lines/%u", i + 1) != -1) {
@@ -121,6 +123,8 @@ LaserLinesThread::init()
 
 	line_ifs_[i] =
 	  blackboard->open_for_writing<LaserLineInterface>(id.c_str());
+        line_avg_ifs_[i] =
+          blackboard->open_for_writing<LaserLineInterface>((id + "/moving_avg").c_str());
 	/*
 	line_ifs_[i]->set_rotation(rotation);
 	line_ifs_[i]->write();
@@ -140,6 +144,7 @@ LaserLinesThread::init()
   } catch (Exception &e) {
     for (size_t i = 0; i < line_ifs_.size(); ++i) {
       blackboard->close(line_ifs_[i]);
+      blackboard->close(line_avg_ifs_[i]);
     }
     blackboard->close(switch_if_);
     throw;
@@ -184,6 +189,7 @@ LaserLinesThread::finalize()
   
   for (size_t i = 0; i < line_ifs_.size(); ++i) {
     blackboard->close(line_ifs_[i]);
+    blackboard->close(line_avg_ifs_[i]);
   }
   blackboard->close(switch_if_);
 
