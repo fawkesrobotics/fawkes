@@ -196,7 +196,7 @@ end
 
 function POSITION_AT_TABLE:init()
    navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(false))
-   navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(navigator.SlowAllowBackward))
+   navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(navigator.AllowBackward))
 
    self.args["relgoto"] = {x=self.fsm.vars.table_distance - self.fsm.vars.dist - DIST_TO_FRONT, y=0, ori=0}
 end
