@@ -96,6 +96,8 @@ LaserLinesThread::init()
     config->get_float(CFG_PREFIX"line_cluster_tolerance");
   cfg_cluster_quota_ =
     config->get_float(CFG_PREFIX"line_cluster_quota");
+  cfg_moving_avg_window_size_ =
+    config->get_uint(CFG_PREFIX"moving_avg_window_size");
 
   cfg_switch_tolerance_ =
     config->get_float(CFG_PREFIX"switch_tolerance");

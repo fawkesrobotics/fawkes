@@ -138,6 +138,7 @@ class LaserLinesThread
   float        cfg_cluster_quota_;
   float        cfg_min_dist_;
   float        cfg_max_dist_;
+  unsigned int cfg_moving_avg_window_size_;
 
   unsigned int loop_count_;
 

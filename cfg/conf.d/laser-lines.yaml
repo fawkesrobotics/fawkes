@@ -52,3 +52,6 @@ laser-lines:
   # input laser cloud
   input_cloud: lase_edl-360
   #input_cloud: Line-Sector
+  
+  # The size (number of elements) of the moving average window
+  moving_avg_window_size: 10
