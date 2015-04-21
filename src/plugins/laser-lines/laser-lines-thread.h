@@ -40,6 +40,8 @@
 #include <Eigen/StdVector>
 #include <pcl/ModelCoefficients.h>
 
+#include <deque>
+
 #ifdef HAVE_VISUAL_DEBUGGING
 #  include <plugins/ros/aspect/ros.h>
 
@@ -112,6 +114,8 @@ class LaserLinesThread
   pcl::PointCloud<ColorPointType>::Ptr lines_;
 
   std::vector<fawkes::LaserLineInterface *> line_ifs_;
+  std::vector<fawkes::LaserLineInterface *> line_avg_ifs_;
+  std::vector<std::deque<LineInfo>> moving_average_windows_;
 
   fawkes::SwitchInterface *switch_if_;
 
