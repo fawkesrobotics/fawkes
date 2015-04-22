@@ -94,6 +94,7 @@ class DynamixelDriverThread
     bool         led_disable;
     float        max_speed;
     float        angle_margin;
+    unsigned int torque_limit;
     fawkes::Time time;
     float        last_angle;
   };

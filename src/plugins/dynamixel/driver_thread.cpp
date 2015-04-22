@@ -122,6 +122,7 @@ DynamixelDriverThread::init()
     s.led_enable       = false;
     s.led_disable      = false;
     s.last_angle       = 0.f;
+    s.torque_limit     = cfg_torque_limit_ * 0x3ff;
     s.value_rwlock     = new ReadWriteLock();
     s.angle_margin     = cfg_def_angle_margin_;
 
@@ -177,7 +178,7 @@ DynamixelDriverThread::init()
     s.servo_if->set_ccw_slope(ccw_slope);
     s.servo_if->set_cw_margin(cw_margin);
     s.servo_if->set_ccw_margin(ccw_margin);
-    s.servo_if->set_torque_limit(chain_->get_torque_limit(servo_id));
+    s.servo_if->set_torque_limit(s.torque_limit);
     s.servo_if->set_max_velocity(s.max_speed);
     s.servo_if->set_enable_prevent_alarm_shutdown(cfg_prevent_alarm_shutdown_);
     s.servo_if->write();
