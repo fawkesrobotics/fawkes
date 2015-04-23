@@ -251,6 +251,7 @@ JacoOpenraveThread::loop()
     while( it!=__arm->target_queue->begin() ) {
       --it;
       if( (*it)->trajec_state==TRAJEC_READY || (*it)->trajec_state==TRAJEC_EXECUTING ) {
+        from = RefPtr<jaco_target_t>(new jaco_target_t());
         from->pos = (*it)->trajec->back();
         break;
       } else if( (*it)->trajec_state==TRAJEC_SKIP && (*it)->type == TARGET_ANGULAR ) {
