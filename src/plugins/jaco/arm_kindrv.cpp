@@ -64,6 +64,7 @@ JacoArmKindrv::JacoArmKindrv(const char *name)
       } catch(KinDrvException& e) {
         // don't throw yet, we need to delete the occupied arms first.
         __arm = NULL;
+        break;
       }
     }
 
