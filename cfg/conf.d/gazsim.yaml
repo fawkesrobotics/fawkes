@@ -40,6 +40,7 @@ gazsim:
     # buffer for delaying sensor values
     gyro-buffer-size: 500
     gyro-delay: 0.2
+    infrared-sensor-index: 8
 
     motor:    
       # does the odometry change if the robotino drives against an obstacle?
