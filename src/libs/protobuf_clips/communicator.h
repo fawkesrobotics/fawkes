@@ -181,6 +181,8 @@ class ClipsProtobufCommunicator
   void handle_client_receive_fail(long int client_id,
 				  uint16_t comp_id, uint16_t msg_type, std::string msg);
 
+  static std::string to_string(const CLIPS::Value &v);
+
  private:
   CLIPS::Environment   *clips_;
   fawkes::Mutex        &clips_mutex_;

@@ -44,6 +44,8 @@
 
 #include <google/protobuf/descriptor.h>
 
+#include <boost/format.hpp>
+
 using namespace google::protobuf;
 using namespace protobuf_comm;
 
@@ -576,9 +578,10 @@ ClipsProtobufCommunicator::clips_pb_set_field(void *msgptr, std::string field_na
     }
   } catch (std::logic_error &e) {
     if (logger_) {
-      logger_->log_warn("CLIPS-Protobuf", "Failed to set field %s (type %d) of %s: %s",
-			field_name.c_str(), value.type(),
-			(*m)->GetTypeName().c_str(), e.what());
+      logger_->log_warn("CLIPS-Protobuf", "Failed to set field %s of %s: %s "
+			"(type %d, as string %s)",
+			field_name.c_str(), (*m)->GetTypeName().c_str(), e.what(),
+			value.type(), to_string(value).c_str());
     }
   }
 }
@@ -1124,6 +1127,23 @@ ClipsProtobufCommunicator::handle_client_receive_fail(long int client_id,
   clips_->assert_fact_f("(protobuf-receive-failed (client-id %li) (rcvd-via STREAM) "
 			"(comp-id %u) (msg-type %u) (message \"%s\"))",
 			client_id, comp_id, msg_type, msg.c_str());
+}
+
+std::string
+ClipsProtobufCommunicator::to_string(const CLIPS::Value &v)
+{
+  switch (v.type()) {
+  case CLIPS::TYPE_UNKNOWN: return "Unknown Type";
+  case CLIPS::TYPE_FLOAT:   return std::to_string(v.as_float());
+  case CLIPS::TYPE_INTEGER: return std::to_string(v.as_integer());
+  case CLIPS::TYPE_SYMBOL:
+  case CLIPS::TYPE_INSTANCE_NAME:
+  case CLIPS::TYPE_STRING:  return v.as_string();
+  case CLIPS::TYPE_INSTANCE_ADDRESS:
+  case CLIPS::TYPE_EXTERNAL_ADDRESS:
+    return boost::str(boost::format("%p") % v.as_address());
+  }
+  return "Implicit unknown type";
 }
 
 } // end namespace protobuf_clips
