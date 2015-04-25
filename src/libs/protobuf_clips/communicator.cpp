@@ -421,8 +421,10 @@ ClipsProtobufCommunicator::clips_pb_has_field(void *msgptr, std::string field_na
 
   if (field->is_repeated()) {
     return (refl->FieldSize(**m, field) > 0);
-  } else {
+  } else if (field->is_optional()) {
     return refl->HasField(**m, field);
+  } else {
+    return true;
   }
 }
 
