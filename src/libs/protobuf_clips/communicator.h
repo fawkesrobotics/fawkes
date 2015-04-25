@@ -125,6 +125,7 @@ class ClipsProtobufCommunicator
   void          clips_pb_set_field(void *msgptr, std::string field_name, CLIPS::Value value);
   void          clips_pb_add_list(void *msgptr, std::string field_name, CLIPS::Value value);
   void          clips_pb_send(long int client_id, void *msgptr);
+  std::string   clips_pb_tostring(void *msgptr);
   long int      clips_pb_client_connect(std::string host, int port);
   void          clips_pb_disconnect(long int client_id);
   void          clips_pb_broadcast(long int peer_id, void *msgptr);

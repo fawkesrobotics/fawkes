@@ -141,6 +141,7 @@ ClipsProtobufCommunicator::setup_clips()
   ADD_FUNCTION("pb-set-field", (sigc::slot<void, void *, std::string, CLIPS::Value>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_set_field))));
   ADD_FUNCTION("pb-add-list", (sigc::slot<void, void *, std::string, CLIPS::Value>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_add_list))));
   ADD_FUNCTION("pb-send", (sigc::slot<void, long int, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_send))));
+  ADD_FUNCTION("pb-tostring", (sigc::slot<std::string, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_tostring))));
   ADD_FUNCTION("pb-server-enable", (sigc::slot<void, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::enable_server))));
   ADD_FUNCTION("pb-server-disable", (sigc::slot<void>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::disable_server))));
   ADD_FUNCTION("pb-peer-create", (sigc::slot<long int, std::string, int>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_peer_create))));
@@ -734,6 +735,22 @@ ClipsProtobufCommunicator::clips_pb_send(long int client_id, void *msgptr)
 			(*m)->GetTypeName().c_str(), e.what());
     }
   }
+}
+
+std::string
+ClipsProtobufCommunicator::clips_pb_tostring(void *msgptr)
+{
+  std::shared_ptr<google::protobuf::Message> *m =
+    static_cast<std::shared_ptr<google::protobuf::Message> *>(msgptr);
+  if (!(m || *m)) {
+    if (logger_) {
+      logger_->log_warn("CLIPS-Protobuf",
+			"Cannot convert message to string: invalid message");
+    }
+    return "";
+  }
+
+  return (*m)->DebugString();
 }
 
 
