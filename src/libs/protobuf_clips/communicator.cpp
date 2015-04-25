@@ -522,23 +522,26 @@ ClipsProtobufCommunicator::clips_pb_set_field(void *msgptr, std::string field_na
 
   try {
     switch (field->type()) {
-    case FieldDescriptor::TYPE_DOUBLE:   refl->SetDouble(m->get(), field, value); break;
-    case FieldDescriptor::TYPE_FLOAT:    refl->SetFloat(m->get(), field, value);  break;
+    case FieldDescriptor::TYPE_DOUBLE:
+      refl->SetDouble(m->get(), field, value.as_float()); break;
+    case FieldDescriptor::TYPE_FLOAT:
+      refl->SetFloat(m->get(), field, value.as_float());  break;
     case FieldDescriptor::TYPE_SFIXED64:
     case FieldDescriptor::TYPE_SINT64:
     case FieldDescriptor::TYPE_INT64:
-      refl->SetInt64(m->get(), field, value);  break;
+      refl->SetInt64(m->get(), field, value.as_integer());  break;
     case FieldDescriptor::TYPE_FIXED64:
     case FieldDescriptor::TYPE_UINT64:
-      refl->SetUInt64(m->get(), field, (long int)value); break;
+      refl->SetUInt64(m->get(), field, value.as_integer()); break;
     case FieldDescriptor::TYPE_SFIXED32:
     case FieldDescriptor::TYPE_SINT32:
-  case FieldDescriptor::TYPE_INT32:
-      refl->SetInt32(m->get(), field, value); break;
+    case FieldDescriptor::TYPE_INT32:
+      refl->SetInt32(m->get(), field, value.as_integer()); break;
     case FieldDescriptor::TYPE_BOOL:
       refl->SetBool(m->get(), field, (value == "TRUE"));
       break;
-    case FieldDescriptor::TYPE_STRING:   refl->SetString(m->get(), field, value); break;
+    case FieldDescriptor::TYPE_STRING:
+      refl->SetString(m->get(), field, value.as_string()); break;
     case FieldDescriptor::TYPE_MESSAGE:
       {
 	std::shared_ptr<google::protobuf::Message> *mfrom =
@@ -551,7 +554,7 @@ ClipsProtobufCommunicator::clips_pb_set_field(void *msgptr, std::string field_na
     case FieldDescriptor::TYPE_BYTES:    break;
     case FieldDescriptor::TYPE_FIXED32:
     case FieldDescriptor::TYPE_UINT32:
-      refl->SetUInt32(m->get(), field, value); break;
+      refl->SetUInt32(m->get(), field, value.as_integer()); break;
     case FieldDescriptor::TYPE_ENUM:
       {
 	const EnumDescriptor *enumdesc = field->enum_type();
@@ -573,8 +576,9 @@ ClipsProtobufCommunicator::clips_pb_set_field(void *msgptr, std::string field_na
     }
   } catch (std::logic_error &e) {
     if (logger_) {
-      logger_->log_warn("CLIPS-Protobuf", "Failed to set field %s of %s: %s",
-			field_name.c_str(), (*m)->GetTypeName().c_str(), e.what());
+      logger_->log_warn("CLIPS-Protobuf", "Failed to set field %s (type %d) of %s: %s",
+			field_name.c_str(), value.type(),
+			(*m)->GetTypeName().c_str(), e.what());
     }
   }
 }
