@@ -127,14 +127,14 @@ ClipsProtobufCommunicator::setup_clips()
 {
   fawkes::MutexLocker lock(&clips_mutex_);
 
-  ADD_FUNCTION("pb-register-type", (sigc::slot<bool, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_register_type))));
+  ADD_FUNCTION("pb-register-type", (sigc::slot<CLIPS::Value, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_register_type))));
   ADD_FUNCTION("pb-field-names", (sigc::slot<CLIPS::Values, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_field_names))));
   ADD_FUNCTION("pb-field-type", (sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_field_type))));
-  ADD_FUNCTION("pb-has-field", (sigc::slot<bool, void *, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_has_field))));
+  ADD_FUNCTION("pb-has-field", (sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_has_field))));
   ADD_FUNCTION("pb-field-label", (sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_field_label))));
   ADD_FUNCTION("pb-field-value", (sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_field_value))));
   ADD_FUNCTION("pb-field-list", (sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_field_list))));
-  ADD_FUNCTION("pb-field-is-list", (sigc::slot<bool, void *, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_field_is_list))));
+  ADD_FUNCTION("pb-field-is-list", (sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_field_is_list))));
   ADD_FUNCTION("pb-create", (sigc::slot<CLIPS::Value, std::string>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_create))));
   ADD_FUNCTION("pb-destroy", (sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_destroy))));
   ADD_FUNCTION("pb-ref", (sigc::slot<CLIPS::Value, void *>(sigc::mem_fun(*this, &ClipsProtobufCommunicator::clips_pb_ref))));
@@ -300,18 +300,18 @@ ClipsProtobufCommunicator::clips_pb_peer_setup_crypto(long int peer_id,
  * @param full_name full name of type to register
  * @return true if the type was successfully registered, false otherwise
  */
-bool
+CLIPS::Value
 ClipsProtobufCommunicator::clips_pb_register_type(std::string full_name)
 {
   try {
     message_register_->add_message_type(full_name);
-    return true;
+    return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
   } catch (std::runtime_error &e) {
     if (logger_) {
       logger_->log_error("CLIPS-Protobuf", "Registering type %s failed: %s",
 			 full_name.c_str(), e.what());
     }
-    return false;
+    return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
   }
 }
 
@@ -406,7 +406,7 @@ ClipsProtobufCommunicator::clips_pb_field_type(void *msgptr, std::string field_n
   }
 }
 
-bool
+CLIPS::Value
 ClipsProtobufCommunicator::clips_pb_has_field(void *msgptr, std::string field_name)
 {
   std::shared_ptr<google::protobuf::Message> *m =
@@ -420,11 +420,13 @@ ClipsProtobufCommunicator::clips_pb_has_field(void *msgptr, std::string field_na
   const Reflection *refl       = (*m)->GetReflection();
 
   if (field->is_repeated()) {
-    return (refl->FieldSize(**m, field) > 0);
+    return CLIPS::Value((refl->FieldSize(**m, field) > 0) ? "TRUE" : "FALSE",
+			CLIPS::TYPE_SYMBOL);
   } else if (field->is_optional()) {
-    return refl->HasField(**m, field);
+    return CLIPS::Value(refl->HasField(**m, field) ? "TRUE" : "FALSE",
+			CLIPS::TYPE_SYMBOL);
   } else {
-    return true;
+    return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
   }
 }
 
@@ -903,19 +905,17 @@ ClipsProtobufCommunicator::clips_pb_field_list(void *msgptr, std::string field_n
 }
 
 
-bool
+CLIPS::Value
 ClipsProtobufCommunicator::clips_pb_field_is_list(void *msgptr, std::string field_name)
 {
   std::shared_ptr<google::protobuf::Message> *m =
     static_cast<std::shared_ptr<google::protobuf::Message> *>(msgptr);
-  if (!(m || *m)) return false;
+  if (!(m || *m)) return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 
   const Descriptor *desc       = (*m)->GetDescriptor();
   const FieldDescriptor *field = desc->FindFieldByName(field_name);
-  if (! field) {
-    return false;
-  }
-  return (field->label() == FieldDescriptor::LABEL_REPEATED);
+  if (! field)  return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  return CLIPS::Value(field->is_repeated() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
 }
 
 
