@@ -49,6 +49,10 @@ namespace protobuf_comm {
   class ProtobufBroadcastPeer;
 }
 
+namespace fawkes {
+  class Logger;
+}
+
 namespace protobuf_clips {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -57,9 +61,11 @@ namespace protobuf_clips {
 class ClipsProtobufCommunicator
 {
  public:
-  ClipsProtobufCommunicator(CLIPS::Environment *env, fawkes::Mutex &env_mutex);
   ClipsProtobufCommunicator(CLIPS::Environment *env, fawkes::Mutex &env_mutex,
-			    std::vector<std::string> &proto_path);
+			    fawkes::Logger *logger = NULL);
+  ClipsProtobufCommunicator(CLIPS::Environment *env, fawkes::Mutex &env_mutex,
+			    std::vector<std::string> &proto_path,
+			    fawkes::Logger *logger = NULL);
   ~ClipsProtobufCommunicator();
 
   void enable_server(int port);
@@ -178,6 +184,8 @@ class ClipsProtobufCommunicator
  private:
   CLIPS::Environment   *clips_;
   fawkes::Mutex        &clips_mutex_;
+
+  fawkes::Logger       *logger_;
 
   protobuf_comm::MessageRegister       *message_register_;
   protobuf_comm::ProtobufStreamServer  *server_;
