@@ -1063,8 +1063,9 @@ ClipsProtobufCommunicator::handle_peer_recv_error(long int peer_id,
 {
   if (logger_) {
     logger_->log_warn("CLIPS-Protobuf",
-		      "Failed to receive peer message from %s:%u: %s", msg.c_str(),
-		      endpoint.address().to_string().c_str(), endpoint.port());
+		      "Failed to receive peer message from %s:%u: %s",
+		      endpoint.address().to_string().c_str(), endpoint.port(),
+		      msg.c_str());
   }
 }
 
