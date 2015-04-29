@@ -155,11 +155,15 @@ clean: presubdirs subdirs
 presubdirs: $(PRESUBDIRS)
 subdirs: $(SUBDIRS)
 
-ifneq ($(MAKECMDGOALS),clean)
-  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(MANPAGES_all)$(TARGETS_all)$(EXTRA_ALL),)
-subdirs: | $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL)
-$(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL): | presubdirs
-  endif
+SUBDIRS_DEPS = $(foreach goal,$(filter-out clean,$(MAKECMDGOALS)), \
+	$(LIBS_$(goal)) $(PLUGINS_$(goal)) $(BINS_$(goal)) $(MANPAGES_$(goal)) $(TARGETS_$(goal)))
+ifeq ($(findstring all,$(MAKECMDGOALS)),all)
+  SUBDIRS_DEPS += $(EXTRA_ALL)
+endif
+
+ifneq ($(strip $(SUBDIRS_DEPS)),)
+subdirs: | $(SUBDIRS_DEPS)
+$(SUBDIRS_DEPS): | presubdirs
 endif
 
 # Either presubdirs *or* subdirs have been specified
