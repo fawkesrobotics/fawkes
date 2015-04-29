@@ -78,7 +78,8 @@ fsm:define_states{
    export_to=_M,
    closure={ppnavi=ppnavi},
 
-   {"PPGOTO", JumpState}
+   {"PPGOTO", JumpState},
+   {"CHECK_ERROR", JumpState}
 }
 
 -- Transitions
@@ -86,8 +87,10 @@ fsm:add_transitions{
    {"PPGOTO", "FAILED", cond_and_precond="not ppnavi:has_writer()", desc="No writer for interface"},
    {"PPGOTO", "FAILED", cond=jumpcond_paramfail, desc="Invalid/insufficient parameters"},
    {"PPGOTO", "FAILED", cond=jumpcond_navifail, desc="Navigator failure"},
-   {"PPGOTO", "FINAL", cond=jumpcond_navifinal, desc="Position reached"}
+   {"PPGOTO", "CHECK_ERROR", cond=jumpcond_navifinal, desc="Navigator final"},
 
+   {"CHECK_ERROR", "FINAL", cond="ppnavi:error_code() == ppnavi.ERROR_NONE", desc="Position reached"},
+   {"CHECK_ERROR", "FAILED", cond=true, desc="Navigator error"}
 }
 
 function PPGOTO:init()
