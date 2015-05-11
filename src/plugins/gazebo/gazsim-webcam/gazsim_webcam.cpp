@@ -38,6 +38,13 @@ using namespace fawkes;
  * @author Frederik Zwilling
  */
 
+
+/** Constructor.
+ * The GazsimWebcam object simulates a single webcam in Gazebo
+ * @param shm_id The shared memory id the simulated webcam should write to and the prefix of the config values for this camera
+ * @param gazebo_world_node gazebo world node to register subscribers
+ * @param config config object to access config values
+ */
 GazsimWebcam::GazsimWebcam(std::string shm_id,
 			     gazebo::transport::NodePtr gazebo_world_node,
 			     Configuration* config)
