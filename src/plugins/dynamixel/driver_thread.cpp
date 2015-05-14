@@ -554,16 +554,35 @@ DynamixelDriverThread::set_velocity(unsigned int servo_id, float vel)
   }
   Servo &s = servos_[servo_id];
 
-  ScopedRWLock lock(s.value_rwlock);
   float velo_tmp  = roundf((vel  / s.max_speed)  * DynamixelChain::MAX_SPEED);
+  set_speed(servo_id, (unsigned int) velo_tmp);
+}
 
-  if ((velo_tmp >= 0) && (velo_tmp <= DynamixelChain::MAX_SPEED)) {
-    s.vel = (unsigned int)velo_tmp;
+
+
+/** Set desired speed.
+ * When the servo is set to wheel mode, bit 10 of the speed value is used
+ * to either move cw (1) or ccw (0).
+ * @param speed the speed 
+ */
+void
+DynamixelDriverThread::set_speed(unsigned int servo_id, unsigned int speed)
+{
+  if (servos_.find(servo_id) == servos_.end()) {
+    logger->log_warn(name(), "No servo with ID %u in chain %s, cannot set speed",
+		     servo_id, cfg_name_.c_str());
+    return;
+  }
+  Servo &s = servos_[servo_id];
+
+  ScopedRWLock lock(s.value_rwlock);
+  if ((speed >= 0) && (speed <= DynamixelChain::MAX_SPEED)) {
+    s.vel = speed;
     s.velo_pending = true;
   } else {
     logger->log_warn(name(), "Calculated velocity value out of bounds, "
 		      "min: 0  max: %u  des: %u",
-		      DynamixelChain::MAX_SPEED, (unsigned int)velo_tmp);
+		      DynamixelChain::MAX_SPEED, speed);
   }
 }
 
