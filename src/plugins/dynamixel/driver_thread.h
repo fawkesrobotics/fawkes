@@ -132,6 +132,7 @@ class DynamixelDriverThread
   float get_angle(unsigned int servo_id, fawkes::Time &time);
   void  set_velocity(unsigned int servo_id, float vel);
   float get_velocity(unsigned int servo_id);
+  void  set_mode(unsigned int servo_id, unsigned int new_mode);
   void  set_margin(unsigned int servo_id, float margin);
   bool  is_final(unsigned int servo_id);
   bool  is_enabled(unsigned int servo_id);
@@ -142,6 +143,7 @@ class DynamixelDriverThread
   void  wait_for_fresh_data();
 
   void exec_goto_angle(unsigned int servo_id, float angle);
+  void exec_set_mode(unsigned int servo_id, unsigned int new_mode);
 
  private:
   fawkes::WaitCondition       *update_waitcond_;

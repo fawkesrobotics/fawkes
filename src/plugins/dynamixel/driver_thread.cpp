@@ -565,6 +565,24 @@ DynamixelDriverThread::set_velocity(unsigned int servo_id, float vel)
 }
 
 
+/** Set desired mode.
+ * @param mode, either DynamixelServoInterface.JOINT or DynamixelServoInterface.WHEEL
+ */
+void
+DynamixelDriverThread::set_mode(unsigned int servo_id, unsigned int mode)
+{
+  if (servos_.find(servo_id) == servos_.end()) {
+    logger->log_warn(name(), "No servo with ID %u in chain %s, cannot set mode",
+		     servo_id, cfg_name_.c_str());
+    return;
+  }
+  Servo &s = servos_[servo_id];
+
+  s.mode_set_pending = true;
+  s.new_mode = mode;
+}
+
+
 /** Get current velocities.
  * @param pan_vel upon return contains current pan velocity
  * @param tilt_vel upon return contains current tilt velocity
@@ -798,6 +816,29 @@ DynamixelDriverThread::exec_goto_angle(unsigned int servo_id, float angle_rad)
 
   ScopedRWLock lock(chain_rwlock_);
   chain_->goto_position(servo_id, pos);
+}
+
+
+/** Execute pan/tilt motion.
+ * @param angle_rad angle in rad to move to
+ */
+void
+DynamixelDriverThread::exec_set_mode(unsigned int servo_id, unsigned int new_mode)
+{
+  if (new_mode == DynamixelServoInterface::JOINT) {
+    ScopedRWLock lock(chain_rwlock_);
+    chain_->set_angle_limits(servo_id, 0, 1023);
+  }
+  else if (new_mode == DynamixelServoInterface::WHEEL) {
+    ScopedRWLock lock(chain_rwlock_);
+    chain_->set_angle_limits(servo_id, 0, 0);
+  }
+  else {
+    logger->log_error(name(), "Mode %d cannot be set - unknown",
+		     new_mode);    
+  }
+
+  return;
 }
 
 
