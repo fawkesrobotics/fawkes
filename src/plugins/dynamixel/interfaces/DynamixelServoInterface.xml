@@ -75,6 +75,7 @@
     <field type="float"  name="max_angle">Maximum angle allowed.</field>
     <field type="float"  name="max_velocity">Maximum supported velocity.</field>
     <field type="float"  name="velocity">Maximum pan velocity currently reached.</field>
+    <field type="string" name="mode" length="5">Working mode, can either be JOINT or WHEEL</field>
     <field type="float"  name="angle_margin">
       Margin in radians around a target pan value to consider the
       motion as final.

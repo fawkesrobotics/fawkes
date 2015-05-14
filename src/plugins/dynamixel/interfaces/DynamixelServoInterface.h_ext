@@ -113,6 +113,7 @@ class DynamixelServoInterface : public Interface
     float max_angle; /**< Maximum angle allowed. */
     float max_velocity; /**< Maximum supported velocity. */
     float velocity; /**< Maximum pan velocity currently reached. */
+    char mode[5]; /**< Working mode, can either be JOINT or WHEEL */
     float angle_margin; /**< 
       Margin in radians around a target pan value to consider the
       motion as final.
@@ -667,6 +668,9 @@ class DynamixelServoInterface : public Interface
   float velocity() const;
   void set_velocity(const float new_velocity);
   size_t maxlenof_velocity() const;
+  char * mode() const;
+  void set_mode(const char * new_mode);
+  size_t maxlenof_mode() const;
   float angle_margin() const;
   void set_angle_margin(const float new_angle_margin);
   size_t maxlenof_angle_margin() const;

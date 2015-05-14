@@ -270,6 +270,9 @@ class DynamixelServoInterface : public Interface
   float velocity();
   void set_velocity(const float new_velocity);
   int maxlenof_velocity() const;
+  char * mode();
+  void set_mode(const char * new_mode);
+  int maxlenof_mode() const;
   float angle_margin();
   void set_angle_margin(const float new_angle_margin);
   int maxlenof_angle_margin() const;

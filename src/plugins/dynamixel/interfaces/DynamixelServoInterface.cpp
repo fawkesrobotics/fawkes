@@ -84,6 +84,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "max_angle", 1, &data->max_angle);
   add_fieldinfo(IFT_FLOAT, "max_velocity", 1, &data->max_velocity);
   add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
+  add_fieldinfo(IFT_STRING, "mode", 5, data->mode);
   add_fieldinfo(IFT_FLOAT, "angle_margin", 1, &data->angle_margin);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
@@ -103,7 +104,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_messageinfo("SetAngleLimitsMessage");
   add_messageinfo("ResetRawErrorMessage");
   add_messageinfo("SetPreventAlarmShutdownMessage");
-  unsigned char tmp_hash[] = {0x43, 0x7f, 0x73, 0x9a, 0x30, 0xf, 0x52, 0x32, 0xf7, 0x5b, 0xad, 0xcc, 0xcd, 0x40, 0x4, 0xcd};
+  unsigned char tmp_hash[] = {0xe8, 0xb4, 0x62, 0x88, 0xf6, 0x87, 0x3a, 0x3e, 0x31, 0xda, 0xf2, 0x46, 0x82, 0x86, 0xe5, 0x7d};
   set_hash(tmp_hash);
 }
 
@@ -1046,6 +1047,37 @@ void
 DynamixelServoInterface::set_velocity(const float new_velocity)
 {
   data->velocity = new_velocity;
+  data_changed = true;
+}
+
+/** Get mode value.
+ * Working mode, can either be JOINT or WHEEL
+ * @return mode value
+ */
+char *
+DynamixelServoInterface::mode() const
+{
+  return data->mode;
+}
+
+/** Get maximum length of mode value.
+ * @return length of mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+DynamixelServoInterface::maxlenof_mode() const
+{
+  return 5;
+}
+
+/** Set mode value.
+ * Working mode, can either be JOINT or WHEEL
+ * @param new_mode new mode value
+ */
+void
+DynamixelServoInterface::set_mode(const char * new_mode)
+{
+  strncpy(data->mode, new_mode, sizeof(data->mode));
   data_changed = true;
 }
 
