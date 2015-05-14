@@ -351,6 +351,9 @@ DynamixelDriverThread::exec_act()
         DynamixelServoInterface::SetPreventAlarmShutdownMessage *msg = s.servo_if->msgq_first(msg);
         s.servo_if->set_enable_prevent_alarm_shutdown(msg->is_enable_prevent_alarm_shutdown());
         
+      } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::SetModeMessage>()) {
+        DynamixelServoInterface::SetModeMessage *msg = s.servo_if->msgq_first(msg);
+        set_mode(servo_id, msg->mode());
       } else {
 	logger->log_warn(name(), "Unknown message received");
       }
