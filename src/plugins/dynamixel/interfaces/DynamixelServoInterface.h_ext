@@ -273,6 +273,35 @@ class DynamixelServoInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetSpeedMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint16_t speed; /**< New speed. Used when the servo is in wheel mode. Bits 0-9 determine the rotation speed and bit 10 determines the rotation direction (0 for ccw and 1 for cw) */
+    } SetSpeedMessage_data_t;
+#pragma pack(pop)
+
+    SetSpeedMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
+   public:
+    SetSpeedMessage(const uint16_t ini_speed);
+    SetSpeedMessage();
+    ~SetSpeedMessage();
+
+    SetSpeedMessage(const SetSpeedMessage *m);
+    /* Methods */
+    uint16_t speed() const;
+    void set_speed(const uint16_t new_speed);
+    size_t maxlenof_speed() const;
+    virtual Message * clone() const;
+  };
+
   class SetEnabledMessage : public Message
   {
    private:

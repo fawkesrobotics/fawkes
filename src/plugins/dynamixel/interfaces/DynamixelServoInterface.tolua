@@ -68,6 +68,17 @@ class DynamixelServoInterface : public Interface
     int maxlenof_mode() const;
   };
 
+  class SetSpeedMessage : public Message
+  {
+    SetSpeedMessage(unsigned short ini_speed);
+    SetSpeedMessage();
+    ~SetSpeedMessage();
+
+    unsigned short speed();
+    void set_speed(const unsigned short new_speed);
+    int maxlenof_speed() const;
+  };
+
   class SetEnabledMessage : public Message
   {
     SetEnabledMessage(bool ini_enabled);

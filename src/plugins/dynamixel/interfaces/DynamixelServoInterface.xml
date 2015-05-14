@@ -115,6 +115,10 @@
     <comment>Set working mode</comment>
     <field type="uint8" name="mode">New mode, see the enum WorkingMode in this interface</field>
   </message>
+  <message name="SetSpeed">
+    <comment>Set speed</comment>
+    <field type="uint16" name="speed">New speed. Used when the servo is in wheel mode. Bits 0-9 determine the rotation speed and bit 10 determines the rotation direction (0 for ccw and 1 for cw)</field>
+  </message>
 
   <!-- Parameter setting, higher level with SI units -->
   <message name="SetEnabled">
