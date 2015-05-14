@@ -90,6 +90,8 @@ class DynamixelDriverThread
     bool         disable;
     bool         velo_pending;
     unsigned int vel;
+    bool         mode_set_pending;
+    unsigned int new_mode;
     bool         led_enable;
     bool         led_disable;
     float        max_speed;
