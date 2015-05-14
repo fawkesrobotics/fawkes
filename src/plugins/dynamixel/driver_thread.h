@@ -132,6 +132,7 @@ class DynamixelDriverThread
   float get_angle(unsigned int servo_id, fawkes::Time &time);
   void  set_velocity(unsigned int servo_id, float vel);
   float get_velocity(unsigned int servo_id);
+  void  set_speed(unsigned int servo_id, unsigned int speed);
   void  set_mode(unsigned int servo_id, unsigned int new_mode);
   void  set_margin(unsigned int servo_id, float margin);
   bool  is_final(unsigned int servo_id);
