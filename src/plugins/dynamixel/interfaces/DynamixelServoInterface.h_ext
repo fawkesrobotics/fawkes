@@ -51,6 +51,14 @@ class DynamixelServoInterface : public Interface
   } ErrorCode;
   const char * tostring_ErrorCode(ErrorCode value) const;
 
+  /** Mode to be set for the servo */
+  typedef enum {
+    JOINT = 0 /**< Joint mode to move in a range of -2.616 to +2.616 rad. */,
+    WHEEL = 1 /**< Wheel mode to use the servo in a continuously rotating mode.
+      The rotation speed is set by bits 0-9 in the goal speed setting. Bit 10 of the goal speed setting sets the desired rotation direction, 0 for CCW direction turn and 1 for CW direction turn. */
+  } WorkingMode;
+  const char * tostring_WorkingMode(WorkingMode value) const;
+
  private:
 #pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
@@ -121,6 +129,7 @@ class DynamixelServoInterface : public Interface
   DynamixelServoInterface_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
  public:
   /* messages */
   class StopMessage : public Message
@@ -137,6 +146,7 @@ class DynamixelServoInterface : public Interface
     StopMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     StopMessage();
     ~StopMessage();
@@ -160,6 +170,7 @@ class DynamixelServoInterface : public Interface
     FlushMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     FlushMessage();
     ~FlushMessage();
@@ -184,6 +195,7 @@ class DynamixelServoInterface : public Interface
     GotoMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     GotoMessage(const float ini_angle);
     GotoMessage();
@@ -214,6 +226,7 @@ class DynamixelServoInterface : public Interface
     TimedGotoMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     TimedGotoMessage(const float ini_time_sec, const float ini_angle);
     TimedGotoMessage();
@@ -245,6 +258,7 @@ class DynamixelServoInterface : public Interface
     SetEnabledMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     SetEnabledMessage(const bool ini_enabled);
     SetEnabledMessage();
@@ -273,6 +287,7 @@ class DynamixelServoInterface : public Interface
     SetVelocityMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     SetVelocityMessage(const float ini_velocity);
     SetVelocityMessage();
@@ -304,6 +319,7 @@ class DynamixelServoInterface : public Interface
     SetMarginMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     SetMarginMessage(const float ini_angle_margin);
     SetMarginMessage();
@@ -335,6 +351,7 @@ class DynamixelServoInterface : public Interface
     SetComplianceValuesMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     SetComplianceValuesMessage(const uint8_t ini_cw_margin, const uint8_t ini_ccw_margin, const uint8_t ini_cw_slope, const uint8_t ini_ccw_slope);
     SetComplianceValuesMessage();
@@ -372,6 +389,7 @@ class DynamixelServoInterface : public Interface
     SetGoalSpeedMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     SetGoalSpeedMessage(const uint32_t ini_goal_speed);
     SetGoalSpeedMessage();
@@ -400,6 +418,7 @@ class DynamixelServoInterface : public Interface
     SetTorqueLimitMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     SetTorqueLimitMessage(const uint32_t ini_torque_limit);
     SetTorqueLimitMessage();
@@ -428,6 +447,7 @@ class DynamixelServoInterface : public Interface
     SetPunchMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     SetPunchMessage(const uint32_t ini_punch);
     SetPunchMessage();
@@ -456,6 +476,7 @@ class DynamixelServoInterface : public Interface
     GotoPositionMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     GotoPositionMessage(const uint32_t ini_position);
     GotoPositionMessage();
@@ -485,6 +506,7 @@ class DynamixelServoInterface : public Interface
     SetAngleLimitsMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     SetAngleLimitsMessage(const uint32_t ini_angle_limit_cw, const uint32_t ini_angle_limit_ccw);
     SetAngleLimitsMessage();
@@ -515,6 +537,7 @@ class DynamixelServoInterface : public Interface
     ResetRawErrorMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     ResetRawErrorMessage();
     ~ResetRawErrorMessage();
@@ -539,6 +562,7 @@ class DynamixelServoInterface : public Interface
     SetPreventAlarmShutdownMessage_data_t *data;
 
   interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
    public:
     SetPreventAlarmShutdownMessage(const bool ini_enable_prevent_alarm_shutdown);
     SetPreventAlarmShutdownMessage();

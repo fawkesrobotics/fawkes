@@ -54,6 +54,8 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_STRING, "model", 8, data->model);
   add_fieldinfo(IFT_UINT32, "model_number", 1, &data->model_number);
   add_fieldinfo(IFT_UINT32, "cw_angle_limit", 1, &data->cw_angle_limit);
@@ -101,7 +103,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_messageinfo("SetAngleLimitsMessage");
   add_messageinfo("ResetRawErrorMessage");
   add_messageinfo("SetPreventAlarmShutdownMessage");
-  unsigned char tmp_hash[] = {0xcc, 0x4f, 0x35, 0x5c, 0xa9, 0xa6, 0xdb, 0xc3, 0xad, 0x5f, 0xa2, 0x7c, 00, 0xda, 0x5d, 0x35};
+  unsigned char tmp_hash[] = {0x43, 0x7f, 0x73, 0x9a, 0x30, 0xf, 0x52, 0x32, 0xf7, 0x5b, 0xad, 0xcc, 0xcd, 0x40, 0x4, 0xcd};
   set_hash(tmp_hash);
 }
 
@@ -122,6 +124,19 @@ DynamixelServoInterface::tostring_ErrorCode(ErrorCode value) const
   case ERROR_UNSPECIFIC: return "ERROR_UNSPECIFIC";
   case ERROR_COMMUNICATION: return "ERROR_COMMUNICATION";
   case ERROR_ANGLE_OUTOFRANGE: return "ERROR_ANGLE_OUTOFRANGE";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert WorkingMode constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+DynamixelServoInterface::tostring_WorkingMode(WorkingMode value) const
+{
+  switch (value) {
+  case JOINT: return "JOINT";
+  case WHEEL: return "WHEEL";
   default: return "UNKNOWN";
   }
 }
@@ -1231,6 +1246,9 @@ DynamixelServoInterface::enum_tostring(const char *enumtype, int val) const
   if (strcmp(enumtype, "ErrorCode") == 0) {
     return tostring_ErrorCode((ErrorCode)val);
   }
+  if (strcmp(enumtype, "WorkingMode") == 0) {
+    return tostring_WorkingMode((WorkingMode)val);
+  }
   throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
@@ -1254,6 +1272,8 @@ DynamixelServoInterface::StopMessage::StopMessage() : Message("StopMessage")
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
 }
 
 /** Destructor */
@@ -1304,6 +1324,8 @@ DynamixelServoInterface::FlushMessage::FlushMessage() : Message("FlushMessage")
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
 }
 
 /** Destructor */
@@ -1357,6 +1379,8 @@ DynamixelServoInterface::GotoMessage::GotoMessage(const float ini_angle) : Messa
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
 }
 /** Constructor */
@@ -1371,6 +1395,8 @@ DynamixelServoInterface::GotoMessage::GotoMessage() : Message("GotoMessage")
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
 }
 
@@ -1457,6 +1483,8 @@ DynamixelServoInterface::TimedGotoMessage::TimedGotoMessage(const float ini_time
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
 }
@@ -1472,6 +1500,8 @@ DynamixelServoInterface::TimedGotoMessage::TimedGotoMessage() : Message("TimedGo
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_FLOAT, "time_sec", 1, &data->time_sec);
   add_fieldinfo(IFT_FLOAT, "angle", 1, &data->angle);
 }
@@ -1589,6 +1619,8 @@ DynamixelServoInterface::SetEnabledMessage::SetEnabledMessage(const bool ini_ena
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 /** Constructor */
@@ -1603,6 +1635,8 @@ DynamixelServoInterface::SetEnabledMessage::SetEnabledMessage() : Message("SetEn
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
 }
 
@@ -1687,6 +1721,8 @@ DynamixelServoInterface::SetVelocityMessage::SetVelocityMessage(const float ini_
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
 }
 /** Constructor */
@@ -1701,6 +1737,8 @@ DynamixelServoInterface::SetVelocityMessage::SetVelocityMessage() : Message("Set
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
 }
 
@@ -1785,6 +1823,8 @@ DynamixelServoInterface::SetMarginMessage::SetMarginMessage(const float ini_angl
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_FLOAT, "angle_margin", 1, &data->angle_margin);
 }
 /** Constructor */
@@ -1799,6 +1839,8 @@ DynamixelServoInterface::SetMarginMessage::SetMarginMessage() : Message("SetMarg
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_FLOAT, "angle_margin", 1, &data->angle_margin);
 }
 
@@ -1895,6 +1937,8 @@ DynamixelServoInterface::SetComplianceValuesMessage::SetComplianceValuesMessage(
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT8, "cw_margin", 1, &data->cw_margin);
   add_fieldinfo(IFT_UINT8, "ccw_margin", 1, &data->ccw_margin);
   add_fieldinfo(IFT_UINT8, "cw_slope", 1, &data->cw_slope);
@@ -1912,6 +1956,8 @@ DynamixelServoInterface::SetComplianceValuesMessage::SetComplianceValuesMessage(
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT8, "cw_margin", 1, &data->cw_margin);
   add_fieldinfo(IFT_UINT8, "ccw_margin", 1, &data->ccw_margin);
   add_fieldinfo(IFT_UINT8, "cw_slope", 1, &data->cw_slope);
@@ -2089,6 +2135,8 @@ DynamixelServoInterface::SetGoalSpeedMessage::SetGoalSpeedMessage(const uint32_t
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT32, "goal_speed", 1, &data->goal_speed);
 }
 /** Constructor */
@@ -2103,6 +2151,8 @@ DynamixelServoInterface::SetGoalSpeedMessage::SetGoalSpeedMessage() : Message("S
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT32, "goal_speed", 1, &data->goal_speed);
 }
 
@@ -2187,6 +2237,8 @@ DynamixelServoInterface::SetTorqueLimitMessage::SetTorqueLimitMessage(const uint
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT32, "torque_limit", 1, &data->torque_limit);
 }
 /** Constructor */
@@ -2201,6 +2253,8 @@ DynamixelServoInterface::SetTorqueLimitMessage::SetTorqueLimitMessage() : Messag
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT32, "torque_limit", 1, &data->torque_limit);
 }
 
@@ -2285,6 +2339,8 @@ DynamixelServoInterface::SetPunchMessage::SetPunchMessage(const uint32_t ini_pun
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT32, "punch", 1, &data->punch);
 }
 /** Constructor */
@@ -2299,6 +2355,8 @@ DynamixelServoInterface::SetPunchMessage::SetPunchMessage() : Message("SetPunchM
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT32, "punch", 1, &data->punch);
 }
 
@@ -2383,6 +2441,8 @@ DynamixelServoInterface::GotoPositionMessage::GotoPositionMessage(const uint32_t
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT32, "position", 1, &data->position);
 }
 /** Constructor */
@@ -2397,6 +2457,8 @@ DynamixelServoInterface::GotoPositionMessage::GotoPositionMessage() : Message("G
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT32, "position", 1, &data->position);
 }
 
@@ -2483,6 +2545,8 @@ DynamixelServoInterface::SetAngleLimitsMessage::SetAngleLimitsMessage(const uint
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT32, "angle_limit_cw", 1, &data->angle_limit_cw);
   add_fieldinfo(IFT_UINT32, "angle_limit_ccw", 1, &data->angle_limit_ccw);
 }
@@ -2498,6 +2562,8 @@ DynamixelServoInterface::SetAngleLimitsMessage::SetAngleLimitsMessage() : Messag
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_UINT32, "angle_limit_cw", 1, &data->angle_limit_cw);
   add_fieldinfo(IFT_UINT32, "angle_limit_ccw", 1, &data->angle_limit_ccw);
 }
@@ -2610,6 +2676,8 @@ DynamixelServoInterface::ResetRawErrorMessage::ResetRawErrorMessage() : Message(
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
 }
 
 /** Destructor */
@@ -2663,6 +2731,8 @@ DynamixelServoInterface::SetPreventAlarmShutdownMessage::SetPreventAlarmShutdown
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_BOOL, "enable_prevent_alarm_shutdown", 1, &data->enable_prevent_alarm_shutdown);
 }
 /** Constructor */
@@ -2677,6 +2747,8 @@ DynamixelServoInterface::SetPreventAlarmShutdownMessage::SetPreventAlarmShutdown
   enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
   enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
   enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
   add_fieldinfo(IFT_BOOL, "enable_prevent_alarm_shutdown", 1, &data->enable_prevent_alarm_shutdown);
 }
 

@@ -13,6 +13,11 @@ class DynamixelServoInterface : public Interface
     ERROR_ANGLE_OUTOFRANGE = 4
   } ErrorCode;
 
+  typedef enum {
+    JOINT = 0,
+    WHEEL = 1
+  } WorkingMode;
+
   class StopMessage : public Message
   {
     StopMessage();

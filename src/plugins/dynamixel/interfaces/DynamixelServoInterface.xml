@@ -13,6 +13,12 @@
 	Desired angle is out of range.
       </item>
     </enum>
+    <enum name="WorkingMode">
+      <comment>Mode to be set for the servo</comment>
+      <item name="JOINT" value="0">Joint mode to move in a range of -2.616 to +2.616 rad.</item>
+      <item name="WHEEL" value="1">Wheel mode to use the servo in a continuously rotating mode.
+      The rotation speed is set by bits 0-9 in the goal speed setting. Bit 10 of the goal speed setting sets the desired rotation direction, 0 for CCW direction turn and 1 for CW direction turn.</item>
+    </enum>
   </constants>
   <data>
     <comment>
