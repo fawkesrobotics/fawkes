@@ -111,6 +111,10 @@
     the final position.</field>
     <ref>angle</ref>
   </message>
+  <message name="SetMode">
+    <comment>Set working mode</comment>
+    <field type="uint8" name="mode">New mode, see the enum WorkingMode in this interface</field>
+  </message>
 
   <!-- Parameter setting, higher level with SI units -->
   <message name="SetEnabled">

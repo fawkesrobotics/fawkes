@@ -244,6 +244,35 @@ class DynamixelServoInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetModeMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint8_t mode; /**< New mode, see the enum WorkingMode in this interface */
+    } SetModeMessage_data_t;
+#pragma pack(pop)
+
+    SetModeMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
+   public:
+    SetModeMessage(const uint8_t ini_mode);
+    SetModeMessage();
+    ~SetModeMessage();
+
+    SetModeMessage(const SetModeMessage *m);
+    /* Methods */
+    uint8_t mode() const;
+    void set_mode(const uint8_t new_mode);
+    size_t maxlenof_mode() const;
+    virtual Message * clone() const;
+  };
+
   class SetEnabledMessage : public Message
   {
    private:

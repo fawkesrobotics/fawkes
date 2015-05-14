@@ -57,6 +57,17 @@ class DynamixelServoInterface : public Interface
     int maxlenof_angle() const;
   };
 
+  class SetModeMessage : public Message
+  {
+    SetModeMessage(unsigned char ini_mode);
+    SetModeMessage();
+    ~SetModeMessage();
+
+    unsigned char mode();
+    void set_mode(const unsigned char new_mode);
+    int maxlenof_mode() const;
+  };
+
   class SetEnabledMessage : public Message
   {
     SetEnabledMessage(bool ini_enabled);

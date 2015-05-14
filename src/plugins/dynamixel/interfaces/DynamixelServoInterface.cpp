@@ -93,6 +93,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_messageinfo("FlushMessage");
   add_messageinfo("GotoMessage");
   add_messageinfo("TimedGotoMessage");
+  add_messageinfo("SetModeMessage");
   add_messageinfo("SetEnabledMessage");
   add_messageinfo("SetVelocityMessage");
   add_messageinfo("SetMarginMessage");
@@ -104,7 +105,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_messageinfo("SetAngleLimitsMessage");
   add_messageinfo("ResetRawErrorMessage");
   add_messageinfo("SetPreventAlarmShutdownMessage");
-  unsigned char tmp_hash[] = {0xe8, 0xb4, 0x62, 0x88, 0xf6, 0x87, 0x3a, 0x3e, 0x31, 0xda, 0xf2, 0x46, 0x82, 0x86, 0xe5, 0x7d};
+  unsigned char tmp_hash[] = {0x90, 0x36, 0xda, 0xbd, 0xf, 0xc0, 0xe6, 0x1b, 0x59, 0xa4, 0xea, 0x33, 0x4e, 0x9b, 0x98, 0x41};
   set_hash(tmp_hash);
 }
 
@@ -1229,6 +1230,8 @@ DynamixelServoInterface::create_message(const char *type) const
     return new GotoMessage();
   } else if ( strncmp("TimedGotoMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new TimedGotoMessage();
+  } else if ( strncmp("SetModeMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetModeMessage();
   } else if ( strncmp("SetEnabledMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetEnabledMessage();
   } else if ( strncmp("SetVelocityMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -1628,6 +1631,108 @@ Message *
 DynamixelServoInterface::TimedGotoMessage::clone() const
 {
   return new DynamixelServoInterface::TimedGotoMessage(this);
+}
+/** @class DynamixelServoInterface::SetModeMessage <interfaces/DynamixelServoInterface.h>
+ * SetModeMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_mode initial value for mode
+ */
+DynamixelServoInterface::SetModeMessage::SetModeMessage(const uint8_t ini_mode) : Message("SetModeMessage")
+{
+  data_size = sizeof(SetModeMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->mode = ini_mode;
+  enum_map_ErrorCode[(int)ERROR_NONE] = "ERROR_NONE";
+  enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
+  enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
+  enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
+  add_fieldinfo(IFT_UINT8, "mode", 1, &data->mode);
+}
+/** Constructor */
+DynamixelServoInterface::SetModeMessage::SetModeMessage() : Message("SetModeMessage")
+{
+  data_size = sizeof(SetModeMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ErrorCode[(int)ERROR_NONE] = "ERROR_NONE";
+  enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
+  enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
+  enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
+  add_fieldinfo(IFT_UINT8, "mode", 1, &data->mode);
+}
+
+/** Destructor */
+DynamixelServoInterface::SetModeMessage::~SetModeMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+DynamixelServoInterface::SetModeMessage::SetModeMessage(const SetModeMessage *m) : Message("SetModeMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetModeMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get mode value.
+ * New mode, see the enum WorkingMode in this interface
+ * @return mode value
+ */
+uint8_t
+DynamixelServoInterface::SetModeMessage::mode() const
+{
+  return data->mode;
+}
+
+/** Get maximum length of mode value.
+ * @return length of mode value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+DynamixelServoInterface::SetModeMessage::maxlenof_mode() const
+{
+  return 1;
+}
+
+/** Set mode value.
+ * New mode, see the enum WorkingMode in this interface
+ * @param new_mode new mode value
+ */
+void
+DynamixelServoInterface::SetModeMessage::set_mode(const uint8_t new_mode)
+{
+  data->mode = new_mode;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+DynamixelServoInterface::SetModeMessage::clone() const
+{
+  return new DynamixelServoInterface::SetModeMessage(this);
 }
 /** @class DynamixelServoInterface::SetEnabledMessage <interfaces/DynamixelServoInterface.h>
  * SetEnabledMessage Fawkes BlackBoard Interface Message.
@@ -2866,48 +2971,52 @@ DynamixelServoInterface::message_valid(const Message *message) const
   if ( m3 != NULL ) {
     return true;
   }
-  const SetEnabledMessage *m4 = dynamic_cast<const SetEnabledMessage *>(message);
+  const SetModeMessage *m4 = dynamic_cast<const SetModeMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const SetVelocityMessage *m5 = dynamic_cast<const SetVelocityMessage *>(message);
+  const SetEnabledMessage *m5 = dynamic_cast<const SetEnabledMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const SetMarginMessage *m6 = dynamic_cast<const SetMarginMessage *>(message);
+  const SetVelocityMessage *m6 = dynamic_cast<const SetVelocityMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const SetComplianceValuesMessage *m7 = dynamic_cast<const SetComplianceValuesMessage *>(message);
+  const SetMarginMessage *m7 = dynamic_cast<const SetMarginMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const SetGoalSpeedMessage *m8 = dynamic_cast<const SetGoalSpeedMessage *>(message);
+  const SetComplianceValuesMessage *m8 = dynamic_cast<const SetComplianceValuesMessage *>(message);
   if ( m8 != NULL ) {
     return true;
   }
-  const SetTorqueLimitMessage *m9 = dynamic_cast<const SetTorqueLimitMessage *>(message);
+  const SetGoalSpeedMessage *m9 = dynamic_cast<const SetGoalSpeedMessage *>(message);
   if ( m9 != NULL ) {
     return true;
   }
-  const SetPunchMessage *m10 = dynamic_cast<const SetPunchMessage *>(message);
+  const SetTorqueLimitMessage *m10 = dynamic_cast<const SetTorqueLimitMessage *>(message);
   if ( m10 != NULL ) {
     return true;
   }
-  const GotoPositionMessage *m11 = dynamic_cast<const GotoPositionMessage *>(message);
+  const SetPunchMessage *m11 = dynamic_cast<const SetPunchMessage *>(message);
   if ( m11 != NULL ) {
     return true;
   }
-  const SetAngleLimitsMessage *m12 = dynamic_cast<const SetAngleLimitsMessage *>(message);
+  const GotoPositionMessage *m12 = dynamic_cast<const GotoPositionMessage *>(message);
   if ( m12 != NULL ) {
     return true;
   }
-  const ResetRawErrorMessage *m13 = dynamic_cast<const ResetRawErrorMessage *>(message);
+  const SetAngleLimitsMessage *m13 = dynamic_cast<const SetAngleLimitsMessage *>(message);
   if ( m13 != NULL ) {
     return true;
   }
-  const SetPreventAlarmShutdownMessage *m14 = dynamic_cast<const SetPreventAlarmShutdownMessage *>(message);
+  const ResetRawErrorMessage *m14 = dynamic_cast<const ResetRawErrorMessage *>(message);
   if ( m14 != NULL ) {
+    return true;
+  }
+  const SetPreventAlarmShutdownMessage *m15 = dynamic_cast<const SetPreventAlarmShutdownMessage *>(message);
+  if ( m15 != NULL ) {
     return true;
   }
   return false;
