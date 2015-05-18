@@ -155,6 +155,7 @@ NavGraphThread::init()
 
   exec_active_       = false;
   target_reached_    = false;
+  target_rotating_   = false;
   last_node_         = "";
   error_reason_      = "";
   constrained_plan_  = false;
@@ -269,10 +270,22 @@ NavGraphThread::loop()
 	pp_nav_if_->set_final(true);
 	exec_active_ = false;
 	needs_write = true;
-      } else if ((now - target_reached_at_) >= target_time_) {
-	stop_motion();
-	needs_write = true;
+
+      } else if (!target_rotating_ && (now - target_reached_at_) >= target_time_) {
+        if (traversal_.current().has_property("orientation")) {
+          // send one last command, which will only rotate
+          send_next_goal();
+          target_rotating_ = true;
+        } else {
+          stop_motion();
+          needs_write = true;
+        }
+
+      } else if (target_rotating_ && node_ori_reached()) {
+        // we have no timeout here for now
+	//logger->log_debug(name(), "loop(), target_rotating_, ori reached, but colli not final");
       }
+
     } else if (node_reached()) {
       logger->log_info(name(), "Node '%s' has been reached",
 		       traversal_.current().name().c_str());
@@ -286,9 +299,8 @@ NavGraphThread::loop()
 
 	target_reached_ = true;
 	target_reached_at_->stamp();
-      }
 
-      if (traversal_.next()) {
+      } else if (traversal_.next()) {
 	publish_path();
 
         try {
@@ -535,6 +547,7 @@ NavGraphThread::start_plan()
   path_planned_at_->stamp();
 
   target_reached_ = false;
+  target_rotating_ = false;
   if (traversal_.remaining() == 0) {
     exec_active_ = false;
     pp_nav_if_->set_final(true);
@@ -598,6 +611,7 @@ NavGraphThread::stop_motion()
   last_node_ = "";
   exec_active_ = false;
   target_reached_ = false;
+  target_rotating_ = false;
   pp_nav_if_->set_final(true);
   traversal_.invalidate();
 
@@ -657,6 +671,11 @@ NavGraphThread::send_next_goal()
     logger->log_warn(name(),
 		     "Failed to compute pose, cannot generate plan", e.what());
     throw;
+  }
+
+  if( target_reached_ ) {
+    // no need for traveling anymore, just rotating
+    tpose.setOrigin(tf::Vector3(0.f, 0.f, 0.f));
   }
 
   NavigatorInterface::CartesianGotoMessage *gotomsg =
@@ -722,7 +741,9 @@ NavGraphThread::send_next_goal()
   }
 }
 
-
+/** Check if current node has been reached.
+ * Compares the distance to the node to defined tolerances.
+ */
 bool
 NavGraphThread::node_reached()
 {
@@ -746,17 +767,8 @@ NavGraphThread::node_reached()
   // use a different tolerance for the final node
   if (traversal_.last()) {
     tolerance = cur_target.property_as_float("target_tolerance");
-    if (cur_target.has_property("orientation")) {
-      float ori_tolerance = cur_target.property_as_float("orientation_tolerance");
-      float ori_diff  =
-	fabs( angle_distance( normalize_rad(tf::get_yaw(pose_.getRotation())),
-			      normalize_rad(cur_target.property_as_float("orientation"))));
-      
-      //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f Tol=%f Dist=%f Tol=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose_.getRotation() ), ori_diff, ori_tolerance, dist, tolerance);
-      return (dist <= tolerance) && (ori_diff <= ori_tolerance);
-    }
+    //return (dist <= tolerance) && node_ori_reached(cur_target);
   }
-
 
   // can be no or invalid tolerance, be very generous
   if (tolerance == 0.) {
@@ -768,6 +780,49 @@ NavGraphThread::node_reached()
   return (dist <= tolerance);
 }
 
+
+/** Check if orientation of current node has been reached.
+ * Compares the angular distance to the targeted orientation
+ * to the defined angular tolerances.
+ */
+bool
+NavGraphThread::node_ori_reached()
+{
+  if (! traversal_) {
+    logger->log_error(name(), "Cannot check node reached if no traversal given");
+    return true;
+  }
+
+  if (! traversal_.running()) {
+    logger->log_error(name(), "Cannot check node reached if no traversal running");
+    return true;
+  }
+
+  const NavGraphNode &cur_target = traversal_.current();
+  return node_ori_reached(cur_target);
+}
+
+
+/** Check if orientation of a given node has been reached.
+ * Compares the angular distance to the targeted orientation
+ * to the defined angular tolerances.
+ */
+bool
+NavGraphThread::node_ori_reached(const NavGraphNode &node)
+{
+  if (node.has_property("orientation")) {
+    float ori_tolerance = node.property_as_float("orientation_tolerance");
+    float ori_diff  =
+      fabs( angle_distance( normalize_rad(tf::get_yaw(pose_.getRotation())),
+			    normalize_rad(node.property_as_float("orientation"))));
+
+    //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f Tol=%f Dist=%f Tol=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose_.getRotation() ), ori_diff, ori_tolerance, dist, tolerance);
+    return (ori_diff <= ori_tolerance);
+
+  } else {
+    return true;
+  }
+}
 
 
 size_t

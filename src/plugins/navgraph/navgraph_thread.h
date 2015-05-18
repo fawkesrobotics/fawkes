@@ -86,6 +86,8 @@ class NavGraphThread
   void start_plan();
   void send_next_goal();
   bool node_reached();
+  bool node_ori_reached();
+  bool node_ori_reached(const fawkes::NavGraphNode &node);
   size_t shortcut_possible();
   fawkes::LockPtr<fawkes::NavGraph> load_graph(std::string filename);
   void log_graph();
@@ -97,13 +99,13 @@ class NavGraphThread
 
   std::string  cfg_graph_file_;
   std::string  cfg_base_frame_;
-  std::string  cfg_global_frame_; 
-  std::string  cfg_nav_if_id_; 
-  float        cfg_resend_interval_; 
-  float        cfg_replan_interval_; 
-  float        cfg_replan_factor_; 
+  std::string  cfg_global_frame_;
+  std::string  cfg_nav_if_id_;
+  float        cfg_resend_interval_;
+  float        cfg_replan_interval_;
+  float        cfg_replan_factor_;
 #ifdef HAVE_VISUALIZATION
-  float        cfg_visual_interval_; 
+  float        cfg_visual_interval_;
 #endif
   bool         cfg_monitor_file_;
   float        cfg_target_time_;
@@ -119,6 +121,7 @@ class NavGraphThread
   fawkes::tf::Stamped<fawkes::tf::Pose> pose_;
   bool exec_active_;
   bool target_reached_;
+  bool target_rotating_;
   float target_time_;
   fawkes::Time *target_reached_at_;
   std::string last_node_;
