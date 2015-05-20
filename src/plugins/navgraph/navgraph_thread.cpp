@@ -79,6 +79,7 @@ NavGraphThread::init()
   cfg_replan_interval_ = config->get_float("/navgraph/replan_interval");
   cfg_replan_factor_   = config->get_float("/navgraph/replan_cost_factor");
   cfg_target_time_     = config->get_float("/navgraph/target_time");
+  cfg_target_ori_time_ = config->get_float("/navgraph/target_ori_time");
   cfg_log_graph_       = config->get_bool("/navgraph/log_graph");
   cfg_abort_on_error_  = config->get_bool("/navgraph/abort_on_error");
 #ifdef HAVE_VISUALIZATION
@@ -134,6 +135,10 @@ NavGraphThread::init()
     cfg_target_time_ = graph_->default_property_as_float("target_time");
     logger->log_info(name(), "Using target time %f from graph file", cfg_target_time_);
   }
+  if (graph_->has_default_property("target_ori_time")) {
+    cfg_target_time_ = graph_->default_property_as_float("target_ori_time");
+    logger->log_info(name(), "Using target orientation time %f from graph file", cfg_target_ori_time_);
+  }
 
   navgraph_aspect_inifin_.set_navgraph(graph_);
   if (cfg_log_graph_) {
@@ -155,6 +160,7 @@ NavGraphThread::init()
 
   exec_active_       = false;
   target_reached_    = false;
+  target_ori_reached_= false;
   target_rotating_   = false;
   last_node_         = "";
   error_reason_      = "";
@@ -271,6 +277,12 @@ NavGraphThread::loop()
 	exec_active_ = false;
 	needs_write = true;
 
+      } else if (target_ori_reached_) {
+	if ((now - target_reached_at_) >= target_time_) {
+	  stop_motion();
+	  needs_write = true;
+	}
+
       } else if (!target_rotating_ && (now - target_reached_at_) >= target_time_) {
         if (traversal_.current().has_property("orientation")) {
           // send one last command, which will only rotate
@@ -282,8 +294,16 @@ NavGraphThread::loop()
         }
 
       } else if (target_rotating_ && node_ori_reached()) {
-        // we have no timeout here for now
 	//logger->log_debug(name(), "loop(), target_rotating_, ori reached, but colli not final");
+	// reset timer with new timeout value
+	target_time_ = 0;
+	if (traversal_.current().has_property("target_ori_time")) {
+	  target_time_ = traversal_.current().property_as_float("target_ori_time");
+	}
+	if (target_time_ == 0)  target_time_ = cfg_target_ori_time_;
+
+	target_ori_reached_ = true;
+	target_reached_at_->stamp();
       }
 
     } else if (node_reached()) {
@@ -547,6 +567,7 @@ NavGraphThread::start_plan()
   path_planned_at_->stamp();
 
   target_reached_ = false;
+  target_ori_reached_ = false;
   target_rotating_ = false;
   if (traversal_.remaining() == 0) {
     exec_active_ = false;
@@ -610,7 +631,7 @@ NavGraphThread::stop_motion()
   }
   last_node_ = "";
   exec_active_ = false;
-  target_reached_ = false;
+  target_ori_reached_ = false;
   target_rotating_ = false;
   pp_nav_if_->set_final(true);
   traversal_.invalidate();

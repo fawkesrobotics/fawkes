@@ -109,6 +109,7 @@ class NavGraphThread
 #endif
   bool         cfg_monitor_file_;
   float        cfg_target_time_;
+  float        cfg_target_ori_time_;
   bool         cfg_log_graph_;
   bool         cfg_abort_on_error_;
 
@@ -121,6 +122,7 @@ class NavGraphThread
   fawkes::tf::Stamped<fawkes::tf::Pose> pose_;
   bool exec_active_;
   bool target_reached_;
+  bool target_ori_reached_;
   bool target_rotating_;
   float target_time_;
   fawkes::Time *target_reached_at_;

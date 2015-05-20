@@ -64,10 +64,14 @@ navgraph:
   # of all constraints and if any change occurs the graph will be published
   # again. This is done whether the robot is currently driving or standing still.
   visualization_interval: 0.5
-  
+
   # Time to keep moving after the target tolerance has been reached; sec
   # NOTE: it is recommended to set this as graph default property
   target_time: 2.5
+
+  # Time to keep moving after the orientation tolerance has been reached; sec
+  # NOTE: it is recommended to set this as graph default property
+  target_ori_time: 2.5
 
   # If set to true, aborts traveling on error, e.g. if no writer exists for
   # the NavigatorInterface. If false, keeps trying and re-sending.
@@ -75,7 +79,7 @@ navgraph:
   # error because none is reported. It is recommended to set this to false
   # only if you really know what you are doing.
   abort_on_error: true
-  
+
   # Monitor graph file and automatically reload on changes?
   monitor_file: true
 
