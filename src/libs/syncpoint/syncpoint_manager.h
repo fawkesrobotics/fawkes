@@ -36,10 +36,6 @@ namespace fawkes {
 
 class SyncPoint;
 
-class SyncPointSetLessThan {
-  public:
-    bool operator()(const RefPtr<SyncPoint> sp1, const RefPtr<SyncPoint> sp2) const;
-};
 
 class SyncPointManager
 {
@@ -66,6 +62,8 @@ class SyncPointManager
       const std::string & identifier);
     void release_syncpoint_no_lock(const std::string & component,
       RefPtr<SyncPoint> syncpoint);
+    bool component_watches_any_successor(const RefPtr<SyncPoint> sp,
+      const std::string component) const;
 
 
 };

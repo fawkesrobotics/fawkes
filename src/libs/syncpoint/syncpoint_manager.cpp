@@ -254,6 +254,7 @@ SyncPointManager::get_syncpoint_no_lock(const std::string & component, const std
     // If this is the root SyncPoint ("/"), there will be no prefix
     std::string prefix = find_prefix(identifier);
     RefPtr<SyncPoint> predecessor = get_syncpoint_no_lock(component, prefix);
+    predecessor->successors_.insert(*sp_it);
     (*sp_it)->predecessor_ = predecessor;
   }
 
@@ -262,15 +263,21 @@ SyncPointManager::get_syncpoint_no_lock(const std::string & component, const std
 
 
 void
-SyncPointManager::release_syncpoint_no_lock(const std::string & component, RefPtr<SyncPoint> sync_point)
+SyncPointManager::release_syncpoint_no_lock(const std::string & component,
+  RefPtr<SyncPoint> sync_point)
 {
-  std::set<RefPtr<SyncPoint> >::iterator sp_it = syncpoints_.find(
-      sync_point);
+  std::set<RefPtr<SyncPoint> >::iterator sp_it = syncpoints_.find(sync_point);
   if (sp_it == syncpoints_.end()) {
-    throw SyncPointReleasedDoesNotExistException(component.c_str(), sync_point->get_identifier().c_str());
+    throw SyncPointReleasedDoesNotExistException(component.c_str(),
+        sync_point->get_identifier().c_str());
+  }
+  if (component_watches_any_successor(sync_point, component)) {
+    // successor is watched, do not release the syncpoint yet
+    return;
   }
   if (!(*sp_it)->watchers_.erase(component)) {
-    throw SyncPointReleasedByNonWatcherException(component.c_str(), sync_point->get_identifier().c_str());
+    throw SyncPointReleasedByNonWatcherException(component.c_str(),
+        sync_point->get_identifier().c_str());
   }
 
   if (sync_point->predecessor_) {
@@ -278,5 +285,18 @@ SyncPointManager::release_syncpoint_no_lock(const std::string & component, RefPt
   }
 }
 
+bool
+SyncPointManager::component_watches_any_successor(
+  const RefPtr<SyncPoint> syncpoint, const std::string component) const
+{
+  for (std::set<RefPtr<SyncPoint> >::const_iterator it = syncpoint->successors_.begin();
+      it != syncpoint->successors_.end();
+      it++) {
+    if ((*it)->get_watchers().count(component)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 } // namespace fawkes

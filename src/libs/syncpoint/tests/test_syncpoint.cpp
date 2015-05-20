@@ -203,7 +203,9 @@ TEST_F(SyncPointManagerTest, ReleaseAndReacquire)
   ASSERT_EQ(1, syncpoints.count(RefPtr<SyncPoint>(new SyncPoint("/test"))));
   for (set<RefPtr<SyncPoint> >::const_iterator sp_it = syncpoints.begin();
       sp_it != syncpoints.end(); sp_it++) {
-    EXPECT_EQ(1, (*sp_it)->get_watchers().count(comp)) << "for component " << comp;
+    EXPECT_EQ(1, (*sp_it)->get_watchers().count(comp))
+        << "for component '" << comp << "' and SyncPoint '"
+        << (*sp_it)->get_identifier() << "'";
   }
   manager->release_syncpoint(comp, sp);
   for (set<RefPtr<SyncPoint> >::const_iterator sp_it = syncpoints.begin();
@@ -238,6 +240,61 @@ TEST_F(SyncPointManagerTest, SyncPointManagerExceptions) {
         SyncPointInvalidIdentifierException);
 }
 
+TEST_F(SyncPointManagerTest, SyncPointHierarchyRegisteredWatchers)
+{
+  string comp = "component1";
+  string id = "/test/sp1";
+  RefPtr<SyncPoint> sp = manager->get_syncpoint(comp, "/test/sp1");
+  set<RefPtr<SyncPoint>, SyncPointSetLessThan > syncpoints = manager->get_syncpoints();
+  set<RefPtr<SyncPoint>>::iterator sp_test_it = syncpoints.find(RefPtr<SyncPoint>(new SyncPoint("/test")));
+  set<RefPtr<SyncPoint>>::iterator sp_root_it = syncpoints.find(RefPtr<SyncPoint>(new SyncPoint("/")));
+  ASSERT_NE(syncpoints.end(), sp_test_it);
+  ASSERT_NE(syncpoints.end(), sp_root_it);
+  RefPtr<SyncPoint> sp_test = *sp_test_it;
+  RefPtr<SyncPoint> sp_root = *sp_root_it;
+  EXPECT_EQ(1, syncpoints.count(sp_test));
+  EXPECT_EQ(1, syncpoints.count(sp_root));
+  EXPECT_EQ(1, sp->get_watchers().count(comp));
+  EXPECT_EQ(1, sp_test->get_watchers().count(comp));
+  EXPECT_EQ(0, sp_test->get_watchers().count(id));
+  EXPECT_EQ(1, sp_root->get_watchers().count(comp));
+  EXPECT_EQ(0, sp_root->get_watchers().count(id));
+  EXPECT_EQ(0,
+      sp_root->get_watchers().count(
+          sp_test->get_identifier()));
+
+  manager->release_syncpoint(comp, sp);
+  EXPECT_EQ(0, sp_test->get_watchers().count(id));
+}
+
+TEST_F(SyncPointManagerTest, SyncPointComponentRegistersForMultipleSyncPoints)
+{
+  string comp = "component1";
+  string sp1_id = "/test/sp1";
+  string sp2_id = "/test/sp2";
+  RefPtr<SyncPoint> sp1 = manager->get_syncpoint(comp, sp1_id);
+  // the following should not throw
+  // if it does, registering for the predecessor '/test' may be broken
+  RefPtr<SyncPoint> sp2 = manager->get_syncpoint(comp, sp2_id);
+  RefPtr<SyncPoint> predecessor = *manager->get_syncpoints().find(
+      RefPtr<SyncPoint>(new SyncPoint("/test")));
+  EXPECT_EQ(1, sp1->get_watchers().count(comp))
+      << comp << " is not registered for " << sp1->get_identifier()
+      << ", but should be!";
+  EXPECT_EQ(1, sp2->get_watchers().count(comp))
+      << comp << " is not registered for " << sp2->get_identifier()
+      << ", but should be!";
+  EXPECT_EQ(1, predecessor->get_watchers().count(comp))
+      << comp << " is not registered for " << predecessor->get_identifier()
+      << ", but should be!";
+
+  manager->release_syncpoint(comp, sp1);
+  EXPECT_EQ(1, sp2->get_watchers().count(comp));
+  EXPECT_EQ(1, predecessor->get_watchers().count(comp))
+      << comp << " is not registered for " << predecessor->get_identifier()
+      << ", but should be!";
+}
+
 // helper function used for testing wait()
 void * call_wait(void *data)
 {
@@ -265,21 +322,26 @@ struct waiter_thread_params {
     /** SyncPointManager passed to the thread */
     RefPtr<SyncPointManager> manager;
     /** Thread number */
-    uint thread_nr;
+    uint thread_nr = 0;
     /** Number of wait calls the thread should make */
     uint num_wait_calls;
     /** Name of the SyncPoint */
     string sp_identifier;
+    /** Name of the component */
+    string component = "";
 };
 
 
 /** get a SyncPoint and wait for it */
 void * start_waiter_thread(void * data) {
   waiter_thread_params *params = (waiter_thread_params *)data;
-  char *comp;
-  asprintf(&comp, "component %u", params->thread_nr);
-  string component = comp;
-  free(comp);
+  string component = params->component;
+  if (component == "") {
+    char *comp;
+    asprintf(&comp, "component %u", params->thread_nr);
+    component = comp;
+    free(comp);
+  }
   RefPtr<SyncPoint> sp = params->manager->get_syncpoint(component, params->sp_identifier);
   for (uint i = 0; i < params->num_wait_calls; i++) {
     sp->wait(component);
@@ -455,7 +517,8 @@ TEST_F(SyncBarrierTest, EmitWithoutRegister)
   ASSERT_THROW(barrier->emit(component), SyncPointNonEmitterCalledEmitException);
 }
 
-/** Register multiple times */
+/** Register multiple times
+ * This is allowed, but the component should then also emit multiple times */
 TEST_F(SyncBarrierTest, MultipleRegisterCalls)
 {
   string component = "emitter";
@@ -741,3 +804,94 @@ TEST_F(SyncBarrierTest, SyncBarrierHierarchy)
   }
 }
 
+/** One component registers as emitter for two syncpoints, two other components
+ *  wait for the first and second syncpoint respectively.
+ *  Then, the first component unregisters for the first syncpoint.
+ *  Test whether it is still registered for the second syncpoint.
+ *  A third waiter waits for the predecessor syncpoint and should also still be
+ *  waiting after the emitter has unregistered for the first syncpoint.
+ */
+TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTest)
+{
+  string id_sp1 = "/test/sp1";
+  string id_sp2 = "/test/sp2";
+  string id_sp_pred = "/test";
+  string id_emitter = "component_emitter";
+  string id_waiter1 = "component_waiter1";
+  string id_waiter2 = "component_waiter2";
+  string id_waiter3 = "component_waiter_on_predecessor";
+
+  RefPtr<SyncPoint> sp1 = manager->get_syncpoint(id_emitter, id_sp1);
+  RefPtr<SyncPoint> sp2 = manager->get_syncpoint(id_emitter, id_sp2);
+  manager->get_syncpoint(id_waiter1, id_sp1);
+  manager->get_syncpoint(id_waiter2, id_sp2);
+  RefPtr<SyncPoint> pred = manager->get_syncpoint(id_waiter3, id_sp_pred);
+  sp1->register_emitter(id_emitter);
+  sp2->register_emitter(id_emitter);
+  EXPECT_EQ(1, sp1->get_emitters().count(id_emitter));
+  EXPECT_EQ(1, sp2->get_emitters().count(id_emitter));
+  // this should be 2 as the emitter has registered twice
+  EXPECT_EQ(2, pred->get_emitters().count(id_emitter));
+
+
+  waiter_thread_params *params1 = new waiter_thread_params();
+  params1->manager = manager;
+  params1->component = id_waiter1;
+  params1->num_wait_calls = 1;
+  params1->sp_identifier = id_sp1;
+
+  waiter_thread_params *params2 = new waiter_thread_params();
+  params2->manager = manager;
+  params2->component = id_waiter2;
+  params2->num_wait_calls = 1;
+  params2->sp_identifier = id_sp2;
+
+  waiter_thread_params *params3 = new waiter_thread_params();
+  params3->manager = manager;
+  params3->component = id_waiter3;
+  params3->num_wait_calls = 1;
+  params3->sp_identifier = id_sp_pred;
+
+  pthread_t pthread1;
+  pthread_create(&pthread1, &attrs, start_barrier_waiter_thread, params1);
+  pthread_t pthread2;
+  pthread_create(&pthread2, &attrs, start_barrier_waiter_thread, params2);
+  pthread_t pthread3;
+  pthread_create(&pthread3, &attrs, start_barrier_waiter_thread, params3);
+
+  usleep(10000);
+  sp1->emit(id_emitter);
+  usleep(10000);
+  EXPECT_EQ(0, pthread_tryjoin_np(pthread1, NULL));
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread2, NULL));
+  // this should be EBUSY as the component has registered twice for '/test'
+  // and thus should emit '/test' also twice (by hierarchical emit calls)
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread3, NULL));
+  sp2->emit(id_emitter);
+  usleep(10000);
+  EXPECT_EQ(0, pthread_tryjoin_np(pthread2, NULL));
+  EXPECT_EQ(0, pthread_tryjoin_np(pthread3, NULL));
+
+  sp2->unregister_emitter(id_emitter);
+  EXPECT_EQ(1, sp1->get_emitters().count(id_emitter));
+  EXPECT_EQ(0, sp2->get_emitters().count(id_emitter));
+  EXPECT_EQ(1, pred->get_emitters().count(id_emitter));
+
+  pthread_create(&pthread1, &attrs, start_barrier_waiter_thread, params1);
+  pthread_create(&pthread2, &attrs, start_barrier_waiter_thread, params2);
+  pthread_create(&pthread3, &attrs, start_barrier_waiter_thread, params3);
+
+  usleep(10000);
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread1, NULL));
+  ASSERT_EQ(0, pthread_tryjoin_np(pthread2, NULL));
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread3, NULL));
+
+  sp1->emit(id_emitter);
+  usleep(10000);
+  ASSERT_EQ(0, pthread_tryjoin_np(pthread1, NULL));
+  ASSERT_EQ(0, pthread_tryjoin_np(pthread3, NULL));
+  delete params1;
+  delete params2;
+  delete params3;
+
+}

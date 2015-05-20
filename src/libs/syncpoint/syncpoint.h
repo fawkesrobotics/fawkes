@@ -41,6 +41,12 @@ namespace fawkes {
 #endif
 
 class SyncPointManager;
+class SyncPoint;
+
+class SyncPointSetLessThan {
+  public:
+    bool operator()(const RefPtr<SyncPoint> sp1, const RefPtr<SyncPoint> sp2) const;
+};
 
 
 class SyncPoint
@@ -71,7 +77,7 @@ class SyncPoint
     virtual void register_emitter(const std::string & component);
 
     /** unregister as emitter */
-    virtual void unregister_emitter(const std::string & component);
+    virtual void unregister_emitter(const std::string & component, bool emit_if_pending = true);
 
     std::string get_identifier() const;
     bool operator==(const SyncPoint & other) const;
@@ -79,6 +85,7 @@ class SyncPoint
     bool operator<(const SyncPoint & other) const;
 
     std::set<std::string> get_watchers() const;
+    std::multiset<std::string> get_emitters() const;
     CircularBuffer<SyncPointCall> get_wait_calls(WakeupType type = WAIT_FOR_ONE) const;
     CircularBuffer<SyncPointCall> get_emit_calls() const;
 
@@ -119,6 +126,7 @@ class SyncPoint
 
   private:
     void reset_emitters();
+    bool is_pending(std::string component);
 
   private:
     /** The predecessor SyncPoint, which is the SyncPoint one level up
@@ -126,8 +134,11 @@ class SyncPoint
      */
     RefPtr<SyncPoint> predecessor_;
 
-    std::set<std::string> emitters_;
-    std::set<std::string> pending_emitters_;
+    /** all successors */
+    std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > successors_;
+
+    std::multiset<std::string> emitters_;
+    std::multiset<std::string> pending_emitters_;
 };
 
 } // end namespace fawkes

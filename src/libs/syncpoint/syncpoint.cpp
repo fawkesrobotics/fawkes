@@ -156,9 +156,13 @@ SyncPoint::emit(const std::string & component)
     throw SyncPointNonEmitterCalledEmitException(component.c_str(),
       get_identifier().c_str());
   }
-  // we do NOT expect the component to be pending
-  // a component may call emit multiple times in a loop
-  pending_emitters_.erase(component);
+  // 1. we do NOT expect the component to be pending
+  //    a component may call emit multiple times in a loop
+  // 2. only erase the component once; it may be registered multiple times
+  multiset<string>::iterator it_pending = pending_emitters_.find(component);
+  if (it_pending != pending_emitters_.end()) {
+    pending_emitters_.erase(it_pending);
+  }
   if (pending_emitters_.empty()) {
     // all emitters have emitted the signal, thus wake all waking components
     watchers_wait_for_all_.clear();
@@ -265,18 +269,28 @@ SyncPoint::register_emitter(const string & component)
   }
 }
 
-/** Unregister an emitter. This removes the component from the barrier, thus
+/** Unregister an emitter. This removes the component from the syncpoint, thus
  *  other components will not wait for it anymore.
  *  @param component The identifier of the component which is unregistered.
+ *  @param emit_if_pending if this is set to true and the component is a
+ *         pending emitter, emit the syncpoint before releasing it.
  */
 void
-SyncPoint::unregister_emitter(const string & component) {
+SyncPoint::unregister_emitter(const string & component, bool emit_if_pending) {
   // TODO should this throw if the calling component is not registered?
   MutexLocker ml(mutex_);
-  pending_emitters_.erase(component);
-  emitters_.erase(component);
+  if (emit_if_pending && is_pending(component)) {
+    ml.unlock();
+    emit(component);
+    ml.relock();
+  }
+
+  // erase a single element from the set of emitters
+  multiset<string>::iterator it_emitter = emitters_.find(component);
+  emitters_.erase(it_emitter);
   if (predecessor_) {
-    predecessor_->unregister_emitter(component);
+    // never emit the predecessor if it's pending; it is already emitted above
+    predecessor_->unregister_emitter(component, false);
   }
 }
 
@@ -318,6 +332,14 @@ SyncPoint::get_wait_calls(WakeupType type /* = WAIT_FOR_ONE */) const {
   }
 }
 
+/**
+ * @return a copy of the set of registered emitters
+ */
+multiset<string>
+SyncPoint::get_emitters() const
+{
+  return emitters_;
+}
 
 /**
  * @return a copy of the emit call buffer
@@ -331,6 +353,11 @@ SyncPoint::get_emit_calls() const {
 void
 SyncPoint::reset_emitters() {
   pending_emitters_ = emitters_;
+}
+
+bool
+SyncPoint::is_pending(string component) {
+  return pending_emitters_.count(component) > 0;
 }
 
 } // namespace fawkes
