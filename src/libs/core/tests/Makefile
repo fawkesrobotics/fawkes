@@ -34,7 +34,7 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 test: $(WARN_TARGETS)
 
-.PHONE: warning_gtest
+.PHONY: warning_gtest
 warning_gtest:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting unit test for CircularBuffer$(TNORMAL) (gtest not available)"
 
