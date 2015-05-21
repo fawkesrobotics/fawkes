@@ -185,9 +185,8 @@ class SyncPointNonEmitterCalledEmitException : public Exception
 	SyncPointNonEmitterCalledEmitException(const char * component,
       const char *identifier)
     {
-      append("Component '%s' called emit for SyncBarrier '%s', "
-	  "but is not a registered emitter",
-          component, identifier);
+      append("Component '%s' called emit for SyncPoint '%s', "
+          "but is not a registered emitter", component, identifier);
     }
 };
 

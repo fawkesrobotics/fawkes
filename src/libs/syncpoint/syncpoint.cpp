@@ -61,7 +61,8 @@ SyncPoint::SyncPoint(string identifier)
       creation_time_(Time()),
       mutex_(new Mutex()),
       cond_wait_for_one_(new WaitCondition()),
-      cond_wait_for_all_(new WaitCondition())
+      cond_wait_for_all_(new WaitCondition()),
+      last_emitter_reset_(Time(0l))
 {
   if (identifier.empty()) {
     delete cond_wait_for_one_;
@@ -141,9 +142,21 @@ SyncPoint::operator<(const SyncPoint &other) const
 void
 SyncPoint::emit(const std::string & component)
 {
+  emit(component, true);
+}
+
+/** Wake up all components which are waiting for this SyncPoint
+ * @param component The identifier of the component emitting the SyncPoint
+ * @param remove_from_pending if set to true, the component will be removed
+ *        from the pending emitters for this syncpoint
+ */
+void
+SyncPoint::emit(const std::string & component, bool remove_from_pending)
+{
   MutexLocker ml(mutex_);
   if (!watchers_.count(component)) {
-    throw SyncPointNonWatcherCalledEmitException(component.c_str(), get_identifier().c_str());
+    throw SyncPointNonWatcherCalledEmitException(component.c_str(),
+        get_identifier().c_str());
   }
 
   // unlock all wait_for_one waiters
@@ -156,18 +169,29 @@ SyncPoint::emit(const std::string & component)
     throw SyncPointNonEmitterCalledEmitException(component.c_str(),
       get_identifier().c_str());
   }
-  // 1. we do NOT expect the component to be pending
-  //    a component may call emit multiple times in a loop
-  // 2. only erase the component once; it may be registered multiple times
-  multiset<string>::iterator it_pending = pending_emitters_.find(component);
-  if (it_pending != pending_emitters_.end()) {
-    pending_emitters_.erase(it_pending);
-  }
-  if (pending_emitters_.empty()) {
-    // all emitters have emitted the signal, thus wake all waking components
-    watchers_wait_for_all_.clear();
-    cond_wait_for_all_->wake_all();
-    reset_emitters();
+
+  /* 1. remember whether the component was pending; if so, it may be removed
+   *    from the pending components of the predecessor. Otherwise, it should
+   *    not be removed
+   * 2. only erase the component once; it may be registered multiple times
+   */
+  bool pred_remove_from_pending = false;
+  if (remove_from_pending) {
+    multiset<string>::iterator it_pending = pending_emitters_.find(component);
+    if (it_pending != pending_emitters_.end()) {
+      pending_emitters_.erase(it_pending);
+      if (predecessor_) {
+        if (last_emitter_reset_ <= predecessor_->last_emitter_reset_) {
+          pred_remove_from_pending = true;
+        }
+      }
+      if (pending_emitters_.empty()) {
+        // all emitters have emitted the signal, thus wake all waking components
+        watchers_wait_for_all_.clear();
+        cond_wait_for_all_->wake_all();
+        reset_emitters();
+      }
+    }
   }
 
   emit_calls_.push_back(SyncPointCall(component));
@@ -175,7 +199,7 @@ SyncPoint::emit(const std::string & component)
   ml.unlock();
 
   if (predecessor_) {
-    predecessor_->emit(component);
+    predecessor_->emit(component, pred_remove_from_pending);
   }
 }
 
@@ -352,6 +376,7 @@ SyncPoint::get_emit_calls() const {
 
 void
 SyncPoint::reset_emitters() {
+  last_emitter_reset_ = Time();
   pending_emitters_ = emitters_;
 }
 

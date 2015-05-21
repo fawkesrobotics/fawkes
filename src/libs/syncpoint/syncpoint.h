@@ -97,6 +97,8 @@ class SyncPoint
 
   protected:
     std::pair<std::set<std::string>::iterator,bool> add_watcher(std::string watcher);
+    /** send a signal to all waiting threads */
+    virtual void emit(const std::string & component, bool remove_from_pending);
 
   protected:
     /** The unique identifier of the SyncPoint */
@@ -139,6 +141,8 @@ class SyncPoint
 
     std::multiset<std::string> emitters_;
     std::multiset<std::string> pending_emitters_;
+
+    Time last_emitter_reset_;
 };
 
 } // end namespace fawkes

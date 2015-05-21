@@ -664,11 +664,6 @@ TEST_F(SyncBarrierTest, WaitForAllEmitters)
 
   em1.emit();
 
-  sleep(1);
-  for (uint i = 0; i < num_waiter_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(waiter_threads[i], NULL));
-  }
-
   em2.emit();
 
   sleep(1);
@@ -862,15 +857,15 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   usleep(10000);
   sp1->emit(id_emitter);
   usleep(10000);
-  EXPECT_EQ(0, pthread_tryjoin_np(pthread1, NULL));
+  ASSERT_EQ(0, pthread_tryjoin_np(pthread1, NULL));
   EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread2, NULL));
   // this should be EBUSY as the component has registered twice for '/test'
   // and thus should emit '/test' also twice (by hierarchical emit calls)
   EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread3, NULL));
   sp2->emit(id_emitter);
   usleep(10000);
-  EXPECT_EQ(0, pthread_tryjoin_np(pthread2, NULL));
-  EXPECT_EQ(0, pthread_tryjoin_np(pthread3, NULL));
+  ASSERT_EQ(0, pthread_tryjoin_np(pthread2, NULL));
+  ASSERT_EQ(0, pthread_tryjoin_np(pthread3, NULL));
 
   sp2->unregister_emitter(id_emitter);
   EXPECT_EQ(1, sp1->get_emitters().count(id_emitter));
@@ -894,4 +889,56 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   delete params2;
   delete params3;
 
+}
+
+/** Test if an exception is thrown if a registered emitter is currently not
+ * pending
+ */
+TEST_F(SyncBarrierTest, NonPendingEmitterEmits)
+{
+  Emitter em1("em1", "/barrier", manager);
+  // register a second emitter to avoid immediate reset after emit
+  Emitter em2("em2", "/barrier", manager);
+  EXPECT_NO_THROW(em1.emit());
+  EXPECT_NO_THROW(em1.emit());
+}
+
+/** Test if a component waiting for a syncpoint is woken up
+ * if an emitter is registered for two successor syncpoints and the emitter
+ * emits the same syncpoint twice
+ */
+TEST_F(SyncPointManagerTest, EmitterEmitsSameSyncPointTwiceTest)
+{
+  RefPtr<SyncPoint> sp1 = manager->get_syncpoint("emitter", "/test/sp1");
+  RefPtr<SyncPoint> sp2 = manager->get_syncpoint("emitter", "/test/sp2");
+  RefPtr<SyncPoint> sp_pred = manager->get_syncpoint("waiter", "/test");
+
+  sp1->register_emitter("emitter");
+  sp2->register_emitter("emitter");
+
+  waiter_thread_params *params1 = new waiter_thread_params();
+  params1->manager = manager;
+  params1->component = "waiter";
+  params1->num_wait_calls = 1;
+  params1->sp_identifier = "/test";
+
+  pthread_t pthread1;
+  pthread_create(&pthread1, &attrs, start_barrier_waiter_thread, params1);
+
+  usleep(10000);
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread1, NULL));
+
+  sp1->emit("emitter");
+  usleep(10000);
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread1, NULL));
+
+  sp1->emit("emitter");
+  usleep(10000);
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread1, NULL));
+
+  sp2->emit("emitter");
+  usleep(10000);
+  ASSERT_EQ(0, pthread_tryjoin_np(pthread1, NULL));
+
+  delete params1;
 }
