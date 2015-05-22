@@ -46,7 +46,7 @@ OBJS_ros_images = image_plugin.o image_thread.o
 
 LIBS_ros_laserscan = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	          fawkesinterface fawkesrosaspect fvutils Laser360Interface \
-		  Laser720Interface
+		  Laser720Interface Laser1080Interface
 OBJS_ros_laserscan = laserscan_plugin.o laserscan_thread.o
 
 LIBS_ros_odometry = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
