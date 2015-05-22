@@ -114,6 +114,7 @@ DynamixelDriverThread::init()
     }
 
     s.move_pending     = false;
+    s.mode_set_pending = false;
     s.target_angle     = 0;
     s.velo_pending     = false;
     s.vel              = 0.;
@@ -174,6 +175,7 @@ DynamixelDriverThread::init()
     s.servo_if->set_ccw_angle_limit(ccw_limit);
     s.servo_if->set_temperature_limit(chain_->get_temperature_limit(servo_id));
     s.servo_if->set_max_torque(chain_->get_max_torque(servo_id));
+    s.servo_if->set_mode(cw_limit == ccw_limit && cw_limit == 0 ? "WHEEL" : "JOINT");
     s.servo_if->set_cw_slope(cw_slope);
     s.servo_if->set_ccw_slope(ccw_slope);
     s.servo_if->set_cw_margin(cw_margin);
