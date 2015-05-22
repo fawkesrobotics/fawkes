@@ -36,5 +36,21 @@ dynamixel:
     # temperature limit in degrees celsius - set for each servo found in the particular servo chain 
     temperature_limit: 70
 
+    # prevent alarm shutdown to turn into the direction of the torque
+    # when the particular servo is in overload condition
     prevent_alarm_shutdown: true
-    prevent_alarm_shutdown_threshold: 0.4
+
+    # normalized value of torque limit to measure an overload condition
+    prevent_alarm_shutdown_threshold: 0.6
+
+    # temperature limit in celsius
+    temperature_limit: 70
+
+    # connection stability used to handle connection drops to the servos
+    enable_connection_stability: true
+
+    # minimum allowed voltage
+    min_voltage: 9.0
+
+    # maximum allowed voltage
+    max_voltage: 13.0
