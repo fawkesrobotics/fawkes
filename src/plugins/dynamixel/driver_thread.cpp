@@ -606,8 +606,10 @@ DynamixelDriverThread::set_mode(unsigned int servo_id, unsigned int mode)
   }
   Servo &s = servos_[servo_id];
 
+  ScopedRWLock(s.value_rwlock);
   s.mode_set_pending = true;
   s.new_mode = mode;
+  s.servo_if->set_mode(mode == DynamixelServoInterface::JOINT ? "JOINT" : "WHEEL");
 }
 
 
