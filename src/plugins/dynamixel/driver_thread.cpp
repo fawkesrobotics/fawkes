@@ -233,7 +233,7 @@ DynamixelDriverThread::finalize()
 
 
 /** Update sensor values as necessary.
- * To be called only from PanTiltSensorThread. Writes the current pan/tilt
+ * To be called only from DynamixelSensorThread. Writes the current servo
  * data into the interface.
  */
 void
@@ -488,9 +488,8 @@ DynamixelDriverThread::stop_motion(unsigned int servo_id)
 }
 
 
-/** Goto desired pan/tilt values.
- * @param pan pan in radians
- * @param tilt tilt in radians
+/** Goto desired angle value.
+ * @param angle in radians
  */
 void
 DynamixelDriverThread::goto_angle(unsigned int servo_id, float angle)
@@ -512,10 +511,9 @@ DynamixelDriverThread::goto_angle(unsigned int servo_id, float angle)
 }
 
 
-/** Goto desired pan/tilt values in a specified time.
- * @param pan pan in radians
- * @param tilt tilt in radians
- * @param time_sec time when to reach the desired pan/tilt values
+/** Goto desired angle value in a specified time.
+ * @param angle in radians
+ * @param time_sec time when to reach the desired angle value
  */
 void
 DynamixelDriverThread::goto_angle_timed(unsigned int servo_id, float angle, float time_sec)
@@ -546,9 +544,8 @@ DynamixelDriverThread::goto_angle_timed(unsigned int servo_id, float angle, floa
 }
 
 
-/** Set desired velocities.
- * @param pan_vel pan velocity
- * @param tilt_vel tilt velocity
+/** Set desired velocity.
+ * @param vel the desired velocity in rad/s
  */
 void
 DynamixelDriverThread::set_velocity(unsigned int servo_id, float vel)
@@ -613,9 +610,7 @@ DynamixelDriverThread::set_mode(unsigned int servo_id, unsigned int mode)
 }
 
 
-/** Get current velocities.
- * @param pan_vel upon return contains current pan velocity
- * @param tilt_vel upon return contains current tilt velocity
+/** Get current velocity.
  */
 float
 DynamixelDriverThread::get_velocity(unsigned int servo_id)
@@ -634,9 +629,8 @@ DynamixelDriverThread::get_velocity(unsigned int servo_id)
 }
 
 
-/** Set desired velocities.
- * @param pan_margin pan margin
- * @param tilt_margin tilt margin
+/** Set desired angle margin.
+ * @param angle_margin the desired angle_margin
  */
 void
 DynamixelDriverThread::set_margin(unsigned int servo_id, float angle_margin)
@@ -651,9 +645,7 @@ DynamixelDriverThread::set_margin(unsigned int servo_id, float angle_margin)
 }
 
 
-/** Get pan/tilt value.
- * @param pan upon return contains the current pan value
- * @param tilt upon return contains the current tilt value
+/** Get angle - the position from -2.62 to + 2.62 (-150 to +150 degrees)
  */
 float
 DynamixelDriverThread::get_angle(unsigned int servo_id)
@@ -672,10 +664,8 @@ DynamixelDriverThread::get_angle(unsigned int servo_id)
 }
 
 
-/** Get pan/tilt value with time.
- * @param pan upon return contains the current pan value
- * @param tilt upon return contains the current tilt value
- * @param time upon return contains the time the pan and tilt values were read
+/** Get angle value with time.
+ * @param time upon return contains the time the angle value was read
  */
 float
 DynamixelDriverThread::get_angle(unsigned int servo_id,
@@ -826,20 +816,12 @@ DynamixelDriverThread::loop()
 }
 
 
-/** Execute pan/tilt motion.
+/** Execute angle motion.
  * @param angle_rad angle in rad to move to
  */
 void
 DynamixelDriverThread::exec_goto_angle(unsigned int servo_id, float angle_rad)
 {
-  /*
-  if ( (pan_rad < pan_min_) || (pan_rad > pan_max_) ) {
-    logger_->log_warn(name(), "Pan value out of bounds, min: %f  max: %f  des: %f",
-		       pan_min_, pan_max_, pan_rad);
-    return;
-  }
-  */
-
   unsigned int pos_min = 0, pos_max = 0;
   chain_->get_angle_limits(servo_id, pos_min, pos_max);
 
@@ -857,8 +839,8 @@ DynamixelDriverThread::exec_goto_angle(unsigned int servo_id, float angle_rad)
 }
 
 
-/** Execute pan/tilt motion.
- * @param angle_rad angle in rad to move to
+/** Execute set mode.
+ * @param new_mode - either DynamixelServoInterface::JOINT or DynamixelServoInterface::WHEEL
  */
 void
 DynamixelDriverThread::exec_set_mode(unsigned int servo_id, unsigned int new_mode)
