@@ -63,6 +63,9 @@ using namespace fawkes;
  *
  * @var std::string SickTiM55xCommonAcquisitionThread::cfg_prefix_
  * Configuration path prefix for this configuration.
+ *
+ * @var std::string SickTiM55xCommonAcquisitionThread::dev_model_
+ * Device model type as string.
  */
 
 
@@ -93,7 +96,21 @@ SickTiM55xCommonAcquisitionThread::pre_init(fawkes::Configuration *config,
   if (pre_init_done_)  return;
   pre_init_done_ = true;
 
-  _distances_size = 360;
+  if (dev_model_.empty()) {
+    throw Exception("LaserSick5xx: model has not yet been determined");
+  }
+
+  if (dev_model_ == "TiM551") {
+    _distances_size = 360;
+    expected_num_data_ = 271;
+  } else if (dev_model_ == "TiM571") {
+    _distances_size = 1080;
+    expected_num_data_ = 811;
+  } else {
+    throw Exception("LaserSick5xx: unknown model %s", dev_model_.c_str());
+  }
+
+  alloc_distances(_distances_size);
 }
 
 /** Read common configuration parameters. */
@@ -132,9 +149,8 @@ SickTiM55xCommonAcquisitionThread::init_device()
   }
   rep_dev_indent += '\0';
   rep_dev_indent = rep_dev_indent.substr(9, rep_dev_indent.length() - 11);
+  dev_model_ = rep_dev_indent.substr(0, rep_dev_indent.find(" "));
   logger->log_debug(name(), "Ident: %s", rep_dev_indent.c_str());
-
-  alloc_distances(_distances_size);
 
   try {
     const char *req_scan_data = "\x02sEN LMDscandata 1\x03";
@@ -204,8 +220,9 @@ SickTiM55xCommonAcquisitionThread::parse_datagram(const unsigned char *datagram,
   unsigned short int number_of_data = 0;
   sscanf(fields[25].c_str(), "%hx", &number_of_data);
 
-  if (number_of_data < 1 || number_of_data > 271) {
-    throw Exception("Invalid data length %u not in [1..271]", number_of_data);
+  if (number_of_data != expected_num_data_) {
+    throw Exception("Invalid data length, got %u, expected %u",
+		    number_of_data, expected_num_data_);
   }
   if (count < HEADER_FIELDS + number_of_data) {
     throw Exception("Invalid number of fields received, got %zu, expected %u+%u=%u",
@@ -285,6 +302,7 @@ SickTiM55xCommonAcquisitionThread::parse_datagram(const unsigned char *datagram,
   unsigned short angular_step_width = -1;
   sscanf(fields[24].c_str(), "%hx", &angular_step_width);
   float angle_increment = (angular_step_width / 10000.0) / 180.0 * M_PI;
+  float angle_increment_deg = rad2deg(angle_increment);
   //float angle_max = angle_min + (number_of_data - 1) * angle_increment;
 
   // 25: Number of data (<= 10F)
@@ -293,10 +311,13 @@ SickTiM55xCommonAcquisitionThread::parse_datagram(const unsigned char *datagram,
   // 26..26 + n - 1: Data_1 .. Data_n
   _data_mutex->lock();
   _timestamp->stamp();
+
+  int start_idx = (int)roundf(rad2deg(angle_min) / angle_increment_deg);
+
   for (int j = 0; j < number_of_data; ++j) {
     unsigned short range;
     sscanf(fields[j + 26].c_str(), "%hx", &range);
-    int idx = (360 + ((int)roundf(rad2deg(angle_min + j * angle_increment)))) % 360;
+    int idx = (_distances_size + start_idx + j) % _distances_size;
     _distances[idx] = range / 1000.0;
   }
 
@@ -318,7 +339,7 @@ SickTiM55xCommonAcquisitionThread::parse_datagram(const unsigned char *datagram,
     for (int j = 0; j < number_of_data; ++j) {
       unsigned short intensity;
       sscanf(fields[j + offset].c_str(), "%hx", &intensity);
-      int idx = (360 + ((int)roundf(rad2deg(angle_min + j * angle_increment)))) % 360;
+      int idx = (_echoes_size + start_idx + j) % _echoes_size;
       _echoes[idx] = intensity;
     }
   }

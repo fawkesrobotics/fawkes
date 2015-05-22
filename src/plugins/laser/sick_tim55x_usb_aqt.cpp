@@ -72,7 +72,6 @@ SickTiM55xUSBAcquisitionThread::SickTiM55xUSBAcquisitionThread(std::string &cfg_
 void
 SickTiM55xUSBAcquisitionThread::init()
 {
-  pre_init(config, logger);
   read_common_config();
 
   try {
@@ -93,6 +92,8 @@ SickTiM55xUSBAcquisitionThread::init()
     libusb_exit(usb_ctx_);
     throw;
   }
+
+  pre_init(config, logger);
 }
 
 

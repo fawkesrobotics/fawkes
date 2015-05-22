@@ -17,7 +17,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_laser = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	     fawkesinterface Laser360Interface Laser720Interface
+	     fawkesinterface Laser360Interface Laser720Interface \
+	     Laser1080Interface
 
 OBJS_laser = laser_plugin.o acquisition_thread.o sensor_thread.o
 
