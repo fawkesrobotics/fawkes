@@ -106,7 +106,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_messageinfo("SetAngleLimitsMessage");
   add_messageinfo("ResetRawErrorMessage");
   add_messageinfo("SetPreventAlarmShutdownMessage");
-  unsigned char tmp_hash[] = {0xfc, 0x72, 0xcd, 0xa3, 0xe7, 0x93, 0xda, 0x8c, 0xd, 0xb5, 0xa7, 0x98, 0x8f, 0xb9, 0x2e, 0x14};
+  unsigned char tmp_hash[] = {0x6d, 0x83, 0x4e, 0xad, 0x93, 0x6f, 0xf9, 0xb8, 0x92, 0x9d, 0xb8, 0xc3, 0x22, 0x80, 0x51, 0x36};
   set_hash(tmp_hash);
 }
 
@@ -898,7 +898,7 @@ DynamixelServoInterface::set_angle(const float new_angle)
 }
 
 /** Get enabled value.
- * Is the pan/tilt unit enabled?
+ * Is the servo enabled?
  * @return enabled value
  */
 bool
@@ -918,7 +918,7 @@ DynamixelServoInterface::maxlenof_enabled() const
 }
 
 /** Set enabled value.
- * Is the pan/tilt unit enabled?
+ * Is the servo enabled?
  * @param new_enabled new enabled value
  */
 void
@@ -1022,7 +1022,7 @@ DynamixelServoInterface::set_max_velocity(const float new_max_velocity)
 }
 
 /** Get velocity value.
- * Maximum pan velocity currently reached.
+ * Maximum servo velocity currently reached.
  * @return velocity value
  */
 float
@@ -1042,7 +1042,7 @@ DynamixelServoInterface::maxlenof_velocity() const
 }
 
 /** Set velocity value.
- * Maximum pan velocity currently reached.
+ * Maximum servo velocity currently reached.
  * @param new_velocity new velocity value
  */
 void
@@ -1085,7 +1085,7 @@ DynamixelServoInterface::set_mode(const char * new_mode)
 
 /** Get angle_margin value.
  * 
-      Margin in radians around a target pan value to consider the
+      Margin in radians around a target servo value to consider the
       motion as final.
     
  * @return angle_margin value
@@ -1108,7 +1108,7 @@ DynamixelServoInterface::maxlenof_angle_margin() const
 
 /** Set angle_margin value.
  * 
-      Margin in radians around a target pan value to consider the
+      Margin in radians around a target servo value to consider the
       motion as final.
     
  * @param new_angle_margin new angle_margin value
@@ -1902,7 +1902,7 @@ DynamixelServoInterface::SetEnabledMessage::SetEnabledMessage(const SetEnabledMe
 
 /* Methods */
 /** Get enabled value.
- * Is the pan/tilt unit enabled?
+ * Is the servo enabled?
  * @return enabled value
  */
 bool
@@ -1922,7 +1922,7 @@ DynamixelServoInterface::SetEnabledMessage::maxlenof_enabled() const
 }
 
 /** Set enabled value.
- * Is the pan/tilt unit enabled?
+ * Is the servo enabled?
  * @param new_enabled new enabled value
  */
 void
@@ -2004,7 +2004,7 @@ DynamixelServoInterface::SetVelocityMessage::SetVelocityMessage(const SetVelocit
 
 /* Methods */
 /** Get velocity value.
- * Maximum pan velocity currently reached.
+ * Maximum servo velocity currently reached.
  * @return velocity value
  */
 float
@@ -2024,7 +2024,7 @@ DynamixelServoInterface::SetVelocityMessage::maxlenof_velocity() const
 }
 
 /** Set velocity value.
- * Maximum pan velocity currently reached.
+ * Maximum servo velocity currently reached.
  * @param new_velocity new velocity value
  */
 void
@@ -2107,7 +2107,7 @@ DynamixelServoInterface::SetMarginMessage::SetMarginMessage(const SetMarginMessa
 /* Methods */
 /** Get angle_margin value.
  * 
-      Margin in radians around a target pan value to consider the
+      Margin in radians around a target servo value to consider the
       motion as final.
     
  * @return angle_margin value
@@ -2130,7 +2130,7 @@ DynamixelServoInterface::SetMarginMessage::maxlenof_angle_margin() const
 
 /** Set angle_margin value.
  * 
-      Margin in radians around a target pan value to consider the
+      Margin in radians around a target servo value to consider the
       motion as final.
     
  * @param new_angle_margin new angle_margin value

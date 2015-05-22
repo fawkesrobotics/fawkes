@@ -70,14 +70,14 @@
 
     <!-- Values converted to useful units -->
     <field type="float"  name="angle">Current angle.</field>
-    <field type="bool"   name="enabled">Is the pan/tilt unit enabled?</field>
+    <field type="bool"   name="enabled">Is the servo enabled?</field>
     <field type="float"  name="min_angle">Minimum angle allowed.</field>
     <field type="float"  name="max_angle">Maximum angle allowed.</field>
     <field type="float"  name="max_velocity">Maximum supported velocity.</field>
-    <field type="float"  name="velocity">Maximum pan velocity currently reached.</field>
+    <field type="float"  name="velocity">Maximum servo velocity currently reached.</field>
     <field type="string" name="mode" length="5">Working mode, can either be JOINT or WHEEL</field>
     <field type="float"  name="angle_margin">
-      Margin in radians around a target pan value to consider the
+      Margin in radians around a target servo value to consider the
       motion as final.
     </field>
 
@@ -98,14 +98,12 @@
     <comment>Flush the message queue. This implicitly stops running motions.</comment>
   </message>
   <message name="Goto">
-    <comment>Goto desired pan/tilt values.</comment>
+    <comment>Goto desired angle value.</comment>
     <ref>angle</ref>
   </message>
   <message name="TimedGoto">
     <comment>
-      Goto desired pan/tilt values in a specified time. The PTU may
-      adapt the velocities such that two positions are reached at the
-      same time.
+      Goto desired angle value in a specified time.
     </comment>
     <field type="float" name="time_sec">Time in seconds when to reach
     the final position.</field>
@@ -130,7 +128,7 @@
     <ref>velocity</ref>
   </message>
   <message name="SetMargin">
-    <comment>Set margins pan/tilt unit motions.</comment>
+    <comment>Set margins servo unit motions.</comment>
     <ref>angle_margin</ref>
   </message>
 

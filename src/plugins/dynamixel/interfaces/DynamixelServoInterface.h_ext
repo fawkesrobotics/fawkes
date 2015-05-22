@@ -108,14 +108,14 @@ class DynamixelServoInterface : public Interface
      */
     bool enable_prevent_alarm_shutdown; /**< Enable alarm shutdown */
     float angle; /**< Current angle. */
-    bool enabled; /**< Is the pan/tilt unit enabled? */
+    bool enabled; /**< Is the servo enabled? */
     float min_angle; /**< Minimum angle allowed. */
     float max_angle; /**< Maximum angle allowed. */
     float max_velocity; /**< Maximum supported velocity. */
-    float velocity; /**< Maximum pan velocity currently reached. */
+    float velocity; /**< Maximum servo velocity currently reached. */
     char mode[5]; /**< Working mode, can either be JOINT or WHEEL */
     float angle_margin; /**< 
-      Margin in radians around a target pan value to consider the
+      Margin in radians around a target servo value to consider the
       motion as final.
      */
     uint32_t msgid; /**< The ID of the message that is currently being
@@ -310,7 +310,7 @@ class DynamixelServoInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      bool enabled; /**< Is the pan/tilt unit enabled? */
+      bool enabled; /**< Is the servo enabled? */
     } SetEnabledMessage_data_t;
 #pragma pack(pop)
 
@@ -339,7 +339,7 @@ class DynamixelServoInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      float velocity; /**< Maximum pan velocity currently reached. */
+      float velocity; /**< Maximum servo velocity currently reached. */
     } SetVelocityMessage_data_t;
 #pragma pack(pop)
 
@@ -369,7 +369,7 @@ class DynamixelServoInterface : public Interface
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float angle_margin; /**< 
-      Margin in radians around a target pan value to consider the
+      Margin in radians around a target servo value to consider the
       motion as final.
      */
     } SetMarginMessage_data_t;
