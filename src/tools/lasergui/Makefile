@@ -23,7 +23,8 @@ LDFLAGS += $(LDFLAGS_GUI)
 
 LIBS_lasergui = stdc++ m fawkescore fawkesutils fawkesblackboard \
 		fawkesinterface fawkesnetcomm fawkesguiutils \
-		Position2DTrackInterface Laser360Interface Laser720Interface \
+		Position2DTrackInterface \
+		Laser360Interface Laser720Interface Laser1080Interface \
 		ObjectPositionInterface SwitchInterface VisualDisplay2DInterface
 
 ifeq ($(BUILD_TYPE),maemo)

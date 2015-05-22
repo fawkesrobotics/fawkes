@@ -27,6 +27,7 @@
 #include <blackboard/remote.h>
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Laser720Interface.h>
+#include <interfaces/Laser1080Interface.h>
 
 #include <interfaces/ObjectPositionInterface.h>
 #include <interfaces/Position2DTrackInterface.h>
@@ -198,7 +199,9 @@ class LaserGuiGtkWindow : public Gtk::Window
       const Glib::ustring& id = it->second;
       Interface* itf = NULL;
       try {
-        if (type == "Laser720Interface") {
+        if (type == "Laser1080Interface") {
+          itf = __bb->open_for_reading<Laser1080Interface>(id.c_str());
+        } else if (type == "Laser720Interface") {
           itf = __bb->open_for_reading<Laser720Interface>(id.c_str());
         } else if (type == "Laser360Interface") {
           itf = __bb->open_for_reading<Laser360Interface>(id.c_str());
