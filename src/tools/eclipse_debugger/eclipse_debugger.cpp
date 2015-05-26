@@ -37,6 +37,19 @@
 
 using namespace fawkes;
 
+/** @class EclipseDebugger "eclipse_debugger.h"
+ * ECLiPSe-clp Debugger GUI Wrapper.
+ * Can connect remotely with (embedded) ECLiPSe-clp session and
+ * starts the tkeclipse-clp graphical debugger. Has to be supported
+ * from the ECLiPSe program.
+ * @author Gesche Gierse
+ */
+
+
+/** Constructor.
+ * @param cobject C base object
+ * @param builder Gtk Builder
+ */
 EclipseDebugger::EclipseDebugger(BaseObjectType* cobject,
                     const Glib::RefPtr<Gtk::Builder> &builder)
 {
@@ -48,7 +61,7 @@ EclipseDebugger::EclipseDebugger(BaseObjectType* cobject,
   establish_connection();
 }
 
-
+/** Destructor. */
 EclipseDebugger::~EclipseDebugger()
 {
 
