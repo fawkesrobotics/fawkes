@@ -38,12 +38,15 @@ class WebRequestDispatcher;
 class WebUserVerifier;
 class WebRequestManager;
 
+#define WEBVIEW_DEFAULT_CIPHERS "SECURE128:-VERS-SSL3.0:-VERS-TLS-ALL:+VERS-TLS1.2"
+
 class WebServer {
  public:
   WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 	    fawkes::Logger *logger = 0);
   WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 	    const char *key_pem_filepath, const char *cert_pem_filepath,
+	    const char *cipher_suite = WEBVIEW_DEFAULT_CIPHERS,
 	    fawkes::Logger *logger = 0);
   ~WebServer();
 

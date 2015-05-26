@@ -91,7 +91,7 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
  */
 WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 		     const char *key_pem_filepath, const char *cert_pem_filepath,
-		     fawkes::Logger *logger)
+		     const char *cipher_suite, fawkes::Logger *logger)
 {
   __port       = port;
   __dispatcher = dispatcher;
@@ -100,6 +100,9 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 
   __ssl_key_mem  = read_file(key_pem_filepath);
   __ssl_cert_mem = read_file(cert_pem_filepath);
+  if (cipher_suite == NULL) {
+    cipher_suite = WEBVIEW_DEFAULT_CIPHERS;
+  }
 
   __daemon = MHD_start_daemon(MHD_USE_SSL,
 			      __port,
@@ -113,6 +116,7 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 			        WebRequestDispatcher::uri_log_cb, (void *)__dispatcher,
 			      MHD_OPTION_HTTPS_MEM_KEY,  __ssl_key_mem,
 			      MHD_OPTION_HTTPS_MEM_CERT, __ssl_cert_mem,
+			      MHD_OPTION_HTTPS_PRIORITIES, cipher_suite,
 			      MHD_OPTION_END);
 
   if ( __daemon == NULL ) {
