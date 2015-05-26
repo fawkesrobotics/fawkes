@@ -29,6 +29,16 @@
 using namespace boost::filesystem;
 using namespace fawkes;
 
+/** @class EclipsePath
+ * Class to determine the location of ECLiPSe-clp programs.
+ * Given a filename the complete path to that file will be specified.
+ * Paths can contain variables, which will be transformed to the string
+ * if matched by a regex.
+ * @author Gesche Gierse
+ * @author Tim Niemueller
+ */
+
+
 EclipsePath* EclipsePath::m_instance = NULL;
 
 
@@ -37,6 +47,9 @@ EclipsePath::EclipsePath()
 {
 }
 
+/** Create the initial EclipsePath object.
+ * Already supplies regexes for BASEDIR, CONFDIR and FAWKES_BASEDIR
+ */
 void
 EclipsePath::create_initial_object()
 {
@@ -48,6 +61,9 @@ EclipsePath::create_initial_object()
   m_instance->add_regex(boost::regex("@FAWKESDIR@"), FAWKES_BASEDIR);
 }
 
+/** Get the EclipsePath instance.
+ * @return the instance
+ */
 EclipsePath* EclipsePath::instance()
 {
   create_initial_object();
@@ -56,6 +72,9 @@ EclipsePath* EclipsePath::instance()
 
 
 
+/** Add a new path.
+ * @param path The path to be added.
+ */
 void
 EclipsePath::add_path(std::string path)
 {
@@ -63,6 +82,9 @@ EclipsePath::add_path(std::string path)
 }
 
 
+/** Add a new path and apply regexes to all paths.
+ * @param path The path to be added.
+ */
 void
 EclipsePath::add_path_check(std::string path)
 {
@@ -70,6 +92,10 @@ EclipsePath::add_path_check(std::string path)
   instance()->apply_regexes();
 }
 
+/** Locate a file by filename
+ * @param filename the searched filename
+ * @return path to the file
+ */
 std::string
 EclipsePath::locate_file(std::string filename)
 {
@@ -100,6 +126,8 @@ EclipsePath::locate_file(std::string filename)
   return "";
 }
 
+/** Apply the regexes to all paths.
+ */
 void
 EclipsePath::apply_regexes()
 {
@@ -116,6 +144,8 @@ EclipsePath::apply_regexes()
   }
 }
 
+/** Debug method to print all path to the command line.
+ */
 void
 EclipsePath::print_all_paths()
 {
@@ -124,14 +154,21 @@ EclipsePath::print_all_paths()
   }
 }
 
+/** Add a regex. To apply the regex to all paths use
+ * apply_regexes().
+ * @param re the regex to be matched
+ * @param str the string by which each instanstance of the regex will be replaced
+ */
 void
 EclipsePath::add_regex(boost::regex re, std::string str)
 {
   regexes.insert( std::pair<boost::regex,std::string>(re, str) );
 }
 
-
-// locate_file(+filename,-result)
+/** Wrapper method for external ECLiPSe-clp.
+ * Returns the path to a file.
+ * locate_file(+filename,-result)
+ */
 int
 p_locate_file(...)
 {

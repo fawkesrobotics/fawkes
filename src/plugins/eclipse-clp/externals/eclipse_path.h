@@ -45,9 +45,9 @@ class EclipsePath
  private:
   static EclipsePath* m_instance;
   
- public: 
-  std::vector<std::string>            paths;
-  std::map<boost::regex, std::string> regexes;
+ public: /* members */
+  std::vector<std::string>            paths;    //!< all paths known
+  std::map<boost::regex, std::string> regexes;  /**< regexes and strings they should be replaced with */
 };
 
 extern "C" int p_locate_file(...);
