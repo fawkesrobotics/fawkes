@@ -22,7 +22,9 @@
 
 #include "skiller_plugin.h"
 #include "exec_thread.h"
-#include "skiller_navgraph_feature.h"
+#ifdef HAVE_NAVGRAPH
+ #include "skiller_navgraph_feature.h"
+#endif
 
 using namespace fawkes;
 
@@ -41,17 +43,21 @@ using namespace fawkes;
 SkillerPlugin::SkillerPlugin(Configuration *config)
   : Plugin(config)
 {
+#ifdef HAVE_NAVGRAPH
   bool navgraph_enable = false;
   try {
     navgraph_enable = config->get_bool("/skiller/features/navgraph/enable");
   } catch (Exception &e) {} // ignore, use default
+#endif
 
   SkillerExecutionThread *exec_thread = new SkillerExecutionThread();
+#ifdef HAVE_NAVGRAPH
   if (navgraph_enable) {
     SkillerNavGraphFeature *navgraph_feature = new SkillerNavGraphFeature();
     exec_thread->add_skiller_feature(navgraph_feature);
     thread_list.push_back(navgraph_feature);
   }
+#endif
   thread_list.push_back(exec_thread);
 }
 

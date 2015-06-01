@@ -13,8 +13,10 @@
 #*****************************************************************************
 
 ifndef __buildsys_config_mk_
-$(error config.mk must be included before ros.mk)
+$(error config.mk must be included before navgraph.mk)
 endif
+
+include $(BUILDSYSDIR)/eigen3.mk
 
 ifndef __navgraph_mk_
 __navgraph_mk_ := 1
@@ -39,7 +41,7 @@ ifeq ($(HAVE_YAMLCPP),1)
   endif
 endif
 
-ifeq ($(HAVE_YAMLCPP)$(HAVE_CPP11),11)
+ifeq ($(HAVE_YAMLCPP)$(HAVE_CPP11)$(HAVE_EIGEN3),111)
   HAVE_NAVGRAPH=1
 
   CFLAGS_NAVGRAPH  = $(CFLAGS_CPP11)
@@ -51,6 +53,9 @@ else
   endif
   ifneq ($(HAVE_CPP11),1)
     NAVGRAPH_ERRORS += "compiler_does_not_support_C++11"
+  endif
+  ifneq ($(HAVE_EIGEN3),1)
+    NAVGRAPH_ERRORS += "eigen3_not_installed"
   endif
 
   _NAVGRAPH_COMMA := ,
