@@ -37,7 +37,7 @@ LIBS_skiller = fawkescore fawkesutils fawkesaspects fawkesnetcomm fawkeslua \
 	       SkillerInterface SkillerDebugInterface
 
 ifeq ($(HAVE_NAVGRAPH),1)
-  LIBS_SKILLER += fawkesnavgraphaspect
+  LIBS_skiller += fawkesnavgraphaspect
   CFLAGS += -DHAVE_NAVGRAPH
 else
   FILTER_OUT += skiller_navgraph_feature.o
