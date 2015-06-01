@@ -52,6 +52,8 @@ class NavGraphNode
   float       x() const;
   float       y() const;
 
+  bool is_valid() const;
+
   vector<string> & reachable_nodes();
 
   bool has_property(string property);
