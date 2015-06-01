@@ -76,7 +76,6 @@ NavGraphClustersThread::init()
   blackboard->register_listener(this);
 
   bbio_add_observed_create("Position3DInterface", pattern.c_str());
-  bbio_add_observed_create("Position3DInterface", pattern.c_str());
   blackboard->register_observer(this);
 
   edge_constraint_ = NULL;
@@ -143,13 +142,15 @@ NavGraphClustersThread::bb_interface_created(const char *type, const char *id) t
   }
 
   try {
-    bbil_add_data_interface(pif);
+    bbil_add_reader_interface(pif);
+    bbil_add_writer_interface(pif);
     blackboard->update_listener(this);
   } catch (Exception &e) {
     logger->log_warn(name(), "Failed to register for %s:%s: %s",
                      type, id, e.what());
     try {
-      bbil_remove_data_interface(pif);
+      bbil_remove_reader_interface(pif);
+      bbil_remove_writer_interface(pif);
       blackboard->update_listener(this);
       blackboard->close(pif);
     } catch (Exception &e) {
@@ -201,7 +202,8 @@ NavGraphClustersThread::conditional_close(Interface *interface) throw()
   if (close) {
     std::string uid = interface->uid();
     try {
-      bbil_remove_data_interface(interface);
+      bbil_remove_reader_interface(interface);
+      bbil_remove_writer_interface(interface);
       blackboard->update_listener(this);
       blackboard->close(interface);
     } catch (Exception &e) {
