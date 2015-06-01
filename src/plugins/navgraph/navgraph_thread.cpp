@@ -79,6 +79,7 @@ NavGraphThread::init()
   cfg_replan_interval_ = config->get_float("/navgraph/replan_interval");
   cfg_replan_factor_   = config->get_float("/navgraph/replan_cost_factor");
   cfg_target_time_     = config->get_float("/navgraph/target_time");
+  cfg_target_ori_time_ = config->get_float("/navgraph/target_ori_time");
   cfg_log_graph_       = config->get_bool("/navgraph/log_graph");
   cfg_abort_on_error_  = config->get_bool("/navgraph/abort_on_error");
 #ifdef HAVE_VISUALIZATION
@@ -134,6 +135,10 @@ NavGraphThread::init()
     cfg_target_time_ = graph_->default_property_as_float("target_time");
     logger->log_info(name(), "Using target time %f from graph file", cfg_target_time_);
   }
+  if (graph_->has_default_property("target_ori_time")) {
+    cfg_target_time_ = graph_->default_property_as_float("target_ori_time");
+    logger->log_info(name(), "Using target orientation time %f from graph file", cfg_target_ori_time_);
+  }
 
   navgraph_aspect_inifin_.set_navgraph(graph_);
   if (cfg_log_graph_) {
@@ -148,13 +153,15 @@ NavGraphThread::init()
       fam_->add_listener(this);
     } catch (Exception &e) {
       logger->log_warn(name(), "Could not enable graph file monitoring");
-      logger->log_warn(name(), e); 
+      logger->log_warn(name(), e);
     }
 
   }
 
   exec_active_       = false;
   target_reached_    = false;
+  target_ori_reached_= false;
+  target_rotating_   = false;
   last_node_         = "";
   error_reason_      = "";
   constrained_plan_  = false;
@@ -267,11 +274,38 @@ NavGraphThread::loop()
       fawkes::Time now(clock);
       if (nav_if_->is_final()) {
 	pp_nav_if_->set_final(true);
+	exec_active_ = false;
 	needs_write = true;
-      } else if ((now - target_reached_at_) >= target_time_) {
-	stop_motion();
-	needs_write = true;
+
+      } else if (target_ori_reached_) {
+	if ((now - target_reached_at_) >= target_time_) {
+	  stop_motion();
+	  needs_write = true;
+	}
+
+      } else if (!target_rotating_ && (now - target_reached_at_) >= target_time_) {
+        if (traversal_.current().has_property("orientation")) {
+          // send one last command, which will only rotate
+          send_next_goal();
+          target_rotating_ = true;
+        } else {
+          stop_motion();
+          needs_write = true;
+        }
+
+      } else if (target_rotating_ && node_ori_reached()) {
+	//logger->log_debug(name(), "loop(), target_rotating_, ori reached, but colli not final");
+	// reset timer with new timeout value
+	target_time_ = 0;
+	if (traversal_.current().has_property("target_ori_time")) {
+	  target_time_ = traversal_.current().property_as_float("target_ori_time");
+	}
+	if (target_time_ == 0)  target_time_ = cfg_target_ori_time_;
+
+	target_ori_reached_ = true;
+	target_reached_at_->stamp();
       }
+
     } else if (node_reached()) {
       logger->log_info(name(), "Node '%s' has been reached",
 		       traversal_.current().name().c_str());
@@ -285,9 +319,8 @@ NavGraphThread::loop()
 
 	target_reached_ = true;
 	target_reached_at_->stamp();
-      }
 
-      if (traversal_.next()) {
+      } else if (traversal_.next()) {
 	publish_path();
 
         try {
@@ -463,7 +496,7 @@ NavGraphThread::replan(const NavGraphNode &start, const NavGraphNode &goal)
   NavGraphPath new_path =
     graph_->search_path(start, act_goal,
 			  /* use constraints */ true, /* compute constraints */ false);
-  
+
   if (! new_path.empty()) {
     // get cost of current plan
     NavGraphNode pose("current-pose", pose_.getOrigin().x(), pose_.getOrigin().y());
@@ -534,6 +567,8 @@ NavGraphThread::start_plan()
   path_planned_at_->stamp();
 
   target_reached_ = false;
+  target_ori_reached_ = false;
+  target_rotating_ = false;
   if (traversal_.remaining() == 0) {
     exec_active_ = false;
     pp_nav_if_->set_final(true);
@@ -596,7 +631,8 @@ NavGraphThread::stop_motion()
   }
   last_node_ = "";
   exec_active_ = false;
-  target_reached_ = false;
+  target_ori_reached_ = false;
+  target_rotating_ = false;
   pp_nav_if_->set_final(true);
   traversal_.invalidate();
 
@@ -622,36 +658,29 @@ NavGraphThread::send_next_goal()
 
   const NavGraphNode &next_target = traversal_.current();
 
-  if (traversal_.last()) {
-    stop_at_target = true;
-  } else {
-    stop_at_target = false;
-  }
-
-  float ori = 0.;
+  float ori = NAN;
   if ( traversal_.last() ) {
+    stop_at_target = true;
+
     if ( next_target.has_property("orientation") ) {
       orient_at_target  = true;
 
       // take the given orientation for the final node
       ori = next_target.property_as_float("orientation");
-    } else {
-      orient_at_target  = false;
-      ori = NAN;
     }
-  } else {
-    orient_at_target  = false;
 
-    // set direction facing from next_target (what is the actual point
+  } else {
+    // set direction facing from next_target (what is the current point
     // to drive to) to next point to drive to.  So orientation is the
     // direction from next_target to the target after that
     const NavGraphNode &next_next_target = traversal_.peek_next();
 
     ori = atan2f( next_next_target.y() - next_target.y(),
                   next_next_target.x() - next_target.x());
+
   }
 
-  // get target position in map frame
+  // get target position in base frame
   tf::Stamped<tf::Pose> tpose;
   tf::Stamped<tf::Pose>
     tposeglob(tf::Transform(tf::create_quaternion_from_yaw(ori),
@@ -663,6 +692,11 @@ NavGraphThread::send_next_goal()
     logger->log_warn(name(),
 		     "Failed to compute pose, cannot generate plan", e.what());
     throw;
+  }
+
+  if( target_reached_ ) {
+    // no need for traveling anymore, just rotating
+    tpose.setOrigin(tf::Vector3(0.f, 0.f, 0.f));
   }
 
   NavigatorInterface::CartesianGotoMessage *gotomsg =
@@ -728,18 +762,25 @@ NavGraphThread::send_next_goal()
   }
 }
 
-
+/** Check if current node has been reached.
+ * Compares the distance to the node to defined tolerances.
+ */
 bool
 NavGraphThread::node_reached()
 {
   if (! traversal_) {
+    logger->log_error(name(), "Cannot check node reached if no traversal given");
+    return true;
+  }
+
+  if (! traversal_.running()) {
     logger->log_error(name(), "Cannot check node reached if no traversal running");
     return true;
   }
 
   const NavGraphNode &cur_target = traversal_.current();
 
-  // get current position of robot in map frame
+  // get distance to current target in map frame
   float dist = sqrt(pow(pose_.getOrigin().x() - cur_target.x(), 2) +
 		    pow( pose_.getOrigin().y() - cur_target.y(), 2));
 
@@ -747,17 +788,8 @@ NavGraphThread::node_reached()
   // use a different tolerance for the final node
   if (traversal_.last()) {
     tolerance = cur_target.property_as_float("target_tolerance");
-    if (cur_target.has_property("orientation")) {
-      float ori_tolerance = cur_target.property_as_float("orientation_tolerance");
-      float ori_diff  =
-	fabs( angle_distance( normalize_rad(tf::get_yaw(pose_.getRotation())),
-			      normalize_rad(cur_target.property_as_float("orientation"))));
-      
-      //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f Tol=%f Dist=%f Tol=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose_.getRotation() ), ori_diff, ori_tolerance, dist, tolerance);
-      return (dist <= tolerance) && (ori_diff <= ori_tolerance);
-    }
+    //return (dist <= tolerance) && node_ori_reached(cur_target);
   }
-
 
   // can be no or invalid tolerance, be very generous
   if (tolerance == 0.) {
@@ -769,6 +801,49 @@ NavGraphThread::node_reached()
   return (dist <= tolerance);
 }
 
+
+/** Check if orientation of current node has been reached.
+ * Compares the angular distance to the targeted orientation
+ * to the defined angular tolerances.
+ */
+bool
+NavGraphThread::node_ori_reached()
+{
+  if (! traversal_) {
+    logger->log_error(name(), "Cannot check node reached if no traversal given");
+    return true;
+  }
+
+  if (! traversal_.running()) {
+    logger->log_error(name(), "Cannot check node reached if no traversal running");
+    return true;
+  }
+
+  const NavGraphNode &cur_target = traversal_.current();
+  return node_ori_reached(cur_target);
+}
+
+
+/** Check if orientation of a given node has been reached.
+ * Compares the angular distance to the targeted orientation
+ * to the defined angular tolerances.
+ */
+bool
+NavGraphThread::node_ori_reached(const NavGraphNode &node)
+{
+  if (node.has_property("orientation")) {
+    float ori_tolerance = node.property_as_float("orientation_tolerance");
+    float ori_diff  =
+      fabs( angle_distance( normalize_rad(tf::get_yaw(pose_.getRotation())),
+			    normalize_rad(node.property_as_float("orientation"))));
+
+    //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f Tol=%f Dist=%f Tol=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose_.getRotation() ), ori_diff, ori_tolerance, dist, tolerance);
+    return (ori_diff <= ori_tolerance);
+
+  } else {
+    return true;
+  }
+}
 
 
 size_t
