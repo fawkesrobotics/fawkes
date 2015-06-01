@@ -22,6 +22,7 @@
 #include "filter_thread.h"
 #include "filters/max_circle.h"
 #include "filters/720to360.h"
+#include "filters/1080to360.h"
 #include "filters/deadspots.h"
 #include "filters/cascade.h"
 #include "filters/reverse_angle.h"
@@ -418,6 +419,12 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
       average = config->get_bool((prefix + "average").c_str());
     } catch (Exception &e) {} // ignore
     return new Laser720to360DataFilter(average, in_data_size, inbufs);
+  } else if (filter_type == "1080to360") {
+    bool average = false;
+    try {
+      average = config->get_bool((prefix + "average").c_str());
+    } catch (Exception &e) {} // ignore
+    return new Laser1080to360DataFilter(average, in_data_size, inbufs);
   } else if (filter_type == "reverse") {
     return new LaserReverseAngleDataFilter(in_data_size, inbufs);
   } else if (filter_type == "max_circle") {
