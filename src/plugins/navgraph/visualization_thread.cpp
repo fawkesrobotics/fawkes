@@ -23,6 +23,8 @@
 
 #include <navgraph/navgraph.h>
 #include <navgraph/constraints/constraint_repo.h>
+#include <navgraph/constraints/polygon_node_constraint.h>
+#include <navgraph/constraints/polygon_edge_constraint.h>
 #include <tf/types.h>
 #include <utils/math/angle.h>
 #include <utils/math/coord.h>
@@ -663,6 +665,44 @@ NavGraphVisualizationThread::publish()
             arrow.color.r = arrow.color.g = arrow.color.b = 0.5;
             arrow.scale.x = 0.04; // shaft radius
             arrow.scale.y = 0.15; // head radius
+
+	    tf::Vector3 p1v(p1.x, p1.y, p1.z);
+	    tf::Vector3 p2v(p2.x, p2.y, p2.z);
+
+	    tf::Vector3 p = p1v + (p2v - p1v) * 0.5;
+
+	    std::string text_s = "";
+
+	    std::map<std::pair<std::string, std::string>, std::string>::iterator e =
+	      bl_edges.find(std::make_pair(to.name(), from.name()));
+	    if (e != bl_edges.end()) {
+	      text_s = e->second;
+	    } else {
+	      e = bl_edges.find(std::make_pair(from.name(), to.name()));
+	      if (e != bl_edges.end()) {
+		text_s = e->second;
+	      }
+	    }
+
+	    visualization_msgs::Marker text;
+	    text.header.frame_id = "/map";
+	    text.header.stamp = ros::Time::now();
+	    text.ns = "navgraph-constraints";
+	    text.id = constraints_id_num++;
+	    text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+	    text.action = visualization_msgs::Marker::ADD;
+	    text.pose.position.x =  p[0];
+	    text.pose.position.y =  p[1];
+	    text.pose.position.z = 0.3;
+	    text.pose.orientation.w = 1.;
+	    text.scale.z = 0.12;
+	    text.color.r = 1.0;
+	    text.color.g = text.color.b = 0.f;
+	    text.color.a = 1.0;
+	    text.lifetime = ros::Duration(0, 0);
+	    text.text = text_s;
+	    m.markers.push_back(text);
+
           } else {
             // regular
             arrow.color.r = 0.66666;
@@ -805,6 +845,60 @@ NavGraphVisualizationThread::publish()
   m.markers.push_back(plan_lines);
   m.markers.push_back(blocked_lines);
   m.markers.push_back(cur_line);
+
+  crepo_.lock();
+  const NavGraphConstraintRepo::NodeConstraintList &node_constraints =
+    crepo_->node_constraints();
+  const NavGraphConstraintRepo::EdgeConstraintList &edge_constraints =
+    crepo_->edge_constraints();
+  std::list<const NavGraphPolygonConstraint *> poly_constraints;
+
+  std::for_each(node_constraints.begin(), node_constraints.end(),
+		[&poly_constraints](const NavGraphNodeConstraint *c) {
+		  const NavGraphPolygonNodeConstraint *pc =
+		    dynamic_cast<const NavGraphPolygonNodeConstraint *>(c);
+		  if (pc) {
+		    poly_constraints.push_back(pc);
+		  }
+		});
+
+  std::for_each(edge_constraints.begin(), edge_constraints.end(),
+		[&poly_constraints](const NavGraphEdgeConstraint *c) {
+		  const NavGraphPolygonEdgeConstraint *pc =
+		    dynamic_cast<const NavGraphPolygonEdgeConstraint *>(c);
+		  if (pc) {
+		    poly_constraints.push_back(pc);
+		  }
+		});
+
+  for (const NavGraphPolygonConstraint *pc : poly_constraints) {
+    const NavGraphPolygonConstraint::PolygonMap &polygons = pc->polygons();
+    for (auto const &p : polygons) {
+      visualization_msgs::Marker polc_lines;
+      polc_lines.header.frame_id = "/map";
+      polc_lines.header.stamp = ros::Time::now();
+      polc_lines.ns = "navgraph-constraints";
+      polc_lines.id = constraints_id_num++;
+      polc_lines.type = visualization_msgs::Marker::LINE_STRIP;
+      polc_lines.action = visualization_msgs::Marker::ADD;
+      polc_lines.color.r = polc_lines.color.g = 1.0;
+      polc_lines.color.b = 0.f;
+      polc_lines.color.a = 1.0;
+      polc_lines.scale.x = 0.02;
+      polc_lines.lifetime = ros::Duration(0, 0);
+
+      polc_lines.points.resize(p.second.size());
+      for (size_t i = 0; i < p.second.size(); ++i) {
+	polc_lines.points[i].x = p.second[i].x;
+	polc_lines.points[i].y = p.second[i].y;
+	polc_lines.points[i].z = 0.;
+      }
+
+      m.markers.push_back(polc_lines);
+    }
+  }
+  crepo_.unlock();
+
 
   for (size_t i = id_num; i < last_id_num_; ++i) {
     visualization_msgs::Marker delop;
