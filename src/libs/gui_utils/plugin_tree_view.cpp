@@ -100,10 +100,11 @@ PluginTreeView::ctor()
   renderer = dynamic_cast<Gtk::CellRendererToggle*>( get_column_cell_renderer(1) );
   renderer->signal_toggled().connect( sigc::mem_fun(*this, &PluginTreeView::on_status_toggled));
 
+  set_search_column(1);
+
   m_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &PluginTreeView::on_connected));
   m_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &PluginTreeView::on_disconnected));
   m_dispatcher.signal_message_received().connect(sigc::mem_fun(*this, &PluginTreeView::on_message_received));
-
 }
 
 /** Destructor. */
