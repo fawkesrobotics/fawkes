@@ -25,7 +25,7 @@ include $(BUILDSYSDIR)/protobuf.mk
 LIBS_gazsim_webcam = fawkescore fawkesutils fawkesaspects fvutils \
 	       fawkestf fawkesinterface fawkesblackboard \
 	       fawkesgazeboaspect
-OBJS_gazsim_webcam = gazsim_webcam_plugin.o gazsim_webcam_thread.o
+OBJS_gazsim_webcam = gazsim_webcam_plugin.o gazsim_webcam_thread.o gazsim_webcam.o
 
 OBJS_all    = $(OBJS_gazsim_webcam)
 
