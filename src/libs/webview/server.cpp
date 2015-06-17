@@ -87,6 +87,7 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
  * @param dispatcher dispatcher to call for requests
  * @param key_pem_filepath path to PEM formatted file containing the key
  * @param cert_pem_filepath path to PEM formatted file containing the certificate
+ * @param cipher_suite which cipers to use for SSL/TLS connections
  * @param logger optional logger, used to output possible run-time problems
  */
 WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
