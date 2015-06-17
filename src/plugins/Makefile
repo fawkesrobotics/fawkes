@@ -36,7 +36,7 @@ include $(BUILDSYSDIR)/rules.mk
 luaagent: skiller
 rrdweb: rrd
 katana: openrave
-amcl navgraph perception robotino: ros
+amcl colli navgraph perception robotino: ros
 mongodb_log: mongodb
 mongodb: rrd
 clips-navgraph clips-agent clips-protobuf clips-tf: clips
