@@ -254,7 +254,7 @@ action_blackboard_print(TermList terms)
 
 #define ADD_ARRAY(src_type, target_type, array_type)			\
   do {									\
-    target_type array[f.get_length()];					\
+    target_type *array = (target_type *)OPRS_MALLOC(sizeof(target_type) * f.get_length());					\
     src_type ## _t *src_array = f.get_ ## src_type ## s();		\
     for (unsigned int j = 0; j < f.get_length(); ++j)  array[j] = src_array[j]; \
     data = l_add_to_tail(data, make_ ## array_type ## _array_from_array(f.get_length(), array)); \
