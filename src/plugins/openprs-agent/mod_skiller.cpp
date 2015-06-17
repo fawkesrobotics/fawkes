@@ -153,8 +153,8 @@ action_skill_call(TermList terms)
 
     printf("Calling skill %s\n", skill_string.c_str());
 
-    SkillerInterface::ExecSkillContinuousMessage *msg =
-      new SkillerInterface::ExecSkillContinuousMessage(skill_string.c_str());
+    SkillerInterface::ExecSkillMessage *msg =
+      new SkillerInterface::ExecSkillMessage(skill_string.c_str());
     msg->ref();
 
     skiller_if->msgq_enqueue(msg);
