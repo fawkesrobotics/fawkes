@@ -50,6 +50,8 @@ class FawkesNetworkManager
   ServicePublisher *     service_publisher();
   ServiceBrowser *       service_browser();
 
+  unsigned short int     fawkes_port() const;
+
  private:
   unsigned short int          __fawkes_port;
   ThreadCollector            *__thread_collector;

@@ -188,7 +188,8 @@ CFLAGS_DEFS      = -DBASEDIR=\"$(abspath $(TOP_BASEDIR))\" \
 		   -DBUILDTYPE=\"$(BUILD_TYPE)\" -DSOEXT=\"$(SOEXT)\"
 
 CFLAGS_MINIMUM   = -fPIC -pthread $(DEFAULT_INCLUDES) $(CFLAGS_DEFS)
-LDFLAGS_MINIMUM  = $(LIBDIRS_BASE:%=-L%) -rdynamic -fPIC -Wl,--no-undefined -lstdc++
+LDFLAGS_MINIMUM  = $(LIBDIRS_BASE:%=-L%) -rdynamic -fPIC -lstdc++
+LDFLAGS_NO_UNDEF = -Wl,--no-undefined
 CFLAGS_BASE      = $(CFLAGS_MINIMUM) $(CFLAGS_EXTRA)
 LDFLAGS_BASE     =  $(LDFLAGS_MINIMUM) $(LDFLAGS_RPATH) $(LDFLAGS_EXTRA)
 LDFLAGS_SHARED   = -shared

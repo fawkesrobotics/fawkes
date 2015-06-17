@@ -298,10 +298,12 @@ InterfaceFieldIterator::get_length() const
 
 
 /** Get value of current field as string.
+ * @param array_sep in the case that the field is an array the given string is
+ * used to split the individual elements in the array string representation
  * @return field value as string
  */
 const char *
-InterfaceFieldIterator::get_value_string()
+InterfaceFieldIterator::get_value_string(const char *array_sep)
 {
   if ( __infol == NULL ) {
     throw NullPointerException("Cannot get value of end element");
@@ -376,7 +378,7 @@ InterfaceFieldIterator::get_value_string()
 	  free(tmp1);
 	  tmp1 = tmp2;
 	  if ( (__infol->length > 1) && (i < __infol->length - 1) ) {
-	    if (asprintf(&tmp2, "%s, ", tmp1) == -1) {
+	    if (asprintf(&tmp2, "%s%s", tmp1, array_sep) == -1) {
 	      throw OutOfMemoryException("InterfaceFieldIterator::get_value_string(): asprintf() failed (2)");
 	    }
 	    free(tmp1);

@@ -1,0 +1,74 @@
+
+;---------------------------------------------------------------------------
+;  meta-coalesce.opf - Meta OP to handle COALESCE property
+;
+;  Created: Fri Aug 29 14:10:54 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+(
+
+(defop meta-coalesce
+  :invocation (FACT-INVOKED-OPS $X)
+  :context ((? (& (null (list-intersection (op-names (get-all-intentions)) (. meta-coalesce .)))
+                  (|| (> (length $X) 1)
+                      (& (equal (length $X) 1)
+                         (~ (property-p META-SELECTOR (first $x))))))))
+  :body (
+    (! (start-critical-section))
+    (! (printf (format "OPs: %s -- %d\n" (op-names $X) (length $X))))
+    (! (= @OPS $X))
+    (! (= @COALESCED-OPS (. .)))
+    (! (= @EXEC-OPS (. .)))
+    (! (= @ACTIVE-OPS (op-names (get-all-intentions))))
+    (! (printf (format "Active OPs: %s\n" @ACTIVE-OPS)))
+
+    (while (? (~ (null @OPS)))
+      (! (= @op-name (op-name (car @OPS))))
+      (! (printf (format "   *** Working on op %s  Remaining %d\n"  @op-name (length (cdr @OPS)))))
+      (if (? (property-p COALESCE (car @OPS)))
+        (! (printf (format "*** OP %s is coalescing\n"  @op-name)))
+        (if (? (> (length (list-intersection @ACTIVE-OPS (. (val @op-name) .) )) 0))
+          (! (printf (format "   *** COALESCE OP -> already executed: %s\n" @op-name)))
+         elseif (? (> (length (list-intersection @COALESCED-OPS (. @op-name .) )) 0))
+          (! (printf (format "   *** COALESCE OP -> no exec: %s\n"  (op-name (car @OPS)))))
+         else
+          (! (printf (format "   *** COALESCE OP -> === EXECUTING ===: %s\n"  @op-name)))
+          (! (= @COALESCED-OPS (cons @op-name @COALESCED-OPS)))
+	  (! (= @EXEC-OPS (cons-tail (car @OPS) @EXEC-OPS)))
+        )
+      else
+        (! (printf (format "   INTENT straight: %s\n" @op-name)))
+ 	(! (= @EXEC-OPS (cons-tail (car @OPS) @EXEC-OPS)))
+      )
+      (! (= @OPS (cdr @OPS)))
+    )
+
+    (if (? (~ (null @EXEC-OPS)))
+      (! (printf (format "   Running OPs: %s\n" (op-names (current @EXEC-OPS)))))
+      (! (INTENDED-ALL-OPS-AS-ROOT (current @EXEC-OPS)))
+    )
+    (! (end-critical-section))
+  )
+  :properties ((DECISION-PROCEDURE T) (META-SELECTOR T))
+  :effects ()
+  :documentation "Meta OP to coalesce marked OP instances of the same OP.
+    Sometimes it is desirable to activate only a single OP even if multiple
+    facts for which the OP triggers have been added, e.g. if the OP itself
+    performs steps of reduction of the data.
+    This is achieved by this meta OP. To use it, the OPs which should be
+    coalesced must have the property COALESCE set to T."
+)
+
+; alternative for soak ops
+;  :invocation (SOAK $X)
+;  :context (> (length $X) 1)
+; alternative for only fact-invoked OPs:
+;  :invocation (FACT-INVOKED-OPS $X)
+;  :context ((? (|| (> (length $X) 1)
+;                   (& (equal (length $X) 1)
+;                      (~ (property-p META-SELECTOR (first $x)))))))
+
+)
+

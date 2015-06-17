@@ -1,0 +1,30 @@
+
+;---------------------------------------------------------------------------
+;  agent-settings.opf - OpenPRS agent settings loader
+;
+;  Created: Mon Sep 08 15:55:12 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+(
+(defop agent-settings-load
+  :invocation (agent-settings-load)
+  :context ()
+  :body (
+    (! (print (string-cat "Loading config for agent " @@AGENT_NAME)))
+    (! (config-load-to-settings (term-string-cat "/openprs-agent/" @@AGENT_NAME "/")))
+  )
+  :effects ((~> (agent-settings-load)))
+)
+
+(defop agent-settings-loaded
+  :invocation (settings-loaded $prefix)
+  :context ()
+  :body (
+    (! (print "Loaded config for agent"))
+    (! (send-string @@FAWKES_MP_NAME "openprs-agent-init-done"))
+  )
+  :effects ((~> (settings-loaded $prefix)))
+)
+)

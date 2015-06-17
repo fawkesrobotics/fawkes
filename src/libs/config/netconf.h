@@ -189,6 +189,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   FawkesNetworkClient  *c;
   FawkesNetworkMessage *msg;
   Mutex *mutex;
+  bool                  __mirror_init_waiting;
   InterruptibleBarrier *__mirror_init_barrier;
 
   bool __mirror_mode;

@@ -122,7 +122,7 @@ ConfigListContent::append(Configuration::ValueIterator *i)
     data_size = num_values * sizeof(float);
   } else if ( i->is_string() ) {
     cle.type = MSG_CONFIG_STRING_VALUE;
-    if (num_values > 1) {
+    if (i->is_list()) {
       std::vector<std::string> values = i->get_strings();
       for (unsigned int j = 0; j < values.size(); ++j) {
 	data_size += sizeof(config_string_value_t) + values[j].length() + 1;
@@ -131,26 +131,26 @@ ConfigListContent::append(Configuration::ValueIterator *i)
       data_size = sizeof(config_string_value_t) + i->get_string().length() + 1;
     }
   } else {
-    throw TypeMismatchException("Invalid type of config iterator value");
+    throw Exception("Invalid type of config iterator value (%s)", i->path());
   }
 
   data = (char *)malloc(sizeof(config_list_entity_header_t) + data_size);
   memcpy(data, &cle, sizeof(config_list_entity_header_t));
 
   if ( i->is_uint() ) {
-    if (num_values > 1) {
+    if (i->is_list()) {
       copy_data_vector(&i->get_uints()[0], (uint32_t *)(data + sizeof(cle)), num_values);
     } else {
       *((uint32_t *)(data + sizeof(cle))) = i->get_uint();
     }
   } else if ( i->is_int() ) {
-    if (num_values > 1) {
+    if (i->is_list()) {
       copy_data_vector(&i->get_ints()[0], (int32_t *)(data + sizeof(cle)), num_values);
     } else {
       *((int32_t *)(data + sizeof(cle))) = i->get_int();
     }
   } else if ( i->is_bool() ) {
-    if (num_values > 1) {
+    if (i->is_list()) {
       std::vector<bool> values = i->get_bools();
       int32_t *msg_values = (int32_t *)(data + sizeof(cle));
       for (unsigned int j = 0; j < values.size(); ++j) {
@@ -161,13 +161,13 @@ ConfigListContent::append(Configuration::ValueIterator *i)
       *((int32_t *)(data + sizeof(cle))) = i->get_bool() ? 1 : 0;
     }
   } else if ( i->is_float() ) {
-    if (num_values > 1) {
+    if (i->is_list()) {
       copy_data_vector(&i->get_floats()[0], (float *)(data + sizeof(cle)), num_values);
     } else {
       *((float *)(data + sizeof(cle))) = i->get_float();
     }
   } else if ( i->is_string() ) {
-    if (num_values > 1) {
+    if (i->is_list()) {
       std::vector<std::string> values = i->get_strings();
       char *tmpdata = (char *)data + sizeof(cle);
       for (unsigned int j = 0; j < values.size(); ++j) {

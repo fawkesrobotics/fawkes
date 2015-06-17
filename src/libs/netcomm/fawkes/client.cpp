@@ -80,6 +80,7 @@ class FawkesNetworkClientSendThread : public Thread
     __outbound_msgqs[1] = new FawkesNetworkMessageQueue();
     __outbound_active   = 0;
     __outbound_msgq     = __outbound_msgqs[0];
+    __outbound_havemore = false;
   }
 
   /** Destructor. */

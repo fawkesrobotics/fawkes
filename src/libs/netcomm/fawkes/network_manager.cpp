@@ -138,4 +138,14 @@ FawkesNetworkManager::service_browser()
   return __service_browser;
 }
 
+/** Get Fawkes TCP port.
+ * @return TCP port on which Fawkes is listening
+ */
+unsigned short int
+FawkesNetworkManager::fawkes_port() const
+{
+  return __fawkes_port;
+}
+
+
 } // end namespace fawkes

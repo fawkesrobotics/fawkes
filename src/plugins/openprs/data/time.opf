@@ -1,0 +1,142 @@
+
+;---------------------------------------------------------------------------
+;  time.opf - OPs to process incoming time messages
+;             requires meta-coalesce.opf
+;
+;  Created: Tue Aug 26 16:45:38 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+(
+
+(defop time-update
+  :invocation (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)
+  :context (time @sec @usec)
+  :body (
+     (! (start-critical-section))
+     (if (? (time-lt @sec @usec $t_sec $t_usec))
+       (! (= @sec  $t_sec))
+       (! (= @usec $t_usec))
+     )
+     (! (end-critical-section))
+  )
+  :effects ((=> (time @sec @usec)))
+  :documentation "OP to update the (time) fact from incoming fawkes-time messages."
+)
+
+;(defop time-update
+;  :invocation (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)
+;  :context ()
+;  :body (
+;     (! (= @times (n-all (. $o_sec $o_usec $so_sec $so_usec .) (fawkes-time $o_sec $o_usec $so_sec $so_usec))))
+;     ;(! (print "Start times"))
+;     ;(! (print @times))
+;     (! (= @latest (. $t_sec $t_usec .)))
+;
+;     (while (? (~ (null @times)))
+;       (! (= @t (car @times)))
+;       (if (? (time-lt (car @latest) (cadr @latest) (car @t) (cadr @t)))
+;         (! (= @latest @t))
+;       )
+;       (~> (fawkes-time (car @t) (cadr @t) (caddr @t) (last @t)))
+;       (! (= @times (cdr @times)))
+;     )
+;     ;(! (printf (format "*** Final latest (%d %d)\n" (car @latest) (cadr @latest))))
+;     
+;  )
+;  :properties ((COALESCE T))
+;  :effects ((=> (time (first @latest) (second @latest))))
+;  :documentation "OP to update the (time) fact from incoming fawkes-time messages.
+;    This OP is triggered by a fawkes-time message. It requires to be coalesced to
+;    guarantee that the latest time is posted to the database, otherwise parallel
+;    OP execution would lead to unpredictable results.
+;    The OP iterates through all received time messages and sets the time to the
+;    latest such message that has been received."
+;)
+
+(defop time-set-idle-looptime
+  :invocation (! (time-set-idle-looptime $sec $usec))
+  :call (time-set-idle-looptime $sec $usec)
+  :action (time-set-idle-looptime $sec $usec)
+  :documentation
+    "Sets the idle loop time.
+     The time (given as split sec/microseconds) is set as the new time interval
+     for loops when no intention is active."
+)
+
+(defop time-print
+  :invocation (time $t_sec $t_usec)
+  :setting (setting "print-time" T)
+  :body ((! (printf (format "=== Time %d %d\n" $t_sec $t_usec))))
+  :effects ()
+  :documentation "Simple OP that is only used to print the latest time once it is updated."
+)
+
+
+; (~> (fawkes-time-process)) (~> (time $sec $usec)) (=> (time (first @latest) (last @latest)))
+
+;    (! (= @oldertimes (n-all (. $o_sec $o_usec $so_sec $so_usec .) (& (fawkes-time $sec $usec $so_sec $so_usec)
+;	  	        	     	               		      (time-lt $sec $usec $t_sec $s_usec)))))
+
+; (defop time-update
+;     :invocation (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)
+;     :context ()
+;    ;:body ((! (printf (format "New time: %d %d\n" $t_sec $t_usec))))
+;     :body ()
+;     :effects ((~> (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)) (=> (time $t_sec $t_usec)))
+; )
+ 
+; (defop time-update
+;     :invocation (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)
+;     :context ((? (fawkes-time $t2_sec $t2_usec $syst2_sec $syst2_usec)))
+;     :body ((! (printf (format "Cond ! %d %d < %d %d\n" $t_sec $t_usec $t2_sec $t2_usec))))
+;     :effects ()
+; )
+
+; (defop time-update
+;     :invocation (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)
+;     :context ((? (|| (~ (fawkes-time $t2_sec $t2_usec $syst2_sec $syst2_usec))
+;                      (~ (time-lt  $t_sec $t_usec $t2_sec $t2_usec)))))
+;     :body ((! (printf (format "Cond ! %d %d < %d %d\n" $t_sec $t_usec $t2_sec $t2_usec))))
+;     :effects ((=> (time $t_sec $t_usec)))
+; )
+; (! (printf (format "Time %d %d  -- %d %d\n" $t_sec $t_usec $t2_sec $t2_usec)))
+
+; (defop time-update
+;     :invocation (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)
+;     :context ((? (& (fawkes-time $t2_sec $t2_usec $syst2_sec $syst2_usec)
+;                     (time-neq  $t_sec $t_usec $t2_sec $t2_usec)
+;                     (~ (time-lt  $t2_sec $t2_usec $t_sec $t_usec)) )))
+;     :body ((! (printf (format "Cond ! %d %d < %d %d\n" $t_sec $t_usec $t2_sec $t2_usec))))
+;     :effects ((=> (time $t_sec $t_usec)))
+; )
+; ; (! (printf (format "Time %d %06d  -- %d %06d\n" $t_sec $t_usec $t2_sec $t2_usec)))
+
+; (defrule time-update
+;   (fawkes-time ?t_sec ?t_usec)
+;   (not (fawkes-time ?t2_sec ?t2_usec&:(time-lt ?t2... ?t1...)))
+; =>
+;  ...
+; )
+
+
+;    :context ((~ (& (fawkes-time $t2_sec $t2_usec $syst2_sec $syst2_usec)
+;		    (time-lt  $t2_sec $t2_usec $t_sec $t_usec))))
+;    :context ((~ (& (fawkes-time $t2_sec $t2_usec $syst2_sec $syst2_usec)
+;		    (time-lt  $t2_sec $t2_usec $t_sec $t_usec))))
+;    	      (~ (& (fawkes-time $ot_sec $ot_usec $osyst_sec $osyst_usec)
+;	      	    (time-lt2 $ot_sec $ot_usec $t_sec $t_usec))))
+
+; (defop time-create
+;     :invocation (fawkes-time $t_sec $t_usec $syst_sec $syst_usec)
+;     :context ((~ (time $oldt_sec $oldt_usec)))
+;     :body ()
+;     :effects ((=> (time $t_sec $t_usec)) (=> (create-time $t_sec $t_usec)))
+; )
+
+)
+
+;(while (? (time $any_sec $any_usec)) (! (time-remove $any_sec $any_usec))))
+;    	      (~ (AND (fawkes-time $ot_sec $ot_usec $osyst_sec $osyst_usec)
+;	      	      (time-lt2 $ot_sec $ot_usec $t_sec $t_usec))))

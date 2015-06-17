@@ -68,6 +68,7 @@ ConfigNetworkHandler::ConfigNetworkHandler(Configuration *config,
 /** Destructor. */
 ConfigNetworkHandler::~ConfigNetworkHandler()
 {
+  __hub->remove_handler(this);
   cancel();
   join();
   __config->rem_change_handler(this);
@@ -97,11 +98,16 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
   if ( i->is_uint() ) {
     try {
       uint32_t *values;
-      uint16_t num_values = i->is_list() ? i->get_list_size() : 1;
+      uint16_t num_values = i->is_list() ? i->get_list_size() : 0;
       size_t data_size = 0;
       void *m = prepare_value_msg<uint32_t>(i->path(), i->is_default(), i->is_list(),
 					    num_values, data_size, (void**)&values);
-      values[0] = i->get_uint();
+      if (i->is_list()) {
+	std::vector<unsigned int> c_values = i->get_uints();
+	for (uint16_t i = 0; i < num_values; ++i)  values[0] = c_values[0];
+      } else {
+	values[0] = i->get_uint();
+      }
       __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE, m, data_size);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
@@ -112,11 +118,16 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
   } else if ( i->is_int() ) {
     try {
       int32_t *values;
-      int16_t num_values = i->is_list() ? i->get_list_size() : 1;
+      int16_t num_values = i->is_list() ? i->get_list_size() : 0;
       size_t data_size = 0;
       void *m = prepare_value_msg<int32_t>(i->path(), i->is_default(), i->is_list(),
 					    num_values, data_size, (void**)&values);
-      values[0] = i->get_int();
+      if (i->is_list()) {
+	std::vector<int> c_values = i->get_ints();
+	for (uint16_t i = 0; i < num_values; ++i)  values[0] = c_values[0];
+      } else {
+	values[0] = i->get_int();
+      }
       __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE, m, data_size);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
@@ -127,11 +138,16 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
   } else if ( i->is_bool() ) {
     try {
       int32_t *values;
-      int16_t num_values = i->is_list() ? i->get_list_size() : 1;
+      int16_t num_values = i->is_list() ? i->get_list_size() : 0;
       size_t data_size = 0;
       void *m = prepare_value_msg<int32_t>(i->path(), i->is_default(), i->is_list(),
 					    num_values, data_size, (void**)&values);
-      values[0] = i->get_bool() ? 1 : 0;
+      if (i->is_list()) {
+	std::vector<bool> c_values = i->get_bools();
+	for (uint16_t i = 0; i < num_values; ++i)  values[0] = (c_values[0] ? 1 : 0);
+      } else {
+	values[0] = i->get_bool() ? 1 : 0;
+      }
       __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE, m, data_size);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
@@ -142,11 +158,16 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
   } else if ( i->is_float() ) {  
     try {
       float *values;
-      uint16_t num_values = i->is_list() ? i->get_list_size() : 1;
+      uint16_t num_values = i->is_list() ? i->get_list_size() : 0;
       size_t data_size = 0;
       void *m = prepare_value_msg<float>(i->path(), i->is_default(), i->is_list(), num_values,
 					 data_size, (void**)&values);
-      values[0] = i->get_float();
+      if (i->is_list()) {
+	std::vector<float> c_values = i->get_floats();
+	for (uint16_t i = 0; i < num_values; ++i)  values[0] = c_values[0];
+      } else {
+	values[0] = i->get_float();
+      }
       __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE, m, data_size);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",

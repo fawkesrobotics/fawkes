@@ -65,6 +65,9 @@ class SkillerInterface : public Interface
   unsigned int exclusive_controller();
   void set_exclusive_controller(const unsigned int new_exclusive_controller);
   int maxlenof_exclusive_controller() const;
+  unsigned int msgid();
+  void set_msgid(const unsigned int new_msgid);
+  int maxlenof_msgid() const;
   SkillStatusEnum status();
   void set_status(const SkillStatusEnum new_status);
   int maxlenof_status() const;

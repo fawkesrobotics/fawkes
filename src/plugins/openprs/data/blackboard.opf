@@ -1,0 +1,73 @@
+
+;---------------------------------------------------------------------------
+;  blackboard.opf - OpenPRS blackboard OPs
+;
+;  Created: Tue Sep 02 11:18:23 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+(
+(defop bb-open
+  :invocation (! (bb-open $type $id $mode))
+  :context ()
+  :action (bb-open $type $id $mode)
+  :effects ((=> (blackboard-interface $type $id $mode)))
+  :documentation "Open a blackboard interface using mod_blackboard."
+)
+
+(defop bb-close
+  :invocation (! (bb-close $type $id))
+  :context (blackboard-interface $type $id $mode)
+  :action (bb-close $type $id)
+  :effects ((~> (blackboard-interface $type $id $mode)))
+  :documentation "Close a blackboard interface."
+)
+
+(defop bb-auto-read
+  :invocation (time $sec $usec)
+  :setting (setting "bb-auto-read" T)
+  :body ((! (bb-read-all)))
+  :documentation "Read all interfaces on time update.
+    This feature must be enabled by adding a fact (setting \"bb-auto-read\" T) to
+    the database. This will trigger posint new bb-data facts for all interfaces
+    opened for reading that have changed since the last read."
+)
+
+(defop bb-read-all
+  :invocation (! (bb-read-all))
+  :context ()
+  :action (bb-read-all)
+  :documentation "Read all interfaces opened for reading that have changed."
+)
+
+(defop bb-read
+  :invocation (! (bb-read $type $id))
+  :context (blackboard-interface $type $id $mode)
+  :action (bb-read $type $id)
+  :documentation "Read speciied interface opened for reading.
+    A fact is only posted if the interface has changed since the last read."
+)
+
+(defop bb-print
+  :invocation (! (bb-print $type $id))
+  :context (blackboard-interface $type $id $mode)
+  :action (bb-print $type $id)
+  :documentation "Print all interfaces opened for reading that have changed."
+)
+
+(defop bb-cleanup
+  :invocation (bb-data "type" $type "id" $id "time" $t_sec $t_usec $data)
+  :setting (setting "bb-auto-cleanup" T)
+  :body ()
+  :effects ((~> (bb-data "type" $type "id" $id "time" $t_sec $t_usec $data)))
+  :documentation "Remove bb-data facts.
+    This feature must be enabled by adding a fact (setting \"bb-auto-cleanup\" T)
+    to the database. If enabled, it will retract bb-data facts as they are posted.
+    Due to parallel execution your own OPs will still be invoked to handle the
+    incoming data, but it prevents the database from growing indefinitely.
+    You can also disable this feature (not adding the setting), but then you have
+    to make sure on your own that you properly cleanup unused bb-data facts."
+)
+
+)

@@ -1,0 +1,74 @@
+
+;---------------------------------------------------------------------------
+;  config.opf - OpenPRS config OPs
+;
+;  Created: Fri Sep 05 13:35:13 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+(
+(defop config-load-to-settings
+  :invocation (! (config-load-to-settings $prefix))
+  :context ()
+  :body (
+    (! (config-load $prefix))
+    (! (config-to-settings $prefix))
+    (! (config-cleanup))
+  )
+  :effects ((~> (config-loaded $prefix)) (=> (settings-loaded $prefix)))
+  :documentation "Load all config values below given prefix into settings.
+    This will load all settings for the given config prefix and eventually
+    assert them as (settings) facts where the name of the setting is the
+    path of the config value with the prefix removed.
+    Note that to load a complete sub-tree of the config it is important to
+    include a trailing slash to the prefix, i.e. /path/to/values/ (mind the
+    final slash)."
+)
+
+(defop config-load
+  :invocation (! (config-load $prefix))
+  :context ()
+  :action (config-load $prefix)
+  :documentation "Load all config values below given prefix."
+)
+
+
+(defop config-to-settings
+  :invocation (! (config-to-settings $prefix))
+  :context ()
+  :body (
+    (! (= @confvals (n-all (. $path $type $value .) (confval $path $type $value))))
+
+    (while (? (~ (null @confvals)))
+      (! (= @cv (car @confvals)))
+      (if (? (string-prefix-p (car @cv) $prefix))
+        (=> (setting (string-remove-prefix (car @cv) $prefix) (caddr @cv)))
+      )
+      (! (= @confvals (cdr @confvals)))
+    )
+  )
+  :documentation "Convert config file values to settings.
+    Given a prefix this OP will check all (confval) facts if the path matches the
+    given prefix. If it does, the prefix is removed and for each fact of the form
+    (confval $path $type $value)
+    it asserts a new fact of the form
+    (setting (string-remove-prefix $path $prefix) $value)"
+)
+
+
+(defop config-cleanup
+  :invocation (! (config-cleanup))
+  :context ()
+  :body (
+    (! (= @confvals (n-all (. $path $type $value .) (confval $path $type $value))))
+
+    (while (? (~ (null @confvals)))
+      (! (= @cv (car @confvals)))
+      (~> (confval (car @cv) (cadr @cv) (caddr @cv)))
+      (! (= @confvals (cdr @confvals)))
+    )
+  )
+  :documentation "Removes all (confval) facts."
+)
+)

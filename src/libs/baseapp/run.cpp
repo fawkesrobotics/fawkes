@@ -39,6 +39,9 @@
 #include <logging/liblogger.h>
 #include <logging/factory.h>
 #include <logging/network.h>
+#ifdef HAVE_LOGGING_FD_REDIRECT
+#  include <logging/fd_redirect.h>
+#endif
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
 #include <netcomm/fawkes/network_manager.h>
@@ -84,6 +87,10 @@ SharedMemoryRegistry      * shm_registry;
 InitOptions               * init_options = NULL;
 tf::Transformer           * tf_listener = NULL;
 Time                      * start_time = NULL;
+#ifdef HAVE_LOGGING_FD_REDIRECT
+LogFileDescriptorToLog    * log_fd_redirect_stderr_ = NULL;
+LogFileDescriptorToLog    * log_fd_redirect_stdout_ = NULL;
+#endif
 
 // this is NOT shared to the outside
 FawkesMainThread::Runner  * runner = NULL;
@@ -265,6 +272,20 @@ init(InitOptions options, int & retval)
     }
   }
 
+  if (config->exists("/fawkes/mainapp/log_stderr_as_warn")) {
+    try {
+      bool log_stderr_as_warn = config->get_bool("/fawkes/mainapp/log_stderr_as_warn");
+      if (log_stderr_as_warn) {
+#ifdef HAVE_LOGGING_FD_REDIRECT
+	log_fd_redirect_stderr_ =
+	  new LogFileDescriptorToLog(STDERR_FILENO, logger, "stderr", Logger::LL_WARN);
+#else
+	logger->log_warn("FawkesMainThread", "stderr log redirection enabled but not available at compile time");
+#endif
+      }
+    } catch (Exception &e) {} // ignored
+  }
+
   // *** Determine network parameters
   unsigned int net_tcp_port     = 1910;
   std::string  net_service_name = "Fawkes on %h";
@@ -410,6 +431,10 @@ cleanup()
   delete thread_manager;
   delete aspect_manager;
   delete shm_registry;
+#ifdef HAVE_LOGGING_FD_REDIRECT
+  delete log_fd_redirect_stderr_;
+  delete log_fd_redirect_stdout_;
+#endif
 
   main_thread = NULL;
   argument_parser = NULL;
@@ -423,6 +448,10 @@ cleanup()
   aspect_manager = NULL;
   shm_registry = NULL;
   blackboard = NULL;
+#ifdef HAVE_LOGGING_FD_REDIRECT
+  log_fd_redirect_stderr_ = NULL;
+  log_fd_redirect_stdout_ = NULL;
+#endif
 
   // implicitly frees multi_logger and all sub-loggers
   LibLogger::finalize();

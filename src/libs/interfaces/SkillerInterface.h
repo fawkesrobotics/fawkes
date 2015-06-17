@@ -67,6 +67,10 @@ class SkillerInterface : public Interface
       carry your instance serial your exec messages will be ignored. Aquire control with
       the AquireControlMessage. Make sure you release control before exiting.
      */
+    uint32_t msgid; /**< 
+      The ID of the message that is currently being processed,
+      or 0 if no message is being processed.
+     */
     int32_t status; /**< 
       The status of the current skill execution.
      */
@@ -227,6 +231,9 @@ class SkillerInterface : public Interface
   uint32_t exclusive_controller() const;
   void set_exclusive_controller(const uint32_t new_exclusive_controller);
   size_t maxlenof_exclusive_controller() const;
+  uint32_t msgid() const;
+  void set_msgid(const uint32_t new_msgid);
+  size_t maxlenof_msgid() const;
   SkillStatusEnum status() const;
   void set_status(const SkillStatusEnum new_status);
   size_t maxlenof_status() const;

@@ -1,0 +1,29 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/openprs
+---
+openprs-agent:
+
+  # In which mode should the agent kernel run? One of:
+  # - OPRS:  run in console mode
+  # - XOPRS: run in graphical mode
+  oprs-mode: OPRS
+
+  # Whether to wait for a GDB connection for a short time at startup
+  # or not. Use this to debug problems in OpenPRS modules. It will
+  # instruct mod_utils to wait 10 seconds on startup to allow for a
+  # gdb connection being made in that time.
+  gdb-delay: false
+
+  # The agent include file to load. This file should contain everything
+  # to setup the agent. Some standard modules are already loaded by the
+  # agent itself. In particular should the file load the agent's OPs.
+  # Make sure that the include file is in the OpenPRS data path.
+  agent: example
+
+  # Below you are agent-specific settings
+  example:
+    # How long to wait inbetween loops (when no intention is active)
+    idle-looptime-sec: 0
+    idle-looptime-usec: 25000

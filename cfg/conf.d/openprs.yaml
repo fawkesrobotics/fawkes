@@ -1,0 +1,87 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/openprs
+---
+openprs:
+
+  # Configuration related to mp-oprs
+  message-passer:
+    # Run the message passer explicitly? Disabling this allows to
+    # run mp-oprs on your own. Note that if it is run neither by
+    # Fawkes nor by yourself it will be started automatically by
+    # openprs-server and not be stopped on exit.
+    run: true
+
+    # the command to execute for the message passer,
+    # can be in PATH or an absolute path
+    binary: mp-oprs
+
+    # Hostname where the message passer can be reached. Warning,
+    # OpenPRS is quite picky about the hostname. Set this only
+    # if you run mp-oprs yourself on a _remote_ host.
+    #hostname: some.remote-host.com
+    
+    # The TCP port that mp-oprs listens on for connections.
+    # If mp-oprs is started by Fawkes it will be instructed to
+    # listen on that port. If disabled, this is where we expect
+    # to be able to communicate with the message passer.
+    tcp-port: !tcp-port 3300
+
+    # Use a proxy for message passer communication?
+    # If enabled it will print forwarded messages in the log file.
+    # OPRS kernels will be instructed to use this port for communication.
+    use-proxy: false
+
+    # TCP port to use as proxy "message passer" port
+    proxy-tcp-port: !tcp-port 3301
+
+
+  # Configuration related to oprs-server
+  server:
+    # Run oprs-server explicitly? If enabled (true) Fawkes will
+    # run oprs-server when the openprs plugin is loaded and
+    # terminate it when the plugin is unloaded.
+    run: true
+
+    # the command to execute for the oprs-server
+    # can be in PATH or an absolute path
+    binary: oprs-server
+
+    # Hostname where the oprs-server can be reached. Warning,
+    # OpenPRS is quite picky about the hostname. Set this only
+    # if you run oprs-server yourself on a _remote_ host.
+    #hostname: some.remote-host.com
+
+    # The TCP port that oprs-server listens on for connections.
+    # If oprs-server is started by Fawkes it will be instructed to
+    # listen on that port. If disabled, this is where we expect
+    # to be able to communicate with oprs-server.
+    tcp-port: !tcp-port 3400
+
+    # TCP port to use as proxy oprs-server port.
+    # The oprs-server proxy is always needed as it is the only way
+    # to inject commands for OpenPRS kernels.
+    proxy-tcp-port: !tcp-port 3401
+
+    # Time in seconds to wait for the server to be reachable on
+    # initializing the plugin. This is particularly relevant when
+    # run is set to true as on a loaded system it may take some
+    # time for the server to be actually up.
+    timeout: 15
+
+  kernels:
+    # This will be posted as OPRS_DATA_PATH environment variable for
+    # newly instantiated kernels. The special string $HOME will be
+    # replaced by the user's home directory (or whatever is set as
+    # the fawkes process' HOME environment variable).
+    data-path: ["@FAWKES_BASEDIR@/src/plugins/openprs/data",
+                "/usr/share/openprs/data",
+                "$HOME/openprs", "$HOME/robotics/openprs"]
+
+    # Timeout for the kernel process to come up after starting it.
+    # This is relevant especially on loaded system, e.g. running
+    # multiple robot instances for simulation on a single machine.
+    # The timeout is given in seconds.
+    start-timeout: 30.0
+

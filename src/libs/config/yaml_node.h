@@ -34,6 +34,7 @@
 #include <iostream>
 #include <stack>
 #include <cerrno>
+#include <climits>
 #include <unistd.h>
 #include <algorithm>
 #include <yaml-cpp/traits.h>
@@ -159,6 +160,23 @@ namespace fawkes {
     convert(const std::string& input, YAML::_Null& output)
     {
       return input.empty() || input == "~" || input == "null" || input == "Null" || input == "NULL";
+    }
+
+    inline bool convert(const std::string &input, unsigned int &rhs)
+    {
+      char *endptr;
+      long int l = strtol(input.c_str(), &endptr, 10);
+
+      if ((errno == ERANGE && (l == LONG_MAX || l == LONG_MIN)) || (errno != 0 && l == 0)) {
+	return false;
+      }
+      if (endptr == input.c_str())  return false;
+      if (*endptr != 0)  return false;
+      if (l < 0)   return false;
+
+      rhs = (unsigned int)l;
+
+      return true;
     }
 
 
@@ -653,7 +671,7 @@ class YamlConfigurationNode
 	T rv;
 	return (yaml_utils::convert(list_values_[0], rv));
       } else {
-	return false;
+	return true;
       }
     } else {
       return (yaml_utils::convert(scalar_value_, rv));

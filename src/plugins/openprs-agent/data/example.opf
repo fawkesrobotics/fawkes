@@ -1,0 +1,45 @@
+
+;---------------------------------------------------------------------------
+;  example.opf - OpenPRS example agent
+;
+;  Created: Tue Sep 09 11:55:36 2014
+;  Copyright  2014  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+(
+
+(defop example-agent-init
+  :invocation (agent-init)
+  :setting (& (setting "idle-looptime-sec" $ilt_sec) (setting "idle-looptime-usec" $ilt_usec))
+              ; Settings if you were to use the team communication via protobuf
+	      ;(setting "peer-address" $peer-addr) (setting "peer-public-send-port" $peer-send-port)
+	      ;(setting "peer-public-recv-port" $peer-recv-port)
+  :body (
+    (! (time-set-idle-looptime $ilt_sec $ilt_usec))
+    (! (say "Example agent loaded and ready to run"))
+    (! (print "Example agent successfully initialized"))
+
+    ; *** EXAMPLES
+    ; The following has examples how to use certain agent features.
+    ; Load the navgraph and assert facts to make use of the graph
+    ;(! (navgraph-load))
+    ; setup protobuf communication and a public (unencrypted) channel
+    ;(! (pb-setup))
+    ;(! (pb-peer-create-local $peer-addr $peer-send-port $peer-recv-port @peer-id))
+    ; open an interface for reading:
+    ;(! (bb-open "SkillerInterface" "Skiller" BB-READ))
+  )
+  :effects ((~> (agent-init)))
+           ;(=> (peer-id public @peer-id))
+)
+
+(defop say
+  :invocation (! (say $text))
+  :call (say $text)
+  :context ()
+  :action (skill-call "say" "text" $text "wait" true)
+  :documentation "Invoke skiller to synthesize given text as speech."
+)
+
+)

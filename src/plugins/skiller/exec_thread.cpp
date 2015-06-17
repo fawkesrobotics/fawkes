@@ -182,6 +182,7 @@ SkillerExecutionThread::init()
     __lua->add_watcher(this);
   
     __skiller_if->set_skill_string("");
+    __skiller_if->set_msgid(0);
     __skiller_if->set_status(SkillerInterface::S_INACTIVE);
     __skiller_if->write();
 
@@ -286,9 +287,10 @@ SkillerExecutionThread::bb_interface_reader_removed(Interface *interface,
 /** Determines the skill status and writes it to the BB.
  * This method assumes that it is called from within loop() and lua_mutex is locked.
  * @param curss current skill string
+ * @param cur_msgid ID of message for which we currently execute @p curss
  */
 void
-SkillerExecutionThread::publish_skill_status(std::string &curss)
+SkillerExecutionThread::publish_skill_status(std::string &curss, unsigned int cur_msgid)
 {
   //const char *sst = "Unknown";
   LUA_INTEGER running = 0, final = 0, failed = 0;
@@ -345,6 +347,9 @@ SkillerExecutionThread::publish_skill_status(std::string &curss)
       */
 
       __skiller_if->set_skill_string(curss.c_str());
+      __skiller_if->set_msgid(cur_msgid);
+      __skiller_if->set_continuous(__continuous_run);
+
       __skiller_if->set_status(new_status);
 
       if ( ! __error_written && (new_status == SkillerInterface::S_FAILED) ) {
@@ -453,6 +458,7 @@ SkillerExecutionThread::loop()
 
   // Current skill string
   std::string curss = __skiller_if->skill_string();
+  unsigned int cur_msgid = __skiller_if->msgid();;
 
   unsigned int excl_ctrl   = __skiller_if->exclusive_controller();
   bool write_skiller_if    = false;
@@ -518,6 +524,7 @@ SkillerExecutionThread::loop()
 
 	  skill_enqueued = true;
 	  curss = m->skill_string();
+	  cur_msgid = m->id();
 	  __continuous_reset = true;
 	}
       } else {
@@ -619,7 +626,9 @@ SkillerExecutionThread::loop()
 #ifdef SKILLER_TIMETRACKING
     __tt->ping_start(__ttc_publish);
 #endif
-  publish_skill_status(curss);
+  __lua_ifi->write();
+
+  publish_skill_status(curss, cur_msgid);
   publish_skdbg();
 #ifdef SKILLER_TIMETRACKING
   __tt->ping_end(__ttc_publish);
@@ -630,7 +639,6 @@ SkillerExecutionThread::loop()
 
   __reader_just_left = false;
 
-  __lua_ifi->write();
 #ifdef SKILLER_TIMETRACKING
   __tt->ping_end(__ttc_looprst);
   __tt->ping_end(__ttc_total);
