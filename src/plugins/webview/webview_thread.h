@@ -121,6 +121,7 @@ class WebviewThread
   bool         __cfg_ssl_create;
   std::string  __cfg_ssl_key;
   std::string  __cfg_ssl_cert;
+  std::string  __cfg_ssl_cipher_suite;
   bool         __cfg_use_basic_auth;
   std::string  __cfg_basic_auth_realm;
   std::string  __cfg_access_log;

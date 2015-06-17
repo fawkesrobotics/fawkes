@@ -110,6 +110,11 @@ WebviewThread::init()
     __cfg_ssl_key  = config->get_string("/webview/ssl_key");
     __cfg_ssl_cert = config->get_string("/webview/ssl_cert");
 
+    try {
+      __cfg_ssl_cipher_suite = config->get_string("/webview/ssl_cipher_suite");
+      logger->log_debug(name(), "Using cipher suite %s", __cfg_ssl_cipher_suite.c_str());
+    } catch (Exception &e) {}
+
     if (__cfg_ssl_key[0] != '/')
       __cfg_ssl_key = std::string(CONFDIR"/") + __cfg_ssl_key;
 
@@ -167,8 +172,10 @@ WebviewThread::init()
 
   try {
     if (__cfg_use_ssl) {
-      __webserver  = new WebServer(__cfg_port, __dispatcher, __cfg_ssl_key.c_str(),
-				   __cfg_ssl_cert.c_str(), logger);
+      __webserver  = new WebServer(__cfg_port, __dispatcher,
+				   __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str(),
+				   __cfg_ssl_cipher_suite.empty() ? NULL : __cfg_ssl_cipher_suite.c_str(),
+				   logger);
     } else {
       __webserver  = new WebServer(__cfg_port, __dispatcher, logger);
     }

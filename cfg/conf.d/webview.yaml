@@ -23,6 +23,13 @@ webview:
   # Certificate file name, if not absolute relative to config dir.
   ssl_cert: webview.crt
 
+  # Default suite allowing only secure ciphers with 128 bits or more for
+  # the stream cipher. Only TLS 1.2 is allowed. Older versions or SSLv3
+  # are disabled.
+  # The cipher suite is documented as GnuTLS priority strings at
+  # http://gnutls.org/manual/html_node/Priority-Strings.html
+  ssl_cipher_suite: SECURE128:-VERS-SSL3.0:-VERS-TLS-ALL:+VERS-TLS1.2
+  
   # Use basic authentication?
   use_basic_auth: false
 
