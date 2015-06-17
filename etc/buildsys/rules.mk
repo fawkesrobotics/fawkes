@@ -95,7 +95,7 @@ ifeq ($(MAKELEVEL),1)
 endif
 all: presubdirs $(LIBS_all:%.so=%.$(SOEXT)) $(PLUGINS_all:%.so=%.$(SOEXT)) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs | silent-nothing-to-do-all
 gui: presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs | silent-nothing-to-do-gui
-test: presubdirs $(LIBS_test:%.so=%.$(SOEXT)) $(PLUGINS_test:%.so=%.$(SOEXT)) $(BINS_test) $(TARGETS_test) subdirs | silent-nothing-to-do-test
+test: presubdirs $(LIBS_test:%.so=%.$(SOEXT)) $(PLUGINS_test:%.so=%.$(SOEXT)) $(BINS_test) $(TARGETS_test) exec_test subdirs | silent-nothing-to-do-test
 uncolored-all: all
 uncolored-gui: gui
 uncolored-test: test
@@ -155,11 +155,15 @@ clean: presubdirs subdirs
 presubdirs: $(PRESUBDIRS)
 subdirs: $(SUBDIRS)
 
-ifneq ($(MAKECMDGOALS),clean)
-  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(MANPAGES_all)$(TARGETS_all)$(EXTRA_ALL),)
-subdirs: | $(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL)
-$(LIBS_all) $(PLUGINS_all) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL): | presubdirs
-  endif
+SUBDIRS_DEPS = $(foreach goal,$(filter-out clean,$(MAKECMDGOALS)), \
+	$(LIBS_$(goal)) $(PLUGINS_$(goal)) $(BINS_$(goal)) $(MANPAGES_$(goal)) $(TARGETS_$(goal)))
+ifeq ($(findstring all,$(MAKECMDGOALS)),all)
+  SUBDIRS_DEPS += $(EXTRA_ALL)
+endif
+
+ifneq ($(strip $(SUBDIRS_DEPS)),)
+subdirs: | $(SUBDIRS_DEPS)
+$(SUBDIRS_DEPS): | presubdirs
 endif
 
 # Either presubdirs *or* subdirs have been specified
@@ -242,6 +246,16 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 		echo -e "$(INDENT_PRINT)=== $(TYELLOW)Cannot generate man page for $* (asciidoc not installed)$(TNORMAL)"; \
 	fi
 
+# execute every test in $(BINS_test)
+exec_test: $(patsubst $(BINDIR)/%,exec_%,$(BINS_test))
+
+# execution of a single test.
+exec_gtest_%: $(BINDIR)/gtest_%
+	$(eval BUILT_PARTS += $@)
+	$(SILENT)echo -e "$(INDENT_PRINT)[TEST] $(BINDIR)/gtest_$*"
+	$(SILENT)exec $(BINDIR)/gtest_$* --gtest_color=yes | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
+		test $${PIPESTATUS[0]} -eq 0
+
 .SECONDEXPANSION:
 $(BINDIR)/%: $$(OBJS_$$(call nametr,$$*))
 	$(eval BUILT_PARTS += $@)
@@ -281,10 +295,6 @@ else
     endif
   endif
 endif
-
-.PHONY:
-test:
-	$(foreach B, $(BINS_test), $(B))
 
 endif # __buildsys_rules_mk_
 
