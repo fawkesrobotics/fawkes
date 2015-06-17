@@ -1413,7 +1413,7 @@ Interface::parse_uid(const char *uid, std::string &type, std::string &id)
 #define xstr(s) str(s)
   if ((ec = regcomp(&re,
 		    "^([a-zA-Z0-9]{1," xstr(__INTERFACE_TYPE_SIZE) "})::"
-		    "([a-zA-Z0-9 _\\.-]{1," xstr(__INTERFACE_ID_SIZE) "})$",
+		    "([a-zA-Z0-9 _/\\.-]{1," xstr(__INTERFACE_ID_SIZE) "})$",
 		    REG_EXTENDED)) != 0) {
     char errbuf[1024];
     regerror(ec, &re, errbuf, 1024);

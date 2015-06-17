@@ -73,6 +73,7 @@ InterfaceFieldIterator::InterfaceFieldIterator(Interface *interface,
  */
 InterfaceFieldIterator::InterfaceFieldIterator(const InterfaceFieldIterator &fit)
 {
+  __interface = fit.__interface;
   __infol = fit.__infol;
   if ( fit.__value_string ) {
     __value_string = strdup(fit.__value_string);
