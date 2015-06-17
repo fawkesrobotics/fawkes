@@ -1,4 +1,4 @@
-
+  
 /***************************************************************************
  *  mod_blackboard.cpp -  OpenPRS blackboard module
  *
@@ -410,6 +410,54 @@ action_blackboard_read(TermList terms)
 }
 
 
+/** Searches for a given entry in the bb-date object
+ *  specified by String. Returns nil if entry not present */
+extern "C"
+Term *
+func_blackboard_value(TermList terms)
+{
+  int terms_len = sl_slist_length(terms);
+  if (terms_len != 2) {
+    fprintf(stderr, "Error[bb-value]: invalid number of "
+	    "arguments: req 2, got %i\n", terms_len);
+    ACTION_FAIL(); 
+  }
+  Term *dlist = (Term *)get_list_pos(terms, 1);
+  Term *name  = (Term *)get_list_pos(terms, 2);
+  Term *restemp;
+  
+  if (dlist->type != LISP_LIST) {
+    fprintf(stderr, "Error[bb-value]: first argument is not a LISP_LIST\n");
+    ACTION_FAIL();
+  }
+  if (name->type != STRING) {
+    fprintf(stderr, "Error[bb-value]: interface ID is not a STRING\n");
+    ACTION_FAIL();
+  }
+  char* pattern = name->u.string;
+  int i = 1;
+  while (i < l_length(dlist->u.l_list) - 1) {
+    Term *t1 = get_term_from_l_car(l_nth(dlist->u.l_list, i));
+    t1 = t1;
+    if (t1->type == STRING) {             
+      char* searched = t1->u.string;
+      if (strcmp(pattern, searched) == 0) {
+	restemp = get_term_from_l_car(l_nth((dlist->u).l_list, i+1)); 
+	// cast string objects to symbols to prevent upper-/lowercase
+	// differences in db.
+	if (restemp->type == STRING) {
+	  std::string outputs = std::string(restemp->u.string);
+	  std::transform(outputs.begin(), outputs.end(), outputs.begin(), ::tolower);
+	  restemp = build_id(declare_atom(outputs.c_str())); 
+	}
+	return copy_term(restemp);
+      }
+      ++i;
+    }
+  }
+  fprintf(stderr, "Error[bb-value]: wanted entry in bb-data not present\n");
+  ACTION_FAIL();
+}
 
 /** Entry function for the OpenPRS module. */
 extern "C"
@@ -433,6 +481,7 @@ void init()
   g_bb_write_sym = declare_atom("BB-WRITE");
   g_bb_data_sym  = declare_atom("bb-data");
   declare_pred_from_symbol(g_bb_data_sym);
+  make_and_declare_eval_funct("bb-value", func_blackboard_value ,2);
   make_and_declare_action("bb-open", action_blackboard_open, 3);
   make_and_declare_action("bb-close", action_blackboard_close, 2);
   make_and_declare_action("bb-read", action_blackboard_read, 2);

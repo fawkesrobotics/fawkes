@@ -38,6 +38,7 @@
 #include <ev-predicate_f-pub.h>
 
 #include <string>
+#include <algorithm>
 #include <cstring>
 #include <unistd.h>
 
