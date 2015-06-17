@@ -36,6 +36,7 @@
 #include <interface/interface_info.h>
 
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/threading/refc_rwlock.h>
 #include <core/exceptions/system.h>
 #include <utils/system/dynamic_module/module.h>
@@ -251,6 +252,15 @@ BlackBoardInterfaceManager::create_interface(const char *type, const char *ident
 Interface *
 BlackBoardInterfaceManager::open_for_reading(const char *type, const char *identifier, const char *owner)
 {
+  if (strlen(type) > __INTERFACE_TYPE_SIZE) {
+    throw Exception("Interface type '%s' too long, maximum length is %zu",
+		    type, __INTERFACE_TYPE_SIZE);
+  }
+  if (strlen(identifier) > __INTERFACE_ID_SIZE) {
+    throw Exception("Interface ID '%s' too long, maximum length is %zu",
+		    type, __INTERFACE_ID_SIZE);
+  }
+
   mutex->lock();
   Interface *iface = NULL;
   void *ptr = NULL;
@@ -406,6 +416,15 @@ BlackBoardInterfaceManager::open_multiple_for_reading(const char *type_pattern,
 Interface *
 BlackBoardInterfaceManager::open_for_writing(const char *type, const char *identifier, const char *owner)
 {
+  if (strlen(type) > __INTERFACE_TYPE_SIZE) {
+    throw Exception("Interface type '%s' too long, maximum length is %zu",
+		    type, __INTERFACE_TYPE_SIZE);
+  }
+  if (strlen(identifier) > __INTERFACE_ID_SIZE) {
+    throw Exception("Interface ID '%s' too long, maximum length is %zu",
+		    type, __INTERFACE_ID_SIZE);
+  }
+
   mutex->lock();
   memmgr->lock();
 
@@ -501,9 +520,8 @@ BlackBoardInterfaceManager::close(Interface *interface)
     notifier->notify_of_interface_destroyed(interface->__type, interface->__id);
   }
 
-  mutex->lock();
+  MutexLocker lock(mutex);
   delete_interface_instance( interface );
-  mutex->unlock();
 }
 
 

@@ -2,9 +2,8 @@
 /***************************************************************************
  *  parser.h - Interface config parser
  *
- *  Generated: Tue Oct 10 17:29:33 2006
- *  Copyright  2006  Tim Niemueller [www.niemueller.de]
- *
+ *  Created: Tue Oct 10 17:29:33 2006
+ *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

@@ -588,9 +588,11 @@ ThreadList::finalize(ThreadFinalizer *finalizer)
       me.append("AspectIniFin called Thread[%s]::finalize() which failed", (*i)->name());
       me.append(e);
     } catch (Exception &e) {
+      error = true;
       me.append("AspectIniFin called Thread[%s]::finalize() which failed", (*i)->name());
       me.append(e);
     } catch (...) {
+      error = true;
       me.append("Thread[%s]::finalize() threw unsupported exception", (*i)->name());
     }
     try {
