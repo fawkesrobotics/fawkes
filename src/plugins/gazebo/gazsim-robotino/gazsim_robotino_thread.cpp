@@ -81,6 +81,7 @@ RobotinoSimThread::init()
   }
   gyro_buffer_size_ = config->get_int("/gazsim/robotino/gyro-buffer-size");
   gyro_delay_ = config->get_float("/gazsim/robotino/gyro-delay");
+  infrared_sensor_index_ = config->get_int("/gazsim/robotino/infrared-sensor-index");
   
   //Open interfaces
   motor_if_  = blackboard->open_for_writing<MotorInterface>("Robotino");
@@ -91,9 +92,9 @@ RobotinoSimThread::init()
   //Create suscribers
   pos_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gps"), &RobotinoSimThread::on_pos_msg, this);
   gyro_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gyro"), &RobotinoSimThread::on_gyro_msg, this);
+  infrared_puck_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/infrared-puck-sensor"), &RobotinoSimThread::on_infrared_puck_sensor_msg, this);
   if(have_gripper_sensors_)
   {
-    infrared_puck_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/infrared-puck-sensor"), &RobotinoSimThread::on_infrared_puck_sensor_msg, this);
     gripper_laser_left_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-laser-left"), &RobotinoSimThread::on_gripper_laser_left_sensor_msg, this);
     gripper_laser_right_sensor_sub_ = gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-laser-right"), &RobotinoSimThread::on_gripper_laser_right_sensor_msg, this);
   }
@@ -196,9 +197,10 @@ RobotinoSimThread::loop()
     }
     imu_if_->write();
 
+    sens_if_->set_distance(infrared_sensor_index_, infrared_puck_sensor_dist_);
+    
     if(have_gripper_sensors_)
     {
-      sens_if_->set_distance(8, infrared_puck_sensor_dist_);
       sens_if_->set_analog_in(gripper_laser_left_pos_, analog_in_left_);
       sens_if_->set_analog_in(gripper_laser_right_pos_, analog_in_right_);
     }    
@@ -362,12 +364,11 @@ void RobotinoSimThread::on_gyro_msg(ConstVector3dPtr &msg)
   gyro_available_ = true;
   new_data_ = true;
 }
-void RobotinoSimThread::on_infrared_puck_sensor_msg(ConstFloatPtr &msg)
+void RobotinoSimThread::on_infrared_puck_sensor_msg(ConstLaserScanStampedPtr &msg)
 {
   MutexLocker lock(loop_mutex);
-
   //make sure that the config values for fetch_puck are set right
-  infrared_puck_sensor_dist_ = msg->value();
+  infrared_puck_sensor_dist_ = msg->scan().ranges(0);
   new_data_ = true;
 }
 void RobotinoSimThread::on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg)

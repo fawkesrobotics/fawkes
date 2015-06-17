@@ -81,7 +81,7 @@ class RobotinoSimThread
 
   //Handler functions for incoming messages
   void on_gyro_msg(ConstVector3dPtr &msg);
-  void on_infrared_puck_sensor_msg(ConstFloatPtr &msg);
+  void on_infrared_puck_sensor_msg(ConstLaserScanStampedPtr &msg);
   void on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg);
   void on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg);
   void on_pos_msg(ConstPosePtr &msg);
@@ -103,6 +103,7 @@ class RobotinoSimThread
   bool have_gripper_sensors_;
   int gripper_laser_left_pos_;
   int gripper_laser_right_pos_;
+  int infrared_sensor_index_;
 
   //Helper variables for motor:
 
