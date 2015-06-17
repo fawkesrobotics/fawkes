@@ -1,3 +1,4 @@
+DynamixelServoInterface.h
 LaserClusterInterface.h
 HumanSkeletonProjectionInterface.h
 KatanaInterface.h
