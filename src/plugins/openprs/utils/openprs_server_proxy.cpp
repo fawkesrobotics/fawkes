@@ -370,6 +370,10 @@ OpenPRSServerProxy::Mapping::transmit_command(const std::string &command)
   write_string_newline_to_socket(client_socket, command);
 }
 
+/** Read an int from a given socket.
+ * @param socket socket to read from
+ * @return read value
+ */
 int
 OpenPRSServerProxy::read_int_from_socket(boost::asio::ip::tcp::socket &socket)
 {
@@ -383,6 +387,10 @@ OpenPRSServerProxy::read_int_from_socket(boost::asio::ip::tcp::socket &socket)
   }
 }
 
+/** Read a string from a given socket.
+ * @param socket socket to read from
+ * @return read value
+ */
 std::string
 OpenPRSServerProxy::read_string_from_socket(boost::asio::ip::tcp::socket &socket)
 {
@@ -405,6 +413,10 @@ OpenPRSServerProxy::read_string_from_socket(boost::asio::ip::tcp::socket &socket
 }
 
 
+/** Write an int to a given socket.
+ * @param socket socket to write to
+ * @param i value to write
+ */
 void
 OpenPRSServerProxy::write_int_to_socket(boost::asio::ip::tcp::socket &socket, int i)
 {
@@ -416,6 +428,10 @@ OpenPRSServerProxy::write_int_to_socket(boost::asio::ip::tcp::socket &socket, in
   }
 }
 
+/** Write a string to a given socket.
+ * @param socket socket to write to
+ * @param str string value to write
+ */
 void
 OpenPRSServerProxy::write_string_to_socket(boost::asio::ip::tcp::socket &socket,
 					   const std::string &str)
@@ -433,6 +449,10 @@ OpenPRSServerProxy::write_string_to_socket(boost::asio::ip::tcp::socket &socket,
 }
 
 
+/** Write a string followed by a newline character to a given socket.
+ * @param socket socket to write to
+ * @param str string value to write
+ */
 void
 OpenPRSServerProxy::write_string_newline_to_socket(boost::asio::ip::tcp::socket &socket,
 						   const std::string &str)
