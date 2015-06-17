@@ -156,7 +156,7 @@ function INIT:init()
 end
 
 function APPROACH:init()
-   local x, y
+   local x, y, z
    local target = vars.targets[1]
     if vars.direction == DIR_Z then
       if target.orth ~= 0 then

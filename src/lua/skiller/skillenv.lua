@@ -115,6 +115,7 @@ local skill_env_template = {
    logger   = logger,
    config   = config,
    clock    = clock,
+   tf       = tf,
 
    -- Packages
    math     = math,
@@ -755,7 +756,8 @@ function skill_module(module_name)
       -- Skiller related stuff
       logger   = logger,
       config   = config,
-      clock    = clock
+      clock    = clock,
+      tf       = tf
    }
 
    for k,v in pairs(skillstati) do
