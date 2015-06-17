@@ -3,7 +3,7 @@
  *  laser-cluster-thread.h - Thread to detect a cluster in 2D laser data
  *
  *  Created: Sun Apr 21 01:17:09 2013
- *  Copyright  2011-2013  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -76,6 +76,11 @@ class LaserClusterThread
   typedef ColorCloud::Ptr ColorCloudPtr;
   typedef ColorCloud::ConstPtr ColorCloudConstPtr;
 
+  typedef pcl::PointXYZL LabelPointType;
+  typedef pcl::PointCloud<LabelPointType> LabelCloud;
+  typedef LabelCloud::Ptr LabelCloudPtr;
+  typedef LabelCloud::ConstPtr LabelCloudConstPtr;
+
  private:
   void set_position(fawkes::Position3DInterface *iface,
                     bool is_visible,
@@ -91,8 +96,10 @@ class LaserClusterThread
  private:
   fawkes::RefPtr<const pcl::PointCloud<PointType> > finput_;
   fawkes::RefPtr<pcl::PointCloud<ColorPointType> > fclusters_;
+  fawkes::RefPtr<pcl::PointCloud<LabelPointType> > fclusters_labeled_;
   CloudConstPtr input_;
   pcl::PointCloud<ColorPointType>::Ptr clusters_;
+  pcl::PointCloud<LabelPointType>::Ptr clusters_labeled_;
 
   pcl::SACSegmentation<PointType> seg_;
 
@@ -135,6 +142,7 @@ class LaserClusterThread
   unsigned int cfg_max_num_clusters_;
 
   std::string  output_cluster_name_;
+  std::string  output_cluster_labeled_name_;
 
   float        current_max_x_;
 
