@@ -40,6 +40,13 @@ class WaitConditionData
  public:
   pthread_cond_t cond;
 };
+
+void
+cleanup_mutex(void *arg)
+{
+  Mutex *mutex = (Mutex *) arg;
+  mutex->unlock();
+}
 /// @endcond
 
 
@@ -138,8 +145,10 @@ WaitCondition::wait()
   int err;
   if ( __own_mutex) {
     __mutex->lock();
+    pthread_cleanup_push(cleanup_mutex, __mutex);
     err = pthread_cond_wait( &(__cond_data->cond), &(__mutex->mutex_data->mutex) );
     __mutex->unlock();
+    pthread_cleanup_pop(0);
   } else {
     err = pthread_cond_wait( &(__cond_data->cond), &(__mutex->mutex_data->mutex) );
   }
@@ -169,8 +178,10 @@ WaitCondition::abstimed_wait(long int sec, long int nanosec)
 
   if ( __own_mutex) {
     __mutex->lock();
+    pthread_cleanup_push(cleanup_mutex, __mutex);
     err = pthread_cond_timedwait( &(__cond_data->cond), &(__mutex->mutex_data->mutex), &ts );
     __mutex->unlock();
+    pthread_cleanup_pop(0);
   } else {
     err = pthread_cond_timedwait( &(__cond_data->cond), &(__mutex->mutex_data->mutex), &ts );
   }
@@ -230,8 +241,10 @@ WaitCondition::reltimed_wait(unsigned int sec, unsigned int nanosec)
 
     if ( __own_mutex) {
       __mutex->lock();
+      pthread_cleanup_push(cleanup_mutex, __mutex);
       err = pthread_cond_timedwait( &(__cond_data->cond), &(__mutex->mutex_data->mutex), &ts );
       __mutex->unlock();
+      pthread_cleanup_pop(0);
     } else {
       err = pthread_cond_timedwait( &(__cond_data->cond), &(__mutex->mutex_data->mutex), &ts );
     }
@@ -289,6 +302,5 @@ WaitCondition::wake_all()
     pthread_cond_broadcast( &(__cond_data->cond) );
   }
 }
-
 
 } // end namespace fawkes
