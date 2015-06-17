@@ -25,11 +25,10 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  laser-filter laser-lines laser-cluster laser-pointclouds \
 	  static_transforms navgraph navgraph-clusters navgraph-generator colli \
 	  clips clips-agent clips-protobuf clips-webview clips-navgraph clips-ros \
-	  clips-tf openprs openprs-agent \
+	  clips-tf openprs openprs-agent eclipse-clp \
 	  mongodb mongodb_log \
 	  openni refboxcomm ros player xmlrpc gossip \
 	  robot_state_publisher gazebo dynamixel
-	  # readylogagent
 
 include $(BUILDSYSDIR)/rules.mk
 

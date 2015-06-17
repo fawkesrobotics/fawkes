@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="EclipseDebuggerInterface" author="Gesche Gierse" year="2012">
+  <data>
+    <comment>Interface to enable connection between tktools and readylog agent.</comment>
+    <field type="uint16" name="port">Port where to connect to</field>
+    <field type="string" length="100" name="host">Host where to connect to</field>
+  </data>
+  <message name="Connection">
+    <comment>Ask the writer (in the current usecase the readylog agent) for a connection.</comment>
+  </message>
+  
+</interface>
+

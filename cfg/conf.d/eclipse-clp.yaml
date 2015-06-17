@@ -1,0 +1,23 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/eclipse-clp
+---
+eclipse-clp:
+  agent: skillexec #name of the ECLiPSe module in which the agent is stored (needs to be placed in plugins/eclipse-clp/interpreter/)
+  
+  #Basedirectory of ECLiPSe
+  eclipse_dir: /usr/lib64/eclipse-clp-6.1-164-x86_64/
+
+  # List of directories to search for included files and modules
+  file_path: ["@FAWKESDIR@/src/plugins/eclipse-clp/interpreter/",
+              "@FAWKESDIR@/src/plugins/eclipse-clp/utils/",
+              "@FAWKESDIR@/src/eclipse-clp/externals/",
+              "@BASEDIR@/src/agents/@AGENT@/"]
+
+  elevator:
+    use_graph: False
+  skillexec:
+    use_graph: False
+  indi_elevator:
+    use_graph: False
