@@ -22,7 +22,7 @@ include $(BUILDSYSDIR)/clips.mk
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-LIBS_libfawkes_protobuf_clips = stdc++ m fawkescore fawkes_protobuf_comm
+LIBS_libfawkes_protobuf_clips = stdc++ m fawkescore fawkeslogging fawkes_protobuf_comm
 OBJS_libfawkes_protobuf_clips = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 HDRS_libfawkes_protobuf_clips = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 

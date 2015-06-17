@@ -94,7 +94,8 @@ ClipsProtobufThread::clips_context_init(const std::string &env_name,
 {
   logger->log_info(name(), "Called to initialize environment %s", env_name.c_str());
   pb_comms_[env_name] =
-    new ClipsProtobufCommunicator(*clips, *clips.objmutex_ptr(), cfg_proto_dirs_);
+    new ClipsProtobufCommunicator(*clips, *clips.objmutex_ptr(), cfg_proto_dirs_,
+				  logger);
   clips->batch_evaluate(SRCDIR"/clips/protobuf.clp");
 }
 
