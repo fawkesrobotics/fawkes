@@ -12,7 +12,7 @@ declare predicate protobuf-server-client-connected
 declare predicate protobuf-server-client-disconnected
 declare predicate protobuf-client-connected
 declare predicate protobuf-client-disconnected
-declare predicate protobuf-msg
+declare ff protobuf-msg 1
 
 load external "mod_protobuf" "init"
 load opf "protobuf.opf"
