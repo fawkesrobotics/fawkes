@@ -1,15 +1,37 @@
+
+/***************************************************************************
+ *  eclipseclp_config.cpp - config wrapper for Eclipse-CLP
+ *
+ *  Created: Fri Jan 30 17:17:16 2015 +0100
+ *  Copyright  2015  Gesche Gierse
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
+
 #include "eclipseclp_config.h"
 
 #include <eclipseclass.h>
 #include <cstring>
 #include <typeinfo>
 
-namespace fawkes{
-/** @class fawkes::EclExternalConfig
- * Wrapper class for using the config in the implementation of the external
- * predicates.
- * @author Daniel Beck
- */
+namespace fawkes {
+
+  /** @class fawkes::EclExternalConfig
+   * Wrapper class for using the config in the implementation of the external
+   * predicates.
+   * @author Gesche Gierse
+   */
 
 Configuration* EclExternalConfig::m_config = NULL;
 EclExternalConfig*  EclExternalConfig::m_instance = NULL;
