@@ -9,7 +9,7 @@
 load external "mod_time" "init"
 
 ;add (setting "print-time" T)
-
+undeclare function time
 declare ff time 0
 declare predicate time-update
 declare be fawkes-time
