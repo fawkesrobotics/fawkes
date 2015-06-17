@@ -25,6 +25,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  laser-filter laser-lines laser-cluster laser-pointclouds \
 	  static_transforms navgraph navgraph-clusters navgraph-generator colli \
 	  clips clips-agent clips-protobuf clips-webview clips-navgraph clips-ros \
+	  clips-tf \
 	  mongodb mongodb_log \
 	  openni refboxcomm ros player xmlrpc gossip \
 	  robot_state_publisher gazebo
@@ -38,7 +39,7 @@ katana: openrave
 amcl navgraph perception robotino: ros
 mongodb_log: mongodb
 mongodb: rrd
-clips-navgraph clips-agent clips-protobuf: clips
+clips-navgraph clips-agent clips-protobuf clips-tf: clips
 clips-navgraph navgraph-clusters: navgraph
 clips-webview: clips webview
 clips-ros: clips ros
