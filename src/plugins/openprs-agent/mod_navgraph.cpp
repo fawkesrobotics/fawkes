@@ -1,9 +1,8 @@
-
 /***************************************************************************
  *  mod_navgraph.cpp -  OpenPRS navgraph module
  *
  *  Created: Fri Sep 05 16:22:26 2014
- *  Copyright  2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2014-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,8 +23,8 @@
 
 #include <plugins/openprs/mod_utils.h>
 #include <config/netconf.h>
-#include <utils/graph/yaml_navgraph.h>
-#include <utils/graph/topological_map_graph.h>
+#include <navgraph/yaml_navgraph.h>
+#include <navgraph/navgraph.h>
 #include <oprs_f-pub.h>
 
 using namespace fawkes;
@@ -35,7 +34,7 @@ extern "C" void finalize();
 // Global variables
 FawkesNetworkClient  *g_fnet_client = NULL;
 NetworkConfiguration *g_config = NULL;
-TopologicalMapGraph  *g_navgraph = NULL;
+NavGraph  *g_navgraph = NULL;
 
 
 extern "C"
@@ -54,8 +53,8 @@ action_navgraph_load(TermList terms)
 
     g_navgraph = load_yaml_navgraph(graph_file);
 
-    const std::vector<TopologicalMapNode> &nodes = g_navgraph->nodes();
-    const std::vector<TopologicalMapEdge> &edges = g_navgraph->edges();
+    const std::vector<NavGraphNode> &nodes = g_navgraph->nodes();
+    const std::vector<NavGraphEdge> &edges = g_navgraph->edges();
 
     TermList graph_tl = sl_make_slist();
     graph_tl = build_term_list(graph_tl, build_string(g_navgraph->name().c_str()));
