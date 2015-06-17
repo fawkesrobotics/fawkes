@@ -348,7 +348,6 @@ SkillerExecutionThread::publish_skill_status(std::string &curss, unsigned int cu
 
       __skiller_if->set_skill_string(curss.c_str());
       __skiller_if->set_msgid(cur_msgid);
-      __skiller_if->set_continuous(__continuous_run);
 
       __skiller_if->set_status(new_status);
 
