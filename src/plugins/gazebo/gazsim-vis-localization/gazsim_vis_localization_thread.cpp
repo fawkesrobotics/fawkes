@@ -60,6 +60,7 @@ void VisLocalizationThread::init()
   location_textures_ = config->get_string("/gazsim/visualization/location-textures");
   parent_name_ = config->get_string("/gazsim/visualization/localization/parent-name");
   label_size_ = config->get_float("/gazsim/visualization/localization/label-size");
+  label_height_ = config->get_float("/gazsim/visualization/localization/label-height");
 
   last_update_time_ = clock->now().in_sec();
 
@@ -106,7 +107,7 @@ void VisLocalizationThread::loop()
     msgs::Set(geomMsg->mutable_plane()->mutable_size(), math::Vector2d(label_size_, label_size_));
     msg_number.set_transparency(0.2);  
     msg_number.set_cast_shadows(false);
-    msgs::Set(msg_number.mutable_pose(), math::Pose(x, y, 0.5, 0, 0, 0));
+    msgs::Set(msg_number.mutable_pose(), math::Pose(x, y, label_height_, 0, 0, 0));
     msgs::Material::Script* script = msg_number.mutable_material()->mutable_script();
     script->add_uri(location_scripts_.c_str());
     script->add_uri(location_textures_.c_str());
@@ -122,7 +123,7 @@ void VisLocalizationThread::loop()
     msgs::Set(geomArrowMsg->mutable_plane()->mutable_size(), math::Vector2d(0.17, 0.17));
     msg_arrow.set_transparency(0.4);  
     msg_arrow.set_cast_shadows(false);
-    msgs::Set(msg_arrow.mutable_pose(), math::Pose(x, y, 0.51, 0, 0, ori - /*turn image right*/ M_PI / 2));
+    msgs::Set(msg_arrow.mutable_pose(), math::Pose(x, y, label_height_ + 0.01, 0, 0, ori - /*turn image right*/ M_PI / 2));
     msgs::Material::Script* arrow_script = msg_arrow.mutable_material()->mutable_script();
     arrow_script->add_uri(location_scripts_.c_str());
     arrow_script->add_uri(location_textures_.c_str());
