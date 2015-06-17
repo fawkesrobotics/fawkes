@@ -32,7 +32,11 @@
 	     else
 	     (bind ?a-type (type ?a))
 	     (switch ?a-type
-		     (case STRING then (bind ?sks (str-cat ?sks "\"" ?a "\"")))
+		     (case STRING then
+             (if (eq (sub-string 1 1 ?a) "{") then
+               (bind ?sks (str-cat ?sks ?a))
+              else
+               (bind ?sks (str-cat ?sks "\"" ?a "\""))))
 		     (case SYMBOL then
 			   (if (or (eq ?a true) (eq ?a false)) then
 			     (bind ?sks (str-cat ?sks ?a))
