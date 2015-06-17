@@ -96,6 +96,10 @@ LaserLinesThread::init()
     config->get_float(CFG_PREFIX"line_cluster_tolerance");
   cfg_cluster_quota_ =
     config->get_float(CFG_PREFIX"line_cluster_quota");
+  cfg_moving_avg_enabled_ =
+    config->get_bool(CFG_PREFIX"moving_avg_enabled");
+  cfg_moving_avg_window_size_ =
+    config->get_uint(CFG_PREFIX"moving_avg_window_size");
 
   cfg_switch_tolerance_ =
     config->get_float(CFG_PREFIX"switch_tolerance");
@@ -110,6 +114,11 @@ LaserLinesThread::init()
   try {
     //double rotation[4] = {0., 0., 0., 1.};
     line_ifs_.resize(cfg_max_num_lines_, NULL);
+    if(cfg_moving_avg_enabled_)
+    {
+      line_avg_ifs_.resize(cfg_max_num_lines_, NULL);
+      moving_average_windows_.resize(cfg_max_num_lines_);
+    }
     for (unsigned int i = 0; i < cfg_max_num_lines_; ++i) {
       char *tmp;
       if (asprintf(&tmp, "/laser-lines/%u", i + 1) != -1) {
@@ -119,6 +128,11 @@ LaserLinesThread::init()
 
 	line_ifs_[i] =
 	  blackboard->open_for_writing<LaserLineInterface>(id.c_str());
+	if(cfg_moving_avg_enabled_)
+	{
+	  line_avg_ifs_[i] =
+	    blackboard->open_for_writing<LaserLineInterface>((id + "/moving_avg").c_str());
+	}
 	/*
 	line_ifs_[i]->set_rotation(rotation);
 	line_ifs_[i]->write();
@@ -138,6 +152,10 @@ LaserLinesThread::init()
   } catch (Exception &e) {
     for (size_t i = 0; i < line_ifs_.size(); ++i) {
       blackboard->close(line_ifs_[i]);
+      if(cfg_moving_avg_enabled_)
+      {
+        blackboard->close(line_avg_ifs_[i]);
+      }
     }
     blackboard->close(switch_if_);
     throw;
@@ -182,6 +200,10 @@ LaserLinesThread::finalize()
   
   for (size_t i = 0; i < line_ifs_.size(); ++i) {
     blackboard->close(line_ifs_[i]);
+    if(cfg_moving_avg_enabled_)
+    {
+      blackboard->close(line_avg_ifs_[i]);
+    }
   }
   blackboard->close(switch_if_);
 
@@ -236,6 +258,10 @@ LaserLinesThread::loop()
 
     for (unsigned int i = 0; i < cfg_max_num_lines_; ++i) {
       set_line(line_ifs_[i], false);
+      if(cfg_moving_avg_enabled_)
+      {
+        set_line(line_avg_ifs_[i], false);
+      }
     }
 
     return;
@@ -269,15 +295,76 @@ LaserLinesThread::loop()
 	    {
 	      return l1.bearing < l2.bearing;
 	    });
-
+  std::vector<LineInfo> linfos_filtered;
+  linfos_filtered.resize(linfos.size());
+  if(cfg_moving_avg_enabled_)
+  {
+    
+    for(size_t info_cntr = 0; info_cntr < linfos.size(); ++info_cntr)
+    {
+      std::deque<LineInfo> &moving_avg_window = moving_average_windows_[info_cntr];
+      LineInfo &info = linfos[info_cntr];
+      LineInfo &filtered = linfos_filtered[info_cntr];
+      moving_avg_window.push_front(LineInfo(info));
+      if(moving_avg_window.size() > cfg_moving_avg_window_size_) {
+        moving_avg_window.pop_back();
+      }
+      
+      float if_point_on_line_avg[3] = {0,0,0};
+      float if_line_direction_avg[3] = {0,0,0};
+      float if_end_point_1_avg[3] = {0,0,0};
+      float if_end_point_2_avg[3] = {0,0,0};
+      float bearing_avg = 0;
+      float length_avg = 0;
+      
+      for(const LineInfo &avg_info: moving_avg_window) {
+        if_point_on_line_avg[0] += avg_info.base_point[0];
+        if_point_on_line_avg[1] += avg_info.base_point[1];
+        if_point_on_line_avg[2] += avg_info.base_point[2];
+        if_line_direction_avg[0] += avg_info.line_direction[0];
+        if_line_direction_avg[1] += avg_info.line_direction[1];
+        if_line_direction_avg[2] += avg_info.line_direction[2];
+        if_end_point_1_avg[0] += avg_info.end_point_1[0];
+        if_end_point_1_avg[1] += avg_info.end_point_1[1];
+        if_end_point_1_avg[2] += avg_info.end_point_1[2];
+        if_end_point_2_avg[0] += avg_info.end_point_2[0];
+        if_end_point_2_avg[1] += avg_info.end_point_2[1];
+        if_end_point_2_avg[2] += avg_info.end_point_2[2];
+        bearing_avg += avg_info.bearing;
+        length_avg += avg_info.length;
+      }
+      
+      size_t queue_size = moving_avg_window.size();
+      filtered.base_point = {if_point_on_line_avg[0] / queue_size,
+                             if_point_on_line_avg[1] / queue_size,
+                             if_point_on_line_avg[2] / queue_size};
+      filtered.line_direction = {if_line_direction_avg[0] / queue_size,
+                                 if_line_direction_avg[1] / queue_size,
+                                 if_line_direction_avg[2] / queue_size};
+      filtered.end_point_1 = {if_end_point_1_avg[0] / queue_size,
+                              if_end_point_1_avg[1] / queue_size,
+                              if_end_point_1_avg[2] / queue_size};
+      filtered.end_point_2 = {if_end_point_2_avg[0] / queue_size,
+                              if_end_point_2_avg[1] / queue_size,
+                              if_end_point_2_avg[2] / queue_size};
+      filtered.bearing = bearing_avg / queue_size;
+      filtered.length = length_avg / queue_size;
+    }
+  }
   // set line parameters
   size_t oi = 0;
   unsigned int line_if_idx = 0;
   for (size_t i = 0; i < linfos.size(); ++i) {
     const LineInfo &info = linfos[i];
+    const LineInfo &info_avg = linfos_filtered[i];
 
     if (line_if_idx < cfg_max_num_lines_) {
-      set_line(line_ifs_[line_if_idx++], true, finput_->header.frame_id, info);
+      set_line(line_ifs_[line_if_idx], true, finput_->header.frame_id, info);
+      if(cfg_moving_avg_enabled_)
+      {
+        set_line(line_avg_ifs_[line_if_idx], true, finput_->header.frame_id, info_avg);
+      }
+      line_if_idx++;
     }
 
     for (size_t p = 0; p < info.cloud->points.size(); ++p) {
@@ -299,10 +386,26 @@ LaserLinesThread::loop()
 
   for (unsigned int i = line_if_idx; i < cfg_max_num_lines_; ++i) {
     set_line(line_ifs_[i], false);
+    if(cfg_moving_avg_enabled_)
+    {
+      set_line(line_avg_ifs_[i], false);
+    }
   }
 
 #ifdef HAVE_VISUAL_DEBUGGING
-  publish_visualization(linfos);
+  std::vector<LineInfo> to_publish;
+  for(LineInfo info: linfos)
+  {
+    to_publish.push_back(info);
+  }
+  if(cfg_moving_avg_enabled_)
+  {
+    for(LineInfo info: linfos_filtered)
+    {
+      to_publish.push_back(info);
+    }
+  }
+  publish_visualization(to_publish);
 #endif
 
   //*lines_ = *tmp_lines;
@@ -354,6 +457,7 @@ LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
       { info.end_point_1[0], info.end_point_1[1], info.end_point_1[2] };
     float if_end_point_2[3] =
       { info.end_point_2[0], info.end_point_2[1], info.end_point_2[2] };
+
     iface->set_point_on_line(if_point_on_line);
     iface->set_line_direction(if_line_direction);
     iface->set_frame_id(frame_id.c_str());
