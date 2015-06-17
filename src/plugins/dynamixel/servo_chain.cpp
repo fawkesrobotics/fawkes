@@ -147,6 +147,10 @@ using namespace fawkes;
 /** Constructor.
  * @param device_file device file of the serial port
  * @param default_timeout_ms the timeout to apply by default to reading operations
+ * @param enable_echo_fix true to enable a fix for buggy serial adapters
+ * @param enable_connection_stability true to enable explicit timeout handling
+ * @param min_voltage minimum voltage to assume safe operation
+ * @param max_voltage maximum voltage to assume safe operation
  */
 DynamixelChain::DynamixelChain(const char *device_file, unsigned int default_timeout_ms, bool enable_echo_fix, bool enable_connection_stability, float min_voltage, float max_voltage)
 {
@@ -833,7 +837,6 @@ DynamixelChain::get_delay_time(unsigned char id, bool refresh)
 
 /** Get error flags set by the servo
  * @param id servo ID, not the broadcast ID
- * @param refresh if true, will issue a read command for the value
  * @return error flags
  */
 unsigned char
