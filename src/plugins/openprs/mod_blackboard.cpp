@@ -326,7 +326,7 @@ post_interface(Interface *i)
 	ADD_NUM_DATA(float, double, float, float);
 	break;
       case IFT_DOUBLE:
-	ADD_NUM_DATA(float, double, float, float);
+	ADD_NUM_DATA(double, double, float, float);
 	break;
       case IFT_STRING:
 	data = l_add_to_tail(data, build_string(f.get_value_string()));
