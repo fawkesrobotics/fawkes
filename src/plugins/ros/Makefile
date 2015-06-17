@@ -76,6 +76,10 @@ LIBS_ros_skiller = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect SkillerInterface
 OBJS_ros_skiller = skiller_plugin.o skiller_thread.o
 
+LIBS_ros_position_3d = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	      fawkesinterface fawkesrosaspect Position3DInterface
+OBJS_ros_position_3d = position_3d_thread.o position_3d_plugin.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
 	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) \
@@ -222,6 +226,14 @@ ifeq ($(HAVE_ROS),1)
   else
     WARN_TARGETS += warning_sensor_msgs
   endif
+  ifeq ($(call ros-have-pkg,fawkes_msgs),1)
+    CFLAGS_position_3d_thread += $(call ros-pkg-cflags,fawkes_msgs)
+    CFLAGS_position_3d_plugin = $(CFLAGS_position_3d_thread)
+    LDFLAGS_position_3d += $(call ros-pkg-lflags,fawkes_msgs)
+    PLUGINS_all += $(PLUGINDIR)/ros-position-3d.so
+  else
+    WARN_TARGETS += warning_fawkes_msgs
+  endif
 
   PLUGINS_all += $(PLUGINDIR)/ros-robot-description.so
 
@@ -285,6 +297,7 @@ warning_sensor_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS JointState Plugin$(TNORMAL) (ROS package sensor_msgs not found)"
 warning_fawkes_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS skiller plugin$(TNORMAL) (ROS package fawkes_msgs not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Position 3D Plugin$(TNORMAL) (ROS package fawkes_msgs not found)"
 warning_tinyxml:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS images plugin$(TNORMAL) (tinyxml[-devel] not installed)"
 endif
