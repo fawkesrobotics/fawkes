@@ -47,7 +47,12 @@ OBJS_eclipsedebugger = main.o eclipse_debugger.o
 
 OBJS_all = $(OBJS_eclipsedebugger)
 
-BINS_gui = $(BINDIR)/eclipsedebugger 
+ifeq ($(HAVE_GUI),1)
+  BINS_gui = $(BINDIR)/eclipsedebugger 
+else
+  WARN_TARGETS += warning_eclipsedebugger
+endif
+
 INST_RESDIRS = guis/eclipsedebugger
 
 
