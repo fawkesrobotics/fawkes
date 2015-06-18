@@ -103,7 +103,6 @@ class NavGraphSearchState : public fawkes::AStarState
   fawkes::NavGraph *map_graph_;
 
   fawkes::NavGraphConstraintRepo *constraint_repo_;
-  bool constrained_search_;
 
   size_t key_;
 
