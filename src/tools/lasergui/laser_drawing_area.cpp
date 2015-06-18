@@ -24,6 +24,7 @@
 #include "visdisplay.h"
 #include <interfaces/Laser720Interface.h>
 #include <interfaces/Laser360Interface.h>
+#include <interfaces/Laser1080Interface.h>
 #include <interfaces/ObjectPositionInterface.h>
 #include <interfaces/VisualDisplay2DInterface.h>
 #include <utils/math/angle.h>
@@ -523,6 +524,7 @@ LaserDrawingArea::draw_beams(const fawkes::Interface *itf,
   bool clockwise;
   const fawkes::Laser360Interface* itf360 = NULL;
   const fawkes::Laser720Interface* itf720 = NULL;
+  const fawkes::Laser1080Interface* itf1080 = NULL;
   if ((itf360 = dynamic_cast<const fawkes::Laser360Interface*>(itf))) {
     distances = itf360->distances();
     nd = itf360->maxlenof_distances();
@@ -531,6 +533,10 @@ LaserDrawingArea::draw_beams(const fawkes::Interface *itf,
     distances = itf720->distances();
     nd = itf720->maxlenof_distances();
     clockwise = itf720->is_clockwise_angle();
+  } else if ((itf1080 = dynamic_cast<const fawkes::Laser1080Interface*>(itf))) {
+    distances = itf1080->distances();
+    nd = itf1080->maxlenof_distances();
+    clockwise = itf1080->is_clockwise_angle();
   } else {
     throw fawkes::Exception("Interface is neither Laser360Interface nor Laser720Interface");
   }
@@ -904,10 +910,13 @@ LaserDrawingArea::draw_segments(const fawkes::Interface* itf,
   float *distances;
   const fawkes::Laser360Interface* itf360 = NULL;
   const fawkes::Laser720Interface* itf720 = NULL;
+  const fawkes::Laser1080Interface* itf1080 = NULL;
   if ((itf360 = dynamic_cast<const fawkes::Laser360Interface*>(itf))) {
     distances = itf360->distances();
   } else if ((itf720 = dynamic_cast<const fawkes::Laser720Interface*>(itf))) {
     distances = itf720->distances();
+  } else if ((itf1080 = dynamic_cast<const fawkes::Laser1080Interface*>(itf))) {
+    distances = itf1080->distances();
   } else {
     throw fawkes::Exception("Interface is neither Laser360Interface nor Laser720Interface");
   }

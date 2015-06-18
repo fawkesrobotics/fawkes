@@ -32,6 +32,7 @@
 #include <blackboard/interface_observer.h>
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Laser720Interface.h>
+#include <interfaces/Laser1080Interface.h>
 #include <core/threading/mutex.h>
 #include <utils/time/time.h>
 
@@ -80,6 +81,7 @@ class RosLaserScanThread
  private:
   std::list<fawkes::Laser360Interface *> __ls360_ifs;
   std::list<fawkes::Laser720Interface *> __ls720_ifs;
+  std::list<fawkes::Laser1080Interface *> __ls1080_ifs;
 
   ros::Subscriber __sub_ls;
 

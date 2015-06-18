@@ -60,6 +60,11 @@ class SickTiM55xCommonAcquisitionThread : public LaserAcquisitionThread
  protected:
   std::string  cfg_name_;
   std::string  cfg_prefix_;
+
+  std::string  dev_model_;
+
+ private:
+  unsigned int expected_num_data_;
 };
 
 

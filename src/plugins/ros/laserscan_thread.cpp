@@ -85,6 +85,8 @@ RosLaserScanThread::init()
     blackboard->open_multiple_for_reading<Laser360Interface>("*");
   __ls720_ifs =
     blackboard->open_multiple_for_reading<Laser720Interface>("*");
+  __ls1080_ifs =
+    blackboard->open_multiple_for_reading<Laser1080Interface>("*");
 
   std::list<Laser360Interface *>::iterator i360;
   for (i360 = __ls360_ifs.begin(); i360 != __ls360_ifs.end(); ++i360) {
@@ -111,6 +113,7 @@ RosLaserScanThread::init()
 
     __pubs[(*i360)->uid()] = pi;
   }
+
   std::list<Laser720Interface *>::iterator i720;
   for (i720 = __ls720_ifs.begin(); i720 != __ls720_ifs.end(); ++i720) {
     logger->log_info(name(), "Opened %s", (*i720)->uid());
@@ -135,10 +138,37 @@ RosLaserScanThread::init()
 
     __pubs[(*i720)->uid()] = pi;
   }
+
+  std::list<Laser1080Interface *>::iterator i1080;
+  for (i1080 = __ls1080_ifs.begin(); i1080 != __ls1080_ifs.end(); ++i1080) {
+    logger->log_info(name(), "Opened %s", (*i1080)->uid());
+    bbil_add_data_interface(*i1080);
+    bbil_add_reader_interface(*i1080);
+    bbil_add_writer_interface(*i1080);
+
+    std::string topname = topic_name((*i1080)->id(), "1080");
+
+    PublisherInfo pi;
+    pi.pub =
+      rosnode->advertise<sensor_msgs::LaserScan>(topname, 1);
+
+    logger->log_info(name(), "Publishing laser scan %s at %s, frame %s",
+                     (*i1080)->uid(), topname.c_str(), (*i1080)->frame());
+
+    pi.msg.header.frame_id = (*i1080)->frame();
+    pi.msg.angle_min = 0;
+    pi.msg.angle_max = 2*M_PI;
+    pi.msg.angle_increment = deg2rad(1. / 3.);
+    pi.msg.ranges.resize(1080);
+
+    __pubs[(*i1080)->uid()] = pi;
+  }
+
   blackboard->register_listener(this);
 
   bbio_add_observed_create("Laser360Interface", "*");
   bbio_add_observed_create("Laser720Interface", "*");
+  bbio_add_observed_create("Laser1080Interface", "*");
   blackboard->register_observer(this);
 }
 
@@ -166,6 +196,11 @@ RosLaserScanThread::finalize()
     blackboard->close(*i720);
   }
   __ls720_ifs.clear();
+  std::list<Laser1080Interface *>::iterator i1080;
+  for (i1080 = __ls1080_ifs.begin(); i1080 != __ls1080_ifs.end(); ++i1080) {
+    blackboard->close(*i1080);
+  }
+  __ls1080_ifs.clear();
 }
 
 
@@ -239,6 +274,7 @@ RosLaserScanThread::bb_interface_data_changed(fawkes::Interface *interface) thro
 {
   Laser360Interface *ls360if = dynamic_cast<Laser360Interface *>(interface);
   Laser720Interface *ls720if = dynamic_cast<Laser720Interface *>(interface);
+  Laser1080Interface *ls1080if = dynamic_cast<Laser1080Interface *>(interface);
 
   PublisherInfo &pi = __pubs[interface->uid()];
   sensor_msgs::LaserScan &msg = pi.msg;
@@ -269,7 +305,6 @@ RosLaserScanThread::bb_interface_data_changed(fawkes::Interface *interface) thro
 
     const Time *time = ls720if->timestamp();
 
-    sensor_msgs::LaserScan msg;
     __seq_num_mutex->lock();
     msg.header.seq = ++__seq_num;
     __seq_num_mutex->unlock();
@@ -278,11 +313,32 @@ RosLaserScanThread::bb_interface_data_changed(fawkes::Interface *interface) thro
 
     msg.angle_min = 0;
     msg.angle_max = 2*M_PI;
-    msg.angle_increment = deg2rad(1);
+    msg.angle_increment = deg2rad(1./2.);
     msg.range_min = 0.;
     msg.range_max = 1000.;
     msg.ranges.resize(720);
     memcpy(&msg.ranges[0], ls720if->distances(), 720*sizeof(float));
+
+    pi.pub.publish(pi.msg);
+
+  } else if (ls1080if) {
+    ls1080if->read();
+
+    const Time *time = ls1080if->timestamp();
+
+    __seq_num_mutex->lock();
+    msg.header.seq = ++__seq_num;
+    __seq_num_mutex->unlock();
+    msg.header.stamp = ros::Time(time->get_sec(), time->get_nsec());
+    msg.header.frame_id = ls1080if->frame();
+
+    msg.angle_min = 0;
+    msg.angle_max = 2*M_PI;
+    msg.angle_increment = deg2rad(1./3.);
+    msg.range_min = 0.;
+    msg.range_max = 1000.;
+    msg.ranges.resize(1080);
+    memcpy(&msg.ranges[0], ls1080if->distances(), 1080*sizeof(float));
 
     pi.pub.publish(pi.msg);
   }
@@ -337,8 +393,8 @@ RosLaserScanThread::bb_interface_created(const char *type, const char *id) throw
                        type, id, e.what());
       return;
     }
-  } else if (strncmp(type, "Laser720Interface", __INTERFACE_TYPE_SIZE) == 0) {
 
+  } else if (strncmp(type, "Laser720Interface", __INTERFACE_TYPE_SIZE) == 0) {
     Laser720Interface *ls720if;
     try {
       logger->log_info(name(), "Opening %s:%s", type, id);
@@ -378,6 +434,47 @@ RosLaserScanThread::bb_interface_created(const char *type, const char *id) throw
                        type, id, e.what());
       return;
     }
+
+  } else if (strncmp(type, "Laser1080Interface", __INTERFACE_TYPE_SIZE) == 0) {
+    Laser1080Interface *ls1080if;
+    try {
+      logger->log_info(name(), "Opening %s:%s", type, id);
+      ls1080if = blackboard->open_for_reading<Laser1080Interface>(id);
+    } catch (Exception &e) {
+      // ignored
+      logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what());
+      return;
+    }
+
+    try {
+      bbil_add_data_interface(ls1080if);
+      bbil_add_reader_interface(ls1080if);
+      bbil_add_writer_interface(ls1080if);
+
+      std::string topname = topic_name(ls1080if->id(), "1080");
+
+      PublisherInfo pi;
+      pi.pub = rosnode->advertise<sensor_msgs::LaserScan>(topname, 1);
+
+      logger->log_info(name(), "Publishing 1080 laser scan %s at %s",
+                       ls1080if->uid(), topname.c_str());
+
+      pi.msg.header.frame_id = ls1080if->frame();
+      pi.msg.angle_min = 0;
+      pi.msg.angle_max = 2*M_PI;
+      pi.msg.angle_increment = deg2rad(0.5);
+      pi.msg.ranges.resize(1080);
+
+      __pubs[ls1080if->uid()] = pi;
+
+      blackboard->update_listener(this);
+      __ls1080_ifs.push_back(ls1080if);
+    } catch (Exception &e) {
+      blackboard->close(ls1080if);
+      logger->log_warn(name(), "Failed to register for %s:%s: %s",
+                       type, id, e.what());
+      return;
+    }
   }
 }
 
@@ -401,6 +498,7 @@ RosLaserScanThread::conditional_close(Interface *interface) throw()
   // Verify it's a laser interface
   Laser360Interface *ls360if = dynamic_cast<Laser360Interface *>(interface);
   Laser720Interface *ls720if = dynamic_cast<Laser720Interface *>(interface);
+  Laser1080Interface *ls1080if = dynamic_cast<Laser1080Interface *>(interface);
 
   if (ls360if) {
     std::list<Laser360Interface *>::iterator i;
@@ -432,6 +530,24 @@ RosLaserScanThread::conditional_close(Interface *interface) throw()
           blackboard->update_listener(this);
           blackboard->close(*i);
           __ls720_ifs.erase(i);
+          break;
+        }
+      }
+    }
+
+  } else if (ls1080if) {
+    std::list<Laser1080Interface *>::iterator i;
+    for (i = __ls1080_ifs.begin(); i != __ls1080_ifs.end(); ++i) {
+      if (*ls1080if == **i) {
+        if (! ls1080if->has_writer() && (ls1080if->num_readers() == 1)) {
+          // It's only us
+          logger->log_info(name(), "Last on %s, closing", ls1080if->uid());
+          bbil_remove_data_interface(*i);
+          bbil_remove_reader_interface(*i);
+          bbil_remove_writer_interface(*i);
+          blackboard->update_listener(this);
+          blackboard->close(*i);
+          __ls1080_ifs.erase(i);
           break;
         }
       }

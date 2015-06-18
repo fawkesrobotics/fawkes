@@ -39,6 +39,7 @@ namespace fawkes {
   class Interface;
   class Laser360Interface;
   class Laser720Interface;
+  class Laser1080Interface;
 }
 
 class LaserPointCloudThread
@@ -78,10 +79,11 @@ class LaserPointCloudThread
   /// @cond INTERNALS
   typedef struct {
     std::string id;
-    bool is_360;
+    unsigned int size;
     union {
       fawkes::Laser360Interface *as360;
       fawkes::Laser720Interface *as720;
+      fawkes::Laser1080Interface *as1080;
     } interface_typed;
     fawkes::Interface *interface;
 
@@ -95,6 +97,8 @@ class LaserPointCloudThread
   float cos_angles360[360];
   float sin_angles720[720];
   float cos_angles720[720];
+  float sin_angles1080[1080];
+  float cos_angles1080[1080];
 };
 
 #endif

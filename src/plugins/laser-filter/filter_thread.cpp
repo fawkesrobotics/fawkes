@@ -22,6 +22,7 @@
 #include "filter_thread.h"
 #include "filters/max_circle.h"
 #include "filters/720to360.h"
+#include "filters/1080to360.h"
 #include "filters/deadspots.h"
 #include "filters/cascade.h"
 #include "filters/reverse_angle.h"
@@ -40,6 +41,7 @@
 
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Laser720Interface.h>
+#include <interfaces/Laser1080Interface.h>
 
 #include <cstring>
 #include <memory>
@@ -97,17 +99,11 @@ LaserFilterThread::init()
       std::string filter_name = std::string(suffix.substr(0,suffix.find("/")));
       std::string conf_key = std::string(suffix.substr(suffix.find("/")+1,suffix.length()));
       
-      
-      logger->log_debug(name(),"filter_name is %s", filter_name.c_str());
-      logger->log_debug(name(),"conf_key is %s", conf_key.c_str());
-      if (conf_key != "type") {
-	continue;
-      }
+      if (conf_key != "type")  continue;
 
       if (! i->is_string()) {
 	throw Exception("Filter value %s is not a string", i->path());
       }
-
 	
       filters[filter_name] = i->get_string();
     }
@@ -120,10 +116,10 @@ LaserFilterThread::init()
       logger->log_debug(name(), "Adding filter %s (%s)",
 			filter_name.c_str(), filters[filter_name].c_str());
       __filter = create_filter(filters[filter_name], fpfx + filter_name + "/",
-			       __in[0].is_360 ? 360 : 720, __in_bufs);
+			       __in[0].size, __in_bufs);
     } else {
       LaserDataFilterCascade *cascade =
-        new LaserDataFilterCascade(__in[0].is_360 ? 360 : 720, __in_bufs);
+        new LaserDataFilterCascade(__in[0].size, __in_bufs);
 
       try {
 	std::map<std::string, std::string>::iterator f;
@@ -143,14 +139,9 @@ LaserFilterThread::init()
       __filter = cascade;
     }
 
-    if (__out[0].is_360 && (__filter->get_out_data_size() != 360)) {
-      Exception e("Output interface and filter data size for %s do not match (%u != 360)",
-		  __cfg_name.c_str(), __filter->get_out_data_size());
-      delete __filter;
-      throw e;
-    } else if (!__out[0].is_360 && (__filter->get_out_data_size() != 720)) {
-      Exception e("Output interface and filter data size for %s do not match (%u != 720)",
-		  __cfg_name.c_str(), __filter->get_out_data_size());
+    if (__out[0].size != __filter->get_out_data_size()) {
+      Exception e("Output interface and filter data size for %s do not match (%u != %u)",
+		  __cfg_name.c_str(), __out[0].size, __filter->get_out_data_size());
       delete __filter;
       throw e;
     }
@@ -210,12 +201,15 @@ LaserFilterThread::loop()
   const size_t in_num = __in.size();
   for (size_t i = 0; i != in_num; ++i) {
     __in[i].interface->read();
-    if (__in[i].is_360) {
+    if (__in[i].size == 360) {
       __in_bufs[i]->frame      = __in[i].interface_typed.as360->frame();
       *__in_bufs[i]->timestamp = __in[i].interface_typed.as360->timestamp();
-    } else {
+    } else if (__in[i].size == 720) {
       __in_bufs[i]->frame      = __in[i].interface_typed.as720->frame();
       *__in_bufs[i]->timestamp = __in[i].interface_typed.as720->timestamp();
+    } else if (__in[i].size == 1080) {
+      __in_bufs[i]->frame      = __in[i].interface_typed.as1080->frame();
+      *__in_bufs[i]->timestamp = __in[i].interface_typed.as1080->timestamp();
     }
   }
 
@@ -230,12 +224,15 @@ LaserFilterThread::loop()
   // Write output interfaces
   const size_t num = __out.size();
   for (size_t i = 0; i < num; ++i) {
-    if (__out[i].is_360) {
+    if (__out[i].size == 360) {
       __out[i].interface_typed.as360->set_timestamp(__out_bufs[i]->timestamp);
       __out[i].interface_typed.as360->set_frame(__out_bufs[i]->frame.c_str());
-    } else {
+    } else if (__out[i].size == 720) {
       __out[i].interface_typed.as720->set_timestamp(__out_bufs[i]->timestamp);
       __out[i].interface_typed.as720->set_frame(__out_bufs[i]->frame.c_str());
+    } else if (__out[i].size == 1080) {
+      __out[i].interface_typed.as1080->set_timestamp(__out_bufs[i]->timestamp);
+      __out[i].interface_typed.as1080->set_frame(__out_bufs[i]->frame.c_str());
     }
     __out[i].interface->write();
   }
@@ -292,12 +289,15 @@ LaserFilterThread::open_interfaces(std::string prefix,
       lif.interface = NULL;
 
       if (type == "Laser360Interface") {
-	lif.is_360 = true;
+	lif.size = 360;
       } else if (type == "Laser720Interface") {
-	lif.is_360 = false;
+	lif.size = 720;
+      } else if (type == "Laser1080Interface") {
+	lif.size = 1080;
       } else {
-	throw Exception("Interfaces must be of type Laser360Interface or "
-			"Laser720Interface, but it is '%s'", type.c_str());
+	throw Exception("Interfaces must be of type Laser360Interface, "
+			"Laser720Interface, or Laser1080Interface, "
+			"but it is '%s'", type.c_str());
       }
 
       lif.id = id;
@@ -311,16 +311,17 @@ LaserFilterThread::open_interfaces(std::string prefix,
 
   bufs.resize(ifs.size());
 
-  bool must_360 = ifs[0].is_360;
+  unsigned int req_size = ifs[0].size;
 
   try {
     if (writing) {
       for (unsigned int i = 0; i < ifs.size(); ++i) {
-	if (ifs[i].is_360) {
-	  if (! must_360) {
-	    throw Exception("Interfaces of mixed sizes for %s",
-			    __cfg_name.c_str());
-	  }
+	if (req_size != ifs[i].size) {
+	  throw Exception("Interfaces of mixed sizes for %s",
+			  __cfg_name.c_str());
+	}
+
+	if (ifs[i].size == 360) {
 	  logger->log_debug(name(), "Opening writing Laser360Interface::%s", ifs[i].id.c_str());
 	  Laser360Interface *laser360 = 
 	    blackboard->open_for_writing<Laser360Interface>(ifs[i].id.c_str());
@@ -332,12 +333,7 @@ LaserFilterThread::open_interfaces(std::string prefix,
           bufs[i] = new LaserDataFilter::Buffer();
 	  bufs[i]->values = laser360->distances();
 	  
-	} else {
-	  if (must_360) {
-	    throw Exception("Interfaces of mixed sizes for %s",
-			    __cfg_name.c_str());
-	  }
-
+	} else if (ifs[i].size == 720) {
 	  logger->log_debug(name(), "Opening writing Laser720Interface::%s", ifs[i].id.c_str());
 	  Laser720Interface *laser720 = 
 	    blackboard->open_for_writing<Laser720Interface>(ifs[i].id.c_str());
@@ -348,11 +344,24 @@ LaserFilterThread::open_interfaces(std::string prefix,
 	  ifs[i].interface = laser720;
           bufs[i] = new LaserDataFilter::Buffer();
 	  bufs[i]->values = laser720->distances();
+
+	} else if (ifs[i].size == 1080) {
+	  logger->log_debug(name(), "Opening writing Laser1080Interface::%s",
+			    ifs[i].id.c_str());
+	  Laser1080Interface *laser1080 = 
+	    blackboard->open_for_writing<Laser1080Interface>(ifs[i].id.c_str());
+
+	  laser1080->set_auto_timestamping(false);
+
+          ifs[i].interface_typed.as1080 = laser1080;
+	  ifs[i].interface = laser1080;
+          bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i]->values = laser1080->distances();
 	}
       }
     } else {
       for (unsigned int i = 0; i < ifs.size(); ++i) {
-	if (ifs[i].is_360) {
+	if (ifs[i].size == 360) {
 	  logger->log_debug(name(), "Opening reading Laser360Interface::%s", ifs[i].id.c_str());
 	  Laser360Interface *laser360 =
 	    blackboard->open_for_reading<Laser360Interface>(ifs[i].id.c_str());
@@ -363,7 +372,7 @@ LaserFilterThread::open_interfaces(std::string prefix,
           bufs[i]->frame  = laser360->frame();
 	  bufs[i]->values = laser360->distances();
 	  
-	} else {
+	} else if (ifs[i].size == 720) {
 	  logger->log_debug(name(), "Opening reading Laser720Interface::%s", ifs[i].id.c_str());
 	  Laser720Interface *laser720 =
 	    blackboard->open_for_reading<Laser720Interface>(ifs[i].id.c_str());
@@ -373,6 +382,18 @@ LaserFilterThread::open_interfaces(std::string prefix,
           bufs[i] = new LaserDataFilter::Buffer();
           bufs[i]->frame  = laser720->frame();
 	  bufs[i]->values = laser720->distances();
+
+	} else if (ifs[i].size == 1080) {
+	  logger->log_debug(name(), "Opening reading Laser1080Interface::%s",
+			    ifs[i].id.c_str());
+	  Laser1080Interface *laser1080 =
+	    blackboard->open_for_reading<Laser1080Interface>(ifs[i].id.c_str());
+
+          ifs[i].interface_typed.as1080 = laser1080;
+	  ifs[i].interface = laser1080;
+          bufs[i] = new LaserDataFilter::Buffer();
+          bufs[i]->frame  = laser1080->frame();
+	  bufs[i]->values = laser1080->distances();
 	}
       }
     }
@@ -398,6 +419,12 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
       average = config->get_bool((prefix + "average").c_str());
     } catch (Exception &e) {} // ignore
     return new Laser720to360DataFilter(average, in_data_size, inbufs);
+  } else if (filter_type == "1080to360") {
+    bool average = false;
+    try {
+      average = config->get_bool((prefix + "average").c_str());
+    } catch (Exception &e) {} // ignore
+    return new Laser1080to360DataFilter(average, in_data_size, inbufs);
   } else if (filter_type == "reverse") {
     return new LaserReverseAngleDataFilter(in_data_size, inbufs);
   } else if (filter_type == "max_circle") {

@@ -31,6 +31,7 @@
 namespace fawkes {
   class Laser360Interface;
   class Laser720Interface;
+  class Laser1080Interface;
   class ObjectPositionInterface;
   class CairoRobotDrawer;
   class LegtrackerTrackinterface;

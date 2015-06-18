@@ -41,6 +41,7 @@
 namespace fawkes {
   class Laser360Interface;
   class Laser720Interface;
+  class Laser1080Interface;
 }
 
 class LaserFilterThread
@@ -68,11 +69,12 @@ class LaserFilterThread
  private:
   /// @cond INTERNALS
   typedef struct {
-    bool               is_360;
-    std::string        id;
+    std::string    id;
+    unsigned int   size;
     union {
-      fawkes::Laser360Interface *as360;
-      fawkes::Laser720Interface *as720;
+      fawkes::Laser360Interface  *as360;
+      fawkes::Laser720Interface  *as720;
+      fawkes::Laser1080Interface *as1080;
     } interface_typed;
     fawkes::Interface *interface;
   } LaserInterface;

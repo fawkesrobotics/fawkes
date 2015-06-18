@@ -1,0 +1,37 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/laser-filter
+---
+plugins/laser-filter:
+  tim5xx-min-sector:
+
+    # URG input interface
+    #in/urg: Laser360Interface::Laser urg
+    in/sick-tim55x: Laser1080Interface::Laser tim55x-usb
+
+    # URG filtered output interface
+    out/filtered: Laser1080Interface::Laser tim55x-usb filtered
+
+    filters:
+      1-min:
+        # Threshold for minimum value to get rid of erroneous beams on most black surfaces
+        type: min_circle
+
+        # Radius of minimum length; m
+        radius: 0.12
+
+      2-sector:
+        # Ignore a defined range of beams (e.g. those hitting the robot itself)
+        type: circle_sector
+
+        # Indices in laser interface, this example configuration is
+        # for the Laser1080Interface of a Sick TiM571
+        from: 900
+        to: 180
+
+      3-max:
+        # Shorten beams to a given maximum radius
+        type: max_circle
+
+        radius: 0.4
