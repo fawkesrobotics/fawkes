@@ -63,6 +63,7 @@ $(LUALIBDIR)/fawkesnavgraph.$(SOEXT): | $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
 
 ifneq ($(MAKECMDGOALS),clean)
 aspect: | $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
+generators: | $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
 endif
 
 include $(BUILDSYSDIR)/base.mk
