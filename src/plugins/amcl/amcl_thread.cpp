@@ -37,6 +37,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <libgen.h>
 
 #ifdef HAVE_ROS
 #  include <ros/node_handle.h>
