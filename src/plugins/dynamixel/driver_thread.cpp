@@ -579,7 +579,7 @@ DynamixelDriverThread::set_speed(unsigned int servo_id, unsigned int speed)
   Servo &s = servos_[servo_id];
 
   ScopedRWLock lock(s.value_rwlock);
-  if ((speed >= 0) && (speed <= DynamixelChain::MAX_SPEED)) {
+  if (speed <= DynamixelChain::MAX_SPEED) {
     s.vel = speed;
     s.velo_pending = true;
   } else {
