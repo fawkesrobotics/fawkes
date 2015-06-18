@@ -46,7 +46,7 @@ all: $(WARN_TARGETS)
 warning_navgraph:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)navgraph generators library cannot be built$(TNORMAL) ($(NAVGRAPH_ERROR))"
 warning_cgal:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)navgraph generators library cannot be built$(TNORMAL) (CGAL: $(CGAL_ERRORS))"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)navgraph generators library cannot be built$(TNORMAL) (CGAL: $(CGAL_ERROR))"
 endif
 
 
