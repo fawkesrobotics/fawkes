@@ -57,7 +57,7 @@ using namespace fawkes;
 SickTiM55xEthernetAcquisitionThread::SickTiM55xEthernetAcquisitionThread(std::string &cfg_name,
 							       std::string &cfg_prefix)
   : SickTiM55xCommonAcquisitionThread(cfg_name, cfg_prefix),
-    socket_(io_service_), deadline_(io_service_)
+    socket_(io_service_), deadline_(io_service_), soft_deadline_(io_service_)
 {
   set_name("SickTiM55x(%s)", cfg_name.c_str());
 }
@@ -65,7 +65,6 @@ SickTiM55xEthernetAcquisitionThread::SickTiM55xEthernetAcquisitionThread(std::st
 void
 SickTiM55xEthernetAcquisitionThread::init()
 {
-  pre_init(config, logger);
   read_common_config();
 
   cfg_host_ = config->get_string((cfg_prefix_ + "host").c_str());
@@ -76,7 +75,12 @@ SickTiM55xEthernetAcquisitionThread::init()
   deadline_.expires_at(boost::posix_time::pos_infin);
   check_deadline();
 
+  soft_deadline_.expires_at(boost::posix_time::pos_infin);
+  check_soft_timeout();
+
   init_device();
+
+  pre_init(config, logger);
 }
 
 
@@ -99,6 +103,7 @@ SickTiM55xEthernetAcquisitionThread::loop()
 
       ec_ = boost::asio::error::would_block;
       bytes_read_ = 0;
+
       boost::asio::async_read_until(socket_, input_buffer_, '\03',
 #if BOOST_VERSION >= 104800
 				    (boost::lambda::var(ec_) = boost::lambda::_1,
@@ -130,6 +135,8 @@ SickTiM55xEthernetAcquisitionThread::loop()
 	close_device();
 
       } else {
+	deadline_.expires_at(boost::posix_time::pos_infin);
+
 	unsigned char recv_buf[bytes_read_];
 	std::istream in_stream(&input_buffer_);
 	in_stream.read((char *)recv_buf, bytes_read_);
@@ -205,7 +212,8 @@ SickTiM55xEthernetAcquisitionThread::open_device()
 	} else {
 	  throw Exception("Connection failed: %s", ec_.message().c_str());
 	}
-      }				       
+      }
+      deadline_.expires_at(boost::posix_time::pos_infin);
     }
   } catch (boost::system::system_error &e) {
     throw Exception("Connection failed: %s", e.what());
@@ -229,9 +237,9 @@ SickTiM55xEthernetAcquisitionThread::flush_device()
 {
   if (socket_.is_open()) {
     try {
+      soft_deadline_.expires_from_now(boost::posix_time::milliseconds(RECEIVE_TIMEOUT));
       do {
 	ec_ = boost::asio::error::would_block;
-	deadline_.expires_from_now(boost::posix_time::milliseconds(RECEIVE_TIMEOUT));
 	bytes_read_ = 0;
 
 	boost::asio::async_read_until(socket_, input_buffer_, '\03',
@@ -249,7 +257,8 @@ SickTiM55xEthernetAcquisitionThread::flush_device()
 
 	do io_service_.run_one(); while (ec_ == boost::asio::error::would_block);
 
-      } while (ec_ || bytes_read_ > 0);
+      } while (bytes_read_ > 0);
+      soft_deadline_.expires_from_now(boost::posix_time::pos_infin);
     } catch (boost::system::system_error &e) {
       // ignore, just assume done, if there really is an error we'll
       // catch it later on
@@ -295,6 +304,8 @@ SickTiM55xEthernetAcquisitionThread::send_with_reply(const char *request,
       }
     }
 
+    deadline_.expires_at(boost::posix_time::pos_infin);
+
     if (reply) {
       char recv_buf[bytes_read_];
       std::istream in_stream(&input_buffer_);
@@ -326,5 +337,25 @@ SickTiM55xEthernetAcquisitionThread::check_deadline()
   deadline_.async_wait(boost::lambda::bind(&SickTiM55xEthernetAcquisitionThread::check_deadline, this));
 #else
   deadline_.async_wait(boost::bind(&SickTiM55xEthernetAcquisitionThread::check_deadline, this));
+#endif
+}
+
+/** Check whether the soft timeout deadline has passed.
+ * We compare the deadline against the current time since a new
+ * asynchronous operation may have moved the deadline before this
+ * actor had a chance to run.
+ */
+void
+SickTiM55xEthernetAcquisitionThread::check_soft_timeout()
+{
+  if (soft_deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now()) {
+    socket_.cancel();
+    soft_deadline_.expires_at(boost::posix_time::pos_infin);
+  }
+
+#if BOOST_VERSION >= 104800
+  soft_deadline_.async_wait(boost::lambda::bind(&SickTiM55xEthernetAcquisitionThread::check_soft_timeout, this));
+#else
+  soft_deadline_.async_wait(boost::bind(&SickTiM55xEthernetAcquisitionThread::check_soft_timeout, this));
 #endif
 }

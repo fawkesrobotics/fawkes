@@ -48,6 +48,7 @@ class SickTiM55xEthernetAcquisitionThread : public SickTiM55xCommonAcquisitionTh
   void send_with_reply(const char *request, std::string *reply = NULL);
 
   void check_deadline();
+  void check_soft_timeout();
 
 #if BOOST_VERSION < 104800
   void handle_read(boost::system::error_code ec, size_t bytes_read)
@@ -66,6 +67,7 @@ class SickTiM55xEthernetAcquisitionThread : public SickTiM55xCommonAcquisitionTh
   boost::asio::io_service       io_service_;
   boost::asio::ip::tcp::socket  socket_;
   boost::asio::deadline_timer   deadline_;
+  boost::asio::deadline_timer   soft_deadline_;
   boost::asio::streambuf        input_buffer_;
 
   boost::system::error_code ec_;
