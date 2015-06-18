@@ -29,21 +29,21 @@ CGAL_HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 CGAL_ERRORS=
 
 ifeq ($(CGAL_HAVE_BOOST_LIBS),1)
-  ifneq ($(wildcard $(SYSROOT)/usr/include/CGAL/version.h),)
-    ifneq ($(wildcard $(SYSROOT)/usr/include/gmp.h),)
-      ifneq ($(wildcard $(SYSROOT)/usr/include/mpfr.h),)
+  ifneq ($(wildcard $(SYSROOT)/usr/include/CGAL/version.h $(SYSROOT)/usr/local/include/CGAL/version.h),)
+    ifneq ($(wildcard $(SYSROOT)/usr/include/gmp.h $(SYSROOT)/usr/local/include/gmp.h),)
+      ifneq ($(wildcard $(SYSROOT)/usr/include/mpfr.h $(SYSROOT)/usr/local/include/mpfr.h),)
         HAVE_CGAL:=1
-        CFLAGS_CGAL:= -DHAVE_CGAL $(call boost-libs-cflags,$(CGAL_REQ_BOOST_LIBS))
+        CFLAGS_CGAL:= -DHAVE_CGAL $(call boost-libs-cflags,$(CGAL_REQ_BOOST_LIBS)) -Wno-deprecated-register
         LDFLAGS_CGAL:=-lCGAL -lCGAL_Core -lgmp -lmpfr -lm \
 		      $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
       else
-        CGAL_ERRORS += "MPFR_no_found"
+        CGAL_ERRORS += "MPFR_not_found"
       endif
     else
-      CGAL_ERRORS += "GMP_no_found"
+      CGAL_ERRORS += "GMP_not_found"
     endif
   else
-    CGAL_ERRORS += "CGAL_no_found"
+    CGAL_ERRORS += "CGAL_not_found"
   endif
 else
   ifneq ($(HAVE_BOOST_LIBS),1)
