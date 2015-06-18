@@ -932,26 +932,25 @@ SQLiteConfiguration::is_default(const char *path)
 }
 
 
-/** Get value.
- * Get a value from the database.
+/** Get a value from the database.
  * @param path path
  * @param type desired value, NULL to omit type check
  */
 sqlite3_stmt *
-SQLiteConfiguration::get_value(const char *path,
-			       const char *type)
+SQLiteConfiguration::get_typed_value(const char *path,
+				     const char *type)
 {
   sqlite3_stmt *stmt;
   const char   *tail;
 
   if ( sqlite3_prepare(db, SQL_SELECT_VALUE_TYPE, -1, &stmt, &tail) != SQLITE_OK ) {
-    throw ConfigurationException("get_value/prepare", sqlite3_errmsg(db));
+    throw ConfigurationException("get_typed_value/prepare", sqlite3_errmsg(db));
   }
   if ( sqlite3_bind_text(stmt, 1, path, -1, NULL) != SQLITE_OK ) {
-    throw ConfigurationException("get_value/bind/path (1)", sqlite3_errmsg(db));
+    throw ConfigurationException("get_typed_value/bind/path (1)", sqlite3_errmsg(db));
   }
   if ( sqlite3_bind_text(stmt, 2, path, -1, NULL) != SQLITE_OK ) {
-    throw ConfigurationException("get_value/bind/path (2)", sqlite3_errmsg(db));
+    throw ConfigurationException("get_typed_value/bind/path (2)", sqlite3_errmsg(db));
   }
 
   if ( sqlite3_step(stmt) == SQLITE_ROW ) {
@@ -980,7 +979,7 @@ SQLiteConfiguration::get_float(const char *path)
   sqlite3_stmt *stmt;
   mutex->lock();
   try {
-    stmt = get_value(path, "float");
+    stmt = get_typed_value(path, "float");
     float f = (float)sqlite3_column_double(stmt, 1);
     sqlite3_finalize(stmt);
     mutex->unlock();
@@ -999,7 +998,7 @@ SQLiteConfiguration::get_uint(const char *path)
   sqlite3_stmt *stmt;
   mutex->lock();
   try {
-    stmt = get_value(path, "unsigned int");
+    stmt = get_typed_value(path, "unsigned int");
     int i = sqlite3_column_int(stmt, 1);
     sqlite3_finalize(stmt);
     if ( i < 0 ) {
@@ -1022,7 +1021,7 @@ SQLiteConfiguration::get_int(const char *path)
   sqlite3_stmt *stmt;
   mutex->lock();
   try {
-    stmt = get_value(path, "int");
+    stmt = get_typed_value(path, "int");
     int i = sqlite3_column_int(stmt, 1);
     sqlite3_finalize(stmt);
     mutex->unlock();
@@ -1041,7 +1040,7 @@ SQLiteConfiguration::get_bool(const char *path)
   sqlite3_stmt *stmt;
   mutex->lock();
   try {
-    stmt = get_value(path, "bool");
+    stmt = get_typed_value(path, "bool");
     int i = sqlite3_column_int(stmt, 1);
     sqlite3_finalize(stmt);
     mutex->unlock();
@@ -1059,7 +1058,7 @@ SQLiteConfiguration::get_string(const char *path)
   sqlite3_stmt *stmt;
   mutex->lock();
   try {
-    stmt = get_value(path, "string");
+    stmt = get_typed_value(path, "string");
     const char *c = (char *)sqlite3_column_text(stmt, 1);
     std::string rv = c;
     sqlite3_finalize(stmt);

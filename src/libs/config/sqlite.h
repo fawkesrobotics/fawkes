@@ -175,9 +175,7 @@ class SQLiteConfiguration : public Configuration
 
  private:
   void            init_dbs();
-  std::string     get_type(const char *table, const char *path);
-  bool            exists(const char *sql, const char *path);
-  ::sqlite3_stmt *  get_value(const char *type, const char *path);
+  ::sqlite3_stmt *  get_typed_value(const char *path, const char *type);
   ::sqlite3_stmt *  prepare_update(const char *sql, const char *path);
   ::sqlite3_stmt *  prepare_insert_value(const char *sql, const char *type,
 				       const char *path);
