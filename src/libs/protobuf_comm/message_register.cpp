@@ -289,12 +289,18 @@ MessageRegister::serialize(uint16_t component_id, uint16_t msg_type,
 			   std::string &data)
 {
   bool serialized = false;
+#if GOOGLE_PROTOBUF_VERSION >= 2004000
   try {
     serialized = msg.SerializeToString(&data);
   } catch (google::protobuf::FatalException &e) {
     std::string msg = std::string("Failed to serialize message: ") + e.what();
     throw std::runtime_error(msg);
   }
+#else
+  // No exceptions in earlier versions
+  serialized = msg.SerializeToString(&data);
+#endif
+
 
   if (serialized) {
     message_header.component_id = htons(component_id);
