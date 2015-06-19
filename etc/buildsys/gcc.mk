@@ -88,5 +88,9 @@ endif
 
 CFLAG_W_NO_UNUSED_LOCAL_TYPEDEFS=-Wno-unused-local-typedefs
 
+ifeq ($(call gcc_atleast_version,4,6),1)
+  HAVE_CPP11_RANGE_FOR=1
+endif
+
 endif # __buildsys_gcc_mk_
 

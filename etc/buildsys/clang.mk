@@ -53,5 +53,8 @@ endif
 # unsupported flags (which are supported on GCC)
 CFLAG_W_NO_UNUSED_LOCAL_TYPEDEFS=
 
+HAVE_CPP11_RANGE_FOR=1
+
+
 endif # __buildsys_clang_mk_
 
