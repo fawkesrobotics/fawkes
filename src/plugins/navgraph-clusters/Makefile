@@ -16,6 +16,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
+include $(BUILDCONFDIR)/navgraph/navgraph.mk
 include $(BUILDSYSDIR)/eigen3.mk
 
 CFLAGS += $(CFLAGS_CPP11)
@@ -30,7 +31,7 @@ OBJS_navgraph_clusters = navgraph_clusters_plugin.o navgraph_clusters_thread.o \
 			 clusters_distance_cost_constraint.o
 OBJS_all    = $(OBJS_navgraph_clusters)
 
-ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_EIGEN3),111)
+ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_EIGEN3)$(HAVE_NAVGRAPH),1111)
   CFLAGS  += $(CFLAGS_TF)  $(CFLAGS_EIGEN3)
   LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_EIGEN3)
 
@@ -45,19 +46,24 @@ else
   ifneq ($(HAVE_EIGEN3),1)
     WARN_TARGETS = warning_eigen3
   endif
+  ifneq ($(HAVE_NAVGRAPH),1)
+    WARN_TARGETS += warning_navgraph
+  endif
 endif
 
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_cpp11 warning_tf warning_eigen3
+.PHONY: warning_cpp11 warning_tf warning_eigen3 warning_navgraph
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting navgraph-clusters plugin$(TNORMAL) (tf not available)"
 warning_cpp11:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting navgraph-clusters plugin$(TNORMAL) (C++11 support required)"
 warning_eigen3:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting navgraph-clusters plugin$(TNORMAL) (Eigen3 not found)"
+warning_navgraph:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting navgraph-clusters plugin$(TNORMAL) ($(NAVGRAPH_ERROR))"
 endif
 
 include $(BUILDSYSDIR)/base.mk
