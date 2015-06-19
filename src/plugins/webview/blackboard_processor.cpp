@@ -85,7 +85,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
     std::string subpath = request->url().substr(__baseurl_len);
 
     if (subpath.find("/graph/graph.png") == 0) {
-#ifdef HAVE_GRAPHVIZ
+#if defined(HAVE_GRAPHVIZ) && ((defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))) || defined(__clang__))
       std::string graph_node = request->get_value("for");
       std::string graph = generate_graph(graph_node);
 
@@ -267,8 +267,8 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	std::string graph_baseurl("/graph/");
 	std::string graph_node =
 	  subpath.length() > graph_baseurl.length() ? subpath.substr(graph_baseurl.length()) : "";
+#if defined(HAVE_GRAPHVIZ) && ((defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))) || defined(__clang__))
 	std::string graph = generate_graph(graph_node);
-#ifdef HAVE_GRAPHVIZ
 	char *map;
 	unsigned int map_length;
 
@@ -290,13 +290,13 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 		       __baseurl,
 		       graph_node.empty() ? "" : "?for=",
 		       graph_node.empty() ? "" : graph_node.c_str());
+	r->append_body("<!-- DOT Graph:\n\n%s\n\n-->\n\n", graph.c_str());
 #else
 	r->append_body("<p>No graphviz support at compile time</p>\n");
 #endif
 	if (! graph_node.empty()) {
 	  r->append_body("<p><a href=\"%s/graph\">Full Graph</a></p>\n\n", __baseurl);
 	}
-	r->append_body("<!-- DOT Graph:\n\n%s\n\n-->\n\n", graph.c_str());
       }
       return r;
     }
@@ -306,7 +306,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
   }
 }
 
-
+#if defined(HAVE_GRAPHVIZ) && ((defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))) || defined(__clang__))
 std::string
 WebviewBlackBoardRequestProcessor::generate_graph(std::string for_owner)
 {
@@ -403,3 +403,4 @@ WebviewBlackBoardRequestProcessor::generate_graph(std::string for_owner)
   mstream << "}";
   return mstream.str();
 }
+#endif

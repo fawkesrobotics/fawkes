@@ -43,7 +43,9 @@ class WebviewBlackBoardRequestProcessor : public fawkes::WebRequestProcessor
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
+#if defined(HAVE_GRAPHVIZ) && ((defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))) || defined(__clang__))
   std::string generate_graph(std::string for_owner = "");
+#endif
 
  private:
   char *__baseurl;
