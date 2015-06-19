@@ -41,7 +41,7 @@ ifeq ($(HAVE_YAMLCPP),1)
   endif
 endif
 
-ifeq ($(HAVE_YAMLCPP)$(HAVE_CPP11)$(HAVE_EIGEN3),111)
+ifeq ($(HAVE_YAMLCPP)$(HAVE_CPP11)$(HAVE_EIGEN3)$(HAVE_CPP11_RANGE_FOR),1111)
   HAVE_NAVGRAPH=1
 
   CFLAGS_NAVGRAPH  = $(CFLAGS_CPP11)
@@ -56,6 +56,9 @@ else
   endif
   ifneq ($(HAVE_EIGEN3),1)
     NAVGRAPH_ERRORS += "eigen3_not_installed"
+  endif
+  ifneq ($(HAVE_CPP11_RANGE_FOR),1)
+    NAVGRAPH_ERRORS += "GCC_too_old"
   endif
 
   _NAVGRAPH_COMMA := ,
