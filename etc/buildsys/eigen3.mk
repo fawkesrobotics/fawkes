@@ -34,6 +34,11 @@ ifeq ($(HAVE_EIGEN3),1)
       CFLAGS_EIGEN3 += -Wno-deprecated-register
     endif
   endif
+  ifeq ($(CC),gcc)
+    ifeq ($(call gcc_atleast_version,5,0),1)
+      CFLAGS_EIGEN3 += -Wno-deprecated-declarations
+    endif
+  endif
 endif
 
 endif # __buildsys_eigen3_mk_
