@@ -29,7 +29,19 @@ OBJS_dynamixel = dynamixel_plugin.o act_thread.o sensor_thread.o \
 
 OBJS_all = $(OBJS_dynamixel)
 
-PLUGINS_all = $(PLUGINDIR)/dynamixel.$(SOEXT)
+ifeq ($(HAVE_CPP11_RANGE_FOR),1)
+  PLUGINS_all = $(PLUGINDIR)/dynamixel.$(SOEXT)
+else
+  WARN_TARGETS += warning_cpp11_range_for
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+.PHONY: warning_cpp11_range_for
+warning_cpp11_range_for:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)dynamixel plugin cannot be built$(TNORMAL) (Compiler does not support range-based for loops)"
+endif
+
 
 include $(BUILDSYSDIR)/base.mk
 
