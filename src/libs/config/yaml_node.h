@@ -164,6 +164,7 @@ namespace fawkes {
 
     inline bool convert(const std::string &input, unsigned int &rhs)
     {
+      errno = 0;
       char *endptr;
       long int l = strtol(input.c_str(), &endptr, 10);
 
