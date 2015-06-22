@@ -101,6 +101,7 @@ bool
 InterfaceDataTypeChecker::validValue(const std::string &type, const std::string &value)
 {
   if (type.find("int") != std::string::npos) {
+    errno = 0;
     char *endptr;
     long long int rv = strtoll(value.c_str(), &endptr, 10);
     if ( ((rv == LLONG_MIN) || (rv == LLONG_MAX)) && (errno == ERANGE) ) {
