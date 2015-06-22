@@ -4,6 +4,7 @@
 --
 --  Created: Wed Jul 16 20:02:24 2008
 --  Copyright  2008  Tim Niemueller [www.niemueller.de]
+--             2015  Tobias Neumann
 --
 ------------------------------------------------------------------------
 
@@ -57,6 +58,21 @@ function math.normalize_mirror_rad(angle_rad)
     return angle_rad - 2 * math.pi * math.round(angle_rad / (2 * math.pi))
   else
     return angle_rad
+  end
+end
+
+--- Determines the distance between two angle provided as radians. 
+--  Quadrants of the angles are considered to determine really the minimal
+--  angle difference.
+--  @param angle_rad1 first angle in radian
+--  @param angle_rad2 second angle in radian
+--  @return distance between the two angles
+--
+function math.angle_distance(angle_rad1, angle_rad2)
+  if(angle_rad2 > angle_rad1) then
+    return angle_rad2 - angle_rad1 < math.pi and angle_rad2 - angle_rad1 or - 2.0 * math.pi + angle_rad2 - angle_rad1;
+  else
+    return angle_rad1 - angle_rad2 < math.pi and angle_rad2 - angle_rad1 or   2.0 * math.pi - angle_rad1 + angle_rad2;
   end
 end
 
