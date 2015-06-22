@@ -121,6 +121,7 @@ RobotinoComThread::init()
   state_mutex_ = new Mutex();
   set_state_ = new rec::iocontrol::remotestate::SetState();
   set_state_->gripper_isEnabled = cfg_gripper_enabled_;
+  active_state_ = 0;
 #endif
 
   if (imu_if_) {
