@@ -166,7 +166,7 @@ namespace fawkes {
     {
       errno = 0;
       char *endptr;
-      long int l = strtol(input.c_str(), &endptr, 10);
+      long int l = strtol(input.c_str(), &endptr, 0);
 
       if ((errno == ERANGE && (l == LONG_MAX || l == LONG_MIN)) || (errno != 0 && l == 0)) {
 	return false;
@@ -556,7 +556,8 @@ class YamlConfigurationNode
       T t;
       if (! yaml_utils::convert(list_values_[i], t)) {
 	// might want to have custom exception here later
-	throw Exception("YamlConfig: value or type error on %s", name_.c_str());
+	throw Exception("YamlConfig: value or type error on %s[%zi]",
+			name_.c_str(), i);
       }
       rv[i] = t;
     }
