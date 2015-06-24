@@ -26,6 +26,7 @@
 
 #include <core/threading/mutex_locker.h>
 #include <interfaces/KatanaInterface.h>
+#include <interfaces/JointInterface.h>
 #include <utils/math/angle.h>
 #include <utils/time/time.h>
 
@@ -68,39 +69,52 @@ KatanaActThread::init()
   // freed on destruction, therefore no special handling is necessary in init()
   // itself!
 
-  __cfg_controller       = config->get_string("/hardware/katana/controller");
-  __cfg_device           = config->get_string("/hardware/katana/device");
-  __cfg_kni_conffile     = config->get_string("/hardware/katana/kni_conffile");
-  __cfg_auto_calibrate   = config->get_bool("/hardware/katana/auto_calibrate");
-  __cfg_defmax_speed     = config->get_uint("/hardware/katana/default_max_speed");
-  __cfg_read_timeout     = config->get_uint("/hardware/katana/read_timeout_msec");
-  __cfg_write_timeout    = config->get_uint("/hardware/katana/write_timeout_msec");
-  __cfg_gripper_pollint  = config->get_uint("/hardware/katana/gripper_pollint_msec");
-  __cfg_goto_pollint     = config->get_uint("/hardware/katana/goto_pollint_msec");
+  std::string cfg_prefix = "/hardware/katana/";
+  __cfg_controller       = config->get_string((cfg_prefix + "controller").c_str());
+  __cfg_device           = config->get_string((cfg_prefix + "device").c_str());
+  __cfg_kni_conffile     = config->get_string((cfg_prefix + "kni_conffile").c_str());
+  __cfg_auto_calibrate   = config->get_bool((cfg_prefix + "auto_calibrate").c_str());
+  __cfg_defmax_speed     = config->get_uint((cfg_prefix + "default_max_speed").c_str());
+  __cfg_read_timeout     = config->get_uint((cfg_prefix + "read_timeout_msec").c_str());
+  __cfg_write_timeout    = config->get_uint((cfg_prefix + "write_timeout_msec").c_str());
+  __cfg_gripper_pollint  = config->get_uint((cfg_prefix + "gripper_pollint_msec").c_str());
+  __cfg_goto_pollint     = config->get_uint((cfg_prefix + "goto_pollint_msec").c_str());
 
-  __cfg_park_x           = config->get_float("/hardware/katana/park_x");
-  __cfg_park_y           = config->get_float("/hardware/katana/park_y");
-  __cfg_park_z           = config->get_float("/hardware/katana/park_z");
-  __cfg_park_phi         = config->get_float("/hardware/katana/park_phi");
-  __cfg_park_theta       = config->get_float("/hardware/katana/park_theta");
-  __cfg_park_psi         = config->get_float("/hardware/katana/park_psi");
+  __cfg_park_x           = config->get_float((cfg_prefix + "park_x").c_str());
+  __cfg_park_y           = config->get_float((cfg_prefix + "park_y").c_str());
+  __cfg_park_z           = config->get_float((cfg_prefix + "park_z").c_str());
+  __cfg_park_phi         = config->get_float((cfg_prefix + "park_phi").c_str());
+  __cfg_park_theta       = config->get_float((cfg_prefix + "park_theta").c_str());
+  __cfg_park_psi         = config->get_float((cfg_prefix + "park_psi").c_str());
 
-  __cfg_distance_scale   = config->get_float("/hardware/katana/distance_scale");
+  __cfg_distance_scale   = config->get_float((cfg_prefix + "distance_scale").c_str());
 
-  __cfg_update_interval  = config->get_float("/hardware/katana/update_interval");
+  __cfg_update_interval  = config->get_float((cfg_prefix + "update_interval").c_str());
 
-  __cfg_frame_kni        = config->get_string("/plugins/static-transforms/transforms/katana_kni/child_frame");
-  __cfg_frame_openrave   = config->get_string("/plugins/static-transforms/transforms/openrave/child_frame");
+  __cfg_frame_kni        = config->get_string((cfg_prefix + "frame/kni").c_str());
+  __cfg_frame_gripper    = config->get_string((cfg_prefix + "frame/gripper").c_str());
+  __cfg_frame_openrave   = config->get_string((cfg_prefix + "frame/openrave").c_str());
 
 #ifdef HAVE_OPENRAVE
-  __cfg_OR_enabled       = config->get_bool("/hardware/katana/openrave/enabled");
-  __cfg_OR_use_viewer    = config->get_bool("/hardware/katana/openrave/use_viewer");
-  __cfg_OR_auto_load_ik  = config->get_bool("/hardware/katana/openrave/auto_load_ik");
-  __cfg_OR_robot_file    = config->get_string("/hardware/katana/openrave/robot_file");
-  __cfg_OR_arm_model     = config->get_string("/hardware/katana/openrave/arm_model");
+  __cfg_OR_enabled       = config->get_bool((cfg_prefix + "openrave/enabled").c_str());
+  __cfg_OR_use_viewer    = config->get_bool((cfg_prefix + "openrave/use_viewer").c_str());
+  __cfg_OR_auto_load_ik  = config->get_bool((cfg_prefix + "openrave/auto_load_ik").c_str());
+  __cfg_OR_robot_file    = config->get_string((cfg_prefix + "openrave/robot_file").c_str());
+  __cfg_OR_arm_model     = config->get_string((cfg_prefix + "openrave/arm_model").c_str());
 #else
   __cfg_OR_enabled       = false;
 #endif
+
+  // see if config entries for joints exist
+  std::string joint_name;
+  for( unsigned int i=0; i<5; ++i) {
+    joint_name = config->get_string((cfg_prefix + "joints/" + std::to_string(i)).c_str() );
+    joint_name.clear();
+  }
+  joint_name = config->get_string((cfg_prefix + "joints/finger_l").c_str());
+  joint_name.clear();
+  joint_name = config->get_string((cfg_prefix + "joints/finger_r").c_str());
+  joint_name.clear();
 
   __last_update->set_clock(clock);
   __last_update->set_time(0, 0);
@@ -132,13 +146,36 @@ KatanaActThread::init()
   }
 
   // If you have more than one interface: catch exception and close them!
-  __katana_if = blackboard->open_for_writing<KatanaInterface>("Katana");
+  try {
+    __katana_if = blackboard->open_for_writing<KatanaInterface>("Katana");
+    __joint_ifs = new std::vector<JointInterface*>();
+    JointInterface* joint_if = NULL;
+    for( unsigned int i=0; i<5; ++i) {
+      joint_name = config->get_string((cfg_prefix + "joints/" + std::to_string(i)).c_str() );
+      joint_if = blackboard->open_for_writing<JointInterface>(joint_name.c_str());
+      __joint_ifs->push_back( joint_if );
+      joint_name.clear();
+    }
+
+    joint_name = config->get_string((cfg_prefix + "joints/finger_l").c_str());
+    joint_if = blackboard->open_for_writing<JointInterface>(joint_name.c_str());
+    __joint_ifs->push_back( joint_if );
+    joint_name.clear();
+    joint_name = config->get_string((cfg_prefix + "joints/finger_r").c_str());
+    joint_if = blackboard->open_for_writing<JointInterface>(joint_name.c_str());
+    __joint_ifs->push_back( joint_if );
+    joint_name.clear();
+
+    joint_if = NULL;
+  } catch(Exception &e) {
+    finalize();
+    throw;
+  }
 
   // Create all other threads
   __sensacq_thread.reset(new KatanaSensorAcquisitionThread(__katana, logger));
   __calib_thread   = new KatanaCalibrationThread(__katana, logger);
-  __gripper_thread = new KatanaGripperThread(__katana, logger,
-					     __cfg_gripper_pollint);
+  __gripper_thread = new KatanaGripperThread(__katana, logger, __cfg_gripper_pollint);
   __motor_control_thread = new KatanaMotorControlThread(__katana, logger, __cfg_goto_pollint);
   __goto_thread    = new KatanaGotoThread(__katana, logger, __cfg_goto_pollint);
 #ifdef HAVE_OPENRAVE
@@ -156,7 +193,7 @@ KatanaActThread::init()
   } catch(fawkes::Exception &e) {
     logger->log_warn(name(), "Initializing controller failed. Ex: %s", e.what());
     finalize();
-    throw; // need try-catch anyway?
+    throw;
   }
 
   __sensacq_thread->start();
@@ -176,14 +213,23 @@ KatanaActThread::init()
 void
 KatanaActThread::finalize()
 {
-  if ( __actmot_thread ) {
-    __actmot_thread->cancel();
-    __actmot_thread->join();
-    __actmot_thread = NULL;
+  try {
+    if( __actmot_thread ) {
+      __actmot_thread->cancel();
+      __actmot_thread->join();
+      __actmot_thread = NULL;
+    }
+  } catch(fawkes::Exception &e) {
+    logger->log_warn(name(), "failed finalizing motion thread. Ex:%s", e.what());
   }
-  __sensacq_thread->cancel();
-  __sensacq_thread->join();
-  __sensacq_thread.reset();
+
+  try {
+    __sensacq_thread->cancel();
+    __sensacq_thread->join();
+    __sensacq_thread.reset();
+  } catch(fawkes::Exception &e) {
+    logger->log_warn(name(), "failed finalizing sensor_aquisition thread. Ex:%s", e.what());
+  }
 
   // Setting to NULL also deletes instance (RefPtr)
   __calib_thread   = NULL;
@@ -191,8 +237,8 @@ KatanaActThread::finalize()
   __gripper_thread = NULL;
   __motor_control_thread = NULL;
 #ifdef HAVE_OPENRAVE
-   if(__cfg_OR_enabled)
-    {__goto_openrave_thread->finalize();}
+  if( __cfg_OR_enabled && __goto_openrave_thread )
+    __goto_openrave_thread->finalize();
   __goto_openrave_thread = NULL;
 #endif
 
@@ -203,8 +249,17 @@ KatanaActThread::finalize()
   }
   __katana = NULL;
 
-  blackboard->unregister_listener(this);
-  blackboard->close(__katana_if);
+  try {
+    blackboard->unregister_listener(this);
+  } catch(fawkes::Exception &e) {
+    logger->log_warn(name(), "failed unregistering blackboard listener. Ex:%s", e.what());
+  }
+
+  if(__katana_if)
+    blackboard->close(__katana_if);
+  for (std::vector<JointInterface*>::iterator it = __joint_ifs->begin(); it != __joint_ifs->end(); ++it) {
+    blackboard->close(*it);
+  }
 }
 
 
@@ -256,6 +311,18 @@ KatanaActThread::update_position(bool refresh)
   }
 
   float *a = __katana_if->angles();
+
+  __joint_ifs->at(0)->set_position(  a[0] + M_PI);
+  __joint_ifs->at(1)->set_position(  a[1]);// + M_PI/2);
+  __joint_ifs->at(2)->set_position(  a[2] + M_PI);
+  __joint_ifs->at(3)->set_position(  a[3] - M_PI);
+  __joint_ifs->at(4)->set_position(  a[4]);
+  __joint_ifs->at(5)->set_position(  -a[5]/2.f - 0.5f);
+  __joint_ifs->at(6)->set_position(  -a[5]/2.f - 0.5f);
+  for( unsigned int i=0; i<__joint_ifs->size(); ++i) {
+    __joint_ifs->at(i)->write();
+  }
+/*
   fawkes::Time now(clock);
 
   static const float  p90 = deg2rad(90);
@@ -274,6 +341,7 @@ KatanaActThread::update_position(bool refresh)
   tf_publisher->send_transform(j3_j4, now, "/katana/j3", "/katana/j4");
   tf_publisher->send_transform(j4_j5, now, "/katana/j4", "/katana/j5");
   tf_publisher->send_transform(j5_gr, now, "/katana/j5", "/katana/gripper"); //remember to adjust name in message-processing on change
+*/
 }
 
 
@@ -305,11 +373,11 @@ KatanaActThread::update_sensors(bool refresh)
     const int num_sensors = std::min(sensors.size(), __katana_if->maxlenof_sensor_value());
     for (int i = 0; i < num_sensors; ++i) {
       if (sensors.at(i) <= 0) {
-	__katana_if->set_sensor_value(i, 0);
+        __katana_if->set_sensor_value(i, 0);
       } else if (sensors.at(i) >= 255) {
-	__katana_if->set_sensor_value(i, 255);
+        __katana_if->set_sensor_value(i, 255);
       } else {
-	__katana_if->set_sensor_value(i, sensors.at(i));
+        __katana_if->set_sensor_value(i, sensors.at(i));
       }
     }
   } catch (fawkes::Exception &e) {
@@ -355,7 +423,7 @@ KatanaActThread::update_motors(bool refresh)
  */
 void
 KatanaActThread::start_motion(RefPtr<KatanaMotionThread> motion_thread,
-			      unsigned int msgid, const char *logmsg, ...)
+                              unsigned int msgid, const char *logmsg, ...)
 {
   va_list arg;
   va_start(arg, logmsg);
@@ -404,7 +472,7 @@ KatanaActThread::loop()
       __katana_if->set_final(true);
       __katana_if->set_error_code(__actmot_thread->error_code());
       if (__actmot_thread == __calib_thread) {
-	__katana_if->set_calibrated(true);
+        __katana_if->set_calibrated(true);
       }
       __actmot_thread->reset();
       __actmot_thread = NULL;
@@ -460,7 +528,7 @@ KatanaActThread::loop()
             target += offset;
           }
           // TODO: how to transform euler rotation to quaternion, to be used for tf??
-          if( strcmp(msg->trans_frame(), "/katana/gripper")==0 ) {
+          if( strcmp(msg->trans_frame(), __cfg_frame_gripper.c_str())==0 ) {
             __goto_openrave_thread->set_target(msg->x(), msg->y(), msg->z(),
                                                msg->phi(), msg->theta(), msg->psi());
             __goto_openrave_thread->set_arm_extension(true);
@@ -474,9 +542,9 @@ KatanaActThread::loop()
           __goto_openrave_thread->plan_target();
  #endif
           start_motion(__goto_openrave_thread, msg->id(),
-		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s', theta_error:%f, straight:%u",
-		       target.getX(), target.getY(), target.getZ(),
-		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_openrave.c_str(), msg->theta_error(), msg->is_straight());
+                       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s', theta_error:%f, straight:%u",
+                       target.getX(), target.getY(), target.getZ(),
+                       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_openrave.c_str(), msg->theta_error(), msg->is_straight());
 #endif
         } else {
           tf_listener->transform_point(__cfg_frame_kni, target_local, target);
@@ -490,9 +558,9 @@ KatanaActThread::loop()
                                     target.getZ() / __cfg_distance_scale,
                                     msg->phi(), msg->theta(), msg->psi());
           start_motion(__goto_thread, msg->id(),
-		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
-		       target.getX(), target.getY(), target.getZ(),
-		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_kni.c_str());
+                       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
+                       target.getX(), target.getY(), target.getZ(),
+                       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_kni.c_str());
         }
       }
 
@@ -509,26 +577,26 @@ KatanaActThread::loop()
 
       if( __cfg_OR_enabled ) {
 #ifdef HAVE_OPENRAVE
-          tf_listener->transform_point(__cfg_frame_openrave, target_local, target);
-          __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
-				  	     msg->phi(), msg->theta(), msg->psi());
+        tf_listener->transform_point(__cfg_frame_openrave, target_local, target);
+        __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
+                                           msg->phi(), msg->theta(), msg->psi());
  #ifdef EARLY_PLANNING
-          __goto_openrave_thread->plan_target();
+        __goto_openrave_thread->plan_target();
  #endif
-          start_motion(__goto_openrave_thread, msg->id(),
-		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
-		       target.getX(), target.getY(), target.getZ(),
-		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_openrave.c_str());
+        start_motion(__goto_openrave_thread, msg->id(),
+                     "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
+                     target.getX(), target.getY(), target.getZ(),
+                     msg->phi(), msg->theta(), msg->psi(), __cfg_frame_openrave.c_str());
 #endif
-        } else {
-          __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
-				    msg->phi(), msg->theta(), msg->psi());
+      } else {
+        __goto_thread->set_target(msg->x(), msg->y(), msg->z(),
+                                  msg->phi(), msg->theta(), msg->psi());
 
-          start_motion(__goto_thread, msg->id(),
-		       "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
-		       x, y, z,
-		       msg->phi(), msg->theta(), msg->psi(), __cfg_frame_kni.c_str());
-        }
+        start_motion(__goto_thread, msg->id(),
+                     "Linear movement to (%f,%f,%f, %f,%f,%f), frame '%s'",
+                     x, y, z,
+                     msg->phi(), msg->theta(), msg->psi(), __cfg_frame_kni.c_str());
+      }
 
 #ifdef HAVE_OPENRAVE
     } else if (__katana_if->msgq_first_is<KatanaInterface::ObjectGotoMessage>() && __cfg_OR_enabled) {
@@ -543,7 +611,7 @@ KatanaActThread::loop()
       __goto_openrave_thread->plan_target();
  #endif
       start_motion(__goto_openrave_thread, msg->id(),
-		   "Linear movement to object (%s, %f)", msg->object(), msg->rot_x());
+                   "Linear movement to object (%s, %f)", msg->object(), msg->rot_x());
 #endif
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::ParkMessage>()) {
@@ -557,9 +625,8 @@ KatanaActThread::loop()
                                                   __cfg_park_z * __cfg_distance_scale),
                                         fawkes::Time(0,0), __cfg_frame_kni);
         tf_listener->transform_point(__cfg_frame_openrave, target_local, target);
-
         __goto_openrave_thread->set_target(target.getX(), target.getY(), target.getZ(),
-				  	   __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
+                                           __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
  #ifdef EARLY_PLANNING
         __goto_openrave_thread->plan_target();
  #endif
@@ -567,7 +634,7 @@ KatanaActThread::loop()
 #endif
       } else {
         __goto_thread->set_target(__cfg_park_x, __cfg_park_y, __cfg_park_z,
-				  __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
+          __cfg_park_phi, __cfg_park_theta, __cfg_park_psi);
         start_motion(__goto_thread, msg->id(), "Parking arm");
       }
 
@@ -585,22 +652,22 @@ KatanaActThread::loop()
       KatanaInterface::SetEnabledMessage *msg = __katana_if->msgq_first(msg);
 
       try {
-	if (msg->is_enabled()) {
-	  logger->log_debug(name(), "Turning ON the arm");
+        if (msg->is_enabled()) {
+          logger->log_debug(name(), "Turning ON the arm");
           __katana->turn_on();
-	  update_position(/* refresh */ true);
+          update_position(/* refresh */ true);
           update_motors(/* refresh */ true);
 #ifdef HAVE_OPENRAVE
-	    if(__cfg_OR_enabled)
-	      {__goto_openrave_thread->update_openrave_data();}
+          if(__cfg_OR_enabled)
+            __goto_openrave_thread->update_openrave_data();
 #endif
-	} else {
-	  logger->log_debug(name(), "Turning OFF the arm");
-	  __katana->turn_off();
-	}
-	__katana_if->set_enabled(msg->is_enabled());
+        } else {
+          logger->log_debug(name(), "Turning OFF the arm");
+          __katana->turn_off();
+        }
+        __katana_if->set_enabled(msg->is_enabled());
       } catch (/*KNI*/::Exception &e) {
-	logger->log_warn(name(), "Failed enable/disable arm: %s", e.what());
+        logger->log_warn(name(), "Failed enable/disable arm: %s", e.what());
       }
 
     } else if (__katana_if->msgq_first_is<KatanaInterface::SetMaxVelocityMessage>()) {
@@ -668,8 +735,7 @@ KatanaActThread::loop()
 
 
 bool
-KatanaActThread::bb_interface_message_received(Interface *interface,
-					       Message *message) throw()
+KatanaActThread::bb_interface_message_received(Interface *interface, Message *message) throw()
 {
   if (message->is_of_type<KatanaInterface::StopMessage>()) {
     stop_motion();

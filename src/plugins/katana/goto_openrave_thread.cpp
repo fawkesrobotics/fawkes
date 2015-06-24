@@ -74,9 +74,9 @@ const std::string KatanaGotoOpenRaveThread::DEFAULT_PLANNERPARAMS_STRAIGHT =
  * @param use_viewer true, if viewer should be started (default: false)
  */
 KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-				   fawkes::Logger *logger,
+                                   fawkes::Logger *logger,
                                    fawkes::OpenRaveConnector* openrave,
-				   unsigned int poll_interval_ms,
+                                   unsigned int poll_interval_ms,
                                    std::string robot_file,
                                    std::string arm_model,
                                    bool autoload_IK,
@@ -96,7 +96,8 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
   __is_arm_extension( 0 ),
   __plannerparams( "default" ),
   __plannerparams_straight( "default" ),
-  _openrave( openrave )
+  _openrave( openrave ),
+  __theta_error( 0 )
 {
 }
 
@@ -111,7 +112,7 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
  */
 void
 KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
-			     float phi, float theta, float psi)
+                                     float phi, float theta, float psi)
 {
   __x     = x;
   __y     = y;
@@ -137,7 +138,7 @@ KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
  */
 void
 KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
-			     float quat_x, float quat_y, float quat_z, float quat_w)
+                                     float quat_x, float quat_y, float quat_z, float quat_w)
 {
   __x      = x;
   __y      = y;
@@ -228,7 +229,11 @@ KatanaGotoOpenRaveThread::init()
 {
   try {
     __OR_robot = _openrave->add_robot(__cfg_robot_file, false);
+  } catch (Exception& e) {
+    throw fawkes::Exception("Could not add robot '%s' to openrave environment", __cfg_robot_file.c_str());
+  }
 
+  try {
     // configure manipulator
     // TODO: from config parameters? neccessary?
     if( __cfg_arm_model == "5dof" ) {
@@ -269,7 +274,7 @@ KatanaGotoOpenRaveThread::init()
     }
 
   } catch (Exception& e) {
-    // TODO: not just simple throw....
+    finalize();
     throw;
   }
 
@@ -331,7 +336,7 @@ KatanaGotoOpenRaveThread::once()
       try {
         final = _katana->final();
       } catch (fawkes::KatanaMotorCrashedException &e) {
-        _logger->log_warn("KatanaMotorControlTrhead", e.what());
+        _logger->log_warn("KatanaGotoThread", e.what());
         _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
         break;
       }
@@ -392,11 +397,11 @@ KatanaGotoOpenRaveThread::plan_target()
     try {
       if( __has_target_quaternion ) {
         _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f,%f)",
-  		           __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
+                           __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
         success = __OR_robot->set_target_quat(__x, __y, __z, __quat_w, __quat_x, __quat_y, __quat_z);
       } else if( __move_straight ) {
         _logger->log_debug(name(), "Check IK(%f,%f,%f), straight movement",
-	 	           __x, __y, __z);
+                           __x, __y, __z);
         if( __is_arm_extension ) {
           success = __OR_robot->set_target_rel(__x, __y, __z, true);
         } else {
@@ -409,7 +414,7 @@ KatanaGotoOpenRaveThread::plan_target()
         float theta_error = 0.0f;
         while( !success && (theta_error <= __theta_error)) {
           _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
-	  	             __x, __y, __z, __phi, __theta+theta_error, __psi);
+                             __x, __y, __z, __phi, __theta+theta_error, __psi);
           success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta+theta_error, __psi);
           if( !success ) {
             _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",

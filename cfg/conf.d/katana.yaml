@@ -52,11 +52,32 @@ hardware/katana:
   # Scale from kni coordinate values to fawkes
   distance_scale: 0.001
 
-  # Interval to update the motor position data even if there is no 
+  # Interval to update the motor position data even if there is no
   # act thread running, required for tf; sec
   update_interval: 0.5
 
-  
+  frame:
+    # Base frame for libkni's inverse-kinematics
+    kni: !frame /katana/base_frame
+
+    # Frame in gripper tool
+    gripper: !frame /katana/tool_frame
+
+    # Origin of the OpenRAVE-environment (can differ from "/base_link"!)
+    openrave: !frame /openrave/base
+
+  joints:
+    # Names of the joinst, taken from the xacro file of the katana arm.
+    #  The plugin opens JointInterfaces with these ID's.
+    0: katana_motor1_pan_joint
+    1: katana_motor2_lift_joint
+    2: katana_motor3_lift_joint
+    3: katana_motor4_lift_joint
+    4: katana_motor5_wrist_roll_joint
+    finger_l: katana_l_finger_joint
+    finger_r: katana_r_finger_joint
+
+
   openrave:
     # Use OpenRAVE support?
     enabled: false

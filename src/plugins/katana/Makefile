@@ -21,7 +21,7 @@ include $(BUILDCONFDIR)/tf/tf.mk
 PRESUBDIRS = interfaces
 
 LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkestf \
-	      fawkesinterface KatanaInterface
+	      fawkesinterface KatanaInterface JointInterface
 OBJS_katana = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
 #CFLAGS += -DUSE_TIMETRACKER
