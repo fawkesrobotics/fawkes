@@ -100,7 +100,7 @@ SickTiM55xCommonAcquisitionThread::pre_init(fawkes::Configuration *config,
     throw Exception("LaserSick5xx: model has not yet been determined");
   }
 
-  if (dev_model_ == "TiM551") {
+  if (dev_model_ == "TiM5xx") {
     _distances_size = 360;
     expected_num_data_ = 271;
   } else if (dev_model_ == "TiM571") {
