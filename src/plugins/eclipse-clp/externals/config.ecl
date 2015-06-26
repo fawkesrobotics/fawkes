@@ -25,13 +25,5 @@
 
 :- export get_config/2.
 
-
-%% load the external code from the shared object
-:- ( exists("../../../lib") ->
-       load("../../../lib/eclipse_externals.so")
-   ;
-       load("../../../../lib/eclipse_externals.so")
-   ).
-
 %% definition of external predicates
 :- external(get_config/2, p_get_config_value).
