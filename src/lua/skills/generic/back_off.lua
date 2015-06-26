@@ -27,7 +27,6 @@ name               = "back_off"
 fsm                = SkillHSM:new{name=name, start="INIT", debug=false}
 depends_skills     = {"relgoto"}
 depends_interfaces = {
-   {v = "navigator", type="NavigatorInterface", id="Navigator"}
 }
 
 documentation      = [==[Back off skill
@@ -53,7 +52,7 @@ BACK_OFF_DISTANCE = 0.2 -- default back-off distance
 -- States
 fsm:define_states{
    export_to=_M,
-   closure={navigator=navigator},
+   closure={},
 
    {"INIT",     JumpState},
 
@@ -63,7 +62,6 @@ fsm:define_states{
 
 -- Transitions
 fsm:add_transitions {
-   {"INIT", "FAILED", precond="not navigator:has_writer()", desc="no writer"},
    {"INIT", "BACK_OFF", cond=true, desc="initialized"}
 }
 
@@ -72,21 +70,6 @@ function INIT:init()
 end
 
 function BACK_OFF:init()
-   -- for restoring, save current data from interfaces
-   navigator:read()
-   self.fsm.vars.navi = {escaping = navigator:is_escaping_enabled(),
-                         drive_mode = navigator:drive_mode()}
-
-   -- enable backward-driving. Enable escaping, in case security-distance or sth else changed and
-   --  we are in an obstacle now
-   navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(true))
-   navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(navigator.SlowAllowBackward))
-
-   self.args["relgoto"] = {x=-self.fsm.vars.dist, y=0, ori=0}
+   self.args["relgoto"] = {x=-self.fsm.vars.dist, y=0, ori=0, backwards=true}
 end
 
--- restore previous navigator settings
-function BACK_OFF:exit()
-   navigator:msgq_enqueue_copy(navigator.SetEscapingMessage:new(self.fsm.vars.navi.escaping))
-   navigator:msgq_enqueue_copy(navigator.SetDriveModeMessage:new(self.fsm.vars.navi.drive_mode))
-end
