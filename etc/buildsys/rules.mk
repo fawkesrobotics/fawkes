@@ -114,21 +114,6 @@ silent-nothing-to-do-test:
 	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
 	$(eval BUILT_PARTS += $@)
 
-ifdef OBJS_all
-ifneq ($(OBJS_all),)
-# Do not delete .o files to allow for incremental builds
-.SECONDARY: $(OBJS_all)
-# Whenever the Makefile is modified rebuild everything
-$(OBJS_all): $(SRCDIR)/Makefile
-endif
-else
-  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(LIBS_gui)$(PLUGINS_gui)$(BINS_gui)$(LIBS_test)$(PLUGINS_test)$(BINS_test),)
-    ifneq ($(DISABLE_OBJS_all_WARNING),1)
-      $(warning OBJS_all is not set. This is probably a bug. If you intended this set DISABLE_OBJS_all_WARNING to 1 to get rid of this warning.)
-    endif
-  endif
-endif
-
 .PHONY: clean
 clean: presubdirs subdirs
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)--> Cleaning up directory $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL)"
@@ -190,6 +175,26 @@ $(PRESUBDIRS) $(SUBDIRS):
 			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $(PARENTDIR)$(TBOLDGRAY)$@$(TNORMAL)"; \
 		fi \
 	fi
+endif
+
+
+ifdef OBJS_all
+  ifneq ($(OBJS_all),)
+    # Do not delete .o files to allow for incremental builds
+    .SECONDARY: $(OBJS_all)
+    # Whenever the Makefile is modified rebuild everything
+    $(OBJS_all): $(SRCDIR)/Makefile
+    # processs presubdirs before OBJS_all
+    ifneq ($(PRESUBDIRS),)
+      $(OBJS_all): | presubdirs
+    endif
+  endif
+else
+  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(LIBS_gui)$(PLUGINS_gui)$(BINS_gui)$(LIBS_test)$(PLUGINS_test)$(BINS_test),)
+    ifneq ($(DISABLE_OBJS_all_WARNING),1)
+      $(warning OBJS_all is not set. This is probably a bug. If you intended this set DISABLE_OBJS_all_WARNING to 1 to get rid of this warning.)
+    endif
+  endif
 endif
 
 # Cancel built-in implicit rules, they suck
