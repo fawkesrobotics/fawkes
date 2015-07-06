@@ -60,6 +60,12 @@ class Position3DInterface : public Interface
     double translation[3]; /**< 
       Translation vector from the reference frame's origin, ordered as (x, y, z).
      */
+    double covariance[36]; /**< 
+      Row-major representation of the 6x6 covariance matrix.
+      The orientation parameters use a fixed-axis representation.
+      In order, the parameters are:
+      (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+     */
   } Position3DInterface_data_t;
 #pragma pack(pop)
 
@@ -90,6 +96,11 @@ class Position3DInterface : public Interface
   void set_translation(unsigned int index, const double new_translation);
   void set_translation(const double * new_translation);
   size_t maxlenof_translation() const;
+  double * covariance() const;
+  double covariance(unsigned int index) const;
+  void set_covariance(unsigned int index, const double new_covariance);
+  void set_covariance(const double * new_covariance);
+  size_t maxlenof_covariance() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

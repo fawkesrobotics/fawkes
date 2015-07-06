@@ -54,7 +54,8 @@ Position3DInterface::Position3DInterface() : Interface()
   add_fieldinfo(IFT_INT32, "visibility_history", 1, &data->visibility_history);
   add_fieldinfo(IFT_DOUBLE, "rotation", 4, &data->rotation);
   add_fieldinfo(IFT_DOUBLE, "translation", 3, &data->translation);
-  unsigned char tmp_hash[] = {0xd, 0x82, 0xad, 0x13, 0x3c, 0xeb, 0x96, 0x82, 0x25, 0x6f, 0x2f, 0x62, 0xd7, 0x87, 0xec, 0x5a};
+  add_fieldinfo(IFT_DOUBLE, "covariance", 36, &data->covariance);
+  unsigned char tmp_hash[] = {0xd6, 0x19, 0x3f, 0x58, 0x62, 0xbc, 0x72, 0xd6, 0x22, 0x36, 0xd3, 0x7, 0x55, 0xb5, 0x3a, 0x48};
   set_hash(tmp_hash);
 }
 
@@ -276,6 +277,86 @@ Position3DInterface::set_translation(unsigned int index, const double new_transl
     throw Exception("Index value %u out of bounds (0..3)", index);
   }
   data->translation[index] = new_translation;
+  data_changed = true;
+}
+/** Get covariance value.
+ * 
+      Row-major representation of the 6x6 covariance matrix.
+      The orientation parameters use a fixed-axis representation.
+      In order, the parameters are:
+      (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+    
+ * @return covariance value
+ */
+double *
+Position3DInterface::covariance() const
+{
+  return data->covariance;
+}
+
+/** Get covariance value at given index.
+ * 
+      Row-major representation of the 6x6 covariance matrix.
+      The orientation parameters use a fixed-axis representation.
+      In order, the parameters are:
+      (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+    
+ * @param index index of value
+ * @return covariance value
+ * @exception Exception thrown if index is out of bounds
+ */
+double
+Position3DInterface::covariance(unsigned int index) const
+{
+  if (index > 36) {
+    throw Exception("Index value %u out of bounds (0..36)", index);
+  }
+  return data->covariance[index];
+}
+
+/** Get maximum length of covariance value.
+ * @return length of covariance value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+Position3DInterface::maxlenof_covariance() const
+{
+  return 36;
+}
+
+/** Set covariance value.
+ * 
+      Row-major representation of the 6x6 covariance matrix.
+      The orientation parameters use a fixed-axis representation.
+      In order, the parameters are:
+      (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+    
+ * @param new_covariance new covariance value
+ */
+void
+Position3DInterface::set_covariance(const double * new_covariance)
+{
+  memcpy(data->covariance, new_covariance, sizeof(double) * 36);
+  data_changed = true;
+}
+
+/** Set covariance value at given index.
+ * 
+      Row-major representation of the 6x6 covariance matrix.
+      The orientation parameters use a fixed-axis representation.
+      In order, the parameters are:
+      (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+    
+ * @param new_covariance new covariance value
+ * @param index index for of the value
+ */
+void
+Position3DInterface::set_covariance(unsigned int index, const double new_covariance)
+{
+  if (index > 36) {
+    throw Exception("Index value %u out of bounds (0..36)", index);
+  }
+  data->covariance[index] = new_covariance;
   data_changed = true;
 }
 /* =========== message create =========== */
