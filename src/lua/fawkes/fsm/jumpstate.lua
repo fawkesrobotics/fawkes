@@ -72,6 +72,9 @@ function JumpState:new(o)
    o.inits = o.inits or {}
 
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
+   assert(type(o.dotattr) == "table", "Dot attributes for " .. o.name .. " not a table")
+   assert(type(o.loops) == "table", "Loops for " .. o.name .. " not a table")
+   assert(type(o.inits) == "table", "Inits for " .. o.name .. " not a table")
 
    return o
 end
