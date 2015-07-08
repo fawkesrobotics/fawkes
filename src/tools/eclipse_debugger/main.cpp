@@ -22,6 +22,10 @@
 
 #include "eclipse_debugger.h"
 
+#ifdef HAVE_GCONFMM
+#include <gui_utils/service_chooser_dialog.h>
+#endif
+
 
 #  define UI_FILE RESDIR"/eclipsedebuggergui/eclipsedebuggergui.ui"
 
@@ -31,6 +35,9 @@
 int
 main(int argc, char **argv) {
   Gtk::Main gtk_main(argc, argv);
+#ifdef HAVE_GCONFMM
+  Gnome::Conf::init();
+#endif
 
   try {
     Glib::RefPtr<Gtk::Builder> builder =
