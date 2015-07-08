@@ -318,15 +318,20 @@ end
 --- Setup timeout transition.
 -- @param to state to go to if the timeout expires
 -- @param time in seconds
-function JumpState:set_timeout(time, to, errmsg)
+function JumpState:set_timeout(time, to, errmsg, desc)
    assert(time, "No timeout value given")
    assert(type(time) == "number", "Timeout value must be a number")
    assert(to, "No timeout target state given")
    self.timeout_time = time
    self.timeout_to   = to
-	 
+
+   local tdesc = "Timeout ("..time.." sec)"
+   if desc then
+      tdesc = tdesc .. " [" .. tostring(desc) .. "]"
+   end
+
    table.insert(self.inits, self.init_timeout)
-   self.timeout_transition = self:add_new_transition(to, self.jumpcond_timeout, "Timeout ("..time.." sec)", errmsg)
+   self.timeout_transition = self:add_new_transition(to, self.jumpcond_timeout, tdesc, errmsg)
    self.timeout_transition.dotattr = { style = "dashed" }
 end
 
