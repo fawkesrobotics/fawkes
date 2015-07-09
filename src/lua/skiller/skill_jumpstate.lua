@@ -104,10 +104,14 @@ function SkillJumpState:new(o)
    o.skill_status  = skillstati.S_RUNNING
    --o.subskills     = o.subskills or {}
    o.transitions   = o.transitions or {}
+   o.loops         = o.loops or {}
+   o.inits         = o.inits or {}
    o.dotattr       = o.dotattr or {}
    assert(type(o.transitions) == "table", "Transitions for " .. o.name .. " not a table")
    --assert(type(o.subskills) == "table", "Subskills for " .. o.name .. " not a table")
    assert(type(o.dotattr) == "table", "Dot attributes for " .. o.name .. " not a table")
+   assert(type(o.loops) == "table", "Loops for " .. o.name .. " not a table")
+   assert(type(o.inits) == "table", "Inits for " .. o.name .. " not a table")
 
    if o.final_to and o.fail_to and o.final_to == o.fail_to then
       o.final_transition =
@@ -272,6 +276,10 @@ function SkillJumpState:do_init()
    --   print_debug("%s: executing %s", self.name, self:skillstring(self.skill))
    end
 
+   for _,i in ipairs(self.inits) do
+      i(self)
+   end
+
    return self:try_transitions()
 end
 
@@ -322,6 +330,10 @@ function SkillJumpState:do_loop()
       if all_final then
          self.skill_status = skillstati.S_FINAL
       end
+   end
+
+   for _,l in ipairs(self.loops) do
+      l(self)
    end
 
    return self:try_transitions()

@@ -230,7 +230,7 @@ function HSM:add_transitions(trans)
                    .. tostring(timeout_to)
                    .. " does not exist for transition " .. trans_string)
 
-            from:set_timeout(timeout_time, timeout_to, timeout_err)
+            from:set_timeout(timeout_time, timeout_to, timeout_err, t.desc)
          end
 
          -- We might have no condition but still a useful transition,
