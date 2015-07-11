@@ -9,6 +9,7 @@ class NavigatorInterface : public Interface
   static const unsigned int ERROR_MOTOR;
   static const unsigned int ERROR_OBSTRUCTION;
   static const unsigned int ERROR_UNKNOWN_PLACE;
+  static const unsigned int ERROR_PATH_GEN_FAIL;
   static const unsigned int FLAG_NONE;
   static const unsigned int FLAG_CART_GOTO;
   static const unsigned int FLAG_POLAR_GOTO;

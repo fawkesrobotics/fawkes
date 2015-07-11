@@ -59,6 +59,8 @@ const uint32_t NavigatorInterface::ERROR_MOTOR = 1u;
 const uint32_t NavigatorInterface::ERROR_OBSTRUCTION = 2u;
 /** ERROR_UNKNOWN_PLACE constant */
 const uint32_t NavigatorInterface::ERROR_UNKNOWN_PLACE = 4u;
+/** ERROR_PATH_GEN_FAIL constant */
+const uint32_t NavigatorInterface::ERROR_PATH_GEN_FAIL = 8u;
 /** FLAG_NONE constant */
 const uint32_t NavigatorInterface::FLAG_NONE = 0u;
 /** FLAG_CART_GOTO constant */
@@ -123,7 +125,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("SetStopAtTargetMessage");
   add_messageinfo("SetOrientationModeMessage");
   add_messageinfo("ResetParametersMessage");
-  unsigned char tmp_hash[] = {0x59, 0x5f, 0xcc, 0x6b, 0xf3, 0xfd, 0xaa, 0x1b, 0x92, 0xbc, 0xcd, 0xc8, 0x50, 0xa4, 0x39, 0x9e};
+  unsigned char tmp_hash[] = {0x44, 0x8, 0x67, 0xd0, 0x2d, 0xf0, 0x41, 0xe7, 0x78, 0x46, 0x10, 0xda, 0x85, 0x81, 0x1f, 0x32};
   set_hash(tmp_hash);
 }
 

@@ -14,6 +14,9 @@
       The last GotoPlaceMessages could not be processed as the given
       place is unknown.
     </constant>
+    <constant type="uint32" value="8" name="ERROR_PATH_GEN_FAIL">
+      Failed to generate path to goal.
+    </constant>
 
     <!-- Note that since these flags are bit-wise OR'ed the values must be chosen such that
    the equation f = 2^n holds, for f being the flag value and n a natural number. -->
