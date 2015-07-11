@@ -230,29 +230,37 @@ NavGraphThread::loop()
 		       msg->x(), msg->y(), msg->orientation());
 
       pp_nav_if_->set_msgid(msg->id());
-      generate_plan(msg->x(), msg->y(), msg->orientation());
-      optimize_plan();
-      start_plan();
+      if (generate_plan(msg->x(), msg->y(), msg->orientation())) {
+	      optimize_plan();
+	      start_plan();
+      } else {
+	      stop_motion();
+      }
 
     } else if (pp_nav_if_->msgq_first_is<NavigatorInterface::PlaceGotoMessage>()) {
       NavigatorInterface::PlaceGotoMessage *msg = pp_nav_if_->msgq_first(msg);
       logger->log_info(name(), "goto '%s'", msg->place());
 
       pp_nav_if_->set_msgid(msg->id());
-      generate_plan(msg->place());
-      optimize_plan();
-      start_plan();
+      if (generate_plan(msg->place())) {
+	      optimize_plan();
+	      start_plan();
+      } else {
+	      stop_motion();
+      }
 
     } else if (pp_nav_if_->msgq_first_is<NavigatorInterface::PlaceWithOriGotoMessage>()) {
       NavigatorInterface::PlaceWithOriGotoMessage *msg = pp_nav_if_->msgq_first(msg);
       logger->log_info(name(), "goto '%s' with ori %f", msg->place(), msg->orientation());
 
       pp_nav_if_->set_msgid(msg->id());
-      generate_plan(msg->place(), msg->orientation());
-      optimize_plan();
-      start_plan();
+      if (generate_plan(msg->place(), msg->orientation())) {
+	      optimize_plan();
+	      start_plan();
+      } else {
+	      stop_motion();
+      }
     }
-
 
     pp_nav_if_->msgq_pop();
   }
@@ -417,66 +425,103 @@ NavGraphThread::load_graph(std::string filename)
   }
 }
 
-void
+bool
 NavGraphThread::generate_plan(std::string goal_name)
 {
-  if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose_)) {
-    logger->log_warn(name(),
-		     "Failed to compute pose, cannot generate plan");
-    return;
-  }
+	if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose_)) {
+		logger->log_warn(name(),
+		                 "Failed to compute pose, cannot generate plan");
+    pp_nav_if_->set_final(true);
+    pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		return false;
+	}
 
-  NavGraphNode init =
-    graph_->closest_node(pose_.getOrigin().x(), pose_.getOrigin().y());
-  NavGraphNode goal = graph_->node(goal_name);
+	NavGraphNode init =
+		graph_->closest_node(pose_.getOrigin().x(), pose_.getOrigin().y());
+	NavGraphNode goal = graph_->node(goal_name);
 
+	if (! goal.is_valid()) {
+		logger->log_error(name(), "Failed to generate path from (%.2f,%.2f) to %s: goal is unknown",
+		                  init.x(), init.y(), goal_name.c_str()); 
+    pp_nav_if_->set_final(true);
+    pp_nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+    return false;
+	}
 
-  logger->log_debug(name(), "Starting at (%f,%f), closest node is '%s'",
-		    pose_.getOrigin().x(), pose_.getOrigin().y(), init.name().c_str());
+	logger->log_debug(name(), "Starting at (%f,%f), closest node is '%s'",
+	                  pose_.getOrigin().x(), pose_.getOrigin().y(), init.name().c_str());
 
-  path_ = graph_->search_path(init, goal, /* use constraints */ true);
+	try {
+		path_ = graph_->search_path(init, goal, /* use constraints */ true);
+	} catch (Exception &e) {
+		logger->log_error(name(), "Failed to generate path from (%.2f,%.2f) to %s: %s",
+		                  init.x(), init.y(), goal_name.c_str(), e.what_no_backtrace());
+    pp_nav_if_->set_final(true);
+    pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		return false;
+	}
 
-  if (! path_.empty()) {
-    constrained_plan_ = true;
-  } else {
-    constrained_plan_ = false;
-    logger->log_warn(name(), "Failed to generate plan, will try without constraints");
-    path_ = graph_->search_path(init, goal, /* use constraints */ false);
-  }
+	if (! path_.empty()) {
+		constrained_plan_ = true;
+	} else {
+		constrained_plan_ = false;
+		logger->log_warn(name(), "Failed to generate plan, will try without constraints");
+		try {
+			path_ = graph_->search_path(init, goal, /* use constraints */ false);
+		} catch (Exception &e) {
+			pp_nav_if_->set_final(true);
+			pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+			return false;
+		}
+	}
 
-  if (path_.empty()) {
-    logger->log_error(name(), "Failed to generate plan to travel to '%s'",
-		      goal_name.c_str());
-  }
+	if (path_.empty()) {
+		logger->log_error(name(), "Failed to generate plan to travel to '%s'",
+		                  goal_name.c_str());
+	}
 
-  traversal_ = path_.traversal();
+	traversal_ = path_.traversal();
+	return true;
 }
 
-void
+bool
 NavGraphThread::generate_plan(std::string goal_name, float ori)
 {
-  generate_plan(goal_name);
+	if (generate_plan(goal_name)) {
 
-  if (! path_.empty() && std::isfinite(ori)) {
-    path_.nodes_mutable().back().set_property("orientation", ori);
-  }
+		if (! path_.empty() && std::isfinite(ori)) {
+			path_.nodes_mutable().back().set_property("orientation", ori);
+		}
 
-  traversal_ = path_.traversal();
+		traversal_ = path_.traversal();
+		return true;
+	} else {
+	  pp_nav_if_->set_final(true);
+	  pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+	  return false;
+	}
 }
 
-void
+bool
 NavGraphThread::generate_plan(float x, float y, float ori)
 {
   NavGraphNode close_to_goal = graph_->closest_node(x, y);
-  generate_plan(close_to_goal.name());
+  if (generate_plan(close_to_goal.name())) {
 
-  NavGraphNode n("free-target", x, y);
-  if (std::isfinite(ori)) {
-    n.set_property("orientation", ori);
+	  NavGraphNode n("free-target", x, y);
+	  if (std::isfinite(ori)) {
+		  n.set_property("orientation", ori);
+	  }
+	  graph_->apply_default_properties(n);
+	  path_.add_node(n);
+	  traversal_ = path_.traversal();
+	  return true;
+
+  } else {
+	  pp_nav_if_->set_final(true);
+	  pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+	  return false;
   }
-  graph_->apply_default_properties(n);
-  path_.add_node(n);
-  traversal_ = path_.traversal();
 }
 
 
@@ -903,15 +948,19 @@ NavGraphThread::fam_event(const char *filename, unsigned int mask)
       stop_motion();
       NavGraphNode goal = path_.goal();
 
+      bool gen_ok = false;
       if (goal.name() == "free-target") {
-	generate_plan(goal.x(), goal.y(), goal.property_as_float("orientation"));
-	optimize_plan();
+	      gen_ok = generate_plan(goal.x(), goal.y(), goal.property_as_float("orientation"));
       } else {
-	generate_plan(goal.name());
-	optimize_plan();
+	      gen_ok = generate_plan(goal.name());
       }
 
-      start_plan();
+      if (gen_ok) {
+	      optimize_plan();
+	      start_plan();
+      } else {
+	      stop_motion();
+      }
     }
   }
 }

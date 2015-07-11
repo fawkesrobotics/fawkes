@@ -76,9 +76,9 @@ class NavGraphThread
  protected: virtual void run() { Thread::run();}
 
  private:
-  void generate_plan(std::string goal);
-  void generate_plan(std::string goal, float ori);
-  void generate_plan(float x, float y, float ori);
+  bool generate_plan(std::string goal);
+  bool generate_plan(std::string goal, float ori);
+  bool generate_plan(float x, float y, float ori);
   bool replan(const fawkes::NavGraphNode &start,
 	      const fawkes::NavGraphNode &goal);
   void optimize_plan();
