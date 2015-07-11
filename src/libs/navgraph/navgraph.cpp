@@ -1056,7 +1056,7 @@ NavGraph::search_path(const NavGraphNode &from, const NavGraphNode &to,
 		      navgraph::CostFunction cost_func,
 		      bool use_constraints, bool compute_constraints)
 {
-  if (! reachability_calced_)  calc_reachability();
+	if (! reachability_calced_)  calc_reachability(/* allow multi graph */ true);
 
   AStar astar;
 

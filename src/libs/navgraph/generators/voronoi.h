@@ -33,29 +33,27 @@ namespace fawkes {
 class NavGraphGeneratorVoronoi
 {
  public:
-  NavGraphGeneratorVoronoi();
-  NavGraphGeneratorVoronoi(float bbox_p1_x, float bbox_p1_y,
-			   float bbox_p2_x, float bbox_p2_y);
-  virtual ~NavGraphGeneratorVoronoi();
+	NavGraphGeneratorVoronoi();
+	NavGraphGeneratorVoronoi(float bbox_p1_x, float bbox_p1_y,
+	                         float bbox_p2_x, float bbox_p2_y);
+	virtual ~NavGraphGeneratorVoronoi();
 
-  virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph);
+	virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph);
 
-  void set_bounding_box(float bbox_p1_x, float bbox_p1_y,
-			float bbox_p2_x, float bbox_p2_y);
-  void add_obstacle(float x, float y);
-  void clear();
+	void set_bounding_box(float bbox_p1_x, float bbox_p1_y,
+	                      float bbox_p2_x, float bbox_p2_y);
+	void add_obstacle(float x, float y);
+	void clear();
 
  private:
+	bool  bbox_enabled_;
+	float bbox_p1_x_;
+	float bbox_p1_y_;
+	float bbox_p2_x_;
+	float bbox_p2_y_;
 
-  bool  bbox_enabled_;
-  float bbox_p1_x_;
-  float bbox_p1_y_;
-  float bbox_p2_x_;
-  float bbox_p2_y_;
-
-  std::list<std::pair<float, float>> obstacles_;
+	std::list<std::pair<float, float>> obstacles_;
 };
-
 
 } // end of namespace fawkes
 
