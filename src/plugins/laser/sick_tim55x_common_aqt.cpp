@@ -273,14 +273,15 @@ SickTiM55xCommonAcquisitionThread::parse_datagram(const unsigned char *datagram,
   // 15: Reserved Byte A (0)
 
   // 16: Scanning Frequency (5DC)
-  //unsigned short scanning_freq = -1;
-  //sscanf(fields[16], "%hx", &scanning_freq);
-  //scan_time = 1.0 / (scanning_freq / 100.0);
+  unsigned short scanning_freq = -1;
+  sscanf(fields[16].c_str(), "%hx", &scanning_freq);
+  float scan_time = 1.0 / (scanning_freq / 100.0);
 
   // 17: Measurement Frequency (36)
-  unsigned short measurement_freq = -1;
-  sscanf(fields[17].c_str(), "%hx", &measurement_freq);
-  float time_increment = 1.0 / (measurement_freq * 100.0);
+  // this yields wrong results on some devices
+  //unsigned short measurement_freq = -1;
+  //sscanf(fields[17].c_str(), "%hx", &measurement_freq);
+  //float time_increment = 1.0 / (measurement_freq * 100.0);
 
   // 18: Number of encoders (0)
   // 19: Number of 16 bit channels (1)
@@ -345,6 +346,8 @@ SickTiM55xCommonAcquisitionThread::parse_datagram(const unsigned char *datagram,
   }
 
   _new_data = true;
+
+  float time_increment = scan_time * angle_increment / (2.0 * M_PI);
 
   *_timestamp -= number_of_data * time_increment;
   *_timestamp += cfg_time_offset_;
