@@ -54,3 +54,8 @@ dynamixel:
 
     # maximum allowed voltage
     max_voltage: 13.0
+
+    # Servos to be discovered on initialization.
+    # Either set the desired servo IDs that should be found in the servo chain
+    # or leave this field empty (servos: []) to discover all available servos
+    servos: []
