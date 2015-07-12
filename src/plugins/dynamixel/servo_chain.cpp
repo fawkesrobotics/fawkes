@@ -41,7 +41,7 @@
 const unsigned char DynamixelChain::BROADCAST_ID             = 0xfe; /**< BROADCAST_ID */
 const unsigned int  DynamixelChain::MAX_POSITION             = 0x3ff; /**< MAX_POSITION */
 const unsigned int  DynamixelChain::CENTER_POSITION          = 0x1ff; /**< CENTER_POSITION */
-const unsigned int  DynamixelChain::MAX_SPEED                = 0x3ff; /**< MAX_SPEED */
+const unsigned int  DynamixelChain::MAX_SPEED                = 0x7ff; /**< MAX_SPEED */
 const float         DynamixelChain::MAX_ANGLE_DEG            = 300; /**< MAX_ANGLE_DEG */
 const float         DynamixelChain::MAX_ANGLE_RAD            = fawkes::deg2rad(DynamixelChain::MAX_ANGLE_DEG); /**< MAX_ANGLE_RAD */
 const float         DynamixelChain::RAD_PER_POS_TICK         = DynamixelChain::MAX_ANGLE_RAD / (float)(DynamixelChain::MAX_POSITION); /**< RAD_PER_POS_TICK */
