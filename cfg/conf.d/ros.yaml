@@ -18,3 +18,19 @@ ros:
 
   # Number of threads for asynchronous spinning
   async-num-threads: 4
+
+  cmdvel:
+    # Set motor interface to write to
+    motor_interface_id: Robotino
+
+  odometry:
+    # Motor interface to read odometry from
+    motor_interface_id: Robotino
+    # Frame IDs
+    odom_frame_id: !frame /odom
+    base_frame_id: !frame /base_link
+
+  clock:
+    # Frequency in Hz at which the clock should be published
+    frequency: 100
+
