@@ -26,6 +26,7 @@
 #include <core/exception.h>
 
 #include <list>
+#include <vector>
 #include <cstddef>
 #include <cstdio>
 
@@ -45,7 +46,7 @@ class DynamixelChain
   void         close();
 
   bool         ping(unsigned char id, unsigned int timeout_ms = 100);
-  DeviceList   discover(unsigned int total_timeout_ms = 50);
+  DeviceList   discover(unsigned int total_timeout_ms = 50, const std::vector<unsigned int> servos = std::vector<unsigned int>());
 
 
   void write_table_value(unsigned char id, unsigned char addr,
