@@ -82,9 +82,10 @@ DynamixelDriverThread::init()
   cfg_prevent_alarm_shutdown_threshold_ = config->get_float((cfg_prefix_ + "prevent_alarm_shutdown_threshold").c_str());
   cfg_min_voltage_                      = config->get_float((cfg_prefix_ + "min_voltage").c_str());
   cfg_max_voltage_                      = config->get_float((cfg_prefix_ + "max_voltage").c_str());
+  cfg_servos_to_discover_               = config->get_uints((cfg_prefix_ + "servos").c_str());
 
   chain_ = new DynamixelChain(cfg_device_.c_str(), cfg_read_timeout_ms_, cfg_enable_echo_fix_, cfg_enable_connection_stability_, cfg_min_voltage_, cfg_max_voltage_);
-  DynamixelChain::DeviceList devl = chain_->discover(cfg_disc_timeout_ms_);
+  DynamixelChain::DeviceList devl = chain_->discover(cfg_disc_timeout_ms_, cfg_servos_to_discover_);
   std::list<std::string> found_servos;
   for (DynamixelChain::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
     found_servos.push_back(std::to_string(*i));
