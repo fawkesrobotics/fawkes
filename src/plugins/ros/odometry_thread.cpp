@@ -44,7 +44,7 @@ ROSOdometryThread::init()
   cfg_odom_frame_id_ = config->get_string("/ros/odometry/odom_frame_id");
   cfg_base_frame_id_ = config->get_string("/ros/odometry/base_frame_id");
   motor_if_ = blackboard->open_for_reading<MotorInterface>(motor_if_id.c_str());
-  pub_ = rosnode->advertise<nav_msgs::Odometry>("odom", 100, this);
+  pub_ = rosnode->advertise<nav_msgs::Odometry>("odom", 10);
 }
 
 void
