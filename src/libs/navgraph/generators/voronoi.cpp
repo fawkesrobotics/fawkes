@@ -22,6 +22,8 @@
 
 #include <navgraph/generators/voronoi.h>
 #include <core/exception.h>
+#include <utils/math/polygon.h>
+#include <utils/math/triangle.h>
 
 // includes for defining the Voronoi diagram adaptor
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -168,6 +170,7 @@ void
 NavGraphGeneratorVoronoi::clear()
 {
 	obstacles_.clear();
+	polygons_.clear();
 }
 
 
@@ -183,6 +186,8 @@ NavGraphGeneratorVoronoi::compute(fawkes::LockPtr<fawkes::NavGraph> graph)
 	for (auto o : obstacles_) {
 		vd.insert(Site_2(o.first, o.second));
 	}
+
+	polygons_.clear();
 
 	Iso_rectangle rect(Point_2(bbox_p1_x_, bbox_p1_y_), Point_2(bbox_p2_x_, bbox_p2_y_));
 
@@ -233,9 +238,59 @@ NavGraphGeneratorVoronoi::compute(fawkes::LockPtr<fawkes::NavGraph> graph)
 			}
 		}
 
+		// Store Polygons
+		VD::Bounded_faces_iterator f;
+		for (f = vd.bounded_faces_begin(); f != vd.bounded_faces_end(); ++f) {
+			unsigned int num_v = 0;
+			Ccb_halfedge_circulator ec_start = f->ccb();
+			Ccb_halfedge_circulator ec = ec_start;
+
+			do { ++num_v; } while ( ++ec != ec_start );
+
+			Polygon2D poly(num_v);
+			size_t poly_i = 0;
+			bool f_ok = true;
+			do {
+				const Point_2 &p = ec->source()->point();
+				if (bbox_enabled_) {
+					if (rect.has_on_unbounded_side(p)) {
+						f_ok = false;
+						break;
+					}
+				}
+				poly[poly_i][0] = p.x();
+				poly[poly_i][1] = p.y();
+				++poly_i;
+			} while ( ++ec != ec_start );
+			if (f_ok)  polygons_.push_back(poly);
+		}
+
+		std::list<Eigen::Vector2f> node_coords;
+		std::vector<NavGraphNode>::const_iterator n;
+		for (n = graph->nodes().begin(); n != graph->nodes().end(); ++n) {
+			node_coords.push_back(Eigen::Vector2f(n->x(), n->y()));
+		}
+
+		polygons_.erase(
+		  std::remove_if(polygons_.begin(), polygons_.end(),
+		                 [&node_coords](const Polygon2D &poly) {
+			                 for (const auto nc : node_coords) {
+				                 if (polygon_contains(poly, nc))  return true;
+			                 }
+			                 return false;
+		                 })
+		);
+
+		polygons_.sort([](const Polygon2D &p1, const Polygon2D &p2)
+		               {
+			               return polygon_area(p2) < polygon_area(p1);
+		               }
+		);
+
 		graph->calc_reachability();
 		graph.unlock();
 	}
 }
+
 
 } // end of namespace fawkes

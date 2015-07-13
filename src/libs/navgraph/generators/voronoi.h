@@ -25,6 +25,8 @@
 
 #include <navgraph/navgraph.h>
 
+#include <utils/math/polygon.h>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -45,7 +47,15 @@ class NavGraphGeneratorVoronoi
 	void add_obstacle(float x, float y);
 	void clear();
 
+	/** Get list of polygons.
+	 * @return list of polygons, each polygon contains the vertices of a
+	 * bounded face of the Voronoi diagram.
+	 */
+	const std::list<Polygon2D> &  face_polygons() const
+	{ return polygons_; }
+
  private:
+
 	bool  bbox_enabled_;
 	float bbox_p1_x_;
 	float bbox_p1_y_;
@@ -53,6 +63,7 @@ class NavGraphGeneratorVoronoi
 	float bbox_p2_y_;
 
 	std::list<std::pair<float, float>> obstacles_;
+	std::list<Polygon2D> polygons_;
 };
 
 } // end of namespace fawkes
