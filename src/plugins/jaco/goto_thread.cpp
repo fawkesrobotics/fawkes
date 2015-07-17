@@ -275,7 +275,11 @@ JacoGotoThread::stop()
 void
 JacoGotoThread::loop()
 {
-  if(__arm == NULL || __arm->arm == NULL || !__final) {
+  __final_mutex->lock();
+  bool final = __final;
+  __final_mutex->unlock();
+
+  if(__arm == NULL || __arm->arm == NULL || !final) {
     usleep(30e3);
     return;
   }
@@ -422,9 +426,12 @@ JacoGotoThread::_check_final()
 
   }
 
-  //logger->log_debug(name(), "check final: %u", __final);
+  __final_mutex->lock();
+  final = __final;
+  __final_mutex->unlock();
+  //logger->log_debug(name(), "check final: %u", final);
 
-  if( check_fingers && __final ) {
+  if( check_fingers && final ) {
     //logger->log_debug(name(), "check fingeres for final");
 
     // also check fingeres

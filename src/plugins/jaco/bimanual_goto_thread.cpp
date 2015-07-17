@@ -90,7 +90,11 @@ JacoBimanualGotoThread::finalize()
 void
 JacoBimanualGotoThread::loop()
 {
-  if( __arms.l.arm == NULL || __arms.r.arm == NULL || !__final ) {
+  __final_mutex->lock();
+  bool final = __final;
+  __final_mutex->unlock();
+
+  if( __arms.l.arm == NULL || __arms.r.arm == NULL || !final ) {
     usleep(30e3);
     return;
   }
