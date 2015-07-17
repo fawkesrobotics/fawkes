@@ -4,6 +4,7 @@
  *
  *  Created: Wed Jun 10 11:20:18 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *             2012-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -26,9 +27,6 @@
 #include <core/threading/thread.h>
 #include <logging/logger.h>
 #include <core/utils/refptr.h>
-#include <interfaces/KatanaInterface.h>
-
-#include <unistd.h>
 
 namespace fawkes {
   class KatanaController;
