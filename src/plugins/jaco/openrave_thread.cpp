@@ -441,6 +441,64 @@ JacoOpenraveThread::add_target(float x, float y, float z, float e1, float e2, fl
   return solvable;
 }
 
+
+/** Add target joint values to the queue.
+ *
+ * Use this method with caution, as for now there are no checks for validity
+ * of the target joint values. This will be added soon.
+ * Collision checking with the environment is done in a later step
+ * in JacoOpenraveThread::_plan_path .
+ *
+ * @param j1 target angle of 1st joint
+ * @param j2 target angle of 2nd joint
+ * @param j3 target angle of 3rd joint
+ * @param j4 target angle of 4th joint
+ * @param j5 target angle of 5th joint
+ * @param j6 target angle of 6th joint
+ * @param plan decide if we want to plan a trajectory for this or not
+ * @return "true", if the target joints are valid and not in self-collision,
+ *  "false" otherwise.
+ *  CAUTION: Self-collision is not checked yet, this feature will be added soon.
+ */
+bool
+JacoOpenraveThread::add_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, bool plan)
+{
+  bool joints_valid = false;  // need to define it here outside the ifdef-scope
+
+#ifdef HAVE_OPENRAVE
+  try {
+    // update planner params; set correct DOF and stuff
+    __planner_env.robot->get_planner_params();
+
+    //TODO: need some kind cheking for self-collision, i.e. if the joint values are "valid".
+    // For now expect the user to know what he does, when he sets joint angles directly
+    joints_valid = true;
+
+    // create new target for the queue
+    RefPtr<jaco_target_t> target(new jaco_target_t());
+    target->type = TARGET_ANGULAR;
+    target->trajec_state = plan ? TRAJEC_WAITING : TRAJEC_SKIP;
+    target->coord=false;
+    target->pos.push_back(j1);
+    target->pos.push_back(j2);
+    target->pos.push_back(j3);
+    target->pos.push_back(j4);
+    target->pos.push_back(j5);
+    target->pos.push_back(j6);
+
+    __arm->target_mutex->lock();
+    __arm->target_queue->push_back(target);
+    __arm->target_mutex->unlock();
+
+  } catch( openrave_exception &e) {
+    throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
+  }
+#endif
+
+  return joints_valid;
+}
+
+
 /** Flush the target_queue and add this one.
  * see JacoOpenraveThread#add_target for that.
  *
@@ -461,6 +519,29 @@ JacoOpenraveThread::set_target(float x, float y, float z, float e1, float e2, fl
   __arm->target_mutex->unlock();
   return add_target(x, y, z, e1, e2, e3, plan);
 }
+
+
+/** Flush the target_queue and add this one.
+ * see JacoOpenraveThread#add_target_ang for that.
+ *
+ * @param j1 target angle of 1st joint
+ * @param j2 target angle of 2nd joint
+ * @param j3 target angle of 3rd joint
+ * @param j4 target angle of 4th joint
+ * @param j5 target angle of 5th joint
+ * @param j6 target angle of 6th joint
+ * @param plan decide if we want to plan a trajectory for this or not
+ * @return "true", if IK could be solved. "false" otherwise
+ */
+bool
+JacoOpenraveThread::set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, bool plan)
+{
+  __arm->target_mutex->lock();
+  __arm->target_queue->clear();
+  __arm->target_mutex->unlock();
+  return add_target_ang(j1, j2, j3, j4, j5, j6, plan);
+}
+
 
 void
 JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
@@ -532,17 +613,29 @@ JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t
   //logger->log_debug(name(), "setting target %f %f %f %f %f %f",
   //                  to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5));
   __planner_env.robot->enable_ik_comparison(true);
-  if( !__planner_env.robot->set_target_euler(EULER_ZXZ, to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5)) ) {
-    logger->log_warn(name(), "Planning failed, second IK check failed");
-    __arm->target_mutex->lock();
-    to->trajec_state = TRAJEC_PLANNING_ERROR;
-    __arm->target_mutex->unlock();
-    return;
+  if( to->type == TARGET_CARTESIAN ) {
+    if( !__planner_env.robot->set_target_euler(EULER_ZXZ, to->pos.at(0), to->pos.at(1), to->pos.at(2), to->pos.at(3), to->pos.at(4), to->pos.at(5)) ) {
+      logger->log_warn(name(), "Planning failed, second IK check failed");
+      __arm->target_mutex->lock();
+      to->trajec_state = TRAJEC_PLANNING_ERROR;
+      __arm->target_mutex->unlock();
+      return;
+
+    } else {
+      // set target angles. This changes the internal target type to ANGLES (see openrave/robot.*)
+      //  and will use BaseManipulation's MoveActiveJoints. Otherwise it will use MoveToHandPosition,
+      //  which does not have the filtering of IK solutions for the closest one as we have.
+      vector<float> target;
+      __planner_env.robot->get_target().manip->get_angles(target);
+      __planner_env.robot->set_target_angles(target);
+    }
+
   } else {
-    // set target angles. This changes the internal target type to ANGLES (see openrave/robot.*)
-    //  and will use BaseManipulation's MoveActiveJoints. Otherwise it will use MoveToHandPosition,
-    //  which does not have the filtering of IK solutions for the closest one as we have.
     vector<float> target;
+    //TODO: need some kind cheking for env-collision, i.e. if the target is colllision-free.
+    // For now expect the user to know what he does, when he sets joint angles directly
+    __planner_env.robot->get_target().manip->set_angles_device(to->pos);
+
     __planner_env.robot->get_target().manip->get_angles(target);
     __planner_env.robot->set_target_angles(target);
   }

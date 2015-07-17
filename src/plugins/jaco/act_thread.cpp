@@ -296,7 +296,18 @@ JacoActThread::_process_msgs()
 
       logger->log_debug(name(), "%s: AngularGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f", __arm->iface->id(),
                         msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
+    #ifdef HAVE_OPENRAVE
+      logger->log_debug(name(), "%s: AngularGotoMessage is being passed to openrave", __arm->iface->id());
+      // add target to OpenRAVE queue for planning
+      bool joints_valid = __arm->openrave_thread->add_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
+      if( !joints_valid ) {
+        __arm->iface->set_error_code(JacoInterface::ERROR_NO_IK);
+        logger->log_warn(name(), "Failed executing AngularGotoMessage, given target joints for arm %s are invalid or in self-collision",
+                         __arm->arm->get_name().c_str());
+      }
+    #else
       __arm->goto_thread->set_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
+    #endif
 
     } else if( __arm->iface->msgq_first_is<JacoInterface::MoveGripperMessage>() ) {
       JacoInterface::MoveGripperMessage *msg = __arm->iface->msgq_first(msg);

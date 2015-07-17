@@ -45,7 +45,9 @@ class JacoOpenraveThread : public JacoOpenraveBaseThread
   virtual void plot_first();
 
   virtual bool add_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true);
+  virtual bool add_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, bool plan=true);
   virtual bool set_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true);
+  virtual bool set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, bool plan=true);
 
  protected:
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
