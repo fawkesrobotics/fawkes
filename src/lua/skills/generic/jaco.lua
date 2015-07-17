@@ -38,7 +38,78 @@ function use_skill(skill_name, iface_name)
       {v = "jacoarm_right", type = "JacoInterface"}
    }
 
-   M.documentation      = [==[
+   M.documentation      = [==[Kinova Jaco arm skill.
+
+   This skill is used to control a Kinova Jaco robot arm.
+
+   ====================
+   Creating skills:
+
+   The file is structured as a skill-generator, meaning you can use it to
+   create separate skills for multiple Jaco arms, whit this in "init.lu":
+
+     local jaco_gen = require("skills.generic.jaco")
+     --jaco_gen.use_skill("skill_name", "iface_to_use")
+     jaco_gen.use_skill("jaco", "jacoarm")
+     jaco_gen.use_skill("jaco_left", "jacoarm_left")
+     jaco_gen.use_skill("jaco_right", "jacoarm_right")
+
+   Interfaces are currently restricted to those above in "M.depends_interfaces".
+
+
+   ====================
+   Using the skill:
+   (assume we created a skill named "jaco").
+
+   jaco{mode="init" | "retract"}
+      Brings the arm into the desired mode (similar to pressing the
+         yellow button on the joystick).
+
+   jaco{pos="home" | "retract" | "stop"}
+      Brings the arm to predefined positions (with path-planning etc).
+      "home" is the position at INIT mode,
+      "retract" is the position at RETRACT mode,
+      "stop" stops the movement.
+
+   jaco{gripper="open" | "close" | F_ALL | {F1, F2, F3} }
+      F_ALL: numeric value [0,..,60].
+      {F1, F2, F3}: table with values [0,..,60].
+      Moving the griper. Either use predefined modes, or set the joint
+         values directly. You can use one value for all fingers (F_ALL),
+         or set independent ones ({F1, F2, F3}).
+
+   jaco{params=PARAMS}
+      PARAMS: string.
+      Set planner parameters string that can be added to OpenRAVE's
+         BaseManipulation module. See OpenRAVE doc for deeper information.
+         Use empty string to clear the custom parameters.
+
+   jaco{x=X, y=Y, z=Z [,e1=E1] [,e2=E2] [,e3=E3] [,type="ang"]}
+      X, Y, Z: positions in 3D (currently based on /base_link frame).
+      E1, E2, E3: rotations of the hand (optional).
+      This sends a GotoMessage to the jaco plugin, with the given target
+         position. If a rotation value is not set, its default will be used.
+      This can also be used to move joint angles. Simply consider the tuple
+         (X,Y,Z,E1,E2,E3) as values for the 6 joints, and add the argument
+         type="ang".
+
+
+   ====================
+   For backwards compatibility:
+
+   In order to not break some existing skills, it is still possible to
+   call the "jaco" skill (after it has been properly generated) with
+   an additional parameter that defines which arm (left or right) to use:
+
+   jaco{arm="left" | "right", ...}
+      This explicitly tells the skill to use the left or right arm.
+
+    Use this additional argument for every command you want to use. It
+    was introduced when this skill was not a "skill generator" yet, but
+    a single skill where we still wanted to be able to decide which arm
+    to use. Now that we use this "generator" to have truly separate skills
+    for each arm, this method should not be used anymore.
+
    ]==]
 
    -- Initialize as skill module
