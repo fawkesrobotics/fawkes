@@ -31,6 +31,7 @@
 #include "filters/min_merge.h"
 #ifdef HAVE_TF
 #  include "filters/projection.h"
+  #include "filters/map_filter.h"
 #endif
 
 #include <core/threading/barrier.h>
@@ -479,6 +480,12 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
                                          not_from_y, not_to_y,
                                          only_from_z, only_to_z,
                                          in_data_size, inbufs);
+#else
+    throw Exception("Projection filter unavailable, tf missing");
+#endif
+  } else if (filter_type == "map_filter") {
+#ifdef HAVE_TF
+    return new LaserMapFilterDataFilter(in_data_size, inbufs, tf_listener, config, logger);
 #else
     throw Exception("Projection filter unavailable, tf missing");
 #endif

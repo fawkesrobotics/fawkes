@@ -21,6 +21,7 @@ SUBDIRS = deadspots
 
 LIBS_laser_filter = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	            fawkesinterface \
+	            fawkes_amcl_utils fawkes_amcl_map \
 		    Laser360Interface Laser720Interface Laser1080Interface
 
 ifeq ($(HAVE_TF),1)
