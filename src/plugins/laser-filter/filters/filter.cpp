@@ -25,6 +25,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <limits>
 
 /** @class LaserDataFilter "filter.h"
  * Laser data filter.
@@ -174,13 +175,15 @@ LaserDataFilter::get_out_data_size()
 }
 
 
-/** Resets all readings in outbuf to 0.0
+/** Resets all readings in outbuf to NaN.
  * @param outbuf array of out_data_size
  */
 void
 LaserDataFilter::reset_outbuf(Buffer *outbuf)
 {
-  memset(outbuf->values, 0, sizeof(float) * out_data_size);
+	for (unsigned int i = 0; i < out_data_size; ++i) {
+		outbuf->values[i] = std::numeric_limits<float>::quiet_NaN();
+	}
 }
 
 /** Copies the readings from inbuf to outbuf.
