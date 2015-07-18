@@ -143,8 +143,8 @@ LaserMapFilterDataFilter::filter()
         int cell_y = (int)MAP_GYWY(map_, p.getY());
 
         // search in 8-neighborhood and itself for occupied pixels in map
-        for (int ox = -1; add && ox <= 1; ++ox) {
-          for (int oy = -1; oy <= 1; ++oy) {
+        for (int ox = -2; add && ox <= 2; ++ox) {
+          for (int oy = -2; oy <= 2; ++oy) {
             int x = cell_x + ox;
             int y = cell_y + oy;
             if (MAP_VALID(map_, x, y)) {
