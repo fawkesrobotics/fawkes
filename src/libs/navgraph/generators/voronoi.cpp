@@ -66,8 +66,8 @@ namespace fawkes {
 /** Default constructor. */
 NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi()
 	: bbox_enabled_(false),
-	  bbox_p1_x_(0.), bbox_p1_y_(0.), bbox_p2_x_(0.), bbox_p2_y_(0.)
-
+	  bbox_p1_x_(0.), bbox_p1_y_(0.), bbox_p2_x_(0.), bbox_p2_y_(0.),
+	  near_threshold_(0.01)
 {
 }
 
@@ -78,12 +78,17 @@ NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi()
  * @param bbox_p1_y y coordinate of first (lower) bounding box point
  * @param bbox_p2_x X coordinate of second (upper) bounding box point
  * @param bbox_p2_y y coordinate of second (upper) bounding box point
+ * @param near_threshold distance threshold for which to consider
+ * nodes to be the same if the distance is smaller than this
+ * threshold.
  */
 NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi(float bbox_p1_x, float bbox_p1_y,
-                                                   float bbox_p2_x, float bbox_p2_y)
+                                                   float bbox_p2_x, float bbox_p2_y,
+                                                   float near_threshold)
 	: bbox_enabled_(true),
 	  bbox_p1_x_(bbox_p1_x), bbox_p1_y_(bbox_p1_y),
-	  bbox_p2_x_(bbox_p2_x), bbox_p2_y_(bbox_p2_y)
+	  bbox_p2_x_(bbox_p2_x), bbox_p2_y_(bbox_p2_y),
+	  near_threshold_(near_threshold)
 {
 }
 
@@ -99,14 +104,17 @@ NavGraphGeneratorVoronoi::~NavGraphGeneratorVoronoi()
  * @param point point to check whether it already exists
  * @param name if the point was found in the map will be assigned
  * the name of the point in the map upon return
+ * @param near_threshold distance threshold for which to consider
+ * nodes to be the same if the distance is smaller than this
+ * threshold.
  * @return true if the point has been found in the map, false otherwise
  */
 static bool
-contains(Point_map points, Point_2 point, std::string &name)
+contains(Point_map points, Point_2 point, std::string &name, float near_threshold)
 {
 	for (auto p : points) {
 		K::FT dist = sqrt(CGAL::squared_distance(p.second, point));
-		if (dist < std::numeric_limits<K::FT>::epsilon()) {
+		if (dist < near_threshold) {
 			name = p.first;
 			return true;
 		}
@@ -150,6 +158,17 @@ NavGraphGeneratorVoronoi::set_bounding_box(float bbox_p1_x, float bbox_p1_y,
 	bbox_p1_y_ = bbox_p1_y;
 	bbox_p2_x_ = bbox_p2_x;
 	bbox_p2_y_ = bbox_p2_y;  
+}
+
+/** Set distance threshold for considering nodes to be the same.
+ * @param near_threshold distance threshold for which to consider
+ * nodes to be the same if the distance is smaller than this
+ * threshold.
+ */
+void
+NavGraphGeneratorVoronoi::set_near_threshold(float near_threshold)
+{
+	near_threshold_ = near_threshold;
 }
 
 /** Add an obstacle point.
@@ -212,8 +231,10 @@ NavGraphGeneratorVoronoi::compute(fawkes::LockPtr<fawkes::NavGraph> graph)
 
 				// check if we have a point in the vicinity
 				std::string source_name, target_name;
-				bool have_source = contains(points, e->source()->point(), source_name);
-				bool have_target = contains(points, e->target()->point(), target_name);
+				bool have_source = contains(points, e->source()->point(),
+				                            source_name, near_threshold_);
+				bool have_target = contains(points, e->target()->point(),
+				                            target_name, near_threshold_);
 
 				if (! have_source) {
 					source_name = genname(num_nodes);

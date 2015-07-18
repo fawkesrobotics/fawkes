@@ -37,13 +37,15 @@ class NavGraphGeneratorVoronoi
  public:
 	NavGraphGeneratorVoronoi();
 	NavGraphGeneratorVoronoi(float bbox_p1_x, float bbox_p1_y,
-	                         float bbox_p2_x, float bbox_p2_y);
+	                         float bbox_p2_x, float bbox_p2_y,
+	                         float near_threshold);
 	virtual ~NavGraphGeneratorVoronoi();
 
 	virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph);
 
 	void set_bounding_box(float bbox_p1_x, float bbox_p1_y,
 	                      float bbox_p2_x, float bbox_p2_y);
+	void set_near_threshold(float near_threshold);
 	void add_obstacle(float x, float y);
 	void clear();
 
@@ -61,6 +63,7 @@ class NavGraphGeneratorVoronoi
 	float bbox_p1_y_;
 	float bbox_p2_x_;
 	float bbox_p2_y_;
+	float near_threshold_;
 
 	std::list<std::pair<float, float>> obstacles_;
 	std::list<Polygon2D> polygons_;
