@@ -76,6 +76,8 @@ DynamixelDriverThread::init()
   cfg_def_angle_margin_                 = config->get_float((cfg_prefix_ + "angle_margin").c_str());
   cfg_enable_echo_fix_                  = config->get_bool((cfg_prefix_ + "enable_echo_fix").c_str());
   cfg_enable_connection_stability_      = config->get_bool((cfg_prefix_ + "enable_connection_stability").c_str());
+  cfg_autorecover_enabled_              = config->get_bool((cfg_prefix_ + "autorecover_enabled").c_str());
+  cfg_autorecover_flags_                = config->get_uint((cfg_prefix_ + "autorecover_flags").c_str());
   cfg_torque_limit_                     = config->get_float((cfg_prefix_ + "torque_limit").c_str());
   cfg_temperature_limit_                = config->get_uint((cfg_prefix_ + "temperature_limit").c_str());
   cfg_prevent_alarm_shutdown_           = config->get_bool((cfg_prefix_ + "prevent_alarm_shutdown").c_str());
@@ -185,6 +187,7 @@ DynamixelDriverThread::init()
     s.servo_if->set_torque_limit(s.torque_limit);
     s.servo_if->set_max_velocity(s.max_speed);
     s.servo_if->set_enable_prevent_alarm_shutdown(cfg_prevent_alarm_shutdown_);
+    s.servo_if->set_autorecover_enabled(cfg_autorecover_enabled_);
     s.servo_if->write();
 
     s.servo_if->set_auto_timestamping(false);

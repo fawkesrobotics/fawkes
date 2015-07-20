@@ -120,6 +120,8 @@ class DynamixelDriverThread
   float         cfg_def_angle_margin_;
   bool          cfg_enable_echo_fix_;
   bool          cfg_enable_connection_stability_;
+  bool          cfg_autorecover_enabled_;
+  unsigned char cfg_autorecover_flags_;
   float         cfg_torque_limit_;
   unsigned char cfg_temperature_limit_;
   bool          cfg_prevent_alarm_shutdown_;
