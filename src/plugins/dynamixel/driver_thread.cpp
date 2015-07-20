@@ -376,6 +376,11 @@ DynamixelDriverThread::exec_act()
         DynamixelServoInterface::SetAutorecoverEnabledMessage *msg = s.servo_if->msgq_first(msg);
         s.servo_if->set_autorecover_enabled(msg->is_autorecover_enabled());
 
+      } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::SetTorqueLimitMessage>()) {
+        DynamixelServoInterface::SetTorqueLimitMessage *msg = s.servo_if->msgq_first(msg);
+        s.recover_pending = true;
+        s.torque_limit = msg->torque_limit();
+
       } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::RecoverMessage>()) {
         s.recover_pending = true;
 
