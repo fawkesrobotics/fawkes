@@ -38,6 +38,12 @@
 
 using namespace fawkes;
 
+#define COMBO_IDX_UP      0
+#define COMBO_IDX_DOWN    1
+#define COMBO_IDX_LEFT    2
+#define COMBO_IDX_RIGHT   3
+#define COMBO_IDX_RELEASE 4
+
 
 /** @class JoystickAcquisitionThread "acquisition_thread.h"
  * Joystick acqusition thread for Linux joystick API.
@@ -85,13 +91,23 @@ JoystickAcquisitionThread::init()
 {
   try {
     __cfg_device_file    = config->get_string("/hardware/joystick/device_file");
-
   } catch (Exception &e) {
     e.append("Could not read all required config values for %s", name());
     throw;
   }
 
+  __safety_lockout = true;
+  try {
+	  __safety_lockout = config->get_bool("/hardware/joystick/safety_lockout");
+  } catch (Exception &e) {} // ignore, use default
+  for (int i = 0; i < 5; ++i) __safety_combo[i] = false;
+
   init(__cfg_device_file);
+
+  if (__safety_lockout) {
+	  logger->log_info(name(), "To enable joystick, move primary cross all the way in all "
+	                   "directions while holding first button. Then let go of button.");
+  }
 }
 
 
@@ -175,6 +191,7 @@ JoystickAcquisitionThread::init(std::string device_file)
     logger->log_warn(name(), e);
   }
   __data_mutex = new Mutex();
+
 }
 
 
@@ -205,7 +222,7 @@ JoystickAcquisitionThread::loop()
     }
 
     __data_mutex->lock();
-    __new_data = true;
+    __new_data = ! __safety_lockout;
 
     if ((e.type & ~JS_EVENT_INIT) == JS_EVENT_BUTTON) {
       //logger->log_debug(name(), "Button %u button event: %f", e.number, e.value);
@@ -237,8 +254,40 @@ JoystickAcquisitionThread::loop()
 
     __data_mutex->unlock();
 
-    if ( __bbhandler ) {
-      __bbhandler->joystick_changed(__pressed_buttons, __axis_values);
+    if (__safety_lockout) {
+	    // the actual axis directions don't matter, we are just interested
+	    // that they take both extremes once.
+	    if (__num_axes < 2 || __num_buttons == 0) {
+		    __safety_combo[COMBO_IDX_UP]      = true;
+		    __safety_combo[COMBO_IDX_DOWN]    = true;
+		    __safety_combo[COMBO_IDX_RIGHT]   = true;
+		    __safety_combo[COMBO_IDX_LEFT]    = true;
+		    __safety_combo[COMBO_IDX_RELEASE] = true;
+	    } else {
+		    if (__pressed_buttons > 0) {
+			    if (__axis_values[0] >  0.9)  __safety_combo[COMBO_IDX_UP]    = true;
+			    if (__axis_values[0] < -0.9)  __safety_combo[COMBO_IDX_DOWN]  = true;
+			    if (__axis_values[1] >  0.9)  __safety_combo[COMBO_IDX_RIGHT] = true;
+			    if (__axis_values[1] < -0.9)  __safety_combo[COMBO_IDX_LEFT]  = true;
+		    }
+		    if (__safety_combo[COMBO_IDX_UP] && __safety_combo[COMBO_IDX_DOWN] &&
+		        __safety_combo[COMBO_IDX_LEFT] && __safety_combo[COMBO_IDX_RIGHT] &&
+		        __pressed_buttons == 0) {
+			    __safety_combo[COMBO_IDX_RELEASE] = true;
+		    }
+	    }
+
+	    if (__safety_combo[COMBO_IDX_UP] && __safety_combo[COMBO_IDX_DOWN] &&
+	        __safety_combo[COMBO_IDX_LEFT] && __safety_combo[COMBO_IDX_RIGHT] &&
+	        __safety_combo[COMBO_IDX_RELEASE])
+	    {
+		    logger->log_warn(name(), "Joystick safety lockout DISABLED (combo received)");
+		    __safety_lockout = false;
+	    }
+    } else {
+	    if ( __bbhandler ) {
+		    __bbhandler->joystick_changed(__pressed_buttons, __axis_values);
+	    }
     }
   } else {
     // Connection to joystick has been lost
