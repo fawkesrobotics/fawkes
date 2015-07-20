@@ -59,3 +59,12 @@ dynamixel:
     # Either set the desired servo IDs that should be found in the servo chain
     # or leave this field empty (servos: []) to discover all available servos
     servos: []
+
+    # Autorecover of servos which disable their torque (by setting torque limit to 0)
+    # after an alarm shutdown. One can set a servo to automatically recover from such a situation
+    # by setting autorecover_enabled.
+    # autorecover_flags is used to specify to recover only on certian errors. This can for example be 0x20 (32)
+    # to recover on overload shutdown. To recover on all errors set autorecover_flags to 127 (7 bits per error)
+    autorecover_enabled: true
+    autorecover_flags: 127
+
