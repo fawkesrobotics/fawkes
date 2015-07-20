@@ -91,6 +91,7 @@ class DynamixelDriverThread
     bool         velo_pending;
     unsigned int vel;
     bool         mode_set_pending;
+    bool         recover_pending;
     unsigned int new_mode;
     bool         led_enable;
     bool         led_disable;
