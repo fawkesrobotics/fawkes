@@ -665,6 +665,30 @@ class DynamixelServoInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class RecoverMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } RecoverMessage_data_t;
+#pragma pack(pop)
+
+    RecoverMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
+   public:
+    RecoverMessage();
+    ~RecoverMessage();
+
+    RecoverMessage(const RecoverMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   DynamixelServoInterface();

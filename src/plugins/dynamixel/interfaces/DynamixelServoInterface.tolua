@@ -219,6 +219,13 @@ class DynamixelServoInterface : public Interface
     int maxlenof_autorecover_enabled() const;
   };
 
+  class RecoverMessage : public Message
+  {
+    RecoverMessage();
+    ~RecoverMessage();
+
+  };
+
   char * model();
   void set_model(const char * new_model);
   int maxlenof_model() const;

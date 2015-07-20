@@ -108,7 +108,8 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_messageinfo("ResetRawErrorMessage");
   add_messageinfo("SetPreventAlarmShutdownMessage");
   add_messageinfo("SetAutorecoverEnabledMessage");
-  unsigned char tmp_hash[] = {0x4b, 0x9a, 0x5b, 0x1e, 0xbe, 0x7a, 0x2a, 0x85, 0x8d, 0xf2, 0x3f, 0x81, 0xf, 0x1d, 0x9d, 0xa};
+  add_messageinfo("RecoverMessage");
+  unsigned char tmp_hash[] = {0x18, 0x72, 0x74, 0xa6, 0x80, 0xfa, 0x62, 0xa2, 0x56, 0x91, 0x21, 0xfc, 0x48, 0xd5, 0xe0, 0x5f};
   set_hash(tmp_hash);
 }
 
@@ -1292,6 +1293,8 @@ DynamixelServoInterface::create_message(const char *type) const
     return new SetPreventAlarmShutdownMessage();
   } else if ( strncmp("SetAutorecoverEnabledMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetAutorecoverEnabledMessage();
+  } else if ( strncmp("RecoverMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new RecoverMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -3190,6 +3193,58 @@ DynamixelServoInterface::SetAutorecoverEnabledMessage::clone() const
 {
   return new DynamixelServoInterface::SetAutorecoverEnabledMessage(this);
 }
+/** @class DynamixelServoInterface::RecoverMessage <interfaces/DynamixelServoInterface.h>
+ * RecoverMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+DynamixelServoInterface::RecoverMessage::RecoverMessage() : Message("RecoverMessage")
+{
+  data_size = sizeof(RecoverMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (RecoverMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ErrorCode[(int)ERROR_NONE] = "ERROR_NONE";
+  enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
+  enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
+  enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
+}
+
+/** Destructor */
+DynamixelServoInterface::RecoverMessage::~RecoverMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+DynamixelServoInterface::RecoverMessage::RecoverMessage(const RecoverMessage *m) : Message("RecoverMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (RecoverMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+DynamixelServoInterface::RecoverMessage::clone() const
+{
+  return new DynamixelServoInterface::RecoverMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -3267,6 +3322,10 @@ DynamixelServoInterface::message_valid(const Message *message) const
   }
   const SetAutorecoverEnabledMessage *m17 = dynamic_cast<const SetAutorecoverEnabledMessage *>(message);
   if ( m17 != NULL ) {
+    return true;
+  }
+  const RecoverMessage *m18 = dynamic_cast<const RecoverMessage *>(message);
+  if ( m18 != NULL ) {
     return true;
   }
   return false;

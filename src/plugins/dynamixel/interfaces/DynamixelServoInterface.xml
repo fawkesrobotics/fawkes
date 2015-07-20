@@ -173,4 +173,7 @@
     <comment>Enable or disable the autorecover functionality</comment>
     <ref>autorecover_enabled</ref>
   </message>
+  <message name="Recover">
+    <comment>Manually initiate a recovery</comment>
+  </message>
 </interface>
