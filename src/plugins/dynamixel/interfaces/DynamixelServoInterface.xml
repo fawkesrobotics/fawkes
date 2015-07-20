@@ -80,6 +80,7 @@
       Margin in radians around a target servo value to consider the
       motion as final.
     </field>
+    <field type="bool" name="autorecover_enabled">Automatically recover on alarm shutdown</field>
 
     <!-- Actuation command feedback -->
     <field type="uint32" name="msgid">The ID of the message that is currently being
@@ -167,5 +168,9 @@
   <message name="SetPreventAlarmShutdown">
     <comment>Enable or disable the prevent alarm shutdown functionality</comment>
     <ref>enable_prevent_alarm_shutdown</ref>
+  </message>
+  <message name="SetAutorecoverEnabled">
+    <comment>Enable or disable the autorecover functionality</comment>
+    <ref>autorecover_enabled</ref>
   </message>
 </interface>

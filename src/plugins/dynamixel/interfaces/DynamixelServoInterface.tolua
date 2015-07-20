@@ -208,6 +208,17 @@ class DynamixelServoInterface : public Interface
     int maxlenof_enable_prevent_alarm_shutdown() const;
   };
 
+  class SetAutorecoverEnabledMessage : public Message
+  {
+    SetAutorecoverEnabledMessage(bool ini_autorecover_enabled);
+    SetAutorecoverEnabledMessage();
+    ~SetAutorecoverEnabledMessage();
+
+    bool is_autorecover_enabled();
+    void set_autorecover_enabled(const bool new_autorecover_enabled);
+    int maxlenof_autorecover_enabled() const;
+  };
+
   char * model();
   void set_model(const char * new_model);
   int maxlenof_model() const;
@@ -298,6 +309,9 @@ class DynamixelServoInterface : public Interface
   float angle_margin();
   void set_angle_margin(const float new_angle_margin);
   int maxlenof_angle_margin() const;
+  bool is_autorecover_enabled();
+  void set_autorecover_enabled(const bool new_autorecover_enabled);
+  int maxlenof_autorecover_enabled() const;
   unsigned int msgid();
   void set_msgid(const unsigned int new_msgid);
   int maxlenof_msgid() const;
