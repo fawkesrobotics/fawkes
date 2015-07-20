@@ -371,6 +371,11 @@ DynamixelDriverThread::exec_act()
       } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::SetSpeedMessage>()) {
         DynamixelServoInterface::SetSpeedMessage *msg = s.servo_if->msgq_first(msg);
         set_speed(servo_id, msg->speed());
+
+      } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::SetAutorecoverEnabledMessage>()) {
+        DynamixelServoInterface::SetAutorecoverEnabledMessage *msg = s.servo_if->msgq_first(msg);
+        s.servo_if->set_autorecover_enabled(msg->is_autorecover_enabled());
+
       } else {
 	logger->log_warn(name(), "Unknown message received");
       }
