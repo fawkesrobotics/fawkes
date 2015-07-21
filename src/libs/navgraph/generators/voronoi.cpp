@@ -271,14 +271,12 @@ NavGraphGeneratorVoronoi::compute(fawkes::LockPtr<fawkes::NavGraph> graph)
 			node_coords.push_back(Eigen::Vector2f(n->x(), n->y()));
 		}
 
-		polygons_.erase(
-		  std::remove_if(polygons_.begin(), polygons_.end(),
-		                 [&node_coords](const Polygon2D &poly) {
-			                 for (const auto nc : node_coords) {
-				                 if (polygon_contains(poly, nc))  return true;
-			                 }
-			                 return false;
-		                 })
+		polygons_.remove_if([&node_coords](const Polygon2D &poly) {
+				                  for (const auto nc : node_coords) {
+					                  if (polygon_contains(poly, nc))  return true;
+				                  }
+				                  return false;
+			                  }
 		);
 
 		polygons_.sort([](const Polygon2D &p1, const Polygon2D &p2)
