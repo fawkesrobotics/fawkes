@@ -632,6 +632,16 @@ Thread::join()
     // mutex above could happen!
     loop_mutex->try_lock();
     loop_mutex->unlock();
+
+    // Force unlock of the loop listeners' mutex. If the thread is canceled
+    // during a loop listener call (pre_loop or post_loop), the thread cannot
+    // be finalized because this LockList is still locked, and any aspect using
+    // a LoopListener will try to remove itself from the LockList during
+    // finalization, leading to a deadlock. It is safe to unlock the mutex
+    // because the thread is already joined and thus no more loop listener calls
+    // will occur.
+    __loop_listeners->try_lock();
+    __loop_listeners->unlock();
   }
 }
 
