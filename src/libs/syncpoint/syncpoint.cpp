@@ -196,8 +196,6 @@ SyncPoint::emit(const std::string & component, bool remove_from_pending)
 
   emit_calls_.push_back(SyncPointCall(component));
 
-  ml.unlock();
-
   if (predecessor_) {
     predecessor_->emit(component, pred_remove_from_pending);
   }
