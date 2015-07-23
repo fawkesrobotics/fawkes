@@ -95,6 +95,9 @@ SyncPointCallStats::get_last_call() const
 float
 SyncPointCallStats::get_call_frequency() const
 {
+  if (num_calls_ <= 1) {
+    return 0.f;
+  }
   return num_calls_ / (last_call_.in_sec() - first_call_.in_sec());
 }
 
@@ -105,6 +108,15 @@ float
 SyncPointCallStats::get_waittime_average() const
 {
   return total_wait_time_.in_sec() / num_calls_;
+}
+
+/** Get total number of calls.
+ * @return the total number of calls
+ */
+unsigned int
+SyncPointCallStats::get_num_calls() const
+{
+  return num_calls_;
 }
 
 } // namespace fawkes

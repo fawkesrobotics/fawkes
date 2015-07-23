@@ -164,6 +164,7 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
           << "\"" << " [label=\""
           << " freq=" << emit_call_stats_it->second.get_call_frequency() << "Hz"
           << " age=" << age << "s"
+          << " #calls=" << emit_call_stats_it->second.get_num_calls()
           << "\"" << "];";
       }
     }
@@ -181,12 +182,18 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
         wait_call_stats_it != wait_one_call_stats.end(); wait_call_stats_it++) {
       float age = (Time() - wait_call_stats_it->second.get_last_call()).in_sec();
       if (age < max_age) {
-      graph << "\"" << (*sp_it)->get_identifier() << "\"" << " -> "
-          << "\"" << wait_call_stats_it->first << "\"" << " [label=" << "\""
-          << " avg=" << wait_call_stats_it->second.get_waittime_average() <<  "s"
-          << " age=" << age << "s"
-          //<< " max=" << max_wait_time << "s"
-          << "\"" << "];";
+        graph << "\"" << (*sp_it)->get_identifier() << "\"" << " -> "
+            << "\"" << wait_call_stats_it->first << "\"" << " [label=" << "\""
+            << " avg=" << wait_call_stats_it->second.get_waittime_average() <<  "s"
+            << " age=" << age << "s"
+            << " #calls=" << wait_call_stats_it->second.get_num_calls()
+            //          << " max=" << max_wait_time << "s"
+            << "\"";
+        if ((*sp_it)->watchers_wait_for_one_.count(wait_call_stats_it->first)) {
+          graph << ",color=\"red\"";
+        }
+        graph << ",style=dotted";
+        graph << "];";
       }
     }
 
@@ -203,12 +210,18 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
         wait_call_stats_it != wait_all_call_stats.end(); wait_call_stats_it++) {
       float age = (Time() - wait_call_stats_it->second.get_last_call()).in_sec();
       if (age < max_age) {
-      graph << "\"" << (*sp_it)->get_identifier() << "\"" << " -> "
-          << "\"" << wait_call_stats_it->first << "\"" << " [label=" << "\""
-          << " avg=" << wait_call_stats_it->second.get_waittime_average() <<  "s"
-          << " age=" << age << "s"
-          //<< " max=" << max_wait_time << "s"
-          << "\"" << "];";
+        graph << "\"" << (*sp_it)->get_identifier() << "\"" << " -> "
+            << "\"" << wait_call_stats_it->first << "\"" << " [label=" << "\""
+            << " avg=" << wait_call_stats_it->second.get_waittime_average() <<  "s"
+            << " age=" << age << "s"
+            << " #calls=" << wait_call_stats_it->second.get_num_calls()
+            //<< " max=" << max_wait_time << "s"
+            << "\"";
+        if ((*sp_it)->watchers_wait_for_all_.count(wait_call_stats_it->first)) {
+          graph << ",color=\"red\"";
+        }
+        graph << ",style=dashed";
+        graph << "];";
       }
     }
 

@@ -41,6 +41,7 @@ class SyncPointCallStats {
     Time get_last_call() const;
     float get_call_frequency() const;
     float get_waittime_average() const;
+    unsigned int get_num_calls() const;
 
   private:
     Time first_call_;
