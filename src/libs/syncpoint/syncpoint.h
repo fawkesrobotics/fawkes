@@ -31,6 +31,8 @@
 #include <core/utils/refptr.h>
 #include <core/utils/circular_buffer.h>
 
+#include <logging/multi.h>
+
 #include <set>
 #include <map>
 #include <string>
@@ -62,16 +64,22 @@ class SyncPoint
       NONE
     } WakeupType;
 
-    SyncPoint(std::string identifier);
+    SyncPoint(std::string identifier, MultiLogger *logger);
     virtual ~SyncPoint();
 
     /** send a signal to all waiting threads */
     virtual void emit(const std::string & component);
 
     /** wait for the sync point to be emitted by any other component */
-    virtual void wait(const std::string & component, WakeupType = WAIT_FOR_ONE);
+    virtual void wait(const std::string & component, WakeupType = WAIT_FOR_ONE,
+      uint wait_sec = 0, uint wait_nsec = 0);
     virtual void wait_for_one(const std::string & component);
     virtual void wait_for_all(const std::string & component);
+    /** wait for the sync point, but abort after given time */
+    virtual void reltime_wait_for_one(const std::string & component,
+      uint wait_sec, uint wait_nsec);
+    virtual void reltime_wait_for_all(const std::string & component,
+      uint wait_sec, uint wait_nsec);
 
     /** register as emitter */
     virtual void register_emitter(const std::string & component);
@@ -125,10 +133,14 @@ class SyncPoint
     WaitCondition *cond_wait_for_one_;
     /** WaitCondition which is used for wait_for_all() */
     WaitCondition *cond_wait_for_all_;
+    /** Logger */
+    MultiLogger *logger_;
 
   private:
     void reset_emitters();
     bool is_pending(std::string component);
+    void handle_default(std::string component, WakeupType type,
+      uint max_time_sec, uint max_time_nsec);
 
   private:
     /** The predecessor SyncPoint, which is the SyncPoint one level up
@@ -141,6 +153,8 @@ class SyncPoint
 
     std::multiset<std::string> emitters_;
     std::multiset<std::string> pending_emitters_;
+
+    std::set<std::string> bad_components_;
 
     Time last_emitter_reset_;
 };

@@ -346,7 +346,8 @@ FawkesMainThread::loop()
       } else {
         for (uint i = 0; i < num_hooks; i++) {
           __syncpoints_start_hook[i]->emit("FawkesMainThread");
-          __syncpoints_end_hook[i]->wait_for_all("FawkesMainThread");
+          __syncpoints_end_hook[i]->reltime_wait_for_all("FawkesMainThread",
+              0, __max_thread_time_nanosec);
         }
       }
     }

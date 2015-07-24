@@ -18,7 +18,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gtest.mk
 
 CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable
-LIBS_gtest_syncpoint += stdc++ fawkescore fawkesutils fawkessyncpoint pthread
+LIBS_gtest_syncpoint += stdc++ fawkescore fawkesutils fawkessyncpoint pthread \
+                        fawkeslogging
 
 OBJS_gtest_syncpoint += test_syncpoint.o
 OBJS_all = $(OBJS_gtest_syncpoint)

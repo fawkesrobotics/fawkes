@@ -387,7 +387,7 @@ init(InitOptions options, int & retval)
   aspect_manager     = new AspectManager();
   thread_manager     = new ThreadManager(aspect_manager, aspect_manager);
 
-  syncpoint_manager  = new SyncPointManager();
+  syncpoint_manager  = new SyncPointManager(logger);
 
   plugin_manager     = new PluginManager(thread_manager, config,
 					 "/fawkes/meta_plugins/",

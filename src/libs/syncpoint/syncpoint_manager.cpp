@@ -45,8 +45,9 @@ namespace fawkes {
  * @see SyncPoint
  */
 
-SyncPointManager::SyncPointManager()
-: mutex_(new Mutex())
+SyncPointManager::SyncPointManager(MultiLogger *logger)
+: mutex_(new Mutex()),
+  logger_(logger)
 {
 }
 
@@ -256,7 +257,8 @@ SyncPointManager::get_syncpoint_no_lock(const std::string & component, const std
   // insert a new SyncPoint if no SyncPoint with the same identifier exists,
   // otherwise, use that SyncPoint
   std::pair<std::set<RefPtr<SyncPoint> >::iterator,bool> insert_ret;
-  insert_ret = syncpoints_.insert(RefPtr<SyncPoint>(new SyncPoint(identifier)));
+  insert_ret = syncpoints_.insert(
+      RefPtr<SyncPoint>(new SyncPoint(identifier, logger_)));
   std::set<RefPtr<SyncPoint> >::iterator sp_it = insert_ret.first;
 
   // add component to the set of watchers

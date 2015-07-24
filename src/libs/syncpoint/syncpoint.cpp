@@ -52,8 +52,9 @@ namespace fawkes {
 /** Constructor.
  * @param identifier The identifier of the SyncPoint. This must be in absolute
  * path style, e.g. '/some/syncpoint'.
+ * @param logger The logger to use for error messages.
  */
-SyncPoint::SyncPoint(string identifier)
+SyncPoint::SyncPoint(string identifier, MultiLogger *logger)
     : identifier_(identifier),
       emit_calls_(CircularBuffer<SyncPointCall>(1000)),
       wait_for_one_calls_(CircularBuffer<SyncPointCall>(1000)),
@@ -62,6 +63,7 @@ SyncPoint::SyncPoint(string identifier)
       mutex_(new Mutex()),
       cond_wait_for_one_(new WaitCondition()),
       cond_wait_for_all_(new WaitCondition()),
+      logger_(logger),
       last_emitter_reset_(Time(0l))
 {
   if (identifier.empty()) {
@@ -204,14 +206,24 @@ SyncPoint::emit(const std::string & component, bool remove_from_pending)
 /** Wait until SyncPoint is emitted.
  * Either wait until a single emitter has emitted the SyncPoint, or wait
  * until all registered emitters have emitted the SyncPoint.
+ * If wait_sec != 0 or wait_nsec !=0, then only wait for
+ * wait_sec + wait_nsec*10^-9 seconds.
+ * If the maximal wait time has been exceeded, a warning is shown and the
+ * SyncPoint is released.
  * @param component The identifier of the component waiting for the SyncPoint
  * @param type the wakeup type. If this is set to WAIT_FOR_ONE, wait returns
  * when a single emitter has emitted the SyncPoint. If set to WAIT_FOR_ALL, wait
  * until all registered emitters have emitted the SyncPoint.
+ * @param wait_sec number of seconds to wait for the SyncPoint
+ * @param wait_nsec number of nanoseconds to wait for the SyncPoint
  * @see SyncPoint::WakeupType
  */
 void
-SyncPoint::wait(const std::string & component, WakeupType type /* = WAIT_FOR_ONE */) {
+SyncPoint::wait(const std::string & component,
+  WakeupType type /* = WAIT_FOR_ONE */, uint wait_sec /* = 0 */,
+  uint wait_nsec /* = 0 */)
+{
+
   MutexLocker ml(mutex_);
 
   std::set<std::string> *watchers;
@@ -250,7 +262,12 @@ SyncPoint::wait(const std::string & component, WakeupType type /* = WAIT_FOR_ONE
   ml.unlock();
   Time start;
   if (need_to_wait) {
-    cond->wait();
+    if (!cond->reltimed_wait(wait_sec, wait_nsec)) {
+      ml.relock();
+      // wait failed, default
+      handle_default(component, type, wait_sec, wait_nsec);
+      ml.unlock();
+    }
   }
   Time wait_time = Time() - start;
   ml.relock();
@@ -275,6 +292,29 @@ SyncPoint::wait_for_all(const string & component)
   wait(component, WAIT_FOR_ALL);
 }
 
+/** Wait for a single emitter for the given time.
+ * @param component The identifier of the calling component.
+ * @param wait_sec number of seconds to wait
+ * @param wait_nsec number of nanoseconds to wait additionally to wait_sec
+ */
+void
+SyncPoint::reltime_wait_for_one(const string & component, uint wait_sec,
+  uint wait_nsec)
+{
+  wait(component, SyncPoint::WAIT_FOR_ONE, wait_sec, wait_nsec);
+}
+
+/** Wait for all registered emitters for the given time.
+ * @param component The identifier of the calling component.
+ * @param wait_sec number of seconds to wait
+ * @param wait_nsec number of nanoseconds to wait additionally to wait_sec
+ */
+void
+SyncPoint::reltime_wait_for_all(const string & component, uint wait_sec,
+  uint wait_nsec)
+{
+  wait(component, SyncPoint::WAIT_FOR_ALL, wait_sec, wait_nsec);
+}
 
 /** Register an emitter. A thread can only emit the barrier if it has been
  *  registered.
@@ -383,4 +423,36 @@ SyncPoint::is_pending(string component) {
   return pending_emitters_.count(component) > 0;
 }
 
+void
+SyncPoint::handle_default(string component, WakeupType type,
+  uint max_time_sec, uint max_time_nsec)
+{
+  logger_->log_warn(component.c_str(),
+      "Thread time limit exceeded while waiting for syncpoint '%s'. "
+      "Time limit: %f sec.",
+      get_identifier().c_str(),
+      max_time_sec + static_cast<float>(max_time_nsec) / 1000000000.f);
+  bad_components_.insert(pending_emitters_.begin(), pending_emitters_.end());
+  if (bad_components_.size() > 1) {
+    string bad_components_string = "";
+    for (set<string>::const_iterator it = bad_components_.begin();
+        it != bad_components_.end(); it++) {
+      bad_components_string += " " + *it;
+    }
+    logger_->log_warn(component.c_str(), "bad components:%s",
+        bad_components_string.c_str());
+  }
+  else if (bad_components_.size() == 1) {
+    logger_->log_warn(component.c_str(), "bad component: %s",
+        bad_components_.begin()->c_str());
+  }
+  else if (type == SyncPoint::WAIT_FOR_ALL) {
+    throw Exception("SyncPoints: component %s defaulted, "
+        "but there is no pending emitter. This is probably a bug.",
+        component.c_str());
+  }
+
+  watchers_wait_for_all_.erase(component);
+  watchers_wait_for_one_.erase(component);
+}
 } // namespace fawkes

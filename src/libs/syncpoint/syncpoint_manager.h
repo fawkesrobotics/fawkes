@@ -29,6 +29,8 @@
 #include <core/utils/refptr.h>
 #include <core/threading/mutex.h>
 
+#include <logging/multi.h>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -40,7 +42,7 @@ class SyncPoint;
 class SyncPointManager
 {
   public:
-    SyncPointManager();
+    SyncPointManager(MultiLogger *logger);
     virtual ~SyncPointManager();
 
     RefPtr<SyncPoint> get_syncpoint(const std::string & component, const std::string & identifier);
@@ -64,6 +66,7 @@ class SyncPointManager
       RefPtr<SyncPoint> syncpoint);
     bool component_watches_any_successor(const RefPtr<SyncPoint> sp,
       const std::string component) const;
+    MultiLogger *logger_;
 
 
 };

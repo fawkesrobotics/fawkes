@@ -32,10 +32,14 @@
 #include <libs/syncpoint/syncpoint_manager.h>
 #include <libs/syncpoint/exceptions.h>
 
+#include <logging/multi.h>
+#include <logging/cache.h>
+
 #include <core/utils/refptr.h>
 
 using namespace fawkes;
 using namespace std;
+
 
 /** @class SyncPointTest
  * Test class for SyncPoint
@@ -50,11 +54,18 @@ class SyncPointTest : public ::testing::Test
      */
     virtual void SetUp()
     {
+      logger_ = new MultiLogger();
       string id1 = "/id1";
       string id2 = "/id2";
-      sp1 = new SyncPoint(id1);
-      sp2 = new SyncPoint(id1);
-      sp3 = new SyncPoint(id2);
+      sp1 = new SyncPoint(id1, logger_);
+      sp2 = new SyncPoint(id1, logger_);
+      sp3 = new SyncPoint(id2, logger_);
+    }
+
+    /** Clean up */
+    virtual void TearDown()
+    {
+      delete logger_;
     }
 
 
@@ -66,6 +77,10 @@ class SyncPointTest : public ::testing::Test
     RefPtr<SyncPoint> sp2;
     RefPtr<SyncPoint> sp3;
     /**@}*/
+
+    /** Logger for testing */
+    MultiLogger *logger_;
+
 };
 
 /** @class SyncPointManagerTest
@@ -80,7 +95,10 @@ class SyncPointManagerTest : public ::testing::Test
      */
     SyncPointManagerTest()
     {
-      manager = new SyncPointManager();
+      logger_ = new MultiLogger();
+      cache_logger_ = new CacheLogger();
+      logger_->add_logger(cache_logger_);
+      manager = new SyncPointManager(logger_);
 
       pthread_attr_init(&attrs);
 
@@ -92,12 +110,20 @@ class SyncPointManagerTest : public ::testing::Test
     virtual ~SyncPointManagerTest()
     {
       pthread_attr_destroy(&attrs);
+      delete logger_;
+//      delete cache_logger_;
     }
 
     /**
      * A Pointer to a SyncPointManager
      */
     RefPtr<SyncPointManager> manager;
+
+    /** Logger used to initialize SyncPoints */
+    MultiLogger *logger_;
+
+    /** Cache Logger used for testing */
+    CacheLogger *cache_logger_;
 
     /** Thread attributes */
     pthread_attr_t attrs;
@@ -170,17 +196,31 @@ TEST_F(SyncPointManagerTest, SyncPointManager)
   ASSERT_EQ(0u, manager->get_syncpoints().size());
   manager->get_syncpoint("test", "/test/1");
   ASSERT_EQ(3u, manager->get_syncpoints().size());
-  ASSERT_EQ(manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))), 1u);
+  ASSERT_EQ(1u,
+      manager->get_syncpoints().count(
+          RefPtr<SyncPoint>(new SyncPoint("/test/1", logger_))));
   manager->get_syncpoint("test2", "/test/2");
   ASSERT_EQ(4u, manager->get_syncpoints().size());
-  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))));
-  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/2"))));
+  ASSERT_EQ(1u,
+      manager->get_syncpoints().count(
+          RefPtr<SyncPoint>(new SyncPoint("/test/1", logger_))));
+  ASSERT_EQ(1u,
+      manager->get_syncpoints().count(
+          RefPtr<SyncPoint>(new SyncPoint("/test/2", logger_))));
   manager->get_syncpoint("test3", "/test/1");
   ASSERT_EQ(4u, manager->get_syncpoints().size());
-  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/1"))));
-  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test/2"))));
-  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/"))));
-  ASSERT_EQ(1u, manager->get_syncpoints().count(RefPtr<SyncPoint>(new SyncPoint("/test"))));
+  ASSERT_EQ(1u,
+      manager->get_syncpoints().count(
+          RefPtr<SyncPoint>(new SyncPoint("/test/1", logger_))));
+  ASSERT_EQ(1u,
+      manager->get_syncpoints().count(
+          RefPtr<SyncPoint>(new SyncPoint("/test/2", logger_))));
+  ASSERT_EQ(1u,
+      manager->get_syncpoints().count(
+          RefPtr<SyncPoint>(new SyncPoint("/", logger_))));
+  ASSERT_EQ(1u,
+      manager->get_syncpoints().count(
+          RefPtr<SyncPoint>(new SyncPoint("/test", logger_))));
 }
 
 TEST_F(SyncPointManagerTest, WatcherSet)
@@ -200,7 +240,9 @@ TEST_F(SyncPointManagerTest, ReleaseAndReacquire)
   string id = "/test/sp1";
   RefPtr<SyncPoint> sp = manager->get_syncpoint(comp, id);
   set<RefPtr<SyncPoint>, SyncPointSetLessThan > syncpoints = manager->get_syncpoints();
-  ASSERT_EQ(1, syncpoints.count(RefPtr<SyncPoint>(new SyncPoint("/test"))));
+  ASSERT_EQ(1,
+      syncpoints.count(
+          RefPtr<SyncPoint>(new SyncPoint("/test", logger_))));
   for (set<RefPtr<SyncPoint> >::const_iterator sp_it = syncpoints.begin();
       sp_it != syncpoints.end(); sp_it++) {
     EXPECT_EQ(1, (*sp_it)->get_watchers().count(comp))
@@ -218,14 +260,16 @@ TEST_F(SyncPointManagerTest, ReleaseAndReacquire)
 
 TEST_F(SyncPointTest, EmptyIdentifier)
 {
-  ASSERT_THROW(sp1 = new SyncPoint(""), SyncPointInvalidIdentifierException);
+  ASSERT_THROW(sp1 = new SyncPoint("", NULL), SyncPointInvalidIdentifierException);
 }
 
 TEST_F(SyncPointTest, InvalidIdentifier)
 {
-  EXPECT_THROW(sp1 = new SyncPoint("invalid"), SyncPointInvalidIdentifierException);
-  EXPECT_NO_THROW(sp1 = new SyncPoint("/"));
-  EXPECT_THROW(sp1 = new SyncPoint("/test/"), SyncPointInvalidIdentifierException);
+  EXPECT_THROW(sp1 = new SyncPoint("invalid", NULL),
+      SyncPointInvalidIdentifierException);
+  EXPECT_NO_THROW(sp1 = new SyncPoint("/", NULL));
+  EXPECT_THROW(sp1 = new SyncPoint("/test/", NULL),
+      SyncPointInvalidIdentifierException);
 }
 
 TEST_F(SyncPointManagerTest, SyncPointManagerExceptions) {
@@ -246,8 +290,10 @@ TEST_F(SyncPointManagerTest, SyncPointHierarchyRegisteredWatchers)
   string id = "/test/sp1";
   RefPtr<SyncPoint> sp = manager->get_syncpoint(comp, "/test/sp1");
   set<RefPtr<SyncPoint>, SyncPointSetLessThan > syncpoints = manager->get_syncpoints();
-  set<RefPtr<SyncPoint>>::iterator sp_test_it = syncpoints.find(RefPtr<SyncPoint>(new SyncPoint("/test")));
-  set<RefPtr<SyncPoint>>::iterator sp_root_it = syncpoints.find(RefPtr<SyncPoint>(new SyncPoint("/")));
+  set<RefPtr<SyncPoint>>::iterator sp_test_it = syncpoints.find(
+      RefPtr<SyncPoint>(new SyncPoint("/test", logger_)));
+  set<RefPtr<SyncPoint>>::iterator sp_root_it = syncpoints.find(
+      RefPtr<SyncPoint>(new SyncPoint("/", logger_)));
   ASSERT_NE(syncpoints.end(), sp_test_it);
   ASSERT_NE(syncpoints.end(), sp_root_it);
   RefPtr<SyncPoint> sp_test = *sp_test_it;
@@ -277,7 +323,7 @@ TEST_F(SyncPointManagerTest, SyncPointComponentRegistersForMultipleSyncPoints)
   // if it does, registering for the predecessor '/test' may be broken
   RefPtr<SyncPoint> sp2 = manager->get_syncpoint(comp, sp2_id);
   RefPtr<SyncPoint> predecessor = *manager->get_syncpoints().find(
-      RefPtr<SyncPoint>(new SyncPoint("/test")));
+      RefPtr<SyncPoint>(new SyncPoint("/test", logger_)));
   EXPECT_EQ(1, sp1->get_watchers().count(comp))
       << comp << " is not registered for " << sp1->get_identifier()
       << ", but should be!";
@@ -941,4 +987,28 @@ TEST_F(SyncPointManagerTest, EmitterEmitsSameSyncPointTwiceTest)
   ASSERT_EQ(0, pthread_tryjoin_np(pthread1, NULL));
 
   delete params1;
+}
+
+
+/** helper function used for testing reltime_wait() */
+void * call_timed_wait(void *data)
+{
+  SyncPoint * sp = (SyncPoint *)(data);
+  sp->reltime_wait_for_all("waiter", 0, 1000000);
+  return NULL;
+}
+
+/** Test if the component returns when using reltime_wait */
+TEST_F(SyncPointManagerTest, RelTimeWaitTest)
+{
+  RefPtr<SyncPoint> sp1 = manager->get_syncpoint("emitter", "/test/sp1");
+  manager->get_syncpoint("waiter", "/test/sp1");
+  sp1->register_emitter("emitter");
+  pthread_t thread;
+  pthread_create(&thread, NULL, call_timed_wait, (void *) *sp1);
+  usleep(2000000);
+  ASSERT_EQ(0, pthread_tryjoin_np(thread, NULL));
+  /* The SyncPoint should have logged the error */
+  ASSERT_GT(cache_logger_->get_messages().size(), 0);
+
 }
