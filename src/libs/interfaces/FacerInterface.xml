@@ -10,6 +10,7 @@
       <item name="OPMODE_DETECTION">Facer will detect faces, but not try to recognize them.</item>
       <item name="OPMODE_RECOGNITION">Facer will detect faces, and then try to recognize the most dominant face.</item>
       <item name="OPMODE_LEARNING">Facer will gather images and learn an identity.</item>
+      <item name="OPMODE_GENDER">Facer will detect faces and try to identify the gender of the faces</item>
     </enum>
   </constants>
   <data>
@@ -46,6 +47,10 @@
 
     <field type="uint32" name="most_likely_identity">
       The identity that was recognized most prevalently.
+    </field>
+
+    <field type="string" length="64" name="most_likely_gender">
+      The gender that was recogniced.
     </field>
 
     <field type="float" name="history_ratio">

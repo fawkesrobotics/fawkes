@@ -10,7 +10,8 @@ class FacerInterface : public Interface
     OPMODE_DISABLED,
     OPMODE_DETECTION,
     OPMODE_RECOGNITION,
-    OPMODE_LEARNING
+    OPMODE_LEARNING,
+    OPMODE_GENDER
   } if_facer_opmode_t;
 
   class LearnFaceMessage : public Message
@@ -95,6 +96,9 @@ class FacerInterface : public Interface
   unsigned int most_likely_identity();
   void set_most_likely_identity(const unsigned int new_most_likely_identity);
   int maxlenof_most_likely_identity() const;
+  char * most_likely_gender();
+  void set_most_likely_gender(const char * new_most_likely_gender);
+  int maxlenof_most_likely_gender() const;
   float history_ratio();
   void set_history_ratio(const float new_history_ratio);
   int maxlenof_history_ratio() const;

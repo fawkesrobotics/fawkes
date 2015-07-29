@@ -58,6 +58,7 @@ FacerInterface::FacerInterface() : Interface()
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t", &enum_map_if_facer_opmode_t);
   add_fieldinfo(IFT_UINT32, "num_identities", 1, &data->num_identities);
   add_fieldinfo(IFT_UINT32, "recognized_identity", 1, &data->recognized_identity);
@@ -65,6 +66,7 @@ FacerInterface::FacerInterface() : Interface()
   add_fieldinfo(IFT_UINT32, "num_detections", 1, &data->num_detections);
   add_fieldinfo(IFT_UINT32, "num_recognitions", 1, &data->num_recognitions);
   add_fieldinfo(IFT_UINT32, "most_likely_identity", 1, &data->most_likely_identity);
+  add_fieldinfo(IFT_STRING, "most_likely_gender", 64, data->most_likely_gender);
   add_fieldinfo(IFT_FLOAT, "history_ratio", 1, &data->history_ratio);
   add_fieldinfo(IFT_FLOAT, "sec_since_detection", 1, &data->sec_since_detection);
   add_fieldinfo(IFT_INT32, "visibility_history", 1, &data->visibility_history);
@@ -79,7 +81,7 @@ FacerInterface::FacerInterface() : Interface()
   add_messageinfo("EnableIdentityMessage");
   add_messageinfo("SetNameMessage");
   add_messageinfo("GetNameMessage");
-  unsigned char tmp_hash[] = {0xe1, 0x12, 0xd2, 0x51, 0x1d, 0x24, 0x1b, 0x27, 0x86, 0xce, 0x29, 0x32, 0xd6, 0x5a, 0x5e, 0xb3};
+  unsigned char tmp_hash[] = {0xbf, 0x3d, 0x9c, 0xc5, 0x18, 0xc8, 0x17, 0xeb, 0x89, 0x86, 0x87, 0x65, 0x3c, 0x5a, 0x5e, 0x37};
   set_hash(tmp_hash);
 }
 
@@ -100,6 +102,7 @@ FacerInterface::tostring_if_facer_opmode_t(if_facer_opmode_t value) const
   case OPMODE_DETECTION: return "OPMODE_DETECTION";
   case OPMODE_RECOGNITION: return "OPMODE_RECOGNITION";
   case OPMODE_LEARNING: return "OPMODE_LEARNING";
+  case OPMODE_GENDER: return "OPMODE_GENDER";
   default: return "UNKNOWN";
   }
 }
@@ -346,6 +349,41 @@ void
 FacerInterface::set_most_likely_identity(const uint32_t new_most_likely_identity)
 {
   data->most_likely_identity = new_most_likely_identity;
+  data_changed = true;
+}
+
+/** Get most_likely_gender value.
+ * 
+      The gender that was recogniced.
+    
+ * @return most_likely_gender value
+ */
+char *
+FacerInterface::most_likely_gender() const
+{
+  return data->most_likely_gender;
+}
+
+/** Get maximum length of most_likely_gender value.
+ * @return length of most_likely_gender value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_most_likely_gender() const
+{
+  return 64;
+}
+
+/** Set most_likely_gender value.
+ * 
+      The gender that was recogniced.
+    
+ * @param new_most_likely_gender new most_likely_gender value
+ */
+void
+FacerInterface::set_most_likely_gender(const char * new_most_likely_gender)
+{
+  strncpy(data->most_likely_gender, new_most_likely_gender, sizeof(data->most_likely_gender));
   data_changed = true;
 }
 
@@ -737,6 +775,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage(const char * ini_name) : Mess
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 /** Constructor */
@@ -751,6 +790,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage() : Message("LearnFaceMessage
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
@@ -835,6 +875,7 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage(const if_facer_opmode_t ini_o
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t", &enum_map_if_facer_opmode_t);
 }
 /** Constructor */
@@ -849,6 +890,7 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage() : Message("SetOpmodeMessage
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t", &enum_map_if_facer_opmode_t);
 }
 
@@ -939,6 +981,7 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const uint32_t ini_
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
@@ -954,6 +997,7 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage() : Message("Enable
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
@@ -1071,6 +1115,7 @@ FacerInterface::SetNameMessage::SetNameMessage(const uint32_t ini_index, const c
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
@@ -1086,6 +1131,7 @@ FacerInterface::SetNameMessage::SetNameMessage() : Message("SetNameMessage")
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
@@ -1201,6 +1247,7 @@ FacerInterface::GetNameMessage::GetNameMessage(const uint32_t ini_index) : Messa
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
 }
 /** Constructor */
@@ -1215,6 +1262,7 @@ FacerInterface::GetNameMessage::GetNameMessage() : Message("GetNameMessage")
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
 }
 

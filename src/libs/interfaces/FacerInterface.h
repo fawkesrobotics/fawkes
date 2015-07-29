@@ -45,7 +45,8 @@ class FacerInterface : public Interface
     OPMODE_DISABLED /**< Facer will not process any images */,
     OPMODE_DETECTION /**< Facer will detect faces, but not try to recognize them. */,
     OPMODE_RECOGNITION /**< Facer will detect faces, and then try to recognize the most dominant face. */,
-    OPMODE_LEARNING /**< Facer will gather images and learn an identity. */
+    OPMODE_LEARNING /**< Facer will gather images and learn an identity. */,
+    OPMODE_GENDER /**< Facer will detect faces and try to identify the gender of the faces */
   } if_facer_opmode_t;
   const char * tostring_if_facer_opmode_t(if_facer_opmode_t value) const;
 
@@ -75,6 +76,9 @@ class FacerInterface : public Interface
      */
     uint32_t most_likely_identity; /**< 
       The identity that was recognized most prevalently.
+     */
+    char most_likely_gender[64]; /**< 
+      The gender that was recogniced.
      */
     float history_ratio; /**< 
       The ratio of the most likely identity showing up in the history
@@ -292,6 +296,9 @@ class FacerInterface : public Interface
   uint32_t most_likely_identity() const;
   void set_most_likely_identity(const uint32_t new_most_likely_identity);
   size_t maxlenof_most_likely_identity() const;
+  char * most_likely_gender() const;
+  void set_most_likely_gender(const char * new_most_likely_gender);
+  size_t maxlenof_most_likely_gender() const;
   float history_ratio() const;
   void set_history_ratio(const float new_history_ratio);
   size_t maxlenof_history_ratio() const;
