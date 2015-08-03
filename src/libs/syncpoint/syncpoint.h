@@ -87,6 +87,8 @@ class SyncPoint
     /** unregister as emitter */
     virtual void unregister_emitter(const std::string & component, bool emit_if_pending = true);
 
+    void lock_until_next_wait(const std::string & component);
+
     std::string get_identifier() const;
     bool operator==(const SyncPoint & other) const;
     bool operator==(const std::string & other) const;
@@ -129,10 +131,17 @@ class SyncPoint
 
     /** Mutex used to protect all member variables */
     Mutex *mutex_;
+    /** Mutex used to allow lock_until_next_wait */
+    Mutex *mutex_next_wait_;
+    /** Mutex used for cond_wait_for_one_ */
+    Mutex *mutex_wait_for_one_;
     /** WaitCondition which is used for wait_for_one() */
     WaitCondition *cond_wait_for_one_;
+    /** Mutex used for cond_wait_for_all_ */
+    Mutex *mutex_wait_for_all_;
     /** WaitCondition which is used for wait_for_all() */
     WaitCondition *cond_wait_for_all_;
+
     /** Logger */
     MultiLogger *logger_;
 
@@ -141,6 +150,7 @@ class SyncPoint
     bool is_pending(std::string component);
     void handle_default(std::string component, WakeupType type,
       uint max_time_sec, uint max_time_nsec);
+    void cleanup();
 
   private:
     /** The predecessor SyncPoint, which is the SyncPoint one level up
@@ -155,6 +165,8 @@ class SyncPoint
     std::multiset<std::string> pending_emitters_;
 
     std::set<std::string> bad_components_;
+
+    std::string emit_locker_;
 
     Time last_emitter_reset_;
 };

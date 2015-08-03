@@ -1012,3 +1012,98 @@ TEST_F(SyncPointManagerTest, RelTimeWaitTest)
   ASSERT_GT(cache_logger_->get_messages().size(), 0);
 
 }
+
+/// @cond INTERNALS
+struct emitter_thread_data {
+    RefPtr<SyncPointManager> manager;
+    std::string name;
+    std::string sp_name;
+};
+/// @endcond
+
+/** helper function to call emit in a thread */
+void * call_emit(void * data)
+{
+  emitter_thread_data * tdata = (emitter_thread_data *) data;
+  RefPtr<SyncPoint> sp = tdata->manager->get_syncpoint(tdata->name, tdata->sp_name);
+  sp->register_emitter(tdata->name);
+  sp->emit(tdata->name);
+  return NULL;
+}
+
+/** Test the functionality of lock_until_next_wait */
+TEST_F(SyncPointManagerTest, LockUntilNextWaitTest)
+{
+  RefPtr<SyncPoint> sp = manager->get_syncpoint("component", "/test");
+
+  sp->lock_until_next_wait("component");
+  pthread_t thread;
+  emitter_thread_data * emitter_params = new emitter_thread_data();
+  emitter_params->manager = manager;
+  emitter_params->name = "emitter";
+  emitter_params->sp_name = "/test";
+  pthread_create(&thread, NULL, call_emit, (void *) emitter_params);
+
+  usleep(2000000);
+
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(thread, NULL));
+
+  pthread_t waiter_thread;
+  pthread_create(&waiter_thread, NULL, call_wait, (void *) *sp);
+
+  usleep(2000000);
+
+  ASSERT_EQ(0, pthread_tryjoin_np(thread, NULL));
+  ASSERT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
+
+  delete emitter_params;
+}
+
+
+/** helper function used for testing wait() */
+void * call_wait_for_all(void *data)
+{
+  SyncPoint * sp = (SyncPoint *)(data);
+  sp->wait_for_all("waiter");
+  return NULL;
+}
+
+/** Test the functionality of lock_until_next_wait
+ *  Test whether the waiter really calls wait before ALL emitters call emit
+ *  This tests a potential race condition between wait() and emit() */
+TEST_F(SyncPointManagerTest, LockUntilNextWaitWaiterComesFirstTest)
+{
+  RefPtr<SyncPoint> sp = manager->get_syncpoint("waiter", "/test");
+
+  sp->lock_until_next_wait("waiter");
+
+  uint num_emitters = 100;
+  pthread_t emitter_thread[num_emitters];
+  emitter_thread_data * params[num_emitters];
+  for (uint i = 0; i < num_emitters; i++) {
+    params[i] = new emitter_thread_data();
+    params[i]->manager = manager;
+    string emitter_name = "emitter" + to_string(i);
+    params[i]->name = emitter_name;
+    params[i]->sp_name = "/test";
+    pthread_create(&emitter_thread[i], NULL, call_emit, (void *) params[i]);
+  }
+
+  usleep(2000000);
+
+  for (uint i = 0; i < num_emitters; i++) {
+    EXPECT_EQ(EBUSY, pthread_tryjoin_np(emitter_thread[i], NULL));
+  }
+
+  pthread_t waiter_thread;
+  pthread_create(&waiter_thread, NULL, call_wait_for_all, (void *) *sp);
+
+  usleep(2000000);
+
+  for (uint i = 0; i < num_emitters; i++) {
+    ASSERT_EQ(0, pthread_tryjoin_np(emitter_thread[i], NULL));
+    delete params[i];
+  }
+
+  ASSERT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
+}
