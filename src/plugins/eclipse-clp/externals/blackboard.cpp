@@ -107,13 +107,14 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
 
   /** Open remote blackboard connection.
    * @param host the host running Fawkes
+   * @param port the host's port to connect to
    */
-  void EclExternalBlackBoard::connect(const char* host)
+  void EclExternalBlackBoard::connect(const char* host, const long port)
   {
     if (m_blackboard && m_own_blackboard) {
       delete m_blackboard;
     }
-    m_blackboard = new RemoteBlackBoard(host, 1910);
+    m_blackboard = new RemoteBlackBoard(host, port);
   }
 
 
@@ -176,15 +177,21 @@ p_bb_connect_to_remote_blackboard()
   // get hostname
   char* hostname;
 
-  if (EC_succeed != EC_arg(2).is_string(&hostname))
+  if (EC_succeed != EC_arg(1).is_string(&hostname))
   {
     fprintf(stderr, "p_bb_connect_to_remote_blackboard(): first argument is not a string\n");
     return EC_fail;
   }
 
+  long port;
+  if (EC_succeed != EC_arg(2).is_long(&port))
+  {
+    return EC_fail;
+  }
+
   try
   {
-    EclExternalBlackBoard::instance()->connect(hostname);
+    EclExternalBlackBoard::instance()->connect(hostname, port);
   }
   catch (Exception& e)
   {

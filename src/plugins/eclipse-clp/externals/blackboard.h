@@ -54,7 +54,7 @@ public:
   static void cleanup_instance();
   static EclExternalBlackBoard* instance();
 
-  void connect(const char *host);
+  void connect(const char *host, long port);
   bool connected();
   void disconnect();
   static BlackBoard* blackboard_instance();
