@@ -156,6 +156,7 @@ void
 EclipseAgentThread::finalize()
 {
   ec_cleanup();
+  fawkes::EclExternalBlackBoard::cleanup_instance();
 }
 
 

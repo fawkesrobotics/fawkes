@@ -41,40 +41,53 @@ BlackBoard* EclExternalBlackBoard::m_blackboard = NULL;
 EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
 
   /** Constructor. */
-  EclExternalBlackBoard::EclExternalBlackBoard() {
-    if (m_instance == NULL) {
-      m_instance = this;
-    }else{
-      //throw Exception("There is already an instance of type EclExternalBlackBoard instantiated");
+  EclExternalBlackBoard::EclExternalBlackBoard()
+  {
+    if (m_instance != NULL) {
+      throw Exception("There is already an instance of type "
+          "EclExternalBlackBoard instantiated");
     }
+    m_own_blackboard = true;
   }
 
   /** Constructor. */
-  EclExternalBlackBoard::EclExternalBlackBoard(BlackBoard* blackboard) {
-    if (m_instance == NULL) {;
-      m_instance = this;
-      m_blackboard = blackboard;
-    }else{
-      m_blackboard = blackboard;
-      //throw Exception("There is already an instance of type EclExternalBlackBoard instantiated");
+  EclExternalBlackBoard::EclExternalBlackBoard(BlackBoard* blackboard)
+  {
+    if (m_instance != NULL) {
+      throw Exception("There is already an instance of type "
+          "EclExternalBlackBoard instantiated");
     }
+    m_blackboard = blackboard;
+    m_own_blackboard = false;
   }
 
   /** Destructor. */
-  EclExternalBlackBoard::~EclExternalBlackBoard() {
+  EclExternalBlackBoard::~EclExternalBlackBoard()
+  {
     for (std::map<std::string, Interface *>::iterator iit = m_interfaces.begin();
-	  iit != m_interfaces.end();
-	  ++iit)
-    { m_blackboard->close(iit->second); }
-    delete m_instance;
-    //delete m_blackboard;
+        iit != m_interfaces.end(); ++iit) {
+      m_blackboard->close(iit->second);
+    }
+    if (m_own_blackboard) {
+      delete m_blackboard;
+    }
   }
 
   /** Creates the initial EclExternalBlackBoard object
    * @param bb pointer to the BlackBoard to be used
    */
-  void EclExternalBlackBoard::create_initial_object(BlackBoard *bb) {
+  void EclExternalBlackBoard::create_initial_object(BlackBoard *bb)
+  {
       m_instance = new EclExternalBlackBoard(bb);
+  }
+
+  /** Delete the current EclExternalBlackBoard instance and set it to NULL */
+  void EclExternalBlackBoard::cleanup_instance()
+  {
+    if (m_instance) {
+      delete m_instance;
+    }
+    m_instance = NULL;
   }
 
 
@@ -83,8 +96,10 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
   */
   EclExternalBlackBoard* EclExternalBlackBoard::instance()
   {
-    if (!m_instance)
-    { throw Exception("No instance of type EclExternalBlackBoard instantiated"); }
+    if (!m_instance) {
+      throw Exception("EclExternalBlackBoard::instance(): "
+        "No instance of type EclExternalBlackBoard instantiated");
+    }
 
     return m_instance;
   }
@@ -95,6 +110,9 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
    */
   void EclExternalBlackBoard::connect(const char* host)
   {
+    if (m_blackboard && m_own_blackboard) {
+      delete m_blackboard;
+    }
     m_blackboard = new RemoteBlackBoard(host, 1910);
   }
 
@@ -114,8 +132,10 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
 	  iit != m_interfaces.end();
 	  ++iit)
     { m_blackboard->close(iit->second); }
-    //delete m_blackboard;
-    //m_blackboard = 0;
+    if (m_own_blackboard) {
+      delete m_blackboard;
+    }
+    m_blackboard = 0;
   }
 
   /** Access the BlackBoard instance.
