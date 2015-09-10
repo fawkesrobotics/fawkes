@@ -95,6 +95,11 @@ class FacerInterface : public Interface
       Indicates whether a new identity is currently learnt. If
       learning is in progress only "old" faces can be recognized.
      */
+    bool searching_person; /**< 
+      Indicates whether the plugin is searching for a specified person.
+      If set to true, the index and name will be listed in the fields
+      "requested_index" and "requested_name".
+     */
     float recording_progress; /**< 
       Indicates the progress of recording images of a new face.
      */
@@ -268,6 +273,57 @@ class FacerInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class StartSearchPersonMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t index; /**< Index of the identity. */
+    } StartSearchPersonMessage_data_t;
+#pragma pack(pop)
+
+    StartSearchPersonMessage_data_t *data;
+
+  interface_enum_map_t enum_map_if_facer_opmode_t;
+   public:
+    StartSearchPersonMessage(const uint32_t ini_index);
+    StartSearchPersonMessage();
+    ~StartSearchPersonMessage();
+
+    StartSearchPersonMessage(const StartSearchPersonMessage *m);
+    /* Methods */
+    uint32_t index() const;
+    void set_index(const uint32_t new_index);
+    size_t maxlenof_index() const;
+    virtual Message * clone() const;
+  };
+
+  class StopSearchPersonMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } StopSearchPersonMessage_data_t;
+#pragma pack(pop)
+
+    StopSearchPersonMessage_data_t *data;
+
+  interface_enum_map_t enum_map_if_facer_opmode_t;
+   public:
+    StopSearchPersonMessage();
+    ~StopSearchPersonMessage();
+
+    StopSearchPersonMessage(const StopSearchPersonMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   FacerInterface();
@@ -311,6 +367,9 @@ class FacerInterface : public Interface
   bool is_learning_in_progress() const;
   void set_learning_in_progress(const bool new_learning_in_progress);
   size_t maxlenof_learning_in_progress() const;
+  bool is_searching_person() const;
+  void set_searching_person(const bool new_searching_person);
+  size_t maxlenof_searching_person() const;
   float recording_progress() const;
   void set_recording_progress(const float new_recording_progress);
   size_t maxlenof_recording_progress() const;

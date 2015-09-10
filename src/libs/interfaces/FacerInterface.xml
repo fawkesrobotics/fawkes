@@ -72,6 +72,12 @@
       learning is in progress only "old" faces can be recognized.
     </field>
 
+    <field type="bool" name="searching_person">
+      Indicates whether the plugin is searching for a specified person.
+      If set to true, the index and name will be listed in the fields
+      "requested_index" and "requested_name".
+    </field>
+
     <field type="float" name="recording_progress">
       Indicates the progress of recording images of a new face.
     </field>
@@ -121,6 +127,13 @@
       "requested_index".
     </comment>
     <field type="uint32" name="index">Index of the identity.</field>
+  </message>
+  <message name="StartSearchPerson">
+    <comment>Search for a person regarding all faces visible.</comment>
+    <field type="uint32" name="index">Index of the identity.</field>
+  </message>
+  <message name="StopSearchPerson">
+    <comment>Stop searching for a specific person, return to recognition.</comment>
   </message>
 </interface>
 

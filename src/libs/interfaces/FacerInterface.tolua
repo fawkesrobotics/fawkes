@@ -75,6 +75,24 @@ class FacerInterface : public Interface
     int maxlenof_index() const;
   };
 
+  class StartSearchPersonMessage : public Message
+  {
+    StartSearchPersonMessage(unsigned int ini_index);
+    StartSearchPersonMessage();
+    ~StartSearchPersonMessage();
+
+    unsigned int index();
+    void set_index(const unsigned int new_index);
+    int maxlenof_index() const;
+  };
+
+  class StopSearchPersonMessage : public Message
+  {
+    StopSearchPersonMessage();
+    ~StopSearchPersonMessage();
+
+  };
+
   if_facer_opmode_t opmode();
   void set_opmode(const if_facer_opmode_t new_opmode);
   int maxlenof_opmode() const;
@@ -111,6 +129,9 @@ class FacerInterface : public Interface
   bool is_learning_in_progress();
   void set_learning_in_progress(const bool new_learning_in_progress);
   int maxlenof_learning_in_progress() const;
+  bool is_searching_person();
+  void set_searching_person(const bool new_searching_person);
+  int maxlenof_searching_person() const;
   float recording_progress();
   void set_recording_progress(const float new_recording_progress);
   int maxlenof_recording_progress() const;
