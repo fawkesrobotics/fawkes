@@ -30,13 +30,6 @@
 :- export map_graph_get_closest_node/3.
 :- export map_graph_get_children/2.
 
-%% load the external code from the shared object
-:- ( exists("../../../lib") ->
-       load("../../../lib/eclipse_externals.so")
-   ;
-       load("../../../../lib/eclipse_externals.so")
-   ).
-
 %% definition of external predicates
 :- external(map_graph_load/1, p_map_graph_load).
 :- external(map_graph_get_node_coords/3, p_map_graph_get_node_coords3).

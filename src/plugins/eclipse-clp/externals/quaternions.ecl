@@ -25,13 +25,5 @@
 
 :- export quat_get_yaw/2.
 
-
-%% load the external code from the shared object
-:- ( exists("../../../lib") ->
-       load("../../../lib/eclipse_externals.so")
-   ;
-       load("../../../../lib/eclipse_externals.so")
-   ).
-
 %% definition of external predicates
 :- external(quat_get_yaw/2, p_get_yaw).

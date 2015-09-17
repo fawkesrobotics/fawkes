@@ -22,6 +22,11 @@
 
 #include "eclipse_debugger.h"
 
+#include <glibmm/exception.h>
+#ifdef HAVE_GCONFMM
+#include <gui_utils/service_chooser_dialog.h>
+#endif
+
 
 #  define UI_FILE RESDIR"/eclipsedebuggergui/eclipsedebuggergui.ui"
 
@@ -31,6 +36,9 @@
 int
 main(int argc, char **argv) {
   Gtk::Main gtk_main(argc, argv);
+#ifdef HAVE_GCONFMM
+  Gnome::Conf::init();
+#endif
 
   try {
     Glib::RefPtr<Gtk::Builder> builder =
@@ -44,6 +52,10 @@ main(int argc, char **argv) {
     delete window;
   } catch (Gtk::BuilderError &e) {
     printf("Failed to instantiate window: %s\n", e.what().c_str());
+    return 1;
+  } catch (Glib::Exception &e) {
+    printf("%s\n", e.what().c_str());
+    return 1;
   }
 
   return 0;
