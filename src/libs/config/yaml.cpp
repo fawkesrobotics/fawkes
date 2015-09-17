@@ -880,6 +880,7 @@ YamlConfiguration::write_host_file()
   if (mutex->try_lock()) {
     try {
       host_root_->emit(host_file_);
+      mutex->unlock();
     } catch (...) {
       write_pending_mutex_->unlock();
       mutex->unlock();
