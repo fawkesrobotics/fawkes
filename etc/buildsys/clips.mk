@@ -45,6 +45,12 @@ endif
 ifeq ($(HAVE_CLIPS),1)
   CFLAGS_CLIPS  = -DHAVE_CLIPS $(shell $(PKGCONFIG) --cflags 'clipsmm-1.0')
   LDFLAGS_CLIPS = $(shell $(PKGCONFIG) --libs 'clipsmm-1.0')
+  # The following is required since the GCC 5 libstdc++ deprecates
+  # std::auto_ptr according to C++11. This causes warnings since this
+  # is used in glibmm, a dependency of clipsmm.
+  ifeq ($(call gcc_atleast_version,5,0),1)
+    CFLAGS_CLIPS += -Wno-deprecated-declarations
+  endif
 endif
 
 endif # __buildsys_clips_mk_
