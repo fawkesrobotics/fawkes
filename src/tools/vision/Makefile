@@ -41,6 +41,7 @@ OBJS_fvlistfwcams = listfwcams.o
 LIBS_fvlistsrcams = $(VISION_CAM_LIBS) stdc++ fawkesutils fvcams
 OBJS_fvlistsrcams = listsrcams.o
 
+CFLAGS_converter = $(CFLAGS_LIBPNG)
 LIBS_fvconverter = stdc++ fawkescore fawkesutils fvutils fvcams
 OBJS_fvconverter = converter.o
 
