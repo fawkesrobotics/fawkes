@@ -107,7 +107,7 @@ KatanaActThread::init()
 
   // see if config entries for joints exist
   std::string joint_name;
-  for( unsigned int i=0; i<5; ++i) {
+  for( long long i = 0; i < 5; ++i) {
     joint_name = config->get_string((cfg_prefix + "joints/" + std::to_string(i)).c_str() );
     joint_name.clear();
   }
@@ -150,7 +150,7 @@ KatanaActThread::init()
     __katana_if = blackboard->open_for_writing<KatanaInterface>("Katana");
     __joint_ifs = new std::vector<JointInterface*>();
     JointInterface* joint_if = NULL;
-    for( unsigned int i=0; i<5; ++i) {
+    for( long long i = 0; i < 5; ++i) {
       joint_name = config->get_string((cfg_prefix + "joints/" + std::to_string(i)).c_str() );
       joint_if = blackboard->open_for_writing<JointInterface>(joint_name.c_str());
       __joint_ifs->push_back( joint_if );
