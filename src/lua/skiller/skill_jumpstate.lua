@@ -239,18 +239,28 @@ function SkillJumpState:do_init()
          if k ~= 1 then
             set_already = true
             if type(k) == "number" and type(v) == "table" then
+	       -- assuming this is the default args table, passed in define_states
                for k2, v2 in pairs(v) do
-                  args[k2] = v2
+                  if type(v2) == "table" then
+		     args[k2] = table.deepcopy(v2)
+		  else
+		     args[k2] = v2
+		  end
                end
-            else
+
+            elseif type(k) ~= "string" or (k ~= "status" and k ~= "args") then
+	       print_warn("You have set the subskill "..s[1].name.."'s field '"..tostring(k).."'."
+			  .." Please pass the subskill's arguments in the 'args' field of subskills,"
+			  .." or the 'args' field of the state that envokes the subskill(s).")
                args[k] = v
-            end
+	    end
          end
       end
 
-      -- Set args from "self.args[skill] = {arg1=arg,...}"
-      if self.args[s[1]] or self.args[s[1].name] then
-         sargs = self.args[s[1]] or self.args[s[1].name]
+      -- Set args from "self.args[skill] = {arg1=arg,...}",
+      --            or "self.skills[..].args = {arg1=arg,...}"
+      if self.args[s[1]] or self.args[s[1].name] or s.args then
+         sargs = self.args[s[1]] or self.args[s[1].name] or s.args
          if type(sargs) == "table" then
             set_already = true
             for k, v in pairs(sargs) do
@@ -353,6 +363,7 @@ end
 function SkillJumpState:skill_reset()
    if self.skills then
       for _, s in ipairs(self.skills) do
+	 s.args = nil
 	 s.__args = nil
 	 s.status = skillstati.S_RUNNING
 	 s[1].reset()
