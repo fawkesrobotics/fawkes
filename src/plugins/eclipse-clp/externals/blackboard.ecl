@@ -24,6 +24,7 @@
 :- module(blackboard).
 
 :- export bb_connect_remote/1.
+:- export bb_connect_remote/2.
 :- export bb_disconnect/0.
 :- export bb_is_alive/0.
 :- export bb_open_interface/3.
@@ -43,11 +44,12 @@
 :- export bb_send_message/4.
 :- export bb_recv_messages/2.
 
+:- export bb_ensure_connected_remote/2.
 :- export bb_ensure_connected_remote/1.
 :- export bb_ensure_connected/0.
 
 %% definition of external predicates
-:- external(bb_connect_remote/1, p_bb_connect_to_remote_blackboard).
+:- external(bb_connect_remote/2, p_bb_connect_to_remote_blackboard).
 :- external(bb_disconnect/0, p_bb_disconnect_from_blackboard).
 :- external(bb_is_alive/0, p_bb_is_alive).
 :- external(bb_is_connected/0, p_bb_is_connected).
@@ -79,7 +81,9 @@ bb_open_interface_writing(Type, Id) :-
 bb_open_interface_reading(Type, Id) :-
         bb_open_interface(r, Type, Id).
 
+bb_connect_remote(Host) :- bb_connect_remote(Host,1910).
 bb_ensure_connected_remote(Host) :- bb_is_connected ; bb_connect_remote(Host).
+bb_ensure_connected_remote(Host,Port) :- bb_is_connected ; bb_connect_remote(Host,Port).
 bb_ensure_connected :- bb_is_connected ; error('Connection error',_).
 
 %% bb_send_message/3 with the MsgID omitted

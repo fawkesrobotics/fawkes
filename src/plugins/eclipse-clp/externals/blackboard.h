@@ -51,9 +51,10 @@ public:
   ~EclExternalBlackBoard();
 
   static void create_initial_object(BlackBoard *bb);
+  static void cleanup_instance();
   static EclExternalBlackBoard* instance();
 
-  void connect(const char *host);
+  void connect(const char *host, long port);
   bool connected();
   void disconnect();
   static BlackBoard* blackboard_instance();
@@ -63,6 +64,7 @@ private:
   static EclExternalBlackBoard *      m_instance;
   std::map<std::string, Interface *>  m_interfaces;
   static BlackBoard *                 m_blackboard;
+  bool                                m_own_blackboard;
 };
 }
 
