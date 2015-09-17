@@ -7,6 +7,12 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
   # Joystick device file
   device_file: /dev/input/js0
 
+  # True to enable safety lockout feature.
+  # This feature requires that axes 0 and 1 (usually primary cross) must be
+  # moved all the way once while any button is pressed. After the button is
+  # then released the data is passed through to the blackboard
+  safety_lockout: true
+  
   # Configuration settings for the joystick-teleop plugin
   # The example configuration is suitable for an Xbox 360 controller
   teleop:

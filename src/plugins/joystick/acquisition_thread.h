@@ -79,6 +79,9 @@ class JoystickAcquisitionThread
  private:
   std::string __cfg_device_file;
 
+  bool        __safety_combo[5];
+  bool        __safety_lockout;
+
   int  __fd;
   bool __connected;
   unsigned int __axis_array_size;
