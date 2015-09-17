@@ -80,11 +80,15 @@ LIBS_ros_position_3d = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect Position3DInterface
 OBJS_ros_position_3d = position_3d_thread.o position_3d_plugin.o
 
+LIBS_ros_clock = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	      fawkesinterface fawkesrosaspect
+OBJS_ros_clock = clock_plugin.o clock_thread.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
 	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) \
 	   $(OBJS_ros_robot_description) $(OBJS_ros_move_base) \
-	   $(OBJS_ros_skiller)
+	   $(OBJS_ros_skiller) $(OBJS_ros_clock) $(OBJS_ros_position_3d)
 
 ifneq ($(PKGCONFIG),)
   HAVE_TINYXML = $(if $(shell $(PKGCONFIG) --exists 'tinyxml'; echo $${?/1/}),1,0)
@@ -235,6 +239,15 @@ ifeq ($(HAVE_ROS),1)
     WARN_TARGETS += warning_fawkes_msgs
   endif
 
+  ifeq ($(call ros-have-pkg,rosgraph_msgs),1)
+    CFLAGS_clock_thread += $(call ros-pkg-cflags,rosgraph_msgs) $(CFLAGS)
+    CFLAGS_clock_plugin = $(CFLAGS_clock_thread)
+    LDFLAGS_ros_clock += $(LDFLAGS) $(call ros-pkg-lflags,rosgraph_msgs)
+    PLUGINS_all += $(PLUGINDIR)/ros-clock.so
+  else
+    WARN_TARGETS += warning_rosgraph_msgs
+  endif
+
   PLUGINS_all += $(PLUGINDIR)/ros-robot-description.so
 
   ifeq ($(call ros-have-pkg,fawkes_msgs),1)
@@ -295,6 +308,8 @@ warning_actionlib:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator, move_base and skiller plugins$(TNORMAL) (ROS package actionlib not found)"
 warning_sensor_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS JointState Plugin$(TNORMAL) (ROS package sensor_msgs not found)"
+warning_rosgraph_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS clock plugin$(TNORMAL) (ROS package rosgraph_msgs not found)"
 warning_fawkes_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS skiller plugin$(TNORMAL) (ROS package fawkes_msgs not found)"
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Position 3D Plugin$(TNORMAL) (ROS package fawkes_msgs not found)"
