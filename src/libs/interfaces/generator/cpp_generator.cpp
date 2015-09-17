@@ -637,7 +637,7 @@ CppInterfaceGenerator::write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceF
   for (i = fields.begin(); i != fields.end(); ++i) {
     const char *type = "";
     const char *dataptr = "&";
-    const char *enumtype = 0;
+    std::string enumtype;
 
     if ( i->getType() == "bool" ) {
       type = "BOOL";
@@ -668,19 +668,19 @@ CppInterfaceGenerator::write_add_fieldinfo_calls(FILE *f, std::vector<InterfaceF
       dataptr = "";
     } else {
       type = "ENUM";
-      enumtype = i->getType().c_str();
+      enumtype = i->getType();
     }
 
     fprintf(f, "  add_fieldinfo(IFT_%s, \"%s\", %u, %sdata->%s%s%s%s%s%s%s);\n",
 	    type, i->getName().c_str(),
 	    (i->getLengthValue() > 0) ? i->getLengthValue() : 1,
 	    dataptr, i->getName().c_str(),
-	    enumtype ? ", \"" : "",
-	    enumtype ? enumtype : "",
-	    enumtype ? "\"" : "",
-	    enumtype ? ", " : "",
-	    enumtype ? "&enum_map_" : "",
-	    enumtype ? enumtype : ""
+	    enumtype.empty() ? "" : ", \"",
+	    enumtype.empty() ? "" : enumtype.c_str(),
+	    enumtype.empty() ? "" : "\"",
+	    enumtype.empty() ? "" : ", ",
+	    enumtype.empty() ? "" : "&enum_map_",
+	    enumtype.empty() ? "" : enumtype.c_str()
 	    );
   }
 }
