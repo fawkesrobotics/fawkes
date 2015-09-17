@@ -41,35 +41,35 @@ class NavGraphGeneratorInterface : public Interface
   /** Drive modes enum */
   typedef enum {
     NOT_CONNECTED /**< 
-	The node is will not be initially connected.
+				The node is will not be initially connected.
 
-	The difference to UNCONNECTED is that we do not connect the
-	nodes just now, but will do so later, e.g. by adding
-	edges. Note that it is an error not to connect the node later.
+				The difference to UNCONNECTED is that we do not connect the
+				nodes just now, but will do so later, e.g. by adding
+				edges. Note that it is an error not to connect the node later.
        */,
     UNCONNECTED /**< 
-	The node is marked as unconnected and will not be connected to
-	another node. This kind of nodes is useful to mark points and
-	possibly assign properties without needing to travel to it.
+				The node is marked as unconnected and will not be connected to
+				another node. This kind of nodes is useful to mark points and
+				possibly assign properties without needing to travel to it.
 
-	The difference to NOT_CONNECTED is that the nodes will be
-	explicitly marked as not being connected and it is an error to
-	connect them.
+				The difference to NOT_CONNECTED is that the nodes will be
+				explicitly marked as not being connected and it is an error to
+				connect them.
        */,
     CLOSEST_NODE /**< 
-	Connect point to the node on the graph closest to the given
-	point.
+				Connect point to the node on the graph closest to the given
+				point.
        */,
     CLOSEST_EDGE /**< 
-	Connect point to the edge in which segment it lies, i.e. search
-	for an edge where we can find a perpendicular line going
-	through the given point and any point on the edge's line
-	segment. If no such segment is found, the point cannot be
-	added.
+				Connect point to the edge in which segment it lies, i.e. search
+				for an edge where we can find a perpendicular line going
+				through the given point and any point on the edge's line
+				segment. If no such segment is found, the point cannot be
+				added.
        */,
     CLOSEST_EDGE_OR_NODE /**< 
-	First try the CLOSEST_EDGE method. If that yields no result,
-	use the CLOSEST_NODE method as a fallback.
+				First try the CLOSEST_EDGE method. If that yields no result,
+				use the CLOSEST_NODE method as a fallback.
        */
   } ConnectionMode;
   const char * tostring_ConnectionMode(ConnectionMode value) const;
@@ -77,47 +77,47 @@ class NavGraphGeneratorInterface : public Interface
   /** Post-processing filtering type. */
   typedef enum {
     FILTER_EDGES_BY_MAP /**< 
-	If enabled, filters out all edges after the map generation that
-	pass too close by an occupied cell of the map. Use this to get
-	rid of connections which "pass through walls".
-	Note that this step is done before adding points of interest.
-	Therefore edges going to POIs might still pass through or close
-	by occupied cells.
-	
-	Parameters:
-	distance: minimum distance from edges to occupied map grid
-       cells to consider it safe.
+				If enabled, filters out all edges after the map generation that
+				pass too close by an occupied cell of the map. Use this to get
+				rid of connections which "pass through walls".
+				Note that this step is done before adding points of interest.
+				Therefore edges going to POIs might still pass through or close
+				by occupied cells.
+
+				Parameters:
+				distance: minimum distance from edges to occupied map grid
+				cells to consider it safe.
        */,
     FILTER_ORPHAN_NODES /**< 
-	If enabled, filters out all nodes which are not connected to
-	any other node. These can occur, for example, after performing
-	the FILTER_EDGES_BY_MAP filter.
+				If enabled, filters out all nodes which are not connected to
+				any other node. These can occur, for example, after performing
+				the FILTER_EDGES_BY_MAP filter.
        */,
     FILTER_MULTI_GRAPH /**< 
-	Sometimes after applying other filters one can end up with
-	multiple disconnected graphs. Enabling this filter will keep
-	only the largest connected graph and simply remove all nodes
-	and edges from smaller graphs not connected to the largest.
+				Sometimes after applying other filters one can end up with
+				multiple disconnected graphs. Enabling this filter will keep
+				only the largest connected graph and simply remove all nodes
+				and edges from smaller graphs not connected to the largest.
        */
   } FilterType;
   const char * tostring_FilterType(FilterType value) const;
 
   /** 
-	When adding edges, the mode defines how to add edges.
+				When adding edges, the mode defines how to add edges.
        */
   typedef enum {
     NO_INTERSECTION /**< 
-	Only insert edge if it does not intersect with any other
-	existing edge in the graph.
+				Only insert edge if it does not intersect with any other
+				existing edge in the graph.
        */,
     SPLIT_INTERSECTION /**< 
-	If the new edge intersects with one or more edges, add new
-	points at the intersections and split the edges for this
-	point.
+				If the new edge intersects with one or more edges, add new
+				points at the intersections and split the edges for this
+				point.
        */,
     FORCE /**< 
-	The edge is added as-is, it may overlap or intersect with
-	other edges.
+				The edge is added as-is, it may overlap or intersect with
+				other edges.
        */
   } EdgeMode;
   const char * tostring_EdgeMode(EdgeMode value) const;

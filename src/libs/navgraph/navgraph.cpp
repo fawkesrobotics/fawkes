@@ -529,7 +529,7 @@ NavGraph::connect_node_to_closest_node(const NavGraphNode &n)
   NavGraphEdge new_edge(n.name(), closest.name());
   new_edge.set_property("created-for", n.name() + "--" + closest.name());
   new_edge.set_property("generated", true);
-  add_edge(new_edge);
+  add_edge(new_edge, EDGE_SPLIT_INTERSECTION);
 }
 
 
@@ -556,7 +556,7 @@ NavGraph::connect_node_to_closest_edge(const NavGraphNode &n)
     NavGraphEdge new_edge(cn.name(), n.name());
     new_edge.set_property("generated", true);
     new_edge.set_property("created-for", cn.name() + "--" + n.name());
-    add_edge(new_edge);
+    add_edge(new_edge, EDGE_SPLIT_INTERSECTION);
   } else {
     // we are inserting a new point into the edge
     remove_edge(closest);
@@ -569,9 +569,9 @@ NavGraph::connect_node_to_closest_edge(const NavGraphNode &n)
     new_edge_3.set_property("generated", true);
 
     if (! node_exists(cn))  add_node(cn);
-    add_edge(new_edge_1);
-    add_edge(new_edge_2);
-    add_edge(new_edge_3);
+    add_edge(new_edge_1, EDGE_SPLIT_INTERSECTION);
+    add_edge(new_edge_2, EDGE_SPLIT_INTERSECTION);
+    add_edge(new_edge_3, EDGE_SPLIT_INTERSECTION);
   }
 }
 
@@ -1056,7 +1056,7 @@ NavGraph::search_path(const NavGraphNode &from, const NavGraphNode &to,
 		      navgraph::CostFunction cost_func,
 		      bool use_constraints, bool compute_constraints)
 {
-  if (! reachability_calced_)  calc_reachability();
+	if (! reachability_calced_)  calc_reachability(/* allow multi graph */ true);
 
   AStar astar;
 

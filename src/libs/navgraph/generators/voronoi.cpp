@@ -22,6 +22,8 @@
 
 #include <navgraph/generators/voronoi.h>
 #include <core/exception.h>
+#include <utils/math/polygon.h>
+#include <utils/math/triangle.h>
 
 // includes for defining the Voronoi diagram adaptor
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -63,9 +65,9 @@ namespace fawkes {
 
 /** Default constructor. */
 NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi()
-  : bbox_enabled_(false),
-    bbox_p1_x_(0.), bbox_p1_y_(0.), bbox_p2_x_(0.), bbox_p2_y_(0.)
-
+	: bbox_enabled_(false),
+	  bbox_p1_x_(0.), bbox_p1_y_(0.), bbox_p2_x_(0.), bbox_p2_y_(0.),
+	  near_threshold_(0.01)
 {
 }
 
@@ -76,12 +78,17 @@ NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi()
  * @param bbox_p1_y y coordinate of first (lower) bounding box point
  * @param bbox_p2_x X coordinate of second (upper) bounding box point
  * @param bbox_p2_y y coordinate of second (upper) bounding box point
+ * @param near_threshold distance threshold for which to consider
+ * nodes to be the same if the distance is smaller than this
+ * threshold.
  */
 NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi(float bbox_p1_x, float bbox_p1_y,
-						   float bbox_p2_x, float bbox_p2_y)
-  : bbox_enabled_(true),
-    bbox_p1_x_(bbox_p1_x), bbox_p1_y_(bbox_p1_y),
-    bbox_p2_x_(bbox_p2_x), bbox_p2_y_(bbox_p2_y)
+                                                   float bbox_p2_x, float bbox_p2_y,
+                                                   float near_threshold)
+	: bbox_enabled_(true),
+	  bbox_p1_x_(bbox_p1_x), bbox_p1_y_(bbox_p1_y),
+	  bbox_p2_x_(bbox_p2_x), bbox_p2_y_(bbox_p2_y),
+	  near_threshold_(near_threshold)
 {
 }
 
@@ -97,19 +104,22 @@ NavGraphGeneratorVoronoi::~NavGraphGeneratorVoronoi()
  * @param point point to check whether it already exists
  * @param name if the point was found in the map will be assigned
  * the name of the point in the map upon return
+ * @param near_threshold distance threshold for which to consider
+ * nodes to be the same if the distance is smaller than this
+ * threshold.
  * @return true if the point has been found in the map, false otherwise
  */
 static bool
-contains(Point_map points, Point_2 point, std::string &name)
+contains(Point_map points, Point_2 point, std::string &name, float near_threshold)
 {
-  for (auto p : points) {
-    K::FT dist = sqrt(CGAL::squared_distance(p.second, point));
-    if (dist < std::numeric_limits<K::FT>::epsilon()) {
-      name = p.first;
-      return true;
-    }
-  }
-  return false;
+	for (auto p : points) {
+		K::FT dist = sqrt(CGAL::squared_distance(p.second, point));
+		if (dist < near_threshold) {
+			name = p.first;
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -120,14 +130,14 @@ contains(Point_map points, Point_2 point, std::string &name)
 static std::string
 genname(unsigned int &i)
 {
-  char * name;
-  if (asprintf(&name, "V_%02u", ++i) != -1) {
-    std::string rv = name;
-    free(name);
-    return rv;
-  } else {
-    throw Exception("Failed to create node name");
-  }
+	char * name;
+	if (asprintf(&name, "V_%02u", ++i) != -1) {
+		std::string rv = name;
+		free(name);
+		return rv;
+	} else {
+		throw Exception("Failed to create node name");
+	}
 }
 
 
@@ -141,13 +151,24 @@ genname(unsigned int &i)
  */
 void
 NavGraphGeneratorVoronoi::set_bounding_box(float bbox_p1_x, float bbox_p1_y,
-					   float bbox_p2_x, float bbox_p2_y)
+                                           float bbox_p2_x, float bbox_p2_y)
 {
-  bbox_enabled_ = true;
-  bbox_p1_x_ = bbox_p1_x;
-  bbox_p1_y_ = bbox_p1_y;
-  bbox_p2_x_ = bbox_p2_x;
-  bbox_p2_y_ = bbox_p2_y;  
+	bbox_enabled_ = true;
+	bbox_p1_x_ = bbox_p1_x;
+	bbox_p1_y_ = bbox_p1_y;
+	bbox_p2_x_ = bbox_p2_x;
+	bbox_p2_y_ = bbox_p2_y;  
+}
+
+/** Set distance threshold for considering nodes to be the same.
+ * @param near_threshold distance threshold for which to consider
+ * nodes to be the same if the distance is smaller than this
+ * threshold.
+ */
+void
+NavGraphGeneratorVoronoi::set_near_threshold(float near_threshold)
+{
+	near_threshold_ = near_threshold;
 }
 
 /** Add an obstacle point.
@@ -159,7 +180,7 @@ NavGraphGeneratorVoronoi::set_bounding_box(float bbox_p1_x, float bbox_p1_y,
 void
 NavGraphGeneratorVoronoi::add_obstacle(float x, float y)
 {
-  obstacles_.push_back(std::make_pair(x, y));
+	obstacles_.push_back(std::make_pair(x, y));
 }
 
 
@@ -167,7 +188,8 @@ NavGraphGeneratorVoronoi::add_obstacle(float x, float y)
 void
 NavGraphGeneratorVoronoi::clear()
 {
-  obstacles_.clear();
+	obstacles_.clear();
+	polygons_.clear();
 }
 
 
@@ -179,63 +201,117 @@ NavGraphGeneratorVoronoi::clear()
 void
 NavGraphGeneratorVoronoi::compute(fawkes::LockPtr<fawkes::NavGraph> graph)
 {
-  VD vd;
-  for (auto o : obstacles_) {
-    vd.insert(Site_2(o.first, o.second));
-  }
-
-  Iso_rectangle rect(Point_2(bbox_p1_x_, bbox_p1_y_), Point_2(bbox_p2_x_, bbox_p2_y_));
-
-  std::map<std::string, Point_2> points;
-  std::map<std::string, std::string> props_gen;
-  props_gen["generated"] = "true";
-
-  unsigned int num_nodes = 0;
-  if (vd.is_valid()) {
-    VD::Edge_iterator e;
-    graph.lock();
-    for (e = vd.edges_begin(); e != vd.edges_end(); ++e) {
-      if (e->is_segment()) {
-	if (bbox_enabled_) {
-	  CGAL::Bounded_side source_side, target_side;
-	  source_side = rect.bounded_side(e->source()->point());
-	  target_side = rect.bounded_side(e->target()->point());
-
-	  if (source_side == CGAL::ON_UNBOUNDED_SIDE || target_side == CGAL::ON_UNBOUNDED_SIDE)
-	    continue;
+	VD vd;
+	for (auto o : obstacles_) {
+		vd.insert(Site_2(o.first, o.second));
 	}
 
-	// check if we have a point in the vicinity
-	std::string source_name, target_name;
-	bool have_source = contains(points, e->source()->point(), source_name);
-	bool have_target = contains(points, e->target()->point(), target_name);
+	polygons_.clear();
 
-	if (! have_source) {
-	  source_name = genname(num_nodes);
-	  //printf("Adding source %s\n", source_name.c_str());
-	  graph->add_node(NavGraphNode(source_name,
-				       e->source()->point().x(), e->source()->point().y(),
-				       props_gen));
-	  points[source_name] = e->source()->point();
+	Iso_rectangle rect(Point_2(bbox_p1_x_, bbox_p1_y_), Point_2(bbox_p2_x_, bbox_p2_y_));
+
+	std::map<std::string, Point_2> points;
+	std::map<std::string, std::string> props_gen;
+	props_gen["generated"] = "true";
+
+	unsigned int num_nodes = 0;
+	if (vd.is_valid()) {
+		VD::Edge_iterator e;
+		graph.lock();
+		for (e = vd.edges_begin(); e != vd.edges_end(); ++e) {
+			if (e->is_segment()) {
+				if (bbox_enabled_) {
+					CGAL::Bounded_side source_side, target_side;
+					source_side = rect.bounded_side(e->source()->point());
+					target_side = rect.bounded_side(e->target()->point());
+
+					if (source_side == CGAL::ON_UNBOUNDED_SIDE || target_side == CGAL::ON_UNBOUNDED_SIDE)
+						continue;
+				}
+
+				// check if we have a point in the vicinity
+				std::string source_name, target_name;
+				bool have_source = contains(points, e->source()->point(),
+				                            source_name, near_threshold_);
+				bool have_target = contains(points, e->target()->point(),
+				                            target_name, near_threshold_);
+
+				if (! have_source) {
+					source_name = genname(num_nodes);
+					//printf("Adding source %s\n", source_name.c_str());
+					graph->add_node(NavGraphNode(source_name,
+					                             e->source()->point().x(), e->source()->point().y(),
+					                             props_gen));
+					points[source_name] = e->source()->point();
+				}
+				if (! have_target) {
+					target_name = genname(num_nodes);
+					//printf("Adding target %s\n", target_name.c_str());
+					graph->add_node(NavGraphNode(target_name,
+					                             e->target()->point().x(), e->target()->point().y(),
+					                             props_gen));
+					points[target_name] = e->target()->point();
+				}
+
+				graph->add_edge(NavGraphEdge(source_name, target_name, props_gen));
+			} else {
+				//printf("Unbounded edge\n");
+			}
+		}
+
+		// Store Polygons
+		VD::Bounded_faces_iterator f;
+		for (f = vd.bounded_faces_begin(); f != vd.bounded_faces_end(); ++f) {
+			unsigned int num_v = 0;
+			Ccb_halfedge_circulator ec_start = f->ccb();
+			Ccb_halfedge_circulator ec = ec_start;
+
+			do { ++num_v; } while ( ++ec != ec_start );
+
+			Polygon2D poly(num_v);
+			size_t poly_i = 0;
+			bool f_ok = true;
+			do {
+				const Point_2 &p = ec->source()->point();
+				if (bbox_enabled_) {
+					if (rect.has_on_unbounded_side(p)) {
+						f_ok = false;
+						break;
+					}
+				}
+				poly[poly_i][0] = p.x();
+				poly[poly_i][1] = p.y();
+				++poly_i;
+			} while ( ++ec != ec_start );
+			if (f_ok)  polygons_.push_back(poly);
+		}
+
+		std::list<Eigen::Vector2f> node_coords;
+		std::vector<NavGraphNode>::const_iterator n;
+		for (n = graph->nodes().begin(); n != graph->nodes().end(); ++n) {
+			node_coords.push_back(Eigen::Vector2f(n->x(), n->y()));
+		}
+
+		polygons_.erase(
+		  std::remove_if(polygons_.begin(), polygons_.end(),
+		                 [&node_coords](const Polygon2D &poly) {
+			                 for (const auto nc : node_coords) {
+				                 if (polygon_contains(poly, nc))  return true;
+			                 }
+			                 return false;
+		                 })
+		);
+
+		polygons_.sort([](const Polygon2D &p1, const Polygon2D &p2)
+		               {
+			               return polygon_area(p2) < polygon_area(p1);
+		               }
+		);
+
+		graph->calc_reachability();
+		graph.unlock();
 	}
-	if (! have_target) {
-	  target_name = genname(num_nodes);
-	  //printf("Adding target %s\n", target_name.c_str());
-	  graph->add_node(NavGraphNode(target_name,
-				       e->target()->point().x(), e->target()->point().y(),
-				       props_gen));
-	  points[target_name] = e->target()->point();
-	}
-
-	graph->add_edge(NavGraphEdge(source_name, target_name, props_gen));
-      } else {
-	//printf("Unbounded edge\n");
-      }
-    }
-
-    graph->calc_reachability();
-    graph.unlock();
-  }
 }
+
 
 } // end of namespace fawkes

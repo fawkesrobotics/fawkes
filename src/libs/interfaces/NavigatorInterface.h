@@ -41,6 +41,7 @@ class NavigatorInterface : public Interface
   static const uint32_t ERROR_MOTOR;
   static const uint32_t ERROR_OBSTRUCTION;
   static const uint32_t ERROR_UNKNOWN_PLACE;
+  static const uint32_t ERROR_PATH_GEN_FAIL;
   static const uint32_t FLAG_NONE;
   static const uint32_t FLAG_CART_GOTO;
   static const uint32_t FLAG_POLAR_GOTO;

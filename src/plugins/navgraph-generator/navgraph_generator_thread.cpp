@@ -185,44 +185,43 @@ NavGraphGeneratorThread::loop()
   // add POIs
   for (const auto &p : pois_) {
     // add poi
-    NavGraphNode node(p.first,
-		      p.second.position.x, p.second.position.y,
-		      p.second.properties);
+	  NavGraphNode node(p.first, p.second.position.x, p.second.position.y,
+	                    p.second.properties);
     switch (p.second.conn_mode) {
     case NavGraphGeneratorInterface::NOT_CONNECTED:
-      logger->log_debug(name(), "  POI without initial connection %s at (%f,%f)",
-			p.first.c_str(), p.second.position.x, p.second.position.y);
+	    logger->log_debug(name(), "  POI without initial connection %s at (%f,%f)",
+                        p.first.c_str(), p.second.position.x, p.second.position.y);
       navgraph->add_node(node);
       break;
 
     case NavGraphGeneratorInterface::UNCONNECTED:
-      logger->log_debug(name(), "  Unconnected POI %s at (%f,%f)",
-			p.first.c_str(), p.second.position.x, p.second.position.y);
-      node.set_unconnected(true);
+	    logger->log_debug(name(), "  Unconnected POI %s at (%f,%f)",
+	                      p.first.c_str(), p.second.position.x, p.second.position.y);
+	    node.set_unconnected(true);
       navgraph->add_node(node);
       break;
 
     case NavGraphGeneratorInterface::CLOSEST_NODE:
-      logger->log_debug(name(), "  Connecting POI %s at (%f,%f) to closest node",
-			p.first.c_str(), p.second.position.x, p.second.position.y);
+	    logger->log_debug(name(), "  Connecting POI %s at (%f,%f) to closest node",
+                        p.first.c_str(), p.second.position.x, p.second.position.y);
       navgraph->add_node_and_connect(node, NavGraph::CLOSEST_NODE);
       break;
     case NavGraphGeneratorInterface::CLOSEST_EDGE:
       try {
-	logger->log_debug(name(), "  Connecting POI %s at (%f,%f) to closest edge",
-			  p.first.c_str(), p.second.position.x, p.second.position.y);
-	navgraph->add_node_and_connect(node, NavGraph::CLOSEST_EDGE);
+	      logger->log_debug(name(), "  Connecting POI %s at (%f,%f) to closest edge",
+	                        p.first.c_str(), p.second.position.x, p.second.position.y);
+	      navgraph->add_node_and_connect(node, NavGraph::CLOSEST_EDGE);
       } catch (Exception &e) {
-	logger->log_error(name(), "  Failed to add POI %s, exception follows",
-			  p.first.c_str());
-	logger->log_error(name(), e);
+	      logger->log_error(name(), "  Failed to add POI %s, exception follows",
+	                        p.first.c_str());
+	      logger->log_error(name(), e);
       }
       break;
     case NavGraphGeneratorInterface::CLOSEST_EDGE_OR_NODE:
-      logger->log_debug(name(), "  Connecting POI %s at (%f,%f) to closest edge or node",
-			p.first.c_str(), p.second.position.x, p.second.position.y);
-      navgraph->add_node_and_connect(node, NavGraph::CLOSEST_EDGE_OR_NODE);
-      break;
+	    logger->log_debug(name(), "  Connecting POI %s at (%f,%f) to closest edge or node",
+	                      p.first.c_str(), p.second.position.x, p.second.position.y);
+	    navgraph->add_node_and_connect(node, NavGraph::CLOSEST_EDGE_OR_NODE);
+	    break;
     }
   }
 
@@ -231,35 +230,48 @@ NavGraphGeneratorThread::loop()
   for (const auto &e : edges_) {
     switch (e.edge_mode) {
     case NavGraphGeneratorInterface::NO_INTERSECTION:
-      logger->log_debug(name(), "  Edge %s-%s%s (no intersection)",
-			e.p1.c_str(), e.directed ? ">" : "-", e.p2.c_str());
-      navgraph->add_edge(NavGraphEdge(e.p1, e.p2, e.directed),
-			 NavGraph::EDGE_NO_INTERSECTION);
+	    logger->log_debug(name(), "  Edge %s-%s%s (no intersection)",
+	                      e.p1.c_str(), e.directed ? ">" : "-", e.p2.c_str());
+	    navgraph->add_edge(NavGraphEdge(e.p1, e.p2, e.directed),
+	                       NavGraph::EDGE_NO_INTERSECTION);
       break;
 
     case NavGraphGeneratorInterface::SPLIT_INTERSECTION:
-      logger->log_debug(name(), "  Edge %s-%s%s (split intersection)",
-			e.p1.c_str(), e.directed ? ">" : "-", e.p2.c_str());
+	    logger->log_debug(name(), "  Edge %s-%s%s (split intersection)",
+	                      e.p1.c_str(), e.directed ? ">" : "-", e.p2.c_str());
       navgraph->add_edge(NavGraphEdge(e.p1, e.p2, e.directed),
-			 NavGraph::EDGE_SPLIT_INTERSECTION);
+                         NavGraph::EDGE_SPLIT_INTERSECTION);
       break;
 
     case NavGraphGeneratorInterface::FORCE:
-      logger->log_debug(name(), "  Edge %s-%s%s (force)",
-			e.p1.c_str(), e.directed ? ">" : "-", e.p2.c_str());
-      navgraph->add_edge(NavGraphEdge(e.p1, e.p2, e.directed),
-			 NavGraph::EDGE_FORCE);
+	    logger->log_debug(name(), "  Edge %s-%s%s (force)",
+	                      e.p1.c_str(), e.directed ? ">" : "-", e.p2.c_str());
+	    navgraph->add_edge(NavGraphEdge(e.p1, e.p2, e.directed),
+	                       NavGraph::EDGE_FORCE);
       break;
     }
   }
+
+  /*
+	// Add POIs in free areas
+	unsigned int ci = 0;
+	const std::list<Polygon2D> &polygons = nggv.face_polygons();
+	for (const auto &p : polygons) {
+		Eigen::Vector2f centroid(polygon_centroid(p));
+		navgraph->add_node_and_connect(NavGraphNode(navgraph->format_name("AREA-%u", ++ci),
+		                                            centroid.x(), centroid.y()),
+		                               NavGraph::CLOSEST_EDGE_OR_NODE);
+		
+	}
+  */
 
   // Finalize graph setup
   try {
     logger->log_debug(name(), "  Calculate reachability relations");
     navgraph->calc_reachability();
   } catch (Exception &e) {
-    logger->log_error(name(), "Failed to finalize graph setup, exception follows");
-    logger->log_error(name(), e);
+	  logger->log_error(name(), "Failed to finalize graph setup, exception follows");
+	  logger->log_error(name(), e);
   }
 
   // re-enable notifications
@@ -279,7 +291,7 @@ NavGraphGeneratorThread::loop()
 
 bool
 NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
-						       Message *message) throw()
+                                                       Message *message) throw()
 {
   // in continuous mode wait for signal if disabled
   MutexLocker lock(loop_mutex);
