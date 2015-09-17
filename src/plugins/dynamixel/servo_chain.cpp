@@ -41,7 +41,7 @@
 const unsigned char DynamixelChain::BROADCAST_ID             = 0xfe; /**< BROADCAST_ID */
 const unsigned int  DynamixelChain::MAX_POSITION             = 0x3ff; /**< MAX_POSITION */
 const unsigned int  DynamixelChain::CENTER_POSITION          = 0x1ff; /**< CENTER_POSITION */
-const unsigned int  DynamixelChain::MAX_SPEED                = 0x3ff; /**< MAX_SPEED */
+const unsigned int  DynamixelChain::MAX_SPEED                = 0x7ff; /**< MAX_SPEED */
 const float         DynamixelChain::MAX_ANGLE_DEG            = 300; /**< MAX_ANGLE_DEG */
 const float         DynamixelChain::MAX_ANGLE_RAD            = fawkes::deg2rad(DynamixelChain::MAX_ANGLE_DEG); /**< MAX_ANGLE_RAD */
 const float         DynamixelChain::RAD_PER_POS_TICK         = DynamixelChain::MAX_ANGLE_RAD / (float)(DynamixelChain::MAX_POSITION); /**< RAD_PER_POS_TICK */
@@ -467,9 +467,10 @@ DynamixelChain::data_available()
 
 
 /** Discover devices on the bus.
- * This method will send a PING instruction to the broadcast ID and collect
- * responses. This assumes that the return delay time is set appropriately that
- * all responses can be received without collisions, and that the difference
+ * This method will send a PING instruction to either the broadcast ID 
+ * (servos.size() == 0) or by iterating the given servos vector and collect responses.
+ * This assumes that the return delay time is set appropriately 
+ * that all responses can be received without collisions, and that the difference
  * between the time of two consecutive servos is smaller than the given timeout
  * (note that this might be void if you have one servo with ID 1 and one with
  * ID 253). After sending the packet this method will do up to
@@ -482,25 +483,40 @@ DynamixelChain::data_available()
  * After the servos are found, the control tables of all recognized servos are
  * received to ensure that all other methods return valid data.
  * @param timeout_ms maximum timeout to wait for replies.
+ * @param servos vector of desired servos on the bus, can be an empty vector
+ * to make use of the broadcast (all available servos).
  * @return list of detected servo IDs
  */
 DynamixelChain::DeviceList
-DynamixelChain::discover(unsigned int timeout_ms)
+DynamixelChain::discover(unsigned int timeout_ms, const std::vector<unsigned int> servos)
 {
   DeviceList rv;
-
-  // simply re-throw exception upwards
-  send(BROADCAST_ID, INST_PING, NULL, 0);
-
-  for (unsigned int i = 0; i < DYNAMIXEL_MAX_NUM_SERVOS; ++i) {
-    try {
-      recv(0, timeout_ms);
-      rv.push_back(__ibuffer[PACKET_OFFSET_ID]);
-    } catch (TimeoutException &e) {
-      // the first timeout, no more devices can be expected to respond
-      break;
+  if (servos.size() == 0) {
+    // send ping to broadcast address because we want all available servos
+    // on the bus
+    // simply re-throw exception upwards
+    send(BROADCAST_ID, INST_PING, NULL, 0);
+    for (unsigned int i = 0; i < DYNAMIXEL_MAX_NUM_SERVOS ; ++i) {
+      try {
+        recv(0, timeout_ms);
+        rv.push_back(__ibuffer[PACKET_OFFSET_ID]);
+      } catch (TimeoutException &e) {
+        // the first timeout, no more devices can be expected to respond
+        break;
+      }
     }
   }
+  else {
+    // discover servos given by the servos-vector considering the defined timeout
+    for (std::vector<unsigned int>::const_iterator iS = servos.begin() ; iS != servos.end(); ++iS)
+      try {
+        send(*iS, INST_PING, NULL, 0);
+        recv(0, timeout_ms);
+        rv.push_back(__ibuffer[PACKET_OFFSET_ID]);
+      } catch (TimeoutException &e) {
+        throw Exception("Desired servo with ID %u not found!", *iS);
+      }
+    }
 
   // now get data about all servos
   for (DeviceList::iterator i = rv.begin(); i != rv.end(); ++i) {

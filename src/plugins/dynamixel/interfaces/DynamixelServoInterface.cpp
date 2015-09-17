@@ -86,6 +86,7 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "velocity", 1, &data->velocity);
   add_fieldinfo(IFT_STRING, "mode", 5, data->mode);
   add_fieldinfo(IFT_FLOAT, "angle_margin", 1, &data->angle_margin);
+  add_fieldinfo(IFT_BOOL, "autorecover_enabled", 1, &data->autorecover_enabled);
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_ENUM, "error_code", 1, &data->error_code, "ErrorCode", &enum_map_ErrorCode);
@@ -106,7 +107,9 @@ DynamixelServoInterface::DynamixelServoInterface() : Interface()
   add_messageinfo("SetAngleLimitsMessage");
   add_messageinfo("ResetRawErrorMessage");
   add_messageinfo("SetPreventAlarmShutdownMessage");
-  unsigned char tmp_hash[] = {0x6d, 0x83, 0x4e, 0xad, 0x93, 0x6f, 0xf9, 0xb8, 0x92, 0x9d, 0xb8, 0xc3, 0x22, 0x80, 0x51, 0x36};
+  add_messageinfo("SetAutorecoverEnabledMessage");
+  add_messageinfo("RecoverMessage");
+  unsigned char tmp_hash[] = {0x18, 0x72, 0x74, 0xa6, 0x80, 0xfa, 0x62, 0xa2, 0x56, 0x91, 0x21, 0xfc, 0x48, 0xd5, 0xe0, 0x5f};
   set_hash(tmp_hash);
 }
 
@@ -1120,6 +1123,37 @@ DynamixelServoInterface::set_angle_margin(const float new_angle_margin)
   data_changed = true;
 }
 
+/** Get autorecover_enabled value.
+ * Automatically recover on alarm shutdown
+ * @return autorecover_enabled value
+ */
+bool
+DynamixelServoInterface::is_autorecover_enabled() const
+{
+  return data->autorecover_enabled;
+}
+
+/** Get maximum length of autorecover_enabled value.
+ * @return length of autorecover_enabled value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+DynamixelServoInterface::maxlenof_autorecover_enabled() const
+{
+  return 1;
+}
+
+/** Set autorecover_enabled value.
+ * Automatically recover on alarm shutdown
+ * @param new_autorecover_enabled new autorecover_enabled value
+ */
+void
+DynamixelServoInterface::set_autorecover_enabled(const bool new_autorecover_enabled)
+{
+  data->autorecover_enabled = new_autorecover_enabled;
+  data_changed = true;
+}
+
 /** Get msgid value.
  * The ID of the message that is currently being
       processed, or 0 if no message is being processed.
@@ -1257,6 +1291,10 @@ DynamixelServoInterface::create_message(const char *type) const
     return new ResetRawErrorMessage();
   } else if ( strncmp("SetPreventAlarmShutdownMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetPreventAlarmShutdownMessage();
+  } else if ( strncmp("SetAutorecoverEnabledMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetAutorecoverEnabledMessage();
+  } else if ( strncmp("RecoverMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new RecoverMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -3053,6 +3091,160 @@ DynamixelServoInterface::SetPreventAlarmShutdownMessage::clone() const
 {
   return new DynamixelServoInterface::SetPreventAlarmShutdownMessage(this);
 }
+/** @class DynamixelServoInterface::SetAutorecoverEnabledMessage <interfaces/DynamixelServoInterface.h>
+ * SetAutorecoverEnabledMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_autorecover_enabled initial value for autorecover_enabled
+ */
+DynamixelServoInterface::SetAutorecoverEnabledMessage::SetAutorecoverEnabledMessage(const bool ini_autorecover_enabled) : Message("SetAutorecoverEnabledMessage")
+{
+  data_size = sizeof(SetAutorecoverEnabledMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetAutorecoverEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->autorecover_enabled = ini_autorecover_enabled;
+  enum_map_ErrorCode[(int)ERROR_NONE] = "ERROR_NONE";
+  enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
+  enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
+  enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
+  add_fieldinfo(IFT_BOOL, "autorecover_enabled", 1, &data->autorecover_enabled);
+}
+/** Constructor */
+DynamixelServoInterface::SetAutorecoverEnabledMessage::SetAutorecoverEnabledMessage() : Message("SetAutorecoverEnabledMessage")
+{
+  data_size = sizeof(SetAutorecoverEnabledMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetAutorecoverEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ErrorCode[(int)ERROR_NONE] = "ERROR_NONE";
+  enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
+  enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
+  enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
+  add_fieldinfo(IFT_BOOL, "autorecover_enabled", 1, &data->autorecover_enabled);
+}
+
+/** Destructor */
+DynamixelServoInterface::SetAutorecoverEnabledMessage::~SetAutorecoverEnabledMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+DynamixelServoInterface::SetAutorecoverEnabledMessage::SetAutorecoverEnabledMessage(const SetAutorecoverEnabledMessage *m) : Message("SetAutorecoverEnabledMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetAutorecoverEnabledMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get autorecover_enabled value.
+ * Automatically recover on alarm shutdown
+ * @return autorecover_enabled value
+ */
+bool
+DynamixelServoInterface::SetAutorecoverEnabledMessage::is_autorecover_enabled() const
+{
+  return data->autorecover_enabled;
+}
+
+/** Get maximum length of autorecover_enabled value.
+ * @return length of autorecover_enabled value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+DynamixelServoInterface::SetAutorecoverEnabledMessage::maxlenof_autorecover_enabled() const
+{
+  return 1;
+}
+
+/** Set autorecover_enabled value.
+ * Automatically recover on alarm shutdown
+ * @param new_autorecover_enabled new autorecover_enabled value
+ */
+void
+DynamixelServoInterface::SetAutorecoverEnabledMessage::set_autorecover_enabled(const bool new_autorecover_enabled)
+{
+  data->autorecover_enabled = new_autorecover_enabled;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+DynamixelServoInterface::SetAutorecoverEnabledMessage::clone() const
+{
+  return new DynamixelServoInterface::SetAutorecoverEnabledMessage(this);
+}
+/** @class DynamixelServoInterface::RecoverMessage <interfaces/DynamixelServoInterface.h>
+ * RecoverMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+DynamixelServoInterface::RecoverMessage::RecoverMessage() : Message("RecoverMessage")
+{
+  data_size = sizeof(RecoverMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (RecoverMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ErrorCode[(int)ERROR_NONE] = "ERROR_NONE";
+  enum_map_ErrorCode[(int)ERROR_UNSPECIFIC] = "ERROR_UNSPECIFIC";
+  enum_map_ErrorCode[(int)ERROR_COMMUNICATION] = "ERROR_COMMUNICATION";
+  enum_map_ErrorCode[(int)ERROR_ANGLE_OUTOFRANGE] = "ERROR_ANGLE_OUTOFRANGE";
+  enum_map_WorkingMode[(int)JOINT] = "JOINT";
+  enum_map_WorkingMode[(int)WHEEL] = "WHEEL";
+}
+
+/** Destructor */
+DynamixelServoInterface::RecoverMessage::~RecoverMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+DynamixelServoInterface::RecoverMessage::RecoverMessage(const RecoverMessage *m) : Message("RecoverMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (RecoverMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+DynamixelServoInterface::RecoverMessage::clone() const
+{
+  return new DynamixelServoInterface::RecoverMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -3126,6 +3318,14 @@ DynamixelServoInterface::message_valid(const Message *message) const
   }
   const SetPreventAlarmShutdownMessage *m16 = dynamic_cast<const SetPreventAlarmShutdownMessage *>(message);
   if ( m16 != NULL ) {
+    return true;
+  }
+  const SetAutorecoverEnabledMessage *m17 = dynamic_cast<const SetAutorecoverEnabledMessage *>(message);
+  if ( m17 != NULL ) {
+    return true;
+  }
+  const RecoverMessage *m18 = dynamic_cast<const RecoverMessage *>(message);
+  if ( m18 != NULL ) {
     return true;
   }
   return false;

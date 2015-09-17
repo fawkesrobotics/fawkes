@@ -76,15 +76,18 @@ DynamixelDriverThread::init()
   cfg_def_angle_margin_                 = config->get_float((cfg_prefix_ + "angle_margin").c_str());
   cfg_enable_echo_fix_                  = config->get_bool((cfg_prefix_ + "enable_echo_fix").c_str());
   cfg_enable_connection_stability_      = config->get_bool((cfg_prefix_ + "enable_connection_stability").c_str());
+  cfg_autorecover_enabled_              = config->get_bool((cfg_prefix_ + "autorecover_enabled").c_str());
+  cfg_autorecover_flags_                = config->get_uint((cfg_prefix_ + "autorecover_flags").c_str());
   cfg_torque_limit_                     = config->get_float((cfg_prefix_ + "torque_limit").c_str());
   cfg_temperature_limit_                = config->get_uint((cfg_prefix_ + "temperature_limit").c_str());
   cfg_prevent_alarm_shutdown_           = config->get_bool((cfg_prefix_ + "prevent_alarm_shutdown").c_str());
   cfg_prevent_alarm_shutdown_threshold_ = config->get_float((cfg_prefix_ + "prevent_alarm_shutdown_threshold").c_str());
   cfg_min_voltage_                      = config->get_float((cfg_prefix_ + "min_voltage").c_str());
   cfg_max_voltage_                      = config->get_float((cfg_prefix_ + "max_voltage").c_str());
+  cfg_servos_to_discover_               = config->get_uints((cfg_prefix_ + "servos").c_str());
 
   chain_ = new DynamixelChain(cfg_device_.c_str(), cfg_read_timeout_ms_, cfg_enable_echo_fix_, cfg_enable_connection_stability_, cfg_min_voltage_, cfg_max_voltage_);
-  DynamixelChain::DeviceList devl = chain_->discover();
+  DynamixelChain::DeviceList devl = chain_->discover(cfg_disc_timeout_ms_, cfg_servos_to_discover_);
   std::list<std::string> found_servos;
   for (DynamixelChain::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
     found_servos.push_back(std::to_string(*i));
@@ -115,6 +118,7 @@ DynamixelDriverThread::init()
 
     s.move_pending     = false;
     s.mode_set_pending = false;
+    s.recover_pending = false;
     s.target_angle     = 0;
     s.velo_pending     = false;
     s.vel              = 0.;
@@ -183,6 +187,7 @@ DynamixelDriverThread::init()
     s.servo_if->set_torque_limit(s.torque_limit);
     s.servo_if->set_max_velocity(s.max_speed);
     s.servo_if->set_enable_prevent_alarm_shutdown(cfg_prevent_alarm_shutdown_);
+    s.servo_if->set_autorecover_enabled(cfg_autorecover_enabled_);
     s.servo_if->write();
 
     s.servo_if->set_auto_timestamping(false);
@@ -285,6 +290,12 @@ DynamixelDriverThread::exec_sensor()
           }
         }
       }
+      
+      if (s.servo_if->is_autorecover_enabled() && chain_->get_error(servo_id) & cfg_autorecover_flags_) {
+        logger->log_warn(name(), "Recovery for servo with ID: %d pending", servo_id);
+        s.recover_pending = true;
+      }
+      
       unsigned char cur_error = chain_->get_error(servo_id);
       s.servo_if->set_error(s.servo_if->error() | cur_error);
       if (cur_error) {
@@ -360,6 +371,19 @@ DynamixelDriverThread::exec_act()
       } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::SetSpeedMessage>()) {
         DynamixelServoInterface::SetSpeedMessage *msg = s.servo_if->msgq_first(msg);
         set_speed(servo_id, msg->speed());
+
+      } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::SetAutorecoverEnabledMessage>()) {
+        DynamixelServoInterface::SetAutorecoverEnabledMessage *msg = s.servo_if->msgq_first(msg);
+        s.servo_if->set_autorecover_enabled(msg->is_autorecover_enabled());
+
+      } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::SetTorqueLimitMessage>()) {
+        DynamixelServoInterface::SetTorqueLimitMessage *msg = s.servo_if->msgq_first(msg);
+        s.recover_pending = true;
+        s.torque_limit = msg->torque_limit();
+
+      } else if (s.servo_if->msgq_first_is<DynamixelServoInterface::RecoverMessage>()) {
+        s.recover_pending = true;
+
       } else {
 	logger->log_warn(name(), "Unknown message received");
       }
@@ -743,14 +767,14 @@ DynamixelDriverThread::loop()
       ScopedRWLock lock(chain_rwlock_);
       chain_->set_led_enabled(servo_id, true);
       chain_->set_torque_enabled(servo_id, true);
-      if (s.led_enable || s.led_disable || s.velo_pending || s.move_pending || s.mode_set_pending) usleep(3000);
+      if (s.led_enable || s.led_disable || s.velo_pending || s.move_pending || s.mode_set_pending || s.recover_pending) usleep(3000);
     } else if (s.disable) {
       s.value_rwlock->lock_for_write();
       s.disable = false;
       s.value_rwlock->unlock();
       ScopedRWLock lock(chain_rwlock_);
       chain_->set_torque_enabled(servo_id, false);
-      if (s.led_enable || s.led_disable || s.velo_pending || s.move_pending || s.mode_set_pending) usleep(3000);
+      if (s.led_enable || s.led_disable || s.velo_pending || s.move_pending || s.mode_set_pending || s.recover_pending) usleep(3000);
     }
 
     if (s.led_enable) {
@@ -759,14 +783,14 @@ DynamixelDriverThread::loop()
       s.value_rwlock->unlock();    
       ScopedRWLock lock(chain_rwlock_);
       chain_->set_led_enabled(servo_id, true);
-      if (s.velo_pending || s.move_pending || s.mode_set_pending) usleep(3000);
+      if (s.velo_pending || s.move_pending || s.mode_set_pending || s.recover_pending) usleep(3000);
     } else if (s.led_disable) {
       s.value_rwlock->lock_for_write();
       s.led_disable = false;
       s.value_rwlock->unlock();    
       ScopedRWLock lock(chain_rwlock_);
       chain_->set_led_enabled(servo_id, false);    
-      if (s.velo_pending || s.move_pending || s.mode_set_pending) usleep(3000);
+      if (s.velo_pending || s.move_pending || s.mode_set_pending || s.recover_pending) usleep(3000);
     }
 
     if (s.velo_pending) {
@@ -776,7 +800,7 @@ DynamixelDriverThread::loop()
       s.value_rwlock->unlock();
       ScopedRWLock lock(chain_rwlock_);
       chain_->set_goal_speed(servo_id, vel);
-      if (s.move_pending || s.mode_set_pending) usleep(3000);
+      if (s.move_pending || s.mode_set_pending || s.recover_pending) usleep(3000);
     }
 
     if (s.move_pending) {
@@ -785,13 +809,21 @@ DynamixelDriverThread::loop()
       float target_angle  = s.target_angle;
       s.value_rwlock->unlock();
       exec_goto_angle(servo_id, target_angle);
-      if (s.mode_set_pending) usleep(3000);
+      if (s.mode_set_pending || s.recover_pending) usleep(3000);
     }
 
     if (s.mode_set_pending) {
       s.value_rwlock->lock_for_write();
       s.mode_set_pending  = false;
       exec_set_mode(servo_id, s.new_mode);
+      s.value_rwlock->unlock();
+      if (s.recover_pending) usleep(3000);
+    }
+
+    if (s.recover_pending) {
+      s.value_rwlock->lock_for_write();
+      s.recover_pending = false;
+      chain_->set_torque_limit(servo_id, s.torque_limit);
       s.value_rwlock->unlock();
     }
 

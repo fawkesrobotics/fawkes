@@ -118,6 +118,7 @@ class DynamixelServoInterface : public Interface
       Margin in radians around a target servo value to consider the
       motion as final.
      */
+    bool autorecover_enabled; /**< Automatically recover on alarm shutdown */
     uint32_t msgid; /**< The ID of the message that is currently being
       processed, or 0 if no message is being processed. */
     bool final; /**< True, if the last goto command has been finished,
@@ -635,6 +636,59 @@ class DynamixelServoInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetAutorecoverEnabledMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      bool autorecover_enabled; /**< Automatically recover on alarm shutdown */
+    } SetAutorecoverEnabledMessage_data_t;
+#pragma pack(pop)
+
+    SetAutorecoverEnabledMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
+   public:
+    SetAutorecoverEnabledMessage(const bool ini_autorecover_enabled);
+    SetAutorecoverEnabledMessage();
+    ~SetAutorecoverEnabledMessage();
+
+    SetAutorecoverEnabledMessage(const SetAutorecoverEnabledMessage *m);
+    /* Methods */
+    bool is_autorecover_enabled() const;
+    void set_autorecover_enabled(const bool new_autorecover_enabled);
+    size_t maxlenof_autorecover_enabled() const;
+    virtual Message * clone() const;
+  };
+
+  class RecoverMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } RecoverMessage_data_t;
+#pragma pack(pop)
+
+    RecoverMessage_data_t *data;
+
+  interface_enum_map_t enum_map_ErrorCode;
+  interface_enum_map_t enum_map_WorkingMode;
+   public:
+    RecoverMessage();
+    ~RecoverMessage();
+
+    RecoverMessage(const RecoverMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   DynamixelServoInterface();
@@ -732,6 +786,9 @@ class DynamixelServoInterface : public Interface
   float angle_margin() const;
   void set_angle_margin(const float new_angle_margin);
   size_t maxlenof_angle_margin() const;
+  bool is_autorecover_enabled() const;
+  void set_autorecover_enabled(const bool new_autorecover_enabled);
+  size_t maxlenof_autorecover_enabled() const;
   uint32_t msgid() const;
   void set_msgid(const uint32_t new_msgid);
   size_t maxlenof_msgid() const;
