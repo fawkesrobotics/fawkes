@@ -303,6 +303,7 @@ SkillerExecutionThread::publish_skill_status(std::string &curss, unsigned int cu
     if ( curss == "" ) {
       // nothing running, we're inactive
       //sst = "S_INACTIVE/empty";
+      __skiller_if->set_skill_string("");
       __skiller_if->set_status(SkillerInterface::S_INACTIVE);
 
     } else {                                  // Stack:
@@ -579,7 +580,9 @@ SkillerExecutionThread::loop()
 
   if ( write_skiller_if )  __skiller_if->write();
 
-  if ( curss != "" ) {
+  if (curss != "" &&
+      (! __sksf_pushed || __skiller_if->status() == SkillerInterface::S_RUNNING))
+  {
     // We've got something to execute
 
 #ifdef SKILLER_TIMETRACKING
