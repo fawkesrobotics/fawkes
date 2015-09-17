@@ -25,6 +25,7 @@
 #include <utils/math/angle.h>
 #include <utils/time/time.h>
 #include <cstdlib>
+#include <limits>
 
 /** @class LaserMinCircleDataFilter "min_circle.h"
  * Erase beams below a certain minimum distance distance.
@@ -58,9 +59,9 @@ LaserMinCircleDataFilter::filter()
     float *outbuf = out[a]->values;
     for (unsigned int i = 0; i < arrsize; ++i) {
       if (inbuf[i] < __radius) {
-	outbuf[i] = 0;
+	      outbuf[i] = std::numeric_limits<float>::quiet_NaN();
       } else {
-	outbuf[i] = inbuf[i];
+	      outbuf[i] = inbuf[i];
       }
     }
   }

@@ -108,7 +108,10 @@ LaserClusterThread::init()
   cfg_cluster_max_size_      = config->get_uint(cfg_prefix_+"clustering/max_size");
   cfg_input_pcl_             = config->get_string(cfg_prefix_+"input_cloud");
   cfg_result_frame_          = config->get_string(cfg_prefix_+"result_frame");
-  cfg_use_bbox_ = false;
+
+  cfg_use_bbox_   = false;
+  cfg_bbox_min_x_ = 0.0;
+  cfg_bbox_max_x_ = 0.0;
   try {
     cfg_bbox_min_x_   = config->get_float(cfg_prefix_+"bounding-box/min_x");
     cfg_bbox_max_x_   = config->get_float(cfg_prefix_+"bounding-box/max_x");
@@ -323,7 +326,7 @@ LaserClusterThread::loop()
   pcl::PassThrough<PointType> passthrough;
   if (current_max_x_ > 0.) {
     passthrough.setFilterFieldName("x");
-    passthrough.setFilterLimits(0.0, current_max_x_);
+    passthrough.setFilterLimits(cfg_bbox_min_x_, current_max_x_);
   }
   passthrough.setInputCloud(input_);
   passthrough.filter(*noline_cloud);
