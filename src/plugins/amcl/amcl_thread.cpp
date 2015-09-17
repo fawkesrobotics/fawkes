@@ -29,6 +29,9 @@
 
 #include "amcl_thread.h"
 #include "amcl_utils.h"
+#ifdef HAVE_ROS
+#  include "ros_thread.h"
+#endif
 
 #include <utils/math/angle.h>
 #include <core/threading/mutex.h>
@@ -38,14 +41,6 @@
 #include <cstdio>
 #include <cstring>
 #include <libgen.h>
-
-#ifdef HAVE_ROS
-#  include <ros/node_handle.h>
-#  include <geometry_msgs/PoseArray.h>
-#  ifdef USE_MAP_PUB
-#    include <nav_msgs/OccupancyGrid.h>
-#  endif
-#endif
 
 using namespace fawkes;
 
@@ -75,7 +70,11 @@ static double angle_diff(double a, double b) {
 std::vector<std::pair<int,int> > AmclThread::free_space_indices;
 
 /** Constructor. */
+#ifdef HAVE_ROS
+AmclThread::AmclThread(AmclROSThread *ros_thread)
+#else
 AmclThread::AmclThread()
+#endif
   : Thread("AmclThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
     TransformAspect(TransformAspect::BOTH, "Pose"),
@@ -83,6 +82,9 @@ AmclThread::AmclThread()
 {
   map_ = NULL;
   conf_mutex_ = new Mutex();
+#ifdef HAVE_ROS
+  rt_ = ros_thread;
+#endif
 }
 
 /** Destructor. */
@@ -326,20 +328,6 @@ void AmclThread::init()
   last_move_time_ = new Time(clock);
   last_move_time_->stamp();
 
-#ifdef HAVE_ROS
-  pose_pub_ =
-    rosnode->advertise<geometry_msgs::PoseWithCovarianceStamped>("amcl_pose", 2);
-  particlecloud_pub_ =
-    rosnode->advertise<geometry_msgs::PoseArray>("particlecloud", 2);
-  initial_pose_sub_ =
-    rosnode->subscribe("initialpose", 2,
-		       &AmclThread::initial_pose_received, this);
-#  ifdef USE_MAP_PUB
-  map_pub_ = rosnode->advertise<nav_msgs::OccupancyGrid>("map", 1, true);
-  publish_map();
-#  endif
-#endif
-
   laser_if_ =
     blackboard->open_for_reading<Laser360Interface>(cfg_laser_ifname_.c_str());
   pos3d_if_ =
@@ -379,6 +367,10 @@ void AmclThread::init()
 
   loc_if_->set_map(map_name.c_str());
   loc_if_->write();
+
+#ifdef HAVE_ROS
+  if (rt_) rt_->publish_map(global_frame_id_, map_);
+#endif
 
   apply_initial_pose();
 }
@@ -642,27 +634,7 @@ AmclThread::loop()
     }
 
 #ifdef HAVE_ROS
-    pf_sample_set_t* set = (pf_->sets) + pf_->current_set;
-    //logger->log_debug(name(), "Num samples: %d", set->sample_count);
-
-    // Publish the resulting cloud
-    // TODO: set maximum rate for publishing
-    geometry_msgs::PoseArray cloud_msg;
-    cloud_msg.header.stamp = ros::Time::now();
-    cloud_msg.header.frame_id = global_frame_id_;
-    cloud_msg.poses.resize(set->sample_count);
-    for (int i = 0; i < set->sample_count; i++) {
-      tf::Quaternion q(tf::create_quaternion_from_yaw(set->samples[i].pose.v[2]));
-      cloud_msg.poses[i].position.x = set->samples[i].pose.v[0];
-      cloud_msg.poses[i].position.y = set->samples[i].pose.v[1];
-      cloud_msg.poses[i].position.z = 0.;
-      cloud_msg.poses[i].orientation.x   = q.x();
-      cloud_msg.poses[i].orientation.y   = q.y();
-      cloud_msg.poses[i].orientation.z   = q.z();
-      cloud_msg.poses[i].orientation.w   = q.w();
-    }
-
-    particlecloud_pub_.publish(cloud_msg);
+    if (rt_) rt_->publish_pose_array(global_frame_id_, (pf_->sets) + pf_->current_set);
 #endif
   }
 
@@ -724,31 +696,7 @@ AmclThread::loop()
       last_covariance_[6 * 5 + 5] = set->cov.m[2][2];
 
 #ifdef HAVE_ROS
-      geometry_msgs::PoseWithCovarianceStamped p;
-      // Fill in the header
-      p.header.frame_id = global_frame_id_;
-      p.header.stamp = ros::Time();
-      // Copy in the pose
-      p.pose.pose.position.x = hyps[max_weight_hyp].pf_pose_mean.v[0];
-      p.pose.pose.position.y = hyps[max_weight_hyp].pf_pose_mean.v[1];
-      tf::Quaternion q(tf::Vector3(0,0,1),
-		       hyps[max_weight_hyp].pf_pose_mean.v[2]);
-      p.pose.pose.orientation.x = q.x();
-      p.pose.pose.orientation.y = q.y();
-      p.pose.pose.orientation.z = q.z();
-      p.pose.pose.orientation.w = q.w();
-
-      // Copy in the covariance
-      for (int i = 0; i < 2; i++) {
-	for (int j = 0; j < 2; j++) {
-	  // Report the overall filter covariance, rather than the
-	  // covariance for the highest-weight cluster
-	  p.pose.covariance[6*i+j] = last_covariance_[6 * i + j];
-	}
-      }
-      p.pose.covariance[6 * 5 + 5] = last_covariance_[6 * 5 + 5];
-
-      pose_pub_.publish(p);
+      if (rt_) rt_->publish_pose(global_frame_id_, hyps[max_weight_hyp], last_covariance_);
 #endif
       //last_published_pose = p;
       /*
@@ -897,13 +845,6 @@ void AmclThread::finalize()
   blackboard->close(laser_if_);
   blackboard->close(pos3d_if_);
   blackboard->close(loc_if_);
-
-#ifdef HAVE_ROS
-  pose_pub_.shutdown();
-  particlecloud_pub_.shutdown();
-  initial_pose_sub_.shutdown();
-  map_pub_.shutdown();
-#endif
 }
 
 bool
@@ -933,47 +874,6 @@ AmclThread::get_odom_pose(tf::Stamped<tf::Pose>& odom_pose, double& x,
 
   return true;
 }
-
-
-#ifdef HAVE_ROS
-#  ifdef USE_MAP_PUB
-void
-AmclThread::publish_map()
-{
-  nav_msgs::OccupancyGrid msg;
-  msg.info.map_load_time = ros::Time::now();
-  msg.header.stamp = ros::Time::now();
-  msg.header.frame_id = "map";
-
-  msg.info.width  = map_width_;
-  msg.info.height = map_height_;
-  msg.info.resolution = cfg_resolution_;
-  msg.info.origin.position.x = cfg_origin_x_;
-  msg.info.origin.position.y = cfg_origin_y_;
-  msg.info.origin.position.z = 0.0;
-  tf::Quaternion q(tf::create_quaternion_from_yaw(cfg_origin_theta_));
-  msg.info.origin.orientation.x = q.x();
-  msg.info.origin.orientation.y = q.y();
-  msg.info.origin.orientation.z = q.z();
-  msg.info.origin.orientation.w = q.w();
-
-  // Allocate space to hold the data
-  msg.data.resize(msg.info.width * msg.info.height);
-
-  for (unsigned int i = 0; i < msg.info.width * msg.info.height; ++i) {
-    if (map_->cells[i].occ_state == +1) {
-      msg.data[i] = +100;
-    } else if (map_->cells[i].occ_state == -1) {
-      msg.data[i] =    0;
-    } else {
-      msg.data[i] =   -1;
-    }
-  }
-
-  map_pub_.publish(msg);
-}
-#  endif
-#endif
 
 
 bool
@@ -1170,29 +1070,6 @@ AmclThread::set_initial_pose(const std::string &frame_id, const fawkes::Time &ms
   last_move_time_->stamp();
 
 }
-
-
-#ifdef HAVE_ROS
-void
-AmclThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg)
-{
-  fawkes::Time msg_time(msg->header.stamp.sec,
-			msg->header.stamp.nsec / 1000);
-  
-  tf::Pose pose =
-    tf::Transform(tf::Quaternion(msg->pose.pose.orientation.x,
-				 msg->pose.pose.orientation.y,
-				 msg->pose.pose.orientation.z,
-				 msg->pose.pose.orientation.w), 
-		  tf::Vector3(msg->pose.pose.position.x,
-			      msg->pose.pose.position.y,
-			      msg->pose.pose.position.z));
-
-
-  const double *covariance = msg->pose.covariance.data();
-  set_initial_pose(msg->header.frame_id, msg_time, pose, covariance);
-}
-#endif
 
 
 bool

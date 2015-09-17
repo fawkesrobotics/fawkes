@@ -70,11 +70,13 @@ ifeq ($(HAVE_TF),1)
         CFLAGS_amcl_thread += $(CFLAGS_ROS) \
           $(call ros-pkg-cflags,geometry_msgs) \
           $(call ros-pkg-cflags,nav_msgs)
-        CFLAGS_amcl_plugin += $(CFLAGS_amcl_thread)
+        CFLAGS_amcl_plugin += $(CFLAGS_ros_thread)
         LDFLAGS_amcl += $(LDFLAGS_ROS) \
           $(call ros-pkg-lflags,geometry_msgs) \
           $(call ros-pkg-lflags,nav_msgs)
         LIBS_amcl += fawkesrosaspect
+	OBJS_amcl += ros_thread.o
+	CFLAGS_ros_thread = $(CFLAGS_amcl_thread)
       else
         WARN_TARGET += warning_nav_msgs
       endif

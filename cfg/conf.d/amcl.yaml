@@ -137,6 +137,16 @@ plugins/amcl:
     # helpful to debug buffering issues or to check if data is used at all
     debug: false
 
+  ros:
+    # Enable ROS integration?
+    # If enabled, the map, a pose array, and the pose are published
+    # on ROS topics and an initial pose topic will be created to accept
+    # new initial pose estimates.
+    # Obviously, ROS support can only be enabled if ROS was available
+    # at compile time. Additionally, this feature requires the ros
+    # plugin to be loaded (or to be run as rosfawkes)
+    enable: false
+
   # Parameters for fake laser generation
   map-lasergen:
     # Generate laser data for the current position, if set to false use

@@ -47,14 +47,6 @@
 #include <map>
 #include <cmath>
 
-#ifdef HAVE_ROS
-#  include <plugins/ros/aspect/ros.h>
-#  include <ros/publisher.h>
-#  include <ros/subscriber.h>
-#  include <geometry_msgs/PoseWithCovarianceStamped.h>
-#endif
-
-
 /// Pose hypothesis
 typedef struct {
   /// Total weight (weights sum to 1)
@@ -69,6 +61,10 @@ namespace fawkes {
   class Mutex;
 }
 
+#ifdef HAVE_ROS
+class AmclROSThread;
+#endif
+
 class AmclThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
@@ -76,15 +72,16 @@ class AmclThread
   public fawkes::ConfigurableAspect,
   public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect,
-#ifdef HAVE_ROS
-  public fawkes::ROSAspect,
-#endif
   public fawkes::TransformAspect,
   public fawkes::BlackBoardInterfaceListener
 
 {
 public:
+#ifdef HAVE_ROS
+  AmclThread(AmclROSThread *ros_thread);
+#else
   AmclThread();
+#endif
   virtual ~AmclThread();
 
   virtual void init();
@@ -102,12 +99,6 @@ public:
   static pf_vector_t uniform_pose_generator(void* arg);
   void set_initial_pose(const std::string &frame_id, const fawkes::Time &msg_time,
 			const fawkes::tf::Pose &pose, const double *covariance);
-#ifdef HAVE_ROS
-  void initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg);
-#  ifdef USE_MAP_PUB
-  void publish_map();
-#  endif
-#endif
   virtual bool bb_interface_message_received(fawkes::Interface *interface,
 					     fawkes::Message *message) throw();
 
@@ -152,13 +143,6 @@ private:
   fawkes::Laser360Interface     *laser_if_;
   fawkes::Position3DInterface   *pos3d_if_;
   fawkes::LocalizationInterface *loc_if_;
-
-#ifdef HAVE_ROS
-  ros::Publisher pose_pub_;
-  ros::Publisher particlecloud_pub_;
-  ros::Subscriber initial_pose_sub_;
-  ros::Publisher map_pub_;
-#endif
 
   amcl_hyp_t* initial_pose_hyp_;
   bool first_map_received_;
@@ -216,6 +200,10 @@ private:
 
 #if NEW_UNIFORM_SAMPLING
     static std::vector<std::pair<int,int> > free_space_indices;
+#endif
+
+#ifdef HAVE_ROS
+    AmclROSThread *rt_;
 #endif
 };
 

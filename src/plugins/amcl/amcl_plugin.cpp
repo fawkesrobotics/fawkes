@@ -23,6 +23,10 @@
 #include <core/plugin.h>
 
 #include "amcl_thread.h"
+#ifdef HAVE_ROS
+#  include "ros_thread.h"
+#  include "amcl_utils.h"
+#endif
 
 using namespace fawkes;
 
@@ -38,7 +42,21 @@ class AmclPlugin : public fawkes::Plugin
   AmclPlugin(Configuration *config)
     : Plugin(config)
   {
+#ifdef HAVE_ROS
+    AmclROSThread *rt = NULL;
+    bool ros_enabled = true;
+    try {
+      ros_enabled = config->get_bool(AMCL_CFG_PREFIX"ros/enable");
+    } catch (Exception &e) {} // ignore, use default
+    if (ros_enabled) {
+      printf("Instantiating\n");
+      rt = new AmclROSThread();
+      thread_list.push_back(rt);
+    }
+    thread_list.push_back(new AmclThread(rt));
+#else
     thread_list.push_back(new AmclThread());
+#endif
   }
 };
 
