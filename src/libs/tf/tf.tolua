@@ -32,6 +32,8 @@ namespace fawkes {
   namespace tf {
 
 double get_yaw(const Quaternion &bt_q);
+Quaternion create_quaternion_from_rpy(double roll, double pitch, double yaw);
+Quaternion create_quaternion_from_yaw(double yaw);
 
 Vector3 resize_vector(const Vector3 &v, double s);
 
