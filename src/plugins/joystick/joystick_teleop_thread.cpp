@@ -86,15 +86,26 @@ JoystickTeleOpThread::init()
   cfg_special_max_vy_    = config->get_float(CFG_PREFIX"drive_modes/special/max_vy");
   cfg_special_max_omega_ = config->get_float(CFG_PREFIX"drive_modes/special/max_omega");
 
-  cfg_ifid_motor_        = config->get_string(CFG_PREFIX"motor_interface_id");
-  cfg_ifid_joystick_     = config->get_string(CFG_PREFIX"joystick_interface_id");
-  cfg_ifid_laser_        = config->get_string(CFG_PREFIX"laser_interface_id");
+  cfg_collision_safety_          = config->get_bool(CFG_PREFIX"collision_safety/enabled");
+  cfg_collision_safety_distance_ = config->get_float(CFG_PREFIX"collision_safety/distance");
+  cfg_collision_safety_angle_    = config->get_uint(CFG_PREFIX"collision_safety/angle");
 
+  cfg_ifid_motor_        = config->get_string(CFG_PREFIX"motor_interface_id");
   motor_if_ = blackboard->open_for_reading<MotorInterface>(cfg_ifid_motor_.c_str());
+
+  cfg_ifid_joystick_     = config->get_string(CFG_PREFIX"joystick_interface_id");
   joystick_if_ =
     blackboard->open_for_reading<JoystickInterface>(cfg_ifid_joystick_.c_str());
-  laser_if_ =
-    blackboard->open_for_reading<Laser360Interface>(cfg_ifid_laser_.c_str());
+
+  cfg_use_laser_ = false;
+  try {
+    cfg_ifid_laser_        = config->get_string(CFG_PREFIX"laser_interface_id");
+    laser_if_ =
+      blackboard->open_for_reading<Laser360Interface>(cfg_ifid_laser_.c_str());
+    cfg_use_laser_ = true;
+  } catch (Exception &e) {
+    logger->log_debug(name(), "No laser_interface_id configured, ignoring");
+  }
 
   stopped_ = false;
 }
@@ -143,14 +154,14 @@ JoystickTeleOpThread::stop()
 bool
 JoystickTeleOpThread::is_area_free(float theta)
 {
-  for (int i = -20; i <= 20; ++i) // scan 41 degree in front for obstacles
+  for (int i = (-1)*cfg_collision_safety_angle_; i <= (int)cfg_collision_safety_angle_; ++i)
   {
     int angle = ((int)theta) + i;
     if (angle < 0)
     {
       angle = angle + 359;
     }
-    if (laser_if_->distances(angle) > 0. && laser_if_->distances(angle) < 0.4)
+    if (laser_if_->distances(angle) > 0. && laser_if_->distances(angle) < cfg_collision_safety_distance_)
     {
       return false;
     }
@@ -164,8 +175,6 @@ JoystickTeleOpThread::loop()
 {
   joystick_if_->read();
   laser_if_->read();
-
-
 
   if ((! joystick_if_->has_writer() || joystick_if_->num_axes() == 0) && ! stopped_) {
     logger->log_warn(name(), "Joystick disconnected, stopping");

@@ -82,8 +82,12 @@ class JoystickTeleOpThread
   float        cfg_special_max_vx_;
   float        cfg_special_max_vy_;
   float        cfg_special_max_omega_;
+  bool         cfg_collision_safety_;
+  float        cfg_collision_safety_distance_;
+  unsigned int cfg_collision_safety_angle_;
   std::string  cfg_ifid_motor_;
   std::string  cfg_ifid_joystick_;
+  bool         cfg_use_laser_;
   std::string  cfg_ifid_laser_;
 
   bool         stopped_;
