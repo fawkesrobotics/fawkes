@@ -422,7 +422,6 @@ JacoGotoThread::_check_final()
 
       check_fingers = true;
       break;
-//*/
 
   }
 

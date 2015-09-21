@@ -568,13 +568,11 @@ JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t
     RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
                                      0xffffffff&~KinBody::Save_GrabbedBodies&~KinBody::Save_ActiveManipulator&~KinBody::Save_ActiveDOF);
     saver.Restore( __planner_env.robot->get_robot_ptr() );
-    //*/
-    //*
+    */
     // New method. Simply set the DOF values as they are in __viewer_env
     vector<dReal> dofs;
     __viewer_env.robot->get_robot_ptr()->GetDOFValues(dofs);
     __planner_env.robot->get_robot_ptr()->SetDOFValues(dofs);
-    //*/
   }
 
   // then clone all objects
@@ -596,8 +594,7 @@ JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t
       RobotBase::RobotStateSaver saver(__viewer_env.robot->get_robot_ptr(),
                                        KinBody::Save_LinkTransformation|KinBody::Save_LinkEnable|KinBody::Save_GrabbedBodies);
       saver.Restore( __planner_env.robot->get_robot_ptr() );
-      //*/
-      //*
+      */
       // New method. Grab all bodies in __planner_env that are grabbed in __viewer_env by this manipulator
       vector<RobotBase::GrabbedInfoPtr> grabbed;
       __viewer_env.robot->get_robot_ptr()->GetGrabbedInfo(grabbed);
@@ -609,7 +606,6 @@ JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t
           __planner_env.robot->attach_object((*it)->_grabbedname.c_str(), __planner_env.env, __cfg_manipname.c_str());
         }
       }
-      //*/
     }
   }
 
