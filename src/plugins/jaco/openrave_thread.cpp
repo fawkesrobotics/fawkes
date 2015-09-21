@@ -31,6 +31,7 @@
 #include <cmath>
 #include <stdio.h>
 #include <cstring>
+#include <unistd.h>
 
 #ifdef HAVE_OPENRAVE
  #include <plugins/openrave/environment.h>
@@ -288,10 +289,12 @@ JacoOpenraveThread::loop()
 void
 JacoOpenraveThread::update_openrave()
 {
+#ifndef HAVE_OPENRAVE
+  return;
+#else
   if( __arm == NULL || __arm->iface == NULL || __robot == NULL || __manip == NULL )
     return;
 
-#ifdef HAVE_OPENRAVE
   try {
     __joints.clear();
     __joints.push_back(__arm->iface->joints(0));
@@ -546,6 +549,7 @@ JacoOpenraveThread::set_target_ang(float j1, float j2, float j3, float j4, float
 void
 JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t> &to)
 {
+#ifdef HAVE_OPENRAVE
   // update state of the trajectory
   __arm->target_mutex->lock();
   to->trajec_state = TRAJEC_PLANNING;
@@ -679,6 +683,7 @@ JacoOpenraveThread::_plan_path(RefPtr<jaco_target_t> &from, RefPtr<jaco_target_t
   // update trajectory state
   to->trajec_state = TRAJEC_READY;
   __arm->target_mutex->unlock();
+#endif
 }
 
 

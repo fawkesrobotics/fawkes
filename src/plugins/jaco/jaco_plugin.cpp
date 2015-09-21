@@ -56,8 +56,9 @@ JacoPlugin::JacoPlugin(Configuration *config)
     JacoActThread* act_thread = new JacoActThread("JacoActThread", arm);
     JacoInfoThread* info_thread = new JacoInfoThread("JacoInfoThread", arm);
     JacoGotoThread* goto_thread = new JacoGotoThread("JacoGotoThread", arm);
+    JacoOpenraveThread* openrave_thread = NULL;
 #ifdef HAVE_OPENRAVE
-    JacoOpenraveThread* openrave_thread = new JacoOpenraveThread("JacoOpenraveThread", arm);
+    openrave_thread = new JacoOpenraveThread("JacoOpenraveThread", arm);
 #endif
 
     arm->goto_thread = goto_thread;

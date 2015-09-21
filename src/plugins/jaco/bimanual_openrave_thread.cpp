@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <cstring>
 #include <algorithm>
+#include <unistd.h>
 
 #ifdef HAVE_OPENRAVE
  #include <openrave/openrave.h>
@@ -310,6 +311,7 @@ bool
 JacoBimanualOpenraveThread::add_target(float l_x, float l_y, float l_z, float l_e1, float l_e2, float l_e3,
                                        float r_x, float r_y, float r_z, float r_e1, float r_e2, float r_e3)
 {
+#ifdef HAVE_OPENRAVE
   // no IK checking yet, just enqueue until they can be processed
   // create new targets for the queues
   RefPtr<jaco_target_t> target_l(new jaco_target_t());
@@ -342,6 +344,9 @@ JacoBimanualOpenraveThread::add_target(float l_x, float l_y, float l_z, float l_
   __arms.right.arm->target_mutex->unlock();
 
   return true;
+#else
+  return false;
+#endif
 }
 
 void
@@ -358,12 +363,14 @@ JacoBimanualOpenraveThread::plot_first()
 void
 JacoBimanualOpenraveThread::_set_trajec_state(jaco_trajec_state_t state)
 {
+#ifdef HAVE_OPENRAVE
   __arms.left.arm->target_mutex->lock();
   __arms.right.arm->target_mutex->lock();
   __arms.left.target->trajec_state=state;
   __arms.right.target->trajec_state=state;
   __arms.left.arm->target_mutex->unlock();
   __arms.right.arm->target_mutex->unlock();
+#endif
 }
 
 void
@@ -553,6 +560,9 @@ JacoBimanualOpenraveThread::_plan_path()
 bool
 JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &right)
 {
+#ifndef HAVE_OPENRAVE
+  return false;
+#else
   EnvironmentMutex::scoped_lock plan_lock(__planner_env.env->get_env_ptr()->GetMutex());
 
   // robot ptr for convenienc
@@ -695,4 +705,5 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &
 
 
   return solution_found;
+#endif
 }
