@@ -49,7 +49,7 @@ plugin: core netcomm utils config logging
 aspect: core utils blackboard netcomm config plugin webview logging tf pcl_utils
 lua: core utils blackboard config logging
 interfaces: core interface
-gui_utils: core netcomm plugin logging
+gui_utils: core netcomm blackboard interface plugin logging
 logging: core utils netcomm
 naoutils: core utils
 webview: core utils logging
