@@ -180,10 +180,10 @@ JoystickTeleOpThread::loop()
     logger->log_warn(name(), "Joystick disconnected, stopping");
     stop();
   } else if ((cfg_axis_forward_ > joystick_if_->num_axes() ||
-	      cfg_axis_sideward_ > joystick_if_->num_axes() ||
-	      cfg_axis_rotation_ > joystick_if_->num_axes() ||
-	      (cfg_deadman_use_axis_ && cfg_deadman_axis_ > joystick_if_->num_axes()))
-	     && ! stopped_)
+                cfg_axis_sideward_ > joystick_if_->num_axes() ||
+	              cfg_axis_rotation_ > joystick_if_->num_axes() ||
+	              (cfg_deadman_use_axis_ && cfg_deadman_axis_ > joystick_if_->num_axes()))
+	            && ! stopped_)
   {
     logger->log_warn(name(), "Axis number out of range, stopping");
     stop();
@@ -193,31 +193,31 @@ JoystickTeleOpThread::loop()
 	       (cfg_deadman_ax_thresh_ <  0 && joystick_if_->axis(cfg_deadman_axis_) < cfg_deadman_ax_thresh_))))
   {
     if (fabsf(joystick_if_->axis(cfg_axis_forward_)) < cfg_axis_threshold_ &&
-	fabsf(joystick_if_->axis(cfg_axis_sideward_)) < cfg_axis_threshold_ &&
-	fabsf(joystick_if_->axis(cfg_axis_rotation_)) < cfg_axis_threshold_) {
+         fabsf(joystick_if_->axis(cfg_axis_sideward_)) < cfg_axis_threshold_ &&
+         fabsf(joystick_if_->axis(cfg_axis_rotation_)) < cfg_axis_threshold_) {
       stop();
     } else {
       float vx = 0, vy = 0, omega = 0;
 
       if ((joystick_if_->pressed_buttons() & cfg_drive_mode_butmask_) ||
-	  (cfg_drive_mode_use_axis_ &&
-	   ((cfg_drive_mode_ax_thresh_ >= 0 &&
-	     joystick_if_->axis(cfg_drive_mode_axis_) > cfg_drive_mode_ax_thresh_) ||
-	    (cfg_drive_mode_ax_thresh_ <  0 &&
-	     joystick_if_->axis(cfg_drive_mode_axis_) < cfg_drive_mode_ax_thresh_))))
+        (cfg_drive_mode_use_axis_ &&
+          ((cfg_drive_mode_ax_thresh_ >= 0 &&
+            joystick_if_->axis(cfg_drive_mode_axis_) > cfg_drive_mode_ax_thresh_) ||
+          (cfg_drive_mode_ax_thresh_ <  0 &&
+          joystick_if_->axis(cfg_drive_mode_axis_) < cfg_drive_mode_ax_thresh_))))
       {
-	vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_special_max_vx_;
-	vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_special_max_vy_;
-	omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_special_max_omega_;
+        vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_special_max_vx_;
+        vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_special_max_vy_;
+        omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_special_max_omega_;
       } else {
-	vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_normal_max_vx_;
-	vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_normal_max_vy_;
-	omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_normal_max_omega_;
+        vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_normal_max_vx_;
+        vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_normal_max_vy_;
+        omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_normal_max_omega_;
       }
 
       float theta, distance;
       cart2polar2d(vx, vy, &theta, &distance);
-      if (is_area_free(rad2deg(theta)))
+      if (!cfg_use_laser_ || is_area_free(rad2deg(theta))) // if we have no laser or area is free, move
       {  
         send_transrot(vx, vy, omega);
       }
