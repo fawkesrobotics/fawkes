@@ -29,6 +29,7 @@
 #include <aspect/blackboard.h>
 
 #include <string>
+#include <cfloat>
 
 namespace fawkes {
   class MotorInterface;
@@ -91,6 +92,7 @@ class JoystickTeleOpThread
   std::string  cfg_ifid_laser_;
 
   bool         stopped_;
+  float        min_distance_;
 };
 
 

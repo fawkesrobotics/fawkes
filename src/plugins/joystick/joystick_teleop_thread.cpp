@@ -154,12 +154,17 @@ JoystickTeleOpThread::stop()
 bool
 JoystickTeleOpThread::is_area_free(float theta)
 {
+  min_distance_ = FLT_MAX;
   for (int i = (-1)*cfg_collision_safety_angle_; i <= (int)cfg_collision_safety_angle_; ++i)
   {
     int angle = ((int)theta) + i;
     if (angle < 0)
     {
       angle = angle + 359;
+    }
+    if (laser_if_->distances(angle) > 0. && laser_if_->distances(angle) < min_distance_)
+    {
+      min_distance_ = laser_if_->distances(angle);
     }
     if (laser_if_->distances(angle) > 0. && laser_if_->distances(angle) < cfg_collision_safety_distance_)
     {
@@ -219,6 +224,12 @@ JoystickTeleOpThread::loop()
       cart2polar2d(vx, vy, &theta, &distance);
       if (!cfg_use_laser_ || is_area_free(rad2deg(theta))) // if we have no laser or area is free, move
       {  
+        if (min_distance_ < 2*cfg_collision_safety_distance_)
+        {
+          logger->log_warn(name(),"slow down");
+          vx = vx * min_distance_ / 2 /cfg_collision_safety_distance_;
+          vy = vy * min_distance_ / 2 /cfg_collision_safety_distance_;
+        }
         send_transrot(vx, vy, omega);
       }
       else // If area is not free, only allow rotation
