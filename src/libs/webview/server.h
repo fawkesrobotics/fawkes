@@ -57,7 +57,7 @@ class WebServer {
   void setup_access_log(const char *filename);
 
   unsigned int active_requests() const;
-  std::auto_ptr<Time> last_request_completion_time() const;
+  Time last_request_completion_time() const;
 
  private:
   static char * read_file(const char *filename);

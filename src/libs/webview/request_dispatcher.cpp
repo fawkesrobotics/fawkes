@@ -505,11 +505,11 @@ WebRequestDispatcher::active_requests() const
 /** Get time when last request was completed.
  * @return Time when last request was completed
  */
-std::auto_ptr<Time>
+Time
 WebRequestDispatcher::last_request_completion_time() const
 {
   MutexLocker lock(__active_requests_mutex);
-  return std::auto_ptr<Time>(new Time(__last_request_completion_time));
+  return *__last_request_completion_time;
 }
 
 } // end namespace fawkes

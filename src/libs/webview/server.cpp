@@ -229,7 +229,7 @@ WebServer::active_requests() const
 /** Get time when last request was completed.
  * @return Time when last request was completed
  */
-std::auto_ptr<Time>
+Time
 WebServer::last_request_completion_time() const
 {
   return __dispatcher->last_request_completion_time();

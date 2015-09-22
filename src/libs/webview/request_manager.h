@@ -42,7 +42,7 @@ class WebRequestManager
   ~WebRequestManager();
 
   unsigned int num_active_requests() const;
-  std::auto_ptr<Time> last_request_completion_time() const;
+  Time last_request_completion_time() const;
 
  private:
   void set_server(WebServer *server);

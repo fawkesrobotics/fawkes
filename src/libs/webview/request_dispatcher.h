@@ -22,6 +22,8 @@
 #ifndef __LIBS_WEBVIEW_REQUEST_DISPATCHER_H_
 #define __LIBS_WEBVIEW_REQUEST_DISPATCHER_H_
 
+#include <utils/time/time.h>
+
 #include <string>
 #include <map>
 #include <stdint.h>
@@ -44,7 +46,6 @@ class WebUserVerifier;
 class WebRequest;
 class WebviewAccessLog;
 class Mutex;
-class Time;
 
 class WebRequestDispatcher
 {
@@ -73,7 +74,7 @@ class WebRequestDispatcher
   void setup_access_log(const char *filename);
 
   unsigned int active_requests() const;
-  std::auto_ptr<Time> last_request_completion_time() const;
+  Time last_request_completion_time() const;
 
  private:
   struct MHD_Response *  prepare_static_response(StaticWebReply *sreply);

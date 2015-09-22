@@ -82,14 +82,14 @@ WebRequestManager::num_active_requests() const
  * completed.
  * @return time when last request was completed
  */
-std::auto_ptr<Time>
+Time
 WebRequestManager::last_request_completion_time() const
 {
   MutexLocker lock(mutex_);
   if (server_) {
     return server_->last_request_completion_time();
   } else {
-    return std::auto_ptr<Time>(new Time(0,0));
+    return Time(0,0);
   }
 }
 
