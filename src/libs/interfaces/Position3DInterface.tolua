@@ -18,6 +18,9 @@ class Position3DInterface : public Interface
   double translation(int index);
   void set_translation(unsigned int index, const double new_translation);
   int maxlenof_translation() const;
+  double covariance(int index);
+  void set_covariance(unsigned int index, const double new_covariance);
+  int maxlenof_covariance() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

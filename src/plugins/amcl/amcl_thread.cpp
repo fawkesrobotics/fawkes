@@ -756,6 +756,7 @@ AmclThread::loop()
       }
       pos3d_if_->set_translation(trans);
       pos3d_if_->set_rotation(rot);
+      pos3d_if_->set_covariance(last_covariance_);
       pos3d_if_->write();
 
       sent_first_transform_ = true;

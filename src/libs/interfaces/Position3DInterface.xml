@@ -21,5 +21,11 @@
     <field type="double" length="3" name="translation">
       Translation vector from the reference frame's origin, ordered as (x, y, z).
     </field>
+    <field type="double" length="36" name="covariance">
+      Row-major representation of the 6x6 covariance matrix.
+      The orientation parameters use a fixed-axis representation.
+      In order, the parameters are:
+      (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+    </field>
   </data>
 </interface>
