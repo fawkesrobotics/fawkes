@@ -4,7 +4,7 @@
  *
  *  Created: Wed Jun 10 11:44:24 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *                  2010  Bahram Maleki-Fard
+ *             2011-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -26,17 +26,16 @@
 
 #include "motion_thread.h"
 
+#ifdef HAVE_OPENRAVE
+ #include <plugins/openrave/types.h>
+#endif
+
 #include <vector>
 #include <string>
 
-#include <plugins/openrave/aspect/openrave.h>
-
-#ifdef HAVE_OPENRAVE
 namespace fawkes {
-  class OpenRaveRobot;
-  class OpenRaveManipulator;
+  class OpenRaveConnector;
 }
-#endif
 
 /** class KatanaGotoOpenRaveThread */
 class KatanaGotoOpenRaveThread : public KatanaMotionThread
@@ -73,8 +72,8 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   static const std::string DEFAULT_PLANNERPARAMS_STRAIGHT;
 
  private:
-  fawkes::OpenRaveRobot*        __OR_robot;
-  fawkes::OpenRaveManipulator*  __OR_manip;
+  fawkes::OpenRaveRobotPtr        __OR_robot;
+  fawkes::OpenRaveManipulatorPtr  __OR_manip;
 
   std::string                                   __target_object;
   std::vector< std::vector<float> >*            __target_traj;

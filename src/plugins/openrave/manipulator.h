@@ -38,7 +38,12 @@ class OpenRaveManipulator
   OpenRaveManipulator(unsigned int count, unsigned int count_device);
   virtual ~OpenRaveManipulator();
 
-  virtual void add_motor(unsigned int number, unsigned int number_device);
+  /** Create a new copy of this OpenRaveManipulator instance
+   * @return RefPtr to the copied OpenRaveManipulator
+   */
+  virtual OpenRaveManipulatorPtr copy() = 0;
+
+  void add_motor(unsigned int number, unsigned int number_device);
 
   template <typename T_from, typename T_to> void angles_or_to_device(std::vector<T_from>& from, std::vector<T_to>& to) const;
   template <typename T> void get_angles(std::vector<T>& to) const; // angles of OpenRAVE model
@@ -49,8 +54,19 @@ class OpenRaveManipulator
 
 
  protected:
-  virtual float angle_OR_to_device(unsigned int number, float angle) const;
-  virtual float angle_device_to_OR(unsigned int number, float angle) const;
+  /** Transform single OpenRAVE motor angle to real device angle
+   * @param number motor number of real device
+   * @param angle motor angle of OpenRAVE model
+   * @return transformed angle
+   */
+  virtual float angle_OR_to_device(unsigned int number, float angle) const = 0;
+
+  /** Transform single device motor angle to OpenRAVE angle
+   * @param number motor number of real device
+   * @param angle motor angle of real device
+   * @return transformed angle
+   */
+  virtual float angle_device_to_OR(unsigned int number, float angle) const = 0;
 
   std::vector<motor_t>  __motors;       /**< vector of motors */
   unsigned int          __cnt;          /**< number of motors on OpenRAVE model */
@@ -109,6 +125,9 @@ template <typename T>
 void
 OpenRaveManipulator::set_angles(std::vector<T>& angles)
 {
+  if( angles.size() < __motors.size() ) {
+    angles.reserve(__motors.size());
+  }
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = (float)angles[__motors[i].no];
   }
@@ -121,6 +140,9 @@ template <typename T>
 void
 OpenRaveManipulator::set_angles_device(std::vector<T>& angles)
 {
+  if( angles.size() < __motors.size() ) {
+    angles.reserve(__motors.size());
+  }
   for (unsigned int i=0; i<__motors.size(); i++) {
     __motors[i].angle = angle_device_to_OR(__motors[i].no_device, (float)angles[__motors[i].no_device]);
   }

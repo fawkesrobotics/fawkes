@@ -4,6 +4,7 @@
  *
  *  Created: Thu Jun 11 11:59:38 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *             2012-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -24,6 +25,9 @@
 #include "controller.h"
 #include "exception.h"
 
+#include <interfaces/KatanaInterface.h>
+
+#include <unistd.h>
 
 /** @class KatanaGripperThread "gripper_thread.h"
  * Katana gripper thread.

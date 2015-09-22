@@ -1,0 +1,87 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/jaco
+---
+hardware/jaco:
+  # What arm are we controlling (or what is our library to control the arm)?
+  # Currently supported:
+  #   libkindrv: use libkindrv to control a real arm
+  #   dummy: control a dummy arm. Not a real arm, but useful for rudimentary "simulation"
+  arm: libkindrv
+
+  # Should arm be automatically initialized after plugin loaded? This puts the arm into
+  #  READY position, only if the arm has just been turned on, which means we cannot
+  #  control it until it is initialized once.
+  #  Note: If arm was initialized once, plugin unloaded -> arm moved by joystick -> plugin loaded
+  #  => arm is still initialized!
+  auto_initialize: true
+
+  # Should arm be automatically put in calibration mode after plugin loaded?
+  #  This should not be confused with auto_initialize. This puts arm into READY
+  #  no matter what state it is in. auto_initialize just makes sure if arm is initialized.
+  auto_calibrate: false
+
+  config:
+    # Do we have a dual_arm setup? This defines whether we work with a dual-arm or single-arm
+    # setup. Setting this to 'true' will fail on single-arm setups. 'false' should still work
+    # with dual-arm setups, although it might be random which arm is actually used on initialization,
+    dual_arm: false
+
+    single:
+      # Name of JacoArm.
+      name: Jaco 1
+
+      # JacoInterface ID string for left arm
+      interface: JacoArm
+
+    left:
+      # Name of left JacoArm. libkindrv should provide methods to see names of connected arms. Or you
+      # can use Kinova's JacoSoft to check and set a new name
+      name: Jaco 1
+
+      # JacoInterface ID string for left arm
+      interface: JacoArm Left
+
+    right:
+      # Name of right JacoArm.
+      name: Jaco 2
+
+      # JacoInterface ID string for left arm
+      interface: JacoArm Right
+
+  openrave:
+    # Use OpenRAVE qtcoin viewer (i.e. see 3D robot model)?
+    use_viewer: false
+
+    # Automatically generate IK database for OpenRAVE robot model?
+    auto_load_ik: true
+
+    # Trajectory sampling distance (in seconds)
+    sampling: 0.04
+
+    # robot/xml file to be loaded into OpenRAVE
+    robot_file: ../res/openrave/jaco.robot.xml
+
+    # robot/xml file for dual-arm setup
+    robot_dual_file: ../res/openrave/jaco_dual.robot.xml
+
+    # the names of the manipulator define in the OpenRAVE robot model
+    manipname:
+      # manipulator names when using a single arm
+      single: fingertip
+      #manipulator names for l/r when using a dual-arm setup
+      dual_left: arm_left
+      dual_right: arm_right
+
+    # plotting options
+    plotting:
+      # plot the planned trajectory of the manipulator
+      planned_manipulator: true
+      # plot the planned trajectory of all joints
+      planned_joints: false
+
+      # plot the current position of manipulator, while trajectory is being executed.
+      current_manipulator: false
+      # plot the current position of joints, while trajectory is being executed.
+      current_joints: false

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="JacoInterface" author="Bahram Maleki-Fard" year="2013">
+  <constants>
+    <constant type="uint32" value="0" name="ERROR_NONE">No error</constant>
+    <constant type="uint32" value="1" name="ERROR_UNSPECIFIC">Some unspecified error</constant>
+    <constant type="uint32" value="2" name="ERROR_NO_IK">No IK solution found</constant>
+    <constant type="uint32" value="4" name="ERROR_PLANNING">Planning error</constant>
+  </constants>
+
+  <data>
+    <comment>
+      Interface providing access to a Kinova Jaco arm.
+    </comment>
+
+    <field type="bool" name="connected">Is JacoArm connected/ready?</field>
+    <field type="bool" name="initialized">Checks if Jaco arm has been initialized once after switched on.</field>
+
+    <field type="float" name="x">X-Coordinate of tool translation.</field>
+    <field type="float" name="y">Y-Coordinate op tool translation.</field>
+    <field type="float" name="z">Z-Coordinate of tool translation.</field>
+
+    <field type="float" name="euler1">1st Euler angle of tool rotation.</field>
+    <field type="float" name="euler2">2nd Euler angle of tool rotation.</field>
+    <field type="float" name="euler3">3rd Euler angle of tool rotation.</field>
+
+    <field type="float" length="6" name="joints">Angle values of joints</field>
+
+    <field type="float" name="finger1">Angular value of finger 1.</field>
+    <field type="float" name="finger2">Angular value of finger 2.</field>
+    <field type="float" name="finger3">Angular value of finger 3.</field>
+
+    <field type="uint32" name="msgid">The ID of the message that is currently being
+      processed, or 0 if no message is being processed.</field>
+    <field type="bool" name="final">True, if the last goto command has been finished,
+      false if it is still running</field>
+    <field type="uint32" name="error_code">Error code, set if
+      final is true. 0 if no error occured, an error code from ERROR_*
+      constants otherwise.</field>
+  </data>
+
+  <message name="Calibrate">
+    <comment>Stop movement.</comment>
+  </message>
+
+  <message name="Retract">
+    <comment>Stop movement.</comment>
+  </message>
+
+  <message name="Stop">
+    <comment>Stop movement.</comment>
+  </message>
+
+  <message name="CartesianGoto">
+    <commment>Move arm to cartesian coordinates</commment>
+    <field type="float" name="x">X-coordinate of target</field>
+    <field type="float" name="y">Y-coordinate of target</field>
+    <field type="float" name="z">Z-coordinate of target</field>
+    <field type="float" name="e1">1st Euler angle of target rotation</field>
+    <field type="float" name="e2">2nd Euler angle of target rotation</field>
+    <field type="float" name="e3">3rd Euler angle of target rotation</field>
+  </message>
+
+  <message name="AngularGoto">
+    <comment>Move arm to given angular position</comment>
+    <field type="float" name="j1">Angular value of 1st joint</field>
+    <field type="float" name="j2">Angular value of 2nd joint</field>
+    <field type="float" name="j3">Angular value of 3rd joint</field>
+    <field type="float" name="j4">Angular value of 4th joint</field>
+    <field type="float" name="j5">Angular value of 5th joint</field>
+    <field type="float" name="j6">Angular value of 6th joint</field>
+  </message>
+
+  <message name="MoveGripper">
+    <comment>Move fingers on gripper.</comment>
+    <field type="float" name="finger1">Value of finger 1. Range [0,60]</field>
+    <field type="float" name="finger2">Value of finger 2. Range [0,60]</field>
+    <field type="float" name="finger3">Value of finger 3. Range [0,60]</field>
+  </message>
+
+  <message name="SetPlannerParams">
+    <comment>Set plannerparams that can be added to OpenRAVE's BaseManipulation module.</comment>
+    <field type="string" length="1024" name="params">Planner parameters</field>
+  </message>
+
+  <message name="JoystickPush">
+    <comment>Push and hold(!) a joystick button</comment>
+    <field type="uint32" name="button">Button ID to push.</field>
+  </message>
+  <message name="JoystickRelease">
+    <comment>Release any joystick button. Stick included.</comment>
+  </message>
+
+</interface>

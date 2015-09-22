@@ -1,0 +1,14 @@
+<KinBody name="BasicSeparator">
+
+  <Body name="BodySeparator" type="dynamic">
+    <Mass type="mimicgeom">
+      <density>1000</density>
+    </Mass>
+    <Geom type="box">
+      <extents>1 0.001 1</extents>
+      <translation>0 0 0</translation>
+      <diffusecolor>0 0 0.66</diffusecolor>
+      <transparency>0.9</transparency>
+    </Geom>
+  </Body>
+</KinBody>

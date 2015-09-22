@@ -4,7 +4,7 @@
  *
  *  Created: Wed Jun 10 11:45:31 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *                  2010  Bahram Maleki-Fard
+ *             2011-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -26,17 +26,19 @@
 #include "controller.h"
 #include "exception.h"
 
+#include <interfaces/KatanaInterface.h>
+
 #include <cstdlib>
 
 #include <utils/time/time.h>
 
 #ifdef HAVE_OPENRAVE
+#include <plugins/openrave/aspect/openrave_connector.h>
 
 #include <plugins/openrave/robot.h>
 #include <plugins/openrave/environment.h>
 #include <plugins/openrave/manipulators/katana6M180.h>
 #include <plugins/openrave/manipulators/neuronics_katana.h>
-#include <plugins/openrave/types.h>
 
 #include <vector>
 #endif
@@ -82,8 +84,6 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
                                    bool autoload_IK,
                                    bool use_viewer)
   : KatanaMotionThread("KatanaGotoOpenRaveThread", katana, logger),
-  __OR_robot( 0 ),
-  __OR_manip( 0 ),
   __target_object( "" ),
   __target_traj( 0 ),
   __cfg_robot_file( robot_file ),
@@ -285,10 +285,8 @@ KatanaGotoOpenRaveThread::init()
 void
 KatanaGotoOpenRaveThread::finalize()
 {
-  delete(__OR_robot);
+  _openrave->set_active_robot( NULL );
   __OR_robot = NULL;
-
-  delete(__OR_manip);
   __OR_manip = NULL;
 }
 

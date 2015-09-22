@@ -36,6 +36,7 @@ class OpenRaveManipulatorNeuronicsKatana : public OpenRaveManipulator
   OpenRaveManipulatorNeuronicsKatana(unsigned int count, unsigned int countDevice);
   virtual ~OpenRaveManipulatorNeuronicsKatana();
 
+  virtual OpenRaveManipulatorPtr copy();
 
  private:
   virtual float angle_OR_to_device(unsigned int number, float angle) const;

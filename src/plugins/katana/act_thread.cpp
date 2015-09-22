@@ -4,6 +4,7 @@
  *
  *  Created: Mon Jun 08 18:00:56 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *             2010-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -21,6 +22,13 @@
  */
 
 #include "act_thread.h"
+#include "motion_thread.h"
+#include "calib_thread.h"
+#include "goto_thread.h"
+#include "goto_openrave_thread.h"
+#include "gripper_thread.h"
+#include "sensacq_thread.h"
+#include "motor_control_thread.h"
 #include "controller_kni.h"
 #include "controller_openrave.h"
 
@@ -29,6 +37,11 @@
 #include <interfaces/JointInterface.h>
 #include <utils/math/angle.h>
 #include <utils/time/time.h>
+
+#ifdef HAVE_OPENRAVE
+ #include <plugins/openrave/robot.h>
+ #include <plugins/openrave/manipulator.h>
+#endif
 
 #include <algorithm>
 #include <cstdarg>

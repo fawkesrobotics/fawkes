@@ -1,0 +1,60 @@
+<KinBody name="ServicePlate">
+  <Body name="BodyServicePlate" type="dynamic">
+    <Mass type="mimicgeom">
+      <density>1000</density>
+    </Mass>
+
+    <!-- base plate -->
+    <Geom type="box">
+      <extents>0.15 0.25 0.005</extents>
+      <translation>0 0 0.005</translation>
+      <diffusecolor>0.45 0.2 0</diffusecolor>
+    </Geom>
+
+    <!-- short edges -->
+    <Geom type="box">
+      <extents>0.15 0.005 0.005</extents>
+      <translation>0 -0.245 0.015</translation>
+      <diffusecolor>0.45 0.2 0</diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <extents>0.17 0.015 0.005</extents>
+      <translation>0 -0.255 0.025</translation>
+      <diffusecolor>0.4 0.2 0</diffusecolor>
+    </Geom>
+
+    <Geom type="box">
+      <extents>0.15 0.005 0.005</extents>
+      <translation>0 0.245 0.015</translation>
+      <diffusecolor>0.45 0.2 0</diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <extents>0.17 0.015 0.005</extents>
+      <translation>0 0.255 0.025</translation>
+      <diffusecolor>0.4 0.2 0</diffusecolor>
+    </Geom>
+
+    <!-- long edges -->
+    <Geom type="box">
+      <extents>0.005 0.25 0.005</extents>
+      <translation>-0.145 0 0.015</translation>
+      <diffusecolor>0.45 0.2 0</diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <extents>0.015 0.25 0.005</extents>
+      <translation>-0.155 0 0.025</translation>
+      <diffusecolor>0.4 0.2 0</diffusecolor>
+    </Geom>
+
+    <Geom type="box">
+      <extents>0.005 0.25 0.005</extents>
+      <translation>0.145 0 0.015</translation>
+      <diffusecolor>0.45 0.2 0</diffusecolor>
+    </Geom>
+    <Geom type="box">
+      <extents>0.015 0.25 0.005</extents>
+      <translation>0.155 0 0.025</translation>
+      <diffusecolor>0.4 0.2 0</diffusecolor>
+    </Geom>
+  </Body>
+</KinBody>

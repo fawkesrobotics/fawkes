@@ -3,7 +3,7 @@
  *  controller_openrave.cpp - OpenRAVE Controller class for katana arm
  *
  *  Created: Sat Jan 07 16:10:54 2012
- *  Copyright  2012  Bahram Maleki-Fard, AllemaniACs RoboCup Team
+ *  Copyright  2012-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -24,6 +24,8 @@
 #include "exception.h"
 
 #include <core/exceptions/software.h>
+
+#include <plugins/openrave/aspect/openrave_connector.h>
 
 #ifdef HAVE_OPENRAVE
 #include <plugins/openrave/environment.h>
@@ -54,9 +56,6 @@ namespace fawkes {
 KatanaControllerOpenrave::KatanaControllerOpenrave(fawkes::OpenRaveConnector* openrave)
 {
   __openrave = openrave;
-  __OR_env   = NULL;
-  __OR_robot = NULL;
-  __OR_manip = NULL;
   __initialized = false;
 }
 
@@ -79,7 +78,7 @@ KatanaControllerOpenrave::init()
     __OR_env   = __openrave->get_environment();
     __OR_robot = __openrave->get_active_robot();
 
-    if( __OR_robot == NULL) {
+    if( !__OR_robot ) {
       throw fawkes::Exception("Cannot access OpenRaveRobot in current OpenRaveEnvironment.");
     }
  // TODO: get robot string and name, compare to this!

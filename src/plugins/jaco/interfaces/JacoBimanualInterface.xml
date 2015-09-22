@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="JacoBimanualInterface" author="Bahram Maleki-Fard" year="2014">
+  <constants>
+    <constant type="uint32" value="0" name="ERROR_NONE">No error</constant>
+    <constant type="uint32" value="1" name="ERROR_UNSPECIFIC">Some unspecified error</constant>
+    <constant type="uint32" value="2" name="ERROR_NO_IK">No IK solution found</constant>
+    <constant type="uint32" value="4" name="ERROR_PLANNING">Planning error</constant>
+  </constants>
+
+  <data>
+    <comment>
+      Interface for coordinate bimanual manipulation with a Kinova Jaco arm.
+    </comment>
+
+    <field type="uint32" name="msgid">The ID of the message that is currently being
+      processed, or 0 if no message is being processed.</field>
+    <field type="bool" name="final">True, if the last command has been finished,
+      false if it is still running</field>
+    <field type="uint32" name="error_code">Error code, set if
+      final is true. 0 if no error occured, an error code from ERROR_*
+      constants otherwise.</field>
+    <field type="bool" name="constrained">Wheter planning is using constraint-function.
+      This is an OpenRAVE internal constraint function.</field>
+  </data>
+
+  <message name="CartesianGoto">
+    <commment>Move both arms to cartesian coordinates</commment>
+    <field type="float" name="l_x">X-coordinate of left manipulator</field>
+    <field type="float" name="l_y">Y-coordinate of left manipulator</field>
+    <field type="float" name="l_z">Z-coordinate of left manipulator</field>
+    <field type="float" name="l_e1">1st Euler angle of left manipulator rotation</field>
+    <field type="float" name="l_e2">2nd Euler angle of left manipulator rotation</field>
+    <field type="float" name="l_e3">3rd Euler angle of left manipulator rotation</field>
+    <field type="float" name="r_x">X-coordinate of right manipulator</field>
+    <field type="float" name="r_y">Y-coordinate of right manipulator</field>
+    <field type="float" name="r_z">Z-coordinate of right manipulator</field>
+    <field type="float" name="r_e1">1st Euler angle of right manipulator rotation</field>
+    <field type="float" name="r_e2">2nd Euler angle of right manipulator rotation</field>
+    <field type="float" name="r_e3">3rd Euler angle of right manipulator rotation</field>
+  </message>
+
+  <message name="MoveGripper">
+    <comment>Move fingers on grippers.</comment>
+    <field type="float" name="l_finger1">Value of finger 1 on left gripper. Range [0,60]</field>
+    <field type="float" name="l_finger2">Value of finger 2 on left gripper. Range [0,60]</field>
+    <field type="float" name="l_finger3">Value of finger 3 on left gripper. Range [0,60]</field>
+    <field type="float" name="r_finger1">Value of finger 1 on right gripper. Range [0,60]</field>
+    <field type="float" name="r_finger2">Value of finger 2 on right gripper. Range [0,60]</field>
+    <field type="float" name="r_finger3">Value of finger 3 on right gripper. Range [0,60]</field>
+  </message>
+
+  <message name="SetPlannerParams">
+    <comment>Set plannerparams that can be added to OpenRAVE's DualManipulation module.</comment>
+    <field type="string" length="1024" name="params">Planner parameters</field>
+  </message>
+
+  <message name="SetConstrained">
+    <comment>Enable/Disable planning constraint that are used by OpenRAVE's DualManipulation module.</comment>
+    <ref>constrained</ref>
+  </message>
+
+</interface>

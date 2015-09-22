@@ -19,7 +19,9 @@
     <field type="bool" name="success">True, if last command was successful. False otherwise</field>
 
   </data>
-
+  <message name="StartViewer">
+    Start the qtcoin viewer, showing the current OpenRAVE environment.
+  </message>
   <message name="AddObject">
     <comment>Add object to current environment.</comment>
     <field type="string" length="30" name="name">Name of object</field>
@@ -29,9 +31,13 @@
     <comment>Delete object from current environment.</comment>
     <field type="string" length="30" name="name">Name of object</field>
   </message>
+  <message name="DeleteAllObjects">
+    <comment>Delete all objects from current environment.</comment>
+  </message>
   <message name="AttachObject">
     <comment>Attaches the object to the active robot</comment>
     <field type="string" length="30" name="name">Name of object</field>
+    <field type="string" length="30" name="manip_name">Name of manipulator</field>
   </message>
   <message name="ReleaseObject">
     <comment>Releases the object from the active robot</comment>

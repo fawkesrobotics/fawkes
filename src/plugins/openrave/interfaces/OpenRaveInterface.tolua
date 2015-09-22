@@ -6,6 +6,13 @@ namespace fawkes {
 class OpenRaveInterface : public Interface
 {
 
+  class StartViewerMessage : public Message
+  {
+    StartViewerMessage();
+    ~StartViewerMessage();
+
+  };
+
   class AddObjectMessage : public Message
   {
     AddObjectMessage(char * ini_name, char * ini_path);
@@ -31,15 +38,25 @@ class OpenRaveInterface : public Interface
     int maxlenof_name() const;
   };
 
+  class DeleteAllObjectsMessage : public Message
+  {
+    DeleteAllObjectsMessage();
+    ~DeleteAllObjectsMessage();
+
+  };
+
   class AttachObjectMessage : public Message
   {
-    AttachObjectMessage(char * ini_name);
+    AttachObjectMessage(char * ini_name, char * ini_manip_name);
     AttachObjectMessage();
     ~AttachObjectMessage();
 
     char * name();
     void set_name(const char * new_name);
     int maxlenof_name() const;
+    char * manip_name();
+    void set_manip_name(const char * new_manip_name);
+    int maxlenof_manip_name() const;
   };
 
   class ReleaseObjectMessage : public Message

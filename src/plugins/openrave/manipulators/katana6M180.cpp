@@ -50,15 +50,17 @@ OpenRaveManipulatorKatana6M180::~OpenRaveManipulatorKatana6M180()
 {
 }
 
-
+/** Create a new copy of this OpenRaveManipulator instance.
+ * @return A pointer to the copied instance
+ */
+OpenRaveManipulatorPtr
+OpenRaveManipulatorKatana6M180::copy()
+{
+  return RefPtr<OpenRaveManipulatorKatana6M180>( new OpenRaveManipulatorKatana6M180(*this) );
+}
 
 
 /* ########## various ######### */
-/** Transform single OpenRAVE motor angle to real device angle
- * @param number motor number of real device
- * @param angle motor angle of OpenRAVE model
- * @return transformed angle
- */
 float
 OpenRaveManipulatorKatana6M180::angle_OR_to_device(unsigned int number, float angle) const
 {
@@ -88,11 +90,6 @@ OpenRaveManipulatorKatana6M180::angle_OR_to_device(unsigned int number, float an
   return _angle;
 }
 
-/** Transform single device motor angle to OpenRAVE angle
- * @param number motor number of real device
- * @param angle motor angle of real device
- * @return transformed angle
- */
 float
 OpenRaveManipulatorKatana6M180::angle_device_to_OR(unsigned int number, float angle) const
 {

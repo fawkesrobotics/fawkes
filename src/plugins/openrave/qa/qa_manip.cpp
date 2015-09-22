@@ -89,7 +89,7 @@ main(int argc, char **argv)
 
 
   // test manipulator pointer. same as above, set angles, then print
-  OpenRaveManipulator* p;
+  OpenRaveManipulatorPtr p;
 
   p = new OpenRaveManipulatorKatana6M180(6, 5);
   p->add_motor(0,0);

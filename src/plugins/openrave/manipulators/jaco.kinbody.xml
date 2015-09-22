@@ -1,0 +1,327 @@
+<KinBody name="KinovaJacoKinbody">
+
+  <!-- Base Cylinder -->
+  <Body name="Base" type="dynamic">
+    <Geom type="trimesh">
+      <Data>jaco_base_joint2.stl</Data>
+      <Render>jaco_base_joint2.stl</Render>
+      <!-- Mesh has some weird offset, thats whay we have slight Translation-X. Does not matter though,
+           as the other important link and its joints have correct measurements, independent of this mesh
+           positioning. -->
+      <Translation>0.001 0 0.06</Translation>
+      <RotationAxis>0 0 0 90</RotationAxis>
+      <Diffusecolor>0.1 0.1 0.11</Diffusecolor>
+    </Geom>
+  </Body>
+
+  <!-- ShoulderYaw
+       Sits right on top of "Base".-->
+  <Body name="ShoulderYaw" type="dynamic">
+    <Translation>0 0 0.2725</Translation>
+    <Geom type="trimesh">
+      <Data>jaco_shoulder_yaw_joint2.stl</Data>
+      <Render>jaco_shoulder_yaw_joint2.stl</Render>
+      <RotationAxis>0 1 0 -90</RotationAxis>
+      <Diffusecolor>0.1 0.1 0.11</Diffusecolor>
+    </Geom>
+
+    <Geom type="cylinder">
+      <Radius>0.044</Radius>
+      <Height>0.02</Height>
+      <Translation>0 0 -0.118</Translation>
+      <RotationAxis>1 0 0 90</RotationAxis>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+
+  <!-- ShoulderPitch
+       The long link of the Jaco arm (41cm)-->
+  <Body name="ShoulderPitch" type="dynamic">
+    <offsetfrom>ShoulderYaw</offsetfrom>
+    <Geom type="trimesh">
+      <Data>jaco_shoulder_pitch_joint2.stl</Data>
+      <Render>jaco_shoulder_pitch_joint2.stl</Render>
+      <RotationAxis>0 1 0 90</RotationAxis>
+      <RotationAxis>1 0 0 90</RotationAxis>
+      <Diffusecolor>0.1 0.1 0.11</Diffusecolor>
+    </Geom>
+
+    <Geom type="cylinder">
+      <Radius>0.044</Radius>
+      <Height>0.02</Height>
+      <RotationAxis>0 0 1 90</RotationAxis>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+
+  <!-- ElbowPitch
+       The medium link that connects to the short 55° links -->
+  <Body name="ElbowPitch" type="dynamic">
+    <offsetfrom>ShoulderPitch</offsetfrom>
+    <Translation>0 0 0.410</Translation>
+    <Geom type="trimesh">
+      <Data>jaco_elbow_pitch_joint2.stl</Data>
+      <Render>jaco_elbow_pitch_joint2.stl</Render>
+      <RotationAxis>0 1 0 -90</RotationAxis>
+      <RotationAxis>1 0 0 90</RotationAxis>
+      <Diffusecolor>0.1 0.1 0.11</Diffusecolor>
+    </Geom>
+
+    <Geom type="cylinder">
+      <Radius>0.044</Radius>
+      <Height>0.02</Height>
+      <RotationAxis>0 0 1 90</RotationAxis>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+
+
+
+  <!-- ElbowRoll
+       The first "curved" link.
+       Remember, that we need to shift 11.3mm down from the center of the end-circle of ElbowPitch.
+   -->
+  <Body name="ElbowRoll" type="dynamic">
+    <offsetfrom>ElbowPitch</offsetfrom>
+    <Translation>0.0113 0 0.2073</Translation>
+    <Geom type="trimesh">
+      <Data>jaco_elbow_roll_joint2.stl</Data>
+      <Render>jaco_elbow_roll_joint2.stl</Render>
+      <RotationAxis>1 0 0 180</RotationAxis>
+      <Diffusecolor>0.1 0.1 0.11</Diffusecolor>
+    </Geom>
+
+    <Geom type="cylinder">
+      <Radius>0.034</Radius>
+      <Height>0.02</Height>
+      <RotationAxis>1 0 0 90</RotationAxis>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+
+
+  <!-- WristRoll.
+       The second "curved" link.
+
+       The center coordinates of the two "closing circles" (call them c_0 and c_1) can be derived
+       from a vector v=(x,y) with length 80.4mm , and rotating it by 55° (see Jaco-doc). The rotated
+       vector would then be v_r=(cos55*x - sin55*y, sin55*x + cos55*y).
+
+       Take a look at the 2D sketch of the arm in the Jaco-doc. We assume, that the stretched arm follows the y-axis
+       (rightwards), and the x-axis goes downwards:
+
+
+       -|- - - -Y
+        |
+        | ======K  (the arm))
+        |
+        X
+
+       So we are working with axis-orthogonal vector v=(80.4, 0) (see Jaco-doc sketch),
+       and we start from ElbowRoll, which is 90° aligned to the world-axis.
+       That means that:
+       c_0 = (0,0)
+       c_1 =  c_0  -      v    +    v_r
+           = (0,0) - ( 80.4,0) + ( cos55*80.4 - 0 , sin55*80.4 + 0)
+           =         (-80.4,0) + ( 46.11554548    , 65.85982436)
+           =                     (-34.28445452    , 65.85982436)
+
+       Depending on the positions and rotations of the meshes/bodies, the translations need to be done by values
+       0.034284455 and 0.065859824 (may differ in signs).
+  -->
+  <Body name="WristRoll" type="dynamic">
+    <offsetfrom>ElbowRoll</offsetfrom>
+    <Translation>-0.034284455 0 0.065859824</Translation>
+    <RotationAxis>0 1 0 -55</RotationAxis>
+    <Geom type="trimesh">
+      <Data>jaco_wrist_roll_joint2.stl</Data>
+      <Render>jaco_wrist_roll_joint2.stl</Render>
+      <RotationAxis>0 1 0 180</RotationAxis>
+      <Diffusecolor>0.1 0.1 0.11</Diffusecolor>
+    </Geom>
+
+    <Geom type="cylinder">
+      <Radius>0.034</Radius>
+      <Height>0.02</Height>
+      <RotationAxis>1 0 0 90</RotationAxis>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+
+
+  <!-- Gripper -->
+  <!-- HandRoll
+       This is just a basic plate (temporary?), where the gripper will be mounted on. We use this plate to apply
+       necessary translations/rotations to this and have less transformations for the other gripper parts.
+  -->
+  <Body name="HandRoll" type="dynamic">
+    <offsetfrom>WristRoll</offsetfrom>
+    <Translation>0.034284455 0 0.065859824</Translation>
+    <RotationAxis>0 1 0 55</RotationAxis>
+    <Geom type="trimesh">
+      <Data>jaco_hand_roll_joint2.stl</Data>
+      <Render>jaco_hand_roll_joint2.stl</Render>
+      <Diffusecolor>0.1 0.1 0.11</Diffusecolor>
+    </Geom>
+
+    <Geom type="cylinder">
+      <Radius>0.034</Radius>
+      <Height>0.02</Height>
+      <RotationAxis>1 0 0 90</RotationAxis>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+
+
+<!--
+  <Body name="HandIK" type="dynamic">
+    <offsetfrom>HandRoll</offsetfrom>
+    <Translation>0 0 0.188</Translation>
+    <Geom type="Box">
+      <Extents>0.1 0.01 0.0001</Extents>
+    </Geom>
+  </Body>
+-->
+
+  <!-- HandFinger
+       The 3 fingers. The position is estimated, but the IK position should be correct
+       (188mm from HandRoll)
+  -->
+  <Body name="FingerDualLeft" type="dynamic">
+    <offsetfrom>HandRoll</offsetfrom>
+    <Translation>-0.04 0 0.115</Translation>
+    <RotationAxis>0 1 0 10</RotationAxis>
+    <RotationAxis>0 0 1 -15</RotationAxis>
+    <Geom type="trimesh">
+      <Data>jaco_finger_joint.stl</Data>
+      <Render>jaco_finger_joint.stl</Render>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+  <Body name="FingerDualRight" type="dynamic">
+    <offsetfrom>HandRoll</offsetfrom>
+    <Translation>0.037 -0.021 0.115</Translation>
+    <RotationAxis>0 1 0 10</RotationAxis>
+    <RotationAxis>0 0 1 165</RotationAxis>
+    <Geom type="trimesh">
+      <Data>jaco_finger_joint.stl</Data>
+      <Render>jaco_finger_joint.stl</Render>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+  <Body name="FingerSingle" type="dynamic">
+    <offsetfrom>HandRoll</offsetfrom>
+    <Translation>0.037 0.021 0.115</Translation>
+    <RotationAxis>0 1 0 10</RotationAxis>
+    <RotationAxis>0 0 1 190</RotationAxis>
+    <Geom type="trimesh">
+      <Data>jaco_finger_joint.stl</Data>
+      <Render>jaco_finger_joint.stl</Render>
+      <Diffusecolor>0.9 0.9 0.9</Diffusecolor>
+    </Geom>
+  </Body>
+
+
+
+
+  <!-- Joints
+       All joints are "circular", which means they have no rotation limit.
+  -->
+  <Joint name="j_ShoulderYaw" type="hinge" circular="true">
+    <Body>Base</Body>
+    <Body>ShoulderYaw</Body>
+    <offsetfrom>ShoulderYaw</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-180 180</limitsdeg>
+    <Anchor>0 0 -0.118</Anchor>
+    <axis>0 0 -1</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <Joint name="j_ShoulderPitch" type="hinge" circular="false">
+    <Body>ShoulderYaw</Body>
+    <Body>ShoulderPitch</Body>
+    <offsetfrom>ShoulderPitch</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-140 140</limitsdeg>
+    <axis>1 0 0</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <Joint name="j_ElbowPitch" type="hinge" circular="false">
+    <Body>ShoulderPitch</Body>
+    <Body>ElbowPitch</Body>
+    <offsetfrom>ElbowPitch</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-160 160</limitsdeg>
+    <axis>-1 0 0</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <Joint name="j_ElbowRoll" type="hinge" circular="true">
+    <Body>ElbowPitch</Body>
+    <Body>ElbowRoll</Body>
+    <offsetfrom>ElbowRoll</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-180 180</limitsdeg>
+    <axis>0 0 -1</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <Joint name="j_WristRoll" type="hinge" circular="true">
+    <Body>ElbowRoll</Body>
+    <Body>WristRoll</Body>
+    <offsetfrom>WristRoll</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-180 180</limitsdeg>
+    <axis>0 0 -1</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <Joint name="j_HandRoll" type="hinge" circular="true">
+    <Body>WristRoll</Body>
+    <Body>HandRoll</Body>
+    <offsetfrom>HandRoll</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-180 180</limitsdeg>
+    <axis>0 0 -1</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+
+  <!-- Gripper Joints -->
+  <Joint name="j_FingerSingle" type="hinge">
+    <Body>HandRoll</Body>
+    <Body>FingerSingle</Body>
+    <offsetfrom>FingerSingle</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-40 20</limitsdeg>
+    <axis>0 1 0</axis>
+    <maxvel>1</maxvel>
+    <resolution>1</resolution>
+  </Joint>
+  <Joint name="j_FingerDualLeft" type="hinge">
+    <Body>HandRoll</Body>
+    <Body>FingerDualLeft</Body>
+    <offsetfrom>FingerDualLeft</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-40 20</limitsdeg>
+    <axis>0 1 0</axis>
+    <resolution>1</resolution>
+  </Joint>
+  <Joint name="j_FingerDualRight" type="hinge">
+    <Body>HandRoll</Body>
+    <Body>FingerDualRight</Body>
+    <offsetfrom>FingerDualRight</offsetfrom>
+    <weight>1</weight>
+    <limitsdeg>-40 20</limitsdeg>
+    <axis>0 1 0</axis>
+    <resolution>1</resolution>
+  </Joint>
+
+</KinBody>

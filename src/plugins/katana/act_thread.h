@@ -4,6 +4,7 @@
  *
  *  Created: Mon Jun 08 17:59:57 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *             2010-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -22,14 +23,6 @@
 
 #ifndef __PLUGINS_KATANA_ACT_THREAD_H_
 #define __PLUGINS_KATANA_ACT_THREAD_H_
-
-#include "motion_thread.h"
-#include "calib_thread.h"
-#include "goto_thread.h"
-#include "goto_openrave_thread.h"
-#include "gripper_thread.h"
-#include "sensacq_thread.h"
-#include "motor_control_thread.h"
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
@@ -56,6 +49,14 @@ namespace fawkes {
   class Time;
   class KatanaController;
 }
+
+class KatanaSensorAcquisitionThread;
+class KatanaMotionThread;
+class KatanaCalibrationThread;
+class KatanaGotoThread;
+class KatanaGripperThread;
+class KatanaMotorControlThread;
+class KatanaGotoOpenRaveThread;
 
 class KatanaActThread
 : public fawkes::Thread,

@@ -60,8 +60,8 @@ main(int argc, char **argv)
 
   ConsoleLogger* cl = new ConsoleLogger();
 
-  OpenRaveRobot* robot = new OpenRaveRobot(cl);
-  OpenRaveEnvironment* env = new OpenRaveEnvironment(cl);
+  OpenRaveRobotPtr robot( new OpenRaveRobot(cl) );
+  OpenRaveEnvironmentPtr env( new OpenRaveEnvironment(cl) );
 
   vector<OpenRAVE::RobotBasePtr> robots;
   list<OpenRAVE::ModuleBasePtr> modules;
@@ -102,7 +102,7 @@ main(int argc, char **argv)
 
 
 
-  delete robot;
+  robot = NULL;
 
   env->get_env_ptr()->GetModules(modules);
   env->get_env_ptr()->GetRobots(robots);

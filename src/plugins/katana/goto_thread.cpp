@@ -4,6 +4,7 @@
  *
  *  Created: Wed Jun 10 11:45:31 2009
  *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *             2011-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -24,7 +25,10 @@
 #include "controller.h"
 #include "exception.h"
 
+#include <interfaces/KatanaInterface.h>
+
 #include <cstdlib>
+#include <unistd.h>
 
 /** @class KatanaGotoThread "goto_thread.h"
  * Katana linear goto thread.

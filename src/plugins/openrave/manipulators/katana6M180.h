@@ -36,6 +36,7 @@ class OpenRaveManipulatorKatana6M180 : public OpenRaveManipulator
   OpenRaveManipulatorKatana6M180(unsigned int count, unsigned int countDevice);
   virtual ~OpenRaveManipulatorKatana6M180();
 
+  virtual OpenRaveManipulatorPtr copy();
 
  private:
   virtual float angle_OR_to_device(unsigned int number, float angle) const;

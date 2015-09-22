@@ -1,4 +1,6 @@
 DynamixelServoInterface.h
+JacoInterface.h
+JacoBimanualInterface.h
 LaserClusterInterface.h
 HumanSkeletonProjectionInterface.h
 KatanaInterface.h

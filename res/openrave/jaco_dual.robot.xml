@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Robot name="JacoDual_robot">
+
+  <KinBody name="JacoDual_kinbody">
+    <Body name="JacoDual_base">
+      <Geom type="box">
+        <Extents>0.03 0.23 0.0025</Extents>
+        <DiffuseColor>0 0 0</DiffuseColor>
+      </Geom>
+    </Body>
+  </KinBody>
+
+  <Robot prefix="l_" file="jaco.kinbody.xml" name="JacoDual_left">
+    <Translation> 0 0.2 -0.06</Translation>
+    <RotationAxis>0 0 1 90</RotationAxis>
+  </Robot>
+
+  <Robot prefix="r_" file="jaco.kinbody.xml" name="JacoDual_right">
+    <Translation> 0 -0.2 -0.06</Translation>
+    <RotationAxis>0 0 1 90</RotationAxis>
+  </Robot>
+
+  <Robot>
+  <KinBody>
+    <Joint name="leftdummy" type="hinge" enable="false">
+      <body>JacoDual_base</body>
+      <body>l_Base</body>
+      <limits>0 0</limits>
+    </Joint>
+    <Joint name="rightdummy" type="hinge" enable="false">
+      <body>JacoDual_base</body>
+      <body>r_Base</body>
+      <limits>0 0</limits>
+    </Joint>
+  </KinBody>
+
+  <Manipulator name="arm_left">
+    <Base>l_Base</Base>
+    <Effector>l_HandRoll</Effector>
+    <translation>0 0 0.188</translation>
+    <RotationAxis>0 0 1 -90</RotationAxis>
+    <joints>l_j_FingerDualLeft l_j_FingerDualRight l_j_FingerSingle</joints>
+    <closingdirection>1 1 1</closingdirection>
+    <direction>0 0 1</direction>
+  </Manipulator>
+
+  <Manipulator name="arm_right">
+    <base>r_Base</base>
+    <effector>r_HandRoll</effector>
+    <translation>0 0 0.188</translation>
+    <RotationAxis>0 0 1 -90</RotationAxis>
+    <joints>r_j_FingerDualLeft r_j_FingerDualRight r_j_FingerSingle</joints>
+    <closingdirection>1 1 1</closingdirection>
+    <direction>0 0 1</direction>
+  </Manipulator>
+  </Robot>
+
+</Robot>

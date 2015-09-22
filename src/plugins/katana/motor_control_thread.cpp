@@ -3,7 +3,7 @@
  *  motor_control_thread.cpp - Katana direct motor encoder/value control thread
  *
  *  Created: Sun Mar 13 14:44:24 2011
- *  Copyright  2011  Bahram Maleki-Fard
+ *  Copyright  2011-2014  Bahram Maleki-Fard
  *
  ****************************************************************************/
 
@@ -24,7 +24,10 @@
 #include "controller.h"
 #include "exception.h"
 
+#include <interfaces/KatanaInterface.h>
+
 #include <cstdlib>
+#include <unistd.h>
 
 /** @class KatanaMotorControlThread "goto_thread.h"
  * Katana motor control thread.
