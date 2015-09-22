@@ -87,7 +87,11 @@ WebviewPtzCamThread::init()
 
   std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets;
   std::string prefix = "/webview/ptzcam/presets/";
+#if __cplusplus >= 201103L
+  std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+#else
   std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+#endif
   while (i->next()) {
     std::string cfg_name = std::string(i->path()).substr(prefix.length());
     cfg_name = cfg_name.substr(0, cfg_name.find("/"));
@@ -162,10 +166,10 @@ WebviewPtzCamThread::loop()
   if (webview_request_manager->num_active_requests() == 0) {
     fawkes::Time now(clock);
     try {
-      std::auto_ptr<Time> last_completion =
+      Time last_completion =
 	webview_request_manager->last_request_completion_time();
 
-      if (now - last_completion.get() >= cfg_inactivity_timeout_) {
+      if (now - &last_completion >= cfg_inactivity_timeout_) {
 	if (! timeout_) {
 	  logger->log_info(name(), "Inactivity timeout");
 	  timeout_ = true;
