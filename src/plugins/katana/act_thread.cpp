@@ -173,7 +173,7 @@ KatanaActThread::init()
   }
 
   // Create all other threads
-  __sensacq_thread.reset(new KatanaSensorAcquisitionThread(__katana, logger));
+  __sensacq_thread = new KatanaSensorAcquisitionThread(__katana, logger);
   __calib_thread   = new KatanaCalibrationThread(__katana, logger);
   __gripper_thread = new KatanaGripperThread(__katana, logger, __cfg_gripper_pollint);
   __motor_control_thread = new KatanaMotorControlThread(__katana, logger, __cfg_goto_pollint);

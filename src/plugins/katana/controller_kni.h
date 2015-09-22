@@ -102,8 +102,13 @@ class KatanaControllerKni : public KatanaController
   unsigned int   __cfg_write_timeout;
 
   fawkes::RefPtr<CLMBase>        __katana;
+#if __cplusplus >= 201103L
+  std::unique_ptr<CCdlCOM>       __device;
+  std::unique_ptr<CCplSerialCRC> __protocol;
+#else
   std::auto_ptr<CCdlCOM>         __device;
   std::auto_ptr<CCplSerialCRC>   __protocol;
+#endif
   CKatBase                      *__katbase;
   CSctBase                      *__sensor_ctrl;
   std::vector<TMotInit>          __motor_init;

@@ -50,6 +50,9 @@ ifeq ($(HAVE_LIBKNI)$(HAVE_TF),11)
   # will then be executed in a non-continuous thread!
   CFLAGS  += $(CFLAGS_LIBKNI) -DEARLY_PLANNING
   LDFLAGS += $(LDFLAGS_LIBKNI)
+  # KNI uses std::auto_ptr which is deprecated in C++11
+  # Ignore this warning here as we won't fix KNI for this
+  CFLAGS_controller_kni = $(CFLAGS) -Wno-deprecated-declarations
   PLUGINS_all = $(PLUGINDIR)/katana.so
   ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
     LIBS_katana += fawkesopenrave fawkesopenraveaspect

@@ -132,7 +132,7 @@ class KatanaActThread
   std::string    __cfg_OR_arm_model;
 #endif
 
-  std::auto_ptr<KatanaSensorAcquisitionThread> __sensacq_thread;
+  fawkes::RefPtr<KatanaSensorAcquisitionThread> __sensacq_thread;
   fawkes::RefPtr<KatanaMotionThread>           __actmot_thread;
   fawkes::RefPtr<KatanaCalibrationThread>      __calib_thread;
   fawkes::RefPtr<KatanaGotoThread>             __goto_thread;
@@ -147,7 +147,7 @@ class KatanaActThread
   fawkes::Time                  *__last_update;
 
 #ifdef USE_TIMETRACKER
-  std::auto_ptr<fawkes::TimeTracker> __tt;
+  fawkes::RefPtr<fawkes::TimeTracker> __tt;
   unsigned int __tt_count;
   unsigned int __ttc_read_sensor;
 #endif
