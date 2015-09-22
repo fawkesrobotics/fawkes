@@ -146,7 +146,7 @@ typedef struct {
 
 /** Message to send update data. */
 typedef struct {
-  uint32_t  errno;	/**< Error code. @see blackboard_neterror_t */
+  uint32_t  error_code;	/**< Error code. @see blackboard_neterror_t */
 } bb_iopenfail_msg_t;
 
 

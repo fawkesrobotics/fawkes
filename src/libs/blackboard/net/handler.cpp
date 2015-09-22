@@ -361,10 +361,10 @@ BlackBoardNetworkHandler::send_opensuccess(unsigned int clid, Interface *interfa
 
 
 void
-BlackBoardNetworkHandler::send_openfailure(unsigned int clid, unsigned int errno)
+BlackBoardNetworkHandler::send_openfailure(unsigned int clid, unsigned int error_code)
 {
   bb_iopenfail_msg_t *ofm = (bb_iopenfail_msg_t *)malloc(sizeof(bb_iopenfail_msg_t));
-  ofm->errno = htonl(errno);
+  ofm->error_code = htonl(error_code);
 
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(clid, FAWKES_CID_BLACKBOARD,
 							MSG_BB_OPEN_FAILURE, ofm,

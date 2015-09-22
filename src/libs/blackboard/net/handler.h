@@ -62,7 +62,7 @@ class BlackBoardNetworkHandler
 
  private:
   void send_opensuccess(unsigned int clid, Interface *interface);
-  void send_openfailure(unsigned int clid, unsigned int errno);
+  void send_openfailure(unsigned int clid, unsigned int error_code);
 
 
   BlackBoard *__bb;

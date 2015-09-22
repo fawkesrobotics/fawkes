@@ -229,7 +229,7 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, const
     __proxies[proxy->serial()] = proxy;
   } else if ( __m->msgid() == MSG_BB_OPEN_FAILURE ) {
     bb_iopenfail_msg_t *fm = __m->msg<bb_iopenfail_msg_t>();
-    unsigned int error = ntohl(fm->errno);
+    unsigned int error = ntohl(fm->error_code);
     __m->unref();
     __m = NULL;
     if ( error == BB_ERR_WRITER_EXISTS ) {
