@@ -76,7 +76,7 @@ $(PROTOBUF_HDRS): $(SRCDIR)/%.pb.h: $(SRCDIR)/$(OBJDIR)/%.pb.touch
 		$(CC) -x c++ -o $@ $(CFLAGS_BASE)$(addprefix -I,$(INCDIRS)) -c -
 
 $(SRCDIR)/$(OBJDIR)/%.pb.touch: $(SRCDIR)/%.proto
-	$(SILENTSYMB) echo "$(INDENT_PRINT)--> Generating $* (Protobuf Message)"
+	$(SILENT) echo -e "$(INDENT_PRINT)[PRB] $(PARENTDIR)$(TBOLDGRAY)$(<F)$(TNORMAL)"
 	$(SILENT)$(PROTOBUF_PROTOC) --cpp_out $(SRCDIR) --proto_path $(SRCDIR) $<
 	$(SILENT) mv $(SRCDIR)/$*.pb.cc $(SRCDIR)/$*.pb.cpp
 	$(SILENT) mkdir -p $(@D)
