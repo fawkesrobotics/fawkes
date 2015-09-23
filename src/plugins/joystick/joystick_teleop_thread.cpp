@@ -100,9 +100,13 @@ JoystickTeleOpThread::init()
   cfg_use_laser_ = false;
   try {
     cfg_ifid_laser_        = config->get_string(CFG_PREFIX"laser_interface_id");
-    laser_if_ =
-      blackboard->open_for_reading<Laser360Interface>(cfg_ifid_laser_.c_str());
-    cfg_use_laser_ = true;
+    if (laser_if_->has_writer()) {
+      laser_if_ =
+        blackboard->open_for_reading<Laser360Interface>(cfg_ifid_laser_.c_str());
+      cfg_use_laser_ = true;
+    } else {
+      logger->log_warn(name(), "Laser Interface has no writer");
+    }
   } catch (Exception &e) {
     logger->log_debug(name(), "No laser_interface_id configured, ignoring");
   }
