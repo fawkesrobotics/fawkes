@@ -98,17 +98,19 @@ JoystickTeleOpThread::init()
     blackboard->open_for_reading<JoystickInterface>(cfg_ifid_joystick_.c_str());
 
   cfg_use_laser_ = false;
-  try {
-    cfg_ifid_laser_        = config->get_string(CFG_PREFIX"laser_interface_id");
-    if (laser_if_->has_writer()) {
-      laser_if_ =
-        blackboard->open_for_reading<Laser360Interface>(cfg_ifid_laser_.c_str());
-      cfg_use_laser_ = true;
-    } else {
-      logger->log_warn(name(), "Laser Interface has no writer");
+  if (cfg_collision_safety_) {
+    try {
+      cfg_ifid_laser_        = config->get_string(CFG_PREFIX"laser_interface_id");
+      if (laser_if_->has_writer()) {
+        laser_if_ =
+          blackboard->open_for_reading<Laser360Interface>(cfg_ifid_laser_.c_str());
+        cfg_use_laser_ = true;
+      } else {
+        logger->log_warn(name(), "Laser Interface has no writer");
+      }
+    } catch (Exception &e) {
+      logger->log_debug(name(), "No laser_interface_id configured, ignoring");
     }
-  } catch (Exception &e) {
-    logger->log_debug(name(), "No laser_interface_id configured, ignoring");
   }
 
   stopped_ = false;
@@ -231,8 +233,8 @@ JoystickTeleOpThread::loop()
         if (min_distance_ < 2*cfg_collision_safety_distance_)
         {
           logger->log_warn(name(),"slow down");
-          vx = vx * min_distance_ / 2 /cfg_collision_safety_distance_;
-          vy = vy * min_distance_ / 2 /cfg_collision_safety_distance_;
+          vx = vx * min_distance_ / 2 / cfg_collision_safety_distance_;
+          vy = vy * min_distance_ / 2 / cfg_collision_safety_distance_;
         }
         send_transrot(vx, vy, omega);
       }
