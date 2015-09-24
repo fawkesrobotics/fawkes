@@ -103,14 +103,12 @@ JoystickTeleOpThread::init()
       cfg_ifid_laser_        = config->get_string(CFG_PREFIX"laser_interface_id");
       laser_if_ =
         blackboard->open_for_reading<Laser360Interface>(cfg_ifid_laser_.c_str());
-      if (cfg_collision_safety_ && laser_if_->has_writer()) {
-        cfg_use_laser_ = true;
-      } else {
-        logger->log_warn(name(), "Laser Interface has no writer");
-      }
+      cfg_use_laser_ = true;
     } catch (Exception &e) {
       logger->log_debug(name(), "No laser_interface_id configured, ignoring");
     }
+  } else {
+    logger->log_debug(name(), "Collision safety for joystick is disabled.");
   }
 
   stopped_ = false;
@@ -230,7 +228,7 @@ JoystickTeleOpThread::loop()
       cart2polar2d(vx, vy, &theta, &distance);
       if (!cfg_use_laser_ || is_area_free(rad2deg(theta))) // if we have no laser or area is free, move
       {  
-        if (min_distance_ < 2*cfg_collision_safety_distance_)
+        if (laser_if_->has_writer() && min_distance_ < 2*cfg_collision_safety_distance_)
         {
           logger->log_warn(name(),"slow down");
           vx = vx * min_distance_ / 2 / cfg_collision_safety_distance_;
