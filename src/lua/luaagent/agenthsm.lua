@@ -27,7 +27,10 @@ require("fawkes.modinit")
 module(..., fawkes.modinit.module_init)
 
 local hsmmod = require("fawkes.hsm")
+local jsmod = require("fawkes.fsm.jumpstate")
+
 local HSM    = hsmmod.HSM
+JumpState    = jsmod.JumpState
 
 AgentHSM = {}
 
@@ -41,6 +44,8 @@ function AgentHSM:new(o)
    f:clear_states()
    f.exit_state = "FINAL"
    f.fail_state = "FAILED"
+   f:define_states{ export_to = o.export_to,
+                    {"FINAL", JumpState}, {"FAILED", JumpState}}
 
    return f
 end
