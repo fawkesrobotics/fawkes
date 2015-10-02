@@ -24,15 +24,15 @@ require("fawkes.modinit")
 module(..., fawkes.modinit.register_all)
 require("fawkes.logprint")
 local skillstati = require("skiller.skillstati")
-local hsmmod = require("luaagent.agenthsm")
-local skqmod = require("luaagent.skillqueue")
+local hsmmod   = require("luaagent.agenthsm")
+local skqmod   = require("luaagent.skillqueue")
 local agjsmod  = require("luaagent.jumpstates")
-local fsmjsmod = require("fawkes.fsm.jumpstate")
-local shsmmod  = require("fawkes.fsm.subfsmjumpstate")
-local fsmstmod = require("fawkes.fsm.state")
-local skillenv = require("skiller.skillenv")
-local predlib  = require("fawkes.predlib")
-local grapher  = require("fawkes.fsm.grapher")
+local fsmjsmod  = require("fawkes.fsm.jumpstate")
+local subfjsmod = require("fawkes.fsm.subfsmjumpstate")
+local fsmstmod  = require("fawkes.fsm.state")
+local skillenv  = require("skiller.skillenv")
+local predlib   = require("fawkes.predlib")
+local grapher   = require("fawkes.fsm.grapher")
 
 local agent = nil
 
@@ -43,7 +43,7 @@ local module_exports = {
    AgentSkillExecJumpState = agjsmod.AgentSkillExecJumpState,
    SkillQueue              = skqmod.SkillQueue,
    JumpState               = fsmjsmod.JumpState,
-   SubFSMJumpState         = shsmmod.SubFSMJumpState,
+   SubFSMJumpState         = subfjsmod.SubFSMJumpState,
    config                  = config
 }
 
