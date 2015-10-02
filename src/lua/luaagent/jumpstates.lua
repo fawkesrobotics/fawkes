@@ -104,12 +104,14 @@ end
 function AgentSkillExecJumpState:do_init()
    self.skill_status = skillstati.S_INACTIVE
 
+   self.args = {}
+
    -- Note that this also already calls init() and checks the regular
    -- non-precondition transitions!
    local rv = { JumpState.do_init(self) }
    if next(rv) then return unpack(rv) end
 
-   if self.args then
+   if #self.args > 0 then
       self.skill_queue:set_args(self.args)
    end
    self.skill_queue:execute()
