@@ -71,9 +71,9 @@
               <object class="GtkToolItem" id="tb_throbber">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkImage" id="img_throbber">
+                  <object class="GtkSpinner" id="tb_spinner">
                     <property name="visible">True</property>
-                    <property name="stock">gtk-missing-image</property>
+                    <property name="can_focus">False</property>
                   </object>
                 </child>
               </object>

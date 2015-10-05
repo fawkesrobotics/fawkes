@@ -38,7 +38,6 @@ namespace fawkes {
   class BlackBoard;
   class InterfaceDispatcher;
   class LogView;
-  class Throbber;
   class PluginTreeView;
 }
 
@@ -127,6 +126,7 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::ToolButton        *tb_zoomout;
   Gtk::ToolButton        *tb_zoomfit;
   Gtk::ToolButton        *tb_zoomreset;
+  Gtk::Spinner           *tb_spinner;
 
   Gtk::ToolButton        *tb_graphdir;
   Gtk::ToggleToolButton  *tb_graphcolored;
@@ -148,7 +148,6 @@ class SkillGuiGtkWindow : public Gtk::Window
   fawkes::SkillerDebugInterface *__agdbg_if;
 
   fawkes::LogView         *__logview;
-  fawkes::Throbber        *__throbber;
   fawkes::PluginTreeView  *__trv_plugins;
 };
 

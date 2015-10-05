@@ -32,7 +32,6 @@
 #include <netcomm/fawkes/client.h>
 
 #include <gui_utils/logview.h>
-#include <gui_utils/throbber.h>
 #include <gui_utils/service_chooser_dialog.h>
 #include <gui_utils/interface_dispatcher.h>
 #include <gui_utils/plugin_tree_view.h>
@@ -108,7 +107,7 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   builder->get_widget("tb_graphdir", tb_graphdir);
   builder->get_widget("tb_graphcolored", tb_graphcolored);
 
-  builder->get_widget_derived("img_throbber", __throbber);
+  builder->get_widget("tb_spinner", tb_spinner);
   builder->get_widget_derived("trv_plugins",  __trv_plugins);
 
   Gtk::SeparatorToolItem *spacesep;
@@ -431,7 +430,7 @@ SkillGuiGtkWindow::on_exec_clicked()
   }
 
   if ( sks != "" ) {
-    __throbber->set_timeout(80);
+	  tb_spinner->start();
 
     if (__skiller_if && __skiller_if->is_valid() && __skiller_if->has_writer() &&
 	__skiller_if->exclusive_controller() == __skiller_if->serial()) {
@@ -490,21 +489,21 @@ SkillGuiGtkWindow::on_skiller_data_changed()
 
     switch (__skiller_if->status()) {
     case SkillerInterface::S_INACTIVE:
-      __throbber->stop_anim();
+	    tb_spinner->stop();
       lab_status->set_text("S_INACTIVE");
       break;
     case SkillerInterface::S_FINAL:
-      __throbber->stop_anim();
-      __throbber->set_stock(Gtk::Stock::APPLY);
+	    tb_spinner->stop();
+	    //__throbber->set_stock(Gtk::Stock::APPLY);
       lab_status->set_text("S_FINAL");
       break;
     case SkillerInterface::S_RUNNING:
-      __throbber->start_anim();
+	    tb_spinner->start();
       lab_status->set_text("S_RUNNING");
       break;
     case SkillerInterface::S_FAILED:
-      __throbber->stop_anim();
-      __throbber->set_stock(Gtk::Stock::DIALOG_WARNING);
+	    tb_spinner->stop();
+	    //__throbber->set_stock(Gtk::Stock::DIALOG_WARNING);
       lab_status->set_text("S_FAILED");
       break;
     }
@@ -539,7 +538,7 @@ SkillGuiGtkWindow::on_skiller_data_changed()
 
 
   } catch (Exception &e) {
-    __throbber->stop_anim();
+	  tb_spinner->stop();
   }
 }
 

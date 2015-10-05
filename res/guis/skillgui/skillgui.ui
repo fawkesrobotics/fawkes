@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.16.1 -->
+<!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.0"/>
   <object class="GtkMenu" id="menu_graphdir">
@@ -86,10 +86,9 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkImage" id="img_throbber">
+                  <object class="GtkSpinner" id="tb_spinner">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="stock">gtk-missing-image</property>
                   </object>
                 </child>
               </object>
@@ -512,9 +511,9 @@
                           <object class="GtkLabel" id="lab_alive">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="xalign">0</property>
                             <property name="label" translatable="yes">?</property>
                             <property name="ellipsize">end</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -525,9 +524,9 @@
                           <object class="GtkLabel" id="label5">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="xalign">0</property>
                             <property name="label" translatable="yes">&lt;b&gt;Alive:&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="left_attach">2</property>
@@ -539,9 +538,9 @@
                           <object class="GtkLabel" id="lab_status">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="xalign">0</property>
                             <property name="label" translatable="yes">?</property>
                             <property name="ellipsize">end</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -552,9 +551,9 @@
                           <object class="GtkLabel" id="label3">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="xalign">0</property>
                             <property name="label" translatable="yes">&lt;b&gt;Status:&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="x_options">GTK_FILL</property>
@@ -564,9 +563,9 @@
                           <object class="GtkLabel" id="lab_skillstring">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="xalign">0</property>
                             <property name="selectable">True</property>
                             <property name="ellipsize">end</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -579,9 +578,9 @@
                           <object class="GtkLabel" id="label2">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="xalign">0</property>
                             <property name="label" translatable="yes">&lt;b&gt;Skill:&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="top_attach">1</property>
@@ -593,8 +592,8 @@
                           <object class="GtkLabel" id="lab_error">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="xalign">0</property>
                             <property name="ellipsize">end</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -607,9 +606,9 @@
                           <object class="GtkLabel" id="label8">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="xalign">0</property>
                             <property name="label" translatable="yes">&lt;b&gt;Error:&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="top_attach">2</property>
