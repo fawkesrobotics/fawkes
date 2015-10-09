@@ -263,7 +263,7 @@ NavGraphGeneratorVoronoi::compute(fawkes::LockPtr<fawkes::NavGraph> graph)
 		VD::Bounded_faces_iterator f;
 		for (f = vd.bounded_faces_begin(); f != vd.bounded_faces_end(); ++f) {
 			unsigned int num_v = 0;
-			Ccb_halfedge_circulator ec_start = f->ccb();
+			Ccb_halfedge_circulator ec_start = f->outer_ccb();
 			Ccb_halfedge_circulator ec = ec_start;
 
 			do { ++num_v; } while ( ++ec != ec_start );
