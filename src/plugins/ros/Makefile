@@ -171,7 +171,7 @@ ifeq ($(HAVE_ROS),1)
       LDFLAGS_ros_odometry += $(call ros-pkg-lflags,nav_msgs) $(LDFLAGS_TF)
       PLUGINS_all += $(PLUGINDIR)/ros-odometry.so
     else
-      WARN_TARGETS += warning_odometry_tf
+      WARN_TARGETS += warning_odometry
     endif
   else
     WARN_TARGETS += warning_nav_msgs
