@@ -113,7 +113,6 @@ RosMoveBaseThread::once()
 void
 RosMoveBaseThread::stop()
 {
-  move_base_msgs::MoveBaseResult result = create_result();
   NavigatorInterface::StopMessage *msg =
     new NavigatorInterface::StopMessage();
   if (exec_type_ == NAVGRAPH) {
