@@ -71,7 +71,7 @@ class RosLaserScanThread
                                            unsigned int instance_serial) throw();
 
  private:
-  void laser_scan_message_cb(const sensor_msgs::LaserScan::ConstPtr &msg);
+  void laser_scan_message_cb(const ros::MessageEvent<sensor_msgs::LaserScan const> &msg_evt);
   void conditional_close(fawkes::Interface *interface) throw();
   std::string topic_name(const char *if_id, const char *suffix);
 
@@ -95,7 +95,7 @@ class RosLaserScanThread
 
   fawkes::Mutex *__ls_msg_queue_mutex;
   unsigned int __active_queue;
-  std::queue<sensor_msgs::LaserScan::ConstPtr>   __ls_msg_queues[2];
+  std::queue<ros::MessageEvent<sensor_msgs::LaserScan const> >   __ls_msg_queues[2];
 
   std::map<std::string, fawkes::Laser360Interface *> __ls360_wifs;
 
