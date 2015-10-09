@@ -82,7 +82,11 @@ line_segm_intersect(const Eigen::Vector2f l1_from, const Eigen::Vector2f l1_to,
       edge_seg.intersection(Eigen::Hyperplane<float, 2>(line_seg));
 
     if (std::isfinite(ipar)) {
+#if EIGEN_VERSION_AT_LEAST(3,2,0)
       const Eigen::Vector2f ip(edge_seg.pointAt(ipar));
+#else
+      const Eigen::Vector2f ip(edge_seg.origin() + (edge_seg.direction()*ipar));
+#endif
       // check if the intersection point is on the line segments
       Eigen::Vector2f dir_edge = l1_to - l1_from;
       Eigen::Vector2f dir_line = l2_to - l2_from;
@@ -153,7 +157,11 @@ line_segm_intersection(const Eigen::Vector2f l1_from, const Eigen::Vector2f l1_t
       edge_seg.intersection(Eigen::Hyperplane<float, 2>(line_seg));
 
     if (std::isfinite(ipar)) {
+#if EIGEN_VERSION_AT_LEAST(3,2,0)
       const Eigen::Vector2f ip(edge_seg.pointAt(ipar));
+#else
+      const Eigen::Vector2f ip(edge_seg.origin() + (edge_seg.direction()*ipar));
+#endif
       // check if the intersection point is on the line segments
       Eigen::Vector2f dir_edge = l1_to - l1_from;
       Eigen::Vector2f dir_line = l2_to - l2_from;
