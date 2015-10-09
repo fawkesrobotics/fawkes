@@ -62,7 +62,11 @@ RosTfThread::init()
 
   // Must do that before registering listener because we might already
   // get events right away
+#if ROS_VERSION_MINIMUM(1,11,0)
+  __sub_tf = rosnode->subscribe<::tf::tfMessage>("/tf", 100, boost::bind(&RosTfThread::tf_message_cb, this, _1));
+#else
   __sub_tf = rosnode->subscribe("/tf", 100, &RosTfThread::tf_message_cb, this);
+#endif
   __pub_tf = rosnode->advertise< ::tf::tfMessage >("/tf", 100);
 
   __tfifs = blackboard->open_multiple_for_reading<TransformInterface>("TF *");
@@ -245,6 +249,22 @@ RosTfThread::conditional_close(Interface *interface) throw()
 /** Callback function for ROS tf message subscription.
  * @param msg incoming message
  */
+#if ROS_VERSION_MINIMUM(1,11,0)
+void
+RosTfThread::tf_message_cb(const ros::MessageEvent<::tf::tfMessage const> &msg_evt)
+{
+  MutexLocker lock(__tf_msg_queue_mutex);
+
+  const ::tf::tfMessage::ConstPtr &msg = msg_evt.getConstMessage();
+  std::string authority = msg_evt.getPublisherName();
+
+  if (authority == "") {
+    logger->log_warn(name(), "Message received without callerid");
+  } else if (authority != ros::this_node::getName()) {
+    __tf_msg_queues[__active_queue].push(msg);
+  }
+}
+#else
 void
 RosTfThread::tf_message_cb(const ::tf::tfMessage::ConstPtr &msg)
 {
@@ -261,3 +281,4 @@ RosTfThread::tf_message_cb(const ::tf::tfMessage::ConstPtr &msg)
     __tf_msg_queues[__active_queue].push(msg);
   }
 }
+#endif

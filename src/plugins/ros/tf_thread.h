@@ -39,6 +39,7 @@
 #include <queue>
 
 // from ROS
+#include <ros/common.h>
 #include <ros/node_handle.h>
 #include <tf/tfMessage.h>
 
@@ -73,7 +74,11 @@ class RosTfThread
                                            unsigned int instance_serial) throw();
 
  private:
+#if ROS_VERSION_MINIMUM(1,11,0)
+  void tf_message_cb(const ros::MessageEvent<::tf::tfMessage const> &msg_evt);
+#else
   void tf_message_cb(const ::tf::tfMessage::ConstPtr &msg);
+#endif
   void conditional_close(fawkes::Interface *interface) throw();
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
