@@ -19,8 +19,10 @@ include $(BUILDSYSDIR)/ros.mk
 # bullet version we will get a segfault when shutting down fawkes, always.
 USE_ROS_BULLET=0
 ifeq ($(HAVE_ROS),1)
-  ifeq ($(call ros-have-pkg,bullet),1)
-    USE_ROS_BULLET=1
+  ifeq ($(ROS_VERSION),fuerte)
+    ifeq ($(call ros-have-pkg,bullet),1)
+      USE_ROS_BULLET=1
+    endif
   endif
 endif
 
