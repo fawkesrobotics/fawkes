@@ -85,6 +85,9 @@ class NavGraphPath {
   const NavGraph &     graph() const;
   const NavGraphNode & goal() const;
 
+  std::string	get_path_as_string(const char delim = ':') const;
+  std::vector<std::string> get_node_names() const;
+
   /** Get nodes along the path.
    * @return sequence of nodes that compose the path
    */

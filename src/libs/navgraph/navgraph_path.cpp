@@ -23,6 +23,7 @@
 #include <navgraph/navgraph_path.h>
 #include <navgraph/navgraph.h>
 #include <core/exceptions/software.h>
+#include <utils/misc/string_split.h>
 
 #include <cmath>
 #include <algorithm>
@@ -425,6 +426,30 @@ NavGraphPath::Traversal::set_current(size_t new_current)
     throw OutOfBoundsException("Invalid new index, is beyond path length");
   }
   current_ = new_current;
+}
+
+
+/** Get string representation of path.
+ * @param delim custom delimiter
+ * @return all nodes of the path in one string
+ */
+std::string
+NavGraphPath::get_path_as_string(const char delim) const
+{
+	return str_join(get_node_names(), delim);
+}
+
+/** Get names of nodes in path.
+ * @return vector of strings for all nodes
+ */
+std::vector<std::string>
+NavGraphPath::get_node_names() const
+{
+	std::vector<std::string> nodes(nodes_.size());
+	for (size_t i = 0; i < nodes_.size(); ++i){
+		nodes[i] = nodes_[i].name();
+	}
+	return nodes;
 }
 
 } // end of namespace fawkes
