@@ -27,7 +27,6 @@
 #include <netcomm/fawkes/client.h>
 
 #include <gui_utils/logview.h>
-#include <gui_utils/throbber.h>
 #include <gui_utils/service_chooser_dialog.h>
 #include <gui_utils/interface_dispatcher.h>
 

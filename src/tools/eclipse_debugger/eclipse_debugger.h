@@ -34,7 +34,6 @@ namespace fawkes {
   class BlackBoard;
   class InterfaceDispatcher;
   class LogView;
-  class Throbber;
 }
 
 
