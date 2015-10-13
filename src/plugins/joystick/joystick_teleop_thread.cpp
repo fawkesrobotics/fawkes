@@ -23,6 +23,10 @@
 
 #include <interfaces/MotorInterface.h>
 #include <interfaces/JoystickInterface.h>
+#include <interfaces/Laser360Interface.h>
+#include <utils/math/angle.h>
+#include <utils/math/coord.h>
+
 
 #include <cmath>
 
@@ -82,12 +86,31 @@ JoystickTeleOpThread::init()
   cfg_special_max_vy_    = config->get_float(CFG_PREFIX"drive_modes/special/max_vy");
   cfg_special_max_omega_ = config->get_float(CFG_PREFIX"drive_modes/special/max_omega");
 
-  cfg_ifid_motor_        = config->get_string(CFG_PREFIX"motor_interface_id");
-  cfg_ifid_joystick_     = config->get_string(CFG_PREFIX"joystick_interface_id");
+  cfg_collision_safety_          = config->get_bool(CFG_PREFIX"collision_safety/enabled");
+  cfg_collision_safety_distance_ = config->get_float(CFG_PREFIX"collision_safety/distance");
+  cfg_collision_safety_angle_    = config->get_uint(CFG_PREFIX"collision_safety/angle");
 
+  cfg_ifid_motor_        = config->get_string(CFG_PREFIX"motor_interface_id");
   motor_if_ = blackboard->open_for_reading<MotorInterface>(cfg_ifid_motor_.c_str());
+
+  cfg_ifid_joystick_     = config->get_string(CFG_PREFIX"joystick_interface_id");
   joystick_if_ =
     blackboard->open_for_reading<JoystickInterface>(cfg_ifid_joystick_.c_str());
+
+  cfg_use_laser_ = false;
+  if (cfg_collision_safety_) {
+    try {
+      cfg_ifid_laser_        = config->get_string(CFG_PREFIX"laser_interface_id");
+      laser_if_ =
+        blackboard->open_for_reading<Laser360Interface>(cfg_ifid_laser_.c_str());
+      cfg_use_laser_ = true;
+    } catch (Exception &e) {
+      logger->log_warn(name(), "No laser_interface_id configured, ignoring");
+    }
+  } else {
+	  laser_if_ = NULL;
+    logger->log_warn(name(), "Collision safety for joystick is disabled.");
+  }
 
   stopped_ = false;
 }
@@ -105,6 +128,7 @@ JoystickTeleOpThread::finalize()
 {
   blackboard->close(motor_if_);
   blackboard->close(joystick_if_);
+  blackboard->close(laser_if_);
 }
 
 void
@@ -132,19 +156,46 @@ JoystickTeleOpThread::stop()
   stopped_ = true;
 }
 
+bool
+JoystickTeleOpThread::is_area_free(float theta)
+{
+	if (! laser_if_)  return true;
+
+  min_distance_ = FLT_MAX;
+  for (int i = (-1)*cfg_collision_safety_angle_; i <= (int)cfg_collision_safety_angle_; ++i)
+  {
+    int angle = ((int)theta) + i;
+    if (angle < 0)
+    {
+      angle = angle + 359;
+    }
+    if (laser_if_->distances(angle) > 0. && laser_if_->distances(angle) < min_distance_)
+    {
+      min_distance_ = laser_if_->distances(angle);
+    }
+    if (laser_if_->distances(angle) > 0. && laser_if_->distances(angle) < cfg_collision_safety_distance_)
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void
 JoystickTeleOpThread::loop()
 {
   joystick_if_->read();
+  if (laser_if_)  laser_if_->read();
 
   if ((! joystick_if_->has_writer() || joystick_if_->num_axes() == 0) && ! stopped_) {
     logger->log_warn(name(), "Joystick disconnected, stopping");
     stop();
   } else if ((cfg_axis_forward_ > joystick_if_->num_axes() ||
-	      cfg_axis_sideward_ > joystick_if_->num_axes() ||
-	      cfg_axis_rotation_ > joystick_if_->num_axes() ||
-	      (cfg_deadman_use_axis_ && cfg_deadman_axis_ > joystick_if_->num_axes()))
-	     && ! stopped_)
+                cfg_axis_sideward_ > joystick_if_->num_axes() ||
+	              cfg_axis_rotation_ > joystick_if_->num_axes() ||
+	              (cfg_deadman_use_axis_ && cfg_deadman_axis_ > joystick_if_->num_axes()))
+	            && ! stopped_)
   {
     logger->log_warn(name(), "Axis number out of range, stopping");
     stop();
@@ -154,29 +205,45 @@ JoystickTeleOpThread::loop()
 	       (cfg_deadman_ax_thresh_ <  0 && joystick_if_->axis(cfg_deadman_axis_) < cfg_deadman_ax_thresh_))))
   {
     if (fabsf(joystick_if_->axis(cfg_axis_forward_)) < cfg_axis_threshold_ &&
-	fabsf(joystick_if_->axis(cfg_axis_sideward_)) < cfg_axis_threshold_ &&
-	fabsf(joystick_if_->axis(cfg_axis_rotation_)) < cfg_axis_threshold_) {
+         fabsf(joystick_if_->axis(cfg_axis_sideward_)) < cfg_axis_threshold_ &&
+         fabsf(joystick_if_->axis(cfg_axis_rotation_)) < cfg_axis_threshold_) {
       stop();
     } else {
       float vx = 0, vy = 0, omega = 0;
 
       if ((joystick_if_->pressed_buttons() & cfg_drive_mode_butmask_) ||
-	  (cfg_drive_mode_use_axis_ &&
-	   ((cfg_drive_mode_ax_thresh_ >= 0 &&
-	     joystick_if_->axis(cfg_drive_mode_axis_) > cfg_drive_mode_ax_thresh_) ||
-	    (cfg_drive_mode_ax_thresh_ <  0 &&
-	     joystick_if_->axis(cfg_drive_mode_axis_) < cfg_drive_mode_ax_thresh_))))
+        (cfg_drive_mode_use_axis_ &&
+          ((cfg_drive_mode_ax_thresh_ >= 0 &&
+            joystick_if_->axis(cfg_drive_mode_axis_) > cfg_drive_mode_ax_thresh_) ||
+          (cfg_drive_mode_ax_thresh_ <  0 &&
+          joystick_if_->axis(cfg_drive_mode_axis_) < cfg_drive_mode_ax_thresh_))))
       {
-	vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_special_max_vx_;
-	vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_special_max_vy_;
-	omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_special_max_omega_;
+        vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_special_max_vx_;
+        vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_special_max_vy_;
+        omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_special_max_omega_;
       } else {
-	vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_normal_max_vx_;
-	vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_normal_max_vy_;
-	omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_normal_max_omega_;
+        vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_normal_max_vx_;
+        vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_normal_max_vy_;
+        omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_normal_max_omega_;
       }
 
-      send_transrot(vx, vy, omega);
+      float theta, distance;
+      cart2polar2d(vx, vy, &theta, &distance);
+      if (!cfg_use_laser_ || is_area_free(rad2deg(theta))) // if we have no laser or area is free, move
+      {  
+        if (laser_if_ && laser_if_->has_writer() && min_distance_ < 2*cfg_collision_safety_distance_)
+        {
+          logger->log_warn(name(),"slow down");
+          vx = vx * min_distance_ / 2 / cfg_collision_safety_distance_;
+          vy = vy * min_distance_ / 2 / cfg_collision_safety_distance_;
+        }
+        send_transrot(vx, vy, omega);
+      }
+      else // If area is not free, only allow rotation
+      {
+        logger->log_warn(name(),"obstacle reached");
+        send_transrot(0.,0.,omega);
+      }
     }
   } else if (! stopped_) {
     stop();

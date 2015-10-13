@@ -29,10 +29,12 @@
 #include <aspect/blackboard.h>
 
 #include <string>
+#include <cfloat>
 
 namespace fawkes {
   class MotorInterface;
   class JoystickInterface;
+  class Laser360Interface;
 }
 
 class JoystickTeleOpThread
@@ -55,11 +57,13 @@ class JoystickTeleOpThread
 
  private:
   void stop();
+  bool is_area_free(float theta);
   void send_transrot(float vx, float vy, float omega);
 
  private:
   fawkes::MotorInterface     *motor_if_;
   fawkes::JoystickInterface  *joystick_if_;
+  fawkes::Laser360Interface  *laser_if_;
 
   unsigned int cfg_axis_forward_;
   unsigned int cfg_axis_sideward_;
@@ -79,10 +83,16 @@ class JoystickTeleOpThread
   float        cfg_special_max_vx_;
   float        cfg_special_max_vy_;
   float        cfg_special_max_omega_;
+  bool         cfg_collision_safety_;
+  float        cfg_collision_safety_distance_;
+  unsigned int cfg_collision_safety_angle_;
   std::string  cfg_ifid_motor_;
   std::string  cfg_ifid_joystick_;
+  bool         cfg_use_laser_;
+  std::string  cfg_ifid_laser_;
 
   bool         stopped_;
+  float        min_distance_;
 };
 
 

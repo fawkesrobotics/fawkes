@@ -12,7 +12,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
   # moved all the way once while any button is pressed. After the button is
   # then released the data is passed through to the blackboard
   safety_lockout: true
-  
+
   # Configuration settings for the joystick-teleop plugin
   # The example configuration is suitable for an Xbox 360 controller
   teleop:
@@ -79,8 +79,27 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
         max_vy: 0.3
         max_omega: 1.0
 
+  # This feature stops the robot from moving forward if an obstacle is
+  # detected up front.
+  # A laser must be present for this feature to work.
+    collision_safety:
+      # True to enable collision safety feature.
+      enabled: true
+
+      # Stopping distance if obstacle is within configured angle
+      distance: 0.4
+
+      # Angle within which obstacles are detected
+      # Given in degrees to the left and right from the front
+      # i.e. 20 degrees will have an complete opening angle of 41 degrees
+      angle: 20
+  
+
     # Interface ID for MotorInterface to send TransRotMessages to.
     motor_interface_id: Motor
 
     # Interface ID for JoystickInterface to read data from
     joystick_interface_id: Joystick
+
+    # Interface ID for Laser360Interface
+    laser_interface_id: Laser urg filtered
