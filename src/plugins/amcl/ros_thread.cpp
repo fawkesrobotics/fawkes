@@ -161,8 +161,8 @@ AmclROSThread::publish_map(const std::string &global_frame_id,
   msg.info.width  = map->size_x;
   msg.info.height = map->size_y;
   msg.info.resolution = map->scale;
-  msg.info.origin.position.x = map->origin_x;
-  msg.info.origin.position.y = map->origin_y;
+  msg.info.origin.position.x = map->origin_x - (map->size_x / 2) * map->scale;
+  msg.info.origin.position.y = map->origin_y - (map->size_y / 2) * map->scale;
   msg.info.origin.position.z = 0.0;
   tf::Quaternion q(tf::create_quaternion_from_yaw(0));
   msg.info.origin.orientation.x = q.x();
