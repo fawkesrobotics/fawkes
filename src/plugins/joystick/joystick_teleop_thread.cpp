@@ -105,10 +105,11 @@ JoystickTeleOpThread::init()
         blackboard->open_for_reading<Laser360Interface>(cfg_ifid_laser_.c_str());
       cfg_use_laser_ = true;
     } catch (Exception &e) {
-      logger->log_debug(name(), "No laser_interface_id configured, ignoring");
+      logger->log_warn(name(), "No laser_interface_id configured, ignoring");
     }
   } else {
-    logger->log_debug(name(), "Collision safety for joystick is disabled.");
+	  laser_if_ = NULL;
+    logger->log_warn(name(), "Collision safety for joystick is disabled.");
   }
 
   stopped_ = false;
@@ -158,6 +159,8 @@ JoystickTeleOpThread::stop()
 bool
 JoystickTeleOpThread::is_area_free(float theta)
 {
+	if (! laser_if_)  return true;
+
   min_distance_ = FLT_MAX;
   for (int i = (-1)*cfg_collision_safety_angle_; i <= (int)cfg_collision_safety_angle_; ++i)
   {
@@ -183,7 +186,7 @@ void
 JoystickTeleOpThread::loop()
 {
   joystick_if_->read();
-  laser_if_->read();
+  if (laser_if_)  laser_if_->read();
 
   if ((! joystick_if_->has_writer() || joystick_if_->num_axes() == 0) && ! stopped_) {
     logger->log_warn(name(), "Joystick disconnected, stopping");
@@ -228,7 +231,7 @@ JoystickTeleOpThread::loop()
       cart2polar2d(vx, vy, &theta, &distance);
       if (!cfg_use_laser_ || is_area_free(rad2deg(theta))) // if we have no laser or area is free, move
       {  
-        if (laser_if_->has_writer() && min_distance_ < 2*cfg_collision_safety_distance_)
+        if (laser_if_ && laser_if_->has_writer() && min_distance_ < 2*cfg_collision_safety_distance_)
         {
           logger->log_warn(name(),"slow down");
           vx = vx * min_distance_ / 2 / cfg_collision_safety_distance_;
