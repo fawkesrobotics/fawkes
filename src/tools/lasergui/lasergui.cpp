@@ -160,7 +160,11 @@ class LaserGuiGtkWindow : public Gtk::Window
       md.set_title("Interface Selection Failed");
       md.run();
     } else {
+#if __cplusplus >= 201103L
+      std::unique_ptr<MultiInterfaceChooserDialog> ifcd(
+#else
       std::auto_ptr<MultiInterfaceChooserDialog> ifcd(
+#endif
           MultiInterfaceChooserDialog::create(*this,
                                               __bb,
                                               "Laser*Interface",
