@@ -107,7 +107,9 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   builder->get_widget("tb_graphdir", tb_graphdir);
   builder->get_widget("tb_graphcolored", tb_graphcolored);
 
+#if GTKMM_VERSION_GE(2,20)
   builder->get_widget("tb_spinner", tb_spinner);
+#endif
   builder->get_widget_derived("trv_plugins",  __trv_plugins);
 
   Gtk::SeparatorToolItem *spacesep;
@@ -430,7 +432,9 @@ SkillGuiGtkWindow::on_exec_clicked()
   }
 
   if ( sks != "" ) {
+#if GTKMM_VERSION_GE(2,20)
 	  tb_spinner->start();
+#endif
 
     if (__skiller_if && __skiller_if->is_valid() && __skiller_if->has_writer() &&
 	__skiller_if->exclusive_controller() == __skiller_if->serial()) {
@@ -489,20 +493,28 @@ SkillGuiGtkWindow::on_skiller_data_changed()
 
     switch (__skiller_if->status()) {
     case SkillerInterface::S_INACTIVE:
+#if GTKMM_VERSION_GE(2,20)
 	    tb_spinner->stop();
+#endif
       lab_status->set_text("S_INACTIVE");
       break;
     case SkillerInterface::S_FINAL:
+#if GTKMM_VERSION_GE(2,20)
 	    tb_spinner->stop();
+#endif
 	    //__throbber->set_stock(Gtk::Stock::APPLY);
       lab_status->set_text("S_FINAL");
       break;
     case SkillerInterface::S_RUNNING:
+#if GTKMM_VERSION_GE(2,20)
 	    tb_spinner->start();
+#endif
       lab_status->set_text("S_RUNNING");
       break;
     case SkillerInterface::S_FAILED:
+#if GTKMM_VERSION_GE(2,20)
 	    tb_spinner->stop();
+#endif
 	    //__throbber->set_stock(Gtk::Stock::DIALOG_WARNING);
       lab_status->set_text("S_FAILED");
       break;
@@ -538,7 +550,9 @@ SkillGuiGtkWindow::on_skiller_data_changed()
 
 
   } catch (Exception &e) {
+#if GTKMM_VERSION_GE(2,20)
 	  tb_spinner->stop();
+#endif
   }
 }
 

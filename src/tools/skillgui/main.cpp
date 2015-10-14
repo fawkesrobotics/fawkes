@@ -25,7 +25,11 @@
 #if GTK_VERSION_GE(3,0)
 #  define UI_FILE RESDIR"/guis/skillgui/skillgui.ui"
 #else
-#  define UI_FILE RESDIR"/guis/skillgui/skillgui_gtk2.ui"
+#  if GTKMM_VERSION_GE(2,20)
+#    define UI_FILE RESDIR"/guis/skillgui/skillgui_gtk2.ui"
+#  else
+#    define UI_FILE RESDIR"/guis/skillgui/skillgui_gtk2_nospinner.ui"
+#  endif
 #endif
 
 /** This is the main program of the Skill GUI.

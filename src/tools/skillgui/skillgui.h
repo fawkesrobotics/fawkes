@@ -34,6 +34,10 @@
 #include <interfaces/SkillerInterface.h>
 #include <interfaces/SkillerDebugInterface.h>
 
+#ifndef GTKMM_VERSION_GE
+#  define GTKMM_VERSION_GE(major,minor) ((GTKMM_MAJOR_VERSION>major)||(GTKMM_MAJOR_VERSION==major)&&(GTKMM_MINOR_VERSION>=minor))
+#endif
+
 namespace fawkes {
   class BlackBoard;
   class InterfaceDispatcher;
@@ -126,7 +130,9 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::ToolButton        *tb_zoomout;
   Gtk::ToolButton        *tb_zoomfit;
   Gtk::ToolButton        *tb_zoomreset;
+#if GTKMM_VERSION_GE(2,20)
   Gtk::Spinner           *tb_spinner;
+#endif
 
   Gtk::ToolButton        *tb_graphdir;
   Gtk::ToggleToolButton  *tb_graphcolored;
