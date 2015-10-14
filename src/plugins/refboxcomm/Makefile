@@ -16,8 +16,7 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-
-HAVE_LIBXMLPP   = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
+include $(BUILDSYSDIR)/libxmlpp.mk
 
 LIBS_refboxcomm = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		  fawkesinterface fawkesnetcomm \
@@ -29,8 +28,8 @@ OBJS_all = $(OBJS_refboxcomm)
 PLUGINS_all = $(PLUGINDIR)/refboxcomm.so
 
 ifeq ($(HAVE_LIBXMLPP),1)
-  CFLAGS  += -DHAVE_MSL2010 $(shell $(PKGCONFIG) --cflags libxml++-2.6)
-  LDFLAGS += $(shell $(PKGCONFIG) --libs libxml++-2.6)
+  CFLAGS  += -DHAVE_MSL2010 $(CFLAGS_LIBXMLPP)
+  LDFLAGS += $(LDFLAGS_LIBXMLPP)
   OBJS_refboxcomm += processor/msl2010.o
 else
   WARN_TARGETS += warning_libxmlpp
