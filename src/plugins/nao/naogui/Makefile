@@ -17,8 +17,8 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/gui.mk
 
-CFLAGS  += $(CFLAGS_GTKMM)
-LDFLAGS += $(LDFLAGS_GTKMM)
+CFLAGS  += $(CFLAGS_GUI)
+LDFLAGS += $(LDFLAGS_GUI)
 
 LIBS_ffnaogui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
 		fawkesguiutils fawkesinterface \
