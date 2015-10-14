@@ -21,11 +21,9 @@ ifndef __buildsys_interface_mk_
 __buildsys_interface_mk_ := 1
 
 include $(BUILDSYSDIR)/lua.mk
+include $(BUILDSYSDIR)/libxmlpp.mk
 
 ifneq ($(PKGCONFIG),)
-  HAVE_LIBXMLPP    = $(if $(shell $(PKGCONFIG) --exists 'libxml++-2.6'; echo $${?/1/}),1,0)
-  CFLAGS_LIBXMLPP  = $(shell $(PKGCONFIG) --cflags libxml++-2.6)
-  LDFLAGS_LIBXMLPP = $(shell $(PKGCONFIG) --libs libxml++-2.6)
   HAVE_LIBCRYPTO := $(if $(shell $(PKGCONFIG) --exists 'libcrypto'; echo $${?/1/}),1,0)
   LIBCRYPTO_PKG  := libcrypto
   CFLAGS_LIBCRYPTO  = $(shell $(PKGCONFIG) --cflags 'libcrypto')
