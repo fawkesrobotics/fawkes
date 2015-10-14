@@ -233,14 +233,12 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
     sreply->pack();
   }
   if (sreply->body_length() > 0) {
-    response = MHD_create_response_from_data(sreply->body_length(),
-					     (void*) sreply->body().c_str(),
-					     /* free */ MHD_YES,
-					     /* copy */ MHD_YES);
+    response = MHD_create_response_from_buffer(sreply->body_length(),
+                                               (void*) sreply->body().c_str(),
+                                               MHD_RESPMEM_MUST_COPY);
   } else {
-    response = MHD_create_response_from_data(0, (void*) "",
-					     /* free */ MHD_NO,
-					     /* copy */ MHD_NO);
+    response = MHD_create_response_from_buffer(0, (void*) "",
+                                               MHD_RESPMEM_PERSISTENT);
   }
 
   WebRequest *request = sreply->get_request();
