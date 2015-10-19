@@ -53,7 +53,7 @@ ifeq ($(HAVE_ROSVERSION), 1)
 
     ros-have-pkg     = $(if $(shell $(PKGCONFIG) --exists $(1); echo $${?/1/}),1,0)
     ros-pkg-cflags   = $(shell $(PKGCONFIG) --cflags $(1))
-    ros-pkg-lflags   = $(shell $(PKGCONFIG) --libs $(1))
+    ros-pkg-lflags   = $(subst -l:,,$(shell $(PKGCONFIG) --libs $(1)))
   endif
 
   HAVE_ROS = $(call ros-have-pkg,roscpp)
