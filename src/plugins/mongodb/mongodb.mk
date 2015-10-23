@@ -18,7 +18,7 @@ include $(BUILDSYSDIR)/boost.mk
 ifneq ($(wildcard /usr/include/mongo/client/dbclient.h /usr/local/include/mongo/client/dbclient.h),)
   ifeq ($(call boost-have-libs,thread system filesystem),1)
     HAVE_MONGODB = 1
-    CFLAGS_MONGODB  = -DHAVE_MONGODB
+    CFLAGS_MONGODB  = -DHAVE_MONGODB $(CFLAGS_CPP11)
     LDFLAGS_MONGODB = -lmongoclient -lm -lpthread \
 		      $(call boost-libs-ldflags,thread system filesystem)
 
