@@ -65,6 +65,7 @@
 
 #include <string>
 #include <cmath>
+#include <cstdint>
 
 namespace fawkes {
   namespace tf {
