@@ -39,7 +39,7 @@ ifeq ($(HAVE_LUA),1)
     ifneq ($(wildcard $(SYSROOT)/usr/include/tolua++.h),)
 
       # Fedora 32 and 64 bit
-      ifeq ($(ARCH),x86_64)
+      ifeq ($(ARCH),$(filter $(ARCH),x86_64 aarch64 ppc64 ppc64le s390x))
         ifneq ($(wildcard $(SYSROOT)/usr/lib64/libtolua++-$(LUA_VERSION).$(SOEXT)),)
           _HAVE_TOLUA_LIB := 1
           TOLUA_LIBS := tolua++-$(LUA_VERSION) stdc++
