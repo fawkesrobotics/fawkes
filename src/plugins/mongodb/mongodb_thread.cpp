@@ -21,6 +21,10 @@
 
 #include "mongodb_thread.h"
 
+#ifdef HAVE_MONGODB_VERSION_H
+#  include <mongo/client/init.h>
+#endif
+
 using namespace mongo;
 using namespace fawkes;
 
@@ -98,6 +102,10 @@ MongoDBThread::~MongoDBThread()
 void
 MongoDBThread::init()
 {
+#ifdef HAVE_MONGODB_VERSION_H
+  mongo::client::initialize();
+#endif
+
   std::set<std::string> ignored_configs;
 
   std::string prefix = "/plugins/mongodb/clients/";
