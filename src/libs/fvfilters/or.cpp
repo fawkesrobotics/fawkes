@@ -29,7 +29,7 @@
 #ifdef HAVE_IPP
 #  include <ippi.h>
 #elif defined(HAVE_OPENCV)
-#  include <cv.h>
+#  include <opencv/cv.hpp>
 #else
 #  error "Neither IPP nor OpenCV available"
 #endif
