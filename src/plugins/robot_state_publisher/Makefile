@@ -17,6 +17,7 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/boost.mk
+include $(BUILDSYSDIR)/eigen3.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BUILDCONFDIR)/kdl_parser/kdl_parser.mk
 
@@ -27,11 +28,11 @@ OBJS_all = $(OBJS_robot_state_publisher)
 
 HAVE_KDL = $(if $(shell $(PKGCONFIG) --exists 'orocos-kdl'; echo $${?/1/}),1,0)
 
-ifeq ($(HAVE_KDLPARSER),1)
+ifeq ($(HAVE_KDLPARSER)$(HAVE_EIGEN3),11)
   ifeq ($(HAVE_TF),1)
     PLUGINS_all = $(PLUGINDIR)/robot-state-publisher.so
-    CFLAGS += $(CFLAGS_TF) $(CFLAGS_KDLPARSER)
-    LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_KDLPARSER) \
+    CFLAGS += $(CFLAGS_TF) $(CFLAGS_KDLPARSER) $(CFLAGS_EIGEN3)
+    LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_KDLPARSER) $(LDFLAGS_EIGEN3) \
       $(call boost-lib-lflags,scoped_ptr)
   else
     WARN_TARGETS += warning_tf
