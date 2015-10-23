@@ -110,7 +110,11 @@ MongoDBThread::init()
 
   std::string prefix = "/plugins/mongodb/clients/";
 
+#if __cplusplus >= 201103L
+  std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+#else
   std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+#endif
   while (i->next()) {
     std::string cfg_name = std::string(i->path()).substr(prefix.length());
     cfg_name = cfg_name.substr(0, cfg_name.find("/"));
@@ -210,7 +214,11 @@ MongoDBThread::ClientConf::read_authinfo(Configuration *config, Logger *logger,
 		     "MongoDB client '%s'", cfgname.c_str());
   }
 
+#if __cplusplus >= 201103L
+  std::unique_ptr<Configuration::ValueIterator>
+#else
   std::auto_ptr<Configuration::ValueIterator>
+#endif
     i(config->search((prefix + "auth/").c_str()));
   while (i->next()) {
     std::string auth_name = std::string(i->path()).substr(prefix.length());
@@ -260,7 +268,11 @@ MongoDBThread::ClientConf::ClientConf(Configuration *config, Logger *logger,
   if (mode == "replica_set" || mode == "replicaset") {
     __mode = REPLICA_SET;
 
+#if __cplusplus >= 201103L
+    std::unique_ptr<Configuration::ValueIterator>
+#else
     std::auto_ptr<Configuration::ValueIterator>
+#endif
       i(config->search((prefix + "hosts/").c_str()));
     while (i->next()) {
       if (i->is_string()) {
