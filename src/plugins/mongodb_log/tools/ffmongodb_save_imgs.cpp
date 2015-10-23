@@ -136,7 +136,11 @@ main(int argc, char **argv)
 	.sort("timestamp", 1);
     }
 
+#if __cplusplus >= 201103L
+    std::unique_ptr<mongo::DBClientCursor> cursor =
+#else
     std::auto_ptr<mongo::DBClientCursor> cursor =
+#endif
       mongodb_client->query(query_coll, q);
 
     while (cursor->more()) {
