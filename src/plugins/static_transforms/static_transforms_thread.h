@@ -41,7 +41,6 @@ class StaticTransformsThread
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::TransformAspect,
   public fawkes::ConfigurationChangeHandler
@@ -65,9 +64,6 @@ class StaticTransformsThread
   } Entry;
 
   std::list<Entry> __entries;
-
-  float __cfg_update_interval;
-  fawkes::Time *__last_update;
 
   void entries_delete();
   void entries_get_from_config();
