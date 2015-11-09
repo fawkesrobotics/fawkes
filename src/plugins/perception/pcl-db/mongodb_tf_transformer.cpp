@@ -109,7 +109,7 @@ MongoDBTransformer::restore_tf_doc(BSONObj &doc,
   tf::assert_quaternion_valid(q);
   tf::Transform t(q, tf::Vector3(tx, ty, tz));
   tf::StampedTransform transform(t, time, frame, child_frame);
-  set_transform(transform);
+  set_transform(transform, "MongoDBTransformer");
 }
 
 
