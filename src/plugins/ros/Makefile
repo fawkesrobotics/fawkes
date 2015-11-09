@@ -123,6 +123,13 @@ ifeq ($(HAVE_ROS),1)
       CFLAGS_tf_plugin = $(CFLAGS_tf_thread)
       LDFLAGS_ros_tf += $(LDFLAGS_TF)  $(patsubst %bullet/lib,,$(call ros-pkg-lflags,tf))
       PLUGINS_all += $(PLUGINDIR)/ros-tf.so
+
+      ifeq ($(call ros-have-pkg,tf2_msgs),1)
+        CFLAGS_tf_thread += -DHAVE_TF2_MSGS $(call ros-pkg-cflags,tf2_msgs)
+      else
+        WARN_TARGETS += warning_tf2_msgs
+      endif
+      CFLAGS_tf_plugin = $(CFLAGS_tf_thread)
     else
       WARN_TARGETS += warning_fawkestf
     endif
@@ -277,7 +284,7 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_ros warning_webview_msgs warning_fawkestf warning_rostf warning_pcl warning_rospcl
+.PHONY: warning_ros warning_webview_msgs warning_fawkestf warning_rostf warning_pcl warning_rospcl warning_tf2_msgs
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Plugins$(TNORMAL) (ROS not found)"
 warning_webview_msgs:
@@ -286,6 +293,8 @@ warning_fawkestf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS tf plugin$(TNORMAL) (fawkestf not available)"
 warning_rostf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS tf plugin$(TNORMAL) (ROS package tf not found)"
+warning_tf2_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling tf2 support in tf plugin$(TNORMAL) (ROS package tf2_msgs not found)"
 warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (pcl[-devel] not installed)"
 warning_rospcl:

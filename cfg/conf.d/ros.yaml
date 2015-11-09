@@ -34,3 +34,9 @@ ros:
     # Frequency in Hz at which the clock should be published
     frequency: 100
 
+
+  tf:
+    # Use tf2 for communication with ROS.
+    # This means using the tf2_msgs message types and publishing
+    # static transforms to /tf_static.
+    use_tf2: true

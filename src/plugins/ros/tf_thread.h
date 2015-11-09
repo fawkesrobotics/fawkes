@@ -42,6 +42,9 @@
 #include <ros/common.h>
 #include <ros/node_handle.h>
 #include <tf/tfMessage.h>
+#ifdef HAVE_TF2_MSGS
+#  include <tf2_msgs/TFMessage.h>
+#endif
 
 class RosTfThread
 : public fawkes::Thread,
@@ -74,25 +77,37 @@ class RosTfThread
                                            unsigned int instance_serial) throw();
 
  private:
-#if ROS_VERSION_MINIMUM(1,11,0)
   void tf_message_cb(const ros::MessageEvent<::tf::tfMessage const> &msg_evt);
-#else
-  void tf_message_cb(const ::tf::tfMessage::ConstPtr &msg);
+#ifdef HAVE_TF2_MSGS
+  void tf_message_cb(const ros::MessageEvent<tf2_msgs::TFMessage const> &msg_evt, bool static_tf);
 #endif
+
   void conditional_close(fawkes::Interface *interface) throw();
+  void publish_static_transforms_to_ros();
+  void publish_transform_to_fawkes(const geometry_msgs::TransformStamped &ts,
+                                   bool static_tf = false);
+  geometry_msgs::TransformStamped create_transform_stamped(fawkes::TransformInterface *tfif);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
+  bool __cfg_use_tf2;
+
+  std::list<std::string>                  __ros_frames;
   std::list<fawkes::TransformInterface *> __tfifs;
 
   ros::Subscriber __sub_tf;
+  ros::Subscriber __sub_static_tf;
   ros::Publisher  __pub_tf;
+  ros::Publisher  __pub_static_tf;
 
   fawkes::Mutex *__tf_msg_queue_mutex;
   unsigned int __active_queue;
-  std::queue<tf::tfMessage::ConstPtr>   __tf_msg_queues[2];
+  std::queue<::tf::tfMessage::ConstPtr>     __tf_msg_queues[2];
+#ifdef HAVE_TF2_MSGS
+  std::queue<std::pair<bool, tf2_msgs::TFMessage::ConstPtr> > __tf2_msg_queues[2];
+#endif
 
   fawkes::Mutex *__seq_num_mutex;
   unsigned int   __seq_num;
