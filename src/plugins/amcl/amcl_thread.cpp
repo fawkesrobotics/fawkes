@@ -1007,8 +1007,7 @@ AmclThread::set_initial_pose(const std::string &frame_id, const fawkes::Time &ms
     // This should be removed at some point
     logger->log_warn(name(), "Received initial pose with empty frame_id. "
 		     "You should always supply a frame_id.");
-  } else if (tf_listener->resolve(frame_id) != tf_listener->resolve(global_frame_id_))
-  {
+  } else if (frame_id != global_frame_id_) {
     // We only accept initial pose estimates in the global frame, #5148.
     logger->log_warn(name(),"Ignoring initial pose in frame \"%s\"; "
 		     "initial poses must be in the global frame, \"%s\"",
