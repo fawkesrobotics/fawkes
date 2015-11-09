@@ -53,10 +53,11 @@
 #define __LIBS_TF_TIME_CACHE_H_
 
 #include <tf/types.h>
+#include <tf/transform_storage.h>
 
-#include <LinearMath/btTransform.h>
 #include <list>
-#include <stdint.h>
+#include <cstdint>
+#include <memory>
 
 namespace fawkes {
   namespace tf {
@@ -65,43 +66,27 @@ namespace fawkes {
 }
 #endif
 
-enum ExtrapolationMode {
-  ONE_VALUE,
-  INTERPOLATE,
-  EXTRAPOLATE_BACK,
-  EXTRAPOLATE_FORWARD
-};
-
 typedef std::pair<fawkes::Time, CompactFrameID> P_TimeAndFrameID;
 
-class TransformStorage
+class TimeCacheInterface
 {
  public:
-  TransformStorage();
-  TransformStorage(const StampedTransform& data, CompactFrameID frame_id,
-                   CompactFrameID child_frame_id);
-  TransformStorage(const TransformStorage& rhs);
+	virtual bool get_data(fawkes::Time time, TransformStorage & data_out,
+	                      std::string* error_str = 0) = 0;
+	virtual bool insert_data(const TransformStorage& new_data) = 0;
+	virtual void clear_list() = 0;
+	virtual CompactFrameID get_parent(fawkes::Time time, std::string* error_str) = 0;
+  virtual P_TimeAndFrameID get_latest_time_and_parent() = 0;
 
-  TransformStorage& operator=(const TransformStorage& rhs)
-  {
-    rotation = rhs.rotation;
-    translation = rhs.translation;
-    stamp = rhs.stamp;
-    frame_id = rhs.frame_id;
-    child_frame_id = rhs.child_frame_id;
-    return *this;
-  }
-
-  btQuaternion rotation;	///< rotation quaternio
-  btVector3 translation;	///< translation vector
-  fawkes::Time stamp;		///< time stamp
-  CompactFrameID frame_id;	///< parent/reference frame number
-  CompactFrameID child_frame_id;	///< child frame number
+  /// Debugging information methods
+  virtual unsigned int get_list_length() const = 0;
+  virtual fawkes::Time get_latest_timestamp() const = 0;
+  virtual fawkes::Time get_oldest_timestamp() const = 0;
 };
 
+typedef std::shared_ptr<TimeCacheInterface> TimeCacheInterfacePtr;
 
-
-class TimeCache
+class TimeCache : public TimeCacheInterface
 {
  public:
   /** List of stored transforms. */
@@ -111,26 +96,24 @@ class TimeCache
   static const int MIN_INTERPOLATION_DISTANCE = 5;
   /// Maximum length of linked list, to make sure not to be able to use unlimited memory.
   static const unsigned int MAX_LENGTH_LINKED_LIST = 1000000;
+  /// default value of 10 seconds storage
+  static const int64_t DEFAULT_MAX_STORAGE_TIME = 1ULL * 1000000000LL; //!< default value of 10 seconds storage
+  
+  TimeCache(float max_storage_time = DEFAULT_MAX_STORAGE_TIME);
 
-  TimeCache(float max_storage_time = 10.0);
-  TimeCache(const TimeCache &t);
-  TimeCache(const TimeCache *t);
-  TimeCache(const TimeCache *t, fawkes::Time &look_back_until);
-
-  bool get_data(fawkes::Time time, TransformStorage & data_out,
-                std::string* error_str = 0);
-  bool insert_data(const TransformStorage& new_data);
-  void clear_list();
-  CompactFrameID get_parent(fawkes::Time time, std::string* error_str);
-  P_TimeAndFrameID get_latest_time_and_parent() const;
+  virtual bool get_data(fawkes::Time time, TransformStorage & data_out,
+                        std::string* error_str = 0);
+  virtual bool insert_data(const TransformStorage& new_data);
+  virtual void clear_list();
+  virtual CompactFrameID get_parent(fawkes::Time time, std::string* error_str);
+  virtual P_TimeAndFrameID get_latest_time_and_parent();
 
   const L_TransformStorage & get_storage() const;
   L_TransformStorage         get_storage_copy() const;
 
-  /// Debugging information methods
-  unsigned int get_list_length() const;
-  fawkes::Time get_latest_timestamp() const;
-  fawkes::Time get_oldest_timestamp() const;
+  virtual unsigned int get_list_length() const;
+  virtual fawkes::Time get_latest_timestamp() const;
+  virtual fawkes::Time get_oldest_timestamp() const;
 
  private:
   L_TransformStorage storage_;
@@ -145,6 +128,25 @@ class TimeCache
                           fawkes::Time time, TransformStorage& output);
 
   void prune_list();
+};
+
+
+class StaticCache : public TimeCacheInterface
+{
+ public:
+	virtual bool get_data(fawkes::Time time, TransformStorage & data_out,
+	                      std::string* error_str = 0);
+	virtual bool insert_data(const TransformStorage& new_data);
+	virtual void clear_list();
+	virtual CompactFrameID get_parent(fawkes::Time time, std::string* error_str);
+	virtual P_TimeAndFrameID get_latest_time_and_parent();
+
+	virtual unsigned int get_list_length() const;
+	virtual fawkes::Time get_latest_timestamp() const;
+	virtual fawkes::Time get_oldest_timestamp() const;
+
+ private:
+	TransformStorage  storage_;
 };
 
 

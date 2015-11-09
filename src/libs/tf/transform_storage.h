@@ -1,8 +1,8 @@
 /***************************************************************************
- *  transform_publisher.h - Fawkes transform publisher (based on ROS tf)
+ *  transform_storage.h - Fawkes tf transform storage (based on ROS tf/tf2)
  *
- *  Created: Tue Oct 25 22:17:54 2011
- *  Copyright  2011  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Oct 20 11:09:58 2011
+ *  Copyright  2011-2015  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 
 /* This code is based on ROS tf with the following copyright and license:
  *
- * Copyright (c) 2008, Willow Garage, Inc.
+ * Copyright (c) 2010, Willow Garage, Inc.
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -49,45 +49,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TRANSFORM_PUBLISHER_H_
-#define __LIBS_TF_TRANSFORM_PUBLISHER_H_
+#ifndef __LIBS_TF_TRANSFORM_STORAGE_H_
+#define __LIBS_TF_TRANSFORM_STORAGE_H_
 
 #include <tf/types.h>
-#include <utils/time/time.h>
+
+#include <list>
 
 namespace fawkes {
-
-  class BlackBoard;
-  class TransformInterface;
-  class Mutex;
-
   namespace tf {
 #if 0 /* just to make Emacs auto-indent happy */
   }
 }
 #endif
 
-class TransformPublisher
+class TransformStorage
 {
  public:
-  TransformPublisher(BlackBoard *bb, const char *bb_iface_id);
-  virtual ~TransformPublisher();
+	TransformStorage();
+	TransformStorage(const StampedTransform& data, CompactFrameID frame_id,
+	                 CompactFrameID child_frame_id);
 
-  virtual void send_transform(const StampedTransform &transform, const bool is_static = false);
+	/** Copy constructor.
+	 * @param rhs storage to copy
+	 */
+	TransformStorage(const TransformStorage& rhs)
+	{
+		*this = rhs;
+	}
 
-  virtual void send_transform(const Transform &transform,
-                              const fawkes::Time &time,
-                              const std::string frame,
-                              const std::string child_frame,
-                              const bool is_static = false)
-  { send_transform(StampedTransform(transform, time, frame, child_frame), is_static); }
+	TransformStorage& operator=(const TransformStorage& rhs)
+	{
+		rotation = rhs.rotation;
+		translation = rhs.translation;
+		stamp = rhs.stamp;
+		frame_id = rhs.frame_id;
+		child_frame_id = rhs.child_frame_id;
+		return *this;
+	}
 
- private:
-  BlackBoard *bb_;
-  TransformInterface *tfif_;
-  Mutex *mutex_;
+	Quaternion rotation;	///< rotation quaternion
+	Vector3 translation;	///< translation vector
+	fawkes::Time stamp;		///< time stamp
+	CompactFrameID frame_id;	///< parent/reference frame number
+	CompactFrameID child_frame_id;	///< child frame number
 };
-
 
 } // end namespace tf
 } // end namespace fawkes

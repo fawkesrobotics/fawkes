@@ -50,6 +50,7 @@
  */
 
 #include <tf/transform_listener.h>
+#include <tf/transformer.h>
 
 #include <blackboard/blackboard.h>
 #include <interfaces/TransformInterface.h>
@@ -75,25 +76,26 @@ namespace fawkes {
 
 /** Constructor.
  * @param bb blackboard to listen to
+ * @param tf_transformer transformer to add transforms to
  */
-TransformListener::TransformListener(BlackBoard *bb)
+TransformListener::TransformListener(BlackBoard *bb, Transformer *tf_transformer)
   : BlackBoardInterfaceListener("TransformListener"),
-    __bb(bb)
+    bb_(bb), tf_transformer_(tf_transformer)
 {
-  if (__bb) {
-    __tfifs = __bb->open_multiple_for_reading<TransformInterface>("TF *");
+  if (bb_) {
+    tfifs_ = bb_->open_multiple_for_reading<TransformInterface>("/tf*");
 
     std::list<TransformInterface *>::iterator i;
-    for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
+    for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
       bbil_add_data_interface(*i);
     }
-    __bb->register_listener(this);
+    bb_->register_listener(this);
 
-    bbio_add_observed_create("TransformInterface", "TF *");
-    __bb->register_observer(this);
-    set_enabled(true);
+    bbio_add_observed_create("TransformInterface", "/tf*");
+    bb_->register_observer(this);
+    tf_transformer->set_enabled(true);
   } else {
-    set_enabled(false);
+    tf_transformer->set_enabled(false);
   }
 }
 
@@ -101,15 +103,15 @@ TransformListener::TransformListener(BlackBoard *bb)
 /** Destructor. */
 TransformListener::~TransformListener()
 {
-  if (__bb) {
-    __bb->unregister_listener(this);
-    __bb->unregister_observer(this);
+  if (bb_) {
+    bb_->unregister_listener(this);
+    bb_->unregister_observer(this);
 
     std::list<TransformInterface *>::iterator i;
-    for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
-      __bb->close(*i);
+    for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
+      bb_->close(*i);
     }
-    __tfifs.clear();
+    tfifs_.clear();
   }
 }
 
@@ -121,7 +123,7 @@ TransformListener::bb_interface_created(const char *type, const char *id) throw(
 
   TransformInterface *tfif;
   try {
-    tfif = __bb->open_for_reading<TransformInterface>(id, "TF-Listener");
+    tfif = bb_->open_for_reading<TransformInterface>(id, "TF-Listener");
   } catch (Exception &e) {
     // ignored
     return;
@@ -129,10 +131,10 @@ TransformListener::bb_interface_created(const char *type, const char *id) throw(
 
   try {
     bbil_add_data_interface(tfif);
-    __bb->update_listener(this);
-    __tfifs.push_back(tfif);
+    bb_->update_listener(this);
+    tfifs_.push_back(tfif);
   } catch (Exception &e) {
-    __bb->close(tfif);
+    bb_->close(tfif);
     return;
   }
 }
@@ -163,14 +165,14 @@ TransformListener::conditional_close(Interface *interface) throw()
   if (! tfif) return;
   
   std::list<TransformInterface *>::iterator i;
-  for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
+  for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
     if (*interface == **i) {
       if (! interface->has_writer() && (interface->num_readers() == 1)) {
         // It's only us
         bbil_remove_data_interface(*i);
-        __bb->update_listener(this);
-        __bb->close(*i);
-        __tfifs.erase(i);
+        bb_->update_listener(this);
+        bb_->close(*i);
+        tfifs_.erase(i);
         break;
       }
     }
@@ -186,6 +188,8 @@ TransformListener::bb_interface_data_changed(Interface *interface) throw()
 
   tfif->read();
 
+  std::string authority = tfif->writer();
+  
   double *translation = tfif->translation();
   double *rotation = tfif->rotation();
   const Time *time = tfif->timestamp();
@@ -198,7 +202,7 @@ TransformListener::bb_interface_data_changed(Interface *interface) throw()
 
   StampedTransform str(tr, *time, frame_id, child_frame_id);
 
-  set_transform(str);
+  tf_transformer_->set_transform(str, authority, tfif->is_static_transform());
 }
 
 } // end namespace tf

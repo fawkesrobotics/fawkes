@@ -19,8 +19,9 @@ include $(BUILDSYSDIR)/lua.mk
 FILTER_OUT=%_tolua.o
 
 LIBS_libfawkestf = fawkescore fawkesutils fawkesblackboard fawkesinterface \
-		   TransformInterface
-OBJS_libfawkestf = $(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
+	                 TransformInterface
+OBJS_libfawkestf = buffer_core.o time_cache.o static_cache.o exceptions.o \
+	                 transformer.o transform_listener.o transform_publisher.o
 HDRS_libfawkestf = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h  $(SRCDIR)/*/*/*.h ))
 
 CFLAGS_fawkestf_tolua = -Wno-unused-function $(CFLAGS_LUA) $(CFLAGS)
@@ -43,7 +44,12 @@ ifeq ($(HAVE_TF),1)
     WARN_TARGETS += warning_tolua_wrapper
   endif
 else
-  WARN_TARGETS += warning_bullet
+	ifneq ($(HAVE_BULLET),1)
+    WARN_TARGETS += warning_bullet
+  endif
+	ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
 endif
 
 $(LUALIBDIR)/fawkestf.$(SOEXT): | $(LIBDIR)/libfawkestf.$(SOEXT)
@@ -52,10 +58,11 @@ ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_bullet
+.PHONY: warning_bullet warning_cpp11
 warning_bullet:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting transforms library$(TNORMAL) (bullet[-devel] not installed)"
-
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting transforms library$(TNORMAL) (C++11 required)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

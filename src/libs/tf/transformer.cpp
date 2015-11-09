@@ -55,6 +55,7 @@
 #include <tf/utils.h>
 
 #include <core/threading/mutex_locker.h>
+#include <core/macros.h>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -94,223 +95,49 @@ namespace fawkes {
  * Check if transformer is enabled.
  * @return true if enabled, false otherwise
  *
- * @var static const unsigned int Transformer::MAX_GRAPH_DEPTH
- * Maximum number of times to recurse before assuming the tree
- * has a loop
- *
- * @param static const int64_t Transformer::DEFAULT_MAX_EXTRAPOLATION_DISTANCE
- * The default amount of time to extrapolate.
  */
-
-/** The default amount of time to extrapolate. */
-const float Transformer::DEFAULT_MAX_EXTRAPOLATION_DISTANCE = 0.f;
-
-/// Flag to advise accumulator finalization.
-enum WalkEnding
-{
-  Identity,	///< identity
-  TargetParentOfSource,	///< Target is parent of source
-  SourceParentOfTarget,	///< Source is parent of target
-  FullPath,	///< Full path between source and target.
-};
-
-/// Internal error values
-enum ErrorValues {
-  NO_ERROR = 0, ///< No error occured.
-  LOOKUP_ERROR, ///< Frame ID lookup error
-  CONNECTIVITY_ERROR, ///< No connection between frames found
-  EXTRAPOLATION_ERROR	///< Extrapolation required out of limits.
-};
-
-/** Accumulator to test for transformability.
- * Operations are basically noops.
- */
-struct CanTransformAccum
-{
-  /** Gather frame number.
-   * @param cache cache
-   * @param time time
-   * @param error_string string containing error message in case of failure
-   * @return parent frame number
-   */
-  CompactFrameID
-  gather(TimeCache* cache, fawkes::Time time, std::string* error_string)
-  {
-    return cache->get_parent(time, error_string);
-  }
-
-  /** Accumulate.
-   * @param source true if looking from source
-   */
-  void accum(bool source)
-  {
-  }
-
-  /** Finalize accumulation.
-   * @param end flag how the walk ended
-   * @param _time time
-   */
-  void finalize(WalkEnding end, fawkes::Time _time)
-  {
-  }
-
-  /// Transform storage to use.
-  TransformStorage st;
-};
-
-/** Accumulator to accumulate transforms between two frames.
- */
-struct TransformAccum
-{
-  /** Constructor. */
-  TransformAccum()
-  : source_to_top_quat(0.0, 0.0, 0.0, 1.0)
-  , source_to_top_vec(0.0, 0.0, 0.0)
-  , target_to_top_quat(0.0, 0.0, 0.0, 1.0)
-  , target_to_top_vec(0.0, 0.0, 0.0)
-  , result_quat(0.0, 0.0, 0.0, 1.0)
-  , result_vec(0.0, 0.0, 0.0)
-  {
-  }
-
-  /** Gather frame number.
-   * @param cache cache
-   * @param time time
-   * @param error_string string containing error message in case of failure
-   * @return parent frame number
-   */
-  CompactFrameID
-  gather(TimeCache* cache, fawkes::Time time, std::string* error_string)
-  {
-    if (!cache->get_data(time, st, error_string))
-    {
-      return 0;
-    }
-
-    return st.frame_id;
-  }
-
-  /** Accumulate.
-   * @param source true if looking from source
-   */
-  void accum(bool source)
-  {
-    if (source)
-    {
-      source_to_top_vec = quatRotate(st.rotation, source_to_top_vec) + st.translation;
-      source_to_top_quat = st.rotation * source_to_top_quat;
-    }
-    else
-    {
-      target_to_top_vec = quatRotate(st.rotation, target_to_top_vec) + st.translation;
-      target_to_top_quat = st.rotation * target_to_top_quat;
-    }
-  }
-
-  /** Finalize accumulation.
-   * @param end flag how the walk ended
-   * @param _time time
-   */
-  void finalize(WalkEnding end, fawkes::Time _time)
-  {
-    switch (end)
-    {
-    case Identity:
-      break;
-    case TargetParentOfSource:
-      result_vec = source_to_top_vec;
-      result_quat = source_to_top_quat;
-      break;
-    case SourceParentOfTarget:
-      {
-        btQuaternion inv_target_quat = target_to_top_quat.inverse();
-        btVector3 inv_target_vec = quatRotate(inv_target_quat, -target_to_top_vec);
-        result_vec = inv_target_vec;
-        result_quat = inv_target_quat;
-        break;
-      }
-    case FullPath:
-      {
-        btQuaternion inv_target_quat = target_to_top_quat.inverse();
-        btVector3 inv_target_vec = quatRotate(inv_target_quat, -target_to_top_vec);
-
-     	result_vec = quatRotate(inv_target_quat, source_to_top_vec) + inv_target_vec;
-        result_quat = inv_target_quat * source_to_top_quat;
-      }
-      break;
-    };
-
-    time = _time;
-  }
-
-  /// Transform storage.
-  TransformStorage st;
-  /// time stamp
-  fawkes::Time time;
-  /// Source to top accumulated quaternion
-  btQuaternion source_to_top_quat;
-  /// Source to top accumulated vector
-  btVector3 source_to_top_vec;
-  /// Target to top accumulated quaternion
-  btQuaternion target_to_top_quat;
-  /// Target to top accumulated vector
-  btVector3 target_to_top_vec;
-
-  /// After finalize contains result quaternion.
-  btQuaternion result_quat;
-  /// After finalize contains result vector.
-  btVector3 result_vec;
-};
 
 /** Constructor.
  * @param cache_time time in seconds to cache incoming transforms
  */
 Transformer::Transformer(float cache_time)
-  : enabled_(true),
-    cache_time_(cache_time),
-    fall_back_to_wall_time_(false)
+	: BufferCore(cache_time),
+	  enabled_(true)
 {
-  max_extrapolation_distance_ = DEFAULT_MAX_EXTRAPOLATION_DISTANCE;
-  frameIDs_["NO_PARENT"] = 0;
-  //unused but needed for iteration over all elements
-  frames_.push_back(NULL);
-  frameIDs_reverse.push_back("NO_PARENT");
-
-  frame_mutex_ = new Mutex();
 }
 
 
 /** Destructor. */
 Transformer::~Transformer()
 {
-  // deallocate all frames
-  MutexLocker lock(frame_mutex_);
-  std::vector<TimeCache*>::iterator cache_it;
-  for (cache_it = frames_.begin(); cache_it != frames_.end(); ++cache_it)
-  {
-    delete (*cache_it);
-  }
-
 };
 
 
-/** Set transformer enabled or disabled.
+/** Set enabled status of transformer.
  * @param enabled true to enable, false to disable
  */
 void
 Transformer::set_enabled(bool enabled)
 {
-  enabled_ = enabled;
+	enabled_ = enabled;
 }
 
+/** Check if transformer is enabled.
+ * @return true if enabled, false otherwise
+ */
+bool
+Transformer::is_enabled() const
+{
+	return enabled_;
+}
 
-/** Get maximum caching time.
- * @return maximum caching time in seconds
+/** Get cache time.
+ * @return time in seconds caches will date back.
  */
 float
 Transformer::get_cache_time() const
 {
-  return cache_time_;
+	return cache_time_;
 }
 
 /** Lock transformer.
@@ -320,7 +147,7 @@ Transformer::get_cache_time() const
 void
 Transformer::lock()
 {
-  frame_mutex_->lock();
+  frame_mutex_.lock();
 }
 
 
@@ -330,7 +157,7 @@ Transformer::lock()
 bool
 Transformer::try_lock()
 {
-  return frame_mutex_->try_lock();
+  return frame_mutex_.try_lock();
 }
 
 
@@ -340,34 +167,9 @@ Transformer::try_lock()
 void
 Transformer::unlock()
 {
-  frame_mutex_->unlock();
+  frame_mutex_.unlock();
 }
 
-
-/** Clear cached transforms. */
-void
-Transformer::clear()
-{
-  MutexLocker lock(frame_mutex_);
-  if ( frames_.size() > 1 )
-  {
-    std::vector< TimeCache*>::iterator cache_it;
-    for (cache_it = frames_.begin() + 1; cache_it != frames_.end(); ++cache_it)
-    {
-      (*cache_it)->clear_list();
-    }
-  }
-}
-
-/** Resolve transform name.
- * @param frame_name frame name
- * @return resolved frame name
- */
-std::string
-Transformer::resolve(const std::string& frame_name)
-{
-  return fawkes::tf::resolve("", frame_name);
-}
 
 /** Check if frame exists.
  * @param frame_id_str frame ID
@@ -376,646 +178,74 @@ Transformer::resolve(const std::string& frame_name)
 bool
 Transformer::frame_exists(const std::string& frame_id_str) const
 {
-  MutexLocker lock(frame_mutex_);
-  std::string frame_id_resolveped = /*assert_resolved(tf_prefix_,*/ frame_id_str;
-  
-  return frameIDs_.count(frame_id_resolveped);
-}
+	std::unique_lock<std::mutex> lock(frame_mutex_);
 
-void
-Transformer::create_connectivity_error_string(CompactFrameID source_frame, CompactFrameID target_frame, std::string* out) const
-{
-  if (!out) return;
-
-  *out = std::string("Could not find a connection between '"+lookup_frame_string(target_frame)+"' and '"+
-                     lookup_frame_string(source_frame)+"' because they are not part of the same tree."+
-                     "Tf has two or more unconnected trees.");
+	return (frameIDs_.count(frame_id_str) > 0);
 }
 
 
-/** Walk from frame to top-parent of both.
- * @param f accumulator
- * @param time timestamp
- * @param target_id frame number of target
- * @param source_id frame number of source
- * @param error_string accumulated error string
- * @return error flag from ErrorValues
+/** Get cache for specific frame.
+ * @param frame_id ID of frame
+ * @return pointer to time cache for frame
  */
-template<typename F>
-int
-Transformer::walk_to_top_parent(F& f, fawkes::Time time,
-                                CompactFrameID target_id, CompactFrameID source_id,
-                                std::string* error_string) const
+TimeCacheInterfacePtr
+Transformer::get_frame_cache(const std::string& frame_id) const
 {
-  // Short circuit if zero length transform to allow lookups on non existant links
-  if (source_id == target_id)
-  {
-    f.finalize(Identity, time);
-    return NO_ERROR;
-  }
-
-  //If getting the latest get the latest common time
-  if (time == fawkes::Time(0,0))
-  {
-    int retval = get_latest_common_time(target_id, source_id, time, error_string);
-    if (retval != NO_ERROR)
-    {
-      return retval;
-    }
-  }
-
-  // Walk the tree to its root from the source frame, accumulating the transform
-  CompactFrameID frame = source_id;
-  CompactFrameID top_parent = frame;
-  uint32_t depth = 0;
-  while (frame != 0)
-  {
-    TimeCache* cache = get_frame(frame);
-
-    if (!cache)
-    {
-      // There will be no cache for the very root of the tree
-      top_parent = frame;
-      break;
-    }
-
-    CompactFrameID parent = f.gather(cache, time, 0);
-    if (parent == 0)
-    {
-      // Just break out here... there may still be a path from source -> target
-      top_parent = frame;
-      break;
-    }
-
-    // Early out... target frame is a direct parent of the source frame
-    if (frame == target_id)
-    {
-      f.finalize(TargetParentOfSource, time);
-      return NO_ERROR;
-    }
-
-    f.accum(true);
-
-    top_parent = frame;
-    frame = parent;
-
-    ++depth;
-    if (depth > MAX_GRAPH_DEPTH)
-    {
-      if (error_string)
-      {
-        std::stringstream ss;
-        ss << "The tf tree is invalid because it contains a loop." << std::endl;
-        //   << allFramesAsString() << std::endl;
-        *error_string = ss.str();
-      }
-      return LOOKUP_ERROR;
-    }
-  }
-
-  // Now walk to the top parent from the target frame, accumulating its transform
-  frame = target_id;
-  depth = 0;
-  while (frame != top_parent)
-  {
-    TimeCache* cache = get_frame(frame);
-
-    if (!cache)
-    {
-      break;
-    }
-
-    CompactFrameID parent = f.gather(cache, time, error_string);
-    if (parent == 0)
-    {
-      if (error_string)
-      {
-        std::stringstream ss;
-        ss << "Looking up transform from frame [" << lookup_frame_string(source_id) <<
-          "] to frame [" << lookup_frame_string(target_id) << "] failed";
-	if (*error_string != "") {
-	  *error_string += "; " + ss.str();
-	} else {
-	  *error_string = ss.str();
-	}
-      }
-
-      return EXTRAPOLATION_ERROR;
-    }
-
-    // Early out... source frame is a direct parent of the target frame
-    if (frame == source_id)
-    {
-      f.finalize(SourceParentOfTarget, time);
-      return NO_ERROR;
-    }
-
-    f.accum(false);
-
-    frame = parent;
-
-    ++depth;
-    if (depth > MAX_GRAPH_DEPTH)
-    {
-      if (error_string)
-      {
-        std::stringstream ss;
-        //ss << "The tf tree is invalid because it contains a loop." << std::endl
-        //   << allFramesAsString() << std::endl;
-        *error_string = "The tf tree is invalid because it contains a loop.";
-      }
-      return LOOKUP_ERROR;
-    }
-  }
-
-  if (frame != top_parent)
-  {
-    create_connectivity_error_string(source_id, target_id, error_string);
-    return CONNECTIVITY_ERROR;
-  }
-
-  f.finalize(FullPath, time);
-
-  return NO_ERROR;
+	return get_frame(lookup_frame_number(frame_id));
 }
 
-/** Time and frame ID comparator class. */
-struct TimeAndFrameIDFrameComparator
-{
-  /** Constructor.
-   * @param id frame number to look for
-   */
-  TimeAndFrameIDFrameComparator(CompactFrameID id)
-  : id(id)
-  {}
-
-  /** Application operator.
-   * @param rhs right-hand side to compare to
-   * @return true if the frame numbers are equal, false otherwise
-   */
-  bool operator()(const P_TimeAndFrameID& rhs) const
-  {
-    return rhs.second == id;
-  }
-
-  /// Frame number to look for.
-  CompactFrameID id;
-};
-
-
-/** Get latest common time of two frames.
- * @param target_id target frame number
- * @param source_id source frame number
- * @param time upon return contains latest common timestamp
- * @param error_string upon error contains accumulated error message.
- * @return value from ErrorValues
+/** Get all currently existing caches.
+ * @return vector of pointer to time caches
  */
-int
-Transformer::get_latest_common_time(CompactFrameID target_id, CompactFrameID source_id,
-                                 fawkes::Time & time, std::string *error_string) const
-{
-  if (source_id == target_id)
-  {
-    //Set time to latest timestamp of frameid in case of target and source frame id are the same
-    time.stamp();
-    return NO_ERROR;
-  }
-
-  std::vector<P_TimeAndFrameID> lct_cache;
-
-  // Walk the tree to its root from the source frame, accumulating the list of parent/time as well as the latest time
-  // in the target is a direct parent
-  CompactFrameID frame = source_id;
-  P_TimeAndFrameID temp;
-  uint32_t depth = 0;
-  fawkes::Time common_time = fawkes::TIME_MAX;
-  while (frame != 0)
-  {
-    TimeCache* cache = get_frame(frame);
-
-    if (!cache) {
-      // There will be no cache for the very root of the tree
-      break;
-    }
-
-    P_TimeAndFrameID latest = cache->get_latest_time_and_parent();
-
-    if (latest.second == 0) {
-      // Just break out here... there may still be a path from source -> target
-      break;
-    }
-
-    if (!latest.first.is_zero()) {
-      common_time = std::min(latest.first, common_time);
-    }
-
-    lct_cache.push_back(latest);
-
-    frame = latest.second;
-
-    // Early out... target frame is a direct parent of the source frame
-    if (frame == target_id) {
-      time = common_time;
-      if (time == fawkes::TIME_MAX) {
-        time = fawkes::Time();
-      }
-      return NO_ERROR;
-    }
-
-    ++depth;
-    if (depth > MAX_GRAPH_DEPTH) {
-      if (error_string) {
-        std::stringstream ss;
-        ss<<"The tf tree is invalid because it contains a loop." << std::endl;
-        /*
-          << allFramesAsString() << std::endl;
-        */
-        *error_string = ss.str();
-      }
-      return LOOKUP_ERROR;
-    }
-  }
-
-  // Now walk to the top parent from the target frame, accumulating the latest time and looking for a common parent
-  frame = target_id;
-  depth = 0;
-  common_time = fawkes::TIME_MAX;
-  CompactFrameID common_parent = 0;
-  while (true)
-  {
-    TimeCache* cache = get_frame(frame);
-
-    if (!cache) {
-      break;
-    }
-
-    P_TimeAndFrameID latest = cache->get_latest_time_and_parent();
-
-    if (latest.second == 0) {
-      break;
-    }
-
-    if (!latest.first.is_zero()) {
-      common_time = std::min(latest.first, common_time);
-    }
-
-    std::vector<P_TimeAndFrameID>::iterator it =
-      std::find_if(lct_cache.begin(), lct_cache.end(),
-                   TimeAndFrameIDFrameComparator(latest.second));
-
-    if (it != lct_cache.end()) { // found a common parent
-      common_parent = it->second;
-      break;
-    }
-
-    frame = latest.second;
-
-    // Early out... source frame is a direct parent of the target frame
-    if (frame == source_id) {
-      time = common_time;
-      if (time == fawkes::TIME_MAX) {
-        time = fawkes::Time();
-      }
-      return NO_ERROR;
-    }
-
-    ++depth;
-    if (depth > MAX_GRAPH_DEPTH) {
-      if (error_string) {
-        std::stringstream ss;
-        //ss<<"The tf tree is invalid because it contains a loop." << std::endl
-        //  << allFramesAsString() << std::endl;
-        *error_string = ss.str();
-      }
-      return LOOKUP_ERROR;
-    }
-  }
-
-  if (common_parent == 0) {
-    create_connectivity_error_string(source_id, target_id, error_string);
-    return CONNECTIVITY_ERROR;
-  }
-
-  // Loop through the source -> root list until we hit the common parent
-  {
-    std::vector<P_TimeAndFrameID>::iterator it = lct_cache.begin();
-    std::vector<P_TimeAndFrameID>::iterator end = lct_cache.end();
-    for (; it != end; ++it) {
-      if (!it->first.is_zero()) {
-        common_time = std::min(common_time, it->first);
-      }
-
-      if (it->second == common_parent) {
-        break;
-      }
-    }
-  }
-
-  if (common_time == fawkes::TIME_MAX) {
-    common_time = fawkes::Time();
-  }
-
-  time = common_time;
-  return NO_ERROR;
-}
-
-/** Get latest common time of two frames.
- * @param source_frame source frame ID
- * @param target_frame frame target frame ID
- * @param time upon return contains latest common timestamp
- * @param error_string upon error contains accumulated error message.
- * @return value from ErrorValues
- */
-int
-Transformer::get_latest_common_time(const std::string &source_frame,
-                                    const std::string &target_frame,
-                                    fawkes::Time& time,
-                                    std::string* error_string) const
-{
-  std::string mapped_tgt = /*assert_resolved(tf_prefix_,*/ target_frame;
-  std::string mapped_src = /*assert_resolved(tf_prefix_,*/ source_frame;
-
-  if (!frame_exists(mapped_tgt) || !frame_exists(mapped_src)) {
-    time = fawkes::Time();
-    return LOOKUP_ERROR;
-  }
-
-  CompactFrameID source_id = lookup_frame_number(mapped_src);
-  CompactFrameID target_id = lookup_frame_number(mapped_tgt);
-  return get_latest_common_time(source_id, target_id, time, error_string);
-}
-
-/** Set a transform.
- * @param transform transform to set
- * @param authority authority from which the transform was received.
- * @return true on success, false otherwise
- */
-bool
-Transformer::set_transform(const StampedTransform &transform, const std::string &authority)
-{
-  StampedTransform mapped_transform((btTransform)transform, transform.stamp,
-                                    transform.frame_id, transform.child_frame_id);
-  mapped_transform.child_frame_id = /*assert_resolved(tf_prefix_, */ transform.child_frame_id;
-  mapped_transform.frame_id = /*assert_resolved(tf_prefix_,*/ transform.frame_id;
-
- 
-  bool error_exists = false;
-  if (mapped_transform.child_frame_id == mapped_transform.frame_id)
-  {
-    printf("TF_SELF_TRANSFORM: Ignoring transform from authority \"%s\" with frame_id and child_frame_id  \"%s\" because they are the same",  authority.c_str(), mapped_transform.child_frame_id.c_str());
-    error_exists = true;
-  }
-
-  if (mapped_transform.child_frame_id == "/")//empty frame id will be mapped to "/"
-  {
-    printf("TF_NO_CHILD_FRAME_ID: Ignoring transform from authority \"%s\" because child_frame_id not set ", authority.c_str());
-    error_exists = true;
-  }
-
-  if (mapped_transform.frame_id == "/")//empty parent id will be mapped to "/"
-  {
-    printf("TF_NO_FRAME_ID: Ignoring transform with child_frame_id \"%s\"  from authority \"%s\" because frame_id not set", mapped_transform.child_frame_id.c_str(), authority.c_str());
-    error_exists = true;
-  }
-
-  if (std::isnan(mapped_transform.getOrigin().x()) || std::isnan(mapped_transform.getOrigin().y()) || std::isnan(mapped_transform.getOrigin().z())||
-      std::isnan(mapped_transform.getRotation().x()) ||       std::isnan(mapped_transform.getRotation().y()) ||       std::isnan(mapped_transform.getRotation().z()) ||       std::isnan(mapped_transform.getRotation().w()))
-  {
-    printf("TF_NAN_INPUT: Ignoring transform for child_frame_id \"%s\" from authority \"%s\" because of a nan value in the transform (%f %f %f) (%f %f %f %f)",
-           mapped_transform.child_frame_id.c_str(), authority.c_str(),
-           mapped_transform.getOrigin().x(), mapped_transform.getOrigin().y(), mapped_transform.getOrigin().z(),
-           mapped_transform.getRotation().x(), mapped_transform.getRotation().y(), mapped_transform.getRotation().z(), mapped_transform.getRotation().w()
-              );
-    error_exists = true;
-  }
-
-  if (error_exists)
-    return false;
-
-  {
-    MutexLocker lock(frame_mutex_);
-    CompactFrameID frame_number = lookup_or_insert_frame_number(mapped_transform.child_frame_id);
-    TimeCache* frame = get_frame(frame_number);
-    if (frame == NULL) {
-      frames_[frame_number] = new TimeCache(cache_time_);
-      frame = frames_[frame_number];
-    }
-
-    if (frame->insert_data(TransformStorage(mapped_transform, lookup_or_insert_frame_number(mapped_transform.frame_id), frame_number)))
-    {
-      frame_authority_[frame_number] = authority;
-    } else {
-      //ROS_WARN("TF_OLD_DATA ignoring data from the past for frame %s at time %g according to authority %s\nPossible reasons are listed at ", mapped_transform.child_frame_id.c_str(), mapped_transform.stamp.toSec(), authority.c_str());
-      return false;
-    }
-  }
-
-  return true;
-};
-
-
-/** An accessor to get a frame.
- * This is an internal function which will get the pointer to the
- * frame associated with the frame id
- * @param frame_number The frameID of the desired reference frame
- * @return time cache for given frame number
- * @exception LookupException thrown if lookup fails
- */
-TimeCache *
-Transformer::get_frame(unsigned int frame_number) const
-{
-  if (frame_number == 0) /// @todo check larger values too
-    return NULL;
-  else
-    return frames_[frame_number];
-}
-
-
-/** An accessor to get access to the frame cache.
- * @param frame_id frame ID
- * @return time cache for given frame ID
- * @exception LookupException thrown if lookup fails
- */
-const TimeCache *
-Transformer::get_frame_cache(const std::string &frame_id) const
-{
-  CompactFrameID frame_number = lookup_frame_number(frame_id);
-  if (frame_number == 0) {
-    throw LookupException("Failed to lookup frame %s", frame_id.c_str());
-  } else {
-    return frames_[frame_number];
-  }
-}
-
-
-/** An accessor to get access to all frame caches at once.
- * @return vector of time caches
- */
-const std::vector<TimeCache *> &
+std::vector<TimeCacheInterfacePtr>
 Transformer::get_frame_caches() const
 {
-  return frames_;
+	return frames_;
 }
 
-
-/** String to number for frame lookup.
- * @param frameid_str frame ID
- * @return frame number
- * @exception LookupException if frame ID is unknown
+/** Test if a transform is possible.
+ * @param target_frame The frame into which to transform
+ * @param source_frame The frame from which to transform
+ * @param time The time at which to transform
+ * @param error_msg A pointer to a string which will be filled with
+ * why the transform failed, if not NULL
+ * @return true if the transformation can be calculated, false otherwise
  */
-CompactFrameID
-Transformer::lookup_frame_number(const std::string &frameid_str) const
+bool
+Transformer::can_transform(const std::string& target_frame,
+                           const std::string& source_frame,
+                           const fawkes::Time& time,
+                           std::string* error_msg) const
 {
-  unsigned int retval = 0;
-  //MutexLocker lock(frame_mutex_);
-  M_StringToCompactFrameID::const_iterator map_it = frameIDs_.find(frameid_str);
-  if (map_it == frameIDs_.end())
-  {
-    throw LookupException("Frame id %s does not exist! Frames (%zu): %s",
-                          frameid_str.c_str(), frameIDs_.size(), "" /*allFramesAsString()*/);
-  }
-  else
-    retval = map_it->second;
-  return retval;
-};
-
-
-/** String to number for frame lookup with dynamic allocation of new
- * frames.
- * @param frameid_str frame ID
- * @return frame number, if none existed for the given frame ID a new
- * one is created
- */
-CompactFrameID
-Transformer::lookup_or_insert_frame_number(const std::string &frameid_str)
-{
-  unsigned int retval = 0;
-  //MutexLocker lock(frame_mutex_);
-  M_StringToCompactFrameID::iterator map_it = frameIDs_.find(frameid_str);
-  if (map_it == frameIDs_.end())
-  {
-    retval = frames_.size();
-    frameIDs_[frameid_str] = retval;
-    frames_.push_back( new TimeCache(cache_time_));
-    frameIDs_reverse.push_back(frameid_str);
-  }
-  else
-    retval = frameIDs_[frameid_str];
-  return retval;
-};
-
-/** Get frame ID given its number.
- * @param frame_num frame number
- * @return frame ID string
- * @exception LookupException thrown if number invalid
- */
-std::string
-Transformer::lookup_frame_string(unsigned int frame_num) const
-{
-  if (frame_num >= frameIDs_reverse.size()) {
-    throw LookupException("Reverse lookup of frame id %u failed!", frame_num);
-  }
-  else return frameIDs_reverse[frame_num];
+	if (likely(enabled_))
+		return BufferCore::can_transform(target_frame, source_frame, time, error_msg);
+	else return false;
 }
 
-/** Get mappings from frame ID to names.
- * @return vector of mappings from frame IDs to names
+/** Test if a transform is possible.
+ * @param target_frame The frame into which to transform
+ * @param target_time The time into which to transform
+ * @param source_frame The frame from which to transform
+ * @param source_time The time from which to transform
+ * @param fixed_frame The frame in which to treat the transform as
+ * constant in time
+ * @param error_msg A pointer to a string which will be filled with
+ * why the transform failed, if not NULL
+ * @return true if the transformation can be calculated, false otherwise
  */
-std::vector<std::string>
-Transformer::get_frame_id_mappings() const
+bool
+Transformer::can_transform(const std::string& target_frame,
+                           const fawkes::Time& target_time,
+                           const std::string& source_frame,
+                           const fawkes::Time& source_time,
+                           const std::string& fixed_frame,
+                           std::string* error_msg) const
 {
-  return frameIDs_reverse;
-}
-
-
-/** Get DOT graph of all frames.
- * @param print_time true to add the time of the transform as graph label
- * @param time if not NULL will be assigned the time of the graph generation
- * @return string representation of DOT graph
- */
-std::string
-Transformer::all_frames_as_dot(bool print_time, fawkes::Time *time) const
-{
-  MutexLocker lock(frame_mutex_);
-
-  fawkes::Time current_time;
-  if (time)  *time = current_time;
-
-  std::stringstream mstream;
-  mstream << std::fixed; //fixed point notation
-  mstream.precision(3); //3 decimal places
-  mstream << "digraph { graph [fontsize=14";
-  if (print_time) {
-    mstream << ", label=\"\\nRecorded at time: "
-	    << current_time.str() << " (" << current_time.in_sec() << ")\"";
-  }
-  mstream << "]; node [fontsize=12]; edge [fontsize=12]; " << std::endl;
-
-  TransformStorage temp;
-
-  if (frames_.size() == 1)
-    mstream <<"\"no tf data received\"";
-
-  mstream.precision(3);
-  mstream.setf(std::ios::fixed, std::ios::floatfield);
-    
-  //  for (std::vector< TimeCache*>::iterator  it = frames_.begin(); it != frames_.end(); ++it)
-  for (unsigned int cnt = 1; cnt < frames_.size(); ++cnt) //one referenced for 0 is no frame
-  {
-    TimeCache *cache = get_frame(cnt);
-
-    unsigned int frame_id_num;
-    if(cache->get_data(fawkes::Time(0,0), temp)) {
-      frame_id_num = temp.frame_id;
-    } else {
-      frame_id_num = 0;
-    }
-    if (frame_id_num != 0) {
-      std::string authority = "no recorded authority";
-      std::map<unsigned int, std::string>::const_iterator it = frame_authority_.find(cnt);
-      if (it != frame_authority_.end())
-	authority = it->second;
-
-      double rate = cache->get_list_length() /
-	std::max((cache->get_latest_timestamp().in_sec() -
-		  cache->get_oldest_timestamp().in_sec()), 0.0001);
-
-      mstream << "\"" << frameIDs_reverse[frame_id_num] << "\"" << " -> "
-              << "\"" << frameIDs_reverse[cnt] << "\"" << "[label=\""
-	      //<< "Broadcaster: " << authority << "\\n"
-              << "Average rate: " << rate << " Hz\\n"
-              << "Most recent transform: "
-	      << (current_time - cache->get_latest_timestamp()).in_sec() << " sec old \\n"
-              << "Buffer length: "
-	      << (cache->get_latest_timestamp() - cache->get_oldest_timestamp()).in_sec()
-	      << " sec\\n"
-              <<"\"];" <<std::endl;
-    }
-  }
-
-  /* That's how ROS TF does it
-  if (print_time) {
-    for (unsigned int cnt = 1; cnt < frames_.size(); cnt ++) //one referenced for 0 is no frame
-    {
-      unsigned int frame_id_num;
-      if(  get_frame(cnt)->get_data(fawkes::Time(0,0), temp)) {
-	frame_id_num = temp.frame_id;
-      } else {
-	frame_id_num = 0;
-      }
-
-      if(frameIDs_reverse[frame_id_num] == "NO_PARENT") {
-	mstream << "edge [style=invis];" << std::endl;
-	mstream << " subgraph cluster_legend { \n"
-		<< "\"Recorded at time: " << current_time.in_sec()
-		<< " (" << current_time.str() << ")" << "\"[ shape=plaintext ] ;\n "
-	      << "}" << "->" << "\"" << frameIDs_reverse[cnt]<<"\";" << std::endl;
-      }
-    }
-  }
-  */
-  mstream << "}";
-  return mstream.str();
+	if (likely(enabled_))
+		return BufferCore::can_transform(target_frame, target_time,
+		                                 source_frame, source_time,
+		                                 fixed_frame, error_msg);
+	else return false;
 }
 
 /** Lookup transform.
@@ -1031,76 +261,17 @@ Transformer::all_frames_as_dot(bool print_time, fawkes::Time *time) const
  * @exception LookupException at least one of the two given frames is
  * unknown
  */
-void Transformer::lookup_transform(const std::string& target_frame,
-                                   const std::string& source_frame,
-                                   const fawkes::Time& time,
-                                   StampedTransform& transform) const
+void
+Transformer::lookup_transform(const std::string& target_frame,
+                              const std::string& source_frame,
+                              const fawkes::Time& time,
+                              StampedTransform& transform) const
 {
   if (! enabled_) {
     throw DisabledException("Transformer has been disabled");
   }
-
-  std::string mapped_tgt = /*assert_resolved(tf_prefix_,*/ target_frame;
-  std::string mapped_src = /*assert_resolved(tf_prefix_,*/ source_frame;
-
-  if (mapped_tgt == mapped_src) {
-    transform.setIdentity();
-    transform.child_frame_id = mapped_src;
-    transform.frame_id       = mapped_tgt;
-    transform.stamp          = fawkes::Time();
-    return;
-  }
-
-  MutexLocker lock(frame_mutex_);
-
-  CompactFrameID target_id = lookup_frame_number(mapped_tgt);
-  CompactFrameID source_id = lookup_frame_number(mapped_src);
-
-  std::string error_string;
-  TransformAccum accum;
-  int rv = walk_to_top_parent(accum, time, target_id, source_id, &error_string);
-  if (rv != NO_ERROR)
-  {
-    switch (rv)
-    {
-    case CONNECTIVITY_ERROR:
-      throw ConnectivityException("Connectivity: %s", error_string.c_str());
-    case EXTRAPOLATION_ERROR:
-      throw ExtrapolationException("Extrapolation: %s", error_string.c_str());
-    case LOOKUP_ERROR:
-      throw LookupException("Lookup: %s", error_string.c_str());
-    default:
-      throw Exception("lookup_transform: unknown error code: %d", rv);
-      break;
-    }
-  }
-
-  transform.setOrigin(accum.result_vec);
-  transform.setRotation(accum.result_quat);
-  transform.child_frame_id = mapped_src;
-  transform.frame_id       = mapped_tgt;
-  transform.stamp          = accum.time;
+  BufferCore::lookup_transform(target_frame, source_frame, time, transform);
 }
-
-
-/** Lookup transform at latest common time.
- * @param target_frame target frame ID
- * @param source_frame source frame ID
- * @param transform upon return contains the transform
- * @exception ConnectivityException thrown if no connection between
- * the source and target frame could be found in the tree.
- * @exception ExtrapolationException returning a value would have
- * required extrapolation beyond current limits.
- * @exception LookupException at least one of the two given frames is
- * unknown
- */
-void Transformer::lookup_transform(const std::string& target_frame,
-                                   const std::string& source_frame,
-                                   StampedTransform& transform) const
-{
-  lookup_transform(target_frame, source_frame, fawkes::Time(0,0), transform);
-}
-
 
 /** Lookup transform assuming a fixed frame.
  * This will lookup a transformation from source to target, assuming
@@ -1128,82 +299,30 @@ Transformer::lookup_transform(const std::string& target_frame,
                               const std::string& fixed_frame,
                               StampedTransform& transform) const
 {
-  StampedTransform temp1, temp2;
-  lookup_transform(fixed_frame, source_frame, source_time, temp1);
-  lookup_transform(target_frame, fixed_frame, target_time, temp2);
-  transform.set_data(temp2 * temp1);
-  transform.stamp = temp2.stamp;
-  transform.frame_id = target_frame;
-  transform.child_frame_id = source_frame;
+  if (! enabled_) {
+    throw DisabledException("Transformer has been disabled");
+  }
+  BufferCore::lookup_transform(target_frame, target_time,
+                               source_frame, source_time,
+                               fixed_frame, transform);
 }
 
-/** Test if a transform is possible.
- * @param target_frame The frame into which to transform
- * @param source_frame The frame from which to transform
- * @param time The time at which to transform
- * @return true if the transformation can be calculated, false otherwise
+/** Lookup transform at latest common time.
+ * @param target_frame target frame ID
+ * @param source_frame source frame ID
+ * @param transform upon return contains the transform
+ * @exception ConnectivityException thrown if no connection between
+ * the source and target frame could be found in the tree.
+ * @exception ExtrapolationException returning a value would have
+ * required extrapolation beyond current limits.
+ * @exception LookupException at least one of the two given frames is
+ * unknown
  */
-bool
-Transformer::can_transform(const std::string& target_frame,
-                           const std::string& source_frame,
-                           const fawkes::Time& time) const
+void Transformer::lookup_transform(const std::string& target_frame,
+                                   const std::string& source_frame,
+                                   StampedTransform& transform) const
 {
-  std::string mapped_tgt = /*assert_resolved(tf_prefix_,*/ target_frame;
-  std::string mapped_src = /*assert_resolved(tf_prefix_,*/ source_frame;
-
-  if (mapped_tgt == mapped_src)  return true;
-
-  if (!frame_exists(mapped_tgt) || !frame_exists(mapped_src))  return false;
-
-  MutexLocker lock(frame_mutex_);
-  CompactFrameID target_id = lookup_frame_number(mapped_tgt);
-  CompactFrameID source_id = lookup_frame_number(mapped_src);
-
-  return can_transform_no_lock(target_id, source_id, time);
-}
-
-
-/** Test if a transform is possible.
- * @param target_frame The frame into which to transform
- * @param target_time The time into which to transform
- * @param source_frame The frame from which to transform
- * @param source_time The time from which to transform
- * @param fixed_frame The frame in which to treat the transform as
- * constant in time
- * @return true if the transformation can be calculated, false otherwise
- */
-bool
-Transformer::can_transform(const std::string& target_frame,
-                           const fawkes::Time& target_time,
-                           const std::string& source_frame,
-                           const fawkes::Time& source_time,
-                           const std::string& fixed_frame) const
-{
-  return
-    can_transform(target_frame, fixed_frame, target_time) &&
-    can_transform(fixed_frame, source_frame, source_time);
-}
-
-
-/** Test if a transform is possible.
- * Internal check that does not lock the frame mutex.
- * @param target_id The frame number into which to transform
- * @param source_id The frame number from which to transform
- * @param time The time at which to transform
- * @return true if the transformation can be calculated, false otherwise
- */
-bool
-Transformer::can_transform_no_lock(CompactFrameID target_id,
-                                   CompactFrameID source_id,
-                                   const fawkes::Time& time) const
-{
-  if (target_id == 0 || source_id == 0)  return false;
-
-  CanTransformAccum accum;
-  if (walk_to_top_parent(accum, time, target_id, source_id, NULL) == NO_ERROR)
-    return true;
-  else
-    return false;
+  lookup_transform(target_frame, source_frame, fawkes::Time(0,0), transform);
 }
 
 
@@ -1511,6 +630,84 @@ Transformer::transform_pose(const std::string& target_frame,
   stamped_out.set_data(transform * stamped_in);
   stamped_out.stamp = transform.stamp;
   stamped_out.frame_id = target_frame;
+}
+
+
+/** Get DOT graph of all frames.
+ * @param print_time true to add the time of the transform as graph label
+ * @param time if not NULL will be assigned the time of the graph generation
+ * @return string representation of DOT graph
+ */
+std::string
+Transformer::all_frames_as_dot(bool print_time, fawkes::Time *time) const
+{
+	std::unique_lock<std::mutex> lock(frame_mutex_);
+
+	fawkes::Time current_time;
+	if (time)  *time = current_time;
+
+	std::stringstream mstream;
+	mstream << std::fixed; //fixed point notation
+	mstream.precision(3); //3 decimal places
+	mstream << "digraph { graph [fontsize=14";
+	if (print_time) {
+		mstream << ", label=\"\\nRecorded at time: "
+		        << current_time.str() << " (" << current_time.in_sec() << ")\"";
+	}
+	mstream << "]; node [fontsize=12]; edge [fontsize=12]; " << std::endl;
+
+	TransformStorage temp;
+
+	if (frames_.size() == 1)
+		mstream <<"\"no tf data received\"";
+
+	mstream.precision(3);
+	mstream.setf(std::ios::fixed, std::ios::floatfield);
+    
+	//  for (std::vector< TimeCache*>::iterator  it = frames_.begin(); it != frames_.end(); ++it)
+	for (unsigned int cnt = 1; cnt < frames_.size(); ++cnt) //one referenced for 0 is no frame
+	{
+		std::shared_ptr<TimeCacheInterface> cache = get_frame(cnt);
+		if (! cache) continue;
+
+		unsigned int frame_id_num;
+		if(cache->get_data(fawkes::Time(0,0), temp)) {
+			frame_id_num = temp.frame_id;
+		} else {
+			frame_id_num = 0;
+		}
+		if (frame_id_num != 0) {
+			std::string authority = "no recorded authority";
+			std::map<unsigned int, std::string>::const_iterator it = frame_authority_.find(cnt);
+			if (it != frame_authority_.end())
+				authority = it->second;
+
+			double rate = cache->get_list_length() /
+				std::max((cache->get_latest_timestamp().in_sec() -
+				          cache->get_oldest_timestamp().in_sec()), 0.0001);
+
+			mstream << "\"" << frameIDs_reverse[frame_id_num] << "\"" << " -> "
+			        << "\"" << frameIDs_reverse[cnt] << "\"" << "[label=\"";
+
+			std::shared_ptr<StaticCache> static_cache =
+				std::dynamic_pointer_cast<StaticCache>(cache);
+			if (static_cache) {
+				mstream << "Static";
+			} else {
+				//<< "Broadcaster: " << authority << "\\n"
+				mstream << "Average rate: " << rate << " Hz\\n"
+				        << "Most recent transform: "
+				        << (current_time - cache->get_latest_timestamp()).in_sec() << " sec old \\n"
+				        << "Buffer length: "
+				        << (cache->get_latest_timestamp() - cache->get_oldest_timestamp()).in_sec()
+				        << " sec\\n";
+			}
+			mstream <<"\"];" <<std::endl;
+		}
+	}
+
+	mstream << "}";
+	return mstream.str();
 }
 
 } // end namespace tf
