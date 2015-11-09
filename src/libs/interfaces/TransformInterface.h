@@ -52,6 +52,10 @@ class TransformInterface : public Interface
       The ID of the child frame. The child frame's origin is at the
       given point in the parent frame denoted by the transform.
      */
+    bool static_transform; /**< 
+	    True if the transform is static, i.e. it will never change
+	    during its lifetime, false otherwise.
+     */
     double translation[3]; /**< 
       This array denotes the translation vector of the transform. The
       element indexes are ordered x, y, z, i.e. translation[0] is the
@@ -83,6 +87,9 @@ class TransformInterface : public Interface
   char * child_frame() const;
   void set_child_frame(const char * new_child_frame);
   size_t maxlenof_child_frame() const;
+  bool is_static_transform() const;
+  void set_static_transform(const bool new_static_transform);
+  size_t maxlenof_static_transform() const;
   double * translation() const;
   double translation(unsigned int index) const;
   void set_translation(unsigned int index, const double new_translation);
