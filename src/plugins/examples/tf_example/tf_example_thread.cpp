@@ -92,8 +92,8 @@ TfExampleThread::loop()
     tf::Quaternion q = transform.getRotation();
     tf::Vector3 v   = transform.getOrigin();
 
-    const tf::TimeCache *world_cache = tf_listener->get_frame_cache(SOURCE);
-    const tf::TimeCache *robot_cache = tf_listener->get_frame_cache(TARGET);
+    const tf::TimeCacheInterfacePtr world_cache = tf_listener->get_frame_cache(SOURCE);
+    const tf::TimeCacheInterfacePtr robot_cache = tf_listener->get_frame_cache(TARGET);
 
     logger->log_info(name(), "Transform %s -> %s, %f sec old: "
                      "T(%f,%f,%f)  Q(%f,%f,%f,%f)",
