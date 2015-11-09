@@ -47,7 +47,7 @@ class TransformAspect : public virtual Aspect
     ONLY_LISTENER,	///< only create a transform listener
     ONLY_PUBLISHER,	///< only create a transform publisher
     DEFER_PUBLISHER,	/**< Create neither listener or publisher, but allow late
-			 * enabling of a publisher using tf_enable_publisher() in init().
+			 * enabling of a publisher using tf_enable_publisher() or tf_add_publisher() in init().
 			 * Note that this requires to pass a valid (unique) tf_bb_iface_id
 			 * to the constructor. */
     BOTH,		///< create both, transform listener and publisher
@@ -64,10 +64,13 @@ class TransformAspect : public virtual Aspect
 
  protected: // methods
   void tf_enable_publisher();
+  void tf_add_publisher(const char *tf_bb_iface_id_format, ...);
 
  protected: // members
   tf::Transformer         * tf_listener;
   tf::TransformPublisher  * tf_publisher;
+
+  std::map<std::string, tf::TransformPublisher *>  tf_publishers;
 
  private:
   Mode  __tf_aspect_mode;
