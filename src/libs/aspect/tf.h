@@ -58,7 +58,8 @@ class TransformAspect : public virtual Aspect
   TransformAspect(Mode mode = ONLY_LISTENER, const char *tf_bb_iface_id = 0);
   virtual ~TransformAspect();
 
-  void init_TransformAspect(BlackBoard *blackboard, tf::Transformer *transformer);
+  void init_TransformAspect(BlackBoard *blackboard, tf::Transformer *transformer,
+                            const char *thread_name);
   void finalize_TransformAspect();
 
  protected: // methods
@@ -70,9 +71,9 @@ class TransformAspect : public virtual Aspect
 
  private:
   Mode  __tf_aspect_mode;
+  char *__tf_aspect_thread_name;
   char *__tf_aspect_bb_iface_id;
   BlackBoard *__tf_aspect_blackboard;
-  bool  __tf_aspect_own_listener;
 };
 
 } // end namespace fawkes

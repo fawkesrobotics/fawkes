@@ -27,6 +27,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <core/threading/thread_initializer.h>
+#include <core/exceptions/system.h>
+#include <blackboard/ownership.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -88,9 +90,11 @@ TransformAspect::~TransformAspect()
  * This creates the listener and potentially publisher.
  * @param blackboard blackboard used to create listener and/or publisher.
  * @param transformer system-wide shared transformer to pass to threads
+ * @param thread_name name of thread opening publishers
  */
 void
-TransformAspect::init_TransformAspect(BlackBoard *blackboard, tf::Transformer *transformer)
+TransformAspect::init_TransformAspect(BlackBoard *blackboard, tf::Transformer *transformer,
+                                      const char *thread_name)
 {
   if (((__tf_aspect_mode == ONLY_PUBLISHER) || (__tf_aspect_mode == BOTH)) &&
       (__tf_aspect_bb_iface_id == NULL))
@@ -112,20 +116,19 @@ TransformAspect::init_TransformAspect(BlackBoard *blackboard, tf::Transformer *t
 					  __tf_aspect_mode == DEFER_PUBLISHER
 					  ? "DEFER_PUBLISHER" : "BOTH_DEFER_PUBLISHER" );
   }
+  __tf_aspect_blackboard = new BlackBoardWithOwnership(blackboard, thread_name);
 
   if ((__tf_aspect_mode == ONLY_LISTENER) || (__tf_aspect_mode == BOTH) ||
       (__tf_aspect_mode == BOTH_DEFER_PUBLISHER))
   {
-    __tf_aspect_own_listener = false;
     tf_listener = transformer;
   } else {
-    __tf_aspect_own_listener = true;
-    tf_listener = new tf::TransformListener(NULL);
+    tf_listener = NULL;
   }
 
   if ((__tf_aspect_mode == ONLY_PUBLISHER) || (__tf_aspect_mode == BOTH)) {
     tf_publisher =
-      new tf::TransformPublisher(blackboard, __tf_aspect_bb_iface_id);
+      new tf::TransformPublisher(__tf_aspect_blackboard, __tf_aspect_frame_id);
   } else {
     tf_publisher = new tf::TransformPublisher(NULL, NULL);
   }
@@ -162,12 +165,12 @@ TransformAspect::tf_enable_publisher()
 void
 TransformAspect::finalize_TransformAspect()
 {
-  if (__tf_aspect_own_listener) {
-    delete tf_listener;
   }
   delete tf_publisher;
   tf_listener = 0;
   tf_publisher = 0;
+  delete __tf_aspect_blackboard;
+  __tf_aspect_blackboard = 0;
 }
 
 } // end namespace fawkes
