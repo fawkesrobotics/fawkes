@@ -767,10 +767,10 @@ ColliThread::interface_data_valid()
 
   } else {
     // check if transforms are up to date
-    tf::TimeCache* cache = tf_listener->get_frame( tf_listener->lookup_frame_number(cfg_frame_laser_) );
+    tf::TimeCacheInterfacePtr cache = tf_listener->get_frame_cache(cfg_frame_laser_);
     if( !cache ) {
-      logger->log_warn(name(), "No TimeCache for transform to laser_frame '%s'", cfg_frame_laser_.c_str());
-      return false;
+	    logger->log_warn(name(), "No TimeCache for transform to laser_frame '%s'", cfg_frame_laser_.c_str());
+	    return false;
     }
 
     tf::TransformStorage temp;
