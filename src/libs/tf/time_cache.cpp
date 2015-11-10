@@ -129,6 +129,14 @@ TransformStorage::TransformStorage(const StampedTransform& data,
  * @fn virtual fawkes::Time TimeCacheInterface::get_oldest_timestamp() = 0 const
  * Get oldest timestamp from cache.
  * @return oldest time stamp.
+ *
+ * @fn virtual const L_TransformStorage & TimeCacheInterface::get_storage() const = 0
+ * Get storage list.
+ * @return reference to list of storage elements
+ *
+ * @fn L_TransformStorage TimeCacheInterface::get_storage_copy() const = 0
+ * Get copy of storage elements.
+ * @return copied list of storage elements
  */
 
 /** @class TimeCache <tf/time_cache.h>
@@ -374,19 +382,13 @@ TimeCache::get_list_length() const
 }
 
 
-/** Get storage list.
- * @return reference to list of storage elements
- */
-const TimeCache::L_TransformStorage &
+const TimeCacheInterface::L_TransformStorage &
 TimeCache::get_storage() const
 {
   return storage_;
 }
 
-/** Get copy of storage elements.
- * @return copied list of storage elements
- */
-TimeCache::L_TransformStorage
+TimeCacheInterface::L_TransformStorage
 TimeCache::get_storage_copy() const
 {
   return storage_;

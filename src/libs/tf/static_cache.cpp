@@ -64,6 +64,13 @@ namespace fawkes {
  * Transform cache for static transforms.
  */
 
+/** Constructor.
+ */
+StaticCache::StaticCache()
+	: storage_as_list_(1)
+{
+}
+
 bool
 StaticCache::get_data(fawkes::Time time, TransformStorage & data_out,
                       std::string* error_str)
@@ -77,6 +84,7 @@ bool
 StaticCache::insert_data(const TransformStorage& new_data)
 {
   storage_ = new_data;
+  storage_as_list_.front() = new_data;
   return true;
 }
 
@@ -114,6 +122,18 @@ fawkes::Time
 StaticCache::get_oldest_timestamp() const
 {   
 	return fawkes::Time(0,0);
+}
+
+const TimeCacheInterface::L_TransformStorage &
+StaticCache::get_storage() const
+{
+  return storage_as_list_;
+}
+
+TimeCacheInterface::L_TransformStorage
+StaticCache::get_storage_copy() const
+{
+  return storage_as_list_;
 }
 
 

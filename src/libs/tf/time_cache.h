@@ -68,9 +68,16 @@ namespace fawkes {
 
 typedef std::pair<fawkes::Time, CompactFrameID> P_TimeAndFrameID;
 
+class TimeCacheInterface;
+typedef std::shared_ptr<TimeCacheInterface> TimeCacheInterfacePtr;
+
 class TimeCacheInterface
 {
  public:
+  /** List of stored transforms. */
+  typedef std::list<TransformStorage> L_TransformStorage;
+
+  virtual TimeCacheInterfacePtr clone(const fawkes::Time &look_back_until = fawkes::Time(0,0)) const = 0;
 	virtual bool get_data(fawkes::Time time, TransformStorage & data_out,
 	                      std::string* error_str = 0) = 0;
 	virtual bool insert_data(const TransformStorage& new_data) = 0;
@@ -82,15 +89,15 @@ class TimeCacheInterface
   virtual unsigned int get_list_length() const = 0;
   virtual fawkes::Time get_latest_timestamp() const = 0;
   virtual fawkes::Time get_oldest_timestamp() const = 0;
+
+  virtual const L_TransformStorage & get_storage() const = 0;
+  virtual L_TransformStorage         get_storage_copy() const = 0;
 };
 
-typedef std::shared_ptr<TimeCacheInterface> TimeCacheInterfacePtr;
 
 class TimeCache : public TimeCacheInterface
 {
  public:
-  /** List of stored transforms. */
-  typedef std::list<TransformStorage> L_TransformStorage;
 
   /// Number of nano-seconds to not interpolate below.
   static const int MIN_INTERPOLATION_DISTANCE = 5;
@@ -108,8 +115,8 @@ class TimeCache : public TimeCacheInterface
   virtual CompactFrameID get_parent(fawkes::Time time, std::string* error_str);
   virtual P_TimeAndFrameID get_latest_time_and_parent();
 
-  const L_TransformStorage & get_storage() const;
-  L_TransformStorage         get_storage_copy() const;
+  virtual const L_TransformStorage & get_storage() const;
+  virtual L_TransformStorage         get_storage_copy() const;
 
   virtual unsigned int get_list_length() const;
   virtual fawkes::Time get_latest_timestamp() const;
@@ -134,6 +141,8 @@ class TimeCache : public TimeCacheInterface
 class StaticCache : public TimeCacheInterface
 {
  public:
+	StaticCache();
+	
 	virtual bool get_data(fawkes::Time time, TransformStorage & data_out,
 	                      std::string* error_str = 0);
 	virtual bool insert_data(const TransformStorage& new_data);
@@ -144,9 +153,13 @@ class StaticCache : public TimeCacheInterface
 	virtual unsigned int get_list_length() const;
 	virtual fawkes::Time get_latest_timestamp() const;
 	virtual fawkes::Time get_oldest_timestamp() const;
+	
+	virtual const L_TransformStorage & get_storage() const;
+  virtual L_TransformStorage         get_storage_copy() const;
 
  private:
-	TransformStorage  storage_;
+	TransformStorage    storage_;
+	L_TransformStorage  storage_as_list_;
 };
 
 
