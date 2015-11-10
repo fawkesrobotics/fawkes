@@ -8,13 +8,13 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Frames
 frames:
   # Base frame, this frame defines the robot-centric reference frame.
   # It is typically located at the center on the ground.
-  base: !frame /base_link
+  base: !frame base_link
 
   # Fixed reference frame which is fixed "forever". Typically provided
   # by a self-localization component like AMCL.
-  fixed: !frame /map
+  fixed: !frame map
 
   # Odometry coordinate system, it is typically initialized when the
   # the robot is turned on and provides the robot's position within
   # on movement of the robot (accumulating error)
-  odom: !frame /odom
+  odom: !frame odom

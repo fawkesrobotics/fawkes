@@ -92,10 +92,10 @@ plugins/amcl:
   pose_interface_id: Pose
 
   # Coordinate frame IDs
-  odom_frame_id: !frame /odom
-  base_frame_id: !frame /base_link
-  global_frame_id: !frame /map
-  laser_frame_id: !frame /base_laser
+  odom_frame_id: !frame odom
+  base_frame_id: !frame base_link
+  global_frame_id: !frame map
+  laser_frame_id: !frame base_laser
 
   # Laser angle increment between two consecutive beams
   angle_increment: 1.0

@@ -74,7 +74,7 @@ perception/tabletop-objects:
   cluster_max_size: 200
 
   # The frame in which the result should be published; frame
-  result_frame: "/base_link"
+  result_frame: !frame base_link
 
   # Show the frustrum according to configured horizontal and vertical viewing angle.
   visualization/show_frustrum: true

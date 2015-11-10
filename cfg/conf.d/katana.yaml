@@ -58,13 +58,13 @@ hardware/katana:
 
   frame:
     # Base frame for libkni's inverse-kinematics
-    kni: !frame /katana/base_frame
+    kni: !frame katana/base_frame
 
     # Frame in gripper tool
-    gripper: !frame /katana/tool_frame
+    gripper: !frame katana/tool_frame
 
     # Origin of the OpenRAVE-environment (can differ from "/base_link"!)
-    openrave: !frame /openrave/base
+    openrave: !frame openrave/base
 
   joints:
     # Names of the joinst, taken from the xacro file of the katana arm.

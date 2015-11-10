@@ -15,7 +15,7 @@ hardware/robotino:
   deadman_time_threshold: 0.5
 
   # Base coordinate frame
-  base_frame: !frame /base_link
+  base_frame: !frame base_link
 
   # Minimum time in milliseconds between two Robotino sensor readings.
   # Lower values increase the machine load (considerably) but decrease
@@ -39,7 +39,7 @@ hardware/robotino:
     enable: true
     
     # Gyro coordinate frame
-    frame: !frame /gyro
+    frame: !frame gyro
 
     interface_id: IMU Robotino
 
@@ -54,7 +54,7 @@ hardware/robotino:
     mode: calc
 
     # Odometry coordinate frame
-    frame: !frame /odom
+    frame: !frame odom
 
     # Odom TF offset. This time is added to the current time when the
     # odometry <- base_link TF is published

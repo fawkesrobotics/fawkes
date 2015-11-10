@@ -27,8 +27,8 @@ ros:
     # Motor interface to read odometry from
     motor_interface_id: Robotino
     # Frame IDs
-    odom_frame_id: !frame /odom
-    base_frame_id: !frame /base_link
+    odom_frame_id: !frame odom
+    base_frame_id: !frame base_link
 
   clock:
     # Frequency in Hz at which the clock should be published

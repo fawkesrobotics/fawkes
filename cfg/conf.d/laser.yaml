@@ -115,7 +115,7 @@ hardware/laser:
     #serial: 14200190
 
     # Frame ID
-    frame: !frame /base_laser
+    frame: !frame base_laser
 
     # Offset added to measurement timestamp in interface. Can be used to
     # account for latencies.
@@ -133,7 +133,7 @@ hardware/laser:
     port: 2112
 
     # Frame ID
-    frame: !frame /base_laser
+    frame: !frame base_laser
 
     # Offset added to measurement timestamp in interface. Can be used to
     # account for latencies.

@@ -23,7 +23,7 @@ gazsim:
   laser:
     max_range: 5.5 
     interface-id: "Laser urg"
-    frame-id: "/base_laser"
+    frame-id: !frame base_laser"
 
   webcam:
     # list of ids for all cameras to simulate
@@ -36,7 +36,7 @@ gazsim:
     heights:
       light_front: 240
     frames:
-      light_front: "/cam_front"
+      light_front: !frame cam_front
 
   robotino:
     gripper-laser-threshold: 0.18
