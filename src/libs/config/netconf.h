@@ -178,7 +178,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   virtual void try_dump();
 
  private:
-  void send_get(const char *path, unsigned int msgid);
+  void send_get(const char *path, unsigned int msgid, unsigned int expected_reply);
 
   void set_value_internal(unsigned int msg_type, const char *path, uint16_t num_values,
 			  size_t data_size, void *data);
