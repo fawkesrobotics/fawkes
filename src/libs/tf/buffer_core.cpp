@@ -53,6 +53,7 @@
 #include <tf/time_cache.h>
 #include <tf/exceptions.h>
 #include <tf/types.h>
+#include <tf/utils.h>
 
 #include <sstream>
 #include <algorithm>
@@ -67,31 +68,6 @@ namespace fawkes {
 /// @cond INTERNAL
 typedef std::pair<fawkes::Time, CompactFrameID> P_TimeAndFrameID;
 /// @endcond
-
-
-/** Check if frame ID starts with a slash (/).
- * @param frame_id frame ID to check
- * @return true if strings starts with slash, false otherwise
- */
-static bool
-starts_with_slash(const std::string& frame_id)
-{
-	return (frame_id.size() > 0) && (frame_id[0] == '/');
-}
-
-
-/** Remove leading slash, if any.
- * @param in frame_id to process
- * @return returns @p in with leading slash removed, if any
- */
-static std::string
-strip_slash(const std::string& in)
-{
-  if (starts_with_slash(in))
-	  return in.substr(1);
-  else
-	  return in;
-}
 
 
 /** Warn if an illegal frame_id was passed.
