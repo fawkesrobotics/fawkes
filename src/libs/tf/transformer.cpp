@@ -228,8 +228,11 @@ Transformer::can_transform(const std::string& target_frame,
                            const fawkes::Time& time,
                            std::string* error_msg) const
 {
-	if (likely(enabled_))
-		return BufferCore::can_transform(target_frame, source_frame, time, error_msg);
+	if (likely(enabled_)) {
+		std::string stripped_target = strip_slash(target_frame);
+		std::string stripped_source = strip_slash(source_frame);
+		return BufferCore::can_transform(stripped_target, stripped_source, time, error_msg);
+	}
 	else return false;
 }
 
@@ -252,10 +255,13 @@ Transformer::can_transform(const std::string& target_frame,
                            const std::string& fixed_frame,
                            std::string* error_msg) const
 {
-	if (likely(enabled_))
-		return BufferCore::can_transform(target_frame, target_time,
-		                                 source_frame, source_time,
+	if (likely(enabled_)) {
+		std::string stripped_target = strip_slash(target_frame);
+		std::string stripped_source = strip_slash(source_frame);
+		return BufferCore::can_transform(stripped_target, target_time,
+		                                 stripped_source, source_time,
 		                                 fixed_frame, error_msg);
+	}
 	else return false;
 }
 
@@ -281,7 +287,11 @@ Transformer::lookup_transform(const std::string& target_frame,
   if (! enabled_) {
     throw DisabledException("Transformer has been disabled");
   }
-  BufferCore::lookup_transform(target_frame, source_frame, time, transform);
+
+  std::string stripped_target = strip_slash(target_frame);
+  std::string stripped_source = strip_slash(source_frame);
+
+  BufferCore::lookup_transform(stripped_target, stripped_source, time, transform);
 }
 
 /** Lookup transform assuming a fixed frame.
@@ -313,8 +323,11 @@ Transformer::lookup_transform(const std::string& target_frame,
   if (! enabled_) {
     throw DisabledException("Transformer has been disabled");
   }
-  BufferCore::lookup_transform(target_frame, target_time,
-                               source_frame, source_time,
+  std::string stripped_target = strip_slash(target_frame);
+  std::string stripped_source = strip_slash(source_frame);
+  
+  BufferCore::lookup_transform(stripped_target, target_time,
+                               stripped_source, source_time,
                                fixed_frame, transform);
 }
 
