@@ -55,7 +55,7 @@ class TransformAspect : public virtual Aspect
 			  * cf. DEFER_PUBLISHER mode documentation above for details. */
   } Mode;
 
-  TransformAspect(Mode mode = ONLY_LISTENER, const char *tf_bb_iface_id = 0);
+  TransformAspect(Mode mode = ONLY_LISTENER, const char *frame_id = 0);
   virtual ~TransformAspect();
 
   void init_TransformAspect(BlackBoard *blackboard, tf::Transformer *transformer,
@@ -64,7 +64,7 @@ class TransformAspect : public virtual Aspect
 
  protected: // methods
   void tf_enable_publisher();
-  void tf_add_publisher(const char *tf_bb_iface_id_format, ...);
+  void tf_add_publisher(const char *frame_id_format, ...);
 
  protected: // members
   tf::Transformer         * tf_listener;
@@ -75,7 +75,7 @@ class TransformAspect : public virtual Aspect
  private:
   Mode  __tf_aspect_mode;
   char *__tf_aspect_thread_name;
-  char *__tf_aspect_bb_iface_id;
+  char *__tf_aspect_frame_id;
   BlackBoard *__tf_aspect_blackboard;
 };
 

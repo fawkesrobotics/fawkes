@@ -72,20 +72,20 @@ namespace fawkes {
 
 /** Constructor.
  * @param mode mode of operation
- * @param tf_bb_iface_id interface ID to be used for the transform
- * publisher. Note that this will be prefixed with "TF ".
+ * @param frame_id ID of frame to create publisher for, can be zero if
+ * creating of publisher is omitted or deferred.
  */
-TransformAspect::TransformAspect(Mode mode, const char *tf_bb_iface_id)
+TransformAspect::TransformAspect(Mode mode, const char *frame_id)
   : __tf_aspect_mode(mode)
 {
   add_aspect("TransformAspect");
   if (((mode == ONLY_PUBLISHER) || (mode == BOTH) ||
        (mode == BOTH_DEFER_PUBLISHER) || (mode == DEFER_PUBLISHER))
-      && tf_bb_iface_id)
+      && frame_id)
   {
-	  __tf_aspect_bb_iface_id = strdup(tf_bb_iface_id);
+	  __tf_aspect_frame_id = strdup(frame_id);
   } else {
-	  __tf_aspect_bb_iface_id = 0;
+	  __tf_aspect_frame_id = 0;
   }
   __tf_aspect_blackboard = 0;
 }
@@ -94,7 +94,7 @@ TransformAspect::TransformAspect(Mode mode, const char *tf_bb_iface_id)
 /** Virtual empty destructor. */
 TransformAspect::~TransformAspect()
 {
-  if (__tf_aspect_bb_iface_id)  free(__tf_aspect_bb_iface_id);
+  if (__tf_aspect_frame_id)  free(__tf_aspect_frame_id);
 }
 
 
@@ -109,7 +109,7 @@ TransformAspect::init_TransformAspect(BlackBoard *blackboard, tf::Transformer *t
                                       const char *thread_name)
 {
   if (((__tf_aspect_mode == ONLY_PUBLISHER) || (__tf_aspect_mode == BOTH)) &&
-      (__tf_aspect_bb_iface_id == NULL))
+      (__tf_aspect_frame_id == NULL))
   {
     throw CannotInitializeThreadException("TransformAspect was initialized "
                                           "in mode %s but BB interface ID"
@@ -165,8 +165,8 @@ TransformAspect::tf_enable_publisher()
 
   delete tf_publisher;
   tf_publisher =
-    new tf::TransformPublisher(__tf_aspect_blackboard, __tf_aspect_bb_iface_id);
-  tf_publishers[__tf_aspect_bb_iface_id] = tf_publisher;
+    new tf::TransformPublisher(__tf_aspect_blackboard, __tf_aspect_frame_id);
+  tf_publishers[__tf_aspect_frame_id] = tf_publisher;
 }
 
 
@@ -180,34 +180,34 @@ TransformAspect::tf_enable_publisher()
  * time whether the publisher will be needed or not.
  * @exception Exception thrown if the TransformAspect is not initialized in
  * DEFER_PUBLISHER or BOTH_DEFER_PUBLISHER mode.
- * @param tf_bb_iface_id_format format string of interface ID to create. See man printf
+ * @param frame_id_format format string of interface ID to create. See man printf
  * for accepted patterns. If string starts with / is taken as is, otherwise "/tf/" is
  * prepended to interface ID implicitly.
  */
 void
-TransformAspect::tf_add_publisher(const char *tf_bb_iface_id_format, ...)
+TransformAspect::tf_add_publisher(const char *frame_id_format, ...)
 {
   if ((__tf_aspect_mode != DEFER_PUBLISHER) && (__tf_aspect_mode != BOTH_DEFER_PUBLISHER)) {
     throw Exception("Publisher can only be enabled later in (BOTH_)DEFER_PUBLISHER mode");
   }
 
   va_list arg;
-  va_start(arg, tf_bb_iface_id_format);
+  va_start(arg, frame_id_format);
 
   char *msg;
-  if (vasprintf(&msg, tf_bb_iface_id_format, arg) == -1) {
+  if (vasprintf(&msg, frame_id_format, arg) == -1) {
     throw OutOfMemoryException("Cannot format transform publisher BB interface ID");
   }
   va_end(arg);
-  std::string tf_bb_iface_id = msg;
+  std::string frame_id = msg;
   free(msg);
 
-  if (tf_publishers.find(tf_bb_iface_id) != tf_publishers.end()) {
-	  throw Exception("Publisher for %s has already been added", tf_bb_iface_id);
+  if (tf_publishers.find(frame_id) != tf_publishers.end()) {
+	  throw Exception("Publisher for %s has already been added", frame_id);
   }
 
-  tf_publishers[tf_bb_iface_id] =
-	  new tf::TransformPublisher(__tf_aspect_blackboard, tf_bb_iface_id.c_str());
+  tf_publishers[frame_id] =
+	  new tf::TransformPublisher(__tf_aspect_blackboard, frame_id.c_str());
 }
 
 /** Finalize transform aspect.
@@ -216,8 +216,8 @@ TransformAspect::tf_add_publisher(const char *tf_bb_iface_id_format, ...)
 void
 TransformAspect::finalize_TransformAspect()
 {
-  if (__tf_aspect_bb_iface_id) {
-	  tf_publishers.erase(__tf_aspect_bb_iface_id);
+  if (__tf_aspect_frame_id) {
+	  tf_publishers.erase(__tf_aspect_frame_id);
   }
   delete tf_publisher;
   std::map<std::string, tf::TransformPublisher *>::iterator ti;
