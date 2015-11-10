@@ -188,10 +188,9 @@ void AmclThread::init()
   max_particles_ = config->get_uint(AMCL_CFG_PREFIX"max_particles");
   resample_interval_ = config->get_uint(AMCL_CFG_PREFIX"resample_interval");
 
-  odom_frame_id_ = config->get_string(AMCL_CFG_PREFIX"odom_frame_id");
-  base_frame_id_ = config->get_string(AMCL_CFG_PREFIX"base_frame_id");
-  laser_frame_id_ = config->get_string(AMCL_CFG_PREFIX"laser_frame_id");
-  global_frame_id_ = config->get_string(AMCL_CFG_PREFIX"global_frame_id");
+  odom_frame_id_ = config->get_string("/frames/odom");
+  base_frame_id_ = config->get_string("/frames/base");
+  global_frame_id_ = config->get_string("/frames/fixed");
 
   tf_enable_publisher(odom_frame_id_.c_str());
   
@@ -325,11 +324,6 @@ void AmclThread::init()
     logger->log_info(name(), "Done initializing likelihood field model.");
   }
 
-  laser_pose_set_ = set_laser_pose();
-
-  last_move_time_ = new Time(clock);
-  last_move_time_->stamp();
-
   laser_if_ =
     blackboard->open_for_reading<Laser360Interface>(cfg_laser_ifname_.c_str());
   pos3d_if_ =
@@ -339,6 +333,12 @@ void AmclThread::init()
 
   bbil_add_message_interface(loc_if_);
   blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+
+  laser_if_->read();
+  laser_pose_set_ = set_laser_pose();
+
+  last_move_time_ = new Time(clock);
+  last_move_time_->stamp();
 
   cfg_buffer_enable_ = true;
   try {
@@ -381,6 +381,8 @@ void AmclThread::init()
 void
 AmclThread::loop()
 {
+  laser_if_->read();
+
   if (!laser_pose_set_) {
     if (set_laser_pose()) {
       laser_pose_set_ = true;
@@ -393,7 +395,6 @@ AmclThread::loop()
     }
   }
 
-  laser_if_->read();
   //if (! laser_if_->changed() && ! laser_buffered_) {
   //  logger->log_warn(name(), "Laser data unchanged, skipping loop");
   //  return;
@@ -567,9 +568,9 @@ AmclThread::loop()
     Time latest(0, 0);
     tf::Quaternion q;
     q.setEulerZYX(angle_min_, 0.0, 0.0);
-    tf::Stamped<tf::Quaternion> min_q(q, latest, laser_frame_id_);
+    tf::Stamped<tf::Quaternion> min_q(q, latest, laser_if_->frame());
     q.setEulerZYX(angle_min_ + angle_increment_, 0.0, 0.0);
-    tf::Stamped<tf::Quaternion> inc_q(q, latest, laser_frame_id_);
+    tf::Stamped<tf::Quaternion> inc_q(q, latest, laser_if_->frame());
     try
     {
       tf_listener->transform_quaternion(base_frame_id_, min_q, min_q);
@@ -883,27 +884,31 @@ bool
 AmclThread::set_laser_pose()
 {
   //logger->log_debug(name(), "Transform 1");
+
+  std::string laser_frame_id = laser_if_->frame();
+  if (laser_frame_id.empty())  return false;
+
   fawkes::Time now(clock);
   tf::Stamped<tf::Pose>
     ident(tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
-          &now, laser_frame_id_);
+          &now, laser_frame_id);
   tf::Stamped<tf::Pose> laser_pose;
   try {
     tf_listener->transform_pose(base_frame_id_, ident, laser_pose);
   } catch (fawkes::tf::LookupException& e) {
     //logger->log_error(name(), "Failed to lookup transform from %s to %s.",
-    //                  laser_frame_id_.c_str(), base_frame_id_.c_str());
+    //                  laser_frame_id.c_str(), base_frame_id_.c_str());
     //logger->log_error(name(), e);
     return false;
   } catch (fawkes::tf::TransformException& e) {
     //logger->log_error(name(), "Transform error from %s to %s, exception follows.",
-    //                  laser_frame_id_.c_str(), base_frame_id_.c_str());
+    //                  laser_frame_id.c_str(), base_frame_id_.c_str());
     //logger->log_error(name(), e);
     return false;
   } catch (fawkes::Exception& e) {
     if (fawkes::runtime::uptime() >= tf_listener->get_cache_time()) {
       logger->log_error(name(), "Generic exception for transform from %s to %s.",
-			laser_frame_id_.c_str(), base_frame_id_.c_str());
+			laser_frame_id.c_str(), base_frame_id_.c_str());
       logger->log_error(name(), e);
     }
     return false;
@@ -912,7 +917,7 @@ AmclThread::set_laser_pose()
   /*
   tf::Stamped<tf::Pose>
     ident(tf::Transform(tf::Quaternion(0, 0, 0, 1),
-                        tf::Vector3(0, 0, 0)), Time(), laser_frame_id_);
+                        tf::Vector3(0, 0, 0)), Time(), laser_frame_id);
   tf::Stamped<tf::Pose> laser_pose;
 
   try {
@@ -920,7 +925,7 @@ AmclThread::set_laser_pose()
   } catch (tf::TransformException& e) {
     logger->log_error(name(), "Couldn't transform from %s to %s, "
                       "even though the message notifier is in use",
-                      laser_frame_id_.c_str(), base_frame_id_.c_str());
+                      laser_frame_id.c_str(), base_frame_id_.c_str());
     logger->log_error(name(), e);
     return;
   }
