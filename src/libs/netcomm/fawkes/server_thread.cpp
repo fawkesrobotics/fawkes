@@ -30,6 +30,7 @@
 #include <netcomm/fawkes/message_content.h>
 #include <core/threading/thread_collector.h>
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/exception.h>
 
 #include <unistd.h>
@@ -220,12 +221,14 @@ FawkesNetworkServerThread::force_send()
 void
 FawkesNetworkServerThread::broadcast(FawkesNetworkMessage *msg)
 {
+  clients.lock();
   for (cit = clients.begin(); cit != clients.end(); ++cit) {
     if ( (*cit).second->alive() ) {
       msg->ref();
       (*cit).second->enqueue(msg);
     }
   }
+  clients.unlock();
   msg->unref();
 }
 
@@ -275,7 +278,8 @@ FawkesNetworkServerThread::broadcast(unsigned short int component_id, unsigned s
 void
 FawkesNetworkServerThread::send(FawkesNetworkMessage *msg)
 {
-  unsigned int clid = msg->clid();
+	MutexLocker lock(clients.mutex());
+	unsigned int clid = msg->clid();
   if ( clients.find(clid) != clients.end() ) {
     if ( clients[clid]->alive() ) {
       clients[clid]->enqueue(msg);
