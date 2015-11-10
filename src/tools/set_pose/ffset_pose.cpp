@@ -25,6 +25,7 @@
 #include <core/threading/thread.h>
 #include <netcomm/fawkes/client_handler.h>
 #include <tf/types.h>
+#include <config/netconf.h>
 
 #include <cstdio>
 #include <cmath>
@@ -52,11 +53,23 @@ print_usage(const char *program_name)
 
 void
 try_localize(const std::string &host, unsigned short int port, std::string &interface_id,
-	     const std::string &frame,
-	     double translation[3], double rotation[4], double covariance[36])
+             std::string frame,
+             double translation[3], double rotation[4], double covariance[36])
 {
   FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), port);
   c->connect();
+
+	if (frame == "") {
+		NetworkConfiguration *netconf = NULL;
+		try {
+			netconf = new NetworkConfiguration(c);
+			frame = netconf->get_string("/frames/fixed");
+		} catch (Exception &e) {
+			printf("WARNING: no frame set and failed to get frame from remote.\n");
+			e.print_trace();
+		}
+		delete netconf;
+	}
 
   BlackBoard *bb = new RemoteBlackBoard(c);
   LocalizationInterface *loc_if =
