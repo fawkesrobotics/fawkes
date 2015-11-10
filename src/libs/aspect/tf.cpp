@@ -147,16 +147,26 @@ TransformAspect::init_TransformAspect(BlackBoard *blackboard, tf::Transformer *t
  *
  * This method is intended to be used if it is unclear at construction
  * time whether the publisher will be needed or not.
+ * @param frame_id Frame ID to use for publisher. This can only be passed if
+ * the frame_id passed to the constructor was null.
  * @exception Exception thrown if the TransformAspect is not initialized in
  * DEFER_PUBLISHER or BOTH_DEFER_PUBLISHER mode.
  */
 void
-TransformAspect::tf_enable_publisher()
+TransformAspect::tf_enable_publisher(const char *frame_id)
 {
   if ((__tf_aspect_mode != DEFER_PUBLISHER) && (__tf_aspect_mode != BOTH_DEFER_PUBLISHER)) {
     throw Exception("Publisher can only be enabled later in (BOTH_)DEFER_PUBLISHER mode");
   }
-  if (__tf_aspect_bb_iface_id == 0) {
+  if (frame_id) {
+	  if (__tf_aspect_frame_id) {
+		  throw Exception("Cannot overwrite frame_id '%s' with '%s' in tf_enable_publisher",
+		                  __tf_aspect_frame_id, frame_id);
+	  } else {
+		  __tf_aspect_frame_id = strdup(frame_id);
+	  }
+  }
+  if (__tf_aspect_frame_id == 0) {
 	  throw Exception("TransformAspect in %s mode "
 	                  "requires a valid blackboard interface ID to enable the publisher",
 	                  __tf_aspect_mode == DEFER_PUBLISHER

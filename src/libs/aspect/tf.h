@@ -63,7 +63,7 @@ class TransformAspect : public virtual Aspect
   void finalize_TransformAspect();
 
  protected: // methods
-  void tf_enable_publisher();
+  void tf_enable_publisher(const char *frame_id = 0);
   void tf_add_publisher(const char *frame_id_format, ...);
 
  protected: // members
