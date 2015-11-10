@@ -116,8 +116,8 @@ MongoLogTransformsThread::loop()
   std::vector<fawkes::Time> tf_range_end;;
 
   tf_listener->lock();
-  const std::vector<tf::TimeCache *> &caches = tf_listener->get_frame_caches();
-  std::vector<tf::TimeCache *> copies(caches.size(), NULL);
+  std::vector<tf::TimeCacheInterfacePtr> caches = tf_listener->get_frame_caches();
+  std::vector<tf::TimeCacheInterfacePtr> copies(caches.size(), NULL);
 
   const size_t n_caches = caches.size();
   tf_range_start.resize(n_caches, fawkes::Time(0,0));
@@ -129,31 +129,27 @@ MongoLogTransformsThread::loop()
   unsigned int num_transforms = 0;
   unsigned int num_upd_caches = 0;
 
-  for (size_t i = 0; i < n_caches; ++i) {
-    if (caches[i]) {
-      tf_range_end[i]   = caches[i]->get_latest_timestamp();
-      if (last_tf_range_end_[i] != tf_range_end[i]) {
-	// we have new data
-	if (! tf_range_end[i].is_zero()) {
-	  tf_range_start[i] = tf_range_end[i] - cfg_storage_interval_;
-	  if (last_tf_range_end_[i] > tf_range_start[i]) {
-	    tf_range_start[i] = last_tf_range_end_[i];
-	  }
+	for (size_t i = 0; i < n_caches; ++i) {
+		if (caches[i]) {
+			tf_range_end[i]   = caches[i]->get_latest_timestamp();
+			if (last_tf_range_end_[i] != tf_range_end[i]) {
+				// we have new data
+				if (! tf_range_end[i].is_zero()) {
+					tf_range_start[i] = tf_range_end[i] - cfg_storage_interval_;
+					if (last_tf_range_end_[i] > tf_range_start[i]) {
+						tf_range_start[i] = last_tf_range_end_[i];
+					}
+				}
+				copies[i] = caches[i]->clone(tf_range_start[i]);
+				last_tf_range_end_[i] = tf_range_end[i];
+				num_upd_caches += 1;
+				num_transforms += copies[i]->get_list_length();
+			}
+		}
 	}
-	copies[i] = new tf::TimeCache(caches[i], tf_range_start[i]);
-	last_tf_range_end_[i] = tf_range_end[i];
-	num_upd_caches += 1;
-	num_transforms += copies[i]->get_storage().size();
-      }
-    }
-  }
-  tf_listener->unlock();
+	tf_listener->unlock();
 
   store(copies, tf_range_start, tf_range_end);
-
-  for (size_t i = 0; i < n_caches; ++i) {
-    delete copies[i];
-  }
 
   mutex_->unlock();
   // -1 to subtract "NO PARENT" pseudo cache
@@ -166,14 +162,14 @@ MongoLogTransformsThread::loop()
 
 
 void
-MongoLogTransformsThread::store(std::vector<tf::TimeCache *> &caches,
-				std::vector<fawkes::Time> &from,
-				std::vector<fawkes::Time> &to)
+MongoLogTransformsThread::store(std::vector<tf::TimeCacheInterfacePtr> &caches,
+                                std::vector<fawkes::Time> &from,
+                                std::vector<fawkes::Time> &to)
 {
-  std::vector<std::string> frame_map = tf_listener->get_frame_id_mappings();
+	std::vector<std::string> frame_map = tf_listener->get_frame_id_mappings();
 
   for (size_t i = 0; i < caches.size(); ++i) {
-    tf::TimeCache *tc = caches[i];
+    tf::TimeCacheInterfacePtr tc = caches[i];
     if (! tc)  continue;
 
     BSONObjBuilder document;

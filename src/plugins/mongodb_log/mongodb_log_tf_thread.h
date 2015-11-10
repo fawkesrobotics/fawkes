@@ -60,7 +60,7 @@ class MongoLogTransformsThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void store(std::vector<fawkes::tf::TimeCache *> &caches,
+  void store(std::vector<fawkes::tf::TimeCacheInterfacePtr> &caches,
 	     std::vector<fawkes::Time> &from, std::vector<fawkes::Time> &to);
 
  private:
