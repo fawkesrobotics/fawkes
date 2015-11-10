@@ -77,7 +77,7 @@ AmclThread::AmclThread()
 #endif
   : Thread("AmclThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
-    TransformAspect(TransformAspect::BOTH, "Pose"),
+    TransformAspect(TransformAspect::BOTH_DEFER_PUBLISHER),
     BlackBoardInterfaceListener("AmclThread")
 {
   map_ = NULL;
@@ -193,6 +193,8 @@ void AmclThread::init()
   laser_frame_id_ = config->get_string(AMCL_CFG_PREFIX"laser_frame_id");
   global_frame_id_ = config->get_string(AMCL_CFG_PREFIX"global_frame_id");
 
+  tf_enable_publisher(odom_frame_id_.c_str());
+  
   std::string tmp_model_type;
   tmp_model_type = config->get_string(AMCL_CFG_PREFIX"laser_model_type");
 

@@ -49,7 +49,6 @@ class AmclPlugin : public fawkes::Plugin
       ros_enabled = config->get_bool(AMCL_CFG_PREFIX"ros/enable");
     } catch (Exception &e) {} // ignore, use default
     if (ros_enabled) {
-      printf("Instantiating\n");
       rt = new AmclROSThread();
       thread_list.push_back(rt);
     }
