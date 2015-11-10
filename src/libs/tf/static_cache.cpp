@@ -71,6 +71,19 @@ StaticCache::StaticCache()
 {
 }
 
+/** Create a copy of this time cache.
+ * @param look_back_until Ignored for static caches
+ * @return shared pointer to copy of this time cache
+ */
+TimeCacheInterfacePtr
+StaticCache::clone(const fawkes::Time &look_back_until) const
+{
+	StaticCache *copy = new StaticCache();
+	copy->storage_ = storage_;
+	copy->storage_as_list_ = storage_as_list_;
+	return std::shared_ptr<TimeCacheInterface>(copy);
+}
+
 bool
 StaticCache::get_data(fawkes::Time time, TransformStorage & data_out,
                       std::string* error_str)

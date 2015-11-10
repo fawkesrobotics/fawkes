@@ -93,13 +93,19 @@ TransformStorage::TransformStorage(const StampedTransform& data,
 /** @class TimeCacheInterface <tf/time_cache.h>
  * Interface for transform time caches.
  *
+ * @fn virtual TimeCacheInterfacePtr TimeCacheInterface::clone(const fawkes::Time &look_back_until = fawkes::Time(0,0)) const = 0
+ * Create a copy of this time cache.
+ * @param look_back_until if non-zero time is passed only
+ * include transforms younger than the given time.
+ * @return shared pointer to copy of this time cache
+ *
  * @fn virtual bool TimeCacheInterface::get_data(fawkes::Time time, TransformStorage & data_out, std::string* error_str = 0) = 0
  * Get data.
  * @param time time for which go get data
  * @param data_out upon return contains requested data
  * @param error_str error stirng
  * @return false if data not available
-
+ *
  * @fn virtual bool TimeCacheInterface::insert_data(const TransformStorage& new_data) = 0
  * Insert data.
  * @param new_data data to insert
@@ -307,6 +313,23 @@ TimeCache::interpolate(const TransformStorage& one,
   output.frame_id = one.frame_id;
   output.child_frame_id = one.child_frame_id;
 }
+
+TimeCacheInterfacePtr
+TimeCache::clone(const fawkes::Time &look_back_until) const
+{
+	TimeCache *copy = new TimeCache(max_storage_time_);
+	if (look_back_until.is_zero()) {
+		copy->storage_ = storage_;
+	} else {
+		L_TransformStorage::const_iterator storage_it = storage_.begin();
+		for (storage_it = storage_.begin(); storage_it != storage_.end(); ++storage_it) {
+			if (storage_it->stamp <= look_back_until)  break;
+			copy->storage_.push_back(*storage_it);
+		}
+	}
+	return std::shared_ptr<TimeCacheInterface>(copy);
+}
+
 
 bool
 TimeCache::get_data(fawkes::Time time, TransformStorage & data_out,
