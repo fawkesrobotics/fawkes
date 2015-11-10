@@ -52,7 +52,7 @@ namespace fawkes {
 #define YAML_REGEX "^[a-zA-Z0-9_-]+\\.yaml$"
 // from https://www.ietf.org/rfc/rfc3986.txt
 #define URL_REGEX "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
-#define FRAME_REGEX "^(/[a-zA-Z_][a-zA-Z0-9_-]*)+$"
+#define FRAME_REGEX "^([a-zA-Z_][a-zA-Z0-9_/-]*)+$"
 
 
 /** @class YamlConfiguration::YamlValueIterator <config/yaml.h>
