@@ -82,7 +82,8 @@ class Transformer : public BufferCore
   bool frame_exists(const std::string& frame_id_str) const;
   TimeCacheInterfacePtr get_frame_cache(const std::string& frame_id) const;
   std::vector<TimeCacheInterfacePtr> get_frame_caches() const;
-
+  std::vector<std::string> get_frame_id_mappings() const;
+  
 	void lookup_transform(const std::string& target_frame,
                         const std::string& source_frame,
                         const fawkes::Time& time,

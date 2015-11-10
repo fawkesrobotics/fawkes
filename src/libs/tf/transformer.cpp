@@ -203,6 +203,17 @@ Transformer::get_frame_caches() const
 	return frames_;
 }
 
+
+/** Get mappings from frame ID to names.
+ * @return vector of mappings from frame IDs to names
+ */
+std::vector<std::string>
+Transformer::get_frame_id_mappings() const
+{
+	return frameIDs_reverse;
+}
+
+
 /** Test if a transform is possible.
  * @param target_frame The frame into which to transform
  * @param source_frame The frame from which to transform
