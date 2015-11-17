@@ -121,7 +121,7 @@ RosNavigatorThread::loop()
 {
   if (! ac_->isServerConnected()) {
     if (! nav_if_->msgq_empty()) {
-      logger->log_warn(name(), "Command received while ROS ActionServer "
+      logger->log_warn(name(), "Command received while ROS ActionClient "
 		       "not reachable, ignoring");
       nav_if_->msgq_flush();
     }
