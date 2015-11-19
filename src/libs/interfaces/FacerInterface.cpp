@@ -77,6 +77,7 @@ FacerInterface::FacerInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "slope", 1, &data->slope);
   add_fieldinfo(IFT_UINT32, "requested_index", 1, &data->requested_index);
   add_fieldinfo(IFT_STRING, "requested_name", 64, data->requested_name);
+  add_fieldinfo(IFT_UINT32, "index_last_learned", 1, &data->index_last_learned);
   add_messageinfo("LearnFaceMessage");
   add_messageinfo("SetOpmodeMessage");
   add_messageinfo("EnableIdentityMessage");
@@ -84,7 +85,7 @@ FacerInterface::FacerInterface() : Interface()
   add_messageinfo("GetNameMessage");
   add_messageinfo("StartSearchPersonMessage");
   add_messageinfo("StopSearchPersonMessage");
-  unsigned char tmp_hash[] = {0xf9, 0x48, 0x62, 0x1e, 0x2, 0x76, 0x39, 0x10, 0x8f, 0x8, 0xf5, 0xf, 0x24, 0x20, 0x4e, 0xf3};
+  unsigned char tmp_hash[] = {0x5d, 0xd, 0xac, 0xa1, 0xe1, 0x23, 0x82, 0xc4, 0x22, 0xed, 0x8b, 0xa7, 0x3e, 0x1f, 0x2d, 0x7c};
   set_hash(tmp_hash);
 }
 
@@ -747,6 +748,41 @@ void
 FacerInterface::set_requested_name(const char * new_requested_name)
 {
   strncpy(data->requested_name, new_requested_name, sizeof(data->requested_name));
+  data_changed = true;
+}
+
+/** Get index_last_learned value.
+ * 
+      Index of the identity which was learned last.
+    
+ * @return index_last_learned value
+ */
+uint32_t
+FacerInterface::index_last_learned() const
+{
+  return data->index_last_learned;
+}
+
+/** Get maximum length of index_last_learned value.
+ * @return length of index_last_learned value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_index_last_learned() const
+{
+  return 1;
+}
+
+/** Set index_last_learned value.
+ * 
+      Index of the identity which was learned last.
+    
+ * @param new_index_last_learned new index_last_learned value
+ */
+void
+FacerInterface::set_index_last_learned(const uint32_t new_index_last_learned)
+{
+  data->index_last_learned = new_index_last_learned;
   data_changed = true;
 }
 

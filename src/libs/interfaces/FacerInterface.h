@@ -115,6 +115,9 @@ class FacerInterface : public Interface
     char requested_name[64]; /**< 
       Requested name.
      */
+    uint32_t index_last_learned; /**< 
+      Index of the identity which was learned last.
+     */
   } FacerInterface_data_t;
 #pragma pack(pop)
 
@@ -385,6 +388,9 @@ class FacerInterface : public Interface
   char * requested_name() const;
   void set_requested_name(const char * new_requested_name);
   size_t maxlenof_requested_name() const;
+  uint32_t index_last_learned() const;
+  void set_index_last_learned(const uint32_t new_index_last_learned);
+  size_t maxlenof_index_last_learned() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

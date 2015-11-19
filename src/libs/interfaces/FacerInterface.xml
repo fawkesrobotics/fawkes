@@ -97,6 +97,10 @@
     <field type="string" length="64" name="requested_name">
       Requested name.
     </field>
+
+    <field type="uint32" name="index_last_learned">
+      Index of the identity which was learned last.
+    </field>
   </data>
   <message name="LearnFace">
     <comment>

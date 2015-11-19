@@ -147,6 +147,9 @@ class FacerInterface : public Interface
   char * requested_name();
   void set_requested_name(const char * new_requested_name);
   int maxlenof_requested_name() const;
+  unsigned int index_last_learned();
+  void set_index_last_learned(const unsigned int new_index_last_learned);
+  int maxlenof_index_last_learned() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
