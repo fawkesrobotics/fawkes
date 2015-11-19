@@ -103,11 +103,20 @@ void VisLocalizationThread::loop()
     msg_number.set_parent_name(parent_name_.c_str());
     msgs::Geometry *geomMsg = msg_number.mutable_geometry();
     geomMsg->set_type(msgs::Geometry::PLANE);
+#if GAZEBO_MAJOR_VERSION > 5
+    msgs::Set(geomMsg->mutable_plane()->mutable_normal(), ignition::math::Vector3d(0.0, 0.0, 1.0));
+    msgs::Set(geomMsg->mutable_plane()->mutable_size(), ignition::math::Vector2d(label_size_, label_size_));
+#else
     msgs::Set(geomMsg->mutable_plane()->mutable_normal(), math::Vector3(0.0, 0.0, 1.0));
     msgs::Set(geomMsg->mutable_plane()->mutable_size(), math::Vector2d(label_size_, label_size_));
+#endif
     msg_number.set_transparency(0.2);  
     msg_number.set_cast_shadows(false);
+#if GAZEBO_MAJOR_VERSION > 5
+    msgs::Set(msg_number.mutable_pose(), ignition::math::Pose3d(x, y, label_height_, 0, 0, 0));
+#else
     msgs::Set(msg_number.mutable_pose(), math::Pose(x, y, label_height_, 0, 0, 0));
+#endif
     msgs::Material::Script* script = msg_number.mutable_material()->mutable_script();
     script->add_uri(location_scripts_.c_str());
     script->add_uri(location_textures_.c_str());
@@ -119,11 +128,20 @@ void VisLocalizationThread::loop()
     msg_arrow.set_parent_name(parent_name_.c_str());
     msgs::Geometry *geomArrowMsg = msg_arrow.mutable_geometry();
     geomArrowMsg->set_type(msgs::Geometry::PLANE);
+#if GAZEBO_MAJOR_VERSION > 5
+    msgs::Set(geomArrowMsg->mutable_plane()->mutable_normal(), ignition::math::Vector3d(0.0, 0.0, 1.0));
+    msgs::Set(geomArrowMsg->mutable_plane()->mutable_size(), ignition::math::Vector2d(0.17, 0.17));
+#else
     msgs::Set(geomArrowMsg->mutable_plane()->mutable_normal(), math::Vector3(0.0, 0.0, 1.0));
     msgs::Set(geomArrowMsg->mutable_plane()->mutable_size(), math::Vector2d(0.17, 0.17));
+#endif
     msg_arrow.set_transparency(0.4);  
     msg_arrow.set_cast_shadows(false);
+#if GAZEBO_MAJOR_VERSION > 5
+    msgs::Set(msg_arrow.mutable_pose(), ignition::math::Pose3d(x, y, label_height_ + 0.01, 0, 0, ori - /*turn image right*/ M_PI / 2));
+#else
     msgs::Set(msg_arrow.mutable_pose(), math::Pose(x, y, label_height_ + 0.01, 0, 0, ori - /*turn image right*/ M_PI / 2));
+#endif
     msgs::Material::Script* arrow_script = msg_arrow.mutable_material()->mutable_script();
     arrow_script->add_uri(location_scripts_.c_str());
     arrow_script->add_uri(location_textures_.c_str());
