@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="KeyValueInterface" author="Gesche Gierse" year="2015">
+  <constants>
+    <enum name="ValueType">
+      <comment>Indicator of current o.</comment>
+      <item name="TypeStr">The value to be transported is of type string.</item>
+      <item name="TypeInt">The value to be transported is of type integer.</item>
+      <item name="TypeUint">The value to be transported is of type unsigned integer.</item>
+      <item name="TypeBool">The value to be transported is of type boolean.</item>
+      <item name="TypeByte">The value to be transported is of type byte.</item>
+      <item name="TypeFloat">The value to be transported is of type float.</item>
+    </enum>
+  </constants>
+  <data>
+    <comment>Key-Value interface. Use this to publish Key-Value based information, if you do not want to create a new interface type for the data. This interface can be used for different kind of data, but should only contain one value at a time. Set the value_type field to represent which kind of value should be transported (e.g. TYPE_INT for integer) and fill the data in the correct value field (e.g. value_int).</comment>
+    <field type="string" length="32" name="key">The key entry</field>
+    <field type="ValueType" name="value_type">The type of the value entry.</field>
+    <field type="string" length="32" name="value_string">Value with type string</field>
+    <field type="uint32" name="value_uint">Value with type uint32</field>
+    <field type="int32" name="value_int">Value with type integer</field>
+    <field type="bool" name="value_bool"> Value with type Bool</field>
+    <field type="byte" name="value_byte">Value with type byte</field>
+    <field type="float" name="value_float">Value with type float</field>
+  </data>
+</interface>
