@@ -752,11 +752,16 @@ YamlConfiguration::read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &lo
 
 
 void
-YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode *&node)
+YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode *&node, std::string path)
 {
   if (! node) {
     node = new YamlConfigurationNode("root");
   }
+
+  if (*path.rbegin() != '/')
+    path += '/';
+  if (node->name() != "root")
+    path += node->name();
 
   if (doc.Type() == YAML::NodeType::Map) {
 #ifdef HAVE_YAMLCPP_0_5
@@ -791,8 +796,8 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode 
 	if (tmp->is_scalar() && it.second().Type() != YAML::NodeType::Scalar)
 #endif
 	{
-	  throw Exception("YamlConfig: scalar %s cannot be overwritten by non-scalar",
-			  tmp->name().c_str());
+	  throw Exception("YamlConfig: %s: scalar %s cannot be overwritten by non-scalar",
+			  path.c_str(), tmp->name().c_str());
 	}
 #ifdef HAVE_YAMLCPP_0_5
 	tmp->set_scalar(it->second.Scalar());
@@ -806,11 +811,11 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode 
 #ifdef HAVE_YAMLCPP_0_5
 	YamlConfigurationNode *tmp = new YamlConfigurationNode(key, it->second);
 	in->add_child(key, tmp);
-	read_config_doc(it->second, tmp);
+	read_config_doc(it->second, tmp, path);
 #else
 	YamlConfigurationNode *tmp = new YamlConfigurationNode(key, it.second());
 	in->add_child(key, tmp);
-	read_config_doc(it.second(), tmp);
+	read_config_doc(it.second(), tmp, path);
 #endif
       }
     }
@@ -823,7 +828,7 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode 
       try {
 	p = node->get_uint();
       } catch (Exception &e) {
-	e.prepend("YamlConfig: Invalid TCP/UDP port number (not an unsigned int)");
+	e.prepend("YamlConfig: %s: Invalid TCP/UDP port number (not an unsigned int)", path.c_str());
 	throw;
       }
       if (p <= 0 || p >= 65535) {
@@ -845,7 +850,7 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode 
 #  endif
 #else
       if (regexec(&__url_regex, scalar.c_str(), 0, NULL, 0) == REG_NOMATCH) {
-	throw Exception("YamlConfig: %s is not a valid URL", scalar.c_str());
+	throw Exception("YamlConfig: %s: %s is not a valid URL", path.c_str(), scalar.c_str());
       }
 #endif
     } else if (doc.Tag() == "tag:fawkesrobotics.org,cfg/frame") {
@@ -863,7 +868,7 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode 
 #  endif
 #else
       if (regexec(&__frame_regex, scalar.c_str(), 0, NULL, 0) == REG_NOMATCH) {
-	throw Exception("YamlConfig: %s is not a valid frame ID", scalar.c_str());
+	throw Exception("YamlConfig: %s: %s is not a valid frame ID", path.c_str(), scalar.c_str());
       }
 #endif
     }
