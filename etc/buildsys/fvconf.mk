@@ -123,9 +123,11 @@ ifeq ($(HAVE_OPENCV),1)
   ifeq ($(filter-out 2.0 2.1,$(VERSION_MAJOR_OPENCV).$(VERSION_MINOR_OPENCV)),)
     LDFLAGS_OPENCV     = -lcxcore -lcv
     LDFLAGS_OPENCV_GUI = -lhighgui
+    LDFLAGS_OPENCV_CONT  = -lopencv_contrib
   else
     LDFLAGS_OPENCV     = -lopencv_core -lopencv_imgproc -lopencv_ml
     LDFLAGS_OPENCV_GUI = -lopencv_highgui
+    LDFLAGS_OPENCV_CONT  = -lopencv_contrib
   endif
 endif
 

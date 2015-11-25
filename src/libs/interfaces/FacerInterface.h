@@ -45,7 +45,8 @@ class FacerInterface : public Interface
     OPMODE_DISABLED /**< Facer will not process any images */,
     OPMODE_DETECTION /**< Facer will detect faces, but not try to recognize them. */,
     OPMODE_RECOGNITION /**< Facer will detect faces, and then try to recognize the most dominant face. */,
-    OPMODE_LEARNING /**< Facer will gather images and learn an identity. */
+    OPMODE_LEARNING /**< Facer will gather images and learn an identity. */,
+    OPMODE_GENDER /**< Facer will detect faces and try to identify the gender of the faces */
   } if_facer_opmode_t;
   const char * tostring_if_facer_opmode_t(if_facer_opmode_t value) const;
 
@@ -76,6 +77,9 @@ class FacerInterface : public Interface
     uint32_t most_likely_identity; /**< 
       The identity that was recognized most prevalently.
      */
+    char most_likely_gender[64]; /**< 
+      The gender that was recogniced.
+     */
     float history_ratio; /**< 
       The ratio of the most likely identity showing up in the history
       and the length of the history.
@@ -91,6 +95,11 @@ class FacerInterface : public Interface
       Indicates whether a new identity is currently learnt. If
       learning is in progress only "old" faces can be recognized.
      */
+    bool searching_person; /**< 
+      Indicates whether the plugin is searching for a specified person.
+      If set to true, the index and name will be listed in the fields
+      "requested_index" and "requested_name".
+     */
     float recording_progress; /**< 
       Indicates the progress of recording images of a new face.
      */
@@ -105,6 +114,9 @@ class FacerInterface : public Interface
      */
     char requested_name[64]; /**< 
       Requested name.
+     */
+    uint32_t index_last_learned; /**< 
+      Index of the identity which was learned last.
      */
   } FacerInterface_data_t;
 #pragma pack(pop)
@@ -264,6 +276,57 @@ class FacerInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class StartSearchPersonMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t index; /**< Index of the identity. */
+    } StartSearchPersonMessage_data_t;
+#pragma pack(pop)
+
+    StartSearchPersonMessage_data_t *data;
+
+  interface_enum_map_t enum_map_if_facer_opmode_t;
+   public:
+    StartSearchPersonMessage(const uint32_t ini_index);
+    StartSearchPersonMessage();
+    ~StartSearchPersonMessage();
+
+    StartSearchPersonMessage(const StartSearchPersonMessage *m);
+    /* Methods */
+    uint32_t index() const;
+    void set_index(const uint32_t new_index);
+    size_t maxlenof_index() const;
+    virtual Message * clone() const;
+  };
+
+  class StopSearchPersonMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+    } StopSearchPersonMessage_data_t;
+#pragma pack(pop)
+
+    StopSearchPersonMessage_data_t *data;
+
+  interface_enum_map_t enum_map_if_facer_opmode_t;
+   public:
+    StopSearchPersonMessage();
+    ~StopSearchPersonMessage();
+
+    StopSearchPersonMessage(const StopSearchPersonMessage *m);
+    /* Methods */
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   FacerInterface();
@@ -292,6 +355,9 @@ class FacerInterface : public Interface
   uint32_t most_likely_identity() const;
   void set_most_likely_identity(const uint32_t new_most_likely_identity);
   size_t maxlenof_most_likely_identity() const;
+  char * most_likely_gender() const;
+  void set_most_likely_gender(const char * new_most_likely_gender);
+  size_t maxlenof_most_likely_gender() const;
   float history_ratio() const;
   void set_history_ratio(const float new_history_ratio);
   size_t maxlenof_history_ratio() const;
@@ -304,6 +370,9 @@ class FacerInterface : public Interface
   bool is_learning_in_progress() const;
   void set_learning_in_progress(const bool new_learning_in_progress);
   size_t maxlenof_learning_in_progress() const;
+  bool is_searching_person() const;
+  void set_searching_person(const bool new_searching_person);
+  size_t maxlenof_searching_person() const;
   float recording_progress() const;
   void set_recording_progress(const float new_recording_progress);
   size_t maxlenof_recording_progress() const;
@@ -319,6 +388,9 @@ class FacerInterface : public Interface
   char * requested_name() const;
   void set_requested_name(const char * new_requested_name);
   size_t maxlenof_requested_name() const;
+  uint32_t index_last_learned() const;
+  void set_index_last_learned(const uint32_t new_index_last_learned);
+  size_t maxlenof_index_last_learned() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

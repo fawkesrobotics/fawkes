@@ -58,6 +58,7 @@ FacerInterface::FacerInterface() : Interface()
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t", &enum_map_if_facer_opmode_t);
   add_fieldinfo(IFT_UINT32, "num_identities", 1, &data->num_identities);
   add_fieldinfo(IFT_UINT32, "recognized_identity", 1, &data->recognized_identity);
@@ -65,21 +66,26 @@ FacerInterface::FacerInterface() : Interface()
   add_fieldinfo(IFT_UINT32, "num_detections", 1, &data->num_detections);
   add_fieldinfo(IFT_UINT32, "num_recognitions", 1, &data->num_recognitions);
   add_fieldinfo(IFT_UINT32, "most_likely_identity", 1, &data->most_likely_identity);
+  add_fieldinfo(IFT_STRING, "most_likely_gender", 64, data->most_likely_gender);
   add_fieldinfo(IFT_FLOAT, "history_ratio", 1, &data->history_ratio);
   add_fieldinfo(IFT_FLOAT, "sec_since_detection", 1, &data->sec_since_detection);
   add_fieldinfo(IFT_INT32, "visibility_history", 1, &data->visibility_history);
   add_fieldinfo(IFT_BOOL, "learning_in_progress", 1, &data->learning_in_progress);
+  add_fieldinfo(IFT_BOOL, "searching_person", 1, &data->searching_person);
   add_fieldinfo(IFT_FLOAT, "recording_progress", 1, &data->recording_progress);
   add_fieldinfo(IFT_FLOAT, "bearing", 1, &data->bearing);
   add_fieldinfo(IFT_FLOAT, "slope", 1, &data->slope);
   add_fieldinfo(IFT_UINT32, "requested_index", 1, &data->requested_index);
   add_fieldinfo(IFT_STRING, "requested_name", 64, data->requested_name);
+  add_fieldinfo(IFT_UINT32, "index_last_learned", 1, &data->index_last_learned);
   add_messageinfo("LearnFaceMessage");
   add_messageinfo("SetOpmodeMessage");
   add_messageinfo("EnableIdentityMessage");
   add_messageinfo("SetNameMessage");
   add_messageinfo("GetNameMessage");
-  unsigned char tmp_hash[] = {0xe1, 0x12, 0xd2, 0x51, 0x1d, 0x24, 0x1b, 0x27, 0x86, 0xce, 0x29, 0x32, 0xd6, 0x5a, 0x5e, 0xb3};
+  add_messageinfo("StartSearchPersonMessage");
+  add_messageinfo("StopSearchPersonMessage");
+  unsigned char tmp_hash[] = {0x5d, 0xd, 0xac, 0xa1, 0xe1, 0x23, 0x82, 0xc4, 0x22, 0xed, 0x8b, 0xa7, 0x3e, 0x1f, 0x2d, 0x7c};
   set_hash(tmp_hash);
 }
 
@@ -100,6 +106,7 @@ FacerInterface::tostring_if_facer_opmode_t(if_facer_opmode_t value) const
   case OPMODE_DETECTION: return "OPMODE_DETECTION";
   case OPMODE_RECOGNITION: return "OPMODE_RECOGNITION";
   case OPMODE_LEARNING: return "OPMODE_LEARNING";
+  case OPMODE_GENDER: return "OPMODE_GENDER";
   default: return "UNKNOWN";
   }
 }
@@ -349,6 +356,41 @@ FacerInterface::set_most_likely_identity(const uint32_t new_most_likely_identity
   data_changed = true;
 }
 
+/** Get most_likely_gender value.
+ * 
+      The gender that was recogniced.
+    
+ * @return most_likely_gender value
+ */
+char *
+FacerInterface::most_likely_gender() const
+{
+  return data->most_likely_gender;
+}
+
+/** Get maximum length of most_likely_gender value.
+ * @return length of most_likely_gender value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_most_likely_gender() const
+{
+  return 64;
+}
+
+/** Set most_likely_gender value.
+ * 
+      The gender that was recogniced.
+    
+ * @param new_most_likely_gender new most_likely_gender value
+ */
+void
+FacerInterface::set_most_likely_gender(const char * new_most_likely_gender)
+{
+  strncpy(data->most_likely_gender, new_most_likely_gender, sizeof(data->most_likely_gender));
+  data_changed = true;
+}
+
 /** Get history_ratio value.
  * 
       The ratio of the most likely identity showing up in the history
@@ -492,6 +534,45 @@ void
 FacerInterface::set_learning_in_progress(const bool new_learning_in_progress)
 {
   data->learning_in_progress = new_learning_in_progress;
+  data_changed = true;
+}
+
+/** Get searching_person value.
+ * 
+      Indicates whether the plugin is searching for a specified person.
+      If set to true, the index and name will be listed in the fields
+      "requested_index" and "requested_name".
+    
+ * @return searching_person value
+ */
+bool
+FacerInterface::is_searching_person() const
+{
+  return data->searching_person;
+}
+
+/** Get maximum length of searching_person value.
+ * @return length of searching_person value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_searching_person() const
+{
+  return 1;
+}
+
+/** Set searching_person value.
+ * 
+      Indicates whether the plugin is searching for a specified person.
+      If set to true, the index and name will be listed in the fields
+      "requested_index" and "requested_name".
+    
+ * @param new_searching_person new searching_person value
+ */
+void
+FacerInterface::set_searching_person(const bool new_searching_person)
+{
+  data->searching_person = new_searching_person;
   data_changed = true;
 }
 
@@ -670,6 +751,41 @@ FacerInterface::set_requested_name(const char * new_requested_name)
   data_changed = true;
 }
 
+/** Get index_last_learned value.
+ * 
+      Index of the identity which was learned last.
+    
+ * @return index_last_learned value
+ */
+uint32_t
+FacerInterface::index_last_learned() const
+{
+  return data->index_last_learned;
+}
+
+/** Get maximum length of index_last_learned value.
+ * @return length of index_last_learned value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::maxlenof_index_last_learned() const
+{
+  return 1;
+}
+
+/** Set index_last_learned value.
+ * 
+      Index of the identity which was learned last.
+    
+ * @param new_index_last_learned new index_last_learned value
+ */
+void
+FacerInterface::set_index_last_learned(const uint32_t new_index_last_learned)
+{
+  data->index_last_learned = new_index_last_learned;
+  data_changed = true;
+}
+
 /* =========== message create =========== */
 Message *
 FacerInterface::create_message(const char *type) const
@@ -684,6 +800,10 @@ FacerInterface::create_message(const char *type) const
     return new SetNameMessage();
   } else if ( strncmp("GetNameMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new GetNameMessage();
+  } else if ( strncmp("StartSearchPersonMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new StartSearchPersonMessage();
+  } else if ( strncmp("StopSearchPersonMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new StopSearchPersonMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -737,6 +857,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage(const char * ini_name) : Mess
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 /** Constructor */
@@ -751,6 +872,7 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage() : Message("LearnFaceMessage
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
@@ -835,6 +957,7 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage(const if_facer_opmode_t ini_o
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t", &enum_map_if_facer_opmode_t);
 }
 /** Constructor */
@@ -849,6 +972,7 @@ FacerInterface::SetOpmodeMessage::SetOpmodeMessage() : Message("SetOpmodeMessage
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_ENUM, "opmode", 1, &data->opmode, "if_facer_opmode_t", &enum_map_if_facer_opmode_t);
 }
 
@@ -939,6 +1063,7 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage(const uint32_t ini_
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
@@ -954,6 +1079,7 @@ FacerInterface::EnableIdentityMessage::EnableIdentityMessage() : Message("Enable
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
@@ -1071,6 +1197,7 @@ FacerInterface::SetNameMessage::SetNameMessage(const uint32_t ini_index, const c
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
@@ -1086,6 +1213,7 @@ FacerInterface::SetNameMessage::SetNameMessage() : Message("SetNameMessage")
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
@@ -1201,6 +1329,7 @@ FacerInterface::GetNameMessage::GetNameMessage(const uint32_t ini_index) : Messa
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
 }
 /** Constructor */
@@ -1215,6 +1344,7 @@ FacerInterface::GetNameMessage::GetNameMessage() : Message("GetNameMessage")
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
   enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
   add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
 }
 
@@ -1277,6 +1407,157 @@ FacerInterface::GetNameMessage::clone() const
 {
   return new FacerInterface::GetNameMessage(this);
 }
+/** @class FacerInterface::StartSearchPersonMessage <interfaces/FacerInterface.h>
+ * StartSearchPersonMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_index initial value for index
+ */
+FacerInterface::StartSearchPersonMessage::StartSearchPersonMessage(const uint32_t ini_index) : Message("StartSearchPersonMessage")
+{
+  data_size = sizeof(StartSearchPersonMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StartSearchPersonMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->index = ini_index;
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
+  add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
+}
+/** Constructor */
+FacerInterface::StartSearchPersonMessage::StartSearchPersonMessage() : Message("StartSearchPersonMessage")
+{
+  data_size = sizeof(StartSearchPersonMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StartSearchPersonMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
+  add_fieldinfo(IFT_UINT32, "index", 1, &data->index);
+}
+
+/** Destructor */
+FacerInterface::StartSearchPersonMessage::~StartSearchPersonMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+FacerInterface::StartSearchPersonMessage::StartSearchPersonMessage(const StartSearchPersonMessage *m) : Message("StartSearchPersonMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StartSearchPersonMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get index value.
+ * Index of the identity.
+ * @return index value
+ */
+uint32_t
+FacerInterface::StartSearchPersonMessage::index() const
+{
+  return data->index;
+}
+
+/** Get maximum length of index value.
+ * @return length of index value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+FacerInterface::StartSearchPersonMessage::maxlenof_index() const
+{
+  return 1;
+}
+
+/** Set index value.
+ * Index of the identity.
+ * @param new_index new index value
+ */
+void
+FacerInterface::StartSearchPersonMessage::set_index(const uint32_t new_index)
+{
+  data->index = new_index;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+FacerInterface::StartSearchPersonMessage::clone() const
+{
+  return new FacerInterface::StartSearchPersonMessage(this);
+}
+/** @class FacerInterface::StopSearchPersonMessage <interfaces/FacerInterface.h>
+ * StopSearchPersonMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor */
+FacerInterface::StopSearchPersonMessage::StopSearchPersonMessage() : Message("StopSearchPersonMessage")
+{
+  data_size = sizeof(StopSearchPersonMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopSearchPersonMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
+  enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
+  enum_map_if_facer_opmode_t[(int)OPMODE_LEARNING] = "OPMODE_LEARNING";
+  enum_map_if_facer_opmode_t[(int)OPMODE_GENDER] = "OPMODE_GENDER";
+}
+
+/** Destructor */
+FacerInterface::StopSearchPersonMessage::~StopSearchPersonMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+FacerInterface::StopSearchPersonMessage::StopSearchPersonMessage(const StopSearchPersonMessage *m) : Message("StopSearchPersonMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (StopSearchPersonMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+FacerInterface::StopSearchPersonMessage::clone() const
+{
+  return new FacerInterface::StopSearchPersonMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -1302,6 +1583,14 @@ FacerInterface::message_valid(const Message *message) const
   }
   const GetNameMessage *m4 = dynamic_cast<const GetNameMessage *>(message);
   if ( m4 != NULL ) {
+    return true;
+  }
+  const StartSearchPersonMessage *m5 = dynamic_cast<const StartSearchPersonMessage *>(message);
+  if ( m5 != NULL ) {
+    return true;
+  }
+  const StopSearchPersonMessage *m6 = dynamic_cast<const StopSearchPersonMessage *>(message);
+  if ( m6 != NULL ) {
     return true;
   }
   return false;
