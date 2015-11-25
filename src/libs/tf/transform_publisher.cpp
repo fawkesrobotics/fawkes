@@ -73,7 +73,7 @@ namespace fawkes {
  * succession.
  * @author Tim Niemueller
  *
- * @fn   void TransformPublisher::send_transform(const Transform &transform, const fawkes::Time &time, const std::string frame, const std::string child_frame)
+ * @fn   void TransformPublisher::send_transform(const Transform &transform, const fawkes::Time &time, const std::string frame, const std::string child_frame, const bool is_static = false)
  * Convenience wrapper to send a transform.
  * This simply calls send_transform() with a StampedTransform created
  * from the data pased into this method.
@@ -81,6 +81,8 @@ namespace fawkes {
  * @param time time of the transform to publish
  * @param frame reference frame ID
  * @param child_frame child frame ID
+ * @param is_static true if the transform is static, i.e., it does not
+ * change over time, false otherwise
  */
 
 /** Constructor.
@@ -88,17 +90,16 @@ namespace fawkes {
  * publisher will be disabled. Trying to send a transform will
  * result in a DisabledException being thrown.
  * @param bb_iface_id the blackboard interface ID to be used for the
- * opened TransformInterface. Note that the name is prefixed with "TF ".
+ * opened TransformInterface. Note that the name is prefixed with "/tf/".
  */
 TransformPublisher::TransformPublisher(BlackBoard *bb,
                                        const char *bb_iface_id)
-  : __bb(bb), __mutex(new Mutex())
+  : bb_(bb), mutex_(new Mutex())
 {
-  if (__bb) {
-    std::string bbid = std::string("TF ") + bb_iface_id;
-    std::string owner = std::string("TF/P:") + bb_iface_id;
-    __tfif = __bb->open_for_writing<TransformInterface>(bbid.c_str(), owner.c_str());
-    __tfif->set_auto_timestamping(false);
+  if (bb_) {
+	  std::string bbid = (bb_iface_id[0] == '/') ? bb_iface_id : std::string("/tf/") + bb_iface_id;
+    tfif_ = bb_->open_for_writing<TransformInterface>(bbid.c_str());
+    tfif_->set_auto_timestamping(false);
   }
 }
 
@@ -109,26 +110,28 @@ TransformPublisher::TransformPublisher(BlackBoard *bb,
  */
 TransformPublisher::~TransformPublisher()
 {
-  if (__bb) __bb->close(__tfif);
-  delete __mutex;
+  if (bb_) bb_->close(tfif_);
+  delete mutex_;
 }
 
 
 /** Publish transform.
  * @param transform transform to publish
+ * @param is_static true to mark transform as static, false otherwise
  */
 void
-TransformPublisher::send_transform(const StampedTransform &transform)
+TransformPublisher::send_transform(const StampedTransform &transform, bool is_static)
 {
-  if (! __bb) {
+  if (! bb_) {
     throw DisabledException("TransformPublisher is disabled");
   }
 
-  MutexLocker lock(__mutex);
+  MutexLocker lock(mutex_);
 
-  __tfif->set_timestamp(&transform.stamp);
-  __tfif->set_frame(transform.frame_id.c_str());
-  __tfif->set_child_frame(transform.child_frame_id.c_str());
+  tfif_->set_timestamp(&transform.stamp);
+  tfif_->set_frame(transform.frame_id.c_str());
+  tfif_->set_child_frame(transform.child_frame_id.c_str());
+  tfif_->set_static_transform(is_static);
   double translation[3], rotation[4];
   const Vector3 &t = transform.getOrigin();
   translation[0] = t.x(); translation[1] = t.y(); translation[2] = t.z();
@@ -136,9 +139,9 @@ TransformPublisher::send_transform(const StampedTransform &transform)
   assert_quaternion_valid(r);
   rotation[0] = r.x(); rotation[1] = r.y();
   rotation[2] = r.z(); rotation[3] = r.w();
-  __tfif->set_translation(translation);
-  __tfif->set_rotation(rotation);
-  __tfif->write();
+  tfif_->set_translation(translation);
+  tfif_->set_rotation(rotation);
+  tfif_->write();
 }
 
 

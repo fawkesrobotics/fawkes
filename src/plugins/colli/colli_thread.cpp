@@ -767,23 +767,27 @@ ColliThread::interface_data_valid()
 
   } else {
     // check if transforms are up to date
-    tf::TimeCache* cache = tf_listener->get_frame( tf_listener->lookup_frame_number(cfg_frame_laser_) );
+    tf::TimeCacheInterfacePtr cache = tf_listener->get_frame_cache(cfg_frame_laser_);
     if( !cache ) {
-      logger->log_warn(name(), "No TimeCache for transform to laser_frame '%s'", cfg_frame_laser_.c_str());
-      return false;
+	    logger->log_warn(name(), "No TimeCache for transform to laser_frame '%s'", cfg_frame_laser_.c_str());
+	    return false;
     }
 
     tf::TransformStorage temp;
     if( !cache->get_data(Time(0,0), temp)) {
-      logger->log_warn(name(), "No data in TimeCache for transform to laser_frame '%s'", cfg_frame_laser_.c_str());
+      logger->log_warn(name(), "No data in TimeCache for transform to laser frame '%s'", cfg_frame_laser_.c_str());
       return false;
     }
 
-    float diff = (now - cache->get_latest_timestamp()).in_sec();
-    if( diff > 2.f* cfg_iface_read_timeout_) {
-      logger->log_warn(name(), "Transform to laser_frame '%s' is too old (%f > %f)",
-                              cfg_frame_laser_.c_str(), diff, 2.f*cfg_iface_read_timeout_);
-      return false;
+    fawkes::Time laser_frame_latest(cache->get_latest_timestamp());
+    if (! laser_frame_latest.is_zero()) {
+	    // not a static transform
+	    float diff = (now - laser_frame_latest).in_sec();
+	    if( diff > 2.f* cfg_iface_read_timeout_) {
+		    logger->log_warn(name(), "Transform to laser frame '%s' is too old (%f > %f)",
+		                     cfg_frame_laser_.c_str(), diff, 2.f*cfg_iface_read_timeout_);
+		    return false;
+	    }
     }
 
     // everything OK

@@ -54,7 +54,7 @@ using namespace gazebo;
 RobotinoSimThread::RobotinoSimThread()
   : Thread("RobotinoSimThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE), //sonsor and act here
-    TransformAspect(TransformAspect::ONLY_PUBLISHER, "Robotino Odometry")
+    TransformAspect(TransformAspect::DEFER_PUBLISHER)
 {
 }
 
@@ -65,6 +65,8 @@ RobotinoSimThread::init()
   logger->log_debug(name(), "Creating Gazebo publishers");
 
   //read config values
+  cfg_frame_odom_ = config->get_string("/frames/odom");
+  cfg_frame_base_ = config->get_string("/frames/base");
   slippery_wheels_enabled_ = config->get_bool("gazsim/robotino/motor/slippery-wheels-enabled");
   slippery_wheels_threshold_ = config->get_float("gazsim/robotino/motor/slippery-wheels-threshold");
   moving_speed_factor_ = config->get_float("gazsim/robotino/motor/moving-speed-factor");
@@ -82,7 +84,9 @@ RobotinoSimThread::init()
   gyro_buffer_size_ = config->get_int("/gazsim/robotino/gyro-buffer-size");
   gyro_delay_ = config->get_float("/gazsim/robotino/gyro-delay");
   infrared_sensor_index_ = config->get_int("/gazsim/robotino/infrared-sensor-index");
-  
+
+  tf_enable_publisher(cfg_frame_base_.c_str());
+ 
   //Open interfaces
   motor_if_  = blackboard->open_for_writing<MotorInterface>("Robotino");
   switch_if_ = blackboard->open_for_writing<fawkes::SwitchInterface>("Robotino Motor");
@@ -353,7 +357,7 @@ void RobotinoSimThread::on_pos_msg(ConstPosePtr &msg)
   tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1),ori_),
 		  tf::Vector3(x_, y_, 0.0));
 
-  tf_publisher->send_transform(t, now, "/odom", "/base_link");
+  tf_publisher->send_transform(t, now, cfg_frame_odom_, cfg_frame_base_);
 }
 void RobotinoSimThread::on_gyro_msg(ConstVector3dPtr &msg)
 {

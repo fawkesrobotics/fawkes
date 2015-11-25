@@ -38,7 +38,7 @@ using namespace fawkes;
 RosTfThread::RosTfThread()
   : Thread("RosTfThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-    TransformAspect(TransformAspect::ONLY_PUBLISHER, "ROS"),
+    TransformAspect(TransformAspect::DEFER_PUBLISHER),
     BlackBoardInterfaceListener("RosTfThread")
 {
   __tf_msg_queue_mutex = new Mutex();
@@ -60,33 +60,37 @@ RosTfThread::init()
   __active_queue = 0;
   __seq_num = 0;
 
+  __cfg_use_tf2 = config->get_bool("/ros/tf/use_tf2");
+
   // Must do that before registering listener because we might already
   // get events right away
-  __sub_tf = rosnode->subscribe("/tf", 100, &RosTfThread::tf_message_cb, this);
-  __pub_tf = rosnode->advertise< ::tf::tfMessage >("/tf", 100);
-
-  __tfifs = blackboard->open_multiple_for_reading<TransformInterface>("TF *");
-
-  std::list<TransformInterface *>::iterator i;
-  std::list<TransformInterface *>::iterator own_if = __tfifs.end();
-  for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
-    //logger->log_info(name(), "Opened %s", (*i)->uid());
-    if (strcmp((*i)->id(), "TF ROS") == 0) {
-      // that's our own Fawkes publisher, do NOT republish what we receive...
-      own_if = i;
-      blackboard->close(*i);
-    } else {
-      bbil_add_data_interface(*i);
-      bbil_add_reader_interface(*i);
-      bbil_add_writer_interface(*i);
-    }
+  if (__cfg_use_tf2) {
+#ifndef HAVE_TF2_MSGS
+	  throw Exception("tf2 enabled in config but not available at compile time");
+#else
+	  __sub_tf = rosnode->subscribe<tf2_msgs::TFMessage>("/tf", 100, boost::bind(&RosTfThread::tf_message_cb, this, _1, false));
+	  __sub_static_tf = rosnode->subscribe<tf2_msgs::TFMessage>("/tf_static", 100, boost::bind(&RosTfThread::tf_message_cb, this, _1, true));
+#endif
+	  __pub_tf = rosnode->advertise< tf2_msgs::TFMessage >("/tf", 100);
+	  __pub_static_tf = rosnode->advertise< tf2_msgs::TFMessage >("/tf_static", 100, /* latch */ true);
+  } else {
+	  __sub_tf = rosnode->subscribe<::tf::tfMessage>("/tf", 100, boost::bind(&RosTfThread::tf_message_cb, this, _1));
+	  __pub_tf = rosnode->advertise< ::tf::tfMessage >("/tf", 100);
   }
-  if (own_if != __tfifs.end()) __tfifs.erase(own_if);
+
+  __tfifs = blackboard->open_multiple_for_reading<TransformInterface>("/tf*");
+  std::list<TransformInterface *>::iterator i;
+  for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
+	  bbil_add_data_interface(*i);
+	  bbil_add_reader_interface(*i);
+	  bbil_add_writer_interface(*i);
+  }
   blackboard->register_listener(this);
 
-  bbio_add_observed_create("TransformInterface", "TF *");
+  publish_static_transforms_to_ros();
+  
+  bbio_add_observed_create("TransformInterface", "/tf*");
   blackboard->register_observer(this);
-
 }
 
 
@@ -115,24 +119,27 @@ RosTfThread::loop()
   __active_queue = 1 - __active_queue;
   __tf_msg_queue_mutex->unlock();
 
-  while (! __tf_msg_queues[queue].empty()) {
-    const ::tf::tfMessage::ConstPtr &msg = __tf_msg_queues[queue].front();
-    const size_t tsize = msg->transforms.size();
-    for (size_t i = 0; i < tsize; ++i) {
-      const geometry_msgs::TransformStamped &ts = msg->transforms[i];
-      const geometry_msgs::Vector3 &t = ts.transform.translation;
-      const geometry_msgs::Quaternion &r = ts.transform.rotation;
+  if (__cfg_use_tf2) {
+	  while (! __tf2_msg_queues[queue].empty()) {
+		  const std::pair<bool, tf2_msgs::TFMessage::ConstPtr> &q = __tf2_msg_queues[queue].front();
+		  const tf2_msgs::TFMessage::ConstPtr &msg = q.second;
+		  const size_t tsize = msg->transforms.size();
+		  for (size_t i = 0; i < tsize; ++i) {
+			  publish_transform_to_fawkes(msg->transforms[i], q.first);
+		  }
+		  __tf2_msg_queues[queue].pop();
+	  }
+  } else {
+	  while (! __tf_msg_queues[queue].empty()) {
+		  const ::tf::tfMessage::ConstPtr &msg = __tf_msg_queues[queue].front();
+		  const size_t tsize = msg->transforms.size();
+		  for (size_t i = 0; i < tsize; ++i) {
+			  publish_transform_to_fawkes(msg->transforms[i]);
+		  }
+		  __tf_msg_queues[queue].pop();
+	  }
 
-      fawkes::Time time(ts.header.stamp.sec, ts.header.stamp.nsec / 1000);
-
-      fawkes::tf::Transform tr(fawkes::tf::Quaternion(r.x, r.y, r.z, r.w),
-                               fawkes::tf::Vector3(t.x, t.y, t.z));
-      fawkes::tf::StampedTransform
-        st(tr, time, ts.header.frame_id, ts.child_frame_id);
-
-      tf_publisher->send_transform(st);
-    }
-    __tf_msg_queues[queue].pop();
+	  publish_static_transforms_to_ros();
   }
 }
 
@@ -145,32 +152,21 @@ RosTfThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
 
   tfif->read();
 
+  if (__cfg_use_tf2 && tfif->is_static_transform()) {
+	  publish_static_transforms_to_ros();
+  } else {
+	  geometry_msgs::TransformStamped ts = create_transform_stamped(tfif);
 
-  double *translation = tfif->translation();
-  double *rotation = tfif->rotation();
-  const Time *time = tfif->timestamp();
-
-  geometry_msgs::Vector3 t;
-  t.x = translation[0]; t.y = translation[1]; t.z = translation[2];
-  geometry_msgs::Quaternion r;
-  r.x = rotation[0]; r.y = rotation[1]; r.z = rotation[2]; r.w = rotation[3];
-  geometry_msgs::Transform tr;
-  tr.translation = t;
-  tr.rotation = r;
-
-  geometry_msgs::TransformStamped ts;
-  __seq_num_mutex->lock();
-  ts.header.seq = ++__seq_num;
-  __seq_num_mutex->unlock();
-  ts.header.stamp = ros::Time(time->get_sec(), time->get_nsec());
-  ts.header.frame_id = tfif->frame();
-  ts.child_frame_id = tfif->child_frame();
-  ts.transform = tr;
-
-  ::tf::tfMessage tmsg;
-  tmsg.transforms.push_back(ts);
-
-  __pub_tf.publish(tmsg);
+	  if (__cfg_use_tf2) {
+		  tf2_msgs::TFMessage tmsg;
+		  tmsg.transforms.push_back(ts);
+		  __pub_tf.publish(tmsg);
+	  } else {
+		  ::tf::tfMessage tmsg;
+		  tmsg.transforms.push_back(ts);
+		  __pub_tf.publish(tmsg);
+	  }
+  }
 }
 
 
@@ -179,6 +175,11 @@ RosTfThread::bb_interface_created(const char *type, const char *id) throw()
 {
   if (strncmp(type, "TransformInterface", __INTERFACE_TYPE_SIZE) != 0)  return;
 
+  for (const auto &f : __ros_frames) {
+	  // ignore interfaces that we publish ourself
+	  if (f == id)  return;
+  }
+  
   TransformInterface *tfif;
   try {
     //logger->log_info(name(), "Opening %s:%s", type, id);
@@ -242,22 +243,122 @@ RosTfThread::conditional_close(Interface *interface) throw()
 }
 
 
+geometry_msgs::TransformStamped
+RosTfThread::create_transform_stamped(TransformInterface *tfif)
+{
+  double *translation = tfif->translation();
+  double *rotation = tfif->rotation();
+  const Time *time = tfif->timestamp();
+
+  geometry_msgs::Vector3 t;
+  t.x = translation[0]; t.y = translation[1]; t.z = translation[2];
+  geometry_msgs::Quaternion r;
+  r.x = rotation[0]; r.y = rotation[1]; r.z = rotation[2]; r.w = rotation[3];
+  geometry_msgs::Transform tr;
+  tr.translation = t;
+  tr.rotation = r;
+
+  geometry_msgs::TransformStamped ts;
+  __seq_num_mutex->lock();
+  ts.header.seq = ++__seq_num;
+  __seq_num_mutex->unlock();
+  ts.header.stamp = ros::Time(time->get_sec(), time->get_nsec());
+  ts.header.frame_id = tfif->frame();
+  ts.child_frame_id = tfif->child_frame();
+  ts.transform = tr;
+
+  return ts;
+}
+
+void
+RosTfThread::publish_static_transforms_to_ros()
+{
+	std::list<fawkes::TransformInterface *>::iterator t;
+	if (__cfg_use_tf2) {
+		tf2_msgs::TFMessage tmsg;
+		for (t = __tfifs.begin(); t != __tfifs.end(); ++t) {
+			fawkes::TransformInterface *tfif = *t;
+			tfif->read();
+			if (tfif->is_static_transform()) {
+				tmsg.transforms.push_back(create_transform_stamped(tfif));
+			}
+		}
+		__pub_static_tf.publish(tmsg);
+	} else {
+		::tf::tfMessage tmsg;
+		for (t = __tfifs.begin(); t != __tfifs.end(); ++t) {
+			fawkes::TransformInterface *tfif = *t;
+			tfif->read();
+			if (tfif->is_static_transform()) {
+				tmsg.transforms.push_back(create_transform_stamped(tfif));
+			}
+		}
+		__pub_tf.publish(tmsg);
+	}
+}
+
+
+void
+RosTfThread::publish_transform_to_fawkes(const geometry_msgs::TransformStamped &ts, bool static_tf)
+{
+	const geometry_msgs::Vector3 &t = ts.transform.translation;
+	const geometry_msgs::Quaternion &r = ts.transform.rotation;
+
+	fawkes::Time time(ts.header.stamp.sec, ts.header.stamp.nsec / 1000);
+
+	fawkes::tf::Transform tr(fawkes::tf::Quaternion(r.x, r.y, r.z, r.w),
+	                         fawkes::tf::Vector3(t.x, t.y, t.z));
+	fawkes::tf::StampedTransform
+		st(tr, time, ts.header.frame_id, ts.child_frame_id);
+
+	if (tf_publishers.find(ts.child_frame_id) == tf_publishers.end()) {
+		try {
+			__ros_frames.push_back(std::string("/tf/") + ts.child_frame_id);
+			tf_add_publisher("%s", ts.child_frame_id.c_str());
+			tf_publishers[ts.child_frame_id]->send_transform(st, static_tf);
+		} catch (Exception &e) {
+			__ros_frames.pop_back();
+			logger->log_warn(name(), "Failed to create Fawkes transform publisher for frame %s from ROS",
+			                 ts.child_frame_id.c_str());
+			logger->log_warn(name(), e);
+		}
+	} else {
+		tf_publishers[ts.child_frame_id]->send_transform(st, static_tf);
+	}
+}
+
+
 /** Callback function for ROS tf message subscription.
  * @param msg incoming message
  */
 void
-RosTfThread::tf_message_cb(const ::tf::tfMessage::ConstPtr &msg)
+RosTfThread::tf_message_cb(const ros::MessageEvent<::tf::tfMessage const> &msg_evt)
 {
   MutexLocker lock(__tf_msg_queue_mutex);
 
-  std::map<std::string, std::string> *msg_header_map =
-    msg->__connection_header.get();
-  std::map<std::string, std::string>::iterator it =
-    msg_header_map->find("callerid");
+  const ::tf::tfMessage::ConstPtr &msg = msg_evt.getConstMessage();
+  std::string authority = msg_evt.getPublisherName();
 
-  if (it == msg_header_map->end()) {
+  if (authority == "") {
     logger->log_warn(name(), "Message received without callerid");
-  } else if (it->second != ros::this_node::getName()) {
+  } else if (authority != ros::this_node::getName()) {
     __tf_msg_queues[__active_queue].push(msg);
   }
 }
+
+#ifdef HAVE_TF2_MSGS
+void
+RosTfThread::tf_message_cb(const ros::MessageEvent<tf2_msgs::TFMessage const> &msg_evt, bool static_tf)
+{
+  MutexLocker lock(__tf_msg_queue_mutex);
+
+  const tf2_msgs::TFMessage::ConstPtr &msg = msg_evt.getConstMessage();
+  std::string authority = msg_evt.getPublisherName();
+
+  if (authority == "") {
+    logger->log_warn(name(), "Message received without callerid");
+  } else if (authority != ros::this_node::getName()) {
+	  __tf2_msg_queues[__active_queue].push(std::make_pair(static_tf, msg));
+  }
+}
+#endif

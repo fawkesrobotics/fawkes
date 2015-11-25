@@ -68,9 +68,9 @@ void MapLaserGenThread::init()
   } catch (Exception &e) {} // ignored, use default
 
   cfg_laser_ifname_ = config->get_string(AMCL_CFG_PREFIX"map-lasergen/laser_interface_id");
-  odom_frame_id_  = config->get_string(AMCL_CFG_PREFIX"odom_frame_id");
-  base_frame_id_  = config->get_string(AMCL_CFG_PREFIX"base_frame_id");
-  laser_frame_id_ = config->get_string(AMCL_CFG_PREFIX"laser_frame_id");
+  odom_frame_id_  = config->get_string("/frames/odom");
+  base_frame_id_  = config->get_string("/frames/base");
+  laser_frame_id_ = config->get_string(AMCL_CFG_PREFIX"map-lasergen/laser_frame_id");
 
   if (cfg_use_current_pose_) {
     cfg_pose_ifname_ = config->get_string(AMCL_CFG_PREFIX"map-lasergen/pose_interface_id");

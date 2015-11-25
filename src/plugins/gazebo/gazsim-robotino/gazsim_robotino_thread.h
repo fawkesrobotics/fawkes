@@ -93,6 +93,8 @@ class RobotinoSimThread
   fawkes::IMUInterface            *imu_if_;
 
   //config values
+  std::string cfg_frame_odom_;
+  std::string cfg_frame_base_;
   double gripper_laser_threshold_;
   double gripper_laser_value_far_;
   double gripper_laser_value_near_;

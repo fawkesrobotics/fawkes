@@ -31,7 +31,7 @@ laser-cluster:
     switch_tolerance: 0.2
 
     # The frame in which the result should be published; frame
-    result_frame: /base_link
+    result_frame: !frame base_link
 
     line_removal:
       enable: false

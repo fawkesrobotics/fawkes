@@ -53,7 +53,6 @@
 #define __LIBS_TF_TRANSFORM_LISTENER_H_
 
 #include <tf/types.h>
-#include <tf/transformer.h>
 
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
@@ -71,13 +70,14 @@ namespace fawkes {
 }
 #endif
 
+class Transformer;
+
 class TransformListener
-: public Transformer,
-  public BlackBoardInterfaceObserver,
+: public BlackBoardInterfaceObserver,
   public BlackBoardInterfaceListener
 {
  public:
-  TransformListener(BlackBoard *bb);
+	TransformListener(BlackBoard *bb, Transformer *tf_transformer);
   virtual ~TransformListener();
 
   // for BlackBoardInterfaceObserver
@@ -94,9 +94,10 @@ class TransformListener
   void conditional_close(Interface *interface) throw();
 
  private:
-  BlackBoard *__bb;
-  std::list<TransformInterface *> __tfifs;
+  BlackBoard  *bb_;
+  Transformer *tf_transformer_;
 
+  std::list<TransformInterface *> tfifs_;
 };
 
 } // end namespace tf

@@ -32,6 +32,17 @@ namespace fawkes {
 }
 #endif
 
+#if ! EIGEN_VERSION_AT_LEAST(3,2,0)
+namespace workaround {
+  template<typename Derived>
+  static inline bool allFinite(const Eigen::DenseBase<Derived> &d)
+  {
+    const Derived t = (d.derived()-d.derived());
+    return ((t.derived().array()==t.derived().array()).all());
+  }
+}
+#endif
+
 /** @class NavGraphEdge <navgraph/navgraph_edge.h>
  * Topological graph edge.
  * @author Tim Niemueller
@@ -250,7 +261,11 @@ NavGraphEdge::intersection(float x1, float y1, float x2, float y2,
   const Eigen::Vector2f p1(x1, y1);
   const Eigen::Vector2f p2(x2, y2);
   const Eigen::Vector2f lip = line_segm_intersection(e_from, e_to, p1, p2);
+#if EIGEN_VERSION_AT_LEAST(3,2,0)
   if (lip.allFinite()) {
+#else
+  if (workaround::allFinite(lip)) {
+#endif
     ip.x = lip[0];
     ip.y = lip[1];
     return true;

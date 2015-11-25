@@ -43,7 +43,8 @@ namespace fawkes {
   class PluginNetworkHandler;
 
   namespace tf {
-    class Transformer;
+	  class Transformer;
+    class TransformListener;
   }
 
   namespace runtime {
@@ -65,7 +66,8 @@ extern ThreadManager         *thread_manager;
 extern FawkesNetworkManager  *network_manager;
 extern ConfigNetworkHandler  *nethandler_config;
 extern PluginNetworkHandler  *nethandler_plugin;
-extern tf::Transformer       *tf_listener; 
+extern tf::Transformer       *tf_transformer;
+extern tf::TransformListener *tf_listener;
 extern Time                  *start_time;
 
 bool init(int argc, char **argv, int & retval);

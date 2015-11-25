@@ -90,14 +90,60 @@ TransformStorage::TransformStorage(const StampedTransform& data,
 { }
 
 
-/** Copy constructor.
- * @param rhs storage to copy
+/** @class TimeCacheInterface <tf/time_cache.h>
+ * Interface for transform time caches.
+ *
+ * @fn virtual TimeCacheInterfacePtr TimeCacheInterface::clone(const fawkes::Time &look_back_until = fawkes::Time(0,0)) const = 0
+ * Create a copy of this time cache.
+ * @param look_back_until if non-zero time is passed only
+ * include transforms younger than the given time.
+ * @return shared pointer to copy of this time cache
+ *
+ * @fn virtual bool TimeCacheInterface::get_data(fawkes::Time time, TransformStorage & data_out, std::string* error_str = 0) = 0
+ * Get data.
+ * @param time time for which go get data
+ * @param data_out upon return contains requested data
+ * @param error_str error stirng
+ * @return false if data not available
+ *
+ * @fn virtual bool TimeCacheInterface::insert_data(const TransformStorage& new_data) = 0
+ * Insert data.
+ * @param new_data data to insert
+ * @return true on success, false otherwise
+ *
+ * @fn virtual void TimeCacheInterface::clear_list() = 0
+ * Clear storage.
+ *
+ * @fn virtual CompactFrameID TimeCacheInterface::get_parent(fawkes::Time time, std::string* error_str) = 0
+ * Get parent frame number.
+ * @param time point in time
+ * @param error_str error string
+ * @return frame number
+ *
+ * @fn virtual P_TimeAndFrameID TimeCacheInterface::get_latest_time_and_parent() = 0
+ * Get latest time and parent frame number.
+ * @return latest time and parent frame number
+ *
+ * @fn virtual unsigned int TimeCacheInterface::get_list_length() = 0 const
+ * Get storage list length.
+ * @return storage list length
+ *
+ * @fn virtual fawkes::Time TimeCacheInterface::get_latest_timestamp() = 0 const
+ * Get latest timestamp from cache.
+ * @return latest timestamp
+ *
+ * @fn virtual fawkes::Time TimeCacheInterface::get_oldest_timestamp() = 0 const
+ * Get oldest timestamp from cache.
+ * @return oldest time stamp.
+ *
+ * @fn virtual const L_TransformStorage & TimeCacheInterface::get_storage() const = 0
+ * Get storage list.
+ * @return reference to list of storage elements
+ *
+ * @fn L_TransformStorage TimeCacheInterface::get_storage_copy() const = 0
+ * Get copy of storage elements.
+ * @return copied list of storage elements
  */
-TransformStorage::TransformStorage(const TransformStorage& rhs)
-{
-  *this = rhs;
-}
-
 
 /** @class TimeCache <tf/time_cache.h>
  * Time based transform cache.
@@ -113,39 +159,6 @@ TimeCache::TimeCache(float max_storage_time)
 : max_storage_time_(max_storage_time)
 {}
 
-
-/** Copy constructor.
- * @param t time cache to copy
- */
-TimeCache::TimeCache(const TimeCache &t)
-  : storage_(t.storage_), max_storage_time_(t.max_storage_time_)
-{}
-
-/** Copy constructor.
- * @param t time cache to copy
- */
-TimeCache::TimeCache(const TimeCache *t)
-  : storage_(t->storage_), max_storage_time_(t->max_storage_time_)
-{}
-
-
-/** Conditional copy constructor.
- * This copy constructor takes an additional argument that denotes
- * how far to go back in time to copy data. Only times larger than
- * the given time will be copied to the new time cache.
- * @param t time cache to copy
- * @param look_back_until time to look back for transforms 
- */
-TimeCache::TimeCache(const TimeCache *t, fawkes::Time &look_back_until)
-  : max_storage_time_(t->max_storage_time_)
-{
-  L_TransformStorage::const_iterator storage_it = t->storage_.begin();
-  while (storage_it != t->storage_.end()) {
-    if (storage_it->stamp <= look_back_until)  break;
-    storage_.push_back(*storage_it);
-    ++storage_it;
-  }
-}
 
 /** Create extrapolation error string.
  * @param t0 requested time
@@ -301,12 +314,23 @@ TimeCache::interpolate(const TransformStorage& one,
   output.child_frame_id = one.child_frame_id;
 }
 
-/** Get data.
- * @param time time for which go get data
- * @param data_out upon return contains requested data
- * @param error_str error stirng
-* @return false if data not available
-*/
+TimeCacheInterfacePtr
+TimeCache::clone(const fawkes::Time &look_back_until) const
+{
+	TimeCache *copy = new TimeCache(max_storage_time_);
+	if (look_back_until.is_zero()) {
+		copy->storage_ = storage_;
+	} else {
+		L_TransformStorage::const_iterator storage_it = storage_.begin();
+		for (storage_it = storage_.begin(); storage_it != storage_.end(); ++storage_it) {
+			if (storage_it->stamp <= look_back_until)  break;
+			copy->storage_.push_back(*storage_it);
+		}
+	}
+	return std::shared_ptr<TimeCacheInterface>(copy);
+}
+
+
 bool
 TimeCache::get_data(fawkes::Time time, TransformStorage & data_out,
                     std::string* error_str)
@@ -330,11 +354,6 @@ TimeCache::get_data(fawkes::Time time, TransformStorage & data_out,
   return true;
 }
 
-/** Get parent frame number
- * @param time point in time
- * @param error_str error string
- * @return frame number
- */
 CompactFrameID
 TimeCache::get_parent(fawkes::Time time, std::string* error_str)
 {
@@ -350,10 +369,6 @@ TimeCache::get_parent(fawkes::Time time, std::string* error_str)
 }
 
 
-/** Insert data.
- * @param new_data data to insert
- * @return true on success, false otherwise
- */
 bool
 TimeCache::insert_data(const TransformStorage& new_data)
 {
@@ -377,16 +392,12 @@ TimeCache::insert_data(const TransformStorage& new_data)
   return true;
 }
 
-/** Clear storage. */
 void
 TimeCache::clear_list()
 {
   storage_.clear();
 }
 
-/** Get storage list length.
- * @return storage list length
- */
 unsigned int
 TimeCache::get_list_length() const
 {
@@ -394,29 +405,20 @@ TimeCache::get_list_length() const
 }
 
 
-/** Get storage list.
- * @return reference to list of storage elements
- */
-const TimeCache::L_TransformStorage &
+const TimeCacheInterface::L_TransformStorage &
 TimeCache::get_storage() const
 {
   return storage_;
 }
 
-/** Get copy of storage elements.
- * @return copied list of storage elements
- */
-TimeCache::L_TransformStorage
+TimeCacheInterface::L_TransformStorage
 TimeCache::get_storage_copy() const
 {
   return storage_;
 }
 
-/** Get latest time and parent frame number.
- * @return latest time and parent frame number
- */
 P_TimeAndFrameID
-TimeCache::get_latest_time_and_parent() const
+TimeCache::get_latest_time_and_parent()
 {
   if (storage_.empty()) {
     return std::make_pair(fawkes::Time(), 0);
@@ -426,9 +428,6 @@ TimeCache::get_latest_time_and_parent() const
   return std::make_pair(ts.stamp, ts.frame_id);
 }
 
-/** Get latest timestamp from cache.
- * @return latest timestamp
- */
 fawkes::Time
 TimeCache::get_latest_timestamp() const
 {
@@ -436,9 +435,6 @@ TimeCache::get_latest_timestamp() const
   return storage_.front().stamp;
 }
 
-/** Get oldest timestamp from cache.
- * @return oldest time stamp.
- */
 fawkes::Time
 TimeCache::get_oldest_timestamp() const
 {

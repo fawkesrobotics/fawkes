@@ -52,56 +52,41 @@
 #ifndef __LIBS_TF_TRANSFORMER_H_
 #define __LIBS_TF_TRANSFORMER_H_
 
+#include <tf/buffer_core.h>
 #include <tf/types.h>
-#include <stdint.h>
-
-#include <map>
-#include <unordered_map>
-#include <vector>
-#include <string>
 
 namespace fawkes {
-
-  class Mutex;
-
   namespace tf {
 #if 0 /* just to make Emacs auto-indent happy */
   }
 }
 #endif
 
-class TimeCache;
+class TimeCacheInterface;
+typedef std::shared_ptr<TimeCacheInterface> TimeCacheInterfacePtr;
 
-class Transformer
+class Transformer : public BufferCore
 {
  public:
-  static const unsigned int MAX_GRAPH_DEPTH = 100UL;
-  static const float DEFAULT_MAX_EXTRAPOLATION_DISTANCE;
-
-  Transformer(float cache_time_sec = 10.0);
+	Transformer(float cache_time_sec = BufferCore::DEFAULT_CACHE_TIME);
   virtual ~Transformer(void);
 
+  void set_enabled(bool enabled);
+  bool is_enabled() const;
+  
   float get_cache_time() const;
   void lock();
   bool try_lock();
   void unlock();
 
-  void clear();
-
-  bool set_transform(const StampedTransform &transform,
-                     const std::string &authority = "default_authority");
-
   bool frame_exists(const std::string& frame_id_str) const;
-
-  std::string resolve(const std::string& frame_name);
-
-  void lookup_transform(const std::string& target_frame,
+  TimeCacheInterfacePtr get_frame_cache(const std::string& frame_id) const;
+  std::vector<TimeCacheInterfacePtr> get_frame_caches() const;
+  std::vector<std::string> get_frame_id_mappings() const;
+  
+	void lookup_transform(const std::string& target_frame,
                         const std::string& source_frame,
                         const fawkes::Time& time,
-                        StampedTransform& transform) const;
-
-  void lookup_transform(const std::string& target_frame,
-                        const std::string& source_frame,
                         StampedTransform& transform) const;
 
   void lookup_transform(const std::string& target_frame,
@@ -110,25 +95,17 @@ class Transformer
                         const fawkes::Time& source_time,
                         const std::string& fixed_frame,
                         StampedTransform& transform) const;
-
-  bool can_transform(const std::string& target_frame,
-                     const std::string& source_frame,
-                     const fawkes::Time& time) const;
-
-  bool can_transform(const std::string& target_frame,
-                     const fawkes::Time& target_time,
-                     const std::string& source_frame,
-                     const fawkes::Time& source_time,
-                     const std::string& fixed_frame) const;
-
-  const TimeCache *  get_frame_cache(const std::string &frame_id) const;
-  const std::vector<TimeCache *> &  get_frame_caches() const;
-
-  void set_enabled(bool enabled);
-  bool is_enabled() const { return enabled_; };
-
-  int get_latest_common_time(const std::string &source_frame, const std::string &target_frame,
-                             fawkes::Time& time, std::string* error_string = 0) const;
+ 
+  void lookup_transform(const std::string& target_frame,
+                        const std::string& source_frame,
+                        StampedTransform& transform) const;
+  
+  bool can_transform(const std::string& target_frame, const std::string& source_frame,
+                     const fawkes::Time& time, std::string* error_msg = NULL) const;
+  
+  bool can_transform(const std::string& target_frame, const fawkes::Time& target_time,
+                     const std::string& source_frame, const fawkes::Time& source_time,
+                     const std::string& fixed_frame, std::string* error_msg = NULL) const;
 
   void transform_quaternion(const std::string& target_frame,
                             const Stamped<Quaternion>& stamped_in,
@@ -163,61 +140,10 @@ class Transformer
                      const std::string& fixed_frame,
                      Stamped<Pose>& stamped_out) const;
 
-  TimeCache *               get_frame(unsigned int frame_number) const;
-  CompactFrameID            lookup_frame_number(const std::string &frameid_str) const;
-  CompactFrameID            lookup_or_insert_frame_number(const std::string &frameid_str);
-  std::string               lookup_frame_string(unsigned int frame_id_num) const;
-  std::vector<std::string>  get_frame_id_mappings() const;
-  std::string               all_frames_as_dot(bool print_time = false,
-					      fawkes::Time *time = 0) const;
-
-
- protected:
-  /// Flag to mark the transformer as disabled
-  bool enabled_;
-  /// Map from string frame ids to CompactFrameID.
-  typedef std::unordered_map<std::string, CompactFrameID> M_StringToCompactFrameID;
-  /// Map from frame IDs to frame numbers
-  M_StringToCompactFrameID frameIDs_;
-  /// Map from CompactFrameID frame_id_numbers to string for debugging and output.
-  std::vector<std::string> frameIDs_reverse;
-  /// Map to lookup the most recent authority for a given frame.
-  std::map<CompactFrameID, std::string> frame_authority_;
-
-  /** \brief The pointers to potential frames that the tree can be made of.
-   * The frames will be dynamically allocated at run time when set the first time. */
-  std::vector<TimeCache*> frames_;
-
-  /** \brief A mutex to protect testing and allocating new frames on the above vector. */
-  mutable Mutex *frame_mutex_;
-
-  /// How long to cache transform history
-  float cache_time_;
-
-  /// whether or not to allow extrapolation
-  float max_extrapolation_distance_;
-
-  /// transform prefix to apply as necessary
-  std::string tf_prefix_;
-
-  /// Set to true to allow falling back to wall time
-  bool fall_back_to_wall_time_;
+  std::string all_frames_as_dot(bool print_time, fawkes::Time *time = 0) const;
 
  private:
-  /**Return the latest time which is common across the spanning set.
-   * @return zero if fails to cross */
-  int get_latest_common_time(CompactFrameID target_frame, CompactFrameID source_frame,
-                             fawkes::Time& time, std::string* error_string) const;
-
-  bool can_transform_no_lock(CompactFrameID target_id, CompactFrameID source_id,
-                             const fawkes::Time& time) const;
-  void create_connectivity_error_string(CompactFrameID source_frame, CompactFrameID target_frame, std::string* out) const;
-
-  template<typename F>
-  int walk_to_top_parent(F& f, fawkes::Time time,
-                         CompactFrameID target_id, CompactFrameID source_id,
-                         std::string* error_string) const;
-
+  bool enabled_;
 };
 
 

@@ -59,9 +59,10 @@ TransformInterface::TransformInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_STRING, "frame", 64, data->frame);
   add_fieldinfo(IFT_STRING, "child_frame", 64, data->child_frame);
+  add_fieldinfo(IFT_BOOL, "static_transform", 1, &data->static_transform);
   add_fieldinfo(IFT_DOUBLE, "translation", 3, &data->translation);
   add_fieldinfo(IFT_DOUBLE, "rotation", 4, &data->rotation);
-  unsigned char tmp_hash[] = {0xfd, 0xf6, 0x19, 0x45, 0x14, 0xa9, 0x28, 0xd2, 0xfd, 0x73, 0xd8, 0xc9, 0xf5, 0xc8, 0x55, 0x2};
+  unsigned char tmp_hash[] = {0xb6, 0xb0, 0xd3, 0x96, 0xda, 0x61, 0xdd, 0xd3, 0x6, 0x9e, 0x66, 0x4d, 0x14, 0x54, 0x5e, 0xfb};
   set_hash(tmp_hash);
 }
 
@@ -142,6 +143,43 @@ void
 TransformInterface::set_child_frame(const char * new_child_frame)
 {
   strncpy(data->child_frame, new_child_frame, sizeof(data->child_frame));
+  data_changed = true;
+}
+
+/** Get static_transform value.
+ * 
+	    True if the transform is static, i.e. it will never change
+	    during its lifetime, false otherwise.
+    
+ * @return static_transform value
+ */
+bool
+TransformInterface::is_static_transform() const
+{
+  return data->static_transform;
+}
+
+/** Get maximum length of static_transform value.
+ * @return length of static_transform value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+TransformInterface::maxlenof_static_transform() const
+{
+  return 1;
+}
+
+/** Set static_transform value.
+ * 
+	    True if the transform is static, i.e. it will never change
+	    during its lifetime, false otherwise.
+    
+ * @param new_static_transform new static_transform value
+ */
+void
+TransformInterface::set_static_transform(const bool new_static_transform)
+{
+  data->static_transform = new_static_transform;
   data_changed = true;
 }
 

@@ -213,17 +213,16 @@ RosLaserScanThread::loop()
   __ls_msg_queue_mutex->unlock();
 
   while (! __ls_msg_queues[queue].empty()) {
-    const sensor_msgs::LaserScan::ConstPtr &msg = __ls_msg_queues[queue].front();
+    const ros::MessageEvent<sensor_msgs::LaserScan const> &msg_evt =
+      __ls_msg_queues[queue].front();
+
+    sensor_msgs::LaserScan::ConstPtr msg = msg_evt.getConstMessage();
 
     // Check if interface exists, open if it does not
-    std::map<std::string, std::string> *msg_header_map =
-      msg->__connection_header.get();
-    std::map<std::string, std::string>::iterator it =
-      msg_header_map->find("callerid");
-    const std::string &callerid = it->second;
+    const std::string callerid = msg_evt.getPublisherName();
 
     // for now we only create 360 interfaces, might add on that later
-    if (it == msg_header_map->end()) {
+    if (callerid.empty()) {
       logger->log_warn(name(), "Received laser scan from ROS without caller ID,"
                        "ignoring");
     } else {
@@ -245,7 +244,7 @@ RosLaserScanThread::loop()
 
       if (have_interface) {
         // update interface with laser data
-        Laser360Interface *ls360if = __ls360_wifs[it->second];
+        Laser360Interface *ls360if = __ls360_wifs[callerid];
         ls360if->set_frame(msg->header.frame_id.c_str());
         float distances[360];
         for (unsigned int a = 0; a < 360; ++a) {
@@ -560,18 +559,8 @@ RosLaserScanThread::conditional_close(Interface *interface) throw()
  * @param msg incoming message
  */
 void
-RosLaserScanThread::laser_scan_message_cb(const sensor_msgs::LaserScan::ConstPtr &msg)
+RosLaserScanThread::laser_scan_message_cb(const ros::MessageEvent<sensor_msgs::LaserScan const> &msg_evt)
 {
   MutexLocker lock(__ls_msg_queue_mutex);
-
-  std::map<std::string, std::string> *msg_header_map =
-    msg->__connection_header.get();
-  std::map<std::string, std::string>::iterator it =
-    msg_header_map->find("callerid");
-
-  if (it == msg_header_map->end()) {
-    logger->log_warn(name(), "Message received without callerid");
-  } else if (it->second != ros::this_node::getName()) {
-    __ls_msg_queues[__active_queue].push(msg);
-  }
+  __ls_msg_queues[__active_queue].push(msg_evt);
 }

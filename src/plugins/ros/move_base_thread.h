@@ -70,8 +70,8 @@ class RosMoveBaseThread
 
   typedef actionlib::ActionServer<move_base_msgs::MoveBaseAction> MoveBaseServer;
 
-  void action_goal_cb(MoveBaseServer::GoalHandle &goal, ExecType ext);
-  void action_cancel_cb(MoveBaseServer::GoalHandle &goal);
+  void action_goal_cb(MoveBaseServer::GoalHandle goal, ExecType ext);
+  void action_cancel_cb(MoveBaseServer::GoalHandle goal);
   void message_cb(geometry_msgs::PoseStampedConstPtr goal_pose, ExecType ext);
 
   void stop();

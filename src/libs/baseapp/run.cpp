@@ -50,6 +50,7 @@
 #include <aspect/manager.h>
 #ifdef HAVE_TF
 #  include <tf/transform_listener.h>
+#  include <tf/transformer.h>
 #endif
 
 #include <sys/types.h>
@@ -85,7 +86,8 @@ PluginNetworkHandler      * nethandler_plugin = NULL;
 Clock                     * clock = NULL;
 SharedMemoryRegistry      * shm_registry;
 InitOptions               * init_options = NULL;
-tf::Transformer           * tf_listener = NULL;
+tf::Transformer           * tf_transformer = NULL;
+tf::TransformListener     * tf_listener = NULL;
 Time                      * start_time = NULL;
 #ifdef HAVE_LOGGING_FD_REDIRECT
 LogFileDescriptorToLog    * log_fd_redirect_stderr_ = NULL;
@@ -345,7 +347,8 @@ init(InitOptions options, int & retval)
   blackboard = lbb;
 
 #ifdef HAVE_TF
-  tf_listener        = new tf::TransformListener(blackboard);
+  tf_transformer     = new tf::Transformer();
+  tf_listener        = new tf::TransformListener(blackboard, tf_transformer);
 #endif
 
   aspect_manager     = new AspectManager();
@@ -391,7 +394,7 @@ init(InitOptions options, int & retval)
 					   network_manager->nnresolver(),
 					   network_manager->service_publisher(),
 					   network_manager->service_browser(),
-					   plugin_manager, tf_listener);
+					   plugin_manager, tf_transformer);
 
   retval = 0;
   return true;
@@ -422,6 +425,7 @@ cleanup()
   delete plugin_manager;
 #ifdef HAVE_TF
   delete tf_listener;
+  delete tf_transformer;
 #endif
   delete blackboard;
   delete config;

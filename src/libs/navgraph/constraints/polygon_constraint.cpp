@@ -194,7 +194,12 @@ NavGraphPolygonConstraint::on_poly(const Point &p1, const Point &p2, const Polyg
       Eigen::ParametrizedLine<float,2>::Through(ep1, ep2);
     const Eigen::Hyperplane<float, 2> lh(l2);
 
+#if EIGEN_VERSION_AT_LEAST(3,2,0)
     const Eigen::Vector2f is = l1.intersectionPoint(lh);
+#else
+    const Eigen::Vector2f::Scalar ip = l1.intersection(lh);
+    const Eigen::Vector2f is = l1.origin() + (l1.direction() * ip);
+#endif
     const Eigen::Vector2f d1 = pp2 - pp1;
     const Eigen::Vector2f d2 = ep2 - ep1;
     const float t1 = d1.dot(is - l1.origin()) / d1.squaredNorm();

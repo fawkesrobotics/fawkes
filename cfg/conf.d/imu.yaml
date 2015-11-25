@@ -19,7 +19,7 @@ hardware/imu:
     type: CruizCore-XG1010
 
     # Coordinate frame at which origin the IMU is positioned
-    frame: !frame /imu
+    frame: !frame imu
     
     # Device file
     device: /dev/ttyUSB0

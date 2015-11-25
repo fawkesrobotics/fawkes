@@ -44,7 +44,7 @@ namespace fawkes {
  * @param transformer system-wide shared transformer to pass to threads
  */
 TransformAspectIniFin::TransformAspectIniFin(BlackBoard *blackboard,
-					     tf::Transformer *transformer)
+                                             tf::Transformer *transformer)
   : AspectIniFin("TransformAspect")
 {
   __blackboard  = blackboard;
@@ -62,7 +62,7 @@ TransformAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  transform_thread->init_TransformAspect(__blackboard, __transformer);
+  transform_thread->init_TransformAspect(__blackboard, __transformer, thread->name());
 }
 
 void

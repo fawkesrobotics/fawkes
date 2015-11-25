@@ -33,7 +33,8 @@ using namespace fawkes;
 /** Constructor. */
 TfExampleThread::TfExampleThread()
   : Thread("TfExampleThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
+    TransformAspect(TransformAspect::BOTH, "test_frame")
 {
 }
 
@@ -47,6 +48,7 @@ TfExampleThread::~TfExampleThread()
 void
 TfExampleThread::init()
 {
+	angle_ = 0.;
 }
 
 
@@ -56,8 +58,8 @@ TfExampleThread::finalize()
 }
 
 
-#define SOURCE "/rx28/tilt"
-#define TARGET "/base_link"
+#define SOURCE "rx28/tilt"
+#define TARGET "base_link"
 
 void
 TfExampleThread::loop()
@@ -92,8 +94,8 @@ TfExampleThread::loop()
     tf::Quaternion q = transform.getRotation();
     tf::Vector3 v   = transform.getOrigin();
 
-    const tf::TimeCache *world_cache = tf_listener->get_frame_cache(SOURCE);
-    const tf::TimeCache *robot_cache = tf_listener->get_frame_cache(TARGET);
+    const tf::TimeCacheInterfacePtr world_cache = tf_listener->get_frame_cache(SOURCE);
+    const tf::TimeCacheInterfacePtr robot_cache = tf_listener->get_frame_cache(TARGET);
 
     logger->log_info(name(), "Transform %s -> %s, %f sec old: "
                      "T(%f,%f,%f)  Q(%f,%f,%f,%f)",
@@ -103,6 +105,13 @@ TfExampleThread::loop()
     logger->log_info(name(), "World cache size: %zu  Robot cache size: %zu",
                      world_cache->get_list_length(),
                      robot_cache->get_list_length());
-
   }
+
+  angle_ += M_PI / 4.;
+  if (angle_ >= 2*M_PI) angle_ = 0.;
+  fawkes::Time now;
+
+  tf::Transform t(tf::create_quaternion_from_yaw(angle_));
+  tf::StampedTransform st(t, now, "base_link", "test_frame");
+  tf_publisher->send_transform(st);
 }

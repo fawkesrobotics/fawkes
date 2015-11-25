@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_ffset_pose = fawkescore fawkesutils fawkesinterface \
-	    fawkesblackboard fawkesnetcomm \
+	    fawkesblackboard fawkesnetcomm fawkesconfig \
 	    LocalizationInterface
 OBJS_ffset_pose = ffset_pose.o
 OBJS_all    = $(OBJS_ffset_pose)

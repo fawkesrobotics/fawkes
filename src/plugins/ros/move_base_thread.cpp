@@ -113,7 +113,6 @@ RosMoveBaseThread::once()
 void
 RosMoveBaseThread::stop()
 {
-  move_base_msgs::MoveBaseResult result = create_result();
   NavigatorInterface::StopMessage *msg =
     new NavigatorInterface::StopMessage();
   if (exec_type_ == NAVGRAPH) {
@@ -128,7 +127,7 @@ RosMoveBaseThread::stop()
 }
 
 void
-RosMoveBaseThread::action_goal_cb(MoveBaseServer::GoalHandle &goal, ExecType ext)
+RosMoveBaseThread::action_goal_cb(MoveBaseServer::GoalHandle goal, ExecType ext)
 {
   MutexLocker lock(loop_mutex);
   if (exec_running_ && exec_as_) {
@@ -144,7 +143,7 @@ RosMoveBaseThread::action_goal_cb(MoveBaseServer::GoalHandle &goal, ExecType ext
 }
 
 void
-RosMoveBaseThread::action_cancel_cb(MoveBaseServer::GoalHandle &goal)
+RosMoveBaseThread::action_cancel_cb(MoveBaseServer::GoalHandle goal)
 {
   MutexLocker lock(loop_mutex);
   stop();

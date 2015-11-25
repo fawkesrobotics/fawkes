@@ -166,14 +166,32 @@ class Stamped : public T{
  * child frame IDs between the transforms are the same, as well as the
  * time stamps and transforms.
  */
-static inline bool operator==(const StampedTransform &a, const StampedTransform &b)
+static inline bool
+operator==(const StampedTransform &a, const StampedTransform &b)
 {
   return
     a.frame_id == b.frame_id &&
     a.child_frame_id == b.child_frame_id &&
     a.stamp == b.stamp &&
     static_cast<const Transform&>(a) == static_cast<const Transform&>(b);
-};
+}
+
+/** Comparison operator for StampedTransform.
+ * @param a transform to compare
+ * @param b transform to compare
+ * @return true of the transforms are the same, i.e. the parent and
+ * child frame IDs between the transforms are the same, as well as the
+ * time stamps and transforms.
+ */
+template <typename T>
+bool
+operator==(const Stamped<T> &a, const Stamped<T> &b) {
+	return
+	a.frame_id_ == b.frame_id_ &&
+	a.stamp_ == b.stamp_ &&
+	static_cast<const T&>(a) == static_cast<const T&>(b);
+}
+
 
 
 /** \brief Throw InvalidArgument if quaternion is malformed */
@@ -191,7 +209,7 @@ assert_quaternion_valid(const Quaternion & q)
     throw InvalidArgumentException("Quaternion malformed, magnitude: %f, "
                                    "should be 1.0", magnitude);
   }
-};
+}
 
 /** Construct a Quaternion from fixed angles.
  * @param roll The roll about the X axis

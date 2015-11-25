@@ -267,7 +267,8 @@ ifeq ($(DO_32BIT_BUILD),1)
   LDFLAGS_BASE += -m32
 
   SYSLIBDIR32 = /usr/lib$(if $(wildcard /usr/lib32),32)
-  PKGCONFIG = PKG_CONFIG_PATH=$(SYSLIBDIR32)/pkgconfig PKG_CONFIG_LIBDIR=$$PKG_CONFIG_PATH; pkg-config
+  export PKG_CONFIG_PATH   = $(SYSLIBDIR32)/pkgconfig$(if $(PKG_CONFIG_PATH),:$(PKG_CONFIG_PATH))
+  export PKG_CONFIG_LIBDIR = $(SYSLIBDIR32)/pkgconfig$(if $(PKG_CONFIG_LIBDIR),:$(PKG_CONFIG_LIBDIR))
   ARCH=i386
 endif
 

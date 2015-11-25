@@ -1,7 +1,7 @@
 /***************************************************************************
- *  transform_publisher.h - Fawkes transform publisher (based on ROS tf)
+ *  time_cache.cpp - Fawkes tf time cache (based on ROS tf)
  *
- *  Created: Tue Oct 25 22:17:54 2011
+ *  Created: Thu Oct 20 11:26:40 2011
  *  Copyright  2011  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
@@ -49,47 +49,106 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TRANSFORM_PUBLISHER_H_
-#define __LIBS_TF_TRANSFORM_PUBLISHER_H_
-
+#include <tf/time_cache.h>
+#include <tf/exceptions.h>
 #include <tf/types.h>
-#include <utils/time/time.h>
 
 namespace fawkes {
-
-  class BlackBoard;
-  class TransformInterface;
-  class Mutex;
-
   namespace tf {
 #if 0 /* just to make Emacs auto-indent happy */
   }
 }
 #endif
 
-class TransformPublisher
+/** @class StaticCache <tf/time_cache.h>
+ * Transform cache for static transforms.
+ */
+
+/** Constructor.
+ */
+StaticCache::StaticCache()
+	: storage_as_list_(1)
 {
- public:
-  TransformPublisher(BlackBoard *bb, const char *bb_iface_id);
-  virtual ~TransformPublisher();
+}
 
-  virtual void send_transform(const StampedTransform &transform, const bool is_static = false);
+/** Create a copy of this time cache.
+ * @param look_back_until Ignored for static caches
+ * @return shared pointer to copy of this time cache
+ */
+TimeCacheInterfacePtr
+StaticCache::clone(const fawkes::Time &look_back_until) const
+{
+	StaticCache *copy = new StaticCache();
+	copy->storage_ = storage_;
+	copy->storage_as_list_ = storage_as_list_;
+	return std::shared_ptr<TimeCacheInterface>(copy);
+}
 
-  virtual void send_transform(const Transform &transform,
-                              const fawkes::Time &time,
-                              const std::string frame,
-                              const std::string child_frame,
-                              const bool is_static = false)
-  { send_transform(StampedTransform(transform, time, frame, child_frame), is_static); }
+bool
+StaticCache::get_data(fawkes::Time time, TransformStorage & data_out,
+                      std::string* error_str)
+{
+	data_out = storage_;
+	data_out.stamp = time;
+	return true;
+}
 
- private:
-  BlackBoard *bb_;
-  TransformInterface *tfif_;
-  Mutex *mutex_;
-};
+bool
+StaticCache::insert_data(const TransformStorage& new_data)
+{
+  storage_ = new_data;
+  storage_as_list_.front() = new_data;
+  return true;
+}
+
+void
+StaticCache::clear_list()
+{
+	return;
+}
+
+unsigned int
+StaticCache::get_list_length() const
+{
+	return 1;
+}
+
+CompactFrameID
+StaticCache::get_parent(fawkes::Time time, std::string *error_str)
+{
+  return storage_.frame_id;
+}
+
+P_TimeAndFrameID
+StaticCache::get_latest_time_and_parent()
+{
+	return std::make_pair(fawkes::Time(0,0), storage_.frame_id);
+}
+
+fawkes::Time
+StaticCache::get_latest_timestamp() const
+{
+	return fawkes::Time(0,0);
+}
+
+fawkes::Time
+StaticCache::get_oldest_timestamp() const
+{   
+	return fawkes::Time(0,0);
+}
+
+const TimeCacheInterface::L_TransformStorage &
+StaticCache::get_storage() const
+{
+  return storage_as_list_;
+}
+
+TimeCacheInterface::L_TransformStorage
+StaticCache::get_storage_copy() const
+{
+  return storage_as_list_;
+}
 
 
 } // end namespace tf
 } // end namespace fawkes
-
-#endif

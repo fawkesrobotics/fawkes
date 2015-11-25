@@ -11,12 +11,12 @@ bumblebee2:
 
   # Coordinate frame ID of the basis of the BB2, i.e. the center point
   # at the lower camera bound (the screw hole)
-  base-frame: /bumblebee2/base
+  base-frame: !frame bumblebee2/base
 
   # Prefix to prepend to coordinate frame IDs the two cameras. The plugin will
   # append left and right respectively and publish them
   # at the lower camera bound (the screw hole)
-  frames-prefix: /bumblebee2/
+  frames-prefix: bumblebee2/
 
   # Interval in seconds in which to publish the transforms
   frames-interval: 1.0

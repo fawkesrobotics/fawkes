@@ -196,7 +196,6 @@ private:
   std::string odom_frame_id_;
   std::string base_frame_id_;
   std::string global_frame_id_;
-  std::string laser_frame_id_;
 
 #if NEW_UNIFORM_SAMPLING
     static std::vector<std::pair<int,int> > free_space_indices;

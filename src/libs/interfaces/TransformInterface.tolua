@@ -12,6 +12,9 @@ class TransformInterface : public Interface
   char * child_frame();
   void set_child_frame(const char * new_child_frame);
   int maxlenof_child_frame() const;
+  bool is_static_transform();
+  void set_static_transform(const bool new_static_transform);
+  int maxlenof_static_transform() const;
   double translation(int index);
   void set_translation(unsigned int index, const double new_translation);
   int maxlenof_translation() const;

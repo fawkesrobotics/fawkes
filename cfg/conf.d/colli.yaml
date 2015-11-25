@@ -76,11 +76,11 @@ plugins/colli:
 
   frame:
     # base_link frame
-    base: !frame /base_link
+    base: !frame base_link
     # laser frame
-    laser: !frame /base_laser
+    laser: !frame base_laser
     # odometry frame
-    odometry: !frame /odom
+    odometry: !frame odom
 
   ros:
     # subscribe to this topic to be able to set the target via rviz

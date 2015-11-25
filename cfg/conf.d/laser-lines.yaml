@@ -45,7 +45,7 @@ laser-lines:
   line_max_dist: -1
   
   # The frame in which the result should be published; frame
-  result_frame: /base_link
+  result_frame: !frame base_link
 
   switch_tolerance: 0.3
 

@@ -43,18 +43,15 @@ using namespace fawkes;
 /** Constructor. */
 StaticTransformsThread::StaticTransformsThread()
   : Thread("StaticTransformsThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-    TransformAspect(TransformAspect::ONLY_PUBLISHER, "static"),
+    TransformAspect(TransformAspect::DEFER_PUBLISHER),
     ConfigurationChangeHandler(CFG_PREFIX)
 {
-  __last_update = new Time();
 }
 
 
 /** Destructor. */
 StaticTransformsThread::~StaticTransformsThread()
 {
-  delete __last_update;
 }
 
 
@@ -62,9 +59,6 @@ void
 StaticTransformsThread::init()
 {
   entries_get_from_config();
-
-  __last_update->set_clock(clock);
-  __last_update->set_time(0, 0);
 
   config->add_change_handler(this);
 }
@@ -82,11 +76,6 @@ StaticTransformsThread::entries_get_from_config()
 {
   std::set<std::string> transforms;
   std::set<std::string> ignored_transforms;
-
-  __cfg_update_interval = 1.0;
-  try  {
-    __cfg_update_interval = config->get_float(CFG_PREFIX"update-interval");
-  } catch (Exception &e) {} // ignored, use default
 
   std::string prefix = CFG_PREFIX"transforms/";
 #if __cplusplus >= 201103L
@@ -113,6 +102,17 @@ StaticTransformsThread::entries_get_from_config()
           std::string frame = config->get_string((cfg_prefix + "frame").c_str());
           std::string child_frame =
             config->get_string((cfg_prefix + "child_frame").c_str());
+
+          if (frame[0] == '/') {
+	          logger->log_warn(name(), "Transform %s parent frame %s starts with /,"
+	                           "removing leading slash.", cfg_name.c_str(), frame.c_str());
+	          frame = frame.substr(1);
+          }
+          if (child_frame[0] == '/') {
+	          logger->log_warn(name(), "Transform %s child frame %s starts with /,"
+	                           "removing leading slash.", cfg_name.c_str(), frame.c_str());
+	          child_frame = child_frame.substr(1);
+          }
 
           float tx = 0., ty = 0., tz = 0.;
           if (config->exists((cfg_prefix + "trans_x").c_str()) ||
@@ -180,6 +180,7 @@ StaticTransformsThread::entries_get_from_config()
                               v.x(), v.y(), v.z(), q.x(), q.y(), q.z(), q.w());
 
             __entries.push_back(e);
+            tf_add_publisher("%s", e.transform->child_frame_id.c_str());
           } catch (Exception &e) {
             entries_delete();
             throw;
@@ -201,6 +202,11 @@ StaticTransformsThread::entries_get_from_config()
   if ( __entries.empty() ) {
     throw Exception("No transforms configured");
   }
+
+  for (std::list<Entry>::iterator i = __entries.begin(); i != __entries.end(); ++i) {
+	  i->transform->stamp.stamp();
+	  tf_publishers[i->transform->child_frame_id]->send_transform(*(i->transform), /* is_static */ true);
+  }
 }
 
 void
@@ -208,6 +214,8 @@ StaticTransformsThread::entries_delete()
 {
   std::list<Entry>::iterator i;
   for (i = __entries.begin(); i != __entries.end(); ++i) {
+	  delete tf_publishers[i->name];
+	  tf_publishers.erase(i->name);
     delete i->transform;
   }
   __entries.clear();
@@ -225,18 +233,4 @@ StaticTransformsThread::config_value_changed(const fawkes::Configuration::ValueI
 void
 StaticTransformsThread::loop()
 {
-  fawkes::Time now(clock);
-  if ((now - __last_update) > __cfg_update_interval) {
-    __last_update->stamp();
-
-    // date time stamps slightly into the future so they are valid
-    // for longer and need less frequent updates.
-    fawkes::Time timestamp = now + (__cfg_update_interval * 1.1);
-
-    std::list<Entry>::iterator i;
-    for (i = __entries.begin(); i != __entries.end(); ++i) {
-      i->transform->stamp = timestamp;
-      tf_publisher->send_transform(*(i->transform));
-    }
-  }
 }

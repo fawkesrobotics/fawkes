@@ -19,8 +19,10 @@ include $(BUILDSYSDIR)/ros.mk
 # bullet version we will get a segfault when shutting down fawkes, always.
 USE_ROS_BULLET=0
 ifeq ($(HAVE_ROS),1)
-  ifeq ($(call ros-have-pkg,bullet),1)
-    USE_ROS_BULLET=1
+  ifeq ($(ROS_VERSION),fuerte)
+    ifeq ($(call ros-have-pkg,bullet),1)
+      USE_ROS_BULLET=1
+    endif
   endif
 endif
 
@@ -39,12 +41,9 @@ else
   endif
 endif
 
-ifeq ($(HAVE_BULLET),1)
+ifeq ($(HAVE_BULLET)$(HAVE_CPP11),11)
   HAVE_TF = 1
-  CFLAGS_TF  = -DHAVE_TF $(CFLAGS_BULLET) \
+  CFLAGS_TF  = -DHAVE_TF $(CFLAGS_BULLET) $(CFLAGS_CPP11) \
 	       -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX
   LDFLAGS_TF = $(LDFLAGS_BULLET) -lm
-  ifeq ($(HAVE_CPP11),1)
-    CFLAGS_TF += $(CFLAGS_CPP11)
-  endif
 endif

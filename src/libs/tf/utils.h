@@ -126,6 +126,31 @@ resize_vector(const Vector3 &v, double s)
 }
 
 
+/** Check if frame ID starts with a slash (/).
+ * @param frame_id frame ID to check
+ * @return true if strings starts with slash, false otherwise
+ */
+inline bool
+starts_with_slash(const std::string& frame_id)
+{
+	return (frame_id.size() > 0) && (frame_id[0] == '/');
+}
+
+
+/** Remove leading slash, if any.
+ * @param in frame_id to process
+ * @return returns @p in with leading slash removed, if any
+ */
+inline std::string
+strip_slash(const std::string& in)
+{
+  if (starts_with_slash(in))
+	  return in.substr(1);
+  else
+	  return in;
+}
+
+
 } // end namespace tf
 } // end namespace fawkes
 

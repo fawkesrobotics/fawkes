@@ -65,7 +65,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/pantilt
 
     # Frame ID base string; will be prefixed by / if missing;
     # and suffixed with .base, .pan, and .tilt repsectively
-    frame_id_prefix: !frame /rx28
+    frame_id_prefix: !frame rx28
 
     # PAN servo base to joint translation X; m
     pan_trans_x: -0.002
