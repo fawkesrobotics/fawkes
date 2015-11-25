@@ -29,6 +29,10 @@
 :- export(exec_skill2/1).
 :- export(wait_for_skiller/0).
 :- export(decide_on_sensing/1).
+:- export(is_final/1).
+:- export(is_failed/1).
+:- export(is_running/1).
+
 
 :- log_info("Loading skiller tools done").
 
