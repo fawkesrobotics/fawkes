@@ -15,12 +15,14 @@
 
 include $(BUILDSYSDIR)/boost.mk
 
+MONGO_CXX_DRIVER_BOOST_LIBS = thread system regex
+
 ifneq ($(wildcard /usr/include/mongo/client/dbclient.h /usr/local/include/mongo/client/dbclient.h),)
-  ifeq ($(call boost-have-libs,thread system filesystem),1)
+  ifeq ($(call boost-have-libs,$(MONGO_CXX_DRIVER_BOOST_LIBS)),1)
     HAVE_MONGODB = 1
-    CFLAGS_MONGODB  = -DHAVE_MONGODB
+    CFLAGS_MONGODB  = -DHAVE_MONGODB $(CFLAGS_CPP11)
     LDFLAGS_MONGODB = -lmongoclient -lm -lpthread \
-		      $(call boost-libs-ldflags,thread system filesystem)
+		      $(call boost-libs-ldflags,$(MONGO_CXX_DRIVER_BOOST_LIBS))
 
     ifneq ($(wildcard $(SYSROOT)/usr/include/mongo/version.h $(SYSROOT)/usr/local/include/mongo/version.h),)
       CFLAGS_MONGODB += -DHAVE_MONGODB_VERSION_H
