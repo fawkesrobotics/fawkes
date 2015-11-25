@@ -229,7 +229,7 @@ NetworkConfiguration::is_list(const char *path)
 }
 
 void
-NetworkConfiguration::send_get(const char *path, unsigned int msgid)
+NetworkConfiguration::send_get(const char *path, unsigned int msgid, unsigned int expected_reply)
 {
   if ( ! __connected ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
@@ -238,20 +238,22 @@ NetworkConfiguration::send_get(const char *path, unsigned int msgid)
   config_getval_msg_t *g = (config_getval_msg_t *)calloc(1, sizeof(config_getval_msg_t));
   strncpy(g->cp.path, path, CONFIG_MSG_PATH_LENGTH);
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
-							msgid,
-							g, sizeof(config_getval_msg_t));
+                                                        msgid,
+                                                        g, sizeof(config_getval_msg_t));
   c->enqueue_and_wait(omsg);
 
-  if ( msg == NULL ) {
+  if ( ! msg ) {
     mutex->unlock();
     throw NullPointerException("NetworkConfiguration::send_get: msg == NULL");
   }
 
-  if ( msg->msgid() != msgid ) {
+  if ( msg->msgid() != expected_reply ) {
+	  unsigned int msg_msgid = msg->msgid();
     msg->unref();
     msg = NULL;
     mutex->unlock();
-    throw TypeMismatchException("NetworkConfiguration::send_get: msg type not float");
+    throw Exception("NetworkConfiguration::send_get: expected %u, but got %u",
+                    expected_reply, msg_msgid);
   }
 }
 
@@ -281,7 +283,7 @@ NetworkConfiguration::get_float(const char *path)
     }
   } else {
     try {
-      send_get(path, MSG_CONFIG_GET_FLOAT);
+	    send_get(path, MSG_CONFIG_GET_FLOAT, MSG_CONFIG_FLOAT_VALUE);
 
       config_descriptor_t *d = msg->msgge<config_descriptor_t>();
       if (d->num_values > 0) {
@@ -336,7 +338,7 @@ NetworkConfiguration::get_uint(const char *path)
     }
   } else {
     try {
-      send_get(path, MSG_CONFIG_GET_UINT);
+	    send_get(path, MSG_CONFIG_GET_UINT, MSG_CONFIG_UINT_VALUE);
 
       config_descriptor_t *d = msg->msgge<config_descriptor_t>();
       if (d->num_values > 0) {
@@ -391,7 +393,7 @@ NetworkConfiguration::get_int(const char *path)
     }
   } else {
     try {
-      send_get(path, MSG_CONFIG_GET_INT);
+	    send_get(path, MSG_CONFIG_GET_INT, MSG_CONFIG_INT_VALUE);
 
       config_descriptor_t *d = msg->msgge<config_descriptor_t>();
       if (d->num_values > 0) {
@@ -446,7 +448,7 @@ NetworkConfiguration::get_bool(const char *path)
     }
   } else {
     try {
-      send_get(path, MSG_CONFIG_GET_BOOL);
+	    send_get(path, MSG_CONFIG_GET_BOOL, MSG_CONFIG_BOOL_VALUE);
 
       config_descriptor_t *d = msg->msgge<config_descriptor_t>();
       if (d->num_values > 0) {
@@ -501,7 +503,7 @@ NetworkConfiguration::get_string(const char *path)
     }
   } else {
     try {
-      send_get(path, MSG_CONFIG_GET_STRING);
+	    send_get(path, MSG_CONFIG_GET_STRING, MSG_CONFIG_STRING_VALUE);
 
       config_descriptor_t *d = msg->msgge<config_descriptor_t>();
       if (d->num_values > 0) {
@@ -511,13 +513,13 @@ NetworkConfiguration::get_string(const char *path)
       }
       config_string_value_t *sv =
 	(config_string_value_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
-      s = (char *)sv + sizeof(config_string_value_t);
+      s = std::string((char *)sv + sizeof(config_string_value_t), sv->s_length);
 
       msg->unref();
       msg = NULL;
 
     } catch (Exception &e) {
-      e.append("NetworkConfiguration::get_string: Fetching int failed");
+      e.append("NetworkConfiguration::get_string: Fetching string failed");
       if ( msg != NULL ) {
 	msg->unref();
 	msg = NULL;
@@ -588,7 +590,7 @@ NetworkConfiguration::get_comment(const char *path)
     }
   } else {
     try {
-      send_get(path, MSG_CONFIG_GET_COMMENT);
+	    send_get(path, MSG_CONFIG_GET_COMMENT, MSG_CONFIG_COMMENT_VALUE);
 
       config_comment_msg_t *sm = msg->msgge<config_comment_msg_t>();
       s = sm->s;
@@ -639,7 +641,7 @@ NetworkConfiguration::get_default_comment(const char *path)
     }
   } else {
     try {
-      send_get(path, MSG_CONFIG_GET_DEFAULT_COMMENT);
+	    send_get(path, MSG_CONFIG_GET_DEFAULT_COMMENT, MSG_CONFIG_COMMENT_VALUE);
 
       config_comment_msg_t *sm = msg->msgge<config_comment_msg_t>();
       s = sm->s;
