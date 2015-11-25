@@ -20,8 +20,8 @@ INSTALL_PREFIX     = /usr/local
 INSTALL_RESDIR     = $(INSTALL_PREFIX)/share/fawkes
 INSTALL_INCDIR     = $(INSTALL_PREFIX)/include/fawkes
 
-# For x86_64 we must append 64 to lib dir
-LIBBITS=$(if $(call seq,$(ARCH),x86_64),64)
+# For x86_64/ppc64/aarch64 we must append 64 to lib dir
+LIBBITS=$(if $(or $(call seq,$(ARCH),x86_64),$(call seq,$(ARCH),aarch64),$(call seq,$(ARCH),ppc64)),64)
 
 DEFAULT_INCLUDES  += -I$(abspath $(INSTALL_INCDIR))
 LIBDIRS_BASE      += $(INSTALL_PREFIX)/lib$(LIBBITS)/fawkes/interfaces
