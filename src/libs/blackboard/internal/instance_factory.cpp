@@ -70,6 +70,21 @@ BlackBoardInstanceFactory::~BlackBoardInstanceFactory()
 Interface *
 BlackBoardInstanceFactory::new_interface_instance(const char *type, const char *identifier)
 {
+	if (strlen(identifier) == 0) {
+		throw Exception("Interface ID may not be empty");	
+	}
+	if (strlen(type) == 0) {
+		throw Exception("Interface type may not be empty");	
+	}
+	if (strlen(type) > __INTERFACE_TYPE_SIZE) {
+		throw Exception("Interface type '%s' too long, maximum length is %zu",
+		                type, __INTERFACE_TYPE_SIZE);
+	}
+	if (strlen(identifier) > __INTERFACE_ID_SIZE) {
+		throw Exception("Interface ID '%s' too long, maximum length is %zu",
+		                type, __INTERFACE_ID_SIZE);
+	}
+
   Module *mod = NULL;
   std::string filename = std::string("lib") + type + "." + __mm->get_module_file_extension();
   try {

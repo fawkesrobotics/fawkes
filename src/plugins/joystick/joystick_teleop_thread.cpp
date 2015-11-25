@@ -98,6 +98,7 @@ JoystickTeleOpThread::init()
     blackboard->open_for_reading<JoystickInterface>(cfg_ifid_joystick_.c_str());
 
   cfg_use_laser_ = false;
+  laser_if_ = NULL;
   if (cfg_collision_safety_) {
     try {
       cfg_ifid_laser_        = config->get_string(CFG_PREFIX"laser_interface_id");
@@ -108,7 +109,6 @@ JoystickTeleOpThread::init()
       logger->log_warn(name(), "No laser_interface_id configured, ignoring");
     }
   } else {
-	  laser_if_ = NULL;
     logger->log_warn(name(), "Collision safety for joystick is disabled.");
   }
 
