@@ -172,7 +172,7 @@ LaserOccupancyGrid::update_laser()
   }
   //write BB date into buffer (instead of read())
   if ( if_buffer_free_pos < 0 ) {                 //if there is no free buffer
-    logger_->log_error("LaserOccupancyGrid", "if_laser buffer is full empty oldest");
+	  //logger_->log_error("LaserOccupancyGrid", "if_laser buffer is full empty oldest");
 
                                                   //search for the oldest buffer and uses this
     double if_buffer_oldest_time = Clock::instance()->now().in_sec() + 1000;
