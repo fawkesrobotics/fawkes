@@ -25,7 +25,7 @@ ifneq ($(PKGCONFIG),)
 endif
 
 ifeq ($(HAVE_EIGEN3),1)
-  CFLAGS_EIGEN3  = -DHAVE_EIGEN3 $(shell $(PKGCONFIG) --cflags 'eigen3') \
+  CFLAGS_EIGEN3  = -DHAVE_EIGEN3 $(subst -I,-isystem,$(shell $(PKGCONFIG) --cflags 'eigen3')) \
 		   -DEIGEN_USE_NEW_STDVECTOR \
 		   -DEIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
   LDFLAGS_EIGEN3 = $(shell $(PKGCONFIG) --libs 'eigen3')
