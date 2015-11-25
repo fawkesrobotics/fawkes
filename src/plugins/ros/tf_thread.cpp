@@ -62,16 +62,6 @@ RosTfThread::init()
 
   __cfg_use_tf2 = config->get_bool("/ros/tf/use_tf2");
 
-  __tfifs = blackboard->open_multiple_for_reading<TransformInterface>("/tf*");
-
-  std::list<TransformInterface *>::iterator i;
-  for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
-	  bbil_add_data_interface(*i);
-	  bbil_add_reader_interface(*i);
-	  bbil_add_writer_interface(*i);
-  }
-  blackboard->register_listener(this);
-
   // Must do that before registering listener because we might already
   // get events right away
   if (__cfg_use_tf2) {
@@ -88,11 +78,19 @@ RosTfThread::init()
 	  __pub_tf = rosnode->advertise< ::tf::tfMessage >("/tf", 100);
   }
 
+  __tfifs = blackboard->open_multiple_for_reading<TransformInterface>("/tf*");
+  std::list<TransformInterface *>::iterator i;
+  for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
+	  bbil_add_data_interface(*i);
+	  bbil_add_reader_interface(*i);
+	  bbil_add_writer_interface(*i);
+  }
+  blackboard->register_listener(this);
+
   publish_static_transforms_to_ros();
   
   bbio_add_observed_create("TransformInterface", "/tf*");
   blackboard->register_observer(this);
-
 }
 
 
