@@ -555,7 +555,7 @@ LaserClusterThread::loop()
 
   //*clusters_ = *tmp_clusters;
   if (finput_->header.frame_id == "") {
-    logger->log_error(name(), "Empty frame ID");
+    logger->log_debug(name(), "Empty frame ID");
   }
   fclusters_->header.frame_id = finput_->header.frame_id;
   pcl_utils::copy_time(finput_, fclusters_);
@@ -579,26 +579,30 @@ LaserClusterThread::set_position(fawkes::Position3DInterface *iface,
 				 bool is_visible, const Eigen::Vector4f &centroid,
 				 const Eigen::Quaternionf &attitude)
 {
-  tf::Stamped<tf::Pose> baserel_pose;
+	tf::Stamped<tf::Pose> baserel_pose;
 
-  try{
-    // Note that we add a correction offset to the centroid X value.
-    // This offset is determined empirically and just turns out to be helpful
-    // in certain situations.
+	if (input_->header.frame_id.empty()) {
+		is_visible = false;
+	} else {
+		try{
+			// Note that we add a correction offset to the centroid X value.
+			// This offset is determined empirically and just turns out to be helpful
+			// in certain situations.
 
-    tf::Stamped<tf::Pose>
-      spose(tf::Pose(tf::Quaternion(attitude.x(), attitude.y(), attitude.z(), attitude.w()),
-                     tf::Vector3(centroid[0], centroid[1], centroid[2])),
-            fawkes::Time(0, 0), input_->header.frame_id);
-    tf_listener->transform_pose(cfg_result_frame_, spose, baserel_pose);
-    iface->set_frame(cfg_result_frame_.c_str());
-  } catch (tf::TransformException &e) {
-    if (fawkes::runtime::uptime() >= tf_listener->get_cache_time()) {
-      logger->log_warn(name(),"Transform exception:");
-      logger->log_warn(name(),e);
-    }
-    is_visible = false;
-  }
+			tf::Stamped<tf::Pose>
+				spose(tf::Pose(tf::Quaternion(attitude.x(), attitude.y(), attitude.z(), attitude.w()),
+				               tf::Vector3(centroid[0], centroid[1], centroid[2])),
+				      fawkes::Time(0, 0), input_->header.frame_id);
+			tf_listener->transform_pose(cfg_result_frame_, spose, baserel_pose);
+			iface->set_frame(cfg_result_frame_.c_str());
+		} catch (tf::TransformException &e) {
+			if (fawkes::runtime::uptime() >= tf_listener->get_cache_time()) {
+				logger->log_warn(name(),"Transform exception:");
+				logger->log_warn(name(),e);
+			}
+			is_visible = false;
+		}
+	}
 
   int visibility_history = iface->visibility_history();
   if (is_visible) {

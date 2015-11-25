@@ -409,9 +409,9 @@ NavGraphVisualizationThread::publish()
       arrow.pose.orientation.y = q.y();
       arrow.pose.orientation.z = q.z();
       arrow.pose.orientation.w = q.w();
-      arrow.scale.x = 0.1;
-      arrow.scale.y = 0.5;
-      arrow.scale.z = 0.10;
+      arrow.scale.x = 0.08;
+      arrow.scale.y = 0.02;
+      arrow.scale.z = 0.02;
       if (is_in_plan) {
 	if (is_last) {
 	  arrow.color.r = arrow.color.g = 1.f;
@@ -511,9 +511,9 @@ NavGraphVisualizationThread::publish()
       ori_arrow.pose.orientation.y = q.y();
       ori_arrow.pose.orientation.z = q.z();
       ori_arrow.pose.orientation.w = q.w();
-      ori_arrow.scale.x = 0.1;
-      ori_arrow.scale.y = 0.5;
-      ori_arrow.scale.z = 0.10;
+      ori_arrow.scale.x = 0.08;
+      ori_arrow.scale.y = 0.02;
+      ori_arrow.scale.z = 0.02;
       ori_arrow.color.r = 1.f;
       ori_arrow.color.g = 0.5f;
       ori_arrow.color.b = 0.f;

@@ -113,9 +113,8 @@ LaserMapFilterDataFilter::filter()
         logger_->log_debug("map_filter", "Can't transform laser-data using newest tf\n(%s\t%s\t\%lf)",
             frame_map_.c_str(), in[a]->frame.c_str(), in[a]->timestamp->in_sec());
       } catch(fawkes::tf::TransformException &e) {
-        logger_->log_error("map_filter", "Can't transform laser-data at all\n(%s\t%s\t\%lf)\n(%s\t%s\t\%lf)",
-            frame_map_.c_str(), in[a]->frame.c_str(), in[a]->timestamp->in_sec(),
-            frame_map_.c_str(), in[a]->frame.c_str(), fawkes::Time(0, 0).in_sec());
+        logger_->log_debug("map_filter", "Can't transform laser-data at all (%s -> %s)",
+                           frame_map_.c_str(), in[a]->frame.c_str());
         return;
       }
     }

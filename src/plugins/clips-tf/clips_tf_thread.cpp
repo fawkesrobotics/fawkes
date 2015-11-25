@@ -45,7 +45,6 @@ ClipsTFThread::~ClipsTFThread()
 void
 ClipsTFThread::init()
 {
-  logger->log_warn(name(), "INIT");
 }
 
 
@@ -61,7 +60,7 @@ ClipsTFThread::clips_context_init(const std::string &env_name,
 				  LockPtr<CLIPS::Environment> &clips)
 {
   envs_[env_name] = clips;
-  logger->log_info(name(), "Called to initialize environment %s", env_name.c_str());
+  logger->log_debug(name(), "Called to initialize environment %s", env_name.c_str());
 
   clips.lock();
   //clips->batch_evaluate(SRCDIR"/clips/navgraph.clp");
@@ -100,7 +99,7 @@ void
 ClipsTFThread::clips_context_destroyed(const std::string &env_name)
 {
   envs_.erase(env_name);
-  logger->log_info(name(), "Removing environment %s", env_name.c_str());
+  logger->log_debug(name(), "Removing environment %s", env_name.c_str());
 }
 
 CLIPS::Value

@@ -109,12 +109,15 @@ FawkesNetworkServerThread::add_connection(StreamSocket *s) throw()
   } else {
     client->start();
   }
-  clients[next_client_id] = client;
-  for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
-    (*hit).second->client_connected(next_client_id);
-  }
-  ++next_client_id;
+  unsigned int cid = next_client_id++;
+  clients[cid] = client;
   clients.unlock();
+
+  MutexLocker handlers_lock(handlers.mutex());
+  for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
+    (*hit).second->client_connected(cid);
+  }
+  handlers_lock.unlock();
 
   wakeup();
 }
@@ -126,13 +129,11 @@ FawkesNetworkServerThread::add_connection(StreamSocket *s) throw()
 void
 FawkesNetworkServerThread::add_handler(FawkesNetworkHandler *handler)
 {
-  handlers.lock();
+  MutexLocker handlers_lock(handlers.mutex());
   if ( handlers.find(handler->id()) != handlers.end()) {
-    handlers.unlock();
     throw Exception("Handler already registered");
   }
   handlers[handler->id()] = handler;
-  handlers.unlock();
 }
 
 
@@ -142,11 +143,10 @@ FawkesNetworkServerThread::add_handler(FawkesNetworkHandler *handler)
 void
 FawkesNetworkServerThread::remove_handler(FawkesNetworkHandler *handler)
 {
-  handlers.lock();
+  MutexLocker handlers_lock(handlers.mutex());
   if( handlers.find(handler->id()) != handlers.end() ) {
     handlers.erase(handler->id());
   }
-  handlers.unlock();
 }
 
 
@@ -159,44 +159,55 @@ FawkesNetworkServerThread::remove_handler(FawkesNetworkHandler *handler)
 void
 FawkesNetworkServerThread::loop()
 {
+  std::list<unsigned int> dead_clients;
   clients.lock();
-
   // check for dead clients
-  cit = clients.begin();
-  while (cit != clients.end()) {
+  for (cit = clients.begin(); cit != clients.end(); ++cit) {
     if ( ! cit->second->alive() ) {
-      if ( thread_collector ) {
-	thread_collector->remove((*cit).second);
-      } else {
-	cit->second->cancel();
-	cit->second->join();
-      }
-      usleep(5000);
-      delete cit->second;
-      unsigned int clid = (*cit).first;
-      ++cit;
-      clients.erase(clid);
-      for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
-	(*hit).second->client_disconnected(clid);
-      }
-    } else {
-      ++cit;
+	    dead_clients.push_back(cit->first);
     }
+  }
+  clients.unlock();
+
+  std::list<unsigned int>::iterator dci;
+  for (dci = dead_clients.begin(); dci != dead_clients.end(); ++dci) {
+	  const unsigned int clid = *dci;
+	  
+	  {
+		  MutexLocker handlers_lock(handlers.mutex());
+		  for (hit = handlers.begin(); hit != handlers.end(); ++hit) {
+			  (*hit).second->client_disconnected(clid);
+		  }
+	  }
+
+	  {
+		  MutexLocker clients_lock(clients.mutex());
+		  if ( thread_collector ) {
+			  thread_collector->remove(clients[clid]);
+		  } else {
+			  clients[clid]->cancel();
+			  clients[clid]->join();
+		  }
+		  usleep(5000);
+		  delete clients[clid];
+      clients.erase(clid);
+	  }
   }
 
   // dispatch messages
   inbound_messages->lock();
   while ( ! inbound_messages->empty() ) {
     FawkesNetworkMessage *m = inbound_messages->front();
-    if ( handlers.find(m->cid()) != handlers.end()) {
-      handlers[m->cid()]->handle_network_message(m);
+    {
+	    MutexLocker handlers_lock(handlers.mutex());
+	    if ( handlers.find(m->cid()) != handlers.end()) {
+		    handlers[m->cid()]->handle_network_message(m);
+	    }
     }
     m->unref();
     inbound_messages->pop();
   }
   inbound_messages->unlock();
-
-  clients.unlock();
 }
 
 

@@ -513,13 +513,13 @@ NetworkConfiguration::get_string(const char *path)
       }
       config_string_value_t *sv =
 	(config_string_value_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
-      s = (char *)sv + sizeof(config_string_value_t);
+      s = std::string((char *)sv + sizeof(config_string_value_t), sv->s_length);
 
       msg->unref();
       msg = NULL;
 
     } catch (Exception &e) {
-      e.append("NetworkConfiguration::get_string: Fetching int failed");
+      e.append("NetworkConfiguration::get_string: Fetching string failed");
       if ( msg != NULL ) {
 	msg->unref();
 	msg = NULL;

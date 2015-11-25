@@ -230,6 +230,17 @@ function SkillJumpState:do_init()
    self.skill_status = skillstati.S_RUNNING
 
    self.args = {}
+   for _, s in ipairs(self.skills) do
+			if s[1] ~= nil then
+				 local sname = ""
+				 if type(s[1]) == "string" then
+						sname = s[1]
+				 else
+						sname = s[1].name
+				 end
+				 self.args[sname] = {}
+			end
+	 end
    self:init()
    for _, s in ipairs(self.skills) do
       local set_already = false

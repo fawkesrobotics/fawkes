@@ -754,6 +754,9 @@ ColliThread::interface_data_valid()
   if( !if_laser_->has_writer() || !if_motor_->has_writer() ) {
     logger->log_warn(name(), "Laser or Motor dead, no writing instance for interfaces!!!");
     return false;
+  } else if (if_laser_->timestamp()->is_zero()) {
+	  logger->log_debug(name(), "No laser data");
+	  return false;
 
   } else if( (now - if_laser_->timestamp()) > (double)cfg_iface_read_timeout_ ) {
     logger->log_warn(name(), "LaserInterface writer has been inactive for too long (%f > %f)",

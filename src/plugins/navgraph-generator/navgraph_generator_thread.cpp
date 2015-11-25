@@ -155,6 +155,17 @@ NavGraphGeneratorThread::loop()
   std::map<std::string, std::string> default_props = navgraph->default_properties();
 
   navgraph->clear();
+
+  // restore default properties
+  if (copy_default_properties_) {
+    navgraph->set_default_properties(default_props);
+  }
+
+  // set properties received as message
+  for (auto p : default_properties_) {
+    navgraph->set_default_property(p.first, p.second);
+  }
+
   logger->log_debug(name(), "  Computing Voronoi");
   nggv.compute(navgraph);
 
@@ -170,16 +181,6 @@ NavGraphGeneratorThread::loop()
   if (filter_["FILTER_MULTI_GRAPH"]) {
     logger->log_debug(name(), "  Applying FILTER_MULTI_GRAPH");
     filter_multi_graph();
-  }
-
-  // restore default properties
-  if (copy_default_properties_) {
-    navgraph->set_default_properties(default_props);
-  }
-
-  // set propertis received as message
-  for (auto p : default_properties_) {
-    navgraph->set_default_property(p.first, p.second);
   }
 
   // add POIs
