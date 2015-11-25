@@ -204,7 +204,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       } else {
 	std::string s = i->get_string();
 	size_t data_size =
-	  sizeof(config_descriptor_t) + sizeof(config_string_value_t) + s.length();
+	  sizeof(config_descriptor_t) + sizeof(config_string_value_t) + s.length() + 1;
 	void *m = calloc(1, data_size);
 	config_descriptor_t *cd = (config_descriptor_t *)m;
 	strncpy(cd->path, i->path(), CONFIG_MSG_PATH_LENGTH);
@@ -213,7 +213,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 
 	config_string_value_t *sv = 
 	  (config_string_value_t *)((char *)m + sizeof(config_descriptor_t));
-	char *msg_string = (char *)m + sizeof(config_string_value_t);
+	char *msg_string = (char *)sv + sizeof(config_string_value_t);
 
 	sv->s_length = s.length();
 	strcpy(msg_string, s.c_str());
