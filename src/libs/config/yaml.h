@@ -183,7 +183,7 @@ class YamlConfiguration
   YamlConfigurationNode *  query(const char *path) const;
   void read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue,
                      std::string &host_file);
-  void read_config_doc(const YAML::Node &doc, YamlConfigurationNode *&node);
+  void read_config_doc(const YAML::Node &doc, YamlConfigurationNode *&node, std::string path = "");
   YamlConfigurationNode * read_yaml_file(std::string filename, bool ignore_missing,
 			std::queue<LoadQueueEntry> &load_queue, std::string &host_file);
   void read_yaml_config(std::string filename, std::string &host_file,
