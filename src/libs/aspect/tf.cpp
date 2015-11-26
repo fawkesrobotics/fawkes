@@ -213,7 +213,7 @@ TransformAspect::tf_add_publisher(const char *frame_id_format, ...)
   free(msg);
 
   if (tf_publishers.find(frame_id) != tf_publishers.end()) {
-	  throw Exception("Publisher for %s has already been added", frame_id);
+	  throw Exception("Publisher for %s has already been added", frame_id.c_str());
   }
 
   tf_publishers[frame_id] =
