@@ -27,6 +27,9 @@
 #ifdef HAVE_IPP
 #  include <ippi.h>
 #elif defined(HAVE_OPENCV)
+#  if CV_MAJOR_VERSION < 2 || (CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION < 4)
+#    include <opencv/cv.h>
+#  endif
 #  include <opencv/cv.hpp>
 #else
 #  error "Neither IPP nor OpenCV available"
