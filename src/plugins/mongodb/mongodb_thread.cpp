@@ -110,7 +110,7 @@ MongoDBThread::init()
 
   std::string prefix = "/plugins/mongodb/clients/";
 
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || (defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ >= 4)
   std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #else
   std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
@@ -268,7 +268,7 @@ MongoDBThread::ClientConf::ClientConf(Configuration *config, Logger *logger,
   if (mode == "replica_set" || mode == "replicaset") {
     __mode = REPLICA_SET;
 
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || (defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ >= 4)
     std::unique_ptr<Configuration::ValueIterator>
 #else
     std::auto_ptr<Configuration::ValueIterator>
