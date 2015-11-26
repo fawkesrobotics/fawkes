@@ -921,6 +921,23 @@ BufferCore::all_frames_as_string_no_lock() const
   return mstream.str();
 }
 
+/// @cond INTERNAL
+struct TimeAndFrameIDFrameComparator
+{
+  TimeAndFrameIDFrameComparator(CompactFrameID id)
+  : id(id)
+  {}
+
+  bool operator()(const P_TimeAndFrameID& rhs) const
+  {
+    return rhs.second == id;
+  }
+
+  CompactFrameID id;
+};
+/// @endcond
+
+
 /** Get latest common time of two frames.
  * @param target_id target frame number
  * @param source_id source frame number
@@ -1034,9 +1051,15 @@ BufferCore::get_latest_common_time(CompactFrameID target_id, CompactFrameID sour
 
     std::vector<P_TimeAndFrameID>::iterator it =
 	    std::find_if(lct_cache.begin(), lct_cache.end(),
+    /* Nice version, but requires rather recent compiler
 	                 [&latest](const P_TimeAndFrameID& rhs){
 		                 return rhs.second == latest.second;
 	                 });
+    */
+                         TimeAndFrameIDFrameComparator(latest.second));
+
+
+
     if (it != lct_cache.end()) // found a common parent
     {
       common_parent = it->second;
