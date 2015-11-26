@@ -117,7 +117,7 @@ MongoLogTransformsThread::loop()
 
   tf_listener->lock();
   std::vector<tf::TimeCacheInterfacePtr> caches = tf_listener->get_frame_caches();
-  std::vector<tf::TimeCacheInterfacePtr> copies(caches.size(), NULL);
+  std::vector<tf::TimeCacheInterfacePtr> copies(caches.size(), tf::TimeCacheInterfacePtr());
 
   const size_t n_caches = caches.size();
   tf_range_start.resize(n_caches, fawkes::Time(0,0));
