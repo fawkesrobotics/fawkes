@@ -74,7 +74,6 @@ class TransformAspect : public virtual Aspect
 
  private:
   Mode  __tf_aspect_mode;
-  char *__tf_aspect_thread_name;
   char *__tf_aspect_frame_id;
   BlackBoard *__tf_aspect_blackboard;
 };
