@@ -70,9 +70,9 @@ RosTfThread::init()
 #else
 	  __sub_tf = rosnode->subscribe<tf2_msgs::TFMessage>("/tf", 100, boost::bind(&RosTfThread::tf_message_cb, this, _1, false));
 	  __sub_static_tf = rosnode->subscribe<tf2_msgs::TFMessage>("/tf_static", 100, boost::bind(&RosTfThread::tf_message_cb, this, _1, true));
-#endif
 	  __pub_tf = rosnode->advertise< tf2_msgs::TFMessage >("/tf", 100);
 	  __pub_static_tf = rosnode->advertise< tf2_msgs::TFMessage >("/tf_static", 100, /* latch */ true);
+#endif
   } else {
 	  __sub_tf = rosnode->subscribe<::tf::tfMessage>("/tf", 100, boost::bind(&RosTfThread::tf_message_cb, this, _1));
 	  __pub_tf = rosnode->advertise< ::tf::tfMessage >("/tf", 100);
@@ -120,6 +120,7 @@ RosTfThread::loop()
   __tf_msg_queue_mutex->unlock();
 
   if (__cfg_use_tf2) {
+#ifdef HAVE_TF2_MSGS
 	  while (! __tf2_msg_queues[queue].empty()) {
 		  const std::pair<bool, tf2_msgs::TFMessage::ConstPtr> &q = __tf2_msg_queues[queue].front();
 		  const tf2_msgs::TFMessage::ConstPtr &msg = q.second;
@@ -129,6 +130,7 @@ RosTfThread::loop()
 		  }
 		  __tf2_msg_queues[queue].pop();
 	  }
+#endif
   } else {
 	  while (! __tf_msg_queues[queue].empty()) {
 		  const ::tf::tfMessage::ConstPtr &msg = __tf_msg_queues[queue].front();
@@ -158,9 +160,11 @@ RosTfThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
 	  geometry_msgs::TransformStamped ts = create_transform_stamped(tfif);
 
 	  if (__cfg_use_tf2) {
+#ifdef HAVE_TF2_MSGS
 		  tf2_msgs::TFMessage tmsg;
 		  tmsg.transforms.push_back(ts);
 		  __pub_tf.publish(tmsg);
+#endif
 	  } else {
 		  ::tf::tfMessage tmsg;
 		  tmsg.transforms.push_back(ts);
@@ -275,6 +279,7 @@ RosTfThread::publish_static_transforms_to_ros()
 {
 	std::list<fawkes::TransformInterface *>::iterator t;
 	if (__cfg_use_tf2) {
+#ifdef HAVE_TF2_MSGS
 		tf2_msgs::TFMessage tmsg;
 		for (t = __tfifs.begin(); t != __tfifs.end(); ++t) {
 			fawkes::TransformInterface *tfif = *t;
@@ -284,6 +289,7 @@ RosTfThread::publish_static_transforms_to_ros()
 			}
 		}
 		__pub_static_tf.publish(tmsg);
+#endif
 	} else {
 		::tf::tfMessage tmsg;
 		for (t = __tfifs.begin(); t != __tfifs.end(); ++t) {
