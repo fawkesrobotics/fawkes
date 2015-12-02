@@ -43,6 +43,7 @@ RosTfThread::RosTfThread()
 {
   __tf_msg_queue_mutex = new Mutex();
   __seq_num_mutex = new Mutex();
+  __last_update = new Time();
 }
 
 /** Destructor. */
@@ -50,6 +51,7 @@ RosTfThread::~RosTfThread()
 {
   delete __tf_msg_queue_mutex;
   delete __seq_num_mutex;
+  delete __last_update;
 }
 
 
@@ -59,8 +61,14 @@ RosTfThread::init()
 {
   __active_queue = 0;
   __seq_num = 0;
+  __last_update->set_clock(clock);
+  __last_update->set_time(0, 0);
 
   __cfg_use_tf2 = config->get_bool("/ros/tf/use_tf2");
+  __cfg_update_interval = 1.0;
+  try  {
+	  __cfg_update_interval = config->get_float("/ros/tf/static-update-interval");
+  } catch (Exception &e) {} // ignored, use default
 
   // Must do that before registering listener because we might already
   // get events right away
@@ -141,7 +149,12 @@ RosTfThread::loop()
 		  __tf_msg_queues[queue].pop();
 	  }
 
-	  publish_static_transforms_to_ros();
+	  fawkes::Time now(clock);
+	  if ((now - __last_update) > __cfg_update_interval) {
+		  __last_update->stamp();
+
+		  publish_static_transforms_to_ros();
+	  }
   }
 }
 
@@ -157,17 +170,23 @@ RosTfThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
   if (__cfg_use_tf2 && tfif->is_static_transform()) {
 	  publish_static_transforms_to_ros();
   } else {
-	  geometry_msgs::TransformStamped ts = create_transform_stamped(tfif);
-
 	  if (__cfg_use_tf2) {
 #ifdef HAVE_TF2_MSGS
 		  tf2_msgs::TFMessage tmsg;
-		  tmsg.transforms.push_back(ts);
+		  tmsg.transforms.push_back(create_transform_stamped(tfif));
 		  __pub_tf.publish(tmsg);
 #endif
 	  } else {
 		  ::tf::tfMessage tmsg;
-		  tmsg.transforms.push_back(ts);
+		  if (tfif->is_static_transform()) {
+			  // date time stamps slightly into the future so they are valid
+			  // for longer and need less frequent updates.
+			  fawkes::Time timestamp = fawkes::Time(clock) + (__cfg_update_interval * 1.1);
+
+			  tmsg.transforms.push_back(create_transform_stamped(tfif, &timestamp));
+		  } else {
+			  tmsg.transforms.push_back(create_transform_stamped(tfif));
+		  }
 		  __pub_tf.publish(tmsg);
 	  }
   }
@@ -248,11 +267,11 @@ RosTfThread::conditional_close(Interface *interface) throw()
 
 
 geometry_msgs::TransformStamped
-RosTfThread::create_transform_stamped(TransformInterface *tfif)
+RosTfThread::create_transform_stamped(TransformInterface *tfif, const Time *time)
 {
   double *translation = tfif->translation();
   double *rotation = tfif->rotation();
-  const Time *time = tfif->timestamp();
+  if (! time)  time = tfif->timestamp();
 
   geometry_msgs::Vector3 t;
   t.x = translation[0]; t.y = translation[1]; t.z = translation[2];
@@ -278,6 +297,8 @@ void
 RosTfThread::publish_static_transforms_to_ros()
 {
 	std::list<fawkes::TransformInterface *>::iterator t;
+	fawkes::Time now(clock);
+
 	if (__cfg_use_tf2) {
 #ifdef HAVE_TF2_MSGS
 		tf2_msgs::TFMessage tmsg;
@@ -285,18 +306,22 @@ RosTfThread::publish_static_transforms_to_ros()
 			fawkes::TransformInterface *tfif = *t;
 			tfif->read();
 			if (tfif->is_static_transform()) {
-				tmsg.transforms.push_back(create_transform_stamped(tfif));
+				tmsg.transforms.push_back(create_transform_stamped(tfif, &now));
 			}
 		}
 		__pub_static_tf.publish(tmsg);
 #endif
 	} else {
+		// date time stamps slightly into the future so they are valid
+		// for longer and need less frequent updates.
+		fawkes::Time timestamp = now + (__cfg_update_interval * 1.1);
+
 		::tf::tfMessage tmsg;
 		for (t = __tfifs.begin(); t != __tfifs.end(); ++t) {
 			fawkes::TransformInterface *tfif = *t;
 			tfif->read();
 			if (tfif->is_static_transform()) {
-				tmsg.transforms.push_back(create_transform_stamped(tfif));
+				tmsg.transforms.push_back(create_transform_stamped(tfif, &timestamp));
 			}
 		}
 		__pub_tf.publish(tmsg);

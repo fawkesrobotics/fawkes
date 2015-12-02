@@ -86,13 +86,16 @@ class RosTfThread
   void publish_static_transforms_to_ros();
   void publish_transform_to_fawkes(const geometry_msgs::TransformStamped &ts,
                                    bool static_tf = false);
-  geometry_msgs::TransformStamped create_transform_stamped(fawkes::TransformInterface *tfif);
+  geometry_msgs::TransformStamped create_transform_stamped(fawkes::TransformInterface *tfif,
+                                                           const fawkes::Time *time = NULL);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
   bool __cfg_use_tf2;
+  float __cfg_update_interval;
+
 
   std::list<std::string>                  __ros_frames;
   std::list<fawkes::TransformInterface *> __tfifs;
@@ -111,6 +114,8 @@ class RosTfThread
 
   fawkes::Mutex *__seq_num_mutex;
   unsigned int   __seq_num;
+
+  fawkes::Time *__last_update;
 
 };
 
