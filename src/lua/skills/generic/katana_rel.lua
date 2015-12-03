@@ -47,6 +47,10 @@ katana_rel{x=X, y=Y, z=Z}
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+local FRAMES = {
+   KNI = config:get_string("/katana/frame/kni"),
+   GRIPPER = config:get_string("/katana/frame/gripper")
+}
 -- States
 fsm:define_states{
    export_to=_M,
@@ -80,9 +84,9 @@ function MOVE:init()
    local theta       = self.fsm.vars.theta or katanaarm:theta()
    local theta_error = self.fsm.vars.theta_error or 0.0
    local straight    = self.fsm.vars.straight    or false
-   local frame       = self.fsm.vars.frame or "/katana/base_frame"
+   local frame       = self.fsm.vars.frame or FRAMES.KNI
 
-   if frame ~= "/katana/tool_frame" then
+   if frame ~= FRAMES.GRIPPER then
      -- calculate global position (translation)
       x = x + katanaarm:x()
       y = y + katanaarm:y()

@@ -66,7 +66,7 @@ TABLE_POSITION_DISTANCE = 0.2 -- hold a distance of 0.2m to table
 TIMEOUT = {DETECT_TABLE = 8.0,
            WAIT_FOR_STOPPING = 1.5}
 
-FRAMES = {TARGET = "/base_link"}
+FRAMES = {TARGET = config:get_string("/frames/base")}
 
 YAW_LIMIT = math.pi/4
 MIN_DIST = 0.1
@@ -77,7 +77,7 @@ PTU = {PAN = 0.0,
        SPEED = 0.5}
 
 function can_transform(source_frame)
-   return tf:can_transform(FRAMES.target, source_frame, fawkes.Time:new(0,0))
+   return tf:can_transform(FRAMES.TARGET, source_frame, fawkes.Time:new(0,0))
 end
 
 -- Jumpconditions
@@ -88,7 +88,7 @@ function table_detected(state)
          if can_transform(table_pos:frame()) then
             x, y, z = transform_object(table_pos)
          else
-            print_warn("can't transform from '%s' to '/base_link'", table_pos:frame())
+            print_warn("can't transform from '%s' to '%s'", table_pos:frame(), FRAMES.TARGET)
          end
          state.fsm.vars.table_distance = x - TABLE_WIDTH/2 -- distance to table front
          local quat = fawkes.tf.Quaternion:new(table_pos:rotation(0),
