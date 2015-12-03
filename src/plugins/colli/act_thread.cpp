@@ -28,10 +28,6 @@
 
 #include <utils/math/coord.h>
 
-#ifdef HAVE_ROS
- #include <ros/ros.h>
-#endif
-
 #include <string>
 
 using namespace fawkes;
@@ -102,12 +98,6 @@ ColliActThread::init()
 
   if_navi_ = blackboard->open_for_writing<NavigatorInterface>(cfg_iface_navi_.c_str());
 
-#ifdef HAVE_ROS
-  std::string ros_target_topic = config->get_string((cfg_prefix + "ros/target_topic").c_str());
-  sub_ = new ros::Subscriber();
-  *sub_ = rosnode->subscribe(ros_target_topic.c_str(), 1, &ColliActThread::callback_simple_goal, this);
-#endif
-
   if_navi_->set_max_velocity(cfg_max_velocity_);
   if_navi_->set_max_rotation(cfg_max_rotation_);
   if_navi_->set_escaping_enabled(cfg_escaping_enabled_);
@@ -123,11 +113,6 @@ void
 ColliActThread::finalize()
 {
   blackboard->close( if_navi_ );
-
-#ifdef HAVE_ROS
-  sub_->shutdown();
-  delete(sub_);
-#endif
 }
 
 void
@@ -277,55 +262,3 @@ ColliActThread::colli_final()
   //  return alive && final && ( (cf - tp) == 0);
   // }
 }
-
-
-
-#ifdef HAVE_ROS
-void
-ColliActThread::callback_simple_goal(const geometry_msgs::PoseStamped::ConstPtr& msg)
-{
-  //calculate transform
-  std::string from = msg->header.frame_id;  //maybe get this as well from the config ?? Should both be /map anyways
-  std::string to = cfg_frame_odom_;
-
-  float x = msg->pose.position.x;
-  float y = msg->pose.position.y;
-  float ori = tf::get_yaw(
-      tf::Quaternion(msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z, msg->pose.orientation.w)
-  );
-
-  bool world_frame_exists = tf_listener->frame_exists(from);
-  bool robot_frame_exists = tf_listener->frame_exists(to);
-
-  bool tf_ok = true;
-
-  if (! world_frame_exists || ! robot_frame_exists) {
-    logger->log_warn(name(), "Frame missing: %s %s   %s %s",
-        from.c_str(), world_frame_exists ? "exists" : "missing",
-        to.c_str(), robot_frame_exists ? "exists" : "missing");
-  } else {
-    fawkes::tf::StampedTransform transform;
-      try {
-        tf_listener->lookup_transform(to, from, transform);
-      } catch (fawkes::tf::ExtrapolationException &e) {
-        logger->log_debug(name(), "Extrapolation error");
-        tf_ok = false;
-      } catch (fawkes::tf::ConnectivityException &e) {
-        logger->log_debug(name(), "Connectivity exception: %s", e.what());
-        tf_ok = false;
-      }
-
-      if (tf_ok) {
-        fawkes::tf::Point p = transform.getOrigin();
-        x = x + p.getX();
-        y = y + p.getY();
-
-        tf::Quaternion q = transform.getRotation();
-        ori = ori + tf::get_yaw(q);
-      }
-  }
-
-  //send command
-  thread_colli_->colli_goto(x, y, ori, if_navi_);
-}
-#endif

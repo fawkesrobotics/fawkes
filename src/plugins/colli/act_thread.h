@@ -29,10 +29,6 @@
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <aspect/tf.h>
-#ifdef HAVE_ROS
- #include <plugins/ros/aspect/ros.h>
- #include <geometry_msgs/PoseStamped.h>
-#endif
 
 #include <interfaces/NavigatorInterface.h>
 
@@ -55,9 +51,6 @@ class ColliActThread
   public fawkes::LoggingAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::ConfigurableAspect,
-#ifdef HAVE_ROS
-  public fawkes::ROSAspect,
-#endif
   public fawkes::TransformAspect
 {
  public:
@@ -88,10 +81,6 @@ class ColliActThread
   bool  cfg_stop_at_target_;
   fawkes::NavigatorInterface::OrientationMode cfg_orient_mode_;
   fawkes::NavigatorInterface::DriveMode       cfg_drive_mode_;
-
-#ifdef HAVE_ROS
-  void callback_simple_goal(const geometry_msgs::PoseStamped::ConstPtr& msg);
-#endif
 
   // methods mainly transfered from libmonaco
   bool colli_final();
