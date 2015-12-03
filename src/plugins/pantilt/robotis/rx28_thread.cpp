@@ -121,7 +121,7 @@ PanTiltRX28Thread::init()
         config->get_float((__ptu_cfg_prefix + "tilt_trans_z").c_str());
 
 
-    std::string frame_id_prefix = std::string("/") + __ptu_name;
+    std::string frame_id_prefix = std::string("") + __ptu_name;
     try {
       frame_id_prefix =
           config->get_string((__ptu_cfg_prefix + "frame_id_prefix").c_str());
