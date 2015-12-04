@@ -85,7 +85,7 @@ function use_skill(skill_name, iface_name)
          Use empty string to clear the custom parameters.
 
    jaco{x=X, y=Y, z=Z [,e1=E1] [,e2=E2] [,e3=E3] [,type="ang"]}
-      X, Y, Z: positions in 3D (currently based on /base_link frame).
+      X, Y, Z: positions in 3D (currently based on base-frame).
       E1, E2, E3: rotations of the hand (optional).
       This sends a GotoMessage to the jaco plugin, with the given target
          position. If a rotation value is not set, its default will be used.

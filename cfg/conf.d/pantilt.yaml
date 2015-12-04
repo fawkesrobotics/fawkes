@@ -63,8 +63,8 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/pantilt
     # Tolerance between desired and actual tilt value to consider RX28 PTU motion finished; rad
     tilt_margin: 0.1
 
-    # Frame ID base string; will be prefixed by / if missing;
-    # and suffixed with .base, .pan, and .tilt repsectively
+    # Frame ID base string;
+    # Will add frames with /base, /pan, and /tilt suffixes if missing
     frame_id_prefix: !frame rx28
 
     # PAN servo base to joint translation X; m

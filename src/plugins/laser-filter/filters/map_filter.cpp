@@ -53,7 +53,7 @@ LaserMapFilterDataFilter::LaserMapFilterDataFilter(unsigned int in_data_size,
   config_ = config;
   logger_ = logger;
   map_ = load_map();
-  frame_map_ = "/map";
+  frame_map_ = config_->get_string("/frames/fixed");
   cfg_occupied_thresh_ = std::numeric_limits<float>::max();
 }
 

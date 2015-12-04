@@ -44,7 +44,7 @@ separate translation and rotation tolerances (acceptable deviations
 from desired final position to consider the movement completed).
 
 goto{x=X, y=Y[, ori=ORI][, global_frame="/map"][, local_frame="/base_link"][, trans_tolerance=0.2][, rot_tolerance=0.1]}
-  
+
 Parameters:
 x, y:            global target point
 ori:             global orientation
@@ -65,14 +65,14 @@ local tfutils = require("fawkes.tfutils")
 local DEFAULT_ORI = 0.0
 local DEFAULT_TRANS_TOLERANCE = 0.2
 local DEFAULT_ROT_TOLERANCE = 0.1
-local DEFAULT_GLOBAL_FRAME = "/map"
-local DEFAULT_LOCAL_FRAME = "/base_link"
+local DEFAULT_GLOBAL_FRAME = config:get_string("/frames/fixed")
+local DEFAULT_LOCAL_FRAME = config:get_string("/frames/base")
 
 -- Initialize as skill module
 skillenv.skill_module(...)
 
 local function target_reached(self)
-   return 
+   return
       math.abs(self.fsm.vars.x - pose:translation(0)) <= self.fsm.vars.trans_tolerance
       and math.abs(self.fsm.vars.y - pose:translation(1)) <= self.fsm.vars.trans_tolerance
       and math.abs(self.fsm.vars.ori - 2 * math.acos(pose:rotation(3))) <= self.fsm.vars.rot_tolerance

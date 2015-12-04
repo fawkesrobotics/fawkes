@@ -80,6 +80,8 @@ class NavGraphVisualizationThread
 
   fawkes::LockPtr<fawkes::NavGraph> graph_;
   fawkes::LockPtr<fawkes::NavGraphConstraintRepo>      crepo_;
+
+  std::string cfg_global_frame_;
 };
 
 

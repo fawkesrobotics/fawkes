@@ -66,6 +66,10 @@ as it is the easiest to reproduce a rotation from there on.
 -- Initialize as skill module
 skillenv.skill_module(...)
 
+local FRAMES = {
+   BASE = config:get_string("/frames/base")
+}
+
 --- Check if arm motion is final.
 -- @return true if motion is final, false otherwise
 function jc_arm_is_final(state)
@@ -196,8 +200,8 @@ function GOTO:init()
    local theta_error = self.fsm.vars.theta_error or 0
    local offset      = self.fsm.vars.offset      or 0
    local straight    = self.fsm.vars.straight    or false
-   local frame       = self.fsm.vars.frame       or "/base_link" -- default: values given in robot's coordinate system!
-   local rot_frame   = self.fsm.vars.rot_frame   or "/base_link" -- default: values given in robot's coordinate system!
+   local frame       = self.fsm.vars.frame       or FRAMES.BASE -- default: values given in robot's coordinate system!
+   local rot_frame   = self.fsm.vars.rot_frame   or FRAMES.BASE -- default: values given in robot's coordinate system!
 
    -- check if distances are too high (means they are in libkni coordinate system)
    if math.abs(x) > 5 or

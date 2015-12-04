@@ -5,12 +5,6 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/navgraph
 ---
 navgraph:
 
-  # Base TF Frame ID
-  base_frame: !frame base_link
-
-  # Global TF Frame ID
-  global_frame: !frame map
-
   # Blackboard interface ID for navigator interface of locomotion component
   navigator_interface_id: Navigator
 

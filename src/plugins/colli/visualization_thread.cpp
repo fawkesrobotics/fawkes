@@ -73,7 +73,10 @@ ColliVisualizationThread::init()
   pub_search_path_ = new ros::Publisher();
   *pub_search_path_ = rosnode->advertise< nav_msgs::GridCells >("colli_search_path", 1);
 
-  roboshape_ = new RoboShapeColli( "/plugins/colli/roboshape/", logger, config );
+  std::string cfg_prefix = "/plugins/colli/";
+  roboshape_ = new RoboShapeColli( (cfg_prefix + "roboshape/").c_str(), logger, config );
+  frame_base_  = config->get_string((cfg_prefix + "frame/base").c_str());
+  frame_laser_ = config->get_string((cfg_prefix + "frame/laser").c_str());
 }
 
 void
@@ -110,7 +113,7 @@ ColliVisualizationThread::loop()
 
   // define grid settings
   nav_msgs::GridCells grid;
-  grid.header.frame_id = "/base_laser";
+  grid.header.frame_id = frame_laser_;
   grid.cell_width = 0.05;
   grid.cell_height = 0.05;
 
@@ -172,7 +175,7 @@ ColliVisualizationThread::loop()
 
   // publish path
   grid.cells.clear();
-  grid.header.frame_id = "/base_link";
+  grid.header.frame_id = frame_base_;
   std::vector< point_t >* plan = search_->get_plan();
   point_t gridpos_robo = search_->get_robot_position();
   for( std::vector<point_t>::iterator it=plan->begin(); it!=plan->end(); ++it ) {

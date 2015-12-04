@@ -126,6 +126,7 @@ TabletopObjectsThread::init()
   cfg_cluster_tolerance_     = config->get_float(CFG_PREFIX"cluster_tolerance");
   cfg_cluster_min_size_      = config->get_uint(CFG_PREFIX"cluster_min_size");
   cfg_cluster_max_size_      = config->get_uint(CFG_PREFIX"cluster_max_size");
+  cfg_base_frame_            = config->get_string("/frames/base");
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
   cfg_input_pointcloud_      = config->get_string(CFG_PREFIX"input_pointcloud");
   cfg_centroid_max_age_      = config->get_uint(CFG_PREFIX"centroid_max_age");
@@ -319,7 +320,7 @@ TabletopObjectsThread::finalize()
   pcl_manager->remove_pointcloud("tabletop-object-clusters");
   pcl_manager->remove_pointcloud("tabletop-table-model");
   pcl_manager->remove_pointcloud("tabletop-simplified-polygon");
-  
+
   blackboard->close(table_pos_if_);
   blackboard->close(switch_if_);
   for (PosIfsVector::iterator it = pos_ifs_.begin(); it != pos_ifs_.end(); it++) {
@@ -498,7 +499,7 @@ TabletopObjectsThread::loop()
                      fawkes::Time(0,0), input_->header.frame_id);
 
       tf::Stamped<tf::Vector3> baserel_normal;
-      tf_listener->transform_vector("/base_link", table_normal, baserel_normal);
+      tf_listener->transform_vector(cfg_base_frame_, table_normal, baserel_normal);
       tf::Vector3 z_axis(0, 0, copysign(1.0, baserel_normal.z()));
       table_inclination_ = z_axis.angle(baserel_normal);
       if (fabs(z_axis.angle(baserel_normal)) > cfg_max_z_angle_deviation_) {
@@ -524,7 +525,7 @@ TabletopObjectsThread::loop()
           centroid(tf::Point(table_centroid[0], table_centroid[1], table_centroid[2]),
                    fawkes::Time(0, 0), input_->header.frame_id);
         tf::Stamped<tf::Point> baserel_centroid;
-        tf_listener->transform_point("/base_link", centroid, baserel_centroid);
+        tf_listener->transform_point(cfg_base_frame_, centroid, baserel_centroid);
         baserel_table_centroid[0] = baserel_centroid.x();
         baserel_table_centroid[1] = baserel_centroid.y();
         baserel_table_centroid[2] = baserel_centroid.z();
@@ -545,7 +546,7 @@ TabletopObjectsThread::loop()
 
 
     if (! happy_with_plane) {
-      // throw away 
+      // throw away
       Cloud extracted;
       extract_.setNegative(true);
       extract_.setInputCloud(temp_cloud);
@@ -672,12 +673,12 @@ TabletopObjectsThread::loop()
 #endif
 
   try {
-    
+
     // Get transform Input camera -> base_link
     tf::StampedTransform t;
     fawkes::Time input_time(0,0);
     //pcl_utils::get_time(input_, input_time);
-    tf_listener->lookup_transform("/base_link", input_->header.frame_id,
+    tf_listener->lookup_transform(cfg_base_frame_, input_->header.frame_id,
                                   input_time, t);
 
     tf::Quaternion q = t.getRotation();
@@ -1028,7 +1029,7 @@ TabletopObjectsThread::loop()
     tf::Stamped<tf::Point>
       origin(tf::Point(0, 0, 0), fawkes::Time(0, 0), input_->header.frame_id);
     tf::Stamped<tf::Point> baserel_viewpoint;
-    tf_listener->transform_point("/base_link", origin, baserel_viewpoint);
+    tf_listener->transform_point(cfg_base_frame_, origin, baserel_viewpoint);
 
     viewpoint_above = (baserel_viewpoint.z() > table_centroid[2]);
   } catch (tf::TransformException &e) {
@@ -1092,7 +1093,7 @@ TabletopObjectsThread::loop()
   //CloudPtr table_points(new Cloud());
   //condrem.setInputCloud(temp_cloud2);
   //condrem.filter(*table_points);
-  
+
   // CLUSTERS
   // extract clusters of OBJECTS
 
@@ -1297,7 +1298,7 @@ TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud,
       single_cluster->height = 1;
 
       ColorCloudPtr obj_in_base_frame(new ColorCloud());
-      obj_in_base_frame->header.frame_id = "/base_link";
+      obj_in_base_frame->header.frame_id = cfg_base_frame_;
       obj_in_base_frame->width = it->indices.size();
       obj_in_base_frame->height = 1;
       obj_in_base_frame->points.resize(it->indices.size());
@@ -1305,7 +1306,7 @@ TabletopObjectsThread::cluster_objects(CloudConstPtr input_cloud,
       // don't add cluster here since the id is wrong
       //*obj_clusters_[obj_i++] = *single_cluster;
 
-pcl_utils::transform_pointcloud("/base_link", *single_cluster,
+pcl_utils::transform_pointcloud(cfg_base_frame_, *single_cluster,
         *obj_in_base_frame, *tf_listener);
 
       pcl::compute3DCentroid(*obj_in_base_frame, new_centroids[centroid_i]);
@@ -1461,7 +1462,7 @@ TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
     double rotation[4] = { quat.x(), quat.y(), quat.z(), quat.w() };
     iface->set_translation(translation);
     iface->set_rotation(rotation);
-  
+
   } else {
     if (visibility_history <= 0) {
       iface->set_visibility_history(visibility_history - 1);
@@ -1473,7 +1474,7 @@ TabletopObjectsThread::set_position(fawkes::Position3DInterface *iface,
       iface->set_rotation(rotation);
     }
   }
-  iface->write();  
+  iface->write();
 }
 
 
@@ -1684,12 +1685,12 @@ TabletopObjectsThread::remove_high_centroids(Eigen::Vector4f table_centroid,
       tf::Point(table_centroid[0], table_centroid[1], table_centroid[2]),
       fawkes::Time(0, 0), input_->header.frame_id);
   try {
-    tf_listener->transform_point("/base_link", sp_table, sp_baserel_table);
+    tf_listener->transform_point(cfg_base_frame_, sp_table, sp_baserel_table);
     for (CentroidMap::iterator it = centroids.begin(); it != centroids.end();) {
       try {
         tf::Stamped<tf::Point> sp_baserel_centroid(
             tf::Point(it->second[0], it->second[1], it->second[2]),
-            fawkes::Time(0, 0), "/base_link");
+            fawkes::Time(0, 0), cfg_base_frame_);
         float d = sp_baserel_centroid.z() - sp_baserel_table.z();
         if (d > cfg_centroid_max_height_) {
           //logger->log_debug(name(), "remove centroid %u, too high (d=%f)", it->first, d);
