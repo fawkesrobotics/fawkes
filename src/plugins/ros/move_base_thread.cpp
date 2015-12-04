@@ -82,9 +82,9 @@ RosMoveBaseThread::init()
 				    /* auto_start */ false);
 
   sub_colli_ = rosnode->subscribe<geometry_msgs::PoseStamped>
-    ("goal_colli", 1, boost::bind(&RosMoveBaseThread::message_cb, this, _1, COLLI));
+    ("move_base_simple/goal_colli", 1, boost::bind(&RosMoveBaseThread::message_cb, this, _1, COLLI));
   sub_navgraph_ = rosnode->subscribe<geometry_msgs::PoseStamped>
-    ("goal", 1, boost::bind(&RosMoveBaseThread::message_cb, this, _1, NAVGRAPH));
+    ("move_base_simple/goal", 1, boost::bind(&RosMoveBaseThread::message_cb, this, _1, NAVGRAPH));
 }
 
 void
