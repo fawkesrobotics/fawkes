@@ -54,7 +54,7 @@ RobotinoIrPclThread::init()
   pcl_xyz_->width    = sens_if_->maxlenof_distance();
   pcl_xyz_->height   = 1;
   pcl_xyz_->points.resize(pcl_xyz_->width * pcl_xyz_->height);
-  pcl_xyz_->header.frame_id = "/base_link";
+  pcl_xyz_->header.frame_id = config->get_string("/hardware/robotino/base_frame");
 
   pcl_manager->add_pointcloud("robotino-ir", pcl_xyz_);
 
