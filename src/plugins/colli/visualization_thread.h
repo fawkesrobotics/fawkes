@@ -86,6 +86,8 @@ class ColliVisualizationThread
   std::vector<fawkes::point_t> cells_far_;
   std::vector<fawkes::point_t> cells_free_;
 
+  std::string frame_base_;
+  std::string frame_laser_;
 };
 
 #endif
