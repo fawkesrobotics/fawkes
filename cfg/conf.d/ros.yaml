@@ -40,3 +40,8 @@ ros:
     # This means using the tf2_msgs message types and publishing
     # static transforms to /tf_static.
     use_tf2: true
+
+    # Interval in which to post static transform updates; sec
+    # This setting is only relevant is use_tf2 is set to false above.
+    static-update-interval: 1.0
+
