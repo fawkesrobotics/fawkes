@@ -106,6 +106,8 @@ TabletopVisualizationThread::init()
     cfg_cylinder_fitting_ = config->get_bool(CFG_PREFIX"enable_cylinder_fitting");
   } catch (Exception &e) {} // ignored, use default
 
+  cfg_base_frame_ = config->get_string("/frames/base");
+
   vispub_ = new ros::Publisher();
   *vispub_ = rosnode->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 100);
 #ifdef USE_POSEPUB
@@ -154,12 +156,12 @@ TabletopVisualizationThread::loop()
       /*
        tf::Stamped<tf::Point> centroid(tf::Point(centroids_[i][0], centroids_[i][1], centroids_[i][2]), fawkes::Time(0, 0), frame_id_);
        tf::Stamped<tf::Point> baserel_centroid;
-       tf_listener->transform_point("/base_link", centroid, baserel_centroid);
+       tf_listener->transform_point(cfg_base_frame_, centroid, baserel_centroid);
        */
 
       tf::Stamped<tf::Point>
         centroid(tf::Point(it->second[0], it->second[1], it->second[2]),
-                 fawkes::Time(0, 0), "/base_link");
+                 fawkes::Time(0, 0), cfg_base_frame_);
       tf::Stamped<tf::Point> camrel_centroid;
       tf_listener->transform_point(frame_id_, centroid, camrel_centroid);
 
@@ -170,7 +172,7 @@ TabletopVisualizationThread::loop()
         free(tmp);
 
         visualization_msgs::Marker text;
-        text.header.frame_id = "/base_link";
+        text.header.frame_id = cfg_base_frame_;
         text.header.stamp = ros::Time::now();
         text.ns = "tabletop";
         text.id = idnum++;
@@ -192,7 +194,7 @@ TabletopVisualizationThread::loop()
       }
 
       visualization_msgs::Marker sphere;
-      sphere.header.frame_id = "/base_link";
+      sphere.header.frame_id = cfg_base_frame_;
       sphere.header.stamp = ros::Time::now();
       sphere.ns = "tabletop";
       sphere.id = idnum++;
@@ -650,7 +652,7 @@ TabletopVisualizationThread::triangulate_hull()
     table_triangle_vertices_.clear();
     return;
   }
-    
+
 
   // Don't need to, resizing and overwriting them all later
   //table_triangle_vertices_.clear();

@@ -232,6 +232,7 @@ class TabletopObjectsThread
   float cfg_cluster_tolerance_;
   unsigned int cfg_cluster_min_size_;
   unsigned int cfg_cluster_max_size_;
+  std::string cfg_base_frame_;
   std::string cfg_result_frame_;
   std::string cfg_input_pointcloud_;
   uint cfg_centroid_max_age_;
