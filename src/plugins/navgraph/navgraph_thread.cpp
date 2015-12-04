@@ -72,8 +72,8 @@ NavGraphThread::init()
   } catch (Exception &e) {
     logger->log_warn(name(), "No graph file given, will create empty one");
   }
-  cfg_base_frame_      = config->get_string("/navgraph/base_frame");
-  cfg_global_frame_    = config->get_string("/navgraph/global_frame");
+  cfg_base_frame_      = config->get_string("/frames/base");
+  cfg_global_frame_    = config->get_string("/frames/fixed");
   cfg_nav_if_id_       = config->get_string("/navgraph/navigator_interface_id");
   cfg_resend_interval_ = config->get_float("/navgraph/resend_interval");
   cfg_replan_interval_ = config->get_float("/navgraph/replan_interval");
