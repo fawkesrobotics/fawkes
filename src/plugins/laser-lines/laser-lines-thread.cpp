@@ -295,6 +295,15 @@ LaserLinesThread::loop()
 	    {
 	      return l1.bearing < l2.bearing;
 	    });
+
+  if (linfos.size() > cfg_max_num_lines_){
+    // Ignore lines if more than cfg_max_num_lines_ found.
+    // Since the lines are orderd by bearing, this will drop
+    // the line with the highest bearing.
+    linfos.resize(cfg_max_num_lines_);
+  }
+
+
   std::vector<LineInfo> linfos_filtered;
   linfos_filtered.resize(linfos.size());
   if(cfg_moving_avg_enabled_)
