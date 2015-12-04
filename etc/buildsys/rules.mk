@@ -125,7 +125,7 @@ clean: presubdirs subdirs
 	$(SILENT)$(foreach M,$(MANPAGES_all),rm -f $(M);)
 	$(SILENT)$(foreach T,$(TARGETS_all),rm -rf $(T);)
 	$(SILENT)$(foreach B,$(BINS_gui),rm -f $(B);)
-	$(SILENT)$(foreach L,$(LIBS_gui:%.so=%.$(SOEXT)),rm -f $(L);)
+	$(SILENT)$(foreach L,$(LIBS_gui:%.so=%.$(SOEXT)),rm -f $(addsuffix *,$(L));)
 	$(SILENT)$(foreach P,$(PLUGINS_gui:%.so=%.$(SOEXT)),rm -f $(P);)
 	$(SILENT)$(foreach M,$(MANPAGES_gui),rm -f $(M);)
 	$(SILENT)$(foreach T,$(TARGETS_gui),rm -rf $(T);)
