@@ -44,7 +44,8 @@ class RobotinoIrPclThread
   public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::PointCloudAspect,
-  public fawkes::LoggingAspect
+  public fawkes::LoggingAspect,
+  public fawkes::ConfigurableAspect
 {
  public:
   RobotinoIrPclThread();
