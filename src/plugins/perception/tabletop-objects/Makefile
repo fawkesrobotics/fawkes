@@ -86,6 +86,12 @@ ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
       CFLAGS_visualization_thread  = -DHAVE_VISUAL_DEBUGGING $(CFLAGS_ROS) $(CFLAGS_TF) \
 				     -Wno-unused-local-typedefs \
 				     $(CFLAGS_EIGEN3) $(call ros-pkg-cflags,visualization_msgs)
+
+      # Check for newer libqhull
+      ifneq ($(wildcard $(SYSROOT)/usr/include/libqhull),)
+        CFLAGS_visualization_thread += -DHAVE_QHULL_2011
+      endif
+
       CFLAGS += -DHAVE_VISUAL_DEBUGGING
       LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)
 
