@@ -76,14 +76,14 @@ RosTfThread::init()
 #ifndef HAVE_TF2_MSGS
 	  throw Exception("tf2 enabled in config but not available at compile time");
 #else
-	  __sub_tf = rosnode->subscribe<tf2_msgs::TFMessage>("/tf", 100, boost::bind(&RosTfThread::tf_message_cb, this, _1, false));
-	  __sub_static_tf = rosnode->subscribe<tf2_msgs::TFMessage>("/tf_static", 100, boost::bind(&RosTfThread::tf_message_cb, this, _1, true));
-	  __pub_tf = rosnode->advertise< tf2_msgs::TFMessage >("/tf", 100);
-	  __pub_static_tf = rosnode->advertise< tf2_msgs::TFMessage >("/tf_static", 100, /* latch */ true);
+	  __sub_tf = rosnode->subscribe("tf", 100, &RosTfThread::tf_message_cb_dynamic, this);
+	  __sub_static_tf = rosnode->subscribe("tf_static", 100, &RosTfThread::tf_message_cb_static, this);
+	  __pub_tf = rosnode->advertise< tf2_msgs::TFMessage >("tf", 100);
+	  __pub_static_tf = rosnode->advertise< tf2_msgs::TFMessage >("tf_static", 100, /* latch */ true);
 #endif
   } else {
-	  __sub_tf = rosnode->subscribe<::tf::tfMessage>("/tf", 100, boost::bind(&RosTfThread::tf_message_cb, this, _1));
-	  __pub_tf = rosnode->advertise< ::tf::tfMessage >("/tf", 100);
+	  __sub_tf = rosnode->subscribe("tf", 100, &RosTfThread::tf_message_cb, this);
+	  __pub_tf = rosnode->advertise< ::tf::tfMessage >("tf", 100);
   }
 
   __tfifs = blackboard->open_multiple_for_reading<TransformInterface>("/tf*");
@@ -378,6 +378,18 @@ RosTfThread::tf_message_cb(const ros::MessageEvent<::tf::tfMessage const> &msg_e
 }
 
 #ifdef HAVE_TF2_MSGS
+void
+RosTfThread::tf_message_cb_static(const ros::MessageEvent<tf2_msgs::TFMessage const> &msg_evt)
+{
+	tf_message_cb(msg_evt, true);
+}
+
+void
+RosTfThread::tf_message_cb_dynamic(const ros::MessageEvent<tf2_msgs::TFMessage const> &msg_evt)
+{
+	tf_message_cb(msg_evt, false);
+}
+
 void
 RosTfThread::tf_message_cb(const ros::MessageEvent<tf2_msgs::TFMessage const> &msg_evt, bool static_tf)
 {
