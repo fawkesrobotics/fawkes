@@ -201,9 +201,12 @@ AmclROSThread::initial_pose_received(const geometry_msgs::PoseWithCovarianceStam
 				msg->pose.pose.position.y,
 				msg->pose.pose.position.z};
 
+  std::string frame = msg->header.frame_id;
+  if (! frame.empty() && frame[0] == '/')  frame = frame.substr(1);
+
   LocalizationInterface::SetInitialPoseMessage *ipm =
     new LocalizationInterface::SetInitialPoseMessage();
-  ipm->set_frame(msg->header.frame_id.c_str());
+  ipm->set_frame(frame.c_str());
   ipm->set_translation(translation);
   ipm->set_rotation(rotation);
   ipm->set_covariance(covariance);
