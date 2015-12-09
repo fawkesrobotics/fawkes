@@ -79,6 +79,8 @@ class RosTfThread
  private:
   void tf_message_cb(const ros::MessageEvent<::tf::tfMessage const> &msg_evt);
 #ifdef HAVE_TF2_MSGS
+  void tf_message_cb_dynamic(const ros::MessageEvent<tf2_msgs::TFMessage const> &msg_evt);
+  void tf_message_cb_static(const ros::MessageEvent<tf2_msgs::TFMessage const> &msg_evt);
   void tf_message_cb(const ros::MessageEvent<tf2_msgs::TFMessage const> &msg_evt, bool static_tf);
 #endif
 
