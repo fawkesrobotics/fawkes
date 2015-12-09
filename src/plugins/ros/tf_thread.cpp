@@ -144,7 +144,14 @@ RosTfThread::loop()
 		  const ::tf::tfMessage::ConstPtr &msg = __tf_msg_queues[queue].front();
 		  const size_t tsize = msg->transforms.size();
 		  for (size_t i = 0; i < tsize; ++i) {
-			  publish_transform_to_fawkes(msg->transforms[i]);
+			  geometry_msgs::TransformStamped ts = msg->transforms[i];
+			  if (! ts.header.frame_id.empty() && ts.header.frame_id[0] == '/') {
+				  ts.header.frame_id = ts.header.frame_id.substr(1);
+			  }
+			  if (! ts.child_frame_id.empty() && ts.child_frame_id[0] == '/') {
+				  ts.child_frame_id = ts.child_frame_id.substr(1);
+			  }
+			  publish_transform_to_fawkes(ts);
 		  }
 		  __tf_msg_queues[queue].pop();
 	  }
