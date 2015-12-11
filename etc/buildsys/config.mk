@@ -272,5 +272,11 @@ ifeq ($(DO_32BIT_BUILD),1)
   ARCH=i386
 endif
 
+ifeq ($(ARCH),x86_64)
+  ifeq ($(DISTRO),fedora)
+    LIB_SUFFIX=64
+  endif
+endif
+
 endif # __buildsys_config_mk_
 
