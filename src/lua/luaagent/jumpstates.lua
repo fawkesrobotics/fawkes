@@ -30,12 +30,12 @@ module(..., fawkes.modinit.module_init)
 require("fawkes.fsm.jumpstate")
 require("luaagent.skillqueue")
 local skillstati = require("skiller.skillstati")
-local skjsmod = require("skiller.skill_jumpstate")
+local ssjsmod = require("skiller.subskill_jumpstate")
 
 -- Convenience shortcuts
-local JumpState      = fawkes.fsm.jumpstate.JumpState
-local SkillJumpState = skjsmod.SkillJumpState
-local SkillQueue     = luaagent.skillqueue.SkillQueue
+local JumpState         = fawkes.fsm.jumpstate.JumpState
+local SubSkillJumpState = ssjsmod.SubSkillJumpState
+local SkillQueue        = luaagent.skillqueue.SkillQueue
 
 
 --- @class SkillJumpState
@@ -45,7 +45,7 @@ local SkillQueue     = luaagent.skillqueue.SkillQueue
 -- loop() function. You need to add transitions with jump conditions for state
 -- transitions and cannot return a state to switch to after the loop.
 -- @author Tim Niemueller
-AgentSkillExecJumpState = { set_transition_labels = SkillJumpState.set_transition_labels }
+AgentSkillExecJumpState = { set_transition_labels = SubSkillJumpState.set_transition_labels }
 
 
 
@@ -77,7 +77,7 @@ function AgentSkillExecJumpState:new(o)
    o.hide_failure_transition = o.hide_failure_transition or false
    assert(type(o.hide_final_transition) == "boolean", "Hide final transition for " .. o.name .. " not a boolean")
    assert(type(o.hide_failure_transition) == "boolean", "Hide failure transition for " .. o.name .. " not a boolean")
-   
+
    o.skill_status = skillstati.S_RUNNING
 
    o:set_transition_labels()

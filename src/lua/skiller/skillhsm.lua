@@ -26,13 +26,16 @@ require("fawkes.modinit")
 module(..., fawkes.modinit.module_init)
 local hsmmod = require("fawkes.hsm")
 local jsmod = require("fawkes.fsm.jumpstate")
-local sjsmod = require("skiller.skill_jumpstate")
 local subfsmjsmod = require("fawkes.fsm.subfsmjumpstate")
+local sjsmod = require("fawkes.fsm.skill_jumpstate")
+local ssjsmod = require("skiller.subskill_jumpstate")
 
 local HSM         = hsmmod.HSM
 JumpState         = jsmod.JumpState
-SkillJumpState    = sjsmod.SkillJumpState
 SubFSMJumpState   = subfsmjsmod.SubFSMJumpState
+
+SkillJumpState    = sjsmod.SkillJumpState
+SkillJumpState:implemented_by(ssjsmod.SubSkillJumpState)
 
 SkillHSM = {}
 
