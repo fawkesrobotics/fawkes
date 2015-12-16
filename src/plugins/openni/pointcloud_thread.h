@@ -119,6 +119,9 @@ class OpenNiPointCloudThread
 
   fawkes::Time *__capture_start;
 
+  std::string __cfg_frame_depth;
+  std::string __cfg_frame_image;
+
 #ifdef HAVE_PCL
   bool         __cfg_generate_pcl;
 

@@ -38,9 +38,6 @@
 using namespace fawkes;
 using namespace firevision;
 
-#define FRAME_ID_DEPTH "/kinect/depth"
-#define FRAME_ID_IMAGE "/kinect/image"
-
 /** @class OpenNiPointCloudThread "pointcloud_thread.h"
  * OpenNI Point Cloud Provider Thread.
  * This thread provides a point cloud calculated from the depth image
@@ -94,18 +91,21 @@ OpenNiPointCloudThread::init()
     __cfg_register_depth_image = config->get_bool("/plugins/openni/register_depth_image");
   } catch (Exception &e) {}
 
+  __cfg_frame_depth = config->get_string("/plugins/openni/frame/depth");
+  __cfg_frame_image = config->get_string("/plugins/openni/frame/image");
+
   __pcl_xyz_buf = new SharedMemoryImageBuffer("openni-pointcloud-xyz",
 					  CARTESIAN_3D_FLOAT,
 					  __depth_md->XRes(), __depth_md->YRes());
 
-  __pcl_xyz_buf->set_frame_id(__cfg_register_depth_image ? FRAME_ID_IMAGE : FRAME_ID_DEPTH);
+  __pcl_xyz_buf->set_frame_id(__cfg_register_depth_image ? __cfg_frame_image.c_str() : __cfg_frame_depth.c_str());
 
 
   __pcl_xyzrgb_buf = new SharedMemoryImageBuffer("openni-pointcloud-xyzrgb",
                                                  CARTESIAN_3D_FLOAT_RGB,
                                                  __depth_md->XRes(), __depth_md->YRes());
 
-  __pcl_xyzrgb_buf->set_frame_id(__cfg_register_depth_image ? FRAME_ID_IMAGE : FRAME_ID_DEPTH);
+  __pcl_xyzrgb_buf->set_frame_id(__cfg_register_depth_image ? __cfg_frame_image.c_str() : __cfg_frame_depth.c_str());
 
   // this is magic from ROS openni_device.cpp, reading code from
   // openni-primesense suggests that SXGA is the base configuration
@@ -192,14 +192,14 @@ OpenNiPointCloudThread::init()
     __pcl_xyz->width    = __width;
     __pcl_xyz->height   = __height;
     __pcl_xyz->points.resize(__width * __height);
-    __pcl_xyz->header.frame_id = __cfg_register_depth_image ? FRAME_ID_IMAGE : FRAME_ID_DEPTH;
+    __pcl_xyz->header.frame_id = __cfg_register_depth_image ? __cfg_frame_image : __cfg_frame_depth;
 
     __pcl_xyzrgb = new pcl::PointCloud<pcl::PointXYZRGB>();
     __pcl_xyzrgb->is_dense = false;
     __pcl_xyzrgb->width    = __width;
     __pcl_xyzrgb->height   = __height;
     __pcl_xyzrgb->points.resize(__width * __height);
-    __pcl_xyzrgb->header.frame_id = __cfg_register_depth_image ? FRAME_ID_IMAGE : FRAME_ID_DEPTH;
+    __pcl_xyzrgb->header.frame_id = __cfg_register_depth_image ? __cfg_frame_image : __cfg_frame_depth;
 
     pcl_manager->add_pointcloud("openni-pointcloud-xyz", __pcl_xyz);
     pcl_manager->add_pointcloud("openni-pointcloud-xyzrgb", __pcl_xyzrgb);
