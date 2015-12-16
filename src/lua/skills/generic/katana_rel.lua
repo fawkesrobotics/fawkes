@@ -48,8 +48,8 @@ katana_rel{x=X, y=Y, z=Z}
 skillenv.skill_module(...)
 
 local FRAMES = {
-   KNI = config:get_string("/katana/frame/kni"),
-   GRIPPER = config:get_string("/katana/frame/gripper")
+   KNI = config:get_string("/hardware/katana/frame/kni"),
+   GRIPPER = config:get_string("/hardware/katana/frame/gripper")
 }
 -- States
 fsm:define_states{
