@@ -1,0 +1,10 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/PCL
+---
+pcl:
+
+  # Set to true to make PCL quiet and remove all direct messages by PCL.
+  shutup: false
+
