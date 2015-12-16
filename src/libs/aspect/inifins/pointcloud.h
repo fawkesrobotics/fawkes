@@ -34,7 +34,7 @@ namespace fawkes {
 class PointCloudAspectIniFin : public AspectIniFin
 {
  public:
-  PointCloudAspectIniFin();
+  PointCloudAspectIniFin(Configuration *config);
   virtual ~PointCloudAspectIniFin();
 
   virtual void init(Thread *thread);

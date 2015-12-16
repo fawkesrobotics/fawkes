@@ -265,7 +265,7 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
   TransformAspectIniFin *tf_aif = new TransformAspectIniFin(blackboard, tf_listener);
 #endif
 #ifdef HAVE_PCL
-  PointCloudAspectIniFin *pcl_aif = new PointCloudAspectIniFin();
+  PointCloudAspectIniFin *pcl_aif = new PointCloudAspectIniFin(config);
 #endif
 
 
