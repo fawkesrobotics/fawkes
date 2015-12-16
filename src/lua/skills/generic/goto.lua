@@ -61,15 +61,15 @@ the navigator started processing another goto message.
 
 local tfutils = require("fawkes.tfutils")
 
+-- Initialize as skill module
+skillenv.skill_module(...)
+
 -- Constants
 local DEFAULT_ORI = 0.0
 local DEFAULT_TRANS_TOLERANCE = 0.2
 local DEFAULT_ROT_TOLERANCE = 0.1
 local DEFAULT_GLOBAL_FRAME = config:get_string("/frames/fixed")
 local DEFAULT_LOCAL_FRAME = config:get_string("/frames/base")
-
--- Initialize as skill module
-skillenv.skill_module(...)
 
 local function target_reached(self)
    return
