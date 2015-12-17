@@ -39,6 +39,8 @@ ifeq ($(HAVE_ROSVERSION), 1)
     ros-pkg-cflags   = $(call ros-pkg-msg-cflags,$(1)) \
 	$(shell rospack export --lang=cpp --attrib=cflags $(1) 2>/dev/null)
     ros-pkg-lflags   = $(shell rospack export --lang=cpp --attrib=lflags $(1) 2>/dev/null)
+    ros-pkg-version  = unknown
+    ros-pkg-version-atleast =
   else
     # This has been tested with indigo and hydro, there is no groovy around to test
 
@@ -51,9 +53,11 @@ ifeq ($(HAVE_ROSVERSION), 1)
       endif
     endif
 
-    ros-have-pkg     = $(if $(shell $(PKGCONFIG) --exists $(1); echo $${?/1/}),1,0)
-    ros-pkg-cflags   = $(shell $(PKGCONFIG) --cflags $(1))
-    ros-pkg-lflags   = $(subst -l:,,$(shell $(PKGCONFIG) --libs $(1)))
+    ros-have-pkg     = $(if $(shell $(PKGCONFIG) --exists "$(1)"; echo $${?/1/}),1,0)
+    ros-pkg-cflags   = $(shell $(PKGCONFIG) --cflags "$(1)")
+    ros-pkg-lflags   = $(subst -l:,,$(shell $(PKGCONFIG) --libs "$(1)"))
+    ros-pkg-version  = $(shell $(PKGCONFIG) --modversion "$(1)")
+    ros-pkg-version-atleast = $(if $(shell $(PKGCONFIG) --atleast-version "$(2)" "$(1)"; echo $${?/1/}),1,0)
   endif
 
   HAVE_ROS = $(call ros-have-pkg,roscpp)
