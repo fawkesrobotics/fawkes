@@ -23,8 +23,10 @@
 #define __LIBS_PCL_UTILS_UTILS_H_
 
 #include <pcl/point_cloud.h>
+#include <pcl/console/print.h>
 #include <core/utils/refptr.h>
 #include <utils/time/time.h>
+#include <config/config.h>
 
 namespace fawkes {
   namespace pcl_utils {
@@ -41,6 +43,33 @@ typedef union {
   } time;		///< Access timestamp as time
   uint64_t timestamp;	///< Access timestamp as number only
 } PointCloudTimestamp;
+
+
+/** Call this function to make PCL shutup.
+ * Warning: this makes PCL completely quiet for everything using
+ * PCL in the same process.
+ */
+inline void
+shutup()
+{
+  pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
+}
+
+
+/** Shutup PCL based on configuration.
+ * Check the configuration flag /pcl/shutup and call pcl_utils::shutup() if
+ * it is set to true.
+ * @param config config to query for value
+ */
+inline void
+shutup_conditional(Configuration *config)
+{
+  bool pcl_shutup = false;
+  try {
+    pcl_shutup = config->get_bool("/pcl/shutup");
+  } catch (Exception &e) {} // ignore, use default
+  if (pcl_shutup)  ::fawkes::pcl_utils::shutup();
+}
 
 
 /** Set time of a point cloud from a fawkes::Time instance.

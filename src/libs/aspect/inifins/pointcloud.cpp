@@ -23,6 +23,7 @@
 
 #include <aspect/inifins/pointcloud.h>
 #include <aspect/pointcloud.h>
+#include <pcl_utils/utils.h>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -34,11 +35,14 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-PointCloudAspectIniFin::PointCloudAspectIniFin()
+/** Constructor.
+ * @param config configuration used to conditionally make PCL quiet.
+ */
+PointCloudAspectIniFin::PointCloudAspectIniFin(Configuration *config)
   : AspectIniFin("PointCloudAspect")
 {
   __pcl_manager = new PointCloudManager();
+  pcl_utils::shutup_conditional(config);
 }
 
 
