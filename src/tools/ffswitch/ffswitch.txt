@@ -1,0 +1,57 @@
+ffswitch(1)
+===========
+
+NAME
+----
+ffswitch - Send Messages to a Fawkes SwitchInterface
+
+SYNOPSIS
+--------
+[verse]
+'ffswitch' [-h] [-e|-d <interface_ID>] [-r host[:port]]
+
+DESCRIPTION
+-----------
+This program connects to a Fawkes instance over the network and can
+then instruct to load or unload plugins, watch for plugin events, or
+list available or currently loaded plugins.
+
+
+OPTIONS
+-------
+ *-h*::
+	Show help instructions.
+
+  *-e* 'interface_ID'::
+	Send an EnableSwitchMessage to the SwitchInterface with ID 'interface_id'.
+
+  *-d* 'interface_ID'::
+	Send an DisableSwitchMessage to the SwitchInterface with ID 'interface_id'.
+
+  *-r* 'host[:port]'::
+	Remote host and optionally port to connect to. If not given
+	defaults to localhost:1910.
+
+EXAMPLES
+--------
+
+ *ffswitch -e Start -r myrobot:1234*::
+	Send an EnableSwitchMessage to the SwitchInterface with ID "Start" and
+	the Fawkes instance running on the host "myrobot" on port 1234.
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Gesche Gierse <gierse@kbsg.rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Gesche Gierse <gierse@kbsg.rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org
