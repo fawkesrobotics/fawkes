@@ -18,15 +18,18 @@ include $(BUILDSYSDIR)/boost.mk
 MONGO_CXX_DRIVER_BOOST_LIBS = thread system
 
 ifneq ($(wildcard /usr/include/mongo/client/dbclient.h /usr/local/include/mongo/client/dbclient.h),)
+  ifneq ($(wildcard $(SYSROOT)/usr/include/mongo/version.h $(SYSROOT)/usr/local/include/mongo/version.h),)
+    CFLAGS_MONGODB_VERSION_H += -DHAVE_MONGODB_VERSION_H
+    ifeq ($(OS),FreeBSD)
+      MONGO_CXX_DRIVER_BOOST_LIBS += regex
+    endif
+  else
+    MONGO_CXX_DRIVER_BOOST_LIBS += regex filesystem
+  endif
+
   ifeq ($(call boost-have-libs,$(MONGO_CXX_DRIVER_BOOST_LIBS)),1)
     HAVE_MONGODB = 1
-    CFLAGS_MONGODB  = -DHAVE_MONGODB $(CFLAGS_CPP11)
-    ifneq ($(wildcard $(SYSROOT)/usr/include/mongo/version.h $(SYSROOT)/usr/local/include/mongo/version.h),)
-      CFLAGS_MONGODB += -DHAVE_MONGODB_VERSION_H
-    else
-      MONGO_CXX_DRIVER_BOOST_LIBS += regex filesystem
-    endif
-
+    CFLAGS_MONGODB  = -DHAVE_MONGODB $(CFLAGS_CPP11) $(CFLAGS_MONGODB_VERSION_H)
     LDFLAGS_MONGODB = -lmongoclient -lm -lpthread \
 		                  $(call boost-libs-ldflags,$(MONGO_CXX_DRIVER_BOOST_LIBS))
 
