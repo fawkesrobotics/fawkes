@@ -46,7 +46,8 @@ ifeq ($(HAVE_OPENRAVE),1)
   CFLAGS_OPENRAVE  = -DHAVE_OPENRAVE \
                      $(shell $(PKGCONFIG) --cflags 'openrave$(OPENRAVE_VERSION_INFIX)-core') \
                      $(shell $(PKGCONFIG) --cflags 'openrave$(OPENRAVE_VERSION_INFIX)') \
-                     $(call boost-lib-cflags,thread)
+                     $(call boost-lib-cflags,thread) \
+		     -Wno-deprecated-declarations
   LDFLAGS_OPENRAVE = $(shell $(PKGCONFIG) --libs 'openrave$(OPENRAVE_VERSION_INFIX)-core') \
                      $(shell $(PKGCONFIG) --libs 'openrave$(OPENRAVE_VERSION_INFIX)') \
                      $(call boost-lib-ldflags,thread)
