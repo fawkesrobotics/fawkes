@@ -29,6 +29,7 @@ local skqmod   = require("luaagent.skillqueue")
 local agjsmod  = require("luaagent.jumpstates")
 local fsmjsmod  = require("fawkes.fsm.jumpstate")
 local subfjsmod = require("fawkes.fsm.subfsmjumpstate")
+local sjsmmod  = require("fawkes.fsm.skill_jumpstate")
 local fsmstmod  = require("fawkes.fsm.state")
 local skillenv  = require("skiller.skillenv")
 local predlib   = require("fawkes.predlib")
@@ -38,9 +39,13 @@ local agent = nil
 
 local graphing_enabled = true
 
+SkillJumpState = sjsmod.SkillJumpState
+SkillJumpState:implemented_by(agjsmod.AgentSkillExecJumpState)
+
 local module_exports = {
    AgentHSM                = hsmmod.AgentHSM,
    AgentSkillExecJumpState = agjsmod.AgentSkillExecJumpState,
+   SkillJumpState          = SkillJumpState,
    SkillQueue              = skqmod.SkillQueue,
    JumpState               = fsmjsmod.JumpState,
    SubFSMJumpState         = subfjsmod.SubFSMJumpState,
@@ -161,7 +166,7 @@ function execute()
       local ok, err = pcall(agent.fsm.loop, agent.fsm)
       if not ok then
          handle_error(err)
-      end      
+      end
    else
       handle_error("Agent has neither execute() function nor FSM")
    end

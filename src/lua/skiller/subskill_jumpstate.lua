@@ -21,12 +21,12 @@
 
 require("fawkes.modinit")
 
---- SkillJumpState.
+--- SubSkillJumpState.
 --
 -- WARNING: documentation currently out-of-sync, rewrite in progress.
 --
 -- Skill jump states to build up Hybrid State Machines (HSM)
--- specifically for the use in skills. SkillJumpState (SJS) provide
+-- specifically for the use in skills. SubSkillJumpState (SJS) provide
 -- specific tools to deal with sub-skills. SJS may operate either a
 -- single sub-skill, which is automatically executed and reset in the
 -- loop and appropriate transitions on success or failure are
@@ -69,19 +69,19 @@ local skillenv = require("skiller.skillenv")
 local JumpState     = fawkes.fsm.jumpstate.JumpState
 
 
-SkillJumpState = {}
+SubSkillJumpState = {}
 
 --- Create new state.
 -- @param o table with initializations for the object.
 -- @return Initialized FSM state
-function SkillJumpState:new(o)
-   assert(o, "SkillJumpState requires a table as argument")
-   assert(o.name, "SkillJumpState requires a name")
-   assert(o.fsm, "SkillJumpState " .. o.name .. " requires a FSM")
-   assert(not getmetatable(o), "Meta table already set for SkillJumpState " .. o.name)
+function SubSkillJumpState:new(o)
+   assert(o, "SubSkillJumpState requires a table as argument")
+   assert(o.name, "SubSkillJumpState requires a name")
+   assert(o.fsm, "SubSkillJumpState " .. o.name .. " requires a FSM")
+   assert(not getmetatable(o), "Meta table already set for SubSkillJumpState " .. o.name)
 
    --if o.skill or o.skills then
-   assert(o.final_to, "SkillJumpState " .. o.name .. " requires final_to state")
+   assert(o.final_to, "SubSkillJumpState " .. o.name .. " requires final_to state")
    o.fail_to = o.fail_to or "FAILED"
    --end
 
@@ -89,7 +89,7 @@ function SkillJumpState:new(o)
    --    o.skill and not o.skills and not o.subskills or
    --    o.skills and not o.skill and not o.subskills or
    --    o.subskills and not o.skill and not o.skills,
-   -- "SkillJumpState " .. o.name .. " may only operate in a specific mode")
+   -- "SubSkillJumpState " .. o.name .. " may only operate in a specific mode")
    assert(o.skills, "No skills given")
    for _,s in ipairs(o.skills) do
       if type(s[1]) == "string" then
@@ -154,7 +154,7 @@ function SkillJumpState:new(o)
    return o
 end
 
-function SkillJumpState:set_transition_labels()
+function SubSkillJumpState:set_transition_labels()
    if self.skills and #self.skills > 0 then
       local snames = {}
       for _,s in ipairs(self.skills) do
@@ -195,15 +195,15 @@ function SkillJumpState:set_transition_labels()
    self.fsm:mark_changed()
 end
 
-function SkillJumpState:jumpcond_skill_done()
+function SubSkillJumpState:jumpcond_skill_done()
    return self:jumpcond_skill_final() or self:jumpcond_skill_failed()
 end
 
-function SkillJumpState:jumpcond_skill_final()
+function SubSkillJumpState:jumpcond_skill_final()
    return self.skill_status == skillstati.S_FINAL
 end
 
-function SkillJumpState:jumpcond_skill_failed()
+function SubSkillJumpState:jumpcond_skill_failed()
    if self.skill_status == skillstati.S_FAILED then
       local error = ""
 
@@ -221,7 +221,7 @@ end
 --- Execute init routines.
 -- This resets any skills that have been added for this state and then executes
 -- the state's init() routine. Do not overwrite do_init(), rather implement init().
-function SkillJumpState:do_init()
+function SubSkillJumpState:do_init()
    -- Try preconditions
    local rv = { self:try_transitions(true) }
    if next(rv) then return unpack(rv) end
@@ -308,7 +308,7 @@ end
 --- Execute exit routine.
 -- This resets any subskills that have been added for this state and then executes
 -- the state's exit() routine. Do not overwrite do_exit(), rather implement exit().
-function SkillJumpState:do_exit()
+function SubSkillJumpState:do_exit()
    for _, s in ipairs(self.skills) do
       s.__args = nil
       s.status = skillstati.S_RUNNING
@@ -317,7 +317,7 @@ function SkillJumpState:do_exit()
    self:exit()
 end
 
-function SkillJumpState:skillstring(skill)
+function SubSkillJumpState:skillstring(skill)
    local s = skill[1].name .. "{"
    local first = true
    for k,v in pairs(skill.__args ) do
@@ -329,7 +329,7 @@ function SkillJumpState:skillstring(skill)
 end
 
 --- Execute loop.
-function SkillJumpState:do_loop()
+function SubSkillJumpState:do_loop()
    self:loop()
 
    -- status might have been changed in custom loop(), execute the following only
@@ -361,7 +361,7 @@ function SkillJumpState:do_loop()
 end
 
 
-function SkillJumpState:set_skill_name(skill_name)
+function SubSkillJumpState:set_skill_name(skill_name)
    if self.final_transition then
       self.final_transition.description = skill_name .. "() succeeded"
    end
@@ -371,7 +371,7 @@ function SkillJumpState:set_skill_name(skill_name)
    end
 end
 
-function SkillJumpState:skill_reset()
+function SubSkillJumpState:skill_reset()
    if self.skills then
       for _, s in ipairs(self.skills) do
 	 s.args = nil
@@ -382,7 +382,7 @@ function SkillJumpState:skill_reset()
    end
 end
 
-function SkillJumpState:reset()
+function SubSkillJumpState:reset()
    JumpState.reset(self)
    self:skill_reset()
    self.skill_status = skillstati.S_INACTIVE
