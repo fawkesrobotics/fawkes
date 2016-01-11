@@ -20,6 +20,13 @@ plugins/openni:
   # Full path to the XnSensorServer binary; path
   sensor_server_bin: /usr/bin/XnSensorServer
 
+  frame:
+    # Base frame of the depth image
+    depth: !frame kinect/depth
+
+    # Base frame of the rgb image
+    image: !frame kinect/image
+
 plugins/openni-image:
   # De-bayering mode, can be bilinear or nearest_neighbor
   debayering: bilinear

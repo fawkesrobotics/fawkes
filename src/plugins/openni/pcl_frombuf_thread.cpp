@@ -69,7 +69,7 @@ OpenNiPclOnlyThread::init()
   __pcl->width    = __width;
   __pcl->height   = __height;
   __pcl->points.resize(__width * __height);
-  __pcl->header.frame_id = "/kinect/depth";
+  __pcl->header.frame_id = config->get_string("/plugins/openni/frame/depth");
 
   pcl_manager->add_pointcloud("openni-pointcloud", __pcl);
 }
