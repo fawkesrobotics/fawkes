@@ -44,6 +44,23 @@ class FacialExpressionInterface : public Interface
     MoveBrowsMessage();
     ~MoveBrowsMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     brows_t brows_action();
     void set_brows_action(const brows_t new_brows_action);
     int maxlenof_brows_action() const;
@@ -54,6 +71,23 @@ class FacialExpressionInterface : public Interface
     MoveEyesMessage(eyes_t ini_eyes_action);
     MoveEyesMessage();
     ~MoveEyesMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     eyes_t eyes_action();
     void set_eyes_action(const eyes_t new_eyes_action);
@@ -66,6 +100,23 @@ class FacialExpressionInterface : public Interface
     MoveJowlMessage();
     ~MoveJowlMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     jowl_t jowl_action();
     void set_jowl_action(const jowl_t new_jowl_action);
     int maxlenof_jowl_action() const;
@@ -76,6 +127,23 @@ class FacialExpressionInterface : public Interface
     MoveMouthMessage(mouth_t ini_mouth_action);
     MoveMouthMessage();
     ~MoveMouthMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     mouth_t mouth_action();
     void set_mouth_action(const mouth_t new_mouth_action);
@@ -108,7 +176,7 @@ class FacialExpressionInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -127,10 +195,18 @@ class FacialExpressionInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+fawkes.FacialExpressionInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.FacialExpressionInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

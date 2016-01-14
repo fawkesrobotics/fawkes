@@ -12,6 +12,23 @@ class SpeechSynthInterface : public Interface
     SayMessage();
     ~SayMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     char * text();
     void set_text(const char * new_text);
     int maxlenof_text() const;
@@ -43,7 +60,7 @@ class SpeechSynthInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -62,10 +79,18 @@ class SpeechSynthInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+fawkes.SpeechSynthInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.SpeechSynthInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

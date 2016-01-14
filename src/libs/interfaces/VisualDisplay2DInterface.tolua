@@ -31,6 +31,23 @@ class VisualDisplay2DInterface : public Interface
     AddCartLineMessage();
     ~AddCartLineMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float x(int index);
     void set_x(unsigned int index, const float new_x);
     int maxlenof_x() const;
@@ -50,6 +67,23 @@ class VisualDisplay2DInterface : public Interface
     AddCartCircleMessage(float ini_x, float ini_y, float ini_radius, LineStyle ini_style, unsigned char * ini_color);
     AddCartCircleMessage();
     ~AddCartCircleMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float x();
     void set_x(const float new_x);
@@ -73,6 +107,23 @@ class VisualDisplay2DInterface : public Interface
     AddCartRectMessage(float ini_x, float ini_y, float ini_width, float ini_height, LineStyle ini_style, unsigned char * ini_color);
     AddCartRectMessage();
     ~AddCartRectMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float x();
     void set_x(const float new_x);
@@ -100,6 +151,23 @@ class VisualDisplay2DInterface : public Interface
     AddCartTextMessage();
     ~AddCartTextMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float x();
     void set_x(const float new_x);
     int maxlenof_x() const;
@@ -126,6 +194,23 @@ class VisualDisplay2DInterface : public Interface
     DeleteObjectMessage();
     ~DeleteObjectMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int object_id();
     void set_object_id(const unsigned int new_object_id);
     int maxlenof_object_id() const;
@@ -135,6 +220,23 @@ class VisualDisplay2DInterface : public Interface
   {
     DeleteAllMessage();
     ~DeleteAllMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
   };
 
@@ -155,7 +257,7 @@ class VisualDisplay2DInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -174,10 +276,18 @@ class VisualDisplay2DInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+fawkes.VisualDisplay2DInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.VisualDisplay2DInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

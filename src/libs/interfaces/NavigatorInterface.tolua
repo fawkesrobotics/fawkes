@@ -36,6 +36,23 @@ class NavigatorInterface : public Interface
     StopMessage();
     ~StopMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class TurnMessage : public Message
@@ -43,6 +60,23 @@ class NavigatorInterface : public Interface
     TurnMessage(float ini_angle, float ini_velocity);
     TurnMessage();
     ~TurnMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float angle();
     void set_angle(const float new_angle);
@@ -57,6 +91,23 @@ class NavigatorInterface : public Interface
     CartesianGotoMessage(float ini_x, float ini_y, float ini_orientation);
     CartesianGotoMessage();
     ~CartesianGotoMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float x();
     void set_x(const float new_x);
@@ -75,6 +126,23 @@ class NavigatorInterface : public Interface
     PolarGotoMessage();
     ~PolarGotoMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float phi();
     void set_phi(const float new_phi);
     int maxlenof_phi() const;
@@ -92,6 +160,23 @@ class NavigatorInterface : public Interface
     PlaceGotoMessage();
     ~PlaceGotoMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     char * place();
     void set_place(const char * new_place);
     int maxlenof_place() const;
@@ -102,6 +187,23 @@ class NavigatorInterface : public Interface
     PlaceWithOriGotoMessage(char * ini_place, float ini_orientation);
     PlaceWithOriGotoMessage();
     ~PlaceWithOriGotoMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     char * place();
     void set_place(const char * new_place);
@@ -116,6 +218,23 @@ class NavigatorInterface : public Interface
     ObstacleMessage(float ini_x, float ini_y, float ini_width);
     ObstacleMessage();
     ~ObstacleMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float x();
     void set_x(const float new_x);
@@ -133,6 +252,23 @@ class NavigatorInterface : public Interface
     ResetOdometryMessage();
     ~ResetOdometryMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class SetMaxVelocityMessage : public Message
@@ -140,6 +276,23 @@ class NavigatorInterface : public Interface
     SetMaxVelocityMessage(float ini_max_velocity);
     SetMaxVelocityMessage();
     ~SetMaxVelocityMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float max_velocity();
     void set_max_velocity(const float new_max_velocity);
@@ -152,6 +305,23 @@ class NavigatorInterface : public Interface
     SetMaxRotationMessage();
     ~SetMaxRotationMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float max_rotation();
     void set_max_rotation(const float new_max_rotation);
     int maxlenof_max_rotation() const;
@@ -162,6 +332,23 @@ class NavigatorInterface : public Interface
     SetEscapingMessage(bool ini_escaping_enabled);
     SetEscapingMessage();
     ~SetEscapingMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     bool is_escaping_enabled();
     void set_escaping_enabled(const bool new_escaping_enabled);
@@ -174,6 +361,23 @@ class NavigatorInterface : public Interface
     SetSecurityDistanceMessage();
     ~SetSecurityDistanceMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float security_distance();
     void set_security_distance(const float new_security_distance);
     int maxlenof_security_distance() const;
@@ -184,6 +388,23 @@ class NavigatorInterface : public Interface
     SetDriveModeMessage(DriveMode ini_drive_mode);
     SetDriveModeMessage();
     ~SetDriveModeMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     DriveMode drive_mode();
     void set_drive_mode(const DriveMode new_drive_mode);
@@ -196,6 +417,23 @@ class NavigatorInterface : public Interface
     SetStopAtTargetMessage();
     ~SetStopAtTargetMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     bool is_stop_at_target();
     void set_stop_at_target(const bool new_stop_at_target);
     int maxlenof_stop_at_target() const;
@@ -207,6 +445,23 @@ class NavigatorInterface : public Interface
     SetOrientationModeMessage();
     ~SetOrientationModeMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     OrientationMode orientation_mode();
     void set_orientation_mode(const OrientationMode new_orientation_mode);
     int maxlenof_orientation_mode() const;
@@ -216,6 +471,23 @@ class NavigatorInterface : public Interface
   {
     ResetParametersMessage();
     ~ResetParametersMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
   };
 
@@ -287,7 +559,7 @@ class NavigatorInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -306,10 +578,18 @@ class NavigatorInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+fawkes.NavigatorInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.NavigatorInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }
