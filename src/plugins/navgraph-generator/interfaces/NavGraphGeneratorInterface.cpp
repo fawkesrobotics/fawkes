@@ -91,7 +91,7 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   add_messageinfo("SetCopyGraphDefaultPropertiesMessage");
   add_messageinfo("RemovePointOfInterestMessage");
   add_messageinfo("ComputeMessage");
-  unsigned char tmp_hash[] = {0x5c, 0x8a, 0xdf, 0x1a, 0x27, 0xe3, 0x7, 0x2f, 0x3a, 0x74, 0xe3, 0xb4, 0xe5, 0x33, 0xd, 0x73};
+  unsigned char tmp_hash[] = {0x5e, 0xdf, 0x82, 0xa5, 0x9f, 0x36, 0xc2, 0xb5, 0x43, 0xba, 0xb6, 0x5, 0x12, 0xf4, 0x9c, 0xd};
   set_hash(tmp_hash);
 }
 
@@ -1025,18 +1025,18 @@ NavGraphGeneratorInterface::AddMapObstaclesMessage::clone() const
 
 
 /** Constructor with initial values.
- * @param ini_id initial value for id
+ * @param ini_name initial value for name
  * @param ini_x initial value for x
  * @param ini_y initial value for y
  */
-NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage(const char * ini_id, const float ini_x, const float ini_y) : Message("AddObstacleMessage")
+NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage(const char * ini_name, const float ini_x, const float ini_y) : Message("AddObstacleMessage")
 {
   data_size = sizeof(AddObstacleMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->id, ini_id, 64);
+  strncpy(data->name, ini_name, 64);
   data->x = ini_x;
   data->y = ini_y;
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
@@ -1050,7 +1050,7 @@ NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage(const char * 
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
 }
@@ -1073,7 +1073,7 @@ NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage() : Message("
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
 }
@@ -1097,38 +1097,38 @@ NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage(const AddObst
 }
 
 /* Methods */
-/** Get id value.
+/** Get name value.
  * 
       ID of the obstacle. Can later be used to remove it again.
     
- * @return id value
+ * @return name value
  */
 char *
-NavGraphGeneratorInterface::AddObstacleMessage::id() const
+NavGraphGeneratorInterface::AddObstacleMessage::name() const
 {
-  return data->id;
+  return data->name;
 }
 
-/** Get maximum length of id value.
- * @return length of id value, can be length of the array or number of 
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NavGraphGeneratorInterface::AddObstacleMessage::maxlenof_id() const
+NavGraphGeneratorInterface::AddObstacleMessage::maxlenof_name() const
 {
   return 64;
 }
 
-/** Set id value.
+/** Set name value.
  * 
       ID of the obstacle. Can later be used to remove it again.
     
- * @param new_id new id value
+ * @param new_name new name value
  */
 void
-NavGraphGeneratorInterface::AddObstacleMessage::set_id(const char * new_id)
+NavGraphGeneratorInterface::AddObstacleMessage::set_name(const char * new_name)
 {
-  strncpy(data->id, new_id, sizeof(data->id));
+  strncpy(data->name, new_name, sizeof(data->name));
 }
 
 /** Get x value.
@@ -1209,16 +1209,16 @@ NavGraphGeneratorInterface::AddObstacleMessage::clone() const
 
 
 /** Constructor with initial values.
- * @param ini_id initial value for id
+ * @param ini_name initial value for name
  */
-NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage(const char * ini_id) : Message("RemoveObstacleMessage")
+NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage(const char * ini_name) : Message("RemoveObstacleMessage")
 {
   data_size = sizeof(RemoveObstacleMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (RemoveObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->id, ini_id, 64);
+  strncpy(data->name, ini_name, 64);
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
@@ -1230,7 +1230,7 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage(const c
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 /** Constructor */
 NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage() : Message("RemoveObstacleMessage")
@@ -1251,7 +1251,7 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage() : Mes
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
 /** Destructor */
@@ -1273,38 +1273,38 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage(const R
 }
 
 /* Methods */
-/** Get id value.
+/** Get name value.
  * 
       ID of the obstacle to remove.
     
- * @return id value
+ * @return name value
  */
 char *
-NavGraphGeneratorInterface::RemoveObstacleMessage::id() const
+NavGraphGeneratorInterface::RemoveObstacleMessage::name() const
 {
-  return data->id;
+  return data->name;
 }
 
-/** Get maximum length of id value.
- * @return length of id value, can be length of the array or number of 
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NavGraphGeneratorInterface::RemoveObstacleMessage::maxlenof_id() const
+NavGraphGeneratorInterface::RemoveObstacleMessage::maxlenof_name() const
 {
   return 64;
 }
 
-/** Set id value.
+/** Set name value.
  * 
       ID of the obstacle to remove.
     
- * @param new_id new id value
+ * @param new_name new name value
  */
 void
-NavGraphGeneratorInterface::RemoveObstacleMessage::set_id(const char * new_id)
+NavGraphGeneratorInterface::RemoveObstacleMessage::set_name(const char * new_name)
 {
-  strncpy(data->id, new_id, sizeof(data->id));
+  strncpy(data->name, new_name, sizeof(data->name));
 }
 
 /** Clone this message.
@@ -1325,19 +1325,19 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::clone() const
 
 
 /** Constructor with initial values.
- * @param ini_id initial value for id
+ * @param ini_name initial value for name
  * @param ini_x initial value for x
  * @param ini_y initial value for y
  * @param ini_mode initial value for mode
  */
-NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage(const char * ini_id, const float ini_x, const float ini_y, const ConnectionMode ini_mode) : Message("AddPointOfInterestMessage")
+NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage(const char * ini_name, const float ini_x, const float ini_y, const ConnectionMode ini_mode) : Message("AddPointOfInterestMessage")
 {
   data_size = sizeof(AddPointOfInterestMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddPointOfInterestMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->id, ini_id, 64);
+  strncpy(data->name, ini_name, 64);
   data->x = ini_x;
   data->y = ini_y;
   data->mode = ini_mode;
@@ -1352,7 +1352,7 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_ENUM, "mode", 1, &data->mode, "ConnectionMode", &enum_map_ConnectionMode);
@@ -1376,7 +1376,7 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_ENUM, "mode", 1, &data->mode, "ConnectionMode", &enum_map_ConnectionMode);
@@ -1401,38 +1401,38 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage
 }
 
 /* Methods */
-/** Get id value.
+/** Get name value.
  * 
       ID of the obstacle. Can later be used to remove it again.
     
- * @return id value
+ * @return name value
  */
 char *
-NavGraphGeneratorInterface::AddPointOfInterestMessage::id() const
+NavGraphGeneratorInterface::AddPointOfInterestMessage::name() const
 {
-  return data->id;
+  return data->name;
 }
 
-/** Get maximum length of id value.
- * @return length of id value, can be length of the array or number of 
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NavGraphGeneratorInterface::AddPointOfInterestMessage::maxlenof_id() const
+NavGraphGeneratorInterface::AddPointOfInterestMessage::maxlenof_name() const
 {
   return 64;
 }
 
-/** Set id value.
+/** Set name value.
  * 
       ID of the obstacle. Can later be used to remove it again.
     
- * @param new_id new id value
+ * @param new_name new name value
  */
 void
-NavGraphGeneratorInterface::AddPointOfInterestMessage::set_id(const char * new_id)
+NavGraphGeneratorInterface::AddPointOfInterestMessage::set_name(const char * new_name)
 {
-  strncpy(data->id, new_id, sizeof(data->id));
+  strncpy(data->name, new_name, sizeof(data->name));
 }
 
 /** Get x value.
@@ -1547,20 +1547,20 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::clone() const
 
 
 /** Constructor with initial values.
- * @param ini_id initial value for id
+ * @param ini_name initial value for name
  * @param ini_x initial value for x
  * @param ini_y initial value for y
  * @param ini_ori initial value for ori
  * @param ini_mode initial value for mode
  */
-NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterestWithOriMessage(const char * ini_id, const float ini_x, const float ini_y, const float ini_ori, const ConnectionMode ini_mode) : Message("AddPointOfInterestWithOriMessage")
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterestWithOriMessage(const char * ini_name, const float ini_x, const float ini_y, const float ini_ori, const ConnectionMode ini_mode) : Message("AddPointOfInterestWithOriMessage")
 {
   data_size = sizeof(AddPointOfInterestWithOriMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (AddPointOfInterestWithOriMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->id, ini_id, 64);
+  strncpy(data->name, ini_name, 64);
   data->x = ini_x;
   data->y = ini_y;
   data->ori = ini_ori;
@@ -1576,7 +1576,7 @@ NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterest
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "ori", 1, &data->ori);
@@ -1601,7 +1601,7 @@ NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterest
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
   add_fieldinfo(IFT_FLOAT, "ori", 1, &data->ori);
@@ -1627,38 +1627,38 @@ NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterest
 }
 
 /* Methods */
-/** Get id value.
+/** Get name value.
  * 
       ID of the obstacle. Can later be used to remove it again.
     
- * @return id value
+ * @return name value
  */
 char *
-NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::id() const
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::name() const
 {
-  return data->id;
+  return data->name;
 }
 
-/** Get maximum length of id value.
- * @return length of id value, can be length of the array or number of 
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::maxlenof_id() const
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::maxlenof_name() const
 {
   return 64;
 }
 
-/** Set id value.
+/** Set name value.
  * 
       ID of the obstacle. Can later be used to remove it again.
     
- * @param new_id new id value
+ * @param new_name new name value
  */
 void
-NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::set_id(const char * new_id)
+NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::set_name(const char * new_name)
 {
-  strncpy(data->id, new_id, sizeof(data->id));
+  strncpy(data->name, new_name, sizeof(data->name));
 }
 
 /** Get x value.
@@ -1803,18 +1803,18 @@ NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::clone() const
 
 
 /** Constructor with initial values.
- * @param ini_id initial value for id
+ * @param ini_name initial value for name
  * @param ini_property_name initial value for property_name
  * @param ini_property_value initial value for property_value
  */
-NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInterestPropertyMessage(const char * ini_id, const char * ini_property_name, const char * ini_property_value) : Message("SetPointOfInterestPropertyMessage")
+NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInterestPropertyMessage(const char * ini_name, const char * ini_property_name, const char * ini_property_value) : Message("SetPointOfInterestPropertyMessage")
 {
   data_size = sizeof(SetPointOfInterestPropertyMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (SetPointOfInterestPropertyMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->id, ini_id, 64);
+  strncpy(data->name, ini_name, 64);
   strncpy(data->property_name, ini_property_name, 64);
   strncpy(data->property_value, ini_property_value, 1024);
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
@@ -1828,7 +1828,7 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInteres
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
   add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
 }
@@ -1851,7 +1851,7 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInteres
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
   add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
 }
@@ -1875,38 +1875,38 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInteres
 }
 
 /* Methods */
-/** Get id value.
+/** Get name value.
  * 
       ID of the point of interest.
     
- * @return id value
+ * @return name value
  */
 char *
-NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::id() const
+NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::name() const
 {
-  return data->id;
+  return data->name;
 }
 
-/** Get maximum length of id value.
- * @return length of id value, can be length of the array or number of 
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::maxlenof_id() const
+NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::maxlenof_name() const
 {
   return 64;
 }
 
-/** Set id value.
+/** Set name value.
  * 
       ID of the point of interest.
     
- * @param new_id new id value
+ * @param new_name new name value
  */
 void
-NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::set_id(const char * new_id)
+NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::set_name(const char * new_name)
 {
-  strncpy(data->id, new_id, sizeof(data->id));
+  strncpy(data->name, new_name, sizeof(data->name));
 }
 
 /** Get property_name value.
@@ -2471,16 +2471,16 @@ NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::clone() const
 
 
 /** Constructor with initial values.
- * @param ini_id initial value for id
+ * @param ini_name initial value for name
  */
-NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestMessage(const char * ini_id) : Message("RemovePointOfInterestMessage")
+NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestMessage(const char * ini_name) : Message("RemovePointOfInterestMessage")
 {
   data_size = sizeof(RemovePointOfInterestMessage_data_t);
   data_ptr  = malloc(data_size);
   memset(data_ptr, 0, data_size);
   data      = (RemovePointOfInterestMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->id, ini_id, 64);
+  strncpy(data->name, ini_name, 64);
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
@@ -2492,7 +2492,7 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestM
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 /** Constructor */
 NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestMessage() : Message("RemovePointOfInterestMessage")
@@ -2513,7 +2513,7 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestM
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
-  add_fieldinfo(IFT_STRING, "id", 64, data->id);
+  add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
 /** Destructor */
@@ -2535,38 +2535,38 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestM
 }
 
 /* Methods */
-/** Get id value.
+/** Get name value.
  * 
       ID of the obstacle to remove.
     
- * @return id value
+ * @return name value
  */
 char *
-NavGraphGeneratorInterface::RemovePointOfInterestMessage::id() const
+NavGraphGeneratorInterface::RemovePointOfInterestMessage::name() const
 {
-  return data->id;
+  return data->name;
 }
 
-/** Get maximum length of id value.
- * @return length of id value, can be length of the array or number of 
+/** Get maximum length of name value.
+ * @return length of name value, can be length of the array or number of 
  * maximum number of characters for a string
  */
 size_t
-NavGraphGeneratorInterface::RemovePointOfInterestMessage::maxlenof_id() const
+NavGraphGeneratorInterface::RemovePointOfInterestMessage::maxlenof_name() const
 {
   return 64;
 }
 
-/** Set id value.
+/** Set name value.
  * 
       ID of the obstacle to remove.
     
- * @param new_id new id value
+ * @param new_name new name value
  */
 void
-NavGraphGeneratorInterface::RemovePointOfInterestMessage::set_id(const char * new_id)
+NavGraphGeneratorInterface::RemovePointOfInterestMessage::set_name(const char * new_name)
 {
-  strncpy(data->id, new_id, sizeof(data->id));
+  strncpy(data->name, new_name, sizeof(data->name));
 }
 
 /** Clone this message.
