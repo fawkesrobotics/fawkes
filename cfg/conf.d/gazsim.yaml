@@ -23,7 +23,7 @@ gazsim:
   laser:
     max_range: 5.5 
     interface-id: "Laser urg"
-    frame-id: !frame base_laser"
+    frame-id: !frame base_laser
 
   webcam:
     # list of ids for all cameras to simulate
