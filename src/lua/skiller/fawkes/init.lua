@@ -205,7 +205,7 @@ function loop()
 			local ok, errmsg = xpcall(sksf, debug.traceback)
 
 			if not ok then
-				 local errstr = string.format("%s|%s", skill_string, errmsg)
+				 local errstr = string.format("%s|%s", tostring(skiller_if:skill_string()), tostring(errmsg))
 				 print_error("Failed to execute skill: " .. errstr)
 
 				 skiller_if:set_error(errstr)
@@ -257,9 +257,12 @@ function init()
 	 skdbg_if          = blackboard:open_for_writing("SkillerDebugInterface", "Skiller")
 	 skdbg_layouted_if = blackboard:open_for_writing("SkillerDebugInterface", "SkillerLayouted")
 
+	 -- read interface once to enable keeping the
+	 -- exclusive controller on a Lua context restart
+	 skiller_if:read()
+
 	 skdbg_if:set_graph_colored(skdbg_graphcolored)
 	 skdbg_if:write()
 	 skdbg_layouted_if:set_graph_colored(skdbg_graphcolored)
 	 skdbg_layouted_if:write()
 end
-
