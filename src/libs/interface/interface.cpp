@@ -1171,7 +1171,6 @@ Interface::msgq_first()
     throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
 					"reading instance of an interface (first).");
   }
-
   return __message_queue->first();
 }
 

@@ -33,7 +33,9 @@ class Message : public RefCount
   Message(Message *mesg);
   Message(Message &mesg);
 
-  unsigned int      sender_id() const;
+  unsigned int      id() const;
+
+	unsigned int      sender_id() const;
   const char *      sender_thread_name() const;
   Interface *       interface() const;
   const char *      type() const;

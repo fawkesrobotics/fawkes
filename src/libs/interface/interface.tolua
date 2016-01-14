@@ -46,7 +46,7 @@ class Interface
 
   void                    set_from_chunk(void *chunk);
 
-  virtual Message *       create_message(const char *type) const = 0;
+  virtual fawkes::Message * create_message @ create_message_generic(const char *type) const = 0;
 
   void          read();
   void          write();
@@ -69,8 +69,24 @@ class Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic ();
   bool          msgq_empty();
 };
+
+$[
+
+function fawkes.Interface:msgq_first()
+  local message = self:msgq_first_generic()
+  local m = tolua.cast(message, "fawkes::" .. self:type() .. "::" .. message:type())
+	return m
+end
+
+function fawkes.Interface:create_message(type)
+  local message = self:create_message_generic(type)
+  return tolua.cast(message, "fawkes::" .. self:type() .. "::" .. message:type())
+end
+
+$]
+
 
 }
