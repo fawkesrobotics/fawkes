@@ -17,6 +17,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetPreFilterTypeMessage();
     ~SetPreFilterTypeMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     PreFilterType pre_filter_type();
     void set_pre_filter_type(const PreFilterType new_pre_filter_type);
     int maxlenof_pre_filter_type() const;
@@ -27,6 +44,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetPreFilterSizeMessage(unsigned int ini_pre_filter_size);
     SetPreFilterSizeMessage();
     ~SetPreFilterSizeMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned int pre_filter_size();
     void set_pre_filter_size(const unsigned int new_pre_filter_size);
@@ -39,6 +73,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetPreFilterCapMessage();
     ~SetPreFilterCapMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int pre_filter_cap();
     void set_pre_filter_cap(const unsigned int new_pre_filter_cap);
     int maxlenof_pre_filter_cap() const;
@@ -49,6 +100,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetSADWindowSizeMessage(unsigned int ini_sad_window_size);
     SetSADWindowSizeMessage();
     ~SetSADWindowSizeMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned int sad_window_size();
     void set_sad_window_size(const unsigned int new_sad_window_size);
@@ -61,6 +129,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetMinDisparityMessage();
     ~SetMinDisparityMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     int min_disparity();
     void set_min_disparity(const int new_min_disparity);
     int maxlenof_min_disparity() const;
@@ -71,6 +156,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetNumDisparitiesMessage(unsigned int ini_num_disparities);
     SetNumDisparitiesMessage();
     ~SetNumDisparitiesMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned int num_disparities();
     void set_num_disparities(const unsigned int new_num_disparities);
@@ -83,6 +185,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetTextureThresholdMessage();
     ~SetTextureThresholdMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int texture_threshold();
     void set_texture_threshold(const unsigned int new_texture_threshold);
     int maxlenof_texture_threshold() const;
@@ -93,6 +212,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetUniquenessRatioMessage(unsigned int ini_uniqueness_ratio);
     SetUniquenessRatioMessage();
     ~SetUniquenessRatioMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned int uniqueness_ratio();
     void set_uniqueness_ratio(const unsigned int new_uniqueness_ratio);
@@ -105,6 +241,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetSpeckleWindowSizeMessage();
     ~SetSpeckleWindowSizeMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int speckle_window_size();
     void set_speckle_window_size(const unsigned int new_speckle_window_size);
     int maxlenof_speckle_window_size() const;
@@ -116,6 +269,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetSpeckleRangeMessage();
     ~SetSpeckleRangeMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int speckle_range();
     void set_speckle_range(const unsigned int new_speckle_range);
     int maxlenof_speckle_range() const;
@@ -126,6 +296,23 @@ class OpenCVStereoParamsInterface : public Interface
     SetTrySmallerWindowsMessage(bool ini_try_smaller_windows);
     SetTrySmallerWindowsMessage();
     ~SetTrySmallerWindowsMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     bool is_try_smaller_windows();
     void set_try_smaller_windows(const bool new_try_smaller_windows);
@@ -179,7 +366,7 @@ class OpenCVStereoParamsInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -198,10 +385,23 @@ class OpenCVStereoParamsInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.OpenCVStereoParamsInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.OpenCVStereoParamsInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.OpenCVStereoParamsInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }
