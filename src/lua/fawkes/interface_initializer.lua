@@ -26,6 +26,33 @@ require("fawkes.modinit")
 -- @author Tim Niemueller
 module(..., fawkes.modinit.module_init)
 
+local interfaces_reading = {}
+local interfaces_writing = {}
+
+local blackboard = _G.blackboard
+
+function finalize()
+	 for _,v in pairs(interfaces_reading) do
+			blackboard:close(v)
+	 end
+	 for _,v in pairs(interfaces_writing) do
+			blackboard:close(v)
+	 end
+end
+
+function read()
+	 for _,v in pairs(interfaces_reading) do
+			v:read()
+	 end
+end
+
+function write()
+	 for _,v in pairs(interfaces_writing) do
+			if v:changed() then
+				 v:write()
+			end
+	 end	 
+end
 
 function init_interfaces(module, table)
    local name = module.name
@@ -33,30 +60,30 @@ function init_interfaces(module, table)
    if not dependencies then return end
 
    assert(type(dependencies) == "table", "Type of dependencies not table")
-   assert(interfaces and type(interfaces) == "table", "Interfaces not initialized")
    for _,t in ipairs(dependencies) do
       assert(type(t) == "table", "Non-table element in interface dependencies")
-      assert(t.v, "Interface dependency does not have a variable name (v) field")
-      assert(t.type, "Interface dependency does not have a type field")
-      if t.id then
-	 local uid = t.type .. "::" .. t.id
-	 if interfaces.reading_by_uid[uid] then
-	    table[t.v] = interfaces.reading_by_uid[uid]
-	 elseif interfaces.writing_by_uid[uid] then
-	    table[t.v] = interfaces.writing_by_uid[uid]
-	 else
-	    error("No interface available with the UID " .. uid ..
-		  ", required by ".. name)
+      assert(t.v, "Interface dependency of " .. name .. " does not have a variable name (v) field")
+      assert(t.type, "Interface dependency '" .. t.v .. "' of " .. name .. " does not have a type field")
+      assert(t.id, "Interface dependency '" .. t.v .. "' of " .. name .. " does not have an id field")
+
+			local uid = t.type .. "::" .. t.id
+			
+			if t.writing then
+				 if not interfaces_writing[uid] then
+						print_debug("Opening interface %s for writing", uid)
+						interfaces_writing[uid] = blackboard:open_for_writing(t.type, t.id)
+				 end
+				 assert(interfaces_writing[uid], "Failed to open interface " .. uid .. " for writing")
+
+				 table[t.v] = interfaces_writing[uid]
+			else
+				 if not interfaces_reading[uid] then
+						print_debug("Opening interface %s for reading", uid)
+						interfaces_reading[uid] = blackboard:open_for_reading(t.type, t.id)
+				 end
+				 assert(interfaces_reading[uid], "Failed to open interface " .. uid .. " for reading")
+
+				 table[t.v] = interfaces_reading[uid]
+			end
 	 end
-      else
-	 if interfaces.reading[t.v] then
-	    table[t.v] = interfaces.reading[t.v]
-	 elseif interfaces.writing[t.v] then
-	    table[t.v] = interfaces.writing[t.v]
-	 else
-	    error("No interface available with the variable name " .. t.v ..
-		  ", required by ".. name)
-	 end
-      end
-   end
 end
