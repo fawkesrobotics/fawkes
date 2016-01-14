@@ -47,6 +47,12 @@ namespace fawkes {
 BlackBoardWithOwnership::BlackBoardWithOwnership(fawkes::BlackBoard *parent, const char *owner)
   : BlackBoard(/* create notifier */ false), blackboard_(parent), owner_(owner)
 {
+	BlackBoardWithOwnership *bbo = dynamic_cast<BlackBoardWithOwnership *>(blackboard_);
+	if (bbo) {
+		// we are wrapping another ownership, remove indirection and make sure
+		// we do use the outer wrapper's ownership info
+		blackboard_ = bbo->blackboard_;
+	}
 }
 
 
