@@ -12,6 +12,23 @@ class NaoJointStiffnessInterface : public Interface
     SetStiffnessMessage();
     ~SetStiffnessMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int servo();
     void set_servo(const unsigned int new_servo);
     int maxlenof_servo() const;
@@ -29,6 +46,23 @@ class NaoJointStiffnessInterface : public Interface
     SetBodyStiffnessMessage();
     ~SetBodyStiffnessMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float value();
     void set_value(const float new_value);
     int maxlenof_value() const;
@@ -42,6 +76,23 @@ class NaoJointStiffnessInterface : public Interface
     SetStiffnessesMessage(float ini_time_sec, float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_wrist_yaw, float ini_l_hand, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_wrist_yaw, float ini_r_hand, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll, float ini_r_elbow_roll);
     SetStiffnessesMessage();
     ~SetStiffnessesMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float time_sec();
     void set_time_sec(const float new_time_sec);
@@ -221,7 +272,7 @@ class NaoJointStiffnessInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -240,10 +291,23 @@ class NaoJointStiffnessInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.NaoJointStiffnessInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.NaoJointStiffnessInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.NaoJointStiffnessInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }
