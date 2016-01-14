@@ -47,6 +47,7 @@ local module_exports = {
 
 
 local loop_callbacks = {}
+local preloop_callbacks = {}
 local finalize_callbacks = {}
 
 --- Add an export for module initialization.
@@ -288,6 +289,24 @@ function add_loop_callback(name, cb)
    if (type(cb) ~= "function") then error("Loop callback must be a function") end
 
    loop_callbacks[name] = cb
+end
+
+--- Remove pre-loop callback.
+-- @param name name of callback to remove
+function remove_preloop_callback(name)
+   preloop_callbacks[name] = nil
+end
+
+--- Add a pre-loop callback.
+-- A loop callback is called in each loop regardless if a skill is running
+-- or not, at the beginning of each loop.
+-- @param name name of the callback, used for later identification on removal
+-- @param cb callback function to call
+function add_preloop_callback(name, cb)
+   if (type(name) ~= "string") then error("Pre-Loop callback name must be a string") end
+   if (type(cb) ~= "function") then error("Pre-Loop callback must be a function") end
+
+   preloop_callbacks[name] = cb
 end
 
 --- Remove loop callback.
