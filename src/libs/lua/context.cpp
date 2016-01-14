@@ -98,6 +98,10 @@ LuaContext::LuaContext(lua_State *L)
 LuaContext::~LuaContext()
 {
   __lua_mutex->lock();
+
+  if (! __finalize_call.empty())
+	  do_string(__L, "%s", __finalize_call.c_str());
+
   if (__fam_thread) {
     __fam_thread->cancel();
     __fam_thread->join();
@@ -272,13 +276,22 @@ LuaContext::restart()
 {
   MutexLocker lock(__lua_mutex);
   try {
+	  if (! __finalize_prepare_call.empty())
+		  do_string(__L, "%s", __finalize_prepare_call.c_str());
+	  
     lua_State *L = init_state();
     lua_State *tL = __L;
+
+    if (! __finalize_call.empty())
+	    do_string(__L, "%s", __finalize_call.c_str());
+
     __L = L;
     if (__owns_L)  lua_close(tL);
     __owns_L = true;
 
   } catch (Exception &e) {
+    if (! __finalize_cancel_call.empty())
+	    do_string(__L, "%s", __finalize_cancel_call.c_str());
     LibLogger::log_error("LuaContext", "Could not restart Lua instance, an error "
 			 "occured while initializing new state. Keeping old state.");
     LibLogger::log_error("LuaContext", e);
@@ -1256,7 +1269,6 @@ LuaContext::setfenv(int idx)
 #endif
 }
 
-
 /** Add a context watcher.
  * @param watcher watcher to add
  */
@@ -1275,6 +1287,27 @@ LuaContext::remove_watcher(fawkes::LuaContextWatcher *watcher)
 {
   __watchers.remove_locked(watcher);
 }
+
+
+/** Set code to execute during finalization.
+ * @param finalize code string to execute (via do_string()) when eventually
+ * finalizing a context
+ * @param finalize_prepare code string to execute (via do_string()) before
+ * finalization is performed, for example during a context restart before the
+ * new context is initialized
+ * @param finalize_cancel code string to execute (via do_string()) if,
+ * during a restart, the initialization of the new context failed and therefore
+ * the previously prepared finalization must be cancelled
+ */
+void
+LuaContext::set_finalization_calls(std::string finalize, std::string finalize_prepare,
+                                   std::string finalize_cancel)
+{
+	__finalize_call = finalize;
+	__finalize_prepare_call = finalize_prepare;
+	__finalize_cancel_call = finalize_cancel;
+}
+
 
 
 

@@ -55,6 +55,9 @@ class LuaContext : public FamListener
   RefPtr<FileAlterationMonitor>  get_fam() const;
 
   void set_start_script(const char *start_script);
+  void set_finalization_calls(std::string finalize,
+                              std::string finalize_prepare,
+                              std::string finalize_cancel);
 
   void restart();
 
@@ -148,6 +151,7 @@ class LuaContext : public FamListener
   void         do_file(lua_State *L, const char *s);
   void         assert_unique_name(const char *name, std::string type);
 
+ 
  private:
   lua_State *__L;
   bool       __owns_L;
@@ -174,6 +178,10 @@ class LuaContext : public FamListener
   std::map<std::string, lua_CFunction>           __cfuncs;
   std::map<std::string, lua_CFunction>::iterator __cfuncs_it;
 
+  std::string __finalize_call;
+  std::string __finalize_prepare_call;
+  std::string __finalize_cancel_call;
+  
   RefPtr<FileAlterationMonitor>  __fam;
   FamThread                     *__fam_thread;
 
