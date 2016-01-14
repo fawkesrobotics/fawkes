@@ -23,12 +23,46 @@ class DynamixelServoInterface : public Interface
     StopMessage();
     ~StopMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class FlushMessage : public Message
   {
     FlushMessage();
     ~FlushMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
   };
 
@@ -37,6 +71,23 @@ class DynamixelServoInterface : public Interface
     GotoMessage(float ini_angle);
     GotoMessage();
     ~GotoMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float angle();
     void set_angle(const float new_angle);
@@ -48,6 +99,23 @@ class DynamixelServoInterface : public Interface
     TimedGotoMessage(float ini_time_sec, float ini_angle);
     TimedGotoMessage();
     ~TimedGotoMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float time_sec();
     void set_time_sec(const float new_time_sec);
@@ -63,6 +131,23 @@ class DynamixelServoInterface : public Interface
     SetModeMessage();
     ~SetModeMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned char mode();
     void set_mode(const unsigned char new_mode);
     int maxlenof_mode() const;
@@ -73,6 +158,23 @@ class DynamixelServoInterface : public Interface
     SetSpeedMessage(unsigned short ini_speed);
     SetSpeedMessage();
     ~SetSpeedMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned short speed();
     void set_speed(const unsigned short new_speed);
@@ -85,6 +187,23 @@ class DynamixelServoInterface : public Interface
     SetEnabledMessage();
     ~SetEnabledMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     bool is_enabled();
     void set_enabled(const bool new_enabled);
     int maxlenof_enabled() const;
@@ -95,6 +214,23 @@ class DynamixelServoInterface : public Interface
     SetVelocityMessage(float ini_velocity);
     SetVelocityMessage();
     ~SetVelocityMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float velocity();
     void set_velocity(const float new_velocity);
@@ -107,6 +243,23 @@ class DynamixelServoInterface : public Interface
     SetMarginMessage();
     ~SetMarginMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float angle_margin();
     void set_angle_margin(const float new_angle_margin);
     int maxlenof_angle_margin() const;
@@ -117,6 +270,23 @@ class DynamixelServoInterface : public Interface
     SetComplianceValuesMessage(unsigned char ini_cw_margin, unsigned char ini_ccw_margin, unsigned char ini_cw_slope, unsigned char ini_ccw_slope);
     SetComplianceValuesMessage();
     ~SetComplianceValuesMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned char cw_margin();
     void set_cw_margin(const unsigned char new_cw_margin);
@@ -138,6 +308,23 @@ class DynamixelServoInterface : public Interface
     SetGoalSpeedMessage();
     ~SetGoalSpeedMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int goal_speed();
     void set_goal_speed(const unsigned int new_goal_speed);
     int maxlenof_goal_speed() const;
@@ -148,6 +335,23 @@ class DynamixelServoInterface : public Interface
     SetTorqueLimitMessage(unsigned int ini_torque_limit);
     SetTorqueLimitMessage();
     ~SetTorqueLimitMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned int torque_limit();
     void set_torque_limit(const unsigned int new_torque_limit);
@@ -160,6 +364,23 @@ class DynamixelServoInterface : public Interface
     SetPunchMessage();
     ~SetPunchMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int punch();
     void set_punch(const unsigned int new_punch);
     int maxlenof_punch() const;
@@ -171,6 +392,23 @@ class DynamixelServoInterface : public Interface
     GotoPositionMessage();
     ~GotoPositionMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int position();
     void set_position(const unsigned int new_position);
     int maxlenof_position() const;
@@ -181,6 +419,23 @@ class DynamixelServoInterface : public Interface
     SetAngleLimitsMessage(unsigned int ini_angle_limit_cw, unsigned int ini_angle_limit_ccw);
     SetAngleLimitsMessage();
     ~SetAngleLimitsMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned int angle_limit_cw();
     void set_angle_limit_cw(const unsigned int new_angle_limit_cw);
@@ -195,6 +450,23 @@ class DynamixelServoInterface : public Interface
     ResetRawErrorMessage();
     ~ResetRawErrorMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class SetPreventAlarmShutdownMessage : public Message
@@ -202,6 +474,23 @@ class DynamixelServoInterface : public Interface
     SetPreventAlarmShutdownMessage(bool ini_enable_prevent_alarm_shutdown);
     SetPreventAlarmShutdownMessage();
     ~SetPreventAlarmShutdownMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     bool is_enable_prevent_alarm_shutdown();
     void set_enable_prevent_alarm_shutdown(const bool new_enable_prevent_alarm_shutdown);
@@ -214,6 +503,23 @@ class DynamixelServoInterface : public Interface
     SetAutorecoverEnabledMessage();
     ~SetAutorecoverEnabledMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     bool is_autorecover_enabled();
     void set_autorecover_enabled(const bool new_autorecover_enabled);
     int maxlenof_autorecover_enabled() const;
@@ -223,6 +529,23 @@ class DynamixelServoInterface : public Interface
   {
     RecoverMessage();
     ~RecoverMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
   };
 
@@ -342,7 +665,7 @@ class DynamixelServoInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -361,10 +684,23 @@ class DynamixelServoInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.DynamixelServoInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.DynamixelServoInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.DynamixelServoInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }
