@@ -481,18 +481,40 @@ LuaContext::do_string(lua_State *L, const char *format, ...)
   if (vasprintf(&s, format, arg) == -1) {
     throw Exception("LuaContext::do_string: Could not form string");
   }
-
-  int rv = 0;
-  int errfunc = __enable_tracebacks ? 1 : 0;
-  rv = (luaL_loadstring(L, s) || lua_pcall(L, 0, LUA_MULTRET, errfunc));
-
+  std::string ss(s);
   free(s);
   va_end(arg);
 
-  if (rv != 0) {
-    std::string errmsg = lua_tostring(L, -1);
+  int err = 0;
+  std::string errmsg;
+  if ( (err = luaL_loadstring(L, ss.c_str())) != 0) {
+    errmsg = lua_tostring(L, -1);
     lua_pop(L, 1);
-    throw LuaRuntimeException("do_string", errmsg.c_str());
+    switch (err) {
+    case LUA_ERRSYNTAX:
+	    throw SyntaxErrorException("Lua syntax error in string %s: %s", ss.c_str(), errmsg.c_str());
+
+    case LUA_ERRMEM:
+	    throw OutOfMemoryException("Could not load Lua string %s", ss.c_str());
+    }
+  }
+
+  int errfunc = __enable_tracebacks ? 1 : 0;
+  err = lua_pcall(L, 0, LUA_MULTRET, errfunc);
+
+  if (err != 0) {
+	  std::string errmsg = lua_tostring(L, -1);
+	  lua_pop(L, 1);
+	  switch (err) {
+	  case LUA_ERRRUN:
+		  throw LuaRuntimeException("do_string", errmsg.c_str());
+
+	  case LUA_ERRMEM:
+		  throw OutOfMemoryException("Could not execute Lua chunk via pcall");
+
+	  case LUA_ERRERR:
+		  throw LuaErrorException("do_string", errmsg.c_str());
+	  }
   }
 }
 
@@ -505,24 +527,47 @@ void
 LuaContext::do_string(const char *format, ...)
 {
   MutexLocker lock(__lua_mutex);
+
   va_list arg;
   va_start(arg, format);
   char *s;
   if (vasprintf(&s, format, arg) == -1) {
     throw Exception("LuaContext::do_string: Could not form string");
   }
-
-  int rv = 0;
-  int errfunc = __enable_tracebacks ? 1 : 0;
-  rv = (luaL_loadstring(__L, s) || lua_pcall(__L, 0, LUA_MULTRET, errfunc));
-
+  std::string ss(s);
   free(s);
   va_end(arg);
 
-  if ( rv != 0 ) {
-    std::string errmsg = lua_tostring(__L, -1);
+  int err = 0;
+  std::string errmsg;
+  if ( (err = luaL_loadstring(__L, ss.c_str())) != 0) {
+    errmsg = lua_tostring(__L, -1);
     lua_pop(__L, 1);
-    throw LuaRuntimeException("do_string", errmsg.c_str());
+    switch (err) {
+    case LUA_ERRSYNTAX:
+	    throw SyntaxErrorException("Lua syntax error in string %s: %s", ss.c_str(), errmsg.c_str());
+
+    case LUA_ERRMEM:
+	    throw OutOfMemoryException("Could not load Lua string %s", ss.c_str());
+    }
+  }
+
+  int errfunc = __enable_tracebacks ? 1 : 0;
+  err = lua_pcall(__L, 0, LUA_MULTRET, errfunc);
+
+  if (err != 0) {
+	  std::string errmsg = lua_tostring(__L, -1);
+	  lua_pop(__L, 1);
+	  switch (err) {
+	  case LUA_ERRRUN:
+		  throw LuaRuntimeException("do_string", errmsg.c_str());
+
+	  case LUA_ERRMEM:
+		  throw OutOfMemoryException("Could not execute Lua chunk via pcall");
+
+	  case LUA_ERRERR:
+		  throw LuaErrorException("do_string", errmsg.c_str());
+	  }
   }
 }
 
