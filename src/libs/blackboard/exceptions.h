@@ -142,10 +142,17 @@ class BlackBoardNoMasterAliveException : public Exception {
 
 /** Thrown if no writer interface is alive.
  */
-class BlackBoardNoWritingInstanceException : public Exception {
+class BlackBoardNoWritingInstanceException : public Exception
+{
  public:
-  /** Constructor*/
-  BlackBoardNoWritingInstanceException() : Exception("No writing instance for interface") {}
+	/** Constructor.
+	 * @param type interface type string
+	 * @param id interface ID
+	 */
+	BlackBoardNoWritingInstanceException(const char *type, const char *id) : Exception()
+	{
+		append("No writing instance for interface %s::%s", type, id);
+	}
 };
 
 } // end namespace fawkes

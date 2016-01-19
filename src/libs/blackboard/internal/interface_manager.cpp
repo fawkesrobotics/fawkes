@@ -619,7 +619,24 @@ BlackBoardInterfaceManager::writer_for_mem_serial(unsigned int mem_serial)
   if ( writer_interfaces.find(mem_serial) != writer_interfaces.end() ) {
     return writer_interfaces[mem_serial];
   } else {
-    throw BlackBoardNoWritingInstanceException();
+	  char type[__INTERFACE_TYPE_SIZE + 1] = "Unknown";
+	  char id[__INTERFACE_ID_SIZE + 1] = "Invalid";
+	  // ensure NULL-termination
+	  type[__INTERFACE_TYPE_SIZE] = 0;
+	  id[__INTERFACE_ID_SIZE] = 0;
+	  std::string uid = "Unknown::Invalid";
+	  memmgr->lock();
+	  BlackBoardMemoryManager::ChunkIterator cit;
+	  for ( cit = memmgr->begin(); cit != memmgr->end(); ++cit ) {
+		  interface_header_t *ih = (interface_header_t *)*cit;
+		  if (ih->serial == mem_serial) {
+			  strncpy(type, ih->type, __INTERFACE_TYPE_SIZE);
+			  strncpy(id, ih->id, __INTERFACE_ID_SIZE);
+			  break;
+		  }
+	  }
+	  memmgr->unlock();
+	  throw BlackBoardNoWritingInstanceException(type, id);
   }
 }
 
