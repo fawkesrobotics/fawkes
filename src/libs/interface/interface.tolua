@@ -86,6 +86,10 @@ function fawkes.Interface:create_message(type)
   return tolua.cast(message, "fawkes::" .. self:type() .. "::" .. message:type())
 end
 
+function fawkes.Interface:msgq_enqueue(message)
+	 return self:msgq_enqueue_copy(message)
+end
+
 $]
 
 
