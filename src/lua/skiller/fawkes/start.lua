@@ -56,6 +56,11 @@ local ifinitmod = require("fawkes.interface_initializer")
 
 skillenv = require("skiller.skillenv")
 
+if interfaces_writing_preload then
+	 ifinitmod.preload(interfaces_writing_preload)
+	 interfaces_writing_preload = nil
+end
+
 fawkes.depinit.add_module_initializer(ifinitmod.init_interfaces)
 skillenv.add_finalize_callback("interface_initializer", ifinitmod.finalize)
 skillenv.add_preloop_callback("fawkes_interfaces_read", ifinitmod.read)
@@ -89,6 +94,7 @@ end
 require("skiller.fawkes")
 skiller.fawkes.init()
 
-skillenv.init(SKILLSPACE, skiller.fawkes.loop)
+local ok, errmsg = xpcall(function() skillenv.init(SKILLSPACE, skiller.fawkes.loop) end, debug.traceback)
+if not ok then error(errmsg) end
 
 logger:log_debug("Lua startup completed")

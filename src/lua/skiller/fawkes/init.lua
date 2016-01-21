@@ -21,6 +21,7 @@
 module("skiller.fawkes", package.seeall)
 
 require("fawkes.logprint")
+require("fawkes.interface_initializer")
 fawkes.logprint.init(logger)
 
 require("interfaces.SkillerInterface")
@@ -42,6 +43,8 @@ local sksf
 local skdbg_what = "ACTIVE"
 local skdbg_graphdir = "TB"
 local skdbg_graphcolored = true
+
+local loop_has_run = false
 
 function notify_reader_removed(instance_serial)
 	 if instance_serial == skiller_if:exclusive_controller() then
@@ -197,6 +200,16 @@ function publish_skdbg()
 end
 
 function loop()
+	 if not loop_has_run then
+			skdbg_if:set_graph_colored(skdbg_graphcolored)
+			skdbg_if:write()
+			skdbg_layouted_if:set_graph_colored(skdbg_graphcolored)
+			skdbg_layouted_if:write()
+
+			loop_has_run = true
+	 end
+
+
 	 process_skdbg_messages()
 	 process_skiller_messages()
 
@@ -234,6 +247,10 @@ function finalize()
 	 skdbg_if = nil
 	 skdbg_layouted_if = nil
 
+	 if not loop_has_run then
+			-- Initialization failed and we are cleaned up
+			fawkes.interface_initializer.preloaded_remove_without_closing()
+	 end
 	 skillenv.finalize()
 end
 
@@ -250,6 +267,7 @@ end
 
 function finalize_cancel()
 	 init()
+	 fawkes.interface_initializer.finalize_cancel()
 end
 
 function init()
@@ -260,9 +278,4 @@ function init()
 	 -- read interface once to enable keeping the
 	 -- exclusive controller on a Lua context restart
 	 skiller_if:read()
-
-	 skdbg_if:set_graph_colored(skdbg_graphcolored)
-	 skdbg_if:write()
-	 skdbg_layouted_if:set_graph_colored(skdbg_graphcolored)
-	 skdbg_layouted_if:write()
 end

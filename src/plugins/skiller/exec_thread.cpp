@@ -183,13 +183,34 @@ SkillerExecutionThread::add_skiller_feature(SkillerFeature *feature)
 void
 SkillerExecutionThread::lua_restarted(LuaContext *context)
 {
-  context->create_table();
+	context->create_table();
   context->set_global("features_env_template");
 
   std::list<SkillerFeature *>::iterator f;
   for (f = __features.begin(); f != __features.end(); ++f) {
     (*f)->init_lua_context(context);
   }
+
+  // move writing interfaces
+  __lua->do_string("return fawkes.interface_initializer.finalize_prepare()");
+
+  context->create_table();
+
+  __lua->push_nil();
+  while (__lua->table_next(-2) ) {
+	  void * udata = __lua->to_usertype(-1);
+	  if (udata) {
+		  std::string type, id;
+		  Interface::parse_uid(__lua->to_string(-2), type, id);
+		  context->do_string("require(\"interfaces.%s\")", type.c_str());
+		  context->push_string(__lua->to_string(-2));
+		  context->push_usertype(udata, type.c_str(), "fawkes");
+		  context->set_table(-3);
+		  __lua->pop(1);
+	  }
+  }
+
+  context->set_global("interfaces_writing_preload");
 }
 
 
