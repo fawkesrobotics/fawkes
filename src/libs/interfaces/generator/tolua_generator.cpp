@@ -396,10 +396,14 @@ ToLuaInterfaceGenerator::write_lua_code(FILE *f, std::string classname)
 {
 	fprintf(f,
 	        "\n$[\n\n"
+	        "assert(fawkes.Interface.msgq_first)\n"
+	        "assert(fawkes.Interface.msgq_enqueue)\n"
+	        "assert(fawkes.Interface.create_message)\n\n"
 	        "fawkes.%s.msgq_first     = fawkes.Interface.msgq_first\n"
+	        "fawkes.%s.msgq_enqueue   = fawkes.Interface.msgq_enqueue\n"
 	        "fawkes.%s.create_message = fawkes.Interface.create_message\n"
 	        "\n$]\n\n",
-          classname.c_str(), classname.c_str());
+	        classname.c_str(), classname.c_str(), classname.c_str());
 }
 
 /** Write methods to h file.
