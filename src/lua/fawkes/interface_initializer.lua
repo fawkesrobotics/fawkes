@@ -29,15 +29,35 @@ module(..., fawkes.modinit.module_init)
 local interfaces_reading = {}
 local interfaces_writing = {}
 
+local interfaces_writing_stash = {}
+local interfaces_writing_preloaded = {}
+
 local blackboard = _G.blackboard
+
+function finalize_prepare()
+	 interfaces_writing_stash = interfaces_writing
+	 interfaces_writing = {}
+	 return interfaces_writing_stash
+end
+
+function finalize_cancel()
+	 interfaces_writing = interfaces_writing_stash
+	 interfaces_writing_stash = {}
+end
 
 function finalize()
 	 for _,v in pairs(interfaces_reading) do
 			blackboard:close(v)
 	 end
+	 interfaces_reading = {}
 	 for _,v in pairs(interfaces_writing) do
 			blackboard:close(v)
 	 end
+	 interfaces_writing = {}
+	 for _,v in pairs(interfaces_writing_stash) do
+			tolua.releaseownership(v)
+	 end
+	 interfaces_writing_stash = {}
 end
 
 function read()
@@ -47,11 +67,27 @@ function read()
 end
 
 function write()
-	 for _,v in pairs(interfaces_writing) do
+	 for k,v in pairs(interfaces_writing) do
 			if v:changed() then
 				 v:write()
 			end
 	 end	 
+end
+
+function preload(interfaces_writing_preload)
+	 for k,v in pairs(interfaces_writing_preload) do
+			print_debug("Preloading writing interface " .. tostring(k) .. "::" .. tostring(v))
+			interfaces_writing[k] = v
+			interfaces_writing_preloaded[k] = v
+	 end
+end
+
+--- Renive preloaded interfaces
+-- This can be used to prevent closing preloaded interfaces.
+function preloaded_remove_without_closing()
+	 for k,_ in pairs(interfaces_writing_preloaded) do
+			interfaces_writing[k] = nil
+	 end
 end
 
 function init_interfaces(module, table)
