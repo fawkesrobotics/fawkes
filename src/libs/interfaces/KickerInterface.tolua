@@ -157,7 +157,12 @@ class KickerInterface : public Interface
 
 $[
 
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
 fawkes.KickerInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.KickerInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
 fawkes.KickerInterface.create_message = fawkes.Interface.create_message
 
 $]

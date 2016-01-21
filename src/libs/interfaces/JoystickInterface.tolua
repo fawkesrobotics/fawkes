@@ -201,7 +201,12 @@ class JoystickInterface : public Interface
 
 $[
 
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
 fawkes.JoystickInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.JoystickInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
 fawkes.JoystickInterface.create_message = fawkes.Interface.create_message
 
 $]

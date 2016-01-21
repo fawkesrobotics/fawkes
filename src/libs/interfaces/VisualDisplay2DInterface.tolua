@@ -285,7 +285,12 @@ class VisualDisplay2DInterface : public Interface
 
 $[
 
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
 fawkes.VisualDisplay2DInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.VisualDisplay2DInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
 fawkes.VisualDisplay2DInterface.create_message = fawkes.Interface.create_message
 
 $]

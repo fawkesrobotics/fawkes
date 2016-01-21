@@ -57,7 +57,12 @@ class Laser720Interface : public Interface
 
 $[
 
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
 fawkes.Laser720Interface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.Laser720Interface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
 fawkes.Laser720Interface.create_message = fawkes.Interface.create_message
 
 $]

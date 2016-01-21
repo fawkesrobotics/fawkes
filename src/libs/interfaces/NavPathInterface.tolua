@@ -171,7 +171,12 @@ class NavPathInterface : public Interface
 
 $[
 
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
 fawkes.NavPathInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.NavPathInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
 fawkes.NavPathInterface.create_message = fawkes.Interface.create_message
 
 $]

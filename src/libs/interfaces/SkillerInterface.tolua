@@ -198,7 +198,12 @@ class SkillerInterface : public Interface
 
 $[
 
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
 fawkes.SkillerInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.SkillerInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
 fawkes.SkillerInterface.create_message = fawkes.Interface.create_message
 
 $]

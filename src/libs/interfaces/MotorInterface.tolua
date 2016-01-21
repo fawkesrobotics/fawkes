@@ -456,7 +456,12 @@ class MotorInterface : public Interface
 
 $[
 
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
 fawkes.MotorInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.MotorInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
 fawkes.MotorInterface.create_message = fawkes.Interface.create_message
 
 $]

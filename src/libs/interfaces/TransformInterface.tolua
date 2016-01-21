@@ -63,7 +63,12 @@ class TransformInterface : public Interface
 
 $[
 
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
 fawkes.TransformInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.TransformInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
 fawkes.TransformInterface.create_message = fawkes.Interface.create_message
 
 $]
