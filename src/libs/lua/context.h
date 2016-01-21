@@ -102,6 +102,8 @@ class LuaContext : public FamListener
 		     const char *name_space = 0);
   void push_cfunction(lua_CFunction f);
 
+  std::string type_name(int idx);
+
   void pop(int n);
   void remove(int idx);
   int  stack_size();
@@ -109,11 +111,13 @@ class LuaContext : public FamListener
   void create_table(int narr = 0, int nrec = 0);
   void set_table(int t_index = -3);
   void set_field(const char *key, int t_index = -2);
-
+  
   void get_table(int idx);
   void get_field(int idx, const char *k);
   void get_global(const char *name);
 
+  bool table_next(int idx);
+  
   void raw_set(int idx);
   void raw_seti(int idx, int n);
   void raw_get(int idx);
@@ -123,6 +127,9 @@ class LuaContext : public FamListener
   lua_Integer  to_integer(int idx);
   bool         to_boolean(int idx);
   const char * to_string(int idx);
+  void *       to_userdata(int idx);
+  void *       to_pointer(int idx);
+  void *       to_usertype(int idx);
 
   bool         is_boolean(int idx);
   bool         is_cfunction(int idx);

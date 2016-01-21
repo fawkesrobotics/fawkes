@@ -926,6 +926,16 @@ LuaContext::push_cfunction(lua_CFunction f)
 }
 
 
+/** Get name of type of value at a given index.
+ * @param idx index of value to get type for
+ * @return name of type of the value at the given index
+ */
+std::string
+LuaContext::type_name(int idx)
+{
+	return lua_typename(__L, lua_type(__L, idx));
+}
+
 /** Pop value(s) from stack.
  * @param n number of values to pop
  */
@@ -1120,6 +1130,18 @@ LuaContext::remove_global(const char *name)
 }
 
 
+/** Iterate to next entry of table.
+ * @param idx stack index of table
+ * @return true if there was another iterable value in the table,
+ * false otherwise
+ */
+bool
+LuaContext::table_next(int idx)
+{
+	return lua_next(__L, idx) != 0;
+}
+
+
 /** Retrieve stack value as number.
  * @param idx stack index of value
  * @return value as number
@@ -1161,6 +1183,38 @@ const char *
 LuaContext::to_string(int idx)
 {
   return lua_tostring(__L, idx);
+}
+
+/** Retrieve stack value as userdata.
+ * @param idx stack index of value
+ * @return value as userdata, maybe NULL
+ */
+void *
+LuaContext::to_userdata(int idx)
+{
+  return lua_touserdata(__L, idx);
+}
+
+
+/** Retrieve stack value as pointer.
+ * @param idx stack index of value
+ * @return value as pointer, maybe NULL
+ */
+void *
+LuaContext::to_pointer(int idx)
+{
+	return (void *)lua_topointer(__L, idx);
+}
+
+
+/** Retrieve stack value as a tolua++ user type.
+ * @param idx stack index of value
+ * @return value as pointer, maybe NULL
+ */
+void *
+LuaContext::to_usertype(int idx)
+{
+	return tolua_tousertype(__L, idx, 0);
 }
 
 
