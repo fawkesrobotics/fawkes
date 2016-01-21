@@ -212,26 +212,39 @@ LuaContext::init_state()
   }
 
   LuaContext *tmpctx = new LuaContext(L);
+
   MutexLocker(__watchers.mutex());
   LockList<LuaContextWatcher *>::iterator i;
   for (i = __watchers.begin(); i != __watchers.end(); ++i) {
-    try {
-      (*i)->lua_restarted(tmpctx);
-    } catch (...) {
-      delete tmpctx;
+	  try {
+		  (*i)->lua_restarted(tmpctx);
+	  } catch (...) {
+		  try {
+			  if (! __finalize_call.empty())
+				  do_string(L, "%s", __finalize_call.c_str());
+		  } catch (Exception &e) {} // ignored
+		  
+		  delete tmpctx;
       lua_close(L);
       throw;
     }
   }
   delete tmpctx;
 
-  if ( __start_script ) {
-    if (access(__start_script, R_OK) == 0) {
-      // it's a file and we can access it, execute it!
-      do_file(L, __start_script);
-    } else {
-      do_string(L, "require(\"%s\")", __start_script);
-    }
+  try {
+	  if ( __start_script ) {
+		  if (access(__start_script, R_OK) == 0) {
+			  // it's a file and we can access it, execute it!
+			  do_file(L, __start_script);
+		  } else {
+			  do_string(L, "require(\"%s\")", __start_script);
+		  }
+	  }
+  } catch (...) {
+	  if (! __finalize_call.empty())
+		  do_string(L, "%s", __finalize_call.c_str());
+	  lua_close(L);
+    throw;
   }
 
   return L;
@@ -279,22 +292,30 @@ LuaContext::restart()
 	  if (! __finalize_prepare_call.empty())
 		  do_string(__L, "%s", __finalize_prepare_call.c_str());
 	  
-    lua_State *L = init_state();
+	  lock.unlock();
+	  lua_State *L = init_state();
+	  lock.relock();
     lua_State *tL = __L;
 
-    if (! __finalize_call.empty())
-	    do_string(__L, "%s", __finalize_call.c_str());
+    try {
+	    if (! __finalize_call.empty())
+		    do_string(__L, "%s", __finalize_call.c_str());
+    } catch (Exception &e) {
+	    LibLogger::log_warn("LuaContext", "Finalization call on old context failed, "
+	                        "exception follows, ignoring.");
+	    LibLogger::log_warn("LuaContext", e);
+    }
 
     __L = L;
     if (__owns_L)  lua_close(tL);
     __owns_L = true;
 
   } catch (Exception &e) {
-    if (! __finalize_cancel_call.empty())
-	    do_string(__L, "%s", __finalize_cancel_call.c_str());
     LibLogger::log_error("LuaContext", "Could not restart Lua instance, an error "
 			 "occured while initializing new state. Keeping old state.");
     LibLogger::log_error("LuaContext", e);
+    if (! __finalize_cancel_call.empty())
+	    do_string(__L, "%s", __finalize_cancel_call.c_str());
   }
 }
 
