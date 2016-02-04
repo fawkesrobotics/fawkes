@@ -481,7 +481,7 @@ function write_skill_dep(skdbg)
       -- set attributes of graph
       gmod.setv(g, "rankdir", "LR")
       gmod.setv(g, "penwidth", "1.0")
-      gmod.setv(g, "compound")
+      gmod.setv(g, "compound", "true")
 
       -- set attributes of default nodes and edges (will probably apply to all here)
       local defnode = gmod.get_current_default_node(g)
