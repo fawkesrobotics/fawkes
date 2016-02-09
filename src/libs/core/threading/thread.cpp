@@ -1077,7 +1077,7 @@ Thread::loop()
  * This code is executed once and only once right after the thread is started
  * before loop() is called.
  * This is useful if you want to implement an one-shot background job. Just implement
- * once() and leave once() untouched. Start the thread and detach it and it will just
+ * once() and leave loop() untouched. Start the thread and detach it and it will just
  * do its job and then die automatically. If you use set_delete_on_exit(true) even the
  * Thread instance will be automatically deleted.
  */
