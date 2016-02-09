@@ -391,7 +391,7 @@ JacoGotoThread::_check_final()
       //logger->log_debug(name(), "check final for TARGET ANGULAR");
       //final = __arm->arm->final();
       for( unsigned int i=0; i<6; ++i ) {
-        final &= std::abs( angle_distance(deg2rad(__target->pos.at(i)), deg2rad(__arm->iface->joints(i))) ) < 0.05;
+        final &= (angle_distance(deg2rad(__target->pos.at(i)), deg2rad(__arm->iface->joints(i))) < 0.05);
       }
       __final_mutex->lock();
       __final = final;
@@ -410,12 +410,12 @@ JacoGotoThread::_check_final()
     default: //TARGET_CARTESIAN
       //logger->log_debug(name(), "check final for TARGET CARTESIAN");
       //final = __arm->arm->final();
-      final &= (std::abs(angle_distance(__target->pos.at(0) , __arm->iface->x())) < 0.01);
-      final &= (std::abs(angle_distance(__target->pos.at(1) , __arm->iface->y())) < 0.01);
-      final &= (std::abs(angle_distance(__target->pos.at(2) , __arm->iface->z())) < 0.01);
-      final &= (std::abs(angle_distance(__target->pos.at(3) , __arm->iface->euler1())) < 0.1);
-      final &= (std::abs(angle_distance(__target->pos.at(4) , __arm->iface->euler2())) < 0.1);
-      final &= (std::abs(angle_distance(__target->pos.at(5) , __arm->iface->euler3())) < 0.1);
+      final &= (angle_distance(__target->pos.at(0) , __arm->iface->x()) < 0.01);
+      final &= (angle_distance(__target->pos.at(1) , __arm->iface->y()) < 0.01);
+      final &= (angle_distance(__target->pos.at(2) , __arm->iface->z()) < 0.01);
+      final &= (angle_distance(__target->pos.at(3) , __arm->iface->euler1()) < 0.1);
+      final &= (angle_distance(__target->pos.at(4) , __arm->iface->euler2()) < 0.1);
+      final &= (angle_distance(__target->pos.at(5) , __arm->iface->euler3()) < 0.1);
       __final_mutex->lock();
       __final = final;
       __final_mutex->unlock();
