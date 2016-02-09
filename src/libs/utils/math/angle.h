@@ -131,6 +131,18 @@ angle_distance(float angle_rad1,
   return fabs( normalize_mirror_rad(angle_rad2 - angle_rad1) );
 }
 
+/** Determines the signed distance between from "angle_from" to "angle_to" provided as radians. 
+ * @param angle_to angle to which the signed value is calculated
+ * @param angle_from angle from which the signed value is calculated
+ * @return signed distance from angle "angle_from" to "angle_to"
+ */
+inline float 
+angle_distance_signed(float angle_to, float angle_from)
+{
+  return normalize_mirror_rad(angle_to - angle_from);
+}
+
+
 
 } // end namespace fawkes
 
