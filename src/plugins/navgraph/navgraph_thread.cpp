@@ -879,8 +879,8 @@ NavGraphThread::node_ori_reached(const NavGraphNode &node)
   if (node.has_property("orientation")) {
     float ori_tolerance = node.property_as_float("orientation_tolerance");
     float ori_diff  =
-      fabs( angle_distance( normalize_rad(tf::get_yaw(pose_.getRotation())),
-			    normalize_rad(node.property_as_float("orientation"))));
+      angle_distance( normalize_rad(tf::get_yaw(pose_.getRotation())),
+			    normalize_rad(node.property_as_float("orientation")));
 
     //logger->log_info(name(), "Ori=%f Rot=%f Diff=%f Tol=%f Dist=%f Tol=%f", cur_target.property_as_float("orientation"), tf::get_yaw(pose_.getRotation() ), ori_diff, ori_tolerance, dist, tolerance);
     return (ori_diff <= ori_tolerance);
