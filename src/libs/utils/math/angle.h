@@ -120,8 +120,6 @@ normalize_bigmirror_rad(float angle_rad)
 
 
 /** Determines the distance between two angle provided as radians. 
- * Quadrants of the angles are considered to determine really the minimal
- * angle difference.
  * @param angle_rad1 first angle in radian
  * @param angle_rad2 second angle in radian
  * @return distance between the two angles
@@ -130,7 +128,7 @@ inline float
 angle_distance(float angle_rad1,
 	       float angle_rad2)
 {
-  return normalize_mirror_rad(angle_rad2 - angle_rad1);
+  return fabs( normalize_mirror_rad(angle_rad2 - angle_rad1) );
 }
 
 
