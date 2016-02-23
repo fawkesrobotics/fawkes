@@ -84,9 +84,9 @@ class ConfigNetworkHandler
   template <typename T>
   void *
     prepare_value_msg(const char *path, bool is_default, bool is_list,
-		      uint16_t num_values, size_t &datasize, void * __attribute__((__may_alias__)) * data)
+		      uint16_t num_values, size_t &data_size, void * __attribute__((__may_alias__)) * data)
   {
-    size_t data_size = sizeof(config_descriptor_t) + sizeof(T) * (is_list ? num_values : 1);
+    data_size = sizeof(config_descriptor_t) + sizeof(T) * (is_list ? num_values : 1);
     void* m = calloc(1, data_size);
     config_descriptor_t *cd = (config_descriptor_t *)m;
     strncpy(cd->path, path, CONFIG_MSG_PATH_LENGTH);
