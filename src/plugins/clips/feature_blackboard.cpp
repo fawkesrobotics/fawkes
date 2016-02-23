@@ -506,6 +506,17 @@ BlackboardCLIPSFeature::clips_blackboard_read(std::string env_name)
 	    while ((pos = value.find(",")) != std::string::npos) {
 	      value = value.erase(pos, 1);
 	    }
+
+	    if (f.get_type() == IFT_FLOAT || f.get_type() == IFT_DOUBLE) {
+		    std::string::size_type pos;
+		    while ((pos = value.find("-inf")) != std::string::npos) {
+			    value = value.replace(pos, 4, std::to_string(std::numeric_limits<double>::min()));
+		    }
+		    while ((pos = value.find("inf")) != std::string::npos) {
+			    value = value.replace(pos, 3, std::to_string(std::numeric_limits<double>::max()));
+		    }
+	    }
+
 	  }
 	  fact += std::string(" (") + f.get_name() + " " + value + ")";
 	}
