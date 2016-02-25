@@ -96,9 +96,9 @@ void DepthcamSimThread::on_depthcam_data_msg(ConstPointCloudPtr &msg)
     for (unsigned int h = 0; h < height_; ++h) {
       for (unsigned int w = 0; w < width_; ++w, ++idx) {
         // Fill in XYZ
-        pcl.points[idx].x = -msg->points(idx).x();
-        pcl.points[idx].y = msg->points(idx).y();
-        pcl.points[idx].z = msg->points(idx).z();
+        pcl.points[idx].x = msg->points(idx).z();
+        pcl.points[idx].y = -msg->points(idx).x();
+        pcl.points[idx].z = msg->points(idx).y();
       }
     }
   // }
