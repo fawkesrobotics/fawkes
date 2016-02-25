@@ -74,3 +74,10 @@ gazsim:
       update-rate: 5.0 #in Hz
       label-size: 0.3
       label-height: 0.9
+
+  depthcam:
+    topic: "~/depthcam_sensor/depthcam-pcl/"
+    width: 640
+    height: 480
+    frame: !frame kinect/depth
+    pointcloud-id: "openni-pointcloud-xyz"

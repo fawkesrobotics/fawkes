@@ -23,7 +23,8 @@ include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 PRESUBDIRS = aspect msgs
 
 SUBDIRS = gazsim-robotino gazsim-laser gazsim-localization gazsim-comm \
-	  gazsim-vis-localization gazsim-webcam gazsim-timesource
+	  gazsim-vis-localization gazsim-webcam gazsim-timesource \
+	  gazsim-depthcam
 
 LIBS_gazebo = fawkescore fawkesaspects fawkesgazeboaspect
 OBJS_gazebo = gazebo_plugin.o node_thread.o
