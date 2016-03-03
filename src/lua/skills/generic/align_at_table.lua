@@ -33,7 +33,7 @@ depends_interfaces = {
    {v = "navigator", type="NavigatorInterface", id="Navigator"}
 }
 
---local tfutils = require("fawkes.tfutils")
+local tfutils = require("fawkes.tfutils")
 
 documentation      = [==[Align at table skill
 This skill brings the robot into position in front of a table. The position
@@ -78,6 +78,22 @@ PTU = {PAN = 0.0,
 
 function can_transform(source_frame)
    return tf:can_transform(FRAMES.TARGET, source_frame, fawkes.Time:new(0,0))
+end
+
+function transform_point(source_frame, x, y, z)
+   local p  = fawkes.tf.Point:new(x, y, z)
+   local sp = fawkes.tf.StampedPoint:new(p, fawkes.Time:new(0,0), source_frame)
+   local tp = fawkes.tf.StampedPoint:new()
+   tf:transform_point(FRAMES.TARGET, sp, tp)
+
+   return tp:x(), tp:y(), tp:z()
+end
+
+function transform_object(obj)
+   return transform_point(obj:frame(),
+                          obj:translation(0),
+                          obj:translation(1),
+                          obj:translation(2))
 end
 
 -- Jumpconditions
