@@ -466,5 +466,15 @@ TimeTracker::print_to_file()
   fflush(__timelog);
 }
 
+
+ScopedClassItemTracker::ScopedClassItemTracker(TimeTracker &tt, unsigned int cls)
+: tt_(tt), cls_(cls)
+{ tt_.ping_start(cls_); }
+
+
+ScopedClassItemTracker::~ScopedClassItemTracker()
+{ tt_.ping_end(cls_); }
+
+
 } // end namespace fawkes
 

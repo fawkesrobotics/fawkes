@@ -77,6 +77,17 @@ class TimeTracker {
   FILE *__timelog;
 };
 
+
+class ScopedClassItemTracker {
+public:
+  explicit ScopedClassItemTracker(TimeTracker &tt, unsigned int cls);
+  ~ScopedClassItemTracker();
+private:
+  TimeTracker &tt_;
+  unsigned int cls_;
+};
+
+
 } // end namespace fawkes
 
 #endif
