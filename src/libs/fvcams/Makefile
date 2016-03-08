@@ -28,6 +28,7 @@ LDFLAGS_libfvcams = $(VISION_CAM_LDFLAGS)
 
 LIBS_libfvcams = $(VISION_CAM_LIBS) fawkescore fawkesutils fvutils fawkeslogging
 OBJS_libfvcams = camera.o          \
+                 buffer.o          \
                  control/control.o \
                  control/color.o   \
                  control/image.o   \
