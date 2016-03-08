@@ -364,7 +364,7 @@ FireVisionDataFile::read(const char *file_name)
   }
 
   //printf("Reading %u blocks\n", __header->num_blocks);
-  for (uint8_t b = 0; b < __header->num_blocks && !feof(f); ++b) {
+  for (unsigned int b = 0; b < __header->num_blocks && !feof(f); ++b) {
     fvff_block_header_t bh;
     //printf("Reading %zu bytes for block header\n", sizeof(bh));
     if ( fread(&bh, sizeof(bh), 1, f) != 1 ) {
