@@ -25,6 +25,7 @@
 #include <utils/system/argparser.h>
 
 #include <fvcams/factory.h>
+#include <fvcams/buffer.h>
 #ifdef HAVE_SHMEM_CAM
 #include <fvcams/shmem.h>
 #endif
@@ -41,6 +42,9 @@
 #include <fvutils/rectification/rectinfo_block.h>
 #include <fvfilters/rectify.h>
 #endif
+#include <fvutils/colormap/colormap.h>
+#include <fvutils/colormap/cmfile.h>
+#include <fvutils/system/filetype.h>
 
 #include <cstring>
 #include <cstdio>
@@ -116,6 +120,8 @@ main(int argc, char **argv)
   SharedMemoryImageBuffer *buf = NULL;
   bool verbose = argp.has_arg("v");
   int delay = 0;
+  Colormap *colormap = NULL;
+  unsigned int colormap_y = 0;
 
   if ( argp.has_arg("d") ) {
     delay = atoi(argp.arg("d"));
@@ -134,8 +140,20 @@ main(int argc, char **argv)
 #endif
   } else if ( argp.has_arg("f") ) {
 #ifdef HAVE_FILELOADER_CAM
-    title = std::string("File: ").append(argp.arg("f"));
-    cam = new FileLoader(argp.arg("f"));
+    std::string filename = argp.arg("f");
+    title = std::string("File: ").append(filename);
+    std::string ft = fv_filetype_file(filename.c_str());
+
+    if (ft == "FvColormap") {
+	    ColormapFile cm_file;
+	    cm_file.read(filename.c_str());
+	    colormap = cm_file.get_colormap();
+
+	    cam = new BufferCamera(YUV422_PLANAR, 512, 512);
+	    colormap->to_image(cam->buffer(), colormap_y);
+    } else {
+	    cam = new FileLoader(filename.c_str());
+    }
 #else
     throw Exception("FileLoader not available at compile time");
 #endif
@@ -288,6 +306,16 @@ main(int argc, char **argv)
 	    delay = 0;
 	  }
 	  printf("New delay: %i ms\n", delay);
+	} else if ( event.key.keysym.sym == SDLK_UP ) {
+		colormap_y = std::min(255u, colormap_y + 5);
+		printf("Colormap new Y (+): %u\n", colormap_y);
+		colormap->to_image(cam->buffer(), colormap_y);
+	  SDL_PushEvent(&redraw_event);
+	} else if ( event.key.keysym.sym == SDLK_DOWN ) {
+		colormap_y = std::max(0, (int)colormap_y - 5);
+		printf("Colormap new Y (-): %u\n", colormap_y);
+		colormap->to_image(cam->buffer(), colormap_y);
+	  SDL_PushEvent(&redraw_event);
 	} else if ( event.key.keysym.sym == SDLK_r ) {
 #ifdef HAVE_GTKMM
 #  ifdef HAVE_RECTINFO
@@ -417,7 +445,8 @@ main(int argc, char **argv)
   cam->close();
   delete cam;
   delete display;
-
+  delete colormap;
+  
   return 0;
 }
 
