@@ -15,6 +15,11 @@ eclipse-clp:
               "@FAWKESDIR@/src/eclipse-clp/externals/",
               "@BASEDIR@/src/agents/@AGENT@/"]
 
+  gazebo:
+    allow-shutdown: True
+    fawkes-path: "~/fawkes_clean/fawkes-athome/"
+    simulation-shutdown-script: "bin/gazsim.bash -x kill"
+
   elevator:
     use_graph: False
   skillexec:
