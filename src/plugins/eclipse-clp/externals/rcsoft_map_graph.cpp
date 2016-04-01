@@ -122,6 +122,17 @@ p_map_graph_load()
 }
 
 int
+p_is_map_graph_loaded()
+{
+  if ( g_map_graph.loaded() )
+  {
+    return EC_succeed;
+  } else {
+    return EC_fail;
+  }
+}
+
+int
 p_map_graph_get_node_coords3()
 {
   if ( !g_map_graph.loaded() )
