@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="ExitSimulationInterface" author="Gesche Gierse" year="2016">
+  <data>
+    <comment>Exit simulation interface. Use this to exit fawkes and the simulation.</comment>
+    <field type="bool" name="shutdown_initiated">Whether a shutdown was initiated</field>
+  </data>
+  <message name="ExitSimulation">
+    <comment>Request exit of the simulation.</comment>
+  </message>
+</interface>
