@@ -27,11 +27,14 @@
 
 :- export(exec_skill/2).
 :- export(exec_skill2/1).
+:- export(exec_skill_id/3).
+:- export(exec_skill_id2/2).
 :- export(wait_for_skiller/0).
 :- export(decide_on_sensing/1).
 :- export(is_final/1).
 :- export(is_failed/1).
 :- export(is_running/1).
+:- export(not_running/1).
 
 
 :- log_info("Loading skiller tools done").
@@ -89,4 +92,16 @@ exec_skill2(Skillmsg) :-
     log_info("Sending message with ID %w", [MsgID]),
     wait_until_processed(MsgID),
     log_info("Sent Skiller Message").
+
+% returns MsgID of the skill execution
+exec_skill_id(Skill, Arguments, MsgID) :-
+    append_strings(Skill, "{", Str1),
+    append_strings(Str1, Arguments, Str2),
+    append_strings(Str2, "}", Skillmsg),
+    bb_send_message("SkillerInterface::Skiller", "ExecSkillMessage", [["skill_string", Skillmsg]], MsgID),
+    wait_until_processed(MsgID).
+
+exec_skill_id2(Skillmsg, MsgID) :-
+    bb_send_message("SkillerInterface::Skiller", "ExecSkillMessage", [["skill_string", Skillmsg]], MsgID),
+    wait_until_processed(MsgID).
 
