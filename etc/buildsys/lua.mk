@@ -21,7 +21,7 @@ ifndef __buildsys_lua_mk_
 __buildsys_lua_mk_ := 1
 
 # List of acceptable Lua versions
-LUA_VERSIONS= 5.3 5.2 5.1
+LUA_VERSIONS= 5.2 5.1
 $(foreach V,$(LUA_VERSIONS),$(if $(HAVE_LUA),,$(eval include $(BUILDSYSDIR)/lua_check.mk)))
 
 ifeq ($(HAVE_LUA),1)
