@@ -28,7 +28,7 @@ PRESUBDIRS = interfaces
 LIBS_robotino = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 		fawkesblackboard fawkesinterface MotorInterface GripperInterface \
 		BatteryInterface RobotinoSensorInterface IMUInterface
-OBJS_robotino = robotino_plugin.o com_thread.o sensor_thread.o act_thread.o 
+OBJS_robotino = robotino_plugin.o com_thread.o sensor_thread.o act_thread.o
 
 LIBS_robotino_ir_pcl = m fawkescore fawkesutils fawkesaspects fawkestf \
 			 fawkesblackboard fawkesinterface fawkespcl_utils \
@@ -41,8 +41,10 @@ LIBS_robotino_ros_joints = m fawkescore fawkesutils fawkesaspects \
 OBJS_robotino_ros_joints = robotino_ros_joints_plugin.o ros_joints_thread.o
 
 ifeq ($(HAVE_OPENROBOTINO),1)
-  CFLAGS  += $(CFLAGS_OPENROBOTINO)
+  CFLAGS  += -DHAVE_OPENROBOTINO $(CFLAGS_OPENROBOTINO)
   LDFLAGS_robotino += $(LDFLAGS_OPENROBOTINO)
+
+	OBJS_robotino += openrobotino_com_thread.o
 
   CFLAGS_sensor_thread = $(CFLAGS) -Wno-reorder -Wno-unused-function
 
@@ -50,7 +52,7 @@ ifeq ($(HAVE_OPENROBOTINO),1)
     CFLAGS_robotino_plugin  = $(CFLAGS) $(CFLAGS_TF)
     CFLAGS_act_thread       = $(CFLAGS_robotino_plugin)
     CFLAGS_sensor_thread   += $(CFLAGS) $(CFLAGS_TF)
-    CFLAGS_com_thread      += $(CFLAGS) $(CFLAGS_TF)
+    CFLAGS_openrobotino_com_thread      += $(CFLAGS) $(CFLAGS_TF)
     LDFLAGS_robotino += $(LDFLAGS_TF)
     LIBS_robotino    += fawkestf
   endif

@@ -22,7 +22,9 @@
 
 #include <core/plugin.h>
 
-#include "com_thread.h"
+#ifdef HAVE_OPENROBOTINO
+#  include "openrobotino_com_thread.h"
+#endif
 #include "sensor_thread.h"
 #include "act_thread.h"
 
@@ -40,7 +42,11 @@ class RobotinoPlugin : public fawkes::Plugin
   RobotinoPlugin(Configuration *config)
     : Plugin(config)
   {
-    RobotinoComThread *com_thread = new RobotinoComThread();
+#ifdef HAVE_OPENROBOTINO
+    RobotinoComThread *com_thread = new OpenRobotinoComThread();
+#else
+#  error "No com thread implementation available"
+#endif
     thread_list.push_back(com_thread);
     thread_list.push_back(new RobotinoSensorThread(com_thread));
     thread_list.push_back(new RobotinoActThread(com_thread));
