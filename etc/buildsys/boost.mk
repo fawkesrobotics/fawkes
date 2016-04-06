@@ -26,13 +26,26 @@ BOOST_LIB_DIRS=/usr/lib64 /usr/lib /usr/lib32 \
 BOOST_INCLUDE_DIRS=
 BOOST_LIBRARY_SUFFIXES=-mt NOSUFFIX
 
+boost-find-include = $(firstword $(wildcard $(foreach i,$(BOOST_INCLUDE_DIRS) /usr/include /usr/local/include,$i/boost/$1)))
+boost-have-include = $(if $(call boost-find-include,$1),1)
 boost-have-libfile = $(if $(wildcard $(foreach l,$(BOOST_LIB_DIRS),$(foreach s,$(BOOST_LIBRARY_SUFFIXES),$l/libboost_$1$(subst NOSUFFIX,,$s).$(SOEXT) ))),1)
-boost-have-lib     = $(if $(or $(call boost-have-libfile,$1),$(wildcard $(foreach i,$(BOOST_INCLUDE_DIRS) /usr/include /usr/local/include,$i/boost/$1.hpp))),1)
+boost-have-lib     = $(if $(or $(call boost-have-libfile,$1),$(call boost-have-include,$(1).hpp)),1)
 boost-lib-cflags   = $(addprefix -I,$(wildcard $(BOOST_INCLUDE_DIRS)))
 boost-lib-ldflags  = $(addprefix -lboost_,$(foreach l,$(BOOST_LIB_DIRS),$(foreach s,$(BOOST_LIBRARY_SUFFIXES),$(if $(wildcard $l/libboost_$1$(subst NOSUFFIX,,$s).$(SOEXT)),$1$(subst NOSUFFIX,,$s) ))))
 
 boost-have-libs    = $(if $(strip $(subst 1,,$(foreach l,$1,$(or $(call boost-have-lib,$l),0)))),,1)
 boost-libs-cflags  = $(foreach l,$1,$(call boost-lib-cflags,$l))
 boost-libs-ldflags = $(foreach l,$1,$(call boost-lib-ldflags,$l))
+
+ifeq ($(call boost-have-include,version.hpp),1)
+	HAVE_BOOST = 1
+  BOOST_VERSION = $(shell LANG=C grep "define BOOST_VERSION " "$(call boost-find-include,version.hpp)" | awk '{ print $$3 }')
+  BOOST_VERSION_MAJOR = $(shell echo $$(($(BOOST_VERSION) / 100000)))
+  BOOST_VERSION_MINOR = $(shell echo $$(($(BOOST_VERSION) / 100 % 1000)))
+  BOOST_VERSION_PATCH = $(shell echo $$(($(BOOST_VERSION) % 100)))
+endif
+
+boost-version-create = $(shell echo $$(($1 * 100000 + $2 * 1000 + $3)))
+boost-version-atleast = $(shell echo $$(($(BOOST_VERSION) >= $1 * 100000 + $2 * 1000 + $3)))
 
 endif # __buildsys_boost_mk_
