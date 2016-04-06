@@ -3,7 +3,7 @@
  *  act_thread.cpp - Robotino act thread
  *
  *  Created: Sun Nov 13 16:07:40 2011
- *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2016  Tim Niemueller [www.niemueller.de]
  *             2014       Sebastian Reuter
  *             2014       Tobias Neumann
  ****************************************************************************/
@@ -28,16 +28,6 @@
 #include <interfaces/GripperInterface.h>
 #include <interfaces/IMUInterface.h>
 #include <utils/math/angle.h>
-
-#ifdef HAVE_OPENROBOTINO_API_1
-#  include <rec/robotino/com/Com.h>
-#  include <rec/robotino/com/OmniDrive.h>
-#  include <rec/sharedmemory/sharedmemory.h>
-#  include <rec/iocontrol/remotestate/SensorState.h>
-#  include <rec/iocontrol/robotstate/State.h>
-#elif defined(HAVE_OPENROBOTINO_API_2)
-#  include <rec/robotino/api2/OmniDriveModel.h>
-#endif
 
 using namespace fawkes;
 
@@ -68,12 +58,6 @@ RobotinoActThread::init()
 	last_seqnum_ = 0;
 	last_msg_time_ = clock->now();
 
-#ifdef HAVE_OPENROBOTINO_API_1
-	omni_drive_ = new rec::robotino::com::OmniDrive();
-#elif defined(HAVE_OPENROBOTINO_API_2)
-	omni_drive_ = new rec::robotino::api2::OmniDriveModel();
-#endif
-
 	//get config values
 	cfg_deadman_threshold_    = config->get_float("/hardware/robotino/deadman_time_threshold");
 	cfg_gripper_enabled_      = config->get_bool("/hardware/robotino/gripper/enable_gripper");
@@ -86,6 +70,10 @@ RobotinoActThread::init()
 		config->get_float("/hardware/robotino/odometry/calc/correction/phi");
 	cfg_odom_corr_trans_      =
 		config->get_float("/hardware/robotino/odometry/calc/correction/trans");
+
+	cfg_rb_   = config->get_float("/hardware/robotino/motor-layout/rb");
+	cfg_rw_   = config->get_float("/hardware/robotino/motor-layout/rw");
+	cfg_gear_ = config->get_float("/hardware/robotino/motor-layout/gear");
 
 	std::string imu_if_id;
 
@@ -141,9 +129,6 @@ RobotinoActThread::finalize()
 	com_->set_speed_points(0., 0., 0.);
 	com_ = NULL;
 	delete odom_time_;
-#if defined(HAVE_OPENROBOTINO_API_1) || defined(HAVE_OPENROBOTINO_API_2)
-	delete omni_drive_;
-#endif
 }
 
 void
@@ -177,13 +162,7 @@ RobotinoActThread::loop()
 
 		else if (MotorInterface::TransRotMessage *msg = motor_if_->msgq_first_safe(msg))
 		{
-#ifdef HAVE_OPENROBOTINO_API_1
-			omni_drive_->project(&s1, &s2, &s3,
-			                     msg->vx() * 1000., msg->vy() * 1000.,
-			                     rad2deg(msg->omega()));
-#elif defined(HAVE_OPENROBOTINO_API_2)
-			omni_drive_->project(&s1, &s2, &s3, msg->vx(), msg->vy(), msg->omega());
-#endif
+			project(&s1, &s2, &s3, msg->vx(), msg->vy(), msg->omega());
 
 			des_vx_    = msg->vx();
 			des_vy_    = msg->vy();
@@ -275,9 +254,7 @@ RobotinoActThread::publish_odometry()
 		last_seqnum_ = seq;
 
 		float vx = 0., vy = 0., omega = 0.;
-#if defined(HAVE_OPENROBOTINO_API_1) || defined(HAVE_OPENROBOTINO_API_2)
-		omni_drive_->unproject(&vx, &vy, &omega, a1, a2, a3);
-#endif
+		unproject(&vx, &vy, &omega, a1, a2, a3);
 
 		motor_if_->set_vx(vx);
 		motor_if_->set_vy(vy);
@@ -422,4 +399,84 @@ RobotinoActThread::publish_gripper()
 		gripper_if_->set_gripper_state(GripperInterface::OPEN);
 		gripper_if_->write();
 	}
+}
+
+/** Project the velocity of the robot in cartesian coordinates to single motor speeds.
+ *
+ * From OpenRobotino API2 (C) REC Robotics Equipment Corporation GmbH, Planegg, Germany.
+ * The code has been released under a 2-clause BSD license.
+ *
+ * @param m1		The resulting speed of motor 1 in rpm
+ * @param m2		The resulting speed of motor 2 in rpm
+ * @param m3		The resulting speed of motor 3 in rpm
+ * @param vx		Velocity in x-direction in m/s
+ * @param vy		Velocity in y-direction in m/s
+ * @param omega	Angular velocity in rad/s
+ */
+//Redistribution and use in source and binary forms, with or without
+//modification, are permitted provided that the following conditions
+//are met:
+//1) Redistributions of source code must retain the above copyright
+//notice, this list of conditions and the following disclaimer.
+//2) Redistributions in binary form must reproduce the above copyright
+//notice, this list of conditions and the following disclaimer in the
+//documentation and/or other materials provided with the distribution.
+//
+//THIS SOFTWARE IS PROVIDED BY REC ROBOTICS EQUIPMENT CORPORATION GMBH
+//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+//FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL REC
+//ROBOTICS EQUIPMENT CORPORATION GMBH BE LIABLE FOR ANY DIRECT,
+//INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+//(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+//SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+//STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+//OF THE POSSIBILITY OF SUCH DAMAGE.
+void
+RobotinoActThread::project( float* m1, float* m2, float* m3, float vx, float vy, float omega ) const
+{
+	//Projection matrix
+	static const double v0[2] = { -0.5 * sqrt( 3.0 ),  0.5 };
+	static const double v1[2] = {  0.0              , -1.0 };
+	static const double v2[2] = {  0.5 * sqrt( 3.0 ),  0.5 };
+
+	//Scale omega with the radius of the robot
+	double vOmegaScaled = cfg_rb_ * (double)omega ;
+
+	//Convert from m/s to RPM
+	const double k = 60.0 * cfg_gear_ / ( 2.0 * M_PI * cfg_rw_ );
+
+	//Compute the desired velocity
+	*m1 = static_cast<float>( ( v0[0] * (double)vx + v0[1] * (double)vy + vOmegaScaled ) * k );
+	*m2 = static_cast<float>( ( v1[0] * (double)vx + v1[1] * (double)vy + vOmegaScaled ) * k );
+	*m3 = static_cast<float>( ( v2[0] * (double)vx + v2[1] * (double)vy + vOmegaScaled ) * k );
+}
+
+/** Project single motor speeds to velocity in cartesian coordinates.
+ *
+ * From OpenRobotino API2 (C) REC Robotics Equipment Corporation GmbH, Planegg, Germany.
+ * The code has been released under a 2-clause BSD license.
+ *
+ * @param vx		The resulting speed in x-direction in m/s
+ * @param vy		The resulting speed in y-direction in m/s
+ * @param omega	The resulting angular velocity in rad/s
+ * @param m1		Speed of motor 1 in rpm
+ * @param m2		Speed of motor 2 in rpm
+ * @param m3		Speed of motor 3 in rpm
+ * @throws		RobotinoException if no valid drive layout parameters are available.
+ */
+void
+RobotinoActThread::unproject( float* vx, float* vy, float* omega, float m1, float m2, float m3 ) const
+{
+	//Convert from RPM to mm/s
+	const double k = 60.0 * cfg_gear_ / ( 2.0 * M_PI * cfg_rw_ );
+
+	*vx = static_cast<float>( ( (double)m3 - (double)m1 ) / sqrt( 3.0 ) / k );
+	*vy = static_cast<float>( 2.0 / 3.0 * ( (double)m1 + 0.5 * ( (double)m3 - (double)m1 ) - (double)m2 ) / k );
+
+	double vw = (double)*vy + (double)m2 / k;
+
+	*omega = static_cast<float>( vw / cfg_rb_ );
 }

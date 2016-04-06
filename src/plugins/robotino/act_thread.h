@@ -36,33 +36,6 @@
 
 #include <string>
 
-#ifdef HAVE_OPENROBOTINO_API_1
-namespace rec {
-	namespace robotino {
-		namespace com {
-			class Com;
-			class OmniDrive;
-		}
-	}
-	namespace sharedmemory {
-		template<typename SharedType> class SharedMemory;
-	}
-	namespace iocontrol {
-		namespace robotstate {
-			class State;
-		}
-	}
-}
-#else
-namespace rec {
-	namespace robotino {
-		namespace api2 {
-			class OmniDriveModel;
-		}
-	}
-}
-#endif
-
 namespace fawkes {
 	class MotorInterface;
 	class GripperInterface;
@@ -101,14 +74,11 @@ class RobotinoActThread
 	void publish_odometry();
 	void publish_gripper();
 
+	void project(float *m1, float *m2, float *m3, float vx, float vy, float omega) const;
+	void unproject(float *vx, float *vy, float *omega, float m1, float m2, float m3) const;
+	
  private:
 	RobotinoComThread              *com_;
-
-#ifdef HAVE_OPENROBOTINO_API_1
-	rec::robotino::com::OmniDrive  *omni_drive_;
-#elif defined(HAVE_OPENROBOTINO_API_2)
-	rec::robotino::api2::OmniDriveModel *omni_drive_;
-#endif
 
 	unsigned int                    last_seqnum_;
 	fawkes::MotorInterface         *motor_if_;
@@ -132,7 +102,10 @@ class RobotinoActThread
 	float                           cfg_odom_corr_phi_;
 	float                           cfg_odom_corr_trans_;
 	bool                            cfg_bumper_estop_enabled_;
-
+	float                           cfg_rb_;
+	float                           cfg_rw_;
+	float                           cfg_gear_;
+	
 	float                           des_vx_;
 	float                           des_vy_;
 	float                           des_omega_;
