@@ -40,12 +40,40 @@ LIBS_robotino_ros_joints = m fawkescore fawkesutils fawkesaspects \
 			   RobotinoSensorInterface
 OBJS_robotino_ros_joints = robotino_ros_joints_plugin.o ros_joints_thread.o
 
+
 ifeq ($(HAVE_OPENROBOTINO),1)
   CFLAGS  += -DHAVE_OPENROBOTINO $(CFLAGS_OPENROBOTINO)
   LDFLAGS_robotino += $(LDFLAGS_OPENROBOTINO)
 
 	OBJS_robotino += openrobotino_com_thread.o
+else
+  WARN_TARGETS += warning_openrobotino
+endif
 
+ifeq ($(HAVE_LIBUDEV)$(HAVE_ROBOTINO_DIRECT_BOOST_LIBS)$(call boost-version-atleast,1,0,48)$(HAVE_CPP11),1111)
+	HAVE_ROBOTINO_DIRECT = 1
+
+  CFLAGS += -DHAVE_ROBOTINO_DIRECT $(CFLAGS_CPP11) $(CFLAGS_LIBUDEV) $(CFLAGS_ROBOTINO_DIRECT_BOOST)
+  LDFLAGS_robotino += $(LDFLAGS_LIBUDEV) $(LDFLAGS_ROBOTINO_DIRECT_BOOST)
+
+	OBJS_robotino += direct_com_thread.o direct_com_message.o
+else
+  ifneq ($(HAVE_LIBUDEV),1)
+    WARN_TARGETS += warning_libudev
+  endif
+  ifneq ($(HAVE_ROBOTINO_DIRECT_BOOST_LIBS),1)
+    WARN_TARGETS_ROBOTINO_DIRECT_BOOST = $(foreach l,$(ROBOTINO_DIRECT_REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_robotino_direct_boost_$l))
+	  WARN_TARGETS += $(WARN_TARGETS_ROBOTINO_DIRECT_BOOST)
+  endif
+  ifneq ($(call boost-version-atleast,1,0,48),1)
+    WARN_TARGETS += warning_old_boost
+  endif
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
+endif
+
+ifneq ($(HAVE_OPENROBOTINO)$(HAVE_ROBOTINO_DIRECT),)
   CFLAGS_sensor_thread = $(CFLAGS) -Wno-reorder -Wno-unused-function
 
   ifeq ($(HAVE_TF),1)
@@ -53,6 +81,7 @@ ifeq ($(HAVE_OPENROBOTINO),1)
     CFLAGS_act_thread       = $(CFLAGS_robotino_plugin)
     CFLAGS_sensor_thread   += $(CFLAGS) $(CFLAGS_TF)
     CFLAGS_openrobotino_com_thread      += $(CFLAGS) $(CFLAGS_TF)
+    CFLAGS_direct_com_thread      += $(CFLAGS) $(CFLAGS_TF)
     LDFLAGS_robotino += $(LDFLAGS_TF)
     LIBS_robotino    += fawkestf
   endif
@@ -69,7 +98,7 @@ ifeq ($(HAVE_OPENROBOTINO),1)
     WARN_TARGETS += warning_pcl
   endif
 else
-  WARN_TARGETS += warning_openrobotino
+  WARN_TARGETS += warning_nodriver
 endif
 
 ifeq ($(HAVE_ROS),1)
@@ -93,15 +122,25 @@ ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_openrobotino warning_pcl warning_ros warning_sensor_msgs
+.PHONY: warning_openrobotino warning_pcl warning_ros warning_sensor_msgs $(WARN_TARGETS_ROBOTINO_DIRECT_BOOST) warning_nodriver warning_old_boost warning_cpp11
 warning_openrobotino:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TBROWN)Omitting Robotino support$(TNORMAL) (OpenRobotino API not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TBROWN)Omitting OpenRobotino API support$(TNORMAL) (OpenRobotino API not found)"
+warning_nodriver:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TBROWN)Omitting Robotino platform support$(TNORMAL) (driver prerequisites not met)"
 warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TBROWN)Omitting Robotino PCL plugins$(TNORMAL) (PCL not found)"
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TBROWN)Omitting Robotino Joints plugin$(TNORMAL) (ROS not found)"
 warning_sensor_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TBROWN)Omitting Robotino Joints plugin$(TNORMAL) (ROS package sensor_msgs not found)"
+warning_libudev:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct commnunication support$(TNORMAL) (libudev not available)"
+$(WARN_TARGETS_ROBOTINO_DIRECT_BOOST): warning_robotino_direct_boost_%:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct commnunication support$(TNORMAL) (Boost library $* not found)"
+warning_old_boost:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct commnunication support$(TNORMAL) (Boost library too old, require at least 1.0.48, have $(BOOST_VERSION))"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct commnunication support$(TNORMAL) (C++11 support required)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

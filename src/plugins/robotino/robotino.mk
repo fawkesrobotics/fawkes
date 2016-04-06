@@ -13,6 +13,8 @@
 #
 #*****************************************************************************
 
+include $(BUILDSYSDIR)/boost.mk
+
 OPENROBOTINOAPI_DIR=/usr/local/OpenRobotinoAPI
 OPENROBOTINOAPI2_DIR=/usr/local/robotino
 
@@ -35,3 +37,23 @@ else
 			   -lrec_iocontrol_robotstate -lrec_iocontrol_remotestate
   endif
 endif
+
+HAVE_LIBUDEV=$(if $(shell $(PKGCONFIG) --exists 'libudev'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBUDEV),1)
+  CFLAGS_LIBUDEV  = -DHAVE_LIBUDEV $(shell $(PKGCONFIG) --cflags 'libudev')
+  LDFLAGS_LIBUDEV = $(shell $(PKGCONFIG) --libs 'libudev')
+endif
+
+HAVE_LIBUSB=$(if $(shell $(PKGCONFIG) --exists 'libusb-1.0'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBUSB),1)
+  CFLAGS_LIBUSB  = -DHAVE_LIBUSB $(shell $(PKGCONFIG) --cflags 'libusb-1.0')
+  LDFLAGS_LIBUSB = $(shell $(PKGCONFIG) --libs 'libusb-1.0')
+endif
+
+ROBOTINO_DIRECT_REQ_BOOST_LIBS = thread asio system
+HAVE_ROBOTINO_DIRECT_BOOST_LIBS = $(call boost-have-libs,$(ROBOTINO_DIRECT_REQ_BOOST_LIBS))
+ifeq ($(HAVE_ROBOTINO_DIRECT_BOOST_LIBS),1)
+  CFLAGS_ROBOTINO_DIRECT_BOOST  = $(call boost-libs-cflags,$(ROBOTINO_DIRECT_REQ_BOOST_LIBS))
+  LDFLAGS_ROBOTINO_DIRECT_BOOST = $(call boost-libs-ldflags,$(ROBOTINO_DIRECT_REQ_BOOST_LIBS)) -lpthread
+endif
+

@@ -35,7 +35,7 @@
 #  include <rec/sharedmemory/sharedmemory.h>
 #  include <rec/iocontrol/remotestate/SensorState.h>
 #  include <rec/iocontrol/robotstate/State.h>
-#else
+#elif defined(HAVE_OPENROBOTINO_API_2)
 #  include <rec/robotino/api2/OmniDriveModel.h>
 #endif
 
@@ -69,11 +69,8 @@ RobotinoActThread::init()
   last_msg_time_ = clock->now();
 
 #ifdef HAVE_OPENROBOTINO_API_1
-  statemem_ =  new rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State>
-    (rec::iocontrol::robotstate::State::sharedMemoryKey);
-  state_ = statemem_->getData();
   omni_drive_ = new rec::robotino::com::OmniDrive();
-#else
+#elif defined(HAVE_OPENROBOTINO_API_2)
   omni_drive_ = new rec::robotino::api2::OmniDriveModel();
 #endif
 
@@ -144,9 +141,8 @@ RobotinoActThread::finalize()
   com_->set_speed_points(0., 0., 0.);
   com_ = NULL;
   delete odom_time_;
+#if defined(HAVE_OPENROBOTINO_API_1) || defined(HAVE_OPENROBOTINO_API_2)
   delete omni_drive_;
-#ifdef HAVE_OPENROBOTINO_API_1
-  delete statemem_;
 #endif
 }
 
@@ -185,7 +181,7 @@ RobotinoActThread::loop()
       omni_drive_->project(&s1, &s2, &s3,
 			   msg->vx() * 1000., msg->vy() * 1000.,
 			   rad2deg(msg->omega()));
-#else
+#elif defined(HAVE_OPENROBOTINO_API_2)
       omni_drive_->project(&s1, &s2, &s3, msg->vx(), msg->vy(), msg->omega());
 #endif
 
@@ -278,8 +274,10 @@ RobotinoActThread::publish_odometry()
   if (seq != last_seqnum_) {
     last_seqnum_ = seq;
 
-    float vx, vy, omega;
+    float vx = 0., vy = 0., omega = 0.;
+#if defined(HAVE_OPENROBOTINO_API_1) || defined(HAVE_OPENROBOTINO_API_2)
     omni_drive_->unproject(&vx, &vy, &omega, a1, a2, a3);
+#endif
 
     motor_if_->set_vx(vx);
     motor_if_->set_vy(vy);

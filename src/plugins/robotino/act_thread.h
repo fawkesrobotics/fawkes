@@ -106,9 +106,7 @@ class RobotinoActThread
 
 #ifdef HAVE_OPENROBOTINO_API_1
   rec::robotino::com::OmniDrive  *omni_drive_;
-  rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State> *statemem_;
-  rec::iocontrol::robotstate::State *state_;
-#else
+#elif defined(HAVE_OPENROBOTINO_API_2)
   rec::robotino::api2::OmniDriveModel *omni_drive_;
 #endif
 

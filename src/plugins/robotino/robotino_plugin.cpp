@@ -25,6 +25,9 @@
 #ifdef HAVE_OPENROBOTINO
 #  include "openrobotino_com_thread.h"
 #endif
+#ifdef HAVE_ROBOTINO_DIRECT
+#  include "direct_com_thread.h"
+#endif
 #include "sensor_thread.h"
 #include "act_thread.h"
 
@@ -42,11 +45,25 @@ class RobotinoPlugin : public fawkes::Plugin
   RobotinoPlugin(Configuration *config)
     : Plugin(config)
   {
+	  std::string cfg_driver = config->get_string("/hardware/robotino/driver");
+	  
+	  RobotinoComThread *com_thread = NULL;
+
+	  if (cfg_driver == "openrobotino") {
 #ifdef HAVE_OPENROBOTINO
-    RobotinoComThread *com_thread = new OpenRobotinoComThread();
+		  com_thread = new OpenRobotinoComThread();
 #else
-#  error "No com thread implementation available"
+		  throw Exception("robotino: driver mode 'openrobotino' not available at compile time");
 #endif
+	  } else if (cfg_driver == "direct") {
+#ifdef HAVE_ROBOTINO_DIRECT
+		  com_thread = new DirectRobotinoComThread();    
+#else
+		  throw Exception("robotino: driver mode 'direct' not available at compile time");
+#endif
+	  } else {
+		  throw Exception("robotino: unknown driver '%s'", cfg_driver.c_str());
+	  }
     thread_list.push_back(com_thread);
     thread_list.push_back(new RobotinoSensorThread(com_thread));
     thread_list.push_back(new RobotinoActThread(com_thread));
