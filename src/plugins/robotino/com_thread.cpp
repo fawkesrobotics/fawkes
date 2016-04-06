@@ -75,7 +75,7 @@ using namespace fawkes;
  * @param thread_name name of thread
  */
 RobotinoComThread::RobotinoComThread(const char *thread_name)
-  : Thread(thread_name, Thread::OPMODE_CONTINUOUS)
+	: Thread(thread_name, Thread::OPMODE_CONTINUOUS)
 {
 }
 

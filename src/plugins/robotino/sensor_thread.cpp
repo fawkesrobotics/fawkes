@@ -35,10 +35,10 @@ using namespace fawkes;
  * @param com_thread communication thread to trigger for writing data
  */
 RobotinoSensorThread::RobotinoSensorThread(RobotinoComThread *com_thread)
-  : Thread("RobotinoSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
+	: Thread("RobotinoSensorThread", Thread::OPMODE_WAITFORWAKEUP),
+	  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
-  com_ = com_thread;
+	com_ = com_thread;
 }
 
 
@@ -56,5 +56,5 @@ RobotinoSensorThread::finalize()
 void
 RobotinoSensorThread::loop()
 {
-  com_->update_bb_sensor();
+	com_->update_bb_sensor();
 }

@@ -30,13 +30,13 @@
 #include <utils/time/time.h>
 
 namespace fawkes {
-  class Mutex;
-  class Clock;
-  class TimeWait;
+	class Mutex;
+	class Clock;
+	class TimeWait;
 
-  class BatteryInterface;
-  class RobotinoSensorInterface;
-  class IMUInterface;
+	class BatteryInterface;
+	class RobotinoSensorInterface;
+	class IMUInterface;
 }
 
 class RobotinoComThread
@@ -44,18 +44,18 @@ class RobotinoComThread
 {
  public:
 	RobotinoComThread(const char *thread_name);
-  virtual ~RobotinoComThread();
+	virtual ~RobotinoComThread();
 
-  virtual void update_bb_sensor() = 0;
+	virtual void update_bb_sensor() = 0;
 
-  virtual bool is_connected() = 0;
+	virtual bool is_connected() = 0;
 
-  virtual void set_gripper(bool opened) = 0;
-  virtual bool is_gripper_open() = 0;
-  virtual void set_speed_points(float s1, float s2, float s3) = 0;
-  virtual void get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t) = 0;
-  virtual void get_odometry(double &x, double &y, double &phi) = 0;
-  virtual void reset_odometry() = 0;
+	virtual void set_gripper(bool opened) = 0;
+	virtual bool is_gripper_open() = 0;
+	virtual void set_speed_points(float s1, float s2, float s3) = 0;
+	virtual void get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t) = 0;
+	virtual void get_odometry(double &x, double &y, double &phi) = 0;
+	virtual void reset_odometry() = 0;
 };
 
 

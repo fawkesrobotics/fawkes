@@ -36,35 +36,35 @@
 class RobotinoComThread;
 
 namespace fawkes {
-  class BatteryInterface;
-  class RobotinoSensorInterface;
-  class IMUInterface;
+	class BatteryInterface;
+	class RobotinoSensorInterface;
+	class IMUInterface;
 }
 
 
 class RobotinoSensorThread
 : public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ClockAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+	public fawkes::BlockedTimingAspect,
+	public fawkes::LoggingAspect,
+	public fawkes::ClockAspect,
+	public fawkes::ConfigurableAspect,
+	public fawkes::BlackBoardAspect
 {
-  friend class RobotinoActThread;
+	friend class RobotinoActThread;
  public:
-  RobotinoSensorThread(RobotinoComThread *com_thread);
+	RobotinoSensorThread(RobotinoComThread *com_thread);
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private: // methods
 
  private: // members
-  RobotinoComThread *com_;
+	RobotinoComThread *com_;
 };
 
 
