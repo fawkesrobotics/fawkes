@@ -62,9 +62,23 @@ class RobotinoSensorThread
  protected: virtual void run() { Thread::run(); }
 
  private: // methods
+	void process_sensor_msgs();
+	void update_distances(float *voltages);
+
+	// Voltage to distance data points
+	static const std::vector<std::pair<double, double> > voltage_to_dist_dps_;
+
 
  private: // members
 	RobotinoComThread *com_;
+
+	bool            cfg_enable_gyro_;
+	std::string     cfg_imu_iface_id_;
+
+	fawkes::BatteryInterface        *batt_if_;
+	fawkes::RobotinoSensorInterface *sens_if_;
+	fawkes::IMUInterface            *imu_if_;
+
 };
 
 

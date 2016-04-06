@@ -39,14 +39,43 @@ namespace fawkes {
 	class IMUInterface;
 }
 
+#define NUM_IR_SENSORS 9
+
 class RobotinoComThread
 : public fawkes::Thread
 {
  public:
+	struct SensorData {
+		SensorData();
+
+		/// @cond INTERNAL
+		unsigned int seq;
+
+		float        mot_velocity[3];
+		int32_t      mot_position[3];
+		float        mot_current[3];
+		bool         bumper;
+		bool         bumper_estop_enabled;
+		bool         digital_in[8];
+		float        analog_in[8];
+
+		float        bat_voltage;
+		float        bat_current;
+		float        bat_absolute_soc;
+
+		bool         imu_enabled;
+		float        imu_orientation[4];
+		float        imu_angular_velocity[3];
+		double       imu_angular_velocity_covariance[9];
+
+		float        ir_voltages[NUM_IR_SENSORS];
+		
+		fawkes::Time time;
+		/// @endcond
+	};
+
 	RobotinoComThread(const char *thread_name);
 	virtual ~RobotinoComThread();
-
-	virtual void update_bb_sensor() = 0;
 
 	virtual bool is_connected() = 0;
 
@@ -56,6 +85,19 @@ class RobotinoComThread
 	virtual void get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t) = 0;
 	virtual void get_odometry(double &x, double &y, double &phi) = 0;
 	virtual void reset_odometry() = 0;
+	virtual void set_bumper_estop_enabled(bool enabled) = 0;
+	
+	virtual bool get_data(SensorData &sensor_data);
+
+ protected:
+	/** Mutex to protect data_. Lock whenever accessing it. */
+	fawkes::Mutex    *data_mutex_;
+	/** Data struct that must be updated whenever new data is available. */
+	SensorData        data_;
+	/** Flag to indicate new data, set to true if data_ is modified. */
+	bool              new_data_;
+
+
 };
 
 

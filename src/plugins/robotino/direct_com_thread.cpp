@@ -40,9 +40,6 @@
 
 using namespace fawkes;
 
-#define NUM_IR_SENSORS 9
-
-
 /** @class DirectRobotinoComThread "openrobotino_com_thread.h"
  * Thread to communicate with Robotino via OpenRobotino API (v1 or v2).
  * @author Tim Niemueller
@@ -66,50 +63,11 @@ void
 DirectRobotinoComThread::init()
 {
 	cfg_hostname_ = config->get_string("/hardware/robotino/hostname");
-	cfg_quit_on_disconnect_ = config->get_bool("/hardware/robotino/quit_on_disconnect");
 	cfg_enable_gyro_ = config->get_bool("/hardware/robotino/gyro/enable");
-	cfg_imu_iface_id_ = config->get_string("/hardware/robotino/gyro/interface_id");
 	cfg_sensor_update_cycle_time_ =
 		config->get_uint("/hardware/robotino/sensor_update_cycle_time");
 	cfg_gripper_enabled_ = config->get_bool("/hardware/robotino/gripper/enable_gripper");
 
-	batt_if_ = NULL;
-	sens_if_ = NULL;
-	imu_if_ = NULL;
-
-	batt_if_ = blackboard->open_for_writing<BatteryInterface>("Robotino");
-	sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
-
-	if (cfg_enable_gyro_) {
-		imu_if_ = blackboard->open_for_writing<IMUInterface>(cfg_imu_iface_id_.c_str());
-	}
-
-	// taken from Robotino API2 DistanceSensorImpl.hpp
-	voltage_to_dist_dps_.push_back(std::make_pair(0.3 , 0.41));
-	voltage_to_dist_dps_.push_back(std::make_pair(0.39, 0.35));
-	voltage_to_dist_dps_.push_back(std::make_pair(0.41, 0.30));
-	voltage_to_dist_dps_.push_back(std::make_pair(0.5 , 0.25));
-	voltage_to_dist_dps_.push_back(std::make_pair(0.75, 0.18));
-	voltage_to_dist_dps_.push_back(std::make_pair(0.8 , 0.16));
-	voltage_to_dist_dps_.push_back(std::make_pair(0.95, 0.14));
-	voltage_to_dist_dps_.push_back(std::make_pair(1.05, 0.12));
-	voltage_to_dist_dps_.push_back(std::make_pair(1.3 , 0.10));
-	voltage_to_dist_dps_.push_back(std::make_pair(1.4 , 0.09));
-	voltage_to_dist_dps_.push_back(std::make_pair(1.55, 0.08));
-	voltage_to_dist_dps_.push_back(std::make_pair(1.8 , 0.07));
-	voltage_to_dist_dps_.push_back(std::make_pair(2.35, 0.05));
-	voltage_to_dist_dps_.push_back(std::make_pair(2.55, 0.04));
-
-	if (imu_if_) {
-		// Assume that the gyro is the CruizCore XG1010 and thus set data
-		// from datasheet
-		imu_if_->set_linear_acceleration(0, -1.);
-		imu_if_->set_angular_velocity_covariance(8, deg2rad(0.1));
-		imu_if_->write();
-	}
-
-	data_mutex_  = new Mutex();
-	new_data_    = false;
 	last_seqnum_ = 0;
 	time_wait_   = new TimeWait(clock, cfg_sensor_update_cycle_time_ * 1000);
 
@@ -135,11 +93,7 @@ DirectRobotinoComThread::init()
 void
 DirectRobotinoComThread::finalize()
 {
-	delete data_mutex_;
 	delete time_wait_;
-	blackboard->close(sens_if_);
-	blackboard->close(batt_if_);
-	blackboard->close(imu_if_);
 }
 
 void
@@ -155,44 +109,6 @@ DirectRobotinoComThread::loop()
 
 
 	time_wait_->wait();
-}
-
-
-void
-DirectRobotinoComThread::process_sensor_msgs()
-{
-	// process command messages
-	while (! sens_if_->msgq_empty()) {
-		if (RobotinoSensorInterface::SetBumperEStopEnabledMessage *msg =
-		    sens_if_->msgq_first_safe(msg))
-		{
-#ifdef HAVE_OPENROBOTINO_API_1
-			logger->log_info(name(), "%sabling motor on request",
-			                 msg->is_enabled() ? "En" : "Dis");
-			state_->emergencyStop.isEnabled = msg->is_enabled();
-#else
-			logger->log_info(name(), "Setting emergency stop not yet supported for API2");
-#endif
-		}
-		sens_if_->msgq_pop();
-	} // while sensor msgq
-}
-
-
-/** Trigger writes of blackboard interfaces.
- * This is meant to be called by the sensor thread so that writes to the
- * blackboard happen in the sensor acquisition hook.
- */
-void
-DirectRobotinoComThread::update_bb_sensor()
-{
-	MutexLocker lock(data_mutex_);
-	if (new_data_) {
-		batt_if_->write();
-		sens_if_->write();
-		if (imu_if_)  imu_if_->write();
-		new_data_ = false;
-	}
 }
 
 
@@ -222,7 +138,6 @@ DirectRobotinoComThread::get_odometry(double &x, double &y, double &phi)
 	MutexLocker lock(data_mutex_);
 }
 
-
 bool
 DirectRobotinoComThread::is_gripper_open()
 {
@@ -230,15 +145,18 @@ DirectRobotinoComThread::is_gripper_open()
 	return false;
 }
 
-
 void
 DirectRobotinoComThread::set_speed_points(float s1, float s2, float s3)
 {
 }
 
-
 void
 DirectRobotinoComThread::set_gripper(bool opened)
+{
+}
+
+void
+DirectRobotinoComThread::set_bumper_estop_enabled(bool enabled)
 {
 }
 
@@ -247,8 +165,6 @@ std::string
 DirectRobotinoComThread::find_device_udev()
 {
 	std::string cfg_device = "";
-
-        
 
 	// try to find device using udev
 	struct udev *udev;

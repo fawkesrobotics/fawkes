@@ -21,6 +21,9 @@
 
 #include "com_thread.h"
 
+#include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
+
 using namespace fawkes;
 
 /** @class RobotinoComThread "com_thread.h"
@@ -29,11 +32,6 @@ using namespace fawkes;
  * required pace. It provides hook for sensor and act threads.
  * @author Tim Niemueller
  *
- *
- * @fn void RobotinoComThread::update_bb_sensor() = 0
- * Trigger writes of blackboard interfaces.
- * This is meant to be called by the sensor thread so that writes to the
- * blackboard happen in the sensor acquisition hook.
  *
  * @fn void RobotinoComThread::reset_odometry() = 0
  * Reset odometry to zero.
@@ -69,7 +67,26 @@ using namespace fawkes;
  * @param x upon return contains x coordinate of odometry
  * @param y upon return contains y coordinate of odometry
  * @param phi upon return contains rptation of odometry
+ *
+ * @fn void RobotinoComThread::set_bumper_estop_enabled(bool enabled) = 0
+ * Enable or disable emergency stop on bumper contact.
+ * @param enabled true to enable, false to disable
  */
+
+/** @class RobotinoComThread::SensorData "com_thread.h"
+ * Struct to exchange data between com and sensor thread.
+ */
+
+/** Constructor. */
+RobotinoComThread::SensorData::SensorData()
+	: seq(0), mot_velocity{0,0,0}, mot_position{0,0,0}, mot_current{0.,0.,0.},
+	  bumper(false), bumper_estop_enabled(false), digital_in{0,0,0,0,0,0,0,0},
+	  analog_in{0.,0.,0.,0.,0.,0.,0.,0.}, bat_voltage(0.), bat_current(0.),
+	  imu_enabled(false), imu_orientation{0.,0.,0.,0.}, imu_angular_velocity{0.,0.,0.},
+	  imu_angular_velocity_covariance{0.,0.,0.,0.,0.,0.,0.,0.,0.},
+	  ir_voltages{0.,0.,0.,0.,0.,0.,0.,0.,0.}
+{
+}
 
 /** Constructor.
  * @param thread_name name of thread
@@ -77,11 +94,33 @@ using namespace fawkes;
 RobotinoComThread::RobotinoComThread(const char *thread_name)
 	: Thread(thread_name, Thread::OPMODE_CONTINUOUS)
 {
+	data_mutex_  = new Mutex();
+	new_data_    = false;
 }
 
 
 /** Destructor. */
 RobotinoComThread::~RobotinoComThread()
 {
+	delete data_mutex_;
 }
 
+
+/** Get all current sensor data.
+ * @param sensor_data upon return (true) contains the latest available
+ * sensor data
+ * @return true if new data was available and has been stored in \p
+ * sensor_data, false otherwise
+ */
+bool
+RobotinoComThread::get_data(SensorData &sensor_data)
+{
+	MutexLocker lock(data_mutex_);
+	if (new_data_) {
+		sensor_data = data_;
+		new_data_ = false;
+		return true;
+	} else {
+		return false;
+	}
+}
