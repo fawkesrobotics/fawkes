@@ -87,6 +87,8 @@ DirectRobotinoComThread::init()
 	check_deadline();
 
 	open_device();
+	opened_ = true;
+	open_tries_ = 0;
 }
 
 
@@ -99,7 +101,7 @@ DirectRobotinoComThread::finalize()
 void
 DirectRobotinoComThread::once()
 {
-	//reset_odometry();
+	reset_odometry();
 }
 
 void
@@ -107,21 +109,125 @@ DirectRobotinoComThread::loop()
 {
 	time_wait_->mark_start();
 
+	if (opened_) {
+		DirectRobotinoComMessage req;
+		req.add_command(DirectRobotinoComMessage::CMDID_GET_ALL_MOTOR_READINGS);
+		req.add_command(DirectRobotinoComMessage::CMDID_GET_DISTANCE_SENSOR_READINGS);
+		req.add_command(DirectRobotinoComMessage::CMDID_GET_ALL_ANALOG_INPUTS);
+		req.add_command(DirectRobotinoComMessage::CMDID_GET_ALL_DIGITAL_INPUTS);
+		req.add_command(DirectRobotinoComMessage::CMDID_GET_BUMPER);
+		req.add_command(DirectRobotinoComMessage::CMDID_GET_GYRO_Z_ANGLE);
+		// This command is documented in the wiki but does not exist in the
+		// enum and is not handled in the firmware. Instead, the information
+		// is sent with every reply, so we also get it here automatically.
+		// This has been checked in Robotino3 firmware 1.1.1
+		// req.add_command(DirectRobotinoComMessage::CMDID_GET_POWER_SOURCE_READINGS);
+
+		//req.pack();
+		//logger->log_debug(name(), "Req1:\n%s", req.to_string().c_str());
+
+		try {
+			DirectRobotinoComMessage::pointer m = send_and_recv(req);
+	
+			MutexLocker lock(data_mutex_);
+			new_data_ = true;
+			data_.seq += 1;
+
+			process_message(m);
+		} catch (Exception &e) {
+			logger->log_warn(name(), "Transmission error, re-connecting, exception follows");
+			logger->log_warn(name(), e);
+			opened_ = false;
+			open_tries_ = 0;
+			close_device();
+		}
+	} else {
+		try {
+			open_device();
+			opened_ = true;
+			logger->log_info(name(), "Connection re-established after %u tries", open_tries_ + 1);
+		} catch (Exception &e) {
+			open_tries_ += 1;
+			if (open_tries_ >= (1000 / cfg_sensor_update_cycle_time_)) {
+				logger->log_error(name(), "Connection problem to base persists");
+				open_tries_ = 0;
+			}
+		}
+	}
 
 	time_wait_->wait();
 }
 
 
 void
+DirectRobotinoComThread::process_message(DirectRobotinoComMessage::pointer m)
+{
+	DirectRobotinoComMessage::command_id_t msgid;
+	while ((msgid = m->next_command()) != DirectRobotinoComMessage::CMDID_NONE) {
+		//logger->log_info(name(), "Command length: %u", m->command_length());
+
+		if (msgid == DirectRobotinoComMessage::CMDID_ALL_MOTOR_READINGS) {
+			// there are four motors, one of which might be a gripper, therefore skips
+
+			for (int i = 0; i < 3; ++i)  data_.mot_velocity[i] = m->get_int16();
+			m->skip_int16();
+
+			for (int i = 0; i < 3; ++i)  data_.mot_position[i] = m->get_int32();
+			m->skip_int32();
+
+			for (int i = 0; i < 3; ++i)  data_.mot_current[i] = m->get_float();
+
+		} else if (msgid == DirectRobotinoComMessage::CMDID_DISTANCE_SENSOR_READINGS) {
+			for (int i = 0; i < 9; ++i)  data_.ir_voltages[i] = m->get_float();
+
+		} else if (msgid == DirectRobotinoComMessage::CMDID_ALL_ANALOG_INPUTS) {
+			for (int i = 0; i < 8; ++i)  data_.analog_in[i] = m->get_float();
+
+		} else if (msgid == DirectRobotinoComMessage::CMDID_ALL_DIGITAL_INPUTS) {
+			uint8_t value = m->get_uint8();
+			for (int i = 0; i < 8; ++i)  data_.digital_in[i] = (value & (1 << i)) ? true : false;
+
+		} else if (msgid == DirectRobotinoComMessage::CMDID_BUMPER) {
+			data_.bumper = (m->get_uint8() != 0) ? true : false;
+
+		} else if (msgid == DirectRobotinoComMessage::CMDID_POWER_SOURCE_READINGS) {
+			float voltage = m->get_float();
+			float current = m->get_float();
+
+			data_.bat_voltage = voltage * 1000.; // V -> mV
+			data_.bat_current = current * 1000.; // A -> mA
+
+			// 22.0V is empty, 24.5V is full, this is just a guess
+			float soc = (voltage - 22.0f) / 2.5f;
+			soc = std::min(1.f, std::max(0.f, soc));
+			data_.bat_absolute_soc = soc;
+
+		} else if (msgid == DirectRobotinoComMessage::CMDID_CHARGER_ERROR) {
+			uint8_t id = m->get_uint8();
+			uint32_t mtime = m->get_uint32();
+			std::string error = m->get_string();
+			logger->log_warn(name(), "Charger error (ID %u, Time: %u): %s",
+			                 id, mtime, error.c_str());
+		}
+	}
+}
+
+
+void
 DirectRobotinoComThread::reset_odometry()
 {
+	DirectRobotinoComMessage m(DirectRobotinoComMessage::CMDID_SET_ODOMETRY);
+	m.add_float(0.); // X (m)
+	m.add_float(0.); // Y (m)
+	m.add_float(0.); // rot (rad)
+	send_message(m);
 }
 
 
 bool
 DirectRobotinoComThread::is_connected()
 {
-	return false;
+	return serial_.is_open();
 }
 
 
@@ -129,13 +235,23 @@ void
 DirectRobotinoComThread::get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t)
 {
 	MutexLocker lock(data_mutex_);
+	a1 = data_.mot_velocity[0];
+	a2 = data_.mot_velocity[1];
+	a3 = data_.mot_velocity[2];
+
+	seq = data_.seq;
+	t   = data_.time;
 }
 
 
 void
 DirectRobotinoComThread::get_odometry(double &x, double &y, double &phi)
 {
-	MutexLocker lock(data_mutex_);
+	DirectRobotinoComMessage req(DirectRobotinoComMessage::CMDID_GET_ODOMETRY);
+	DirectRobotinoComMessage::pointer m = send_and_recv(req);
+	x   = m->get_float();
+	y   = m->get_float();
+	phi = m->get_float();
 }
 
 bool
@@ -148,6 +264,17 @@ DirectRobotinoComThread::is_gripper_open()
 void
 DirectRobotinoComThread::set_speed_points(float s1, float s2, float s3)
 {
+	DirectRobotinoComMessage m;
+	m.add_command(DirectRobotinoComMessage::CMDID_SET_MOTOR_SPEED);
+	m.add_uint8(0);
+	m.add_uint16((uint16_t)roundf(s1));
+	m.add_command(DirectRobotinoComMessage::CMDID_SET_MOTOR_SPEED);
+	m.add_uint8(1);
+	m.add_uint16((uint16_t)roundf(s2));
+	m.add_command(DirectRobotinoComMessage::CMDID_SET_MOTOR_SPEED);
+	m.add_uint8(2);
+	m.add_uint16((uint16_t)roundf(s3));
+	send_message(m);
 }
 
 void
@@ -158,6 +285,9 @@ DirectRobotinoComThread::set_gripper(bool opened)
 void
 DirectRobotinoComThread::set_bumper_estop_enabled(bool enabled)
 {
+	DirectRobotinoComMessage m(DirectRobotinoComMessage::CMDID_SET_EMERGENCY_BUMPER);
+	m.add_uint8(enabled ? 1 : 0);
+	send_message(m);
 }
 
 
@@ -240,6 +370,8 @@ DirectRobotinoComThread::open_device()
 	try {
 		input_buffer_.consume(input_buffer_.size());
 
+		boost::mutex::scoped_lock lock(io_mutex_);
+
 		serial_.open(cfg_device_);
 		//serial_.set_option(boost::asio::serial_port::stop_bits(boost::asio::serial_port::stop_bits::none));
 		serial_.set_option(boost::asio::serial_port::parity(boost::asio::serial_port::parity::none));
@@ -274,6 +406,8 @@ DirectRobotinoComThread::open_device()
 				std::string error = m->get_string();
 				logger->log_warn(name(), "Charger error (ID %u, Time: %u): %s",
 				                 id, mtime, error.c_str());
+				//} else {
+				//logger->log_debug(name(), "  - %u\n", msgid);
 			}
 		}
 		if (hw_version.empty() || sw_version.empty()) {
@@ -289,13 +423,48 @@ DirectRobotinoComThread::open_device()
 void
 DirectRobotinoComThread::close_device()
 {
+	boost::mutex::scoped_lock lock(io_mutex_);
 	serial_.cancel();
 	serial_.close();
+}
+
+
+void
+DirectRobotinoComThread::flush_device()
+{
+	if (serial_.is_open()) {
+		try {
+			boost::system::error_code ec = boost::asio::error::would_block;
+			size_t bytes_read = 0;
+			do {
+				ec = boost::asio::error::would_block;
+				bytes_read = 0;
+
+				deadline_.expires_from_now(boost::posix_time::milliseconds(200));
+				boost::asio::async_read(serial_, input_buffer_,
+				                        boost::asio::transfer_at_least(1),
+				                        (boost::lambda::var(ec) = boost::lambda::_1,
+				                         boost::lambda::var(bytes_read) = boost::lambda::_2));
+
+				do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+
+				if (bytes_read > 0) {
+					logger->log_warn(name(), "Flushing %zu bytes\n", bytes_read);
+				}
+
+			} while (bytes_read > 0);
+			deadline_.expires_from_now(boost::posix_time::pos_infin);
+		} catch (boost::system::system_error &e) {
+			// ignore, just assume done, if there really is an error we'll
+			// catch it later on
+		}
+	}
 }
 
 void
 DirectRobotinoComThread::send_message(DirectRobotinoComMessage &msg)
 {
+	boost::mutex::scoped_lock lock(io_mutex_);
 	boost::asio::write(serial_, boost::asio::const_buffers_1(msg.buffer()));
 }
 
@@ -310,7 +479,8 @@ DirectRobotinoComThread::send_message(DirectRobotinoComMessage &msg)
 std::shared_ptr<DirectRobotinoComMessage>
 DirectRobotinoComThread::send_and_recv(DirectRobotinoComMessage &msg)
 {
-	send_message(msg);
+	boost::mutex::scoped_lock lock(io_mutex_);
+	boost::asio::write(serial_, boost::asio::const_buffers_1(msg.buffer()));
 	read_packet();
 
 	std::shared_ptr<DirectRobotinoComMessage> m =
@@ -360,7 +530,7 @@ DirectRobotinoComThread::read_packet()
 	boost::system::error_code ec = boost::asio::error::would_block;
 	size_t bytes_read = 0;
 
-	deadline_.expires_from_now(boost::posix_time::milliseconds(50));
+	deadline_.expires_from_now(boost::posix_time::milliseconds(200));
 	boost::asio::async_read_until(serial_, input_buffer_, DirectRobotinoComMessage::MSG_HEAD,
 	                              (boost::lambda::var(ec) = boost::lambda::_1,
 	                               boost::lambda::var(bytes_read) = boost::lambda::_2));
@@ -376,6 +546,9 @@ DirectRobotinoComThread::read_packet()
 	}
 
 	// Read all potential junk before the start header
+	if (bytes_read > 1) {
+		logger->log_warn(name(), "Read junk off line");
+	}
 	input_buffer_.consume(bytes_read - 1);
 
 	// read packet length
@@ -419,11 +592,14 @@ DirectRobotinoComThread::read_packet()
 
 	if (ec) {
 		if (ec.value() == boost::system::errc::operation_canceled) {
-			throw Exception("Timeout (3) on initial synchronization");
+			throw Exception("Timeout (3) on initial synchronization (reading %u bytes, have %zu)",
+			                length, input_buffer_.size());
 		} else {
 			throw Exception("Error (3) on initial synchronization: %s", ec.message().c_str());
 		}
 	}
+
+	deadline_.expires_at(boost::posix_time::pos_infin);
 }
 
 

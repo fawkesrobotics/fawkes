@@ -22,6 +22,7 @@
 #define __PLUGINS_ROBOTINO_DIRECT_COM_THREAD_H_
 
 #include "com_thread.h"
+#include "direct_com_message.h"
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/clock.h>
@@ -32,6 +33,7 @@
 
 #include <memory>
 #include <boost/asio.hpp>
+#include <boost/thread/mutex.hpp>
 
 class DirectRobotinoComMessage;
 
@@ -77,12 +79,14 @@ class DirectRobotinoComThread
 	std::string find_device_udev();
 	void open_device();
 	void close_device();
+	void flush_device();
 	void check_deadline();
 
 	void read_packet();
 	void send_message(DirectRobotinoComMessage &msg);
 	std::shared_ptr<DirectRobotinoComMessage>
 		send_and_recv(DirectRobotinoComMessage &msg);
+	void process_message(DirectRobotinoComMessage::pointer m);
 
  private:
 	std::string     cfg_device_;
@@ -91,8 +95,9 @@ class DirectRobotinoComThread
 	unsigned int    cfg_sensor_update_cycle_time_;
 	bool            cfg_gripper_enabled_;
 
-	fawkes::Mutex    *data_mutex_;
-	bool              new_data_;
+	bool opened_;
+	unsigned int open_tries_;
+
 	fawkes::TimeWait *time_wait_;
 	unsigned int      last_seqnum_;
 
@@ -101,7 +106,8 @@ class DirectRobotinoComThread
 	boost::asio::io_service::work io_service_work_;
 	boost::asio::deadline_timer   deadline_;
 	boost::asio::streambuf        input_buffer_;
-
+	boost::mutex                  io_mutex_;
+	
 };
 
 

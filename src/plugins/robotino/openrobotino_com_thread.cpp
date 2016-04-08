@@ -416,6 +416,8 @@ OpenRobotinoComThread::get_act_velocity(float &a1, float &a2, float &a3, unsigne
 	a3 = sensor_state.actualVelocity[2] / 1000.f;
 	seq = sensor_state.sequenceNumber;
 #else
+	t.stamp();
+
 	float mot_act_vel[motors_com_->numMotors()];
 	motors_com_->actualVelocities(mot_act_vel);
 
