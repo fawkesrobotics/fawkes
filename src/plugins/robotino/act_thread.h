@@ -59,6 +59,7 @@ class RobotinoActThread
 	RobotinoActThread(RobotinoComThread *com_thread);
 
 	virtual void init();
+	virtual void once();
 	virtual void loop();
 	virtual void finalize();
 

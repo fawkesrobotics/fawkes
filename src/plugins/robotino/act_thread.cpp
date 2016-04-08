@@ -131,6 +131,15 @@ RobotinoActThread::finalize()
 	delete odom_time_;
 }
 
+
+void
+RobotinoActThread::once()
+{
+	try {
+		com_->set_bumper_estop_enabled(cfg_bumper_estop_enabled_);
+	} catch (Exception &e) {}
+}
+
 void
 RobotinoActThread::loop()
 {
