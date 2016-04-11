@@ -60,6 +60,8 @@ class DirectRobotinoComThread
 	virtual void init();
 	virtual void once();
 	virtual void loop();
+	bool    prepare_finalize_user();
+
 	virtual void finalize();
 
 	virtual bool is_connected();
@@ -81,16 +83,19 @@ class DirectRobotinoComThread
 	void close_device();
 	void flush_device();
 	void check_deadline();
-
-	void read_packet();
+	void request_data();
+	void handle_request_data(const boost::system::error_code &ec);
+	void handle_nodata(const boost::system::error_code &ec);
+	void update_nodata_timer();
+	
+	DirectRobotinoComMessage::pointer read_packet();
 	void send_message(DirectRobotinoComMessage &msg);
-	std::shared_ptr<DirectRobotinoComMessage>
+	DirectRobotinoComMessage::pointer
 		send_and_recv(DirectRobotinoComMessage &msg);
 	void process_message(DirectRobotinoComMessage::pointer m);
 
  private:
 	std::string     cfg_device_;
-	std::string     cfg_hostname_;
 	bool            cfg_enable_gyro_;
 	unsigned int    cfg_sensor_update_cycle_time_;
 	bool            cfg_gripper_enabled_;
@@ -98,15 +103,15 @@ class DirectRobotinoComThread
 	bool opened_;
 	unsigned int open_tries_;
 
-	fawkes::TimeWait *time_wait_;
-	unsigned int      last_seqnum_;
-
 	boost::asio::io_service       io_service_;
 	boost::asio::serial_port      serial_;
 	boost::asio::io_service::work io_service_work_;
 	boost::asio::deadline_timer   deadline_;
 	boost::asio::streambuf        input_buffer_;
 	boost::mutex                  io_mutex_;
+
+	boost::asio::deadline_timer   request_timer_;
+	boost::asio::deadline_timer   nodata_timer_;
 	
 };
 

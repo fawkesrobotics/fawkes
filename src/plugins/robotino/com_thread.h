@@ -68,6 +68,10 @@ class RobotinoComThread
 		float        imu_angular_velocity[3];
 		double       imu_angular_velocity_covariance[9];
 
+		float        odo_x;
+		float        odo_y;
+		float        odo_phi;
+
 		float        ir_voltages[NUM_IR_SENSORS];
 		
 		fawkes::Time time;
