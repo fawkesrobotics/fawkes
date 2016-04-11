@@ -184,11 +184,15 @@ class DirectRobotinoComMessage
 
 	std::string to_string(bool escaped = false);
 
-	static size_t unescape(unsigned char *unescaped,
+	static size_t unescape(unsigned char *unescaped, size_t unescaped_size,
 	                       const unsigned char *escaped, size_t escaped_size);
 
 	static uint16_t parse_uint16(const unsigned char *buf);
 
+	size_t escaped_data_size();
+	size_t payload_size();
+	size_t data_size();
+	
  private:
 	void ctor();
 	void assert_mode(mode_t mode) const;
@@ -197,7 +201,7 @@ class DirectRobotinoComMessage
 
 	void inc_payload_by(uint16_t count);
 	void escape();
-	void unescape_data();
+	size_t unescape_data();
 	void check_checksum() const;
   
  private:

@@ -98,9 +98,12 @@ DirectRobotinoComMessage::DirectRobotinoComMessage(const unsigned char *msg, siz
 	escaped_data_ = (unsigned char *)malloc(msg_size);
 	memcpy(escaped_data_, msg, msg_size);
 	escaped_data_size_ = msg_size;
-	unescape_data();
+	size_t escaped_consumed = unescape_data();
 
-	payload_size_ = parse_uint16(&msg[1]);
+	if (escaped_consumed < msg_size) {
+		escaped_data_ = (unsigned char *)realloc(escaped_data_, escaped_consumed);
+		escaped_data_size_ = escaped_consumed;
+	}
 
 	check_checksum();
 }
@@ -625,6 +628,39 @@ DirectRobotinoComMessage::skip_float()
 	cur_data_ += 4;
 }
 
+
+/** Size of escaped buffer.
+ * In particular, after calling the parsing ctor this denotes how many
+ * bytes of the input buffer have been consumed.
+ * On message creation, only provides meaningful values after calling
+ * pack() or buffer().
+ * @return size of escaped buffer
+ */
+size_t
+DirectRobotinoComMessage::escaped_data_size()
+{
+	return escaped_data_size_;
+}
+
+
+/** Get payload size.
+ * @return payload size
+ */
+size_t
+DirectRobotinoComMessage::payload_size()
+{
+	return payload_size_;
+}
+
+/** Get internal data buffer size.
+ * @return data buffer size
+ */
+size_t
+DirectRobotinoComMessage::data_size()
+{
+	return data_size_;
+}
+
 /** Perform message escaping. */
 void
 DirectRobotinoComMessage::escape()
@@ -656,18 +692,22 @@ DirectRobotinoComMessage::escape()
 	}
 }
 
-/** Unescape given buffer.
+/** Unescape a number of unescaped bytes.
  * @param unescaped buffer to contain the unescaped data on return,
- * must be at least of \p escaped_size number of bytes
+ * must be at least of \p unescaped_size number of bytes
+ * @param unescaped_size expected number of bytes to unescape
+ * from input buffer
  * @param escaped escaped buffer to process
  * @param escaped_size size of escaped_buffer
- * @return number of bytes in \p unescaped
+ * @return number of bytes consumed from escaped buffer
+ * @throw Exception if not enough bytes could be unescaped
  */
 size_t
-DirectRobotinoComMessage::unescape(unsigned char *unescaped,
+DirectRobotinoComMessage::unescape(unsigned char *unescaped, size_t unescaped_size,
                                    const unsigned char *escaped, size_t escaped_size)
 {
-	size_t unescaped_size = 0;
+	if (unescaped_size == 0)  return 0;
+
 	unsigned int j = 0;
 	for (unsigned int i = 0; i < escaped_size; ++i) {
 		if (escaped[i] == MSG_DATA_ESCAPE) {
@@ -679,32 +719,41 @@ DirectRobotinoComMessage::unescape(unsigned char *unescaped,
 		} else {
 			unescaped[j++] = escaped[i];
 		}
-		unescaped_size += 1;
+		if (j == unescaped_size)  return i+1;
 	}
 
-	return unescaped_size;
+	throw Exception("Not enough escaped bytes for unescaping");
 }
 
-/** Unescape all data. */
-void
+/** Unescape all data.
+ * @return number of bytes consumed from escaped buffer
+ */
+size_t
 DirectRobotinoComMessage::unescape_data()
 {
 	if (! escaped_data_ || escaped_data_size_ == 0) {
 		throw Exception("No escaped data to unescape");
 	}
 
-	if (data_size_ < escaped_data_size_) {
-		data_ = (unsigned char *)realloc(data_, escaped_data_size_);
-		data_size_ = escaped_data_size_;
+	if (data_size_ < 3) {
+		data_ = (unsigned char *)realloc(data_, 3);
+		data_[0] = MSG_HEAD;
 	}
-
-	size_t unescaped_size =
-		unescape(&data_[1], &escaped_data_[1], escaped_data_size_ - 1);
-
 	// +1: HEAD
-	unescaped_size += 1;
+	size_t consumed_bytes = unescape(&data_[1], 2, &escaped_data_[1], escaped_data_size_-1) + 1;
+	size_t unescaped_size = parse_uint16(&data_[1]) + 2; // +2: checksum
 
-	payload_size_ = unescaped_size - MSG_METADATA_SIZE;
+	if (data_size_ < unescaped_size + 3) {
+		data_ = (unsigned char *)realloc(data_, unescaped_size + 3); // +3: HEAD, LENGTH
+		data_size_ = unescaped_size + 3;
+	}
+	payload_size_ = unescaped_size - 2; // -2: no checksum
+
+	consumed_bytes +=
+		unescape(&data_[3], unescaped_size,
+		         &escaped_data_[consumed_bytes], escaped_data_size_ - consumed_bytes);
+
+	return consumed_bytes;
 }
 
 
