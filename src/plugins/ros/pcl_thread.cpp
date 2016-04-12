@@ -175,7 +175,6 @@ RosPointCloudThread::ros_pointcloud_check_for_listener_in_fawkes()
       logger->log_error(name(), "Can't detect cloud type");
     }
 
-    logger->log_info(name(), "For: %s\t got %u", item.first.c_str(), use_count);
     if ( use_count <= 2 ) { // my internal list, this ref and the pcl_manager have copys of this pointer, if more are used, otheres are listening too
       std::map<std::string, ros::Subscriber>::iterator element = ros_pointcloud_subs.find(item.first);
       if (element != ros_pointcloud_subs.end()) {
@@ -237,7 +236,7 @@ RosPointCloudThread::fawkes_pointcloud_publish_to_ros()
   std::map<std::string, PublisherInfo>::iterator p;
   for (p = fawkes_pubs.begin(); p != fawkes_pubs.end(); ++p) {
     PublisherInfo &pi = p->second;
-    if (pi.pub.getNumSubscribers() > 0) {
+    if (pi.pub.getNumSubscribers() > 0 && pcl_manager->exists_pointcloud(p->first.c_str())) {
       unsigned int width, height;
       void *point_data;
       size_t point_size, num_points;
@@ -267,7 +266,9 @@ RosPointCloudThread::fawkes_pointcloud_publish_to_ros()
         // logger->log_debug(name(), "No update for %s, not sending", p->first.c_str());
       }
     } else {
-      __adapter->close(p->first);
+      if (pcl_manager->exists_pointcloud(p->first.c_str())) {
+        __adapter->close(p->first);
+      }
     }
   }
 }
