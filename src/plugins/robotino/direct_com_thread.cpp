@@ -38,6 +38,7 @@
 #include <boost/bind.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/lambda.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace fawkes;
 
@@ -72,6 +73,10 @@ DirectRobotinoComThread::init()
 	cfg_rpm_max_ = config->get_float("/hardware/robotino/motor/rpm-max");
 
 	// -------------------------------------------------------------------------- //
+
+	if (find_controld3()) {
+		throw Exception("Found running controld3, stop using 'sudo initctl stop controld3'");
+	}
 
 	try {
 		cfg_device_ = config->get_string(("/hardware/robotino/direct/device"));
@@ -437,6 +442,63 @@ DirectRobotinoComThread::find_device_udev()
 	}
 
 	return cfg_device;
+}
+
+
+bool
+DirectRobotinoComThread::find_controld3()
+{
+	bool rv = false;
+	boost::filesystem::path p("/proc");
+
+	using namespace boost::filesystem;
+ 
+  try {
+	  if (boost::filesystem::exists(p) && boost::filesystem::is_directory(p)) {
+
+		  directory_iterator di;
+		  for (di = directory_iterator(p); di != directory_iterator(); ++di) {
+			  directory_entry &d = *di;
+			  //for (directory_entry &d : directory_iterator(p))
+			  std::string f = d.path().filename().native();
+			  bool is_process = true;
+			  for (std::string::size_type i = 0; i < f.length(); ++i) {
+				  if (! isdigit(f[i])) {
+					  is_process = false;
+					  break;
+				  }
+			  }
+			  if (is_process) {
+				  path pproc(d.path());
+				  pproc /= "stat";
+
+				  FILE *f = fopen(pproc.c_str(), "r");
+				  if (f) {
+					  int pid;
+					  char *procname;
+					  if (fscanf(f, "%d (%m[a-z0-9])", &pid, &procname) == 2) {
+						  
+						  if (strcmp("controld3", procname) == 0) {
+							  rv = true;
+						  }
+						  ::free(procname);
+					  }
+					  fclose(f);
+				  }
+			  }
+		  }
+
+	  } else {
+		  logger->log_warn(name(), "Cannot open /proc, cannot determine if controld3 is running");
+		  return false;
+	  }
+
+  } catch (const boost::filesystem::filesystem_error &ex) {
+	  logger->log_warn(name(), "Failure to determine if controld3 is running: %s", ex.what());
+	  return false;
+  }
+
+  return rv;
 }
 
 void

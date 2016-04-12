@@ -78,6 +78,7 @@ class DirectRobotinoComThread
 
  private:
 	std::string find_device_udev();
+	bool find_controld3();
 	void open_device(bool wait_replies);
 	void close_device();
 	void flush_device();

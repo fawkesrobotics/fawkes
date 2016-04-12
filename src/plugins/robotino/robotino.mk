@@ -50,7 +50,7 @@ ifeq ($(HAVE_LIBUSB),1)
   LDFLAGS_LIBUSB = $(shell $(PKGCONFIG) --libs 'libusb-1.0')
 endif
 
-ROBOTINO_DIRECT_REQ_BOOST_LIBS = thread asio system
+ROBOTINO_DIRECT_REQ_BOOST_LIBS = thread asio system filesystem
 HAVE_ROBOTINO_DIRECT_BOOST_LIBS = $(call boost-have-libs,$(ROBOTINO_DIRECT_REQ_BOOST_LIBS))
 ifeq ($(HAVE_ROBOTINO_DIRECT_BOOST_LIBS),1)
   CFLAGS_ROBOTINO_DIRECT_BOOST  = $(call boost-libs-cflags,$(ROBOTINO_DIRECT_REQ_BOOST_LIBS))
