@@ -64,7 +64,7 @@ RobotinoActThread::init()
 	cfg_bumper_estop_enabled_ = config->get_bool("/hardware/robotino/bumper/estop_enabled");
 	cfg_odom_time_offset_     = config->get_float("/hardware/robotino/odometry/time_offset");
 	cfg_odom_frame_           = config->get_string("/hardware/robotino/odometry/frame");
-	cfg_base_frame_           = config->get_string("/hardware/robotino/base_frame");
+	cfg_base_frame_           = config->get_string("/frames/base");
 	std::string odom_mode     = config->get_string("/hardware/robotino/odometry/mode");
 	cfg_odom_corr_phi_        =
 		config->get_float("/hardware/robotino/odometry/calc/correction/phi");

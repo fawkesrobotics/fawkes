@@ -67,7 +67,7 @@ DirectRobotinoComThread::init()
 {
 	cfg_enable_gyro_ = config->get_bool("/hardware/robotino/gyro/enable");
 	cfg_sensor_update_cycle_time_ =
-		config->get_uint("/hardware/robotino/sensor_update_cycle_time");
+		config->get_uint("/hardware/robotino/cycle-time");
 	cfg_gripper_enabled_ = config->get_bool("/hardware/robotino/gripper/enable_gripper");
 
 	// -------------------------------------------------------------------------- //

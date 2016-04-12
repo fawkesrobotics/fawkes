@@ -4,24 +4,59 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/robotino
 ---
 hardware/robotino:
-  # Host to connect to
-  hostname: 127.0.0.1
 
-  # If true quit Fawkes on disconnect from Robotino Com server, otherwise
-  # retry connection. If run from LCD menu should be set to true.
-  quit_on_disconnect: true
+  # Hardware access driver mode, can be one of:
+  # - direct: directly communicate with Robotino base through USB
+  #           NOTE: disable controld3! This has only been tested
+  #           on Robotino 3 (firmware 1.1.1)
+  # - openrobotino: use OpenRobotino API to communicate with base
+  #                 This compiles with API 1 or 2 (preferring 2).
+  driver: direct
 
-  # Time threshold after all motor velocities are set to zero if no new messages arrived inbetween
-  deadman_time_threshold: 0.5
+  # *** Common Settings for all drivers
 
-  # Base coordinate frame
-  base_frame: !frame base_link
-
-  # Minimum time in milliseconds between two Robotino sensor readings.
+  # Minimum time in milliseconds between two data updates.
   # Lower values increase the machine load (considerably) but decrease
   # the average sensor data age. Zero means receive as fast as possible
   # without waiting between receive calls
-  sensor_update_cycle_time: 5
+  cycle-time: 5
+
+  act:
+    # Time threshold after all motor velocities are set to zero if no new messages arrived inbetween
+    deadman_time_threshold: 0.5
+
+  openrobotino:
+    # Configuration settings specific to the OpenRobotino driver
+
+    # Host to connect to
+    hostname: 127.0.0.1
+
+    # If true quit Fawkes on disconnect from Robotino Com server, otherwise
+    # retry connection. If run from LCD menu should be set to true.
+    quit_on_disconnect: true
+
+  direct:
+    # Configuration settings specific to the direct comm driver
+
+    # Path to device file to access base at
+    # It is strongly recommended NOT to set this. In that case, the plugin will
+    # introspect the system for a matching USB device and determine the device
+    # path automatically. This is most often the better way.
+    # A typical problem is not that the device cannot be determined, but rather
+    # that the user running fawkes has no permission to access such device. In
+    # particular, on the default Ubuntu installation add the user robotino to
+    # the group dialout: usermod -a -G dialout robotino (and reboot)
+    # device: /dev/ttyACM1
+
+  motor-layout:
+    # Distance from Robotino center to wheel center in meters
+    rb: 0.175
+
+    # Wheel radius in meters
+    rw: 0.060
+
+    # Gear ratio between motors and wheels
+    gear: 32.0
 
   bumper:
     # Set to true to enable the emergency stop on bumper contact (provided
@@ -52,6 +87,7 @@ hardware/robotino:
     # robotino plugin and instead use the imu plugin with the gyro connected
     # directly to the Fawkes machine.
     mode: calc
+    #mode: copy
 
     # Odometry coordinate frame
     frame: !frame odom

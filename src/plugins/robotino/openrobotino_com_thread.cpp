@@ -73,10 +73,10 @@ OpenRobotinoComThread::~OpenRobotinoComThread()
 void
 OpenRobotinoComThread::init()
 {
-	cfg_hostname_ = config->get_string("/hardware/robotino/hostname");
-	cfg_quit_on_disconnect_ = config->get_bool("/hardware/robotino/quit_on_disconnect");
+	cfg_hostname_ = config->get_string("/hardware/robotino/openrobotino/hostname");
+	cfg_quit_on_disconnect_ = config->get_bool("/hardware/robotino/openrobotino/quit_on_disconnect");
 	cfg_sensor_update_cycle_time_ =
-		config->get_uint("/hardware/robotino/sensor_update_cycle_time");
+		config->get_uint("/hardware/robotino/cycle-time");
 	cfg_gripper_enabled_ = config->get_bool("/hardware/robotino/gripper/enable_gripper");
 	cfg_enable_gyro_ = config->get_bool("/hardware/robotino/gyro/enable");
 
