@@ -63,7 +63,7 @@ RobotinoActThread::init()
 	cfg_gripper_enabled_      = config->get_bool("/hardware/robotino/gripper/enable_gripper");
 	cfg_bumper_estop_enabled_ = config->get_bool("/hardware/robotino/bumper/estop_enabled");
 	cfg_odom_time_offset_     = config->get_float("/hardware/robotino/odometry/time_offset");
-	cfg_odom_frame_           = config->get_string("/hardware/robotino/odometry/frame");
+	cfg_odom_frame_           = config->get_string("/frames/odom");
 	cfg_base_frame_           = config->get_string("/frames/base");
 	std::string odom_mode     = config->get_string("/hardware/robotino/odometry/mode");
 	cfg_odom_corr_phi_        =
@@ -71,9 +71,18 @@ RobotinoActThread::init()
 	cfg_odom_corr_trans_      =
 		config->get_float("/hardware/robotino/odometry/calc/correction/trans");
 
-	cfg_rb_   = config->get_float("/hardware/robotino/motor-layout/rb");
-	cfg_rw_   = config->get_float("/hardware/robotino/motor-layout/rw");
-	cfg_gear_ = config->get_float("/hardware/robotino/motor-layout/gear");
+	cfg_rb_   = config->get_float("/hardware/robotino/drive/layout/rb");
+	cfg_rw_   = config->get_float("/hardware/robotino/drive/layout/rw");
+	cfg_gear_ = config->get_float("/hardware/robotino/drive/layout/gear");
+
+	cfg_trans_accel_ = config->get_float("/hardware/robotino/drive/trans-acceleration");
+	cfg_trans_decel_ = config->get_float("/hardware/robotino/drive/trans-deceleration");
+	cfg_rot_accel_   = config->get_float("/hardware/robotino/drive/rot-acceleration");
+	cfg_rot_decel_   = config->get_float("/hardware/robotino/drive/rot-deceleration");
+
+	com_->set_drive_layout(cfg_rb_, cfg_rw_, cfg_gear_);
+	com_->set_drive_limits(cfg_trans_accel_, cfg_trans_decel_,
+	                       cfg_rot_accel_, cfg_rot_decel_);
 
 	std::string imu_if_id;
 
@@ -94,10 +103,6 @@ RobotinoActThread::init()
 
 	msg_received_ = false;
 	msg_zero_vel_ = false;
-
-	des_vx_    = 0.;
-	des_vy_    = 0.;
-	des_omega_ = 0.;
 
 	odom_x_ = odom_y_ = odom_phi_ = 0.;
 	odom_time_ = new Time(clock);
@@ -155,10 +160,8 @@ RobotinoActThread::loop()
 		return;
 	}
 
-	bool set_speed_points = false;
-	float s1 = 0., s2 = 0., s3 = 0.;
 	bool reset_odometry = false;
-
+	bool set_des_vel = false;
 	while (! motor_if_->msgq_empty()) {
 		if (MotorInterface::SetMotorStateMessage *msg = motor_if_->msgq_first_safe(msg))
 		{
@@ -171,18 +174,15 @@ RobotinoActThread::loop()
 
 		else if (MotorInterface::TransRotMessage *msg = motor_if_->msgq_first_safe(msg))
 		{
-			project(&s1, &s2, &s3, msg->vx(), msg->vy(), msg->omega());
-
 			des_vx_    = msg->vx();
 			des_vy_    = msg->vy();
 			des_omega_ = msg->omega();
 
-			set_speed_points = true;
-        
 			last_msg_time_ = clock->now();
-			msg_received_ = true;
-	
-			msg_zero_vel_ = (s1 == 0.0 && s2 == 0.0 && s3 == 0.0);
+			msg_received_ = true;	
+
+			set_des_vel = true;
+			msg_zero_vel_ = (des_vx_ == 0.0 && des_vy_ == 0.0 && des_omega_ == 0.0);
 		}
 
 		else if (motor_if_->msgq_first_is<MotorInterface::ResetOdometryMessage>())
@@ -226,21 +226,22 @@ RobotinoActThread::loop()
 	if (diff >= cfg_deadman_threshold_ && msg_received_ && !msg_zero_vel_) {
 		logger->log_error(name(), "Time-Gap between TransRotMsgs too large "
 		                  "(%f sec.), motion planner alive?", diff);
-		s1 = s2 = s3 = 0.;
-		set_speed_points = true;
+		des_vx_ = des_vy_ = des_omega_ = 0.;
+		msg_zero_vel_ = true;
+		set_des_vel = true;
 		msg_received_ = false;
 	}
 
 	if (motor_if_->motor_state() == MotorInterface::MOTOR_DISABLED) {
-		if (set_speed_points && ((s1 != 0.0) || (s2 != 0.0) || (s3 != 0.0))) {
+		if (set_des_vel && ((des_vx_ != 0.0) || (des_vy_ != 0.0) || (des_omega_ != 0.0))) {
 			logger->log_warn(name(), "Motor command received while disabled, ignoring");
 		}
-		s1 = s2 = s3 = 0.;
-		set_speed_points = true;
+		des_vx_ = des_vy_ = des_omega_ = 0.;
+		set_des_vel = true;
 	}
 
-	if (set_speed_points)  com_->set_speed_points(s1, s2, s3);
-	if (reset_odometry)    com_->reset_odometry();
+	if (reset_odometry)  com_->reset_odometry();
+	if (set_des_vel)     com_->set_desired_vel(des_vx_, des_vy_, des_omega_);
 
 	publish_odometry();
 
@@ -263,7 +264,7 @@ RobotinoActThread::publish_odometry()
 		last_seqnum_ = seq;
 
 		float vx = 0., vy = 0., omega = 0.;
-		unproject(&vx, &vy, &omega, a1, a2, a3);
+		com_->unproject(&vx, &vy, &omega, a1, a2, a3);
 
 		motor_if_->set_vx(vx);
 		motor_if_->set_vy(vy);
@@ -410,82 +411,3 @@ RobotinoActThread::publish_gripper()
 	}
 }
 
-/** Project the velocity of the robot in cartesian coordinates to single motor speeds.
- *
- * From OpenRobotino API2 (C) REC Robotics Equipment Corporation GmbH, Planegg, Germany.
- * The code has been released under a 2-clause BSD license.
- *
- * @param m1		The resulting speed of motor 1 in rpm
- * @param m2		The resulting speed of motor 2 in rpm
- * @param m3		The resulting speed of motor 3 in rpm
- * @param vx		Velocity in x-direction in m/s
- * @param vy		Velocity in y-direction in m/s
- * @param omega	Angular velocity in rad/s
- */
-//Redistribution and use in source and binary forms, with or without
-//modification, are permitted provided that the following conditions
-//are met:
-//1) Redistributions of source code must retain the above copyright
-//notice, this list of conditions and the following disclaimer.
-//2) Redistributions in binary form must reproduce the above copyright
-//notice, this list of conditions and the following disclaimer in the
-//documentation and/or other materials provided with the distribution.
-//
-//THIS SOFTWARE IS PROVIDED BY REC ROBOTICS EQUIPMENT CORPORATION GMBH
-//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-//FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL REC
-//ROBOTICS EQUIPMENT CORPORATION GMBH BE LIABLE FOR ANY DIRECT,
-//INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-//(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-//SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-//STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-//ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-//OF THE POSSIBILITY OF SUCH DAMAGE.
-void
-RobotinoActThread::project( float* m1, float* m2, float* m3, float vx, float vy, float omega ) const
-{
-	//Projection matrix
-	static const double v0[2] = { -0.5 * sqrt( 3.0 ),  0.5 };
-	static const double v1[2] = {  0.0              , -1.0 };
-	static const double v2[2] = {  0.5 * sqrt( 3.0 ),  0.5 };
-
-	//Scale omega with the radius of the robot
-	double vOmegaScaled = cfg_rb_ * (double)omega ;
-
-	//Convert from m/s to RPM
-	const double k = 60.0 * cfg_gear_ / ( 2.0 * M_PI * cfg_rw_ );
-
-	//Compute the desired velocity
-	*m1 = static_cast<float>( ( v0[0] * (double)vx + v0[1] * (double)vy + vOmegaScaled ) * k );
-	*m2 = static_cast<float>( ( v1[0] * (double)vx + v1[1] * (double)vy + vOmegaScaled ) * k );
-	*m3 = static_cast<float>( ( v2[0] * (double)vx + v2[1] * (double)vy + vOmegaScaled ) * k );
-}
-
-/** Project single motor speeds to velocity in cartesian coordinates.
- *
- * From OpenRobotino API2 (C) REC Robotics Equipment Corporation GmbH, Planegg, Germany.
- * The code has been released under a 2-clause BSD license.
- *
- * @param vx		The resulting speed in x-direction in m/s
- * @param vy		The resulting speed in y-direction in m/s
- * @param omega	The resulting angular velocity in rad/s
- * @param m1		Speed of motor 1 in rpm
- * @param m2		Speed of motor 2 in rpm
- * @param m3		Speed of motor 3 in rpm
- * @throws		RobotinoException if no valid drive layout parameters are available.
- */
-void
-RobotinoActThread::unproject( float* vx, float* vy, float* omega, float m1, float m2, float m3 ) const
-{
-	//Convert from RPM to mm/s
-	const double k = 60.0 * cfg_gear_ / ( 2.0 * M_PI * cfg_rw_ );
-
-	*vx = static_cast<float>( ( (double)m3 - (double)m1 ) / sqrt( 3.0 ) / k );
-	*vy = static_cast<float>( 2.0 / 3.0 * ( (double)m1 + 0.5 * ( (double)m3 - (double)m1 ) - (double)m2 ) / k );
-
-	double vw = (double)*vy + (double)m2 / k;
-
-	*omega = static_cast<float>( vw / cfg_rb_ );
-}

@@ -50,7 +50,7 @@ using namespace fawkes;
 DirectRobotinoComThread::DirectRobotinoComThread()
 	: RobotinoComThread("DirectRobotinoComThread"),
 	  serial_(io_service_), io_service_work_(io_service_), deadline_(io_service_),
-	  request_timer_(io_service_), nodata_timer_(io_service_)
+	  request_timer_(io_service_), nodata_timer_(io_service_), drive_timer_(io_service_)
 {
 	set_prepfin_conc_loop(true);
 }
@@ -69,6 +69,7 @@ DirectRobotinoComThread::init()
 	cfg_sensor_update_cycle_time_ =
 		config->get_uint("/hardware/robotino/cycle-time");
 	cfg_gripper_enabled_ = config->get_bool("/hardware/robotino/gripper/enable_gripper");
+	cfg_rpm_max_ = config->get_float("/hardware/robotino/motor/rpm-max");
 
 	// -------------------------------------------------------------------------- //
 
@@ -85,8 +86,10 @@ DirectRobotinoComThread::init()
 	deadline_.expires_at(boost::posix_time::pos_infin);
 	check_deadline();
 
-	open_device();
-	opened_ = true;
+	request_timer_.expires_from_now(boost::posix_time::milliseconds(-1));
+	drive_timer_.expires_at(boost::posix_time::pos_infin);
+
+	open_device(/* wait for replies */ true);
 	open_tries_ = 0;
 }
 
@@ -97,6 +100,8 @@ DirectRobotinoComThread::prepare_finalize_user()
 	//logger->log_info(name(), "Prepare Finalize");
 	request_timer_.cancel();
 	nodata_timer_.cancel();
+	drive_timer_.cancel();
+	drive_timer_.expires_at(boost::posix_time::pos_infin);
 	request_timer_.expires_at(boost::posix_time::pos_infin);
 	nodata_timer_.expires_at(boost::posix_time::pos_infin);
 	deadline_.expires_at(boost::posix_time::pos_infin);
@@ -135,22 +140,27 @@ DirectRobotinoComThread::loop()
 			update_nodata_timer();
 		} catch (Exception &e) {
 			if (! finalize_prepared) {
-				logger->log_warn(name(), "Transmission error, sending ping");
-				logger->log_warn(name(), e);
-				input_buffer_.consume(input_buffer_.size());
-				DirectRobotinoComMessage req(DirectRobotinoComMessage::CMDID_GET_HW_VERSION);
-				send_message(req);
-				//} else {
-				//logger->log_warn(name(), "Transmission error, but finalize prepared");
-				//logger->log_warn(name(), e);
+				if (opened_) {
+					logger->log_warn(name(), "Transmission error, sending ping");
+					logger->log_warn(name(), e);
+					input_buffer_.consume(input_buffer_.size());
+					try {
+						DirectRobotinoComMessage req(DirectRobotinoComMessage::CMDID_GET_HW_VERSION);
+						send_message(req);
+						request_data();
+					} catch (Exception &e) {}
+				} else {
+					logger->log_warn(name(), "Transmission error, connection closed");
+				}
 			}
 		}
 	} else {
 		try {
 			logger->log_info(name(), "Re-opening device");
-			open_device();
-			opened_ = true;
+			open_device(/* wait for replies */ false);
 			logger->log_info(name(), "Connection re-established after %u tries", open_tries_ + 1);
+			open_tries_ = 0;
+			request_data();
 		} catch (Exception &e) {
 			open_tries_ += 1;
 			if (open_tries_ >= (1000 / cfg_sensor_update_cycle_time_)) {
@@ -241,11 +251,35 @@ DirectRobotinoComThread::process_message(DirectRobotinoComMessage::pointer m)
 void
 DirectRobotinoComThread::reset_odometry()
 {
-	DirectRobotinoComMessage m(DirectRobotinoComMessage::CMDID_SET_ODOMETRY);
-	m.add_float(0.); // X (m)
-	m.add_float(0.); // Y (m)
-	m.add_float(0.); // rot (rad)
-	send_message(m);
+	try {
+		DirectRobotinoComMessage m(DirectRobotinoComMessage::CMDID_SET_ODOMETRY);
+		m.add_float(0.); // X (m)
+		m.add_float(0.); // Y (m)
+		m.add_float(0.); // rot (rad)
+		send_message(m);
+	} catch (Exception &e) {
+		logger->log_error(name(), "Resetting odometry failed, exception follows");
+		logger->log_error(name(), e);
+	}
+}
+
+
+void
+DirectRobotinoComThread::set_motor_accel_limits(float min_accel, float max_accel)
+{
+	try {
+		DirectRobotinoComMessage req;
+		for (int i = 0; i < 2; ++i) {
+			req.add_command(DirectRobotinoComMessage::CMDID_SET_MOTOR_ACCEL_LIMITS);
+			req.add_uint8(i);
+			req.add_float(min_accel);
+			req.add_float(max_accel);
+		}
+		send_message(req);
+	} catch (Exception &e) {
+		logger->log_error(name(), "Setting motor accel limits failed, exception follows");
+		logger->log_error(name(), e);
+	}
 }
 
 
@@ -288,17 +322,26 @@ DirectRobotinoComThread::is_gripper_open()
 void
 DirectRobotinoComThread::set_speed_points(float s1, float s2, float s3)
 {
-	DirectRobotinoComMessage m;
-	m.add_command(DirectRobotinoComMessage::CMDID_SET_MOTOR_SPEED);
-	m.add_uint8(0);
-	m.add_uint16((uint16_t)roundf(s1));
-	m.add_command(DirectRobotinoComMessage::CMDID_SET_MOTOR_SPEED);
-	m.add_uint8(1);
-	m.add_uint16((uint16_t)roundf(s2));
-	m.add_command(DirectRobotinoComMessage::CMDID_SET_MOTOR_SPEED);
-	m.add_uint8(2);
-	m.add_uint16((uint16_t)roundf(s3));
-	send_message(m);
+	float bounded_s1 = std::max(-cfg_rpm_max_, std::min(cfg_rpm_max_, s1));
+	float bounded_s2 = std::max(-cfg_rpm_max_, std::min(cfg_rpm_max_, s2));
+	float bounded_s3 = std::max(-cfg_rpm_max_, std::min(cfg_rpm_max_, s3));
+	
+	try {
+		DirectRobotinoComMessage m;
+		m.add_command(DirectRobotinoComMessage::CMDID_SET_MOTOR_SPEED);
+		m.add_uint8(0);
+		m.add_uint16((uint16_t)roundf(bounded_s1));
+		m.add_command(DirectRobotinoComMessage::CMDID_SET_MOTOR_SPEED);
+		m.add_uint8(1);
+		m.add_uint16((uint16_t)roundf(bounded_s2));
+		m.add_command(DirectRobotinoComMessage::CMDID_SET_MOTOR_SPEED);
+		m.add_uint8(2);
+		m.add_uint16((uint16_t)roundf(bounded_s3));
+		send_message(m);
+	} catch (Exception &e) {
+		logger->log_error(name(), "Setting speed points failed, exception follows");
+		logger->log_error(name(), e);
+	}
 }
 
 void
@@ -309,12 +352,17 @@ DirectRobotinoComThread::set_gripper(bool opened)
 void
 DirectRobotinoComThread::set_bumper_estop_enabled(bool enabled)
 {
-	DirectRobotinoComMessage m(DirectRobotinoComMessage::CMDID_SET_EMERGENCY_BUMPER);
-	m.add_uint8(enabled ? 1 : 0);
-	send_message(m);
+	try {
+		DirectRobotinoComMessage m(DirectRobotinoComMessage::CMDID_SET_EMERGENCY_BUMPER);
+		m.add_uint8(enabled ? 1 : 0);
+		send_message(m);
 
-	MutexLocker lock(data_mutex_);
-	data_.bumper_estop_enabled = enabled;
+		MutexLocker lock(data_mutex_);
+		data_.bumper_estop_enabled = enabled;
+	} catch (Exception &e) {
+		logger->log_error(name(), "Setting bumper estop state failed, exception follows");
+		logger->log_error(name(), e);
+	}
 }
 
 
@@ -392,7 +440,7 @@ DirectRobotinoComThread::find_device_udev()
 }
 
 void
-DirectRobotinoComThread::open_device()
+DirectRobotinoComThread::open_device(bool wait_replies)
 {
 	if (finalize_prepared)  return;
 
@@ -405,10 +453,8 @@ DirectRobotinoComThread::open_device()
 		//serial_.set_option(boost::asio::serial_port::stop_bits(boost::asio::serial_port::stop_bits::none));
 		serial_.set_option(boost::asio::serial_port::parity(boost::asio::serial_port::parity::none));
 		serial_.set_option(boost::asio::serial_port::baud_rate(115200));
-    
-		//send_init_packet(/* enable transfer */ true);
-
-		//resync();
+		
+		opened_ = true;
 	} catch (boost::system::system_error &e) {
 		throw Exception("RobotinoDirect failed I/O: %s", e.what());
 	}
@@ -417,34 +463,44 @@ DirectRobotinoComThread::open_device()
 		DirectRobotinoComMessage req;
 		req.add_command(DirectRobotinoComMessage::CMDID_GET_HW_VERSION);
 		req.add_command(DirectRobotinoComMessage::CMDID_GET_SW_VERSION);
-		DirectRobotinoComMessage::pointer m = send_and_recv(req);
 
-		//logger->log_info(name(), "Escaped:\n%s", m->to_string(true).c_str());
-		//logger->log_info(name(), "Un-Escaped:\n%s", m->to_string(false).c_str());
-		std::string hw_version, sw_version;
-		DirectRobotinoComMessage::command_id_t msgid;
-		while ((msgid = m->next_command()) != DirectRobotinoComMessage::CMDID_NONE) {
-			if (msgid == DirectRobotinoComMessage::CMDID_HW_VERSION) {
-				hw_version = m->get_string();
-			} else if (msgid == DirectRobotinoComMessage::CMDID_SW_VERSION) {
-				sw_version = m->get_string();
+		if (wait_replies) {
+			DirectRobotinoComMessage::pointer m = send_and_recv(req);
+
+			//logger->log_info(name(), "Escaped:\n%s", m->to_string(true).c_str());
+			//logger->log_info(name(), "Un-Escaped:\n%s", m->to_string(false).c_str());
+			std::string hw_version, sw_version;
+			DirectRobotinoComMessage::command_id_t msgid;
+			while ((msgid = m->next_command()) != DirectRobotinoComMessage::CMDID_NONE) {
+				if (msgid == DirectRobotinoComMessage::CMDID_HW_VERSION) {
+					hw_version = m->get_string();
+				} else if (msgid == DirectRobotinoComMessage::CMDID_SW_VERSION) {
+					sw_version = m->get_string();
 				
-			} else if (msgid == DirectRobotinoComMessage::CMDID_CHARGER_ERROR) {
-				uint8_t id = m->get_uint8();
-				uint32_t mtime = m->get_uint32();
-				std::string error = m->get_string();
-				logger->log_warn(name(), "Charger error (ID %u, Time: %u): %s",
-				                 id, mtime, error.c_str());
-				//} else {
-				//logger->log_debug(name(), "  - %u\n", msgid);
+				} else if (msgid == DirectRobotinoComMessage::CMDID_CHARGER_ERROR) {
+					uint8_t id = m->get_uint8();
+					uint32_t mtime = m->get_uint32();
+					std::string error = m->get_string();
+					logger->log_warn(name(), "Charger error (ID %u, Time: %u): %s",
+					                 id, mtime, error.c_str());
+					//} else {
+					//logger->log_debug(name(), "  - %u\n", msgid);
+				}
+			}
+			if (hw_version.empty() || sw_version.empty()) {
+				close_device();
+				throw Exception("RobotinoDirect: no reply to version inquiry from robot");
+			}
+			logger->log_debug(name(), "Connected, HW Version: %s  SW Version: %s",
+			                  hw_version.c_str(), sw_version.c_str());
+		} else {
+			try {
+				send_message(req);
+			} catch (Exception &e) {
+				logger->log_error(name(), "Requesting version information failed, exception follows");
+				logger->log_error(name(), e);
 			}
 		}
-		if (hw_version.empty() || sw_version.empty()) {
-			close_device();
-			throw Exception("RobotinoDirect: no reply to version inquiry from robot");
-		}
-		logger->log_debug(name(), "Connected, HW Version: %s  SW Version: %s",
-		                  hw_version.c_str(), sw_version.c_str());
 	}
 }
 
@@ -452,9 +508,10 @@ DirectRobotinoComThread::open_device()
 void
 DirectRobotinoComThread::close_device()
 {
-	boost::mutex::scoped_lock lock(io_mutex_);
 	serial_.cancel();
 	serial_.close();
+	opened_ = false;
+	open_tries_ = 0;
 }
 
 
@@ -496,25 +553,36 @@ DirectRobotinoComThread::send_message(DirectRobotinoComMessage &msg)
 	boost::mutex::scoped_lock lock(io_mutex_);
 	if (opened_) {
 		//logger->log_warn(name(), "Sending");
-		boost::asio::write(serial_, boost::asio::const_buffers_1(msg.buffer()));
+		boost::system::error_code ec;
+		boost::asio::write(serial_, boost::asio::const_buffers_1(msg.buffer()), ec);
+
+		if (ec) {
+			close_device();
+			throw Exception("Error while writing message (%s), closing connection",
+			                ec.message().c_str());
+		}
 	}
 }
-
-/*
-  std::shared_ptr<DirectRobotinoComMessage>
-  DirectRobotinoComMessage::send_and_recv(std::shared_ptr<DirectRobotinoComMessage> msg)
-  {
-	
-  }
-*/
 
 std::shared_ptr<DirectRobotinoComMessage>
 DirectRobotinoComThread::send_and_recv(DirectRobotinoComMessage &msg)
 {
 	boost::mutex::scoped_lock lock(io_mutex_);
-	boost::asio::write(serial_, boost::asio::const_buffers_1(msg.buffer()));
-	std::shared_ptr<DirectRobotinoComMessage> m = read_packet();
-	return m;
+	if (opened_) {
+		boost::system::error_code ec;
+		boost::asio::write(serial_, boost::asio::const_buffers_1(msg.buffer()), ec);
+		if (ec) {
+			logger->log_error(name(), "Error while writing message (%s), closing connection",
+			                  ec.message().c_str());
+
+			close_device();
+			throw Exception("RobotinoDirect: write failed (%s)", ec.message().c_str());
+		}
+		std::shared_ptr<DirectRobotinoComMessage> m = read_packet();
+		return m;
+	} else {
+		throw Exception("RobotinoDirect: serial device not opened");
+	}
 }
 
 /// @cond INTERNAL
@@ -571,9 +639,9 @@ DirectRobotinoComThread::read_packet()
 	}
 
 	// Read all potential junk before the start header
-	if (bytes_read > 1) {
-		logger->log_warn(name(), "Read junk off line");
-	}
+	// if (bytes_read > 1) {
+	// 	logger->log_warn(name(), "Read junk off line");
+	// }
 	input_buffer_.consume(bytes_read - 1);
 	
 	// start timeout for remaining packet
@@ -660,9 +728,11 @@ DirectRobotinoComThread::request_data()
 {
 	if (finalize_prepared)  return;
 
-	request_timer_.expires_from_now(boost::posix_time::milliseconds(cfg_sensor_update_cycle_time_));
-	request_timer_.async_wait(boost::bind(&DirectRobotinoComThread::handle_request_data, this,
-	                                      boost::asio::placeholders::error));
+	if (request_timer_.expires_from_now() < boost::posix_time::milliseconds(0)) {
+		request_timer_.expires_from_now(boost::posix_time::milliseconds(cfg_sensor_update_cycle_time_));
+		request_timer_.async_wait(boost::bind(&DirectRobotinoComThread::handle_request_data, this,
+		                                      boost::asio::placeholders::error));
+	}
 }
 
 void
@@ -693,7 +763,39 @@ DirectRobotinoComThread::handle_request_data(const boost::system::error_code &ec
 			logger->log_warn(name(), e);
 		}
 
+	} else {		
+		logger->log_warn(name(), "Request timer failed: %s", ec.message().c_str());
+	}
+
+	if (! finalize_prepared && opened_) {
 		request_data();
+	}
+}
+
+void
+DirectRobotinoComThread::set_desired_vel(float vx, float vy, float omega)
+{
+	RobotinoComThread::set_desired_vel(vx, vy, omega);
+	drive();
+}
+
+
+void
+DirectRobotinoComThread::drive()
+{
+	if (finalize_prepared)  return;
+
+	drive_timer_.expires_from_now(boost::posix_time::milliseconds(10));
+	drive_timer_.async_wait(boost::bind(&DirectRobotinoComThread::handle_drive, this,
+	                                    boost::asio::placeholders::error));	
+}
+
+
+void
+DirectRobotinoComThread::handle_drive(const boost::system::error_code &ec)
+{
+	if (! ec) {
+		if (update_velocities())  drive();
 	}
 }
 
@@ -702,7 +804,7 @@ void
 DirectRobotinoComThread::update_nodata_timer()
 {
 	nodata_timer_.cancel();
-	nodata_timer_.expires_from_now(boost::posix_time::milliseconds(1000));
+	nodata_timer_.expires_from_now(boost::posix_time::milliseconds(2000));
 	nodata_timer_.async_wait(boost::bind(&DirectRobotinoComThread::handle_nodata, this,
 	                                     boost::asio::placeholders::error));
 }
@@ -714,7 +816,5 @@ DirectRobotinoComThread::handle_nodata(const boost::system::error_code &ec)
 	if (! ec) {
 		logger->log_error(name(), "No data received for too long, re-establishing connection");
 		close_device();
-		opened_ = false;
-		open_tries_ = 0;
 	}
 }

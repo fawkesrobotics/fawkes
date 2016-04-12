@@ -75,9 +75,6 @@ class RobotinoActThread
 	void publish_odometry();
 	void publish_gripper();
 
-	void project(float *m1, float *m2, float *m3, float vx, float vy, float omega) const;
-	void unproject(float *vx, float *vy, float *omega, float m1, float m2, float m3) const;
-	
  private:
 	RobotinoComThread              *com_;
 
@@ -93,23 +90,23 @@ class RobotinoActThread
 	bool        			  msg_zero_vel_;
 	fawkes::Time 			  last_msg_time_;
 
-	float        			  cfg_deadman_threshold_;
-	float        			  cfg_odom_time_offset_;
-	bool 				  cfg_gripper_enabled_;
+	float        			              cfg_deadman_threshold_;
+	float        			              cfg_odom_time_offset_;
+	bool 				                    cfg_gripper_enabled_;
 	std::string                     cfg_odom_frame_;
 	std::string                     cfg_base_frame_;
 	OdometryMode                    cfg_odom_mode_;
 	unsigned int                    cfg_imu_deadman_loops_;
 	float                           cfg_odom_corr_phi_;
 	float                           cfg_odom_corr_trans_;
-	bool                            cfg_bumper_estop_enabled_;
+	bool                            cfg_bumper_estop_enabled_;	
 	float                           cfg_rb_;
 	float                           cfg_rw_;
 	float                           cfg_gear_;
-	
-	float                           des_vx_;
-	float                           des_vy_;
-	float                           des_omega_;
+	float                           cfg_trans_accel_;
+	float                           cfg_trans_decel_;
+	float                           cfg_rot_accel_;
+	float                           cfg_rot_decel_;
 
 	bool                            gripper_close_;
 
@@ -118,6 +115,10 @@ class RobotinoActThread
 	float                           odom_phi_;
 	float                           odom_gyro_origin_;
 	fawkes::Time                   *odom_time_;
+
+	float                           des_vx_;
+	float                           des_vy_;
+	float                           des_omega_;
 };
 
 

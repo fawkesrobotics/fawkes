@@ -48,7 +48,20 @@ hardware/robotino:
     # the group dialout: usermod -a -G dialout robotino (and reboot)
     # device: /dev/ttyACM1
 
-  motor-layout:
+
+  # The motor and drive settings and limits are enforced for direct
+  # communication, for the openrobotino driver, these values are
+  # checked by controld3, cf. /etc/robotino/controld3.conf on the
+  # robotino base
+
+  motor:
+    # Minimum and maximum acceleration of motors
+    acceleration-limits: [-11500, 11500]
+
+    rpm-max: 3000
+  
+  drive:
+    layout:
     # Distance from Robotino center to wheel center in meters
     rb: 0.175
 
@@ -57,6 +70,14 @@ hardware/robotino:
 
     # Gear ratio between motors and wheels
     gear: 32.0
+
+    # Maximum acceleration and deceleration for translation, m/s^2
+    trans-acceleration: 0.4
+    trans-deceleration: 0.4
+
+    # Maximum acceleration and deceleration for rotation, deg/s^2
+    rot-acceleration: 0.4
+    rot-deceleration: 0.4
 
   bumper:
     # Set to true to enable the emergency stop on bumper contact (provided
@@ -120,3 +141,13 @@ hardware/robotino:
 
     # ID of the Gripper Interface
     gripper_id: Robotino
+
+    # Maximum current in A for the motor output.
+    # If the current is larger than maxcurrent for more than
+    # max-time milliseconds the set-point is set to 0. To recover
+    # from the over current situation decrease the set-point in your
+    # application below the set-point when the over current flag had
+    # been set
+    # Currently not implemented
+    #current-max: 1
+    #current-max-time: 400

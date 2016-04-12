@@ -24,25 +24,22 @@
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/clock.h>
-#include <aspect/configurable.h>
-#include <aspect/blackboard.h>
 
 #include <utils/time/time.h>
+
+#include <cstdio>
 
 namespace fawkes {
 	class Mutex;
 	class Clock;
-	class TimeWait;
-
-	class BatteryInterface;
-	class RobotinoSensorInterface;
-	class IMUInterface;
 }
 
 #define NUM_IR_SENSORS 9
 
 class RobotinoComThread
-: public fawkes::Thread
+: public fawkes::Thread,
+	public fawkes::ClockAspect,
+	public fawkes::LoggingAspect
 {
  public:
 	struct SensorData {
@@ -88,20 +85,59 @@ class RobotinoComThread
 	virtual void set_speed_points(float s1, float s2, float s3) = 0;
 	virtual void get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t) = 0;
 	virtual void get_odometry(double &x, double &y, double &phi) = 0;
+
 	virtual void reset_odometry() = 0;
 	virtual void set_bumper_estop_enabled(bool enabled) = 0;
+	virtual void set_motor_accel_limits(float min_accel, float max_accel) = 0;
 	
 	virtual bool get_data(SensorData &sensor_data);
 
+	        void set_drive_layout(float rb, float rw, float gear);
+	        void set_drive_limits(float trans_accel, float trans_decel, float rot_accel, float rot_decel);
+	virtual void set_desired_vel(float vx, float vy, float omega);
+
+	void  project(float *m1, float *m2, float *m3, float vx, float vy, float omega) const;
+	void  unproject(float *vx, float *vy, float *omega, float m1, float m2, float m3) const;
+
+ protected:
+	bool update_velocities();
+	
+ private:
+
+	float update_speed(float des, float set, float accel, float decel, float diff_sec);
+
  protected:
 	/** Mutex to protect data_. Lock whenever accessing it. */
-	fawkes::Mutex    *data_mutex_;
+	fawkes::Mutex  *data_mutex_;
 	/** Data struct that must be updated whenever new data is available. */
-	SensorData        data_;
+	SensorData      data_;
 	/** Flag to indicate new data, set to true if data_ is modified. */
-	bool              new_data_;
+	bool            new_data_;
 
+ private:
+	float           cfg_rb_;
+	float           cfg_rw_;
+	float           cfg_gear_;
+	float           cfg_trans_accel_;
+	float           cfg_trans_decel_;
+	float           cfg_rot_accel_;
+	float           cfg_rot_decel_;
+	
+	fawkes::Mutex  *vel_mutex_;
+	fawkes::Time   *vel_last_update_;
+	bool            vel_last_zero_;
+	float           des_vx_;
+	float           des_vy_;
+	float           des_omega_;
 
+	float           set_vx_;
+	float           set_vy_;
+	float           set_omega_;
+
+#ifdef USE_VELOCITY_RECORDING
+	FILE *f_;
+	fawkes::Time     *start_;
+#endif
 };
 
 

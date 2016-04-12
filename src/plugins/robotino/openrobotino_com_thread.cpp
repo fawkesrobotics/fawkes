@@ -382,6 +382,13 @@ OpenRobotinoComThread::reset_odometry()
 }
 
 
+void
+OpenRobotinoComThread::set_motor_accel_limits(float min_accel, float max_accel)
+{
+	throw Exception("Setting motor accel limits for OpenRobotino driver not supported, configure controld3");
+}
+
+
 /** Check if we are connected to OpenRobotino.
  * @return true if the connection has been established, false otherwise
  */

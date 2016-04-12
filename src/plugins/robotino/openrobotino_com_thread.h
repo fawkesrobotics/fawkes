@@ -23,8 +23,6 @@
 
 #include "com_thread.h"
 #include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 
@@ -68,10 +66,6 @@ namespace fawkes {
 	class Mutex;
 	class Clock;
 	class TimeWait;
-
-	class BatteryInterface;
-	class RobotinoSensorInterface;
-	class IMUInterface;
 }
 
 class OpenRobotinoComThread
@@ -79,9 +73,7 @@ class OpenRobotinoComThread
 #ifdef HAVE_OPENROBOTINO_API_1
 	public rec::robotino::com::Com,
 #endif
-	public fawkes::LoggingAspect,
-	public fawkes::ConfigurableAspect,
-	public fawkes::ClockAspect
+	public fawkes::ConfigurableAspect
 {
  public:
 	OpenRobotinoComThread();
@@ -99,8 +91,10 @@ class OpenRobotinoComThread
 	virtual void set_speed_points(float s1, float s2, float s3);
 	virtual void get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t);
 	virtual void get_odometry(double &x, double &y, double &phi);
+
 	virtual void reset_odometry();
 	virtual void set_bumper_estop_enabled(bool enabled);
+	virtual void set_motor_accel_limits(float min_accel, float max_accel);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }

@@ -24,8 +24,6 @@
 #include "com_thread.h"
 #include "direct_com_message.h"
 #include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 
@@ -39,7 +37,6 @@ class DirectRobotinoComMessage;
 
 namespace fawkes {
 	class Mutex;
-	class Clock;
 	class TimeWait;
 
 	class BatteryInterface;
@@ -49,9 +46,7 @@ namespace fawkes {
 
 class DirectRobotinoComThread
 : public RobotinoComThread,
-	public fawkes::LoggingAspect,
-	public fawkes::ConfigurableAspect,
-	public fawkes::ClockAspect
+	public fawkes::ConfigurableAspect
 {
  public:
 	DirectRobotinoComThread();
@@ -71,15 +66,19 @@ class DirectRobotinoComThread
 	virtual void set_speed_points(float s1, float s2, float s3);
 	virtual void get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t);
 	virtual void get_odometry(double &x, double &y, double &phi);
+
 	virtual void reset_odometry();
 	virtual void set_bumper_estop_enabled(bool enabled);
+	virtual void set_motor_accel_limits(float min_accel, float max_accel);
+
+	virtual void set_desired_vel(float vx, float vy, float omega);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
 	std::string find_device_udev();
-	void open_device();
+	void open_device(bool wait_replies);
 	void close_device();
 	void flush_device();
 	void check_deadline();
@@ -87,7 +86,10 @@ class DirectRobotinoComThread
 	void handle_request_data(const boost::system::error_code &ec);
 	void handle_nodata(const boost::system::error_code &ec);
 	void update_nodata_timer();
-	
+
+	void drive();
+	void handle_drive(const boost::system::error_code &ec);
+
 	DirectRobotinoComMessage::pointer read_packet();
 	void send_message(DirectRobotinoComMessage &msg);
 	DirectRobotinoComMessage::pointer
@@ -99,6 +101,7 @@ class DirectRobotinoComThread
 	bool            cfg_enable_gyro_;
 	unsigned int    cfg_sensor_update_cycle_time_;
 	bool            cfg_gripper_enabled_;
+	float           cfg_rpm_max_;
 
 	bool opened_;
 	unsigned int open_tries_;
@@ -112,6 +115,7 @@ class DirectRobotinoComThread
 
 	boost::asio::deadline_timer   request_timer_;
 	boost::asio::deadline_timer   nodata_timer_;
+	boost::asio::deadline_timer   drive_timer_;
 	
 };
 
