@@ -314,7 +314,7 @@ end
 --- Fires on timeout.
 -- @return true if the time ran out
 function JumpState:jumpcond_timeout()
- return difftime(self.timeout_start) >= self.timeout_time
+ return difftime(self.timeout_start) >= math.floor(self.timeout_time*1000)
 end
 
 --- Initializes timeout value.
