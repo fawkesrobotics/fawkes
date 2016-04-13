@@ -167,6 +167,7 @@ DirectRobotinoComThread::loop()
 			open_tries_ = 0;
 			request_data();
 		} catch (Exception &e) {
+			logger->log_warn(name(), "Re-open failed: %s", e.what_no_backtrace());
 			open_tries_ += 1;
 			if (open_tries_ >= (1000 / cfg_sensor_update_cycle_time_)) {
 				logger->log_error(name(), "Connection problem to base persists");
