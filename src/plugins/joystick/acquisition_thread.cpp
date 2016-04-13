@@ -332,8 +332,8 @@ JoystickAcquisitionThread::loop()
       } catch (Exception &e) {
 	logger->log_warn(name(), "Initializing force feedback failed, disabling");
       }
-    } catch (...) {
-      // ignored
+    } catch (Exception &e) {
+	    usleep(100000);
     }
   }
 }
