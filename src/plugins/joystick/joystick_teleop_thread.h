@@ -90,9 +90,13 @@ class JoystickTeleOpThread
   std::string  cfg_ifid_joystick_;
   bool         cfg_use_laser_;
   std::string  cfg_ifid_laser_;
+  bool         cfg_use_ff_;
 
   bool         stopped_;
   float        min_distance_;
+
+  bool         ff_weak_;
+  bool         ff_strong_;
 };
 
 

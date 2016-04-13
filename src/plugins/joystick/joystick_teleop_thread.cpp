@@ -108,6 +108,25 @@ JoystickTeleOpThread::init()
     } catch (Exception &e) {
       logger->log_warn(name(), "No laser_interface_id configured, ignoring");
     }
+
+    cfg_use_ff_ = false;
+    ff_weak_ = false;
+    ff_strong_ = false;
+    try {
+	    cfg_use_ff_ = config->get_bool(CFG_PREFIX"collision_safety/use-force-feedback");
+    } catch (Exception &e) {} // ignore, use default
+    logger->log_debug(name(), "Collision safety force feedback %sabled", cfg_use_ff_ ? "En" : "Dis");
+    if (cfg_use_ff_) {
+	    JoystickInterface::StartRumbleMessage *msg =
+		    new JoystickInterface::StartRumbleMessage();
+
+	    msg->set_strong_magnitude(0xFFFF);
+	    msg->set_weak_magnitude(0x8000);
+	    msg->set_length(1000);
+
+	    joystick_if_->msgq_enqueue(msg);
+
+    }
   } else {
     logger->log_warn(name(), "Collision safety for joystick is disabled.");
   }
@@ -249,6 +268,25 @@ JoystickTeleOpThread::loop()
           logger->log_warn(name(),"slow down");
           vx = vx * min_distance_ / 2 / cfg_collision_safety_distance_;
           vy = vy * min_distance_ / 2 / cfg_collision_safety_distance_;
+
+          if (cfg_use_ff_ && ! ff_weak_ && joystick_if_->supported_ff_effects() != 0) {
+	          JoystickInterface::StartRumbleMessage *msg =
+		          new JoystickInterface::StartRumbleMessage();
+
+	          msg->set_strong_magnitude(0xFFFF);
+	          msg->set_weak_magnitude(0x8000);
+
+	          joystick_if_->msgq_enqueue(msg);
+	          ff_weak_ = true;
+	          ff_strong_ = false;
+          }
+        } else if (ff_weak_ || ff_strong_) {
+	        JoystickInterface::StopRumbleMessage *msg =
+		        new JoystickInterface::StopRumbleMessage();
+
+	        joystick_if_->msgq_enqueue(msg);
+	        ff_weak_ = false;
+	        ff_strong_ = false;
         }
         send_transrot(vx, vy, omega);
       }
@@ -256,6 +294,19 @@ JoystickTeleOpThread::loop()
       {
         logger->log_warn(name(),"obstacle reached");
         send_transrot(0.,0.,omega);
+
+        if (cfg_use_ff_ && ! ff_weak_ && joystick_if_->supported_ff_effects() != 0) {
+	        JoystickInterface::StartRumbleMessage *msg =
+		        new JoystickInterface::StartRumbleMessage();
+
+	        msg->set_strong_magnitude(0x8000);
+	        msg->set_weak_magnitude(0xFFFF);
+      
+	        logger->log_debug(name(), "Enabling strong rumble");
+	        joystick_if_->msgq_enqueue(msg);
+	        ff_strong_ = true;
+	        ff_weak_ = false;
+        }
       }
     }
   } else if (! stopped_) {
