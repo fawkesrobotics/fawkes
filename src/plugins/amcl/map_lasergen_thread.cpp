@@ -158,9 +158,13 @@ MapLaserGenThread::loop()
 
     //logger->log_info(name(), "Pos: (%f,%f,%f)", pos_x_, pos_y_, pos_theta_);
 
-    laser_pos_x_ = pos_x_ + laser_pose_.getOrigin().x();
-    laser_pos_y_ = pos_y_ + laser_pose_.getOrigin().y();
+    const float lx = laser_pose_.getOrigin().x();
+    const float ly = laser_pose_.getOrigin().y();
     laser_pos_theta_ = pos_theta_ + tf::get_yaw(laser_pose_.getRotation());
+    const float sin_theta = sinf(laser_pos_theta_);
+    const float cos_theta = cosf(laser_pos_theta_);
+    laser_pos_x_ = pos_x_ + (lx * cos_theta - ly * sin_theta);
+    laser_pos_y_ = pos_y_ + (lx * sin_theta + ly * cos_theta);
   }
 
   tf::Quaternion q(tf::create_quaternion_from_yaw(pos_theta_));
