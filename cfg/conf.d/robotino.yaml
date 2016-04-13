@@ -21,9 +21,8 @@ hardware/robotino:
   # without waiting between receive calls
   cycle-time: 5
 
-  act:
-    # Time threshold after all motor velocities are set to zero if no new messages arrived inbetween
-    deadman_time_threshold: 0.5
+  # Time threshold after all motor velocities are set to zero if no new messages arrived inbetween
+  deadman_time_threshold: 0.5
 
   openrobotino:
     # Configuration settings specific to the OpenRobotino driver
@@ -62,22 +61,22 @@ hardware/robotino:
   
   drive:
     layout:
-    # Distance from Robotino center to wheel center in meters
-    rb: 0.175
+      # Distance from Robotino center to wheel center in meters
+      rb: 0.175
 
-    # Wheel radius in meters
-    rw: 0.060
+      # Wheel radius in meters
+      rw: 0.060
 
-    # Gear ratio between motors and wheels
-    gear: 32.0
+      # Gear ratio between motors and wheels
+      gear: 32.0
 
     # Maximum acceleration and deceleration for translation, m/s^2
-    trans-acceleration: 0.4
-    trans-deceleration: 0.4
+    trans-acceleration: 0.8
+    trans-deceleration: 1.5
 
-    # Maximum acceleration and deceleration for rotation, deg/s^2
-    rot-acceleration: 0.4
-    rot-deceleration: 0.4
+    # Maximum acceleration and deceleration for rotation, rad/s^2
+    rot-acceleration: 1.6
+    rot-deceleration: 3.14
 
   bumper:
     # Set to true to enable the emergency stop on bumper contact (provided
@@ -100,7 +99,6 @@ hardware/robotino:
     interface_id: IMU Robotino
 
   odometry:
-
     # Odometry mode, one of "calc" or "copy"
     # calc: calculate on our own based on IMUInterface and velocity data
     # copy: copy values as-is from OpenRobotino
@@ -109,9 +107,6 @@ hardware/robotino:
     # directly to the Fawkes machine.
     mode: calc
     #mode: copy
-
-    # Odometry coordinate frame
-    frame: !frame odom
 
     # Odom TF offset. This time is added to the current time when the
     # odometry <- base_link TF is published
