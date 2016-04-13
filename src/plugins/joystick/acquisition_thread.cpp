@@ -159,6 +159,7 @@ JoystickAcquisitionThread::open_joystick()
     bbhandler_->joystick_plugged(num_axes_, num_buttons_);
   }
   connected_ = true;
+  just_connected_ = true;
 }
 
 void
@@ -243,6 +244,7 @@ JoystickAcquisitionThread::loop()
 	    close(fd_);
 	    fd_ = -1;
 	    connected_ = false;
+	    just_connected_ = false;
 	    safety_lockout_ = true;
 	    new_data_ = false;
 	    if ( bbhandler_ ) {
@@ -347,7 +349,8 @@ bool
 JoystickAcquisitionThread::lock_if_new_data()
 {
   data_mutex_->lock();
-  if (new_data_) {
+  if (new_data_ || just_connected_) {
+	  just_connected_ = false;
     return true;
   } else {
     data_mutex_->unlock();
@@ -401,7 +404,7 @@ JoystickAcquisitionThread::joystick_name() const
 unsigned int
 JoystickAcquisitionThread::pressed_buttons() const
 {
-  return pressed_buttons_;
+	return safety_lockout_ ? 0 : pressed_buttons_;
 }
 
 
@@ -411,5 +414,8 @@ JoystickAcquisitionThread::pressed_buttons() const
 float *
 JoystickAcquisitionThread::axis_values()
 {
+	if (safety_lockout_) {
+		memset(axis_values_, 0, axis_array_size_ * sizeof(float));
+	}
   return axis_values_;
 }

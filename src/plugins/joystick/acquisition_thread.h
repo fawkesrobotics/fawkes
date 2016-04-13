@@ -86,6 +86,7 @@ class JoystickAcquisitionThread
 
   int  fd_;
   bool connected_;
+  bool just_connected_;
   unsigned int axis_array_size_;
   char num_axes_;
   char num_buttons_;
