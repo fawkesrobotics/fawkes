@@ -170,6 +170,9 @@ RobotinoActThread::loop()
 			                 ? "En" : "Dis");
 			motor_if_->set_motor_state(msg->motor_state());
 			motor_if_->write();
+
+			des_vx_ = des_vy_ = des_omega_ = 0.;
+			set_des_vel = true;
 		}
 
 		else if (MotorInterface::TransRotMessage *msg = motor_if_->msgq_first_safe(msg))
