@@ -218,13 +218,25 @@ JoystickTeleOpThread::loop()
           (cfg_drive_mode_ax_thresh_ <  0 &&
           joystick_if_->axis(cfg_drive_mode_axis_) < cfg_drive_mode_ax_thresh_))))
       {
-        vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_special_max_vx_;
-        vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_special_max_vy_;
-        omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_special_max_omega_;
+	      if (fabsf(joystick_if_->axis(cfg_axis_forward_)) > cfg_axis_threshold_) {
+		      vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_special_max_vx_;
+	      }
+	      if (fabsf(joystick_if_->axis(cfg_axis_sideward_)) > cfg_axis_threshold_) {
+		      vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_special_max_vy_;
+	      }
+	      if (fabsf(joystick_if_->axis(cfg_axis_rotation_)) > cfg_axis_threshold_) {
+		      omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_special_max_omega_;
+	      }
       } else {
-        vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_normal_max_vx_;
-        vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_normal_max_vy_;
-        omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_normal_max_omega_;
+	      if (fabsf(joystick_if_->axis(cfg_axis_forward_)) > cfg_axis_threshold_) {
+		      vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_normal_max_vx_;
+	      }
+	      if (fabsf(joystick_if_->axis(cfg_axis_sideward_)) > cfg_axis_threshold_) {
+		      vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_normal_max_vy_;
+	      }
+	      if (fabsf(joystick_if_->axis(cfg_axis_rotation_)) > cfg_axis_threshold_) {
+		      omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_normal_max_omega_;
+	      }
       }
 
       float theta, distance;
