@@ -66,7 +66,7 @@ endif
 protobuf_clips: core logging protobuf_comm
 pcl_utils: core tf
 kdl_parser: core
-syncpoint: core logging
+syncpoint: core logging utils
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk
