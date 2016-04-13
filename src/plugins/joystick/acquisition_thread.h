@@ -46,10 +46,10 @@ class JoystickAcquisitionThread
   public fawkes::ConfigurableAspect
 {
  public:
-  JoystickAcquisitionThread();
-  JoystickAcquisitionThread(const char *device_file,
-			    JoystickBlackBoardHandler *handler,
-			    fawkes::Logger *logger);
+	JoystickAcquisitionThread();
+	JoystickAcquisitionThread(const char *device_file,
+                            JoystickBlackBoardHandler *handler,
+                            fawkes::Logger *logger);
 
   virtual void init();
   virtual void finalize();
@@ -75,9 +75,11 @@ class JoystickAcquisitionThread
   void init(std::string device_file);
   void open_joystick();
   void open_forcefeedback();
-
+  
  private:
-  std::string cfg_device_file_;
+  std::string  cfg_device_file_;
+  float        cfg_safety_lockout_timeout_;
+  unsigned int cfg_safety_button_mask_;
 
   bool        safety_combo_[5];
   bool        safety_lockout_;

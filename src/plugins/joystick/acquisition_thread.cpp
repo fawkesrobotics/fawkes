@@ -26,6 +26,8 @@
 #include <core/threading/mutex.h>
 #include <core/exceptions/system.h>
 
+#include <utils/time/time.h>
+
 #include <algorithm>
 #include <linux/joystick.h>
 #include <cstdlib>
@@ -98,8 +100,12 @@ JoystickAcquisitionThread::init()
 
   safety_lockout_ = true;
   try {
-	  safety_lockout_ = config->get_bool("/hardware/joystick/safety_lockout");
+	  safety_lockout_ = config->get_bool("/hardware/joystick/safety_lockout/enable");
   } catch (Exception &e) {} // ignore, use default
+  if (safety_lockout_) {
+	  cfg_safety_lockout_timeout_ = config->get_float("/hardware/joystick/safety_lockout/timeout");
+	  cfg_safety_button_mask_ = config->get_uint("/hardware/joystick/safety_lockout/button-mask");
+  }
   for (int i = 0; i < 5; ++i) safety_combo_[i] = false;
 
   init(cfg_device_file_);
@@ -133,8 +139,8 @@ JoystickAcquisitionThread::open_joystick()
   if (axis_values_ == NULL) {
     // memory had not been allocated
     // minimum of 8 because there are 8 axes in the interface
-    axis_array_size_ = std::max((int)num_axes_, 8);
-    axis_values_   = (float *)malloc(sizeof(float) * axis_array_size_);
+    axis_array_size_  = std::max((int)num_axes_, 8);
+    axis_values_      = (float *)malloc(sizeof(float) * axis_array_size_);
   } else if ( num_axes_ > std::max((int)axis_array_size_, 8) ) {
     // We loose axes as we cannot increase BB interface on-the-fly
     num_axes_ = axis_array_size_;
@@ -148,7 +154,7 @@ JoystickAcquisitionThread::open_joystick()
 
   memset(axis_values_, 0, sizeof(float) * axis_array_size_);
   pressed_buttons_ = 0;
-
+  
   if ( bbhandler_ ) {
     bbhandler_->joystick_plugged(num_axes_, num_buttons_);
   }
@@ -199,7 +205,7 @@ void
 JoystickAcquisitionThread::finalize()
 {
   if ( fd_ >= 0 )  close(fd_);
-  free(axis_values_);
+  if (axis_values_)  free(axis_values_);
   delete data_mutex_;
 }
 
@@ -210,46 +216,71 @@ JoystickAcquisitionThread::loop()
   if ( connected_ ) {
     struct js_event e;
 
-    if ( read(fd_, &e, sizeof(struct js_event)) < (int)sizeof(struct js_event) ) {
-      logger->log_warn(name(), "Joystick removed, will try to reconnect.");
-      close(fd_);
-      fd_ = -1;
-      connected_ = false;
-      if ( bbhandler_ ) {
-	bbhandler_->joystick_unplugged();
-      }
-      return;
+    long int timeout_sec  = (long int)truncf(cfg_safety_lockout_timeout_);
+    long int timeout_usec = (cfg_safety_lockout_timeout_ - timeout_sec) * 10000000;
+    timeval timeout = {timeout_sec, timeout_usec};
+
+    fd_set read_fds;
+    FD_ZERO(&read_fds);
+    FD_SET(fd_, &read_fds);
+
+    int rv = 0;
+    rv = select(fd_ + 1, &read_fds, NULL, NULL, &timeout);
+
+    if (rv == 0) {
+	    if (! safety_lockout_) {
+		    logger->log_warn(name(), "No action for %.2f seconds, re-enabling safety lockout",
+		                     cfg_safety_lockout_timeout_);
+		    safety_lockout_ = true;
+		    for (int i = 0; i < 5; ++i) safety_combo_[i] = false;
+	    }
+	    new_data_ = false;
+	    return;
+    }
+    
+    if (rv == -1 || read(fd_, &e, sizeof(struct js_event)) < (int)sizeof(struct js_event)) {
+	    logger->log_warn(name(), "Joystick removed, will try to reconnect.");
+	    close(fd_);
+	    fd_ = -1;
+	    connected_ = false;
+	    safety_lockout_ = true;
+	    new_data_ = false;
+	    if ( bbhandler_ ) {
+		    bbhandler_->joystick_unplugged();
+	    }
+	    return;
     }
 
     data_mutex_->lock();
+
     new_data_ = ! safety_lockout_;
 
     if ((e.type & ~JS_EVENT_INIT) == JS_EVENT_BUTTON) {
       //logger->log_debug(name(), "Button %u button event: %f", e.number, e.value);
       if (e.number <= 32) {
-	if (e.value) {
-	  pressed_buttons_ |=  (1 << e.number);
-	} else {
-	  pressed_buttons_ &= ~(1 << e.number);
-	}
+	      if (e.value) {
+		      pressed_buttons_ |=  (1 << e.number);
+	      } else {
+		      pressed_buttons_ &= ~(1 << e.number);
+	      }
       } else {
-	logger->log_warn(name(), "Button value for button > 32, ignoring");
+	      logger->log_warn(name(), "Button value for button > 32, ignoring");
       }
     } else if ((e.type & ~JS_EVENT_INIT) == JS_EVENT_AXIS) {
-      if ( e.number >= axis_array_size_ ) {
-	logger->log_warn(name(),
-			 "Got value for axis %u, but only %u axes registered. "
-			 "Plugged in a different joystick? Ignoring.",
-			 e.number + 1 /* natural numbering */, axis_array_size_);
-      } else {
-	// Joystick axes usually go positive right, down, twist right, min speed,
-	// hat right, and hat down. In the Fawkes coordinate system we actually
-	// want opposite directions, hence multiply each value by -1
-	axis_values_[e.number] = (e.value == 0) ? 0. : (e.value / -32767.f);
+	    if ( e.number >= axis_array_size_ ) {
+		    logger->log_warn(name(),
+		                     "Got value for axis %u, but only %u axes registered. "
+		                     "Plugged in a different joystick? Ignoring.",
+		                     e.number + 1 /* natural numbering */, axis_array_size_);
+	    } else {
+		    // Joystick axes usually go positive right, down, twist right, min speed,
+		    // hat right, and hat down. In the Fawkes coordinate system we actually
+		    // want opposite directions, hence multiply each value by -1
+		    axis_values_[e.number] = (e.value == 0) ? 0. : (e.value / -32767.f);
 	
-	//logger->log_debug(name(), "Axis %u new X: %f",
-	//                  axis_index, axis_values_[e.number]);
-      }
+		    //logger->log_debug(name(), "Axis %u new X: %f",
+		    //                  axis_index, axis_values_[e.number]);
+	    }
     }
 
     data_mutex_->unlock();
@@ -264,7 +295,7 @@ JoystickAcquisitionThread::loop()
 		    safety_combo_[COMBO_IDX_LEFT]    = true;
 		    safety_combo_[COMBO_IDX_RELEASE] = true;
 	    } else {
-		    if (pressed_buttons_ > 0) {
+		    if (pressed_buttons_ & cfg_safety_button_mask_) {
 			    if (axis_values_[0] >  0.9)  safety_combo_[COMBO_IDX_UP]    = true;
 			    if (axis_values_[0] < -0.9)  safety_combo_[COMBO_IDX_DOWN]  = true;
 			    if (axis_values_[1] >  0.9)  safety_combo_[COMBO_IDX_RIGHT] = true;
