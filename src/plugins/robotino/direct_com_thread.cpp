@@ -71,7 +71,10 @@ DirectRobotinoComThread::init()
 		config->get_uint("/hardware/robotino/cycle-time");
 	cfg_gripper_enabled_ = config->get_bool("/hardware/robotino/gripper/enable_gripper");
 	cfg_rpm_max_ = config->get_float("/hardware/robotino/motor/rpm-max");
-
+	cfg_nodata_timeout_ = config->get_uint("/hardware/robotino/direct/no-data-timeout");
+	cfg_drive_update_interval_ = config->get_uint("/hardware/robotino/direct/drive-update-interval");
+	cfg_read_timeout_ = config->get_uint("/hardware/robotino/direct/read-timeout");
+	
 	// -------------------------------------------------------------------------- //
 
 	if (find_controld3()) {
@@ -589,7 +592,7 @@ DirectRobotinoComThread::flush_device()
 				ec = boost::asio::error::would_block;
 				bytes_read = 0;
 
-				deadline_.expires_from_now(boost::posix_time::milliseconds(200));
+				deadline_.expires_from_now(boost::posix_time::milliseconds(cfg_read_timeout_));
 				boost::asio::async_read(serial_, input_buffer_,
 				                        boost::asio::transfer_at_least(1),
 				                        (boost::lambda::var(ec) = boost::lambda::_1,
@@ -708,7 +711,7 @@ DirectRobotinoComThread::read_packet()
 	input_buffer_.consume(bytes_read - 1);
 	
 	// start timeout for remaining packet
-	deadline_.expires_from_now(boost::posix_time::milliseconds(200));
+	deadline_.expires_from_now(boost::posix_time::milliseconds(cfg_read_timeout_));
 
 	// read packet length
 	ec = boost::asio::error::would_block;
@@ -848,7 +851,7 @@ DirectRobotinoComThread::drive()
 {
 	if (finalize_prepared)  return;
 
-	drive_timer_.expires_from_now(boost::posix_time::milliseconds(10));
+	drive_timer_.expires_from_now(boost::posix_time::milliseconds(cfg_drive_update_interval_));
 	drive_timer_.async_wait(boost::bind(&DirectRobotinoComThread::handle_drive, this,
 	                                    boost::asio::placeholders::error));	
 }
@@ -867,7 +870,7 @@ void
 DirectRobotinoComThread::update_nodata_timer()
 {
 	nodata_timer_.cancel();
-	nodata_timer_.expires_from_now(boost::posix_time::milliseconds(2000));
+	nodata_timer_.expires_from_now(boost::posix_time::milliseconds(cfg_nodata_timeout_));
 	nodata_timer_.async_wait(boost::bind(&DirectRobotinoComThread::handle_nodata, this,
 	                                     boost::asio::placeholders::error));
 }

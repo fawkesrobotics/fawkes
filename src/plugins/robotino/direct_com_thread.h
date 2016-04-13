@@ -103,7 +103,10 @@ class DirectRobotinoComThread
 	unsigned int    cfg_sensor_update_cycle_time_;
 	bool            cfg_gripper_enabled_;
 	float           cfg_rpm_max_;
-
+	unsigned int    cfg_nodata_timeout_;
+	unsigned int    cfg_drive_update_interval_;
+	unsigned int    cfg_read_timeout_;
+	
 	bool opened_;
 	unsigned int open_tries_;
 

@@ -47,6 +47,17 @@ hardware/robotino:
     # the group dialout: usermod -a -G dialout robotino (and reboot)
     # device: /dev/ttyACM1
 
+    # Timeout in milliseconds after which the connection is considered
+    # to be dead and re-established by closing and re-opening the device
+    no-data-timeout: 2000
+
+    # Interval in milliseconds in which to send wheel velocity updates
+    # while driving
+    drive-update-interval: 20
+
+    # Timeout in milliseconds for a single read operation
+    read-timeout: 200
+
 
   # The motor and drive settings and limits are enforced for direct
   # communication, for the openrobotino driver, these values are
