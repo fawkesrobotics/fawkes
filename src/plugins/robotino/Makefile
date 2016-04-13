@@ -50,7 +50,7 @@ else
   WARN_TARGETS += warning_openrobotino
 endif
 
-ifeq ($(HAVE_LIBUDEV)$(HAVE_ROBOTINO_DIRECT_BOOST_LIBS)$(call boost-version-atleast,1,0,48)$(HAVE_CPP11),1111)
+ifeq ($(HAVE_LIBUDEV)$(HAVE_ROBOTINO_DIRECT_BOOST_LIBS)$(call boost-version-atleast,1,0,48),111)
 	HAVE_ROBOTINO_DIRECT = 1
 
   CFLAGS += -DHAVE_ROBOTINO_DIRECT $(CFLAGS_CPP11) $(CFLAGS_LIBUDEV) $(CFLAGS_ROBOTINO_DIRECT_BOOST)
@@ -68,34 +68,38 @@ else
   ifneq ($(call boost-version-atleast,1,0,48),1)
     WARN_TARGETS += warning_old_boost
   endif
-  ifneq ($(HAVE_CPP11),1)
-    WARN_TARGETS += warning_cpp11
-  endif
 endif
 
 ifneq ($(HAVE_OPENROBOTINO)$(HAVE_ROBOTINO_DIRECT),)
-  CFLAGS_sensor_thread = $(CFLAGS) -Wno-reorder -Wno-unused-function
+  ifeq ($(HAVE_CPP11),1)
 
-  ifeq ($(HAVE_TF),1)
-    CFLAGS_robotino_plugin  = $(CFLAGS) $(CFLAGS_TF)
-    CFLAGS_act_thread       = $(CFLAGS_robotino_plugin)
-    CFLAGS_sensor_thread   += $(CFLAGS) $(CFLAGS_TF)
-    CFLAGS_openrobotino_com_thread      += $(CFLAGS) $(CFLAGS_TF)
-    CFLAGS_direct_com_thread      += $(CFLAGS) $(CFLAGS_TF)
-    LDFLAGS_robotino += $(LDFLAGS_TF)
-    LIBS_robotino    += fawkestf
-  endif
+    CFLAGS += $(CFLAGS_CPP11)
 
-  PLUGINS_all = $(PLUGINDIR)/robotino.so
+    CFLAGS_sensor_thread = $(CFLAGS) -Wno-reorder -Wno-unused-function
 
-  ifeq ($(HAVE_PCL),1)
-    CFLAGS_robotino_ir_pcl_plugin = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
-    CFLAGS_ir_pcl_thread = $(CFLAGS_robotino_ir_pcl_plugin)
-    LDFLAGS_robotino_ir_pcl += $(LDFLAGS_PCL) $(LDFLAGS_TF)
+    ifeq ($(HAVE_TF),1)
+      CFLAGS_robotino_plugin  = $(CFLAGS) $(CFLAGS_TF)
+      CFLAGS_act_thread       = $(CFLAGS_robotino_plugin)
+      CFLAGS_sensor_thread   += $(CFLAGS) $(CFLAGS_TF)
+      CFLAGS_openrobotino_com_thread      += $(CFLAGS) $(CFLAGS_TF)
+      CFLAGS_direct_com_thread      += $(CFLAGS) $(CFLAGS_TF)
+      LDFLAGS_robotino += $(LDFLAGS_TF)
+      LIBS_robotino    += fawkestf
+    endif
 
-    PLUGINS_all += $(PLUGINDIR)/robotino-ir-pcl.$(SOEXT)
+    PLUGINS_all = $(PLUGINDIR)/robotino.so
+
+    ifeq ($(HAVE_PCL),1)
+      CFLAGS_robotino_ir_pcl_plugin = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
+      CFLAGS_ir_pcl_thread = $(CFLAGS_robotino_ir_pcl_plugin)
+      LDFLAGS_robotino_ir_pcl += $(LDFLAGS_PCL) $(LDFLAGS_TF)
+
+      PLUGINS_all += $(PLUGINDIR)/robotino-ir-pcl.$(SOEXT)
+    else
+      WARN_TARGETS += warning_pcl
+    endif
   else
-    WARN_TARGETS += warning_pcl
+    WARN_TARGETS += warning_cpp11
   endif
 else
   WARN_TARGETS += warning_nodriver
