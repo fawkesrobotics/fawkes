@@ -75,6 +75,15 @@ NavGraphVisualizationThread::finalize()
 {
   visualization_msgs::MarkerArray m;
 
+#if ROS_VERSION_MINIMUM(1,10,0)
+  visualization_msgs::Marker delop;
+  delop.header.frame_id = cfg_global_frame_;
+  delop.header.stamp = ros::Time::now();
+  delop.ns = "navgraph-constraints";
+  delop.id = 0;
+  delop.action = 3; // visualization_msgs::Marker::DELETEALL;
+  m.markers.push_back(delop);
+#else
   for (size_t i = 0; i < last_id_num_; ++i) {
     visualization_msgs::Marker delop;
     delop.header.frame_id = cfg_global_frame_;
@@ -93,6 +102,7 @@ NavGraphVisualizationThread::finalize()
     delop.action = visualization_msgs::Marker::DELETE;
     m.markers.push_back(delop);
   }
+#endif
   vispub_.publish(m);
   usleep(500000); // needs some time to actually send
   vispub_.shutdown();
@@ -241,6 +251,19 @@ NavGraphVisualizationThread::publish()
   size_t constraints_id_num = 0;
 
   visualization_msgs::MarkerArray m;
+
+#if ROS_VERSION_MINIMUM(1,10,0)
+  {
+	  visualization_msgs::Marker delop;
+	  delop.header.frame_id = cfg_global_frame_;
+	  delop.header.stamp = ros::Time::now();
+	  delop.ns = "navgraph-constraints";
+	  delop.id = 0;
+	  delop.action = 3; // visualization_msgs::Marker::DELETEALL;
+	  m.markers.push_back(delop);
+  }
+#endif
+
   visualization_msgs::Marker lines;
   lines.header.frame_id = cfg_global_frame_;
   lines.header.stamp = ros::Time::now();
@@ -902,6 +925,7 @@ NavGraphVisualizationThread::publish()
   crepo_.unlock();
 
 
+#if ! ROS_VERSION_MINIMUM(1,10,0)
   for (size_t i = id_num; i < last_id_num_; ++i) {
     visualization_msgs::Marker delop;
     delop.header.frame_id = cfg_global_frame_;
@@ -921,6 +945,7 @@ NavGraphVisualizationThread::publish()
     delop.action = visualization_msgs::Marker::DELETE;
     m.markers.push_back(delop);
   }
+#endif
 
   last_id_num_ = id_num;
   constraints_last_id_num_ = constraints_id_num;
