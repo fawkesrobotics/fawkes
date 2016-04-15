@@ -17,6 +17,20 @@ class RobotinoSensorInterface : public Interface
     int maxlenof_enabled() const;
   };
 
+  class SetDigitalOutputMessage : public Message
+  {
+    SetDigitalOutputMessage(unsigned char ini_digital_out, bool ini_enabled);
+    SetDigitalOutputMessage();
+    ~SetDigitalOutputMessage();
+
+    unsigned char digital_out();
+    void set_digital_out(const unsigned char new_digital_out);
+    int maxlenof_digital_out() const;
+    bool is_enabled();
+    void set_enabled(const bool new_enabled);
+    int maxlenof_enabled() const;
+  };
+
   float mot_velocity(int index);
   void set_mot_velocity(unsigned int index, const float new_mot_velocity);
   int maxlenof_mot_velocity() const;
@@ -35,6 +49,9 @@ class RobotinoSensorInterface : public Interface
   bool is_digital_in(int index);
   void set_digital_in(unsigned int index, const bool new_digital_in);
   int maxlenof_digital_in() const;
+  bool is_digital_out(int index);
+  void set_digital_out(unsigned int index, const bool new_digital_out);
+  int maxlenof_digital_out() const;
   float analog_in(int index);
   void set_analog_in(unsigned int index, const float new_analog_in);
   int maxlenof_analog_in() const;

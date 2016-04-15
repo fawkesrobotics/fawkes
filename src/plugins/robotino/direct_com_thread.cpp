@@ -97,8 +97,16 @@ DirectRobotinoComThread::init()
 	request_timer_.expires_from_now(boost::posix_time::milliseconds(-1));
 	drive_timer_.expires_at(boost::posix_time::pos_infin);
 
+	digital_outputs_ = 0;
+
 	open_device(/* wait for replies */ true);
 	open_tries_ = 0;
+
+	{ // Disable all digital outputs initially
+		DirectRobotinoComMessage req(DirectRobotinoComMessage::CMDID_SET_ALL_DIGITAL_OUTPUTS);
+		req.add_uint8(digital_outputs_);
+		send_message(req);
+	}
 }
 
 
@@ -289,6 +297,36 @@ DirectRobotinoComThread::set_motor_accel_limits(float min_accel, float max_accel
 		logger->log_error(name(), "Setting motor accel limits failed, exception follows");
 		logger->log_error(name(), e);
 	}
+}
+
+void
+DirectRobotinoComThread::set_digital_output(unsigned int digital_out, bool enable)
+{
+	if (digital_out < 1 || digital_out > 8) {
+		throw Exception("Invalid digital output, must be in range [1..8], got %u",
+		                digital_out);
+	}
+
+	unsigned int digital_out_idx = digital_out - 1;
+
+	if (enable) {
+		digital_outputs_ |= (1 << digital_out_idx);
+	} else {
+		digital_outputs_ &= ~(1 << digital_out_idx);
+	}
+	
+	try {
+		DirectRobotinoComMessage req(DirectRobotinoComMessage::CMDID_SET_ALL_DIGITAL_OUTPUTS);
+		req.add_uint8(digital_outputs_);
+		send_message(req);
+	} catch (Exception &e) {
+		logger->log_error(name(), "Setting digital outputs failed, exception follows");
+		logger->log_error(name(), e);
+	}
+
+	MutexLocker lock(data_mutex_);
+	for (int i = 0; i < 8; ++i)  data_.digital_out[i] = (digital_outputs_ & (1 << i)) ? true : false;
+	new_data_ = true;
 }
 
 

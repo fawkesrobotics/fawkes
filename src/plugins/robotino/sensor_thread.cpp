@@ -95,6 +95,7 @@ RobotinoSensorThread::loop()
 		sens_if_->set_bumper(data.bumper);
 		sens_if_->set_bumper_estop_enabled(data.bumper_estop_enabled);
 		sens_if_->set_digital_in(data.digital_in);
+		sens_if_->set_digital_out(data.digital_out);
 		sens_if_->set_analog_in(data.analog_in);
 		update_distances(data.ir_voltages);
 		sens_if_->write();
@@ -133,6 +134,14 @@ RobotinoSensorThread::process_sensor_msgs()
 		    sens_if_->msgq_first_safe(msg))
 		{
 			com_->set_bumper_estop_enabled(msg->is_enabled());
+		} else if (RobotinoSensorInterface::SetDigitalOutputMessage *msg =
+		    sens_if_->msgq_first_safe(msg))
+		{
+			try {
+				com_->set_digital_output(msg->digital_out(), msg->is_enabled());
+			} catch (Exception &e) {
+				logger->log_warn(name(), e);
+			}
 		}
 		sens_if_->msgq_pop();
 	} // while sensor msgq

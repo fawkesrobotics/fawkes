@@ -54,6 +54,7 @@ class RobotinoComThread
 		bool         bumper;
 		bool         bumper_estop_enabled;
 		bool         digital_in[8];
+		bool         digital_out[8];
 		float        analog_in[8];
 
 		float        bat_voltage;
@@ -89,6 +90,7 @@ class RobotinoComThread
 	virtual void reset_odometry() = 0;
 	virtual void set_bumper_estop_enabled(bool enabled) = 0;
 	virtual void set_motor_accel_limits(float min_accel, float max_accel) = 0;
+	virtual void set_digital_output(unsigned int digital_out, bool enable) = 0;
 	
 	virtual bool get_data(SensorData &sensor_data);
 
@@ -96,6 +98,7 @@ class RobotinoComThread
 	        void set_drive_limits(float trans_accel, float trans_decel, float rot_accel, float rot_decel);
 	virtual void set_desired_vel(float vx, float vy, float omega);
 
+	
 	void  project(float *m1, float *m2, float *m3, float vx, float vy, float omega) const;
 	void  unproject(float *vx, float *vy, float *omega, float m1, float m2, float m3) const;
 

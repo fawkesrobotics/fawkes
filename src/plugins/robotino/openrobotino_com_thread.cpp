@@ -388,6 +388,12 @@ OpenRobotinoComThread::set_motor_accel_limits(float min_accel, float max_accel)
 	throw Exception("Setting motor accel limits for OpenRobotino driver not supported, configure controld3");
 }
 
+void
+OpenRobotinoComThread::set_digital_output(unsigned int digital_out, bool enable)
+{
+	logger->log_error(name(), "Setting digital outputs not supported with openrobotino driver");
+}
+
 
 /** Check if we are connected to OpenRobotino.
  * @return true if the connection has been established, false otherwise

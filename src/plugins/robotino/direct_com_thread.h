@@ -70,6 +70,7 @@ class DirectRobotinoComThread
 	virtual void reset_odometry();
 	virtual void set_bumper_estop_enabled(bool enabled);
 	virtual void set_motor_accel_limits(float min_accel, float max_accel);
+	virtual void set_digital_output(unsigned int digital_out, bool enable);
 
 	virtual void set_desired_vel(float vx, float vy, float omega);
 
@@ -106,9 +107,12 @@ class DirectRobotinoComThread
 	unsigned int    cfg_nodata_timeout_;
 	unsigned int    cfg_drive_update_interval_;
 	unsigned int    cfg_read_timeout_;
+
 	
 	bool opened_;
 	unsigned int open_tries_;
+
+	uint8_t         digital_outputs_;
 
 	boost::asio::io_service       io_service_;
 	boost::asio::serial_port      serial_;

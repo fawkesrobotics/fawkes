@@ -95,6 +95,7 @@ class OpenRobotinoComThread
 	virtual void reset_odometry();
 	virtual void set_bumper_estop_enabled(bool enabled);
 	virtual void set_motor_accel_limits(float min_accel, float max_accel);
+	virtual void set_digital_output(unsigned int digital_out, bool enable);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }

@@ -76,6 +76,11 @@ using namespace fawkes;
  * Set acceleration limits of motors.
  * @param min_accel minimum acceleration
  * @param max_accel maximum acceleration
+ *
+ * @fn void RobotinoComThread::set_digital_output(unsigned int digital_out, bool enable) = 0
+ * Set digital output state.
+ * @param digital_out digital output as written on the robot, i.e., 1 to 8
+ * @param enable true to enable output, false to disable
  */
 
 /** @class RobotinoComThread::SensorData "com_thread.h"
@@ -86,6 +91,7 @@ using namespace fawkes;
 RobotinoComThread::SensorData::SensorData()
 	: seq(0), mot_velocity{0,0,0}, mot_position{0,0,0}, mot_current{0.,0.,0.},
 	  bumper(false), bumper_estop_enabled(false), digital_in{0,0,0,0,0,0,0,0},
+	  digital_out{0,0,0,0,0,0,0,0},
 	  analog_in{0.,0.,0.,0.,0.,0.,0.,0.}, bat_voltage(0.), bat_current(0.),
 	  imu_enabled(false), imu_orientation{0.,0.,0.,0.}, imu_angular_velocity{0.,0.,0.},
 	  imu_angular_velocity_covariance{0.,0.,0.,0.,0.,0.,0.,0.,0.},
