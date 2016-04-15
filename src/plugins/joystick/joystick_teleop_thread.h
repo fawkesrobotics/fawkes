@@ -91,12 +91,16 @@ class JoystickTeleOpThread
   bool         cfg_use_laser_;
   std::string  cfg_ifid_laser_;
   bool         cfg_use_ff_;
-
+  unsigned int cfg_runstop_enable_buttons_;
+  unsigned int cfg_runstop_disable_buttons_;
+  
   bool         stopped_;
   float        min_distance_;
 
   bool         ff_weak_;
   bool         ff_strong_;
+
+  bool         runstop_pressed_;
 };
 
 

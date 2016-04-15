@@ -67,6 +67,18 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
     # buttons and the start button
     deadman_button_mask: 4294965631
 
+    # Run-stop buttons
+    # Whenever this button combination is pressed, enable/disable the
+    # motor enabled state. For this to work always, even during safety
+    # lockout, set the very same button combination(s) as safety bypass
+    # buttons above.
+    # These button combos may be the same for both, in which case toggling
+    # happens only after the button has been released.
+    # Enable on xboxctrl: RB and Y
+    runstop-enable-buttons: 40
+    # Disable on xboxctrl: RB and X
+    runstop-disable-buttons: 36
+
     # Drive mode switching
     # Certain button or an axis can be configured that will allow to
     # use a different drive mode as long as the button is pushed.

@@ -90,6 +90,9 @@ JoystickTeleOpThread::init()
   cfg_collision_safety_distance_ = config->get_float(CFG_PREFIX"collision_safety/distance");
   cfg_collision_safety_angle_    = config->get_uint(CFG_PREFIX"collision_safety/angle");
 
+  cfg_runstop_enable_buttons_  = config->get_uint(CFG_PREFIX"runstop-enable-buttons");
+  cfg_runstop_disable_buttons_ = config->get_uint(CFG_PREFIX"runstop-disable-buttons");
+
   cfg_ifid_motor_        = config->get_string(CFG_PREFIX"motor_interface_id");
   motor_if_ = blackboard->open_for_reading<MotorInterface>(cfg_ifid_motor_.c_str());
 
@@ -131,6 +134,7 @@ JoystickTeleOpThread::init()
     logger->log_warn(name(), "Collision safety for joystick is disabled.");
   }
 
+  runstop_pressed_ = false;
   stopped_ = false;
 }
 
@@ -206,6 +210,7 @@ JoystickTeleOpThread::loop()
 {
   joystick_if_->read();
   if (laser_if_)  laser_if_->read();
+  motor_if_->read();
 
   if ((! joystick_if_->has_writer() || joystick_if_->num_axes() == 0) && ! stopped_) {
     logger->log_warn(name(), "Joystick disconnected, stopping");
@@ -218,11 +223,32 @@ JoystickTeleOpThread::loop()
   {
     logger->log_warn(name(), "Axis number out of range, stopping");
     stop();
+  } else if (joystick_if_->pressed_buttons() == cfg_runstop_enable_buttons_ &&
+             ! runstop_pressed_ &&
+             motor_if_->motor_state() != MotorInterface::MOTOR_DISABLED)
+  {
+	  stop();
+	  MotorInterface::SetMotorStateMessage *msg =
+		  new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_DISABLED);
+	  motor_if_->msgq_enqueue(msg);
+	  logger->log_warn(name(), "Runstop ENABLED");
+	  runstop_pressed_ = true;
+  } else if (joystick_if_->pressed_buttons() == cfg_runstop_disable_buttons_ &&
+             ! runstop_pressed_ &&
+             motor_if_->motor_state() == MotorInterface::MOTOR_DISABLED)
+  {
+	  stop();
+	  MotorInterface::SetMotorStateMessage *msg =
+		  new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED);
+	  motor_if_->msgq_enqueue(msg);
+	  logger->log_warn(name(), "Runstop DISABLED");
+	  runstop_pressed_ = true;
   } else if ((joystick_if_->pressed_buttons() & cfg_deadman_butmask_) ||
 	     (cfg_deadman_use_axis_ &&
 	      ((cfg_deadman_ax_thresh_ >= 0 && joystick_if_->axis(cfg_deadman_axis_) > cfg_deadman_ax_thresh_) ||
 	       (cfg_deadman_ax_thresh_ <  0 && joystick_if_->axis(cfg_deadman_axis_) < cfg_deadman_ax_thresh_))))
   {
+	  runstop_pressed_ = false;
     if (fabsf(joystick_if_->axis(cfg_axis_forward_)) < cfg_axis_threshold_ &&
          fabsf(joystick_if_->axis(cfg_axis_sideward_)) < cfg_axis_threshold_ &&
          fabsf(joystick_if_->axis(cfg_axis_rotation_)) < cfg_axis_threshold_) {
@@ -289,6 +315,7 @@ JoystickTeleOpThread::loop()
 	        ff_strong_ = false;
         }
         send_transrot(vx, vy, omega);
+        runstop_pressed_ = false;
       }
       else if (cfg_use_laser_ && ! area_free)
       {
@@ -310,6 +337,11 @@ JoystickTeleOpThread::loop()
       }
     }
   } else if (! stopped_) {
+    runstop_pressed_ = false;
     stop();
+  } else if (joystick_if_->pressed_buttons() != cfg_runstop_enable_buttons_ &&
+             joystick_if_->pressed_buttons() != cfg_runstop_enable_buttons_)
+  {
+	  runstop_pressed_ = false;
   }
 }
