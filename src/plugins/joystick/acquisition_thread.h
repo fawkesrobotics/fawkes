@@ -80,6 +80,7 @@ class JoystickAcquisitionThread
   std::string  cfg_device_file_;
   float        cfg_safety_lockout_timeout_;
   unsigned int cfg_safety_button_mask_;
+  unsigned int cfg_safety_bypass_button_mask_;
 
   bool        safety_combo_[5];
   bool        safety_lockout_;

@@ -105,6 +105,10 @@ JoystickAcquisitionThread::init()
   if (safety_lockout_) {
 	  cfg_safety_lockout_timeout_ = config->get_float("/hardware/joystick/safety_lockout/timeout");
 	  cfg_safety_button_mask_ = config->get_uint("/hardware/joystick/safety_lockout/button-mask");
+	  cfg_safety_bypass_button_mask_ = 0;
+	  try {
+		  cfg_safety_bypass_button_mask_ = config->get_uint("/hardware/joystick/safety_lockout/bypass-button-mask");
+	  } catch (Exception &e) {} // ignore, use default
   }
   for (int i = 0; i < 5; ++i) safety_combo_[i] = false;
 
@@ -256,7 +260,8 @@ JoystickAcquisitionThread::loop()
     data_mutex_->lock();
 
     new_data_ = ! safety_lockout_;
-
+    unsigned int last_pressed_buttons = pressed_buttons_;
+    
     if ((e.type & ~JS_EVENT_INIT) == JS_EVENT_BUTTON) {
       //logger->log_debug(name(), "Button %u button event: %f", e.number, e.value);
       if (e.number <= 32) {
@@ -285,6 +290,16 @@ JoystickAcquisitionThread::loop()
 	    }
     }
 
+    // As a special case, allow a specific button combination to be
+    // written even during safety lockout. Can be used to implement
+    // an emergency stop, for example.
+    if (safety_lockout_ &&
+        ((cfg_safety_bypass_button_mask_ & pressed_buttons_) ||
+         ((cfg_safety_bypass_button_mask_ & last_pressed_buttons) && pressed_buttons_ == 0)))
+    {
+	    new_data_ = true;
+    }
+    
     data_mutex_->unlock();
 
     if (safety_lockout_) {
@@ -404,7 +419,13 @@ JoystickAcquisitionThread::joystick_name() const
 unsigned int
 JoystickAcquisitionThread::pressed_buttons() const
 {
-	return safety_lockout_ ? 0 : pressed_buttons_;
+	if (! safety_lockout_) {
+		return pressed_buttons_;
+	} else if (pressed_buttons_ & cfg_safety_bypass_button_mask_) {
+		return pressed_buttons_ & cfg_safety_bypass_button_mask_;
+	} else {
+		return 0;
+	}
 }
 
 

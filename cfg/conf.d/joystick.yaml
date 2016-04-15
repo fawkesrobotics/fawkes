@@ -21,6 +21,10 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
     # data has been received.
     timeout: 30.0
 
+    # Accept exactly buttons matching this mask even during safety lockout
+    # On xbox controller 44 are: RB, X, and Y
+    bypass-button-mask: 44
+
   # Configuration settings for the joystick-teleop plugin
   # The example configuration is suitable for an Xbox 360 controller
   teleop:
