@@ -103,7 +103,6 @@ BlockedTimingAspect::blockedTimingAspectHook() const
   return __wakeup_hook;
 }
 
-
 /** Get string for wakeup hook.
  * @param hook wakeup hook to get string for
  * @return string representation of hook
@@ -126,6 +125,20 @@ BlockedTimingAspect::blocked_timing_hook_to_string(WakeupHook hook)
   }
 }
 
+const std::map<const BlockedTimingAspect::WakeupHook, const std::string>
+BlockedTimingAspect::hook_to_syncpoint = {
+  { WAKEUP_HOOK_PRE_LOOP,       "/preloop" },
+  { WAKEUP_HOOK_SENSOR_ACQUIRE, "/sensors/acquire" },
+  { WAKEUP_HOOK_SENSOR_PREPARE, "/sensors/prepare" },
+  { WAKEUP_HOOK_SENSOR_PROCESS, "/sensors/process" },
+  { WAKEUP_HOOK_WORLDSTATE,     "/worldstate" },
+  { WAKEUP_HOOK_THINK,          "/agent" },
+  { WAKEUP_HOOK_SKILL,          "/skill" },
+  { WAKEUP_HOOK_ACT,            "/act/main" },
+  { WAKEUP_HOOK_ACT_EXEC,       "/act/exec" },
+  { WAKEUP_HOOK_POST_LOOP,      "/postloop" }
+};
+
 /** Get the syncpoint identifier corresponding to the end of a wakeup hook.
  * This is the syncpoint emitted at the end of a hook.
  * @param hook wakeup hook to get the syncpoint identifier for
@@ -134,18 +147,10 @@ BlockedTimingAspect::blocked_timing_hook_to_string(WakeupHook hook)
 std::string
 BlockedTimingAspect::blocked_timing_hook_to_end_syncpoint(WakeupHook hook)
 {
-  switch (hook) {
-    case WAKEUP_HOOK_PRE_LOOP:       return "/preloop/end";
-    case WAKEUP_HOOK_SENSOR_ACQUIRE: return "/sensors/acquire/end";
-    case WAKEUP_HOOK_SENSOR_PREPARE: return "/sensors/prepare/end";
-    case WAKEUP_HOOK_SENSOR_PROCESS: return "/sensors/process/end";
-    case WAKEUP_HOOK_WORLDSTATE:     return "/worldstate/end";
-    case WAKEUP_HOOK_THINK:          return "/agent/end";
-    case WAKEUP_HOOK_SKILL:          return "/skill/end";
-    case WAKEUP_HOOK_ACT:            return "/act/main/end";
-    case WAKEUP_HOOK_ACT_EXEC:       return "/act/exec/end";
-    case WAKEUP_HOOK_POST_LOOP:      return "/postloop/end";
-    default: throw Exception("Unknown blocked timing wakeup hook");
+  try {
+    return std::string(hook_to_syncpoint.at(hook)) + "/end";
+  } catch (const std::out_of_range &e) {
+    throw Exception("Unknown blocked timing wakeup hook. Error: %s", e.what());
   }
 }
 
@@ -157,21 +162,12 @@ BlockedTimingAspect::blocked_timing_hook_to_end_syncpoint(WakeupHook hook)
 std::string
 BlockedTimingAspect::blocked_timing_hook_to_start_syncpoint(WakeupHook hook)
 {
-  switch (hook) {
-    case WAKEUP_HOOK_PRE_LOOP:       return "/preloop/start";
-    case WAKEUP_HOOK_SENSOR_ACQUIRE: return "/sensors/acquire/start";
-    case WAKEUP_HOOK_SENSOR_PREPARE: return "/sensors/prepare/start";
-    case WAKEUP_HOOK_SENSOR_PROCESS: return "/sensors/process/start";
-    case WAKEUP_HOOK_WORLDSTATE:     return "/worldstate/start";
-    case WAKEUP_HOOK_THINK:          return "/agent/start";
-    case WAKEUP_HOOK_SKILL:          return "/skill/start";
-    case WAKEUP_HOOK_ACT:            return "/act/main/start";
-    case WAKEUP_HOOK_ACT_EXEC:       return "/act/exec/start";
-    case WAKEUP_HOOK_POST_LOOP:      return "/postloop/start";
-    default: throw Exception("Unknown blocked timing wakeup hook");
+  try {
+    return std::string(hook_to_syncpoint.at(hook)) + "/start";
+  } catch (const std::out_of_range &e) {
+    throw Exception("Unknown blocked timing wakeup hook. Error: %s", e.what());
   }
 }
-
 
 /** The post loop function of the BlockedTimingAspect
  * This function is called right after the loop of the thread with the aspect.
