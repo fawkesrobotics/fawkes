@@ -21,6 +21,8 @@
 
 #include <core/threading/mutex_locker.h>
 
+#include <aspect/blocked_timing.h>
+
 #include <syncpoint/syncpoint_manager.h>
 #include <syncpoint/exceptions.h>
 
@@ -144,7 +146,6 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
 
   for (std::set<RefPtr<SyncPoint>, SyncPointSetLessThan>::const_iterator sp_it = syncpoints_.begin();
       sp_it != syncpoints_.end(); sp_it++) {
-    Time lifetime = Time() - (*sp_it)->creation_time_;
     graph << "\"" << (*sp_it)->get_identifier() << "\";";
 
     // EMIT CALLS
@@ -153,6 +154,15 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
     std::map<std::string, SyncPointCallStats> emit_call_stats;
     for (CircularBuffer<SyncPointCall>::iterator emitcalls_it = emit_calls.begin();
         emitcalls_it != emit_calls.end(); emitcalls_it++) {
+      // Remove the main thread from the graph, and also remove any emit calls
+      // to the SyncPoint "/" to improve the resulting graph.
+      // The main thread emits and waits for every hook, which adds a lot of
+      // uninteresting edges to the graph.
+      // Similarly, all emitters also emit "/", which is not interesting to see.
+      if (emitcalls_it->get_caller() == "FawkesMainThread" ||
+          (*sp_it)->get_identifier() == "/") {
+        continue;
+      }
       emit_call_stats[emitcalls_it->get_caller()].update_calls(emitcalls_it->get_call_time());
     }
 
@@ -181,6 +191,9 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
 
     for (std::map<std::string, SyncPointCallStats>::iterator wait_call_stats_it = wait_one_call_stats.begin();
         wait_call_stats_it != wait_one_call_stats.end(); wait_call_stats_it++) {
+      if (wait_call_stats_it->first == "FawkesMainThread") {
+        continue;
+      }
       float age = (Time() - wait_call_stats_it->second.get_last_call()).in_sec();
       if (age < max_age) {
         graph << "\"" << (*sp_it)->get_identifier() << "\"" << " -> "
@@ -209,6 +222,9 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
 
     for (std::map<std::string, SyncPointCallStats>::iterator wait_call_stats_it = wait_all_call_stats.begin();
         wait_call_stats_it != wait_all_call_stats.end(); wait_call_stats_it++) {
+      if (wait_call_stats_it->first == "FawkesMainThread") {
+        continue;
+      }
       float age = (Time() - wait_call_stats_it->second.get_last_call()).in_sec();
       if (age < max_age) {
         graph << "\"" << (*sp_it)->get_identifier() << "\"" << " -> "
@@ -225,7 +241,26 @@ SyncPointManager::all_syncpoints_as_dot(float max_age)
         graph << "];";
       }
     }
-
+  }
+  // Visualize hook dependencies by directly adding edges from one hook to the
+  // next. This is necessary because we removed the main thread from the
+  // visualization, which makes sure that the hooks are started in the right
+  // order. To retain the dependencies between the hooks, add edges manually.
+  // Essentially, these edges represent the order that is guaranteed by the
+  // main thread.
+  // Note: this expects that
+  //   (1) pre loop is the first, post loop th last hook,
+  //   (2) no custom enum values (e.g. WAKEUP_HOOK_ACT = 5) are specified.
+  for (uint i = BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP;
+       i != BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP;
+       i++) {
+    graph << "\""
+      << BlockedTimingAspect::blocked_timing_hook_to_end_syncpoint(
+        static_cast<BlockedTimingAspect::WakeupHook>(i)) << "\""
+      << " -> " << "\""
+      << BlockedTimingAspect::blocked_timing_hook_to_start_syncpoint(
+        static_cast<BlockedTimingAspect::WakeupHook>(i+1))
+      << "\";";
   }
   graph << "}";
   return graph.str();

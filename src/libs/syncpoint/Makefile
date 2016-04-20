@@ -17,7 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 
-LIBS_libfawkessyncpoint = fawkescore fawkesutils
+LIBS_libfawkessyncpoint = fawkescore fawkesutils fawkesaspects
 OBJS_libfawkessyncpoint = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 HDRS_libfawkessyncpoint = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
