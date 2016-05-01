@@ -29,11 +29,13 @@
 #include <aspect/clock.h>
 #include <plugins/mongodb/aspect/mongodb.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 
 #include <string>
 
 namespace fawkes {
   class Mutex;
+  class RobotMemoryInterface;
 }
 
 class RobotMemoryThread
@@ -42,6 +44,7 @@ class RobotMemoryThread
   public fawkes::ConfigurableAspect,
   public fawkes::ClockAspect,
   public fawkes::MongoDBAspect,
+	public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect
 {
  public:
@@ -57,6 +60,10 @@ class RobotMemoryThread
 
  private:
   std::string    __collection;
+  fawkes::Mutex *__mutex;
+  fawkes::RobotMemoryInterface *__rm_if;
+
+  void exec_query(std::string query);
 };
 
 #endif

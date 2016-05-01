@@ -21,6 +21,10 @@
  */
 
 #include "robot_memory_thread.h"
+#include "interfaces/RobotMemoryInterface.h"
+#include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
+#include <memory>
 
 // from MongoDB
 #include <mongo/client/dbclient.h>
@@ -35,24 +39,34 @@ using namespace fawkes;
 
 /** Constructor. */
 RobotMemoryThread::RobotMemoryThread()
-  : Thread("RobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP)
+	: Thread("RobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
+	  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
+  __mutex = new Mutex();
 }
 
 
 /** Destructor. */
 RobotMemoryThread::~RobotMemoryThread()
 {
+  delete __mutex;
 }
 
 
 void
 RobotMemoryThread::init()
 {
+	logger->log_info(name(), "Started RobotMemory");
 	__collection = "fawkes.msglog";
   try {
     __collection = config->get_string("/plugins/mongodb/logger_collection");
   } catch (Exception &e) {}
+
+  __rm_if = blackboard->open_for_writing<RobotMemoryInterface>(config->get_string("/plugins/robot-memory/interface-name").c_str());
+  __rm_if->set_error("");
+  __rm_if->set_result("");
+  
+  __rm_if->write();
 }
 
 
@@ -65,8 +79,52 @@ RobotMemoryThread::finalize()
 void
 RobotMemoryThread::loop()
 {
+	// process interface messages
+  while (! __rm_if->msgq_empty() ) {
+    if (__rm_if->msgq_first_is<RobotMemoryInterface::QueryMessage>()) {
+	    RobotMemoryInterface::QueryMessage* query = (RobotMemoryInterface::QueryMessage*) __rm_if->msgq_first();
+	    exec_query(query->query());
+    } else {
+      logger->log_warn(name(), "Unknown message received");
+    }
+
+    __rm_if->msgq_pop();
+  }
 }
 
+void RobotMemoryThread::exec_query(std::string query_string)
+{
+	logger->log_info(name(), "Executing Query: %s", query_string.c_str());
+
+	//only one query at a time
+	MutexLocker lock(__mutex);
+
+	//get query from string
+	Query query;
+	try{
+	  query = Query(query_string);
+	} catch (DBException &e) {
+		logger->log_error(name(), "Can't parse query_string '%s'\n Exception: %s",
+		                  query_string.c_str(), e.toString().c_str());
+		__rm_if->set_error((std::string("Can't parse query_string ") +  query_string
+		                    + "\nException: " + e.toString()).c_str());
+		return;
+	}
+
+	//actually execute query
+	std::unique_ptr<DBClientCursor> cursor;
+	try{
+	  cursor = mongodb_client->query(__collection, query);
+	} catch (DBException &e) {
+		logger->log_error(name(), "Error for query %s\n Exception: %s",
+		                  query_string.c_str(), e.toString().c_str());
+		__rm_if->set_error((std::string("Query error for ") +  query_string
+		                    + "\nException: " + e.toString()).c_str());
+		return;
+	}
+
+	logger->log_info(name(), "Query One result:\n%s", cursor->next().toString().c_str());
+}
 
 // void
 // RobotMemoryThread::insert_message(LogLevel ll, const char *component,
