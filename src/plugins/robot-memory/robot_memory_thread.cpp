@@ -108,9 +108,18 @@ void RobotMemoryThread::exec_query(std::string query_string)
 		                  query_string.c_str(), e.toString().c_str());
 		__rm_if->set_error((std::string("Can't parse query_string ") +  query_string
 		                    + "\nException: " + e.toString()).c_str());
+		__rm_if->write();
 		return;
 	}
 
+	//introspect query
+	logger->log_info(name(), "Filter: %s", query.getFilter().toString().c_str());
+	logger->log_info(name(), "Modifiers: %s", query.getModifiers().toString().c_str());
+	logger->log_info(name(), "Sort: %s", query.getSort().toString().c_str());
+	logger->log_info(name(), "Hint: %s", query.getHint().toString().c_str());
+	logger->log_info(name(), "ReadPref: %s", query.getReadPref().toString().c_str());
+
+	
 	//actually execute query
 	std::unique_ptr<DBClientCursor> cursor;
 	try{
@@ -120,10 +129,13 @@ void RobotMemoryThread::exec_query(std::string query_string)
 		                  query_string.c_str(), e.toString().c_str());
 		__rm_if->set_error((std::string("Query error for ") +  query_string
 		                    + "\nException: " + e.toString()).c_str());
+		__rm_if->write();
 		return;
 	}
 
 	logger->log_info(name(), "Query One result:\n%s", cursor->next().toString().c_str());
+	__rm_if->set_result(cursor->next().toString().c_str());
+	__rm_if->write();
 }
 
 // void
