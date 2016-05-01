@@ -1,0 +1,56 @@
+#*****************************************************************************
+#           Makefile Build System for Fawkes: Robot-Memory Plugin
+#                            -------------------
+#   Created on Sun May 01 13:32:12 2016
+#   Copyright (C) 2016 Frederik Zwilling
+#
+#*****************************************************************************
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#*****************************************************************************
+
+BASEDIR = ../../..
+
+include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDCONFDIR)/tf/tf.mk
+include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
+
+LIBS_robot_memory = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
+		fawkesutils fawkeslogging fawkesmongodbaspect fvutils \
+		fawkestf
+OBJS_robot_memory = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+
+CFLAGS  += $(CFLAGS_MONGODB)
+LDFLAGS += $(LDFLAGS_MONGODB)
+
+OBJS_all    = $(OBJS_robot_memory)
+
+ifeq ($(HAVE_MONGODB)$(HAVE_TF),11)
+  CFLAGS += $(CFLAGS_TF) $(CFLAGS_MONGODB)
+  LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_MONGODB)
+  PLUGINS_all = $(PLUGINDIR)/robot-memory.so
+else
+  ifneq ($(HAVE_MONGODB),1)
+    WARN_TARGETS += warning_mongodb
+  endif
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS += warning_tf
+  endif
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+
+.PHONY: warning_mongodb warning_tf
+warning_mongodb:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB Logging Plugin$(TNORMAL) (mongodb[-devel] not installed)"
+warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL utility library$(TNORMAL) (tf framework not available)"
+endif
+
+include $(BUILDSYSDIR)/base.mk
+

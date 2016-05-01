@@ -26,7 +26,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  static_transforms navgraph navgraph-clusters navgraph-generator colli \
 	  clips clips-agent clips-protobuf clips-webview clips-navgraph clips-ros \
 	  clips-tf openprs openprs-agent eclipse-clp \
-	  mongodb mongodb_log \
+	  mongodb mongodb_log robot-memory\
 	  openni refboxcomm ros player xmlrpc gossip \
 	  robot_state_publisher gazebo dynamixel navgraph-interactive
 
