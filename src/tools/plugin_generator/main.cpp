@@ -51,10 +51,10 @@ main(int argc, char **argv)
 int
 main()
 {
-  std::string dir = ".";
+  std::string dir = "../src/plugins/generator_test/" ; //TODO generate folder
   std::string author = "Johannes Rothe";
   std::string year = "2016";
-  std::string date = "25.04";
+  std::string date = "25.04.2016";
   std::string name = "generator_test";
   std::string description = "I am the description";
 

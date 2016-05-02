@@ -64,6 +64,7 @@ PluginGenerator::PluginGenerator(std::string directory,
   _filename_thread_cpp = plugin_name + "_thread.cpp";
   _filename_thread_h   = plugin_name + "_thread.h";
   _filename_plugin_cpp = plugin_name + "_plugin.cpp";
+  _filename_makefile   = "Makefile";
 
   _plugin_name = plugin_name;
 
@@ -113,6 +114,27 @@ PluginGenerator::write_header(FILE *f, std::string filename)
 	  (_creation_date.length() > 0 ) ? "\n" : "",
 	  _year.c_str(),  _author.c_str()
 	  );
+}
+
+void
+PluginGenerator::write_makefile_header(FILE *f, std::string filename){
+  fprintf(f,
+          "#*****************************************************************************\n"
+          "#         Makefile Build System for Fawkes: %s Plugin\n"
+          "#                            -------------------\n"
+          "#   Created on %s \n"
+          "#   Copyright (C) %s by %s\n"
+          "#\n"
+          "#*****************************************************************************\n"
+          "#\n"
+          "#   This program is free software; you can redistribute it and/or modify\n"
+          "#   it under the terms of the GNU General Public License as published by\n"
+          "#   the Free Software Foundation; either version 2 of the License, or\n"
+          "#   (at your option) any later version.\n"
+          "#\n"
+          "#*****************************************************************************\n\n",
+          _plugin_name.c_str(), _creation_date.c_str(), _year.c_str(),
+          _author.c_str());
 }
 
 
@@ -244,6 +266,28 @@ PluginGenerator::write_plugin_cpp(FILE *f)
           _description.c_str(), _class_name_plugin.c_str());
 }
 
+void
+PluginGenerator::write_makefile (FILE* f)
+{
+  write_makefile_header(f, _filename_makefile);
+  std::string filename_plugin_o = _plugin_name + "_plugin.o";
+  std::string filename_thread_o = _plugin_name + "_thread.o";
+  fprintf(f,
+          "BASEDIR = ../../..\n"
+          "include $(BASEDIR)/etc/buildsys/config.mk\n\n"
+          "LIBS_%s = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \\\n"
+          "                      fawkesblackboard fawkesinterface\n\n"
+          "OBJS_%s = %s %s\n\n",
+          _plugin_name.c_str(), _plugin_name.c_str(), filename_plugin_o.c_str(),
+          filename_thread_o.c_str()
+          );
+  fprintf(f,
+         "PLUGINS_all = $(PLUGINDIR)/%s.$(SOEXT)\n\n"
+         "OBJS_all = $(OBJS_%s)\n\n"
+         "include $(BUILDSYSDIR)/base.mk",
+         _plugin_name.c_str(), _plugin_name.c_str());
+}
+
 /*
  * Format a lowercase plugin name to CamelCase plugin name and append
  * a string to specify the name
@@ -288,11 +332,12 @@ PluginGenerator::generate()
   FILE *thread_cpp;
   FILE *thread_h;
   FILE *plugin_cpp;
-  //TODO Makefile, Pluginfile
+  FILE *makefile;
 
   thread_h   = fopen(string(_dir + _filename_thread_h).c_str(), "w");
   thread_cpp = fopen(string(_dir + _filename_thread_cpp).c_str(), "w");
   plugin_cpp = fopen(string(_dir + _filename_plugin_cpp).c_str(), "w");
+  makefile   = fopen(string(_dir + _filename_makefile).c_str(), "w");
 
   if ( thread_h == NULL ) {
     printf("Cannot open thread_h file %s%s\n", _dir.c_str(), _filename_thread_h.c_str());
@@ -303,11 +348,17 @@ PluginGenerator::generate()
   if ( plugin_cpp == NULL ) {
     printf("Cannot open plugin_cpp file %s%s\n", _dir.c_str(), _filename_plugin_cpp.c_str());
   }
+  if ( makefile == NULL ) {
+    printf("Cannot open makefile %s%s\n", _dir.c_str(), _filename_makefile.c_str());
+  }
   
   write_thread_cpp(thread_cpp);
   write_thread_h(thread_h);
   write_plugin_cpp(plugin_cpp);
+  write_makefile(makefile);
 
   fclose(thread_cpp);
   fclose(thread_h);
+  fclose(plugin_cpp);
+  fclose(makefile);
 }
