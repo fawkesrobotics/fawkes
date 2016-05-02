@@ -105,13 +105,13 @@ PluginGenerator::write_header(FILE *f, std::string filename)
 	  " *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
 	  " *  GNU Library General Public License for more details.\n"
 	  " *\n"
-	  " *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.\n"
+	  " *  Read the full text in the LICENSE.GPL file in the doc directory.\n"
 	  " */\n\n",
 	  filename.c_str(), _plugin_name.c_str(),
-	  (_creation_date.length() > 0 ) ? " *  Interface created: " : "",
+	  (_creation_date.length() > 0 ) ? " *  Plugin created: " : "",
 	  (_creation_date.length() > 0 ) ? _creation_date.c_str() : "",
 	  (_creation_date.length() > 0 ) ? "\n" : "",
-	  _year.c_str(), (_author.length() > 0) ? _author.c_str() : "AllemaniACs RoboCup Team"
+	  _year.c_str(),  _author.c_str()
 	  );
 }
 
@@ -199,11 +199,49 @@ PluginGenerator::write_thread_h(FILE *f)
           "  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */\n"
           "  protected: virtual void run() { Thread::run(); }\n\n"
           " private:\n"
+          "  //Define class member variables here\n"
           ,
 	  _class_name_thread.c_str(),
 	  _class_name_thread.c_str());
 
   fprintf(f, "\n};\n\n\n#endif");
+}
+
+void
+PluginGenerator::write_plugin_cpp(FILE *f)
+{
+  write_header(f, _filename_plugin_cpp);
+  fprintf(f,
+          "#include <core/plugin.h>\n\n"
+          "#include \"%s\"\n\n"
+          "using namespace fawkes;\n\n",
+          _filename_thread_h.c_str());
+  fprintf(f,
+          "/* @class %s \"%s\"\n"
+          " * %s\n"
+          " * @author %s\n"
+          " */\n",
+          _class_name_plugin.c_str(), _filename_plugin_cpp.c_str(),
+          _description.c_str(), _author.c_str());
+  fprintf(f,
+          "class %s : public fawkes::Plugin\n"
+          "{\n"
+          " public:\n"
+          "  /* Constructor\n"
+          "   * @param config Fakwes configuration\n"
+          "   */\n"
+          "  %s(Configuration *config)\n"
+          "     : Plugin(config)\n"
+          "  {\n"
+          "     thread_list.push_back(new %s();\n"
+          "  }\n"
+          "};\n\n",
+          _class_name_plugin.c_str(), _class_name_plugin.c_str(),
+          _class_name_thread.c_str());
+  fprintf(f,
+          "PLUGIN_DESCRIPTION(\"%s\")\n"
+          "EXPORT_PLUGIN(%s)",
+          _description.c_str(), _class_name_plugin.c_str());
 }
 
 /*
@@ -268,6 +306,7 @@ PluginGenerator::generate()
   
   write_thread_cpp(thread_cpp);
   write_thread_h(thread_h);
+  write_plugin_cpp(plugin_cpp);
 
   fclose(thread_cpp);
   fclose(thread_h);

@@ -40,6 +40,7 @@ class PluginGenerator
 
   void write_thread_h(FILE *f);
   void write_thread_cpp(FILE *f);
+  void write_plugin_cpp(FILE *f);
   void write_makefile(FILE *f);
   void write_header(FILE *f, std::string filename);
   void write_deflector(FILE *f);
