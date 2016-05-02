@@ -98,8 +98,7 @@ PluginGenerator::write_header(FILE *f, std::string filename)
 	  "/*  This program is free software; you can redistribute it and/or modify\n"
 	  " *  it under the terms of the GNU General Public License as published by\n"
 	  " *  the Free Software Foundation; either version 2 of the License, or\n"
-	  " *  (at your option) any later version. A runtime exception applies to\n"
-	  " *  this software (see LICENSE.GPL_WRE file mentioned below for details).\n"
+	  " *  (at your option) any later version.\n"
 	  " *\n"
 	  " *  This program is distributed in the hope that it will be useful,\n"
 	  " *  but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
@@ -158,7 +157,7 @@ PluginGenerator::write_thread_cpp(FILE *f)
   write_header(f, _filename_thread_cpp);
   fprintf(f,
           "#include \"%s\"\n\n"
-	  "using namespace fawkes \n\n"
+	  "using namespace fawkes;\n\n"
 	  "/** @class %s '%s' \n"
 	  " * %s\n"
 	  " * @author %s\n"
@@ -169,13 +168,9 @@ PluginGenerator::write_thread_cpp(FILE *f)
   //Constructor
   fprintf(f,
           "%s::%s()\n"
-          " : Thread(\"%s\", Thread::OPMODE_CONTINUOUS)\n{\n}\n\n", //TODO support the other OPMODES
+          " : Thread(\"%s\", Thread::OPMODE_WAITFORWAKEUP),\n"
+          "             BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL) \n{\n}\n\n", //TODO support the other OPMODES
           _class_name_thread.c_str(), _class_name_thread.c_str(),
-          _class_name_thread.c_str());
-  //Destructor
-  fprintf(f,
-          "%s::~%s()\n{\n}\n\n",
-          _class_name_thread.c_str(),
           _class_name_thread.c_str());
   //init
   fprintf(f,
@@ -198,11 +193,12 @@ PluginGenerator::write_thread_h(FILE *f)
   write_deflector(f);
 
   fprintf(f,
-          "#include <string>\n"
           "#include <core/threading/thread.h>\n"
           "#include <aspect/blocked_timing.h>\n"
           "#include <aspect/logging.h>\n"
+          "#include <aspect/blackboard.h>\n"
           "#include <aspect/configurable.h>\n\n"
+          "#include <string>\n\n"
 
 	  "namespace fawkes {\n"
           "}\n\n"
@@ -214,10 +210,10 @@ PluginGenerator::write_thread_h(FILE *f)
           "  public fawkes::BlackBoardAspect\n"
 	  "{\n\n"
 	  " public:\n"
-          "  %s()\n\n"
-          "  virtual void init()\n"
-          "  virtual void finalize()\n"
-          "  virtual void loop()\n\n"
+          "  %s();\n\n"
+          "  virtual void init();\n"
+          "  virtual void finalize();\n"
+          "  virtual void loop();\n\n"
           "  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */\n"
           "  protected: virtual void run() { Thread::run(); }\n\n"
           " private:\n"
@@ -255,7 +251,7 @@ PluginGenerator::write_plugin_cpp(FILE *f)
           "  %s(Configuration *config)\n"
           "     : Plugin(config)\n"
           "  {\n"
-          "     thread_list.push_back(new %s();\n"
+          "     thread_list.push_back(new %s());\n"
           "  }\n"
           "};\n\n",
           _class_name_plugin.c_str(), _class_name_plugin.c_str(),
