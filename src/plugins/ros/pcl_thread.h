@@ -80,14 +80,14 @@ class RosPointCloudThread
     pcl = new pcl::PointCloud<PointT>();
     pcl::fromROSMsg(*msg, **pcl);
     pcl_manager->add_pointcloud(topic_name.c_str(), pcl);
-    ros_pointcloud_available_ref[topic_name] = new fawkes::pcl_utils::PointCloudStorageAdapter<PointT>(pcl);
+    ros_pointcloud_available_ref_[topic_name] = new fawkes::pcl_utils::PointCloudStorageAdapter<PointT>(pcl);
   }
 
   template<typename PointT>
   void update_pointcloud(const sensor_msgs::PointCloud2ConstPtr &msg, const std::string topic_name)
   {
     fawkes::RefPtr<pcl::PointCloud<PointT>> pcl;
-    pcl = dynamic_cast<fawkes::pcl_utils::PointCloudStorageAdapter<PointT> *>(ros_pointcloud_available_ref[topic_name])->cloud;
+    pcl = dynamic_cast<fawkes::pcl_utils::PointCloudStorageAdapter<PointT> *>(ros_pointcloud_available_ref_[topic_name])->cloud;
     pcl::fromROSMsg(*msg, **pcl);
   }
 
@@ -100,12 +100,14 @@ class RosPointCloudThread
     fawkes::Time             last_sent;
   } PublisherInfo;
   /// @endcond
-  std::map<std::string, PublisherInfo> fawkes_pubs;                            // the list and ref of topics from fawkes->ros
-  std::list<std::string> ros_pointcloud_available;                             // the list of topics from ros->fawkes
-  std::map<std::string, fawkes::pcl_utils::StorageAdapter *> ros_pointcloud_available_ref;// the list of refs of topics from ros->fawkes
-  std::map<std::string, ros::Subscriber> ros_pointcloud_subs;                  // the list of subscribers in ros, ros_pointcloud_available that are currently used in fawkes
+  std::map<std::string, PublisherInfo> fawkes_pubs_;                           // the list and ref of topics from fawkes->ros
+  std::list<std::string> ros_pointcloud_available_;                            // the list of topics from ros->fawkes
+  std::map<std::string, fawkes::pcl_utils::StorageAdapter *> ros_pointcloud_available_ref_;// the list of refs of topics from ros->fawkes
+  std::map<std::string, ros::Subscriber> ros_pointcloud_subs_;                 // the list of subscribers in ros, ros_pointcloud_available that are currently used in fawkes
 
-  fawkes::Time ros_pointcloud_last_searched;
+  fawkes::Time ros_pointcloud_last_searched_;
+
+  float cfg_ros_research_ival_;
 };
 
 #endif
