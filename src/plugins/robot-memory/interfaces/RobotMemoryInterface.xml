@@ -16,5 +16,24 @@
     </comment>
     <field type="string"  length="1024" name="query">Query as JSON string</field>
   </message>
+  <message name="Insert">
+    <comment>
+      Message to insert a document into the database.
+    </comment>
+    <field type="string"  length="1024" name="insert">Document to insert as JSON string</field>
+  </message>
+  <message name="Update">
+    <comment>
+      Message to update documents mathing a query.
+    </comment>
+    <field type="string"  length="1024" name="query">Query as JSON string</field>
+    <field type="string"  length="1024" name="update">Update as JSON string</field>
+  </message>
+  <message name="Remove">
+    <comment>
+      Message to remove documents matching the query.
+    </comment>
+    <field type="string"  length="1024" name="query">Query as JSON string</field>
+  </message>
 
 </interface>

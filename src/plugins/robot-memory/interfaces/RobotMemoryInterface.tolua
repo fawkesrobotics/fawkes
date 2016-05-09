@@ -34,6 +34,93 @@ class RobotMemoryInterface : public Interface
     int maxlenof_query() const;
   };
 
+  class InsertMessage : public Message
+  {
+    InsertMessage(char * ini_insert);
+    InsertMessage();
+    ~InsertMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * insert();
+    void set_insert(const char * new_insert);
+    int maxlenof_insert() const;
+  };
+
+  class UpdateMessage : public Message
+  {
+    UpdateMessage(char * ini_query, char * ini_update);
+    UpdateMessage();
+    ~UpdateMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * query();
+    void set_query(const char * new_query);
+    int maxlenof_query() const;
+    char * update();
+    void set_update(const char * new_update);
+    int maxlenof_update() const;
+  };
+
+  class RemoveMessage : public Message
+  {
+    RemoveMessage(char * ini_query);
+    RemoveMessage();
+    ~RemoveMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * query();
+    void set_query(const char * new_query);
+    int maxlenof_query() const;
+  };
+
   char * error();
   void set_error(const char * new_error);
   int maxlenof_error() const;

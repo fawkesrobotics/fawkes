@@ -80,6 +80,91 @@ class RobotMemoryInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class InsertMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char insert[1024]; /**< Document to insert as JSON string */
+    } InsertMessage_data_t;
+#pragma pack(pop)
+
+    InsertMessage_data_t *data;
+
+   public:
+    InsertMessage(const char * ini_insert);
+    InsertMessage();
+    ~InsertMessage();
+
+    InsertMessage(const InsertMessage *m);
+    /* Methods */
+    char * insert() const;
+    void set_insert(const char * new_insert);
+    size_t maxlenof_insert() const;
+    virtual Message * clone() const;
+  };
+
+  class UpdateMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char query[1024]; /**< Query as JSON string */
+      char update[1024]; /**< Update as JSON string */
+    } UpdateMessage_data_t;
+#pragma pack(pop)
+
+    UpdateMessage_data_t *data;
+
+   public:
+    UpdateMessage(const char * ini_query, const char * ini_update);
+    UpdateMessage();
+    ~UpdateMessage();
+
+    UpdateMessage(const UpdateMessage *m);
+    /* Methods */
+    char * query() const;
+    void set_query(const char * new_query);
+    size_t maxlenof_query() const;
+    char * update() const;
+    void set_update(const char * new_update);
+    size_t maxlenof_update() const;
+    virtual Message * clone() const;
+  };
+
+  class RemoveMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char query[1024]; /**< Query as JSON string */
+    } RemoveMessage_data_t;
+#pragma pack(pop)
+
+    RemoveMessage_data_t *data;
+
+   public:
+    RemoveMessage(const char * ini_query);
+    RemoveMessage();
+    ~RemoveMessage();
+
+    RemoveMessage(const RemoveMessage *m);
+    /* Methods */
+    char * query() const;
+    void set_query(const char * new_query);
+    size_t maxlenof_query() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   RobotMemoryInterface();

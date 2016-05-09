@@ -30,6 +30,7 @@
 #include <plugins/mongodb/aspect/mongodb.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
+#include <mongo/client/dbclient.h>
 
 #include <string>
 
@@ -64,6 +65,12 @@ class RobotMemoryThread
   fawkes::RobotMemoryInterface *__rm_if;
 
   void exec_query(std::string query);
+  void exec_insert(std::string insert);
+  void exec_update(std::string query, std::string update);
+  void exec_remove(std::string query);
+
+  void log(mongo::Query query, std::string what);
+  void log(mongo::BSONObj obj, std::string what);
 };
 
 #endif
