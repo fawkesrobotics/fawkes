@@ -21,6 +21,7 @@
 
 #include <string>
 #include <cstdio>
+#include <ctime>
 #include <utils/system/argparser.h>
 #include "plugin_generator.h"
 
@@ -37,28 +38,52 @@ using namespace fawkes;
  * Maybe libraries to include in the Makefile and as includes
  */
 
-/*int
+void
+print_usage(const char *program_name)
+{
+  printf("Usage: %s [-h] <author_name> <plugin_name> <description> <directory> \n"
+	 "Example: %s \"John Doe\" robot_mover \"Move the robot a meter forward\" \n"
+	 "                            ~/fawkes/src/plugins/robot_mover/"
+	 "\n"
+         "-h  Print this usage information\n\n"
+         "Generate the necessary files to build a fawkes plugin",
+	 program_name, program_name);
+}
+
+void
+generate_plugin(std::string author_name, std::string plugin_name, std::string description, std::string directory)
+{
+  time_t now = time(0);
+  std::string date = ctime(&now);
+  tm *time_structure = localtime(&now);
+  std::string year = std::to_string(time_structure->tm_year + 1900);
+
+  PluginGenerator *generator = new PluginGenerator(directory, author_name, year , date, plugin_name, description);
+  generator->generate();
+}
+
+int
 main(int argc, char **argv)
 {
-  ArgumentParser *argparser = new ArgumentParser(argc, argv, "hd:v");
-  const vector<const char *> & items = argparser->items();
-  if (items.size() == 0 || argparser->has_arg("h")) {
-      printf("Help stuff and binary description\n");
-  } else {
-    printf("Plugin Generator Starting\n");
+  ArgumentParser argp(argc, argv, "h");
+
+  if ( argp.has_arg("h") ) {
+    print_usage(argv[0]);
+    exit(0);
   }
-  */
-int
-main()
-{
-  std::string dir = "../src/plugins/generator_test/" ; //TODO generate folder
-  std::string author = "Johannes Rothe";
-  std::string year = "2016";
-  std::string date = "25.04.2016";
-  std::string name = "generator_test";
-  std::string description = "I am the description";
 
-  PluginGenerator *generator = new PluginGenerator(dir, author, year, date, name, description);
+  std::string author_name, plugin_name, description, directory;
+  if (argp.num_items() != 4) {
+    printf("Invalid number of arguments\n");
+    print_usage(argv[0]);
+    exit(1);
+  } else {
+    author_name = argp.items()[0];
+    plugin_name = argp.items()[1];
+    description = argp.items()[2];
+    directory = argp.items()[3];
+    generate_plugin(author_name, plugin_name, description, directory);
+  }
 
-  generator->generate();
+  return 0;
 }
