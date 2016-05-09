@@ -29,6 +29,7 @@
 #include <vector>
 #include <time.h>
 #include <fstream>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -330,6 +331,14 @@ PluginGenerator::generate()
   FILE *plugin_cpp;
   FILE *makefile;
 
+  struct stat info;
+
+  if (!(stat(_dir.c_str(), &info) == 0 && S_ISDIR(info.st_mode))) {
+      printf( "ERROR: Cannot open %s\n"
+          "Use this command to create it: \n"
+          "mkdir %s\n", _dir.c_str(), _dir.c_str());
+      exit(1);
+  }
   thread_h   = fopen(string(_dir + _filename_thread_h).c_str(), "w");
   thread_cpp = fopen(string(_dir + _filename_thread_cpp).c_str(), "w");
   plugin_cpp = fopen(string(_dir + _filename_plugin_cpp).c_str(), "w");
