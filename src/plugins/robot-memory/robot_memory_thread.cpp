@@ -103,6 +103,10 @@ RobotMemoryThread::loop()
 
 void RobotMemoryThread::exec_query(std::string query_string)
 {
+	exec_query(query_string, __collection);
+}
+void RobotMemoryThread::exec_query(std::string query_string, std::string collection)
+{
 	logger->log_info(name(), "Executing Query: %s", query_string.c_str());
 
 	//only one query at a time
@@ -123,11 +127,26 @@ void RobotMemoryThread::exec_query(std::string query_string)
 
 	//introspect query
 	log(query, "executing query:");
+
+	//check if virtual knowledge is queried
+	//rename field in query
+	if(query.getFilter().hasField("class")){
+		set_fields(query, std::string("{type:\"") +
+		           query.getFilter()["class"].String() + "\"}");
+		remove_field(query, "class");
+	}
+	log(query, "Virtual query:");
+	//computation on request
+	if(query.getFilter().hasField("bbinterface")){
+		collection = config->get_string("plugins/robot-memory/blackboard-collection");
+		gen_blackboard_data(query.getFilter()["bbinterface"].String());
+	}
+	log(query, "Virtual query:");
 	
 	//actually execute query
 	std::unique_ptr<DBClientCursor> cursor;
 	try{
-	  cursor = mongodb_client->query(dyn_collection, query);
+	  cursor = mongodb_client->query(collection, query);
 	} catch (DBException &e) {
 		logger->log_error(name(), "Error for query %s\n Exception: %s",
 		                  query_string.c_str(), e.toString().c_str());
@@ -150,6 +169,10 @@ void RobotMemoryThread::exec_query(std::string query_string)
 
 void RobotMemoryThread::exec_insert(std::string insert_string)
 {
+	exec_insert(insert_string, __collection);
+}
+void RobotMemoryThread::exec_insert(std::string insert_string, std::string collection)
+{
 	logger->log_info(name(), "Executing Query: %s", insert_string.c_str());
 
 	//only one query at a time
@@ -169,10 +192,12 @@ void RobotMemoryThread::exec_insert(std::string insert_string)
 	}
 
 	log(obj, "Inserting:");
+	set_fields(obj, "{type: \"test\"}");
+	log(obj, "Updated Inserting:");
 	
 	//actually execute insert
 	try{
-	  mongodb_client->insert(__collection, obj);
+	  mongodb_client->insert(collection, obj);
 	} catch (DBException &e) {
 		logger->log_error(name(), "Error for insert %s\n Exception: %s",
 		                  insert_string.c_str(), e.toString().c_str());
@@ -187,6 +212,11 @@ void RobotMemoryThread::exec_insert(std::string insert_string)
 }
 
 void RobotMemoryThread::exec_update(std::string query_string, std::string update_string)
+{
+	exec_update(query_string, update_string, __collection);
+}
+void RobotMemoryThread::exec_update(std::string query_string, std::string update_string,
+                                    std::string collection)
 {
 	logger->log_info(name(), "Executing Update %s for query %s",
 	                 update_string.c_str(), query_string.c_str());
@@ -223,7 +253,7 @@ void RobotMemoryThread::exec_update(std::string query_string, std::string update
 	
 	//actually execute update
 	try{
-		mongodb_client->update(__collection, query, update);
+		mongodb_client->update(collection, query, update);
 	} catch (DBException &e) {
 		logger->log_error(name(), "Error for update %s for query %s\n Exception: %s",
 		                  update_string.c_str(), query_string.c_str(), e.toString().c_str());
@@ -238,6 +268,11 @@ void RobotMemoryThread::exec_update(std::string query_string, std::string update
 }
 
 void RobotMemoryThread::exec_remove(std::string query_string)
+{
+	exec_remove(query_string, __collection);
+}
+
+void RobotMemoryThread::exec_remove(std::string query_string, std::string collection)
 {
 	logger->log_info(name(), "Executing Remove: %s", query_string.c_str());
 
@@ -262,7 +297,7 @@ void RobotMemoryThread::exec_remove(std::string query_string)
 	
 	//actually execute remove
 	try{
-	  mongodb_client->remove(__collection, query);
+	  mongodb_client->remove(collection, query);
 	} catch (DBException &e) {
 		logger->log_error(name(), "Error for query %s\n Exception: %s",
 		                  query_string.c_str(), e.toString().c_str());
@@ -296,5 +331,70 @@ RobotMemoryThread::log(BSONObj obj, std::string what)
 		+ "\nObject: " + obj.toString();
 		
 	logger->log_info(name(), "%s", output.c_str());
+}
+
+void
+RobotMemoryThread::set_fields(BSONObj &obj, std::string what)
+{
+	BSONObjBuilder b;
+	b.appendElements(obj);
+	b.appendElements(fromjson(what));
+	//override
+	obj = b.obj();
+}
+
+void
+RobotMemoryThread::set_fields(Query &q, std::string what)
+{
+	BSONObjBuilder b;
+	b.appendElements(q.getFilter());
+	b.appendElements(fromjson(what));
+
+	//TODO keep other stuff in query
+	// + "\nFilter: " + query.getFilter().toString()
+	// + "\nModifiers: " + query.getModifiers().toString()
+	// + "\nSort: " + query.getSort().toString()
+	// + "\nHint: " + query.getHint().toString()
+	// + "\nReadPref: " + query.getReadPref().toString();
+     
+	//override
+	q = Query(b.obj());
+}
+
+void
+RobotMemoryThread::remove_field(Query &q, std::string what)
+{
+	BSONObjBuilder b;
+	b.appendElements(q.getFilter().removeField(what));
+	
+	//TODO keep other stuff in query
+	// + "\nFilter: " + query.getFilter().toString()
+	// + "\nModifiers: " + query.getModifiers().toString()
+	// + "\nSort: " + query.getSort().toString()
+	// + "\nHint: " + query.getHint().toString()
+	// + "\nReadPref: " + query.getReadPref().toString();
+	
+	//override
+	q = Query(b.obj());
+}
+
+void
+RobotMemoryThread::gen_blackboard_data(std::string field)
+{
+	logger->log_info(name(), "Generating virtual kb for bb");
+
+	std::string collection = config->get_string("plugins/robot-memory/blackboard-collection");
+	
+	//remove old data first
+	mongodb_client->remove(collection, Query{"{}"});
+	
+	BSONObjBuilder b;
+	b.append("type", "bbinterface");
+	__rm_if->read();
+	b.append("bbinterface", __rm_if->uid());
+	b.append("error", __rm_if->error());
+	b.append("result", __rm_if->result());
+	
+	mongodb_client->insert(collection, b.obj());  
 }
 
