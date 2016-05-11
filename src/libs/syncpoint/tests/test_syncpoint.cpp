@@ -1107,3 +1107,47 @@ TEST_F(SyncPointManagerTest, LockUntilNextWaitWaiterComesFirstTest)
 
   ASSERT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
 }
+
+/** Test whether all waiters are always released at the same time, even if one
+ *  waiter called wait after one emitter already emitted. In particular, this
+ *  tests the following scenario:
+ *  1. waiter1: wait
+ *  2. emitter1: emit
+ *  3. waiter2: wait
+ *  4. emitter2: emit
+ *  5. both waiter1 and waiter2 are released
+ */
+TEST_F(SyncPointManagerTest, WaitersAreAlwaysReleasedSimultaneouslyTest)
+{
+  string sp_identifier = "/test";
+  RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter1", sp_identifier);
+  manager->get_syncpoint("emitter2", sp_identifier);
+  sp->register_emitter("emitter1");
+  sp->register_emitter("emitter2");
+  uint num_threads = 2;
+  pthread_t threads[num_threads];
+  waiter_thread_params params[num_threads];
+  for (uint i = 0; i < num_threads; i++) {
+    params[i].manager = manager;
+    params[i].thread_nr = i;
+    params[i].num_wait_calls = 1;
+    params[i].sp_identifier = sp_identifier;
+  }
+  pthread_create(&threads[0], &attrs, start_barrier_waiter_thread, &params[0]);
+  pthread_yield();
+  usleep(10000);
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[0], NULL));
+  sp->emit("emitter1");
+  usleep(10000);
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[0], NULL));
+  pthread_create(&threads[1], &attrs, start_barrier_waiter_thread, &params[1]);
+  usleep(10000);
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+  }
+  sp->emit("emitter2");
+  usleep(10000);
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+  }
+}
