@@ -1,0 +1,12 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/robot-memory
+---
+plugins/robot-memory:
+
+  database: fawkes
+  test-collection: "robmem.test"
+  interface-name: "memory"
+
+  blackboard-collection: "robmem.bb"
