@@ -64,7 +64,8 @@ class SyncPoint
       NONE
     } WakeupType;
 
-    SyncPoint(std::string identifier, MultiLogger *logger);
+    SyncPoint(std::string identifier, MultiLogger *logger,
+      uint max_waittime_sec = 0, uint max_waittime_nsec = 0);
     virtual ~SyncPoint();
 
     /** send a signal to all waiting threads */
@@ -141,6 +142,14 @@ class SyncPoint
     Mutex *mutex_wait_for_all_;
     /** WaitCondition which is used for wait_for_all() */
     WaitCondition *cond_wait_for_all_;
+    /** true if the wait for all timer is running */
+    bool wait_for_all_timer_running_;
+    /** true if the wait for one timer is running */
+    bool wait_for_one_timer_running_;
+    /** maximum waiting time in secs */
+    uint max_waittime_sec_;
+    /** maximum waiting time in nsecs */
+    uint max_waittime_nsec_;
 
     /** Logger */
     MultiLogger *logger_;
@@ -148,8 +157,7 @@ class SyncPoint
   private:
     void reset_emitters();
     bool is_pending(std::string component);
-    void handle_default(std::string component, WakeupType type,
-      uint max_time_sec, uint max_time_nsec);
+    void handle_default(std::string component, WakeupType type);
     void cleanup();
 
   private:

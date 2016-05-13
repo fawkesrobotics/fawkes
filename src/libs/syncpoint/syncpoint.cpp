@@ -53,8 +53,13 @@ namespace fawkes {
  * @param identifier The identifier of the SyncPoint. This must be in absolute
  * path style, e.g. '/some/syncpoint'.
  * @param logger The logger to use for error messages.
+ * @param max_waittime_sec the maximum number of seconds to wait until a timeout
+ * is triggered
+ * @param max_waittime_nsec the maximum number of nanoseconds to wait until a
+ * timeout is triggered
  */
-SyncPoint::SyncPoint(string identifier, MultiLogger *logger)
+SyncPoint::SyncPoint(string identifier, MultiLogger *logger,
+  uint max_waittime_sec /* = 0 */, uint max_waittime_nsec /* = 0 */)
     : identifier_(identifier),
       emit_calls_(CircularBuffer<SyncPointCall>(1000)),
       wait_for_one_calls_(CircularBuffer<SyncPointCall>(1000)),
@@ -66,6 +71,10 @@ SyncPoint::SyncPoint(string identifier, MultiLogger *logger)
       cond_wait_for_one_(new WaitCondition(mutex_wait_for_one_)),
       mutex_wait_for_all_(new Mutex()),
       cond_wait_for_all_(new WaitCondition(mutex_wait_for_all_)),
+      wait_for_all_timer_running_(false),
+      wait_for_one_timer_running_(false),
+      max_waittime_sec_(max_waittime_sec),
+      max_waittime_nsec_(max_waittime_nsec),
       logger_(logger),
       last_emitter_reset_(Time(0l))
 {
@@ -207,7 +216,9 @@ SyncPoint::emit(const std::string & component, bool remove_from_pending)
  * Either wait until a single emitter has emitted the SyncPoint, or wait
  * until all registered emitters have emitted the SyncPoint.
  * If wait_sec != 0 or wait_nsec !=0, then only wait for
- * wait_sec + wait_nsec*10^-9 seconds.
+ * wait_sec + wait_nsec*10^-9 seconds and set the SyncPoint's maximum waiting
+ * time to the specified time (i.e., on any subsequent wait calls, wait for
+ * the specified time until a timeout is triggered).
  * If the maximal wait time has been exceeded, a warning is shown and the
  * SyncPoint is released.
  * @param component The identifier of the component waiting for the SyncPoint
@@ -230,16 +241,19 @@ SyncPoint::wait(const std::string & component,
   WaitCondition *cond;
   CircularBuffer<SyncPointCall> *calls;
   Mutex *mutex_cond;
+  bool *timer_running;
   // set watchers, cond and calls depending of the Wakeup type
   if (type == WAIT_FOR_ONE) {
     watchers = &watchers_wait_for_one_;
     cond = cond_wait_for_one_;
     mutex_cond = mutex_wait_for_one_;
+    timer_running = &wait_for_one_timer_running_;
     calls = &wait_for_one_calls_;
   } else if (type == WAIT_FOR_ALL) {
     watchers = &watchers_wait_for_all_;
     cond = cond_wait_for_all_;
     mutex_cond = mutex_wait_for_all_;
+    timer_running = &wait_for_all_timer_running_;
     calls = &wait_for_all_calls_;
   } else {
     throw SyncPointInvalidTypeException();
@@ -270,22 +284,41 @@ SyncPoint::wait(const std::string & component,
    */
   Time start;
   mutex_cond->lock();
-  pthread_cleanup_push(cleanup_mutex, mutex_cond);
   if (emit_locker_ == component) {
     mutex_next_wait_->unlock();
     emit_locker_ = "";
   }
-  ml.unlock();
   if (need_to_wait) {
-    if (!cond->reltimed_wait(wait_sec, wait_nsec)) {
+    if (*timer_running) {
+      ml.unlock();
+      pthread_cleanup_push(cleanup_mutex, mutex_cond);
+      cond->wait();
+      pthread_cleanup_pop(1);
+    } else {
+      *timer_running = true;
+      if (wait_sec != 0 || wait_nsec != 0) {
+        max_waittime_sec_ = wait_sec;
+        max_waittime_nsec_ = wait_nsec;
+      }
+      ml.unlock();
+      bool timeout;
+      pthread_cleanup_push(cleanup_mutex, mutex_cond);
+      timeout = !cond->reltimed_wait(max_waittime_sec_, max_waittime_nsec_);
+      pthread_cleanup_pop(1);
       ml.relock();
-      // wait failed, default
-      handle_default(component, type, wait_sec, wait_nsec);
+      *timer_running = false;
+      if (timeout) {
+        // wait failed, handle default
+        handle_default(component, type);
+        mutex_cond->lock();
+        cond->wake_all();
+        mutex_cond->unlock();
+      }
       ml.unlock();
     }
+  } else {
+    ml.unlock();
   }
-  mutex_cond->unlock();
-  pthread_cleanup_pop(0);
   Time wait_time = Time() - start;
   ml.relock();
   calls->push_back(SyncPointCall(component, start, wait_time));
@@ -462,14 +495,13 @@ SyncPoint::is_pending(string component) {
 }
 
 void
-SyncPoint::handle_default(string component, WakeupType type,
-  uint max_time_sec, uint max_time_nsec)
+SyncPoint::handle_default(string component, WakeupType type)
 {
   logger_->log_warn(component.c_str(),
       "Thread time limit exceeded while waiting for syncpoint '%s'. "
       "Time limit: %f sec.",
       get_identifier().c_str(),
-      max_time_sec + static_cast<float>(max_time_nsec) / 1000000000.f);
+      max_waittime_sec_ + static_cast<float>(max_waittime_nsec_)/1000000000.f);
   bad_components_.insert(pending_emitters_.begin(), pending_emitters_.end());
   if (bad_components_.size() > 1) {
     string bad_components_string = "";
