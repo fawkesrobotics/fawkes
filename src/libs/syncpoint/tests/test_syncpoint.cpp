@@ -375,6 +375,10 @@ struct waiter_thread_params {
     string sp_identifier;
     /** Name of the component */
     string component = "";
+    /** timeout in sec */
+    uint timeout_sec = 0;
+    /** timeout in nsec */
+    uint timeout_nsec = 0;
 };
 
 
@@ -390,7 +394,8 @@ void * start_waiter_thread(void * data) {
   }
   RefPtr<SyncPoint> sp = params->manager->get_syncpoint(component, params->sp_identifier);
   for (uint i = 0; i < params->num_wait_calls; i++) {
-    sp->wait(component);
+    sp->wait(component, SyncPoint::WAIT_FOR_ONE, params->timeout_sec,
+        params->timeout_nsec);
   }
   pthread_exit(NULL);
 }
@@ -583,7 +588,8 @@ void * start_barrier_waiter_thread(void * data) {
   RefPtr<SyncPoint> sp;
   sp = params->manager->get_syncpoint(component, params->sp_identifier);
   for (uint i = 0; i < params->num_wait_calls; i++) {
-    sp->wait(component, SyncPoint::WAIT_FOR_ALL);
+    sp->wait(component, SyncPoint::WAIT_FOR_ALL, params->timeout_sec,
+        params->timeout_nsec);
   }
   pthread_exit(NULL);
 }
@@ -1147,6 +1153,40 @@ TEST_F(SyncPointManagerTest, WaitersAreAlwaysReleasedSimultaneouslyTest)
   }
   sp->emit("emitter2");
   usleep(10000);
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+  }
+}
+
+/** Test whether all syncpoints are released simultaneously if a timeout occurs;
+ *  i.e. make sure that only the first waiter's timeout matters and all
+ *  subsequent waiters are released when the first waiter times out.
+ */
+TEST_F(SyncPointManagerTest, WaitersTimeoutSimultaneousReleaseTest)
+{
+  RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter1", "/test");
+  sp->register_emitter("emitter1");
+  uint num_threads = 2;
+  pthread_t threads[num_threads];
+  string sp_identifier = "/test";
+  waiter_thread_params params[num_threads];
+  for (uint i = 0; i < num_threads; i++) {
+    params[i].manager = manager;
+    params[i].thread_nr = i;
+    params[i].num_wait_calls = 1;
+    params[i].timeout_sec = 1;
+    params[i].sp_identifier = sp_identifier;
+  }
+  pthread_create(&threads[0], &attrs, start_barrier_waiter_thread, &params[0]);
+  pthread_yield();
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[0], NULL));
+  params[1].timeout_sec = 5;
+  pthread_create(&threads[1], &attrs, start_barrier_waiter_thread, &params[1]);
+  usleep(10000);
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+  }
+  sleep(2);
   for (uint i = 0; i < num_threads; i++) {
     EXPECT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
   }
