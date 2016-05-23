@@ -46,7 +46,7 @@ print_usage(const char *program_name)
 	 "                            ~/fawkes/src/plugins/robot_mover/"
 	 "\n"
          "-h  Print this usage information\n\n"
-         "Generate the necessary files to build a fawkes plugin",
+         "Generate the necessary files to build a fawkes plugin\n",
 	 program_name, program_name);
 }
 
@@ -57,6 +57,7 @@ generate_plugin(std::string author_name, std::string plugin_name, std::string de
   std::string date = ctime(&now);
   tm *time_structure = localtime(&now);
   std::string year = std::to_string(time_structure->tm_year + 1900);
+  //TimeStructure's year is the number of years since 1900
 
   PluginGenerator *generator = new PluginGenerator(directory, author_name, year , date, plugin_name, description);
   generator->generate();
