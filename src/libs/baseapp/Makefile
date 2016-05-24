@@ -15,25 +15,59 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDCONFDIR)/tf/tf.mk
-include $(BUILDCONFDIR)/logging/logging.mk
+ifneq ($(wildcard $(BUILDCONFDIR)/tf/tf.mk),)
+  include $(BUILDCONFDIR)/tf/tf.mk
+endif
+ifneq ($(wildcard $(BUILDCONFDIR)/logging/logging.mk),)
+  include $(BUILDCONFDIR)/logging/logging.mk
+endif
 include $(BUILDSYSDIR)/boost.mk
 
-CFLAGS  += $(CFLAGS_LIBDAEMON) $(CFLAGS_TF)
-LDFLAGS += $(LDFLAGS_LIBDAEMON) $(LDFLAGS_TF)
+CFLAGS  += $(CFLAGS_LIBDAEMON)
+LDFLAGS += $(LDFLAGS_LIBDAEMON)
 
 LIBS_libfawkesbaseapp = stdc++ pthread fawkescore fawkesutils fawkesconfig \
-			fawkesblackboard fawkesplugin fawkesnetcomm \
-			fawkesaspects fawkeslogging fawkesnetworklogger \
-			fawkessyncpoint \
+			fawkesplugin fawkesaspects fawkeslogging \
+			fawkessyncpoint
 
 REQ_BOOST_LIBS = asio system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-ifeq ($(HAVE_TF),1)
-  LIBS_libfawkesbaseapp += fawkestf
+ifneq ($(wildcard $(SRCDIR)/../blackboard/blackboard.h),)
+  CFLAGS += -DHAVE_BLACKBOARD
+  LIBS_libfawkesbaseapp += fawkesblackboard
+  ifeq ($(HAVE_TF),1)
+    CFLAGS  += $(CFLAGS_TF)
+    LDFLAGS += $(LDFLAGS_TF)
+    LIBS_libfawkesbaseapp += fawkestf
+  else
+    WARN_TARGETS += warning_tf
+  endif
 else
-  WARN_TARGETS += warning_tf
+  WARN_TARGETS += warning_blackboard
+endif
+
+ifneq ($(wildcard $(SRCDIR)/../netcomm/fawkes/network_manager.h),)
+  CFLAGS += -DHAVE_NETWORK_MANAGER
+  LIBS_libfawkesbaseapp += fawkesnetcomm
+  ifneq ($(wildcard $(SRCDIR)/../network_logger/network_logger.h),)
+    CFLAGS += -DHAVE_NETWORK_LOGGER
+    LIBS_libfawkesbaseapp += fawkesnetworklogger
+  else
+    WARN_TARGETS += warning_network_logger
+  endif
+  ifneq ($(wildcard $(SRCDIR)/../config/net_handler.h),)
+    CFLAGS += -DHAVE_CONFIG_NETWORK_HANDLER
+  else
+    WARN_TARGETS += warning_config_net_handler
+  endif
+  ifneq ($(wildcard $(SRCDIR)/../plugin/net/handler.h),)
+    CFLAGS += -DHAVE_PLUGIN_NETWORK_HANDLER
+  else
+    WARN_TARGETS += warning_plugin_net_handler
+  endif
+else
+  WARN_TARGETS += warning_netcomm
 endif
 
 ifeq ($(HAVE_CPP11)$(HAVE_BOOST_LIBS),11)
@@ -56,13 +90,23 @@ ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_libdaemon warning_tf
+.PHONY: warning_libdaemon warning_tf warning_blackboard warning_netcomm warning_config_net_handler warning_plugin_net_handler warning_network_logger
 warning_libdaemon:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without daemonizing support$(TNORMAL) (libdaemon[-devel] not installed)"
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without TF support$(TNORMAL) (tf framework not available)"
 warning_fd_redirect:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building stdout/stderr redirect logger support$(TNORMAL) (feature not available in logging lib)"
+warning_blackboard:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without blackboard support$(TNORMAL) (blackboard not available)"
+warning_netcomm:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without Fawkes network support$(TNORMAL) (netcomm library not available)"
+warning_config_net_handler:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without config network handler support$(TNORMAL) (config network handler not available)"
+warning_plugin_net_handler:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without plugin network handler support$(TNORMAL) (plugin network handler not available)"
+warning_network_logger:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without network logger support$(TNORMAL) (network logger not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
