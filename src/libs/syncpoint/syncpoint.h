@@ -99,6 +99,7 @@ class SyncPoint
     std::multiset<std::string> get_emitters() const;
     CircularBuffer<SyncPointCall> get_wait_calls(WakeupType type = WAIT_FOR_ONE) const;
     CircularBuffer<SyncPointCall> get_emit_calls() const;
+    bool watcher_is_waiting(std::string watcher, WakeupType type) const;
 
 
     /**

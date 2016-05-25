@@ -50,8 +50,6 @@ class SyncPointManager
 
     std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > get_syncpoints();
 
-    std::string all_syncpoints_as_dot(float max_age);
-
   protected:
     /** Set of all existing SyncPoints */
     std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > syncpoints_;
@@ -67,7 +65,6 @@ class SyncPointManager
     bool component_watches_any_successor(const RefPtr<SyncPoint> sp,
       const std::string component) const;
     MultiLogger *logger_;
-
 
 };
 

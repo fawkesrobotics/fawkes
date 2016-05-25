@@ -483,6 +483,25 @@ SyncPoint::get_emit_calls() const {
   return emit_calls_;
 }
 
+/**
+ * Check if the given waiter is currently waiting with the given type
+ * @param watcher the string identifier of the watcher to check
+ * @param type the type of call to check
+ */
+bool
+SyncPoint::watcher_is_waiting(std::string watcher, WakeupType type) const
+{
+  switch (type) {
+    case SyncPoint::WAIT_FOR_ONE:
+      return watchers_wait_for_one_.count(watcher);
+    case SyncPoint::WAIT_FOR_ALL:
+      return watchers_wait_for_all_.count(watcher);
+    default:
+      throw Exception("Unknown watch type %u for syncpoint %s",
+                      type, identifier_);
+  }
+}
+
 void
 SyncPoint::reset_emitters() {
   last_emitter_reset_ = Time();

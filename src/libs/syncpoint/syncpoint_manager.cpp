@@ -21,15 +21,12 @@
 
 #include <core/threading/mutex_locker.h>
 
-#include <aspect/blocked_timing.h>
-
 #include <syncpoint/syncpoint_manager.h>
 #include <syncpoint/exceptions.h>
 
 #include "syncpoint_call_stats.h"
 
 #include <string>
-#include <sstream>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -122,149 +119,6 @@ SyncPointManager::get_syncpoints() {
   return syncpoints_;
 }
 
-/**
- * Get DOT graph for all SyncPoints
- * @param max_age Show only SyncPoint calls which are younger than max_age
- * @return string representation of DOT graph
- */
-std::string
-SyncPointManager::all_syncpoints_as_dot(float max_age)
-{
-  std::stringstream graph;
-  graph << std::fixed; //fixed point notation
-  graph.precision(3); //3 decimal places
-  graph << "digraph { graph [fontsize=14]; "
-      << "node [fontsize=12]; edge [fontsize=12]; ";
-  graph.setf(std::ios::fixed, std::ios::floatfield);
-
-  MutexLocker ml(mutex_);
-  for (std::set<RefPtr<SyncPoint>, SyncPointSetLessThan>::const_iterator sp_it = syncpoints_.begin();
-      sp_it != syncpoints_.end(); sp_it++) {
-    graph << "\"" << (*sp_it)->get_identifier() << "\""
-        << " [shape=box];";
-  }
-
-  for (std::set<RefPtr<SyncPoint>, SyncPointSetLessThan>::const_iterator sp_it = syncpoints_.begin();
-      sp_it != syncpoints_.end(); sp_it++) {
-    graph << "\"" << (*sp_it)->get_identifier() << "\";";
-
-    // EMIT CALLS
-    CircularBuffer<SyncPointCall> emit_calls = (*sp_it)->get_emit_calls();
-    // generate call stats
-    std::map<std::string, SyncPointCallStats> emit_call_stats;
-    for (CircularBuffer<SyncPointCall>::iterator emitcalls_it = emit_calls.begin();
-        emitcalls_it != emit_calls.end(); emitcalls_it++) {
-      // Remove the main thread from the graph, and also remove any emit calls
-      // to the SyncPoint "/" to improve the resulting graph.
-      // The main thread emits and waits for every hook, which adds a lot of
-      // uninteresting edges to the graph.
-      // Similarly, all emitters also emit "/", which is not interesting to see.
-      if (emitcalls_it->get_caller() == "FawkesMainThread" ||
-          (*sp_it)->get_identifier() == "/") {
-        continue;
-      }
-      emit_call_stats[emitcalls_it->get_caller()].update_calls(emitcalls_it->get_call_time());
-    }
-
-    for (std::map<std::string, SyncPointCallStats>::iterator emit_call_stats_it = emit_call_stats.begin();
-        emit_call_stats_it != emit_call_stats.end(); emit_call_stats_it++) {
-      float age = (Time() - emit_call_stats_it->second.get_last_call()).in_sec();
-      if (age < max_age) {
-      graph << "\"" << emit_call_stats_it->first << "\" -> \""
-          <<  (*sp_it)->get_identifier()
-          << "\"" << " [label=\""
-          << " freq=" << emit_call_stats_it->second.get_call_frequency() << "Hz"
-          << " age=" << age << "s"
-          << " #calls=" << emit_call_stats_it->second.get_num_calls()
-          << "\"" << "];";
-      }
-    }
-
-    // WAIT FOR ONE CALLS
-    CircularBuffer<SyncPointCall> wait_one_calls = (*sp_it)->get_wait_calls(SyncPoint::WAIT_FOR_ONE);
-    // generate call stats
-    std::map<std::string, SyncPointCallStats> wait_one_call_stats;
-    for (CircularBuffer<SyncPointCall>::iterator waitcalls_it = wait_one_calls.begin();
-        waitcalls_it != wait_one_calls.end(); waitcalls_it++) {
-      wait_one_call_stats[waitcalls_it->get_caller()].update_calls(*waitcalls_it);
-    }
-
-    for (std::map<std::string, SyncPointCallStats>::iterator wait_call_stats_it = wait_one_call_stats.begin();
-        wait_call_stats_it != wait_one_call_stats.end(); wait_call_stats_it++) {
-      if (wait_call_stats_it->first == "FawkesMainThread") {
-        continue;
-      }
-      float age = (Time() - wait_call_stats_it->second.get_last_call()).in_sec();
-      if (age < max_age) {
-        graph << "\"" << (*sp_it)->get_identifier() << "\"" << " -> "
-            << "\"" << wait_call_stats_it->first << "\"" << " [label=" << "\""
-            << " avg=" << wait_call_stats_it->second.get_waittime_average() <<  "s"
-            << " age=" << age << "s"
-            << " #calls=" << wait_call_stats_it->second.get_num_calls()
-            //          << " max=" << max_wait_time << "s"
-            << "\"";
-        if ((*sp_it)->watchers_wait_for_one_.count(wait_call_stats_it->first)) {
-          graph << ",color=\"red\"";
-        }
-        graph << ",style=dotted";
-        graph << "];";
-      }
-    }
-
-    // WAIT FOR ALL CALLS
-    CircularBuffer<SyncPointCall> wait_all_calls = (*sp_it)->get_wait_calls(SyncPoint::WAIT_FOR_ALL);
-    // generate call stats
-    std::map<std::string, SyncPointCallStats> wait_all_call_stats;
-    for (CircularBuffer<SyncPointCall>::iterator waitcalls_it = wait_all_calls.begin();
-        waitcalls_it != wait_all_calls.end(); waitcalls_it++) {
-      wait_all_call_stats[waitcalls_it->get_caller()].update_calls(*waitcalls_it);
-    }
-
-    for (std::map<std::string, SyncPointCallStats>::iterator wait_call_stats_it = wait_all_call_stats.begin();
-        wait_call_stats_it != wait_all_call_stats.end(); wait_call_stats_it++) {
-      if (wait_call_stats_it->first == "FawkesMainThread") {
-        continue;
-      }
-      float age = (Time() - wait_call_stats_it->second.get_last_call()).in_sec();
-      if (age < max_age) {
-        graph << "\"" << (*sp_it)->get_identifier() << "\"" << " -> "
-            << "\"" << wait_call_stats_it->first << "\"" << " [label=" << "\""
-            << " avg=" << wait_call_stats_it->second.get_waittime_average() <<  "s"
-            << " age=" << age << "s"
-            << " #calls=" << wait_call_stats_it->second.get_num_calls()
-            //<< " max=" << max_wait_time << "s"
-            << "\"";
-        if ((*sp_it)->watchers_wait_for_all_.count(wait_call_stats_it->first)) {
-          graph << ",color=\"red\"";
-        }
-        graph << ",style=dashed";
-        graph << "];";
-      }
-    }
-  }
-  // Visualize hook dependencies by directly adding edges from one hook to the
-  // next. This is necessary because we removed the main thread from the
-  // visualization, which makes sure that the hooks are started in the right
-  // order. To retain the dependencies between the hooks, add edges manually.
-  // Essentially, these edges represent the order that is guaranteed by the
-  // main thread.
-  // Note: this expects that
-  //   (1) pre loop is the first, post loop th last hook,
-  //   (2) no custom enum values (e.g. WAKEUP_HOOK_ACT = 5) are specified.
-  for (uint i = BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP;
-       i != BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP;
-       i++) {
-    graph << "\""
-      << BlockedTimingAspect::blocked_timing_hook_to_end_syncpoint(
-        static_cast<BlockedTimingAspect::WakeupHook>(i)) << "\""
-      << " -> " << "\""
-      << BlockedTimingAspect::blocked_timing_hook_to_start_syncpoint(
-        static_cast<BlockedTimingAspect::WakeupHook>(i+1))
-      << "\";";
-  }
-  graph << "}";
-  return graph.str();
-}
 
 /** Find the prefix of the SyncPoint's identifier which is the identifier of
  *  the direct predecessor SyncPoint.

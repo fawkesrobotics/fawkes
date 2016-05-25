@@ -25,6 +25,7 @@
 
 #include <webview/request_processor.h>
 
+#include <core/utils/refptr.h>
 #include <syncpoint/syncpoint_manager.h>
 
 namespace fawkes {
@@ -40,6 +41,12 @@ class WebviewSyncPointRequestProcessor : public fawkes::WebRequestProcessor
   virtual ~WebviewSyncPointRequestProcessor();
 
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+
+ protected:
+  std::string all_syncpoints_as_dot(
+    const std::set< fawkes::RefPtr<fawkes::SyncPoint>,
+                    fawkes::SyncPointSetLessThan > syncpoints,
+    float max_age);
 
  private:
   char *baseurl_;
