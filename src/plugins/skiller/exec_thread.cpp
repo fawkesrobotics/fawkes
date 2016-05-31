@@ -500,6 +500,7 @@ SkillerExecutionThread::loop()
 			  m->sender_thread_name());
 	
 	__continuous_reset = true;
+	curss = "";
 	__last_exclusive_controller = __skiller_if->exclusive_controller();
 	__skiller_if->set_exclusive_controller(0);
 	write_skiller_if = true;
