@@ -93,9 +93,8 @@ RosSkillerThread::stop()
         return;
       }
 
-  SkillerInterface::StopExecMessage *msg =
-    new SkillerInterface::StopExecMessage();
-  if (skiller_if_->has_writer()) skiller_if_->msgq_enqueue(msg);
+  if (skiller_if_->has_writer())
+	  skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
   if (exec_as_) {
     std::string error_msg = "Abort on request";
     as_goal_.setAborted(create_result(error_msg), error_msg);
