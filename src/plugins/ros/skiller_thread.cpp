@@ -183,6 +183,7 @@ RosSkillerThread::loop()
 
     SkillerInterface::ExecSkillMessage *msg =
       new SkillerInterface::ExecSkillMessage(goal_.c_str());
+    msg->ref();
 
     logger->log_debug(name(), "Creating goal '%s'", goal_.c_str());
 
@@ -196,6 +197,7 @@ RosSkillerThread::loop()
       logger->log_warn(name(), "Failed to execute skill, exception follows");
       logger->log_warn(name(), e);
     }
+    msg->unref();
 
   } else if (exec_running_) {
     if (exec_as_) as_goal_.publishFeedback(create_feedback());
