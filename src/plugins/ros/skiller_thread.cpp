@@ -202,7 +202,9 @@ RosSkillerThread::loop()
   } else if (exec_running_) {
     if (exec_as_) as_goal_.publishFeedback(create_feedback());
 
-    if (skiller_if_->status() == SkillerInterface::S_INACTIVE) {
+    if (skiller_if_->status() == SkillerInterface::S_INACTIVE ||
+        skiller_if_->msgid() != exec_msgid_)
+    {
       // wait three loops, maybe the skiller will start
       logger->log_debug(name(), "Should be executing skill, but skiller is inactive");
       ++loops_waited_;
