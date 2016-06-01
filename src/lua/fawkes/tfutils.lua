@@ -46,26 +46,81 @@ function transform(src_pos, src_frame, target_frame)
    }
 end
 
+
+function is_quaternion(o)
+   return type(o) == "userdata" and (
+      tolua.type(o) == "fawkes::tf::Quaternion" or tolua.type(o) == "const fawkes::tf::Quaternion")
+end
+
+function is_stamped_pose(o)
+   return type(o) == "userdata" and (
+      tolua.type(o) == "fawkes::tf:StampedPose" or tolua.type(o) == "const fawkes::tf:StampedPose")
+end
+
+function is_pose(o)
+   return type(o) == "userdata" and (
+      tolua.type(o) == "fawkes::tf::Pose" or tolua.type(o) == "const fawkes::tf::Pose")
+end
+
+
 --- Transform 6D pose with orientation between coordinate frames.
--- @param src_pos pose in source frame
--- @param src_frame source coordinate frame
+-- @param src_pos Pose in source frame, can be a Pose or StampedPose object, or an {x,y,z,ori} table, where
+--        ori may be either a Quaternion object or an {x,y,z,w} table.
+-- @param src_frame Source coordinate frame
+-- @return A StampedPose object if src_pos was an object, or a {x,y,z,ori} table if src_pos was a table, where
+--         ori is either a Quaternion object if src.ori was an object, or an {x,y,z,w} table if src.ori was a table.
 function transform6D(src_pos, src_frame, target_frame)
    if not tf:can_transform(src_frame, target_frame, fawkes.Time:new(0,0)) then
       -- no transform currently available
       return nil
    end
 
-   local from_t = fawkes.tf.Vector3:new(src_pos.x, src_pos.y, src_pos.z)
-   local from_r = fawkes.tf.Quaternion:new(src_pos.ori.x, src_pos.ori.y, src_pos.ori.z, src_pos.ori.w)
-   local from_p = fawkes.tf.Pose:new(from_r, from_t)
-   local from_sp = fawkes.tf.StampedPose(from_p, fawkes.Time:new(0,0), src_frame)
-   local to_sp = fawkes.tf.StampedPose:new()
+   local from_t
+   local from_r
+   local from_p
+   local from_sp -- Input StampedPose
+
+   -- Detect input data format
+   if is_stamped_pose(src_pos) then
+      from_sp = src_pos
+   elseif is_pose(src_pos) then
+      from_sp = fawkes.tf.StampedPose(src_pos, fawkes.Time:new(0,0), src_frame)
+   elseif type(src_pos) == "table" then
+      from_t = fawkes.tf.Vector3:new(src_pos.x, src_pos.y, src_pos.z)
+      if type(src_pos.ori) == "table" then
+         from_r = fawkes.tf.Quaternion:new(src_pos.ori.x, src_pos.ori.y, src_pos.ori.z, src_pos.ori.w)
+      elseif is_quaternion(src_pos.ori) then
+         from_r = src_pos.ori
+      else
+         printf("tfutils.transform6D: invalid input data: tolua.type(src_pos.ori) = %s", tolua.type(src_pos.ori))
+         return nil
+      end
+      from_p = fawkes.tf.Pose:new(from_r, from_t)
+      from_sp = fawkes.tf.StampedPose(from_p, fawkes.Time:new(0,0), src_frame)
+   else
+      printf("tfutils.transform6D: invalid input data: tolua.type(src_pos) = %s", tolua.type(src_pos.ori))
+      return nil
+   end
+   
+   to_sp = fawkes.tf.StampedPose:new()
    tf:transform_pose(target_frame, from_sp, to_sp)
 
-   return { x = to_sp:getOrigin():x(),
-            y = to_sp:getOrigin():y(),
-            z = to_sp:getOrigin():z(),
-            ori = {x=to_sp:getRotation():x(), y=to_sp:getRotation():y(), z=to_sp:getRotation():z(), w=to_sp:getRotation():w()},
-            frame = target_frame
-   }
+   -- Set output data format according to input format
+   if type(src_pos) == "table" then
+      rv = { x = to_sp:getOrigin():x(),
+             y = to_sp:getOrigin():y(),
+             z = to_sp:getOrigin():z() }
+      if type(src_pos.ori) == "table" then
+         rv.ori = { x = to_sp:getRotation():x(),
+                    y=to_sp:getRotation():y(),
+                    z=to_sp:getRotation():z(),
+                    w=to_sp:getRotation():w() }
+      else
+         rv.ori = to_sp:getRotation()
+      end
+   else
+      rv = to_sp
+   end
+
+   return rv
 end
