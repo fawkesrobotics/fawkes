@@ -116,3 +116,7 @@ navgraph:
   interactive:
     out-file: navgraph-interactive-saved.yaml
 
+  # Publishing of usable data structures to ROS
+  ros-publishing:
+    enable: true
+
