@@ -40,27 +40,39 @@ ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_NAVGRAPH),111)
 
   SUBDIRS = static-constraints
 
-  ifeq ($(ENABLE_VISUALIZATION),1)
-    ifeq ($(HAVE_ROS),1)
+  ifeq ($(HAVE_ROS),1)
+
+    LIBS_navgraph += fawkesrosaspect
+    CFLAGS += $(CFLAGS_ROS)
+
+    ifeq ($(ENABLE_VISUALIZATION),1)
       ifeq ($(call ros-have-pkg,visualization_msgs),1)
-        CFLAGS  += -DHAVE_VISUALIZATION $(CFLAGS_ROS)
-	CFLAGS_visualization_thread = $(CFLAGS) $(CFLAGS_TF) \
-				      $(call ros-pkg-cflags,visualization_msgs)
+        CFLAGS  += -DHAVE_VISUALIZATION
+        CFLAGS_visualization_thread = $(CFLAGS) $(CFLAGS_TF) \
+				                              $(call ros-pkg-cflags,visualization_msgs)
         LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)
 
-        LIBS_navgraph += fawkesrosaspect
-
         OBJS_navgraph += visualization_thread.o
+      else
+        ENABLE_VISUALIZATION = 0
+        WARN_TARGETS += warning_visualization_msgs
+      endif
+    endif
+
+    ifeq ($(call ros-have-pkg,fawkes_msgs),1)
+      CFLAGS  += -DHAVE_FAWKES_MSGS
+      CFLAGS_rospub_thread = $(CFLAGS)  \
+			                       $(call ros-pkg-cflags,fawkes_msgs)
+      LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,fawkes_msgs)
+
+      OBJS_navgraph += rospub_thread.o
     else
-      ENABLE_VISUALIZATION = 0
-      WARN_TARGETS += warning_visualization_msgs
+      WARN_TARGETS += warning_fawkes_msgs
     endif
   else
     ENABLE_VISUALIZATION = 0
     WARN_TARGETS += warning_ros
   endif
-endif
-
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS = warning_cpp11
@@ -87,6 +99,8 @@ warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS not available)"
 warning_visualization_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling visual debugging$(TNORMAL) (ROS package visualization_msgs not available)"
+warning_fawkes_msgs:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Disabling non-visual ROS navgraph publishing$(TNORMAL) (ROS package fawkes_msgs not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
