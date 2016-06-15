@@ -58,6 +58,16 @@ hardware/robotino:
     # Timeout in milliseconds for a single read operation
     read-timeout: 200
 
+    checksums:
+      # Log all checksum errors as a warning?
+      # If disabled only recover and critical errors are logged
+      log-errors: true
+      # The number of consecutive checksum errors after which to attempt
+      # recovery (flushing buffer, sending ping)
+      recover-bound: 2
+      # The number of consecutive checksum errors after which to consider
+      # the connection dead and try to re-establish the connection
+      critical-bound: 25
 
   # The motor and drive settings and limits are enforced for direct
   # communication, for the openrobotino driver, these values are
