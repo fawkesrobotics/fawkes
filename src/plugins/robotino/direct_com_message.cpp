@@ -35,6 +35,23 @@ const unsigned char DirectRobotinoComMessage::MSG_DATA_MANGLE = 0x20;
 const unsigned int DirectRobotinoComMessage::MSG_METADATA_SIZE = 5;
 /// @endcond INTERNAL
 
+/** @class DirectRobotinoComMessage::ChecksumError "direct_com_message.h"
+ * Excpetion thrown on checksum errors.
+ */
+
+/** Constructor.
+ * @param expected expected checksum
+ * @param received actually received checksm
+ * @param byte1 First byte of actually received checksum
+ * @param byte2 Second byte of actually received checksum
+ */
+DirectRobotinoComMessage::ChecksumError::ChecksumError(unsigned int expected, unsigned int received,
+                                                       unsigned char byte1, unsigned char byte2)
+	: Exception("Checksum verification error for Robotino message, "
+	            "expected %u, got %u (%02x %02x)", expected, received, byte1, byte2)
+{
+}
+
 /** @class DirectRobotinoComMessage "direct_com_message.h"
  * Robotino communication message.
  *
@@ -812,8 +829,8 @@ DirectRobotinoComMessage::check_checksum() const
 	uint16_t checksum_v = checksum();
 	uint16_t packet_checksum = parse_uint16(&data_[payload_size_ + 3]);
 	if (checksum_v != packet_checksum) {
-		throw Exception("Checksum verification error for Robotino message, expected %u, got %u (%02x %02x)",
-		                checksum_v, packet_checksum, data_[payload_size_ + 3], data_[payload_size_ + 4]);
+		throw ChecksumError(checksum_v, packet_checksum,
+		                    data_[payload_size_ + 3], data_[payload_size_ + 4]);
 	}
 }
 

@@ -21,6 +21,8 @@
 #ifndef __PLUGINS_ROBOTINO_DIRECT_COM_MESSAGE_H_
 #define __PLUGINS_ROBOTINO_DIRECT_COM_MESSAGE_H_
 
+#include <core/exception.h>
+
 #include <cstdint>
 #include <boost/asio.hpp>
 
@@ -141,6 +143,13 @@ class DirectRobotinoComMessage
 	static const unsigned char MSG_DATA_MANGLE;
 	static const unsigned int  MSG_METADATA_SIZE;
 	/// @endcond INTERNAL
+
+	class ChecksumError : public fawkes::Exception
+	{
+	public:
+		ChecksumError(unsigned int expected, unsigned int received,
+		              unsigned char byte1, unsigned char byte2);
+	};
 
 	DirectRobotinoComMessage();
 	DirectRobotinoComMessage(command_id_t cmdid);

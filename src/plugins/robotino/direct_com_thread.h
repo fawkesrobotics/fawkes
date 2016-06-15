@@ -107,10 +107,14 @@ class DirectRobotinoComThread
 	unsigned int    cfg_nodata_timeout_;
 	unsigned int    cfg_drive_update_interval_;
 	unsigned int    cfg_read_timeout_;
-
+	bool            cfg_log_checksum_errors_;
+	bool            cfg_checksum_error_recover_;
+	bool            cfg_checksum_error_critical_;
 	
 	bool opened_;
 	unsigned int open_tries_;
+
+	unsigned int checksum_errors_;
 
 	uint8_t         digital_outputs_;
 

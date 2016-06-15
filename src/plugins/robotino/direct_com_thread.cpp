@@ -74,6 +74,9 @@ DirectRobotinoComThread::init()
 	cfg_nodata_timeout_ = config->get_uint("/hardware/robotino/direct/no-data-timeout");
 	cfg_drive_update_interval_ = config->get_uint("/hardware/robotino/direct/drive-update-interval");
 	cfg_read_timeout_ = config->get_uint("/hardware/robotino/direct/read-timeout");
+	cfg_log_checksum_errors_ = config->get_bool("/hardware/robotino/direct/checksums/log-errors");
+	cfg_checksum_error_recover_ = config->get_bool("/hardware/robotino/direct/checksums/recover-bound");
+	cfg_checksum_error_critical_ = config->get_bool("/hardware/robotino/direct/checksums/critical-bound");
 	
 	// -------------------------------------------------------------------------- //
 
@@ -101,6 +104,7 @@ DirectRobotinoComThread::init()
 
 	open_device(/* wait for replies */ true);
 	open_tries_ = 0;
+	checksum_errors_ = 0;
 
 	{ // Disable all digital outputs initially
 		DirectRobotinoComMessage req(DirectRobotinoComMessage::CMDID_SET_ALL_DIGITAL_OUTPUTS);
@@ -152,8 +156,30 @@ DirectRobotinoComThread::loop()
 	if (opened_) {
 		try {
 			DirectRobotinoComMessage::pointer m = read_packet();
+			checksum_errors_ = 0;
 			process_message(m);
 			update_nodata_timer();
+		} catch (DirectRobotinoComMessage::ChecksumError &ce) {
+			if (! finalize_prepared && opened_) {
+				checksum_errors_ += 1;
+				if (cfg_log_checksum_errors_) {
+					logger->log_warn(name(), "%s [%u consecutive errors]",
+					                 ce.what_no_backtrace(), checksum_errors_);
+				}
+				if (checksum_errors_ >= cfg_checksum_error_recover_) {
+					logger->log_warn(name(), "Large number of consecutive checksum errors, trying recover");
+					input_buffer_.consume(input_buffer_.size());
+					try {
+						DirectRobotinoComMessage req(DirectRobotinoComMessage::CMDID_GET_HW_VERSION);
+						send_message(req);
+						request_data();
+					} catch (Exception &e) {}
+				} else if (checksum_errors_ >= cfg_checksum_error_critical_) {
+					logger->log_error(name(), "Critical number of consecutive checksum errors, re-opening");
+					input_buffer_.consume(input_buffer_.size());
+					close_device();
+				}
+			}
 		} catch (Exception &e) {
 			if (! finalize_prepared) {
 				if (opened_) {
