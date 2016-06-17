@@ -160,6 +160,7 @@ DirectRobotinoComThread::loop()
 			process_message(m);
 			update_nodata_timer();
 		} catch (DirectRobotinoComMessage::ChecksumError &ce) {
+			input_buffer_.consume(input_buffer_.size());
 			if (! finalize_prepared && opened_) {
 				checksum_errors_ += 1;
 				if (cfg_log_checksum_errors_) {
