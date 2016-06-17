@@ -75,8 +75,8 @@ DirectRobotinoComThread::init()
 	cfg_drive_update_interval_ = config->get_uint("/hardware/robotino/direct/drive-update-interval");
 	cfg_read_timeout_ = config->get_uint("/hardware/robotino/direct/read-timeout");
 	cfg_log_checksum_errors_ = config->get_bool("/hardware/robotino/direct/checksums/log-errors");
-	cfg_checksum_error_recover_ = config->get_bool("/hardware/robotino/direct/checksums/recover-bound");
-	cfg_checksum_error_critical_ = config->get_bool("/hardware/robotino/direct/checksums/critical-bound");
+	cfg_checksum_error_recover_ = config->get_uint("/hardware/robotino/direct/checksums/recover-bound");
+	cfg_checksum_error_critical_ = config->get_uint("/hardware/robotino/direct/checksums/critical-bound");
 	
 	// -------------------------------------------------------------------------- //
 
