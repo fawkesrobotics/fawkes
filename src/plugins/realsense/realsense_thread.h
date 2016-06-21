@@ -64,6 +64,7 @@ class RealsenseThread
   void log_error();
   void log_depths(const uint16_t * image);
   void fill_pointcloud();
+  void stop_camera();
 
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
   protected: virtual void run() { Thread::run(); }
@@ -87,6 +88,7 @@ class RealsenseThread
   float camera_scale_;
   std::string frame_id_;
   std::string pcl_id_;
+  bool camera_started_ = false;
 
 };
 

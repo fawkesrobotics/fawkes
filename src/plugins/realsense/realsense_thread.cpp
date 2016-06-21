@@ -98,8 +98,10 @@ void
 RealsenseThread::finalize()
 {
   realsense_depth_refptr_.reset();
-  //TODO delete point objects and cloud
-  //TODO Makefile
+  pcl_manager->remove_pointcloud(pcl_id_.c_str());
+  stop_camera();
+  //TODO Makefile & SwitchInterface
+  //TODO Documentation with librealsense
 }
 
 bool
@@ -121,6 +123,7 @@ RealsenseThread::connect_and_start_camera()
   logger->log_info(name(), "Stream format: %s",
                    rs_format_to_string(rs_get_stream_format(rs_device_, rs_stream_type_, &rs_error_)));
   log_error();
+  camera_started_ = true;
   return true;
 }
 
@@ -176,4 +179,17 @@ RealsenseThread::log_depths(const uint16_t * image)
     out += "\n";
   }
   logger->log_info(name(), "%s\n\n\n\n\n", out.c_str());
+}
+
+void
+RealsenseThread::stop_camera()
+{
+  if (camera_started_){
+    logger->log_info(name(), "Stopping realsense camera ...");
+    rs_stop_device(rs_device_, &rs_error_);
+    rs_delete_context(rs_context_, &rs_error_);
+    log_error();
+    logger->log_info(name(), "Realsense camera stopped!");
+    camera_started_ = false;
+  }
 }
