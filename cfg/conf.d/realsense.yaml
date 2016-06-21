@@ -1,0 +1,11 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/realsense
+---
+realsense:
+  # Frame ID of the PointCloud 
+  frame_id: "cam_conveyor"
+
+  # ID of the PointCloud
+  pcl_id: "/camera/depth/points"

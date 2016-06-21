@@ -85,6 +85,8 @@ class RealsenseThread
   rs_stream rs_stream_type_;
   int num_of_cameras_;
   float camera_scale_;
+  std::string frame_id_;
+  std::string pcl_id_;
 
 };
 

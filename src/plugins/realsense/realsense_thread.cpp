@@ -40,6 +40,11 @@ RealsenseThread::RealsenseThread()
 void
 RealsenseThread::init()
 {
+  //set config values
+  const std::string cfg_prefix = "/realsense/";
+  frame_id_ = config->get_string(cfg_prefix + "frame_id");
+  pcl_id_ = config->get_string(cfg_prefix + "pcl_id");
+
   rs_stream_type_ = RS_STREAM_DEPTH;
   connect_and_start_camera();
   camera_scale_ = rs_get_device_depth_scale(rs_device_, NULL);
@@ -47,13 +52,14 @@ RealsenseThread::init()
   rs_get_stream_intrinsics(rs_device_, rs_stream_type_, &z_intrinsic_, &rs_error_);
   logger->log_info(name(), "Height: %i, Width: %i", z_intrinsic_.height, z_intrinsic_.width);
 
+  //initalize pointcloud
   realsense_depth_refptr_ = new Cloud();
   realsense_depth_ = pcl_utils::cloudptr_from_refptr(realsense_depth_refptr_);
-  realsense_depth_->header.frame_id = "cam_conveyor";
+  realsense_depth_->header.frame_id = frame_id_;
   realsense_depth_->width = z_intrinsic_.width;
   realsense_depth_->height = z_intrinsic_.height;
-  pcl_manager->add_pointcloud("/camera/depth/points", realsense_depth_refptr_);
-  //initialize the pointcloud with points
+  pcl_manager->add_pointcloud(pcl_id_.c_str(), realsense_depth_refptr_);
+  //fill pointcloud with empty points
   for(int i = 0; i < z_intrinsic_.height; i++) {
     for(int j = 0; j < z_intrinsic_.width;  j++) {
       realsense_depth_->push_back(PointType(0, 0, 0));
