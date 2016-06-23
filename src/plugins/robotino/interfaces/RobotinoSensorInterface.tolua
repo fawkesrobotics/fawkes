@@ -40,6 +40,23 @@ class RobotinoSensorInterface : public Interface
     SetDigitalOutputMessage();
     ~SetDigitalOutputMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned char digital_out();
     void set_digital_out(const unsigned char new_digital_out);
     int maxlenof_digital_out() const;
