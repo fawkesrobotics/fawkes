@@ -29,7 +29,7 @@
 
 using namespace fawkes;
 
-/** @class NavGraphROSPubThread "navgraph_rospub_thread.h"
+/** @class NavGraphROSPubThread "rospub_thread.h"
  * Publish navgaraph to ROS.
  * @author Tim Niemueller
  */
