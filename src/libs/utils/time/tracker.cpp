@@ -466,12 +466,22 @@ TimeTracker::print_to_file()
   fflush(__timelog);
 }
 
+/** @class ScopedClassItemTracker "utils/time/tracker.h"
+ * Scoped time tracking for specific item.
+ * @author Victor Matare
+ */
 
+/** Constructor.
+ * Starts time tracking for given class on given time tracker.
+ * @param tt time tracker
+ * @param cls class ID
+ */
 ScopedClassItemTracker::ScopedClassItemTracker(TimeTracker &tt, unsigned int cls)
 : tt_(tt), cls_(cls)
 { tt_.ping_start(cls_); }
 
 
+/** Destructor. */
 ScopedClassItemTracker::~ScopedClassItemTracker()
 { tt_.ping_end(cls_); }
 
