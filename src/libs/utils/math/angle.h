@@ -137,7 +137,7 @@ angle_distance(float angle_rad1,
  * @return signed distance from angle "angle_from" to "angle_to"
  */
 inline float 
-angle_distance_signed(float angle_to, float angle_from)
+angle_distance_signed(float angle_from, float angle_to)
 {
   return normalize_mirror_rad(angle_to - angle_from);
 }
