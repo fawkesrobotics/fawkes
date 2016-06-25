@@ -105,7 +105,7 @@ class LaserLinesThread
 
 
 #ifdef HAVE_VISUAL_DEBUGGING
-  void publish_visualization(const std::vector<LineInfo> &linfos,
+  void publish_visualization(const LineInfo &linfo, size_t i, unsigned int idnum,
                              std::string marker_namespace, std::string name_suffix = "");
 #endif
 
@@ -117,7 +117,7 @@ class LaserLinesThread
 
   std::vector<fawkes::LaserLineInterface *> line_ifs_;
   std::vector<fawkes::LaserLineInterface *> line_avg_ifs_;
-  std::vector<std::deque<LineInfo>> moving_average_windows_;
+  std::vector<TrackedLineInfo> known_lines_;
 
   fawkes::SwitchInterface *switch_if_;
 

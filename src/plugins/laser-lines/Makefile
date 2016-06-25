@@ -39,7 +39,7 @@ CFLAGS += $(CFLAGS_CPP11) -Wno-unknown-pragmas
 LIBS_laser_lines = fawkescore fawkesutils fawkesaspects fvutils fawkesbaseapp \
 			fawkestf fawkesinterface fawkesblackboard fawkespcl_utils \
 			Position3DInterface SwitchInterface LaserLineInterface
-OBJS_laser_lines = laser-lines-plugin.o laser-lines-thread.o
+OBJS_laser_lines = laser-lines-plugin.o laser-lines-thread.o  line_info.o
 
 OBJS_all    = $(OBJS_laser_lines)
 
