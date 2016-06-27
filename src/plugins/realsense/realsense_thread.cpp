@@ -44,9 +44,11 @@ RealsenseThread::init()
   const std::string cfg_prefix = "/realsense/";
   frame_id_ = config->get_string(cfg_prefix + "frame_id");
   pcl_id_ = config->get_string(cfg_prefix + "pcl_id");
+  laser_power_ = config->get_int(cfg_prefix + "device_options/laser_power");
 
   rs_stream_type_ = RS_STREAM_DEPTH;
   connect_and_start_camera();
+
   camera_scale_ = rs_get_device_depth_scale(rs_device_, NULL);
 
   rs_get_stream_intrinsics(rs_device_, rs_stream_type_, &z_intrinsic_, &rs_error_);
@@ -108,6 +110,7 @@ bool
 RealsenseThread::connect_and_start_camera()
 {
   rs_context_ = rs_create_context(RS_API_VERSION, &rs_error_);
+  log_error();
   num_of_cameras_ = rs_get_device_count(rs_context_, &rs_error_);
   logger->log_info(name(), "No. of cameras: %i ", num_of_cameras_);
   if (num_of_cameras_ < 1){
@@ -115,14 +118,16 @@ RealsenseThread::connect_and_start_camera()
   }
 
   rs_device_ = get_camera();
-
+  rs_set_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, laser_power_, &rs_error_);
+  log_error();
   enable_depth_stream();
 
   rs_start_device(rs_device_, &rs_error_);
+  log_error();
 
   logger->log_info(name(), "Stream format: %s",
                    rs_format_to_string(rs_get_stream_format(rs_device_, rs_stream_type_, &rs_error_)));
-  log_error();
+
   camera_started_ = true;
   return true;
 }

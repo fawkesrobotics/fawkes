@@ -89,6 +89,7 @@ class RealsenseThread
   std::string frame_id_;
   std::string pcl_id_;
   bool camera_started_ = false;
+  int laser_power_;
 
 };
 
