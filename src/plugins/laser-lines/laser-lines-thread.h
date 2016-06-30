@@ -97,10 +97,11 @@ class LaserLinesThread
 
  private:
 
-  void set_line(fawkes::LaserLineInterface *iface,
-		bool is_visible,
-		const std::string &frame_id = "",
-		const LineInfo &info = LineInfo());
+  void set_line(unsigned int idx,
+                fawkes::LaserLineInterface *iface,
+                bool is_visible,
+                const std::string &frame_id = "",
+                const LineInfo &info = LineInfo());
 
 
 #ifdef HAVE_VISUAL_DEBUGGING

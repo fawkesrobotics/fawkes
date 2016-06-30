@@ -62,7 +62,7 @@ using namespace fawkes;
 LaserLinesThread::LaserLinesThread()
   : Thread("LaserLinesThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
-    TransformAspect(TransformAspect::ONLY_LISTENER)
+    TransformAspect(TransformAspect::BOTH, "laser_lines")
 {
 }
 
@@ -257,10 +257,10 @@ LaserLinesThread::loop()
     //TimeWait::wait(50000);
 
     for (unsigned int i = 0; i < cfg_max_num_lines_; ++i) {
-      set_line(line_ifs_[i], false);
+	    set_line(i, line_ifs_[i], false);
       if(cfg_moving_avg_enabled_)
       {
-        set_line(line_avg_ifs_[i], false);
+	      set_line(i, line_avg_ifs_[i], false);
       }
     }
 
@@ -368,10 +368,10 @@ LaserLinesThread::loop()
     const LineInfo &info_avg = linfos_filtered[i];
 
     if (line_if_idx < cfg_max_num_lines_) {
-      set_line(line_ifs_[line_if_idx], true, finput_->header.frame_id, info);
+	    set_line(line_if_idx, line_ifs_[line_if_idx], true, finput_->header.frame_id, info);
       if(cfg_moving_avg_enabled_)
       {
-        set_line(line_avg_ifs_[line_if_idx], true, finput_->header.frame_id, info_avg);
+        set_line(line_if_idx, line_avg_ifs_[line_if_idx], true, finput_->header.frame_id, info_avg);
       }
       line_if_idx++;
     }
@@ -394,10 +394,10 @@ LaserLinesThread::loop()
   }
 
   for (unsigned int i = line_if_idx; i < cfg_max_num_lines_; ++i) {
-    set_line(line_ifs_[i], false);
+	  set_line(i, line_ifs_[i], false);
     if(cfg_moving_avg_enabled_)
     {
-      set_line(line_avg_ifs_[i], false);
+	    set_line(i, line_avg_ifs_[i], false);
     }
   }
 
@@ -439,10 +439,11 @@ LaserLinesThread::loop()
 
 
 void
-LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
-			   bool is_visible,
-			   const std::string &frame_id,
-			   const LineInfo &info)
+LaserLinesThread::set_line(unsigned int idx,
+                           fawkes::LaserLineInterface *iface,
+                           bool is_visible,
+                           const std::string &frame_id,
+                           const LineInfo &info)
 {
   int visibility_history = iface->visibility_history();
   if (is_visible) {
@@ -474,6 +475,42 @@ LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
     iface->set_length(info.length);
     iface->set_end_point_1(if_end_point_1);
     iface->set_end_point_2(if_end_point_2);
+
+    // this makes the usual assumption that the laser data is in the X-Y plane
+    fawkes::Time now(clock);  
+    std::string frame_name_1, frame_name_2;
+    char *tmp;
+    if (asprintf(&tmp, "laser_line_%u_e1", idx) != -1) {
+	    frame_name_1 = tmp;
+	    free(tmp);
+    }
+    if (asprintf(&tmp, "laser_line_%u_e2", idx) != -1) {
+	    frame_name_2 = tmp;
+	    free(tmp);
+    }
+    if (frame_name_1 != "" && frame_name_2 != "") {
+	    Eigen::Vector3f bp_unit = info.base_point / info.base_point.norm();
+	    double dotprod = Eigen::Vector3f::UnitX().dot(bp_unit);
+	    double angle = acos(dotprod) + M_PI;
+
+	    if (info.base_point[1] < 0.)  angle = fabs(angle) * -1.;
+
+	    tf::Transform t1(tf::Quaternion(tf::Vector3(0,0,1), angle),
+	                     tf::Vector3(info.end_point_1[0], info.end_point_1[1], info.end_point_1[2]));
+	    tf::Transform t2(tf::Quaternion(tf::Vector3(0,0,1), angle),
+	                     tf::Vector3(info.end_point_2[0], info.end_point_2[1], info.end_point_2[2]));
+	    
+	    try {
+		    tf_publisher->send_transform(t1, now, frame_id, frame_name_1);
+		    tf_publisher->send_transform(t2, now, frame_id, frame_name_2);
+	    } catch (Exception &e) {
+		    logger->log_warn(name(), "Failed to publish laser_line_%u_* transforms, exception follows", idx);
+		    logger->log_warn(name(), e);
+	    }
+    } else {
+	    logger->log_warn(name(), "Failed to determine frame names");
+    }
+
   } else {
     if (visibility_history <= 0) {
       iface->set_visibility_history(visibility_history - 1);
@@ -489,7 +526,7 @@ LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
       iface->set_frame_id("");
     }
   }
-  iface->write();  
+  iface->write();
 }
 
 
