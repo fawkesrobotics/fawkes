@@ -227,7 +227,13 @@ NavGraphVisualizationThread::publish()
   graph_.lock();
   std::vector<fawkes::NavGraphNode> nodes = graph_->nodes();
   std::vector<fawkes::NavGraphEdge> edges = graph_->edges();
+  std::map<std::string, std::string> default_props = graph_->default_properties();
   graph_.unlock();
+
+  std::map<std::string, fawkes::NavGraphNode> nodes_map;
+  for (const fawkes::NavGraphNode &n : nodes) {
+	  nodes_map[n.name()] = n;
+  }
 
   crepo_.lock();
   std::map<std::string, std::string> bl_nodes = crepo_->blocks(nodes);
@@ -359,8 +365,8 @@ NavGraphVisualizationThread::publish()
       float target_tolerance = 0.;
       if (nodes[i].has_property("target_tolerance")) {
 	target_tolerance = nodes[i].property_as_float("target_tolerance");
-      } else if (graph_->has_default_property("target_tolerance")) {
-	target_tolerance = graph_->default_property_as_float("target_tolerance");
+      } else if (default_props.find("target_tolerance") != default_props.end()) {
+	      target_tolerance = StringConversions::to_float(default_props["target_tolerance"]);
       }
       if (target_tolerance > 0.) {
 	add_circle_markers(m, id_num, nodes[i].x(), nodes[i].y(), target_tolerance, 5,
@@ -370,9 +376,9 @@ NavGraphVisualizationThread::publish()
     } else if (is_active) {
       float travel_tolerance = 0.;
       if (nodes[i].has_property("travel_tolerance")) {
-	travel_tolerance = nodes[i].property_as_float("travel_tolerance");
-      } else if (graph_->has_default_property("travel_tolerance")) {
-	travel_tolerance = graph_->default_property_as_float("travel_tolerance");
+	      travel_tolerance = nodes[i].property_as_float("travel_tolerance");
+      } else if (default_props.find("travel_tolerance") != default_props.end()) {
+	      travel_tolerance = StringConversions::to_float(default_props["travel_tolerance"]);
       }
       if (travel_tolerance > 0.) {
 	add_circle_markers(m, id_num, nodes[i].x(), nodes[i].y(), travel_tolerance, 10,
@@ -384,8 +390,8 @@ NavGraphVisualizationThread::publish()
       float shortcut_tolerance = 0.;
       if (nodes[i].has_property("shortcut_tolerance")) {
 	shortcut_tolerance = nodes[i].property_as_float("shortcut_tolerance");
-      } else if (graph_->has_default_property("shortcut_tolerance")) {
-	shortcut_tolerance = graph_->default_property_as_float("shortcut_tolerance");
+      } else if (default_props.find("shortcut_tolerance") != default_props.end()) {
+	shortcut_tolerance = StringConversions::to_float(default_props["shortcut_tolerance"]);
       }
       if (shortcut_tolerance > 0.) {
 	add_circle_markers(m, id_num, nodes[i].x(), nodes[i].y(), shortcut_tolerance, 30,
@@ -527,8 +533,8 @@ NavGraphVisualizationThread::publish()
     float target_tolerance = 0.;
     if (traversal_.path().goal().has_property("target_tolerance")) {
       target_tolerance = traversal_.path().goal().property_as_float("target_tolerance");
-    } else if (graph_->has_default_property("target_tolerance")) {
-      target_tolerance = graph_->default_property_as_float("target_tolerance");
+    } else if (default_props.find("target_tolerance") != default_props.end()) {
+	    target_tolerance = StringConversions::to_float(default_props["target_tolerance"]);
     }
     if (target_tolerance > 0.) {
       add_circle_markers(m, id_num, traversal_.path().goal().x(), traversal_.path().goal().y(),
@@ -540,8 +546,8 @@ NavGraphVisualizationThread::publish()
     float shortcut_tolerance = 0.;
     if (traversal_.path().goal().has_property("shortcut_tolerance")) {
       shortcut_tolerance = traversal_.path().goal().property_as_float("shortcut_tolerance");
-    } else if (graph_->has_default_property("shortcut_tolerance")) {
-      shortcut_tolerance = graph_->default_property_as_float("shortcut_tolerance");
+    } else if (default_props.find("shortcut_tolerance") != default_props.end()) {
+	    shortcut_tolerance = StringConversions::to_float(default_props["shortcut_tolerance"]);
     }
     if (shortcut_tolerance > 0.) {
       add_circle_markers(m, id_num, traversal_.path().goal().x(), traversal_.path().goal().y(),
@@ -551,7 +557,7 @@ NavGraphVisualizationThread::publish()
 
     if (traversal_.remaining() >= 2) {
       const NavGraphNode &last_graph_node =
-	traversal_.path().nodes()[traversal_.path().size() - 2];
+	      traversal_.path().nodes()[traversal_.path().size() - 2];
 
       geometry_msgs::Point p1;
       p1.x =  last_graph_node.x();
@@ -598,9 +604,11 @@ NavGraphVisualizationThread::publish()
 
   for (size_t i = 0; i < edges.size(); ++i) {
     NavGraphEdge &edge = edges[i];
-    if (graph_->node_exists(edge.from()) && graph_->node_exists(edge.to())) {
-      NavGraphNode from = graph_->node(edge.from());
-      NavGraphNode to   = graph_->node(edge.to());
+    if (nodes_map.find(edge.from()) != nodes_map.end() &&
+        nodes_map.find(edge.to()) != nodes_map.end())
+    {
+      NavGraphNode from = nodes_map[edge.from()];
+      NavGraphNode to   = nodes_map[edge.to()];
 
       geometry_msgs::Point p1;
       p1.x =  from.x();
