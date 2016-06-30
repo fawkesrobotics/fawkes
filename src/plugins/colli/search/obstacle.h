@@ -152,12 +152,12 @@ ColliFastEllipse::ColliFastEllipse( int width, int height, colli_cell_cost_t &co
 
   int maxRad = std::max( radius_width, radius_height );
 
-  for( int y = -(maxRad+3); y <= (maxRad+3); y++ ) {
-    for( int x = -(maxRad+3); x <= (maxRad+3); x++ ) {
+  for( int y = -(maxRad+8); y <= (maxRad+8); y++ ) {
+    for( int x = -(maxRad+8); x <= (maxRad+8); x++ ) {
       dist        = sqr((float)y/(float)radius_width)     + sqr((float)x/(float)radius_height);
-      dist_near   = sqr((float)y/(float)(radius_width+1)) + sqr((float)x/(float)(radius_height+1));
-      dist_middle = sqr((float)y/(float)(radius_width+2)) + sqr((float)x/(float)(radius_height+2));
-      dist_far    = sqr((float)x/(float)(radius_width+3)) +  sqr((float)y/(float)(radius_height+3));
+      dist_near   = sqr((float)y/(float)(radius_width+2)) + sqr((float)x/(float)(radius_height+2));
+      dist_middle = sqr((float)y/(float)(radius_width+4)) + sqr((float)x/(float)(radius_height+4));
+      dist_far    = sqr((float)x/(float)(radius_width+8)) +  sqr((float)y/(float)(radius_height+8));
 
       if( (dist > 1.f) && (dist_near > 1.f)
        && (dist_middle > 1.f) && (dist_far > 1.f) ) {
