@@ -76,6 +76,10 @@ NavGraphGeneratorThread::init()
   filter_["FILTER_MULTI_GRAPH"] = false;
 
   filter_params_float_defaults_["FILTER_EDGES_BY_MAP"]["distance"] = 0.3;
+  if (config->exists(CFG_PREFIX"filters/edges_by_map/distance")) {
+	  filter_params_float_defaults_["FILTER_EDGES_BY_MAP"]["distance"] =
+		  config->get_float(CFG_PREFIX"filters/edges_by_map/distance");
+  }
 
   filter_params_float_ = filter_params_float_defaults_;
 
