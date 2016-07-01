@@ -105,7 +105,8 @@ class LaserLinesThread
 
 
 #ifdef HAVE_VISUAL_DEBUGGING
-  void publish_visualization(const std::vector<LineInfo> &linfos);
+  void publish_visualization(const std::vector<LineInfo> &linfos,
+                             std::string marker_namespace, std::string name_suffix = "");
 #endif
 
  private:
