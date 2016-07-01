@@ -471,11 +471,11 @@ LaserLinesThread::set_line(unsigned int idx,
     fawkes::Time now(clock);  
     std::string frame_name_1, frame_name_2;
     char *tmp;
-    if (asprintf(&tmp, "laser_line_%u_e1", idx) != -1) {
+    if (asprintf(&tmp, "laser_line_%u_e1", idx+1) != -1) {
 	    frame_name_1 = tmp;
 	    free(tmp);
     }
-    if (asprintf(&tmp, "laser_line_%u_e2", idx) != -1) {
+    if (asprintf(&tmp, "laser_line_%u_e2", idx+1) != -1) {
 	    frame_name_2 = tmp;
 	    free(tmp);
     }
@@ -495,7 +495,7 @@ LaserLinesThread::set_line(unsigned int idx,
 		    tf_publisher->send_transform(t1, now, frame_id, frame_name_1);
 		    tf_publisher->send_transform(t2, now, frame_id, frame_name_2);
 	    } catch (Exception &e) {
-		    logger->log_warn(name(), "Failed to publish laser_line_%u_* transforms, exception follows", idx);
+		    logger->log_warn(name(), "Failed to publish laser_line_%u_* transforms, exception follows", idx+1);
 		    logger->log_warn(name(), e);
 	    }
     } else {
