@@ -24,6 +24,7 @@
 
 #include <core/exception.h>
 #include <utils/time/time.h>
+#include <logging/logger.h>
 #include <cstring>
 
 /** @class LaserMinMergeDataFilter "min_merge.h"
@@ -34,28 +35,38 @@
  */
 
 /** Constructor.
+ * @param filter_name name of this filter instance
+ * @param logger logger
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserMinMergeDataFilter::LaserMinMergeDataFilter(unsigned int in_data_size,
-						 std::vector<LaserDataFilter::Buffer *> &in)
-  : LaserDataFilter(in_data_size, in, 1),
+LaserMinMergeDataFilter::LaserMinMergeDataFilter(const std::string filter_name,
+                                                 fawkes::Logger *logger,
+                                                 unsigned int in_data_size,
+                                                 std::vector<LaserDataFilter::Buffer *> &in)
+	: LaserDataFilter(filter_name, in_data_size, in, 1),
+    logger(logger),
     timestamp_selection_method_(TIMESTAMP_LATEST)
 {
 }
 
 /** Constructor.
+ * @param filter_name name of this filter instance
+ * @param logger logger
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  * @param timestamp_selection_method method to use for timestamp selection
  * @param timestamp_index if timestamp selection method is TIMESTAMP_INDEX this
  * is the index of the input buffer to choose the timestamp from
  */
-LaserMinMergeDataFilter::LaserMinMergeDataFilter(
-  unsigned int in_data_size,
-  std::vector<LaserDataFilter::Buffer *> &in,
-  TimestampSelectionMethod timestamp_selection_method, unsigned int timestamp_index)
-  : LaserDataFilter(in_data_size, in, 1),
+LaserMinMergeDataFilter::LaserMinMergeDataFilter(const std::string filter_name,
+                                                 fawkes::Logger *logger,
+                                                 unsigned int in_data_size,
+                                                 std::vector<LaserDataFilter::Buffer *> &in,
+                                                 TimestampSelectionMethod timestamp_selection_method,
+                                                 unsigned int timestamp_index)
+	: LaserDataFilter(filter_name, in_data_size, in, 1),
+    logger(logger),
     timestamp_selection_method_(timestamp_selection_method),
     timestamp_index_(timestamp_index)
 {

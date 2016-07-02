@@ -28,8 +28,9 @@
 class Laser1080to360DataFilter : public LaserDataFilter
 {
  public:
-  Laser1080to360DataFilter(bool average, unsigned int in_data_size,
-			   std::vector<LaserDataFilter::Buffer *> &in);
+	Laser1080to360DataFilter(std::string filter_name,
+	                         bool average, unsigned int in_data_size,
+	                         std::vector<LaserDataFilter::Buffer *> &in);
   void filter();
 
  private:

@@ -41,7 +41,8 @@ namespace fawkes {
 class LaserProjectionDataFilter : public LaserDataFilter
 {
  public:
-  LaserProjectionDataFilter(fawkes::tf::Transformer *tf,
+	LaserProjectionDataFilter(std::string filter_name,
+                            fawkes::tf::Transformer *tf,
                             std::string target_frame,
                             float not_from_x, float not_to_x,
                             float not_from_y, float not_to_y,

@@ -36,18 +36,20 @@
  */
 
 /** Constructor.
+ * @param filter_name name of this filter
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  * @param tf_listener to access the tf::Transformer aspect
  * @param config to access the Configuration aspect
  * @param logger to access the Logger aspect
  */
-LaserMapFilterDataFilter::LaserMapFilterDataFilter(unsigned int in_data_size,
-    std::vector<LaserDataFilter::Buffer *> &in,
-    fawkes::tf::Transformer *tf_listener,
-    fawkes::Configuration *config,
-    fawkes::Logger *logger)
-  : LaserDataFilter(in_data_size, in, 1)
+LaserMapFilterDataFilter::LaserMapFilterDataFilter(const std::string filter_name,
+                                                   unsigned int in_data_size,
+                                                   std::vector<LaserDataFilter::Buffer *> &in,
+                                                   fawkes::tf::Transformer *tf_listener,
+                                                   fawkes::Configuration *config,
+                                                   fawkes::Logger *logger)
+	: LaserDataFilter(filter_name, in_data_size, in, 1)
 {
   tf_listener_ = tf_listener;
   config_ = config;

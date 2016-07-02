@@ -45,11 +45,12 @@ class LaserMapFilterDataFilter : public LaserDataFilter
 
  public:
 
-  LaserMapFilterDataFilter(unsigned int in_data_size,
-			  std::vector<LaserDataFilter::Buffer *> &in,
-			  fawkes::tf::Transformer * tf_listener,
-        fawkes::Configuration *config,
-        fawkes::Logger *logger);
+  LaserMapFilterDataFilter(const std::string filter_name,
+                           unsigned int in_data_size,
+                           std::vector<LaserDataFilter::Buffer *> &in,
+                           fawkes::tf::Transformer * tf_listener,
+                           fawkes::Configuration *config,
+                           fawkes::Logger *logger);
 
   virtual void filter();
 

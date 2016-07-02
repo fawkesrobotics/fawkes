@@ -25,6 +25,10 @@
 
 #include "filter.h"
 
+namespace fawkes {
+	class Logger;
+}
+
 class LaserMinMergeDataFilter : public LaserDataFilter
 {
  public:
@@ -35,16 +39,22 @@ class LaserMinMergeDataFilter : public LaserDataFilter
     TIMESTAMP_INDEX	///< use a specific index in the input buffer list
   } TimestampSelectionMethod;
 
-  LaserMinMergeDataFilter(unsigned int in_data_size,
-			  std::vector<LaserDataFilter::Buffer *> &in);
-  LaserMinMergeDataFilter(unsigned int in_data_size,
-			  std::vector<LaserDataFilter::Buffer *> &in,
-			  TimestampSelectionMethod timestamp_selection_method,
-			  unsigned int timestamp_index = 0);
+  LaserMinMergeDataFilter(const std::string filter_name,
+                          fawkes::Logger *logger,
+                          unsigned int in_data_size,
+                          std::vector<LaserDataFilter::Buffer *> &in);
+  LaserMinMergeDataFilter(const std::string filter_name,
+                          fawkes::Logger *logger,
+                          unsigned int in_data_size,
+                          std::vector<LaserDataFilter::Buffer *> &in,
+                          TimestampSelectionMethod timestamp_selection_method,
+                          unsigned int timestamp_index = 0);
 
   virtual void filter();
 
  private:
+  fawkes::Logger *logger;
+
   TimestampSelectionMethod timestamp_selection_method_;
   unsigned int timestamp_index_;
 };

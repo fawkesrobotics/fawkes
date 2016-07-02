@@ -37,9 +37,10 @@ namespace fawkes {
 class LaserDeadSpotsDataFilter : public LaserDataFilter
 {
  public:
-  LaserDeadSpotsDataFilter(fawkes::Configuration *config, fawkes::Logger *logger,
-			   std::string prefix,
-			   unsigned int data_size, std::vector<LaserDataFilter::Buffer *> &in);
+  LaserDeadSpotsDataFilter(const std::string filter_name,
+                           fawkes::Configuration *config, fawkes::Logger *logger,
+                           std::string prefix,
+                           unsigned int data_size, std::vector<LaserDataFilter::Buffer *> &in);
   ~LaserDeadSpotsDataFilter();
 
   void filter();

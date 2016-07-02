@@ -36,12 +36,14 @@ class LaserDataFilter
    public:
     Buffer(size_t num_values = 0);
     ~Buffer();
+    std::string   name; ///< name of the input buffer
     std::string   frame;		///< reference coordinate frame ID
     float        *values;	///< values
     fawkes::Time *timestamp;	///< timestamp of data
   };
 
-  LaserDataFilter(unsigned int in_data_size,
+  LaserDataFilter(const std::string filter_name,
+                  unsigned int in_data_size,
                   std::vector<Buffer *> &in, unsigned int out_size);
   virtual ~LaserDataFilter();
 
@@ -67,6 +69,7 @@ class LaserDataFilter
 
 
  protected:
+  const std::string    filter_name;
   unsigned int         out_data_size;
   unsigned int         in_data_size;
   std::vector<Buffer *>  in;
