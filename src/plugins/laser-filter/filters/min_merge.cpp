@@ -122,7 +122,7 @@ LaserMinMergeDataFilter::filter()
     }
     float *inbuf  = in[a]->values;
     for (unsigned int i = 0; i < (const unsigned int)out_data_size; ++i) {
-      if ( (outbuf[i] == 0) || ((inbuf[i] != 0) && (inbuf[i] < outbuf[i])) ) {
+      if ( (outbuf[i] == 0) || ((inbuf[i] != 0) && ( ! std::isfinite(outbuf[i]) || (std::isfinite(inbuf[1]) && (inbuf[i] < outbuf[i])))) ) {
 	outbuf[i] = inbuf[i];
       }
     }
