@@ -25,6 +25,8 @@
 
 #include "filter.h"
 
+#include <vector>
+
 namespace fawkes {
 	class Logger;
 }
@@ -57,6 +59,8 @@ class LaserMinMergeDataFilter : public LaserDataFilter
 
   TimestampSelectionMethod timestamp_selection_method_;
   unsigned int timestamp_index_;
+
+  std::vector<bool> ignored_;
 };
 
 #endif
