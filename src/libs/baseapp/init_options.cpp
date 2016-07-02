@@ -244,9 +244,29 @@ InitOptions::InitOptions(int argc, char **argv)
   __show_help = argp->has_arg("h");
   __bb_cleanup = argp->has_arg("C");
 
-  __has_load_plugin_list = argp->has_arg("p");
+  __has_load_plugin_list = argp->has_arg("p") || argp->num_items() > 0;
   if (__has_load_plugin_list) {
-    __load_plugin_list = strdup(argp->arg("p"));
+    uint len = 0;
+    for (uint i = 0; i < argp->items().size(); i++) {
+      len += strlen(argp->items()[i]);
+    }
+    if (argp->has_arg("p")) {
+      len += strlen(argp->arg("p") + 1);
+    }
+    char res[len + argp->items().size()];
+    if (argp->has_arg("p") && argp->num_items() > 0) {
+      sprintf(res, "%s,%s,", argp->arg("p"), argp->items()[0]);
+    } else if (argp->has_arg("p")) {
+      sprintf(res, "%s", argp->arg("p"));
+    } else {
+      sprintf(res, "%s", argp->items()[0]);
+    }
+    for (uint i = 1; i < argp->items().size(); i++) {
+      char *tmp = strdup(res);
+      sprintf(res, "%s,%s", tmp, argp->items()[i]);
+      free(tmp);
+    }
+    __load_plugin_list = strdup(res);
   } else {
     __load_plugin_list = NULL;
   }
