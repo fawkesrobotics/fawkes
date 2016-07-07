@@ -186,9 +186,8 @@ LaserAcquisitionThread::alloc_distances(unsigned int num_distances)
 
   _distances_size = num_distances;
   _distances      = (float *)malloc(sizeof(float) * _distances_size);
-  memset(_distances,
-         std::numeric_limits<float>::quiet_NaN(),
-         sizeof(float) * _distances_size);
+  std::fill_n(_distances, _distances_size,
+              std::numeric_limits<float>::quiet_NaN());
 }
 
 
