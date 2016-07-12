@@ -205,7 +205,7 @@ HokuyoUrgAcquisitionThread::init()
 #endif
 
   __ctrl = new UrgCtrl();
-  std::auto_ptr<UrgCtrl> ctrl(__ctrl);
+  std::unique_ptr<UrgCtrl> ctrl(__ctrl);
   __fd = open(__cfg_device.c_str(), 0, O_RDONLY);
   if (__fd == -1) {
     throw Exception(errno, "Failed to open URG device %s", __cfg_device.c_str());

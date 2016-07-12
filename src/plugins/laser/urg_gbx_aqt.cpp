@@ -88,10 +88,10 @@ HokuyoUrgGbxAcquisitionThread::init()
 
 #ifdef HAVE_URG_GBX_9_11
   __laser = new HokuyoLaser();
-  std::auto_ptr<HokuyoLaser> laser(__laser);
+  std::unique_ptr<HokuyoLaser> laser(__laser);
 #else
   __laser = new Sensor();
-  std::auto_ptr<Sensor> laser(__laser);
+  std::unique_ptr<Sensor> laser(__laser);
 #endif
   std::string port_options = "type=serial,device=" + __cfg_device + ",timeout=1";
   try {
