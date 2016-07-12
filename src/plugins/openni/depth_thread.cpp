@@ -60,7 +60,7 @@ OpenNiDepthThread::init()
   MutexLocker lock(openni.objmutex_ptr());
 
   __depth_gen = new xn::DepthGenerator();
-  std::auto_ptr<xn::DepthGenerator> depthgen_autoptr(__depth_gen);
+  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
 
   XnStatus st;
 
@@ -90,7 +90,7 @@ OpenNiDepthThread::init()
   *__capture_start -= (long int)__depth_gen->GetTimestamp();
   
   
-  depthgen_autoptr.release();
+  depthgen_uniqueptr.release();
 }
 
 
