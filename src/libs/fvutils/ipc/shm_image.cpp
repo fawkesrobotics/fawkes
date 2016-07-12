@@ -506,9 +506,9 @@ SharedMemoryImageBuffer::list()
 std::list<SharedMemoryImageBufferMetaData>
 SharedMemoryImageBuffer::list_meta_data()
 {
-  std::auto_ptr<SharedMemoryImageBufferMetaDataCollector>
+  std::unique_ptr<SharedMemoryImageBufferMetaDataCollector>
     lister(new SharedMemoryImageBufferMetaDataCollector());
-  std::auto_ptr<SharedMemoryImageBufferHeader>
+  std::unique_ptr<SharedMemoryImageBufferHeader>
     h(new SharedMemoryImageBufferHeader());
 
   SharedMemory::list(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h.get(), lister.get());
