@@ -72,7 +72,7 @@ class LaserGuiHildonWindow : public Hildon::Window
     __laser_if = NULL;
     __ifd = NULL;
 
-    std::auto_ptr<Glib::Error> error;
+    std::unique_ptr<Glib::Error> error;
     set_icon_from_file(RESDIR"/guis/lasergui/lines_"ICON_FORMAT".png", error);
 
     add(__area);
