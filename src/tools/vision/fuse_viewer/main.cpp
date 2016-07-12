@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     Glib::RefPtr<Gtk::Builder> builder =
       Gtk::Builder::create_from_file(RESDIR"/guis/fuse_viewer/fuse_viewer.ui");
 #else
-    std::auto_ptr<Gtk::BuilderError> error;
+    std::unique_ptr<Gtk::BuilderError> error;
     Glib::RefPtr<Gtk::Builder> builder =
       Gtk::Builder::create_from_file(RESDIR"/guis/fuse_viewer/fuse_viewer.ui", error);
     if (error.get()) {
