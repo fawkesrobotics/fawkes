@@ -54,7 +54,7 @@ int main(int argc, char** argv)
       printf("Failed to create GUI: %s\n", e.what().c_str());
     }
 #else
-    std::auto_ptr<Gtk::BuilderError> error;
+    std::unique_ptr<Gtk::BuilderError> error;
     Glib::RefPtr<Gtk::Builder> builder =
       Gtk::Builder::create_from_file(UI_FILE, error);
     if (error.get()) {
