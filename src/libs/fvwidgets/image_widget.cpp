@@ -436,7 +436,7 @@ ImageWidget::save_image(std::string filename, Glib::ustring type) const throw()
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
     __pixbuf->save(filename, type);
 #else
-    std::auto_ptr<Glib::Error> error;
+    std::unique_ptr<Glib::Error> error;
     __pixbuf->save(filename, type, error);
 #endif
     __cam_mutex->unlock();
