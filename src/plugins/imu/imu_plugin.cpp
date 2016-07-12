@@ -52,7 +52,7 @@ class IMUPlugin : public fawkes::Plugin
 #if __cplusplus >= 201103L
     std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #else
-    std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+    std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #endif
     while (i->next()) {
       std::string cfg_name = std::string(i->path()).substr(prefix.length());
