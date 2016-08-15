@@ -17,21 +17,54 @@ function parse_yaml {
 
 _fawkes()
 {
-  local cur prev opts base
+  local cur prev pprev opts base
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
+  pprev=${COMP_WORDS[COMP_CWORD-2]}
 
-  opts="-c -C -d -D -g -h -l -L -p -P -u --net-service-name"
+  opts="-c -C -d -D -g -h -l -L -p -P -q -qq -qqq -qqqq -u --net-service-name"
+
+  # -L needs special treatment; format for files is '-L file:path/to/file'
+  # 1) -L file: --> -L file:somedir
+  if [[ "${pprev}" = "-L" ]] && [[ "${prev}" = "file" ]]
+  then
+    # use default auto completion which will auto-complete files
+    compopt -o default
+    return 0
+  fi
+  # 2) -L file:so --> -L file:somedir
+  # this can also be used for other file: arguments
+  if [[ "${pprev}" = "file" ]] && [[ "${prev}" = ":" ]]
+  then
+    # use default auto completion which will auto-complete files
+    compopt -o default
+    return 0
+  fi
 
   case "${prev}" in
     -L)
-      #OPTIONS=( $(compgen -W "${available_plugins}" -- ${cur##*,}) )
-      #COMPREPLY=( ${OPTIONS[@]/#/${cur}} )
+      # turn off space because we don't want a space after 'file:'
+      compopt -o nospace
       COMPREPLY=( $(compgen -W "console file:" -- ${cur}) )
       return 0
       ;;
     -D*)
-      COMPREPLY=( $(compgen -W "-k -s" -- ${cur}) )
+      if [[ "${cur}" = -* ]] ; then
+        COMPREPLY=( $(compgen -W "-k -s" -- ${cur}) )
+      else
+        # use default auto completion which will auto-complete files
+        compopt -o default
+        COMPREPLY=()
+      fi
+      return 0
+      ;;
+    -P)
+      COMPREPLY=()
+      return 0
+      ;;
+    -c)
+      # use default auto completion which will auto-complete files
+      compopt -o default
       return 0
       ;;
   esac
