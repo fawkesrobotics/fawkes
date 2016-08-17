@@ -96,6 +96,15 @@ get_distance_map(double scale, double max_dist)
   return cdm;
 }
 
+static unsigned int delta(const unsigned int x, const unsigned int y)
+{
+  if(x < y)
+  {
+	return y - x;
+  }
+  return x - y;
+}
+
 void enqueue(map_t* map, unsigned int i, unsigned int j, 
 	     unsigned int src_i, unsigned int src_j,
 	     std::priority_queue<CellData>& Q,
@@ -105,8 +114,8 @@ void enqueue(map_t* map, unsigned int i, unsigned int j,
   if(marked[MAP_INDEX(map, i, j)])
     return;
 
-  unsigned int di = abs(i - src_i);
-  unsigned int dj = abs(j - src_j);
+  unsigned int di = delta(i, src_i);
+  unsigned int dj = delta(j, src_j);
   double distance = cdm->distances_[di][dj];
 
   if(distance > cdm->cell_radius_)
