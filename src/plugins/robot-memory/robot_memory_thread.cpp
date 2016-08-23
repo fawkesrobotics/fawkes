@@ -26,10 +26,7 @@
 #include <core/threading/mutex_locker.h>
 #include <memory>
 
-// from MongoDB
-#include <mongo/client/dbclient.h>
 
-using namespace mongo;
 using namespace fawkes;
 
 /** @class RobotMemoryThread "robot_memory_thread.h"
@@ -40,39 +37,33 @@ using namespace fawkes;
 /** Constructor. */
 RobotMemoryThread::RobotMemoryThread()
 	: Thread("RobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
-	  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
+	  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
+    AspectProviderAspect(&robot_memory_inifin_)
 {
-  __mutex = new Mutex();
 }
 
 
 /** Destructor. */
 RobotMemoryThread::~RobotMemoryThread()
-{
-  delete __mutex;
-}
+{}
 
 
 void
 RobotMemoryThread::init()
 {
-	logger->log_info(name(), "Started RobotMemory");
-	__collection = "fawkes.msglog";
-  try {
-    __collection = config->get_string("/plugins/mongodb/test-collection");
-  } catch (Exception &e) {}
-
-  __rm_if = blackboard->open_for_writing<RobotMemoryInterface>(config->get_string("/plugins/robot-memory/interface-name").c_str());
-  __rm_if->set_error("");
-  __rm_if->set_result("");
-  
-  __rm_if->write();
+  //init RobotMemory itself
+  robot_memory = new RobotMemory(config, logger, clock, mongodb_client, blackboard);
+  robot_memory->init();
+  //prepare aspect initializer
+  robot_memory_inifin_.set_robot_memory(robot_memory);
 }
 
 
 void
 RobotMemoryThread::finalize()
 {
+  robot_memory_inifin_.set_robot_memory(NULL);
+  delete robot_memory;
 }
 
 
@@ -80,321 +71,24 @@ void
 RobotMemoryThread::loop()
 {
 	// process interface messages
-  while (! __rm_if->msgq_empty() ) {
-    if (__rm_if->msgq_first_is<RobotMemoryInterface::QueryMessage>()) {
-	    RobotMemoryInterface::QueryMessage* msg = (RobotMemoryInterface::QueryMessage*) __rm_if->msgq_first();
-	    exec_query(msg->query());
-    } else if (__rm_if->msgq_first_is<RobotMemoryInterface::InsertMessage>()) {
-	    RobotMemoryInterface::InsertMessage* msg = (RobotMemoryInterface::InsertMessage*) __rm_if->msgq_first();
-	    exec_insert(msg->insert());
-    } else if (__rm_if->msgq_first_is<RobotMemoryInterface::UpdateMessage>()) {
-	    RobotMemoryInterface::UpdateMessage* msg = (RobotMemoryInterface::UpdateMessage*) __rm_if->msgq_first();
-	    exec_update(msg->query(), msg->update());
-    } else if (__rm_if->msgq_first_is<RobotMemoryInterface::RemoveMessage>()) {
-	    RobotMemoryInterface::RemoveMessage* msg = (RobotMemoryInterface::RemoveMessage*) __rm_if->msgq_first();
-	    exec_remove(msg->query());
+  while (! robot_memory->rm_if_->msgq_empty() ) {
+    if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::QueryMessage>()) {
+	    RobotMemoryInterface::QueryMessage* msg = (RobotMemoryInterface::QueryMessage*) robot_memory->rm_if_->msgq_first();
+	    robot_memory->exec_query(msg->query());
+    } else if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::InsertMessage>()) {
+	    RobotMemoryInterface::InsertMessage* msg = (RobotMemoryInterface::InsertMessage*) robot_memory->rm_if_->msgq_first();
+	    robot_memory->exec_insert(msg->insert());
+    } else if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::UpdateMessage>()) {
+	    RobotMemoryInterface::UpdateMessage* msg = (RobotMemoryInterface::UpdateMessage*) robot_memory->rm_if_->msgq_first();
+	    robot_memory->exec_update(msg->query(), msg->update());
+    } else if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::RemoveMessage>()) {
+	    RobotMemoryInterface::RemoveMessage* msg = (RobotMemoryInterface::RemoveMessage*) robot_memory->rm_if_->msgq_first();
+	    robot_memory->exec_remove(msg->query());
     } else {
       logger->log_warn(name(), "Unknown message received");
     }
 
-    __rm_if->msgq_pop();
+    robot_memory->rm_if_->msgq_pop();
   }
-}
-
-void RobotMemoryThread::exec_query(std::string query_string)
-{
-	exec_query(query_string, __collection);
-}
-void RobotMemoryThread::exec_query(std::string query_string, std::string collection)
-{
-	logger->log_info(name(), "Executing Query: %s", query_string.c_str());
-
-	//only one query at a time
-	MutexLocker lock(__mutex);
-
-	//get query from string
-	Query query;
-	try{
-	  query = Query(query_string);
-	} catch (DBException &e) {
-		logger->log_error(name(), "Can't parse query_string '%s'\n Exception: %s",
-		                  query_string.c_str(), e.toString().c_str());
-		__rm_if->set_error((std::string("Can't parse query_string ") +  query_string
-		                    + "\nException: " + e.toString()).c_str());
-		__rm_if->write();
-		return;
-	}
-
-	//introspect query
-	log(query, "executing query:");
-
-	//check if virtual knowledge is queried
-	//rename field in query
-	if(query.getFilter().hasField("class")){
-		set_fields(query, std::string("{type:\"") +
-		           query.getFilter()["class"].String() + "\"}");
-		remove_field(query, "class");
-	}
-	log(query, "Virtual query:");
-	//computation on request
-	if(query.getFilter().hasField("bbinterface")){
-		collection = config->get_string("plugins/robot-memory/blackboard-collection");
-		gen_blackboard_data(query.getFilter()["bbinterface"].String());
-	}
-	log(query, "Virtual query:");
-	
-	//actually execute query
-	std::unique_ptr<DBClientCursor> cursor;
-	try{
-	  cursor = mongodb_client->query(collection, query);
-	} catch (DBException &e) {
-		logger->log_error(name(), "Error for query %s\n Exception: %s",
-		                  query_string.c_str(), e.toString().c_str());
-		__rm_if->set_error((std::string("Query error for ") +  query_string
-		                    + "\nException: " + e.toString()).c_str());
-		__rm_if->write();
-		return;
-	}
-
-	if(cursor->more()){
-		BSONObj res = cursor->next();
-		logger->log_info(name(), "Query One result:\n%s", res.toString().c_str());
-		__rm_if->set_result(res.toString().c_str());
-		__rm_if->write();
-	}
-	else {
-		logger->log_info(name(), "Query result empty");
-	}
-}
-
-void RobotMemoryThread::exec_insert(std::string insert_string)
-{
-	exec_insert(insert_string, __collection);
-}
-void RobotMemoryThread::exec_insert(std::string insert_string, std::string collection)
-{
-	logger->log_info(name(), "Executing Query: %s", insert_string.c_str());
-
-	//only one query at a time
-	MutexLocker lock(__mutex);
-
-	//get query from string
-  BSONObj obj;
-	try{
-		obj = fromjson(insert_string);
-	} catch (DBException &e) {
-		logger->log_error(name(), "Can't parse insert_string '%s'\n Exception: %s",
-		                  insert_string.c_str(), e.toString().c_str());
-		__rm_if->set_error((std::string("Can't parse insert_string ") +  insert_string
-		                    + "\nException: " + e.toString()).c_str());
-		__rm_if->write();
-		return;
-	}
-
-	log(obj, "Inserting:");
-	set_fields(obj, "{type: \"test\"}");
-	log(obj, "Updated Inserting:");
-	
-	//actually execute insert
-	try{
-	  mongodb_client->insert(collection, obj);
-	} catch (DBException &e) {
-		logger->log_error(name(), "Error for insert %s\n Exception: %s",
-		                  insert_string.c_str(), e.toString().c_str());
-		__rm_if->set_error((std::string("Query error for ") +  insert_string
-		                    + "\nException: " + e.toString()).c_str());
-		__rm_if->write();
-		return;
-	}
-
-	__rm_if->set_result("insert successful");
-	__rm_if->write();
-}
-
-void RobotMemoryThread::exec_update(std::string query_string, std::string update_string)
-{
-	exec_update(query_string, update_string, __collection);
-}
-void RobotMemoryThread::exec_update(std::string query_string, std::string update_string,
-                                    std::string collection)
-{
-	logger->log_info(name(), "Executing Update %s for query %s",
-	                 update_string.c_str(), query_string.c_str());
-
-	//only one query at a time
-	MutexLocker lock(__mutex);
-
-	//get query from string
-	Query query;
-	try{
-	  query = Query(query_string);
-	} catch (DBException &e) {
-		logger->log_error(name(), "Can't parse query_string '%s'\n Exception: %s",
-		                  query_string.c_str(), e.toString().c_str());
-		__rm_if->set_error((std::string("Can't parse query_string ") +  query_string
-		                    + "\nException: " + e.toString()).c_str());
-		__rm_if->write();
-		return;
-	}
-	BSONObj update;
-	try{
-		update = fromjson(update_string);
-	} catch (DBException &e) {
-		logger->log_error(name(), "Can't parse update_string '%s'\n Exception: %s",
-		                  update_string.c_str(), e.toString().c_str());
-		__rm_if->set_error((std::string("Can't parse update_string ") +  update_string
-		                    + "\nException: " + e.toString()).c_str());
-		__rm_if->write();
-		return;
-	}
-
-	log(query, "Updating documents for query:");
-	log(update, "Updating with:");
-	
-	//actually execute update
-	try{
-		mongodb_client->update(collection, query, update);
-	} catch (DBException &e) {
-		logger->log_error(name(), "Error for update %s for query %s\n Exception: %s",
-		                  update_string.c_str(), query_string.c_str(), e.toString().c_str());
-		__rm_if->set_error((std::string("Query error for ") +  query_string + " and update "
-		                    + update_string + "\nException: " + e.toString()).c_str());
-		__rm_if->write();
-		return;
-	}
-
-	__rm_if->set_result("update successful");
-	__rm_if->write();
-}
-
-void RobotMemoryThread::exec_remove(std::string query_string)
-{
-	exec_remove(query_string, __collection);
-}
-
-void RobotMemoryThread::exec_remove(std::string query_string, std::string collection)
-{
-	logger->log_info(name(), "Executing Remove: %s", query_string.c_str());
-
-	//only one query at a time
-	MutexLocker lock(__mutex);
-
-	//get query from string
-	Query query;
-	try{
-	  query = Query(query_string);
-	} catch (DBException &e) {
-		logger->log_error(name(), "Can't parse query_string '%s'\n Exception: %s",
-		                  query_string.c_str(), e.toString().c_str());
-		__rm_if->set_error((std::string("Can't parse query_string ") +  query_string
-		                    + "\nException: " + e.toString()).c_str());
-		__rm_if->write();
-		return;
-	}
-
-	//introspect
-	log(query, "Removing documents for query:");
-	
-	//actually execute remove
-	try{
-	  mongodb_client->remove(collection, query);
-	} catch (DBException &e) {
-		logger->log_error(name(), "Error for query %s\n Exception: %s",
-		                  query_string.c_str(), e.toString().c_str());
-		__rm_if->set_error((std::string("Query error for ") +  query_string
-		                    + "\nException: " + e.toString()).c_str());
-		__rm_if->write();
-		return;
-	}
-
-	__rm_if->set_result("remove successful");
-	__rm_if->write();
-}
-
-void
-RobotMemoryThread::log(Query query, std::string what)
-{
-	std::string output = what
-		+ "\nFilter: " + query.getFilter().toString()
-		+ "\nModifiers: " + query.getModifiers().toString()
-		+ "\nSort: " + query.getSort().toString()
-		+ "\nHint: " + query.getHint().toString()
-		+ "\nReadPref: " + query.getReadPref().toString();
-		
-	logger->log_info(name(), "%s", output.c_str());
-}
-
-void
-RobotMemoryThread::log(BSONObj obj, std::string what)
-{
-	std::string output = what
-		+ "\nObject: " + obj.toString();
-		
-	logger->log_info(name(), "%s", output.c_str());
-}
-
-void
-RobotMemoryThread::set_fields(BSONObj &obj, std::string what)
-{
-	BSONObjBuilder b;
-	b.appendElements(obj);
-	b.appendElements(fromjson(what));
-	//override
-	obj = b.obj();
-}
-
-void
-RobotMemoryThread::set_fields(Query &q, std::string what)
-{
-	BSONObjBuilder b;
-	b.appendElements(q.getFilter());
-	b.appendElements(fromjson(what));
-
-	//TODO keep other stuff in query
-	// + "\nFilter: " + query.getFilter().toString()
-	// + "\nModifiers: " + query.getModifiers().toString()
-	// + "\nSort: " + query.getSort().toString()
-	// + "\nHint: " + query.getHint().toString()
-	// + "\nReadPref: " + query.getReadPref().toString();
-     
-	//override
-	q = Query(b.obj());
-}
-
-void
-RobotMemoryThread::remove_field(Query &q, std::string what)
-{
-	BSONObjBuilder b;
-	b.appendElements(q.getFilter().removeField(what));
-	
-	//TODO keep other stuff in query
-	// + "\nFilter: " + query.getFilter().toString()
-	// + "\nModifiers: " + query.getModifiers().toString()
-	// + "\nSort: " + query.getSort().toString()
-	// + "\nHint: " + query.getHint().toString()
-	// + "\nReadPref: " + query.getReadPref().toString();
-	
-	//override
-	q = Query(b.obj());
-}
-
-void
-RobotMemoryThread::gen_blackboard_data(std::string field)
-{
-	logger->log_info(name(), "Generating virtual kb for bb");
-
-	std::string collection = config->get_string("plugins/robot-memory/blackboard-collection");
-	
-	//remove old data first
-	mongodb_client->remove(collection, Query{"{}"});
-	
-	BSONObjBuilder b;
-	b.append("type", "bbinterface");
-	__rm_if->read();
-	b.append("bbinterface", __rm_if->uid());
-	b.append("error", __rm_if->error());
-	b.append("result", __rm_if->result());
-	
-	mongodb_client->insert(collection, b.obj());  
 }
 

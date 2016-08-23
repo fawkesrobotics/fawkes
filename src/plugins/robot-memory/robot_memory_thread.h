@@ -31,6 +31,9 @@
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <mongo/client/dbclient.h>
+#include <aspect/aspect_provider.h>
+#include "robot_memory.h"
+#include "aspect/robot_memory_inifin.h"
 
 #include <string>
 
@@ -46,7 +49,8 @@ class RobotMemoryThread
   public fawkes::ClockAspect,
   public fawkes::MongoDBAspect,
 	public fawkes::BlockedTimingAspect,
-  public fawkes::BlackBoardAspect
+  public fawkes::BlackBoardAspect,
+  public fawkes::AspectProviderAspect
 {
  public:
   RobotMemoryThread();
@@ -60,28 +64,8 @@ class RobotMemoryThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  std::string    __collection;
-  fawkes::Mutex *__mutex;
-  fawkes::RobotMemoryInterface *__rm_if;
-
-  void exec_query(std::string query, std::string collection);
-  void exec_query(std::string query);
-  void exec_insert(std::string insert, std::string collection);
-  void exec_insert(std::string insert);
-  void exec_update(std::string query, std::string update, std::string collection);
-  void exec_update(std::string query, std::string update);
-  void exec_remove(std::string query, std::string collection);
-  void exec_remove(std::string query);
-
-  void log(mongo::Query query, std::string what);
-  void log(mongo::BSONObj obj, std::string what);
-
-  void set_fields(mongo::BSONObj &obj, std::string what);
-  void set_fields(mongo::Query &q, std::string what);
-  void remove_field(mongo::Query &q, std::string what);
-
-  //funtions to generate virtual knowledge
-  void gen_blackboard_data(std::string field);
+   RobotMemory* robot_memory;
+   fawkes::RobotMemoryIniFin robot_memory_inifin_;
 };
 
 #endif

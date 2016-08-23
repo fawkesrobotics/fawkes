@@ -19,15 +19,12 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
-PRESUBDIRS = interfaces
+PRESUBDIRS = interfaces aspect
 
 LIBS_robot_memory = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesmongodbaspect fvutils \
-		fawkestf RobotMemoryInterface
+		fawkestf RobotMemoryInterface fawkesrobotmemory
 OBJS_robot_memory = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
-
-CFLAGS  += $(CFLAGS_MONGODB)
-LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_robot_memory)
 
@@ -49,7 +46,7 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_mongodb warning_tf
 warning_mongodb:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB Logging Plugin$(TNORMAL) (mongodb[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (mongodb[-devel] not installed)"
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting PCL utility library$(TNORMAL) (tf framework not available)"
 endif

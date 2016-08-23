@@ -24,7 +24,7 @@
   </message>
   <message name="Update">
     <comment>
-      Message to update documents mathing a query.
+      Message to update documents matching a query.
     </comment>
     <field type="string"  length="1024" name="query">Query as JSON string</field>
     <field type="string"  length="1024" name="update">Update as JSON string</field>
