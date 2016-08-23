@@ -326,7 +326,7 @@ MongoDBThread::ClientConf::create_client()
       client = clconn;
       std::string errmsg;
       if (! clconn->connect(__conn_hostport, errmsg)) {
-	throw Exception("Could not connect to MongoDB at %s: %s",
+	throw Exception("Could not connect to MongoDB at %s: %s\nYou probably forgot to start/enable the mongod service",
 			__conn_hostport.toString().c_str(), errmsg.c_str());
       }
       std::list<AuthInfo>::iterator ai;
