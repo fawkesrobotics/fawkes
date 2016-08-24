@@ -1,10 +1,11 @@
 
 /***************************************************************************
- *  robot_memory_test.cpp - Unit tests for the robot memory
- *    
+ *  robot_memory_test_plugin.cpp - robot_memory_test
  *
- *  Created: Aug 18, 2016 12:40:46 PM 2016
+ *  Plugin created: Wed Aug 24 13:37:27 2016
+
  *  Copyright  2016  Frederik Zwilling
+ *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,15 +21,28 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <gtest/gtest.h>
+#include <core/plugin.h>
 
-#include <plugins/robot-memory/robot_memory_thread.h>
-#include <stdexcept>
+#include "robot_memory_test_thread.h"
 
 using namespace fawkes;
 
-
-TEST(RobotMemoryTest, TestsWorking)
+/* @class RobotMemoryTestPlugin "robot_memory_test_plugin.cpp"
+ * gtests for the RobotMemory
+ * @author Frederik Zwilling
+ */
+class RobotMemoryTestPlugin : public fawkes::Plugin
 {
-  ASSERT_EQ(1, 3-2);
-}
+ public:
+  /* Constructor
+   * @param config Fakwes configuration
+   */
+  RobotMemoryTestPlugin(Configuration *config)
+     : Plugin(config)
+  {
+     thread_list.push_back(new RobotMemoryTestThread());
+  }
+};
+
+PLUGIN_DESCRIPTION("gtests for the RobotMemory")
+EXPORT_PLUGIN(RobotMemoryTestPlugin)
