@@ -74,16 +74,16 @@ RobotMemoryThread::loop()
   while (! robot_memory->rm_if_->msgq_empty() ) {
     if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::QueryMessage>()) {
 	    RobotMemoryInterface::QueryMessage* msg = (RobotMemoryInterface::QueryMessage*) robot_memory->rm_if_->msgq_first();
-	    robot_memory->exec_query(msg->query());
+	    robot_memory->query(msg->query());
     } else if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::InsertMessage>()) {
 	    RobotMemoryInterface::InsertMessage* msg = (RobotMemoryInterface::InsertMessage*) robot_memory->rm_if_->msgq_first();
-	    robot_memory->exec_insert(msg->insert());
+	    robot_memory->insert(msg->insert());
     } else if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::UpdateMessage>()) {
 	    RobotMemoryInterface::UpdateMessage* msg = (RobotMemoryInterface::UpdateMessage*) robot_memory->rm_if_->msgq_first();
-	    robot_memory->exec_update(msg->query(), msg->update());
+	    robot_memory->update(msg->query(), msg->update());
     } else if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::RemoveMessage>()) {
 	    RobotMemoryInterface::RemoveMessage* msg = (RobotMemoryInterface::RemoveMessage*) robot_memory->rm_if_->msgq_first();
-	    robot_memory->exec_remove(msg->query());
+	    robot_memory->remove(msg->query());
     } else {
       logger->log_warn(name(), "Unknown message received");
     }

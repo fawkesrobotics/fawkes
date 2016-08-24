@@ -48,14 +48,10 @@ class RobotMemory
     virtual ~RobotMemory();
 
     //robot memory functions
-    void exec_query(std::string query, std::string collection);
-    void exec_query(std::string query);
-    void exec_insert(std::string insert, std::string collection);
-    void exec_insert(std::string insert);
-    void exec_update(std::string query, std::string update, std::string collection);
-    void exec_update(std::string query, std::string update);
-    void exec_remove(std::string query, std::string collection);
-    void exec_remove(std::string query);
+    void query(std::string query, std::string collection = "");
+    void insert(std::string insert, std::string collection = "");
+    void update(std::string query, std::string update, std::string collection = "");
+    void remove(std::string query, std::string collection = "");
 
   private:
     mongo::DBClientBase* mongodb_client_;
@@ -65,7 +61,7 @@ class RobotMemory
     fawkes::BlackBoard* blackboard_;
 
     const char* name_ = "RobotMemory";
-    std::string collection_;
+    std::string default_collection_;
     fawkes::Mutex *mutex_;
     fawkes::RobotMemoryInterface* rm_if_;
 

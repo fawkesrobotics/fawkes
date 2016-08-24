@@ -52,9 +52,9 @@ void RobotMemory::init()
 {
   //load config values
   logger_->log_info(name_, "Started RobotMemory");
-  collection_ = "fawkes.msglog";
+  default_collection_ = "fawkes.msglog";
   try {
-    collection_ = config_->get_string("/plugins/mongodb/test-collection");
+    default_collection_ = config_->get_string("/plugins/mongodb/test-collection");
   } catch (Exception &e) {}
 
   //init blackboard interface
@@ -64,13 +64,13 @@ void RobotMemory::init()
   rm_if_->write();
 }
 
-void RobotMemory::exec_query(std::string query_string)
+void RobotMemory::query(std::string query_string, std::string collection)
 {
-  exec_query(query_string, collection_);
-}
-void RobotMemory::exec_query(std::string query_string, std::string collection)
-{
-  logger_->log_info(name_, "Executing Query: %s", query_string.c_str());
+  if(collection == "")
+  {
+    collection = default_collection_;
+  }
+  logger_->log_info(name_, "Executing Query %s on collection %s", query_string.c_str(), collection);
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -122,13 +122,13 @@ void RobotMemory::exec_query(std::string query_string, std::string collection)
   }
 }
 
-void RobotMemory::exec_insert(std::string insert_string)
+void RobotMemory::insert(std::string insert_string, std::string collection)
 {
-  exec_insert(insert_string, collection_);
-}
-void RobotMemory::exec_insert(std::string insert_string, std::string collection)
-{
-  logger_->log_info(name_, "Executing Query: %s", insert_string.c_str());
+  if(collection == "")
+  {
+    collection = default_collection_;
+  }
+  logger_->log_info(name_, "Executing Query %s on collection %s", insert_string.c_str(), collection);
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -157,15 +157,15 @@ void RobotMemory::exec_insert(std::string insert_string, std::string collection)
   }
 }
 
-void RobotMemory::exec_update(std::string query_string, std::string update_string)
-{
-  exec_update(query_string, update_string, collection_);
-}
-void RobotMemory::exec_update(std::string query_string, std::string update_string,
+void RobotMemory::update(std::string query_string, std::string update_string,
                                     std::string collection)
 {
-  logger_->log_info(name_, "Executing Update %s for query %s",
-                   update_string.c_str(), query_string.c_str());
+  if(collection == "")
+  {
+    collection = default_collection_;
+  }
+  logger_->log_info(name_, "Executing Update %s for query %s on collection %s",
+                   update_string.c_str(), query_string.c_str(), collection);
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -201,14 +201,14 @@ void RobotMemory::exec_update(std::string query_string, std::string update_strin
   }
 }
 
-void RobotMemory::exec_remove(std::string query_string)
+void RobotMemory::remove(std::string query_string, std::string collection)
 {
-  exec_remove(query_string, collection_);
-}
-
-void RobotMemory::exec_remove(std::string query_string, std::string collection)
-{
-  logger_->log_info(name_, "Executing Remove: %s", query_string.c_str());
+  if(collection == "")
+  {
+    collection = default_collection_;
+  }
+  logger_->log_info(name_, "Executing Remove %s on collection %s",
+                    query_string.c_str(), collection);
 
   //only one query at a time
   MutexLocker lock(mutex_);
