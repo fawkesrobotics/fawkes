@@ -39,14 +39,14 @@ RobotMemoryTestThread::RobotMemoryTestThread()
 {
 }
 
-TEST(GTestTest, TestsWorking)
-{
-  ASSERT_EQ(1, 3-2);
-}
-
 void
 RobotMemoryTestThread::init()
 {
+  //prepare tests
+  logger->log_warn(name(), "Preparing tests");
+  test_env_ = new RobotMemoryTestEnvironment(robot_memory);
+  ::testing::AddGlobalTestEnvironment((testing::Environment*) test_env_);
+
   logger->log_warn(name(), "Starting tests");
   test_result_ = RUN_ALL_TESTS();
 }

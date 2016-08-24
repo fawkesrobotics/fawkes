@@ -29,19 +29,19 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
-
 #include <string>
 
+#include "plugins/robot-memory/aspect/robot_memory_aspect.h"
+#include "robot_memory_test.h"
 
-namespace fawkes {
-}
 
 class RobotMemoryTestThread 
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+  public fawkes::BlackBoardAspect,
+  public fawkes::RobotMemoryAspect
 {
 
  public:
@@ -57,6 +57,8 @@ class RobotMemoryTestThread
  private:
   int test_result_;
 
+  //environment to make objects available for testing
+  RobotMemoryTestEnvironment* test_env_;
 };
 
 
