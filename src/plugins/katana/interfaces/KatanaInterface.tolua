@@ -33,12 +33,46 @@ class KatanaInterface : public Interface
     StopMessage();
     ~StopMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class FlushMessage : public Message
   {
     FlushMessage();
     ~FlushMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
   };
 
@@ -47,6 +81,23 @@ class KatanaInterface : public Interface
     ParkMessage();
     ~ParkMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class LinearGotoMessage : public Message
@@ -54,6 +105,23 @@ class KatanaInterface : public Interface
     LinearGotoMessage(float ini_theta_error, float ini_offset_xy, bool ini_straight, char * ini_trans_frame, char * ini_rot_frame, float ini_x, float ini_y, float ini_z, float ini_phi, float ini_theta, float ini_psi);
     LinearGotoMessage();
     ~LinearGotoMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float theta_error();
     void set_theta_error(const float new_theta_error);
@@ -96,6 +164,23 @@ class KatanaInterface : public Interface
     LinearGotoKniMessage();
     ~LinearGotoKniMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float x();
     void set_x(const float new_x);
     int maxlenof_x() const;
@@ -122,6 +207,23 @@ class KatanaInterface : public Interface
     ObjectGotoMessage();
     ~ObjectGotoMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     char * object();
     void set_object(const char * new_object);
     int maxlenof_object() const;
@@ -135,12 +237,46 @@ class KatanaInterface : public Interface
     CalibrateMessage();
     ~CalibrateMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class OpenGripperMessage : public Message
   {
     OpenGripperMessage();
     ~OpenGripperMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
   };
 
@@ -149,6 +285,23 @@ class KatanaInterface : public Interface
     CloseGripperMessage();
     ~CloseGripperMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class SetEnabledMessage : public Message
@@ -156,6 +309,23 @@ class KatanaInterface : public Interface
     SetEnabledMessage(bool ini_enabled);
     SetEnabledMessage();
     ~SetEnabledMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     bool is_enabled();
     void set_enabled(const bool new_enabled);
@@ -168,6 +338,23 @@ class KatanaInterface : public Interface
     SetMaxVelocityMessage();
     ~SetMaxVelocityMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned char max_velocity();
     void set_max_velocity(const unsigned char new_max_velocity);
     int maxlenof_max_velocity() const;
@@ -178,6 +365,23 @@ class KatanaInterface : public Interface
     SetPlannerParamsMessage(char * ini_plannerparams, bool ini_straight);
     SetPlannerParamsMessage();
     ~SetPlannerParamsMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     char * plannerparams();
     void set_plannerparams(const char * new_plannerparams);
@@ -193,6 +397,23 @@ class KatanaInterface : public Interface
     SetMotorEncoderMessage();
     ~SetMotorEncoderMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int nr();
     void set_nr(const unsigned int new_nr);
     int maxlenof_nr() const;
@@ -206,6 +427,23 @@ class KatanaInterface : public Interface
     MoveMotorEncoderMessage(unsigned int ini_nr, unsigned int ini_enc);
     MoveMotorEncoderMessage();
     ~MoveMotorEncoderMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned int nr();
     void set_nr(const unsigned int new_nr);
@@ -221,6 +459,23 @@ class KatanaInterface : public Interface
     SetMotorAngleMessage();
     ~SetMotorAngleMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int nr();
     void set_nr(const unsigned int new_nr);
     int maxlenof_nr() const;
@@ -234,6 +489,23 @@ class KatanaInterface : public Interface
     MoveMotorAngleMessage(unsigned int ini_nr, float ini_angle);
     MoveMotorAngleMessage();
     ~MoveMotorAngleMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned int nr();
     void set_nr(const unsigned int new_nr);
@@ -305,7 +577,7 @@ class KatanaInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -324,10 +596,23 @@ class KatanaInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.KatanaInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.KatanaInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.KatanaInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

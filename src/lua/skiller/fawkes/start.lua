@@ -49,14 +49,22 @@ end
 
 require("fawkes.logprint")
 fawkes.logprint.init(logger)
-require("fawkes.depinit")
 
+require("fawkes.depinit")
 require("fawkes.mathext")
 local ifinitmod = require("fawkes.interface_initializer")
 
 skillenv = require("skiller.skillenv")
 
+if interfaces_writing_preload then
+	 ifinitmod.preload(interfaces_writing_preload)
+	 interfaces_writing_preload = nil
+end
+
 fawkes.depinit.add_module_initializer(ifinitmod.init_interfaces)
+skillenv.add_finalize_callback("interface_initializer", ifinitmod.finalize)
+skillenv.add_preloop_callback("fawkes_interfaces_read", ifinitmod.read)
+skillenv.add_loop_callback("fawkes_interfaces_write", ifinitmod.write)
 
 if config:exists("/skiller/features/ros/enable")
    and config:get_bool("/skiller/features/ros/enable")
@@ -67,9 +75,9 @@ then
       logger:log_debug("Starting internal ROS node (roslua)")
       local uri = os.getenv("ROS_MASTER_URI")
       if uri then
-	 ROS_MASTER_URI = uri
+				 ROS_MASTER_URI = uri
       else
-	 error("ROS_MASTER_URI environment variable not defined")
+				 error("ROS_MASTER_URI environment variable not defined")
       end
 
       dofile(LUADIR .. "/skiller/ros/start.lua")
@@ -83,8 +91,10 @@ then
    end
 end
 
-skillenv.init(SKILLSPACE)
+require("skiller.fawkes")
+skiller.fawkes.init()
 
---skiller.skillhsm.SkillHSM:set_debug(true)
+local ok, errmsg = xpcall(function() skillenv.init(SKILLSPACE, skiller.fawkes.loop) end, debug.traceback)
+if not ok then error(errmsg) end
 
 logger:log_debug("Lua startup completed")

@@ -22,6 +22,23 @@ class HumanoidMotionInterface : public Interface
     StopMessage();
     ~StopMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class WalkStraightMessage : public Message
@@ -29,6 +46,23 @@ class HumanoidMotionInterface : public Interface
     WalkStraightMessage(float ini_distance);
     WalkStraightMessage();
     ~WalkStraightMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float distance();
     void set_distance(const float new_distance);
@@ -41,6 +75,23 @@ class HumanoidMotionInterface : public Interface
     WalkSidewaysMessage();
     ~WalkSidewaysMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float distance();
     void set_distance(const float new_distance);
     int maxlenof_distance() const;
@@ -51,6 +102,23 @@ class HumanoidMotionInterface : public Interface
     WalkArcMessage(float ini_angle, float ini_radius);
     WalkArcMessage();
     ~WalkArcMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float angle();
     void set_angle(const float new_angle);
@@ -65,6 +133,23 @@ class HumanoidMotionInterface : public Interface
     WalkVelocityMessage(float ini_x, float ini_y, float ini_theta, float ini_speed);
     WalkVelocityMessage();
     ~WalkVelocityMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float x();
     void set_x(const float new_x);
@@ -86,6 +171,23 @@ class HumanoidMotionInterface : public Interface
     TurnMessage();
     ~TurnMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float angle();
     void set_angle(const float new_angle);
     int maxlenof_angle() const;
@@ -96,6 +198,23 @@ class HumanoidMotionInterface : public Interface
     KickMessage(LegEnum ini_leg, float ini_strength);
     KickMessage();
     ~KickMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     LegEnum leg();
     void set_leg(const LegEnum new_leg);
@@ -110,12 +229,46 @@ class HumanoidMotionInterface : public Interface
     ParkMessage();
     ~ParkMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class GetUpMessage : public Message
   {
     GetUpMessage();
     ~GetUpMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
   };
 
@@ -124,6 +277,23 @@ class HumanoidMotionInterface : public Interface
     StandupMessage(StandupEnum ini_from_pos);
     StandupMessage();
     ~StandupMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     StandupEnum from_pos();
     void set_from_pos(const StandupEnum new_from_pos);
@@ -135,6 +305,23 @@ class HumanoidMotionInterface : public Interface
     MoveHeadMessage(float ini_yaw, float ini_pitch, float ini_speed);
     MoveHeadMessage();
     ~MoveHeadMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float yaw();
     void set_yaw(const float new_yaw);
@@ -170,7 +357,7 @@ class HumanoidMotionInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -189,10 +376,23 @@ class HumanoidMotionInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.HumanoidMotionInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.HumanoidMotionInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.HumanoidMotionInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

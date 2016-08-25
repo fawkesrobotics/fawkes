@@ -330,7 +330,7 @@ class HumanSkeletonInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -349,10 +349,23 @@ class HumanSkeletonInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.HumanSkeletonInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.HumanSkeletonInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.HumanSkeletonInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

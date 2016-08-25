@@ -11,6 +11,23 @@ class OpenRaveInterface : public Interface
     StartViewerMessage();
     ~StartViewerMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class AddObjectMessage : public Message
@@ -18,6 +35,23 @@ class OpenRaveInterface : public Interface
     AddObjectMessage(char * ini_name, char * ini_path);
     AddObjectMessage();
     ~AddObjectMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     char * name();
     void set_name(const char * new_name);
@@ -33,6 +67,23 @@ class OpenRaveInterface : public Interface
     DeleteObjectMessage();
     ~DeleteObjectMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     char * name();
     void set_name(const char * new_name);
     int maxlenof_name() const;
@@ -43,6 +94,23 @@ class OpenRaveInterface : public Interface
     DeleteAllObjectsMessage();
     ~DeleteAllObjectsMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class AttachObjectMessage : public Message
@@ -50,6 +118,23 @@ class OpenRaveInterface : public Interface
     AttachObjectMessage(char * ini_name, char * ini_manip_name);
     AttachObjectMessage();
     ~AttachObjectMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     char * name();
     void set_name(const char * new_name);
@@ -65,6 +150,23 @@ class OpenRaveInterface : public Interface
     ReleaseObjectMessage();
     ~ReleaseObjectMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     char * name();
     void set_name(const char * new_name);
     int maxlenof_name() const;
@@ -75,6 +177,23 @@ class OpenRaveInterface : public Interface
     ReleaseAllObjectsMessage();
     ~ReleaseAllObjectsMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class MoveObjectMessage : public Message
@@ -82,6 +201,23 @@ class OpenRaveInterface : public Interface
     MoveObjectMessage(char * ini_name, float ini_x, float ini_y, float ini_z);
     MoveObjectMessage();
     ~MoveObjectMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     char * name();
     void set_name(const char * new_name);
@@ -102,6 +238,23 @@ class OpenRaveInterface : public Interface
     RotateObjectQuatMessage(char * ini_name, float ini_x, float ini_y, float ini_z, float ini_w);
     RotateObjectQuatMessage();
     ~RotateObjectQuatMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     char * name();
     void set_name(const char * new_name);
@@ -126,6 +279,23 @@ class OpenRaveInterface : public Interface
     RotateObjectMessage();
     ~RotateObjectMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     char * name();
     void set_name(const char * new_name);
     int maxlenof_name() const;
@@ -145,6 +315,23 @@ class OpenRaveInterface : public Interface
     RenameObjectMessage(char * ini_name, char * ini_newName);
     RenameObjectMessage();
     ~RenameObjectMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     char * name();
     void set_name(const char * new_name);
@@ -180,7 +367,7 @@ class OpenRaveInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -199,10 +386,23 @@ class OpenRaveInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.OpenRaveInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.OpenRaveInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.OpenRaveInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

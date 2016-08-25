@@ -20,6 +20,23 @@ class MotorInterface : public Interface
     SetMotorStateMessage();
     ~SetMotorStateMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int motor_state();
     void set_motor_state(const unsigned int new_motor_state);
     int maxlenof_motor_state() const;
@@ -30,6 +47,23 @@ class MotorInterface : public Interface
     AcquireControlMessage(unsigned int ini_controller, char * ini_controller_thread_name);
     AcquireControlMessage();
     ~AcquireControlMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned int controller();
     void set_controller(const unsigned int new_controller);
@@ -44,6 +78,23 @@ class MotorInterface : public Interface
     ResetOdometryMessage();
     ~ResetOdometryMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class SetOdometryMessage : public Message
@@ -51,6 +102,23 @@ class MotorInterface : public Interface
     SetOdometryMessage(float ini_x, float ini_y, float ini_odometry_orientation);
     SetOdometryMessage();
     ~SetOdometryMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float x();
     void set_x(const float new_x);
@@ -69,6 +137,23 @@ class MotorInterface : public Interface
     DriveRPMMessage();
     ~DriveRPMMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float front_right();
     void set_front_right(const float new_front_right);
     int maxlenof_front_right() const;
@@ -85,6 +170,23 @@ class MotorInterface : public Interface
     GotoMessage(float ini_x, float ini_y, float ini_phi, float ini_time_sec);
     GotoMessage();
     ~GotoMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float x();
     void set_x(const float new_x);
@@ -106,6 +208,23 @@ class MotorInterface : public Interface
     TransMessage();
     ~TransMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float vx();
     void set_vx(const float new_vx);
     int maxlenof_vx() const;
@@ -120,6 +239,23 @@ class MotorInterface : public Interface
     RotMessage();
     ~RotMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float omega();
     void set_omega(const float new_omega);
     int maxlenof_omega() const;
@@ -130,6 +266,23 @@ class MotorInterface : public Interface
     TransRotMessage(float ini_vx, float ini_vy, float ini_omega);
     TransRotMessage();
     ~TransRotMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float vx();
     void set_vx(const float new_vx);
@@ -148,6 +301,23 @@ class MotorInterface : public Interface
     OrbitMessage();
     ~OrbitMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float px();
     void set_px(const float new_px);
     int maxlenof_px() const;
@@ -164,6 +334,23 @@ class MotorInterface : public Interface
     LinTransRotMessage(float ini_vx, float ini_vy, float ini_omega);
     LinTransRotMessage();
     ~LinTransRotMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float vx();
     void set_vx(const float new_vx);
@@ -241,7 +428,7 @@ class MotorInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -260,10 +447,23 @@ class MotorInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.MotorInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.MotorInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.MotorInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

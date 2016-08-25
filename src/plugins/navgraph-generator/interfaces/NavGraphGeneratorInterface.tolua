@@ -31,6 +31,23 @@ class NavGraphGeneratorInterface : public Interface
     ClearMessage();
     ~ClearMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class SetBoundingBoxMessage : public Message
@@ -38,6 +55,23 @@ class NavGraphGeneratorInterface : public Interface
     SetBoundingBoxMessage(float ini_p1_x, float ini_p1_y, float ini_p2_x, float ini_p2_y);
     SetBoundingBoxMessage();
     ~SetBoundingBoxMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float p1_x();
     void set_p1_x(const float new_p1_x);
@@ -59,6 +93,23 @@ class NavGraphGeneratorInterface : public Interface
     SetFilterMessage();
     ~SetFilterMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     FilterType filter();
     void set_filter(const FilterType new_filter);
     int maxlenof_filter() const;
@@ -72,6 +123,23 @@ class NavGraphGeneratorInterface : public Interface
     SetFilterParamFloatMessage(FilterType ini_filter, char * ini_param, float ini_value);
     SetFilterParamFloatMessage();
     ~SetFilterParamFloatMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     FilterType filter();
     void set_filter(const FilterType new_filter);
@@ -90,6 +158,23 @@ class NavGraphGeneratorInterface : public Interface
     AddMapObstaclesMessage();
     ~AddMapObstaclesMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float max_line_point_distance();
     void set_max_line_point_distance(const float new_max_line_point_distance);
     int maxlenof_max_line_point_distance() const;
@@ -97,13 +182,30 @@ class NavGraphGeneratorInterface : public Interface
 
   class AddObstacleMessage : public Message
   {
-    AddObstacleMessage(char * ini_id, float ini_x, float ini_y);
+    AddObstacleMessage(char * ini_name, float ini_x, float ini_y);
     AddObstacleMessage();
     ~AddObstacleMessage();
 
-    char * id();
-    void set_id(const char * new_id);
-    int maxlenof_id() const;
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
     float x();
     void set_x(const float new_x);
     int maxlenof_x() const;
@@ -114,24 +216,58 @@ class NavGraphGeneratorInterface : public Interface
 
   class RemoveObstacleMessage : public Message
   {
-    RemoveObstacleMessage(char * ini_id);
+    RemoveObstacleMessage(char * ini_name);
     RemoveObstacleMessage();
     ~RemoveObstacleMessage();
 
-    char * id();
-    void set_id(const char * new_id);
-    int maxlenof_id() const;
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
   };
 
   class AddPointOfInterestMessage : public Message
   {
-    AddPointOfInterestMessage(char * ini_id, float ini_x, float ini_y, ConnectionMode ini_mode);
+    AddPointOfInterestMessage(char * ini_name, float ini_x, float ini_y, ConnectionMode ini_mode);
     AddPointOfInterestMessage();
     ~AddPointOfInterestMessage();
 
-    char * id();
-    void set_id(const char * new_id);
-    int maxlenof_id() const;
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
     float x();
     void set_x(const float new_x);
     int maxlenof_x() const;
@@ -145,13 +281,30 @@ class NavGraphGeneratorInterface : public Interface
 
   class AddPointOfInterestWithOriMessage : public Message
   {
-    AddPointOfInterestWithOriMessage(char * ini_id, float ini_x, float ini_y, float ini_ori, ConnectionMode ini_mode);
+    AddPointOfInterestWithOriMessage(char * ini_name, float ini_x, float ini_y, float ini_ori, ConnectionMode ini_mode);
     AddPointOfInterestWithOriMessage();
     ~AddPointOfInterestWithOriMessage();
 
-    char * id();
-    void set_id(const char * new_id);
-    int maxlenof_id() const;
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
     float x();
     void set_x(const float new_x);
     int maxlenof_x() const;
@@ -168,13 +321,30 @@ class NavGraphGeneratorInterface : public Interface
 
   class SetPointOfInterestPropertyMessage : public Message
   {
-    SetPointOfInterestPropertyMessage(char * ini_id, char * ini_property_name, char * ini_property_value);
+    SetPointOfInterestPropertyMessage(char * ini_name, char * ini_property_name, char * ini_property_value);
     SetPointOfInterestPropertyMessage();
     ~SetPointOfInterestPropertyMessage();
 
-    char * id();
-    void set_id(const char * new_id);
-    int maxlenof_id() const;
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
     char * property_name();
     void set_property_name(const char * new_property_name);
     int maxlenof_property_name() const;
@@ -188,6 +358,23 @@ class NavGraphGeneratorInterface : public Interface
     AddEdgeMessage(char * ini_p1, char * ini_p2, bool ini_directed, EdgeMode ini_mode);
     AddEdgeMessage();
     ~AddEdgeMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     char * p1();
     void set_p1(const char * new_p1);
@@ -209,6 +396,23 @@ class NavGraphGeneratorInterface : public Interface
     SetGraphDefaultPropertyMessage();
     ~SetGraphDefaultPropertyMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     char * property_name();
     void set_property_name(const char * new_property_name);
     int maxlenof_property_name() const;
@@ -223,6 +427,23 @@ class NavGraphGeneratorInterface : public Interface
     SetCopyGraphDefaultPropertiesMessage();
     ~SetCopyGraphDefaultPropertiesMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     bool is_enable_copy();
     void set_enable_copy(const bool new_enable_copy);
     int maxlenof_enable_copy() const;
@@ -230,19 +451,53 @@ class NavGraphGeneratorInterface : public Interface
 
   class RemovePointOfInterestMessage : public Message
   {
-    RemovePointOfInterestMessage(char * ini_id);
+    RemovePointOfInterestMessage(char * ini_name);
     RemovePointOfInterestMessage();
     ~RemovePointOfInterestMessage();
 
-    char * id();
-    void set_id(const char * new_id);
-    int maxlenof_id() const;
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * name();
+    void set_name(const char * new_name);
+    int maxlenof_name() const;
   };
 
   class ComputeMessage : public Message
   {
     ComputeMessage();
     ~ComputeMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
   };
 
@@ -266,7 +521,7 @@ class NavGraphGeneratorInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -285,10 +540,23 @@ class NavGraphGeneratorInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.NavGraphGeneratorInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.NavGraphGeneratorInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.NavGraphGeneratorInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

@@ -16,6 +16,23 @@ class JacoBimanualInterface : public Interface
     CartesianGotoMessage();
     ~CartesianGotoMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float l_x();
     void set_l_x(const float new_l_x);
     int maxlenof_l_x() const;
@@ -60,6 +77,23 @@ class JacoBimanualInterface : public Interface
     MoveGripperMessage();
     ~MoveGripperMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     float l_finger1();
     void set_l_finger1(const float new_l_finger1);
     int maxlenof_l_finger1() const;
@@ -86,6 +120,23 @@ class JacoBimanualInterface : public Interface
     SetPlannerParamsMessage();
     ~SetPlannerParamsMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     char * params();
     void set_params(const char * new_params);
     int maxlenof_params() const;
@@ -96,6 +147,23 @@ class JacoBimanualInterface : public Interface
     SetConstrainedMessage(bool ini_constrained);
     SetConstrainedMessage();
     ~SetConstrainedMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     bool is_constrained();
     void set_constrained(const bool new_constrained);
@@ -128,7 +196,7 @@ class JacoBimanualInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -147,10 +215,23 @@ class JacoBimanualInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.JacoBimanualInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.JacoBimanualInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.JacoBimanualInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

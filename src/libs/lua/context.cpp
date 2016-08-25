@@ -98,6 +98,10 @@ LuaContext::LuaContext(lua_State *L)
 LuaContext::~LuaContext()
 {
   __lua_mutex->lock();
+
+  if (! __finalize_call.empty())
+	  do_string(__L, "%s", __finalize_call.c_str());
+
   if (__fam_thread) {
     __fam_thread->cancel();
     __fam_thread->join();
@@ -208,26 +212,39 @@ LuaContext::init_state()
   }
 
   LuaContext *tmpctx = new LuaContext(L);
+
   MutexLocker(__watchers.mutex());
   LockList<LuaContextWatcher *>::iterator i;
   for (i = __watchers.begin(); i != __watchers.end(); ++i) {
-    try {
-      (*i)->lua_restarted(tmpctx);
-    } catch (...) {
-      delete tmpctx;
+	  try {
+		  (*i)->lua_restarted(tmpctx);
+	  } catch (...) {
+		  try {
+			  if (! __finalize_call.empty())
+				  do_string(L, "%s", __finalize_call.c_str());
+		  } catch (Exception &e) {} // ignored
+		  
+		  delete tmpctx;
       lua_close(L);
       throw;
     }
   }
   delete tmpctx;
 
-  if ( __start_script ) {
-    if (access(__start_script, R_OK) == 0) {
-      // it's a file and we can access it, execute it!
-      do_file(L, __start_script);
-    } else {
-      do_string(L, "require(\"%s\")", __start_script);
-    }
+  try {
+	  if ( __start_script ) {
+		  if (access(__start_script, R_OK) == 0) {
+			  // it's a file and we can access it, execute it!
+			  do_file(L, __start_script);
+		  } else {
+			  do_string(L, "require(\"%s\")", __start_script);
+		  }
+	  }
+  } catch (...) {
+	  if (! __finalize_call.empty())
+		  do_string(L, "%s", __finalize_call.c_str());
+	  lua_close(L);
+    throw;
   }
 
   return L;
@@ -272,8 +289,23 @@ LuaContext::restart()
 {
   MutexLocker lock(__lua_mutex);
   try {
-    lua_State *L = init_state();
+	  if (! __finalize_prepare_call.empty())
+		  do_string(__L, "%s", __finalize_prepare_call.c_str());
+	  
+	  lock.unlock();
+	  lua_State *L = init_state();
+	  lock.relock();
     lua_State *tL = __L;
+
+    try {
+	    if (! __finalize_call.empty())
+		    do_string(__L, "%s", __finalize_call.c_str());
+    } catch (Exception &e) {
+	    LibLogger::log_warn("LuaContext", "Finalization call on old context failed, "
+	                        "exception follows, ignoring.");
+	    LibLogger::log_warn("LuaContext", e);
+    }
+
     __L = L;
     if (__owns_L)  lua_close(tL);
     __owns_L = true;
@@ -282,6 +314,8 @@ LuaContext::restart()
     LibLogger::log_error("LuaContext", "Could not restart Lua instance, an error "
 			 "occured while initializing new state. Keeping old state.");
     LibLogger::log_error("LuaContext", e);
+    if (! __finalize_cancel_call.empty())
+	    do_string(__L, "%s", __finalize_cancel_call.c_str());
   }
 }
 
@@ -468,18 +502,40 @@ LuaContext::do_string(lua_State *L, const char *format, ...)
   if (vasprintf(&s, format, arg) == -1) {
     throw Exception("LuaContext::do_string: Could not form string");
   }
-
-  int rv = 0;
-  int errfunc = __enable_tracebacks ? 1 : 0;
-  rv = (luaL_loadstring(L, s) || lua_pcall(L, 0, LUA_MULTRET, errfunc));
-
+  std::string ss(s);
   free(s);
   va_end(arg);
 
-  if (rv != 0) {
-    std::string errmsg = lua_tostring(L, -1);
+  int err = 0;
+  std::string errmsg;
+  if ( (err = luaL_loadstring(L, ss.c_str())) != 0) {
+    errmsg = lua_tostring(L, -1);
     lua_pop(L, 1);
-    throw LuaRuntimeException("do_string", errmsg.c_str());
+    switch (err) {
+    case LUA_ERRSYNTAX:
+	    throw SyntaxErrorException("Lua syntax error in string %s: %s", ss.c_str(), errmsg.c_str());
+
+    case LUA_ERRMEM:
+	    throw OutOfMemoryException("Could not load Lua string %s", ss.c_str());
+    }
+  }
+
+  int errfunc = __enable_tracebacks ? 1 : 0;
+  err = lua_pcall(L, 0, LUA_MULTRET, errfunc);
+
+  if (err != 0) {
+	  std::string errmsg = lua_tostring(L, -1);
+	  lua_pop(L, 1);
+	  switch (err) {
+	  case LUA_ERRRUN:
+		  throw LuaRuntimeException("do_string", errmsg.c_str());
+
+	  case LUA_ERRMEM:
+		  throw OutOfMemoryException("Could not execute Lua chunk via pcall");
+
+	  case LUA_ERRERR:
+		  throw LuaErrorException("do_string", errmsg.c_str());
+	  }
   }
 }
 
@@ -492,24 +548,47 @@ void
 LuaContext::do_string(const char *format, ...)
 {
   MutexLocker lock(__lua_mutex);
+
   va_list arg;
   va_start(arg, format);
   char *s;
   if (vasprintf(&s, format, arg) == -1) {
     throw Exception("LuaContext::do_string: Could not form string");
   }
-
-  int rv = 0;
-  int errfunc = __enable_tracebacks ? 1 : 0;
-  rv = (luaL_loadstring(__L, s) || lua_pcall(__L, 0, LUA_MULTRET, errfunc));
-
+  std::string ss(s);
   free(s);
   va_end(arg);
 
-  if ( rv != 0 ) {
-    std::string errmsg = lua_tostring(__L, -1);
+  int err = 0;
+  std::string errmsg;
+  if ( (err = luaL_loadstring(__L, ss.c_str())) != 0) {
+    errmsg = lua_tostring(__L, -1);
     lua_pop(__L, 1);
-    throw LuaRuntimeException("do_string", errmsg.c_str());
+    switch (err) {
+    case LUA_ERRSYNTAX:
+	    throw SyntaxErrorException("Lua syntax error in string %s: %s", ss.c_str(), errmsg.c_str());
+
+    case LUA_ERRMEM:
+	    throw OutOfMemoryException("Could not load Lua string %s", ss.c_str());
+    }
+  }
+
+  int errfunc = __enable_tracebacks ? 1 : 0;
+  err = lua_pcall(__L, 0, LUA_MULTRET, errfunc);
+
+  if (err != 0) {
+	  std::string errmsg = lua_tostring(__L, -1);
+	  lua_pop(__L, 1);
+	  switch (err) {
+	  case LUA_ERRRUN:
+		  throw LuaRuntimeException("do_string", errmsg.c_str());
+
+	  case LUA_ERRMEM:
+		  throw OutOfMemoryException("Could not execute Lua chunk via pcall");
+
+	  case LUA_ERRERR:
+		  throw LuaErrorException("do_string", errmsg.c_str());
+	  }
   }
 }
 
@@ -868,6 +947,16 @@ LuaContext::push_cfunction(lua_CFunction f)
 }
 
 
+/** Get name of type of value at a given index.
+ * @param idx index of value to get type for
+ * @return name of type of the value at the given index
+ */
+std::string
+LuaContext::type_name(int idx)
+{
+	return lua_typename(__L, lua_type(__L, idx));
+}
+
 /** Pop value(s) from stack.
  * @param n number of values to pop
  */
@@ -1062,6 +1151,18 @@ LuaContext::remove_global(const char *name)
 }
 
 
+/** Iterate to next entry of table.
+ * @param idx stack index of table
+ * @return true if there was another iterable value in the table,
+ * false otherwise
+ */
+bool
+LuaContext::table_next(int idx)
+{
+	return lua_next(__L, idx) != 0;
+}
+
+
 /** Retrieve stack value as number.
  * @param idx stack index of value
  * @return value as number
@@ -1103,6 +1204,38 @@ const char *
 LuaContext::to_string(int idx)
 {
   return lua_tostring(__L, idx);
+}
+
+/** Retrieve stack value as userdata.
+ * @param idx stack index of value
+ * @return value as userdata, maybe NULL
+ */
+void *
+LuaContext::to_userdata(int idx)
+{
+  return lua_touserdata(__L, idx);
+}
+
+
+/** Retrieve stack value as pointer.
+ * @param idx stack index of value
+ * @return value as pointer, maybe NULL
+ */
+void *
+LuaContext::to_pointer(int idx)
+{
+	return (void *)lua_topointer(__L, idx);
+}
+
+
+/** Retrieve stack value as a tolua++ user type.
+ * @param idx stack index of value
+ * @return value as pointer, maybe NULL
+ */
+void *
+LuaContext::to_usertype(int idx)
+{
+	return tolua_tousertype(__L, idx, 0);
 }
 
 
@@ -1256,7 +1389,6 @@ LuaContext::setfenv(int idx)
 #endif
 }
 
-
 /** Add a context watcher.
  * @param watcher watcher to add
  */
@@ -1275,6 +1407,27 @@ LuaContext::remove_watcher(fawkes::LuaContextWatcher *watcher)
 {
   __watchers.remove_locked(watcher);
 }
+
+
+/** Set code to execute during finalization.
+ * @param finalize code string to execute (via do_string()) when eventually
+ * finalizing a context
+ * @param finalize_prepare code string to execute (via do_string()) before
+ * finalization is performed, for example during a context restart before the
+ * new context is initialized
+ * @param finalize_cancel code string to execute (via do_string()) if,
+ * during a restart, the initialization of the new context failed and therefore
+ * the previously prepared finalization must be cancelled
+ */
+void
+LuaContext::set_finalization_calls(std::string finalize, std::string finalize_prepare,
+                                   std::string finalize_cancel)
+{
+	__finalize_call = finalize;
+	__finalize_prepare_call = finalize_prepare;
+	__finalize_cancel_call = finalize_cancel;
+}
+
 
 
 

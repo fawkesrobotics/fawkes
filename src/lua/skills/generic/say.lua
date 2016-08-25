@@ -27,7 +27,7 @@ name               = "say"
 fsm                = SkillHSM:new{name=name, start="SAY"}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "speechsynth", type = "SpeechSynthInterface"}
+   {v = "speechsynth", type = "SpeechSynthInterface", id = "Flite"}
 }
 
 documentation      = [==[Speech synthesis skill.

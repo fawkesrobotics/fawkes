@@ -348,7 +348,7 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     NavGraphGeneratorInterface::AddObstacleMessage *msg =
       message->as_type<NavGraphGeneratorInterface::AddObstacleMessage>();
     if (std::isfinite(msg->x()) && std::isfinite(msg->x())) {
-      obstacles_[msg->id()] = cart_coord_2d_t(msg->x(), msg->y());
+      obstacles_[msg->name()] = cart_coord_2d_t(msg->x(), msg->y());
     } else {
       logger->log_error(name(), "Received non-finite obstacle (%.2f,%.2f), ignoring",
 			msg->x(), msg->y());
@@ -357,7 +357,7 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     NavGraphGeneratorInterface::RemoveObstacleMessage *msg =
       message->as_type<NavGraphGeneratorInterface::RemoveObstacleMessage>();
     ObstacleMap::iterator f;
-    if ((f = obstacles_.find(msg->id())) != obstacles_.end()) {
+    if ((f = obstacles_.find(msg->name())) != obstacles_.end()) {
       obstacles_.erase(f);
     }
 
@@ -368,7 +368,7 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
       PointOfInterest poi;
       poi.position  = cart_coord_2d_t(msg->x(), msg->y());
       poi.conn_mode = msg->mode();
-      pois_[msg->id()] = poi;
+      pois_[msg->name()] = poi;
     } else {
       logger->log_error(name(), "Received non-finite POI (%.2f,%.2f), ignoring",
 			msg->x(), msg->y());
@@ -398,7 +398,7 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
 	logger->log_warn(name(), "Received POI with non-finite ori %f, ignoring ori",
 			 msg->ori());
       }
-      pois_[msg->id()] = poi;
+      pois_[msg->name()] = poi;
     } else {
       logger->log_error(name(), "Received non-finite POI (%.2f,%.2f), ignoring ori",
 			msg->x(), msg->y());
@@ -408,7 +408,7 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     NavGraphGeneratorInterface::RemovePointOfInterestMessage *msg =
       message->as_type<NavGraphGeneratorInterface::RemovePointOfInterestMessage>();
     PoiMap::iterator f;
-    if ((f = pois_.find(msg->id())) != pois_.end()) {
+    if ((f = pois_.find(msg->name())) != pois_.end()) {
       pois_.erase(f);
     }
 
@@ -416,11 +416,11 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage *msg =
       message->as_type<NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage>();
     PoiMap::iterator f;
-    if ((f = pois_.find(msg->id())) != pois_.end()) {
+    if ((f = pois_.find(msg->name())) != pois_.end()) {
       f->second.properties[msg->property_name()] = msg->property_value();
     } else {
       logger->log_warn(name(), "POI %s unknown, cannot set property %s=%s",
-		       msg->id(), msg->property_name(), msg->property_value());
+		       msg->name(), msg->property_name(), msg->property_value());
     }
 
   } else if (message->is_of_type<NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage>()) {

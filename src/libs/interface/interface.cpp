@@ -777,17 +777,29 @@ Interface::mark_data_changed()
 
 
 /** Check if data has been changed.
+ * This method has slightly different semantics depending on whether
+ * this interface is a writing or a reading instance.
+ * For a reading instance:
  * Note that if the data has been modified this method will return
  * true at least until the next call to read. From then on it will
  * return false if the data has not been modified between the two
  * read() calls and still true otherwise.
+ * For a writing instance:
+ * The data is considered to have changed if any of the interface field
+ * set methods has been called since the last write() call.
  * @return true if data has been changed between the last call to
- * read() and the one before.
+ * read() and the one before (reading instance) or if any data field
+ * setter has been called since the last write() call (writing instance),
+ * false otherwise
  */
 bool
 Interface::changed() const
 {
-  return (*__timestamp != __local_read_timestamp);
+	if (__write_access) {
+		return data_changed;
+	} else {
+		return (*__timestamp != __local_read_timestamp);
+	}
 }
 
 
@@ -1171,7 +1183,6 @@ Interface::msgq_first()
     throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
 					"reading instance of an interface (first).");
   }
-
   return __message_queue->first();
 }
 

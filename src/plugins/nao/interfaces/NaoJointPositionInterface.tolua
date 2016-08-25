@@ -45,6 +45,23 @@ class NaoJointPositionInterface : public Interface
     SetServoMessage();
     ~SetServoMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int servo();
     void set_servo(const unsigned int new_servo);
     int maxlenof_servo() const;
@@ -61,6 +78,23 @@ class NaoJointPositionInterface : public Interface
     SetServosMessage(float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_l_wrist_yaw, float ini_l_hand, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_elbow_roll, float ini_r_wrist_yaw, float ini_r_hand, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll, int ini_time);
     SetServosMessage();
     ~SetServosMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float head_yaw();
     void set_head_yaw(const float new_head_yaw);
@@ -151,6 +185,23 @@ class NaoJointPositionInterface : public Interface
     MoveServoMessage();
     ~MoveServoMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int servo();
     void set_servo(const unsigned int new_servo);
     int maxlenof_servo() const;
@@ -167,6 +218,23 @@ class NaoJointPositionInterface : public Interface
     MoveServosMessage(float ini_speed, float ini_head_yaw, float ini_head_pitch, float ini_l_shoulder_pitch, float ini_l_shoulder_roll, float ini_l_elbow_yaw, float ini_l_elbow_roll, float ini_l_wrist_yaw, float ini_l_hand, float ini_l_hip_yaw_pitch, float ini_l_hip_roll, float ini_l_hip_pitch, float ini_l_knee_pitch, float ini_l_ankle_pitch, float ini_l_ankle_roll, float ini_r_shoulder_pitch, float ini_r_shoulder_roll, float ini_r_elbow_yaw, float ini_r_elbow_roll, float ini_r_wrist_yaw, float ini_r_hand, float ini_r_hip_yaw_pitch, float ini_r_hip_roll, float ini_r_hip_pitch, float ini_r_knee_pitch, float ini_r_ankle_pitch, float ini_r_ankle_roll);
     MoveServosMessage();
     ~MoveServosMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     float speed();
     void set_speed(const float new_speed);
@@ -352,7 +420,7 @@ class NaoJointPositionInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -371,10 +439,23 @@ class NaoJointPositionInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.NaoJointPositionInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.NaoJointPositionInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.NaoJointPositionInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

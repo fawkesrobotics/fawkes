@@ -246,6 +246,7 @@ ToLuaInterfaceGenerator::write_messages_h(FILE *f)
     fprintf(f, "  class %s : public Message\n"
 	    "  {\n", (*i).getName().c_str());
     write_message_ctor_dtor_h(f, "    ", (*i).getName(), (*i).getFields());
+    write_message_superclass_h(f);
     write_methods_h(f, "    ", (*i).getFields());
 
     fprintf(f, "  };\n\n");
@@ -328,7 +329,7 @@ ToLuaInterfaceGenerator::write_superclass_h(FILE *f)
 
           "  void                    set_from_chunk(void *chunk);\n"
 
-          "  virtual Message *   create_message(const char *type) const = 0;\n"
+          "  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;\n"
 
           "  void          read();\n"
           "  void          write();\n"
@@ -351,9 +352,58 @@ ToLuaInterfaceGenerator::write_superclass_h(FILE *f)
           "  bool          msgq_try_lock();\n"
           "  void          msgq_unlock();\n"
           "  void          msgq_pop();\n"
-          "  Message *     msgq_first();\n"
+          "  fawkes::Message * msgq_first @ msgq_first_generic();\n"
           "  bool          msgq_empty();\n"
           "\n");
+       
+}
+
+
+/** Write superclass methods.
+ * @param f file to write to
+ */
+void
+ToLuaInterfaceGenerator::write_message_superclass_h(FILE *f)
+{
+  fprintf(f,
+          "    unsigned int      id() const;\n"
+          "\n"
+          "    unsigned int      sender_id() const;\n"
+          "    const char *      sender_thread_name() const;\n"
+          "    Interface *       interface() const;\n"
+          "    const char *      type() const;\n"
+          "\n"
+          "    const void *      datachunk() const;\n"
+          "    unsigned int      datasize() const;\n"
+          "\n"
+          "    void              set_from_chunk(const void *chunk);\n"
+          "\n"
+          "    /* from RefCount */\n"
+          "    void              ref();\n"
+          "    void              unref();\n"
+          "    unsigned int      refcount();\n"
+          "\n");
+}
+
+
+/** Write additional Lua code to file.
+ * The code is required for correctly type message access.
+ * @param f file to write to
+ * @param classname name of the interface class
+ */
+void
+ToLuaInterfaceGenerator::write_lua_code(FILE *f, std::string classname)
+{
+	fprintf(f,
+	        "\n$[\n\n"
+	        "assert(fawkes.Interface.msgq_first)\n"
+	        "assert(fawkes.Interface.msgq_enqueue)\n"
+	        "assert(fawkes.Interface.create_message)\n\n"
+	        "fawkes.%s.msgq_first     = fawkes.Interface.msgq_first\n"
+	        "fawkes.%s.msgq_enqueue   = fawkes.Interface.msgq_enqueue\n"
+	        "fawkes.%s.create_message = fawkes.Interface.create_message\n"
+	        "\n$]\n\n",
+	        classname.c_str(), classname.c_str(), classname.c_str());
 }
 
 /** Write methods to h file.
@@ -446,7 +496,9 @@ ToLuaInterfaceGenerator::write_toluaf(FILE *f)
   //write_ctor_dtor_h(f, "  ", class_name);
   write_methods_h(f, "  ", data_fields, pseudo_maps);
   write_superclass_h(f);
-  fprintf(f, "\n};\n\n}\n");
+  fprintf(f, "\n};\n\n");
+  write_lua_code(f, class_name);
+  fprintf(f, "}\n");
 }
 
 

@@ -332,7 +332,7 @@ class NavGraphGeneratorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      char id[64]; /**< 
+      char name[64]; /**< 
       ID of the obstacle. Can later be used to remove it again.
      */
       float x; /**< X coordinate of obstacle in global frame. */
@@ -346,15 +346,15 @@ class NavGraphGeneratorInterface : public Interface
   interface_enum_map_t enum_map_FilterType;
   interface_enum_map_t enum_map_EdgeMode;
    public:
-    AddObstacleMessage(const char * ini_id, const float ini_x, const float ini_y);
+    AddObstacleMessage(const char * ini_name, const float ini_x, const float ini_y);
     AddObstacleMessage();
     ~AddObstacleMessage();
 
     AddObstacleMessage(const AddObstacleMessage *m);
     /* Methods */
-    char * id() const;
-    void set_id(const char * new_id);
-    size_t maxlenof_id() const;
+    char * name() const;
+    void set_name(const char * new_name);
+    size_t maxlenof_name() const;
     float x() const;
     void set_x(const float new_x);
     size_t maxlenof_x() const;
@@ -372,7 +372,7 @@ class NavGraphGeneratorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      char id[64]; /**< 
+      char name[64]; /**< 
       ID of the obstacle to remove.
      */
     } RemoveObstacleMessage_data_t;
@@ -384,15 +384,15 @@ class NavGraphGeneratorInterface : public Interface
   interface_enum_map_t enum_map_FilterType;
   interface_enum_map_t enum_map_EdgeMode;
    public:
-    RemoveObstacleMessage(const char * ini_id);
+    RemoveObstacleMessage(const char * ini_name);
     RemoveObstacleMessage();
     ~RemoveObstacleMessage();
 
     RemoveObstacleMessage(const RemoveObstacleMessage *m);
     /* Methods */
-    char * id() const;
-    void set_id(const char * new_id);
-    size_t maxlenof_id() const;
+    char * name() const;
+    void set_name(const char * new_name);
+    size_t maxlenof_name() const;
     virtual Message * clone() const;
   };
 
@@ -404,7 +404,7 @@ class NavGraphGeneratorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      char id[64]; /**< 
+      char name[64]; /**< 
       ID of the obstacle. Can later be used to remove it again.
      */
       float x; /**< X coordinate of obstacle in global frame. */
@@ -421,15 +421,15 @@ class NavGraphGeneratorInterface : public Interface
   interface_enum_map_t enum_map_FilterType;
   interface_enum_map_t enum_map_EdgeMode;
    public:
-    AddPointOfInterestMessage(const char * ini_id, const float ini_x, const float ini_y, const ConnectionMode ini_mode);
+    AddPointOfInterestMessage(const char * ini_name, const float ini_x, const float ini_y, const ConnectionMode ini_mode);
     AddPointOfInterestMessage();
     ~AddPointOfInterestMessage();
 
     AddPointOfInterestMessage(const AddPointOfInterestMessage *m);
     /* Methods */
-    char * id() const;
-    void set_id(const char * new_id);
-    size_t maxlenof_id() const;
+    char * name() const;
+    void set_name(const char * new_name);
+    size_t maxlenof_name() const;
     float x() const;
     void set_x(const float new_x);
     size_t maxlenof_x() const;
@@ -450,7 +450,7 @@ class NavGraphGeneratorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      char id[64]; /**< 
+      char name[64]; /**< 
       ID of the obstacle. Can later be used to remove it again.
      */
       float x; /**< X coordinate of obstacle in global frame. */
@@ -468,15 +468,15 @@ class NavGraphGeneratorInterface : public Interface
   interface_enum_map_t enum_map_FilterType;
   interface_enum_map_t enum_map_EdgeMode;
    public:
-    AddPointOfInterestWithOriMessage(const char * ini_id, const float ini_x, const float ini_y, const float ini_ori, const ConnectionMode ini_mode);
+    AddPointOfInterestWithOriMessage(const char * ini_name, const float ini_x, const float ini_y, const float ini_ori, const ConnectionMode ini_mode);
     AddPointOfInterestWithOriMessage();
     ~AddPointOfInterestWithOriMessage();
 
     AddPointOfInterestWithOriMessage(const AddPointOfInterestWithOriMessage *m);
     /* Methods */
-    char * id() const;
-    void set_id(const char * new_id);
-    size_t maxlenof_id() const;
+    char * name() const;
+    void set_name(const char * new_name);
+    size_t maxlenof_name() const;
     float x() const;
     void set_x(const float new_x);
     size_t maxlenof_x() const;
@@ -500,7 +500,7 @@ class NavGraphGeneratorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      char id[64]; /**< 
+      char name[64]; /**< 
       ID of the point of interest.
      */
       char property_name[64]; /**< Name of the property to set. */
@@ -515,15 +515,15 @@ class NavGraphGeneratorInterface : public Interface
   interface_enum_map_t enum_map_FilterType;
   interface_enum_map_t enum_map_EdgeMode;
    public:
-    SetPointOfInterestPropertyMessage(const char * ini_id, const char * ini_property_name, const char * ini_property_value);
+    SetPointOfInterestPropertyMessage(const char * ini_name, const char * ini_property_name, const char * ini_property_value);
     SetPointOfInterestPropertyMessage();
     ~SetPointOfInterestPropertyMessage();
 
     SetPointOfInterestPropertyMessage(const SetPointOfInterestPropertyMessage *m);
     /* Methods */
-    char * id() const;
-    void set_id(const char * new_id);
-    size_t maxlenof_id() const;
+    char * name() const;
+    void set_name(const char * new_name);
+    size_t maxlenof_name() const;
     char * property_name() const;
     void set_property_name(const char * new_property_name);
     size_t maxlenof_property_name() const;
@@ -652,7 +652,7 @@ class NavGraphGeneratorInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      char id[64]; /**< 
+      char name[64]; /**< 
       ID of the obstacle to remove.
      */
     } RemovePointOfInterestMessage_data_t;
@@ -664,15 +664,15 @@ class NavGraphGeneratorInterface : public Interface
   interface_enum_map_t enum_map_FilterType;
   interface_enum_map_t enum_map_EdgeMode;
    public:
-    RemovePointOfInterestMessage(const char * ini_id);
+    RemovePointOfInterestMessage(const char * ini_name);
     RemovePointOfInterestMessage();
     ~RemovePointOfInterestMessage();
 
     RemovePointOfInterestMessage(const RemovePointOfInterestMessage *m);
     /* Methods */
-    char * id() const;
-    void set_id(const char * new_id);
-    size_t maxlenof_id() const;
+    char * name() const;
+    void set_name(const char * new_name);
+    size_t maxlenof_name() const;
     virtual Message * clone() const;
   };
 

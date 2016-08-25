@@ -316,7 +316,7 @@ PluginNetworkHandler::loop()
 
     case MSG_PLUGIN_LIST_AVAIL:
       try {
-	LibLogger::log_debug("PluginNetworkHandler", "Sending list of all available plugins");
+	      //LibLogger::log_debug("PluginNetworkHandler", "Sending list of all available plugins");
 	PluginListMessage *plm = list_avail();
 	__hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_AVAIL_LIST, plm);
       } catch (Exception &e) {
@@ -326,7 +326,7 @@ PluginNetworkHandler::loop()
 
     case MSG_PLUGIN_LIST_LOADED:
       try {
-	LibLogger::log_debug("PluginNetworkHandler", "Sending list of all loaded plugins");
+	      //LibLogger::log_debug("PluginNetworkHandler", "Sending list of all loaded plugins");
 	PluginListMessage *plm = list_loaded();
 	__hub->send(msg->clid(), FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED_LIST, plm);
       } catch (Exception &e) {

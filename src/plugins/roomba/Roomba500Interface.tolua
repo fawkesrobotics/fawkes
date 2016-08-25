@@ -69,12 +69,46 @@ class Roomba500Interface : public Interface
     StopMessage();
     ~StopMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
   };
 
   class DockMessage : public Message
   {
     DockMessage();
     ~DockMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
   };
 
@@ -83,6 +117,23 @@ class Roomba500Interface : public Interface
     SetModeMessage(Mode ini_mode);
     SetModeMessage();
     ~SetModeMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     Mode mode();
     void set_mode(const Mode new_mode);
@@ -95,6 +146,23 @@ class Roomba500Interface : public Interface
     DriveStraightMessage();
     ~DriveStraightMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     short velocity();
     void set_velocity(const short new_velocity);
     int maxlenof_velocity() const;
@@ -105,6 +173,23 @@ class Roomba500Interface : public Interface
     DriveMessage(short ini_velocity, short ini_radius);
     DriveMessage();
     ~DriveMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     short velocity();
     void set_velocity(const short new_velocity);
@@ -119,6 +204,23 @@ class Roomba500Interface : public Interface
     SetMotorsMessage(bool ini_vacuuming, BrushState ini_main, BrushState ini_side);
     SetMotorsMessage();
     ~SetMotorsMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     bool is_vacuuming();
     void set_vacuuming(const bool new_vacuuming);
@@ -346,7 +448,7 @@ class Roomba500Interface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -365,10 +467,23 @@ class Roomba500Interface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.Roomba500Interface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.Roomba500Interface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.Roomba500Interface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

@@ -38,6 +38,9 @@ local active_skills = {}
 local skill_space      = ""
 local graphing_enabled = true
 
+local interfaces = {}
+local loop_function = nil
+
 local module_exports = {
    SkillHSM          = shsmmod.SkillHSM,
    JumpState         = shsmmod.JumpState,
@@ -47,6 +50,7 @@ local module_exports = {
 
 
 local loop_callbacks = {}
+local preloop_callbacks = {}
 local finalize_callbacks = {}
 
 --- Add an export for module initialization.
@@ -116,7 +120,8 @@ local skill_env_template = {
    config   = config,
    clock    = clock,
    tf       = tf,
-
+	 blackboard = blackboard,
+	 
    -- Packages
    math     = math,
    os       = { date = os.date, getenv = os.getenv, time = os.time, difftime = os.difftime },
@@ -153,23 +158,12 @@ local skill_env_template = {
 -- This tries to load and initialize the given skill space and all its
 -- skills.
 -- @param skillspace skill space to initialize
-function init(skillspace)
+-- @param loop_func the central processing loop function
+function init(skillspace, loop_func)
    skill_space = skillspace
+	 loop_function = loop_func
 
-   skill_env_template.interfaces = interfaces
-
-   if interfaces and interfaces.writing then
-      if interfaces.writing.skiller then
-	 interfaces.writing.skiller:set_error("")
-	 interfaces.writing.skiller:write()
-      end
-
-      if interfaces.writing.skdbg then
-	 interfaces.writing.skdbg:set_graph_fsm("")
-	 interfaces.writing.skdbg:set_graph("")
-	 interfaces.writing.skdbg:write()
-      end
-   end
+	 add_preloop_callback("predlib-reset", predlib.reset)
 
    require("skills." .. SKILLSPACE)
 end
@@ -179,6 +173,34 @@ function finalize()
    for _, cb in pairs(finalize_callbacks) do
       cb()
    end
+end
+
+function loop()
+   for _, cb in pairs(preloop_callbacks) do cb() end
+	 if loop_function then loop_function() end
+   for _, cb in pairs(loop_callbacks) do cb() end
+end
+
+
+--- Set interfaces used for informational output.
+-- @param interfaces an optional argument denoting relevant interfaces.
+-- Accepted entries are:
+-- - "skiller", SkillerInterface for status setting (writing)
+-- - "skdbg", SkillerDebugInterface for writing graphs etc. (writing)
+-- - "skdbg_layouted", SkillerDebugInterface that will contain a graph enriched
+--                     by layout information if a reader exists (writing)
+function set_interfaces(interfaces)
+	 _G.interfaces = interfaces
+	 if interfaces.skiller then
+			interfaces.skiller:set_error("")
+			interfaces.skiller:write()
+	 end
+
+	 if interfaces.skdbg then
+			interfaces.skdbg:set_graph_fsm("")
+			interfaces.skdbg:set_graph("")
+			interfaces.skdbg:write()
+	 end
 end
 
 --- Generate a sandbox for skill execution.
@@ -199,20 +221,6 @@ function gensandbox()
    for _, s in ipairs(skills) do
       assert(not rv[s.name], "Sandbox: Name " .. s.name .. " has already been registered")
       rv[s.name] = create_skill_functable(s)
-   end
-   if interfaces then
-      if interfaces.reading then
-	 for n, i in pairs(interfaces.reading) do
-	    assert(not rv[n], "Sandbox: Name " .. n .. " has already been registered")
-	    rv[n] = i
-	 end
-      end
-      if interfaces.writing then
-	 for n, i in pairs(interfaces.writing) do
-	    assert(not rv[n], "Sandbox: Name " .. n .. " has already been registered")
-	    rv[n] = i
-	 end
-      end
    end
 
    return rv
@@ -268,15 +276,6 @@ function reset_all()
    reset_status()
 end
 
---- Reset loop internals.
--- This function is called after every loop, no matter if skills are executed
--- continuous or one-show and independent of the status.
-function reset_loop()
-   predlib.reset()
-   for _, cb in pairs(loop_callbacks) do
-      cb()
-   end
-end
 
 --- Add a loop callback.
 -- A loop callback is called in each loop regardless if a skill is running
@@ -288,6 +287,24 @@ function add_loop_callback(name, cb)
    if (type(cb) ~= "function") then error("Loop callback must be a function") end
 
    loop_callbacks[name] = cb
+end
+
+--- Remove pre-loop callback.
+-- @param name name of callback to remove
+function remove_preloop_callback(name)
+   preloop_callbacks[name] = nil
+end
+
+--- Add a pre-loop callback.
+-- A loop callback is called in each loop regardless if a skill is running
+-- or not, at the beginning of each loop.
+-- @param name name of the callback, used for later identification on removal
+-- @param cb callback function to call
+function add_preloop_callback(name, cb)
+   if (type(name) ~= "string") then error("Pre-Loop callback name must be a string") end
+   if (type(cb) ~= "function") then error("Pre-Loop callback must be a function") end
+
+   preloop_callbacks[name] = cb
 end
 
 --- Remove loop callback.
@@ -319,6 +336,20 @@ end
 -- @return three return values, number of running, final and failed skills.
 function get_status()
    return #skill_status.running, #skill_status.final, #skill_status.failed
+end
+
+--- Get current skill status.
+-- @return overall status depending on number of skills running, final, or failed.
+function get_overall_status()
+	 if #skill_status.failed > 0 then
+			return fawkes.SkillerInterface.S_FAILED
+	 elseif #skill_status.final > 0 and #skill_status.running == 0 then
+			return fawkes.SkillerInterface.S_FINAL
+	 elseif #skill_status.running > 0 then
+			return fawkes.SkillerInterface.S_RUNNING
+	 else
+			return fawkes.SkillerInterface.S_INACTIVE;
+	 end
 end
 
 
@@ -417,6 +448,7 @@ end
 -- @param fsm FSM to get the error string from
 -- @param interface skiller interface to write to
 function write_fsm_error(fsm, interface)
+	 local interface = interface or interfaces.skiller
    assert(interface, "skillenv.write_fsm_error: no interface!")
    if fsm and fsm.error and #fsm.error > 0 then
       --print_warn("Writing error to interface")
@@ -449,7 +481,7 @@ function write_skill_dep(skdbg)
       -- set attributes of graph
       gmod.setv(g, "rankdir", "LR")
       gmod.setv(g, "penwidth", "1.0")
-      gmod.setv(g, "compound")
+      gmod.setv(g, "compound", "true")
 
       -- set attributes of default nodes and edges (will probably apply to all here)
       local defnode = gmod.get_current_default_node(g)
@@ -506,13 +538,13 @@ function update_grapher_config(skdbg, graphdir, colored)
 	 params_changed = true
       end
    end
-
+	 
    return params_changed
 end
 
 function write_skiller_debug(skdbg, skdbg_layouted, what, graphdir, colored)
-   local skdbg = skdbg or interfaces.writing.skdbg
-   assert(skdbg, "write_skiler_debug: No SkillerDebugInterface given")
+   local skdbg = skdbg or interfaces.skdbg
+   assert(skdbg, "write_skiller_debug: No SkillerDebugInterface given")
 
    local cur_what = skdbg:graph_fsm()
 
@@ -523,27 +555,30 @@ function write_skiller_debug(skdbg, skdbg_layouted, what, graphdir, colored)
    elseif graphing_enabled then
       local sname = what
       if what == "ACTIVE" then
-	 sname = get_active_skills()
+				 sname = get_active_skills()
       end
 
       local fsm = get_skill_fsm(sname)
+			local params_changed = update_grapher_config(skdbg, graphdir, colored)
       if fsm then
-	 local params_changed = update_grapher_config(skdbg, graphdir, colored)
+				 if what ~= cur_what or params_changed then
+						fsm:mark_changed()
+						skdbg:set_graph_fsm(what)
+				 end
 
-	 if what ~= cur_what or params_changed then
-	    fsm:mark_changed()
-	    skdbg:set_graph_fsm(what)
-	 end
-
-	 write_fsm_graph(fsm, skdbg, false)
-	 write_fsm_graph(fsm, skdbg_layouted, true)
+				 write_fsm_graph(fsm, skdbg, false)
+				 write_fsm_graph(fsm, skdbg_layouted, true)
       else
-	 if what ~= cur_what then
-	    print_warn("Could not write FSM graph, FSM for %s not found", what)
-	    skdbg:set_graph_fsm(what)
-	    skdbg:set_graph("")
-	    skdbg:write()
-	 end
+				 if what ~= cur_what then
+						if what ~= "" and what ~= "ACTIVE" then
+							 print_warn("Could not write FSM graph, FSM for %s not found", what)
+						end
+						skdbg:set_graph_fsm(what)
+						skdbg:set_graph("")
+						skdbg:write()
+				 elseif params_changed then
+						skdbg:write()
+				 end
       end
    end
 end

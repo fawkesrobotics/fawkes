@@ -32,10 +32,10 @@ ifeq ($(HAVE_LUA),1)
 %_tolua.cpp: $$(TOLUA_$$(call nametr,$$*))
 	$(SILENT) echo -e "$(INDENT_PRINT)[LUA] $(PARENTDIR)$(TBOLDGRAY)$(@F)$(TNORMAL)"
 	$(SILENT)cat $(addprefix $(SRCDIR)/,$(subst $(SRCDIR)/,,$(filter %.tolua,$^))) > $(patsubst %.cpp,%.pkg,$@)
-	$(SILENT)$(TOLUAPP) -n $(TOLUA_PKGPREFIX_$(call nametr,$*))$(notdir $*) $(patsubst %.cpp,%.pkg,$@) | \
+	$(SILENT)$(TOLUAPP) -L "$(FAWKES_BASEDIR)/src/lua/fawkes/toluaext.lua" -n $(TOLUA_PKGPREFIX_$(call nametr,$*))$(notdir $*) $(patsubst %.cpp,%.pkg,$@) | \
 	sed -e 's/^\(.*Generated automatically .*\) on .*$$/\1/' | \
 	awk '/^#if defined/ { f=1 }; f { t = t "\n" $$0 }; !f {print}; f && /^#endif/ {print "extern \"C\" {" t "\n}\n"; f=0}' | \
-	awk '/^\*\/$$/ { print; while ((getline line < "$(BASEDIR)/doc/headers/lichead_c.GPL_WRE") > 0) print line }; ! /^\*\/$$/ { print }' \
+	awk '/^\*\/$$/ { print; while ((getline line < "$(BASEDIR)/doc/headers/lichead_c.GPL_WRE") > 0) print line; print "\n#include <core/exception.h>" }; ! /^\*\/$$/ { print }' \
 	> $@
 
   endif # HAVE_TOLUA is 1

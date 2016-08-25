@@ -12,6 +12,23 @@ class PclDatabaseMergeInterface : public Interface
     MergeMessage();
     ~MergeMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     long timestamps(int index);
     void set_timestamps(unsigned int index, const long new_timestamps);
     int maxlenof_timestamps() const;
@@ -46,7 +63,7 @@ class PclDatabaseMergeInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -65,10 +82,23 @@ class PclDatabaseMergeInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.PclDatabaseMergeInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.PclDatabaseMergeInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.PclDatabaseMergeInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

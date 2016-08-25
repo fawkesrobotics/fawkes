@@ -26,6 +26,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 
 namespace fawkes {
 
@@ -56,6 +57,24 @@ ComponentLogger::~ComponentLogger()
 }
 
 
+/** Set a new component name.
+ * @param format format string for the new command string, cf. sprintf
+ * man page for allowed syntax.
+ */
+void
+ComponentLogger::set_component(const char *format, ...)
+{
+  va_list arg;
+  va_start(arg, format);
+  char *new_component;
+  if (vasprintf(&new_component, format, arg) > 0) {
+	  char *old_component = __component;
+	  __component = new_component;
+	  free(old_component);
+  }
+  va_end(arg);
+}
+	
 /** Log debug message.
  * @param format format of the message, see man page of sprintf for available
  * tokens.

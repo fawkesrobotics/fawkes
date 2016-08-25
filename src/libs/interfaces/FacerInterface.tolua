@@ -20,6 +20,23 @@ class FacerInterface : public Interface
     LearnFaceMessage();
     ~LearnFaceMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     char * name();
     void set_name(const char * new_name);
     int maxlenof_name() const;
@@ -31,6 +48,23 @@ class FacerInterface : public Interface
     SetOpmodeMessage();
     ~SetOpmodeMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     if_facer_opmode_t opmode();
     void set_opmode(const if_facer_opmode_t new_opmode);
     int maxlenof_opmode() const;
@@ -41,6 +75,23 @@ class FacerInterface : public Interface
     EnableIdentityMessage(unsigned int ini_index, bool ini_enable);
     EnableIdentityMessage();
     ~EnableIdentityMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
     unsigned int index();
     void set_index(const unsigned int new_index);
@@ -56,6 +107,23 @@ class FacerInterface : public Interface
     SetNameMessage();
     ~SetNameMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int index();
     void set_index(const unsigned int new_index);
     int maxlenof_index() const;
@@ -70,6 +138,23 @@ class FacerInterface : public Interface
     GetNameMessage();
     ~GetNameMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int index();
     void set_index(const unsigned int new_index);
     int maxlenof_index() const;
@@ -81,6 +166,23 @@ class FacerInterface : public Interface
     StartSearchPersonMessage();
     ~StartSearchPersonMessage();
 
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
     unsigned int index();
     void set_index(const unsigned int new_index);
     int maxlenof_index() const;
@@ -90,6 +192,23 @@ class FacerInterface : public Interface
   {
     StopSearchPersonMessage();
     ~StopSearchPersonMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
 
   };
 
@@ -164,7 +283,7 @@ class FacerInterface : public Interface
   const char *            hash_printable() const;
   bool                    is_writer() const;
   void                    set_from_chunk(void *chunk);
-  virtual Message *   create_message(const char *type) const = 0;
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
   void          read();
   void          write();
   bool          has_writer() const;
@@ -183,10 +302,23 @@ class FacerInterface : public Interface
   bool          msgq_try_lock();
   void          msgq_unlock();
   void          msgq_pop();
-  Message *     msgq_first();
+  fawkes::Message * msgq_first @ msgq_first_generic();
   bool          msgq_empty();
 
 
 };
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.FacerInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.FacerInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.FacerInterface.create_message = fawkes.Interface.create_message
+
+$]
 
 }

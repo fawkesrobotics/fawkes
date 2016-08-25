@@ -614,6 +614,10 @@ SkillGuiGtkWindow::on_skdbg_data_changed()
       case SkillerDebugInterface::GD_RIGHT_LEFT:
 	tb_graphdir->set_stock_id(Gtk::Stock::GO_BACK); break;
       }
+
+      if (__skdbg_if->is_graph_colored() != tb_graphcolored->get_active()) {
+	      tb_graphcolored->set_active(__skdbg_if->is_graph_colored());
+      }
     } catch (Exception &e) {
       // ignored
     }
