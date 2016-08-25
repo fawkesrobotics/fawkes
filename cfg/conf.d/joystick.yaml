@@ -7,11 +7,23 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
   # Joystick device file
   device_file: /dev/input/js0
 
-  # True to enable safety lockout feature.
-  # This feature requires that axes 0 and 1 (usually primary cross) must be
-  # moved all the way once while any button is pressed. After the button is
-  # then released the data is passed through to the blackboard
-  safety_lockout: true
+  safety_lockout:
+    # True to enable safety lockout feature.
+    # This feature requires that axes 0 and 1 (usually primary cross) must be
+    # moved all the way once while any button is pressed. After the button is
+    # then released the data is passed through to the blackboard
+    enable: true
+
+    # 128: accept only start button on XBox controller
+    button-mask: 128
+
+    # Time in seconds after which to re-enable the safety lockout if no
+    # data has been received.
+    timeout: 30.0
+
+    # Accept exactly buttons matching this mask even during safety lockout
+    # On xbox controller 44 are: RB, X, and Y
+    bypass-button-mask: 44
 
   # Configuration settings for the joystick-teleop plugin
   # The example configuration is suitable for an Xbox 360 controller
@@ -40,7 +52,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
     # than the configured value. To disable using an axis as deadman
     # switch comment out the following line.
     deadman_axis: 5
-    deadman_axis_threshold: -0.1
+    deadman_axis_threshold: -0.5
 
     # Deadman button
     # The button mask is AND'ed to the JoystickInterface::pressed_buttons
@@ -48,7 +60,24 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
     # movement commands. To get the appropriate value sum up values of
     # the appropriate BUTTON_* constants of the JoystickInterface.
     # To react to all buttons, set value to 4294967295.
-    deadman_button_mask: 4294967295
+    # The value "4294965759" accepts all buttons except the axis push-down
+    # buttons on the XBox-Controller. They have rather surprising effects
+    # making the robot drive unexpectedly.
+    # The value "4294965631" accepts all buttons except the axis push-down
+    # buttons and the start button
+    deadman_button_mask: 4294965631
+
+    # Run-stop buttons
+    # Whenever this button combination is pressed, enable/disable the
+    # motor enabled state. For this to work always, even during safety
+    # lockout, set the very same button combination(s) as safety bypass
+    # buttons above.
+    # These button combos may be the same for both, in which case toggling
+    # happens only after the button has been released.
+    # Enable on xboxctrl: RB and Y
+    runstop-enable-buttons: 40
+    # Disable on xboxctrl: RB and X
+    runstop-disable-buttons: 36
 
     # Drive mode switching
     # Certain button or an axis can be configured that will allow to
@@ -63,21 +92,21 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
     # The conditions work the same way as the deadman switch documented
     # above.
     drive_mode_button_mask: 0
-    drive_mode_axis: 6
-    drive_mode_axis_threshold: -0.2
+    drive_mode_axis: 2
+    drive_mode_axis_threshold: -0.5
 
     # Maximum velocity forward and sideward; m/s
     # Maximum rotation; rad/s
     drive_modes:
       normal:
-        max_vx: 0.6
-        max_vy: 0.6
+        max_vx: 0.5
+        max_vy: 0.5
         max_omega: 1.57
 
       special:
-        max_vx: 0.3
-        max_vy: 0.3
-        max_omega: 1.0
+        max_vx: 1.0
+        max_vy: 1.0
+        max_omega: 2.36
 
   # This feature stops the robot from moving forward if an obstacle is
   # detected up front.

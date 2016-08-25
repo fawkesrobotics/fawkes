@@ -3,7 +3,7 @@
  *  RobotinoSensorInterface.cpp - Fawkes BlackBoard Interface - RobotinoSensorInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2012  Tim Niemueller
+ *  Copyright  2012-2016  Tim Niemueller
  *
  ****************************************************************************/
 
@@ -54,10 +54,12 @@ RobotinoSensorInterface::RobotinoSensorInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "bumper", 1, &data->bumper);
   add_fieldinfo(IFT_FLOAT, "distance", 9, &data->distance);
   add_fieldinfo(IFT_BOOL, "digital_in", 8, &data->digital_in);
+  add_fieldinfo(IFT_BOOL, "digital_out", 8, &data->digital_out);
   add_fieldinfo(IFT_FLOAT, "analog_in", 8, &data->analog_in);
   add_fieldinfo(IFT_BOOL, "bumper_estop_enabled", 1, &data->bumper_estop_enabled);
   add_messageinfo("SetBumperEStopEnabledMessage");
-  unsigned char tmp_hash[] = {0x3f, 0x22, 0xb4, 0xc5, 0xe8, 0x9c, 0xd9, 0xa8, 0x90, 0x80, 0x23, 0xb2, 0x55, 0xed, 0xfd, 0x52};
+  add_messageinfo("SetDigitalOutputMessage");
+  unsigned char tmp_hash[] = {0xa5, 0xb, 0xa1, 0x94, 0xea, 0x39, 0x14, 0x7, 0x98, 0x77, 0x10, 0xc, 0x25, 0x72, 0x57, 0xa0};
   set_hash(tmp_hash);
 }
 
@@ -398,6 +400,66 @@ RobotinoSensorInterface::set_digital_in(unsigned int index, const bool new_digit
   data->digital_in[index] = new_digital_in;
   data_changed = true;
 }
+/** Get digital_out value.
+ * Digital output values.
+ * @return digital_out value
+ */
+bool *
+RobotinoSensorInterface::is_digital_out() const
+{
+  return data->digital_out;
+}
+
+/** Get digital_out value at given index.
+ * Digital output values.
+ * @param index index of value
+ * @return digital_out value
+ * @exception Exception thrown if index is out of bounds
+ */
+bool
+RobotinoSensorInterface::is_digital_out(unsigned int index) const
+{
+  if (index > 8) {
+    throw Exception("Index value %u out of bounds (0..8)", index);
+  }
+  return data->digital_out[index];
+}
+
+/** Get maximum length of digital_out value.
+ * @return length of digital_out value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+RobotinoSensorInterface::maxlenof_digital_out() const
+{
+  return 8;
+}
+
+/** Set digital_out value.
+ * Digital output values.
+ * @param new_digital_out new digital_out value
+ */
+void
+RobotinoSensorInterface::set_digital_out(const bool * new_digital_out)
+{
+  memcpy(data->digital_out, new_digital_out, sizeof(bool) * 8);
+  data_changed = true;
+}
+
+/** Set digital_out value at given index.
+ * Digital output values.
+ * @param new_digital_out new digital_out value
+ * @param index index for of the value
+ */
+void
+RobotinoSensorInterface::set_digital_out(unsigned int index, const bool new_digital_out)
+{
+  if (index > 8) {
+    throw Exception("Index value %u out of bounds (0..8)", index);
+  }
+  data->digital_out[index] = new_digital_out;
+  data_changed = true;
+}
 /** Get analog_in value.
  * Analog input values.
  * @return analog_in value
@@ -499,6 +561,8 @@ RobotinoSensorInterface::create_message(const char *type) const
 {
   if ( strncmp("SetBumperEStopEnabledMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetBumperEStopEnabledMessage();
+  } else if ( strncmp("SetDigitalOutputMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetDigitalOutputMessage();
   } else {
     throw UnknownTypeException("The given type '%s' does not match any known "
                                "message type for this interface type.", type);
@@ -623,6 +687,138 @@ RobotinoSensorInterface::SetBumperEStopEnabledMessage::clone() const
 {
   return new RobotinoSensorInterface::SetBumperEStopEnabledMessage(this);
 }
+/** @class RobotinoSensorInterface::SetDigitalOutputMessage <interfaces/RobotinoSensorInterface.h>
+ * SetDigitalOutputMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_digital_out initial value for digital_out
+ * @param ini_enabled initial value for enabled
+ */
+RobotinoSensorInterface::SetDigitalOutputMessage::SetDigitalOutputMessage(const uint8_t ini_digital_out, const bool ini_enabled) : Message("SetDigitalOutputMessage")
+{
+  data_size = sizeof(SetDigitalOutputMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetDigitalOutputMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->digital_out = ini_digital_out;
+  data->enabled = ini_enabled;
+  add_fieldinfo(IFT_UINT8, "digital_out", 1, &data->digital_out);
+  add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
+}
+/** Constructor */
+RobotinoSensorInterface::SetDigitalOutputMessage::SetDigitalOutputMessage() : Message("SetDigitalOutputMessage")
+{
+  data_size = sizeof(SetDigitalOutputMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetDigitalOutputMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_UINT8, "digital_out", 1, &data->digital_out);
+  add_fieldinfo(IFT_BOOL, "enabled", 1, &data->enabled);
+}
+
+/** Destructor */
+RobotinoSensorInterface::SetDigitalOutputMessage::~SetDigitalOutputMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+RobotinoSensorInterface::SetDigitalOutputMessage::SetDigitalOutputMessage(const SetDigitalOutputMessage *m) : Message("SetDigitalOutputMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetDigitalOutputMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get digital_out value.
+ * 
+	    The number of the digital output to set.
+    
+ * @return digital_out value
+ */
+uint8_t
+RobotinoSensorInterface::SetDigitalOutputMessage::digital_out() const
+{
+  return data->digital_out;
+}
+
+/** Get maximum length of digital_out value.
+ * @return length of digital_out value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+RobotinoSensorInterface::SetDigitalOutputMessage::maxlenof_digital_out() const
+{
+  return 1;
+}
+
+/** Set digital_out value.
+ * 
+	    The number of the digital output to set.
+    
+ * @param new_digital_out new digital_out value
+ */
+void
+RobotinoSensorInterface::SetDigitalOutputMessage::set_digital_out(const uint8_t new_digital_out)
+{
+  data->digital_out = new_digital_out;
+}
+
+/** Get enabled value.
+ * 
+      True to enable digital out, false to disable.
+    
+ * @return enabled value
+ */
+bool
+RobotinoSensorInterface::SetDigitalOutputMessage::is_enabled() const
+{
+  return data->enabled;
+}
+
+/** Get maximum length of enabled value.
+ * @return length of enabled value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+RobotinoSensorInterface::SetDigitalOutputMessage::maxlenof_enabled() const
+{
+  return 1;
+}
+
+/** Set enabled value.
+ * 
+      True to enable digital out, false to disable.
+    
+ * @param new_enabled new enabled value
+ */
+void
+RobotinoSensorInterface::SetDigitalOutputMessage::set_enabled(const bool new_enabled)
+{
+  data->enabled = new_enabled;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+RobotinoSensorInterface::SetDigitalOutputMessage::clone() const
+{
+  return new RobotinoSensorInterface::SetDigitalOutputMessage(this);
+}
 /** Check if message is valid and can be enqueued.
  * @param message Message to check
  * @return true if the message is valid, false otherwise.
@@ -632,6 +828,10 @@ RobotinoSensorInterface::message_valid(const Message *message) const
 {
   const SetBumperEStopEnabledMessage *m0 = dynamic_cast<const SetBumperEStopEnabledMessage *>(message);
   if ( m0 != NULL ) {
+    return true;
+  }
+  const SetDigitalOutputMessage *m1 = dynamic_cast<const SetDigitalOutputMessage *>(message);
+  if ( m1 != NULL ) {
     return true;
   }
   return false;

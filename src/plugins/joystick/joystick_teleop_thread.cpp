@@ -90,6 +90,9 @@ JoystickTeleOpThread::init()
   cfg_collision_safety_distance_ = config->get_float(CFG_PREFIX"collision_safety/distance");
   cfg_collision_safety_angle_    = config->get_uint(CFG_PREFIX"collision_safety/angle");
 
+  cfg_runstop_enable_buttons_  = config->get_uint(CFG_PREFIX"runstop-enable-buttons");
+  cfg_runstop_disable_buttons_ = config->get_uint(CFG_PREFIX"runstop-disable-buttons");
+
   cfg_ifid_motor_        = config->get_string(CFG_PREFIX"motor_interface_id");
   motor_if_ = blackboard->open_for_reading<MotorInterface>(cfg_ifid_motor_.c_str());
 
@@ -108,10 +111,30 @@ JoystickTeleOpThread::init()
     } catch (Exception &e) {
       logger->log_warn(name(), "No laser_interface_id configured, ignoring");
     }
+
+    cfg_use_ff_ = false;
+    ff_weak_ = false;
+    ff_strong_ = false;
+    try {
+	    cfg_use_ff_ = config->get_bool(CFG_PREFIX"collision_safety/use-force-feedback");
+    } catch (Exception &e) {} // ignore, use default
+    logger->log_debug(name(), "Collision safety force feedback %sabled", cfg_use_ff_ ? "En" : "Dis");
+    if (cfg_use_ff_) {
+	    JoystickInterface::StartRumbleMessage *msg =
+		    new JoystickInterface::StartRumbleMessage();
+
+	    msg->set_strong_magnitude(0xFFFF);
+	    msg->set_weak_magnitude(0x8000);
+	    msg->set_length(1000);
+
+	    joystick_if_->msgq_enqueue(msg);
+
+    }
   } else {
     logger->log_warn(name(), "Collision safety for joystick is disabled.");
   }
 
+  runstop_pressed_ = false;
   stopped_ = false;
 }
 
@@ -187,6 +210,7 @@ JoystickTeleOpThread::loop()
 {
   joystick_if_->read();
   if (laser_if_)  laser_if_->read();
+  motor_if_->read();
 
   if ((! joystick_if_->has_writer() || joystick_if_->num_axes() == 0) && ! stopped_) {
     logger->log_warn(name(), "Joystick disconnected, stopping");
@@ -199,11 +223,32 @@ JoystickTeleOpThread::loop()
   {
     logger->log_warn(name(), "Axis number out of range, stopping");
     stop();
+  } else if (joystick_if_->pressed_buttons() == cfg_runstop_enable_buttons_ &&
+             ! runstop_pressed_ &&
+             motor_if_->motor_state() != MotorInterface::MOTOR_DISABLED)
+  {
+	  stop();
+	  MotorInterface::SetMotorStateMessage *msg =
+		  new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_DISABLED);
+	  motor_if_->msgq_enqueue(msg);
+	  logger->log_warn(name(), "Runstop ENABLED");
+	  runstop_pressed_ = true;
+  } else if (joystick_if_->pressed_buttons() == cfg_runstop_disable_buttons_ &&
+             ! runstop_pressed_ &&
+             motor_if_->motor_state() == MotorInterface::MOTOR_DISABLED)
+  {
+	  stop();
+	  MotorInterface::SetMotorStateMessage *msg =
+		  new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED);
+	  motor_if_->msgq_enqueue(msg);
+	  logger->log_warn(name(), "Runstop DISABLED");
+	  runstop_pressed_ = true;
   } else if ((joystick_if_->pressed_buttons() & cfg_deadman_butmask_) ||
 	     (cfg_deadman_use_axis_ &&
 	      ((cfg_deadman_ax_thresh_ >= 0 && joystick_if_->axis(cfg_deadman_axis_) > cfg_deadman_ax_thresh_) ||
 	       (cfg_deadman_ax_thresh_ <  0 && joystick_if_->axis(cfg_deadman_axis_) < cfg_deadman_ax_thresh_))))
   {
+	  runstop_pressed_ = false;
     if (fabsf(joystick_if_->axis(cfg_axis_forward_)) < cfg_axis_threshold_ &&
          fabsf(joystick_if_->axis(cfg_axis_sideward_)) < cfg_axis_threshold_ &&
          fabsf(joystick_if_->axis(cfg_axis_rotation_)) < cfg_axis_threshold_) {
@@ -218,34 +263,85 @@ JoystickTeleOpThread::loop()
           (cfg_drive_mode_ax_thresh_ <  0 &&
           joystick_if_->axis(cfg_drive_mode_axis_) < cfg_drive_mode_ax_thresh_))))
       {
-        vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_special_max_vx_;
-        vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_special_max_vy_;
-        omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_special_max_omega_;
+	      if (fabsf(joystick_if_->axis(cfg_axis_forward_)) > cfg_axis_threshold_) {
+		      vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_special_max_vx_;
+	      }
+	      if (fabsf(joystick_if_->axis(cfg_axis_sideward_)) > cfg_axis_threshold_) {
+		      vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_special_max_vy_;
+	      }
+	      if (fabsf(joystick_if_->axis(cfg_axis_rotation_)) > cfg_axis_threshold_) {
+		      omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_special_max_omega_;
+	      }
       } else {
-        vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_normal_max_vx_;
-        vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_normal_max_vy_;
-        omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_normal_max_omega_;
+	      if (fabsf(joystick_if_->axis(cfg_axis_forward_)) > cfg_axis_threshold_) {
+		      vx    = joystick_if_->axis(cfg_axis_forward_) * cfg_normal_max_vx_;
+	      }
+	      if (fabsf(joystick_if_->axis(cfg_axis_sideward_)) > cfg_axis_threshold_) {
+		      vy    = joystick_if_->axis(cfg_axis_sideward_) * cfg_normal_max_vy_;
+	      }
+	      if (fabsf(joystick_if_->axis(cfg_axis_rotation_)) > cfg_axis_threshold_) {
+		      omega = joystick_if_->axis(cfg_axis_rotation_) * cfg_normal_max_omega_;
+	      }
       }
 
       float theta, distance;
       cart2polar2d(vx, vy, &theta, &distance);
-      if (!cfg_use_laser_ || is_area_free(rad2deg(theta))) // if we have no laser or area is free, move
+      bool area_free = is_area_free(rad2deg(theta));
+      if (!cfg_use_laser_ || area_free) // if we have no laser or area is free, move
       {  
         if (laser_if_ && laser_if_->has_writer() && min_distance_ < 2*cfg_collision_safety_distance_)
         {
           logger->log_warn(name(),"slow down");
           vx = vx * min_distance_ / 2 / cfg_collision_safety_distance_;
           vy = vy * min_distance_ / 2 / cfg_collision_safety_distance_;
+
+          if (cfg_use_ff_ && ! ff_weak_ && joystick_if_->supported_ff_effects() != 0) {
+	          JoystickInterface::StartRumbleMessage *msg =
+		          new JoystickInterface::StartRumbleMessage();
+
+	          msg->set_strong_magnitude(0xFFFF);
+	          msg->set_weak_magnitude(0x8000);
+
+	          joystick_if_->msgq_enqueue(msg);
+	          ff_weak_ = true;
+	          ff_strong_ = false;
+          }
+        } else if (ff_weak_ || ff_strong_) {
+	        JoystickInterface::StopRumbleMessage *msg =
+		        new JoystickInterface::StopRumbleMessage();
+
+	        joystick_if_->msgq_enqueue(msg);
+	        ff_weak_ = false;
+	        ff_strong_ = false;
         }
         send_transrot(vx, vy, omega);
+        runstop_pressed_ = false;
       }
-      else // If area is not free, only allow rotation
+      else if (cfg_use_laser_ && ! area_free)
       {
         logger->log_warn(name(),"obstacle reached");
         send_transrot(0.,0.,omega);
+
+        if (cfg_use_ff_ && ! ff_weak_ && joystick_if_->supported_ff_effects() != 0) {
+	        JoystickInterface::StartRumbleMessage *msg =
+		        new JoystickInterface::StartRumbleMessage();
+
+	        msg->set_strong_magnitude(0x8000);
+	        msg->set_weak_magnitude(0xFFFF);
+      
+	        logger->log_debug(name(), "Enabling strong rumble");
+	        joystick_if_->msgq_enqueue(msg);
+	        ff_strong_ = true;
+	        ff_weak_ = false;
+        }
       }
     }
   } else if (! stopped_) {
+    runstop_pressed_ = false;
     stop();
+  } else if (joystick_if_->pressed_buttons() != cfg_runstop_enable_buttons_ &&
+             joystick_if_->pressed_buttons() != cfg_runstop_enable_buttons_)
+  {
+	  runstop_pressed_ = false;
   }
 }

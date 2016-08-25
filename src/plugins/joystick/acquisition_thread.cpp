@@ -26,6 +26,8 @@
 #include <core/threading/mutex.h>
 #include <core/exceptions/system.h>
 
+#include <utils/time/time.h>
+
 #include <algorithm>
 #include <linux/joystick.h>
 #include <cstdlib>
@@ -56,10 +58,10 @@ JoystickAcquisitionThread::JoystickAcquisitionThread()
   : Thread("JoystickAcquisitionThread", Thread::OPMODE_CONTINUOUS)
 {
   set_prepfin_conc_loop(true);
-  __data_mutex = NULL;
-  __axis_values = NULL;
-  __bbhandler = NULL;
-  __ff = NULL;
+  data_mutex_ = NULL;
+  axis_values_ = NULL;
+  bbhandler_ = NULL;
+  ff_ = NULL;
   logger = NULL;
 }
 
@@ -77,10 +79,10 @@ JoystickAcquisitionThread::JoystickAcquisitionThread(const char *device_file,
   : Thread("JoystickAcquisitionThread", Thread::OPMODE_CONTINUOUS)
 {
   set_prepfin_conc_loop(true);
-  __data_mutex = NULL;
-  __axis_values = NULL;
-  __ff = NULL;
-  __bbhandler = handler;
+  data_mutex_ = NULL;
+  axis_values_ = NULL;
+  ff_ = NULL;
+  bbhandler_ = handler;
   this->logger = logger;
   init(device_file);
 }
@@ -90,21 +92,29 @@ void
 JoystickAcquisitionThread::init()
 {
   try {
-    __cfg_device_file    = config->get_string("/hardware/joystick/device_file");
+    cfg_device_file_    = config->get_string("/hardware/joystick/device_file");
   } catch (Exception &e) {
     e.append("Could not read all required config values for %s", name());
     throw;
   }
 
-  __safety_lockout = true;
+  safety_lockout_ = true;
   try {
-	  __safety_lockout = config->get_bool("/hardware/joystick/safety_lockout");
+	  safety_lockout_ = config->get_bool("/hardware/joystick/safety_lockout/enable");
   } catch (Exception &e) {} // ignore, use default
-  for (int i = 0; i < 5; ++i) __safety_combo[i] = false;
+  if (safety_lockout_) {
+	  cfg_safety_lockout_timeout_ = config->get_float("/hardware/joystick/safety_lockout/timeout");
+	  cfg_safety_button_mask_ = config->get_uint("/hardware/joystick/safety_lockout/button-mask");
+	  cfg_safety_bypass_button_mask_ = 0;
+	  try {
+		  cfg_safety_bypass_button_mask_ = config->get_uint("/hardware/joystick/safety_lockout/bypass-button-mask");
+	  } catch (Exception &e) {} // ignore, use default
+  }
+  for (int i = 0; i < 5; ++i) safety_combo_[i] = false;
 
-  init(__cfg_device_file);
+  init(cfg_device_file_);
 
-  if (__safety_lockout) {
+  if (safety_lockout_) {
 	  logger->log_info(name(), "To enable joystick, move primary cross all the way in all "
 	                   "directions while holding first button. Then let go of button.");
   }
@@ -114,75 +124,76 @@ JoystickAcquisitionThread::init()
 void
 JoystickAcquisitionThread::open_joystick()
 {
-  __fd = open(__cfg_device_file.c_str(), O_RDONLY);
-  if ( __fd == -1 ) {
-    throw CouldNotOpenFileException(__cfg_device_file.c_str(), errno,
+  fd_ = open(cfg_device_file_.c_str(), O_RDONLY);
+  if ( fd_ == -1 ) {
+    throw CouldNotOpenFileException(cfg_device_file_.c_str(), errno,
 				    "Opening the joystick device file failed");
   }
 
-  if ( ioctl(__fd, JSIOCGNAME(sizeof(__joystick_name)), __joystick_name) < 0) {
+  if ( ioctl(fd_, JSIOCGNAME(sizeof(joystick_name_)), joystick_name_) < 0) {
     throw Exception(errno, "Failed to get name of joystick");
   }
-  if ( ioctl(__fd, JSIOCGAXES, &__num_axes) < 0 ) {
+  if ( ioctl(fd_, JSIOCGAXES, &num_axes_) < 0 ) {
     throw Exception(errno, "Failed to get number of axes for joystick");
   }
-  if ( ioctl(__fd, JSIOCGBUTTONS, &__num_buttons) < 0 ) {
+  if ( ioctl(fd_, JSIOCGBUTTONS, &num_buttons_) < 0 ) {
     throw Exception(errno, "Failed to get number of buttons for joystick");
   }
 
-  if (__axis_values == NULL) {
+  if (axis_values_ == NULL) {
     // memory had not been allocated
     // minimum of 8 because there are 8 axes in the interface
-    __axis_array_size = std::max((int)__num_axes, 8);
-    __axis_values   = (float *)malloc(sizeof(float) * __axis_array_size);
-  } else if ( __num_axes > std::max((int)__axis_array_size, 8) ) {
+    axis_array_size_  = std::max((int)num_axes_, 8);
+    axis_values_      = (float *)malloc(sizeof(float) * axis_array_size_);
+  } else if ( num_axes_ > std::max((int)axis_array_size_, 8) ) {
     // We loose axes as we cannot increase BB interface on-the-fly
-    __num_axes = __axis_array_size;
+    num_axes_ = axis_array_size_;
   }
 
-  logger->log_debug(name(), "Joystick device:   %s", __cfg_device_file.c_str());
-  logger->log_debug(name(), "Joystick name:     %s", __joystick_name);
-  logger->log_debug(name(), "Number of Axes:    %i", __num_axes);
-  logger->log_debug(name(), "Number of Buttons: %i", __num_buttons);
-  logger->log_debug(name(), "Axis Array Size:   %u", __axis_array_size);
+  logger->log_debug(name(), "Joystick device:   %s", cfg_device_file_.c_str());
+  logger->log_debug(name(), "Joystick name:     %s", joystick_name_);
+  logger->log_debug(name(), "Number of Axes:    %i", num_axes_);
+  logger->log_debug(name(), "Number of Buttons: %i", num_buttons_);
+  logger->log_debug(name(), "Axis Array Size:   %u", axis_array_size_);
 
-  memset(__axis_values, 0, sizeof(float) * __axis_array_size);
-  __pressed_buttons = 0;
-
-  if ( __bbhandler ) {
-    __bbhandler->joystick_plugged(__num_axes, __num_buttons);
+  memset(axis_values_, 0, sizeof(float) * axis_array_size_);
+  pressed_buttons_ = 0;
+  
+  if ( bbhandler_ ) {
+    bbhandler_->joystick_plugged(num_axes_, num_buttons_);
   }
-  __connected = true;
+  connected_ = true;
+  just_connected_ = true;
 }
 
 void
 JoystickAcquisitionThread::open_forcefeedback()
 {
-  __ff = new JoystickForceFeedback(__joystick_name);
-  logger->log_debug(name(), "Force Feedback:    %s", (__ff) ? "Yes" : "No");
+  ff_ = new JoystickForceFeedback(joystick_name_);
+  logger->log_debug(name(), "Force Feedback:    %s", (ff_) ? "Yes" : "No");
   logger->log_debug(name(), "Supported effects:");
 
-  if (__ff->can_rumble())   logger->log_debug(name(), "  rumble");
-  if (__ff->can_periodic()) logger->log_debug(name(), "  periodic");
-  if (__ff->can_constant()) logger->log_debug(name(), "  constant");
-  if (__ff->can_spring())   logger->log_debug(name(), "  spring");
-  if (__ff->can_friction()) logger->log_debug(name(), "  friction");
-  if (__ff->can_damper())   logger->log_debug(name(), "  damper");
-  if (__ff->can_inertia())  logger->log_debug(name(), "  inertia");
-  if (__ff->can_ramp())     logger->log_debug(name(), "  ramp");
-  if (__ff->can_square())   logger->log_debug(name(), "  square");
-  if (__ff->can_triangle()) logger->log_debug(name(), "  triangle");
-  if (__ff->can_sine())     logger->log_debug(name(), "  sine");
-  if (__ff->can_saw_up())   logger->log_debug(name(), "  saw up");
-  if (__ff->can_saw_down()) logger->log_debug(name(), "  saw down");
-  if (__ff->can_custom())   logger->log_debug(name(), "  custom");
+  if (ff_->can_rumble())   logger->log_debug(name(), "  rumble");
+  if (ff_->can_periodic()) logger->log_debug(name(), "  periodic");
+  if (ff_->can_constant()) logger->log_debug(name(), "  constant");
+  if (ff_->can_spring())   logger->log_debug(name(), "  spring");
+  if (ff_->can_friction()) logger->log_debug(name(), "  friction");
+  if (ff_->can_damper())   logger->log_debug(name(), "  damper");
+  if (ff_->can_inertia())  logger->log_debug(name(), "  inertia");
+  if (ff_->can_ramp())     logger->log_debug(name(), "  ramp");
+  if (ff_->can_square())   logger->log_debug(name(), "  square");
+  if (ff_->can_triangle()) logger->log_debug(name(), "  triangle");
+  if (ff_->can_sine())     logger->log_debug(name(), "  sine");
+  if (ff_->can_saw_up())   logger->log_debug(name(), "  saw up");
+  if (ff_->can_saw_down()) logger->log_debug(name(), "  saw down");
+  if (ff_->can_custom())   logger->log_debug(name(), "  custom");
 }
 
 void
 JoystickAcquisitionThread::init(std::string device_file)
 {
-  __new_data = false;
-  __cfg_device_file = device_file;
+  new_data_ = false;
+  cfg_device_file_ = device_file;
   open_joystick();
   try {
     open_forcefeedback();
@@ -190,7 +201,7 @@ JoystickAcquisitionThread::init(std::string device_file)
     logger->log_warn(name(), "Initializing force feedback failed, disabling");
     logger->log_warn(name(), e);
   }
-  __data_mutex = new Mutex();
+  data_mutex_ = new Mutex();
 
 }
 
@@ -198,95 +209,132 @@ JoystickAcquisitionThread::init(std::string device_file)
 void
 JoystickAcquisitionThread::finalize()
 {
-  if ( __fd >= 0 )  close(__fd);
-  free(__axis_values);
-  delete __data_mutex;
+  if ( fd_ >= 0 )  close(fd_);
+  if (axis_values_)  free(axis_values_);
+  delete data_mutex_;
 }
 
 
 void
 JoystickAcquisitionThread::loop()
 {
-  if ( __connected ) {
+  if ( connected_ ) {
     struct js_event e;
 
-    if ( read(__fd, &e, sizeof(struct js_event)) < (int)sizeof(struct js_event) ) {
-      logger->log_warn(name(), "Joystick removed, will try to reconnect.");
-      close(__fd);
-      __fd = -1;
-      __connected = false;
-      if ( __bbhandler ) {
-	__bbhandler->joystick_unplugged();
-      }
-      return;
+    long int timeout_sec  = (long int)truncf(cfg_safety_lockout_timeout_);
+    long int timeout_usec = (cfg_safety_lockout_timeout_ - timeout_sec) * 10000000;
+    timeval timeout = {timeout_sec, timeout_usec};
+
+    fd_set read_fds;
+    FD_ZERO(&read_fds);
+    FD_SET(fd_, &read_fds);
+
+    int rv = 0;
+    rv = select(fd_ + 1, &read_fds, NULL, NULL, &timeout);
+
+    if (rv == 0) {
+	    if (! safety_lockout_) {
+		    logger->log_warn(name(), "No action for %.2f seconds, re-enabling safety lockout",
+		                     cfg_safety_lockout_timeout_);
+		    safety_lockout_ = true;
+		    for (int i = 0; i < 5; ++i) safety_combo_[i] = false;
+	    }
+	    new_data_ = false;
+	    return;
+    }
+    
+    if (rv == -1 || read(fd_, &e, sizeof(struct js_event)) < (int)sizeof(struct js_event)) {
+	    logger->log_warn(name(), "Joystick removed, will try to reconnect.");
+	    close(fd_);
+	    fd_ = -1;
+	    connected_ = false;
+	    just_connected_ = false;
+	    safety_lockout_ = true;
+	    new_data_ = false;
+	    if ( bbhandler_ ) {
+		    bbhandler_->joystick_unplugged();
+	    }
+	    return;
     }
 
-    __data_mutex->lock();
-    __new_data = ! __safety_lockout;
+    data_mutex_->lock();
 
+    new_data_ = ! safety_lockout_;
+    unsigned int last_pressed_buttons = pressed_buttons_;
+    
     if ((e.type & ~JS_EVENT_INIT) == JS_EVENT_BUTTON) {
       //logger->log_debug(name(), "Button %u button event: %f", e.number, e.value);
       if (e.number <= 32) {
-	if (e.value) {
-	  __pressed_buttons |=  (1 << e.number);
-	} else {
-	  __pressed_buttons &= ~(1 << e.number);
-	}
+	      if (e.value) {
+		      pressed_buttons_ |=  (1 << e.number);
+	      } else {
+		      pressed_buttons_ &= ~(1 << e.number);
+	      }
       } else {
-	logger->log_warn(name(), "Button value for button > 32, ignoring");
+	      logger->log_warn(name(), "Button value for button > 32, ignoring");
       }
     } else if ((e.type & ~JS_EVENT_INIT) == JS_EVENT_AXIS) {
-      if ( e.number >= __axis_array_size ) {
-	logger->log_warn(name(),
-			 "Got value for axis %u, but only %u axes registered. "
-			 "Plugged in a different joystick? Ignoring.",
-			 e.number + 1 /* natural numbering */, __axis_array_size);
-      } else {
-	// Joystick axes usually go positive right, down, twist right, min speed,
-	// hat right, and hat down. In the Fawkes coordinate system we actually
-	// want opposite directions, hence multiply each value by -1
-	__axis_values[e.number] = (e.value == 0) ? 0. : (e.value / -32767.f);
+	    if ( e.number >= axis_array_size_ ) {
+		    logger->log_warn(name(),
+		                     "Got value for axis %u, but only %u axes registered. "
+		                     "Plugged in a different joystick? Ignoring.",
+		                     e.number + 1 /* natural numbering */, axis_array_size_);
+	    } else {
+		    // Joystick axes usually go positive right, down, twist right, min speed,
+		    // hat right, and hat down. In the Fawkes coordinate system we actually
+		    // want opposite directions, hence multiply each value by -1
+		    axis_values_[e.number] = (e.value == 0) ? 0. : (e.value / -32767.f);
 	
-	//logger->log_debug(name(), "Axis %u new X: %f",
-	//                  axis_index, __axis_values[e.number]);
-      }
+		    //logger->log_debug(name(), "Axis %u new X: %f",
+		    //                  axis_index, axis_values_[e.number]);
+	    }
     }
 
-    __data_mutex->unlock();
+    // As a special case, allow a specific button combination to be
+    // written even during safety lockout. Can be used to implement
+    // an emergency stop, for example.
+    if (safety_lockout_ &&
+        ((cfg_safety_bypass_button_mask_ & pressed_buttons_) ||
+         ((cfg_safety_bypass_button_mask_ & last_pressed_buttons) && pressed_buttons_ == 0)))
+    {
+	    new_data_ = true;
+    }
+    
+    data_mutex_->unlock();
 
-    if (__safety_lockout) {
+    if (safety_lockout_) {
 	    // the actual axis directions don't matter, we are just interested
 	    // that they take both extremes once.
-	    if (__num_axes < 2 || __num_buttons == 0) {
-		    __safety_combo[COMBO_IDX_UP]      = true;
-		    __safety_combo[COMBO_IDX_DOWN]    = true;
-		    __safety_combo[COMBO_IDX_RIGHT]   = true;
-		    __safety_combo[COMBO_IDX_LEFT]    = true;
-		    __safety_combo[COMBO_IDX_RELEASE] = true;
+	    if (num_axes_ < 2 || num_buttons_ == 0) {
+		    safety_combo_[COMBO_IDX_UP]      = true;
+		    safety_combo_[COMBO_IDX_DOWN]    = true;
+		    safety_combo_[COMBO_IDX_RIGHT]   = true;
+		    safety_combo_[COMBO_IDX_LEFT]    = true;
+		    safety_combo_[COMBO_IDX_RELEASE] = true;
 	    } else {
-		    if (__pressed_buttons > 0) {
-			    if (__axis_values[0] >  0.9)  __safety_combo[COMBO_IDX_UP]    = true;
-			    if (__axis_values[0] < -0.9)  __safety_combo[COMBO_IDX_DOWN]  = true;
-			    if (__axis_values[1] >  0.9)  __safety_combo[COMBO_IDX_RIGHT] = true;
-			    if (__axis_values[1] < -0.9)  __safety_combo[COMBO_IDX_LEFT]  = true;
+		    if (pressed_buttons_ & cfg_safety_button_mask_) {
+			    if (axis_values_[0] >  0.9)  safety_combo_[COMBO_IDX_UP]    = true;
+			    if (axis_values_[0] < -0.9)  safety_combo_[COMBO_IDX_DOWN]  = true;
+			    if (axis_values_[1] >  0.9)  safety_combo_[COMBO_IDX_RIGHT] = true;
+			    if (axis_values_[1] < -0.9)  safety_combo_[COMBO_IDX_LEFT]  = true;
 		    }
-		    if (__safety_combo[COMBO_IDX_UP] && __safety_combo[COMBO_IDX_DOWN] &&
-		        __safety_combo[COMBO_IDX_LEFT] && __safety_combo[COMBO_IDX_RIGHT] &&
-		        __pressed_buttons == 0) {
-			    __safety_combo[COMBO_IDX_RELEASE] = true;
+		    if (safety_combo_[COMBO_IDX_UP] && safety_combo_[COMBO_IDX_DOWN] &&
+		        safety_combo_[COMBO_IDX_LEFT] && safety_combo_[COMBO_IDX_RIGHT] &&
+		        pressed_buttons_ == 0) {
+			    safety_combo_[COMBO_IDX_RELEASE] = true;
 		    }
 	    }
 
-	    if (__safety_combo[COMBO_IDX_UP] && __safety_combo[COMBO_IDX_DOWN] &&
-	        __safety_combo[COMBO_IDX_LEFT] && __safety_combo[COMBO_IDX_RIGHT] &&
-	        __safety_combo[COMBO_IDX_RELEASE])
+	    if (safety_combo_[COMBO_IDX_UP] && safety_combo_[COMBO_IDX_DOWN] &&
+	        safety_combo_[COMBO_IDX_LEFT] && safety_combo_[COMBO_IDX_RIGHT] &&
+	        safety_combo_[COMBO_IDX_RELEASE])
 	    {
 		    logger->log_warn(name(), "Joystick safety lockout DISABLED (combo received)");
-		    __safety_lockout = false;
+		    safety_lockout_ = false;
 	    }
     } else {
-	    if ( __bbhandler ) {
-		    __bbhandler->joystick_changed(__pressed_buttons, __axis_values);
+	    if ( bbhandler_ ) {
+		    bbhandler_->joystick_changed(pressed_buttons_, axis_values_);
 	    }
     }
   } else {
@@ -299,8 +347,8 @@ JoystickAcquisitionThread::loop()
       } catch (Exception &e) {
 	logger->log_warn(name(), "Initializing force feedback failed, disabling");
       }
-    } catch (...) {
-      // ignored
+    } catch (Exception &e) {
+	    usleep(100000);
     }
   }
 }
@@ -315,11 +363,12 @@ JoystickAcquisitionThread::loop()
 bool
 JoystickAcquisitionThread::lock_if_new_data()
 {
-  __data_mutex->lock();
-  if (__new_data) {
+  data_mutex_->lock();
+  if (new_data_ || just_connected_) {
+	  just_connected_ = false;
     return true;
   } else {
-    __data_mutex->unlock();
+    data_mutex_->unlock();
     return false;
   }
 }
@@ -329,8 +378,8 @@ JoystickAcquisitionThread::lock_if_new_data()
 void
 JoystickAcquisitionThread::unlock()
 {
-  __new_data = false;
-  __data_mutex->unlock();
+  new_data_ = false;
+  data_mutex_->unlock();
 }
 
 
@@ -340,7 +389,7 @@ JoystickAcquisitionThread::unlock()
 char
 JoystickAcquisitionThread::num_axes() const
 {
-  return __num_axes;
+  return num_axes_;
 }
 
 
@@ -350,7 +399,7 @@ JoystickAcquisitionThread::num_axes() const
 char
 JoystickAcquisitionThread::num_buttons() const
 {
-  return __num_buttons;
+  return num_buttons_;
 }
 
 
@@ -360,7 +409,7 @@ JoystickAcquisitionThread::num_buttons() const
 const char *
 JoystickAcquisitionThread::joystick_name() const
 {
-  return __joystick_name;
+  return joystick_name_;
 }
 
 
@@ -370,7 +419,13 @@ JoystickAcquisitionThread::joystick_name() const
 unsigned int
 JoystickAcquisitionThread::pressed_buttons() const
 {
-  return __pressed_buttons;
+	if (! safety_lockout_) {
+		return pressed_buttons_;
+	} else if (pressed_buttons_ & cfg_safety_bypass_button_mask_) {
+		return pressed_buttons_ & cfg_safety_bypass_button_mask_;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -380,5 +435,8 @@ JoystickAcquisitionThread::pressed_buttons() const
 float *
 JoystickAcquisitionThread::axis_values()
 {
-  return __axis_values;
+	if (safety_lockout_) {
+		memset(axis_values_, 0, axis_array_size_ * sizeof(float));
+	}
+  return axis_values_;
 }

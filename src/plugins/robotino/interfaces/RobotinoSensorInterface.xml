@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
-<interface name="RobotinoSensorInterface" author="Tim Niemueller" year="2012">
+<interface name="RobotinoSensorInterface" author="Tim Niemueller" year="2012-2016">
   <data>
     <comment>Sensor information of a Robotino robot</comment>
     <field type="float" name="mot_velocity" length="3">Velocities of the wheels.</field>
@@ -9,6 +9,7 @@
     <field type="bool" name="bumper">Bumper pressed indicator.</field>
     <field type="float" name="distance" length="9">Distance sensor values.</field>
     <field type="bool" name="digital_in" length="8">Digital input values.</field>
+    <field type="bool" name="digital_out" length="8">Digital output values.</field>
     <field type="float" name="analog_in" length="8">Analog input values.</field>
     <field type="bool" name="bumper_estop_enabled">
       True if emergency stop on bumper contact is enabled, false otherwise.
@@ -20,6 +21,16 @@
     <field type="bool" name="enabled">
       True to enable emergency stop on bumper contact, false to
       disable. This will persist over OpenRobotino stated restarts.
+    </field>
+  </message>
+
+  <message name="SetDigitalOutput">
+    <comment>Set a digital output.</comment>
+    <field type="uint8" name="digital_out">
+	    The number of the digital output to set.
+    </field>
+    <field type="bool" name="enabled">
+      True to enable digital out, false to disable.
     </field>
   </message>
 

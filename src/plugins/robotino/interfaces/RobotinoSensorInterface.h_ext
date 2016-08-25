@@ -3,7 +3,7 @@
  *  RobotinoSensorInterface.h - Fawkes BlackBoard Interface - RobotinoSensorInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2012  Tim Niemueller
+ *  Copyright  2012-2016  Tim Niemueller
  *
  ****************************************************************************/
 
@@ -50,6 +50,7 @@ class RobotinoSensorInterface : public Interface
     bool bumper; /**< Bumper pressed indicator. */
     float distance[9]; /**< Distance sensor values. */
     bool digital_in[8]; /**< Digital input values. */
+    bool digital_out[8]; /**< Digital output values. */
     float analog_in[8]; /**< Analog input values. */
     bool bumper_estop_enabled; /**< 
       True if emergency stop on bumper contact is enabled, false otherwise.
@@ -91,6 +92,41 @@ class RobotinoSensorInterface : public Interface
     virtual Message * clone() const;
   };
 
+  class SetDigitalOutputMessage : public Message
+  {
+   private:
+#pragma pack(push,4)
+    /** Internal data storage, do NOT modify! */
+    typedef struct {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint8_t digital_out; /**< 
+	    The number of the digital output to set.
+     */
+      bool enabled; /**< 
+      True to enable digital out, false to disable.
+     */
+    } SetDigitalOutputMessage_data_t;
+#pragma pack(pop)
+
+    SetDigitalOutputMessage_data_t *data;
+
+   public:
+    SetDigitalOutputMessage(const uint8_t ini_digital_out, const bool ini_enabled);
+    SetDigitalOutputMessage();
+    ~SetDigitalOutputMessage();
+
+    SetDigitalOutputMessage(const SetDigitalOutputMessage *m);
+    /* Methods */
+    uint8_t digital_out() const;
+    void set_digital_out(const uint8_t new_digital_out);
+    size_t maxlenof_digital_out() const;
+    bool is_enabled() const;
+    void set_enabled(const bool new_enabled);
+    size_t maxlenof_enabled() const;
+    virtual Message * clone() const;
+  };
+
   virtual bool message_valid(const Message *message) const;
  private:
   RobotinoSensorInterface();
@@ -126,6 +162,11 @@ class RobotinoSensorInterface : public Interface
   void set_digital_in(unsigned int index, const bool new_digital_in);
   void set_digital_in(const bool * new_digital_in);
   size_t maxlenof_digital_in() const;
+  bool * is_digital_out() const;
+  bool is_digital_out(unsigned int index) const;
+  void set_digital_out(unsigned int index, const bool new_digital_out);
+  void set_digital_out(const bool * new_digital_out);
+  size_t maxlenof_digital_out() const;
   float * analog_in() const;
   float analog_in(unsigned int index) const;
   void set_analog_in(unsigned int index, const float new_analog_in);

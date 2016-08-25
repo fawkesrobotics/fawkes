@@ -301,43 +301,49 @@ PluginManager::parse_plugin_list(const char *plugin_list)
 void
 PluginManager::load(const char *plugin_list)
 {
-  std::list<std::string> pp = parse_plugin_list(plugin_list);
+	std::list<std::string> pp = parse_plugin_list(plugin_list);
 
-  for (std::list<std::string>::iterator i = pp.begin(); i != pp.end(); ++i) {
-    if ( i->length() == 0 ) continue;
+	for (std::list<std::string>::iterator i = pp.begin(); i != pp.end(); ++i) {
+		if ( i->length() == 0 ) continue;
 
-    bool try_real_plugin = true;
-    if ( __meta_plugins.find(*i) == __meta_plugins.end() ) {
-      std::string meta_plugin = __meta_plugin_prefix + *i;
-      try {
-	std::string pset = __config->get_string(meta_plugin.c_str());
-	if (pset.length() == 0) {
-	  throw Exception("Refusing to load an empty meta plugin");
-	}
-	//printf("Going to load meta plugin %s (%s)\n", i->c_str(), pset.c_str());
-	__meta_plugins.lock();
-	// Setting has to happen here, so that a meta plugin will not cause an
-	// endless loop if it references itself!
-	__meta_plugins[*i] = pset;
-	__meta_plugins.unlock();
-	try {
-	  LibLogger::log_info("PluginManager", "Loading plugins %s for meta plugin %s",
-	                      pset.c_str(), i->c_str());
-	  load(pset.c_str());
-	  notify_loaded(i->c_str());
-	} catch (Exception &e) {
-	  e.append("Could not initialize meta plugin %s, aborting loading.", i->c_str());
-	  __meta_plugins.erase_locked(*i);
-	  throw;
-	}
+		bool try_real_plugin = true;
+		if ( __meta_plugins.find(*i) == __meta_plugins.end() ) {
+			std::string meta_plugin = __meta_plugin_prefix + *i;
+			bool found_meta = false;
+			std::string pset = "";
+			try {
+				pset = __config->get_string(meta_plugin.c_str());
+				found_meta = true;
+			} catch (ConfigEntryNotFoundException &e) {
+				// no meta plugin defined by that name
+	      //printf("No meta plugin defined with the name %s\n", i->c_str());
+				try_real_plugin = true;
+			}
 
-	try_real_plugin = false;
-      } catch (ConfigEntryNotFoundException &e) {
-	// no meta plugin defined by that name
-	//printf("No meta plugin defined with the name %s\n", i->c_str());
-	try_real_plugin = true;
-      }
-    }
+			if (found_meta) {
+				if (pset.length() == 0) {
+					throw Exception("Refusing to load an empty meta plugin");
+				}
+				//printf("Going to load meta plugin %s (%s)\n", i->c_str(), pset.c_str());
+				__meta_plugins.lock();
+				// Setting has to happen here, so that a meta plugin will not cause an
+				// endless loop if it references itself!
+				__meta_plugins[*i] = pset;
+				__meta_plugins.unlock();
+				try {
+					LibLogger::log_info("PluginManager", "Loading plugins %s for meta plugin %s",
+					                    pset.c_str(), i->c_str());
+					load(pset.c_str());
+					notify_loaded(i->c_str());
+				} catch (Exception &e) {
+					e.append("Could not initialize meta plugin %s, aborting loading.", i->c_str());
+					__meta_plugins.erase_locked(*i);
+					throw;
+				}
+			
+				try_real_plugin = false;
+			}
+		}
 
     if (try_real_plugin &&
 	(find_if(plugins.begin(), plugins.end(), plname_eq(*i)) == plugins.end()))

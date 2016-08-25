@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  com_thread.cpp - Robotino com thread
+ *  com_thread.cpp - Robotino com thread base class
  *
  *  Created: Thu Sep 11 13:18:00 2014
- *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2016  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,52 +20,117 @@
  */
 
 #include "com_thread.h"
-#ifdef HAVE_OPENROBOTINO_API_1
-#  include <rec/robotino/com/Com.h>
-#  include <rec/sharedmemory/sharedmemory.h>
-#  include <rec/iocontrol/remotestate/SensorState.h>
-#  include <rec/iocontrol/robotstate/State.h>
-#else
-#  include <rec/robotino/api2/Com.h>
-#  include <rec/robotino/api2/AnalogInputArray.h>
-#  include <rec/robotino/api2/Bumper.h>
-#  include <rec/robotino/api2/DigitalInputArray.h>
-#  include <rec/robotino/api2/DistanceSensorArray.h>
-#  include <rec/robotino/api2/ElectricalGripper.h>
-#  include <rec/robotino/api2/Gyroscope.h>
-#  include <rec/robotino/api2/MotorArray.h>
-#  include <rec/robotino/api2/Odometry.h>
-#  include <rec/robotino/api2/PowerManagement.h>
-#endif
-#include <baseapp/run.h>
+
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
-#include <utils/math/angle.h>
-#include <utils/time/wait.h>
-#include <tf/types.h>
-
-#include <interfaces/BatteryInterface.h>
-#include <interfaces/RobotinoSensorInterface.h>
-#include <interfaces/IMUInterface.h>
-
-#include <unistd.h>
 
 using namespace fawkes;
 
-#define NUM_IR_SENSORS 9
-
-
-/** @class RobotinoComThread "sensor_thread.h"
- * Thread to communicate with Robotino API.
+/** @class RobotinoComThread "com_thread.h"
+ * Virtual base class for thread that communicates with a Robotino.
+ * A communication thread is always continuous and must communicate at the
+ * required pace. It provides hook for sensor and act threads.
  * @author Tim Niemueller
+ *
+ *
+ * @fn void RobotinoComThread::reset_odometry() = 0
+ * Reset odometry to zero.
+ *
+ * @fn bool RobotinoComThread::is_connected() = 0
+ * Check if we are connected to OpenRobotino.
+ * @return true if the connection has been established, false otherwise
+ *
+ * @fn void RobotinoComThread::get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t) = 0
+ * Get actual velocity.
+ * @param a1 upon return contains velocity in RPM for first wheel
+ * @param a2 upon return contains velocity in RPM for second wheel
+ * @param a3 upon return contains velocity in RPM for third wheel
+ * @param seq upon return contains sequence number of latest data
+ * @param t upon return contains time of latest data
+ *
+ * @fn bool RobotinoComThread::is_gripper_open() = 0
+ * Check if gripper is open.
+ * @return true if the gripper is presumably open, false otherwise
+ *
+ * @fn void RobotinoComThread::set_speed_points(float s1, float s2, float s3) = 0
+ * Set speed points for wheels.
+ * @param s1 speed point for first wheel in RPM
+ * @param s2 speed point for second wheel in RPM
+ * @param s3 speed point for third wheel in RPM
+ *
+ * @fn void RobotinoComThread::set_gripper(bool opened) = 0
+ * Open or close gripper.
+ * @param opened true to open gripper, false to close
+ *
+ * @fn void RobotinoComThread::get_odometry(double &x, double &y, double &phi) = 0
+ * Get latest odometry value.
+ * @param x upon return contains x coordinate of odometry
+ * @param y upon return contains y coordinate of odometry
+ * @param phi upon return contains rptation of odometry
+ *
+ * @fn void RobotinoComThread::set_bumper_estop_enabled(bool enabled) = 0
+ * Enable or disable emergency stop on bumper contact.
+ * @param enabled true to enable, false to disable
+ *
+ * @fn void RobotinoComThread::set_motor_accel_limits(float min_accel, float max_accel) = 0
+ * Set acceleration limits of motors.
+ * @param min_accel minimum acceleration
+ * @param max_accel maximum acceleration
+ *
+ * @fn void RobotinoComThread::set_digital_output(unsigned int digital_out, bool enable) = 0
+ * Set digital output state.
+ * @param digital_out digital output as written on the robot, i.e., 1 to 8
+ * @param enable true to enable output, false to disable
+ */
+
+/** @class RobotinoComThread::SensorData "com_thread.h"
+ * Struct to exchange data between com and sensor thread.
  */
 
 /** Constructor. */
-RobotinoComThread::RobotinoComThread()
-  : Thread("RobotinoComThread", Thread::OPMODE_CONTINUOUS)
+RobotinoComThread::SensorData::SensorData()
+	: seq(0), mot_velocity{0,0,0}, mot_position{0,0,0}, mot_current{0.,0.,0.},
+	  bumper(false), bumper_estop_enabled(false), digital_in{0,0,0,0,0,0,0,0},
+	  digital_out{0,0,0,0,0,0,0,0},
+	  analog_in{0.,0.,0.,0.,0.,0.,0.,0.}, bat_voltage(0.), bat_current(0.),
+	  imu_enabled(false), imu_orientation{0.,0.,0.,0.}, imu_angular_velocity{0.,0.,0.},
+	  imu_angular_velocity_covariance{0.,0.,0.,0.,0.,0.,0.,0.,0.},
+	  ir_voltages{0.,0.,0.,0.,0.,0.,0.,0.,0.}
 {
-#ifdef HAVE_OPENROBOTINO_API_1
-  com_ = this;
+}
+
+/** Constructor.
+ * @param thread_name name of thread
+ */
+RobotinoComThread::RobotinoComThread(const char *thread_name)
+	: Thread(thread_name, Thread::OPMODE_CONTINUOUS)
+{
+	data_mutex_  = new Mutex();
+	new_data_    = false;
+
+	vel_mutex_ = new Mutex();
+	vel_last_update_ = new Time();
+	vel_last_zero_ = false;
+	des_vx_    = 0.;
+	des_vy_    = 0.;
+	des_omega_ = 0.;
+
+	set_vx_    = 0.;
+	set_vy_    = 0.;
+	set_omega_ = 0.;
+
+	cfg_rb_   = 0.;
+	cfg_rw_   = 0.;
+	cfg_gear_ = 0.;	
+
+	cfg_trans_accel_ = 0.;
+	cfg_trans_decel_ = 0.;
+	cfg_rot_accel_   = 0.;
+	cfg_rot_decel_   = 0.;
+
+#ifdef USE_VELOCITY_RECORDING
+	f_ = fopen("comdata.csv", "w");
+	start_ = new Time();
 #endif
 }
 
@@ -73,577 +138,253 @@ RobotinoComThread::RobotinoComThread()
 /** Destructor. */
 RobotinoComThread::~RobotinoComThread()
 {
-}
-
-
-void
-RobotinoComThread::init()
-{
-  cfg_hostname_ = config->get_string("/hardware/robotino/hostname");
-  cfg_quit_on_disconnect_ = config->get_bool("/hardware/robotino/quit_on_disconnect");
-  cfg_enable_gyro_ = config->get_bool("/hardware/robotino/gyro/enable");
-  cfg_imu_iface_id_ = config->get_string("/hardware/robotino/gyro/interface_id");
-  cfg_sensor_update_cycle_time_ =
-    config->get_uint("/hardware/robotino/sensor_update_cycle_time");
-  cfg_gripper_enabled_ = config->get_bool("/hardware/robotino/gripper/enable_gripper");
-
-  batt_if_ = NULL;
-  sens_if_ = NULL;
-  imu_if_ = NULL;
-
-  batt_if_ = blackboard->open_for_writing<BatteryInterface>("Robotino");
-  sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
-
-  if (cfg_enable_gyro_) {
-    imu_if_ = blackboard->open_for_writing<IMUInterface>(cfg_imu_iface_id_.c_str());
-  }
-
-  // taken from Robotino API2 DistanceSensorImpl.hpp
-  voltage_to_dist_dps_.push_back(std::make_pair(0.3 , 0.41));
-  voltage_to_dist_dps_.push_back(std::make_pair(0.39, 0.35));
-  voltage_to_dist_dps_.push_back(std::make_pair(0.41, 0.30));
-  voltage_to_dist_dps_.push_back(std::make_pair(0.5 , 0.25));
-  voltage_to_dist_dps_.push_back(std::make_pair(0.75, 0.18));
-  voltage_to_dist_dps_.push_back(std::make_pair(0.8 , 0.16));
-  voltage_to_dist_dps_.push_back(std::make_pair(0.95, 0.14));
-  voltage_to_dist_dps_.push_back(std::make_pair(1.05, 0.12));
-  voltage_to_dist_dps_.push_back(std::make_pair(1.3 , 0.10));
-  voltage_to_dist_dps_.push_back(std::make_pair(1.4 , 0.09));
-  voltage_to_dist_dps_.push_back(std::make_pair(1.55, 0.08));
-  voltage_to_dist_dps_.push_back(std::make_pair(1.8 , 0.07));
-  voltage_to_dist_dps_.push_back(std::make_pair(2.35, 0.05));
-  voltage_to_dist_dps_.push_back(std::make_pair(2.55, 0.04));
-
-#ifdef HAVE_OPENROBOTINO_API_1
-  statemem_ =  new rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State>
-    (rec::iocontrol::robotstate::State::sharedMemoryKey);
-  state_ = statemem_->getData();
-  state_mutex_ = new Mutex();
-  set_state_ = new rec::iocontrol::remotestate::SetState();
-  set_state_->gripper_isEnabled = cfg_gripper_enabled_;
-  active_state_ = 0;
-#endif
-
-  if (imu_if_) {
-    // Assume that the gyro is the CruizCore XG1010 and thus set data
-    // from datasheet
-    imu_if_->set_linear_acceleration(0, -1.);
-    imu_if_->set_angular_velocity_covariance(8, deg2rad(0.1));
-    imu_if_->write();
-  }
-
-  data_mutex_  = new Mutex();
-  new_data_    = false;
-  last_seqnum_ = 0;
-  time_wait_   = new TimeWait(clock, cfg_sensor_update_cycle_time_);
-
-#ifdef HAVE_OPENROBOTINO_API_1
-  com_->setAddress(cfg_hostname_.c_str());
-  com_->setMinimumUpdateCycleTime(cfg_sensor_update_cycle_time_);
-  com_->connect(/* blocking */ false);
-#else
-  com_ = new rec::robotino::api2::Com("Fawkes");
-  com_->setAddress(cfg_hostname_.c_str());
-  com_->setAutoReconnectEnabled(false);
-  com_->connectToServer(/* blocking */ true);
-
-  analog_inputs_com_  = new rec::robotino::api2::AnalogInputArray();
-  bumper_com_         = new rec::robotino::api2::Bumper();
-  digital_inputs_com_ = new rec::robotino::api2::DigitalInputArray();
-  distances_com_      = new rec::robotino::api2::DistanceSensorArray();
-  gripper_com_        = new rec::robotino::api2::ElectricalGripper();
-  gyroscope_com_      = new rec::robotino::api2::Gyroscope();
-  motors_com_         = new rec::robotino::api2::MotorArray();
-  odom_com_           = new rec::robotino::api2::Odometry();
-  power_com_          = new rec::robotino::api2::PowerManagement();
-
-  analog_inputs_com_->setComId(com_->id());
-  bumper_com_->setComId(com_->id());
-  digital_inputs_com_->setComId(com_->id());
-  distances_com_->setComId(com_->id());
-  gripper_com_->setComId(com_->id());
-  gyroscope_com_->setComId(com_->id());
-  motors_com_->setComId(com_->id());
-  odom_com_->setComId(com_->id());
-  power_com_->setComId(com_->id());
-#endif
-
-}
-
-
-void
-RobotinoComThread::finalize()
-{
-  delete data_mutex_;
-  delete time_wait_;
-  blackboard->close(sens_if_);
-  blackboard->close(batt_if_);
-  blackboard->close(imu_if_);
-#ifdef HAVE_OPENROBOTINO_API_1
-  set_state_->speedSetPoint[0] = 0.;
-  set_state_->speedSetPoint[1] = 0.;
-  set_state_->speedSetPoint[2] = 0.;
-  set_state_->gripper_isEnabled = false;
-  com_->setSetState(*set_state_);
-  usleep(50000);
-  delete set_state_;
-  delete state_mutex_;
-  delete statemem_;
-#else
-  float speeds[3] = { 0, 0, 0 };
-  motors_com_->setSpeedSetPoints(speeds, 3);
-  usleep(50000);
-  delete analog_inputs_com_;
-  delete bumper_com_;
-  delete digital_inputs_com_;
-  delete distances_com_;
-  delete gripper_com_;
-  delete gyroscope_com_;
-  delete motors_com_;
-  delete odom_com_;
-  delete power_com_;
-  delete com_;
+	delete data_mutex_;
+#ifdef USE_VELOCITY_RECORDING
+	fclose(f_);
 #endif
 }
 
-void
-RobotinoComThread::once()
+
+/** Get all current sensor data.
+ * @param sensor_data upon return (true) contains the latest available
+ * sensor data
+ * @return true if new data was available and has been stored in \p
+ * sensor_data, false otherwise
+ */
+bool
+RobotinoComThread::get_data(SensorData &sensor_data)
 {
-  reset_odometry();
-}
-
-void
-RobotinoComThread::loop()
-{
-  time_wait_->mark_start();
-
-  if (com_->isConnected()) {
-    process_sensor_msgs();
-
-    MutexLocker lock(data_mutex_);
-#ifdef HAVE_OPENROBOTINO_API_1
-    process_sensor_state();
-#else
-    process_com();
-#endif
-
-
-#ifdef HAVE_OPENROBOTINO_API_1
-  } else if (com_->connectionState() == rec::robotino::com::Com::NotConnected) {
-#else
-  } else {
-#endif
-    if (cfg_quit_on_disconnect_) {
-      logger->log_warn(name(), "Connection lost, quitting (as per config)");
-      fawkes::runtime::quit();
-    } else {
-      // retry connection
-#ifdef HAVE_OPENROBOTINO_API_1
-      com_->connect(/* blocking */ false);
-#else
-      com_->connectToServer(/* blocking */ true);
-#endif
-    }
-  }
-
-  time_wait_->wait();
-}
-
-
-void
-RobotinoComThread::process_sensor_msgs()
-{
-  // process command messages
-  while (! sens_if_->msgq_empty()) {
-    if (RobotinoSensorInterface::SetBumperEStopEnabledMessage *msg =
-	sens_if_->msgq_first_safe(msg))
-    {
-#ifdef HAVE_OPENROBOTINO_API_1
-      logger->log_info(name(), "%sabling motor on request",
-		       msg->is_enabled() ? "En" : "Dis");
-      state_->emergencyStop.isEnabled = msg->is_enabled();
-#else
-      logger->log_info(name(), "Setting emergency stop not yet supported for API2");
-#endif
-    }
-    sens_if_->msgq_pop();
-  } // while sensor msgq
-}
-
-
-void
-RobotinoComThread::process_sensor_state()
-{
-#ifdef HAVE_OPENROBOTINO_API_1
-  state_mutex_->lock();
-  fawkes::Time sensor_time = times_[active_state_];
-  rec::iocontrol::remotestate::SensorState sensor_state = sensor_states_[active_state_];
-  state_mutex_->unlock();
-
-  if (sensor_state.sequenceNumber != last_seqnum_) {
-    new_data_ = true;
-    last_seqnum_ = sensor_state.sequenceNumber;
-
-    // update sensor values in interface
-    sens_if_->set_mot_velocity(sensor_state.actualVelocity);
-    sens_if_->set_mot_position(sensor_state.actualPosition);
-    sens_if_->set_mot_current(sensor_state.motorCurrent);
-    sens_if_->set_bumper(sensor_state.bumper);
-    sens_if_->set_bumper_estop_enabled(state_->emergencyStop.isEnabled);
-    sens_if_->set_digital_in(sensor_state.dIn);
-    sens_if_->set_analog_in(sensor_state.aIn);
-    if (cfg_enable_gyro_) {
-      if (state_->gyro.port == rec::serialport::UNDEFINED) {
-	if (fabs(imu_if_->angular_velocity(0) + 1.) > 0.00001) {
-	  imu_if_->set_angular_velocity(0, -1.);
-	  imu_if_->set_angular_velocity(2,  0.);
-	  imu_if_->set_orientation(0, -1.);
+	MutexLocker lock(data_mutex_);
+	if (new_data_) {
+		sensor_data = data_;
+		new_data_ = false;
+		return true;
+	} else {
+		return false;
 	}
-      } else {
-	imu_if_->set_angular_velocity(0, 0.);
-	imu_if_->set_angular_velocity(2, state_->gyro.rate);
-
-	tf::Quaternion q = tf::create_quaternion_from_yaw(state_->gyro.angle);
-	imu_if_->set_orientation(0, q.x());
-	imu_if_->set_orientation(1, q.y());
-	imu_if_->set_orientation(2, q.z());
-	imu_if_->set_orientation(3, q.w());
-      }
-    }
-
-    update_distances(sensor_state.distanceSensor);
-
-    batt_if_->set_voltage(roundf(sensor_state.voltage * 1000.));
-    batt_if_->set_current(roundf(sensor_state.current));
-
-    // 21.0V is empty, 26.0V is empty, from OpenRobotino lcdd
-    float soc = (sensor_state.voltage - 21.0f) / 5.f;
-    soc = std::min(1.f, std::max(0.f, soc));
-
-    batt_if_->set_absolute_soc(soc);
-  }
-#endif
 }
 
 
-void
-RobotinoComThread::process_com()
-{
-#ifdef HAVE_OPENROBOTINO_API_2
-  com_->processComEvents();
-
-  double odo_x = 0, odo_y = 0, odo_phi = 0;
-  unsigned int odo_seq = 0;
-
-  odom_com_->readings(&odo_x, &odo_y, &odo_phi, &odo_seq);
-
-  if (odo_seq != last_seqnum_) {  
-    new_data_ = true;
-    last_seqnum_ = odo_seq;
-
-    unsigned int mot_num = motors_com_->numMotors();
-    float mot_act_vel[mot_num];
-    int   mot_act_pos[mot_num];
-    float mot_currents[mot_num];
-    motors_com_->actualVelocities(mot_act_vel);
-    motors_com_->actualPositions(mot_act_pos);
-    motors_com_->motorCurrents(mot_currents);
-
-    bool bumper = bumper_com_->value();
-
-    unsigned int digin_num = digital_inputs_com_->numDigitalInputs();
-    int digin_readings[digin_num];
-    bool digin_bools[digin_num];
-    digital_inputs_com_->values(digin_readings);
-    for (unsigned int i = 0; i < digin_num; ++i)  digin_bools[i] = (digin_readings[i] != 0);
-
-    unsigned int anlgin_num = analog_inputs_com_->numAnalogInputs();
-    float anlgin_readings[anlgin_num];
-    analog_inputs_com_->values(anlgin_readings);
-
-    unsigned int dist_num = distances_com_->numDistanceSensors();
-    // the distance calculation from API2 uses a max value of 0.41,
-    // which breaks the previous behavior of 0.0 for "nothing"
-    // therefore use our API1 conversion routine
-    //float dist_distances[dist_num];
-    //distances_com_->distances(dist_distances);
-    float dist_voltages[dist_num];
-    distances_com_->voltages(dist_voltages);
-
-    if (anlgin_num != sens_if_->maxlenof_analog_in()) {
-      logger->log_warn(name(), "Different number of analog inputs: %u vs. %u",
-		       anlgin_num, sens_if_->maxlenof_analog_in());
-    }
-
-    if (digin_num != sens_if_->maxlenof_digital_in()) {
-      logger->log_warn(name(), "Different number of digital inputs: %u vs. %u",
-		       digin_num, sens_if_->maxlenof_digital_in());
-    }
-
-    if (dist_num != sens_if_->maxlenof_distance()) {
-      logger->log_warn(name(), "Different number of distances: %u vs. %u",
-		       dist_num, sens_if_->maxlenof_distance());
-    }
-
-    float pow_current = power_com_->current() * 1000.; // A -> mA
-    float pow_voltage = power_com_->voltage() * 1000.; // V -> mV
-
-    float gyro_angle  = gyroscope_com_->angle();
-    float gyro_rate   = gyroscope_com_->rate();
-
-    // update sensor values in interface
-    sens_if_->set_mot_velocity(mot_act_vel);
-    sens_if_->set_mot_position(mot_act_pos);
-    sens_if_->set_mot_current(mot_currents);
-    sens_if_->set_bumper(bumper);
-    //sens_if_->set_bumper_estop_enabled(???);
-    sens_if_->set_digital_in(digin_bools);
-    sens_if_->set_analog_in(anlgin_readings);
-    if (cfg_enable_gyro_) {
-      imu_if_->set_angular_velocity(0, 0.);
-      imu_if_->set_angular_velocity(2, gyro_rate);
-
-      tf::Quaternion q = tf::create_quaternion_from_yaw(gyro_angle);
-      imu_if_->set_orientation(0, q.x());
-      imu_if_->set_orientation(1, q.y());
-      imu_if_->set_orientation(2, q.z());
-      imu_if_->set_orientation(3, q.w());
-    }
-
-    //sens_if_->set_distance(dist_distances);
-    update_distances(dist_voltages);
-
-    batt_if_->set_voltage(roundf(pow_voltage));
-    batt_if_->set_current(roundf(pow_current));
-
-    // 22.0V is empty, 24.5V is full, this is just a guess
-    float soc = (power_com_->voltage() - 22.0f) / 2.5f;
-    soc = std::min(1.f, std::max(0.f, soc));
-    batt_if_->set_absolute_soc(soc);
-  }
-#endif
-}
-
-
-/** Trigger writes of blackboard interfaces.
- * This is meant to be called by the sensor thread so that writes to the
- * blackboard happen in the sensor acquisition hook.
+/** Set omni drive layout parameters.
+ * @param rb Distance from Robotino center to wheel center in meters
+ * @param rw Wheel radius in meters
+ * @param gear Gear ratio between motors and wheels
  */
 void
-RobotinoComThread::update_bb_sensor()
+RobotinoComThread::set_drive_layout(float rb, float rw, float gear)
 {
-  MutexLocker lock(data_mutex_);
-  if (new_data_) {
-    batt_if_->write();
-    sens_if_->write();
-    if (imu_if_)  imu_if_->write();
-    new_data_ = false;
-  }
+	cfg_rb_   = rb;
+	cfg_rw_   = rw;
+	cfg_gear_ = gear;	
 }
 
+
+/** Set the omni drive limits.
+ * @param trans_accel maximum acceleration in translation
+ * @param trans_decel maximum deceleration in translation
+ * @param rot_accel maximum acceleration in rotation
+ * @param rot_decel maximum deceleration in rotation
+ */
 void
-RobotinoComThread::update_distances(float *voltages)
+RobotinoComThread::set_drive_limits(float trans_accel, float trans_decel, float rot_accel, float rot_decel)
 {
-  float dist_m[NUM_IR_SENSORS];
-  const size_t num_dps = voltage_to_dist_dps_.size();
-
-  for (int i = 0; i < NUM_IR_SENSORS; ++i) {
-    dist_m[i] = 0.;
-    // find the two enclosing data points
-
-    for (size_t j = 0; j < num_dps - 1; ++j) {
-      // This determines two points, l(eft) and r(ight) that are
-      // defined by voltage (x coord) and distance (y coord). We
-      // assume a linear progression between two adjacent points,
-      // i.e. between l and r. We then do the following:
-      // 1. Find two adjacent voltage values lv and rv where
-      //    the voltage lies inbetween
-      // 2. Interpolate by calculating the line parameters
-      //    m = dd/dv, x = voltage - lv and b = ld.
-      // cf. http://www.acroname.com/robotics/info/articles/irlinear/irlinear.html
-
-      const double lv = voltage_to_dist_dps_[j  ].first;
-      const double rv = voltage_to_dist_dps_[j+1].first;
-
-      if ((voltages[i] >= lv) && (voltages[i] < rv)) {
-        const double ld = voltage_to_dist_dps_[j  ].second;
-        const double rd = voltage_to_dist_dps_[j+1].second;
-
-        double dv = rv - lv;
-        double dd = rd - ld;
-
-        // Linear interpolation between 
-        dist_m[i] = (dd / dv) * (voltages[i] - lv) + ld;
-        break;
-      }
-    }
-  }
-
-  sens_if_->set_distance(dist_m);
+	cfg_trans_accel_ = trans_accel;
+	cfg_trans_decel_ = trans_decel;
+	cfg_rot_accel_   = rot_accel;
+	cfg_rot_decel_   = rot_decel;
 }
 
-#ifdef HAVE_OPENROBOTINO_API_1
-/** Update event. */
+
+/** Set desired velocities.
+ * @param vx desired velocity in base_link frame X direction ("forward")
+ * @param vy desired velocity in base_link frame Y direction ("sideward")
+ * @param omega desired rotational velocity
+ */
 void
-RobotinoComThread::updateEvent()
+RobotinoComThread::set_desired_vel(float vx, float vy, float omega)
 {
-  unsigned int next_state = 1 - active_state_;
-  sensor_states_[next_state] = sensorState();
-  times_[next_state].stamp();
-
-  MutexLocker lock(state_mutex_);
-  active_state_ = next_state;
-}
-#endif
-
-
-/** Reset odometry to zero. */
-void
-RobotinoComThread::reset_odometry()
-{
-  if (com_->isConnected()) {
-#ifdef HAVE_OPENROBOTINO_API_1
-    set_state_->setOdometry = true;
-    set_state_->odometryX = set_state_->odometryY = set_state_->odometryPhi = 0.;
-    com_->setSetState(*set_state_);
-    set_state_->setOdometry = false;
-#else
-    odom_com_->set(0., 0., 0., /* blocking */ true);
-#endif
-  }
+	des_vx_    = vx;
+	des_vy_    = vy;
+	des_omega_ = omega;
 }
 
 
-/** Check if we are connected to OpenRobotino.
- * @return true if the connection has been established, false otherwise
+/** Update velocity values.
+ * This method must be called periodically while driving to update the controller.
+ * @return true if the method must be called again, false otherwise
  */
 bool
-RobotinoComThread::is_connected()
+RobotinoComThread::update_velocities()
 {
-  return com_->isConnected();
+	bool set_speed = false;
+
+	Time now(clock);
+	float diff_sec = now - vel_last_update_;
+	*vel_last_update_ = now;
+
+	set_vx_    = update_speed(des_vx_, set_vx_, cfg_trans_accel_, cfg_trans_decel_, diff_sec);
+	set_vy_    = update_speed(des_vy_, set_vy_, cfg_trans_accel_, cfg_trans_decel_, diff_sec);
+	set_omega_ = update_speed(des_omega_, set_omega_, cfg_rot_accel_, cfg_rot_decel_, diff_sec);
+
+	/*
+	logger->log_info(name(), "VX: %.2f -> %.2f (%.2f)   VY: %.2f -> %.2f (%.2f)   Omg: %.2f -> %.2f (%.2f)",
+	                 old_set_vx, set_vx_, des_vx_,
+	                 old_set_vy, set_vy_, des_vy_,
+	                 old_set_omega, set_omega_);
+	*/
+
+	if (set_vx_ == 0.0 && set_vy_ == 0.0 && set_omega_ == 0.0) {
+		if (! vel_last_zero_) {
+			set_speed = true;
+			vel_last_zero_ = true;
+		}
+	} else {
+		set_speed = true;
+		vel_last_zero_ = false;
+	}
+
+	if (set_speed) {
+		float s1 = 0., s2 = 0., s3 = 0.;
+		project(&s1, &s2, &s3, set_vx_, set_vy_, set_omega_);
+		set_speed_points(s1, s2, s3);
+
+#ifdef USE_VELOCITY_RECORDING
+		{
+			Time now(clock);
+			float time_diff = now - start_;
+	
+			fprintf(f_, "%f\t%f\t%f\t%f\t%f\t%f\t%f\n", time_diff,
+			        des_vx_, set_vx_, des_vy_, set_vy_, des_omega_, set_omega_);
+		}
+#endif
+
+	}
+
+	return ! vel_last_zero_;
 }
 
+float
+RobotinoComThread::update_speed(float des, float set, float accel, float decel, float diff_sec)
+{
+	if (des >= 0 && set < 0) {
+		const float decrement = std::copysign(decel, set) * diff_sec;
+		if (des > set - decrement) {
+			//logger->log_debug(name(), "    Case 1a  %f  %f  %f", decrement, decel, diff_sec);
+			set -= decrement;
+		} else {
+			//logger->log_debug(name(), "    Case 1b");
+			set = des;
+		}
 
-/** Get actual velocity.
- * @param a1 upon return contains velocity in RPM for first wheel
- * @param a2 upon return contains velocity in RPM for second wheel
- * @param a3 upon return contains velocity in RPM for third wheel
- * @param seq upon return contains sequence number of latest data
- * @param t upon return contains time of latest data
+	} else if (des <= 0 && set > 0) {
+		const float decrement = std::copysign(decel, set) * diff_sec;
+		if (des < set - decrement ) {
+			//logger->log_debug(name(), "    Case 1c  %f  %f  %f", decrement, decel, diff_sec);
+			set -= decrement;
+		} else {
+			//logger->log_debug(name(), "    Case 1d");
+			set = des;
+		}
+
+	} else if (fabs(des) > fabs(set)) {
+		const float increment = std::copysign(accel, des) * diff_sec;
+		if (fabs(des) > fabs(set + increment)) {
+			//logger->log_debug(name(), "    Case 2a  %f  %f", increment, accel, diff_sec);
+			set += increment;
+		} else {
+			//logger->log_debug(name(), "    Case 2b");
+			set  = des;
+		}
+	} else if (fabs(des) < fabs(set)) {
+		const float decrement = std::copysign(decel, des) * diff_sec;
+		if (fabs(des) < fabs(set - decrement)) {
+			//logger->log_debug(name(), "    Case 3a  %f  %f  %f", decrement, decel, diff_sec);
+			set -= decrement;
+		} else {
+			//logger->log_debug(name(), "    Case 3b");
+			set  = des;
+		}
+	}
+
+	return set;
+}
+
+/** Project the velocity of the robot in cartesian coordinates to single motor speeds.
+ *
+ * From OpenRobotino API2 (C) REC Robotics Equipment Corporation GmbH, Planegg, Germany.
+ * The code has been released under a 2-clause BSD license.
+ *
+ * @param m1		The resulting speed of motor 1 in rpm
+ * @param m2		The resulting speed of motor 2 in rpm
+ * @param m3		The resulting speed of motor 3 in rpm
+ * @param vx		Velocity in x-direction in m/s
+ * @param vy		Velocity in y-direction in m/s
+ * @param omega	Angular velocity in rad/s
+ */
+//Redistribution and use in source and binary forms, with or without
+//modification, are permitted provided that the following conditions
+//are met:
+//1) Redistributions of source code must retain the above copyright
+//notice, this list of conditions and the following disclaimer.
+//2) Redistributions in binary form must reproduce the above copyright
+//notice, this list of conditions and the following disclaimer in the
+//documentation and/or other materials provided with the distribution.
+//
+//THIS SOFTWARE IS PROVIDED BY REC ROBOTICS EQUIPMENT CORPORATION GMBH
+//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+//FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL REC
+//ROBOTICS EQUIPMENT CORPORATION GMBH BE LIABLE FOR ANY DIRECT,
+//INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+//(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+//SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+//HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+//STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+//OF THE POSSIBILITY OF SUCH DAMAGE.
+void
+RobotinoComThread::project( float* m1, float* m2, float* m3, float vx, float vy, float omega ) const
+{
+	//Projection matrix
+	static const double v0[2] = { -0.5 * sqrt( 3.0 ),  0.5 };
+	static const double v1[2] = {  0.0              , -1.0 };
+	static const double v2[2] = {  0.5 * sqrt( 3.0 ),  0.5 };
+
+	//Scale omega with the radius of the robot
+	double vOmegaScaled = cfg_rb_ * (double)omega ;
+
+	//Convert from m/s to RPM
+	const double k = 60.0 * cfg_gear_ / ( 2.0 * M_PI * cfg_rw_ );
+
+	//Compute the desired velocity
+	*m1 = static_cast<float>( ( v0[0] * (double)vx + v0[1] * (double)vy + vOmegaScaled ) * k );
+	*m2 = static_cast<float>( ( v1[0] * (double)vx + v1[1] * (double)vy + vOmegaScaled ) * k );
+	*m3 = static_cast<float>( ( v2[0] * (double)vx + v2[1] * (double)vy + vOmegaScaled ) * k );
+}
+
+/** Project single motor speeds to velocity in cartesian coordinates.
+ *
+ * From OpenRobotino API2 (C) REC Robotics Equipment Corporation GmbH, Planegg, Germany.
+ * The code has been released under a 2-clause BSD license.
+ *
+ * @param vx		The resulting speed in x-direction in m/s
+ * @param vy		The resulting speed in y-direction in m/s
+ * @param omega	The resulting angular velocity in rad/s
+ * @param m1		Speed of motor 1 in rpm
+ * @param m2		Speed of motor 2 in rpm
+ * @param m3		Speed of motor 3 in rpm
+ * @throws		RobotinoException if no valid drive layout parameters are available.
  */
 void
-RobotinoComThread::get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t)
+RobotinoComThread::unproject( float* vx, float* vy, float* omega, float m1, float m2, float m3 ) const
 {
-  MutexLocker lock(data_mutex_);
+	//Convert from RPM to mm/s
+	const double k = 60.0 * cfg_gear_ / ( 2.0 * M_PI * cfg_rw_ );
 
-#ifdef HAVE_OPENROBOTINO_API_1
-  state_mutex_->lock();
-  t = times_[active_state_];
-  rec::iocontrol::remotestate::SensorState sensor_state = sensor_states_[active_state_];
-  state_mutex_->unlock();
+	*vx = static_cast<float>( ( (double)m3 - (double)m1 ) / sqrt( 3.0 ) / k );
+	*vy = static_cast<float>( 2.0 / 3.0 * ( (double)m1 + 0.5 * ( (double)m3 - (double)m1 ) - (double)m2 ) / k );
 
-  // div by 1000 to convert from mm to m
-  a1 = sensor_state.actualVelocity[0] / 1000.f;
-  a2 = sensor_state.actualVelocity[1] / 1000.f;
-  a3 = sensor_state.actualVelocity[2] / 1000.f;
-  seq = sensor_state.sequenceNumber;
-#else
-  float mot_act_vel[motors_com_->numMotors()];
-  motors_com_->actualVelocities(mot_act_vel);
+	double vw = (double)*vy + (double)m2 / k;
 
-  double odo_x = 0, odo_y = 0, odo_phi = 0;
-  odom_com_->readings(&odo_x, &odo_y, &odo_phi, &seq);
-
-  a1 = mot_act_vel[0];
-  a2 = mot_act_vel[1];
-  a3 = mot_act_vel[2];
-#endif
-}
-
-
-/** Get current odometry.
- * @param x X coordinate of robot in odometry frame
- * @param y Y coordinate of robot in odometry frame
- * @param phi orientation of robot in odometry frame
- */
-void
-RobotinoComThread::get_odometry(double &x, double &y, double &phi)
-{
-  MutexLocker lock(data_mutex_);
-
-#ifdef HAVE_OPENROBOTINO_API_1
-  state_mutex_->lock();
-  rec::iocontrol::remotestate::SensorState sensor_state = sensor_states_[active_state_];
-  state_mutex_->unlock();
-
-  x   = sensor_state.odometryX / 1000.f;
-  y   = sensor_state.odometryY / 1000.f;
-  phi = deg2rad(sensor_state.odometryPhi);
-
-#else
-  unsigned int seq;
-  odom_com_->readings(&x, &y, &phi, &seq);
-#endif
-}
-
-
-/** Check if gripper is open.
- * @return true if the gripper is presumably open, false otherwise
- */
-bool
-RobotinoComThread::is_gripper_open()
-{
-  MutexLocker lock(data_mutex_);
-
-#ifdef HAVE_OPENROBOTINO_API_1
-  state_mutex_->lock();
-  rec::iocontrol::remotestate::SensorState sensor_state = sensor_states_[active_state_];
-  state_mutex_->unlock();
-
-  return sensor_state.isGripperOpened;
-#else
-  return gripper_com_->isOpened();
-#endif
-}
-
-
-/** Set speed points for wheels.
- * @param s1 speed point for first wheel in RPM
- * @param s2 speed point for second wheel in RPM
- * @param s3 speed point for third wheel in RPM
- */
-void
-RobotinoComThread::set_speed_points(float s1, float s2, float s3)
-{
-#ifdef HAVE_OPENROBOTINO_API_1
-  set_state_->speedSetPoint[0] = s1;
-  set_state_->speedSetPoint[1] = s2;
-  set_state_->speedSetPoint[2] = s3;
-
-  com_->setSetState(*set_state_);
-#else
-  float speeds[3] = { s1, s2, s3 };
-  motors_com_->setSpeedSetPoints(speeds, 3);
-#endif
-
-}
-
-
-/** Open or close gripper.
- * @param opened true to open gripper, false to close
- */
-void
-RobotinoComThread::set_gripper(bool opened)
-{
-#ifdef HAVE_OPENROBOTINO_API_1
-  set_state_->gripper_close = ! opened;
-  com_->setSetState(*set_state_);
-#else
-  if (opened) {
-    gripper_com_->open();
-  } else {
-    gripper_com_->close();
-  }
-#endif
-
+	*omega = static_cast<float>( vw / cfg_rb_ );
 }

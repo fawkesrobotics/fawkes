@@ -46,10 +46,10 @@ class JoystickAcquisitionThread
   public fawkes::ConfigurableAspect
 {
  public:
-  JoystickAcquisitionThread();
-  JoystickAcquisitionThread(const char *device_file,
-			    JoystickBlackBoardHandler *handler,
-			    fawkes::Logger *logger);
+	JoystickAcquisitionThread();
+	JoystickAcquisitionThread(const char *device_file,
+                            JoystickBlackBoardHandler *handler,
+                            fawkes::Logger *logger);
 
   virtual void init();
   virtual void finalize();
@@ -66,7 +66,7 @@ class JoystickAcquisitionThread
 
   /** Access force feedback of joystick.
    * @return instance of JoystickForceFeedback class for current joystick. */
-  JoystickForceFeedback *  ff() const { return __ff; }
+  JoystickForceFeedback *  ff() const { return ff_; }
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -75,28 +75,32 @@ class JoystickAcquisitionThread
   void init(std::string device_file);
   void open_joystick();
   void open_forcefeedback();
-
+  
  private:
-  std::string __cfg_device_file;
+  std::string  cfg_device_file_;
+  float        cfg_safety_lockout_timeout_;
+  unsigned int cfg_safety_button_mask_;
+  unsigned int cfg_safety_bypass_button_mask_;
 
-  bool        __safety_combo[5];
-  bool        __safety_lockout;
+  bool        safety_combo_[5];
+  bool        safety_lockout_;
 
-  int  __fd;
-  bool __connected;
-  unsigned int __axis_array_size;
-  char __num_axes;
-  char __num_buttons;
-  char __joystick_name[128];
+  int  fd_;
+  bool connected_;
+  bool just_connected_;
+  unsigned int axis_array_size_;
+  char num_axes_;
+  char num_buttons_;
+  char joystick_name_[128];
 
-  bool            __new_data;
-  fawkes::Mutex  *__data_mutex;
+  bool            new_data_;
+  fawkes::Mutex  *data_mutex_;
 
-  unsigned int    __pressed_buttons;
-  float          *__axis_values;
+  unsigned int    pressed_buttons_;
+  float          *axis_values_;
 
-  JoystickBlackBoardHandler *__bbhandler;
-  JoystickForceFeedback *__ff;
+  JoystickBlackBoardHandler *bbhandler_;
+  JoystickForceFeedback *ff_;
 };
 
 

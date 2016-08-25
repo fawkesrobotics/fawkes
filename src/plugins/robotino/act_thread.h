@@ -36,116 +36,89 @@
 
 #include <string>
 
-#ifdef HAVE_OPENROBOTINO_API_1
-namespace rec {
-  namespace robotino {
-    namespace com {
-      class Com;
-      class OmniDrive;
-    }
-  }
-  namespace sharedmemory {
-    template<typename SharedType> class SharedMemory;
-  }
-  namespace iocontrol {
-    namespace robotstate {
-      class State;
-    }
-  }
-}
-#else
-namespace rec {
-  namespace robotino {
-    namespace api2 {
-      class OmniDriveModel;
-    }
-  }
-}
-#endif
-
 namespace fawkes {
-  class MotorInterface;
-  class GripperInterface;
-  class IMUInterface;
+	class MotorInterface;
+	class GripperInterface;
+	class IMUInterface;
 }
 
 class RobotinoComThread;
 
 class RobotinoActThread
 : public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
+	public fawkes::LoggingAspect,
+	public fawkes::ConfigurableAspect,
+	public fawkes::ClockAspect,
 #ifdef HAVE_TF
-  public fawkes::TransformAspect,
+	public fawkes::TransformAspect,
 #endif
-  public fawkes::BlockedTimingAspect,
-  public fawkes::BlackBoardAspect
+	public fawkes::BlockedTimingAspect,
+	public fawkes::BlackBoardAspect
 {
  public:
-  RobotinoActThread(RobotinoComThread *com_thread);
+	RobotinoActThread(RobotinoComThread *com_thread);
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void once();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  typedef enum {
-    ODOM_COPY,
-    ODOM_CALC
-  } OdometryMode;
+	typedef enum {
+		ODOM_COPY,
+		ODOM_CALC
+	} OdometryMode;
 
-  void publish_odometry();
-  void publish_gripper();
+	void publish_odometry();
+	void publish_gripper();
 
  private:
-  RobotinoComThread              *com_;
+	RobotinoComThread              *com_;
 
-#ifdef HAVE_OPENROBOTINO_API_1
-  rec::robotino::com::OmniDrive  *omni_drive_;
-  rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State> *statemem_;
-  rec::iocontrol::robotstate::State *state_;
-#else
-  rec::robotino::api2::OmniDriveModel *omni_drive_;
-#endif
+	unsigned int                    last_seqnum_;
+	fawkes::MotorInterface         *motor_if_;
+	fawkes::GripperInterface       *gripper_if_;
+	fawkes::IMUInterface           *imu_if_;
+	unsigned int                    imu_if_nochange_loops_;
+	bool                            imu_if_writer_warning_printed_;
+	bool                            imu_if_invquat_warning_printed_;
+	bool                            imu_if_changed_warning_printed_;
+	bool        			  msg_received_;
+	bool        			  msg_zero_vel_;
+	fawkes::Time 			  last_msg_time_;
 
-  unsigned int                    last_seqnum_;
-  fawkes::MotorInterface         *motor_if_;
-  fawkes::GripperInterface       *gripper_if_;
-  fawkes::IMUInterface           *imu_if_;
-  unsigned int                    imu_if_nochange_loops_;
-  bool                            imu_if_writer_warning_printed_;
-  bool                            imu_if_invquat_warning_printed_;
-  bool                            imu_if_changed_warning_printed_;
-  bool        			  msg_received_;
-  bool        			  msg_zero_vel_;
-  fawkes::Time 			  last_msg_time_;
+	float        			              cfg_deadman_threshold_;
+	float        			              cfg_odom_time_offset_;
+	bool 				                    cfg_gripper_enabled_;
+	std::string                     cfg_odom_frame_;
+	std::string                     cfg_base_frame_;
+	OdometryMode                    cfg_odom_mode_;
+	unsigned int                    cfg_imu_deadman_loops_;
+	float                           cfg_odom_corr_phi_;
+	float                           cfg_odom_corr_trans_;
+	bool                            cfg_bumper_estop_enabled_;	
+	float                           cfg_rb_;
+	float                           cfg_rw_;
+	float                           cfg_gear_;
+	float                           cfg_trans_accel_;
+	float                           cfg_trans_decel_;
+	float                           cfg_rot_accel_;
+	float                           cfg_rot_decel_;
 
-  float        			  cfg_deadman_threshold_;
-  float        			  cfg_odom_time_offset_;
-  bool 				  cfg_gripper_enabled_;
-  std::string                     cfg_odom_frame_;
-  std::string                     cfg_base_frame_;
-  OdometryMode                    cfg_odom_mode_;
-  unsigned int                    cfg_imu_deadman_loops_;
-  float                           cfg_odom_corr_phi_;
-  float                           cfg_odom_corr_trans_;
-  bool                            cfg_bumper_estop_enabled_;
+	bool                            gripper_close_;
 
-  float                           des_vx_;
-  float                           des_vy_;
-  float                           des_omega_;
+	float                           odom_x_;
+	float                           odom_y_;
+	float                           odom_phi_;
+	float                           odom_gyro_origin_;
+	fawkes::Time                   *odom_time_;
 
-  bool                            gripper_close_;
-
-  float                           odom_x_;
-  float                           odom_y_;
-  float                           odom_phi_;
-  float                           odom_gyro_origin_;
-  fawkes::Time                   *odom_time_;
+	float                           des_vx_;
+	float                           des_vy_;
+	float                           des_omega_;
 };
 
 

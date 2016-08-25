@@ -175,7 +175,7 @@ create_extrapolation_exception1(fawkes::Time t0, fawkes::Time t1, std::string* e
     char *tmp;
     if (asprintf(&tmp, "Lookup would require extrapolation at time %li.%li, "
                  "but only time %li.%li is in the buffer", t0.get_sec(), t0.get_nsec(),
-                 t1.get_sec(), t1.get_nsec()) != -1)
+                 t1.get_sec(), t1.get_usec()) != -1)
     {
       *error_str = tmp;
       free(tmp);
@@ -195,8 +195,8 @@ create_extrapolation_exception2(fawkes::Time t0, fawkes::Time t1, std::string* e
   {
     char *tmp;
     if (asprintf(&tmp,"Lookup would require extrapolation into the future. "
-                 "Requested time %s, but the latest data is at time %s",
-                 t0.str(), t1.str()) != -1)
+                 "Requested time %li.%li, but the latest data is at time %li.%li",
+                 t0.get_sec(), t0.get_usec(), t1.get_sec(), t1.get_usec()) != -1)
     {
       *error_str = tmp;
       free(tmp);
@@ -216,8 +216,8 @@ create_extrapolation_exception3(fawkes::Time t0, fawkes::Time t1, std::string* e
   {
     char *tmp;
     if (asprintf(&tmp,"Lookup would require extrapolation into the past. "
-                 "Requested time %s, but the latest data is at time %s",
-                 t0.str(), t1.str()) != -1)
+                 "Requested time %li.%li, but the latest data is at time %li.%li",
+                 t0.get_sec(), t0.get_usec(), t1.get_sec(), t1.get_usec()) != -1)
     {
       *error_str = tmp;
       free(tmp);

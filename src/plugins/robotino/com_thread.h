@@ -1,8 +1,8 @@
 /***************************************************************************
- *  com_thread.h - Robotino com thread
+ *  com_thread.h - Robotino com thread base class
  *
  *  Created: Thu Sep 11 11:43:42 2014
- *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2016  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,141 +24,122 @@
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/clock.h>
-#include <aspect/configurable.h>
-#include <aspect/blackboard.h>
 
 #include <utils/time/time.h>
 
-#ifdef HAVE_OPENROBOTINO_API_1
-#  include <rec/robotino/com/Com.h>
-namespace rec {
-  namespace sharedmemory {
-    template<typename SharedType> class SharedMemory;
-  }
-  namespace iocontrol {
-    namespace robotstate {
-      class State;
-    }
-    namespace remotestate {
-      class SetState;
-    }
-  }
-}
-#else
-namespace rec {
-  namespace robotino {
-    namespace api2 {
-      class Com;
-      class AnalogInputArray;
-      class Bumper;
-      class DigitalInputArray;
-      class DistanceSensorArray;
-      class ElectricalGripper;
-      class Gyroscope;
-      class MotorArray;
-      class Odometry;
-      class PowerManagement;
-    }
-  }
-}
-#endif
+#include <cstdio>
 
 namespace fawkes {
-  class Mutex;
-  class Clock;
-  class TimeWait;
-
-  class BatteryInterface;
-  class RobotinoSensorInterface;
-  class IMUInterface;
+	class Mutex;
+	class Clock;
 }
+
+#define NUM_IR_SENSORS 9
 
 class RobotinoComThread
 : public fawkes::Thread,
-#ifdef HAVE_OPENROBOTINO_API_1
-  public rec::robotino::com::Com,
-#endif
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::BlackBoardAspect
+	public fawkes::ClockAspect,
+	public fawkes::LoggingAspect
 {
  public:
-  RobotinoComThread();
-  virtual ~RobotinoComThread();
+	struct SensorData {
+		SensorData();
 
-  virtual void init();
-  virtual void once();
-  virtual void loop();
-  virtual void finalize();
+		/// @cond INTERNAL
+		unsigned int seq;
 
-  void update_bb_sensor();
+		float        mot_velocity[3];
+		int32_t      mot_position[3];
+		float        mot_current[3];
+		bool         bumper;
+		bool         bumper_estop_enabled;
+		bool         digital_in[8];
+		bool         digital_out[8];
+		float        analog_in[8];
 
-  bool is_connected();
+		float        bat_voltage;
+		float        bat_current;
+		float        bat_absolute_soc;
 
-  void set_gripper(bool opened);
-  bool is_gripper_open();
-  void set_speed_points(float s1, float s2, float s3);
-  void get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t);
-  void get_odometry(double &x, double &y, double &phi);
-  void reset_odometry();
+		bool         imu_enabled;
+		float        imu_orientation[4];
+		float        imu_angular_velocity[3];
+		double       imu_angular_velocity_covariance[9];
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+		float        odo_x;
+		float        odo_y;
+		float        odo_phi;
+
+		float        ir_voltages[NUM_IR_SENSORS];
+		
+		fawkes::Time time;
+		/// @endcond
+	};
+
+	RobotinoComThread(const char *thread_name);
+	virtual ~RobotinoComThread();
+
+	virtual bool is_connected() = 0;
+
+	virtual void set_gripper(bool opened) = 0;
+	virtual bool is_gripper_open() = 0;
+	virtual void set_speed_points(float s1, float s2, float s3) = 0;
+	virtual void get_act_velocity(float &a1, float &a2, float &a3, unsigned int &seq, fawkes::Time &t) = 0;
+	virtual void get_odometry(double &x, double &y, double &phi) = 0;
+
+	virtual void reset_odometry() = 0;
+	virtual void set_bumper_estop_enabled(bool enabled) = 0;
+	virtual void set_motor_accel_limits(float min_accel, float max_accel) = 0;
+	virtual void set_digital_output(unsigned int digital_out, bool enable) = 0;
+	
+	virtual bool get_data(SensorData &sensor_data);
+
+	        void set_drive_layout(float rb, float rw, float gear);
+	        void set_drive_limits(float trans_accel, float trans_decel, float rot_accel, float rot_decel);
+	virtual void set_desired_vel(float vx, float vy, float omega);
+
+	
+	void  project(float *m1, float *m2, float *m3, float vx, float vy, float omega) const;
+	void  unproject(float *vx, float *vy, float *omega, float m1, float m2, float m3) const;
+
+ protected:
+	bool update_velocities();
+	
+ private:
+
+	float update_speed(float des, float set, float accel, float decel, float diff_sec);
+
+ protected:
+	/** Mutex to protect data_. Lock whenever accessing it. */
+	fawkes::Mutex  *data_mutex_;
+	/** Data struct that must be updated whenever new data is available. */
+	SensorData      data_;
+	/** Flag to indicate new data, set to true if data_ is modified. */
+	bool            new_data_;
 
  private:
-#ifdef HAVE_OPENROBOTINO_API_1
-  using rec::robotino::com::Com::sensorState;
-  virtual void updateEvent();
-#endif
-  void process_sensor_msgs();
-  void process_sensor_state();
-  void process_com();
-  void update_distances(float *voltages);
+	float           cfg_rb_;
+	float           cfg_rw_;
+	float           cfg_gear_;
+	float           cfg_trans_accel_;
+	float           cfg_trans_decel_;
+	float           cfg_rot_accel_;
+	float           cfg_rot_decel_;
+	
+	fawkes::Mutex  *vel_mutex_;
+	fawkes::Time   *vel_last_update_;
+	bool            vel_last_zero_;
+	float           des_vx_;
+	float           des_vy_;
+	float           des_omega_;
 
- private:
-  std::string     cfg_hostname_;
-  bool            cfg_quit_on_disconnect_;
-  bool            cfg_enable_gyro_;
-  std::string     cfg_imu_iface_id_;
-  unsigned int    cfg_sensor_update_cycle_time_;
-  bool            cfg_gripper_enabled_;
+	float           set_vx_;
+	float           set_vy_;
+	float           set_omega_;
 
-  // Voltage to distance data points
-  std::vector<std::pair<double, double> > voltage_to_dist_dps_;
-
-  fawkes::Mutex    *data_mutex_;
-  bool              new_data_;
-  fawkes::TimeWait *time_wait_;
-  unsigned int      last_seqnum_;
-
-  fawkes::BatteryInterface        *batt_if_;
-  fawkes::RobotinoSensorInterface *sens_if_;
-  fawkes::IMUInterface            *imu_if_;
-
-#ifdef HAVE_OPENROBOTINO_API_1
-  rec::robotino::com::Com *com_;
-  fawkes::Mutex *state_mutex_;
-  unsigned int active_state_;
-  rec::iocontrol::remotestate::SensorState sensor_states_[2];
-  fawkes::Time times_[2];
-
-  rec::sharedmemory::SharedMemory<rec::iocontrol::robotstate::State> *statemem_;
-  rec::iocontrol::robotstate::State *state_;
-
-  rec::iocontrol::remotestate::SetState *set_state_;
-
-#else
-  rec::robotino::api2::Com                    *com_;
-  rec::robotino::api2::AnalogInputArray       *analog_inputs_com_;
-  rec::robotino::api2::Bumper                 *bumper_com_;
-  rec::robotino::api2::DigitalInputArray      *digital_inputs_com_;
-  rec::robotino::api2::DistanceSensorArray    *distances_com_;
-  rec::robotino::api2::ElectricalGripper      *gripper_com_;
-  rec::robotino::api2::Gyroscope              *gyroscope_com_;
-  rec::robotino::api2::MotorArray             *motors_com_;
-  rec::robotino::api2::Odometry               *odom_com_;
-  rec::robotino::api2::PowerManagement        *power_com_;
+#ifdef USE_VELOCITY_RECORDING
+	FILE *f_;
+	fawkes::Time     *start_;
 #endif
 };
 
