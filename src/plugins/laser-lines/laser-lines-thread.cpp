@@ -62,7 +62,7 @@ using namespace fawkes;
 LaserLinesThread::LaserLinesThread()
   : Thread("LaserLinesThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
-    TransformAspect(TransformAspect::ONLY_LISTENER)
+    TransformAspect(TransformAspect::BOTH, "laser_lines")
 {
 }
 
@@ -257,10 +257,10 @@ LaserLinesThread::loop()
     //TimeWait::wait(50000);
 
     for (unsigned int i = 0; i < cfg_max_num_lines_; ++i) {
-      set_line(line_ifs_[i], false);
+	    set_line(i, line_ifs_[i], false);
       if(cfg_moving_avg_enabled_)
       {
-        set_line(line_avg_ifs_[i], false);
+	      set_line(i, line_avg_ifs_[i], false);
       }
     }
 
@@ -368,10 +368,10 @@ LaserLinesThread::loop()
     const LineInfo &info_avg = linfos_filtered[i];
 
     if (line_if_idx < cfg_max_num_lines_) {
-      set_line(line_ifs_[line_if_idx], true, finput_->header.frame_id, info);
+	    set_line(line_if_idx, line_ifs_[line_if_idx], true, finput_->header.frame_id, info);
       if(cfg_moving_avg_enabled_)
       {
-        set_line(line_avg_ifs_[line_if_idx], true, finput_->header.frame_id, info_avg);
+        set_line(line_if_idx, line_avg_ifs_[line_if_idx], true, finput_->header.frame_id, info_avg);
       }
       line_if_idx++;
     }
@@ -394,27 +394,18 @@ LaserLinesThread::loop()
   }
 
   for (unsigned int i = line_if_idx; i < cfg_max_num_lines_; ++i) {
-    set_line(line_ifs_[i], false);
+	  set_line(i, line_ifs_[i], false);
     if(cfg_moving_avg_enabled_)
     {
-      set_line(line_avg_ifs_[i], false);
+	    set_line(i, line_avg_ifs_[i], false);
     }
   }
 
 #ifdef HAVE_VISUAL_DEBUGGING
-  std::vector<LineInfo> to_publish;
-  for(LineInfo info: linfos)
-  {
-    to_publish.push_back(info);
+  publish_visualization(linfos, "laser_lines");
+  if(cfg_moving_avg_enabled_) {
+	  publish_visualization(linfos_filtered, "laser_lines_moving_average", "_avg");
   }
-  if(cfg_moving_avg_enabled_)
-  {
-    for(LineInfo info: linfos_filtered)
-    {
-      to_publish.push_back(info);
-    }
-  }
-  publish_visualization(to_publish);
 #endif
 
   //*lines_ = *tmp_lines;
@@ -439,10 +430,11 @@ LaserLinesThread::loop()
 
 
 void
-LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
-			   bool is_visible,
-			   const std::string &frame_id,
-			   const LineInfo &info)
+LaserLinesThread::set_line(unsigned int idx,
+                           fawkes::LaserLineInterface *iface,
+                           bool is_visible,
+                           const std::string &frame_id,
+                           const LineInfo &info)
 {
   int visibility_history = iface->visibility_history();
   if (is_visible) {
@@ -474,6 +466,42 @@ LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
     iface->set_length(info.length);
     iface->set_end_point_1(if_end_point_1);
     iface->set_end_point_2(if_end_point_2);
+
+    // this makes the usual assumption that the laser data is in the X-Y plane
+    fawkes::Time now(clock);  
+    std::string frame_name_1, frame_name_2;
+    char *tmp;
+    if (asprintf(&tmp, "laser_line_%u_e1", idx+1) != -1) {
+	    frame_name_1 = tmp;
+	    free(tmp);
+    }
+    if (asprintf(&tmp, "laser_line_%u_e2", idx+1) != -1) {
+	    frame_name_2 = tmp;
+	    free(tmp);
+    }
+    if (frame_name_1 != "" && frame_name_2 != "") {
+	    Eigen::Vector3f bp_unit = info.base_point / info.base_point.norm();
+	    double dotprod = Eigen::Vector3f::UnitX().dot(bp_unit);
+	    double angle = acos(dotprod) + M_PI;
+
+	    if (info.base_point[1] < 0.)  angle = fabs(angle) * -1.;
+
+	    tf::Transform t1(tf::Quaternion(tf::Vector3(0,0,1), angle),
+	                     tf::Vector3(info.end_point_1[0], info.end_point_1[1], info.end_point_1[2]));
+	    tf::Transform t2(tf::Quaternion(tf::Vector3(0,0,1), angle),
+	                     tf::Vector3(info.end_point_2[0], info.end_point_2[1], info.end_point_2[2]));
+	    
+	    try {
+		    tf_publisher->send_transform(t1, now, frame_id, frame_name_1);
+		    tf_publisher->send_transform(t2, now, frame_id, frame_name_2);
+	    } catch (Exception &e) {
+		    logger->log_warn(name(), "Failed to publish laser_line_%u_* transforms, exception follows", idx+1);
+		    logger->log_warn(name(), e);
+	    }
+    } else {
+	    logger->log_warn(name(), "Failed to determine frame names");
+    }
+
   } else {
     if (visibility_history <= 0) {
       iface->set_visibility_history(visibility_history - 1);
@@ -489,13 +517,14 @@ LaserLinesThread::set_line(fawkes::LaserLineInterface *iface,
       iface->set_frame_id("");
     }
   }
-  iface->write();  
+  iface->write();
 }
 
 
 #ifdef HAVE_VISUAL_DEBUGGING
 void
-LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
+LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos,
+                                        std::string marker_namespace, std::string name_suffix)
 {
   visualization_msgs::MarkerArray m;
   unsigned int idnum = 0;
@@ -507,7 +536,7 @@ LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
     visualization_msgs::Marker basevec;
     basevec.header.frame_id = finput_->header.frame_id;
     basevec.header.stamp = ros::Time::now();
-    basevec.ns = "laser_lines";
+    basevec.ns = marker_namespace;
     basevec.id = idnum++;
     basevec.type = visualization_msgs::Marker::ARROW;
     basevec.action = visualization_msgs::Marker::ADD;
@@ -528,7 +557,7 @@ LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
     visualization_msgs::Marker dirvec;
     dirvec.header.frame_id = finput_->header.frame_id;
     dirvec.header.stamp = ros::Time::now();
-    dirvec.ns = "laser_lines";
+    dirvec.ns = marker_namespace;
     dirvec.id = idnum++;
     dirvec.type = visualization_msgs::Marker::ARROW;
     dirvec.action = visualization_msgs::Marker::ADD;
@@ -551,7 +580,7 @@ LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
     visualization_msgs::Marker testvec;
     testvec.header.frame_id = finput_->header.frame_id;
     testvec.header.stamp = ros::Time::now();
-    testvec.ns = "laser_lines";
+    testvec.ns = marker_namespace;
     testvec.id = idnum++;
     testvec.type = visualization_msgs::Marker::ARROW;
     testvec.action = visualization_msgs::Marker::ADD;
@@ -572,7 +601,7 @@ LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
     m.markers.push_back(testvec);
 
     char *tmp;
-    if (asprintf(&tmp, "L_%zu", i+1) != -1) {
+    if (asprintf(&tmp, "L_%zu%s", i+1, name_suffix.c_str()) != -1) {
       // Copy to get memory freed on exception
       std::string id = tmp;
       free(tmp);
@@ -580,7 +609,7 @@ LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
       visualization_msgs::Marker text;
       text.header.frame_id = finput_->header.frame_id;
       text.header.stamp = ros::Time::now();
-      text.ns = "laser_lines";
+      text.ns = marker_namespace;
       text.id = idnum++;
       text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
       text.action = visualization_msgs::Marker::ADD;
@@ -600,7 +629,7 @@ LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
       visualization_msgs::Marker sphere_ep_1;
       sphere_ep_1.header.frame_id = finput_->header.frame_id;
       sphere_ep_1.header.stamp = ros::Time::now();
-      sphere_ep_1.ns = "laser_lines";
+      sphere_ep_1.ns = marker_namespace;
       sphere_ep_1.id = idnum++;
       sphere_ep_1.type = visualization_msgs::Marker::SPHERE;
       sphere_ep_1.action = visualization_msgs::Marker::ADD;
@@ -621,7 +650,7 @@ LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
       visualization_msgs::Marker sphere_ep_2;
       sphere_ep_2.header.frame_id = finput_->header.frame_id;
       sphere_ep_2.header.stamp = ros::Time::now();
-      sphere_ep_2.ns = "laser_lines";
+      sphere_ep_2.ns = marker_namespace;
       sphere_ep_2.id = idnum++;
       sphere_ep_2.type = visualization_msgs::Marker::SPHERE;
       sphere_ep_2.action = visualization_msgs::Marker::ADD;
@@ -642,7 +671,7 @@ LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
       visualization_msgs::Marker lineseg;
       lineseg.header.frame_id = finput_->header.frame_id;
       lineseg.header.stamp = ros::Time::now();
-      lineseg.ns = "laser_lines";
+      lineseg.ns = marker_namespace;
       lineseg.id = idnum++;
       lineseg.type = visualization_msgs::Marker::LINE_LIST;
       lineseg.action = visualization_msgs::Marker::ADD;
@@ -668,7 +697,7 @@ LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos)
     visualization_msgs::Marker delop;
     delop.header.frame_id = finput_->header.frame_id;
     delop.header.stamp = ros::Time::now();
-    delop.ns = "laser_lines";
+    delop.ns = marker_namespace;
     delop.id = i;
     delop.action = visualization_msgs::Marker::DELETE;
     m.markers.push_back(delop);

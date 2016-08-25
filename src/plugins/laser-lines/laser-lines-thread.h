@@ -97,14 +97,16 @@ class LaserLinesThread
 
  private:
 
-  void set_line(fawkes::LaserLineInterface *iface,
-		bool is_visible,
-		const std::string &frame_id = "",
-		const LineInfo &info = LineInfo());
+  void set_line(unsigned int idx,
+                fawkes::LaserLineInterface *iface,
+                bool is_visible,
+                const std::string &frame_id = "",
+                const LineInfo &info = LineInfo());
 
 
 #ifdef HAVE_VISUAL_DEBUGGING
-  void publish_visualization(const std::vector<LineInfo> &linfos);
+  void publish_visualization(const std::vector<LineInfo> &linfos,
+                             std::string marker_namespace, std::string name_suffix = "");
 #endif
 
  private:
