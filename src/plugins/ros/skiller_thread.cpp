@@ -93,9 +93,8 @@ RosSkillerThread::stop()
         return;
       }
 
-  SkillerInterface::StopExecMessage *msg =
-    new SkillerInterface::StopExecMessage();
-  if (skiller_if_->has_writer()) skiller_if_->msgq_enqueue(msg);
+  if (skiller_if_->has_writer())
+	  skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
   if (exec_as_) {
     std::string error_msg = "Abort on request";
     as_goal_.setAborted(create_result(error_msg), error_msg);
@@ -184,6 +183,7 @@ RosSkillerThread::loop()
 
     SkillerInterface::ExecSkillMessage *msg =
       new SkillerInterface::ExecSkillMessage(goal_.c_str());
+    msg->ref();
 
     logger->log_debug(name(), "Creating goal '%s'", goal_.c_str());
 
@@ -197,11 +197,14 @@ RosSkillerThread::loop()
       logger->log_warn(name(), "Failed to execute skill, exception follows");
       logger->log_warn(name(), e);
     }
+    msg->unref();
 
   } else if (exec_running_) {
     if (exec_as_) as_goal_.publishFeedback(create_feedback());
 
-    if (skiller_if_->status() == SkillerInterface::S_INACTIVE) {
+    if (skiller_if_->status() == SkillerInterface::S_INACTIVE ||
+        skiller_if_->msgid() != exec_msgid_)
+    {
       // wait three loops, maybe the skiller will start
       logger->log_debug(name(), "Should be executing skill, but skiller is inactive");
       ++loops_waited_;
