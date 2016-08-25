@@ -33,14 +33,16 @@
  */
 
 /** Constructor.
+ * @param filter_name name of this filter instance
  * @param radius radius of cut-off circle in meters
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserMaxCircleDataFilter::LaserMaxCircleDataFilter(float radius,
-						   unsigned int in_data_size,
-						   std::vector<LaserDataFilter::Buffer *> &in)
-  : LaserDataFilter(in_data_size, in, in.size())
+LaserMaxCircleDataFilter::LaserMaxCircleDataFilter(const std::string filter_name,
+                                                   float radius,
+                                                   unsigned int in_data_size,
+                                                   std::vector<LaserDataFilter::Buffer *> &in)
+	: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
   __radius = radius;
 }

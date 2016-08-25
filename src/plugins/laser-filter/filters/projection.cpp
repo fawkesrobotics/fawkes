@@ -42,6 +42,7 @@ using namespace fawkes;
  */
 
 /** Constructor.
+ * @param filter_name name of this filter
  * @param tf transformer to get transform from
  * @param target_frame target coordinate fram to project into
  * @param not_from_x lower X boundary of ignored rectangle
@@ -54,6 +55,7 @@ using namespace fawkes;
  * @param in vector of input arrays
  */
 LaserProjectionDataFilter::LaserProjectionDataFilter(
+    const std::string filter_name,
     tf::Transformer *tf,
     std::string target_frame,
     float not_from_x, float not_to_x,
@@ -61,7 +63,7 @@ LaserProjectionDataFilter::LaserProjectionDataFilter(
     float only_from_z, float only_to_z,
     unsigned int in_data_size,
     std::vector<LaserDataFilter::Buffer *> &in)
-  : LaserDataFilter(in_data_size, in, in.size()),
+	: LaserDataFilter(filter_name, in_data_size, in, in.size()),
     tf_(tf), target_frame_(target_frame),
     not_from_x_(not_from_x), not_to_x_(not_to_x),
     not_from_y_(not_from_y), not_to_y_(not_to_y),

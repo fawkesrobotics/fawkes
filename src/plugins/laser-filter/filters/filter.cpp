@@ -39,6 +39,10 @@
  * to the "out" member vector.
  */
 
+/** @var LaserDataFilter::filter_name
+ * Name of the specific filter instance.
+ */
+
 /** @var LaserDataFilter::in
  * Vector of input arrays.
  * Each entry in the vector is an array of data_size entries. It depends on
@@ -65,17 +69,17 @@
  */
 
 /** Constructor.
+ * @param filter_name name of this filter instance
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  * @param out_size number of value arrays to generate in out vector
  */
-LaserDataFilter::LaserDataFilter(unsigned int in_data_size,
-				 std::vector<Buffer *> &in, unsigned int out_size)
+LaserDataFilter::LaserDataFilter(const std::string filter_name,
+                                 unsigned int in_data_size,
+                                 std::vector<Buffer *> &in, unsigned int out_size)
+	: filter_name(filter_name), out_data_size(in_data_size), // yes, in_data_size!
+	  in_data_size(in_data_size), in(in)
 {
-  this->in            = in;
-  this->in_data_size  = in_data_size;
-  this->out_data_size = in_data_size; // yes, in_data_size!
-
   if (out_size > 0)  out.resize(out_size);
   for (unsigned int i = 0; i < out_size; ++i) {
     out[i]      = new Buffer(out_data_size);

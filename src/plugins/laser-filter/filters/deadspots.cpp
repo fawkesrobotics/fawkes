@@ -46,18 +46,20 @@ using namespace fawkes;
  */
 
 /** Constructor.
+ * @param filter_name name of this filter instance
  * @param config configuration instance
  * @param logger logger for informational output
  * @param prefix configuration prefix where to log for config information
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(fawkes::Configuration *config,
-						   fawkes::Logger *logger,
-						   std::string prefix,
-						   unsigned int in_data_size,
-						   std::vector<LaserDataFilter::Buffer *> &in)
-  : LaserDataFilter(in_data_size, in, in.size())
+LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string filter_name,
+                                                   fawkes::Configuration *config,
+                                                   fawkes::Logger *logger,
+                                                   std::string prefix,
+                                                   unsigned int in_data_size,
+                                                   std::vector<LaserDataFilter::Buffer *> &in)
+	: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
   __logger = logger;
 

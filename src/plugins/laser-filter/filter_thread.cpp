@@ -116,25 +116,24 @@ LaserFilterThread::init()
       std::string filter_name = filters.begin()->first;
       logger->log_debug(name(), "Adding filter %s (%s)",
 			filter_name.c_str(), filters[filter_name].c_str());
-      __filter = create_filter(filters[filter_name], fpfx + filter_name + "/",
-			       __in[0].size, __in_bufs);
+      __filter = create_filter(__cfg_name + "/" + filter_name, filters[filter_name], fpfx + filter_name + "/",
+                               __in[0].size, __in_bufs);
     } else {
       LaserDataFilterCascade *cascade =
-        new LaserDataFilterCascade(__in[0].size, __in_bufs);
-
+	      new LaserDataFilterCascade(__cfg_name, __in[0].size, __in_bufs);
+      
       try {
-	std::map<std::string, std::string>::iterator f;
-	for (f = filters.begin(); f != filters.end(); ++f) {
-          logger->log_debug(name(), "Adding filter %s (%s) %zu %zu",
-                            f->first.c_str(), f->second.c_str(), __in_bufs.size(),
-                            cascade->get_out_vector().size());
-	  cascade->add_filter(create_filter(f->second, fpfx + f->first + "/",
-					    cascade->get_out_data_size(),
-					    cascade->get_out_vector()));
-	}
+	      std::map<std::string, std::string>::iterator f;
+	      for (f = filters.begin(); f != filters.end(); ++f) {
+		      logger->log_debug(name(), "Adding filter %s (%s) %zu %zu",
+		                        f->first.c_str(), f->second.c_str(), __in_bufs.size(),
+		                        cascade->get_out_vector().size());
+		      cascade->add_filter(create_filter(__cfg_name + "/" + f->first, f->second, fpfx + f->first + "/",
+		                                        cascade->get_out_data_size(), cascade->get_out_vector()));
+	      }
       } catch (Exception &e) {
-	delete cascade;
-	throw;
+	      delete cascade;
+	      throw;
       }
 
       __filter = cascade;
@@ -329,9 +328,10 @@ LaserFilterThread::open_interfaces(std::string prefix,
 
 	  laser360->set_auto_timestamping(false);
 
-          ifs[i].interface_typed.as360 = laser360;
+	  ifs[i].interface_typed.as360 = laser360;
 	  ifs[i].interface = laser360;
-          bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i]->name = laser360->uid();
 	  bufs[i]->values = laser360->distances();
 	  
 	} else if (ifs[i].size == 720) {
@@ -341,22 +341,24 @@ LaserFilterThread::open_interfaces(std::string prefix,
 
 	  laser720->set_auto_timestamping(false);
 
-          ifs[i].interface_typed.as720 = laser720;
+	  ifs[i].interface_typed.as720 = laser720;
 	  ifs[i].interface = laser720;
-          bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i]->name = laser720->uid();
 	  bufs[i]->values = laser720->distances();
 
 	} else if (ifs[i].size == 1080) {
-	  logger->log_debug(name(), "Opening writing Laser1080Interface::%s",
-			    ifs[i].id.c_str());
-	  Laser1080Interface *laser1080 = 
-	    blackboard->open_for_writing<Laser1080Interface>(ifs[i].id.c_str());
+		logger->log_debug(name(), "Opening writing Laser1080Interface::%s",
+		                  ifs[i].id.c_str());
+		Laser1080Interface *laser1080 = 
+			blackboard->open_for_writing<Laser1080Interface>(ifs[i].id.c_str());
 
 	  laser1080->set_auto_timestamping(false);
 
-          ifs[i].interface_typed.as1080 = laser1080;
+	  ifs[i].interface_typed.as1080 = laser1080;
 	  ifs[i].interface = laser1080;
-          bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i]->name = laser1080->uid();
 	  bufs[i]->values = laser1080->distances();
 	}
       }
@@ -367,10 +369,11 @@ LaserFilterThread::open_interfaces(std::string prefix,
 	  Laser360Interface *laser360 =
 	    blackboard->open_for_reading<Laser360Interface>(ifs[i].id.c_str());
 
-          ifs[i].interface_typed.as360 = laser360;
+	  ifs[i].interface_typed.as360 = laser360;
 	  ifs[i].interface = laser360;
-          bufs[i] = new LaserDataFilter::Buffer();
-          bufs[i]->frame  = laser360->frame();
+	  bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i]->name   = laser360->uid();
+	  bufs[i]->frame  = laser360->frame();
 	  bufs[i]->values = laser360->distances();
 	  
 	} else if (ifs[i].size == 720) {
@@ -378,10 +381,11 @@ LaserFilterThread::open_interfaces(std::string prefix,
 	  Laser720Interface *laser720 =
 	    blackboard->open_for_reading<Laser720Interface>(ifs[i].id.c_str());
 
-          ifs[i].interface_typed.as720 = laser720;
+	  ifs[i].interface_typed.as720 = laser720;
 	  ifs[i].interface = laser720;
-          bufs[i] = new LaserDataFilter::Buffer();
-          bufs[i]->frame  = laser720->frame();
+	  bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i]->name   = laser720->uid();
+	  bufs[i]->frame  = laser720->frame();
 	  bufs[i]->values = laser720->distances();
 
 	} else if (ifs[i].size == 1080) {
@@ -390,10 +394,11 @@ LaserFilterThread::open_interfaces(std::string prefix,
 	  Laser1080Interface *laser1080 =
 	    blackboard->open_for_reading<Laser1080Interface>(ifs[i].id.c_str());
 
-          ifs[i].interface_typed.as1080 = laser1080;
+	  ifs[i].interface_typed.as1080 = laser1080;
 	  ifs[i].interface = laser1080;
-          bufs[i] = new LaserDataFilter::Buffer();
-          bufs[i]->frame  = laser1080->frame();
+	  bufs[i] = new LaserDataFilter::Buffer();
+	  bufs[i]->name   = laser1080->uid();
+	  bufs[i]->frame  = laser1080->frame();
 	  bufs[i]->values = laser1080->distances();
 	}
       }
@@ -410,8 +415,9 @@ LaserFilterThread::open_interfaces(std::string prefix,
 
 
 LaserDataFilter *
-LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
-				 unsigned int in_data_size,
+LaserFilterThread::create_filter(std::string filter_name,
+                                 std::string filter_type, std::string prefix,
+                                 unsigned int in_data_size,
                                  std::vector<LaserDataFilter::Buffer *> &inbufs)
 {
   if (filter_type == "720to360") {
@@ -419,27 +425,27 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
     try {
       average = config->get_bool((prefix + "average").c_str());
     } catch (Exception &e) {} // ignore
-    return new Laser720to360DataFilter(average, in_data_size, inbufs);
+    return new Laser720to360DataFilter(filter_name, average, in_data_size, inbufs);
   } else if (filter_type == "1080to360") {
     bool average = false;
     try {
       average = config->get_bool((prefix + "average").c_str());
     } catch (Exception &e) {} // ignore
-    return new Laser1080to360DataFilter(average, in_data_size, inbufs);
+    return new Laser1080to360DataFilter(filter_name, average, in_data_size, inbufs);
   } else if (filter_type == "reverse") {
-    return new LaserReverseAngleDataFilter(in_data_size, inbufs);
+	  return new LaserReverseAngleDataFilter(filter_name, in_data_size, inbufs);
   } else if (filter_type == "max_circle") {
     float radius = config->get_float((prefix + "radius").c_str());
-    return new LaserMaxCircleDataFilter(radius, in_data_size, inbufs);
+    return new LaserMaxCircleDataFilter(filter_name, radius, in_data_size, inbufs);
   } else if (filter_type == "min_circle") {
     float radius = config->get_float((prefix + "radius").c_str());
-    return new LaserMinCircleDataFilter(radius, in_data_size, inbufs);
+    return new LaserMinCircleDataFilter(filter_name, radius, in_data_size, inbufs);
   } else if (filter_type == "circle_sector") {
     unsigned int from = config->get_uint((prefix + "from").c_str());
     unsigned int to   = config->get_uint((prefix + "to").c_str());
-    return new LaserCircleSectorDataFilter(from, to, in_data_size, inbufs);
+    return new LaserCircleSectorDataFilter(filter_name, from, to, in_data_size, inbufs);
   } else if (filter_type == "deadspots") {
-    return new LaserDeadSpotsDataFilter(config, logger, prefix, in_data_size, inbufs);
+	  return new LaserDeadSpotsDataFilter(filter_name, config, logger, prefix, in_data_size, inbufs);
   } else if (filter_type == "min_merge") {
     std::string timestamp_selection;
     try {
@@ -447,22 +453,22 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
     } catch (Exception &e) {} // ignored, use default
 
     if (timestamp_selection == "latest") {
-      return new LaserMinMergeDataFilter(in_data_size, inbufs,
+	    return new LaserMinMergeDataFilter(filter_name, logger, in_data_size, inbufs,
 					 LaserMinMergeDataFilter::TIMESTAMP_LATEST);
     } else if (timestamp_selection == "first") {
-      return new LaserMinMergeDataFilter(in_data_size, inbufs,
+      return new LaserMinMergeDataFilter(filter_name, logger, in_data_size, inbufs,
 					 LaserMinMergeDataFilter::TIMESTAMP_FIRST);
     } else if (timestamp_selection == "index") {
       unsigned int timestamp_if_index =
 	config->get_uint((prefix + "timestamp_index").c_str());
-      return new LaserMinMergeDataFilter(in_data_size, inbufs,
+      return new LaserMinMergeDataFilter(filter_name, logger, in_data_size, inbufs,
 					 LaserMinMergeDataFilter::TIMESTAMP_INDEX,
 					 timestamp_if_index);
     } else if (timestamp_selection != "") {
       throw Exception("Laser filter: unknown timestamp selection method '%s'",
 		      timestamp_selection.c_str());
     } else {
-      return new LaserMinMergeDataFilter(in_data_size, inbufs,
+	    return new LaserMinMergeDataFilter(filter_name, logger, in_data_size, inbufs,
 					 LaserMinMergeDataFilter::TIMESTAMP_LATEST);
     }
   } else if (filter_type == "projection") {
@@ -475,7 +481,7 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
     const float only_to_z = config->get_float((prefix + "only_to_z").c_str());
     const std::string frame =
       config->get_string((prefix + "target_frame").c_str());
-    return new LaserProjectionDataFilter(tf_listener, frame,
+    return new LaserProjectionDataFilter(filter_name, tf_listener, frame,
                                          not_from_x, not_to_x,
                                          not_from_y, not_to_y,
                                          only_from_z, only_to_z,
@@ -485,7 +491,7 @@ LaserFilterThread::create_filter(std::string filter_type, std::string prefix,
 #endif
   } else if (filter_type == "map_filter") {
 #ifdef HAVE_TF
-    return new LaserMapFilterDataFilter(in_data_size, inbufs, tf_listener, config, logger);
+	  return new LaserMapFilterDataFilter(filter_name, in_data_size, inbufs, tf_listener, config, logger);
 #else
     throw Exception("Projection filter unavailable, tf missing");
 #endif

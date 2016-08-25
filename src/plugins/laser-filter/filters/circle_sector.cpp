@@ -38,16 +38,18 @@ using namespace fawkes;
  */
 
 /** Constructor.
+ * @param filter_name name of this filter instance
  * @param from start angle (index in data)
  * @param to end angle (index in data)
  * @param in_data_size number of entries in value arrays
  * @param in vector of input arrays
  */
-LaserCircleSectorDataFilter::LaserCircleSectorDataFilter(unsigned int from,
-							 unsigned int to,
-							 unsigned int in_data_size,
-							 std::vector<LaserDataFilter::Buffer *> &in)
-  : LaserDataFilter(in_data_size, in, in.size())
+LaserCircleSectorDataFilter::LaserCircleSectorDataFilter(const std::string filter_name,
+                                                         unsigned int from,
+                                                         unsigned int to,
+                                                         unsigned int in_data_size,
+                                                         std::vector<LaserDataFilter::Buffer *> &in)
+	: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
   __from = from;
   __to   = to;

@@ -24,6 +24,7 @@
 
 #include <core/exception.h>
 #include <utils/time/time.h>
+#include <logging/logger.h>
 #include <cstring>
 
 /** @class LaserMinMergeDataFilter "min_merge.h"
@@ -34,28 +35,38 @@
  */
 
 /** Constructor.
+ * @param filter_name name of this filter instance
+ * @param logger logger
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserMinMergeDataFilter::LaserMinMergeDataFilter(unsigned int in_data_size,
-						 std::vector<LaserDataFilter::Buffer *> &in)
-  : LaserDataFilter(in_data_size, in, 1),
+LaserMinMergeDataFilter::LaserMinMergeDataFilter(const std::string filter_name,
+                                                 fawkes::Logger *logger,
+                                                 unsigned int in_data_size,
+                                                 std::vector<LaserDataFilter::Buffer *> &in)
+	: LaserDataFilter(filter_name, in_data_size, in, 1),
+    logger(logger),
     timestamp_selection_method_(TIMESTAMP_LATEST)
 {
 }
 
 /** Constructor.
+ * @param filter_name name of this filter instance
+ * @param logger logger
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  * @param timestamp_selection_method method to use for timestamp selection
  * @param timestamp_index if timestamp selection method is TIMESTAMP_INDEX this
  * is the index of the input buffer to choose the timestamp from
  */
-LaserMinMergeDataFilter::LaserMinMergeDataFilter(
-  unsigned int in_data_size,
-  std::vector<LaserDataFilter::Buffer *> &in,
-  TimestampSelectionMethod timestamp_selection_method, unsigned int timestamp_index)
-  : LaserDataFilter(in_data_size, in, 1),
+LaserMinMergeDataFilter::LaserMinMergeDataFilter(const std::string filter_name,
+                                                 fawkes::Logger *logger,
+                                                 unsigned int in_data_size,
+                                                 std::vector<LaserDataFilter::Buffer *> &in,
+                                                 TimestampSelectionMethod timestamp_selection_method,
+                                                 unsigned int timestamp_index)
+	: LaserDataFilter(filter_name, in_data_size, in, 1),
+    logger(logger),
     timestamp_selection_method_(timestamp_selection_method),
     timestamp_index_(timestamp_index)
 {
@@ -71,38 +82,67 @@ LaserMinMergeDataFilter::filter()
   const unsigned int vecsize = in.size();
   if (vecsize == 0)  return;
 
+  if (ignored_.size() != in.size()) ignored_.resize(in.size(), false);
+
   out[0]->frame = in[0]->frame;
 
-  copy_to_outbuf(out[0], in[0]);
+  int first = -1;
+  
+  for (unsigned int a = 0; a < vecsize; ++a) {
+	  if (in[a]->frame.empty()) {
+		  if (! ignored_[a]) {
+			  logger->log_warn(filter_name.c_str(), "input buffer %s has no frame, ignoring", in[a]->name.c_str());
+		  }
+		  ignored_[a] = true;
+	  } else {
+		  if (ignored_[a]) {
+			  logger->log_warn(filter_name.c_str(), "input buffer %s has recovered, frame %s",
+			                   in[a]->name.c_str(), in[a]->frame.c_str());
+		  }
+		  ignored_[a] = false;
+		  if (first == -1) first = a;
+	  }
+  }
+
+  if (first == -1) {
+	  throw fawkes::Exception("MinMerge[%s] has no valid input", filter_name.c_str());
+  }
+
+  copy_to_outbuf(out[0], in[first]);
   float *outbuf = out[0]->values;
 
-  for (unsigned int a = 1; a < vecsize; ++a) {
+  for (unsigned int a = first + 1; a < vecsize; ++a) {
+	  if (ignored_[a]) continue;
+
     if (in[a]->frame != out[0]->frame) {
-      throw fawkes::Exception("MinMerge frame mismatch: two frames with different frame IDs "
-                              "(first has %s but input buffer %u has %s)",
-                              out[0]->frame.c_str(), a, in[a]->frame.c_str());
+      throw fawkes::Exception("MinMerge[%s] frame mismatch: two frames with different frame IDs "
+                              "(output has %s but input buffer %s has %s)",
+                              filter_name.c_str(), out[0]->frame.c_str(),
+                              in[a]->name.c_str(), in[a]->frame.c_str());
     }
     float *inbuf  = in[a]->values;
     for (unsigned int i = 0; i < (const unsigned int)out_data_size; ++i) {
-      if ( (outbuf[i] == 0) || ((inbuf[i] != 0) && (inbuf[i] < outbuf[i])) ) {
+      if ( (outbuf[i] == 0) || ((inbuf[i] != 0) && ( ! std::isfinite(outbuf[i]) || (std::isfinite(inbuf[1]) && (inbuf[i] < outbuf[i])))) ) {
 	outbuf[i] = inbuf[i];
       }
     }
   }
 
   if (timestamp_selection_method_ == TIMESTAMP_FIRST) {
-    fawkes::Time first(in[0]->timestamp);
-    for (unsigned int a = 1; a < vecsize; ++a) {
-      if (*in[a]->timestamp < first) {
-	first = in[a]->timestamp;
+    fawkes::Time first_time(in[first]->timestamp);
+    for (unsigned int a = first + 1; a < vecsize; ++a) {
+	    if (ignored_[a]) continue;
+      if (*in[a]->timestamp < first_time) {
+	first_time = in[a]->timestamp;
       }
     }
-    out[0]->timestamp->set_time(first);
+    out[0]->timestamp->set_time(first_time);
   } else if (timestamp_selection_method_ == TIMESTAMP_INDEX) {
     out[0]->timestamp->set_time(in[timestamp_index_]->timestamp);
  } else { // TIMESTAMP_LATEST
-    fawkes::Time latest(in[0]->timestamp);
-    for (unsigned int a = 1; a < vecsize; ++a) {
+    fawkes::Time latest(in[first]->timestamp);
+    for (unsigned int a = first + 1; a < vecsize; ++a) {
+	    if (ignored_[a]) continue;
       if (*in[a]->timestamp > latest) {
 	latest = in[a]->timestamp;
       }

@@ -30,7 +30,8 @@
 class LaserDataFilterCascade : public LaserDataFilter
 {
  public:
-  LaserDataFilterCascade(unsigned int in_data_size, std::vector<Buffer *> &in);
+  LaserDataFilterCascade(const std::string filter_name,
+                         unsigned int in_data_size, std::vector<Buffer *> &in);
   ~LaserDataFilterCascade();
 
   virtual void set_out_vector(std::vector<LaserDataFilter::Buffer *> &out);

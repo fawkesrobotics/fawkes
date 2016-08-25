@@ -32,15 +32,17 @@
  */
 
 /** Constructor.
+ * @param filter_name name of this filter instance
  * @param average if true, beams will be averaged by left and right neighbours,
  * otherwise every second beam will be used
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-Laser1080to360DataFilter::Laser1080to360DataFilter(bool average,
-						   unsigned int in_data_size,
-						   std::vector<LaserDataFilter::Buffer *> &in)
-  : LaserDataFilter(in_data_size, in, in.size())
+Laser1080to360DataFilter::Laser1080to360DataFilter(const std::string filter_name,
+                                                   bool average,
+                                                   unsigned int in_data_size,
+                                                   std::vector<LaserDataFilter::Buffer *> &in)
+	: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
   if (in_data_size != 1080) {
     throw fawkes::Exception("1080to360 filter needs input array size of "

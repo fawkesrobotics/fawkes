@@ -81,11 +81,12 @@ class LaserFilterThread
   /// @endcond
 
   void open_interfaces(std::string prefix, std::vector<LaserInterface> &ifs,
-		       std::vector<LaserDataFilter::Buffer *> &bufs, bool writing);
+                       std::vector<LaserDataFilter::Buffer *> &bufs, bool writing);
 
-  LaserDataFilter *  create_filter(std::string filter_type, std::string prefix,
-				   unsigned int in_data_size,
-				   std::vector<LaserDataFilter::Buffer *> &inbufs);
+  LaserDataFilter *  create_filter(std::string filter_name,
+                                   std::string filter_type, std::string prefix,
+                                   unsigned int in_data_size,
+                                   std::vector<LaserDataFilter::Buffer *> &inbufs);
 
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
