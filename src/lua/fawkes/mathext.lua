@@ -62,18 +62,12 @@ function math.normalize_mirror_rad(angle_rad)
 end
 
 --- Determines the distance between two angle provided as radians. 
---  Quadrants of the angles are considered to determine really the minimal
---  angle difference.
 --  @param angle_rad1 first angle in radian
 --  @param angle_rad2 second angle in radian
 --  @return distance between the two angles
 --
 function math.angle_distance(angle_rad1, angle_rad2)
-  if(angle_rad2 > angle_rad1) then
-    return angle_rad2 - angle_rad1 < math.pi and angle_rad2 - angle_rad1 or - 2.0 * math.pi + angle_rad2 - angle_rad1;
-  else
-    return angle_rad1 - angle_rad2 < math.pi and angle_rad2 - angle_rad1 or   2.0 * math.pi - angle_rad1 + angle_rad2;
-  end
+  return math.abs( math.normalize_mirror_rad(angle_rad1 - angle_rad2) )
 end
 
 --- Get algebraic sign (-1 or +1)

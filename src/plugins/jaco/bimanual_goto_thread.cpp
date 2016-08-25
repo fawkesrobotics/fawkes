@@ -436,8 +436,8 @@ JacoBimanualGotoThread::_check_final()
       case TARGET_ANGULAR:
         //logger->log_debug(name(), "check[%u] final for TARGET ANGULAR", i);
         for( unsigned int j=0; j<6; ++j ) {
-          final &= std::abs( angle_distance(deg2rad(__v_arms[i]->target->pos.at(j)),
-                                            deg2rad(__v_arms[i]->arm->iface->joints(j))) ) < 0.05;
+          final &= angle_distance(deg2rad(__v_arms[i]->target->pos.at(j)),
+                                  deg2rad(__v_arms[i]->arm->iface->joints(j))) < 0.05;
         }
         break;
 

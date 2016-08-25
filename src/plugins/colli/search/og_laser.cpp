@@ -235,7 +235,7 @@ LaserOccupancyGrid::update_laser()
             new_readings_.push_back(point);
 
             if ( cfg_delete_invisible_old_obstacles_ ) {
-              float angle_dist = angle_distance( angle_min_, point_polar.phi );
+              float angle_dist = angle_distance_signed( angle_min_, point_polar.phi );
               if ( angle_dist >= 0 && angle_dist <= angle_range_ ) {
                 validate_old_laser_points(pos_robot, point.coord);
               }

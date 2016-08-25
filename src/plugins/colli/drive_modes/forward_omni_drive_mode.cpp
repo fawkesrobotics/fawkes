@@ -139,7 +139,7 @@ ForwardOmniDriveModule::update()
 
   float dist_to_target    = sqrt( sqr(local_target_.x) + sqr(local_target_.y) );
   float alpha_target      = normalize_mirror_rad( atan2( local_target_.y, local_target_.x ) );
-  float alpha_next_target = angle_distance(robot_.ori, target_.ori);
+  float alpha_next_target = angle_distance_signed(robot_.ori, target_.ori);
 
   // last time border check............. IMPORTANT!!!
   // because the motorinstructor just tests robots physical borders.
