@@ -66,6 +66,7 @@ class RobotMemory
 
     const char* name_ = "RobotMemory";
     std::string default_collection_;
+    bool debug_;
     fawkes::Mutex *mutex_;
     fawkes::RobotMemoryInterface* rm_if_;
 

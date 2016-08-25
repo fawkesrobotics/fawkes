@@ -38,7 +38,7 @@ class RobotMemoryTestEnvironment : public ::testing::Environment
   }
   virtual ~RobotMemoryTestEnvironment() {}
   void SetUp() {}
-  virtual void TearDown() {}
+  virtual void TearDown(){}
  public:
   static RobotMemory* robot_memory;
 };

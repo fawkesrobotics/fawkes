@@ -40,6 +40,7 @@ RobotMemory::RobotMemory(fawkes::Configuration* config, fawkes::Logger* logger,
   clock_ = clock;
   mongodb_client_ = mongodb_client;
   blackboard_ = blackboard;
+  debug_ = false;
 }
 
 RobotMemory::~RobotMemory()
@@ -56,12 +57,20 @@ void RobotMemory::init()
   try {
     default_collection_ = config_->get_string("/plugins/robot-memory/default-collection");
   } catch (Exception &e) {}
+  try {
+    debug_ = config_->get_bool("/plugins/robot-memory/more-debug-output");
+  } catch (Exception &e) {}
 
   //init blackboard interface
   rm_if_ = blackboard_->open_for_writing<RobotMemoryInterface>(config_->get_string("/plugins/robot-memory/interface-name").c_str());
   rm_if_->set_error("");
   rm_if_->set_result("");
   rm_if_->write();
+
+  if(debug_)
+  {
+    logger_->log_info(name_, "Initialized RobotMemory");
+  }
 }
 
 QResCursor RobotMemory::query(std::string query_string, std::string collection)
@@ -70,7 +79,10 @@ QResCursor RobotMemory::query(std::string query_string, std::string collection)
   {
     collection = default_collection_;
   }
-  logger_->log_info(name_, "Executing Query %s on collection %s", query_string.c_str(), collection);
+  if(debug_)
+  {
+    logger_->log_info(name_, "Executing Query %s on collection %s", query_string.c_str(), collection);
+  }
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -80,8 +92,11 @@ QResCursor RobotMemory::query(std::string query_string, std::string collection)
   try{
     query = Query(query_string);
   } catch (DBException &e) {
-    logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
-                      query_string.c_str(), e.toString().c_str());
+    if(debug_)
+    {
+      logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
+          query_string.c_str(), e.toString().c_str());
+    }
     return NULL;
   }
 
@@ -107,8 +122,11 @@ QResCursor RobotMemory::query(std::string query_string, std::string collection)
   try{
     cursor = mongodb_client_->query(collection, query);
   } catch (DBException &e) {
-    logger_->log_error(name_, "Error for query %s\n Exception: %s",
-                      query_string.c_str(), e.toString().c_str());
+    if(debug_)
+    {
+      logger_->log_error(name_, "Error for query %s\n Exception: %s",
+          query_string.c_str(), e.toString().c_str());
+    }
     return NULL;
   }
   return cursor;
@@ -120,7 +138,10 @@ int RobotMemory::insert(std::string insert_string, std::string collection)
   {
     collection = default_collection_;
   }
-  logger_->log_info(name_, "Executing Query %s on collection %s", insert_string.c_str(), collection);
+  if(debug_)
+  {
+    logger_->log_info(name_, "Executing Query %s on collection %s", insert_string.c_str(), collection);
+  }
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -130,21 +151,25 @@ int RobotMemory::insert(std::string insert_string, std::string collection)
   try{
     obj = fromjson(insert_string);
   } catch (DBException &e) {
-    logger_->log_error(name_, "Can't parse insert_string '%s'\n Exception: %s",
-                      insert_string.c_str(), e.toString().c_str());
+    if(debug_)
+    {
+      logger_->log_error(name_, "Can't parse insert_string '%s'\n Exception: %s",
+          insert_string.c_str(), e.toString().c_str());
+    }
     return 0;
   }
 
-  log(obj, "Inserting:");
   set_fields(obj, "{type: \"test\"}");
-  log(obj, "Updated Inserting:");
 
   //actually execute insert
   try{
     mongodb_client_->insert(collection, obj);
   } catch (DBException &e) {
-    logger_->log_error(name_, "Error for insert %s\n Exception: %s",
-                      insert_string.c_str(), e.toString().c_str());
+    if(debug_)
+    {
+      logger_->log_error(name_, "Error for insert %s\n Exception: %s",
+          insert_string.c_str(), e.toString().c_str());
+    }
     return 0;
   }
   //return success
@@ -158,8 +183,11 @@ int RobotMemory::update(std::string query_string, std::string update_string,
   {
     collection = default_collection_;
   }
-  logger_->log_info(name_, "Executing Update %s for query %s on collection %s",
-                   update_string.c_str(), query_string.c_str(), collection);
+  if(debug_)
+  {
+    logger_->log_info(name_, "Executing Update %s for query %s on collection %s",
+        update_string.c_str(), query_string.c_str(), collection);
+  }
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -169,28 +197,34 @@ int RobotMemory::update(std::string query_string, std::string update_string,
   try{
     query = Query(query_string);
   } catch (DBException &e) {
-    logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
-                      query_string.c_str(), e.toString().c_str());
+    if(debug_)
+    {
+      logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
+          query_string.c_str(), e.toString().c_str());
+    }
     return 0;
   }
   BSONObj update;
   try{
     update = fromjson(update_string);
   } catch (DBException &e) {
-    logger_->log_error(name_, "Can't parse update_string '%s'\n Exception: %s",
-                      update_string.c_str(), e.toString().c_str());
+    if(debug_)
+    {
+      logger_->log_error(name_, "Can't parse update_string '%s'\n Exception: %s",
+          update_string.c_str(), e.toString().c_str());
+    }
     return 0;
   }
-
-  log(query, "Updating documents for query:");
-  log(update, "Updating with:");
 
   //actually execute update
   try{
     mongodb_client_->update(collection, query, update);
   } catch (DBException &e) {
-    logger_->log_error(name_, "Error for update %s for query %s\n Exception: %s",
-                      update_string.c_str(), query_string.c_str(), e.toString().c_str());
+    if(debug_)
+    {
+      logger_->log_error(name_, "Error for update %s for query %s\n Exception: %s",
+          update_string.c_str(), query_string.c_str(), e.toString().c_str());
+    }
     return 0;
   }
   //return success
@@ -203,8 +237,11 @@ int RobotMemory::remove(std::string query_string, std::string collection)
   {
     collection = default_collection_;
   }
-  logger_->log_info(name_, "Executing Remove %s on collection %s",
-                    query_string.c_str(), collection);
+  if(debug_)
+  {
+    logger_->log_info(name_, "Executing Remove %s on collection %s",
+        query_string.c_str(), collection);
+  }
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -214,20 +251,23 @@ int RobotMemory::remove(std::string query_string, std::string collection)
   try{
     query = Query(query_string);
   } catch (DBException &e) {
-    logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
-                      query_string.c_str(), e.toString().c_str());
+    if(debug_)
+    {
+      logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
+          query_string.c_str(), e.toString().c_str());
+    }
     return 0;
   }
-
-  //introspect
-  log(query, "Removing documents for query:");
 
   //actually execute remove
   try{
     mongodb_client_->remove(collection, query);
   } catch (DBException &e) {
-    logger_->log_error(name_, "Error for query %s\n Exception: %s",
-                      query_string.c_str(), e.toString().c_str());
+    if(debug_)
+    {
+      logger_->log_error(name_, "Error for query %s\n Exception: %s",
+          query_string.c_str(), e.toString().c_str());
+    }
     return 0;
   }
   //return success

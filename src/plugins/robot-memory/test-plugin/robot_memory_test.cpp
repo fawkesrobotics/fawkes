@@ -47,6 +47,7 @@ TEST_F(RobotMemoryTest, AspectAvailable)
 
 TEST_F(RobotMemoryTest, QueryResultEmpty)
 {
+  ASSERT_TRUE(robot_memory->insert("{'insert':'something to have the namespace'}"));
   QResCursor qres = robot_memory->query("{somekey:'should_not_exist'}");
   ASSERT_FALSE(qres->more());
 }
@@ -88,7 +89,7 @@ TEST_F(RobotMemoryTest, StoreRemoveQuery)
 
 TEST_F(RobotMemoryTest, QueryInvalidCaught)
 {
-  ASSERT_EQ(robot_memory->query("{key:'not existing'}"), NULL);
+  ASSERT_FALSE(robot_memory->query("{key-:+'not existing'}"));
 }
 
 TEST_F(RobotMemoryTest, InsertInvalidCaught)
