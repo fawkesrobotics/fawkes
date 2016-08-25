@@ -296,7 +296,7 @@ LaserOccupancyGrid::validate_old_laser_points(cart_coord_2d_t pos_robot, cart_co
 
     // angle a between to vectors v,w: cos(a) = dot(v,w) / (|v|*|w|)
     angle = acos( (v_old.x*v_new.x + v_old.y*v_new.y) / (d_new*d_old) );
-    if( isnan(angle) || angle > deg_unit ) {
+    if( std::isnan(angle) || angle > deg_unit ) {
       // p_old is not the range of this laser-beam. Keep it.
       old_readings_tmp.push_back( *it );
 

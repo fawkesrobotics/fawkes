@@ -22,7 +22,7 @@
 
 #include <tf/types.h>
 #include <stdio.h>
-#include <math.h>
+#include <cmath>
 #include <utils/math/angle.h>
 
 #include <interfaces/Position3DInterface.h>
@@ -92,7 +92,7 @@ void VisLocalizationThread::loop()
     //calculate ori from quaternion in interface
     double* quat = pose_if_->rotation();
     double ori = tf::get_yaw(tf::Quaternion(quat[0], quat[1], quat[2], quat[3]));
-    if(isnan(ori))
+    if(std::isnan(ori))
     {
       ori = 0.0;
     }

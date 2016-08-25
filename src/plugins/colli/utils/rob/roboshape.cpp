@@ -59,15 +59,15 @@ RoboShape::RoboShape( const char * cfg_prefix,
   width_add_front_ = width_add_back_ = HUGE_VAL;
   width_add_right_ = width_add_left_ = HUGE_VAL;
 
-  if( (isinf(laser_offset_x_) )
-   && (isinf(laser_offset_y_) )
-   && (isinf(radius_) )
-   && (isinf(width_x_) )
-   && (isinf(width_y_) )
-   && (isinf(width_add_left_) )
-   && (isinf(width_add_right_) )
-   && (isinf(width_add_front_) )
-   && (isinf(width_add_back_) ) ) {
+  if( (std::isinf(laser_offset_x_) )
+   && (std::isinf(laser_offset_y_) )
+   && (std::isinf(radius_) )
+   && (std::isinf(width_x_) )
+   && (std::isinf(width_y_) )
+   && (std::isinf(width_add_left_) )
+   && (std::isinf(width_add_right_) )
+   && (std::isinf(width_add_front_) )
+   && (std::isinf(width_add_back_) ) ) {
     // go on, everything is fine, cause all are infinity
 
   } else {
