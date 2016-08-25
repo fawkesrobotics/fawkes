@@ -54,7 +54,7 @@ void RobotMemory::init()
   logger_->log_info(name_, "Started RobotMemory");
   default_collection_ = "fawkes.msglog";
   try {
-    default_collection_ = config_->get_string("/plugins/mongodb/test-collection");
+    default_collection_ = config_->get_string("/plugins/robot-memory/default-collection");
   } catch (Exception &e) {}
 
   //init blackboard interface
@@ -64,7 +64,7 @@ void RobotMemory::init()
   rm_if_->write();
 }
 
-void RobotMemory::query(std::string query_string, std::string collection)
+QResCursor RobotMemory::query(std::string query_string, std::string collection)
 {
   if(collection == "")
   {
@@ -82,47 +82,39 @@ void RobotMemory::query(std::string query_string, std::string collection)
   } catch (DBException &e) {
     logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
                       query_string.c_str(), e.toString().c_str());
-    return;
+    return NULL;
   }
 
-  //introspect query
-  log(query, "executing query:");
+//  //introspect query
+//  log(query, "executing query:");
 
-  //check if virtual knowledge is queried
-  //rename field in query
-  if(query.getFilter().hasField("class")){
-    set_fields(query, std::string("{type:\"") +
-               query.getFilter()["class"].String() + "\"}");
-    remove_field(query, "class");
-  }
-  log(query, "Virtual query:");
 //  //TODO: computation on demand
+//  //check if virtual knowledge is queried
+//  //rename field in query
+//  if(query.getFilter().hasField("class")){
+//    set_fields(query, std::string("{type:\"") +
+//               query.getFilter()["class"].String() + "\"}");
+//    remove_field(query, "class");
+//  }
+//
 //  if(query.getFilter().hasField("bbinterface")){
 //    collection = config->get_string("plugins/robot-memory/blackboard-collection");
 //    gen_blackboard_data(query.getFilter()["bbinterface"].String());
 //  }
-  log(query, "Virtual query:");
 
   //actually execute query
-  std::unique_ptr<DBClientCursor> cursor;
+  QResCursor cursor;
   try{
     cursor = mongodb_client_->query(collection, query);
   } catch (DBException &e) {
     logger_->log_error(name_, "Error for query %s\n Exception: %s",
                       query_string.c_str(), e.toString().c_str());
-    return;
+    return NULL;
   }
-
-  if(cursor->more()){
-    BSONObj res = cursor->next();
-    logger_->log_info(name_, "Query One result:\n%s", res.toString().c_str());
-  }
-  else {
-    logger_->log_info(name_, "Query result empty");
-  }
+  return cursor;
 }
 
-void RobotMemory::insert(std::string insert_string, std::string collection)
+int RobotMemory::insert(std::string insert_string, std::string collection)
 {
   if(collection == "")
   {
@@ -140,7 +132,7 @@ void RobotMemory::insert(std::string insert_string, std::string collection)
   } catch (DBException &e) {
     logger_->log_error(name_, "Can't parse insert_string '%s'\n Exception: %s",
                       insert_string.c_str(), e.toString().c_str());
-    return;
+    return 0;
   }
 
   log(obj, "Inserting:");
@@ -153,11 +145,13 @@ void RobotMemory::insert(std::string insert_string, std::string collection)
   } catch (DBException &e) {
     logger_->log_error(name_, "Error for insert %s\n Exception: %s",
                       insert_string.c_str(), e.toString().c_str());
-    return;
+    return 0;
   }
+  //return success
+  return 1;
 }
 
-void RobotMemory::update(std::string query_string, std::string update_string,
+int RobotMemory::update(std::string query_string, std::string update_string,
                                     std::string collection)
 {
   if(collection == "")
@@ -177,7 +171,7 @@ void RobotMemory::update(std::string query_string, std::string update_string,
   } catch (DBException &e) {
     logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
                       query_string.c_str(), e.toString().c_str());
-    return;
+    return 0;
   }
   BSONObj update;
   try{
@@ -185,7 +179,7 @@ void RobotMemory::update(std::string query_string, std::string update_string,
   } catch (DBException &e) {
     logger_->log_error(name_, "Can't parse update_string '%s'\n Exception: %s",
                       update_string.c_str(), e.toString().c_str());
-    return;
+    return 0;
   }
 
   log(query, "Updating documents for query:");
@@ -197,11 +191,13 @@ void RobotMemory::update(std::string query_string, std::string update_string,
   } catch (DBException &e) {
     logger_->log_error(name_, "Error for update %s for query %s\n Exception: %s",
                       update_string.c_str(), query_string.c_str(), e.toString().c_str());
-    return;
+    return 0;
   }
+  //return success
+  return 1;
 }
 
-void RobotMemory::remove(std::string query_string, std::string collection)
+int RobotMemory::remove(std::string query_string, std::string collection)
 {
   if(collection == "")
   {
@@ -220,7 +216,7 @@ void RobotMemory::remove(std::string query_string, std::string collection)
   } catch (DBException &e) {
     logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
                       query_string.c_str(), e.toString().c_str());
-    return;
+    return 0;
   }
 
   //introspect
@@ -232,8 +228,10 @@ void RobotMemory::remove(std::string query_string, std::string collection)
   } catch (DBException &e) {
     logger_->log_error(name_, "Error for query %s\n Exception: %s",
                       query_string.c_str(), e.toString().c_str());
-    return;
+    return 0;
   }
+  //return success
+  return 1;
 }
 
 void

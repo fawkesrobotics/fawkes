@@ -25,6 +25,7 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <memory>
 
 #include <mongo/client/dbclient.h>
 #include "interfaces/RobotMemoryInterface.h"
@@ -33,6 +34,9 @@ namespace fawkes {
   class Mutex;
   class RobotMemoryInterface;
 }
+
+///typedef for shorter type description
+typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
 
 /*
  *
@@ -48,10 +52,10 @@ class RobotMemory
     virtual ~RobotMemory();
 
     //robot memory functions
-    void query(std::string query, std::string collection = "");
-    void insert(std::string insert, std::string collection = "");
-    void update(std::string query, std::string update, std::string collection = "");
-    void remove(std::string query, std::string collection = "");
+    QResCursor query(std::string query, std::string collection = "");
+    int insert(std::string insert, std::string collection = "");
+    int update(std::string query, std::string update, std::string collection = "");
+    int remove(std::string query, std::string collection = "");
 
   private:
     mongo::DBClientBase* mongodb_client_;
