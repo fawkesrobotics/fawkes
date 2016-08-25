@@ -23,7 +23,7 @@
 
 #include "robot_memory_test_thread.h"
 #include <core/exception.h>
-
+#include <baseapp/run.h>
 #include <gtest/gtest.h>
 
 using namespace fawkes;
@@ -54,10 +54,9 @@ RobotMemoryTestThread::init()
 void
 RobotMemoryTestThread::loop()
 {
-  logger->log_warn(name(), "Finished tests with result %d, shutting down...", test_result_);
-
-  //stop fawkes by throwing an exception
-  throw fawkes::Exception("Stopping Fawkes after running tests in %s", name());
+  logger->log_warn(name(), "Finished tests with, quitting as intended...");
+  //stop fawkes to finish the testing run
+  fawkes::runtime::quit();
 }
 
 void
