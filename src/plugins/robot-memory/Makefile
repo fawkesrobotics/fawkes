@@ -20,6 +20,7 @@ include $(BUILDCONFDIR)/tf/tf.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 PRESUBDIRS = interfaces aspect
+SUBDIRS = test-plugin
 
 LIBS_robot_memory = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesmongodbaspect fvutils \

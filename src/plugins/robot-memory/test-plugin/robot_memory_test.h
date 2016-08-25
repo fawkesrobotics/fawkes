@@ -50,6 +50,9 @@ class RobotMemoryTest : public ::testing::Test
  protected:
   virtual void SetUp();
   RobotMemory* robot_memory;
+
+ protected:
+  ::testing::AssertionResult contains_pairs(mongo::BSONObj obj, mongo::BSONObj exp);
 };
 
 
