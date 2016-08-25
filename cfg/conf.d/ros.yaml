@@ -34,6 +34,10 @@ ros:
     # Frequency in Hz at which the clock should be published
     frequency: 100
 
+  pcl:
+    # The time interval which is used to search for new pointclouds in ROS.
+    # This is the maximum time until a pointcloud from ROS is visible and usable in FAWKES
+    ros-search-interval: 2.
 
   tf:
     # Use tf2 for communication with ROS.
