@@ -52,3 +52,12 @@ function point_in_front(center, distance)
 
   return {x=x, y=y, ori=ori}
 end
+
+function center(line)
+   return laser_lines_center(
+      {x = line:end_point_1(0), y = line:end_point_1(1)},
+      {x = line:end_point_2(0), y = line:end_point_2(1)},
+      line:bearing()
+   )
+end
+
