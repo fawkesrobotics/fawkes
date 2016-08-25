@@ -26,6 +26,9 @@
 #ifdef HAVE_VISUALIZATION
 #  include "visualization_thread.h"
 #endif
+#ifdef HAVE_FAWKES_MSGS
+#  include "rospub_thread.h"
+#endif
 
 using namespace fawkes;
 
@@ -55,6 +58,15 @@ class NavGraphPlugin : public fawkes::Plugin
     }
 #else
     thread_list.push_back(new NavGraphThread());
+#endif
+#ifdef HAVE_FAWKES_MSGS
+    bool use_rospub = false;
+    try {
+	    use_rospub = config->get_bool("/navgraph/ros-publishing/enable");
+    } catch (Exception &e) {} // ignored, use default
+    if (use_rospub) {
+	    thread_list.push_back(new NavGraphROSPubThread());
+    }
 #endif
   }
 };
