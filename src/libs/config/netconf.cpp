@@ -966,7 +966,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 				       unsigned int id) throw()
 {
   if ( m->cid() == FAWKES_CID_CONFIGMANAGER ) {
-
+	  
     if ( __mirror_mode ) {
       switch (m->msgid()) {
       case MSG_CONFIG_LIST:
@@ -984,7 +984,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 		  (float *)((char *)cle + sizeof(config_list_entity_header_t));
 		if (cle->cp.num_values > 0) {
 		  std::vector<float> values(cle->cp.num_values, 0);
-		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
+		  for (volatile unsigned int j = 0; j < cle->cp.num_values; ++j) {
 		    values[j] = msg_values[j];
 		  }
 		  mirror_config->set_floats(cle->cp.path, values);
@@ -1004,7 +1004,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 		  (int32_t *)((char *)cle + sizeof(config_list_entity_header_t));
 		if (cle->cp.num_values > 0) {
 		  std::vector<int32_t> values(cle->cp.num_values, 0);
-		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
+		  for (volatile unsigned int j = 0; j < cle->cp.num_values; ++j) {
 		    values[j] = msg_values[j];
 		  }
 		  mirror_config->set_ints(cle->cp.path, values);
@@ -1024,7 +1024,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 		  (uint32_t *)((char *)cle + sizeof(config_list_entity_header_t));
 		if (cle->cp.num_values > 0) {
 		  std::vector<uint32_t> values(cle->cp.num_values, 0);
-		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
+		  for (volatile unsigned int j = 0; j < cle->cp.num_values; ++j) {
 		    values[j] = msg_values[j];
 		  }
 		  mirror_config->set_uints(cle->cp.path, values);
@@ -1044,7 +1044,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 		  (int32_t *)((char *)cle + sizeof(config_list_entity_header_t));
 		if (cle->cp.num_values > 0) {
 		  std::vector<bool> values(cle->cp.num_values, 0);
-		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
+		  for (volatile unsigned int j = 0; j < cle->cp.num_values; ++j) {
 		    values[j] = (msg_values[j] != 0);
 		  }
 		  mirror_config->set_bools(cle->cp.path, values);
@@ -1063,7 +1063,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 		char *tmpdata = (char *)cle + sizeof(config_list_entity_header_t);
 		if (cle->cp.num_values > 0) {
 		  std::vector<std::string> values(cle->cp.num_values, "");
-		  for (unsigned int j = 0; j < cle->cp.num_values; ++j) {
+		  for (volatile unsigned int j = 0; j < cle->cp.num_values; ++j) {
 		    config_string_value_t *csv = (config_string_value_t *)tmpdata;
 		    char *msg_string = tmpdata + sizeof(config_string_value_t);
 		    values[j] = std::string(msg_string, csv->s_length);
@@ -1818,7 +1818,7 @@ NetworkConfiguration::NetConfValueIterator::get_string() const
       config_string_value_t *sv =
 	(config_string_value_t *)((char *)msg->payload() + sizeof(config_descriptor_t));
       char *msg_string =
-	(char *)msg->payload() + sizeof(config_string_value_t);
+	(char *)msg->payload() + sizeof(config_descriptor_t) + sizeof(config_string_value_t);
       return std::string(msg_string, sv->s_length);
     } else {
       throw TypeMismatchException("NetConfValueIterator::get_string: type mismatch, expected %u, got %u",
