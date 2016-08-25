@@ -143,8 +143,6 @@ class ClipsProtobufCommunicator
   void          clips_pb_peer_setup_crypto(long int peer_id,
 					   std::string crypto_key, std::string cipher);
 
-  CLIPS::Value  clips_pb_connect(std::string host, int port);
-
 
   typedef enum {
     CT_SERVER, CT_CLIENT, CT_PEER
