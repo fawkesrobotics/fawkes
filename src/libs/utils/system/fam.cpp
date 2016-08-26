@@ -170,12 +170,12 @@ FileAlterationMonitor::watch_dir(const char *dirpath)
   if ( (iw = inotify_add_watch(__inotify_fd, dirpath, mask)) >= 0) {
     __inotify_watches[iw] = dirpath;
 
-    dirent de, *res;
-    while ( (readdir_r(d, &de, &res) == 0) && (res != NULL) ) {
-      std::string fp = std::string(dirpath) + "/" + de.d_name;
+    dirent *de;
+    while ( (de = readdir(d)) ) {
+      std::string fp = std::string(dirpath) + "/" + de->d_name;
       struct stat st;
       if ( stat(fp.c_str(), &st) == 0 ) {
-	if ( (de.d_name[0] != '.') && S_ISDIR(st.st_mode) ) {
+        if ( (de->d_name[0] != '.') && S_ISDIR(st.st_mode) ) {
 	  try {
 	    watch_dir(fp.c_str());
 	  } catch (Exception &e) {
