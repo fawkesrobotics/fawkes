@@ -23,15 +23,26 @@ CFLAGS += $(CFLAGS_CPP11)
 CFLAGS  += $(CFLAGS_TF) $(CFLAGS_PCL) $(CFFLAGS_conveyor_pose)
 LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL)
 
-
 LIBS_realsense = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface realsense usb-1.0 \
                       fawkespcl_utils
 
 OBJS_realsense = realsense_plugin.o realsense_thread.o 
 
-PLUGINS_all = $(PLUGINDIR)/realsense.$(SOEXT)
+ifneq ($(wildcard $(SYSROOT)/usr/local/lib/librealsense.so),)
+	PLUGINS_all = $(PLUGINDIR)/realsense.$(SOEXT)
+else
+	WARN_TARGETS += warning_librealsense
+endif
 
 OBJS_all = $(OBJS_realsense)
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+
+.PHONY: warning_nolibrealsense
+warning_librealsense:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Realsense Plugin$(TNORMAL) (librealsense not found)"
+endif
 
 include $(BUILDSYSDIR)/base.mk
