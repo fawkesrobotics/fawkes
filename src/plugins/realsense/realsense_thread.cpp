@@ -106,6 +106,9 @@ RealsenseThread::finalize()
   //TODO Documentation with librealsense
 }
 
+/* Create RS context and start the depth stream
+ * @return true when succesfull
+ */
 bool
 RealsenseThread::connect_and_start_camera()
 {
@@ -132,6 +135,9 @@ RealsenseThread::connect_and_start_camera()
   return true;
 }
 
+/* Get the rs_device pointer and printout camera details
+ * @return rs_device
+ */
 rs_device * RealsenseThread::get_camera()
 {
   //assume we only have one camera connected so take index 0
@@ -151,6 +157,9 @@ rs_device * RealsenseThread::get_camera()
   return rs_detected_device;
 }
 
+/*
+ * Enable the depth stream from rs_device
+ */
 void RealsenseThread::enable_depth_stream()
 {
   rs_enable_stream_preset(rs_device_, rs_stream_type_, RS_PRESET_BEST_QUALITY, &rs_error_);
@@ -164,6 +173,9 @@ void RealsenseThread::enable_depth_stream()
   }
 }
 
+/*
+ * printout and free the rs_error if available
+ */
 void RealsenseThread::log_error()
 {
   if (rs_error_){
@@ -172,6 +184,9 @@ void RealsenseThread::log_error()
   }
 }
 
+/*
+ * Testing function to log the depth pixel distancens
+ */
 void
 RealsenseThread::log_depths(const uint16_t * image)
 {
@@ -186,6 +201,9 @@ RealsenseThread::log_depths(const uint16_t * image)
   logger->log_info(name(), "%s\n\n\n\n\n", out.c_str());
 }
 
+/*
+ * Stop the device and delete the context properly
+ */
 void
 RealsenseThread::stop_camera()
 {
