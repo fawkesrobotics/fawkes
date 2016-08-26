@@ -56,6 +56,8 @@ class RobotMemory
     int insert(std::string insert, std::string collection = "");
     int update(std::string query, std::string update, std::string collection = "");
     int remove(std::string query, std::string collection = "");
+    int drop_collection(std::string collection);
+    int clear_memory();
 
   private:
     mongo::DBClientBase* mongodb_client_;
@@ -65,6 +67,7 @@ class RobotMemory
     fawkes::BlackBoard* blackboard_;
 
     const char* name_ = "RobotMemory";
+    std::string database_name_;
     std::string default_collection_;
     bool debug_;
     fawkes::Mutex *mutex_;
@@ -72,8 +75,12 @@ class RobotMemory
 
     void init();
 
-    void log(mongo::Query query, std::string what);
-    void log(mongo::BSONObj obj, std::string what);
+    void log(std::string what, std::string level = "info");
+    void log_deb(std::string what, std::string level = "info");
+    void log(mongo::Query query, std::string what, std::string level = "info");
+    void log(mongo::BSONObj obj, std::string what, std::string level = "info");
+    void log_deb(mongo::Query query, std::string what, std::string level = "info");
+    void log_deb(mongo::BSONObj obj, std::string what, std::string level = "info");
 
     void set_fields(mongo::BSONObj &obj, std::string what);
     void set_fields(mongo::Query &q, std::string what);

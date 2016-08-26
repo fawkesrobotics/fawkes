@@ -52,13 +52,17 @@ RobotMemory::~RobotMemory()
 void RobotMemory::init()
 {
   //load config values
-  logger_->log_info(name_, "Started RobotMemory");
-  default_collection_ = "fawkes.msglog";
+  log("Started RobotMemory");
+  default_collection_ = "robmem.test";
   try {
     default_collection_ = config_->get_string("/plugins/robot-memory/default-collection");
   } catch (Exception &e) {}
   try {
     debug_ = config_->get_bool("/plugins/robot-memory/more-debug-output");
+  } catch (Exception &e) {}
+  database_name_ = "mobmem";
+  try {
+    database_name_ = config_->get_string("/plugins/robot-memory/database");
   } catch (Exception &e) {}
 
   //init blackboard interface
@@ -67,10 +71,7 @@ void RobotMemory::init()
   rm_if_->set_result("");
   rm_if_->write();
 
-  if(debug_)
-  {
-    logger_->log_info(name_, "Initialized RobotMemory");
-  }
+  log_deb("Initialized RobotMemory");
 }
 
 QResCursor RobotMemory::query(std::string query_string, std::string collection)
@@ -79,10 +80,7 @@ QResCursor RobotMemory::query(std::string query_string, std::string collection)
   {
     collection = default_collection_;
   }
-  if(debug_)
-  {
-    logger_->log_info(name_, "Executing Query %s on collection %s", query_string.c_str(), collection);
-  }
+  log_deb(std::string("Executing Query "+ query_string+" on collection "+collection));
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -92,11 +90,9 @@ QResCursor RobotMemory::query(std::string query_string, std::string collection)
   try{
     query = Query(query_string);
   } catch (DBException &e) {
-    if(debug_)
-    {
-      logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
-          query_string.c_str(), e.toString().c_str());
-    }
+    std::string error = "Can't parse query_string "
+        + query_string + "\n Exception: " + e.toString();
+    log_deb(error, "error");
     return NULL;
   }
 
@@ -122,11 +118,9 @@ QResCursor RobotMemory::query(std::string query_string, std::string collection)
   try{
     cursor = mongodb_client_->query(collection, query);
   } catch (DBException &e) {
-    if(debug_)
-    {
-      logger_->log_error(name_, "Error for query %s\n Exception: %s",
-          query_string.c_str(), e.toString().c_str());
-    }
+    std::string error = std::string("Error for query ")
+      + query_string + "\n Exception: " + e.toString();
+    log(error, "error");
     return NULL;
   }
   return cursor;
@@ -138,10 +132,8 @@ int RobotMemory::insert(std::string insert_string, std::string collection)
   {
     collection = default_collection_;
   }
-  if(debug_)
-  {
-    logger_->log_info(name_, "Executing Query %s on collection %s", insert_string.c_str(), collection);
-  }
+
+  log_deb(std::string("Executing Query "+ insert_string + " on collection " + collection));
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -151,11 +143,9 @@ int RobotMemory::insert(std::string insert_string, std::string collection)
   try{
     obj = fromjson(insert_string);
   } catch (DBException &e) {
-    if(debug_)
-    {
-      logger_->log_error(name_, "Can't parse insert_string '%s'\n Exception: %s",
-          insert_string.c_str(), e.toString().c_str());
-    }
+    std::string error = "Can't parse insert_string "
+        + insert_string + "\n Exception: " + e.toString();
+    log_deb(error, "error");
     return 0;
   }
 
@@ -165,11 +155,9 @@ int RobotMemory::insert(std::string insert_string, std::string collection)
   try{
     mongodb_client_->insert(collection, obj);
   } catch (DBException &e) {
-    if(debug_)
-    {
-      logger_->log_error(name_, "Error for insert %s\n Exception: %s",
-          insert_string.c_str(), e.toString().c_str());
-    }
+    std::string error = "Error for insert " + insert_string
+        + "\n Exception: " + e.toString();
+    log_deb(error, "error");
     return 0;
   }
   //return success
@@ -183,11 +171,7 @@ int RobotMemory::update(std::string query_string, std::string update_string,
   {
     collection = default_collection_;
   }
-  if(debug_)
-  {
-    logger_->log_info(name_, "Executing Update %s for query %s on collection %s",
-        update_string.c_str(), query_string.c_str(), collection);
-  }
+  log_deb(std::string("Executing Update "+update_string+" for query "+query_string+" on collection "+ collection));
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -197,22 +181,16 @@ int RobotMemory::update(std::string query_string, std::string update_string,
   try{
     query = Query(query_string);
   } catch (DBException &e) {
-    if(debug_)
-    {
-      logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
-          query_string.c_str(), e.toString().c_str());
-    }
+    std::string error = "Can't parse query_string " + query_string
+        + "\n Exception: " + e.toString();
+    log_deb(error, "error");
     return 0;
   }
   BSONObj update;
   try{
     update = fromjson(update_string);
   } catch (DBException &e) {
-    if(debug_)
-    {
-      logger_->log_error(name_, "Can't parse update_string '%s'\n Exception: %s",
-          update_string.c_str(), e.toString().c_str());
-    }
+    log_deb(std::string("Can't parse update_string '"+update_string+"'\n Exception: "+e.toString()),"error");
     return 0;
   }
 
@@ -220,11 +198,7 @@ int RobotMemory::update(std::string query_string, std::string update_string,
   try{
     mongodb_client_->update(collection, query, update);
   } catch (DBException &e) {
-    if(debug_)
-    {
-      logger_->log_error(name_, "Error for update %s for query %s\n Exception: %s",
-          update_string.c_str(), query_string.c_str(), e.toString().c_str());
-    }
+    log_deb(std::string("Error for update "+update_string+" for query "+query_string+"\n Exception: "+e.toString()), "error");
     return 0;
   }
   //return success
@@ -237,11 +211,7 @@ int RobotMemory::remove(std::string query_string, std::string collection)
   {
     collection = default_collection_;
   }
-  if(debug_)
-  {
-    logger_->log_info(name_, "Executing Remove %s on collection %s",
-        query_string.c_str(), collection);
-  }
+  log_deb(std::string("Executing Remove "+query_string+" on collection "+collection));
 
   //only one query at a time
   MutexLocker lock(mutex_);
@@ -251,11 +221,7 @@ int RobotMemory::remove(std::string query_string, std::string collection)
   try{
     query = Query(query_string);
   } catch (DBException &e) {
-    if(debug_)
-    {
-      logger_->log_error(name_, "Can't parse query_string '%s'\n Exception: %s",
-          query_string.c_str(), e.toString().c_str());
-    }
+    log_deb(std::string("Can't parse query_string '"+query_string+"'\n Exception: "+e.toString()), "error");
     return 0;
   }
 
@@ -263,19 +229,55 @@ int RobotMemory::remove(std::string query_string, std::string collection)
   try{
     mongodb_client_->remove(collection, query);
   } catch (DBException &e) {
-    if(debug_)
-    {
-      logger_->log_error(name_, "Error for query %s\n Exception: %s",
-          query_string.c_str(), e.toString().c_str());
-    }
+    log_deb(std::string("Error for query "+query_string+"\n Exception: "+e.toString()), "error");
     return 0;
   }
   //return success
   return 1;
 }
 
+int RobotMemory::drop_collection(std::string collection)
+{
+  log_deb("Clearing whole robot memory");
+  return remove("{}", collection);
+}
+
+int RobotMemory::clear_memory()
+{
+  log_deb("Clearing whole robot memory");
+  mongodb_client_->dropDatabase(database_name_);
+  return 1;
+}
+
 void
-RobotMemory::log(Query query, std::string what)
+RobotMemory::log(std::string what, std::string info)
+{
+  if(!info.compare("error"))
+      logger_->log_error(name_, "%s", what.c_str());
+  else if(!info.compare("warn"))
+    logger_->log_warn(name_, "%s", what.c_str());
+  else if(!info.compare("debug"))
+    logger_->log_debug(name_, "%s", what.c_str());
+  else
+    logger_->log_info(name_, "%s", what.c_str());
+}
+
+void
+RobotMemory::log_deb(std::string what, std::string level)
+{
+  if(debug_)
+    log(what, level);
+}
+
+void
+RobotMemory::log_deb(Query query, std::string what, std::string level)
+{
+  if(debug_)
+    log(query, what, level);
+}
+
+void
+RobotMemory::log(Query query, std::string what, std::string level)
 {
   std::string output = what
     + "\nFilter: " + query.getFilter().toString()
@@ -283,17 +285,21 @@ RobotMemory::log(Query query, std::string what)
     + "\nSort: " + query.getSort().toString()
     + "\nHint: " + query.getHint().toString()
     + "\nReadPref: " + query.getReadPref().toString();
-
-  logger_->log_info(name_, "%s", output.c_str());
+  log(output, level);
 }
 
 void
-RobotMemory::log(BSONObj obj, std::string what)
+RobotMemory::log_deb(BSONObj obj, std::string what, std::string level)
+{
+  log(obj, what, level);
+}
+
+void
+RobotMemory::log(BSONObj obj, std::string what, std::string level)
 {
   std::string output = what
     + "\nObject: " + obj.toString();
-
-  logger_->log_info(name_, "%s", output.c_str());
+  log(output, level);
 }
 
 void
