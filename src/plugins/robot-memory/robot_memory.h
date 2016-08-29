@@ -58,6 +58,8 @@ class RobotMemory
     int remove(std::string query, std::string collection = "");
     int drop_collection(std::string collection);
     int clear_memory();
+    int restore_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
+    int dump_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
 
   private:
     mongo::DBClientBase* mongodb_client_;

@@ -129,13 +129,32 @@ TEST_F(RobotMemoryTest, JavaScriptQuery)
   //TODO: implement
 }
 
+TEST_F(RobotMemoryTest, DumpAndResore)
+{
+  ASSERT_TRUE(robot_memory->drop_collection("robmem.test"));
+  ASSERT_TRUE(robot_memory->insert("{'testkey':'value',v:1}"));
+  ASSERT_TRUE(robot_memory->insert("{'testkey':'value',v:2}"));
+  ASSERT_TRUE(robot_memory->insert("{'testkey':'value',v:3}"));
+  ASSERT_TRUE(robot_memory->dump_collection("robmem.test"));
+  ASSERT_TRUE(robot_memory->drop_collection("robmem.test"));
+  ASSERT_TRUE(robot_memory->restore_collection("robmem.test"));
+  QResCursor qres = robot_memory->query("{'testkey':'value'}");
+  ASSERT_TRUE(qres->more());
+  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{'testkey':'value',v:1}")));
+  ASSERT_TRUE(qres->more());
+  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{'testkey':'value',v:2}")));
+  ASSERT_TRUE(qres->more());
+  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{'testkey':'value',v:3}")));
+  ASSERT_FALSE(qres->more());
+
+}
 
 ::testing::AssertionResult RobotMemoryTest::contains_pairs(BSONObj obj, BSONObj exp)
 {
   for(BSONObjIterator it = exp.begin(); it.more();)
   {
     BSONElement kvpair = it.next();
-    printf("checking %s\n", kvpair.toString().c_str());
+    //printf("checking %s\n", kvpair.toString().c_str());
     if(!obj.hasElement(kvpair.fieldName())
         || obj.getField(kvpair.fieldName()) != kvpair)
     {

@@ -21,8 +21,13 @@
 #include "robot_memory.h"
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
+#include <utils/misc/string_conversions.h>
+#include <utils/misc/string_split.h>
 #include <memory>
 #include <string>
+#include <stdio.h>
+#include <iostream>
+#include <stdlib.h>
 
 // from MongoDB
 #include <mongo/client/dbclient.h>
@@ -246,6 +251,97 @@ int RobotMemory::clear_memory()
 {
   log_deb("Clearing whole robot memory");
   mongodb_client_->dropDatabase(database_name_);
+  return 1;
+}
+
+int RobotMemory::restore_collection(std::string collection, std::string directory)
+{
+  drop_collection(collection);
+
+  //resolve path to restore
+  if(collection.find(".") == std::string::npos)
+  {
+    log(std::string("Unable to restore collection" + collection), "error");
+    log(std::string("Specify collection like 'db.collection'"), "error");
+    return 0;
+  }
+  std::string path = StringConversions::resolve_path(directory) + "/"
+      + collection.replace(collection.find("."),1,"/") + ".bson";
+  log_deb(std::string("Restore collection " + collection + " from " + path), "warn");
+
+  //call mongorestore from folder with initial restores
+  std::string command = "/usr/bin/mongorestore --dir " + path + " --quiet";
+  log_deb(std::string("Restore command: " + command), "warn");
+  FILE *bash_output = popen(command.c_str(), "r");
+
+  //check if output is ok
+  if(!bash_output)
+  {
+    log(std::string("Unable to restore collection" + collection), "error");
+    return 0;
+  }
+  std::string output_string = "";
+  char buffer[100];
+  while (!feof(bash_output) )
+  {
+    if (fgets(buffer, 100, bash_output) == NULL)
+    {
+      break;
+    }
+    output_string += buffer;
+  }
+  pclose(bash_output);
+  if(output_string.find("Failed") != std::string::npos)
+  {
+    log(std::string("Unable to restore collection" + collection), "error");
+    log_deb(output_string, "error");
+    return 0;
+  }
+  return 1;
+}
+
+int RobotMemory::dump_collection(std::string collection, std::string directory)
+{
+  //resolve path to dump to
+  if(collection.find(".") == std::string::npos)
+  {
+    log(std::string("Unable to dump collection" + collection), "error");
+    log(std::string("Specify collection like 'db.collection'"), "error");
+    return 0;
+  }
+  std::string path = StringConversions::resolve_path(directory);
+  log_deb(std::string("Dump collection " + collection + " into " + path), "warn");
+
+  //call mongorestore from folder with initial restores
+  std::vector<std::string> split = str_split(collection, '.');
+  std::string command = "/usr/bin/mongodump --out=" + path + " --db=" + split[0]
+    + " --collection=" + split[1] + " --quiet";
+  log_deb(std::string("Dump command: " + command), "warn");
+  FILE *bash_output = popen(command.c_str(), "r");
+
+  //check if output is ok
+  if(!bash_output)
+  {
+    log(std::string("Unable to dump collection" + collection), "error");
+    return 0;
+  }
+  std::string output_string = "";
+  char buffer[100];
+  while (!feof(bash_output) )
+  {
+    if (fgets(buffer, 100, bash_output) == NULL)
+    {
+      break;
+    }
+    output_string += buffer;
+  }
+  pclose(bash_output);
+  if(output_string.find("Failed") != std::string::npos)
+  {
+    log(std::string("Unable to dump collection" + collection), "error");
+    log_deb(output_string, "error");
+    return 0;
+  }
   return 1;
 }
 
