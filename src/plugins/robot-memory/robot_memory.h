@@ -52,10 +52,12 @@ class RobotMemory
     virtual ~RobotMemory();
 
     //robot memory functions
-    QResCursor query(std::string query, std::string collection = "");
-    int insert(std::string insert, std::string collection = "");
-    int update(std::string query, std::string update, std::string collection = "");
-    int remove(std::string query, std::string collection = "");
+    QResCursor query(mongo::Query query, std::string collection = "");
+    int insert(mongo::BSONObj obj, std::string collection = "");
+    int insert(std::string obj_str, std::string collection = "");
+    int update(mongo::Query query, mongo::BSONObj update, std::string collection = "");
+    int update(mongo::Query query, std::string update_str, std::string collection = "");
+    int remove(mongo::Query query, std::string collection = "");
     int drop_collection(std::string collection);
     int clear_memory();
     int restore_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");

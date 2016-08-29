@@ -79,27 +79,14 @@ void RobotMemory::init()
   log_deb("Initialized RobotMemory");
 }
 
-QResCursor RobotMemory::query(std::string query_string, std::string collection)
+QResCursor RobotMemory::query(Query query, std::string collection)
 {
   if(collection == "")
-  {
     collection = default_collection_;
-  }
-  log_deb(std::string("Executing Query "+ query_string+" on collection "+collection));
+  log_deb(std::string("Executing Query "+ query.toString() +" on collection "+collection));
 
   //only one query at a time
   MutexLocker lock(mutex_);
-
-  //get query from string
-  Query query;
-  try{
-    query = Query(query_string);
-  } catch (DBException &e) {
-    std::string error = "Can't parse query_string "
-        + query_string + "\n Exception: " + e.toString();
-    log_deb(error, "error");
-    return NULL;
-  }
 
 //  //introspect query
 //  log(query, "executing query:");
@@ -124,35 +111,22 @@ QResCursor RobotMemory::query(std::string query_string, std::string collection)
     cursor = mongodb_client_->query(collection, query);
   } catch (DBException &e) {
     std::string error = std::string("Error for query ")
-      + query_string + "\n Exception: " + e.toString();
+      + query.toString() + "\n Exception: " + e.toString();
     log(error, "error");
     return NULL;
   }
   return cursor;
 }
 
-int RobotMemory::insert(std::string insert_string, std::string collection)
+int RobotMemory::insert(BSONObj obj, std::string collection)
 {
   if(collection == "")
-  {
     collection = default_collection_;
-  }
 
-  log_deb(std::string("Executing Query "+ insert_string + " on collection " + collection));
+  log_deb(std::string("Executing Query "+ obj.toString() + " on collection " + collection));
 
   //only one query at a time
   MutexLocker lock(mutex_);
-
-  //get query from string
-  BSONObj obj;
-  try{
-    obj = fromjson(insert_string);
-  } catch (DBException &e) {
-    std::string error = "Can't parse insert_string "
-        + insert_string + "\n Exception: " + e.toString();
-    log_deb(error, "error");
-    return 0;
-  }
 
   set_fields(obj, "{type: \"test\"}");
 
@@ -160,7 +134,7 @@ int RobotMemory::insert(std::string insert_string, std::string collection)
   try{
     mongodb_client_->insert(collection, obj);
   } catch (DBException &e) {
-    std::string error = "Error for insert " + insert_string
+    std::string error = "Error for insert " + obj.toString()
         + "\n Exception: " + e.toString();
     log_deb(error, "error");
     return 0;
@@ -169,72 +143,54 @@ int RobotMemory::insert(std::string insert_string, std::string collection)
   return 1;
 }
 
-int RobotMemory::update(std::string query_string, std::string update_string,
-                                    std::string collection)
+int RobotMemory::insert(std::string obj_str, std::string collection)
+{
+  return insert(fromjson(obj_str), collection);
+}
+
+int RobotMemory::update(Query query, BSONObj update, std::string collection)
 {
   if(collection == "")
   {
     collection = default_collection_;
   }
-  log_deb(std::string("Executing Update "+update_string+" for query "+query_string+" on collection "+ collection));
+  log_deb(std::string("Executing Update "+update.toString()+" for query "+query.toString()+" on collection "+ collection));
 
   //only one query at a time
   MutexLocker lock(mutex_);
-
-  //get query from string
-  Query query;
-  try{
-    query = Query(query_string);
-  } catch (DBException &e) {
-    std::string error = "Can't parse query_string " + query_string
-        + "\n Exception: " + e.toString();
-    log_deb(error, "error");
-    return 0;
-  }
-  BSONObj update;
-  try{
-    update = fromjson(update_string);
-  } catch (DBException &e) {
-    log_deb(std::string("Can't parse update_string '"+update_string+"'\n Exception: "+e.toString()),"error");
-    return 0;
-  }
 
   //actually execute update
   try{
     mongodb_client_->update(collection, query, update);
   } catch (DBException &e) {
-    log_deb(std::string("Error for update "+update_string+" for query "+query_string+"\n Exception: "+e.toString()), "error");
+    log_deb(std::string("Error for update "+update.toString()+" for query "+query.toString()+"\n Exception: "+e.toString()), "error");
     return 0;
   }
   //return success
   return 1;
 }
 
-int RobotMemory::remove(std::string query_string, std::string collection)
+int RobotMemory::update(Query query, std::string update_str, std::string collection)
+{
+  return update(query, fromjson(update_str), collection);
+}
+
+int RobotMemory::remove(Query query, std::string collection)
 {
   if(collection == "")
   {
     collection = default_collection_;
   }
-  log_deb(std::string("Executing Remove "+query_string+" on collection "+collection));
+  log_deb(std::string("Executing Remove "+query.toString()+" on collection "+collection));
 
   //only one query at a time
   MutexLocker lock(mutex_);
-
-  //get query from string
-  Query query;
-  try{
-    query = Query(query_string);
-  } catch (DBException &e) {
-    log_deb(std::string("Can't parse query_string '"+query_string+"'\n Exception: "+e.toString()), "error");
-    return 0;
-  }
 
   //actually execute remove
   try{
     mongodb_client_->remove(collection, query);
   } catch (DBException &e) {
-    log_deb(std::string("Error for query "+query_string+"\n Exception: "+e.toString()), "error");
+    log_deb(std::string("Error for query "+query.toString()+"\n Exception: "+e.toString()), "error");
     return 0;
   }
   //return success
@@ -442,4 +398,3 @@ RobotMemory::remove_field(Query &q, std::string what)
   //override
   q = Query(b.obj());
 }
-

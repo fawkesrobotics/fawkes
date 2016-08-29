@@ -87,31 +87,28 @@ TEST_F(RobotMemoryTest, StoreRemoveQuery)
   ASSERT_FALSE(qres->more());
 }
 
-TEST_F(RobotMemoryTest, QueryInvalidCaught)
+TEST_F(RobotMemoryTest, QueryInvalid)
 {
-  ASSERT_FALSE(robot_memory->query("{key-:+'not existing'}"));
+  ASSERT_THROW(robot_memory->query("{key-:+'not existing'}"), mongo::DBException);
 }
 
 TEST_F(RobotMemoryTest, InsertInvalidCaught)
 {
-  ASSERT_NO_THROW(robot_memory->insert("{'testkey'::'value'}"));
-  ASSERT_FALSE(robot_memory->insert("warbagarbl"));
+  ASSERT_THROW(robot_memory->insert("{'testkey'::'value'}"), mongo::DBException);
+  ASSERT_THROW(robot_memory->insert("warbagarbl"), mongo::DBException);
 }
 
 TEST_F(RobotMemoryTest, UpdateInvalidCaught)
 {
-  ASSERT_NO_THROW(robot_memory->update("{'testkey'::'value'}",
-      "{'key':'update'}"));
-  ASSERT_NO_THROW(robot_memory->update("{'testkey':'good'}",
-      "{'bad':1.2.3}"));
-  ASSERT_FALSE(robot_memory->update("{([})]", "{'key':4}"));
-  ASSERT_FALSE(robot_memory->update("{'key':'valid'}", "invalid!"));
+  ASSERT_THROW(robot_memory->update("{'testkey':'good'}",
+      "{'bad':1.2.3}"), mongo::DBException);
+  ASSERT_THROW(robot_memory->update("{([})]", "{'key':4}"), mongo::DBException);
 }
 
 TEST_F(RobotMemoryTest, RemoveInvalidCaught)
 {
-  ASSERT_NO_THROW(robot_memory->remove("{____:4.56}"));
-  ASSERT_FALSE(robot_memory->remove("{([})]"));
+  ASSERT_THROW(robot_memory->remove("{____:4.56!}"), mongo::DBException);
+  ASSERT_THROW(robot_memory->remove("{([})]"), mongo::DBException);
 }
 
 TEST_F(RobotMemoryTest, AggregationQuery)
