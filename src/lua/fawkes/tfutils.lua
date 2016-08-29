@@ -133,7 +133,7 @@ end
 function tf_age(src_frame, target_frame)
    local transform = fawkes.tf.StampedTransform:new()
    tf:lookup_transform(src_frame, target_frame, transform)
-   return timediff = fawkes.Time:new() - transform.stamp
+   return (fawkes.Time:new() - transform.stamp)
 end
 
 
