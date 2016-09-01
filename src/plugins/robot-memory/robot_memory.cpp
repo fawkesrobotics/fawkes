@@ -128,8 +128,6 @@ int RobotMemory::insert(BSONObj obj, std::string collection)
   //only one query at a time
   MutexLocker lock(mutex_);
 
-  set_fields(obj, "{type: \"test\"}");
-
   //actually execute insert
   try{
     mongodb_client_->insert(collection, obj);
