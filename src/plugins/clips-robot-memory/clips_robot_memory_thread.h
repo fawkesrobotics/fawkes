@@ -28,6 +28,7 @@
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <plugins/clips/aspect/clips_feature.h>
 #include <plugins/robot-memory/aspect/robot_memory_aspect.h>
 
 #include <string>
@@ -74,17 +75,17 @@ class ClipsRobotMemoryThread
   void          clips_bson_array_finish(void *barr);
   void          clips_bson_array_append(void *barr, CLIPS::Value value);
   std::string   clips_bson_tostring(void *bson);
-  void          clips_mongodb_upsert(std::string collection, void *bson, CLIPS::Value query);
-  void          clips_mongodb_update(std::string collection, void *bson, CLIPS::Value query);
-  void          clips_mongodb_replace(std::string collection, void *bson, CLIPS::Value query);
-  void          clips_mongodb_insert(std::string collection, void *bson);
-  void          mongodb_update(std::string &collection, mongo::BSONObj obj,
+  void          clips_robotmemory_upsert(std::string collection, void *bson, CLIPS::Value query);
+  void          clips_robotmemory_update(std::string collection, void *bson, CLIPS::Value query);
+  void          clips_robotmemory_replace(std::string collection, void *bson, CLIPS::Value query);
+  void          clips_robotmemory_insert(std::string collection, void *bson);
+  void          robotmemory_update(std::string &collection, mongo::BSONObj obj,
                                CLIPS::Value &query, bool upsert);
-  CLIPS::Value  clips_mongodb_query_sort(std::string collection, void *bson, void *bson_sort);
-  CLIPS::Value  clips_mongodb_query(std::string collection, void *bson);
-  CLIPS::Value  clips_mongodb_cursor_more(void *cursor);
-  CLIPS::Value  clips_mongodb_cursor_next(void *cursor);
-  void          clips_mongodb_cursor_destroy(void *cursor);
+  CLIPS::Value  clips_robotmemory_query_sort(std::string collection, void *bson, void *bson_sort);
+  CLIPS::Value  clips_robotmemory_query(std::string collection, void *bson);
+  CLIPS::Value  clips_robotmemory_cursor_more(void *cursor);
+  CLIPS::Value  clips_robotmemory_cursor_next(void *cursor);
+  void          clips_robotmemory_cursor_destroy(void *cursor);
   CLIPS::Values clips_bson_field_names(void *bson);
   CLIPS::Value  clips_bson_get(void *bson, std::string field_name);
   CLIPS::Values clips_bson_get_array(void *bson, std::string field_name);

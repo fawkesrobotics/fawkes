@@ -62,32 +62,32 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
 
   clips.lock();
 
-  clips_->add_function("bson-create", sigc::slot<CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_create)));
-  clips_->add_function("bson-parse", sigc::slot<CLIPS::Value, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_parse)));
-  clips_->add_function("bson-destroy", sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_destroy)));
-  clips_->add_function("bson-append", sigc::slot<void, void *, std::string, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append)));
-  clips_->add_function("bson-append-array", sigc::slot<void, void *, std::string, CLIPS::Values>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append_array)));
-  clips_->add_function("bson-array-start", sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_array_start)));
-  clips_->add_function("bson-array-finish", sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_array_finish)));
-  clips_->add_function("bson-array-append", sigc::slot<void, void *, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_array_append)));
+  clips->add_function("bson-create", sigc::slot<CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_create)));
+  clips->add_function("bson-parse", sigc::slot<CLIPS::Value, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_parse)));
+  clips->add_function("bson-destroy", sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_destroy)));
+  clips->add_function("bson-append", sigc::slot<void, void *, std::string, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append)));
+  clips->add_function("bson-append-array", sigc::slot<void, void *, std::string, CLIPS::Values>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append_array)));
+  clips->add_function("bson-array-start", sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_array_start)));
+  clips->add_function("bson-array-finish", sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_array_finish)));
+  clips->add_function("bson-array-append", sigc::slot<void, void *, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_array_append)));
 
-  clips_->add_function("bson-append-time", sigc::slot<void, void *, std::string, CLIPS::Values>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append_time)));
-  clips_->add_function("bson-tostring", sigc::slot<std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_tostring)));
-  clips_->add_function("mongodb-insert", sigc::slot<void, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_mongodb_insert)));
-  clips_->add_function("mongodb-upsert", sigc::slot<void, std::string, void *, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_mongodb_upsert)));
-  clips_->add_function("mongodb-update", sigc::slot<void, std::string, void *, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_mongodb_update)));
-  clips_->add_function("mongodb-replace", sigc::slot<void, std::string, void *, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_mongodb_replace)));
-  clips_->add_function("mongodb-query", sigc::slot<CLIPS::Value, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_mongodb_query)));
-  clips_->add_function("mongodb-query-sort", sigc::slot<CLIPS::Value, std::string, void *, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_mongodb_query_sort)));
-  clips_->add_function("mongodb-cursor-destroy", sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_mongodb_cursor_destroy)));
-  clips_->add_function("mongodb-cursor-more", sigc::slot<CLIPS::Value, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_mongodb_cursor_more)));
-  clips_->add_function("mongodb-cursor-next", sigc::slot<CLIPS::Value, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_mongodb_cursor_next)));
-  clips_->add_function("bson-field-names", sigc::slot<CLIPS::Values, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_field_names)));
-  clips_->add_function("bson-get", sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get)));
-  clips_->add_function("bson-get-array", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_array)));
-  clips_->add_function("bson-get-time", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_time)));
+  clips->add_function("bson-append-time", sigc::slot<void, void *, std::string, CLIPS::Values>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append_time)));
+  clips->add_function("bson-tostring", sigc::slot<std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_tostring)));
+  clips->add_function("robmem-insert", sigc::slot<void, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_insert)));
+  clips->add_function("robmem-upsert", sigc::slot<void, std::string, void *, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_upsert)));
+  clips->add_function("robmem-update", sigc::slot<void, std::string, void *, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_update)));
+  clips->add_function("robmem-replace", sigc::slot<void, std::string, void *, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_replace)));
+  clips->add_function("robmem-query", sigc::slot<CLIPS::Value, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_query)));
+  clips->add_function("robmem-query-sort", sigc::slot<CLIPS::Value, std::string, void *, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_query_sort)));
+  clips->add_function("robmem-cursor-destroy", sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_cursor_destroy)));
+  clips->add_function("robmem-cursor-more", sigc::slot<CLIPS::Value, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_cursor_more)));
+  clips->add_function("robmem-cursor-next", sigc::slot<CLIPS::Value, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_cursor_next)));
+  clips->add_function("bson-field-names", sigc::slot<CLIPS::Values, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_field_names)));
+  clips->add_function("bson-get", sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get)));
+  clips->add_function("bson-get-array", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_array)));
+  clips->add_function("bson-get-time", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_time)));
 
-  clips_->build("(deffacts have-feature-mongodb (have-feature MongoDB))");
+  clips->build("(deffacts have-feature-mongodb (have-feature MongoDB))");
 
   //TODO: clips->batch_evaluate(SRCDIR"/plugins/clips-robot-memory/robot_memory.clp");
 
@@ -118,7 +118,7 @@ ClipsRobotMemoryThread::clips_bson_parse(std::string document)
 #ifdef HAVE_MONGODB_VERSION_H
   } catch (mongo::MsgAssertionException &e) {
 #else
-  } catch (bson::assertion &e) {
+  } catch (mongo::AssertionException &e) {
 #endif
     logger->log_error("MongoDB", "Parsing JSON doc failed: %s\n%s",
            e.what(), document.c_str());
@@ -175,7 +175,7 @@ ClipsRobotMemoryThread::clips_bson_append(void *bson, std::string field_name, CL
 #ifdef HAVE_MONGODB_VERSION_H
   } catch (mongo::MsgAssertionException &e) {
 #else
-  } catch (bson::assertion &e) {
+  } catch (mongo::AssertionException &e) {
 #endif
     logger->log_error("MongoDB", "Failed to append array value to field %s: %s",
            field_name.c_str(), e.what());
@@ -224,7 +224,7 @@ ClipsRobotMemoryThread::clips_bson_append_array(void *bson,
 #ifdef HAVE_MONGODB_VERSION_H
   } catch (mongo::MsgAssertionException &e) {
 #else
-  } catch (bson::assertion &e) {
+  } catch (mongo::AssertionException &e) {
 #endif
     logger->log_error("MongoDB", "Failed to append array value to field %s: %s",
            field_name.c_str(), e.what());
@@ -282,7 +282,7 @@ ClipsRobotMemoryThread::clips_bson_array_append(void *barr, CLIPS::Value value)
 #ifdef HAVE_MONGODB_VERSION_H
   } catch (mongo::MsgAssertionException &e) {
 #else
-  } catch (bson::assertion &e) {
+  } catch (mongo::AssertionException &e) {
 #endif
     logger->log_error("MongoDB", "Failed to append to array: %s", e.what());
   }
@@ -309,7 +309,7 @@ ClipsRobotMemoryThread::clips_bson_append_time(void *bson, std::string field_nam
 #ifdef HAVE_MONGODB_VERSION_H
   } catch (mongo::MsgAssertionException &e) {
 #else
-  } catch (bson::assertion &e) {
+  } catch (mongo::AssertionException &e) {
 #endif
     logger->log_error("MongoDB", "Failed to append time value to field %s: %s",
            field_name.c_str(), e.what());
@@ -317,17 +317,12 @@ ClipsRobotMemoryThread::clips_bson_append_time(void *bson, std::string field_nam
 }
 
 void
-ClipsRobotMemoryThread::clips_mongodb_insert(std::string collection, void *bson)
+ClipsRobotMemoryThread::clips_robotmemory_insert(std::string collection, void *bson)
 {
-  if (! cfg_mongodb_enabled_) {
-    logger->log_warn("MongoDB", "Insert requested while MongoDB disabled");
-    return;
-  }
-
   mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
 
   try {
-    mongodb_->insert(collection, b->asTempObj());
+    robot_memory->insert(b->asTempObj(), collection);
   } catch (mongo::DBException &e) {
     logger->log_warn("MongoDB", "Insert failed: %s", e.what());
   }
@@ -335,14 +330,9 @@ ClipsRobotMemoryThread::clips_mongodb_insert(std::string collection, void *bson)
 
 
 void
-ClipsRobotMemoryThread::mongodb_update(std::string &collection, mongo::BSONObj obj,
+ClipsRobotMemoryThread::robotmemory_update(std::string &collection, mongo::BSONObj obj,
          CLIPS::Value &query, bool upsert)
 {
-  if (! cfg_mongodb_enabled_) {
-    logger->log_warn("MongoDB", "Update requested while MongoDB disabled");
-    return;
-  }
-
   try {
     mongo::BSONObj query_obj;
     if (query.type() == CLIPS::TYPE_STRING) {
@@ -355,11 +345,11 @@ ClipsRobotMemoryThread::mongodb_update(std::string &collection, mongo::BSONObj o
       return;
     }
 
-    mongodb_->update(collection, query_obj, obj, upsert);
+    robot_memory->update(query_obj, obj, collection, upsert);
 #ifdef HAVE_MONGODB_VERSION_H
   } catch (mongo::MsgAssertionException &e) {
 #else
-  } catch (bson::assertion &e) {
+  } catch (mongo::AssertionException &e) {
 #endif
     logger->log_warn("MongoDB", "Compiling query failed: %s", e.what());
   } catch (mongo::DBException &e) {
@@ -369,18 +359,18 @@ ClipsRobotMemoryThread::mongodb_update(std::string &collection, mongo::BSONObj o
 
 
 void
-ClipsRobotMemoryThread::clips_mongodb_upsert(std::string collection, void *bson, CLIPS::Value query)
+ClipsRobotMemoryThread::clips_robotmemory_upsert(std::string collection, void *bson, CLIPS::Value query)
 {
   mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
   if (! b) {
     logger->log_warn("MongoDB", "Invalid BSON Obj Builder passed");
     return;
   }
-  mongodb_update(collection, b->asTempObj(), query, true);
+  robotmemory_update(collection, b->asTempObj(), query, true);
 }
 
 void
-ClipsRobotMemoryThread::clips_mongodb_update(std::string collection, void *bson, CLIPS::Value query)
+ClipsRobotMemoryThread::clips_robotmemory_update(std::string collection, void *bson, CLIPS::Value query)
 {
   mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
   if (! b) {
@@ -391,25 +381,20 @@ ClipsRobotMemoryThread::clips_mongodb_update(std::string collection, void *bson,
   mongo::BSONObjBuilder update_doc;
   update_doc.append("$set", b->asTempObj());
 
-  mongodb_update(collection, update_doc.obj(), query, false);
+  robotmemory_update(collection, update_doc.obj(), query, false);
 }
 
 void
-ClipsRobotMemoryThread::clips_mongodb_replace(std::string collection, void *bson, CLIPS::Value query)
+ClipsRobotMemoryThread::clips_robotmemory_replace(std::string collection, void *bson, CLIPS::Value query)
 {
   mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
   if (! b) logger->log_warn("MongoDB", "Invalid BSON Obj Builder passed");
-  mongodb_update(collection, b->asTempObj(), query, false);
+  robotmemory_update(collection, b->asTempObj(), query, false);
 }
 
 CLIPS::Value
-ClipsRobotMemoryThread::clips_mongodb_query_sort(std::string collection, void *bson, void *bson_sort)
+ClipsRobotMemoryThread::clips_robotmemory_query_sort(std::string collection, void *bson, void *bson_sort)
 {
-  if (! cfg_mongodb_enabled_) {
-    logger->log_warn("MongoDB", "Query requested while MongoDB disabled");
-    return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
-  }
-
   mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
 
   try {
@@ -420,7 +405,7 @@ ClipsRobotMemoryThread::clips_mongodb_query_sort(std::string collection, void *b
     }
 
 #if __cplusplus >= 201103L
-    std::unique_ptr<mongo::DBClientCursor> c = mongodb_->query(collection, q);
+    std::unique_ptr<mongo::DBClientCursor> c = robot_memory->query(q, collection);
 
     return CLIPS::Value(new std::unique_ptr<mongo::DBClientCursor>(std::move(c)),
                         CLIPS::TYPE_EXTERNAL_ADDRESS);
@@ -438,13 +423,13 @@ ClipsRobotMemoryThread::clips_mongodb_query_sort(std::string collection, void *b
 }
 
 CLIPS::Value
-ClipsRobotMemoryThread::clips_mongodb_query(std::string collection, void *bson)
+ClipsRobotMemoryThread::clips_robotmemory_query(std::string collection, void *bson)
 {
-  return clips_mongodb_query_sort(collection, bson, NULL);
+  return clips_robotmemory_query_sort(collection, bson, NULL);
 }
 
 void
-ClipsRobotMemoryThread::clips_mongodb_cursor_destroy(void *cursor)
+ClipsRobotMemoryThread::clips_robotmemory_cursor_destroy(void *cursor)
 {
 #if __cplusplus >= 201103L
   std::unique_ptr<mongo::DBClientCursor> *c =
@@ -463,7 +448,7 @@ ClipsRobotMemoryThread::clips_mongodb_cursor_destroy(void *cursor)
 }
 
 CLIPS::Value
-ClipsRobotMemoryThread::clips_mongodb_cursor_more(void *cursor)
+ClipsRobotMemoryThread::clips_robotmemory_cursor_more(void *cursor)
 {
 #if __cplusplus >= 201103L
   std::unique_ptr<mongo::DBClientCursor> *c =
@@ -482,7 +467,7 @@ ClipsRobotMemoryThread::clips_mongodb_cursor_more(void *cursor)
 }
 
 CLIPS::Value
-ClipsRobotMemoryThread::clips_mongodb_cursor_next(void *cursor)
+ClipsRobotMemoryThread::clips_robotmemory_cursor_next(void *cursor)
 {
 #if __cplusplus >= 201103L
   std::unique_ptr<mongo::DBClientCursor> *c =
