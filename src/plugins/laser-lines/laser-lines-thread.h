@@ -40,10 +40,9 @@
 #include <Eigen/StdVector>
 #include <pcl/ModelCoefficients.h>
 
-#include <deque>
-
 #ifdef HAVE_VISUAL_DEBUGGING
 #  include <plugins/ros/aspect/ros.h>
+#  include <visualization_msgs/MarkerArray.h>
 
 namespace ros {
   class Publisher;
@@ -105,8 +104,16 @@ class LaserLinesThread
 
 
 #ifdef HAVE_VISUAL_DEBUGGING
-  void publish_visualization(const LineInfo &linfo, size_t i, unsigned int idnum,
-                             std::string marker_namespace, std::string name_suffix = "");
+  void publish_visualization(const std::vector<TrackedLineInfo> &linfos,
+                             const std::string &marker_namespace,
+                             const std::string &avg_marker_namespace);
+
+  void publish_visualization_add_line(visualization_msgs::MarkerArray &m,
+                                      unsigned int &idnum,
+                                      const LineInfo &info,
+                                      const size_t i,
+                                      const std::string &marker_namespace,
+                                      const std::string &name_suffix = "");
 #endif
 
  private:

@@ -39,7 +39,6 @@
 
 #ifdef HAVE_VISUAL_DEBUGGING
 #  include <ros/ros.h>
-#  include <visualization_msgs/MarkerArray.h>
 #endif
 
 #include <iostream>
@@ -383,16 +382,7 @@ LaserLinesThread::loop()
   }
 
 #ifdef HAVE_VISUAL_DEBUGGING
-  { unsigned int line_id = 0;
-  for (size_t i = 0; i < known_lines_.size(); i++) {
-    publish_visualization(known_lines_[i].raw, i, line_id, "laser_lines");
-    line_id++;
-    if (cfg_moving_avg_enabled_) {
-      publish_visualization(known_lines_[i].smooth, i, line_id, "laser_lines_moving_average", "_avg");
-      line_id++;
-    }
-  }
-  }
+  publish_visualization(known_lines_, "laser_lines", "laser_lines_moving_average");
 #endif
 
   //*lines_ = *tmp_lines;
@@ -511,15 +501,16 @@ LaserLinesThread::set_line(unsigned int idx,
 
 #ifdef HAVE_VISUAL_DEBUGGING
 void
-LaserLinesThread::publish_visualization(const LineInfo &info, size_t i, unsigned int idnum,
-                                        std::string marker_namespace, std::string name_suffix)
+LaserLinesThread::publish_visualization_add_line(visualization_msgs::MarkerArray &m,
+                                                 unsigned int &idnum,
+                                                 const LineInfo &info,
+                                                 const size_t i,
+                                                 const std::string &marker_namespace,
+                                                 const std::string &name_suffix)
 {
-  visualization_msgs::MarkerArray m;
-
-  {
-    /*
-    visualization_msgs::Marker basevec;
-    basevec.header.frame_id = finput_->header.frame_id;
+	/*
+	  visualization_msgs::Marker basevec;
+	  basevec.header.frame_id = finput_->header.frame_id;
     basevec.header.stamp = ros::Time::now();
     basevec.ns = marker_namespace;
     basevec.id = idnum++;
@@ -537,145 +528,160 @@ LaserLinesThread::publish_visualization(const LineInfo &info, size_t i, unsigned
     basevec.color.a = 1.0;
     basevec.lifetime = ros::Duration(2, 0);
     m.markers.push_back(basevec);
-    */
+	*/
 
-    visualization_msgs::Marker dirvec;
-    dirvec.header.frame_id = finput_->header.frame_id;
-    dirvec.header.stamp = ros::Time::now();
-    dirvec.ns = marker_namespace;
-    dirvec.id = idnum++;
-    dirvec.type = visualization_msgs::Marker::ARROW;
-    dirvec.action = visualization_msgs::Marker::ADD;
-    dirvec.points.resize(2);
-    dirvec.points[0].x = info.base_point[0];
-    dirvec.points[0].y = info.base_point[1];
-    dirvec.points[0].z = info.base_point[2];
-    dirvec.points[1].x = info.base_point[0] + info.line_direction[0];
-    dirvec.points[1].y = info.base_point[1] + info.line_direction[1];
-    dirvec.points[1].z = info.base_point[2] + info.line_direction[2];
-    dirvec.scale.x = 0.02;
-    dirvec.scale.y = 0.04;
-    dirvec.color.r = 0.0;
-    dirvec.color.g = 1.0;
-    dirvec.color.b = 0.f;
-    dirvec.color.a = 1.0;
-    dirvec.lifetime = ros::Duration(2, 0);
-    m.markers.push_back(dirvec);
+	visualization_msgs::Marker dirvec;
+	dirvec.header.frame_id = finput_->header.frame_id;
+	dirvec.header.stamp = ros::Time::now();
+	dirvec.ns = marker_namespace;
+	dirvec.id = idnum++;
+	dirvec.type = visualization_msgs::Marker::ARROW;
+	dirvec.action = visualization_msgs::Marker::ADD;
+	dirvec.points.resize(2);
+	dirvec.points[0].x = info.base_point[0];
+	dirvec.points[0].y = info.base_point[1];
+	dirvec.points[0].z = info.base_point[2];
+	dirvec.points[1].x = info.base_point[0] + info.line_direction[0];
+	dirvec.points[1].y = info.base_point[1] + info.line_direction[1];
+	dirvec.points[1].z = info.base_point[2] + info.line_direction[2];
+	dirvec.scale.x = 0.02;
+	dirvec.scale.y = 0.04;
+	dirvec.color.r = 0.0;
+	dirvec.color.g = 1.0;
+	dirvec.color.b = 0.f;
+	dirvec.color.a = 1.0;
+	dirvec.lifetime = ros::Duration(2, 0);
+	m.markers.push_back(dirvec);
 
-    visualization_msgs::Marker testvec;
-    testvec.header.frame_id = finput_->header.frame_id;
-    testvec.header.stamp = ros::Time::now();
-    testvec.ns = marker_namespace;
-    testvec.id = idnum++;
-    testvec.type = visualization_msgs::Marker::ARROW;
-    testvec.action = visualization_msgs::Marker::ADD;
-    testvec.points.resize(2);
-    testvec.points[0].x = 0; //info.point_on_line[0];
-    testvec.points[0].y = 0; //info.point_on_line[1];
-    testvec.points[0].z = 0; //info.point_on_line[2];
-    testvec.points[1].x = info.base_point[0];
-    testvec.points[1].y = info.base_point[1];
-    testvec.points[1].z = info.base_point[2];
-    testvec.scale.x = 0.02;
-    testvec.scale.y = 0.04;
-    testvec.color.r = line_colors[i][0] / 255.;
-    testvec.color.g = line_colors[i][1] / 255.;
-    testvec.color.b = line_colors[i][2] / 255.;
-    testvec.color.a = 1.0;
-    testvec.lifetime = ros::Duration(2, 0);
-    m.markers.push_back(testvec);
+	visualization_msgs::Marker testvec;
+	testvec.header.frame_id = finput_->header.frame_id;
+	testvec.header.stamp = ros::Time::now();
+	testvec.ns = marker_namespace;
+	testvec.id = idnum++;
+	testvec.type = visualization_msgs::Marker::ARROW;
+	testvec.action = visualization_msgs::Marker::ADD;
+	testvec.points.resize(2);
+	testvec.points[0].x = 0; //info.point_on_line[0];
+	testvec.points[0].y = 0; //info.point_on_line[1];
+	testvec.points[0].z = 0; //info.point_on_line[2];
+	testvec.points[1].x = info.base_point[0];
+	testvec.points[1].y = info.base_point[1];
+	testvec.points[1].z = info.base_point[2];
+	testvec.scale.x = 0.02;
+	testvec.scale.y = 0.04;
+	testvec.color.r = line_colors[i][0] / 255.;
+	testvec.color.g = line_colors[i][1] / 255.;
+	testvec.color.b = line_colors[i][2] / 255.;
+	testvec.color.a = 1.0;
+	testvec.lifetime = ros::Duration(2, 0);
+	m.markers.push_back(testvec);
 
-    char *tmp;
-    if (asprintf(&tmp, "L_%zu%s", i+1, name_suffix.c_str()) != -1) {
-      // Copy to get memory freed on exception
-      std::string id = tmp;
-      free(tmp);
+	char *tmp;
+	if (asprintf(&tmp, "L_%zu%s", i+1, name_suffix.c_str()) != -1) {
+		// Copy to get memory freed on exception
+		std::string id = tmp;
+		free(tmp);
 
-      visualization_msgs::Marker text;
-      text.header.frame_id = finput_->header.frame_id;
-      text.header.stamp = ros::Time::now();
-      text.ns = marker_namespace;
-      text.id = idnum++;
-      text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-      text.action = visualization_msgs::Marker::ADD;
-      text.pose.position.x = info.base_point[0];
-      text.pose.position.y = info.base_point[1];
-      text.pose.position.z = info.base_point[2] + .15;
-      text.pose.orientation.w = 1.;
-      text.scale.z = 0.15;
-      text.color.r = text.color.g = text.color.b = 1.0f;
-      text.color.a = 1.0;
-      text.lifetime = ros::Duration(2, 0);
-      text.text = id;
-      m.markers.push_back(text);
-    }
+		visualization_msgs::Marker text;
+		text.header.frame_id = finput_->header.frame_id;
+		text.header.stamp = ros::Time::now();
+		text.ns = marker_namespace;
+		text.id = idnum++;
+		text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+		text.action = visualization_msgs::Marker::ADD;
+		text.pose.position.x = info.base_point[0];
+		text.pose.position.y = info.base_point[1];
+		text.pose.position.z = info.base_point[2] + .15;
+		text.pose.orientation.w = 1.;
+		text.scale.z = 0.15;
+		text.color.r = text.color.g = text.color.b = 1.0f;
+		text.color.a = 1.0;
+		text.lifetime = ros::Duration(2, 0);
+		text.text = id;
+		m.markers.push_back(text);
+	}
 
-    if (cfg_min_length_ >= 0. || cfg_max_length_ >= 0.) {
-      visualization_msgs::Marker sphere_ep_1;
-      sphere_ep_1.header.frame_id = finput_->header.frame_id;
-      sphere_ep_1.header.stamp = ros::Time::now();
-      sphere_ep_1.ns = marker_namespace;
-      sphere_ep_1.id = idnum++;
-      sphere_ep_1.type = visualization_msgs::Marker::SPHERE;
-      sphere_ep_1.action = visualization_msgs::Marker::ADD;
-      sphere_ep_1.pose.position.x = info.end_point_1[0];
-      sphere_ep_1.pose.position.y = info.end_point_1[1];
-      sphere_ep_1.pose.position.z = info.end_point_1[2];
-      sphere_ep_1.pose.orientation.w = 1.;
-      sphere_ep_1.scale.x = 0.05;
-      sphere_ep_1.scale.y = 0.05;
-      sphere_ep_1.scale.z = 0.05;
-      sphere_ep_1.color.r = line_colors[i][0] / 255.;
-      sphere_ep_1.color.g = line_colors[i][1] / 255.;
-      sphere_ep_1.color.b = line_colors[i][2] / 255.;
-      sphere_ep_1.color.a = 1.0;
-      sphere_ep_1.lifetime = ros::Duration(2, 0);
-      m.markers.push_back(sphere_ep_1);
+	if (cfg_min_length_ >= 0. || cfg_max_length_ >= 0.) {
+		visualization_msgs::Marker sphere_ep_1;
+		sphere_ep_1.header.frame_id = finput_->header.frame_id;
+		sphere_ep_1.header.stamp = ros::Time::now();
+		sphere_ep_1.ns = marker_namespace;
+		sphere_ep_1.id = idnum++;
+		sphere_ep_1.type = visualization_msgs::Marker::SPHERE;
+		sphere_ep_1.action = visualization_msgs::Marker::ADD;
+		sphere_ep_1.pose.position.x = info.end_point_1[0];
+		sphere_ep_1.pose.position.y = info.end_point_1[1];
+		sphere_ep_1.pose.position.z = info.end_point_1[2];
+		sphere_ep_1.pose.orientation.w = 1.;
+		sphere_ep_1.scale.x = 0.05;
+		sphere_ep_1.scale.y = 0.05;
+		sphere_ep_1.scale.z = 0.05;
+		sphere_ep_1.color.r = line_colors[i][0] / 255.;
+		sphere_ep_1.color.g = line_colors[i][1] / 255.;
+		sphere_ep_1.color.b = line_colors[i][2] / 255.;
+		sphere_ep_1.color.a = 1.0;
+		sphere_ep_1.lifetime = ros::Duration(2, 0);
+		m.markers.push_back(sphere_ep_1);
 
-      visualization_msgs::Marker sphere_ep_2;
-      sphere_ep_2.header.frame_id = finput_->header.frame_id;
-      sphere_ep_2.header.stamp = ros::Time::now();
-      sphere_ep_2.ns = marker_namespace;
-      sphere_ep_2.id = idnum++;
-      sphere_ep_2.type = visualization_msgs::Marker::SPHERE;
-      sphere_ep_2.action = visualization_msgs::Marker::ADD;
-      sphere_ep_2.pose.position.x = info.end_point_2[0];
-      sphere_ep_2.pose.position.y = info.end_point_2[1];
-      sphere_ep_2.pose.position.z = info.end_point_2[2];
-      sphere_ep_2.pose.orientation.w = 1.;
-      sphere_ep_2.scale.x = 0.05;
-      sphere_ep_2.scale.y = 0.05;
-      sphere_ep_2.scale.z = 0.05;
-      sphere_ep_2.color.r = line_colors[i][0] / 255.;
-      sphere_ep_2.color.g = line_colors[i][1] / 255.;
-      sphere_ep_2.color.b = line_colors[i][2] / 255.;
-      sphere_ep_2.color.a = 1.0;
-      sphere_ep_2.lifetime = ros::Duration(2, 0);
-      m.markers.push_back(sphere_ep_2);
+		visualization_msgs::Marker sphere_ep_2;
+		sphere_ep_2.header.frame_id = finput_->header.frame_id;
+		sphere_ep_2.header.stamp = ros::Time::now();
+		sphere_ep_2.ns = marker_namespace;
+		sphere_ep_2.id = idnum++;
+		sphere_ep_2.type = visualization_msgs::Marker::SPHERE;
+		sphere_ep_2.action = visualization_msgs::Marker::ADD;
+		sphere_ep_2.pose.position.x = info.end_point_2[0];
+		sphere_ep_2.pose.position.y = info.end_point_2[1];
+		sphere_ep_2.pose.position.z = info.end_point_2[2];
+		sphere_ep_2.pose.orientation.w = 1.;
+		sphere_ep_2.scale.x = 0.05;
+		sphere_ep_2.scale.y = 0.05;
+		sphere_ep_2.scale.z = 0.05;
+		sphere_ep_2.color.r = line_colors[i][0] / 255.;
+		sphere_ep_2.color.g = line_colors[i][1] / 255.;
+		sphere_ep_2.color.b = line_colors[i][2] / 255.;
+		sphere_ep_2.color.a = 1.0;
+		sphere_ep_2.lifetime = ros::Duration(2, 0);
+		m.markers.push_back(sphere_ep_2);
 
-      visualization_msgs::Marker lineseg;
-      lineseg.header.frame_id = finput_->header.frame_id;
-      lineseg.header.stamp = ros::Time::now();
-      lineseg.ns = marker_namespace;
-      lineseg.id = idnum++;
-      lineseg.type = visualization_msgs::Marker::LINE_LIST;
-      lineseg.action = visualization_msgs::Marker::ADD;
-      lineseg.points.resize(2);
-      lineseg.points[0].x = info.end_point_1[0];
-      lineseg.points[0].y = info.end_point_1[1];
-      lineseg.points[0].z = info.end_point_1[2];
-      lineseg.points[1].x = info.end_point_2[0];
-      lineseg.points[1].y = info.end_point_2[1];
-      lineseg.points[1].z = info.end_point_2[2];
-      lineseg.scale.x = 0.02;
-      lineseg.scale.y = 0.04;
-      lineseg.color.r = line_colors[i][0] / 255.;
-      lineseg.color.g = line_colors[i][1] / 255.;
-      lineseg.color.b = line_colors[i][2] / 255.;
-      lineseg.color.a = 1.0;
-      lineseg.lifetime = ros::Duration(2, 0);
-      m.markers.push_back(lineseg);
-    }
+		visualization_msgs::Marker lineseg;
+		lineseg.header.frame_id = finput_->header.frame_id;
+		lineseg.header.stamp = ros::Time::now();
+		lineseg.ns = marker_namespace;
+		lineseg.id = idnum++;
+		lineseg.type = visualization_msgs::Marker::LINE_LIST;
+		lineseg.action = visualization_msgs::Marker::ADD;
+		lineseg.points.resize(2);
+		lineseg.points[0].x = info.end_point_1[0];
+		lineseg.points[0].y = info.end_point_1[1];
+		lineseg.points[0].z = info.end_point_1[2];
+		lineseg.points[1].x = info.end_point_2[0];
+		lineseg.points[1].y = info.end_point_2[1];
+		lineseg.points[1].z = info.end_point_2[2];
+		lineseg.scale.x = 0.02;
+		lineseg.scale.y = 0.04;
+		lineseg.color.r = line_colors[i][0] / 255.;
+		lineseg.color.g = line_colors[i][1] / 255.;
+		lineseg.color.b = line_colors[i][2] / 255.;
+		lineseg.color.a = 1.0;
+		lineseg.lifetime = ros::Duration(2, 0);
+		m.markers.push_back(lineseg);
+	}
+}
+
+void
+LaserLinesThread::publish_visualization(const std::vector<TrackedLineInfo> &linfos,
+                                        const std::string &marker_namespace,
+                                        const std::string &avg_marker_namespace)
+{
+  visualization_msgs::MarkerArray m;
+
+  unsigned int idnum = 0;
+ 
+  for (size_t i = 0; i < linfos.size(); ++i) {
+	  const TrackedLineInfo &info = linfos[i];
+	  publish_visualization_add_line(m, idnum, info.raw, i, marker_namespace);
+	  publish_visualization_add_line(m, idnum, info.smooth, i, avg_marker_namespace, "_avg");
   }
 
   for (size_t i = idnum; i < last_id_num_; ++i) {
