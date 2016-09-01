@@ -104,7 +104,7 @@ RosSkillerThread::stop()
 }
 
 void
-RosSkillerThread::action_goal_cb(SkillerServer::GoalHandle &goal)
+RosSkillerThread::action_goal_cb(SkillerServer::GoalHandle goal)
 {
   MutexLocker lock(loop_mutex);
   if (exec_running_ && exec_as_) {
@@ -120,7 +120,7 @@ RosSkillerThread::action_goal_cb(SkillerServer::GoalHandle &goal)
 }
 
 void
-RosSkillerThread::action_cancel_cb(SkillerServer::GoalHandle &goal)
+RosSkillerThread::action_cancel_cb(SkillerServer::GoalHandle goal)
 {
   MutexLocker lock(loop_mutex);
   stop();

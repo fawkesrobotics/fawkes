@@ -68,8 +68,8 @@ class RosSkillerThread
 
   typedef actionlib::ActionServer<fawkes_msgs::ExecSkillAction> SkillerServer;
 
-  void action_goal_cb(SkillerServer::GoalHandle &goal);
-  void action_cancel_cb(SkillerServer::GoalHandle &goal);
+  void action_goal_cb(SkillerServer::GoalHandle goal);
+  void action_cancel_cb(SkillerServer::GoalHandle goal);
   void message_cb(const std_msgs::String::ConstPtr & goal);
 
   void stop();
