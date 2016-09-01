@@ -148,7 +148,7 @@ int RobotMemory::insert(std::string obj_str, std::string collection)
   return insert(fromjson(obj_str), collection);
 }
 
-int RobotMemory::update(Query query, BSONObj update, std::string collection)
+int RobotMemory::update(Query query, BSONObj update, std::string collection, bool upsert)
 {
   if(collection == "")
   {
@@ -161,7 +161,7 @@ int RobotMemory::update(Query query, BSONObj update, std::string collection)
 
   //actually execute update
   try{
-    mongodb_client_->update(collection, query, update);
+    mongodb_client_->update(collection, query, update, upsert);
   } catch (DBException &e) {
     log_deb(std::string("Error for update "+update.toString()+" for query "+query.toString()+"\n Exception: "+e.toString()), "error");
     return 0;
@@ -170,9 +170,9 @@ int RobotMemory::update(Query query, BSONObj update, std::string collection)
   return 1;
 }
 
-int RobotMemory::update(Query query, std::string update_str, std::string collection)
+int RobotMemory::update(Query query, std::string update_str, std::string collection, bool upsert)
 {
-  return update(query, fromjson(update_str), collection);
+  return update(query, fromjson(update_str), collection, upsert);
 }
 
 int RobotMemory::remove(Query query, std::string collection)

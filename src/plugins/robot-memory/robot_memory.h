@@ -55,8 +55,8 @@ class RobotMemory
     QResCursor query(mongo::Query query, std::string collection = "");
     int insert(mongo::BSONObj obj, std::string collection = "");
     int insert(std::string obj_str, std::string collection = "");
-    int update(mongo::Query query, mongo::BSONObj update, std::string collection = "");
-    int update(mongo::Query query, std::string update_str, std::string collection = "");
+    int update(mongo::Query query, mongo::BSONObj update, std::string collection = "", bool upsert = false);
+    int update(mongo::Query query, std::string update_str, std::string collection = "", bool upsert = false);
     int remove(mongo::Query query, std::string collection = "");
     int drop_collection(std::string collection);
     int clear_memory();

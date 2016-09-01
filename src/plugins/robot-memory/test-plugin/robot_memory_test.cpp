@@ -87,6 +87,16 @@ TEST_F(RobotMemoryTest, StoreRemoveQuery)
   ASSERT_FALSE(qres->more());
 }
 
+TEST_F(RobotMemoryTest, Upsert)
+{
+  ASSERT_TRUE(robot_memory->update("{upsert:'not existing'}", "{upsert:'should not exist'}", "", false));
+  QResCursor qres = robot_memory->query("{upsert:'should not exist'}");
+  ASSERT_FALSE(qres->more());
+  ASSERT_TRUE(robot_memory->update("{upsert:'not existing'}", "{upsert:'should exist'}", "", true));
+  qres = robot_memory->query("{upsert:'should exist'}");
+  ASSERT_TRUE(qres->more());
+}
+
 TEST_F(RobotMemoryTest, QueryInvalid)
 {
   ASSERT_THROW(robot_memory->query("{key-:+'not existing'}"), mongo::DBException);
