@@ -16,15 +16,16 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/boost.mk
+include $(BUILDSYSDIR)/eigen3.mk
 
 LIBS_libfawkeskdl_parser = fawkescore
 OBJS_libfawkeskdl_parser = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 HDRS_libfawkeskdl_parser = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
 OBJS_all = $(OBJS_libfawkeskdl_parser)
-ifeq ($(HAVE_KDLPARSER),1)
-  CFLAGS += $(CFLAGS_KDLPARSER)
-  LDFLAGS += $(LDFLAGS_KDLPARSER)
+ifeq ($(HAVE_KDLPARSER)$(HAVE_EIGEN3),11)
+  CFLAGS  += $(CFLAGS_KDLPARSER) $(CFLAGS_EIGEN3)
+  LDFLAGS += $(LDFLAGS_KDLPARSER) $(LDFLAGS_EIGEN3)
   LIBS_all = $(LIBDIR)/libfawkeskdl_parser.so
 else
   ifneq ($(HAVE_KDL),1)
