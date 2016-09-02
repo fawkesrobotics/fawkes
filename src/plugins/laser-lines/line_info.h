@@ -29,6 +29,7 @@
 #include <memory>
 #include <tf/types.h>
 #include <tf/transformer.h>
+#include <logging/logger.h>
 
 /** Line information container.
  * All points and angles are in the sensor reference frame
@@ -64,12 +65,16 @@ public:
   float cfg_switch_tolerance;	///< Configured line jitter threshold
   boost::circular_buffer<LineInfo> history;	///< history of raw line geometries for computing moving average
   float bearing_center; 	///< Bearing towards line center, used to select lines "in front of us" when there
+  fawkes::Logger *logger;
+  std::string plugin_name;
 
   TrackedLineInfo(
       fawkes::tf::Transformer *tfer,
       const std::string &input_frame_id,
       float cfg_switch_tolerance,
-      unsigned int cfg_moving_avg_len);
+      unsigned int cfg_moving_avg_len,
+      fawkes::Logger *logger,
+      std::string plugin_name);
 
   btScalar distance(const LineInfo &linfo) const;
   void update(LineInfo &new_linfo);

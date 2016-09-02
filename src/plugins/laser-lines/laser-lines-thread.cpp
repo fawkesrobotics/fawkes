@@ -316,7 +316,8 @@ LaserLinesThread::loop()
 	tf_listener,
 	finput_->header.frame_id,
 	cfg_switch_tolerance_,
-	cfg_moving_avg_enabled_ ? cfg_moving_avg_window_size_ : 1);
+	cfg_moving_avg_enabled_ ? cfg_moving_avg_window_size_ : 1,
+	logger, name());
     tl.update(l);
     known_lines_.push_back(tl);
   }
