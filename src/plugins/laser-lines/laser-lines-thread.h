@@ -149,6 +149,7 @@ class LaserLinesThread
   float        cfg_max_dist_;
   bool         cfg_moving_avg_enabled_;
   unsigned int cfg_moving_avg_window_size_;
+  std::string  cfg_tracking_frame_id_;
 
   unsigned int loop_count_;
 

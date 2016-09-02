@@ -107,6 +107,8 @@ LaserLinesThread::init()
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
   cfg_max_num_lines_         = config->get_uint(CFG_PREFIX"max_num_lines");
 
+  cfg_tracking_frame_id_     = config->get_string("/frames/odom");
+
   finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pcl_.c_str());
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
 
@@ -315,6 +317,7 @@ LaserLinesThread::loop()
     TrackedLineInfo tl(
 	tf_listener,
 	finput_->header.frame_id,
+	cfg_tracking_frame_id_,
 	cfg_switch_tolerance_,
 	cfg_moving_avg_enabled_ ? cfg_moving_avg_window_size_ : 1,
 	logger, name());

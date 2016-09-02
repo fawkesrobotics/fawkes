@@ -28,12 +28,14 @@ using namespace std;
 TrackedLineInfo::TrackedLineInfo(
     fawkes::tf::Transformer *tfer,
     const string &input_frame_id,
+    const string &tracking_frame_id,
     float cfg_switch_tolerance,
     unsigned int cfg_moving_avg_len,
     fawkes::Logger *logger,
     string plugin_name)
 : transformer(tfer),
   input_frame_id(input_frame_id),
+  tracking_frame_id(tracking_frame_id),
   cfg_switch_tolerance(cfg_switch_tolerance),
   history(cfg_moving_avg_len),
   bearing_center(0),
@@ -54,7 +56,7 @@ btScalar TrackedLineInfo::distance(const LineInfo &linfo) const
 	  ), fawkes::Time(0,0), input_frame_id);
   fawkes::tf::Stamped<fawkes::tf::Point> bp_odom_new;
   try {
-    transformer->transform_point("/odom", bp_new, bp_odom_new);
+    transformer->transform_point(tracking_frame_id, bp_new, bp_odom_new);
   } catch (fawkes::tf::TransformException &e) {
     // Continue without tf, track in input frame instead. Warning follows on update() call.
     bp_odom_new = bp_new;
@@ -76,9 +78,10 @@ void TrackedLineInfo::update(LineInfo &linfo)
 	      linfo.base_point[0], linfo.base_point[1], linfo.base_point[2]
 	  ), fawkes::Time(0,0), input_frame_id);
   try {
-    transformer->transform_point("/odom", bp_new, this->base_point_odom);
+    transformer->transform_point(tracking_frame_id, bp_new, this->base_point_odom);
   } catch (fawkes::tf::TransformException &e) {
-    logger->log_warn(plugin_name.c_str(), "Can't transform to odom. Attempting to track in %s.", input_frame_id);
+    logger->log_warn(plugin_name.c_str(), "Can't transform to %s. Attempting to track in %s.",
+	tracking_frame_id, input_frame_id);
     this->base_point_odom = bp_new;
   }
   this->history.push_back(linfo);
