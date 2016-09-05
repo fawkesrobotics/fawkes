@@ -36,6 +36,10 @@ ifneq ($(wildcard /usr/include/mongo/client/dbclient.h /usr/local/include/mongo/
     ifeq ($(DISTRO),ubuntu)
       LDFLAGS_MONGODB += -lssl -lcrypto
     endif
+    ifeq ($(OS),FreeBSD)
+      CFLAGS_MONGODB  += -Wno-deprecated-declarations
+      LDFLAGS_MONGODB += -lssl -lcrypto -lsasl2
+    endif
   endif
 endif
 
