@@ -92,9 +92,6 @@ class SkillerExecutionThread
   fawkes::ComponentLogger *__clog;
   fawkes::BlackBoardWithOwnership *__bbo;
   
-  unsigned int __last_exclusive_controller;
-  bool         __reader_just_left;
-
   // config values
   std::string __cfg_skillspace;
   bool        __cfg_watch_files;
