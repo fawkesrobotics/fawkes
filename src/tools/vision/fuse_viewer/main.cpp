@@ -36,17 +36,8 @@ int main(int argc, char** argv)
   {
     Gtk::Main kit(argc, argv);
 
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
     Glib::RefPtr<Gtk::Builder> builder =
       Gtk::Builder::create_from_file(RESDIR"/guis/fuse_viewer/fuse_viewer.ui");
-#else
-    std::unique_ptr<Gtk::BuilderError> error;
-    Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file(RESDIR"/guis/fuse_viewer/fuse_viewer.ui", error);
-    if (error.get()) {
-      throw fawkes::Exception("Failed to load UI file: %s", error->what().c_str());
-    }
-#endif
 
     FuseViewerGtkWindow *window = NULL;
     builder->get_widget_derived("wndMain", window);
