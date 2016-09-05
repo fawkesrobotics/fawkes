@@ -122,12 +122,7 @@ PluginTreeView::~PluginTreeView()
 
 #ifdef HAVE_GCONFMM
   if (__gconf) {
-#  ifdef GLIBMM_EXCEPTIONS_ENABLED
     __gconf->remove_dir(__gconf_prefix);
-#  else
-    std::unique_ptr<Glib::Error> error;
-    __gconf->remove_dir(__gconf_prefix, error);
-#  endif
   }
 #endif
 }
@@ -153,20 +148,10 @@ PluginTreeView::set_gconf_prefix(Glib::ustring gconf_prefix)
   if (! __gconf) {
     __gconf = Gnome::Conf::Client::get_default_client();
   } else {
-#  ifdef GLIBMM_EXCEPTIONS_ENABLED
     __gconf->remove_dir(__gconf_prefix);
-#  else
-    std::unique_ptr<Glib::Error> error;
-    __gconf->remove_dir(__gconf_prefix, error);
-#  endif
   }
 
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
   __gconf->add_dir(gconf_prefix);
-#else
-  std::unique_ptr<Glib::Error> error;
-  __gconf->add_dir(gconf_prefix, Gnome::Conf::CLIENT_PRELOAD_NONE, error);
-#endif
   __gconf_prefix = gconf_prefix;
 
   if (__gconf_connection) {
@@ -445,12 +430,7 @@ PluginTreeView::append_plugin_column()
 #  ifdef HAVE_GCONFMM
   if ( __gconf )
   {
-#    ifdef GLIBMM_EXCEPTIONS_ENABLED
     description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip");
-#    else
-    std::unique_ptr<Glib::Error> error;
-    description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip", error);
-#    endif
   }
 #  endif
 #endif
