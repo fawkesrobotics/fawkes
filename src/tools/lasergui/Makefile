@@ -21,7 +21,7 @@ include $(BUILDSYSDIR)/gui.mk
 CFLAGS  += $(CFLAGS_GUI)
 LDFLAGS += $(LDFLAGS_GUI)
 
-LIBS_lasergui = stdc++ m fawkescore fawkesutils fawkesblackboard \
+LIBS_fflasergui = stdc++ m fawkescore fawkesutils fawkesblackboard \
 		fawkesinterface fawkesnetcomm fawkesguiutils \
 		Position2DTrackInterface \
 		Laser360Interface Laser720Interface Laser1080Interface \
@@ -29,23 +29,23 @@ LIBS_lasergui = stdc++ m fawkescore fawkesutils fawkesblackboard \
 
 ifeq ($(BUILD_TYPE),maemo)
   ifeq ($(HAVE_HILDON_GUI),1)
-    OBJS_lasergui = lasergui_hildon.o
-    LIBS_lasergui += osso
+    OBJS_fflasergui = lasergui_hildon.o
+    LIBS_fflasergui += osso
     BUILD_LASERGUI = $(HAVE_GUI)
   else
     WARN_TARGETS += warning_hildonmm
   endif
 else
-  OBJS_lasergui = lasergui.o
+  OBJS_fflasergui = lasergui.o
   BUILD_LASERGUI = $(HAVE_GUI)
 endif
-OBJS_lasergui += laser_drawing_area.o visdisplay.o
-OBJS_all = $(OBJS_lasergui)
+OBJS_fflasergui += laser_drawing_area.o visdisplay.o
+OBJS_all = $(OBJS_fflasergui)
 
 ifeq ($(BUILD_LASERGUI),1)
-  BINS_gui = $(BINDIR)/lasergui
+  BINS_gui = $(BINDIR)/fflasergui
   INST_RESDIRS = guis/lasergui
-  MANPAGES_all = $(MANDIR)/man1/lasergui.1
+  MANPAGES_all = $(MANDIR)/man1/fflasergui.1
 else
   WARN_TARGETS += warning_lasergui
 endif
