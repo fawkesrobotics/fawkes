@@ -72,7 +72,11 @@ class LaserGuiHildonWindow : public Hildon::Window
     __laser_if = NULL;
     __ifd = NULL;
 
+#  if GLIBMM_MAJOR_VERSION > 2 || (GLIBMM_MAJOR_VERSION == 2 && GLIBMM_MINOR_VERSION >= 48)
     std::unique_ptr<Glib::Error> error;
+#  else
+    std::auto_ptr<Glib::Error> error;
+#  endif
     set_icon_from_file(RESDIR"/guis/lasergui/lines_"ICON_FORMAT".png", error);
 
     add(__area);
