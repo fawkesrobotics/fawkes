@@ -54,8 +54,8 @@ OBJS_pcl_db_store = pcl_db_store_plugin.o pcl_db_store_thread.o
 OBJS_all    = $(OBJS_pcl_db_merge) $(OBJS_pcl_db_retrieve) $(OBJS_pcl_db_store)
 
 
-ifeq ($(HAVE_MONGODB)$(HAVE_PCL)$(HAVE_TF),111)
-  CFLAGS += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS_MONGODB)
+ifeq ($(HAVE_MONGODB)$(HAVE_PCL)$(HAVE_TF)$(HAVE_CPP11),1111)
+  CFLAGS += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS_MONGODB) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(LDFLAGS_MONGODB)
 
   PLUGINS_all = $(PLUGINDIR)/pcl-db-store.so $(PLUGINDIR)/pcl-db-retrieve.so
@@ -81,6 +81,9 @@ else
   ifneq ($(HAVE_TF),1)
     WARN_TARGETS += warning_tf
   endif
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
 endif
 
 ros: interfaces
@@ -89,7 +92,7 @@ ros: interfaces
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_mongodb warning_pcl warning_pcl_components warning_tf
+.PHONY: warning_mongodb warning_pcl warning_pcl_components warning_tf warning_cpp11
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL plugins$(TNORMAL) (mongodb[-devel] not installed)"
 warning_pcl:
@@ -98,6 +101,8 @@ warning_pcl_components:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL merge plugin$(TNORMAL) (missing PCL components: $(call pcl-missing-libs,$(REQUIRED_PCL_LIBS_MERGE)))"
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL merge plugin$(TNORMAL) (TF framework not available)"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB PCL merge plugin$(TNORMAL) (C++11 support required)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
