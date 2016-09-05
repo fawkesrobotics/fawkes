@@ -45,7 +45,8 @@ ifeq ($(call boost-have-include,version.hpp),1)
   BOOST_VERSION_PATCH = $(shell echo $$(($(BOOST_VERSION) % 100)))
 endif
 
-boost-version-create = $(shell echo $$(($1 * 100000 + $2 * 1000 + $3)))
-boost-version-atleast = $(shell echo $$(($(BOOST_VERSION) >= $1 * 100000 + $2 * 1000 + $3)))
+boost-version-create = $(shell echo $$(($1 * 100000 + $2 * 100 + $3)))
+boost-version-atleast = $(shell echo $$(($(BOOST_VERSION) >= $1 * 100000 + $2 * 100 + $3)))
+boost-version-parse  = $(shell echo $$(($1 / 100000)).$$(($1 / 100 % 1000)).$$(($1 % 100)))
 
 endif # __buildsys_boost_mk_
