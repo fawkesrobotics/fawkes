@@ -234,12 +234,7 @@ SkillGuiGtkWindow::on_config_changed()
     row[__sks_record.skillstring] = *i;
   }
 
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
   bool colored    = __gconf->get_bool(GCONF_PREFIX"/graph_colored");
-#else
-  std::unique_ptr<Glib::Error> error;
-  bool colored    = __gconf->get_bool(GCONF_PREFIX"/graph_colored", error);
-#endif
   tb_graphcolored->set_active(colored);
 #endif
 }
