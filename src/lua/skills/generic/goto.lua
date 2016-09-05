@@ -27,8 +27,8 @@ name               = "goto"
 fsm                = SkillHSM:new{name=name, start="GOTO"}
 depends_skills     = {"relgoto"}
 depends_interfaces = {
-   {v = "pose", type = "Position3DInterface"},
-   {v = "navigator", type = "NavigatorInterface"}
+   {v = "pose", id = "Pose", type = "Position3DInterface"},
+   {v = "navigator", id = "Navigator", type = "NavigatorInterface"}
 }
 
 documentation      = [==[Global goto skill.

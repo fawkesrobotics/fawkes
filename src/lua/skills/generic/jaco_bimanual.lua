@@ -27,7 +27,7 @@ name               = "jaco_bimanual"
 fsm                = SkillHSM:new{name=name, start="INIT", debug=true}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "jaco_bi", type = "JacoBimanualInterface"}
+   {v = "jaco_bi", id = "JacoArm Bimanual", type = "JacoBimanualInterface"}
 }
 
 documentation      = [==[

@@ -27,7 +27,7 @@ name               = "katana"
 fsm                = SkillHSM:new{name=name, start="DECIDE_MODE"}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "katanaarm", type = "KatanaInterface"}
+   {v = "katanaarm", id = "Katana", type = "KatanaInterface"}
 }
 
 documentation      = [==[Katana skill.

@@ -27,7 +27,7 @@ name               = "kick"
 fsm                = SkillHSM:new{name=name, start="KICK"}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "naomotion", type = "HumanoidMotionInterface"}
+   {v = "naomotion", id = "NaoQi Motion", type = "HumanoidMotionInterface"}
 }
 
 documentation      = [==[Kick the ball.

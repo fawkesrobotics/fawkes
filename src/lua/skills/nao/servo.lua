@@ -27,9 +27,9 @@ name               = "servo"
 fsm                = SkillHSM:new{name=name, start="SERVO"}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "naojoints", type = "NaoJointPositionInterface"},
-   {v = "naostiffness", type = "NaoJointStiffnessInterface"},
-   {v = "naomotion", type = "HumanoidMotionInterface"}
+   {v = "naojoints", type = "NaoJointPositionInterface", id = "Nao Joint Positions"},
+   {v = "naostiffness", type = "NaoJointStiffnessInterface", id = "Nao Joint Stiffness"},
+   {v = "naomotion", type = "HumanoidMotionInterface", id = "NaoQi Motion"}
 }
 
 documentation = [==[Servo control for the Nao.

@@ -27,8 +27,8 @@ name               = "relgoto"
 fsm                = SkillHSM:new{name=name, start="RELGOTO", debug=true}
 depends_skills     = {"servo"}
 depends_interfaces = {
-   {v = "naomotion", type = "HumanoidMotionInterface"},
-   {v = "navigator", type = "NavigatorInterface"}
+   {v = "naomotion", id = "NaoQi Motion", type = "HumanoidMotionInterface"},
+   {v = "navigator", id = "Navigator", type = "NavigatorInterface"}
 }
 
 local p = require("predicates.soccer.general")

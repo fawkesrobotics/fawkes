@@ -27,7 +27,7 @@ name               = "stop"
 fsm                = SkillHSM:new{name=name, start="STOP"}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "naomotion", type = "HumanoidMotionInterface"}
+   {v = "naomotion", type = "HumanoidMotionInterface", id = "NaoQi Motion"}
 }
 
 documentation      = [==[Stop any motion.

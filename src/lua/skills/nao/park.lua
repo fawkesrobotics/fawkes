@@ -27,8 +27,8 @@ name               = "park"
 fsm                = SkillHSM:new{name=name, start="PARK"}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "naomotion", type = "HumanoidMotionInterface"},
-   {v = "naostiffness", type = "NaoJointStiffnessInterface"}
+   {v = "naomotion", id = "NaoQi Motion", type = "HumanoidMotionInterface"},
+   {v = "naostiffness", id = "Nao Joint Stiffness", type = "NaoJointStiffnessInterface"}
 }
 
 documentation      = [==[Park the robot.

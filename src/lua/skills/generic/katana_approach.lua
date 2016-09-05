@@ -27,7 +27,7 @@ name               = "katana_approach"
 fsm                = SkillHSM:new{name=name, start="INIT"}
 depends_skills     = {"katana_rel"}
 depends_interfaces = {
-   {v = "katanaarm", type = "KatanaInterface"}
+   {v = "katanaarm", id = "Katana", type = "KatanaInterface"}
 }
 
 documentation      = [==[Katana approaching
