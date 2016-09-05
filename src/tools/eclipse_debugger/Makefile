@@ -41,14 +41,14 @@ endif
 CFLAGS  += $(CFLAGS_GUI) $(CFLAGS_GRAPHVIZ)
 LDFLAGS += $(LDFLAGS_GUI) $(LDFLAGS_GRAPHVIZ)
 
-LIBS_eclipsedebugger = stdc++ m fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
+LIBS_ffeclipse_debugger = stdc++ m fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
 		fawkesguiutils fawkesinterface EclipseDebuggerInterface
-OBJS_eclipsedebugger = main.o eclipse_debugger.o
+OBJS_ffeclipse_debugger = main.o eclipse_debugger.o
 
-OBJS_all = $(OBJS_eclipsedebugger)
+OBJS_all = $(OBJS_ffeclipse_debugger)
 
 ifeq ($(HAVE_GUI),1)
-  BINS_gui = $(BINDIR)/eclipsedebugger 
+  BINS_gui = $(BINDIR)/ffeclipse-debugger 
 else
   WARN_TARGETS += warning_eclipsedebugger
 endif
