@@ -42,9 +42,11 @@ gcc_lessthan_version = $(strip $(if $(call lt,$(GCC_VERSION_MAJOR),$1),1,	\
 # Check für C++0x/C++11 availability
 ifeq ($(call gcc_atleast_version,4,3),1)
   HAVE_CPP11=1
-  CFLAGS_CPP11=-std=c++0x
-  ifeq ($(call gcc_atleast_version,4,7),1)
-    CFLAGS_CPP11=-std=c++11
+  ifneq ($(call gcc_atleast_version,6,0),1)
+    CFLAGS_CPP11=-std=c++0x
+    ifeq ($(call gcc_atleast_version,4,7),1)
+      CFLAGS_CPP11=-std=c++11
+    endif
   endif
 endif
 
