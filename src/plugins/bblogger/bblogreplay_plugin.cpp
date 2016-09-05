@@ -103,7 +103,11 @@ BlackBoardLogReplayPlugin::BlackBoardLogReplayPlugin(Configuration *config)
     scenario_grace_period = config->get_float((scenario_prefix + "grace_period").c_str());
   } catch (Exception &e) {} // ignored, assume enabled
 
+#if __cplusplus >= 201103L
   std::unique_ptr<Configuration::ValueIterator> i(config->search(logs_prefix.c_str()));
+#else
+  std::auto_ptr<Configuration::ValueIterator> i(config->search(logs_prefix.c_str()));
+#endif
   while (i->next()) {
     std::string log_name = std::string(i->path()).substr(logs_prefix.length());
     log_name = log_name.substr(0, log_name.find("/"));
