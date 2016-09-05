@@ -1,14 +1,14 @@
-lasergui(1)
-===========
+fflasergui(1)
+=============
 
 NAME
 ----
-lasergui - Watch laser scanner data remotely in real-time
+fflasergui - Watch laser scanner data remotely in real-time
 
 SYNOPSIS
 --------
 [verse]
-*lasergui*
+*fflasergui*
 
 DESCRIPTION
 -----------
