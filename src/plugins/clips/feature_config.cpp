@@ -86,7 +86,12 @@ ConfigCLIPSFeature::clips_config_load(std::string env_name, std::string cfg_pref
   }
 
   fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
+#if __cplusplus >= 201103L
   std::unique_ptr<Configuration::ValueIterator> v(config_->search(cfg_prefix.c_str()));
+#else
+  std::auto_ptr<Configuration::ValueIterator> v(config_->search(cfg_prefix.c_str()));
+#endif
+
   while (v->next()) {
     std::string type = "";
     std::string value = v->get_as_string();
