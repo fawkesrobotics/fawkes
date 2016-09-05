@@ -20,7 +20,7 @@ include $(BUILDSYSDIR)/ext/gmsl
 $(foreach P,$(PLUGINS_all:$(PLUGINDIR)/%.so=%),$(eval INST_LIB_SUBDIR_$(call nametr,$P) = $(FFLIBSUBDIR)/plugins))
 
 # Library headers get subdir matching name if not set
-$(foreach P,$(LIBS_all:$(LIBDIR)/libfawkes%.so=%) $(LIBS_gui:$(LIBDIR)/libfawkes%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfawkes$P)),$P),$(eval INST_HDRS_SUBDIR_libfawkes$P = $P)))
+$(foreach P,$(LIBS_all:$(LIBDIR)/libfawkes%.so=%) $(LIBS_gui:$(LIBDIR)/libfawkes%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfawkes$P)),$P),$(eval INST_HDRS_SUBDIR_libfawkes$P = $(P:_%=%))))
 $(foreach P,$(LIBS_all:$(LIBDIR)/libfv%.so=%) $(LIBS_gui:$(LIBDIR)/libfv%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfv$P)),$P),$(eval INST_HDRS_SUBDIR_libfv$P = fv$P)))
 
 ifdef __buildsys_lua_mk_
