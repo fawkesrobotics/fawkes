@@ -28,6 +28,15 @@ endif
 ifeq ($(HAVE_GAZEBO),1)
   CFLAGS_GAZEBO  = -DHAVE_GAZEBO $(shell $(PKGCONFIG) --cflags 'gazebo')
   LDFLAGS_GAZEBO = $(shell $(PKGCONFIG) --libs 'gazebo') -ldl
+
+  # if ffmpeg is installed, gazebo may have been compiled with support for it
+  #   # hence check for headers and add the respective include directories
+  ifneq ($(wildcard $(SYSROOT)/usr/include/ffmpeg/libavcodec/avcodec.h),)
+    CFLAGS_GAZEBO += -I$(SYSROOT)/usr/include/ffmpeg
+  endif
+  ifneq ($(wildcard $(SYSROOT)/usr/local/include/ffmpeg/libavcodec/avcodec.h),)
+    CFLAGS_GAZEBO += -I$(SYSROOT)/usr/local/include/ffmpeg
+  endif
 endif
 
 endif # __buildsys_gazebo_mk_
