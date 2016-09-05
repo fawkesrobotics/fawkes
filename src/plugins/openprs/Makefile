@@ -35,6 +35,10 @@ OBJS_openprs_mod_blackboard = mod_blackboard.o
 LIBS_openprs_mod_config = fawkescore fawkesutils fawkesconfig fawkesnetcomm
 OBJS_openprs_mod_config = mod_config.o
 
+INST_LIB_SUBDIR_openprs_mod_utils = $(FFLIBSUBDIR)
+INST_LIB_SUBDIR_openprs_mod_time = $(FFLIBSUBDIR)
+INST_LIB_SUBDIR_openprs_mod_blackboard = $(FFLIBSUBDIR)
+INST_LIB_SUBDIR_openprs_mod_config = $(FFLIBSUBDIR)
 
 OBJS_all = $(OBJS_openprs) $(OBJS_openprs_mod_utils) \
 	   $(OBJS_openprs_mod_time) $(OBJS_openprs_mod_blackboard) \
