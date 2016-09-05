@@ -45,7 +45,7 @@ OBJS_all = $(OBJS_fflasergui)
 ifeq ($(BUILD_LASERGUI),1)
   BINS_gui = $(BINDIR)/fflasergui
   INST_RESDIRS = guis/lasergui
-  MANPAGES_all = $(MANDIR)/man1/fflasergui.1
+  MANPAGES_gui = $(MANDIR)/man1/fflasergui.1
 else
   WARN_TARGETS += warning_lasergui
 endif
