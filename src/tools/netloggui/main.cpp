@@ -29,13 +29,7 @@ main(int argc, char **argv) {
   Gtk::Main gtk_main(argc, argv);
 
   Glib::RefPtr<Gtk::Builder> builder;
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
   builder = Gtk::Builder::create_from_file(RESDIR"/guis/netloggui/netloggui.ui");
-#else
-  Glib::RefPtr<Gtk::BuilderError> error;
-  builder =
-    Gtk::Builder::create_from_file(RESDIR"/guis/netloggui/netloggui.ui", error);
-#endif
 
   NetLogGuiGtkWindow *window = NULL;
   builder->get_widget_derived("wnd_netloggui", window);
