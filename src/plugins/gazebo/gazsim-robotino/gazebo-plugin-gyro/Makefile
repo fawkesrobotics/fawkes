@@ -26,6 +26,8 @@ LIBDIRS_BASE += $(GAZEBO_LIBDIR)
 LIBS_gazebo_libgyro = gazsim_msgs
 OBJS_gazebo_libgyro = gyro.o
 
+INST_LIB_SUBDIR_gazebo_libgyro = $(FFLIBSUBDIR)
+
 OBJS_all    = $(OBJS_gazebo_libgyro)
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF),11)

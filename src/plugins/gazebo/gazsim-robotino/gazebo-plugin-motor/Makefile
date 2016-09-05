@@ -26,6 +26,8 @@ LIBDIRS_BASE += $(GAZEBO_LIBDIR)
 LIBS_gazebo_libmotor = gazsim_msgs
 OBJS_gazebo_libmotor = motor.o
 
+INST_LIB_SUBDIR_gazebo_libmotor = $(FFLIBSUBDIR)
+
 OBJS_all    = $(OBJS_gazebo_libmotor)
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF),11)
