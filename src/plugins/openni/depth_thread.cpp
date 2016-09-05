@@ -60,7 +60,11 @@ OpenNiDepthThread::init()
   MutexLocker lock(openni.objmutex_ptr());
 
   __depth_gen = new xn::DepthGenerator();
+#if __cplusplus >= 201103L
   std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+#else
+  std::auto_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+#endif
 
   XnStatus st;
 

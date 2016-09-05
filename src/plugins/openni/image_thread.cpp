@@ -66,7 +66,11 @@ OpenNiImageThread::init()
   __cfg_copy_mode = CONVERT_YUV;
 
   __image_gen = new xn::ImageGenerator();
+#if __cplusplus >= 201103L
   std::unique_ptr<xn::ImageGenerator> imagegen_uniqueptr(__image_gen);
+#else
+  std::auto_ptr<xn::ImageGenerator> imagegen_uniqueptr(__image_gen);
+#endif
 
   XnStatus st;
 

@@ -103,13 +103,18 @@ OpenNiHandTrackerThread::init()
   MutexLocker lock(openni.objmutex_ptr());
 
   __hand_gen = new xn::HandsGenerator();
+#if __cplusplus >= 201103L
   std::unique_ptr<xn::HandsGenerator> handgen_uniqueptr(__hand_gen);
+  std::unique_ptr<xn::GestureGenerator> gesturegen_uniqueptr(__gesture_gen);
+  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+#else
+  std::auto_ptr<xn::HandsGenerator> handgen_uniqueptr(__hand_gen);
+  std::auto_ptr<xn::GestureGenerator> gesturegen_uniqueptr(__gesture_gen);
+  std::auto_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+#endif
 
   __gesture_gen = new xn::GestureGenerator();
-  std::unique_ptr<xn::GestureGenerator> gesturegen_uniqueptr(__gesture_gen);
-
   __depth_gen = new xn::DepthGenerator();
-  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
 
   XnStatus st;
 
