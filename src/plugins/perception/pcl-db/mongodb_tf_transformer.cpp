@@ -132,7 +132,11 @@ MongoDBTransformer::restore(long long start_msec, long long end_msec, long long 
   std::list<std::string> collections =
     mongodb_client_->getCollectionNames(database_);
   
+#if __cplusplus >= 201103L
   std::unique_ptr<DBClientCursor> cursor;
+#else
+  std::auto_ptr<DBClientCursor> cursor;
+#endif
   BSONObj doc;
   std::list<std::string>::iterator c;
   for (c = collections.begin(); c != collections.end(); ++c) {
