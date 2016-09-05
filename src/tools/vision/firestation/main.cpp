@@ -30,14 +30,8 @@ int main(int argc, char** argv)
   try
   {
     Gtk::Main kit(argc, argv);
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
     Glib::RefPtr<Gtk::Builder> builder =
       Gtk::Builder::create_from_file(RESDIR"/guis/firestation/firestation.ui");
-#else
-    std::unique_ptr<Gtk::BuilderError> error;
-    Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file(RESDIR"/guis/firestation/firestation.ui", error);
-#endif
     Firestation firestation(builder);
     kit.run(firestation.get_window());
     return 0;
