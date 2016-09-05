@@ -31,6 +31,10 @@ OBJS_openprs_mod_protobuf = oprs_protobuf.o mod_protobuf.o
 LIBS_openprs_mod_navgraph = fawkescore fawkesnavgraph fawkesconfig fawkesnetcomm
 OBJS_openprs_mod_navgraph = mod_navgraph.o
 
+INST_LIB_SUBDIR_openprs_mod_skiller  = $(FFLIBSUBDIR)
+INST_LIB_SUBDIR_openprs_mod_protobuf = $(FFLIBSUBDIR)
+INST_LIB_SUBDIR_openprs_mod_navgraph = $(FFLIBSUBDIR)
+
 OBJS_all = $(OBJS_openprs_agent) $(OBJS_openprs_mod_skiller) \
 	   $(OBJS_openprs_mod_protobuf) $(OBJS_openprs_mod_navgraph)
 
