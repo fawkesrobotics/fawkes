@@ -21,7 +21,7 @@ $(foreach P,$(PLUGINS_all:$(PLUGINDIR)/%.so=%),$(eval INST_LIB_SUBDIR_$(call nam
 
 # Library headers get subdir matching name if not set
 $(foreach P,$(LIBS_all:$(LIBDIR)/libfawkes%.so=%) $(LIBS_gui:$(LIBDIR)/libfawkes%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfawkes$P)),$P),$(eval INST_HDRS_SUBDIR_libfawkes$P = $P)))
-$(foreach P,$(LIBS_all:$(LIBDIR)/libfv%.so=%) $(LIBS_gui:$(LIBDIR)/libfv%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfv$P)),$P),$(eval INST_HDRS_SUBDIR_libfv$P = firevision/$P)))
+$(foreach P,$(LIBS_all:$(LIBDIR)/libfv%.so=%) $(LIBS_gui:$(LIBDIR)/libfv%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfv$P)),$P),$(eval INST_HDRS_SUBDIR_libfv$P = fv$P)))
 
 ifdef __buildsys_lua_mk_
 # Lua libraries are "inferred" and automatically installed to proper directory
