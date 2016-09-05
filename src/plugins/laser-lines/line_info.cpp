@@ -24,7 +24,19 @@
 
 using namespace std;
 
+/** @class TrackedLineInfo "line_info.h"
+ * Container for a line with tracking and smoothing info.
+ */
 
+/** Constructor.
+ * @param tfer tf transformer
+ * @param input_frame_id frame id of incoming data
+ * @param tracking_frame_id fixed frame in which to perform tracking
+ * @param cfg_switch_tolerance tolerance in m for when to assume a line ID switch
+ * @param cfg_moving_avg_len length of buffer for moving average
+ * @param logger logger for informational messages
+ * @param plugin_name component for informational messages
+ */
 TrackedLineInfo::TrackedLineInfo(
     fawkes::tf::Transformer *tfer,
     const string &input_frame_id,
@@ -44,8 +56,8 @@ TrackedLineInfo::TrackedLineInfo(
 {}
 
 
-/**
- * Compute this line's distance from @param linfo, using odom as reference frame.
+/** Compute this line's distance from line info
+ * @param linfo line info
  * @return the scalar distance between the two base points in meters.
  */
 btScalar TrackedLineInfo::distance(const LineInfo &linfo) const
@@ -66,8 +78,8 @@ btScalar TrackedLineInfo::distance(const LineInfo &linfo) const
 }
 
 
-/**
- * Update this line with the data from @param linfo.
+/** Update this line.
+ * @param linfo new info to consume
  * This also updates moving averages for all fields.
  */
 void TrackedLineInfo::update(LineInfo &linfo)
