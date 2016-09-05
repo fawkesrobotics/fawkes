@@ -46,22 +46,12 @@ int main(int argc, char** argv)
 #endif
 
     Glib::RefPtr<Gtk::Builder> builder;
-#ifdef GLIBMM_EXCEPTIONS_ENABLED
     try {
       builder =
         Gtk::Builder::create_from_file(UI_FILE);
     } catch (Gtk::BuilderError &e) {
       printf("Failed to create GUI: %s\n", e.what().c_str());
     }
-#else
-    std::unique_ptr<Gtk::BuilderError> error;
-    Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file(UI_FILE, error);
-    if (error.get()) {
-      throw fawkes::Exception("Failed to load Glade file: %s",
-                              error->what().c_str());
-    }
-#endif
 
     PluginGuiGtkWindow *window = NULL;
     builder->get_widget_derived("wndMain", window);
