@@ -45,7 +45,11 @@ class LaserClusterPlugin : public fawkes::Plugin
     std::string prefix = "/laser-cluster/";
 
     // Read configurations and spawn LaserFilterThreads
+#if __cplusplus >= 201103L
     std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+#else
+    std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+#endif
     while (i->next()) {
       std::string cfg_name = std::string(i->path()).substr(prefix.length());
       cfg_name = cfg_name.substr(0, cfg_name.find("/"));
