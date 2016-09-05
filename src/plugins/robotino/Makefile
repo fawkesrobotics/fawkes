@@ -50,7 +50,7 @@ else
   WARN_TARGETS += warning_openrobotino
 endif
 
-ifeq ($(HAVE_LIBUDEV)$(HAVE_ROBOTINO_DIRECT_BOOST_LIBS)$(call boost-version-atleast,1,0,48),111)
+ifeq ($(HAVE_LIBUDEV)$(HAVE_ROBOTINO_DIRECT_BOOST_LIBS)$(call boost-version-atleast,1,48,0),111)
 	HAVE_ROBOTINO_DIRECT = 1
 
   CFLAGS += -DHAVE_ROBOTINO_DIRECT $(CFLAGS_CPP11) $(CFLAGS_LIBUDEV) $(CFLAGS_ROBOTINO_DIRECT_BOOST)
@@ -65,7 +65,7 @@ else
     WARN_TARGETS_ROBOTINO_DIRECT_BOOST = $(foreach l,$(ROBOTINO_DIRECT_REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_robotino_direct_boost_$l))
 	  WARN_TARGETS += $(WARN_TARGETS_ROBOTINO_DIRECT_BOOST)
   endif
-  ifneq ($(call boost-version-atleast,1,0,48),1)
+  ifneq ($(call boost-version-atleast,1,48,0),1)
     WARN_TARGETS += warning_old_boost
   endif
 endif
@@ -138,13 +138,13 @@ warning_ros:
 warning_sensor_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TBROWN)Omitting Robotino Joints plugin$(TNORMAL) (ROS package sensor_msgs not found)"
 warning_libudev:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct commnunication support$(TNORMAL) (libudev not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct communication support$(TNORMAL) (libudev not available)"
 $(WARN_TARGETS_ROBOTINO_DIRECT_BOOST): warning_robotino_direct_boost_%:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct commnunication support$(TNORMAL) (Boost library $* not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct communication support$(TNORMAL) (Boost library $* not found)"
 warning_old_boost:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct commnunication support$(TNORMAL) (Boost library too old, require at least 1.0.48, have $(BOOST_VERSION))"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct communication support$(TNORMAL) (Boost library too old, require at least 1.0.48, have $(call boost-version-parse,$(BOOST_VERSION)))"
 warning_cpp11:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct commnunication support$(TNORMAL) (C++11 support required)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting Robotino direct communication support$(TNORMAL) (C++11 support required)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
