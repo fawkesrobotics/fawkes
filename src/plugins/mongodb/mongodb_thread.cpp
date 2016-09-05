@@ -113,7 +113,7 @@ MongoDBThread::init()
 #if __cplusplus >= 201103L || (defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ >= 4)
   std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #else
-  std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+  std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #endif
   while (i->next()) {
     std::string cfg_name = std::string(i->path()).substr(prefix.length());
@@ -217,7 +217,7 @@ MongoDBThread::ClientConf::read_authinfo(Configuration *config, Logger *logger,
 #if __cplusplus >= 201103L
   std::unique_ptr<Configuration::ValueIterator>
 #else
-  std::unique_ptr<Configuration::ValueIterator>
+  std::auto_ptr<Configuration::ValueIterator>
 #endif
     i(config->search((prefix + "auth/").c_str()));
   while (i->next()) {
@@ -271,7 +271,7 @@ MongoDBThread::ClientConf::ClientConf(Configuration *config, Logger *logger,
 #if __cplusplus >= 201103L || (defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ >= 4)
     std::unique_ptr<Configuration::ValueIterator>
 #else
-    std::unique_ptr<Configuration::ValueIterator>
+    std::auto_ptr<Configuration::ValueIterator>
 #endif
       i(config->search((prefix + "hosts/").c_str()));
     while (i->next()) {
