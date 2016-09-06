@@ -1,0 +1,63 @@
+ffgenplugin(1)
+==============
+
+NAME
+----
+ffgenplugin - Generate the necessary files to build a fawkes plugin
+
+SYNOPSIS
+--------
+[verse]
+'ffgenplugin' [-h] <author_name> <plugin_name> <description> <directory>
+
+DESCRIPTION
+-----------
+This program will generate the basic files to build a fawkes Plugin into
+a folder specified by the user, to simplify the process of building your
+own plugin
+
+OPTIONS
+-------
+ *-h*::
+	Show help instructions.
+
+  'author_name'::
+	The author's name, for the plugin description
+	
+  'plugin_name'::
+	Name of the plugin, seperate multiple words with a dash
+
+  'description'::
+	Short description of the plugin
+
+  'directory'::
+	Path to the directory where the files should be 
+	generated in
+
+EXAMPLE
+-------
+
+ *ffgenplugin "John Doe" move-robot "Move the robot forward for a meter" ../src/plugins/move-robot*::
+	Will generate the following files: 
+		Makefile 
+		move-robot_plugin.cpp
+		move-robot_thread.h
+		move-robot_thread.cpp 
+	in the directory ../src/plugins/move-robot
+
+SEE ALSO
+--------
+linkff:fawkes[8]
+
+Author
+------
+Written by Johannes Rothe <johannes.rothe@rwth-aachen.de>
+
+Documentation
+--------------
+Documentation by Johannes Rothe <johannes.rothe@rwth-aachen.de>
+
+Fawkes
+------
+Part of the Fawkes Robot Software Framework.
+Project website is at http://www.fawkesrobotics.org
