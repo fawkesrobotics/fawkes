@@ -171,9 +171,11 @@ PluginGenerator::write_thread_cpp(FILE *f)
 	  _author.c_str());
   //Constructor
   fprintf(f,
+          "/** Constructor. */\n"
           "%s::%s()\n"
           " : Thread(\"%s\", Thread::OPMODE_WAITFORWAKEUP),\n"
-          "             BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL) \n{\n}\n\n", //TODO support the other OPMODES
+          "   BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT) \n{\n}\n\n",
+          //TODO support the other OPMODES
           _class_name_thread.c_str(), _class_name_thread.c_str(),
           _class_name_thread.c_str());
   //init
@@ -202,9 +204,9 @@ PluginGenerator::write_thread_h(FILE *f)
           "#include <aspect/logging.h>\n"
           "#include <aspect/blackboard.h>\n"
           "#include <aspect/configurable.h>\n\n"
-          "#include <string>\n\n"
 
-	  "namespace fawkes {\n"
+          "namespace fawkes {\n"
+          "  // add forward declarations here, e.g., interfaces\n"
           "}\n\n"
 	  "class %s \n"
           ": public fawkes::Thread,\n"
@@ -242,7 +244,7 @@ PluginGenerator::write_plugin_cpp(FILE *f)
           "using namespace fawkes;\n\n",
           _filename_thread_h.c_str());
   fprintf(f,
-          "/* @class %s \"%s\"\n"
+          "/** @class %s \"%s\"\n"
           " * %s\n"
           " * @author %s\n"
           " */\n",
@@ -252,7 +254,7 @@ PluginGenerator::write_plugin_cpp(FILE *f)
           "class %s : public fawkes::Plugin\n"
           "{\n"
           " public:\n"
-          "  /* Constructor\n"
+          "  /** Constructor.\n"
           "   * @param config Fakwes configuration\n"
           "   */\n"
           "  %s(Configuration *config)\n"
