@@ -35,9 +35,8 @@
 using namespace std;
 
 
-/** @class CppInterfaceGenerator <interfaces/generator/cpp_generator.h>
- * Generator that transforms input from the InterfaceParser into valid
- * C++ classes.
+/** @class PluginGenerator "plugin_generator.h
+ * Generate basic plugins from minimal input.
  */
 
 /** Constructor.
@@ -49,10 +48,10 @@ using namespace std;
  * @param description Plugin description
  */
 PluginGenerator::PluginGenerator(std::string directory,
-					     std::string author,
-					     std::string year, std::string creation_date,
-					     std::string plugin_name, std::string description
-					     )
+                                 std::string author,
+                                 std::string year, std::string creation_date,
+                                 std::string plugin_name, std::string description
+                                 )
 {
   _dir    = directory;
   if ( _dir.find_last_of("/") != (_dir.length() - 1) ) {
@@ -116,8 +115,12 @@ PluginGenerator::write_header(FILE *f, std::string filename)
 	  );
 }
 
+/** Write makefile header.
+ * @param f file to write to
+ */
 void
-PluginGenerator::write_makefile_header(FILE *f, std::string filename){
+PluginGenerator::write_makefile_header(FILE *f)
+{
   fprintf(f,
           "#*****************************************************************************\n"
           "#         Makefile Build System for Fawkes: %s Plugin\n"
@@ -226,6 +229,9 @@ PluginGenerator::write_thread_h(FILE *f)
   fprintf(f, "\n};\n\n\n#endif");
 }
 
+/** Write plugin cpp file.
+ * @param f file to write to
+ */
 void
 PluginGenerator::write_plugin_cpp(FILE *f)
 {
@@ -263,10 +269,13 @@ PluginGenerator::write_plugin_cpp(FILE *f)
           _description.c_str(), _class_name_plugin.c_str());
 }
 
+/** Write Makefile.
+ * @param f file to write to
+ */
 void
 PluginGenerator::write_makefile (FILE* f)
 {
-  write_makefile_header(f, _filename_makefile);
+  write_makefile_header(f);
   std::string filename_plugin_o = _plugin_name + "_plugin.o";
   std::string filename_thread_o = _plugin_name + "_thread.o";
   fprintf(f,
@@ -285,10 +294,10 @@ PluginGenerator::write_makefile (FILE* f)
          _plugin_name.c_str(), _plugin_name.c_str());
 }
 
-/*
- * Replace dash with undescore
- *
+/** Replace dash with underscore.
  * Example: plugin-generator to plugin_generator
+ * @param source input string
+ * @return modified string
  */
 std::string
 PluginGenerator::replace_dash_w_undescore(std::string source)
@@ -301,11 +310,11 @@ PluginGenerator::replace_dash_w_undescore(std::string source)
   return source;
 }
 
-/*
- * Format a lowercase plugin name to CamelCase plugin name and append
- * a string to specify the name
- *
+/** Format a lowercase plugin name to CamelCase class.
  * Example: plugin_name to PluginNameThread
+ * @param plugin_name name of plugin
+ * @param appendix class name appendix, e.g., Thread or Plugin
+ * @return class name matching the plugin name
  */
 std::string
 PluginGenerator::format_class_name(std::string plugin_name, std::string appendix)

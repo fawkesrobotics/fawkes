@@ -42,7 +42,7 @@ class PluginGenerator
   void write_thread_cpp(FILE *f);
   void write_plugin_cpp(FILE *f);
   void write_makefile(FILE *f);
-  void write_makefile_header(FILE *f, std::string filename);
+  void write_makefile_header(FILE *f);
   void write_header(FILE *f, std::string filename);
   void write_deflector(FILE *f);
   std::string format_class_name(std::string plugin_name, std::string append);
