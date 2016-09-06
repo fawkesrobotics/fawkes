@@ -23,6 +23,7 @@
 #include "plugin_generator.h"
 
 #include <utils/misc/string_conversions.h>
+#include <core/exception.h>
 
 #include <algorithm>
 #include <iostream>
@@ -109,7 +110,7 @@ PluginGenerator::write_header(FILE *f, std::string filename)
 	  " *  Read the full text in the LICENSE.GPL file in the doc directory.\n"
 	  " */\n\n",
 	  filename.c_str(), _plugin_name.c_str(),
-	  (_creation_date.length() > 0 ) ? " *  Plugin created: " : "",
+	  (_creation_date.length() > 0 ) ? " *  Created: " : "",
 	  (_creation_date.length() > 0 ) ? _creation_date.c_str() : "",
 	  (_creation_date.length() > 0 ) ? "\n" : "",
 	  _year.c_str(),  _author.c_str()
@@ -334,10 +335,9 @@ PluginGenerator::generate()
   struct stat info;
 
   if (!(stat(_dir.c_str(), &info) == 0 && S_ISDIR(info.st_mode))) {
-      printf( "ERROR: Cannot open %s\n"
-          "Use this command to create it: \n"
-          "mkdir %s\n", _dir.c_str(), _dir.c_str());
-      exit(1);
+	  if (mkdir(_dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) {
+		  throw fawkes::Exception(errno, "Failed to generate plugin, cannot create directory");
+	  }
   }
   thread_h   = fopen(string(_dir + _filename_thread_h).c_str(), "w");
   thread_cpp = fopen(string(_dir + _filename_thread_cpp).c_str(), "w");
