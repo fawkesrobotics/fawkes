@@ -74,7 +74,7 @@ PluginGenerator::PluginGenerator(std::string directory,
   _class_name_thread = format_class_name(_plugin_name_underscore, "Thread");
   _class_name_plugin = format_class_name(_plugin_name_underscore, "Plugin");
 
-  _deflector = "__PLUGINS_" + fawkes::StringConversions::to_upper(_plugin_name_underscore) + "THREAD_H_";
+  _deflector = "__PLUGINS_" + fawkes::StringConversions::to_upper(_plugin_name_underscore) + "_THREAD_H_";
 }
 
 
