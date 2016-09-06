@@ -94,9 +94,8 @@ PluginGenerator::write_header(FILE *f, std::string filename)
 	  "\n/***************************************************************************\n"
 	  " *  %s - %s\n"
 	  " *\n"
-	  "%s%s%s"
+	  "%s%s"
 	  " *  Copyright  %s  %s\n"
-	  " *\n"
 	  " ****************************************************************************/\n\n"
 	  "/*  This program is free software; you can redistribute it and/or modify\n"
 	  " *  it under the terms of the GNU General Public License as published by\n"
@@ -113,7 +112,6 @@ PluginGenerator::write_header(FILE *f, std::string filename)
 	  filename.c_str(), _plugin_name.c_str(),
 	  (_creation_date.length() > 0 ) ? " *  Created: " : "",
 	  (_creation_date.length() > 0 ) ? _creation_date.c_str() : "",
-	  (_creation_date.length() > 0 ) ? "\n" : "",
 	  _year.c_str(),  _author.c_str()
 	  );
 }
