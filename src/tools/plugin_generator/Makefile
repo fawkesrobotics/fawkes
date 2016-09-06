@@ -24,12 +24,12 @@ else
 	WARN_TARGETS += warning_cpp11
 endif
 
-LIBS_plugin_generator = stdc++ fawkescore fawkesutils
+LIBS_ffgenplugin = stdc++ fawkescore fawkesutils
 
-OBJS_plugin_generator = plugin_generator.o main.o
+OBJS_ffgenplugin = plugin_generator.o main.o
 
-OBJS_all     += $(OBJS_plugin_generator)
-BINS_all     += $(BINDIR)/plugin_generator
+OBJS_all     += $(OBJS_ffgenplugin)
+BINS_all     += $(BINDIR)/ffgenplugin
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
