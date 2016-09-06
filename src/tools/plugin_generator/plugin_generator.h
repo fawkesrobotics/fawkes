@@ -46,11 +46,13 @@ class PluginGenerator
   void write_header(FILE *f, std::string filename);
   void write_deflector(FILE *f);
   std::string format_class_name(std::string plugin_name, std::string append);
+  std::string replace_dash_w_undescore(std::string source);
   void generate();
 
  private:
   std::string _dir;
   std::string _plugin_name;
+  std::string _plugin_name_underscore;
   std::string _class_name_thread;
   std::string _class_name_plugin;
   std::string _description;

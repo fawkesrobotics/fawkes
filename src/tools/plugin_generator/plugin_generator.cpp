@@ -69,11 +69,12 @@ PluginGenerator::PluginGenerator(std::string directory,
   _filename_makefile   = "Makefile";
 
   _plugin_name = plugin_name;
+  _plugin_name_underscore = replace_dash_w_undescore(_plugin_name);
 
-  _class_name_thread = format_class_name(_plugin_name, "Thread");
-  _class_name_plugin = format_class_name(_plugin_name, "Plugin");
+  _class_name_thread = format_class_name(_plugin_name_underscore, "Thread");
+  _class_name_plugin = format_class_name(_plugin_name_underscore, "Plugin");
 
-  _deflector = "__PLUGINS_" + fawkes::StringConversions::to_upper(plugin_name) + "THREAD_H_";
+  _deflector = "__PLUGINS_" + fawkes::StringConversions::to_upper(_plugin_name_underscore) + "THREAD_H_";
 }
 
 
@@ -276,7 +277,7 @@ PluginGenerator::write_makefile (FILE* f)
           "LIBS_%s = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \\\n"
           "                      fawkesblackboard fawkesinterface\n\n"
           "OBJS_%s = %s %s\n\n",
-          _plugin_name.c_str(), _plugin_name.c_str(), filename_plugin_o.c_str(),
+          _plugin_name_underscore.c_str(), _plugin_name_underscore.c_str(), filename_plugin_o.c_str(),
           filename_thread_o.c_str()
           );
   fprintf(f,
@@ -284,6 +285,22 @@ PluginGenerator::write_makefile (FILE* f)
          "OBJS_all = $(OBJS_%s)\n\n"
          "include $(BUILDSYSDIR)/base.mk",
          _plugin_name.c_str(), _plugin_name.c_str());
+}
+
+/*
+ * Replace dash with undescore
+ *
+ * Example: plugin-generator to plugin_generator
+ */
+std::string
+PluginGenerator::replace_dash_w_undescore(std::string source)
+{
+  for(std::string::size_type i = 0; (i = source.find("-", i)) != std::string::npos;)
+  {
+    source.replace(i, 1, "_");
+    i++;
+  }
+  return source;
 }
 
 /*
