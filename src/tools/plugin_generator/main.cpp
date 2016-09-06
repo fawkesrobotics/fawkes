@@ -28,16 +28,6 @@
 using namespace std;
 using namespace fawkes;
 
-/*
- * Usage:
- * Author -> from input
- * Date -> from system
- * Name of the plugin -> from input 
- * Description -> from input
- *
- * Maybe libraries to include in the Makefile and as includes
- */
-
 void
 print_usage(const char *program_name)
 {
@@ -63,6 +53,17 @@ generate_plugin(std::string author_name, std::string plugin_name, std::string de
   generator->generate();
 }
 
+bool
+plugin_name_valid(std::string plugin_name){
+  for (char& c : plugin_name){
+    if (isalpha(c) || c == '-' || c == '_') {
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -75,10 +76,15 @@ main(int argc, char **argv)
 
   std::string author_name, plugin_name, description, directory;
   if (argp.num_items() != 4) {
-    printf("Invalid number of arguments\n");
+    printf("ERROR: Invalid number of arguments\n");
     print_usage(argv[0]);
     exit(1);
-  } else {
+  } else if (!plugin_name_valid(argp.items()[1])) {
+    printf("ERROR: Invalid plugin name: Only alphanumerical chars allowed. \n"
+        "To separate multiple words use '-' or '_'\n");
+    exit(2);
+  }
+    else {
     author_name = argp.items()[0];
     plugin_name = argp.items()[1];
     description = argp.items()[2];

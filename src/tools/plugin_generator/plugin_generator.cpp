@@ -383,4 +383,6 @@ PluginGenerator::generate()
   fclose(thread_h);
   fclose(plugin_cpp);
   fclose(makefile);
+
+  printf("Plugin %s successfully created!\n",  _plugin_name.c_str());
 }
