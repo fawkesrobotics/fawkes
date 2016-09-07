@@ -26,6 +26,10 @@ OBJS_clips_protobuf = clips-protobuf-plugin.o clips-protobuf-thread.o
 
 OBJS_all = $(OBJS_clips_protobuf)
 
+# Extra files for system-wide install, i.e., "make install"
+FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
+DESTDIR_clips_files = $(EXEC_SHAREDIR)/clips/clips-protobuf
+
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
@@ -36,6 +40,8 @@ ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS),1111)
 	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
   PLUGINS_all = $(PLUGINDIR)/clips-protobuf.so
+
+	INSTALL_extra = clips_files
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11
