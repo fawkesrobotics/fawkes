@@ -51,21 +51,22 @@ resdirs: $(INST_RESDIRS)
 ifneq ($(INST_RESDIRS),)
 $(INST_RESDIRS):
 	$(SILENTSYMB) if [ -d "$(RESDIR)/$@" ]; then	\
-		echo -e "$(INDENT_PRINT)--- Copying resource directory $@ to $(DESTDIR)$(EXEC_RESDIR)/$@"; \
+		echo -e "$(INDENT_PRINT)[DIR] $(DESTDIR)$(TBOLDGRAY)$(RESDIR)/$@$(TNORMAL)"; \
 		mkdir -p $(DESTDIR)$(EXEC_RESDIR)/$@ || exit $?; \
+		echo -e "$(INDENT_PRINT)[CPY] $(PARENTDIR)$(TBOLDGRAY)$@(TNORMAL) -> $(DESTDIR)$(EXEC_RESDIR)/$@"; \
 		cp -af $(RESDIR)/$@/* $(DESTDIR)$(EXEC_RESDIR)/$@ || exit $$?; \
 	fi
 endif
 
 install_config:
 ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
-	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Creating config directory $(DESTDIR)$(EXEC_CONFDIR)"
+	$(SILENT)echo -e "$(INDENT_PRINT)[DIR] $(DESTDIR)$(TBOLDGRAY)$(EXEC_CONFDIR)$(TNORMAL)"
 	$(SILENT)mkdir -p $(DESTDIR)$(EXEC_CONFDIR)
 	$(SILENT)for f in $$(find cfg/ ! -name '*.db' -type f); do \
 		if [ -e "$(DESTDIR)$(EXEC_CONFDIR)/$${f/cfg\//}" ]; then \
-			echo -e "$(INDENT_PRINT)--- $(TYELLOW)Omitting$(TNORMAL) config file $$f, already exists"; \
+			echo -e "$(INDENT_PRINT)[CPY] $(TYELLOW)Omitting config file $(TNORMAL)$(PARENTDIR)$(TBOLDGRAY)$$f$(TNORMAL) (file already exists)"; \
 		else \
-			echo -e "$(INDENT_PRINT)--- Copying config file $$f"; \
+			echo -e "$(INDENT_PRINT)[CPY] $(PARENTDIR)$(TBOLDGRAY)$$f$(TNORMAL) -> $(DESTDIR)$(EXEC_CONFDIR)/$${f/cfg\//}"; \
 			install -D -m 644 $$f $(DESTDIR)$(EXEC_CONFDIR)/$${f/cfg\//}; \
 		fi \
 	done
@@ -73,36 +74,36 @@ endif
 
 install_buildsys:
 ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
-	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Creating buildsys directory $(DESTDIR)$(EXEC_CONFDIR)"
+	$(SILENT)echo -e "$(INDENT_PRINT)[DIR] $(DESTDIR)$(TBOLDGRAY)$(EXEC_BUILDSYSDIR)$(TNORMAL)"
 	$(SILENT)mkdir -p $(DESTDIR)$(EXEC_BUILDSYSDIR)
 	$(SILENT)for f in $$(find $(BUILDSYSDIR) -type d -printf "%P\n"); do \
 		if [ "$$F" == "" ]; then continue; fi; \
 		mkdir -p $(BUILDSYSDIR)/$$f; \
 	done
 	$(SILENT)for f in $$(find $(BUILDSYSDIR) -type f ! -regex '.*[\~#]$$' -printf "%P\n"); do \
-		echo -e "$(INDENT_PRINT)--- Copying buildsys file $$f"; \
+		echo -e "$(INDENT_PRINT)[CPY] $(subst $(realpath $(TOP_BASEDIR))/,,$(BUILDSYSDIR))/$(TBOLDGRAY)$$f$(TNORMAL) -> $(DESTDIR)$(EXEC_BUILDSYSDIR)/$$f"; \
 		install -D -m 644 $(BUILDSYSDIR)/$$f $(DESTDIR)$(EXEC_BUILDSYSDIR)/$$f; \
 	done
 	$(SILENT)echo -e "$(INDENT_PRINT)--- Setting installed build type to 'syswide'";
 	$(SILENT)sed -i -e 's/^BUILD_TYPE=.*$$/BUILD_TYPE=syswide/' $(DESTDIR)$(EXEC_BUILDSYSDIR)/buildtype.mk
 	$(SILENT)echo -e "$(INDENT_PRINT)--- Setting installed INSTALL_PREFIX to '$(PREFIX)'";
 	$(SILENT)sed -i -e 's|^INSTALL_PREFIX\( *\)=.*$$|INSTALL_PREFIX\1= $(PREFIX)|' $(DESTDIR)$(EXEC_BUILDSYSDIR)/btypes/config_syswide.mk
-	$(SILENT)mkdir -p $(DESTDIR)$(EXEC_BUILDCONFDIR)
+	$(SILENT)echo -e "$(INDENT_PRINT)[DIR] $(DESTDIR)$(TBOLDGRAY)$(EXEC_BUILDCONFDIR)$(TNORMAL)"
 	$(SILENT)find $(BUILDCONFDIR) -name '*.mk' -type f -printf "%f:%P\n" | \
 		while IFS=":" read basename relname; \
 		do \
-			echo -e "$(INDENT_PRINT)--- Copying buildsys config file $$relname"; \
-		install -D -m 644 $(BUILDCONFDIR)/$$relname $(DESTDIR)$(EXEC_BUILDCONFDIR)/$$basename; \
+			echo -e "$(INDENT_PRINT)[CPY] $(subst $(realpath $(TOP_BASEDIR))/,,$(BUILDCONFDIR))/$(TBOLDGRAY)$$relname$(TNORMAL) -> $(DESTDIR)$(EXEC_BUILDSYSDIR)/$$basename"; \
+			install -D -m 644 $(BUILDCONFDIR)/$$relname $(DESTDIR)$(EXEC_BUILDCONFDIR)/$$basename; \
 		done
 
 endif
 
 install_lua:
 ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
-	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Creating Lua directory $(DESTDIR)$(EXEC_LUADIR)"
+	$(SILENT)echo -e "$(INDENT_PRINT)[DIR] $(DESTDIR)$(TBOLDGRAY)$(EXEC_LUADIR)$(TNORMAL)"
 	$(SILENT)mkdir -p $(DESTDIR)$(EXEC_LUADIR)
 	$(SILENT)for f in $$(find src/lua/ -name '*.lua'); do \
-		echo -e "$(INDENT_PRINT)--- Copying Lua file $$f"; \
+		echo -e "$(INDENT_PRINT)[CPY] $(PARENTDIR)$(TBOLDGRAY)$$f$(TNORMAL) -> $(DESTDIR)$(EXEC_LUADIR)/$${f/src\/lua\//}"; \
 		install -D -m 644 $$f $(DESTDIR)$(EXEC_LUADIR)/$${f/src\/lua\//}; \
 	done
 endif
@@ -111,8 +112,9 @@ install_apidoc:
 ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
 	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Creating documentation directory $(DESTDIR)$(EXEC_DOCDIR)"
 	$(SILENT)if [ -d "$(DOCDIR)/api/html" ]; then \
+		echo -e "$(INDENT_PRINT)[DIR] $(DESTDIR)$(TBOLDGRAY)$(EXEC_DOCDIR)$(TNORMAL)"; \
 		mkdir -p $(DESTDIR)$(EXEC_DOCDIR); \
-		echo -e "$(INDENT_PRINT)--- Copying API documentation"; \
+		echo -e "$(INDENT_PRINT)[CPY] $(DOCDIR)/api/html/* -> $(DESTDIR)$(EXEC_DOCDIR)"; \
 		cp -ar $(DOCDIR)/api/html/* $(DESTDIR)$(EXEC_DOCDIR); \
 	else \
 		echo -e "$(INDENT_PRINT)--- $(TYELLOW)API documentation not generated, not copying$(TNORMAL)"; \
