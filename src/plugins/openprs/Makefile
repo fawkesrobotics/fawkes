@@ -35,14 +35,18 @@ OBJS_openprs_mod_blackboard = mod_blackboard.o
 LIBS_openprs_mod_config = fawkescore fawkesutils fawkesconfig fawkesnetcomm
 OBJS_openprs_mod_config = mod_config.o
 
+OBJS_all = $(OBJS_openprs) $(OBJS_openprs_mod_utils) \
+	   $(OBJS_openprs_mod_time) $(OBJS_openprs_mod_blackboard) \
+	   $(OBJS_openprs_mod_config)
+
 INST_LIB_SUBDIR_openprs_mod_utils = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_time = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_blackboard = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_config = $(FFLIBSUBDIR)
 
-OBJS_all = $(OBJS_openprs) $(OBJS_openprs_mod_utils) \
-	   $(OBJS_openprs_mod_time) $(OBJS_openprs_mod_blackboard) \
-	   $(OBJS_openprs_mod_config)
+# Extra files for system-wide install, i.e., "make install"
+FILES_openprs_files   = $(subst $(SRCDIR)/,,$(wildcard $(addprefix $(SRCDIR)/data/,*.opf *.inc)))
+DESTDIR_openprs_files = $(EXEC_SHAREDIR)/openprs/data
 
 ifeq ($(HAVE_OPENPRS),1)
   PRESUBDIRS += utils aspect
@@ -69,6 +73,8 @@ ifeq ($(HAVE_OPENPRS),1)
 		$(OPENPRS_MOD_DIR)/mod_time.so \
 		$(OPENPRS_MOD_DIR)/mod_blackboard.so \
 		$(OPENPRS_MOD_DIR)/mod_config.so
+
+	INSTALL_extra = openprs_files
 else
   WARN_TARGETS += warning_openprs
 endif
