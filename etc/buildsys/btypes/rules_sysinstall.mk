@@ -34,7 +34,10 @@ MANPAGES_install = $(addprefix $(DESTDIR)$(EXEC_MANDIR)/,$(patsubst $(abspath $(
 # Main install target
 .PHONY: install install_test_basedir install_config install_buildsys install_lua install_apidoc uncolored-install
 uncolored-install: install
-install: install_test_basedir presubdirs $(subst $(LIBDIR),$(DESTDIR)$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(DESTDIR)$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(DESTDIR)$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) $(MANPAGES_install) resdirs subdirs install_buildsys install_config install_lua install_apidoc
+install: install_test_basedir presubdirs install_targets install_resdirs install_extra subdirs install_buildsys install_config install_lua install_apidoc
+ifeq ($(abspath $(SRCDIR)),$(abspath $(BASEDIR)))
+	$(SILENT)echo -e "$(TGREEN)*** Installation completed ***$(TNORMAL)"
+endif
 
 # Only allow "make install" from basedir
 install_test_basedir:
@@ -45,8 +48,26 @@ ifeq ($(INDENT),)
 endif
 endif
 
-.PHONY: resdirs $(INST_RESDIRS)
-resdirs: $(INST_RESDIRS)
+.PHONY: install_targets
+install_targets: $(subst $(LIBDIR),$(DESTDIR)$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(DESTDIR)$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(DESTDIR)$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) $(MANPAGES_install)
+
+.PHONY: install_resdirs $(INST_RESDIRS)
+install_resdirs: $(INST_RESDIRS)
+
+.PHONY: install_extra $(INSTALL_extra)
+install_extra: $(INSTALL_extra)
+
+ifneq ($(INSTALL_extra),1)
+$(INSTALL_extra): %: $$(FILES_$$(call nametr,$$*))
+	$(SILENTSYMB)for f in $(subst $(SRCDIR)/,,$^); do \
+		if [ ! -d $(DESTDIR)$(DESTDIR_$*) ]; then \
+			echo -e "$(INDENT_PRINT)[DIR] $(DESTDIR)$(TBOLDGRAY)$(DESTDIR_$*)$(TNORMAL)"; \
+			mkdir -p "$(DESTDIR)$(DESTDIR_$*)"; \
+		fi; \
+		echo -e "$(INDENT_PRINT)[CPY] $(PARENTDIR)$(TBOLDGRAY)$$f$(TNORMAL) -> $(DESTDIR)$(DESTDIR_$*)"; \
+		$(FILE_INSTALL) -m $(if $(FILEMODE_$*),$(FILEMODE_$*),$(FILEMODE_DEFAULT)) -t $(DESTDIR)$(DESTDIR_$*) $(SRCDIR)/$$f; \
+	done
+endif
 
 ifneq ($(INST_RESDIRS),)
 $(INST_RESDIRS):

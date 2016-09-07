@@ -37,13 +37,14 @@ SYSCONFDIR     = /etc/fawkes
 CFLAGS_BASE    = $(CFLAGS_MINIMUM)
 LDFLAGS_BASE   = $(LDFLAGS_MINIMUM) -Wl,-rpath=$(EXEC_LIBDIR)/fawkes/interfaces
 
-# Note: the install scripts make the assumption that FFLIBDIR, RESDIR and INCDIR
+# Note: the install scripts make the assumption that FFLIBDIR, SHAREDIR and INCDIR
 # paths (with EXEC_ prefix) are specific to Fawkes and can be deleted completely
 # without interfering with the rest of the system!
 FFLIBSUBDIR        = fawkes
 EXEC_BASEDIR       = $(abspath $(PREFIX))
 EXEC_CONFDIR       = $(SYSCONFDIR)
-EXEC_RESDIR        = $(EXEC_BASEDIR)/share/fawkes
+EXEC_SHAREDIR      = $(EXEC_BASEDIR)/share/fawkes
+EXEC_RESDIR        = $(EXEC_SHAREDIR)/res
 EXEC_LIBDIR        = $(EXEC_BASEDIR)/lib$(LIBBITS)
 EXEC_FFLIBDIR      = $(EXEC_LIBDIR)/$(FFLIBSUBDIR)
 EXEC_PLUGINDIR     = $(EXEC_FFLIBDIR)/plugins
@@ -52,10 +53,16 @@ EXEC_INCDIR        = $(EXEC_BASEDIR)/include/fawkes
 EXEC_DFILEDIR      = $(EXEC_BASEDIR)/share/applications
 EXEC_DOCDIR        = $(EXEC_BASEDIR)/share/doc/fawkes-$(FAWKES_VERSION)
 EXEC_MANDIR        = $(EXEC_BASEDIR)/share/man
-EXEC_LUADIR        = $(EXEC_RESDIR)/lua
+EXEC_LUADIR        = $(EXEC_SHAREDIR)/lua
 EXEC_LUALIBDIR     = $(EXEC_FFLIBDIR)/lua
-EXEC_BUILDSYSDIR   = $(EXEC_RESDIR)/buildsys
+EXEC_BUILDSYSDIR   = $(EXEC_SHAREDIR)/buildsys
 EXEC_BUILDCONFDIR  = $(EXEC_BUILDSYSDIR)/conf
+
+FILE_INSTALL = install
+
+# The default file mode used for additional install files
+# (using INSTALL_extra targets)
+FILEMODE_DEFAULT   = 0644
 
 ifneq ($(CFLAGS_EXT),)
   CFLAGS_BASE += $(CFLAGS_EXT)
