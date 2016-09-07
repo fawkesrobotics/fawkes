@@ -24,6 +24,10 @@ OBJS_clips = clips_plugin.o clips_thread.o \
 
 OBJS_all = $(OBJS_clips)
 
+# Extra files for system-wide install, i.e., "make install"
+FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
+DESTDIR_clips_files = $(EXEC_SHAREDIR)/clips/clips
+
 ifeq ($(CC),gcc)
   ifneq ($(call gcc_atleast_version,4,6),1)
     GCC_TOO_OLD=1
@@ -38,7 +42,9 @@ ifneq ($(GCC_TOO_OLD),1)
     LDFLAGS += $(LDFLAGS_CLIPS)
 
     PLUGINS_all = $(PLUGINDIR)/clips.so
-  else
+
+		INSTALL_extra = clips_files
+else
     WARN_TARGETS += warning_clips
   endif
 else
