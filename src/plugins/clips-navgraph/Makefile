@@ -25,11 +25,17 @@ OBJS_clips_navgraph = clips_navgraph_plugin.o clips_navgraph_thread.o
 
 OBJS_all = $(OBJS_clips_navgraph)
 
+# Extra files for system-wide install, i.e., "make install"
+FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
+DESTDIR_clips_files = $(EXEC_SHAREDIR)/clips/clips-navgraph
+
 ifeq ($(HAVE_CPP11)$(HAVE_CLIPS)$(HAVE_NAVGRAPH),111)
   CFLAGS  += $(CFLAGS_CLIPS) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_CLIPS)
 
   PLUGINS_all = $(PLUGINDIR)/clips-navgraph.$(SOEXT)
+
+	INSTALL_extra = clips_files
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11
