@@ -16,17 +16,17 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_joystick = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_joystick = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		fawkesinterface JoystickInterface
 OBJS_joystick = joystick_plugin.o sensor_thread.o acquisition_thread.o \
 		bb_handler.o force_feedback.o act_thread.o
 
-LIBS_ffjoystick = stdc++ fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_ffjoystick = stdc++ m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		  fawkesinterface fawkeslogging JoystickInterface
 OBJS_ffjoystick = ffjoystick.o acquisition_thread.o remote_bb_poster.o \
 		  bb_handler.o force_feedback.o act_thread.o
 
-LIBS_ffkbjoystick = stdc++ fawkescore fawkesutils fawkesaspects fawkesblackboard \
+LIBS_ffkbjoystick = stdc++ m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		    fawkesinterface fawkeslogging JoystickInterface
 OBJS_ffkbjoystick = ffkbjoystick.o remote_bb_poster.o bb_handler.o
 
