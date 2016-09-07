@@ -28,6 +28,10 @@ OBJS_clips_ros = clips_ros_plugin.o clips_ros_thread.o
 
 OBJS_all = $(OBJS_clips_ros)
 
+# Extra files for system-wide install, i.e., "make install"
+FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
+DESTDIR_clips_files = $(EXEC_SHAREDIR)/clips/clips-ros
+
 ifeq ($(HAVE_CPP11)$(HAVE_ROS)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS)$(call ros-have-pkg,xmlrpcpp),11111)
   CFLAGS  += $(CFLAGS_ROS)  $(CFLAGS_CLIPS) $(call ros-pkg-cflags,xmlrpcpp) $(CFLAGS_CPP11) \
              $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
@@ -35,6 +39,8 @@ ifeq ($(HAVE_CPP11)$(HAVE_ROS)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS)$(call ros-have-pkg
              $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
   PLUGINS_all = $(PLUGINDIR)/clips-ros.$(SOEXT)
+
+	INSTALL_extra = clips_files
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11
