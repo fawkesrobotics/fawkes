@@ -25,11 +25,17 @@ OBJS_clips_agent = clips_agent_plugin.o clips_agent_thread.o
 
 OBJS_all = $(OBJS_clips_agent)
 
+# Extra files for system-wide install, i.e., "make install"
+FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
+DESTDIR_clips_files = $(EXEC_SHAREDIR)/clips/clips-agent
+
 ifeq ($(HAVE_CLIPS),1)
   CFLAGS  += $(CFLAGS_CLIPS)
   LDFLAGS += $(LDFLAGS_CLIPS)
 
   PLUGINS_all = $(PLUGINDIR)/clips-agent.so
+
+	INSTALL_extra = clips_files
 else
   WARN_TARGETS += warning_clips
 endif
