@@ -39,3 +39,37 @@
   (bson-append-array ?doc "values" (fact-slot-value ?fact implied))
   (return ?doc)
 )
+
+;; Assert (structured/ordered) fact from a BSON document
+; @param ?doc BSON document
+(deffunction rm-assert-from-bson (?doc)
+  (bind ?relation "")
+  (bind ?values "")
+  (bind ?keys (bson-field-names ?doc))
+  (if (member$ "relation" ?keys)
+    then
+    (bind ?relation (bson-get ?doc "relation"))
+    else
+    (printout error "Can not create fact from " (bson-tostring ?doc) crlf)
+    (return)
+  )
+  (if (member$ ?relation (get-deftemplate-list *))
+    then ;structured fact
+    (progn$ (?slot ?keys)
+      (if (deftemplate-slot-existp ?relation ?slot) then
+        (if (deftemplate-slot-multip ?relation ?slot)
+          then
+          (bind ?values (str-cat ?values "(" ?relation " " (bson-get ?doc ?slot) ")"))
+          else
+          (bind ?values (str-cat ?values "(" ?relation " " (implode$ (bson-get-array ?doc ?slot)) ")"))
+        )
+      )
+    )
+    else ;ordered fact
+    (if (member$ "values" ?keys) then
+      (bind ?values (str-cat ?values "(" ?relation " " (implode$ (bson-get-array ?doc "values")) ")"))
+    )
+  )
+  
+  (assert-string (str-cat "(" ?relation " " ?values ")"))
+)
