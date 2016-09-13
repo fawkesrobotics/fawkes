@@ -89,7 +89,8 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
 
   clips->build("(deffacts have-feature-mongodb (have-feature MongoDB))");
 
-  //TODO: clips->batch_evaluate(SRCDIR"/plugins/clips-robot-memory/robot_memory.clp");
+  //load helper functions written in CLIPS
+  clips->batch_evaluate(SRCDIR"/robot-memory.clp");
 
   clips.unlock();
 }
