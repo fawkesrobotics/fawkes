@@ -13,7 +13,7 @@
 (deffunction rm-structured-fact-to-bson (?fact)
   (bind ?doc (bson-create))
   (bind ?templ (fact-relation ?fact))
-  (bson-append ?doc "type" (str-cat ?templ))
+  (bson-append ?doc "relation" (str-cat ?templ))
   ;append kv-pair for each field
   (progn$ (?slot (fact-slot-names ?fact))
     (if (deftemplate-slot-multip ?templ ?slot)
@@ -25,5 +25,17 @@
       (bson-append ?doc ?slot (fact-slot-value ?fact ?slot))
     )
   )      
+  (return ?doc)
+)
+
+;; Creates a BSON document from an ordered fact
+; @param ?fact Fact-Pointer
+; @return BSON document
+(deffunction rm-ordered-fact-to-bson (?fact)
+  (bind ?doc (bson-create))
+  (bind ?templ (fact-relation ?fact))
+  (bson-append ?doc "relation" (str-cat ?templ))
+  ;append values as array
+  (bson-append-array ?doc "values" (fact-slot-value ?fact implied))
   (return ?doc)
 )
