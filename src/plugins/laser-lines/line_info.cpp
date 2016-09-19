@@ -93,7 +93,7 @@ void TrackedLineInfo::update(LineInfo &linfo)
     transformer->transform_point(tracking_frame_id, bp_new, this->base_point_odom);
   } catch (fawkes::tf::TransformException &e) {
     logger->log_warn(plugin_name.c_str(), "Can't transform to %s. Attempting to track in %s.",
-	tracking_frame_id, input_frame_id);
+										 tracking_frame_id.c_str(), input_frame_id.c_str());
     this->base_point_odom = bp_new;
   }
   this->history.push_back(linfo);
