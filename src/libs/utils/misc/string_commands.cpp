@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  string.cpp - string utilities
+ *  string.cpp - string utilities for command argv and envs
  *
  *  Created: Fri Aug 22 15:32:47 2014
  *  Copyright  2014  Tim Niemueller [www.niemueller.de]
@@ -26,6 +26,7 @@
 #include <tuple>
 #include <string>
 #include <cstring>
+#include <vector>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
