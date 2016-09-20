@@ -16,8 +16,12 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/lua.mk
+include $(BASEDIR)/etc/buildsys/boost.mk
 
 FILTER_OUT=%_tolua.o
+
+REQ_BOOST_LIBS = asio system
+HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 ifneq ($(wildcard $(SYSROOT)/usr/include/magic.h $(SYSROOT)/opt/local/include/magic.h),)
   HAVE_LIBMAGIC = 1
@@ -42,10 +46,13 @@ CFLAGS  += $(CFLAGS_LIBMAGIC)
 LDFLAGS += $(LDFLAGS_LIBMAGIC)
 
 OBJS_all = $(OBJS_libfawkesutils) $(OBJS_lua_fawkesutils)
-LIBS_all  = $(LIBDIR)/libfawkesutils.so
-ifeq ($(HAVE_TOLUA)$(HAVE_CPP11),11)
-  CFLAGS += $(CFLAGS_CPP11)
+
+ifeq ($(HAVE_TOLUA)$(HAVE_CPP11)$(HAVE_BOOST_LIBS),111)
+  CFLAGS += $(CFLAGS_CPP11) $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
   LIBS_all += $(LUALIBDIR)/fawkesutils.so
+  LDFLAGS += $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
+
+  LIBS_all  = $(LIBDIR)/libfawkesutils.so
   TARGETS_all += $(SRCDIR)/fawkesutils_tolua.cpp
 else
   ifneq ($(HAVE_CPP11),1)
@@ -54,6 +61,9 @@ else
   ifneq ($(HAVE_TOLUA),1)
     WARN_TARGETS += warning_tolua_wrapper
   endif
+  ifneq ($(HAVE_BOOST_LIBS),1)
+    WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
+  endif
 endif
 
 ifneq ($(HAVE_INOTIFY),1)
@@ -61,7 +71,7 @@ ifneq ($(HAVE_INOTIFY),1)
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
-all: $(WARN_TARGETS)
+all: $(WARN_TARGETS) $(WARN_TARGETS_BOOST)
 .PHONY: warning_libmagic warning_inotify
 warning_libmagic:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Restricted file type detection support$(TNORMAL) (file[-devel] (libmagic) not installed)"
@@ -69,6 +79,9 @@ warning_libmagic:
 warning_cpp11:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting utils$(TNORMAL) " \
 		"(CPP11 not available)"
+$(WARN_TARGETS_BOOST): warning_boost_%:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build utils library$(TNORMAL) (Boost library $* not found)"endif
+
 endif
 
 $(LUALIBDIR)/fawkesutils.$(SOEXT): | $(LIBDIR)/libfawkesutils.$(SOEXT)
