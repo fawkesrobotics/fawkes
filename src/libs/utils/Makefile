@@ -43,11 +43,17 @@ LDFLAGS += $(LDFLAGS_LIBMAGIC)
 
 OBJS_all = $(OBJS_libfawkesutils) $(OBJS_lua_fawkesutils)
 LIBS_all  = $(LIBDIR)/libfawkesutils.so
-ifeq ($(HAVE_TOLUA),1)
+ifeq ($(HAVE_TOLUA)$(HAVE_CPP11),11)
+  CFLAGS += $(CFLAGS_CPP11)
   LIBS_all += $(LUALIBDIR)/fawkesutils.so
   TARGETS_all += $(SRCDIR)/fawkesutils_tolua.cpp
 else
-  WARN_TARGETS += warning_tolua_wrapper
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
+  ifneq ($(HAVE_TOLUA),1)
+    WARN_TARGETS += warning_tolua_wrapper
+  endif
 endif
 
 ifneq ($(HAVE_INOTIFY),1)
@@ -60,6 +66,9 @@ all: $(WARN_TARGETS)
 warning_libmagic:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Restricted file type detection support$(TNORMAL) (file[-devel] (libmagic) not installed)"
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)File monitoring utils cannot be built$(TNORMAL) (inotify headers not found)"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting utils$(TNORMAL) " \
+		"(CPP11 not available)"
 endif
 
 $(LUALIBDIR)/fawkesutils.$(SOEXT): | $(LIBDIR)/libfawkesutils.$(SOEXT)
