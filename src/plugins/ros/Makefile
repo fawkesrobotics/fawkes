@@ -106,14 +106,14 @@ ifeq ($(HAVE_ROS),1)
   PLUGINS_all = $(PLUGINDIR)/ros.so \
 		$(PLUGINDIR)/ros-talkerpub.so
 
-  ifeq ($(call ros-have-pkg,webview_msgs),1)
-    CFLAGS_webview_thread += $(call ros-pkg-cflags,webview_msgs) $(CFLAGS)
+  ifeq ($(call ros-have-pkg,fawkes_msgs),1)
+    CFLAGS_webview_thread += $(call ros-pkg-cflags,fawkes_msgs) $(CFLAGS)
     CFLAGS_webview_plugin = $(CFLAGS_webview_thread)
     CFLAGS_webview_reqproc = $(CFLAGS_webview_thread)
-    LDFLAGS_ros_webview += $(LDFLAGS) $(call ros-pkg-lflags,webview_msgs)
+    LDFLAGS_ros_webview += $(LDFLAGS) $(call ros-pkg-lflags,fawkes_msgs)
     PLUGINS_all += $(PLUGINDIR)/ros-webview.so
   else
-    WARN_TARGETS += warning_webview_msgs
+    WARN_TARGETS += warning_fawkes_msgs
   endif
 
   ifeq ($(call ros-have-pkg,tf),1)
@@ -284,11 +284,9 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_ros warning_webview_msgs warning_fawkestf warning_rostf warning_pcl warning_rospcl warning_tf2_msgs
+.PHONY: warning_ros warning_fawkestf warning_rostf warning_pcl warning_rospcl warning_tf2_msgs
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Plugins$(TNORMAL) (ROS not found)"
-warning_webview_msgs:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Webview Plugin$(TNORMAL) (ROS package webview_msgs not found)"
 warning_fawkestf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS tf plugin$(TNORMAL) (fawkestf not available)"
 warning_rostf:
@@ -322,6 +320,7 @@ warning_rosgraph_msgs:
 warning_fawkes_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS skiller plugin$(TNORMAL) (ROS package fawkes_msgs not found)"
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Position 3D Plugin$(TNORMAL) (ROS package fawkes_msgs not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Webview Plugin$(TNORMAL) (ROS package fawkes_msgs not found)"
 warning_tinyxml:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS images plugin$(TNORMAL) (tinyxml[-devel] not installed)"
 endif

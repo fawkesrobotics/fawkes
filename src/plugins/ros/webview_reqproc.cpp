@@ -24,7 +24,7 @@
 #include <core/exception.h>
 #include <logging/logger.h>
 #include <webview/error_reply.h>
-#include <webview_msgs/ProcessRequest.h>
+#include <fawkes_msgs/WebviewProcessRequest.h>
 
 using namespace fawkes;
 
@@ -45,15 +45,15 @@ using namespace fawkes;
  * @param srv_name the ROS service name to query for requests
  */
 ROSWebviewRequestProcessor::ROSWebviewRequestProcessor(LockPtr<ros::NodeHandle> nh,
-						       Logger *logger,
-						       std::string &baseurl,
-						       std::string &srv_name)
+                                                       Logger *logger,
+                                                       std::string &baseurl,
+                                                       std::string &srv_name)
 {
   __baseurl  = baseurl;
   __srv_name = srv_name;
   __logcomp  = std::string("ROSWebviewRP[") + srv_name + "]";
 
-  __srv_client = nh->serviceClient<webview_msgs::ProcessRequest>(srv_name);
+  __srv_client = nh->serviceClient<fawkes_msgs::WebviewProcessRequest>(srv_name);
 }
 
 /** Destructor. */
@@ -67,7 +67,7 @@ ROSWebviewRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
   //logger->log_debug(__logcomp.c_str(), "Processing %s", url);
 
-  webview_msgs::ProcessRequest srv;
+  fawkes_msgs::WebviewProcessRequest srv;
   srv.request.url = request->url();
   //srv.request.method = method;
   //srv.request.version = version;

@@ -32,8 +32,8 @@
 #include <plugins/ros/aspect/ros.h>
 
 #include <ros/service_server.h>
-#include <webview_msgs/UrlRegistration.h>
-#include <webview_msgs/NavRegistration.h>
+#include <fawkes_msgs/WebviewUrlRegistration.h>
+#include <fawkes_msgs/WebviewNavRegistration.h>
 
 #include <map>
 #include <string>
@@ -57,17 +57,17 @@ class ROSWebviewThread
   virtual void finalize();
 
  private:
-  bool srv_register_cb(webview_msgs::UrlRegistration::Request  &req,
-		       webview_msgs::UrlRegistration::Response &resp);
+  bool srv_register_cb(fawkes_msgs::WebviewUrlRegistration::Request  &req,
+                       fawkes_msgs::WebviewUrlRegistration::Response &resp);
 
-  bool srv_unregister_cb(webview_msgs::UrlRegistration::Request  &req,
-			 webview_msgs::UrlRegistration::Response &resp);
+  bool srv_unregister_cb(fawkes_msgs::WebviewUrlRegistration::Request  &req,
+                         fawkes_msgs::WebviewUrlRegistration::Response &resp);
 
-  bool srv_add_nav_cb(webview_msgs::NavRegistration::Request  &req,
-		      webview_msgs::NavRegistration::Response &resp);
+  bool srv_add_nav_cb(fawkes_msgs::WebviewNavRegistration::Request  &req,
+                      fawkes_msgs::WebviewNavRegistration::Response &resp);
 
-  bool srv_remove_nav_cb(webview_msgs::NavRegistration::Request  &req,
-			 webview_msgs::NavRegistration::Response &resp);
+  bool srv_remove_nav_cb(fawkes_msgs::WebviewNavRegistration::Request  &req,
+                         fawkes_msgs::WebviewNavRegistration::Response &resp);
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }

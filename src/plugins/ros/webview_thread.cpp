@@ -52,23 +52,19 @@ ROSWebviewThread::~ROSWebviewThread()
 void
 ROSWebviewThread::init()
 {
-  __srv_register   =
-    rosnode->advertiseService("/webview/register",
-			      &ROSWebviewThread::srv_register_cb,
-			      this);
+	__srv_register   =
+		rosnode->advertiseService("/webview/register",
+		                          &ROSWebviewThread::srv_register_cb, this);
   __srv_unregister =
-    rosnode->advertiseService("/webview/unregister",
-			      &ROSWebviewThread::srv_unregister_cb,
-			      this);
+	  rosnode->advertiseService("/webview/unregister",
+	                            &ROSWebviewThread::srv_unregister_cb, this);
 
   __srv_add_nav   =
-    rosnode->advertiseService("/webview/add_nav_entry",
-			      &ROSWebviewThread::srv_add_nav_cb,
-			      this);
+	  rosnode->advertiseService("/webview/add_nav_entry",
+	                            &ROSWebviewThread::srv_add_nav_cb, this);
   __srv_remove_nav =
     rosnode->advertiseService("/webview/remove_nav_entry",
-			      &ROSWebviewThread::srv_remove_nav_cb,
-			      this);
+                              &ROSWebviewThread::srv_remove_nav_cb, this);
 }
 
 
@@ -103,8 +99,8 @@ ROSWebviewThread::loop()
 
 
 bool
-ROSWebviewThread::srv_register_cb(webview_msgs::UrlRegistration::Request  &req,
-				  webview_msgs::UrlRegistration::Response &resp)
+ROSWebviewThread::srv_register_cb(fawkes_msgs::WebviewUrlRegistration::Request  &req,
+                                  fawkes_msgs::WebviewUrlRegistration::Response &resp)
 {
   if (__procs.find(req.url_prefix) != __procs.end()) {
     resp.success = false;
@@ -133,8 +129,8 @@ ROSWebviewThread::srv_register_cb(webview_msgs::UrlRegistration::Request  &req,
 }
 
 bool
-ROSWebviewThread::srv_unregister_cb(webview_msgs::UrlRegistration::Request  &req,
-				    webview_msgs::UrlRegistration::Response &resp)
+ROSWebviewThread::srv_unregister_cb(fawkes_msgs::WebviewUrlRegistration::Request  &req,
+                                    fawkes_msgs::WebviewUrlRegistration::Response &resp)
 {
   logger->log_debug(name(), "%s unregisters for %s", req.service_name.c_str(),
 		    req.url_prefix.c_str());
@@ -158,8 +154,8 @@ ROSWebviewThread::srv_unregister_cb(webview_msgs::UrlRegistration::Request  &req
 }
 
 bool
-ROSWebviewThread::srv_add_nav_cb(webview_msgs::NavRegistration::Request  &req,
-				 webview_msgs::NavRegistration::Response &resp)
+ROSWebviewThread::srv_add_nav_cb(fawkes_msgs::WebviewNavRegistration::Request  &req,
+                                 fawkes_msgs::WebviewNavRegistration::Response &resp)
 {
   try {
     webview_nav_manager->add_nav_entry(req.url, req.name);
@@ -174,8 +170,8 @@ ROSWebviewThread::srv_add_nav_cb(webview_msgs::NavRegistration::Request  &req,
 }
 
 bool
-ROSWebviewThread::srv_remove_nav_cb(webview_msgs::NavRegistration::Request  &req,
-				    webview_msgs::NavRegistration::Response &resp)
+ROSWebviewThread::srv_remove_nav_cb(fawkes_msgs::WebviewNavRegistration::Request  &req,
+                                    fawkes_msgs::WebviewNavRegistration::Response &resp)
 {
   webview_nav_manager->remove_nav_entry(req.url);
   __nav_entries.erase(req.url);
