@@ -340,13 +340,17 @@ ThreadList::try_recover(std::list<std::string> &recovered_threads)
   while (__wnw_bbit != __wnw_bad_barriers.end()) {
     iterator i = __wnw_bbit->second.begin();
     while (i != __wnw_bbit->second.end()) {
-      if ( (*i)->waiting() ) {
-	// waiting means running() finished and the barrier has been passed
-	recovered_threads.push_back((*i)->name());
-	// it finally finished, re-integrate and hope that it does not bust again
-	(*i)->unset_flag(Thread::FLAG_BAD);
-	i = __wnw_bbit->second.erase(i);
-	changed = true;
+      if ( (*i)->cancelled() ) {
+        // thread is cancelled, remove it from the barrier
+        i = __wnw_bbit->second.erase(i);
+        changed = true;
+      } else if ( (*i)->waiting() ) {
+        // waiting means running() finished and the barrier has been passed
+        recovered_threads.push_back((*i)->name());
+        // it finally finished, re-integrate and hope that it does not bust again
+        (*i)->unset_flag(Thread::FLAG_BAD);
+        i = __wnw_bbit->second.erase(i);
+        changed = true;
       } else {
 	++i;
       }

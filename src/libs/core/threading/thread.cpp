@@ -597,6 +597,7 @@ Thread::exit()
     delete this;
   }
 
+  __waiting_for_wakeup = false;
   __cancelled   = true;
   pthread_exit(NULL);
 }
@@ -651,6 +652,7 @@ Thread::cancel()
 {
   if ( __started && ! __cancelled ) {
     if ( pthread_cancel(__thread_id) == 0 ) {
+      __waiting_for_wakeup = false;
       __cancelled = true;
     }
   }
