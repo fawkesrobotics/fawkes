@@ -159,7 +159,7 @@ class PointCloudDBPipeline
     std::string fq_collection = database + "." + collection;
     try {
       for (unsigned int i = 0; i < num_clouds; ++i) {
-	std::auto_ptr<mongo::DBClientCursor> cursor =
+	std::unique_ptr<mongo::DBClientCursor> cursor =
 	  mongodb_client_->query(fq_collection,
 				 QUERY("timestamp" << mongo::LTE << times[i]
                            << mongo::GTE << (times[i] - cfg_pcl_age_tolerance_))
@@ -277,7 +277,7 @@ class PointCloudDBPipeline
     // retrieve point clouds
     for (unsigned int i = 0; i < num_clouds; ++i) {
 
-      std::auto_ptr<mongo::DBClientCursor> cursor =
+      std::unique_ptr<mongo::DBClientCursor> cursor =
 	mongodb_client_->query(database + "." + collection,
 			       QUERY("timestamp" << mongo::LTE << times[i]
                                << mongo::GTE << (times[i] - cfg_pcl_age_tolerance_))

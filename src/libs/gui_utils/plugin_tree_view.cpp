@@ -125,7 +125,7 @@ PluginTreeView::~PluginTreeView()
 #  ifdef GLIBMM_EXCEPTIONS_ENABLED
     __gconf->remove_dir(__gconf_prefix);
 #  else
-    std::auto_ptr<Glib::Error> error;
+    std::unique_ptr<Glib::Error> error;
     __gconf->remove_dir(__gconf_prefix, error);
 #  endif
   }
@@ -156,7 +156,7 @@ PluginTreeView::set_gconf_prefix(Glib::ustring gconf_prefix)
 #  ifdef GLIBMM_EXCEPTIONS_ENABLED
     __gconf->remove_dir(__gconf_prefix);
 #  else
-    std::auto_ptr<Glib::Error> error;
+    std::unique_ptr<Glib::Error> error;
     __gconf->remove_dir(__gconf_prefix, error);
 #  endif
   }
@@ -164,7 +164,7 @@ PluginTreeView::set_gconf_prefix(Glib::ustring gconf_prefix)
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   __gconf->add_dir(gconf_prefix);
 #else
-  std::auto_ptr<Glib::Error> error;
+  std::unique_ptr<Glib::Error> error;
   __gconf->add_dir(gconf_prefix, Gnome::Conf::CLIENT_PRELOAD_NONE, error);
 #endif
   __gconf_prefix = gconf_prefix;
@@ -448,7 +448,7 @@ PluginTreeView::append_plugin_column()
 #    ifdef GLIBMM_EXCEPTIONS_ENABLED
     description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip");
 #    else
-    std::auto_ptr<Glib::Error> error;
+    std::unique_ptr<Glib::Error> error;
     description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip", error);
 #    endif
   }

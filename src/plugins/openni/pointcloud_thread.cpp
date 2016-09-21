@@ -72,9 +72,15 @@ OpenNiPointCloudThread::init()
   __image_rgb_buf = NULL;
 
   __depth_gen = new xn::DepthGenerator();
-  std::auto_ptr<xn::DepthGenerator> depthgen_autoptr(__depth_gen);
+#if __cplusplus >= 201103L
+  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+  std::unique_ptr<xn::ImageGenerator> imagegen_uniqueptr(__image_gen);
+#else
+  std::auto_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+  std::auto_ptr<xn::ImageGenerator> imagegen_uniqueptr(__image_gen);
+#endif
+
   __image_gen = new xn::ImageGenerator();
-  std::auto_ptr<xn::ImageGenerator> imagegen_autoptr(__image_gen);
 
   XnStatus st;
 
@@ -206,8 +212,8 @@ OpenNiPointCloudThread::init()
   }
 #endif
 
-  depthgen_autoptr.release();
-  imagegen_autoptr.release();
+  depthgen_uniqueptr.release();
+  imagegen_uniqueptr.release();
 }
 
 

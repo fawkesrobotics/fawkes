@@ -93,7 +93,12 @@ LaserFilterThread::init()
     std::map<std::string, std::string> filters;
 
     std::string fpfx = __cfg_prefix + "filters/";
+#if __cplusplus >= 201103L
+    std::unique_ptr<Configuration::ValueIterator> i(config->search(fpfx.c_str()));
+#else
     std::auto_ptr<Configuration::ValueIterator> i(config->search(fpfx.c_str()));
+#endif
+
     while (i->next()) {
       
       std::string suffix = std::string(i->path()).substr(fpfx.length());
@@ -271,7 +276,11 @@ LaserFilterThread::open_interfaces(std::string prefix,
 				   std::vector<LaserInterface> &ifs,
 				   std::vector<LaserDataFilter::Buffer *> &bufs, bool writing)
 {
+#if __cplusplus >= 201103L
+  std::unique_ptr<Configuration::ValueIterator> in(config->search(prefix.c_str()));
+#else
   std::auto_ptr<Configuration::ValueIterator> in(config->search(prefix.c_str()));
+#endif
   while (in->next()) {
     if (! in->is_string()) {
       throw Exception("Config value %s is not of type string", in->path());

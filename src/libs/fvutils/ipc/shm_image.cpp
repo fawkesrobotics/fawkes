@@ -506,10 +506,17 @@ SharedMemoryImageBuffer::list()
 std::list<SharedMemoryImageBufferMetaData>
 SharedMemoryImageBuffer::list_meta_data()
 {
+#if __cplusplus >= 201103L
+  std::unique_ptr<SharedMemoryImageBufferMetaDataCollector>
+    lister(new SharedMemoryImageBufferMetaDataCollector());
+  std::unique_ptr<SharedMemoryImageBufferHeader>
+    h(new SharedMemoryImageBufferHeader());
+#else
   std::auto_ptr<SharedMemoryImageBufferMetaDataCollector>
     lister(new SharedMemoryImageBufferMetaDataCollector());
   std::auto_ptr<SharedMemoryImageBufferHeader>
     h(new SharedMemoryImageBufferHeader());
+#endif
 
   SharedMemory::list(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h.get(), lister.get());
   return lister->meta_data();

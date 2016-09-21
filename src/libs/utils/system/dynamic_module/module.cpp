@@ -94,9 +94,9 @@ Module::open()
   std::string full_filename = "";
   full_filename = __filename;
   //                                                                .   SOEXT
-  if ( full_filename.find("."SOEXT, 0) != (full_filename.length() - 1 - strlen(FILE_EXTENSION)) ) {
+  if ( full_filename.find("." SOEXT, 0) != (full_filename.length() - 1 - strlen(FILE_EXTENSION)) ) {
     // filename has no proper ending
-    full_filename += "."SOEXT;
+    full_filename += "." SOEXT;
   }
 
   int tflags = 0;

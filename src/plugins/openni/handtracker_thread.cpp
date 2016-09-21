@@ -103,13 +103,18 @@ OpenNiHandTrackerThread::init()
   MutexLocker lock(openni.objmutex_ptr());
 
   __hand_gen = new xn::HandsGenerator();
-  std::auto_ptr<xn::HandsGenerator> handgen_autoptr(__hand_gen);
+#if __cplusplus >= 201103L
+  std::unique_ptr<xn::HandsGenerator> handgen_uniqueptr(__hand_gen);
+  std::unique_ptr<xn::GestureGenerator> gesturegen_uniqueptr(__gesture_gen);
+  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+#else
+  std::auto_ptr<xn::HandsGenerator> handgen_uniqueptr(__hand_gen);
+  std::auto_ptr<xn::GestureGenerator> gesturegen_uniqueptr(__gesture_gen);
+  std::auto_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+#endif
 
   __gesture_gen = new xn::GestureGenerator();
-  std::auto_ptr<xn::GestureGenerator> gesturegen_autoptr(__gesture_gen);
-
   __depth_gen = new xn::DepthGenerator();
-  std::auto_ptr<xn::DepthGenerator> depthgen_autoptr(__depth_gen);
 
   XnStatus st;
 
@@ -174,9 +179,9 @@ OpenNiHandTrackerThread::init()
   // 		      xnGetStatusString(st));
   // }
 
-  handgen_autoptr.release();
-  depthgen_autoptr.release();
-  gesturegen_autoptr.release();
+  handgen_uniqueptr.release();
+  depthgen_uniqueptr.release();
+  gesturegen_uniqueptr.release();
 }
 
 

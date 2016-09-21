@@ -138,10 +138,11 @@ main(int argc, char **argv)
 
 #if __cplusplus >= 201103L
     std::unique_ptr<mongo::DBClientCursor> cursor =
+      mongodb_client->query(query_coll, q);
 #else
     std::auto_ptr<mongo::DBClientCursor> cursor =
-#endif
       mongodb_client->query(query_coll, q);
+#endif
 
     while (cursor->more()) {
       BSONObj doc = cursor->next();

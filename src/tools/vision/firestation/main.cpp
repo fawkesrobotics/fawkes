@@ -34,7 +34,7 @@ int main(int argc, char** argv)
     Glib::RefPtr<Gtk::Builder> builder =
       Gtk::Builder::create_from_file(RESDIR"/guis/firestation/firestation.ui");
 #else
-    std::auto_ptr<Gtk::BuilderError> error;
+    std::unique_ptr<Gtk::BuilderError> error;
     Glib::RefPtr<Gtk::Builder> builder =
       Gtk::Builder::create_from_file(RESDIR"/guis/firestation/firestation.ui", error);
 #endif

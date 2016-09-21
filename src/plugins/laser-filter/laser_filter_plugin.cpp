@@ -54,7 +54,11 @@ LaserFilterPlugin::LaserFilterPlugin(Configuration *config)
   std::string prefix = "/plugins/laser-filter/";
 
   // Read configurations and spawn LaserFilterThreads
+#if __cplusplus >= 201103L
+  std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+#else
   std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+#endif
   while (i->next()) {
     std::string cfg_name = std::string(i->path()).substr(prefix.length());
     cfg_name = cfg_name.substr(0, cfg_name.find("/"));
@@ -102,7 +106,11 @@ LaserFilterPlugin::LaserFilterPlugin(Configuration *config)
   for (c = configs.begin(); c != configs.end(); ++c) {
     std::string cinp = prefix + *c + "/in/";
     std::list<std::string> cinputs;
+#if __cplusplus >= 201103L
+    std::unique_ptr<Configuration::ValueIterator> in(config->search(cinp.c_str()));
+#else
     std::auto_ptr<Configuration::ValueIterator> in(config->search(cinp.c_str()));
+#endif
     while (in->next()) {
       if (in->is_string()) {
 	cinputs.push_back(in->get_string());
@@ -111,7 +119,11 @@ LaserFilterPlugin::LaserFilterPlugin(Configuration *config)
 
     std::string coutp = prefix + *c + "/out/";
     std::list<std::string> coutputs;
+#if __cplusplus >= 201103L
+    std::unique_ptr<Configuration::ValueIterator> out(config->search(coutp.c_str()));
+#else
     std::auto_ptr<Configuration::ValueIterator> out(config->search(coutp.c_str()));
+#endif
     while (out->next()) {
       if (out->is_string()) {
 	coutputs.push_back(out->get_string());

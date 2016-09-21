@@ -237,7 +237,7 @@ SkillGuiGtkWindow::on_config_changed()
 #ifdef GLIBMM_EXCEPTIONS_ENABLED
   bool colored    = __gconf->get_bool(GCONF_PREFIX"/graph_colored");
 #else
-  std::auto_ptr<Glib::Error> error;
+  std::unique_ptr<Glib::Error> error;
   bool colored    = __gconf->get_bool(GCONF_PREFIX"/graph_colored", error);
 #endif
   tb_graphcolored->set_active(colored);

@@ -44,11 +44,7 @@ action_config_load(TermList terms)
   ACTION_ASSERT_ARG_LENGTH("config-load", terms, 1);
   ACTION_SET_AND_ASSERT_ARG_TYPE("config-load", prefix, terms, 1, STRING);
 
-#if __cplusplus >= 201103L
   std::unique_ptr<Configuration::ValueIterator> v(g_config->search(prefix->u.string));
-#else
-  std::auto_ptr<Configuration::ValueIterator> v(g_config->search(prefix->u.string));
-#endif
   while (v->next()) {
     TermList tl = sl_make_slist();
     tl = build_term_list(tl, build_string(v->path()));
