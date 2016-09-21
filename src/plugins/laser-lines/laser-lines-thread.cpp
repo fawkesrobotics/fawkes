@@ -39,7 +39,6 @@
 
 #ifdef HAVE_VISUAL_DEBUGGING
 #  include <ros/ros.h>
-#  include <visualization_msgs/MarkerArray.h>
 #endif
 
 #include <iostream>
@@ -108,6 +107,8 @@ LaserLinesThread::init()
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
   cfg_max_num_lines_         = config->get_uint(CFG_PREFIX"max_num_lines");
 
+  cfg_tracking_frame_id_     = config->get_string("/frames/odom");
+
   finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pcl_.c_str());
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
 
@@ -117,7 +118,6 @@ LaserLinesThread::init()
     if(cfg_moving_avg_enabled_)
     {
       line_avg_ifs_.resize(cfg_max_num_lines_, NULL);
-      moving_average_windows_.resize(cfg_max_num_lines_);
     }
     for (unsigned int i = 0; i < cfg_max_num_lines_; ++i) {
       char *tmp;
@@ -270,6 +270,7 @@ LaserLinesThread::loop()
   //logger->log_info(name(), "[L %u] total: %zu   finite: %zu",
   //		     loop_count_, input_->points.size(), in_cloud->points.size());
 
+  {
   std::vector<LineInfo> linfos =
     calc_lines<PointType>(input_,
 			  cfg_segm_min_inliers_, cfg_segm_max_iterations_,
@@ -289,96 +290,79 @@ LaserLinesThread::loop()
   lines_->height = 1;
   lines_->width  = num_points;
 
-  // sort lines by bearing to stabilize IDs
-  std::sort(linfos.begin(), linfos.end(),
-	    [](const LineInfo &l1, const LineInfo &l2) -> bool
-	    {
-	      return l1.bearing < l2.bearing;
-	    });
-
-  if (linfos.size() > cfg_max_num_lines_){
-    // Ignore lines if more than cfg_max_num_lines_ found.
-    // Since the lines are orderd by bearing, this will drop
-    // the line with the highest bearing.
-    linfos.resize(cfg_max_num_lines_);
-  }
-
-
-  std::vector<LineInfo> linfos_filtered;
-  linfos_filtered.resize(linfos.size());
-  if(cfg_moving_avg_enabled_)
-  {
-    
-    for(size_t info_cntr = 0; info_cntr < linfos.size(); ++info_cntr)
-    {
-      std::deque<LineInfo> &moving_avg_window = moving_average_windows_[info_cntr];
-      LineInfo &info = linfos[info_cntr];
-      LineInfo &filtered = linfos_filtered[info_cntr];
-      moving_avg_window.push_front(LineInfo(info));
-      if(moving_avg_window.size() > cfg_moving_avg_window_size_) {
-        moving_avg_window.pop_back();
+  vector<TrackedLineInfo>::iterator known_it = known_lines_.begin();
+  while (known_it != known_lines_.end()) {
+    btScalar min_dist = numeric_limits<btScalar>::max();
+    auto best_match = linfos.end();
+    for (vector<LineInfo>::iterator it_new = linfos.begin(); it_new != linfos.end(); ++it_new) {
+      btScalar d = known_it->distance(*it_new);
+      if (d < min_dist) {
+	min_dist = d;
+	best_match = it_new;
       }
-      
-      float if_point_on_line_avg[3] = {0,0,0};
-      float if_line_direction_avg[3] = {0,0,0};
-      float if_end_point_1_avg[3] = {0,0,0};
-      float if_end_point_2_avg[3] = {0,0,0};
-      float bearing_avg = 0;
-      float length_avg = 0;
-      
-      for(const LineInfo &avg_info: moving_avg_window) {
-        if_point_on_line_avg[0] += avg_info.base_point[0];
-        if_point_on_line_avg[1] += avg_info.base_point[1];
-        if_point_on_line_avg[2] += avg_info.base_point[2];
-        if_line_direction_avg[0] += avg_info.line_direction[0];
-        if_line_direction_avg[1] += avg_info.line_direction[1];
-        if_line_direction_avg[2] += avg_info.line_direction[2];
-        if_end_point_1_avg[0] += avg_info.end_point_1[0];
-        if_end_point_1_avg[1] += avg_info.end_point_1[1];
-        if_end_point_1_avg[2] += avg_info.end_point_1[2];
-        if_end_point_2_avg[0] += avg_info.end_point_2[0];
-        if_end_point_2_avg[1] += avg_info.end_point_2[1];
-        if_end_point_2_avg[2] += avg_info.end_point_2[2];
-        bearing_avg += avg_info.bearing;
-        length_avg += avg_info.length;
-      }
-      
-      size_t queue_size = moving_avg_window.size();
-      filtered.base_point = {if_point_on_line_avg[0] / queue_size,
-                             if_point_on_line_avg[1] / queue_size,
-                             if_point_on_line_avg[2] / queue_size};
-      filtered.line_direction = {if_line_direction_avg[0] / queue_size,
-                                 if_line_direction_avg[1] / queue_size,
-                                 if_line_direction_avg[2] / queue_size};
-      filtered.end_point_1 = {if_end_point_1_avg[0] / queue_size,
-                              if_end_point_1_avg[1] / queue_size,
-                              if_end_point_1_avg[2] / queue_size};
-      filtered.end_point_2 = {if_end_point_2_avg[0] / queue_size,
-                              if_end_point_2_avg[1] / queue_size,
-                              if_end_point_2_avg[2] / queue_size};
-      filtered.bearing = bearing_avg / queue_size;
-      filtered.length = length_avg / queue_size;
     }
+    if (best_match != linfos.end() && min_dist < cfg_switch_tolerance_) {
+      known_it->update(*best_match);
+
+      // Important: erase line because all lines remaining after this are considered "new" (see below)
+      linfos.erase(best_match);
+      ++known_it;
+    }
+    else // No match for this line, so kill it
+      known_it = known_lines_.erase(known_it);
   }
+
+  for (LineInfo &l : linfos) {
+    // Only unmatched lines remaining, so these are the "new" lines
+    TrackedLineInfo tl(
+	tf_listener,
+	finput_->header.frame_id,
+	cfg_tracking_frame_id_,
+	cfg_switch_tolerance_,
+	cfg_moving_avg_enabled_ ? cfg_moving_avg_window_size_ : 1,
+	logger, name());
+    tl.update(l);
+    known_lines_.push_back(tl);
+  }
+
+  }
+
+  // When there are too many lines, delete the ones farthest away
+  std::sort(known_lines_.begin(), known_lines_.end(),
+      [](const TrackedLineInfo &l1, const TrackedLineInfo &l2) -> bool
+      {
+	return l1.raw.point_on_line.norm() < l2.raw.point_on_line.norm();
+      }
+  );
+  while (known_lines_.size() > cfg_max_num_lines_)
+    known_lines_.erase(known_lines_.end() - 1);
+
+  // Then sort by bearing to stabilize blackboard interface assignment
+  std::sort(known_lines_.begin(), known_lines_.end(),
+      [](const TrackedLineInfo &l1, const TrackedLineInfo &l2) -> bool
+      {
+	return l1.bearing_center < l2.bearing_center;
+      }
+  );
+
   // set line parameters
   size_t oi = 0;
   unsigned int line_if_idx = 0;
-  for (size_t i = 0; i < linfos.size(); ++i) {
-    const LineInfo &info = linfos[i];
-    const LineInfo &info_avg = linfos_filtered[i];
+  for (size_t i = 0; i < known_lines_.size(); ++i) {
+    const TrackedLineInfo &info = known_lines_[i];
 
     if (line_if_idx < cfg_max_num_lines_) {
-	    set_line(line_if_idx, line_ifs_[line_if_idx], true, finput_->header.frame_id, info);
+      set_line(line_if_idx, line_ifs_[line_if_idx], true, finput_->header.frame_id, info.raw);
       if(cfg_moving_avg_enabled_)
       {
-        set_line(line_if_idx, line_avg_ifs_[line_if_idx], true, finput_->header.frame_id, info_avg);
+        set_line(line_if_idx, line_avg_ifs_[line_if_idx], true, finput_->header.frame_id, info.smooth);
       }
       line_if_idx++;
     }
 
-    for (size_t p = 0; p < info.cloud->points.size(); ++p) {
+    for (size_t p = 0; p < info.raw.cloud->points.size(); ++p) {
       ColorPointType &out_point = lines_->points[oi++];
-      PointType &in_point  = info.cloud->points[p];
+      PointType &in_point  = info.raw.cloud->points[p];
       out_point.x = in_point.x;
       out_point.y = in_point.y;
       out_point.z = in_point.z;
@@ -394,18 +378,15 @@ LaserLinesThread::loop()
   }
 
   for (unsigned int i = line_if_idx; i < cfg_max_num_lines_; ++i) {
-	  set_line(i, line_ifs_[i], false);
+    set_line(i, line_ifs_[i], false);
     if(cfg_moving_avg_enabled_)
     {
-	    set_line(i, line_avg_ifs_[i], false);
+      set_line(i, line_avg_ifs_[i], false);
     }
   }
 
 #ifdef HAVE_VISUAL_DEBUGGING
-  publish_visualization(linfos, "laser_lines");
-  if(cfg_moving_avg_enabled_) {
-	  publish_visualization(linfos_filtered, "laser_lines_moving_average", "_avg");
-  }
+  publish_visualization(known_lines_, "laser_lines", "laser_lines_moving_average");
 #endif
 
   //*lines_ = *tmp_lines;
@@ -427,6 +408,7 @@ LaserLinesThread::loop()
   }
 #endif
 }
+
 
 
 void
@@ -523,18 +505,16 @@ LaserLinesThread::set_line(unsigned int idx,
 
 #ifdef HAVE_VISUAL_DEBUGGING
 void
-LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos,
-                                        std::string marker_namespace, std::string name_suffix)
+LaserLinesThread::publish_visualization_add_line(visualization_msgs::MarkerArray &m,
+                                                 unsigned int &idnum,
+                                                 const LineInfo &info,
+                                                 const size_t i,
+                                                 const std::string &marker_namespace,
+                                                 const std::string &name_suffix)
 {
-  visualization_msgs::MarkerArray m;
-  unsigned int idnum = 0;
-
-  for (size_t i = 0; i < linfos.size(); ++i) {
-    const LineInfo &info = linfos[i];
-    
-    /*
-    visualization_msgs::Marker basevec;
-    basevec.header.frame_id = finput_->header.frame_id;
+	/*
+	  visualization_msgs::Marker basevec;
+	  basevec.header.frame_id = finput_->header.frame_id;
     basevec.header.stamp = ros::Time::now();
     basevec.ns = marker_namespace;
     basevec.id = idnum++;
@@ -552,145 +532,160 @@ LaserLinesThread::publish_visualization(const std::vector<LineInfo> &linfos,
     basevec.color.a = 1.0;
     basevec.lifetime = ros::Duration(2, 0);
     m.markers.push_back(basevec);
-    */
+	*/
 
-    visualization_msgs::Marker dirvec;
-    dirvec.header.frame_id = finput_->header.frame_id;
-    dirvec.header.stamp = ros::Time::now();
-    dirvec.ns = marker_namespace;
-    dirvec.id = idnum++;
-    dirvec.type = visualization_msgs::Marker::ARROW;
-    dirvec.action = visualization_msgs::Marker::ADD;
-    dirvec.points.resize(2);
-    dirvec.points[0].x = info.base_point[0];
-    dirvec.points[0].y = info.base_point[1];
-    dirvec.points[0].z = info.base_point[2];
-    dirvec.points[1].x = info.base_point[0] + info.line_direction[0];
-    dirvec.points[1].y = info.base_point[1] + info.line_direction[1];
-    dirvec.points[1].z = info.base_point[2] + info.line_direction[2];
-    dirvec.scale.x = 0.02;
-    dirvec.scale.y = 0.04;
-    dirvec.color.r = 0.0;
-    dirvec.color.g = 1.0;
-    dirvec.color.b = 0.f;
-    dirvec.color.a = 1.0;
-    dirvec.lifetime = ros::Duration(2, 0);
-    m.markers.push_back(dirvec);
+	visualization_msgs::Marker dirvec;
+	dirvec.header.frame_id = finput_->header.frame_id;
+	dirvec.header.stamp = ros::Time::now();
+	dirvec.ns = marker_namespace;
+	dirvec.id = idnum++;
+	dirvec.type = visualization_msgs::Marker::ARROW;
+	dirvec.action = visualization_msgs::Marker::ADD;
+	dirvec.points.resize(2);
+	dirvec.points[0].x = info.base_point[0];
+	dirvec.points[0].y = info.base_point[1];
+	dirvec.points[0].z = info.base_point[2];
+	dirvec.points[1].x = info.base_point[0] + info.line_direction[0];
+	dirvec.points[1].y = info.base_point[1] + info.line_direction[1];
+	dirvec.points[1].z = info.base_point[2] + info.line_direction[2];
+	dirvec.scale.x = 0.02;
+	dirvec.scale.y = 0.04;
+	dirvec.color.r = 0.0;
+	dirvec.color.g = 1.0;
+	dirvec.color.b = 0.f;
+	dirvec.color.a = 1.0;
+	dirvec.lifetime = ros::Duration(2, 0);
+	m.markers.push_back(dirvec);
 
-    visualization_msgs::Marker testvec;
-    testvec.header.frame_id = finput_->header.frame_id;
-    testvec.header.stamp = ros::Time::now();
-    testvec.ns = marker_namespace;
-    testvec.id = idnum++;
-    testvec.type = visualization_msgs::Marker::ARROW;
-    testvec.action = visualization_msgs::Marker::ADD;
-    testvec.points.resize(2);
-    testvec.points[0].x = 0; //info.point_on_line[0];
-    testvec.points[0].y = 0; //info.point_on_line[1];
-    testvec.points[0].z = 0; //info.point_on_line[2];
-    testvec.points[1].x = info.base_point[0];
-    testvec.points[1].y = info.base_point[1];
-    testvec.points[1].z = info.base_point[2];
-    testvec.scale.x = 0.02;
-    testvec.scale.y = 0.04;
-    testvec.color.r = line_colors[i][0] / 255.;
-    testvec.color.g = line_colors[i][1] / 255.;
-    testvec.color.b = line_colors[i][2] / 255.;
-    testvec.color.a = 1.0;
-    testvec.lifetime = ros::Duration(2, 0);
-    m.markers.push_back(testvec);
+	visualization_msgs::Marker testvec;
+	testvec.header.frame_id = finput_->header.frame_id;
+	testvec.header.stamp = ros::Time::now();
+	testvec.ns = marker_namespace;
+	testvec.id = idnum++;
+	testvec.type = visualization_msgs::Marker::ARROW;
+	testvec.action = visualization_msgs::Marker::ADD;
+	testvec.points.resize(2);
+	testvec.points[0].x = 0; //info.point_on_line[0];
+	testvec.points[0].y = 0; //info.point_on_line[1];
+	testvec.points[0].z = 0; //info.point_on_line[2];
+	testvec.points[1].x = info.base_point[0];
+	testvec.points[1].y = info.base_point[1];
+	testvec.points[1].z = info.base_point[2];
+	testvec.scale.x = 0.02;
+	testvec.scale.y = 0.04;
+	testvec.color.r = line_colors[i][0] / 255.;
+	testvec.color.g = line_colors[i][1] / 255.;
+	testvec.color.b = line_colors[i][2] / 255.;
+	testvec.color.a = 1.0;
+	testvec.lifetime = ros::Duration(2, 0);
+	m.markers.push_back(testvec);
 
-    char *tmp;
-    if (asprintf(&tmp, "L_%zu%s", i+1, name_suffix.c_str()) != -1) {
-      // Copy to get memory freed on exception
-      std::string id = tmp;
-      free(tmp);
+	char *tmp;
+	if (asprintf(&tmp, "L_%zu%s", i+1, name_suffix.c_str()) != -1) {
+		// Copy to get memory freed on exception
+		std::string id = tmp;
+		free(tmp);
 
-      visualization_msgs::Marker text;
-      text.header.frame_id = finput_->header.frame_id;
-      text.header.stamp = ros::Time::now();
-      text.ns = marker_namespace;
-      text.id = idnum++;
-      text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-      text.action = visualization_msgs::Marker::ADD;
-      text.pose.position.x = info.base_point[0];
-      text.pose.position.y = info.base_point[1];
-      text.pose.position.z = info.base_point[2] + .15;
-      text.pose.orientation.w = 1.;
-      text.scale.z = 0.15;
-      text.color.r = text.color.g = text.color.b = 1.0f;
-      text.color.a = 1.0;
-      text.lifetime = ros::Duration(2, 0);
-      text.text = id;
-      m.markers.push_back(text);
-    }
+		visualization_msgs::Marker text;
+		text.header.frame_id = finput_->header.frame_id;
+		text.header.stamp = ros::Time::now();
+		text.ns = marker_namespace;
+		text.id = idnum++;
+		text.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+		text.action = visualization_msgs::Marker::ADD;
+		text.pose.position.x = info.base_point[0];
+		text.pose.position.y = info.base_point[1];
+		text.pose.position.z = info.base_point[2] + .15;
+		text.pose.orientation.w = 1.;
+		text.scale.z = 0.15;
+		text.color.r = text.color.g = text.color.b = 1.0f;
+		text.color.a = 1.0;
+		text.lifetime = ros::Duration(2, 0);
+		text.text = id;
+		m.markers.push_back(text);
+	}
 
-    if (cfg_min_length_ >= 0. || cfg_max_length_ >= 0.) {
-      visualization_msgs::Marker sphere_ep_1;
-      sphere_ep_1.header.frame_id = finput_->header.frame_id;
-      sphere_ep_1.header.stamp = ros::Time::now();
-      sphere_ep_1.ns = marker_namespace;
-      sphere_ep_1.id = idnum++;
-      sphere_ep_1.type = visualization_msgs::Marker::SPHERE;
-      sphere_ep_1.action = visualization_msgs::Marker::ADD;
-      sphere_ep_1.pose.position.x = info.end_point_1[0];
-      sphere_ep_1.pose.position.y = info.end_point_1[1];
-      sphere_ep_1.pose.position.z = info.end_point_1[2];
-      sphere_ep_1.pose.orientation.w = 1.;
-      sphere_ep_1.scale.x = 0.05;
-      sphere_ep_1.scale.y = 0.05;
-      sphere_ep_1.scale.z = 0.05;
-      sphere_ep_1.color.r = line_colors[i][0] / 255.;
-      sphere_ep_1.color.g = line_colors[i][1] / 255.;
-      sphere_ep_1.color.b = line_colors[i][2] / 255.;
-      sphere_ep_1.color.a = 1.0;
-      sphere_ep_1.lifetime = ros::Duration(2, 0);
-      m.markers.push_back(sphere_ep_1);
+	if (cfg_min_length_ >= 0. || cfg_max_length_ >= 0.) {
+		visualization_msgs::Marker sphere_ep_1;
+		sphere_ep_1.header.frame_id = finput_->header.frame_id;
+		sphere_ep_1.header.stamp = ros::Time::now();
+		sphere_ep_1.ns = marker_namespace;
+		sphere_ep_1.id = idnum++;
+		sphere_ep_1.type = visualization_msgs::Marker::SPHERE;
+		sphere_ep_1.action = visualization_msgs::Marker::ADD;
+		sphere_ep_1.pose.position.x = info.end_point_1[0];
+		sphere_ep_1.pose.position.y = info.end_point_1[1];
+		sphere_ep_1.pose.position.z = info.end_point_1[2];
+		sphere_ep_1.pose.orientation.w = 1.;
+		sphere_ep_1.scale.x = 0.05;
+		sphere_ep_1.scale.y = 0.05;
+		sphere_ep_1.scale.z = 0.05;
+		sphere_ep_1.color.r = line_colors[i][0] / 255.;
+		sphere_ep_1.color.g = line_colors[i][1] / 255.;
+		sphere_ep_1.color.b = line_colors[i][2] / 255.;
+		sphere_ep_1.color.a = 1.0;
+		sphere_ep_1.lifetime = ros::Duration(2, 0);
+		m.markers.push_back(sphere_ep_1);
 
-      visualization_msgs::Marker sphere_ep_2;
-      sphere_ep_2.header.frame_id = finput_->header.frame_id;
-      sphere_ep_2.header.stamp = ros::Time::now();
-      sphere_ep_2.ns = marker_namespace;
-      sphere_ep_2.id = idnum++;
-      sphere_ep_2.type = visualization_msgs::Marker::SPHERE;
-      sphere_ep_2.action = visualization_msgs::Marker::ADD;
-      sphere_ep_2.pose.position.x = info.end_point_2[0];
-      sphere_ep_2.pose.position.y = info.end_point_2[1];
-      sphere_ep_2.pose.position.z = info.end_point_2[2];
-      sphere_ep_2.pose.orientation.w = 1.;
-      sphere_ep_2.scale.x = 0.05;
-      sphere_ep_2.scale.y = 0.05;
-      sphere_ep_2.scale.z = 0.05;
-      sphere_ep_2.color.r = line_colors[i][0] / 255.;
-      sphere_ep_2.color.g = line_colors[i][1] / 255.;
-      sphere_ep_2.color.b = line_colors[i][2] / 255.;
-      sphere_ep_2.color.a = 1.0;
-      sphere_ep_2.lifetime = ros::Duration(2, 0);
-      m.markers.push_back(sphere_ep_2);
+		visualization_msgs::Marker sphere_ep_2;
+		sphere_ep_2.header.frame_id = finput_->header.frame_id;
+		sphere_ep_2.header.stamp = ros::Time::now();
+		sphere_ep_2.ns = marker_namespace;
+		sphere_ep_2.id = idnum++;
+		sphere_ep_2.type = visualization_msgs::Marker::SPHERE;
+		sphere_ep_2.action = visualization_msgs::Marker::ADD;
+		sphere_ep_2.pose.position.x = info.end_point_2[0];
+		sphere_ep_2.pose.position.y = info.end_point_2[1];
+		sphere_ep_2.pose.position.z = info.end_point_2[2];
+		sphere_ep_2.pose.orientation.w = 1.;
+		sphere_ep_2.scale.x = 0.05;
+		sphere_ep_2.scale.y = 0.05;
+		sphere_ep_2.scale.z = 0.05;
+		sphere_ep_2.color.r = line_colors[i][0] / 255.;
+		sphere_ep_2.color.g = line_colors[i][1] / 255.;
+		sphere_ep_2.color.b = line_colors[i][2] / 255.;
+		sphere_ep_2.color.a = 1.0;
+		sphere_ep_2.lifetime = ros::Duration(2, 0);
+		m.markers.push_back(sphere_ep_2);
 
-      visualization_msgs::Marker lineseg;
-      lineseg.header.frame_id = finput_->header.frame_id;
-      lineseg.header.stamp = ros::Time::now();
-      lineseg.ns = marker_namespace;
-      lineseg.id = idnum++;
-      lineseg.type = visualization_msgs::Marker::LINE_LIST;
-      lineseg.action = visualization_msgs::Marker::ADD;
-      lineseg.points.resize(2);
-      lineseg.points[0].x = info.end_point_1[0];
-      lineseg.points[0].y = info.end_point_1[1];
-      lineseg.points[0].z = info.end_point_1[2];
-      lineseg.points[1].x = info.end_point_2[0];
-      lineseg.points[1].y = info.end_point_2[1];
-      lineseg.points[1].z = info.end_point_2[2];
-      lineseg.scale.x = 0.02;
-      lineseg.scale.y = 0.04;
-      lineseg.color.r = line_colors[i][0] / 255.;
-      lineseg.color.g = line_colors[i][1] / 255.;
-      lineseg.color.b = line_colors[i][2] / 255.;
-      lineseg.color.a = 1.0;
-      lineseg.lifetime = ros::Duration(2, 0);
-      m.markers.push_back(lineseg);
-    }
+		visualization_msgs::Marker lineseg;
+		lineseg.header.frame_id = finput_->header.frame_id;
+		lineseg.header.stamp = ros::Time::now();
+		lineseg.ns = marker_namespace;
+		lineseg.id = idnum++;
+		lineseg.type = visualization_msgs::Marker::LINE_LIST;
+		lineseg.action = visualization_msgs::Marker::ADD;
+		lineseg.points.resize(2);
+		lineseg.points[0].x = info.end_point_1[0];
+		lineseg.points[0].y = info.end_point_1[1];
+		lineseg.points[0].z = info.end_point_1[2];
+		lineseg.points[1].x = info.end_point_2[0];
+		lineseg.points[1].y = info.end_point_2[1];
+		lineseg.points[1].z = info.end_point_2[2];
+		lineseg.scale.x = 0.02;
+		lineseg.scale.y = 0.04;
+		lineseg.color.r = line_colors[i][0] / 255.;
+		lineseg.color.g = line_colors[i][1] / 255.;
+		lineseg.color.b = line_colors[i][2] / 255.;
+		lineseg.color.a = 1.0;
+		lineseg.lifetime = ros::Duration(2, 0);
+		m.markers.push_back(lineseg);
+	}
+}
+
+void
+LaserLinesThread::publish_visualization(const std::vector<TrackedLineInfo> &linfos,
+                                        const std::string &marker_namespace,
+                                        const std::string &avg_marker_namespace)
+{
+  visualization_msgs::MarkerArray m;
+
+  unsigned int idnum = 0;
+ 
+  for (size_t i = 0; i < linfos.size(); ++i) {
+	  const TrackedLineInfo &info = linfos[i];
+	  publish_visualization_add_line(m, idnum, info.raw, i, marker_namespace);
+	  publish_visualization_add_line(m, idnum, info.smooth, i, avg_marker_namespace, "_avg");
   }
 
   for (size_t i = idnum; i < last_id_num_; ++i) {

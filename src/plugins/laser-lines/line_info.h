@@ -25,6 +25,11 @@
 #include <Eigen/Geometry>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <boost/circular_buffer.hpp>
+#include <memory>
+#include <tf/types.h>
+#include <tf/transformer.h>
+#include <logging/logger.h>
 
 /** Line information container.
  * All points and angles are in the sensor reference frame
@@ -47,6 +52,34 @@ class LineInfo {
 
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;	///< point cloud consisting only of
   						///< points account to this line
+};
+
+
+class TrackedLineInfo {
+public:
+  LineInfo raw;   	///< the latest geometry of this line, i.e. unfiltered
+  LineInfo smooth;	///< moving-average geometry of this line (cf. length of history buffer)
+  fawkes::tf::Stamped<fawkes::tf::Point> base_point_odom;	///< last reference point (in odom frame) for line tracking
+  fawkes::tf::Transformer *transformer;	///< Transformer used to transform from input_frame_id_to odom
+  std::string input_frame_id;	///< Input frame ID of raw line infos (base_laser usually)
+  std::string tracking_frame_id;	///< Track lines relative to this frame (e.g. odom helps compensate movement)
+  float cfg_switch_tolerance;	///< Configured line jitter threshold
+  boost::circular_buffer<LineInfo> history;	///< history of raw line geometries for computing moving average
+  float bearing_center; 	///< Bearing towards line center, used to select lines "in front of us" when there
+  fawkes::Logger *logger;	///< Logger pointer of the calling class
+  std::string plugin_name;	///< Plugin name of the calling class
+
+  TrackedLineInfo(
+      fawkes::tf::Transformer *tfer,
+      const std::string &input_frame_id,
+      const std::string &tracking_frame_id,
+      float cfg_switch_tolerance,
+      unsigned int cfg_moving_avg_len,
+      fawkes::Logger *logger,
+      std::string plugin_name);
+
+  btScalar distance(const LineInfo &linfo) const;
+  void update(LineInfo &new_linfo);
 };
 
 #endif
