@@ -71,7 +71,7 @@ ForwardOmniDriveModule::calculate_rotation(float ori_alpha_target, float ori_alp
   } else {
     float angle_min = ori_alpha_target - angle_allowed_to_next_target;
     float angle_max = ori_alpha_target + angle_allowed_to_next_target;
-    des_alpha = normalize_mirror_rad( std::max( angle_min, std::min(ori_alpha_next_target, angle_max) ) );
+    des_alpha = normalize_mirror_rad( std::max( angle_min, std::min(ori_alpha_target, angle_max) ) );
   }
 
   // then choose rotation speed, depending on desired angle
