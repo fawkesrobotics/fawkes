@@ -25,6 +25,10 @@ LIBS_ffmongodb_save_imgs = fawkescore fawkesaspects fawkesblackboard fawkesinter
 			   fawkestf
 OBJS_ffmongodb_save_imgs = ffmongodb_save_imgs.o
 
+ifeq ($(DISTRO),debian)
+	LIBS_ffmongodb_save_imgs += crypto ssl
+endif
+
 CFLAGS  += $(CFLAGS_MONGODB)
 LDFLAGS += $(LDFLAGS_MONGODB)
 
