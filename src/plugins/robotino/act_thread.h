@@ -119,6 +119,7 @@ class RobotinoActThread
 	float                           des_vx_;
 	float                           des_vy_;
 	float                           des_omega_;
+	std::string                     last_transrot_sender_;
 };
 
 

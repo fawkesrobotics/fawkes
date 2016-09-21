@@ -186,6 +186,11 @@ RobotinoActThread::loop()
 
 			set_des_vel = true;
 			msg_zero_vel_ = (des_vx_ == 0.0 && des_vy_ == 0.0 && des_omega_ == 0.0);
+
+			if (msg->sender_thread_name() != last_transrot_sender_) {
+			  last_transrot_sender_ = msg->sender_thread_name();
+			  logger->log_info(name(), "Sender of TransRotMessage changed to %s", last_transrot_sender_.c_str());
+			}
 		}
 
 		else if (motor_if_->msgq_first_is<MotorInterface::ResetOdometryMessage>())
