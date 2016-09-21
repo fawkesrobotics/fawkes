@@ -124,3 +124,20 @@ function transform6D(src_pos, src_frame, target_frame)
 
    return rv
 end
+
+
+--- Return the age of the latest transform
+-- @param src_frame Source frame of transform
+-- @param target_frame Target frame of transform
+-- @return Age of the transform from @param src_frame to @param target_frame in seconds (as float)
+function tf_age(src_frame, target_frame)
+   local transform = fawkes.tf.StampedTransform:new()
+   tf:lookup_transform(src_frame, target_frame, transform)
+   return timediff = fawkes.Time:new() - transform.stamp
+end
+
+
+
+
+
+
