@@ -45,7 +45,8 @@ class RobotMemorySetup
     fawkes::Logger *logger;
 
     bool is_mongo_running(unsigned int port);
-    void wait_until_started(unsigned int port, std::string cmd, int timout = 10000000);
+    void wait_until_started(unsigned int port, std::string cmd, int timout = 15000000);
+    void prepare_mongo_db_path(std::string path);
 
     fawkes::SubProcess *local_mongod;
     fawkes::SubProcess *config_mongod;

@@ -20,8 +20,10 @@
  */
 
 #include "robot_memory_setup.h"
+#include <plugin/loader.h>
 #include <mongo/client/dbclient.h>
 #include <mongo/client/init.h>
+#include <utils/misc/string_conversions.h>
 
 using namespace fawkes;
 
@@ -43,16 +45,36 @@ RobotMemorySetup::~RobotMemorySetup()
 void RobotMemorySetup::setup_mongods()
 {
   //start local mongod if necessary
-  unsigned int local_port = config->get_uint("plugins/robot-memory/setup/local/port");
+  unsigned int local_port = config->get_int("plugins/robot-memory/setup/local/port");
   if (!is_mongo_running(local_port))
   {
     const char *argv[] = {"mongod","--port", std::to_string(local_port).c_str(), NULL};
     std::string cmd = command_args_tostring(argv);
-    //logger->log_debug("RobotMemorySetup", "Port: '%s'", std::to_string(local_port).c_str());
     logger->log_info("RobotMemorySetup", "Starting local mongod process: '%s'", cmd.c_str());
     local_mongod = new SubProcess("mongod-local", "mongod", argv, NULL, logger);
     logger->log_info("RobotMemorySetup", "Started local mongod");
     wait_until_started(local_port, cmd);
+  }
+
+  //only start other processes when we want to run the robot memory distributed
+  if(!config->get_bool("plugins/robot-memory/setup/distributed"))
+    return;
+
+  unsigned int config_port = config->get_int("plugins/robot-memory/setup/config/port");
+  if (!is_mongo_running(config_port))
+  {
+    std::string repl_set_name = config->get_string("plugins/robot-memory/setup/config/replica-set-name");
+    std::string db_path = StringConversions::resolve_path(config->get_string("plugins/robot-memory/setup/config/db-path").c_str());
+    const char *argv[] = {"mongod", "--configsvr", "--port", std::to_string(config_port).c_str(),
+        //"--replSet", repl_set_name.c_str(),
+        "--dbpath", db_path.c_str(), NULL};
+    logger->log_info("RobotMemorySetup", "Running on port: %s", std::to_string(config_port));
+    std::string cmd = command_args_tostring(argv);
+    prepare_mongo_db_path(db_path);
+    logger->log_info("RobotMemorySetup", "Starting config mongod process: '%s'", cmd.c_str());
+    config_mongod = new SubProcess("mongod-config", "mongod", argv, NULL, logger);
+    logger->log_info("RobotMemorySetup", "Started config mongod");
+    wait_until_started(config_port, cmd);
   }
 }
 
@@ -64,8 +86,12 @@ void RobotMemorySetup::shutdown_mongods()
 {
   if (local_mongod)
     delete local_mongod;
-
-  //TODO:remember and shutdown Subprocesses
+  if (config_mongod)
+    delete config_mongod;
+  if (distribuded_mongod)
+    delete distribuded_mongod;
+  if (mongos)
+    delete mongos;
 }
 
 /**
@@ -118,5 +144,13 @@ void RobotMemorySetup::wait_until_started(unsigned int port, std::string cmd, in
       return;
     usleep(wait_step);
   }
-  logger->log_error("RobotMemorySetup", "MongoDB did not starup in the given time. Please start '%s' manually once.", cmd.c_str());
+  std::string err_msg = "MongoDB did not starup in the given time. Please start '"
+      +cmd+"' manually once.";
+  throw PluginLoadException("robot-memory", err_msg.c_str());
+}
+
+void RobotMemorySetup::prepare_mongo_db_path(std::string path)
+{
+  std::string command = "mkdir -p " + path;
+  popen(command.c_str(), "r");
 }
