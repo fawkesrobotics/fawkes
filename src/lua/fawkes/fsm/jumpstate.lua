@@ -303,15 +303,23 @@ function JumpState:jumpcond_true()
    return true
 end
 
+--- Mimics the os.difftime for the time in milli- respectively microsecconds
+-- @param time in milliseconds
+-- @return time difference
+function difftime(starttime)
+	local	time=fawkes.Time:new() 
+	return (time:in_msec() - starttime)
+end
+
 --- Fires on timeout.
 -- @return true if the time ran out
 function JumpState:jumpcond_timeout()
-   return os.difftime(os.time(), self.timeout_start) >= self.timeout_time
+ return difftime(self.timeout_start) >= math.floor(self.timeout_time*1000)
 end
 
 --- Initializes timeout value.
 function JumpState:init_timeout()
-   self.timeout_start = os.time()
+   self.timeout_start = fawkes.Time:new():in_msec()
 end
 
 
