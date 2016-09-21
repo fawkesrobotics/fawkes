@@ -121,34 +121,33 @@ function process_skiller_messages()
 			elseif mtype == "ExecSkillMessage" then
 				 if skiller_if:exclusive_controller() == m:sender_id() then
 						if skill_enqueued then
-							 print_warn("More than one skill string enqueued, ignoring successive string (%s).",
-													m:skill_string())
-						else
-							 print_debug("%s wants me to execute '%s'", m:sender_thread_name(), m:skill_string())
-
-							 if sksf then
-									print_info("Aborting execution of previous skill string '%s' for new goal",
-														 skiller_if:skill_string())
-									skillenv.reset_all()
-							 end
-
-							 skiller_if:set_skill_string(m:skill_string())
-							 skiller_if:set_msgid(m:id())
-							 write_skiller_if = true
-
-							 skill_enqueued = true
-							 sksf, err = loadstring(m:skill_string())
-							 if sksf then
-									skillenv.reset_all()
-									local sandbox = skillenv.gensandbox()
-									setfenv(sksf, sandbox)
-									skiller_if:set_status(SkillerInterface.S_RUNNING)
-							 else
-									local errstr = string.format("%s|%s", m:skill_string(), err)
-									print_error("Failed to compile skill string: " .. errstr)
-									skiller_if:set_status(SkillerInterface.S_FAILED)
-							 end
+							 print_warn("More than one skill string enqueued, ignoring previous string (%s).",
+                                                                    skiller_if:skill_string())
 						end
+            print_debug("%s wants me to execute '%s'", m:sender_thread_name(), m:skill_string())
+
+            if sksf then
+               print_info("Aborting execution of previous skill string '%s' for new goal",
+                          skiller_if:skill_string())
+               skillenv.reset_all()
+            end
+
+            skiller_if:set_skill_string(m:skill_string())
+            skiller_if:set_msgid(m:id())
+            write_skiller_if = true
+
+            skill_enqueued = true
+            sksf, err = loadstring(m:skill_string())
+            if sksf then
+               skillenv.reset_all()
+               local sandbox = skillenv.gensandbox()
+               setfenv(sksf, sandbox)
+               skiller_if:set_status(SkillerInterface.S_RUNNING)
+            else
+               local errstr = string.format("%s|%s", m:skill_string(), err)
+               print_error("Failed to compile skill string: " .. errstr)
+               skiller_if:set_status(SkillerInterface.S_FAILED)
+            end
 				 else
 						print_warn("%s tries to exec while not controller", m:sender_thread_name())
 				 end
