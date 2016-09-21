@@ -27,7 +27,7 @@ name               = "relgoto"
 fsm                = SkillHSM:new{name=name, start="INIT", debug=false}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "navigator", type = "NavigatorInterface"}
+   {v = "navigator", id = "Navigator", type = "NavigatorInterface"}
 }
 
 documentation      = [==[Relative goto skill.

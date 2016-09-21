@@ -27,7 +27,7 @@ name               = "katana_grab"
 fsm                = SkillHSM:new{name=name, start="INIT", debug=false}
 depends_skills     = {"katana", "katana_rel", "or_object"}
 depends_interfaces = {
-   {v = "katanaarm", type = "KatanaInterface"}
+   {v = "katanaarm", id = "Katana", type = "KatanaInterface"}
 }
 
 documentation      = [==[Katana grabbing skill

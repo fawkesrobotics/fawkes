@@ -27,7 +27,7 @@ name               = "katana_put"
 fsm                = SkillHSM:new{name=name, start="INIT"}
 depends_skills     = {"katana", "or_object"}
 depends_interfaces = {
-   {v = "katanaarm", type = "KatanaInterface"}
+   {v = "katanaarm", id = "Katana", type = "KatanaInterface"}
 }
 
 documentation      = [==[Katana putting skill

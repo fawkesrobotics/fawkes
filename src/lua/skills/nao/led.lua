@@ -35,8 +35,8 @@ depends_interfaces = {
    { v = "rfootled_red", id = "Nao LED RFoot/Red", type = "LedInterface" },
    { v = "rfootled_green", id = "Nao LED RFoot/Green", type = "LedInterface" },
    { v = "rfootled_blue", id = "Nao LED RFoot/Blue", type = "LedInterface" },
-   { v = "ear_leds", type = "LedInterface" },
-   { v = "face_leds", type = "LedInterface" }
+   { v = "ear_leds", id = "Nao LED Ears", type = "LedInterface" },
+   { v = "face_leds", id = "Nao LED Face", type = "LedInterface" }
 }
 
 documentation      = [==[Nao LED setting skill.

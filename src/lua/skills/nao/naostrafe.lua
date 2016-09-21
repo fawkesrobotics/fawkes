@@ -30,7 +30,7 @@ name               = "naostrafe"
 fsm                = SkillHSM:new{name=name, start="STRAFE"}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "naomotion", type = "HumanoidMotionInterface"}
+   {v = "naomotion", id = "NaoQi Motion", type = "HumanoidMotionInterface"}
 }
 
 documentation      = [==[Straves and tries to keep the ball in sight

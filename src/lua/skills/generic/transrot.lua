@@ -27,7 +27,7 @@ name               = "transrot"
 fsm                = SkillHSM:new{name=name, start="TRANSROT", debug=false}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "motor", type = "MotorInterface"}
+   {v = "motor", id = "Motor", type = "MotorInterface"}
 }
 
 documentation      = [==[Trans/rot via MotorInterface.

@@ -33,9 +33,9 @@ function use_skill(skill_name, iface_name)
    M.depends_skills     = nil
    M.depends_interfaces = {
       --{v = iface_name, type = "JacoInterface"},
-      {v = "jacoarm", type = "JacoInterface"},
-      {v = "jacoarm_left", type = "JacoInterface"},
-      {v = "jacoarm_right", type = "JacoInterface"}
+      {v = "jacoarm", id = "JacoArm", type = "JacoInterface"},
+      {v = "jacoarm_left", id = "JacoArm Left", type = "JacoInterface"},
+      {v = "jacoarm_right", id = "JacoArm Right", type = "JacoInterface"}
    }
 
    M.documentation      = [==[Kinova Jaco arm skill.

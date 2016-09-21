@@ -27,7 +27,7 @@ name               = "turn"
 fsm                = SkillHSM:new{name=name, start="TURN"}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "navigator", type = "NavigatorInterface"}
+   {v = "navigator", type = "NavigatorInterface", id = "Navigator"}
 }
 
 documentation      = [==[Turn on the spot.

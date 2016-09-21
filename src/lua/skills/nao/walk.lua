@@ -25,7 +25,7 @@ module(..., skillenv.module_init)
 -- Crucial skill information
 name               = "walk"
 depends_interfaces = {
-   {v = "naomotion", type = "HumanoidMotionInterface"}
+   {v = "naomotion", id = "NaoQi Motion", type = "HumanoidMotionInterface"}
 }
 
 documentation      = [==[Start or stop walk]==]

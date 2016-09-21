@@ -27,7 +27,7 @@ name               = "standup"
 fsm                = SkillHSM:new{name=name, start="TURNON"}
 depends_skills     = {"servo", "getup"}
 depends_interfaces = {
-   {v = "naomotion", type = "HumanoidMotionInterface"}
+   {v = "naomotion", id = "NaoQi Motion", type = "HumanoidMotionInterface"}
 }
 
 documentation      = [==[Make the robot standup.]==]

@@ -27,7 +27,7 @@ name               = "getup"
 fsm                = SkillHSM:new{name=name, start="GETUP"}
 depends_skills     = nil
 depends_interfaces = {
-   {v = "naomotion", type = "HumanoidMotionInterface"}
+   {v = "naomotion", id = "NaoQi Motion", type = "HumanoidMotionInterface"}
 }
 
 documentation      = [==[Get the robot up to standing position.
