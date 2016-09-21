@@ -53,7 +53,7 @@ class RobotMemoryThread
   public fawkes::AspectProviderAspect
 {
  public:
-  RobotMemoryThread();
+  RobotMemoryThread(std::string mongo_client_connection);
   virtual ~RobotMemoryThread();
 
   virtual void init();

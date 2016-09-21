@@ -35,9 +35,11 @@ using namespace fawkes;
  */
 
 /** Constructor. */
-RobotMemoryThread::RobotMemoryThread()
+RobotMemoryThread::RobotMemoryThread(std::string mongo_client_connection)
 	: Thread("RobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
-	  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
+    ConfigurableAspect(),
+    MongoDBAspect(mongo_client_connection.c_str()),
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
     AspectProviderAspect(&robot_memory_inifin_)
 {
 }
