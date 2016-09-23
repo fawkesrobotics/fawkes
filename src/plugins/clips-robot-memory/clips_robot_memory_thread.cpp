@@ -78,6 +78,7 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
   clips->add_function("robmem-update", sigc::slot<void, std::string, void *, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_update)));
   clips->add_function("robmem-replace", sigc::slot<void, std::string, void *, CLIPS::Value>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_replace)));
   clips->add_function("robmem-query", sigc::slot<CLIPS::Value, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_query)));
+  clips->add_function("robmem-remove", sigc::slot<void, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_remove)));
   clips->add_function("robmem-query-sort", sigc::slot<CLIPS::Value, std::string, void *, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_query_sort)));
   clips->add_function("robmem-cursor-destroy", sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_cursor_destroy)));
   clips->add_function("robmem-cursor-more", sigc::slot<CLIPS::Value, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_cursor_more)));
@@ -411,7 +412,7 @@ ClipsRobotMemoryThread::clips_robotmemory_query_sort(std::string collection, voi
     return CLIPS::Value(new std::unique_ptr<mongo::DBClientCursor>(std::move(c)),
                         CLIPS::TYPE_EXTERNAL_ADDRESS);
 #else
-    std::auto_ptr<mongo::DBClientCursor> c = mongodb_->query(collection, q);
+    std::auto_ptr<mongo::DBClientCursor> c = robot_memory->query(collection, q);
 
     return CLIPS::Value(new std::auto_ptr<mongo::DBClientCursor>(c),
                         CLIPS::TYPE_EXTERNAL_ADDRESS);
@@ -420,6 +421,18 @@ ClipsRobotMemoryThread::clips_robotmemory_query_sort(std::string collection, voi
   } catch (mongo::DBException &e) {
     logger->log_warn("MongoDB", "Query failed: %s", e.what());
     return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  }
+}
+
+void
+ClipsRobotMemoryThread::clips_robotmemory_remove(std::string collection, void *bson)
+{
+  mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+  try {
+    mongo::Query q(b->asTempObj());
+    robot_memory->remove(q, collection);
+  } catch (mongo::DBException &e) {
+    logger->log_warn("MongoDB", "Remove failed: %s", e.what());
   }
 }
 
