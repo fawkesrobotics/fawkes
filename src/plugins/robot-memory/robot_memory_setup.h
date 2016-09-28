@@ -26,6 +26,7 @@
 #include <logging/logger.h>
 #include <utils/sub_process/proc.h>
 #include <utils/misc/string_commands.h>
+#include <mongo/client/dbclient.h>
 
 /** @class RobotMemorySetup  robot_memory_setup.h
  *
@@ -48,7 +49,7 @@ class RobotMemorySetup
     void wait_until_started(unsigned int port, std::string cmd, int timout = 15000000);
     void prepare_mongo_db_path(std::string path);
     void start_mongo_process(std::string proc_name, unsigned int port, const char *argv[]);
-    void run_mongo_command(unsigned int port, std::string command, std::string err_msg_to_ignore="");
+    mongo::BSONObj run_mongo_command(unsigned int port, std::string command, std::string err_msg_to_ignore="");
 
     fawkes::SubProcess *local_mongod;
     fawkes::SubProcess *config_mongod;

@@ -79,7 +79,8 @@ void RobotMemorySetup::setup_mongods()
       + config->get_string("plugins/robot-memory/setup/replicated/replica-set-members") + "}";
   run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"), "already initialized");
   //wait for replica set initialization and election
-  usleep(1000000);
+  usleep(3000000);
+  run_mongo_command(distributed_port, std::string("{create: '" + distributed_replset + ".config'}"), "collection already exists");
 
   //start mongos for accessing
   unsigned int mongos_port = config->get_uint("plugins/robot-memory/setup/mongos/port");
@@ -90,9 +91,13 @@ void RobotMemorySetup::setup_mongods()
   start_mongo_process("mongos", mongos_port, mongos_argv);
 
   //configure mongos (add parts of the sharded cluster)
-  run_mongo_command(mongos_port, std::string("{addShard: 'localhost:" + local_port_str + "'}"), "host already used");
-  run_mongo_command(mongos_port, std::string("{addShard: '" + distributed_replset +
-    "/localhost:" + distributed_port_str + "'}"), "host already used");
+  mongo::BSONObj current_shards =  run_mongo_command(mongos_port, std::string("{listShards:1}"));
+  if(current_shards.getField("shards").Array().size() == 0)
+  {
+    run_mongo_command(mongos_port, std::string("{addShard: 'localhost:" + local_port_str + "'}"), "host already used");
+    run_mongo_command(mongos_port, std::string("{addShard: '" + distributed_replset +
+      "/localhost:" + distributed_port_str + "'}"), "host already used");
+  }
 }
 
 /**
@@ -187,7 +192,7 @@ void RobotMemorySetup::prepare_mongo_db_path(std::string path)
   popen(command.c_str(), "r");
 }
 
-void RobotMemorySetup::run_mongo_command(unsigned int port, std::string command,
+mongo::BSONObj RobotMemorySetup::run_mongo_command(unsigned int port, std::string command,
   std::string err_msg_to_ignore)
 {
   std::string errmsg;
@@ -201,6 +206,7 @@ void RobotMemorySetup::run_mongo_command(unsigned int port, std::string command,
   mongo::BSONObj res;
   logger->log_info("RobotMemorySetup", "Executing db command: %s", command.c_str());
   con.runCommand("admin", mongo::fromjson(command), res);
-//  if(res.getField("ok").Double() == 0.0 && res.getField("errmsg").String().compare(err_msg_to_ignore) != 0)
-//    throw PluginLoadException("robot-memory", std::string("Running DB command " + command + " failed: " + res.toString()).c_str());
+  if(res.getField("ok").Double() == 0.0 && res.getField("errmsg").String().compare(err_msg_to_ignore) != 0)
+    throw PluginLoadException("robot-memory", std::string("Running DB command " + command + " failed: " + res.toString()).c_str());
+  return res;
 }
