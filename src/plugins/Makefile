@@ -38,10 +38,11 @@ katana jaco: openrave
 amcl colli navgraph perception robotino: ros
 mongodb_log: mongodb
 mongodb: rrd
-clips-navgraph clips-agent clips-protobuf clips-tf: clips
+clips-navgraph clips-agent clips-protobuf clips-tf clips-robot-memory: clips
 clips-navgraph navgraph-clusters: navgraph
 clips-webview: clips webview
 clips-ros: clips ros
+clips-robot-memory: robot-memory
 gazebo: robotino
 skiller: navgraph
 perception: mongodb
