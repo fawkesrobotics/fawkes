@@ -89,6 +89,8 @@ class RobotMemory
     void set_fields(mongo::BSONObj &obj, std::string what);
     void set_fields(mongo::Query &q, std::string what);
     void remove_field(mongo::Query &q, std::string what);
+
+    void check_collection_name(std::string &collection);
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ROBOT_MEMORY_H_ */

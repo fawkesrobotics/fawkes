@@ -81,8 +81,7 @@ void RobotMemory::init()
 
 QResCursor RobotMemory::query(Query query, std::string collection)
 {
-  if(collection == "")
-    collection = default_collection_;
+  check_collection_name(collection);
   log_deb(std::string("Executing Query "+ query.toString() +" on collection "+collection));
 
   //only one query at a time
@@ -123,8 +122,7 @@ QResCursor RobotMemory::query(Query query, std::string collection)
 
 int RobotMemory::insert(BSONObj obj, std::string collection)
 {
-  if(collection == "")
-    collection = default_collection_;
+  check_collection_name(collection);
 
   log_deb(std::string("Executing Query "+ obj.toString() + " on collection " + collection));
 
@@ -151,10 +149,7 @@ int RobotMemory::insert(std::string obj_str, std::string collection)
 
 int RobotMemory::update(Query query, BSONObj update, std::string collection, bool upsert)
 {
-  if(collection == "")
-  {
-    collection = default_collection_;
-  }
+  check_collection_name(collection);
   log_deb(std::string("Executing Update "+update.toString()+" for query "+query.toString()+" on collection "+ collection));
 
   //only one query at a time
@@ -178,10 +173,7 @@ int RobotMemory::update(Query query, std::string update_str, std::string collect
 
 int RobotMemory::remove(Query query, std::string collection)
 {
-  if(collection == "")
-  {
-    collection = default_collection_;
-  }
+  check_collection_name(collection);
   log_deb(std::string("Executing Remove "+query.toString()+" on collection "+collection));
 
   //only one query at a time
@@ -398,4 +390,21 @@ RobotMemory::remove_field(Query &q, std::string what)
 
   //override
   q = Query(b.obj());
+}
+
+/**
+ * Check if collection name is valid and correct it if necessary
+ */
+void
+RobotMemory::check_collection_name(std::string &collection)
+{
+  if(collection == "")
+  {
+      collection = default_collection_;
+  }
+  else if(default_collection_ != "robmem" && collection.find("robmem.") == 1)
+  {
+    //change used database name (e.g. for the case of multiple simulated dababases)
+    collection.replace(0, 6, default_collection_);
+  }
 }
