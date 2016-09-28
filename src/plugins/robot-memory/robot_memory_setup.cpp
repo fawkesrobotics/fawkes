@@ -54,6 +54,7 @@ void RobotMemorySetup::setup_mongods()
   if(!config->get_bool("plugins/robot-memory/setup/distributed"))
     return;
 
+  //start config server
   unsigned int config_port = config->get_uint("plugins/robot-memory/setup/config/port");
   std::string db_path = StringConversions::resolve_path(config->get_string("plugins/robot-memory/setup/config/db-path").c_str());
   prepare_mongo_db_path(db_path);
@@ -62,6 +63,7 @@ void RobotMemorySetup::setup_mongods()
       config_port_str.c_str(), "--dbpath", db_path.c_str(), NULL};
   start_mongo_process("mongod-config", config_port, config_argv);
 
+  //start own part of replica set
   unsigned int distributed_port = config->get_uint("plugins/robot-memory/setup/replicated/port");
   std::string distributed_db_path = StringConversions::resolve_path(config->get_string("plugins/robot-memory/setup/replicated/db-path").c_str());
   prepare_mongo_db_path(distributed_db_path);
@@ -72,12 +74,23 @@ void RobotMemorySetup::setup_mongods()
       "--replSet", distributed_replset.c_str(),NULL};
   start_mongo_process("mongod-replicated", distributed_port, distributed_argv);
 
+  //configure replica set
+  std::string repl_config = "{_id:'" + distributed_replset + "', members:"
+      + config->get_string("plugins/robot-memory/setup/replicated/replica-set-members") + "}";
+  run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"));
+
+  //start mongos for accessing
   unsigned int mongos_port = config->get_uint("plugins/robot-memory/setup/mongos/port");
   std::string mongos_port_str = std::to_string(mongos_port);
   std::string confighost = "localhost:" + config_port_str;
   const char *mongos_argv[] = {"mongos", "--port", mongos_port_str.c_str(),
       "--configdb", confighost.c_str(), NULL};
   start_mongo_process("mongos", mongos_port, mongos_argv);
+
+  //configure mongos (add parts of the sharded cluster)
+  run_mongo_command(mongos_port, std::string("{addShard: 'localhost:" + local_port_str + "'}"), "host already used");
+  run_mongo_command(mongos_port, std::string("{addShard: '" + distributed_replset +
+    "/localhost:" + distributed_port_str + "'}"), "host already used");
 }
 
 /**
@@ -170,4 +183,22 @@ void RobotMemorySetup::prepare_mongo_db_path(std::string path)
 {
   std::string command = "mkdir -p " + path;
   popen(command.c_str(), "r");
+}
+
+void RobotMemorySetup::run_mongo_command(unsigned int port, std::string command,
+  std::string err_msg_to_ignore)
+{
+  std::string errmsg;
+  mongo::DBClientConnection con(false);
+  bool could_connect = con.connect(std::string("localhost:" + std::to_string(port)), errmsg);
+  if(!could_connect)
+  {
+    std::string err_msg = "Could not connect to mongo process to execute command: "+ errmsg;
+    throw PluginLoadException("robot-memory", err_msg.c_str());
+  }
+  mongo::BSONObj res;
+  logger->log_info("RobotMemorySetup", "Executing db command: %s", command.c_str());
+  con.runCommand("admin", mongo::fromjson(command), res);
+  if(res.getField("ok").Double() == 0.0 && res.getField("errmsg").String().compare(err_msg_to_ignore) != 0)
+    throw PluginLoadException("robot-memory", std::string("Running DB command " + command + " failed: " + res.toString()).c_str());
 }
