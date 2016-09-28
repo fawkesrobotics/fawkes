@@ -77,7 +77,9 @@ void RobotMemorySetup::setup_mongods()
   //configure replica set
   std::string repl_config = "{_id:'" + distributed_replset + "', members:"
       + config->get_string("plugins/robot-memory/setup/replicated/replica-set-members") + "}";
-  run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"));
+  run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"), "already initialized");
+  //wait for replica set initialization and election
+  usleep(1000000);
 
   //start mongos for accessing
   unsigned int mongos_port = config->get_uint("plugins/robot-memory/setup/mongos/port");
@@ -199,6 +201,6 @@ void RobotMemorySetup::run_mongo_command(unsigned int port, std::string command,
   mongo::BSONObj res;
   logger->log_info("RobotMemorySetup", "Executing db command: %s", command.c_str());
   con.runCommand("admin", mongo::fromjson(command), res);
-  if(res.getField("ok").Double() == 0.0 && res.getField("errmsg").String().compare(err_msg_to_ignore) != 0)
-    throw PluginLoadException("robot-memory", std::string("Running DB command " + command + " failed: " + res.toString()).c_str());
+//  if(res.getField("ok").Double() == 0.0 && res.getField("errmsg").String().compare(err_msg_to_ignore) != 0)
+//    throw PluginLoadException("robot-memory", std::string("Running DB command " + command + " failed: " + res.toString()).c_str());
 }

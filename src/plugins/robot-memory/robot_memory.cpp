@@ -105,6 +105,9 @@ QResCursor RobotMemory::query(Query query, std::string collection)
 //    gen_blackboard_data(query.getFilter()["bbinterface"].String());
 //  }
 
+  //set read preference of query to nearest to read from the local replica set member first
+  query.readPref(ReadPreference_Nearest, BSONArray());
+
   //actually execute query
   QResCursor cursor;
   try{
