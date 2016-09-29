@@ -109,8 +109,8 @@ void VisLocalizationThread::loop()
 #else
     msgs::Set(geomMsg->mutable_plane()->mutable_normal(), math::Vector3(0.0, 0.0, 1.0));
     msgs::Set(geomMsg->mutable_plane()->mutable_size(), math::Vector2d(label_size_, label_size_));
-#endif
     msg_number.set_transparency(0.2);  
+#endif
     msg_number.set_cast_shadows(false);
 #if GAZEBO_MAJOR_VERSION > 5
     msgs::Set(msg_number.mutable_pose(), ignition::math::Pose3d(x, y, label_height_, 0, 0, 0));
@@ -122,7 +122,10 @@ void VisLocalizationThread::loop()
     script->add_uri(location_textures_.c_str());
     script->set_name(label_script_name_.c_str());
 
+    visual_publisher_->Publish(msg_number);
+
     //create label with direction arrow
+#if GAZEBO_MAJOR_VERSION <= 5
     msgs::Visual msg_arrow;
     msg_arrow.set_name((robot_name_ + "-localization-arrow").c_str());
     msg_arrow.set_parent_name(parent_name_.c_str());
@@ -134,8 +137,8 @@ void VisLocalizationThread::loop()
 #else
     msgs::Set(geomArrowMsg->mutable_plane()->mutable_normal(), math::Vector3(0.0, 0.0, 1.0));
     msgs::Set(geomArrowMsg->mutable_plane()->mutable_size(), math::Vector2d(0.17, 0.17));
-#endif
     msg_arrow.set_transparency(0.4);  
+#endif
     msg_arrow.set_cast_shadows(false);
 #if GAZEBO_MAJOR_VERSION > 5
     msgs::Set(msg_arrow.mutable_pose(), ignition::math::Pose3d(x, y, label_height_ + 0.01, 0, 0, ori - /*turn image right*/ M_PI / 2));
@@ -147,8 +150,7 @@ void VisLocalizationThread::loop()
     arrow_script->add_uri(location_textures_.c_str());
     arrow_script->set_name(arrow_script_name_.c_str());
 
-    //Publish with the gazebo aspect
-    visual_publisher_->Publish(msg_number);
     visual_publisher_->Publish(msg_arrow);
+#endif
   }
 }
