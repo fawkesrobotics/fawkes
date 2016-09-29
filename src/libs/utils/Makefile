@@ -52,7 +52,7 @@ ifeq ($(HAVE_TOLUA)$(HAVE_CPP11)$(HAVE_BOOST_LIBS),111)
   LIBS_all += $(LUALIBDIR)/fawkesutils.so
   LDFLAGS += $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
-  LIBS_all  = $(LIBDIR)/libfawkesutils.so
+  LIBS_all  += $(LIBDIR)/libfawkesutils.so
   TARGETS_all += $(SRCDIR)/fawkesutils_tolua.cpp
 else
   ifneq ($(HAVE_CPP11),1)
