@@ -50,6 +50,7 @@ class RobotMemorySetup
     void prepare_mongo_db_path(std::string path);
     void start_mongo_process(std::string proc_name, unsigned int port, const char *argv[]);
     mongo::BSONObj run_mongo_command(unsigned int port, std::string command, std::string err_msg_to_ignore="");
+    void create_database(unsigned int port, std::string name);
 
     fawkes::SubProcess *local_mongod;
     fawkes::SubProcess *config_mongod;

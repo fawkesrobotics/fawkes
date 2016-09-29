@@ -46,6 +46,7 @@ void RobotMemorySetup::setup_mongods()
 {
   //start local mongod if necessary
   unsigned int local_port = config->get_uint("plugins/robot-memory/setup/local/port");
+  std::string local_db_name = config->get_string("plugins/robot-memory/database");
   std::string local_port_str = std::to_string(local_port);
   const char *local_argv[] = {"mongod", "--port", local_port_str.c_str(), NULL};
   start_mongo_process("mongod-local", local_port, local_argv);
@@ -62,6 +63,7 @@ void RobotMemorySetup::setup_mongods()
   const char *config_argv[] = {"mongod", "--configsvr", "--port",
       config_port_str.c_str(), "--dbpath", db_path.c_str(), NULL};
   start_mongo_process("mongod-config", config_port, config_argv);
+  create_database(local_port, local_db_name);
 
   //start own part of replica set
   unsigned int distributed_port = config->get_uint("plugins/robot-memory/setup/replicated/port");
@@ -80,7 +82,7 @@ void RobotMemorySetup::setup_mongods()
   run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"), "already initialized");
   //wait for replica set initialization and election
   usleep(3000000);
-  run_mongo_command(distributed_port, std::string("{create: '" + distributed_replset + ".config'}"), "collection already exists");
+  create_database(distributed_port, distributed_replset);
 
   //start mongos for accessing
   unsigned int mongos_port = config->get_uint("plugins/robot-memory/setup/mongos/port");
@@ -98,6 +100,9 @@ void RobotMemorySetup::setup_mongods()
     run_mongo_command(mongos_port, std::string("{addShard: '" + distributed_replset +
       "/localhost:" + distributed_port_str + "'}"), "host already used");
   }
+  //define which db is in which shard
+  run_mongo_command(mongos_port, std::string("{movePrimary: '" + distributed_replset + "', to: '" + distributed_replset + "'}"), "it is already the primary");
+  run_mongo_command(mongos_port, std::string("{movePrimary: '" + local_db_name + "', to: 'shard0000'}"), "it is already the primary");
 }
 
 /**
@@ -206,7 +211,26 @@ mongo::BSONObj RobotMemorySetup::run_mongo_command(unsigned int port, std::strin
   mongo::BSONObj res;
   logger->log_info("RobotMemorySetup", "Executing db command: %s", command.c_str());
   con.runCommand("admin", mongo::fromjson(command), res);
-  if(res.getField("ok").Double() == 0.0 && res.getField("errmsg").String().compare(err_msg_to_ignore) != 0)
+  con.reset();
+  if(res.getField("ok").type() != mongo::BSONType::NumberDouble || (res.getField("ok").Double() == 0.0 && res.getField("errmsg").String().compare(err_msg_to_ignore) != 0))
     throw PluginLoadException("robot-memory", std::string("Running DB command " + command + " failed: " + res.toString()).c_str());
   return res;
+}
+
+void RobotMemorySetup::create_database(unsigned int port, std::string name)
+{
+  //to create a database you have to insert at least one document
+  std::string errmsg;
+  mongo::DBClientConnection con(false);
+  bool could_connect = con.connect(std::string("localhost:" + std::to_string(port)), errmsg);
+  if(!could_connect)
+  {
+    std::string err_msg = "Could not connect to mongo process to execute command: "+ errmsg;
+    throw PluginLoadException("robot-memory", err_msg.c_str());
+  }
+  mongo::BSONObj first_doc = mongo::fromjson("{initialized:1}");
+  con.insert(name + ".config", first_doc);
+  con.reset();
+
+
 }
