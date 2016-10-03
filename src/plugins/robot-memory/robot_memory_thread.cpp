@@ -92,5 +92,7 @@ RobotMemoryThread::loop()
 
     robot_memory->rm_if_->msgq_pop();
   }
+
+  robot_memory->loop();
 }
 

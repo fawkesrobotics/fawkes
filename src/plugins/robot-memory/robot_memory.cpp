@@ -51,6 +51,7 @@ RobotMemory::RobotMemory(fawkes::Configuration* config, fawkes::Logger* logger,
 RobotMemory::~RobotMemory()
 {
   delete mutex_;
+  delete trigger_manager_;
   blackboard_->close(rm_if_);
 }
 
@@ -76,7 +77,15 @@ void RobotMemory::init()
   rm_if_->set_result("");
   rm_if_->write();
 
+  //Setup event trigger manager
+  trigger_manager_ = new EventTriggerManager(logger_, config_);
+
   log_deb("Initialized RobotMemory");
+}
+
+void RobotMemory::loop()
+{
+  trigger_manager_->check_events();
 }
 
 QResCursor RobotMemory::query(Query query, std::string collection)

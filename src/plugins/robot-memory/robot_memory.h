@@ -29,6 +29,7 @@
 
 #include <mongo/client/dbclient.h>
 #include "interfaces/RobotMemoryInterface.h"
+#include "event_trigger_manager.h"
 
 namespace fawkes {
   class Mutex;
@@ -76,8 +77,10 @@ class RobotMemory
     bool debug_;
     fawkes::Mutex *mutex_;
     fawkes::RobotMemoryInterface* rm_if_;
+    EventTriggerManager* trigger_manager_;
 
     void init();
+    void loop();
 
     void log(std::string what, std::string level = "info");
     void log_deb(std::string what, std::string level = "info");
