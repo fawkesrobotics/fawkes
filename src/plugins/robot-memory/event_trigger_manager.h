@@ -25,6 +25,8 @@
 #include <mongo/client/dbclient.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <list>
+#include "event_trigger.h"
 
 
 ///typedef for shorter type description
@@ -42,11 +44,13 @@ class EventTriggerManager
     EventTriggerManager(fawkes::Logger* logger, fawkes::Configuration* config);
     virtual ~EventTriggerManager();
 
-    void register_trigger(mongo::Query query, std::string collection);
+    template<typename T>
+    void register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj);
 
   private:
     void check_events();
     QResCursor create_oplog_cursor(mongo::DBClientConnection* con, std::string oplog, mongo::Query query);
+    void callback_test(mongo::BSONObj update);
 
     std::string name = "RobotMemory EventTriggerManager";
     fawkes::Logger* logger_;
@@ -58,9 +62,7 @@ class EventTriggerManager
 
     std::string repl_set, local_db;
 
-    mongo::Query oplog_query;
-    std::string oplog_collection;
-    QResCursor oplog_cursor;
+    std::list<EventTrigger*> triggers;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_EVENT_TRIGGER_MANAGER_H_ */

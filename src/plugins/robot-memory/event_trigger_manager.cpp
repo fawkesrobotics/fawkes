@@ -21,9 +21,15 @@
 
 #include "event_trigger_manager.h"
 #include <plugin/loader.h>
+#include <boost/bind.hpp>
 
 using namespace fawkes;
 using namespace mongo;
+
+void EventTriggerManager::callback_test(mongo::BSONObj update)
+{
+  logger_->log_info(name.c_str(), "callback: %s", update.toString().c_str());
+}
 
 EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config)
 {
@@ -49,39 +55,71 @@ EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config)
   }
 
   //test setup
-  register_trigger(mongo::fromjson("{}"), "syncedrobmem.test");
+  register_trigger(mongo::fromjson("{test: 0}"), "syncedrobmem.test", &EventTriggerManager::callback_test, this);
 
   logger_->log_info(name.c_str(), "Initialized");
 }
 
 EventTriggerManager::~EventTriggerManager()
 {
+  for(EventTrigger *trigger : triggers)
+    {
+      delete trigger;
+    }
 }
 
 void EventTriggerManager::check_events()
 {
-  while(oplog_cursor->more())
+  for(EventTrigger *trigger : triggers)
   {
-    BSONObj change = oplog_cursor->next();
-    logger_->log_info(name.c_str(), "Oplog has more: %s", change.toString().c_str());
-  }
-  if(oplog_cursor->isDead())
-  {
-    logger_->log_info(name.c_str(), "Tailable Cursor is dead, requerying");
-    oplog_cursor = create_oplog_cursor(con_replica_, "local.oplog.rs", oplog_query);
+    while(trigger->oplog_cursor->more())
+    {
+      BSONObj change = trigger->oplog_cursor->next();
+      //actually call the callback function
+      trigger->callback(change);
+    }
+    if(trigger->oplog_cursor->isDead())
+    {
+      logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
+      trigger->oplog_cursor = create_oplog_cursor(con_replica_, "local.oplog.rs", trigger->oplog_query);
+    }
   }
 }
 
-void EventTriggerManager::register_trigger(mongo::Query query, std::string collection)
+template<typename T>
+void EventTriggerManager::register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *obj)
 {
   logger_->log_info(name.c_str(), "Registering Trigger");
 
-  oplog_query = query;
+  //construct query for oplog
+  BSONObjBuilder query_builder;
+  query_builder.append("ns", collection);
+  // added/updated object is a subdocument in the oplog document
+  for(BSONObjIterator it = query.getFilter().begin(); it.more();)
+  {
+    BSONElement elem = it.next();
+    query_builder.appendAs(elem, std::string("o.") + elem.fieldName());
+  }
+  mongo::Query oplog_query = query_builder.obj();
   oplog_query.readPref(ReadPreference_Nearest, BSONArray());
-  oplog_collection = collection;
 
-  //TODO: check if collection is local or replicated
-  oplog_cursor = create_oplog_cursor(con_replica_, "local.oplog.rs", oplog_query);
+  //check if collection is local or replicated
+  mongo::DBClientConnection* con;
+  std::string oplog;
+  if(collection.find(repl_set) == 0)
+  {
+    con = con_replica_;
+    oplog = "local.oplog.rs";
+  }
+  else
+  {
+    con = con_local_;
+    oplog = "local.oplog";
+  }
+
+  EventTrigger *trigger = new EventTrigger(oplog_query, collection, boost::bind(callback, obj, _1));
+  trigger->oplog_cursor = create_oplog_cursor(con, oplog, oplog_query);
+  triggers.push_back(trigger);
 }
 
 QResCursor EventTriggerManager::create_oplog_cursor(mongo::DBClientConnection* con, std::string oplog, mongo::Query query)

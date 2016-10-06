@@ -39,7 +39,7 @@ namespace fawkes {
 ///typedef for shorter type description
 typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
 
-/*
+/**
  *
  */
 class RobotMemory
@@ -63,6 +63,11 @@ class RobotMemory
     int clear_memory();
     int restore_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
     int dump_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
+
+    template<typename T>
+    void register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj);
+    template<typename T>
+    void register_trigger(std::string query_str, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj);
 
   private:
     mongo::DBClientBase* mongodb_client_;
