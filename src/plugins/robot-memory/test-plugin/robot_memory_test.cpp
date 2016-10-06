@@ -20,6 +20,8 @@
  */
 
 #include "robot_memory_test.h"
+#include <list>
+#include <algorithm>
 
 //init static variable
 RobotMemory* RobotMemoryTestEnvironment::robot_memory = NULL;
@@ -146,14 +148,21 @@ TEST_F(RobotMemoryTest, DumpAndResore)
   ASSERT_TRUE(robot_memory->drop_collection("robmem.test"));
   ASSERT_TRUE(robot_memory->restore_collection("robmem.test"));
   QResCursor qres = robot_memory->query("{'testkey':'value'}");
+  std::list<int> values = {3, 2, 1};
   ASSERT_TRUE(qres->more());
-  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{'testkey':'value',v:1}")));
+  int got = qres->next().getField("v").Int();
+  ASSERT_TRUE(std::find(values.begin(), values.end(), got) != values.end());
+  values.remove(got);
   ASSERT_TRUE(qres->more());
-  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{'testkey':'value',v:2}")));
+  got = qres->next().getField("v").Int();
+  ASSERT_TRUE(std::find(values.begin(), values.end(), got) != values.end());
+  values.remove(got);
   ASSERT_TRUE(qres->more());
-  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{'testkey':'value',v:3}")));
+  got = qres->next().getField("v").Int();
+  ASSERT_TRUE(std::find(values.begin(), values.end(), got) != values.end());
+  values.remove(got);
+  ASSERT_EQ(0, values.size());
   ASSERT_FALSE(qres->more());
-
 }
 
 TEST_F(RobotMemoryTest, EventTriggerLocal)
@@ -170,7 +179,7 @@ TEST_F(RobotMemoryTest, EventTriggerLocal)
   robot_memory->update(fromjson("{updateid:42}"), fromjson("{test:2, updateid:42}"), "robmem.test");
 
   //wait for robot memory to call triggers
-  usleep(500000);
+  usleep(100000);
 
   ASSERT_EQ(2, rmc->callback_counter);
 
@@ -192,7 +201,7 @@ TEST_F(RobotMemoryTest, EventTriggerReplica)
   robot_memory->update(fromjson("{updateid:42}"), fromjson("{test:2, updateid:42}"), "syncedrobmem.test");
 
   //wait for robot memory to call triggers
-  usleep(500000);
+  usleep(100000);
 
   ASSERT_EQ(2, rmc->callback_counter);
 
