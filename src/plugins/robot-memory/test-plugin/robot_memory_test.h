@@ -55,5 +55,23 @@ class RobotMemoryTest : public ::testing::Test
   ::testing::AssertionResult contains_pairs(mongo::BSONObj obj, mongo::BSONObj exp);
 };
 
+/**
+ * Class to register callbacks independent of how many tests are using them at the moment
+ */
+class RobotMemoryCallback
+{
+  public:
+    RobotMemoryCallback()
+  {
+      callback_counter = 0;
+  };
+   ~RobotMemoryCallback(){};
+   int callback_counter;
+   void callback_test(mongo::BSONObj update)
+   {
+     callback_counter++;
+   }
+};
+
 
 #endif

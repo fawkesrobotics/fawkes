@@ -156,6 +156,50 @@ TEST_F(RobotMemoryTest, DumpAndResore)
 
 }
 
+TEST_F(RobotMemoryTest, EventTriggerLocal)
+{
+  RobotMemoryCallback* rmc = new RobotMemoryCallback();
+  rmc->callback_counter = 0;
+  EventTrigger* trigger1 = robot_memory->register_trigger(fromjson("{test:1}"),
+      "robmem.test", &RobotMemoryCallback::callback_test, rmc);
+  EventTrigger* trigger2 = robot_memory->register_trigger(fromjson("{test:2}"),
+      "robmem.test", &RobotMemoryCallback::callback_test, rmc);
+
+  robot_memory->insert(fromjson("{test:0, updateid:55}"), "robmem.test");
+  robot_memory->insert(fromjson("{test:1, updateid:42}"), "robmem.test");
+  robot_memory->update(fromjson("{updateid:42}"), fromjson("{test:2, updateid:42}"), "robmem.test");
+
+  //wait for robot memory to call triggers
+  usleep(500000);
+
+  ASSERT_EQ(2, rmc->callback_counter);
+
+  robot_memory->remove_trigger(trigger1);
+  robot_memory->remove_trigger(trigger2);
+}
+
+TEST_F(RobotMemoryTest, EventTriggerReplica)
+{
+  RobotMemoryCallback* rmc = new RobotMemoryCallback();
+  rmc->callback_counter = 0;
+  EventTrigger* trigger1 = robot_memory->register_trigger(fromjson("{test:1}"),
+      "syncedrobmem.test", &RobotMemoryCallback::callback_test, rmc);
+  EventTrigger* trigger2 = robot_memory->register_trigger(fromjson("{test:2}"),
+      "syncedrobmem.test", &RobotMemoryCallback::callback_test, rmc);
+
+  robot_memory->insert(fromjson("{test:0, updateid:55}"), "syncedrobmem.test");
+  robot_memory->insert(fromjson("{test:1, updateid:42}"), "syncedrobmem.test");
+  robot_memory->update(fromjson("{updateid:42}"), fromjson("{test:2, updateid:42}"), "syncedrobmem.test");
+
+  //wait for robot memory to call triggers
+  usleep(500000);
+
+  ASSERT_EQ(2, rmc->callback_counter);
+
+  robot_memory->remove_trigger(trigger1);
+  robot_memory->remove_trigger(trigger2);
+}
+
 ::testing::AssertionResult RobotMemoryTest::contains_pairs(BSONObj obj, BSONObj exp)
 {
   for(BSONObjIterator it = exp.begin(); it.more();)

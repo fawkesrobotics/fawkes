@@ -47,13 +47,14 @@ RobotMemoryTestThread::init()
   test_env_ = new RobotMemoryTestEnvironment(robot_memory);
   ::testing::AddGlobalTestEnvironment((testing::Environment*) test_env_);
 
-  logger->log_warn(name(), "Starting tests");
-  test_result_ = RUN_ALL_TESTS();
 }
 
 void
 RobotMemoryTestThread::loop()
 {
+  logger->log_warn(name(), "Starting tests");
+  test_result_ = RUN_ALL_TESTS();
+  usleep(100000);
   logger->log_warn(name(), "Finished tests with, quitting as intended...");
   //stop fawkes to finish the testing run
   fawkes::runtime::quit();

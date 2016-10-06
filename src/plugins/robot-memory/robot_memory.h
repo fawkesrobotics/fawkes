@@ -64,10 +64,34 @@ class RobotMemory
     int restore_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
     int dump_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
 
+    /**
+     * Register a trigger to be notified when the robot memory is updated and the updated document matches the query
+     * @param query Query the updated document has to match
+     * @param collection db.collection to use
+     * @param callback Callback function (e.g. &Class::callback)
+     * @param _obj Pointer to class the callback is a function of (usaually this)
+     * @return Trigger object pointer, save it to remove the trigger later
+     */
     template<typename T>
-    void register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj);
+    EventTrigger* register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj)
+    {
+      return trigger_manager_->register_trigger(query, collection, callback, _obj);
+    }
+    /**
+     * Register a trigger to be notified when the robot memory is updated and the updated document matches the query
+     * @param query_str Query as JSON string
+     * @param collection db.collection to use
+     * @param callback Callback function (e.g. &Class::callback)
+     * @param _obj Pointer to class the callback is a function of (usaually this)
+     * @return Trigger object pointer, save it to remove the trigger later
+     */
     template<typename T>
-    void register_trigger(std::string query_str, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj);
+    EventTrigger* register_trigger(std::string query_str, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj)
+    {
+      return register_trigger(mongo::fromjson(query_str), collection, callback);
+    }
+
+    void remove_trigger(EventTrigger* trigger);
 
   private:
     mongo::DBClientBase* mongodb_client_;

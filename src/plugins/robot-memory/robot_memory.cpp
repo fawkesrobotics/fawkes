@@ -419,19 +419,10 @@ RobotMemory::check_collection_name(std::string &collection)
 }
 
 /**
- * Register a trigger that notifies you when the event specified in the query happens
+ * Remove a previously registered trigger
+ * @param trigger Pointer to the trigger to remove
  */
-template<typename T>
-void RobotMemory::register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj)
+void RobotMemory::remove_trigger(EventTrigger* trigger)
 {
-  trigger_manager_->register_trigger(query, collection, callback, _obj);
-}
-
-/**
- * Register a trigger that notifies you when the event specified in the query happens
- */
-template<typename T>
-void RobotMemory::register_trigger(std::string query_str, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj)
-{
-  register_trigger(fromjson(query_str), collection, callback);
+  trigger_manager_->remove_trigger(trigger);
 }

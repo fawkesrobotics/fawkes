@@ -27,6 +27,7 @@
 #include <aspect/configurable.h>
 #include <list>
 #include "event_trigger.h"
+#include <boost/bind.hpp>
 
 
 ///typedef for shorter type description
@@ -45,12 +46,46 @@ class EventTriggerManager
     virtual ~EventTriggerManager();
 
     template<typename T>
-    void register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj);
+    EventTrigger* register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *obj)
+    {
+      //construct query for oplog
+      mongo::BSONObjBuilder query_builder;
+      query_builder.append("ns", collection);
+      // added/updated object is a subdocument in the oplog document
+      for(mongo::BSONObjIterator it = query.getFilter().begin(); it.more();)
+      {
+        mongo::BSONElement elem = it.next();
+        query_builder.appendAs(elem, std::string("o.") + elem.fieldName());
+      }
+      mongo::Query oplog_query = query_builder.obj();
+      oplog_query.readPref(mongo::ReadPreference_Nearest, mongo::BSONArray());
+
+      //check if collection is local or replicated
+      mongo::DBClientConnection* con;
+      std::string oplog;
+      if(collection.find(repl_set) == 0)
+      {
+        con = con_replica_;
+        oplog = "local.oplog.rs";
+      }
+      else
+      {
+        con = con_local_;
+        oplog = "local.oplog.rs";
+      }
+
+      EventTrigger *trigger = new EventTrigger(oplog_query, collection, boost::bind(callback, obj, _1));
+      trigger->oplog_cursor = create_oplog_cursor(con, oplog, oplog_query);
+      triggers.push_back(trigger);
+      return trigger;
+    }
+
+
+    void remove_trigger(EventTrigger* trigger);
 
   private:
     void check_events();
     QResCursor create_oplog_cursor(mongo::DBClientConnection* con, std::string oplog, mongo::Query query);
-    void callback_test(mongo::BSONObj update);
 
     std::string name = "RobotMemory EventTriggerManager";
     fawkes::Logger* logger_;
@@ -65,4 +100,4 @@ class EventTriggerManager
     std::list<EventTrigger*> triggers;
 };
 
-#endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_EVENT_TRIGGER_MANAGER_H_ */
+#endif //FAWKES_SRC_PLUGINS_ROBOT_MEMORY_EVENT_TRIGGER_MANAGER_H_
