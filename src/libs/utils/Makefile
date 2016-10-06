@@ -45,6 +45,14 @@ OBJS_lua_fawkesutils = fawkesutils_tolua.o
 CFLAGS  += $(CFLAGS_LIBMAGIC)
 LDFLAGS += $(LDFLAGS_LIBMAGIC)
 
+HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBDAEMON),1)
+  CFLAGS  +=  -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
+  LDFLAGS += $(shell $(PKGCONFIG) --libs 'libdaemon')
+else
+  WARN_TARGETS += warning_libdaemon
+endif
+
 OBJS_all = $(OBJS_libfawkesutils) $(OBJS_lua_fawkesutils)
 
 ifeq ($(HAVE_TOLUA)$(HAVE_CPP11)$(HAVE_BOOST_LIBS),111)
@@ -81,6 +89,8 @@ warning_cpp11:
 		"(CPP11 not available)"
 $(WARN_TARGETS_BOOST): warning_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build utils library$(TNORMAL) (Boost library $* not found)"endif
+warning_libdaemon:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Sub-process cannot close all file handles$(TNORMAL) (libdaemon not found)"
 
 endif
 
