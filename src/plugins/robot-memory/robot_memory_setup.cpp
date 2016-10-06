@@ -24,6 +24,7 @@
 #include <mongo/client/dbclient.h>
 #include <mongo/client/init.h>
 #include <utils/misc/string_conversions.h>
+#include <stdio.h>
 
 using namespace fawkes;
 
@@ -48,8 +49,14 @@ void RobotMemorySetup::setup_mongods()
   unsigned int local_port = config->get_uint("plugins/robot-memory/setup/local/port");
   std::string local_db_name = config->get_string("plugins/robot-memory/database");
   std::string local_port_str = std::to_string(local_port);
-  const char *local_argv[] = {"mongod", "--port", local_port_str.c_str(), NULL};
+  const char *local_argv[] = {"mongod", "--port", local_port_str.c_str(),
+      "--replSet", "local", NULL}; //'local' replica set to enable the oplog
   start_mongo_process("mongod-local", local_port, local_argv);
+  std::string local_config = "{_id: 'local', members:[{_id:1,host:'localhost:" + local_port_str + "'}]}";
+  run_mongo_command(local_port, std::string("{replSetInitiate:" + local_config + "}"), "already initialized");
+  //wait for initialization
+  usleep(1000000);
+  create_database(local_port, local_db_name);
 
   //only start other processes when we want to run the robot memory distributed
   if(!config->get_bool("plugins/robot-memory/setup/distributed"))
@@ -113,10 +120,10 @@ void RobotMemorySetup::start_mongo_process(std::string proc_name, unsigned int p
   if (!is_mongo_running(port))
     {
       std::string cmd = command_args_tostring(argv);
-      logger->log_info("RobotMemorySetup", "Starting %s process: '%s'", proc_name.c_str(), cmd.c_str());
+      logger->log_error("RobotMemorySetup", "Starting %s process: '%s'", proc_name.c_str(), cmd.c_str());
       config_mongod = new SubProcess(proc_name.c_str(), argv[0], argv, NULL, logger);
       logger->log_info("RobotMemorySetup", "Started %s", proc_name.c_str());
-      wait_until_started(port, cmd);
+      wait_until_started(port, cmd, config->get_int("plugins/robot-memory/setup/max_setup_time"));
     }
 }
 
@@ -126,13 +133,13 @@ void RobotMemorySetup::start_mongo_process(std::string proc_name, unsigned int p
  */
 void RobotMemorySetup::shutdown_mongods()
 {
-  if (local_mongod)
+  if(local_mongod)
     delete local_mongod;
-  if (config_mongod)
+  if(config_mongod)
     delete config_mongod;
-  if (distribuded_mongod)
+  if(distribuded_mongod)
     delete distribuded_mongod;
-  if (mongos)
+  if(mongos)
     delete mongos;
 }
 
