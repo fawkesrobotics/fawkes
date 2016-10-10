@@ -23,7 +23,7 @@ LIBS_clips_robot_memory = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface fawkesclipsaspect \
                       fawkesrobotmemory
 
-OBJS_clips_robot_memory = clips_robot_memory_plugin.o clips_robot_memory_thread.o
+OBJS_clips_robot_memory = clips_robot_memory_plugin.o clips_robot_memory_thread.o clips_rm_trigger.o
 
 OBJS_all = $(OBJS_clips_robot_memory)
 

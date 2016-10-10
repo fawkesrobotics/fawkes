@@ -120,7 +120,7 @@ void RobotMemorySetup::start_mongo_process(std::string proc_name, unsigned int p
   if (!is_mongo_running(port))
     {
       std::string cmd = command_args_tostring(argv);
-      logger->log_error("RobotMemorySetup", "Starting %s process: '%s'", proc_name.c_str(), cmd.c_str());
+      logger->log_warn("RobotMemorySetup", "Starting %s process: '%s'", proc_name.c_str(), cmd.c_str());
       config_mongod = new SubProcess(proc_name.c_str(), argv[0], argv, NULL, logger);
       logger->log_info("RobotMemorySetup", "Started %s", proc_name.c_str());
       wait_until_started(port, cmd, config->get_int("plugins/robot-memory/setup/max_setup_time"));

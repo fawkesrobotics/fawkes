@@ -49,7 +49,7 @@ EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config)
     throw PluginLoadException("robot-memory", err_msg.c_str());
   }
 
-  logger_->log_info(name.c_str(), "Initialized");
+  logger_->log_debug(name.c_str(), "Initialized");
 }
 
 EventTriggerManager::~EventTriggerManager()

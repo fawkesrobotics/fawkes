@@ -30,6 +30,7 @@
 #include <aspect/configurable.h>
 #include <plugins/clips/aspect/clips_feature.h>
 #include <plugins/robot-memory/aspect/robot_memory_aspect.h>
+#include "clips_rm_trigger.h"
 
 #include <string>
 #include <clipsmm.h>
@@ -63,6 +64,7 @@ class ClipsRobotMemoryThread
 
  private:
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+
   CLIPS::Value  clips_bson_create();
   CLIPS::Value  clips_bson_parse(std::string document);
   void          clips_bson_destroy(void *bson);
@@ -91,6 +93,10 @@ class ClipsRobotMemoryThread
   CLIPS::Value  clips_bson_get(void *bson, std::string field_name);
   CLIPS::Values clips_bson_get_array(void *bson, std::string field_name);
   CLIPS::Values clips_bson_get_time(void *bson, std::string field_name);
+  CLIPS::Value  clips_robotmemory_register_trigger(std::string env_name, std::string collection, void *query, std::string assert_name);
+  void  clips_robotmemory_destroy_trigger(void *trigger);
+
+  std::list<ClipsRmTrigger*>  clips_triggers_;
 };
 
 

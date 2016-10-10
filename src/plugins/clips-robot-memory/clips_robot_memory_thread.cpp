@@ -51,6 +51,10 @@ void
 ClipsRobotMemoryThread::finalize()
 {
   envs_.clear();
+  for(ClipsRmTrigger* trigger : clips_triggers_)
+  {
+    delete trigger;
+  }
 }
 
 void
@@ -83,6 +87,14 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
   clips->add_function("robmem-cursor-destroy", sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_cursor_destroy)));
   clips->add_function("robmem-cursor-more", sigc::slot<CLIPS::Value, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_cursor_more)));
   clips->add_function("robmem-cursor-next", sigc::slot<CLIPS::Value, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_cursor_next)));
+  clips->add_function("robmem-trigger-register",
+      sigc::slot<CLIPS::Value, std::string, void *, std::string>(
+        sigc::bind<0>(
+          sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_register_trigger),
+    env_name)
+      )
+    );
+  clips->add_function("robmem-trigger-destroy", sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_destroy_trigger)));
   clips->add_function("bson-field-names", sigc::slot<CLIPS::Values, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_field_names)));
   clips->add_function("bson-get", sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get)));
   clips->add_function("bson-get-array", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_array)));
@@ -677,3 +689,27 @@ ClipsRobotMemoryThread::clips_bson_get_time(void *bson, std::string field_name)
   return rv;
 }
 
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_register_trigger(std::string env_name, std::string collection, void *query, std::string assert_name)
+{
+  mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(query);
+  try {
+    mongo::Query q(b->asTempObj());
+    ClipsRmTrigger *clips_trigger = new ClipsRmTrigger(assert_name, robot_memory, envs_[env_name]);
+    clips_trigger->set_trigger(robot_memory->register_trigger(q, collection, &ClipsRmTrigger::callback, clips_trigger));
+    clips_triggers_.push_back(clips_trigger);
+    return CLIPS::Value(clips_trigger);
+  } catch (mongo::DBException &e) {
+    logger->log_warn("CLIPS RobotMemory", "Trigger query failed: %s", e.what());
+    return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  }
+}
+
+void
+ClipsRobotMemoryThread::clips_robotmemory_destroy_trigger(void *trigger)
+{
+  ClipsRmTrigger *clips_trigger = static_cast<ClipsRmTrigger *>(trigger);
+  clips_triggers_.remove(clips_trigger);
+  delete clips_trigger; //the triger unregisteres itself at the robot memory
+}
