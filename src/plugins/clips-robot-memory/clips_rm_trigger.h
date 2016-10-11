@@ -26,6 +26,7 @@
 #include <plugins/robot-memory/robot_memory.h>
 #include <clipsmm.h>
 #include <core/utils/lockptr.h>
+#include <logging/logger.h>
 
 /** @class ClipsRmTrigger  clips_rm_trigger.h
  *
@@ -34,7 +35,7 @@
 class ClipsRmTrigger
 {
   public:
-    ClipsRmTrigger(std::string assert_name, RobotMemory *robot_memory, fawkes::LockPtr<CLIPS::Environment> &clips);
+    ClipsRmTrigger(std::string assert_name, RobotMemory *robot_memory, fawkes::LockPtr<CLIPS::Environment> &clips, fawkes::Logger *logger);
     virtual ~ClipsRmTrigger();
 
     void callback(mongo::BSONObj update);
@@ -45,6 +46,7 @@ class ClipsRmTrigger
     EventTrigger *trigger;
     RobotMemory *robot_memory;
     fawkes::LockPtr<CLIPS::Environment> clips;
+    fawkes::Logger *logger;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_CLIPS_ROBOT_MEMORY_CLIPS_RM_TRIGGER_H_ */

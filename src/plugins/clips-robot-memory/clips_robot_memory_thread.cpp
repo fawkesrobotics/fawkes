@@ -574,6 +574,9 @@ ClipsRobotMemoryThread::clips_bson_get(void *bson, std::string field_name)
       b->appendElements(el.Obj());
       return CLIPS::Value(b);
     }
+  case 7: //ObjectId
+    return CLIPS::Value(el.OID().toString());
+
   default:
     return CLIPS::Value("INVALID_VALUE_TYPE", CLIPS::TYPE_SYMBOL);
   }
@@ -696,7 +699,7 @@ ClipsRobotMemoryThread::clips_robotmemory_register_trigger(std::string env_name,
   mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(query);
   try {
     mongo::Query q(b->asTempObj());
-    ClipsRmTrigger *clips_trigger = new ClipsRmTrigger(assert_name, robot_memory, envs_[env_name]);
+    ClipsRmTrigger *clips_trigger = new ClipsRmTrigger(assert_name, robot_memory, envs_[env_name], logger);
     clips_trigger->set_trigger(robot_memory->register_trigger(q, collection, &ClipsRmTrigger::callback, clips_trigger));
     clips_triggers_.push_back(clips_trigger);
     return CLIPS::Value(clips_trigger);

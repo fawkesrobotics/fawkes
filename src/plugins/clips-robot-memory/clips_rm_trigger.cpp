@@ -20,14 +20,18 @@
  */
 
 #include "clips_rm_trigger.h"
+#include <clipsmm.h>
 
 using namespace fawkes;
+using namespace mongo;
 
-ClipsRmTrigger::ClipsRmTrigger(std::string assert_name, RobotMemory *robot_memory, LockPtr<CLIPS::Environment> &clips)
+ClipsRmTrigger::ClipsRmTrigger(std::string assert_name, RobotMemory *robot_memory,
+  LockPtr<CLIPS::Environment> &clips, fawkes::Logger *logger)
 {
   this->assert_name = assert_name;
   this->robot_memory = robot_memory;
   this->clips = clips;
+  this->logger = logger;
 }
 
 ClipsRmTrigger::~ClipsRmTrigger()
@@ -49,6 +53,33 @@ void ClipsRmTrigger::set_trigger(EventTrigger *trigger)
  */
 void ClipsRmTrigger::callback(mongo::BSONObj update)
 {
-  clips->assert_fact_f("(robmem-update-triggered)");
+  clips->assert_fact_f("( %s)", assert_name.c_str());
+  CLIPS::Template::pointer temp = clips->get_template("robmem-trigger");
+  if (temp) {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
+    fact->set_slot("name", assert_name.c_str());
+    CLIPS::Values rcvd_at(2, CLIPS::Value(CLIPS::TYPE_INTEGER));
+    rcvd_at[0] = tv.tv_sec;
+    rcvd_at[1] = tv.tv_usec;
+    fact->set_slot("rcvd-at", rcvd_at);
+    BSONObjBuilder *b = new BSONObjBuilder();
+    b->appendElements(update);
+    void *ptr = b;
+    fact->set_slot("ptr", CLIPS::Value(ptr));
+    CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
+
+    if (new_fact) {
+      //TODO: msg_facts_[new_fact->index()] = new_fact;
+    } else {
+      logger->log_warn("CLIPS-RobotMemory", "Asserting robmem-trigger fact failed");
+      delete static_cast<BSONObjBuilder *>(ptr);
+    }
+  } else {
+    logger->log_warn("CLIPS-RobotMemory",
+        "Did not get template, did you load robot-memory.clp?");
+  }
+
 }
 

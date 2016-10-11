@@ -7,6 +7,12 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
+(deftemplate robmem-trigger
+  (slot name (type STRING))
+  (multislot rcvd-at (type INTEGER) (cardinality 2 2))
+  (slot ptr (type EXTERNAL-ADDRESS))
+)
+
 ;; Creates a BSON document from a structured fact
 ; @param ?fact Fact-Pointer
 ; @return BSON document
@@ -70,6 +76,15 @@
       (bind ?values (str-cat ?values "(" ?relation " " (implode$ (bson-get-array ?doc "values")) ")"))
     )
   )
-  
+
   (assert-string (str-cat "(" ?relation " " ?values ")"))
+)
+
+(defrule rm-cleanup-trigger-facts
+  "remove all trigger update facts when they were not used (by a rule with a higher priority in this iteration)"
+  (declare (salience -4000))
+  ?rt <- (robmem-trigger (ptr ?bson))
+  =>
+  (retract ?rt)
+  (bson-destroy ?bson)
 )
