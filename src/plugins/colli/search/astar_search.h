@@ -34,7 +34,7 @@ namespace fawkes
 #endif
 
 class LaserOccupancyGrid;
-class AStar;
+class AStarColli;
 class Logger;
 class Configuration;
 
@@ -77,7 +77,7 @@ class Search: public AbstractSearch
   bool is_obstacle_between( const point_t &a, const point_t &b, const int maxcount );
 
 
-  AStar * astar_;              /**< the A* search algorithm */
+  AStarColli * astar_;              /**< the A* search algorithm */
   std::vector< point_t > plan_; /**< the local representation of the plan */
 
   point_t robo_position_, target_position_;

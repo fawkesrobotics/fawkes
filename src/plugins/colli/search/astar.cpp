@@ -52,7 +52,7 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-AStar::AStar( LaserOccupancyGrid * occGrid, Logger* logger, Configuration* config )
+AStarColli::AStarColli( LaserOccupancyGrid * occGrid, Logger* logger, Configuration* config )
  : logger_( logger )
 {
   logger_->log_debug("AStar", "(Constructor): Initializing AStar");
@@ -86,7 +86,7 @@ AStar::AStar( LaserOccupancyGrid * occGrid, Logger* logger, Configuration* confi
 /** Destructor.
  *  This destructor deletes all the states allocated during construction.
  */
-AStar::~AStar()
+AStarColli::~AStarColli()
 {
   logger_->log_debug("AStar", "(Destructor): Destroying AStar");
   for( int i = 0; i < max_states_; i++ )
@@ -106,7 +106,7 @@ AStar::~AStar()
  * @param solution a vector that will be filled with the found path
  */
 void
-AStar::solve( const point_t &robo_pos, const point_t &target_pos, vector<point_t> &solution )
+AStarColli::solve( const point_t &robo_pos, const point_t &target_pos, vector<point_t> &solution )
 {
   // initialize counter, vectors/lists/queues
   astar_state_count_ = 0;
@@ -146,7 +146,7 @@ AStar::solve( const point_t &robo_pos, const point_t &target_pos, vector<point_t
  *  Its really easy, you can find it like this everywhere.
  */
 AStarState*
-AStar::search( )
+AStarColli::search( )
 {
   AStarState * best = 0;
 
@@ -197,7 +197,7 @@ AStar::search( )
  *    afterwards a number that is smaller tham 14 bits!
  */
 int
-AStar::calculate_key( int x, int y )
+AStarColli::calculate_key( int x, int y )
 {
   return (x << 15) | y;  // This line is a crime! But fast ;-)
 }
@@ -209,7 +209,7 @@ AStar::calculate_key( int x, int y )
  *   Afterwards these children are put on the openlist.
  */
 void
-AStar::generate_children( AStarState * father )
+AStarColli::generate_children( AStarState * father )
 {
   AStarState * child;
   int key;
@@ -301,7 +301,7 @@ AStar::generate_children( AStarState * father )
  *    because we are calculating on a grid...
  */
 int
-AStar::heuristic( AStarState * state )
+AStarColli::heuristic( AStarState * state )
 {
   //  return (int)( abs( state->x_ - target_state_.x_ ));
   return (int)( abs( state->x_ - target_state_.x_ ) +
@@ -313,7 +313,7 @@ AStar::heuristic( AStarState * state )
  *  This method checks, if a state is a goal state.
  */
 bool
-AStar::is_goal( AStarState * state )
+AStarColli::is_goal( AStarState * state )
 {
   return ( (target_state_.x_ == state->x_) &&
            (target_state_.y_ == state->y_) );
@@ -325,7 +325,7 @@ AStar::is_goal( AStarState * state )
  *    tree into the solution/plan vector.
  */
 void
-AStar::get_solution_sequence( AStarState * node, vector<point_t> &solution )
+AStarColli::get_solution_sequence( AStarState * node, vector<point_t> &solution )
 {
   AStarState * state = node;
   while ( state != 0 ) {
@@ -350,7 +350,7 @@ AStar::get_solution_sequence( AStarState * node, vector<point_t> &solution )
  * @return a new modified point.
  */
 point_t
-AStar::remove_target_from_obstacle( int target_x, int target_y, int step_x, int step_y  )
+AStarColli::remove_target_from_obstacle( int target_x, int target_y, int step_x, int step_y  )
 {
   // initializing lists...
   while ( open_list_.size() > 0 )
