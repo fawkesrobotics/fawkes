@@ -972,11 +972,9 @@ ClipsProtobufCommunicator::clips_assert_message(std::pair<std::string, unsigned 
     fact->set_slot("ptr", CLIPS::Value(ptr));
     CLIPS::Fact::pointer new_fact = clips_->assert_fact(fact);
 
-    if (new_fact) {
-      msg_facts_[new_fact->index()] = new_fact;
-    } else {
+    if (! new_fact) {
       if (logger_) {
-	logger_->log_warn("CLIPS-Protobuf", "Asserting protobuf-msg fact failed");
+	      logger_->log_warn("CLIPS-Protobuf", "Asserting protobuf-msg fact failed");
       }
       delete static_cast<std::shared_ptr<google::protobuf::Message> *>(ptr);
     }
