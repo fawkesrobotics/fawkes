@@ -48,20 +48,20 @@
   (bind ?keys (bson-field-names ?doc))
   (if (member$ "relation" ?keys)
     then
-    (bind ?relation (bson-get ?doc "relation"))
+    (bind ?relation (sym-cat (bson-get ?doc "relation")))
     else
     (printout error "Can not create fact from " (bson-tostring ?doc) crlf)
     (return)
   )
-  (if (member$ ?relation (get-deftemplate-list *))
+  (if (member$ ?relation (get-deftemplate-list MAIN))
     then ;structured fact
     (progn$ (?slot ?keys)
-      (if (deftemplate-slot-existp ?relation ?slot) then
-        (if (deftemplate-slot-multip ?relation ?slot)
+      (if (deftemplate-slot-existp ?relation (sym-cat ?slot)) then
+        (if (deftemplate-slot-multip ?relation (sym-cat ?slot))
           then
-          (bind ?values (str-cat ?values "(" ?relation " " (bson-get ?doc ?slot) ")"))
+          (bind ?values (str-cat ?values "(" ?slot " " (implode$ (bson-get-array ?doc ?slot)) ")"))
           else
-          (bind ?values (str-cat ?values "(" ?relation " " (implode$ (bson-get-array ?doc ?slot)) ")"))
+          (bind ?values (str-cat ?values "(" ?slot " " (bson-get ?doc ?slot) ")"))
         )
       )
     )
