@@ -61,8 +61,9 @@
 
 (defrule protobuf-cleanup-message
   (declare (salience -4000))
-  ?pf <- (protobuf-msg)
+  ?pf <- (protobuf-msg (ptr ?p))
   =>
+	(pb-destroy ?p)
   (retract ?pf)
 )
 
