@@ -48,11 +48,12 @@ void RobotMemorySetup::setup_mongods()
   //start local mongod if necessary
   unsigned int local_port = config->get_uint("plugins/robot-memory/setup/local/port");
   std::string local_db_name = config->get_string("plugins/robot-memory/database");
+  std::string local_repl_name = config->get_string("plugins/robot-memory/setup/local/replica-set-name");
   std::string local_port_str = std::to_string(local_port);
   const char *local_argv[] = {"mongod", "--port", local_port_str.c_str(),
-      "--replSet", "local", NULL}; //'local' replica set to enable the oplog
+      "--replSet", local_repl_name.c_str(), NULL}; //local replica set just to enable the oplog
   start_mongo_process("mongod-local", local_port, local_argv);
-  std::string local_config = "{_id: 'local', members:[{_id:1,host:'localhost:" + local_port_str + "'}]}";
+  std::string local_config = "{_id: '" + local_repl_name + "', members:[{_id:1,host:'localhost:" + local_port_str + "'}]}";
   run_mongo_command(local_port, std::string("{replSetInitiate:" + local_config + "}"), "already initialized");
   //wait for initialization
   usleep(1000000);
@@ -101,15 +102,16 @@ void RobotMemorySetup::setup_mongods()
 
   //configure mongos (add parts of the sharded cluster)
   mongo::BSONObj current_shards =  run_mongo_command(mongos_port, std::string("{listShards:1}"));
-  if(current_shards.getField("shards").Array().size() == 0)
+  if(current_shards.getField("shards").Array().size() < 2)
   {
-    run_mongo_command(mongos_port, std::string("{addShard: 'localhost:" + local_port_str + "'}"), "host already used");
+    run_mongo_command(mongos_port, std::string("{addShard: '" + local_repl_name +
+      "/localhost:" + local_port_str + "'}"), "host already used");
     run_mongo_command(mongos_port, std::string("{addShard: '" + distributed_replset +
       "/localhost:" + distributed_port_str + "'}"), "host already used");
   }
   //define which db is in which shard
   run_mongo_command(mongos_port, std::string("{movePrimary: '" + distributed_replset + "', to: '" + distributed_replset + "'}"), "it is already the primary");
-  run_mongo_command(mongos_port, std::string("{movePrimary: '" + local_db_name + "', to: 'shard0000'}"), "it is already the primary");
+  run_mongo_command(mongos_port, std::string("{movePrimary: '" + local_db_name + "', to: '" + local_repl_name + "'}"), "it is already the primary");
 }
 
 /**
