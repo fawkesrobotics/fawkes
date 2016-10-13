@@ -24,6 +24,7 @@
 #include "pddl_robot_memory_thread.h"
 #include <fstream>
 #include <utils/misc/string_conversions.h>
+#include <ctemplate/template.h>
 
 using namespace fawkes;
 
@@ -62,7 +63,11 @@ PddlRobotMemoryThread::init()
   }
 
   //TODO: expand template
-  std::string output = input;
+  ctemplate::StringToTemplateCache("tpl-cache", input, ctemplate::DO_NOT_STRIP);
+  ctemplate::TemplateDictionary dict("pddl-rm");
+  dict.SetValue("TEST", "EXPANDED TEST");
+  std::string output;
+  ctemplate::ExpandTemplate("tpl-cache", ctemplate::DO_NOT_STRIP, &dict, &output);
 
   //generate output
   logger->log_info(name(), "Output:\n%s", output.c_str());
