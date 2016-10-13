@@ -29,6 +29,7 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
+#include <plugins/robot-memory/aspect/robot_memory_aspect.h>
 
 #include <string>
 
@@ -40,7 +41,8 @@ class PddlRobotMemoryThread
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+  public fawkes::BlackBoardAspect,
+  public fawkes::RobotMemoryAspect
 {
 
  public:
@@ -54,7 +56,9 @@ class PddlRobotMemoryThread
   protected: virtual void run() { Thread::run(); }
 
  private:
-  //Define class member variables here
+  std::string collection;
+  std::string input_path;
+  std::string output_path;
 
 };
 

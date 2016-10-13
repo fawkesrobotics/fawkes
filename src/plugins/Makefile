@@ -43,6 +43,7 @@ clips-navgraph navgraph-clusters: navgraph
 clips-webview: clips webview
 clips-ros: clips ros
 clips-robot-memory: robot-memory
+pddl-robot-memory: robot-memory
 gazebo: robotino
 skiller: navgraph
 perception: mongodb
