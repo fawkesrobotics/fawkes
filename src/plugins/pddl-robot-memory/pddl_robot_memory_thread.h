@@ -33,6 +33,8 @@
 
 #include <string>
 
+#include <ctemplate/template.h>
+
 namespace fawkes {
 }
 
@@ -59,6 +61,8 @@ class PddlRobotMemoryThread
   std::string collection;
   std::string input_path;
   std::string output_path;
+
+  void fill_dict_from_document(ctemplate::TemplateDictionary *dict, mongo::BSONObj obj, std::string prefix = "");
 
 };
 
