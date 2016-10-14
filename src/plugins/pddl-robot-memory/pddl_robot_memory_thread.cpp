@@ -78,6 +78,11 @@ PddlRobotMemoryThread::init()
   //setup interface listener
   bbil_add_message_interface(gen_if);
   blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+
+  if(config->get_bool("plugins/pddl-robot-memory/generate-on-init"))
+  {
+    wakeup(); //activates loop where the generation is done
+  }
 }
 
 /**
