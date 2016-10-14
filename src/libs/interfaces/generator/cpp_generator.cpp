@@ -129,9 +129,8 @@ CppInterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* in
   //stable_sort(fields.begin(), fields.end());
 
   fprintf(f,
-	  "#pragma pack(push,4)\n"
 	  "%s/** Internal data storage, do NOT modify! */\n"
-	  "%stypedef struct {\n"
+	  "%stypedef struct __attribute__((packed)) {\n"
 	  "%s  int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */\n"
 	  "%s  int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */\n", is.c_str(), is.c_str(), is.c_str(), is.c_str());
 
@@ -143,8 +142,7 @@ CppInterfaceGenerator::write_struct(FILE *f, std::string name, std::string /* in
     fprintf(f, "; /**< %s */\n", (*i).getComment().c_str());
   }
   
-  fprintf(f, "%s} %s;\n"
-	  "#pragma pack(pop)\n\n", is.c_str(), name.c_str());
+  fprintf(f, "%s} %s;\n\n", is.c_str(), name.c_str());
 }
 
 
