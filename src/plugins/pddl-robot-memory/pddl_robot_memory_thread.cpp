@@ -47,7 +47,8 @@ using namespace mongo;
  *
  * Variable templates <<key>> inside the selection are substituted by the values
  *  of that key in the document returned by the query. You can also access subdocuments
- *  (e.g. <<position.orientation.yaw>> )
+ *  and arrays as follows:
+ *  (e.g. <<position_translation_0>> for a document {position:{translation:[0,1,2], orientation:[0,1,2]}})
  *
  * @author Frederik Zwilling
  */
@@ -160,7 +161,7 @@ PddlRobotMemoryThread::finalize()
  * @param obj Document
  * @param prefix Prefix of previous super-documents keys
  */
-void PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionary *dict, mongo::BSONObj obj, std::string prefix)
+void PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionary *dict, BSONObj obj, std::string prefix)
 {
   for(BSONObjIterator it = obj.begin(); it.more();)
   {
@@ -185,10 +186,20 @@ void PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionar
         fill_dict_from_document(dict, elem.Obj(), prefix + elem.fieldName() + "_");
         break;
       case 7: //ObjectId
-      dict->SetValue(prefix + elem.fieldName(), elem.OID().toString());
-      break;
-      //TODO: array
-
+        dict->SetValue(prefix + elem.fieldName(), elem.OID().toString());
+        break;
+      case mongo::Array:
+      {
+        // access array elements as if they were a subdocument with key-value pairs
+        // using the indices as keys
+        BSONObjBuilder b;
+        for(size_t i = 0; i < elem.Array().size(); i++)
+        {
+          b.append(elem.Array()[i]);
+        }
+        fill_dict_from_document(dict, b.obj(), prefix + elem.fieldName() + "_");
+        break;
+      }
       default:
         dict->SetValue(prefix + elem.fieldName(), "INVALID_VALUE_TYPE");
     }
