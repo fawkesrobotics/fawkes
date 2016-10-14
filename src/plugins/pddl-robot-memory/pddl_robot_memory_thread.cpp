@@ -55,7 +55,7 @@ using namespace mongo;
 
 PddlRobotMemoryThread::PddlRobotMemoryThread()
  : Thread("PddlRobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
-             BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL) 
+   BlackBoardInterfaceListener("NavGraphGeneratorThread")
 {
 }
 
@@ -69,6 +69,23 @@ PddlRobotMemoryThread::init()
   output_path = StringConversions::resolve_path("@BASEDIR@/src/agents/" +
     config->get_string("plugins/pddl-robot-memory/output-problem-description"));
 
+  //setup interface
+  gen_if = blackboard->open_for_writing<PddlGenInterface>(config->get_string("plugins/pddl-robot-memory/interface-name").c_str());
+  gen_if->set_msg_id(0);
+  gen_if->set_final(false);
+  gen_if->write();
+
+  //setup interface listener
+  bbil_add_message_interface(gen_if);
+  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+}
+
+/**
+ * Thread is only waked up if there is a new interface message to generate a pddl
+ */
+void
+PddlRobotMemoryThread::loop()
+{
   //read input template of problem description
   std::string input;
   std::ifstream istream(input_path);
@@ -143,16 +160,29 @@ PddlRobotMemoryThread::init()
   }
 
   logger->log_info(name(), "Generation of PDDL problem description finished");
-}
-
-void
-PddlRobotMemoryThread::loop()
-{
+  gen_if->set_final(true);
+  gen_if->write();
 }
 
 void
 PddlRobotMemoryThread::finalize()
 {
+  blackboard->close(gen_if);
+}
+
+bool
+PddlRobotMemoryThread::bb_interface_message_received(Interface *interface, fawkes::Message *message) throw()
+{
+  if (message->is_of_type<PddlGenInterface::GenerateMessage>()) {
+      gen_if->set_msg_id(message->id());
+      gen_if->set_final(false);
+      gen_if->write();
+      wakeup(); //activates loop where the generation is done
+    } else {
+      logger->log_error(name(), "Received unknown message of type %s, ignoring",
+            message->type());
+    }
+  return false;
 }
 
 /**

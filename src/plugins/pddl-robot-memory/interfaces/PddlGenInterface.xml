@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="PddlGenInterface" author="Frederik Zwilling" year="2016">
+  <data>
+    <comment>
+      Interface to start the PDDL generation
+    </comment>
+    <field type="uint32" name="msg_id">
+      The ID of the message that was processed last
+    </field>
+    <field type="bool" name="final">
+      Is the generation finished?
+    </field>
+  </data>
+  
+  <message name="Generate">
+    <comment>
+      Query to execute.
+    </comment>
+  </message>
+</interface>

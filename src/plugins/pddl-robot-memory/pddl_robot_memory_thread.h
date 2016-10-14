@@ -25,26 +25,27 @@
 #define __PLUGINS_PDDL_ROBOT_MEMORYTHREAD_H_
 
 #include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <plugins/robot-memory/aspect/robot_memory_aspect.h>
+#include <blackboard/interface_listener.h>
 
 #include <string>
 
 #include <ctemplate/template.h>
+#include "interfaces/PddlGenInterface.h"
 
 namespace fawkes {
 }
 
 class PddlRobotMemoryThread 
 : public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
-  public fawkes::RobotMemoryAspect
+  public fawkes::RobotMemoryAspect,
+  public fawkes::BlackBoardInterfaceListener
 {
 
  public:
@@ -58,12 +59,17 @@ class PddlRobotMemoryThread
   protected: virtual void run() { Thread::run(); }
 
  private:
+  fawkes::PddlGenInterface *gen_if;
+
   std::string collection;
   std::string input_path;
   std::string output_path;
 
   void fill_dict_from_document(ctemplate::TemplateDictionary *dict, mongo::BSONObj obj, std::string prefix = "");
+  void generate();
 
+  virtual bool bb_interface_message_received(fawkes::Interface *interface,
+                                             fawkes::Message *message) throw();
 };
 
 

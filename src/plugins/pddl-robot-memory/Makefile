@@ -19,8 +19,11 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 include $(BASEDIR)/src/plugins/pddl-robot-memory/ctemplate.mk
 
+PRESUBDIRS = interfaces
+
 LIBS_pddl_robot_memory = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-                      fawkesblackboard fawkesinterface fawkesrobotmemory
+                      fawkesblackboard fawkesinterface fawkesrobotmemory \
+                      PddlGenInterface
 
 OBJS_pddl_robot_memory = pddl_robot_memory_plugin.o pddl_robot_memory_thread.o
 
