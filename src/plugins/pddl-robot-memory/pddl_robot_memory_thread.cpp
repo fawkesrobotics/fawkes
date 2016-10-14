@@ -182,7 +182,7 @@ void PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionar
         dict->SetValue(prefix + elem.fieldName(), std::to_string(elem.Long()));
         break;
       case mongo::Object:
-        fill_dict_from_document(dict, elem.Obj(), prefix + elem.fieldName() + ".");
+        fill_dict_from_document(dict, elem.Obj(), prefix + elem.fieldName() + "_");
         break;
       case 7: //ObjectId
       dict->SetValue(prefix + elem.fieldName(), elem.OID().toString());
