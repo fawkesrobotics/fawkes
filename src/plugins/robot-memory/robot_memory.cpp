@@ -35,6 +35,23 @@
 using namespace mongo;
 using namespace fawkes;
 
+/** @class RobotMemory "robot_memory.h"
+ * Access to the robot memory based on mongodb.
+ * Using this class, you can query/insert/remove/update information in the robot memory.
+ * Furthermore, you can register trigger to get notified when something was changed in the robot memory matching your query
+ * and you can access computables, which are on demand computed information, by registering the computables
+ * and then querying as if the information would already be in the database.
+ * @author Frederik Zwilling
+ */
+
+/**
+ * Robot Memory Constructor
+ * @param config Fawkes config
+ * @param logger Fawkes logger
+ * @param clock Fawkes clock
+ * @param mongodb_client Fawkes mongo client from the mongo aspect
+ * @param blackboard Fawkes blackboard
+ */
 RobotMemory::RobotMemory(fawkes::Configuration* config, fawkes::Logger* logger,
    fawkes::Clock* clock, mongo::DBClientBase* mongodb_client,
    fawkes::BlackBoard* blackboard)
@@ -88,6 +105,12 @@ void RobotMemory::loop()
   trigger_manager_->check_events();
 }
 
+/**
+ * Query information from the robot memory.
+ * @param query The query returned documents have to match (essentially a BSONObj)
+ * @param collection The database and collection to query as string (e.g. robmem.worldmodel)
+ * @return Cursor to get the documents from, NULL for invalid query
+ */
 QResCursor RobotMemory::query(Query query, std::string collection)
 {
   check_collection_name(collection);
@@ -129,6 +152,12 @@ QResCursor RobotMemory::query(Query query, std::string collection)
   return cursor;
 }
 
+/**
+ * Inserts a document into the robot memory
+ * @param obj The document as BSONObj
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @return 1: Success 0: Error
+ */
 int RobotMemory::insert(BSONObj obj, std::string collection)
 {
   check_collection_name(collection);
@@ -151,11 +180,25 @@ int RobotMemory::insert(BSONObj obj, std::string collection)
   return 1;
 }
 
+/**
+ * Inserts a document into the robot memory
+ * @param obj_str The document as json string
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @return 1: Success 0: Error
+ */
 int RobotMemory::insert(std::string obj_str, std::string collection)
 {
   return insert(fromjson(obj_str), collection);
 }
 
+/**
+ * Updates documents in the robot memory
+ * @param query The query defining which documents to update
+ * @param update What to change in these documents
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @param upsert Should the update document be inserted if the query returns no documents?
+ * @return 1: Success 0: Error
+ */
 int RobotMemory::update(Query query, BSONObj update, std::string collection, bool upsert)
 {
   check_collection_name(collection);
@@ -175,11 +218,25 @@ int RobotMemory::update(Query query, BSONObj update, std::string collection, boo
   return 1;
 }
 
+/**
+ * Updates documents in the robot memory
+ * @param query The query defining which documents to update
+ * @param update_str What to change in these documents as json string
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @param upsert Should the update document be inserted if the query returns no documents?
+ * @return 1: Success 0: Error
+ */
 int RobotMemory::update(Query query, std::string update_str, std::string collection, bool upsert)
 {
   return update(query, fromjson(update_str), collection, upsert);
 }
 
+/**
+ * Remove documents from the robot memory
+ * @param query Which documents to remove
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @return 1: Success 0: Error
+ */
 int RobotMemory::remove(Query query, std::string collection)
 {
   check_collection_name(collection);
@@ -199,12 +256,21 @@ int RobotMemory::remove(Query query, std::string collection)
   return 1;
 }
 
+/**
+ * Drop (= remove) a whole collection and all documents inside it
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @return 1: Success 0: Error
+ */
 int RobotMemory::drop_collection(std::string collection)
 {
   log_deb("Clearing whole robot memory");
   return remove("{}", collection);
 }
 
+/**
+ * Remove the whole database of the robot memory and all documents inside
+ * @return 1: Success 0: Error
+ */
 int RobotMemory::clear_memory()
 {
   log_deb("Clearing whole robot memory");
@@ -212,6 +278,12 @@ int RobotMemory::clear_memory()
   return 1;
 }
 
+/**
+ * Restore a previously dumped collection from a directory
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @param directory Directory of the dump
+ * @return 1: Success 0: Error
+ */
 int RobotMemory::restore_collection(std::string collection, std::string directory)
 {
   drop_collection(collection);
@@ -258,6 +330,12 @@ int RobotMemory::restore_collection(std::string collection, std::string director
   return 1;
 }
 
+/**
+ * Dump (= save) a collection to the filesystem to restore it later
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @param directory Directory to dump the collection to
+ * @return 1: Success 0: Error
+ */
 int RobotMemory::dump_collection(std::string collection, std::string directory)
 {
   //resolve path to dump to

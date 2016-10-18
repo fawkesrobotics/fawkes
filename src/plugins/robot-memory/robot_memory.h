@@ -39,9 +39,6 @@ namespace fawkes {
 ///typedef for shorter type description
 typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
 
-/**
- *
- */
 class RobotMemory
 {
   friend class RobotMemoryThread;

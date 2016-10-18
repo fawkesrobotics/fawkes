@@ -45,6 +45,14 @@ class EventTriggerManager
     EventTriggerManager(fawkes::Logger* logger, fawkes::Configuration* config);
     virtual ~EventTriggerManager();
 
+    /**
+     * Register a trigger to be notified when the robot memory is updated and the updated document matches the query
+     * @param query Query the updated document has to match
+     * @param collection db.collection to use
+     * @param callback Callback function (e.g. &Class::callback)
+     * @param _obj Pointer to class the callback is a function of (usaually this)
+     * @return Trigger object pointer, save it to remove the trigger later
+     */
     template<typename T>
     EventTrigger* register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *obj)
     {
@@ -79,7 +87,6 @@ class EventTriggerManager
       triggers.push_back(trigger);
       return trigger;
     }
-
 
     void remove_trigger(EventTrigger* trigger);
 

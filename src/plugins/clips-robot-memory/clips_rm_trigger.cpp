@@ -49,6 +49,7 @@ void ClipsRmTrigger::set_trigger(EventTrigger *trigger)
 
 /**
  * Callback function for the trigger. Asserts a fact about the update with the assert_name and updated object.
+ * When you retract the fact about the update, also call bson-destroy on the included pointer to avoid memory leaks.
  * @param update updated object
  */
 void ClipsRmTrigger::callback(mongo::BSONObj update)
@@ -70,9 +71,7 @@ void ClipsRmTrigger::callback(mongo::BSONObj update)
     fact->set_slot("ptr", CLIPS::Value(ptr));
     CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
-    if (new_fact) {
-      //TODO: msg_facts_[new_fact->index()] = new_fact;
-    } else {
+    if (!new_fact) {
       logger->log_warn("CLIPS-RobotMemory", "Asserting robmem-trigger fact failed");
       delete static_cast<BSONObjBuilder *>(ptr);
     }
