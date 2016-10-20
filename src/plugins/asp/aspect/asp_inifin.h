@@ -32,13 +32,20 @@ namespace fawkes {
 }
 #endif
 
+class Logger;
+
 class ASPAspectIniFin : public AspectIniFin
 {
+	private:
+	Logger *Log;
+
 	public:
 	ASPAspectIniFin(void);
 
 	void init(Thread *thread) override;
 	void finalize(Thread *thread) override;
+
+	void setLogger(Logger *logger);
 };
 
 } // end namespace fawkes

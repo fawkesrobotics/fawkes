@@ -42,6 +42,7 @@ ASPThread::ASPThread(void)
 void
 ASPThread::init(void)
 {
+	ASPIniFin.setLogger(logger);
 	return;
 }
 

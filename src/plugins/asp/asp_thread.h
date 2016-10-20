@@ -25,6 +25,7 @@
 
 #include <aspect/aspect_provider.h>
 #include "aspect/asp_inifin.h"
+#include <aspect/logging.h>
 #include <core/threading/thread.h>
 
 namespace fawkes {
@@ -33,6 +34,7 @@ namespace fawkes {
 
 class ASPThread
 : public fawkes::Thread,
+  public fawkes::LoggingAspect,
   public fawkes::AspectProviderAspect
 {
 	private:
