@@ -94,8 +94,9 @@ void RobotMemory::init()
   rm_if_->set_result("");
   rm_if_->write();
 
-  //Setup event trigger manager
+  //Setup event trigger and computables manager
   trigger_manager_ = new EventTriggerManager(logger_, config_);
+  computables_manager_ = new ComputablesManager(logger_, config_, mongodb_client_, clock_);
 
   log_deb("Initialized RobotMemory");
 }
@@ -503,4 +504,13 @@ RobotMemory::check_collection_name(std::string &collection)
 void RobotMemory::remove_trigger(EventTrigger* trigger)
 {
   trigger_manager_->remove_trigger(trigger);
+}
+
+/**
+ * Remove previously registered computable
+ * @param computable The computable to remove
+ */
+void RobotMemory::remove_computable(Computable* computable)
+{
+  computables_manager_->remove_computable(computable);
 }

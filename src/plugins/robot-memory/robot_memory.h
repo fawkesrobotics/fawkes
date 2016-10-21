@@ -30,6 +30,7 @@
 #include <mongo/client/dbclient.h>
 #include "interfaces/RobotMemoryInterface.h"
 #include "event_trigger_manager.h"
+#include "computables_manager.h"
 
 namespace fawkes {
   class Mutex;
@@ -87,8 +88,22 @@ class RobotMemory
     {
       return register_trigger(mongo::fromjson(query_str), collection, callback);
     }
-
     void remove_trigger(EventTrigger* trigger);
+
+    /**
+     * Registers a Computable which provides information in the robot memory that is computed on demand.
+     *
+     * @param identifyer BSONObj describing what the function computes. Yor computable is called when an new query matches the key value fields in the identifiyer.
+     * @param compute_func Callback function that computes the information
+     * @param obj Pointer to class the callback is a function of (usaually this)
+     * @return Computable Object pointer used for removing it
+     */
+    template<typename T>
+    Computable* register_computable(mongo::BSONObj identifyer, void(T::*compute_func)(mongo::BSONObj), T *obj)
+    {
+      return computables_manager_->register_computable(identifyer, compute_func, obj);
+    }
+    void remove_computable(Computable* computable);
 
   private:
     mongo::DBClientBase* mongodb_client_;
@@ -104,6 +119,7 @@ class RobotMemory
     fawkes::Mutex *mutex_;
     fawkes::RobotMemoryInterface* rm_if_;
     EventTriggerManager* trigger_manager_;
+    ComputablesManager* computables_manager_;
 
     void init();
     void loop();

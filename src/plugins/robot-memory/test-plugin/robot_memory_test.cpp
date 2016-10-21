@@ -224,3 +224,11 @@ TEST_F(RobotMemoryTest, EventTriggerReplica)
   }
   return ::testing::AssertionSuccess();
 }
+
+
+TEST_F(RobotMemoryTest, ComputableRegisterRemove)
+{
+  TestComputable* tc = new TestComputable();
+  Computable* comp = robot_memory->register_computable(fromjson("{somekey:'value'}"), &TestComputable::compute, tc);
+  robot_memory->remove_computable(comp);
+}

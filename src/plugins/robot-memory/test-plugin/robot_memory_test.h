@@ -73,5 +73,20 @@ class RobotMemoryCallback
    }
 };
 
+/**
+ * Class providing a computable function
+ */
+class TestComputable
+{
+  public:
+    TestComputable()
+  {
+  };
+   ~TestComputable(){};
+   void compute(mongo::BSONObj query)
+   {
+   }
+};
+
 
 #endif
