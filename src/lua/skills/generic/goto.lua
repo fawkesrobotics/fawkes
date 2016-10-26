@@ -1,9 +1,10 @@
 
 ----------------------------------------------------------------------------
---  goto.lua - generic global goto
+--  goto.lua - 
 --
 --  Created: Thu Aug 14 14:32:47 2008
---  Copyright  2008  Tim Niemueller [www.niemueller.de]
+--  modified by Victor MatarÃ©
+--              2015  Tobias Neumann
 --
 ----------------------------------------------------------------------------
 
@@ -24,110 +25,100 @@ module(..., skillenv.module_init)
 
 -- Crucial skill information
 name               = "goto"
-fsm                = SkillHSM:new{name=name, start="GOTO"}
-depends_skills     = {"relgoto"}
+fsm                = SkillHSM:new{name=name, start="INIT"}
+depends_skills     = { "relgoto"}
 depends_interfaces = {
-   {v = "pose", id = "Pose", type = "Position3DInterface"},
-   {v = "navigator", id = "Navigator", type = "NavigatorInterface"}
+   {v = "navigator", type="NavigatorInterface", id="Navigator"},
 }
 
-documentation      = [==[Global goto skill.
+documentation      = [==[Move to a known location via place or x, y, ori.
+if place is set, this will be used and x, y and ori will be ignored
 
-This skill takes you to a position given the global world coordinate
-system. The orientation is the final orientation, nothing is said
-about the intermediate orientation while on the way.
+@param place  Name of the place we want to go to.
+@param x      x we want to drive to
+@param y      y we want to drive to
+@param ori    ori we want to drive to
 
-The skill can be parameterized in the input coordinate system (in what
-frame are the given coordinates, this is the global frame) and the
-output coordinate system (this is the local frame). The skill accepts
-separate translation and rotation tolerances (acceptable deviations
-from desired final position to consider the movement completed).
-
-goto{x=X, y=Y[, ori=ORI][, global_frame="/map"][, local_frame="/base_link"][, trans_tolerance=0.2][, rot_tolerance=0.1]}
-
-Parameters:
-x, y:            global target point
-ori:             global orientation
-global_frame:    global coordinate frame in which x,y,ori are given
-local_frame:     local coordinate frame in which the navigation component expects its input
-trans_tolerance: translation tolerance
-rot_tolerance:   rotation tolerance
-
-The skill is S_RUNNING as long as the target can still be reached, S_FINAL if the target
-has been reached (at least once, the robot might move afterwards for example if it did not
-brake fast enough or if another robot crashed into this robot). The skill is S_FAILED if
-the navigator started processing another goto message.
 ]==]
 
-local tfutils = require("fawkes.tfutils")
-
 -- Initialize as skill module
-skillenv.skill_module(...)
+skillenv.skill_module(_M)
 
--- Constants
-local DEFAULT_ORI = 0.0
-local DEFAULT_TRANS_TOLERANCE = 0.2
-local DEFAULT_ROT_TOLERANCE = 0.1
-local DEFAULT_GLOBAL_FRAME = config:get_string("/frames/fixed")
-local DEFAULT_LOCAL_FRAME = config:get_string("/frames/base")
+require("fawkes.modinit")
+local tf = require("fawkes.tfutils")
 
-local function target_reached(self)
-   return
-      math.abs(self.fsm.vars.x - pose:translation(0)) <= self.fsm.vars.trans_tolerance
-      and math.abs(self.fsm.vars.y - pose:translation(1)) <= self.fsm.vars.trans_tolerance
-      and math.abs(self.fsm.vars.ori - 2 * math.acos(pose:rotation(3))) <= self.fsm.vars.rot_tolerance
+-- Tunables
+local REGION_TRANS=0.2
+
+function check_navgraph(self)
+  return self.fsm.vars.place ~= nil and not navgraph
 end
 
-
--- Jumpconditions
-local function jumpcond_resend_command(self)
-   if navigator:msgid() ~= relgoto.fsm.vars.msgid then
-      return false
-   end
-
-   if not target_reached(self) then
-      if self.fsm.vars.counter < 30 then
-	 self.fsm.vars.counter = self.fsm.vars.counter + 1
-	 return false
-      else
-	 printf("Recalculating target position")
-	 return true
-      end
-   else
-      self.fsm.vars.counter = 0
-      return false
-   end
-end
-
-
--- States
-fsm:define_states{
-   export_to=_M,
-   {"GOTO", SkillJumpState, skills={{relgoto}},
-            final_to="FINAL", fail_to="FAILED"}
+fsm:define_states{ export_to=_M,
+  closure={navgraph=navgraph,check_navgraph=check_navgraph, reached_target_region=reached_target_region, },
+  {"INIT",          JumpState},
+  {"SKILL_RELGOTO", SkillJumpState, skills={{relgoto}}, final_to="FINAL", fail_to="FAILED"},
 }
 
--- Transitions
 fsm:add_transitions{
-   {"GOTO", "FINAL", cond=target_reached, desc="Target reached"},
-   {"GOTO", "GOTO", cond=jumpcond_resend_command, desc="recalculated current goto params"}
+  {"INIT",  "FAILED",         precond=check_navgraph, desc="no navgraph"},
+  {"INIT",  "FAILED",         cond="not vars.target_valid",                 desc="target invalid"},
+  {"INIT",  "SKILL_RELGOTO",  cond=true},
+  {"SKILL_RELGOTO", "INIT", timeout=1, desc="Recalculate target"},
 }
 
+function INIT:init()
+  self.fsm.vars.target_valid = true
 
-function GOTO:init()
-   self.fsm.vars.x      = self.fsm.vars.x   or self.fsm.vars[1] or pose:world_x()
-   self.fsm.vars.y      = self.fsm.vars.y   or self.fsm.vars[2] or pose:world_y()
-   self.fsm.vars.ori    = self.fsm.vars.ori or self.fsm.vars[3] or DEFAULT_ORI
-   self.fsm.vars.trans_tolerance = self.fsm.vars.trans_tolerance or DEFAULT_TRANS_TOLERANCE
-   self.fsm.vars.rot_tolerance = self.fsm.vars.rot_tolerance or DEFAULT_ROT_TOLERANCE
-   self.fsm.vars.global_frame = self.fsm.vars.global_frame or DEFAULT_GLOBAL_FRAME
-   self.fsm.vars.local_frame  = self.fsm.vars.local_frame  or DEFAULT_LOCAL_FRAME
-   self.fsm.vars.counter = 0
+  -- if a place is given, get the point from the navgraph and use this instead of x, y, ori
+  if self.fsm.vars.place ~= nil then
+    self.fsm.vars.node = navgraph:node(self.fsm.vars.place)
+    if self.fsm.vars.node:is_valid() then
+      self.fsm.vars.x = self.fsm.vars.node:x()
+      self.fsm.vars.y = self.fsm.vars.node:y()
+      if self.fsm.vars.node:has_property("orientation") then
+        self.fsm.vars.ori   = self.fsm.vars.node:property_as_float("orientation");
+      else
+        self.fsm.vars.ori   = nil   -- if orientation is not set, we don't care
+      end
+    else
+      self.fsm.vars.target_valid = false
+    end
+  end 
 
-   local rel_pos =
-      tfutils.transform({x = self.fsm.vars.x, y = self.fsm.vars.y, ori = self.fsm.vars.ori},
-			self.fsm.vars.global_frame, self.fsm.vars.local_frame)
+  if self.fsm.vars.target_valid then
+    local rel_pos = tf.transform({
+                      x = self.fsm.vars.x,
+                      y = self.fsm.vars.y,
+                      ori = self.fsm.vars.ori or 0},
+                      "/map", "/base_link")
 
-   self.args[relgoto] = {x=rel_pos.x, y=rel_pos.y, ori=rel_pos.ori}
+    -- sanity check *this is an error*, but where is it comming from???
+    if rel_pos.x <= 20 or rel_pos.y <= 20 then
+      self.fsm.vars.rel_x   = rel_pos.x
+      self.fsm.vars.rel_y   = rel_pos.y
+    else
+      self.fsm.vars.rel_x   = 0
+      self.fsm.vars.rel_y   = 0
+      print_error("GOTO ERROR!!!!!!!!!! place: " .. self.fsm.vars.place ..
+                                        " f_x: " .. self.fsm.vars.x ..
+                                        " f_y: " .. self.fsm.vars.y ..
+                                        " f_ori: " .. self.fsm.vars.ori ..
+                                        " t_x: " .. rel_pos.x ..
+                                        " t_y: " .. rel_pos.y ..
+                                        " t_ori: " .. rel_pos.ori)
+    end
+
+    if self.fsm.vars.ori == nil then
+      self.fsm.vars.rel_ori = nil
+    else
+      self.fsm.vars.rel_ori = rel_pos.ori
+    end
+  end
+
+  self.fsm.vars.region_trans = self.fsm.vars.region_trans or REGION_TRANS
 end
 
+function SKILL_RELGOTO:init()
+	 self.args["relgoto"] = { x = self.fsm.vars.rel_x, y = self.fsm.vars.rel_y, ori = self.fsm.vars.rel_ori }
+end
