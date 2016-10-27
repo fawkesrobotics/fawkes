@@ -24,6 +24,7 @@
 
 #include <gtest/gtest.h>
 #include "plugins/robot-memory/robot_memory.h"
+#include <stdio.h>
 
 
 /** Environment for running Tests of the RobotMemory
@@ -83,8 +84,11 @@ class TestComputable
   {
   };
    ~TestComputable(){};
-   void compute(mongo::BSONObj query)
+   std::list<mongo::BSONObj> compute(mongo::BSONObj query)
    {
+     std::list<mongo::BSONObj> res;
+     res.push_back(mongo::fromjson("{computed:true, result:'this is computed'}"));
+     return res;
    }
 };
 

@@ -22,11 +22,23 @@
 #ifndef FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLE_H_
 #define FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLE_H_
 
+#include <mongo/client/dbclient.h>
+#include <boost/function.hpp>
+
 class Computable
 {
   public:
-    Computable();
+    Computable(mongo::Query query_to_compute, std::string collection, const boost::function<std::list<mongo::BSONObj> (mongo::BSONObj)> &compute_function);
     virtual ~Computable();
+
+    std::list<mongo::BSONObj> compute(mongo::BSONObj query);
+    mongo::Query get_query();
+    std::string get_collection();
+
+  private:
+    boost::function<std::list<mongo::BSONObj> (mongo::BSONObj)> compute_function;
+    mongo::Query query_to_compute;
+    std::string collection;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLE_H_ */

@@ -27,6 +27,8 @@
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
 #include "computable.h"
+#include <boost/bind.hpp>
+#include <utility>
 
 class ComputablesManager
 {
@@ -35,21 +37,25 @@ class ComputablesManager
       mongo::DBClientBase* mongodb_client, fawkes::Clock* clock);
     virtual ~ComputablesManager();
 
-    void check_and_compute(mongo::Query query);
+    bool check_and_compute(mongo::Query query, std::string collection);
     void remove_computable(Computable* computable);
+    void cleanup_computed_docs();
 
     /**
      * Registers a Computable which provides information in the robot memory that is computed on demand.
      *
-     * @param identifyer BSONObj describing what the function computes. Yor computable is called when an new query matches the key value fields in the identifiyer.
-     * @param compute_func Callback function that computes the information
+     * @param query_to_compute Query describing what the function computes. Yor computable is called when an new query matches query_to_compute.
+     * @param collection db.collection to fill with computed information
+     * @param compute_func Callback function that computes the information and retruns a list of computed documents
      * @param obj Pointer to class the callback is a function of (usaually this)
      * @return Computable Object pointer used for removing it
      */
     template<typename T>
-    Computable* register_computable(mongo::BSONObj identifyer, void(T::*compute_func)(mongo::BSONObj), T *obj)
+    Computable* register_computable(mongo::Query query_to_compute, std::string collection, std::list<mongo::BSONObj>(T::*compute_func)(mongo::BSONObj), T *obj)
     {
-      return NULL;
+      Computable* comp = new Computable(query_to_compute, collection, boost::bind(compute_func, obj, _1));
+      computables.push_back(comp);
+      return comp;
     }
 
   private:
@@ -59,7 +65,9 @@ class ComputablesManager
     mongo::DBClientBase* mongodb_client_;
     fawkes::Clock* clock_;
 
-    std::map<mongo::BSONObj, Computable*> computables;
+    std::list<Computable*> computables;
+    std::string matching_test_collection_;
+    std::list<std::string> collections_to_cleanup;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_COMPUTABLES_MANAGER_H_ */

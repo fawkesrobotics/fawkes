@@ -229,6 +229,17 @@ TEST_F(RobotMemoryTest, EventTriggerReplica)
 TEST_F(RobotMemoryTest, ComputableRegisterRemove)
 {
   TestComputable* tc = new TestComputable();
-  Computable* comp = robot_memory->register_computable(fromjson("{somekey:'value'}"), &TestComputable::compute, tc);
+  Computable* comp = robot_memory->register_computable(fromjson("{somekey:'value'}"), "robmem.test", &TestComputable::compute, tc);
+  robot_memory->remove_computable(comp);
+}
+
+
+TEST_F(RobotMemoryTest, ComputableCall)
+{
+  TestComputable* tc = new TestComputable();
+  Computable* comp = robot_memory->register_computable(fromjson("{computed:true}"), "robmem.test", &TestComputable::compute, tc);
+  QResCursor qres = robot_memory->query(fromjson("{computed:true}"), "robmem.test");
+  ASSERT_TRUE(qres->more());
+  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{result:'this is computed'}")));
   robot_memory->remove_computable(comp);
 }

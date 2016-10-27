@@ -104,6 +104,7 @@ void RobotMemory::init()
 void RobotMemory::loop()
 {
   trigger_manager_->check_events();
+  computables_manager_->cleanup_computed_docs();
 }
 
 /**
@@ -120,22 +121,8 @@ QResCursor RobotMemory::query(Query query, std::string collection)
   //only one query at a time
   MutexLocker lock(mutex_);
 
-//  //introspect query
-//  log(query, "executing query:");
-
-//  //TODO: computation on demand
-//  //check if virtual knowledge is queried
-//  //rename field in query
-//  if(query.getFilter().hasField("class")){
-//    set_fields(query, std::string("{type:\"") +
-//               query.getFilter()["class"].String() + "\"}");
-//    remove_field(query, "class");
-//  }
-//
-//  if(query.getFilter().hasField("bbinterface")){
-//    collection = config->get_string("plugins/robot-memory/blackboard-collection");
-//    gen_blackboard_data(query.getFilter()["bbinterface"].String());
-//  }
+  //check if computation on demand is necessary and execute Computables
+  computables_manager_->check_and_compute(query, collection);
 
   //set read preference of query to nearest to read from the local replica set member first
   query.readPref(ReadPreference_Nearest, BSONArray());

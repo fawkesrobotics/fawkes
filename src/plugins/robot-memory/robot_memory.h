@@ -93,15 +93,16 @@ class RobotMemory
     /**
      * Registers a Computable which provides information in the robot memory that is computed on demand.
      *
-     * @param identifyer BSONObj describing what the function computes. Yor computable is called when an new query matches the key value fields in the identifiyer.
-     * @param compute_func Callback function that computes the information
+     * @param query_to_compute Query describing what the function computes. Yor computable is called when an new query matches the key value fields in the identifiyer.
+     * @param collection db.collection to fill with computed information
+     * @param compute_func Callback function that computes the information and retruns a list of computed documents
      * @param obj Pointer to class the callback is a function of (usaually this)
      * @return Computable Object pointer used for removing it
      */
     template<typename T>
-    Computable* register_computable(mongo::BSONObj identifyer, void(T::*compute_func)(mongo::BSONObj), T *obj)
+    Computable* register_computable(mongo::Query query_to_compute, std::string collection, std::list<mongo::BSONObj>(T::*compute_func)(mongo::BSONObj), T *obj)
     {
-      return computables_manager_->register_computable(identifyer, compute_func, obj);
+      return computables_manager_->register_computable(query_to_compute, collection, compute_func, obj);
     }
     void remove_computable(Computable* computable);
 
