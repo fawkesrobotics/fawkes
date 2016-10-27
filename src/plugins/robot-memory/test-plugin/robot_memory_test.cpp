@@ -243,3 +243,40 @@ TEST_F(RobotMemoryTest, ComputableCall)
   ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{result:'this is computed'}")));
   robot_memory->remove_computable(comp);
 }
+
+
+TEST_F(RobotMemoryTest, ComputableCallAddition)
+{
+  TestComputable* tc = new TestComputable();
+  Computable* comp = robot_memory->register_computable(fromjson(
+      "{compute:'sum',x:{$exists:true},y:{$exists:true}}"), "robmem.test", &TestComputable::compute_sum, tc);
+  QResCursor qres = robot_memory->query(fromjson("{compute:'sum',x:15,y:4}"), "robmem.test");
+  ASSERT_TRUE(qres->more());
+  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{sum:19}")));
+  robot_memory->remove_computable(comp);
+}
+
+
+TEST_F(RobotMemoryTest, ComputableMultiple)
+{
+  TestComputable* tc = new TestComputable();
+  Computable* comp = robot_memory->register_computable(fromjson(
+      "{compute:'multiple'}"), "robmem.test", &TestComputable::compute_multiple, tc);
+  QResCursor qres = robot_memory->query(fromjson("{compute:'multiple'}"), "robmem.test");
+  std::list<int> values = {3, 2, 1};
+  ASSERT_TRUE(qres->more());
+  int got = qres->next().getField("count").Int();
+  ASSERT_TRUE(std::find(values.begin(), values.end(), got) != values.end());
+  values.remove(got);
+  ASSERT_TRUE(qres->more());
+  got = qres->next().getField("count").Int();
+  ASSERT_TRUE(std::find(values.begin(), values.end(), got) != values.end());
+  values.remove(got);
+  ASSERT_TRUE(qres->more());
+  got = qres->next().getField("count").Int();
+  ASSERT_TRUE(std::find(values.begin(), values.end(), got) != values.end());
+  values.remove(got);
+  ASSERT_EQ(0, values.size());
+  ASSERT_FALSE(qres->more());
+  robot_memory->remove_computable(comp);
+}
