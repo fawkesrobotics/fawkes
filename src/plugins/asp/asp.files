@@ -7,7 +7,11 @@ asp_thread.cpp
 aspect/Makefile
 aspect/asp.h
 aspect/asp.cpp
-aspect/clingo_control_manager.h
-aspect/clingo_control_manager.cpp
 aspect/asp_inifin.h
 aspect/asp_inifin.cpp
+aspect/clingo_control_manager.h
+aspect/clingo_control_manager.cpp
+aspect/clingo_manager.h
+aspect/clingo_manager.cpp
+aspect/clingo_manager_inifin.h
+aspect/clingo_manager_inifin.cpp
