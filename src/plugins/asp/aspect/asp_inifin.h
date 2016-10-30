@@ -25,6 +25,8 @@
 #define __PLUGINS_ASP_ASPECT_ASP_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
+#include <core/utils/lockptr.h>
+
 #include "asp.h"
 
 namespace fawkes {
@@ -32,20 +34,24 @@ namespace fawkes {
 }
 #endif
 
+class ClingoControlManager;
 class Logger;
 
 class ASPAspectIniFin : public AspectIniFin
 {
 	private:
 	Logger *Log;
+	LockPtr<ClingoControlManager> CtrlMgr;
 
 	public:
 	ASPAspectIniFin(void);
+	~ASPAspectIniFin(void);
 
 	void init(Thread *thread) override;
 	void finalize(Thread *thread) override;
 
 	void setLogger(Logger *logger);
+	void setControlManager(const LockPtr<ClingoControlManager>& ctrlMgr);
 };
 
 } // end namespace fawkes

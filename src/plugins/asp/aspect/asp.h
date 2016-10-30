@@ -41,6 +41,8 @@ namespace fawkes {
 class ASPAspect : public virtual Aspect
 {
 	private:
+	const std::string ControlName;
+
 	void init_ASPAspect(LockPtr<Clingo::Control> clingoControl);
 	void finalize_ASPAspect();
 
@@ -48,7 +50,7 @@ class ASPAspect : public virtual Aspect
 	LockPtr<Clingo::Control> ClingoControl;
 
 	public:
-	ASPAspect(void);
+	ASPAspect(const std::string&& controlName);
 	virtual ~ASPAspect(void);
 
 	friend class ASPAspectIniFin;

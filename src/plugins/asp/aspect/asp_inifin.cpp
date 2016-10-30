@@ -21,29 +21,44 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "asp.h"
-#include "asp_inifin.h"
 #include <clingo.hh>
 #include <core/threading/thread_finalizer.h>
 #include <logging/logger.h>
+
+#include "asp.h"
+#include "asp_inifin.h"
+#include "clingo_control_manager.h"
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-/** @class ASPAspectIniFin <plugins/asp/aspect/asp_inifin.h>
+/**
+ * @class ASPAspectIniFin <plugins/asp/aspect/asp_inifin.h>
  * ASPAspect initializer/finalizer.
  * This initializer/finalizer will provide the ASP node handle to threads with the ASPAspect.
  * @author Björn Schäpers
  *
  * @property ASPAspectIniFin::Log
  * @brief The logger used for Clingo Output.
+ *
+ * @property ASPAspectIniFin::CtrlMgr
+ * @brief The control manager.
  */
 
-/** Constructor.
+/**
+ * Constructor.
  */
 ASPAspectIniFin::ASPAspectIniFin(void) : AspectIniFin("ASPAspect"), Log(nullptr)
+{
+	return;
+}
+
+/**
+ * @brief Destructor.
+ */
+ASPAspectIniFin::~ASPAspectIniFin(void)
 {
 	return;
 }
@@ -100,6 +115,17 @@ void
 ASPAspectIniFin::setLogger(Logger *logger)
 {
 	Log = logger;
+	return;
+}
+
+/**
+ * @brief Sets the control manager.
+ * @param[in] ctrlMgr The new control manager.
+ */
+void
+ASPAspectIniFin::setControlManager(const LockPtr<ClingoControlManager>& ctrlMgr)
+{
+	CtrlMgr = ctrlMgr;
 	return;
 }
 

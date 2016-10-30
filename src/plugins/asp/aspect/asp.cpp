@@ -36,14 +36,19 @@ namespace fawkes {
  * @ingroup Aspects
  * @author Björn Schäpers
  *
- * @property fawkes:LockPtr<Clingo::Control> ASPAspect::ClingoControl
- * Clingo Control for exclusive usage.
+ * @property ASPAspect::ControlName
+ * @brief The name for the control in the manager.
+ *
+ * @property ASPAspect::ClingoControl
+ * @brief Clingo Control for exclusive usage.
  */
 
 
-/** Constructor.
+/**
+ * Constructor.
+ * @param[in] controlName The desired control name.
  */
-ASPAspect::ASPAspect(void)
+ASPAspect::ASPAspect(const std::string&& controlName) : ControlName(std::move(controlName))
 {
 	add_aspect("ASPAspect");
 	return;
