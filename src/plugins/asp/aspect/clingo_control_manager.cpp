@@ -39,9 +39,8 @@ namespace fawkes {
 
 /**
  * Constructor.
- * @param[in] logger The logger for the controls.
  */
-ClingoControlManager::ClingoControlManager(Logger *logger) : Log(logger)
+ClingoControlManager::ClingoControlManager(void) : Log(nullptr)
 {
 	return;
 }
@@ -49,6 +48,16 @@ ClingoControlManager::ClingoControlManager(Logger *logger) : Log(logger)
 /** Destructor. */
 ClingoControlManager::~ClingoControlManager(void)
 {
+	return;
+}
+
+/**
+ * @brief Sets the logger for all Clingo Controls.
+ * @param[in] logger The logger.
+ */
+void ClingoControlManager::setLogger(Logger *logger)
+{
+	Log = logger;
 	return;
 }
 

@@ -39,6 +39,9 @@ namespace fawkes {
  * @property ASPAspect::ControlName
  * @brief The name for the control in the manager.
  *
+ * @property ASPAspect::LogComponent
+ * @brief The component for the logger.
+ *
  * @property ASPAspect::ClingoControl
  * @brief Clingo Control for exclusive usage.
  */
@@ -47,8 +50,10 @@ namespace fawkes {
 /**
  * Constructor.
  * @param[in] controlName The desired control name.
+ * @param[in] logComponent The component for the logger.
  */
-ASPAspect::ASPAspect(const std::string&& controlName) : ControlName(std::move(controlName))
+ASPAspect::ASPAspect(const std::string&& controlName, const std::string&& logComponent) :
+	ControlName(std::move(controlName)), LogComponent(std::move(logComponent))
 {
 	add_aspect("ASPAspect");
 	return;

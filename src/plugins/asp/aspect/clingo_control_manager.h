@@ -44,8 +44,10 @@ class ClingoControlManager
 	std::unordered_map<std::string, LockPtr<Clingo::Control>> Controls;
 
 	public:
-	ClingoControlManager(Logger *logger);
+	ClingoControlManager(void);
 	virtual ~ClingoControlManager(void);
+
+	void setLogger(Logger *logger);
 
 	LockPtr<Clingo::Control> create_control(const std::string& ctrl_name, const std::string& log_component_name);
 	void destroy_control(const std::string& ctrl_name);

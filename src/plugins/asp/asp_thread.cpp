@@ -29,12 +29,27 @@ using namespace fawkes;
  * ASP environment thread.
  *
  * @author Björn Schäpers
+ *
+ * @property ASPThread::ASPIniFin
+ * @brief The initi-/finalizer for the ASPAspect.
+ *
+ * @property ASPThread::ClingoIniFin
+ * @brief The initi-/finalizer for the ClingoManagerAspect.
+ *
+ * @property ASPThread::CtrlMgr
+ * @brief The clingo control manager.
  */
 
 /** Constructor. */
 ASPThread::ASPThread(void)
   : Thread("ASPThread", Thread::OPMODE_WAITFORWAKEUP),
-	AspectProviderAspect(std::list<fawkes::AspectIniFin*>(1, &ASPIniFin))
+	AspectProviderAspect([this](void) {
+		std::list<fawkes::AspectIniFin*> ret;
+		ret.emplace_back(&ASPIniFin);
+		ret.emplace_back(&ClingoIniFin);
+		return ret;
+	}()),
+	CtrlMgr(new ClingoControlManager)
 {
 	return;
 }
@@ -42,7 +57,9 @@ ASPThread::ASPThread(void)
 void
 ASPThread::init(void)
 {
-	ASPIniFin.setLogger(logger);
+	CtrlMgr->setLogger(logger);
+	ASPIniFin.setControlManager(CtrlMgr);
+	ClingoIniFin.setControlManager(CtrlMgr);
 	return;
 }
 

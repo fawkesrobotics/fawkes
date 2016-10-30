@@ -24,9 +24,12 @@
 #define __PLUGINS_ASP_ASP_THREAD_H_
 
 #include <aspect/aspect_provider.h>
-#include "aspect/asp_inifin.h"
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
+
+#include "aspect/asp_inifin.h"
+#include "aspect/clingo_control_manager.h"
+#include "aspect/clingo_manager_inifin.h"
 
 namespace fawkes {
 	class AspectIniFin;
@@ -39,6 +42,8 @@ class ASPThread
 {
 	private:
 	fawkes::ASPAspectIniFin ASPIniFin;
+	fawkes::ClingoManagerAspectIniFin ClingoIniFin;
+	fawkes::LockPtr<fawkes::ClingoControlManager> CtrlMgr;
 
 	protected:
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -50,7 +55,6 @@ class ASPThread
 	void init(void) override;
 	void loop(void) override;
 	void finalize(void) override;
-
 };
 
 #endif

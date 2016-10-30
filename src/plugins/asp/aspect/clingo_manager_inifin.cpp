@@ -82,7 +82,7 @@ ClingoManagerAspectIniFin::finalize(Thread *thread)
  * @param[in] clingoCtrlMgr Clingo control manager
  */
 void
-ClingoManagerAspectIniFin::set_manager(LockPtr<ClingoControlManager>& clingoCtrlMgr)
+ClingoManagerAspectIniFin::setControlManager(LockPtr<ClingoControlManager>& clingoCtrlMgr)
 {
 	ClingoCtrlMgr = clingoCtrlMgr;
 	return;

@@ -40,9 +40,6 @@ namespace fawkes {
  * This initializer/finalizer will provide the ASP node handle to threads with the ASPAspect.
  * @author Björn Schäpers
  *
- * @property ASPAspectIniFin::Log
- * @brief The logger used for Clingo Output.
- *
  * @property ASPAspectIniFin::CtrlMgr
  * @brief The control manager.
  */
@@ -50,7 +47,7 @@ namespace fawkes {
 /**
  * Constructor.
  */
-ASPAspectIniFin::ASPAspectIniFin(void) : AspectIniFin("ASPAspect"), Log(nullptr)
+ASPAspectIniFin::ASPAspectIniFin(void) : AspectIniFin("ASPAspect")
 {
 	return;
 }
@@ -73,23 +70,7 @@ ASPAspectIniFin::init(Thread *thread)
 		thread->name());
 	} //if ( asp_thread == nullptr )
 
-	auto clingoLogger = [this](const Clingo::WarningCode code, char const *msg)
-		{
-			fawkes::Logger::LogLevel level = fawkes::Logger::LL_NONE;
-			switch ( code )
-			{
-				case Clingo::WarningCode::AtomUndefined      :
-				case Clingo::WarningCode::OperationUndefined :
-				case Clingo::WarningCode::RuntimeError       : level = fawkes::Logger::LL_ERROR; break;
-				case Clingo::WarningCode::Other              :
-				case Clingo::WarningCode::VariableUnbounded  : level = fawkes::Logger::LL_WARN;
-				case Clingo::WarningCode::FileIncluded       :
-				case Clingo::WarningCode::GlobalVariable     : level = fawkes::Logger::LL_INFO; break;
-			} //switch ( code )
-			Log->log(level, "Clingo", msg);
-			return;
-		};
-	asp_thread->init_ASPAspect(LockPtr<Clingo::Control>(new Clingo::Control({}, clingoLogger, 100)));
+	asp_thread->init_ASPAspect(CtrlMgr->create_control(asp_thread->ControlName, asp_thread->LogComponent));
 	return;
 }
 
@@ -104,17 +85,6 @@ ASPAspectIniFin::finalize(Thread *thread)
 	} //if ( asp_thread == nullptr )
 
 	asp_thread->finalize_ASPAspect();
-	return;
-}
-
-/**
- * @brief Sets the logger to use for Clingo messages.
- * @param[in] logger The new logger.
- */
-void
-ASPAspectIniFin::setLogger(Logger *logger)
-{
-	Log = logger;
 	return;
 }
 

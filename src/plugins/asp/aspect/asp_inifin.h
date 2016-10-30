@@ -40,7 +40,6 @@ class Logger;
 class ASPAspectIniFin : public AspectIniFin
 {
 	private:
-	Logger *Log;
 	LockPtr<ClingoControlManager> CtrlMgr;
 
 	public:
@@ -50,7 +49,6 @@ class ASPAspectIniFin : public AspectIniFin
 	void init(Thread *thread) override;
 	void finalize(Thread *thread) override;
 
-	void setLogger(Logger *logger);
 	void setControlManager(const LockPtr<ClingoControlManager>& ctrlMgr);
 };
 

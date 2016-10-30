@@ -42,6 +42,7 @@ class ASPAspect : public virtual Aspect
 {
 	private:
 	const std::string ControlName;
+	const std::string LogComponent;
 
 	void init_ASPAspect(LockPtr<Clingo::Control> clingoControl);
 	void finalize_ASPAspect();
@@ -50,7 +51,7 @@ class ASPAspect : public virtual Aspect
 	LockPtr<Clingo::Control> ClingoControl;
 
 	public:
-	ASPAspect(const std::string&& controlName);
+	ASPAspect(const std::string&& controlName, const std::string&& logComponent = std::string());
 	virtual ~ASPAspect(void);
 
 	friend class ASPAspectIniFin;

@@ -45,7 +45,7 @@ class ClingoManagerAspectIniFin : public AspectIniFin
 	void init(Thread *thread) override;
 	void finalize(Thread *thread) override;
 
-	void set_manager(LockPtr<ClingoControlManager>& clingoCtrlMgr);
+	void setControlManager(LockPtr<ClingoControlManager>& clingoCtrlMgr);
 };
 
 } // end namespace fawkes
