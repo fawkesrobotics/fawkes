@@ -19,12 +19,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include "clingo_access.h"
 #include "clingo_control_manager.h"
 
 #include <core/exception.h>
 #include <logging/logger.h>
-
-#include <clingo.hh>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -68,31 +67,16 @@ void ClingoControlManager::setLogger(Logger *logger)
  * @param[in] log_component_name The Prefix for log entries. If empty it will be set to "Clingo".
  * @return A new plain Clingo Control.
  */
-LockPtr<Clingo::Control>
-ClingoControlManager::create_control(const std::string& ctrl_name, const std::string& log_component_name)
+LockPtr<ClingoAccess> ClingoControlManager::create_control(const std::string& ctrl_name,
+		const std::string& log_component_name)
 {
 	if ( Controls.count(ctrl_name) != 0 )
 	{
 		throw Exception("Clingo Control '%s' already exists!", ctrl_name.c_str());
 	} //if ( Controls.count(ctrl_name) != 0 )
 
-	auto clingoLogger = [this,log_component_name](const Clingo::WarningCode code, char const *msg)
-		{
-			fawkes::Logger::LogLevel level = fawkes::Logger::LL_NONE;
-			switch ( code )
-			{
-				case Clingo::WarningCode::AtomUndefined      :
-				case Clingo::WarningCode::OperationUndefined :
-				case Clingo::WarningCode::RuntimeError       : level = fawkes::Logger::LL_ERROR; break;
-				case Clingo::WarningCode::Other              :
-				case Clingo::WarningCode::VariableUnbounded  : level = fawkes::Logger::LL_WARN;
-				case Clingo::WarningCode::FileIncluded       :
-				case Clingo::WarningCode::GlobalVariable     : level = fawkes::Logger::LL_INFO; break;
-			} //switch ( code )
-			Log->log(level, log_component_name.empty() ? "Clingo" : log_component_name.c_str(), msg);
-			return;
-		};
-	LockPtr<Clingo::Control> ctrl(new Clingo::Control({}, clingoLogger, 100));
+	Clingo::SymbolSpan s;
+	LockPtr<ClingoAccess> ctrl(new ClingoAccess(Log, log_component_name));
 
 	Controls.emplace(ctrl_name, ctrl);
 
@@ -111,12 +95,11 @@ ClingoControlManager::destroy_control(const std::string& ctrl_name)
 	return;
 }
 
-
 /**
  * Get map of controls.
  * @return The map from control name to control lock ptr.
  */
-const std::unordered_map<std::string, LockPtr<Clingo::Control>>&
+const std::unordered_map<std::string, LockPtr<ClingoAccess>>&
 ClingoControlManager::controls(void) const
 {
 	return Controls;

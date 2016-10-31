@@ -36,12 +36,12 @@ LDFLAGS_CLINGO = -L$(HOME)/clingo/build/debug/ -Wl,-rpath=$(HOME)/clingo/build/d
 
 ifeq ($(HAVE_CPP11),1)
   ifeq ($(HAVE_CLINGO),1)
-	CFLAGS  += $(CFLAGS_CLINGO) $(CFLAGS_CPP11)
-	LDFLAGS += $(LDFLAGS_CLINGO) $(LDFLAGS_CPP11)
+    CFLAGS  += $(CFLAGS_CLINGO) $(CFLAGS_CPP11)
+    LDFLAGS += $(LDFLAGS_CLINGO) $(LDFLAGS_CPP11)
 
-	LIBS_all = $(LIBDIR)/libfawkesaspaspect.so
-else
-	WARN_TARGETS += warning_clingo
+    LIBS_all = $(LIBDIR)/libfawkesaspaspect.so
+  else
+    WARN_TARGETS += warning_clingo
   endif
 else
   WARN_TARGETS += warning_cpp11

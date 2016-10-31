@@ -21,12 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <clingo.hh>
 #include <core/threading/thread_finalizer.h>
 #include <logging/logger.h>
 
 #include "asp.h"
 #include "asp_inifin.h"
+#include "clingo_access.h"
 #include "clingo_control_manager.h"
 
 namespace fawkes {

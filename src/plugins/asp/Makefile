@@ -41,14 +41,14 @@ ifeq ($(HAVE_CPP11),1)
   ifeq ($(HAVE_CLINGO),1)
     PRESUBDIRS += aspect
 
-	CFLAGS  += $(CFLAGS_CLINGO) $(CFLAGS_CPP11)
-	LDFLAGS += $(LDFLAGS_CLINGO) $(LDFLAGS_CPP11)
+    CFLAGS  += $(CFLAGS_CLINGO) $(CFLAGS_CPP11)
+    LDFLAGS += $(LDFLAGS_CLINGO) $(LDFLAGS_CPP11)
 
-	PLUGINS_all = $(PLUGINDIR)/asp.so
+    PLUGINS_all = $(PLUGINDIR)/asp.so
 
-	INSTALL_extra = asp_files
-else
-	WARN_TARGETS += warning_clingo
+    INSTALL_extra = asp_files
+  else
+    WARN_TARGETS += warning_clingo
   endif
 else
   WARN_TARGETS += warning_cpp11

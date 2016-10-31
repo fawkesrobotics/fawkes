@@ -26,22 +26,19 @@
 
 #include <unordered_map>
 
-namespace Clingo {
-	class Control;
-}
-
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
+class ClingoAccess;
 class Logger;
 
 class ClingoControlManager
 {
 	private:
 	Logger *Log;
-	std::unordered_map<std::string, LockPtr<Clingo::Control>> Controls;
+	std::unordered_map<std::string, LockPtr<ClingoAccess>> Controls;
 
 	public:
 	ClingoControlManager(void);
@@ -49,10 +46,10 @@ class ClingoControlManager
 
 	void setLogger(Logger *logger);
 
-	LockPtr<Clingo::Control> create_control(const std::string& ctrl_name, const std::string& log_component_name);
+	LockPtr<ClingoAccess> create_control(const std::string& ctrl_name, const std::string& log_component_name);
 	void destroy_control(const std::string& ctrl_name);
 
-	const std::unordered_map<std::string, LockPtr<Clingo::Control>>& controls(void) const;
+	const std::unordered_map<std::string, LockPtr<ClingoAccess>>& controls(void) const;
 };
 
 } // end namespace fawkes

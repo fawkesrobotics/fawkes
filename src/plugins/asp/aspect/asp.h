@@ -29,14 +29,12 @@
 
 #include <string>
 
-namespace Clingo {
-  class Control;
-}
-
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
+class ClingoAccess;
 
 class ASPAspect : public virtual Aspect
 {
@@ -44,11 +42,11 @@ class ASPAspect : public virtual Aspect
 	const std::string ControlName;
 	const std::string LogComponent;
 
-	void init_ASPAspect(LockPtr<Clingo::Control> clingoControl);
-	void finalize_ASPAspect();
+	void init_ASPAspect(const LockPtr<ClingoAccess>& clingo);
+	void finalize_ASPAspect(void);
 
 	protected:
-	LockPtr<Clingo::Control> ClingoControl;
+	LockPtr<ClingoAccess> Clingo;
 
 	public:
 	ASPAspect(const std::string&& controlName, const std::string&& logComponent = std::string());

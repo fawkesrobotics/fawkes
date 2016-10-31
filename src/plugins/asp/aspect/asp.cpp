@@ -22,7 +22,7 @@
  */
 
 #include "asp.h"
-#include <clingo.hh>
+#include "clingo_access.h"
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -69,12 +69,12 @@ ASPAspect::~ASPAspect(void)
 /** Init ASP aspect.
  * This sets the Clingo Control.
  * It is guaranteed that this is called for an ASP Thread before start is called (when running regularly inside Fawkes).
- * @param control The Clingo Control
+ * @param[in] clingo The Clingo Control.
  */
 void
-ASPAspect::init_ASPAspect(LockPtr<Clingo::Control> control)
+ASPAspect::init_ASPAspect(const LockPtr<ClingoAccess>& clingo)
 {
-	ClingoControl = control;
+	Clingo = clingo;
 	return;
 }
 
@@ -82,9 +82,9 @@ ASPAspect::init_ASPAspect(LockPtr<Clingo::Control> control)
  * This clears the Clingo Control.
  */
 void
-ASPAspect::finalize_ASPAspect()
+ASPAspect::finalize_ASPAspect(void)
 {
-	ClingoControl.clear();
+	Clingo.clear();
 	return;
 }
 

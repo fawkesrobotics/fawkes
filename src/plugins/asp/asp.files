@@ -9,6 +9,8 @@ aspect/asp.h
 aspect/asp.cpp
 aspect/asp_inifin.h
 aspect/asp_inifin.cpp
+aspect/clingo_access.h
+aspect/clingo_access.cpp
 aspect/clingo_control_manager.h
 aspect/clingo_control_manager.cpp
 aspect/clingo_manager.h
