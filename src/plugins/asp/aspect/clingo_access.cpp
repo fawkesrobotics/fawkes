@@ -353,4 +353,59 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
 	return true;
 }
 
+/**
+ * @brief Assigns an external value.
+ * @param[in] atom The atom to assign.
+ * @param[in] value The assigned value.
+ * @return If it could be assigned.
+ */
+bool
+ClingoAccess::assign_external(const Clingo::Symbol atom, const Clingo::TruthValue value)
+{
+	MutexLocker locker(&ControlMutex);
+	if ( Solving )
+	{
+		return false;
+	} //if ( Solving )
+
+	if ( Debug )
+	{
+		Log->log_info(LogComponent.c_str(), "Assigning %s to %s.", [value](void)
+			{
+				const char *ret = "Unknown Value";
+				switch ( value )
+				{
+					case Clingo::TruthValue::Free  : ret = "Free";  break;
+					case Clingo::TruthValue::True  : ret = "True";  break;
+					case Clingo::TruthValue::False : ret = "False"; break;
+				} //switch ( value )
+				return ret;
+			}, atom.string());
+	} //if ( Debug )
+	Control.assign_external(atom, value);
+	return true;
+}
+
+/**
+ * @brief Releases an external value.
+ * @param[in] atom The atom to release.
+ * @return If it could be released.
+ */
+bool
+ClingoAccess::release_external(const Clingo::Symbol atom)
+{
+	MutexLocker locker(&ControlMutex);
+	if ( Solving )
+	{
+		return false;
+	} //if ( Solving )
+
+	if ( Debug )
+	{
+		Log->log_info(LogComponent.c_str(), "Releasing %s.", atom.string());
+	} //if ( Debug )
+	Control.release_external(atom);
+	return true;
+}
+
 } // end namespace fawkes
