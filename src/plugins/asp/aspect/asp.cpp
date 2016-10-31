@@ -42,7 +42,7 @@ namespace fawkes {
  * @property ASPAspect::LogComponent
  * @brief The component for the logger.
  *
- * @property ASPAspect::ClingoControl
+ * @property ASPAspect::ClingoAcc
  * @brief Clingo Control for exclusive usage.
  */
 
@@ -74,7 +74,7 @@ ASPAspect::~ASPAspect(void)
 void
 ASPAspect::init_ASPAspect(const LockPtr<ClingoAccess>& clingo)
 {
-	Clingo = clingo;
+	ClingoAcc = clingo;
 	return;
 }
 
@@ -84,7 +84,7 @@ ASPAspect::init_ASPAspect(const LockPtr<ClingoAccess>& clingo)
 void
 ASPAspect::finalize_ASPAspect(void)
 {
-	Clingo.clear();
+	ClingoAcc.clear();
 	return;
 }
 

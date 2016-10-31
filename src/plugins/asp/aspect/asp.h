@@ -46,7 +46,7 @@ class ASPAspect : public virtual Aspect
 	void finalize_ASPAspect(void);
 
 	protected:
-	LockPtr<ClingoAccess> Clingo;
+	LockPtr<ClingoAccess> ClingoAcc;
 
 	public:
 	ASPAspect(const std::string&& controlName, const std::string&& logComponent = std::string());
