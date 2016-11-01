@@ -44,7 +44,7 @@ RobotMemoryTestThread::init()
 {
   //prepare tests
   logger->log_warn(name(), "Preparing tests");
-  test_env_ = new RobotMemoryTestEnvironment(robot_memory);
+  test_env_ = new RobotMemoryTestEnvironment(robot_memory, blackboard);
   ::testing::AddGlobalTestEnvironment((testing::Environment*) test_env_);
 
 }

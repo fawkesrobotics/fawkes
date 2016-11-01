@@ -58,12 +58,16 @@ RobotMemoryThread::init()
   robot_memory->init();
   //prepare aspect initializer
   robot_memory_inifin_.set_robot_memory(robot_memory);
+
+  //register blackboard computable
+  blackboard_computable = new BlackboardComputable(robot_memory, blackboard, logger);
 }
 
 
 void
 RobotMemoryThread::finalize()
 {
+  delete blackboard_computable;
   robot_memory_inifin_.set_robot_memory(NULL);
   delete robot_memory;
 }

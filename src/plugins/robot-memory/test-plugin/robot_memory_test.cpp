@@ -20,14 +20,16 @@
  */
 
 #include "robot_memory_test.h"
+#include <interfaces/Position3DInterface.h>
 #include <list>
 #include <algorithm>
 
-//init static variable
-RobotMemory* RobotMemoryTestEnvironment::robot_memory = NULL;
-
 using namespace fawkes;
 using namespace mongo;
+
+//init static variable
+RobotMemory* RobotMemoryTestEnvironment::robot_memory = NULL;
+BlackBoard* RobotMemoryTestEnvironment::blackboard = NULL;
 
 /**
  * Setup for each test
@@ -35,6 +37,7 @@ using namespace mongo;
 void RobotMemoryTest::SetUp()
 {
   robot_memory = RobotMemoryTestEnvironment::robot_memory;
+  blackboard = RobotMemoryTestEnvironment::blackboard;
 }
 
 TEST_F(RobotMemoryTest, TestsWorking)
@@ -279,4 +282,20 @@ TEST_F(RobotMemoryTest, ComputableMultiple)
   ASSERT_EQ(0, values.size());
   ASSERT_FALSE(qres->more());
   robot_memory->remove_computable(comp);
+}
+
+
+TEST_F(RobotMemoryTest, BlackboardComputable)
+{
+  Position3DInterface* if3d = blackboard->open_for_writing<Position3DInterface>("test");
+  if3d->set_frame("test_frame");
+  if3d->set_translation(0, 1.1);
+  if3d->set_translation(1, 2.2);
+  if3d->set_translation(2, 3.3);
+  if3d->write();
+  QResCursor qres = robot_memory->query(fromjson("{interface:'Position3DInterface',id:'test'}"), "robmem.blackboard");
+  ASSERT_TRUE(qres->more());
+  ASSERT_TRUE(contains_pairs(qres->next(), fromjson(
+      "{interface:'Position3DInterface',id:'test',frame:'test_frame',translation:[1.1, 2.2, 3.3]}")));
+  blackboard->close(if3d);
 }

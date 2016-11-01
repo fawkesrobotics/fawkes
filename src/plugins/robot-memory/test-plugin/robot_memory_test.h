@@ -23,6 +23,7 @@
 #define __PLUGINS_ROBOT_MEMORY_TEST_H_
 
 #include <gtest/gtest.h>
+#include <blackboard/blackboard.h>
 #include "plugins/robot-memory/robot_memory.h"
 #include <stdio.h>
 
@@ -33,15 +34,17 @@
 class RobotMemoryTestEnvironment : public ::testing::Environment
 {
  public:
-  RobotMemoryTestEnvironment(RobotMemory* robot_memory)
+  RobotMemoryTestEnvironment(RobotMemory* robot_memory, fawkes::BlackBoard* blackboard)
   {
     this->robot_memory = robot_memory;
+    this->blackboard = blackboard;
   }
   virtual ~RobotMemoryTestEnvironment() {}
   void SetUp() {}
   virtual void TearDown(){}
  public:
   static RobotMemory* robot_memory;
+  static fawkes::BlackBoard* blackboard;
 };
 
 /** Class for Tests of the RobotMemory
@@ -51,6 +54,7 @@ class RobotMemoryTest : public ::testing::Test
  protected:
   virtual void SetUp();
   RobotMemory* robot_memory;
+  fawkes::BlackBoard* blackboard;
 
  protected:
   ::testing::AssertionResult contains_pairs(mongo::BSONObj obj, mongo::BSONObj exp);

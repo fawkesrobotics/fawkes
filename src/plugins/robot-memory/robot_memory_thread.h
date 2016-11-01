@@ -34,6 +34,7 @@
 #include <aspect/aspect_provider.h>
 #include "robot_memory.h"
 #include "aspect/robot_memory_inifin.h"
+#include "computables/blackboard_computable.h"
 
 #include <string>
 
@@ -66,6 +67,7 @@ class RobotMemoryThread
  private:
    RobotMemory* robot_memory;
    fawkes::RobotMemoryIniFin robot_memory_inifin_;
+   BlackboardComputable* blackboard_computable;
 };
 
 #endif

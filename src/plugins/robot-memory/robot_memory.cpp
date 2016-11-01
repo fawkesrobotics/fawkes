@@ -118,7 +118,7 @@ QResCursor RobotMemory::query(Query query, std::string collection)
   check_collection_name(collection);
   log_deb(std::string("Executing Query "+ query.toString() +" on collection "+collection));
 
-  //only one query at a time
+  //lock (mongo_client not thread safe)
   MutexLocker lock(mutex_);
 
   //check if computation on demand is necessary and execute Computables
@@ -152,7 +152,7 @@ int RobotMemory::insert(BSONObj obj, std::string collection)
 
   log_deb(std::string("Executing Query "+ obj.toString() + " on collection " + collection));
 
-  //only one query at a time
+  //lock (mongo_client not thread safe)
   MutexLocker lock(mutex_);
 
   //actually execute insert
@@ -192,7 +192,7 @@ int RobotMemory::update(Query query, BSONObj update, std::string collection, boo
   check_collection_name(collection);
   log_deb(std::string("Executing Update "+update.toString()+" for query "+query.toString()+" on collection "+ collection));
 
-  //only one query at a time
+  //lock (mongo_client not thread safe)
   MutexLocker lock(mutex_);
 
   //actually execute update
@@ -230,7 +230,7 @@ int RobotMemory::remove(Query query, std::string collection)
   check_collection_name(collection);
   log_deb(std::string("Executing Remove "+query.toString()+" on collection "+collection));
 
-  //only one query at a time
+  //lock (mongo_client not thread safe)
   MutexLocker lock(mutex_);
 
   //actually execute remove
@@ -261,6 +261,9 @@ int RobotMemory::drop_collection(std::string collection)
  */
 int RobotMemory::clear_memory()
 {
+  //lock (mongo_client not thread safe)
+  MutexLocker lock(mutex_);
+
   log_deb("Clearing whole robot memory");
   mongodb_client_->dropDatabase(database_name_);
   return 1;

@@ -19,7 +19,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gtest.mk
 
 LIBS_robot_memory_test = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-                      fawkesblackboard fawkesinterface fawkesrobotmemory
+                      fawkesblackboard fawkesinterface fawkesrobotmemory \
+                      Position3DInterface
 
 OBJS_robot_memory_test = robot_memory_test_plugin.o robot_memory_test_thread.o robot_memory_test.o
 
