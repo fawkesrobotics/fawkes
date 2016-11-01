@@ -30,7 +30,7 @@
 #include <mongo/client/dbclient.h>
 #include "interfaces/RobotMemoryInterface.h"
 #include "event_trigger_manager.h"
-#include "computables_manager.h"
+#include "computables/computables_manager.h"
 
 namespace fawkes {
   class Mutex;
