@@ -37,8 +37,8 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-PHONY: warning_mongodb
-.warning_mongodb:
+.PHONY: warning_mongodb
+warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemoryAspect$(TNORMAL) (mongodb[-devel] not installed)"
 endif
 
