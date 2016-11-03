@@ -56,7 +56,7 @@ RobotMemoryInterface::RobotMemoryInterface() : Interface()
   add_messageinfo("InsertMessage");
   add_messageinfo("UpdateMessage");
   add_messageinfo("RemoveMessage");
-  unsigned char tmp_hash[] = {0x57, 0x8, 0x55, 0x6b, 0x61, 0x8, 0xc9, 0x16, 0xf7, 0x68, 0xcc, 0x7e, 0xae, 0xe2, 0x42, 0xe};
+  unsigned char tmp_hash[] = {0x46, 0x15, 0x7a, 0xda, 0x53, 0x5, 0x42, 0x51, 0xa6, 0xd5, 0x3c, 0x1d, 0x56, 0xfa, 0x61, 0xba};
   set_hash(tmp_hash);
 }
 
@@ -177,8 +177,9 @@ RobotMemoryInterface::enum_tostring(const char *enumtype, int val) const
 
 /** Constructor with initial values.
  * @param ini_query initial value for query
+ * @param ini_collection initial value for collection
  */
-RobotMemoryInterface::QueryMessage::QueryMessage(const char * ini_query) : Message("QueryMessage")
+RobotMemoryInterface::QueryMessage::QueryMessage(const char * ini_query, const char * ini_collection) : Message("QueryMessage")
 {
   data_size = sizeof(QueryMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -186,7 +187,9 @@ RobotMemoryInterface::QueryMessage::QueryMessage(const char * ini_query) : Messa
   data      = (QueryMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->query, ini_query, 1024);
+  strncpy(data->collection, ini_collection, 1024);
   add_fieldinfo(IFT_STRING, "query", 1024, data->query);
+  add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
 /** Constructor */
 RobotMemoryInterface::QueryMessage::QueryMessage() : Message("QueryMessage")
@@ -197,6 +200,7 @@ RobotMemoryInterface::QueryMessage::QueryMessage() : Message("QueryMessage")
   data      = (QueryMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "query", 1024, data->query);
+  add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
 
 /** Destructor */
@@ -248,6 +252,36 @@ RobotMemoryInterface::QueryMessage::set_query(const char * new_query)
   strncpy(data->query, new_query, sizeof(data->query));
 }
 
+/** Get collection value.
+ * The collection to query
+ * @return collection value
+ */
+char *
+RobotMemoryInterface::QueryMessage::collection() const
+{
+  return data->collection;
+}
+
+/** Get maximum length of collection value.
+ * @return length of collection value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+RobotMemoryInterface::QueryMessage::maxlenof_collection() const
+{
+  return 1024;
+}
+
+/** Set collection value.
+ * The collection to query
+ * @param new_collection new collection value
+ */
+void
+RobotMemoryInterface::QueryMessage::set_collection(const char * new_collection)
+{
+  strncpy(data->collection, new_collection, sizeof(data->collection));
+}
+
 /** Clone this message.
  * Produces a message of the same type as this message and copies the
  * data to the new message.
@@ -267,8 +301,9 @@ RobotMemoryInterface::QueryMessage::clone() const
 
 /** Constructor with initial values.
  * @param ini_insert initial value for insert
+ * @param ini_collection initial value for collection
  */
-RobotMemoryInterface::InsertMessage::InsertMessage(const char * ini_insert) : Message("InsertMessage")
+RobotMemoryInterface::InsertMessage::InsertMessage(const char * ini_insert, const char * ini_collection) : Message("InsertMessage")
 {
   data_size = sizeof(InsertMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -276,7 +311,9 @@ RobotMemoryInterface::InsertMessage::InsertMessage(const char * ini_insert) : Me
   data      = (InsertMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->insert, ini_insert, 1024);
+  strncpy(data->collection, ini_collection, 1024);
   add_fieldinfo(IFT_STRING, "insert", 1024, data->insert);
+  add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
 /** Constructor */
 RobotMemoryInterface::InsertMessage::InsertMessage() : Message("InsertMessage")
@@ -287,6 +324,7 @@ RobotMemoryInterface::InsertMessage::InsertMessage() : Message("InsertMessage")
   data      = (InsertMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "insert", 1024, data->insert);
+  add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
 
 /** Destructor */
@@ -338,6 +376,36 @@ RobotMemoryInterface::InsertMessage::set_insert(const char * new_insert)
   strncpy(data->insert, new_insert, sizeof(data->insert));
 }
 
+/** Get collection value.
+ * The collection to query
+ * @return collection value
+ */
+char *
+RobotMemoryInterface::InsertMessage::collection() const
+{
+  return data->collection;
+}
+
+/** Get maximum length of collection value.
+ * @return length of collection value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+RobotMemoryInterface::InsertMessage::maxlenof_collection() const
+{
+  return 1024;
+}
+
+/** Set collection value.
+ * The collection to query
+ * @param new_collection new collection value
+ */
+void
+RobotMemoryInterface::InsertMessage::set_collection(const char * new_collection)
+{
+  strncpy(data->collection, new_collection, sizeof(data->collection));
+}
+
 /** Clone this message.
  * Produces a message of the same type as this message and copies the
  * data to the new message.
@@ -358,8 +426,9 @@ RobotMemoryInterface::InsertMessage::clone() const
 /** Constructor with initial values.
  * @param ini_query initial value for query
  * @param ini_update initial value for update
+ * @param ini_collection initial value for collection
  */
-RobotMemoryInterface::UpdateMessage::UpdateMessage(const char * ini_query, const char * ini_update) : Message("UpdateMessage")
+RobotMemoryInterface::UpdateMessage::UpdateMessage(const char * ini_query, const char * ini_update, const char * ini_collection) : Message("UpdateMessage")
 {
   data_size = sizeof(UpdateMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -368,8 +437,10 @@ RobotMemoryInterface::UpdateMessage::UpdateMessage(const char * ini_query, const
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->query, ini_query, 1024);
   strncpy(data->update, ini_update, 1024);
+  strncpy(data->collection, ini_collection, 1024);
   add_fieldinfo(IFT_STRING, "query", 1024, data->query);
   add_fieldinfo(IFT_STRING, "update", 1024, data->update);
+  add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
 /** Constructor */
 RobotMemoryInterface::UpdateMessage::UpdateMessage() : Message("UpdateMessage")
@@ -381,6 +452,7 @@ RobotMemoryInterface::UpdateMessage::UpdateMessage() : Message("UpdateMessage")
   data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "query", 1024, data->query);
   add_fieldinfo(IFT_STRING, "update", 1024, data->update);
+  add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
 
 /** Destructor */
@@ -462,6 +534,36 @@ RobotMemoryInterface::UpdateMessage::set_update(const char * new_update)
   strncpy(data->update, new_update, sizeof(data->update));
 }
 
+/** Get collection value.
+ * The collection to query
+ * @return collection value
+ */
+char *
+RobotMemoryInterface::UpdateMessage::collection() const
+{
+  return data->collection;
+}
+
+/** Get maximum length of collection value.
+ * @return length of collection value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+RobotMemoryInterface::UpdateMessage::maxlenof_collection() const
+{
+  return 1024;
+}
+
+/** Set collection value.
+ * The collection to query
+ * @param new_collection new collection value
+ */
+void
+RobotMemoryInterface::UpdateMessage::set_collection(const char * new_collection)
+{
+  strncpy(data->collection, new_collection, sizeof(data->collection));
+}
+
 /** Clone this message.
  * Produces a message of the same type as this message and copies the
  * data to the new message.
@@ -481,8 +583,9 @@ RobotMemoryInterface::UpdateMessage::clone() const
 
 /** Constructor with initial values.
  * @param ini_query initial value for query
+ * @param ini_collection initial value for collection
  */
-RobotMemoryInterface::RemoveMessage::RemoveMessage(const char * ini_query) : Message("RemoveMessage")
+RobotMemoryInterface::RemoveMessage::RemoveMessage(const char * ini_query, const char * ini_collection) : Message("RemoveMessage")
 {
   data_size = sizeof(RemoveMessage_data_t);
   data_ptr  = malloc(data_size);
@@ -490,7 +593,9 @@ RobotMemoryInterface::RemoveMessage::RemoveMessage(const char * ini_query) : Mes
   data      = (RemoveMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   strncpy(data->query, ini_query, 1024);
+  strncpy(data->collection, ini_collection, 1024);
   add_fieldinfo(IFT_STRING, "query", 1024, data->query);
+  add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
 /** Constructor */
 RobotMemoryInterface::RemoveMessage::RemoveMessage() : Message("RemoveMessage")
@@ -501,6 +606,7 @@ RobotMemoryInterface::RemoveMessage::RemoveMessage() : Message("RemoveMessage")
   data      = (RemoveMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   add_fieldinfo(IFT_STRING, "query", 1024, data->query);
+  add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
 
 /** Destructor */
@@ -550,6 +656,36 @@ void
 RobotMemoryInterface::RemoveMessage::set_query(const char * new_query)
 {
   strncpy(data->query, new_query, sizeof(data->query));
+}
+
+/** Get collection value.
+ * The collection to query
+ * @return collection value
+ */
+char *
+RobotMemoryInterface::RemoveMessage::collection() const
+{
+  return data->collection;
+}
+
+/** Get maximum length of collection value.
+ * @return length of collection value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+RobotMemoryInterface::RemoveMessage::maxlenof_collection() const
+{
+  return 1024;
+}
+
+/** Set collection value.
+ * The collection to query
+ * @param new_collection new collection value
+ */
+void
+RobotMemoryInterface::RemoveMessage::set_collection(const char * new_collection)
+{
+  strncpy(data->collection, new_collection, sizeof(data->collection));
 }
 
 /** Clone this message.

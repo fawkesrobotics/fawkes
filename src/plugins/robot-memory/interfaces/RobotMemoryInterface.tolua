@@ -8,7 +8,7 @@ class RobotMemoryInterface : public Interface
 
   class QueryMessage : public Message
   {
-    QueryMessage(char * ini_query);
+    QueryMessage(char * ini_query, char * ini_collection);
     QueryMessage();
     ~QueryMessage();
 
@@ -32,11 +32,14 @@ class RobotMemoryInterface : public Interface
     char * query();
     void set_query(const char * new_query);
     int maxlenof_query() const;
+    char * collection();
+    void set_collection(const char * new_collection);
+    int maxlenof_collection() const;
   };
 
   class InsertMessage : public Message
   {
-    InsertMessage(char * ini_insert);
+    InsertMessage(char * ini_insert, char * ini_collection);
     InsertMessage();
     ~InsertMessage();
 
@@ -60,11 +63,14 @@ class RobotMemoryInterface : public Interface
     char * insert();
     void set_insert(const char * new_insert);
     int maxlenof_insert() const;
+    char * collection();
+    void set_collection(const char * new_collection);
+    int maxlenof_collection() const;
   };
 
   class UpdateMessage : public Message
   {
-    UpdateMessage(char * ini_query, char * ini_update);
+    UpdateMessage(char * ini_query, char * ini_update, char * ini_collection);
     UpdateMessage();
     ~UpdateMessage();
 
@@ -91,11 +97,14 @@ class RobotMemoryInterface : public Interface
     char * update();
     void set_update(const char * new_update);
     int maxlenof_update() const;
+    char * collection();
+    void set_collection(const char * new_collection);
+    int maxlenof_collection() const;
   };
 
   class RemoveMessage : public Message
   {
-    RemoveMessage(char * ini_query);
+    RemoveMessage(char * ini_query, char * ini_collection);
     RemoveMessage();
     ~RemoveMessage();
 
@@ -119,6 +128,9 @@ class RobotMemoryInterface : public Interface
     char * query();
     void set_query(const char * new_query);
     int maxlenof_query() const;
+    char * collection();
+    void set_collection(const char * new_collection);
+    int maxlenof_collection() const;
   };
 
   char * error();
