@@ -28,6 +28,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <png.h>
+#include <cerrno>
+#include <cstring>
+#include <string>
 
 using namespace fawkes;
 
@@ -74,7 +77,7 @@ PNGReader::setup_read(const char *filename)
   d->read = false;
 
   if ((d->infile = fopen(filename, "rb")) == NULL) {
-    throw Exception("Cannot open PNG file");
+    throw Exception("Cannot open PNG file %s: %s", filename, ::strerror(errno));
   }
 
   d->png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -97,11 +100,12 @@ PNGReader::setup_read(const char *filename)
    * set up your own error handlers in the png_create_read_struct() earlier.
    */
   if (setjmp(png_jmpbuf(d->png_ptr))) {
+    std::string err(::strerror(errno));
     /* Free all of the memory associated with the png_ptr and info_ptr */
     png_destroy_read_struct(&d->png_ptr, &d->info_ptr, (png_infopp)NULL);
     fclose(d->infile);
     /* If we get here, we had a problem reading the file */
-    throw Exception("Could not read PNG file");
+    throw Exception("Could not read PNG file %s: %s", filename, err.c_str());
   }
 
   /* Set up the input control if you are using standard C streams */
