@@ -221,8 +221,13 @@ mongo::BSONObj RobotMemorySetup::run_mongo_command(unsigned int port, std::strin
   logger->log_info("RobotMemorySetup", "Executing db command: %s", command.c_str());
   con.runCommand("admin", mongo::fromjson(command), res);
   con.reset();
+
   if(res.getField("ok").type() != mongo::BSONType::NumberDouble || (res.getField("ok").Double() == 0.0 && res.getField("errmsg").String().compare(err_msg_to_ignore) != 0))
+  {
+    if(res.getField("errmsg").String() == "server is not running with --replSet")
+      logger->log_error("RobotMemorySetup", "The mongod instance which is already running is started with the wrong parameters. Stop it to let it start by the robot memory or change the mongod config and restart it.");
     throw PluginLoadException("robot-memory", std::string("Running DB command " + command + " failed: " + res.toString()).c_str());
+  }
   return res;
 }
 
