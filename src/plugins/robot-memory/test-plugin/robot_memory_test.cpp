@@ -299,3 +299,21 @@ TEST_F(RobotMemoryTest, BlackboardComputable)
       "{interface:'Position3DInterface',id:'test',frame:'test_frame',translation:[1.1, 2.2, 3.3]}")));
   blackboard->close(if3d);
 }
+
+
+TEST_F(RobotMemoryTest, BlackboardComputableMultiple)
+{
+  Position3DInterface* if3d = blackboard->open_for_writing<Position3DInterface>("test");
+  if3d->set_frame("test_frame");
+  if3d->write();
+  Position3DInterface* if3d_2 = blackboard->open_for_writing<Position3DInterface>("test_2");
+  if3d_2->set_frame("test_frame");
+  if3d_2->write();
+  QResCursor qres = robot_memory->query(fromjson("{interface:'Position3DInterface',id:'test'}"), "robmem.blackboard");
+  ASSERT_TRUE(qres->more());
+  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{interface:'Position3DInterface'}")));
+  ASSERT_TRUE(qres->more());
+  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{interface:'Position3DInterface'}")));
+  blackboard->close(if3d);
+  blackboard->close(if3d_2);
+}

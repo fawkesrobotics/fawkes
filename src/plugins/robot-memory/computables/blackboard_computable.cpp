@@ -37,7 +37,7 @@ BlackboardComputable::BlackboardComputable(RobotMemory* robot_memory, fawkes::Bl
   logger_ = logger;
 
   //register computable
-  Query query = fromjson("{interface:{$exists:true}, id:{$exists:true}}");
+  Query query = fromjson("{interface:{$exists:true}}");
   computable = robot_memory_->register_computable(query, "robmem.blackboard", &BlackboardComputable::compute_interfaces, this);
 }
 
@@ -50,7 +50,9 @@ std::list<mongo::BSONObj> BlackboardComputable::compute_interfaces(mongo::BSONOb
 {
   std::list<mongo::BSONObj> res;
   std::string type = query.getField("interface").String();
-  std::string id = query.getField("id").String();
+  std::string id = "*";
+  if(query.hasField("id"))
+    id = query.getField("id").String();
   //get all matching interfaces
   for(Interface* interface : blackboard_->open_multiple_for_reading(type.c_str(), id.c_str()))
   {
