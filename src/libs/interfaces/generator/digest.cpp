@@ -44,8 +44,9 @@ InterfaceDigest::InterfaceDigest(std::string config_filename)
 {
   digest = NULL;
 
-  EVP_MD_CTX ctx;
-  if ( ! EVP_DigestInit(&ctx, EVP_md5())) {
+  EVP_MD_CTX *ctx = EVP_MD_CTX_create();
+  if ( ! EVP_DigestInit(ctx, EVP_md5())) {
+    EVP_MD_CTX_destroy(ctx);
     throw Exception("Could not initialize digest context");
   }
 
@@ -54,26 +55,30 @@ InterfaceDigest::InterfaceDigest(std::string config_filename)
   while ( ! feof(f) && ! ferror(f) ) {
     size_t rb;
     if ((rb = fread(buf, 1, FILE_STEP, f)) > 0) {
-      if ( ! EVP_DigestUpdate(&ctx, buf, rb) ) {
+      if ( ! EVP_DigestUpdate(ctx, buf, rb) ) {
 	fclose(f);
+	EVP_MD_CTX_destroy(ctx);
 	throw Exception("Failed to update digest");
       }
     }
   }
   if ( ferror(f) ) {
     fclose(f);
+    EVP_MD_CTX_destroy(ctx);
     throw Exception("Failure while reading the file");
   }
   fclose(f);
 
-  digest_size=EVP_MD_CTX_size(&ctx);
+  digest_size=EVP_MD_CTX_size(ctx);
   digest = new unsigned char[digest_size];
 
-  if ( ! EVP_DigestFinal(&ctx, digest, NULL) ) {
+  if ( ! EVP_DigestFinal(ctx, digest, NULL) ) {
     delete digest;
     digest = NULL;
+    EVP_MD_CTX_destroy(ctx);
     throw Exception("Could not finalize digest");
   }
+  EVP_MD_CTX_destroy(ctx);
 }
 
 
