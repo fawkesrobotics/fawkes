@@ -50,8 +50,11 @@ void RobotMemorySetup::setup_mongods()
   std::string local_db_name = config->get_string("plugins/robot-memory/database");
   std::string local_repl_name = config->get_string("plugins/robot-memory/setup/local/replica-set-name");
   std::string local_port_str = std::to_string(local_port);
+  std::string local_db_path = StringConversions::resolve_path(config->get_string("plugins/robot-memory/setup/local/db-path").c_str());
+  prepare_mongo_db_path(local_db_path);
   const char *local_argv[] = {"mongod", "--port", local_port_str.c_str(),
-      "--replSet", local_repl_name.c_str(), NULL}; //local replica set just to enable the oplog
+			      "--replSet", local_repl_name.c_str(),
+      "--dbpath", local_db_path.c_str(), NULL}; //local replica set just to enable the oplog
   start_mongo_process("mongod-local", local_port, local_argv);
   std::string local_config = "{_id: '" + local_repl_name + "', members:[{_id:1,host:'localhost:" + local_port_str + "'}]}";
   run_mongo_command(local_port, std::string("{replSetInitiate:" + local_config + "}"), "already initialized");
