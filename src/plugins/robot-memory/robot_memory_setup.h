@@ -28,6 +28,8 @@
 #include <utils/misc/string_commands.h>
 #include <mongo/client/dbclient.h>
 
+typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
+
 /** @class RobotMemorySetup  robot_memory_setup.h
  *
  * @author Frederik Zwilling

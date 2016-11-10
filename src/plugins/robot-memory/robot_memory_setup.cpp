@@ -60,7 +60,6 @@ void RobotMemorySetup::setup_mongods()
   run_mongo_command(local_port, std::string("{replSetInitiate:" + local_config + "}"), "already initialized");
   //wait for initialization
   usleep(1000000);
-  create_database(local_port, local_db_name);
 
   //only start other processes when we want to run the robot memory distributed
   if(!config->get_bool("plugins/robot-memory/setup/distributed"))
@@ -74,7 +73,6 @@ void RobotMemorySetup::setup_mongods()
   const char *config_argv[] = {"mongod", "--configsvr", "--port",
       config_port_str.c_str(), "--dbpath", db_path.c_str(), NULL};
   start_mongo_process("mongod-config", config_port, config_argv);
-  create_database(local_port, local_db_name);
 
   //start own part of replica set
   unsigned int distributed_port = config->get_uint("plugins/robot-memory/setup/replicated/port");
@@ -93,7 +91,6 @@ void RobotMemorySetup::setup_mongods()
   run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"), "already initialized");
   //wait for replica set initialization and election
   usleep(3000000);
-  create_database(distributed_port, distributed_replset);
 
   //start mongos for accessing
   unsigned int mongos_port = config->get_uint("plugins/robot-memory/setup/mongos/port");
@@ -113,6 +110,8 @@ void RobotMemorySetup::setup_mongods()
       "/localhost:" + distributed_port_str + "'}"), "host already used");
   }
   //define which db is in which shard
+  create_database(mongos_port, local_db_name);
+  create_database(mongos_port, distributed_replset);
   run_mongo_command(mongos_port, std::string("{movePrimary: '" + distributed_replset + "', to: '" + distributed_replset + "'}"), "it is already the primary");
   run_mongo_command(mongos_port, std::string("{movePrimary: '" + local_db_name + "', to: '" + local_repl_name + "'}"), "it is already the primary");
 }
@@ -248,6 +247,4 @@ void RobotMemorySetup::create_database(unsigned int port, std::string name)
   mongo::BSONObj first_doc = mongo::fromjson("{initialized:1}");
   con.insert(name + ".config", first_doc);
   con.reset();
-
-
 }
