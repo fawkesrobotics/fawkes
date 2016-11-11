@@ -64,8 +64,13 @@
     (progn$ (?slot ?keys)
       (if (deftemplate-slot-existp ?relation (sym-cat ?slot)) then
         (if (deftemplate-slot-multip ?relation (sym-cat ?slot))
-          then
-          (bind ?values (str-cat ?values "(" ?slot " " (implode$ (bson-get-array ?doc ?slot)) ")"))
+	  then
+	  (bind ?arr-str (bson-get-array ?doc ?slot))
+	  (bind ?arr (create$))
+	  (progn$ (?i ?arr-str)
+	    (bind ?arr (create$ ?arr (sym-cat ?i)))
+	  )
+          (bind ?values (str-cat ?values "(" ?slot " " (implode$ ?arr) ")"))
           else
           (bind ?values (str-cat ?values "(" ?slot " " (bson-get ?doc ?slot) ")"))
         )
@@ -76,7 +81,7 @@
       (bind ?values (str-cat ?values "(" ?relation " " (implode$ (bson-get-array ?doc "values")) ")"))
     )
   )
-
+  ;(printout t "Asserting:" (str-cat "(" ?relation " " ?values ")") crlf)
   (assert-string (str-cat "(" ?relation " " ?values ")"))
 )
 
