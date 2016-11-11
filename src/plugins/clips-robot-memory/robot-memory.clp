@@ -19,7 +19,7 @@
 (deffunction rm-structured-fact-to-bson (?fact)
   (bind ?doc (bson-create))
   (bind ?templ (fact-relation ?fact))
-  (bson-append ?doc "relation" (str-cat ?templ))
+  (bson-append ?doc "relation" (sym-cat ?templ))
   ;append kv-pair for each field
   (progn$ (?slot (fact-slot-names ?fact))
     (if (deftemplate-slot-multip ?templ ?slot)
@@ -40,7 +40,7 @@
 (deffunction rm-ordered-fact-to-bson (?fact)
   (bind ?doc (bson-create))
   (bind ?templ (fact-relation ?fact))
-  (bson-append ?doc "relation" (str-cat ?templ))
+  (bson-append ?doc "relation" (sym-cat ?templ))
   ;append values as array
   (bson-append-array ?doc "values" (fact-slot-value ?fact implied))
   (return ?doc)

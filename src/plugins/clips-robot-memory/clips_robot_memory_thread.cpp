@@ -169,11 +169,12 @@ ClipsRobotMemoryThread::clips_bson_append(void *bson, std::string field_name, CL
       break;
 
     case CLIPS::TYPE_SYMBOL:
-    case CLIPS::TYPE_STRING:
     case CLIPS::TYPE_INSTANCE_NAME:
       b->append(field_name, value.as_string());
       break;
-
+    case CLIPS::TYPE_STRING:
+      b->append(field_name, std::string("\"") + value.as_string() + std::string("\""));
+      break;
     case CLIPS::TYPE_EXTERNAL_ADDRESS:
       {
   mongo::BSONObjBuilder *subb = static_cast<mongo::BSONObjBuilder *>(value.as_address());
