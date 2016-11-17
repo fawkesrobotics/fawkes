@@ -52,6 +52,8 @@ JacoArmKindrv::JacoArmKindrv(const char *name)
   // trim tailing whitespaces
   __name.erase(__name.find_last_not_of(" ")+1);
 
+  std::string found_names = "'" + __name + "'";
+
   if( name!=NULL ) {
     // Check all connected arms until the right one is found.
     std::vector<KinDrv::JacoArm*> arms;
@@ -61,6 +63,7 @@ JacoArmKindrv::JacoArmKindrv(const char *name)
         __arm = new KinDrv::JacoArm();
         __name = __arm->get_client_config(true).name;
         __name.erase(__name.find_last_not_of(" ")+1);
+        found_names += ", '" + __name + "'";
       } catch(KinDrvException& e) {
         // don't throw yet, we need to delete the occupied arms first.
         __arm = NULL;
@@ -75,7 +78,9 @@ JacoArmKindrv::JacoArmKindrv(const char *name)
   }
 
   if( __arm==NULL )
-    throw fawkes::Exception("Could not connect to Jaco arm with libkindrv");
+  {
+    throw fawkes::Exception("Could not connect to Jaco arm '%s' with libkindrv. But I found the following arms: %s", name, found_names.c_str());
+  }
 
   __initialized = false;
   __final = true;
