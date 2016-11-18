@@ -18,6 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+syntax = "proto2";
+
 package gazsim_msgs;
 
 message SimTime {
