@@ -31,6 +31,7 @@ EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config)
 {
   logger_ = logger;
   config_ = config;
+  distributed_ = config_->get_bool("plugins/robot-memory/setup/distributed");
 
   // create connections to running mongod instances because only there
   con_local_ = new mongo::DBClientConnection();
@@ -41,14 +42,16 @@ EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config)
     std::string err_msg = "Could not connect to mongod process: "+ errmsg;
     throw PluginLoadException("robot-memory", err_msg.c_str());
   }
-  repl_set = config_->get_string("plugins/robot-memory/setup/replicated/replica-set-name");
-  con_replica_ = new mongo::DBClientConnection();
-  if(!con_replica_->connect("localhost:" + std::to_string(config_->get_uint("plugins/robot-memory/setup/replicated/port")), errmsg))
+  if(distributed_)
   {
-    std::string err_msg = "Could not connect to replica set: "+ errmsg;
-    throw PluginLoadException("robot-memory", err_msg.c_str());
+    repl_set = config_->get_string("plugins/robot-memory/setup/replicated/replica-set-name");
+    con_replica_ = new mongo::DBClientConnection();
+    if(!con_replica_->connect("localhost:" + std::to_string(config_->get_uint("plugins/robot-memory/setup/replicated/port")), errmsg))
+    {
+      std::string err_msg = "Could not connect to replica set: "+ errmsg;
+      throw PluginLoadException("robot-memory", err_msg.c_str());
+    }
   }
-
   logger_->log_debug(name.c_str(), "Initialized");
 }
 
@@ -74,7 +77,18 @@ void EventTriggerManager::check_events()
     if(trigger->oplog_cursor->isDead())
     {
       logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
-      trigger->oplog_cursor = create_oplog_cursor(con_replica_, "local.oplog.rs", trigger->oplog_query);
+      //check if collection is local or replicated
+      mongo::DBClientConnection* con;
+      if(trigger->oplog_collection.find(repl_set) == 0)
+      {
+        con = con_replica_;
+      }
+      else
+      {
+        con = con_local_;
+      }
+
+      trigger->oplog_cursor = create_oplog_cursor(con, "local.oplog.rs", trigger->oplog_query);
     }
   }
 }
