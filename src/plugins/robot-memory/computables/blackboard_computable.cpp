@@ -23,7 +23,7 @@
 
 /** @class BlackboardComputable  blackboard_computable.h
  * Computable providing access to blackboard interfaces.
- * The Query has to match
+ * The Query has to match {interface:{$exists:true}} on the blackboard collection
  * @author Frederik Zwilling
  */
 
@@ -46,7 +46,7 @@ BlackboardComputable::~BlackboardComputable()
   robot_memory_->remove_computable(computable);
 }
 
-std::list<mongo::BSONObj> BlackboardComputable::compute_interfaces(mongo::BSONObj query)
+std::list<mongo::BSONObj> BlackboardComputable::compute_interfaces(mongo::BSONObj query, std::string collection)
 {
   std::list<mongo::BSONObj> res;
   std::string type = query.getField("interface").String();

@@ -89,13 +89,13 @@ class TestComputable
   };
    ~TestComputable(){};
    //Different functions for computables:
-   std::list<mongo::BSONObj> compute(mongo::BSONObj query)
+   std::list<mongo::BSONObj> compute(mongo::BSONObj query, std::string collection)
    {
      std::list<mongo::BSONObj> res;
      res.push_back(mongo::fromjson("{computed:true, result:'this is computed'}"));
      return res;
    }
-   std::list<mongo::BSONObj> compute_sum(mongo::BSONObj query)
+   std::list<mongo::BSONObj> compute_sum(mongo::BSONObj query, std::string collection)
    {
      std::list<mongo::BSONObj> res;
      int x = query.getField("x").Int();
@@ -107,7 +107,7 @@ class TestComputable
      res.push_back(b.obj());
      return res;
    }
-   std::list<mongo::BSONObj> compute_multiple(mongo::BSONObj query)
+   std::list<mongo::BSONObj> compute_multiple(mongo::BSONObj query, std::string collection)
    {
      std::list<mongo::BSONObj> res;
      res.push_back(mongo::fromjson("{compute:'multiple', count:1}"));

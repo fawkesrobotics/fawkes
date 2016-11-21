@@ -28,7 +28,7 @@
 class Computable
 {
   public:
-    Computable(mongo::Query query_to_compute, std::string collection, const boost::function<std::list<mongo::BSONObj> (mongo::BSONObj)> &compute_function);
+    Computable(mongo::Query query_to_compute, std::string collection, const boost::function<std::list<mongo::BSONObj> (mongo::BSONObj, std::string)> &compute_function);
     virtual ~Computable();
 
     std::list<mongo::BSONObj> compute(mongo::BSONObj query);
@@ -36,7 +36,7 @@ class Computable
     std::string get_collection();
 
   private:
-    boost::function<std::list<mongo::BSONObj> (mongo::BSONObj)> compute_function;
+    boost::function<std::list<mongo::BSONObj> (mongo::BSONObj, std::string)> compute_function;
     mongo::Query query_to_compute;
     std::string collection;
 };

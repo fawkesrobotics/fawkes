@@ -28,7 +28,7 @@ using namespace mongo;
  * @author Frederik Zwilling
  */
 
-Computable::Computable(Query query_to_compute, std::string collection, const boost::function<std::list<BSONObj> (BSONObj)> &compute_function)
+Computable::Computable(Query query_to_compute, std::string collection, const boost::function<std::list<BSONObj> (BSONObj, std::string)> &compute_function)
 {
   this->compute_function = compute_function;
   this->query_to_compute = query_to_compute;
@@ -48,7 +48,7 @@ Computable::~Computable()
 std::list<BSONObj> Computable::compute(BSONObj query)
 {
   // use provided function to compute demanded documents
-  std::list<BSONObj> docs = compute_function(query);
+  std::list<BSONObj> docs = compute_function(query, collection);
   //add metainformation for each document
   for(BSONObj &obj : docs)
   {
