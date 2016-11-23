@@ -86,7 +86,7 @@ class RobotMemory
     template<typename T>
     EventTrigger* register_trigger(std::string query_str, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj)
     {
-      return register_trigger(mongo::fromjson(query_str), collection, callback);
+      return register_trigger(mongo::fromjson(query_str), collection, callback, _obj);
     }
     void remove_trigger(EventTrigger* trigger);
 
