@@ -30,11 +30,14 @@
 #include <boost/bind.hpp>
 #include <utility>
 
+//forward declaration
+class RobotMemory;
+
 class ComputablesManager
 {
   public:
     ComputablesManager(fawkes::Logger* logger, fawkes::Configuration* config,
-      mongo::DBClientBase* mongodb_client, fawkes::Clock* clock);
+      RobotMemory* robot_memory, fawkes::Clock* clock);
     virtual ~ComputablesManager();
 
     bool check_and_compute(mongo::Query query, std::string collection);
@@ -62,7 +65,7 @@ class ComputablesManager
     std::string name = "RobotMemory ComputablesManager";
     fawkes::Logger* logger_;
     fawkes::Configuration* config_;
-    mongo::DBClientBase* mongodb_client_;
+    RobotMemory* robot_memory_;
     fawkes::Clock* clock_;
 
     std::list<Computable*> computables;

@@ -21,6 +21,7 @@
 
 #include "computables_manager.h"
 #include <core/exception.h>
+#include <plugins/robot-memory/robot_memory.h>
 
 /** @class ComputablesManager  computables_manager.h
  *  This class manages registering computables and can check
@@ -32,11 +33,11 @@ using namespace fawkes;
 using namespace mongo;
 
 ComputablesManager::ComputablesManager(fawkes::Logger* logger, fawkes::Configuration* config,
-  mongo::DBClientBase* mongodb_client, fawkes::Clock* clock)
+  RobotMemory* robot_memory, fawkes::Clock* clock)
 {
   logger_ = logger;
   config_ = config;
-  mongodb_client_ = mongodb_client;
+  robot_memory_ = robot_memory;
   clock_ = clock;
 
   matching_test_collection_ = "robmem.computables_matching";
@@ -77,15 +78,16 @@ void ComputablesManager::remove_computable(Computable* computable)
  */
 bool ComputablesManager::check_and_compute(mongo::Query query, std::string collection)
 {
-  //logger_->log_info(name.c_str(), "checking query: %s", query.toString().c_str());
+  if(collection == matching_test_collection_)
+    return false; //not necessary for matching test itself
   bool added_computed_docs = false;
   //check if the query is matched by the computable identifyer
   //to do that we just insert the query as if it would be a document and query for it with the computable identifiers
-  mongodb_client_->dropCollection(matching_test_collection_);
-  mongodb_client_->insert(matching_test_collection_, query.obj);
+  robot_memory_->remove(fromjson("{}"), matching_test_collection_);
+  robot_memory_->insert(query.obj, matching_test_collection_);
   for(std::list<Computable*>::iterator it = computables.begin(); it != computables.end(); it++)
   {
-    if(collection == (*it)->get_collection() &&  mongodb_client_->query(matching_test_collection_, (*it)->get_query())->more())
+    if(collection == (*it)->get_collection() &&  robot_memory_->query((*it)->get_query(), matching_test_collection_)->more())
     {
       std::list<BSONObj> computed_docs_list = (*it)->compute(query.obj);
       if(computed_docs_list.size() > 0)
@@ -93,7 +95,7 @@ bool ComputablesManager::check_and_compute(mongo::Query query, std::string colle
         //move list into vector
         std::vector<BSONObj> computed_docs_vector{ std::make_move_iterator(std::begin(computed_docs_list)),
           std::make_move_iterator(std::end(computed_docs_list))};
-        mongodb_client_->insert((*it)->get_collection(), computed_docs_vector);
+        robot_memory_->insert(computed_docs_vector, (*it)->get_collection());
         added_computed_docs = true;
       }
     }
@@ -112,7 +114,7 @@ void ComputablesManager::cleanup_computed_docs()
 {
   for(std::string collection : collections_to_cleanup)
   {
-    mongodb_client_->remove(collection, fromjson("{'_robmem_info.computed':true}"));
+    robot_memory_->remove(fromjson("{'_robmem_info.computed':true}"), collection);
   }
   collections_to_cleanup.clear();
 }

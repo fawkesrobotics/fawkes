@@ -96,7 +96,7 @@ void RobotMemory::init()
 
   //Setup event trigger and computables manager
   trigger_manager_ = new EventTriggerManager(logger_, config_);
-  computables_manager_ = new ComputablesManager(logger_, config_, mongodb_client_, clock_);
+  computables_manager_ = new ComputablesManager(logger_, config_, this, clock_);
 
   log_deb("Initialized RobotMemory");
 }
