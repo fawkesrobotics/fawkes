@@ -118,11 +118,11 @@ QResCursor RobotMemory::query(Query query, std::string collection)
   check_collection_name(collection);
   log_deb(std::string("Executing Query "+ query.toString() +" on collection "+collection));
 
-  //lock (mongo_client not thread safe)
-  MutexLocker lock(mutex_);
-
   //check if computation on demand is necessary and execute Computables
   computables_manager_->check_and_compute(query, collection);
+
+  //lock (mongo_client not thread safe)
+  MutexLocker lock(mutex_);
 
   //set read preference of query to nearest to read from the local replica set member first
   query.readPref(ReadPreference_Nearest, BSONArray());

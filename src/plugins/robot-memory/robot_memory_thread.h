@@ -30,11 +30,13 @@
 #include <plugins/mongodb/aspect/mongodb.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/tf.h>
 #include <mongo/client/dbclient.h>
 #include <aspect/aspect_provider.h>
 #include "robot_memory.h"
 #include "aspect/robot_memory_inifin.h"
 #include "computables/blackboard_computable.h"
+#include "computables/transform_computable.h"
 
 #include <string>
 
@@ -51,6 +53,7 @@ class RobotMemoryThread
   public fawkes::MongoDBAspect,
 	public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect,
+  public fawkes::TransformAspect,
   public fawkes::AspectProviderAspect
 {
  public:
@@ -68,6 +71,7 @@ class RobotMemoryThread
    RobotMemory* robot_memory;
    fawkes::RobotMemoryIniFin robot_memory_inifin_;
    BlackboardComputable* blackboard_computable;
+   TransformComputable* transform_computable;
 };
 
 #endif

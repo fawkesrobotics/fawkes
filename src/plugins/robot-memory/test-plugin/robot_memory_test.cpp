@@ -23,6 +23,7 @@
 #include <interfaces/Position3DInterface.h>
 #include <list>
 #include <algorithm>
+#include <math.h>
 
 using namespace fawkes;
 using namespace mongo;
@@ -287,16 +288,16 @@ TEST_F(RobotMemoryTest, ComputableMultiple)
 
 TEST_F(RobotMemoryTest, BlackboardComputable)
 {
-  Position3DInterface* if3d = blackboard->open_for_writing<Position3DInterface>("test");
+  Position3DInterface* if3d = blackboard->open_for_writing<Position3DInterface>("test1");
   if3d->set_frame("test_frame");
   if3d->set_translation(0, 1.1);
   if3d->set_translation(1, 2.2);
   if3d->set_translation(2, 3.3);
   if3d->write();
-  QResCursor qres = robot_memory->query(fromjson("{interface:'Position3DInterface',id:'test'}"), "robmem.blackboard");
+  QResCursor qres = robot_memory->query(fromjson("{interface:'Position3DInterface',id:'test1'}"), "robmem.blackboard");
   ASSERT_TRUE(qres->more());
   ASSERT_TRUE(contains_pairs(qres->next(), fromjson(
-      "{interface:'Position3DInterface',id:'test',frame:'test_frame',translation:[1.1, 2.2, 3.3]}")));
+      "{interface:'Position3DInterface',id:'test1',frame:'test_frame',translation:[1.1, 2.2, 3.3]}")));
   blackboard->close(if3d);
 }
 
@@ -316,4 +317,16 @@ TEST_F(RobotMemoryTest, BlackboardComputableMultiple)
   ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{interface:'Position3DInterface'}")));
   blackboard->close(if3d);
   blackboard->close(if3d_2);
+}
+
+
+TEST_F(RobotMemoryTest, TransformComputable)
+{
+  robot_memory->insert("{name:'test pos', frame:'cam_tag', translation:[0.0, 0.0, 0.0], rotation:[0.0, 0.0, 0.0, 1.0]}", "robmem.test");
+  QResCursor qres = robot_memory->query(fromjson("{name:'test pos', frame:'base_link', allow_tf:true}"), "robmem.test");
+  ASSERT_TRUE(qres->more());
+  BSONObj res = qres->next();
+  ASSERT_EQ("base_link", res.getField("frame").String());
+  ASSERT_TRUE(fabs(0.1 - res.getField("translation").Array()[0].Double()) < 0.001);
+  ASSERT_TRUE(fabs(-0.5 - res.getField("rotation").Array()[0].Double()) < 0.001);
 }
