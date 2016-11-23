@@ -380,7 +380,7 @@ ClingoAccess::assign_external(const Clingo::Symbol atom, const Clingo::TruthValu
 					case Clingo::TruthValue::False : ret = "False"; break;
 				} //switch ( value )
 				return ret;
-			}, atom.string());
+			}(), atom.to_string().c_str());
 	} //if ( Debug )
 	Control.assign_external(atom, value);
 	return true;
@@ -402,7 +402,7 @@ ClingoAccess::release_external(const Clingo::Symbol atom)
 
 	if ( Debug )
 	{
-		Log->log_info(LogComponent.c_str(), "Releasing %s.", atom.string());
+		Log->log_info(LogComponent.c_str(), "Releasing %s.", atom.to_string().c_str());
 	} //if ( Debug )
 	Control.release_external(atom);
 	return true;
