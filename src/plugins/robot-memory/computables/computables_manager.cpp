@@ -22,6 +22,7 @@
 #include "computables_manager.h"
 #include <core/exception.h>
 #include <plugins/robot-memory/robot_memory.h>
+#include <chrono>
 
 /** @class ComputablesManager  computables_manager.h
  *  This class manages registering computables and can check
@@ -78,6 +79,16 @@ void ComputablesManager::remove_computable(Computable* computable)
  */
 bool ComputablesManager::check_and_compute(mongo::Query query, std::string collection)
 {
+  //check if computation result of the query is already cached
+  for(std::map<std::tuple<std::string, std::string>, long long>::iterator it = cached_querries_.begin();
+      it != cached_querries_.end(); it++)
+  {
+    if(collection == std::get<0>(it->first) && query.toString() == std::get<1>(it->first))
+    {
+      logger_->log_info(name.c_str(), "Already computed");
+      return false;
+    }
+  }
   if(collection == matching_test_collection_)
     return false; //not necessary for matching test itself
   bool added_computed_docs = false;
@@ -95,14 +106,14 @@ bool ComputablesManager::check_and_compute(mongo::Query query, std::string colle
         //move list into vector
         std::vector<BSONObj> computed_docs_vector{ std::make_move_iterator(std::begin(computed_docs_list)),
           std::make_move_iterator(std::end(computed_docs_list))};
+        //remember how long a query is cached:
+        long long cached_until = computed_docs_vector[0].getField("_robmem_info").Obj().getField("cached_until").Long();
+        cached_querries_[std::make_tuple(collection, query.toString())] = cached_until;
+        //TODO: fix problem: equivalent queries in different order jield unequal strings
         robot_memory_->insert(computed_docs_vector, (*it)->get_collection());
         added_computed_docs = true;
       }
     }
-  }
-  if(added_computed_docs)
-  {
-    collections_to_cleanup.push_back(collection);
   }
   return added_computed_docs;
 }
@@ -112,9 +123,18 @@ bool ComputablesManager::check_and_compute(mongo::Query query, std::string colle
  */
 void ComputablesManager::cleanup_computed_docs()
 {
-  for(std::string collection : collections_to_cleanup)
-  {
-    robot_memory_->remove(fromjson("{'_robmem_info.computed':true}"), collection);
-  }
-  collections_to_cleanup.clear();
+  long long current_time_ms =
+          std::chrono::system_clock::now().time_since_epoch() /
+          std::chrono::milliseconds(1);
+  for(std::map<std::tuple<std::string, std::string>, long long>::iterator it = cached_querries_.begin();
+        it != cached_querries_.end(); it++)
+    {
+      if(current_time_ms > it->second)
+      {
+        logger_->log_info(name.c_str(), "Removing cache %s", std::get<0>(it->first).c_str());
+        robot_memory_->remove(BSON("_robmem_info.computed" << true
+            << "_robmem_info.cached_until" << BSON("$lt" << current_time_ms)), std::get<0>(it->first));
+        cached_querries_.erase(it->first);
+      }
+    }
 }

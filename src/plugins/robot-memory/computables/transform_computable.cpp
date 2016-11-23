@@ -55,8 +55,6 @@ TransformComputable::~TransformComputable()
 
 std::list<mongo::BSONObj> TransformComputable::compute_transform(mongo::BSONObj query, std::string collection)
 {
-  logger_->log_info(name_, "Tfcomputable: %s", query.toString().c_str());
-
   //get positions in other frames
   BSONObjBuilder query_other_frames;
   query_other_frames.appendElements(query.removeField("frame").removeField("allow_tf"));
@@ -69,7 +67,6 @@ std::list<mongo::BSONObj> TransformComputable::compute_transform(mongo::BSONObj 
   while(cur->more())
   {
     BSONObj pos = cur->next();
-    logger_->log_info(name_, "Transforming: %s", pos.toString().c_str());
     if(pos.hasField("frame") && pos.hasField("translation") && pos.hasField("rotation"))
     {
       std::string src_frame = pos.getField("frame").String();
@@ -102,10 +99,10 @@ std::list<mongo::BSONObj> TransformComputable::compute_transform(mongo::BSONObj 
 
         res.push_back(res_pos.obj());
       }
-      else
-      {
-        logger_->log_info(name_, "Cant transform %s to %s", src_frame.c_str(), target_frame.c_str());
-      }
+//      else
+//      {
+//        logger_->log_info(name_, "Cant transform %s to %s", src_frame.c_str(), target_frame.c_str());
+//      }
     }
   }
   return res;

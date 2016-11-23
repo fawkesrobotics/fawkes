@@ -28,7 +28,7 @@
 class Computable
 {
   public:
-    Computable(mongo::Query query_to_compute, std::string collection, const boost::function<std::list<mongo::BSONObj> (mongo::BSONObj, std::string)> &compute_function);
+    Computable(mongo::Query query_to_compute, std::string collection, const boost::function<std::list<mongo::BSONObj> (mongo::BSONObj, std::string)> &compute_function, double caching_time = 0.0);
     virtual ~Computable();
 
     std::list<mongo::BSONObj> compute(mongo::BSONObj query);
@@ -39,6 +39,7 @@ class Computable
     boost::function<std::list<mongo::BSONObj> (mongo::BSONObj, std::string)> compute_function;
     mongo::Query query_to_compute;
     std::string collection;
+    int caching_time; //in milliseconds
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLE_H_ */

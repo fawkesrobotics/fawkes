@@ -20,19 +20,23 @@
  */
 
 #include "computable.h"
+#include <chrono>
 
 using namespace mongo;
 
 /** @class Computable  computable.h
  * Class holding information for a single computable
+ * this class also enhances computed documents by additional information, such as the caching time
  * @author Frederik Zwilling
  */
 
-Computable::Computable(Query query_to_compute, std::string collection, const boost::function<std::list<BSONObj> (BSONObj, std::string)> &compute_function)
+Computable::Computable(Query query_to_compute, std::string collection, const boost::function<std::list<BSONObj> (BSONObj, std::string)> &compute_function, double caching_time)
 {
   this->compute_function = compute_function;
   this->query_to_compute = query_to_compute;
   this->collection = collection;
+  //convert caching time to milliseconds
+  this->caching_time = (int) (caching_time * 1000.0);
 }
 
 Computable::~Computable()
@@ -49,11 +53,16 @@ std::list<BSONObj> Computable::compute(BSONObj query)
 {
   // use provided function to compute demanded documents
   std::list<BSONObj> docs = compute_function(query, collection);
+  long long milliseconds_since_epoch =
+      std::chrono::system_clock::now().time_since_epoch() /
+      std::chrono::milliseconds(1);
+  long long cached_until = milliseconds_since_epoch + caching_time;
   //add metainformation for each document
   for(BSONObj &obj : docs)
   {
     BSONObjBuilder info_b;
     info_b.append("computed", true);
+    info_b.append("cached_until", cached_until);
     BSONObjBuilder obj_b;
     obj_b.appendElements(obj);
     obj_b.append("_robmem_info", info_b.obj());
