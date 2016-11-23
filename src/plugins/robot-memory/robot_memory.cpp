@@ -150,7 +150,7 @@ int RobotMemory::insert(BSONObj obj, std::string collection)
 {
   check_collection_name(collection);
 
-  log_deb(std::string("Executing Query "+ obj.toString() + " on collection " + collection));
+  log_deb(std::string("Inserting "+ obj.toString() + " into collection " + collection));
 
   //lock (mongo_client not thread safe)
   MutexLocker lock(mutex_);
@@ -160,6 +160,41 @@ int RobotMemory::insert(BSONObj obj, std::string collection)
     mongodb_client_->insert(collection, obj);
   } catch (DBException &e) {
     std::string error = "Error for insert " + obj.toString()
+        + "\n Exception: " + e.toString();
+    log_deb(error, "error");
+    return 0;
+  }
+  //return success
+  return 1;
+}
+
+/**
+ * Inserts all document of a vector into the robot memory
+ * @param v_obj The vector of BSONObj document
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @return 1: Success 0: Error
+ */
+int RobotMemory::insert(std::vector<BSONObj> v_obj, std::string collection)
+{
+  check_collection_name(collection);
+
+  std::string insert_string = "[";
+  for(BSONObj obj : v_obj)
+  {
+    insert_string += obj.toString() + ",\n";
+  }
+  insert_string += "]";
+
+  log_deb(std::string("Inserting vector of documents " + insert_string+  " into collection " + collection));
+
+  //lock (mongo_client not thread safe)
+  MutexLocker lock(mutex_);
+
+  //actually execute insert
+  try{
+    mongodb_client_->insert(collection, v_obj);
+  } catch (DBException &e) {
+    std::string error = "Error for insert " + insert_string
         + "\n Exception: " + e.toString();
     log_deb(error, "error");
     return 0;

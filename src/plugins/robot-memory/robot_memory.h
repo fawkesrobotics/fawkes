@@ -26,6 +26,7 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <memory>
+#include <vector>
 
 #include <mongo/client/dbclient.h>
 #include "interfaces/RobotMemoryInterface.h"
@@ -53,6 +54,7 @@ class RobotMemory
     //robot memory functions
     QResCursor query(mongo::Query query, std::string collection = "");
     int insert(mongo::BSONObj obj, std::string collection = "");
+    int insert(std::vector<mongo::BSONObj> v_obj, std::string collection = "");
     int insert(std::string obj_str, std::string collection = "");
     int update(mongo::Query query, mongo::BSONObj update, std::string collection = "", bool upsert = false);
     int update(mongo::Query query, std::string update_str, std::string collection = "", bool upsert = false);
