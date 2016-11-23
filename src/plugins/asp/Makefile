@@ -31,7 +31,7 @@ CFLAGS_CLINGO = -DWITH_THREADS=1 \
 	-I $(HOME)/clingo/libgringo \
 	-I $(HOME)/clingo/liblp \
 	-I $(HOME)/clingo/libprogram_opts
-LDFLAGS_CLINGO = -L$(HOME)/clingo/build/debug/ -Wl,-rpath=$(HOME)/clingo/build/debug/ -lclingo
+LDFLAGS_CLINGO = -L$(HOME)/clingo-build/bin/ -Wl,-rpath=$(HOME)/clingo-build/bin/ -lclingo
 
 # Extra files for system-wide install, i.e., "make install"
 #FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
