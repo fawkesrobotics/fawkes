@@ -83,7 +83,7 @@ void RobotMemory::init()
   try {
     debug_ = config_->get_bool("/plugins/robot-memory/more-debug-output");
   } catch (Exception &e) {}
-  database_name_ = "mobmem";
+  database_name_ = "robmem";
   try {
     database_name_ = config_->get_string("/plugins/robot-memory/database");
   } catch (Exception &e) {}

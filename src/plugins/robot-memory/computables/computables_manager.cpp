@@ -85,20 +85,19 @@ bool ComputablesManager::check_and_compute(mongo::Query query, std::string colle
   {
     if(collection == std::get<0>(it->first) && query.toString() == std::get<1>(it->first))
     {
-      logger_->log_info(name.c_str(), "Already computed");
       return false;
     }
   }
-  if(collection == matching_test_collection_)
+  if(collection.find(matching_test_collection_) != std::string::npos)
     return false; //not necessary for matching test itself
   bool added_computed_docs = false;
   //check if the query is matched by the computable identifyer
   //to do that we just insert the query as if it would be a document and query for it with the computable identifiers
-  robot_memory_->remove(fromjson("{}"), matching_test_collection_);
-  robot_memory_->insert(query.obj, matching_test_collection_);
+  std::string current_test_collection = matching_test_collection_ + std::to_string(rand());
+  robot_memory_->insert(query.obj, current_test_collection);
   for(std::list<Computable*>::iterator it = computables.begin(); it != computables.end(); it++)
   {
-    if(collection == (*it)->get_collection() &&  robot_memory_->query((*it)->get_query(), matching_test_collection_)->more())
+    if(collection == (*it)->get_collection() &&  robot_memory_->query((*it)->get_query(), current_test_collection)->more())
     {
       std::list<BSONObj> computed_docs_list = (*it)->compute(query.obj);
       if(computed_docs_list.size() > 0)
@@ -115,6 +114,7 @@ bool ComputablesManager::check_and_compute(mongo::Query query, std::string colle
       }
     }
   }
+  robot_memory_->drop_collection(current_test_collection);
   return added_computed_docs;
 }
 
@@ -131,7 +131,6 @@ void ComputablesManager::cleanup_computed_docs()
     {
       if(current_time_ms > it->second)
       {
-        logger_->log_info(name.c_str(), "Removing cache %s", std::get<0>(it->first).c_str());
         robot_memory_->remove(BSON("_robmem_info.computed" << true
             << "_robmem_info.cached_until" << BSON("$lt" << current_time_ms)), std::get<0>(it->first));
         cached_querries_.erase(it->first);
