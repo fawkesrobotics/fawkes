@@ -82,8 +82,9 @@ std::list<mongo::BSONObj> TransformComputable::compute_transform(mongo::BSONObj 
         fawkes::tf::Stamped<fawkes::tf::Pose> res_stamped_pose;
         tf_->transform_pose(target_frame.c_str(), src_stamped_pose, res_stamped_pose);
 
-        res_pos.appendElements(query.removeField("frame").removeField("translation").removeField("rotation"));
+        res_pos.appendElements(pos.removeField("frame").removeField("translation").removeField("rotation").removeField("_id"));
         res_pos.append("frame", target_frame);
+        res_pos.append("allow_tf", true);
         BSONArrayBuilder arrb_trans;
         arrb_trans.append(res_stamped_pose.getOrigin().x());
         arrb_trans.append(res_stamped_pose.getOrigin().y());
@@ -95,8 +96,6 @@ std::list<mongo::BSONObj> TransformComputable::compute_transform(mongo::BSONObj 
         arrb_rot.append(res_stamped_pose.getRotation().z());
         arrb_rot.append(res_stamped_pose.getRotation().w());
         res_pos.append("rotation", arrb_rot.arr());
-        //logger_->log_info(name_, "Tf res: %s", res_pos.obj().toString().c_str());
-
         res.push_back(res_pos.obj());
       }
 //      else
