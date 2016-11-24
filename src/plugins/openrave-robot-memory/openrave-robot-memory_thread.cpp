@@ -22,6 +22,7 @@
 #include "openrave-robot-memory_thread.h"
 
 using namespace fawkes;
+using namespace mongo;
 
 /** @class OpenraveRobotMemoryThread 'openrave-robot-memory_thread.h' 
  * Creates an OpenRave Scene for motion planning from data in the robot memory
@@ -66,4 +67,31 @@ void
 OpenraveRobotMemoryThread::construct_scene()
 {
   logger->log_info(name(), "Constructing Scene");
+
+  //add or move already added objects:
+  QResCursor cur = robot_memory->query(fromjson("{block:{$exists:true},frame:'base_link',allow_tf:true}"), collection_);
+  while(cur->more())
+  {
+    BSONObj block = cur->next();
+    logger->log_info(name(), "Block: %s", block.toString().c_str());
+    std::string block_name = block.getStringField("block");
+    if(std::find(added_objects_.begin(), added_objects_.end(), block_name) == added_objects_.end())
+    {
+      //add new object
+      logger->log_info(name(), "adding %s", block_name.c_str());
+      OpenRaveInterface::AddObjectMessage add_msg;
+      add_msg.set_name(block_name.c_str());
+      add_msg.set_path("../fawkes/res/openrave/cylinder.kinbody.xml");
+      openrave_if_->msgq_enqueue_copy(&add_msg);
+      added_objects_.push_back(block_name);
+    }
+    //move object to right position
+    OpenRaveInterface::MoveObjectMessage move_msg;
+    move_msg.set_name(block_name.c_str());
+    move_msg.set_x(block.getField("translation").Array()[0].Double());
+    move_msg.set_y(block.getField("translation").Array()[1].Double());
+    move_msg.set_z(block.getField("translation").Array()[2].Double());
+    openrave_if_->msgq_enqueue_copy(&move_msg);
+  }
+  logger->log_info(name(), "Finished Constructing Scene");
 }

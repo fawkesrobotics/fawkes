@@ -26,20 +26,27 @@ OBJS_openrave_robot_memory = openrave-robot-memory_plugin.o openrave-robot-memor
 
 OBJS_all = $(OBJS_openrave-robot-memory)
 
-ifeq ($(HAVE_MONGODB),1)
+ifeq ($(HAVE_CPP11)$(HAVE_MONGODB),11)
+  CFLAGS  += $(CFLAGS_CPP11)
+  
   PLUGINS_all = $(PLUGINDIR)/openrave-robot-memory.$(SOEXT)
 else
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb
+  endif
+  ifneq ($(HAVE_CLIPS),1)
+    WARN_TARGETS = warning_clips
   endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_mongodb
+.PHONY: warning_mongodb warning_cpp11
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting openrave-robot-memory Plugin$(TNORMAL) (mongodb[-devel] not installed)"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-robot-memory plugin$(TNORMAL) (C++11 not supported)"
 endif
 
 

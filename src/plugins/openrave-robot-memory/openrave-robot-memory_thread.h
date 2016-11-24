@@ -29,6 +29,9 @@
 #include <aspect/configurable.h>
 #include <interfaces/OpenRaveInterface.h>
 #include <interfaces/OpenraveRobotMemoryInterface.h>
+#include <plugins/robot-memory/aspect/robot_memory_aspect.h>
+#include <list>
+#include <algorithm>
 
 namespace fawkes {
   // add forward declarations here, e.g., interfaces
@@ -39,6 +42,7 @@ class OpenraveRobotMemoryThread
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
+  public fawkes::RobotMemoryAspect,
   public fawkes::BlackBoardAspect
 {
 
@@ -56,6 +60,8 @@ class OpenraveRobotMemoryThread
   std::string collection_;
   fawkes::OpenRaveInterface* openrave_if_;
   fawkes::OpenraveRobotMemoryInterface* or_rm_if_;
+  std::list<std::string> added_objects_;
+
   void construct_scene();
 };
 
