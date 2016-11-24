@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="OpenraveRobotMemoryInterface" author="Frederik Zwilling" year="2016">
+  <data>
+    <comment>
+      Interface to instruct the OpenraveRobotMemory Plugin
+    </comment>
+    <field type="uint32" name="dummy">
+      Dummy field
+    </field>
+  </data>
+  
+  <message name="ConstructScene">
+    <comment>
+      Construct the scene from data in the RobotMemory
+    </comment>
+  </message>
+</interface>
