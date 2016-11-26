@@ -248,11 +248,41 @@ ClingoAccess::startSolving(void)
 
 	if ( Debug )
 	{
-		Log->log_info(LogComponent.c_str(), "Start solving.");
+		Log->log_info(LogComponent.c_str(), "Start async solving.");
 	} //if ( Debug )
+	Solving = true;
 	Control.solve_async([this](const Clingo::Model& model) { return newModel(model); },
 		[this](const Clingo::SolveResult& result) { solvingFinished(result); return; });
+	return true;
+}
+
+/**
+ * @brief Starts the solving process, if it isn't already running, in a blocking manner, that means it does not start
+ *        the computation in an asynchronous way.
+ * @return If the process was started.
+ */
+bool
+ClingoAccess::startSolvingBlocking(void)
+{
+	MutexLocker locker(&ControlMutex);
+	if ( Solving )
+	{
+		return false;
+	} //if ( Solving )
+
+	if ( Debug )
+	{
+		Log->log_info(LogComponent.c_str(), "Start sync solving.");
+	} //if ( Debug )
 	Solving = true;
+	const auto result(Control.solve([this,&locker](const Clingo::Model& model) {
+		locker.unlock();
+		const auto ret = newModel(model);
+		locker.relock();
+		return ret;
+	}));
+	locker.unlock();
+	solvingFinished(result);
 	return true;
 }
 

@@ -68,6 +68,7 @@ class ClingoAccess
 
 	bool solving(void) const noexcept;
 	bool startSolving(void);
+	bool startSolvingBlocking(void);
 	bool cancelSolving(void);
 
 	Clingo::SymbolVector modelSymbols(void) const;
