@@ -96,6 +96,7 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
     );
   clips->add_function("robmem-trigger-destroy", sigc::slot<void, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_destroy_trigger)));
   clips->add_function("bson-field-names", sigc::slot<CLIPS::Values, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_field_names)));
+  clips->add_function("bson-has-field", sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_has_field)));
   clips->add_function("bson-get", sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get)));
   clips->add_function("bson-get-array", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_array)));
   clips->add_function("bson-get-time", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_time)));
@@ -583,6 +584,23 @@ ClipsRobotMemoryThread::clips_bson_get(void *bson, std::string field_name)
   }
 }
 
+CLIPS::Value
+ClipsRobotMemoryThread::clips_bson_has_field(void *bson, std::string field_name)
+{
+  mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+
+  if (! b) {
+    logger->log_error("MongoDB", "mongodb-bson-get: invalid object");
+    return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  }
+
+  mongo::BSONObj o(b->asTempObj());
+
+  if (! o.hasField(field_name)) {
+    return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  }
+  return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+}
 
 CLIPS::Values
 ClipsRobotMemoryThread::clips_bson_get_array(void *bson, std::string field_name)

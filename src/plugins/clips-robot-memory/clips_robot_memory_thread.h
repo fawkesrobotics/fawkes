@@ -90,6 +90,7 @@ class ClipsRobotMemoryThread
   CLIPS::Value  clips_robotmemory_cursor_next(void *cursor);
   void          clips_robotmemory_cursor_destroy(void *cursor);
   CLIPS::Values clips_bson_field_names(void *bson);
+  CLIPS::Value  clips_bson_has_field(void *bson, std::string field_name);
   CLIPS::Value  clips_bson_get(void *bson, std::string field_name);
   CLIPS::Values clips_bson_get_array(void *bson, std::string field_name);
   CLIPS::Values clips_bson_get_time(void *bson, std::string field_name);
