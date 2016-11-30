@@ -21,7 +21,6 @@
 
 
 #include "event_trigger_manager.h"
-#include <plugin/loader.h>
 #include <boost/bind.hpp>
 
 using namespace fawkes;
@@ -42,9 +41,10 @@ EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config)
     std::string err_msg = "Could not connect to mongod process: "+ errmsg;
     throw PluginLoadException("robot-memory", err_msg.c_str());
   }
+  repl_set_dist = config_->get_string("plugins/robot-memory/setup/replicated/replica-set-name");
+  repl_set_local = config_->get_string("plugins/robot-memory/setup/local/replica-set-name");
   if(distributed_)
   {
-    repl_set = config_->get_string("plugins/robot-memory/setup/replicated/replica-set-name");
     con_replica_ = new mongo::DBClientConnection();
     if(!con_replica_->connect("localhost:" + std::to_string(config_->get_uint("plugins/robot-memory/setup/replicated/port")), errmsg))
     {
@@ -79,7 +79,7 @@ void EventTriggerManager::check_events()
       logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
       //check if collection is local or replicated
       mongo::DBClientConnection* con;
-      if(trigger->oplog_collection.find(repl_set) == 0)
+      if(trigger->oplog_collection.find(repl_set_dist) == 0)
       {
         con = con_replica_;
       }

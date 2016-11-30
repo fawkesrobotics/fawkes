@@ -28,6 +28,7 @@
 #include <list>
 #include "event_trigger.h"
 #include <boost/bind.hpp>
+#include <plugin/loader.h>
 
 
 ///typedef for shorter type description
@@ -72,16 +73,10 @@ class EventTriggerManager
       mongo::DBClientConnection* con;
       std::string oplog;
       oplog = "local.oplog.rs";
-      if(collection.find(repl_set) == 0)
-      {
+      if(collection.find(repl_set_dist) == 0)
         con = con_replica_;
-        if(!distributed_)
-          logger_->log_error(name.c_str(), "Can not add trigger for %s, if the robot memory is not configured to be distributed", collection.c_str());
-      }
       else
-      {
         con = con_local_;
-      }
 
       EventTrigger *trigger = new EventTrigger(oplog_query, collection, boost::bind(callback, obj, _1));
       trigger->oplog_cursor = create_oplog_cursor(con, oplog, oplog_query);
@@ -103,7 +98,7 @@ class EventTriggerManager
     mongo::DBClientConnection* con_local_;
     mongo::DBClientConnection* con_replica_;
 
-    std::string repl_set, local_db;
+    std::string repl_set_dist, repl_set_local, local_db;
     bool distributed_;
 
     std::list<EventTrigger*> triggers;
