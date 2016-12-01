@@ -446,7 +446,7 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
  * @return If it could be assigned.
  */
 bool
-ClingoAccess::assign_external(const Clingo::Symbol atom, const Clingo::TruthValue value)
+ClingoAccess::assign_external(const Clingo::Symbol& atom, const Clingo::TruthValue value)
 {
 	MutexLocker locker(&ControlMutex);
 	if ( Solving )
@@ -478,7 +478,7 @@ ClingoAccess::assign_external(const Clingo::Symbol atom, const Clingo::TruthValu
  * @return If it could be released.
  */
 bool
-ClingoAccess::release_external(const Clingo::Symbol atom)
+ClingoAccess::release_external(const Clingo::Symbol& atom)
 {
 	MutexLocker locker(&ControlMutex);
 	if ( Solving )

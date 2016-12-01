@@ -85,8 +85,8 @@ class ClingoAccess
 
 	bool ground(const Clingo::PartSpan& parts);
 
-	bool assign_external(const Clingo::Symbol atom, const Clingo::TruthValue value);
-	bool release_external(const Clingo::Symbol atom);
+	bool assign_external(const Clingo::Symbol& atom, const Clingo::TruthValue value);
+	bool release_external(const Clingo::Symbol& atom);
 };
 
 } // end namespace fawkes
