@@ -52,6 +52,7 @@ class ClingoAccess
 	mutable Mutex CallbackMutex;
 	std::vector<std::shared_ptr<std::function<bool(void)>>> ModelCallbacks;
 	std::vector<std::shared_ptr<std::function<void(Clingo::SolveResult)>>> FinishCallbacks;
+	Clingo::GroundCallback GroundCallback;
 
 	bool newModel(const Clingo::Model& model);
 	void solvingFinished(const Clingo::SolveResult result);
@@ -68,6 +69,8 @@ class ClingoAccess
 	void unregisterModelCallback(std::shared_ptr<std::function<bool(void)>> callback);
 	void registerFinishCallback(std::shared_ptr<std::function<void(Clingo::SolveResult)>> callback);
 	void unregisterFinishCallback(std::shared_ptr<std::function<void(Clingo::SolveResult)>> callback);
+
+	void setGroundCallback(Clingo::GroundCallback&& callback);
 
 	bool solving(void) const noexcept;
 	bool startSolving(void);

@@ -68,6 +68,9 @@ namespace fawkes {
  * @property ClingoAccess::FinishCallbacks
  * @brief The functions to call, when the solving process finished.
  *
+ * @property ClingoAccess::GroundCallback
+ * @brief The callback for the grounding.
+ *
  * @property ClingoAccess::Debug
  * @brief Whether additional debug output is desired.
  */
@@ -246,6 +249,18 @@ ClingoAccess::unregisterFinishCallback(std::shared_ptr<std::function<void(Clingo
 }
 
 /**
+ * @brief Sets the ground callback, to implement custom functions.
+ * @param[in, out] callback The callback, will be moved.
+ */
+void
+ClingoAccess::setGroundCallback(Clingo::GroundCallback&& callback)
+{
+	MutexLocker locker(&CallbackMutex);
+	GroundCallback = std::move(callback);
+	return;
+}
+
+/**
  * @brief Returns whether the solving process is running.
  */
 bool
@@ -415,7 +430,7 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
 		} //for ( const auto& part : parts )
 	} //if ( Debug )
 
-	Control->ground(parts);
+	Control->ground(parts, GroundCallback);
 
 	if ( Debug )
 	{
