@@ -45,7 +45,7 @@ class ClingoAccess
 	const std::string LogComponent;
 
 	mutable Mutex ControlMutex;
-	Clingo::Control Control;
+	Clingo::Control *Control;
 	Clingo::SymbolVector ModelSymbols, OldSymbols;
 
 	std::atomic_bool Solving;
@@ -56,10 +56,13 @@ class ClingoAccess
 	bool newModel(const Clingo::Model& model);
 	void solvingFinished(const Clingo::SolveResult result);
 
+	void allocControl(void);
+
 	public:
 	std::atomic_bool Debug;
 
 	ClingoAccess(Logger *log, const std::string& logComponent);
+	~ClingoAccess(void);
 
 	void registerModelCallback(std::shared_ptr<std::function<bool(void)>> callback);
 	void unregisterModelCallback(std::shared_ptr<std::function<bool(void)>> callback);
@@ -70,6 +73,8 @@ class ClingoAccess
 	bool startSolving(void);
 	bool startSolvingBlocking(void);
 	bool cancelSolving(void);
+
+	bool reset(void);
 
 	Clingo::SymbolVector modelSymbols(void) const;
 

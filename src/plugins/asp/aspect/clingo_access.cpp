@@ -148,30 +148,51 @@ ClingoAccess::solvingFinished(const Clingo::SolveResult result)
 }
 
 /**
+ * @brief Allocates the control object and initializes the logger.
+ */
+void
+ClingoAccess::allocControl()
+{
+	assert(!Control);
+	Control = new Clingo::Control({},
+		[this](const Clingo::WarningCode code, char const *msg)
+		{
+			fawkes::Logger::LogLevel level = fawkes::Logger::LL_NONE;
+			switch ( code )
+			{
+				case Clingo::WarningCode::AtomUndefined      :
+				case Clingo::WarningCode::OperationUndefined :
+				case Clingo::WarningCode::RuntimeError       : level = fawkes::Logger::LL_ERROR; break;
+				case Clingo::WarningCode::Other              :
+				case Clingo::WarningCode::VariableUnbounded  : level = fawkes::Logger::LL_WARN; break;
+				case Clingo::WarningCode::FileIncluded       :
+				case Clingo::WarningCode::GlobalVariable     : level = fawkes::Logger::LL_INFO; break;
+			} //switch ( code )
+			Log->log(level, LogComponent.c_str(), msg);
+			return;
+		}, 100);
+	return;
+}
+
+/**
  * @brief Constructor.
  * @param[in] log The used logger.
  * @param[in] logComponent The logging component.
  * @param[in] controlArgs... The arguments for the clingo control constructor.
  */
 ClingoAccess::ClingoAccess(Logger *log, const std::string& logComponent) : Log(log),
-		LogComponent(logComponent.empty() ? "Clingo" : logComponent), Control({},
-			[this](const Clingo::WarningCode code, char const *msg)
-			{
-				fawkes::Logger::LogLevel level = fawkes::Logger::LL_NONE;
-				switch ( code )
-				{
-					case Clingo::WarningCode::AtomUndefined      :
-					case Clingo::WarningCode::OperationUndefined :
-					case Clingo::WarningCode::RuntimeError       : level = fawkes::Logger::LL_ERROR; break;
-					case Clingo::WarningCode::Other              :
-					case Clingo::WarningCode::VariableUnbounded  : level = fawkes::Logger::LL_WARN; break;
-					case Clingo::WarningCode::FileIncluded       :
-					case Clingo::WarningCode::GlobalVariable     : level = fawkes::Logger::LL_INFO; break;
-				} //switch ( code )
-				Log->log(level, LogComponent.c_str(), msg);
-				return;
-			}, 100), Solving(false), Debug(false)
+		LogComponent(logComponent.empty() ? "Clingo" : logComponent), Control(nullptr), Solving(false), Debug(false)
 {
+	allocControl();
+	return;
+}
+
+/**
+ * @brief The destructor.
+ */
+ClingoAccess::~ClingoAccess(void)
+{
+	delete Control;
 	return;
 }
 
@@ -251,7 +272,7 @@ ClingoAccess::startSolving(void)
 		Log->log_info(LogComponent.c_str(), "Start async solving.");
 	} //if ( Debug )
 	Solving = true;
-	Control.solve_async([this](const Clingo::Model& model) { return newModel(model); },
+	Control->solve_async([this](const Clingo::Model& model) { return newModel(model); },
 		[this](const Clingo::SolveResult& result) { solvingFinished(result); return; });
 	return true;
 }
@@ -275,7 +296,7 @@ ClingoAccess::startSolvingBlocking(void)
 		Log->log_info(LogComponent.c_str(), "Start sync solving.");
 	} //if ( Debug )
 	Solving = true;
-	const auto result(Control.solve([this,&locker](const Clingo::Model& model) {
+	const auto result(Control->solve([this,&locker](const Clingo::Model& model) {
 		locker.unlock();
 		const auto ret = newModel(model);
 		locker.relock();
@@ -303,7 +324,27 @@ ClingoAccess::cancelSolving(void)
 	{
 		Log->log_info(LogComponent.c_str(), "Cancel solving.");
 	} //if ( Debug )
-	Control.interrupt();
+	Control->interrupt();
+	return true;
+}
+
+/**
+ * @brief Tries to reset Clingo, that means deletes the control object and creates a new one.
+ * @return If it was an success.
+ */
+bool
+ClingoAccess::reset()
+{
+	if ( Solving )
+	{
+		Log->log_warn(LogComponent.c_str(),
+			"Could not reset while solving. Please try again when the solving is stopped.");
+		cancelSolving();
+		return false;
+	} //if ( Solving )
+	delete Control;
+	Control = nullptr;
+	allocControl();
 	return true;
 }
 
@@ -332,7 +373,7 @@ ClingoAccess::loadFile(const std::string& path)
 	} //if ( Solving )
 
 	Log->log_info(LogComponent.c_str(), "Loading file program file %s.", path.c_str());
-	Control.load(path.c_str());
+	Control->load(path.c_str());
 	return true;
 }
 
@@ -374,7 +415,7 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
 		} //for ( const auto& part : parts )
 	} //if ( Debug )
 
-	Control.ground(parts);
+	Control->ground(parts);
 
 	if ( Debug )
 	{
@@ -412,7 +453,7 @@ ClingoAccess::assign_external(const Clingo::Symbol atom, const Clingo::TruthValu
 				return ret;
 			}(), atom.to_string().c_str());
 	} //if ( Debug )
-	Control.assign_external(atom, value);
+	Control->assign_external(atom, value);
 	return true;
 }
 
@@ -434,7 +475,7 @@ ClingoAccess::release_external(const Clingo::Symbol atom)
 	{
 		Log->log_info(LogComponent.c_str(), "Releasing %s.", atom.to_string().c_str());
 	} //if ( Debug )
-	Control.release_external(atom);
+	Control->release_external(atom);
 	return true;
 }
 
