@@ -47,6 +47,7 @@ class ClingoAccess
 	mutable Mutex ControlMutex;
 	Clingo::Control *Control;
 	Clingo::SymbolVector ModelSymbols, OldSymbols;
+	unsigned int ModelCounter;
 
 	std::atomic_bool Solving;
 	mutable Mutex CallbackMutex;

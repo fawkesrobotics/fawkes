@@ -56,6 +56,10 @@ namespace fawkes {
  * @property ClingoAccess::OldSymbols
  * @brief The symbols found in the before last model.
  *
+ * @property ClingoAccess::ModelCounter
+ * @brief Counts how many models we have computed for one solving process.
+ *
+ *
  * @property ClingoAccess::Solving
  * @brief Whether the control is in the solving process.
  *
@@ -89,7 +93,7 @@ ClingoAccess::newModel(const Clingo::Model& model)
 
 	if ( Debug )
 	{
-		Log->log_info(LogComponent.c_str(), "New model found.");
+		Log->log_info(LogComponent.c_str(), "New model found: #%d", ++ModelCounter);
 
 		/* To save (de-)allocations just move found symbols at the end of the vector and move the end iterator to the
 		 * front. After this everything in [begin, end) is in oldSymbols but not in symbols. */
@@ -287,6 +291,7 @@ ClingoAccess::startSolving(void)
 		Log->log_info(LogComponent.c_str(), "Start async solving.");
 	} //if ( Debug )
 	Solving = true;
+	ModelCounter = 0;
 	Control->solve_async([this](const Clingo::Model& model) { return newModel(model); },
 		[this](const Clingo::SolveResult& result) { solvingFinished(result); return; });
 	return true;
@@ -311,6 +316,7 @@ ClingoAccess::startSolvingBlocking(void)
 		Log->log_info(LogComponent.c_str(), "Start sync solving.");
 	} //if ( Debug )
 	Solving = true;
+	ModelCounter = 0;
 	const auto result(Control->solve([this,&locker](const Clingo::Model& model) {
 		locker.unlock();
 		const auto ret = newModel(model);
