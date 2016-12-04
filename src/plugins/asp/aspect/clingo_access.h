@@ -61,7 +61,18 @@ class ClingoAccess
 	void allocControl(void);
 
 	public:
-	std::atomic_bool Debug;
+	enum DebugLevel_t
+	{
+		None = 0,
+		Time = 10,
+		Programs = 20,
+		Models = 30,
+		Externals = 40,
+		AllModelSymbols = 50,
+		All
+	};
+
+	std::atomic<DebugLevel_t> DebugLevel;
 
 	ClingoAccess(Logger *log, const std::string& logComponent);
 	~ClingoAccess(void);

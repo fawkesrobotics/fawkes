@@ -75,8 +75,32 @@ namespace fawkes {
  * @property ClingoAccess::GroundCallback
  * @brief The callback for the grounding.
  *
- * @property ClingoAccess::Debug
- * @brief Whether additional debug output is desired.
+ * @enum ClingoAccess::DebugLevel_t
+ * @brief An enum to define debug levels. The higher levels include the lower values.
+ *
+ * @var ClingoAccess::DebugLevel_t::None
+ * @brief No debug output at all.
+ *
+ * @var ClingoAccess::DebugLevel_t::Time
+ * @brief Print when starting/finishing grounding/solving for analysis.
+ *
+ * @var ClingoAccess::DebugLevel_t::Programs
+ * @brief Print which programs are grounded.
+ *
+ * @var ClingoAccess::DebugLevel_t::Models
+ * @brief Print new models.
+ *
+ * @var ClingoAccess::DebugLevel_t::Externals
+ * @brief Print assignments and releases of externals.
+ *
+ * @var ClingoAccess::DebugLevel_t::AllModelSymbols
+ * @brief Ignore #show statements and print all symbols of a model.
+ *
+ * @var ClingoAccess::DebugLevel_t::All
+ * @brief Print everything.
+ *
+ * @property ClingoAccess::DebugLevel
+ * @brief Which debug outputs should be printed.
  */
 
 
@@ -89,34 +113,37 @@ bool
 ClingoAccess::newModel(const Clingo::Model& model)
 {
 	MutexLocker locker1(&ControlMutex);
-	ModelSymbols = model.symbols();
+	ModelSymbols = model.symbols(DebugLevel >= AllModelSymbols ? Clingo::ShowType::All : Clingo::ShowType::Shown);
 
-	if ( Debug )
+	if ( DebugLevel >= Time )
 	{
 		Log->log_info(LogComponent.c_str(), "New model found: #%d", ++ModelCounter);
 
-		/* To save (de-)allocations just move found symbols at the end of the vector and move the end iterator to the
-		 * front. After this everything in [begin, end) is in oldSymbols but not in symbols. */
-		auto begin = OldSymbols.begin(), end = OldSymbols.end();
-
-		for ( const Clingo::Symbol& symbol : ModelSymbols )
+		if ( DebugLevel >= Models )
 		{
-			auto iter = std::find(begin, end, symbol);
-			if ( iter == end )
-			{
-				Log->log_info(LogComponent.c_str(), "New Symbol: %s", symbol.to_string().c_str());
-			} //if ( iter == end )
-			else
-			{
-				std::swap(*iter, *--end);
-			} //else -> if ( iter == end )
-		} //for ( const Clingo::Symbol& symbol : ModelSymbols )
+			/* To save (de-)allocations just move found symbols at the end of the vector and move the end iterator to
+			 * the front. After this everything in [begin, end) is in oldSymbols but not in symbols. */
+			auto begin = OldSymbols.begin(), end = OldSymbols.end();
 
-		for ( ; begin != end; ++begin )
-		{
-			Log->log_info(LogComponent.c_str(), "Symbol removed: %s", begin->to_string().c_str());
-		} //for ( ; begin != end; ++begin )
-	} //if ( Debug )
+			for ( const Clingo::Symbol& symbol : ModelSymbols )
+			{
+				auto iter = std::find(begin, end, symbol);
+				if ( iter == end )
+				{
+					Log->log_info(LogComponent.c_str(), "New Symbol: %s", symbol.to_string().c_str());
+				} //if ( iter == end )
+				else
+				{
+					std::swap(*iter, *--end);
+				} //else -> if ( iter == end )
+			} //for ( const Clingo::Symbol& symbol : ModelSymbols )
+
+			for ( ; begin != end; ++begin )
+			{
+				Log->log_info(LogComponent.c_str(), "Symbol removed: %s", begin->to_string().c_str());
+			} //for ( ; begin != end; ++begin )
+		} //if ( DebugLevel >= Models )
+	} //if ( DebugLevel >= Time )
 
 	OldSymbols = ModelSymbols;
 	locker1.unlock();
@@ -139,10 +166,10 @@ ClingoAccess::newModel(const Clingo::Model& model)
 void
 ClingoAccess::solvingFinished(const Clingo::SolveResult result)
 {
-	if ( Debug )
+	if ( DebugLevel >= Time )
 	{
 		Log->log_info(LogComponent.c_str(), "Solving done.");
-	} //if ( Debug )
+	} //if ( DebugLevel >= Time )
 	MutexLocker locker1(&ControlMutex);
 	Solving = false;
 
@@ -188,7 +215,7 @@ ClingoAccess::allocControl()
  * @param[in] controlArgs... The arguments for the clingo control constructor.
  */
 ClingoAccess::ClingoAccess(Logger *log, const std::string& logComponent) : Log(log),
-		LogComponent(logComponent.empty() ? "Clingo" : logComponent), Control(nullptr), Solving(false), Debug(false)
+		LogComponent(logComponent.empty() ? "Clingo" : logComponent), Control(nullptr), Solving(false), DebugLevel(None)
 {
 	allocControl();
 	return;
@@ -286,10 +313,10 @@ ClingoAccess::startSolving(void)
 		return false;
 	} //if ( Solving )
 
-	if ( Debug )
+	if ( DebugLevel >= Time )
 	{
 		Log->log_info(LogComponent.c_str(), "Start async solving.");
-	} //if ( Debug )
+	} //if ( DebugLevel >= Time )
 	Solving = true;
 	ModelCounter = 0;
 	Control->solve_async([this](const Clingo::Model& model) { return newModel(model); },
@@ -311,10 +338,10 @@ ClingoAccess::startSolvingBlocking(void)
 		return false;
 	} //if ( Solving )
 
-	if ( Debug )
+	if ( DebugLevel >= Time )
 	{
 		Log->log_info(LogComponent.c_str(), "Start sync solving.");
-	} //if ( Debug )
+	} //if ( DebugLevel >= Time )
 	Solving = true;
 	ModelCounter = 0;
 	const auto result(Control->solve([this,&locker](const Clingo::Model& model) {
@@ -341,10 +368,10 @@ ClingoAccess::cancelSolving(void)
 		return false;
 	} //if ( !Solving )
 
-	if ( Debug )
+	if ( DebugLevel >= Time )
 	{
 		Log->log_info(LogComponent.c_str(), "Cancel solving.");
-	} //if ( Debug )
+	} //if ( DebugLevel >= Time )
 	Control->interrupt();
 	return true;
 }
@@ -354,7 +381,7 @@ ClingoAccess::cancelSolving(void)
  * @return If it was an success.
  */
 bool
-ClingoAccess::reset()
+ClingoAccess::reset(void)
 {
 	if ( Solving )
 	{
@@ -412,36 +439,39 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
 		return false;
 	} //if ( Solving )
 
-	if ( Debug )
+	if ( DebugLevel >= Time )
 	{
 		Log->log_info(LogComponent.c_str(), "Grounding %d parts:", parts.size());
-		auto i = 0;
-		for ( const Clingo::Part& part : parts )
+		if ( DebugLevel >= Programs )
 		{
-			std::string params;
-			bool first = true;
-			for ( const auto& param : part.params() )
+			auto i = 0;
+			for ( const Clingo::Part& part : parts )
 			{
-				if ( first )
+				std::string params;
+				bool first = true;
+				for ( const auto& param : part.params() )
 				{
-					first = false;
-				} //if ( first )
-				else
-				{
-					params += ", ";
-				} //else -> if ( first )
-				params += param.to_string();
-			} //for ( const auto& param : part.params() )
-			Log->log_info(LogComponent.c_str(), "Part #%d: %s [%s]", ++i, part.name(), params.c_str());
-		} //for ( const auto& part : parts )
-	} //if ( Debug )
+					if ( first )
+					{
+						first = false;
+					} //if ( first )
+					else
+					{
+						params += ", ";
+					} //else -> if ( first )
+					params += param.to_string();
+				} //for ( const auto& param : part.params() )
+				Log->log_info(LogComponent.c_str(), "Part #%d: %s [%s]", ++i, part.name(), params.c_str());
+			} //for ( const auto& part : parts )
+		} //if ( DebugLevel >= Programs )
+	} //if ( DebugLevel >= Time )
 
 	Control->ground(parts, GroundCallback);
 
-	if ( Debug )
+	if ( DebugLevel >= Time )
 	{
 		Log->log_info(LogComponent.c_str(), "Grounding done.");
-	} //if ( Debug )
+	} //if ( DebugLevel >= Time )
 	return true;
 }
 
@@ -460,7 +490,7 @@ ClingoAccess::assign_external(const Clingo::Symbol& atom, const Clingo::TruthVal
 		return false;
 	} //if ( Solving )
 
-	if ( Debug )
+	if ( DebugLevel >= Externals )
 	{
 		Log->log_info(LogComponent.c_str(), "Assigning %s to %s.", [value](void)
 			{
@@ -473,7 +503,7 @@ ClingoAccess::assign_external(const Clingo::Symbol& atom, const Clingo::TruthVal
 				} //switch ( value )
 				return ret;
 			}(), atom.to_string().c_str());
-	} //if ( Debug )
+	} //if ( DebugLevel >= Externals )
 	Control->assign_external(atom, value);
 	return true;
 }
@@ -492,10 +522,10 @@ ClingoAccess::release_external(const Clingo::Symbol& atom)
 		return false;
 	} //if ( Solving )
 
-	if ( Debug )
+	if ( DebugLevel >= Externals )
 	{
 		Log->log_info(LogComponent.c_str(), "Releasing %s.", atom.to_string().c_str());
-	} //if ( Debug )
+	} //if ( DebugLevel >= Externals )
 	Control->release_external(atom);
 	return true;
 }
