@@ -117,7 +117,8 @@ ClingoAccess::newModel(const Clingo::Model& model)
 
 	if ( DebugLevel >= Time )
 	{
-		Log->log_info(LogComponent.c_str(), "New model found: #%d", ++ModelCounter);
+		Log->log_info(LogComponent.c_str(), "New %smodel found: #%d", model.optimality_proven() ? "optimal " : "",
+			++ModelCounter);
 
 		if ( DebugLevel >= Models )
 		{
