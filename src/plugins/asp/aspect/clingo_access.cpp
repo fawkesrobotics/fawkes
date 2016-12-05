@@ -391,6 +391,7 @@ ClingoAccess::reset(void)
 		cancelSolving();
 		return false;
 	} //if ( Solving )
+	Log->log_warn(LogComponent.c_str(), "Clingo will be resetted.");
 	delete Control;
 	Control = nullptr;
 	allocControl();
