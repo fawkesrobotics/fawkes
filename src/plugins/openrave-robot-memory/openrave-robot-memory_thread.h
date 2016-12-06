@@ -57,10 +57,10 @@ class OpenraveRobotMemoryThread
   protected: virtual void run() { Thread::run(); }
 
  private:
-  std::string collection_;
   fawkes::OpenRaveInterface* openrave_if_;
   fawkes::OpenraveRobotMemoryInterface* or_rm_if_;
   std::list<std::string> added_objects_;
+  std::list<std::string> added_object_types_;
 
   void construct_scene();
 };

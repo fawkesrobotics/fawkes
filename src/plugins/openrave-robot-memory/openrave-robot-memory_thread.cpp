@@ -20,6 +20,7 @@
  */
 
 #include "openrave-robot-memory_thread.h"
+#include <algorithm>
 
 using namespace fawkes;
 using namespace mongo;
@@ -39,7 +40,6 @@ OpenraveRobotMemoryThread::OpenraveRobotMemoryThread()
 void
 OpenraveRobotMemoryThread::init()
 {
-  collection_ = config->get_string("plugins/openrave-robot-memory/input-collection");
   openrave_if_ = blackboard->open_for_reading<OpenRaveInterface>(config->get_string("plugins/openrave-robot-memory/openrave-if-name").c_str());
   or_rm_if_ = blackboard->open_for_writing<OpenraveRobotMemoryInterface>(config->get_string("plugins/openrave-robot-memory/if-name").c_str());
 }
@@ -68,30 +68,53 @@ OpenraveRobotMemoryThread::construct_scene()
 {
   logger->log_info(name(), "Constructing Scene");
 
-  //add or move already added objects:
-  QResCursor cur = robot_memory->query(fromjson("{block:{$exists:true},frame:'base_link',allow_tf:true}"), collection_);
-  while(cur->more())
+  // add all object types by iterating over config paths
+  std::string prefix = "plugins/openrave-robot-memory/object-types/";
+  std::unique_ptr<Configuration::ValueIterator> object_types(config->search(prefix.c_str()));
+  while(object_types->next())
   {
-    BSONObj block = cur->next();
-    logger->log_info(name(), "Block: %s", block.toString().c_str());
-    std::string block_name = block.getStringField("block");
-    if(std::find(added_objects_.begin(), added_objects_.end(), block_name) == added_objects_.end())
+    //object_types->next() yields the whole path, so we have to get the right prefix
+    std::string cfg_name = std::string(object_types->path()).substr(prefix.length());
+    cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+    //don't use the same prefix again
+    if(std::find(added_object_types_.begin(), added_object_types_.end(), cfg_name) != added_object_types_.end())
+      continue;
+    added_object_types_.push_back(cfg_name);
+    logger->log_info(name(), "Adding object type: %s", cfg_name.c_str());
+    std::string cfg_prefix = prefix + cfg_name + "/";
+    std::string collection = config->get_string(cfg_prefix + "collection");
+
+    //construct query
+    BSONObjBuilder query_builder;
+    query_builder.appendElements(fromjson(config->get_string(cfg_prefix + "query")));
+    query_builder << "frame" << "base_link" << "allow_tf" << true;
+    BSONObj query = query_builder.obj();
+    logger->log_info(name(), "Querying: %s", query.toString().c_str());
+    QResCursor cur = robot_memory->query(query, collection);
+    while(cur->more())
     {
-      //add new object
-      logger->log_info(name(), "adding %s", block_name.c_str());
-      OpenRaveInterface::AddObjectMessage add_msg;
-      add_msg.set_name(block_name.c_str());
-      add_msg.set_path("../fawkes/res/openrave/cylinder.kinbody.xml");
-      openrave_if_->msgq_enqueue_copy(&add_msg);
-      added_objects_.push_back(block_name);
+      BSONObj block = cur->next();
+      //logger->log_info(name(), "Adding: %s", cfg_prefix.c_str(), block.toString().c_str());
+      std::string block_name = block.getStringField(config->get_string(cfg_prefix + "name-key"));
+      if(std::find(added_objects_.begin(), added_objects_.end(), block_name) == added_objects_.end())
+      {
+        //add new object
+        logger->log_info(name(), "adding %s", block_name.c_str());
+        OpenRaveInterface::AddObjectMessage add_msg;
+        add_msg.set_name(block_name.c_str());
+        add_msg.set_path(config->get_string(cfg_prefix + "model-path").c_str());
+        openrave_if_->msgq_enqueue_copy(&add_msg);
+        added_objects_.push_back(block_name);
+      }
+      //move object to right position
+      OpenRaveInterface::MoveObjectMessage move_msg;
+      move_msg.set_name(block_name.c_str());
+      move_msg.set_x(block.getField("translation").Array()[0].Double());
+      move_msg.set_y(block.getField("translation").Array()[1].Double());
+      move_msg.set_z(block.getField("translation").Array()[2].Double());
+      openrave_if_->msgq_enqueue_copy(&move_msg);
     }
-    //move object to right position
-    OpenRaveInterface::MoveObjectMessage move_msg;
-    move_msg.set_name(block_name.c_str());
-    move_msg.set_x(block.getField("translation").Array()[0].Double());
-    move_msg.set_y(block.getField("translation").Array()[1].Double());
-    move_msg.set_z(block.getField("translation").Array()[2].Double());
-    openrave_if_->msgq_enqueue_copy(&move_msg);
   }
+  added_object_types_.clear();
   logger->log_info(name(), "Finished Constructing Scene");
 }
