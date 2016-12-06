@@ -15,7 +15,10 @@
   
   <message name="Generate">
     <comment>
-      Query to execute.
+      Call to generate PDDL Problem
     </comment>
+    <field type="string" length="1024" name="goal">
+    	Optional goal to insert into the template dictionary.
+    </field>
   </message>
 </interface>

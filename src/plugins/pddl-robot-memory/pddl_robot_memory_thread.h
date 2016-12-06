@@ -64,6 +64,7 @@ class PddlRobotMemoryThread
   std::string collection;
   std::string input_path;
   std::string output_path;
+  std::string goal;
 
   void fill_dict_from_document(ctemplate::TemplateDictionary *dict, mongo::BSONObj obj, std::string prefix = "");
   void generate();

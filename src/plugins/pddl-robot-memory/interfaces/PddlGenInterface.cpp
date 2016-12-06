@@ -53,7 +53,7 @@ PddlGenInterface::PddlGenInterface() : Interface()
   add_fieldinfo(IFT_UINT32, "msg_id", 1, &data->msg_id);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_messageinfo("GenerateMessage");
-  unsigned char tmp_hash[] = {0x5d, 0xea, 0x4d, 0x50, 0x65, 0x68, 0x7, 0x93, 0xe0, 0x52, 0x46, 0x2, 0xe7, 0x3c, 0x3b, 0xa1};
+  unsigned char tmp_hash[] = {0x24, 0x2e, 0xeb, 0xd7, 0x1d, 0x5d, 0x15, 0x7f, 0x73, 0xca, 0xa3, 0xf3, 0x74, 0x1, 0x55, 0xc5};
   set_hash(tmp_hash);
 }
 
@@ -174,6 +174,19 @@ PddlGenInterface::enum_tostring(const char *enumtype, int val) const
  */
 
 
+/** Constructor with initial values.
+ * @param ini_goal initial value for goal
+ */
+PddlGenInterface::GenerateMessage::GenerateMessage(const char * ini_goal) : Message("GenerateMessage")
+{
+  data_size = sizeof(GenerateMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (GenerateMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->goal, ini_goal, 1024);
+  add_fieldinfo(IFT_STRING, "goal", 1024, data->goal);
+}
 /** Constructor */
 PddlGenInterface::GenerateMessage::GenerateMessage() : Message("GenerateMessage")
 {
@@ -182,6 +195,7 @@ PddlGenInterface::GenerateMessage::GenerateMessage() : Message("GenerateMessage"
   memset(data_ptr, 0, data_size);
   data      = (GenerateMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
+  add_fieldinfo(IFT_STRING, "goal", 1024, data->goal);
 }
 
 /** Destructor */
@@ -203,6 +217,40 @@ PddlGenInterface::GenerateMessage::GenerateMessage(const GenerateMessage *m) : M
 }
 
 /* Methods */
+/** Get goal value.
+ * 
+    	Optional goal to insert into the template dictionary.
+    
+ * @return goal value
+ */
+char *
+PddlGenInterface::GenerateMessage::goal() const
+{
+  return data->goal;
+}
+
+/** Get maximum length of goal value.
+ * @return length of goal value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PddlGenInterface::GenerateMessage::maxlenof_goal() const
+{
+  return 1024;
+}
+
+/** Set goal value.
+ * 
+    	Optional goal to insert into the template dictionary.
+    
+ * @param new_goal new goal value
+ */
+void
+PddlGenInterface::GenerateMessage::set_goal(const char * new_goal)
+{
+  strncpy(data->goal, new_goal, sizeof(data->goal));
+}
+
 /** Clone this message.
  * Produces a message of the same type as this message and copies the
  * data to the new message.

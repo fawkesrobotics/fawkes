@@ -68,6 +68,8 @@ PddlRobotMemoryThread::init()
     config->get_string("plugins/pddl-robot-memory/input-problem-description"));
   output_path = StringConversions::resolve_path("@BASEDIR@/src/agents/" +
     config->get_string("plugins/pddl-robot-memory/output-problem-description"));
+  if(config->exists("plugins/pddl-robot-memory/goal"))
+    goal = config->get_string("plugins/pddl-robot-memory/goal");
 
   //setup interface
   gen_if = blackboard->open_for_writing<PddlGenInterface>(config->get_string("plugins/pddl-robot-memory/interface-name").c_str());
@@ -135,6 +137,8 @@ PddlRobotMemoryThread::loop()
       fill_dict_from_document(entry_dict, obj);
     }
   }
+  //Add goal to dictionary
+  dict.SetValue("GOAL", goal);
 
   //prepare template expanding
   ctemplate::StringToTemplateCache("tpl-cache", input, ctemplate::DO_NOT_STRIP);
@@ -179,14 +183,17 @@ bool
 PddlRobotMemoryThread::bb_interface_message_received(Interface *interface, fawkes::Message *message) throw()
 {
   if (message->is_of_type<PddlGenInterface::GenerateMessage>()) {
-      gen_if->set_msg_id(message->id());
-      gen_if->set_final(false);
-      gen_if->write();
-      wakeup(); //activates loop where the generation is done
-    } else {
-      logger->log_error(name(), "Received unknown message of type %s, ignoring",
-            message->type());
-    }
+    PddlGenInterface::GenerateMessage* msg = (PddlGenInterface::GenerateMessage*) message;
+    gen_if->set_msg_id(msg->id());
+    gen_if->set_final(false);
+    gen_if->write();
+    if(std::string(msg->goal()) != "")
+      goal = msg->goal();
+    wakeup(); //activates loop where the generation is done
+  } else {
+    logger->log_error(name(), "Received unknown message of type %s, ignoring",
+        message->type());
+  }
   return false;
 }
 

@@ -8,6 +8,7 @@ class PddlGenInterface : public Interface
 
   class GenerateMessage : public Message
   {
+    GenerateMessage(char * ini_goal);
     GenerateMessage();
     ~GenerateMessage();
 
@@ -28,6 +29,9 @@ class PddlGenInterface : public Interface
     void              unref();
     unsigned int      refcount();
 
+    char * goal();
+    void set_goal(const char * new_goal);
+    int maxlenof_goal() const;
   };
 
   unsigned int msg_id();

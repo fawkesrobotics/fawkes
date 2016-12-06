@@ -65,17 +65,24 @@ class PddlGenInterface : public Interface
     typedef struct {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      char goal[1024]; /**< 
+    	Optional goal to insert into the template dictionary.
+     */
     } GenerateMessage_data_t;
 #pragma pack(pop)
 
     GenerateMessage_data_t *data;
 
    public:
+    GenerateMessage(const char * ini_goal);
     GenerateMessage();
     ~GenerateMessage();
 
     GenerateMessage(const GenerateMessage *m);
     /* Methods */
+    char * goal() const;
+    void set_goal(const char * new_goal);
+    size_t maxlenof_goal() const;
     virtual Message * clone() const;
   };
 
