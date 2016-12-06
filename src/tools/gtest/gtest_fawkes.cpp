@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     fawkes_argv[1] = new char[2];
     strcpy(fawkes_argv[1], "-p");
     fawkes_argv[2] = new char[128];
-    strcpy(fawkes_argv[2], "static-transforms,m-robot-memory,robot_memory_test");
+    strcpy(fawkes_argv[2], "static-transforms,mongodb,robot-memory,robot_memory_test");
     fawkes_argv[3] = new char[2];
     strcpy(fawkes_argv[3], "-c");
     fawkes_argv[4] = new char[128];

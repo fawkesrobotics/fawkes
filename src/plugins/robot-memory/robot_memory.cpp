@@ -286,7 +286,8 @@ int RobotMemory::remove(Query query, std::string collection)
  */
 int RobotMemory::drop_collection(std::string collection)
 {
-  log_deb("Clearing whole robot memory");
+  check_collection_name(collection);
+  log_deb("Dropping collection " + collection);
   return remove("{}", collection);
 }
 
@@ -312,6 +313,7 @@ int RobotMemory::clear_memory()
  */
 int RobotMemory::restore_collection(std::string collection, std::string directory)
 {
+  check_collection_name(collection);
   drop_collection(collection);
 
   //resolve path to restore
@@ -326,7 +328,8 @@ int RobotMemory::restore_collection(std::string collection, std::string director
   log_deb(std::string("Restore collection " + collection + " from " + path), "warn");
 
   //call mongorestore from folder with initial restores
-  std::string command = "/usr/bin/mongorestore --dir " + path + " --quiet";
+  std::string command = "/usr/bin/mongorestore --dir " + path
+      + " --host=127.0.0.1 --quiet";
   log_deb(std::string("Restore command: " + command), "warn");
   FILE *bash_output = popen(command.c_str(), "r");
 
@@ -364,6 +367,7 @@ int RobotMemory::restore_collection(std::string collection, std::string director
  */
 int RobotMemory::dump_collection(std::string collection, std::string directory)
 {
+  check_collection_name(collection);
   //resolve path to dump to
   if(collection.find(".") == std::string::npos)
   {
@@ -377,10 +381,9 @@ int RobotMemory::dump_collection(std::string collection, std::string directory)
   //call mongorestore from folder with initial restores
   std::vector<std::string> split = str_split(collection, '.');
   std::string command = "/usr/bin/mongodump --out=" + path + " --db=" + split[0]
-    + " --collection=" + split[1] + " --quiet";
+    + " --collection=" + split[1] + " --host=127.0.0.1 --quiet";
   log_deb(std::string("Dump command: " + command), "warn");
   FILE *bash_output = popen(command.c_str(), "r");
-
   //check if output is ok
   if(!bash_output)
   {
@@ -515,10 +518,10 @@ RobotMemory::check_collection_name(std::string &collection)
   {
       collection = default_collection_;
   }
-  else if(default_collection_ != "robmem" && collection.find("robmem.") == 1)
+  if(database_name_ != "robmem" && collection.find("robmem.") == 0)
   {
     //change used database name (e.g. for the case of multiple simulated dababases)
-    collection.replace(0, 6, default_collection_);
+    collection.replace(0, 6, database_name_);
   }
 }
 
