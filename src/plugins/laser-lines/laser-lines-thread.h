@@ -140,6 +140,7 @@ class LaserLinesThread
   float        cfg_max_length_;
   unsigned int cfg_segm_min_inliers_;
   std::string  cfg_input_pcl_;
+  // the variable cfg_result_frame_ is not used anywhere in the plugin
   std::string  cfg_result_frame_;
   unsigned int cfg_max_num_lines_;
   float        cfg_switch_tolerance_;

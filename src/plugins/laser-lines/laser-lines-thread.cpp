@@ -75,6 +75,7 @@ LaserLinesThread::~LaserLinesThread()
 void
 LaserLinesThread::init()
 {
+  //step 1: read config-values
   cfg_segm_max_iterations_ =
     config->get_uint(CFG_PREFIX"line_segmentation_max_iterations");
   cfg_segm_distance_threshold_ =
@@ -104,7 +105,9 @@ LaserLinesThread::init()
     config->get_float(CFG_PREFIX"switch_tolerance");
 
   cfg_input_pcl_             = config->get_string(CFG_PREFIX"input_cloud");
+  //the variable cfg_result_frame_ is not used anywhere in this plugin
   cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
+  //max_num_lines_ resulting in the specified number of interfaces
   cfg_max_num_lines_         = config->get_uint(CFG_PREFIX"max_num_lines");
 
   cfg_tracking_frame_id_     = config->get_string("/frames/odom");
@@ -112,20 +115,24 @@ LaserLinesThread::init()
   finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pcl_.c_str());
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
 
+  //step 2: configure the interfaces
   try {
-    //double rotation[4] = {0., 0., 0., 1.};
+    //2.1:format the interface-arrays
     line_ifs_.resize(cfg_max_num_lines_, NULL);
     if(cfg_moving_avg_enabled_)
     {
       line_avg_ifs_.resize(cfg_max_num_lines_, NULL);
     }
+    //2.2:open interfaces for writing
     for (unsigned int i = 0; i < cfg_max_num_lines_; ++i) {
+      //2.2.1:create id name /laser-lines/(i+1)
       char *tmp;
       if (asprintf(&tmp, "/laser-lines/%u", i + 1) != -1) {
         // Copy to get memory freed on exception
         std::string id = tmp;
         free(tmp);
 
+	//2.2.2: actually opening the interfaces
 	line_ifs_[i] =
 	  blackboard->open_for_writing<LaserLineInterface>(id.c_str());
 	if(cfg_moving_avg_enabled_)
@@ -133,13 +140,10 @@ LaserLinesThread::init()
 	  line_avg_ifs_[i] =
 	    blackboard->open_for_writing<LaserLineInterface>((id + "/moving_avg").c_str());
 	}
-	/*
-	line_ifs_[i]->set_rotation(rotation);
-	line_ifs_[i]->write();
-	*/
       }
     }
 
+    //step 3:configure switch interface
     switch_if_ = NULL;
     switch_if_ = blackboard->open_for_writing<SwitchInterface>("laser-lines");
 
@@ -150,6 +154,7 @@ LaserLinesThread::init()
     switch_if_->set_enabled(autostart);
     switch_if_->write();
   } catch (Exception &e) {
+    //step 4:close all interfaces if something went wrong
     for (size_t i = 0; i < line_ifs_.size(); ++i) {
       blackboard->close(line_ifs_[i]);
       if(cfg_moving_avg_enabled_)
@@ -220,6 +225,7 @@ LaserLinesThread::loop()
 
   TIMETRACK_START(ttc_msgproc_);
 
+  //step 1:deal with switch on/off-messages
   while (! switch_if_->msgq_empty()) {
     if (SwitchInterface::EnableSwitchMessage *msg =
         switch_if_->msgq_first_safe(msg))
@@ -242,6 +248,7 @@ LaserLinesThread::loop()
     switch_if_->msgq_pop();
   }
 
+  //step 2:if switch is off, don't even try to do something
   if (! switch_if_->is_enabled()) {
     //TimeWait::wait(250000);
     return;
@@ -319,7 +326,7 @@ LaserLinesThread::loop()
 	finput_->header.frame_id,
 	cfg_tracking_frame_id_,
 	cfg_switch_tolerance_,
-	cfg_moving_avg_enabled_ ? cfg_moving_avg_window_size_ : 1,
+	cfg_moving_avg_enabled_ ? cfg_moving_avg_window_size_ : 1, // a 0 for the window size is more sensible, if avg is disabled
 	logger, name());
     tl.update(l);
     known_lines_.push_back(tl);
@@ -389,7 +396,6 @@ LaserLinesThread::loop()
   publish_visualization(known_lines_, "laser_lines", "laser_lines_moving_average");
 #endif
 
-  //*lines_ = *tmp_lines;
   if (finput_->header.frame_id == "" &&
       fawkes::runtime::uptime() >= tf_listener->get_cache_time())
   {
@@ -409,8 +415,8 @@ LaserLinesThread::loop()
 #endif
 }
 
-
-
+//the following function is quite buggy and should be replaced
+//by something like set_interface(LaserLineInterface,TrackeLineInfo)
 void
 LaserLinesThread::set_line(unsigned int idx,
                            fawkes::LaserLineInterface *iface,
@@ -418,13 +424,17 @@ LaserLinesThread::set_line(unsigned int idx,
                            const std::string &frame_id,
                            const LineInfo &info)
 {
+  //iface is not guaranteed to be the same one as in the loop before
   int visibility_history = iface->visibility_history();
   if (is_visible) {
+    //iface is not guaranteed to be the same one as in the loop before
     Eigen::Vector3f old_point_on_line(iface->point_on_line(0),
 				      iface->point_on_line(1),
 				      iface->point_on_line(2));
     float diff = (old_point_on_line - info.base_point).norm();
 
+    //diff not well-defined and also unneccessary check as it is already
+    //done in loop() by comparing to the TrackedLineInfo, see about line 310
     if (visibility_history >= 0 && (diff <= cfg_switch_tolerance_)) {
       iface->set_visibility_history(visibility_history + 1);
     } else {
