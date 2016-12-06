@@ -57,6 +57,8 @@ class LineInfo {
 
 class TrackedLineInfo {
 public:
+  int interface_idx;			///< id of the interface, this line is written to, -1 when not yet assigned
+  int visibility_history;	///< visibility history of this line, negative for "no sighting"
   LineInfo raw;   	///< the latest geometry of this line, i.e. unfiltered
   LineInfo smooth;	///< moving-average geometry of this line (cf. length of history buffer)
   fawkes::tf::Stamped<fawkes::tf::Point> base_point_odom;	///< last reference point (in odom frame) for line tracking
@@ -80,6 +82,7 @@ public:
 
   btScalar distance(const LineInfo &linfo) const;
   void update(LineInfo &new_linfo);
+  void not_visible_update();
 };
 
 #endif

@@ -96,11 +96,13 @@ class LaserLinesThread
 
  private:
 
-  void set_line(unsigned int idx,
+  void set_interface(unsigned int idx,
                 fawkes::LaserLineInterface *iface,
-                bool is_visible,
-                const std::string &frame_id = "",
-                const LineInfo &info = LineInfo());
+                bool moving_average,
+                const TrackedLineInfo &tinfo,
+                const std::string &frame_id = "") const;
+
+  void set_empty_interface(fawkes::LaserLineInterface *iface) const;
 
 
 #ifdef HAVE_VISUAL_DEBUGGING
@@ -140,8 +142,6 @@ class LaserLinesThread
   float        cfg_max_length_;
   unsigned int cfg_segm_min_inliers_;
   std::string  cfg_input_pcl_;
-  // the variable cfg_result_frame_ is not used anywhere in the plugin
-  std::string  cfg_result_frame_;
   unsigned int cfg_max_num_lines_;
   float        cfg_switch_tolerance_;
   float        cfg_cluster_tolerance_;

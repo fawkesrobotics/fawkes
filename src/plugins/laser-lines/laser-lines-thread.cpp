@@ -105,8 +105,6 @@ LaserLinesThread::init()
     config->get_float(CFG_PREFIX"switch_tolerance");
 
   cfg_input_pcl_             = config->get_string(CFG_PREFIX"input_cloud");
-  //the variable cfg_result_frame_ is not used anywhere in this plugin
-  cfg_result_frame_          = config->get_string(CFG_PREFIX"result_frame");
   //max_num_lines_ resulting in the specified number of interfaces
   cfg_max_num_lines_         = config->get_uint(CFG_PREFIX"max_num_lines");
 
@@ -263,15 +261,10 @@ LaserLinesThread::loop()
     //logger->log_warn(name(), "Empty voxelized point cloud, omitting loop");
     //TimeWait::wait(50000);
 
-    for (unsigned int i = 0; i < cfg_max_num_lines_; ++i) {
-	    set_line(i, line_ifs_[i], false);
-      if(cfg_moving_avg_enabled_)
-      {
-	      set_line(i, line_avg_ifs_[i], false);
-      }
+    for (unsigned int i = 0; i < this->known_lines_.size(); ++i) {
+      known_lines_[i].not_visible_update();
     }
-
-    return;
+    goto writing_interfaces;
   }
 
   //logger->log_info(name(), "[L %u] total: %zu   finite: %zu",
@@ -315,8 +308,10 @@ LaserLinesThread::loop()
       linfos.erase(best_match);
       ++known_it;
     }
-    else // No match for this line, so kill it
-      known_it = known_lines_.erase(known_it);
+    else { // No match for this line
+    	known_it->not_visible_update();
+    	++known_it;
+    }
   }
 
   for (LineInfo &l : linfos) {
@@ -326,7 +321,7 @@ LaserLinesThread::loop()
 	finput_->header.frame_id,
 	cfg_tracking_frame_id_,
 	cfg_switch_tolerance_,
-	cfg_moving_avg_enabled_ ? cfg_moving_avg_window_size_ : 1, // a 0 for the window size is more sensible, if avg is disabled
+	cfg_moving_avg_enabled_ ? cfg_moving_avg_window_size_ : 0,
 	logger, name());
     tl.update(l);
     known_lines_.push_back(tl);
@@ -334,7 +329,18 @@ LaserLinesThread::loop()
 
   }
 
-  // When there are too many lines, delete the ones farthest away
+  // When there are too many lines, delete the ones with negative and lowest
+  // visibility history
+  std::sort(known_lines_.begin(), known_lines_.end(),
+      [](const TrackedLineInfo &l1, const TrackedLineInfo &l2) -> bool
+      {
+	return l1.visibility_history < l2.visibility_history;
+      }
+  );
+  while (known_lines_.size() > cfg_max_num_lines_ && known_lines_[0].visibility_history<0)
+    known_lines_.erase(known_lines_.begin());
+
+  // When there are still too many lines, delete the ones farthest away
   std::sort(known_lines_.begin(), known_lines_.end(),
       [](const TrackedLineInfo &l1, const TrackedLineInfo &l2) -> bool
       {
@@ -344,6 +350,7 @@ LaserLinesThread::loop()
   while (known_lines_.size() > cfg_max_num_lines_)
     known_lines_.erase(known_lines_.end() - 1);
 
+  writing_interfaces:
   // Then sort by bearing to stabilize blackboard interface assignment
   std::sort(known_lines_.begin(), known_lines_.end(),
       [](const TrackedLineInfo &l1, const TrackedLineInfo &l2) -> bool
@@ -354,19 +361,10 @@ LaserLinesThread::loop()
 
   // set line parameters
   size_t oi = 0;
-  unsigned int line_if_idx = 0;
   for (size_t i = 0; i < known_lines_.size(); ++i) {
     const TrackedLineInfo &info = known_lines_[i];
 
-    if (line_if_idx < cfg_max_num_lines_) {
-      set_line(line_if_idx, line_ifs_[line_if_idx], true, finput_->header.frame_id, info.raw);
-      if(cfg_moving_avg_enabled_)
-      {
-        set_line(line_if_idx, line_avg_ifs_[line_if_idx], true, finput_->header.frame_id, info.smooth);
-      }
-      line_if_idx++;
-    }
-
+    if(info.raw.cloud){
     for (size_t p = 0; p < info.raw.cloud->points.size(); ++p) {
       ColorPointType &out_point = lines_->points[oi++];
       PointType &in_point  = info.raw.cloud->points[p];
@@ -382,13 +380,40 @@ LaserLinesThread::loop()
 	out_point.r = out_point.g = out_point.b = 1.0;
       }
     }
+    }
   }
 
-  for (unsigned int i = line_if_idx; i < cfg_max_num_lines_; ++i) {
-    set_line(i, line_ifs_[i], false);
-    if(cfg_moving_avg_enabled_)
-    {
-      set_line(i, line_avg_ifs_[i], false);
+  //set interfaces
+  for (unsigned int line_if_idx = 0; line_if_idx < cfg_max_num_lines_; ++line_if_idx){
+    int known_line_idx = -1;
+    //find the associated known line to the interface
+    //if there is none, make a new association with the first, newfound line
+    //otherwise clear the interface (indicated by known_line_idx = -1)
+    for (unsigned int test_idx = 0; test_idx < known_lines_.size(); ++test_idx){
+      const TrackedLineInfo &info = known_lines_[test_idx];
+      if(info.interface_idx == (int) line_if_idx){
+        known_line_idx = test_idx;
+        break;
+      }
+      if (info.interface_idx == -1 && known_line_idx == -1){
+        known_line_idx = test_idx;
+      }
+    }
+
+    if(known_line_idx == -1){
+      set_empty_interface(line_ifs_[line_if_idx]);
+      if(cfg_moving_avg_enabled_)
+      {
+        set_empty_interface(line_avg_ifs_[line_if_idx]);
+      }
+    } else {
+      known_lines_[known_line_idx].interface_idx = line_if_idx;
+      const TrackedLineInfo &info = known_lines_[known_line_idx];
+      set_interface(line_if_idx, line_ifs_[line_if_idx], false, info, finput_->header.frame_id);
+      if(cfg_moving_avg_enabled_)
+      {
+        set_interface(line_if_idx, line_avg_ifs_[line_if_idx], true, info, finput_->header.frame_id);
+      }
     }
   }
 
@@ -415,31 +440,16 @@ LaserLinesThread::loop()
 #endif
 }
 
-//the following function is quite buggy and should be replaced
-//by something like set_interface(LaserLineInterface,TrackeLineInfo)
 void
-LaserLinesThread::set_line(unsigned int idx,
+LaserLinesThread::set_interface(unsigned int idx,
                            fawkes::LaserLineInterface *iface,
-                           bool is_visible,
-                           const std::string &frame_id,
-                           const LineInfo &info)
+                           bool moving_average,
+                           const TrackedLineInfo &tinfo,
+                           const std::string &frame_id) const
 {
-  //iface is not guaranteed to be the same one as in the loop before
-  int visibility_history = iface->visibility_history();
-  if (is_visible) {
-    //iface is not guaranteed to be the same one as in the loop before
-    Eigen::Vector3f old_point_on_line(iface->point_on_line(0),
-				      iface->point_on_line(1),
-				      iface->point_on_line(2));
-    float diff = (old_point_on_line - info.base_point).norm();
+  const LineInfo& info = moving_average ? tinfo.smooth : tinfo.raw;
 
-    //diff not well-defined and also unneccessary check as it is already
-    //done in loop() by comparing to the TrackedLineInfo, see about line 310
-    if (visibility_history >= 0 && (diff <= cfg_switch_tolerance_)) {
-      iface->set_visibility_history(visibility_history + 1);
-    } else {
-      iface->set_visibility_history(1);
-    }
+  iface->set_visibility_history(tinfo.visibility_history);
 
     //add the offset and publish
     float if_point_on_line[3] =
@@ -459,6 +469,10 @@ LaserLinesThread::set_line(unsigned int idx,
     iface->set_end_point_1(if_end_point_1);
     iface->set_end_point_2(if_end_point_2);
 
+    if(tinfo.visibility_history<=0){
+      iface->write();
+      return;
+    }
     // this makes the usual assumption that the laser data is in the X-Y plane
     fawkes::Time now(clock);  
     std::string frame_name_1, frame_name_2;
@@ -494,7 +508,11 @@ LaserLinesThread::set_line(unsigned int idx,
 	    logger->log_warn(name(), "Failed to determine frame names");
     }
 
-  } else {
+  iface->write();
+}
+
+void LaserLinesThread::set_empty_interface(fawkes::LaserLineInterface *iface) const{
+    int visibility_history = iface->visibility_history();
     if (visibility_history <= 0) {
       iface->set_visibility_history(visibility_history - 1);
     } else {
@@ -508,7 +526,6 @@ LaserLinesThread::set_line(unsigned int idx,
       iface->set_length(0);
       iface->set_frame_id("");
     }
-  }
   iface->write();
 }
 
@@ -694,8 +711,10 @@ LaserLinesThread::publish_visualization(const std::vector<TrackedLineInfo> &linf
  
   for (size_t i = 0; i < linfos.size(); ++i) {
 	  const TrackedLineInfo &info = linfos[i];
-	  publish_visualization_add_line(m, idnum, info.raw, i, marker_namespace);
-	  publish_visualization_add_line(m, idnum, info.smooth, i, avg_marker_namespace, "_avg");
+	  if(info.visibility_history > 0){
+	    publish_visualization_add_line(m, idnum, info.raw, info.interface_idx, marker_namespace);
+	    publish_visualization_add_line(m, idnum, info.smooth, info.interface_idx, avg_marker_namespace, "_avg");
+	  }
   }
 
   for (size_t i = idnum; i < last_id_num_; ++i) {
