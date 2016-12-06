@@ -287,8 +287,9 @@ int RobotMemory::remove(Query query, std::string collection)
 int RobotMemory::drop_collection(std::string collection)
 {
   check_collection_name(collection);
+  MutexLocker lock(mutex_);
   log_deb("Dropping collection " + collection);
-  return remove("{}", collection);
+  return mongodb_client_->dropCollection(collection);
 }
 
 /**
