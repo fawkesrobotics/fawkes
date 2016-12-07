@@ -55,7 +55,7 @@ using namespace mongo;
 
 PddlRobotMemoryThread::PddlRobotMemoryThread()
  : Thread("PddlRobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
-   BlackBoardInterfaceListener("NavGraphGeneratorThread")
+   BlackBoardInterfaceListener("PddlRobotMemoryThread")
 {
 }
 
