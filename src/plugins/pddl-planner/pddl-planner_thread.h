@@ -53,6 +53,7 @@ class PddlPlannerThread
  private:
   fawkes::PddlPlannerInterface *gen_if;
   std::string result_path;
+  std::string collection;
 
   virtual bool bb_interface_message_received(fawkes::Interface *interface,
                                              fawkes::Message *message) throw();

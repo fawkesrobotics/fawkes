@@ -55,6 +55,7 @@ PddlPlannerThread::init()
   blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 
   result_path = StringConversions::resolve_path(config->get_string("plugins/pddl-planner/description-folder") + config->get_string("plugins/pddl-planner/result-file"));
+  collection = config->get_string("plugins/pddl-planner/collection");
 }
 
 /**
@@ -92,12 +93,14 @@ PddlPlannerThread::loop()
   else
   {
     logger->log_error(name(), "Could not open %s", result_path.c_str());
+    robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:'failed'}"), collection, true);
     return;
   }
   size_t cur_pos = 0;
   if(result.find("found legal plan as follows", cur_pos) == std::string::npos)
   {
-    logger->log_error(name(), "Planning Failed");
+    logger->log_error(name(), "Planning Failed: %s", result.c_str());
+    robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:'failed'}"), collection, true);
     return;
   }
   //remove stuff that could confuse us later
@@ -105,7 +108,7 @@ PddlPlannerThread::loop()
 
   cur_pos = result.find("step", cur_pos) + 4;
   BSONObjBuilder plan_builder;
-  plan_builder << "plan" << 1;
+  plan_builder << "plan" << "success";
   BSONArrayBuilder steps_arr_builder;
   while(result.find(": ", cur_pos) != std::string::npos)
   {
@@ -140,7 +143,7 @@ PddlPlannerThread::loop()
   logger->log_info(name(), "Plan: %s", plan.toString().c_str());
 
   //Write result into Robot Memory
-  robot_memory->update(fromjson("{plan:1}"), plan, config->get_string("plugins/pddl-planner/collection"), true);
+  robot_memory->update(fromjson("{plan:{$exists:true}}"), plan, collection, true);
 }
 
 void
