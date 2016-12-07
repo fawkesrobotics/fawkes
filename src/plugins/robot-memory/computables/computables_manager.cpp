@@ -45,6 +45,8 @@ ComputablesManager::ComputablesManager(fawkes::Logger* logger, fawkes::Configura
   try {
     matching_test_collection_ = config_->get_string("/plugins/robot-memory/database") + ".computables_matching";
   } catch (Exception &e) {}
+
+  srand(time(NULL));
 }
 
 ComputablesManager::~ComputablesManager()
