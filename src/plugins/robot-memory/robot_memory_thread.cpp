@@ -60,7 +60,7 @@ RobotMemoryThread::init()
   robot_memory_inifin_.set_robot_memory(robot_memory);
 
   //register computables
-  blackboard_computable = new BlackboardComputable(robot_memory, blackboard, logger);
+  blackboard_computable = new BlackboardComputable(robot_memory, blackboard, logger, config);
   transform_computable = new TransformComputable(robot_memory, tf_listener, logger, config);
 }
 

@@ -56,10 +56,14 @@ class ComputablesManager
      * @return Computable Object pointer used for removing it
      */
     template<typename T>
-    Computable* register_computable(mongo::Query query_to_compute, std::string collection, std::list<mongo::BSONObj>(T::*compute_func)(mongo::BSONObj, std::string), T *obj, double caching_time = 0.0)
+    Computable* register_computable(mongo::Query query_to_compute, std::string collection, std::list<mongo::BSONObj>(T::*compute_func)(mongo::BSONObj, std::string), T *obj, double caching_time = 0.0, int priority = 0)
     {
-      Computable* comp = new Computable(query_to_compute, collection, boost::bind(compute_func, obj, _1, _2), caching_time);
-      computables.push_back(comp);
+      Computable* comp = new Computable(query_to_compute, collection, boost::bind(compute_func, obj, _1, _2), caching_time, priority);
+      //sort it into the right position
+      std::list<Computable*>::iterator pos = computables.begin();
+      while(pos != computables.end() && priority < (*pos)->get_priority())
+        pos++;
+      computables.insert(pos, comp);
       return comp;
     }
 

@@ -25,6 +25,7 @@
 #include "../robot_memory.h"
 #include <blackboard/blackboard.h>
 #include <aspect/logging.h>
+#include <config/config.h>
 
 /** @class BlackboardComputable  blackboard_computable.h
  *
@@ -33,7 +34,7 @@
 class BlackboardComputable
 {
   public:
-    BlackboardComputable(RobotMemory* robot_memory, fawkes::BlackBoard* blackboard, fawkes::Logger* logger);
+    BlackboardComputable(RobotMemory* robot_memory, fawkes::BlackBoard* blackboard, fawkes::Logger* logger, fawkes::Configuration* config);
     virtual ~BlackboardComputable();
 
   private:

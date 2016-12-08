@@ -30,7 +30,7 @@
 using namespace fawkes;
 using namespace mongo;
 
-BlackboardComputable::BlackboardComputable(RobotMemory* robot_memory, fawkes::BlackBoard* blackboard, fawkes::Logger* logger)
+BlackboardComputable::BlackboardComputable(RobotMemory* robot_memory, fawkes::BlackBoard* blackboard, fawkes::Logger* logger, fawkes::Configuration* config)
 {
   robot_memory_ = robot_memory;
   blackboard_ = blackboard;
@@ -38,7 +38,9 @@ BlackboardComputable::BlackboardComputable(RobotMemory* robot_memory, fawkes::Bl
 
   //register computable
   Query query = fromjson("{interface:{$exists:true}}");
-  computable = robot_memory_->register_computable(query, "robmem.blackboard", &BlackboardComputable::compute_interfaces, this);
+  int priority = config->get_int("plugins/robot-memory/computables/blackboard/priority");
+  float caching_time = config->get_float("plugins/robot-memory/computables/blackboard/caching-time");
+  computable = robot_memory_->register_computable(query, "robmem.blackboard", &BlackboardComputable::compute_interfaces, this, caching_time, priority);
 }
 
 BlackboardComputable::~BlackboardComputable()

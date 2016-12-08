@@ -30,13 +30,14 @@ using namespace mongo;
  * @author Frederik Zwilling
  */
 
-Computable::Computable(Query query_to_compute, std::string collection, const boost::function<std::list<BSONObj> (BSONObj, std::string)> &compute_function, double caching_time)
+Computable::Computable(Query query_to_compute, std::string collection, const boost::function<std::list<BSONObj> (BSONObj, std::string)> &compute_function, double caching_time, int priority)
 {
   this->compute_function = compute_function;
   this->query_to_compute = query_to_compute;
   this->collection = collection;
   //convert caching time to milliseconds
   this->caching_time = (int) (caching_time * 1000.0);
+  this->priority = priority;
 }
 
 Computable::~Computable()
@@ -88,6 +89,15 @@ mongo::Query Computable::get_query()
 std::string Computable::get_collection()
 {
   return collection;
+}
+
+/**
+ * Gets the priority of the computable
+ * @return The query
+ */
+int Computable::get_priority()
+{
+  return priority;
 }
 
 

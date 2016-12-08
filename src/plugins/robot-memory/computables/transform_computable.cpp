@@ -39,9 +39,11 @@ TransformComputable::TransformComputable(RobotMemory* robot_memory, fawkes::tf::
   //register computable
   Query query = fromjson("{frame:{$exists:true},allow_tf:true}");
   std::vector<std::string>  collections = config->get_strings("plugins/robot-memory/computables/transform/collections");
+  int priority = config->get_int("plugins/robot-memory/computables/transform/priority");
+  float caching_time = config->get_float("plugins/robot-memory/computables/transform/caching-time");
   for(std::string col : collections)
   {
-    computables.push_back(robot_memory_->register_computable(query, col, &TransformComputable::compute_transform, this));
+    computables.push_back(robot_memory_->register_computable(query, col, &TransformComputable::compute_transform, this, caching_time, priority));
   }
 }
 

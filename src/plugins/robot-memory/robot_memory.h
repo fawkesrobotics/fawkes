@@ -102,9 +102,9 @@ class RobotMemory
      * @return Computable Object pointer used for removing it
      */
     template<typename T>
-    Computable* register_computable(mongo::Query query_to_compute, std::string collection, std::list<mongo::BSONObj>(T::*compute_func)(mongo::BSONObj, std::string), T *obj, double caching_time = 0.0)
+    Computable* register_computable(mongo::Query query_to_compute, std::string collection, std::list<mongo::BSONObj>(T::*compute_func)(mongo::BSONObj, std::string), T *obj, double caching_time = 0.0, int priority = 0)
     {
-      return computables_manager_->register_computable(query_to_compute, collection, compute_func, obj, caching_time);
+      return computables_manager_->register_computable(query_to_compute, collection, compute_func, obj, caching_time, priority);
     }
     void remove_computable(Computable* computable);
 
