@@ -61,6 +61,40 @@ NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *h
   }
 }
 
+	/** Constructor.
+ * @param handler Connection handler for newly accepted incoming connections.
+ * @param addr_type Specify IPv4 or IPv6
+ * @param listen_addr IP address to listen on (format depends on addr_type), nullptr to listen
+ * on any local (address type specific) address, e.g., :: for IPv6.
+ * @param port port to listen on for incoming connections
+ * @param thread_name name of the thread
+ * @exception SocketException as thrown by StreamSocket connstructor, bind and listen.
+ */
+NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
+                                             Socket::AddrType addr_type,
+                                             const std::string &listen_addr,
+                                             unsigned short int port,
+                                             const char *thread_name)
+  : Thread(thread_name)
+{
+  __handler = handler;
+  __port    = port;
+
+  set_prepfin_conc_loop(true);
+
+  try {
+    __socket = new StreamSocket(addr_type);
+    if (listen_addr.empty()) {
+	    __socket->bind(__port);
+    } else {
+	    __socket->bind(__port, listen_addr.c_str());
+    }
+    __socket->listen();
+  } catch (SocketException &e) {
+    throw;
+  }
+}
+
 
 /** Constructor.
  * @param handler Connection handler for newly accepted incoming connections.
