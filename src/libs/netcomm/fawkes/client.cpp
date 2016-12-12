@@ -209,7 +209,7 @@ class FawkesNetworkClientRecvThread : public Thread
 
   /** Receive and process messages. */
   void recv()
-  {
+	{
     std::list<unsigned int> wakeup_list;
 
     try {
@@ -292,15 +292,13 @@ class FawkesNetworkClientRecvThread : public Thread
  */
 
 /** Constructor.
- * @param hostname remote host to connect to.
+ * @param host remote host to connect to.
  * @param port port to connect to.
- * @param ip optional: use ip to connect, and hostname for cosmetic purposes
  */
-FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short int port, const char *ip)
+FawkesNetworkClient::FawkesNetworkClient(const char *host, unsigned short int port)
 {
-  __hostname = strdup(hostname);
-  __ip = ip ? strdup(ip) : NULL;
-  __port     = port;
+  __host = strdup(host);
+  __port = port;
 
   s = NULL;
   __send_slave = NULL;
@@ -330,9 +328,8 @@ FawkesNetworkClient::FawkesNetworkClient(const char *hostname, unsigned short in
  */
 FawkesNetworkClient::FawkesNetworkClient()
 {
-  __hostname = NULL;
-  __ip = NULL;
-  __port     = 0;
+  __host = NULL;
+  __port = 0;
 
   s = NULL;
   __send_slave = NULL;
@@ -358,16 +355,14 @@ FawkesNetworkClient::FawkesNetworkClient()
 
 /** Constructor.
  * @param id id of the client.
- * @param hostname remote host to connect to.
+ * @param host remote host to connect to.
  * @param port port to connect to.
- * @param ip optional: use ip to connect, and hostname for cosmetic purposes
  */
-FawkesNetworkClient::FawkesNetworkClient(unsigned int id, const char *hostname,
-                                         unsigned short int port, const char *ip)
+FawkesNetworkClient::FawkesNetworkClient(unsigned int id, const char *host,
+                                         unsigned short int port)
 {
-  __hostname = strdup(hostname);
-  __ip = ip ? strdup(ip) : NULL;
-  __port     = port;
+  __host = strdup(host);
+  __port = port;
 
   s = NULL;
   __send_slave = NULL;
@@ -397,8 +392,7 @@ FawkesNetworkClient::~FawkesNetworkClient()
   disconnect();
 
   delete s;
-  if (__hostname) free(__hostname);
-  if (__ip) free(__ip);
+  if (__host) free(__host);
   delete slave_status_mutex;
 
   delete __connest_waitcond;
@@ -415,7 +409,7 @@ FawkesNetworkClient::~FawkesNetworkClient()
 void
 FawkesNetworkClient::connect()
 {
-  if ( __hostname == NULL && __ip == NULL) {
+  if ( __host == NULL ) {
     throw NullPointerException("Hostname not set. Cannot connect.");
   }
 
@@ -428,7 +422,7 @@ FawkesNetworkClient::connect()
 
   try {
     s = new StreamSocket();
-    s->connect(__ip ? __ip : __hostname, __port);
+    s->connect(__host, __port);
     __send_slave = new FawkesNetworkClientSendThread(s, this);
     __send_slave->start();
     __recv_slave = new FawkesNetworkClientRecvThread(s, this, __recv_mutex);
@@ -469,32 +463,17 @@ FawkesNetworkClient::connect()
 }
 
 
-/** Connect to new host and port.
- * @param hostname new hostname to connect to
- * @param port new port to connect to
- * @see connect() Look there for more documentation and notes about possible
- * exceptions.
- */
-void
-FawkesNetworkClient::connect(const char *hostname, unsigned short int port)
-{
-  connect(hostname, NULL, port);
-}
-
 /** Connect to new ip and port, and set hostname.
- * @param hostname remote host name
- * @param ip new ip to connect to
+ * @param host remote host name
  * @param port new port to connect to
  * @see connect() Look there for more documentation and notes about possible
  * exceptions.
  */
 void
-FawkesNetworkClient::connect(const char *hostname, const char *ip, unsigned short int port)
+FawkesNetworkClient::connect(const char *host, unsigned short int port)
 {
-  if (__hostname)  free(__hostname);
-  if (__ip) free(__ip);
-  __hostname = strdup(hostname);
-  __ip = ip ? strdup(ip) : NULL;
+  if (__host)  free(__host);
+  __host = strdup(host);
   __port = port;
   connect();
 }
@@ -830,16 +809,7 @@ FawkesNetworkClient::id() const
 const char *
 FawkesNetworkClient::get_hostname() const
 {
-  return __hostname;
-}
-
-/** Get the client's ip
- * @return ip or NULL
- */
-const char *
-FawkesNetworkClient::get_ip() const
-{
-  return __ip;
+  return __host;
 }
 
 } // end namespace fawkes

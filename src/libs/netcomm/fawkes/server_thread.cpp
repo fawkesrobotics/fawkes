@@ -47,11 +47,19 @@ namespace fawkes {
  */
 
 /** Constructor.
- * @param thread_collector thread collector to register new threads with
+ * @param enable_ipv4 true to listen on the IPv4 TCP port
+ * @param enable_ipv6 true to listen on the IPv6 TCP port
+ * @param listen_ipv4 IPv4 address to listen on for incoming connections,
+ * nullptr or 0.0.0.0 to listen on any local address
+ * @param listen_ipv6 IPv6 address to listen on for incoming connections,
+ * nullptr or :: to listen on any local address
  * @param fawkes_port port for Fawkes network protocol
+ * @param thread_collector thread collector to register new threads with
  */
-FawkesNetworkServerThread::FawkesNetworkServerThread(unsigned int fawkes_port,
-						     ThreadCollector *thread_collector)
+FawkesNetworkServerThread::FawkesNetworkServerThread(bool enable_ipv4, bool enable_ipv6,
+                                                     const std::string &listen_ipv4, const std::string &listen_ipv6,
+                                                     unsigned int fawkes_port,
+                                                     ThreadCollector *thread_collector)
   : Thread("FawkesNetworkServerThread", Thread::OPMODE_WAITFORWAKEUP)
 {
   this->thread_collector = thread_collector;
@@ -59,12 +67,23 @@ FawkesNetworkServerThread::FawkesNetworkServerThread(unsigned int fawkes_port,
   next_client_id = 1;
   inbound_messages = new FawkesNetworkMessageQueue();
 
-  acceptor_thread = new NetworkAcceptorThread(this, fawkes_port,
-					      "FawkesNetworkAcceptorThread");
+  if (enable_ipv4) {
+	  acceptor_threads.push_back(new NetworkAcceptorThread(this, Socket::IPv4, listen_ipv4, fawkes_port,
+	                                                       "FawkesNetworkAcceptorThread"));
+  }
+  if (enable_ipv6) {
+	  acceptor_threads.push_back(new NetworkAcceptorThread(this, Socket::IPv6, listen_ipv6, fawkes_port,
+	                                                       "FawkesNetworkAcceptorThread"));
+  }
+		  
   if ( thread_collector ) {
-    thread_collector->add(acceptor_thread);
+	  for (size_t i = 0; i < acceptor_threads.size(); ++i) {
+		  thread_collector->add(acceptor_threads[i]);
+	  }
   } else {
-    acceptor_thread->start();
+	  for (size_t i = 0; i < acceptor_threads.size(); ++i) {
+		  acceptor_threads[i]->start();
+	  }
   }
 }
 
@@ -81,13 +100,16 @@ FawkesNetworkServerThread::~FawkesNetworkServerThread()
     }
     delete (*cit).second;
   }
-  if ( thread_collector ) {
-    thread_collector->remove(acceptor_thread);
-  } else {
-    acceptor_thread->cancel();
-    acceptor_thread->join();
+  for (size_t i = 0; i < acceptor_threads.size(); ++i) {
+	  if ( thread_collector ) {
+		  thread_collector->remove(acceptor_threads[i]);
+	  } else {
+		  acceptor_threads[i]->cancel();
+		  acceptor_threads[i]->join();
+	  }
+	  delete acceptor_threads[i];
   }
-  delete acceptor_thread;
+  acceptor_threads.clear();
 
   delete inbound_messages;
 }

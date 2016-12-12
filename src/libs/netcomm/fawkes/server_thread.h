@@ -29,6 +29,9 @@
 #include <netcomm/fawkes/hub.h>
 #include <netcomm/utils/incoming_connection_handler.h>
 
+#include <vector>
+#include <string>
+
 namespace fawkes {
 
 class ThreadCollector;
@@ -46,8 +49,10 @@ class FawkesNetworkServerThread
   public NetworkIncomingConnectionHandler
 {
  public:
-  FawkesNetworkServerThread(unsigned int fawkes_port,
-			    ThreadCollector *thread_collector = 0);
+  FawkesNetworkServerThread(bool enable_ipv4, bool enable_ipv6,
+                            const std::string &listen_ipv4, const std::string &listen_ipv6,
+                            unsigned int fawkes_port,
+                            ThreadCollector *thread_collector = 0);
   virtual ~FawkesNetworkServerThread();
 
   virtual void loop();
@@ -81,7 +86,7 @@ class FawkesNetworkServerThread
  private:
   ThreadCollector       *thread_collector;
   unsigned int           next_client_id;
-  NetworkAcceptorThread *acceptor_thread;
+  std::vector<NetworkAcceptorThread *> acceptor_threads;
 
   // key: component id,  value: handler
   LockMap<unsigned int, FawkesNetworkHandler *> handlers;
