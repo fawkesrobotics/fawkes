@@ -81,6 +81,8 @@ PddlPlannerThread::loop()
   }
   logger->log_info(name(), "Finished planning");
 
+  sleep(2);
+
   //Parse Result and write it into the robot memory
   logger->log_info(name(), "Parsing result");
   std::string result;
@@ -93,14 +95,14 @@ PddlPlannerThread::loop()
   else
   {
     logger->log_error(name(), "Could not open %s", result_path.c_str());
-    robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:'failed'}"), collection, true);
+    robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:1,fail:1,steps:[]}"), collection, true);
     return;
   }
   size_t cur_pos = 0;
   if(result.find("found legal plan as follows", cur_pos) == std::string::npos)
   {
     logger->log_error(name(), "Planning Failed: %s", result.c_str());
-    robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:'failed'}"), collection, true);
+    robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:1,fail:1,steps:[]}"), collection, true);
     return;
   }
   //remove stuff that could confuse us later
@@ -108,7 +110,7 @@ PddlPlannerThread::loop()
 
   cur_pos = result.find("step", cur_pos) + 4;
   BSONObjBuilder plan_builder;
-  plan_builder << "plan" << "success";
+  plan_builder << "plan" << 1;
   BSONArrayBuilder steps_arr_builder;
   while(result.find(": ", cur_pos) != std::string::npos)
   {
