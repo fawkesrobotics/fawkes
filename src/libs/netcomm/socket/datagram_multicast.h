@@ -32,8 +32,9 @@ namespace fawkes {
 class MulticastDatagramSocket : public Socket
 {
  public:
-  MulticastDatagramSocket(const char *multicast_addr_s, unsigned short port,
-			  float timeout = 0.f);
+	MulticastDatagramSocket(AddrType addr_type,
+	                        const char *multicast_addr_s, unsigned short port,
+	                        float timeout = 0.f);
   MulticastDatagramSocket(MulticastDatagramSocket &s);
   virtual ~MulticastDatagramSocket();
 

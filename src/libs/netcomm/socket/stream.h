@@ -31,7 +31,8 @@ namespace fawkes {
 class StreamSocket : public Socket
 {
  public:
-  StreamSocket(float timeout = 0.f);
+	StreamSocket(float timeout = 0.f);
+	StreamSocket(AddrType addr_type, float timeout = 0.f);
   StreamSocket(StreamSocket &s);
 
   virtual Socket *  clone();

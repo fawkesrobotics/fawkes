@@ -41,16 +41,18 @@ namespace fawkes {
  */
 
 /** Constructor.
+ * @param addr_type Specify IPv4 or IPv6
  * @param multicast_addr_s textual representation of the multicast IP address
  * to use for multicast communication. NOT a hostname!
  * @param port port
  * @param timeout timeout, if 0 all operationsare blocking, otherwise it
  * is tried for timeout seconds.
  */
-MulticastDatagramSocket::MulticastDatagramSocket(const char *multicast_addr_s,
+	MulticastDatagramSocket::MulticastDatagramSocket(AddrType addr_type,
+                                                 const char *multicast_addr_s,
 						 unsigned short port,
 						 float timeout)
-  : Socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP, timeout)
+  : Socket(addr_type, UDP, timeout)
 {
   multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
 
@@ -94,14 +96,14 @@ MulticastDatagramSocket::bind()
 {
   int reuse = 1;
   if ( setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) == -1) {
-    throw SocketException("Could not set SO_REUSEADDR", errno);
+	  throw SocketException(errno, "Could not set SO_REUSEADDR");
   }
 
   struct ip_mreq imr;
   imr.imr_multiaddr.s_addr = multicast_addr->sin_addr.s_addr;
   imr.imr_interface.s_addr = htonl( INADDR_ANY );
   if ( setsockopt(sock_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &imr, sizeof(imr)) == -1 ) {
-    throw SocketException("Could not add multicast group membership", errno);
+	  throw SocketException(errno, "Could not add multicast group membership");
   }
 
   struct ::sockaddr_in local;
@@ -110,7 +112,7 @@ MulticastDatagramSocket::bind()
   local.sin_port = multicast_addr->sin_port;
 
   if (::bind(sock_fd, (struct ::sockaddr *) &local, sizeof(local)) < 0) {
-    throw SocketException("Could not bind to port", errno);
+	  throw SocketException(errno, "Could not bind to port");
   }
 }
 
@@ -176,7 +178,7 @@ MulticastDatagramSocket::set_loop(bool loop)
 {
   int l = (loop ? 1 : 0);
   if (setsockopt(sock_fd, IPPROTO_IP, IP_MULTICAST_LOOP, &l, sizeof(l)) == -1) {
-    throw SocketException("MulticastDatagramSocket::set_loop: setsockopt failed", errno);
+	  throw SocketException(errno, "MulticastDatagramSocket::set_loop: setsockopt failed");
   }
 }
 
@@ -189,7 +191,7 @@ MulticastDatagramSocket::set_ttl(int ttl)
 {
   if ( ttl < 0 ) ttl = -ttl;
   if ( setsockopt( sock_fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl) ) == -1 ) {
-    throw SocketException("MulticastDatagramSocket::set_ttl: setsockopt failed", errno);
+	  throw SocketException(errno, "MulticastDatagramSocket::set_ttl: setsockopt failed");
   }
 }
 

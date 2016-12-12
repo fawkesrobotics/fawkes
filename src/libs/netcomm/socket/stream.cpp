@@ -40,11 +40,22 @@ namespace fawkes {
  */
 
 /** Constructor.
+ * This assumes that the socket will later be created using connect().
  * @param timeout timeout, if 0 all operationsare blocking, otherwise it
  * is tried for timeout seconds.
  */
 StreamSocket::StreamSocket(float timeout)
-  : Socket(PF_INET, SOCK_STREAM, 0, timeout)
+	: Socket(Socket::TCP, timeout)
+{
+}
+
+/** Constructor.
+ * @param addr_type Specify IPv4 or IPv6
+ * @param timeout timeout, if 0 all operationsare blocking, otherwise it
+ * is tried for timeout seconds.
+ */
+StreamSocket::StreamSocket(AddrType addr_type, float timeout)
+	: Socket(addr_type, Socket::TCP, timeout)
 {
 }
 
@@ -77,8 +88,12 @@ StreamSocket::clone()
 bool
 StreamSocket::nodelay()
 {
+	if (sock_fd == -1) {
+		throw Exception("Socket not initialized, call bind() or connect()");
+	}
+	
   int val = 0;
- socklen_t val_len = sizeof(val);
+  socklen_t val_len = sizeof(val);
   if ( getsockopt(sock_fd, IPPROTO_TCP, TCP_NODELAY, &val, &val_len) == -1 ) {
     throw SocketException("StreamSocket::nodelay: getsockopt failed", errno);
   }
@@ -93,7 +108,11 @@ StreamSocket::nodelay()
 void
 StreamSocket::set_nodelay(bool nodelay)
 {
-  int val = (nodelay ? 1 : 0);
+	if (sock_fd == -1) {
+		throw Exception("Socket not initialized, call bind() or connect()");
+	}
+
+	int val = (nodelay ? 1 : 0);
   socklen_t val_len = sizeof(val);
   if ( setsockopt(sock_fd, IPPROTO_TCP, TCP_NODELAY, &val, val_len) == -1 ) {
     throw SocketException("StreamSocket::set_nodelay: setsockopt failed", errno);

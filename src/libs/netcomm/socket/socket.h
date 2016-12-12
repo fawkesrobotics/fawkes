@@ -58,8 +58,8 @@ namespace fawkes {
 class SocketException : public Exception
 {
  public:
-  SocketException(const char *msg, int _errno);
-  SocketException(const char *msg);
+	SocketException(int _errno, const char *msg);
+	SocketException(const char *format, ...);
 };
 
 class Socket
@@ -74,16 +74,29 @@ class Socket
   static const short POLL_HUP;
   static const short POLL_NVAL;
 
-  Socket(int domain, int type, int protocol, float timeout = 0.f);
+  /** Address type specification. */
+  typedef enum {
+	  UNSPECIFIED,	/**< Yet unknown address type */
+	  IPv4,					/**< IPv4 */
+	  IPv6					/**< IPv6 */
+  } AddrType;
+
+  /** Socket type. */
+  typedef enum {
+	  TCP,		/**< TCP stream socket */
+	  UDP			/**< UDP datagram socket */
+  } SocketType;
+  
+  Socket(AddrType addr_type, SocketType sock_type, float timeout = 0.f);
   Socket(Socket &socket);
   virtual ~Socket();
 
   virtual void         connect(const char *hostname, const unsigned short int port);
-  virtual void         connect(struct sockaddr *addr_port, unsigned int struct_size);
+  virtual void         connect(const struct ::sockaddr_storage &addr_port);
+  virtual void         connect(const struct sockaddr *addr_port, socklen_t struct_size);
 
   virtual void         bind(const unsigned short int port);
-  virtual void         bind(const unsigned short int port,
-			    const char *hostname);
+  virtual void         bind(const unsigned short int port, const char *ipaddr);
 
   virtual void         listen(int backlog = 1);
   virtual Socket *     accept();
@@ -120,12 +133,22 @@ class Socket
     SocketType *     accept();
 
  protected:
+  Socket(SocketType sock_type, float timeout = 0.f);
   Socket();
 
+  AddrType addr_type;
   int sock_fd;
   float timeout;
-  struct ::sockaddr_in  *client_addr;
-  unsigned int         client_addr_len;
+  struct ::sockaddr_storage  *client_addr;
+  unsigned int                client_addr_len;
+
+  
+ private:
+  int socket_addr_family_;
+  int socket_type_;
+  int socket_protocol_;
+
+  void create();
 
 };
 

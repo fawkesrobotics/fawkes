@@ -31,7 +31,7 @@ namespace fawkes {
 class DatagramSocket : public Socket
 {
  public:
-  DatagramSocket(float timeout = 0.f);
+	DatagramSocket(AddrType addr_type, float timeout = 0.f);
   DatagramSocket(DatagramSocket &s);
 
   virtual Socket *  clone();

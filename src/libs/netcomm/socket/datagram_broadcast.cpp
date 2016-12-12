@@ -35,7 +35,7 @@ namespace fawkes {
 
 /** @class BroadcastDatagramSocket netcomm/socket/datagram.h
  * Broadcast datagram socket.
- * An broadcast UDP socket on top of IP.
+ * An broadcast UDP socket on top of IPv4 (not available for IPv6).
  *
  * @ingroup NetComm
  * @author Christoph Schwering
@@ -51,7 +51,7 @@ namespace fawkes {
 BroadcastDatagramSocket::BroadcastDatagramSocket(const char *broadcast_addr_s,
 						 unsigned short port,
 						 float timeout)
-  : Socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP, timeout)
+  : Socket(IPv4, UDP, timeout)
 {
   broadcast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
 
@@ -96,12 +96,12 @@ BroadcastDatagramSocket::bind()
 {
   int broadcast = 1;
   if ( setsockopt(sock_fd, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast)) == -1) {
-    throw SocketException("Could not set SO_BROADCAST", errno);
+	  throw SocketException(errno, "Could not set SO_BROADCAST");
   }
 
   int reuse = 1;
   if ( setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) == -1) {
-    throw SocketException("Could not set SO_REUSEADDR", errno);
+	  throw SocketException(errno, "Could not set SO_REUSEADDR");
   }
 
   struct ::sockaddr_in local;
@@ -110,7 +110,7 @@ BroadcastDatagramSocket::bind()
   local.sin_port = broadcast_addr->sin_port;
 
   if (::bind(sock_fd, (struct ::sockaddr *) &local, sizeof(local)) < 0) {
-    throw SocketException("Could not bind to port", errno);
+	  throw SocketException(errno, "Could not bind to port");
   }
 }
 

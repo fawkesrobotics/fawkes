@@ -33,7 +33,7 @@ class BroadcastDatagramSocket : public Socket
 {
  public:
   BroadcastDatagramSocket(const char *broadcast_addr_s, unsigned short port,
-			  float timeout = 0.f);
+                          float timeout = 0.f);
   BroadcastDatagramSocket(BroadcastDatagramSocket &s);
   virtual ~BroadcastDatagramSocket();
 
