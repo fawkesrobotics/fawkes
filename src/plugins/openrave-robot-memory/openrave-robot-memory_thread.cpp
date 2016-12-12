@@ -113,6 +113,14 @@ OpenraveRobotMemoryThread::construct_scene()
       move_msg.set_y(block.getField("translation").Array()[1].Double());
       move_msg.set_z(block.getField("translation").Array()[2].Double());
       openrave_if_->msgq_enqueue_copy(&move_msg);
+      //rotate object
+      OpenRaveInterface::RotateObjectQuatMessage rotate_msg;
+      rotate_msg.set_name(block_name.c_str());
+      rotate_msg.set_x(block.getField("rotation").Array()[0].Double());
+      rotate_msg.set_y(block.getField("rotation").Array()[1].Double());
+      rotate_msg.set_z(block.getField("rotation").Array()[2].Double());
+      rotate_msg.set_w(block.getField("rotation").Array()[3].Double());
+      openrave_if_->msgq_enqueue_copy(&rotate_msg);
     }
   }
   added_object_types_.clear();
