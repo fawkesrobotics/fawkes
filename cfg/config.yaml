@@ -39,6 +39,18 @@ fawkes:
       # %h is replaced by short hostname
       service_name: "Fawkes on %h"
 
+      # Enable or disable IPv4 or IPv6 server port
+
+      # Set "listen" value to bind to a specific IP address of the
+      # host, rather than to "any" address, example shows how to bind
+      # for connections from the local host only
+      ipv4:
+        enable: true
+        #listen: !ipv4 127.0.0.1
+
+      ipv6:
+        enable: true
+        #listen: !ipv6 "::1"
 
 # Log level for ballposlog example plugin; sum of any of
 # debug=0, info=1, warn=2, error=4, none=8
