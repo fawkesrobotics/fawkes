@@ -89,13 +89,13 @@ NetLogGuiGtkWindow::on_connection_clicked()
   if (ssd.run() ) {
     struct sockaddr_in saddr;
     socklen_t saddr_size = sizeof(struct sockaddr_in);
-    Glib::ustring name, hostname, ipaddr;
+    Glib::ustring name, hostname;
     unsigned short int port = 1910;
     std::list<std::string> txt;
     int page = -1;
 
     try {
-      ssd.get_selected_service (name, hostname, ipaddr, port);
+      ssd.get_selected_service (name, hostname, port);
       ssd.get_raw_address((struct sockaddr *)&saddr, saddr_size);
       NetworkService *service = new NetworkService(name.c_str(), "_fawkes._tcp", "",
 						   hostname.c_str(), port,
@@ -107,7 +107,7 @@ NetLogGuiGtkWindow::on_connection_clicked()
       if ( page >= 0 ) {
 	Gtk::ScrolledWindow *scrolled = dynamic_cast<Gtk::ScrolledWindow *>(ntb_logviewers.get_nth_page(page));
 	LogView *logview = dynamic_cast<LogView *>(scrolled->get_child());
-	logview->get_client()->connect(ipaddr.c_str(), port);
+	logview->get_client()->connect(hostname.c_str(), port);
       }
     } catch (Exception &e) {
       Glib::ustring message = *(e.begin());
