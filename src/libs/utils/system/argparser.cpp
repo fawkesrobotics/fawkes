@@ -231,27 +231,79 @@ bool
 ArgumentParser::parse_hostport(const char *argn, char **host,
 			       unsigned short int *port)
 {
-  if ((__opts.count(argn) > 0) && (__opts[argn] != NULL)) {
-    char *tmpvalue = strdup(__opts[ (char *)argn ]);
-
-    if ( strchr(tmpvalue, ':') != NULL ) {
-      char *save_ptr;
-      *host = strtok_r(tmpvalue, ":", &save_ptr);
-      char *tmpport = strtok_r(NULL, "", &save_ptr);
-
-      int port_num = atoi(tmpport);
-      if ( (port_num < 0) || (port_num > 0xFFFF) ) {
-	throw OutOfBoundsException("Invalid port", port_num, 0, 0xFFFF);
-      }
-      *port = port_num;
-    } else {
-      *host = tmpvalue;
-    }
-
-    return true;
-  } else {
-    return false;
+	if ((__opts.count(argn) > 0) && (__opts[argn] != NULL)) {
+		parse_hostport_s(__opts[ (char *)argn ], host, port);
+		return true;
+	} else {
+		return false;
   }
+}
+
+/** Parse host:port string.
+ * The value referenced by the given argn is parsed for the pattern "host:port".
+ * If the string does not match this pattern an exception is thrown.
+ * The host will be a newly allocated copy of the string. You have to
+ * free it after you are done with it. If no port is supplied in the string (plain
+ * hostname string) the port argument is left unchanged. If the argument has not
+ * been supplied at all both values are left unchanged. Thus it is safe to put the
+ * default values into the variables before passing them to this method. Note
+ * however that you have to free the returned host string in case of a successful
+ * return, and only in that case probably!
+ * @param s string to parse
+ * @param host Upon successful return contains a pointer to a newly alloated string
+ * with the hostname part. Free it after you are finished.
+ * @param port upon successful return contains the port part
+ * @return true, if the argument was supplied, false otherwise
+ * @exception Exception thrown on parsing error
+ */
+void
+ArgumentParser::parse_hostport_s(const char *s, char **host,
+                                 unsigned short int *port)
+{
+	std::string tmp = s;
+	size_t num_colons = 0;
+	std::string::size_type idx = 0;
+	while ((idx = tmp.find(':', idx)) != std::string::npos) {
+		idx += 1;
+		num_colons += 1;
+	}
+
+	if (num_colons == 1) {
+		idx = tmp.find(':');
+		*host = strdup(tmp.substr(0, idx).c_str());
+		*port = atoi(tmp.substr(idx+1).c_str());
+	} else if (num_colons > 1) {
+		// IPv6
+		if (tmp[0] == '[') {
+			// notation that actually contains a port
+			std::string::size_type closing_idx = tmp.find(']');
+			if (closing_idx == std::string::npos) {
+				throw Exception("No closing bracket for IPv6 address");
+			} else if (closing_idx < (tmp.length() - 1)) {
+				// there might be a port
+				if (tmp[closing_idx + 1] != ':') {
+					throw Exception("Expected colon after closing IPv6 address bracket");
+				} else if (closing_idx > tmp.length() - 3) {
+					throw Exception("Malformed IPv6 address with port, not enough characters after closing bracket");
+				} else {
+					*host = strdup(tmp.substr(1, closing_idx - 1).c_str());
+					*port = atoi(tmp.substr(closing_idx + 2).c_str());
+				}
+			} else {
+				// Just an IPv6 in bracket notation
+				*host = strdup(tmp.substr(1, closing_idx - 2).c_str());
+				*port = 0;
+			}
+		} else {
+			// no port, just an IPv6 address
+			*host = strdup(tmp.c_str());
+			*port = 0;
+		}
+	} else {
+		// no port given
+		*host = strdup(tmp.c_str());
+		*port = 0;
+	}
 }
 
 
@@ -273,24 +325,37 @@ ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned sho
 {
   if ((__opts.count(argn) == 0) || (__opts[argn] == NULL)) return false;
 
-  std::string tmpvalue = __opts[argn];
-
-  size_t col_idx = tmpvalue.find_last_of(':');
-  if ( col_idx == tmpvalue.npos ) {
-    host = tmpvalue;
+  char *tmp_host = NULL;
+  unsigned short int tmp_port = 0;
+  if (parse_hostport(argn, &tmp_host, &tmp_port)) {
+	  host = tmp_host;
+	  port = tmp_port;
+	  return true;
   }
-  else
-  {
-    host = tmpvalue.substr(0, col_idx);
-    std::string tmpport = tmpvalue.substr(col_idx + 1);
+  return false;
+}
 
-    int port_num = atoi(tmpport.c_str());
-    if ( (port_num < 0) || (port_num > 0xFFFF) ) {
-      throw OutOfBoundsException("Invalid port", port_num, 0, 0xFFFF);
-    }
-    port = port_num;
-  }
-  return true;
+/** Parse host:port string.
+ * The value referenced by the given argn is parsed for the pattern "host:port". If the
+ * string does not match this pattern an exception is thrown.
+ * If no port is supplied in the string (plain
+ * hostname string) the port argument is left unchanged. If the argument has not
+ * been supplied at all both values are left unchanged. Thus it is safe to put the default
+ * values into the variables before passing them to this method.
+ * @param s string to parse
+ * @param host Upon successful return contains the hostname part
+ * @param port upon successful return contains the port part (unchanged if not supplied)
+ * @return true, if the argument was supplied, false otherwise
+ * @exception OutOfBoundsException thrown if port is not in the range [0..65535]
+ */
+void
+ArgumentParser::parse_hostport_s(const char *s, std::string &host, unsigned short int &port)
+{
+  char *tmp_host = NULL;
+  unsigned short int tmp_port = 0;
+  parse_hostport_s(s, &tmp_host, &tmp_port);
+  host = tmp_host;
+  port = tmp_port;
 }
 
 
