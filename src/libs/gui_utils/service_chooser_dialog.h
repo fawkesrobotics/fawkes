@@ -59,7 +59,7 @@ class ServiceChooserDialog
   virtual ~ServiceChooserDialog();
 
   void get_selected_service(Glib::ustring &name, Glib::ustring &hostname,
-			    Glib::ustring &ipaddr, unsigned short int &port);
+                            unsigned short int &port);
   void get_raw_address(struct sockaddr *addr, socklen_t addr_size);
 
   void run_and_connect();
