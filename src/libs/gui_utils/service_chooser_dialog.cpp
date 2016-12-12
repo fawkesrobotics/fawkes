@@ -106,7 +106,7 @@ ServiceChooserDialog::~ServiceChooserDialog()
 void
 ServiceChooserDialog::ctor()
 {
-  set_default_size(360, 240);
+  set_default_size(400, 300);
 
   __treeview.set_model(__service_model->get_list_store());
   __treeview.append_column("Service", __service_model->get_column_record().name);
