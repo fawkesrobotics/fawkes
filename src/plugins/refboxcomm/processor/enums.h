@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_WORLDINFO_ENUMS_H_
-#define __NETCOMM_WORLDINFO_ENUMS_H_
+#ifndef __REFBOXCOMM_ENUMS_H_
+#define __REFBOXCOMM_ENUMS_H_
 
 namespace fawkes {
 

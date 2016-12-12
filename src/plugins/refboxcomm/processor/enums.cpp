@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <netcomm/worldinfo/enums.h>
+#include "enums.h"
 
 #define CASE_STRING(x) case x: return #x
 
