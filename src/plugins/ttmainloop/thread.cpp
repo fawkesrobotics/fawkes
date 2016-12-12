@@ -27,7 +27,7 @@
 
 using namespace fawkes;
 
-/** @class TimeTrackerMainLoopThread <plugins/worldmodel/wm_thread.h>
+/** @class TimeTrackerMainLoopThread <plugins/ttmainloop/thread.h>
  * Main thread of time tracker main loop plugin.
  * @author Tim Niemueller
  */
