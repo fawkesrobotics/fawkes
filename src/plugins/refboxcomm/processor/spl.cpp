@@ -118,7 +118,7 @@ SplRefBoxProcessor::SplRefBoxProcessor(fawkes::Logger *logger,
   __team_number = team_number;
   __logger = logger;
   __quit = false;
-  __s = new DatagramSocket(0.0000000001);
+  __s = new DatagramSocket(Socket::IPv4, 0.0000000001);
   __s->bind(broadcast_port);
 
   __penalty = SPL_PENALTY_NONE;
