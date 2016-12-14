@@ -55,7 +55,7 @@ main(int argc, char **argv)
   try {
     c->connect();
   } catch( Exception &e ) {
-    printf("Could not connect to host: %s\n", host.c_str());
+	  printf("Could not connect to host: %s (%s)\n", host.c_str(), e.what_no_backtrace());
     exit(1);
   }
 
