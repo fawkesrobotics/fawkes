@@ -37,7 +37,8 @@
 #include <netinet/in.h>
 
 #ifdef HAVE_GCONFMM
-#  define GCONF_PREFIX "/apps/fawkes/service_chooser_dialog/"
+#  define GCONF_DIR "/apps/fawkes/service_chooser_dialog"
+#  define GCONF_PREFIX GCONF_DIR"/"
 #endif
 
 namespace fawkes {
@@ -122,7 +123,7 @@ ServiceChooserDialog::ctor()
   Glib::ustring default_host("localhost");
 #ifdef HAVE_GCONFMM
   __gconf = Gnome::Conf::Client::get_default_client();
-  __gconf->add_dir(GCONF_PREFIX);
+  __gconf->add_dir(GCONF_DIR);
   Gnome::Conf::Value host_val =
     __gconf->get_without_default(GCONF_PREFIX"manual_host");
   if (host_val.get_type() == Gnome::Conf::VALUE_STRING) {
