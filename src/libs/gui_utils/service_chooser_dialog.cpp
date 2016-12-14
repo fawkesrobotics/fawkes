@@ -108,11 +108,11 @@ ServiceChooserDialog::~ServiceChooserDialog()
 void
 ServiceChooserDialog::ctor()
 {
-  set_default_size(400, 300);
+  set_default_size(480, 300);
 
   __treeview.set_model(__service_model->get_list_store());
   __treeview.append_column("Service", __service_model->get_column_record().name);
-  __treeview.append_column("IP Address", __service_model->get_column_record().ipaddr);
+  __treeview.append_column("Address/Port", __service_model->get_column_record().ipaddr);
   __scrollwin.add(__treeview);
   __scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
   __treeview.show();

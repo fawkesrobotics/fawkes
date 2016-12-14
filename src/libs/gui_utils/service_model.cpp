@@ -23,6 +23,7 @@
 
 #include <gui_utils/service_model.h>
 #include <netcomm/dns-sd/avahi_thread.h>
+#include <utils/misc/string_conversions.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -167,13 +168,30 @@ ServiceModel::service_added( const char* name,
 			    int flags )
 {
   ServiceAddedRecord s;
-  char ipaddr[INET_ADDRSTRLEN];
-  struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
+  if (addr->sa_family == AF_INET) {
+	  char ipaddr[INET_ADDRSTRLEN];
+	  struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
+	  if (inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr)) != NULL) {
+		  s.ipaddr = std::string(ipaddr) + ":" + StringConversions::to_string(port);
+	  } else {
+		  s.ipaddr = std::string("Failed to convert IPv4: ") + strerror(errno);
+	  }
+  } else if (addr->sa_family == AF_INET6) {
+	  char ipaddr[INET6_ADDRSTRLEN];
+	  struct sockaddr_in6 *saddr = (struct sockaddr_in6 *)addr;
+	  if (inet_ntop(AF_INET6, &(saddr->sin6_addr), ipaddr, sizeof(ipaddr)) != NULL) {
+		  s.ipaddr = std::string("[") + ipaddr + "]:" + StringConversions::to_string(port);
+	  } else {
+		  s.ipaddr = std::string("Failed to convert IPv6: ") + strerror(errno);
+	  }
+  } else {
+	  s.ipaddr = "Unknown address family";
+  }
+
   s.name = string(name);
   s.type = string(type);
   s.domain = string(domain);
   s.hostname = string(host_name);
-  s.ipaddr = inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr));
   s.port = port;
 
   m_added_services.push_locked(s);
