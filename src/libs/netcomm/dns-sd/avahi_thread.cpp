@@ -55,9 +55,17 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-/** Constructor. */
-AvahiThread::AvahiThread()
-  : Thread("AvahiThread")
+/** Constructor.
+ * You can choose whether to announce IPv4 or IPv6 only or both.
+ * If you select both, new service will be created with the "unspecified"
+ * address family in Avahi, causing it to announce the service on all
+ * supported protocols (which may or may not include both).
+ * @param enable_ipv4 enable IPv4 support
+ * @param enable_ipv6 enable IPv6 support
+ */
+AvahiThread::AvahiThread(bool enable_ipv4, bool enable_ipv6)
+	: Thread("AvahiThread"),
+	  enable_ipv4(enable_ipv4), enable_ipv6(enable_ipv6)
 {
   simple_poll = NULL;
   client = NULL;
@@ -65,6 +73,16 @@ AvahiThread::AvahiThread()
   need_recover = false;
   do_reset_groups = false;
 
+  if (enable_ipv4 && enable_ipv6) {
+	  service_protocol = AVAHI_PROTO_UNSPEC;
+  } else if (enable_ipv4) {
+	  service_protocol = AVAHI_PROTO_INET;
+  } else if (enable_ipv6) {
+	  service_protocol = AVAHI_PROTO_INET6;
+  } else {
+	  throw Exception("Neither IPv4 nor IPv6 enabled");
+  }
+  
   init_wc = new WaitCondition();
 
   set_prepfin_conc_loop(true);
@@ -282,12 +300,12 @@ AvahiThread::create_service(const NetworkService &service, AvahiEntryGroup *exgr
   std::string name = service.modified_name() ? service.modified_name() : service.name();
   for (int i = 1; (i <= 100) && (rv == AVAHI_ERR_COLLISION); ++i) {
     rv = avahi_entry_group_add_service_strlst(group, AVAHI_IF_UNSPEC,
-					      AVAHI_PROTO_INET,
-					      AVAHI_PUBLISH_USE_MULTICAST,
-					      name.c_str(), service.type(),
-					      service.domain(),
-					      service.host(),
-					      service.port(), al);
+                                              service_protocol,
+                                              (AvahiPublishFlags)0,
+                                              name.c_str(), service.type(),
+                                              service.domain(),
+                                              service.host(),
+                                              service.port(), al);
 
     if (rv == AVAHI_ERR_COLLISION) {
       char *n = avahi_alternative_service_name(name.c_str());
@@ -514,9 +532,9 @@ AvahiThread::create_browser(const char *service_type)
   if ( __browsers.find(service_type) == __browsers.end() ) {
     if ( client ) {
       AvahiServiceBrowser *b = avahi_service_browser_new(client, AVAHI_IF_UNSPEC,
-							 AVAHI_PROTO_UNSPEC,
-							 service_type, NULL, (AvahiLookupFlags)0,
-							 AvahiThread::browse_callback, this);
+                                                         service_protocol, service_type,
+                                                         NULL, (AvahiLookupFlags)0,
+                                                         AvahiThread::browse_callback, this);
 
       if ( ! b ) {
 	__handlers[service_type].pop_back();
@@ -622,12 +640,22 @@ AvahiThread::call_handler_service_added( const char *name,
 					  std::list<std::string> &txt,
 					  AvahiLookupResultFlags flags)
 {
-  struct sockaddr_in *s = NULL;
+  struct sockaddr *s = NULL;
   socklen_t slen;
   if ( address->proto == AVAHI_PROTO_INET ) {
+	  if (! enable_ipv4)  return;
     slen = sizeof(struct sockaddr_in);
-    s = (struct sockaddr_in *)malloc(slen);
-    s->sin_addr.s_addr = address->data.ipv4.address;
+    struct sockaddr_in *sin = (struct sockaddr_in *)malloc(slen);
+    sin->sin_family = AF_INET;
+    sin->sin_addr.s_addr = address->data.ipv4.address;
+    s = (struct sockaddr *)sin;
+  } else if ( address->proto == AVAHI_PROTO_INET6 ) {
+	  if (! enable_ipv6)  return;
+    slen = sizeof(struct sockaddr_in6);
+    struct sockaddr_in6 *sin = (struct sockaddr_in6 *)malloc(slen);
+    sin->sin6_family = AF_INET6;
+	  memcpy(&sin->sin6_addr, &address->data.ipv6.address, sizeof(in6_addr));
+    s = (struct sockaddr *)sin;
   } else {
     // ignore
     return;
@@ -635,8 +663,8 @@ AvahiThread::call_handler_service_added( const char *name,
   if ( __handlers.find(type) != __handlers.end() ) {
     std::list<ServiceBrowseHandler *>::iterator i;
     for ( i = __handlers[type].begin(); i != __handlers[type].end(); ++i) {
-      (*i)->service_added(name, type, domain, host_name,
-			  (struct sockaddr *)s, slen, port, txt, (int)flags);
+	    (*i)->service_added(name, type, domain, host_name,
+	                        (struct sockaddr *)s, slen, port, txt, (int)flags);
     }
   }
   free(s);
@@ -848,7 +876,7 @@ AvahiThread::start_hostname_resolver(const char *name, AvahiResolverCallbackData
 {
   AvahiHostNameResolver *resolver;
   if ( (resolver = avahi_host_name_resolver_new(client, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
-						name, AVAHI_PROTO_INET,
+						name, service_protocol,
 						AVAHI_LOOKUP_USE_MULTICAST,
 						AvahiThread::host_name_resolver_callback,
 						data) ) == NULL ) {
@@ -863,8 +891,9 @@ AvahiThread::start_hostname_resolver(const char *name, AvahiResolverCallbackData
 void
 AvahiThread::start_hostname_resolvers()
 {
-  for (__phrit = __pending_hostname_resolves.begin(); __phrit != __pending_hostname_resolves.end(); ++__phrit) {
-    start_hostname_resolver((*__phrit).first.c_str(), (*__phrit).second);
+	LockMap<std::string, AvahiResolverCallbackData * >::iterator phrit;
+  for (phrit = __pending_hostname_resolves.begin(); phrit != __pending_hostname_resolves.end(); ++phrit) {
+    start_hostname_resolver(phrit->first.c_str(), phrit->second);
   }
   __pending_hostname_resolves.clear();
 }
@@ -873,8 +902,10 @@ AvahiThread::start_hostname_resolvers()
 void
 AvahiThread::start_address_resolvers()
 {
-  for (__parit = __pending_address_resolves.begin(); __parit != __pending_address_resolves.end(); ++__parit) {
-    start_address_resolver((*__parit).first, (*__parit).second);
+	LockMap<struct ::sockaddr_storage *, AvahiResolverCallbackData *>::iterator  parit;
+
+  for (parit = __pending_address_resolves.begin(); parit != __pending_address_resolves.end(); ++parit) {
+    start_address_resolver(parit->first, parit->second);
   }
   __pending_address_resolves.clear();
 }
@@ -883,7 +914,7 @@ AvahiThread::start_address_resolvers()
 /** Order address resolution.
  * This initiates resolution of an address. The method immediately returns and will not
  * wait for the result.
- * @param addr address to resolve, currently only struct sockaddr_in is supported (IPv4)
+ * @param addr address to resolve
  * @param addrlen length of addr in bytes
  * @param handler handler to call for the result
  */
@@ -891,25 +922,42 @@ void
 AvahiThread::resolve_address(struct sockaddr *addr, socklen_t addrlen,
 			     AvahiResolverHandler *handler)
 {
-  if ( addrlen != sizeof(struct sockaddr_in) ) {
-    throw Exception("Only IPv4 is currently supported");
+	struct ::sockaddr_storage *sstor =
+		(struct ::sockaddr_storage *)malloc(sizeof(struct ::sockaddr_storage));
+  if (addr->sa_family == AF_INET) {
+	  if (addrlen != sizeof(sockaddr_in)) {
+		  throw Exception("Invalid size for IPv4 address struct");
+	  }
+	  memcpy(&sstor, addr, sizeof(sockaddr_in));
+  } else if (addr->sa_family == AF_INET6) {
+	  if (addrlen != sizeof(sockaddr_in6)) {
+		  throw Exception("Invalid size for IPv6 address struct");
+	  }
+	  memcpy(&sstor, addr, sizeof(sockaddr_in6));
+  } else {
+	  throw Exception("Unknown address family");
   }
-
-  struct sockaddr_in *in_addr = (struct sockaddr_in *)calloc(1, sizeof(struct sockaddr_in));
-  memcpy(in_addr, addr, sizeof(struct sockaddr_in));
   AvahiResolverCallbackData *data = new AvahiResolverCallbackData(this, handler);
 
-  __pending_address_resolves[in_addr] = data;
+  __pending_address_resolves[sstor] = data;
   wake_poller();
 }
 
 
 void
-AvahiThread::start_address_resolver(struct sockaddr_in *in_addr, AvahiResolverCallbackData *data)
+AvahiThread::start_address_resolver(const struct sockaddr_storage *in_addr, AvahiResolverCallbackData *data)
 {
-  AvahiAddress a;
-  a.proto = AVAHI_PROTO_INET;
-  a.data.ipv4.address = in_addr->sin_addr.s_addr;
+	AvahiAddress a;
+
+	if (in_addr->ss_family == AF_INET) {
+		a.proto = AVAHI_PROTO_INET;
+		a.data.ipv4.address = ((sockaddr_in *)in_addr)->sin_addr.s_addr;
+	} else if (in_addr->ss_family == AF_INET6) {
+		a.proto = AVAHI_PROTO_INET6;
+		memcpy(&a.data.ipv6.address, &((sockaddr_in6 *)in_addr)->sin6_addr, sizeof(in6_addr));
+	} else {
+	  throw Exception("Unknown address family");
+	}
 
   AvahiAddressResolver *resolver;
   if ( (resolver = avahi_address_resolver_new(client, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
@@ -968,17 +1016,25 @@ AvahiThread::host_name_resolver_callback(AvahiHostNameResolver *r,
   switch (event) {
   case AVAHI_RESOLVER_FOUND:
     {
-      struct sockaddr_in *res = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-      res->sin_family = (unsigned short)avahi_proto_to_af(protocol);
-      res->sin_addr.s_addr = a->data.ipv4.address;
-      
-      cd->second->resolved_name(strdup(name), (struct sockaddr *)res, sizeof(struct sockaddr_in));
+	    if (protocol == AVAHI_PROTO_INET) {
+		    struct sockaddr_in *res = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+		    res->sin_family = (unsigned short)avahi_proto_to_af(protocol);
+		    res->sin_addr.s_addr = a->data.ipv4.address;
+		    cd->second->resolved_name(strdup(name), (struct sockaddr *)res, sizeof(struct sockaddr_in));
+	    } else if (protocol == AVAHI_PROTO_INET6) {
+		    struct sockaddr_in6 *res = (struct sockaddr_in6 *)malloc(sizeof(struct sockaddr_in6));
+		    res->sin6_family = (unsigned short)avahi_proto_to_af(protocol);
+		    memcpy(&res->sin6_addr, &a->data.ipv6.address, sizeof(in6_addr));
+		    cd->second->resolved_name(strdup(name), (struct sockaddr *)res, sizeof(struct sockaddr_in6));
+	    } else { // don't know
+		    cd->second->name_resolution_failed(strdup(name));
+	    }
     }
     break;
     
   case AVAHI_RESOLVER_FAILURE:
   default:
-    cd->second->name_resolution_failed(strdup(name));
+	  cd->second->name_resolution_failed(strdup(name));
     break;
   }
 
@@ -1004,21 +1060,35 @@ AvahiThread::address_resolver_callback(AvahiAddressResolver *r,
   cd->first->remove_address_resolver(r);
   avahi_address_resolver_free(r);
 
-  struct sockaddr_in *res = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-  res->sin_family = (unsigned short)avahi_proto_to_af(protocol);
-  res->sin_addr.s_addr = a->data.ipv4.address;
+  struct sockaddr *res = NULL;
+  socklen_t res_size = 0;
+
+  if (protocol == AVAHI_PROTO_INET) {
+	  res_size = sizeof(struct sockaddr_in);
+	  res = (struct sockaddr *)malloc(res_size);
+	  sockaddr_in *res_4 = (struct sockaddr_in *)res;
+	  res_4->sin_family = (unsigned short)avahi_proto_to_af(protocol);
+	  res_4->sin_addr.s_addr = a->data.ipv4.address;
+  } else if (protocol == AVAHI_PROTO_INET6) {
+	  res_size = sizeof(struct sockaddr_in6);
+	  res = (struct sockaddr *)malloc(res_size);
+	  sockaddr_in6 *res_6 = (struct sockaddr_in6 *)res;
+	  res_6->sin6_family = (unsigned short)avahi_proto_to_af(protocol);
+	  memcpy(&res_6->sin6_addr, &a->data.ipv6.address, sizeof(in6_addr));
+  }
 
    switch (event) {
-  case AVAHI_RESOLVER_FOUND:
-    cd->second->resolved_address((struct sockaddr_in *)res, sizeof(struct sockaddr_in),
-				 strdup(name));
-    break;
-  case AVAHI_RESOLVER_FAILURE:
-  default:
-    cd->second->address_resolution_failed((struct sockaddr_in *)res,
-					  sizeof(struct sockaddr_in));
-    break;
-  }
+   case AVAHI_RESOLVER_FOUND:
+	   cd->second->resolved_address(res, res_size, strdup(name));
+	   break;
+   case AVAHI_RESOLVER_FAILURE:
+	   cd->second->address_resolution_failed(res, res_size);
+	   break;
+
+   default:
+	   cd->second->address_resolution_failed(NULL, 0);
+	   break;
+   }
 
   delete cd;
 }

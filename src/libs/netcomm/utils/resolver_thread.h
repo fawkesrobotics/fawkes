@@ -37,6 +37,7 @@
 #include <cstddef>
 #include <utility>
 #include <map>
+#include <list>
 
 namespace fawkes {
 
@@ -55,18 +56,17 @@ class NetworkNameResolverThread : public Thread
                             AvahiThread *avahi_thread = NULL);
   ~NetworkNameResolverThread();
 
-  void resolve_name(const char *name);
+  void resolve_name(const std::string &name);
   void resolve_address(struct sockaddr *addr, socklen_t addrlen);
 
-  bool resolve_name_immediately(const char *name,
-				struct sockaddr **addr, socklen_t *addr_len);
-  bool resolve_address_immediately(struct sockaddr *addr, socklen_t addr_len,
-				   char **name, bool *namefound);
+  bool resolve_name_immediately(const std::string &name,
+                                struct sockaddr **addr, socklen_t *addr_len);
+  bool resolve_address_immediately(struct sockaddr *addr, std::string &name, bool &namefound);
 
   virtual void resolved_name(char *name, struct sockaddr *addr, socklen_t addrlen);
-  virtual void resolved_address(struct sockaddr_in *addr, socklen_t addrlen, char *name);
+  virtual void resolved_address(struct sockaddr *addr, socklen_t addrlen, char *name);
   virtual void name_resolution_failed(char *name);
-  virtual void address_resolution_failed(struct sockaddr_in *addr, socklen_t addrlen);
+  virtual void address_resolution_failed(struct sockaddr *addr, socklen_t addrlen);
 
   virtual void loop();
 
@@ -81,13 +81,7 @@ class NetworkNameResolverThread : public Thread
 
   Mutex *__namesq_mutex;
   unsigned int __namesq_active;
-#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
-  typedef LockHashSet<char *, std::hash<char *>, StringEquality>  NamesQMap;
-#elif __GLIBCXX__ > 20080305
-  typedef LockHashSet<char *, std::tr1::hash<char *>, StringEquality>  NamesQMap;
-#else
-  typedef LockHashSet<char *, __gnu_cxx::hash<char *>, StringEquality> NamesQMap;
-#endif
+  typedef LockHashSet<std::string>  NamesQMap;
   NamesQMap   __namesqs[2];
   NamesQMap  *__namesq;
   NamesQMap  *__namesq_proc;
@@ -95,10 +89,10 @@ class NetworkNameResolverThread : public Thread
 
   Mutex *__addrq_mutex;
   unsigned int __addrq_active;
-  typedef std::map<uint32_t, std::pair<struct sockaddr *, socklen_t> > AddrQMap;
-  AddrQMap   __addrqs[2];
-  AddrQMap  *__addrq;
-  AddrQMap  *__addrq_proc;
+  typedef std::list<struct sockaddr *> AddrQList;
+  AddrQList   __addrqs[2];
+  AddrQList  *__addrq;
+  AddrQList  *__addrq_proc;
 };
 
 } // end namespace fawkes

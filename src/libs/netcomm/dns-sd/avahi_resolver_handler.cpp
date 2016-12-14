@@ -42,7 +42,7 @@ namespace fawkes {
  * especially that the handler is responsible for freeing the associated memory
  * after it is done with the result using free() on name and addr.
  * @param name name that was resolved
- * @param addr resulting addr record, currently always of type struct sockaddr_in (only IPv4)
+ * @param addr resulting addr record
  * @param addrlen length of addr in bytes
  *
  * @fn void AvahiResolverHandler::resolved_address(struct sockaddr_in *addr, socklen_t addrlen, char *name) = 0
@@ -53,7 +53,7 @@ namespace fawkes {
  * especially that the handler is responsible for freeing the associated memory
  * after it is done with the result using free() on name and addr.
  * @param name the resulting hostname
- * @param addr addr record, currently always of type struct sockaddr_in (only IPv4)
+ * @param addr addr record
  * @param addrlen length of addr in bytes
  *
  * @fn void AvahiResolverHandler::name_resolution_failed(char *name) = 0

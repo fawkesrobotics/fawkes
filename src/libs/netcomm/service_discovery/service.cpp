@@ -71,8 +71,7 @@ NetworkService::NetworkService(const char         *name,
 
   _modified_name = NULL;
 
-  _addr = NULL;
-  _addr_size = 0;
+  memset(&_addr, 0, sizeof(_addr));
 }
 
 
@@ -105,9 +104,10 @@ NetworkService::NetworkService(const char         *name,
 
   _modified_name = NULL;
 
-  _addr = (struct sockaddr *)malloc(addr_size);
-  memcpy(_addr, addr, addr_size);
-  _addr_size = addr_size;
+  if (addr_size > sizeof(_addr)) {
+	  throw Exception("Address size too large");
+  }
+  memcpy(&_addr, addr, addr_size);
   list = txt;
 }
 
@@ -121,8 +121,8 @@ NetworkService::NetworkService(const char         *name,
  * @param port port of service
  */
 NetworkService::NetworkService(const char         *name,
-			       const char         *type,
-			       unsigned short int  port)
+                               const char         *type,
+                               unsigned short int  port)
 {
   _name   = strdup(name);
   _type   = strdup(type);
@@ -132,8 +132,7 @@ NetworkService::NetworkService(const char         *name,
 
   _modified_name = NULL;
 
-  _addr = NULL;
-  _addr_size = 0;
+  memset(&_addr, 0, sizeof(_addr));
 }
 
 
@@ -167,8 +166,7 @@ NetworkService::NetworkService(NetworkNameResolver *nnresolver,
 
   _modified_name = NULL;
 
-  _addr = NULL;
-  _addr_size = 0;
+  memset(&_addr, 0, sizeof(_addr));
 }
 
 /** Constructor.
@@ -189,8 +187,8 @@ NetworkService::NetworkService(const char         *name,
 
   _host   = NULL;
   _port   = 0;
-  _addr = NULL;
-  _addr_size = 0;
+
+  memset(&_addr, 0, sizeof(_addr));
 }
 
 
@@ -201,7 +199,6 @@ NetworkService::~NetworkService()
   if ( _type   != NULL)  free( _type );
   if ( _domain != NULL)  free( _domain );
   if ( _host   != NULL)  free( _host );
-  if ( _addr   != NULL)  free( _addr );
   if ( _modified_name   != NULL)  free( _modified_name );
 }
 
@@ -231,8 +228,7 @@ NetworkService::NetworkService(const NetworkService *s)
     _modified_name = strdup(s->_modified_name);
   }
 
-  _addr = NULL;
-  _addr_size = 0;
+  memcpy(&_addr, &s->_addr, sizeof(_addr));
 
   list = s->list;
 }
@@ -263,8 +259,7 @@ NetworkService::NetworkService(const NetworkService &s)
     _modified_name = strdup(s._modified_name);
   }
 
-  _addr = NULL;
-  _addr_size = 0;
+  memcpy(&_addr, &s._addr, sizeof(_addr));
 
   list = s.list;
 }
@@ -393,9 +388,25 @@ NetworkService::port() const
 std::string
 NetworkService::addr_string() const
 {
-  char ipaddr[INET_ADDRSTRLEN];
-  struct sockaddr_in *saddr = (struct sockaddr_in *)_addr;
-  return std::string(inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr)));
+	if (_addr.ss_family == AF_INET) {
+		char ipaddr[INET_ADDRSTRLEN];
+		struct sockaddr_in *saddr = (struct sockaddr_in *)&_addr;
+		if (inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr)) != NULL) {
+			return ipaddr;
+		} else {
+			throw Exception("Failed to convert IPv4 address to string");
+		}
+	} else if (_addr.ss_family == AF_INET6) {
+		char ipaddr[INET6_ADDRSTRLEN];
+		struct sockaddr_in6 *saddr = (struct sockaddr_in6 *)&_addr;
+		if (inet_ntop(AF_INET6, &(saddr->sin6_addr), ipaddr, sizeof(ipaddr)) != NULL) {
+			return ipaddr;
+		} else {
+			throw Exception("Failed to convert IPv6 address to string");
+		}
+	} else {
+		throw Exception("Unknown address family");
+	}
 }
 
 

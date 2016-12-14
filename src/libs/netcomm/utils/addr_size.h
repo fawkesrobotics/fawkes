@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  avahi_resolver_handler.h - Avahi name resolver
+ *  addr_comp.h - address comparison
  *
- *  Created: Tue Nov 14 14:32:56 2006 (as avahi_resolver.h)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Dec 13 15:17:43 2016
+ *  Copyright  2006-2016  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,27 +21,33 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_DNSSD_AVAHI_RESOLVER_HANDLER_H_
-#define __NETCOMM_DNSSD_AVAHI_RESOLVER_HANDLER_H_
+#ifndef __NETCOMM_UTILS_ADDR_SIZE_H_
+#define __NETCOMM_UTILS_ADDR_SIZE_H_
 
-#include <sys/socket.h>
+#include <netinet/in.h>
 
 namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
 
-class AvahiResolverHandler
+/** Get canonical size of sockaddr structure.
+ * @param a sockaddr_in or sockaddr_in6 structure with properly set
+ * address family field.
+ * @return size in bytes of struct
+ */
+inline size_t
+sock_addr_size(const struct sockaddr *a)
 {
- public:
-  virtual ~AvahiResolverHandler();
-  virtual void resolved_name(char *name,
-                             struct sockaddr *addr, socklen_t addrlen)   = 0;
-  virtual void resolved_address(struct sockaddr *addr, socklen_t addrlen,
-                                char *name)                              = 0;
-
-  virtual void name_resolution_failed(char *name)                        = 0;
-  virtual void address_resolution_failed(struct sockaddr *addr,
-                                         socklen_t addrlen)              = 0;
-};
-
+	if (a->sa_family == AF_INET) {
+		return sizeof(sockaddr_in);
+	} else if (a->sa_family == AF_INET6) {
+		return sizeof(sockaddr_in6);
+	} else {
+		return 0;
+	}
+}
+	
 } // end namespace fawkes
 
 #endif

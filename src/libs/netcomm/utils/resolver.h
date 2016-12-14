@@ -65,9 +65,9 @@ class NetworkNameResolver
   const char * short_hostname();
 
  private:
-  void name_resolved(char *name, struct sockaddr *addr, socklen_t addrlen);
-  void addr_resolved(struct sockaddr *addr, socklen_t addrlen, char *name, bool namefound);
-  void name_resolution_failed(char *name);
+  void name_resolved(std::string name, struct sockaddr *addr, socklen_t addrlen);
+  void addr_resolved(struct sockaddr *addr, socklen_t addrlen, std::string name, bool namefound);
+  void name_resolution_failed(std::string name);
   void address_resolution_failed(struct sockaddr *addr, socklen_t addrlen);
 
  private:
@@ -75,28 +75,11 @@ class NetworkNameResolver
   HostInfo *__host_info;
   unsigned int __cache_timeout;
 
-  LockHashMap<uint32_t, std::pair<char *, time_t> >       addr2name_cache;
-  LockHashMap<char *,
-    std::pair<struct sockaddr *, time_t>,
-#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
-             std::hash<char *>,
-#elif __GLIBCXX__ > 20080305
-             std::tr1::hash<char *>,
-#else
-             __gnu_cxx::hash<char *>,
-#endif
-             StringEquality >                             name2addr_cache;
+  LockHashMap<uint32_t, std::pair<std::string, time_t> >          addr2name_cache;
+  LockHashMap<std::string, std::pair<struct sockaddr *, time_t> > name2addr_cache;
 
-  LockHashMap<uint32_t, std::pair<char *, time_t> >::iterator  a2ncit;
-  LockHashMap<char *, std::pair<struct sockaddr *, time_t>,
-#if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
-    std::hash<char *>,
-#elif __GLIBCXX__ > 20080305
-    std::tr1::hash<char *>,
-#else
-    __gnu_cxx::hash<char *>,
-#endif
-    StringEquality >::iterator                                 n2acit;
+  LockHashMap<uint32_t, std::pair<std::string, time_t> >::iterator  a2ncit;
+  LockHashMap<std::string, std::pair<struct sockaddr *, time_t> >::iterator n2acit;
 };
 
 } // end namespace fawkes

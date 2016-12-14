@@ -75,7 +75,7 @@ FawkesNetworkManager::FawkesNetworkManager(ThreadCollector *thread_collector,
                                                           __thread_collector);
   __thread_collector->add(__fawkes_network_thread);
 #ifdef HAVE_AVAHI
-  __avahi_thread          = new AvahiThread();
+  __avahi_thread          = new AvahiThread(enable_ipv4, enable_ipv6);
   __service_publisher     = __avahi_thread;
   __service_browser       = __avahi_thread;
   __thread_collector->add(__avahi_thread);
