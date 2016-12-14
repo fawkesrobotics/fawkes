@@ -435,6 +435,11 @@ ClingoAccess::loadFile(const std::string& path)
 bool
 ClingoAccess::ground(const Clingo::PartSpan& parts)
 {
+	if ( parts.empty() )
+	{
+		return true;
+	} //if ( parts.empty() )
+
 	MutexLocker locker(&ControlMutex);
 	if ( Solving )
 	{
