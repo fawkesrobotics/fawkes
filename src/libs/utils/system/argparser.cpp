@@ -271,7 +271,9 @@ ArgumentParser::parse_hostport_s(const char *s, char **host,
 	if (num_colons == 1) {
 		idx = tmp.find(':');
 		*host = strdup(tmp.substr(0, idx).c_str());
-		*port = atoi(tmp.substr(idx+1).c_str());
+		if (! tmp.substr(idx+1).empty()) {
+			*port = atoi(tmp.substr(idx+1).c_str());
+		}
 	} else if (num_colons > 1) {
 		// IPv6
 		if (tmp[0] == '[') {
@@ -292,17 +294,14 @@ ArgumentParser::parse_hostport_s(const char *s, char **host,
 			} else {
 				// Just an IPv6 in bracket notation
 				*host = strdup(tmp.substr(1, closing_idx - 2).c_str());
-				*port = 0;
 			}
 		} else {
 			// no port, just an IPv6 address
 			*host = strdup(tmp.c_str());
-			*port = 0;
 		}
 	} else {
 		// no port given
 		*host = strdup(tmp.c_str());
-		*port = 0;
 	}
 }
 
@@ -326,7 +325,7 @@ ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned sho
   if ((__opts.count(argn) == 0) || (__opts[argn] == NULL)) return false;
 
   char *tmp_host = NULL;
-  unsigned short int tmp_port = 0;
+  unsigned short int tmp_port = port;
   if (parse_hostport(argn, &tmp_host, &tmp_port)) {
 	  host = tmp_host;
 	  port = tmp_port;
@@ -352,7 +351,7 @@ void
 ArgumentParser::parse_hostport_s(const char *s, std::string &host, unsigned short int &port)
 {
   char *tmp_host = NULL;
-  unsigned short int tmp_port = 0;
+  unsigned short int tmp_port = port;
   parse_hostport_s(s, &tmp_host, &tmp_port);
   host = tmp_host;
   port = tmp_port;
