@@ -331,6 +331,19 @@ init(InitOptions options, int & retval)
 	  listen_ipv6 = config->get_string("/fawkes/mainapp/net/ipv6/listen");
   } catch (Exception &e) {}  // ignore, we stick with the default
 
+  if (! enable_ipv4) {
+	  logger->log_warn("FawkesMainThread", "Disabling IPv4 support");
+  }
+  if (! enable_ipv6) {
+	  logger->log_warn("FawkesMainThread", "Disabling IPv6 support");
+  }
+  if (! listen_ipv4.empty()) {
+	  logger->log_info("FawkesMainThread", "Listening on IPv4 address %s", listen_ipv4.c_str());
+  }
+  if (! listen_ipv6.empty()) {
+	  logger->log_info("FawkesMainThread", "Listening on IPv6 address %s", listen_ipv4.c_str());
+  }
+  
   // *** Setup blackboard
   std::string bb_magic_token = "";
   unsigned int bb_size = 2097152;
