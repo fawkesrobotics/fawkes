@@ -402,6 +402,8 @@ Socket::connect(const char *hostname, unsigned short int port)
 		}
 	}
 
+	freeaddrinfo(servinfo);
+	
 	if (p == NULL || sock_fd == -1) {
 		throw SocketException("Failed to connect to any endpoint (tried:%s)", tried_endpoints.c_str());
 	}
