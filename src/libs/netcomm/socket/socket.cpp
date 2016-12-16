@@ -352,17 +352,24 @@ Socket::connect(const char *hostname, unsigned short int port)
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = socket_type_;
 	if ((rv = getaddrinfo(hostname, port_s.c_str(), &hints, &servinfo)) != 0) {
-		throw SocketException("getaddrinfo failed: %s", gai_strerror(rv));
+		throw SocketException("getaddrinfo for %s:%s failed: %s",
+		                      hostname, port_s.c_str(), gai_strerror(rv));
 	}
 
 	for (p = servinfo; p != NULL; p = p->ai_next) {
 		bool failed = false;
+		std::string what;
+		int lerrno = 0;
 		if ((sock_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+			what="socket";
+			lerrno = errno;
 			failed = true;
 		}
 
 		if (! failed) {
 			if (::connect(sock_fd, p->ai_addr, p->ai_addrlen) == -1) {
+				what="connect";
+				lerrno = errno;
 				::close(sock_fd);
 				sock_fd = -1;
 				failed = true;
@@ -373,16 +380,16 @@ Socket::connect(const char *hostname, unsigned short int port)
 			if (p->ai_family == AF_INET) {
 				char tmp[INET_ADDRSTRLEN];
 				if (inet_ntop(p->ai_family, &((struct sockaddr_in *)p->ai_addr)->sin_addr, tmp, INET_ADDRSTRLEN) != NULL) {
-					tried_endpoints += std::string(" IPv4:") + tmp + ":" + port_s;
+					tried_endpoints += std::string(" IPv4:") + tmp + ":" + port_s + "|" + what + "|" + strerror(lerrno);
 				} else {
-					tried_endpoints += std::string(" IPv4:FAIL") + tmp + ":" + port_s;
+					tried_endpoints += std::string(" IPv4:FAIL") + tmp + ":" + port_s + "|" + what + "|" + strerror(lerrno);
 				}
 			} else if (p->ai_family == AF_INET6) {
 				char tmp[INET6_ADDRSTRLEN];
 				if (inet_ntop(p->ai_family, &((struct sockaddr_in6 *) p->ai_addr)->sin6_addr, tmp, INET6_ADDRSTRLEN) != NULL) {
-					tried_endpoints += std::string(" IPv6:[") + tmp + "]:" + port_s;
+					tried_endpoints += std::string(" IPv6:[") + tmp + "]:" + port_s + "|" + what + "|" + strerror(lerrno);
 				} else {
-					tried_endpoints += std::string(" IPv6:FAIL") + tmp + ":" + port_s;
+					tried_endpoints += std::string(" IPv6:FAIL") + tmp + ":" + port_s + "|" + what + "|" + strerror(lerrno);
 				}
 			} else {
 				tried_endpoints += std::string(" UNKNOWN_AF:") + port_s;
