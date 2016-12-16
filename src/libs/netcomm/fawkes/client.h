@@ -30,6 +30,7 @@
 
 #include <core/exception.h>
 #include <core/utils/lock_map.h>
+#include <sys/socket.h>
 
 namespace fawkes {
 
@@ -62,6 +63,8 @@ class FawkesNetworkClient
   void connect();
   void disconnect();
   void connect(const char *host, unsigned short int port);
+  void connect(const char *hostname, const struct sockaddr *addr, socklen_t addrlen);
+  void connect(const char *hostname, const struct sockaddr_storage &addr);
 
   void enqueue(FawkesNetworkMessage *message);
   void enqueue_and_wait(FawkesNetworkMessage *message, unsigned int timeout_sec = 15);
@@ -117,6 +120,9 @@ class FawkesNetworkClient
   Mutex *slave_status_mutex;
   bool _has_id;
   unsigned int _id;
+
+  struct sockaddr *addr_;
+  socklen_t        addr_len_;
 };
 
 } // end namespace fawkes

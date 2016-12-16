@@ -299,6 +299,8 @@ FawkesNetworkClient::FawkesNetworkClient(const char *host, unsigned short int po
 {
   __host = strdup(host);
   __port = port;
+  addr_  = NULL;
+  addr_len_ = 0;
 
   s = NULL;
   __send_slave = NULL;
@@ -330,6 +332,8 @@ FawkesNetworkClient::FawkesNetworkClient()
 {
   __host = NULL;
   __port = 0;
+  addr_  = NULL;
+  addr_len_ = 0;
 
   s = NULL;
   __send_slave = NULL;
@@ -363,6 +367,8 @@ FawkesNetworkClient::FawkesNetworkClient(unsigned int id, const char *host,
 {
   __host = strdup(host);
   __port = port;
+  addr_  = NULL;
+  addr_len_ = 0;
 
   s = NULL;
   __send_slave = NULL;
@@ -393,6 +399,7 @@ FawkesNetworkClient::~FawkesNetworkClient()
 
   delete s;
   if (__host) free(__host);
+  if (addr_) free(addr_);
   delete slave_status_mutex;
 
   delete __connest_waitcond;
@@ -409,8 +416,8 @@ FawkesNetworkClient::~FawkesNetworkClient()
 void
 FawkesNetworkClient::connect()
 {
-  if ( __host == NULL ) {
-    throw NullPointerException("Hostname not set. Cannot connect.");
+  if ( __host == NULL && addr_ == NULL) {
+    throw NullPointerException("Neither hostname nor sockaddr set. Cannot connect.");
   }
 
   if ( s != NULL ) {
@@ -422,7 +429,13 @@ FawkesNetworkClient::connect()
 
   try {
     s = new StreamSocket();
-    s->connect(__host, __port);
+    if (addr_) {
+	    s->connect(addr_, addr_len_);
+    } else if (__host) {
+	    s->connect(__host, __port);
+    } else {
+	    throw NullPointerException("Nothing to connect to!?");
+    }
     __send_slave = new FawkesNetworkClientSendThread(s, this);
     __send_slave->start();
     __recv_slave = new FawkesNetworkClientRecvThread(s, this, __recv_mutex);
@@ -475,6 +488,39 @@ FawkesNetworkClient::connect(const char *host, unsigned short int port)
   if (__host)  free(__host);
   __host = strdup(host);
   __port = port;
+  connect();
+}
+
+/** Connect to specific endpoint.
+ * @param hostname hostname, informational only and not used for connecting
+ * @param addr sockaddr structure of specific endpoint to connect to
+ * @param addr_len length of @p addr
+ */
+void
+FawkesNetworkClient::connect(const char *hostname, const struct sockaddr *addr, socklen_t addr_len)
+{
+  if (__host)  free(__host);
+  if (addr_) free(addr_);
+	addr_ = (struct sockaddr *)malloc(addr_len);
+	addr_len_ = addr_len;
+	memcpy(addr_, addr, addr_len);
+	__host = strdup(hostname);
+  connect();
+}
+
+/** Connect to specific endpoint.
+ * @param hostname hostname, informational only and not used for connecting
+ * @param addr sockaddr_storage structure of specific endpoint to connect to
+ */
+void
+FawkesNetworkClient::connect(const char *hostname, const struct sockaddr_storage &addr)
+{
+  if (__host)  free(__host);
+  if (addr_) free(addr_);
+  addr_ = (struct sockaddr *)malloc(sizeof(sockaddr_storage));
+  addr_len_ = sizeof(sockaddr_storage);
+	memcpy(addr_, &addr, addr_len_);
+	__host = strdup(hostname);
   connect();
 }
 
