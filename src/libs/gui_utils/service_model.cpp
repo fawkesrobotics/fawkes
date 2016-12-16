@@ -193,6 +193,7 @@ ServiceModel::service_added( const char* name, const char* type,
   s.domain = string(domain);
   s.hostname = string(host_name);
   s.port = port;
+  memcpy(&s.sockaddr, addr, addr_size);
 
   m_added_services.push_locked(s);
 
@@ -231,6 +232,7 @@ ServiceModel::on_service_added()
       row[m_service_record.ipaddr]   = s.ipaddr;
       row[m_service_record.port]     = s.port;
       row[m_service_record.addrport] = s.addrport;
+      row[m_service_record.sockaddr] = s.sockaddr;
       
       m_added_services.pop();
     }

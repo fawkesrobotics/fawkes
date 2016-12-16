@@ -197,6 +197,35 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &name,
   }
 }
 
+/** Get selected service.
+ * If a service has been selected use this method to get the IP Address as
+ * string of the host that has the service and the port.
+ * May not be called for manual entry since this would require hostname resolution within
+ * the dialog. That should be handled on the caller's side.
+ * @param hostname hostname of the host associated with the service
+ * @param sockaddr upon successful return contains the sockaddr structure of the specific endpoint
+ * @exception Exception thrown if no service has been selected
+ */
+void
+ServiceChooserDialog::get_selected_service(Glib::ustring &hostname,
+                                           struct sockaddr_storage &sockaddr)
+{
+  Glib::RefPtr<Gtk::TreeSelection> treesel = __treeview.get_selection();
+  if (__expander.get_expanded() && !__treeview.has_focus() &&  __entry.get_text_length() > 0) {
+	  throw Exception("May not be called for manual entry");
+  }
+
+  Gtk::TreeModel::iterator iter = treesel->get_selected();
+  if (iter) {
+    Gtk::TreeModel::Row row = *iter;
+    hostname = row[__service_model->get_column_record().ipaddr];
+    sockaddr = row[__service_model->get_column_record().sockaddr];
+
+  } else {
+    throw Exception("No host selected");
+  }
+}
+
 
 /** Get raw address.
  * @param addr upon returns contains the raw representation of the IP address
@@ -260,12 +289,19 @@ ServiceChooserDialog::run_and_connect()
 
   if ( run() ) {
     try {
-      Glib::ustring name;
-      Glib::ustring hostname;
-      unsigned short int port = 1910;
-      get_selected_service(name, hostname, port);
+	    if (__expander.get_expanded() && !__treeview.has_focus() &&  __entry.get_text_length() > 0 ) {
+		    Glib::ustring name, hostname;
+		    unsigned short int port;
+		    get_selected_service(name, hostname, port);
+		    __client->connect(hostname.c_str(), port);
+		    
+	    } else {
+		    struct sockaddr_storage sockaddr;
+		    Glib::ustring hostname;
+		    get_selected_service(hostname, sockaddr);
+		    __client->connect(hostname.c_str(), sockaddr);
 
-      __client->connect(hostname.c_str(), port);
+	    }
     } catch (Exception &e) {
       Glib::ustring message = *(e.begin());
       Gtk::MessageDialog md(__parent, message, /* markup */ false,

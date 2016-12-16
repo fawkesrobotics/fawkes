@@ -52,6 +52,7 @@ class ServiceModel : public fawkes::ServiceBrowseHandler
 	  add(ipaddr);
 	  add(port);
 	  add(addrport);
+	  add(sockaddr);
 	}
       
       Gtk::TreeModelColumn<Glib::ustring> name;      /**< The name of the service */
@@ -61,6 +62,7 @@ class ServiceModel : public fawkes::ServiceBrowseHandler
       Gtk::TreeModelColumn<Glib::ustring> ipaddr;    /**< The IP address as string of the host the service is running on */
       Gtk::TreeModelColumn<unsigned short>  port;     /**< The port the service is running on */
       Gtk::TreeModelColumn<Glib::ustring>   addrport;    /**< Address:port string */
+      Gtk::TreeModelColumn<struct sockaddr_storage> sockaddr;    /**< sockaddr structure */
     };
 
   ServiceRecord& get_column_record();
@@ -87,6 +89,7 @@ class ServiceModel : public fawkes::ServiceBrowseHandler
     std::string ipaddr;    /**< the IP address of the new service */
     unsigned short port;   /**< the port the new service is running on */
     std::string addrport;    /**< address:port */
+	  struct sockaddr_storage sockaddr; /**< sockaddr structure */
   };
 
   struct ServiceRemovedRecord
