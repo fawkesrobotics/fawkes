@@ -49,6 +49,7 @@ class ServiceModel : public fawkes::ServiceBrowseHandler
 	  add(type);
 	  add(domain);
 	  add(hostname);
+	  add(interface);
 	  add(ipaddr);
 	  add(port);
 	  add(addrport);
@@ -59,6 +60,7 @@ class ServiceModel : public fawkes::ServiceBrowseHandler
       Gtk::TreeModelColumn<Glib::ustring> type;      /**< The type of the service */
       Gtk::TreeModelColumn<Glib::ustring> domain;    /**< The domain of the service */
       Gtk::TreeModelColumn<Glib::ustring> hostname;  /**< The name of the host the service is running on */
+      Gtk::TreeModelColumn<Glib::ustring> interface; /**< Name of network interface to reach service */
       Gtk::TreeModelColumn<Glib::ustring> ipaddr;    /**< The IP address as string of the host the service is running on */
       Gtk::TreeModelColumn<unsigned short>  port;     /**< The port the service is running on */
       Gtk::TreeModelColumn<Glib::ustring>   addrport;    /**< Address:port string */
@@ -75,7 +77,7 @@ class ServiceModel : public fawkes::ServiceBrowseHandler
                       const char* type,
                       const char* domain );
   void service_added( const char* name, const char* type,
-                      const char* domain, const char* host_name,
+                      const char* domain, const char* host_name, const char *interface,
                       const struct sockaddr* addr, const socklen_t addr_size,
                       uint16_t port, std::list<std::string>& txt, int flags );
   void service_removed( const char* name, const char* type, const char* domain );
@@ -86,6 +88,7 @@ class ServiceModel : public fawkes::ServiceBrowseHandler
     std::string type;      /**< the type of the new service */
     std::string domain;    /**< the domain of the new service */
     std::string hostname;  /**< the hostname of the new service */
+    std::string interface; /**< name of network interface to reach service */
     std::string ipaddr;    /**< the IP address of the new service */
     unsigned short port;   /**< the port the new service is running on */
     std::string addrport;    /**< address:port */
