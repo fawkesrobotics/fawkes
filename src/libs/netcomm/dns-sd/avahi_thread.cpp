@@ -644,7 +644,15 @@ AvahiThread::call_handler_service_added( const char *name,
                                          std::list<std::string> &txt,
                                          AvahiLookupResultFlags flags)
 {
-  struct sockaddr *s = NULL;
+	char ifname[IF_NAMESIZE];
+	ifname[0] = 0;
+	if (if_indextoname(interface, ifname) == NULL) {
+		fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 if_indextoname failed");
+		return;
+	}
+		
+
+	struct sockaddr *s = NULL;
   socklen_t slen;
   if ( address->proto == AVAHI_PROTO_INET ) {
 	  if (! enable_ipv4)  return;
@@ -661,39 +669,33 @@ AvahiThread::call_handler_service_added( const char *name,
     sin->sin6_family = AF_INET6;
     memcpy(&sin->sin6_addr, &address->data.ipv6.address, sizeof(in6_addr));
 
-    char ifname[IF_NAMESIZE];
-    if (if_indextoname(interface, ifname) != NULL) {
-	    char ipaddr[INET6_ADDRSTRLEN];
-	    if (inet_ntop(AF_INET6, &sin->sin6_addr, ipaddr, sizeof(ipaddr)) != NULL) {
-		    std::string addr_with_scope = std::string(ipaddr) + "%" + ifname;
-		    std::string port_s = StringConversions::to_string((unsigned int)port);
+    char ipaddr[INET6_ADDRSTRLEN];
+    if (inet_ntop(AF_INET6, &sin->sin6_addr, ipaddr, sizeof(ipaddr)) != NULL) {
+	    std::string addr_with_scope = std::string(ipaddr) + "%" + ifname;
+	    std::string port_s = StringConversions::to_string((unsigned int)port);
 
-		    // use getaddrinfo to fill especially to determine scope ID
-		    struct addrinfo hints, *res;
-		    memset(&hints, 0, sizeof(hints));
-		    hints.ai_family = AF_INET6;
-		    hints.ai_flags = AI_NUMERICHOST;
-		    if (getaddrinfo(addr_with_scope.c_str(), port_s.c_str(), &hints, &res) == 0) {
-			    if (slen == res[0].ai_addrlen) {
-				    memcpy(sin, res[0].ai_addr, slen);
-				    freeaddrinfo(res);
-			    } else {
-				    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 address lengths different");
-				    freeaddrinfo(res);
-				    return;
-			    }
+	    // use getaddrinfo to fill especially to determine scope ID
+	    struct addrinfo hints, *res;
+	    memset(&hints, 0, sizeof(hints));
+	    hints.ai_family = AF_INET6;
+	    hints.ai_flags = AI_NUMERICHOST;
+	    if (getaddrinfo(addr_with_scope.c_str(), port_s.c_str(), &hints, &res) == 0) {
+		    if (slen == res[0].ai_addrlen) {
+			    memcpy(sin, res[0].ai_addr, slen);
+			    printf("Scope %u  interface %u\n", sin->sin6_scope_id, interface);
+			    freeaddrinfo(res);
 		    } else {
-			    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 getaddrinfo failed");
-			    return;
+			    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 address lengths different");
+			    freeaddrinfo(res);
+				    return;
 		    }
 	    } else {
-		    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 inet_ntop failed");
+		    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 getaddrinfo failed");
 		    return;
 	    }
     } else {
-	    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 if_indextoname failed");
+	    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 inet_ntop failed");
 	    return;
-
     }
     s = (struct sockaddr *)sin;
   } else {
@@ -703,7 +705,7 @@ AvahiThread::call_handler_service_added( const char *name,
   if ( __handlers.find(type) != __handlers.end() ) {
     std::list<ServiceBrowseHandler *>::iterator i;
     for ( i = __handlers[type].begin(); i != __handlers[type].end(); ++i) {
-	    (*i)->service_added(name, type, domain, host_name,
+	    (*i)->service_added(name, type, domain, host_name, ifname,
 	                        (struct sockaddr *)s, slen, port, txt, (int)flags);
     }
   }
