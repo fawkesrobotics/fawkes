@@ -101,6 +101,9 @@ WebviewThread::init()
     __cfg_use_ssl = config->get_bool("/webview/use_ssl");
   } catch (Exception &e) {}
 
+  __cfg_use_ipv4 = config->get_bool("/network/ipv4/enable");
+  __cfg_use_ipv6 = config->get_bool("/network/ipv6/enable");
+
   if (__cfg_use_ssl) {
     __cfg_ssl_create = false;
     try {
@@ -173,11 +176,11 @@ WebviewThread::init()
   try {
     if (__cfg_use_ssl) {
       __webserver  = new WebServer(__cfg_port, __dispatcher,
-				   __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str(),
-				   __cfg_ssl_cipher_suite.empty() ? NULL : __cfg_ssl_cipher_suite.c_str(),
-				   logger);
+                                   __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str(),
+                                   __cfg_ssl_cipher_suite.empty() ? NULL : __cfg_ssl_cipher_suite.c_str(),
+                                   logger, __cfg_use_ipv4, __cfg_use_ipv6);
     } else {
-      __webserver  = new WebServer(__cfg_port, __dispatcher, logger);
+      __webserver  = new WebServer(__cfg_port, __dispatcher, logger, __cfg_use_ipv4, __cfg_use_ipv6);
     }
 
     if (__cfg_use_basic_auth) {
@@ -240,8 +243,16 @@ WebviewThread::init()
   webview_nav_manager->add_nav_entry(IMAGE_URL_PREFIX, "Images");
 #endif
 
-  logger->log_info("WebviewThread", "Listening for HTTP%s connections on port %u",
-		   __cfg_use_ssl ? "S" : "", __cfg_port);
+  std::string afs;
+  if (__cfg_use_ipv4 && __cfg_use_ipv6) {
+	  afs = "IPv4,IPv6";
+  } else if (__cfg_use_ipv4) {
+	  afs = "IPv4";
+  } else if (__cfg_use_ipv6) {
+	  afs = "IPv6";
+  }
+  logger->log_info("WebviewThread", "Listening for HTTP%s connections on port %u (%s)",
+                   __cfg_use_ssl ? "S" : "", __cfg_port, afs.c_str());
 
   service_publisher->publish_service(__webview_service);
   service_browser->watch_service("_http._tcp", __service_browse_handler);
