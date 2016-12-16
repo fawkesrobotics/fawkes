@@ -40,6 +40,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <net/if.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #include <cstdlib>
 #include <cstddef>
 #include <cstring>
@@ -632,13 +635,14 @@ AvahiThread::call_handler_service_removed( const char *name,
  */
 void
 AvahiThread::call_handler_service_added( const char *name,
-					  const char *type,
-					  const char *domain,
-					  const char *host_name,
-					  const AvahiAddress *address,
-					  uint16_t port,
-					  std::list<std::string> &txt,
-					  AvahiLookupResultFlags flags)
+                                         const char *type,
+                                         const char *domain,
+                                         const char *host_name,
+                                         const AvahiIfIndex interface,
+                                         const AvahiAddress *address,
+                                         uint16_t port,
+                                         std::list<std::string> &txt,
+                                         AvahiLookupResultFlags flags)
 {
   struct sockaddr *s = NULL;
   socklen_t slen;
@@ -648,13 +652,49 @@ AvahiThread::call_handler_service_added( const char *name,
     struct sockaddr_in *sin = (struct sockaddr_in *)malloc(slen);
     sin->sin_family = AF_INET;
     sin->sin_addr.s_addr = address->data.ipv4.address;
+    sin->sin_port = htons(port);
     s = (struct sockaddr *)sin;
   } else if ( address->proto == AVAHI_PROTO_INET6 ) {
 	  if (! enable_ipv6)  return;
     slen = sizeof(struct sockaddr_in6);
     struct sockaddr_in6 *sin = (struct sockaddr_in6 *)malloc(slen);
     sin->sin6_family = AF_INET6;
-	  memcpy(&sin->sin6_addr, &address->data.ipv6.address, sizeof(in6_addr));
+    memcpy(&sin->sin6_addr, &address->data.ipv6.address, sizeof(in6_addr));
+
+    char ifname[IF_NAMESIZE];
+    if (if_indextoname(interface, ifname) != NULL) {
+	    char ipaddr[INET6_ADDRSTRLEN];
+	    if (inet_ntop(AF_INET6, &sin->sin6_addr, ipaddr, sizeof(ipaddr)) != NULL) {
+		    std::string addr_with_scope = std::string(ipaddr) + "%" + ifname;
+		    std::string port_s = StringConversions::to_string((unsigned int)port);
+
+		    // use getaddrinfo to fill especially to determine scope ID
+		    struct addrinfo hints, *res;
+		    memset(&hints, 0, sizeof(hints));
+		    hints.ai_family = AF_INET6;
+		    hints.ai_flags = AI_NUMERICHOST;
+		    if (getaddrinfo(addr_with_scope.c_str(), port_s.c_str(), &hints, &res) == 0) {
+			    if (slen == res[0].ai_addrlen) {
+				    memcpy(sin, res[0].ai_addr, slen);
+				    freeaddrinfo(res);
+			    } else {
+				    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 address lengths different");
+				    freeaddrinfo(res);
+				    return;
+			    }
+		    } else {
+			    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 getaddrinfo failed");
+			    return;
+		    }
+	    } else {
+		    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 inet_ntop failed");
+		    return;
+	    }
+    } else {
+	    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 if_indextoname failed");
+	    return;
+
+    }
     s = (struct sockaddr *)sin;
   } else {
     // ignore
@@ -805,7 +845,7 @@ AvahiThread::browse_callback( AvahiServiceBrowser *b,
  */
 void
 AvahiThread::resolve_callback( AvahiServiceResolver *r,
-			       AVAHI_GCC_UNUSED AvahiIfIndex interface,
+			       AvahiIfIndex interface,
 			       AVAHI_GCC_UNUSED AvahiProtocol protocol,
 			       AvahiResolverEvent event,
 			       const char *name,
@@ -838,7 +878,7 @@ AvahiThread::resolve_callback( AvahiServiceResolver *r,
 	l = avahi_string_list_get_next( l );
       }
 
-      at->call_handler_service_added(name, type, domain, host_name, address, port, txts, flags);
+      at->call_handler_service_added(name, type, domain, host_name, interface, address, port, txts, flags);
     }
     break;
   }

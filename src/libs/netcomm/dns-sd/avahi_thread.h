@@ -134,11 +134,12 @@ class AvahiThread
 				     const char *type,
 				     const char *domain);
   void call_handler_service_added( const char *name,
-				   const char *type,
-				   const char *domain,
-				   const char *host_name,
-				   const AvahiAddress *address,
-				   uint16_t port,
+                                   const char *type,
+                                   const char *domain,
+                                   const char *host_name,
+                                   const AvahiIfIndex interface,
+                                   const AvahiAddress *address,
+                                   uint16_t port,
 				   std::list<std::string> &txt,
 				   AvahiLookupResultFlags flags);
   void call_handler_failed( const char *name,
