@@ -157,35 +157,35 @@ ServiceModel::browse_failed( const char* name,
 }
 
 void
-ServiceModel::service_added( const char* name,
-			    const char* type,
-			    const char* domain,
-			    const char* host_name,
-			    const struct sockaddr* addr,
-			    const socklen_t addr_size,
-			    uint16_t port,
-			    std::list<std::string>& txt,
-			    int flags )
+ServiceModel::service_added( const char* name, const char* type,
+                             const char* domain, const char* host_name,
+                             const struct sockaddr* addr, const socklen_t addr_size,
+                             uint16_t port, std::list<std::string>& txt, int flags )
 {
   ServiceAddedRecord s;
   if (addr->sa_family == AF_INET) {
 	  char ipaddr[INET_ADDRSTRLEN];
 	  struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
 	  if (inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr)) != NULL) {
-		  s.ipaddr = std::string(ipaddr) + ":" + StringConversions::to_string(port);
+		  s.ipaddr   = ipaddr;
+		  s.addrport = std::string(ipaddr) + ":" + StringConversions::to_string(port);
 	  } else {
-		  s.ipaddr = std::string("Failed to convert IPv4: ") + strerror(errno);
+		  s.ipaddr = "";
+		  s.addrport = std::string("Failed to convert IPv4: ") + strerror(errno);
 	  }
   } else if (addr->sa_family == AF_INET6) {
 	  char ipaddr[INET6_ADDRSTRLEN];
 	  struct sockaddr_in6 *saddr = (struct sockaddr_in6 *)addr;
 	  if (inet_ntop(AF_INET6, &(saddr->sin6_addr), ipaddr, sizeof(ipaddr)) != NULL) {
-		  s.ipaddr = std::string("[") + ipaddr + "]:" + StringConversions::to_string(port);
+		  s.ipaddr   = ipaddr;
+		  s.addrport = std::string("[") + ipaddr + "]:" + StringConversions::to_string(port);
 	  } else {
-		  s.ipaddr = std::string("Failed to convert IPv6: ") + strerror(errno);
+		  s.ipaddr = "";
+		  s.addrport = std::string("Failed to convert IPv6: ") + strerror(errno);
 	  }
   } else {
-	  s.ipaddr = "Unknown address family";
+	  s.ipaddr = "";
+	  s.addrport = "Unknown address family";
   }
 
   s.name = string(name);
@@ -200,9 +200,7 @@ ServiceModel::service_added( const char* name,
 }
 
 void
-ServiceModel::service_removed( const char* name,
-			      const char* type,
-			      const char* domain )
+ServiceModel::service_removed(const char* name, const char* type, const char* domain)
 {
   ServiceRemovedRecord s;
   s.name = string(name);
@@ -232,7 +230,8 @@ ServiceModel::on_service_added()
       row[m_service_record.hostname] = s.hostname;
       row[m_service_record.ipaddr]   = s.ipaddr;
       row[m_service_record.port]     = s.port;
-
+      row[m_service_record.addrport] = s.addrport;
+      
       m_added_services.pop();
     }
 

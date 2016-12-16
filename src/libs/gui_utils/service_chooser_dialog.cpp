@@ -112,7 +112,7 @@ ServiceChooserDialog::ctor()
 
   __treeview.set_model(__service_model->get_list_store());
   __treeview.append_column("Service", __service_model->get_column_record().name);
-  __treeview.append_column("Address/Port", __service_model->get_column_record().ipaddr);
+  __treeview.append_column("Address/Port", __service_model->get_column_record().addrport);
   __scrollwin.add(__treeview);
   __scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
   __treeview.show();
@@ -189,7 +189,7 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &name,
   if (iter) {
     Gtk::TreeModel::Row row = *iter;
     name     = row[__service_model->get_column_record().name];
-    hostname = row[__service_model->get_column_record().hostname];
+    hostname = row[__service_model->get_column_record().ipaddr];
     port     = row[__service_model->get_column_record().port];
 
   } else {
