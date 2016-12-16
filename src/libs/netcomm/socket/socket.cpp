@@ -165,9 +165,9 @@ Socket::Socket(AddrType addr_type, SocketType sock_type, float timeout)
 	  client_addr(NULL), client_addr_len(0), socket_protocol_(0)
 {
   if (addr_type == IPv4) {
-	  socket_addr_family_ = PF_INET;
+	  socket_addr_family_ = AF_INET;
   } else if (addr_type == IPv6) {
-	  socket_addr_family_ = PF_INET6;
+	  socket_addr_family_ = AF_INET6;
   } else {
 	  throw SocketException("Unknown address type");
   }
@@ -305,9 +305,10 @@ void
 Socket::connect(const struct sockaddr *addr_port, socklen_t struct_size)
 {
 	if ( sock_fd != -1 )  throw SocketException("Socket already initialized and connected");
+	socket_addr_family_ = addr_port->sa_family;
 
 	create();
-  
+
 	if (timeout == 0.f) {
 		if ( ::connect(sock_fd, addr_port, struct_size) < 0 ) {
 			throw SocketException(errno, "Could not connect");
