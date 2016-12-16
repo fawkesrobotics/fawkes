@@ -169,14 +169,14 @@ Socket::Socket(AddrType addr_type, SocketType sock_type, float timeout)
   } else if (addr_type == IPv6) {
 	  socket_addr_family_ = PF_INET6;
   } else {
-	  throw Exception("Unknown address type");
+	  throw SocketException("Unknown address type");
   }
   if (sock_type == TCP) {
 	  socket_type_ = SOCK_STREAM;
   } else if (sock_type == UDP) {
 	  socket_type_ = SOCK_DGRAM;
   } else {
-	  throw Exception("Unknown socket type");
+	  throw SocketException("Unknown socket type");
   }
 }
 
@@ -197,7 +197,7 @@ Socket::Socket(SocketType sock_type, float timeout)
   } else if (sock_type == UDP) {
 	  socket_type_ = SOCK_DGRAM;
   } else {
-	  throw Exception("Unknown socket type");
+	  throw SocketException("Unknown socket type");
   }
 }
 
@@ -395,7 +395,7 @@ Socket::connect(const char *hostname, unsigned short int port)
 	}
 
 	if (p == NULL || sock_fd == -1) {
-		throw Exception("Failed to connect to any endpoint (tried:%s)", tried_endpoints.c_str());
+		throw SocketException("Failed to connect to any endpoint (tried:%s)", tried_endpoints.c_str());
 	}
 }
 
