@@ -97,6 +97,16 @@ class ClingoAccess
 
 	bool ground(const Clingo::PartSpan& parts);
 
+	inline bool assign_external(const Clingo::Symbol& atom, const bool value)
+	{
+		return assign_external(atom, value ? Clingo::TruthValue::True : Clingo::TruthValue::False);
+	}
+
+	inline bool free_exteral(const Clingo::Symbol& atom)
+	{
+		return assign_external(atom, Clingo::TruthValue::Free);
+	}
+
 	bool assign_external(const Clingo::Symbol& atom, const Clingo::TruthValue value);
 	bool release_external(const Clingo::Symbol& atom);
 };
