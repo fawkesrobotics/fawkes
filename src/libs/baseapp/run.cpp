@@ -299,7 +299,7 @@ init(InitOptions options, int & retval)
     net_tcp_port = options.net_tcp_port();
   } else {
     try {
-      net_tcp_port = config->get_uint("/fawkes/mainapp/net/tcp_port");
+      net_tcp_port = config->get_uint("/network/fawkes/tcp_port");
     } catch (Exception &e) {}  // ignore, we stick with the default
   }
 
@@ -307,7 +307,7 @@ init(InitOptions options, int & retval)
     net_service_name = options.net_service_name();
   } else {
     try {
-      net_service_name = config->get_string("/fawkes/mainapp/net/service_name");
+      net_service_name = config->get_string("/network/fawkes/service_name");
     } catch (Exception &e) {}  // ignore, we stick with the default
   }
 
@@ -318,17 +318,17 @@ init(InitOptions options, int & retval)
   }
 
   try {
-	  enable_ipv4 = config->get_bool("/fawkes/mainapp/net/ipv4/enable");
+	  enable_ipv4 = config->get_bool("/network/ipv4/enable");
   } catch (Exception &e) {}  // ignore, we stick with the default
   try {
-	  enable_ipv6 = config->get_bool("/fawkes/mainapp/net/ipv6/enable");
+	  enable_ipv6 = config->get_bool("/network/ipv6/enable");
   } catch (Exception &e) {}  // ignore, we stick with the default
 
   try {
-	  listen_ipv4 = config->get_string("/fawkes/mainapp/net/ipv4/listen");
+	  listen_ipv4 = config->get_string("/network/ipv4/listen");
   } catch (Exception &e) {}  // ignore, we stick with the default
   try {
-	  listen_ipv6 = config->get_string("/fawkes/mainapp/net/ipv6/listen");
+	  listen_ipv6 = config->get_string("/network/ipv6/listen");
   } catch (Exception &e) {}  // ignore, we stick with the default
 
   if (! enable_ipv4) {
