@@ -52,9 +52,12 @@ namespace fawkes {
  * @param port TCP port to listen on
  * @param dispatcher dispatcher to call for requests
  * @param logger optional logger, used to output possible run-time problems
+ * @param enable_ipv4 enable IPv4 support
+ * @param enable_ipv6 enable IPv6 support
  */
 WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
-		     fawkes::Logger *logger)
+                     fawkes::Logger *logger,
+                     bool enable_ipv4, bool enable_ipv6)
 {
   __port         = port;
   __dispatcher   = dispatcher;
@@ -64,7 +67,18 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
   __ssl_key_mem  = NULL;
   __ssl_cert_mem = NULL;
 
-  __daemon = MHD_start_daemon(MHD_NO_FLAG,
+  unsigned int flags = MHD_NO_FLAG;
+#if MHD_VERSION >= 0x00090280
+  if (enable_ipv4 && enable_ipv6) {
+	  flags |= MHD_USE_DUAL_STACK;
+  } else if (enable_ipv6) {
+	  flags |= MHD_USE_IPv6;
+  } else if (! enable_ipv4 && ! enable_ipv6) {
+	  throw fawkes::Exception("WebServer: neither IPv4 nor IPv6 enabled");
+  }
+#endif
+
+  __daemon = MHD_start_daemon(flags,
 			      __port,
 			      NULL,
 			      NULL,
@@ -89,10 +103,13 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
  * @param cert_pem_filepath path to PEM formatted file containing the certificate
  * @param cipher_suite which cipers to use for SSL/TLS connections
  * @param logger optional logger, used to output possible run-time problems
+ * @param enable_ipv4 enable IPv4 support
+ * @param enable_ipv6 enable IPv6 support
  */
 WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
-		     const char *key_pem_filepath, const char *cert_pem_filepath,
-		     const char *cipher_suite, fawkes::Logger *logger)
+                     const char *key_pem_filepath, const char *cert_pem_filepath,
+                     const char *cipher_suite, fawkes::Logger *logger,
+                     bool enable_ipv4, bool enable_ipv6)
 {
   __port       = port;
   __dispatcher = dispatcher;
@@ -105,7 +122,18 @@ WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
     cipher_suite = WEBVIEW_DEFAULT_CIPHERS;
   }
 
-  __daemon = MHD_start_daemon(MHD_USE_SSL,
+  unsigned int flags = MHD_USE_SSL;
+#if MHD_VERSION >= 0x00090280
+  if (enable_ipv4 && enable_ipv6) {
+	  flags |= MHD_USE_DUAL_STACK;
+  } else if (enable_ipv6) {
+	  flags |= MHD_USE_IPv6;
+  } else if (! enable_ipv4 && ! enable_ipv6) {
+	  throw fawkes::Exception("WebServer: neither IPv4 nor IPv6 enabled");
+  }
+#endif
+
+  __daemon = MHD_start_daemon(flags,
 			      __port,
 			      NULL,
 			      NULL,
