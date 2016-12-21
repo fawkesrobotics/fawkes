@@ -79,9 +79,8 @@ class FacialExpressionInterface : public Interface
   const char * tostring_mouth_t(mouth_t value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     int32_t brows_action; /**< Type of action of brows */
@@ -89,7 +88,6 @@ class FacialExpressionInterface : public Interface
     int32_t jowl_action; /**< Type of action of jown */
     int32_t mouth_action; /**< Type of action of mouth */
   } FacialExpressionInterface_data_t;
-#pragma pack(pop)
 
   FacialExpressionInterface_data_t *data;
 
@@ -102,14 +100,12 @@ class FacialExpressionInterface : public Interface
   class MoveBrowsMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t brows_action; /**< Type of action of brows */
     } MoveBrowsMessage_data_t;
-#pragma pack(pop)
 
     MoveBrowsMessage_data_t *data;
 
@@ -133,14 +129,12 @@ class FacialExpressionInterface : public Interface
   class MoveEyesMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t eyes_action; /**< Type of action of eyes */
     } MoveEyesMessage_data_t;
-#pragma pack(pop)
 
     MoveEyesMessage_data_t *data;
 
@@ -164,14 +158,12 @@ class FacialExpressionInterface : public Interface
   class MoveJowlMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t jowl_action; /**< Type of action of jown */
     } MoveJowlMessage_data_t;
-#pragma pack(pop)
 
     MoveJowlMessage_data_t *data;
 
@@ -195,14 +187,12 @@ class FacialExpressionInterface : public Interface
   class MoveMouthMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t mouth_action; /**< Type of action of mouth */
     } MoveMouthMessage_data_t;
-#pragma pack(pop)
 
     MoveMouthMessage_data_t *data;
 

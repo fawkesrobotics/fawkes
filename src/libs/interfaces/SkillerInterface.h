@@ -50,9 +50,8 @@ class SkillerInterface : public Interface
   const char * tostring_SkillStatusEnum(SkillStatusEnum value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char skill_string[1024]; /**< 
@@ -75,7 +74,6 @@ class SkillerInterface : public Interface
       The status of the current skill execution.
      */
   } SkillerInterface_data_t;
-#pragma pack(pop)
 
   SkillerInterface_data_t *data;
 
@@ -85,9 +83,8 @@ class SkillerInterface : public Interface
   class ExecSkillMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char skill_string[1024]; /**< 
@@ -95,7 +92,6 @@ class SkillerInterface : public Interface
       Must be properly null-terminated.
      */
     } ExecSkillMessage_data_t;
-#pragma pack(pop)
 
     ExecSkillMessage_data_t *data;
 
@@ -116,13 +112,11 @@ class SkillerInterface : public Interface
   class RestartInterpreterMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } RestartInterpreterMessage_data_t;
-#pragma pack(pop)
 
     RestartInterpreterMessage_data_t *data;
 
@@ -139,13 +133,11 @@ class SkillerInterface : public Interface
   class StopExecMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopExecMessage_data_t;
-#pragma pack(pop)
 
     StopExecMessage_data_t *data;
 
@@ -162,9 +154,8 @@ class SkillerInterface : public Interface
   class AcquireControlMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool steal_control; /**< 
@@ -174,7 +165,6 @@ class SkillerInterface : public Interface
       acquire control.
      */
     } AcquireControlMessage_data_t;
-#pragma pack(pop)
 
     AcquireControlMessage_data_t *data;
 
@@ -195,13 +185,11 @@ class SkillerInterface : public Interface
   class ReleaseControlMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ReleaseControlMessage_data_t;
-#pragma pack(pop)
 
     ReleaseControlMessage_data_t *data;
 

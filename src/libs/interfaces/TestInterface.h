@@ -48,9 +48,8 @@ class TestInterface : public Interface
   const char * tostring_TestEnum(TestEnum value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     bool test_bool; /**< Test Bool */
@@ -60,7 +59,6 @@ class TestInterface : public Interface
     int32_t result; /**< Result of operation add operation from Calculate message. */
     uint32_t test_uint; /**< Test uint32 */
   } TestInterface_data_t;
-#pragma pack(pop)
 
   TestInterface_data_t *data;
 
@@ -70,14 +68,12 @@ class TestInterface : public Interface
   class SetTestIntMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t test_int; /**< Test integer */
     } SetTestIntMessage_data_t;
-#pragma pack(pop)
 
     SetTestIntMessage_data_t *data;
 
@@ -98,14 +94,12 @@ class TestInterface : public Interface
   class SetTestStringMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char test_string[30]; /**< A test sring */
     } SetTestStringMessage_data_t;
-#pragma pack(pop)
 
     SetTestStringMessage_data_t *data;
 
@@ -126,15 +120,13 @@ class TestInterface : public Interface
   class CalculateMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t summand; /**< Summand */
       int32_t addend; /**< Addend */
     } CalculateMessage_data_t;
-#pragma pack(pop)
 
     CalculateMessage_data_t *data;
 

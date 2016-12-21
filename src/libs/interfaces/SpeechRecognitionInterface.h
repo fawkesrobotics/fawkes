@@ -39,9 +39,8 @@ class SpeechRecognitionInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char text[1024]; /**< 
@@ -57,7 +56,6 @@ class SpeechRecognitionInterface : public Interface
       True, if speech processing is currently enabled, false otherwise.
      */
   } SpeechRecognitionInterface_data_t;
-#pragma pack(pop)
 
   SpeechRecognitionInterface_data_t *data;
 
@@ -66,13 +64,11 @@ class SpeechRecognitionInterface : public Interface
   class ResetMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ResetMessage_data_t;
-#pragma pack(pop)
 
     ResetMessage_data_t *data;
 
@@ -88,16 +84,14 @@ class SpeechRecognitionInterface : public Interface
   class SetEnabledMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool enabled; /**< 
       True, if speech processing is currently enabled, false otherwise.
      */
     } SetEnabledMessage_data_t;
-#pragma pack(pop)
 
     SetEnabledMessage_data_t *data;
 

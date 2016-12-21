@@ -39,9 +39,8 @@ class Position2DTrackInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     float track_x_positions[30]; /**< 
@@ -60,7 +59,6 @@ class Position2DTrackInterface : public Interface
     uint32_t length; /**< Length of the Tracks (i.e. up to which index there are valid positions). */
     uint32_t track_id; /**< The ID of the Track. */
   } Position2DTrackInterface_data_t;
-#pragma pack(pop)
 
   Position2DTrackInterface_data_t *data;
 

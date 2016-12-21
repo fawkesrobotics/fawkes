@@ -39,9 +39,8 @@ class NavPathInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char path_node_1[64]; /**< Path Node */
@@ -86,7 +85,6 @@ class NavPathInterface : public Interface
     char path_node_40[64]; /**< Path Node */
     uint32_t path_length; /**< Length of path */
   } NavPathInterface_data_t;
-#pragma pack(pop)
 
   NavPathInterface_data_t *data;
 

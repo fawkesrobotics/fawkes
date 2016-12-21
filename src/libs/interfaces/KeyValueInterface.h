@@ -50,9 +50,8 @@ class KeyValueInterface : public Interface
   const char * tostring_ValueType(ValueType value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char key[32]; /**< The key entry */
@@ -64,7 +63,6 @@ class KeyValueInterface : public Interface
     uint8_t value_byte; /**< Value with type byte */
     float value_float; /**< Value with type float */
   } KeyValueInterface_data_t;
-#pragma pack(pop)
 
   KeyValueInterface_data_t *data;
 

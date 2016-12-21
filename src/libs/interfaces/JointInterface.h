@@ -39,9 +39,8 @@ class JointInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     float position; /**< 
@@ -51,7 +50,6 @@ class JointInterface : public Interface
       The joint's velocity in rad/s.
      */
   } JointInterface_data_t;
-#pragma pack(pop)
 
   JointInterface_data_t *data;
 

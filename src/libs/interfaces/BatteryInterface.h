@@ -39,9 +39,8 @@ class BatteryInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t current; /**< Battery Current [mA] */
@@ -50,7 +49,6 @@ class BatteryInterface : public Interface
     float absolute_soc; /**< Absolute state of charge [%] */
     float relative_soc; /**< Relative state of charge [%] */
   } BatteryInterface_data_t;
-#pragma pack(pop)
 
   BatteryInterface_data_t *data;
 
@@ -59,13 +57,11 @@ class BatteryInterface : public Interface
   class PushButtonMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } PushButtonMessage_data_t;
-#pragma pack(pop)
 
     PushButtonMessage_data_t *data;
 
@@ -81,13 +77,11 @@ class BatteryInterface : public Interface
   class SleepMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } SleepMessage_data_t;
-#pragma pack(pop)
 
     SleepMessage_data_t *data;
 

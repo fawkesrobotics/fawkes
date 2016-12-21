@@ -68,9 +68,8 @@ class NavigatorInterface : public Interface
   const char * tostring_OrientationMode(OrientationMode value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t flags; /**< Bit-wise combination of
@@ -100,7 +99,6 @@ class NavigatorInterface : public Interface
     bool stop_at_target; /**< Stop when target is reached? */
     int32_t orientation_mode; /**< Mode how/when to orientate if orientation is given */
   } NavigatorInterface_data_t;
-#pragma pack(pop)
 
   NavigatorInterface_data_t *data;
 
@@ -111,13 +109,11 @@ class NavigatorInterface : public Interface
   class StopMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopMessage_data_t;
-#pragma pack(pop)
 
     StopMessage_data_t *data;
 
@@ -135,16 +131,14 @@ class NavigatorInterface : public Interface
   class TurnMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float angle; /**< Angle of the turn. */
       float velocity; /**< The desired turning velocity in rad/s,
       set to zero to use default value. */
     } TurnMessage_data_t;
-#pragma pack(pop)
 
     TurnMessage_data_t *data;
 
@@ -169,16 +163,14 @@ class NavigatorInterface : public Interface
   class CartesianGotoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X-coordinate of the target, in the robot's coordinate system. */
       float y; /**< Y-coordinate of the target, in the robot's coordinate system. */
       float orientation; /**< The desired orientation of the robot at the target. */
     } CartesianGotoMessage_data_t;
-#pragma pack(pop)
 
     CartesianGotoMessage_data_t *data;
 
@@ -206,16 +198,14 @@ class NavigatorInterface : public Interface
   class PolarGotoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float phi; /**< Angle between the robot's front and the target. */
       float dist; /**< Distance to the target. */
       float orientation; /**< The desired orientation of the robot at the target. */
     } PolarGotoMessage_data_t;
-#pragma pack(pop)
 
     PolarGotoMessage_data_t *data;
 
@@ -243,14 +233,12 @@ class NavigatorInterface : public Interface
   class PlaceGotoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char place[64]; /**< Place to go to. */
     } PlaceGotoMessage_data_t;
-#pragma pack(pop)
 
     PlaceGotoMessage_data_t *data;
 
@@ -272,15 +260,13 @@ class NavigatorInterface : public Interface
   class PlaceWithOriGotoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char place[64]; /**< Place to go to. */
       float orientation; /**< The desired orientation of the robot at the target. */
     } PlaceWithOriGotoMessage_data_t;
-#pragma pack(pop)
 
     PlaceWithOriGotoMessage_data_t *data;
 
@@ -305,16 +291,14 @@ class NavigatorInterface : public Interface
   class ObstacleMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X-coordinate of the obstacle. */
       float y; /**< Y-coordinate of the obstacle. */
       float width; /**< Width of the obstacle. */
     } ObstacleMessage_data_t;
-#pragma pack(pop)
 
     ObstacleMessage_data_t *data;
 
@@ -342,13 +326,11 @@ class NavigatorInterface : public Interface
   class ResetOdometryMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ResetOdometryMessage_data_t;
-#pragma pack(pop)
 
     ResetOdometryMessage_data_t *data;
 
@@ -366,14 +348,12 @@ class NavigatorInterface : public Interface
   class SetMaxVelocityMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float max_velocity; /**< Maximum velocity */
     } SetMaxVelocityMessage_data_t;
-#pragma pack(pop)
 
     SetMaxVelocityMessage_data_t *data;
 
@@ -395,14 +375,12 @@ class NavigatorInterface : public Interface
   class SetMaxRotationMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float max_rotation; /**< Maximum rotation velocity */
     } SetMaxRotationMessage_data_t;
-#pragma pack(pop)
 
     SetMaxRotationMessage_data_t *data;
 
@@ -424,15 +402,13 @@ class NavigatorInterface : public Interface
   class SetEscapingMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool escaping_enabled; /**< This is used for navigation components with integrated collision avoidance,
       to check whether the navigator should stop when an obstacle obstructs the path, or if it should escape. */
     } SetEscapingMessage_data_t;
-#pragma pack(pop)
 
     SetEscapingMessage_data_t *data;
 
@@ -454,14 +430,12 @@ class NavigatorInterface : public Interface
   class SetSecurityDistanceMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float security_distance; /**< Security distance to keep to obstacles */
     } SetSecurityDistanceMessage_data_t;
-#pragma pack(pop)
 
     SetSecurityDistanceMessage_data_t *data;
 
@@ -483,14 +457,12 @@ class NavigatorInterface : public Interface
   class SetDriveModeMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t drive_mode; /**< Current drive mode */
     } SetDriveModeMessage_data_t;
-#pragma pack(pop)
 
     SetDriveModeMessage_data_t *data;
 
@@ -512,14 +484,12 @@ class NavigatorInterface : public Interface
   class SetStopAtTargetMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool stop_at_target; /**< Stop when target is reached? */
     } SetStopAtTargetMessage_data_t;
-#pragma pack(pop)
 
     SetStopAtTargetMessage_data_t *data;
 
@@ -541,14 +511,12 @@ class NavigatorInterface : public Interface
   class SetOrientationModeMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t orientation_mode; /**< Mode how/when to orientate if orientation is given */
     } SetOrientationModeMessage_data_t;
-#pragma pack(pop)
 
     SetOrientationModeMessage_data_t *data;
 
@@ -570,13 +538,11 @@ class NavigatorInterface : public Interface
   class ResetParametersMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ResetParametersMessage_data_t;
-#pragma pack(pop)
 
     ResetParametersMessage_data_t *data;
 

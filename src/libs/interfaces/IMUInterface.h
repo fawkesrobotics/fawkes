@@ -39,9 +39,8 @@ class IMUInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char frame[32]; /**< 
@@ -66,7 +65,6 @@ class IMUInterface : public Interface
       Covariance of linear acceleration, row major about x, y, z axes.
      */
   } IMUInterface_data_t;
-#pragma pack(pop)
 
   IMUInterface_data_t *data;
 

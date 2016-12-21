@@ -39,15 +39,13 @@ class EclipseDebuggerInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint16_t port; /**< Port where to connect to */
     char host[100]; /**< Host where to connect to */
   } EclipseDebuggerInterface_data_t;
-#pragma pack(pop)
 
   EclipseDebuggerInterface_data_t *data;
 
@@ -56,13 +54,11 @@ class EclipseDebuggerInterface : public Interface
   class ConnectionMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ConnectionMessage_data_t;
-#pragma pack(pop)
 
     ConnectionMessage_data_t *data;
 

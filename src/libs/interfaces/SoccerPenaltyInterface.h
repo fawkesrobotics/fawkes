@@ -49,15 +49,13 @@ class SoccerPenaltyInterface : public Interface
   static const uint16_t SPL_PENALTY_MANUAL;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint16_t penalty; /**< Current penalty code. */
     uint16_t remaining; /**< Estimated time in seconds until the robot is unpenalized. */
   } SoccerPenaltyInterface_data_t;
-#pragma pack(pop)
 
   SoccerPenaltyInterface_data_t *data;
 
@@ -66,14 +64,12 @@ class SoccerPenaltyInterface : public Interface
   class SetPenaltyMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint16_t penalty; /**< Current penalty code. */
     } SetPenaltyMessage_data_t;
-#pragma pack(pop)
 
     SetPenaltyMessage_data_t *data;
 

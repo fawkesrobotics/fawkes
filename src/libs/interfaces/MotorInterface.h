@@ -47,9 +47,8 @@ class MotorInterface : public Interface
   static const uint32_t DRIVE_MODE_LINE_TRANS_ROT;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t motor_state; /**< 
@@ -107,7 +106,6 @@ class MotorInterface : public Interface
      avoided since the interface locking has to be reproduced for these threads then).
    */
   } MotorInterface_data_t;
-#pragma pack(pop)
 
   MotorInterface_data_t *data;
 
@@ -116,16 +114,14 @@ class MotorInterface : public Interface
   class SetMotorStateMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t motor_state; /**< 
       The new motor state to set. Use the MOTOR_* constants.
      */
     } SetMotorStateMessage_data_t;
-#pragma pack(pop)
 
     SetMotorStateMessage_data_t *data;
 
@@ -145,9 +141,8 @@ class MotorInterface : public Interface
   class AcquireControlMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t controller; /**< 
@@ -160,7 +155,6 @@ class MotorInterface : public Interface
      avoided since the interface locking has to be reproduced for these threads then).
    */
     } AcquireControlMessage_data_t;
-#pragma pack(pop)
 
     AcquireControlMessage_data_t *data;
 
@@ -183,13 +177,11 @@ class MotorInterface : public Interface
   class ResetOdometryMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ResetOdometryMessage_data_t;
-#pragma pack(pop)
 
     ResetOdometryMessage_data_t *data;
 
@@ -205,16 +197,14 @@ class MotorInterface : public Interface
   class SetOdometryMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< Translation in x direction in m */
       float y; /**< Translation in y direction in m */
       float odometry_orientation; /**< OdometryOrientation in m */
     } SetOdometryMessage_data_t;
-#pragma pack(pop)
 
     SetOdometryMessage_data_t *data;
 
@@ -240,16 +230,14 @@ class MotorInterface : public Interface
   class DriveRPMMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float front_right; /**< Rotation in RPM of the right front wheel. */
       float front_left; /**< Rotation in RPM of the left front wheel. */
       float rear; /**< Rotation in RPM of the rear wheel. */
     } DriveRPMMessage_data_t;
-#pragma pack(pop)
 
     DriveRPMMessage_data_t *data;
 
@@ -275,9 +263,8 @@ class MotorInterface : public Interface
   class GotoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X distance in m. */
@@ -285,7 +272,6 @@ class MotorInterface : public Interface
       float phi; /**< Angle relative to current angle in rad. */
       float time_sec; /**< When to reach the desired location. */
     } GotoMessage_data_t;
-#pragma pack(pop)
 
     GotoMessage_data_t *data;
 
@@ -314,15 +300,13 @@ class MotorInterface : public Interface
   class TransMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float vx; /**< Speed in X direction in m/s. */
       float vy; /**< Speed in Y direction in m/s. */
     } TransMessage_data_t;
-#pragma pack(pop)
 
     TransMessage_data_t *data;
 
@@ -345,14 +329,12 @@ class MotorInterface : public Interface
   class RotMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float omega; /**< Angle rotation in rad/s. */
     } RotMessage_data_t;
-#pragma pack(pop)
 
     RotMessage_data_t *data;
 
@@ -372,16 +354,14 @@ class MotorInterface : public Interface
   class TransRotMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float vx; /**< Speed in X direction in m/s. */
       float vy; /**< Speed in Y direction in m/s. */
       float omega; /**< Angle rotation in rad/s. */
     } TransRotMessage_data_t;
-#pragma pack(pop)
 
     TransRotMessage_data_t *data;
 
@@ -407,16 +387,14 @@ class MotorInterface : public Interface
   class OrbitMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float px; /**< Point's X coordinate to orbit. */
       float py; /**< Point's Y coordinate to orbit. */
       float omega; /**< Angular speed around point in rad/s. */
     } OrbitMessage_data_t;
-#pragma pack(pop)
 
     OrbitMessage_data_t *data;
 
@@ -442,16 +420,14 @@ class MotorInterface : public Interface
   class LinTransRotMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float vx; /**< Speed for translation in X direction in m/s. */
       float vy; /**< Speed for translation in Y direction in m/s. */
       float omega; /**< Rotational speed in rad/s. */
     } LinTransRotMessage_data_t;
-#pragma pack(pop)
 
     LinTransRotMessage_data_t *data;
 

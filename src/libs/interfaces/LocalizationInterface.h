@@ -39,14 +39,12 @@ class LocalizationInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char map[64]; /**< The currently used map. */
   } LocalizationInterface_data_t;
-#pragma pack(pop)
 
   LocalizationInterface_data_t *data;
 
@@ -55,9 +53,8 @@ class LocalizationInterface : public Interface
   class SetInitialPoseMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char frame[32]; /**< 
@@ -76,7 +73,6 @@ class LocalizationInterface : public Interface
       rotation about Y axis, rotation about Z axis).
      */
     } SetInitialPoseMessage_data_t;
-#pragma pack(pop)
 
     SetInitialPoseMessage_data_t *data;
 

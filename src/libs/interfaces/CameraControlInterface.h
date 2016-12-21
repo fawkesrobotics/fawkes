@@ -52,9 +52,8 @@ class CameraControlInterface : public Interface
   const char * tostring_Effect(Effect value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     int32_t effect; /**< Currently active effect. */
@@ -66,7 +65,6 @@ class CameraControlInterface : public Interface
     bool mirror; /**< Is the image mirrored? */
     bool mirror_supported; /**< Is mirroring supported? */
   } CameraControlInterface_data_t;
-#pragma pack(pop)
 
   CameraControlInterface_data_t *data;
 
@@ -76,14 +74,12 @@ class CameraControlInterface : public Interface
   class SetEffectMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t effect; /**< Currently active effect. */
     } SetEffectMessage_data_t;
-#pragma pack(pop)
 
     SetEffectMessage_data_t *data;
 
@@ -104,14 +100,12 @@ class CameraControlInterface : public Interface
   class SetZoomMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t zoom; /**< Current zoom setting. */
     } SetZoomMessage_data_t;
-#pragma pack(pop)
 
     SetZoomMessage_data_t *data;
 
@@ -132,14 +126,12 @@ class CameraControlInterface : public Interface
   class SetMirrorMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool mirror; /**< Is the image mirrored? */
     } SetMirrorMessage_data_t;
-#pragma pack(pop)
 
     SetMirrorMessage_data_t *data;
 

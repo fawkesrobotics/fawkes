@@ -54,9 +54,8 @@ class HumanoidMotionInterface : public Interface
   const char * tostring_StandupEnum(StandupEnum value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     bool moving; /**< True if the robot is moving. */
@@ -68,7 +67,6 @@ class HumanoidMotionInterface : public Interface
       processed, or 0 if no message is being processed.
      */
   } HumanoidMotionInterface_data_t;
-#pragma pack(pop)
 
   HumanoidMotionInterface_data_t *data;
 
@@ -79,13 +77,11 @@ class HumanoidMotionInterface : public Interface
   class StopMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopMessage_data_t;
-#pragma pack(pop)
 
     StopMessage_data_t *data;
 
@@ -103,14 +99,12 @@ class HumanoidMotionInterface : public Interface
   class WalkStraightMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float distance; /**< Distance in m to walk. */
     } WalkStraightMessage_data_t;
-#pragma pack(pop)
 
     WalkStraightMessage_data_t *data;
 
@@ -132,14 +126,12 @@ class HumanoidMotionInterface : public Interface
   class WalkSidewaysMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float distance; /**< Distance in m to walk. */
     } WalkSidewaysMessage_data_t;
-#pragma pack(pop)
 
     WalkSidewaysMessage_data_t *data;
 
@@ -161,15 +153,13 @@ class HumanoidMotionInterface : public Interface
   class WalkArcMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float angle; /**< Angle in radians to turn over the way. */
       float radius; /**< Radius in m of the circle in m. */
     } WalkArcMessage_data_t;
-#pragma pack(pop)
 
     WalkArcMessage_data_t *data;
 
@@ -194,9 +184,8 @@ class HumanoidMotionInterface : public Interface
   class WalkVelocityMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< 
@@ -212,7 +201,6 @@ class HumanoidMotionInterface : public Interface
       Fraction of MaxStepFrequency [0.0 to 1.0].
      */
     } WalkVelocityMessage_data_t;
-#pragma pack(pop)
 
     WalkVelocityMessage_data_t *data;
 
@@ -243,14 +231,12 @@ class HumanoidMotionInterface : public Interface
   class TurnMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float angle; /**< Angle in radians to turn. */
     } TurnMessage_data_t;
-#pragma pack(pop)
 
     TurnMessage_data_t *data;
 
@@ -272,15 +258,13 @@ class HumanoidMotionInterface : public Interface
   class KickMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t leg; /**< Leg to kick with */
       float strength; /**< Kick strength */
     } KickMessage_data_t;
-#pragma pack(pop)
 
     KickMessage_data_t *data;
 
@@ -305,13 +289,11 @@ class HumanoidMotionInterface : public Interface
   class ParkMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ParkMessage_data_t;
-#pragma pack(pop)
 
     ParkMessage_data_t *data;
 
@@ -329,13 +311,11 @@ class HumanoidMotionInterface : public Interface
   class GetUpMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } GetUpMessage_data_t;
-#pragma pack(pop)
 
     GetUpMessage_data_t *data;
 
@@ -353,14 +333,12 @@ class HumanoidMotionInterface : public Interface
   class StandupMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t from_pos; /**< Position from where to standup. */
     } StandupMessage_data_t;
-#pragma pack(pop)
 
     StandupMessage_data_t *data;
 
@@ -382,16 +360,14 @@ class HumanoidMotionInterface : public Interface
   class MoveHeadMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float yaw; /**< Desired yaw (horizontal orientation). */
       float pitch; /**< Desired pitch (vertical orientation). */
       float speed; /**< Maximum speed in [0.0..1.0]. */
     } MoveHeadMessage_data_t;
-#pragma pack(pop)
 
     MoveHeadMessage_data_t *data;
 

@@ -88,9 +88,8 @@ class JoystickInterface : public Interface
   const char * tostring_Direction(Direction value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint8_t num_axes; /**< 
@@ -113,7 +112,6 @@ class JoystickInterface : public Interface
       ored field of the JFF constants.
      */
   } JoystickInterface_data_t;
-#pragma pack(pop)
 
   JoystickInterface_data_t *data;
 
@@ -123,9 +121,8 @@ class JoystickInterface : public Interface
   class StartRumbleMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint16_t length; /**< Effect length in ms.
@@ -136,7 +133,6 @@ class JoystickInterface : public Interface
       uint16_t strong_magnitude; /**< Magnitude of heavy motor. */
       uint16_t weak_magnitude; /**< Magnitude of light motor. */
     } StartRumbleMessage_data_t;
-#pragma pack(pop)
 
     StartRumbleMessage_data_t *data;
 
@@ -169,13 +165,11 @@ class JoystickInterface : public Interface
   class StopRumbleMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopRumbleMessage_data_t;
-#pragma pack(pop)
 
     StopRumbleMessage_data_t *data;
 
@@ -192,13 +186,11 @@ class JoystickInterface : public Interface
   class StopAllMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopAllMessage_data_t;
-#pragma pack(pop)
 
     StopAllMessage_data_t *data;
 
