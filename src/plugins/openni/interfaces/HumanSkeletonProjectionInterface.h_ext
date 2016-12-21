@@ -39,9 +39,8 @@ class HumanSkeletonProjectionInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     float horizontal_fov; /**< Opening angle in radians. */
@@ -95,7 +94,6 @@ class HumanSkeletonProjectionInterface : public Interface
     float proj_right_foot[2]; /**< 
       Right foot position vector. */
   } HumanSkeletonProjectionInterface_data_t;
-#pragma pack(pop)
 
   HumanSkeletonProjectionInterface_data_t *data;
 
