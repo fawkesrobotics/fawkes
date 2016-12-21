@@ -39,9 +39,8 @@ class PclDatabaseRetrieveInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t msgid; /**< 
@@ -56,7 +55,6 @@ class PclDatabaseRetrieveInterface : public Interface
       Error description if reconstruction fails.
      */
   } PclDatabaseRetrieveInterface_data_t;
-#pragma pack(pop)
 
   PclDatabaseRetrieveInterface_data_t *data;
 
@@ -65,9 +63,8 @@ class PclDatabaseRetrieveInterface : public Interface
   class RetrieveMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int64_t timestamp; /**< 
@@ -93,7 +90,6 @@ class PclDatabaseRetrieveInterface : public Interface
       false (default) to publish with current time.
      */
     } RetrieveMessage_data_t;
-#pragma pack(pop)
 
     RetrieveMessage_data_t *data;
 

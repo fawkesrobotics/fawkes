@@ -39,9 +39,8 @@ class PclDatabaseStoreInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t msgid; /**< 
@@ -56,7 +55,6 @@ class PclDatabaseStoreInterface : public Interface
       Error description if reconstruction fails.
      */
   } PclDatabaseStoreInterface_data_t;
-#pragma pack(pop)
 
   PclDatabaseStoreInterface_data_t *data;
 
@@ -65,9 +63,8 @@ class PclDatabaseStoreInterface : public Interface
   class StoreMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char pcl_id[64]; /**< 
@@ -82,7 +79,6 @@ class PclDatabaseStoreInterface : public Interface
       include the database name.
      */
     } StoreMessage_data_t;
-#pragma pack(pop)
 
     StoreMessage_data_t *data;
 
