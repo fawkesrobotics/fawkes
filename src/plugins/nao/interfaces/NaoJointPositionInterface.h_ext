@@ -81,9 +81,8 @@ class NaoJointPositionInterface : public Interface
   const char * tostring_RobotType(RobotType value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     int32_t robot_type; /**< Robot type. */
@@ -124,7 +123,6 @@ class NaoJointPositionInterface : public Interface
       time is added before executing the command.
      */
   } NaoJointPositionInterface_data_t;
-#pragma pack(pop)
 
   NaoJointPositionInterface_data_t *data;
 
@@ -134,9 +132,8 @@ class NaoJointPositionInterface : public Interface
   class SetServoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t servo; /**< A concatenated list of SERVO_* constants to
@@ -149,7 +146,6 @@ class NaoJointPositionInterface : public Interface
       time is added before executing the command.
      */
     } SetServoMessage_data_t;
-#pragma pack(pop)
 
     SetServoMessage_data_t *data;
 
@@ -176,9 +172,8 @@ class NaoJointPositionInterface : public Interface
   class SetServosMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float head_yaw; /**< Head yaw */
@@ -213,7 +208,6 @@ class NaoJointPositionInterface : public Interface
       time is added before executing the command.
      */
     } SetServosMessage_data_t;
-#pragma pack(pop)
 
     SetServosMessage_data_t *data;
 
@@ -312,9 +306,8 @@ class NaoJointPositionInterface : public Interface
   class MoveServoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t servo; /**< 
@@ -327,7 +320,6 @@ class NaoJointPositionInterface : public Interface
       Fraction of max speed in range [0.0..1.0].
      */
     } MoveServoMessage_data_t;
-#pragma pack(pop)
 
     MoveServoMessage_data_t *data;
 
@@ -354,9 +346,8 @@ class NaoJointPositionInterface : public Interface
   class MoveServosMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float speed; /**< 
@@ -389,7 +380,6 @@ class NaoJointPositionInterface : public Interface
       float r_ankle_pitch; /**< Right ankle pitch */
       float r_ankle_roll; /**< Right ankle roll */
     } MoveServosMessage_data_t;
-#pragma pack(pop)
 
     MoveServosMessage_data_t *data;
 

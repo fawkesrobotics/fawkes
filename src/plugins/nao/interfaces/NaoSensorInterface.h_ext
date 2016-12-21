@@ -52,9 +52,8 @@ class NaoSensorInterface : public Interface
   const char * tostring_UltrasonicDirection(UltrasonicDirection value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     float accel_x; /**< Accelerometer x */
@@ -100,7 +99,6 @@ class NaoSensorInterface : public Interface
     uint8_t chest_button; /**< Chest button state */
     float battery_charge; /**< Battery charge */
   } NaoSensorInterface_data_t;
-#pragma pack(pop)
 
   NaoSensorInterface_data_t *data;
 
@@ -110,16 +108,14 @@ class NaoSensorInterface : public Interface
   class EmitUltrasonicWaveMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t ultrasonic_direction; /**< 
       Direction that was used to gather the ultrasonic readings.
      */
     } EmitUltrasonicWaveMessage_data_t;
-#pragma pack(pop)
 
     EmitUltrasonicWaveMessage_data_t *data;
 
@@ -140,16 +136,14 @@ class NaoSensorInterface : public Interface
   class StartUltrasonicMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t ultrasonic_direction; /**< 
       Direction that was used to gather the ultrasonic readings.
      */
     } StartUltrasonicMessage_data_t;
-#pragma pack(pop)
 
     StartUltrasonicMessage_data_t *data;
 
@@ -170,13 +164,11 @@ class NaoSensorInterface : public Interface
   class StopUltrasonicMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopUltrasonicMessage_data_t;
-#pragma pack(pop)
 
     StopUltrasonicMessage_data_t *data;
 

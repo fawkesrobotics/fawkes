@@ -39,9 +39,8 @@ class NaoJointStiffnessInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     float head_yaw; /**< Head yaw */
@@ -75,7 +74,6 @@ class NaoJointStiffnessInterface : public Interface
       ignores the hand and wrist values.
      */
   } NaoJointStiffnessInterface_data_t;
-#pragma pack(pop)
 
   NaoJointStiffnessInterface_data_t *data;
 
@@ -84,9 +82,8 @@ class NaoJointStiffnessInterface : public Interface
   class SetStiffnessMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t servo; /**< 
@@ -98,7 +95,6 @@ class NaoJointStiffnessInterface : public Interface
       float value; /**< Servo value to set for servos. */
       float time_sec; /**< Time when to reach the stiffness. */
     } SetStiffnessMessage_data_t;
-#pragma pack(pop)
 
     SetStiffnessMessage_data_t *data;
 
@@ -124,15 +120,13 @@ class NaoJointStiffnessInterface : public Interface
   class SetBodyStiffnessMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float value; /**< Servo value to set for servos. */
       float time_sec; /**< Time when to reach the stiffness. */
     } SetBodyStiffnessMessage_data_t;
-#pragma pack(pop)
 
     SetBodyStiffnessMessage_data_t *data;
 
@@ -155,9 +149,8 @@ class NaoJointStiffnessInterface : public Interface
   class SetStiffnessesMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float time_sec; /**< Time when to reach the stiffness. */
@@ -188,7 +181,6 @@ class NaoJointStiffnessInterface : public Interface
       float r_ankle_roll; /**< Right ankle roll */
       float r_elbow_roll; /**< Right elbow roll */
     } SetStiffnessesMessage_data_t;
-#pragma pack(pop)
 
     SetStiffnessesMessage_data_t *data;
 
