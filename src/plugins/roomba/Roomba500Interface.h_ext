@@ -129,9 +129,8 @@ class Roomba500Interface : public Interface
   const char * tostring_BrushState(BrushState value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     int32_t mode; /**< Open Interface mode. */
@@ -212,7 +211,6 @@ class Roomba500Interface : public Interface
     int16_t side_brush_current; /**< Side brush current in mA. */
     bool caster_stasis; /**< Caster wheel stasis. */
   } Roomba500Interface_data_t;
-#pragma pack(pop)
 
   Roomba500Interface_data_t *data;
 
@@ -225,13 +223,11 @@ class Roomba500Interface : public Interface
   class StopMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopMessage_data_t;
-#pragma pack(pop)
 
     StopMessage_data_t *data;
 
@@ -251,13 +247,11 @@ class Roomba500Interface : public Interface
   class DockMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } DockMessage_data_t;
-#pragma pack(pop)
 
     DockMessage_data_t *data;
 
@@ -277,14 +271,12 @@ class Roomba500Interface : public Interface
   class SetModeMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t mode; /**< Open Interface mode. */
     } SetModeMessage_data_t;
-#pragma pack(pop)
 
     SetModeMessage_data_t *data;
 
@@ -308,14 +300,12 @@ class Roomba500Interface : public Interface
   class DriveStraightMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int16_t velocity; /**< Requested velocity in mm/s. */
     } DriveStraightMessage_data_t;
-#pragma pack(pop)
 
     DriveStraightMessage_data_t *data;
 
@@ -339,15 +329,13 @@ class Roomba500Interface : public Interface
   class DriveMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int16_t velocity; /**< Requested velocity in mm/s. */
       int16_t radius; /**< Requested radius in mm. */
     } DriveMessage_data_t;
-#pragma pack(pop)
 
     DriveMessage_data_t *data;
 
@@ -374,16 +362,14 @@ class Roomba500Interface : public Interface
   class SetMotorsMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool vacuuming; /**< Enable vacuuming? */
       int32_t main; /**< Main brush state. */
       int32_t side; /**< Side brush state. */
     } SetMotorsMessage_data_t;
-#pragma pack(pop)
 
     SetMotorsMessage_data_t *data;
 
