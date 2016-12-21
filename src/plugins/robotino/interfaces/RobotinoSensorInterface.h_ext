@@ -39,9 +39,8 @@ class RobotinoSensorInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     float mot_velocity[3]; /**< Velocities of the wheels. */
@@ -56,7 +55,6 @@ class RobotinoSensorInterface : public Interface
       True if emergency stop on bumper contact is enabled, false otherwise.
      */
   } RobotinoSensorInterface_data_t;
-#pragma pack(pop)
 
   RobotinoSensorInterface_data_t *data;
 
@@ -65,9 +63,8 @@ class RobotinoSensorInterface : public Interface
   class SetBumperEStopEnabledMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool enabled; /**< 
@@ -75,7 +72,6 @@ class RobotinoSensorInterface : public Interface
       disable. This will persist over OpenRobotino stated restarts.
      */
     } SetBumperEStopEnabledMessage_data_t;
-#pragma pack(pop)
 
     SetBumperEStopEnabledMessage_data_t *data;
 
@@ -95,9 +91,8 @@ class RobotinoSensorInterface : public Interface
   class SetDigitalOutputMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint8_t digital_out; /**< 
@@ -107,7 +102,6 @@ class RobotinoSensorInterface : public Interface
       True to enable digital out, false to disable.
      */
     } SetDigitalOutputMessage_data_t;
-#pragma pack(pop)
 
     SetDigitalOutputMessage_data_t *data;
 
