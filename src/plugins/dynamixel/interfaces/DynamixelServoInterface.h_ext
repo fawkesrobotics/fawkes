@@ -60,9 +60,8 @@ class DynamixelServoInterface : public Interface
   const char * tostring_WorkingMode(WorkingMode value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char model[8]; /**< Model if known */
@@ -126,7 +125,6 @@ class DynamixelServoInterface : public Interface
     int32_t error_code; /**< Failure code set if
     final is true. ERROR_NONE if no error occured. */
   } DynamixelServoInterface_data_t;
-#pragma pack(pop)
 
   DynamixelServoInterface_data_t *data;
 
@@ -137,13 +135,11 @@ class DynamixelServoInterface : public Interface
   class StopMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopMessage_data_t;
-#pragma pack(pop)
 
     StopMessage_data_t *data;
 
@@ -161,13 +157,11 @@ class DynamixelServoInterface : public Interface
   class FlushMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } FlushMessage_data_t;
-#pragma pack(pop)
 
     FlushMessage_data_t *data;
 
@@ -185,14 +179,12 @@ class DynamixelServoInterface : public Interface
   class GotoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float angle; /**< Current angle. */
     } GotoMessage_data_t;
-#pragma pack(pop)
 
     GotoMessage_data_t *data;
 
@@ -214,16 +206,14 @@ class DynamixelServoInterface : public Interface
   class TimedGotoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float time_sec; /**< Time in seconds when to reach
     the final position. */
       float angle; /**< Current angle. */
     } TimedGotoMessage_data_t;
-#pragma pack(pop)
 
     TimedGotoMessage_data_t *data;
 
@@ -248,14 +238,12 @@ class DynamixelServoInterface : public Interface
   class SetModeMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint8_t mode; /**< New mode, see the enum WorkingMode in this interface */
     } SetModeMessage_data_t;
-#pragma pack(pop)
 
     SetModeMessage_data_t *data;
 
@@ -277,14 +265,12 @@ class DynamixelServoInterface : public Interface
   class SetSpeedMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint16_t speed; /**< New speed. Used when the servo is in wheel mode. Bits 0-9 determine the rotation speed and bit 10 determines the rotation direction (0 for ccw and 1 for cw) */
     } SetSpeedMessage_data_t;
-#pragma pack(pop)
 
     SetSpeedMessage_data_t *data;
 
@@ -306,14 +292,12 @@ class DynamixelServoInterface : public Interface
   class SetEnabledMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool enabled; /**< Is the servo enabled? */
     } SetEnabledMessage_data_t;
-#pragma pack(pop)
 
     SetEnabledMessage_data_t *data;
 
@@ -335,14 +319,12 @@ class DynamixelServoInterface : public Interface
   class SetVelocityMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float velocity; /**< Maximum servo velocity currently reached. */
     } SetVelocityMessage_data_t;
-#pragma pack(pop)
 
     SetVelocityMessage_data_t *data;
 
@@ -364,9 +346,8 @@ class DynamixelServoInterface : public Interface
   class SetMarginMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float angle_margin; /**< 
@@ -374,7 +355,6 @@ class DynamixelServoInterface : public Interface
       motion as final.
      */
     } SetMarginMessage_data_t;
-#pragma pack(pop)
 
     SetMarginMessage_data_t *data;
 
@@ -396,9 +376,8 @@ class DynamixelServoInterface : public Interface
   class SetComplianceValuesMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint8_t cw_margin; /**< New CW compliance margin */
@@ -406,7 +385,6 @@ class DynamixelServoInterface : public Interface
       uint8_t cw_slope; /**< New CW compliance slope */
       uint8_t ccw_slope; /**< New LED enabled value */
     } SetComplianceValuesMessage_data_t;
-#pragma pack(pop)
 
     SetComplianceValuesMessage_data_t *data;
 
@@ -437,14 +415,12 @@ class DynamixelServoInterface : public Interface
   class SetGoalSpeedMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t goal_speed; /**< New goal speed */
     } SetGoalSpeedMessage_data_t;
-#pragma pack(pop)
 
     SetGoalSpeedMessage_data_t *data;
 
@@ -466,14 +442,12 @@ class DynamixelServoInterface : public Interface
   class SetTorqueLimitMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t torque_limit; /**< New torque limit */
     } SetTorqueLimitMessage_data_t;
-#pragma pack(pop)
 
     SetTorqueLimitMessage_data_t *data;
 
@@ -495,14 +469,12 @@ class DynamixelServoInterface : public Interface
   class SetPunchMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t punch; /**< New punch */
     } SetPunchMessage_data_t;
-#pragma pack(pop)
 
     SetPunchMessage_data_t *data;
 
@@ -524,14 +496,12 @@ class DynamixelServoInterface : public Interface
   class GotoPositionMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t position; /**< New position */
     } GotoPositionMessage_data_t;
-#pragma pack(pop)
 
     GotoPositionMessage_data_t *data;
 
@@ -553,15 +523,13 @@ class DynamixelServoInterface : public Interface
   class SetAngleLimitsMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t angle_limit_cw; /**< New cw angle limit */
       uint32_t angle_limit_ccw; /**< New ccw angle limit */
     } SetAngleLimitsMessage_data_t;
-#pragma pack(pop)
 
     SetAngleLimitsMessage_data_t *data;
 
@@ -586,13 +554,11 @@ class DynamixelServoInterface : public Interface
   class ResetRawErrorMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ResetRawErrorMessage_data_t;
-#pragma pack(pop)
 
     ResetRawErrorMessage_data_t *data;
 
@@ -610,14 +576,12 @@ class DynamixelServoInterface : public Interface
   class SetPreventAlarmShutdownMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool enable_prevent_alarm_shutdown; /**< Enable alarm shutdown */
     } SetPreventAlarmShutdownMessage_data_t;
-#pragma pack(pop)
 
     SetPreventAlarmShutdownMessage_data_t *data;
 
@@ -639,14 +603,12 @@ class DynamixelServoInterface : public Interface
   class SetAutorecoverEnabledMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool autorecover_enabled; /**< Automatically recover on alarm shutdown */
     } SetAutorecoverEnabledMessage_data_t;
-#pragma pack(pop)
 
     SetAutorecoverEnabledMessage_data_t *data;
 
@@ -668,13 +630,11 @@ class DynamixelServoInterface : public Interface
   class RecoverMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } RecoverMessage_data_t;
-#pragma pack(pop)
 
     RecoverMessage_data_t *data;
 
