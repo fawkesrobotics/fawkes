@@ -289,13 +289,17 @@ init(InitOptions options, int & retval)
   }
 
   // *** Determine network parameters
+  bool enable_ipv4 = true;
+  bool enable_ipv6 = true;
+  std::string listen_ipv4;
+  std::string listen_ipv6;
   unsigned int net_tcp_port     = 1910;
   std::string  net_service_name = "Fawkes on %h";
   if (options.has_net_tcp_port()) {
     net_tcp_port = options.net_tcp_port();
   } else {
     try {
-      net_tcp_port = config->get_uint("/fawkes/mainapp/net/tcp_port");
+      net_tcp_port = config->get_uint("/network/fawkes/tcp_port");
     } catch (Exception &e) {}  // ignore, we stick with the default
   }
 
@@ -303,7 +307,7 @@ init(InitOptions options, int & retval)
     net_service_name = options.net_service_name();
   } else {
     try {
-      net_service_name = config->get_string("/fawkes/mainapp/net/service_name");
+      net_service_name = config->get_string("/network/fawkes/service_name");
     } catch (Exception &e) {}  // ignore, we stick with the default
   }
 
@@ -313,6 +317,33 @@ init(InitOptions options, int & retval)
     net_tcp_port = 1910;
   }
 
+  try {
+	  enable_ipv4 = config->get_bool("/network/ipv4/enable");
+  } catch (Exception &e) {}  // ignore, we stick with the default
+  try {
+	  enable_ipv6 = config->get_bool("/network/ipv6/enable");
+  } catch (Exception &e) {}  // ignore, we stick with the default
+
+  try {
+	  listen_ipv4 = config->get_string("/network/ipv4/listen");
+  } catch (Exception &e) {}  // ignore, we stick with the default
+  try {
+	  listen_ipv6 = config->get_string("/network/ipv6/listen");
+  } catch (Exception &e) {}  // ignore, we stick with the default
+
+  if (! enable_ipv4) {
+	  logger->log_warn("FawkesMainThread", "Disabling IPv4 support");
+  }
+  if (! enable_ipv6) {
+	  logger->log_warn("FawkesMainThread", "Disabling IPv6 support");
+  }
+  if (! listen_ipv4.empty()) {
+	  logger->log_info("FawkesMainThread", "Listening on IPv4 address %s", listen_ipv4.c_str());
+  }
+  if (! listen_ipv6.empty()) {
+	  logger->log_info("FawkesMainThread", "Listening on IPv6 address %s", listen_ipv4.c_str());
+  }
+  
   // *** Setup blackboard
   std::string bb_magic_token = "";
   unsigned int bb_size = 2097152;
@@ -359,8 +390,10 @@ init(InitOptions options, int & retval)
 					 options.plugin_module_flags(),
 					 options.init_plugin_cache());
   network_manager    = new FawkesNetworkManager(thread_manager,
-						net_tcp_port,
-						net_service_name.c_str());
+                                                enable_ipv4, enable_ipv6,
+                                                listen_ipv4, listen_ipv6,
+                                                net_tcp_port,
+                                                net_service_name.c_str());
   nethandler_config  = new ConfigNetworkHandler(config,
 						network_manager->hub());
 

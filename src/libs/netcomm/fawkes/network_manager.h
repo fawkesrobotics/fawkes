@@ -24,6 +24,8 @@
 #ifndef __FAWKES_NETWORK_MANAGER_H_
 #define __FAWKES_NETWORK_MANAGER_H_
 
+#include <string>
+
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -40,9 +42,11 @@ class ServiceBrowser;
 class FawkesNetworkManager
 {
  public:
-  FawkesNetworkManager(ThreadCollector *thread_collector,
-		       unsigned short int fawkes_port,
-		       const char *service_name);
+	FawkesNetworkManager(ThreadCollector *thread_collector,
+	                     bool enable_ipv4, bool enable_ipv6,
+	                     const std::string &listen_ipv4, const std::string &listen_ipv6,
+                       unsigned short int fawkes_port,
+                       const char *service_name);
   ~FawkesNetworkManager();
 
   FawkesNetworkHub *     hub();

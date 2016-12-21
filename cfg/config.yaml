@@ -31,14 +31,9 @@ fawkes:
     # going on for later analysis.
     log_stderr_as_warn: true
 
-    net:
-      # Port for Fawkes Network Protocol service; TCP port
-      tcp_port: !tcp-port 1910
 
-      # Name for Fawkes service, announced via Avahi,
-      # %h is replaced by short hostname
-      service_name: "Fawkes on %h"
-
+    # *** Network settings
+    # Moved to conf.d/network.yaml
 
 # Log level for ballposlog example plugin; sum of any of
 # debug=0, info=1, warn=2, error=4, none=8

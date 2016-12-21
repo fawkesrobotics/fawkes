@@ -23,6 +23,7 @@
 
 #include <gui_utils/service_model.h>
 #include <netcomm/dns-sd/avahi_thread.h>
+#include <utils/misc/string_conversions.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -156,25 +157,44 @@ ServiceModel::browse_failed( const char* name,
 }
 
 void
-ServiceModel::service_added( const char* name,
-			    const char* type,
-			    const char* domain,
-			    const char* host_name,
-			    const struct sockaddr* addr,
-			    const socklen_t addr_size,
-			    uint16_t port,
-			    std::list<std::string>& txt,
-			    int flags )
+ServiceModel::service_added( const char* name, const char* type,
+                             const char* domain, const char* host_name, const char *interface,
+                             const struct sockaddr* addr, const socklen_t addr_size,
+                             uint16_t port, std::list<std::string>& txt, int flags )
 {
   ServiceAddedRecord s;
-  char ipaddr[INET_ADDRSTRLEN];
-  struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
-  s.name = string(name);
-  s.type = string(type);
-  s.domain = string(domain);
-  s.hostname = string(host_name);
-  s.ipaddr = inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr));
-  s.port = port;
+  if (addr->sa_family == AF_INET) {
+	  char ipaddr[INET_ADDRSTRLEN];
+	  struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
+	  if (inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr)) != NULL) {
+		  s.ipaddr   = ipaddr;
+		  s.addrport = std::string(ipaddr) + ":" + StringConversions::to_string(port);
+	  } else {
+		  s.ipaddr = "";
+		  s.addrport = std::string("Failed to convert IPv4: ") + strerror(errno);
+	  }
+  } else if (addr->sa_family == AF_INET6) {
+	  char ipaddr[INET6_ADDRSTRLEN];
+	  struct sockaddr_in6 *saddr = (struct sockaddr_in6 *)addr;
+	  if (inet_ntop(AF_INET6, &(saddr->sin6_addr), ipaddr, sizeof(ipaddr)) != NULL) {
+		  s.ipaddr   = ipaddr;
+		  s.addrport = std::string("[") + ipaddr + "%" + interface + "]:" + StringConversions::to_string(port);
+	  } else {
+		  s.ipaddr = "";
+		  s.addrport = std::string("Failed to convert IPv6: ") + strerror(errno);
+	  }
+  } else {
+	  s.ipaddr = "";
+	  s.addrport = "Unknown address family";
+  }
+
+  s.name      = name;
+  s.type      = type;
+  s.domain    = domain;
+  s.hostname  = host_name;
+  s.interface = interface;
+  s.port      = port;
+  memcpy(&s.sockaddr, addr, addr_size);
 
   m_added_services.push_locked(s);
 
@@ -182,9 +202,7 @@ ServiceModel::service_added( const char* name,
 }
 
 void
-ServiceModel::service_removed( const char* name,
-			      const char* type,
-			      const char* domain )
+ServiceModel::service_removed(const char* name, const char* type, const char* domain)
 {
   ServiceRemovedRecord s;
   s.name = string(name);
@@ -212,9 +230,12 @@ ServiceModel::on_service_added()
       row[m_service_record.type]     = s.type;
       row[m_service_record.domain]   = s.domain;
       row[m_service_record.hostname] = s.hostname;
+      row[m_service_record.interface] = s.interface;
       row[m_service_record.ipaddr]   = s.ipaddr;
       row[m_service_record.port]     = s.port;
-
+      row[m_service_record.addrport] = s.addrport;
+      row[m_service_record.sockaddr] = s.sockaddr;
+      
       m_added_services.pop();
     }
 

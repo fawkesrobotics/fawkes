@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  defs.h - World Info definitions
+ *  addr_comp.h - address comparison
  *
- *  Created: Wed May 07 10:56:48 2007
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Created: Tue Dec 13 15:17:43 2016
+ *  Copyright  2006-2016  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,14 +21,33 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_WORLDINFO_DEFS_H_
-#define __NETCOMM_WORLDINFO_DEFS_H_
+#ifndef __NETCOMM_UTILS_ADDR_SIZE_H_
+#define __NETCOMM_UTILS_ADDR_SIZE_H_
 
-#define WORLDINFO_MTU                 1400
-#define WORLDINFO_MAX_MSGS             255
-#define WORLDINFO_VERSION                2
-#define WORLDINFO_COVARIANCE_SIZE_3X3    9
-#define WORLDINFO_COVARIANCE_SIZE_2X2    4
-#define WORLDINFO_FATMSG_NUMOPPS        10
+#include <netinet/in.h>
+
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
+}
+#endif
+
+/** Get canonical size of sockaddr structure.
+ * @param a sockaddr_in or sockaddr_in6 structure with properly set
+ * address family field.
+ * @return size in bytes of struct
+ */
+inline size_t
+sock_addr_size(const struct sockaddr *a)
+{
+	if (a->sa_family == AF_INET) {
+		return sizeof(sockaddr_in);
+	} else if (a->sa_family == AF_INET6) {
+		return sizeof(sockaddr_in6);
+	} else {
+		return 0;
+	}
+}
+	
+} // end namespace fawkes
 
 #endif

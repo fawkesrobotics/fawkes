@@ -25,7 +25,7 @@
 #define __TOOLS_REFBOXREP_SPL_H_
 
 #include "processor.h"
-#include <netcomm/worldinfo/enums.h>
+#include "enums.h"
 
 #include <cstdlib>
 #include <stdint.h>

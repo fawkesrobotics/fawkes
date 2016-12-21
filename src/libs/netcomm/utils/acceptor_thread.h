@@ -25,6 +25,9 @@
 #define __NETCOMM_UTILS_ACCEPTOR_THREAD_H_
 
 #include <core/threading/thread.h>
+#include <netcomm/socket/socket.h>
+
+#include <string>
 
 namespace fawkes {
 
@@ -34,12 +37,17 @@ class NetworkIncomingConnectionHandler;
 class NetworkAcceptorThread : public Thread
 {
  public:
+	NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
+	                      unsigned short int port,
+	                      const char *thread_name = "NetworkAcceptorThread");
   NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
-			unsigned short int port,
-			const char *thread_name = "NetworkAcceptorThread");
+                        Socket::AddrType addr_type,
+                        const std::string &listen_addr,
+                        unsigned short int port,
+                        const char *thread_name = "NetworkAcceptorThread");
   NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
-			StreamSocket *socket,
-			const char *thread_name = "NetworkAcceptorThread");
+                        StreamSocket *socket,
+                        const char *thread_name = "NetworkAcceptorThread");
   ~NetworkAcceptorThread();
 
   virtual void loop();

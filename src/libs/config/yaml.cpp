@@ -40,6 +40,7 @@
 #include <cerrno>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <arpa/inet.h>
 
 #include <yaml-cpp/exceptions.h>
 
@@ -821,20 +822,44 @@ YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode 
     }
 
   } else if (doc.Type() == YAML::NodeType::Scalar) {
-    if (doc.Tag() == "tag:fawkesrobotics.org,cfg/tcp-port" ||
-	doc.Tag() == "tag:fawkesrobotics.org,cfg/udp-port")
+    if (doc.Tag() == "tag:fawkesrobotics.org,cfg/ipv4" ||
+        doc.Tag() == "tag:fawkesrobotics.org,cfg/ipv6")
     {
-      unsigned int p = 0;
-      try {
-	p = node->get_uint();
+	    std::string addr_s;
+	    try {
+		    addr_s = node->get_string();
       } catch (Exception &e) {
-	e.prepend("YamlConfig: %s: Invalid TCP/UDP port number (not an unsigned int)", path.c_str());
-	throw;
-      }
-      if (p <= 0 || p >= 65535) {
-	throw Exception("YamlConfig: Invalid TCP/UDP port number "
-			"(%u out of allowed range)", p);
-      }
+		    e.prepend("YamlConfig: %s: Invalid IPv4 or IPv6 address (not a string)", path.c_str());
+		    throw;
+	    }
+
+	    if (doc.Tag() == "tag:fawkesrobotics.org,cfg/ipv4") {
+		    struct in_addr addr;
+		    if (inet_pton(AF_INET, addr_s.c_str(), &addr) != 1) {
+			    throw Exception("YamlConfig: %s is not a valid IPv4 address", addr_s.c_str());
+		    }
+	    }
+	    if (doc.Tag() == "tag:fawkesrobotics.org,cfg/ipv6") {
+		    struct in6_addr addr;
+		    if (inet_pton(AF_INET6, addr_s.c_str(), &addr) != 1) {
+			    throw Exception("YamlConfig: %s is not a valid IPv6 address", addr_s.c_str());
+		    }
+	    }
+
+    } else if (doc.Tag() == "tag:fawkesrobotics.org,cfg/tcp-port" ||
+               doc.Tag() == "tag:fawkesrobotics.org,cfg/udp-port")
+    {
+	    unsigned int p = 0;
+	    try {
+		    p = node->get_uint();
+	    } catch (Exception &e) {
+		    e.prepend("YamlConfig: %s: Invalid TCP/UDP port number (not an unsigned int)", path.c_str());
+		    throw;
+	    }
+	    if (p <= 0 || p >= 65535) {
+		    throw Exception("YamlConfig: Invalid TCP/UDP port number "
+		                    "(%u out of allowed range)", p);
+	    }
     } else if (doc.Tag() == "tag:fawkesrobotics.org,cfg/url") {
 #ifdef HAVE_YAMLCPP_0_5
       std::string scalar = doc.Scalar();

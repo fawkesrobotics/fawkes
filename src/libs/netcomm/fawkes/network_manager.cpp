@@ -52,20 +52,30 @@ namespace fawkes {
 
 /** Constructor.
  * @param thread_collector thread collector that threads shall be registered to
+ * @param enable_ipv4 true to listen on the IPv4 TCP port
+ * @param enable_ipv6 true to listen on the IPv6 TCP port
+ * @param listen_ipv4 IPv4 address to listen on for incoming connections,
+ * empty string or 0.0.0.0 to listen on any local address
+ * @param listen_ipv6 IPv6 address to listen on for incoming connections,
+ * empty string or :: to listen on any local address
  * @param fawkes_port port to listen on for Fawkes network connections
  * @param service_name Avahi service name for Fawkes network service
  */
 FawkesNetworkManager::FawkesNetworkManager(ThreadCollector *thread_collector,
-					   unsigned short int fawkes_port,
-					   const char *service_name)
+                                           bool enable_ipv4, bool enable_ipv6,
+                                           const std::string &listen_ipv4, const std::string &listen_ipv6,
+                                           unsigned short int fawkes_port,
+                                           const char *service_name)
 {
   __fawkes_port      = fawkes_port;
   __thread_collector = thread_collector;
-  __fawkes_network_thread = new FawkesNetworkServerThread(__fawkes_port,
-							  __thread_collector);
+  __fawkes_network_thread = new FawkesNetworkServerThread(enable_ipv4, enable_ipv6,
+                                                          listen_ipv4, listen_ipv6,
+                                                          __fawkes_port,
+                                                          __thread_collector);
   __thread_collector->add(__fawkes_network_thread);
 #ifdef HAVE_AVAHI
-  __avahi_thread          = new AvahiThread();
+  __avahi_thread          = new AvahiThread(enable_ipv4, enable_ipv6);
   __service_publisher     = __avahi_thread;
   __service_browser       = __avahi_thread;
   __thread_collector->add(__avahi_thread);

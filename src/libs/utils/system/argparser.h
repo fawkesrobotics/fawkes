@@ -77,6 +77,10 @@ class ArgumentParser
 
   bool         parse_hostport(const char *argn, char **host, unsigned short int *port);
   bool         parse_hostport(const char *argn, std::string &host, unsigned short int &port);
+
+  static void  parse_hostport_s(const char *s, char **host, unsigned short int *port);
+  static void  parse_hostport_s(const char *s, std::string &host, unsigned short int &port);
+  
   long int     parse_int(const char *argn);
   double       parse_float(const char *argn);
 

@@ -43,7 +43,6 @@ struct AvahiServiceBrowser;
 struct AvahiServiceResolver;
 struct AvahiHostNameResolver;
 struct AvahiAddressResolver;
-struct sockaddr_in;
 
 namespace fawkes {
 
@@ -58,7 +57,7 @@ class AvahiThread
   public ServiceBrowser
 {
  public:
-  AvahiThread();
+  AvahiThread(bool enable_ipv4 = true, bool enable_ipv6 = true);
   ~AvahiThread();
 
   void wait_initialized();
@@ -135,11 +134,12 @@ class AvahiThread
 				     const char *type,
 				     const char *domain);
   void call_handler_service_added( const char *name,
-				   const char *type,
-				   const char *domain,
-				   const char *host_name,
-				   const AvahiAddress *address,
-				   uint16_t port,
+                                   const char *type,
+                                   const char *domain,
+                                   const char *host_name,
+                                   const AvahiIfIndex interface,
+                                   const AvahiAddress *address,
+                                   uint16_t port,
 				   std::list<std::string> &txt,
 				   AvahiLookupResultFlags flags);
   void call_handler_failed( const char *name,
@@ -183,8 +183,10 @@ class AvahiThread
   void start_address_resolvers();
   void start_hostname_resolvers();
   void start_hostname_resolver(const char *name, AvahiResolverCallbackData *data);
-  void start_address_resolver(struct sockaddr_in *in_addr, AvahiResolverCallbackData *data);
+  void start_address_resolver(const struct sockaddr_storage *in_addr, AvahiResolverCallbackData *data);
 
+  bool enable_ipv4;
+  bool enable_ipv6;
 
   bool need_recover;
   bool do_erase_browsers;
@@ -193,6 +195,7 @@ class AvahiThread
   AvahiSimplePoll  *simple_poll;
   AvahiClient      *client;
   AvahiClientState  client_state;
+  AvahiProtocol     service_protocol;
 
   WaitCondition         *init_wc;
 
@@ -210,9 +213,7 @@ class AvahiThread
   LockList<AvahiAddressResolver *>  __running_address_resolvers;
 
   LockMap<std::string, AvahiResolverCallbackData * >      __pending_hostname_resolves;
-  LockMap<std::string, AvahiResolverCallbackData * >::iterator __phrit;
-  LockMap<struct sockaddr_in *, AvahiResolverCallbackData *>  __pending_address_resolves;
-  LockMap<struct sockaddr_in *, AvahiResolverCallbackData *>::iterator  __parit;
+  LockMap<struct ::sockaddr_storage *, AvahiResolverCallbackData *>  __pending_address_resolves;
 };
 
 } // end namespace fawkes

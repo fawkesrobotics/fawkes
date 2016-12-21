@@ -35,11 +35,12 @@ namespace fawkes {
  */
 
 /** Constructor.
+ * @param addr_type Specify IPv4 or IPv6
  * @param timeout timeout, if 0 all operationsare blocking, otherwise it
  * is tried for timeout seconds.
  */
-DatagramSocket::DatagramSocket(float timeout)
-  : Socket(PF_INET, SOCK_DGRAM, 0, timeout)
+DatagramSocket::DatagramSocket(AddrType addr_type, float timeout)
+  : Socket(addr_type, UDP, timeout)
 {
 }
 

@@ -25,6 +25,7 @@
 
 #include <core/exceptions/system.h>
 #include <utils/time/time.h>
+#include <utils/misc/string_conversions.h>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -36,12 +37,14 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
+#include <string>
+#include <cstring>
+#include <cstdlib>
 // include <linux/in.h>
 #include <netinet/in.h>
 #include <netinet/in_systm.h>
 #include <netinet/ip.h> 
+#include <arpa/inet.h>
 #include <poll.h>
 
 #include <cstdio>
@@ -67,11 +70,15 @@ namespace fawkes {
  */
 
 /** Constructor.
- * @param msg reason that caused the exception.
+ * @param format format for reason that caused the exception.
  */
-SocketException::SocketException(const char *msg)
-  : Exception("%s", msg)
+	SocketException::SocketException(const char *format, ...)
+  : Exception()
 {
+	va_list va;
+  va_start(va, format);
+  append_va(format, va);
+  va_end(va);
 }
 
 
@@ -79,7 +86,7 @@ SocketException::SocketException(const char *msg)
  * @param msg reason of the exception
  * @param _errno error number (errno returned by a syscall)
  */
-SocketException::SocketException(const char *msg, int _errno)
+SocketException::SocketException(int _errno, const char *msg)
   : Exception(_errno, "%s", msg)
 {
 }
@@ -94,6 +101,9 @@ SocketException::SocketException(const char *msg, int _errno)
  * @author Tim Niemueller
  */
 
+/** @var Socket::addr_type
+ * Address type/family of socket.
+ */
 /** @var Socket::sock_fd
  * Socket file descriptor.
  */
@@ -145,29 +155,50 @@ const short Socket::POLL_NVAL  = POLLNVAL;
  * This creates a new socket. This is a plain pass-through constructor
  * to the socket() syscall. In most cases this should only be used by
  * a derivate.
- * @param domain communication domain, selects the protocol
- * @param type type of the sockets which specifies communication semantics
- * @param protocol protocol to use, most types support only one and protocol
- * should be 0
+ * @param addr_type Specify IPv4 or IPv6
+ * @param sock_type socket type, either TCP or UDP
  * @param timeout See Socket::timeout.
  * @exception SocketException thrown if socket cannot be opened, check errno for cause
  */
-Socket::Socket(int domain, int type, int protocol, float timeout)
+Socket::Socket(AddrType addr_type, SocketType sock_type, float timeout)
+	: addr_type(addr_type), sock_fd(-1), timeout(timeout),
+	  client_addr(NULL), client_addr_len(0), socket_protocol_(0)
 {
-  this->timeout = timeout;
-  if ( (sock_fd = socket(domain, type, protocol)) == -1 ) {
-    throw SocketException("Could not open socket", errno);
+  if (addr_type == IPv4) {
+	  socket_addr_family_ = AF_INET;
+  } else if (addr_type == IPv6) {
+	  socket_addr_family_ = AF_INET6;
+  } else {
+	  throw SocketException("Unknown address type");
   }
-
-  if (timeout > 0.f) {
-    // set to non-blocking
-    if ( fcntl(sock_fd, F_SETFL, O_NONBLOCK) == -1 ) {
-      throw SocketException("Could not set socket to non-blocking", errno);
-    }
+  if (sock_type == TCP) {
+	  socket_type_ = SOCK_STREAM;
+  } else if (sock_type == UDP) {
+	  socket_type_ = SOCK_DGRAM;
+  } else {
+	  throw SocketException("Unknown socket type");
   }
+}
 
-  client_addr = NULL;
-  client_addr_len = 0;
+/**  IPv4 Constructor.
+ * This creates a new socket. This is a plain pass-through constructor
+ * to the socket() syscall. In most cases this should only be used by
+ * a derivate.
+ * @param sock_type socket type, either TCP or UDP
+ * @param timeout See Socket::timeout.
+ * @exception SocketException thrown if socket cannot be opened, check errno for cause
+ */
+Socket::Socket(SocketType sock_type, float timeout)
+	: sock_fd(-1), timeout(timeout), client_addr(NULL), client_addr_len(0),
+	  socket_addr_family_(-1), socket_protocol_(0)
+{
+	if (sock_type == TCP) {
+	  socket_type_ = SOCK_STREAM;
+  } else if (sock_type == UDP) {
+	  socket_type_ = SOCK_DGRAM;
+  } else {
+	  throw SocketException("Unknown socket type");
+  }
 }
 
 
@@ -177,11 +208,9 @@ Socket::Socket(int domain, int type, int protocol, float timeout)
  * properly.
  */
 Socket::Socket()
+	: sock_fd(-1), timeout(0.f), client_addr(NULL), client_addr_len(0),
+	  socket_addr_family_(0), socket_type_(0), socket_protocol_(0)
 {
-  client_addr = NULL;
-  client_addr_len = 0;
-  timeout = 0.f;
-  sock_fd = -1;
 }
 
 
@@ -191,8 +220,11 @@ Socket::Socket()
 Socket::Socket(Socket &socket)
 {
   if ( socket.client_addr != NULL ) {
-    client_addr = (struct ::sockaddr_in *)malloc(socket.client_addr_len);
-    client_addr_len = socket.client_addr_len;
+	  if (socket.client_addr_len > sizeof(struct ::sockaddr_storage)) {
+		  throw SocketException("Invalid client socket address length");
+	  }
+	  client_addr = (struct ::sockaddr_storage *)malloc(sizeof(struct ::sockaddr_storage));
+	  client_addr_len = sizeof(struct ::sockaddr_storage);
     memcpy(client_addr, socket.client_addr, client_addr_len);
   } else {
     client_addr = NULL;
@@ -200,6 +232,29 @@ Socket::Socket(Socket &socket)
   }    
   timeout = socket.timeout;
   sock_fd = socket.sock_fd;
+  socket_addr_family_ = socket.socket_addr_family_;
+  socket_type_ = socket.socket_type_;
+  socket_protocol_ = socket.socket_protocol_;
+}
+
+void
+Socket::create()
+{
+	if (sock_fd != -1)  return;
+	if (socket_addr_family_ == -1) {
+		throw UnknownTypeException("Invalid socket address family, wrong constructor called?");
+	}
+	
+  if ( (sock_fd = socket(socket_addr_family_, socket_type_, socket_protocol_)) == -1 ) {
+	  throw SocketException(errno, "Could not open socket");
+  }
+
+  if (timeout > 0.f) {
+    // set to non-blocking
+    if ( fcntl(sock_fd, F_SETFL, O_NONBLOCK) == -1 ) {
+	    throw SocketException(errno, "Could not set socket to non-blocking");
+    }
+  }
 }
 
 
@@ -230,31 +285,46 @@ Socket::close()
  * you call this on a datagram socket you will tune in to a specific sender and
  * receiver.
  * @param addr_port struct containing address and port to connect to
+ * @exception SocketException thrown if socket cannot connect, check errno for cause
+ */
+void
+Socket::connect(const struct ::sockaddr_storage &addr_port)
+{
+	connect((const struct sockaddr *)&addr_port, sizeof(::sockaddr_storage));
+}
+
+/** Connect socket.
+ * If called for a stream socket this will connect to the remote address. If
+ * you call this on a datagram socket you will tune in to a specific sender and
+ * receiver.
+ * @param addr_port struct containing address and port to connect to
  * @param struct_size size of addr_port struct
  * @exception SocketException thrown if socket cannot connect, check errno for cause
  */
 void
-Socket::connect(struct sockaddr *addr_port, unsigned int struct_size)
+Socket::connect(const struct sockaddr *addr_port, socklen_t struct_size)
 {
-  if ( sock_fd == -1 )  throw SocketException("Trying to connect invalid socket");
+	if ( sock_fd != -1 )  throw SocketException("Socket already initialized and connected");
+	socket_addr_family_ = addr_port->sa_family;
 
-  if (timeout == 0.f) {
-    if ( ::connect(sock_fd, addr_port, struct_size) < 0 ) {
-      throw SocketException("Could not connect", errno);
-    }
-  } else {
-    struct timeval start, now;
-    gettimeofday(&start, NULL);
-    do {
-      if ( ::connect(sock_fd, addr_port, struct_size) < 0 ) {
-	if ( (errno != EINPROGRESS) &&
-	     (errno != EALREADY) ) {
-	  throw SocketException("Could not connect", errno);
+	create();
+
+	if (timeout == 0.f) {
+		if ( ::connect(sock_fd, addr_port, struct_size) < 0 ) {
+			throw SocketException(errno, "Could not connect");
+		}
+	} else {
+		struct timeval start, now;
+		gettimeofday(&start, NULL);
+		do {
+			if ( ::connect(sock_fd, addr_port, struct_size) < 0 ) {
+				if ( (errno != EINPROGRESS) && (errno != EALREADY) ) {
+					throw SocketException(errno, "Could not connect");
+				}
+			}
+			gettimeofday(&now, NULL);
+	  } while (time_diff_sec(now, start) < timeout);
 	}
-      }
-      gettimeofday(&now, NULL);
-    } while (time_diff_sec(now, start) < timeout);
-  }
 }
 
 
@@ -269,23 +339,74 @@ Socket::connect(struct sockaddr *addr_port, unsigned int struct_size)
 void
 Socket::connect(const char *hostname, unsigned short int port)
 {
-  if ( sock_fd == -1 )  throw SocketException("Trying to connect invalid socket");
+	if ( sock_fd != -1 )  throw SocketException("Socket already initialized and connected");
 
-  struct hostent* h;
-  struct ::sockaddr_in host;
+	struct addrinfo hints, *servinfo, *p;
+	int rv;
 
+	std::string tried_endpoints;
 
-  h = gethostbyname(hostname);
-  if ( ! h ) {
-    throw SocketException("Cannot lookup hostname", h_errno);
-  }
+	std::string port_s = StringConversions::to_string((unsigned int)port);
+	
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = socket_type_;
+	if ((rv = getaddrinfo(hostname, port_s.c_str(), &hints, &servinfo)) != 0) {
+		throw SocketException("getaddrinfo for %s:%s failed: %s",
+		                      hostname, port_s.c_str(), gai_strerror(rv));
+	}
 
-  memset(&host, 0, sizeof(host));
-  host.sin_family = AF_INET;
-  memcpy((char *)&host.sin_addr.s_addr, h->h_addr, h->h_length);
-  host.sin_port = htons(port);
+	for (p = servinfo; p != NULL; p = p->ai_next) {
+		bool failed = false;
+		std::string what;
+		int lerrno = 0;
+		if ((sock_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+			what="socket";
+			lerrno = errno;
+			failed = true;
+		}
 
-  connect((struct sockaddr *)&host, sizeof(host));
+		if (! failed) {
+			if (::connect(sock_fd, p->ai_addr, p->ai_addrlen) == -1) {
+				what="connect";
+				lerrno = errno;
+				::close(sock_fd);
+				sock_fd = -1;
+				failed = true;
+			}
+		}
+
+		if (failed) {
+			if (p->ai_family == AF_INET) {
+				char tmp[INET_ADDRSTRLEN];
+				if (inet_ntop(p->ai_family, &((struct sockaddr_in *)p->ai_addr)->sin_addr, tmp, INET_ADDRSTRLEN) != NULL) {
+					tried_endpoints += std::string(" IPv4:") + tmp + ":" + port_s + "|" + what + "|" + strerror(lerrno);
+				} else {
+					tried_endpoints += std::string(" IPv4:FAIL") + tmp + ":" + port_s + "|" + what + "|" + strerror(lerrno);
+				}
+			} else if (p->ai_family == AF_INET6) {
+				char tmp[INET6_ADDRSTRLEN];
+				if (inet_ntop(p->ai_family, &((struct sockaddr_in6 *) p->ai_addr)->sin6_addr, tmp, INET6_ADDRSTRLEN) != NULL) {
+					tried_endpoints += std::string(" IPv6:[") + tmp + "]:" + port_s + "|" + what + "|" + strerror(lerrno);
+				} else {
+					tried_endpoints += std::string(" IPv6:FAIL") + tmp + ":" + port_s + "|" + what + "|" + strerror(lerrno);
+				}
+			} else {
+				tried_endpoints += std::string(" UNKNOWN_AF:") + port_s;
+			}
+
+			continue;
+		} else {
+			// Connected succesfully!
+			break;
+		}
+	}
+
+	freeaddrinfo(servinfo);
+	
+	if (p == NULL || sock_fd == -1) {
+		throw SocketException("Failed to connect to any endpoint (tried:%s)", tried_endpoints.c_str());
+	}
 }
 
 
@@ -297,51 +418,120 @@ Socket::connect(const char *hostname, unsigned short int port)
 void
 Socket::bind(const unsigned short int port)
 {
-  struct ::sockaddr_in host;
+	if ( sock_fd != -1 )  throw SocketException("Socket already initialized and connected");
+	create();
 
-  host.sin_family = AF_INET;
-  host.sin_addr.s_addr = INADDR_ANY;
-  host.sin_port = htons(port);
+	switch (addr_type) {
+	case IPv4:
+		{
+			struct ::sockaddr_in host;
+			memset(&host, 0, sizeof(host));
+	
+			host.sin_family = AF_INET;
+			host.sin_addr.s_addr = INADDR_ANY;
+			host.sin_port = htons(port);
 
-  int reuse = 1;
-  if ( setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) == -1) {
-    throw SocketException("Could not set SO_REUSEADDR", errno);
-  }
+			int reuse = 1;
+			if ( setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) == -1) {
+				throw SocketException(errno, "Could not set SO_REUSEADDR");
+			}
 
-  if (::bind(sock_fd, (struct sockaddr *) &host, sizeof(host)) < 0) {
-    throw SocketException("Could not bind to port", errno);
-  }
+			if (::bind(sock_fd, (struct sockaddr *) &host, sizeof(host)) < 0) {
+				throw SocketException(errno, "Could not bind to port");
+			}
+		}
+		break;
+	case IPv6:
+		{
+			struct ::sockaddr_in6 host;
+			memset(&host, 0, sizeof(host));
+	
+			host.sin6_family = AF_INET6;
+			host.sin6_port = htons(port);
+
+			int on = 1;
+			if ( setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
+				throw SocketException(errno, "Could not set SO_REUSEADDR");
+			}
+			if ( setsockopt(sock_fd, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1) {
+				throw SocketException(errno, "Could not set IPV6_V6ONLY");
+			}
+
+			if (::bind(sock_fd, (struct sockaddr *) &host, sizeof(host)) < 0) {
+				throw SocketException(errno, "Could not bind to port");
+			}
+		}
+		break;
+	default:
+		throw SocketException("Address type not specified for socket, cannot bind");
+	}
+
 }
 
 
 /** Bind socket to a specific address.
  * @param port port to bind
- * @param hostname hostname or textual IP address of a local interface to bind to.
+ * @param ipaddr textual IP address of a local interface to bind to, must match the address
+ * type passed to the constructor.
  * @exception SocketException thrown if socket cannot bind, check errno for cause
  */
 void
-Socket::bind(const unsigned short int port, const char *hostname)
+Socket::bind(const unsigned short int port, const char *ipaddr)
 {
-  struct hostent* h;
-  struct ::sockaddr_in host;
+	if ( sock_fd != -1 )  throw SocketException("Socket already initialized and connected");
+	create();
 
-  h = gethostbyname(hostname);
-  if ( ! h ) {
-    throw SocketException("Cannot lookup hostname", h_errno);
-  }
+	switch (addr_type) {
+	case IPv4:
+		{
+			struct ::sockaddr_in host;
+			memset(&host, 0, sizeof(host));
 
-  memset(&host, 0, sizeof(host));
-  host.sin_family = AF_INET;
-  memcpy(&host.sin_addr.s_addr, h->h_addr, h->h_length);
-  host.sin_port = htons(port);
+			host.sin_family = AF_INET;
+			host.sin_port = htons(port);
 
-  host.sin_family = AF_INET;
-  host.sin_addr.s_addr = INADDR_ANY;
-  host.sin_port = htons(port);
+			if (inet_pton(AF_INET, ipaddr, &host.sin_addr) <= 0) {
+				throw SocketException("bind(IPv4): failed to parse IP address '%s'", ipaddr);
+			}
 
-  if (::bind(sock_fd, (struct sockaddr *) &host, sizeof(host)) < 0) {
-    throw SocketException("Could not bind to port", errno);
-  }
+			int reuse = 1;
+			if ( setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) == -1) {
+				throw SocketException(errno, "Could not set SO_REUSEADDR");
+			}
+
+			if (::bind(sock_fd, (struct sockaddr *) &host, sizeof(host)) < 0) {
+				throw SocketException(errno, "Could not bind to port");
+			}
+		}
+		break;
+	case IPv6:
+		{
+			struct ::sockaddr_in6 host;
+			memset(&host, 0, sizeof(host));
+	
+			host.sin6_family = AF_INET6;
+			host.sin6_port = htons(port);
+
+			if (inet_pton(AF_INET6, ipaddr, &host.sin6_addr) <= 0) {
+				throw SocketException("bind(IPv6): failed to parse IP address '%s'", ipaddr);
+			}
+
+			int on = 1;
+			if ( setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
+				throw SocketException(errno, "Could not set SO_REUSEADDR");
+			}
+			if ( setsockopt(sock_fd, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1) {
+				throw SocketException(errno, "Could not set IPV6_V6ONLY");
+			}
+
+			if (::bind(sock_fd, (struct sockaddr *) &host, sizeof(host)) < 0) {
+				throw SocketException(errno, "Could not bind to port");
+			}
+		}
+		break;
+	default:
+		throw SocketException("Address type not specified for socket, cannot bind");
+	}
 }
 
 
@@ -356,8 +546,12 @@ Socket::bind(const unsigned short int port, const char *hostname)
 void
 Socket::listen(int backlog)
 {
-  if ( ::listen(sock_fd, backlog) ) {
-    throw SocketException("Cannot listen on socket", errno);
+	if (sock_fd == -1) {
+		throw SocketException("Socket not initialized, call bind() or connect()");
+	}
+
+	if ( ::listen(sock_fd, backlog) ) {
+		throw SocketException(errno, "Cannot listen on socket");
   }
 }
 
@@ -370,7 +564,11 @@ Socket::listen(int backlog)
 Socket *
 Socket::accept()
 {
-  struct ::sockaddr_in  tmp_client_addr;
+	if (sock_fd == -1) {
+		throw SocketException("Socket not initialized, call bind() or connect()");
+	}
+
+	struct ::sockaddr_in  tmp_client_addr;
   unsigned int  tmp_client_addr_len = sizeof(struct ::sockaddr_in);
 
   int a_sock_fd = -1;
@@ -378,7 +576,7 @@ Socket::accept()
   a_sock_fd = ::accept(sock_fd, (sockaddr *)&tmp_client_addr, &tmp_client_addr_len);
   if ( a_sock_fd == -1 ) {
     if (errno != EWOULDBLOCK) {
-      throw SocketException("Could not accept connection", errno);
+	    throw SocketException(errno, "Could not accept connection");
     } else {
       return NULL;
     }
@@ -394,10 +592,12 @@ Socket::accept()
   if ( s->client_addr != NULL ) {
     free(s->client_addr);
   }
+  /*
   struct ::sockaddr_in  *tmp_client_addr_alloc = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
   memcpy(tmp_client_addr_alloc, &tmp_client_addr, sizeof(struct ::sockaddr_in));
   s->client_addr = tmp_client_addr_alloc;
   s->client_addr_len = tmp_client_addr_len;
+  */
 
   return s;
 }
@@ -463,7 +663,7 @@ Socket::poll(int timeout, short what)
     if ( errno == EINTR ) {
       throw InterruptedException();
     } else {
-      throw SocketException("poll() failed", errno);
+	    throw SocketException(errno, "poll() failed");
     }
   } else {
     return pfd.revents;
@@ -480,7 +680,11 @@ Socket::poll(int timeout, short what)
 void
 Socket::write(const void *buf, size_t count)
 {
-  int retval = 0;
+	if (sock_fd == -1) {
+		throw SocketException("Socket not initialized, call bind() or connect()");
+	}
+
+	int retval = 0;
   unsigned int bytes_written = 0;
   struct timeval start, now;
 
@@ -490,7 +694,7 @@ Socket::write(const void *buf, size_t count)
     retval = ::write(sock_fd, (char *)buf + bytes_written, count - bytes_written);
     if (retval == -1) {
       if (errno != EAGAIN) {
-	throw SocketException("Could not write data", errno);
+	      throw SocketException(errno, "Could not write data");
       } else {
 	// just to meet loop condition
 	retval = 0;
@@ -524,7 +728,11 @@ Socket::write(const void *buf, size_t count)
 size_t
 Socket::read(void *buf, size_t count, bool read_all)
 {
-  int retval = 0;
+	if (sock_fd == -1) {
+		throw SocketException("Socket not initialized, call bind() or connect()");
+	}
+
+	int retval = 0;
   unsigned int bytes_read = 0;
 
   if ( timeout > 0 ) {
@@ -537,7 +745,7 @@ Socket::read(void *buf, size_t count, bool read_all)
 	retval = ::read(sock_fd, (char *)buf + bytes_read, count - bytes_read);
 	if (retval == -1) {
 	  if (errno != EAGAIN) {
-	    throw SocketException("Could not read data", errno);
+		  throw SocketException(errno, "Could not read data");
 	  } else {
 	    // just to meet loop condition
 	    retval = 0;
@@ -554,7 +762,7 @@ Socket::read(void *buf, size_t count, bool read_all)
       do {
 	retval = ::read(sock_fd, (char *)buf, count);
 	if ( (retval == -1) && (errno != EAGAIN) ) {
-	  throw SocketException("Could not read data", errno);
+		throw SocketException(errno, "Could not read data");
 	} else {
 	  bytes_read = retval;
 	}
@@ -566,7 +774,7 @@ Socket::read(void *buf, size_t count, bool read_all)
       do {
 	retval = ::read(sock_fd, (char *)buf + bytes_read, count - bytes_read);
 	if (retval == -1) {
-	  throw SocketException("Could not read data", errno);
+		throw SocketException(errno, "Could not read data");
 	} else if (retval == 0) {
 	  throw SocketException("Could not read any data");
 	} else {
@@ -578,7 +786,7 @@ Socket::read(void *buf, size_t count, bool read_all)
       do {
 	retval = ::read(sock_fd, (char *)buf, count);
 	if ( (retval == -1) && (errno != EAGAIN) ) {
-	  throw SocketException("Could not read data", errno);
+		throw SocketException(errno, "Could not read data");
 	} else {
 	  bytes_read = retval;
 	}
@@ -627,9 +835,13 @@ Socket::send(void *buf, size_t buf_len)
 size_t
 Socket::recv(void *buf, size_t buf_len)
 {
-  ssize_t rv;
+	if (sock_fd == -1) {
+		throw SocketException("Socket not initialized, call bind() or connect()");
+	}
+
+	ssize_t rv;
   if ( (rv = ::recv(sock_fd, buf, buf_len, 0)) == -1 ) {
-    throw SocketException("recv() failed", errno);
+	  throw SocketException(errno, "recv() failed");
   } else if ( rv == 0 ) {
     throw SocketException("Other side closed the connection");
   }
@@ -647,7 +859,11 @@ void
 Socket::send(void *buf, size_t buf_len,
 	     const struct sockaddr *addr, socklen_t addr_len)
 {
-  int retval = 0;
+	if (sock_fd == -1) {
+		throw SocketException("Socket not initialized, call bind() or connect()");
+	}
+
+	int retval = 0;
   unsigned int bytes_written = 0;
   struct timeval start, now;
 
@@ -658,7 +874,7 @@ Socket::send(void *buf, size_t buf_len,
 		      addr, addr_len);
     if (retval == -1) {
       if (errno != EAGAIN) {
-	throw SocketException("Could not read data", errno);
+	      throw SocketException(errno, "Could not read data");
       } else {
 	// just to meet loop condition
 	retval = 0;
@@ -693,10 +909,14 @@ size_t
 Socket::recv(void *buf, size_t buf_len,
 	     struct sockaddr *addr, socklen_t *addr_len)
 {
-  ssize_t rv = 0;
+	if (sock_fd == -1) {
+		throw SocketException("Socket not initialized, call bind() or connect()");
+	}
+
+	ssize_t rv = 0;
 
   if ( (rv = ::recvfrom(sock_fd, buf, buf_len, 0, addr, addr_len)) == -1) {
-    throw SocketException("recvfrom() failed", errno);
+	  throw SocketException(errno, "recvfrom() failed");
   } else if ( rv == 0 ) {
     throw SocketException("Peer has closed the connection");
   } else {
@@ -716,7 +936,7 @@ Socket::listening()
   int i = 0;
   unsigned int len = sizeof(i);
   if ( getsockopt(sock_fd, SOL_SOCKET, SO_ACCEPTCONN, &i, &len) == -1 ) {
-    throw SocketException("Socket::listening(): getsockopt failed", errno);
+	  throw SocketException(errno, "Socket::listening(): getsockopt failed");
   }
   return ( i == 1 );
 }
@@ -729,14 +949,16 @@ Socket::listening()
 unsigned int
 Socket::mtu()
 {
-  int m = 0;
+	if (sock_fd == -1) {
+		throw SocketException("Socket not initialized, call bind() or connect()");
+	}
 
-  if ( sock_fd == -1 ) throw SocketException("Cannot get MTU of disconnected socket");
+	int m = 0;
 
 #ifdef __linux__
   unsigned int len = sizeof(m);
   if ( getsockopt(sock_fd, IPPROTO_IP, IP_MTU, &m, &len) == -1 ) {
-    throw SocketException("Socket::mtu(): getsockopt failed", errno);
+	  throw SocketException(errno, "Socket::mtu(): getsockopt failed");
   }
 
   if ( m < 0 ) {

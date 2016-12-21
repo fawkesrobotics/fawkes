@@ -43,11 +43,14 @@ class WebRequestManager;
 class WebServer {
  public:
   WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
-	    fawkes::Logger *logger = 0);
+            fawkes::Logger *logger = 0,
+            bool enable_ipv4 = true, bool enable_ipv6 = true);
+
   WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
 	    const char *key_pem_filepath, const char *cert_pem_filepath,
 	    const char *cipher_suite = WEBVIEW_DEFAULT_CIPHERS,
-	    fawkes::Logger *logger = 0);
+            fawkes::Logger *logger = 0,
+            bool enable_ipv4 = true, bool enable_ipv6 = true);
   ~WebServer();
 
   void process();

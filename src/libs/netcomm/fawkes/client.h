@@ -30,6 +30,7 @@
 
 #include <core/exception.h>
 #include <core/utils/lock_map.h>
+#include <sys/socket.h>
 
 namespace fawkes {
 
@@ -54,15 +55,16 @@ class FawkesNetworkClient
  friend class FawkesNetworkClientRecvThread;
  public:
  FawkesNetworkClient();
- FawkesNetworkClient(const char *hostname, unsigned short int port, const char *ip = NULL);
- FawkesNetworkClient(unsigned int id, const char *hostname, 
-                     unsigned short int port, const char *ip = NULL);
+ FawkesNetworkClient(const char *host, unsigned short int port);
+ FawkesNetworkClient(unsigned int id, const char *host, 
+                     unsigned short int port);
   ~FawkesNetworkClient();
 
   void connect();
   void disconnect();
-  void connect(const char *hostname, unsigned short int port);
-  void connect(const char *hostname, const char *ip, unsigned short int port);
+  void connect(const char *host, unsigned short int port);
+  void connect(const char *hostname, const struct sockaddr *addr, socklen_t addrlen);
+  void connect(const char *hostname, const struct sockaddr_storage &addr);
 
   void enqueue(FawkesNetworkMessage *message);
   void enqueue_and_wait(FawkesNetworkMessage *message, unsigned int timeout_sec = 15);
@@ -81,7 +83,6 @@ class FawkesNetworkClient
   unsigned int id() const;
 
   const char *get_hostname() const;
-  const char *get_ip() const;
 
  private:
   void recv();
@@ -94,8 +95,7 @@ class FawkesNetworkClient
   void set_send_slave_alive();
   void set_recv_slave_alive();
 
-  char *__hostname;
-  char *__ip;
+  char *__host;
   unsigned short int __port;
 
   StreamSocket *s;
@@ -120,6 +120,9 @@ class FawkesNetworkClient
   Mutex *slave_status_mutex;
   bool _has_id;
   unsigned int _id;
+
+  struct sockaddr *addr_;
+  socklen_t        addr_len_;
 };
 
 } // end namespace fawkes

@@ -23,7 +23,7 @@
 #ifndef __PLUGINS_REFBOXCOMM_STATE_HANDLER_H_
 #define __PLUGINS_REFBOXCOMM_STATE_HANDLER_H_
 
-#include <netcomm/worldinfo/enums.h>
+#include "enums.h"
 
 class RefBoxStateHandler
 {

@@ -1,0 +1,29 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Settings/network
+---
+network:
+
+  # Enable or disable IPv4 or IPv6 server port
+
+  # Set "listen" value to bind to a specific IP address of the
+  # host, rather than to "any" address, example shows how to bind
+  # for connections from the local host only
+  ipv4:
+    enable: true
+    #listen: !ipv4 127.0.0.1
+
+  ipv6:
+    enable: true
+    #listen: !ipv6 "::1"
+
+  # Fawkes protocol specific settings
+  fawkes:
+    # Port for Fawkes Network Protocol service; TCP port
+    tcp_port: !tcp-port 1910
+
+    # Name for Fawkes service, announced via Avahi,
+    # %h is replaced by short hostname
+    service_name: "Fawkes on %h"
+

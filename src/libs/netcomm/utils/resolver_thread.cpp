@@ -23,11 +23,13 @@
 
 #include <netcomm/utils/resolver_thread.h>
 #include <netcomm/utils/resolver.h>
+#include <netcomm/utils/addr_size.h>
 #ifdef HAVE_AVAHI
 #include <netcomm/dns-sd/avahi_thread.h>
 #endif
 #include <core/exceptions/system.h>
 
+#include <algorithm>
 #include <sys/types.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -82,31 +84,21 @@ NetworkNameResolverThread::NetworkNameResolverThread(NetworkNameResolver *resolv
 NetworkNameResolverThread::~NetworkNameResolverThread()
 {
   __namesq_mutex->lock();
-  while ( ! __namesq->empty() ) {
-    NamesQMap::iterator nqit = __namesq->begin();
-    char *nqn = (*nqit);
-    __namesq->erase(nqit);
-    free(nqn);
-  }
-  while ( ! __namesq_proc->empty() ) {
-    NamesQMap::iterator nqit = __namesq_proc->begin();
-    char *nqn = (*nqit);
-    __namesq->erase(nqit);
-    free(nqn);
-  }
+  __namesq->clear();
+  __namesq_proc->clear();
   __namesq_mutex->unlock();
   __addrq_mutex->lock();
   while ( ! __addrq->empty() ) {
-    AddrQMap::iterator nqit = __addrq->begin();
-    free(nqit->second.first);
+    AddrQList::iterator nqit = __addrq->begin();
+    free(*nqit);
     __addrq->erase(nqit);
   }
   // The next operation cannot be locked, but we make the (valid) assumption
   // that the thread is not running when it is destructed, this situation is
   // an error anyway
   while ( ! __addrq_proc->empty() ) {
-    AddrQMap::iterator nqit = __addrq_proc->begin();
-    free(nqit->second.first);
+    AddrQList::iterator nqit = __addrq_proc->begin();
+    free(*nqit);
     __addrq->erase(nqit);
   }
   __addrq_mutex->unlock();
@@ -128,14 +120,14 @@ NetworkNameResolverThread::~NetworkNameResolverThread()
  * addr_len carry the result, false otherwise
  */
 bool
-NetworkNameResolverThread::resolve_name_immediately(const char *name,
-						    struct sockaddr **addr, socklen_t *addr_len)
+NetworkNameResolverThread::resolve_name_immediately(const std::string &name,
+                                                    struct sockaddr **addr, socklen_t *addr_len)
 {
   bool found = false;
 
   // First try a regular lookup
   struct addrinfo *ai;
-  if ( getaddrinfo(name, NULL, NULL, &ai) == 0 ) {
+  if ( getaddrinfo(name.c_str(), NULL, NULL, &ai) == 0 ) {
     // return the first result
     struct sockaddr *tmp = (struct sockaddr *)malloc(ai->ai_addrlen);
     memcpy(tmp, ai->ai_addr, ai->ai_addrlen);
@@ -147,10 +139,8 @@ NetworkNameResolverThread::resolve_name_immediately(const char *name,
 
 #ifdef HAVE_AVAHI
   // resolve names in .local domain with Avahi if available
-  char *n = (char *)name + strlen(name) - 6; // 6 == strlen(".local")
-  const char *f = strstr(name, ".local");
-  if ( __avahi_thread && f && (f == n) ) {
-    __avahi_thread->resolve_name(name, this);          
+  if ( __avahi_thread && name.find(".local") == name.length() - 6) { // 6 == strlen(".local")
+	  __avahi_thread->resolve_name(name.c_str(), this);          
   /*
   } else {
     printf("NOT ordering avahi_thread lookup\n");
@@ -173,9 +163,8 @@ NetworkNameResolverThread::resolve_name_immediately(const char *name,
 /** Immediately resolve address.
  * This tries to lookup the address with the getnameinfo(). If that fails a textual
  * representation of the address is created. Additionally if an Avahi thread has
- * @param addr pointer to a struct of type struct sockaddr_in with the address to
+ * @param addr pointer to a struct of type struct sockaddr with the address to
  * lookup
- * @param addr_len length of addr in bytes
  * @param name contains a newly allocated buffer upon successful return that you have
  * to free after use using free().
  * @param namefound true, if the name could be resolved, false if it was just transformed
@@ -184,28 +173,20 @@ NetworkNameResolverThread::resolve_name_immediately(const char *name,
  * carries the result, false otherwise
  */
 bool
-NetworkNameResolverThread::resolve_address_immediately(struct sockaddr *addr, socklen_t addr_len,
-						       char **name, bool *namefound)
+NetworkNameResolverThread::resolve_address_immediately(struct sockaddr *addr,
+                                                       std::string &name, bool &namefound)
 {
   bool found = false;
   char hbuf[NI_MAXHOST];
+  socklen_t addr_len = addr->sa_family == AF_INET ? sizeof(sockaddr_in) : sizeof(sockaddr_in6);
+  
   if ( getnameinfo(addr, addr_len, hbuf, sizeof(hbuf), NULL, 0, NI_NAMEREQD) == 0 ) {
-    char *tmp = (char *)malloc(strlen(hbuf) + 1);
-    if ( ! tmp ) {
-      throw OutOfMemoryException();
-    }
-    strcpy(tmp, hbuf);
-    *name = tmp;
-    *namefound = true;
+	  name = hbuf;
+    namefound = true;
     found = true;
   } else if ( getnameinfo(addr, addr_len, hbuf, sizeof(hbuf), NULL, 0, 0) == 0 ) {
-    char *tmp = (char *)malloc(strlen(hbuf) + 1);
-    if ( ! tmp ) {
-      throw OutOfMemoryException();
-    }
-    strcpy(tmp, hbuf);
-    *name = tmp;
-    *namefound = false;
+	  name = hbuf;
+    namefound = false;
     found = true;
   }
 
@@ -225,12 +206,11 @@ NetworkNameResolverThread::resolve_address_immediately(struct sockaddr *addr, so
  * @param name name to resolve
  */
 void
-NetworkNameResolverThread::resolve_name(const char *name)
+NetworkNameResolverThread::resolve_name(const std::string &name)
 {
   __namesq_mutex->lock();
-  if ( __namesq->find((char *)name) == __namesq->end() ) {
-    char *tmp = strdup(name);
-    __namesq->insert(tmp);
+  if ( __namesq->find(name) == __namesq->end() ) {
+    __namesq->insert(name);
     __namesq_mutex->unlock();
     wakeup();
   } else {
@@ -242,18 +222,18 @@ NetworkNameResolverThread::resolve_name(const char *name)
 /** Enqueue address for resolution.
  * The address is enqueued and the resolver thread woken up. The result is reported
  * to the resolver given to the constructor.
- * @param addr address to resolve, must be a struct sockaddr_in
+ * @param addr address to resolve, must be a struct sockaddr
  * @param addrlen length of addr
  */
 void
 NetworkNameResolverThread::resolve_address(struct sockaddr *addr, socklen_t addrlen)
 {
-  struct ::sockaddr_in *saddr = (struct ::sockaddr_in *)addr;
+	
   __addrq_mutex->lock();
-  if ( __addrq->find(saddr->sin_addr.s_addr) == __addrq->end() ) {
+  if ( std::find(__addrq->begin(), __addrq->end(), addr) == __addrq->end() ) {
     struct sockaddr *taddr = (struct sockaddr *)malloc(addrlen);
     memcpy(taddr, addr, addrlen);
-    (*__addrq)[saddr->sin_addr.s_addr] = std::make_pair(taddr, addrlen);
+    __addrq->push_back(taddr);
     __addrq_mutex->unlock();
     wakeup();
   } else {
@@ -274,7 +254,7 @@ NetworkNameResolverThread::resolve_address(struct sockaddr *addr, socklen_t addr
  */
 void
 NetworkNameResolverThread::resolved_name(char *name,
-					 struct sockaddr *addr, socklen_t addrlen)
+                                         struct sockaddr *addr, socklen_t addrlen)
 {
   __resolver->name_resolved(name, addr, addrlen);
 }
@@ -291,10 +271,10 @@ NetworkNameResolverThread::resolved_name(char *name,
  * @param addrlen length of addr in bytes
  */
 void
-NetworkNameResolverThread::resolved_address(struct sockaddr_in *addr, socklen_t addrlen,
-					    char *name)
+NetworkNameResolverThread::resolved_address(struct sockaddr *addr, socklen_t addrlen,
+                                            char *name)
 {
-  __resolver->addr_resolved((struct sockaddr *)addr, addrlen, name, true);
+  __resolver->addr_resolved(addr, addrlen, name, true);
 }
 
 
@@ -321,9 +301,9 @@ NetworkNameResolverThread::name_resolution_failed(char *name)
  * @param addrlen length of address
  */
 void
-NetworkNameResolverThread::address_resolution_failed(struct sockaddr_in *addr, socklen_t addrlen)
+NetworkNameResolverThread::address_resolution_failed(struct sockaddr *addr, socklen_t addrlen)
 {
-  __resolver->address_resolution_failed((struct sockaddr *)addr, addrlen);
+  __resolver->address_resolution_failed(addr, addrlen);
 }
 
 
@@ -338,17 +318,17 @@ NetworkNameResolverThread::loop()
   __addrq_active = 1 - __addrq_active;
   __addrq = &__addrqs[__addrq_active];
   __addrq_mutex->unlock();
-  AddrQMap::iterator aqit;
+  AddrQList::iterator aqit;
   while ( ! __addrq_proc->empty() ) {
     aqit = __addrq_proc->begin();
     
-    char *name;
+    std::string name;
     bool  namefound;
 
-    if ( resolve_address_immediately(aqit->second.first, aqit->second.second, &name, &namefound) ) {
-      __resolver->addr_resolved(aqit->second.first, aqit->second.second, name, namefound);
+    if ( resolve_address_immediately(*aqit, name, namefound) ) {
+	    __resolver->addr_resolved(*aqit, sock_addr_size(*aqit), name, namefound);
     } else {
-      __resolver->address_resolution_failed(aqit->second.first, aqit->second.second);
+      __resolver->address_resolution_failed(*aqit, sock_addr_size(*aqit));
     }
     __addrq_proc->erase(aqit);
   }
@@ -361,23 +341,15 @@ NetworkNameResolverThread::loop()
   NamesQMap::iterator nqit;
   while ( ! __namesq_proc->empty() ) {
     nqit = __namesq_proc->begin();
-    char *nqn = (*nqit);
-
     struct sockaddr *addr;
     socklen_t addrlen;
 
-    // we strdup here because otherwise we could not ensure
-    // that the erase operation below can still suceed!
-    // And even if we make it mandatory that the name_resolved will not
-    // free the memory we would have the problem that it would be
-    // unknown when the resolver may free the variable
-    if ( resolve_name_immediately(nqn, &addr, &addrlen) ) {
-      __resolver->name_resolved(strdup(nqn), addr, addrlen);
+    if ( resolve_name_immediately(*nqit, &addr, &addrlen) ) {
+      __resolver->name_resolved(*nqit, addr, addrlen);
     } else {
-      __resolver->name_resolution_failed(strdup(nqn));
+      __resolver->name_resolution_failed(*nqit);
     }
     __namesq_proc->erase(nqit);
-    free(nqn);
   }
 }
 

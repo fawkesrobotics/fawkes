@@ -94,8 +94,7 @@ class NetworkService
   char *              _domain;
   char *              _host;
   unsigned short int  _port;
-  struct sockaddr    *_addr;
-  socklen_t           _addr_size;
+  struct sockaddr_storage _addr;
 
   mutable char *      _modified_name;
 };

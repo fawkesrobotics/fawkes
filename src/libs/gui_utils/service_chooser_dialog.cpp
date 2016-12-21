@@ -27,6 +27,7 @@
 #include <netcomm/utils/resolver.h>
 #include <gui_utils/service_chooser_dialog.h>
 #include <gui_utils/service_model.h>
+#include <utils/system/argparser.h>
 
 #include <algorithm>
 #include <cstring>
@@ -36,7 +37,8 @@
 #include <netinet/in.h>
 
 #ifdef HAVE_GCONFMM
-#  define GCONF_PREFIX "/apps/fawkes/service_chooser_dialog/"
+#  define GCONF_DIR "/apps/fawkes/service_chooser_dialog"
+#  define GCONF_PREFIX GCONF_DIR"/"
 #endif
 
 namespace fawkes {
@@ -106,11 +108,11 @@ ServiceChooserDialog::~ServiceChooserDialog()
 void
 ServiceChooserDialog::ctor()
 {
-  set_default_size(360, 240);
+  set_default_size(480, 300);
 
   __treeview.set_model(__service_model->get_list_store());
   __treeview.append_column("Service", __service_model->get_column_record().name);
-  __treeview.append_column("IP Address", __service_model->get_column_record().ipaddr);
+  __treeview.append_column("Address/Port", __service_model->get_column_record().addrport);
   __scrollwin.add(__treeview);
   __scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
   __treeview.show();
@@ -121,7 +123,7 @@ ServiceChooserDialog::ctor()
   Glib::ustring default_host("localhost");
 #ifdef HAVE_GCONFMM
   __gconf = Gnome::Conf::Client::get_default_client();
-  __gconf->add_dir(GCONF_PREFIX);
+  __gconf->add_dir(GCONF_DIR);
   Gnome::Conf::Value host_val =
     __gconf->get_without_default(GCONF_PREFIX"manual_host");
   if (host_val.get_type() == Gnome::Conf::VALUE_STRING) {
@@ -164,43 +166,22 @@ ServiceChooserDialog::ctor()
  * string of the host that has the service and the port.
  * @param name name of the service
  * @param hostname hostname of the host associated with the service
- * @param ipaddr upon successful return contains the IP address as string
  * @param port upon successful return contains the port
  * @exception Exception thrown if no service has been selected
  */
 void
 ServiceChooserDialog::get_selected_service(Glib::ustring &name,
-					   Glib::ustring &hostname,
-					   Glib::ustring &ipaddr,
-					   unsigned short int &port)
+                                           Glib::ustring &hostname,
+                                           unsigned short int &port)
 {
   Glib::RefPtr<Gtk::TreeSelection> treesel = __treeview.get_selection();
   if (__expander.get_expanded() && !__treeview.has_focus()) {
     if ( __entry.get_text_length() > 0 ) {
-      char *tmpvalue = strdup(__entry.get_text().c_str());
-
-      if ( strchr(tmpvalue, ':') != NULL ) {
-	char *save_ptr;
-	hostname = strtok_r(tmpvalue, ":", &save_ptr);
-	char *tmpport = strtok_r(NULL, "", &save_ptr);
-
-	int port_num = atoi(tmpport);
-	if ( (port_num < 0) || (port_num > 0xFFFF) ) {
-	  throw OutOfBoundsException("Invalid port", port_num, 0, 0xFFFF);
-	}
-	port = port_num;
-      } else {
-	hostname = tmpvalue;
-	port = 0;
-      }
-
-      // evil, but Glib::Regex is only availabel in ver >= 2.14, n/a on maemo
-      ipaddr = hostname;
-
-      name = hostname;
-
-      free(tmpvalue);
-      return;
+	    std::string tmp_hostname;
+	    ArgumentParser::parse_hostport_s(__entry.get_text().c_str(), tmp_hostname, port);
+	    hostname = tmp_hostname;
+	    name = hostname;
+	    return;
     }
   }
 
@@ -208,9 +189,37 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &name,
   if (iter) {
     Gtk::TreeModel::Row row = *iter;
     name     = row[__service_model->get_column_record().name];
-    hostname = row[__service_model->get_column_record().hostname];
-    ipaddr   = row[__service_model->get_column_record().ipaddr];
+    hostname = row[__service_model->get_column_record().ipaddr];
     port     = row[__service_model->get_column_record().port];
+
+  } else {
+    throw Exception("No host selected");
+  }
+}
+
+/** Get selected service.
+ * If a service has been selected use this method to get the IP Address as
+ * string of the host that has the service and the port.
+ * May not be called for manual entry since this would require hostname resolution within
+ * the dialog. That should be handled on the caller's side.
+ * @param hostname hostname of the host associated with the service
+ * @param sockaddr upon successful return contains the sockaddr structure of the specific endpoint
+ * @exception Exception thrown if no service has been selected
+ */
+void
+ServiceChooserDialog::get_selected_service(Glib::ustring &hostname,
+                                           struct sockaddr_storage &sockaddr)
+{
+  Glib::RefPtr<Gtk::TreeSelection> treesel = __treeview.get_selection();
+  if (__expander.get_expanded() && !__treeview.has_focus() &&  __entry.get_text_length() > 0) {
+	  throw Exception("May not be called for manual entry");
+  }
+
+  Gtk::TreeModel::iterator iter = treesel->get_selected();
+  if (iter) {
+    Gtk::TreeModel::Row row = *iter;
+    hostname = row[__service_model->get_column_record().ipaddr];
+    sockaddr = row[__service_model->get_column_record().sockaddr];
 
   } else {
     throw Exception("No host selected");
@@ -226,11 +235,12 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &name,
 void
 ServiceChooserDialog::get_raw_address(struct sockaddr *addr, socklen_t addr_size)
 {
+	/*
   if ( addr_size < sizeof(struct sockaddr_in) ) {
     throw Exception("Size of addrlen too small, only %u bytes, but required %zu\n",
 		    addr_size, sizeof(struct sockaddr_in));
   }
-  Glib::ustring name, hostname, ipaddr;
+  Glib::ustring name, hostname;
   unsigned short int port;
   get_selected_service (name, hostname, ipaddr, port);
 
@@ -245,7 +255,7 @@ ServiceChooserDialog::get_raw_address(struct sockaddr *addr, socklen_t addr_size
 		      ipaddr.c_str());
     }
   }
-
+	*/
 }
 
 
@@ -279,14 +289,19 @@ ServiceChooserDialog::run_and_connect()
 
   if ( run() ) {
     try {
-      Glib::ustring name;
-      Glib::ustring hostname;
-      Glib::ustring ipaddr;
-      unsigned short int port;
-      get_selected_service(name, hostname, ipaddr, port);
-      if ( port == 0 )  port = 1910;
+	    if (__expander.get_expanded() && !__treeview.has_focus() &&  __entry.get_text_length() > 0 ) {
+		    Glib::ustring name, hostname;
+		    unsigned short int port;
+		    get_selected_service(name, hostname, port);
+		    __client->connect(hostname.c_str(), port);
+		    
+	    } else {
+		    struct sockaddr_storage sockaddr;
+		    Glib::ustring hostname;
+		    get_selected_service(hostname, sockaddr);
+		    __client->connect(hostname.c_str(), sockaddr);
 
-      __client->connect(hostname.c_str(), ipaddr.c_str(), port);
+	    }
     } catch (Exception &e) {
       Glib::ustring message = *(e.begin());
       Gtk::MessageDialog md(__parent, message, /* markup */ false,

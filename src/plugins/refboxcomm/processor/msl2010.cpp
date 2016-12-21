@@ -146,7 +146,7 @@ Msl2010RefBoxProcessor::reconnect()
 		     __refbox_host, __refbox_port);
   try {
     __logger->log_info(__name, "Creating MulticastDatagramSocket");
-    __s = new MulticastDatagramSocket(__refbox_host, __refbox_port, 2.3);
+    __s = new MulticastDatagramSocket(Socket::IPv4, __refbox_host, __refbox_port, 2.3);
     //printf("set loop\n");
     __s->set_loop(true); // (re)receive locally sent stuff
     //printf("bind\n");

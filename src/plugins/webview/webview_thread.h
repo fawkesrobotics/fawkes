@@ -117,6 +117,8 @@ class WebviewThread
   WebviewUserVerifier                *__user_verifier;
 
   unsigned int __cfg_port;
+  bool         __cfg_use_ipv4;
+  bool         __cfg_use_ipv6;
   bool         __cfg_use_ssl;
   bool         __cfg_ssl_create;
   std::string  __cfg_ssl_key;

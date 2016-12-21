@@ -250,6 +250,7 @@ class FireVisionNetworkTool
 			     const char *type,
 			     const char *domain,
 			     const char *host_name,
+			     const char *interface,
 			     const struct sockaddr *addr,
 			     const socklen_t addr_size,
 			     uint16_t port,

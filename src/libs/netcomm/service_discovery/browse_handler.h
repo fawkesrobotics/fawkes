@@ -74,6 +74,7 @@ class ServiceBrowseHandler
    * @param type type of the service
    * @param domain domain of the service
    * @param host_name name of the host that provides the service
+   * @param interface name of network interface to reach service
    * @param addr pointer to sockaddr struct of appropriate type for address
    * @param addr_size size of addr struct
    * @param port port of the service
@@ -84,6 +85,7 @@ class ServiceBrowseHandler
 			     const char *type,
 			     const char *domain,
 			     const char *host_name,
+           const char *interface,
 			     const struct sockaddr *addr,
 			     const socklen_t addr_size,
 			     uint16_t port,
