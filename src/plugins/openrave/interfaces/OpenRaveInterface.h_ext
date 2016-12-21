@@ -39,9 +39,8 @@ class OpenRaveInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t msgid; /**< The ID of the message that is currently being
@@ -53,7 +52,6 @@ class OpenRaveInterface : public Interface
       constants otherwise (or a bit-wise combination). */
     bool success; /**< True, if last command was successful. False otherwise */
   } OpenRaveInterface_data_t;
-#pragma pack(pop)
 
   OpenRaveInterface_data_t *data;
 
@@ -62,13 +60,11 @@ class OpenRaveInterface : public Interface
   class StartViewerMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StartViewerMessage_data_t;
-#pragma pack(pop)
 
     StartViewerMessage_data_t *data;
 
@@ -84,15 +80,13 @@ class OpenRaveInterface : public Interface
   class AddObjectMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char name[30]; /**< Name of object */
       char path[1024]; /**< Path to object xml file */
     } AddObjectMessage_data_t;
-#pragma pack(pop)
 
     AddObjectMessage_data_t *data;
 
@@ -115,14 +109,12 @@ class OpenRaveInterface : public Interface
   class DeleteObjectMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char name[30]; /**< Name of object */
     } DeleteObjectMessage_data_t;
-#pragma pack(pop)
 
     DeleteObjectMessage_data_t *data;
 
@@ -142,13 +134,11 @@ class OpenRaveInterface : public Interface
   class DeleteAllObjectsMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } DeleteAllObjectsMessage_data_t;
-#pragma pack(pop)
 
     DeleteAllObjectsMessage_data_t *data;
 
@@ -164,15 +154,13 @@ class OpenRaveInterface : public Interface
   class AttachObjectMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char name[30]; /**< Name of object */
       char manip_name[30]; /**< Name of manipulator */
     } AttachObjectMessage_data_t;
-#pragma pack(pop)
 
     AttachObjectMessage_data_t *data;
 
@@ -195,14 +183,12 @@ class OpenRaveInterface : public Interface
   class ReleaseObjectMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char name[30]; /**< Name of object */
     } ReleaseObjectMessage_data_t;
-#pragma pack(pop)
 
     ReleaseObjectMessage_data_t *data;
 
@@ -222,13 +208,11 @@ class OpenRaveInterface : public Interface
   class ReleaseAllObjectsMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ReleaseAllObjectsMessage_data_t;
-#pragma pack(pop)
 
     ReleaseAllObjectsMessage_data_t *data;
 
@@ -244,9 +228,8 @@ class OpenRaveInterface : public Interface
   class MoveObjectMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char name[30]; /**< Name of object */
@@ -254,7 +237,6 @@ class OpenRaveInterface : public Interface
       float y; /**< y position of object (meters) */
       float z; /**< z position of object (meters) */
     } MoveObjectMessage_data_t;
-#pragma pack(pop)
 
     MoveObjectMessage_data_t *data;
 
@@ -283,9 +265,8 @@ class OpenRaveInterface : public Interface
   class RotateObjectQuatMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char name[30]; /**< Name of object */
@@ -294,7 +275,6 @@ class OpenRaveInterface : public Interface
       float z; /**< z value of quaternion */
       float w; /**< w value of quaternion */
     } RotateObjectQuatMessage_data_t;
-#pragma pack(pop)
 
     RotateObjectQuatMessage_data_t *data;
 
@@ -326,9 +306,8 @@ class OpenRaveInterface : public Interface
   class RotateObjectMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char name[30]; /**< Name of object */
@@ -336,7 +315,6 @@ class OpenRaveInterface : public Interface
       float y; /**< y-axis rotation of object (rad) */
       float z; /**< z-axis rotation of object (rad) */
     } RotateObjectMessage_data_t;
-#pragma pack(pop)
 
     RotateObjectMessage_data_t *data;
 
@@ -365,15 +343,13 @@ class OpenRaveInterface : public Interface
   class RenameObjectMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char name[30]; /**< Name of object */
       char newName[30]; /**< New name of object */
     } RenameObjectMessage_data_t;
-#pragma pack(pop)
 
     RenameObjectMessage_data_t *data;
 
