@@ -58,20 +58,17 @@ namespace firevision {
 /** Constructor.
  * @param histos histograms
  * @param d depth of lookup table
- * @param object type of the foreground object
+ * @param fg_object type of the foreground object
  * @param w the width of the lookup table (u-resolution)
  * @param h the height of the lookup table (v-resolution)
  */
 BayesHistosToLut::BayesHistosToLut(std::map<hint_t, Histogram*> &histos,
-				   unsigned int d, hint_t object, unsigned int w, unsigned int h)
-  : histograms(histos)
+				   unsigned int d, hint_t fg_object, unsigned int w, unsigned int h)
+  : histograms(histos), fg_object(fg_object)
 {
   width  = w;
   height = h;
   depth  = d;
-
-  fg_object  = object;
-  //  histograms = histos;
 
   // no as shmem segment
   lut = new YuvColormap(depth, width, height);
