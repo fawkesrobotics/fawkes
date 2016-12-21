@@ -77,7 +77,7 @@ WebviewAccessLog::log(const WebRequest *request)
   localtime_r(&timesec, &ltime);
   char timestr[1024];
   // [day/month/year:hour:minute:second zone]
-  strftime(timestr, sizeof(timestr), "[%d/%m/%Y:%H:%M:%S %z]", &ltime);
+  strftime(timestr, sizeof(timestr), "[%d/%b/%Y:%H:%M:%S %z]", &ltime);
   fprintf(logfile_, "%s - %s %s \"%s %s %s\" %i %zu \"%s\" \"%s\"\n",
 	  request->client_addr().c_str(),
 	  request->user().length() == 0 ? "-" : request->user().c_str(),
