@@ -49,9 +49,8 @@ class OpenCVStereoParamsInterface : public Interface
   const char * tostring_PreFilterType(PreFilterType value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     int32_t pre_filter_type; /**< Pre-filtering method. */
@@ -88,7 +87,6 @@ class OpenCVStereoParamsInterface : public Interface
       slower processing.
      */
   } OpenCVStereoParamsInterface_data_t;
-#pragma pack(pop)
 
   OpenCVStereoParamsInterface_data_t *data;
 
@@ -98,14 +96,12 @@ class OpenCVStereoParamsInterface : public Interface
   class SetPreFilterTypeMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t pre_filter_type; /**< Pre-filtering method. */
     } SetPreFilterTypeMessage_data_t;
-#pragma pack(pop)
 
     SetPreFilterTypeMessage_data_t *data;
 
@@ -126,16 +122,14 @@ class OpenCVStereoParamsInterface : public Interface
   class SetPreFilterSizeMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t pre_filter_size; /**< 
       Averaging window size: ~5x5..21x21.
      */
     } SetPreFilterSizeMessage_data_t;
-#pragma pack(pop)
 
     SetPreFilterSizeMessage_data_t *data;
 
@@ -156,16 +150,14 @@ class OpenCVStereoParamsInterface : public Interface
   class SetPreFilterCapMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t pre_filter_cap; /**< 
       The output of pre-filtering is clipped by [-pre_filter_cap,pre_filter_cap].
      */
     } SetPreFilterCapMessage_data_t;
-#pragma pack(pop)
 
     SetPreFilterCapMessage_data_t *data;
 
@@ -186,16 +178,14 @@ class OpenCVStereoParamsInterface : public Interface
   class SetSADWindowSizeMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t sad_window_size; /**< 
       Correspondence using Sum of Absolute Difference (SAD) window size (5x5..21x21).
      */
     } SetSADWindowSizeMessage_data_t;
-#pragma pack(pop)
 
     SetSADWindowSizeMessage_data_t *data;
 
@@ -216,14 +206,12 @@ class OpenCVStereoParamsInterface : public Interface
   class SetMinDisparityMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t min_disparity; /**< Minimum disparity (can be negative). */
     } SetMinDisparityMessage_data_t;
-#pragma pack(pop)
 
     SetMinDisparityMessage_data_t *data;
 
@@ -244,16 +232,14 @@ class OpenCVStereoParamsInterface : public Interface
   class SetNumDisparitiesMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t num_disparities; /**< 
       Number of disparities (maximum disparity - minimum disparity (> 0)).
      */
     } SetNumDisparitiesMessage_data_t;
-#pragma pack(pop)
 
     SetNumDisparitiesMessage_data_t *data;
 
@@ -274,9 +260,8 @@ class OpenCVStereoParamsInterface : public Interface
   class SetTextureThresholdMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t texture_threshold; /**< 
@@ -284,7 +269,6 @@ class OpenCVStereoParamsInterface : public Interface
       neighborhood.
      */
     } SetTextureThresholdMessage_data_t;
-#pragma pack(pop)
 
     SetTextureThresholdMessage_data_t *data;
 
@@ -305,9 +289,8 @@ class OpenCVStereoParamsInterface : public Interface
   class SetUniquenessRatioMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t uniqueness_ratio; /**< 
@@ -316,7 +299,6 @@ class OpenCVStereoParamsInterface : public Interface
       for any d != d*+/-1 within the search range.
      */
     } SetUniquenessRatioMessage_data_t;
-#pragma pack(pop)
 
     SetUniquenessRatioMessage_data_t *data;
 
@@ -337,16 +319,14 @@ class OpenCVStereoParamsInterface : public Interface
   class SetSpeckleWindowSizeMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t speckle_window_size; /**< 
       Disparity variation window size.
      */
     } SetSpeckleWindowSizeMessage_data_t;
-#pragma pack(pop)
 
     SetSpeckleWindowSizeMessage_data_t *data;
 
@@ -367,16 +347,14 @@ class OpenCVStereoParamsInterface : public Interface
   class SetSpeckleRangeMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t speckle_range; /**< 
       Acceptable range of variation in window.
      */
     } SetSpeckleRangeMessage_data_t;
-#pragma pack(pop)
 
     SetSpeckleRangeMessage_data_t *data;
 
@@ -397,9 +375,8 @@ class OpenCVStereoParamsInterface : public Interface
   class SetTrySmallerWindowsMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool try_smaller_windows; /**< 
@@ -407,7 +384,6 @@ class OpenCVStereoParamsInterface : public Interface
       slower processing.
      */
     } SetTrySmallerWindowsMessage_data_t;
-#pragma pack(pop)
 
     SetTrySmallerWindowsMessage_data_t *data;
 
