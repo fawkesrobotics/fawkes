@@ -43,9 +43,8 @@ class JacoInterface : public Interface
   static const uint32_t ERROR_PLANNING;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     bool connected; /**< Is JacoArm connected/ready? */
@@ -68,7 +67,6 @@ class JacoInterface : public Interface
       final is true. 0 if no error occured, an error code from ERROR_*
       constants otherwise. */
   } JacoInterface_data_t;
-#pragma pack(pop)
 
   JacoInterface_data_t *data;
 
@@ -77,13 +75,11 @@ class JacoInterface : public Interface
   class CalibrateMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } CalibrateMessage_data_t;
-#pragma pack(pop)
 
     CalibrateMessage_data_t *data;
 
@@ -99,13 +95,11 @@ class JacoInterface : public Interface
   class RetractMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } RetractMessage_data_t;
-#pragma pack(pop)
 
     RetractMessage_data_t *data;
 
@@ -121,13 +115,11 @@ class JacoInterface : public Interface
   class StopMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } StopMessage_data_t;
-#pragma pack(pop)
 
     StopMessage_data_t *data;
 
@@ -143,9 +135,8 @@ class JacoInterface : public Interface
   class CartesianGotoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float x; /**< X-coordinate of target */
@@ -155,7 +146,6 @@ class JacoInterface : public Interface
       float e2; /**< 2nd Euler angle of target rotation */
       float e3; /**< 3rd Euler angle of target rotation */
     } CartesianGotoMessage_data_t;
-#pragma pack(pop)
 
     CartesianGotoMessage_data_t *data;
 
@@ -190,9 +180,8 @@ class JacoInterface : public Interface
   class AngularGotoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float j1; /**< Angular value of 1st joint */
@@ -202,7 +191,6 @@ class JacoInterface : public Interface
       float j5; /**< Angular value of 5th joint */
       float j6; /**< Angular value of 6th joint */
     } AngularGotoMessage_data_t;
-#pragma pack(pop)
 
     AngularGotoMessage_data_t *data;
 
@@ -237,16 +225,14 @@ class JacoInterface : public Interface
   class MoveGripperMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float finger1; /**< Value of finger 1. Range [0,60] */
       float finger2; /**< Value of finger 2. Range [0,60] */
       float finger3; /**< Value of finger 3. Range [0,60] */
     } MoveGripperMessage_data_t;
-#pragma pack(pop)
 
     MoveGripperMessage_data_t *data;
 
@@ -272,14 +258,12 @@ class JacoInterface : public Interface
   class SetPlannerParamsMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char params[1024]; /**< Planner parameters */
     } SetPlannerParamsMessage_data_t;
-#pragma pack(pop)
 
     SetPlannerParamsMessage_data_t *data;
 
@@ -299,14 +283,12 @@ class JacoInterface : public Interface
   class JoystickPushMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       uint32_t button; /**< Button ID to push. */
     } JoystickPushMessage_data_t;
-#pragma pack(pop)
 
     JoystickPushMessage_data_t *data;
 
@@ -326,13 +308,11 @@ class JacoInterface : public Interface
   class JoystickReleaseMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } JoystickReleaseMessage_data_t;
-#pragma pack(pop)
 
     JoystickReleaseMessage_data_t *data;
 

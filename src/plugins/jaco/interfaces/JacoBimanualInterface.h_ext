@@ -43,9 +43,8 @@ class JacoBimanualInterface : public Interface
   static const uint32_t ERROR_PLANNING;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t msgid; /**< The ID of the message that is currently being
@@ -58,7 +57,6 @@ class JacoBimanualInterface : public Interface
     bool constrained; /**< Wheter planning is using constraint-function.
       This is an OpenRAVE internal constraint function. */
   } JacoBimanualInterface_data_t;
-#pragma pack(pop)
 
   JacoBimanualInterface_data_t *data;
 
@@ -67,9 +65,8 @@ class JacoBimanualInterface : public Interface
   class CartesianGotoMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float l_x; /**< X-coordinate of left manipulator */
@@ -85,7 +82,6 @@ class JacoBimanualInterface : public Interface
       float r_e2; /**< 2nd Euler angle of right manipulator rotation */
       float r_e3; /**< 3rd Euler angle of right manipulator rotation */
     } CartesianGotoMessage_data_t;
-#pragma pack(pop)
 
     CartesianGotoMessage_data_t *data;
 
@@ -138,9 +134,8 @@ class JacoBimanualInterface : public Interface
   class MoveGripperMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float l_finger1; /**< Value of finger 1 on left gripper. Range [0,60] */
@@ -150,7 +145,6 @@ class JacoBimanualInterface : public Interface
       float r_finger2; /**< Value of finger 2 on right gripper. Range [0,60] */
       float r_finger3; /**< Value of finger 3 on right gripper. Range [0,60] */
     } MoveGripperMessage_data_t;
-#pragma pack(pop)
 
     MoveGripperMessage_data_t *data;
 
@@ -185,14 +179,12 @@ class JacoBimanualInterface : public Interface
   class SetPlannerParamsMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char params[1024]; /**< Planner parameters */
     } SetPlannerParamsMessage_data_t;
-#pragma pack(pop)
 
     SetPlannerParamsMessage_data_t *data;
 
@@ -212,15 +204,13 @@ class JacoBimanualInterface : public Interface
   class SetConstrainedMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       bool constrained; /**< Wheter planning is using constraint-function.
       This is an OpenRAVE internal constraint function. */
     } SetConstrainedMessage_data_t;
-#pragma pack(pop)
 
     SetConstrainedMessage_data_t *data;
 
