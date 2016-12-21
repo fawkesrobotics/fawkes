@@ -53,9 +53,8 @@ class LaserClusterInterface : public Interface
   const char * tostring_SelectionMode(SelectionMode value) const;
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     float max_x; /**< Maximum distance in X coordinate
@@ -64,7 +63,6 @@ class LaserClusterInterface : public Interface
       Current cluster selection mode.
      */
   } LaserClusterInterface_data_t;
-#pragma pack(pop)
 
   LaserClusterInterface_data_t *data;
 
@@ -74,15 +72,13 @@ class LaserClusterInterface : public Interface
   class SetMaxXMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       float max_x; /**< Maximum distance in X coordinate
     of sensor frame. */
     } SetMaxXMessage_data_t;
-#pragma pack(pop)
 
     SetMaxXMessage_data_t *data;
 
@@ -103,16 +99,14 @@ class LaserClusterInterface : public Interface
   class SetSelectionModeMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       int32_t selection_mode; /**< 
       Current cluster selection mode.
      */
     } SetSelectionModeMessage_data_t;
-#pragma pack(pop)
 
     SetSelectionModeMessage_data_t *data;
 
