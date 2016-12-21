@@ -209,9 +209,6 @@ class ClipsProtobufCommunicator
 
   std::map<long int, std::pair<std::string, unsigned short>> client_endpoints_;
 
-  std::map<long int, CLIPS::Fact::pointer>  msg_facts_;
-
-
   std::list<std::string>  functions_;
   CLIPS::Fact::pointer    avail_fact_;
 };
