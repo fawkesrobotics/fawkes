@@ -2,7 +2,7 @@
 #                Makefile Build System for Fawkes: gtest unit tests
 #                            -------------------
 #   Created on Mon Jan 05 15:44:42 2015
-#   Copyright (C) 2015 by Till Hofmann
+#   Copyright (C) 2015-2016 by Till Hofmann
 #
 #*****************************************************************************
 #
@@ -31,10 +31,16 @@ ifneq ($(GTESTCONFIG),)
   LDFLAGS_GTEST = $(shell $(GTESTCONFIG) --ldflags --libs)
 else
   # gtest-config not available, but maybe we can still find gtest
-  HAVE_GTEST = $(if $(wildcard $(addsuffix /gtest/gtest.h,$(__GTEST_INCLUDE_PATHS))),1)
-  ifeq ($(HAVE_GTEST),1)
-    # gtest-config not available, we must set the flags manually
-    LDFLAGS_GTEST += -pthread -lgtest
+  HAVE_GTEST_HDR = $(if $(wildcard $(addsuffix /gtest/gtest.h,$(__GTEST_INCLUDE_PATHS))),1)
+  ifeq ($(HAVE_GTEST_HDR),1)
+    # check if library is available
+    HAVE_GTEST_LIB = $(if $(shell ldconfig -p | grep libgtest\\.$(SOEXT)),1,)
+    HAVE_GTEST_MAIN = $(if $(shell ldconfig -p | grep libgtest_main\\.$(SOEXT)),1,)
+    ifeq ($(HAVE_GTEST_LIB)$(HAVE_GTEST_MAIN),11)
+      HAVE_GTEST = 1
+      # gtest-config not available, we must set the flags manually
+      LDFLAGS_GTEST += -pthread -lgtest
+    endif
   endif
 endif
 
