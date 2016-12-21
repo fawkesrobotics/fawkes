@@ -135,10 +135,10 @@ MessageEncryptor::recommended_crypt_buffer_size()
   }
 
 #ifdef HAVE_LIBCRYPTO
-  EVP_CIPHER_CTX ctx;
-  EVP_EncryptInit(&ctx, EVP_aes_128_ecb(), key, iv);
-  size_t rv = plain_buffer_length + EVP_CIPHER_CTX_block_size(&ctx);
-  EVP_CIPHER_CTX_cleanup(&ctx);
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+  EVP_EncryptInit(ctx, EVP_aes_128_ecb(), key, iv);
+  size_t rv = plain_buffer_length + EVP_CIPHER_CTX_block_size(ctx);
+  EVP_CIPHER_CTX_free(ctx);
   return rv;
 #else
   return plain_buffer_length;
@@ -172,25 +172,29 @@ MessageEncryptor::encrypt()
   }
 
 #ifdef HAVE_LIBCRYPTO
-  EVP_CIPHER_CTX ctx;
-  if ( ! EVP_EncryptInit(&ctx, EVP_aes_128_ecb(), key, iv) ) {
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+  if ( ! EVP_EncryptInit(ctx, EVP_aes_128_ecb(), key, iv) ) {
+    EVP_CIPHER_CTX_free(ctx);
     throw MessageEncryptionException("Could not initialize cipher context");
   }
 
 
   int outl = crypt_buffer_length;
-  if ( ! EVP_EncryptUpdate(&ctx,
+  if ( ! EVP_EncryptUpdate(ctx,
 			   (unsigned char *)crypt_buffer, &outl,
 			   (unsigned char *)plain_buffer, plain_buffer_length) ) {
+    EVP_CIPHER_CTX_free(ctx);
     throw MessageEncryptionException("EncryptUpdate failed");
   }
 
   int plen = 0;
-  if ( ! EVP_EncryptFinal_ex(&ctx, (unsigned char *)crypt_buffer + outl, &plen) ) {
+  if ( ! EVP_EncryptFinal_ex(ctx, (unsigned char *)crypt_buffer + outl, &plen) ) {
+    EVP_CIPHER_CTX_free(ctx);
     throw MessageEncryptionException("EncryptFinal failed");
   }
   outl += plen;
  
+  EVP_CIPHER_CTX_free(ctx);
   return outl;
 #else
   /* Plain text copy-through for debugging

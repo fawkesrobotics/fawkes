@@ -124,24 +124,28 @@ MessageDecryptor::decrypt()
   }
 
 #ifdef HAVE_LIBCRYPTO
-  EVP_CIPHER_CTX ctx;
-  if ( ! EVP_DecryptInit(&ctx, EVP_aes_128_ecb(), key, iv) ) {
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+  if ( ! EVP_DecryptInit(ctx, EVP_aes_128_ecb(), key, iv) ) {
+    EVP_CIPHER_CTX_free(ctx);
     throw MessageDecryptionException("Could not initialize cipher context");
   }
 
   int outl = plain_buffer_length;
-  if ( ! EVP_DecryptUpdate(&ctx,
+  if ( ! EVP_DecryptUpdate(ctx,
 			   (unsigned char *)plain_buffer, &outl,
 			   (unsigned char *)crypt_buffer, crypt_buffer_length) ) {
+    EVP_CIPHER_CTX_free(ctx);
     throw MessageDecryptionException("DecryptUpdate failed");
   }
 
   int plen = 0;
-  if ( ! EVP_DecryptFinal(&ctx, (unsigned char *)plain_buffer + outl, &plen) ) {
+  if ( ! EVP_DecryptFinal(ctx, (unsigned char *)plain_buffer + outl, &plen) ) {
+    EVP_CIPHER_CTX_free(ctx);
     throw MessageDecryptionException("DecryptFinal failed");
   }
   outl += plen;
 
+  EVP_CIPHER_CTX_free(ctx);
   return outl;
 #else
   // Plain-text copy-through for debugging.
