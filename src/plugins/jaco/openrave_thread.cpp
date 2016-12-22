@@ -258,7 +258,7 @@ JacoOpenraveThread::loop()
       } else if( (*it)->trajec_state==TRAJEC_SKIP && (*it)->type == TARGET_ANGULAR ) {
         from = *it;
         break;
-      } else if( !(*it)->type==TARGET_GRIPPER ) {
+      } else if( !((*it)->type==TARGET_GRIPPER) ) {
         // A previous target has unknown final configuration. Cannot plan for our target yet. Abort.
         //  TARGET_GRIPPER would be the only one we could skip without problems.
         __arm->target_mutex->unlock();
