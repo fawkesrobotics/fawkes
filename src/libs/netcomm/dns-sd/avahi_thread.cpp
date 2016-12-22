@@ -46,6 +46,7 @@
 #include <cstdlib>
 #include <cstddef>
 #include <cstring>
+#include <cstdio>
 
 namespace fawkes {
 
@@ -970,12 +971,12 @@ AvahiThread::resolve_address(struct sockaddr *addr, socklen_t addrlen,
 	  if (addrlen != sizeof(sockaddr_in)) {
 		  throw Exception("Invalid size for IPv4 address struct");
 	  }
-	  memcpy(&sstor, addr, sizeof(sockaddr_in));
+	  memcpy(sstor, addr, sizeof(sockaddr_in));
   } else if (addr->sa_family == AF_INET6) {
 	  if (addrlen != sizeof(sockaddr_in6)) {
 		  throw Exception("Invalid size for IPv6 address struct");
 	  }
-	  memcpy(&sstor, addr, sizeof(sockaddr_in6));
+	  memcpy(sstor, addr, sizeof(sockaddr_in6));
   } else {
 	  throw Exception("Unknown address family");
   }
