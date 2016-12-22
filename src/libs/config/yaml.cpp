@@ -40,6 +40,8 @@
 #include <cerrno>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
 
 #include <yaml-cpp/exceptions.h>
