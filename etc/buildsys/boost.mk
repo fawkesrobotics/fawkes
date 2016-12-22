@@ -30,8 +30,8 @@ boost-find-include = $(firstword $(wildcard $(foreach i,$(BOOST_INCLUDE_DIRS) /u
 boost-have-include = $(if $(call boost-find-include,$1),1)
 boost-have-libfile = $(if $(wildcard $(foreach l,$(BOOST_LIB_DIRS),$(foreach s,$(BOOST_LIBRARY_SUFFIXES),$l/libboost_$1$(subst NOSUFFIX,,$s).$(SOEXT) ))),1)
 boost-have-lib     = $(if $(or $(call boost-have-libfile,$1),$(call boost-have-include,$(1).hpp)),1)
-boost-lib-cflags   = $(addprefix -I,$(wildcard $(BOOST_INCLUDE_DIRS)))
-boost-lib-ldflags  = $(addprefix -lboost_,$(foreach l,$(BOOST_LIB_DIRS),$(foreach s,$(BOOST_LIBRARY_SUFFIXES),$(if $(wildcard $l/libboost_$1$(subst NOSUFFIX,,$s).$(SOEXT)),$1$(subst NOSUFFIX,,$s) ))))
+boost-lib-cflags   = $(addprefix -I,$(wildcard $(BOOST_INCLUDE_DIRS))) $(BOOST_CFLAGS_$1)
+boost-lib-ldflags  = $(addprefix -lboost_,$(foreach l,$(BOOST_LIB_DIRS),$(foreach s,$(BOOST_LIBRARY_SUFFIXES),$(if $(wildcard $l/libboost_$1$(subst NOSUFFIX,,$s).$(SOEXT)),$1$(subst NOSUFFIX,,$s) )))) $(BOOST_LDFLAGS_$1)
 
 boost-have-libs    = $(if $(strip $(subst 1,,$(foreach l,$1,$(or $(call boost-have-lib,$l),0)))),,1)
 boost-libs-cflags  = $(foreach l,$1,$(call boost-lib-cflags,$l))
