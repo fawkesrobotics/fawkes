@@ -47,6 +47,13 @@ endif
 
 boost-version-create = $(shell echo $$(($1 * 100000 + $2 * 100 + $3)))
 boost-version-atleast = $(shell echo $$(($(BOOST_VERSION) >= $1 * 100000 + $2 * 100 + $3)))
+boost-version-atmost = $(shell echo $$(($(BOOST_VERSION) <= $1 * 100000 + $2 * 100 + $3)))
 boost-version-parse  = $(shell echo $$(($1 / 100000)).$$(($1 / 100 % 1000)).$$(($1 % 100)))
+
+ifeq ($(CC),clang)
+  ifeq ($(call boost-version-atmost,1,55,0),1)
+    BOOST_CFLAGS_asio=-Wno-infinite-recursion -Wno-unused-local-typedef
+  endif
+endif
 
 endif # __buildsys_boost_mk_
