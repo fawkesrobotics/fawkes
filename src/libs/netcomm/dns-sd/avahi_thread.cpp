@@ -949,6 +949,7 @@ AvahiThread::start_address_resolvers()
 
   for (parit = __pending_address_resolves.begin(); parit != __pending_address_resolves.end(); ++parit) {
     start_address_resolver(parit->first, parit->second);
+    free(parit->first);
   }
   __pending_address_resolves.clear();
 }
