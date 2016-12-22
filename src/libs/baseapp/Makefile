@@ -26,7 +26,7 @@ LIBS_libfawkesbaseapp = stdc++ pthread fawkescore fawkesutils fawkesconfig \
 			fawkesblackboard fawkesplugin fawkesnetcomm \
 			fawkesaspects fawkeslogging
 
-REQ_BOOST_LIBS = system
+REQ_BOOST_LIBS = asio system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 ifeq ($(HAVE_TF),1)

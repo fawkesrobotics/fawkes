@@ -64,7 +64,7 @@ class JpegImageCompressor : public ImageCompressor {
   virtual void          set_compression_destination(ImageCompressor::CompressionDestination cd)
   { impl_->set_compression_destination(cd); }
   virtual bool          supports_compression_destination(ImageCompressor::CompressionDestination cd)
-  { return supports_compression_destination(cd); }
+  { return impl_->supports_compression_destination(cd); }
   virtual void          compress()
   { impl_->compress(); }
   virtual size_t        recommended_compressed_buffer_size()

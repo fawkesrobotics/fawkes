@@ -129,8 +129,8 @@ class Socket
    * the given type.
    * @return socket to client
    */
-  template <class SocketType>
-    SocketType *     accept();
+  template <class SocketTypeC>
+    SocketTypeC *     accept();
 
  protected:
   Socket(SocketType sock_type, float timeout = 0.f);
@@ -153,12 +153,12 @@ class Socket
 };
 
 
-template <class SocketType>
-SocketType *
+template <class SocketTypeC>
+SocketTypeC *
 Socket::accept()
 {
   Socket *s = accept();
-  if (SocketType *ts = dynamic_cast<SocketType *>(s)) {
+  if (SocketTypeC *ts = dynamic_cast<SocketTypeC *>(s)) {
     return ts;
   } else {
     delete s;

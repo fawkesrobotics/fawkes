@@ -33,9 +33,15 @@ ifeq ($(CGAL_HAVE_BOOST_LIBS),1)
     ifneq ($(wildcard $(SYSROOT)/usr/include/gmp.h $(SYSROOT)/usr/local/include/gmp.h $(SYSROOT)/usr/include/$(ARCH)-linux-gnu/gmp.h),)
       ifneq ($(wildcard $(SYSROOT)/usr/include/mpfr.h $(SYSROOT)/usr/local/include/mpfr.h),)
         HAVE_CGAL:=1
-        CFLAGS_CGAL:= -DHAVE_CGAL $(call boost-libs-cflags,$(CGAL_REQ_BOOST_LIBS)) -Wno-deprecated-register -frounding-math
+        CFLAGS_CGAL:= -DHAVE_CGAL $(call boost-libs-cflags,$(CGAL_REQ_BOOST_LIBS)) -Wno-deprecated-register
         LDFLAGS_CGAL:=-lCGAL -lCGAL_Core -lgmp -lmpfr -lm \
 		      $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
+
+        ifeq ($(CC),clang)
+          CFLAGS_CGAL += -Wno-unused-local-typedef
+        else
+          CFLAGS_CGAL += -frounding-math
+        endif
       else
         CGAL_ERRORS += "MPFR_not_found"
       endif

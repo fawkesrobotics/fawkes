@@ -177,7 +177,7 @@ void AmclThread::init()
     angle_max_idx_ = 359;
   }
   if (angle_max_idx_ > angle_min_idx_) {
-    angle_range_ = (unsigned int)abs(angle_max_idx_ - angle_min_idx_);
+    angle_range_ = (unsigned int)abs((long)angle_max_idx_ - (long)angle_min_idx_);
   } else {
     angle_range_ = (360 - angle_min_idx_) + angle_max_idx_;
   }

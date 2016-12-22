@@ -155,7 +155,7 @@ ImageDiff::numDifferingPixels()
   if ( (buffer_a == NULL) && (buffer_b != NULL) ) return (width_b * height_b);
   if ( (buffer_a != NULL) && (buffer_b == NULL) ) return (width_a * height_a);
   if ( (width_a != width_b) || (height_a != height_b) ) {
-    return abs(width_a - width_b) * abs(height_a - height_b);
+    return std::abs((long)width_a - (long)width_b) * std::abs((long)height_a - (long)height_b);
   }
 
   unsigned int num = 0;

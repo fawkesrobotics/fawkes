@@ -35,6 +35,7 @@
 #include <netinet/in.h>
 #include <stdint.h>
 #include <cstddef>
+#include <string>
 #include <utility>
 #include <map>
 #include <list>

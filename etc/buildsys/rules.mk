@@ -169,7 +169,7 @@ $(PRESUBDIRS) $(SUBDIRS):
 	else \
 		echo -e "$(INDENT_PRINT)--> Entering sub-directory $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL)$(TBOLDBLUE)$@$(TNORMAL)"; \
 		$(MAKE) --no-print-directory --no-keep-going -C "$(abspath $(SRCDIR)/$@)" \
-		$(MFLAGS) $(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)" \
+		$(MAKECMDGOALS) INDENT="$(INDENT)$(INDENT_STRING)" \
 		SRCDIR="$(abspath $(SRCDIR)/$@)" OBJSSUBMAKE=0 || exit $$?; \
 		if [ "$(MAKECMDGOALS)" != "clean" ]; then \
 			echo -e "$(INDENT_PRINT)$(subst -, ,$(INDENT_STRING))<-- Leaving $(PARENTDIR)$(TBOLDGRAY)$@$(TNORMAL)"; \
