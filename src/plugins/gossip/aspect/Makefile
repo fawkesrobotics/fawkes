@@ -21,7 +21,7 @@ include $(BUILDSYSDIR)/boost.mk
 
 CFLAGS += $(CFLAGS_CPP11)
 
-REQ_BOOST_LIBS = system
+REQ_BOOST_LIBS = asio system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 LIBS_libfawkesgossipaspect = stdc++ fawkescore fawkesaspects fawkesutils fawkesgossip
