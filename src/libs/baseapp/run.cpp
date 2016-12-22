@@ -452,10 +452,10 @@ cleanup()
     delete network_logger;
   }
 
-  delete main_thread;
   delete nethandler_config;
   delete nethandler_plugin;
   delete plugin_manager;
+  delete main_thread;
 #ifdef HAVE_TF
   delete tf_listener;
   delete tf_transformer;
