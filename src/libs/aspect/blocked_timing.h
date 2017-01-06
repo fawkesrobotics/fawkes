@@ -87,6 +87,9 @@ class BlockedTimingAspect : public SyncPointAspect
 
   WakeupHook blockedTimingAspectHook() const;
 
+  /** Translation from WakeupHooks to SyncPoints. Each WakeupHook corresponds to
+   *  exactly one SyncPoint, e.g., WAKEUP_HOOK_PRE_LOOP becomes /preloop.
+   */
   static const std::map<const WakeupHook, const std::string> hook_to_syncpoint;
 
  private:
