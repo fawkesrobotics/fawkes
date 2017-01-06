@@ -114,6 +114,7 @@ WebviewSyncPointRequestProcessor::process_request(const fawkes::WebRequest *requ
 
 /**
  * Get DOT graph for all SyncPoints
+ * @param syncpoints The set of syncpoints to show
  * @param max_age Show only SyncPoint calls which are younger than max_age
  * @return string representation of DOT graph
  */
