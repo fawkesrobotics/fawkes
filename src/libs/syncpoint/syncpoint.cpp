@@ -506,6 +506,7 @@ SyncPoint::get_emit_calls() const {
  * Check if the given waiter is currently waiting with the given type
  * @param watcher the string identifier of the watcher to check
  * @param type the type of call to check
+ * @return true if the waiter is currently waiting
  */
 bool
 SyncPoint::watcher_is_waiting(std::string watcher, WakeupType type) const

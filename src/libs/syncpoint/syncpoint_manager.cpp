@@ -44,6 +44,9 @@ namespace fawkes {
  * @see SyncPoint
  */
 
+/** Constructor.
+ *  @param logger the logger to use for logging messages
+ */
 SyncPointManager::SyncPointManager(MultiLogger *logger)
 : mutex_(new Mutex()),
   logger_(logger)
