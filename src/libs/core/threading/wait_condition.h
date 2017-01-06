@@ -29,7 +29,9 @@ namespace fawkes {
 class WaitConditionData;
 class Mutex;
 
+/// @cond INTERNALS
 void cleanup_mutex(void *);
+/// @endcond
 
 class WaitCondition {
  public:
