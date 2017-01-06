@@ -1191,3 +1191,52 @@ TEST_F(SyncPointManagerTest, WaitersTimeoutSimultaneousReleaseTest)
     EXPECT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
   }
 }
+
+/** Similar as before, test if the timeout is handled properly. This time, let
+ *  a wait_for_one with a short timeout step by. The other waiters should not be
+ *  affected, i.e. they should still be waiting even when the timeout for the
+ *  wait_for_one occurred.
+ *  In other words, wait_for_one waiters are handled completeley separately.
+ */
+TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
+{
+  RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter1", "/test");
+  sp->register_emitter("emitter1");
+  string sp_identifier = "/test";
+  pthread_t wait_for_one_thread;
+  waiter_thread_params wait_for_one_params;
+  wait_for_one_params.manager = manager;
+  wait_for_one_params.thread_nr = 2;
+  wait_for_one_params.num_wait_calls = 1;
+  wait_for_one_params.timeout_sec = 0;
+  wait_for_one_params.timeout_nsec = 1000000;
+  wait_for_one_params.sp_identifier = sp_identifier;
+  pthread_create(&wait_for_one_thread, &attrs, start_waiter_thread,
+    &wait_for_one_params);
+  uint num_threads = 2;
+  pthread_t threads[num_threads];
+  waiter_thread_params params[num_threads];
+  for (uint i = 0; i < num_threads; i++) {
+    params[i].manager = manager;
+    params[i].thread_nr = i;
+    params[i].num_wait_calls = 1;
+    params[i].timeout_sec = 1;
+    params[i].sp_identifier = sp_identifier;
+    pthread_create(&threads[i], &attrs, start_barrier_waiter_thread,
+      &params[i]);
+  }
+  usleep(10);
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+  }
+  EXPECT_EQ(EBUSY, pthread_tryjoin_np(wait_for_one_thread, NULL));
+  usleep(2 * (uint)(wait_for_one_params.timeout_nsec / 1000));
+  EXPECT_EQ(0, pthread_tryjoin_np(wait_for_one_thread, NULL));
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+  }
+  sleep(params[0].timeout_sec);
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+  }
+}

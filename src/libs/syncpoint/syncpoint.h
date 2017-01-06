@@ -145,8 +145,6 @@ class SyncPoint
     WaitCondition *cond_wait_for_all_;
     /** true if the wait for all timer is running */
     bool wait_for_all_timer_running_;
-    /** true if the wait for one timer is running */
-    bool wait_for_one_timer_running_;
     /** maximum waiting time in secs */
     uint max_waittime_sec_;
     /** maximum waiting time in nsecs */

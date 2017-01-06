@@ -72,7 +72,6 @@ SyncPoint::SyncPoint(string identifier, MultiLogger *logger,
       mutex_wait_for_all_(new Mutex()),
       cond_wait_for_all_(new WaitCondition(mutex_wait_for_all_)),
       wait_for_all_timer_running_(false),
-      wait_for_one_timer_running_(false),
       max_waittime_sec_(max_waittime_sec),
       max_waittime_nsec_(max_waittime_nsec),
       logger_(logger),
@@ -221,6 +220,12 @@ SyncPoint::emit(const std::string & component, bool remove_from_pending)
  * the specified time until a timeout is triggered).
  * If the maximal wait time has been exceeded, a warning is shown and the
  * SyncPoint is released.
+ * If the WakeupType is WAIT_FOR_ALL, then the time limit is only used if there
+ * is currently no other component waiting in WAIT_FOR_ALL mode. If there is
+ * already a component waiting, that component's wait_time is used to compute
+ * the timeout. This ensures that in case a timeout occurs, all waiting
+ * components in WAIT_FOR_ALL mode are released simultaneously. Components in
+ * WAIT_FOR_ONE mode are treated separately and have their own timeouts.
  * @param component The identifier of the component waiting for the SyncPoint
  * @param type the wakeup type. If this is set to WAIT_FOR_ONE, wait returns
  * when a single emitter has emitted the SyncPoint. If set to WAIT_FOR_ALL, wait
@@ -247,8 +252,8 @@ SyncPoint::wait(const std::string & component,
     watchers = &watchers_wait_for_one_;
     cond = cond_wait_for_one_;
     mutex_cond = mutex_wait_for_one_;
-    timer_running = &wait_for_one_timer_running_;
     calls = &wait_for_one_calls_;
+    timer_running = NULL;
   } else if (type == WAIT_FOR_ALL) {
     watchers = &watchers_wait_for_all_;
     cond = cond_wait_for_all_;
@@ -289,32 +294,45 @@ SyncPoint::wait(const std::string & component,
     emit_locker_ = "";
   }
   if (need_to_wait) {
-    if (*timer_running) {
-      ml.unlock();
-      pthread_cleanup_push(cleanup_mutex, mutex_cond);
-      cond->wait();
-      pthread_cleanup_pop(1);
-    } else {
-      *timer_running = true;
-      if (wait_sec != 0 || wait_nsec != 0) {
-        max_waittime_sec_ = wait_sec;
-        max_waittime_nsec_ = wait_nsec;
-      }
+    if (type == WAIT_FOR_ONE) {
       ml.unlock();
       bool timeout;
       pthread_cleanup_push(cleanup_mutex, mutex_cond);
-      timeout = !cond->reltimed_wait(max_waittime_sec_, max_waittime_nsec_);
+      timeout = !cond->reltimed_wait(wait_sec, wait_nsec);
       pthread_cleanup_pop(1);
-      ml.relock();
-      *timer_running = false;
       if (timeout) {
-        // wait failed, handle default
+        ml.relock();
         handle_default(component, type);
-        mutex_cond->lock();
-        cond->wake_all();
-        mutex_cond->unlock();
+        ml.unlock();
       }
-      ml.unlock();
+    } else {
+      if (*timer_running) {
+        ml.unlock();
+        pthread_cleanup_push(cleanup_mutex, mutex_cond);
+        cond->wait();
+        pthread_cleanup_pop(1);
+      } else {
+        *timer_running = true;
+        if (wait_sec != 0 || wait_nsec != 0) {
+          max_waittime_sec_ = wait_sec;
+          max_waittime_nsec_ = wait_nsec;
+        }
+        ml.unlock();
+        bool timeout;
+        pthread_cleanup_push(cleanup_mutex, mutex_cond);
+        timeout = !cond->reltimed_wait(max_waittime_sec_, max_waittime_nsec_);
+        pthread_cleanup_pop(1);
+        ml.relock();
+        *timer_running = false;
+        if (timeout) {
+          // wait failed, handle default
+          handle_default(component, type);
+          mutex_cond->lock();
+          cond->wake_all();
+          mutex_cond->unlock();
+        }
+        ml.unlock();
+      }
     }
   } else {
     ml.unlock();
