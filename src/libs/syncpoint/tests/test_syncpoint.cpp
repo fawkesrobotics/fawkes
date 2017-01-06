@@ -2,7 +2,7 @@
  *  test_syncpoint.cpp - SyncPoint Unit Test
  *
  *  Created: Wed Jan 22 11:17:43 2014
- *  Copyright  2014-2015  Till Hofmann
+ *  Copyright  2014-2017  Till Hofmann
  *
  ****************************************************************************/
 
@@ -1179,6 +1179,7 @@ TEST_F(SyncPointManagerTest, WaitersTimeoutSimultaneousReleaseTest)
   }
   pthread_create(&threads[0], &attrs, start_barrier_waiter_thread, &params[0]);
   pthread_yield();
+  usleep(10000);
   EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[0], NULL));
   params[1].timeout_sec = 5;
   pthread_create(&threads[1], &attrs, start_barrier_waiter_thread, &params[1]);
@@ -1239,4 +1240,19 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
   for (uint i = 0; i < num_threads; i++) {
     EXPECT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
   }
+}
+
+TEST_F(SyncPointManagerTest, MultipleWaitsWithoutEmitters)
+{
+  RefPtr<SyncPoint> sp = manager->get_syncpoint("waiter", "/test");
+  pthread_t waiter_thread;
+  waiter_thread_params thread_params;
+  thread_params.manager = manager;
+  thread_params.thread_nr = 1;
+  thread_params.num_wait_calls = 2;
+  thread_params.sp_identifier = "/test";
+  pthread_create(&waiter_thread, &attrs, start_barrier_waiter_thread,
+    &thread_params);
+  usleep(10000);
+  EXPECT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
 }

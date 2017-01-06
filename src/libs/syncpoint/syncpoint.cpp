@@ -2,7 +2,7 @@
  *  syncpoint.cpp - Fawkes SyncPoint
  *
  *  Created: Thu Jan 09 12:35:57 2014
- *  Copyright  2014  Till Hofmann
+ *  Copyright  2014-2017  Till Hofmann
  *
  ****************************************************************************/
 
@@ -336,6 +336,7 @@ SyncPoint::wait(const std::string & component,
     }
   } else {
     ml.unlock();
+    mutex_cond->unlock();
   }
   Time wait_time = Time() - start;
   ml.relock();

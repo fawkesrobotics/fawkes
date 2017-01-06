@@ -2,7 +2,7 @@
  *  syncpoint.h - Fawkes SyncPoint
  *
  *  Created: Thu Jan 09 12:22:03 2014
- *  Copyright  2014  Till Hofmann
+ *  Copyright  2014-2017  Till Hofmann
  *
  ****************************************************************************/
 
