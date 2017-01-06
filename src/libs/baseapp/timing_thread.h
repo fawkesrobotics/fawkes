@@ -2,7 +2,7 @@
  *  timing_thread.h - Timing thread to achieve a desired main loop time
  *
  *  Created: Thu Jul 23 14:45:42 2015
- *  Copyright  2015  Till Hofmann
+ *  Copyright  2015-2017  Till Hofmann
  *
  ****************************************************************************/
 

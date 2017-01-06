@@ -2,7 +2,7 @@
  *  timing_thread.cpp - Timing thread to achieve a desired main loop time
  *
  *  Created: Thu Jul 23 14:45:42 2015
- *  Copyright  2015  Till Hofmann
+ *  Copyright  2015-2017  Till Hofmann
  ****************************************************************************/
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,14 +25,26 @@
 
 #define CFG_PREFIX "/fawkes/mainapp/"
 
-using namespace fawkes;
+namespace fawkes {
 
+/** @class FawkesTimingThread <baseapp/timing_thread.h>
+ * Thread to control the main loop timing.
+ * This thread uses the preloop and postloop SyncPoints to control the timing of
+ * the main loop. It waits for the preloop SyncPoint at the beginning of the
+ * main loop and emits the postloop SyncPoint at the end of the loop. If the
+ * loop time is less than the desired loop time, the thread waits before
+ * releasing the postloop SyncPoint. If the loop time is longer than the maximum
+ * loop time, a warning is printed.
+ */
 FawkesTimingThread::FawkesTimingThread()
 : Thread("FawkesTimingThread", Thread::OPMODE_CONTINUOUS)
 //  ConfigurationChangeHandler(CFG_PREFIX)
 {
 }
 
+/** Initialize.
+ * Get the pre- and postloop SyncPoints and read all relevant config values.
+ */
 void
 FawkesTimingThread::init()
 {
@@ -75,6 +87,11 @@ FawkesTimingThread::init()
 
 }
 
+/** Thread loop.
+ * This loop runs parallel to the main loop. At the beginning of the main loop,
+ * it waits for the preloop SyncPoint. At the end of the main loop, it emits the
+ * postloop SyncPoint.
+ */
 void
 FawkesTimingThread::loop()
 {
@@ -111,6 +128,9 @@ FawkesTimingThread::loop()
   }
 }
 
+/** Finalize the thread.
+ * Release all SyncPoints and do other cleanup.
+ */
 void
 FawkesTimingThread::finalize()
 {
@@ -119,3 +139,5 @@ FawkesTimingThread::finalize()
   delete __loop_start;
   delete __loop_end;
 }
+
+} // end namespace fawkes
