@@ -32,7 +32,11 @@ using namespace fawkes;
  * @author Till Hofmann
  */
 
-/** Constructor. */
+/** Constructor.
+ *  @param name the name of the thread
+ *  @param hook the hook this thread belongs to
+ */
+
 SyncPointTestThread::SyncPointTestThread(const char * name, BlockedTimingAspect::WakeupHook hook)
   : Thread(name, Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(hook),
