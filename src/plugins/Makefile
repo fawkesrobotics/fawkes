@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 # base + hardware drivers + perception + functional + integration
 SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
-	  laser imu flite festival joystick openrave openrave-robot-memory\
+	  laser imu flite festival joystick openrave \
 	  katana jaco pantilt roomba nao robotino \
 	  bumblebee2 perception amcl \
 	  skiller luaagent worldmodel \
@@ -27,7 +27,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  clips clips-agent clips-protobuf clips-webview clips-navgraph clips-ros \
 	  clips-tf openprs openprs-agent eclipse-clp \
 	  mongodb mongodb_log robot-memory clips-robot-memory pddl-robot-memory \
-	  openni refboxcomm ros player xmlrpc gossip \
+	  openrave-robot-memory openni refboxcomm ros player xmlrpc gossip \
 	  robot_state_publisher gazebo dynamixel navgraph-interactive \
 	  pddl-planner
 
@@ -45,6 +45,7 @@ clips-webview: clips webview
 clips-ros: clips ros
 clips-robot-memory: robot-memory
 pddl-robot-memory: robot-memory
+openrave-robot-memory: robot-memory openrave
 pddl-planner: robot-memory
 gazebo: robotino
 skiller: navgraph
