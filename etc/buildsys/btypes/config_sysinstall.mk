@@ -23,8 +23,10 @@ COLORED = 0
 GCC_USE_OPENMP=0
 DO_32BIT_BUILD=0
 
-# For x86_64/ppc64/aarch64 we must append 64 to lib dir
-LIBBITS=$(if $(or $(call seq,$(ARCH),x86_64),$(call seq,$(ARCH),aarch64),$(call seq,$(ARCH),ppc64)),64)
+# For 64-bit architectures we must append 64 to lib dir
+ifneq ($(filter $(ARCH),x86_64 aarch64 ppc64 ppc64le s390x),)
+  LIBBITS=64
+endif
 
 DESTDIR        =
 PREFIX         = /usr/local
