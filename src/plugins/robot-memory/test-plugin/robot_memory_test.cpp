@@ -313,8 +313,6 @@ TEST_F(RobotMemoryTest, BlackboardComputableMultiple)
   QResCursor qres = robot_memory->query(fromjson("{interface:'Position3DInterface',id:'test'}"), "robmem.blackboard");
   ASSERT_TRUE(qres->more());
   ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{interface:'Position3DInterface'}")));
-  ASSERT_TRUE(qres->more());
-  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{interface:'Position3DInterface'}")));
   blackboard->close(if3d);
   blackboard->close(if3d_2);
 }
