@@ -39,9 +39,8 @@ class PddlPlannerInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t msg_id; /**< 
@@ -51,7 +50,6 @@ class PddlPlannerInterface : public Interface
       Is the planning finished?
      */
   } PddlPlannerInterface_data_t;
-#pragma pack(pop)
 
   PddlPlannerInterface_data_t *data;
 
@@ -60,16 +58,14 @@ class PddlPlannerInterface : public Interface
   class PlanMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char dummy[1]; /**< 
     	Just a dummy field.
      */
     } PlanMessage_data_t;
-#pragma pack(pop)
 
     PlanMessage_data_t *data;
 

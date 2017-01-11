@@ -39,15 +39,13 @@ class RobotMemoryInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     char error[1024]; /**< Error of last query */
     char result[1024]; /**< Result of last query */
   } RobotMemoryInterface_data_t;
-#pragma pack(pop)
 
   RobotMemoryInterface_data_t *data;
 
@@ -56,15 +54,13 @@ class RobotMemoryInterface : public Interface
   class QueryMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char query[1024]; /**< Query as JSON string */
       char collection[1024]; /**< The collection to query */
     } QueryMessage_data_t;
-#pragma pack(pop)
 
     QueryMessage_data_t *data;
 
@@ -87,15 +83,13 @@ class RobotMemoryInterface : public Interface
   class InsertMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char insert[1024]; /**< Document to insert as JSON string */
       char collection[1024]; /**< The collection to query */
     } InsertMessage_data_t;
-#pragma pack(pop)
 
     InsertMessage_data_t *data;
 
@@ -118,16 +112,14 @@ class RobotMemoryInterface : public Interface
   class UpdateMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char query[1024]; /**< Query as JSON string */
       char update[1024]; /**< Update as JSON string */
       char collection[1024]; /**< The collection to query */
     } UpdateMessage_data_t;
-#pragma pack(pop)
 
     UpdateMessage_data_t *data;
 
@@ -153,15 +145,13 @@ class RobotMemoryInterface : public Interface
   class RemoveMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char query[1024]; /**< Query as JSON string */
       char collection[1024]; /**< The collection to query */
     } RemoveMessage_data_t;
-#pragma pack(pop)
 
     RemoveMessage_data_t *data;
 

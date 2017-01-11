@@ -39,16 +39,14 @@ class OpenraveRobotMemoryInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t dummy; /**< 
       Dummy field
      */
   } OpenraveRobotMemoryInterface_data_t;
-#pragma pack(pop)
 
   OpenraveRobotMemoryInterface_data_t *data;
 
@@ -57,13 +55,11 @@ class OpenraveRobotMemoryInterface : public Interface
   class ConstructSceneMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     } ConstructSceneMessage_data_t;
-#pragma pack(pop)
 
     ConstructSceneMessage_data_t *data;
 

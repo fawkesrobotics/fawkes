@@ -39,9 +39,8 @@ class PddlGenInterface : public Interface
   /* constants */
 
  private:
-#pragma pack(push,4)
   /** Internal data storage, do NOT modify! */
-  typedef struct {
+  typedef struct __attribute__((packed)) {
     int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
     int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
     uint32_t msg_id; /**< 
@@ -51,7 +50,6 @@ class PddlGenInterface : public Interface
       Is the generation finished?
      */
   } PddlGenInterface_data_t;
-#pragma pack(pop)
 
   PddlGenInterface_data_t *data;
 
@@ -60,16 +58,14 @@ class PddlGenInterface : public Interface
   class GenerateMessage : public Message
   {
    private:
-#pragma pack(push,4)
     /** Internal data storage, do NOT modify! */
-    typedef struct {
+    typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
       char goal[1024]; /**< 
     	Optional goal to insert into the template dictionary.
      */
     } GenerateMessage_data_t;
-#pragma pack(pop)
 
     GenerateMessage_data_t *data;
 
