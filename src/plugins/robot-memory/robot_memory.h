@@ -75,6 +75,7 @@ class RobotMemory
     template<typename T>
     EventTrigger* register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj)
     {
+      check_collection_name(collection);
       return trigger_manager_->register_trigger(query, collection, callback, _obj);
     }
     /**
@@ -88,6 +89,7 @@ class RobotMemory
     template<typename T>
     EventTrigger* register_trigger(std::string query_str, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj)
     {
+      check_collection_name(collection);
       return register_trigger(mongo::fromjson(query_str), collection, callback, _obj);
     }
     void remove_trigger(EventTrigger* trigger);
@@ -104,6 +106,7 @@ class RobotMemory
     template<typename T>
     Computable* register_computable(mongo::Query query_to_compute, std::string collection, std::list<mongo::BSONObj>(T::*compute_func)(mongo::BSONObj, std::string), T *obj, double caching_time = 0.0, int priority = 0)
     {
+      check_collection_name(collection);
       return computables_manager_->register_computable(query_to_compute, collection, compute_func, obj, caching_time, priority);
     }
     void remove_computable(Computable* computable);
