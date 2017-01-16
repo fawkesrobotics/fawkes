@@ -60,6 +60,16 @@
 #include <string>
 #include <urdf_model/model.h>
 #include <tinyxml.h>
+#include <ros/common.h>
+
+#if !ROS_VERSION_MINIMUM(1, 12, 0)
+namespace urdf {
+typedef boost::shared_ptr<urdf::Joint> JointSharedPtr;
+typedef boost::shared_ptr<urdf::Inertial> InertialSharedPtr;
+typedef boost::shared_ptr<urdf::Link> LinkSharedPtr;
+typedef boost::shared_ptr<urdf::ModelInterface> ModelInterfaceSharedPtr;
+}
+#endif
 
 namespace fawkes {
 
@@ -69,6 +79,7 @@ namespace kdl_parser {
   }
 }
 #endif
+
 
 /** Constructs a KDL tree from a file, given the file name
  * @param file The filename from where to read the xml
