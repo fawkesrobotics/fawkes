@@ -29,7 +29,9 @@ LIBS_realsense = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 
 OBJS_realsense = realsense_plugin.o realsense_thread.o 
 
-ifneq ($(wildcard $(SYSROOT)/usr/local/lib/librealsense.so),)
+__REALSENSE_LIB_PATHS = /usr/local/lib /usr/lib64 /usr/lib
+
+ifneq ($(wildcard $(addsuffix /librealsense.so,$(__REALSENSE_LIB_PATHS))),)
 	PLUGINS_all = $(PLUGINDIR)/realsense.$(SOEXT)
 else
 	WARN_TARGETS += warning_librealsense
