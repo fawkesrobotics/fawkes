@@ -54,7 +54,7 @@ void RobotMemorySetup::setup_mongods()
   prepare_mongo_db_path(local_db_path);
   const char *local_argv[] = {"mongod", "--port", local_port_str.c_str(),
 			      "--replSet", local_repl_name.c_str(),
-      "--dbpath", local_db_path.c_str(), NULL}; //local replica set just to enable the oplog
+      "--dbpath", local_db_path.c_str(),  "--nojournal", NULL}; //local replica set just to enable the oplog
   start_mongo_process("mongod-local", local_port, local_argv);
   std::string local_config = "{_id: '" + local_repl_name + "', members:[{_id:1,host:'localhost:" + local_port_str + "'}]}";
   run_mongo_command(local_port, std::string("{replSetInitiate:" + local_config + "}"), "already initialized");
@@ -82,7 +82,7 @@ void RobotMemorySetup::setup_mongods()
   std::string distributed_replset = config->get_string("plugins/robot-memory/setup/replicated/replica-set-name");
   const char *distributed_argv[] = {"mongod", "--port", distributed_port_str.c_str(),
       "--dbpath", distributed_db_path.c_str(),
-      "--replSet", distributed_replset.c_str(),NULL};
+      "--replSet", distributed_replset.c_str(),  "--nojournal",NULL};
   start_mongo_process("mongod-replicated", distributed_port, distributed_argv);
 
   //configure replica set
