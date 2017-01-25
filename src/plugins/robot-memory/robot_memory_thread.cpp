@@ -54,7 +54,7 @@ void
 RobotMemoryThread::init()
 {
   //init RobotMemory itself
-  robot_memory = new RobotMemory(config, logger, clock, mongodb_client, blackboard);
+  robot_memory = new RobotMemory(config, logger, clock, mongodb_connmgr, blackboard);
   robot_memory->init();
   //prepare aspect initializer
   robot_memory_inifin_.set_robot_memory(robot_memory);

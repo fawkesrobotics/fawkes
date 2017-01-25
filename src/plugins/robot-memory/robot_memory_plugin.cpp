@@ -46,7 +46,7 @@ class RobotMemoryPlugin : public fawkes::Plugin
     setup = new RobotMemorySetup(config, logger_for_setup);
     setup->setup_mongods();
 
-    std::string mongo_client_connection = config->get_string("plugins/robot-memory/setup/mongo-client-connection");
+    std::string mongo_client_connection = config->get_string("plugins/robot-memory/setup/mongo-client-connection-local");
 	  thread_list.push_back(new RobotMemoryThread(mongo_client_connection));
   }
 

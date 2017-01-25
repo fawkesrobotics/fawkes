@@ -25,6 +25,7 @@
 #include <mongo/client/dbclient.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <plugins/mongodb/aspect/mongodb_conncreator.h>
 #include <list>
 #include "event_trigger.h"
 #include <boost/bind.hpp>
@@ -44,7 +45,7 @@ class EventTriggerManager
   friend class RobotMemory;
 
   public:
-    EventTriggerManager(fawkes::Logger* logger, fawkes::Configuration* config);
+    EventTriggerManager(fawkes::Logger* logger, fawkes::Configuration* config, fawkes::MongoDBConnCreator* mongo_connection_manager);
     virtual ~EventTriggerManager();
 
     /**
@@ -74,7 +75,7 @@ class EventTriggerManager
       oplog_query.readPref(mongo::ReadPreference_Nearest, mongo::BSONArray());
 
       //check if collection is local or replicated
-      mongo::DBClientConnection* con;
+      mongo::DBClientBase* con;
       std::string oplog;
       oplog = "local.oplog.rs";
       if(collection.find(repl_set_dist) == 0)
@@ -92,16 +93,17 @@ class EventTriggerManager
 
   private:
     void check_events();
-    QResCursor create_oplog_cursor(mongo::DBClientConnection* con, std::string oplog, mongo::Query query);
+    QResCursor create_oplog_cursor(mongo::DBClientBase* con, std::string oplog, mongo::Query query);
 
     std::string name = "RobotMemory EventTriggerManager";
     fawkes::Logger* logger_;
     fawkes::Configuration* config_;
     fawkes::Mutex *mutex_;
 
+    fawkes::MongoDBConnCreator* mongo_connection_manager_;
     //MongoDB connections (necessary because the mongos instance used by the robot memory has no access to the oplog)
-    mongo::DBClientConnection* con_local_;
-    mongo::DBClientConnection* con_replica_;
+    mongo::DBClientBase* con_local_;
+    mongo::DBClientBase* con_replica_;
 
     std::string repl_set_dist, repl_set_local, local_db;
     bool distributed_;

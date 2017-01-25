@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
+#include <algorithm>
 
 // from MongoDB
 #include <mongo/client/dbclient.h>
@@ -53,20 +54,22 @@ using namespace fawkes;
  * @param blackboard Fawkes blackboard
  */
 RobotMemory::RobotMemory(fawkes::Configuration* config, fawkes::Logger* logger,
-   fawkes::Clock* clock, mongo::DBClientBase* mongodb_client,
+   fawkes::Clock* clock, fawkes::MongoDBConnCreator* mongo_connection_manager,
    fawkes::BlackBoard* blackboard)
 {
   mutex_ = new Mutex();
   config_ = config;
   logger_ = logger;
   clock_ = clock;
-  mongodb_client_ = mongodb_client;
+  mongo_connection_manager_ = mongo_connection_manager;
   blackboard_ = blackboard;
   debug_ = false;
 }
 
 RobotMemory::~RobotMemory()
 {
+  mongo_connection_manager_->delete_client(mongodb_client_local_);
+  mongo_connection_manager_->delete_client(mongodb_client_distributed_);
   delete mutex_;
   delete trigger_manager_;
   blackboard_->close(rm_if_);
@@ -87,6 +90,17 @@ void RobotMemory::init()
   try {
     database_name_ = config_->get_string("/plugins/robot-memory/database");
   } catch (Exception &e) {}
+  distributed_dbs_ = config_->get_strings("/plugins/robot-memory/distributed-db-names");
+
+  //initiate mongodb connections:
+  std::string local_client = config_->get_string("plugins/robot-memory/setup/mongo-client-connection-local");
+  mongodb_client_local_ = mongo_connection_manager_->create_client(local_client.c_str());
+  distributed_ = config_->get_bool("plugins/robot-memory/setup/distributed");
+  if(distributed_)
+  {
+    std::string distributed_client = config_->get_string("plugins/robot-memory/setup/mongo-client-connection-distributed");
+    mongodb_client_distributed_ = mongo_connection_manager_->create_client(distributed_client.c_str());
+  }
 
   //init blackboard interface
   rm_if_ = blackboard_->open_for_writing<RobotMemoryInterface>(config_->get_string("/plugins/robot-memory/interface-name").c_str());
@@ -95,7 +109,7 @@ void RobotMemory::init()
   rm_if_->write();
 
   //Setup event trigger and computables manager
-  trigger_manager_ = new EventTriggerManager(logger_, config_);
+  trigger_manager_ = new EventTriggerManager(logger_, config_, mongo_connection_manager_);
   computables_manager_ = new ComputablesManager(logger_, config_, this, clock_);
 
   log_deb("Initialized RobotMemory");
@@ -116,6 +130,7 @@ void RobotMemory::loop()
 QResCursor RobotMemory::query(Query query, std::string collection)
 {
   check_collection_name(collection);
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
   log_deb(std::string("Executing Query "+ query.toString() +" on collection "+collection));
 
   //check if computation on demand is necessary and execute Computables
@@ -130,7 +145,7 @@ QResCursor RobotMemory::query(Query query, std::string collection)
   //actually execute query
   QResCursor cursor;
   try{
-    cursor = mongodb_client_->query(collection, query);
+    cursor = mongodb_client->query(collection, query);
   } catch (DBException &e) {
     std::string error = std::string("Error for query ")
       + query.toString() + "\n Exception: " + e.toString();
@@ -149,6 +164,7 @@ QResCursor RobotMemory::query(Query query, std::string collection)
 int RobotMemory::insert(BSONObj obj, std::string collection)
 {
   check_collection_name(collection);
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
 
   log_deb(std::string("Inserting "+ obj.toString() + " into collection " + collection));
 
@@ -157,7 +173,7 @@ int RobotMemory::insert(BSONObj obj, std::string collection)
 
   //actually execute insert
   try{
-    mongodb_client_->insert(collection, obj);
+    mongodb_client->insert(collection, obj);
   } catch (DBException &e) {
     std::string error = "Error for insert " + obj.toString()
         + "\n Exception: " + e.toString();
@@ -177,6 +193,7 @@ int RobotMemory::insert(BSONObj obj, std::string collection)
 int RobotMemory::insert(std::vector<BSONObj> v_obj, std::string collection)
 {
   check_collection_name(collection);
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
 
   std::string insert_string = "[";
   for(BSONObj obj : v_obj)
@@ -192,7 +209,7 @@ int RobotMemory::insert(std::vector<BSONObj> v_obj, std::string collection)
 
   //actually execute insert
   try{
-    mongodb_client_->insert(collection, v_obj);
+    mongodb_client->insert(collection, v_obj);
   } catch (DBException &e) {
     std::string error = "Error for insert " + insert_string
         + "\n Exception: " + e.toString();
@@ -225,6 +242,7 @@ int RobotMemory::insert(std::string obj_str, std::string collection)
 int RobotMemory::update(Query query, BSONObj update, std::string collection, bool upsert)
 {
   check_collection_name(collection);
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
   log_deb(std::string("Executing Update "+update.toString()+" for query "+query.toString()+" on collection "+ collection));
 
   //lock (mongo_client not thread safe)
@@ -232,7 +250,7 @@ int RobotMemory::update(Query query, BSONObj update, std::string collection, boo
 
   //actually execute update
   try{
-    mongodb_client_->update(collection, query, update, upsert);
+    mongodb_client->update(collection, query, update, upsert);
   } catch (DBException &e) {
     log_deb(std::string("Error for update "+update.toString()+" for query "+query.toString()+"\n Exception: "+e.toString()), "error");
     return 0;
@@ -263,6 +281,7 @@ int RobotMemory::update(Query query, std::string update_str, std::string collect
 int RobotMemory::remove(Query query, std::string collection)
 {
   check_collection_name(collection);
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
   log_deb(std::string("Executing Remove "+query.toString()+" on collection "+collection));
 
   //lock (mongo_client not thread safe)
@@ -270,7 +289,7 @@ int RobotMemory::remove(Query query, std::string collection)
 
   //actually execute remove
   try{
-    mongodb_client_->remove(collection, query);
+    mongodb_client->remove(collection, query);
   } catch (DBException &e) {
     log_deb(std::string("Error for query "+query.toString()+"\n Exception: "+e.toString()), "error");
     return 0;
@@ -287,9 +306,10 @@ int RobotMemory::remove(Query query, std::string collection)
 int RobotMemory::drop_collection(std::string collection)
 {
   check_collection_name(collection);
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
   MutexLocker lock(mutex_);
   log_deb("Dropping collection " + collection);
-  return mongodb_client_->dropCollection(collection);
+  return mongodb_client->dropCollection(collection);
 }
 
 /**
@@ -302,7 +322,7 @@ int RobotMemory::clear_memory()
   MutexLocker lock(mutex_);
 
   log_deb("Clearing whole robot memory");
-  mongodb_client_->dropDatabase(database_name_);
+  mongodb_client_local_->dropDatabase(database_name_);
   return 1;
 }
 
@@ -531,6 +551,31 @@ RobotMemory::check_collection_name(std::string &collection)
     //change used database name (e.g. for the case of multiple simulated dababases)
     collection.replace(0, 6, database_name_);
   }
+}
+
+/**
+ * Get the mongodb client associated with the collection (eighter the local or distributed one)
+ */
+mongo::DBClientBase*
+RobotMemory::get_mongodb_client(std::string &collection)
+{
+  if(!distributed_)
+  {
+      return mongodb_client_local_;
+  }
+  //get db name of collection
+  size_t point_pos = collection.find(".");
+  if(point_pos == collection.npos)
+  {
+    logger_->log_error(name_, "Collection %s needs to start with 'dbname.'", collection.c_str());
+    return mongodb_client_local_;
+  }
+  std::string db = collection.substr(0, point_pos);
+  if(std::find(distributed_dbs_.begin(), distributed_dbs_.end(), db) != distributed_dbs_.end())
+  {
+    return mongodb_client_distributed_;
+  }
+  return mongodb_client_local_;
 }
 
 /**

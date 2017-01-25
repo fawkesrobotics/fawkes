@@ -26,31 +26,25 @@
 using namespace fawkes;
 using namespace mongo;
 
-EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config)
+EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config, MongoDBConnCreator* mongo_connection_manager)
 {
   logger_ = logger;
   config_ = config;
+  mongo_connection_manager_ = mongo_connection_manager;
+
   distributed_ = config_->get_bool("plugins/robot-memory/setup/distributed");
 
   // create connections to running mongod instances because only there
-  con_local_ = new mongo::DBClientConnection();
   local_db = config_->get_string("plugins/robot-memory/database");
-  std::string errmsg;
-  if(!con_local_->connect("localhost:" + std::to_string(config_->get_uint("plugins/robot-memory/setup/local/port")), errmsg))
-  {
-    std::string err_msg = "Could not connect to mongod process: "+ errmsg;
-    throw PluginLoadException("robot-memory", err_msg.c_str());
-  }
+  std::string local_client = config_->get_string("plugins/robot-memory/setup/mongo-client-connection-local");
+  con_local_ = mongo_connection_manager_->create_client(local_client.c_str());
+
   repl_set_dist = config_->get_string("plugins/robot-memory/setup/replicated/replica-set-name");
   repl_set_local = config_->get_string("plugins/robot-memory/setup/local/replica-set-name");
   if(distributed_)
   {
-    con_replica_ = new mongo::DBClientConnection();
-    if(!con_replica_->connect("localhost:" + std::to_string(config_->get_uint("plugins/robot-memory/setup/replicated/port")), errmsg))
-    {
-      std::string err_msg = "Could not connect to replica set: "+ errmsg;
-      throw PluginLoadException("robot-memory", err_msg.c_str());
-    }
+    std::string distributed_client = config_->get_string("plugins/robot-memory/setup/mongo-client-connection-distributed");
+    con_replica_ = mongo_connection_manager_->create_client(distributed_client.c_str());
   }
 
   mutex_ = new Mutex();
@@ -64,6 +58,8 @@ EventTriggerManager::~EventTriggerManager()
     {
       delete trigger;
     }
+  mongo_connection_manager_->delete_client(con_local_);
+  mongo_connection_manager_->delete_client(con_replica_);
 }
 
 void EventTriggerManager::check_events()
@@ -84,7 +80,7 @@ void EventTriggerManager::check_events()
     {
       logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
       //check if collection is local or replicated
-      mongo::DBClientConnection* con;
+      mongo::DBClientBase* con;
       if(trigger->oplog_collection.find(repl_set_dist) == 0)
       {
         con = con_replica_;
@@ -109,7 +105,7 @@ void EventTriggerManager::remove_trigger(EventTrigger* trigger)
   delete trigger;
 }
 
-QResCursor EventTriggerManager::create_oplog_cursor(mongo::DBClientConnection* con, std::string oplog, mongo::Query query)
+QResCursor EventTriggerManager::create_oplog_cursor(mongo::DBClientBase* con, std::string oplog, mongo::Query query)
 {
   QResCursor res = con->query(oplog , query, 0, 0, 0, QueryOption_CursorTailable);
   //Go to end of Oplog to get new updates from then on

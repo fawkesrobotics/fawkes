@@ -25,6 +25,7 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <plugins/mongodb/aspect/mongodb_conncreator.h>
 #include <memory>
 #include <vector>
 
@@ -47,7 +48,7 @@ class RobotMemory
 
   public:
     RobotMemory(fawkes::Configuration* config, fawkes::Logger* logger,
-                fawkes::Clock* clock, mongo::DBClientBase* mongodb_client,
+                fawkes::Clock* clock, fawkes::MongoDBConnCreator* mongo_connection_manager,
                 fawkes::BlackBoard* blackboard);
     virtual ~RobotMemory();
 
@@ -112,7 +113,10 @@ class RobotMemory
     void remove_computable(Computable* computable);
 
   private:
-    mongo::DBClientBase* mongodb_client_;
+    fawkes::MongoDBConnCreator* mongo_connection_manager_;
+    mongo::DBClientBase* mongodb_client_local_;
+    mongo::DBClientBase* mongodb_client_distributed_;
+    bool distributed_;
     fawkes::Configuration* config_;
     fawkes::Logger* logger_;
     fawkes::Clock* clock_;
@@ -126,6 +130,7 @@ class RobotMemory
     fawkes::RobotMemoryInterface* rm_if_;
     EventTriggerManager* trigger_manager_;
     ComputablesManager* computables_manager_;
+    std::vector<std::string> distributed_dbs_;
 
     void init();
     void loop();
@@ -142,6 +147,7 @@ class RobotMemory
     void remove_field(mongo::Query &q, std::string what);
 
     void check_collection_name(std::string &collection);
+    mongo::DBClientBase* get_mongodb_client(std::string &collection);
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ROBOT_MEMORY_H_ */
