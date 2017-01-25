@@ -29,6 +29,7 @@
 #include "event_trigger.h"
 #include <boost/bind.hpp>
 #include <plugin/loader.h>
+#include <core/threading/mutex_locker.h>
 
 
 ///typedef for shorter type description
@@ -57,6 +58,9 @@ class EventTriggerManager
     template<typename T>
     EventTrigger* register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *obj)
     {
+      //lock to be thread safe (e.g. registration during checking)
+      fawkes::MutexLocker lock(mutex_);
+
       //construct query for oplog
       mongo::BSONObjBuilder query_builder;
       query_builder.append("ns", collection);
@@ -93,6 +97,7 @@ class EventTriggerManager
     std::string name = "RobotMemory EventTriggerManager";
     fawkes::Logger* logger_;
     fawkes::Configuration* config_;
+    fawkes::Mutex *mutex_;
 
     //MongoDB connections (necessary because the mongos instance used by the robot memory has no access to the oplog)
     mongo::DBClientConnection* con_local_;

@@ -52,6 +52,9 @@ EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config)
       throw PluginLoadException("robot-memory", err_msg.c_str());
     }
   }
+
+  mutex_ = new Mutex();
+
   logger_->log_debug(name.c_str(), "Initialized");
 }
 
@@ -65,6 +68,9 @@ EventTriggerManager::~EventTriggerManager()
 
 void EventTriggerManager::check_events()
 {
+  //lock to be thread safe (e.g. registration during checking)
+  MutexLocker lock(mutex_);
+
   for(EventTrigger *trigger : triggers)
   {
     while(trigger->oplog_cursor->more())

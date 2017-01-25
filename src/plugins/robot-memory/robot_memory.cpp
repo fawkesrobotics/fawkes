@@ -317,6 +317,9 @@ int RobotMemory::restore_collection(std::string collection, std::string director
   check_collection_name(collection);
   drop_collection(collection);
 
+  //lock (mongo_client not thread safe)
+   MutexLocker lock(mutex_);
+
   //resolve path to restore
   if(collection.find(".") == std::string::npos)
   {
@@ -369,6 +372,10 @@ int RobotMemory::restore_collection(std::string collection, std::string director
 int RobotMemory::dump_collection(std::string collection, std::string directory)
 {
   check_collection_name(collection);
+
+  //lock (mongo_client not thread safe)
+   MutexLocker lock(mutex_);
+
   //resolve path to dump to
   if(collection.find(".") == std::string::npos)
   {
