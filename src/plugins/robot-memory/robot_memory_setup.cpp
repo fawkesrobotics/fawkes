@@ -80,15 +80,14 @@ void RobotMemorySetup::setup_mongods()
   distribuded_mongod = start_mongo_process("mongod-replicated", distributed_port, distributed_argv);
 
   //configure replica set
+  if(config->get_bool("plugins/robot-memory/setup/replicated/initiate"))
+  {
   std::string repl_config = "{_id:'" + distributed_replset + "', members:"
       + config->get_string("plugins/robot-memory/setup/replicated/replica-set-members") + "}";
-  run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"), "already initialized");
+  //run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"), "already initialized");
   //wait for replica set initialization and election
+  }
   usleep(3000000);
-
-  //define which db is in which shard
-  create_database(local_port, local_db_name);
-  create_database(distributed_port, distributed_replset);
 }
 
 /**

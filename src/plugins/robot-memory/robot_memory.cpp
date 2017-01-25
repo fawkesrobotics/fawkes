@@ -94,11 +94,13 @@ void RobotMemory::init()
 
   //initiate mongodb connections:
   std::string local_client = config_->get_string("plugins/robot-memory/setup/mongo-client-connection-local");
+  log("Connect to local mongod");
   mongodb_client_local_ = mongo_connection_manager_->create_client(local_client.c_str());
   distributed_ = config_->get_bool("plugins/robot-memory/setup/distributed");
   if(distributed_)
   {
     std::string distributed_client = config_->get_string("plugins/robot-memory/setup/mongo-client-connection-distributed");
+    log("Connect to distributed mongod");
     mongodb_client_distributed_ = mongo_connection_manager_->create_client(distributed_client.c_str());
   }
 
