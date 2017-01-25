@@ -177,13 +177,12 @@ TEST_F(RobotMemoryTest, EventTriggerLocal)
       "robmem.test", &RobotMemoryCallback::callback_test, rmc);
   EventTrigger* trigger2 = robot_memory->register_trigger(fromjson("{test:2}"),
       "robmem.test", &RobotMemoryCallback::callback_test, rmc);
-
   robot_memory->insert(fromjson("{test:0, updateid:55}"), "robmem.test");
   robot_memory->insert(fromjson("{test:1, updateid:42}"), "robmem.test");
   robot_memory->update(fromjson("{updateid:42}"), fromjson("{test:2, updateid:42}"), "robmem.test");
 
   //wait for robot memory to call triggers
-  usleep(100000);
+  usleep(1000000);
 
   ASSERT_EQ(2, rmc->callback_counter);
 
@@ -205,7 +204,7 @@ TEST_F(RobotMemoryTest, EventTriggerReplica)
   robot_memory->update(fromjson("{updateid:42}"), fromjson("{test:2, updateid:42}"), "syncedrobmem.test");
 
   //wait for robot memory to call triggers
-  usleep(100000);
+  usleep(1000000);
 
   ASSERT_EQ(2, rmc->callback_counter);
 
