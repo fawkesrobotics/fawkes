@@ -39,7 +39,7 @@ else
   ifneq ($(HAVE_CLIPS),1)
     WARN_TARGETS = warning_clips
   endif
-  ifneq ($(HAVE_TF),1)
+  ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS = warning_mongodb
   endif
 endif
@@ -47,7 +47,7 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_tf warning_clips warning_cpp11
+.PHONY: warning_mongodb warning_clips warning_cpp11
 warning_clips:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-robot-memory plugin$(TNORMAL) ($(CLIPS_ERROR))"
 warning_mongodb:
