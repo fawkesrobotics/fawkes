@@ -28,6 +28,9 @@
 #include <core/utils/lock_list.h>
 #include <netcomm/utils/incoming_connection_handler.h>
 
+#include <vector>
+#include <string>
+
 namespace fawkes {
   class ThreadCollector;
   class StreamSocket;
@@ -46,8 +49,10 @@ class FuseServer
 {
  public:
 
-  FuseServer(unsigned short int port, fawkes::ThreadCollector *collector = 0);
-  virtual ~FuseServer();
+	FuseServer(bool enable_ipv4, bool enable_ipv6,
+	           const std::string &listen_ipv4, const std::string &listen_ipv6,
+	           unsigned short int port, fawkes::ThreadCollector *collector = 0);
+	virtual ~FuseServer();
 
   virtual void add_connection(fawkes::StreamSocket *s) throw();
   void connection_died(FuseServerClientThread *client) throw();
@@ -55,7 +60,7 @@ class FuseServer
   virtual void loop();
 
  private:
-  fawkes::NetworkAcceptorThread *__acceptor_thread;
+  std::vector<fawkes::NetworkAcceptorThread *> __acceptor_threads;
 
   fawkes::LockList<FuseServerClientThread *>  __clients;
   fawkes::LockList<FuseServerClientThread *>::iterator  __cit;
