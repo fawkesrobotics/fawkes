@@ -112,6 +112,7 @@ class NavGraphThread
   float        cfg_target_ori_time_;
   bool         cfg_log_graph_;
   bool         cfg_abort_on_error_;
+  bool         cfg_enable_path_execution_;
 
   fawkes::NavigatorInterface *nav_if_;
   fawkes::NavigatorInterface *pp_nav_if_;
