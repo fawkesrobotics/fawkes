@@ -49,3 +49,5 @@ ros:
     # This setting is only relevant is use_tf2 is set to false above.
     static-update-interval: 1.0
 
+  navgraph-breakout:
+    action-topic: place_goto
