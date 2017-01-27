@@ -52,10 +52,12 @@ class RosNavigatorThread
  public:
   RosNavigatorThread();
 
-  /* thread */
   virtual void init();
   virtual void finalize();
   virtual void loop();
+
+ /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+ protected: virtual void run() { Thread::run(); }
 
  private:
   void check_status();

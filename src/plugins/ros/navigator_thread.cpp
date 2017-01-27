@@ -72,13 +72,14 @@ RosNavigatorThread::finalize()
 void
 RosNavigatorThread::check_status()
 {
-  if(cmd_sent_){
-    if(ac_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED){
+  if (cmd_sent_){
+    if (ac_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
       nav_if_->set_final(true);
       nav_if_->set_error_code(0);
     }
-    else if(ac_->getState() == actionlib::SimpleClientGoalState::ABORTED ||
-             ac_->getState() == actionlib::SimpleClientGoalState::REJECTED){
+    else if (ac_->getState() == actionlib::SimpleClientGoalState::ABORTED ||
+             ac_->getState() == actionlib::SimpleClientGoalState::REJECTED)
+    {
       nav_if_->set_final(true);
       nav_if_->set_error_code(2);
     }
@@ -146,7 +147,6 @@ RosNavigatorThread::loop()
         nav_if_->set_dest_ori(0);
 
         nav_if_->set_msgid(msg->id());
-        nav_if_->msgq_pop();
         nav_if_->write();
 
         stop_goals();
@@ -162,7 +162,6 @@ RosNavigatorThread::loop()
 
         nav_if_->set_msgid(msg->id());
 
-        nav_if_->msgq_pop();
         nav_if_->write();
 
         send_goal();
@@ -175,10 +174,7 @@ RosNavigatorThread::loop()
         nav_if_->set_dest_x(msg->dist() * cos(msg->phi()));
         nav_if_->set_dest_y(msg->dist() * cos(msg->phi()));
         nav_if_->set_dest_ori(msg->phi());
-
         nav_if_->set_msgid(msg->id());
-
-        nav_if_->msgq_pop();
         nav_if_->write();
 
         send_goal();
@@ -188,10 +184,7 @@ RosNavigatorThread::loop()
       else if (NavigatorInterface::SetMaxVelocityMessage *msg = nav_if_->msgq_first_safe(msg)) {
         logger->log_info(name(),"velocity message received %f",msg->max_velocity());
         nav_if_->set_max_velocity(msg->max_velocity());
-        
         nav_if_->set_msgid(msg->id());
-        
-        nav_if_->msgq_pop();
         nav_if_->write();
 
         send_goal();
@@ -202,18 +195,15 @@ RosNavigatorThread::loop()
       {
         logger->log_info(name(),"velocity message received %f",msg->security_distance ());
         nav_if_->set_security_distance (msg->security_distance ());
-        
         nav_if_->set_msgid(msg->id());
-        
-        nav_if_->msgq_pop();
         nav_if_->write();
 
         send_goal();
       }
 
+      nav_if_->msgq_pop();
     } // while
 
     check_status();
-
   }
 }
