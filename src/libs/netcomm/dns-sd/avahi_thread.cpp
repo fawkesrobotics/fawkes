@@ -683,7 +683,6 @@ AvahiThread::call_handler_service_added( const char *name,
 	    if (getaddrinfo(addr_with_scope.c_str(), port_s.c_str(), &hints, &res) == 0) {
 		    if (slen == res[0].ai_addrlen) {
 			    memcpy(sin, res[0].ai_addr, slen);
-			    printf("Scope %u  interface %u\n", sin->sin6_scope_id, interface);
 			    freeaddrinfo(res);
 		    } else {
 			    fprintf(stderr, "AvahiThread::call_handler_service_added: IPv6 address lengths different");
