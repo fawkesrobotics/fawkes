@@ -54,6 +54,17 @@ navgraph:
   # Write graph information to log on (re-)loading?
   log_graph: false
 
+  # The following enables or disables path execution.
+  # In either case a navgraph is maintained internally, paths may be
+  # planned, and searches performed. However, if disabled, paths may
+  # not be executed by the navgraph plugin. This can be useful, for
+  # example, to keep the navgraph data structure around and use
+  # ros-navgraph-breakout for external execution. Disabling
+  # essentially means that no blackboard interfaces for path
+  # instruction will be provided and the remaining API is kept
+  # as-is.
+  path_execution: true
+
   visualization:
 
     # Set to true to enable visualization by publishing messages for rviz
