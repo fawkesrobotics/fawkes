@@ -50,9 +50,9 @@ namespace fawkes {
  * @param enable_ipv4 true to listen on the IPv4 TCP port
  * @param enable_ipv6 true to listen on the IPv6 TCP port
  * @param listen_ipv4 IPv4 address to listen on for incoming connections,
- * nullptr or 0.0.0.0 to listen on any local address
+ * 0.0.0.0 to listen on any local address
  * @param listen_ipv6 IPv6 address to listen on for incoming connections,
- * nullptr or :: to listen on any local address
+ * :: to listen on any local address
  * @param fawkes_port port for Fawkes network protocol
  * @param thread_collector thread collector to register new threads with
  */
