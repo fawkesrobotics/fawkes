@@ -232,7 +232,7 @@ ifeq ($(HAVE_ROS),1)
   ifeq ($(call ros-have-pkg,sensor_msgs),1)
     CFLAGS_joint_thread = $(CFLAGS) $(call ros-pkg-cflags,sensor_msgs)
     CFLAGS_joint_plugin = $(CFLAGS_joint_thread)
-    LDFLAGS_joint += $(call ros-pkg-lflags,sensor_msgs)
+    LDFLAGS_ros_joint += $(call ros-pkg-lflags,sensor_msgs)
     PLUGINS_all += $(PLUGINDIR)/ros-joint.so
   else
     WARN_TARGETS += warning_sensor_msgs
@@ -240,7 +240,7 @@ ifeq ($(HAVE_ROS),1)
   ifeq ($(call ros-have-pkg,fawkes_msgs),1)
     CFLAGS_position_3d_thread += $(CFLAGS) $(call ros-pkg-cflags,fawkes_msgs)
     CFLAGS_position_3d_plugin = $(CFLAGS_position_3d_thread)
-    LDFLAGS_position_3d += $(call ros-pkg-lflags,fawkes_msgs)
+    LDFLAGS_ros_position_3d += $(call ros-pkg-lflags,fawkes_msgs)
     PLUGINS_all += $(PLUGINDIR)/ros-position-3d.so
   else
     WARN_TARGETS += warning_fawkes_msgs
