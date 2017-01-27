@@ -68,7 +68,29 @@ FountainThread::init()
     if ( port > 0xFFFF ) {
       throw OutOfBoundsException("Network port out of bounds", port, 0, 0xFFFF);
     }
-    __fuse_server = new FuseServer(port, thread_collector);
+
+    bool enable_ipv4 = true;
+    bool enable_ipv6 = true;
+    std::string listen_ipv4;
+    std::string listen_ipv6;
+
+    try {
+	    enable_ipv4 = config->get_bool("/network/ipv4/enable");
+    } catch (Exception &e) {}  // ignore, we stick with the default
+    try {
+	    enable_ipv6 = config->get_bool("/network/ipv6/enable");
+    } catch (Exception &e) {}  // ignore, we stick with the default
+
+    try {
+	    listen_ipv4 = config->get_string("/network/ipv4/listen");
+    } catch (Exception &e) {}  // ignore, we stick with the default
+    try {
+	    listen_ipv6 = config->get_string("/network/ipv6/listen");
+    } catch (Exception &e) {}  // ignore, we stick with the default
+
+    __fuse_server = new FuseServer(enable_ipv4, enable_ipv6,
+                                   listen_ipv4, listen_ipv6,
+                                   port, thread_collector);
     thread_collector->add(__fuse_server);
   } catch (Exception &e) {
     e.print_trace();
