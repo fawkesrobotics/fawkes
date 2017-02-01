@@ -37,6 +37,9 @@ OBJS_all = $(OBJS_openprs_agent) $(OBJS_openprs_mod_skiller) \
 INST_LIB_SUBDIR_openprs_mod_skiller  = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_protobuf = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_navgraph = $(FFLIBSUBDIR)
+NOSOVER_openprs_mod_skiller  = 1
+NOSOVER_openprs_mod_protobuf = 1
+NOSOVER_openprs_mod_navgraph = 1
 
 # Extra files for system-wide install, i.e., "make install"
 FILES_openprs_files   = $(subst $(SRCDIR)/,,$(wildcard $(addprefix $(SRCDIR)/data/,*.opf *.inc *.sym)))
