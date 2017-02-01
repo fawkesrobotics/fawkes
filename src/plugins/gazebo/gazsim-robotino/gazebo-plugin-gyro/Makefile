@@ -27,6 +27,7 @@ LIBS_gazebo_libgyro = gazsim_msgs
 OBJS_gazebo_libgyro = gyro.o
 
 INST_LIB_SUBDIR_gazebo_libgyro = $(FFLIBSUBDIR)
+NOSOVER_gazebo_libgyro=1
 
 OBJS_all    = $(OBJS_gazebo_libgyro)
 

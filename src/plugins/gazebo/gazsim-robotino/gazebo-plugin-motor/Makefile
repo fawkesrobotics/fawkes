@@ -27,6 +27,7 @@ LIBS_gazebo_libmotor = gazsim_msgs
 OBJS_gazebo_libmotor = motor.o
 
 INST_LIB_SUBDIR_gazebo_libmotor = $(FFLIBSUBDIR)
+NOSOVER_gazebo_libmotor=1
 
 OBJS_all    = $(OBJS_gazebo_libmotor)
 
