@@ -26,7 +26,7 @@
 
 #define FAWKES_VERSION_MAJOR  1
 #define FAWKES_VERSION_MINOR  0
-#define FAWKES_VERSION_MICRO  0
+#define FAWKES_VERSION_MICRO  1
 
 #define FAWKES_VERSION_GT(major, minor) ((FAWKES_MAJOR_VERSION  > major) || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION  > minor))
 #define FAWKES_VERSION_GE(major, minor) ((FAWKES_MAJOR_VERSION  > major) || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION >= minor))
