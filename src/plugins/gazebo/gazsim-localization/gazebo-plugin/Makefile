@@ -27,6 +27,7 @@ LIBS_gazebo_libgps = gazsim_msgs
 OBJS_gazebo_libgps = gps.o
 
 INST_LIB_SUBDIR_gazebo_libgps = $(FFLIBSUBDIR)
+NOSOVER_gazebo_libgps=1
 
 OBJS_all    = $(OBJS_gazebo_libgps)
 
