@@ -43,6 +43,10 @@ INST_LIB_SUBDIR_openprs_mod_utils = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_time = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_blackboard = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_config = $(FFLIBSUBDIR)
+NOSOVER_openprs_mod_utils = 1
+NOSOVER_openprs_mod_time = 1
+NOSOVER_openprs_mod_blackboard = 1
+NOSOVER_openprs_mod_config = 1
 
 # Extra files for system-wide install, i.e., "make install"
 FILES_openprs_files   = $(subst $(SRCDIR)/,,$(wildcard $(addprefix $(SRCDIR)/data/,*.opf *.inc)))
