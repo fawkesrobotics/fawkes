@@ -61,6 +61,10 @@ LIBS_ros_navigator = m pthread fawkescore fawkesutils fawkesaspects fawkesblackb
 		     fawkesinterface fawkesrosaspect NavigatorInterface
 OBJS_ros_navigator = navigator_plugin.o navigator_thread.o
 
+LIBS_ros_navgraph_breakout = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
+		     fawkesinterface fawkesrosaspect NavigatorInterface
+OBJS_ros_navgraph_breakout = navgraph_breakout_plugin.o navgraph_breakout_thread.o
+
 LIBS_ros_joint = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect JointInterface
 OBJS_ros_joint = joint_plugin.o joint_thread.o
@@ -232,7 +236,7 @@ ifeq ($(HAVE_ROS),1)
   ifeq ($(call ros-have-pkg,sensor_msgs),1)
     CFLAGS_joint_thread = $(CFLAGS) $(call ros-pkg-cflags,sensor_msgs)
     CFLAGS_joint_plugin = $(CFLAGS_joint_thread)
-    LDFLAGS_joint += $(call ros-pkg-lflags,sensor_msgs)
+    LDFLAGS_ros_joint += $(call ros-pkg-lflags,sensor_msgs)
     PLUGINS_all += $(PLUGINDIR)/ros-joint.so
   else
     WARN_TARGETS += warning_sensor_msgs
@@ -240,8 +244,13 @@ ifeq ($(HAVE_ROS),1)
   ifeq ($(call ros-have-pkg,fawkes_msgs),1)
     CFLAGS_position_3d_thread += $(CFLAGS) $(call ros-pkg-cflags,fawkes_msgs)
     CFLAGS_position_3d_plugin = $(CFLAGS_position_3d_thread)
-    LDFLAGS_position_3d += $(call ros-pkg-lflags,fawkes_msgs)
+    LDFLAGS_ros_position_3d += $(call ros-pkg-lflags,fawkes_msgs)
     PLUGINS_all += $(PLUGINDIR)/ros-position-3d.so
+
+    CFLAGS_navgraph_breakout_thread += $(CFLAGS) $(call ros-pkg-cflags,fawkes_msgs)
+    CFLAGS_navgraph_breakout_plugin = $(CFLAGS_navgraph_breakout_thread)
+    LDFLAGS_ros_navgraph_breakout += $(call ros-pkg-lflags,fawkes_msgs)
+    PLUGINS_all += $(PLUGINDIR)/ros-navgraph-breakout.so
   else
     WARN_TARGETS += warning_fawkes_msgs
   endif

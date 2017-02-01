@@ -90,6 +90,11 @@ NavGraphThread::init()
     cfg_monitor_file_ = config->get_bool("/navgraph/monitor_file");
   } catch (Exception &e) {} // ignored
 
+  cfg_enable_path_execution_ = true;
+  try {
+    cfg_enable_path_execution_ = config->get_bool("/navgraph/path_execution");
+  } catch (Exception &e) {} // ignored
+
   if (config->exists("/navgraph/travel_tolerance") ||
       config->exists("/navgraph/target_tolerance") ||
       config->exists("/navgraph/orientation_tolerance") ||
@@ -105,9 +110,11 @@ NavGraphThread::init()
     throw Exception("Navgraph tolerances may no longer be set in the config");
   }
 
-  pp_nav_if_ = blackboard->open_for_writing<NavigatorInterface>("Pathplan");
-  nav_if_    = blackboard->open_for_reading<NavigatorInterface>(cfg_nav_if_id_.c_str());
-  path_if_   = blackboard->open_for_writing<NavPathInterface>("NavPath");
+  if (cfg_enable_path_execution_) {
+	  pp_nav_if_ = blackboard->open_for_writing<NavigatorInterface>("Pathplan");
+	  nav_if_    = blackboard->open_for_reading<NavigatorInterface>(cfg_nav_if_id_.c_str());
+	  path_if_   = blackboard->open_for_writing<NavPathInterface>("NavPath");
+  }
 
 
   if (! cfg_graph_file_.empty()) {
@@ -193,9 +200,11 @@ NavGraphThread::finalize()
   }
 #endif
   graph_.clear();
-  blackboard->close(pp_nav_if_);
-  blackboard->close(nav_if_);
-  blackboard->close(path_if_);
+  if (cfg_enable_path_execution_) {
+	  blackboard->close(pp_nav_if_);
+	  blackboard->close(nav_if_);
+	  blackboard->close(path_if_);
+  }
 }
 
 void
@@ -214,7 +223,7 @@ NavGraphThread::loop()
 {
   // process messages
   bool needs_write = false;
-  while (! pp_nav_if_->msgq_empty()) {
+  while (cfg_enable_path_execution_ && ! pp_nav_if_->msgq_empty()) {
     needs_write = true;
 
     if (pp_nav_if_->msgq_first_is<NavigatorInterface::StopMessage>()) {
@@ -269,7 +278,7 @@ NavGraphThread::loop()
     fam_->process_events();
   }
 
-  if (exec_active_) {
+  if (cfg_enable_path_execution_ && exec_active_) {
     // check if current was target reached
     size_t shortcut_to;
 
@@ -404,7 +413,7 @@ NavGraphThread::loop()
   }
 #endif
 
-  if (needs_write) {
+  if (cfg_enable_path_execution_ && needs_write) {
     pp_nav_if_->write();
   }
 }
@@ -431,8 +440,10 @@ NavGraphThread::generate_plan(std::string goal_name)
 	if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose_)) {
 		logger->log_warn(name(),
 		                 "Failed to compute pose, cannot generate plan");
-    pp_nav_if_->set_final(true);
-    pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		if (cfg_enable_path_execution_) {
+			pp_nav_if_->set_final(true);
+			pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		}
 		return false;
 	}
 
@@ -443,8 +454,10 @@ NavGraphThread::generate_plan(std::string goal_name)
 	if (! goal.is_valid()) {
 		logger->log_error(name(), "Failed to generate path from (%.2f,%.2f) to %s: goal is unknown",
 		                  init.x(), init.y(), goal_name.c_str()); 
-    pp_nav_if_->set_final(true);
-    pp_nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+		if (cfg_enable_path_execution_) {
+			pp_nav_if_->set_final(true);
+			pp_nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
+		}
     return false;
 	}
 
@@ -456,8 +469,10 @@ NavGraphThread::generate_plan(std::string goal_name)
 	} catch (Exception &e) {
 		logger->log_error(name(), "Failed to generate path from (%.2f,%.2f) to %s: %s",
 		                  init.x(), init.y(), goal_name.c_str(), e.what_no_backtrace());
-    pp_nav_if_->set_final(true);
-    pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		if (cfg_enable_path_execution_) {
+			pp_nav_if_->set_final(true);
+			pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		}
 		return false;
 	}
 
@@ -469,8 +484,10 @@ NavGraphThread::generate_plan(std::string goal_name)
 		try {
 			path_ = graph_->search_path(init, goal, /* use constraints */ false);
 		} catch (Exception &e) {
-			pp_nav_if_->set_final(true);
-			pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+			if (cfg_enable_path_execution_) {
+				pp_nav_if_->set_final(true);
+				pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+			}
 			return false;
 		}
 	}
@@ -496,8 +513,10 @@ NavGraphThread::generate_plan(std::string goal_name, float ori)
 		traversal_ = path_.traversal();
 		return true;
 	} else {
-	  pp_nav_if_->set_final(true);
-	  pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		if (cfg_enable_path_execution_) {
+			pp_nav_if_->set_final(true);
+			pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		}
 	  return false;
 	}
 }
@@ -518,8 +537,10 @@ NavGraphThread::generate_plan(float x, float y, float ori)
 	  return true;
 
   } else {
-	  pp_nav_if_->set_final(true);
-	  pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		if (cfg_enable_path_execution_) {
+			pp_nav_if_->set_final(true);
+			pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		}
 	  return false;
   }
 }
@@ -609,6 +630,8 @@ NavGraphThread::optimize_plan()
 void
 NavGraphThread::start_plan()
 {
+	if (! cfg_enable_path_execution_)  return;
+
   path_planned_at_->stamp();
 
   target_reached_ = false;
@@ -667,6 +690,8 @@ NavGraphThread::start_plan()
 void
 NavGraphThread::stop_motion()
 {
+	if (! cfg_enable_path_execution_)  return;
+
   NavigatorInterface::StopMessage *stop = new NavigatorInterface::StopMessage();
   try {
     nav_if_->msgq_enqueue(stop);
@@ -694,7 +719,9 @@ NavGraphThread::stop_motion()
 void
 NavGraphThread::send_next_goal()
 {
-  bool stop_at_target   = false;
+	if (! cfg_enable_path_execution_)  return;
+
+	bool stop_at_target   = false;
   bool orient_at_target = false;
 
   if (! traversal_.running()) {
@@ -1000,6 +1027,8 @@ NavGraphThread::log_graph()
 void
 NavGraphThread::publish_path()
 {
+	if (! cfg_enable_path_execution_)  return;
+
   std::vector<std::string> vpath(40, "");
 
   if (traversal_) {
