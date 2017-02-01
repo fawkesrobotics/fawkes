@@ -131,6 +131,11 @@ ColorModelLookupTable::~ColorModelLookupTable()
   delete __colormap;
 }
 
+color_t
+ColorModelLookupTable::determine(unsigned int y, unsigned int u, unsigned int v) const
+{
+  return __colormap->determine(y, u, v);
+}
 
 const char *
 ColorModelLookupTable::get_name()

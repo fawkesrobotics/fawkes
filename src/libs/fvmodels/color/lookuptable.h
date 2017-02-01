@@ -64,13 +64,6 @@ class ColorModelLookupTable : public ColorModel
   YuvColormap *__colormap;
 };
 
-
-inline color_t
-ColorModelLookupTable::determine(unsigned int y, unsigned int u, unsigned int v) const
-{
-  return __colormap->determine(y, u, v);
-}
-
 } // end namespace firevision
 
 #endif
