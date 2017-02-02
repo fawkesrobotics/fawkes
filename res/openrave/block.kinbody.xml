@@ -2,10 +2,10 @@
 
   <Body name="Body1" type="dynamic">
     <Mass type="mimicgeom">
-      <density>1000</density>
+      <density>100</density>
     </Mass>
     <Geom type="box">
-      <Extents>0.05 0.05 0.05</Extents>
+      <Extents>0.025 0.025 0.025</Extents>
       <RotationAxis>1 0 0 90</RotationAxis>
       <diffusecolor>1.0 1.0 0.0</diffusecolor>
     </Geom>
