@@ -66,8 +66,8 @@ class ClingoAccess
 		None = 0,
 		Time = 10,
 		Programs = 20,
-		Models = 30,
-		Externals = 40,
+		Externals = 30,
+		Models = 40,
 		AllModelSymbols = 50,
 		All
 	};
