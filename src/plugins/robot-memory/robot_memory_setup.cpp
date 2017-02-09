@@ -1,6 +1,6 @@
 /***************************************************************************
  *  robot_memory_setup.cpp - Class to setup the robot memory with the mongodb cluster
- *    
+ *
  *
  *  Created: 8:18:32 PM 2016
  *  Copyright  2016  Frederik Zwilling
@@ -24,7 +24,8 @@
 #include <mongo/client/dbclient.h>
 #include <mongo/client/init.h>
 #include <utils/misc/string_conversions.h>
-#include <stdio.h>
+#include <libs/core/exceptions/system.h>
+#include <cstdio>
 
 using namespace fawkes;
 
@@ -54,7 +55,7 @@ void RobotMemorySetup::setup_mongods()
   std::string oplog_size = std::to_string(config->get_int("plugins/robot-memory/setup/oplog-size"));
   prepare_mongo_db_path(local_db_path);
   const char *local_argv[] = {"mongod", "--port", local_port_str.c_str(),
-			      "--replSet", local_repl_name.c_str(),
+                              "--replSet", local_repl_name.c_str(),
       "--dbpath", local_db_path.c_str(),  "--nojournal",
       "--oplogSize", oplog_size.c_str(), NULL}; //local replica set just to enable the oplog
   local_mongod = start_mongo_process("mongod-local", local_port, local_argv);
@@ -177,7 +178,14 @@ void RobotMemorySetup::wait_until_started(unsigned int port, std::string cmd, in
 void RobotMemorySetup::prepare_mongo_db_path(std::string path)
 {
   std::string command = "mkdir -p " + path;
-  popen(command.c_str(), "r");
+  FILE *pipe = ::popen(command.c_str(), "r");
+  char *line = nullptr;
+  size_t n = 0;
+  int len  __attribute__((unused)) = ::getline(&line, &n, pipe);
+  std::string sline(line);
+  free(line);
+  if(::pclose(pipe))
+    throw FileWriteException(path.c_str(), (std::string("Trying to `mkdir -p': ") + sline).c_str());
 }
 
 mongo::BSONObj RobotMemorySetup::run_mongo_command(unsigned int port, std::string command,
