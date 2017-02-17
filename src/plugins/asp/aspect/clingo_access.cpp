@@ -213,7 +213,7 @@ ClingoAccess::allocControl()
 
 	if ( NumberOfThreads != 1 )
 	{
-		std::stringstream s("-t ");
+		std::stringstream s("-t ", std::ios_base::ate | std::ios_base::out);
 		s<<NumberOfThreads;
 		argumentsString.push_back(s.str());
 		argumentsChar.push_back(argumentsString.back().c_str());
