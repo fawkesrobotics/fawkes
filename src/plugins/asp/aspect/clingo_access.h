@@ -69,7 +69,8 @@ class ClingoAccess
 		Externals = 30,
 		Models = 40,
 		AllModelSymbols = 50,
-		All
+		All,
+		EvenClingo
 	};
 
 	std::atomic<DebugLevel_t> DebugLevel;

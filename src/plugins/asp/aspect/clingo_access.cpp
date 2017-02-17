@@ -99,6 +99,9 @@ namespace fawkes {
  * @var ClingoAccess::DebugLevel_t::All
  * @brief Print everything.
  *
+ * @var ClingoAccess::DebugLevel_t::EvenClingo
+ * @brief Activates the --output-debug=text option for clingo. This produces ALOT of output!
+ *
  * @property ClingoAccess::DebugLevel
  * @brief Which debug outputs should be printed.
  */
@@ -189,7 +192,15 @@ void
 ClingoAccess::allocControl()
 {
 	assert(!Control);
-	Control = new Clingo::Control({},
+
+	std::vector<const char*> argumentsChar;
+
+	if ( DebugLevel >= EvenClingo )
+	{
+		argumentsChar.push_back("--output-debug=text");
+	} //if ( DebugLevel >= EvenClingo )
+
+	Control = new Clingo::Control(argumentsChar,
 		[this](const Clingo::WarningCode code, char const *msg)
 		{
 			fawkes::Logger::LogLevel level = fawkes::Logger::LL_NONE;
