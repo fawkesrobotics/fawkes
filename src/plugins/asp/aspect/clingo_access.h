@@ -43,6 +43,7 @@ class ClingoAccess
 	private:
 	Logger* const Log;
 	const std::string LogComponent;
+	int NumberOfThreads;
 
 	mutable Mutex ControlMutex;
 	Clingo::Control *Control;
@@ -91,6 +92,9 @@ class ClingoAccess
 	bool cancelSolving(void);
 
 	bool reset(void);
+
+	void setNumberOfThreads(const int threads);
+	int numberOfThreads(void) const noexcept;
 
 	Clingo::SymbolVector modelSymbols(void) const;
 

@@ -23,6 +23,7 @@
 #include "clingo_access.h"
 
 #include <algorithm>
+#include <sstream>
 
 #include <core/threading/mutex_locker.h>
 #include <logging/logger.h>
@@ -44,6 +45,11 @@ namespace fawkes {
  * @property ClingoAccess::LogComponent
  * @brief The log component.
  *
+ * @property ClingoAccess::NumberOfThreads
+ * @brief How many threads Clingo should use for solving.
+ */
+
+/**
  * @property ClingoAccess::ControlMutex
  * @brief The mutex to protect the clingo control.
  *
@@ -193,12 +199,25 @@ ClingoAccess::allocControl()
 {
 	assert(!Control);
 
+	/* The arguments to Clingo::Control are given as a Span of const char*, because we need to compose some strings we
+	 * save them as std::string, so we have not to take care about memory leaks. The arguments given to Clingo are saved
+	 * in another vector, where the c_str() pointers of the strings are saved. */
+
+	std::vector<std::string> argumentsString;
 	std::vector<const char*> argumentsChar;
 
 	if ( DebugLevel >= EvenClingo )
 	{
 		argumentsChar.push_back("--output-debug=text");
 	} //if ( DebugLevel >= EvenClingo )
+
+	if ( NumberOfThreads != 1 )
+	{
+		std::stringstream s("-t ");
+		s<<NumberOfThreads;
+		argumentsString.push_back(s.str());
+		argumentsChar.push_back(argumentsString.back().c_str());
+	} //if ( NumberOfThreads != 1 )
 
 	Control = new Clingo::Control(argumentsChar,
 		[this](const Clingo::WarningCode code, char const *msg)
@@ -227,7 +246,8 @@ ClingoAccess::allocControl()
  * @param[in] controlArgs... The arguments for the clingo control constructor.
  */
 ClingoAccess::ClingoAccess(Logger *log, const std::string& logComponent) : Log(log),
-		LogComponent(logComponent.empty() ? "Clingo" : logComponent), Control(nullptr), Solving(false), DebugLevel(None)
+		LogComponent(logComponent.empty() ? "Clingo" : logComponent), NumberOfThreads(1),
+		Control(nullptr), Solving(false), DebugLevel(None)
 {
 	allocControl();
 	return;
@@ -407,6 +427,39 @@ ClingoAccess::reset(void)
 	Control = nullptr;
 	allocControl();
 	return true;
+}
+
+/**
+ * @brief Sets the number of threads Clingo should use.
+ * @param[in] threads The number.
+ * @warning This will call reset().
+ * @exception Exception If it is called while solving.
+ * @exception Exception If it is called with @c threads < 1.
+ */
+void
+ClingoAccess::setNumberOfThreads(const int threads)
+{
+	if ( Solving )
+	{
+		throw Exception("Tried to set the number of threads while Clingo was solving.");
+	} //if ( Solving )
+	if ( threads < 1 )
+	{
+		throw Exception("Tried to set thread count to %d, only values >= 1 are valid.", threads);
+	} //if ( threads < 1 )
+	NumberOfThreads = threads;
+	reset();
+	return;
+}
+
+/**
+ * @brief Returns how many threads Clingo should use.
+ * @return @link ClingoAccess::NumberOfThreads NumberOfThreads @endlink
+ */
+int
+ClingoAccess::numberOfThreads(void) const noexcept
+{
+	return NumberOfThreads;
 }
 
 /**
