@@ -84,9 +84,10 @@ btScalar TrackedLineInfo::distance(const LineInfo &linfo) const
  * and invalidate the data.
  */
 void TrackedLineInfo::not_visible_update() {
-	if (visibility_history > 0)
-		visibility_history = 0;
-	visibility_history -= 1;
+	if (visibility_history >= 0)
+	  visibility_history = -1;
+	else
+	  visibility_history -= 1;
 
 	this->raw.cloud.reset();
 	this->smooth.cloud.reset();
@@ -98,8 +99,10 @@ void TrackedLineInfo::not_visible_update() {
  */
 void TrackedLineInfo::update(LineInfo &linfo)
 {
-  if(visibility_history<0) visibility_history = 0;
-  visibility_history += 1;
+  if (visibility_history <= 0)
+    visibility_history = 1;
+  else
+    visibility_history += 1;
 
   this->raw = linfo;
   fawkes::tf::Stamped<fawkes::tf::Point> bp_new(
