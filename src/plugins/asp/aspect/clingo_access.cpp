@@ -520,7 +520,7 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
 
 	if ( DebugLevel >= Time )
 	{
-		Log->log_info(LogComponent.c_str(), "Grounding %d parts:", parts.size());
+		Log->log_info(LogComponent.c_str(), "Grounding %zu parts:", parts.size());
 		if ( DebugLevel >= Programs )
 		{
 			auto i = 0;
