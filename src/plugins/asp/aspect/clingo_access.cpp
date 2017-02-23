@@ -55,6 +55,11 @@ namespace fawkes {
  *
  * @property ClingoAccess::Control
  * @brief The clingo control.
+ */
+
+/**
+ * @property ClingoAccess::ModelMutex
+ * @brief The mutex for the model symbols.
  *
  * @property ClingoAccess::ModelSymbols
  * @brief The symbols found in the last model.
@@ -121,7 +126,7 @@ namespace fawkes {
 bool
 ClingoAccess::newModel(const Clingo::Model& model)
 {
-	MutexLocker locker1(&ControlMutex);
+	MutexLocker locker1(&ModelMutex);
 	ModelSymbols = model.symbols(DebugLevel >= AllModelSymbols ? Clingo::ShowType::All : Clingo::ShowType::Shown);
 
 	if ( DebugLevel >= Time )
@@ -156,7 +161,6 @@ ClingoAccess::newModel(const Clingo::Model& model)
 	} //if ( DebugLevel >= Time )
 
 	OldSymbols = ModelSymbols;
-	locker1.unlock();
 
 	bool ret = false;
 
@@ -243,11 +247,10 @@ ClingoAccess::allocControl()
  * @brief Constructor.
  * @param[in] log The used logger.
  * @param[in] logComponent The logging component.
- * @param[in] controlArgs... The arguments for the clingo control constructor.
  */
 ClingoAccess::ClingoAccess(Logger *log, const std::string& logComponent) : Log(log),
 		LogComponent(logComponent.empty() ? "Clingo" : logComponent), NumberOfThreads(1),
-		Control(nullptr), Solving(false), DebugLevel(None)
+		Control(nullptr), ModelMutex(Mutex::RECURSIVE), Solving(false), DebugLevel(None)
 {
 	allocControl();
 	return;
@@ -350,7 +353,9 @@ ClingoAccess::startSolving(void)
 		Log->log_info(LogComponent.c_str(), "Start async solving.");
 	} //if ( DebugLevel >= Time )
 	Solving = true;
+	ModelMutex.lock();
 	ModelCounter = 0;
+	ModelMutex.unlock();
 	Control->solve_async([this](const Clingo::Model& model) { return newModel(model); },
 		[this](const Clingo::SolveResult& result) { solvingFinished(result); return; });
 	return true;
@@ -364,18 +369,20 @@ ClingoAccess::startSolving(void)
 bool
 ClingoAccess::startSolvingBlocking(void)
 {
-	MutexLocker locker(&ControlMutex);
 	if ( Solving )
 	{
 		return false;
 	} //if ( Solving )
 
+	MutexLocker locker(&ControlMutex);
 	if ( DebugLevel >= Time )
 	{
 		Log->log_info(LogComponent.c_str(), "Start sync solving.");
 	} //if ( DebugLevel >= Time )
 	Solving = true;
+	ModelMutex.lock();
 	ModelCounter = 0;
+	ModelMutex.unlock();
 	const auto result(Control->solve([this,&locker](const Clingo::Model& model) {
 		locker.unlock();
 		const auto ret = newModel(model);
@@ -447,6 +454,7 @@ ClingoAccess::setNumberOfThreads(const int threads)
 	{
 		throw Exception("Tried to set thread count to %d, only values >= 1 are valid.", threads);
 	} //if ( threads < 1 )
+	Log->log_info(LogComponent.c_str(), "Change # of threads for solving from %d to %d.", NumberOfThreads, threads);
 	NumberOfThreads = threads;
 	reset();
 	return;
@@ -468,7 +476,7 @@ ClingoAccess::numberOfThreads(void) const noexcept
 Clingo::SymbolVector
 ClingoAccess::modelSymbols(void) const
 {
-	MutexLocker locker(&ControlMutex);
+	MutexLocker locker(&ModelMutex);
 	return ModelSymbols;
 }
 

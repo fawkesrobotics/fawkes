@@ -45,8 +45,10 @@ class ClingoAccess
 	const std::string LogComponent;
 	int NumberOfThreads;
 
-	mutable Mutex ControlMutex;
+	Mutex ControlMutex;
 	Clingo::Control *Control;
+
+	mutable Mutex ModelMutex;
 	Clingo::SymbolVector ModelSymbols, OldSymbols;
 	unsigned int ModelCounter;
 
