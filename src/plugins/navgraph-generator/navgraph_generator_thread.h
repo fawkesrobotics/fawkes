@@ -101,6 +101,9 @@ class NavGraphGeneratorThread
   float        cfg_map_line_cluster_quota_;
   bool         cfg_visualization_;
 
+  bool         cfg_save_to_file_;
+  std::string  cfg_save_filename_;
+
   fawkes::NavGraphGeneratorInterface *navgen_if_;
 
   PoiMap      pois_;
