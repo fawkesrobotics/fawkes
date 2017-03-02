@@ -1733,8 +1733,6 @@ Eigen::Vector4f TabletopObjectsThread::fit_cylinder(
         * obj_size_scores[os][1] * obj_size_scores[os][2];
   }
 
-  logger->log_debug(name(), "");
-
   //Fit cylinder:
   pcl::NormalEstimation < ColorPointType, pcl::Normal > ne;
   pcl::SACSegmentationFromNormals < ColorPointType, pcl::Normal > seg;
