@@ -269,7 +269,7 @@ MongoLogPointCloudThread::loop()
     mongodb_client->runCommand("admin", flush_cmd.obj(), reply);
     if (reply.hasField("ok")) {
       if (! reply["ok"].trueValue()) {
-	logger->log_warn(name(), "fsync error: ", reply["errmsg"].String().c_str());
+	logger->log_warn(name(), "fsync error: %s", reply["errmsg"].String().c_str());
       }
     } else {
       logger->log_warn(name(), "fsync reply has no ok field");
