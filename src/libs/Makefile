@@ -38,7 +38,7 @@ endif
 
 # Explicit dependencies, this is needed to have make bail out if there is any
 # error. This is also necessary for working parallel build (i.e. for dual core)
-utils: core
+utils: core logging
 interface: core utils
 blackboard: core utils interface netcomm logging
 netcomm: core utils
