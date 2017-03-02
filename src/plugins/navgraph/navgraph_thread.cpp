@@ -762,7 +762,7 @@ NavGraphThread::send_next_goal()
     tf_listener->transform_pose(cfg_base_frame_, tposeglob, tpose);
   } catch (Exception &e) {
     logger->log_warn(name(),
-		     "Failed to compute pose, cannot generate plan", e.what());
+		     "Failed to compute pose, cannot generate plan: %s", e.what());
     throw;
   }
 
