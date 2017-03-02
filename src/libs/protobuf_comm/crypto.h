@@ -67,7 +67,9 @@ class BufferEncryptor {
   unsigned char *key_;
   long long unsigned int iv_;
 
+#ifdef HAVE_LIBCRYPTO
   const EVP_CIPHER *cipher_;
+#endif
 
   int cipher_id_;
 };
@@ -88,10 +90,10 @@ class BufferDecryptor {
   std::map<int, std::string> keys_;
 };
 
+#ifdef HAVE_LIBCRYPTO
 const char * cipher_name_by_id(int cipher);
 int          cipher_name_to_id(const char *cipher);
 
-#ifdef HAVE_LIBCRYPTO
 const EVP_CIPHER * cipher_by_id(int cipher);
 const EVP_CIPHER * cipher_by_name(const char *cipher);
 #endif
