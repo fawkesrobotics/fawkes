@@ -527,7 +527,7 @@ MongoRRDThread::loop()
 	rrd_manager->add_data("opcounters", "N:%i:%i:%i:%i:%i:%i", insert, query,
 			      update, del, getmore, command);
       } catch (Exception &e) {
-	logger->log_warn(name(), "Failed to update opcounters RRD, ",
+	logger->log_warn(name(), "Failed to update opcounters RRD, "
 			 "exception follows");
 	logger->log_warn(name(), e);
       }
@@ -587,7 +587,7 @@ MongoRRDThread::loop()
 				    objects, avgObjSize, dataSize, storageSize,
 				    numExtents, indexes, indexSize, fileSize);
 	    } catch (Exception &e) {
-	      logger->log_warn(name(), "Failed to update dbstates RRD for ",
+	      logger->log_warn(name(), "Failed to update dbstates RRD for "
 			       "%s exception follows", i->second.db_name.c_str());
 	      logger->log_warn(name(), e);
 	    }
