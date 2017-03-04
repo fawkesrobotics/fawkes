@@ -26,7 +26,11 @@
 #include <ros/master.h>
 #include <ros/network.h>
 #include <ros/xmlrpc_manager.h>
-#include <XmlRpc.h>
+#ifdef HAVE_NEW_ROS_XMLRPCPP_PATH
+#  include <xmlrpcpp/XmlRpc.h>
+#else
+#  include <XmlRpc.h>
+#endif
 
 #include <tuple>
 

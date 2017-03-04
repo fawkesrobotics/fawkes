@@ -38,6 +38,10 @@ ifeq ($(HAVE_CPP11)$(HAVE_ROS)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS)$(call ros-have-pkg
   LDFLAGS += $(LDFLAGS_ROS) $(LDFLAGS_CLIPS) $(call ros-pkg-lflags,xmlrpcpp) \
              $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
+  ifeq ($(call ros-pkg-version-atleast,xmlrpcpp,1.12.7),1)
+    CFLAGS += -DHAVE_NEW_ROS_XMLRPCPP_PATH
+  endif
+
   PLUGINS_all = $(PLUGINDIR)/clips-ros.$(SOEXT)
 
 	INSTALL_extra = clips_files
