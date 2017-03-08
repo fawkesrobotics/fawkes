@@ -44,6 +44,7 @@ class ClingoAccess
 	Logger* const Log;
 	const std::string LogComponent;
 	int NumberOfThreads;
+	bool Splitting;
 
 	Mutex ControlMutex;
 	Clingo::Control *Control;
@@ -95,7 +96,7 @@ class ClingoAccess
 
 	bool reset(void);
 
-	void setNumberOfThreads(const int threads);
+	void setNumberOfThreads(const int threads, const bool useSplitting = false);
 	int numberOfThreads(void) const noexcept;
 
 	Clingo::SymbolVector modelSymbols(void) const;

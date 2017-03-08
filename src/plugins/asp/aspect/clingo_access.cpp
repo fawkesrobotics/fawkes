@@ -47,6 +47,9 @@ namespace fawkes {
  *
  * @property ClingoAccess::NumberOfThreads
  * @brief How many threads Clingo should use for solving.
+ *
+ * @property ClingoAccess::Splitting
+ * @brief Wether splitting should be used.
  */
 
 /**
@@ -218,7 +221,7 @@ ClingoAccess::allocControl()
 	if ( NumberOfThreads != 1 )
 	{
 		std::stringstream s("-t ", std::ios_base::ate | std::ios_base::out);
-		s<<NumberOfThreads;
+		s<<NumberOfThreads<<","<<(Splitting ? "split" : "compete");
 		argumentsString.push_back(s.str());
 		argumentsChar.push_back(argumentsString.back().c_str());
 	} //if ( NumberOfThreads != 1 )
@@ -249,7 +252,7 @@ ClingoAccess::allocControl()
  * @param[in] logComponent The logging component.
  */
 ClingoAccess::ClingoAccess(Logger *log, const std::string& logComponent) : Log(log),
-		LogComponent(logComponent.empty() ? "Clingo" : logComponent), NumberOfThreads(1),
+		LogComponent(logComponent.empty() ? "Clingo" : logComponent), NumberOfThreads(1), Splitting(false),
 		Control(nullptr), ModelMutex(Mutex::RECURSIVE), Solving(false), DebugLevel(None)
 {
 	allocControl();
@@ -439,12 +442,13 @@ ClingoAccess::reset(void)
 /**
  * @brief Sets the number of threads Clingo should use.
  * @param[in] threads The number.
+ * @param[in] useSPlitting Wether splitting should be used.
  * @warning This will call reset().
  * @exception Exception If it is called while solving.
  * @exception Exception If it is called with @c threads < 1.
  */
 void
-ClingoAccess::setNumberOfThreads(const int threads)
+ClingoAccess::setNumberOfThreads(const int threads, const bool useSplitting)
 {
 	if ( Solving )
 	{
@@ -454,8 +458,10 @@ ClingoAccess::setNumberOfThreads(const int threads)
 	{
 		throw Exception("Tried to set thread count to %d, only values >= 1 are valid.", threads);
 	} //if ( threads < 1 )
-	Log->log_info(LogComponent.c_str(), "Change # of threads for solving from %d to %d.", NumberOfThreads, threads);
+	Log->log_info(LogComponent.c_str(), "Change # of threads for solving from %d to %d and splitting from %s to %s.",
+		NumberOfThreads, threads, Splitting ? "true" : "false", useSplitting ? "true" : "false");
 	NumberOfThreads = threads;
+	Splitting = useSplitting;
 	reset();
 	return;
 }
