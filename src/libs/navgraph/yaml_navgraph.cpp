@@ -415,6 +415,7 @@ save_yaml_navgraph(std::string filename, NavGraph *graph)
 
   const std::vector<NavGraphNode> &nodes = graph->nodes();
   for (const NavGraphNode &node : nodes) {
+    if (node.unconnected())  out << YAML::LocalTag("unconnected");
     out << YAML::BeginMap
 	<< YAML::Key   << "name"
 	<< YAML::Value << node.name()
@@ -443,6 +444,16 @@ save_yaml_navgraph(std::string filename, NavGraph *graph)
   const std::vector<NavGraphEdge> &edges = graph->edges();
   for (const NavGraphEdge &edge : edges) {
     if (edge.is_directed())  out << YAML::LocalTag("dir");
+    if (edge.has_property("insert-mode")) {
+	    std::string insert_mode = edge.property("insert-mode");
+	    if (insert_mode == "force") {
+		    out << YAML::LocalTag("allow-intersection");
+	    } else if (insert_mode == "no-intersection") {
+		    out << YAML::LocalTag("no-intersection");
+	    } else if (insert_mode == "split-intersection") {
+		    out << YAML::LocalTag("split-intersection");
+	    }
+    }
     out << YAML::Flow << YAML::BeginSeq << edge.from() << edge.to() << YAML::EndSeq;
   }
 
