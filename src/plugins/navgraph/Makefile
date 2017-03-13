@@ -43,14 +43,13 @@ ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_NAVGRAPH),111)
   ifeq ($(HAVE_ROS),1)
 
     LIBS_navgraph += fawkesrosaspect
-    CFLAGS += $(CFLAGS_ROS)
+    CFLAGS += $(CFLAGS_ROS) $(CFLAGS_TF)
+    LDFLAGS += $(LDFLAGS_ROS) $(LDFLAGS_TF)
 
     ifeq ($(ENABLE_VISUALIZATION),1)
       ifeq ($(call ros-have-pkg,visualization_msgs),1)
-        CFLAGS  += -DHAVE_VISUALIZATION
-        CFLAGS_visualization_thread = $(CFLAGS) $(CFLAGS_TF) \
-				                              $(call ros-pkg-cflags,visualization_msgs)
-        LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)
+        CFLAGS  += -DHAVE_VISUALIZATION $(call ros-pkg-cflags,visualization_msgs)
+        LDFLAGS += $(call ros-pkg-lflags,visualization_msgs)
 
         OBJS_navgraph += visualization_thread.o
       else
@@ -60,10 +59,8 @@ ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_NAVGRAPH),111)
     endif
 
     ifeq ($(call ros-have-pkg,fawkes_msgs),1)
-      CFLAGS  += -DHAVE_FAWKES_MSGS
-      CFLAGS_rospub_thread = $(CFLAGS)  \
-			                       $(call ros-pkg-cflags,fawkes_msgs)
-      LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,fawkes_msgs)
+      CFLAGS  += -DHAVE_FAWKES_MSGS $(call ros-pkg-cflags,fawkes_msgs)
+      LDFLAGS += $(call ros-pkg-lflags,fawkes_msgs)
 
       OBJS_navgraph += rospub_thread.o
     else
