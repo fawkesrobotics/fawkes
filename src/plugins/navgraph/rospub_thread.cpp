@@ -59,13 +59,13 @@ NavGraphROSPubThread::init()
 void
 NavGraphROSPubThread::finalize()
 {
+	navgraph->remove_change_listener(this);
 	pub_.shutdown();
 }
 
 void
 NavGraphROSPubThread::loop()
 {
-	navgraph->remove_change_listener(this);
 }
 
 
