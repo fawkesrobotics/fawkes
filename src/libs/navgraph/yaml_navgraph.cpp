@@ -285,11 +285,12 @@ read_default_properties(NavGraph *graph, YAML::Node &doc)
 
 /** Load topological map graph stored in RCSoft format.
  * @param filename path to the file to read
+ * @param allow_multi_graph if true, allows multiple disconnected graph segments
  * @return topological map graph read from file
  * @exception Exception thrown on any error to read the graph file
  */
 NavGraph *
-load_yaml_navgraph(std::string filename)
+load_yaml_navgraph(std::string filename, bool allow_multi_graph)
 {
   //try to fix use of relative paths
   if (filename[0] != '/') {
@@ -351,7 +352,7 @@ load_yaml_navgraph(std::string filename)
     }
   }
 
-  graph->calc_reachability();
+  graph->calc_reachability(allow_multi_graph);
 
   const std::vector<NavGraphNode> &nodes = graph->nodes();
   for (const NavGraphNode &n : nodes) {
