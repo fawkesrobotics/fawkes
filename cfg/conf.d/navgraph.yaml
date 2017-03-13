@@ -48,6 +48,13 @@ navgraph:
   # only if you really know what you are doing.
   abort_on_error: true
 
+  # Allow that there are multiple graph segments without interconnect.
+  # This can also be useful, for example, if there are explicitly unconnected
+  # nodes in the graph, for example to store semantic information but which
+  # need not be traveled to.
+  # This flag is used during loading the graph_file initially, only.
+  allow_multi_graph: false
+
   # Monitor graph file and automatically reload on changes?
   monitor_file: true
 
