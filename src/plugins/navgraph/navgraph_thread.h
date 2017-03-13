@@ -113,6 +113,7 @@ class NavGraphThread
   bool         cfg_log_graph_;
   bool         cfg_abort_on_error_;
   bool         cfg_enable_path_execution_;
+  bool         cfg_allow_multi_graph_;
 
   fawkes::NavigatorInterface *nav_if_;
   fawkes::NavigatorInterface *pp_nav_if_;

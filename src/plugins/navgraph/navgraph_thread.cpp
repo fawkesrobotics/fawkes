@@ -90,6 +90,11 @@ NavGraphThread::init()
     cfg_monitor_file_ = config->get_bool("/navgraph/monitor_file");
   } catch (Exception &e) {} // ignored
 
+  cfg_allow_multi_graph_ = false;
+  try {
+    cfg_allow_multi_graph_ = config->get_bool("/navgraph/allow_multi_graph");
+  } catch (Exception &e) {} // ignored
+
   cfg_enable_path_execution_ = true;
   try {
     cfg_enable_path_execution_ = config->get_bool("/navgraph/path_execution");
@@ -428,7 +433,8 @@ NavGraphThread::load_graph(std::string filename)
 
   if (firstword == "%YAML") {
     logger->log_info(name(), "Loading YAML graph from %s", filename.c_str());
-    return fawkes::LockPtr<NavGraph>(load_yaml_navgraph(filename), /* recursive mutex */ true);
+    return fawkes::LockPtr<NavGraph>(load_yaml_navgraph(filename, cfg_allow_multi_graph_),
+                                     /* recursive mutex */ true);
   } else {
     throw Exception("Unknown graph format");
   }
