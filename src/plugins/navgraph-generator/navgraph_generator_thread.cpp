@@ -144,26 +144,26 @@ NavGraphGeneratorThread::finalize()
 void
 NavGraphGeneratorThread::loop()
 {
-  NavGraphGeneratorVoronoi nggv;
+	std::shared_ptr<NavGraphGenerator> ng(new NavGraphGeneratorVoronoi());
 
   logger->log_debug(name(), "Calculating new graph");
 
   if (bbox_set_) {
     logger->log_debug(name(), "  Setting bound box (%f,%f) to (%f,%f)",
 		      bbox_p1_.x, bbox_p1_.y, bbox_p2_.x, bbox_p2_.y);
-    nggv.set_bounding_box(bbox_p1_.x, bbox_p1_.y, bbox_p2_.x, bbox_p2_.y);
+    ng->set_bounding_box(bbox_p1_.x, bbox_p1_.y, bbox_p2_.x, bbox_p2_.y);
   }
 
   for (auto o : obstacles_) {
     logger->log_debug(name(), "  Adding obstacle %s at (%f,%f)",
 		      o.first.c_str(), o.second.x, o.second.y);
-    nggv.add_obstacle(o.second.x, o.second.y);
+    ng->add_obstacle(o.second.x, o.second.y);
   }
 
   for (auto o : map_obstacles_) {
     logger->log_debug(name(), "  Adding map obstacle %s at (%f,%f)",
 		      o.first.c_str(), o.second.x, o.second.y);
-    nggv.add_obstacle(o.second.x, o.second.y);
+    ng->add_obstacle(o.second.x, o.second.y);
   }
 
   // Acquire lock on navgraph, no more searches/modifications until we are done
@@ -189,7 +189,7 @@ NavGraphGeneratorThread::loop()
   }
 
   logger->log_debug(name(), "  Computing Voronoi");
-  nggv.compute(navgraph);
+  ng->compute(navgraph);
 
   // post-processing
   if (filter_["FILTER_EDGES_BY_MAP"]) {
