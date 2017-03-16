@@ -24,6 +24,7 @@
 #define __LIBS_NAVGRAPH_GENERATOR_VORONOI_H_
 
 #include <navgraph/navgraph.h>
+#include <navgraph/generators/generator.h>
 
 #include <utils/math/polygon.h>
 
@@ -32,7 +33,7 @@ namespace fawkes {
 }
 #endif
 
-class NavGraphGeneratorVoronoi
+class NavGraphGeneratorVoronoi : public NavGraphGenerator
 {
  public:
 	NavGraphGeneratorVoronoi();
@@ -43,12 +44,6 @@ class NavGraphGeneratorVoronoi
 
 	virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph);
 
-	void set_bounding_box(float bbox_p1_x, float bbox_p1_y,
-	                      float bbox_p2_x, float bbox_p2_y);
-	void set_near_threshold(float near_threshold);
-	void add_obstacle(float x, float y);
-	void clear();
-
 	/** Get list of polygons.
 	 * @return list of polygons, each polygon contains the vertices of a
 	 * bounded face of the Voronoi diagram.
@@ -57,15 +52,6 @@ class NavGraphGeneratorVoronoi
 	{ return polygons_; }
 
  private:
-
-	bool  bbox_enabled_;
-	float bbox_p1_x_;
-	float bbox_p1_y_;
-	float bbox_p2_x_;
-	float bbox_p2_y_;
-	float near_threshold_;
-
-	std::list<std::pair<float, float>> obstacles_;
 	std::list<Polygon2D> polygons_;
 };
 

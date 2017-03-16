@@ -65,9 +65,6 @@ namespace fawkes {
 
 /** Default constructor. */
 NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi()
-	: bbox_enabled_(false),
-	  bbox_p1_x_(0.), bbox_p1_y_(0.), bbox_p2_x_(0.), bbox_p2_y_(0.),
-	  near_threshold_(0.01)
 {
 }
 
@@ -85,10 +82,7 @@ NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi()
 NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi(float bbox_p1_x, float bbox_p1_y,
                                                    float bbox_p2_x, float bbox_p2_y,
                                                    float near_threshold)
-	: bbox_enabled_(true),
-	  bbox_p1_x_(bbox_p1_x), bbox_p1_y_(bbox_p1_y),
-	  bbox_p2_x_(bbox_p2_x), bbox_p2_y_(bbox_p2_y),
-	  near_threshold_(near_threshold)
+	: NavGraphGenerator(bbox_p1_x, bbox_p1_y, bbox_p2_x, bbox_p2_y, near_threshold)
 {
 }
 
@@ -120,76 +114,6 @@ contains(Point_map points, Point_2 point, std::string &name, float near_threshol
 		}
 	}
 	return false;
-}
-
-
-/** Generate a new name
- * @param i number parameter for point name, will be incremented by one
- * @return string with a new point name
- */
-static std::string
-genname(unsigned int &i)
-{
-	char * name;
-	if (asprintf(&name, "V_%02u", ++i) != -1) {
-		std::string rv = name;
-		free(name);
-		return rv;
-	} else {
-		throw Exception("Failed to create node name");
-	}
-}
-
-
-/** Set bounding box.
- * Setting a bounding box will cause compute() to ignore any edge with
- * a vertex out of the given bounding box area.
- * @param bbox_p1_x X coordinate of first (lower) bounding box point
- * @param bbox_p1_y y coordinate of first (lower) bounding box point
- * @param bbox_p2_x X coordinate of second (upper) bounding box point
- * @param bbox_p2_y y coordinate of second (upper) bounding box point
- */
-void
-NavGraphGeneratorVoronoi::set_bounding_box(float bbox_p1_x, float bbox_p1_y,
-                                           float bbox_p2_x, float bbox_p2_y)
-{
-	bbox_enabled_ = true;
-	bbox_p1_x_ = bbox_p1_x;
-	bbox_p1_y_ = bbox_p1_y;
-	bbox_p2_x_ = bbox_p2_x;
-	bbox_p2_y_ = bbox_p2_y;  
-}
-
-/** Set distance threshold for considering nodes to be the same.
- * @param near_threshold distance threshold for which to consider
- * nodes to be the same if the distance is smaller than this
- * threshold.
- */
-void
-NavGraphGeneratorVoronoi::set_near_threshold(float near_threshold)
-{
-	near_threshold_ = near_threshold;
-}
-
-/** Add an obstacle point.
- * An obstacle point will be the representative for a Voronoi
- * face in the newly generated graph.
- * @param x X coordinate of point
- * @param y Y coordinate of point
- */
-void
-NavGraphGeneratorVoronoi::add_obstacle(float x, float y)
-{
-	obstacles_.push_back(std::make_pair(x, y));
-}
-
-
-/** Clear all obstacle points. */
-void
-NavGraphGeneratorVoronoi::clear()
-{
-	obstacles_.clear();
-	polygons_.clear();
 }
 
 
