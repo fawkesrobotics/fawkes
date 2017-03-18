@@ -4,6 +4,7 @@
  *
  *  Created: Wed Dec  7 19:09:44 2016
  *  Copyright  2016  Frederik Zwilling
+ *             2017  Matthias Loebach
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -51,10 +52,27 @@ class PddlPlannerThread
   protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::PddlPlannerInterface *gen_if;
-  std::string result_path;
-  std::string collection;
+  struct action {
+    std::string name;
+    std::vector<std::string> args;
+  };
+  fawkes::PddlPlannerInterface *plan_if_;
+	std::string cfg_descripton_path_;
+	std::string cfg_result_path_;
+	std::string cfg_domain_path_;
+	std::string cfg_problem_path_;
+	std::string cfg_fd_options_;
+  std::string cfg_collection_;
 
+  std::vector<action> action_list_;
+
+  std::function<void()> planner_;
+
+  void ff_planner();
+  void fd_planner();
+  mongo::BSONObj BSONFromActionList();
+  static size_t find_nth_space(const std::string& s, size_t nth);
+	std::string run_planner(std::string command);
   virtual bool bb_interface_message_received(fawkes::Interface *interface,
                                              fawkes::Message *message) throw();
 };
