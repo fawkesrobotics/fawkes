@@ -49,7 +49,7 @@ PddlPlannerThread::init()
   std::string cfg_prefix = "plugins/pddl-planner/";
 	cfg_descripton_path_ = StringConversions::resolve_path(config->get_string((cfg_prefix + "description-folder")));
 	cfg_result_path_ = cfg_descripton_path_ +
-  config->get_string((cfg_prefix + "result-file"));
+    config->get_string((cfg_prefix + "result-file"));
   cfg_domain_path_ = cfg_descripton_path_ + config->get_string(cfg_prefix + "domain-description");
 	cfg_problem_path_ = cfg_descripton_path_ + config->get_string(cfg_prefix + "problem-description");
 	cfg_fd_options_ = config->get_string(cfg_prefix + "fd-search-opts");
@@ -163,8 +163,8 @@ PddlPlannerThread::fd_planner()
   logger->log_info(name(), "Starting PDDL Planning with Fast-Downward...");
 
 	std::string command = "fast-downward"
-		+ std::string(" ") + cfg_descripton_path_ + cfg_domain_path_
-		+ std::string(" ") + cfg_descripton_path_ + cfg_problem_path_;
+		+ std::string(" ") + cfg_domain_path_
+		+ std::string(" ") + cfg_problem_path_;
 
 	if ( !cfg_fd_options_.empty() ) {
 		command += std::string(" ") + cfg_fd_options_;
