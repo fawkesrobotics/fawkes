@@ -11,6 +11,9 @@
     <field type="bool" name="final">
       Is the planning finished?
     </field>
+    <field type="string" length="30" name="active_planner">
+      Currently selected planner
+    </field>
   </data>
   
   <message name="Plan">

@@ -40,6 +40,9 @@ class PddlPlannerInterface : public Interface
   bool is_final();
   void set_final(const bool new_final);
   int maxlenof_final() const;
+  char * active_planner();
+  void set_active_planner(const char * new_active_planner);
+  int maxlenof_active_planner() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

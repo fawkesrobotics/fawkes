@@ -52,8 +52,9 @@ PddlPlannerInterface::PddlPlannerInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_UINT32, "msg_id", 1, &data->msg_id);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
+  add_fieldinfo(IFT_STRING, "active_planner", 30, data->active_planner);
   add_messageinfo("PlanMessage");
-  unsigned char tmp_hash[] = {0x1, 0xbc, 0xa0, 0xb1, 0x9b, 0xa6, 0xc6, 0xa, 0x69, 0xf2, 0x65, 0x38, 0x5a, 0x93, 0x48, 0xf9};
+  unsigned char tmp_hash[] = {0xcd, 0x44, 0x52, 0xa7, 0xfa, 0xb2, 0xaf, 0xfe, 0xe2, 0xc5, 0x4, 0x6b, 0xe0, 0x97, 0x2b, 0x69};
   set_hash(tmp_hash);
 }
 
@@ -130,6 +131,41 @@ void
 PddlPlannerInterface::set_final(const bool new_final)
 {
   data->final = new_final;
+  data_changed = true;
+}
+
+/** Get active_planner value.
+ * 
+      Currently selected planner
+    
+ * @return active_planner value
+ */
+char *
+PddlPlannerInterface::active_planner() const
+{
+  return data->active_planner;
+}
+
+/** Get maximum length of active_planner value.
+ * @return length of active_planner value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PddlPlannerInterface::maxlenof_active_planner() const
+{
+  return 30;
+}
+
+/** Set active_planner value.
+ * 
+      Currently selected planner
+    
+ * @param new_active_planner new active_planner value
+ */
+void
+PddlPlannerInterface::set_active_planner(const char * new_active_planner)
+{
+  strncpy(data->active_planner, new_active_planner, sizeof(data->active_planner));
   data_changed = true;
 }
 

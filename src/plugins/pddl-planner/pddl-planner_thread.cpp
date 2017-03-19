@@ -45,16 +45,6 @@ PddlPlannerThread::PddlPlannerThread()
 void
 PddlPlannerThread::init()
 {
-  //setup interface
-  plan_if_ = blackboard->open_for_writing<PddlPlannerInterface>(config->get_string("plugins/pddl-planner/interface-name").c_str());
-  plan_if_->set_msg_id(0);
-  plan_if_->set_final(false);
-  plan_if_->write();
-
-  //setup interface listener
-  bbil_add_message_interface(plan_if_);
-  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
-
   //read config
   std::string cfg_prefix = "plugins/pddl-planner/";
 	cfg_descripton_path_ = StringConversions::resolve_path(config->get_string((cfg_prefix + "description-folder")));
@@ -78,6 +68,17 @@ PddlPlannerThread::init()
 		logger->log_warn(name(), "No planner configured.\nDefaulting to ff.");
 	}
 
+  //setup interface
+  plan_if_ = blackboard->open_for_writing<PddlPlannerInterface>(config->get_string(cfg_prefix + "interface-name").c_str());
+  plan_if_->set_active_planner(planner_string.c_str());
+  plan_if_->set_msg_id(0);
+  plan_if_->set_final(false);
+  plan_if_->write();
+
+  //setup interface listener
+  bbil_add_message_interface(plan_if_);
+  blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+
   // If we receive multiple wakeup() calls during loop, only call the loop once afterwards
   // We want to only re-plan once after a loop run since multiple runs would plan on the same problem
   this->set_coalesce_wakeups(true);
@@ -100,6 +101,8 @@ PddlPlannerThread::loop()
   } else {
     logger->log_error(name(),"Updating plan failed, action list empty!");
   }
+
+  //TODO handle finished plan
 }
 
 void

@@ -49,6 +49,9 @@ class PddlPlannerInterface : public Interface
     bool final; /**< 
       Is the planning finished?
      */
+    char active_planner[30]; /**< 
+      Currently selected planner
+     */
   } PddlPlannerInterface_data_t;
 
   PddlPlannerInterface_data_t *data;
@@ -95,6 +98,9 @@ class PddlPlannerInterface : public Interface
   bool is_final() const;
   void set_final(const bool new_final);
   size_t maxlenof_final() const;
+  char * active_planner() const;
+  void set_active_planner(const char * new_active_planner);
+  size_t maxlenof_active_planner() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);
