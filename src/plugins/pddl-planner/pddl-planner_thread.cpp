@@ -220,7 +220,7 @@ PddlPlannerThread::BSONFromActionList()
   BSONArrayBuilder action_arr_builder;
   for ( action  a : action_list_ ) {
     BSONObjBuilder action_builder;
-    action_builder << "name " << a.name;
+    action_builder << "name" << a.name;
     BSONArrayBuilder args_builder;
     for ( std::string args : a.args ) {
       args_builder << args;
