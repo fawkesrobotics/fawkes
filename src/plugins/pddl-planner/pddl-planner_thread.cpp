@@ -98,6 +98,7 @@ PddlPlannerThread::loop()
   if ( !action_list_.empty() ) {
     BSONObj plan = BSONFromActionList();
     robot_memory->update(fromjson("{plan:{$exists:true}}"), plan, cfg_collection_, true);
+    print_action_list();
   } else {
     logger->log_error(name(),"Updating plan failed, action list empty!");
     robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:0}"), cfg_collection_, true);
@@ -138,7 +139,7 @@ PddlPlannerThread::ff_planner()
   while(result.find(": ", cur_pos) != std::string::npos) {
     cur_pos = result.find(": ", cur_pos) + 2;
     size_t line_end =  result.find("\n", cur_pos);
-    logger->log_info(name(), "line:%s (%d-%d)", result.substr(cur_pos, line_end-cur_pos).c_str(), cur_pos, line_end);
+    logger->log_debug(name(), "line:%s (%d-%d)", result.substr(cur_pos, line_end-cur_pos).c_str(), cur_pos, line_end);
     action a;
     if(line_end < result.find(" ", cur_pos)) {
        a.name = result.substr(cur_pos, line_end - cur_pos);
@@ -246,6 +247,20 @@ PddlPlannerThread::find_nth_space(const std::string& s, size_t nth)
   }
 
   return pos + 1;
+}
+
+void
+PddlPlannerThread::print_action_list()
+{
+  unsigned int count = 0;
+  for ( action a : action_list_ ) {
+    count++;
+    std::string args;
+    for ( std::string arg : a.args ) {
+      args += arg + " ";
+    }
+    logger->log_info(name(),"Action %d %s with args %s", count, a.name.c_str(), args.c_str());
+  }
 }
 
 std::string

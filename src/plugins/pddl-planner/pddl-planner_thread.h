@@ -72,6 +72,7 @@ class PddlPlannerThread
   void fd_planner();
   mongo::BSONObj BSONFromActionList();
   static size_t find_nth_space(const std::string& s, size_t nth);
+  void print_action_list();
 	std::string run_planner(std::string command);
   virtual bool bb_interface_message_received(fawkes::Interface *interface,
                                              fawkes::Message *message) throw();
