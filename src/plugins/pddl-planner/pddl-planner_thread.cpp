@@ -100,6 +100,7 @@ PddlPlannerThread::loop()
     robot_memory->update(fromjson("{plan:{$exists:true}}"), plan, cfg_collection_, true);
   } else {
     logger->log_error(name(),"Updating plan failed, action list empty!");
+    robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:0}"), cfg_collection_, true);
   }
 
   //TODO handle finished plan
