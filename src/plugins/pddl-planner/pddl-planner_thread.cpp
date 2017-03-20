@@ -154,6 +154,7 @@ PddlPlannerThread::ff_planner()
         cur_pos = arg_end + 1;
       }
     }
+    action_list_.push_back(a);
   }
 }
 
