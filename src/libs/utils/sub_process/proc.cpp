@@ -37,7 +37,7 @@ namespace fawkes {
 }
 #endif
 
-/** @class SubProcess <plugins/openprs/utils/proc.h>
+/** @class SubProcess <libs/utils/sub_process/proc.h>
  * Sub-process execution with stdin/stdout/stderr redirection.
  * This class executes a sub-process and monitors it and supports redirecting
  * stdout/stderr to a logger.
