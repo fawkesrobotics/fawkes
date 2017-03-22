@@ -22,6 +22,8 @@
 #include "clips_rm_trigger.h"
 #include <clipsmm.h>
 
+#include <core/threading/mutex_locker.h>
+
 using namespace fawkes;
 using namespace mongo;
 
@@ -54,6 +56,7 @@ void ClipsRmTrigger::set_trigger(EventTrigger *trigger)
  */
 void ClipsRmTrigger::callback(mongo::BSONObj update)
 {
+  MutexLocker locker(clips.objmutex_ptr());
   clips->assert_fact_f("( %s)", assert_name.c_str());
   CLIPS::Template::pointer temp = clips->get_template("robmem-trigger");
   if (temp) {
