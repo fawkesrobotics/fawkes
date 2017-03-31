@@ -58,6 +58,7 @@ class ClingoAccess
 	std::vector<std::shared_ptr<std::function<bool(void)>>> ModelCallbacks;
 	std::vector<std::shared_ptr<std::function<void(Clingo::SolveResult)>>> FinishCallbacks;
 	Clingo::GroundCallback GroundCallback;
+	Clingo::SolveAsync AsyncHandle;
 
 	bool newModel(const Clingo::Model& model);
 	void solvingFinished(const Clingo::SolveResult result);

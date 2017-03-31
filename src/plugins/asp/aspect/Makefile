@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/utils/utils.mk
 #include $(BUILDSYSDIR)/asp.mk
 
-LIBS_libfawkesaspaspect = stdc++ fawkescore fawkesaspects fawkesutils
+LIBS_libfawkesaspaspect = stdc++ fawkescore fawkesaspects fawkesutils pthread
 OBJS_libfawkesaspaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_libfawkesaspaspect)

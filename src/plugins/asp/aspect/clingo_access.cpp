@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <thread>
 
 #include <core/threading/mutex_locker.h>
 #include <logging/logger.h>
@@ -72,8 +73,9 @@ namespace fawkes {
  *
  * @property ClingoAccess::ModelCounter
  * @brief Counts how many models we have computed for one solving process.
- *
- *
+ */
+
+/**
  * @property ClingoAccess::Solving
  * @brief Whether the control is in the solving process.
  *
@@ -89,6 +91,11 @@ namespace fawkes {
  * @property ClingoAccess::GroundCallback
  * @brief The callback for the grounding.
  *
+ * @property ClingoAccess::AsyncHandle
+ * @brief The handle for the async solving.
+ */
+
+/**
  * @enum ClingoAccess::DebugLevel_t
  * @brief An enum to define debug levels. The higher levels include the lower values.
  *
@@ -185,16 +192,26 @@ ClingoAccess::solvingFinished(const Clingo::SolveResult result)
 {
 	if ( DebugLevel >= Time )
 	{
-		Log->log_info(LogComponent.c_str(), "Solving done.");
+		Log->log_info(LogComponent.c_str(), "Solving nearly done.");
 	} //if ( DebugLevel >= Time )
-	MutexLocker locker1(&ControlMutex);
-	Solving = false;
 
-	MutexLocker locker2(&CallbackMutex);
+	MutexLocker locker1(&ControlMutex), locker2(&CallbackMutex);
 	for ( const auto& cb : FinishCallbacks )
 	{
 		(*cb)(result);
 	} //for ( const auto& cb : FinishCallbacks )
+
+	std::thread blockingThread([this](void)
+		{
+			AsyncHandle.wait();
+			if ( DebugLevel >= Time )
+			{
+				Log->log_info(LogComponent.c_str(), "Solving done.");
+			} //if ( DebugLevel >= Time )
+			Solving = false;
+			return;
+		});
+	blockingThread.detach();
 	return;
 }
 
@@ -253,7 +270,7 @@ ClingoAccess::allocControl()
  */
 ClingoAccess::ClingoAccess(Logger *log, const std::string& logComponent) : Log(log),
 		LogComponent(logComponent.empty() ? "Clingo" : logComponent), NumberOfThreads(1), Splitting(false),
-		Control(nullptr), ModelMutex(Mutex::RECURSIVE), Solving(false), DebugLevel(None)
+		Control(nullptr), ModelMutex(Mutex::RECURSIVE), Solving(false), AsyncHandle(nullptr), DebugLevel(None)
 {
 	allocControl();
 	return;
@@ -359,7 +376,7 @@ ClingoAccess::startSolving(void)
 	ModelMutex.lock();
 	ModelCounter = 0;
 	ModelMutex.unlock();
-	Control->solve_async([this](const Clingo::Model& model) { return newModel(model); },
+	AsyncHandle = Control->solve_async([this](const Clingo::Model& model) { return newModel(model); },
 		[this](const Clingo::SolveResult& result) { solvingFinished(result); return; });
 	return true;
 }
@@ -414,6 +431,7 @@ ClingoAccess::cancelSolving(void)
 	{
 		Log->log_info(LogComponent.c_str(), "Cancel solving.");
 	} //if ( DebugLevel >= Time )
+
 	Control->interrupt();
 	return true;
 }
