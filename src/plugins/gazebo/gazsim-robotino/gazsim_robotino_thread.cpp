@@ -67,6 +67,7 @@ RobotinoSimThread::init()
   //read config values
   cfg_frame_odom_ = config->get_string("/frames/odom");
   cfg_frame_base_ = config->get_string("/frames/base");
+  cfg_frame_imu_  = config->get_string("/gazsim/robotino/imu/frame");
   slippery_wheels_enabled_ = config->get_bool("gazsim/robotino/motor/slippery-wheels-enabled");
   slippery_wheels_threshold_ = config->get_float("gazsim/robotino/motor/slippery-wheels-threshold");
   moving_speed_factor_ = config->get_float("gazsim/robotino/motor/moving-speed-factor");
@@ -111,6 +112,7 @@ RobotinoSimThread::init()
   switch_if_->set_enabled(true);
   switch_if_->write();
 
+  imu_if_->set_frame(cfg_frame_imu_.c_str());
   imu_if_->set_linear_acceleration(0, -1.);
   //imu_if_->set_angular_velocity_covariance(8, deg2rad(0.1));
   // set as not available as we do not currently provide angular velocities.
