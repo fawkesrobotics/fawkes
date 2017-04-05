@@ -280,7 +280,7 @@ BlackboardCLIPSFeature::clips_assert_interface_type(std::string &env_name, std::
 
     case IFT_STRING:
       deftemplate += std::string() +
-	"  (" + ((f.get_length() > 1) ? "multi" : "") + "slot " + f.get_name() +
+        "  (slot " + f.get_name() +
 	" (type STRING))\n";
       break;
 
