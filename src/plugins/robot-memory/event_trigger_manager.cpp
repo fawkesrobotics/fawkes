@@ -39,6 +39,7 @@ using namespace mongo;
  * @param mongo_connection_manager MongoDBConnCreator
  */
 EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config, MongoDBConnCreator* mongo_connection_manager)
+  : cfg_debug_(false)
 {
   logger_ = logger;
   config_ = config;
@@ -62,6 +63,10 @@ EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config, 
   mutex_ = new Mutex();
 
   logger_->log_debug(name.c_str(), "Initialized");
+
+  try {
+    cfg_debug_ = config->get_bool("/plugins/robot-memory/more-debug-output");
+  } catch (...) {}
 }
 
 EventTriggerManager::~EventTriggerManager()
@@ -90,7 +95,8 @@ void EventTriggerManager::check_events()
     }
     if(trigger->oplog_cursor->isDead())
     {
-      logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
+      if (cfg_debug_)
+        logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
       //check if collection is local or replicated
       mongo::DBClientBase* con;
       if(trigger->oplog_collection.find(repl_set_dist) == 0)
