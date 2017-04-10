@@ -378,7 +378,7 @@ SharedMemory::SharedMemory(const char *magic_token,
 
   __registry_name = NULL;
   if (registry_name) {
-    __registry_name = strdup(__registry_name);
+    __registry_name = strdup(registry_name);
   }
 
   try {
