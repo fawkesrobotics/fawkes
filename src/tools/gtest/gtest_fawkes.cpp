@@ -1,5 +1,5 @@
 /***************************************************************************
- *  gtest_fawkes.cpp - Unit testing in Fawkes
+ *  gtest_fawkes.cpp - Unit testing in a Fawkes plugin requiring the framework
  *    
  *
  *  Created: Aug 24, 2016 11:40:46 PM 2016
@@ -26,6 +26,8 @@
 #include <baseapp/run.h>
 #include <core/exception.h>
 #include <cstdio>
+#include <utils/misc/string_conversions.h>
+#include <config/yaml.h>
 
 
 //TEST(GTestTest, TestsWorking)
@@ -43,6 +45,15 @@ int main(int argc, char **argv) {
   try {
     int retval = 0;
 
+    //get config values
+    std::string cfg_path = fawkes::StringConversions::resolve_path("@CONFDIR@/conf.d/gtest.yaml");
+    printf("Config path: %s\n", cfg_path.c_str());
+    fawkes::YamlConfiguration config = fawkes::YamlConfiguration();
+    config.load(cfg_path.c_str());
+    std::string plugins = config.get_string("gtest/plugin-dependencies") + ","
+      + config.get_string("gtest/test-plugin");
+    std::string config_path = config.get_string("gtest/config");
+    
     //init arguments to start fawkes with
     char **fawkes_argv;
     fawkes_argv = new char*[5];
@@ -51,11 +62,11 @@ int main(int argc, char **argv) {
     fawkes_argv[1] = new char[2];
     strcpy(fawkes_argv[1], "-p");
     fawkes_argv[2] = new char[128];
-    strcpy(fawkes_argv[2], "static-transforms,mongodb,robot-memory,robot_memory_test");
+    strcpy(fawkes_argv[2], plugins.c_str());
     fawkes_argv[3] = new char[2];
     strcpy(fawkes_argv[3], "-c");
     fawkes_argv[4] = new char[128];
-    strcpy(fawkes_argv[4], "gazsim-configurations/default/robotino1.yaml");
+    strcpy(fawkes_argv[4], config_path.c_str());
 
     if (! fawkes::runtime::init(5, fawkes_argv, retval)) {
       return retval;

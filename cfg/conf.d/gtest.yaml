@@ -1,0 +1,14 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki
+---
+# This config file specifies how the gtest tool executes unit tests contained in a plugin
+gtest:
+  # Which plugins contains the Unit tests you want to execute?
+  test-plugin: "robot_memory_test"
+  # Dependencies of your test-plugin
+  plugin-dependencies: "static-transforms,mongodb,robot-memory"
+  # Configuration used for the test run (use config.yaml for default)
+  config: "gazsim-configurations/default/robotino1.yaml"
+  
