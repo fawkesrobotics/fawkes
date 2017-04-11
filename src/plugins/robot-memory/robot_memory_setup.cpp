@@ -83,11 +83,11 @@ void RobotMemorySetup::setup_mongods()
   //configure replica set
   if(config->get_bool("plugins/robot-memory/setup/replicated/initiate"))
   {
-  std::string repl_config = "{_id:'" + distributed_replset + "', members:"
-      + config->get_string("plugins/robot-memory/setup/replicated/replica-set-members") + "}";
-  //run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"), "already initialized");
-  //wait for replica set initialization and election
+	  std::string repl_config = "{_id:'" + distributed_replset + "', members:"
+		  + config->get_string("plugins/robot-memory/setup/replicated/replica-set-members") + "}";
+	  run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"), "already initialized");
   }
+  //wait for replica set initialization and election
   usleep(3000000);
 }
 
