@@ -358,14 +358,6 @@ LaserLinesThread::update_lines(std::vector<LineInfo> &linfos) {
 
 void
 LaserLinesThread::publish_known_lines() {
-  // Then sort by bearing to stabilize blackboard interface assignment
-  std::sort(known_lines_.begin(), known_lines_.end(),
-      [](const TrackedLineInfo &l1, const TrackedLineInfo &l2) -> bool
-      {
-	return l1.bearing_center < l2.bearing_center;
-      }
-  );
-
   // set line parameters
   size_t oi = 0;
   for (size_t i = 0; i < known_lines_.size(); ++i) {
