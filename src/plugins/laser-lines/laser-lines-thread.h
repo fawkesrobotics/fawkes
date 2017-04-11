@@ -96,6 +96,9 @@ class LaserLinesThread
 
  private:
 
+  void update_lines(std::vector<LineInfo> &);
+  void publish_known_lines();
+
   void set_interface(unsigned int idx,
                 fawkes::LaserLineInterface *iface,
                 bool moving_average,

@@ -264,23 +264,28 @@ LaserLinesThread::loop()
     for (unsigned int i = 0; i < this->known_lines_.size(); ++i) {
       known_lines_[i].not_visible_update();
     }
-    goto writing_interfaces;
+  }
+  else {
+    //logger->log_info(name(), "[L %u] total: %zu   finite: %zu",
+    //		     loop_count_, input_->points.size(), in_cloud->points.size());
+    std::vector<LineInfo> linfos =
+        calc_lines<PointType>(input_,
+                              cfg_segm_min_inliers_, cfg_segm_max_iterations_,
+                              cfg_segm_distance_threshold_, cfg_segm_sample_max_dist_,
+                              cfg_cluster_tolerance_, cfg_cluster_quota_,
+                              cfg_min_length_, cfg_max_length_, cfg_min_dist_, cfg_max_dist_);
+
+
+    TIMETRACK_INTER(ttc_extract_lines_, ttc_clustering_);
+    update_lines(linfos);
   }
 
-  //logger->log_info(name(), "[L %u] total: %zu   finite: %zu",
-  //		     loop_count_, input_->points.size(), in_cloud->points.size());
-
-  {
-  std::vector<LineInfo> linfos =
-    calc_lines<PointType>(input_,
-			  cfg_segm_min_inliers_, cfg_segm_max_iterations_,
-			  cfg_segm_distance_threshold_, cfg_segm_sample_max_dist_,
-			  cfg_cluster_tolerance_, cfg_cluster_quota_,
-			  cfg_min_length_, cfg_max_length_, cfg_min_dist_, cfg_max_dist_);
+  publish_known_lines();
+}
 
 
-  TIMETRACK_INTER(ttc_extract_lines_, ttc_clustering_);
-
+void
+LaserLinesThread::update_lines(std::vector<LineInfo> &linfos) {
   size_t num_points = 0;
   for (size_t i = 0; i < linfos.size(); ++i) {
     num_points += linfos[i].cloud->points.size();
@@ -327,7 +332,6 @@ LaserLinesThread::loop()
     known_lines_.push_back(tl);
   }
 
-  }
 
   // When there are too many lines, delete the ones with negative and lowest
   // visibility history
@@ -349,8 +353,11 @@ LaserLinesThread::loop()
   );
   while (known_lines_.size() > cfg_max_num_lines_)
     known_lines_.erase(known_lines_.end() - 1);
+}
 
-  writing_interfaces:
+
+void
+LaserLinesThread::publish_known_lines() {
   // Then sort by bearing to stabilize blackboard interface assignment
   std::sort(known_lines_.begin(), known_lines_.end(),
       [](const TrackedLineInfo &l1, const TrackedLineInfo &l2) -> bool
@@ -439,6 +446,7 @@ LaserLinesThread::loop()
   }
 #endif
 }
+
 
 void
 LaserLinesThread::set_interface(unsigned int idx,
