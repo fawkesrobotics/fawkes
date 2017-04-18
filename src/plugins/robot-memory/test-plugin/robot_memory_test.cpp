@@ -139,7 +139,15 @@ TEST_F(RobotMemoryTest, MapReduceQuery)
 
 TEST_F(RobotMemoryTest, JavaScriptQuery)
 {
-  //TODO: implement
+  ASSERT_TRUE(robot_memory->insert("{'testname':'js-query',a:1,b:2}"));
+  ASSERT_TRUE(robot_memory->insert("{'testname':'js-query',a:2,b:4}"));
+  ASSERT_TRUE(robot_memory->insert("{'testname':'js-query',a:3,b:5}"));
+  QResCursor qres = robot_memory->query("{'testname':'js-query', $where: \"return obj.a * 2 == obj.b\"}");
+  ASSERT_TRUE(qres->more());
+  qres->next();
+  ASSERT_TRUE(qres->more());
+  qres->next();
+  ASSERT_FALSE(qres->more());
 }
 
 TEST_F(RobotMemoryTest, DumpAndResore)
