@@ -34,7 +34,10 @@ using namespace fawkes;
  * @author Frederik Zwilling
  */
 
-/** Constructor. */
+/**
+ * Constructor for thread
+ * @param mongo_client_connection Which client connection to use for mongodb aspect
+ */
 RobotMemoryThread::RobotMemoryThread(std::string mongo_client_connection)
 	: Thread("RobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
     ConfigurableAspect(),

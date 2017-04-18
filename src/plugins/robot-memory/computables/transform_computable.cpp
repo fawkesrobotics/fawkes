@@ -29,6 +29,13 @@ using namespace mongo;
  * @author Frederik Zwilling
  */
 
+/**
+ * Constructor for Transform computable with objects of thread aspects
+ * @param robot_memory Robot Memory
+ * @param tf Transform
+ * @param logger Logger
+ * @param config Configuration
+ */
 TransformComputable::TransformComputable(RobotMemory* robot_memory, fawkes::tf::Transformer* tf, fawkes::Logger* logger, fawkes::Configuration* config)
 {
   robot_memory_ = robot_memory;

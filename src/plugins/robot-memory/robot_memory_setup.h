@@ -30,10 +30,6 @@
 
 typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
 
-/** @class RobotMemorySetup  robot_memory_setup.h
- *
- * @author Frederik Zwilling
- */
 class RobotMemorySetup
 {
   public:

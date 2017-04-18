@@ -37,18 +37,18 @@ using namespace mongo;
  * The template file can use the following templates to generate some output
  * for each document returned by a query:
  *
- * Example: <<#ONTABLE|{relation:'on-table'}>> (on-table <<object>>) <</ONTABLE>>
+ * Example: \c "<<#ONTABLE|{relation:'on-table'}>> (on-table <<object>>) <</ONTABLE>>"
  * Yields: (on-table a) (on-table b)
  * When these documents are in the database:
  *  {relation:'on-table', object:'a'}, {relation:'on-table', object:'b'}
  *
- * The selection template <<#UNIQUENAME|query>> something <</UNIQUENAME>>
+ * The selection template \c "<<#UNIQUENAME|query>> something <</UNIQUENAME>>"
  *  queries the robot memory and inserts 'something' for each returned document.
  *
- * Variable templates <<key>> inside the selection are substituted by the values
+ * Variable templates \c "<<key>>" inside the selection are substituted by the values
  *  of that key in the document returned by the query. You can also access subdocuments
  *  and arrays as follows:
- *  (e.g. <<position_translation_0>> for a document {position:{translation:[0,1,2], orientation:[0,1,2]}})
+ *  (e.g. \c "<<position_translation_0>>" for a document {position:{translation:[0,1,2], orientation:[0,1,2]}})
  *
  * @author Frederik Zwilling
  */

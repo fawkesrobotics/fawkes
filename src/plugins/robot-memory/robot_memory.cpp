@@ -46,11 +46,11 @@ using namespace fawkes;
  */
 
 /**
- * Robot Memory Constructor
+ * Robot Memory Constructor with objects of the thread
  * @param config Fawkes config
  * @param logger Fawkes logger
  * @param clock Fawkes clock
- * @param mongodb_client Fawkes mongo client from the mongo aspect
+ * @param mongo_connection_manager MongoDBConnCreator to create client connections to the shared and local db
  * @param blackboard Fawkes blackboard
  */
 RobotMemory::RobotMemory(fawkes::Configuration* config, fawkes::Logger* logger,
@@ -163,7 +163,7 @@ QResCursor RobotMemory::query(Query query, std::string collection)
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return 1: Success 0: Error
  */
-int RobotMemory::insert(BSONObj obj, std::string collection)
+int RobotMemory::insert(mongo::BSONObj obj, std::string collection)
 {
   check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
@@ -192,7 +192,7 @@ int RobotMemory::insert(BSONObj obj, std::string collection)
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return 1: Success 0: Error
  */
-int RobotMemory::insert(std::vector<BSONObj> v_obj, std::string collection)
+int RobotMemory::insert(std::vector<mongo::BSONObj> v_obj, std::string collection)
 {
   check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
@@ -241,7 +241,7 @@ int RobotMemory::insert(std::string obj_str, std::string collection)
  * @param upsert Should the update document be inserted if the query returns no documents?
  * @return 1: Success 0: Error
  */
-int RobotMemory::update(Query query, BSONObj update, std::string collection, bool upsert)
+int RobotMemory::update(mongo::Query query, mongo::BSONObj update, std::string collection, bool upsert)
 {
   check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
@@ -269,7 +269,7 @@ int RobotMemory::update(Query query, BSONObj update, std::string collection, boo
  * @param upsert Should the update document be inserted if the query returns no documents?
  * @return 1: Success 0: Error
  */
-int RobotMemory::update(Query query, std::string update_str, std::string collection, bool upsert)
+int RobotMemory::update(mongo::Query query, std::string update_str, std::string collection, bool upsert)
 {
   return update(query, fromjson(update_str), collection, upsert);
 }
@@ -280,7 +280,7 @@ int RobotMemory::update(Query query, std::string update_str, std::string collect
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return 1: Success 0: Error
  */
-int RobotMemory::remove(Query query, std::string collection)
+int RobotMemory::remove(mongo::Query query, std::string collection)
 {
   check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
@@ -304,11 +304,11 @@ int RobotMemory::remove(Query query, std::string collection)
  * Performs a MapReduce operation on the robot memory (https://docs.mongodb.com/manual/core/map-reduce/)
  * @param query Which documents to use for the map step
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
- * @param js_map_func Map function in JavaScript as string
- * @param js_reduce_func Reduce function in JavaScript as string
+ * @param js_map_fun Map function in JavaScript as string
+ * @param js_reduce_fun Reduce function in JavaScript as string
  * @return BSONObj containing the result
  */
-BSONObj RobotMemory::mapreduce(mongo::Query query, std::string collection, std::string js_map_fun, std::string js_reduce_fun)
+mongo::BSONObj RobotMemory::mapreduce(mongo::Query query, std::string collection, std::string js_map_fun, std::string js_reduce_fun)
 {
   check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
@@ -504,14 +504,14 @@ RobotMemory::log_deb(std::string what, std::string level)
 }
 
 void
-RobotMemory::log_deb(Query query, std::string what, std::string level)
+RobotMemory::log_deb(mongo::Query query, std::string what, std::string level)
 {
   if(debug_)
     log(query, what, level);
 }
 
 void
-RobotMemory::log(Query query, std::string what, std::string level)
+RobotMemory::log(mongo::Query query, std::string what, std::string level)
 {
   std::string output = what
     + "\nFilter: " + query.getFilter().toString()
@@ -523,13 +523,13 @@ RobotMemory::log(Query query, std::string what, std::string level)
 }
 
 void
-RobotMemory::log_deb(BSONObj obj, std::string what, std::string level)
+RobotMemory::log_deb(mongo::BSONObj obj, std::string what, std::string level)
 {
   log(obj, what, level);
 }
 
 void
-RobotMemory::log(BSONObj obj, std::string what, std::string level)
+RobotMemory::log(mongo::BSONObj obj, std::string what, std::string level)
 {
   std::string output = what
     + "\nObject: " + obj.toString();
@@ -537,7 +537,7 @@ RobotMemory::log(BSONObj obj, std::string what, std::string level)
 }
 
 void
-RobotMemory::set_fields(BSONObj &obj, std::string what)
+RobotMemory::set_fields(mongo::BSONObj &obj, std::string what)
 {
   BSONObjBuilder b;
   b.appendElements(obj);
@@ -547,13 +547,13 @@ RobotMemory::set_fields(BSONObj &obj, std::string what)
 }
 
 void
-RobotMemory::set_fields(Query &q, std::string what)
+RobotMemory::set_fields(mongo::Query &q, std::string what)
 {
   BSONObjBuilder b;
   b.appendElements(q.getFilter());
   b.appendElements(fromjson(what));
 
-  //TODO keep other stuff in query
+  //the following is not yet kept in the query:
   // + "\nFilter: " + query.getFilter().toString()
   // + "\nModifiers: " + query.getModifiers().toString()
   // + "\nSort: " + query.getSort().toString()
@@ -565,12 +565,12 @@ RobotMemory::set_fields(Query &q, std::string what)
 }
 
 void
-RobotMemory::remove_field(Query &q, std::string what)
+RobotMemory::remove_field(mongo::Query &q, std::string what)
 {
   BSONObjBuilder b;
   b.appendElements(q.getFilter().removeField(what));
 
-  //TODO keep other stuff in query
+  //the following is not yet kept in the query:
   // + "\nFilter: " + query.getFilter().toString()
   // + "\nModifiers: " + query.getModifiers().toString()
   // + "\nSort: " + query.getSort().toString()

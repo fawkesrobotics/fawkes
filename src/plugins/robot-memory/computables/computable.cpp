@@ -30,6 +30,14 @@ using namespace mongo;
  * @author Frederik Zwilling
  */
 
+/**
+ * Constructor for object holding information about a computable
+ * @param query_to_compute Computable specification. Queries matching to this spec invoke the computable
+ * @param collection Collection covered
+ * @param compute_function Reference to the function providing the computation
+ * @param caching_time How long should computed results for a query be cached and be used for identical queries in that time?
+ * @param priority Computable priority ordering the evaluation
+ */
 Computable::Computable(Query query_to_compute, std::string collection, const boost::function<std::list<BSONObj> (BSONObj, std::string)> &compute_function, double caching_time, int priority)
 {
   this->compute_function = compute_function;
@@ -47,7 +55,6 @@ Computable::~Computable()
 /**
  * Compute demanded information and insert it into the robot memory
  * @param query The query demanding the computable information
- * @param mongodb_client Client to use to insert computed documents
  * @return Documents to insert extended with computable meta information (e.g. caching time)
  */
 std::list<BSONObj> Computable::compute(BSONObj query)

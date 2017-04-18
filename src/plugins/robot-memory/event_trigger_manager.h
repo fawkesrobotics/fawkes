@@ -36,12 +36,9 @@
 ///typedef for shorter type description
 typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
 
-/** @class EventTriggerManager  event_trigger_manager.h
- *
- * @author Frederik Zwilling
- */
 class EventTriggerManager
 {
+  /// Access for robot memory to use the check_events function in the loop
   friend class RobotMemory;
 
   public:
@@ -53,7 +50,7 @@ class EventTriggerManager
      * @param query Query the updated document has to match
      * @param collection db.collection to use
      * @param callback Callback function (e.g. &Class::callback)
-     * @param _obj Pointer to class the callback is a function of (usaually this)
+     * @param obj Pointer to class the callback is a function of (usaually this)
      * @return Trigger object pointer, save it to remove the trigger later
      */
     template<typename T>

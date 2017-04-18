@@ -48,11 +48,12 @@ class ComputablesManager
 
     /**
      * Registers a Computable which provides information in the robot memory that is computed on demand.
-     *
      * @param query_to_compute Query describing what the function computes. Yor computable is called when an new query matches query_to_compute.
      * @param collection db.collection to fill with computed information
      * @param compute_func Callback function that computes the information and retruns a list of computed documents
      * @param obj Pointer to class the callback is a function of (usaually this)
+     * @param caching_time How long should computed results for a query be cached and be used for identical queries in that time?
+     * @param priority Computable priority ordering the evaluation
      * @return Computable Object pointer used for removing it
      */
     template<typename T>

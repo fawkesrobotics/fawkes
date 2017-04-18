@@ -27,14 +27,14 @@
 
 using namespace fawkes;
 
-/* @class RobotMemoryTestPlugin "robot_memory_test_plugin.cpp"
+/** @class RobotMemoryTestPlugin "robot_memory_test_plugin.cpp"
  * gtests for the RobotMemory
  * @author Frederik Zwilling
  */
 class RobotMemoryTestPlugin : public fawkes::Plugin
 {
  public:
-  /* Constructor
+  /** Constructor
    * @param config Fakwes configuration
    */
   RobotMemoryTestPlugin(Configuration *config)

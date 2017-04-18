@@ -26,6 +26,18 @@
 using namespace fawkes;
 using namespace mongo;
 
+
+/** @class EventTriggerManager  event_trigger_manager.h
+ * Manager to realize triggers on events in the robot memory
+ * @author Frederik Zwilling
+ */
+
+/**
+ * Constructor for class managing EventTriggers
+ * @param logger Logger
+ * @param config Configuration
+ * @param mongo_connection_manager MongoDBConnCreator
+ */
 EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config, MongoDBConnCreator* mongo_connection_manager)
 {
   logger_ = logger;

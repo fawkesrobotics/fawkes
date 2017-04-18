@@ -21,6 +21,18 @@
 
 #include "event_trigger.h"
 
+
+/** @class EventTrigger  event_trigger.h
+ * Class holding all information about an EventTrigger
+ * @author Frederik Zwilling
+ */
+
+/**
+ * Constructor for Class holding all information about an EventTrigger
+ * @param oplog_query The Query on the oplog, which defines which database update invokes the trigger
+ * @param oplog_collection Collection the trigger is looking at
+ * @param callback Reference to callback function
+ */
 EventTrigger::EventTrigger(mongo::Query oplog_query, std::string oplog_collection,
   const boost::function<void (mongo::BSONObj)> &callback)
 {

@@ -33,6 +33,7 @@ namespace fawkes
  */
 class RobotMemoryAspect : public virtual Aspect
 {
+  /// Access for RobotMemoryIniFin to set and finalize robot_memory
   friend class RobotMemoryIniFin;
 
   public:

@@ -33,31 +33,42 @@
  */
 class RobotMemoryTestEnvironment : public ::testing::Environment
 {
- public:
-  RobotMemoryTestEnvironment(RobotMemory* robot_memory, fawkes::BlackBoard* blackboard)
-  {
-    this->robot_memory = robot_memory;
-    this->blackboard = blackboard;
-  }
-  virtual ~RobotMemoryTestEnvironment() {}
-  void SetUp() {}
-  virtual void TearDown(){}
- public:
-  static RobotMemory* robot_memory;
-  static fawkes::BlackBoard* blackboard;
+  public:
+    /**
+     * Constructor with objects of the thread
+     * @param robot_memory Robot Memory
+     * @param blackboard Blackboard
+     */
+    RobotMemoryTestEnvironment(RobotMemory* robot_memory, fawkes::BlackBoard* blackboard)
+    {
+      this->robot_memory = robot_memory;
+      this->blackboard = blackboard;
+    }
+    virtual ~RobotMemoryTestEnvironment() {}
+    /// Setup the environment
+    void SetUp() {}
+    /// TearDown the environment
+    virtual void TearDown(){}
+  public:
+    /// Access to Robot Memory
+    static RobotMemory* robot_memory;
+    /// Access to blackboard
+    static fawkes::BlackBoard* blackboard;
 };
 
 /** Class for Tests of the RobotMemory
  */
 class RobotMemoryTest : public ::testing::Test
 {
- protected:
-  virtual void SetUp();
-  RobotMemory* robot_memory;
-  fawkes::BlackBoard* blackboard;
+  protected:
+    virtual void SetUp();
+    /// Access to Robot Memory
+    RobotMemory* robot_memory;
+    /// Access to blackboard
+    fawkes::BlackBoard* blackboard;
 
- protected:
-  ::testing::AssertionResult contains_pairs(mongo::BSONObj obj, mongo::BSONObj exp);
+  protected:
+    ::testing::AssertionResult contains_pairs(mongo::BSONObj obj, mongo::BSONObj exp);
 };
 
 /**
@@ -70,12 +81,17 @@ class RobotMemoryCallback
   {
       callback_counter = 0;
   };
-   ~RobotMemoryCallback(){};
-   int callback_counter;
-   void callback_test(mongo::BSONObj update)
-   {
-     callback_counter++;
-   }
+    ~RobotMemoryCallback(){};
+    /// Counter for how often the callback was called
+    int callback_counter;
+    /**
+     * Test callback function
+     * @param update Trigger update
+     */
+    void callback_test(mongo::BSONObj update)
+    {
+      callback_counter++;
+    }
 };
 
 /**
@@ -84,37 +100,53 @@ class RobotMemoryCallback
 class TestComputable
 {
   public:
-    TestComputable()
-  {
-  };
-   ~TestComputable(){};
-   //Different functions for computables:
-   std::list<mongo::BSONObj> compute(mongo::BSONObj query, std::string collection)
-   {
-     std::list<mongo::BSONObj> res;
-     res.push_back(mongo::fromjson("{computed:true, result:'this is computed'}"));
-     return res;
-   }
-   std::list<mongo::BSONObj> compute_sum(mongo::BSONObj query, std::string collection)
-   {
-     std::list<mongo::BSONObj> res;
-     int x = query.getField("x").Int();
-     int y = query.getField("y").Int();
-     int sum = x + y;
-     mongo::BSONObjBuilder b;
-     b << "compute" << "sum" << "x" << x << "y" << y
-         << "sum" << sum;
-     res.push_back(b.obj());
-     return res;
-   }
-   std::list<mongo::BSONObj> compute_multiple(mongo::BSONObj query, std::string collection)
-   {
-     std::list<mongo::BSONObj> res;
-     res.push_back(mongo::fromjson("{compute:'multiple', count:1}"));
-     res.push_back(mongo::fromjson("{compute:'multiple', count:2}"));
-     res.push_back(mongo::fromjson("{compute:'multiple', count:3}"));
-     return res;
-   }
+    TestComputable(){};
+    ~TestComputable(){};
+    //Different functions for computables:
+    /**
+     * Computable function for static document
+     * @param query Input query
+     * @param collection Corresponding collection
+     * @return Computed docs
+     */
+    std::list<mongo::BSONObj> compute(mongo::BSONObj query, std::string collection)
+    {
+      std::list<mongo::BSONObj> res;
+      res.push_back(mongo::fromjson("{computed:true, result:'this is computed'}"));
+      return res;
+    }
+    /**
+     * Computable function for addition
+     * @param query Input query
+     * @param collection Corresponding collection
+     * @return Computed docs
+     */
+    std::list<mongo::BSONObj> compute_sum(mongo::BSONObj query, std::string collection)
+    {
+      std::list<mongo::BSONObj> res;
+      int x = query.getField("x").Int();
+      int y = query.getField("y").Int();
+      int sum = x + y;
+      mongo::BSONObjBuilder b;
+      b << "compute" << "sum" << "x" << x << "y" << y
+          << "sum" << sum;
+      res.push_back(b.obj());
+      return res;
+    }
+    /**
+     * Computable function for multiple static document
+     * @param query Input query
+     * @param collection Corresponding collection
+     * @return Computed docs
+     */
+    std::list<mongo::BSONObj> compute_multiple(mongo::BSONObj query, std::string collection)
+    {
+      std::list<mongo::BSONObj> res;
+      res.push_back(mongo::fromjson("{compute:'multiple', count:1}"));
+      res.push_back(mongo::fromjson("{compute:'multiple', count:2}"));
+      res.push_back(mongo::fromjson("{compute:'multiple', count:3}"));
+      return res;
+    }
 };
 
 

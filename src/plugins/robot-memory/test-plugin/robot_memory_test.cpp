@@ -210,6 +210,12 @@ TEST_F(RobotMemoryTest, EventTriggerReplica)
   robot_memory->remove_trigger(trigger2);
 }
 
+/**
+ * Function for testing if a document contains all key-value pairs of another document
+ * @param obj Document that should be tested
+ * @param exp Document containing all expected key-value pairs
+ * @return Assertion Result
+ */
 ::testing::AssertionResult RobotMemoryTest::contains_pairs(BSONObj obj, BSONObj exp)
 {
   for(BSONObjIterator it = exp.begin(); it.more();)

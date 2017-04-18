@@ -27,14 +27,14 @@
 
 using namespace fawkes;
 
-/* @class ClipsRobotMemoryPlugin "clips_robot_memory_plugin.cpp"
+/** @class ClipsRobotMemoryPlugin "clips_robot_memory_plugin.cpp"
  * CLIPS feature to access the robot memory
  * @author Frederik Zwilling
  */
 class ClipsRobotMemoryPlugin : public fawkes::Plugin
 {
  public:
-  /* Constructor
+  /** Constructor
    * @param config Fakwes configuration
    */
   ClipsRobotMemoryPlugin(Configuration *config)

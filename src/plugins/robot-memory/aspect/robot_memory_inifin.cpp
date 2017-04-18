@@ -23,7 +23,7 @@
 namespace fawkes
 {
 
-/** @class RobotMemoryAspectIniFin robot_memory_inifin.cpp
+/** @class RobotMemoryIniFin robot_memory_inifin.cpp
  * RobotMemoryAspect initializer/finalizer.
  * This initializer/finalizer will provide the RobotMemory to
  * threads with the RobotMemoryAspect.
@@ -70,6 +70,10 @@ RobotMemoryIniFin::finalize(Thread *thread)
   robot_memory_thread->finalize_RobotMemoryAspect();
 }
 
+/**
+ * Set the reference to the robot memory for the aspect
+ * @param robot_memory Robot Memory
+ */
 void
 RobotMemoryIniFin::set_robot_memory(RobotMemory* robot_memory)
 {

@@ -33,6 +33,13 @@
 using namespace fawkes;
 using namespace mongo;
 
+/**
+ * Constructor for class managing computables with refereces to plugin objects
+ * @param logger Logger
+ * @param config Configuration
+ * @param robot_memory Robot Memory
+ * @param clock Clock
+ */
 ComputablesManager::ComputablesManager(fawkes::Logger* logger, fawkes::Configuration* config,
   RobotMemory* robot_memory, fawkes::Clock* clock)
 {
@@ -110,7 +117,7 @@ bool ComputablesManager::check_and_compute(mongo::Query query, std::string colle
         //remember how long a query is cached:
         long long cached_until = computed_docs_vector[0].getField("_robmem_info").Obj().getField("cached_until").Long();
         cached_querries_[std::make_tuple(collection, query.toString())] = cached_until;
-        //TODO: fix problem: equivalent queries in different order jield unequal strings
+        //TODO: fix minor problem: equivalent queries in different order jield unequal strings
         robot_memory_->insert(computed_docs_vector, (*it)->get_collection());
         added_computed_docs = true;
       }

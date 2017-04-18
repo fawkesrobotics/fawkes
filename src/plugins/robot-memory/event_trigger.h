@@ -28,12 +28,10 @@
 ///typedef for shorter type description
 typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
 
-/** @class EventTrigger  event_trigger.h
- *
- * @author Frederik Zwilling
- */
+
 class EventTrigger
 {
+  /// Information access for Manager
   friend class EventTriggerManager;
 
   public:

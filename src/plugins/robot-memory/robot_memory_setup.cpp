@@ -29,6 +29,16 @@
 
 using namespace fawkes;
 
+/** @class RobotMemorySetup  robot_memory_setup.h
+ * Class to setup the robot memory with the mongodb cluster
+ * @author Frederik Zwilling
+ */
+
+/**
+ * Constructor of class performing the mongodb setup for the robot memory
+ * @param config Configuration
+ * @param logger Logger
+ */
 RobotMemorySetup::RobotMemorySetup(Configuration *config, Logger *logger)
 {
   this->config = config;

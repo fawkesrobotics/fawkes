@@ -44,6 +44,7 @@ typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
 
 class RobotMemory
 {
+  /// Friend the RobotMemoryThread so that only it can access the loop and init functions
   friend class RobotMemoryThread;
 
   public:
@@ -104,6 +105,8 @@ class RobotMemory
      * @param collection db.collection to fill with computed information
      * @param compute_func Callback function that computes the information and retruns a list of computed documents
      * @param obj Pointer to class the callback is a function of (usaually this)
+     * @param caching_time How long should computed results for a query be cached and be used for identical queries in that time?
+     * @param priority Computable priority ordering the evaluation
      * @return Computable Object pointer used for removing it
      */
     template<typename T>

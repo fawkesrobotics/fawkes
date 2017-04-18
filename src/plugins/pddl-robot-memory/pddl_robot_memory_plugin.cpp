@@ -27,14 +27,14 @@
 
 using namespace fawkes;
 
-/* @class PddlRobotMemoryPlugin "pddl_robot_memory_plugin.cpp"
+/** @class PddlRobotMemoryPlugin "pddl_robot_memory_plugin.cpp"
  * Generate PDDL files from the robot memory
  * @author Frederik Zwilling
  */
 class PddlRobotMemoryPlugin : public fawkes::Plugin
 {
  public:
-  /* Constructor
+  /** Constructor
    * @param config Fakwes configuration
    */
   PddlRobotMemoryPlugin(Configuration *config)

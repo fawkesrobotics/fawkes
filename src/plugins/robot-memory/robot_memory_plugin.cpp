@@ -57,6 +57,7 @@ class RobotMemoryPlugin : public fawkes::Plugin
     delete logger_for_setup;
   }
 
+ private:
   RobotMemorySetup* setup;
   Logger *logger_for_setup;
 };

@@ -30,6 +30,13 @@
 using namespace fawkes;
 using namespace mongo;
 
+/**
+ * Constructor with references to objects of the plugin
+ * @param robot_memory Robot Memory
+ * @param blackboard Blackboard
+ * @param logger Logger
+ * @param config Configuration
+ */
 BlackboardComputable::BlackboardComputable(RobotMemory* robot_memory, fawkes::BlackBoard* blackboard, fawkes::Logger* logger, fawkes::Configuration* config)
 {
   robot_memory_ = robot_memory;
