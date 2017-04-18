@@ -132,11 +132,6 @@ TEST_F(RobotMemoryTest, AggregationQuery)
   //TODO: implement
 }
 
-TEST_F(RobotMemoryTest, MapReduceQuery)
-{
-  //TODO: implement
-}
-
 TEST_F(RobotMemoryTest, JavaScriptQuery)
 {
   ASSERT_TRUE(robot_memory->insert("{'testname':'js-query',a:1,b:2}"));
@@ -234,6 +229,20 @@ TEST_F(RobotMemoryTest, EventTriggerReplica)
     }
   }
   return ::testing::AssertionSuccess();
+}
+
+TEST_F(RobotMemoryTest, MapReduceQuery)
+{
+  //Test sums up the amount of ordered products
+  ASSERT_TRUE(robot_memory->insert("{'testname':'mapreduce',order:1, product:1, amount:1}", "robmem.test"));
+  ASSERT_TRUE(robot_memory->insert("{'testname':'mapreduce',order:2, product:1, amount:2}", "robmem.test"));
+  ASSERT_TRUE(robot_memory->insert("{'testname':'mapreduce',order:3, product:2, amount:3}", "robmem.test"));
+  ASSERT_TRUE(robot_memory->insert("{'testname':'mapreduce',order:4, product:2, amount:4}", "robmem.test"));
+  ASSERT_TRUE(robot_memory->insert("{'testname':'not mapreduce',order:1, product:1, amount:2}"));
+  BSONObj res = robot_memory->mapreduce(fromjson("{'testname':'mapreduce'}"), "robmem.test",
+      "function() { emit( this.product, this.amount);}",
+      "function(key, values) { return Array.sum( values )}");
+  ASSERT_TRUE(contains_pairs(res, fromjson("{ok: 1.0, results:[{_id:1.0, value:3.0}, {_id:2.0, value: 7.0}]}")));
 }
 
 

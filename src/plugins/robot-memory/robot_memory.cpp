@@ -301,6 +301,24 @@ int RobotMemory::remove(Query query, std::string collection)
 }
 
 /**
+ * Performs a MapReduce operation on the robot memory (https://docs.mongodb.com/manual/core/map-reduce/)
+ * @param query Which documents to use for the map step
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @param js_map_func Map function in JavaScript as string
+ * @param js_reduce_func Reduce function in JavaScript as string
+ * @return BSONObj containing the result
+ */
+BSONObj RobotMemory::mapreduce(mongo::Query query, std::string collection, std::string js_map_fun, std::string js_reduce_fun)
+{
+  check_collection_name(collection);
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
+  MutexLocker lock(mutex_);
+  log_deb(std::string("Executing MapReduce "+query.toString()+" on collection "+collection+
+    " map: " + js_map_fun + " reduce: " + js_reduce_fun));
+  return mongodb_client->mapreduce(collection, js_map_fun, js_reduce_fun, query);
+}
+
+/**
  * Drop (= remove) a whole collection and all documents inside it
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return 1: Success 0: Error
