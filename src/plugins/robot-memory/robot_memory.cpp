@@ -319,6 +319,31 @@ BSONObj RobotMemory::mapreduce(mongo::Query query, std::string collection, std::
 }
 
 /**
+ * Performs an aggregation operation on the robot memory (https://docs.mongodb.com/v3.2/reference/method/db.collection.aggregate/)
+ * @param pipeline A sequence of data aggregation operations or stages. See the https://docs.mongodb.com/v3.2/reference/operator/aggregation-pipeline/ for details
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @return Cursor to get the documents from, NULL for invalid pipeline
+ */
+QResCursor RobotMemory::aggregate(mongo::BSONObj pipeline, std::string collection)
+{
+  check_collection_name(collection);
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
+  MutexLocker lock(mutex_);
+  log_deb(std::string("Executing Aggregation pipeline: "+pipeline.toString() +" on collection "+collection));
+
+  QResCursor cursor;
+  try{
+    cursor = mongodb_client->aggregate(collection, pipeline);
+  } catch (DBException &e) {
+    std::string error = std::string("Error for query ")
+      + pipeline.toString() + "\n Exception: " + e.toString();
+    log(error, "error");
+    return NULL;
+  }
+  return cursor;
+}
+
+/**
  * Drop (= remove) a whole collection and all documents inside it
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return 1: Success 0: Error

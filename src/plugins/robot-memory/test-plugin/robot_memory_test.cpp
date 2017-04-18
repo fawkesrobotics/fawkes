@@ -127,11 +127,6 @@ TEST_F(RobotMemoryTest, RemoveInvalidCaught)
   ASSERT_THROW(robot_memory->remove("{([})]"), mongo::DBException);
 }
 
-TEST_F(RobotMemoryTest, AggregationQuery)
-{
-  //TODO: implement
-}
-
 TEST_F(RobotMemoryTest, JavaScriptQuery)
 {
   ASSERT_TRUE(robot_memory->insert("{'testname':'js-query',a:1,b:2}"));
@@ -243,6 +238,19 @@ TEST_F(RobotMemoryTest, MapReduceQuery)
       "function() { emit( this.product, this.amount);}",
       "function(key, values) { return Array.sum( values )}");
   ASSERT_TRUE(contains_pairs(res, fromjson("{ok: 1.0, results:[{_id:1.0, value:3.0}, {_id:2.0, value: 7.0}]}")));
+}
+
+TEST_F(RobotMemoryTest, AggregationQuery)
+{
+  //Test finds maximum with aggregation
+  ASSERT_TRUE(robot_memory->insert("{'testname':'agg', v:1}", "robmem.test"));
+  ASSERT_TRUE(robot_memory->insert("{'testname':'agg', v:333}", "robmem.test"));
+  ASSERT_TRUE(robot_memory->insert("{'testname':'agg', v:-20}", "robmem.test"));
+  ASSERT_TRUE(robot_memory->insert("{'testname':'not agg', v:666}", "robmem.test"));
+  QResCursor qres = robot_memory->aggregate(
+      fromjson("[{$match:{testname:'agg'}}, {$group: {_id:null, max:{$max: '$v'}}}]"), "robmem.test");
+  ASSERT_TRUE(qres->more());
+  ASSERT_TRUE(contains_pairs(qres->next(), fromjson("{max: 333}")));
 }
 
 
