@@ -23,6 +23,8 @@
 
 #include <core/threading/thread.h>
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <blackboard/interface_listener.h>
 #include <plugins/ros/aspect/ros.h>
 #include <interfaces/IMUInterface.h>
@@ -31,8 +33,10 @@
 
 class RosIMUThread
 : public fawkes::Thread,
-  public fawkes::BlackBoardAspect,
+  public fawkes::ConfigurableAspect,
+  public fawkes::LoggingAspect,
   public fawkes::ROSAspect,
+  public fawkes::BlackBoardAspect,
   public fawkes::BlackBoardInterfaceListener
 {
  public:

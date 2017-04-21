@@ -20,6 +20,8 @@
 
 #include "imu_thread.h"
 
+#include <interface/interface_info.h>
+
 #include <ros/this_node.h>
 #include <sensor_msgs/Imu.h>
 
@@ -51,8 +53,32 @@ RosIMUThread::~RosIMUThread()
 void
 RosIMUThread::init()
 {
-  ros_pub_ = rosnode->advertise<sensor_msgs::Imu>("/imu_data", 100);
-  iface_ = blackboard->open_for_reading<IMUInterface>("IMU Robotino");
+  std::string iface_name;
+  try {
+    iface_name = config->get_string("/ros/imu/interface");
+  } catch (Exception & e) {
+    InterfaceInfoList *imu_ifaces = blackboard->list("IMUInterface", "*");
+    if (imu_ifaces->empty()) {
+      logger->log_error(name(),
+        "Cannot use default IMUInterface: No IMUInterface found!");
+      throw;
+    } else {
+      iface_name = imu_ifaces->front().id();
+      logger->log_info(name(), "%s. Using first IMU interface '%s'.",
+        e.what_no_backtrace(), iface_name.c_str());
+    }
+  }
+  std::string ros_topic = "/imu/data";
+  try {
+    ros_topic = config->get_string("/ros/imu/topic");
+  } catch (Exception &e) {
+    // ignore, use default
+  }
+  logger->log_info(name(), "Publishing IMU '%s' to ROS topic '%s'.",
+    iface_name.c_str(), ros_topic.c_str());
+  ros_pub_ = rosnode->advertise<sensor_msgs::Imu>(ros_topic, 100);
+
+  iface_ = blackboard->open_for_reading<IMUInterface>(iface_name.c_str());
   bbil_add_data_interface(iface_);
   blackboard->register_listener(this);
 }
