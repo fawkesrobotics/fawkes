@@ -194,6 +194,11 @@ RobotinoSimThread::loop()
       imu_if_->set_orientation(1, q.y());
       imu_if_->set_orientation(2, q.z());
       imu_if_->set_orientation(3, q.w());
+      for (uint i = 0; i < 9u; i += 4) {
+        imu_if_->set_orientation_covariance(i, 1e-3);
+        imu_if_->set_angular_velocity_covariance(i, 1e-3);
+        imu_if_->set_linear_acceleration_covariance(i, 1e-3);
+      }
     } else {
       imu_if_->set_angular_velocity(0, -1.);
       imu_if_->set_orientation(0, -1.);
