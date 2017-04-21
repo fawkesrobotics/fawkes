@@ -102,6 +102,7 @@ RosIMUThread::bb_interface_data_changed(Interface *interface) throw()
   if (!imu_iface) return;
   imu_iface->read();
   sensor_msgs::Imu ros_imu;
+  ros_imu.header.frame_id = imu_iface->frame();
   ros_imu.orientation.x = imu_iface->orientation()[0];
   ros_imu.orientation.y = imu_iface->orientation()[1];
   ros_imu.orientation.z = imu_iface->orientation()[2];
