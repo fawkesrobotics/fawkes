@@ -740,7 +740,12 @@ AmclThread::loop()
       tf::StampedTransform tmp_tf_stamped(latest_tf_.inverse(),
 					  transform_expiration,
 					  global_frame_id_, odom_frame_id_);
-      tf_publisher->send_transform(tmp_tf_stamped);
+      try {
+        tf_publisher->send_transform(tmp_tf_stamped);
+      } catch (Exception &e) {
+        logger->log_error(name(), "Failed to publish transform: %s",
+            e.what_no_backtrace());
+      }
 
 
       // We need to apply the last transform to the latest odom pose to get
@@ -774,7 +779,12 @@ AmclThread::loop()
     tf::StampedTransform tmp_tf_stamped(latest_tf_.inverse(),
 					transform_expiration,
                                         global_frame_id_, odom_frame_id_);
-    tf_publisher->send_transform(tmp_tf_stamped);
+    try {
+        tf_publisher->send_transform(tmp_tf_stamped);
+    } catch (Exception &e) {
+      logger->log_error(name(), "Failed to publish transform: %s",
+          e.what_no_backtrace());
+    }
 
     // We need to apply the last transform to the latest odom pose to get
     // the latest map pose to store.  We'll take the covariance from
