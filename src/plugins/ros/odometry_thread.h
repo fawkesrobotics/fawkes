@@ -61,6 +61,7 @@ private:
   ros::Publisher pub_;
   std::string cfg_odom_frame_id_;
   std::string cfg_base_frame_id_;
+  boost::array<double, 36> odom_covariance_;
 };
 
 #endif
