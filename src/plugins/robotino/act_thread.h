@@ -6,6 +6,7 @@
  *  Copyright  2011-2014  Tim Niemueller [www.niemueller.de]
  *             2014       Sebastian Reuter
  *             2014       Tobias Neumann
+ *             2017       Till Hofmann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -107,6 +108,10 @@ class RobotinoActThread
 	float                           cfg_trans_decel_;
 	float                           cfg_rot_accel_;
 	float                           cfg_rot_decel_;
+
+#ifdef HAVE_TF
+	bool                            cfg_publish_transform_;
+#endif
 
 	bool                            gripper_close_;
 
