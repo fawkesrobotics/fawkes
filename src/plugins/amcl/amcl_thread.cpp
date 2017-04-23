@@ -104,6 +104,13 @@ void AmclThread::init()
   cfg_laser_ifname_ = config->get_string(AMCL_CFG_PREFIX"laser_interface_id");
   cfg_pose_ifname_ = config->get_string(AMCL_CFG_PREFIX"pose_interface_id");
 
+  // If set to true, use the latest available odom->base_link transform.
+  // If false, use the transform that matches the laser data timestamp.
+  cfg_use_latest_odom_ = false;
+  try {
+    cfg_use_latest_odom_ = config->get_bool(AMCL_CFG_PREFIX"use_latest_odom");
+  } catch (Exception & e) {} // ignore, use default
+
   map_ = fawkes::amcl::read_map(cfg_map_file_.c_str(),
 				cfg_origin_x_, cfg_origin_y_, cfg_resolution_,
 				cfg_occupied_thresh_, cfg_free_thresh_, free_space_indices);
@@ -717,9 +724,14 @@ AmclThread::loop()
           tmp_tf(tf::create_quaternion_from_yaw(hyps[max_weight_hyp].pf_pose_mean.v[2]),
                  tf::Vector3(hyps[max_weight_hyp].pf_pose_mean.v[0],
                              hyps[max_weight_hyp].pf_pose_mean.v[1], 0.0));
-        Time latest(0, 0);
+        Time odom_time;
+        if (cfg_use_latest_odom_) {
+          odom_time = Time(0,0);
+        } else {
+          odom_time = laser_if_->timestamp();
+        }
 	tf::Stamped<tf::Pose> tmp_tf_stamped(tmp_tf.inverse(),
-                                             latest, base_frame_id_);
+                                             odom_time, base_frame_id_);
 	tf_listener->transform_pose(odom_frame_id_,
                                     tmp_tf_stamped, odom_to_map);
       } catch (Exception &e) {
