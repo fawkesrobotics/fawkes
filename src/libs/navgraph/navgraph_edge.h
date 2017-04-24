@@ -71,6 +71,7 @@ class NavGraphEdge {
   { return to_node_; }
 
   fawkes::cart_coord_2d_t closest_point_on_edge(float x, float y) const;
+  float distance(float x, float y) const;
   bool intersects(float x1, float y1, float x2, float y2) const;
   bool intersection(float x1, float y1, float x2, float y2,
 		    fawkes::cart_coord_2d_t &ip) const;

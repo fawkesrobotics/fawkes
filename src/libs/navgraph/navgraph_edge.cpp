@@ -243,6 +243,24 @@ NavGraphEdge::closest_point_on_edge(float x, float y) const
 		  from_.c_str(), to_.c_str());
 }
 
+
+/** Get distance of point to closest point on edge.
+ * @param x X coordinate of point to get distance to closest point on edge for
+ * @param y Y coordinate of point to get distance to closest point on edge for
+ * @return distance to the closest point on the edge
+ */
+float
+NavGraphEdge::distance(float x, float y) const
+{
+	cart_coord_2d_t poe = closest_point_on_edge(x, y);
+	Eigen::Vector2f p;
+	p[0] = x; p[1] = y;
+	Eigen::Vector2f cp;
+	cp[0] = poe.x; cp[1] = poe.y;
+	return (p - cp).norm();
+}
+
+
 /** Check if the edge intersects with another line segment.
  * @param x1 X coordinate of first point of line segment to test
  * @param y1 Y coordinate of first point of line segment to test
