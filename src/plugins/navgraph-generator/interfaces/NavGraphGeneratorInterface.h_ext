@@ -134,7 +134,12 @@ class NavGraphGeneratorInterface : public Interface
 	      Grid-based algorithm with customizable spacing.
 
 	      Parameters:
-	      - spacing: the grid spacing in meters (float).
+	      - spacing: the grid spacing in meters
+	        (float, m, mandatory)
+	      - margin: the minimum distances of edges to obstacles
+	        (float, m, mandatory)
+	      - add-diagonals: enable adding of diagonal edges in grid cells
+	        (bool, optional, default: false)
        */
   } Algorithm;
   const char * tostring_Algorithm(Algorithm value) const;
