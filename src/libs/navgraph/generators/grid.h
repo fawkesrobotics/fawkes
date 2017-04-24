@@ -44,6 +44,7 @@ class NavGraphGeneratorGrid : public NavGraphGenerator
  private:
 	float spacing_;
 	float margin_;
+	bool  add_diagonals_;
 };
 
 } // end of namespace fawkes

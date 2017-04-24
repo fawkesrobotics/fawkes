@@ -72,6 +72,10 @@ NavGraphGeneratorGrid::NavGraphGeneratorGrid(const std::map<std::string, std::st
 	if (params.find("margin") == params.end()) {
 		throw Exception("Grid algorithm requires 'margin' parameter");
 	}
+	add_diagonals_ = false;
+	if (params.find("add-diagonals") != params.end()) {
+		add_diagonals_ = (params.at("add-diagonals") == "true");
+	}
 	try {
 		std::size_t pos;
 		spacing_ = std::stof(params.at("spacing"), &pos);
@@ -226,6 +230,17 @@ NavGraphGeneratorGrid::compute(fawkes::LockPtr<fawkes::NavGraph> graph)
 		  // connect to other row, unless it's the first row
 		  const size_t prev_i = (((i / nx) - 1) * nx) + (i % nx);
 		  graph->add_edge(NavGraphEdge(points[prev_i].first, points[i].first));
+
+		  if (add_diagonals_) {
+			  if (prev_i % nx > 0) {
+				  graph->add_edge(NavGraphEdge(points[prev_i - 1].first, points[i].first),
+				                  NavGraph::EDGE_SPLIT_INTERSECTION);
+			  }
+			  if (prev_i % nx < (nx - 1)) {
+				  graph->add_edge(NavGraphEdge(points[prev_i + 1].first, points[i].first),
+				                  NavGraph::EDGE_SPLIT_INTERSECTION);
+			  }
+		  }
 	  }
   }
 
