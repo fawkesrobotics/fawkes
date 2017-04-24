@@ -3,7 +3,7 @@
  *  NavGraphGeneratorInterface.cpp - Fawkes BlackBoard Interface - NavGraphGeneratorInterface
  *
  *  Templated created:   Thu Oct 12 10:49:19 2006
- *  Copyright  2015  Tim Niemueller
+ *  Copyright  2015-2017  Tim Niemueller
  *
  ****************************************************************************/
 
@@ -74,9 +74,15 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
+  add_fieldinfo(IFT_BOOL, "ok", 1, &data->ok);
+  add_fieldinfo(IFT_STRING, "error_message", 128, data->error_message);
   add_messageinfo("ClearMessage");
+  add_messageinfo("SetAlgorithmMessage");
+  add_messageinfo("SetAlgorithmParameterMessage");
   add_messageinfo("SetBoundingBoxMessage");
   add_messageinfo("SetFilterMessage");
   add_messageinfo("SetFilterParamFloatMessage");
@@ -91,7 +97,7 @@ NavGraphGeneratorInterface::NavGraphGeneratorInterface() : Interface()
   add_messageinfo("SetCopyGraphDefaultPropertiesMessage");
   add_messageinfo("RemovePointOfInterestMessage");
   add_messageinfo("ComputeMessage");
-  unsigned char tmp_hash[] = {0x5e, 0xdf, 0x82, 0xa5, 0x9f, 0x36, 0xc2, 0xb5, 0x43, 0xba, 0xb6, 0x5, 0x12, 0xf4, 0x9c, 0xd};
+  unsigned char tmp_hash[] = {0x58, 0xdd, 0x1d, 0xc9, 0x1d, 0x27, 0xfb, 0x8b, 0x25, 0xe5, 0xa1, 0x65, 0x45, 0x9b, 0x3c, 0xba};
   set_hash(tmp_hash);
 }
 
@@ -141,6 +147,19 @@ NavGraphGeneratorInterface::tostring_EdgeMode(EdgeMode value) const
   case NO_INTERSECTION: return "NO_INTERSECTION";
   case SPLIT_INTERSECTION: return "SPLIT_INTERSECTION";
   case FORCE: return "FORCE";
+  default: return "UNKNOWN";
+  }
+}
+/** Convert Algorithm constant to string.
+ * @param value value to convert to string
+ * @return constant value as string.
+ */
+const char *
+NavGraphGeneratorInterface::tostring_Algorithm(Algorithm value) const
+{
+  switch (value) {
+  case ALGORITHM_VORONOI: return "ALGORITHM_VORONOI";
+  case ALGORITHM_GRID: return "ALGORITHM_GRID";
   default: return "UNKNOWN";
   }
 }
@@ -221,12 +240,90 @@ NavGraphGeneratorInterface::set_final(const bool new_final)
   data_changed = true;
 }
 
+/** Get ok value.
+ * 
+	    Indicate success (true) or failure (false) of the most recent
+	    navgraph generation (valid if final equals true).
+    
+ * @return ok value
+ */
+bool
+NavGraphGeneratorInterface::is_ok() const
+{
+  return data->ok;
+}
+
+/** Get maximum length of ok value.
+ * @return length of ok value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::maxlenof_ok() const
+{
+  return 1;
+}
+
+/** Set ok value.
+ * 
+	    Indicate success (true) or failure (false) of the most recent
+	    navgraph generation (valid if final equals true).
+    
+ * @param new_ok new ok value
+ */
+void
+NavGraphGeneratorInterface::set_ok(const bool new_ok)
+{
+  data->ok = new_ok;
+  data_changed = true;
+}
+
+/** Get error_message value.
+ * 
+	    If the "ok" field is false, may give an additional clue about
+	    the encountered error.
+    
+ * @return error_message value
+ */
+char *
+NavGraphGeneratorInterface::error_message() const
+{
+  return data->error_message;
+}
+
+/** Get maximum length of error_message value.
+ * @return length of error_message value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::maxlenof_error_message() const
+{
+  return 128;
+}
+
+/** Set error_message value.
+ * 
+	    If the "ok" field is false, may give an additional clue about
+	    the encountered error.
+    
+ * @param new_error_message new error_message value
+ */
+void
+NavGraphGeneratorInterface::set_error_message(const char * new_error_message)
+{
+  strncpy(data->error_message, new_error_message, sizeof(data->error_message));
+  data_changed = true;
+}
+
 /* =========== message create =========== */
 Message *
 NavGraphGeneratorInterface::create_message(const char *type) const
 {
   if ( strncmp("ClearMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new ClearMessage();
+  } else if ( strncmp("SetAlgorithmMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetAlgorithmMessage();
+  } else if ( strncmp("SetAlgorithmParameterMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
+    return new SetAlgorithmParameterMessage();
   } else if ( strncmp("SetBoundingBoxMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
     return new SetBoundingBoxMessage();
   } else if ( strncmp("SetFilterMessage", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {
@@ -288,6 +385,9 @@ NavGraphGeneratorInterface::enum_tostring(const char *enumtype, int val) const
   if (strcmp(enumtype, "EdgeMode") == 0) {
     return tostring_EdgeMode((EdgeMode)val);
   }
+  if (strcmp(enumtype, "Algorithm") == 0) {
+    return tostring_Algorithm((Algorithm)val);
+  }
   throw UnknownTypeException("Unknown enum type %s", enumtype);
 }
 
@@ -318,6 +418,8 @@ NavGraphGeneratorInterface::ClearMessage::ClearMessage() : Message("ClearMessage
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
 }
 
 /** Destructor */
@@ -348,6 +450,282 @@ Message *
 NavGraphGeneratorInterface::ClearMessage::clone() const
 {
   return new NavGraphGeneratorInterface::ClearMessage(this);
+}
+/** @class NavGraphGeneratorInterface::SetAlgorithmMessage <interfaces/NavGraphGeneratorInterface.h>
+ * SetAlgorithmMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_algorithm initial value for algorithm
+ */
+NavGraphGeneratorInterface::SetAlgorithmMessage::SetAlgorithmMessage(const Algorithm ini_algorithm) : Message("SetAlgorithmMessage")
+{
+  data_size = sizeof(SetAlgorithmMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetAlgorithmMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->algorithm = ini_algorithm;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
+  enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
+  enum_map_FilterType[(int)FILTER_EDGES_BY_MAP] = "FILTER_EDGES_BY_MAP";
+  enum_map_FilterType[(int)FILTER_ORPHAN_NODES] = "FILTER_ORPHAN_NODES";
+  enum_map_FilterType[(int)FILTER_MULTI_GRAPH] = "FILTER_MULTI_GRAPH";
+  enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
+  enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
+  enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
+  add_fieldinfo(IFT_ENUM, "algorithm", 1, &data->algorithm, "Algorithm", &enum_map_Algorithm);
+}
+/** Constructor */
+NavGraphGeneratorInterface::SetAlgorithmMessage::SetAlgorithmMessage() : Message("SetAlgorithmMessage")
+{
+  data_size = sizeof(SetAlgorithmMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetAlgorithmMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
+  enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
+  enum_map_FilterType[(int)FILTER_EDGES_BY_MAP] = "FILTER_EDGES_BY_MAP";
+  enum_map_FilterType[(int)FILTER_ORPHAN_NODES] = "FILTER_ORPHAN_NODES";
+  enum_map_FilterType[(int)FILTER_MULTI_GRAPH] = "FILTER_MULTI_GRAPH";
+  enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
+  enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
+  enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
+  add_fieldinfo(IFT_ENUM, "algorithm", 1, &data->algorithm, "Algorithm", &enum_map_Algorithm);
+}
+
+/** Destructor */
+NavGraphGeneratorInterface::SetAlgorithmMessage::~SetAlgorithmMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavGraphGeneratorInterface::SetAlgorithmMessage::SetAlgorithmMessage(const SetAlgorithmMessage *m) : Message("SetAlgorithmMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetAlgorithmMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get algorithm value.
+ * Algorithm to use.
+ * @return algorithm value
+ */
+NavGraphGeneratorInterface::Algorithm
+NavGraphGeneratorInterface::SetAlgorithmMessage::algorithm() const
+{
+  return (NavGraphGeneratorInterface::Algorithm)data->algorithm;
+}
+
+/** Get maximum length of algorithm value.
+ * @return length of algorithm value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::SetAlgorithmMessage::maxlenof_algorithm() const
+{
+  return 1;
+}
+
+/** Set algorithm value.
+ * Algorithm to use.
+ * @param new_algorithm new algorithm value
+ */
+void
+NavGraphGeneratorInterface::SetAlgorithmMessage::set_algorithm(const Algorithm new_algorithm)
+{
+  data->algorithm = new_algorithm;
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavGraphGeneratorInterface::SetAlgorithmMessage::clone() const
+{
+  return new NavGraphGeneratorInterface::SetAlgorithmMessage(this);
+}
+/** @class NavGraphGeneratorInterface::SetAlgorithmParameterMessage <interfaces/NavGraphGeneratorInterface.h>
+ * SetAlgorithmParameterMessage Fawkes BlackBoard Interface Message.
+ * 
+    
+ */
+
+
+/** Constructor with initial values.
+ * @param ini_param initial value for param
+ * @param ini_value initial value for value
+ */
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::SetAlgorithmParameterMessage(const char * ini_param, const char * ini_value) : Message("SetAlgorithmParameterMessage")
+{
+  data_size = sizeof(SetAlgorithmParameterMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetAlgorithmParameterMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  strncpy(data->param, ini_param, 32);
+  strncpy(data->value, ini_value, 64);
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
+  enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
+  enum_map_FilterType[(int)FILTER_EDGES_BY_MAP] = "FILTER_EDGES_BY_MAP";
+  enum_map_FilterType[(int)FILTER_ORPHAN_NODES] = "FILTER_ORPHAN_NODES";
+  enum_map_FilterType[(int)FILTER_MULTI_GRAPH] = "FILTER_MULTI_GRAPH";
+  enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
+  enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
+  enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
+  add_fieldinfo(IFT_STRING, "param", 32, data->param);
+  add_fieldinfo(IFT_STRING, "value", 64, data->value);
+}
+/** Constructor */
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::SetAlgorithmParameterMessage() : Message("SetAlgorithmParameterMessage")
+{
+  data_size = sizeof(SetAlgorithmParameterMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (SetAlgorithmParameterMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
+  enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
+  enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE] = "CLOSEST_EDGE";
+  enum_map_ConnectionMode[(int)CLOSEST_EDGE_OR_NODE] = "CLOSEST_EDGE_OR_NODE";
+  enum_map_FilterType[(int)FILTER_EDGES_BY_MAP] = "FILTER_EDGES_BY_MAP";
+  enum_map_FilterType[(int)FILTER_ORPHAN_NODES] = "FILTER_ORPHAN_NODES";
+  enum_map_FilterType[(int)FILTER_MULTI_GRAPH] = "FILTER_MULTI_GRAPH";
+  enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
+  enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
+  enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
+  add_fieldinfo(IFT_STRING, "param", 32, data->param);
+  add_fieldinfo(IFT_STRING, "value", 64, data->value);
+}
+
+/** Destructor */
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::~SetAlgorithmParameterMessage()
+{
+  free(data_ptr);
+}
+
+/** Copy constructor.
+ * @param m message to copy from
+ */
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::SetAlgorithmParameterMessage(const SetAlgorithmParameterMessage *m) : Message("SetAlgorithmParameterMessage")
+{
+  data_size = m->data_size;
+  data_ptr  = malloc(data_size);
+  memcpy(data_ptr, m->data_ptr, data_size);
+  data      = (SetAlgorithmParameterMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+}
+
+/* Methods */
+/** Get param value.
+ * Parameter name, see
+    Algorithm enum description for algorithm-specific
+    parameters. Unknown parameters will be ignored.
+ * @return param value
+ */
+char *
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::param() const
+{
+  return data->param;
+}
+
+/** Get maximum length of param value.
+ * @return length of param value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::maxlenof_param() const
+{
+  return 32;
+}
+
+/** Set param value.
+ * Parameter name, see
+    Algorithm enum description for algorithm-specific
+    parameters. Unknown parameters will be ignored.
+ * @param new_param new param value
+ */
+void
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::set_param(const char * new_param)
+{
+  strncpy(data->param, new_param, sizeof(data->param));
+}
+
+/** Get value value.
+ * Value of parameter
+    encoded as string. The algorithm will perform the conversion to
+    the required data type (e.g., float). An error will make the
+    generation fail.
+ * @return value value
+ */
+char *
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::value() const
+{
+  return data->value;
+}
+
+/** Get maximum length of value value.
+ * @return length of value value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::maxlenof_value() const
+{
+  return 64;
+}
+
+/** Set value value.
+ * Value of parameter
+    encoded as string. The algorithm will perform the conversion to
+    the required data type (e.g., float). An error will make the
+    generation fail.
+ * @param new_value new value value
+ */
+void
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::set_value(const char * new_value)
+{
+  strncpy(data->value, new_value, sizeof(data->value));
+}
+
+/** Clone this message.
+ * Produces a message of the same type as this message and copies the
+ * data to the new message.
+ * @return clone of this message
+ */
+Message *
+NavGraphGeneratorInterface::SetAlgorithmParameterMessage::clone() const
+{
+  return new NavGraphGeneratorInterface::SetAlgorithmParameterMessage(this);
 }
 /** @class NavGraphGeneratorInterface::SetBoundingBoxMessage <interfaces/NavGraphGeneratorInterface.h>
  * SetBoundingBoxMessage Fawkes BlackBoard Interface Message.
@@ -384,6 +762,8 @@ NavGraphGeneratorInterface::SetBoundingBoxMessage::SetBoundingBoxMessage(const f
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_FLOAT, "p1_x", 1, &data->p1_x);
   add_fieldinfo(IFT_FLOAT, "p1_y", 1, &data->p1_y);
   add_fieldinfo(IFT_FLOAT, "p2_x", 1, &data->p2_x);
@@ -408,6 +788,8 @@ NavGraphGeneratorInterface::SetBoundingBoxMessage::SetBoundingBoxMessage() : Mes
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_FLOAT, "p1_x", 1, &data->p1_x);
   add_fieldinfo(IFT_FLOAT, "p1_y", 1, &data->p1_y);
   add_fieldinfo(IFT_FLOAT, "p2_x", 1, &data->p2_x);
@@ -594,6 +976,8 @@ NavGraphGeneratorInterface::SetFilterMessage::SetFilterMessage(const FilterType 
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_ENUM, "filter", 1, &data->filter, "FilterType", &enum_map_FilterType);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
@@ -616,6 +1000,8 @@ NavGraphGeneratorInterface::SetFilterMessage::SetFilterMessage() : Message("SetF
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_ENUM, "filter", 1, &data->filter, "FilterType", &enum_map_FilterType);
   add_fieldinfo(IFT_BOOL, "enable", 1, &data->enable);
 }
@@ -746,6 +1132,8 @@ NavGraphGeneratorInterface::SetFilterParamFloatMessage::SetFilterParamFloatMessa
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_ENUM, "filter", 1, &data->filter, "FilterType", &enum_map_FilterType);
   add_fieldinfo(IFT_STRING, "param", 32, data->param);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
@@ -769,6 +1157,8 @@ NavGraphGeneratorInterface::SetFilterParamFloatMessage::SetFilterParamFloatMessa
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_ENUM, "filter", 1, &data->filter, "FilterType", &enum_map_FilterType);
   add_fieldinfo(IFT_STRING, "param", 32, data->param);
   add_fieldinfo(IFT_FLOAT, "value", 1, &data->value);
@@ -928,6 +1318,8 @@ NavGraphGeneratorInterface::AddMapObstaclesMessage::AddMapObstaclesMessage(const
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_FLOAT, "max_line_point_distance", 1, &data->max_line_point_distance);
 }
 /** Constructor */
@@ -949,6 +1341,8 @@ NavGraphGeneratorInterface::AddMapObstaclesMessage::AddMapObstaclesMessage() : M
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_FLOAT, "max_line_point_distance", 1, &data->max_line_point_distance);
 }
 
@@ -1050,6 +1444,8 @@ NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage(const char * 
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
@@ -1073,6 +1469,8 @@ NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage() : Message("
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
@@ -1230,6 +1628,8 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage(const c
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 /** Constructor */
@@ -1251,6 +1651,8 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage() : Mes
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
@@ -1352,6 +1754,8 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
@@ -1376,6 +1780,8 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
@@ -1576,6 +1982,8 @@ NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterest
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
@@ -1601,6 +2009,8 @@ NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterest
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_FLOAT, "x", 1, &data->x);
   add_fieldinfo(IFT_FLOAT, "y", 1, &data->y);
@@ -1828,6 +2238,8 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInteres
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
   add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
@@ -1851,6 +2263,8 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInteres
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
   add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
   add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
@@ -2016,6 +2430,8 @@ NavGraphGeneratorInterface::AddEdgeMessage::AddEdgeMessage(const char * ini_p1, 
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "p1", 64, data->p1);
   add_fieldinfo(IFT_STRING, "p2", 64, data->p2);
   add_fieldinfo(IFT_BOOL, "directed", 1, &data->directed);
@@ -2040,6 +2456,8 @@ NavGraphGeneratorInterface::AddEdgeMessage::AddEdgeMessage() : Message("AddEdgeM
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "p1", 64, data->p1);
   add_fieldinfo(IFT_STRING, "p2", 64, data->p2);
   add_fieldinfo(IFT_BOOL, "directed", 1, &data->directed);
@@ -2232,6 +2650,8 @@ NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::SetGraphDefaultPrope
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
   add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
 }
@@ -2254,6 +2674,8 @@ NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::SetGraphDefaultPrope
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "property_name", 64, data->property_name);
   add_fieldinfo(IFT_STRING, "property_value", 1024, data->property_value);
 }
@@ -2378,6 +2800,8 @@ NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::SetCopyGraphDe
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_BOOL, "enable_copy", 1, &data->enable_copy);
 }
 /** Constructor */
@@ -2399,6 +2823,8 @@ NavGraphGeneratorInterface::SetCopyGraphDefaultPropertiesMessage::SetCopyGraphDe
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_BOOL, "enable_copy", 1, &data->enable_copy);
 }
 
@@ -2492,6 +2918,8 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestM
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 /** Constructor */
@@ -2513,6 +2941,8 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestM
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
   add_fieldinfo(IFT_STRING, "name", 64, data->name);
 }
 
@@ -2605,6 +3035,8 @@ NavGraphGeneratorInterface::ComputeMessage::ComputeMessage() : Message("ComputeM
   enum_map_EdgeMode[(int)NO_INTERSECTION] = "NO_INTERSECTION";
   enum_map_EdgeMode[(int)SPLIT_INTERSECTION] = "SPLIT_INTERSECTION";
   enum_map_EdgeMode[(int)FORCE] = "FORCE";
+  enum_map_Algorithm[(int)ALGORITHM_VORONOI] = "ALGORITHM_VORONOI";
+  enum_map_Algorithm[(int)ALGORITHM_GRID] = "ALGORITHM_GRID";
 }
 
 /** Destructor */
@@ -2647,60 +3079,68 @@ NavGraphGeneratorInterface::message_valid(const Message *message) const
   if ( m0 != NULL ) {
     return true;
   }
-  const SetBoundingBoxMessage *m1 = dynamic_cast<const SetBoundingBoxMessage *>(message);
+  const SetAlgorithmMessage *m1 = dynamic_cast<const SetAlgorithmMessage *>(message);
   if ( m1 != NULL ) {
     return true;
   }
-  const SetFilterMessage *m2 = dynamic_cast<const SetFilterMessage *>(message);
+  const SetAlgorithmParameterMessage *m2 = dynamic_cast<const SetAlgorithmParameterMessage *>(message);
   if ( m2 != NULL ) {
     return true;
   }
-  const SetFilterParamFloatMessage *m3 = dynamic_cast<const SetFilterParamFloatMessage *>(message);
+  const SetBoundingBoxMessage *m3 = dynamic_cast<const SetBoundingBoxMessage *>(message);
   if ( m3 != NULL ) {
     return true;
   }
-  const AddMapObstaclesMessage *m4 = dynamic_cast<const AddMapObstaclesMessage *>(message);
+  const SetFilterMessage *m4 = dynamic_cast<const SetFilterMessage *>(message);
   if ( m4 != NULL ) {
     return true;
   }
-  const AddObstacleMessage *m5 = dynamic_cast<const AddObstacleMessage *>(message);
+  const SetFilterParamFloatMessage *m5 = dynamic_cast<const SetFilterParamFloatMessage *>(message);
   if ( m5 != NULL ) {
     return true;
   }
-  const RemoveObstacleMessage *m6 = dynamic_cast<const RemoveObstacleMessage *>(message);
+  const AddMapObstaclesMessage *m6 = dynamic_cast<const AddMapObstaclesMessage *>(message);
   if ( m6 != NULL ) {
     return true;
   }
-  const AddPointOfInterestMessage *m7 = dynamic_cast<const AddPointOfInterestMessage *>(message);
+  const AddObstacleMessage *m7 = dynamic_cast<const AddObstacleMessage *>(message);
   if ( m7 != NULL ) {
     return true;
   }
-  const AddPointOfInterestWithOriMessage *m8 = dynamic_cast<const AddPointOfInterestWithOriMessage *>(message);
+  const RemoveObstacleMessage *m8 = dynamic_cast<const RemoveObstacleMessage *>(message);
   if ( m8 != NULL ) {
     return true;
   }
-  const SetPointOfInterestPropertyMessage *m9 = dynamic_cast<const SetPointOfInterestPropertyMessage *>(message);
+  const AddPointOfInterestMessage *m9 = dynamic_cast<const AddPointOfInterestMessage *>(message);
   if ( m9 != NULL ) {
     return true;
   }
-  const AddEdgeMessage *m10 = dynamic_cast<const AddEdgeMessage *>(message);
+  const AddPointOfInterestWithOriMessage *m10 = dynamic_cast<const AddPointOfInterestWithOriMessage *>(message);
   if ( m10 != NULL ) {
     return true;
   }
-  const SetGraphDefaultPropertyMessage *m11 = dynamic_cast<const SetGraphDefaultPropertyMessage *>(message);
+  const SetPointOfInterestPropertyMessage *m11 = dynamic_cast<const SetPointOfInterestPropertyMessage *>(message);
   if ( m11 != NULL ) {
     return true;
   }
-  const SetCopyGraphDefaultPropertiesMessage *m12 = dynamic_cast<const SetCopyGraphDefaultPropertiesMessage *>(message);
+  const AddEdgeMessage *m12 = dynamic_cast<const AddEdgeMessage *>(message);
   if ( m12 != NULL ) {
     return true;
   }
-  const RemovePointOfInterestMessage *m13 = dynamic_cast<const RemovePointOfInterestMessage *>(message);
+  const SetGraphDefaultPropertyMessage *m13 = dynamic_cast<const SetGraphDefaultPropertyMessage *>(message);
   if ( m13 != NULL ) {
     return true;
   }
-  const ComputeMessage *m14 = dynamic_cast<const ComputeMessage *>(message);
+  const SetCopyGraphDefaultPropertiesMessage *m14 = dynamic_cast<const SetCopyGraphDefaultPropertiesMessage *>(message);
   if ( m14 != NULL ) {
+    return true;
+  }
+  const RemovePointOfInterestMessage *m15 = dynamic_cast<const RemovePointOfInterestMessage *>(message);
+  if ( m15 != NULL ) {
+    return true;
+  }
+  const ComputeMessage *m16 = dynamic_cast<const ComputeMessage *>(message);
+  if ( m16 != NULL ) {
     return true;
   }
   return false;
