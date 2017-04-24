@@ -33,8 +33,8 @@ else
   ifneq ($(HAVE_ROBOT_MEMORY),1)
     WARN_TARGETS += warning_robot_memory
   endif
-  ifneq ($(HAVE_CLIPS),1)
-    WARN_TARGETS = warning_clips
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS = warning_cpp11
   endif
 endif
 
