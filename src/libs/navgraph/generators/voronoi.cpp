@@ -68,25 +68,6 @@ NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi()
 {
 }
 
-/** Constructor with bounding box.
- * This constructor will cause compute() to ignore any edge with a vertex
- * out of the given bounding box area.
- * @param bbox_p1_x X coordinate of first (lower) bounding box point
- * @param bbox_p1_y y coordinate of first (lower) bounding box point
- * @param bbox_p2_x X coordinate of second (upper) bounding box point
- * @param bbox_p2_y y coordinate of second (upper) bounding box point
- * @param near_threshold distance threshold for which to consider
- * nodes to be the same if the distance is smaller than this
- * threshold.
- */
-NavGraphGeneratorVoronoi::NavGraphGeneratorVoronoi(float bbox_p1_x, float bbox_p1_y,
-                                                   float bbox_p2_x, float bbox_p2_y,
-                                                   float near_threshold)
-	: NavGraphGenerator(bbox_p1_x, bbox_p1_y, bbox_p2_x, bbox_p2_y, near_threshold)
-{
-}
-
-
 /** Destructor. */
 NavGraphGeneratorVoronoi::~NavGraphGeneratorVoronoi()
 {

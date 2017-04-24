@@ -37,9 +37,6 @@ class NavGraphGeneratorVoronoi : public NavGraphGenerator
 {
  public:
 	NavGraphGeneratorVoronoi();
-	NavGraphGeneratorVoronoi(float bbox_p1_x, float bbox_p1_y,
-	                         float bbox_p2_x, float bbox_p2_y,
-	                         float near_threshold);
 	virtual ~NavGraphGeneratorVoronoi();
 
 	virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph);

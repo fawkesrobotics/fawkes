@@ -65,21 +65,12 @@ NavGraphGenerator::NavGraphGenerator()
 }
 
 /** Parametrized constructor.
- * @param bbox_p1_x X coordinate of first (lower) bounding box point
- * @param bbox_p1_y y coordinate of first (lower) bounding box point
- * @param bbox_p2_x X coordinate of second (upper) bounding box point
- * @param bbox_p2_y y coordinate of second (upper) bounding box point
- * @param near_threshold distance threshold for which to consider
- * nodes to be the same if the distance is smaller than this
- * threshold.
+ * @param params parameters
  */
-NavGraphGenerator::NavGraphGenerator(float bbox_p1_x, float bbox_p1_y,
-                                     float bbox_p2_x, float bbox_p2_y,
-                                                   float near_threshold)
-	: bbox_enabled_(true),
-	  bbox_p1_x_(bbox_p1_x), bbox_p1_y_(bbox_p1_y),
-	  bbox_p2_x_(bbox_p2_x), bbox_p2_y_(bbox_p2_y),
-	  near_threshold_(near_threshold)
+NavGraphGenerator::NavGraphGenerator(const std::map<std::string, std::string> params)
+	: bbox_enabled_(false),
+	  bbox_p1_x_(0.), bbox_p1_y_(0.), bbox_p2_x_(0.), bbox_p2_y_(0.),
+	  near_threshold_(0.01), params_(params)
 {
 }
 
