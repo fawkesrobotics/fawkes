@@ -41,6 +41,9 @@ else
   ifneq ($(HAVE_TF),1)
     WARN_TARGETS += warning_tf
   endif
+  ifeq ($(OLDER_THAN_XENIAL),1)
+    WARN_TARGETS += warning_ubuntu
+  endif
   ifneq ($(HAVE_BOOST_LIBS),1)
     WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
   endif
@@ -50,13 +53,15 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_robot_memory warning_mongodb warning_tf
+.PHONY: warning_robot_memory warning_mongodb warning_tf warning_ubuntu
 warning_robot_memory:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL)"
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (mongodb[-devel] not installed)"
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (tf framework not available)"
+warning_ubuntu:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (Ubuntu version is too old)"
 $(WARN_TARGETS_BOOST): warning_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build RobotMemory Plugin$(TNORMAL) (Boost library $* not found)"endif
 endif
