@@ -23,6 +23,12 @@ HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 ifeq ($(HAVE_MONGODB)$(HAVE_TF)$(HAVE_BOOST_LIBS),111)
   HAVE_ROBOT_MEMORY = 1
+  ifeq ($(DISTRO),ubuntu)
+    OLDER_THAN_XENIAL=$(shell [[ "$(DISTRO_VERSION)" < "16.04" ]] && echo 1)
+    ifeq ($(OLDER_THAN_XENIAL),1)
+      HAVE_ROBOT_MEMORY = 0
+    endif
+  endif
   CFLAGS_ROBOT_MEMORY = $(CFLAGS_TF) $(CFLAGS_MONGODB) \
                         $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
   LDFLAGS_ROBOT_MEMORY = $(LDFLAGS_TF) $(LDFLAGS_MONGODB) \
