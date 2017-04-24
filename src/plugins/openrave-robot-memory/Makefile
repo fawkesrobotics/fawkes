@@ -16,7 +16,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
+include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 
 LIBS_openrave_robot_memory = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface fawkesrobotmemory \
@@ -26,13 +26,12 @@ OBJS_openrave_robot_memory = openrave-robot-memory_plugin.o openrave-robot-memor
 
 OBJS_all = $(OBJS_openrave-robot-memory)
 
-ifeq ($(HAVE_CPP11)$(HAVE_MONGODB),11)
+ifeq ($(HAVE_CPP11)$(HAVE_ROBOT_MEMORY),11)
   CFLAGS  += $(CFLAGS_CPP11)
-  
   PLUGINS_all = $(PLUGINDIR)/openrave-robot-memory.$(SOEXT)
 else
-  ifneq ($(HAVE_MONGODB),1)
-    WARN_TARGETS += warning_mongodb
+  ifneq ($(HAVE_ROBOT_MEMORY),1)
+    WARN_TARGETS += warning_robot_memory
   endif
   ifneq ($(HAVE_CLIPS),1)
     WARN_TARGETS = warning_clips
@@ -42,9 +41,9 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_mongodb warning_cpp11
-warning_mongodb:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting openrave-robot-memory Plugin$(TNORMAL) (mongodb[-devel] not installed)"
+.PHONY: warning_robot_memory warning_cpp11
+warning_robot_memory:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting openrave-robot-memory Plugin$(TNORMAL) (robot-memory not available)"
 warning_cpp11:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build clips-robot-memory plugin$(TNORMAL) (C++11 not supported)"
 endif
