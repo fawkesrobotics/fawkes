@@ -16,15 +16,10 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDCONFDIR)/tf/tf.mk
-include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
-include $(BASEDIR)/etc/buildsys/boost.mk
+include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 
 PRESUBDIRS = interfaces aspect
 SUBDIRS = test-plugin
-
-REQ_BOOST_LIBS = bind function
-HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 LIBS_robot_memory = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesmongodbaspect fvutils \
@@ -34,9 +29,9 @@ OBJS_robot_memory += $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$
 
 OBJS_all    = $(OBJS_robot_memory)
 
-ifeq ($(HAVE_MONGODB)$(HAVE_TF)$(HAVE_BOOST_LIBS),111)
-  CFLAGS += $(CFLAGS_TF) $(CFLAGS_MONGODB) $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
-  LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_MONGODB) $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
+ifeq ($(HAVE_ROBOT_MEMORY),1)
+  CFLAGS += $(CFLAGS_ROBOT_MEMORY)
+  LDFLAGS += $(LDFLAGS_ROBOT_MEMORY)
   PLUGINS_all = $(PLUGINDIR)/robot-memory.so
 else
   ifneq ($(HAVE_MONGODB),1)
