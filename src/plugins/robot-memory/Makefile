@@ -34,6 +34,7 @@ ifeq ($(HAVE_ROBOT_MEMORY),1)
   LDFLAGS += $(LDFLAGS_ROBOT_MEMORY)
   PLUGINS_all = $(PLUGINDIR)/robot-memory.so
 else
+  WARN_TARGETS += warning_robot_memory
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb
   endif
@@ -45,10 +46,13 @@ else
   endif
 endif
 
+
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_mongodb warning_tf
+.PHONY: warning_robot_memory warning_mongodb warning_tf
+warning_robot_memory:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL)"
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (mongodb[-devel] not installed)"
 warning_tf:
