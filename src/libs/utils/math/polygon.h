@@ -39,7 +39,7 @@ typedef std::vector<Eigen::Vector2f, Eigen::aligned_allocator<Eigen::Vector2f> >
  * @param p polygon
  * @return area of polygon
  */
-float
+inline float
 polygon_area(const Polygon2D &p)
 { 
   float area = 0.;
@@ -66,7 +66,7 @@ polygon_area(const Polygon2D &p)
  * @param point point to check if it lies within the given polygon
  * @return true if the point lies inside the polygon, false otherwise
  */
-bool
+inline bool
 polygon_contains(const Polygon2D &polygon, const Eigen::Vector2f &point)
 {
 	bool in_poly = false;
@@ -129,7 +129,7 @@ polygon_contains(const Polygon2D &polygon, const Eigen::Vector2f &point)
  * @param p polygon
  * @return centroid
  */
-Eigen::Vector2f
+inline Eigen::Vector2f
 polygon_centroid(const Polygon2D &p)
 {
 	Eigen::Vector2f centroid(0.,0.);
