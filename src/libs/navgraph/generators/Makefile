@@ -23,7 +23,7 @@ include $(BUILDSYSDIR)/eigen3.mk
 
 LIBS_libfawkesnavgraphgenerators = fawkescore fawkesaspects fawkesutils \
 				   fawkesnavgraph
-OBJS_libfawkesnavgraphgenerators = generator.o voronoi.o
+OBJS_libfawkesnavgraphgenerators = generator.o voronoi.o grid.o
 
 OBJS_all    = $(OBJS_libfawkesnavgraphgenerators)
 
