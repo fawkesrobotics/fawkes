@@ -208,8 +208,18 @@ NavGraphGeneratorThread::loop()
     navgraph->set_default_property(p.first, p.second);
   }
 
-  logger->log_debug(name(), "  Computing Voronoi");
-  ng->compute(navgraph);
+  logger->log_debug(name(), "  Computing navgraph");
+  try {
+	  ng->compute(navgraph);
+  } catch (Exception &e) {
+	  logger->log_error(name(), "Failed to compute navgraph, exception follows");
+	  logger->log_error(name(), e);
+	  navgen_if_->set_ok(false);
+	  navgen_if_->set_error_message(e.what_no_backtrace());
+	  navgen_if_->write();
+	  navgraph->set_notifications_enabled(true);
+	  return;
+  }
 
   // post-processing
   if (filter_["FILTER_EDGES_BY_MAP"]) {
