@@ -17,6 +17,7 @@
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gtest.mk
+include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 
 LIBS_robot_memory_test = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface fawkesrobotmemory \
@@ -26,21 +27,33 @@ OBJS_robot_memory_test = robot_memory_test_plugin.o robot_memory_test_thread.o r
 
 OBJS_all = $(OBJS_robot_memory_test)
 
-ifeq ($(HAVE_GTEST)$(HAVE_CPP11),11)
+ifeq ($(HAVE_ROBOT_MEMORY)$(HAVE_GTEST)$(HAVE_CPP11),111)
   CFLAGS += $(CFLAGS_GTEST)
   CFLAGS += $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_GTEST)
   PLUGINS_all = $(PLUGINDIR)/robot_memory_test.$(SOEXT)
 else
-  WARN_TARGETS += warning_gtest
+  ifneq ($(HAVE_ROBOT_MEMORY),1)
+    WARN_TARGETS += warning_robot_memory
+  endif
+  ifneq ($(HAVE_GTEST),1)
+    WARN_TARGETS += warning_gtest
+  endif
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 test: $(WARN_TARGETS)
 
-.PHONY: warning_gtest
+.PHONY: warning_robot_memory warning_gtest warning_cpp11
+warning_robot_memory:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting unit tests for Robot Memory$(TNORMAL) (robot memory not available)"
 warning_gtest:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting unit tests for Robot Memory$(TNORMAL) (gtest or cpp11 not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting unit tests for Robot Memory$(TNORMAL) (gtest not available)"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting unit tests for Robot Memory$(TNORMAL) (no C++11 support)"
 
 endif
 
