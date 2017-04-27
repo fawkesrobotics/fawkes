@@ -78,6 +78,8 @@ RosNavigatorThread::check_status()
       nav_if_->set_error_code(0);
     }
     else if (ac_->getState() == actionlib::SimpleClientGoalState::ABORTED ||
+             ac_->getState() == actionlib::SimpleClientGoalState::LOST ||
+             ac_->getState() == actionlib::SimpleClientGoalState::PREEMPTED ||
              ac_->getState() == actionlib::SimpleClientGoalState::REJECTED)
     {
       nav_if_->set_final(true);
