@@ -145,42 +145,6 @@ GazsimCommThread::loop()
 }
 
 /**
- * Receive and forward msg
- * @param endpoint port msg received from
- * @param component_id message_component_id
- * @param msg_type msg_type
- * @param msg Message
- */
-void
-GazsimCommThread::receive_msg(boost::asio::ip::udp::endpoint &endpoint,
-		       uint16_t component_id, uint16_t msg_type,
-		       std::shared_ptr<google::protobuf::Message> msg)
-{
-  //logger->log_info(name(), "Got Peer Message from port %d", endpoint.port());
-  unsigned int incoming_peer_port = endpoint.port(); //this is suprisingly the send-port
- 
-  if(!initialized_)
-  {
-    return;
-  }
-
-  //simulate package loss
-  double rnd = ((double) rand()) / ((double) RAND_MAX); //0.0 <= rnd <= 1.0
-  if(rnd < package_loss_)
-  {
-    return;
-  }
-  //send message to all other peers
-  for(unsigned int i = 0; i < peers_.size(); i++)
-  {
-    if(send_ports_[i] != incoming_peer_port)
-    {
-      peers_[i]->send(msg);
-    }
-  }
-}
-
-/**
  * Receive and forward raw msg
  * @param endpoint port msg received from
  * @param header header of the msg
