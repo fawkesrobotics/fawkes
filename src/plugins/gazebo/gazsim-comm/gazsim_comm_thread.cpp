@@ -112,17 +112,20 @@ GazsimCommThread::init()
     peers_[i] = new ProtobufBroadcastPeer(addresses_[i], send_ports_[i],
 					  recv_ports_[i], proto_dirs_);
     peers_[i]->signal_received_raw().connect(boost::bind(&GazsimCommThread::receive_raw_msg, this, _1, _2, _3, _4));
+    peers_[i]->signal_send_error().connect(boost::bind(&GazsimCommThread::peer_send_error, this, addresses_[i], send_ports_[i], _1));
     if(use_crypto1_)
     {
       peers_crypto1_[i] = new ProtobufBroadcastPeer(addresses_[i], send_ports_crypto1_[i],
 					  recv_ports_crypto1_[i], proto_dirs_);
       peers_crypto1_[i]->signal_received_raw().connect(boost::bind(&GazsimCommThread::receive_raw_msg, this, _1, _2, _3, _4));
+      peers_crypto1_[i]->signal_send_error().connect(boost::bind(&GazsimCommThread::peer_send_error, this, addresses_[i], send_ports_crypto1_[i], _1));
     }
     if(use_crypto2_)
     {
       peers_crypto2_[i] = new ProtobufBroadcastPeer(addresses_[i], send_ports_crypto2_[i],
 						    recv_ports_crypto2_[i], proto_dirs_);
       peers_crypto2_[i]->signal_received_raw().connect(boost::bind(&GazsimCommThread::receive_raw_msg, this, _1, _2, _3, _4));
+      peers_crypto2_[i]->signal_send_error().connect(boost::bind(&GazsimCommThread::peer_send_error, this, addresses_[i], send_ports_crypto2_[i], _1));
     }
   }
   initialized_ = true;
@@ -198,4 +201,10 @@ GazsimCommThread::receive_raw_msg(boost::asio::ip::udp::endpoint &endpoint,
       peers[i]->send_raw(header, data, length);
     }
   }
+}
+
+void
+GazsimCommThread::peer_send_error(std::string address, unsigned int port, std::string err)
+{
+	logger->log_warn(name(), "Peer send error for %s:%u: %s", address.c_str(), port, err.c_str());
 }
