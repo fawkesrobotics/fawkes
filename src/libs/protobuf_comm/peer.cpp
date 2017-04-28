@@ -60,7 +60,8 @@ namespace protobuf_comm {
  */ 
 ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned short port)
   : io_service_(), resolver_(io_service_),
-    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port))
+    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port)),
+    resolve_retry_timer_(io_service_)
 {
   message_register_ = new MessageRegister();
   own_message_register_ = true;
@@ -80,7 +81,8 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 					     unsigned short send_to_port,
 					     unsigned short recv_on_port)
   : io_service_(), resolver_(io_service_),
-    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port))
+    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port)),
+    resolve_retry_timer_(io_service_)
 {
   message_register_ = new MessageRegister();
   own_message_register_ = true;
@@ -95,7 +97,8 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned short port,
 					     std::vector<std::string> &proto_path)
   : io_service_(), resolver_(io_service_),
-    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port))
+    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port)),
+    resolve_retry_timer_(io_service_)
 {
   message_register_ = new MessageRegister(proto_path);
   own_message_register_ = true;
@@ -117,7 +120,8 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 					     unsigned short recv_on_port,
 					     std::vector<std::string> &proto_path)
   : io_service_(), resolver_(io_service_),
-    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port))
+    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port)),
+    resolve_retry_timer_(io_service_)
 {
   message_register_ = new MessageRegister(proto_path);
   own_message_register_ = true;
@@ -134,6 +138,7 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned
 					     MessageRegister *mr)
   : io_service_(), resolver_(io_service_),
     socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port)),
+    resolve_retry_timer_(io_service_),
     message_register_(mr), own_message_register_(false)
 {
   ctor(address, port);
@@ -150,7 +155,8 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 					     unsigned short send_to_port, unsigned short recv_on_port,
 					     const std::string crypto_key, const std::string cipher)
   : io_service_(), resolver_(io_service_),
-    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port))
+    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port)),
+    resolve_retry_timer_(io_service_)
 {
   ctor(address, send_to_port, crypto_key, cipher);
   message_register_ = new MessageRegister();
@@ -171,6 +177,7 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 					     const std::string crypto_key, const std::string cipher)
   : io_service_(), resolver_(io_service_),
     socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port)),
+    resolve_retry_timer_(io_service_),
     message_register_(mr), own_message_register_(false)
 {
   ctor(address, send_to_port, crypto_key, cipher);
@@ -185,7 +192,8 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned short port,
 					     const std::string crypto_key, const std::string cipher)
   : io_service_(), resolver_(io_service_),
-    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port))
+    socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port)),
+    resolve_retry_timer_(io_service_)
 {
   ctor(address, port, crypto_key, cipher);
   message_register_ = new MessageRegister();
@@ -204,6 +212,7 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address, unsigned
 					     const std::string crypto_key, const std::string cipher)
   : io_service_(), resolver_(io_service_),
     socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), port)),
+    resolve_retry_timer_(io_service_),
     message_register_(mr), own_message_register_(false)
 {
   ctor(address, port, crypto_key, cipher);
@@ -227,6 +236,7 @@ ProtobufBroadcastPeer::ProtobufBroadcastPeer(const std::string address,
 					     frame_header_version_t header_version)
   : io_service_(), resolver_(io_service_),
     socket_(io_service_, ip::udp::endpoint(ip::udp::v4(), recv_on_port)),
+    resolve_retry_timer_(io_service_),
     message_register_(mr), own_message_register_(false)
 {
   ctor(address, send_to_port, "", "", header_version);
@@ -251,6 +261,9 @@ ProtobufBroadcastPeer::ctor(const std::string &address, unsigned int send_to_por
   crypto_dec_   = NULL;
   frame_header_version_ = header_version;
 
+  send_to_address_ = address;
+  send_to_port_    = send_to_port;
+  
   in_data_size_ = max_packet_length;
   in_data_ = malloc(in_data_size_);
   enc_in_data_ = NULL;
@@ -259,12 +272,8 @@ ProtobufBroadcastPeer::ctor(const std::string &address, unsigned int send_to_por
   socket_.set_option(socket_base::reuse_address(true));
   determine_local_endpoints();
 
-  outbound_active_ = true;
-  ip::udp::resolver::query query(address, boost::lexical_cast<std::string>(send_to_port));
-  resolver_.async_resolve(query,
-			  boost::bind(&ProtobufBroadcastPeer::handle_resolve, this,
-				      boost::asio::placeholders::error,
-				      boost::asio::placeholders::iterator));
+  outbound_ready_ = outbound_active_ = false;
+  start_resolve();
 
   if (! crypto_key.empty())  setup_crypto(crypto_key, cipher);
 
@@ -276,6 +285,7 @@ ProtobufBroadcastPeer::ctor(const std::string &address, unsigned int send_to_por
 /** Destructor. */
 ProtobufBroadcastPeer::~ProtobufBroadcastPeer()
 {
+	resolve_retry_timer_.cancel();
   if (asio_thread_.joinable()) {
     io_service_.stop();
     asio_thread_.join();
@@ -382,12 +392,30 @@ ProtobufBroadcastPeer::handle_resolve(const boost::system::error_code& err,
 {
   if (! err) {
     std::lock_guard<std::mutex> lock(outbound_mutex_);
-    outbound_active_   = false;
+    outbound_ready_    = true;
     outbound_endpoint_ = endpoint_iterator->endpoint();
   } else {
-    sig_send_error_("Resolving endpoint failed");
+    sig_send_error_("Resolving endpoint failed, retrying");
+    resolve_retry_timer_.expires_from_now(boost::posix_time::seconds(2));
+    resolve_retry_timer_.async_wait(boost::bind(&ProtobufBroadcastPeer::retry_resolve, this, _1));
   }
   start_send();
+}
+
+void
+ProtobufBroadcastPeer::retry_resolve(const boost::system::error_code &ec)
+{
+	if (! ec)  start_resolve();
+}
+
+void
+ProtobufBroadcastPeer::start_resolve()
+{
+  ip::udp::resolver::query query(send_to_address_, boost::lexical_cast<std::string>(send_to_port_));
+  resolver_.async_resolve(query,
+			  boost::bind(&ProtobufBroadcastPeer::handle_resolve, this,
+				      boost::asio::placeholders::error,
+				      boost::asio::placeholders::iterator));
 }
 
 void
@@ -651,7 +679,7 @@ void
 ProtobufBroadcastPeer::start_send()
 {
   std::lock_guard<std::mutex> lock(outbound_mutex_);
-  if (outbound_queue_.empty() || outbound_active_)  return;
+  if (outbound_queue_.empty() || outbound_active_ || ! outbound_ready_)  return;
 
   outbound_active_ = true;
 

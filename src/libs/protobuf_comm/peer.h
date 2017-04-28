@@ -161,6 +161,8 @@ class ProtobufBroadcastPeer
   void run_asio();
   void start_send();
   void start_recv();
+  void start_resolve();
+  void retry_resolve(const boost::system::error_code &ec);
   void handle_resolve(const boost::system::error_code& err,
 		      boost::asio::ip::udp::resolver::iterator endpoint_iterator);
   void handle_sent(const boost::system::error_code& error,
@@ -171,6 +173,7 @@ class ProtobufBroadcastPeer
   boost::asio::io_service         io_service_;
   boost::asio::ip::udp::resolver  resolver_;
   boost::asio::ip::udp::socket    socket_;
+  boost::asio::deadline_timer     resolve_retry_timer_;
 
   std::list<boost::asio::ip::udp::endpoint>  local_endpoints_;
 
@@ -180,11 +183,13 @@ class ProtobufBroadcastPeer
   signal_send_error_type   sig_send_error_;
 
   std::string  send_to_address_;
+  unsigned int send_to_port_;
 
   std::queue<QueueEntry *> outbound_queue_;
   std::mutex               outbound_mutex_;
   bool                     outbound_active_;
-
+  bool                     outbound_ready_;
+  
   boost::asio::ip::udp::endpoint outbound_endpoint_;
   boost::asio::ip::udp::endpoint in_endpoint_;
 
