@@ -73,13 +73,14 @@ void
 RosNavigatorThread::check_status()
 {
   if (cmd_sent_){
-    if (ac_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
+
+    if (ac_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED || 
+        ac_->getState() == actionlib::SimpleClientGoalState::PREEMPTED) {
       nav_if_->set_final(true);
       nav_if_->set_error_code(0);
     }
     else if (ac_->getState() == actionlib::SimpleClientGoalState::ABORTED ||
              ac_->getState() == actionlib::SimpleClientGoalState::LOST ||
-             ac_->getState() == actionlib::SimpleClientGoalState::PREEMPTED ||
              ac_->getState() == actionlib::SimpleClientGoalState::REJECTED)
     {
       nav_if_->set_final(true);
