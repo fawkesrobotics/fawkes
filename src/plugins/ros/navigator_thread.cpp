@@ -54,6 +54,8 @@ RosNavigatorThread::init()
   logger->log_error(name(),"Change Interface (x,y) ");
   cmd_sent_ = false;
   connected_history_ = false;
+  nav_if_->set_final(true);
+  nav_if_->write();
 }
 
 void
