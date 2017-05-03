@@ -37,6 +37,9 @@
 #include <move_base_msgs/MoveBaseGoal.h>
 #include <move_base_msgs/MoveBaseActionGoal.h>
 #include <actionlib/client/simple_action_client.h>
+#include <dynamic_reconfigure/Reconfigure.h>
+#include <dynamic_reconfigure/Config.h>
+#include <dynamic_reconfigure/DoubleParameter.h>
 
 namespace fawkes {
   class NavigatorInterface;
@@ -50,7 +53,7 @@ class RosNavigatorThread
   public fawkes::ConfigurableAspect
 {
  public:
-  RosNavigatorThread();
+  RosNavigatorThread(std::string &cfg_prefix);
 
   virtual void init();
   virtual void finalize();
@@ -63,6 +66,8 @@ class RosNavigatorThread
   void check_status();
   void send_goal();
   void stop_goals();
+  void load_config();
+  bool set_dynreconf_value(const std::string& path, const float value);
 
  private:
   typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
@@ -72,6 +77,23 @@ class RosNavigatorThread
   move_base_msgs::MoveBaseGoal goal_;
   bool cmd_sent_;
   bool connected_history_;
+
+  std::string cfg_prefix_;
+
+  // ROS dynamic reconfigure parts
+  dynamic_reconfigure::ReconfigureRequest dynreconf_srv_req;
+  dynamic_reconfigure::ReconfigureResponse dynreconf_srv_resp;
+  dynamic_reconfigure::DoubleParameter dynreconf_double_param;
+  dynamic_reconfigure::Config dynreconf_conf;
+
+  std::string cfg_dynreconf_path_;
+  std::string cfg_dynreconf_x_vel_name_;
+  std::string cfg_dynreconf_y_vel_name_;
+  std::string cfg_dynreconf_rot_vel_name_;
+
+  float param_max_vel;
+  float param_max_rot;
+
 };
 
 #endif /* __ROS_NAVIGATOR_THREAD_H_ */

@@ -36,7 +36,10 @@ class RosNavigatorPlugin : public fawkes::Plugin
   RosNavigatorPlugin(Configuration *config)
     : Plugin(config)
   {
-    thread_list.push_back(new RosNavigatorThread());
+    std::string prefix = "/ros/navigator";
+    std::string cfg_prefix = prefix + "/";
+
+    thread_list.push_back(new RosNavigatorThread(cfg_prefix));
   }
 };
 

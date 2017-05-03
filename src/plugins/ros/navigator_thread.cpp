@@ -29,9 +29,10 @@ using namespace fawkes;
  */
 
 /** Contructor. */
-RosNavigatorThread::RosNavigatorThread()
+RosNavigatorThread::RosNavigatorThread(std::string &cfg_prefix)
   : Thread("RosNavigatorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+    cfg_prefix_(cfg_prefix)
 {
 }
 
@@ -56,6 +57,7 @@ RosNavigatorThread::init()
   connected_history_ = false;
   nav_if_->set_final(true);
   nav_if_->write();
+  load_config();
 }
 
 void
@@ -115,6 +117,25 @@ RosNavigatorThread::send_goal()
   ac_->sendGoal(goal_);
 
   cmd_sent_ = true;
+}
+
+bool
+RosNavigatorThread::set_dynreconf_value(const std::string& path, const float value)
+{
+  dynreconf_double_param.name = path;
+  dynreconf_double_param.value = value;
+  dynreconf_conf.doubles.push_back(dynreconf_double_param);
+  dynreconf_srv_req.config = dynreconf_conf;
+
+  logger->log_debug(name(), "call: %s", cfg_dynreconf_path_.c_str());
+
+  if (! ros::service::call((cfg_dynreconf_path_ + "/set_parameters").c_str(), dynreconf_srv_req, dynreconf_srv_resp)) {
+      logger->log_error(name(), "Error in setting dynreconf value %s to %f in path %s", path.c_str(), value, cfg_dynreconf_path_.c_str());
+      return false;
+  } else {
+      logger->log_info(name(), "Setting %s to %f", path.c_str(), value);
+      return true;
+  }
 }
 
 void
@@ -205,6 +226,21 @@ RosNavigatorThread::loop()
         nav_if_->set_msgid(msg->id());
         nav_if_->write();
 
+        set_dynreconf_value(cfg_dynreconf_x_vel_name_, msg->max_velocity());
+        set_dynreconf_value(cfg_dynreconf_y_vel_name_, msg->max_velocity());
+
+        send_goal();
+      }
+
+      // max rotation velocity
+      else if (NavigatorInterface::SetMaxRotationMessage *msg = nav_if_->msgq_first_safe(msg)) {
+        logger->log_info(name(),"rotation message received %f",msg->max_rotation());
+        nav_if_->set_max_rotation(msg->max_rotation());
+        nav_if_->set_msgid(msg->id());
+        nav_if_->write();
+
+        set_dynreconf_value(cfg_dynreconf_rot_vel_name_, msg->max_rotation());
+
         send_goal();
       }
 
@@ -213,4 +249,21 @@ RosNavigatorThread::loop()
 
     check_status();
   }
+}
+
+void
+RosNavigatorThread::load_config()
+{
+    try {
+        cfg_dynreconf_path_ = config->get_string(cfg_prefix_ + "/dynreconf/path");
+        cfg_dynreconf_x_vel_name_ =
+                config->get_string(cfg_prefix_ + "/dynreconf/x_vel_name");
+        cfg_dynreconf_y_vel_name_ =
+                config->get_string(cfg_prefix_ + "/dynreconf/y_vel_name");
+        cfg_dynreconf_rot_vel_name_ =
+                config->get_string(cfg_prefix_ + "/dynreconf/rot_vel_name");
+
+    } catch (Exception &e) {
+        logger->log_error("Error in loading config: %s", e.what());
+    }
 }
