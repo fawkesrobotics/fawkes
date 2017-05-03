@@ -141,9 +141,11 @@ RosNavigatorThread::set_dynreconf_value(const std::string& path, const float val
 
   if (! ros::service::call(cfg_dynreconf_path_ + "/set_parameters", dynreconf_srv_req, dynreconf_srv_resp)) {
       logger->log_error(name(), "Error in setting dynreconf value %s to %f in path %s", path.c_str(), value, cfg_dynreconf_path_.c_str());
+      dynreconf_conf.doubles.clear();
       return false;
   } else {
       logger->log_info(name(), "Setting %s to %f", path.c_str(), value);
+      dynreconf_conf.doubles.clear();
       return true;
   }
 }
