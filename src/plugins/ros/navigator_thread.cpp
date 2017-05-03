@@ -76,6 +76,17 @@ RosNavigatorThread::finalize()
 void
 RosNavigatorThread::check_status()
 {
+  bool write = false;
+  if (rosnode->hasParam(cfg_dynreconf_path_ + "/" + cfg_dynreconf_x_vel_name_)) {
+      rosnode->getParam(cfg_dynreconf_path_ + "/" + cfg_dynreconf_x_vel_name_, param_max_vel);
+      nav_if_->set_max_velocity(param_max_vel);
+      write = true;
+  }
+  if (rosnode->hasParam(cfg_dynreconf_path_ + "/" + cfg_dynreconf_rot_vel_name_)) {
+      rosnode->getParam(cfg_dynreconf_path_ + "/" + cfg_dynreconf_rot_vel_name_, param_max_rot);
+      nav_if_->set_max_rotation(param_max_rot);
+      write = true;
+  }
   if (cmd_sent_){
 
     if (ac_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED || 
@@ -94,8 +105,9 @@ RosNavigatorThread::check_status()
       nav_if_->set_final(false);
       nav_if_->set_error_code(0);
     }
-    nav_if_->write();
+    write = true;
   }
+  if (write) nav_if_->write();
 }
 
 void
@@ -215,17 +227,6 @@ RosNavigatorThread::loop()
         nav_if_->set_msgid(msg->id());
         nav_if_->write();
 
-        send_goal();
-      }
-
-      else if (NavigatorInterface::SetSecurityDistanceMessage *msg =
-	         nav_if_->msgq_first_safe(msg))
-      {
-        logger->log_info(name(),"velocity message received %f",msg->security_distance ());
-        nav_if_->set_security_distance (msg->security_distance ());
-        nav_if_->set_msgid(msg->id());
-        nav_if_->write();
-
         set_dynreconf_value(cfg_dynreconf_x_vel_name_, msg->max_velocity());
         set_dynreconf_value(cfg_dynreconf_y_vel_name_, msg->max_velocity());
 
@@ -240,6 +241,17 @@ RosNavigatorThread::loop()
         nav_if_->write();
 
         set_dynreconf_value(cfg_dynreconf_rot_vel_name_, msg->max_rotation());
+
+        send_goal();
+      }
+
+      else if (NavigatorInterface::SetSecurityDistanceMessage *msg =
+	         nav_if_->msgq_first_safe(msg))
+      {
+        logger->log_info(name(),"velocity message received %f",msg->security_distance ());
+        nav_if_->set_security_distance (msg->security_distance ());
+        nav_if_->set_msgid(msg->id());
+        nav_if_->write();
 
         send_goal();
       }

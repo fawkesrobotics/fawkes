@@ -27,6 +27,7 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
+#include <plugins/ros/aspect/ros.h>
 
 #include <interfaces/NavigatorInterface.h>
 
@@ -50,7 +51,8 @@ class RosNavigatorThread
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect
+  public fawkes::ConfigurableAspect,
+  public fawkes::ROSAspect
 {
  public:
   RosNavigatorThread(std::string &cfg_prefix);
