@@ -194,8 +194,9 @@ RosNavigatorThread::loop()
 
       // cartesian goto
       else if (NavigatorInterface::CartesianGotoMessage *msg = nav_if_->msgq_first_safe(msg)) {
-        logger->log_info(name(), "Cartesian goto message received (x,y) = (%f,%f)",
-                         msg->x(), msg->y());
+        logger->log_info(name(), "Cartesian goto message received (x,y,ori) = (%f,%f,%f)",
+                         msg->x(), msg->y(), std::isfinite(msg->orientation()) ?
+                           msg->orientation() : 0.0);
         nav_if_->set_dest_x(msg->x());
         nav_if_->set_dest_y(msg->y());
         nav_if_->set_dest_ori(msg->orientation());
