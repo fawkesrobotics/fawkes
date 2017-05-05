@@ -51,12 +51,6 @@ else
   LDFLAGS_libfawkeslogging += $(call boost-libs-ldflags,$(LOGGING_REQ_BOOST_LIBS))
 endif
 
-ifeq ($(HAVE_CPP11),1)
-  CFLAGS += $(CFLAGS_CPP11) -DHAVE_CPP11
-else
-  WARN_TARGETS += warning_cpp11
-endif
-
 $(LUALIBDIR)/fawkeslogging.so: | $(LIBDIR)/libfawkeslogging.so
 
 ifeq ($(OBJSSUBMAKE),1)
@@ -65,8 +59,6 @@ all: $(WARN_TARGETS)  $(WARN_TARGETS_BOOST)
 .PHONY: warning_fd_redirect_gcc $(WARN_TARGETS_BOOST)
 warning_fd_redirect_gcc:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting file descriptor redirect support$(TNORMAL) (GCC too old, have $(GCC_VERSION), required 4.6)"
-warning_cpp11:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting support for file name patterns$(TNORMAL) (C+11 not available)"
 $(WARN_TARGETS_BOOST): warning_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting file descriptor redirect support$(TNORMAL) (Boost library $* not found)"
 endif

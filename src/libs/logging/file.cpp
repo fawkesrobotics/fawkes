@@ -35,10 +35,7 @@
 #include <cerrno>
 #include <stdio.h>
 
-#ifdef HAVE_CPP11
 #include <string>
-#include <regex>
-#endif
 
 namespace fawkes {
 
@@ -60,7 +57,6 @@ FileLogger::FileLogger(const char* filename_pattern, LogLevel log_level)
   : Logger(log_level)
 {
   now_s = (struct tm *)malloc(sizeof(struct tm));
-#ifdef HAVE_CPP11
   struct timeval now;
   gettimeofday(&now, NULL);
   localtime_r(&now.tv_sec, now_s);
@@ -71,13 +67,13 @@ FileLogger::FileLogger(const char* filename_pattern, LogLevel log_level)
     throw Exception("Failed to print current time");
   }
   std::string pattern(filename_pattern);
-  std::string filename_str = std::regex_replace(pattern, std::regex("\\$time"),
-    std::string(start_time));
+  std::string time_var = "$time";
+  size_t pos = pattern.find(time_var);
+  if (pos != std::string::npos) {
+    pattern.replace(pos, time_var.length(), std::string(start_time));
+  }
   free(start_time);
-  const char *filename = filename_str.c_str();
-#else
-  const char *filename = filename_pattern;
-#endif
+  const char *filename = pattern.c_str();
   int fd = open(filename, O_RDWR | O_CREAT | O_APPEND,
 		S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
   if (fd == -1) {
