@@ -87,12 +87,38 @@ RosNavigatorThread::check_status()
       nav_if_->set_max_rotation(param_max_rot);
       write = true;
   }
+  
   if (cmd_sent_){
 
     if (ac_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED || 
         ac_->getState() == actionlib::SimpleClientGoalState::PREEMPTED) {
+      
       nav_if_->set_final(true);
-      nav_if_->set_error_code(0);
+      
+      // Check if we reached the goal
+      fawkes::tf::Quaternion q_base_position;
+      q_base_position.setX(base_position.pose.orientation.x);
+      q_base_position.setY(base_position.pose.orientation.y);
+      q_base_position.setZ(base_position.pose.orientation.z);
+      q_base_position.setW(base_position.pose.orientation.w);
+      
+      double base_position_yaw = tf::get_yaw(q_base_position);
+      double base_position_x = base_position.pose.position.x;
+      double base_position_y = base_position.pose.position.y;
+      
+      double diff_x = fabs(base_position_x - nav_if_->dest_x());
+      double diff_y = fabs(base_position_y - nav_if_->dest_y());
+      double diff_yaw = normalize_rad(base_position_yaw - nav_if_->dest_ori());
+      
+      if (diff_x >= 0.05 ||
+          diff_y >= 0.05 ||
+          diff_yaw >= 0.05) {
+          nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
+      } else {
+          nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
+      }
+      
+      
     }
     else if (ac_->getState() == actionlib::SimpleClientGoalState::ABORTED ||
              ac_->getState() == actionlib::SimpleClientGoalState::LOST ||
@@ -126,9 +152,34 @@ RosNavigatorThread::send_goal()
   goal_.target_pose.pose.orientation.z = q.z();
   goal_.target_pose.pose.orientation.w = q.w();
 
-  ac_->sendGoal(goal_);
-
+  ac_->sendGoal(goal_,
+                boost::bind(&RosNavigatorThread::doneCb, this, _1, _2),
+                boost::bind(&RosNavigatorThread::activeCb, this),
+                boost::bind(&RosNavigatorThread::feedbackCb, this, _1));
+      
   cmd_sent_ = true;
+}
+
+// Called once when the goal becomes active
+void
+RosNavigatorThread::activeCb()
+{
+  logger->log_info(name(), "Goal just went active");
+}
+
+// Called every time feedback is received for the goal
+void
+RosNavigatorThread::feedbackCb(const move_base_msgs::MoveBaseFeedbackConstPtr& feedback)
+{
+  base_position = feedback->base_position;
+  logger->log_info(name(), "feedbackcb: x:%f, y:%f", base_position.pose.position.x, base_position.pose.position.y);
+}
+
+void
+RosNavigatorThread::doneCb(const actionlib::SimpleClientGoalState& state,
+            const move_base_msgs::MoveBaseResultConstPtr& result)
+{
+  logger->log_info(name(), "Finished in state [%s]", state.toString().c_str());
 }
 
 bool
