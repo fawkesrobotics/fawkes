@@ -463,7 +463,8 @@ NavGraphThread::generate_plan(std::string goal_name)
 		return generate_plan(goal.x(), goal.y(),
 		                     goal.has_property("orientation")
 		                     ? goal.property_as_float("orientation")
-		                     : std::numeric_limits<float>::quiet_NaN());
+		                     : std::numeric_limits<float>::quiet_NaN(),
+		                     goal.name());
 	}
 
 	NavGraphNode init =
@@ -533,12 +534,12 @@ NavGraphThread::generate_plan(std::string goal_name, float ori)
 }
 
 bool
-NavGraphThread::generate_plan(float x, float y, float ori)
+NavGraphThread::generate_plan(float x, float y, float ori, const std::string &target_name)
 {
   NavGraphNode close_to_goal = graph_->closest_node(x, y);
   if (generate_plan(close_to_goal.name())) {
 
-	  NavGraphNode n("free-target", x, y);
+	  NavGraphNode n(target_name, x, y);
 	  if (std::isfinite(ori)) {
 		  n.set_property("orientation", ori);
 	  }
