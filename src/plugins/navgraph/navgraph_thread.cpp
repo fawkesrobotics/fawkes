@@ -537,6 +537,11 @@ bool
 NavGraphThread::generate_plan(float x, float y, float ori, const std::string &target_name)
 {
   NavGraphNode close_to_goal = graph_->closest_node(x, y);
+  if (! close_to_goal.is_valid()) {
+	  logger->log_error(name(), "Cannot find closest node to target (%.2f,%.2f,%.2f) alias %s",
+	                    x, y, ori, target_name.c_str());
+	  return false;
+  }
   if (generate_plan(close_to_goal.name())) {
 
 	  NavGraphNode n(target_name, x, y);
