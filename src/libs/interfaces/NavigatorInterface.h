@@ -98,6 +98,7 @@ class NavigatorInterface : public Interface
       a SetAutoDriveMode-message (otherwise the navigator might ignore that value). */
     bool stop_at_target; /**< Stop when target is reached? */
     int32_t orientation_mode; /**< Mode how/when to orientate if orientation is given */
+    char target_frame[64]; /**< The target frame to plan into */
   } NavigatorInterface_data_t;
 
   NavigatorInterface_data_t *data;
@@ -192,6 +193,45 @@ class NavigatorInterface : public Interface
     float orientation() const;
     void set_orientation(const float new_orientation);
     size_t maxlenof_orientation() const;
+    virtual Message * clone() const;
+  };
+
+  class CartesianGotoWithFrameMessage : public Message
+  {
+   private:
+    /** Internal data storage, do NOT modify! */
+    typedef struct __attribute__((packed)) {
+      int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
+      int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      float x; /**< X-coordinate of the target, in the robot's coordinate system. */
+      float y; /**< Y-coordinate of the target, in the robot's coordinate system. */
+      float orientation; /**< The desired orientation of the robot at the target. */
+      char target_frame[64]; /**< The target frame to plan in. */
+    } CartesianGotoWithFrameMessage_data_t;
+
+    CartesianGotoWithFrameMessage_data_t *data;
+
+  interface_enum_map_t enum_map_DriveMode;
+  interface_enum_map_t enum_map_OrientationMode;
+   public:
+    CartesianGotoWithFrameMessage(const float ini_x, const float ini_y, const float ini_orientation, const char * ini_target_frame);
+    CartesianGotoWithFrameMessage();
+    ~CartesianGotoWithFrameMessage();
+
+    CartesianGotoWithFrameMessage(const CartesianGotoWithFrameMessage *m);
+    /* Methods */
+    float x() const;
+    void set_x(const float new_x);
+    size_t maxlenof_x() const;
+    float y() const;
+    void set_y(const float new_y);
+    size_t maxlenof_y() const;
+    float orientation() const;
+    void set_orientation(const float new_orientation);
+    size_t maxlenof_orientation() const;
+    char * target_frame() const;
+    void set_target_frame(const char * new_target_frame);
+    size_t maxlenof_target_frame() const;
     virtual Message * clone() const;
   };
 
@@ -618,6 +658,9 @@ class NavigatorInterface : public Interface
   OrientationMode orientation_mode() const;
   void set_orientation_mode(const OrientationMode new_orientation_mode);
   size_t maxlenof_orientation_mode() const;
+  char * target_frame() const;
+  void set_target_frame(const char * new_target_frame);
+  size_t maxlenof_target_frame() const;
   virtual Message * create_message(const char *type) const;
 
   virtual void copy_values(const Interface *other);

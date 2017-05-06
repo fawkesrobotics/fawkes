@@ -120,6 +120,43 @@ class NavigatorInterface : public Interface
     int maxlenof_orientation() const;
   };
 
+  class CartesianGotoWithFrameMessage : public Message
+  {
+    CartesianGotoWithFrameMessage(float ini_x, float ini_y, float ini_orientation, char * ini_target_frame);
+    CartesianGotoWithFrameMessage();
+    ~CartesianGotoWithFrameMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    float x();
+    void set_x(const float new_x);
+    int maxlenof_x() const;
+    float y();
+    void set_y(const float new_y);
+    int maxlenof_y() const;
+    float orientation();
+    void set_orientation(const float new_orientation);
+    int maxlenof_orientation() const;
+    char * target_frame();
+    void set_target_frame(const char * new_target_frame);
+    int maxlenof_target_frame() const;
+  };
+
   class PolarGotoMessage : public Message
   {
     PolarGotoMessage(float ini_phi, float ini_dist, float ini_orientation);
@@ -545,6 +582,9 @@ class NavigatorInterface : public Interface
   OrientationMode orientation_mode();
   void set_orientation_mode(const OrientationMode new_orientation_mode);
   int maxlenof_orientation_mode() const;
+  char * target_frame();
+  void set_target_frame(const char * new_target_frame);
+  int maxlenof_target_frame() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;

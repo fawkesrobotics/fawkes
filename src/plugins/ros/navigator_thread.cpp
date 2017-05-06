@@ -140,7 +140,7 @@ void
 RosNavigatorThread::send_goal()
 {
   //get goal from Navigation interface
-  goal_.target_pose.header.frame_id = "base_link";
+  goal_.target_pose.header.frame_id = nav_if_->target_frame();
   goal_.target_pose.header.stamp = ros::Time::now();
   goal_.target_pose.pose.position.x = nav_if_->dest_x();
   goal_.target_pose.pose.position.y = nav_if_->dest_y();
@@ -249,6 +249,24 @@ RosNavigatorThread::loop()
         nav_if_->set_dest_x(msg->x());
         nav_if_->set_dest_y(msg->y());
         nav_if_->set_dest_ori(msg->orientation());
+        nav_if_->set_target_frame("base_link");
+
+        nav_if_->set_msgid(msg->id());
+
+        nav_if_->write();
+
+        send_goal();
+      }
+
+      // cartesian goto
+      else if (NavigatorInterface::CartesianGotoWithFrameMessage *msg = nav_if_->msgq_first_safe(msg)) {
+        logger->log_info(name(), "Cartesian goto message received (x,y,ori) = (%f,%f,%f)",
+                         msg->x(), msg->y(), std::isfinite(msg->orientation()) ?
+                           msg->orientation() : 0.0);
+        nav_if_->set_dest_x(msg->x());
+        nav_if_->set_dest_y(msg->y());
+        nav_if_->set_dest_ori(msg->orientation());
+        nav_if_->set_target_frame(msg->target_frame());
 
         nav_if_->set_msgid(msg->id());
 
