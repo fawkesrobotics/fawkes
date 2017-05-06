@@ -447,19 +447,27 @@ NavGraphThread::generate_plan(std::string goal_name)
 		return false;
 	}
 
-	NavGraphNode init =
-		graph_->closest_node(pose_.getOrigin().x(), pose_.getOrigin().y());
 	NavGraphNode goal = graph_->node(goal_name);
-
+	
 	if (! goal.is_valid()) {
-		logger->log_error(name(), "Failed to generate path from (%.2f,%.2f) to %s: goal is unknown",
-		                  init.x(), init.y(), goal_name.c_str()); 
+		logger->log_error(name(), "Failed to generate path to %s: goal is unknown",
+		                  goal_name.c_str()); 
 		if (cfg_enable_path_execution_) {
 			pp_nav_if_->set_final(true);
 			pp_nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
 		}
     return false;
 	}
+
+	if (goal.unconnected()) {
+		return generate_plan(goal.x(), goal.y(),
+		                     goal.has_property("orientation")
+		                     ? goal.property_as_float("orientation")
+		                     : std::numeric_limits<float>::quiet_NaN());
+	}
+
+	NavGraphNode init =
+		graph_->closest_node(pose_.getOrigin().x(), pose_.getOrigin().y());
 
 	logger->log_debug(name(), "Starting at (%f,%f), closest node is '%s'",
 	                  pose_.getOrigin().x(), pose_.getOrigin().y(), init.name().c_str());
@@ -495,6 +503,9 @@ NavGraphThread::generate_plan(std::string goal_name)
 	if (path_.empty()) {
 		logger->log_error(name(), "Failed to generate plan to travel to '%s'",
 		                  goal_name.c_str());
+		pp_nav_if_->set_final(true);
+		pp_nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+		return false;
 	}
 
 	traversal_ = path_.traversal();
