@@ -164,7 +164,6 @@ RosNavigatorThread::send_goal()
 void
 RosNavigatorThread::activeCb()
 {
-  logger->log_info(name(), "Goal just went active");
 }
 
 // Called every time feedback is received for the goal
@@ -172,7 +171,6 @@ void
 RosNavigatorThread::feedbackCb(const move_base_msgs::MoveBaseFeedbackConstPtr& feedback)
 {
   base_position = feedback->base_position;
-  logger->log_info(name(), "feedbackcb: x:%f, y:%f", base_position.pose.position.x, base_position.pose.position.y);
 }
 
 void
