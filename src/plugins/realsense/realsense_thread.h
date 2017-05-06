@@ -40,6 +40,7 @@
 #include <string>
 
 namespace fawkes {
+  class SwitchInterface;
 }
 
 class RealsenseThread 
@@ -71,7 +72,12 @@ class RealsenseThread
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
   protected: virtual void run() { Thread::run(); }
 
+ protected:
+  bool read_switch();
+
  private:
+  fawkes::SwitchInterface *switch_if_;
+
   typedef pcl::PointXYZ PointType;
   typedef pcl::PointCloud<PointType> Cloud;
 

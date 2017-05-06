@@ -5,6 +5,7 @@
  *  Plugin created: Mon Jun 13 17:09:44 2016
 
  *  Copyright  2016  Johannes Rothe
+ *             2017  Till Hofmann
  *
  ****************************************************************************/
 
@@ -23,6 +24,8 @@
 
 #include "realsense_thread.h"
 
+#include <interfaces/SwitchInterface.h>
+
 using namespace fawkes;
 
 /** @class RealsenseThread 'realsense_thread.h' 
@@ -33,7 +36,8 @@ using namespace fawkes;
 
 RealsenseThread::RealsenseThread()
  : Thread("RealsenseThread", Thread::OPMODE_WAITFORWAKEUP),
-             BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
+   BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
+   switch_if_(NULL)
 {
 }
 
@@ -45,6 +49,10 @@ RealsenseThread::init()
   frame_id_ = config->get_string(cfg_prefix + "frame_id");
   pcl_id_ = config->get_string(cfg_prefix + "pcl_id");
   laser_power_ = config->get_int(cfg_prefix + "device_options/laser_power");
+
+  switch_if_ = blackboard->open_for_writing<SwitchInterface>("realsense");
+  switch_if_->set_enabled(true);
+  switch_if_->write();
 
   rs_stream_type_ = RS_STREAM_DEPTH;
   connect_and_start_camera();
@@ -73,6 +81,7 @@ RealsenseThread::init()
 void
 RealsenseThread::loop()
 {
+  if (!read_switch()) { return; }
   if (rs_poll_for_frames(rs_device_, &rs_error_) == 1) {
     const uint16_t * image = reinterpret_cast <const uint16_t *>(rs_get_frame_data(rs_device_, rs_stream_type_, NULL));
     log_error();
@@ -102,7 +111,7 @@ RealsenseThread::finalize()
   realsense_depth_refptr_.reset();
   pcl_manager->remove_pointcloud(pcl_id_.c_str());
   stop_camera();
-  //TODO Makefile & SwitchInterface
+  blackboard->close(switch_if_);
   //TODO Documentation with librealsense
 }
 
@@ -215,4 +224,34 @@ RealsenseThread::stop_camera()
     logger->log_info(name(), "Realsense camera stopped!");
     camera_started_ = false;
   }
+}
+
+/**
+ * Read switch interface and return true iff the interface is currently enabled.
+ */
+bool
+RealsenseThread::read_switch()
+{
+  bool enable_camera = false;
+  bool disable_camera = false;
+  while (!switch_if_->msgq_empty()) {
+    Message *msg = switch_if_->msgq_first();
+    if (dynamic_cast<SwitchInterface::EnableSwitchMessage*>(msg)) {
+      disable_camera = false;
+      enable_camera = true;
+    } else if (dynamic_cast<SwitchInterface::DisableSwitchMessage*>(msg)) {
+      disable_camera = true;
+      enable_camera = false;
+    }
+    switch_if_->msgq_pop();
+  }
+  if (camera_started_ && disable_camera) {
+    stop_camera();
+    switch_if_->set_enabled(false);
+  } else if (!camera_started_ && enable_camera) {
+    connect_and_start_camera();
+    switch_if_->set_enabled(true);
+  }
+  switch_if_->write();
+  return switch_if_->is_enabled();
 }
