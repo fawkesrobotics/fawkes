@@ -23,6 +23,8 @@ plugins/robot-memory:
     distributed: true
     # how lagre should the oplog be (minimum 50 mb)
     oplog-size: 1000
+    # Where to store log files
+    log-path: "~/.robot-memory/log"
     # configuration for setting up all mongod and mongos instances:
     local:
       replica-set-name: "local" #single instance set needed to optain the oplog, not actually replicated 
