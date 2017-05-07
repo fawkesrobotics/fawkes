@@ -37,7 +37,7 @@ using namespace fawkes;
 RealsenseThread::RealsenseThread()
  : Thread("RealsenseThread", Thread::OPMODE_WAITFORWAKEUP),
    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-   switch_if_(NULL)
+   switch_if_(NULL), cfg_use_switch_(true)
 {
 }
 
@@ -49,6 +49,16 @@ RealsenseThread::init()
   frame_id_ = config->get_string(cfg_prefix + "frame_id");
   pcl_id_ = config->get_string(cfg_prefix + "pcl_id");
   laser_power_ = config->get_int(cfg_prefix + "device_options/laser_power");
+
+  try {
+    cfg_use_switch_ = config->get_bool((cfg_prefix + "use_switch").c_str());
+  } catch (Exception &e) {} // ignore, use default
+
+  if (cfg_use_switch_) {
+    logger->log_info(name(), "Switch enabled");
+  } else {
+    logger->log_info(name(), "Switch will be ignored");
+  }
 
   switch_if_ = blackboard->open_for_writing<SwitchInterface>("realsense");
   switch_if_->set_enabled(true);
@@ -81,7 +91,7 @@ RealsenseThread::init()
 void
 RealsenseThread::loop()
 {
-  if (!read_switch()) { return; }
+  if (cfg_use_switch_ && !read_switch()) { return; }
   if (rs_poll_for_frames(rs_device_, &rs_error_) == 1) {
     const uint16_t * image = reinterpret_cast <const uint16_t *>(rs_get_frame_data(rs_device_, rs_stream_type_, NULL));
     log_error();

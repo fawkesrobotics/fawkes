@@ -77,6 +77,7 @@ class RealsenseThread
 
  private:
   fawkes::SwitchInterface *switch_if_;
+  bool cfg_use_switch_;
 
   typedef pcl::PointXYZ PointType;
   typedef pcl::PointCloud<PointType> Cloud;
