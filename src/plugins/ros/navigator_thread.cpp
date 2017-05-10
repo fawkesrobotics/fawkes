@@ -117,15 +117,19 @@ RosNavigatorThread::check_status()
       } else {
           nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
       }
-      
-      
+      nav_if_->write();
+    }
+    else if (
+             ac_->getState() == actionlib::SimpleClientGoalState::LOST)
+    {
+      nav_if_->set_final(true);
+      nav_if_->set_error_code(NavigatorInterface::ERROR_UNKNOWN_PLACE);
     }
     else if (ac_->getState() == actionlib::SimpleClientGoalState::ABORTED ||
-             ac_->getState() == actionlib::SimpleClientGoalState::LOST ||
              ac_->getState() == actionlib::SimpleClientGoalState::REJECTED)
     {
       nav_if_->set_final(true);
-      nav_if_->set_error_code(2);
+      nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
     }
     else {
       nav_if_->set_final(false);
