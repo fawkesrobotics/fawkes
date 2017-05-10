@@ -21,6 +21,7 @@
 
 #include "domain_action.h"
 
+namespace fawkes {
 namespace stn {
 
 DomainAction::DomainAction(std::string name, std::vector<std::string> params, std::vector<Predicate> preconds,
@@ -95,4 +96,5 @@ DomainAction::generateStnAction(std::string name, std::string params)
   return StnAction(name_, preconds, effects, params, duration_, cond_breakups_, temp_breakups_);
 }
 
+}
 }

@@ -26,6 +26,7 @@
 #include <vector>
 #include <iostream>
 
+namespace fawkes {
 namespace stn {
 
 class Predicate {
@@ -46,5 +47,6 @@ class Predicate {
   bool condition_;
   std::vector<std::string> attrs_;
 };
+}
 }
 #endif

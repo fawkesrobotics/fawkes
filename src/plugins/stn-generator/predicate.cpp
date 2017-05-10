@@ -21,6 +21,7 @@
 
 #include "predicate.h"
 
+namespace fawkes {
 namespace stn {
 
 Predicate::Predicate(std::string name, bool condition, std::vector<std::string> attrs)
@@ -64,5 +65,6 @@ std::vector<std::string>
 Predicate::attrs()
 {
   return attrs_;
+}
 }
 }

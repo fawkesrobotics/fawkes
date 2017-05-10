@@ -21,6 +21,7 @@
 
 #include "stn_action.h"
 
+namespace fawkes {
 namespace stn {
 
 size_t StnAction::count = 0;
@@ -200,4 +201,5 @@ StnAction::effects()
   return effects_;
 }
 
+}
 }

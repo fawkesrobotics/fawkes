@@ -21,6 +21,7 @@
 
 #include "stn.h"
 
+namespace fawkes {
 namespace stn {
 
 Stn::Stn(StnAction init)
@@ -198,4 +199,5 @@ Stn::findActionById(size_t id)
   throw (" Action with id " + std::to_string(id) + " not found");
 }
 
+}
 }

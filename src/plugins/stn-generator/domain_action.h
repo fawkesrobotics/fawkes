@@ -33,6 +33,7 @@
 #include "predicate.h"
 #include "stn_action.h"
 
+namespace fawkes {
 namespace stn {
 
 class DomainAction {
@@ -57,5 +58,6 @@ class DomainAction {
   std::vector<std::string> temp_breakups_;
 };
 
+}
 }
 #endif

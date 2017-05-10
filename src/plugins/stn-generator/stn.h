@@ -31,6 +31,7 @@
 #include "domain_action.h"
 #include "stn_action.h"
 
+namespace fawkes {
 namespace stn {
 
 class Stn
@@ -63,6 +64,7 @@ class Stn
   StnAction findActionById(size_t id);
 };
 
+}
 }
 
 #endif

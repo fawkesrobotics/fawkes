@@ -32,6 +32,7 @@
 
 #include "predicate.h"
 
+namespace fawkes {
 namespace stn {
 
 enum EdgeType
@@ -75,5 +76,6 @@ class StnAction
   static size_t count;
 
 };
+}
 }
 #endif
