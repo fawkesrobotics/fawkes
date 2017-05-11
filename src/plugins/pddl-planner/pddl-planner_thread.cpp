@@ -104,7 +104,8 @@ PddlPlannerThread::loop()
     robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:0}"), cfg_collection_, true);
   }
 
-  //TODO handle finished plan
+  plan_if_->set_final(true);
+  plan_if_->write();
 }
 
 void
