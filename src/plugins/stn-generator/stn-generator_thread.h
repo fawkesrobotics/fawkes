@@ -22,10 +22,17 @@
 #ifndef __PLUGINS_STN_GENERATOR_THREAD_H_
 #define __PLUGINS_STN_GENERATOR_THREAD_H_
 
+#include <mongo/client/dbclient.h>
+
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
+#include <blackboard/interface_listener.h>
+#include <plugins/robot-memory/aspect/robot_memory_aspect.h>
+#include <interfaces/PddlPlannerInterface.h>
+
+#include "stn.h"
 
 namespace fawkes {
   // add forward declarations here, e.g., interfaces
@@ -35,7 +42,9 @@ class StnGeneratorThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+  public fawkes::BlackBoardAspect,
+  public fawkes::BlackBoardInterfaceListener,
+  public fawkes::RobotMemoryAspect
 {
 
  public:
@@ -45,11 +54,15 @@ class StnGeneratorThread
   virtual void finalize();
   virtual void loop();
 
+  virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
   protected: virtual void run() { Thread::run(); }
 
  private:
-  //Define class member variables here
+   std::string cfg_plan_collection_;
+   std::string cfg_output_collection_;
+   fawkes::PddlPlannerInterface *plan_if_;
 
 };
 
