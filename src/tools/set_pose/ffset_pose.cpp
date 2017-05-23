@@ -106,7 +106,7 @@ try_localize(const std::string &host, unsigned short int port, std::string &inte
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hr:i:t:");
+  ArgumentParser argp(argc, argv, "hr:i:t:f:");
 
   if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
