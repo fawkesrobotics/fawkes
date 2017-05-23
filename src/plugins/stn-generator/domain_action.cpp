@@ -40,7 +40,28 @@ DomainAction::DomainAction(std::string name, std::vector<std::string> params, st
 std::ostream&
 operator<<(std::ostream &strm, const DomainAction &a)
 {
-  strm << a.name_;
+  strm << "DomainAction: " << a.name_ << std::endl;
+  strm << "\tParams:";
+  for ( auto& param : a.params_ ) {
+    strm << " " << param;
+  }
+  strm << std::endl << "\tPreconditions:" << std::endl;
+  for ( auto& pred : a.preconds_ ) {
+    strm << "\t\t" << pred;
+  }
+  strm << std::endl << "\tEffects:" << std::endl;
+  for ( auto& eff : a.effects_) {
+    strm << "\t\t" << eff;
+  }
+  strm << std::endl << "\tDuration: " << std::to_string(a.duration_) << std::endl;
+  strm << "\tConditional Breakups:";
+  for ( auto& breakup : a.cond_breakups_ ) {
+    strm << " " << breakup;
+  }
+  strm << std::endl << "\tConditional Breakups:";
+  for ( auto& breakup : a.temp_breakups_ ) {
+    strm << " " << breakup;
+  }
   return strm;
 }
 

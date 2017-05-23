@@ -64,6 +64,7 @@ class StnGeneratorThread
    std::string cfg_output_collection_;
    fawkes::PddlPlannerInterface *plan_if_;
 
+   fawkes::stn::Stn* stn_;
 };
 
 

@@ -19,19 +19,21 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include "pddl_parser.h"
+
 #include "stn.h"
 
 namespace fawkes {
 namespace stn {
 
-Stn::Stn(StnAction init)
+Stn::Stn(fawkes::Logger* logger)
 {
-  set_initial_state(init);
+  logger_ = logger;
 }
 
 Stn::~Stn()
 {
-};
+}
 
 void
 Stn::add_domain_action(DomainAction action)
@@ -49,6 +51,64 @@ void
 Stn::set_initial_state(StnAction action)
 {
   initial_state_ = action;
+}
+
+void
+Stn::set_pddl_domain(std::string pddl_domain_string)
+{
+  pddl_parser::PddlParser parser;
+  pddl_parser::Domain dom = parser.parseDomain(pddl_domain_string);
+
+
+  for ( auto& action : dom.actions) {
+    std::vector<std::string> params;
+    for ( auto& param : action.action_params ) {
+      params.push_back(param.first);
+    }
+    std::vector<Predicate> preconds;
+    build_pred_list(action.precondition, &preconds, true);
+    std::vector<Predicate> effects;
+    //build_pred_list(action.effect, &effects, true);
+    // TODO
+    int duration = 0;
+    // TODO
+    std::vector<std::string> cond_breakups;
+    // TODO
+    std::vector<std::string> temp_breakups;
+    DomainAction da(action.name, params, preconds, effects, duration, cond_breakups, temp_breakups);
+    domain_actions_.push_back(da);
+    std::stringstream ss;
+    ss << da;
+    log_info("Added action:\n" + ss.str());
+  }
+
+  log_info("Initialized " + std::to_string(domain_actions_.size()) +
+      " domain actions");
+}
+
+/* For now this only works with the not and and operators
+ * to combine multiple predicates
+ */
+void
+Stn::build_pred_list(pddl_parser::Expression e,
+    std::vector<Predicate> *preconds, bool condition)
+{
+  pddl_parser::Atom function = boost::get<pddl_parser::Predicate>(e).function;
+  if ( function == "and" || function == "not" ) {
+    if ( function == "not" ) {
+      condition = !condition;
+    }
+    for ( auto& child : boost::get<pddl_parser::Predicate>(e).arguments ) {
+      build_pred_list(child, preconds, condition);
+    }
+  } else {
+    std::vector<std::string> args;
+    for ( auto& arg : boost::get<pddl_parser::Predicate>(e).arguments ) {
+      args.push_back(boost::get<std::string>(arg));
+    }
+    Predicate p(boost::get<pddl_parser::Predicate>(e).function, condition, args);
+    preconds->push_back(p);
+  }
 }
 
 void
@@ -197,6 +257,40 @@ Stn::findActionById(size_t id)
     }
   }
   throw (" Action with id " + std::to_string(id) + " not found");
+}
+
+void
+Stn::log_warn(std::string s)
+{
+  log(s, LogLevel::WARN);
+}
+
+void
+Stn::log_info(std::string s)
+{
+  log(s, LogLevel::INFO);
+}
+
+void
+Stn::log_debug(std::string s)
+{
+  log(s, LogLevel::DEBUG);
+}
+void
+Stn::log(std::string s, Stn::LogLevel log_level)
+{
+  std::string name = "STN";
+  switch (log_level) {
+    case LogLevel::WARN:
+      logger_->log_warn(name.c_str(), s.c_str());
+      break;
+    case LogLevel::INFO:
+      logger_->log_info(name.c_str(), s.c_str());
+      break;
+    case LogLevel::DEBUG:
+      logger_->log_debug(name.c_str(), s.c_str());
+      break;
+  }
 }
 
 }

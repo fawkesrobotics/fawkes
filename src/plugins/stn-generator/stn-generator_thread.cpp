@@ -19,6 +19,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <fstream>
+#include <streambuf>
+#include <utils/misc/string_conversions.h>
+
 #include "stn-generator_thread.h"
 
 using namespace fawkes;
@@ -39,9 +43,27 @@ StnGeneratorThread::StnGeneratorThread()
 void
 StnGeneratorThread::init()
 {
+  logger->log_info(name(),"reading config");
   std::string cfg_prefix = "plugins/stn-generator/";
   cfg_plan_collection_ = config->get_string(cfg_prefix + "plan/collection");
   cfg_output_collection_ = config->get_string(cfg_prefix + "output/collection");
+
+  std::string pddl_domain_path = StringConversions::resolve_path(
+      config->get_string(cfg_prefix + "domain-file"));
+  logger->log_info(name(),"Reading domain from %s", pddl_domain_path.c_str());
+  std::ifstream s(pddl_domain_path);
+  std::string pddl_domain;
+
+  logger->log_info(name(),"Reading domain into buffer");
+  s.seekg(0, std::ios::end);
+  pddl_domain.reserve(s.tellg());
+  s.seekg(0, std::ios::beg);
+  pddl_domain.assign((std::istreambuf_iterator<char>(s)),
+      std::istreambuf_iterator<char>());
+
+  stn_ = new stn::Stn(logger);
+  stn_->set_pddl_domain(pddl_domain);
+  logger->log_info(name(),"Created STN object from domain");
 
   plan_if_ = blackboard->open_for_reading<PddlPlannerInterface>(config->get_string(cfg_prefix + "plan/interface").c_str());
   bbil_add_data_interface(plan_if_);
@@ -52,7 +74,7 @@ void
 StnGeneratorThread::loop()
 {
   //TODO REMOVE AFTER READING DOMAIN
-  stn::Stn stn(stn::StnAction(std::string("init"),
+  stn_->set_initial_state(stn::StnAction(std::string("init"),
                     {},
                     {stn::Predicate("at", true, {"a","pool1"}),
                      stn::Predicate("at", true, {"b","pool1"}),
@@ -79,7 +101,7 @@ StnGeneratorThread::loop()
       for ( auto &arg : o.getField("args").Array() ) {
         args += arg.str();
       }
-      stn.add_plan_action(o.getField("name").str(), args);
+      stn_->add_plan_action(o.getField("name").str(), args);
     }
   }
   logger->log_info(name(), "STN Generation finished.");
@@ -88,6 +110,7 @@ StnGeneratorThread::loop()
 void
 StnGeneratorThread::finalize()
 {
+  delete stn_;
 }
 
 void

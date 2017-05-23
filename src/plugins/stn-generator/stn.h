@@ -27,7 +27,9 @@
 #include <algorithm>
 #include <iterator>
 #include <graphviz/gvc.h>
+#include <aspect/logging.h>
 
+#include "pddl_ast.h"
 #include "domain_action.h"
 #include "stn_action.h"
 
@@ -37,12 +39,12 @@ namespace stn {
 class Stn
 {
  public:
-  Stn(StnAction init);
+  Stn(fawkes::Logger* logger);
   virtual ~Stn();
 
-  void add_domain_action(DomainAction action);
   void add_plan_action(std::string name, std::string params);
   void set_initial_state(StnAction action);
+  void set_pddl_domain(std::string pddl_domain_string);
   void generate();
   void drawGraph();
 
@@ -52,6 +54,7 @@ class Stn
     std::string params;
   };
 
+  fawkes::Logger* logger_;
   StnAction initial_state_;
 
   std::vector<DomainAction> domain_actions_;
@@ -61,7 +64,17 @@ class Stn
   std::vector<std::pair<StnAction,StnAction>> cond_edges_;
   std::vector<std::pair<StnAction,StnAction>> temp_edges_;
 
+  enum LogLevel {
+    WARN, INFO, DEBUG
+  };
+  void log_warn(std::string s);
+  void log_info(std::string s);
+  void log_debug(std::string s);
+  void log(std::string s, Stn::LogLevel log_leve);
   StnAction findActionById(size_t id);
+  void add_domain_action(DomainAction action);
+  void build_pred_list(pddl_parser::Expression e,
+      std::vector<Predicate> *preconds, bool condition);
 };
 
 }
