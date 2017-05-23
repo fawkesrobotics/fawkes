@@ -57,6 +57,8 @@ FileLogger::FileLogger(const char* filename, LogLevel log_level)
     throw Exception(errno, "Failed to open log file %s", filename);
   }
   log_file = fdopen(fd, "a");
+  // make buffer line-buffered
+  setvbuf(log_file, NULL, _IOLBF, 0);
 
   now_s = (struct tm *)malloc(sizeof(struct tm));
 
