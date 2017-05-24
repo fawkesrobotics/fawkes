@@ -30,7 +30,7 @@ namespace pddl_parser {
     struct pddl_skipper : public qi::grammar<Iterator> {
 
       pddl_skipper() : pddl_skipper::base_type(skip, "PDDL") {
-          skip = ascii::space | (';' >> *(qi::char_) >> '\n');
+          skip = ascii::space | (';' >> *(qi::char_ - qi::eol));
       }
       qi::rule<Iterator> skip;
     };
