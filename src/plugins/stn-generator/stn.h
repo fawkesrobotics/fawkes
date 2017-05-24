@@ -40,6 +40,7 @@ class Stn
 {
  public:
   Stn(fawkes::Logger* logger);
+  Stn(fawkes::Logger* logger, std::string classic_dom_path);
   virtual ~Stn();
 
   void add_plan_action(std::string name, std::string params);
@@ -55,6 +56,8 @@ class Stn
   };
 
   fawkes::Logger* logger_;
+  bool gen_classic_dom_ = false;
+  std::string classic_dom_path_;
   StnAction initial_state_;
 
   std::vector<DomainAction> domain_actions_;
@@ -77,6 +80,8 @@ class Stn
       std::vector<Predicate> *preconds, bool condition);
   void build_breakup_list(pddl_parser::Expression e,
       std::vector<std::string> *breakups);
+  void generate_classic_pddl_domain(pddl_parser::Domain *dom,
+      std::string classic_dom_path);
 };
 
 }

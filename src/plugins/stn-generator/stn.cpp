@@ -1,4 +1,4 @@
-
+ // only if type is Expression
 /***************************************************************************
  *  stn.cpp - stn-generator
  *
@@ -19,6 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <fstream>
+#include <iostream>
 #include "pddl_parser.h"
 
 #include "stn.h"
@@ -29,6 +31,13 @@ namespace stn {
 Stn::Stn(fawkes::Logger* logger)
 {
   logger_ = logger;
+}
+
+Stn::Stn(fawkes::Logger* logger, std::string classic_dom_path)
+{
+  logger_ = logger;
+  classic_dom_path_ = classic_dom_path;
+  gen_classic_dom_ = true;
 }
 
 Stn::~Stn()
@@ -59,6 +68,7 @@ Stn::set_pddl_domain(std::string pddl_domain_string)
   pddl_parser::PddlParser parser;
   pddl_parser::Domain dom = parser.parseDomain(pddl_domain_string);
 
+  log_info("Loading extended PDDL domain into STN.");
 
   for ( auto& action : dom.actions) {
     log_info("Processing action " + action.name);
@@ -82,6 +92,7 @@ Stn::set_pddl_domain(std::string pddl_domain_string)
     }
     DomainAction da(action.name, params, preconds, effects, duration, cond_breakups, temp_breakups);
     domain_actions_.push_back(da);
+    //TODO remove after plugin is fully working
     std::stringstream ss;
     ss << da;
     log_info("Added action:\n" + ss.str());
@@ -89,6 +100,11 @@ Stn::set_pddl_domain(std::string pddl_domain_string)
 
   log_info("Initialized " + std::to_string(domain_actions_.size()) +
       " domain actions");
+
+  if ( gen_classic_dom_ ) {
+    log_info("Generation of classic domain file is configured, starting...");
+    generate_classic_pddl_domain(&dom, classic_dom_path_);
+  }
 }
 
 /* For now this only works with the not and and operators
@@ -313,6 +329,100 @@ Stn::log(std::string s, Stn::LogLevel log_level)
       logger_->log_debug(name.c_str(), s.c_str());
       break;
   }
+}
+
+void
+Stn::generate_classic_pddl_domain(pddl_parser::Domain *dom,
+    std::string classic_dom_path)
+{
+  log_info("Writing domain to " + classic_dom_path);
+  std::ofstream out(classic_dom_path);
+  
+  out << "(define (domain " << dom->name << ")" << std::endl;
+  
+  out << "\t(:requirements";
+  for ( auto& req : dom->requirements ) {
+    out << " :" << req;
+  }
+  out << ")" << std::endl;
+  
+  out << "\t(:types" << std::endl;
+  for ( auto& type : dom->types ) {
+    out << "\t\t" << type.first << " - " << type.second << std::endl;
+  }
+  out << "\t)" << std::endl;
+
+  out << "\t(:constants" << std::endl;
+  for ( auto& const_type : dom->constants ) {
+    out << "\t\t";
+    for ( auto& constant : const_type.first ) {
+      out << constant << " ";
+    }
+    out << "- " << const_type.second << std::endl;
+  }
+  out << "\t)" << std::endl;
+
+  out << "\t(:predicates" << std::endl;
+  for ( auto& predicate : dom->predicates ) {
+    out << "\t\t(" << predicate.first;
+    for ( auto& pred_type : predicate.second ) {
+      out << " ?" << pred_type.first << " - " << pred_type.second;
+    }
+    out << ")" << std::endl;
+  }
+  out << "\t)" << std::endl;
+
+  for ( auto& action: dom->actions ) {
+    out << "\t(:action " << action.name << std::endl;
+    out << "\t\t:parameters (";
+    for ( auto& param: action.action_params ) {
+      out << " ?" << param.first << " - " << param.second;
+    }
+    out << ")" << std::endl;
+    out << "\t\t:precondition (and" << std::endl;
+    std::vector<Predicate> preds;
+    build_pred_list(action.precondition, &preds, true);
+    for ( auto& pred : preds ) {
+      out << "\t\t\t";
+      if ( !pred.condition() ) {
+        out << "(not ";
+      }
+      out << "(" << pred.name();
+      for ( auto& a : pred.attrs() ) {
+        out << " " << a;
+      }
+      if ( !pred.condition() ) {
+        out << ")";
+      }
+      out << ")" << std::endl;
+    }
+    out << "\t\t)" << std::endl;
+    out << "\t\t:effect (and" << std::endl;
+    preds.clear();
+    build_pred_list(action.effect, &preds, true);
+    for ( auto& pred : preds ) {
+      out << "\t\t\t";
+      if ( !pred.condition() ) {
+        out << "(not ";
+      }
+      out << "(" << pred.name();
+      for ( auto& a : pred.attrs() ) {
+        out << " " << a;
+      }
+      if ( !pred.condition() ) {
+        out << ")";
+      }
+      out << ")" << std::endl;
+    }
+    out << "\t\t)" << std::endl;
+
+    out << "\t)" << std::endl;
+
+  }
+
+  out << ")";
+
+  out.close();
 }
 
 }

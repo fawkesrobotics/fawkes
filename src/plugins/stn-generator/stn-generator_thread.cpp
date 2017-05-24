@@ -54,14 +54,19 @@ StnGeneratorThread::init()
   std::ifstream s(pddl_domain_path);
   std::string pddl_domain;
 
-  logger->log_info(name(),"Reading domain into buffer");
   s.seekg(0, std::ios::end);
   pddl_domain.reserve(s.tellg());
   s.seekg(0, std::ios::beg);
   pddl_domain.assign((std::istreambuf_iterator<char>(s)),
       std::istreambuf_iterator<char>());
 
-  stn_ = new stn::Stn(logger);
+  if ( config->get_bool(cfg_prefix + "generate-classic-domain") ) {
+    std::string classic_dom_path = StringConversions::resolve_path(
+      config->get_string(cfg_prefix + "classic-domain-file"));
+    stn_ = new stn::Stn(logger, classic_dom_path);
+  } else {
+    stn_ = new stn::Stn(logger);
+  }
   stn_->set_pddl_domain(pddl_domain);
   logger->log_info(name(),"Created STN object from domain");
 
