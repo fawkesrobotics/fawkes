@@ -59,6 +59,7 @@ namespace pddl_parser {
   {
     std::string name;
     string_pairs_type action_params;
+    int duration;
     Expression precondition;
     Expression effect;
     Expression cond_breakup;
@@ -91,6 +92,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     pddl_parser::Action,
     name,
     action_params,
+    duration,
     precondition,
     effect,
     cond_breakup,

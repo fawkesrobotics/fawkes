@@ -75,6 +75,8 @@ class Stn
   void add_domain_action(DomainAction action);
   void build_pred_list(pddl_parser::Expression e,
       std::vector<Predicate> *preconds, bool condition);
+  void build_breakup_list(pddl_parser::Expression e,
+      std::vector<std::string> *breakups);
 };
 
 }

@@ -61,6 +61,7 @@ Stn::set_pddl_domain(std::string pddl_domain_string)
 
 
   for ( auto& action : dom.actions) {
+    log_info("Processing action " + action.name);
     std::vector<std::string> params;
     for ( auto& param : action.action_params ) {
       params.push_back(param.first);
@@ -68,13 +69,17 @@ Stn::set_pddl_domain(std::string pddl_domain_string)
     std::vector<Predicate> preconds;
     build_pred_list(action.precondition, &preconds, true);
     std::vector<Predicate> effects;
-    //build_pred_list(action.effect, &effects, true);
-    // TODO
-    int duration = 0;
-    // TODO
+    build_pred_list(action.effect, &effects, true);
+    int duration = action.duration;
     std::vector<std::string> cond_breakups;
-    // TODO
+    log_info(std::to_string(action.cond_breakup.which()));
+    if ( action.cond_breakup.which() == 1 ) { // only if type is Expression
+      build_breakup_list(action.cond_breakup, &cond_breakups);
+    }
     std::vector<std::string> temp_breakups;
+    if ( action.temp_breakup.which() == 1 ) { // only if type is Expression
+      build_breakup_list(action.temp_breakup, &temp_breakups);
+    }
     DomainAction da(action.name, params, preconds, effects, duration, cond_breakups, temp_breakups);
     domain_actions_.push_back(da);
     std::stringstream ss;
@@ -108,6 +113,23 @@ Stn::build_pred_list(pddl_parser::Expression e,
     }
     Predicate p(boost::get<pddl_parser::Predicate>(e).function, condition, args);
     preconds->push_back(p);
+    log_info("Added " + boost::get<pddl_parser::Predicate>(e).function);
+  }
+}
+
+void
+Stn::build_breakup_list(pddl_parser::Expression e,
+    std::vector<std::string> *breakups)
+{
+  pddl_parser::Atom function = boost::get<pddl_parser::Predicate>(e).function;
+  // ignore negations, we only take the name into account
+  if ( function == "and" || function == "not" ) {
+    for ( auto& child : boost::get<pddl_parser::Predicate>(e).arguments ) {
+      build_breakup_list(child, breakups);
+    }
+  } else {
+    std::string pred_name = boost::get<pddl_parser::Predicate>(e).function;
+    breakups->push_back(pred_name);
   }
 }
 

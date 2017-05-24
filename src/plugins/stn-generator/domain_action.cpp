@@ -58,7 +58,7 @@ operator<<(std::ostream &strm, const DomainAction &a)
   for ( auto& breakup : a.cond_breakups_ ) {
     strm << " " << breakup;
   }
-  strm << std::endl << "\tConditional Breakups:";
+  strm << std::endl << "\tTemporal Breakups:";
   for ( auto& breakup : a.temp_breakups_ ) {
     strm << " " << breakup;
   }

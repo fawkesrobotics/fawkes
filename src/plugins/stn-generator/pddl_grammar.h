@@ -72,10 +72,13 @@ namespace pddl_parser {
         cond_breakup = lit(":conditional-breakup") >> expression;
         effects = lit(":effect") >> expression;
         preconditions = lit(":precondition") >> expression;
+        duration = lit(":duration") >> '(' >> '=' >> 
+          lit("?duration") >> uint_ >> ')';
         action_params = lit(":parameters") >> '(' >> +param_pair >> ')';
         action = '(' >> lit(":durative-action")
           >> name_type
           >> action_params
+          >> -duration
           >> preconditions
           >> effects
           >> -cond_breakup
@@ -119,6 +122,7 @@ namespace pddl_parser {
       qi::rule<Iterator, Expression(), Skipper> expression;
       qi::rule<Iterator, Expression(), Skipper> preconditions, effects,
         temp_breakup, cond_breakup;
+      qi::rule<Iterator, int(), Skipper> duration;
       qi::rule<Iterator, string_pairs_type(), Skipper> action_params;
       qi::rule<Iterator, Action(), Skipper> action;
       qi::rule<Iterator, std::vector<Action>(), Skipper> actions;
