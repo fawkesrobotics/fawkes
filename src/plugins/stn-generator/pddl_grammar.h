@@ -77,9 +77,9 @@ namespace pddl_parser {
           >> name_type
           >> action_params
           >> preconditions
+          >> effects
           >> -cond_breakup
           >> -temp_breakup
-          >> effects
           >> ')';
         actions = +action;
 
