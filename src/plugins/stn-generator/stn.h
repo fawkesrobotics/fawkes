@@ -82,6 +82,7 @@ class Stn
       std::vector<std::string> *breakups);
   void generate_classic_pddl_domain(pddl_parser::Domain *dom,
       std::string classic_dom_path);
+  void output_pred_list(pddl_parser::Expression e, std::ofstream& out);
 };
 
 }

@@ -379,44 +379,13 @@ Stn::generate_classic_pddl_domain(pddl_parser::Domain *dom,
       out << " ?" << param.first << " - " << param.second;
     }
     out << ")" << std::endl;
-    out << "\t\t:precondition (and" << std::endl;
-    std::vector<Predicate> preds;
-    build_pred_list(action.precondition, &preds, true);
-    for ( auto& pred : preds ) {
-      out << "\t\t\t";
-      if ( !pred.condition() ) {
-        out << "(not ";
-      }
-      out << "(" << pred.name();
-      for ( auto& a : pred.attrs() ) {
-        out << " " << a;
-      }
-      if ( !pred.condition() ) {
-        out << ")";
-      }
-      out << ")" << std::endl;
-    }
-    out << "\t\t)" << std::endl;
-    out << "\t\t:effect (and" << std::endl;
-    preds.clear();
-    build_pred_list(action.effect, &preds, true);
-    for ( auto& pred : preds ) {
-      out << "\t\t\t";
-      if ( !pred.condition() ) {
-        out << "(not ";
-      }
-      out << "(" << pred.name();
-      for ( auto& a : pred.attrs() ) {
-        out << " " << a;
-      }
-      if ( !pred.condition() ) {
-        out << ")";
-      }
-      out << ")" << std::endl;
-    }
-    out << "\t\t)" << std::endl;
+    out << "\t\t:precondition" << std::endl << "\t\t\t";
+    output_pred_list(action.precondition, out);
 
-    out << "\t)" << std::endl;
+    out << std::endl << "\t\t:effect" << std::endl << "\t\t\t";
+    output_pred_list(action.effect, out);
+
+    out << std::endl << "\t)" << std::endl;
 
   }
 
@@ -424,6 +393,30 @@ Stn::generate_classic_pddl_domain(pddl_parser::Domain *dom,
 
   out.close();
 }
+
+void
+Stn::output_pred_list(pddl_parser::Expression e, std::ofstream& out)
+{
+  pddl_parser::Atom function = boost::get<pddl_parser::Predicate>(e).function;
+  if ( function == "not" || function == "and") {
+    if ( function == "not" ) {
+      out << "(not ";
+    } else if ( function == "and") {
+      out << "(and ";
+    }
+    for ( auto& child : boost::get<pddl_parser::Predicate>(e).arguments ) {
+      output_pred_list(child, out);
+    }
+    out << ") ";
+  } else {
+    out << "(" << boost::get<pddl_parser::Predicate>(e).function;
+    for ( auto& arg : boost::get<pddl_parser::Predicate>(e).arguments ) {
+      out << " " << boost::get<std::string>(arg);
+    }
+    out << ")";
+  }
+}
+
 
 }
 }
