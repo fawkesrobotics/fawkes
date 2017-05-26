@@ -173,6 +173,7 @@ main(int argc, char **argv)
 		host.c_str(), port, e.what_no_backtrace());
 	break;
       }
+      usleep(1000000);
     }
   }
 
