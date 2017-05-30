@@ -55,6 +55,7 @@ class RobotMemory
 
     //robot memory functions
     QResCursor query(mongo::Query query, std::string collection = "");
+    mongo::BSONObj aggregate(std::vector<mongo::BSONObj> pipeline, std::string collection = "");
     int insert(mongo::BSONObj obj, std::string collection = "");
     int insert(std::vector<mongo::BSONObj> v_obj, std::string collection = "");
     int insert(std::string obj_str, std::string collection = "");
