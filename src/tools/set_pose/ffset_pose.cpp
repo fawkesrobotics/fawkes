@@ -169,13 +169,13 @@ main(int argc, char **argv)
       localized = true;
     } catch (Exception &e) {
       if ((now - &start) > try_sec) {
-	fprintf(stderr, "Failed to localize %s:%u: %s\n",
-		host.c_str(), port, e.what_no_backtrace());
-	break;
+	      fprintf(stderr, "Failed to localize %s:%u: %s\n",
+	              host.c_str(), port, e.what_no_backtrace());
+	      break;
       }
       usleep(1000000);
     }
   }
 
-  return 0;
+  return localized ? 0 : -1;
 }
