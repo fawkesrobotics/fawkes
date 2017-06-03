@@ -76,6 +76,15 @@ namespace pddl_parser {
     std::vector<Action> actions;
   };
 
+  struct Problem
+  {
+    std::string name;
+    std::string domain_name;
+    pairs_multi_consts objects;
+    Expression init;
+    Expression goal;
+  };
+
 }
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -86,6 +95,15 @@ BOOST_FUSION_ADAPT_STRUCT(
     constants,
     predicates,
     actions
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::Problem,
+    name,
+    domain_name,
+    objects,
+    init,
+    goal
 )
 
 BOOST_FUSION_ADAPT_STRUCT(

@@ -45,6 +45,7 @@ class Stn
 
   void add_plan_action(std::string name, std::string params);
   void set_initial_state(StnAction action);
+  void read_initial_state(std::string pddl_problem_string);
   void set_pddl_domain(std::string pddl_domain_string);
   void generate();
   void drawGraph();

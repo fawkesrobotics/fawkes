@@ -63,6 +63,17 @@ Stn::set_initial_state(StnAction action)
 }
 
 void
+Stn::read_initial_state(std::string pddl_problem_string)
+{
+  pddl_parser::PddlParser parser;
+  pddl_parser::Problem prob = parser.parseProblem(pddl_problem_string);
+
+  log_info("Parsing PDDL Problem for STN generation.");
+
+  log_info("Parsed problem " + prob.name);
+}
+
+void
 Stn::set_pddl_domain(std::string pddl_domain_string)
 {
   pddl_parser::PddlParser parser;

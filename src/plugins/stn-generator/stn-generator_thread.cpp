@@ -50,8 +50,13 @@ StnGeneratorThread::init()
 
   std::string pddl_domain_path = StringConversions::resolve_path(
       config->get_string(cfg_prefix + "domain-file"));
-  logger->log_info(name(),"Reading domain from %s", pddl_domain_path.c_str());
+  cfg_pddl_problem_path_ = StringConversions::resolve_path(
+      config->get_string(cfg_prefix + "problem-file"));
+
   std::ifstream s(pddl_domain_path);
+  if ( ! s.good() ) {
+    logger->log_error(name(), "Could not open domain-file at %s", pddl_domain_path.c_str());
+  }
   std::string pddl_domain;
 
   s.seekg(0, std::ios::end);
@@ -78,8 +83,20 @@ StnGeneratorThread::init()
 void
 StnGeneratorThread::loop()
 {
+  std::ifstream s(cfg_pddl_problem_path_);
+  if ( ! s.good() ) {
+    logger->log_error(name(), "Could not open problem-file at %s", cfg_pddl_problem_path_.c_str());
+  }
+  std::string pddl_problem;
+  s.seekg(0, std::ios::end);
+  pddl_problem.reserve(s.tellg());
+  s.seekg(0, std::ios::beg);
+  pddl_problem.assign((std::istreambuf_iterator<char>(s)),
+      std::istreambuf_iterator<char>());
+
+  stn_->read_initial_state(pddl_problem);
   //TODO REMOVE AFTER READING DOMAIN
-  stn_->set_initial_state(stn::StnAction(std::string("init"),
+  /*stn_->set_initial_state(stn::StnAction(std::string("init"),
                     {},
                     {stn::Predicate("at", true, {"a","pool1"}),
                      stn::Predicate("at", true, {"b","pool1"}),
@@ -95,7 +112,7 @@ StnGeneratorThread::loop()
                      stn::Predicate("clear", true, {"e"})
                     },
                     std::string("")
-                  ));
+                  ));*/
   QResCursor cursor = robot_memory->query(fromjson("{plan:1}"), cfg_plan_collection_);
   while ( cursor->more() ) {
     BSONObj obj = cursor->next();
@@ -107,6 +124,7 @@ StnGeneratorThread::loop()
         args += arg.str();
       }
       stn_->add_plan_action(o.getField("name").str(), args);
+      logger->log_debug(name(), "Added Plan action %s to STN", o.getField("name").str().c_str());
     }
   }
   logger->log_info(name(), "STN Generation finished.");

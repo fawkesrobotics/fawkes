@@ -62,6 +62,7 @@ class StnGeneratorThread
  private:
    std::string cfg_plan_collection_;
    std::string cfg_output_collection_;
+   std::string cfg_pddl_problem_path_;
    fawkes::PddlPlannerInterface *plan_if_;
 
    fawkes::stn::Stn* stn_;

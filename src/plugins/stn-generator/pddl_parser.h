@@ -32,8 +32,7 @@ class PddlParser
 {
  public:
   static Domain parseDomain(const std::string pddl_domain);
-  //TODO implement
-  //static Problem parseProblem(const std::string pddl_problem);
+  static Problem parseProblem(const std::string pddl_problem);
  private:
 };
 

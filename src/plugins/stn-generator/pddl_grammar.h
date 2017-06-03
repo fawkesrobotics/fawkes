@@ -129,6 +129,59 @@ namespace pddl_parser {
 
       qi::rule<Iterator, Domain(), Skipper> domain;
     };
+
+    template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
+    struct problem_parser : qi::grammar<Iterator, Problem(), Skipper>
+    {
+      problem_parser() : problem_parser::base_type(problem)
+      {
+        using namespace qi;
+        using ascii::char_;
+        using ascii::alnum;
+        using ascii::blank;
+
+        name_type = lexeme[ alnum >> *(alnum|char_('-')|char_('_')) ];
+
+        problem_name = '(' >> lit("define") >> '(' >> lit("problem") >> name_type >> ')';
+
+        domain_name = '(' >> lit(":domain") >> name_type >> ')';
+
+        constant_value_list = +name_type;
+        constant_multi_pair = constant_value_list >> -('-' >> name_type);
+        objects = '(' >> lit(":objects") >> +constant_multi_pair >> ')';
+
+        atom = +(graph - '(' - ')');
+        predicate = '(' >> atom >> *expression >> ')';
+        expression = atom | predicate;
+        init = '(' >> lit(":init") >> +expression >> ')';
+
+        goal = '(' >> lit(":goal") >> +expression >> ')';
+
+        problem =
+          problem_name
+          >> domain_name
+          >> objects
+          >> init
+          >> goal
+          ;
+      }
+
+      qi::rule<Iterator, std::string(), Skipper> name_type;
+
+      qi::rule<Iterator, std::string(), Skipper> problem_name, domain_name;
+
+      qi::rule<Iterator, type_list(), Skipper> constant_value_list, predicate_params;
+      qi::rule<Iterator, pair_multi_const(), Skipper> constant_multi_pair;
+      qi::rule<Iterator, pairs_multi_consts(), Skipper> objects;
+
+      qi::rule<Iterator, Atom()> atom;
+      qi::rule<Iterator, Predicate(), Skipper> predicate;
+      qi::rule<Iterator, Expression(), Skipper> expression;
+      qi::rule<Iterator, Expression(), Skipper> init, goal;
+
+      qi::rule<Iterator, Problem(), Skipper> problem;
+    };
+
   }
 }
 

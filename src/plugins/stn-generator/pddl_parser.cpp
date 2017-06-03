@@ -43,11 +43,35 @@ PddlParser::parseDomain(const std::string pddl_domain)
 
   if ( !r ) {
     //TODO implement correct exception and behavior
-    throw ("Parsing PDDL string failed!");
+    throw ("Parsing PDDL domain string failed!");
   }
 
 
   return dom;
+}
+
+Problem
+PddlParser::parseProblem(const std::string pddl_problem)
+{
+
+  typedef std::string::const_iterator iterator_type;
+  typedef pddl_parser::grammar::problem_parser<iterator_type> grammar;
+  typedef pddl_parser::grammar::pddl_skipper<iterator_type> skipper;
+
+  grammar g;
+  skipper s;
+  Problem prob;
+
+  std::string::const_iterator iter = pddl_problem.begin();
+  std::string::const_iterator end = pddl_problem.end();
+  bool r = phrase_parse(iter, end, g, s, prob);
+
+  if ( !r ) {
+    //TODO implement correct exception and behavior
+    throw ("Parsing PDDL problem string failed!");
+  }
+
+  return prob;
 }
 
 }
