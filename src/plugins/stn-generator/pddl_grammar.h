@@ -176,8 +176,8 @@ namespace pddl_parser {
 
       qi::rule<Iterator, Atom()> atom;
       qi::rule<Iterator, Predicate(), Skipper> predicate;
-      qi::rule<Iterator, Expression(), Skipper> expression;
-      qi::rule<Iterator, Expression(), Skipper> init, goal;
+      qi::rule<Iterator, Expression(), Skipper> expression, goal;
+      qi::rule<Iterator, std::vector<Expression>(), Skipper> init;
 
       qi::rule<Iterator, Problem(), Skipper> problem;
     };

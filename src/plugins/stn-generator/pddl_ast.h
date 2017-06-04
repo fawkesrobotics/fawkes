@@ -81,7 +81,7 @@ namespace pddl_parser {
     std::string name;
     std::string domain_name;
     pairs_multi_consts objects;
-    Expression init;
+    std::vector<Expression> init;
     Expression goal;
   };
 

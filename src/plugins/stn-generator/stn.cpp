@@ -71,6 +71,28 @@ Stn::read_initial_state(std::string pddl_problem_string)
   log_info("Parsing PDDL Problem for STN generation.");
 
   log_info("Parsed problem " + prob.name);
+  std::vector<stn::Predicate> init_predicates;
+  for ( pddl_parser::Expression pred : prob.init ) {
+    std::vector<std::string> attrs;
+    std::string log_string = "Adding init-predicate " + boost::get<pddl_parser::Predicate>(pred).function
+        + " with arguments:";
+    for ( pddl_parser::Expression a : boost::get<pddl_parser::Predicate>(pred).arguments ) {
+      attrs.push_back(boost::get<pddl_parser::Atom>(a));
+      log_string += " " + boost::get<pddl_parser::Atom>(a);
+    }
+    log_info(log_string);
+    stn::Predicate init_pred(
+        boost::get<pddl_parser::Predicate>(pred).function,
+        true,
+        attrs);
+    init_predicates.push_back(init_pred);
+  }
+  stn::StnAction init_action(
+    prob.name,
+    {},
+    init_predicates,
+    std::string(""));
+  set_initial_state(init_action);
 }
 
 void
@@ -293,8 +315,6 @@ Stn::drawGraph()
   gvFreeLayout(gvc, G);
   agclose (G);
   gvFreeContext(gvc);
-
-
 }
 
 StnAction

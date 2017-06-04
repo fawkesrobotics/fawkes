@@ -93,26 +93,8 @@ StnGeneratorThread::loop()
   s.seekg(0, std::ios::beg);
   pddl_problem.assign((std::istreambuf_iterator<char>(s)),
       std::istreambuf_iterator<char>());
-
   stn_->read_initial_state(pddl_problem);
-  //TODO REMOVE AFTER READING DOMAIN
-  /*stn_->set_initial_state(stn::StnAction(std::string("init"),
-                    {},
-                    {stn::Predicate("at", true, {"a","pool1"}),
-                     stn::Predicate("at", true, {"b","pool1"}),
-                     stn::Predicate("at", true, {"c","pool1"}),
-                     stn::Predicate("at", true, {"d","pool1"}),
-                     stn::Predicate("at", true, {"e","pool1"}),
-                     stn::Predicate("at", true, {"y","pool2"}),
-                     stn::Predicate("at", true, {"z","pool2"}),
-                     stn::Predicate("clear", true, {"a"}),
-                     stn::Predicate("clear", true, {"b"}),
-                     stn::Predicate("clear", true, {"c"}),
-                     stn::Predicate("clear", true, {"d"}),
-                     stn::Predicate("clear", true, {"e"})
-                    },
-                    std::string("")
-                  ));*/
+
   QResCursor cursor = robot_memory->query(fromjson("{plan:1}"), cfg_plan_collection_);
   while ( cursor->more() ) {
     BSONObj obj = cursor->next();
@@ -121,12 +103,14 @@ StnGeneratorThread::loop()
       BSONObj o = a.Obj();
       std::string args;
       for ( auto &arg : o.getField("args").Array() ) {
-        args += arg.str();
+        args += arg.str() + " ";
       }
       stn_->add_plan_action(o.getField("name").str(), args);
       logger->log_debug(name(), "Added Plan action %s to STN", o.getField("name").str().c_str());
     }
   }
+  stn_->generate();
+  stn_->drawGraph();
   logger->log_info(name(), "STN Generation finished.");
 }
 

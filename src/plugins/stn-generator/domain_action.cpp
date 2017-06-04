@@ -80,6 +80,8 @@ DomainAction::params()
 StnAction
 DomainAction::generateStnAction(std::string name, std::string params)
 {
+  std::cout << "Generating StnAction " << name << " with params " << params << std::endl;
+
   std::vector<Predicate> preconds;
   std::vector<Predicate> effects;
 
@@ -88,17 +90,28 @@ DomainAction::generateStnAction(std::string name, std::string params)
     std::istream_iterator<std::string>{}};
   std::map<std::string,std::string> params_map;
   if ( params_vec.size() != params_.size() ) {
-    std::cout << "Param counts differ for DomainAction " << name_ << std::endl;
+    std::cout << "Param counts differ for DomainAction (" <<std::to_string(params_.size())
+      << ") " << name_ << " and StnAction (" << params << ") "
+      << name << std::endl;
   }
   for ( size_t i = 0; i < params_vec.size(); i++ ) { 
-    params_map.insert( std::pair<std::string,std::string>(params_.at(i), params_vec.at(i)) );
+    // insert with additional question mark, since it is lost during parsing
+    params_map.insert( std::pair<std::string,std::string>("?" + params_.at(i), params_vec.at(i)) );
+    std::cout << "Inserting " << "?" + params_.at(i) << " with " << params_vec.at(i) << std::endl;
   }
   for ( Predicate pred : preconds_) { 
     std::vector<std::string> precond_attr;
     for ( std::string attr : pred.attrs() ) { 
-      if ( params_map.find(attr) == params_map.end() ) 
-        std::cout << "err, could not find attribute for precondition: " << attr << std::endl;
-      std::string opt = params_map.find(attr)->second;
+      std::string opt;
+      // check if attribute is a constant or variable (latter starting with ?)
+      if (attr.find("?") == 0) {
+        if ( params_map.find(attr) == params_map.end() ) {
+          std::cout << "err, could not find attribute for precondition: " << attr << std::endl;
+        }
+        opt = params_map.find(attr)->second;
+      } else {
+        opt = attr;
+      }
       precond_attr.push_back(opt);
     }
     preconds.push_back(Predicate(pred.name(), pred.condition(), precond_attr));
