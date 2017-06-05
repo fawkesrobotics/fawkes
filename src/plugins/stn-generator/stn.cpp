@@ -125,10 +125,6 @@ Stn::set_pddl_domain(std::string pddl_domain_string)
     }
     DomainAction da(action.name, params, preconds, effects, duration, cond_breakups, temp_breakups);
     domain_actions_.push_back(da);
-    //TODO remove after plugin is fully working
-    std::stringstream ss;
-    ss << da;
-    log_info("Added action:\n" + ss.str());
   }
 
   log_info("Initialized " + std::to_string(domain_actions_.size()) +
@@ -315,6 +311,26 @@ Stn::drawGraph()
   gvFreeLayout(gvc, G);
   agclose (G);
   gvFreeContext(gvc);
+}
+
+std::vector<mongo::BSONObj>
+Stn::get_bson()
+{
+  std::vector<mongo::BSONObj> stn;
+  for ( auto& action : stn_actions_ ) {
+    mongo::BSONObjBuilder bson_action;
+    bson_action << "id" << static_cast<long long>(action.id());
+    bson_action << "name" << action.name();
+    bson_action << "duration" << static_cast<long long>(action.duration());
+    mongo::BSONArrayBuilder cond_actions;
+    for ( auto& cond : action.condActionIds() ) {
+      cond_actions << static_cast<long long>(cond);
+    }
+    bson_action << "cond_actions" << cond_actions.arr();
+    bson_action << "opts" << action.opts();
+    stn.push_back(bson_action.obj());
+  }
+  return stn;
 }
 
 StnAction

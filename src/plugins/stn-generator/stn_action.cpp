@@ -201,5 +201,23 @@ StnAction::effects()
   return effects_;
 }
 
+std::string
+StnAction::name()
+{
+  return name_;
+}
+
+size_t
+StnAction::duration()
+{
+  return duration_;
+}
+
+std::string
+StnAction::opts()
+{
+  return opts_;
+}
+
 }
 }

@@ -47,6 +47,7 @@ StnGeneratorThread::init()
   std::string cfg_prefix = "plugins/stn-generator/";
   cfg_plan_collection_ = config->get_string(cfg_prefix + "plan/collection");
   cfg_output_collection_ = config->get_string(cfg_prefix + "output/collection");
+  cfg_publish_to_robot_memory_ = config->get_bool(cfg_prefix + "output/publish-to-rm");
 
   std::string pddl_domain_path = StringConversions::resolve_path(
       config->get_string(cfg_prefix + "domain-file"));
@@ -102,8 +103,13 @@ StnGeneratorThread::loop()
     for ( auto &a : actions ) {
       BSONObj o = a.Obj();
       std::string args;
+      bool first = true;
       for ( auto &arg : o.getField("args").Array() ) {
-        args += arg.str() + " ";
+        if ( !first ) {
+          args += " ";
+        }
+        first = false;
+        args += arg.str();
       }
       stn_->add_plan_action(o.getField("name").str(), args);
       logger->log_debug(name(), "Added Plan action %s to STN", o.getField("name").str().c_str());
@@ -112,6 +118,16 @@ StnGeneratorThread::loop()
   stn_->generate();
   stn_->drawGraph();
   logger->log_info(name(), "STN Generation finished.");
+
+  if ( cfg_publish_to_robot_memory_ ) {
+    //TODO reset actions in robot-memory
+    for ( auto& action : stn_->get_bson() ) {
+      BSONObjBuilder rm_action;
+      rm_action << "relation" << "stn-action";
+      rm_action.appendElements(action);
+      robot_memory->insert(rm_action.obj(), cfg_output_collection_);
+    }
+  }
 }
 
 void

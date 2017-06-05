@@ -27,6 +27,8 @@
 #include <algorithm>
 #include <iterator>
 #include <graphviz/gvc.h>
+#include <mongo/client/dbclient.h>
+
 #include <aspect/logging.h>
 
 #include "pddl_ast.h"
@@ -49,6 +51,7 @@ class Stn
   void set_pddl_domain(std::string pddl_domain_string);
   void generate();
   void drawGraph();
+  std::vector<mongo::BSONObj> get_bson();
 
  private:
   struct plan_action {

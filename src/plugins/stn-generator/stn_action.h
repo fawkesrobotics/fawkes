@@ -61,6 +61,10 @@ class StnAction
   std::string genTemporalEdgeLabel();
   void genConditionalActions(std::vector<StnAction> candidate_actions);
   std::vector<Predicate> effects();
+  std::string name();
+  size_t duration();
+  std::string opts();
+
 
  private:
   friend std::ostream& operator<<(std::ostream&, const StnAction&);
