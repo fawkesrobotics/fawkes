@@ -327,7 +327,13 @@ Stn::get_bson()
       cond_actions << static_cast<long long>(cond);
     }
     bson_action << "cond_actions" << cond_actions.arr();
-    bson_action << "opts" << action.opts();
+    mongo::BSONArrayBuilder opts_arr;
+    std::stringstream opts_ss(action.opts());
+    std::istream_iterator<std::string> end;
+    for ( std::istream_iterator<std::string> it(opts_ss); it != end; it++ ) {
+      opts_arr << *it;
+    }
+    bson_action << "opts" << opts_arr.arr();
     stn.push_back(bson_action.obj());
   }
   return stn;
