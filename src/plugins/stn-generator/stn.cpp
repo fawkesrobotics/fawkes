@@ -174,6 +174,7 @@ Stn::build_breakup_list(pddl_parser::Expression e,
     }
   } else {
     std::string pred_name = boost::get<pddl_parser::Predicate>(e).function;
+    std::cout << "Adding breakup " << pred_name << std::endl;
     breakups->push_back(pred_name);
   }
 }
@@ -326,7 +327,7 @@ Stn::get_bson()
     for ( auto& cond : action.condActionIds() ) {
       cond_actions << static_cast<long long>(cond);
     }
-    bson_action << "cond_actions" << cond_actions.arr();
+    bson_action << "cond-actions" << cond_actions.arr();
     mongo::BSONArrayBuilder opts_arr;
     std::stringstream opts_ss(action.opts());
     std::istream_iterator<std::string> end;

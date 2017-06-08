@@ -99,6 +99,7 @@ DomainAction::generateStnAction(std::string name, std::string params)
     params_map.insert( std::pair<std::string,std::string>("?" + params_.at(i), params_vec.at(i)) );
     std::cout << "Inserting " << "?" + params_.at(i) << " with " << params_vec.at(i) << std::endl;
   }
+  std::cout << "Applying precods" << std::endl;
   for ( Predicate pred : preconds_) { 
     std::vector<std::string> precond_attr;
     for ( std::string attr : pred.attrs() ) { 
@@ -116,16 +117,25 @@ DomainAction::generateStnAction(std::string name, std::string params)
     }
     preconds.push_back(Predicate(pred.name(), pred.condition(), precond_attr));
   }
+  std::cout << "Applying effects" << std::endl;
   for ( Predicate pred : effects_) { 
     std::vector<std::string> effect_attr;
     for ( auto attr : pred.attrs() ) { 
-      if ( params_map.find(attr) == params_map.end() )
-        std::cout << "err, could not find attribute for effect: " << attr << std::endl;
-      std::string opt = params_map.find(attr)->second;
+      std::string opt;
+      // check if attribute is a constant or variable (latter starting with ?)
+      if (attr.find("?") == 0) {
+        if ( params_map.find(attr) == params_map.end() ) {
+          std::cout << "err, could not find attribute for effect: " << attr << std::endl;
+        }
+        opt = params_map.find(attr)->second;
+      } else {
+        opt = attr;
+      }
       effect_attr.push_back(opt);
     }
     effects.push_back(Predicate(pred.name(), pred.condition(), effect_attr));
   }
+  std::cout << "StnAction built" << std::endl;
 
   return StnAction(name_, preconds, effects, params, duration_, cond_breakups_, temp_breakups_);
 }

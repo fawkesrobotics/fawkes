@@ -124,6 +124,7 @@ StnGeneratorThread::loop()
     for ( auto& action : stn_->get_bson() ) {
       BSONObjBuilder rm_action;
       rm_action << "relation" << "stn-action";
+      rm_action << "state" << "pending";
       rm_action.appendElements(action);
       robot_memory->insert(rm_action.obj(), cfg_output_collection_);
     }
