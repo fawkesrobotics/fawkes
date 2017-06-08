@@ -29,7 +29,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  mongodb mongodb_log robot-memory clips-robot-memory pddl-robot-memory \
 	  openrave-robot-memory openni refboxcomm ros player xmlrpc gossip \
 	  robot_state_publisher gazebo dynamixel navgraph-interactive \
-	  pddl-planner
+	  pddl-planner stn-generator
 
 include $(BUILDSYSDIR)/rules.mk
 
