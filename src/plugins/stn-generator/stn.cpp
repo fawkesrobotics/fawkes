@@ -216,7 +216,6 @@ Stn::generate()
     bool break_edge = false;
     for ( Predicate p : predicates ) {
       if ( it->checkForBreakup(EdgeType::TEMPORAL, p) ) {
-        std::cout << "Break because of: " << p;
         break_edge = true;
         break;
       }

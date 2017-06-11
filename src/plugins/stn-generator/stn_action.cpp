@@ -116,6 +116,7 @@ StnAction::checkForBreakup(EdgeType t, Predicate p)
   }
 
   if ( std::find(breakups->begin(), breakups->end(), p.name()) != breakups->end() ) {
+    std::cout << "Break because of: " << p;
     return true;
   }
   return false;

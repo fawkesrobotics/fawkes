@@ -22,6 +22,8 @@
 #include <fstream>
 #include <streambuf>
 #include <utils/misc/string_conversions.h>
+#include <chrono>
+#include <thread>
 
 #include "stn-generator_thread.h"
 
@@ -128,6 +130,11 @@ StnGeneratorThread::loop()
       rm_action.appendElements(action);
       robot_memory->insert(rm_action.obj(), cfg_output_collection_);
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    BSONObjBuilder rm_final;
+    rm_final << "relation" << "stn-sync";
+    rm_final << "state" << "generated";
+    robot_memory->insert(rm_final.obj(), cfg_output_collection_);
   }
 }
 
