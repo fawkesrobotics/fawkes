@@ -26,6 +26,7 @@
 #include <utils/misc/string_conversions.h>
 #include <libs/core/exceptions/system.h>
 #include <cstdio>
+#include <cstdlib>
 
 using namespace fawkes;
 
@@ -115,6 +116,7 @@ void RobotMemorySetup::setup_mongods()
 	  for (size_t i = 0; i < repl_set_members.size(); ++i) {
 		  wait_until_started(repl_set_members[i], "repl set connect", max_setup_time, 1000000);
 	  }
+	  usleep(random() % 15000000);
 
 	  std::string repl_config = "{_id:'" + distributed_replset + "', members: [";
 	  for (size_t i = 0; i < repl_set_members.size(); ++i) {
