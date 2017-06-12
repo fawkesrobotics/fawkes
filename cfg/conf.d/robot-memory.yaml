@@ -34,10 +34,12 @@ plugins/robot-memory:
       port: 27021
       replica-set-name: "syncedrobmem"
       db-path: "~/.robot-memory/dbs/distributed"
-      replica-set-members: "[{_id:1, host:'localhost:27021'}]"
+      replica-set-members:
+        - localhost:27021
       replica-id: 1 #this should be the robot number, override it in host.yaml
       # initiate automatically
       initiate: true
+      max_setup_time_per_host_sec: 60
 
   computables:
     blackboard:
