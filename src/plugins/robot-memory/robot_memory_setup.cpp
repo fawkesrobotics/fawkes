@@ -84,8 +84,10 @@ void RobotMemorySetup::setup_mongods()
   usleep(1000000);
 
   //only start other processes when we want to run the robot memory distributed
-  if(!config->get_bool("plugins/robot-memory/setup/distributed-create"))
+  if(!config->get_bool("plugins/robot-memory/setup/distributed-create")) {
+    distribuded_mongod = NULL;
     return;
+  }
 
   //start own part of replica set
   unsigned int distributed_port = config->get_uint("plugins/robot-memory/setup/replicated/port");
@@ -156,8 +158,7 @@ void RobotMemorySetup::shutdown_mongods()
 {
   if(local_mongod)
     delete local_mongod;
-  if(distribuded_mongod)
-    delete distribuded_mongod;
+  delete distribuded_mongod;
 }
 
 /**
