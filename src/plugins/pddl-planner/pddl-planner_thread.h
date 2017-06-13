@@ -5,6 +5,7 @@
  *  Created: Wed Dec  7 19:09:44 2016
  *  Copyright  2016  Frederik Zwilling
  *             2017  Matthias Loebach
+ *             2017  Till Hofmann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -70,6 +71,7 @@ class PddlPlannerThread
 
   void ff_planner();
   void fd_planner();
+  void dbmp_planner();
   mongo::BSONObj BSONFromActionList();
   static size_t find_nth_space(const std::string& s, size_t nth);
   void print_action_list();
