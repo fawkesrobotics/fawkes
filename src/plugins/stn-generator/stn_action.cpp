@@ -166,26 +166,30 @@ StnAction::genConditionalActions(const std::vector<StnAction> candidate_actions)
   std::vector<Predicate> check_preds = preconds_;
   // iterate backwards to resolve conditions in the correct order
   for ( int i = candidate_actions.size() - 1; i >= 0; i-- ) {
-    for ( Predicate candidate_pred : candidate_actions.at(i).effects_ ) {
-      for ( auto pred_it = check_preds.begin(); pred_it != check_preds.end(); ) {
-        if ( !checkForBreakup(EdgeType::CONDITIONAL, (*pred_it)) && (*pred_it) == candidate_pred ) {
-          std::map<size_t,std::pair<std::string,std::vector<Predicate>>>::iterator it =
-            cond_actions_.find(candidate_actions.at(i).id_);
-          if ( it == cond_actions_.end() ) {
-            cond_actions_.insert(std::map<size_t,
-                std::pair<std::string, std::vector<Predicate>>>::value_type(
-                  candidate_actions.at(i).id_,
-                  std::make_pair(candidate_actions.at(i).name_, std::vector<Predicate>{(*pred_it)})));
+    try {
+      for ( Predicate candidate_pred : candidate_actions.at(i).effects_ ) {
+        for ( auto pred_it = check_preds.begin(); pred_it != check_preds.end(); ) {
+          if ( !checkForBreakup(EdgeType::CONDITIONAL, (*pred_it)) && (*pred_it) == candidate_pred ) {
+            std::map<size_t,std::pair<std::string,std::vector<Predicate>>>::iterator it =
+              cond_actions_.find(candidate_actions.at(i).id_);
+            if ( it == cond_actions_.end() ) {
+              cond_actions_.insert(std::map<size_t,
+                  std::pair<std::string, std::vector<Predicate>>>::value_type(
+                    candidate_actions.at(i).id_,
+                    std::make_pair(candidate_actions.at(i).name_, std::vector<Predicate>{(*pred_it)})));
+            } else {
+              it->second.second.push_back((*pred_it));
+            }
+            // remove predicate to only take the first (backwards)
+            // occurence of a predicate into account _it
+            pred_it = check_preds.erase(pred_it);
           } else {
-            it->second.second.push_back((*pred_it));
+            pred_it++;
           }
-          // remove predicate to only take the first (backwards)
-          // occurence of a predicate into account _it
-          pred_it = check_preds.erase(pred_it);
-        } else {
-          pred_it++;
         }
       }
+    } catch (std::exception& e) {
+      std::cout << "ERROR in stn_action: " << e.what() << std::endl;
     }
   }
   

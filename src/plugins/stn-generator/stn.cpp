@@ -21,6 +21,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <exception>
 #include "pddl_parser.h"
 
 #include "stn.h"
@@ -202,7 +203,11 @@ Stn::generate()
   for ( int i = stn_actions_.size() - 1; i >= 0; i-- ) {
     std::vector<StnAction> candidate_actions = std::vector<StnAction>(
         stn_actions_.begin(), stn_actions_.begin()+i);
-    stn_actions_.at(i).genConditionalActions(candidate_actions);
+    try {
+      stn_actions_.at(i).genConditionalActions(candidate_actions);
+    } catch (std::exception& e) {
+      std::cout << "ERROR stn.cpp:" << e.what() << std::endl;
+    }
   }
 
   std::vector<Predicate> predicates;
