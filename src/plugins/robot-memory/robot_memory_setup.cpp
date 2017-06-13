@@ -84,7 +84,7 @@ void RobotMemorySetup::setup_mongods()
   usleep(1000000);
 
   //only start other processes when we want to run the robot memory distributed
-  if(!config->get_bool("plugins/robot-memory/setup/distributed"))
+  if(!config->get_bool("plugins/robot-memory/setup/distributed-create"))
     return;
 
   //start own part of replica set
