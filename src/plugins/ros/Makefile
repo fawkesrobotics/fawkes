@@ -150,7 +150,7 @@ ifeq ($(HAVE_ROS),1)
     WARN_TARGETS += warning_rostf
   endif
 
-  ifeq ($(call ros-have-pkg,sensor_msgs),1)
+  ifeq ($(call ros-have-pkg,sensor_msgs)$(call ros-have-pkg,pcl_conversions),11)
     ifeq ($(HAVE_PCL),1)
       CFLAGS_pcl_adapter += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS)
       CFLAGS_pcl_thread += $(call ros-pkg-cflags,sensor_msgs) \
