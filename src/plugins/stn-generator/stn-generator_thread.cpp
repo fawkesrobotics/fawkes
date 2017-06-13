@@ -125,7 +125,8 @@ StnGeneratorThread::loop()
     //TODO reset actions in robot-memory
     //
     // max id in clips agent is 1000000 plus offset
-    unsigned long sync_id = 100000001;
+    long int sync_id = 1000001;
+    //long int sync_id = 100000001;
     for ( auto& action : stn_->get_bson() ) {
       BSONObjBuilder rm_action;
       rm_action << "relation" << "stn-action";
