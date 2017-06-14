@@ -127,14 +127,23 @@ PddlRobotMemoryThread::loop()
     //remove query stuff from input (its not part of the ctemplate features)
     input.erase(q_del_pos, tpl_end_pos - q_del_pos);
 
-    //fill dictionary to expand query template:
-    QResCursor cursor = robot_memory->query(fromjson(query_str), collection);
-    while(cursor->more())
-    {
-      BSONObj obj = cursor->next();
-      //dictionary for one entry
-      ctemplate::TemplateDictionary *entry_dict = dict.AddSectionDictionary(template_name);
-      fill_dict_from_document(entry_dict, obj);
+    try {
+      //fill dictionary to expand query template:
+      QResCursor cursor = robot_memory->query(fromjson(query_str), collection);
+      while(cursor->more())
+      {
+        BSONObj obj = cursor->next();
+        //dictionary for one entry
+        ctemplate::TemplateDictionary *entry_dict = dict.AddSectionDictionary(template_name);
+        fill_dict_from_document(entry_dict, obj);
+      }
+    #ifdef HAVE_MONGODB_VERSION_H
+    } catch (mongo::MsgAssertionException &e) {
+    #else
+    } catch (mongo::AssertionException &e) {
+    #endif
+      logger->log_error("PddlRobotMemory", "Template query failed: %s\n%s",
+          e.what(), query_str.c_str());
     }
   }
   //Add goal to dictionary
