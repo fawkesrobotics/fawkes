@@ -126,7 +126,6 @@ StnGeneratorThread::loop()
     //
     // max id in clips agent is 1000000 plus offset
     long int sync_id = 1000001;
-    //long int sync_id = 100000001;
     for ( auto& action : stn_->get_bson() ) {
       BSONObjBuilder rm_action;
       rm_action << "relation" << "stn-action";
