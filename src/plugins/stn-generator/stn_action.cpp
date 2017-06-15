@@ -116,7 +116,11 @@ StnAction::checkForBreakup(EdgeType t, Predicate p)
   }
 
   if ( std::find(breakups->begin(), breakups->end(), p.name()) != breakups->end() ) {
-    std::cout << "Break because of: " << p;
+    std::cout << "Break because of: " << p << " ";
+    switch (t) {
+      case EdgeType::CONDITIONAL : std::cout << "Conditional" << std::endl; break;
+      case EdgeType::TEMPORAL : std::cout << "Temporal" << std::endl; break;
+    }
     return true;
   }
   return false;
