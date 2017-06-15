@@ -62,6 +62,7 @@ class StnGeneratorThread
  private:
    std::string cfg_plan_collection_;
    bool cfg_publish_to_robot_memory_;
+   bool cfg_draw_graph_;
    std::string cfg_output_collection_;
    std::string cfg_pddl_problem_path_;
    fawkes::PddlPlannerInterface *plan_if_;

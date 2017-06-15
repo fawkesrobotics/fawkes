@@ -50,6 +50,7 @@ StnGeneratorThread::init()
   cfg_plan_collection_ = config->get_string(cfg_prefix + "plan/collection");
   cfg_output_collection_ = config->get_string(cfg_prefix + "output/collection");
   cfg_publish_to_robot_memory_ = config->get_bool(cfg_prefix + "output/publish-to-rm");
+  cfg_draw_graph_ = config->get_bool(cfg_prefix + "output/draw-graph");
 
   std::string pddl_domain_path = StringConversions::resolve_path(
       config->get_string(cfg_prefix + "domain-file"));
@@ -118,7 +119,10 @@ StnGeneratorThread::loop()
     }
   }
   stn_->generate();
-  stn_->drawGraph();
+  if ( cfg_draw_graph_ ) {
+    //FIXME this throws an out_of_range exception in larger graphs
+    stn_->drawGraph();
+  }
   logger->log_info(name(), "STN Generation finished.");
 
   if ( cfg_publish_to_robot_memory_ ) {
