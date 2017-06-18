@@ -133,10 +133,13 @@ StnGeneratorThread::loop()
       rm_action.appendElements(action);
       robot_memory->insert(rm_action.obj(), cfg_output_collection_);
     }
+    // ensure all actions are written to RM before acknowledment
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    num_published_actions_ += stn_->get_bson().size();
     BSONObjBuilder rm_final;
     rm_final << "relation" << "stn-sync";
-    rm_final << "state" << "generated";
+    rm_final << "state" << "synced";
+    rm_final << "count" << std::to_string(num_published_actions_);
     robot_memory->insert(rm_final.obj(), cfg_output_collection_);
   }
 }
