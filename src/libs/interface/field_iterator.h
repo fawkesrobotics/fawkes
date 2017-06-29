@@ -36,8 +36,8 @@ class Message;
 
 class InterfaceFieldIterator
 {
-  friend class Interface;
-  friend class Message;
+  friend Interface;
+  friend Message;
 
  public:
   InterfaceFieldIterator();

@@ -43,7 +43,7 @@ class Time;
 
 class Message : public RefCount
 {
- friend class Interface;
+ friend Interface;
  public:
   Message(const char *type);
   Message(const Message *mesg);

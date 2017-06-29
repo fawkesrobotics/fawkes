@@ -50,6 +50,10 @@ class MessageMediator;
 class Time;
 class Clock;
 class Mutex;
+class BlackBoardInterfaceManager;
+class BlackBoardInstanceFactory;
+class BlackBoardMessageManager;
+class BlackBoardInterfaceProxy;
 
 class InterfaceWriteDeniedException : public Exception
 {
@@ -78,10 +82,10 @@ class InterfaceInvalidException : public Exception
 
 class Interface
 {
- friend class BlackBoardInterfaceManager;
- friend class BlackBoardInstanceFactory;
- friend class BlackBoardMessageManager;
- friend class BlackBoardInterfaceProxy;
+ friend BlackBoardInterfaceManager;
+ friend BlackBoardInstanceFactory;
+ friend BlackBoardMessageManager;
+ friend BlackBoardInterfaceProxy;
 
  public:
   virtual ~Interface();

@@ -57,7 +57,7 @@ class MessageQueue
 
   class MessageIterator
   {
-    friend class MessageQueue;
+    friend MessageQueue;
    private:
     MessageIterator(msg_list_t *cur);
    public:
