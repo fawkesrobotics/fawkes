@@ -37,9 +37,11 @@ namespace fawkes {
 }
 #endif
 
+class MongoDBAspectIniFin;
+
 class MongoDBAspect : public virtual Aspect
 {
-  friend class MongoDBAspectIniFin;
+  friend MongoDBAspectIniFin;
 
  public:
   MongoDBAspect(const char *config_prefix = 0);
