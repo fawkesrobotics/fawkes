@@ -58,6 +58,8 @@ class RealsenseThread
   virtual void init();
   virtual void finalize();
   virtual void loop();
+
+ private:
   bool connect_and_start_camera();
   rs_device* get_camera();
   void enable_depth_stream();

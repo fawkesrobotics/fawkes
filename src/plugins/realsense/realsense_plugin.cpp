@@ -27,14 +27,13 @@
 
 using namespace fawkes;
 
-/* @class RealsensePlugin "realsense_plugin.cpp"
- * Driver for the Intel RealSense Camera providing Depth Data as Pointcloud
+/** Driver for the Intel RealSense camera.
  * @author Johannes Rothe
  */
 class RealsensePlugin : public fawkes::Plugin
 {
  public:
-  /* Constructor
+  /** Constructor
    * @param config Fakwes configuration
    */
   RealsensePlugin(Configuration *config)
@@ -44,5 +43,5 @@ class RealsensePlugin : public fawkes::Plugin
   }
 };
 
-PLUGIN_DESCRIPTION("Driver for the Intel RealSense Camera providing Depth Data as Pointcloud")
+PLUGIN_DESCRIPTION("Driver for Intel RealSense camera")
 EXPORT_PLUGIN(RealsensePlugin)
