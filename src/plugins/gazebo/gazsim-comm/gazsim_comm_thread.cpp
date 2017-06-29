@@ -112,17 +112,20 @@ GazsimCommThread::init()
     peers_[i] = new ProtobufBroadcastPeer(addresses_[i], send_ports_[i],
 					  recv_ports_[i], proto_dirs_);
     peers_[i]->signal_received_raw().connect(boost::bind(&GazsimCommThread::receive_raw_msg, this, _1, _2, _3, _4));
+    peers_[i]->signal_send_error().connect(boost::bind(&GazsimCommThread::peer_send_error, this, addresses_[i], send_ports_[i], _1));
     if(use_crypto1_)
     {
       peers_crypto1_[i] = new ProtobufBroadcastPeer(addresses_[i], send_ports_crypto1_[i],
 					  recv_ports_crypto1_[i], proto_dirs_);
       peers_crypto1_[i]->signal_received_raw().connect(boost::bind(&GazsimCommThread::receive_raw_msg, this, _1, _2, _3, _4));
+      peers_crypto1_[i]->signal_send_error().connect(boost::bind(&GazsimCommThread::peer_send_error, this, addresses_[i], send_ports_crypto1_[i], _1));
     }
     if(use_crypto2_)
     {
       peers_crypto2_[i] = new ProtobufBroadcastPeer(addresses_[i], send_ports_crypto2_[i],
 						    recv_ports_crypto2_[i], proto_dirs_);
       peers_crypto2_[i]->signal_received_raw().connect(boost::bind(&GazsimCommThread::receive_raw_msg, this, _1, _2, _3, _4));
+      peers_crypto2_[i]->signal_send_error().connect(boost::bind(&GazsimCommThread::peer_send_error, this, addresses_[i], send_ports_crypto2_[i], _1));
     }
   }
   initialized_ = true;
@@ -142,42 +145,6 @@ GazsimCommThread::finalize()
 void
 GazsimCommThread::loop()
 {
-}
-
-/**
- * Receive and forward msg
- * @param endpoint port msg received from
- * @param component_id message_component_id
- * @param msg_type msg_type
- * @param msg Message
- */
-void
-GazsimCommThread::receive_msg(boost::asio::ip::udp::endpoint &endpoint,
-		       uint16_t component_id, uint16_t msg_type,
-		       std::shared_ptr<google::protobuf::Message> msg)
-{
-  //logger->log_info(name(), "Got Peer Message from port %d", endpoint.port());
-  unsigned int incoming_peer_port = endpoint.port(); //this is suprisingly the send-port
- 
-  if(!initialized_)
-  {
-    return;
-  }
-
-  //simulate package loss
-  double rnd = ((double) rand()) / ((double) RAND_MAX); //0.0 <= rnd <= 1.0
-  if(rnd < package_loss_)
-  {
-    return;
-  }
-  //send message to all other peers
-  for(unsigned int i = 0; i < peers_.size(); i++)
-  {
-    if(send_ports_[i] != incoming_peer_port)
-    {
-      peers_[i]->send(msg);
-    }
-  }
 }
 
 /**
@@ -234,4 +201,10 @@ GazsimCommThread::receive_raw_msg(boost::asio::ip::udp::endpoint &endpoint,
       peers[i]->send_raw(header, data, length);
     }
   }
+}
+
+void
+GazsimCommThread::peer_send_error(std::string address, unsigned int port, std::string err)
+{
+	logger->log_warn(name(), "Peer send error for %s:%u: %s", address.c_str(), port, err.c_str());
 }

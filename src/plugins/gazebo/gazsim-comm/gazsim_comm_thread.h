@@ -54,13 +54,12 @@ class GazsimCommThread
   virtual void loop();
   virtual void finalize();
 
-  void receive_msg(boost::asio::ip::udp::endpoint &endpoint,
-		       uint16_t component_id, uint16_t msg_type,
-		       std::shared_ptr<google::protobuf::Message> msg);
   void receive_raw_msg(boost::asio::ip::udp::endpoint &endpoint,
 		       protobuf_comm::frame_header_t &header, void * data,
 		       size_t length);
 
+  void peer_send_error(std::string address, unsigned int port, std::string err);
+  
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
