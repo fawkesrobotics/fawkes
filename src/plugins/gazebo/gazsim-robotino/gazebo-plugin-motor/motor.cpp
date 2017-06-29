@@ -20,6 +20,8 @@
 
 #include <math.h>
 
+#include <utils/misc/gazebo_api_wrappers.h>
+
 #include "motor.h"
 
 using namespace gazebo;
@@ -55,7 +57,7 @@ void Motor::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
   //Create the communication Node for communication with fawkes
   this->node_ = transport::NodePtr(new transport::Node());
   //the namespace is set to the model name!
-  this->node_->Init(model_->GetWorld()->GetName()+"/"+name_);
+  this->node_->Init(model_->GetWorld()->GZWRAP_NAME()+"/"+name_);
 
 
   //initialize movement commands:
@@ -73,7 +75,7 @@ void Motor::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   //Apply movement command
   float x,y;
-  float yaw = this->model_->GetWorldPose().rot.GetAsEuler().z;
+  float yaw = this->model_->GZWRAP_WORLD_POSE().GZWRAP_ROT_EULER_Z;
   //foward part
   x = cos(yaw) * vx_;
   y = sin(yaw) * vx_;
@@ -81,8 +83,8 @@ void Motor::OnUpdate(const common::UpdateInfo & /*_info*/)
   x += cos(yaw + 3.1415926f / 2) * vy_;
   y += sin(yaw + 3.1415926f / 2) * vy_;
   // Apply velocity to the model.
-  this->model_->SetLinearVel(math::Vector3(x, y, 0));
-  this->model_->SetAngularVel(math::Vector3(0, 0, vomega_));
+  this->model_->SetLinearVel(gzwrap::Vector3d(x, y, 0));
+  this->model_->SetAngularVel(gzwrap::Vector3d(0, 0, vomega_));
 }
 
 /** on Gazebo reset

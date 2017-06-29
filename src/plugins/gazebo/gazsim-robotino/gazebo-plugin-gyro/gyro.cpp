@@ -20,6 +20,8 @@
 
 #include <math.h>
 
+#include <utils/misc/gazebo_api_wrappers.h>
+
 #include "gyro.h"
 
 using namespace gazebo;
@@ -55,14 +57,14 @@ void Gyro::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
   //Create the communication Node for communication with fawkes
   this->node_ = transport::NodePtr(new transport::Node());
   //the namespace is set to the model name!
-  this->node_->Init(model_->GetWorld()->GetName()+"/"+name_);
+  this->node_->Init(model_->GetWorld()->GZWRAP_NAME()+"/"+name_);
 
 
   //create publisher
   this->gyro_pub_ = this->node_->Advertise<msgs::Vector3d>("~/RobotinoSim/Gyro/");
 
   //init last sent time
-  last_sent_time_ = model_->GetWorld()->GetSimTime().Double();
+  last_sent_time_ = model_->GetWorld()->GZWRAP_SIM_TIME().Double();
   this->send_interval_ = 0.05;
 }
 
@@ -71,7 +73,7 @@ void Gyro::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
 void Gyro::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   //Send gyro information to Fawkes
-  double time = model_->GetWorld()->GetSimTime().Double();
+  double time = model_->GetWorld()->GZWRAP_SIM_TIME().Double();
   if(time - last_sent_time_ > send_interval_)
   {
     last_sent_time_ = time;
@@ -90,9 +92,9 @@ void Gyro::send_gyro()
   if(gyro_pub_->HasConnections())
   {
     //Read gyro from simulation
-    float roll = this->model_->GetWorldPose().rot.GetAsEuler().x;
-    float pitch = this->model_->GetWorldPose().rot.GetAsEuler().y;
-    float yaw = this->model_->GetWorldPose().rot.GetAsEuler().z;
+    float roll = this->model_->GZWRAP_WORLD_POSE().GZWRAP_ROT_EULER_X;
+    float pitch = this->model_->GZWRAP_WORLD_POSE().GZWRAP_ROT_EULER_Y;
+    float yaw = this->model_->GZWRAP_WORLD_POSE().GZWRAP_ROT_EULER_Z;
 
     //build message
     msgs::Vector3d gyroMsg;
