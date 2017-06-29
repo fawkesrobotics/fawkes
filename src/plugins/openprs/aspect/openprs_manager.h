@@ -32,9 +32,11 @@ namespace fawkes {
 }
 #endif
 
+class OpenPRSManagerAspectIniFin;
+
 class OpenPRSManagerAspect : public virtual Aspect
 {
-  friend class OpenPRSManagerAspectIniFin;
+  friend OpenPRSManagerAspectIniFin;
 
  public:
   OpenPRSManagerAspect();

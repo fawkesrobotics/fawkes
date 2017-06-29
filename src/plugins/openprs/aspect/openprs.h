@@ -35,10 +35,11 @@ namespace fawkes {
 #endif
 
 class OpenPRSComm;
+class OpenPRSAspectIniFin;
 
 class OpenPRSAspect : public virtual Aspect
 {
-  friend class OpenPRSAspectIniFin;
+ friend OpenPRSAspectIniFin;
 
  public:
   /** OPRS kernel operation mode. */
