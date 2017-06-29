@@ -36,7 +36,7 @@ class WebServer;
 
 class WebRequestManager
 {
-  friend class WebServer;
+  friend WebServer;
  public:
   WebRequestManager();
   ~WebRequestManager();

@@ -39,8 +39,10 @@ namespace fawkes {
 }
 #endif
 
+class WebRequestDispatcher;
+
 class WebRequest {
-  friend class WebRequestDispatcher;
+  friend WebRequestDispatcher;
 
  public:
   /** HTTP transfer methods. */
