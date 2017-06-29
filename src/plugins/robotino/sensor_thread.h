@@ -34,6 +34,7 @@
 #include <vector>
 
 class RobotinoComThread;
+class RobotinoActThread;
 
 namespace fawkes {
 	class BatteryInterface;
@@ -50,7 +51,7 @@ class RobotinoSensorThread
 	public fawkes::ConfigurableAspect,
 	public fawkes::BlackBoardAspect
 {
-	friend class RobotinoActThread;
+	friend RobotinoActThread;
  public:
 	RobotinoSensorThread(RobotinoComThread *com_thread);
 
