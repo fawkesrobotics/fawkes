@@ -35,10 +35,11 @@ namespace fawkes {
 #endif
 
 class GossipGroup;
+class GossipAspectIniFin;
 
 class GossipAspect : public virtual Aspect
 {
-  friend class GossipAspectIniFin;
+ friend GossipAspectIniFin;
 
  public:
   GossipAspect(const char *group_name);

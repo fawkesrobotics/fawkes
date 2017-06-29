@@ -37,6 +37,7 @@ namespace fawkes {
 
 class GossipGroup;
 class ServicePublisher;
+class GossipAspectIniFin;
 
 class GossipGroupConfiguration
 {
@@ -60,7 +61,7 @@ class GossipGroupConfiguration
 
 class GossipGroupManager
 {
-  friend class GossipAspectIniFin;
+  friend GossipAspectIniFin;
  public:
   GossipGroupManager(std::string &service_name, ServicePublisher *service_publisher,
 		     std::map<std::string, GossipGroupConfiguration> &initial_groups);

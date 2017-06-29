@@ -42,9 +42,10 @@ namespace fawkes {
 
 class ServicePublisher;
 class NetworkService;
+class GossipGroupManager;
 
 class GossipGroup {
-  friend class GossipGroupManager;
+  friend GossipGroupManager;
  public:
   ~GossipGroup();
 
