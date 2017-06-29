@@ -33,10 +33,11 @@ namespace firevision {
 
 class CameraArgumentParser;
 class V4L1CameraData;
+class V4LCamera;
 
 class V4L1Camera : public Camera
 {
-  friend class V4LCamera;
+ friend V4LCamera;
 
  public:
   V4L1Camera(const char *device_name = "/dev/video0");
