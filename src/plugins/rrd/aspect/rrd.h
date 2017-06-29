@@ -33,9 +33,11 @@ namespace fawkes {
 }
 #endif
 
+class RRDAspectIniFin;
+
 class RRDAspect : public virtual Aspect
 {
-  friend class RRDAspectIniFin;
+  friend RRDAspectIniFin;
 
  public:
   RRDAspect();
