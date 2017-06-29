@@ -33,9 +33,11 @@ namespace fawkes {
 }
 #endif
 
+class CLIPSManagerAspectIniFin;
+
 class CLIPSManagerAspect : public virtual Aspect
 {
-  friend class CLIPSManagerAspectIniFin;
+  friend CLIPSManagerAspectIniFin;
 
  public:
   CLIPSManagerAspect();

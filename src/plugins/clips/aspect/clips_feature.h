@@ -38,8 +38,12 @@ namespace fawkes {
 }
 #endif
 
-class CLIPSFeature {
-  friend class CLIPSEnvManager;
+class CLIPSEnvManager;
+class CLIPSFeatureAspectIniFin;
+
+class CLIPSFeature
+{
+ friend CLIPSEnvManager;
 
  public:
   CLIPSFeature(const char *feature_name);
@@ -56,7 +60,7 @@ class CLIPSFeature {
 
 class CLIPSFeatureAspect : public virtual Aspect
 {
-  friend class CLIPSFeatureAspectIniFin;
+  friend CLIPSFeatureAspectIniFin;
 
  public:
   CLIPSFeatureAspect(CLIPSFeature *feature);

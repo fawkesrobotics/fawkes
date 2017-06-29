@@ -38,9 +38,11 @@ namespace fawkes {
 }
 #endif
 
+class CLIPSAspectIniFin;
+
 class CLIPSAspect : public virtual Aspect
 {
-  friend class CLIPSAspectIniFin;
+ friend CLIPSAspectIniFin;
 
  public:
   CLIPSAspect(const char *env_name, const char *log_component_name = 0);
