@@ -34,10 +34,12 @@ namespace firevision {
 #endif
 
 class SharedMemoryLookupTable;
+class BulbGenerator;
 
 class Bulb : public MirrorModel
 {
-  friend class BulbGenerator;
+ friend BulbGenerator;
+
  public:
 
   // This constructor loads an existing bulb model (lut) from file "filename".

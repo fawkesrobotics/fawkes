@@ -37,10 +37,14 @@ namespace firevision {
 }
 #endif
 
+class HtLinesModel;
+class RhtLinesModel;
+
 class LineShape : public Shape
 {
-  friend class HtLinesModel;
-  friend class RhtLinesModel;
+ friend HtLinesModel;
+ friend RhtLinesModel;
+
  public:
   LineShape(unsigned int roi_width, unsigned int roi_height);
   ~LineShape();
