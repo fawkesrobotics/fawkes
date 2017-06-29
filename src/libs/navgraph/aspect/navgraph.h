@@ -33,10 +33,11 @@ namespace fawkes {
 #endif
 
 class NavGraph;
+class NavGraphAspectIniFin;
 
 class NavGraphAspect : public virtual Aspect
 {
-  friend class NavGraphAspectIniFin;
+  friend NavGraphAspectIniFin;
 
  public:
   NavGraphAspect();

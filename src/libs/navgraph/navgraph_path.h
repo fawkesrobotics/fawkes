@@ -39,7 +39,7 @@ class NavGraph;
 class NavGraphPath {
  public:
   class Traversal {
-   friend class NavGraphPath;
+   friend NavGraphPath;
    public:
     Traversal();
     Traversal(const NavGraphPath *path);

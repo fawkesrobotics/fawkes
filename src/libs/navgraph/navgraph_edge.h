@@ -36,8 +36,10 @@ namespace fawkes {
 }
 #endif
 
+class NavGraph;
+
 class NavGraphEdge {
-  friend class NavGraph;
+  friend NavGraph;
 
  public:
   NavGraphEdge();
