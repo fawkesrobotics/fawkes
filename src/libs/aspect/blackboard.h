@@ -31,9 +31,11 @@ namespace fawkes {
 }
 #endif
 
+class BlackBoardAspectIniFin;
+
 class BlackBoardAspect : public virtual Aspect
 {
-  friend class BlackBoardAspectIniFin;
+  friend BlackBoardAspectIniFin;
  public:
   BlackBoardAspect(const char *owner = NULL);
   virtual ~BlackBoardAspect();
