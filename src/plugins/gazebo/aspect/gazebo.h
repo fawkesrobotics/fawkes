@@ -34,9 +34,11 @@ namespace fawkes {
 }
 #endif
 
+class GazeboAspectIniFin;
+
 class GazeboAspect : public virtual Aspect
 {
-  friend class GazeboAspectIniFin;
+ friend GazeboAspectIniFin;
 
  public:
   GazeboAspect();
