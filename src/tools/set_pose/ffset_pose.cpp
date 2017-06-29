@@ -106,7 +106,7 @@ try_localize(const std::string &host, unsigned short int port, std::string &inte
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hr:i:t:");
+  ArgumentParser argp(argc, argv, "hr:i:t:f:");
 
   if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
@@ -169,12 +169,13 @@ main(int argc, char **argv)
       localized = true;
     } catch (Exception &e) {
       if ((now - &start) > try_sec) {
-	fprintf(stderr, "Failed to localize %s:%u: %s\n",
-		host.c_str(), port, e.what_no_backtrace());
-	break;
+	      fprintf(stderr, "Failed to localize %s:%u: %s\n",
+	              host.c_str(), port, e.what_no_backtrace());
+	      break;
       }
+      usleep(1000000);
     }
   }
 
-  return 0;
+  return localized ? 0 : -1;
 }
