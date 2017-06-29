@@ -251,7 +251,7 @@ NavGraph::closest_node(float pos_x, float pos_y, bool consider_unconnected,
   float min_dist = HUGE;
 
   std::vector<NavGraphNode>::iterator i;
-  std::vector<NavGraphNode>::iterator elem = nodes.begin();
+  std::vector<NavGraphNode>::iterator elem = nodes.end();
   for (i = nodes.begin(); i != nodes.end(); ++i) {
     if (! consider_unconnected && i->unconnected())  continue;
 
