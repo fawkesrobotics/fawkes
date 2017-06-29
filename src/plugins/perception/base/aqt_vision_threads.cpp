@@ -41,8 +41,7 @@ using namespace fawkes;
 /** Constructor.
  * @param clock Clock for timeout handling, system time is used only.
  */
-FvAqtVisionThreads::FvAqtVisionThreads(Clock *clock)
-
+FvAqtVisionThreads::FvAqtVisionThreads(fawkes::Clock *clock)
 {
   this->clock = clock;
 

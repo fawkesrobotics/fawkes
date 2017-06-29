@@ -31,10 +31,13 @@ namespace fawkes {
   class Barrier;
 }
 
+class FvBaseThread;
+class FvAquisitionThread;
+
 class FvAqtVisionThreads
 {
- friend class FvBaseThread;
- friend class FvAquisitionThread;
+ friend FvBaseThread;
+ friend FvAquisitionThread;
  public:
   FvAqtVisionThreads(fawkes::Clock *clock);
   ~FvAqtVisionThreads();
