@@ -424,6 +424,35 @@ class YamlConfigurationNode
 			add_to->name().c_str());
       }
       add_to->set_scalar(n->get_scalar());
+    } else if (add_to->is_list()) {
+      if (! n->is_list()) {
+        throw Exception("YamlConfig: cannot overwrite list value %s with non-list",
+                        add_to->name().c_str());
+      }
+      if (is_type<unsigned int>()) {
+	      try {
+		      int v = get_int();
+		      if (v >= 0) {
+			      add_to->set_list(n->get_list<unsigned int>());
+		      } else {
+			      add_to->set_list(n->get_list<int>());
+		      }
+	      } catch (Exception &e) {
+		      // can happen if value > MAX_INT
+		      add_to->set_list(n->get_list<unsigned int>());
+	      }
+      } else if (is_type<int>()) {
+	      add_to->set_list(n->get_list<int>());
+      } else if (is_type<float>()) {
+	      add_to->set_list(n->get_list<float>());
+      } else if (is_type<bool>()) {
+	      add_to->set_list(n->get_list<bool>());
+      } else if (is_type<std::string>()) {
+	      add_to->set_list(n->get_list<std::string>());
+      } else {
+	      std::vector<std::string> empty;
+	      add_to->set_list(empty);
+      }
     } else {    
     
       std::map<std::string, YamlConfigurationNode *>::const_iterator i;
@@ -643,7 +672,7 @@ class YamlConfigurationNode
    */
   template<typename T>
   void
-  set_list(std::vector<T> &t)
+  set_list(const std::vector<T> &t)
   {
     if (has_children()) {
       throw Exception("YamlConfig: cannot set value on non-leaf path node %s", name_.c_str());
@@ -697,6 +726,11 @@ class YamlConfigurationNode
     default:
       return false;
     }
+  }
+
+  bool is_list() const
+  {
+	  return (type_ == Type::SEQUENCE);
   }
 
 

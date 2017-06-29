@@ -42,7 +42,7 @@ class StringConversions
   static std::string to_string(float f);
   static std::string to_string(double d);
   static std::string to_string(bool b);
-  static std::string to_string(std::string &s)
+  static std::string to_string(const std::string &s)
   { return s; }
 
   static unsigned int to_uint(std::string s);
@@ -53,7 +53,7 @@ class StringConversions
   static bool         to_bool(std::string s);
 
   static void        trim_inplace(std::string &s);
-  static std::string trim(std::string &s);
+  static std::string trim(const std::string &s);
 
   static std::string  resolve_path(std::string s);
   static std::vector<std::string>  resolve_paths(std::vector<std::string> s);

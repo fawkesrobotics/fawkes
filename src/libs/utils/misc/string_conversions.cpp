@@ -268,7 +268,7 @@ StringConversions::trim_inplace(std::string &s)
  * @return trimmed string
  */
 std::string
-StringConversions::trim(std::string &s)
+StringConversions::trim(const std::string &s)
 {
   std::string::size_type p1 = s.find_first_not_of(' ');
   std::string::size_type p2 = s.find_last_not_of(' ');
