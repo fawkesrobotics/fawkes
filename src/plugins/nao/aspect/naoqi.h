@@ -33,9 +33,11 @@ namespace fawkes {
 }
 #endif
 
+class NaoQiAspectIniFin;
+
 class NaoQiAspect : public virtual Aspect
 {
-  friend class NaoQiAspectIniFin;
+  friend NaoQiAspectIniFin;
 
  public:
   NaoQiAspect();
