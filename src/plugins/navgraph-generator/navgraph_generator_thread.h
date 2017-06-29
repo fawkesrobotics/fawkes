@@ -45,7 +45,9 @@ class NavGraphGeneratorThread
   public fawkes::BlackBoardAspect,
   public fawkes::BlackBoardInterfaceListener
 {
- friend class NavGraphGeneratorVisualizationThread;
+#ifdef HAVE_VISUALIZATION
+ friend NavGraphGeneratorVisualizationThread;
+#endif
  public:
   NavGraphGeneratorThread();
 #ifdef HAVE_VISUALIZATION
