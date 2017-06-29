@@ -46,7 +46,7 @@ namespace fawkes {
 class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
 {
  public:
-  BlackboardCLIPSFeature(fawkes::Logger *logger, fawkes::BlackBoard *blackboard);
+  BlackboardCLIPSFeature(fawkes::Logger *logger, fawkes::BlackBoard *blackboard, bool retract_early);
   virtual ~BlackboardCLIPSFeature();
 
   // for CLIPSFeature
@@ -57,6 +57,7 @@ class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
  private: // members
   fawkes::Logger     *logger_;
   fawkes::BlackBoard *blackboard_;
+  bool                cfg_retract_early_;
 
   typedef std::map<std::string, std::list<fawkes::Interface *> > InterfaceMap;
   typedef struct {
