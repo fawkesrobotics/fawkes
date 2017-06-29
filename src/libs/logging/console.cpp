@@ -53,6 +53,8 @@ ConsoleLogger::ConsoleLogger(LogLevel log_level)
   now_s = (struct ::tm *)malloc(sizeof(struct ::tm));
   mutex = new Mutex();
   outf_ = fdopen(dup(STDERR_FILENO), "a");
+  // make buffer line-buffered
+  setvbuf(outf_, NULL, _IOLBF, 0);
 }
 
 
