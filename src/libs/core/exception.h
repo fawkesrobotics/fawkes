@@ -71,7 +71,7 @@ class Exception : public std::exception {
  public:
   class iterator
   {
-    friend class Exception;
+    friend Exception;
    private:
     iterator(message_list_t *message_list);
    public:

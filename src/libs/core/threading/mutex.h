@@ -31,7 +31,7 @@ class WaitCondition;
 
 class Mutex
 {
-  friend class WaitCondition;
+  friend WaitCondition;
 
  public:
   /** Mutex type. */

@@ -28,9 +28,11 @@
 
 namespace fawkes {
 
+class WaitCondition;
+
 class RecursiveMutex : public Mutex
 {
-  friend class WaitCondition;
+  friend WaitCondition;
 
  public:
   RecursiveMutex();

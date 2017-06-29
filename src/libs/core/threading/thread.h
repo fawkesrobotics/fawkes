@@ -40,8 +40,8 @@ class ThreadList;
 template <typename Type> class LockList;
 
 class Thread {
+ friend ThreadList;
  public:
-  friend class ThreadList;
 
   /** Thread operation mode.
    * A thread can operate in two different modes. In continuous mode the
