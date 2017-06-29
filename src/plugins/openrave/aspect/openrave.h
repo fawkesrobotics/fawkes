@@ -32,9 +32,11 @@ namespace fawkes {
 }
 #endif
 
+class OpenRaveAspectIniFin;
+
 class OpenRaveAspect : public virtual Aspect
 {
-  friend class OpenRaveAspectIniFin;
+  friend OpenRaveAspectIniFin;
 
  public:
   OpenRaveAspect();
