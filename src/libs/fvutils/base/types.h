@@ -114,9 +114,9 @@ typedef struct {
       uint8_t g;	/**< G color component value */
       uint8_t r;	/**< R color component value */
       uint8_t _unused;	/**< unused */
-    };
+    }; /**< Color as RGB struct */
     float rgb;		/**< Color value as float */
-  };
+  }; /**< Union representing color as separate pairs or float */
 } pcl_point_xyzrgb_t;
 #pragma pack(pop)
 
