@@ -36,9 +36,11 @@ namespace fawkes {
 }
 #endif
 
+class OpenNiAspectIniFin;
+
 class OpenNiAspect : public virtual Aspect
 {
-  friend class OpenNiAspectIniFin;
+ friend OpenNiAspectIniFin;
 
  public:
   OpenNiAspect();
