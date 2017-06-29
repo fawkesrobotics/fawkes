@@ -1,7 +1,7 @@
 %YAML 1.2
 %TAG ! tag:fawkesrobotics.org,cfg/
 ---
-doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/laser-cluster
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/navgraph-generator
 ---
 navgraph-generator:
 
@@ -49,3 +49,14 @@ navgraph-generator:
   visualization:
     enable: true
 
+
+  # Save a generated navgraph automatically to disk.
+  
+  # This can be enabled, e.g., for later debugging or during automated
+  # experiments.
+  save-to-file:
+    enable: false
+    # Filename, if starting with a slash (/), absolute path is assumed,
+    # otherwise, it is assumed to be relative to the config directory.
+    # Path may not contain two consecutive dots (..).
+    filename: navgraph-generated.yaml

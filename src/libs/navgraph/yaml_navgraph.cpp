@@ -285,11 +285,12 @@ read_default_properties(NavGraph *graph, YAML::Node &doc)
 
 /** Load topological map graph stored in RCSoft format.
  * @param filename path to the file to read
+ * @param allow_multi_graph if true, allows multiple disconnected graph segments
  * @return topological map graph read from file
  * @exception Exception thrown on any error to read the graph file
  */
 NavGraph *
-load_yaml_navgraph(std::string filename)
+load_yaml_navgraph(std::string filename, bool allow_multi_graph)
 {
   //try to fix use of relative paths
   if (filename[0] != '/') {
@@ -351,7 +352,7 @@ load_yaml_navgraph(std::string filename)
     }
   }
 
-  graph->calc_reachability();
+  graph->calc_reachability(allow_multi_graph);
 
   const std::vector<NavGraphNode> &nodes = graph->nodes();
   for (const NavGraphNode &n : nodes) {
@@ -414,6 +415,7 @@ save_yaml_navgraph(std::string filename, NavGraph *graph)
 
   const std::vector<NavGraphNode> &nodes = graph->nodes();
   for (const NavGraphNode &node : nodes) {
+    if (node.unconnected())  out << YAML::LocalTag("unconnected");
     out << YAML::BeginMap
 	<< YAML::Key   << "name"
 	<< YAML::Value << node.name()
@@ -442,6 +444,16 @@ save_yaml_navgraph(std::string filename, NavGraph *graph)
   const std::vector<NavGraphEdge> &edges = graph->edges();
   for (const NavGraphEdge &edge : edges) {
     if (edge.is_directed())  out << YAML::LocalTag("dir");
+    if (edge.has_property("insert-mode")) {
+	    std::string insert_mode = edge.property("insert-mode");
+	    if (insert_mode == "force") {
+		    out << YAML::LocalTag("allow-intersection");
+	    } else if (insert_mode == "no-intersection") {
+		    out << YAML::LocalTag("no-intersection");
+	    } else if (insert_mode == "split-intersection") {
+		    out << YAML::LocalTag("split-intersection");
+	    }
+    }
     out << YAML::Flow << YAML::BeginSeq << edge.from() << edge.to() << YAML::EndSeq;
   }
 

@@ -25,24 +25,28 @@
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/aspect_provider.h>
+#include <aspect/tf.h>
 #include <plugins/ros/aspect/ros.h>
 #include <navgraph/aspect/navgraph.h>
 
 #include <navgraph/navgraph.h>
 
 #include <ros/publisher.h>
+#include <ros/service_server.h>
+
+#include <fawkes_msgs/NavGraphSearchPath.h>
+#include <fawkes_msgs/NavGraphGetPairwiseCosts.h>
 
 class NavGraphROSPubThread
 : public fawkes::Thread,
   public fawkes::ClockAspect,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
+	public fawkes::TransformAspect,
   public fawkes::ROSAspect,
 	public fawkes::NavGraphAspect,
 	public fawkes::NavGraph::ChangeListener
 {
- private:
  public:
   NavGraphROSPubThread();
   virtual ~NavGraphROSPubThread();
@@ -58,9 +62,21 @@ class NavGraphROSPubThread
 
  private:
   void publish_graph();
+  void convert_nodes(const std::vector<fawkes::NavGraphNode> &nodes,
+                     std::vector<fawkes_msgs::NavGraphNode> &out);
+
+  bool svs_search_path_cb(fawkes_msgs::NavGraphSearchPath::Request  &req,
+                          fawkes_msgs::NavGraphSearchPath::Response &res);
+  bool svs_get_pwcosts_cb(fawkes_msgs::NavGraphGetPairwiseCosts::Request  &req,
+                          fawkes_msgs::NavGraphGetPairwiseCosts::Response &res);
 
  private:
+  std::string  cfg_base_frame_;
+  std::string  cfg_global_frame_;
+
   ros::Publisher pub_;
+  ros::ServiceServer svs_search_path_;
+  ros::ServiceServer svs_get_pwcosts_;
 };
 
 #endif

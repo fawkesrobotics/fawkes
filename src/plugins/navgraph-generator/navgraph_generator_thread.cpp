@@ -2,7 +2,7 @@
  *  navgraph_generator_thread.cpp - Plugin to generate navgraphs
  *
  *  Created: Mon Feb 09 17:37:30 2015
- *  Copyright  2015  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2015-2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 
 #include <core/threading/mutex_locker.h>
 #include <navgraph/generators/voronoi.h>
+#include <navgraph/yaml_navgraph.h>
 #include <plugins/laser-lines/line_func.h>
 #include <plugins/amcl/amcl_utils.h>
 #include <utils/misc/string_split.h>
@@ -100,6 +101,23 @@ NavGraphGeneratorThread::init()
   try {
     cfg_visualization_ = config->get_bool(CFG_PREFIX"visualization/enable");
   } catch (Exception &e) {} // ignore, use default
+
+  cfg_save_to_file_ = false;
+  try {
+    cfg_save_to_file_ = config->get_bool(CFG_PREFIX"save-to-file/enable");
+  } catch (Exception &e) {} // ignore, use default
+  if (cfg_save_to_file_) {
+	  cfg_save_filename_ = config->get_string(CFG_PREFIX"save-to-file/filename");
+	  if (cfg_save_filename_.empty()) {
+		  throw Exception("navgraph-generator: invalid empty filename");
+	  }
+	  if (cfg_save_filename_.find("..") != std::string::npos) {
+		  throw Exception("navgraph-generator: filename may not contains two consecutive dots (..)");
+	  }
+	  if (cfg_save_filename_[0] != '/') {
+		  cfg_save_filename_ = std::string(CONFDIR) + "/" + cfg_save_filename_;
+	  }
+  }
 
 #ifndef HAVE_VISUALIZATION
   if (cfg_visualization_) {
@@ -277,6 +295,11 @@ NavGraphGeneratorThread::loop()
   } catch (Exception &e) {
 	  logger->log_error(name(), "Failed to finalize graph setup, exception follows");
 	  logger->log_error(name(), e);
+  }
+
+  if (cfg_save_to_file_) {
+	  logger->log_debug(name(), "  Writing to file '%s'", cfg_save_filename_.c_str());
+	  save_yaml_navgraph(cfg_save_filename_, *navgraph);
   }
 
   // re-enable notifications
