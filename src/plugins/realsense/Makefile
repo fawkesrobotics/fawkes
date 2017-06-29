@@ -24,7 +24,7 @@ CFLAGS  += $(CFLAGS_TF) $(CFLAGS_PCL) $(CFFLAGS_conveyor_pose)
 LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL)
 
 LIBS_realsense = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-                      fawkesblackboard fawkesinterface realsense usb-1.0 \
+                      fawkesblackboard fawkesinterface realsense \
                       fawkespcl_utils
 
 OBJS_realsense = realsense_plugin.o realsense_thread.o 
