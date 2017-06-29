@@ -122,7 +122,7 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
 
  class NetConfValueIterator : public Configuration::ValueIterator
   {
-    friend class NetworkConfiguration;
+    friend NetworkConfiguration;
    protected:
     NetConfValueIterator(Configuration::ValueIterator *i);
     NetConfValueIterator(FawkesNetworkMessage *m);

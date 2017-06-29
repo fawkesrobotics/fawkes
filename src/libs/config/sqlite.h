@@ -116,7 +116,7 @@ class SQLiteConfiguration : public Configuration
  public:
  class SQLiteValueIterator : public Configuration::ValueIterator
   {
-    friend class SQLiteConfiguration;
+    friend SQLiteConfiguration;
    protected:
     SQLiteValueIterator(::sqlite3_stmt *stmt, void *p = NULL);
    public:
