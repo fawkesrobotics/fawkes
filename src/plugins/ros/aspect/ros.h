@@ -36,9 +36,11 @@ namespace fawkes {
 }
 #endif
 
+class ROSAspectIniFin;
+
 class ROSAspect : public virtual Aspect
 {
-  friend class ROSAspectIniFin;
+  friend ROSAspectIniFin;
 
  public:
   ROSAspect();
