@@ -46,7 +46,7 @@ class RefCountRWLock;
 
 class BlackBoardInterfaceManager : public InterfaceMediator
 {
- friend class BlackBoardMessageManager;
+ friend BlackBoardMessageManager;
  public:
 
   BlackBoardInterfaceManager(BlackBoardMemoryManager *bb_memmgr,

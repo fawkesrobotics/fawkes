@@ -30,11 +30,12 @@ namespace fawkes {
 
 class BlackBoardInterfaceManager;
 class BlackBoardNotifier;
+class LocalBlackBoard;
 class Message;
 
 class BlackBoardMessageManager : public MessageMediator
 {
- friend class LocalBlackBoard;
+ friend LocalBlackBoard;
  public:
   BlackBoardMessageManager(BlackBoardNotifier *notifier);
   ~BlackBoardMessageManager();

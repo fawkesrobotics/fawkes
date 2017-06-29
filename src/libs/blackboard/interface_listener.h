@@ -35,10 +35,11 @@ namespace fawkes {
 
 class Interface;
 class Message;
+class BlackBoardNotifier;
 
 class BlackBoardInterfaceListener
 {
- friend class BlackBoardNotifier;
+ friend BlackBoardNotifier;
 
  public:
  /** Queue entry type. */

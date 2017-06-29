@@ -29,6 +29,8 @@
 namespace fawkes {
 
 class BlackBoardSharedMemoryHeader;
+class BlackBoardInterfaceManager;
+class BlackBoardMemoryManager;
 class SharedMemory;
 class Mutex;
 class SemaphoreSet;
@@ -55,7 +57,7 @@ struct chunk_list_t {
 
 class BlackBoardMemoryManager
 {
-  friend class BlackBoardInterfaceManager;
+  friend BlackBoardInterfaceManager;
  public:
   BlackBoardMemoryManager(size_t memsize);
   BlackBoardMemoryManager(size_t memsize, unsigned int version,
@@ -99,7 +101,7 @@ class BlackBoardMemoryManager
 
   class ChunkIterator
   {
-    friend class BlackBoardMemoryManager;
+    friend BlackBoardMemoryManager;
    private:
     ChunkIterator(SharedMemory *shmem, chunk_list_t *cur);
     ChunkIterator(chunk_list_t *cur);

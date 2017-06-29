@@ -31,10 +31,12 @@
 
 namespace fawkes {
 
+class BlackBoardNotifier;
+
 class BlackBoardInterfaceObserver
 {
 
- friend class BlackBoardNotifier;
+ friend BlackBoardNotifier;
 
  public:
   BlackBoardInterfaceObserver();
