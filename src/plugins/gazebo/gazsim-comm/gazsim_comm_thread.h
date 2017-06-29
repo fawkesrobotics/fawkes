@@ -54,15 +54,15 @@ class GazsimCommThread
   virtual void loop();
   virtual void finalize();
 
-  void receive_raw_msg(boost::asio::ip::udp::endpoint &endpoint,
-		       protobuf_comm::frame_header_t &header, void * data,
-		       size_t length);
-
-  void peer_send_error(std::string address, unsigned int port, std::string err);
-  
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
+ private:
+  void peer_send_error(std::string address, unsigned int port, std::string err);
+  void receive_raw_msg(boost::asio::ip::udp::endpoint &endpoint,
+		       protobuf_comm::frame_header_t &header, void * data,
+		       size_t length);
+  
  private:
   std::vector<protobuf_comm::ProtobufBroadcastPeer*> peers_;
   std::vector<protobuf_comm::ProtobufBroadcastPeer*> peers_crypto1_;
