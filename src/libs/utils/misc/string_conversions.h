@@ -42,6 +42,11 @@ class StringConversions
   static std::string to_string(float f);
   static std::string to_string(double d);
   static std::string to_string(bool b);
+
+  /** No-op conversion of string.
+   * @param s value to convert
+   * @return string the very same string
+   */
   static std::string to_string(const std::string &s)
   { return s; }
 

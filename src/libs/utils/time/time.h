@@ -90,7 +90,7 @@ class Clock;
 
 class Time
 {
- friend class Clock;
+ friend Clock;
  public:
   Time();
   Time(const timeval* tv);
