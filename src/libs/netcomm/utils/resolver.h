@@ -47,7 +47,7 @@ class HostInfo;
 
 class NetworkNameResolver
 {
- friend class NetworkNameResolverThread;
+ friend NetworkNameResolverThread;
 
  public:
   NetworkNameResolver(AvahiThread *avahi_thread = NULL);

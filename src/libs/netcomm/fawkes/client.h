@@ -51,8 +51,8 @@ class HandlerAlreadyRegisteredException : public Exception
 
 class FawkesNetworkClient
 {
- friend class FawkesNetworkClientSendThread;
- friend class FawkesNetworkClientRecvThread;
+ friend FawkesNetworkClientSendThread;
+ friend FawkesNetworkClientRecvThread;
  public:
  FawkesNetworkClient();
  FawkesNetworkClient(const char *host, unsigned short int port);
