@@ -237,7 +237,8 @@ RealsenseThread::stop_camera()
 }
 
 /**
- * Read switch interface and return true iff the interface is currently enabled.
+ * Read the switch interface and start/stop the camera if necessary.
+ * @return true iff the interface is currently enabled.
  */
 bool
 RealsenseThread::read_switch()
