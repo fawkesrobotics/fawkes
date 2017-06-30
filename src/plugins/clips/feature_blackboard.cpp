@@ -41,6 +41,10 @@ using namespace fawkes;
 /** Constructor.
  * @param logger message logger
  * @param blackboard blackboard to use for opening interfaces
+ * @param retract_early Retract blackboard facts at the end of the same
+ *        execution cycle they have been asserted in. If false (default),
+ *        blackboard facts are only retracted immediately before a new
+ *        fact representing a particular interface is asserted.
  */
 BlackboardCLIPSFeature::BlackboardCLIPSFeature(fawkes::Logger *logger,
                                                fawkes::BlackBoard *blackboard,
