@@ -19,10 +19,20 @@ ifneq ($(PKGCONFIG),)
   HAVE_LIBXMLRPCPP := $(if $(shell $(PKGCONFIG) --exists $(LIBXMLPP_PACKAGES); echo $${?/1/}),1,0)
 endif
 
+ifeq ($(HAVE_LIBXMLRPCPP),0)
+  HAVE_XMLRPC_C_CONFIG := $(if $(shell which xmlrpc-c-config; echo $${?/1/}),1,0)
+  HAVE_LIBXMLRPCPP := 1
+endif
+
 ifeq ($(HAVE_LIBXMLRPCPP),1)
   HAVE_XMLRPC = 1
-  CFLAGS_LIBXMLRPCPP  = $(shell $(PKGCONFIG) --cflags $(LIBXMLPP_PACKAGES))
-  LDFLAGS_LIBXMLRPCPP = $(shell $(PKGCONFIG) --libs $(LIBXMLPP_PACKAGES))
+  ifeq ($(HAVE_XMLRPC_C_CONFIG),1)
+    CFLAGS_LIBXMLRPCPP  = $(shell xmlrpc-c-config c++2 --cflags)
+    LDFLAGS_LIBXMLRPCPP = $(shell xmlrpc-c-config c++2 --libs)
+  else
+    CFLAGS_LIBXMLRPCPP  = $(shell $(PKGCONFIG) --cflags $(LIBXMLPP_PACKAGES))
+    LDFLAGS_LIBXMLRPCPP = $(shell $(PKGCONFIG) --libs $(LIBXMLPP_PACKAGES))
+  endif
 else
   # FreeBSD
   ifneq ($(wildcard $(SYSROOT)/usr/local/include/xmlrpc-c/registry.hpp),)
