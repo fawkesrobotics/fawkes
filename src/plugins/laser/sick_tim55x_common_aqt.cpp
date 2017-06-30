@@ -75,7 +75,8 @@ using namespace fawkes;
  */
 SickTiM55xCommonAcquisitionThread::SickTiM55xCommonAcquisitionThread(std::string &cfg_name,
 								     std::string &cfg_prefix)
-  : LaserAcquisitionThread("SickTiM55xCommonAcquisitionThread")
+  : LaserAcquisitionThread("SickTiM55xCommonAcquisitionThread"),
+    ConfigurationChangeHandler(cfg_prefix.c_str())
 {
   set_name("SickTiM55x(%s)", cfg_name.c_str());
   pre_init_done_ = false;
@@ -111,6 +112,8 @@ SickTiM55xCommonAcquisitionThread::pre_init(fawkes::Configuration *config,
   }
 
   alloc_distances(_distances_size);
+
+  config->add_change_handler(this);
 }
 
 /** Read common configuration parameters. */
@@ -121,6 +124,7 @@ SickTiM55xCommonAcquisitionThread::read_common_config()
   try {
     cfg_time_offset_ += config->get_float((cfg_prefix_ + "time_offset").c_str());
   } catch (Exception &e) {} // ignored, use default
+  logger->log_debug(name(), "Time offset: %f", cfg_time_offset_);
 }
 
 
@@ -360,4 +364,19 @@ SickTiM55xCommonAcquisitionThread::parse_datagram(const unsigned char *datagram,
   //   26 + n + 4 .. count - 4 = device label
   //   count - 3 .. count - 1 = unknown (but seems to be 0 always)
   //   <ETX> (\x03)
+}
+
+void
+SickTiM55xCommonAcquisitionThread::config_value_changed(
+  const fawkes::Configuration::ValueIterator *v)
+{
+  MutexLocker lock(loop_mutex);
+  read_common_config();
+}
+
+void
+SickTiM55xCommonAcquisitionThread::config_value_erased(const char *path)
+{
+  MutexLocker lock(loop_mutex);
+  read_common_config();
 }

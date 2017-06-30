@@ -25,6 +25,8 @@
 
 #include "acquisition_thread.h"
 
+#include <config/change_handler.h>
+
 #include <string>
 #include <map>
 
@@ -32,7 +34,9 @@ namespace fawkes {
   class Mutex;
 }
 
-class SickTiM55xCommonAcquisitionThread : public LaserAcquisitionThread
+class SickTiM55xCommonAcquisitionThread
+: public LaserAcquisitionThread,
+  public fawkes::ConfigurationChangeHandler
 {
  public:
   SickTiM55xCommonAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
@@ -52,6 +56,12 @@ class SickTiM55xCommonAcquisitionThread : public LaserAcquisitionThread
   virtual void open_device() = 0;
   virtual void close_device() = 0;
   virtual void flush_device() = 0;
+
+private:
+  virtual void config_tag_changed(const char *new_tag) { };
+  virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *v) { };
+  virtual void config_value_changed(const fawkes::Configuration::ValueIterator *v);
+  virtual void config_value_erased(const char *path);
 
  private:
   bool pre_init_done_;
