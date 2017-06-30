@@ -60,6 +60,13 @@
 #include <map>
 #include <urdf_model/model.h>
 #include <tinyxml.h>
+#include <ros/common.h>
+
+#if !ROS_VERSION_MINIMUM(1, 12, 0)
+namespace urdf {
+typedef boost::shared_ptr<urdf::ModelInterface> ModelInterfaceSharedPtr;
+}
+#endif
 
 namespace urdf{
 

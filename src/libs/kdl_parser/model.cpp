@@ -54,7 +54,7 @@
  */
 
 
-#include <kdl_parser/model.h>
+#include "model.h"
 #include <urdf_parser/urdf_parser.h>
 
 #include <vector>
@@ -151,7 +151,7 @@ bool Model::initXml(TiXmlElement *robot_xml)
  */
 bool Model::initString(const std::string& xml_string)
 {
-  boost::shared_ptr<ModelInterface> model;
+  ModelInterfaceSharedPtr model;
 
   if( IsColladaData(xml_string) ) {
     // currently, support for Collada is not implemented

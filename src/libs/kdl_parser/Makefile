@@ -25,6 +25,9 @@ HDRS_libfawkeskdl_parser = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 OBJS_all = $(OBJS_libfawkeskdl_parser)
 ifeq ($(HAVE_KDLPARSER)$(HAVE_EIGEN3),11)
   CFLAGS  += $(CFLAGS_KDLPARSER) $(CFLAGS_EIGEN3)
+  ifeq ($(HAVE_CPP11),1)
+    CFLAGS += $(CFLAGS_CPP11)
+  endif
   LDFLAGS += $(LDFLAGS_KDLPARSER) $(LDFLAGS_EIGEN3)
   LIBS_all = $(LIBDIR)/libfawkeskdl_parser.so
 else
