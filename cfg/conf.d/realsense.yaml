@@ -1,0 +1,16 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/realsense
+---
+realsense:
+  # Frame ID of the PointCloud 
+  frame_id: "cam_conveyor"
+
+  # ID of the PointCloud
+  pcl_id: "/camera/depth/points"
+
+  # Section to set the Realsense device options
+  device_options:
+    # Laser power from 0 - 15 as integer
+    laser_power: 15
