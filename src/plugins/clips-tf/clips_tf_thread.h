@@ -82,6 +82,7 @@ class ClipsTFThread
 
  private:
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+  bool debug_;
 
 };
 

@@ -31,7 +31,8 @@ using namespace fawkes;
 /** Constructor. */
 ClipsTFThread::ClipsTFThread()
   : Thread("ClipsTFThread", Thread::OPMODE_WAITFORWAKEUP),
-    CLIPSFeature("tf"), CLIPSFeatureAspect(this)
+    CLIPSFeature("tf"), CLIPSFeatureAspect(this),
+    debug_(true)
 {
 }
 
@@ -45,6 +46,9 @@ ClipsTFThread::~ClipsTFThread()
 void
 ClipsTFThread::init()
 {
+  try {
+    debug_ = config->get_bool("/plugins/clips-tf/debug");
+  } catch(...) {}
 }
 
 
@@ -141,7 +145,8 @@ ClipsTFThread::clips_tf_transform_point(std::string target_frame, std::string so
   try {
     tf_listener->transform_point(target_frame, in, out);
 
-    logger->log_debug(name(), "Transformed point %s->%s: (%.2f,%.2f,%.2f) -> (%.2f,%.2f,%.2f)",
+    if (debug_)
+      logger->log_debug(name(), "Transformed point %s->%s: (%.2f,%.2f,%.2f) -> (%.2f,%.2f,%.2f)",
 		      source_frame.c_str(), target_frame.c_str(),
 		      in.x(), in.y(), in.z(), out.x(), out.y(), out.z());
 
@@ -174,7 +179,8 @@ ClipsTFThread::clips_tf_transform_vector( std::string target_frame, std::string 
   try {
     tf_listener->transform_vector(target_frame, in, out);
 
-    logger->log_debug(name(), "Transformed vector %s->%s: (%.2f,%.2f,%.2f) -> (%.2f,%.2f,%.2f)",
+    if (debug_)
+      logger->log_debug(name(), "Transformed vector %s->%s: (%.2f,%.2f,%.2f) -> (%.2f,%.2f,%.2f)",
 		      source_frame.c_str(), target_frame.c_str(),
 		      in.x(), in.y(), in.z(), out.x(), out.y(), out.z());
 
@@ -208,7 +214,8 @@ ClipsTFThread::clips_tf_transform_quaternion(std::string target_frame, std::stri
   try {
     tf_listener->transform_quaternion(target_frame, in, out);
 
-    logger->log_debug(name(), "Transformed quaternion %s->%s: "
+    if (debug_)
+      logger->log_debug(name(), "Transformed quaternion %s->%s: "
 		      "(%.2f,%.2f,%.2f,%.2f) -> (%.2f,%.2f,%.2f,%.2f)",
 		      source_frame.c_str(), target_frame.c_str(),
 		      in.x(), in.y(), in.z(), in.w(), out.x(), out.y(), out.z(), out.w());
@@ -251,7 +258,8 @@ ClipsTFThread::clips_tf_transform_pose(std::string target_frame, std::string sou
 
     tf::Quaternion in_q  = in.getRotation();
     tf::Quaternion out_q = out.getRotation();
-    logger->log_debug(name(), "Transformed pose %s->%s: "
+    if (debug_)
+      logger->log_debug(name(), "Transformed pose %s->%s: "
 		      "T(%.2f,%.2f,%.2f) R(%.2f,%.2f,%.2f,%.2f) -> "
 		      "T(%.2f,%.2f,%.2f) R(%.2f,%.2f,%.2f,%.2f)",
 		      source_frame.c_str(), target_frame.c_str(),
