@@ -33,6 +33,9 @@
 #include <time.h>
 #include <fcntl.h>
 #include <cerrno>
+#include <stdio.h>
+
+#include <string>
 
 namespace fawkes {
 
@@ -45,12 +48,32 @@ namespace fawkes {
  */
 
 /** Constructor. 
- * @param filename the name of the log-file
+ * The filename is generated from the filename pattern by replacing '$time' with
+ * the current time.
+ * @param filename_pattern the name pattern of the log-file
  * @param log_level minimum log level
  */
-FileLogger::FileLogger(const char* filename, LogLevel log_level)
+FileLogger::FileLogger(const char* filename_pattern, LogLevel log_level)
   : Logger(log_level)
 {
+  now_s = (struct tm *)malloc(sizeof(struct tm));
+  struct timeval now;
+  gettimeofday(&now, NULL);
+  localtime_r(&now.tv_sec, now_s);
+  char *start_time;
+  if (asprintf(&start_time, "%04d-%02d-%02d_%02d-%02d-%02d",
+    1900 + now_s->tm_year, now_s->tm_mon + 1, now_s->tm_mday, now_s->tm_hour,
+    now_s->tm_min, now_s->tm_sec) == -1) {
+    throw Exception("Failed to print current time");
+  }
+  std::string pattern(filename_pattern);
+  std::string time_var = "$time";
+  size_t pos = pattern.find(time_var);
+  if (pos != std::string::npos) {
+    pattern.replace(pos, time_var.length(), std::string(start_time));
+  }
+  free(start_time);
+  const char *filename = pattern.c_str();
   int fd = open(filename, O_RDWR | O_CREAT | O_APPEND,
 		S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
   if (fd == -1) {
@@ -59,8 +82,6 @@ FileLogger::FileLogger(const char* filename, LogLevel log_level)
   log_file = fdopen(fd, "a");
   // make buffer line-buffered
   setvbuf(log_file, NULL, _IOLBF, 0);
-
-  now_s = (struct tm *)malloc(sizeof(struct tm));
 
   mutex = new Mutex();
 }
