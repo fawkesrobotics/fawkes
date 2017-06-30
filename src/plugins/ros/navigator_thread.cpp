@@ -342,6 +342,10 @@ RosNavigatorThread::load_config()
                 config->get_string(cfg_prefix_ + "/dynreconf/y_vel_name");
         cfg_dynreconf_rot_vel_name_ =
                 config->get_string(cfg_prefix_ + "/dynreconf/rot_vel_name");
+        cfg_fixed_frame_ =
+                config->get_string("/frames/fixed");
+
+        logger->log_info(name(), "fixed frame: %s", cfg_fixed_frame_.c_str());
 
     } catch (Exception &e) {
         logger->log_error("Error in loading config: %s", e.what());
