@@ -45,7 +45,9 @@ TrackedLineInfo::TrackedLineInfo(
     unsigned int cfg_moving_avg_len,
     fawkes::Logger *logger,
     string plugin_name)
-: transformer(tfer),
+: interface_idx(-1),
+  visibility_history(0),
+  transformer(tfer),
   input_frame_id(input_frame_id),
   tracking_frame_id(tracking_frame_id),
   cfg_switch_tolerance(cfg_switch_tolerance),
@@ -77,6 +79,19 @@ btScalar TrackedLineInfo::distance(const LineInfo &linfo) const
   return (bp_odom_new - this->base_point_odom).length();
 }
 
+/**
+ * Update this currently not visible line, make the visibility history (more) negative
+ * and invalidate the data.
+ */
+void TrackedLineInfo::not_visible_update() {
+	if (visibility_history >= 0)
+	  visibility_history = -1;
+	else
+	  visibility_history -= 1;
+
+	this->raw.cloud.reset();
+	this->smooth.cloud.reset();
+}
 
 /** Update this line.
  * @param linfo new info to consume
@@ -84,6 +99,11 @@ btScalar TrackedLineInfo::distance(const LineInfo &linfo) const
  */
 void TrackedLineInfo::update(LineInfo &linfo)
 {
+  if (visibility_history <= 0)
+    visibility_history = 1;
+  else
+    visibility_history += 1;
+
   this->raw = linfo;
   fawkes::tf::Stamped<fawkes::tf::Point> bp_new(
 	  fawkes::tf::Point(
