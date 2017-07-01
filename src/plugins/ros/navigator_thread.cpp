@@ -28,7 +28,9 @@ using namespace fawkes;
  * @author Sebastian Reuter
  */
 
-/** Contructor. */
+/** Constructor.
+ * @param cfg_prefix configuration prefix specific for the ros/navigator
+ */
 RosNavigatorThread::RosNavigatorThread(std::string &cfg_prefix)
   : Thread("RosNavigatorThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
