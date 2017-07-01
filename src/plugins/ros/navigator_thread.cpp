@@ -344,6 +344,10 @@ RosNavigatorThread::load_config()
                 config->get_string(cfg_prefix_ + "/dynreconf/rot_vel_name");
         cfg_fixed_frame_ =
                 config->get_string("/frames/fixed");
+        cfg_ori_tolerance_ =
+                config->get_float(cfg_prefix_ + "/ori_tolerance");
+        cfg_trans_tolerance_ =
+                config->get_float(cfg_prefix_ + "/trans_tolerance");
 
         logger->log_info(name(), "fixed frame: %s", cfg_fixed_frame_.c_str());
 

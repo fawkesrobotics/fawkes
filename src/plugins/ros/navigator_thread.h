@@ -100,6 +100,8 @@ class RosNavigatorThread
   std::string cfg_dynreconf_rot_vel_name_;
 
   std::string cfg_fixed_frame_;
+  float cfg_ori_tolerance_;
+  float cfg_trans_tolerance_;
 
   float param_max_vel;
   float param_max_rot;
