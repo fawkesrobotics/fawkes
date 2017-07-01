@@ -27,6 +27,7 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
+#include <aspect/tf.h>
 #include <plugins/ros/aspect/ros.h>
 
 #include <interfaces/NavigatorInterface.h>
@@ -53,7 +54,8 @@ class RosNavigatorThread
   public fawkes::LoggingAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::ROSAspect
+  public fawkes::ROSAspect,
+  public fawkes::TransformAspect
 {
  public:
   RosNavigatorThread(std::string &cfg_prefix);
@@ -74,11 +76,13 @@ class RosNavigatorThread
 
  private:
   typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-  
+
   void activeCb();
   void feedbackCb(const move_base_msgs::MoveBaseFeedbackConstPtr& feedback);
   void doneCb(const actionlib::SimpleClientGoalState& state,
             const move_base_msgs::MoveBaseResultConstPtr& result);
+
+  void transform_to_fixed_frame();
 
   fawkes::NavigatorInterface *nav_if_;
   MoveBaseClient *ac_;
@@ -107,6 +111,9 @@ class RosNavigatorThread
   float param_max_rot;
   
   geometry_msgs::PoseStamped base_position;
+  float goal_position_x;
+  float goal_position_y;
+  float goal_position_yaw;
 
 };
 

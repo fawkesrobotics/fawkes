@@ -96,23 +96,23 @@ RosNavigatorThread::check_status()
       nav_if_->set_final(true);
       
       // Check if we reached the goal
-      fawkes::tf::Quaternion q_base_position;
-      q_base_position.setX(base_position.pose.orientation.x);
-      q_base_position.setY(base_position.pose.orientation.y);
-      q_base_position.setZ(base_position.pose.orientation.z);
-      q_base_position.setW(base_position.pose.orientation.w);
-      
-      double base_position_yaw = tf::get_yaw(q_base_position);
+      fawkes::tf::Quaternion q_base_rotation;
+      q_base_rotation.setX(base_position.pose.orientation.x);
+      q_base_rotation.setY(base_position.pose.orientation.y);
+      q_base_rotation.setZ(base_position.pose.orientation.z);
+      q_base_rotation.setW(base_position.pose.orientation.w);
+
       double base_position_x = base_position.pose.position.x;
       double base_position_y = base_position.pose.position.y;
-      
-      double diff_x = fabs(base_position_x - nav_if_->dest_x());
-      double diff_y = fabs(base_position_y - nav_if_->dest_y());
-      double diff_yaw = normalize_rad(base_position_yaw - nav_if_->dest_ori());
-      
-      if (diff_x >= 0.05 ||
-          diff_y >= 0.05 ||
-          diff_yaw >= 0.05) {
+      double base_position_yaw = fawkes::tf::get_yaw(q_base_rotation);
+
+      double diff_x = fabs(base_position_x - goal_position_x);
+      double diff_y = fabs(base_position_y - goal_position_y);
+      double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
+
+      if (diff_x >= cfg_trans_tolerance_ ||
+          diff_y >= cfg_trans_tolerance_ ||
+          diff_yaw >= cfg_ori_tolerance_) {
           nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
       } else {
           nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
@@ -255,6 +255,16 @@ RosNavigatorThread::loop()
 
         nav_if_->write();
 
+        goal_position_x = nav_if_->dest_x();
+        goal_position_y = nav_if_->dest_y();
+        goal_position_yaw = nav_if_->dest_ori();
+
+        // Transform the desired goal position into the fixed frame
+        // so we can check whether we reached the goal or not
+        if (strcmp (cfg_fixed_frame_.c_str(),nav_if_->target_frame()) != 0) {
+            transform_to_fixed_frame();
+        }
+
         send_goal();
       }
 
@@ -271,6 +281,16 @@ RosNavigatorThread::loop()
         nav_if_->set_msgid(msg->id());
 
         nav_if_->write();
+
+        goal_position_x = nav_if_->dest_x();
+        goal_position_y = nav_if_->dest_y();
+        goal_position_yaw = nav_if_->dest_ori();
+
+        // Transform the desired goal position into the fixed frame
+        // so we can check whether we reached the goal or not
+        if (strcmp (cfg_fixed_frame_.c_str(),nav_if_->target_frame()) != 0) {
+            transform_to_fixed_frame();
+        }
 
         send_goal();
       }
@@ -354,4 +374,23 @@ RosNavigatorThread::load_config()
     } catch (Exception &e) {
         logger->log_error("Error in loading config: %s", e.what());
     }
+}
+
+void
+RosNavigatorThread::transform_to_fixed_frame()
+{
+    fawkes::tf::Quaternion goal_q = fawkes::tf::create_quaternion_from_yaw(nav_if_->dest_ori());
+    fawkes::tf::Point goal_p(nav_if_->dest_x(), nav_if_->dest_y(), 0.);
+    fawkes::tf::Pose goal_pos(goal_q, goal_p);
+    fawkes::tf::Stamped<fawkes::tf::Pose> goal_pos_stamped(goal_pos, fawkes::Time(0,0), nav_if_->target_frame());
+    fawkes::tf::Stamped<fawkes::tf::Pose> goal_pos_stamped_transformed;
+
+    try {
+        tf_listener->transform_pose(cfg_fixed_frame_, goal_pos_stamped, goal_pos_stamped_transformed);
+    } catch (fawkes::Exception &e) {
+    }
+
+    goal_position_x = goal_pos_stamped_transformed.getOrigin().getX();
+    goal_position_y = goal_pos_stamped_transformed.getOrigin().getY();
+    goal_position_yaw = fawkes::tf::get_yaw(goal_pos_stamped_transformed.getRotation());
 }
