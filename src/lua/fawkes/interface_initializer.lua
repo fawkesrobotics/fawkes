@@ -96,6 +96,11 @@ function init_interfaces(module, table)
    if not dependencies then return end
 
    assert(type(dependencies) == "table", "Type of dependencies not table")
+   if #dependencies == 0 then
+      for k,v in pairs(dependencies) do
+         assert(type(v) == "table", "depends_interfaces must be a table of tables")
+      end
+   end
    for _,t in ipairs(dependencies) do
       assert(type(t) == "table", "Non-table element in interface dependencies")
       assert(t.v, "Interface dependency of " .. name .. " does not have a variable name (v) field")
