@@ -153,7 +153,7 @@ FuseViewerGtkWindow::on_service_removed( fawkes::NetworkService* service )
 void
 FuseViewerGtkWindow::on_fuse_image_selected()
 {
-  __img_list_widget->set_sensitive(Gtk::SENSITIVITY_OFF);
+  __img_list_widget->set_sensitive(false);
   std::string host;
   unsigned short port;
   std::string image_id;
@@ -173,7 +173,7 @@ FuseViewerGtkWindow::on_fuse_image_selected()
     __image_viewport->add(*__img_widget);
     __image_viewport->set_size_request(__cam->pixel_width(), __cam->pixel_height());
     show_all_children();
-    __save_type->set_sensitive(Gtk::SENSITIVITY_ON);
+    __save_type->set_sensitive(true);
 
     set_status(image_id, host, port);
   }
@@ -182,7 +182,7 @@ FuseViewerGtkWindow::on_fuse_image_selected()
     e.print_trace();
   }
 
-  __img_list_widget->set_sensitive(Gtk::SENSITIVITY_ON);
+  __img_list_widget->set_sensitive(true);
 }
 
 /** Signal handler that is called if the 'Auto save' checkbox status changes */
@@ -268,7 +268,7 @@ FuseViewerGtkWindow::close_image()
     __image_viewport->remove();
     delete __img_widget;
     __img_widget = NULL;
-    __save_type->set_sensitive(Gtk::SENSITIVITY_OFF);
+    __save_type->set_sensitive(false);
   }
 
   if (__cam) {
