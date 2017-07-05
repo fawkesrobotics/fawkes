@@ -27,7 +27,9 @@ OBJS_laser_pointclouds = laser_pointcloud_plugin.o laser_pointcloud_thread.o
 OBJS_all = $(OBJS_laser_pointclouds)
 
 ifeq ($(HAVE_PCL)$(HAVE_TF),11)
-  CFLAGS  += $(CFLAGS_PCL) $(CFLAGS_TF) -Wno-unknown-pragmas -Wno-deprecated-declarations
+  # disable deprecated warnings because glibmm uses deprecated dynamic exception
+  # specifications (throw() specifications)
+  CFLAGS  += $(CFLAGS_PCL) $(CFLAGS_TF) -Wno-unknown-pragmas -Wno-deprecated
   LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF)
 
   PLUGINS_all = $(PLUGINDIR)/laser-pointclouds.so

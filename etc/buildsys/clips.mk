@@ -43,7 +43,10 @@ else
 endif
 
 ifeq ($(HAVE_CLIPS),1)
-  CFLAGS_CLIPS  = -DHAVE_CLIPS $(shell $(PKGCONFIG) --cflags 'clipsmm-1.0')
+  # -Wno-deprecated is needed with GCC7 because glibmm still uses throw()
+  #  specifications, which are deprecated and cause a GCC warning.
+  CFLAGS_CLIPS  = -DHAVE_CLIPS $(shell $(PKGCONFIG) --cflags 'clipsmm-1.0') \
+                  -Wno-deprecated
   LDFLAGS_CLIPS = $(shell $(PKGCONFIG) --libs 'clipsmm-1.0')
   # The following is required since the GCC 5 libstdc++ deprecates
   # std::auto_ptr according to C++11. This causes warnings since this

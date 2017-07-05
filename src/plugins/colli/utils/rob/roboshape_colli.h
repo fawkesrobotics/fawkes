@@ -50,7 +50,7 @@ class RoboShapeColli : public RoboShape
   RoboShapeColli( const char * cfg_prefix,
                   Logger* logger,
                   Configuration* config,
-                  int readings_per_degree = 1 ) throw (int);
+                  int readings_per_degree = 1 );
  ~RoboShapeColli();
 
   ///\brief Returns the robots length for a specific angle.
@@ -81,7 +81,7 @@ inline
 RoboShapeColli::RoboShapeColli( const char * cfg_prefix,
                                 Logger* logger,
                                 Configuration* config,
-                                int readings_per_degree ) throw (int)
+                                int readings_per_degree )
  : RoboShape( cfg_prefix, logger, config)
 {
   resolution_ = readings_per_degree;
