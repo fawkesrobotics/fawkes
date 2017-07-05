@@ -88,7 +88,8 @@ RosDynamicReconfigureThread::finalize()
  * @param value value for the ROS parameter
  */
 bool
-RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, const std::string& parameter, const bool value)
+RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service,
+                                                 const std::string& parameter, const bool value)
 {
   dynamic_reconfigure::BoolParameter dynreconf_bool_param;
   dynamic_reconfigure::Config dynreconf_conf;
@@ -101,19 +102,22 @@ RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, con
   dynreconf_srv_req.config = dynreconf_conf;
 
   if (! ros::service::exists(service, false)) {
-    logger->log_error(name(), "Error in setting dynreconf value %s to %d - service %s does not exists", parameter.c_str(), value, service.c_str());
+    logger->log_error(name(), "Error in setting dynreconf value %s to %s - "
+                      "service %s does not exists",
+                      parameter.c_str(), value ? "true": "false", service.c_str());
     dynrec_if_->set_last_msg_status(fawkes::DynamicReconfigureInterface::LastMsgStatus::Failed);
     dynrec_if_->write();
     dynreconf_conf.bools.clear();
     return false;
   } else if (! ros::service::call(service, dynreconf_srv_req, dynreconf_srv_resp)) {
-    logger->log_error(name(), "Error in setting dynreconf value %s to %d with service %s", parameter.c_str(), value, service.c_str());
+    logger->log_error(name(), "Error in setting dynreconf value %s to %s with service %s",
+                      parameter.c_str(), value ? "true": "false", service.c_str());
     dynrec_if_->set_last_msg_status(fawkes::DynamicReconfigureInterface::LastMsgStatus::Failed);
     dynrec_if_->write();
     dynreconf_conf.bools.clear();
     return false;
   } else {
-    logger->log_info(name(), "Setting %s to %d", parameter.c_str(), value);
+    logger->log_info(name(), "Setting %s to %s", parameter.c_str(), value ? "true": "false");
     dynrec_if_->set_last_msg_status(fawkes::DynamicReconfigureInterface::LastMsgStatus::Succeeded);
     dynrec_if_->write();
     dynreconf_conf.bools.clear();
@@ -127,7 +131,8 @@ RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, con
  * @param value value for the ROS parameter
  */
 bool
-RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, const std::string& parameter, const std::string value)
+RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service,
+                                                 const std::string& parameter, const std::string value)
 {
   dynamic_reconfigure::StrParameter dynreconf_str_param;
   dynamic_reconfigure::Config dynreconf_conf;
@@ -140,19 +145,22 @@ RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, con
   dynreconf_srv_req.config = dynreconf_conf;
 
   if (! ros::service::exists(service, false)) {
-    logger->log_error(name(), "Error in setting dynreconf value %s to %s - service %s does not exists", parameter.c_str(), value, service.c_str());
+    logger->log_error(name(), "Error in setting dynreconf value %s to %s - "
+                      "service %s does not exists",
+                      parameter.c_str(), value.c_str(), service.c_str());
     dynrec_if_->set_last_msg_status(fawkes::DynamicReconfigureInterface::LastMsgStatus::Failed);
     dynrec_if_->write();
     dynreconf_conf.strs.clear();
     return false;
   } else if (! ros::service::call(service, dynreconf_srv_req, dynreconf_srv_resp)) {
-    logger->log_error(name(), "Error in setting dynreconf value %s to %s with service %s", parameter.c_str(), value, service.c_str());
+    logger->log_error(name(), "Error in setting dynreconf value %s to %s with service %s",
+                      parameter.c_str(), value.c_str(), service.c_str());
     dynrec_if_->set_last_msg_status(fawkes::DynamicReconfigureInterface::LastMsgStatus::Failed);
     dynrec_if_->write();
     dynreconf_conf.strs.clear();
     return false;
   } else {
-    logger->log_info(name(), "Setting %s to %s", parameter.c_str(), value);
+	  logger->log_info(name(), "Setting %s to %s", parameter.c_str(), value.c_str());
     dynrec_if_->set_last_msg_status(fawkes::DynamicReconfigureInterface::LastMsgStatus::Succeeded);
     dynrec_if_->write();
     dynreconf_conf.strs.clear();
@@ -166,7 +174,8 @@ RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, con
  * @param value value for the ROS parameter
  */
 bool
-RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, const std::string& parameter, const int value)
+RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service,
+                                                 const std::string& parameter, const int value)
 {
   dynamic_reconfigure::IntParameter dynreconf_int_param;
   dynamic_reconfigure::Config dynreconf_conf;
@@ -179,13 +188,15 @@ RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, con
   dynreconf_srv_req.config = dynreconf_conf;
 
   if (! ros::service::exists(service, false)) {
-    logger->log_error(name(), "Error in setting dynreconf value %s to %d - service %s does not exists", parameter.c_str(), value, service.c_str());
+    logger->log_error(name(), "Error in setting dynreconf value %s to %d - "
+                      "service %s does not exists", parameter.c_str(), value, service.c_str());
     dynrec_if_->set_last_msg_status(fawkes::DynamicReconfigureInterface::LastMsgStatus::Failed);
     dynrec_if_->write();
     dynreconf_conf.ints.clear();
     return false;
   } else if (! ros::service::call(service, dynreconf_srv_req, dynreconf_srv_resp)) {
-    logger->log_error(name(), "Error in setting dynreconf value %s to %d with service %s", parameter.c_str(), value, service.c_str());
+    logger->log_error(name(), "Error in setting dynreconf value %s to %d with service %s",
+                      parameter.c_str(), value, service.c_str());
     dynrec_if_->set_last_msg_status(fawkes::DynamicReconfigureInterface::LastMsgStatus::Failed);
     dynrec_if_->write();
     dynreconf_conf.ints.clear();
@@ -205,7 +216,8 @@ RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, con
  * @param value value for the ROS parameter
  */
 bool
-RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, const std::string& parameter, const double value)
+RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service,
+                                                 const std::string& parameter, const double value)
 {
   dynamic_reconfigure::DoubleParameter dynreconf_double_param;
   dynamic_reconfigure::Config dynreconf_conf;
@@ -218,13 +230,15 @@ RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service, con
   dynreconf_srv_req.config = dynreconf_conf;
 
   if (! ros::service::exists(service, false)) {
-    logger->log_error(name(), "Error in setting dynreconf value %s to %f - service %s does not exists", parameter.c_str(), value, service.c_str());
+    logger->log_error(name(), "Error in setting dynreconf value %s to %f - "
+                      "service %s does not exists", parameter.c_str(), value, service.c_str());
     dynrec_if_->set_last_msg_status(fawkes::DynamicReconfigureInterface::LastMsgStatus::Failed);
     dynrec_if_->write();
     dynreconf_conf.doubles.clear();
     return false;
   } else if (! ros::service::call(service, dynreconf_srv_req, dynreconf_srv_resp)) {
-    logger->log_error(name(), "Error in setting dynreconf value %s to %f with service %s", parameter.c_str(), value, service.c_str());
+    logger->log_error(name(), "Error in setting dynreconf value %s to %f with service %s",
+                      parameter.c_str(), value, service.c_str());
     dynrec_if_->set_last_msg_status(fawkes::DynamicReconfigureInterface::LastMsgStatus::Failed);
     dynrec_if_->write();
     dynreconf_conf.doubles.clear();
