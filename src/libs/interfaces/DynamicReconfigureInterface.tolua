@@ -1,0 +1,263 @@
+$#include <interfaces/DynamicReconfigureInterface.h>
+$#include <utils/time/time.h>
+$#include <utils/time/clock.h>
+$using namespace fawkes;
+namespace fawkes {
+class DynamicReconfigureInterface : public Interface
+{
+
+  typedef enum {
+    Succeeded,
+    Failed
+  } LastMsgStatus;
+
+  class SetBoolMessage : public Message
+  {
+    SetBoolMessage(char * ini_service, char * ini_parameter, bool ini_value);
+    SetBoolMessage();
+    ~SetBoolMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * service();
+    void set_service(const char * new_service);
+    int maxlenof_service() const;
+    char * parameter();
+    void set_parameter(const char * new_parameter);
+    int maxlenof_parameter() const;
+    bool is_value();
+    void set_value(const bool new_value);
+    int maxlenof_value() const;
+  };
+
+  class SetStringMessage : public Message
+  {
+    SetStringMessage(char * ini_service, char * ini_parameter, char * ini_value);
+    SetStringMessage();
+    ~SetStringMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * service();
+    void set_service(const char * new_service);
+    int maxlenof_service() const;
+    char * parameter();
+    void set_parameter(const char * new_parameter);
+    int maxlenof_parameter() const;
+    char * value();
+    void set_value(const char * new_value);
+    int maxlenof_value() const;
+  };
+
+  class SetUint32Message : public Message
+  {
+    SetUint32Message(char * ini_service, char * ini_parameter, unsigned int ini_value);
+    SetUint32Message();
+    ~SetUint32Message();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * service();
+    void set_service(const char * new_service);
+    int maxlenof_service() const;
+    char * parameter();
+    void set_parameter(const char * new_parameter);
+    int maxlenof_parameter() const;
+    unsigned int value();
+    void set_value(const unsigned int new_value);
+    int maxlenof_value() const;
+  };
+
+  class SetUint64Message : public Message
+  {
+    SetUint64Message(char * ini_service, char * ini_parameter, unsigned long ini_value);
+    SetUint64Message();
+    ~SetUint64Message();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * service();
+    void set_service(const char * new_service);
+    int maxlenof_service() const;
+    char * parameter();
+    void set_parameter(const char * new_parameter);
+    int maxlenof_parameter() const;
+    unsigned long value();
+    void set_value(const unsigned long new_value);
+    int maxlenof_value() const;
+  };
+
+  class SetFloatMessage : public Message
+  {
+    SetFloatMessage(char * ini_service, char * ini_parameter, float ini_value);
+    SetFloatMessage();
+    ~SetFloatMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * service();
+    void set_service(const char * new_service);
+    int maxlenof_service() const;
+    char * parameter();
+    void set_parameter(const char * new_parameter);
+    int maxlenof_parameter() const;
+    float value();
+    void set_value(const float new_value);
+    int maxlenof_value() const;
+  };
+
+  char * last_service();
+  void set_last_service(const char * new_last_service);
+  int maxlenof_last_service() const;
+  char * last_parameter();
+  void set_last_parameter(const char * new_last_parameter);
+  int maxlenof_last_parameter() const;
+  bool is_last_bool_value();
+  void set_last_bool_value(const bool new_last_bool_value);
+  int maxlenof_last_bool_value() const;
+  char * last_str_value();
+  void set_last_str_value(const char * new_last_str_value);
+  int maxlenof_last_str_value() const;
+  unsigned int last_uint32_value();
+  void set_last_uint32_value(const unsigned int new_last_uint32_value);
+  int maxlenof_last_uint32_value() const;
+  unsigned long last_uint64_value();
+  void set_last_uint64_value(const unsigned long new_last_uint64_value);
+  int maxlenof_last_uint64_value() const;
+  float last_float_value();
+  void set_last_float_value(const float new_last_float_value);
+  int maxlenof_last_float_value() const;
+  unsigned long last_msg_id();
+  void set_last_msg_id(const unsigned long new_last_msg_id);
+  int maxlenof_last_msg_id() const;
+  LastMsgStatus last_msg_status();
+  void set_last_msg_status(const LastMsgStatus new_last_msg_status);
+  int maxlenof_last_msg_status() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  int                     hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  bool          changed() const;
+  const fawkes::Time *  timestamp() const;
+  void          set_auto_timestamping(bool enabled);
+  void          set_timestamp(const fawkes::Time *t);
+  void          set_clock(fawkes::Clock *clock);
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  fawkes::Message * msgq_first @ msgq_first_generic();
+  bool          msgq_empty();
+
+
+};
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.DynamicReconfigureInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.DynamicReconfigureInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.DynamicReconfigureInterface.create_message = fawkes.Interface.create_message
+
+$]
+
+}
