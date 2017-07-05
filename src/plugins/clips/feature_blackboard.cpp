@@ -41,10 +41,16 @@ using namespace fawkes;
 /** Constructor.
  * @param logger message logger
  * @param blackboard blackboard to use for opening interfaces
+ * @param retract_early Retract blackboard facts at the end of the same
+ *        execution cycle they have been asserted in. If false (default),
+ *        blackboard facts are only retracted immediately before a new
+ *        fact representing a particular interface is asserted.
  */
 BlackboardCLIPSFeature::BlackboardCLIPSFeature(fawkes::Logger *logger,
-					       fawkes::BlackBoard *blackboard)
-: CLIPSFeature("blackboard"), logger_(logger), blackboard_(blackboard)
+                                               fawkes::BlackBoard *blackboard,
+                                               bool retract_early)
+: CLIPSFeature("blackboard"), logger_(logger), blackboard_(blackboard),
+  cfg_retract_early_(retract_early)
 {
 }
 
@@ -294,18 +300,33 @@ BlackboardCLIPSFeature::clips_assert_interface_type(std::string &env_name, std::
 
   deftemplate += ")";
 
-  std::string defrule =
-    "(defrule " + type + "-cleanup\n" +
-    "  (declare (salience -10000))\n" +
-    "  ?f <- (" + type + ")\n" +
-    "  =>\n"
-    "  (retract ?f)\n"
-    ")";
+  std::string retract;
+  std::string logstr;
 
-  fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
-  if (envs_[env_name]->build(deftemplate) && envs_[env_name]->build(defrule)) {
+  if (cfg_retract_early_) {
+    retract =
+      "(defrule " + type + "-cleanup\n" +
+      "  (declare (salience -10000))\n" +
+      "  ?f <- (" + type + ")\n" +
+      "  =>\n"
+      "  (retract ?f)\n"
+      ")";
+    logstr = "Defrule";
+  }
+  else {
+    retract =
+      "(deffunction " + type + "-cleanup-late (?id)\n"
+      "  (delayed-do-for-all-facts ((?f " + type + "))\n"
+      "    (eq ?f:id ?id)\n"
+      "    (retract ?f)\n"
+      "  )\n"
+      ")";
+    logstr = "Deffunction";
+  }
+
+  if (envs_[env_name]->build(deftemplate) && envs_[env_name]->build(retract)) {
     logger_->log_info(log_name.c_str(), "Deftemplate:\n%s", deftemplate.c_str());
-    logger_->log_info(log_name.c_str(), "Defrule:\n%s", defrule.c_str());
+    logger_->log_info(log_name.c_str(), "%s:\n%s", logstr.c_str(), retract.c_str());
     return true;
   } else {
     logger_->log_warn(log_name.c_str(), "Defining blackboard type for %s in %s failed",
@@ -477,11 +498,17 @@ BlackboardCLIPSFeature::clips_blackboard_read(std::string env_name)
   }
 
   fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
+  CLIPS::Environment &env = **(envs_[env_name]);
   for (auto &iface_map : interfaces_[env_name].reading) {
     for (auto i : iface_map.second) {
       i->read();
       if (i->changed()) {
-	const Time *t = i->timestamp();
+        if (!cfg_retract_early_) {
+          std::string fun = std::string("(") + i->type() + "-cleanup-late \"" + i->id() + "\")";
+          env.evaluate(fun);
+        }
+        const Time *t = i->timestamp();
+
 	std::string fact = std::string("(") + i->type() +
 	  " (id \"" + i->id() + "\")" +
 	  " (time " + StringConversions::to_string(t->get_sec()) + " "
@@ -527,7 +554,7 @@ BlackboardCLIPSFeature::clips_blackboard_read(std::string env_name)
 	  fact += std::string(" (") + f.get_name() + " " + value + ")";
 	}
 	fact += ")";
-	envs_[env_name]->assert_fact(fact);
+	env.assert_fact(fact);
       }
     }
   }

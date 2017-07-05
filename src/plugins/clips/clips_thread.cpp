@@ -58,13 +58,18 @@ CLIPSThread::init()
     clips_dir = config->get_string("/clips/clips-dir");
   } catch (Exception &e) {} // ignored, use default
 
+  bool cfg_retract_early = false;
+  try {
+    cfg_retract_early = config->get_bool("/clips/retract-early");
+  } catch (Exception &) {}
+
   CLIPS::init();
   clips_env_mgr_ = new CLIPSEnvManager(logger, clock, clips_dir);
   clips_aspect_inifin_.set_manager(clips_env_mgr_);
   clips_feature_aspect_inifin_.set_manager(clips_env_mgr_);
   clips_manager_aspect_inifin_.set_manager(clips_env_mgr_);
 
-  features_.push_back(new BlackboardCLIPSFeature(logger, blackboard));
+  features_.push_back(new BlackboardCLIPSFeature(logger, blackboard, cfg_retract_early));
   features_.push_back(new ConfigCLIPSFeature(logger, config));
   features_.push_back(new RedefineWarningCLIPSFeature(logger));
   clips_env_mgr_->add_features(features_);
