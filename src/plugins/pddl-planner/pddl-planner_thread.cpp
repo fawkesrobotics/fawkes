@@ -5,6 +5,7 @@
  *  Created: Wed Dec  7 19:09:44 2016
  *  Copyright  2016  Frederik Zwilling
  *             2017  Matthias Loebach
+ *             2017  Till Hofmann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,6 +26,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <fstream>
+#include <sstream>
 #include <utils/misc/string_conversions.h>
 
 using namespace fawkes;
@@ -63,6 +65,9 @@ PddlPlannerThread::init()
 	} else if ( planner_string == "fd" ) {
 		planner_ = std::bind(&PddlPlannerThread::fd_planner, this);
 		logger->log_info(name(), "Fast-Downward planner selected.");
+	} else if ( planner_string == "dbmp" ) {
+		planner_ = std::bind(&PddlPlannerThread::dbmp_planner, this);
+		logger->log_info(name(), "DBMP selected.");
 	} else {
 		planner_ = std::bind(&PddlPlannerThread::ff_planner, this);
 		logger->log_warn(name(), "No planner configured.\nDefaulting to ff.");
@@ -157,6 +162,55 @@ PddlPlannerThread::ff_planner()
         a.args.push_back(result.substr(cur_pos, arg_end - cur_pos));
         cur_pos = arg_end + 1;
       }
+    }
+    action_list_.push_back(a);
+  }
+}
+
+void
+PddlPlannerThread::dbmp_planner()
+{
+  logger->log_info(name(), "Starting PDDL Planning with DBMP...");
+
+  std::string command = "dbmp.py -p ff --output plan.pddl " + cfg_domain_path_ +
+    " " + cfg_problem_path_;
+  logger->log_info(name(), "Calling %s", command.c_str());
+  std::string result = run_planner(command);
+
+  //Parse Result and write it into the robot memory
+  logger->log_info(name(), "Parsing result");
+
+  size_t cur_pos = 0;
+  if(result.find("Planner failed", cur_pos) != std::string::npos) {
+    logger->log_error(name(), "Planning Failed: %s", result.c_str());
+    robot_memory->update(fromjson("{plan:{$exists:true}}"),
+        fromjson("{plan:1,fail:1,steps:[]}"), cfg_collection_, true);
+    return;
+  }
+  std::ifstream planfile("plan.pddl");
+  std::string line;
+  action_list_.clear();
+  while (std::getline(planfile, line)) {
+    std::string time_string = "Time";
+    if (line.compare(0, time_string.size(), time_string) == 0) {
+      // makespan, skip
+      continue;
+    }
+    if (line[0] != '(' || line[line.size() - 1] != ')') {
+      logger->log_error(name(), "Expected parantheses in line '%s'!",
+          line.c_str());
+      return;
+    }
+    // remove parantheses
+    std::string action_str = line.substr(1, line.size() - 2);
+    action a;
+    cur_pos = action_str.find(" ", cur_pos + 1);
+    a.name = StringConversions::to_lower(action_str.substr(0, cur_pos));
+    size_t word_start;
+    while (cur_pos != std::string::npos) {
+      word_start = cur_pos + 1;
+      cur_pos = action_str.find(" ", word_start);
+      a.args.push_back(action_str.substr(word_start, cur_pos - word_start));
     }
     action_list_.push_back(a);
   }
