@@ -56,6 +56,7 @@ class NavGraphGenerator
 
 	/// Obstacles to consider during navgraph generation.
 	std::list<std::pair<float, float>> obstacles_;
+  /// Parameters specific to the actual generator in a generic format.
 	std::map<std::string, std::string> params_;
 };
 
