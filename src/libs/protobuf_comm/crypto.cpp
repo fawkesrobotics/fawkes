@@ -63,6 +63,7 @@ namespace protobuf_comm {
  */
 BufferEncryptor::BufferEncryptor(const std::string &key, std::string cipher_name)
 {
+#ifdef HAVE_LIBCRYPTO
   cipher_ = cipher_by_name(cipher_name.c_str());
   cipher_id_ = cipher_name_to_id(cipher_name.c_str());
 
@@ -79,6 +80,9 @@ BufferEncryptor::BufferEncryptor(const std::string &key, std::string cipher_name
   if (!RAND_bytes((unsigned char *)&iv_, sizeof(iv_))) {
     throw std::runtime_error("Failed to generate IV");
   }
+#else
+    throw std::runtime_error("Encryption support not available");
+#endif
 }
 
 
@@ -107,7 +111,7 @@ BufferEncryptor::encrypt(const std::string &plain, std::string &enc)
 
   if (iv_size > 0) {
     iv_ += 1;
-    
+
     if (! SHA256((unsigned char *)&iv_, sizeof(iv_), iv_hash)) {
       throw std::runtime_error("Failed to generate IV");
     }
@@ -136,7 +140,7 @@ BufferEncryptor::encrypt(const std::string &plain, std::string &enc)
     throw std::runtime_error("EncryptFinal failed");
   }
   outl += plen;
- 
+
   EVP_CIPHER_CTX_free(ctx);
   enc.resize(outl + iv_size);
 #else
@@ -191,6 +195,7 @@ BufferDecryptor::~BufferDecryptor()
 void
 BufferDecryptor::generate_key(int cipher)
 {
+#ifdef HAVE_LIBCRYPTO
   const EVP_CIPHER *evp_cipher = cipher_by_id(cipher);
 
   const size_t key_size = EVP_CIPHER_key_length(evp_cipher);
@@ -201,13 +206,16 @@ BufferDecryptor::generate_key(int cipher)
 		       (const unsigned char *)key_.c_str(), key_.size(), 8, key, iv))
   {
     free(key);
+#endif
     throw std::runtime_error("Failed to generate key");
+#ifdef HAVE_LIBCRYPTO
   }
 
   std::string ks((const char *)key, key_size);
   free(key);
 
   keys_[cipher] = ks;
+#endif
 }
 
 
@@ -265,6 +273,7 @@ BufferDecryptor::decrypt(int cipher, const void *enc, size_t enc_size, void *pla
 }
 
 
+#ifdef HAVE_LIBCRYPTO
 /** Get cipher name for PB_ENCRYPTION_* constants.
  * @param cipher cipher ID
  * @return string representing the cipher
@@ -287,7 +296,6 @@ cipher_name_by_id(int cipher)
     throw std::runtime_error("Unknown cipher type");
   }
 }
-
 
 /** Get cipher for PB_ENCRYPTION_* constants.
  * @param cipher cipher ID
@@ -352,6 +360,6 @@ cipher_by_name(const char *cipher)
     throw std::runtime_error("Unknown cipher type");
   }
 }
-
+#endif
 
 } // end namespace fawkes
