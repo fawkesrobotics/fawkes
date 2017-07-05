@@ -319,7 +319,7 @@ class PointCloudDBPipeline
 	read_gridfs_file(&lpcl->points[0], database,
 			 pcldoc.getFieldDotted("data.filename").String());
       } else {
-	logger_->log_warn(name_, "Cannot retrieve document for time %li", times[i]);
+	logger_->log_warn(name_, "Cannot retrieve document for time %lli", times[i]);
 	return std::vector<CloudPtr>();
       }
     }

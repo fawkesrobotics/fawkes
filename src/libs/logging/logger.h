@@ -28,6 +28,12 @@
 #include <cstdarg>
 #include <sys/time.h>
 
+#if defined(FAWKES_NO_LOGGING_FORMAT_CHECK)
+#define FAKWES_LOGGING_FORMAT_CHECK(string, arguments)
+#else
+#define FAKWES_LOGGING_FORMAT_CHECK(string, arguments) __attribute__((__format__(printf, string, arguments)))
+#endif
+
 namespace fawkes {
 
 
@@ -60,11 +66,16 @@ class Logger
   virtual void set_loglevel(LogLevel level);
   virtual LogLevel loglevel();
 
+  FAKWES_LOGGING_FORMAT_CHECK(4, 5)
   virtual void log(LogLevel level,
 		   const char *component, const char *format, ...);
+  FAKWES_LOGGING_FORMAT_CHECK(3, 4)
   virtual void log_debug(const char *component, const char *format, ...)   = 0;
+  FAKWES_LOGGING_FORMAT_CHECK(3, 4)
   virtual void log_info(const char *component, const char *format, ...)    = 0;
+  FAKWES_LOGGING_FORMAT_CHECK(3, 4)
   virtual void log_warn(const char *component, const char *format, ...)    = 0;
+  FAKWES_LOGGING_FORMAT_CHECK(3, 4)
   virtual void log_error(const char *component, const char *format, ...)   = 0;
 
 
@@ -86,14 +97,19 @@ class Logger
 			  const char *format, va_list va)                  = 0;
 
 
+  FAKWES_LOGGING_FORMAT_CHECK(5, 6)
   virtual void tlog(LogLevel level, struct timeval *t,
 		    const char *component, const char *format, ...);
+  FAKWES_LOGGING_FORMAT_CHECK(4, 5)
   virtual void tlog_debug(struct timeval *t, const char *component,
 			  const char *format, ...)                         = 0;
+  FAKWES_LOGGING_FORMAT_CHECK(4, 5)
   virtual void tlog_info(struct timeval *t, const char *component,
 			 const char *format, ...)                          = 0;
+  FAKWES_LOGGING_FORMAT_CHECK(4, 5)
   virtual void tlog_warn(struct timeval *t, const char *component,
 			 const char *format, ...)                          = 0;
+  FAKWES_LOGGING_FORMAT_CHECK(4, 5)
   virtual void tlog_error(struct timeval *t, const char *component,
 			  const char *format, ...)                         = 0;
 

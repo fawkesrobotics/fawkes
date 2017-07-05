@@ -181,7 +181,7 @@ ColliActThread::loop()
     } else if ( if_navi_->msgq_first_is<NavigatorInterface::SetDriveModeMessage>() ) {
       NavigatorInterface::SetDriveModeMessage *msg = if_navi_->msgq_first<NavigatorInterface::SetDriveModeMessage>();
 
-      logger->log_debug(name(), "setting drive_mode to %f", if_navi_->tostring_DriveMode(msg->drive_mode()));
+      logger->log_debug(name(), "setting drive_mode to %s", if_navi_->tostring_DriveMode(msg->drive_mode()));
       if_navi_->set_drive_mode(msg->drive_mode());
 
     } else if ( if_navi_->msgq_first_is<NavigatorInterface::ResetParametersMessage>() ) {

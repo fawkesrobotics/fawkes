@@ -23,6 +23,22 @@
 
 #include <logging/logger.h>
 
+/**
+ * @def FAKWES_LOGGING_FORMAT_CHECK
+ * Activates semantic format checking for the following function. You have
+ * to specifiy which arguments have to be considered for checking. for
+ * example for the member function @code Logger::log_info(const char *cat,
+ * const char *format, ...) @endcode the arguments are @c format and ...
+ * @note For counting the arguments on member functions you have to consider
+ *       the implicit @c this as first argument.
+ * @note If you want the checks to be deactivated, because you are too lazy
+ *       to fix your warnings, define FAWKES_NO_LOGGING_FORMAT_CHECK. Same
+ *       if your compiler does not support the syntax.
+ * @param[in] string The argument number of the format string. Starting by 1.
+ * @param[in] arguments The argument number of the arguments for the format
+ *                      string. Starting by 1.
+ */
+
 namespace fawkes {
 
 /** @class Logger <logging/logger.h>

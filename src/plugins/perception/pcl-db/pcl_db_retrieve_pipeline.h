@@ -148,7 +148,7 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
       transformer.restore(/* start */  actual_times[0] + this->cfg_transform_range_[0],
 			  /* end */    actual_times[0] + this->cfg_transform_range_[1]);
       this->logger_->log_debug(this->name_,
-			       "Restored transforms for %zu frames for range (%li..%li)",
+			       "Restored transforms for %zu frames for range (%lli..%lli)",
 			       transformer.get_frame_caches().size(),
 			       /* start */  actual_times[0] + this->cfg_transform_range_[0],
 			       /* end */    actual_times[0] + this->cfg_transform_range_[1]);

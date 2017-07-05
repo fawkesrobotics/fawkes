@@ -129,8 +129,8 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
     cfg_icp_euclidean_fitness_eps_ =
       config->get_float(CFG_PREFIX_MERGE"icp/euclidean-fitness-epsilon");
 
-    this->logger_->log_info(this->name_, "Age Tolerance: %lli  "
-			    "Limits: [%f, %f]  tf range: [%lli, %lli]",
+    this->logger_->log_info(this->name_, "Age Tolerance: %li  "
+			    "Limits: [%f, %f]  tf range: [%li, %li]",
 			    this->cfg_pcl_age_tolerance_, cfg_passthrough_filter_limits_[0],
 			    cfg_passthrough_filter_limits_[1], this->cfg_transform_range_[0],
 			    this->cfg_transform_range_[1]);
@@ -220,7 +220,7 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
       transformer.restore(/* start */  actual_times[i] + this->cfg_transform_range_[0],
 			  /* end */    actual_times[i] + this->cfg_transform_range_[1]);
       this->logger_->log_debug(this->name_, "Restored transforms for %zu frames "
-			       "for range (%li..%li)",
+			       "for range (%lli..%lli)",
 			       transformer.get_frame_caches().size(),
 			       /* start */  actual_times[i] + this->cfg_transform_range_[0],
 			       /* end */    actual_times[i] + this->cfg_transform_range_[1]);
@@ -575,7 +575,7 @@ class PointCloudDBMergePipeline : public PointCloudDBPipeline<PointType>
       transformer.restore(/* start */  actual_times[ref_pos] + this->cfg_transform_range_[0],
 			  /* end */    actual_times[ref_pos] + this->cfg_transform_range_[1]);
       this->logger_->log_debug(this->name_,
-			       "Restored transforms for %zu frames for range (%li..%li)",
+			       "Restored transforms for %zu frames for range (%lli..%lli)",
 			       transformer.get_frame_caches().size(),
 			       /* start */  actual_times[ref_pos] + this->cfg_transform_range_[0],
 			       /* end */    actual_times[ref_pos] + this->cfg_transform_range_[1]);

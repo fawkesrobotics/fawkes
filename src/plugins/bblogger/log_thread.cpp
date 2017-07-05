@@ -230,8 +230,7 @@ void
 BBLoggerThread::set_enabled(bool enabled)
 {
   if (enabled && !__enabled) {
-    logger->log_info(name(), "Logging enabled",
-		     (__num_data_items - __session_start));
+    logger->log_info(name(), "Logging enabled");
     __session_start = __num_data_items;
   } else if (!enabled && __enabled) {
     logger->log_info(name(), "Logging disabled (wrote %u entries), flushing",
