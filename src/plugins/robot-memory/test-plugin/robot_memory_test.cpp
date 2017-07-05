@@ -127,6 +127,19 @@ TEST_F(RobotMemoryTest, RemoveInvalidCaught)
   ASSERT_THROW(robot_memory->remove("{([})]"), mongo::DBException);
 }
 
+TEST_F(RobotMemoryTest, AggregationQuery)
+{
+  ASSERT_TRUE(robot_memory->insert("{'agg':'summand',value:0.5}"));
+  ASSERT_TRUE(robot_memory->insert("{'agg':'summand',value:0.7}"));
+  ASSERT_TRUE(robot_memory->insert("{'agg':'not-summand',value:0.9}"));
+
+  std::vector<BSONObj> pipeline;
+  pipeline.push_back(fromjson("{'$match': {'agg':'summand'}}"));
+  pipeline.push_back(fromjson("{'$group': {'_id': null, 'total': {'$sum': '$value'}}}"));
+  BSONObj res = robot_memory->aggregate(pipeline);
+  ASSERT_TRUE(contains_pairs(res.getField("result").Array()[0].Obj(), fromjson("{'total':1.2}")));
+}
+
 TEST_F(RobotMemoryTest, JavaScriptQuery)
 {
   ASSERT_TRUE(robot_memory->insert("{'testname':'js-query',a:1,b:2}"));
