@@ -22,11 +22,11 @@
 #include "openprs_thread.h"
 #include "utils/openprs_server_proxy.h"
 #include "utils/openprs_mp_proxy.h"
-#include "utils/proc.h"
 
 #include <logging/logger.h>
 #include <baseapp/run.h>
 #include <netcomm/fawkes/network_manager.h>
+#include <utils/sub_process/proc.h>
 
 #include <unistd.h>
 #include <cstdio>
