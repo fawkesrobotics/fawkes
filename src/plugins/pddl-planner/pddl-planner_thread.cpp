@@ -116,7 +116,8 @@ PddlPlannerThread::loop()
   {
     cur_pos = result.find(": ", cur_pos) + 2;
     size_t line_end =  result.find("\n", cur_pos);
-    logger->log_info(name(), "line:%s (%d-%d)", result.substr(cur_pos, line_end-cur_pos).c_str(), cur_pos, line_end);
+    logger->log_info(name(), "line:%s (%zu-%zu)",
+                     result.substr(cur_pos, line_end-cur_pos).c_str(), cur_pos, line_end);
     BSONObjBuilder step_builder;
     if(line_end < result.find(" ", cur_pos))
     {
