@@ -16,7 +16,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
+include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 include $(BASEDIR)/src/plugins/pddl-robot-memory/ctemplate.mk
 
 PRESUBDIRS = interfaces
@@ -30,7 +30,7 @@ OBJS_pddl_robot_memory = pddl_robot_memory_plugin.o pddl_robot_memory_thread.o
 
 OBJS_all = $(OBJS_pddl_robot_memory)
 
-ifeq ($(HAVE_CPP11)$(HAVE_MONGODB)$(HAVE_CTEMPLATE),111)
+ifeq ($(HAVE_CPP11)$(HAVE_ROBOT_MEMORY)$(HAVE_CTEMPLATE),111)
   CFLAGS  += $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_CTEMPLATE)
 
@@ -39,20 +39,20 @@ else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11
   endif
-  ifneq ($(HAVE_TF),1)
-    WARN_TARGETS = warning_mongodb
+  ifneq ($(HAVE_ROBOT_MEMORY),1)
+    WARN_TARGETS += warning_robot_memory
   endif
   ifneq ($(HAVE_CTEMPLATE),1)
-    WARN_TARGETS = warning_ctemplate
+    WARN_TARGETS += warning_ctemplate
   endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_mongodb warning_ctemplate warning_cpp11
-warning_mongodb:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting pddl-robot-memory plugin$(TNORMAL) (mongodb not available)"
+.PHONY: warning_robot_memory warning_ctemplate warning_cpp11
+warning_robot_memory:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting pddl-robot-memory plugin$(TNORMAL) (robot memory not available)"
 warning_cpp11:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build pddl-robot-memory plugin$(TNORMAL) (C++11 not supported)"
 warning_ctemplate:

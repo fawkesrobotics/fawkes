@@ -16,15 +16,10 @@
 BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDCONFDIR)/tf/tf.mk
-include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
-include $(BASEDIR)/etc/buildsys/boost.mk
+include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 
 PRESUBDIRS = interfaces aspect
 SUBDIRS = test-plugin
-
-REQ_BOOST_LIBS = bind function
-HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 LIBS_robot_memory = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesmongodbaspect fvutils \
@@ -34,30 +29,39 @@ OBJS_robot_memory += $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$
 
 OBJS_all    = $(OBJS_robot_memory)
 
-ifeq ($(HAVE_MONGODB)$(HAVE_TF)$(HAVE_BOOST_LIBS),111)
-  CFLAGS += $(CFLAGS_TF) $(CFLAGS_MONGODB) $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
-  LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_MONGODB) $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
+ifeq ($(HAVE_ROBOT_MEMORY),1)
+  CFLAGS += $(CFLAGS_ROBOT_MEMORY)
+  LDFLAGS += $(LDFLAGS_ROBOT_MEMORY)
   PLUGINS_all = $(PLUGINDIR)/robot-memory.so
 else
+  WARN_TARGETS += warning_robot_memory
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb
   endif
   ifneq ($(HAVE_TF),1)
     WARN_TARGETS += warning_tf
   endif
+  ifeq ($(OLDER_THAN_XENIAL),1)
+    WARN_TARGETS += warning_ubuntu
+  endif
   ifneq ($(HAVE_BOOST_LIBS),1)
     WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
   endif
 endif
 
+
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_mongodb warning_tf
+.PHONY: warning_robot_memory warning_mongodb warning_tf warning_ubuntu
+warning_robot_memory:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL)"
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (mongodb[-devel] not installed)"
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (tf framework not available)"
+warning_ubuntu:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (Ubuntu version is too old)"
 $(WARN_TARGETS_BOOST): warning_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build RobotMemory Plugin$(TNORMAL) (Boost library $* not found)"endif
 endif

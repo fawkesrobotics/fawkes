@@ -84,6 +84,7 @@ BUILD_TYPE ?= fawkes
 ARCH=$(shell uname -m)
 OS=$(shell uname -s)
 DISTRO=$(if $(wildcard /etc/os-release),$(shell sed -n "/^ID=/ s/ID=//p" /etc/os-release),unknown)
+DISTRO_VERSION=$(if $(wildcard /etc/os-release),$(shell sed -n "/^VERSION_ID=/ s/VERSION_ID=//p" /etc/os-release),0)
 
 
 ### Directories

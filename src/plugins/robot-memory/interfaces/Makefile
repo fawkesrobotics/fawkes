@@ -16,8 +16,11 @@
 BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 
-INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
+ifeq ($(HAVE_ROBOT_MEMORY),1)
+  INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
+endif
 include $(BUILDSYSDIR)/interface.mk
 
 include $(BUILDSYSDIR)/base.mk
