@@ -94,6 +94,7 @@ RosIMUThread::finalize()
 
 /** Handle interface changes.
  * If the IMU interface changes, publish updated data to ROS.
+ * @param interface interface instance that you supplied to bbil_add_data_interface()
  */
 void
 RosIMUThread::bb_interface_data_changed(Interface *interface) throw()
