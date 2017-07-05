@@ -26,6 +26,7 @@
 #include <utils/misc/string_conversions.h>
 #include <libs/core/exceptions/system.h>
 #include <cstdio>
+#include <cstdlib>
 
 using namespace fawkes;
 
@@ -83,8 +84,10 @@ void RobotMemorySetup::setup_mongods()
   usleep(1000000);
 
   //only start other processes when we want to run the robot memory distributed
-  if(!config->get_bool("plugins/robot-memory/setup/distributed"))
+  if(!config->get_bool("plugins/robot-memory/setup/distributed-create")) {
+    distribuded_mongod = NULL;
     return;
+  }
 
   //start own part of replica set
   unsigned int distributed_port = config->get_uint("plugins/robot-memory/setup/replicated/port");
@@ -104,10 +107,25 @@ void RobotMemorySetup::setup_mongods()
   distribuded_mongod = start_mongo_process("mongod-replicated", distributed_port, distributed_argv);
 
   //configure replica set
-  if(config->get_bool("plugins/robot-memory/setup/replicated/initiate"))
+	// * 1000000: sec -> microsec
+  int max_setup_time =
+	  config->get_int("plugins/robot-memory/setup/replicated/max_setup_time_per_host_sec") * 1000000;
+  
+  if (config->get_bool("plugins/robot-memory/setup/replicated/initiate"))
   {
-	  std::string repl_config = "{_id:'" + distributed_replset + "', members:"
-		  + config->get_string("plugins/robot-memory/setup/replicated/replica-set-members") + "}";
+	  std::vector<std::string> repl_set_members =
+		  config->get_strings("plugins/robot-memory/setup/replicated/replica-set-members");
+	  for (size_t i = 0; i < repl_set_members.size(); ++i) {
+		  wait_until_started(repl_set_members[i], "repl set connect", max_setup_time, 1000000);
+	  }
+	  usleep(random() % 15000000);
+
+	  std::string repl_config = "{_id:'" + distributed_replset + "', members: [";
+	  for (size_t i = 0; i < repl_set_members.size(); ++i) {
+		  repl_config += "{_id: " + std::to_string(i+1) + ", host: '" + repl_set_members[i] + "'}";
+		  if (i < repl_set_members.size()-1) { repl_config += ", "; }
+	  }
+    repl_config += "]}";
 	  run_mongo_command(distributed_port, std::string("{replSetInitiate:" + repl_config + "}"), "already initialized");
   }
   //wait for replica set initialization and election
@@ -125,7 +143,8 @@ fawkes::SubProcess* RobotMemorySetup::start_mongo_process(std::string proc_name,
       logger->log_warn("RobotMemorySetup", "Starting %s process: '%s'", proc_name.c_str(), cmd.c_str());
       fawkes::SubProcess * process = new SubProcess(proc_name.c_str(), argv[0], argv, NULL, logger);
       logger->log_info("RobotMemorySetup", "Started %s", proc_name.c_str());
-      wait_until_started(port, cmd, config->get_int("plugins/robot-memory/setup/max_setup_time"));
+      wait_until_started(std::string("localhost:" + std::to_string(port)),
+                         cmd, config->get_int("plugins/robot-memory/setup/max_setup_time"));
       return process;
     }
   return NULL;
@@ -139,8 +158,7 @@ void RobotMemorySetup::shutdown_mongods()
 {
   if(local_mongod)
     delete local_mongod;
-  if(distribuded_mongod)
-    delete distribuded_mongod;
+  delete distribuded_mongod;
 }
 
 /**
@@ -173,10 +191,10 @@ bool RobotMemorySetup::is_mongo_running(unsigned int port)
  * Wait until mongod or mongos is reachable on the given port.
  * Aborts when the timeout is reached
  */
-void RobotMemorySetup::wait_until_started(unsigned int port, std::string cmd, int timeout)
+void RobotMemorySetup::wait_until_started(const std::string &hostport,
+                                          const std::string cmd, int timeout, int wait_step)
 {
-  logger->log_info("RobotMemorySetup", "Waiting until mongo is available on port: %u", port);
-  int wait_step = 100000;
+	logger->log_info("RobotMemorySetup", "Waiting until mongo is available at '%s'", hostport.c_str());
   for(int waited = 0; waited < timeout; waited += wait_step)
   {
     bool could_connect = false;
@@ -184,7 +202,7 @@ void RobotMemorySetup::wait_until_started(unsigned int port, std::string cmd, in
     {
       std::string errmsg;
       mongo::DBClientConnection test_con(false);
-      could_connect = test_con.connect(std::string("localhost:" + std::to_string(port)), errmsg);
+      could_connect = test_con.connect(hostport, errmsg);
       test_con.reset();
     }
     catch(Exception &e){}
