@@ -59,6 +59,7 @@ class MongoDBThread::ClientConf
   ConnectionMode                  __mode;
   mongo::HostAndPort              __conn_hostport;
   std::vector<mongo::HostAndPort> __replicaset_hostports;
+  std::string                     __replicaset_name;
 
   /// @cond INTERNALS
   typedef struct _AuthInfo {
@@ -267,6 +268,7 @@ MongoDBThread::ClientConf::ClientConf(Configuration *config, Logger *logger,
 
   if (mode == "replica_set" || mode == "replicaset") {
     __mode = REPLICA_SET;
+    __replicaset_name = config->get_string((prefix + "name").c_str());
 
 #if __cplusplus >= 201103L || (defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ >= 4)
     std::unique_ptr<Configuration::ValueIterator>
@@ -303,9 +305,8 @@ MongoDBThread::ClientConf::create_client()
   switch (__mode) {
   case REPLICA_SET:
     {
-      std::string noname = "";
       DBClientReplicaSet *repset =
-	new DBClientReplicaSet(noname, __replicaset_hostports);
+	new DBClientReplicaSet(__replicaset_name, __replicaset_hostports);
       client = repset;
       if (! repset->connect())  throw Exception("Cannot connect to database");
       std::list<AuthInfo>::iterator ai;
@@ -326,7 +327,7 @@ MongoDBThread::ClientConf::create_client()
       client = clconn;
       std::string errmsg;
       if (! clconn->connect(__conn_hostport, errmsg)) {
-	throw Exception("Could not connect to MongoDB at %s: %s",
+	throw Exception("Could not connect to MongoDB at %s: %s\nYou probably forgot to start/enable the mongod service",
 			__conn_hostport.toString().c_str(), errmsg.c_str());
       }
       std::list<AuthInfo>::iterator ai;

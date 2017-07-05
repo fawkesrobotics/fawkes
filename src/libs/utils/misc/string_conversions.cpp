@@ -284,6 +284,7 @@ StringConversions::resolve_path(std::string s)
   resolve_map["@CONFDIR@"] = CONFDIR;
   resolve_map["@SRCDIR@"] = SRCDIR;
   resolve_map["@FAWKES_BASEDIR@"] = FAWKES_BASEDIR;
+  resolve_map["~"] = getenv("HOME");
   std::string res = s;
   for(std::map<std::string, std::string>::iterator it = resolve_map.begin(); it != resolve_map.end(); it++)
   {

@@ -1,0 +1,63 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/robot-memory
+---
+plugins/robot-memory:
+
+  database: robmem
+  default-collection: "robmem.test"
+  interface-name: "memory"
+  more-debug-output: false
+  blackboard-collection: "robmem.bb"
+  # databases with these name are stored in the distrited mongod instance and not in the local one:
+  distributed-db-names: ["syncedrobmem"]
+ 
+  setup:
+    # When fawkes starts mongod, it might need some time to initialize the db (especially the first time)
+    max_setup_time: 60000000
+    # The mongo client conntections to use for the robot memory. Defined below in plugins/mongodb/clients
+    mongo-client-connection-local: "robotmemory-local"
+    mongo-client-connection-distributed: "robotmemory-synced"
+    # distribute robot memory
+    distributed: true
+    # how lagre should the oplog be (minimum 50 mb)
+    oplog-size: 1000
+    # Where to store log files
+    log-path: "~/.robot-memory/log"
+    # configuration for setting up all mongod and mongos instances:
+    local:
+      replica-set-name: "local" #single instance set needed to optain the oplog, not actually replicated 
+      port: 27017
+      db-path: "~/.robot-memory/dbs/local"
+    replicated:
+      port: 27021
+      replica-set-name: "syncedrobmem"
+      db-path: "~/.robot-memory/dbs/distributed"
+      replica-set-members: "[{_id:1, host:'localhost:27021'}]"
+      replica-id: 1 #this should be the robot number, override it in host.yaml
+      # initiate automatically
+      initiate: true
+
+  computables:
+    blackboard:
+      priority: 10
+      caching-time: 0.3
+    transform:
+      collections: ['robmem.blackboard','robmem.transform','robmem.test']
+      priority: -10
+      caching-time: 0.3
+    
+    
+  
+plugins/mongodb/clients:
+    robotmemory-synced:
+      active: true
+      mode: replica_set
+      name: syncedrobmem
+      hosts:
+        stargazer: localhost:27021
+    robotmemory-local:
+      active: true
+      mode: connection
+      hostport: localhost:27017

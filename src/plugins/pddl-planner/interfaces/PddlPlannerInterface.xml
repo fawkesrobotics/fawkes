@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="PddlPlannerInterface" author="Frederik Zwilling" year="2016">
+  <data>
+    <comment>
+      Interface to start a PDDL planner and parse the resulting plan
+    </comment>
+    <field type="uint32" name="msg_id">
+      The ID of the message that was processed last
+    </field>
+    <field type="bool" name="final">
+      Is the planning finished?
+    </field>
+  </data>
+  
+  <message name="Plan">
+    <comment>
+      Start PDDL planner and parse result
+    </comment>
+    <field type="string" length="1" name="dummy">
+    	Just a dummy field.
+    </field>
+  </message>
+</interface>

@@ -1,0 +1,88 @@
+$#include <interfaces/OpenraveRobotMemoryInterface.h>
+$#include <utils/time/time.h>
+$#include <utils/time/clock.h>
+$using namespace fawkes;
+namespace fawkes {
+class OpenraveRobotMemoryInterface : public Interface
+{
+
+  class ConstructSceneMessage : public Message
+  {
+    ConstructSceneMessage();
+    ~ConstructSceneMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+  };
+
+  unsigned int dummy();
+  void set_dummy(const unsigned int new_dummy);
+  int maxlenof_dummy() const;
+  bool                    oftype(const char *interface_type) const;
+  const void *            datachunk() const;
+  unsigned int            datasize() const;
+  const char *            type() const;
+  const char *            id() const;
+  const char *            uid() const;
+  unsigned int            serial() const;
+  unsigned int            mem_serial() const;
+  bool                    operator== (Interface &comp) const;
+  const unsigned char *   hash() const;
+  int                     hash_size() const;
+  const char *            hash_printable() const;
+  bool                    is_writer() const;
+  void                    set_from_chunk(void *chunk);
+  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;
+  void          read();
+  void          write();
+  bool          has_writer() const;
+  unsigned int  num_readers() const;
+  bool          changed() const;
+  const fawkes::Time *  timestamp() const;
+  void          set_auto_timestamping(bool enabled);
+  void          set_timestamp(const fawkes::Time *t);
+  void          set_clock(fawkes::Clock *clock);
+  unsigned int  msgq_enqueue_copy(Message *message);
+  void          msgq_remove(Message *message);
+  void          msgq_remove(unsigned int message_id);
+  unsigned int  msgq_size();
+  void          msgq_flush();
+  void          msgq_lock();
+  bool          msgq_try_lock();
+  void          msgq_unlock();
+  void          msgq_pop();
+  fawkes::Message * msgq_first @ msgq_first_generic();
+  bool          msgq_empty();
+
+
+};
+
+
+$[
+
+assert(fawkes.Interface.msgq_first)
+assert(fawkes.Interface.msgq_enqueue)
+assert(fawkes.Interface.create_message)
+
+fawkes.OpenraveRobotMemoryInterface.msgq_first     = fawkes.Interface.msgq_first
+fawkes.OpenraveRobotMemoryInterface.msgq_enqueue   = fawkes.Interface.msgq_enqueue
+fawkes.OpenraveRobotMemoryInterface.create_message = fawkes.Interface.create_message
+
+$]
+
+}

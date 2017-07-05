@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="RobotMemoryInterface" author="Frederik Zwilling" year="2016">
+  <data>
+    <comment>
+      Interface to access robot Memory
+    </comment>
+
+    <field type="string" length="1024" name="error">Error of last query</field>
+    <field type="string" length="1024" name="result">Result of last query</field>
+  </data>
+  
+  <message name="Query">
+    <comment>
+      Query to execute.
+    </comment>
+    <field type="string" length="1024" name="query">Query as JSON string</field>
+    <field type="string" length="1024" name="collection">The collection to query</field>
+  </message>
+  <message name="Insert">
+    <comment>
+      Message to insert a document into the database.
+    </comment>
+    <field type="string"  length="1024" name="insert">Document to insert as JSON string</field>
+    <field type="string" length="1024" name="collection">The collection to query</field>
+  </message>
+  <message name="Update">
+    <comment>
+      Message to update documents matching a query.
+    </comment>
+    <field type="string"  length="1024" name="query">Query as JSON string</field>
+    <field type="string"  length="1024" name="update">Update as JSON string</field>
+    <field type="string" length="1024" name="collection">The collection to query</field>
+  </message>
+  <message name="Remove">
+    <comment>
+      Message to remove documents matching the query.
+    </comment>
+    <field type="string"  length="1024" name="query">Query as JSON string</field>
+    <field type="string" length="1024" name="collection">The collection to query</field>
+  </message>
+
+</interface>
