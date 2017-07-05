@@ -111,7 +111,7 @@ RealsenseThread::loop()
     }
     pcl_utils::set_time(realsense_depth_refptr_, fawkes::Time(clock));
   } else {
-    logger->log_warn(name(), "Poll for frames not successful (%c)", rs_get_error_message(rs_error_));
+    logger->log_warn(name(), "Poll for frames not successful (%s)", rs_get_error_message(rs_error_));
   }
 }
 
