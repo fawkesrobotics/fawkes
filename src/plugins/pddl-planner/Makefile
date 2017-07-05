@@ -26,7 +26,7 @@ LIBS_pddl_planner = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 
 OBJS_pddl_planner = pddl-planner_plugin.o pddl-planner_thread.o
 
-OBJS_all = $(OBJS_pddl-planner)
+OBJS_all = $(OBJS_pddl_planner)
 
 ifeq ($(HAVE_CPP11)$(HAVE_MONGODB),11)
   CFLAGS  += $(CFLAGS_CPP11)
