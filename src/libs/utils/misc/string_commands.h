@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *  string.h - string utilities
+ *  string.h - string utilities for command argv and envs
  *
  *  Created: Fri Aug 22 14:49:05 2014
  *  Copyright  2014  Tim Niemueller [www.niemueller.de]
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENPRS_UTILS_STRING_H_
-#define __PLUGINS_OPENPRS_UTILS_STRING_H_
+#ifndef __PLUGINS_UTILS_STRING_H_
+#define __PLUGINS_UTILS_STRING_H_
 
 #include <string>
 #include <vector>

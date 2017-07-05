@@ -52,7 +52,7 @@ Search::Search( LaserOccupancyGrid * occ_grid, Logger* logger, Configuration* co
   logger_->log_debug("search", "(Constructor): Entering");
   std::string cfg_prefix = "/plugins/colli/search/";
   cfg_search_line_allowed_cost_max_  = config->get_int((cfg_prefix + "line/cost_max").c_str());
-  astar_ = new AStar( occ_grid, logger, config );
+  astar_ = new AStarColli( occ_grid, logger, config );
   logger_->log_debug("search", "(Constructor): Exiting");
 }
 

@@ -46,11 +46,11 @@ typedef struct point_struct point_t;
  *  This is an implementation of the A* search algorithm in a
  *    highly efficient way (I hope ;-).
  */
-class AStar
+class AStarColli
 {
  public:
-  AStar( LaserOccupancyGrid * occGrid, Logger* logger, Configuration* config );
-  ~AStar();
+  AStarColli( LaserOccupancyGrid * occGrid, Logger* logger, Configuration* config );
+  ~AStarColli();
 
   /* =========================================== */
   /* ************* PUBLIC METHODS ************** */

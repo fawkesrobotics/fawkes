@@ -21,8 +21,8 @@
  */
 
 #include <plugins/openprs/aspect/openprs_kernel_manager.h>
-#include <plugins/openprs/utils/proc.h>
-#include <plugins/openprs/utils/string.h>
+#include <utils/sub_process/proc.h>
+#include <utils/misc/string_commands.h>
 #include <logging/logger.h>
 #include <config/config.h>
 #include <utils/time/time.h>
