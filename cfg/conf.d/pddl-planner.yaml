@@ -1,0 +1,27 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/pddl-planner
+---
+plugins/pddl-planner:
+
+  # PDDL planner to be used
+  # Possible values: ff, fd
+  planner: ff
+
+  # Domain and problem description and location
+  # Folder path needs a trailing /
+  description-folder: "@BASEDIR@/src/agents/rcll-pddl/"
+  domain-description: domain.pddl
+  problem-description: pddl-problem.pddl
+  # File for intermediate results from planners
+  result-file: results.txt
+
+  # optional search options for fd planner
+  fd-search-opts: --heuristic "hff=ff()" --heuristic "hcea=cea()" --search "lazy_greedy([hff, hcea], preferred=[hff, hcea])"
+
+  # mongodb collection for robot-memory
+  collection: robmem.pddl-plan
+
+  # blackboard interface
+  interface-name: "pddl-planner"
