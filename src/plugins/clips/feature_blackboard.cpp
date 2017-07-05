@@ -280,7 +280,7 @@ BlackboardCLIPSFeature::clips_assert_interface_type(std::string &env_name, std::
 
     case IFT_STRING:
       deftemplate += std::string() +
-	"  (" + ((f.get_length() > 1) ? "multi" : "") + "slot " + f.get_name() +
+        "  (slot " + f.get_name() +
 	" (type STRING))\n";
       break;
 
@@ -514,6 +514,12 @@ BlackboardCLIPSFeature::clips_blackboard_read(std::string env_name)
 		    }
 		    while ((pos = value.find("inf")) != std::string::npos) {
 			    value = value.replace(pos, 3, std::to_string(std::numeric_limits<double>::max()));
+		    }
+		    while ((pos = value.find("-nan")) != std::string::npos) {
+			    value = value.replace(pos, 4, std::to_string(std::numeric_limits<double>::min() + 1));
+		    }
+		    while ((pos = value.find("nan")) != std::string::npos) {
+			    value = value.replace(pos, 3, std::to_string(std::numeric_limits<double>::max() - 1));
 		    }
 	    }
 
