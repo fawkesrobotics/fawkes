@@ -653,6 +653,31 @@ NavGraph::remove_node(const std::string &node_name)
   notify_of_change();
 }
 
+
+/** Remove orphan nodes.
+ *  Remove nodes which are neither marked unconnected nor participate
+ *  on any edge.
+ */
+void
+NavGraph::remove_orphan_nodes()
+{
+	std::list<std::string> to_remove;
+
+  for (const NavGraphNode &n : nodes_) {
+	  if (n.unconnected()) continue;
+
+	  for (const NavGraphEdge &e : edges_) {
+		  if (e.from_node() == n || e.to_node() == n)  continue;
+	  }
+
+	  to_remove.push_back(n.name());
+  }
+
+  for (const auto &nn : to_remove) {
+	  remove_node(nn);
+  }
+}
+
 /** Remove an edge
  * @param edge edge to remove
  */

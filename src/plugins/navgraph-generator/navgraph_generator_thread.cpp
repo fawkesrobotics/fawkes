@@ -25,6 +25,7 @@
 
 #include <core/threading/mutex_locker.h>
 #include <navgraph/generators/voronoi.h>
+#include <navgraph/generators/grid.h>
 #include <navgraph/yaml_navgraph.h>
 #include <plugins/laser-lines/line_func.h>
 #include <plugins/amcl/amcl_utils.h>
@@ -144,26 +145,45 @@ NavGraphGeneratorThread::finalize()
 void
 NavGraphGeneratorThread::loop()
 {
-  NavGraphGeneratorVoronoi nggv;
+	std::shared_ptr<NavGraphGenerator> ng;
 
-  logger->log_debug(name(), "Calculating new graph");
+	try {
+		switch (algorithm_) {
+		case fawkes::NavGraphGeneratorInterface::ALGORITHM_GRID:
+			ng.reset(new NavGraphGeneratorGrid(algorithm_params_));
+			break;
+		default:
+			ng.reset(new NavGraphGeneratorVoronoi());
+		}
+	} catch (Exception &e) {
+		logger->log_error(name(), "Failed to initialize algorithm %s, exception follows",
+		                  navgen_if_->tostring_Algorithm(algorithm_));
+		logger->log_error(name(), e);
+		navgen_if_->set_ok(false);
+		navgen_if_->set_error_message(e.what_no_backtrace());
+		navgen_if_->set_final(true);
+		navgen_if_->write();
+		return;
+	}
+
+	logger->log_debug(name(), "Calculating new graph (%s)", navgen_if_->tostring_Algorithm(algorithm_));
 
   if (bbox_set_) {
     logger->log_debug(name(), "  Setting bound box (%f,%f) to (%f,%f)",
 		      bbox_p1_.x, bbox_p1_.y, bbox_p2_.x, bbox_p2_.y);
-    nggv.set_bounding_box(bbox_p1_.x, bbox_p1_.y, bbox_p2_.x, bbox_p2_.y);
+    ng->set_bounding_box(bbox_p1_.x, bbox_p1_.y, bbox_p2_.x, bbox_p2_.y);
   }
 
   for (auto o : obstacles_) {
     logger->log_debug(name(), "  Adding obstacle %s at (%f,%f)",
 		      o.first.c_str(), o.second.x, o.second.y);
-    nggv.add_obstacle(o.second.x, o.second.y);
+    ng->add_obstacle(o.second.x, o.second.y);
   }
 
   for (auto o : map_obstacles_) {
     logger->log_debug(name(), "  Adding map obstacle %s at (%f,%f)",
 		      o.first.c_str(), o.second.x, o.second.y);
-    nggv.add_obstacle(o.second.x, o.second.y);
+    ng->add_obstacle(o.second.x, o.second.y);
   }
 
   // Acquire lock on navgraph, no more searches/modifications until we are done
@@ -188,8 +208,18 @@ NavGraphGeneratorThread::loop()
     navgraph->set_default_property(p.first, p.second);
   }
 
-  logger->log_debug(name(), "  Computing Voronoi");
-  nggv.compute(navgraph);
+  logger->log_debug(name(), "  Computing navgraph");
+  try {
+	  ng->compute(navgraph);
+  } catch (Exception &e) {
+	  logger->log_error(name(), "Failed to compute navgraph, exception follows");
+	  logger->log_error(name(), e);
+	  navgen_if_->set_ok(false);
+	  navgen_if_->set_error_message(e.what_no_backtrace());
+	  navgen_if_->write();
+	  navgraph->set_notifications_enabled(true);
+	  return;
+  }
 
   // post-processing
   if (filter_["FILTER_EDGES_BY_MAP"]) {
@@ -308,6 +338,7 @@ NavGraphGeneratorThread::loop()
   logger->log_debug(name(), "  Graph computed, notifying listeners");
   navgraph->notify_of_change();
 
+  navgen_if_->set_ok(true);
   navgen_if_->set_final(true);
   navgen_if_->write();
 
@@ -332,10 +363,25 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
     default_properties_.clear();
     bbox_set_ = false;
     copy_default_properties_ = true;
+    algorithm_ = fawkes::NavGraphGeneratorInterface::ALGORITHM_VORONOI;
+    algorithm_params_.clear();
     filter_params_float_ = filter_params_float_defaults_;
     for (auto &f : filter_) {
       f.second = false;
     }
+
+  } else if (message->is_of_type<NavGraphGeneratorInterface::SetAlgorithmMessage>()) {
+	  NavGraphGeneratorInterface::SetAlgorithmMessage *msg =
+		  message->as_type<NavGraphGeneratorInterface::SetAlgorithmMessage>();
+
+	  algorithm_ = msg->algorithm();
+
+  } else if (message->is_of_type<NavGraphGeneratorInterface::SetAlgorithmParameterMessage>()) {
+    NavGraphGeneratorInterface::SetAlgorithmParameterMessage *msg =
+      message->as_type<NavGraphGeneratorInterface::SetAlgorithmParameterMessage>();
+
+    algorithm_params_[msg->param()] = msg->value();
+
   } else if (message->is_of_type<NavGraphGeneratorInterface::SetBoundingBoxMessage>()) {
     NavGraphGeneratorInterface::SetBoundingBoxMessage *msg =
       message->as_type<NavGraphGeneratorInterface::SetBoundingBoxMessage>();

@@ -153,6 +153,7 @@ class NavGraph
 		bool allow_existing = false);
   void remove_node(const NavGraphNode &node);
   void remove_node(const std::string &node_name);
+  void remove_orphan_nodes();
   void remove_edge(const NavGraphEdge &edge);
   void remove_edge(const std::string &from, const std::string &to);
   void clear();

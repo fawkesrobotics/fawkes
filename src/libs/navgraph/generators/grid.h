@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  voronoi.h - generate navgraph from Voronoi using CGAL
+ *  grid.h - generate navgraph based on a grid
  *
- *  Created: Mon Jan 12 21:31:38 2015
- *  Copyright  2015  Tim Niemueller [www.niemueller.de]
+ *  Created: Sun Apr 23 18:22:09 2017
+ *  Copyright  2015-2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_NAVGRAPH_GENERATOR_VORONOI_H_
-#define __LIBS_NAVGRAPH_GENERATOR_VORONOI_H_
+#ifndef __LIBS_NAVGRAPH_GENERATOR_GRID_H_
+#define __LIBS_NAVGRAPH_GENERATOR_GRID_H_
 
 #include <navgraph/navgraph.h>
 #include <navgraph/generators/generator.h>
@@ -33,23 +33,18 @@ namespace fawkes {
 }
 #endif
 
-class NavGraphGeneratorVoronoi : public NavGraphGenerator
+class NavGraphGeneratorGrid : public NavGraphGenerator
 {
  public:
-	NavGraphGeneratorVoronoi();
-	virtual ~NavGraphGeneratorVoronoi();
+	NavGraphGeneratorGrid(const std::map<std::string, std::string> &params);
+	virtual ~NavGraphGeneratorGrid();
 
 	virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph);
 
-	/** Get list of polygons.
-	 * @return list of polygons, each polygon contains the vertices of a
-	 * bounded face of the Voronoi diagram.
-	 */
-	const std::list<Polygon2D> &  face_polygons() const
-	{ return polygons_; }
-
  private:
-	std::list<Polygon2D> polygons_;
+	float spacing_;
+	float margin_;
+	bool  add_diagonals_;
 };
 
 } // end of namespace fawkes

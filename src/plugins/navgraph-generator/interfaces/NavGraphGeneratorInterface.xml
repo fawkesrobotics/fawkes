@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE interface SYSTEM "interface.dtd">
-<interface name="NavGraphGeneratorInterface" author="Tim Niemueller" year="2015">
+<interface name="NavGraphGeneratorInterface" author="Tim Niemueller" year="2015-2017">
   <constants>
     <enum name="ConnectionMode">
-      <comment>Drive modes enum</comment>
+      <comment>Describe how to connect nodes to the graph.</comment>
       <item name="NOT_CONNECTED">
 				The node is will not be initially connected.
 
@@ -80,6 +80,26 @@
 				other edges.
       </item>
     </enum> 
+    <enum name="Algorithm">
+      <comment>
+				Available generator algorithms.
+      </comment>
+      <item name="ALGORITHM_VORONOI">
+	      Voronoi-based algorithm for navgraph generation.
+	      This is the default if no algorithm is set.
+      </item>
+      <item name="ALGORITHM_GRID">
+	      Grid-based algorithm with customizable spacing.
+
+	      Parameters:
+	      - spacing: the grid spacing in meters
+	        (float, m, mandatory)
+	      - margin: the minimum distances of edges to obstacles
+	        (float, m, mandatory)
+	      - add-diagonals: enable adding of diagonal edges in grid cells
+	        (bool, optional, default: false)
+      </item>
+    </enum> 
   </constants>
   <data>
     <comment>
@@ -108,7 +128,14 @@
       been completed, false if it is still running. Also check the
       msgid field if this field applies to the correct message.
     </field>
-
+    <field type="bool" name="ok">
+	    Indicate success (true) or failure (false) of the most recent
+	    navgraph generation (valid if final equals true).
+    </field>
+    <field type="string" name="error_message" length="128">
+	    If the "ok" field is false, may give an additional clue about
+	    the encountered error.
+    </field>
   </data>
   <message name="Clear">
     <comment>
@@ -116,6 +143,20 @@
       Use this operation with care. A graph generation afterwards will
       yield now results.
     </comment>
+  </message>
+  <message name="SetAlgorithm">
+    <comment>Set algorithm used to generate graph.</comment>
+    <field type="Algorithm" name="algorithm">Algorithm to use.</field>
+  </message>
+  <message name="SetAlgorithmParameter">
+    <comment>Set algorithm-specific parameter.</comment>
+    <field type="string" name="param" length="32">Parameter name, see
+    Algorithm enum description for algorithm-specific
+    parameters. Unknown parameters will be ignored.</field>
+    <field type="string" name="value" length="64">Value of parameter
+    encoded as string. The algorithm will perform the conversion to
+    the required data type (e.g., float). An error will make the
+    generation fail.</field>
   </message>
   <message name="SetBoundingBox">
     <comment>

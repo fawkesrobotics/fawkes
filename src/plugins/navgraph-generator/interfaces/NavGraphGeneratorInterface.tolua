@@ -26,6 +26,11 @@ class NavGraphGeneratorInterface : public Interface
     FORCE
   } EdgeMode;
 
+  typedef enum {
+    ALGORITHM_VORONOI,
+    ALGORITHM_GRID
+  } Algorithm;
+
   class ClearMessage : public Message
   {
     ClearMessage();
@@ -48,6 +53,65 @@ class NavGraphGeneratorInterface : public Interface
     void              unref();
     unsigned int      refcount();
 
+  };
+
+  class SetAlgorithmMessage : public Message
+  {
+    SetAlgorithmMessage(Algorithm ini_algorithm);
+    SetAlgorithmMessage();
+    ~SetAlgorithmMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    Algorithm algorithm();
+    void set_algorithm(const Algorithm new_algorithm);
+    int maxlenof_algorithm() const;
+  };
+
+  class SetAlgorithmParameterMessage : public Message
+  {
+    SetAlgorithmParameterMessage(char * ini_param, char * ini_value);
+    SetAlgorithmParameterMessage();
+    ~SetAlgorithmParameterMessage();
+
+    unsigned int      id() const;
+
+    unsigned int      sender_id() const;
+    const char *      sender_thread_name() const;
+    Interface *       interface() const;
+    const char *      type() const;
+
+    const void *      datachunk() const;
+    unsigned int      datasize() const;
+
+    void              set_from_chunk(const void *chunk);
+
+    /* from RefCount */
+    void              ref();
+    void              unref();
+    unsigned int      refcount();
+
+    char * param();
+    void set_param(const char * new_param);
+    int maxlenof_param() const;
+    char * value();
+    void set_value(const char * new_value);
+    int maxlenof_value() const;
   };
 
   class SetBoundingBoxMessage : public Message
@@ -507,6 +571,12 @@ class NavGraphGeneratorInterface : public Interface
   bool is_final();
   void set_final(const bool new_final);
   int maxlenof_final() const;
+  bool is_ok();
+  void set_ok(const bool new_ok);
+  int maxlenof_ok() const;
+  char * error_message();
+  void set_error_message(const char * new_error_message);
+  int maxlenof_error_message() const;
   bool                    oftype(const char *interface_type) const;
   const void *            datachunk() const;
   unsigned int            datasize() const;
