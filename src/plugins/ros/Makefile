@@ -61,6 +61,10 @@ LIBS_ros_navigator = m pthread fawkescore fawkesutils fawkesaspects fawkesblackb
 		     fawkesinterface fawkesrosaspect NavigatorInterface
 OBJS_ros_navigator = navigator_plugin.o navigator_thread.o
 
+LIBS_ros_dynamic_reconfigure = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
+		     fawkesinterface fawkesrosaspect DynamicReconfigureInterface
+OBJS_ros_dynamic_reconfigure = dynamic_reconfigure_plugin.o dynamic_reconfigure_thread.o
+
 LIBS_ros_navgraph_breakout = m pthread fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		     fawkesinterface fawkesrosaspect NavigatorInterface
 OBJS_ros_navgraph_breakout = navgraph_breakout_plugin.o navgraph_breakout_thread.o
@@ -92,7 +96,8 @@ OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) 
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
 	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) \
 	   $(OBJS_ros_robot_description) $(OBJS_ros_move_base) \
-	   $(OBJS_ros_skiller) $(OBJS_ros_clock) $(OBJS_ros_position_3d)
+	   $(OBJS_ros_skiller) $(OBJS_ros_clock) $(OBJS_ros_position_3d)\
+	   $(OBJS_ros_dynamic_reconfigure)
 
 ifneq ($(PKGCONFIG),)
   HAVE_TINYXML = $(if $(shell $(PKGCONFIG) --exists 'tinyxml'; echo $${?/1/}),1,0)
@@ -196,6 +201,15 @@ ifeq ($(HAVE_ROS),1)
   else
     WARN_TARGETS += warning_geometry_msgs
   endif
+
+   CFLAGS_dynamic_reconfigure_thread += $(call boost-lib-cflags,thread) \
+			   $(CFLAGS) $(CFLAGS_TF)
+   CFLAGS_dynamic_reconfigure_plugin = $(CFLAGS_dynamic_reconfigure_thread)
+   LDFLAGS_ros_dynamic_reconfigure +=  $(call boost-lib-ldflags,thread) \
+			 $(call boost-lib-ldflags,system) \
+			 $(LDFLAGS_TF)
+
+  PLUGINS_all += $(PLUGINDIR)/ros-dynamic_reconfigure.so
 
   ifeq ($(call ros-have-pkg,move_base_msgs),1)
     ifeq ($(call ros-have-pkg,actionlib),1)
