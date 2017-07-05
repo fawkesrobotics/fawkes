@@ -6,6 +6,7 @@
  *  Copyright  2011-2016  Tim Niemueller [www.niemueller.de]
  *             2014       Sebastian Reuter
  *             2014       Tobias Neumann
+ *             2017       Till Hofmann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -79,6 +80,16 @@ RobotinoActThread::init()
 	cfg_trans_decel_ = config->get_float("/hardware/robotino/drive/trans-deceleration");
 	cfg_rot_accel_   = config->get_float("/hardware/robotino/drive/rot-acceleration");
 	cfg_rot_decel_   = config->get_float("/hardware/robotino/drive/rot-deceleration");
+
+#ifdef HAVE_TF
+	cfg_publish_transform_ = true;
+	try {
+		cfg_publish_transform_ =
+			config->get_bool("/hardware/robotino/odometry/publish_transform");
+	} catch (Exception &e) {
+		// ignore, use default
+	}
+#endif // HAVE_TF
 
 	com_->set_drive_layout(cfg_rb_, cfg_rw_, cfg_gear_);
 	com_->set_drive_limits(cfg_trans_accel_, cfg_trans_decel_,
@@ -283,11 +294,12 @@ RobotinoActThread::publish_odometry()
 		motor_if_->set_des_omega(des_omega_);
 
 		if (cfg_odom_mode_ == ODOM_COPY) {
-			double x, y, phi;
-			com_->get_odometry(x, y, phi);
-			odom_x_   = x;
-			odom_y_   = y;
-			odom_phi_ = phi;
+			float diff_sec = sensor_time - odom_time_;
+			*odom_time_ = sensor_time;
+			odom_phi_ =
+				normalize_mirror_rad(odom_phi_ + omega * diff_sec * cfg_odom_corr_phi_);
+			odom_x_ += cos(odom_phi_) * vx * diff_sec * cfg_odom_corr_trans_ - sin(odom_phi_) * vy * diff_sec * cfg_odom_corr_trans_;
+			odom_y_ += sin(odom_phi_) * vx * diff_sec * cfg_odom_corr_trans_ + cos(odom_phi_) * vy * diff_sec * cfg_odom_corr_trans_;
 		} else {
 			float diff_sec = sensor_time - odom_time_;
 			*odom_time_ = sensor_time;
@@ -391,17 +403,19 @@ RobotinoActThread::publish_odometry()
 		motor_if_->write();
 
 #ifdef HAVE_TF
-		tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1), odom_phi_),
-		                tf::Vector3(odom_x_, odom_y_, 0.));
+		if (cfg_publish_transform_) {
+			tf::Transform t(tf::Quaternion(tf::Vector3(0,0,1), odom_phi_),
+			                tf::Vector3(odom_x_, odom_y_, 0.));
 
-		try {
-			tf_publisher->send_transform(t, sensor_time + cfg_odom_time_offset_,
-			                             cfg_odom_frame_, cfg_base_frame_);
-		} catch (Exception &e) {
-			logger->log_warn(name(), "Failed to publish odometry transform for "
-			                 "(%f,%f,%f), exception follows",
-			                 odom_x_, odom_y_, odom_phi_);
-			logger->log_warn(name(), e);
+			try {
+				tf_publisher->send_transform(t, sensor_time + cfg_odom_time_offset_,
+				                             cfg_odom_frame_, cfg_base_frame_);
+			} catch (Exception &e) {
+				logger->log_warn(name(), "Failed to publish odometry transform for "
+				                 "(%f,%f,%f), exception follows",
+				                 odom_x_, odom_y_, odom_phi_);
+				logger->log_warn(name(), e);
+			}
 		}
 #endif
 	}

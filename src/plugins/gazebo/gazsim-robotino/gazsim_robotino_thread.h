@@ -95,6 +95,7 @@ class RobotinoSimThread
   //config values
   std::string cfg_frame_odom_;
   std::string cfg_frame_base_;
+  std::string cfg_frame_imu_;
   double gripper_laser_threshold_;
   double gripper_laser_value_far_;
   double gripper_laser_value_near_;

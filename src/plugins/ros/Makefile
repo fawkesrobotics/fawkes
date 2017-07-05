@@ -92,6 +92,10 @@ LIBS_ros_clock = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect
 OBJS_ros_clock = clock_plugin.o clock_thread.o
 
+LIBS_ros_imu = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+	      fawkesinterface fawkesrosaspect IMUInterface
+OBJS_ros_imu = imu_plugin.o imu_thread.o
+
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
 	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) \
@@ -176,8 +180,12 @@ ifeq ($(HAVE_ROS),1)
     LDFLAGS_ros_laserscan += $(call ros-pkg-lflags,sensor_msgs)
     PLUGINS_all += $(PLUGINDIR)/ros-laserscan.so
 
+    CFLAGS_imu_thread += $(call ros-pkg-cflags,sensor_msgs) $(CFLAGS)
+    CFLAGS_imu_plugin = $(CFLAGS_imu_thread)
+    LDFLAGS_ros_imu += $(call ros-pkg-lflags,sensor_msgs)
+    PLUGINS_all += $(PLUGINDIR)/ros-imu.so
   else
-    WARN_TARGETS += warning_rospcl warning_images warning_laserscan
+    WARN_TARGETS += warning_rospcl warning_images warning_laserscan warning_imu
   endif
 
   ifeq ($(call ros-have-pkg,nav_msgs),1)
@@ -346,6 +354,8 @@ warning_fawkes_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Webview Plugin$(TNORMAL) (ROS package fawkes_msgs not found)"
 warning_tinyxml:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS images plugin$(TNORMAL) (tinyxml[-devel] not installed)"
+warning_imu:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS IMU plugin$(TNORMAL) (ROS package sensor_msgs not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

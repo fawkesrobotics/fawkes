@@ -3,6 +3,7 @@
  *
  *  Created: Fri Jun 1 13:29:39 CEST
  *  Copyright  2012  Sebastian Reuter
+ *             2017  Till Hofmann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -43,6 +44,25 @@ ROSOdometryThread::init()
   std::string motor_if_id = config->get_string("/ros/odometry/motor_interface_id");
   cfg_odom_frame_id_ = config->get_string("/ros/odometry/odom_frame_id");
   cfg_base_frame_id_ = config->get_string("/ros/odometry/base_frame_id");
+  if (config->exists("/ros/odometry/odom/covariance")) {
+    odom_covariance_.assign(0.);
+    std::vector<float> cfg_odom_covariance =
+        config->get_floats("/ros/odometry/odom/covariance");
+    for ( uint i = 0;
+          i < cfg_odom_covariance.size() && i < odom_covariance_.size();
+          i++) {
+      odom_covariance_[i] = cfg_odom_covariance.size();
+    }
+  } else {
+    odom_covariance_ = {
+        1e-3, 0.,   0.,   0.,   0.,  0.,
+        0.,   1e-3, 0.,   0.,   0.,  0.,
+        0.,   0.,   1e-3, 0.,   0.,  0.,
+        0.,   0.,   0.,   1e-3, 0.,   0.,
+        0.,   0.,   0.,   0.,   1e-3, 0.,
+        0.,   0.,   0.,   0.,   0.,   1e-3
+    };
+  }
   motor_if_ = blackboard->open_for_reading<MotorInterface>(motor_if_id.c_str());
   pub_ = rosnode->advertise<nav_msgs::Odometry>("odom", 10);
 }
@@ -66,6 +86,7 @@ ROSOdometryThread::publish_odom()
   odom.pose.pose.position.x = (double)motor_if_->odometry_position_x();
   odom.pose.pose.position.y = (double) motor_if_->odometry_position_y();
   odom.pose.pose.position.z = 0.0;
+  odom.pose.covariance = odom_covariance_;
   fawkes::tf::Quaternion q(motor_if_->odometry_orientation(), 0, 0);
   geometry_msgs::Quaternion odom_quat;
   odom_quat.x = q.x();
@@ -78,6 +99,7 @@ ROSOdometryThread::publish_odom()
   odom.twist.twist.linear.x = (double)motor_if_->vx();
   odom.twist.twist.linear.y = (double)motor_if_->vy();
   odom.twist.twist.angular.z = (double)motor_if_->omega();
+  odom.twist.covariance = odom_covariance_;
   pub_.publish(odom);
 }
 

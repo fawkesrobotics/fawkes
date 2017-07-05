@@ -1,8 +1,8 @@
 /***************************************************************************
- *  odometry_thread.h - Thread to publish odometry to ROS
+ *  imu_thread.h - Thread to publish IMU data to ROS
  *
- *  Created: Fri Jun 1 13:29:39 CEST
- *  Copyright  2012  Sebastian Reuter
+ *  Created: Mon 03 Apr 2017 12:41:33 CEST 12:41
+ *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -18,50 +18,39 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROS_ODOMETRY_THREAD_H_
-#define __PLUGINS_ROS_ODOMETRY_THREAD_H_
+#ifndef __PLUGINS_ROS_IMU_THREAD_H_
+#define __PLUGINS_ROS_IMU_THREAD_H_
 
 #include <core/threading/thread.h>
-#include <core/utils/lockptr.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <blackboard/interface_listener.h>
 #include <plugins/ros/aspect/ros.h>
+#include <interfaces/IMUInterface.h>
+
 #include <ros/node_handle.h>
 
-
-namespace fawkes {
-  class MotorInterface;
-}
-
-class ROSOdometryThread
+class RosIMUThread
 : public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
+  public fawkes::LoggingAspect,
+  public fawkes::ROSAspect,
   public fawkes::BlackBoardAspect,
-  public fawkes::ROSAspect
+  public fawkes::BlackBoardInterfaceListener
 {
  public:
-  ROSOdometryThread();
+  RosIMUThread();
+  virtual ~RosIMUThread();
 
   virtual void init();
-  virtual void loop();
   virtual void finalize();
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+  virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
  private:
-  void publish_odom();
-
-private:
-  fawkes::MotorInterface *motor_if_;
-  ros::Publisher pub_;
-  std::string cfg_odom_frame_id_;
-  std::string cfg_base_frame_id_;
-  boost::array<double, 36> odom_covariance_;
+  ros::Publisher ros_pub_;
+  fawkes::IMUInterface * iface_;
 };
 
-#endif
+#endif /* __PLUGINS_ROS_IMU_THREAD_H_ */
