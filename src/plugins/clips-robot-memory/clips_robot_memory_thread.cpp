@@ -511,8 +511,17 @@ ClipsRobotMemoryThread::clips_robotmemory_cursor_next(void *cursor)
   }
 
   mongo::BSONObjBuilder *b = new mongo::BSONObjBuilder();
-  b->appendElements((*c)->next());
-  return CLIPS::Value(b);
+  try {
+    b->appendElements((*c)->nextSafe());
+#ifdef HAVE_MONGODB_VERSION_H
+  } catch (mongo::MsgAssertionException &e) {
+#else
+  } catch (mongo::AssertionException &e) {
+#endif
+    logger->log_error("MongoDB", "mongodb-cursor: No more objects in result cursor. What: %s", e.what());
+    return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  }
+ return CLIPS::Value(b);
 }
 
 
