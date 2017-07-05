@@ -104,6 +104,7 @@ class EventTriggerManager
 
     std::string repl_set_dist, repl_set_local, local_db;
     bool distributed_;
+    bool cfg_debug_;
 
     std::list<EventTrigger*> triggers;
 };
