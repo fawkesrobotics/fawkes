@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="DynamicReconfigureInterface" author="Christoph Henke" year="2017">
+  <constants>
+    <enum name="LastMsgStatus">
+      <comment>Status of the last send message</comment>
+      <item name="Succeeded">Message was successful send</item> 
+      <item name="Failed">Message failed</item> 
+    </enum> 
+  </constants>
+  <data>
+    <comment>
+      Currently only the last set parameter is displayed.
+    </comment>
+    <field type="string" length="64" name="last_service">The last service for reconfiguration called.</field>
+    <field type="string" length="64" name="last_parameter">The last parameter name.</field>
+    <field type="bool" name="last_bool_value">The last parameter value.</field>
+    <field type="string" length="64" name="last_str_value">The last parameter value.</field>
+    <field type="uint32" name="last_uint32_value">The last parameter value.</field>
+    <field type="uint64" name="last_uint64_value">The last parameter value.</field>
+    <field type="float" name="last_float_value">The last parameter value.</field>
+    <field type="uint64" name="last_msg_id">The last parameter name.</field>
+    <field type="LastMsgStatus" name="last_msg_status">The last send message status.</field>
+  </data>
+    <comment>
+     These messages are used for dynamic reconfiguration of ROS parameters.
+    </comment>
+  <message name="SetBool">
+    <comment>Set a Bool value with dynamic reconfigure of a ROS parameter.</comment>
+    <field type="string" length="64" name="service">Name of the ROS service for dynamic reconfiguration.</field>
+    <field type="string" length="64" name="parameter">Name of the ROS parameter.</field>
+    <field type="bool" name="value">The bool value.</field>
+  </message>
+  <message name="SetString">
+    <comment>Set a String value with dynamic reconfigure of a ROS parameter.</comment>
+    <field type="string" length="64" name="service">Name of the ROS service for dynamic reconfiguration.</field>
+    <field type="string" length="64" name="parameter">Name of the ROS parameter.</field>
+    <field type="string" length="64" name="value">The value to set.</field>
+  </message>
+  <message name="SetUint32">
+    <comment>Set a uint32 value with dynamic reconfigure of a ROS parameter.</comment>
+    <field type="string" length="64" name="service">Name of the ROS service for dynamic reconfiguration.</field>
+    <field type="string" length="64" name="parameter">Name of the ROS parameter.</field>
+    <field type="uint32" name="value">The value to set.</field>
+  </message>
+  <message name="SetUint64">
+    <comment>Set a uint64 value with dynamic reconfigure of a ROS parameter.</comment>
+    <field type="string" length="64" name="service">Name of the ROS service for dynamic reconfiguration.</field>
+    <field type="string" length="64" name="parameter">Name of the ROS parameter.</field>
+    <field type="uint64" name="value">The value to set.</field>
+  </message>
+  <message name="SetFloat">
+    <comment>Set a Float value with dynamic reconfigure of a ROS parameter.</comment>
+    <field type="string" length="64" name="service">Name of the ROS service for dynamic reconfiguration.</field>
+    <field type="string" length="64" name="parameter">Name of the ROS parameter.</field>
+    <field type="float" name="value">The value to set.</field>
+  </message>
+</interface>

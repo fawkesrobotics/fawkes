@@ -1,3 +1,4 @@
+DynamicReconfigureInterface.h
 DynamixelServoInterface.h
 JacoInterface.h
 JacoBimanualInterface.h
