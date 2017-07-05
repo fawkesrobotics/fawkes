@@ -55,6 +55,40 @@ AgentControlThread::init()
   // open & register interfaces
   m_test_iface = blackboard->open_for_writing< TestInterface >("eclipse_clp_test");
   m_debug_iface = blackboard->open_for_reading< EclipseDebuggerInterface >("eclipse_clp_connect");
+
+  fawkes_path_ = "";
+  simulation_shutdown_script_ = "";
+  allow_shutdown_ = false;
+  try
+  {
+    logger->log_info(name(), "reading config /eclipse-clp/gazebo/allow-shutdown");
+    allow_shutdown_ =  config->get_bool( "/eclipse-clp/gazebo/allow-shutdown" );
+  }  catch (...) {}
+  try
+  {
+    logger->log_info(name(), "reading config fawkes-path");
+    fawkes_path_ = strdup( config->get_string( "/eclipse-clp/gazebo/fawkes-path" ).c_str() );
+  }  catch (...) 
+  {
+    logger->log_error(name(), "error reading config value: /eclipse-clp/gazebo/fawkes-path");
+    allow_shutdown_ = false;
+  }
+  try
+  {
+    logger->log_info(name(), "reading config simulation_shutdown_script_");
+    simulation_shutdown_script_ = strdup( config->get_string( "/eclipse-clp/gazebo/simulation-shutdown-script" ).c_str() );
+  }  catch (...)
+  {
+    logger->log_error(name(), "error reading config value: /eclipse-clp/gazebo/simulation-shutdown-script");
+    allow_shutdown_ = false;
+  }
+
+  logger->log_info(name(), "testing allow_shutdown_");
+  if (allow_shutdown_)
+  {
+    logger->log_info(name(), "opening ExitSimulationInterface");
+    m_exit_iface = blackboard->open_for_writing< ExitSimulationInterface >("eclipse_clp_exit");
+  }
 }
 
 bool
@@ -71,6 +105,9 @@ AgentControlThread::finalize()
   // close interfaces
   blackboard->close( m_test_iface );
   blackboard->close( m_debug_iface );
+  if (allow_shutdown_) {
+	blackboard->close( m_exit_iface );
+  }
 }
 
 void
@@ -97,6 +134,21 @@ AgentControlThread::loop()
   }
   m_test_iface->write();
 
+  // this is used to receive exit messages to quit fawkes and the simulation
+  if (allow_shutdown_) {
+    while ( !m_exit_iface->msgq_empty() )
+    {
+      if ( m_exit_iface->msgq_first_is< ExitSimulationInterface::ExitSimulationMessage >() )
+      {
+	  logger->log_info(name(), "shutting down: %s%s", fawkes_path_.c_str(), simulation_shutdown_script_.c_str());
+	  std::string command = fawkes_path_ + simulation_shutdown_script_;
+	  int schnurz = system(command.c_str());
+	  //just avoid warning that the return value of system() is ignored
+	  schnurz++;
+      }
+      m_exit_iface->msgq_pop();
+    }
+  }
 
   //m_eclipse_thread->post_event( "update" );
 

@@ -26,8 +26,10 @@
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <interfaces/EclipseDebuggerInterface.h>
+#include <interfaces/ExitSimulationInterface.h>
 
 namespace fawkes {
   class TestInterface;
@@ -39,6 +41,7 @@ class AgentControlThread
 : public fawkes::Thread,
   public fawkes::BlockedTimingAspect,
   public fawkes::BlackBoardAspect,
+  public fawkes::ConfigurableAspect,
   public fawkes::LoggingAspect
 {
  public:
@@ -54,7 +57,12 @@ class AgentControlThread
   EclipseAgentThread* m_eclipse_thread;
 
   fawkes::TestInterface* m_test_iface;
+  fawkes::ExitSimulationInterface* m_exit_iface;
   fawkes::EclipseDebuggerInterface* m_debug_iface;
+  
+  bool 		allow_shutdown_;
+  std::string 	fawkes_path_;
+  std::string 	simulation_shutdown_script_;
 };
 
 #endif /* __PLUGINS_ECLIPSE_CLP_CONTROL_THREAD_H_ */
