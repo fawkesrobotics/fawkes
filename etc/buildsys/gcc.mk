@@ -39,14 +39,28 @@ gcc_lessthan_version = $(strip $(if $(call lt,$(GCC_VERSION_MAJOR),$1),1,	\
                          $(if $(call eq,$(GCC_VERSION_MAJOR),$1),		\
                            $(if $(call lt,$(GCC_VERSION_MINOR),$2),1))))
 
-# Check für C++0x/C++11 availability
+# Check für newer C++ standards availability
 ifeq ($(call gcc_atleast_version,4,3),1)
   HAVE_CPP11=1
-  ifneq ($(call gcc_atleast_version,6,0),1)
-    CFLAGS_CPP11=-std=c++0x
-    ifeq ($(call gcc_atleast_version,4,7),1)
-      CFLAGS_CPP11=-std=c++11
-    endif
+  CFLAGS_CPP11=-std=c++0x
+  ifeq ($(call gcc_atleast_version,4,7),1)
+    CFLAGS_CPP11=-std=c++11
+  endif
+  ifeq ($(call gcc_atleast_version,4,8),1)
+    HAVE_CPP14=1
+    CFLAGS_CPP14=-std=c++1y
+  endif
+  ifeq ($(call gcc_atleast_version,5,0),1)
+    HAVE_CPP17=1
+    CLFAGS_CPP17=-std=c++1z
+  endif
+  ifeq ($(call gcc_atleast_version,6,0),1)
+    # The default for GCC 6 is C++14, so deactivate C++11 Flags.
+    # Maybe add a define to stop this? To be able to deactivate deprecation warnings from newer versions.
+    CFLAGS_CPP11=
+    # Maybe even earlier, this is not easily checkable.
+    # GCC 5.3 reports it understands even -std=c++17, but GCC 6 also accepts -std=c++0x, so no harm done with c++1y.
+    CFLAGS_CPP14=-std=c++14
   endif
 endif
 
