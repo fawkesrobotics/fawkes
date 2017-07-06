@@ -24,7 +24,7 @@ LDFLAGS += $(LDFLAGS_LIBDAEMON) $(LDFLAGS_TF)
 
 LIBS_libfawkesbaseapp = stdc++ pthread fawkescore fawkesutils fawkesconfig \
 			fawkesblackboard fawkesplugin fawkesnetcomm \
-			fawkesaspects fawkeslogging
+			fawkesaspects fawkeslogging fawkesnetworklogger
 
 REQ_BOOST_LIBS = asio system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))

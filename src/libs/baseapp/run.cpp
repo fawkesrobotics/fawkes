@@ -38,7 +38,7 @@
 #include <logging/console.h>
 #include <logging/liblogger.h>
 #include <logging/factory.h>
-#include <logging/network.h>
+#include <network_logger/network_logger.h>
 #ifdef HAVE_LOGGING_FD_REDIRECT
 #  include <logging/fd_redirect.h>
 #endif
