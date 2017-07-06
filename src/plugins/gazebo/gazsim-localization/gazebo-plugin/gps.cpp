@@ -20,6 +20,8 @@
 
 #include <math.h>
 
+#include <utils/misc/gazebo_api_wrappers.h>
+
 #include "gps.h"
 
 using namespace gazebo;
@@ -55,11 +57,10 @@ void Gps::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
 
   //Create the communication Node for communication with fawkes
   this->node_ = transport::NodePtr(new transport::Node());
-  //the namespace is set to the model name!
-  this->node_->Init(model_->GetWorld()->GetName()+"/"+name_);
 
-  //init last sent time
-  last_sent_time_ = model_->GetWorld()->GetSimTime().Double();
+  //set namespace to the model name & init last sent time
+  this->node_->Init(model_->GetWorld()->GZWRAP_NAME()+"/"+name_);
+  last_sent_time_ = model_->GetWorld()->GZWRAP_SIM_TIME().Double();
 
   //create publisher
   this->gps_pub_ = this->node_->Advertise<msgs::Pose>("~/gazsim/gps/");
@@ -71,7 +72,8 @@ void Gps::Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
 void Gps::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   //Send position information to Fawkes
-  double time = model_->GetWorld()->GetSimTime().Double();
+  double time = model_->GetWorld()->GZWRAP_SIM_TIME().Double();
+
   if(time - last_sent_time_ > (1.0 / 10.0))
   {
     last_sent_time_ = time;
@@ -94,13 +96,13 @@ void Gps::send_position()
   {
     //build message
     msgs::Pose posMsg;
-    posMsg.mutable_position()->set_x(this->model_->GetWorldPose().pos.x);
-    posMsg.mutable_position()->set_y(this->model_->GetWorldPose().pos.y);
-    posMsg.mutable_position()->set_z(this->model_->GetWorldPose().pos.z);
-    posMsg.mutable_orientation()->set_x(this->model_->GetWorldPose().rot.x);
-    posMsg.mutable_orientation()->set_y(this->model_->GetWorldPose().rot.y);
-    posMsg.mutable_orientation()->set_z(this->model_->GetWorldPose().rot.z);
-    posMsg.mutable_orientation()->set_w(this->model_->GetWorldPose().rot.w);
+    posMsg.mutable_position()->set_x(this->model_->GZWRAP_WORLD_POSE().GZWRAP_POS_X);
+    posMsg.mutable_position()->set_y(this->model_->GZWRAP_WORLD_POSE().GZWRAP_POS_Y);
+    posMsg.mutable_position()->set_z(this->model_->GZWRAP_WORLD_POSE().GZWRAP_POS_Z);
+    posMsg.mutable_orientation()->set_x(this->model_->GZWRAP_WORLD_POSE().GZWRAP_ROT_X);
+    posMsg.mutable_orientation()->set_y(this->model_->GZWRAP_WORLD_POSE().GZWRAP_ROT_Y);
+    posMsg.mutable_orientation()->set_z(this->model_->GZWRAP_WORLD_POSE().GZWRAP_ROT_Z);
+    posMsg.mutable_orientation()->set_w(this->model_->GZWRAP_WORLD_POSE().GZWRAP_ROT_W);
 
     //send
     gps_pub_->Publish(posMsg);
