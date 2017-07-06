@@ -50,10 +50,11 @@ aspect: core utils blackboard netcomm config plugin webview logging tf pcl_utils
 lua: core utils blackboard config logging
 interfaces: core interface
 gui_utils: core netcomm blackboard interface plugin logging utils
-logging: core utils netcomm
+logging: core
+network_logger: core utils netcomm
 naoutils: core utils
 webview: core utils logging
-baseapp: core utils aspect config netcomm blackboard plugin logging
+baseapp: core utils aspect config netcomm blackboard plugin logging network_logger
 tf: core utils blackboard interface interfaces
 fvutils: core utils netcomm logging
 fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils logging
