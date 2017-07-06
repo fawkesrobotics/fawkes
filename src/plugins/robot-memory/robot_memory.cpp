@@ -163,7 +163,8 @@ QResCursor RobotMemory::query(Query query, std::string collection)
  * @param collection The database and collection to query as string (e.g. robmem.worldmodel)
  * @return Result object
  */
-BSONObj RobotMemory::aggregate(std::vector<BSONObj> pipeline, std::string collection)
+mongo::BSONObj
+RobotMemory::aggregate(std::vector<mongo::BSONObj> pipeline, std::string collection)
 {
   check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
