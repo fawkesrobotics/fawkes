@@ -127,7 +127,7 @@ TEST_F(RobotMemoryTest, RemoveInvalidCaught)
   ASSERT_THROW(robot_memory->remove("{([})]"), mongo::DBException);
 }
 
-TEST_F(RobotMemoryTest, AggregationQuery)
+TEST_F(RobotMemoryTest, AggregationSumQuery)
 {
   ASSERT_TRUE(robot_memory->insert("{'agg':'summand',value:0.5}"));
   ASSERT_TRUE(robot_memory->insert("{'agg':'summand',value:0.7}"));
