@@ -90,6 +90,9 @@ SickTiM55xEthernetAcquisitionThread::finalize()
   free(_distances);
   _distances = NULL;
 
+  free(_echoes);
+  _echoes = NULL;
+
   delete socket_mutex_;
 }
 

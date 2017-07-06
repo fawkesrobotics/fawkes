@@ -117,6 +117,9 @@ SickTiM55xUSBAcquisitionThread::finalize()
   free(_distances);
   _distances = NULL;
 
+  free(_echoes);
+  _echoes = NULL;
+
   delete usb_mutex_;
 }
 
