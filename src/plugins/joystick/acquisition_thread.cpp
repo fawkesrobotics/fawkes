@@ -84,6 +84,7 @@ JoystickAcquisitionThread::JoystickAcquisitionThread(const char *device_file,
   ff_ = NULL;
   bbhandler_ = handler;
   this->logger = logger;
+  safety_lockout_ = true;
   init(device_file);
 }
 
@@ -93,6 +94,7 @@ JoystickAcquisitionThread::init()
 {
   try {
     cfg_device_file_    = config->get_string("/hardware/joystick/device_file");
+    cfg_retry_interval_ = config->get_float("/hardware/joystick/retry_interval");
   } catch (Exception &e) {
     e.append("Could not read all required config values for %s", name());
     throw;
@@ -112,8 +114,24 @@ JoystickAcquisitionThread::init()
   }
   for (int i = 0; i < 5; ++i) safety_combo_[i] = false;
 
-  init(cfg_device_file_);
+  cfg_lazy_init_ = false;
+  try {
+	  cfg_lazy_init_ = config->get_bool("/hardware/joystick/allow_deferred_initialization");
+  } catch (Exception &e) {} // ignore, use default
 
+  try {
+	  init(cfg_device_file_, cfg_lazy_init_);
+  } catch (Exception &e) {
+		if (! cfg_lazy_init_) {
+			e.append("Deferred initialization of joystick device disabled");
+		}
+		throw;
+  }
+
+  if (! connected_ && cfg_lazy_init_) {
+	  logger->log_info(name(), "Cannot open joystick, deferred initialization enabled");
+  }
+  
   if (safety_lockout_) {
 	  logger->log_info(name(), "To enable joystick, move primary cross all the way in all "
 	                   "directions while holding first button. Then let go of button.");
@@ -190,19 +208,26 @@ JoystickAcquisitionThread::open_forcefeedback()
 }
 
 void
-JoystickAcquisitionThread::init(std::string device_file)
+JoystickAcquisitionThread::init(std::string device_file, bool allow_open_fail)
 {
-  new_data_ = false;
+	fd_ = -1;
+	connected_ = false;
+	just_connected_ = false;
+	new_data_ = false;
+
   cfg_device_file_ = device_file;
-  open_joystick();
   try {
-    open_forcefeedback();
+	  open_joystick();
+	  try {
+		  open_forcefeedback();
+	  } catch (Exception &e) {
+		  logger->log_warn(name(), "Initializing force feedback failed, disabling");
+		  logger->log_warn(name(), e);
+	  }
   } catch (Exception &e) {
-    logger->log_warn(name(), "Initializing force feedback failed, disabling");
-    logger->log_warn(name(), e);
+	  if (! allow_open_fail) throw;
   }
   data_mutex_ = new Mutex();
-
 }
 
 
@@ -337,19 +362,20 @@ JoystickAcquisitionThread::loop()
 		    bbhandler_->joystick_changed(pressed_buttons_, axis_values_);
 	    }
     }
-  } else {
-    // Connection to joystick has been lost
-    try {
-      open_joystick();
-      logger->log_warn(name(), "Joystick plugged in. Delivering data again.");
-      try {
-	open_forcefeedback();
-      } catch (Exception &e) {
-	logger->log_warn(name(), "Initializing force feedback failed, disabling");
-      }
-    } catch (Exception &e) {
-	    usleep(100000);
-    }
+	} else {
+		// Connection to joystick has been lost
+		try {
+			open_joystick();
+			logger->log_warn(name(), "Joystick plugged in. Delivering data again.");
+			try {
+				open_forcefeedback();
+			} catch (Exception &e) {
+				logger->log_warn(name(), "Initializing force feedback failed, disabling");
+			}
+		} catch (Exception &e) {
+			Time duration(cfg_retry_interval_);
+			duration.wait_systime();
+		}
   }
 }
 

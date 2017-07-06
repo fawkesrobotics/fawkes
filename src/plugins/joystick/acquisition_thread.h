@@ -72,12 +72,14 @@ class JoystickAcquisitionThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void init(std::string device_file);
+  void init(std::string device_file, bool allow_open_fail = false);
   void open_joystick();
   void open_forcefeedback();
   
  private:
   std::string  cfg_device_file_;
+  float        cfg_retry_interval_;
+  bool         cfg_lazy_init_;
   float        cfg_safety_lockout_timeout_;
   unsigned int cfg_safety_button_mask_;
   unsigned int cfg_safety_bypass_button_mask_;
