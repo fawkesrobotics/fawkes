@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  network.cpp - Fawkes network logger
+ *  network_logger.cpp - Fawkes network logger
  *
  *  Created: Sat Dec 15 00:48:52 2007 (after I5 xmas party)
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2017  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 
@@ -21,7 +21,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <logging/network.h>
+#include <network_logger/network_logger.h>
 
 #include <core/threading/mutex.h>
 #include <netcomm/fawkes/component_ids.h>
@@ -43,7 +43,7 @@ NetworkLoggerMessageContent::serialize()
 }
 
 
-/** @class NetworkLogger <logging/network.h>
+/** @class NetworkLogger <network_logger/network_logger.h>
  * Interface for logging to network clients.
  * The NetwokLogger will pipe all output to clients that subscribed for log
  * messages.
@@ -428,7 +428,7 @@ NetworkLogger::client_disconnected(unsigned int clid)
 }
 
 
-/** @class NetworkLoggerMessageContent <logging/network.h>
+/** @class NetworkLoggerMessageContent <network_logger/network_logger.h>
  * Message sent over the network with a log message.
  * Contains a buffer with a small header and two null-terminated strings, the first
  * being the component and the second being the real message.

@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  network - Fawkes network logger
+ *  network_logger.h - Fawkes network logger
  *
  *  Created: Sat Dec 15 00:45:54 2007 (after I5 xmas party)
- *  Copyright  2006-2007  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2017  Tim Niemueller [www.niemueller.de]
  *
  ****************************************************************************/
 

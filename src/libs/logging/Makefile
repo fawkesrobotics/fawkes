@@ -2,7 +2,7 @@
 #           Makefile Build System for Fawkes: Logging Utils
 #                            -------------------
 #   Created on Sat May 28 00:16:57 2011
-#   Copyright (C) 2006-2011 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2017 by Tim Niemueller, RWTH Aachen University
 #
 #*****************************************************************************
 #
@@ -25,7 +25,7 @@ ifeq ($(HAVE_TOLUA),1)
   TARGETS_all += $(SRCDIR)/fawkeslogging_tolua.cpp
 endif
 
-LIBS_libfawkeslogging = stdc++ pthread fawkescore fawkesnetcomm
+LIBS_libfawkeslogging = stdc++ pthread fawkescore
 OBJS_libfawkeslogging =$(filter-out %_tolua.o,$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
 HDRS_libfawkeslogging = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
