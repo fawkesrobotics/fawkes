@@ -173,10 +173,10 @@ JoystickTeleOpThread::send_transrot(float vx, float vy, float omega)
 void
 JoystickTeleOpThread::stop()
 {
-  stopped_ = true;
   if (! motor_if_->has_writer())  return;
 
   send_transrot(0., 0., 0.);
+  stopped_ = true;
 }
 
 bool
