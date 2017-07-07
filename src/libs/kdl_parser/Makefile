@@ -22,6 +22,10 @@ LIBS_libfawkeskdl_parser = fawkescore
 OBJS_libfawkeskdl_parser = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 HDRS_libfawkeskdl_parser = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
+ifeq ($(HAVE_URDFDOM_TYPES_H),1)
+  CFLAGS += -DHAVE_URDFDOM_TYPES_H
+endif
+
 OBJS_all = $(OBJS_libfawkeskdl_parser)
 ifeq ($(HAVE_KDLPARSER)$(HAVE_EIGEN3),11)
   CFLAGS  += $(CFLAGS_KDLPARSER) $(CFLAGS_EIGEN3)
