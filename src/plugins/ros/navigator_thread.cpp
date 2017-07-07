@@ -378,7 +378,7 @@ RosNavigatorThread::load_config()
         logger->log_info(name(), "fixed frame: %s", cfg_fixed_frame_.c_str());
 
     } catch (Exception &e) {
-        logger->log_error("Error in loading config: %s", e.what());
+        logger->log_error(name(), "Error in loading config: %s", e.what());
     }
 }
 
