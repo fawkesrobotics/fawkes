@@ -232,12 +232,12 @@ ClipsAgentThread::loop()
 	if (as_info.skill_string == skiller_if_->skill_string()) {
 	  clips->assert_fact_f("(skill-update (name \"%s\") (status %s))", as_name.c_str(),
 			       status_string(skiller_if_->status()));
-	}
-	if (skiller_if_->status() == SkillerInterface::S_FINAL ||
-	    skiller_if_->status() == SkillerInterface::S_FAILED)
-	{
-	  finished_skills.push_back(as_name);
-	}
+	  if (skiller_if_->status() == SkillerInterface::S_FINAL ||
+              skiller_if_->status() == SkillerInterface::S_FAILED)
+	  {
+            finished_skills.push_back(as_name);
+          }
+        }
       }
     }
 
