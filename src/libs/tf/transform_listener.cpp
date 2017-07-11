@@ -131,6 +131,8 @@ TransformListener::bb_interface_created(const char *type, const char *id) throw(
     return;
   }
 
+  bb_interface_data_changed(tfif);
+
   try {
     bbil_add_data_interface(tfif);
     bb_->update_listener(this);
