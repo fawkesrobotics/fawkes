@@ -88,6 +88,8 @@ TransformListener::TransformListener(BlackBoard *bb, Transformer *tf_transformer
     std::list<TransformInterface *>::iterator i;
     for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
       bbil_add_data_interface(*i);
+      // update data once we 
+      bb_interface_data_changed(*i);
     }
     bb_->register_listener(this);
 
@@ -196,13 +198,18 @@ TransformListener::bb_interface_data_changed(Interface *interface) throw()
   const std::string frame_id = tfif->frame();
   const std::string child_frame_id = tfif->child_frame();
 
-  Vector3 t(translation[0], translation[1], translation[2]);
-  Quaternion r(rotation[0], rotation[1], rotation[2], rotation[3]);
-  Transform tr(r, t);
+  try {
+    Vector3 t(translation[0], translation[1], translation[2]);
+    Quaternion r(rotation[0], rotation[1], rotation[2], rotation[3]);
+    assert_quaternion_valid(r);
+    Transform tr(r, t);
 
-  StampedTransform str(tr, *time, frame_id, child_frame_id);
+    StampedTransform str(tr, *time, frame_id, child_frame_id);
 
-  tf_transformer_->set_transform(str, authority, tfif->is_static_transform());
+    tf_transformer_->set_transform(str, authority, tfif->is_static_transform());
+  } catch (InvalidArgumentException &e) {
+    // ignore invalid, might just be not initialized, yet.
+  }
 }
 
 } // end namespace tf
