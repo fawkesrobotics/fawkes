@@ -1166,6 +1166,7 @@ YamlConfiguration::set_float(const char *path, float f)
   root_->set_value(path, f);
   host_root_->set_value(path, f);
   write_host_file();
+  notify_handlers(path, false);
 }
 
 void
@@ -1174,6 +1175,7 @@ YamlConfiguration::set_uint(const char *path, unsigned int uint)
   root_->set_value(path, uint);
   host_root_->set_value(path, uint);
   write_host_file();
+  notify_handlers(path, false);
 }
 
 void
@@ -1182,6 +1184,7 @@ YamlConfiguration::set_int(const char *path, int i)
   root_->set_value(path, i);
   host_root_->set_value(path, i);
   write_host_file();
+  notify_handlers(path, false);
 }
 
 void
@@ -1190,6 +1193,7 @@ YamlConfiguration::set_bool(const char *path, bool b)
   root_->set_value(path, b);
   host_root_->set_value(path, b);
   write_host_file();
+  notify_handlers(path, false);
 }
 
 void
@@ -1198,6 +1202,7 @@ YamlConfiguration::set_string(const char *path, const char *s)
   root_->set_value(path, std::string(s));
   host_root_->set_value(path, std::string(s));
   write_host_file();
+  notify_handlers(path, false);
 }
 
 
@@ -1213,6 +1218,7 @@ YamlConfiguration::set_floats(const char *path, std::vector<float> &f)
   root_->set_list(path, f);
   host_root_->set_list(path, f);
   write_host_file();
+  notify_handlers(path, false);
 }
 
 void
@@ -1221,6 +1227,7 @@ YamlConfiguration::set_uints(const char *path, std::vector<unsigned int> &u)
   root_->set_list(path, u);
   host_root_->set_list(path, u);
   write_host_file();
+  notify_handlers(path, false);
 }
 
 void
@@ -1229,6 +1236,7 @@ YamlConfiguration::set_ints(const char *path, std::vector<int> &i)
   root_->set_list(path, i);
   host_root_->set_list(path, i);
   write_host_file();
+  notify_handlers(path, false);
 }
 
 void
@@ -1237,6 +1245,7 @@ YamlConfiguration::set_bools(const char *path, std::vector<bool> &b)
   root_->set_list(path, b);
   host_root_->set_list(path, b);
   write_host_file();
+  notify_handlers(path, false);
 }
 
 void
@@ -1245,6 +1254,7 @@ YamlConfiguration::set_strings(const char *path, std::vector<std::string> &s)
   root_->set_list(path, s);
   host_root_->set_list(path, s);
   write_host_file();
+  notify_handlers(path, false);
 }
 
 void
@@ -1253,6 +1263,7 @@ YamlConfiguration::set_strings(const char *path, std::vector<const char *> &s)
   root_->set_list(path, s);
   host_root_->set_list(path, s);
   write_host_file();
+  notify_handlers(path, false);
 }
 
 void
