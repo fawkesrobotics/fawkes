@@ -20,25 +20,28 @@
 
 #include <utils/system/argparser.h>
 
+#include <core/exception.h>
 #include <blackboard/remote.h>
 #include <config/netconf.h>
 #include <netcomm/fawkes/client.h>
-
+#include <tf/transformer.h>
+#include <tf/transform_listener.h>
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Laser720Interface.h>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/filters/filter.h>
+#include <pcl/filters/passthrough.h>
 
 #include <string>
-
-#include <unistd.h>
+#include <numeric>
 
 using namespace fawkes;
 using namespace std;
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-typedef RefPtr<PointCloud> PointCloudPtr;
+typedef PointCloud::Ptr PointCloudPtr;
 typedef Laser360Interface LaserInterface;
 
 void
@@ -53,16 +56,20 @@ deg2rad(float deg)
   return (deg * M_PI / 180.f);
 }
 
+class InsufficientDataException : public Exception
+{
+public:
+  InsufficientDataException(const char *error) : Exception(error) {}
+};
+
 class LaserCalibration
 {
 public:
-  LaserCalibration(LaserInterface *laser,
-      NetworkConfiguration *config)
-  {
-    laser_ = laser;
-    config_ = config;
-  }
-  virtual ~LaserCalibration();
+  LaserCalibration(LaserInterface *laser, tf::Transformer *tf_transformer,
+      NetworkConfiguration *config, string config_path)
+: laser_(laser), tf_transformer_(tf_transformer), config_(config),
+  config_path_(config_path) {}
+  virtual ~LaserCalibration() {}
 
   virtual void calibrate() = 0;
 
@@ -83,13 +90,136 @@ protected:
     }
     return cloud;
   }
+  void
+  transform_pointcloud(const string &target_frame, PointCloudPtr cloud) {
+    for (auto &point : cloud->points) {
+      // TODO: convert time stamp correctly
+     tf::Stamped<tf::Point> point_in_laser_frame(
+         tf::Point(point.x, point.y, point.z),
+         fawkes::Time(), cloud->header.frame_id);
+     tf::Stamped<tf::Point> point_in_base_frame;
+     tf_transformer_->transform_point(
+         target_frame, point_in_laser_frame, point_in_base_frame);
+     point.x = static_cast<float>(point_in_base_frame[0]);
+     point.y = static_cast<float>(point_in_base_frame[1]);
+     point.z = static_cast<float>(point_in_base_frame[2]);
+    }
+  }
 
 protected:
   LaserInterface *laser_;
+  tf::Transformer *tf_transformer_;
   NetworkConfiguration *config_;
+  const string config_path_;
+  const static long sleep_time_ = 500000;
+  const static uint max_iterations_ = 100;
 };
 
+class RollCalibration : public LaserCalibration
+{
+public:
+  RollCalibration(LaserInterface *laser, tf::Transformer *tf_transformer,
+      NetworkConfiguration *config, string config_path)
+  : LaserCalibration(laser, tf_transformer, config, config_path) {}
 
+  virtual void calibrate() {
+    float lrd = 2 * threshold;
+    uint iterations = 0;
+    do {
+      try {
+        lrd = get_lr_mean_diff();
+      } catch (InsufficientDataException &e) {
+        printf("Insufficient data: %s\n", e.what_no_backtrace());
+        usleep(sleep_time_);
+        continue;
+      }
+      printf("Left-right difference is %f.\n", lrd);
+      float old_roll = config_->get_float(config_path_.c_str());
+      float new_roll = get_new_roll(lrd, old_roll);
+      printf("Updating roll from %f to %f", old_roll, new_roll);
+      config_->set_float(config_path_.c_str(), new_roll);
+      usleep(sleep_time_);
+    } while (abs(lrd) > threshold && ++iterations < max_iterations_);
+    printf("\n");
+  }
+
+
+protected:
+  float get_lr_mean_diff() {
+    laser_->read();
+    PointCloudPtr cloud = laser_to_pointcloud(*laser_);
+    PointCloudPtr calib_cloud = filter_calibration_cloud(cloud);
+    transform_pointcloud("base_link", cloud);
+    PointCloudPtr rear_cloud = filter_cloud_in_rear(cloud);
+    PointCloudPtr left_cloud = filter_left_cloud(rear_cloud);
+    PointCloudPtr right_cloud = filter_right_cloud(rear_cloud);
+    if (left_cloud->size() < min_points) {
+      stringstream error;
+      error << "Not enough laser points on the left, got "
+            << left_cloud->size() << ", need " << min_points;
+      throw InsufficientDataException(error.str().c_str());
+    }
+    if (right_cloud->size() < min_points) {
+      stringstream error;
+      error << "Not enough laser points on the right, got "
+            << right_cloud->size() << ", need " << min_points;
+      throw InsufficientDataException(error.str().c_str());
+    }
+    printf("Using %zu points on the left, %zu points on the right\n",
+        left_cloud->size(), right_cloud->size());
+    return get_mean_z(left_cloud) - get_mean_z(right_cloud);
+  }
+  float get_mean_z(PointCloudPtr cloud) {
+    vector<float> zs;
+    zs.resize(cloud->points.size());
+    for (auto &point : *cloud) {
+      zs.push_back(point.z);
+    }
+    return accumulate(zs.begin(), zs.end(), 0.) / zs.size();
+  }
+  float get_new_roll(float mean_error, float old_roll) {
+    return old_roll + 0.5 * mean_error;
+  }
+  PointCloudPtr filter_calibration_cloud(PointCloudPtr input) {
+    PointCloudPtr filtered(new PointCloud());
+    std::vector<int> indices;
+    input->is_dense = false;
+    pcl::removeNaNFromPointCloud(*input, *filtered, indices);
+    return filtered;
+  }
+  PointCloudPtr filter_cloud_in_rear(PointCloudPtr input) {
+    pcl::PassThrough<pcl::PointXYZ> pass;
+    pass.setInputCloud(input);
+    pass.setFilterFieldName("x");
+    pass.setFilterLimits(-2., -0.8);
+    PointCloudPtr output(new PointCloud());
+    pass.filter(*output);
+    return output;
+  }
+  PointCloudPtr filter_left_cloud(PointCloudPtr input) {
+    pcl::PassThrough<pcl::PointXYZ> pass;
+    pass.setInputCloud(input);
+    pass.setFilterFieldName("y");
+    pass.setFilterLimits(0., 2.);
+    PointCloudPtr output(new PointCloud());
+    pass.filter(*output);
+    return output;
+  }
+  PointCloudPtr filter_right_cloud(PointCloudPtr input) {
+    pcl::PassThrough<pcl::PointXYZ> pass;
+    pass.setInputCloud(input);
+    pass.setFilterFieldName("y");
+    pass.setFilterLimits(-2., 0.);
+    PointCloudPtr output(new PointCloud());
+    pass.filter(*output);
+    return output;
+  }
+
+protected:
+  // TODO: make threshold and min_points configurable
+  constexpr static float threshold = 0.00001;
+  const static size_t min_points = 10;
+};
 int
 main(int argc, char **argv)
 {
@@ -102,15 +232,22 @@ main(int argc, char **argv)
   FawkesNetworkClient *client = NULL;
   BlackBoard *blackboard = NULL;
   NetworkConfiguration *netconf = NULL;
+  tf::Transformer *transformer = NULL;
+  // Mark the tf listener as unused, we only use its callbacks.
+  tf::TransformListener *tf_listener __attribute__((unused)) = NULL;
+
 
   // TODO: make these configurable
   const string host = "robotino-base-3";
+//  const string host = "localhost";
   const unsigned short int port = FAWKES_TCP_PORT;
   try {
     client = new FawkesNetworkClient(host.c_str(), port);
     client->connect();
     blackboard = new RemoteBlackBoard(client);
     netconf = new NetworkConfiguration(client);
+    transformer = new tf::Transformer();
+    tf_listener = new tf::TransformListener(blackboard, transformer, true);
   } catch (Exception &e) {
     printf("Failed to connect to remote host at %s:%u\n", host.c_str(), port);
     e.print_trace();
@@ -133,7 +270,13 @@ main(int argc, char **argv)
     return -1;
   }
 
+  const string cfg_transforms_prefix =
+      "/plugins/static-transforms/transforms/back_laser/";
+
   // TODO: create calibration objects here and calibrate
+  RollCalibration roll_calibration(
+      laser, transformer, netconf, cfg_transforms_prefix + "rot_roll");
+  roll_calibration.calibrate();
 
   return 0;
 }
