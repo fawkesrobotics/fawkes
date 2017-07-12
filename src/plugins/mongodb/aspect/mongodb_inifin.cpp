@@ -3,8 +3,7 @@
  *  mongodb_inifin.cpp - Fawkes MongoDBAspect initializer/finalizer
  *
  *  Created: Mon Dec 06 22:33:03 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -43,42 +42,40 @@ namespace fawkes {
  * @param conn_creator connection creator to use for initializing threads
  */
 MongoDBAspectIniFin::MongoDBAspectIniFin(MongoDBConnCreator *conn_creator)
-  : AspectIniFin("MongoDBAspect")
+	: AspectIniFin("MongoDBAspect")
 {
-  conn_creator_ = conn_creator;
+	conn_creator_ = conn_creator;
 }
 
 void
 MongoDBAspectIniFin::init(Thread *thread)
 {
-  MongoDBAspect *mongodb_thread;
-  mongodb_thread = dynamic_cast<MongoDBAspect *>(thread);
-  if (mongodb_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "MongoDBAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	MongoDBAspect *mongodb_thread;
+	mongodb_thread = dynamic_cast<MongoDBAspect *>(thread);
+	if (mongodb_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "MongoDBAspect, but RTTI says it "
+		                                      "has not. ", thread->name());
+	}
 
-  mongo::DBClientBase *client =
-    conn_creator_->create_client(mongodb_thread->mongodb_config_name());
+	mongo::DBClientBase *client =
+		conn_creator_->create_client(mongodb_thread->mongodb_config_name());
 
-  mongodb_thread->init_MongoDBAspect(client, conn_creator_);
+	mongodb_thread->init_MongoDBAspect(client, conn_creator_);
 }
 
 void
 MongoDBAspectIniFin::finalize(Thread *thread)
 {
-  MongoDBAspect *mongodb_thread;
-  mongodb_thread = dynamic_cast<MongoDBAspect *>(thread);
-  if (mongodb_thread == NULL) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"MongoDBAspect, but RTTI says it "
-					"has not. ", thread->name());
-  }
+	MongoDBAspect *mongodb_thread;
+	mongodb_thread = dynamic_cast<MongoDBAspect *>(thread);
+	if (mongodb_thread == NULL) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "MongoDBAspect, but RTTI says it "
+		                                    "has not. ", thread->name());
+	}
 
-  conn_creator_->delete_client(mongodb_thread->mongodb_client);
+	conn_creator_->delete_client(mongodb_thread->mongodb_client);
 }
-
-
 
 } // end namespace fawkes

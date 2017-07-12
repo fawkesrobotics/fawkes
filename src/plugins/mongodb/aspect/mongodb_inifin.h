@@ -3,8 +3,7 @@
  *  mongodb_inifin.h - Fawkes MongoDBAspect initializer/finalizer
  *
  *  Created: Mon Dec 06 21:12:05 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -38,13 +37,13 @@ class MongoDBConnCreator;
 class MongoDBAspectIniFin : public AspectIniFin
 {
  public:
-  MongoDBAspectIniFin(MongoDBConnCreator *conn_creator);
+	MongoDBAspectIniFin(MongoDBConnCreator *conn_creator);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
  private:
-  MongoDBConnCreator *conn_creator_;
+	MongoDBConnCreator *conn_creator_;
 };
 
 } // end namespace fawkes

@@ -3,8 +3,7 @@
  *  mongodb.h - MongoDB aspect for Fawkes
  *
  *  Created: Mon Dec 06 00:24:43 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -27,11 +26,11 @@
 #include <aspect/aspect.h>
 
 namespace mongo {
-  class DBClientBase;
+	class DBClientBase;
 }
 
 namespace fawkes {
-  class MongoDBConnCreator;
+	class MongoDBConnCreator;
 
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -41,24 +40,24 @@ class MongoDBAspectIniFin;
 
 class MongoDBAspect : public virtual Aspect
 {
-  friend MongoDBAspectIniFin;
+	friend MongoDBAspectIniFin;
 
  public:
-  MongoDBAspect(const char *config_prefix = 0);
-  virtual ~MongoDBAspect();
+	MongoDBAspect(const char *config_prefix = 0);
+	virtual ~MongoDBAspect();
 
-  const char * mongodb_config_name() const { return config_name_; }
+	const char * mongodb_config_name() const { return config_name_; }
 
  protected:
-  mongo::DBClientBase *mongodb_client;
-  MongoDBConnCreator  *mongodb_connmgr;
+	mongo::DBClientBase *mongodb_client;
+	MongoDBConnCreator  *mongodb_connmgr;
 
  private:
-  void init_MongoDBAspect(mongo::DBClientBase *mongodb_client,
-			  MongoDBConnCreator  *mongodb_connmgr);
+	void init_MongoDBAspect(mongo::DBClientBase *mongodb_client,
+	                        MongoDBConnCreator  *mongodb_connmgr);
 
  private:
-  char *config_name_;
+	char *config_name_;
 };
 
 } // end namespace fawkes

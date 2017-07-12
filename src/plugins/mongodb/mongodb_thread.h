@@ -40,31 +40,31 @@
 
 class MongoDBThread
 : public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::AspectProviderAspect,
-  public fawkes::MongoDBConnCreator
+	public fawkes::LoggingAspect,
+	public fawkes::ConfigurableAspect,
+	public fawkes::ClockAspect,
+	public fawkes::AspectProviderAspect,
+	public fawkes::MongoDBConnCreator
 {
  public:
-  MongoDBThread();
-  virtual ~MongoDBThread();
+	MongoDBThread();
+	virtual ~MongoDBThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  virtual mongo::DBClientBase *  create_client(const char *config_name = 0);
-  virtual void delete_client(mongo::DBClientBase *client);
+	virtual mongo::DBClientBase *  create_client(const char *config_name = 0);
+	virtual void delete_client(mongo::DBClientBase *client);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  class ClientConf;
-  std::map<std::string, ClientConf *> configs_;
+	class ClientConf;
+	std::map<std::string, ClientConf *> configs_;
 
-  fawkes::MongoDBAspectIniFin     mongodb_aspect_inifin_;
+	fawkes::MongoDBAspectIniFin     mongodb_aspect_inifin_;
 };
 
 #endif

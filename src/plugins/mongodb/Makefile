@@ -35,18 +35,25 @@ LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_mongodb) $(OBJS_mongodb_rrd)
 
-ifeq ($(HAVE_MONGODB),1)
+ifeq ($(HAVE_MONGODB)$(HAVE_CPP14),11)
   PLUGINS_all = $(PLUGINDIR)/mongodb.$(SOEXT) $(PLUGINDIR)/mongodb-rrd.$(SOEXT)
 else
-  WARN_TARGETS += warning_mongodb
+  ifneq ($(HAVE_MONGODB),1)
+    WARN_TARGETS += warning_mongodb
+  endif
+  ifneq ($(HAVE_CPP14),1)
+    WARN_TARGETS += warning_cpp14
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_mongodb
+.PHONY: warning_mongodb warning_cpp14
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB Plugins$(TNORMAL) (mongodb[-devel] not installed)"
+warning_cpp14:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting MongoDB Plugins$(TNORMAL) (C++ compiler too old, require at least C++14)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

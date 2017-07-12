@@ -3,8 +3,7 @@
  *  mongodb.h - MongoDB aspect for Fawkes
  *
  *  Created: Mon Dec 06 00:28:55 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -67,15 +66,15 @@ namespace fawkes {
  */
 MongoDBAspect::MongoDBAspect(const char *config_name)
 {
-  add_aspect("MongoDBAspect");
-  config_name_ = config_name ? strdup(config_name) : 0;
+	add_aspect("MongoDBAspect");
+	config_name_ = config_name ? strdup(config_name) : 0;
 }
 
 
 /** Virtual empty destructor. */
 MongoDBAspect::~MongoDBAspect()
 {
-  if (config_name_)  free(config_name_);
+	if (config_name_)  free(config_name_);
 }
 
 
@@ -88,10 +87,10 @@ MongoDBAspect::~MongoDBAspect()
  */
 void
 MongoDBAspect::init_MongoDBAspect(mongo::DBClientBase *mongodb_client,
-				  MongoDBConnCreator *mongodb_connmgr)
+                                  MongoDBConnCreator *mongodb_connmgr)
 {
-  this->mongodb_client  = mongodb_client;
-  this->mongodb_connmgr = mongodb_connmgr;
+	this->mongodb_client  = mongodb_client;
+	this->mongodb_connmgr = mongodb_connmgr;
 }
 
 } // end namespace fawkes
