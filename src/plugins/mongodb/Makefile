@@ -30,7 +30,7 @@ LIBS_mongodb_rrd = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesi
 OBJS_mongodb_rrd = mongorrd_plugin.o mongorrd_thread.o
 
 
-CFLAGS  += $(CFLAGS_MONGODB)
+CFLAGS  += $(CFLAGS_MONGODB) $(CFLAGS_CPP14)
 LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_mongodb) $(OBJS_mongodb_rrd)
