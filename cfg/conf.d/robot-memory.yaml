@@ -58,7 +58,7 @@ plugins/mongodb/clients:
       mode: replica_set
       name: syncedrobmem
       hosts:
-        stargazer: localhost:27021
+        - localhost:27021
     robotmemory-local:
       active: true
       mode: connection
