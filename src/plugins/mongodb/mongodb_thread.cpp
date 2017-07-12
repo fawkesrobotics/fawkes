@@ -21,6 +21,7 @@
 
 #include "mongodb_thread.h"
 #include "mongodb_client_config.h"
+#include "mongodb_instance_config.h"
 
 #ifdef HAVE_MONGODB_VERSION_H
 #  include <mongo/client/init.h>
@@ -61,6 +62,7 @@ MongoDBThread::init()
 	mongo::client::initialize();
 #endif
 
+	init_instance_configs();
 	init_client_configs();
 	
 	if (client_configs_.empty()) {
@@ -101,6 +103,7 @@ MongoDBThread::init_client_configs()
 			} catch (Exception &e) {
 				logger->log_warn(name(), "Invalid MongoDB client config %s, ignoring, "
 				                 "exception follows.", cfg_name.c_str());
+				logger->log_warn(name(), e);
 				ignored_configs.insert(cfg_name);
 			}
 		}
@@ -108,12 +111,64 @@ MongoDBThread::init_client_configs()
 }
 
 void
+MongoDBThread::init_instance_configs()
+{
+	std::set<std::string> ignored_configs;
+	std::string prefix = "/plugins/mongodb/instances/";
+
+	std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+	while (i->next()) {
+		std::string cfg_name = std::string(i->path()).substr(prefix.length());
+		cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+
+		if ( (instance_configs_.find(cfg_name) == instance_configs_.end()) &&
+		     (ignored_configs.find(cfg_name) == ignored_configs.end()) ) {
+
+			std::string cfg_prefix = prefix + cfg_name + "/";
+
+			try {
+				MongoDBInstanceConfig *conf = new MongoDBInstanceConfig(config, logger, cfg_name, cfg_prefix);
+				if (conf->is_enabled()) {
+					instance_configs_[cfg_name] = conf;
+					logger->log_info(name(), "Added MongoDB instance configuration %s",
+					                 cfg_name.c_str());
+					conf->log(logger, name(), "  ");
+				} else {
+					logger->log_info(name(), "Ignoring disabled MongoDB instance "
+					                 "configuration %s", cfg_name.c_str());
+					delete conf;
+					ignored_configs.insert(cfg_name);
+				}
+			} catch (Exception &e) {
+				logger->log_warn(name(), "Invalid MongoDB instance config %s, ignoring, "
+				                 "exception follows.", cfg_name.c_str());
+				logger->log_warn(name(), e);
+				ignored_configs.insert(cfg_name);
+			}
+		}
+	}
+
+	for (auto c : instance_configs_) {
+		MongoDBInstanceConfig *ic = c.second;
+		logger->log_info(name(), "Running instance '%s'", c.first.c_str());
+		logger->log_info(name(), "  '%s'", ic->command_line().c_str());
+		ic->start_mongod();
+	}
+
+}
+
+void
 MongoDBThread::finalize()
 {
-	for (auto c : client_configs_) {
+	for (auto c : client_configs_)  delete c.second;
+	client_configs_.clear();
+	for (auto c : instance_configs_) {
+		logger->log_info(name(), "Stopping instance '%s', grace period %u sec",
+		                 c.first.c_str(), c.second->termination_grace_period());
+		c.second->kill_mongod();
 		delete c.second;
 	}
-	client_configs_.clear();
+	instance_configs_.clear();
 }
 
 

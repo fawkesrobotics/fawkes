@@ -39,6 +39,7 @@
 #include <cstdlib>
 
 class MongoDBClientConfig;
+class MongoDBInstanceConfig;
 
 class MongoDBThread
 : public fawkes::Thread,
@@ -64,9 +65,11 @@ class MongoDBThread
 
  private:
 	void init_client_configs();
+	void init_instance_configs();
 
  private:
 	std::map<std::string, MongoDBClientConfig *> client_configs_;
+	std::map<std::string, MongoDBInstanceConfig *> instance_configs_;
 
 	fawkes::MongoDBAspectIniFin     mongodb_aspect_inifin_;
 };
