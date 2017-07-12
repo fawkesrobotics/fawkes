@@ -23,6 +23,8 @@
 #ifndef __PLUGINS_MONGODB_ASPECT_MONGODB_CONNCREATOR_H_
 #define __PLUGINS_MONGODB_ASPECT_MONGODB_CONNCREATOR_H_
 
+#include <string>
+
 namespace mongo {
 	class DBClientBase;
 }
@@ -41,12 +43,12 @@ class MongoDBConnCreator
  public:
 	/** Create a new MongoDB client.
 	 * @param config_name MongoDB client configuration name for the desired
-	 * connection. May be 0 in which case the default configuration is used.
+	 * connection. May be empty in which case the default configuration is used.
 	 * @return MongoDB client for the given (or the default) configuration.
 	 * @exception thrown if the initialization fails or the configuration for
 	 * the given name does not exist.
 	 */
-	virtual mongo::DBClientBase *  create_client(const char *config_name = 0) = 0;
+	virtual mongo::DBClientBase *  create_client(const std::string &config_name = "") = 0;
 
 	/** Delete a client.
 	 * @param client client to delete

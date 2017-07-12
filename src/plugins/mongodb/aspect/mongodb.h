@@ -24,6 +24,7 @@
 #define __PLUGINS_MONGODB_ASPECT_MONGODB_H_
 
 #include <aspect/aspect.h>
+#include <string>
 
 namespace mongo {
 	class DBClientBase;
@@ -46,7 +47,8 @@ class MongoDBAspect : public virtual Aspect
 	MongoDBAspect(const char *config_prefix = 0);
 	virtual ~MongoDBAspect();
 
-	const char * mongodb_config_name() const { return config_name_; }
+	const std::string & mongodb_config_name() const
+	{ return config_name_; }
 
  protected:
 	mongo::DBClientBase *mongodb_client;
@@ -57,7 +59,7 @@ class MongoDBAspect : public virtual Aspect
 	                        MongoDBConnCreator  *mongodb_connmgr);
 
  private:
-	char *config_name_;
+	std::string config_name_;
 };
 
 } // end namespace fawkes

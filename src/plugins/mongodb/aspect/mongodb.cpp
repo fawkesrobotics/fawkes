@@ -23,9 +23,6 @@
 #include <plugins/mongodb/aspect/mongodb.h>
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 
-#include <cstring>
-#include <cstdlib>
-
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -67,14 +64,14 @@ namespace fawkes {
 MongoDBAspect::MongoDBAspect(const char *config_name)
 {
 	add_aspect("MongoDBAspect");
-	config_name_ = config_name ? strdup(config_name) : 0;
+	if (config_name) config_name_ = config_name;
 }
 
 
 /** Virtual empty destructor. */
 MongoDBAspect::~MongoDBAspect()
 {
-	if (config_name_)  free(config_name_);
+	config_name_.clear();
 }
 
 

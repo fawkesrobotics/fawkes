@@ -165,9 +165,9 @@ MongoDBThread::loop()
 }
 
 mongo::DBClientBase *
-MongoDBThread::create_client(const char *config_name)
+MongoDBThread::create_client(const std::string &config_name)
 {
-	const char *cname = config_name ? config_name : "default";
+	const std::string cname{config_name.empty() ? "default" : config_name};
 
 	if (configs_.find(cname) != configs_.end()) {
 		if (! configs_[cname]->is_active()) {
