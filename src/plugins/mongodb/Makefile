@@ -23,7 +23,8 @@ PRESUBDIRS = aspect
 INCDIRS += $(INCDIRS_MONGODB)
 
 LIBS_mongodb = fawkescore fawkesaspects fawkesmongodbaspect
-OBJS_mongodb = mongodb_plugin.o mongodb_thread.o
+OBJS_mongodb = mongodb_plugin.o mongodb_thread.o \
+               mongodb_client_config.o
 
 LIBS_mongodb_rrd = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface \
                 fawkesconfig fawkesmongodbaspect fawkesrrdaspect

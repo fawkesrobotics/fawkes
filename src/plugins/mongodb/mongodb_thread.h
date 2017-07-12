@@ -38,6 +38,8 @@
 #include <string>
 #include <cstdlib>
 
+class MongoDBClientConfig;
+
 class MongoDBThread
 : public fawkes::Thread,
 	public fawkes::LoggingAspect,
@@ -61,8 +63,10 @@ class MongoDBThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-	class ClientConf;
-	std::map<std::string, ClientConf *> configs_;
+	void init_client_configs();
+
+ private:
+	std::map<std::string, MongoDBClientConfig *> client_configs_;
 
 	fawkes::MongoDBAspectIniFin     mongodb_aspect_inifin_;
 };
