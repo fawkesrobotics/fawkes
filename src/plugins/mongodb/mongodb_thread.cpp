@@ -45,7 +45,7 @@ class MongoDBThread::ClientConf
   /** Check if configuration is active.
    * @return true if configuration is active, false otherwise
    */
-  bool is_active() const { return __active; }
+  bool is_active() const { return active_; }
 
   void log(Logger *logger, const char *component, const char *indent);
 
@@ -54,12 +54,12 @@ class MongoDBThread::ClientConf
 		     std::string cfgname, std::string prefix);
 
  private:
-  std::string                     __logcomp;
-  bool                            __active;
-  ConnectionMode                  __mode;
-  mongo::HostAndPort              __conn_hostport;
-  std::vector<mongo::HostAndPort> __replicaset_hostports;
-  std::string                     __replicaset_name;
+  std::string                     logcomp_;
+  bool                            active_;
+  ConnectionMode                  mode_;
+  mongo::HostAndPort              conn_hostport_;
+  std::vector<mongo::HostAndPort> replicaset_hostports_;
+  std::string                     replicaset_name_;
 
   /// @cond INTERNALS
   typedef struct _AuthInfo {
@@ -72,7 +72,7 @@ class MongoDBThread::ClientConf
   } AuthInfo;    
   /// @endcond
 
-  std::list<AuthInfo> __auth_infos;
+  std::list<AuthInfo> auth_infos_;
 };
 
 
@@ -88,8 +88,8 @@ class MongoDBThread::ClientConf
 /** Constructor. */
 MongoDBThread::MongoDBThread()
   : Thread("MongoDBThread", Thread::OPMODE_WAITFORWAKEUP),
-    AspectProviderAspect(&__mongodb_aspect_inifin),
-    __mongodb_aspect_inifin(this)
+    AspectProviderAspect(&mongodb_aspect_inifin_),
+    mongodb_aspect_inifin_(this)
 {
 }
 
@@ -120,7 +120,7 @@ MongoDBThread::init()
     std::string cfg_name = std::string(i->path()).substr(prefix.length());
     cfg_name = cfg_name.substr(0, cfg_name.find("/"));
 
-    if ( (__configs.find(cfg_name) == __configs.end()) &&
+    if ( (configs_.find(cfg_name) == configs_.end()) &&
 	 (ignored_configs.find(cfg_name) == ignored_configs.end()) ) {
 
       std::string cfg_prefix = prefix + cfg_name + "/";
@@ -128,7 +128,7 @@ MongoDBThread::init()
       try {
 	ClientConf *conf = new ClientConf(config, logger, cfg_name, cfg_prefix);
 	if (conf->is_active()) {
-	  __configs[cfg_name] = conf;
+	  configs_[cfg_name] = conf;
 	  logger->log_info(name(), "Added MongoDB client configuration %s",
 			   cfg_name.c_str());
 	  conf->log(logger, name(), "  ");
@@ -146,7 +146,7 @@ MongoDBThread::init()
     }
   }
 
-  if (__configs.empty()) {
+  if (configs_.empty()) {
     throw Exception("No active MongoDB configurations found");
   }
 }
@@ -156,10 +156,10 @@ void
 MongoDBThread::finalize()
 {
   std::map<std::string, ClientConf *>::iterator i;
-  for (i = __configs.begin(); i != __configs.end(); ++i) {
+  for (i = configs_.begin(); i != configs_.end(); ++i) {
     delete i->second;
   }
-  __configs.clear();
+  configs_.clear();
 }
 
 
@@ -173,11 +173,11 @@ MongoDBThread::create_client(const char *config_name)
 {
   const char *cname = config_name ? config_name : "default";
 
-  if (__configs.find(cname) != __configs.end()) {
-    if (! __configs[cname]->is_active()) {
+  if (configs_.find(cname) != configs_.end()) {
+    if (! configs_[cname]->is_active()) {
       throw Exception("MongoDB config '%s' is not marked active", cname);
     }
-    return __configs[cname]->create_client();
+    return configs_[cname]->create_client();
   } else {
     throw Exception("No MongoDB config named '%s' exists", cname);
   }
@@ -209,9 +209,9 @@ MongoDBThread::ClientConf::read_authinfo(Configuration *config, Logger *logger,
     std::string dbname   = config->get_string((prefix + "auth_dbname").c_str());
     std::string username = config->get_string((prefix + "auth_username").c_str());
     std::string password = config->get_string((prefix + "auth_password").c_str());
-    __auth_infos.push_back(AuthInfo(dbname, username, password));
+    auth_infos_.push_back(AuthInfo(dbname, username, password));
   } catch (Exception &e) {
-    logger->log_info(__logcomp.c_str(), "No default authentication info for "
+    logger->log_info(logcomp_.c_str(), "No default authentication info for "
 		     "MongoDB client '%s'", cfgname.c_str());
   }
 
@@ -231,9 +231,9 @@ MongoDBThread::ClientConf::read_authinfo(Configuration *config, Logger *logger,
 	std::string dbname   = config->get_string((ap + "auth_dbname").c_str());
 	std::string username = config->get_string((ap + "auth_username").c_str());
 	std::string password = config->get_string((ap + "auth_password").c_str());
-	__auth_infos.push_back(AuthInfo(dbname, username, password));
+	auth_infos_.push_back(AuthInfo(dbname, username, password));
       } catch (Exception &e) {
-	logger->log_info(__logcomp.c_str(), "Incomplete extended auth info '%s' "
+	logger->log_info(logcomp_.c_str(), "Incomplete extended auth info '%s' "
 			 "for MongoDB client '%s'",
 			 auth_name.c_str(), cfgname.c_str());
       }
@@ -251,24 +251,24 @@ MongoDBThread::ClientConf::read_authinfo(Configuration *config, Logger *logger,
 MongoDBThread::ClientConf::ClientConf(Configuration *config, Logger *logger,
 				      std::string cfgname, std::string prefix)
 {
-  __logcomp = "MongoDB ClientConf " + cfgname;
+  logcomp_ = "MongoDB ClientConf " + cfgname;
 
-  __active = false;
+  active_ = false;
   try {
-    __active = config->get_bool((prefix + "active").c_str());
+    active_ = config->get_bool((prefix + "active").c_str());
   } catch (Exception &e) {}
 
   std::string mode = "connection";
   try {
     mode = config->get_string((prefix + "mode").c_str());
   } catch (Exception &e) {
-    logger->log_info(__logcomp.c_str(), "MongoDB config '%s' specifies no client "
+    logger->log_info(logcomp_.c_str(), "MongoDB config '%s' specifies no client "
 		     "mode, assuming 'connection'.", cfgname.c_str());
   }
 
   if (mode == "replica_set" || mode == "replicaset") {
-    __mode = REPLICA_SET;
-    __replicaset_name = config->get_string((prefix + "name").c_str());
+    mode_ = REPLICA_SET;
+    replicaset_name_ = config->get_string((prefix + "name").c_str());
 
 #if __cplusplus >= 201103L || (defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ >= 4)
     std::unique_ptr<Configuration::ValueIterator>
@@ -278,7 +278,7 @@ MongoDBThread::ClientConf::ClientConf(Configuration *config, Logger *logger,
       i(config->search((prefix + "hosts/").c_str()));
     while (i->next()) {
       if (i->is_string()) {
-	__replicaset_hostports.push_back(HostAndPort(i->get_string()));
+	      replicaset_hostports_.push_back(HostAndPort(i->get_string()));
       }
     }
 
@@ -286,9 +286,9 @@ MongoDBThread::ClientConf::ClientConf(Configuration *config, Logger *logger,
     throw Exception("sync_cluster connections are no longer supported");
 
   } else {
-    __mode = CONNECTION;
+    mode_ = CONNECTION;
 
-    __conn_hostport =
+    conn_hostport_ =
       HostAndPort(config->get_string((prefix + "hostport").c_str()));
   }
 }
@@ -302,15 +302,15 @@ MongoDBThread::ClientConf::create_client()
   mongo::DBClientBase *client;
   std::string errmsg;
 
-  switch (__mode) {
+  switch (mode_) {
   case REPLICA_SET:
     {
       DBClientReplicaSet *repset =
-	new DBClientReplicaSet(__replicaset_name, __replicaset_hostports);
+	new DBClientReplicaSet(replicaset_name_, replicaset_hostports_);
       client = repset;
       if (! repset->connect())  throw Exception("Cannot connect to database");
       std::list<AuthInfo>::iterator ai;
-      for (ai = __auth_infos.begin(); ai != __auth_infos.end(); ++ai) {
+      for (ai = auth_infos_.begin(); ai != auth_infos_.end(); ++ai) {
 	if (!repset->auth(ai->dbname, ai->username, ai->clearpwd, errmsg, false)) {
 	  throw Exception("Authenticating for %s as %s failed: %s",
 			  ai->dbname.c_str(), ai->username.c_str(),
@@ -326,12 +326,13 @@ MongoDBThread::ClientConf::create_client()
 	new DBClientConnection(/* auto reconnect */ true);
       client = clconn;
       std::string errmsg;
-      if (! clconn->connect(__conn_hostport, errmsg)) {
-	throw Exception("Could not connect to MongoDB at %s: %s\nYou probably forgot to start/enable the mongod service",
-			__conn_hostport.toString().c_str(), errmsg.c_str());
+      if (! clconn->connect(conn_hostport_, errmsg)) {
+	      throw Exception("Could not connect to MongoDB at %s: %s\n"
+	                      "You probably forgot to start/enable the mongod service",
+	                      conn_hostport_.toString().c_str(), errmsg.c_str());
       }
       std::list<AuthInfo>::iterator ai;
-      for (ai = __auth_infos.begin(); ai != __auth_infos.end(); ++ai) {
+      for (ai = auth_infos_.begin(); ai != auth_infos_.end(); ++ai) {
 	if (!clconn->auth(ai->dbname, ai->username, ai->clearpwd, errmsg, false)) {
 	  throw Exception("Authenticating for %s as %s failed: %s",
 			  ai->dbname.c_str(), ai->username.c_str(),
@@ -355,23 +356,23 @@ void
 MongoDBThread::ClientConf::log(Logger *logger, const char *component,
 			       const char *indent)
 {
-  switch (__mode) {
+  switch (mode_) {
   case REPLICA_SET:
     {
       logger->log_info(component, "%smode:   replica set", indent);
       logger->log_info(component, "%shosts:", indent);
       std::vector<mongo::HostAndPort>::iterator i;
-      for (i = __replicaset_hostports.begin();
-	   i != __replicaset_hostports.end();
+      for (i = replicaset_hostports_.begin();
+	   i != replicaset_hostports_.end();
 	   ++i)
       {
 	logger->log_info(component, "%s  - %s:", indent, i->toString().c_str());
       }
 
-      if (! __auth_infos.empty()) {
+      if (! auth_infos_.empty()) {
 	logger->log_info(component, "%sauth infos:", indent);
 	std::list<AuthInfo>::iterator a;
-	for (a = __auth_infos.begin(); a != __auth_infos.end(); ++a) {
+	for (a = auth_infos_.begin(); a != auth_infos_.end(); ++a) {
 	  logger->log_info(component, "%s  - %s @ %s", indent, a->username.c_str(),
 			   a->dbname.c_str());
 	}
@@ -383,11 +384,11 @@ MongoDBThread::ClientConf::log(Logger *logger, const char *component,
     {
       logger->log_info(component, "%smode:   connection", indent);
       logger->log_info(component, "%shost:   %s", indent,
-		       __conn_hostport.toString().c_str());
-      if (! __auth_infos.empty()) {
+		       conn_hostport_.toString().c_str());
+      if (! auth_infos_.empty()) {
 	logger->log_info(component, "%sauth infos:", indent);
 	std::list<AuthInfo>::iterator a;
-	for (a = __auth_infos.begin(); a != __auth_infos.end(); ++a) {
+	for (a = auth_infos_.begin(); a != auth_infos_.end(); ++a) {
 	  logger->log_info(component, "%s  - %s @ %s", indent, a->username.c_str(),
 			   a->dbname.c_str());
 	}

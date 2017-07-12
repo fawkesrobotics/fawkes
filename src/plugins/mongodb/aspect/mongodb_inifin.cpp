@@ -45,7 +45,7 @@ namespace fawkes {
 MongoDBAspectIniFin::MongoDBAspectIniFin(MongoDBConnCreator *conn_creator)
   : AspectIniFin("MongoDBAspect")
 {
-  __conn_creator = conn_creator;
+  conn_creator_ = conn_creator;
 }
 
 void
@@ -60,9 +60,9 @@ MongoDBAspectIniFin::init(Thread *thread)
   }
 
   mongo::DBClientBase *client =
-    __conn_creator->create_client(mongodb_thread->mongodb_config_name());
+    conn_creator_->create_client(mongodb_thread->mongodb_config_name());
 
-  mongodb_thread->init_MongoDBAspect(client, __conn_creator);
+  mongodb_thread->init_MongoDBAspect(client, conn_creator_);
 }
 
 void
@@ -76,7 +76,7 @@ MongoDBAspectIniFin::finalize(Thread *thread)
 					"has not. ", thread->name());
   }
 
-  __conn_creator->delete_client(mongodb_thread->mongodb_client);
+  conn_creator_->delete_client(mongodb_thread->mongodb_client);
 }
 
 

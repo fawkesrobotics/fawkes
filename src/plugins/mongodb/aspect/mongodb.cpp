@@ -68,14 +68,14 @@ namespace fawkes {
 MongoDBAspect::MongoDBAspect(const char *config_name)
 {
   add_aspect("MongoDBAspect");
-  __config_name = config_name ? strdup(config_name) : 0;
+  config_name_ = config_name ? strdup(config_name) : 0;
 }
 
 
 /** Virtual empty destructor. */
 MongoDBAspect::~MongoDBAspect()
 {
-  if (__config_name)  free(__config_name);
+  if (config_name_)  free(config_name_);
 }
 
 

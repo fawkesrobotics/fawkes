@@ -62,9 +62,9 @@ class MongoDBThread
 
  private:
   class ClientConf;
-  std::map<std::string, ClientConf *> __configs;
+  std::map<std::string, ClientConf *> configs_;
 
-  fawkes::MongoDBAspectIniFin     __mongodb_aspect_inifin;
+  fawkes::MongoDBAspectIniFin     mongodb_aspect_inifin_;
 };
 
 #endif

@@ -47,7 +47,7 @@ class MongoDBAspect : public virtual Aspect
   MongoDBAspect(const char *config_prefix = 0);
   virtual ~MongoDBAspect();
 
-  const char * mongodb_config_name() const { return __config_name; }
+  const char * mongodb_config_name() const { return config_name_; }
 
  protected:
   mongo::DBClientBase *mongodb_client;
@@ -58,7 +58,7 @@ class MongoDBAspect : public virtual Aspect
 			  MongoDBConnCreator  *mongodb_connmgr);
 
  private:
-  char *__config_name;
+  char *config_name_;
 };
 
 } // end namespace fawkes

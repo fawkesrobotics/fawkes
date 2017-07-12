@@ -44,7 +44,7 @@ class MongoDBAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  MongoDBConnCreator *__conn_creator;
+  MongoDBConnCreator *conn_creator_;
 };
 
 } // end namespace fawkes
