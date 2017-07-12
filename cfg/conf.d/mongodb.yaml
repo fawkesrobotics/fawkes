@@ -7,6 +7,39 @@ plugins/mongodb:
 
   clients:
     default:
-      active: true
+      enabled: true
       mode: connection
       hostport: localhost:27017
+
+    rs0:
+      enabled: false
+      mode: replica_set
+      name: rs0
+      hosts:
+        - host-1:27021
+        - host-2:27021
+
+  # The following defines the mongod instances you want
+  # the mongodb plugin to run
+  instances:
+    local:
+      enabled: false
+      termination-grace-period: 15
+      clear-data-on-termination: false
+      port: 27018
+      data-path: /tmp/mongodb-local
+      log:
+        path: /tmp/mongodb-local.log
+        append: true
+
+    rs0:
+      enabled: false
+      termination-grace-period: 15
+      clear-data-on-termination: true
+      port: 27021
+      data-path: /tmp/mongodb-rs0
+      log:
+        path: /tmp/mongodb-rs0.log
+        append: true
+      replica-set: rs0
+      oplog-size: 100
