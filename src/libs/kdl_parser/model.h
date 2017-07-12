@@ -60,7 +60,6 @@
 #include <map>
 #include <urdf_model/model.h>
 #include <tinyxml.h>
-#include <ros/common.h>
 
 #if !defined(HAVE_URDFDOM_TYPES_H)
 namespace urdf {
