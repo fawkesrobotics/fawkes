@@ -105,6 +105,29 @@ protected:
      point.z = static_cast<float>(point_in_base_frame[2]);
     }
   }
+  PointCloudPtr filter_cloud_in_rear(PointCloudPtr input) {
+    pcl::PassThrough<pcl::PointXYZ> pass;
+    pass.setInputCloud(input);
+    pass.setFilterFieldName("x");
+    pass.setFilterLimits(-2., -0.8);
+    PointCloudPtr output(new PointCloud());
+    pass.filter(*output);
+    return output;
+  }
+  float get_mean_z(PointCloudPtr cloud) {
+    if (cloud->points.size() < min_points) {
+      stringstream error;
+      error << "Not enough laser points in rear cloud, got "
+            << cloud->size() << ", need " << min_points;
+      throw InsufficientDataException(error.str().c_str());
+    }
+    vector<float> zs;
+    zs.resize(cloud->points.size());
+    for (auto &point : *cloud) {
+      zs.push_back(point.z);
+    }
+    return accumulate(zs.begin(), zs.end(), 0.) / zs.size();
+  }
 
 protected:
   LaserInterface *laser_;
@@ -113,6 +136,7 @@ protected:
   const string config_path_;
   const static long sleep_time_ = 500000;
   const static uint max_iterations_ = 100;
+  const static size_t min_points = 10;
 };
 
 class RollCalibration : public LaserCalibration
@@ -123,6 +147,7 @@ public:
   : LaserCalibration(laser, tf_transformer, config, config_path) {}
 
   virtual void calibrate() {
+    printf("Starting to calibrate roll angle.\n");
     float lrd = 2 * threshold;
     uint iterations = 0;
     do {
@@ -136,11 +161,11 @@ public:
       printf("Left-right difference is %f.\n", lrd);
       float old_roll = config_->get_float(config_path_.c_str());
       float new_roll = get_new_roll(lrd, old_roll);
-      printf("Updating roll from %f to %f", old_roll, new_roll);
+      printf("Updating roll from %f to %f.\n", old_roll, new_roll);
       config_->set_float(config_path_.c_str(), new_roll);
       usleep(sleep_time_);
     } while (abs(lrd) > threshold && ++iterations < max_iterations_);
-    printf("\n");
+    printf("Roll calibration finished.\n");
   }
 
 
@@ -169,14 +194,6 @@ protected:
         left_cloud->size(), right_cloud->size());
     return get_mean_z(left_cloud) - get_mean_z(right_cloud);
   }
-  float get_mean_z(PointCloudPtr cloud) {
-    vector<float> zs;
-    zs.resize(cloud->points.size());
-    for (auto &point : *cloud) {
-      zs.push_back(point.z);
-    }
-    return accumulate(zs.begin(), zs.end(), 0.) / zs.size();
-  }
   float get_new_roll(float mean_error, float old_roll) {
     return old_roll + 0.5 * mean_error;
   }
@@ -186,15 +203,6 @@ protected:
     input->is_dense = false;
     pcl::removeNaNFromPointCloud(*input, *filtered, indices);
     return filtered;
-  }
-  PointCloudPtr filter_cloud_in_rear(PointCloudPtr input) {
-    pcl::PassThrough<pcl::PointXYZ> pass;
-    pass.setInputCloud(input);
-    pass.setFilterFieldName("x");
-    pass.setFilterLimits(-2., -0.8);
-    PointCloudPtr output(new PointCloud());
-    pass.filter(*output);
-    return output;
   }
   PointCloudPtr filter_left_cloud(PointCloudPtr input) {
     pcl::PassThrough<pcl::PointXYZ> pass;
@@ -218,8 +226,43 @@ protected:
 protected:
   // TODO: make threshold and min_points configurable
   constexpr static float threshold = 0.00001;
-  const static size_t min_points = 10;
 };
+
+class PitchCalibration : public LaserCalibration
+{
+public:
+  PitchCalibration(LaserInterface *laser, tf::Transformer *tf_transformer,
+      NetworkConfiguration *config, string config_path)
+  : LaserCalibration(laser, tf_transformer, config, config_path) {}
+  virtual void calibrate() {
+    printf("Starting pitch angle calibration.\n");
+    float mean_z;
+    do {
+      laser_->read();
+      PointCloudPtr cloud = laser_to_pointcloud(*laser_);
+      transform_pointcloud("base_link", cloud);
+      PointCloudPtr rear_cloud = filter_cloud_in_rear(cloud);
+      printf("Rear cloud has %zu points.\n", rear_cloud->points.size());
+      mean_z = get_mean_z(rear_cloud);
+      printf("Mean z is %f.\n", mean_z);
+      float old_pitch = config_->get_float(config_path_.c_str());
+      float new_pitch = get_new_pitch(mean_z, old_pitch);
+      printf("Updating pitch from %f to %f.\n", old_pitch, new_pitch);
+      config_->set_float(config_path_.c_str(), new_pitch);
+      usleep(sleep_time_);
+    } while (abs(mean_z) > threshold);
+    printf("Pitch calibration finished.\n");
+  }
+protected:
+  float get_new_pitch(float z, float old_pitch) {
+    // Note: We could also compute a more accurate new value using the measured
+    // distance and height, but this works well enough.
+    return old_pitch - z;
+  }
+protected:
+  constexpr static float threshold = 0.001;
+};
+
 int
 main(int argc, char **argv)
 {
@@ -276,6 +319,9 @@ main(int argc, char **argv)
   // TODO: create calibration objects here and calibrate
   RollCalibration roll_calibration(
       laser, transformer, netconf, cfg_transforms_prefix + "rot_roll");
+  PitchCalibration pitch_calibration(
+      laser, transformer, netconf, cfg_transforms_prefix + "rot_pitch");
+  pitch_calibration.calibrate();
   roll_calibration.calibrate();
 
   return 0;
