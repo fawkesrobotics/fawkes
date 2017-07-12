@@ -83,6 +83,69 @@ SubProcess::SubProcess(const char *progname, const char *file, const char *argv[
   run_proc(file, argv, envp);
 }
 
+/** Constructor.
+ * @param progname name of program, component name for logging
+ * @param file file to execute, can be a program in the path or a
+ * fully qualified path
+ * @param argv array of arguments for the process, the last element
+ * must be NULL
+ * @param envp array of environment variables for the process, the
+ * last element must be NULL. Can be NULL to omit.
+ */
+SubProcess::SubProcess(const std::string &progname, const std::string &file,
+                       const std::vector<std::string> &argv, const std::vector<std::string> &envp)
+	: progname_(progname),
+	  io_service_work_(io_service_), logger_(NULL),
+	  sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_)
+{
+  io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
+
+  const char *argvc[argv.size() + 1];
+  for (size_t i = 0; i < argv.size(); ++i) {
+	  argvc[i] = argv[i].c_str();
+  }
+  argvc[argv.size()] = NULL;
+  const char *envpc[envp.size() + 1];
+  for (size_t i = 0; i < envp.size(); ++i) {
+	  envpc[i] = envp[i].c_str();
+  }
+  envpc[envp.size()] = NULL;
+  run_proc(file.c_str(), argvc, envpc);
+}
+
+
+/** Constructor.
+ * @param progname name of program, component name for logging
+ * @param file file to execute, can be a program in the path or a
+ * fully qualified path
+ * @param argv array of arguments for the process, the last element
+ * must be NULL
+ * @param envp array of environment variables for the process, the
+ * last element must be NULL. Can be NULL to omit.
+ * @param logger logger to redirect stdout and stderr to
+ */
+SubProcess::SubProcess(const std::string &progname, const std::string &file,
+                       const std::vector<std::string> &argv, const std::vector<std::string> &envp,
+                       fawkes::Logger *logger)
+  : progname_(progname),
+    io_service_work_(io_service_), logger_(logger),
+    sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_)
+{
+  io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
+
+  const char *argvc[argv.size() + 1];
+  for (size_t i = 0; i < argv.size(); ++i) {
+	  argvc[i] = argv[i].c_str();
+  }
+  argvc[argv.size()] = NULL;
+  const char *envpc[envp.size() + 1];
+  for (size_t i = 0; i < envp.size(); ++i) {
+	  envpc[i] = envp[i].c_str();
+  }
+  envpc[envp.size()] = NULL;
+  run_proc(file.c_str(), argvc, envpc);
+}
+
 
 /** Destructor. */
 SubProcess::~SubProcess()

@@ -39,10 +39,15 @@ class Logger;
 class SubProcess
 {
  public:
-  SubProcess(const char *progname, const char *file, const char *argv[], const char *envp[]);
-  SubProcess(const char *progname, const char *file, const char *argv[], const char *envp[],
-	     fawkes::Logger *logger);
-  ~SubProcess();
+	SubProcess(const char *progname, const char *file, const char *argv[], const char *envp[]);
+	SubProcess(const char *progname, const char *file, const char *argv[], const char *envp[],
+	           fawkes::Logger *logger);
+	SubProcess(const std::string &progname, const std::string &file,
+	           const std::vector<std::string> &argv, const std::vector<std::string> &envp);
+	SubProcess(const std::string &progname, const std::string &file,
+	           const std::vector<std::string> &argv, const std::vector<std::string> &envp,
+	           fawkes::Logger *logger);
+	~SubProcess();
 
   /** Get PID of sub-process.
    * @return process ID of sub-process. */
