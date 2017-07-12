@@ -1,5 +1,26 @@
-#ifndef GAZEBO_API_WRAPPERS_H
-#define GAZEBO_API_WRAPPERS_H
+
+/***************************************************************************
+ *  gazebo_api_wrappers.h - Gazebo Compatibility API wrappers
+ *
+ *  Created: Thu Jun 29 13:27:47 2017 +0200
+ *  Copyright  2017  Victor Matare
+ ****************************************************************************/
+
+/*  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  Read the full text in the LICENSE.GPL file in the doc directory.
+ */
+
+#ifndef __UTILS_GAZEBO_API_WRAPPERS_H
+#define __UTILS_GAZEBO_API_WRAPPERS_H
 
 #include <gazebo/gazebo.hh>
 
@@ -92,4 +113,4 @@ typedef gazebo::math::Vector3 Vector3d;
 
 } // namespace gazebo_wrappers
 
-#endif // GAZEBO_API_WRAPPERS_H
+#endif // __UTILS_GAZEBO_API_WRAPPERS_H
