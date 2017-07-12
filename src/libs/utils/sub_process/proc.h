@@ -86,6 +86,7 @@ class SubProcess
 
   void kill(int signum);
   void check_proc();
+  bool alive();
 
  private:
   pid_t run_proc(const char *file, const char *argv[], const char *envp[],

@@ -298,27 +298,40 @@ SubProcess::handle_log_line(const char *logname, Logger::LogLevel log_level,
 }
 
 
+/** Check if process is alive.
+ * @return true if process is alive, false otherwise
+ */
+bool
+SubProcess::alive()
+{
+	check_proc();
+	return pid_ > 0;
+}
+
+
 /** Check if the process is still alive. */
 void
 SubProcess::check_proc()
 {
-  if (pid_ > 0) {
-    int status = 0;
-    if (waitpid(pid_, &status, WUNTRACED | WCONTINUED | WNOHANG) > 0) {
-      if (WIFEXITED(status)) {
-	logger_->log_error(progname_.c_str(), "PID %i exited, status=%d",
-			   pid_, WEXITSTATUS(status));
-	pid_ = -1;
-      } else if (WIFSIGNALED(status)) {
-	logger_->log_error(progname_.c_str(), "PID %i killed by signal %s",
-			   pid_, strsignal(WTERMSIG(status)));
-	pid_ = -1;
-      } else if (WIFSTOPPED(status)) {
-	logger_->log_warn(progname_.c_str(), "PID %i stopped by signal %s",
-			  pid_, strsignal(WSTOPSIG(status)));
-      } else if (WIFCONTINUED(status)) {
-	logger_->log_warn(progname_.c_str(), "PID %i continued", pid_);
-      }
+	if (pid_ > 0) {
+		int status = 0;
+		if (waitpid(pid_, &status, WUNTRACED | WCONTINUED | WNOHANG) > 0) {
+			if (WIFEXITED(status)) {
+				if (WEXITSTATUS(status) != 0) {
+					logger_->log_error(progname_.c_str(), "PID %i exited, status=%d",
+					                   pid_, WEXITSTATUS(status));
+				}
+				pid_ = -1;
+			} else if (WIFSIGNALED(status)) {
+				logger_->log_error(progname_.c_str(), "PID %i killed by signal %s",
+				                   pid_, strsignal(WTERMSIG(status)));
+				pid_ = -1;
+			} else if (WIFSTOPPED(status)) {
+				logger_->log_warn(progname_.c_str(), "PID %i stopped by signal %s",
+				                  pid_, strsignal(WSTOPSIG(status)));
+			} else if (WIFCONTINUED(status)) {
+				logger_->log_warn(progname_.c_str(), "PID %i continued", pid_);
+			}
     }
   }
 }
