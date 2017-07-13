@@ -160,7 +160,7 @@ protected:
   tf::Transformer *tf_transformer_;
   NetworkConfiguration *config_;
   const string config_path_;
-  const static long sleep_time_ = 500000;
+  const static long sleep_time_ = 50000;
   const static uint max_iterations_ = 100;
   const static size_t min_points = 10;
 };
