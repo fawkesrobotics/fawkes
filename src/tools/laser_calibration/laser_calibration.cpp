@@ -417,7 +417,7 @@ protected:
     pass_y_outer.setFilterFieldName("y");
     pass_y_outer.setFilterLimits(-3,3);
     PointCloudPtr xy_filtered(new PointCloud());
-    pass_y.filter(*xy_filtered);
+    pass_y_outer.filter(*xy_filtered);
     pcl::PassThrough<Point> pass_z;
     pass_z.setInputCloud(xy_filtered);
     pass_z.setFilterFieldName("z");
