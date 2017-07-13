@@ -251,7 +251,13 @@ public:
       transform_pointcloud("base_link", cloud);
       PointCloudPtr rear_cloud = filter_cloud_in_rear(cloud);
       printf("Rear cloud has %zu points.\n", rear_cloud->points.size());
-      mean_z = get_mean_z(rear_cloud);
+      try {
+        mean_z = get_mean_z(rear_cloud);
+      } catch (InsufficientDataException &e) {
+        printf("Insufficient data: %s\n", e.what_no_backtrace());
+        usleep(sleep_time_);
+        continue;
+      }
       printf("Mean z is %f.\n", mean_z);
       float old_pitch = config_->get_float(config_path_.c_str());
       float new_pitch = get_new_pitch(mean_z, old_pitch);
