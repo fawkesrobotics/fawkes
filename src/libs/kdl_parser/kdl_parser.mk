@@ -43,6 +43,9 @@ ifeq ($(HAVE_KDL),1)
           $(shell $(PKGCONFIG) --libs 'urdfdom') \
           -ltinyxml
         HAVE_KDLPARSER=1
+        ifeq ($(HAVE_URDFDOM_TYPES_H),1)
+          CFLAGS_KDLPARSER += -DHAVE_URDFDOM_TYPES_H
+        endif
       endif
     endif
   endif
