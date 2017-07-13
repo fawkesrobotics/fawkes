@@ -347,7 +347,7 @@ protected:
       hp.cost[row] = (int*) calloc(hp.num_cols, sizeof(int));
       for (int col = 0; col < hp.num_cols; col++) {
         int cost =
-            (int) 1000 * pcl::geometry::distance<Point>(
+            (int) 100000 * pcl::geometry::distance<Point>(
                 front_cloud->points[row],
                 back_cloud->points[col]);
         hp.cost[row][col] = cost;
