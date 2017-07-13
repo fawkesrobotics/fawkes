@@ -519,8 +519,15 @@ main(int argc, char **argv)
   YawCalibration yaw_calibration(
       laser, front_laser, transformer, netconf,
       cfg_transforms_prefix + "rot_yaw");
+  cout << "Please put the robot in a position such that you only have ground "
+       << "behind the robot." << endl
+       << "To start pitch and roll calibration, press enter" << endl;
+  cin.get();
   pitch_calibration.calibrate();
   roll_calibration.calibrate();
+  cout << "Please move the robot such that it can see a wall." << endl
+       << "To start yaw calibration, press enter." << endl;
+  cin.get();
   yaw_calibration.calibrate();
 
   return 0;
