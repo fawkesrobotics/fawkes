@@ -11,6 +11,11 @@ plugins/mongodb:
       mode: connection
       hostport: localhost:27017
 
+    rs0-local:
+      enabled: true
+      mode: connection
+      hostport: localhost:27021
+
     rs0:
       enabled: false
       mode: replica_set
@@ -43,3 +48,20 @@ plugins/mongodb:
         append: true
       replica-set: rs0
       oplog-size: 100
+
+    bootstrap-mongodb:
+      host:
+
+  replica-sets:
+    bootstrap-mongodb:
+      client: default
+      database: replica_set_leaders
+      collection: replica_set_mgmt
+
+    managed-sets:
+      rs0:
+        enabled: true
+        local-client: rs0-local
+        hosts:
+          - host-1:27021
+          - host-2:27021
