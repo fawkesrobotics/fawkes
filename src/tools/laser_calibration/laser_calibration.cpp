@@ -56,8 +56,10 @@ void
 print_usage(const char *program_name)
 {
   printf("Usage: %s [-h] [-r host[:port]]\n"
-      " -h              This help message\n"
-      " -r host[:port]  Remote host (and optionally port) to connect to\n",
+      " -h                 This help message\n"
+      " -r host[:port]     Remote host (and optionally port) to connect to\n"
+      " -f front-laser-id  The ID of the front laser blackboard interface\n"
+      " -b back-laser-id   The ID of the back laser blackboard interface\n",
       program_name);
 }
 
@@ -451,7 +453,7 @@ protected:
 int
 main(int argc, char **argv)
 {
-  ArgumentParser arg_parser(argc, argv, "hr:");
+  ArgumentParser arg_parser(argc, argv, "hr:f:b:");
   if (arg_parser.has_arg("h")) {
     print_usage(argv[0]);
     return 0;
@@ -470,7 +472,14 @@ main(int argc, char **argv)
   if (arg_parser.has_arg("r")) {
     arg_parser.parse_hostport("r", host, port);
   }
-
+  string front_laser_interface_id = "Laser front 360";
+  if (arg_parser.has_arg("f")) {
+    front_laser_interface_id = string(arg_parser.arg("f"));
+  }
+  string back_laser_interface_id = "Laser back 360";
+  if (arg_parser.has_arg("b")) {
+    back_laser_interface_id = string(arg_parser.arg("b"));
+  }
   try {
     client = new FawkesNetworkClient(host.c_str(), port);
     client->connect();
@@ -484,34 +493,34 @@ main(int argc, char **argv)
     return -1;
   }
 
-  // TODO: make laser interface configurable
-  const string interface_id = "Laser back 360";
   LaserInterface *laser = NULL;
   try {
     laser = blackboard->open_for_reading<LaserInterface>(
-        interface_id.c_str());
+        back_laser_interface_id.c_str());
   } catch (Exception &e) {
-    printf("Failed to open Blackboard interface %s\n", interface_id.c_str());
+    printf("Failed to open Blackboard interface '%s'\n",
+        back_laser_interface_id.c_str());
     e.print_trace();
     return -1;
   }
   if (!laser->has_writer()) {
-    printf("Laser %s does not have a writer!\n", interface_id.c_str());
+    printf("Laser '%s' does not have a writer!\n",
+        back_laser_interface_id.c_str());
     return -1;
   }
-  // TODO: make laser interface configurable
-  const string front_interface_id = "Laser front 360";
   LaserInterface *front_laser = NULL;
   try {
     front_laser = blackboard->open_for_reading<LaserInterface>(
-        front_interface_id.c_str());
+        front_laser_interface_id.c_str());
   } catch (Exception &e) {
-    printf("Failed to open Blackboard interface %s\n", interface_id.c_str());
+    printf("Failed to open Blackboard interface '%s'\n",
+        front_laser_interface_id.c_str());
     e.print_trace();
     return -1;
   }
   if (!front_laser->has_writer()) {
-    printf("Laser %s does not have a writer!\n", interface_id.c_str());
+    printf("Laser '%s' does not have a writer!\n",
+        front_laser_interface_id.c_str());
     return -1;
   }
 
