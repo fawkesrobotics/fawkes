@@ -27,7 +27,9 @@ MONGODB_REQ_BOOST_LIBS = system filesystem
 
 LIBS_mongodb = fawkescore fawkesaspects fawkesmongodbaspect
 OBJS_mongodb = mongodb_plugin.o mongodb_thread.o \
-               mongodb_client_config.o mongodb_instance_config.o
+               mongodb_client_config.o \
+               mongodb_instance_config.o \
+               mongodb_replicaset_config.o
 
 LIBS_mongodb_rrd = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface \
                 fawkesconfig fawkesmongodbaspect fawkesrrdaspect

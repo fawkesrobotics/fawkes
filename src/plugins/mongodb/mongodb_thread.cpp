@@ -22,6 +22,7 @@
 #include "mongodb_thread.h"
 #include "mongodb_client_config.h"
 #include "mongodb_instance_config.h"
+#include "mongodb_replicaset_config.h"
 
 #ifdef HAVE_MONGODB_VERSION_H
 #  include <mongo/client/init.h>
@@ -64,8 +65,12 @@ MongoDBThread::init()
 
 	init_instance_configs();
 	init_client_configs();
+	init_replicaset_configs();
 	
-	if (client_configs_.empty()) {
+	if (client_configs_.empty() &&
+	    instance_configs_.empty() &&
+	    replicaset_configs_.empty())
+	{
 		throw Exception("No enabled MongoDB configurations found");
 	}
 }
@@ -88,7 +93,7 @@ MongoDBThread::init_client_configs()
 			std::string cfg_prefix = prefix + cfg_name + "/";
 
 			try {
-				MongoDBClientConfig *conf = new MongoDBClientConfig(config, logger, cfg_name, cfg_prefix);
+				auto conf = std::make_shared<MongoDBClientConfig>(config, logger, cfg_name, cfg_prefix);
 				if (conf->is_enabled()) {
 					client_configs_[cfg_name] = conf;
 					logger->log_info(name(), "Added MongoDB client configuration %s",
@@ -97,7 +102,6 @@ MongoDBThread::init_client_configs()
 				} else {
 					logger->log_info(name(), "Ignoring disabled MongoDB client "
 					                 "configuration %s", cfg_name.c_str());
-					delete conf;
 					ignored_configs.insert(cfg_name);
 				}
 			} catch (Exception &e) {
@@ -127,7 +131,7 @@ MongoDBThread::init_instance_configs()
 			std::string cfg_prefix = prefix + cfg_name + "/";
 
 			try {
-				MongoDBInstanceConfig *conf = new MongoDBInstanceConfig(config, logger, cfg_name, cfg_prefix);
+				auto conf = std::make_shared<MongoDBInstanceConfig>(config, logger, cfg_name, cfg_prefix);
 				if (conf->is_enabled()) {
 					instance_configs_[cfg_name] = conf;
 					logger->log_info(name(), "Added MongoDB instance configuration %s",
@@ -136,7 +140,6 @@ MongoDBThread::init_instance_configs()
 				} else {
 					logger->log_info(name(), "Ignoring disabled MongoDB instance "
 					                 "configuration %s", cfg_name.c_str());
-					delete conf;
 					ignored_configs.insert(cfg_name);
 				}
 			} catch (Exception &e) {
@@ -149,10 +152,59 @@ MongoDBThread::init_instance_configs()
 	}
 
 	for (auto c : instance_configs_) {
-		MongoDBInstanceConfig *ic = c.second;
 		logger->log_info(name(), "Running instance '%s'", c.first.c_str());
-		logger->log_info(name(), "  '%s'", ic->command_line().c_str());
-		ic->start_mongod();
+		logger->log_info(name(), "  '%s'", c.second->command_line().c_str());
+		c.second->start_mongod();
+	}
+
+}
+
+void
+MongoDBThread::init_replicaset_configs()
+{
+	std::set<std::string> ignored_configs;
+	std::string prefix = "/plugins/mongodb/replica-sets/managed-sets/";
+
+	std::string bootstrap_prefix     = "/plugins/mongodb/replica-sets/bootstrap-mongodb/";
+	std::string bootstrap_client_cfg = config->get_string(bootstrap_prefix + "client");
+	std::string bootstrap_database   = config->get_string(bootstrap_prefix + "database");
+	std::string bootstrap_collection = config->get_string(bootstrap_prefix + "collection");
+
+	std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+	while (i->next()) {
+		std::string cfg_name = std::string(i->path()).substr(prefix.length());
+		cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+
+		if ( (replicaset_configs_.find(cfg_name) == replicaset_configs_.end()) &&
+		     (ignored_configs.find(cfg_name) == ignored_configs.end()) ) {
+
+			std::string cfg_prefix = prefix + cfg_name + "/";
+
+			std::shared_ptr<mongo::DBClientBase> bootstrap_client(create_client(bootstrap_client_cfg));
+			try {
+				auto conf = std::make_shared<MongoDBReplicaSetConfig>(config, cfg_name, cfg_prefix,
+				                                                      bootstrap_client, bootstrap_database);
+				if (conf->is_enabled()) {
+					replicaset_configs_[cfg_name] = conf;
+					logger->log_info(name(), "Added MongoDB replica set configuration %s",
+					                 cfg_name.c_str());
+				} else {
+					logger->log_info(name(), "Ignoring disabled MongoDB replica set "
+					                 "configuration %s", cfg_name.c_str());
+					ignored_configs.insert(cfg_name);
+				}
+			} catch (Exception &e) {
+				logger->log_warn(name(), "Invalid MongoDB replica set config %s, ignoring, "
+				                 "exception follows.", cfg_name.c_str());
+				logger->log_warn(name(), e);
+				ignored_configs.insert(cfg_name);
+			}
+		}
+	}
+
+	for (auto c : replicaset_configs_) {
+		logger->log_info(name(), "Running replica set '%s' management", c.first.c_str());
+		thread_collector->add(&*c.second);
 	}
 
 }
@@ -160,15 +212,20 @@ MongoDBThread::init_instance_configs()
 void
 MongoDBThread::finalize()
 {
-	for (auto c : client_configs_)  delete c.second;
 	client_configs_.clear();
+
 	for (auto c : instance_configs_) {
 		logger->log_info(name(), "Stopping instance '%s', grace period %u sec",
 		                 c.first.c_str(), c.second->termination_grace_period());
 		c.second->kill_mongod();
-		delete c.second;
 	}
 	instance_configs_.clear();
+
+	for (auto c : replicaset_configs_) {
+		logger->log_info(name(), "Stopping replica set '%s' management", c.first.c_str());
+		thread_collector->remove(&*c.second);
+	}
+	replicaset_configs_.clear();
 }
 
 

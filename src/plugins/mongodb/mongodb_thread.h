@@ -29,6 +29,7 @@
 #include <aspect/configurable.h>
 #include <aspect/clock.h>
 #include <aspect/aspect_provider.h>
+#include <aspect/thread_producer.h>
 
 // from MongoDB
 #include <mongo/client/dbclient.h>
@@ -36,10 +37,11 @@
 #include <vector>
 #include <list>
 #include <string>
-#include <cstdlib>
+#include <memory>
 
 class MongoDBClientConfig;
 class MongoDBInstanceConfig;
+class MongoDBReplicaSetConfig;
 
 class MongoDBThread
 : public fawkes::Thread,
@@ -47,6 +49,7 @@ class MongoDBThread
 	public fawkes::ConfigurableAspect,
 	public fawkes::ClockAspect,
 	public fawkes::AspectProviderAspect,
+	public fawkes::ThreadProducerAspect,
 	public fawkes::MongoDBConnCreator
 {
  public:
@@ -66,10 +69,12 @@ class MongoDBThread
  private:
 	void init_client_configs();
 	void init_instance_configs();
+	void init_replicaset_configs();
 
  private:
-	std::map<std::string, MongoDBClientConfig *> client_configs_;
-	std::map<std::string, MongoDBInstanceConfig *> instance_configs_;
+	std::map<std::string, std::shared_ptr<MongoDBClientConfig>> client_configs_;
+	std::map<std::string, std::shared_ptr<MongoDBInstanceConfig>> instance_configs_;
+	std::map<std::string, std::shared_ptr<MongoDBReplicaSetConfig>> replicaset_configs_;
 
 	fawkes::MongoDBAspectIniFin     mongodb_aspect_inifin_;
 };

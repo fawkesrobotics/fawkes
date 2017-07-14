@@ -51,6 +51,8 @@ class MongoDBClientConfig
 	 */
 	bool is_enabled() const { return enabled_; }
 
+	std::string hostport() const;
+	
 	void log(fawkes::Logger *logger, const char *component, const char *indent);
 
  private:

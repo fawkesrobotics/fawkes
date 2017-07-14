@@ -231,3 +231,13 @@ MongoDBClientConfig::log(Logger *logger, const char *component,
 		break;
 	}
 }
+
+
+/** Get host and port of configuration.
+ * @return string of the form "host:port"
+ */
+std::string
+MongoDBClientConfig::hostport() const
+{
+	return conn_hostport_.toString();
+}
