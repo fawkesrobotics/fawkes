@@ -55,7 +55,10 @@ typedef Laser360Interface LaserInterface;
 void
 print_usage(const char *program_name)
 {
-  printf("Usage: %s [-h]\n", program_name);
+  printf("Usage: %s [-h] [-r host[:port]]\n"
+      " -h              This help message\n"
+      " -r host[:port]  Remote host (and optionally port) to connect to\n",
+      program_name);
 }
 
 inline float
@@ -443,10 +446,12 @@ protected:
   float min_cost_;
   float min_cost_yaw_;
 };
+
+
 int
 main(int argc, char **argv)
 {
-  ArgumentParser arg_parser(argc, argv, "h");
+  ArgumentParser arg_parser(argc, argv, "hr:");
   if (arg_parser.has_arg("h")) {
     print_usage(argv[0]);
     return 0;
@@ -460,10 +465,12 @@ main(int argc, char **argv)
   tf::TransformListener *tf_listener __attribute__((unused)) = NULL;
 
 
-  // TODO: make these configurable
-  const string host = "robotino-base-3";
-//  const string host = "localhost";
-  const unsigned short int port = FAWKES_TCP_PORT;
+  string host = "localhost";
+  unsigned short int port = FAWKES_TCP_PORT;
+  if (arg_parser.has_arg("r")) {
+    arg_parser.parse_hostport("r", host, port);
+  }
+
   try {
     client = new FawkesNetworkClient(host.c_str(), port);
     client->connect();
