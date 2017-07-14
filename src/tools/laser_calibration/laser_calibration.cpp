@@ -59,7 +59,10 @@ print_usage(const char *program_name)
       " -h                 This help message\n"
       " -r host[:port]     Remote host (and optionally port) to connect to\n"
       " -f front-laser-id  The ID of the front laser blackboard interface\n"
-      " -b back-laser-id   The ID of the back laser blackboard interface\n",
+      " -b back-laser-id   The ID of the back laser blackboard interface\n"
+      " -R                 Skip roll calibration\n"
+      " -P                 Skip pitch calibration\n"
+      " -Y                 Skip yaw calibration\n",
       program_name);
 }
 
@@ -453,7 +456,7 @@ protected:
 int
 main(int argc, char **argv)
 {
-  ArgumentParser arg_parser(argc, argv, "hr:f:b:");
+  ArgumentParser arg_parser(argc, argv, "hr:f:b:RPY");
   if (arg_parser.has_arg("h")) {
     print_usage(argv[0]);
     return 0;
@@ -480,6 +483,20 @@ main(int argc, char **argv)
   if (arg_parser.has_arg("b")) {
     back_laser_interface_id = string(arg_parser.arg("b"));
   }
+  bool calibrate_roll = true;
+  if (arg_parser.has_arg("R")) {
+    calibrate_roll = false;
+  }
+  bool calibrate_pitch = true;
+  if (arg_parser.has_arg("P")) {
+    calibrate_pitch = false;
+  }
+  bool calibrate_yaw = true;
+  if (arg_parser.has_arg("Y")) {
+    calibrate_yaw = false;
+  }
+
+
   try {
     client = new FawkesNetworkClient(host.c_str(), port);
     client->connect();
@@ -535,16 +552,26 @@ main(int argc, char **argv)
   YawCalibration yaw_calibration(
       laser, front_laser, transformer, netconf,
       cfg_transforms_prefix + "rot_yaw");
-  cout << "Please put the robot in a position such that you only have ground "
-       << "behind the robot." << endl
-       << "To start pitch and roll calibration, press enter" << endl;
-  cin.get();
-  pitch_calibration.calibrate();
-  roll_calibration.calibrate();
-  cout << "Please move the robot such that it can see a wall." << endl
-       << "To start yaw calibration, press enter." << endl;
-  cin.get();
-  yaw_calibration.calibrate();
+  if (calibrate_pitch || calibrate_roll) {
+    cout << "Please put the robot in a position such that you only have ground "
+         << "behind the robot." << endl;
+  }
+  if (calibrate_pitch) {
+    cout << "To start pitch calibration, press enter" << endl;
+    cin.get();
+    pitch_calibration.calibrate();
+  }
+  if (calibrate_roll) {
+    cout << "To start roll calibration, press enter" << endl;
+    cin.get();
+    roll_calibration.calibrate();
+  }
+  if (calibrate_yaw) {
+    cout << "Please move the robot such that it can see a wall." << endl
+         << "To start yaw calibration, press enter." << endl;
+    cin.get();
+    yaw_calibration.calibrate();
+  }
 
   return 0;
 }
