@@ -162,6 +162,50 @@ protected:
     pass.filter(*output);
     return output;
   }
+  float get_matching_cost(PointCloudPtr cloud1, PointCloudPtr cloud2) {
+    hungarian_problem_t hp;
+    hp.num_rows = cloud1->points.size();
+    hp.num_cols = cloud2->points.size();
+    if ((uint) hp.num_rows < min_points || (uint) hp.num_cols < min_points) {
+      stringstream error;
+      error << "Not enough points, got " << hp.num_rows << " and "
+          << hp.num_cols << " points, need " << min_points;
+      throw InsufficientDataException(error.str().c_str());
+    }
+    hp.cost = (int**) calloc(hp.num_rows, sizeof(int*));
+    for (int row = 0; row < hp.num_rows; row++) {
+      hp.cost[row] = (int*) calloc(hp.num_cols, sizeof(int));
+      for (int col = 0; col < hp.num_cols; col++) {
+        int cost =
+            (int) 100000 * pcl::geometry::distance<Point>(
+                cloud1->points[row],
+                cloud2->points[col]);
+        hp.cost[row][col] = cost;
+      }
+    }
+    HungarianMethod solver;
+    solver.init(hp.cost, hp.num_rows, hp.num_cols,
+        HUNGARIAN_MODE_MINIMIZE_COST);
+    solver.solve();
+    float total_cost = 0.;
+    int assignment_size;
+    int *assignment = solver.get_assignment(assignment_size);
+    for (int row = 0; row < assignment_size; row++) {
+      if (row >= hp.num_rows) {
+        continue;
+      }
+      if (assignment[row] >= hp.num_cols) {
+        continue;
+      }
+      total_cost += hp.cost[row][assignment[row]];
+    }
+    for (int row = 0; row < hp.num_rows; row++) {
+      free(hp.cost[row]);
+    }
+    free(hp.cost);
+    float mean_cost = total_cost / (hp.num_rows * hp.num_cols);
+    return mean_cost;
+  }
 
 protected:
   LaserInterface *laser_;
@@ -341,48 +385,7 @@ protected:
     transform_pointcloud("base_link", back_cloud);
     front_cloud = filter_center_cloud(front_cloud);
     back_cloud = filter_center_cloud(back_cloud);
-    hungarian_problem_t hp;
-    hp.num_rows = front_cloud->points.size();
-    hp.num_cols = back_cloud->points.size();
-    if ((uint) hp.num_rows < min_points || (uint) hp.num_cols < min_points) {
-      stringstream error;
-      error << "Not enough points, got " << hp.num_rows << " in the front, "
-          << hp.num_cols << " in the back, need " << min_points;
-      throw InsufficientDataException(error.str().c_str());
-    }
-    hp.cost = (int**) calloc(hp.num_rows, sizeof(int*));
-    for (int row = 0; row < hp.num_rows; row++) {
-      hp.cost[row] = (int*) calloc(hp.num_cols, sizeof(int));
-      for (int col = 0; col < hp.num_cols; col++) {
-        int cost =
-            (int) 100000 * pcl::geometry::distance<Point>(
-                front_cloud->points[row],
-                back_cloud->points[col]);
-        hp.cost[row][col] = cost;
-      }
-    }
-    HungarianMethod solver;
-    solver.init(hp.cost, hp.num_rows, hp.num_cols,
-        HUNGARIAN_MODE_MINIMIZE_COST);
-    solver.solve();
-    float total_cost = 0.;
-    int assignment_size;
-    int *assignment = solver.get_assignment(assignment_size);
-    for (int row = 0; row < assignment_size; row++) {
-      if (row >= hp.num_rows) {
-        continue;
-      }
-      if (assignment[row] >= hp.num_cols) {
-        continue;
-      }
-      total_cost += hp.cost[row][assignment[row]];
-    }
-    for (int row = 0; row < hp.num_rows; row++) {
-      free(hp.cost[row]);
-    }
-    free(hp.cost);
-    float mean_cost = total_cost / (hp.num_rows * hp.num_cols);
-    return mean_cost;
+    return get_matching_cost(front_cloud, back_cloud);
   }
   float get_new_yaw(float current_cost, float last_yaw) {
     static float last_cost = current_cost;
