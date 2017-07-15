@@ -35,6 +35,7 @@
 #include <pcl/filters/filter.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/common/geometry.h>
+#include <pcl/registration/icp.h>
 
 #include <string>
 #include <map>
@@ -162,49 +163,29 @@ protected:
     pass.filter(*output);
     return output;
   }
-  float get_matching_cost(PointCloudPtr cloud1, PointCloudPtr cloud2) {
-    hungarian_problem_t hp;
-    hp.num_rows = cloud1->points.size();
-    hp.num_cols = cloud2->points.size();
-    if ((uint) hp.num_rows < min_points || (uint) hp.num_cols < min_points) {
+  float get_matching_cost(
+      PointCloudPtr cloud1, PointCloudPtr cloud2, float *rot_yaw)
+  {
+    if (cloud1->points.size() < min_points || cloud2->points.size() < min_points) {
       stringstream error;
-      error << "Not enough points, got " << hp.num_rows << " and "
-          << hp.num_cols << " points, need " << min_points;
+      error << "Not enough points, got " << cloud1->points.size() << " and "
+          << cloud2->points.size() << " points, need " << min_points;
       throw InsufficientDataException(error.str().c_str());
     }
-    hp.cost = (int**) calloc(hp.num_rows, sizeof(int*));
-    for (int row = 0; row < hp.num_rows; row++) {
-      hp.cost[row] = (int*) calloc(hp.num_cols, sizeof(int));
-      for (int col = 0; col < hp.num_cols; col++) {
-        int cost =
-            (int) 100000 * pcl::geometry::distance<Point>(
-                cloud1->points[row],
-                cloud2->points[col]);
-        hp.cost[row][col] = cost;
-      }
+    pcl::IterativeClosestPoint<Point, Point> icp;
+    icp.setInputCloud(cloud2);
+    icp.setInputTarget(cloud1);
+    PointCloud final;
+    icp.align(final);
+    if (!icp.hasConverged()) {
+      throw InsufficientDataException("ICP did not converge.");
     }
-    HungarianMethod solver;
-    solver.init(hp.cost, hp.num_rows, hp.num_cols,
-        HUNGARIAN_MODE_MINIMIZE_COST);
-    solver.solve();
-    float total_cost = 0.;
-    int assignment_size;
-    int *assignment = solver.get_assignment(assignment_size);
-    for (int row = 0; row < assignment_size; row++) {
-      if (row >= hp.num_rows) {
-        continue;
-      }
-      if (assignment[row] >= hp.num_cols) {
-        continue;
-      }
-      total_cost += hp.cost[row][assignment[row]];
+    if (rot_yaw) {
+      pcl::Registration<Point, Point, float>::Matrix4 transformation =
+          icp.getFinalTransformation();
+      *rot_yaw = atan2(transformation(1,0), transformation(0,0));
     }
-    for (int row = 0; row < hp.num_rows; row++) {
-      free(hp.cost[row]);
-    }
-    free(hp.cost);
-    float mean_cost = total_cost / (hp.num_rows * hp.num_cols);
-    return mean_cost;
+    return icp.getFitnessScore();
   }
 
 protected:
@@ -343,30 +324,34 @@ public:
     float current_cost;
     while (true) {
       try {
-        current_cost = get_current_cost();
+        current_cost = get_current_cost(NULL);
         break;
       } catch (InsufficientDataException &e) {
         printf("Insufficient data, please move the robot\n");
       }
     }
     uint iterations = 0;
+    float last_yaw = config_->get_float(config_path_.c_str());
+    min_cost_ = current_cost;
+    min_cost_yaw_ = last_yaw;
     while (abs(step_) > 0.0005 && iterations++ < max_iterations_) {
-      float last_yaw = config_->get_float(config_path_.c_str());
-      float next_yaw = get_new_yaw(current_cost, last_yaw);
-      printf("Updating yaw from %f to %f (step %f), last cost %f\n",
-          last_yaw, next_yaw, step_, current_cost);
-      config_->set_float(config_path_.c_str(), next_yaw);
-      usleep(sleep_time_);
+      float next_yaw;
       try {
-        current_cost = get_current_cost();
+        current_cost = get_current_cost(&step_);
+        next_yaw = last_yaw + step_;
         if (current_cost < min_cost_) {
           min_cost_ = current_cost;
-          min_cost_yaw_ = next_yaw;
+          min_cost_yaw_ = last_yaw;
         }
       } catch (InsufficientDataException &e) {
         printf("Insufficient data, skipping loop.\n");
         continue;
       }
+      printf("Updating yaw from %f to %f (step %f), last cost %f\n",
+          last_yaw, next_yaw, step_, current_cost);
+      config_->set_float(config_path_.c_str(), next_yaw);
+      last_yaw = next_yaw;
+      usleep(sleep_time_);
     }
     if (current_cost > min_cost_) {
       printf("Setting yaw to %f with minimal cost %f\n",
@@ -376,7 +361,7 @@ public:
     printf("Yaw calibration finished.\n");
   }
 protected:
-  float get_current_cost() {
+  float get_current_cost(float *new_yaw) {
     front_laser_->read();
     laser_->read();
     PointCloudPtr front_cloud = laser_to_pointcloud(*front_laser_);
@@ -385,7 +370,7 @@ protected:
     transform_pointcloud("base_link", back_cloud);
     front_cloud = filter_center_cloud(front_cloud);
     back_cloud = filter_center_cloud(back_cloud);
-    return get_matching_cost(front_cloud, back_cloud);
+    return get_matching_cost(front_cloud, back_cloud, new_yaw);
   }
   float get_new_yaw(float current_cost, float last_yaw) {
     static float last_cost = current_cost;
