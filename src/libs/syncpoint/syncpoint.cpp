@@ -446,6 +446,26 @@ SyncPoint::unregister_emitter(const string & component, bool emit_if_pending) {
   }
 }
 
+/** Check if the given component is an emitter.
+ *  @param component The name of the component.
+ *  @return True iff the given component is an emitter of this syncpoint.
+ */
+bool
+SyncPoint::is_emitter(const string & component) const {
+  MutexLocker ml(mutex_);
+	return emitters_.count(component) > 0;
+}
+
+/** Check if the given component is a watch.
+ *  @param component The name of the component.
+ *  @return True iff the given component is a watcher.
+ */
+bool
+SyncPoint::is_watcher(const string & component) const {
+  MutexLocker ml(mutex_);
+	return watchers_.count(component) > 0;
+}
+
 /** Add a watcher to the watch list
  *  @param watcher the new watcher
  *  @return A pair, of which the first element is an iterator that points

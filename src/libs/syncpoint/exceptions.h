@@ -202,6 +202,22 @@ public:
   }
 };
 
+/** The component called release but is still registered as emitter. */
+class SyncPointCannotReleaseEmitter : public Exception
+{
+  public:
+  /** Constructor.
+   *  @param component The calling component
+   *  @param identifier The identifier of the SyncPoint
+   */
+SyncPointCannotReleaseEmitter(const char * component,
+    const char * identifier)
+  {
+    append("Component '%s' called emit for SyncPoint '%s', "
+        "but is still registered as emitter", component, identifier);
+  }
+};
+
 
 } // namespace fawkes
 

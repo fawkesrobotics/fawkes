@@ -87,6 +87,8 @@ class SyncPoint
 
     /** unregister as emitter */
     virtual void unregister_emitter(const std::string & component, bool emit_if_pending = true);
+    bool is_emitter(const std::string & component) const;
+    bool is_watcher(const std::string & component) const;
 
     void lock_until_next_wait(const std::string & component);
 

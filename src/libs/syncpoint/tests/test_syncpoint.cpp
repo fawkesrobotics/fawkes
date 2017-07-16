@@ -1256,3 +1256,11 @@ TEST_F(SyncPointManagerTest, MultipleWaitsWithoutEmitters)
   usleep(10000);
   EXPECT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
 }
+
+TEST_F(SyncPointManagerTest, ReleaseOfEmitterThrowsException)
+{
+  RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter", "/test");
+  sp->register_emitter("emitter");
+  ASSERT_THROW(manager->release_syncpoint("emitter", sp),
+      SyncPointCannotReleaseEmitter);
+}

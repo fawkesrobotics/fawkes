@@ -186,6 +186,10 @@ SyncPointManager::release_syncpoint_no_lock(const std::string & component,
     throw SyncPointReleasedByNonWatcherException(component.c_str(),
         sync_point->get_identifier().c_str());
   }
+  if ((*sp_it)->is_emitter(component) && !(*sp_it)->is_watcher(component)) {
+	  throw SyncPointCannotReleaseEmitter(component.c_str(),
+	      (*sp_it)->get_identifier().c_str());
+  }
 
   if (sync_point->predecessor_) {
     release_syncpoint_no_lock(component, sync_point->predecessor_);
