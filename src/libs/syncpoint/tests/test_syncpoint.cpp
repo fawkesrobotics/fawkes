@@ -1264,3 +1264,12 @@ TEST_F(SyncPointManagerTest, ReleaseOfEmitterThrowsException)
   ASSERT_THROW(manager->release_syncpoint("emitter", sp),
       SyncPointCannotReleaseEmitter);
 }
+
+TEST_F(SyncPointManagerTest, UnregisterNonEmitter)
+{
+  RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter", "/test");
+  // "emitter" is a watcher but not an emitter
+  EXPECT_NO_THROW(sp->unregister_emitter("emitter"));
+  // "foo" is not known to the syncpoint
+  EXPECT_NO_THROW(sp->unregister_emitter("foo"));
+}

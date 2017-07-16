@@ -430,6 +430,11 @@ SyncPoint::register_emitter(const string & component)
 void
 SyncPoint::unregister_emitter(const string & component, bool emit_if_pending) {
   // TODO should this throw if the calling component is not registered?
+  multiset<string>::iterator it_emitter = emitters_.find(component);
+  if (it_emitter == emitters_.end()) {
+	  // component is not an emitter
+	  return;
+  }
   MutexLocker ml(mutex_);
   if (emit_if_pending && is_pending(component)) {
     ml.unlock();
@@ -438,7 +443,6 @@ SyncPoint::unregister_emitter(const string & component, bool emit_if_pending) {
   }
 
   // erase a single element from the set of emitters
-  multiset<string>::iterator it_emitter = emitters_.find(component);
   emitters_.erase(it_emitter);
   if (predecessor_) {
     // never emit the predecessor if it's pending; it is already emitted above
