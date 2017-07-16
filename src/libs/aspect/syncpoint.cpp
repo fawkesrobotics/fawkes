@@ -110,6 +110,7 @@ SyncPointAspect::finalize_SyncPointAspect(Thread *thread, SyncPointManager *mana
   }
 
   if (has_output_syncpoint_) {
+    sp_out_->unregister_emitter(thread->name());
     manager->release_syncpoint(thread->name(), sp_out_);
   }
 
