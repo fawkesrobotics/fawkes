@@ -24,6 +24,30 @@ plugins/mongodb:
         - localhost:27021
         - localhost:27021
 
+    robot-memory-local-direct:
+      enabled: true
+      mode: connection
+      hostport: palomino:27021
+
+    robot-memory-local:
+      enabled: true
+      mode: replica_set
+      name: robot-memory-local
+      hosts:
+        - palomino:27021
+
+    robot-memory-distributed-direct:
+      enabled: true
+      mode: connection
+      hostport: palomino:27022
+
+    robot-memory-distributed:
+      enabled: true
+      mode: replica_set
+      name: robot-memory-distributed
+      hosts:
+        - palomino:27022
+      
   # The following defines the mongod instances you want
   # the mongodb plugin to run
   instances:
@@ -38,16 +62,44 @@ plugins/mongodb:
         append: true
 
     rs0:
+      enabled: false
+      termination-grace-period: 15
+      clear-data-on-termination: true
+      #port: 27021
+      port: 27022
+      #data-path: /tmp/mongodb-rs0
+      data-path: /tmp/mongodb-rs0-2
+      log:
+        #path: /tmp/mongodb-rs0.log
+        path: /tmp/mongodb-rs0-2.log
+        append: true
+      replica-set: rs0
+      oplog-size: 100
+
+    robot-memory-local:
       enabled: true
       termination-grace-period: 15
       clear-data-on-termination: true
       port: 27021
-      data-path: /tmp/mongodb-rs0
+      data-path: /tmp/mongodb-robot-memory-local
       log:
-        path: /tmp/mongodb-rs0.log
+        path: /tmp/mongodb-robot-memory-local.log
         append: true
-      replica-set: rs0
+      replica-set: robot-memory-local
       oplog-size: 100
+
+    robot-memory-distributed:
+      enabled: true
+      termination-grace-period: 15
+      clear-data-on-termination: true
+      port: 27022
+      data-path: /tmp/mongodb-robot-memory-distributed
+      log:
+        path: /tmp/mongodb-robot-memory-distributed.log
+        append: true
+      replica-set: robot-memory-distributed
+      oplog-size: 100
+
 
   replica-sets:
     bootstrap-mongodb:
@@ -57,8 +109,20 @@ plugins/mongodb:
 
     managed-sets:
       rs0:
-        enabled: true
+        enabled: false
         local-client: rs0-local
         hosts:
-          - localhost:27021
-          - localhost:27022
+          - palomino:27021
+          - palomino:27022
+
+      robot-memory-local:
+        enabled: true
+        local-client: robot-memory-local-direct
+        hosts:
+          - palomino:27021
+
+      robot-memory-distributed:
+        enabled: true
+        local-client: robot-memory-distributed-direct
+        hosts:
+          - palomino:27022
