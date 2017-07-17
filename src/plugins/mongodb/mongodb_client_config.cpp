@@ -128,10 +128,12 @@ MongoDBClientConfig::read_authinfo(Configuration *config, Logger *logger,
 }
 					 
 /** Create MongoDB client for this configuration.
+ * @param allow_connect_fail true to allow that the connection may not have been
+ * established upon return.
  * @return MongoDB client
  */
 mongo::DBClientBase *
-MongoDBClientConfig::create_client()
+MongoDBClientConfig::create_client(bool allow_connect_fail)
 {
 	mongo::DBClientBase *client;
 	std::string errmsg;
@@ -142,14 +144,17 @@ MongoDBClientConfig::create_client()
 			mongo::DBClientReplicaSet *repset =
 				new mongo::DBClientReplicaSet(replicaset_name_, replicaset_hostports_);
 			client = repset;
-			if (! repset->connect())  throw Exception("Cannot connect to database");
-			std::list<AuthInfo>::iterator ai;
-			for (ai = auth_infos_.begin(); ai != auth_infos_.end(); ++ai) {
-				if (!repset->auth(ai->dbname, ai->username, ai->clearpwd, errmsg, false)) {
-					throw Exception("Authenticating for %s as %s failed: %s",
-					                ai->dbname.c_str(), ai->username.c_str(),
-					                errmsg.c_str());
+			if (repset->connect()) {
+				std::list<AuthInfo>::iterator ai;
+				for (ai = auth_infos_.begin(); ai != auth_infos_.end(); ++ai) {
+					if (!repset->auth(ai->dbname, ai->username, ai->clearpwd, errmsg, false)) {
+						throw Exception("Authenticating for %s as %s failed: %s",
+						                ai->dbname.c_str(), ai->username.c_str(),
+						                errmsg.c_str());
+					}
 				}
+			} else if (! allow_connect_fail) {
+				throw Exception("%s: cannot connect to database", logcomp_.c_str());
 			}
 		}
 		break;
@@ -160,18 +165,19 @@ MongoDBClientConfig::create_client()
 				new mongo::DBClientConnection(/* auto reconnect */ true);
 			client = clconn;
 			std::string errmsg;
-			if (! clconn->connect(conn_hostport_, errmsg)) {
+			if (clconn->connect(conn_hostport_, errmsg)) {
+				std::list<AuthInfo>::iterator ai;
+				for (ai = auth_infos_.begin(); ai != auth_infos_.end(); ++ai) {
+					if (!clconn->auth(ai->dbname, ai->username, ai->clearpwd, errmsg, false)) {
+						throw Exception("Authenticating for %s as %s failed: %s",
+						                ai->dbname.c_str(), ai->username.c_str(),
+						                errmsg.c_str());
+					}
+				}
+			} else if (! allow_connect_fail) {
 				throw Exception("Could not connect to MongoDB at %s: %s\n"
 				                "You probably forgot to start/enable the mongod service",
 				                conn_hostport_.toString().c_str(), errmsg.c_str());
-			}
-			std::list<AuthInfo>::iterator ai;
-			for (ai = auth_infos_.begin(); ai != auth_infos_.end(); ++ai) {
-				if (!clconn->auth(ai->dbname, ai->username, ai->clearpwd, errmsg, false)) {
-					throw Exception("Authenticating for %s as %s failed: %s",
-					                ai->dbname.c_str(), ai->username.c_str(),
-					                errmsg.c_str());
-				}
 			}
 		}
 		break;

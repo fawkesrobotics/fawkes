@@ -60,7 +60,8 @@ class MongoDBThread
 	virtual void loop();
 	virtual void finalize();
 
-	virtual mongo::DBClientBase *  create_client(const std::string &config_name = "");
+	virtual mongo::DBClientBase *  create_client(const std::string &config_name = "",
+	                                             bool allow_connect_fail = false);
 	virtual void delete_client(mongo::DBClientBase *client);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */

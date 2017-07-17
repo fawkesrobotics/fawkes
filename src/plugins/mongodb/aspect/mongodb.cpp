@@ -39,11 +39,16 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-/** @fn const char * MongoDBAspect::mongodb_config_name() const
+/** @fn const std::string & MongoDBAspect::mongodb_config_name() const
  * Get MongoDB configuration name.
  * @return MongoDB path name for the configuration settings from the
  * global configuration. Note that this may return 0 if the default
  * configuration should be used.
+ */
+
+/** @fn bool MongoDBAspect::mongodb_allow_connect_fail() const
+ * Check if initial connection failure is acceptable.
+ * @return true, if the connection may be handed over in a disconnected state.
  */
 
 /** @var mongo::DBClientBase *  MongoDBAspect::mongodb_client
@@ -60,18 +65,22 @@ namespace fawkes {
 /** Constructor.
  * @param config_name optional configuration name from which the
  * configuration for the database is read from the global configuration.
+ * @param allow_connect_fail allow the initial connection to fail.
+ * This is useful to account for instances which require some time to
+ * startup or are not immediately available.
  */
-MongoDBAspect::MongoDBAspect(const char *config_name)
+MongoDBAspect::MongoDBAspect(const char *config_name, bool allow_connect_fail)
 {
 	add_aspect("MongoDBAspect");
-	if (config_name) config_name_ = config_name;
+	if (config_name) mongodb_config_name_ = config_name;
+	mongodb_allow_connect_fail_ = allow_connect_fail;
 }
 
 
 /** Virtual empty destructor. */
 MongoDBAspect::~MongoDBAspect()
 {
-	config_name_.clear();
+	mongodb_config_name_.clear();
 }
 
 

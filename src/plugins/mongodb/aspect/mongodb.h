@@ -44,11 +44,14 @@ class MongoDBAspect : public virtual Aspect
 	friend MongoDBAspectIniFin;
 
  public:
-	MongoDBAspect(const char *config_prefix = 0);
+	MongoDBAspect(const char *config_name = 0, bool allow_connect_fail = false);
 	virtual ~MongoDBAspect();
 
 	const std::string & mongodb_config_name() const
-	{ return config_name_; }
+	{ return mongodb_config_name_; }
+
+	bool mongodb_allow_connect_fail() const
+	{ return mongodb_allow_connect_fail_; }
 
  protected:
 	mongo::DBClientBase *mongodb_client;
@@ -59,7 +62,8 @@ class MongoDBAspect : public virtual Aspect
 	                        MongoDBConnCreator  *mongodb_connmgr);
 
  private:
-	std::string config_name_;
+	std::string mongodb_config_name_;
+	bool        mongodb_allow_connect_fail_;
 };
 
 } // end namespace fawkes

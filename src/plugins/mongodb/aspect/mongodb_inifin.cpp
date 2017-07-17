@@ -59,7 +59,8 @@ MongoDBAspectIniFin::init(Thread *thread)
 	}
 
 	mongo::DBClientBase *client =
-		conn_creator_->create_client(mongodb_thread->mongodb_config_name());
+		conn_creator_->create_client(mongodb_thread->mongodb_config_name(),
+		                             mongodb_thread->mongodb_allow_connect_fail());
 
 	mongodb_thread->init_MongoDBAspect(client, conn_creator_);
 }

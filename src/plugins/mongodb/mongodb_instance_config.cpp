@@ -198,11 +198,11 @@ MongoDBInstanceConfig::check_alive()
 		mongo::BSONObj reply;
 		bool ok = client->runCommand("admin", cmd, reply);
 		if (! ok) {
-			logger_->log_warn(name(), "Failed to connect: %s", reply.jsonString().c_str());
+			logger->log_warn(name(), "Failed to connect: %s", reply.jsonString().c_str());
 		}
 		return ok;
 	} catch (mongo::DBException &e) {
-		logger_->log_warn(name(), "Fail: %s", e.what());
+		logger->log_warn(name(), "Fail: %s", e.what());
 		return false;
 	}
 }
