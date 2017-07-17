@@ -55,6 +55,8 @@ class MongoDBClientConfig
 	
 	void log(fawkes::Logger *logger, const char *component, const char *indent);
 
+	ConnectionMode mode() const;
+	
  private:
 	void read_authinfo(fawkes::Configuration *config, fawkes::Logger *logger,
 	                   std::string cfgname, std::string prefix);

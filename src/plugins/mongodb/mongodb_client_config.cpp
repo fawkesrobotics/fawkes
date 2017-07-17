@@ -241,3 +241,13 @@ MongoDBClientConfig::hostport() const
 {
 	return conn_hostport_.toString();
 }
+
+
+/** Get client configuration mode.
+ * @return mode, connection or replica set
+ */
+MongoDBClientConfig::ConnectionMode
+MongoDBClientConfig::mode() const
+{
+	return mode_;
+}
