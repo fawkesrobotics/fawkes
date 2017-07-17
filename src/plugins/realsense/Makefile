@@ -25,7 +25,7 @@ LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL)
 
 LIBS_realsense = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface realsense \
-                      fawkespcl_utils
+                      fawkespcl_utils SwitchInterface
 
 OBJS_realsense = realsense_plugin.o realsense_thread.o 
 
