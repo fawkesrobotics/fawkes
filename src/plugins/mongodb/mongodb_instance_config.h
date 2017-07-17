@@ -58,7 +58,7 @@ class MongoDBInstanceConfig
 
 	void start_mongod();
 	void kill_mongod(bool clear_data);
-
+	
 	std::string command_line() const;
 	unsigned int termination_grace_period() const;
 
@@ -79,8 +79,6 @@ class MongoDBInstanceConfig
 	bool         log_append_;
 	std::string  replica_set_;
 	unsigned int oplog_size_;
-
-	fawkes::Logger *logger_;
 
 	bool running_;
 	std::vector<std::string> argv_;

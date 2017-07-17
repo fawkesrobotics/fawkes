@@ -214,9 +214,13 @@ MongoDBReplicaSetConfig::loop()
 		//logger->log_info(name(), "Arbiter");
 		break;
 	case NOT_INITIALIZED:
-		if (leader_elect()) {
-			// we are leader, initialize replica set
-			logger->log_info(name(), "Now initializing after winning leader election");
+		if (hosts_.size() == 1 || leader_elect()) {
+			// we are alone or leader, initialize replica set
+			if (hosts_.size() == 1) {
+				logger->log_info(name(), "Now initializing RS (alone)");
+			} else {
+				logger->log_info(name(), "Now initializing RS (leader)");
+			}
 			rs_init();
 		}
 		break;

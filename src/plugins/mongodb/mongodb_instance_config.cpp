@@ -237,9 +237,9 @@ MongoDBInstanceConfig::start_mongod()
 	}
 
 	std::string progname = "mongod(" + config_name_ + ")";
-	proc_ = std::make_shared<SubProcess>(progname, "mongod", argv_, std::vector<std::string>{}, logger_);
+	proc_ = std::make_shared<SubProcess>(progname, "mongod", argv_, std::vector<std::string>{}, logger);
 
-	for (unsigned i = 0; i < startup_grace_period_; ++i) {
+	for (unsigned i = 0; i < startup_grace_period_ * 4; ++i) {
 		if (check_alive()) {
 			running_ = true;
 			return;
