@@ -157,12 +157,42 @@ MongoDBInstanceConfig::termination_grace_period() const
 }
 
 
+bool
+MongoDBInstanceConfig::check_alive()
+{
+	try {
+		std::shared_ptr<mongo::DBClientConnection> client =
+			std::make_shared<mongo::DBClientConnection>();
+		std::string errmsg;
+		mongo::HostAndPort hostport("localhost", port_);
+		if (! client->connect(hostport, errmsg)) {
+			return false;
+		}
+		mongo::BSONObj cmd(BSON("isMaster" << 1));
+		mongo::BSONObj reply;
+		bool ok = client->runCommand("admin", cmd, reply);
+		if (! ok) {
+			logger_->log_warn(name(), "Failed to connect: %s", reply.jsonString().c_str());
+		}
+		return ok;
+	} catch (mongo::DBException &e) {
+		logger_->log_info(name(), "Fail: %s", e.what());
+		return false;
+	}
+}
+
 /** Start mongod. */
 void
 MongoDBInstanceConfig::start_mongod()
 {
 	if (running_)  return;
-	
+
+	if (check_alive()) {
+		logger->log_warn(name(), "MongoDB already running, not starting");
+		running_ = true;
+		return;
+	}
+
 	try {
 		boost::filesystem::create_directories(data_path_);
 	} catch (boost::filesystem::filesystem_error &e) {
