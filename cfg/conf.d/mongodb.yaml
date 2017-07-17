@@ -21,8 +21,8 @@ plugins/mongodb:
       mode: replica_set
       name: rs0
       hosts:
-        - host-1:27021
-        - host-2:27021
+        - localhost:27021
+        - localhost:27021
 
   # The following defines the mongod instances you want
   # the mongodb plugin to run
@@ -38,7 +38,7 @@ plugins/mongodb:
         append: true
 
     rs0:
-      enabled: false
+      enabled: true
       termination-grace-period: 15
       clear-data-on-termination: true
       port: 27021
@@ -48,9 +48,6 @@ plugins/mongodb:
         append: true
       replica-set: rs0
       oplog-size: 100
-
-    bootstrap-mongodb:
-      host:
 
   replica-sets:
     bootstrap-mongodb:
@@ -63,5 +60,5 @@ plugins/mongodb:
         enabled: true
         local-client: rs0-local
         hosts:
-          - host-1:27021
-          - host-2:27021
+          - localhost:27021
+          - localhost:27022
