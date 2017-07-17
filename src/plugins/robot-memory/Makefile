@@ -29,14 +29,16 @@ OBJS_robot_memory += $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$
 
 OBJS_all    = $(OBJS_robot_memory)
 
-ifeq ($(HAVE_ROBOT_MEMORY),1)
-  CFLAGS += $(CFLAGS_ROBOT_MEMORY)
+ifeq ($(HAVE_ROBOT_MEMORY)$(HAVE_CPP11),11)
+  CFLAGS += $(CFLAGS_ROBOT_MEMORY) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_ROBOT_MEMORY)
   PLUGINS_all = $(PLUGINDIR)/robot-memory.so
 else
-  WARN_TARGETS += warning_robot_memory
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb
+  endif
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
   endif
   ifneq ($(HAVE_TF),1)
     WARN_TARGETS += warning_tf
@@ -53,9 +55,9 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_robot_memory warning_mongodb warning_tf warning_ubuntu
-warning_robot_memory:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL)"
+.PHONY: warning_cpp11 warning_mongodb warning_tf warning_ubuntu
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (C++11 required)"
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (mongodb[-devel] not installed)"
 warning_tf:

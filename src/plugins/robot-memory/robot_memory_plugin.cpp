@@ -3,6 +3,7 @@
  *
  *  Created: Sun May 01 13:34:51 2016
  *  Copyright  2016  Frederik Zwilling
+ *             2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -19,7 +20,6 @@
  */
 
 #include "robot_memory_thread.h"
-#include "robot_memory_setup.h"
 #include <string>
 #include <logging/console.h>
 
@@ -40,26 +40,8 @@ class RobotMemoryPlugin : public fawkes::Plugin
    */
   RobotMemoryPlugin(Configuration *config) : Plugin(config)
   {
-    //before starting the robot memory (thread), we have to setup the mongod and mongos processes
-    //because the mongodb aspect of the robot memory hat to connect to it
-    logger_for_setup = new ConsoleLogger(Logger::LL_WARN);
-    setup = new RobotMemorySetup(config, logger_for_setup);
-    setup->setup_mongods();
-
-    std::string mongo_client_connection = config->get_string("plugins/robot-memory/setup/mongo-client-connection-local");
-	  thread_list.push_back(new RobotMemoryThread(mongo_client_connection));
+	  thread_list.push_back(new RobotMemoryThread());
   }
-
-
-  ~RobotMemoryPlugin()
-  {
-    delete setup;
-    delete logger_for_setup;
-  }
-
- private:
-  RobotMemorySetup* setup;
-  Logger *logger_for_setup;
 };
 
 

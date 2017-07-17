@@ -4,7 +4,7 @@
  *
  *  Created: Sun May 01 13:39:52 2016
  *  Copyright  2016  Frederik Zwilling
- *
+ *             2017 Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -57,7 +57,7 @@ class RobotMemoryThread
   public fawkes::AspectProviderAspect
 {
  public:
-  RobotMemoryThread(std::string mongo_client_connection);
+  RobotMemoryThread();
   virtual ~RobotMemoryThread();
 
   virtual void init();

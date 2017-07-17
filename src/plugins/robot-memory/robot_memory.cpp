@@ -1,9 +1,9 @@
 /***************************************************************************
  *  robot_memory.cpp - Class for storing and querying information in the RobotMemory
  *    
- *
  *  Created: Aug 23, 2016 1:34:32 PM 2016
  *  Copyright  2016  Frederik Zwilling
+ *             2017 Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -18,17 +18,17 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
+
 #include "robot_memory.h"
+
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
-#include <memory>
+
 #include <string>
-#include <stdio.h>
-#include <iostream>
-#include <stdlib.h>
-#include <algorithm>
+#include <chrono>
+#include <thread>
 
 // from MongoDB
 #include <mongo/client/dbclient.h>
@@ -38,10 +38,12 @@ using namespace fawkes;
 
 /** @class RobotMemory "robot_memory.h"
  * Access to the robot memory based on mongodb.
- * Using this class, you can query/insert/remove/update information in the robot memory.
- * Furthermore, you can register trigger to get notified when something was changed in the robot memory matching your query
- * and you can access computables, which are on demand computed information, by registering the computables
- * and then querying as if the information would already be in the database.
+ * Using this class, you can query/insert/remove/update information in
+ * the robot memory.  Furthermore, you can register trigger to get
+ * notified when something was changed in the robot memory matching
+ * your query and you can access computables, which are on demand
+ * computed information, by registering the computables and then
+ * querying as if the information would already be in the database.
  * @author Frederik Zwilling
  */
 
@@ -91,17 +93,40 @@ void RobotMemory::init()
     database_name_ = config_->get_string("/plugins/robot-memory/database");
   } catch (Exception &e) {}
   distributed_dbs_ = config_->get_strings("/plugins/robot-memory/distributed-db-names");
+  cfg_startup_grace_period_ = 10;
+  try {
+	  cfg_startup_grace_period_ = config_->get_uint("/plugins/robot-memory/startup-grace-period");
+  } catch (Exception &e) {} // ignored, use default
 
+  using namespace std::chrono_literals;
+  
   //initiate mongodb connections:
-  std::string local_client = config_->get_string("plugins/robot-memory/setup/mongo-client-connection-local");
   log("Connect to local mongod");
-  mongodb_client_local_ = mongo_connection_manager_->create_client(local_client.c_str());
-  distributed_ = config_->get_bool("plugins/robot-memory/setup/distributed");
-  if(distributed_)
+  unsigned int startup_tries = 0;
+  for (; startup_tries < cfg_startup_grace_period_ * 2; ++startup_tries) {
+	  try {
+		  mongodb_client_local_ = mongo_connection_manager_->create_client("robot-memory-local");
+		  break;
+	  } catch (fawkes::Exception &e) {
+		  logger_->log_info(name_, "Waiting");
+		  std::this_thread::sleep_for(500ms);
+	  }
+  }
+
+  if (config_->exists("/plugins/mongodb/clients/robot-memory-distributed/enabled") &&
+      config_->get_bool("/plugins/mongodb/clients/robot-memory-distributed/enabled"))
   {
-    std::string distributed_client = config_->get_string("plugins/robot-memory/setup/mongo-client-connection-distributed");
+	  distributed_ = true;
     log("Connect to distributed mongod");
-    mongodb_client_distributed_ = mongo_connection_manager_->create_client(distributed_client.c_str());
+    for (; startup_tries < cfg_startup_grace_period_ * 2; ++startup_tries) {
+	    try {
+		    mongodb_client_distributed_ = mongo_connection_manager_->create_client("robot-memory-distributed");
+		    break;
+	    } catch (fawkes::Exception &e) {
+		    logger_->log_info(name_, "Waiting");
+		    std::this_thread::sleep_for(500ms);
+	    }
+    }
   }
 
   //init blackboard interface
