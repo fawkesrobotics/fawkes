@@ -22,6 +22,10 @@
 #ifndef __PLUGINS_MONGODB_MONGODB_INSTANCE_CONFIG_H_
 #define __PLUGINS_MONGODB_MONGODB_INSTANCE_CONFIG_H_
 
+#include <core/threading/thread.h>
+#include <aspect/logging.h>
+#include <aspect/clock.h>
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -30,13 +34,17 @@ namespace fawkes {
 	class Configuration;
 	class Logger;
 	class SubProcess;
+	class TimeWait;
 }
 
 /** Client configuration. */
 class MongoDBInstanceConfig
+: public fawkes::Thread,
+	public fawkes::LoggingAspect,
+	public fawkes::ClockAspect
 {
  public:
-	MongoDBInstanceConfig(fawkes::Configuration *config, fawkes::Logger *logger,
+	MongoDBInstanceConfig(fawkes::Configuration *config,
 	                      std::string cfgname, std::string prefix);
 
 	/** Check if configuration is enabled.
@@ -44,17 +52,17 @@ class MongoDBInstanceConfig
 	 */
 	bool is_enabled() const { return enabled_; }
 
-	void log(fawkes::Logger *logger, const char *component, const char *indent);
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
 	void start_mongod();
-	void kill_mongod();
+	void kill_mongod(bool clear_data);
 
 	std::string command_line() const;
 	unsigned int termination_grace_period() const;
 
-	
  private:
-	std::string  logcomp_;
 	bool check_alive();
 
  private:
@@ -63,6 +71,7 @@ class MongoDBInstanceConfig
 	std::string  config_name_;
 	unsigned int startup_grace_period_;
 	unsigned int termination_grace_period_;
+	float        loop_interval_;
 	bool         clear_data_on_termination_;
 	unsigned int port_;
 	std::string  data_path_;
@@ -77,6 +86,8 @@ class MongoDBInstanceConfig
 	std::vector<std::string> argv_;
 	std::shared_ptr<fawkes::SubProcess> proc_;
 	std::string command_line_;
+
+  fawkes::TimeWait *timewait_;
 };
 
 #endif

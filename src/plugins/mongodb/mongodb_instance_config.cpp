@@ -22,8 +22,8 @@
 #include "mongodb_instance_config.h"
 
 #include <config/config.h>
-#include <logging/logger.h>
 #include <utils/sub_process/proc.h>
+#include <utils/time/wait.h>
 
 #include <boost/filesystem.hpp>
 #include <chrono>
@@ -44,18 +44,18 @@ using namespace std::chrono_literals;
 /** Constructor.
  * This will read the given configuration.
  * @param config configuration to query
- * @param logger logger for info messages
  * @param cfgname configuration name
  * @param prefix configuration path prefix
  */
-MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config, Logger *logger,
+MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
                                              std::string cfgname, std::string prefix)
+	: Thread("MongoDBInstance", Thread::OPMODE_CONTINUOUS)
 {
-	logcomp_ = "MongoDBInstance|" + cfgname;
+	set_name("MongoDBInstance|%s",  cfgname.c_str());
 	config_name_ = cfgname;
 
 	running_ = false;
-	
+
 	enabled_ = false;
 	try {
 		enabled_ = config->get_bool(prefix + "enabled");
@@ -65,6 +65,10 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config, Logger *logg
 		startup_grace_period_ = 10;
 		try {
 			startup_grace_period_ = config->get_uint(prefix + "startup-grace-period");
+		} catch (Exception &e) {} // ignored, use default
+		loop_interval_ = 5.0;
+		try {
+			loop_interval_ = config->get_float(prefix + "loop-interval");
 		} catch (Exception &e) {} // ignored, use default
 		termination_grace_period_ = config->get_uint(prefix + "termination-grace-period");
 		clear_data_on_termination_ = config->get_bool(prefix + "clear-data-on-termination");
@@ -105,36 +109,58 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config, Logger *logg
 	command_line_ =
 		std::accumulate(std::next(argv_.begin()), argv_.end(), argv_.front(),
 		                [](std::string &s, const std::string &a) { return s + " " + a; });
-
-	logger_ = logger;
 }
 
 
-/** Write instance configuration information to log.
- * @param logger logger to write to
- * @param component component to pass to logger
- * @param indent indentation to put before each string
- */
 void
-MongoDBInstanceConfig::log(Logger *logger, const char *component,
-                           const char *indent)
+MongoDBInstanceConfig::init()
 {
 	if (enabled_) {
-		logger->log_info(logcomp_.c_str(), "enabled: true");
-		logger->log_info(logcomp_.c_str(), "TCP port: %u", port_);
-		logger->log_info(logcomp_.c_str(), "Termination grace period: %u", termination_grace_period_);
-		logger->log_info(logcomp_.c_str(), "clear data on termination: %s", clear_data_on_termination_ ? "yes" : "no");
-		logger->log_info(logcomp_.c_str(), "data path: %s", data_path_.c_str());
-		logger->log_info(logcomp_.c_str(), "log path: %s", log_path_.c_str());
-		logger->log_info(logcomp_.c_str(), "log append: %s", log_append_ ? "yes" : "no");
-		logger->log_info(logcomp_.c_str(), "replica set: %s",
+		logger->log_info(name(), "enabled: true");
+		logger->log_info(name(), "TCP port: %u", port_);
+		logger->log_info(name(), "Termination grace period: %u", termination_grace_period_);
+		logger->log_info(name(), "clear data on termination: %s", clear_data_on_termination_ ? "yes" : "no");
+		logger->log_info(name(), "data path: %s", data_path_.c_str());
+		logger->log_info(name(), "log path: %s", log_path_.c_str());
+		logger->log_info(name(), "log append: %s", log_append_ ? "yes" : "no");
+		logger->log_info(name(), "replica set: %s",
 		                 replica_set_.empty() ? "DISABLED" : replica_set_.c_str());
 		if (! replica_set_.empty()) {
-			logger->log_info(logcomp_.c_str(), "Op Log Size: %u MB", oplog_size_);
+			logger->log_info(name(), "Op Log Size: %u MB", oplog_size_);
 		}
+
+		start_mongod();
 	} else {
-		logger->log_info(logcomp_.c_str(), "enabled: DISABLED");
+		throw Exception("Instance '%s' cannot be started while disabled", name());
 	}
+
+	timewait_ = new TimeWait(clock, (int)(loop_interval_ * 1000000.));
+}
+
+
+void
+MongoDBInstanceConfig::loop()
+{
+	timewait_->mark_start();
+	if (! running_ || ! check_alive()) {
+		logger->log_error(name(), "MongoDB dead, restarting");
+		// on a crash, clean to make sure
+		try {
+			kill_mongod(true);
+			start_mongod();
+		} catch (Exception &e) {
+			logger->log_error(name(), "Failed to start MongoDB: %s", e.what_no_backtrace());
+		}
+	}
+	timewait_->wait_systime();
+}
+
+
+void
+MongoDBInstanceConfig::finalize()
+{
+	kill_mongod(clear_data_on_termination_);
+	delete timewait_;
 }
 
 
@@ -209,19 +235,30 @@ MongoDBInstanceConfig::start_mongod()
 			                p.parent_path().string().c_str(), config_name_.c_str(), e.what());
 		}
 	}
-	
+
 	std::string progname = "mongod(" + config_name_ + ")";
 	proc_ = std::make_shared<SubProcess>(progname, "mongod", argv_, std::vector<std::string>{}, logger_);
 
-	running_ = true;
+	for (unsigned i = 0; i < startup_grace_period_; ++i) {
+		if (check_alive()) {
+			running_ = true;
+			return;
+		}
+		std::this_thread::sleep_for(250ms);
+	}
+	if (! running_) {
+		proc_.reset();
+		throw Exception("%s: instance did not start in time", name());
+	}
 }
 
 /** Stop mongod.
  * This send a SIGINT and then wait for the configured grace period
  * before sending the TERM signal.
+ * @param clear_data true to clear data, false otherwise
  */
 void
-MongoDBInstanceConfig::kill_mongod()
+MongoDBInstanceConfig::kill_mongod(bool clear_data)
 {
 	if (proc_) {
 		proc_->kill(SIGINT);
@@ -232,7 +269,7 @@ MongoDBInstanceConfig::kill_mongod()
 		// This will send the term signal
 		proc_.reset();
 		running_ = false;
-		if (clear_data_on_termination_) {
+		if (clear_data) {
 			try {
 				boost::filesystem::remove_all(data_path_);
 			} catch (boost::filesystem::filesystem_error &e) {

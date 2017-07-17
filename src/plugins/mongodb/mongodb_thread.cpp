@@ -131,12 +131,11 @@ MongoDBThread::init_instance_configs()
 			std::string cfg_prefix = prefix + cfg_name + "/";
 
 			try {
-				auto conf = std::make_shared<MongoDBInstanceConfig>(config, logger, cfg_name, cfg_prefix);
+				auto conf = std::make_shared<MongoDBInstanceConfig>(config, cfg_name, cfg_prefix);
 				if (conf->is_enabled()) {
 					instance_configs_[cfg_name] = conf;
 					logger->log_info(name(), "Added MongoDB instance configuration %s",
 					                 cfg_name.c_str());
-					conf->log(logger, name(), "  ");
 				} else {
 					logger->log_info(name(), "Ignoring disabled MongoDB instance "
 					                 "configuration %s", cfg_name.c_str());
@@ -154,9 +153,8 @@ MongoDBThread::init_instance_configs()
 	for (auto c : instance_configs_) {
 		logger->log_info(name(), "Running instance '%s'", c.first.c_str());
 		logger->log_info(name(), "  '%s'", c.second->command_line().c_str());
-		c.second->start_mongod();
+		thread_collector->add(&*c.second);
 	}
-
 }
 
 void
@@ -217,7 +215,7 @@ MongoDBThread::finalize()
 	for (auto c : instance_configs_) {
 		logger->log_info(name(), "Stopping instance '%s', grace period %u sec",
 		                 c.first.c_str(), c.second->termination_grace_period());
-		c.second->kill_mongod();
+		thread_collector->remove(&*c.second);
 	}
 	instance_configs_.clear();
 
