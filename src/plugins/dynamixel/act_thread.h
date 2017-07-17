@@ -31,9 +31,9 @@ class DynamixelDriverThread;
 
 class DynamixelActThread
 : public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect
+  public fawkes::ConfigurableAspect,
+  public fawkes::SyncPointAspect
 {
  public:
   DynamixelActThread();

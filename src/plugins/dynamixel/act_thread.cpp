@@ -34,8 +34,8 @@ using namespace fawkes;
 
 /** Constructor. */
 DynamixelActThread::DynamixelActThread()
-  : Thread("DynamixelActThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
+  : Thread("DynamixelActThread", Thread::OPMODE_CONTINUOUS),
+    SyncPointAspect(SyncPoint::WAIT_FOR_ALL, "/sensors/acquire", "/act/exec/end")
 {
 }
 
