@@ -29,6 +29,8 @@
 #include <chrono>
 #include <numeric>
 
+#include <mongo/client/dbclient.h>
+
 using namespace fawkes;
 using namespace std::chrono_literals;
 
@@ -60,6 +62,10 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config, Logger *logg
 	} catch (Exception &e) {}
 
 	if (enabled_) {
+		startup_grace_period_ = 10;
+		try {
+			startup_grace_period_ = config->get_uint(prefix + "startup-grace-period");
+		} catch (Exception &e) {} // ignored, use default
 		termination_grace_period_ = config->get_uint(prefix + "termination-grace-period");
 		clear_data_on_termination_ = config->get_bool(prefix + "clear-data-on-termination");
 		port_ = config->get_uint(prefix + "port");

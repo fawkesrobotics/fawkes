@@ -55,9 +55,13 @@ class MongoDBInstanceConfig
 	
  private:
 	std::string  logcomp_;
+	bool check_alive();
+
+ private:
 	bool         enabled_;
 
 	std::string  config_name_;
+	unsigned int startup_grace_period_;
 	unsigned int termination_grace_period_;
 	bool         clear_data_on_termination_;
 	unsigned int port_;
