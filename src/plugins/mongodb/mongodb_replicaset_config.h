@@ -109,6 +109,8 @@ class MongoDBReplicaSetConfig
 	float loop_interval_;
 	int leader_expiration_;
   fawkes::TimeWait *timewait_;
+
+  ReplicaSetNodeStatus last_status_;
 };
 
 #endif

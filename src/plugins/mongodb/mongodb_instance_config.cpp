@@ -116,17 +116,17 @@ void
 MongoDBInstanceConfig::init()
 {
 	if (enabled_) {
-		logger->log_info(name(), "enabled: true");
-		logger->log_info(name(), "TCP port: %u", port_);
-		logger->log_info(name(), "Termination grace period: %u", termination_grace_period_);
-		logger->log_info(name(), "clear data on termination: %s", clear_data_on_termination_ ? "yes" : "no");
-		logger->log_info(name(), "data path: %s", data_path_.c_str());
-		logger->log_info(name(), "log path: %s", log_path_.c_str());
-		logger->log_info(name(), "log append: %s", log_append_ ? "yes" : "no");
-		logger->log_info(name(), "replica set: %s",
+		logger->log_debug(name(), "enabled: true");
+		logger->log_debug(name(), "TCP port: %u", port_);
+		logger->log_debug(name(), "Termination grace period: %u", termination_grace_period_);
+		logger->log_debug(name(), "clear data on termination: %s", clear_data_on_termination_ ? "yes" : "no");
+		logger->log_debug(name(), "data path: %s", data_path_.c_str());
+		logger->log_debug(name(), "log path: %s", log_path_.c_str());
+		logger->log_debug(name(), "log append: %s", log_append_ ? "yes" : "no");
+		logger->log_debug(name(), "replica set: %s",
 		                 replica_set_.empty() ? "DISABLED" : replica_set_.c_str());
 		if (! replica_set_.empty()) {
-			logger->log_info(name(), "Op Log Size: %u MB", oplog_size_);
+			logger->log_debug(name(), "Op Log Size: %u MB", oplog_size_);
 		}
 
 		start_mongod();
@@ -202,7 +202,7 @@ MongoDBInstanceConfig::check_alive()
 		}
 		return ok;
 	} catch (mongo::DBException &e) {
-		logger_->log_info(name(), "Fail: %s", e.what());
+		logger_->log_warn(name(), "Fail: %s", e.what());
 		return false;
 	}
 }

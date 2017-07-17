@@ -62,7 +62,8 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 	set_name("MongoDBReplicaSet|%s",  cfgname.c_str());
 	config_name_ = cfgname;
 	is_leader_ = false;
-
+	last_status_ = ERROR;
+	
 	enabled_ = false;
 	try {
 		enabled_ = config->get_bool(prefix + "enabled");
@@ -169,8 +170,8 @@ MongoDBReplicaSetConfig::init()
 		throw Exception("Replica set manager '%s' cannot be started while disabled", name());
 	}
 
-	logger->log_info(name(), "Bootstrap Query:  %s", leader_elec_query_.jsonString().c_str());
-	logger->log_info(name(), "Bootstrap Update: %s", leader_elec_update_.jsonString().c_str());
+	logger->log_debug(name(), "Bootstrap Query:  %s", leader_elec_query_.jsonString().c_str());
+	logger->log_debug(name(), "Bootstrap Update: %s", leader_elec_update_.jsonString().c_str());
 
 	timewait_ = new TimeWait(clock, (int)(loop_interval_ * 1000000.));
 }
@@ -188,9 +189,12 @@ MongoDBReplicaSetConfig::loop()
 {
 	timewait_->mark_start();
 	mongo::BSONObj reply;
-	switch (rs_status(reply)) {
+	ReplicaSetNodeStatus status = rs_status(reply);
+	switch (status) {
 	case PRIMARY:
-		logger->log_info(name(), "Primary, managing");
+		if (last_status_ != status) {
+			logger->log_info(name(), "Became PRIMARY, starting managing");
+		}
 		leader_elect(/* force leaderhsip */ true);
 		rs_monitor(reply);
 		break;
@@ -202,14 +206,17 @@ MongoDBReplicaSetConfig::loop()
 		}
 		break;
 	case SECONDARY:
-		logger->log_info(name(), "Secondary, being managed");
+		if (last_status_ != status) {
+			logger->log_info(name(), "Became SECONDARY");
+		}
 		break;
 	case ARBITER:
-		logger->log_info(name(), "Arbiter");
+		//logger->log_info(name(), "Arbiter");
 		break;
 	case NOT_INITIALIZED:
 		if (leader_elect()) {
 			// we are leader, initialize replica set
+			logger->log_info(name(), "Now initializing after winning leader election");
 			rs_init();
 		}
 		break;
@@ -221,6 +228,7 @@ MongoDBReplicaSetConfig::loop()
 	default:
 		break;
 	}
+	last_status_ = status;
 	timewait_->wait_systime();
 }
 
@@ -296,7 +304,7 @@ MongoDBReplicaSetConfig::rs_init()
 		if (! ok) {
 			logger->log_error(name(), "RS initialization failed: %s", reply["errmsg"].toString().c_str());
 		} else {
-			logger->log_info(name(), "RS initialized successfully: %s", reply.jsonString().c_str());
+			logger->log_debug(name(), "RS initialized successfully: %s", reply.jsonString().c_str());
 		}
 	} catch (mongo::DBException &e) {
 		logger->log_error(name(), "RS initialization failed: %s", e.what());
@@ -314,7 +322,7 @@ MongoDBReplicaSetConfig::rs_get_config(mongo::BSONObj &rs_config)
 		bool ok = local_client_->runCommand("admin", cmd, reply);
 		if (ok) {
 			rs_config = reply["config"].Obj().copy();
-			logger->log_info(name(), "Config: %s", rs_config.jsonString(mongo::Strict, true).c_str());
+			//logger->log_info(name(), "Config: %s", rs_config.jsonString(mongo::Strict, true).c_str());
 		} else {
 			logger->log_warn(name(), "Failed to get RS config: %s (DB error)", reply["errmsg"].str().c_str());
 		}
@@ -348,15 +356,8 @@ MongoDBReplicaSetConfig::rs_monitor(const mongo::BSONObj &status_reply)
 				last_heartbeat_rcvd(std::chrono::milliseconds(m["lastHeartbeatRecv"].date()));
 			auto now = std::chrono::high_resolution_clock::now();
 			auto diff_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_heartbeat_rcvd);
-			logger->log_info(name(), "Time Diff: %li", diff_ms.count());
 			if ( (m["health"].numberInt() != 1) || (now - last_heartbeat_rcvd) > 15s) {
-				logger->log_info(name(), "Reply: %s", status_reply.jsonString(mongo::Strict, true).c_str());
-				if (m["health"].numberInt() != 1) {
-					logger->log_info(name(), "%s not healthy", m["name"].str().c_str());
-				}
-				if ( (now - last_heartbeat_rcvd) > 15s) {
-					logger->log_info(name(), "%s timeout", m["name"].str().c_str());
-				}
+				//logger->log_info(name(), "Reply: %s", status_reply.jsonString(mongo::Strict, true).c_str());
 				unresponsive.insert(m["name"].str());
 			} else {
 				in_rs.insert(m["name"].str());
@@ -424,7 +425,7 @@ MongoDBReplicaSetConfig::rs_monitor(const mongo::BSONObj &status_reply)
 		}
 
 		mongo::BSONObj new_config_obj(new_config.obj());
-		logger->log_info(name(), "Reconfigure: %s", new_config_obj.jsonString(mongo::Strict, true).c_str());
+		//logger->log_info(name(), "Reconfigure: %s", new_config_obj.jsonString(mongo::Strict, true).c_str());
 
 		mongo::BSONObjBuilder cmd;
 		cmd.append("replSetReconfig", new_config_obj);
@@ -462,7 +463,7 @@ MongoDBReplicaSetConfig::check_alive(const std::string &h)
 		}
 		return ok;
 	} catch (mongo::DBException &e) {
-		logger->log_info(name(), "Fail: %s", e.what());
+		logger->log_warn(name(), "Fail: %s", e.what());
 		return false;
 	}
 }
