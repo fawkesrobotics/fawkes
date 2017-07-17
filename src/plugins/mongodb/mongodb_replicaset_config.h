@@ -31,11 +31,10 @@
 #include <memory>
 
 #include <mongo/bson/bson.h>
+#include <mongo/client/dbclient.h>
 
 namespace fawkes {
 	class Configuration;
-	class Logger;
-	class SubProcess;
 	class TimeWait;
 }
 
@@ -64,8 +63,26 @@ class MongoDBReplicaSetConfig
 	virtual void finalize();
 
  private:
-	void leader_elect();
+	bool leader_elect(bool force = false);
 	void leader_resign();
+
+	enum ReplicaSetNodeStatus {
+		PRIMARY,
+		SECONDARY,
+		ARBITER,
+		NO_PRIMARY,
+		NOT_INITIALIZED,
+		INITIALIZING,
+		INVALID_CONFIG,
+		REMOVED,
+		ERROR
+	};
+
+	ReplicaSetNodeStatus rs_status(mongo::BSONObj &reply);
+	void rs_init();
+	void rs_monitor(const mongo::BSONObj &reply);
+	bool check_alive(const std::string &h);
+	bool rs_get_config(mongo::BSONObj &rs_config);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
@@ -77,14 +94,16 @@ class MongoDBReplicaSetConfig
 
 	std::shared_ptr<mongo::DBClientBase> bootstrap_client_;
 	mongo::BSONObj leader_elec_query_;
+	mongo::BSONObj leader_elec_query_force_;
 	mongo::BSONObj leader_elec_update_;
 	std::string bootstrap_database_;
 	std::string bootstrap_collection_;
 	std::string bootstrap_ns_;
 
-	std::string local_client_;
+	std::string local_client_cfg_;
+	std::shared_ptr<mongo::DBClientBase> local_client_;
 	std::string local_hostport_;
-	std::vector<std::string> hosts_;
+	std::set<std::string> hosts_;
 
 	bool is_leader_;
 	float loop_interval_;
