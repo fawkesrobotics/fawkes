@@ -22,7 +22,9 @@ LIBS_laser_calibration = stdc++ m fawkescore fawkesutils fawkesblackboard \
 		fawkesconfig fawkesinterface fawkesnetcomm fawkestf fawkespcl_utils \
 		Laser360Interface Laser720Interface Laser1080Interface MotorInterface
 
-OBJS_laser_calibration = laser_calibration.o
+OBJS_laser_calibration = laser_calibration.o main.o \
+                         roll_calibration.o pitch_calibration.o \
+                         yaw_calibration.o time_offset_calibration.o
 OBJS_all = $(OBJS_laser_calibration)
 
 REQUIRED_PCL_LIBS = common filters registration
