@@ -112,10 +112,9 @@ protected:
   void
   transform_pointcloud(const string &target_frame, PointCloudPtr cloud) {
     for (auto &point : cloud->points) {
-      // TODO: convert time stamp correctly
      tf::Stamped<tf::Point> point_in_laser_frame(
          tf::Point(point.x, point.y, point.z),
-         fawkes::Time(), cloud->header.frame_id);
+         fawkes::Time(0., cloud->header.stamp), cloud->header.frame_id);
      tf::Stamped<tf::Point> point_in_base_frame;
      tf_transformer_->transform_point(
          target_frame, point_in_laser_frame, point_in_base_frame);
