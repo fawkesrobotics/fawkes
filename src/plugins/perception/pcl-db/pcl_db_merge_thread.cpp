@@ -34,7 +34,8 @@ using namespace fawkes;
 
 /** Constructor. */
 PointCloudDBMergeThread::PointCloudDBMergeThread()
-  : Thread("PointCloudDBMergeThread", Thread::OPMODE_WAITFORWAKEUP)
+  : Thread("PointCloudDBMergeThread", Thread::OPMODE_WAITFORWAKEUP),
+    MongoDBAspect("default")
 {
 }
 
