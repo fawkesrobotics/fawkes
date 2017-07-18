@@ -38,7 +38,6 @@ using namespace fawkes;
 /** Constructor for thread */
 RobotMemoryThread::RobotMemoryThread()
 	: Thread("RobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
-	  MongoDBAspect("robot-memory-local", true),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
     AspectProviderAspect(&robot_memory_inifin_)
 {
