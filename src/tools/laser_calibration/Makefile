@@ -20,12 +20,12 @@ include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_laser_calibration = stdc++ m fawkescore fawkesutils fawkesblackboard \
 		fawkesconfig fawkesinterface fawkesnetcomm fawkestf fawkespcl_utils \
-		Laser360Interface Laser720Interface Laser1080Interface
+		Laser360Interface Laser720Interface Laser1080Interface MotorInterface
 
 OBJS_laser_calibration = laser_calibration.o
 OBJS_all = $(OBJS_laser_calibration)
 
-REQUIRED_PCL_LIBS = filters
+REQUIRED_PCL_LIBS = common filters registration
 
 ifeq ($(HAVE_TF),1)
   ifeq ($(HAVE_PCL),1)
