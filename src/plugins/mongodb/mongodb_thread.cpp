@@ -233,7 +233,7 @@ MongoDBThread::loop()
 }
 
 mongo::DBClientBase *
-MongoDBThread::create_client(const std::string &config_name, bool allow_connect_fail)
+MongoDBThread::create_client(const std::string &config_name)
 {
 	const std::string cname{config_name.empty() ? "default" : config_name};
 
@@ -241,7 +241,7 @@ MongoDBThread::create_client(const std::string &config_name, bool allow_connect_
 		if (! client_configs_[cname]->is_enabled()) {
 			throw Exception("MongoDB config '%s' is not marked enabled", cname);
 		}
-		return client_configs_[cname]->create_client(allow_connect_fail);
+		return client_configs_[cname]->create_client();
 	} else {
 		throw Exception("No MongoDB config named '%s' exists", cname);
 	}

@@ -46,11 +46,6 @@ namespace fawkes {
  * configuration should be used.
  */
 
-/** @fn bool MongoDBAspect::mongodb_allow_connect_fail() const
- * Check if initial connection failure is acceptable.
- * @return true, if the connection may be handed over in a disconnected state.
- */
-
 /** @var mongo::DBClientBase *  MongoDBAspect::mongodb_client
  * MongoDB client to use to interact with the database. If database name, user
  * and password were given to constructor, authentication has been executed
@@ -65,15 +60,20 @@ namespace fawkes {
 /** Constructor.
  * @param config_name optional configuration name from which the
  * configuration for the database is read from the global configuration.
- * @param allow_connect_fail allow the initial connection to fail.
- * This is useful to account for instances which require some time to
- * startup or are not immediately available.
  */
-MongoDBAspect::MongoDBAspect(const char *config_name, bool allow_connect_fail)
+MongoDBAspect::MongoDBAspect(const char *config_name)
 {
 	add_aspect("MongoDBAspect");
-	if (config_name) mongodb_config_name_ = config_name;
-	mongodb_allow_connect_fail_ = allow_connect_fail;
+	mongodb_config_name_ = config_name;
+}
+
+/** Constructor.
+ * Using this constructor will leave the mongodb_client member uninitialized.
+ * The mongodb_connmgr can be used to create connections at a later point in time.
+ */
+MongoDBAspect::MongoDBAspect()
+{
+	add_aspect("MongoDBAspect");
 }
 
 

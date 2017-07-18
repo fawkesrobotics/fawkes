@@ -44,14 +44,11 @@ class MongoDBConnCreator
 	/** Create a new MongoDB client.
 	 * @param config_name MongoDB client configuration name for the desired
 	 * connection. May be empty in which case the default configuration is used.
-	 * @param allow_connect_fail true to allow that the connection may not have been
-	 * established upon return.
- 	 * @return MongoDB client for the given (or the default) configuration.
+	 * @return MongoDB client for the given (or the default) configuration.
 	 * @exception thrown if the initialization fails or the configuration for
 	 * the given name does not exist.
 	 */
-	virtual mongo::DBClientBase *  create_client(const std::string &config_name = "",
-	                                             bool allow_connect_fail = false) = 0;
+	virtual mongo::DBClientBase *  create_client(const std::string &config_name = "") = 0;
 
 	/** Delete a client.
 	 * @param client client to delete

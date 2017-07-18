@@ -44,7 +44,7 @@ class MongoDBClientConfig
 
 	MongoDBClientConfig(fawkes::Configuration *config, fawkes::Logger *logger,
 	                    std::string cfgname, std::string prefix);
-	mongo::DBClientBase * create_client(bool allow_connect_fail = false);
+	mongo::DBClientBase * create_client();
 
 	/** Check if configuration is enabled.
 	 * @return true if configuration is enabled, false otherwise

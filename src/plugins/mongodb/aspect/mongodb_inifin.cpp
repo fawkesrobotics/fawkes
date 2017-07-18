@@ -58,9 +58,11 @@ MongoDBAspectIniFin::init(Thread *thread)
 		                                      "has not. ", thread->name());
 	}
 
-	mongo::DBClientBase *client =
-		conn_creator_->create_client(mongodb_thread->mongodb_config_name(),
-		                             mongodb_thread->mongodb_allow_connect_fail());
+	mongo::DBClientBase *client = nullptr;
+
+	if (! mongodb_thread->mongodb_config_name().empty()) {
+		conn_creator_->create_client(mongodb_thread->mongodb_config_name());
+	}
 
 	mongodb_thread->init_MongoDBAspect(client, conn_creator_);
 }
