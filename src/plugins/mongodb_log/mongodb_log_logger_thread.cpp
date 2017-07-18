@@ -3,8 +3,7 @@
  *  mongodb_logger_thread.cpp - MongoDB logger thread
  *
  *  Created: Tue Dec 07 22:59:47 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -41,7 +40,8 @@ using namespace fawkes;
 /** Constructor. */
 MongoLogLoggerThread::MongoLogLoggerThread()
   : Thread("MongoLogLoggerThread", Thread::OPMODE_WAITFORWAKEUP),
-    LoggerAspect(this)
+    LoggerAspect(this),
+    MongoDBAspect("default")
 {
   __mutex = new Mutex();
 }

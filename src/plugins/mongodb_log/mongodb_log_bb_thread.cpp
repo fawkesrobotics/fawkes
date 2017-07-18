@@ -3,7 +3,7 @@
  *  mongodb_log_bb_thread.cpp - MongoDB blackboard logging Thread
  *
  *  Created: Wed Dec 08 23:09:29 2010
- *  Copyright  2010-2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2010-2017  Tim Niemueller [www.niemueller.de]
  *             2012       Bastian Klingen
  ****************************************************************************/
 
@@ -45,7 +45,8 @@ using namespace fawkes;
 
 /** Constructor. */
 MongoLogBlackboardThread::MongoLogBlackboardThread()
-  : Thread("MongoLogBlackboardThread", Thread::OPMODE_WAITFORWAKEUP)
+  : Thread("MongoLogBlackboardThread", Thread::OPMODE_WAITFORWAKEUP),
+    MongoDBAspect("default")
 {
 }
 
