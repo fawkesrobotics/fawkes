@@ -68,3 +68,5 @@ dynamixel:
     autorecover_enabled: true
     autorecover_flags: 127
 
+    # Allow verbose output on messages received
+    enable_verbose_output: false

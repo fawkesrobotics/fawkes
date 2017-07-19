@@ -85,6 +85,7 @@ DynamixelDriverThread::init()
   cfg_min_voltage_                      = config->get_float((cfg_prefix_ + "min_voltage").c_str());
   cfg_max_voltage_                      = config->get_float((cfg_prefix_ + "max_voltage").c_str());
   cfg_servos_to_discover_               = config->get_uints((cfg_prefix_ + "servos").c_str());
+  cfg_enable_verbose_output_            = config->get_bool((cfg_prefix_ + "enable_verbose_output").c_str());
 
   chain_ = new DynamixelChain(cfg_device_.c_str(), cfg_read_timeout_ms_, cfg_enable_echo_fix_, cfg_enable_connection_stability_, cfg_min_voltage_, cfg_max_voltage_);
   DynamixelChain::DeviceList devl = chain_->discover(cfg_disc_timeout_ms_, cfg_servos_to_discover_);
@@ -430,11 +431,15 @@ DynamixelDriverThread::bb_interface_message_received(Interface *interface,
       return false; // do not enqueue StopMessage
     } else if (message->is_of_type<DynamixelServoInterface::FlushMessage>()) {
       stop_motion(si->first);
-      logger->log_info(name(), "Flushing message queue");
+      if (cfg_enable_verbose_output_) {
+        logger->log_info(name(), "Flushing message queue");
+      }
       si->second.servo_if->msgq_flush();
       return false;
     } else {
-      logger->log_info(name(), "Received message of type %s, enqueueing", message->type());
+      if (cfg_enable_verbose_output_) {
+        logger->log_info(name(), "Received message of type %s, enqueueing", message->type());
+      }
       return true;
     }
   }
