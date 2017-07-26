@@ -52,7 +52,7 @@ ifeq ($(call gcc_atleast_version,4,3),1)
   endif
   ifeq ($(call gcc_atleast_version,5,0),1)
     HAVE_CPP17=1
-    CLFAGS_CPP17=-std=c++1z
+    CFLAGS_CPP17=-std=c++1z
   endif
   ifeq ($(call gcc_atleast_version,6,0),1)
     # The default for GCC 6 is C++14, so deactivate C++11 Flags.
