@@ -278,9 +278,9 @@ DynamixelDriverThread::exec_sensor()
       s.servo_if->set_velocity(get_velocity(servo_id));
       s.servo_if->set_alarm_shutdown(chain_->get_alarm_shutdown(servo_id));
       
-      if ((chain_->get_load(servo_id) & 0x3ff) > (cfg_prevent_alarm_shutdown_threshold_ * chain_->get_torque_limit(servo_id))) {
+      if (s.servo_if->is_enable_prevent_alarm_shutdown()) {
+        if ((chain_->get_load(servo_id) & 0x3ff) > (cfg_prevent_alarm_shutdown_threshold_ * chain_->get_torque_limit(servo_id))) {
         logger->log_warn(name(), "Servo with ID: %d is in overload condition: torque_limit: %d, load: %d", servo_id, chain_->get_torque_limit(servo_id), chain_->get_load(servo_id) & 0x3ff);
-        if (s.servo_if->is_enable_prevent_alarm_shutdown()) {
           // is the current load cw or ccw?
           if (chain_->get_load(servo_id) & 0x400) {
             goto_angle(servo_id, get_angle(servo_id) + 0.001);
