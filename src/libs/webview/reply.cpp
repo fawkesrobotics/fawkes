@@ -242,6 +242,15 @@ StaticWebReply::append_body(const char *format, ...)
   va_end(args);
 }
 
+/** Append string to body.
+ * @param s string to add, this may contain null bytes
+ */
+void
+StaticWebReply::append_body(const std::string &s)
+{
+	_body += s;
+}
+
 
 /** Append simple text line.
  * @param text text to append to body
