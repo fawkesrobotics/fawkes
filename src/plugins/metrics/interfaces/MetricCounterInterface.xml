@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="MetricCounterInterface" author="Tim Niemueller" year="2017">
+  <data>
+	  <comment>
+		  A counter is a cumulative metric that represents a single
+		  numerical value that only ever goes up. A counter is typically
+		  used to count requests served, tasks completed, errors occurred,
+		  etc. Counters should not be used to expose current counts of
+		  items whose number can also go down, e.g. the number of
+		  currently running threads. Use gauges for this use case.
+    </comment>
+
+    <field type="string" name="labels" length="512">
+		  Labels must be given as key-value pairs of the form
+		  "key=value[,key=value...]".
+	  </field>
+
+    <field type="double" name="value">
+	    The counter value.
+    </field>
+  </data>
+</interface>

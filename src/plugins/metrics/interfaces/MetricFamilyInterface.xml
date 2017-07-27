@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="MetricFamilyInterface" author="Tim Niemueller" year="2017">
+	<constants>
+		<enum name="MetricType">
+			<comment>
+				Describes the expected metrics type for this family.
+			</comment>
+			<item name="NOT_INITIALIZED" value="0">
+				The initialization has not been completed, yet.</item>
+			<item name="COUNTER" value="1">Counter</item>
+			<item name="GAUGE" value="2">Gauge</item>
+			<item name="UNTYPED" value="3">Untyped</item>
+			<!-- Not yet supported
+			     <item name="SUMMARY" value="4">Summary</item>
+			-->
+			<item name="HISTOGRAM" value="5">Histogram</item>
+		</enum>
+	</constants>
+	<data>
+	  <comment>
+		  Each MetricFamily within the same exposition must have a unique
+		  name. Each Metric within the same MetricFamily must have a
+		  unique set of LabelPair fields. Otherwise, the ingestion
+		  behavior is undefined.
+
+		  To determine all metrics, all interfaces of the appropriate type
+		  with the same prefix as a MetricFamilyInterface ID are opened
+		  and exported. Metrics of non-matching type are silently ignored.
+	  </comment>
+
+    <field type="string" name="name" length="128">
+	    The metric family name.
+    </field>
+    <field type="string" name="help" length="256">
+	    The metric family name.
+    </field>
+    <field type="MetricType" name="metric_type">
+	    The type of metrics to look for.
+    </field>
+  </data>
+</interface>

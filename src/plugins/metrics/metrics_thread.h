@@ -24,12 +24,27 @@
 #include "metrics_supplier.h"
 
 #include <core/threading/thread.h>
+#include <core/utils/lock_map.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <aspect/webview.h>
+#include <aspect/blocked_timing.h>
+
+#include <blackboard/interface_observer.h>
+#include <blackboard/interface_listener.h>
+
+#include <interfaces/MetricFamilyInterface.h>
 
 class MetricsRequestProcessor;
+
+namespace fawkes {
+	class MetricCounterInterface;
+	class MetricGaugeInterface;
+	class MetricUntypedInterface;
+	class MetricHistogramInterface;
+	//MetricSummaryInterface;
+}
 
 class MetricsThread
 : public fawkes::Thread,
@@ -37,6 +52,9 @@ class MetricsThread
   public fawkes::ConfigurableAspect,
 	public fawkes::BlackBoardAspect,
 	public fawkes::WebviewAspect,
+	public fawkes::BlockedTimingAspect,
+  public fawkes::BlackBoardInterfaceObserver,
+	public fawkes::BlackBoardInterfaceListener,
 	public MetricsSupplier
 {
  public:
@@ -50,10 +68,45 @@ class MetricsThread
   /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run();}
 
-  virtual std::list<io::prometheus::client::MetricFamily>  metrics();
+ private:
+  typedef union {
+	  fawkes::MetricCounterInterface *    counter;
+	  fawkes::MetricGaugeInterface *      gauge;
+	  fawkes::MetricUntypedInterface *    untyped;
+	  fawkes::MetricHistogramInterface *  histogram;
+	  //fawkes::MetricSummaryInterface *  summary;
+  } MetricFamilyData;
+  
+  typedef struct {
+	  fawkes::MetricFamilyInterface *  metric_family;
+	  fawkes::MetricFamilyInterface::MetricType metric_type;
+	  std::list<MetricFamilyData>      data;
+  } MetricFamilyBB;
 
  private:
+  // for BlackBoardInterfaceObserver
+  virtual void bb_interface_created(const char *type, const char *id) throw();
+
+  // for BlackBoardInterfaceListener
+  virtual void bb_interface_writer_removed(fawkes::Interface *interface,
+                                           unsigned int instance_serial) throw();
+  virtual void bb_interface_reader_removed(fawkes::Interface *interface,
+                                           unsigned int instance_serial) throw();
+  virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+
+  // for MetricsSupplier
+  virtual std::list<io::prometheus::client::MetricFamily>  metrics();
+
+  bool conditional_open(const std::string &id, MetricFamilyBB &mfbb);
+  void conditional_close(fawkes::Interface *interface) throw();
+  void parse_labels(const std::string &labels, io::prometheus::client::Metric *m);
+  
+ private: 
   MetricsRequestProcessor *req_proc_;
+  fawkes::LockMap<std::string, MetricFamilyBB>  metric_bbs_;
+
+  fawkes::MetricFamilyInterface *mfi_loop_count_;
+  fawkes::MetricCounterInterface *mci_loop_count_;
 };
 
 #endif

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="MetricHistogramInterface" author="Tim Niemueller" year="2017">
+  <data>
+	  <comment>
+		  A histogram samples observations (usually things like request
+		  durations or response sizes) and counts them in configurable
+		  buckets. It also provides a sum of all observed values.
+
+		  A histogram with a base metric name of *basename* exposes
+		  multiple time series during a scrape:
+
+		  - cumulative counters for the observation buckets, exposed as
+		    *basename*_bucket{le="*upper inclusive bound*"}
+
+		  - the total sum of all observed values, exposed as *basename*_sum
+
+		  - the count of events that have been observed, exposed as
+		    *basename*_count (identical to *basename*_bucket{le="+Inf"}
+		    above)
+
+		  When operating on buckets, remember that the histogram is
+		  cumulative. See histograms and summaries for details of
+		  histogram usage and differences to summaries.
+
+		  The interface supports histograms of up to 16 buckets.
+	  </comment>
+
+	  <field type="string" name="labels" length="512">
+		  Labels must be given as key-value pairs of the form
+		  "key=value[,key=value...]".
+	  </field>
+	  
+	  <field type="uint64" name="sample_count">
+		  The number of all samples.
+    </field>
+	  <field type="double" name="sample_sum">
+		  The sum of all samples.
+	  </field>
+
+	  <field type="uint32" name="bucket_count">
+		  The number of valid entries in bucket array fields.
+	  </field>
+	  <field type="uint64" name="bucket_cumulative_count" length="16">
+		  The cumulative number of elements for the buckets.
+	  </field>
+	  <field type="double" name="bucket_upper_bound" length="16">
+		  The upper bound for the given bucket.
+	  </field>
+  </data>
+</interface>

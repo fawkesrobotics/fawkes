@@ -21,7 +21,17 @@
 #include "metrics_thread.h"
 #include "metrics_processor.h"
 
+#include <core/threading/mutex_locker.h>
+
+#include <interfaces/MetricCounterInterface.h>
+#include <interfaces/MetricGaugeInterface.h>
+#include <interfaces/MetricUntypedInterface.h>
+#include <interfaces/MetricHistogramInterface.h>
+
 #include <webview/url_manager.h>
+#include <utils/misc/string_split.h>
+
+#include <algorithm>
 
 using namespace fawkes;
 
@@ -35,7 +45,9 @@ using namespace fawkes;
 
 /** Constructor. */
 MetricsThread::MetricsThread()
-  : Thread("MetricsThread", Thread::OPMODE_WAITFORWAKEUP)
+	: Thread("MetricsThread", Thread::OPMODE_WAITFORWAKEUP),
+	  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
+	  BlackBoardInterfaceListener("MetricsThread")
 {
 }
 
@@ -50,6 +62,37 @@ MetricsThread::init()
 {
 	req_proc_ = new MetricsRequestProcessor(this, logger, URL_PREFIX);
 	webview_url_manager->register_baseurl(URL_PREFIX, req_proc_);
+
+	bbio_add_observed_create("MetricFamilyInterface", "*");
+  blackboard->register_observer(this);
+
+	MutexLocker lock(metric_bbs_.mutex());
+  std::list<MetricFamilyInterface *> ifaces =
+	  blackboard->open_multiple_for_reading<MetricFamilyInterface>("*");
+
+  for (auto & i : ifaces) {
+	  logger->log_info(name(), "Got metric family %s", i->id());
+	  i->read();
+	  MetricFamilyBB mfbb{.metric_family = i, .metric_type = i->metric_type()};
+	  metric_bbs_[i->id()] = mfbb;
+	  
+	  if (! conditional_open(i->id(), metric_bbs_[i->id()])) {
+		  bbil_add_data_interface(i);
+	  }
+	}
+
+  blackboard->register_listener(this);
+  lock.unlock();
+
+  mci_loop_count_ = blackboard->open_for_writing<MetricCounterInterface>("/metrics/loop-count/value");
+  mci_loop_count_->set_labels("test=label,foo=bar");
+  mci_loop_count_->write();
+
+  mfi_loop_count_ = blackboard->open_for_writing<MetricFamilyInterface>("/metrics/loop-count");
+  mfi_loop_count_->set_name("loop_count");
+  mfi_loop_count_->set_help("Number of Fawkes main loop iterations");
+  mfi_loop_count_->set_metric_type(MetricFamilyInterface::COUNTER);
+  mfi_loop_count_->write();
 }
 
 void
@@ -57,17 +100,297 @@ MetricsThread::finalize()
 {
 	webview_url_manager->unregister_baseurl(URL_PREFIX);
 	delete req_proc_;
+
+	blackboard->close(mci_loop_count_);
+	blackboard->close(mfi_loop_count_);
 }
 
 
 void
 MetricsThread::loop()
 {
+	mci_loop_count_->set_value(mci_loop_count_->value() + 1);
+	mci_loop_count_->write();
 }
+
+
+void
+MetricsThread::bb_interface_created(const char *type, const char *id) throw()
+{
+  MutexLocker lock(metric_bbs_.mutex());
+  MetricFamilyInterface *mfi;
+  try {
+    mfi = blackboard->open_for_reading<MetricFamilyInterface>(id);
+    logger->log_info(name(), "Opened %s:%s", type, id);
+  } catch (Exception &e) {
+    // ignored
+    logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what_no_backtrace());
+    return;
+  }
+
+  try {
+    bbil_add_reader_interface(mfi);
+    bbil_add_writer_interface(mfi);
+    bbil_add_data_interface(mfi);
+    blackboard->update_listener(this);
+  } catch (Exception &e) {
+    logger->log_warn(name(), "Failed to register for %s:%s: %s",
+                     type, id, e.what());
+    try {
+      bbil_remove_reader_interface(mfi);
+      bbil_remove_writer_interface(mfi);
+      blackboard->update_listener(this);
+      blackboard->close(mfi);
+    } catch (Exception &e) {
+      logger->log_error(name(), "Failed to deregister %s:%s during error recovery: %s",
+                        type, id, e.what());
+    }
+    return;
+  }
+  MetricFamilyBB mfbb{.metric_family = mfi, .metric_type = mfi->metric_type()};
+  metric_bbs_[id] = mfbb;
+}
+
 
 std::list<io::prometheus::client::MetricFamily>
 MetricsThread::metrics()
 {
 	std::list<io::prometheus::client::MetricFamily> rv;
+  MutexLocker lock(metric_bbs_.mutex());
+  for (auto & mbbp : metric_bbs_) {
+		auto & mfbb = mbbp.second;
+
+		io::prometheus::client::MetricFamily mf;
+		mfbb.metric_family->read();
+		mf.set_name(mfbb.metric_family->name());
+		mf.set_help(mfbb.metric_family->help());
+
+		switch (mfbb.metric_type) {
+		case MetricFamilyInterface::COUNTER:
+			mf.set_type(io::prometheus::client::COUNTER);
+			for (const auto &d : mfbb.data) {
+				d.counter->read();
+				io::prometheus::client::Metric *m = mf.add_metric();
+				parse_labels(d.counter->labels(), m);
+				m->mutable_counter()->set_value(d.counter->value());
+			}
+			break;
+
+		case MetricFamilyInterface::GAUGE:
+			mf.set_type(io::prometheus::client::GAUGE);
+			for (const auto &d : mfbb.data) {
+				d.gauge->read();
+				io::prometheus::client::Metric *m = mf.add_metric();
+				parse_labels(d.gauge->labels(), m);
+				m->mutable_gauge()->set_value(d.gauge->value());
+			}
+			break;
+
+		case MetricFamilyInterface::UNTYPED:
+			mf.set_type(io::prometheus::client::UNTYPED);
+			for (const auto &d : mfbb.data) {
+				d.untyped->read();
+				io::prometheus::client::Metric *m = mf.add_metric();
+				parse_labels(d.untyped->labels(), m);
+				m->mutable_untyped()->set_value(d.untyped->value());
+			}
+			break;
+
+		case MetricFamilyInterface::HISTOGRAM:
+			mf.set_type(io::prometheus::client::HISTOGRAM);
+			for (const auto &d : mfbb.data) {
+				d.histogram->read();
+				io::prometheus::client::Metric *m = mf.add_metric();
+				parse_labels(d.histogram->labels(), m);
+				io::prometheus::client::Histogram *h = m->mutable_histogram();
+				h->set_sample_count(d.histogram->sample_count());
+				h->set_sample_sum(d.histogram->sample_sum());
+				for (unsigned int i = 0; i < d.histogram->bucket_count(); ++i) {
+					io::prometheus::client::Bucket *b = h->add_bucket();
+					b->set_cumulative_count(d.histogram->bucket_cumulative_count(i));
+					b->set_upper_bound(d.histogram->bucket_upper_bound(i));
+				}
+			}
+			break;
+
+		case MetricFamilyInterface::NOT_INITIALIZED:
+			// ignore
+			break;
+		}
+		rv.push_back(std::move(mf));
+	}
 	return rv;
+}
+
+
+void
+MetricsThread::parse_labels(const std::string &labels, io::prometheus::client::Metric *m)
+{
+	std::vector<std::string> labelv = str_split(labels, ',');
+	for (const std::string &l : labelv) {
+		std::vector<std::string> key_value = str_split(l, '=');
+		if (key_value.size() == 2) {
+			io::prometheus::client::LabelPair *lp = m->add_label();
+			lp->set_name(key_value[0]);
+			lp->set_value(key_value[1]);
+		} else {
+			logger->log_warn(name(), "Invalid label '%s'", l.c_str());
+		}
+	}
+}
+
+
+void
+MetricsThread::bb_interface_writer_removed(fawkes::Interface *interface,
+                                           unsigned int instance_serial) throw()
+{
+	conditional_close(interface);
+}
+
+void
+MetricsThread::bb_interface_reader_removed(fawkes::Interface *interface,
+                                           unsigned int instance_serial) throw()
+{
+	conditional_close(interface);
+}
+
+void
+MetricsThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
+{
+	MetricFamilyInterface *mfi = dynamic_cast<MetricFamilyInterface *>(interface);
+	if (! mfi) return;
+	if (! mfi->has_writer()) return;
+
+	mfi->read();
+	if (mfi->metric_type() == MetricFamilyInterface::NOT_INITIALIZED) {
+		logger->log_warn(name(), "Got data changed event for %s which is not yet initialized",
+		                 mfi->uid());
+		return;
+	}
+
+	MutexLocker lock(metric_bbs_.mutex());
+	if (metric_bbs_.find(mfi->id()) == metric_bbs_.end()) {
+		logger->log_warn(name(), "Got data changed event for %s which is not registered",
+		                 mfi->uid());
+		return;
+	}
+
+	metric_bbs_[mfi->id()].metric_type = mfi->metric_type();
+	if (conditional_open(mfi->id(), metric_bbs_[mfi->id()])) {
+		bbil_remove_data_interface(mfi);
+		blackboard->update_listener(this);
+	}
+}
+
+
+bool
+MetricsThread::conditional_open(const std::string &id, MetricFamilyBB &mfbb)
+{
+	mfbb.metric_family->read();
+
+  std::string data_id_pattern=id + "/*";
+
+  switch (mfbb.metric_type) {
+  case MetricFamilyInterface::COUNTER:
+	  {
+		  std::list<MetricCounterInterface *> ifaces =
+			  blackboard->open_multiple_for_reading<MetricCounterInterface>(data_id_pattern.c_str());
+		  if (ifaces.empty())  return false;
+		  std::transform(ifaces.begin(), ifaces.end(), std::back_inserter(mfbb.data),
+		                 [](MetricCounterInterface *iface) { return MetricFamilyData{.counter=iface}; });
+	  }
+	  break;
+
+  case MetricFamilyInterface::GAUGE:
+	  {
+		  std::list<MetricGaugeInterface *> ifaces =
+			  blackboard->open_multiple_for_reading<MetricGaugeInterface>(data_id_pattern.c_str());
+		  if (ifaces.empty())  return false;
+		  std::transform(ifaces.begin(), ifaces.end(), std::back_inserter(mfbb.data),
+		                 [](MetricGaugeInterface *iface) { return MetricFamilyData{.gauge=iface}; });
+	  }
+	  break;
+
+  case MetricFamilyInterface::UNTYPED:
+	  {
+		  std::list<MetricUntypedInterface *> ifaces =
+			  blackboard->open_multiple_for_reading<MetricUntypedInterface>(data_id_pattern.c_str());
+		  if (ifaces.empty())  return false;
+		  std::transform(ifaces.begin(), ifaces.end(), std::back_inserter(mfbb.data),
+		                 [](MetricUntypedInterface *iface) { return MetricFamilyData{.untyped=iface}; });
+	  }
+	  break;
+
+  case MetricFamilyInterface::HISTOGRAM:
+	  {
+		  std::list<MetricHistogramInterface *> ifaces =
+			  blackboard->open_multiple_for_reading<MetricHistogramInterface>(data_id_pattern.c_str());
+		  if (ifaces.empty())  return false;
+		  std::transform(ifaces.begin(), ifaces.end(), std::back_inserter(mfbb.data),
+		                 [](MetricHistogramInterface *iface) { return MetricFamilyData{.histogram=iface}; });
+	  }
+	  break;
+
+  case MetricFamilyInterface::NOT_INITIALIZED:
+		logger->log_info(name(), "Metric family %s not yet initialized", id.c_str());
+	  return false;
+  }
+
+  logger->log_info(name(), "Initialized metric %s", id.c_str());
+  return true;
+}
+
+
+void
+MetricsThread::conditional_close(Interface *interface) throw()
+{
+	MetricFamilyInterface *mfi = dynamic_cast<MetricFamilyInterface *>(interface);
+	if (! mfi)  return;
+
+  MutexLocker lock(metric_bbs_.mutex());
+
+  if (metric_bbs_.find(mfi->id()) == metric_bbs_.end()) {
+	  logger->log_warn(name(), "Called to close %s whic was not opened", mfi->uid());
+	  return;
+  }
+
+  logger->log_info(name(), "Last on metric family %s, closing", interface->id());
+  auto & mfbb(metric_bbs_[mfi->id()]);
+
+  switch (mfbb.metric_type) {
+  case MetricFamilyInterface::COUNTER:
+	  std::for_each(mfbb.data.begin(), mfbb.data.end(),
+	                [this](auto &d) { this->blackboard->close(d.counter); });
+	  break;
+
+  case MetricFamilyInterface::GAUGE:
+	  std::for_each(mfbb.data.begin(), mfbb.data.end(),
+	                [this](auto &d) { this->blackboard->close(d.gauge); });
+	  break;
+  case MetricFamilyInterface::UNTYPED:
+	  std::for_each(mfbb.data.begin(), mfbb.data.end(),
+	                [this](auto &d) { this->blackboard->close(d.untyped); });
+	  break;
+  case MetricFamilyInterface::HISTOGRAM:
+	  std::for_each(mfbb.data.begin(), mfbb.data.end(),
+	                [this](auto &d) { this->blackboard->close(d.histogram); });
+	  break;
+  case MetricFamilyInterface::NOT_INITIALIZED:
+	  bbil_remove_data_interface(mfi);
+	  break;
+  }
+
+  metric_bbs_.erase(mfi->id());
+  lock.unlock();
+
+  std::string uid = interface->uid();
+  try {
+	  bbil_remove_reader_interface(interface);
+	  bbil_remove_writer_interface(interface);
+	  blackboard->update_listener(this);
+	  blackboard->close(interface);
+  } catch (Exception &e) {
+	  logger->log_error(name(), "Failed to unregister or close %s: %s",
+	                    uid.c_str(), e.what());
+  }
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="MetricUntypedInterface" author="Tim Niemueller" year="2017">
+  <data>
+	  <comment>
+		  This is an untyped metric of some sort. Use the specific types
+		  if possible and resort to the untyped metric if that does not
+		  fit.
+    </comment>
+
+    <field type="string" name="labels" length="512">
+		  Labels must be given as key-value pairs of the form
+		  "key=value[,key=value...]".
+	  </field>
+
+    <field type="double" name="value">
+	    The counter value.
+    </field>
+  </data>
+</interface>
