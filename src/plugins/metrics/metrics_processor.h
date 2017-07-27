@@ -47,10 +47,6 @@ class MetricsRequestProcessor : public fawkes::WebRequestProcessor
   MetricsSupplier      *supplier_;
   fawkes::Logger       *logger_;
   std::string           base_url_;
-
-  io::prometheus::client::MetricFamily mf_num_req_;
-  io::prometheus::client::MetricFamily mf_hist_proc_time_;
-
 };
 
 #endif

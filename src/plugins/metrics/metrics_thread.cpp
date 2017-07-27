@@ -32,6 +32,7 @@
 #include <utils/misc/string_split.h>
 
 #include <algorithm>
+#include <chrono>
 
 using namespace fawkes;
 
@@ -60,9 +61,6 @@ MetricsThread::~MetricsThread()
 void
 MetricsThread::init()
 {
-	req_proc_ = new MetricsRequestProcessor(this, logger, URL_PREFIX);
-	webview_url_manager->register_baseurl(URL_PREFIX, req_proc_);
-
 	bbio_add_observed_create("MetricFamilyInterface", "*");
   blackboard->register_observer(this);
 
@@ -82,17 +80,47 @@ MetricsThread::init()
 	}
 
   blackboard->register_listener(this);
+
   lock.unlock();
 
-  mci_loop_count_ = blackboard->open_for_writing<MetricCounterInterface>("/metrics/loop-count/value");
-  mci_loop_count_->set_labels("test=label,foo=bar");
-  mci_loop_count_->write();
+  imf_loop_count_ = std::make_shared<io::prometheus::client::MetricFamily>();
+  imf_loop_count_->set_name("fawkes_loop_count");
+  imf_loop_count_->set_help("Number of Fawkes main loop iterations");
+  imf_loop_count_->set_type(io::prometheus::client::COUNTER);
+  imf_loop_count_->add_metric();
+  internal_metrics_.push_back(imf_loop_count_);
 
-  mfi_loop_count_ = blackboard->open_for_writing<MetricFamilyInterface>("/metrics/loop-count");
-  mfi_loop_count_->set_name("loop_count");
-  mfi_loop_count_->set_help("Number of Fawkes main loop iterations");
-  mfi_loop_count_->set_metric_type(MetricFamilyInterface::COUNTER);
-  mfi_loop_count_->write();
+  imf_metrics_requests_ = std::make_shared<io::prometheus::client::MetricFamily>();
+  imf_metrics_requests_->set_name("fawkes_metrics_requests");
+  imf_metrics_requests_->set_help("Number of requests for metrics");
+  imf_metrics_requests_->set_type(io::prometheus::client::COUNTER);
+  imf_metrics_requests_->add_metric();
+  internal_metrics_.push_back(imf_metrics_requests_);
+
+  try {
+	  std::vector<float> buckets_le = config->get_floats("/metrics/internal/metrics_requests/buckets");
+
+	  if (! buckets_le.empty()) {
+		  std::sort(buckets_le.begin(), buckets_le.end());
+
+		  imf_metrics_proctime_ = std::make_shared<io::prometheus::client::MetricFamily>();
+		  imf_metrics_proctime_->set_name("fawkes_metrics_proctime");
+		  imf_metrics_proctime_->set_help("Time required to process metrics");
+		  imf_metrics_proctime_->set_type(io::prometheus::client::HISTOGRAM);
+		  auto m = imf_metrics_proctime_->add_metric();
+		  auto h = m->mutable_histogram();
+		  for (float &b : buckets_le) {
+			  h->add_bucket()->set_upper_bound(b);
+		  }
+		  internal_metrics_.push_back(imf_metrics_proctime_);
+	  }
+  } catch (Exception &e) {
+	  logger->log_warn(name(), "Internal metric metrics_proctime bucket bounds not configured, disabling");
+  }
+
+	req_proc_ = new MetricsRequestProcessor(this, logger, URL_PREFIX);
+	webview_url_manager->register_baseurl(URL_PREFIX, req_proc_);
+
 }
 
 void
@@ -100,17 +128,14 @@ MetricsThread::finalize()
 {
 	webview_url_manager->unregister_baseurl(URL_PREFIX);
 	delete req_proc_;
-
-	blackboard->close(mci_loop_count_);
-	blackboard->close(mfi_loop_count_);
 }
 
 
 void
 MetricsThread::loop()
 {
-	mci_loop_count_->set_value(mci_loop_count_->value() + 1);
-	mci_loop_count_->write();
+	imf_loop_count_->mutable_metric(0)->mutable_counter()->set_value
+		(imf_loop_count_->metric(0).counter().value() + 1);
 }
 
 
@@ -155,7 +180,14 @@ MetricsThread::bb_interface_created(const char *type, const char *id) throw()
 std::list<io::prometheus::client::MetricFamily>
 MetricsThread::metrics()
 {
+	std::chrono::high_resolution_clock::time_point proc_start =
+		std::chrono::high_resolution_clock::now();
+	
+	imf_metrics_requests_->mutable_metric(0)->mutable_counter()->set_value
+		(imf_metrics_requests_->metric(0).counter().value() + 1);
+
 	std::list<io::prometheus::client::MetricFamily> rv;
+
   MutexLocker lock(metric_bbs_.mutex());
   for (auto & mbbp : metric_bbs_) {
 		auto & mfbb = mbbp.second;
@@ -219,6 +251,28 @@ MetricsThread::metrics()
 		}
 		rv.push_back(std::move(mf));
 	}
+
+  if (imf_metrics_proctime_) {
+	  std::chrono::high_resolution_clock::time_point proc_end =
+		  std::chrono::high_resolution_clock::now();
+	  const std::chrono::duration<double> proc_diff = proc_end - proc_start;
+	  for (int i = 0; i < imf_metrics_proctime_->metric(0).histogram().bucket_size(); ++i) {
+		  io::prometheus::client::Histogram *h =
+			  imf_metrics_proctime_->mutable_metric(0)->mutable_histogram();
+		  if (proc_diff.count() < h->bucket(i).upper_bound()) {
+			  io::prometheus::client::Bucket *b = h->mutable_bucket(i);
+			  b->set_cumulative_count(b->cumulative_count() + 1);
+			  h->set_sample_count(h->sample_count() + 1);
+			  h->set_sample_sum(h->sample_sum() + proc_diff.count());
+			  break;
+		  }
+	  }
+  }
+
+  for (auto &im : internal_metrics_) {
+		rv.push_back(std::move(*im));
+	}
+
 	return rv;
 }
 

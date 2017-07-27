@@ -36,6 +36,8 @@
 
 #include <interfaces/MetricFamilyInterface.h>
 
+#include <memory>
+
 class MetricsRequestProcessor;
 
 namespace fawkes {
@@ -44,6 +46,14 @@ namespace fawkes {
 	class MetricUntypedInterface;
 	class MetricHistogramInterface;
 	//MetricSummaryInterface;
+}
+
+namespace io {
+	namespace prometheus {
+		namespace client {
+			class MetricFamily;
+		}
+	}
 }
 
 class MetricsThread
@@ -105,8 +115,12 @@ class MetricsThread
   MetricsRequestProcessor *req_proc_;
   fawkes::LockMap<std::string, MetricFamilyBB>  metric_bbs_;
 
-  fawkes::MetricFamilyInterface *mfi_loop_count_;
-  fawkes::MetricCounterInterface *mci_loop_count_;
+  // Internal metric families
+  std::shared_ptr<io::prometheus::client::MetricFamily> imf_loop_count_;
+  std::shared_ptr<io::prometheus::client::MetricFamily> imf_metrics_requests_;
+  std::shared_ptr<io::prometheus::client::MetricFamily> imf_metrics_proctime_;
+
+  std::vector<std::shared_ptr<io::prometheus::client::MetricFamily>> internal_metrics_;
 };
 
 #endif

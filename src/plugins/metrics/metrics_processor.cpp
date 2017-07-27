@@ -53,13 +53,6 @@ MetricsRequestProcessor::MetricsRequestProcessor(MetricsSupplier *supplier,
                                                  const std::string &baseurl)
 	: supplier_(supplier), logger_(logger), base_url_(baseurl)
 {
-	mf_num_req_.set_name("metrics_requests_processed");
-	mf_num_req_.set_type(io::prometheus::client::COUNTER);
-	mf_num_req_.set_help("Number of requests handled by the metrics plugin");
-	io::prometheus::client::Metric *m = mf_num_req_.add_metric();
-	io::prometheus::client::LabelPair *l = m->add_label();
-	l->set_name("app");
-	l->set_value("fawkes");
 }
 
 
@@ -79,11 +72,7 @@ MetricsRequestProcessor::process_request(const fawkes::WebRequest *request)
 	// std::string subpath = request->url().substr(base_url_.length());
 	StaticWebReply *reply = new StaticWebReply(WebReply::HTTP_OK);
 	
-	io::prometheus::client::Counter *req_c =	mf_num_req_.mutable_metric(0)->mutable_counter();
-	req_c->set_value(req_c->value() + 1);
-
 	std::list<io::prometheus::client::MetricFamily> metrics(std::move(supplier_->metrics()));
-	metrics.insert(metrics.begin(), mf_num_req_);
 
 	if (accepted_encoding.find("application/vnd.google.protobuf") != std::string::npos) {
 		reply->add_header("Content-type",
@@ -245,12 +234,12 @@ MetricsRequestProcessor::process_request(const fawkes::WebRequest *request)
 									b_label = labels.substr(0, labels.size() - 1) +
 										",le=" + std::to_string(bucket.upper_bound()) + "}";
 								}
-								reply->append_body("%s%s %f%s\n", metric.name().c_str(),
+								reply->append_body("%s%s %lu%s\n", metric.name().c_str(),
 								                   b_label.c_str(), bucket.cumulative_count(), timestamp.c_str());
 							}
 							reply->append_body("%s_sum%s %f%s\n", metric.name().c_str(),
 							                   labels.c_str(), histogram.sample_sum(), timestamp.c_str());
-							reply->append_body("%s_count%s %f%s\n", metric.name().c_str(),
+							reply->append_body("%s_count%s %lu%s\n", metric.name().c_str(),
 							                   labels.c_str(), histogram.sample_count(), timestamp.c_str());
 						} else {
 							reply->append_body("# ERROR %s%svalue not set\n",
