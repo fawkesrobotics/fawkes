@@ -23,6 +23,7 @@
 #include "metrics_supplier.h"
 
 #include <webview/page_reply.h>
+#include <logging/logger.h>
 
 #include <sstream>
 #if GOOGLE_PROTOBUF_VERSION >= 3000000
@@ -31,6 +32,8 @@
 #endif
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
+
+#include <algorithm>
 
 using namespace fawkes;
 
@@ -101,7 +104,8 @@ MetricsRequestProcessor::process_request(const fawkes::WebRequest *request)
 			metric.SerializeToString(&buffer);
 			ss << buffer;
 		}
-		reply->append_body("%s", ss.str().c_str());		
+		
+		reply->append_body(ss.str());		
 	} else if (accepted_encoding.find("application/json") != std::string::npos) {
 #if GOOGLE_PROTOBUF_VERSION >= 3000000
 		reply->add_header("Content-type", "application/json");
@@ -126,15 +130,31 @@ MetricsRequestProcessor::process_request(const fawkes::WebRequest *request)
 #endif
 	} else {
 		reply->add_header("Content-type", "text/plain; version=0.0.4");
+		reply->append_body("# Fawkes Metrics\n");
 		for (auto&& metric : metrics) {
 			if (metric.metric_size() > 0) {
+				reply->append_body("\n");
 				if (metric.has_help()) {
 					reply->append_body("# HELP %s %s\n", metric.name().c_str(),
 					                   metric.help().c_str());
 				}
 				if (metric.has_type()) {
-					reply->append_body("# TYPE %s %s\n", metric.name().c_str(),
-					                   io::prometheus::client::MetricType_Name(metric.type()).c_str());
+					const char *typestr = NULL;
+					switch (metric.type()) {
+					case io::prometheus::client::COUNTER:
+						typestr = "counter"; break;
+					case io::prometheus::client::GAUGE:
+						typestr = "gauge"; break;
+					case io::prometheus::client::UNTYPED:
+						typestr = "untyped"; break;
+					case io::prometheus::client::HISTOGRAM:
+						typestr = "histogram"; break;
+					case io::prometheus::client::SUMMARY:
+						typestr = "summary"; break;
+					}
+					if (typestr != NULL) {
+						reply->append_body("# TYPE %s %s\n", metric.name().c_str(), typestr);
+					}
 				}
 				for (int i = 0; i < metric.metric_size(); ++i) { 				
 					
@@ -146,7 +166,7 @@ MetricsRequestProcessor::process_request(const fawkes::WebRequest *request)
 						ss << " {";
 						ss << m.label(0).name() << "=" << m.label(0).value();
 						for (int l = 1; l < m.label_size(); ++l) {
-							const io::prometheus::client::LabelPair &label = m.label(i);
+							const io::prometheus::client::LabelPair &label = m.label(l);
 							ss << "," << label.name() << "=" << label.value();
 						}
 						ss << "}";
