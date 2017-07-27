@@ -6,6 +6,7 @@ LaserClusterInterface.h
 HumanSkeletonProjectionInterface.h
 KatanaInterface.h
 LaserLineInterface.h
+Metric*Interface.h
 NaoJointPositionInterface.h
 NaoJointStiffnessInterface.h
 NaoSensorInterface.h
