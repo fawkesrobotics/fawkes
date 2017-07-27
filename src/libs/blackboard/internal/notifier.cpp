@@ -156,8 +156,9 @@ BlackBoardNotifier::proc_listener_maybe_queue(bool op,
 {
   MutexLocker lock(mutex);
   if (events > 0) {
-    LibLogger::log_warn("BlackBoardNotifier", "Registering interface "
+    LibLogger::log_warn("BlackBoardNotifier", "%s interface "
                         "listener %s for %s events (queued)",
+                        op ? "Registering" : "Unregistering",
                         listener->bbil_name(), hint);
 
     queue_listener(op, interface, listener, queue);
