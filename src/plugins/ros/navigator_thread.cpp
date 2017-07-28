@@ -54,7 +54,6 @@ RosNavigatorThread::init()
   //tell the action client that we want to spin a thread by default
   ac_ = new MoveBaseClient("move_base", false);
 
-  logger->log_error(name(),"Change Interface (x,y) ");
   cmd_sent_ = false;
   connected_history_ = false;
   nav_if_->set_final(true);
@@ -236,15 +235,20 @@ RosNavigatorThread::loop()
 
       // stop
       if (NavigatorInterface::StopMessage *msg = nav_if_->msgq_first_safe(msg)) {
-        logger->log_info(name(), "Stop message received");
-        nav_if_->set_dest_x(0);
-        nav_if_->set_dest_y(0);
-        nav_if_->set_dest_ori(0);
+	      if (msg->msgid() == 0 || msg->msgid() == nav_if_->msgid()) {
+		      logger->log_info(name(), "Stop message received");
+		      nav_if_->set_dest_x(0);
+		      nav_if_->set_dest_y(0);
+		      nav_if_->set_dest_ori(0);
 
-        nav_if_->set_msgid(msg->id());
-        nav_if_->write();
+		      nav_if_->set_msgid(msg->id());
+		      nav_if_->write();
 
-        stop_goals();
+		      stop_goals();
+	      } else {
+		      logger->log_warn(name(), "Received stop message for non-active command "
+		                       "(got %u, running %u)", msg->msgid(), nav_if_->msgid());
+	      }
       }
 
       // cartesian goto
