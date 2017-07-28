@@ -834,6 +834,7 @@ NavGraphThread::send_next_goal()
 		      tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
 
     nav_if_->msgq_enqueue(gotomsg);
+    cmd_msgid_ = gotomsg->id();
     cmd_sent_at_->stamp();
 
     error_at_->stamp();
