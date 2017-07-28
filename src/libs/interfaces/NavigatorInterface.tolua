@@ -33,6 +33,7 @@ class NavigatorInterface : public Interface
 
   class StopMessage : public Message
   {
+    StopMessage(unsigned int ini_msgid);
     StopMessage();
     ~StopMessage();
 
@@ -53,6 +54,9 @@ class NavigatorInterface : public Interface
     void              unref();
     unsigned int      refcount();
 
+    unsigned int msgid();
+    void set_msgid(const unsigned int new_msgid);
+    int maxlenof_msgid() const;
   };
 
   class TurnMessage : public Message
