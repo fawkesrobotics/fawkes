@@ -21,7 +21,8 @@
 #ifndef __PLUGINS_METRICS_METRICS_THREAD_H_
 #define __PLUGINS_METRICS_METRICS_THREAD_H_
 
-#include "metrics_supplier.h"
+#include "aspect/metrics_supplier.h"
+#include "aspect/metrics_inifin.h"
 
 #include <core/threading/thread.h>
 #include <core/utils/lock_map.h>
@@ -30,6 +31,7 @@
 #include <aspect/blackboard.h>
 #include <aspect/webview.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/aspect_provider.h>
 
 #include <blackboard/interface_observer.h>
 #include <blackboard/interface_listener.h>
@@ -63,9 +65,11 @@ class MetricsThread
 	public fawkes::BlackBoardAspect,
 	public fawkes::WebviewAspect,
 	public fawkes::BlockedTimingAspect,
+	public fawkes::AspectProviderAspect,
   public fawkes::BlackBoardInterfaceObserver,
 	public fawkes::BlackBoardInterfaceListener,
-	public MetricsSupplier
+	public fawkes::MetricsSupplier,
+	public fawkes::MetricsManager
 {
  public:
   MetricsThread();
@@ -107,6 +111,15 @@ class MetricsThread
   // for MetricsSupplier
   virtual std::list<io::prometheus::client::MetricFamily>  metrics();
 
+  // for MetricsManager
+  virtual std::list<io::prometheus::client::MetricFamily>  all_metrics();
+
+  virtual void add_supplier(MetricsSupplier *supplier);
+  virtual void remove_supplier(MetricsSupplier *supplier);
+
+  virtual const fawkes::LockList<MetricsSupplier *> &  metrics_suppliers() const;
+
+
   bool conditional_open(const std::string &id, MetricFamilyBB &mfbb);
   void conditional_close(fawkes::Interface *interface) throw();
   void parse_labels(const std::string &labels, io::prometheus::client::Metric *m);
@@ -115,12 +128,16 @@ class MetricsThread
   MetricsRequestProcessor *req_proc_;
   fawkes::LockMap<std::string, MetricFamilyBB>  metric_bbs_;
 
+  fawkes::MetricsAspectIniFin  metrics_aspect_inifin_;
+
   // Internal metric families
   std::shared_ptr<io::prometheus::client::MetricFamily> imf_loop_count_;
   std::shared_ptr<io::prometheus::client::MetricFamily> imf_metrics_requests_;
   std::shared_ptr<io::prometheus::client::MetricFamily> imf_metrics_proctime_;
 
   std::vector<std::shared_ptr<io::prometheus::client::MetricFamily>> internal_metrics_;
+
+  fawkes::LockList<MetricsSupplier *>  metrics_suppliers_;
 };
 
 #endif

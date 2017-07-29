@@ -19,15 +19,15 @@ include $(BUILDCONFDIR)/webview/webview.mk
 include $(BUILDSYSDIR)/protobuf.mk
 
 
-PRESUBDIRS = interfaces protobuf
+PRESUBDIRS = aspect interfaces protobuf
 
 LIBS_metrics = fawkescore fawkesutils fawkesaspects	\
-  fawkesinterface fawkesblackboard fawkeswebview \
+  fawkesinterface fawkesblackboard fawkeswebview fawkesmetricsaspect \
   MetricFamilyInterface MetricCounterInterface MetricGaugeInterface \
   MetricHistogramInterface MetricUntypedInterface \
 	metrics_msgs
 
-OBJS_metrics = metrics_plugin.o metrics_thread.o metrics_processor.o metrics_supplier.o
+OBJS_metrics = metrics_plugin.o metrics_thread.o metrics_processor.o
 OBJS_all    = $(OBJS_metrics)
 
 ifeq ($(HAVE_WEBVIEW)$(HAVE_CPP11)$(HAVE_PROTOBUF),111)
@@ -45,6 +45,8 @@ else
     WARN_TARGETS += warning_protobuf
   endif
 endif
+
+aspect: | protobuf
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)

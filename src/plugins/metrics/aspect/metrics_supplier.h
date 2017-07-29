@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  metrics_supplier.cpp - Metrics supplier interface
+ *  metrics_supplier.h - Metrics supplier interface
  *
- *  Created: Sat May 06 20:16:52 2017 (German Open 2017)
+ *  Created: Sat May 06 20:15:05 2017 (German Open 2017)
  *  Copyright  2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
@@ -19,18 +19,25 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "metrics_supplier.h"
+#ifndef __PLUGINS_METRICS_ASPECT_METRICS_SUPPLIER_H_
+#define __PLUGINS_METRICS_ASPECT_METRICS_SUPPLIER_H_
 
-/** @class MetricsSupplier
- * Metrics supplier class.
- * @author Tim Niemueller
- *
- * @fn std::list<io::prometheus::client::MetricFamily>  MetricsSupplier::metrics() = 0
- * Metrics this supplier hosts.
- * @return list of metric families
- */
+#include <plugins/metrics/protobuf/metrics.pb.h>
+#include <list>
 
-/** Virtual empty destructor. */
-MetricsSupplier::~MetricsSupplier()
-{
+namespace fawkes {
+#if 0 /* just to make Emacs auto-indent happy */
 }
+#endif
+
+class MetricsSupplier
+{
+ public:
+  virtual ~MetricsSupplier();
+
+  virtual std::list<io::prometheus::client::MetricFamily>  metrics() = 0;
+};
+
+} // end namespace fawkes
+
+#endif

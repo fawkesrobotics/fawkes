@@ -20,7 +20,7 @@
  */
 
 #include "metrics_processor.h"
-#include "metrics_supplier.h"
+#include "aspect/metrics_manager.h"
 
 #include <webview/page_reply.h>
 #include <logging/logger.h>
@@ -44,14 +44,14 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param supplier metrics supplier
+ * @param manager metrics manager
  * @param logger logger to report problems
  * @param baseurl base URL of the RRD webrequest processor
  */
-MetricsRequestProcessor::MetricsRequestProcessor(MetricsSupplier *supplier,
+MetricsRequestProcessor::MetricsRequestProcessor(MetricsManager *metrics_manager,
                                                  fawkes::Logger *logger,
                                                  const std::string &baseurl)
-	: supplier_(supplier), logger_(logger), base_url_(baseurl)
+	: metrics_manager_(metrics_manager), logger_(logger), base_url_(baseurl)
 {
 }
 
@@ -72,7 +72,7 @@ MetricsRequestProcessor::process_request(const fawkes::WebRequest *request)
 	// std::string subpath = request->url().substr(base_url_.length());
 	StaticWebReply *reply = new StaticWebReply(WebReply::HTTP_OK);
 	
-	std::list<io::prometheus::client::MetricFamily> metrics(std::move(supplier_->metrics()));
+	std::list<io::prometheus::client::MetricFamily> metrics(std::move(metrics_manager_->all_metrics()));
 
 	if (accepted_encoding.find("application/vnd.google.protobuf") != std::string::npos) {
 		reply->add_header("Content-type",

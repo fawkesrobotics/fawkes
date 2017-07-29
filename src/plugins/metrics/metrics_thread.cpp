@@ -48,6 +48,7 @@ using namespace fawkes;
 MetricsThread::MetricsThread()
 	: Thread("MetricsThread", Thread::OPMODE_WAITFORWAKEUP),
 	  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
+	  AspectProviderAspect(&metrics_aspect_inifin_),
 	  BlackBoardInterfaceListener("MetricsThread")
 {
 }
@@ -61,6 +62,8 @@ MetricsThread::~MetricsThread()
 void
 MetricsThread::init()
 {
+	metrics_aspect_inifin_.set_manager(this);
+	
 	bbio_add_observed_create("MetricFamilyInterface", "*");
   blackboard->register_observer(this);
 
@@ -98,28 +101,30 @@ MetricsThread::init()
   internal_metrics_.push_back(imf_metrics_requests_);
 
   try {
-	  std::vector<float> buckets_le = config->get_floats("/metrics/internal/metrics_requests/buckets");
+		std::vector<float> buckets_le = config->get_floats("/metrics/internal/metrics_requests/buckets");
 
-	  if (! buckets_le.empty()) {
-		  std::sort(buckets_le.begin(), buckets_le.end());
+		if (! buckets_le.empty()) {
+			std::sort(buckets_le.begin(), buckets_le.end());
 
-		  imf_metrics_proctime_ = std::make_shared<io::prometheus::client::MetricFamily>();
-		  imf_metrics_proctime_->set_name("fawkes_metrics_proctime");
-		  imf_metrics_proctime_->set_help("Time required to process metrics");
-		  imf_metrics_proctime_->set_type(io::prometheus::client::HISTOGRAM);
-		  auto m = imf_metrics_proctime_->add_metric();
+			imf_metrics_proctime_ = std::make_shared<io::prometheus::client::MetricFamily>();
+			imf_metrics_proctime_->set_name("fawkes_metrics_proctime");
+			imf_metrics_proctime_->set_help("Time required to process metrics");
+			imf_metrics_proctime_->set_type(io::prometheus::client::HISTOGRAM);
+			auto m = imf_metrics_proctime_->add_metric();
 		  auto h = m->mutable_histogram();
 		  for (float &b : buckets_le) {
 			  h->add_bucket()->set_upper_bound(b);
 		  }
 		  internal_metrics_.push_back(imf_metrics_proctime_);
-	  }
+		}
   } catch (Exception &e) {
 	  logger->log_warn(name(), "Internal metric metrics_proctime bucket bounds not configured, disabling");
   }
 
-	req_proc_ = new MetricsRequestProcessor(this, logger, URL_PREFIX);
-	webview_url_manager->register_baseurl(URL_PREFIX, req_proc_);
+  metrics_suppliers_.push_back(this);
+
+  req_proc_ = new MetricsRequestProcessor(this, logger, URL_PREFIX);
+  webview_url_manager->register_baseurl(URL_PREFIX, req_proc_);
 
 }
 
@@ -274,6 +279,46 @@ MetricsThread::metrics()
 	}
 
 	return rv;
+}
+
+
+std::list<io::prometheus::client::MetricFamily>
+MetricsThread::all_metrics()
+{
+	std::list<io::prometheus::client::MetricFamily> metrics;
+
+	for (auto & s : metrics_suppliers_) {
+		metrics.splice(metrics.begin(), std::move(s->metrics()));
+	}
+
+	return metrics;
+}
+
+
+void
+MetricsThread::add_supplier(MetricsSupplier *supplier)
+{
+	MutexLocker lock(metrics_suppliers_.mutex());
+	auto i = std::find(metrics_suppliers_.begin(), metrics_suppliers_.end(), supplier);
+	if (i == metrics_suppliers_.end()) {
+		metrics_suppliers_.push_back(supplier);
+	}
+}
+
+void
+MetricsThread::remove_supplier(MetricsSupplier *supplier)
+{
+	MutexLocker lock(metrics_suppliers_.mutex());
+	auto i = std::find(metrics_suppliers_.begin(), metrics_suppliers_.end(), supplier);
+	if ( i != metrics_suppliers_.end()) {
+		metrics_suppliers_.erase(i);
+	}
+}
+
+const fawkes::LockList<MetricsSupplier *> &
+MetricsThread::metrics_suppliers() const
+{
+	return metrics_suppliers_;
 }
 
 

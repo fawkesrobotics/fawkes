@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  metrics_processor.h - Metrics exporter
+ *  metrics_manager.h - Metrics supplier interface
  *
- *  Created: Sat May 06 19:46:38 2017 (German Open 2017)
+ *  Created: Fri Jul 28 22:08:16 2017
  *  Copyright  2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
@@ -19,33 +19,31 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_METRICS_METRICS_PROCESSOR_H_
-#define __PLUGINS_METRICS_METRICS_PROCESSOR_H_
+#ifndef __PLUGINS_METRICS_ASPECT_METRICS_MANAGER_H_
+#define __PLUGINS_METRICS_ASPECT_METRICS_MANAGER_H_
 
-#include <webview/request_processor.h>
-
-#include "protobuf/metrics.pb.h"
+#include <core/utils/lock_list.h>
+#include <plugins/metrics/protobuf/metrics.pb.h>
+#include <plugins/metrics/aspect/metrics_supplier.h>
 
 namespace fawkes {
-  class Logger;
-  class MetricsManager;
+#if 0 /* just to make Emacs auto-indent happy */
 }
+#endif
 
-class MetricsRequestProcessor : public fawkes::WebRequestProcessor
+class MetricsManager
 {
  public:
-	MetricsRequestProcessor(fawkes::MetricsManager *manager,
-	                        fawkes::Logger *logger,
-	                        const std::string &base_url);
+  virtual ~MetricsManager();
 
-  virtual ~MetricsRequestProcessor();
+  virtual std::list<io::prometheus::client::MetricFamily> all_metrics() = 0;
 
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+  virtual void add_supplier(MetricsSupplier *supplier) = 0;
+  virtual void remove_supplier(MetricsSupplier *supplier) = 0;
 
- private:
-  fawkes::MetricsManager *  metrics_manager_;
-  fawkes::Logger         *  logger_;
-  std::string               base_url_;
+  virtual const fawkes::LockList<MetricsSupplier *> &  metrics_suppliers() const = 0;
 };
+
+} // end namespace fawkes
 
 #endif
