@@ -36,6 +36,60 @@ namespace fawkes {
 #endif
 
 /**
+ * @brief Helper class to incorporate a bool into a mutex locker and enable RAII on it.
+ */
+class BoolMutexLocker
+{
+	private:
+	Mutex* const Mut;
+	bool& AssociatedBool;
+	const bool InitialLocked;
+
+	public:
+	BoolMutexLocker(Mutex *mutex, bool& associatedBool) : Mut(mutex),
+	                                                      AssociatedBool(associatedBool),
+	                                                      InitialLocked(associatedBool)
+	{
+		if ( !InitialLocked )
+		{
+			Mut->lock();
+			AssociatedBool = true;
+		} //if ( !InitialLocked )
+		return;
+	}
+
+	~BoolMutexLocker(void)
+	{
+		if ( InitialLocked != AssociatedBool )
+		{
+			if ( InitialLocked )
+			{
+				relock();
+			} //if ( InitialLocked )
+			else
+			{
+				unlock();
+			} //else -> if ( InitialLocked )
+		} //if ( InitialLocked != AssociatedBool )
+		return;
+	}
+
+	void unlock(void)
+	{
+		AssociatedBool = false;
+		Mut->unlock();
+		return;
+	}
+
+	void relock(void)
+	{
+		Mut->lock();
+		AssociatedBool = true;
+		return;
+	}
+};
+
+/**
  * @class ClingoAccess
  * @brief A wrapper around the clingo control, to control the solving process.
  * @author Björn Schäpers
@@ -56,6 +110,9 @@ namespace fawkes {
 /**
  * @property ClingoAccess::ControlMutex
  * @brief The mutex to protect the clingo control.
+ *
+ * @property ClingoAccess::ControlIsLocked
+ * @brief Mark if ControlMutex is locked. (Because we can not ask the mutex and need this information for blocked solving.)
  *
  * @property ClingoAccess::Control
  * @brief The clingo control.
@@ -134,7 +191,7 @@ namespace fawkes {
  * @return If the solving process should compute more models (if there are any).
  */
 bool
-ClingoAccess::newModel(const Clingo::Model& model)
+ClingoAccess::on_model(const Clingo::Model& model)
 {
 	MutexLocker locker1(&ModelMutex);
 	ModelSymbols = model.symbols(DebugLevel >= AllModelSymbols ? Clingo::ShowType::All : Clingo::ShowType::Shown);
@@ -188,14 +245,15 @@ ClingoAccess::newModel(const Clingo::Model& model)
  * @param[in] result The result of the solving process.
  */
 void
-ClingoAccess::solvingFinished(const Clingo::SolveResult result)
+ClingoAccess::on_finish(const Clingo::SolveResult result)
 {
 	if ( DebugLevel >= Time )
 	{
 		Log->log_info(LogComponent.c_str(), "Solving nearly done.");
 	} //if ( DebugLevel >= Time )
 
-	MutexLocker locker1(&ControlMutex), locker2(&CallbackMutex);
+	BoolMutexLocker locker1(&ControlMutex, ControlIsLocked);
+	MutexLocker locker2(&CallbackMutex);
 	for ( const auto& cb : FinishCallbacks )
 	{
 		(*cb)(result);
@@ -270,7 +328,7 @@ ClingoAccess::allocControl()
  */
 ClingoAccess::ClingoAccess(Logger *log, const std::string& logComponent) : Log(log),
 		LogComponent(logComponent.empty() ? "Clingo" : logComponent), NumberOfThreads(1), Splitting(false),
-		Control(nullptr), ModelMutex(Mutex::RECURSIVE), Solving(false), AsyncHandle(nullptr), DebugLevel(None)
+		ControlIsLocked(false), Control(nullptr), ModelMutex(Mutex::RECURSIVE), Solving(false), DebugLevel(None)
 {
 	allocControl();
 	return;
@@ -362,7 +420,7 @@ ClingoAccess::solving(void) const noexcept
 bool
 ClingoAccess::startSolving(void)
 {
-	MutexLocker locker(&ControlMutex);
+	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
 	if ( Solving )
 	{
 		return false;
@@ -376,8 +434,7 @@ ClingoAccess::startSolving(void)
 	ModelMutex.lock();
 	ModelCounter = 0;
 	ModelMutex.unlock();
-	AsyncHandle = Control->solve_async([this](const Clingo::Model& model) { return newModel(model); },
-		[this](const Clingo::SolveResult& result) { solvingFinished(result); return; });
+	AsyncHandle = Control->solve({}, this, true, true);
 	return true;
 }
 
@@ -394,7 +451,7 @@ ClingoAccess::startSolvingBlocking(void)
 		return false;
 	} //if ( Solving )
 
-	MutexLocker locker(&ControlMutex);
+	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
 	if ( DebugLevel >= Time )
 	{
 		Log->log_info(LogComponent.c_str(), "Start sync solving.");
@@ -403,14 +460,7 @@ ClingoAccess::startSolvingBlocking(void)
 	ModelMutex.lock();
 	ModelCounter = 0;
 	ModelMutex.unlock();
-	const auto result(Control->solve([this,&locker](const Clingo::Model& model) {
-		locker.unlock();
-		const auto ret = newModel(model);
-		locker.relock();
-		return ret;
-	}));
-	locker.unlock();
-	solvingFinished(result);
+	Control->solve({}, this, false, true);
 	return true;
 }
 
@@ -421,7 +471,7 @@ ClingoAccess::startSolvingBlocking(void)
 bool
 ClingoAccess::cancelSolving(void)
 {
-	MutexLocker locker(&ControlMutex);
+	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
 	if ( !Solving )
 	{
 		return false;
@@ -512,7 +562,7 @@ ClingoAccess::modelSymbols(void) const
 bool
 ClingoAccess::loadFile(const std::string& path)
 {
-	MutexLocker locker(&ControlMutex);
+	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
 	if ( Solving )
 	{
 		return false;
@@ -536,7 +586,7 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
 		return true;
 	} //if ( parts.empty() )
 
-	MutexLocker locker(&ControlMutex);
+	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
 	if ( Solving )
 	{
 		return false;
@@ -587,7 +637,7 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
 bool
 ClingoAccess::assign_external(const Clingo::Symbol& atom, const Clingo::TruthValue value)
 {
-	MutexLocker locker(&ControlMutex);
+	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
 	if ( Solving )
 	{
 		return false;
@@ -619,7 +669,7 @@ ClingoAccess::assign_external(const Clingo::Symbol& atom, const Clingo::TruthVal
 bool
 ClingoAccess::release_external(const Clingo::Symbol& atom)
 {
-	MutexLocker locker(&ControlMutex);
+	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
 	if ( Solving )
 	{
 		return false;

@@ -38,7 +38,7 @@ namespace fawkes {
 
 class Logger;
 
-class ClingoAccess
+class ClingoAccess : public Clingo::SolveEventHandler
 {
 	private:
 	Logger* const Log;
@@ -47,6 +47,7 @@ class ClingoAccess
 	bool Splitting;
 
 	Mutex ControlMutex;
+	bool ControlIsLocked;
 	Clingo::Control *Control;
 
 	mutable Mutex ModelMutex;
@@ -58,10 +59,10 @@ class ClingoAccess
 	std::vector<std::shared_ptr<std::function<bool(void)>>> ModelCallbacks;
 	std::vector<std::shared_ptr<std::function<void(Clingo::SolveResult)>>> FinishCallbacks;
 	Clingo::GroundCallback GroundCallback;
-	Clingo::SolveAsync AsyncHandle;
+	Clingo::SolveHandle AsyncHandle;
 
-	bool newModel(const Clingo::Model& model);
-	void solvingFinished(const Clingo::SolveResult result);
+	bool on_model(const Clingo::Model& model) override;
+	void on_finish(const Clingo::SolveResult result) override;
 
 	void allocControl(void);
 
