@@ -25,5 +25,6 @@
 	(blackboard-interface (type "SkillerInterface") (id "Skiller"))
 	=>
 	(path-load "skills.clp")
+	(assert (ff-feature-loaded skills))
 )
 
