@@ -848,10 +848,18 @@ BlackboardCLIPSFeature::clips_blackboard_send_msg(std::string env_name, void *ms
   //add reference to the message so we can return the message id (otherwise it is changed by sending)
   m->get()->ref();
 
-  //send message about the saved interface
-  interface_of_msg_[m->get()]->msgq_enqueue(m->get());
+  unsigned int message_id = 0;
 
-  unsigned int message_id = m->get()->id();
+  //send message about the saved interface
+  try {
+	  interface_of_msg_[m->get()]->msgq_enqueue(m->get());
+	  message_id = m->get()->id();
+  } catch (BlackBoardNoWritingInstanceException &e) {
+	  // keep quiet, BlackBoardMessageManager will already have printed a warning
+	  //logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Failed to send message: no writer");
+  } catch (Exception &e) {
+	  logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Failed to send message: %s", e.what_no_backtrace());
+  }
 
   //delete saved pointer to interface
   interface_of_msg_.erase(m->get());
