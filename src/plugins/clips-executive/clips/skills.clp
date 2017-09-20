@@ -13,7 +13,7 @@
 )
 
 (deftemplate skill
-  (slot name (type STRING))
+  (slot name (type SYMBOL))
   (slot status (type SYMBOL) (allowed-values S_IDLE S_RUNNING S_FINAL S_FAILED))
   (slot error-msg (type STRING))
   (slot skill-string (type STRING))
@@ -58,7 +58,7 @@
   (printout logwarn "Calling skill " ?sks crlf)
 	(bind ?msgid (blackboard-send-msg ?m))
 	(bind ?status (if (eq ?msgid 0) then S_FAILED else S_IDLE))
-  (assert (skill (name (str-cat ?name)) (skill-string ?sks)
+  (assert (skill (name (sym-cat ?name)) (skill-string ?sks)
 								 (status ?status) (msgid ?msgid) (start-time (now))))
 )
 
