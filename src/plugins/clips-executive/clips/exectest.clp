@@ -1,7 +1,5 @@
 
-(defmodule SPEC (import MAIN ?ALL) (import PLAN ?ALL))
-
-(defrule SPEC::spec-start
+(defrule start
 	(start)
 	=>
 	(printout t "Spec starting" crlf)
@@ -11,7 +9,7 @@
 											 (action-name say) (params text "Good bye" wait true)))
 )
 
-(defrule SPEC::spec-done
+(defrule done
 	(plan-action (id ?id) (status ?s))
 	=>
 	(printout t "Action " ?id " is now " ?s crlf)

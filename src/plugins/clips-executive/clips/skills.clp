@@ -7,12 +7,12 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
-(defglobal SKILL-EXEC
+(defglobal
 	?*SKILL-INIT-TIMEOUT-SEC* = 5
 	?*SKILL-ACQUIRE-CONTROL-RETRY-INTERVAL-SEC* = 3
 )
 
-(deftemplate SKILL-EXEC::skill
+(deftemplate skill
   (slot name (type SYMBOL))
   (slot status (type SYMBOL) (allowed-values S_IDLE S_RUNNING S_FINAL S_FAILED))
   (slot error-msg (type STRING))
@@ -21,7 +21,7 @@
   (multislot start-time (type INTEGER) (cardinality 2 2) (default (create$ 0 0)))
 )
 
-(deffunction SKILL-EXEC::skill-call (?name $?args)
+(deffunction skill-call (?name $?args)
   (if (is-odd-int (length$ ?args)) then
     (printout logerror "Invalid skill call, number of arguments must be even" crlf)
     (return FALSE)
@@ -62,7 +62,7 @@
 								 (status ?status) (msgid ?msgid) (start-time (now))))
 )
 
-(defrule SKILL-EXEC::skiller-control-acquire
+(defrule skill-control-acquire
 	(time $?now)
 	?sc <- (skiller-control (acquired FALSE) (acquiring FALSE)
 													(last-try $?lt&:(timeout ?now ?lt ?*SKILL-ACQUIRE-CONTROL-RETRY-INTERVAL-SEC*)))
@@ -84,7 +84,7 @@
 	)
 )
 
-(defrule SKILL-EXEC::skiller-control-acquired
+(defrule skill-control-acquired
 	?sc <- (skiller-control (acquired FALSE) (acquiring TRUE))
 	(blackboard-interface (type "SkillerInterface") (id "Skiller") (serial ?s))
   (SkillerInterface (id "Skiller") (exclusive_controller ?s))
@@ -93,7 +93,7 @@
 	(modify ?sc (acquired TRUE) (acquiring FALSE))
 )
 		
-(defrule SKILL-EXEC::skiller-control-lost
+(defrule skill-control-lost
 	?sc <- (skiller-control (acquired TRUE))
 	(blackboard-interface (type "SkillerInterface") (id "Skiller") (serial ?s))
   (SkillerInterface (id "Skiller") (exclusive_controller ~?s))
@@ -102,21 +102,21 @@
 	(modify ?sc (acquired FALSE))
 )
 
-; (defrule SKILL-EXEC::skiller-control-release
-; 	(declare (salience 1000) (auto-focus TRUE))
-; 	(executive-finalize)
-; 	;?sc <- (skiller-control (acquired TRUE))
-; 	;?bi <- (blackboard-interface (type "SkillerInterface") (id "Skiller"))
-; 	=>
-; 	;(printout t "Releasing control on finalize" crlf)
-; 	;(bind ?m (blackboard-create-msg "SkillerInterface::Skiller" "ReleaseControlMessage"))
-; 	;(blackboard-send-msg ?m)
-; 	;(blackboard-close "SkillerInterface" "Skiller")
-; 	;(modify ?sc (acquired FALSE))
-; 	;(retract ?bi)
-; )	
+(defrule skill-control-release
+	(declare (salience 1000))
+	(executive-finalize)
+	?sc <- (skiller-control (acquired TRUE))
+	?bi <- (blackboard-interface (type "SkillerInterface") (id "Skiller"))
+	=>
+	(printout t "Releasing control on finalize" crlf)
+	(bind ?m (blackboard-create-msg "SkillerInterface::Skiller" "ReleaseControlMessage"))
+	(blackboard-send-msg ?m)
+	(blackboard-close "SkillerInterface" "Skiller")
+	(modify ?sc (acquired FALSE))
+	(retract ?bi)
+)	
 
-(defrule SKILL-EXEC::skill-status-update
+(defrule skill-status-update
   ?su <- (SkillerInterface (id "Skiller") (msgid ?msgid) (status ?new-status))
   ?sf <- (skill (name ?n) (msgid ?msgid) (status ?old-status&~?new-status))
   =>
@@ -125,14 +125,14 @@
   (modify ?sf (status ?new-status))
 )
 
-(defrule SKILL-EXEC::skill-status-update-nochange
+(defrule skill-status-update-nochange
   ?su <- (SkillerInterface (id "Skiller") (msgid ?msgid) (status ?new-status))
   (skill (name ?n) (msgid ?msgid) (status ?new-status))
   =>
   (retract ?su)
 )
 
-(defrule SKILL-EXEC::skill-start-timeout
+(defrule skill-start-timeout
 	(time $?now)
   ?sf <- (skill (name ?n) (status S_IDLE)
 								(start-time $?st&:(timeout ?now ?st ?*SKILL-INIT-TIMEOUT-SEC*)))
