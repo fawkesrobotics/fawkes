@@ -1,5 +1,4 @@
 
-
 ;---------------------------------------------------------------------------
 ;  plan-exec.clp - CLIPS executive - plan execution
 ;
@@ -8,11 +7,26 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
-(deftemplate plan-exec-action
+(defmodule PLAN-EXEC
+	(export ?ALL)
+	(import EXECUTIVE-PRIORITIES ?ALL)
+	(import MAIN ?ALL)
+	(import PLAN ?ALL)
+	(import SKILL-EXEC ?ALL)
+)
+
+(deftemplate PLAN-EXEC::action
 	(slot action-id (type INTEGER))
 )
 
-(defrule plan-exec-action-start
+(defrule PLAN-EXEC::init
+	(declare (salience ?*PRIORITY-INIT*) (auto-focus TRUE))
+	(executive-init)
+	=>
+	(assert (module-initialized PLAN-EXEC))
+)
+
+(defrule PLAN-EXEC::action-start
 	?pa <- (plan-action (plan-name ?plan-name) (id ?id) (status PENDING)
 											(action-name ?action-name) (params $?params))
 	(not (plan-exec-action))
@@ -20,10 +34,10 @@
 	=>
 	(skill-call ?action-name ?params)
 	(modify ?pa (status WAITING))
-	(assert (plan-exec-action (action-id ?id)))
+	(assert (action (action-id ?id)))
 )
 
-(defrule plan-exec-action-running
+(defrule PLAN-EXEC::action-running
 	?pa <- (plan-action (plan-name ?plan-name) (id ?id) (status WAITING)
 											(action-name ?action-name))
 	(skill (name ?action-name) (status S_RUNNING))
@@ -32,8 +46,8 @@
 	(modify ?pa (status RUNNING))
 )
 
-(defrule plan-exec-action-final
-	?pe <- (plan-exec-action (action-id ?id))
+(defrule PLAN-EXEC::action-final
+	?pe <- (action (action-id ?id))
 	?pa <- (plan-action (plan-name ?plan-name) (id ?id)
 											(action-name ?action-name))
 	?sf <- (skill (name ?action-name) (status S_FINAL))
@@ -43,8 +57,8 @@
 	(retract ?sf ?pe)
 )
 
-(defrule plan-exec-action-failed
-	?pe <- (plan-exec-action (action-id ?id))
+(defrule PLAN-EXEC::action-failed
+	?pe <- (action (action-id ?id))
 	?pa <- (plan-action (plan-name ?plan-name) (id ?id)
 											(action-name ?action-name))
 	?sf <- (skill (name ?action-name) (status S_FAILED) (error-msg ?error))

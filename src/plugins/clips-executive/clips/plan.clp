@@ -20,12 +20,14 @@
 ; 	(multislot values)
 ; )
 
-(deftemplate plan
+(defmodule PLAN (import MAIN ?ALL) (import EXECUTIVE-PRIORITIES ?ALL) (export ?ALL))
+
+(deftemplate PLAN::plan
 	(slot name (type SYMBOL))
 	(slot cost (type FLOAT))
 )
 
-(deftemplate plan-action
+(deftemplate PLAN::plan-action
 	(slot id (type INTEGER))
 	(slot plan-name (type SYMBOL))
 	(slot action-name (type SYMBOL))
@@ -36,8 +38,15 @@
 )
 
 ; alternative
-(deftemplate plan-action-parameter
-	(slot plan-action-id (type INTEGER))
-	(slot key)
-	(slot value)
+; (deftemplate PLAN::plan-action-parameter
+; 	(slot plan-action-id (type INTEGER))
+; 	(slot key)
+; 	(slot value)
+; )
+
+(defrule PLAN::init
+	(declare (salience ?*PRIORITY-INIT*) (auto-focus TRUE))
+	(executive-init)
+	=>
+	(assert (module-initialized PLAN-EXEC))
 )

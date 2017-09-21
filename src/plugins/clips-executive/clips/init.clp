@@ -7,11 +7,16 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
+(defmodule MAIN (export ?ALL))
+
 (defglobal
   ?*CONFIG_PREFIX* = "/clips-executive"
 )
 
+(deftemplate MAIN::start)
+
 (defrule executive-load-config
+  (declare (salience -1000))
   (executive-init)
   =>
   (config-load ?*CONFIG_PREFIX*)
@@ -29,6 +34,7 @@
 )
 
 (defrule executive-enable-debug
+  (declare (salience -2000))
   (executive-init)
   (confval (path "/clips-executive/clips-debug") (type BOOL) (value TRUE))
   =>
@@ -39,6 +45,7 @@
 )
 
 (defrule executive-debug-level
+  (declare (salience -2000))
   (executive-init)
   (confval (path "/clips-executive/debug-level") (type UINT) (value ?v))
   =>
@@ -47,7 +54,7 @@
 )
 
 (defrule executive-silence-debug-facts
-  (declare (salience -1000))
+  (declare (salience -2001))
   (executive-init)
   (confval (path "/clips-executive/clips-debug") (type BOOL) (value TRUE))
   (confval (path "/clips-executive/unwatch-facts") (type STRING) (is-list TRUE) (list-value $?lv))
@@ -64,7 +71,7 @@
 )
 
 (defrule executive-silence-debug-rules
-  (declare (salience -1000))
+  (declare (salience -2001))
   (executive-init)
   (confval (path "/clips-executive/clips-debug") (type BOOL) (value TRUE))
   (confval (path "/clips-executive/unwatch-rules") (type STRING) (is-list TRUE) (list-value $?lv))
@@ -80,18 +87,30 @@
   )
 )
 
-(defrule executive-init-skills
+(defrule executive-init-request-blackboard
 	(executive-init)
 	=>
-  (printout t "Blackboard feature and skill exec init" crlf)
 	(ff-feature-request "blackboard")
 )
 
-(defrule executive-blackboard-feature-loaded
+(defrule executive-init-skills
 	(executive-init)
 	(ff-feature blackboard)
 	=>
-  (printout t "Blackboard feature and skill exec init" crlf)
+  (printout t "Blackboard feature init" crlf)
+	(path-load "priorities.clp")
 	(path-load "blackboard-init.clp")
 	(path-load "skills-init.clp")
+)
+
+(defrule executive-init-flow
+	(executive-init)
+	(module-initialized SKILL-EXEC)
+	=>
+	(printout t "init flow" crlf)
+  (printout t "Flow init" crlf)
+	(path-load "plan.clp")
+	(path-load "plan-exec.clp")
+	(path-load "flowctrl.clp")
+	(assert (executive-initialized))
 )
