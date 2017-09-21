@@ -20,24 +20,32 @@
 ; 	(multislot values)
 ; )
 
+; This is just a dummy until we have a full spec
+(deftemplate goal
+	(slot id (type SYMBOL))
+	(slot mode (type SYMBOL) (allowed-values FORMULATED SELECTED EXPANDED
+																					 COMMITTED DISPATCHED EVALUATED FAILED))
+)
+
 (deftemplate plan
-	(slot name (type SYMBOL))
+	(slot id (type SYMBOL))
+	(slot goal-id (type SYMBOL))
 	(slot cost (type FLOAT))
 )
 
 (deftemplate plan-action
 	(slot id (type INTEGER))
-	(slot plan-name (type SYMBOL))
+	(slot plan-id (type SYMBOL))
 	(slot action-name (type SYMBOL))
 	(multislot params)
 	(slot duration (type FLOAT))
 	(slot dispatch-time (type FLOAT))
-	(slot status (type SYMBOL) (allowed-values PENDING WAITING RUNNING FINAL FAILED))
+	(slot status (type SYMBOL) (allowed-values FORMULATED PENDING WAITING RUNNING FINAL FAILED))
 )
 
 ; alternative
-(deftemplate plan-action-parameter
-	(slot plan-action-id (type INTEGER))
-	(slot key)
-	(slot value)
-)
+; (deftemplate plan-action-parameter
+; 	(slot plan-action-id (type INTEGER))
+; 	(slot key)
+; 	(slot value)
+; )

@@ -13,7 +13,7 @@
 )
 
 (defrule plan-exec-action-start
-	?pa <- (plan-action (plan-name ?plan-name) (id ?id) (status PENDING)
+	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (status PENDING)
 											(action-name ?action-name) (params $?params))
 	(not (plan-exec-action))
 	(skiller-control (acquired TRUE))
@@ -24,7 +24,7 @@
 )
 
 (defrule plan-exec-action-running
-	?pa <- (plan-action (plan-name ?plan-name) (id ?id) (status WAITING)
+	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (status WAITING)
 											(action-name ?action-name))
 	(skill (name ?action-name) (status S_RUNNING))
 	=>
@@ -34,7 +34,7 @@
 
 (defrule plan-exec-action-final
 	?pe <- (plan-exec-action (action-id ?id))
-	?pa <- (plan-action (plan-name ?plan-name) (id ?id)
+	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
 											(action-name ?action-name))
 	?sf <- (skill (name ?action-name) (status S_FINAL))
 	=>
@@ -45,7 +45,7 @@
 
 (defrule plan-exec-action-failed
 	?pe <- (plan-exec-action (action-id ?id))
-	?pa <- (plan-action (plan-name ?plan-name) (id ?id)
+	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
 											(action-name ?action-name))
 	?sf <- (skill (name ?action-name) (status S_FAILED) (error-msg ?error))
 	=>
