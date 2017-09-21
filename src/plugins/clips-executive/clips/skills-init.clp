@@ -14,17 +14,18 @@
 )
 
 (defrule skill-init
+	(executive-init)
 	(ff-feature-loaded blackboard)
 	=>
 	(blackboard-open-reading "SkillerInterface" "Skiller")
 	(assert (skiller-control))
-)
-
-(defrule skill-init-interface-opened
-	(ff-feature-loaded blackboard)
-	(blackboard-interface (type "SkillerInterface") (id "Skiller"))
-	=>
 	(path-load "skills.clp")
 	(assert (ff-feature-loaded skills))
 )
+
+; (defrule skill-init-interface-opened
+; 	(ff-feature-loaded blackboard)
+; 	(blackboard-interface (type "SkillerInterface") (id "Skiller"))
+; 	=>
+; )
 
