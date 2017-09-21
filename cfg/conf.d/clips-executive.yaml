@@ -48,4 +48,14 @@ clips-executive:
 
   # Agent name. On startup the clips-agent will try to resolve a file named
   # <agent name>.clp. It must be in the CLIPS path directories.
-  spec: exectest-init
+  spec: test
+
+  specs:
+    test:
+      goal-reasoner: test/goal-reasoner.clp
+      goal-expander: test/fixed-sequence.clp
+      action-selection: test/action-selection.clp
+      #macro-expansion: test/action-selection.clp
+      action-execution: plan-exec.clp
+      execution-monitoring: test/execution-monitoring.clp
+
