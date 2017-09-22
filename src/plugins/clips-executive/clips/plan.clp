@@ -24,7 +24,7 @@
 (deftemplate goal
 	(slot id (type SYMBOL))
 	(slot mode (type SYMBOL) (allowed-values FORMULATED SELECTED EXPANDED
-																					 COMMITTED DISPATCHED EVALUATED FAILED))
+																					 COMMITTED DISPATCHED COMPLETED FAILED))
 )
 
 (deftemplate plan
