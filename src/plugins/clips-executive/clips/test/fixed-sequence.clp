@@ -1,5 +1,5 @@
 
-(defrule planning-plan
+(defrule goal-expander-create-sequence
 	?g <- (goal (mode SELECTED) (id TESTGOAL))
 	=>
 	(assert (plan (id TESTGOAL-PLAN) (goal-id TESTGOAL)))
