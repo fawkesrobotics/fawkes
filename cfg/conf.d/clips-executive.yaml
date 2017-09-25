@@ -52,10 +52,10 @@ clips-executive:
 
   specs:
     test:
-      goal-reasoner: test/goal-reasoner.clp
-      goal-expander: test/fixed-sequence.clp
-      action-selection: test/action-selection.clp
-      #macro-expansion: test/action-selection.clp
+      goal-reasoner: test-scenario/goal-reasoner.clp
+      goal-expander: test-scenario/fixed-sequence.clp
+      action-selection: test-scenario/action-selection.clp
+      #macro-expansion: test-scenario/action-selection.clp
       action-execution: plan-exec.clp
-      execution-monitoring: test/execution-monitoring.clp
+      execution-monitoring: test-scenario/execution-monitoring.clp
 
