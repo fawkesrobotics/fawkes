@@ -17,6 +17,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
 
+SUBDIRS += clips
+
 LIBS_clips_executive = \
 	fawkescore fawkesutils fawkesaspects fawkesblackboard \
         fawkesinterface fawkesclipsaspect
