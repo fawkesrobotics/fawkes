@@ -23,7 +23,6 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
 
 #ifndef TESTDIR
 #define TESTDIR "."
@@ -41,8 +40,7 @@ class CLIPSTest : public ::testing::Test
     virtual void LoadCLIPSFiles(vector<string> files) {
       for (auto & file : files) {
         const string path = string(TESTDIR) + "/" + file;
-        cout << "Loading " << path << endl;
-        env.evaluate("(load " + path + ")");
+        env.evaluate("(load* " + path + ")");
       }
     }
     /** Check if a non-ordered fact exists.
