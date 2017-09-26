@@ -19,6 +19,7 @@ include $(BUILDSYSDIR)/clips.mk
 include $(BUILDSYSDIR)/gtest.mk
 
 OBJS_gtest_clips_example += test_example.o
+OBJS_gtest_clips_domain += test_domain.o
 OBJS_all = $(OBJS_gtest_clips_example)
 
 ifeq ($(HAVE_CLIPS),1)
@@ -26,6 +27,7 @@ ifeq ($(HAVE_CLIPS),1)
     CFLAGS += $(CFLAGS_CLIPS) $(CFLAGS_GTEST) -DTESTDIR=\"$(PWD)\"
     LDFLAGS += $(LDFLAGS_CLIPS) $(LDFLAGS_GTEST)
     BINS_test += $(BINDIR)/gtest_clips_example
+    BINS_test += $(BINDIR)/gtest_clips_domain
   else
     WARN_TARGETS += warning_gtest
   endif
