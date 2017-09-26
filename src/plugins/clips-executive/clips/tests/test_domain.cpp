@@ -23,6 +23,8 @@
 #include <vector>
 #include <string>
 
+using namespace std;
+
 class DomainTest : public CLIPSTest
 {
   protected:
