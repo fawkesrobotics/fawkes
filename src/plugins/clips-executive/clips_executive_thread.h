@@ -32,6 +32,11 @@
 #include <utils/time/time.h>
 
 #include <clipsmm.h>
+#include <memory>
+
+namespace fawkes {
+	class ActionSkillMapping;
+}
 
 class ClipsExecutiveThread
 : public fawkes::Thread,
@@ -53,12 +58,14 @@ class ClipsExecutiveThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-	CLIPS::Values  clips_now();
+	std::string clips_map_skill(std::string name, CLIPS::Values params);
 
  private:
 	bool        cfg_assert_time_each_loop_;
 
 	bool        started_;
+
+	std::shared_ptr<fawkes::ActionSkillMapping> action_skill_mapping_;
 };
 
 #endif

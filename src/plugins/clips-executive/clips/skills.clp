@@ -25,41 +25,53 @@
   (if (is-odd-int (length$ ?args)) then
     (printout logerror "Invalid skill call, number of arguments must be even" crlf)
     (return FALSE)
-  )
-  (bind ?sks "")
-  (foreach ?a ?args
-	   (if (is-odd-int ?a-index) then
-	     ; argument name
-	     (if (neq ?sks "") then (bind ?sks (str-cat ?sks ", ")))
-	     (bind ?sks (str-cat ?sks ?a "="))
-	     else
-	     (bind ?a-type (type ?a))
-	     (switch ?a-type
-		     (case STRING then
-             (if (eq (sub-string 1 1 ?a) "{") then
-               (bind ?sks (str-cat ?sks ?a))
-              else
-               (bind ?sks (str-cat ?sks "\"" ?a "\""))))
-		     (case SYMBOL then
-			   (if (or (eq ?a true) (eq ?a false)) then
-			     (bind ?sks (str-cat ?sks ?a))
-			    else
-			     (bind ?sks (str-cat ?sks "\"" ?a "\""))
-			   ))
-		     (default (bind ?sks (str-cat ?sks ?a)))
-	     )
-	   )
-  )
-  (bind ?sks (str-cat ?name "{" ?sks "}"))
+	)
+	; The following is a basic 1-to-1 mapping from action to skill
+  ; (bind ?sks "")
+  ; (foreach ?a ?args
+	;    (if (is-odd-int ?a-index) then
+	;      ; argument name
+	;      (if (neq ?sks "") then (bind ?sks (str-cat ?sks ", ")))
+	;      (bind ?sks (str-cat ?sks ?a "="))
+	;      else
+	;      (bind ?a-type (type ?a))
+	;      (switch ?a-type
+	; 	     (case STRING then
+  ;            (if (eq (sub-string 1 1 ?a) "{") then
+  ;              (bind ?sks (str-cat ?sks ?a))
+  ;             else
+  ;              (bind ?sks (str-cat ?sks "\"" ?a "\""))))
+	; 	     (case SYMBOL then
+	; 		   (if (or (eq ?a true) (eq ?a false)) then
+	; 		     (bind ?sks (str-cat ?sks ?a))
+	; 		    else
+	; 		     (bind ?sks (str-cat ?sks "\"" ?a "\""))
+	; 		   ))
+	; 	     (default (bind ?sks (str-cat ?sks ?a)))
+	;      )
+	;    )
+  ; )
+  ; (bind ?sks (str-cat ?name "{" ?sks "}"))
 
-	(bind ?m (blackboard-create-msg "SkillerInterface::Skiller" "ExecSkillMessage"))
-	(blackboard-set-msg-field ?m "skill_string" ?sks)
+	; And here we rely on a function provided from the outside providing
+	; a more sophisticated mapping.
+	(bind ?sks (map-action-skill ?name ?args))
+	(printout logwarn "sks='" ?sks "'" crlf)
 
-  (printout logwarn "Calling skill " ?sks crlf)
-	(bind ?msgid (blackboard-send-msg ?m))
-	(bind ?status (if (eq ?msgid 0) then S_FAILED else S_IDLE))
-  (assert (skill (name (sym-cat ?name)) (skill-string ?sks)
-								 (status ?status) (msgid ?msgid) (start-time (now))))
+	(if (eq ?sks "")
+	then
+		(assert (skill (name (sym-cat ?name)) (status S_FAILED) (start-time (now))
+									 (error-msg (str-cat "Failed to convert action '" ?name "' to skill string"))))
+	else
+		(bind ?m (blackboard-create-msg "SkillerInterface::Skiller" "ExecSkillMessage"))
+		(blackboard-set-msg-field ?m "skill_string" ?sks)
+
+		(printout logwarn "Calling skill '" ?sks "'" crlf)
+		(bind ?msgid (blackboard-send-msg ?m))
+		(bind ?status (if (eq ?msgid 0) then S_FAILED else S_IDLE))
+		(assert (skill (name (sym-cat ?name)) (skill-string ?sks)
+									 (status ?status) (msgid ?msgid) (start-time (now))))
+	)
 )
 
 (defrule skill-control-acquire

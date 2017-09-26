@@ -22,7 +22,7 @@ SUBDIRS += clips
 LIBS_clips_executive = \
 	fawkescore fawkesutils fawkesaspects fawkesblackboard \
         fawkesinterface fawkesclipsaspect
-OBJS_clips_executive = clips_executive_plugin.o clips_executive_thread.o
+OBJS_clips_executive = clips_executive_plugin.o clips_executive_thread.o map_skill.o
 
 OBJS_all = $(OBJS_clips_executive)
 

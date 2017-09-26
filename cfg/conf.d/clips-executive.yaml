@@ -59,3 +59,5 @@ clips-executive:
       action-execution: plan-exec.clp
       execution-monitoring: test-scenario/execution-monitoring.clp
 
+      action-mapping:
+        say: say{text=?(text)s, wait=true}

@@ -20,6 +20,7 @@
  */
 
 #include "clips_executive_thread.h"
+#include "map_skill.h"
 
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
@@ -69,6 +70,26 @@ ClipsExecutiveThread::init()
 	} catch (Exception &e) {} // ignore, use default
 	clips_dirs.insert(clips_dirs.begin(), std::string(SRCDIR) + "/clips/");
 
+	try {
+		std::string cfg_spec = config->get_string("/clips-executive/spec");
+
+		std::string action_mapping_cfgpath = std::string("/clips-executive/specs/") + cfg_spec + "/action-mapping/";
+#if __cplusplus >= 201103L
+		std::unique_ptr<Configuration::ValueIterator> v(config->search(action_mapping_cfgpath.c_str()));
+#else
+		std::auto_ptr<Configuration::ValueIterator> v(config_->search(action_mapping_cfgpath.c_str()));
+#endif
+		std::map<std::string, std::string> mapping;
+		while (v->next()) {
+			std::string action_name = std::string(v->path()).substr(action_mapping_cfgpath.length());
+			mapping[action_name] = v->get_as_string();
+			logger->log_info(name(), "Adding action mapping '%s' -> '%s'",
+			                 action_name.c_str(), v->get_as_string().c_str());
+		}
+
+		action_skill_mapping_ = std::make_shared<fawkes::ActionSkillMapping>(mapping);
+	} catch (Exception &e) {} // ignore
+	
 	MutexLocker lock(clips.objmutex_ptr());
 
 	clips->evaluate(std::string("(path-add-subst \"@BASEDIR@\" \"") + BASEDIR + "\")");
@@ -82,6 +103,10 @@ ClipsExecutiveThread::init()
 	}
 
 	clips->evaluate("(ff-feature-request \"config\")");
+
+	clips->add_function("map-action-skill",
+	                    sigc::slot<std::string, std::string, CLIPS::Values>
+	                    (sigc::mem_fun(*this, &ClipsExecutiveThread::clips_map_skill)));
 
 	bool cfg_req_redefwarn_feature = true;
 	try {
@@ -134,4 +159,45 @@ ClipsExecutiveThread::loop()
 
 	clips->refresh_agenda();
 	clips->run();
+}
+
+
+std::string
+ClipsExecutiveThread::clips_map_skill(std::string action_name, CLIPS::Values params)
+{
+	if (! action_skill_mapping_) {
+		logger->log_error(name(), "No action mapping has been loaded");
+		return "";
+	}
+	if (action_name == "") {
+		logger->log_warn(name(), "Failed to map, action name is empty");
+		return "";
+	}
+	if (! action_skill_mapping_->has_mapping(action_name)) {
+		logger->log_warn(name(), "No mapping for action '%s' known", action_name.c_str());
+		return "";
+	}
+	if (params.size() % 2 != 0) {
+		logger->log_warn(name(), "Odd number of parameters to action '%s'", action_name.c_str());
+		return "";
+	}
+	std::map<std::string, std::string> param_map;
+	for (size_t i = 0; (i+1) < params.size(); i += 2) {
+		param_map[params[i].as_string()] = params[i+1].as_string();
+	}
+
+	std::multimap<std::string, std::string> messages;
+	std::string rv = action_skill_mapping_->map_skill(action_name, param_map, messages);
+	for (auto &m : messages) {
+		if (m.first == "WARN") {
+			logger->log_warn(name(), "%s", m.second.c_str());
+		} else if (m.first == "ERROR") {
+			logger->log_error(name(), "%s", m.second.c_str());
+		} else if (m.first == "DEBUG") {
+			logger->log_debug(name(), "%s", m.second.c_str());
+		} else {
+			logger->log_info(name(), "%s", m.second.c_str());
+		}
+	}
+	return rv;
 }
