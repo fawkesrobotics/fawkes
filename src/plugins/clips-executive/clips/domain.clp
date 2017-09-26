@@ -9,14 +9,14 @@
 (deftemplate obj-type
   "A type in the domain. The type obj must be super-type of all types."
   (slot name (type SYMBOL))
-  (slot super-type (type SYMBOL) (default obj))
+  (slot super-type (type SYMBOL) (default object))
 )
 
 (deftemplate dom-object
   "An object in the domain with the given name and type. The type must refer to
    the name of an existing type."
   (slot name)
-  (slot obj-type (type SYMBOL) (default obj))
+  (slot obj-type (type SYMBOL) (default object))
 )
 
 (deftemplate predicate
@@ -207,4 +207,8 @@
             (not (is-satisfied ?child))))
 =>
   (assert (is-satisfied ?precond))
+)
+
+(deffacts domain-facts
+  (obj-type (name object))
 )

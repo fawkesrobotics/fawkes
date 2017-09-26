@@ -79,8 +79,8 @@ TEST_F(DomainTest, Typing)
   env.assert_fact("(obj-type (name cup) (super-type moveable-obj))");
   env.assert_fact("(dom-object (name c1) (obj-type cup))");
   env.run();
-  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "thing", "obj" }));
+  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "thing", "object" }));
   EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "cup" }));
   EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "moveable-obj" }));
-  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "obj" }));
+  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "object" }));
 }
