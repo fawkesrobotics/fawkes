@@ -53,7 +53,8 @@ class CLIPSTest : public ::testing::Test
      *  e.g., "(eq ?a:parameters ?p:values)".
      *  @return true iff the fact exists.
      */
-    bool has_fact(const string &fact_set_template, const string &query) {
+    bool has_fact(const string &fact_set_template,
+        const string &query = "TRUE") {
       const string & clips_query =
         "(any-factp " + fact_set_template + " " + query + ")";
       return env.evaluate(clips_query)[0].as_string() == "TRUE";

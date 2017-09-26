@@ -94,6 +94,22 @@
   (assert (precond-is-part-of ?cond ?parent))
 )
 
+(defrule translate-obj-slot-type-to-ordered-fact
+  "Translate the slot type of a dom-object into the ordered fact
+   obj-is-of-type."
+  (dom-object (name ?obj) (obj-type ?type))
+=>
+  (assert (obj-is-of-type ?obj ?type))
+)
+
+(defrule get-transitive-types
+  "An object of type t also has each super-type of t as its type."
+  (obj-is-of-type ?obj ?type)
+  (obj-type (name ?type) (super-type ?super-type))
+=>
+  (assert (obj-is-of-type ?obj ?super-type))
+)
+
 (defrule ground-precondition
   "Ground a precondition of an operator."
   (grounding (operator ?op) (parameter ?p) (value ?v))
@@ -101,7 +117,6 @@
                 (parameters $?parameters&:(member$ ?p ?parameters)))
   (precond-is-part-of ?precond-name ?op)
 =>
-  ; assert as new fact?
   (duplicate ?precond
     (parameters (replace-member$ ?parameters ?v ?p))
     (grounded partially)

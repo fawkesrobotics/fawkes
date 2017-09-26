@@ -70,3 +70,17 @@ TEST_F(BlocksworldDomainTest, GroundingWithMultipleParameters)
                             "(eq ?p:parameters (create$ b1 b2)))"));
   EXPECT_TRUE(has_ordered_fact("is-satisfied", { "unstack-precond" }));
 }
+
+TEST_F(DomainTest, Typing)
+{
+  env.reset();
+  env.assert_fact("(dom-object (name thing))");
+  env.assert_fact("(obj-type (name moveable-obj))");
+  env.assert_fact("(obj-type (name cup) (super-type moveable-obj))");
+  env.assert_fact("(dom-object (name c1) (obj-type cup))");
+  env.run();
+  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "thing", "obj" }));
+  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "cup" }));
+  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "moveable-obj" }));
+  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "obj" }));
+}
