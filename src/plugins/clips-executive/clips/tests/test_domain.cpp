@@ -84,3 +84,35 @@ TEST_F(DomainTest, Typing)
   EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "moveable-obj" }));
   EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "object" }));
 }
+
+TEST_F(DomainTest, ErrorIfPreconditionHasNoOperator)
+{
+  env.reset();
+  env.assert_fact("(precondition (name foo))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?error domain-error))"));
+}
+
+TEST_F(DomainTest, ErrorIfOperatorOfPreconditionDoesNotExist)
+{
+  env.reset();
+  env.assert_fact("(precondition (name foo) (part-of op))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?error domain-error))"));
+}
+
+TEST_F(DomainTest, ErrorIfObjTypeDoesNotExist)
+{
+  env.reset();
+  env.assert_fact("(dom-object (name o1) (obj-type t1))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?e domain-error))"));
+}
+
+TEST_F(DomainTest, ErrorIfSuperTypeDoesNotExist)
+{
+  env.reset();
+  env.assert_fact("(obj-type (name t2) (super-type t1))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?e domain-error))"));
+}

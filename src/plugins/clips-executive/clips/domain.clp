@@ -73,6 +73,11 @@
   (slot value)
 )
 
+(deftemplate domain-error
+  "A fact representing some error in the domain definition."
+  (slot error-msg (type STRING))
+)
+
 (defrule compute-precondition-operator-membership
   "Check if a precondition is part of an operator."
   ;(operator (name ?op))
@@ -207,6 +212,44 @@
             (not (is-satisfied ?child))))
 =>
   (assert (is-satisfied ?precond))
+)
+
+(defrule domain-check-precondition-has-an-operator
+  "Check that for each precondition, some operator is defined."
+  (precondition (name ?precond))
+  (not (precond-is-part-of ?precond ?op))
+=>
+  (assert (domain-error (error-msg (str-cat "Precondition " ?precond
+                                     " does not belong to any operator."))))
+)
+
+(defrule domain-check-precondition-belongs-to-existing-operator
+  "Check that all defined preconditions belong to a defined operator."
+  (precondition (name ?precond))
+  (not (and (precond-is-part-of ?precond ?op)
+            (operator (name ?op))))
+=>
+  (assert (domain-error (error-msg (str-cat "Precondition " ?precond
+                                     " is part of a non-existing operator.")
+  )))
+)
+
+(defrule domain-check-object-types-exist
+  "Make sure that each specified type of an object actually exists."
+  (dom-object (name ?obj) (obj-type ?type))
+  (not (obj-type (name ?type)))
+=>
+  (assert (domain-error (error-msg (str-cat "Type " ?type " of object " ?obj
+                                     " does not exist."))))
+)
+
+(defrule domain-check-super-type-exists
+  "Make sure that a super-type of any type in the domain actually exists."
+  (obj-type (name ?type) (super-type ?super-type))
+  (not (obj-type (name ?super-type)))
+=>
+  (assert (domain-error (error-msg (str-cat "Super-type " ?super-type
+                                    " of type " ?type " does not exist."))))
 )
 
 (deffacts domain-facts
