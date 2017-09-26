@@ -117,12 +117,13 @@
 )	
 
 (defrule skill-status-update
-  ?su <- (SkillerInterface (id "Skiller") (msgid ?msgid) (status ?new-status))
+  ?su <- (SkillerInterface (id "Skiller") (msgid ?msgid) (status ?new-status)
+                           (error ?error-msg))
   ?sf <- (skill (name ?n) (msgid ?msgid) (status ?old-status&~?new-status))
   =>
   (printout t "Skill " ?n " is " ?new-status", was: " ?old-status crlf)
   (retract ?su)
-  (modify ?sf (status ?new-status))
+  (modify ?sf (status ?new-status) (error-msg ?error-msg))
 )
 
 (defrule skill-status-update-nochange
