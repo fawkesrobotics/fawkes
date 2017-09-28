@@ -62,10 +62,6 @@
   (slot grounded (type SYMBOL) (allowed-values no partially yes) (default no))
 )
 
-(deftemplate action
-  (slot operator (type SYMBOL))
-)
-
 (deftemplate domain-grounding
   "A grounding of a single parameter of an operator"
   (slot operator (type SYMBOL))
