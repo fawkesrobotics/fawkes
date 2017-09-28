@@ -54,7 +54,7 @@ TEST_F(BlocksworldDomainTest, PreconditionsAreSatisfiedTest)
 TEST_F(BlocksworldDomainTest, NegativePreconditionIsNotSatisfied)
 {
   env.reset();
-  env.assert_fact("(predicate (name ontable) (parameters b1))");
+  env.assert_fact("(domain-predicate (name ontable) (parameters b1))");
   env.run();
   EXPECT_FALSE(has_ordered_fact("is-satisfied", { "neg-on-table" }));
   EXPECT_FALSE(has_ordered_fact("is-satisfied", { "pick-up-precond" }));
@@ -64,9 +64,9 @@ TEST_F(BlocksworldDomainTest, GroundingWithMultipleParameters)
 {
   env.reset();
   env.run();
-  EXPECT_FALSE(has_fact("((?p atomic-precondition))",
+  EXPECT_FALSE(has_fact("((?p domain-atomic-precondition))",
                         "(eq ?p:grounded partially)"));
-  EXPECT_TRUE(has_fact("((?p atomic-precondition))",
+  EXPECT_TRUE(has_fact("((?p domain-atomic-precondition))",
                        "(and (eq ?p:predicate on) "
                             "(eq ?p:grounded yes) "
                             "(eq ?p:parameters (create$ b1 b2)))"));
@@ -76,10 +76,10 @@ TEST_F(BlocksworldDomainTest, GroundingWithMultipleParameters)
 TEST_F(DomainTest, Typing)
 {
   env.reset();
-  env.assert_fact("(dom-object (name thing))");
-  env.assert_fact("(obj-type (name moveable-obj))");
-  env.assert_fact("(obj-type (name cup) (super-type moveable-obj))");
-  env.assert_fact("(dom-object (name c1) (obj-type cup))");
+  env.assert_fact("(domain-object (name thing))");
+  env.assert_fact("(domain-object-type (name moveable-obj))");
+  env.assert_fact("(domain-object-type (name cup) (super-type moveable-obj))");
+  env.assert_fact("(domain-object (name c1) (type cup))");
   env.run();
   EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "thing", "object" }));
   EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "cup" }));
@@ -90,7 +90,7 @@ TEST_F(DomainTest, Typing)
 TEST_F(DomainTest, ErrorIfPreconditionHasNoOperator)
 {
   env.reset();
-  env.assert_fact("(precondition (name foo))");
+  env.assert_fact("(domain-precondition (name foo))");
   env.run();
   EXPECT_TRUE(has_fact("((?error domain-error))"));
 }
@@ -98,7 +98,7 @@ TEST_F(DomainTest, ErrorIfPreconditionHasNoOperator)
 TEST_F(DomainTest, ErrorIfOperatorOfPreconditionDoesNotExist)
 {
   env.reset();
-  env.assert_fact("(precondition (name foo) (part-of op))");
+  env.assert_fact("(domain-precondition (name foo) (part-of op))");
   env.run();
   EXPECT_TRUE(has_fact("((?error domain-error))"));
 }
@@ -106,7 +106,7 @@ TEST_F(DomainTest, ErrorIfOperatorOfPreconditionDoesNotExist)
 TEST_F(DomainTest, ErrorIfObjTypeDoesNotExist)
 {
   env.reset();
-  env.assert_fact("(dom-object (name o1) (obj-type t1))");
+  env.assert_fact("(domain-object (name o1) (type t1))");
   env.run();
   EXPECT_TRUE(has_fact("((?e domain-error))"));
 }
@@ -114,7 +114,7 @@ TEST_F(DomainTest, ErrorIfObjTypeDoesNotExist)
 TEST_F(DomainTest, ErrorIfSuperTypeDoesNotExist)
 {
   env.reset();
-  env.assert_fact("(obj-type (name t2) (super-type t1))");
+  env.assert_fact("(domain-object-type (name t2) (super-type t1))");
   env.run();
   EXPECT_TRUE(has_fact("((?e domain-error))"));
 }
