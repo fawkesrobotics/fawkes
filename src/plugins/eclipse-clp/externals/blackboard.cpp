@@ -25,6 +25,8 @@
 
 
 #include <eclipseclass.h>
+#include <logging/logger.h>
+#include <plugins/eclipse-clp/eclipse_thread.h>
 
 
 #include <cstring>
@@ -96,11 +98,6 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
   */
   EclExternalBlackBoard* EclExternalBlackBoard::instance()
   {
-    if (!m_instance) {
-      throw Exception("EclExternalBlackBoard::instance(): "
-        "No instance of type EclExternalBlackBoard instantiated");
-    }
-
     return m_instance;
   }
 
@@ -144,9 +141,6 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
    */
   BlackBoard* EclExternalBlackBoard::blackboard_instance()
   {
-    if (!m_blackboard)
-    { throw Exception("No instance of type BlackBoard instantiated"); }
-
     return m_blackboard;
   }
 

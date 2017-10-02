@@ -67,6 +67,10 @@ EclipseAgentThread::EclipseAgentThread()
 /** Destructor. */
 EclipseAgentThread::~EclipseAgentThread()
 {
+  if (EclExternalBlackBoard::instance()) {
+    logger->log_info(name(), "Cleaning up");
+    EclExternalBlackBoard::cleanup_instance();
+  }
   delete mutex;
 }
 
@@ -166,7 +170,8 @@ void
 EclipseAgentThread::finalize()
 {
   ec_cleanup();
-  fawkes::EclExternalBlackBoard::cleanup_instance();
+  if (EclExternalBlackBoard::instance())
+    fawkes::EclExternalBlackBoard::cleanup_instance();
 }
 
 
