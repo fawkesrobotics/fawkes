@@ -4,9 +4,11 @@
 	=>
 	(printout t "Spec starting" crlf)
 	(assert (plan-action (id 1) (plan-name foo) (duration 4.0)
-											 (action-name say) (params text "Hello world" wait true)))
+											 (action-name say) (params text wait))
+                       (param-values "Hello world" true))
 	(assert (plan-action (id 2) (plan-name foo) (duration 4.0)
-											 (action-name say) (params text "Good bye" wait true)))
+											 (action-name say) (params text wait)
+                       (param-values "Good bye" true)))
 )
 
 (defrule done
