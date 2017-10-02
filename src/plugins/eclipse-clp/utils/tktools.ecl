@@ -34,8 +34,7 @@
 :- local initialization(init).
 :- local(finalization(fin)).
 
-init :- bb_ensure_connected,
-        bb_open_interface(w,"EclipseDebuggerInterface","eclipse_clp_connect").
+init :- bb_open_interface(w,"EclipseDebuggerInterface","eclipse_clp_connect").
 fin :- bb_close_interface("EclipseDebuggerInterface::eclipse_clp_connect"),
 	log_info("Closing eclipse_clp_connect").
 

@@ -39,9 +39,6 @@ namespace fawkes
 class EclExternalBlackBoard
 {
 private:
-  /** Constructor. */
-  EclExternalBlackBoard();
-
   /** Constructor.
    * @param blackboard blackboard to use to open interfaces
    */
@@ -54,9 +51,6 @@ public:
   static void cleanup_instance();
   static EclExternalBlackBoard* instance();
 
-  void connect(const char *host, long port);
-  bool connected();
-  void disconnect();
   static BlackBoard* blackboard_instance();
   std::map<std::string, Interface *> & interfaces();
 
@@ -64,15 +58,9 @@ private:
   static EclExternalBlackBoard *      m_instance;
   std::map<std::string, Interface *>  m_interfaces;
   static BlackBoard *                 m_blackboard;
-  bool                                m_own_blackboard;
 };
 }
 
-
-extern "C" int p_bb_connect_to_remote_blackboard();
-extern "C" int p_bb_disconnect_from_blackboard();
-extern "C" int p_bb_is_alive();
-extern "C" int p_bb_is_connected();
 
 extern "C" int p_bb_open_interface();
 extern "C" int p_bb_close_interface();
