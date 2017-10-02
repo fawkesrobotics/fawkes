@@ -128,13 +128,16 @@ EclipseAgentThread::init()
     throw Exception("Failed to determine path to filepath module");
   }
   load_file(filepath_path.c_str());
-
-  // load interpreter and agent
-  std::string agent_path = EclipsePath::instance()->locate_file(agent + ".ecl");
-  if (agent_path.empty()) {
-    throw Exception("Failed to determine path to agent module");
-  }
-  load_file( agent_path.c_str() );
+  char *filepath = ::strdup("filepath");
+  post_goal(term(EC_functor(":", 2), EC_atom(filepath),
+                 term(EC_functor("add_library_path", 1),
+                      ::list(EC_word(SRCDIR "/externals"),
+                             ::list(EC_word(SRCDIR "/utils"),
+                                    ::list(EC_word(SRCDIR "/consoletool"),
+                                           ::list(EC_word(SRCDIR "/interpreter"), nil()) ) ) ) )
+  ) );
+  if (EC_succeed != EC_resume())
+    throw Exception("Failed to add " SRCDIR "/externals to library path");
 
   // check if navgraph is used and pass config value
   if (config->get_bool( ("/eclipse-clp/"+agent+"/use_graph").c_str() )){
@@ -145,6 +148,13 @@ EclipseAgentThread::init()
     if ( EC_succeed != EC_resume() )
     { throw Exception( "Error loading graph config to agent" ); }
   }
+
+  // load interpreter and agent
+  std::string agent_path = EclipsePath::instance()->locate_file(agent + ".ecl");
+  if (agent_path.empty()) {
+    throw Exception("Failed to determine path to agent module");
+  }
+  load_file( agent_path.c_str() );
 
    // register external predicates
        if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( agent.c_str(), 0 ) ) )
