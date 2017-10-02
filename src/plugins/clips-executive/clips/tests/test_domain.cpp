@@ -31,7 +31,7 @@ class DomainTest : public CLIPSTest
     virtual void SetUp() {
       LoadCLIPSFiles(clips_files);
     }
-    vector<string> clips_files = { "../domain.clp" };
+    vector<string> clips_files = { "../plan.clp", "../domain.clp" };
 };
 
 class BlocksworldDomainTest : public DomainTest
@@ -69,7 +69,7 @@ TEST_F(BlocksworldDomainTest, GroundingWithMultipleParameters)
   EXPECT_TRUE(has_fact("((?p domain-atomic-precondition))",
                        "(and (eq ?p:predicate on) "
                             "(eq ?p:grounded yes) "
-                            "(eq ?p:parameters (create$ b1 b2)))"));
+                            "(eq ?p:param-values (create$ b1 b2)))"));
   EXPECT_TRUE(has_ordered_fact("is-satisfied", { "unstack-precond" }));
 }
 

@@ -58,16 +58,11 @@
   (slot part-of (type SYMBOL))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot predicate (type SYMBOL))
-  (multislot parameters (type SYMBOL))
+  (multislot params (type SYMBOL))
+  (multislot param-values (default (create$)))
   (slot grounded (type SYMBOL) (allowed-values no partially yes) (default no))
 )
 
-(deftemplate domain-grounding
-  "A grounding of a single parameter of an operator"
-  (slot operator (type SYMBOL))
-  (slot parameter (type SYMBOL))
-  (slot value)
-)
 
 (deftemplate domain-error
   "A fact representing some error in the domain definition."
@@ -113,15 +108,23 @@
 
 (defrule domain-ground-precondition
   "Ground a precondition of an operator."
-  (domain-grounding (operator ?op) (parameter ?p) (value ?v))
-  ?precond <- (domain-atomic-precondition (name ?precond-name)
-                (parameters $?parameters&:(member$ ?p ?parameters)))
+  (plan-action (action-name ?op) (params $?action-params)
+    (param-values $?action-values))
+  ?precond <- (domain-atomic-precondition
+                ;(name ?precond-name&precond-is-part-of ?precond-name ?op)
+                (name ?precond-name)
+                (params $?precond-params)
+                (param-values $?precond-values&
+                  :(< (length$ ?precond-values) (length$ ?precond-params))))
   (precond-is-part-of ?precond-name ?op)
 =>
-  (duplicate ?precond
-    (parameters (replace-member$ ?parameters ?v ?p))
-    (grounded partially)
+  (bind ?values (create$))
+  (foreach ?p ?precond-params
+    (bind ?action-index (member$ ?p ?action-params))
+    (bind ?values
+      (insert$ ?values ?p-index (nth$ ?action-index ?action-values)))
   )
+  (duplicate ?precond (param-values ?values) (grounded yes))
 )
 
 (deffunction intersect
@@ -139,9 +142,9 @@
 (defrule domain-check-if-grounded
   "Check if a precondition is completely grounded."
   ?instance <- (domain-atomic-precondition (name ?precond-name)
-                (parameters $?grounded-params) (grounded partially))
+                (params $?grounded-params) (grounded partially))
   (domain-atomic-precondition (name ?precond-name) (grounded no)
-    (parameters $?params&:
+    (params $?params&:
       (eq nil (nth$ 1 (intersect ?grounded-params ?params)))
     )
   )
@@ -153,7 +156,7 @@
   "Special case of the rule above: If the precondition does not have any
    parameters, it is always grounded."
   ?precond <- (domain-atomic-precondition
-                (parameters $?params&:(eq nil (nth$ 1 ?params))))
+                (params $?params&:(eq nil (nth$ 1 ?params))))
 =>
   (duplicate ?precond (grounded yes))
 )
@@ -168,7 +171,7 @@
 
 (defrule domain-check-if-atomic-precondition-is-satisfied
   (domain-atomic-precondition
-    (name ?precond) (predicate ?pred) (parameters $?params) (grounded yes)
+    (name ?precond) (predicate ?pred) (param-values $?params) (grounded yes)
   )
   (domain-predicate (name ?pred) (parameters $?params))
 =>
