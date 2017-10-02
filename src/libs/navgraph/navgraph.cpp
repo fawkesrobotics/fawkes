@@ -28,6 +28,7 @@
 #include <utils/math/common.h>
 
 #include <algorithm>
+#include <limits>
 #include <list>
 #include <set>
 #include <queue>
@@ -248,7 +249,7 @@ NavGraph::closest_node(float pos_x, float pos_y, bool consider_unconnected,
 {
   std::vector<NavGraphNode> nodes = search_nodes(property);
 
-  float min_dist = HUGE;
+  float min_dist = std::numeric_limits<float>::max();
 
   std::vector<NavGraphNode>::iterator i;
   std::vector<NavGraphNode>::iterator elem = nodes.end();
@@ -288,7 +289,7 @@ NavGraph::closest_node_to(const std::string &node_name, bool consider_unconnecte
   NavGraphNode n = node(node_name);
   std::vector<NavGraphNode> nodes = search_nodes(property);
 
-  float min_dist = HUGE;
+  float min_dist = std::numeric_limits<float>::max();
 
   std::vector<NavGraphNode>::iterator i;
   std::vector<NavGraphNode>::iterator elem = nodes.begin();
