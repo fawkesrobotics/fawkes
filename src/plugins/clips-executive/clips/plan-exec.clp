@@ -14,11 +14,12 @@
 
 (defrule plan-exec-action-start
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (status PENDING)
-											(action-name ?action-name) (params $?params))
+                      (action-name ?action-name) (params $?params)
+                      (param-values $?param-values))
 	(not (plan-exec-action))
 	(skiller-control (acquired TRUE))
 	=>
-	(skill-call ?action-name ?params)
+	(skill-call ?action-name ?params ?param-values)
 	(modify ?pa (status WAITING))
 	(assert (plan-exec-action (action-id ?id)))
 )

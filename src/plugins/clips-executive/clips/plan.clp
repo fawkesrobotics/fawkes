@@ -38,6 +38,7 @@
 	(slot plan-id (type SYMBOL))
 	(slot action-name (type SYMBOL))
 	(multislot params)
+	(multislot param-values)
 	(slot duration (type FLOAT))
 	(slot dispatch-time (type FLOAT))
 	(slot status (type SYMBOL) (allowed-values FORMULATED PENDING WAITING RUNNING FINAL FAILED))

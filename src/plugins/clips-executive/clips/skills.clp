@@ -21,11 +21,27 @@
   (multislot start-time (type INTEGER) (cardinality 2 2) (default (create$ 0 0)))
 )
 
-(deffunction skill-call (?name $?args)
-  (if (is-odd-int (length$ ?args)) then
-    (printout logerror "Invalid skill call, number of arguments must be even" crlf)
+(deffunction merge-params (?params ?param-values)
+  (if (not (= (length$ ?params) (length$ ?param-values))) then
+    (printout logerror "Invalid skill call, number of parameters is not the "
+                       "same as number of parameter values")
     (return FALSE)
-	)
+  )
+  (if (eq (length$ ?params) 0) then
+    (return (create$))
+  )
+  (return (insert$ (merge-params (rest$ ?params) (rest$ ?param-values))
+                   1
+                   (first$ ?params) (first$ ?param-values))
+  )
+)
+
+(deffunction skill-call (?name ?params ?param-values)
+  (bind ?args (merge-params ?params ?param-values))
+  (if (eq FALSE ?args) then
+    (printout logerror "Error constructing skill call, abort.")
+    (return FALSE)
+  )
 	; The following is a basic 1-to-1 mapping from action to skill
   ; (bind ?sks "")
   ; (foreach ?a ?args
