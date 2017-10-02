@@ -27,6 +27,8 @@
 #include <utils/system/console_colors.h>
 #include <utils/time/time.h>
 
+#include <limits>
+
 #include <cmath>
 #include <cstdlib>
 
@@ -253,7 +255,7 @@ VelocityFromRelative::calc()
       vel_last_time.tv_sec  = robot_rel_vel_t.tv_sec;
       vel_last_time.tv_usec = robot_rel_vel_t.tv_usec;
 
-      f_diff_sec = HUGE;
+      f_diff_sec = numeric_limits<float>::max();
       float time_diff;
       vel_postime_t *young = NULL;
       vel_postime_t *old   = NULL;
