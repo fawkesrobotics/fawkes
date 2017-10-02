@@ -48,6 +48,8 @@
 #include <fvutils/adapters/pcl.h>
 #include <utils/time/time.h>
 
+#include <limits>
+
 #define TABLE_MAX_X  3.0
 #define TABLE_MAX_Y  3.0
 #define TABLE_MIN_X -3.0
@@ -182,7 +184,7 @@ public:
     std::vector<int> indices;
     std::vector<float> distances;
 
-    float min_dist = HUGE;
+    float min_dist = std::numeric_limits<float>::max();
     int count = kdtree_.radiusSearch(p, 1.0, indices, distances);
     if (! indices.empty()) {
       printf("Got %i indices!\n", count);
@@ -382,7 +384,7 @@ public:
     //get the extents of the table
      if (! cloud_proj_->points.empty()) {
       printf("Cloud hull non-empty\n");
-      float x_min = HUGE, y_min = HUGE, x_max = 0, y_max = 0;
+      float x_min = std::numeric_limits<float>::max(), y_min = std::numeric_limits<float>::max(), x_max = 0, y_max = 0;
 
       for (size_t i = 1; i < cloud_proj_->points.size(); ++i) {
         if (cloud_proj_->points[i].x < x_min && cloud_proj_->points[i].x > -3.0)
