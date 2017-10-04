@@ -47,8 +47,8 @@ TEST_F(BlocksworldDomainTest, PreconditionsAreSatisfiedTest)
 {
   env.reset();
   env.run();
-  EXPECT_TRUE(has_ordered_fact("is-satisfied", { "neg-on-table" }));
-  EXPECT_TRUE(has_ordered_fact("is-satisfied", { "pick-up-precond" }));
+  EXPECT_TRUE(has_fact("((?p domain-precondition))",
+              "(and (eq ?p:name neg-on-table) (eq ?p:is-satisfied TRUE))"));
 }
 
 TEST_F(BlocksworldDomainTest, NegativePreconditionIsNotSatisfied)
@@ -56,8 +56,14 @@ TEST_F(BlocksworldDomainTest, NegativePreconditionIsNotSatisfied)
   env.reset();
   env.assert_fact("(domain-predicate (name ontable) (parameters b1))");
   env.run();
-  EXPECT_FALSE(has_ordered_fact("is-satisfied", { "neg-on-table" }));
-  EXPECT_FALSE(has_ordered_fact("is-satisfied", { "pick-up-precond" }));
+  EXPECT_TRUE(has_fact("((?p domain-precondition))",
+        "(and (eq ?p:name neg-on-table) (eq ?p:is-satisfied FALSE))"));
+  EXPECT_FALSE(has_fact("((?p domain-precondition))",
+        "(and (eq ?p:name neg-on-table) (eq ?p:is-satisfied TRUE))"));
+  EXPECT_TRUE(has_fact("((?p domain-precondition))",
+        "(and (eq ?p:name pick-up-precond) (eq ?p:is-satisfied FALSE))"));
+  EXPECT_FALSE(has_fact("((?p domain-precondition))",
+        "(and (eq ?p:name pick-up-precond) (eq ?p:is-satisfied TRUE))"));
 }
 
 TEST_F(BlocksworldDomainTest, GroundingWithMultipleParameters)
@@ -70,7 +76,8 @@ TEST_F(BlocksworldDomainTest, GroundingWithMultipleParameters)
                        "(and (eq ?p:predicate on) "
                             "(eq ?p:grounded yes) "
                             "(eq ?p:param-values (create$ b1 b2)))"));
-  EXPECT_TRUE(has_ordered_fact("is-satisfied", { "unstack-precond" }));
+  EXPECT_TRUE(has_fact("((?p domain-precondition))",
+        "(and (eq ?p:name unstack-precond) (eq ?p:is-satisfied TRUE))"));
 }
 
 TEST_F(DomainTest, Typing)

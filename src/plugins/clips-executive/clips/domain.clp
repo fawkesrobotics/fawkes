@@ -46,48 +46,34 @@
    operator or another precondition. Use the name to assign other preconditions
    as part of this precondition. This can currently be a conjunction or a
    negation. If it is a negation, it can have only one sub-condition. If it is
-   a conjunction, it can have an arbitrary number of sub-conditions."
+   a conjunction, it can have an arbitrary number of sub-conditions. The action
+   is an optional ID of grounded action this precondition belongs to. Note that
+   grounded should always be yes if the action is not nil."
   (slot part-of (type SYMBOL))
+  (slot action (type INTEGER) (default 0))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot type (type SYMBOL) (allowed-values conjunction negation))
+  (slot grounded (type SYMBOL) (allowed-values no partially yes) (default no))
+  (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
 (deftemplate domain-atomic-precondition
   "An atomic precondition of an operator. This must always be part-of a
    non-atomic precondition."
   (slot part-of (type SYMBOL))
+  (slot action (type INTEGER) (default 0))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot predicate (type SYMBOL))
   (multislot param-names (type SYMBOL))
   (multislot param-values (default (create$)))
   (slot grounded (type SYMBOL) (allowed-values no partially yes) (default no))
+  (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
 
 (deftemplate domain-error
   "A fact representing some error in the domain definition."
   (slot error-msg (type STRING))
-)
-
-(defrule domain-compute-precondition-operator-membership
-  "Check if a precondition is part of an operator."
-  ;(operator (name ?op))
-  (domain-precondition (name ?parent))
-  (precond-is-part-of ?parent ?op)
-  (or (domain-precondition (name ?cond))
-      (domain-atomic-precondition (name ?cond)))
-  (precond-is-part-of ?cond ?parent)
-=>
-  (assert (precond-is-part-of ?cond ?op))
-)
-
-(defrule domain-translate-precond-part-of-slot-to-fact
-  "For any precondition that is part-of an operator or a precondition, also
-   assert precond-is-part-of."
-  (or (domain-precondition (name ?cond) (part-of ?parent))
-      (domain-atomic-precondition (name ?cond) (part-of ?parent)))
-=>
-  (assert (precond-is-part-of ?cond ?parent))
 )
 
 (defrule domain-translate-obj-slot-type-to-ordered-fact
@@ -107,24 +93,61 @@
 )
 
 (defrule domain-ground-precondition
-  "Ground a precondition of an operator."
-  (plan-action (action-name ?op) (param-names $?action-params)
-    (param-values $?action-values))
-  ?precond <- (domain-atomic-precondition
-                ;(name ?precond-name&precond-is-part-of ?precond-name ?op)
+  "Ground a non-atomic precondition. Grounding here merely means that we
+   duplicate the precondition and tie it to one specific action-id."
+  (plan-action (action-name ?op) (id ?action-id))
+  ?precond <- (domain-precondition
                 (name ?precond-name)
-                (param-names $?precond-params)
-                (param-values $?precond-values&
-                  :(< (length$ ?precond-values) (length$ ?precond-params))))
-  (precond-is-part-of ?precond-name ?op)
+                (part-of ?op)
+                (grounded no))
+  (not (domain-precondition
+        (name ?precond-name) (action ?action-id) (grounded yes)))
+=>
+  (duplicate ?precond (action ?action-id) (grounded yes))
+)
+
+(defrule domain-ground-nested-precondition
+  "Ground a non-atomic precondition that is part of another precondition. Copy
+   the action ID from the parent precondition."
+  ?precond <- (domain-precondition
+                (name ?precond-name)
+                (part-of ?parent)
+                (grounded no))
+  (domain-precondition (name ?parent) (action ?action-id&~0))
+  (not (domain-precondition
+        (name ?precond-name)
+        (action ?action-id)
+        (grounded yes)))
+=>
+  (duplicate ?precond (action ?action-id) (grounded yes))
+)
+
+(defrule domain-ground-atomic-precondition
+  "Ground an atomic precondition of an operator."
+  (plan-action
+    (action-name ?op)
+    (param-names $?action-param-names)
+    (id ?action-id)
+    (param-values $?action-values))
+  (domain-precondition (name ?parent) (action ?action-id&~0) (grounded yes))
+  ?precond <- (domain-atomic-precondition
+                (part-of ?parent)
+                (name ?precond-name)
+                (param-names $?precond-param-names)
+                (grounded no)
+              )
+  (not (domain-atomic-precondition
+        (action ?action-id)
+        (name ?precond-name)
+        (grounded yes)))
 =>
   (bind ?values (create$))
-  (foreach ?p ?precond-params
-    (bind ?action-index (member$ ?p ?action-params))
+  (foreach ?p ?precond-param-names
+    (bind ?action-index (member$ ?p ?action-param-names))
     (bind ?values
       (insert$ ?values ?p-index (nth$ ?action-index ?action-values)))
   )
-  (duplicate ?precond (param-values ?values) (grounded yes))
+  (duplicate ?precond (param-values ?values) (action ?action-id) (grounded yes))
 )
 
 (deffunction intersect
@@ -139,78 +162,90 @@
   (return ?res)
 )
 
-(defrule domain-check-if-grounded
-  "Check if a precondition is completely grounded."
-  ?instance <- (domain-atomic-precondition (name ?precond-name)
-                (param-names $?grounded-params) (grounded partially))
-  (domain-atomic-precondition (name ?precond-name) (grounded no)
-    (param-names $?params&:
-      (eq nil (nth$ 1 (intersect ?grounded-params ?params)))
-    )
-  )
-=>
-  (modify ?instance (grounded yes))
-)
-
-(defrule domain-preconditions-without-params-are-grounded
-  "Special case of the rule above: If the precondition does not have any
-   parameters, it is always grounded."
-  ?precond <- (domain-atomic-precondition
-                (param-names $?params&:(eq nil (nth$ 1 ?params))))
-=>
-  (duplicate ?precond (grounded yes))
-)
-
-(defrule domain-remove-partially-grounded-preconditions
-  "After we found all fully grounded preconditions, we can remove partially
-   grounded preconditions again."
-  ?precond <- (domain-atomic-precondition (grounded partially))
-=>
-  (retract ?precond)
-)
-
 (defrule domain-check-if-atomic-precondition-is-satisfied
-  (domain-atomic-precondition
-    (name ?precond) (predicate ?pred) (param-values $?params) (grounded yes)
-  )
+  ?precond <- (domain-atomic-precondition
+                (is-satisfied FALSE)
+                (predicate ?pred)
+                (param-values $?params)
+                (grounded yes))
   (domain-predicate (name ?pred) (parameters $?params))
 =>
-  (assert (is-satisfied ?precond))
+  (modify ?precond (is-satisfied TRUE))
 )
 
 (defrule domain-check-if-negative-precondition-is-satisfied
   "A negative precondition is satisfied iff its (only) child is not satisfied.
    Note that we need a second rule that retracts the fact if the child is
    asserted."
-  (domain-precondition (name ?precond) (type negation))
-  (or (domain-atomic-precondition (name ?child) (part-of ?precond))
-      (domain-precondition (name ?child) (part-of ?precond)))
-  (not (is-satisfied ?child))
+  ?precond <- (domain-precondition
+                (type negation)
+                (grounded yes)
+                (name ?pn)
+                (is-satisfied FALSE))
+  (or (domain-atomic-precondition
+        (part-of ?pn) (grounded yes) (is-satisfied FALSE))
+      (domain-precondition
+        (part-of ?pn) (grounded yes) (is-satisfied FALSE)))
 =>
-  (assert (is-satisfied ?precond))
+  (modify ?precond (is-satisfied TRUE))
 )
 
 (defrule domain-retract-negative-precondition-if-child-is-satisfied
   "If a negative precondition's child is satisfied, the precondition is not
    satisfied anymore."
-  (domain-precondition (name ?precond) (type negation))
-  ?sat <- (is-satisfied ?precond)
-  (or (domain-atomic-precondition (name ?child) (part-of ?precond))
-      (domain-precondition (name ?child) (part-of ?precond)))
-  (is-satisfied ?child)
+  ?precond <- (domain-precondition
+                (type negation)
+                (name ?pn)
+                (is-satisfied TRUE)
+                (grounded yes))
+  (or (domain-atomic-precondition
+        (part-of ?pn) (grounded yes) (is-satisfied TRUE))
+      (domain-precondition
+        (part-of ?pn) (grounded yes) (is-satisfied TRUE)))
 =>
-  (retract ?sat)
+  (modify ?precond (is-satisfied FALSE))
 )
 
 (defrule domain-check-if-conjunctive-precondition-is-satisfied
   "All the precondition's children must be satisfied."
-  (domain-precondition (name ?precond) (type conjunction))
-  (not (and (domain-atomic-precondition (part-of ?precond) (name ?child))
-            (not (is-satisfied ?child))))
-  (not (and (domain-precondition (part-of ?precond) (name ?child))
-            (not (is-satisfied ?child))))
+  ?precond <- (domain-precondition
+                (name ?pn)
+                (type conjunction)
+                (action ?action-id)
+                (grounded yes)
+                (is-satisfied FALSE))
+  (not (domain-atomic-precondition
+        (part-of ?pn) (grounded yes) (action ?action-id) (is-satisfied FALSE)))
+  (not (domain-precondition
+        (part-of ?pn) (grounded yes) (action ?action-id) (is-satisfied FALSE)))
 =>
-  (assert (is-satisfied ?precond))
+  (modify ?precond (is-satisfied TRUE))
+)
+
+(defrule domain-retract-conjunctive-precondition-if-child-is-not-satisfied
+  "Make sure that a conjunctive precondition is not satisfied if any of its
+   children is satisfied."
+  ?precond <- (domain-precondition
+                (name ?pn)
+                (type conjunction)
+                (action ?action-id)
+                (grounded yes)
+                (is-satisfied TRUE))
+  (or (domain-atomic-precondition
+        (part-of ?pn) (grounded yes) (action ?action-id) (is-satisfied FALSE))
+      (domain-precondition
+        (part-of ?pn) (grounded yes) (action ?action-id) (is-satisfied FALSE))
+  )
+=>
+  (modify ?precond (is-satisfied FALSE))
+)
+
+(defrule domain-check-if-action-is-executable
+  "If the precondition of an action is satisfied, the action is executable."
+  ?action <- (plan-action (id ?action-id) (executable FALSE))
+  (domain-precondition (action ?action-id) (is-satisfied TRUE))
+=>
+  (modify ?action (executable TRUE))
 )
 
 (defrule domain-check-precondition-has-an-operator
