@@ -251,22 +251,13 @@
 
 (defrule domain-check-precondition-has-an-operator
   "Check that for each precondition, some operator is defined."
-  (domain-precondition (name ?precond))
-  (not (precond-is-part-of ?precond ?op))
+  (domain-precondition (name ?precond) (part-of ?parent))
+  (not (domain-precondition (name ?parent)))
+  (not (domain-operator (name ?parent)))
 =>
-  (assert (domain-error (error-msg (str-cat "Precondition " ?precond
-                                     " does not belong to any operator."))))
-)
-
-(defrule domain-check-precondition-belongs-to-existing-operator
-  "Check that all defined preconditions belong to a defined operator."
-  (domain-precondition (name ?precond))
-  (not (and (precond-is-part-of ?precond ?op)
-            (domain-operator (name ?op))))
-=>
-  (assert (domain-error (error-msg (str-cat "Precondition " ?precond
-                                     " is part of a non-existing operator.")
-  )))
+  (assert (domain-error (error-msg
+    (str-cat "Precondition " ?precond
+      " does not belong to any operator or precondition."))))
 )
 
 (defrule domain-check-object-types-exist

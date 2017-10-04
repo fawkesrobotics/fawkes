@@ -1,7 +1,6 @@
 (deffacts blocksworld
   "A simple blocksworld domain"
-  (domain-object-type (name obj) (super-type nil))
-  (domain-object-type (name block) (super-type obj))
+  (domain-object-type (name block) (super-type object))
   ; pick-up
   (domain-operator (name pick-up))
   (domain-operator-parameter (operator pick-up) (type block) (name x))

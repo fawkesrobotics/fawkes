@@ -92,6 +92,13 @@ TEST_F(DomainTest, Typing)
   EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "object" }));
 }
 
+TEST_F(BlocksworldDomainTest, NoErrorWithValidDomain)
+{
+  env.reset();
+  env.run();
+  EXPECT_FALSE(has_fact("((?error domain-error))"));
+}
+
 TEST_F(DomainTest, ErrorIfPreconditionHasNoOperator)
 {
   env.reset();
