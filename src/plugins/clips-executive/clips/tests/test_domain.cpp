@@ -70,11 +70,9 @@ TEST_F(BlocksworldDomainTest, GroundingWithMultipleParameters)
 {
   env.reset();
   env.run();
-  EXPECT_FALSE(has_fact("((?p domain-atomic-precondition))",
-                        "(eq ?p:grounded partially)"));
   EXPECT_TRUE(has_fact("((?p domain-atomic-precondition))",
                        "(and (eq ?p:predicate on) "
-                            "(eq ?p:grounded yes) "
+                            "(eq ?p:grounded TRUE) "
                             "(eq ?p:param-values (create$ b1 b2)))"));
   EXPECT_TRUE(has_fact("((?p domain-precondition))",
         "(and (eq ?p:name unstack-precond) (eq ?p:is-satisfied TRUE))"));
