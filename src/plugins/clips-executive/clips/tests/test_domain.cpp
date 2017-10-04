@@ -130,3 +130,13 @@ TEST_F(DomainTest, ErrorIfSuperTypeDoesNotExist)
   env.run();
   EXPECT_TRUE(has_fact("((?e domain-error))"));
 }
+
+TEST_F(BlocksworldDomainTest, ActionIsExecutableIfPreconditionIsSatisfied)
+{
+  env.reset();
+  env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:action-name pick-up) (eq ?a:executable TRUE))"));
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:action-name unstack) (eq ?a:executable TRUE))"));
+}
