@@ -1,7 +1,7 @@
 
 (defrule action-selection-select
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (status FORMULATED)
-											(action-name ?action-name) (params $?params))
+											(action-name ?action-name))
 	(plan (id ?plan-id) (goal-id ?goal-id))
 	(goal (id ?goal-id) (mode DISPATCHED))
 	(not (plan-action (status PENDING|WAITING|RUNNING|FAILED)))

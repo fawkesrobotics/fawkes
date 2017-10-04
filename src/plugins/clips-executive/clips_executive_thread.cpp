@@ -105,7 +105,7 @@ ClipsExecutiveThread::init()
 	clips->evaluate("(ff-feature-request \"config\")");
 
 	clips->add_function("map-action-skill",
-	                    sigc::slot<std::string, std::string, CLIPS::Values>
+	                    sigc::slot<std::string, std::string, CLIPS::Values, CLIPS::Values>
 	                    (sigc::mem_fun(*this, &ClipsExecutiveThread::clips_map_skill)));
 
 	bool cfg_req_redefwarn_feature = true;
@@ -163,7 +163,7 @@ ClipsExecutiveThread::loop()
 
 
 std::string
-ClipsExecutiveThread::clips_map_skill(std::string action_name, CLIPS::Values params)
+ClipsExecutiveThread::clips_map_skill(std::string action_name, CLIPS::Values param_names, CLIPS::Values param_values)
 {
 	if (! action_skill_mapping_) {
 		logger->log_error(name(), "No action mapping has been loaded");
@@ -177,13 +177,14 @@ ClipsExecutiveThread::clips_map_skill(std::string action_name, CLIPS::Values par
 		logger->log_warn(name(), "No mapping for action '%s' known", action_name.c_str());
 		return "";
 	}
-	if (params.size() % 2 != 0) {
-		logger->log_warn(name(), "Odd number of parameters to action '%s'", action_name.c_str());
+	if (param_names.size() != param_values.size()) {
+		logger->log_warn(name(), "Number of parameter names and values "
+		                 "do not match for action '%s'", action_name.c_str());
 		return "";
 	}
 	std::map<std::string, std::string> param_map;
-	for (size_t i = 0; (i+1) < params.size(); i += 2) {
-		param_map[params[i].as_string()] = params[i+1].as_string();
+	for (size_t i = 0; i < param_names.size(); ++i) {
+		param_map[param_names[i].as_string()] = param_values[i].as_string();
 	}
 
 	std::multimap<std::string, std::string> messages;

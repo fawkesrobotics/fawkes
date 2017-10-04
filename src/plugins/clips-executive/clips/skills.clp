@@ -36,13 +36,13 @@
   )
 )
 
-(deffunction skill-call (?name ?params ?param-values)
-  (bind ?args (merge-params ?params ?param-values))
-  (if (eq FALSE ?args) then
-    (printout logerror "Error constructing skill call, abort.")
-    (return FALSE)
-  )
+(deffunction skill-call (?name ?param-names ?param-values)
 	; The following is a basic 1-to-1 mapping from action to skill
+  ; (bind ?args (merge-params ?param-names ?param-values))
+  ; (if (eq FALSE ?args) then
+  ;   (printout logerror "Error constructing skill call, abort.")
+  ;   (return FALSE)
+  ; )
   ; (bind ?sks "")
   ; (foreach ?a ?args
 	;    (if (is-odd-int ?a-index) then
@@ -71,7 +71,7 @@
 
 	; And here we rely on a function provided from the outside providing
 	; a more sophisticated mapping.
-	(bind ?sks (map-action-skill ?name ?args))
+	(bind ?sks (map-action-skill ?name ?param-names ?param-values))
 	(printout logwarn "sks='" ?sks "'" crlf)
 
 	(if (eq ?sks "")

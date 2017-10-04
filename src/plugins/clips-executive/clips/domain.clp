@@ -58,7 +58,7 @@
   (slot part-of (type SYMBOL))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot predicate (type SYMBOL))
-  (multislot params (type SYMBOL))
+  (multislot param-names (type SYMBOL))
   (multislot param-values (default (create$)))
   (slot grounded (type SYMBOL) (allowed-values no partially yes) (default no))
 )
@@ -108,12 +108,12 @@
 
 (defrule domain-ground-precondition
   "Ground a precondition of an operator."
-  (plan-action (action-name ?op) (params $?action-params)
+  (plan-action (action-name ?op) (param-names $?action-params)
     (param-values $?action-values))
   ?precond <- (domain-atomic-precondition
                 ;(name ?precond-name&precond-is-part-of ?precond-name ?op)
                 (name ?precond-name)
-                (params $?precond-params)
+                (param-names $?precond-params)
                 (param-values $?precond-values&
                   :(< (length$ ?precond-values) (length$ ?precond-params))))
   (precond-is-part-of ?precond-name ?op)
@@ -142,9 +142,9 @@
 (defrule domain-check-if-grounded
   "Check if a precondition is completely grounded."
   ?instance <- (domain-atomic-precondition (name ?precond-name)
-                (params $?grounded-params) (grounded partially))
+                (param-names $?grounded-params) (grounded partially))
   (domain-atomic-precondition (name ?precond-name) (grounded no)
-    (params $?params&:
+    (param-names $?params&:
       (eq nil (nth$ 1 (intersect ?grounded-params ?params)))
     )
   )
@@ -156,7 +156,7 @@
   "Special case of the rule above: If the precondition does not have any
    parameters, it is always grounded."
   ?precond <- (domain-atomic-precondition
-                (params $?params&:(eq nil (nth$ 1 ?params))))
+                (param-names $?params&:(eq nil (nth$ 1 ?params))))
 =>
   (duplicate ?precond (grounded yes))
 )

@@ -37,7 +37,7 @@
 	(slot id (type INTEGER))
 	(slot plan-id (type SYMBOL))
 	(slot action-name (type SYMBOL))
-	(multislot params)
+	(multislot param-names)
 	(multislot param-values)
 	(slot duration (type FLOAT))
 	(slot dispatch-time (type FLOAT))

@@ -14,7 +14,7 @@
 
 (defrule plan-exec-action-start
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (status PENDING)
-                      (action-name ?action-name) (params $?params)
+                      (action-name ?action-name) (param-names $?params)
                       (param-values $?param-values))
 	(not (plan-exec-action))
 	(skiller-control (acquired TRUE))

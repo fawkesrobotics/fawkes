@@ -58,7 +58,7 @@ class ClipsExecutiveThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-	std::string clips_map_skill(std::string name, CLIPS::Values params);
+	std::string clips_map_skill(std::string name, CLIPS::Values param_names, CLIPS::Values param_values);
 
  private:
 	bool        cfg_assert_time_each_loop_;
