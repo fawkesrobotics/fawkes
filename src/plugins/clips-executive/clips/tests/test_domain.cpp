@@ -140,3 +140,37 @@ TEST_F(BlocksworldDomainTest, ActionIsExecutableIfPreconditionIsSatisfied)
   EXPECT_TRUE(has_fact("((?a plan-action))",
         "(and (eq ?a:action-name unstack) (eq ?a:executable TRUE))"));
 }
+
+TEST_F(BlocksworldDomainTest, ApplyEffects)
+{
+  env.reset();
+  env.run();
+  EXPECT_FALSE(has_fact("((?p domain-predicate))",
+        "(and (eq ?p:name holding) (eq ?p:parameters (create$ b1)))"));
+  EXPECT_TRUE(has_fact("((?p domain-predicate))", "(eq ?p:name handempty)"));
+  EXPECT_TRUE(has_fact("((?p domain-predicate))",
+        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b1)))"));
+  env.assert_fact("(apply-action 1)");
+  env.run();
+  EXPECT_TRUE(has_fact("((?p domain-predicate))",
+        "(and (eq ?p:name holding) (eq ?p:parameters (create$ b1)))"));
+  EXPECT_FALSE(has_fact("((?p domain-predicate))", "(eq ?p:name handempty)"));
+  EXPECT_FALSE(has_fact("((?p domain-predicate))",
+        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b1)))"));
+}
+
+TEST_F(BlocksworldDomainTest, ApplyContradictingEffectsWithDifferentParams)
+{
+  env.reset();
+  env.run();
+  EXPECT_TRUE(has_fact("((?p domain-predicate))",
+        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b1)))"));
+  EXPECT_FALSE(has_fact("((?p domain-predicate))",
+        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b2)))"));
+  env.assert_fact("(apply-action 2)");
+  env.run();
+  EXPECT_FALSE(has_fact("((?p domain-predicate))",
+        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b1)))"));
+  EXPECT_TRUE(has_fact("((?p domain-predicate))",
+        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b2)))"));
+}

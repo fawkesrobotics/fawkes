@@ -14,6 +14,16 @@
     (part-of pick-up-precond) (param-names (create$ x)) (predicate clear))
   (domain-atomic-precondition
     (part-of pick-up-precond) (predicate handempty))
+  (domain-effect
+    (part-of pick-up) (predicate ontable) (type NEGATIVE)
+    (param-names (create$ x)))
+  (domain-effect
+    (part-of pick-up) (predicate clear) (type NEGATIVE)
+    (param-names (create$ x)))
+  (domain-effect
+    (part-of pick-up) (predicate handempty) (type NEGATIVE))
+  (domain-effect
+    (part-of pick-up) (predicate holding) (param-names (create$ x)))
   ; unstack
   (domain-operator (name unstack))
   (domain-operator-parameter (operator unstack) (type block) (name x))
@@ -26,16 +36,16 @@
     (part-of unstack-precond) (param-names (create$ x)) (predicate clear))
   (domain-atomic-precondition
     (part-of unstack-precond) (predicate handempty))
-;  (domain-effect
-;    (part-of unstack) (predicate holding) (parameters (create$ x)))
-;  (domain-effect
-;    (part-of unstack) (predicate clear) (parameters (create$ y)))
-;  (domain-effect
-;    (part-of unstack) (predicate clear)  (type NEGATIVE)
-;    (parameters (create$ x)))
-;  (domain-effect
-;    (part-of unstack) (predicate on) (type NEGATIVE)
-;    (parameters (create$ x y)))
+  (domain-effect
+    (part-of unstack) (predicate holding) (param-names (create$ x)))
+  (domain-effect
+    (part-of unstack) (predicate clear) (param-names (create$ y)))
+  (domain-effect
+    (part-of unstack) (predicate clear)  (type NEGATIVE)
+    (param-names (create$ x)))
+  (domain-effect
+    (part-of unstack) (predicate on) (type NEGATIVE)
+    (param-names (create$ x y)))
 
   ; world model
   (domain-predicate (name handempty))
@@ -46,4 +56,13 @@
   (domain-predicate (name on) (parameters b1 b2))
   (plan-action (id 2) (plan-id p0) (action-name unstack)
     (param-names (create$ x y)) (param-values (create$ b1 b2)))
+)
+
+(defrule apply-action
+  "Pseudo-execute action by changing its state to FINAL."
+  ?aa <- (apply-action ?action-id)
+  ?pa <- (plan-action (id ?action-id))
+=>
+  (modify ?pa (status FINAL))
+  (retract ?aa)
 )

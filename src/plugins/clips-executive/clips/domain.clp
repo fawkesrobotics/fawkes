@@ -26,6 +26,13 @@
   (multislot parameters (default (create$)))
 )
 
+(deftemplate domain-retracted-predicate
+  "Helper template that is asserted if a predicate is to be retracted."
+  (slot name (type SYMBOL) (default ?NONE))
+  (multislot parameters (default (create$)))
+)
+
+
 (deftemplate domain-operator
   "An operator of the domain. This only defines the name of the operator, all
    other properties (parameters, precondition, effects) are defined in separate
@@ -70,6 +77,16 @@
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
+(deftemplate domain-effect
+  "An effect of an operator. For now, effects are just a set of atomic effects
+   which are applied after the action was executed successfully."
+  (slot part-of (type SYMBOL))
+  (slot predicate (type SYMBOL))
+  (multislot param-names (default (create$)))
+  (multislot param-values (default (create$)))
+  (slot type (type SYMBOL) (allowed-values POSITIVE NEGATIVE)
+    (default POSITIVE))
+)
 
 (deftemplate domain-error
   "A fact representing some error in the domain definition."
@@ -239,6 +256,49 @@
   )
 =>
   (modify ?precond (is-satisfied FALSE))
+)
+
+(defrule domain-apply-effect
+  "Apply an effect of an action after it succeeded."
+  (plan-action
+    (id ?id)
+    (action-name ?op)
+    (status FINAL)
+    (param-names $?action-param-names)
+    (param-values $?action-param-values)
+  )
+  (domain-effect
+    (part-of ?op)
+    (param-names $?effect-param-names)
+    (type ?effect-type)
+    (predicate ?predicate))
+=>
+  (bind ?values ?effect-param-names)
+  (foreach ?p ?action-param-names
+    (bind ?values
+      (replace-member$ ?values (nth$ ?p-index ?action-param-values) ?p)
+    )
+  )
+  (if (eq ?effect-type POSITIVE) then
+    (assert (domain-predicate (name ?predicate) (parameters ?values)))
+  else
+    (assert (domain-retracted-predicate (name ?predicate) (parameters ?values)))
+  )
+)
+
+(defrule domain-retract-negative-effect
+  "Retract an existing predicate if the same retracted predicate exists."
+  ?p <- (domain-predicate (name ?predicate) (parameters $?params))
+  ?r <- (domain-retracted-predicate (name ?predicate) (parameters $?params))
+=>
+  (retract ?r ?p)
+)
+
+(defrule domain-cleanup-retract-facts
+  "Clean up a retract-predicate if the respective predicate does not exist."
+  ?r <- (domain-retracted-predicate)
+=>
+  (retract ?r)
 )
 
 (defrule domain-check-if-action-is-executable
