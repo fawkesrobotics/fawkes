@@ -66,13 +66,20 @@
 
 (deftemplate domain-atomic-precondition
   "An atomic precondition of an operator. This must always be part-of a
-   non-atomic precondition."
+   non-atomic precondition. The multislot param-constants can be used to define
+   predicate arguments that are not parameters of the operator. After grounding,
+   if the ith slot of param-constants contains the value v != nil, then the ith
+   slot of param-values will also contain the value v. In that case, the ith
+   value of param-names will be ignored and should be set to c (for constant).
+   See the tests for an example.
+"
   (slot part-of (type SYMBOL))
   (slot action (type INTEGER) (default 0))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot predicate (type SYMBOL))
   (multislot param-names (type SYMBOL))
   (multislot param-values (default (create$)))
+  (multislot param-constants (default (create$)))
   (slot grounded (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
@@ -151,6 +158,7 @@
                 (part-of ?parent)
                 (name ?precond-name)
                 (param-names $?precond-param-names)
+                (param-constants $?precond-param-constants)
                 (grounded FALSE)
               )
   (not (domain-atomic-precondition
@@ -160,9 +168,14 @@
 =>
   (bind ?values (create$))
   (foreach ?p ?precond-param-names
-    (bind ?action-index (member$ ?p ?action-param-names))
-    (bind ?values
-      (insert$ ?values ?p-index (nth$ ?action-index ?action-values)))
+    (if (neq (nth$ ?p-index ?precond-param-constants) nil) then
+      (bind ?values
+        (insert$ ?values ?p-index (nth$ ?p-index ?precond-param-constants)))
+    else
+      (bind ?action-index (member$ ?p ?action-param-names))
+      (bind ?values
+        (insert$ ?values ?p-index (nth$ ?action-index ?action-values)))
+    )
   )
   (duplicate ?precond
     (param-values ?values) (action ?action-id) (grounded TRUE))
