@@ -238,3 +238,22 @@ TEST_F(DomainTest, PreconditionWithConstantInSecondSlot)
   EXPECT_TRUE(has_fact("((?a plan-action))",
         "(and (eq ?a:id 1) (eq ?a:executable TRUE))"));
 }
+
+TEST_F(DomainTest, PreconditionWithUnknownParameter)
+{
+  env.reset();
+  env.assert_fact("(plan-action"
+                  " (id 1)"
+                  " (action-name op1)"
+                  " (param-names (create$ x))"
+                  " (param-values (create$ b)))");
+  env.assert_fact("(domain-precondition (name p1) (part-of op1))");
+  env.assert_fact("(domain-atomic-precondition"
+             " (name ap1)"
+             " (part-of p1)"
+             " (predicate pred1)"
+             " (param-names (create$ y c))"
+             " (param-constants (create$ nil a)))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?e domain-error))"));
+}

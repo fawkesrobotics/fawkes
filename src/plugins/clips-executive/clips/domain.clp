@@ -173,8 +173,15 @@
         (insert$ ?values ?p-index (nth$ ?p-index ?precond-param-constants)))
     else
       (bind ?action-index (member$ ?p ?action-param-names))
-      (bind ?values
-        (insert$ ?values ?p-index (nth$ ?action-index ?action-values)))
+      (if (not ?action-index) then
+        ; ?p is not in the list of the action parameters
+        (assert (domain-error (error-msg
+          (str-cat "Precondition " ?precond-name " has unknown parameter " ?p)))
+        )
+      else
+        (bind ?values
+          (insert$ ?values ?p-index (nth$ ?action-index ?action-values)))
+      )
     )
   )
   (duplicate ?precond
