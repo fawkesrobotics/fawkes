@@ -95,6 +95,7 @@
 	(path-load "blackboard-init.clp")
 	(path-load "skills-init.clp")
 	(path-load "plan.clp")
+  (path-load "domain.clp")
 )
 
 (defrule executive-init-stage3
@@ -105,8 +106,9 @@
 	; Common spec config prefix
 	(bind ?pf (str-cat "/clips-executive/specs/" ?spec "/"))
 
-	(foreach ?component (create$ "goal-reasoner" "goal-expander" "macro-expansion"
-															 "action-selection" "action-execution" "execution-monitoring")
+	(foreach ?component (create$ "domain" "goal-reasoner" "goal-expander"
+                               "macro-expansion" "action-selection"
+                               "action-execution" "execution-monitoring")
 		(do-for-fact ((?c confval)) (and (eq ?c:path (str-cat ?pf ?component)) (eq ?c:type STRING))
 			(printout t "Loading component '" ?component "' (" ?c:value ")" crlf)
 			(path-load ?c:value)
