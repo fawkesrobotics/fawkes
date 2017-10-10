@@ -52,6 +52,7 @@ clips-executive:
 
   specs:
     test:
+      domain: test-scenario/test-domain.clp
       goal-reasoner: test-scenario/goal-reasoner.clp
       goal-expander: test-scenario/fixed-sequence.clp
       action-selection: test-scenario/action-selection.clp
@@ -61,3 +62,5 @@ clips-executive:
 
       action-mapping:
         say: say{text=?(text)s, wait=true}
+        say-hello: say{text="Hello world", wait=true}
+        say-goodbye: say{text="Good bye", wait=true}
