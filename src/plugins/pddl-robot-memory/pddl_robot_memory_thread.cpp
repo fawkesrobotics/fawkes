@@ -157,7 +157,7 @@ PddlRobotMemoryThread::loop()
     std::vector<std::string> error_list = ctemplate::TemplateNamelist::GetBadSyntaxList(false, ctemplate::DO_NOT_STRIP);
     for(std::string error : error_list)
     {
-      logger->log_error(name(), "", error.c_str());
+      logger->log_error(name(), "%s", error.c_str());
     }
   }
   //Let ctemplate expand the input
