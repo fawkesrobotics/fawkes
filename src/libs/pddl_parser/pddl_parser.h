@@ -22,9 +22,11 @@
 #ifndef __PLUGINS_PDDL_PARSER_H
 #define __PLUGINS_PDDL_PARSER_H
 
-#include <string>
-
 #include "pddl_grammar.h"
+
+#include <core/exception.h>
+
+#include <string>
 
 namespace pddl_parser {
 
@@ -34,6 +36,13 @@ class PddlParser
   static Domain parseDomain(const std::string pddl_domain);
   static Problem parseProblem(const std::string pddl_problem);
  private:
+};
+
+class PDDLParserException : public fawkes::Exception
+{
+ public:
+  PDDLParserException(const char *msg)
+    : fawkes::Exception(msg) {}
 };
 
 }
