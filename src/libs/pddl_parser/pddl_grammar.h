@@ -75,7 +75,7 @@ namespace pddl_parser {
         duration = lit(":duration") >> '(' >> '=' >> 
           lit("?duration") >> uint_ >> ')';
         action_params = lit(":parameters") >> '(' >> +param_pair >> ')';
-        action = '(' >> lit(":durative-action")
+        action = '(' >> (lit(":durative-action") | lit(":action"))
           >> name_type
           >> action_params
           >> -duration
