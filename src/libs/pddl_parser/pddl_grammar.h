@@ -47,7 +47,7 @@ namespace pddl_parser {
 
         name_type = lexeme[ alnum >> *(alnum|char_('-')|char_('_')) ];
 
-        domain_name = '(' >> lit("define")
+        domain_name = lit("define")
           >> '(' >> lit("domain") >> +(char_ - ')') >> ')';
 
         requirements = '(' >> lit(":requirements")
@@ -87,14 +87,15 @@ namespace pddl_parser {
         actions = +action;
 
         domain =
-          domain_name
+          '('
+          >> domain_name
           >> requirements
           >> -types
           >> -constants
           >> predicates
           >> actions
-          // There should be a closing paranthes here, but parsing will
-          // fail if it is included
+          // make closing parenthesis optional to stay backwards compatible
+          >> -lit(")")
           ;
       }
 
