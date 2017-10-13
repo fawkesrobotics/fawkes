@@ -21,7 +21,7 @@
  */
 
 #include <interfaces/generator/field.h>
-#include <interfaces/generator/type_checker.h>
+#include <interfaces/generator/checker.h>
 #include <interfaces/generator/exceptions.h>
 
 #include <stdlib.h>
@@ -378,20 +378,20 @@ InterfaceField::setAttribute(const std::string &attr_name, const std::string &at
 void
 InterfaceField::valid()
 {
-  if ( ! InterfaceDataTypeChecker::validType(type, enum_constants) ) {
+  if ( ! InterfaceChecker::validType(type, enum_constants) ) {
     throw InterfaceGeneratorInvalidTypeException("field", name.c_str(), type.c_str());
   }
   if ( (name.length() == 0) || (name.find(" ") != std::string::npos) ) {
     throw InterfaceGeneratorInvalidValueException("name", "string", "name must not contain spaces");
   }
-  if ( (length.length() > 0) && ! InterfaceDataTypeChecker::validValue("uint32", length) ) {
+  if ( (length.length() > 0) && ! InterfaceChecker::validValue("uint32", length) ) {
     throw InterfaceGeneratorInvalidValueException("length", "uint32", length.c_str());
   }
-  if ( (validfor.length() > 0) && ! InterfaceDataTypeChecker::validValue("uint32", validfor) ) {
+  if ( (validfor.length() > 0) && ! InterfaceChecker::validValue("uint32", validfor) ) {
     throw InterfaceGeneratorInvalidValueException("validfor", "uint32", validfor.c_str());
   }
   if ( (default_value.length() > 0) &&
-       ! InterfaceDataTypeChecker::validValue(type, default_value) ) {
+       ! InterfaceChecker::validValue(type, default_value) ) {
     throw InterfaceGeneratorInvalidValueException("default", type.c_str(), validfor.c_str());
   }
   for (std::vector<std::string>::iterator i = flags.begin(); i != flags.end(); ++i) {

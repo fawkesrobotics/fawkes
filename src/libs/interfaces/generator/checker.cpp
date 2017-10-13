@@ -20,7 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <interfaces/generator/type_checker.h>
+#include <interfaces/generator/checker.h>
 #include <interfaces/generator/exceptions.h>
 #include <core/exception.h>
 
@@ -35,11 +35,13 @@
 #endif
 #include <stdint.h>
 
-/** @class InterfaceDataTypeChecker <interfaces/generator/type_checker.h>
- * Type checker for interface types.
- * This classed is used by the generator to decide if a supplied type is
- * correct and in the case of constants if the supplied value matches the
- * field type.
+/** @class InterfaceChecker <interfaces/generator/checker.h>
+ * @brief Check interface type and identifier validity.
+ */
+
+
+/** Decide if a supplied type is correct and in the case of constants if the
+ * supplied value matches the field type.
  *
  * Valid types are:
  * - int
@@ -51,17 +53,13 @@
  * - double
  * - byte (unsigned 8-bit number)
  * - string
- */
-
-
-/** Check type validity.
  * @param type type string to check
  * @param enum_constants an optional vector of enumeration constants that are used for
  * type validation.
  * @return true, if type is valid, false otherwise
  */
 bool
-InterfaceDataTypeChecker::validType(const std::string &type, std::vector<InterfaceEnumConstant> *enum_constants)
+InterfaceChecker::validType(const std::string &type, std::vector<InterfaceEnumConstant> *enum_constants)
 {
   if ( (type == "int8") ||
        (type == "int16") ||
@@ -98,7 +96,7 @@ InterfaceDataTypeChecker::validType(const std::string &type, std::vector<Interfa
  * @return true, if value is valid for type, false otherwise
  */
 bool
-InterfaceDataTypeChecker::validValue(const std::string &type, const std::string &value)
+InterfaceChecker::validValue(const std::string &type, const std::string &value)
 {
   if (type.find("int") != std::string::npos) {
     errno = 0;
@@ -152,3 +150,38 @@ InterfaceDataTypeChecker::validValue(const std::string &type, const std::string 
     return false;
   }
 }
+
+/** Check for identifiers that are used by the implementation and cannot be used
+* as field or message names */
+bool
+InterfaceChecker::validName(const std::string &name)
+{
+  if (name.substr(0, 4) == "set_")
+    return reserved_names.find(name.substr(0, 5)) == reserved_names.end();
+  if (name.substr(0, 3) == "is_")
+    return reserved_names.find(name.substr(0, 4)) == reserved_names.end();
+  else
+    return reserved_names.find(name) == reserved_names.end();
+}
+
+
+const std::set<std::string> InterfaceChecker::reserved_names {
+  "id", "clone", "oftype", "datachunk", "datasize",
+  "type", "uid", "serial", "mem_serial", "hash", "hash_size",
+  "hash_printable", "writer", "validity", "valid",
+  "owner", "from_chunk", "create_message", "copy_values",
+  "enum_tostring", "resize_buffers", "num_buffers",
+  "copy_shared_to_buffer", "copy_private_to_buffer", "read_from_buffer",
+  "compare_buffers", "buffer_timestamp", "read", "write", "has_writer",
+  "num_readers", "writer", "readers", "changed", "timestamp",
+  "auto_timestamping", "timestamp", "clock", "mark_data_changed",
+  "get_message_types", "msgq_enqueue", "msgq_enqueue_copy",
+  "msgq_remove", "msgq_size", "msgq_flush", "msgq_lock", "msgq_try_lock",
+  "msgq_unlock", "msgq_pop", "msgq_first", "msgq_empty", "msgq_append",
+  "msgq_first_is", "msgq_first", "msgq_first_safe", "msgq_begin",
+  "msgq_end", "fields", "fields_end", "num_fields", "parse_uid",
+  "reserved_names", "message_valid", "add_fieldinfo", "add_messageinfo",
+  "data_ptr", "data_size", "data_changed", "data_ts", "type_id",
+  "instance_serial", "mediators", "memory", "readwrite", "owner"
+};
+

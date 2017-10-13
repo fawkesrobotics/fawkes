@@ -21,7 +21,7 @@
  */
 
 #include <interfaces/generator/pseudomap.h>
-#include <interfaces/generator/type_checker.h>
+#include <interfaces/generator/checker.h>
 #include <interfaces/generator/exceptions.h>
 
 #include <cstdlib>

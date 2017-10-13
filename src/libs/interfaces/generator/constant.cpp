@@ -21,7 +21,7 @@
  */
 
 #include <interfaces/generator/constant.h>
-#include <interfaces/generator/type_checker.h>
+#include <interfaces/generator/checker.h>
 #include <interfaces/generator/exceptions.h>
 
 /** @class InterfaceConstant interfaces/generator/constant.h
@@ -43,10 +43,10 @@
 InterfaceConstant::InterfaceConstant(const std::string &name, const std::string &type,
 				     const std::string &value, const std::string &comment)
 {
-  if ( ! InterfaceDataTypeChecker::validType(type) ) {
+  if ( ! InterfaceChecker::validType(type) ) {
     throw InterfaceGeneratorInvalidTypeException("constant", name.c_str(), type.c_str());
   }
-  if ( ! InterfaceDataTypeChecker::validValue(type, value) ) {
+  if ( ! InterfaceChecker::validValue(type, value) ) {
     throw InterfaceGeneratorInvalidValueException(name.c_str(), type.c_str(), value.c_str());
   }
 

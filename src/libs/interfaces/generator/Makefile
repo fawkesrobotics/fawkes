@@ -26,7 +26,7 @@ ifeq ($(HAVE_INTERFACE_GENERATOR),1)
   OBJS_ffifacegen = constant.o cpp_generator.o digest.o		\
 		    enum_constant.o field.o pseudomap.o main.o	\
 		    message.o parser.o tolua_generator.o	\
-		    type_checker.o
+		    checker.o
 
   OBJS_all     += $(OBJS_ffifacegen)
   BINS_all     += $(BINDIR)/ffifacegen
