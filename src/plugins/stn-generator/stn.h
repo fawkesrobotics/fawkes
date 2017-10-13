@@ -31,7 +31,7 @@
 
 #include <aspect/logging.h>
 
-#include "pddl_ast.h"
+#include <pddl_parser/pddl_ast.h>
 #include "domain_action.h"
 #include "stn_action.h"
 

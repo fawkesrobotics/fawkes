@@ -22,7 +22,7 @@
 #include <fstream>
 #include <iostream>
 #include <exception>
-#include "pddl_parser.h"
+#include <pddl_parser/pddl_parser.h>
 
 #include "stn.h"
 

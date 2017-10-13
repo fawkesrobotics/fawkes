@@ -16,14 +16,28 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(LIBSRCDIR)/pddl_parser/pddl_parser.mk
 
 LIBS_stn_generator = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-                      fawkesblackboard fawkesinterface gvc cgraph
+                      fawkesblackboard fawkesinterface fawkespddl_parser \
+                      gvc cgraph
 
 OBJS_stn_generator = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-PLUGINS_all = $(PLUGINDIR)/stn-generator.$(SOEXT)
-
 OBJS_all = $(OBJS_stn-generator)
+
+ifeq ($(HAVE_PDDL_PARSER),1)
+  PLUGINS_all = $(PLUGINDIR)/stn-generator.$(SOEXT)
+else
+  WARN_TARGETS += warning_pddl_parser
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+
+.PHONY: warning_pddl_parser
+warning_pddl_parser:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting STN plugin$(TNORMAL) (pddl_parser not available)"
+endif
 
 include $(BUILDSYSDIR)/base.mk
