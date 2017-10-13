@@ -18,7 +18,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/pddl_parser/pddl_parser.mk
 
-LIBS_pddl_parser = stdc++ fawkespddl_parser
+LIBS_pddl_parser = stdc++ fawkescore fawkespddl_parser
 OBJS_pddl_parser = main.o
 OBJS_all = $(OBJS_pddl_parser)
 

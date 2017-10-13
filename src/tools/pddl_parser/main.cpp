@@ -36,7 +36,14 @@ int main()
   str.assign((std::istreambuf_iterator<char>(t)),
       std::istreambuf_iterator<char>());
 
-  pddl_parser::Domain dom = pddl_parser::PddlParser::parseDomain(str);
+  pddl_parser::Domain dom;
+  try {
+  dom = pddl_parser::PddlParser::parseDomain(str);
+  } catch (pddl_parser::PDDLParserException &e) {
+    std::cout << "Error occurred during parsing: "
+      << e.what_no_backtrace() << std::endl;
+    return 1;
+  }
 
   std::cout << "success" << std::endl;
 
