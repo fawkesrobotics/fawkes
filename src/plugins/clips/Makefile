@@ -18,9 +18,10 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
 
 LIBS_clips = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-           fawkesinterface fawkesclipsaspect
+           fawkesinterface fawkesclipsaspect fawkespddl_parser
 OBJS_clips = clips_plugin.o clips_thread.o \
-	     feature_blackboard.o feature_config.o feature_redefine_warning.o
+	     feature_blackboard.o feature_config.o feature_redefine_warning.o \
+	     feature_pddl.o pddl_to_clips_visitor.o
 
 OBJS_all = $(OBJS_clips)
 
