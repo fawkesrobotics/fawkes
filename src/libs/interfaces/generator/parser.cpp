@@ -101,12 +101,8 @@ InterfaceParser::getFields(xmlpp::Node *node)
     f.setComment(comment_node->get_content());
 
     //std::cout << "Field name: " << field_name << std::endl;
-    try {
-      f.valid();
-      result.push_back(f);
-    } catch ( fawkes::Exception &e ) {
-      e.print_trace();
-    }
+    f.valid();
+    result.push_back(f);
   }
   for (vector<InterfaceField>::iterator i = result.begin(); i != result.end(); ++i) {
     for (vector<InterfaceField>::iterator j = i + 1; j != result.end(); ++j) {
