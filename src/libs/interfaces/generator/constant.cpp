@@ -43,6 +43,9 @@
 InterfaceConstant::InterfaceConstant(const std::string &name, const std::string &type,
 				     const std::string &value, const std::string &comment)
 {
+  if ( ! InterfaceChecker::validName(name) ) {
+    throw InterfaceGeneratorReservedIdentifierException("constant", name.c_str());
+  }
   if ( ! InterfaceChecker::validType(type) ) {
     throw InterfaceGeneratorInvalidTypeException("constant", name.c_str(), type.c_str());
   }

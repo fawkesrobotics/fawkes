@@ -378,6 +378,12 @@ InterfaceField::setAttribute(const std::string &attr_name, const std::string &at
 void
 InterfaceField::valid()
 {
+  if ( ! InterfaceChecker::validName(name) ) {
+    throw InterfaceGeneratorReservedIdentifierException("field", name.c_str());
+  }
+  if ( ! InterfaceChecker::validName(type) ) {
+    throw InterfaceGeneratorReservedIdentifierException("type", type.c_str());
+  }
   if ( ! InterfaceChecker::validType(type, enum_constants) ) {
     throw InterfaceGeneratorInvalidTypeException("field", name.c_str(), type.c_str());
   }
