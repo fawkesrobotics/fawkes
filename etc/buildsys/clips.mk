@@ -20,39 +20,35 @@ endif
 ifndef __buildsys_clips_mk_
 __buildsys_clips_mk_ := 1
 
-# We use range-for loops
-CLIPS_GCC_MINV_MAJ = 4
-CLIPS_GCC_MINV_MIN = 6
-
 CLIPS_ERROR=
 
 ifneq ($(PKGCONFIG),)
-  HAVE_CLIPS = $(if $(shell $(PKGCONFIG) --exists 'clipsmm-1.0'; echo $${?/1/}),1,0)
-  ifeq ($(HAVE_CLIPS),1)
-    ifeq ($(CC),gcc)
-      ifneq ($(call gcc_atleast_version,$(CLIPS_GCC_MINV_MAJ),$(CLIPS_GCC_MINV_MIN)),1)
-        HAVE_CLIPS=
-	CLIPS_ERROR = GCC version too old, have $(GCC_VERSION), required $(CLIPS_GCC_MINV_MAJ).$(CLIPS_GCC_MINV_MIN)
-      endif
+  ifeq ($(HAVE_CPP14),1)
+    HAVE_CLIPS = $(if $(shell $(PKGCONFIG) --exists 'clipsmm-1.0'; echo $${?/1/}),1,0)
+    ifneq ($(HAVE_CLIPS),1)
+      CLIPS_ERROR = CLIPS not found
     endif
   else
-    CLIPS_ERROR = CLIPS not found
+    CLIPS_ERROR = C++14 required
   endif
 else
   CLIPS_ERROR = pkg-config not available
 endif
 
 ifeq ($(HAVE_CLIPS),1)
-  # -Wno-deprecated is needed with GCC7 because glibmm still uses throw()
-  #  specifications, which are deprecated and cause a GCC warning.
-  CFLAGS_CLIPS  = -DHAVE_CLIPS $(shell $(PKGCONFIG) --cflags 'clipsmm-1.0') \
-                  -Wno-deprecated
+  # Filter out "-std=c++0x" for clipsmm <=0.3.4 (it unnecessarily downgrades the std)
+  CFLAGS_CLIPS  = -DHAVE_CLIPS $(CFLAGS_CPP14) \
+                  $(filter-out -std=c++0x,$(shell $(PKGCONFIG) --cflags 'clipsmm-1.0'))
   LDFLAGS_CLIPS = $(shell $(PKGCONFIG) --libs 'clipsmm-1.0')
-  # The following is required since the GCC 5 libstdc++ deprecates
-  # std::auto_ptr according to C++11. This causes warnings since this
-  # is used in glibmm, a dependency of clipsmm.
-  ifeq ($(call gcc_atleast_version,5,0),1)
-    CFLAGS_CLIPS += -Wno-deprecated-declarations
+
+  # The following is required since C++11 deprecates some features triggering
+  # warnings in older glibmm version (before 2.46):
+  # -Wno-deprecated-declarations is needed due to the use ofstd::auto_ptr
+  # -Wno-deprecated is needed with GCC7 because glibmm still uses throw()
+  # specifications, which are deprecated and cause a GCC warning.
+  ifneq ($(if $(shell $(PKGCONFIG) --atleast-version 2.46 'glibmm-2.4'; echo $${?/1/}),1,0),1)
+    $(warning HERE)
+    CFLAGS_CLIPS += -Wno-deprecated-declarations -Wno-deprecated
   endif
 endif
 
