@@ -30,8 +30,23 @@ clang_atleast_version = $(strip $(if $(call gt,$(CLANG_VERSION_MAJOR),$1),1,	\
 			  $(if $(call eq,$(CLANG_VERSION_MAJOR),$1),		\
 			    $(if $(call gte,$(CLANG_VERSION_MINOR),$2),1))))
 
-HAVE_CPP11=1
-CFLAGS_CPP11=-std=c++11
+# According to https://clang.llvm.org/cxx_status.html
+ifeq ($(call clang_atleast_version,3,3),1)
+  HAVE_CPP11=1
+  CFLAGS_CPP11=-std=c++11
+endif
+ifeq ($(call clang_atleast_version,3,4),1)
+  HAVE_CPP14=1
+  CFLAGS_CPP14=-std=c++14
+endif
+ifeq ($(call clang_atleast_version,4,0),1)
+  HAVE_CPP17=1
+  CFLAGS_CPP17=-std=c++1z
+endif
+ifeq ($(call clang_atleast_version,5,0),1)
+  HAVE_CPP17=1
+  CFLAGS_CPP17=-std=c++17
+endif
 
 CFLAGS_MTUNE_NATIVE=-march=native -mtune=native
 ifeq ($(OS),FreeBSD)
