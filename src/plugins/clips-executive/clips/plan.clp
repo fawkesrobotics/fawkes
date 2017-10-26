@@ -7,19 +7,6 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
-; (deftemplate durative-action
-; 	(slot name (type SYMBOL))
-; 	(slot duration (type FLOAT))
-; 	(multislot params)
-; )
-
-; (deftemplate action-precondition
-; 	(slot action-name (type SYMBOL))
-; 	(slot type (type SYMBOL) (allowed-values POSITIVE NEGATIVE) (default POSITIVE))
-; 	(slot predicate (type SYMBOL))
-; 	(multislot values)
-; )
-
 ; This is just a dummy until we have a full spec
 (deftemplate goal
 	(slot id (type SYMBOL))
