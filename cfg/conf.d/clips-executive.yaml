@@ -62,5 +62,5 @@ clips-executive:
 
       action-mapping:
         say: say{text=?(text)s, wait=true}
-        say-hello: say{text="Hello world", wait=true}
+        say-hello: say{text="Hello ?(name)y", wait=true}
         say-goodbye: say{text="Good bye", wait=true}
