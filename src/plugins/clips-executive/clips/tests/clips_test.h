@@ -46,7 +46,7 @@ class CLIPSTest : public ::testing::Test
      *  @param fact_set_template The fact set template of the query,
      *  e.g., "((?a action ?p parameters))".
      *  @param query The constraints that must be satisfied by the fact set,
-     *  e.g., "(eq ?a:parameters ?p:values)".
+     *  e.g., "(eq ?a:param-values ?p:values)".
      *  @return true iff the fact exists.
      */
     bool has_fact(const std::string &fact_set_template,

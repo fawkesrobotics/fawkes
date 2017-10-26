@@ -20,16 +20,24 @@
 )
 
 (deftemplate domain-predicate
-  "A predicate symbol in the domain. If a predicate exists, it is true,
-   otherwise it is false."
+	"Representation of a predicate specification."
   (slot name (type SYMBOL) (default ?NONE))
-  (multislot parameters (default (create$)))
+	(slot wm-key-pattern (type STRING))
+  (multislot param-names (type SYMBOL))
+  (multislot param-types (type SYMBOL))
 )
 
-(deftemplate domain-retracted-predicate
+(deftemplate domain-fact
+  "An instantiated predicate (fact) according to a domain predicate spec.
+   If a fact exists, it is considered to be true, false otherwise (closed world assumption)."
+  (slot name (type SYMBOL) (default ?NONE))
+  (multislot param-values)
+)
+
+(deftemplate domain-retracted-fact
   "Helper template that is asserted if a predicate is to be retracted."
   (slot name (type SYMBOL) (default ?NONE))
-  (multislot parameters (default (create$)))
+  (multislot param-values)
 )
 
 
@@ -206,7 +214,7 @@
                 (predicate ?pred)
                 (param-values $?params)
                 (grounded TRUE))
-  (domain-predicate (name ?pred) (parameters $?params))
+  (domain-fact (name ?pred) (param-values $?params))
 =>
   (modify ?precond (is-satisfied TRUE))
 )
@@ -300,23 +308,23 @@
     )
   )
   (if (eq ?effect-type POSITIVE) then
-    (assert (domain-predicate (name ?predicate) (parameters ?values)))
+    (assert (domain-fact (name ?predicate) (param-values ?values)))
   else
-    (assert (domain-retracted-predicate (name ?predicate) (parameters ?values)))
+    (assert (domain-retracted-fact (name ?predicate) (param-values ?values)))
   )
 )
 
 (defrule domain-retract-negative-effect
   "Retract an existing predicate if the same retracted predicate exists."
-  ?p <- (domain-predicate (name ?predicate) (parameters $?params))
-  ?r <- (domain-retracted-predicate (name ?predicate) (parameters $?params))
+  ?p <- (domain-fact (name ?predicate) (param-values $?params))
+  ?r <- (domain-retracted-fact (name ?predicate) (param-values $?params))
 =>
   (retract ?r ?p)
 )
 
 (defrule domain-cleanup-retract-facts
   "Clean up a retract-predicate if the respective predicate does not exist."
-  ?r <- (domain-retracted-predicate)
+  ?r <- (domain-retracted-fact)
 =>
   (retract ?r)
 )

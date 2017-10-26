@@ -48,12 +48,12 @@
     (param-names (create$ x y)))
 
   ; world model
-  (domain-predicate (name handempty))
-  (domain-predicate (name clear) (parameters b1))
+  (domain-fact (name handempty))
+  (domain-fact (name clear) (param-values b1))
   (plan-action (id 1) (plan-id p0) (action-name pick-up) (param-names (create$ x))
     (param-values (create$ b1)))
 
-  (domain-predicate (name on) (parameters b1 b2))
+  (domain-fact (name on) (param-values b1 b2))
   (plan-action (id 2) (plan-id p0) (action-name unstack)
     (param-names (create$ x y)) (param-values (create$ b1 b2)))
 )

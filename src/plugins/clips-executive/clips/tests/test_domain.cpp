@@ -54,7 +54,7 @@ TEST_F(BlocksworldDomainTest, PreconditionsAreSatisfiedTest)
 TEST_F(BlocksworldDomainTest, NegativePreconditionIsNotSatisfied)
 {
   env.reset();
-  env.assert_fact("(domain-predicate (name ontable) (parameters b1))");
+  env.assert_fact("(domain-fact (name ontable) (param-values b1))");
   env.run();
   EXPECT_TRUE(has_fact("((?p domain-precondition))",
         "(and (eq ?p:name neg-on-table) (eq ?p:is-satisfied FALSE))"));
@@ -145,34 +145,34 @@ TEST_F(BlocksworldDomainTest, ApplyEffects)
 {
   env.reset();
   env.run();
-  EXPECT_FALSE(has_fact("((?p domain-predicate))",
-        "(and (eq ?p:name holding) (eq ?p:parameters (create$ b1)))"));
-  EXPECT_TRUE(has_fact("((?p domain-predicate))", "(eq ?p:name handempty)"));
-  EXPECT_TRUE(has_fact("((?p domain-predicate))",
-        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b1)))"));
+  EXPECT_FALSE(has_fact("((?p domain-fact))",
+        "(and (eq ?p:name holding) (eq ?p:param-values (create$ b1)))"));
+  EXPECT_TRUE(has_fact("((?p domain-fact))", "(eq ?p:name handempty)"));
+  EXPECT_TRUE(has_fact("((?p domain-fact))",
+        "(and (eq ?p:name clear) (eq ?p:param-values (create$ b1)))"));
   env.assert_fact("(apply-action 1)");
   env.run();
-  EXPECT_TRUE(has_fact("((?p domain-predicate))",
-        "(and (eq ?p:name holding) (eq ?p:parameters (create$ b1)))"));
-  EXPECT_FALSE(has_fact("((?p domain-predicate))", "(eq ?p:name handempty)"));
-  EXPECT_FALSE(has_fact("((?p domain-predicate))",
-        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b1)))"));
+  EXPECT_TRUE(has_fact("((?p domain-fact))",
+        "(and (eq ?p:name holding) (eq ?p:param-values (create$ b1)))"));
+  EXPECT_FALSE(has_fact("((?p domain-fact))", "(eq ?p:name handempty)"));
+  EXPECT_FALSE(has_fact("((?p domain-fact))",
+        "(and (eq ?p:name clear) (eq ?p:param-values (create$ b1)))"));
 }
 
 TEST_F(BlocksworldDomainTest, ApplyContradictingEffectsWithDifferentParams)
 {
   env.reset();
   env.run();
-  EXPECT_TRUE(has_fact("((?p domain-predicate))",
-        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b1)))"));
-  EXPECT_FALSE(has_fact("((?p domain-predicate))",
-        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b2)))"));
+  EXPECT_TRUE(has_fact("((?p domain-fact))",
+        "(and (eq ?p:name clear) (eq ?p:param-values (create$ b1)))"));
+  EXPECT_FALSE(has_fact("((?p domain-fact))",
+        "(and (eq ?p:name clear) (eq ?p:param-values (create$ b2)))"));
   env.assert_fact("(apply-action 2)");
   env.run();
-  EXPECT_FALSE(has_fact("((?p domain-predicate))",
-        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b1)))"));
-  EXPECT_TRUE(has_fact("((?p domain-predicate))",
-        "(and (eq ?p:name clear) (eq ?p:parameters (create$ b2)))"));
+  EXPECT_FALSE(has_fact("((?p domain-fact))",
+        "(and (eq ?p:name clear) (eq ?p:param-values (create$ b1)))"));
+  EXPECT_TRUE(has_fact("((?p domain-fact))",
+        "(and (eq ?p:name clear) (eq ?p:param-values (create$ b2)))"));
 }
 
 TEST_F(DomainTest, PreconditionWithConstant)
@@ -181,15 +181,15 @@ TEST_F(DomainTest, PreconditionWithConstant)
   env.assert_fact("(plan-action"
                   " (id 1)"
                   " (action-name op1)"
-                  " (param-names (create$ y))"
-                  " (param-values (create$ b)))");
+                  " (param-names y)"
+                  " (param-values b))");
   env.assert_fact("(domain-precondition (name p1) (part-of op1))");
   env.assert_fact("(domain-atomic-precondition"
              " (name ap1)"
              " (part-of p1)"
              " (predicate pred1)"
-             " (param-names (create$ c y))"
-             " (param-constants (create$ a)))");
+             " (param-names c y)"
+             " (param-constants a))");
   env.run();
   EXPECT_FALSE(has_fact("((?p domain-atomic-precondition))",
         "(and (eq ?p:name ap1) (eq ?p:is-satisfied TRUE))"));
@@ -197,7 +197,7 @@ TEST_F(DomainTest, PreconditionWithConstant)
         "(and (eq ?p:name p1) (eq ?p:is-satisfied TRUE))"));
   EXPECT_FALSE(has_fact("((?a plan-action))",
         "(and (eq a:?id 1) (eq ?a:executable TRUE))"));
-  env.assert_fact("(domain-predicate (name pred1) (parameters (create$ a b)))");
+  env.assert_fact("(domain-fact (name pred1) (param-values a b))");
   env.run();
   EXPECT_TRUE(has_fact("((?p domain-atomic-precondition))",
         "(and (eq ?p:name ap1) (eq ?p:is-satisfied TRUE))"));
@@ -213,15 +213,15 @@ TEST_F(DomainTest, PreconditionWithConstantInSecondSlot)
   env.assert_fact("(plan-action"
                   " (id 1)"
                   " (action-name op1)"
-                  " (param-names (create$ x))"
-                  " (param-values (create$ b)))");
+                  " (param-names x)"
+                  " (param-values b))");
   env.assert_fact("(domain-precondition (name p1) (part-of op1))");
   env.assert_fact("(domain-atomic-precondition"
              " (name ap1)"
              " (part-of p1)"
              " (predicate pred1)"
-             " (param-names (create$ x c))"
-             " (param-constants (create$ nil a)))");
+             " (param-names x c)"
+             " (param-constants nil a))");
   env.run();
   EXPECT_FALSE(has_fact("((?p domain-atomic-precondition))",
         "(and (eq ?p:name ap1) (eq ?p:is-satisfied TRUE))"));
@@ -229,7 +229,7 @@ TEST_F(DomainTest, PreconditionWithConstantInSecondSlot)
         "(and (eq ?p:name p1) (eq ?p:is-satisfied TRUE))"));
   EXPECT_FALSE(has_fact("((?a plan-action))",
         "(and (eq a:?id 1) (eq ?a:executable TRUE))"));
-  env.assert_fact("(domain-predicate (name pred1) (parameters (create$ b a)))");
+  env.assert_fact("(domain-fact (name pred1) (param-values b a))");
   env.run();
   EXPECT_TRUE(has_fact("((?p domain-atomic-precondition))",
         "(and (eq ?p:name ap1) (eq ?p:is-satisfied TRUE))"));
@@ -245,15 +245,15 @@ TEST_F(DomainTest, PreconditionWithUnknownParameter)
   env.assert_fact("(plan-action"
                   " (id 1)"
                   " (action-name op1)"
-                  " (param-names (create$ x))"
-                  " (param-values (create$ b)))");
+                  " (param-names x)"
+                  " (param-values b))");
   env.assert_fact("(domain-precondition (name p1) (part-of op1))");
   env.assert_fact("(domain-atomic-precondition"
              " (name ap1)"
              " (part-of p1)"
              " (predicate pred1)"
-             " (param-names (create$ y c))"
-             " (param-constants (create$ nil a)))");
+             " (param-names y c)"
+             " (param-constants nil a))");
   env.run();
   EXPECT_TRUE(has_fact("((?e domain-error))"));
 }
