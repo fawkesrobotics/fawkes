@@ -127,6 +127,7 @@
 (defrule domain-ground-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific action-id."
+  (not (domain-wm-update))
   (plan-action (action-name ?op) (id ?action-id))
   ?precond <- (domain-precondition
                 (name ?precond-name)
@@ -141,6 +142,7 @@
 (defrule domain-ground-nested-precondition
   "Ground a non-atomic precondition that is part of another precondition. Copy
    the action ID from the parent precondition."
+  (not (domain-wm-update))
   ?precond <- (domain-precondition
                 (name ?precond-name)
                 (part-of ?parent)
@@ -156,6 +158,7 @@
 
 (defrule domain-ground-atomic-precondition
   "Ground an atomic precondition of an operator."
+  (not (domain-wm-update))
   (plan-action
     (action-name ?op)
     (param-names $?action-param-names)
@@ -314,6 +317,7 @@
   else
     (assert (domain-retracted-fact (name ?predicate) (param-values ?values)))
   )
+  (assert domain-wm-update)
 )
 
 (defrule domain-retract-negative-effect
@@ -366,6 +370,29 @@
 =>
   (assert (domain-error (error-msg (str-cat "Super-type " ?super-type
                                     " of type " ?type " does not exist."))))
+)
+
+(defrule domain-cleanup-preconditions-on-worldmodel-change
+  "Retract grounded preconditions when the worldmodel changes."
+  (domain-wm-update)
+  ?precond <- (domain-precondition (grounded TRUE))
+=>
+  (retract ?precond)
+)
+
+(defrule domain-cleanup-atomic-preconditions-on-worldmodel-change
+  "Retract grounded atomic preconditions when the worldmodel changes."
+  (domain-wm-update)
+  ?precond <- (domain-atomic-precondition (grounded TRUE))
+=>
+  (retract ?precond)
+)
+
+(defrule domain-wm-update-done
+  "Updating the world model finished, cleanup update fact."
+  ?wmu <- (domain-wm-update)
+=>
+  (retract ?wmu)
 )
 
 (deffacts domain-facts
