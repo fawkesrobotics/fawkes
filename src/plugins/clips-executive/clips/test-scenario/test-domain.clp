@@ -16,17 +16,17 @@
     (domain-operator (name say-hello))
     (domain-precondition (part-of say-hello) (type conjunction))
     (domain-effect
-      (part-of say-hello) (predicate said) (param-names (create$ hello)))
+      (part-of say-hello) (predicate said) (param-names hello))
     (domain-operator (name say-goodbye))
     (domain-precondition
       (name say-goodbye-precond) (part-of say-goodbye) (type conjunction))
     (domain-atomic-precondition
       (part-of say-goodbye-precond)
       (predicate said)
-      (param-names (create$ c))
-      (param-constants (create$ hello))
+      (param-names c)
+      (param-constants hello)
     )
     (domain-effect
-      (part-of say-goodbye) (predicate said) (param-names (create$ goodbye)))
+      (part-of say-goodbye) (predicate said) (param-names goodbye))
   )
 )
