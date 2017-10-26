@@ -226,12 +226,13 @@
   ?precond <- (domain-precondition
                 (type negation)
                 (grounded TRUE)
+                (action ?action-id)
                 (name ?pn)
                 (is-satisfied FALSE))
   (or (domain-atomic-precondition
-        (part-of ?pn) (grounded TRUE) (is-satisfied FALSE))
+        (action ?action-id) (part-of ?pn) (grounded TRUE) (is-satisfied FALSE))
       (domain-precondition
-        (part-of ?pn) (grounded TRUE) (is-satisfied FALSE)))
+        (action ?action-id) (part-of ?pn) (grounded TRUE) (is-satisfied FALSE)))
 =>
   (modify ?precond (is-satisfied TRUE))
 )
@@ -242,12 +243,13 @@
   ?precond <- (domain-precondition
                 (type negation)
                 (name ?pn)
+                (action ?action-id)
                 (is-satisfied TRUE)
                 (grounded TRUE))
   (or (domain-atomic-precondition
-        (part-of ?pn) (grounded TRUE) (is-satisfied TRUE))
+        (action ?action-id) (part-of ?pn) (grounded TRUE) (is-satisfied TRUE))
       (domain-precondition
-        (part-of ?pn) (grounded TRUE) (is-satisfied TRUE)))
+        (action ?action-id) (part-of ?pn) (grounded TRUE) (is-satisfied TRUE)))
 =>
   (modify ?precond (is-satisfied FALSE))
 )
