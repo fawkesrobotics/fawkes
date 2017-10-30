@@ -68,8 +68,16 @@ endif
 # unsupported flags (which are supported on GCC)
 CFLAG_W_NO_UNUSED_LOCAL_TYPEDEFS=
 
+# no-missing-braces: https://bugs.llvm.org/show_bug.cgi?id=21629
+CFLAGS_DISABLE_WARNINGS=-Wno-missing-braces
+
 HAVE_CPP11_RANGE_FOR=1
 
+ifeq ($(HAVE_CPP11),1)
+  CFLAGS_MINIMUM+=$(CFLAGS_CPP11)
+else
+  $(error Your version of clang is too old and does not support c++11)
+endif
 
 endif # __buildsys_clang_mk_
 
