@@ -20,6 +20,7 @@ include $(BUILDSYSDIR)/interface.mk
 
 ifeq ($(HAVE_INTERFACE_GENERATOR),1)
   CFLAGS += $(CFLAGS_LIBXMLPP) $(CFLAGS_LIBCRYPTO)
+  CFLAGS += -Wno-mismatched-tags -Wno-inconsistent-missing-override
   LDFLAGS_ffifacegen = $(LDFLAGS_LIBXMLPP) $(LDFLAGS_LIBCRYPTO)
   LIBS_ffifacegen = stdc++ fawkescore fawkesutils
 
