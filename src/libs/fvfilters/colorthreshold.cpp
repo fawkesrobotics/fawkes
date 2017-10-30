@@ -42,19 +42,19 @@ FilterColorThreshold::~FilterColorThreshold() {
 
 void FilterColorThreshold::apply()
 {
-  register unsigned int h = 0;
-  register unsigned int w = 0;
+  unsigned int h = 0;
+  unsigned int w = 0;
 
-  register unsigned char *p_src_y = src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step);
-  register unsigned char *p_src_u = YUV422_PLANAR_U_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
+  unsigned char *p_src_y = src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step);
+  unsigned char *p_src_u = YUV422_PLANAR_U_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
       + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2 + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2);
-  register unsigned char *p_src_v = YUV422_PLANAR_V_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
+  unsigned char *p_src_v = YUV422_PLANAR_V_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
       + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2 + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2);
 
-  register unsigned char *p_dst_y = dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
-  register unsigned char *p_dst_u = YUV422_PLANAR_U_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
+  unsigned char *p_dst_y = dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
+  unsigned char *p_dst_u = YUV422_PLANAR_U_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
         + ((dst_roi->start.y * dst_roi->line_step) / 2 + (dst_roi->start.x * dst_roi->pixel_step) / 2) ;
-  register unsigned char *p_dst_v = YUV422_PLANAR_V_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
+  unsigned char *p_dst_v = YUV422_PLANAR_V_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
         + ((dst_roi->start.y * dst_roi->line_step) / 2 + (dst_roi->start.x * dst_roi->pixel_step) / 2);
 
   unsigned const char *p_line_src_y = p_src_y,

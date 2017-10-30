@@ -65,7 +65,7 @@ FilterScanlineSegmentation::apply()
 {
   unsigned int  x = 0, y = 0;
   unsigned char   py = 0, pu = 0, pv = 0;
-  register unsigned char *dyp, *dup, *dvp;
+  unsigned char *dyp, *dup, *dvp;
   color_t c;
 
 
