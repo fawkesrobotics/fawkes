@@ -100,12 +100,16 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
   }
   for (auto &predicate : domain.predicates) {
     string param_string = "";
+    string type_string = "";
     for (auto &param : predicate.second) {
       param_string += " " + param.first;
+      type_string += " " + param.second;
     }
-    env.assert_fact("(domain-predicate "
-                    "(name " + predicate.first + ") "
-                    "(parameters (create$" + param_string + ")))");
+    env.assert_fact("(domain-predicate"
+                    " (name " + predicate.first + ")"
+                    " (param-names " + param_string + ")"
+                    " (param-types " + type_string + ")"
+                    ")");
   }
 
   for (auto &action : domain.actions) {
