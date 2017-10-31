@@ -19,7 +19,7 @@
  */
 
 #include "feature_pddl.h"
-#include "pddl_to_clips_visitor.h"
+#include "pddl/precondition_visitor.h"
 
 #include <pddl_parser/pddl_parser.h>
 #include <core/threading/mutex_locker.h>
@@ -110,7 +110,7 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
   for (auto &action : domain.actions) {
     env.assert_fact("(domain-operator (name " + action.name + "))");
     vector<string> facts =
-      boost::apply_visitor(ExpressionToCLIPSFactVisitor(action.name, 1),
+      boost::apply_visitor(PreconditionToCLIPSFactVisitor(action.name, 1),
           action.precondition);
     for (auto &fact : facts) {
       env.assert_fact(fact);

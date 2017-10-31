@@ -1,5 +1,5 @@
 /***************************************************************************
- *  pddl_to_clips_visitor.h - A static visitor that translates PDDL to CLIPS
+ *  precondition_visitor.h - A static visitor to translate a precondition
  *
  *  Created: Mon 16 Oct 2017 18:33:34 CEST 18:33
  *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_PDDL_TO_CLIPS_VISITOR_H_
-#define __PLUGINS_CLIPS_PDDL_TO_CLIPS_VISITOR_H_
+#ifndef __PLUGINS_CLIPS_PDDL_PRECONDITION_VISITOR_H_
+#define __PLUGINS_CLIPS_PDDL_PRECONDITION_VISITOR_H_
 
 #include <pddl_parser/pddl_parser.h>
 
@@ -27,11 +27,11 @@
 #include <vector>
 #include <string>
 
-class ExpressionToCLIPSFactVisitor
+class PreconditionToCLIPSFactVisitor
 : public boost::static_visitor<std::vector<std::string>>
 {
  public:
-  ExpressionToCLIPSFactVisitor(const std::string &parent, int sub_counter);
+  PreconditionToCLIPSFactVisitor(const std::string &parent, int sub_counter);
   std::vector<std::string> operator()(pddl_parser::Atom &a) const;
   std::vector<std::string> operator()(pddl_parser::Predicate &p) const;
  private:
@@ -40,4 +40,4 @@ class ExpressionToCLIPSFactVisitor
 };
 
 
-#endif /* !__PLUGINS_CLIPS_PDDL_TO_CLIPS_VISITOR_H_ */
+#endif /* !__PLUGINS_CLIPS_PDDL_PRECONDITION_VISITOR_H_ */

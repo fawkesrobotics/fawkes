@@ -1,5 +1,5 @@
 /***************************************************************************
- *  pddl_to_clips_visitor.cpp - A static visitor that translates PDDL to CLIPS
+ *  precondition_visitor.cpp - A static visitor to translate a precondition
  *
  *  Created: Mon 16 Oct 2017 18:34:44 CEST 18:34
  *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
@@ -18,24 +18,25 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "pddl_to_clips_visitor.h"
+#include "precondition_visitor.h"
 
 using namespace std;
 using namespace pddl_parser;
 
-/** @class ExpressionToCLIPSFactVisitor "pddl_to_clips_visitor.h"
- * Translate pddl_parser::Expression into CLIPS facts.
+/** @class PreconditionToCLIPSFactVisitor "precondition_visitor.h"
+ * Translate a PDDL precondition into CLIPS facts.
  * @author Till Hofmann
- * Helper class to translate a pddl_parser::Expression to a CLIPS fact.
- * An expression is a boost::variant, and this class is a visitor for the
- * variant that translates the Expression into a a vector of CLIPS facts.
+ * Helper class to translate a precondition from pddl_parser::Expression to a
+ * CLIPS fact.  An expression is a boost::variant, and this class is a visitor
+ * for the variant that translates the Expression into a a vector of CLIPS
+ * facts.
  */
 
 /** Constructor.
  * @param parent The name of the parent (either an operator or a precondition)
  * @param sub_counter Counter passed by the parent to enumerate sub-conditions
  */
-ExpressionToCLIPSFactVisitor::ExpressionToCLIPSFactVisitor(
+PreconditionToCLIPSFactVisitor::PreconditionToCLIPSFactVisitor(
     const string &parent, int sub_counter)
 : parent_(parent), sub_counter_(sub_counter) {}
 
@@ -47,19 +48,19 @@ ExpressionToCLIPSFactVisitor::ExpressionToCLIPSFactVisitor(
  * @return A vector that only contains the atom as is.
  */
 vector<string>
-ExpressionToCLIPSFactVisitor::operator()(Atom &a) const {
+PreconditionToCLIPSFactVisitor::operator()(Atom &a) const {
   return vector<string>({a});
 }
 
 /** Translate a Predicate into a vector of strings.
- * This creates proper CLIPS fact strings for the Predicate and all its
- * arguments. For compound formulae (e.g., conjunctions), this also translates
- * all sub-formulae recursively.
+ * This creates proper CLIPS precondition fact strings for the Predicate and all
+ * its arguments. For compound formulae (e.g., conjunctions), this also
+ * translates all sub-formulae recursively.
  * @param p The predicate to translate.
  * @return A vector of strings, each string is a properly formed CLIPS fact.
  */
 vector<string>
-ExpressionToCLIPSFactVisitor::operator()(Predicate &p) const {
+PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const {
   vector<string> res;
   stringstream namestream;
   namestream << parent_ << sub_counter_;
@@ -79,7 +80,7 @@ ExpressionToCLIPSFactVisitor::operator()(Predicate &p) const {
     uint sub_counter = 1;
     for (Expression &sub : p.arguments) {
       vector<string> args = boost::apply_visitor(
-          ExpressionToCLIPSFactVisitor(name, sub_counter++), sub);
+          PreconditionToCLIPSFactVisitor(name, sub_counter++), sub);
       res.insert(res.end(), args.begin(), args.end());
     }
     return res;
@@ -89,7 +90,7 @@ ExpressionToCLIPSFactVisitor::operator()(Predicate &p) const {
     string constants = "";
     for (auto &p : p.arguments) {
       vector<string> p_strings =
-        boost::apply_visitor(ExpressionToCLIPSFactVisitor(name, 0), p);
+        boost::apply_visitor(PreconditionToCLIPSFactVisitor(name, 0), p);
       if (p_strings.size() != 1) {
         throw PDDLParserException(
             "Unexpected parameter length, expected exactly one");
