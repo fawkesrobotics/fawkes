@@ -99,6 +99,7 @@
   (slot predicate (type SYMBOL))
   (multislot param-names (default (create$)))
   (multislot param-values (default (create$)))
+  (multislot param-constants (default (create$)))
   (slot type (type SYMBOL) (allowed-values POSITIVE NEGATIVE)
     (default POSITIVE))
 )
@@ -306,6 +307,7 @@
     (type ?effect-type)
     (predicate ?predicate))
 =>
+  ; TODO need to check if one of the parameters is a constant
   (bind ?values ?effect-param-names)
   (foreach ?p ?action-param-names
     (bind ?values
