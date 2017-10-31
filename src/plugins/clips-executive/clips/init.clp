@@ -83,6 +83,8 @@
 (defrule executive-init-stage1
 	(executive-init)
 	=>
+  (printout t "PDDL feature" crlf)
+  (ff-feature-request "pddl")
   (printout t "Blackboard feature and skill exec init" crlf)
 	(ff-feature-request "blackboard")
 )
