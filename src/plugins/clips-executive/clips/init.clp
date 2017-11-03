@@ -85,11 +85,14 @@
 	=>
   (printout t "Blackboard feature and skill exec init" crlf)
 	(ff-feature-request "blackboard")
+  (printout t "Navgraph feature" crlf)
+  (ff-feature-request "navgraph")
 )
 
 (defrule executive-init-stage2
 	(executive-init)
 	(ff-feature-loaded blackboard)
+  (ff-feature-loaded navgraph)
 	=>
 
 	(path-load "blackboard-init.clp")
