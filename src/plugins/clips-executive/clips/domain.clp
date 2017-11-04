@@ -317,7 +317,7 @@
   else
     (assert (domain-retracted-fact (name ?predicate) (param-values ?values)))
   )
-  (assert domain-wm-update)
+  (assert (domain-wm-update))
 )
 
 (defrule domain-retract-negative-effect
