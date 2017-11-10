@@ -89,6 +89,16 @@
   (ff-feature-request "navgraph")
 )
 
+(defrule executive-conditional-pddl-init
+  "Load PDDL feature if requested in the config."
+  (executive-init)
+  (ff-feature-loaded blackboard)
+  (confval (path "/clips-executive/use_pddl") (type BOOL) (value TRUE))
+  =>
+  (printout t "Loading PDDL interface")
+  (path-load "pddl-init.clp")
+)
+
 (defrule executive-init-stage2
 	(executive-init)
 	(ff-feature-loaded blackboard)
@@ -104,6 +114,9 @@
 (defrule executive-init-stage3
 	(executive-init)
 	(ff-feature-loaded skills)
+  (or (ff-feature-loaded pddl)
+      (confval (path "/clips-executive/use_pddl") (type BOOL) (value FALSE))
+  )
   (confval (path "/clips-executive/spec") (type STRING) (value ?spec))
 	=>
 	; Common spec config prefix
