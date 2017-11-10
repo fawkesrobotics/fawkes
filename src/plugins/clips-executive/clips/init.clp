@@ -85,7 +85,13 @@
 	=>
   (printout t "Blackboard feature and skill exec init" crlf)
 	(ff-feature-request "blackboard")
-  (printout t "Navgraph feature" crlf)
+)
+
+(defrule executive-conditional-navgraph-init
+  (executive-init)
+  (confval (path "/clips-executive/use_navgraph") (type BOOL) (value TRUE))
+  =>
+  (printout t "Loading navgraph feature")
   (ff-feature-request "navgraph")
 )
 
@@ -102,9 +108,7 @@
 (defrule executive-init-stage2
 	(executive-init)
 	(ff-feature-loaded blackboard)
-  (ff-feature-loaded navgraph)
 	=>
-
 	(path-load "blackboard-init.clp")
 	(path-load "skills-init.clp")
 	(path-load "plan.clp")
@@ -114,6 +118,9 @@
 (defrule executive-init-stage3
 	(executive-init)
 	(ff-feature-loaded skills)
+  (or (ff-feature-loaded navgraph)
+      (confval (path "/clips-executive/use_navgraph") (type BOOL) (value FALSE))
+  )
   (or (ff-feature-loaded pddl)
       (confval (path "/clips-executive/use_pddl") (type BOOL) (value FALSE))
   )
