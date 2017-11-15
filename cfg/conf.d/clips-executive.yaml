@@ -59,6 +59,7 @@ clips-executive:
       #macro-expansion: test-scenario/action-selection.clp
       action-execution: plan-exec.clp
       execution-monitoring: test-scenario/execution-monitoring.clp
+      state-estimation: test-scenario/test-estimation.clp
 
       action-mapping:
         say: say{text=?(text)s, wait=true}
