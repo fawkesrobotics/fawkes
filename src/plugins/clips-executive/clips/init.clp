@@ -131,7 +131,7 @@
 	; Common spec config prefix
 	(bind ?pf (str-cat "/clips-executive/specs/" ?spec "/"))
 
-	(foreach ?component (create$ "domain" "goal-reasoner" "goal-expander"
+	(foreach ?component (create$ "domain" "state-estimation" "goal-reasoner" "goal-expander"
                                "macro-expansion" "action-selection"
                                "action-execution" "execution-monitoring")
 		(do-for-fact ((?c confval)) (and (eq ?c:path (str-cat ?pf ?component)) (eq ?c:type STRING))
