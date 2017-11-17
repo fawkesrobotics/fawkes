@@ -10,6 +10,7 @@
 ;load needed interfaces
 (defrule blackboard-enable-time-read
   "Prepare blackboard usage"
+  (declare (salience 1000))
   (ff-feature blackboard)
   =>
   (blackboard-enable-time-read)
@@ -17,6 +18,7 @@
 
 (defrule blackboard-preload
   "Preload configured blackboard interface types."
+  (declare (salience 1000))
   (ff-feature blackboard)
   (confval (path "/clips-executive/spec") (type STRING) (value ?spec))
   (confval (path ?p&:(eq ?p (str-cat "/clips-executive/specs/" ?spec "/blackboard-preload")))
