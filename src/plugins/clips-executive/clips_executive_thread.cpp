@@ -184,7 +184,26 @@ ClipsExecutiveThread::clips_map_skill(std::string action_name, CLIPS::Values par
 	}
 	std::map<std::string, std::string> param_map;
 	for (size_t i = 0; i < param_names.size(); ++i) {
-		param_map[param_names[i].as_string()] = param_values[i].as_string();
+		if (param_names[i].type() != CLIPS::TYPE_SYMBOL && param_names[i].type() != CLIPS::TYPE_STRING) {
+			logger->log_error(name(), "Param for '%s' is not a string or symbol", action_name.c_str());
+			return "";
+		}
+		switch (param_values[i].type()) {
+		case CLIPS::TYPE_FLOAT:
+			param_map[param_names[i].as_string()] = std::to_string(param_values[i].as_float());
+			break;
+		case CLIPS::TYPE_INTEGER:
+			param_map[param_names[i].as_string()] = std::to_string(param_values[i].as_integer());
+			break;
+		case CLIPS::TYPE_SYMBOL:
+		case CLIPS::TYPE_STRING:
+			param_map[param_names[i].as_string()] = param_values[i].as_string();
+			break;
+		default:
+			logger->log_error(name(), "Param '%s' for action '%s' of invalid type",
+			                  param_names[i].as_string().c_str(), action_name.c_str());
+			break;
+		}
 	}
 
 	std::multimap<std::string, std::string> messages;
