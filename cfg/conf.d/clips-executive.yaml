@@ -59,9 +59,15 @@ clips-executive:
       #macro-expansion: test-scenario/action-selection.clp
       action-execution: plan-exec.clp
       execution-monitoring: test-scenario/execution-monitoring.clp
-      state-estimation: test-scenario/test-estimation.clp
+      state-estimation: test-scenario/state-estimation.clp
 
       action-mapping:
         say: say{text=?(text)s, wait=true}
         say-hello: say{text="Hello ?(name)y", wait=true}
         say-goodbye: say{text="Good bye", wait=true}
+
+      # Interface _types_ mentioned in the following list will be pre-loaded,
+      # i.e., the fact templates will be created in stage2, before user-specified
+      # code is loaded. That avoid the necessity of splitting interface opening
+      # and processing in user code.
+      #blackboard-preload: ["Position3DInterface"]
