@@ -33,7 +33,7 @@ OBJS_lua_fawkestf = fawkestf_tolua.o
 OBJS_all = $(OBJS_libfawkestf) $(OBJS_lua_fawkestf)
 
 ifeq ($(HAVE_TF),1)
-  CFLAGS  += $(CFLAGS_TF)
+  CFLAGS  += $(CFLAGS_TF) -O2
   LDFLAGS += $(LDFLAGS_TF)
   LIBS_all = $(LIBDIR)/libfawkestf.so
 
