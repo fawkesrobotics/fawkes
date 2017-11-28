@@ -5,7 +5,7 @@
 ;  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
 ;  Licensed under GPLv2+ license, cf. LICENSE file in the doc directory.
 ;---------------------------------------------------------------------------
-j
+
 (defglobal
 	?*PDDL-INIT-CONTROL-RETRY-INTERVAL-SEC* = 1
 )
