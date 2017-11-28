@@ -37,6 +37,7 @@
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 #include <baseapp/run.h>
+#include <limits>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -601,7 +602,7 @@ AmclThread::loop()
     if (laser_max_range_ > 0.0)
       ldata.range_max = (float) laser_max_range_;
     else
-      ldata.range_max = HUGE;
+      ldata.range_max = std::numeric_limits<float>::max();
     double range_min;
     if (laser_min_range_ > 0.0)
       range_min = (float) laser_min_range_;

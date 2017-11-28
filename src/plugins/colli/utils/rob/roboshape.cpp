@@ -28,6 +28,7 @@
 #include <utils/math/angle.h>
 
 #include <cmath>
+#include <limits>
 #include <string>
 
 namespace fawkes
@@ -54,25 +55,10 @@ RoboShape::RoboShape( const char * cfg_prefix,
   std::string cfg = cfg_prefix;
 
   is_round_ = is_angular_ = false;
-  radius_ = width_x_ = width_y_   = HUGE_VAL;
-  laser_offset_x_ = laser_offset_y_  = HUGE_VAL;
-  width_add_front_ = width_add_back_ = HUGE_VAL;
-  width_add_right_ = width_add_left_ = HUGE_VAL;
-
-  if( (std::isinf(laser_offset_x_) )
-   && (std::isinf(laser_offset_y_) )
-   && (std::isinf(radius_) )
-   && (std::isinf(width_x_) )
-   && (std::isinf(width_y_) )
-   && (std::isinf(width_add_left_) )
-   && (std::isinf(width_add_right_) )
-   && (std::isinf(width_add_front_) )
-   && (std::isinf(width_add_back_) ) ) {
-    // go on, everything is fine, cause all are infinity
-
-  } else {
-    throw fawkes::Exception("RoboShape: Initializing Infinity-Values failed!");
-  }
+  radius_ = width_x_ = width_y_   = std::numeric_limits<float>::infinity();
+  laser_offset_x_ = laser_offset_y_  = std::numeric_limits<float>::infinity();
+  width_add_front_ = width_add_back_ = std::numeric_limits<float>::infinity();
+  width_add_right_ = width_add_left_ = std::numeric_limits<float>::infinity();
 
   width_add_front_ = config->get_float((cfg + "extension/front").c_str());
   width_add_right_ = config->get_float((cfg + "extension/right").c_str());
