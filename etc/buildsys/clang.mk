@@ -30,8 +30,23 @@ clang_atleast_version = $(strip $(if $(call gt,$(CLANG_VERSION_MAJOR),$1),1,	\
 			  $(if $(call eq,$(CLANG_VERSION_MAJOR),$1),		\
 			    $(if $(call gte,$(CLANG_VERSION_MINOR),$2),1))))
 
-HAVE_CPP11=1
-CFLAGS_CPP11=-std=c++11
+# According to https://clang.llvm.org/cxx_status.html
+ifeq ($(call clang_atleast_version,3,3),1)
+  HAVE_CPP11=1
+  CFLAGS_CPP11=-std=c++11
+endif
+ifeq ($(call clang_atleast_version,3,4),1)
+  HAVE_CPP14=1
+  CFLAGS_CPP14=-std=c++14
+endif
+ifeq ($(call clang_atleast_version,4,0),1)
+  HAVE_CPP17=1
+  CFLAGS_CPP17=-std=c++1z
+endif
+ifeq ($(call clang_atleast_version,5,0),1)
+  HAVE_CPP17=1
+  CFLAGS_CPP17=-std=c++17
+endif
 
 CFLAGS_MTUNE_NATIVE=-march=native -mtune=native
 ifeq ($(OS),FreeBSD)
@@ -53,8 +68,16 @@ endif
 # unsupported flags (which are supported on GCC)
 CFLAG_W_NO_UNUSED_LOCAL_TYPEDEFS=
 
+# no-missing-braces: https://bugs.llvm.org/show_bug.cgi?id=21629
+CFLAGS_DISABLE_WARNINGS=-Wno-missing-braces
+
 HAVE_CPP11_RANGE_FOR=1
 
+ifeq ($(HAVE_CPP11),1)
+  CFLAGS_MINIMUM+=$(CFLAGS_CPP11)
+else
+  $(error Your version of clang is too old and does not support c++11)
+endif
 
 endif # __buildsys_clang_mk_
 

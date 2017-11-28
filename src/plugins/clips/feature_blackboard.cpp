@@ -23,6 +23,7 @@
 #include "feature_blackboard.h"
 #include <core/threading/mutex_locker.h>
 #include <blackboard/blackboard.h>
+#include <blackboard/exceptions.h>
 #include <logging/logger.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/time/time.h>
@@ -372,65 +373,77 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(std::string env_name,
 							std::string type, std::string id,
 							bool writing)
 {
-  std::string name  = "BBCLIPS|" + env_name;
-  std::string owner = "CLIPS:" + env_name;
+	std::string name  = "BBCLIPS|" + env_name;
+	std::string owner = "CLIPS:" + env_name;
 
-  if (envs_.find(env_name) == envs_.end()) {
-    logger_->log_warn(name.c_str(), "Environment %s has not been registered "
-		     "for blackboard feature", env_name.c_str());
-    return;
-  }
-
-  Interface *iface = NULL;
-  InterfaceMap &iface_map =
-    writing ? interfaces_[env_name].writing : interfaces_[env_name].reading;
-
-  if (iface_map.find(type) == iface_map.end()) {
-    // no interface of this type registered yet, add deftemplate for it
-    try {
-      if (writing) {
-	iface = blackboard_->open_for_writing(type.c_str(), id.c_str(), owner.c_str());
-      } else {
-	iface = blackboard_->open_for_reading(type.c_str(), id.c_str(), owner.c_str());
-      }
-    } catch (Exception &e) {
-      logger_->log_warn(name.c_str(), "Failed to open interface %s:%s, exception follows",
-			type.c_str(), id.c_str());
-      logger_->log_warn(name.c_str(), e);
-      return;
-    }
-
-    if (! clips_assert_interface_type(env_name, name, iface, type)) {
-      blackboard_->close(iface);
-    } else {
-      logger_->log_info(name.c_str(), "Added interface %s for %s", iface->uid(),
-			iface->is_writer() ? "writing" : "reading");
-      iface_map.insert(std::make_pair(type, std::list<fawkes::Interface *>(1, iface)));
-    }
-  } else {
-    auto &iface_list = iface_map[type];
-    if (std::none_of(iface_list.begin(), iface_list.end(),
-		     [&type, &id](const Interface *i)->bool {
-		       return (type == i->type()) && (id == i->id());
-		     }))
-    {
-      try {
-	if (writing) {
-	  iface = blackboard_->open_for_writing(type.c_str(), id.c_str(), owner.c_str());
-	} else {
-	  iface = blackboard_->open_for_reading(type.c_str(), id.c_str(), owner.c_str());
+	if (envs_.find(env_name) == envs_.end()) {
+		logger_->log_warn(name.c_str(), "Environment %s has not been registered "
+		                  "for blackboard feature", env_name.c_str());
+		return;
 	}
-	iface_map[type].push_back(iface);
-	logger_->log_info(name.c_str(), "Added interface %s for %s", iface->uid(),
-			  iface->is_writer() ? "writing" : "reading");
-      } catch (Exception &e) {
-	logger_->log_warn(name.c_str(), "Failed to open interface %s:%s, exception follows",
-			  type.c_str(), id.c_str());
-	logger_->log_warn(name.c_str(), e);
-	return;
-      }
-    }
-  }
+
+	fawkes::LockPtr<CLIPS::Environment> clips = envs_[env_name];
+
+	Interface *iface = NULL;
+	InterfaceMap &iface_map =
+		writing ? interfaces_[env_name].writing : interfaces_[env_name].reading;
+
+	if (iface_map.find(type) == iface_map.end()) {
+		// no interface of this type registered yet, add deftemplate for it
+		try {
+			if (writing) {
+				iface = blackboard_->open_for_writing(type.c_str(), id.c_str(), owner.c_str());
+			} else {
+				iface = blackboard_->open_for_reading(type.c_str(), id.c_str(), owner.c_str());
+			}
+		} catch (Exception &e) {
+			logger_->log_warn(name.c_str(), "Failed to open interface %s:%s, exception follows",
+			                  type.c_str(), id.c_str());
+			logger_->log_warn(name.c_str(), e);
+			return;
+		}
+
+		if (! clips_assert_interface_type(env_name, name, iface, type)) {
+			blackboard_->close(iface);
+		} else {
+			logger_->log_info(name.c_str(), "Added interface %s for %s", iface->uid(),
+			                  iface->is_writer() ? "writing" : "reading");
+			iface_map.insert(std::make_pair(type, std::list<fawkes::Interface *>(1, iface)));
+			fawkes::MutexLocker lock(clips.objmutex_ptr());
+			clips->assert_fact_f("(blackboard-interface (id \"%s\") (type \"%s\") (uid \"%s\") "
+			                     "                      (hash \"%s\") (serial %u) (writing %s))",
+			                     iface->id(), iface->type(), iface->uid(), iface->hash_printable(),
+			                     iface->serial(), writing ? "TRUE" : "FALSE");
+		}
+	} else {
+		auto &iface_list = iface_map[type];
+		if (std::none_of(iface_list.begin(), iface_list.end(),
+		                 [&type, &id](const Interface *i)->bool {
+			                 return (type == i->type()) && (id == i->id());
+		                 }))
+		{
+			try {
+				if (writing) {
+					iface = blackboard_->open_for_writing(type.c_str(), id.c_str(), owner.c_str());
+				} else {
+					iface = blackboard_->open_for_reading(type.c_str(), id.c_str(), owner.c_str());
+				}
+				iface_map[type].push_back(iface);
+				logger_->log_info(name.c_str(), "Added interface %s for %s", iface->uid(),
+				                  iface->is_writer() ? "writing" : "reading");
+				fawkes::MutexLocker lock(clips.objmutex_ptr());
+				clips->assert_fact_f("(blackboard-interface (id \"%s\") (type \"%s\") (uid \"%s\") "
+				                     "                      (hash \"%s\") (serial %u) (writing %s))",
+				                     iface->id(), iface->type(), iface->uid(), iface->hash_printable(),
+				                     iface->serial(), writing ? "TRUE" : "FALSE");
+			} catch (Exception &e) {
+				logger_->log_warn(name.c_str(), "Failed to open interface %s:%s, exception follows",
+				                  type.c_str(), id.c_str());
+				logger_->log_warn(name.c_str(), e);
+				return;
+			}
+		}
+	}
 }
 
 
@@ -835,10 +848,18 @@ BlackboardCLIPSFeature::clips_blackboard_send_msg(std::string env_name, void *ms
   //add reference to the message so we can return the message id (otherwise it is changed by sending)
   m->get()->ref();
 
-  //send message about the saved interface
-  interface_of_msg_[m->get()]->msgq_enqueue(m->get());
+  unsigned int message_id = 0;
 
-  unsigned int message_id = m->get()->id();
+  //send message about the saved interface
+  try {
+	  interface_of_msg_[m->get()]->msgq_enqueue(m->get());
+	  message_id = m->get()->id();
+  } catch (BlackBoardNoWritingInstanceException &e) {
+	  // keep quiet, BlackBoardMessageManager will already have printed a warning
+	  //logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Failed to send message: no writer");
+  } catch (Exception &e) {
+	  logger_->log_warn(("BBCLIPS|" + env_name).c_str(), "Failed to send message: %s", e.what_no_backtrace());
+  }
 
   //delete saved pointer to interface
   interface_of_msg_.erase(m->get());

@@ -24,8 +24,11 @@
 #include <core/threading/mutex_locker.h>
 #include <config/config.h>
 #include <logging/logger.h>
+#include <utils/misc/string_split.h>
 
 #include <clipsmm.h>
+#include <sstream>
+#include <iomanip>
 
 using namespace fawkes;
 
@@ -105,7 +108,19 @@ ConfigCLIPSFeature::clips_config_load(std::string env_name, std::string cfg_pref
     } else if (v->is_string()) {
       type = "STRING";
       if (! v->is_list()) {
-	value = std::string("\"") + value + "\"";
+	      std::stringstream escaped_quotes_value;
+	      escaped_quotes_value << std::quoted(value);
+	      value = escaped_quotes_value.str();
+      } else {
+	      std::vector<std::string> strings = v->get_strings();
+	      if (! strings.empty()) {
+		      for (std::string &s : strings) {
+			      std::stringstream escaped_quotes_value;
+			      escaped_quotes_value << std::quoted(s);
+			      s = escaped_quotes_value.str();
+		      }
+		      value = str_join(strings, ' ');
+	      }
       }
     } else {
       logger_->log_warn(name.c_str(), "Config value at '%s' of unknown type '%s'",

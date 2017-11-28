@@ -294,13 +294,13 @@ SimpleColorClassifier::get_mass_point_of_color( ROI *roi,
   massPoint->y     = 0;
 
   // for accessing ROI pixels
-  register unsigned int h = 0;
-  register unsigned int w = 0;
+  unsigned int h = 0;
+  unsigned int w = 0;
   // planes
-  register unsigned char *yp   = _src + (roi->start.y * roi->line_step) + (roi->start.x * roi->pixel_step);
-  register unsigned char *up   = YUV422_PLANAR_U_PLANE(_src, roi->image_width, roi->image_height)
+  unsigned char *yp   = _src + (roi->start.y * roi->line_step) + (roi->start.x * roi->pixel_step);
+  unsigned char *up   = YUV422_PLANAR_U_PLANE(_src, roi->image_width, roi->image_height)
     + ((roi->start.y * roi->line_step) / 2 + (roi->start.x * roi->pixel_step) / 2) ;
-  register unsigned char *vp   = YUV422_PLANAR_V_PLANE(_src, roi->image_width, roi->image_height)
+  unsigned char *vp   = YUV422_PLANAR_V_PLANE(_src, roi->image_width, roi->image_height)
     + ((roi->start.y * roi->line_step) / 2 + (roi->start.x * roi->pixel_step) / 2);
   // line starts
   unsigned char *lyp  = yp;
