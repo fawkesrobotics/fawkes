@@ -24,7 +24,24 @@
 namespace fawkes {
 namespace stn {
 
+/** @class StnAction "stn_action.h"
+ * An action representation within an STN.
+ */
+
+
 size_t StnAction::count = 0;
+
+/** Constructor.
+ * @param name The name of the new action.
+ * @param preconds A Vector of Predicates that must be satisfied to execute the
+ * action.
+ * @param effects A vector of Predicates that are applied after the action is
+ * executed.
+ * @param opts The action parameters.
+ * @param duration The duration of the action.
+ * @param cond_breakups A vector of conditional breakups as strings.
+ * @param temp_breakups A vector of temporal breakups as strings.
+ */
 StnAction::StnAction(std::string name, std::vector<Predicate> preconds, std::vector<Predicate> effects, std::string opts,
     size_t duration, std::vector<std::string> cond_breakups, std::vector<std::string> temp_breakups)
 {
@@ -38,6 +55,10 @@ StnAction::StnAction(std::string name, std::vector<Predicate> preconds, std::vec
   temp_breakups_ = temp_breakups;
 }
 
+/** Print relevant information about the StnAction.
+ * @param strm The stream to print the information to.
+ * @param a The action to show the information about.
+ */
 std::ostream&
 operator<<(std::ostream &strm, const StnAction &a)
 {
@@ -74,24 +95,38 @@ operator<<(std::ostream &strm, const StnAction &a)
   return strm;
 }
 
+/** Compare two StnActions.
+ * @param o The other StnAction.
+ * @return True iff the two actions have the same ID.
+ */
 bool
 StnAction::operator==(const StnAction &o)
 {
   return id_ == o.id_;
 }
 
+/** Compare two StnActions.
+ * @param o The other StnAction.
+ * @return True iff the two actions have different IDs.
+ */
 bool
 StnAction::operator!=(const StnAction &o)
 {
   return id_ != o.id_;
 }
 
+/** Get the ID of the action.
+ * @return The unique ID.
+ */
 size_t
 StnAction::id()
 {
   return id_;
 }
 
+/** Get all IDs of this StnAction's conditional actions.
+ * @return A vector of IDs.
+ */
 std::vector<size_t>
 StnAction::condActionIds()
 {
@@ -102,6 +137,11 @@ StnAction::condActionIds()
   return ids;
 }
 
+/** Check if the given predicate is a breakup.
+ * @param t The type of of breakup to check.
+ * @param p The Predicate to check.
+ * @return True iff a breakup by the given predicate is possible.
+ */
 bool
 StnAction::checkForBreakup(EdgeType t, Predicate p)
 {
@@ -126,6 +166,9 @@ StnAction::checkForBreakup(EdgeType t, Predicate p)
   return false;
 }
 
+/** Get a string representation of the StnAction for the graph representation.
+ * @return The string describing the StnAction.
+ */
 std::string
 StnAction::genGraphNodeName()
 {
@@ -134,6 +177,10 @@ StnAction::genGraphNodeName()
      + "Params: " + opts_;
 }
 
+/** Generate an edge label for the graph representation.
+ * @param cond_action The ID of the conditional action to represent.
+ * @return The string describing the conditional action.
+ */
 std::string
 StnAction::genConditionEdgeLabel(size_t cond_action)
 {
@@ -155,6 +202,9 @@ StnAction::genConditionEdgeLabel(size_t cond_action)
   return edge_label;
 }
 
+/** Generate a temporal edge for the graph representation.
+ * @return The string label for the temporal edge.
+ */
 std::string
 StnAction::genTemporalEdgeLabel()
 {
@@ -164,6 +214,9 @@ StnAction::genTemporalEdgeLabel()
   return edge_label;
 }
 
+/** Generate the conditional actions of this StnAction.
+ * @param candidate_actions The actions to be considered as conditional actions.
+ */
 void
 StnAction::genConditionalActions(const std::vector<StnAction> candidate_actions)
 { 
@@ -204,24 +257,36 @@ StnAction::genConditionalActions(const std::vector<StnAction> candidate_actions)
   }*/
 }
 
+/** Get the effects of the StnAction.
+ * @return A vector of Predicates that are part of the effect.
+ */
 std::vector<Predicate>
 StnAction::effects()
 {
   return effects_;
 }
 
+/** Get the name of the StnAction.
+ * @return The name as string.
+ */
 std::string
 StnAction::name()
 {
   return name_;
 }
 
+/** Get the duration of the StnAction.
+ * @return The duration.
+ */
 size_t
 StnAction::duration()
 {
   return duration_;
 }
 
+/** Get the action parameters.
+ * @return The parameters as string.
+ */
 std::string
 StnAction::opts()
 {

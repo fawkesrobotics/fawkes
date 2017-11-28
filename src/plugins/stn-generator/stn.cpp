@@ -29,11 +29,22 @@
 namespace fawkes {
 namespace stn {
 
+/** @class Stn "stn.h"
+ * A Simple Temporal Network.
+ */
+
+/** Constructor.
+ * @param logger The logger to log to.
+ */
 Stn::Stn(fawkes::Logger* logger)
 {
   logger_ = logger;
 }
 
+/** Constructor.
+ * @param logger The logger to log to.
+ * @param classic_dom_path The path to the domain file to write to.
+ */
 Stn::Stn(fawkes::Logger* logger, std::string classic_dom_path)
 {
   logger_ = logger;
@@ -41,28 +52,44 @@ Stn::Stn(fawkes::Logger* logger, std::string classic_dom_path)
   gen_classic_dom_ = true;
 }
 
+/** Destructor */
 Stn::~Stn()
 {
 }
 
+/** Add the given DomainAction to the STN.
+ * @param action The action to add.
+ */
 void
 Stn::add_domain_action(DomainAction action)
 {
   domain_actions_.push_back(action);
 }
 
+/** Add a (grounded action).
+ * @param name The name of the action/operator.
+ * @param params The parameters of the action.
+ */
 void
 Stn::add_plan_action(std::string name, std::string params)
 {
   plan_actions_.push_back(plan_action{name, params});
 }
 
+/** Set the initial state.
+ * The resulting initial state is the state after applying the effects of the
+ * given action.
+ * @param action The action whose effects define the initial state.
+ */
 void
 Stn::set_initial_state(StnAction action)
 {
   initial_state_ = action;
 }
 
+/** Read the initial state from the given PDDL problem.
+ * @param pddl_problem_string the PDDL rpboelm as (unparsed) string.
+ */
 void
 Stn::read_initial_state(std::string pddl_problem_string)
 {
@@ -96,6 +123,12 @@ Stn::read_initial_state(std::string pddl_problem_string)
   set_initial_state(init_action);
 }
 
+/** Set the domain of the STN to the given PDDL domain.
+ * This parses the given domain and processes all actions in the domain.
+ * It also adds all temporal and conditional breakups defined in the domain to
+ * the STN.
+ * @param pddl_domain_string the PDDL domain as (unparsed) string.
+ */
 void
 Stn::set_pddl_domain(std::string pddl_domain_string)
 {
@@ -180,6 +213,7 @@ Stn::build_breakup_list(pddl_parser::Expression e,
   }
 }
 
+/** Regenerate the STN. */
 void
 Stn::generate()
 {
@@ -268,6 +302,9 @@ Stn::generate()
   }
 }
 
+/** Render a graph representation of the STN.
+ * This writes the graph representation to the file stn.png.
+ */
 void
 Stn::drawGraph()
 {
@@ -318,6 +355,9 @@ Stn::drawGraph()
   gvFreeContext(gvc);
 }
 
+/** Get a BSON representation of the STN.
+ * @return A vector of BSON objects, each element is an action.
+ */
 std::vector<mongo::BSONObj>
 Stn::get_bson()
 {

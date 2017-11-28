@@ -24,6 +24,19 @@
 namespace fawkes {
 namespace stn {
 
+/** @class DomainAction "domain_action.h"
+ * A representation of an action used by the STN generator.
+ */
+
+/** Constructor.
+ * @param name The name of the action
+ * @param params The list of parameters of the action
+ * @param preconds A list of preconditions, each precondition is a Predicate
+ * @param effects A list of effects, each effect is a Predicate
+ * @param duration The duration of the action
+ * @param cond_breakups A list of conditional breakups
+ * @param temp_breakups A list of temporal breakups
+ */
 DomainAction::DomainAction(std::string name, std::vector<std::string> params, std::vector<Predicate> preconds,
     std::vector<Predicate> effects, int duration,
     std::vector<std::string> cond_breakups, std::vector<std::string> temp_breakups)
@@ -37,6 +50,12 @@ DomainAction::DomainAction(std::string name, std::vector<std::string> params, st
   temp_breakups_ = temp_breakups;
 }
 
+/** Print a DomainAction.
+ * This prints all relevant facts about a DomainAction including its name,
+ * preconditions, effects.
+ * @param strm The std::ostream to pass the information to.
+ * @param a The DomainAction to print.
+ */
 std::ostream&
 operator<<(std::ostream &strm, const DomainAction &a)
 {
@@ -65,18 +84,29 @@ operator<<(std::ostream &strm, const DomainAction &a)
   return strm;
 }
 
+/** Get the name of the action.
+ * @return The name as string.
+ */
 const std::string
 DomainAction::getName()
 {
   return name_;
 }
 
+/** Get the list of parameters of the action.
+ * @return A vector of parameters as strings.
+ */
 const std::vector<std::string>
 DomainAction::params()
 {
   return params_;
 }
 
+/** Generate an StnAction from the DomainAction.
+ * @param name The name of the resulting StnAction.
+ * @param params The parameters of the resulting StnAction.
+ * @return The generated StnAction.
+ */
 StnAction
 DomainAction::generateStnAction(std::string name, std::string params)
 {
