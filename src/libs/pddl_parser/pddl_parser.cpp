@@ -42,7 +42,7 @@ PddlParser::parseDomain(const std::string pddl_domain)
   bool r = phrase_parse(iter, end, g, s, dom);
 
   if ( !r ) {
-    throw PDDLParserException("Parsing PDDL domain string failed!");
+    throw PddlParserException("Parsing PDDL domain string failed!");
   }
 
 
@@ -66,7 +66,7 @@ PddlParser::parseProblem(const std::string pddl_problem)
   bool r = phrase_parse(iter, end, g, s, prob);
 
   if ( !r ) {
-    throw PDDLParserException("Parsing PDDL problem string failed!");
+    throw PddlParserException("Parsing PDDL problem string failed!");
   }
 
   return prob;

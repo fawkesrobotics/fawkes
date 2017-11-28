@@ -38,10 +38,10 @@ class PddlParser
  private:
 };
 
-class PDDLParserException : public fawkes::Exception
+class PddlParserException : public fawkes::Exception
 {
  public:
-  PDDLParserException(const char *msg)
+  PddlParserException(const char *msg)
     : fawkes::Exception(msg) {}
 };
 
