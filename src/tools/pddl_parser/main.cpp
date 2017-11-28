@@ -39,7 +39,7 @@ int main()
   pddl_parser::Domain dom;
   try {
   dom = pddl_parser::PddlParser::parseDomain(str);
-  } catch (pddl_parser::PDDLParserException &e) {
+  } catch (pddl_parser::PddlParserException &e) {
     std::cout << "Error occurred during parsing: "
       << e.what_no_backtrace() << std::endl;
     return 1;
