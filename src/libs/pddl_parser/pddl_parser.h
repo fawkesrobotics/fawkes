@@ -38,9 +38,16 @@ class PddlParser
  private:
 };
 
+/** @class PddlParserException <pddl_parser/pddl_parser.h>
+ * Exception thrown by the parser if an error occurs during parsing.
+ */
+
 class PddlParserException : public fawkes::Exception
 {
  public:
+   /** Constructor.
+    * @param msg A message describing the error.
+    */
   PddlParserException(const char *msg)
     : fawkes::Exception(msg) {}
 };

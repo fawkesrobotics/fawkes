@@ -4,6 +4,7 @@
  *
  *  Created: Fri 19 May 2017 14:07:13 CEST
  *  Copyright  2017  Matthias Loebach
+ *                   Till Hofmann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -49,39 +50,83 @@ namespace pddl_parser {
 
   using Expression = boost::variant<Atom, Predicate>;
 
+  /** @class Predicate
+   * A PDDL formula (either part of a precondition or an effect(.
+   * Note that this is NOT necesarily a PDDL predicate, but may also be a
+   * compound formula. For a conjunction, the function would be 'and', and the
+   * arguments would be the subformulae.
+   */
   struct Predicate
   {
+    /** The name of the predicate for atomic formulae, 'and' for a conjunction,
+     * 'not' for a negation.
+     */
     Atom function;
+    /** The arguments of the predicate or the subformulae of the compound
+     * formula.
+     */
     std::vector<Expression> arguments;
   };
 
+  /** @class Action
+   * A structured representation of a PDDL action.
+   */
   struct Action
   {
+    /** The name of the action. */
     std::string name;
+    /** A typed list of action parameters. */
     string_pairs_type action_params;
+    /** The action duration in temporal domains. */
     int duration;
+    /** The precondition of an action. May be a compound. */
     Expression precondition;
+    /** The effect of an action. May be a compound. */
     Expression effect;
+    /** Used by the STN generator to determine conditional break points in the
+     * STN.
+     */
     Expression cond_breakup;
+    /** Used by the STN generator to determine temporal break points in the STN.
+     */
     Expression temp_breakup;
   };
 
+  /** @class Domain
+   * A structured representation of a PDDL domain.
+   */
   struct Domain
   {
+    /** The name of the domain. */
     std::string name;
+    /** A list of PDDL features required by the domain. */
     std::vector<std::string> requirements;
+    /** A list of types with their super types. */
     pairs_type types;
+    /** A typed list of constants defined in the domain. */
     pairs_multi_consts constants;
+    /** A list of predicate names in the domain, including the types of their
+     * arguments.
+     */
     std::vector<predicate_type> predicates;
+    /** A list of actions defined in the domain. */
     std::vector<Action> actions;
   };
 
+  /** @class Problem
+   * A structured representation of a PDDL problem.
+   */
   struct Problem
   {
+    /** The name of the problem. */
     std::string name;
+    /** The name of the domain this problem belongs to. */
     std::string domain_name;
+    /** A typed list of objects in the domain. */
     pairs_multi_consts objects;
+    /** A list of facts that are initially true. */
     std::vector<Expression> init;
+    /** The goal of the problem. */
     Expression goal;
   };
 

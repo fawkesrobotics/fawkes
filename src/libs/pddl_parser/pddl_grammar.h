@@ -4,6 +4,7 @@
  *
  *  Created: Fri 19 May 2017 14:07:29 CEST
  *  Copyright  2017  Matthias Loebach
+ *                   Till Hofmann
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -26,15 +27,23 @@
 
 namespace pddl_parser {
   namespace grammar {
+    /** @class pddl_skipper
+     * A skipper for PDDL files.
+     * This skipper skips spaces and comments starting with ';'
+     */
     template<typename Iterator>
     struct pddl_skipper : public qi::grammar<Iterator> {
 
       pddl_skipper() : pddl_skipper::base_type(skip, "PDDL") {
           skip = ascii::space | (';' >> *(qi::char_ - qi::eol));
       }
+      /** The actual skipping rule. */
       qi::rule<Iterator> skip;
     };
 
+    /** @class domain_parser
+     * A Boost QI parser for a PDDL domain.
+     */
     template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
     struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
     {
@@ -99,38 +108,68 @@ namespace pddl_parser {
           ;
       }
 
+      /** Named placeholder for parsing a name. */
       qi::rule<Iterator, std::string(), Skipper> name_type;
 
+      /** Named placeholder for parsing a domain name. */
       qi::rule<Iterator, std::string(), Skipper> domain_name;
 
+      /** Named placeholder for parsing requirements. */
       qi::rule<Iterator, std::vector<std::string>(), Skipper> requirements;
 
+      /** Named placeholder for parsing types. */
       qi::rule<Iterator, pairs_type(), Skipper> types;
+      /** Named placeholder for parsing type pairs. */
       qi::rule<Iterator, pair_type(), Skipper> type_pair;
 
-      qi::rule<Iterator, type_list(), Skipper> constant_value_list, predicate_params;
+      /** Named placeholder for parsing a list of constant values. */
+      qi::rule<Iterator, type_list(), Skipper> constant_value_list;
+      /** Named placeholder for parsing a list of predicate parameters. */
+      qi::rule<Iterator, type_list(), Skipper> predicate_params;
+      /** Named placeholder for parsing a list of typed constants. */
       qi::rule<Iterator, pair_multi_const(), Skipper> constant_multi_pair;
+      /** Named placeholder for parsing a list of constants. */
       qi::rule<Iterator, pairs_multi_consts(), Skipper> constants;
 
+      /** Named placeholder for parsing a parameter pair. */
       qi::rule<Iterator, string_pair_type(), Skipper> param_pair;
+      /** Named placeholder for parsing a list of parameter pairs. */
       qi::rule<Iterator, string_pairs_type(), Skipper> param_pairs;
+      /** Named placeholder for parsing a predicate type. */
       qi::rule<Iterator, predicate_type(), Skipper> pred;
+      /** Named placeholder for parsing a list of predicate types. */
       qi::rule<Iterator, std::vector<predicate_type>(), Skipper> predicates;
 
-
+      /** Named placeholder for parsing an atom. */
       qi::rule<Iterator, Atom()> atom;
+      /** Named placeholder for parsing a predicate. */
       qi::rule<Iterator, Predicate(), Skipper> predicate;
+      /** Named placeholder for parsing a PDDL expression. */
       qi::rule<Iterator, Expression(), Skipper> expression;
-      qi::rule<Iterator, Expression(), Skipper> preconditions, effects,
-        temp_breakup, cond_breakup;
+      /** Named placeholder for parsing a PDDL precondition. */
+      qi::rule<Iterator, Expression(), Skipper> preconditions;
+      /** Named placeholder for parsing a PDDL effect. */
+      qi::rule<Iterator, Expression(), Skipper> effects;
+      /** Named placeholder for parsing a temporal breakup. */
+      qi::rule<Iterator, Expression(), Skipper> temp_breakup;
+      /** Named placeholder for parsing a conditional breakup. */
+      qi::rule<Iterator, Expression(), Skipper> cond_breakup;
+      /** Named placeholder for parsing an action duration. */
       qi::rule<Iterator, int(), Skipper> duration;
+      /** Named placeholder for parsing action parameters. */
       qi::rule<Iterator, string_pairs_type(), Skipper> action_params;
+      /** Named placeholder for parsing an action. */
       qi::rule<Iterator, Action(), Skipper> action;
+      /** Named placeholder for parsing a list of actions. */
       qi::rule<Iterator, std::vector<Action>(), Skipper> actions;
 
+      /** Named placeholder for parsing a domain. */
       qi::rule<Iterator, Domain(), Skipper> domain;
     };
 
+    /** @class problem_parser
+     * A Boost QI parser for a PDDL problem.
+     */
     template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
     struct problem_parser : qi::grammar<Iterator, Problem(), Skipper>
     {
@@ -167,19 +206,35 @@ namespace pddl_parser {
           ;
       }
 
+      /** Named placeholder for parsing a name. */
       qi::rule<Iterator, std::string(), Skipper> name_type;
 
-      qi::rule<Iterator, std::string(), Skipper> problem_name, domain_name;
+      /** Named placeholder for parsing a problem name. */
+      qi::rule<Iterator, std::string(), Skipper> problem_name;
+      /** Named placeholder for parsing a domain name. */
+      qi::rule<Iterator, std::string(), Skipper> domain_name;
 
-      qi::rule<Iterator, type_list(), Skipper> constant_value_list, predicate_params;
+      /** Named placeholder for parsing a list of constant values. */
+      qi::rule<Iterator, type_list(), Skipper> constant_value_list;
+      /** Named placeholder for parsing a list of predicate parameters. */
+      qi::rule<Iterator, type_list(), Skipper> predicate_params;
+      /** Named placeholder for parsing a list of typed constants. */
       qi::rule<Iterator, pair_multi_const(), Skipper> constant_multi_pair;
+      /** Named placeholder for parsing a list of domain objects. */
       qi::rule<Iterator, pairs_multi_consts(), Skipper> objects;
 
+      /** Named placeholder for parsing an atom. */
       qi::rule<Iterator, Atom()> atom;
+      /** Named placeholder for parsing a predicate. */
       qi::rule<Iterator, Predicate(), Skipper> predicate;
-      qi::rule<Iterator, Expression(), Skipper> expression, goal;
+      /** Named placeholder for parsing a PDDL expression. */
+      qi::rule<Iterator, Expression(), Skipper> expression;
+      /** Named placeholder for parsing a PDDL goal. */
+      qi::rule<Iterator, Expression(), Skipper> goal;
+      /** Named placeholder for parsing the initial state. */
       qi::rule<Iterator, std::vector<Expression>(), Skipper> init;
 
+      /** Named placeholder for parsing a PDDL problem. */
       qi::rule<Iterator, Problem(), Skipper> problem;
     };
 

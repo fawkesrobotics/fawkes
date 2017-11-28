@@ -4,6 +4,7 @@
  *     
  *  Created: Fri 19 May 2017 11:10:01 CEST
  *  Copyright  2017  Matthias Loebach     
+ *                   Till Hofmann
  ****************************************************************************/     
     
 /*  This program is free software; you can redistribute it and/or modify     
@@ -26,6 +27,22 @@
 
 namespace pddl_parser {
 
+/** @class PddlParser <pddl_parser/pddl_parser.h>
+ * Parse a PDDL domain file or problem.
+ * This class parses a domain/problem into a structured representation of
+ * the domain, which can then be used by other components.
+ * @see pddl_ast.h
+ */
+
+/** @class PddlParserException <pddl_parser/pddl_parser.h>
+ * Exception thrown by the parser if an error occurs during parsing.
+ */
+
+/** Parse the PDDL domain.
+ * @param pddl_domain The PDDL domain as string (not a path)
+ * @return A Domain object that contains the parsed domain.
+ * @see Domain
+ */
 Domain
 PddlParser::parseDomain(const std::string pddl_domain)
 {
@@ -49,6 +66,11 @@ PddlParser::parseDomain(const std::string pddl_domain)
   return dom;
 }
 
+/** Parse the PDDL problem.
+ * @param pddl_problem The problem as string (not a path)
+ * @return A Problem object that contains the parsed problem.
+ * @see Problem
+ */
 Problem
 PddlParser::parseProblem(const std::string pddl_problem)
 {
