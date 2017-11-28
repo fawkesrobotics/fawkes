@@ -25,24 +25,32 @@
 
 using namespace std;
 
+/** Test setup for domain tests. */
 class DomainTest : public CLIPSTest
 {
   protected:
+    /** Set up the test environment. */
     virtual void SetUp() {
       LoadCLIPSFiles(clips_files);
     }
+    /** These files are loaded during setup by default. */
     vector<string> clips_files = { "../plan.clp", "../domain.clp" };
 };
 
+/** Test with the blocksworld domain. */
 class BlocksworldDomainTest : public DomainTest
 {
   protected:
+    /** Set up the test environment. */
     virtual void SetUp() {
       clips_files.push_back("blocksworld.clp");
       DomainTest::SetUp();
     }
 };
 
+/** Check that a precondition of an action that should be executable is really
+ * satisfied.
+ */
 TEST_F(BlocksworldDomainTest, PreconditionsAreSatisfiedTest)
 {
   env.reset();
@@ -51,6 +59,9 @@ TEST_F(BlocksworldDomainTest, PreconditionsAreSatisfiedTest)
               "(and (eq ?p:name neg-on-table) (eq ?p:is-satisfied TRUE))"));
 }
 
+/** Check that a negative precondition that should not be satisfied is actually
+ * not satisfied.
+ */
 TEST_F(BlocksworldDomainTest, NegativePreconditionIsNotSatisfied)
 {
   env.reset();
@@ -66,6 +77,9 @@ TEST_F(BlocksworldDomainTest, NegativePreconditionIsNotSatisfied)
         "(and (eq ?p:name pick-up-precond) (eq ?p:is-satisfied TRUE))"));
 }
 
+/** Ground an action with multiple parameters and check that the grounding is
+ * correct. Also make sure its precondition is satisfied (which it should be).
+ */
 TEST_F(BlocksworldDomainTest, GroundingWithMultipleParameters)
 {
   env.reset();
@@ -78,6 +92,9 @@ TEST_F(BlocksworldDomainTest, GroundingWithMultipleParameters)
         "(and (eq ?p:name unstack-precond) (eq ?p:is-satisfied TRUE))"));
 }
 
+/** Check whether some basic facts about types exist after adding some domain
+ * objects.
+ */
 TEST_F(DomainTest, Typing)
 {
   env.reset();
@@ -92,6 +109,7 @@ TEST_F(DomainTest, Typing)
   EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "object" }));
 }
 
+/** There should be no domain error if the specified domain is valid. */
 TEST_F(BlocksworldDomainTest, NoErrorWithValidDomain)
 {
   env.reset();
@@ -99,6 +117,7 @@ TEST_F(BlocksworldDomainTest, NoErrorWithValidDomain)
   EXPECT_FALSE(has_fact("((?error domain-error))"));
 }
 
+/** Operators always have to have a precondition. */
 TEST_F(DomainTest, ErrorIfPreconditionHasNoOperator)
 {
   env.reset();
@@ -107,6 +126,7 @@ TEST_F(DomainTest, ErrorIfPreconditionHasNoOperator)
   EXPECT_TRUE(has_fact("((?error domain-error))"));
 }
 
+/** Every precondition must have an operator. */
 TEST_F(DomainTest, ErrorIfOperatorOfPreconditionDoesNotExist)
 {
   env.reset();
@@ -115,6 +135,7 @@ TEST_F(DomainTest, ErrorIfOperatorOfPreconditionDoesNotExist)
   EXPECT_TRUE(has_fact("((?error domain-error))"));
 }
 
+/** The type of an object must exist in the domain. */
 TEST_F(DomainTest, ErrorIfObjTypeDoesNotExist)
 {
   env.reset();
@@ -123,6 +144,7 @@ TEST_F(DomainTest, ErrorIfObjTypeDoesNotExist)
   EXPECT_TRUE(has_fact("((?e domain-error))"));
 }
 
+/** The super type of a domain type must exist. */
 TEST_F(DomainTest, ErrorIfSuperTypeDoesNotExist)
 {
   env.reset();
@@ -131,6 +153,9 @@ TEST_F(DomainTest, ErrorIfSuperTypeDoesNotExist)
   EXPECT_TRUE(has_fact("((?e domain-error))"));
 }
 
+/** If the precondition of an action is satisfied, then the respective action
+ * should also be marked as executable.
+ */
 TEST_F(BlocksworldDomainTest, ActionIsExecutableIfPreconditionIsSatisfied)
 {
   env.reset();
@@ -141,6 +166,7 @@ TEST_F(BlocksworldDomainTest, ActionIsExecutableIfPreconditionIsSatisfied)
         "(and (eq ?a:action-name unstack) (eq ?a:executable TRUE))"));
 }
 
+/** Applying the effects of an action changes the domain facts. */
 TEST_F(BlocksworldDomainTest, ApplyEffects)
 {
   env.reset();
@@ -159,6 +185,10 @@ TEST_F(BlocksworldDomainTest, ApplyEffects)
         "(and (eq ?p:name clear) (eq ?p:param-values (create$ b1)))"));
 }
 
+/** When we apply one action after the other, then the effects of the latter
+ * action must hold at the end. Also check that effects on the same predicate
+ * but with different parameters are applied correctly.
+ */
 TEST_F(BlocksworldDomainTest, ApplyContradictingEffectsWithDifferentParams)
 {
   env.reset();
@@ -175,6 +205,7 @@ TEST_F(BlocksworldDomainTest, ApplyContradictingEffectsWithDifferentParams)
         "(and (eq ?p:name clear) (eq ?p:param-values (create$ b2)))"));
 }
 
+/** Test whether constants in preconditions work as expected. */
 TEST_F(DomainTest, PreconditionWithConstant)
 {
   env.reset();
@@ -207,6 +238,9 @@ TEST_F(DomainTest, PreconditionWithConstant)
         "(and (eq ?a:id 1) (eq ?a:executable TRUE))"));
 }
 
+/** Test whether the order of parameters and constants is correct if the
+ * constant is the second parameter of the precondition.
+ */
 TEST_F(DomainTest, PreconditionWithConstantInSecondSlot)
 {
   env.reset();
@@ -239,6 +273,9 @@ TEST_F(DomainTest, PreconditionWithConstantInSecondSlot)
         "(and (eq ?a:id 1) (eq ?a:executable TRUE))"));
 }
 
+/** If there is an unknown parameter in a precondition, then the domain contains
+ * an error.
+ */
 TEST_F(DomainTest, PreconditionWithUnknownParameter)
 {
   env.reset();

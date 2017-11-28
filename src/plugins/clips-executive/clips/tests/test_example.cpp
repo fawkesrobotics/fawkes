@@ -20,9 +20,11 @@
 
 #include "clips_test.h"
 
+/** Simple Test class that shows how to do unit testing for CLIPS. */
 class SimpleCLIPSTest : public CLIPSTest
 {
   protected:
+    /** Set up the test environment. */
     virtual void SetUp() {
       LoadCLIPSFiles({ "test_example.clp" });
     }

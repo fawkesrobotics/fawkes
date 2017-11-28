@@ -28,6 +28,10 @@
 #define TESTDIR "."
 #endif
 
+/** Base class for unit testing with CLIPS.
+ * To define your own test setup, derive from this class.
+ * @see SimpleCLIPSTest
+ */
 class CLIPSTest : public ::testing::Test
 {
   protected:
@@ -58,6 +62,7 @@ class CLIPSTest : public ::testing::Test
     /** Check if an ordered fact exists.
      *  @param fact_name The name of the fact, e.g., "foo".
      *  @param slot_values A vector of slot values, e.g., '{ "bar" }'.
+     *  @return true iff the specified ordered fact exists.
      */
     bool has_ordered_fact(const std::string &fact_name,
         const std::vector<CLIPS::Value> slot_values = {}) {
