@@ -1,8 +1,8 @@
 #*****************************************************************************
-#                   Makefile Build System for Fawkes: Tools
+#                      Makefile Build System for Fawkes
 #                            -------------------
-#   Created on Tue Nov 21 18:36:28 2006
-#   Copyright (C) 2006-2009 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Created on Fri 13 Oct 2017 13:55:21 CEST
+#   Copyright (C) 2017 by Till Hofmann <hofmann@kbsg.rwth-aachen.de>
 #
 #*****************************************************************************
 #
@@ -13,12 +13,11 @@
 #
 #*****************************************************************************
 
-BASEDIR = ../..
-
-SUBDIRS = plugin logview config plugin_gui netloggui \
-	  lasergui skillgui battery_monitor ffinfo vision set_pose \
-		eclipse_debugger plugin_generator pddl_parser
-
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BUILDSYSDIR)/rules.mk
+include $(BUILDSYSDIR)/boost.mk
 
+ifeq ($(HAVE_BOOST),1)
+  HAVE_PDDL_PARSER = 1
+else
+  HAVE_PDDL_PARSER = 0
+endif
