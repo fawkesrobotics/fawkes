@@ -23,6 +23,7 @@
 #include "plugin.h"
 #include "control_thread.h"
 #include "eclipse_thread.h"
+#include "blackboard_listener_thread.h"
 
 /** @class EclipseCLPPlugin "plugin.h"
  * The ECLiPSe CLP plugin.
@@ -40,6 +41,7 @@ EclipseCLPPlugin::EclipseCLPPlugin( Configuration* config )
   EclipseAgentThread* eclipse_thread = new EclipseAgentThread();
   thread_list.push_back( eclipse_thread );
   thread_list.push_back( new AgentControlThread( eclipse_thread ) );
+  thread_list.push_back( new BlackboardListenerThread() );
 }
 
 PLUGIN_DESCRIPTION( "Runs the ECLiPSe CLP interpreter" )

@@ -25,6 +25,7 @@
 #define __ECLIPSE_EXTERNALS_BLACKBOARD_H_
 
 #include <blackboard/remote.h>
+#include <logging/logger.h>
 #include <vector>
 
 #include <cstdio>
@@ -42,22 +43,47 @@ private:
   /** Constructor.
    * @param blackboard blackboard to use to open interfaces
    */
-  EclExternalBlackBoard(BlackBoard *blackboard);
+  EclExternalBlackBoard(BlackBoard *blackboard, Logger *logger);
 public:
   /** Destructor. */
   ~EclExternalBlackBoard();
 
-  static void create_initial_object(BlackBoard *bb);
+  static void create_initial_object(BlackBoard *bb, Logger *logger);
   static void cleanup_instance();
   static EclExternalBlackBoard* instance();
 
   static BlackBoard* blackboard_instance();
   std::map<std::string, Interface *> & interfaces();
 
+  static Logger *logger() { return m_logger; }
+  static const char *name() { return "EclExternalBlackBoard"; }
+
+  class Event {
+  public:
+    Event(const std::string &type, const std::string &id)
+      : type(type), id(id)
+    {}
+    std::string type, id;
+  };
+  class Created : public Event {
+    using Event::Event;
+  };
+  class Destroyed : public Event {
+    using Event::Event;
+  };
+  class Changed : public Event {
+  public:
+    Changed(Interface *interface)
+      : Event(interface->type(), interface->id()), interface(interface)
+    {}
+    fawkes::Interface *interface;
+  };
+
 private:
   static EclExternalBlackBoard *      m_instance;
   std::map<std::string, Interface *>  m_interfaces;
   static BlackBoard *                 m_blackboard;
+  static Logger *                     m_logger;
 };
 }
 
@@ -79,6 +105,9 @@ extern "C" int p_bb_set();
 
 extern "C" int p_bb_send_message();
 extern "C" int p_bb_recv_messages();
+
+extern "C" int p_bb_observe_pattern();
+extern "C" int p_bb_listen_for_change();
 
 #endif
 

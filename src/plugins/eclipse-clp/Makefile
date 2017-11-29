@@ -29,7 +29,7 @@ HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 LIBS_eclipse_clp = fawkescore fawkesinterface fawkesblackboard \
                      fawkesaspects fawkesutils eclipse TestInterface \
                      EclipseDebuggerInterface ExitSimulationInterface
-OBJS_eclipse_clp = plugin.o control_thread.o eclipse_thread.o \
+OBJS_eclipse_clp = plugin.o control_thread.o eclipse_thread.o blackboard_listener_thread.o \
 		     externals/fawkes_logger.o       \
 		     externals/blackboard.o          \
 		     externals/eclipse_path.o        \

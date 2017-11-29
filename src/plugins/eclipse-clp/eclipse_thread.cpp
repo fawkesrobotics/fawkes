@@ -78,7 +78,7 @@ void
 EclipseAgentThread::init()
 {
   _running = false;
-  fawkes::EclExternalBlackBoard::create_initial_object(blackboard);
+  fawkes::EclExternalBlackBoard::create_initial_object(blackboard, logger);
   fawkes::EclExternalConfig::create_initial_object(config);
   // set ECLiPSe installation directory
   char* eclipse_dir = NULL;

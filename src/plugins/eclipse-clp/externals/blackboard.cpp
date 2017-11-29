@@ -28,9 +28,10 @@
 #include <logging/logger.h>
 #include <plugins/eclipse-clp/eclipse_thread.h>
 
-
 #include <cstring>
 #include <cstdlib>
+
+#include <plugins/eclipse-clp/blackboard_listener_thread.h>
 
 namespace fawkes{
 /** @class fawkes::EclExternalBlackBoard
@@ -43,13 +44,14 @@ BlackBoard* EclExternalBlackBoard::m_blackboard = NULL;
 EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
 
   /** Constructor. */
-  EclExternalBlackBoard::EclExternalBlackBoard(BlackBoard* blackboard)
+  EclExternalBlackBoard::EclExternalBlackBoard(BlackBoard *blackboard, Logger *logger)
   {
     if (m_instance != NULL) {
       throw Exception("There is already an instance of type "
           "EclExternalBlackBoard instantiated");
     }
     m_blackboard = blackboard;
+    m_logger = logger;
   }
 
   /** Destructor. */
@@ -59,9 +61,9 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
   /** Creates the initial EclExternalBlackBoard object
    * @param bb pointer to the BlackBoard to be used
    */
-  void EclExternalBlackBoard::create_initial_object(BlackBoard *bb)
+  void EclExternalBlackBoard::create_initial_object(BlackBoard *bb, Logger *logger)
   {
-      m_instance = new EclExternalBlackBoard(bb);
+      m_instance = new EclExternalBlackBoard(bb, logger);
   }
 
   /** Delete the current EclExternalBlackBoard instance and set it to NULL */
@@ -436,7 +438,7 @@ p_bb_get()
 	    EC_word res = nil();
 	    float* f_array = fit.get_floats();
 	    for (int i=fit.get_length() - 1; i >= 0; --i)
-	      res = list(EC_word(f_array[i]), res);
+              res = ::list(EC_word(f_array[i]), res);
 	    if (EC_succeed != EC_arg(3).unify(res)) {
 	      fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	      return EC_fail;
@@ -454,7 +456,7 @@ p_bb_get()
 	    EC_word res = nil();
 	    double* double_array = fit.get_doubles();
 	    for (int i=fit.get_length() - 1; i >= 0; --i)
-	      res = list(EC_word(double_array[i]), res);
+              res = ::list(EC_word(double_array[i]), res);
 	    if (EC_succeed != EC_arg(3).unify(res)) {
 	      fprintf(stderr, "p_bb_get(): could not bind return value\n");
 	      return EC_fail;
@@ -480,7 +482,7 @@ p_bb_get()
 	    EC_word res = nil();
 	    uint8_t* array = fit.get_bytes();
 	    for (int i=fit.get_length()-1; i>= 0; i--)
-	      res = list( EC_word( (long) array[i]), res);
+              res = ::list( EC_word( (long) array[i]), res);
 	    if ( EC_succeed != EC_arg( 3 ).unify( res ) )
 	    {
 	      printf( "p_bb_get(): could not bind return value\n" );
@@ -909,6 +911,58 @@ p_bb_recv_messages()
     return EC_fail;
   }
 
+  return EC_succeed;
+}
+
+
+int
+p_bb_observe_pattern()
+{
+  char *type_pattern, *id_pattern;
+  if (EC_succeed != EC_arg(1).is_string(&type_pattern)) {
+    EclExternalBlackBoard::logger()->log_error(
+          EclExternalBlackBoard::name(), "%s: First argument must be a string.", __func__);
+    return EC_fail;
+  }
+  if (EC_succeed != EC_arg(2).is_string(&id_pattern)) {
+    EclExternalBlackBoard::logger()->log_error(
+          EclExternalBlackBoard::name(), "%s: Second argument must be a string.", __func__);
+    return EC_fail;
+  }
+
+  BlackboardListenerThread::instance()->observe_pattern(type_pattern, id_pattern);
+  return EC_succeed;
+}
+
+
+int
+p_bb_listen_for_change()
+{
+  char *type, *id;
+  if (EC_succeed != EC_arg(1).is_string(&type)) {
+    EclExternalBlackBoard::logger()->log_error(
+          EclExternalBlackBoard::name(), "%s: First argument must be a string.", __func__);
+    return EC_fail;
+  }
+  if (EC_succeed != EC_arg(2).is_string(&id)) {
+    EclExternalBlackBoard::logger()->log_error(
+          EclExternalBlackBoard::name(), "%s: Second argument must be a string.", __func__);
+    return EC_fail;
+  }
+
+  std::map<std::string, Interface *> &interfaces =
+    EclExternalBlackBoard::instance()->interfaces();
+
+  std::string uid = std::string(type) + "::" + id;
+  std::map<std::string, Interface *>::iterator iface_it = interfaces.find(uid);
+
+  if (iface_it == interfaces.end()) {
+    EclExternalBlackBoard::logger()->log_error(
+          EclExternalBlackBoard::name(), "%s: Interface %s has not been opened.", __func__, uid.c_str());
+    return EC_fail;
+  }
+
+  BlackboardListenerThread::instance()->listen_for_change(iface_it->second);
   return EC_succeed;
 }
 
