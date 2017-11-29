@@ -50,7 +50,7 @@ class PddlParserException : public fawkes::Exception
     */
   PddlParserException(const char *msg)
     : fawkes::Exception(msg) {}
-  PDDLParserException(const std::string &msg)
+  PddlParserException(const std::string &msg)
     : fawkes::Exception(msg.c_str()) {}
 };
 

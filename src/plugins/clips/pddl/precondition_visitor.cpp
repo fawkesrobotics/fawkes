@@ -92,14 +92,14 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const {
       vector<string> p_strings =
         boost::apply_visitor(PreconditionToCLIPSFactVisitor(name, 0), p);
       if (p_strings.size() != 1) {
-        throw PDDLParserException(
+        throw PddlParserException(
             "Unexpected parameter length, expected exactly one");
       }
       string p_string = p_strings[0];
       if (p_string[0] == '?') {
         // It's really a parameter.
         if (p_string.length() <= 1) {
-          throw PDDLParserException("Invalid parameter name " + p_string);
+          throw PddlParserException("Invalid parameter name " + p_string);
         }
         params += " " + p_string.substr(1);
         constants += " nil";

@@ -69,7 +69,7 @@ EffectToCLIPSFactVisitor::operator()(Predicate &p) const {
     }
   } else if (p.function == "not") {
     if (p.arguments.size() != 1) {
-      throw PDDLParserException("Expected exactly one sub-formula for 'not'");
+      throw PddlParserException("Expected exactly one sub-formula for 'not'");
     }
     vector<string> sub_effects = boost::apply_visitor(
         EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_),
@@ -85,7 +85,7 @@ EffectToCLIPSFactVisitor::operator()(Predicate &p) const {
             EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_),
             p);
       if (p_strings.size() != 1) {
-        throw PDDLParserException(
+        throw PddlParserException(
             "Unexpected parameter length for a predicate parameter, "
             "expected exactly one");
       }
@@ -93,7 +93,7 @@ EffectToCLIPSFactVisitor::operator()(Predicate &p) const {
       if (p_string[0] == '?') {
         // It's really a parameter.
         if (p_string.length() <= 1) {
-          throw PDDLParserException("Invalid parameter name " + p_string);
+          throw PddlParserException("Invalid parameter name " + p_string);
         }
         params += " " + p_string.substr(1);
         constants += " nil";
