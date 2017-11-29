@@ -7,23 +7,33 @@
 ;---------------------------------------------------------------------------
 
 (deftemplate pddl-plan
+  ; The ID of the goal.
+  (slot goal-id (type SYMBOL))
+  ; The ID of PDDL generation message.
   (slot gen-id (type INTEGER))
+  ; The ID of the PDDL Plan message.
   (slot plan-id (type INTEGER))
+  ; The current status of this plan.
   (slot status (type SYMBOL)
-    (allowed-values GEN-PENDING GEN-RUNNING GENERATED PENDING RUNNING PLANNED)
+    (allowed-values
+      GEN-PENDING GEN-RUNNING GENERATED PENDING RUNNING PLANNED PLAN-FETCHED
+    )
   )
+  ; The PDDL formula to plan for.
   (slot goal (type STRING))
 )
 
-(deffunction pddl-call (?goal)
-  "Call the PDDL planner with the goal given as string."
+(deffunction pddl-call (?goal-id ?goal)
+  "Call the PDDL planner for the given goal-id with the goal given as string."
   (bind ?m
     (blackboard-create-msg "PddlGenInterface::pddl-gen" "GenerateMessage")
   )
   (blackboard-set-msg-field ?m "goal" ?goal)
-  (printout info "Calling PDDL planner for goal " ?goal crlf)
+  (printout info "Calling PDDL planner for goal '" ?goal "'" crlf)
   (bind ?gen-id (blackboard-send-msg ?m))
-  (assert (pddl-plan (goal ?goal) (status GEN-PENDING) (gen-id ?gen-id)))
+  (assert (pddl-plan
+    (goal-id ?goal-id) (goal ?goal) (status GEN-PENDING) (gen-id ?gen-id))
+  )
 )
 
 (defrule pddl-check-if-generation-running
@@ -70,4 +80,39 @@
   (PddlPlannerInterface (id "pddl-planner") (msg_id ?plan-id) (final TRUE))
   =>
   (modify ?p (status PLANNED))
+)
+
+(defrule pddl-expand-goal
+  "Fetch the resulting plan from robot memory and expand the goal."
+  ?g <- (goal (id ?goal-id) (mode SELECTED))
+  ?t <- (robmem-trigger (name "new-plan") (ptr ?obj))
+  ?p <- (pddl-plan
+          (status PLANNED)
+          (goal-id ?goal-id)
+          (plan-id ?plan-id&
+            :(eq ?plan-id (bson-get (bson-get ?obj "o") "msg_id")))
+        )
+  =>
+  (printout t "Fetched a new plan!" crlf)
+  (progn$ (?action (bson-get-array (bson-get ?obj "o") "actions"))
+    (assert
+      (plan-action
+        (id ?action-index)
+        (plan-id ?plan-id)
+        (action-name (sym-cat (bson-get ?action "name")))
+        (param-values (bson-get-array ?action "args"))
+      )
+    )
+  )
+  (modify ?g (mode EXPANDED))
+  (retract ?p)
+)
+
+(defrule pddl-clean-up-stale-plans
+  "Clean up pddl-plan facts that were left behind.
+   This may happen if a goal get unselected while the planner is running."
+  ?p <- (pddl-plan (goal-id ?goal-id))
+  (not (goal (id ?goal-id) (mode SELECTED)))
+  =>
+  (retract ?p)
 )
