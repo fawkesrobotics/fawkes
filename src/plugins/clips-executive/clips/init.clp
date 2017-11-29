@@ -93,8 +93,17 @@
   (executive-init)
   (confval (path "/clips-executive/use_navgraph") (type BOOL) (value TRUE))
   =>
-  (printout t "Loading navgraph feature")
+  (printout t "Loading navgraph feature" crlf)
   (ff-feature-request "navgraph")
+)
+
+(defrule executive-conditional-robot-memory-init
+  "Load robot-memory feature required for PDDL."
+  (executive-init)
+  (confval (path "/clips-executive/use_pddl") (type BOOL) (value TRUE))
+  =>
+  (printout t "Robot Memory feature" crlf)
+  (ff-feature-request "robot_memory")
 )
 
 (defrule executive-conditional-pddl-init
@@ -102,8 +111,9 @@
   (executive-init)
   (ff-feature-loaded blackboard)
   (confval (path "/clips-executive/use_pddl") (type BOOL) (value TRUE))
+  (ff-feature-loaded robot_memory)
   =>
-  (printout t "Loading PDDL interface")
+  (printout t "Loading PDDL Planner interface" crlf)
   (path-load "pddl-init.clp")
 )
 
@@ -124,7 +134,7 @@
       (not (confval (path "/clips-executive/use_navgraph")
             (type BOOL) (value TRUE)))
   )
-  (or (ff-feature-loaded pddl)
+  (or (ff-feature-loaded pddl_planner)
       (not (confval (path "/clips-executive/use_pddl")
             (type BOOL) (value TRUE)))
   )
