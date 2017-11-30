@@ -95,13 +95,24 @@
   =>
   (printout t "Fetched a new plan!" crlf)
   (progn$ (?action (bson-get-array (bson-get ?obj "o") "actions"))
+    (bind ?param-values (bson-get-array ?action "args"))
+    ; Convert all paramters to lower-case symbols
+    (progn$ (?param ?param-values)
+      (bind ?param-values
+            (replace$
+              ?param-values
+              ?param-index ?param-index
+              (sym-cat (lowcase ?param))
+            )
+      )
+    )
     (assert
       (plan (id ?plan-id) (goal-id ?goal-id))
       (plan-action
         (id ?action-index)
         (plan-id ?plan-id)
         (action-name (sym-cat (bson-get ?action "name")))
-        (param-values (bson-get-array ?action "args"))
+        (param-values ?param-values)
       )
     )
   )
