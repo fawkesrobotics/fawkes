@@ -50,6 +50,7 @@ clips-executive:
   # <agent name>.clp. It must be in the CLIPS path directories.
   spec: test
   use_pddl: true
+  sync_domain_facts: true
 
   specs:
     test:
