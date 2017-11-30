@@ -356,13 +356,14 @@
 (defrule domain-retract-negative-effect
   "Retract an existing predicate if the same retracted predicate exists."
   ?p <- (domain-fact (name ?predicate) (param-values $?params))
-  ?r <- (domain-retracted-fact (name ?predicate) (param-values $?params))
+  (domain-retracted-fact (name ?predicate) (param-values $?params))
 =>
-  (retract ?r ?p)
+  (retract ?p)
 )
 
 (defrule domain-cleanup-retract-facts
-  "Clean up a retract-predicate if the respective predicate does not exist."
+  "Clean up a retract facts after retracting."
+  (declare (salience -100))
   ?r <- (domain-retracted-fact)
 =>
   (retract ?r)
