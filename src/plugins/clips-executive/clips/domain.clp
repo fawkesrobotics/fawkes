@@ -111,6 +111,13 @@
   (slot error-type (type SYMBOL))
 )
 
+(defrule domain-add-type-object
+  "Make sure we always have a domain object type 'object'."
+  (not (domain-object-type (name object)))
+  =>
+  (assert (domain-object-type (name object)))
+)
+
 (defrule domain-translate-obj-slot-type-to-ordered-fact
   "Translate the slot type of a domain-object into the ordered fact
    obj-is-of-type."
