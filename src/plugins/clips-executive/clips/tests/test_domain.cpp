@@ -117,22 +117,24 @@ TEST_F(BlocksworldDomainTest, NoErrorWithValidDomain)
   EXPECT_FALSE(has_fact("((?error domain-error))"));
 }
 
-/** Operators always have to have a precondition. */
+/** Every precondition must have an operator... */
 TEST_F(DomainTest, ErrorIfPreconditionHasNoOperator)
 {
   env.reset();
   env.assert_fact("(domain-precondition (name foo))");
   env.run();
-  EXPECT_TRUE(has_fact("((?error domain-error))"));
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type precondition-without-parent)"));
 }
 
-/** Every precondition must have an operator. */
+/** ... and the operator must actually be defined. */
 TEST_F(DomainTest, ErrorIfOperatorOfPreconditionDoesNotExist)
 {
   env.reset();
   env.assert_fact("(domain-precondition (name foo) (part-of op))");
   env.run();
-  EXPECT_TRUE(has_fact("((?error domain-error))"));
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type precondition-without-parent)"));
 }
 
 /** The type of an object must exist in the domain. */
@@ -141,7 +143,8 @@ TEST_F(DomainTest, ErrorIfObjTypeDoesNotExist)
   env.reset();
   env.assert_fact("(domain-object (name o1) (type t1))");
   env.run();
-  EXPECT_TRUE(has_fact("((?e domain-error))"));
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type type-of-object-does-not-exist)"));
 }
 
 /** The super type of a domain type must exist. */
@@ -150,7 +153,8 @@ TEST_F(DomainTest, ErrorIfSuperTypeDoesNotExist)
   env.reset();
   env.assert_fact("(domain-object-type (name t2) (super-type t1))");
   env.run();
-  EXPECT_TRUE(has_fact("((?e domain-error))"));
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type super-type-does-not-exist)"));
 }
 
 /** If the precondition of an action is satisfied, then the respective action
@@ -292,7 +296,8 @@ TEST_F(DomainTest, PreconditionWithUnknownParameter)
              " (param-names y c)"
              " (param-constants nil a))");
   env.run();
-  EXPECT_TRUE(has_fact("((?e domain-error))"));
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type unknown-parameter)"));
 }
 
 /** Each action has an operator that is defined in the domain. */
@@ -301,5 +306,6 @@ TEST_F(DomainTest, ActionHasADomainOperator)
   env.reset();
   env.assert_fact("(plan-action (action-name doesn-not-exist))");
   env.run();
-  EXPECT_TRUE(has_fact("((?e domain-error))"));
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type operator-of-action-does-not-exist)"));
 }

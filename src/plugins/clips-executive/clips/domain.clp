@@ -107,6 +107,7 @@
 (deftemplate domain-error
   "A fact representing some error in the domain definition."
   (slot error-msg (type STRING))
+  (slot error-type (type SYMBOL))
 )
 
 (defrule domain-translate-obj-slot-type-to-ordered-fact
@@ -187,7 +188,7 @@
       (bind ?action-index (member$ ?p ?action-param-names))
       (if (not ?action-index) then
         ; ?p is not in the list of the action parameters
-        (assert (domain-error (error-msg
+        (assert (domain-error (error-type unknown-parameter) (error-msg
           (str-cat "Precondition " ?precond-name " has unknown parameter " ?p)))
         )
       else
@@ -351,7 +352,8 @@
   (not (domain-precondition (name ?parent)))
   (not (domain-operator (name ?parent)))
 =>
-  (assert (domain-error (error-msg
+  (assert (domain-error (error-type precondition-without-parent)
+    (error-msg
     (str-cat "Precondition " ?precond
       " does not belong to any operator or precondition."))))
 )
@@ -361,8 +363,9 @@
   (domain-object (name ?obj) (type ?type))
   (not (domain-object-type (name ?type)))
 =>
-  (assert (domain-error (error-msg (str-cat "Type " ?type " of object " ?obj
-                                     " does not exist."))))
+  (assert (domain-error
+    (error-type type-of-object-does-not-exist)
+    (error-msg (str-cat "Type " ?type " of object " ?obj " does not exist."))))
 )
 
 (defrule domain-check-super-type-exists
@@ -370,8 +373,9 @@
   (domain-object-type (name ?type) (super-type ?super-type))
   (not (domain-object-type (name ?super-type)))
 =>
-  (assert (domain-error (error-msg (str-cat "Super-type " ?super-type
-                                    " of type " ?type " does not exist."))))
+  (assert (domain-error (error-type super-type-does-not-exist)
+    (error-msg (str-cat "Super-type " ?super-type
+                        " of type " ?type " does not exist."))))
 )
 
 (defrule domain-check-operator-of-action-exists
@@ -379,8 +383,8 @@
   (plan-action (action-name ?op))
   (not (domain-operator (name ?op)))
   =>
-  (assert (domain-error (error-msg (str-cat "Operator of action " ?op
-                                    " does not exist"))))
+  (assert (domain-error (error-type operator-of-action-does-not-exist)
+    (error-msg (str-cat "Operator of action " ?op " does not exist"))))
 )
 
 (defrule domain-cleanup-preconditions-on-worldmodel-change
