@@ -127,6 +127,19 @@
   (assert (obj-is-of-type ?obj ?super-type))
 )
 
+(defrule domain-amend-action-params
+  "If a plan action has no action-params specified, copy the params from the
+   operator."
+  ?a <- (plan-action
+          (action-name ?op-name)
+          (param-names $?ap-names&:(= (length$ ?ap-names) 0))
+          (param-values $?ap-values&:(> (length$ ?ap-values) 0))
+        )
+  ?op <- (domain-operator (name ?op-name) (param-names $?param-names))
+  =>
+  (modify ?a (param-names ?param-names))
+)
+
 (defrule domain-ground-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific action-id."
