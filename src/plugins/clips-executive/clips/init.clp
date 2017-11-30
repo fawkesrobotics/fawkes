@@ -127,6 +127,17 @@
   (path-load "domain.clp")
 )
 
+(defrule executive-init-load-robot-memory-sync
+  "Load the robot memory domain model synchronization if enabled in the config."
+	(executive-init)
+  (ff-feature-loaded robot_memory)
+  ; Only load after the domain file has been loaded.
+  (domain-loaded)
+  (confval (path "/clips-executive/sync_domain_facts") (type BOOL) (value TRUE))
+  =>
+  (path-load "robot-memory-sync.clp")
+)
+
 (defrule executive-init-stage3
 	(executive-init)
 	(ff-feature-loaded skills)
