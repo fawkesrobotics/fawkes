@@ -49,12 +49,13 @@ clips-executive:
   # Agent name. On startup the clips-agent will try to resolve a file named
   # <agent name>.clp. It must be in the CLIPS path directories.
   spec: test
+  use_pddl: true
 
   specs:
     test:
       domain: test-scenario/test-domain.clp
       goal-reasoner: test-scenario/goal-reasoner.clp
-      goal-expander: test-scenario/fixed-sequence.clp
+      goal-expander: test-scenario/goal-expander-pddl.clp
       action-selection: test-scenario/action-selection.clp
       #macro-expansion: test-scenario/action-selection.clp
       action-execution: plan-exec.clp
