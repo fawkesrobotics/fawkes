@@ -96,6 +96,7 @@
   (printout t "Fetched a new plan!" crlf)
   (progn$ (?action (bson-get-array (bson-get ?obj "o") "actions"))
     (assert
+      (plan (id ?plan-id) (goal-id ?goal-id))
       (plan-action
         (id ?action-index)
         (plan-id ?plan-id)
