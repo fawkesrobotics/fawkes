@@ -113,7 +113,21 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
   }
 
   for (auto &action : domain.actions) {
-    env.assert_fact("(domain-operator (name " + action.name + "))");
+    string params_string = "(param-names";
+    for (auto &param_pair : action.action_params) {
+      string param_name = param_pair.first;
+      string param_type = param_pair.second;
+      params_string += " " + param_name;
+      env.assert_fact("(domain-operator-parameter"
+                      " (name " + param_name + ")"
+                      " (operator " + action.name + ")"
+                      " (type " + param_type + ")"
+                      ")");
+    }
+    params_string += ")";
+    env.assert_fact(
+      "(domain-operator (name " + action.name + ")" + params_string + ")"
+    );
     vector<string> precondition_facts =
       boost::apply_visitor(PreconditionToCLIPSFactVisitor(action.name, 1),
           action.precondition);
