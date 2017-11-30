@@ -35,10 +35,12 @@ using namespace pddl_parser;
 /** Constructor.
  * @param parent The name of the parent (either an operator or a precondition)
  * @param sub_counter Counter passed by the parent to enumerate sub-conditions
+ * @param is_main true if this is the direct child of the operator,
+ * i.e., not a sub-condition
  */
 PreconditionToCLIPSFactVisitor::PreconditionToCLIPSFactVisitor(
-    const string &parent, int sub_counter)
-: parent_(parent), sub_counter_(sub_counter) {}
+    const string &parent, int sub_counter, bool is_main /* = false */)
+: parent_(parent), sub_counter_(sub_counter), is_main_(is_main) {}
 
 /** Translate an Atom into a vector of strings.
  * Note that this does not return a CLIPS fact because we do not store atoms
@@ -86,6 +88,26 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const {
     return res;
   } else {
     // We expect p.function to be a predicate name.
+    string new_parent;
+    if (is_main_) {
+      // Special case: this is the main precondition, but it's an atomic
+      // condition. Add an additional condition so we never have an atomic
+      // precondition as the main precondition.
+      res.push_back(string(
+            "(domain-precondition"
+            " (part-of " + parent_ + ")"
+            " (name " + name + ")"
+            " (type conjunction)"
+            ")"));
+      // Also adapt parent and name, the parent is now the new precondition
+      // above.
+      new_parent = name;
+      stringstream child_name;
+      child_name << name << 1;
+      name = child_name.str();
+    } else {
+      new_parent = parent_;
+    }
     string params = "";
     string constants = "";
     for (auto &p : p.arguments) {

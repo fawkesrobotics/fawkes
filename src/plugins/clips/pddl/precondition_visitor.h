@@ -31,12 +31,14 @@ class PreconditionToCLIPSFactVisitor
 : public boost::static_visitor<std::vector<std::string>>
 {
  public:
-  PreconditionToCLIPSFactVisitor(const std::string &parent, int sub_counter);
+  PreconditionToCLIPSFactVisitor(const std::string &parent, int sub_counter,
+      bool is_main=false);
   std::vector<std::string> operator()(pddl_parser::Atom &a) const;
   std::vector<std::string> operator()(pddl_parser::Predicate &p) const;
  private:
   std::string parent_;
   uint sub_counter_;
+  bool is_main_;
 };
 
 
