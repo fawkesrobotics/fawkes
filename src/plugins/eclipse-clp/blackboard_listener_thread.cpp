@@ -44,20 +44,49 @@ void BlackboardListenerThread::listen_for_change(Interface *interface) noexcept
 void BlackboardListenerThread::bb_interface_created(const char *type, const char *id) noexcept
 {
   MutexLocker lock(&state_mutex_);
-  iface_events_.emplace(new EclExternalBlackBoard::Created{type, id});
+  iface_events_.emplace(new BlackboardListenerThread::Created{type, id});
 }
 
 
 void BlackboardListenerThread::bb_interface_destroyed(const char *type, const char *id) noexcept
 {
   MutexLocker lock(&state_mutex_);
-  iface_events_.emplace(new EclExternalBlackBoard::Destroyed{type, id});
+  iface_events_.emplace(new BlackboardListenerThread::Destroyed{type, id});
 }
 
 
 void BlackboardListenerThread::bb_interface_data_changed(Interface *interface) noexcept
 {
   MutexLocker lock(&state_mutex_);
-  iface_events_.emplace(new EclExternalBlackBoard::Changed{interface});
+  iface_events_.emplace(new BlackboardListenerThread::Changed{interface});
 }
+
+
+bool BlackboardListenerThread::event_pending()
+{
+  MutexLocker lock(&state_mutex_);
+  return !iface_events_.empty();
+}
+
+
+shared_ptr<BlackboardListenerThread::Event> BlackboardListenerThread::event_pop()
+{
+  MutexLocker lock(&state_mutex_);
+  shared_ptr<BlackboardListenerThread::Event> rv = iface_events_.front();
+  iface_events_.pop();
+  return rv;
+}
+
+
+BlackboardListenerThread::Created::operator EC_word ()
+{ return ::term(EC_functor("bb_create", 1), uid().c_str()); }
+
+
+BlackboardListenerThread::Destroyed::operator EC_word ()
+{ return ::term(EC_functor("bb_destroy", 1), uid().c_str()); }
+
+
+BlackboardListenerThread::Changed::operator EC_word ()
+{ return ::term(EC_functor("bb_change", 1), uid().c_str()); }
+
 

@@ -58,27 +58,6 @@ public:
   static Logger *logger() { return m_logger; }
   static const char *name() { return "EclExternalBlackBoard"; }
 
-  class Event {
-  public:
-    Event(const std::string &type, const std::string &id)
-      : type(type), id(id)
-    {}
-    std::string type, id;
-  };
-  class Created : public Event {
-    using Event::Event;
-  };
-  class Destroyed : public Event {
-    using Event::Event;
-  };
-  class Changed : public Event {
-  public:
-    Changed(Interface *interface)
-      : Event(interface->type(), interface->id()), interface(interface)
-    {}
-    fawkes::Interface *interface;
-  };
-
 private:
   static EclExternalBlackBoard *      m_instance;
   std::map<std::string, Interface *>  m_interfaces;

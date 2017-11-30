@@ -24,7 +24,6 @@
 #include "blackboard.h"
 
 
-#include <eclipseclass.h>
 #include <logging/logger.h>
 #include <plugins/eclipse-clp/eclipse_thread.h>
 

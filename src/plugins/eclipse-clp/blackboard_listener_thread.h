@@ -15,6 +15,8 @@
 #include <queue>
 #include <memory>
 
+#include <eclipseclass.h>
+
 #include "externals/blackboard.h"
 
 
@@ -43,13 +45,62 @@ public:
   static BlackboardListenerThread *instance();
   static void cleanup_instance();
 
+
+  class Event {
+  public:
+    Event(const std::string &type, const std::string &id)
+      : type(type), id(id)
+    {}
+
+    virtual ~Event();
+
+    virtual operator EC_word () = 0;
+
+    std::string uid()
+    { return type + "::" + id; }
+
+  protected:
+    std::string type, id;
+  };
+
+
+  class Created : public Event {
+  public:
+    using Event::Event;
+    virtual operator EC_word ();
+  };
+
+
+  class Destroyed : public Event {
+  public:
+    using Event::Event;
+    virtual operator EC_word ();
+  };
+
+
+  class Changed : public Event {
+  public:
+    Changed(Interface *interface)
+      : Event(interface->type(), interface->id()), interface(interface)
+    {}
+    virtual operator EC_word ();
+
+  private:
+    fawkes::Interface *interface;
+  };
+
+
+
+  bool event_pending();
+  shared_ptr<Event> event_pop();
+
 private:
   Mutex state_mutex_;
 
   static BlackboardListenerThread *instance_;
 
   map<string, fawkes::Interface *> last_iface_of_type_;
-  queue<shared_ptr<EclExternalBlackBoard::Event>> iface_events_;
+  queue<shared_ptr<Event>> iface_events_;
 };
 
 #endif // BLACKBOARD_LISTENER_THREAD_H

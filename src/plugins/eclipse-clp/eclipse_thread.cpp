@@ -26,11 +26,11 @@
 #include "externals/fawkes_logger.h"
 #include "externals/eclipse_path.h"
 #include "externals/eclipseclp_config.h"
+#include "blackboard_listener_thread.h"
 
 #include <interfaces/TestInterface.h>
 #include <core/threading/mutex_locker.h>
 #include <core/exception.h>
-#include <eclipseclass.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -77,7 +77,6 @@ EclipseAgentThread::~EclipseAgentThread()
 void
 EclipseAgentThread::init()
 {
-  _running = false;
   fawkes::EclExternalBlackBoard::create_initial_object(blackboard, logger);
   fawkes::EclExternalConfig::create_initial_object(config);
   // set ECLiPSe installation directory
@@ -98,7 +97,7 @@ EclipseAgentThread::init()
   try{
   //set default module in which goals called from the top-level will be executed
   ec_set_option_ptr(EC_OPTION_DEFAULT_MODULE, (void*) agent.c_str());
-    
+
   }
   catch (...){
     throw fawkes::Exception( "Failed to set default ECLiPSe module");
@@ -178,45 +177,36 @@ EclipseAgentThread::finalize()
 void
 EclipseAgentThread::once()
 {
-  post_goal( "run" );
-  int res = EC_resume();
-  if(EC_yield == res){
-    //terminate
-  } else { 
-    if ( EC_succeed != res) {
-      logger->log_error(name(), "Running the agent program failed");
-    }
-  }
+  post_goal("run");
+  ec_result = EC_resume("init", ec_yield_reason);
 }
 
-/** Check if the agent is running
- * @return true if ECLiPSe agent is running
- */
-bool EclipseAgentThread::running()
-{
-  MutexLocker lock(mutex);
-  return _running;
-}
 
-/*
 void
 EclipseAgentThread::loop()
 {
-  if (!running()){
-    mutex->lock();
-    _running = true;
-    mutex->unlock();
+  if (ec_result == EC_status::EC_yield) {
+    EC_word bb_updates(::nil());
+    if (EC_word(ec_yield_reason) == EC_atom("exogenous_update")) {
+      while (BlackboardListenerThread::instance()->event_pending())
+        bb_updates = ::list(bb_updates, *BlackboardListenerThread::instance()->event_pop());
+    }
+    else if (BlackboardListenerThread::instance()->event_pending())
+      post_event("event_exogUpdate");
 
-    post_goal( "cycle" );
-    if ( EC_succeed != EC_resume() )
-    { throw Exception( "Error running agent program" ); }
+    ec_result = EC_resume(bb_updates, ec_yield_reason);
+  }
+  else {
+    if (ec_result == EC_status::EC_succeed)
+      logger->log_warn(name(), "Agent program terminated successfully.");
+    else
+      logger->log_error(name(), "Agent program failed.");
 
-    mutex->lock();
-    _running = false;
-    mutex->unlock();
+    logger->log_warn(name(), "Stopping Agent thread.");
+    exit();
   }
 }
-*/
+
 
 /** Post an event to the ECLiPSe context.
  * @param event the name of the event

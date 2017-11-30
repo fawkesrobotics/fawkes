@@ -32,6 +32,8 @@
 #include <string>
 #include <vector>
 
+#include <eclipseclass.h>
+
 namespace fawkes {
   class Interface;
   class Mutex;
@@ -51,7 +53,7 @@ class EclipseAgentThread
   virtual void init();
   virtual void finalize();
   virtual void once();
-  //virtual void loop();
+  virtual void loop();
 
   void post_event( const char* );
   fawkes::Logger*    get_logger();
@@ -60,15 +62,15 @@ class EclipseAgentThread
 
  private: /* methods */
   bool load_file( const char* filename );
-  bool running();
 
  private: /* members */
   static EclipseAgentThread* m_instance;
 
-  bool _running;
   bool m_initialized;
   std::string agent;
   std::string graph_path;
+  int ec_result;
+  EC_ref ec_yield_reason;
   fawkes::Mutex* mutex;
 
 };
