@@ -374,6 +374,15 @@
                                     " of type " ?type " does not exist."))))
 )
 
+(defrule domain-check-operator-of-action-exists
+  "Make sure that for each action in a plan, the respective operator exists."
+  (plan-action (action-name ?op))
+  (not (domain-operator (name ?op)))
+  =>
+  (assert (domain-error (error-msg (str-cat "Operator of action " ?op
+                                    " does not exist"))))
+)
+
 (defrule domain-cleanup-preconditions-on-worldmodel-change
   "Retract grounded preconditions when the worldmodel changes."
   (domain-wm-update)

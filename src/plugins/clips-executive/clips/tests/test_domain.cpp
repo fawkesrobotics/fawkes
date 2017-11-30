@@ -294,3 +294,12 @@ TEST_F(DomainTest, PreconditionWithUnknownParameter)
   env.run();
   EXPECT_TRUE(has_fact("((?e domain-error))"));
 }
+
+/** Each action has an operator that is defined in the domain. */
+TEST_F(DomainTest, ActionHasADomainOperator)
+{
+  env.reset();
+  env.assert_fact("(plan-action (action-name doesn-not-exist))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?e domain-error))"));
+}
