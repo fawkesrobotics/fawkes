@@ -326,11 +326,20 @@
   (domain-effect
     (part-of ?op)
     (param-names $?effect-param-names)
+    (param-constants $?effect-param-constants)
     (type ?effect-type)
     (predicate ?predicate))
 =>
-  ; TODO need to check if one of the parameters is a constant
   (bind ?values ?effect-param-names)
+  ; Replace constants with their values
+  (foreach ?p ?values
+    (if (eq ?p c) then
+      (bind ?values
+        (replace$ ?values ?p-index ?p-index
+          (nth$ ?p-index ?effect-param-constants))
+      )
+    )
+  )
   (foreach ?p ?action-param-names
     (bind ?values
       (replace-member$ ?values (nth$ ?p-index ?action-param-values) ?p)
