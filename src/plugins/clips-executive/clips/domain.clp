@@ -46,6 +46,7 @@
    other properties (parameters, precondition, effects) are defined in separate
    templates."
   (slot name (type SYMBOL))
+  (multislot param-names)
 )
 
 (deftemplate domain-operator-parameter
