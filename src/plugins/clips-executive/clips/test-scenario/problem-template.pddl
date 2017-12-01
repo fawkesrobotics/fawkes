@@ -26,5 +26,7 @@
     bob peggy - name
   )
   (:init (said bob hello))
-  (:goal (said peggy goodbye))
+  (:goal
+    <<GOAL>>
+  )
 )

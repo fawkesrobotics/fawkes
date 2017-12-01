@@ -22,5 +22,5 @@
 (defrule goal-expander-call-pddl
 	?g <- (goal (mode SELECTED) (id TESTGOAL))
 	=>
-  (pddl-call TESTGOAL "")
+  (pddl-call TESTGOAL "(said peggy goodbye)")
 )
