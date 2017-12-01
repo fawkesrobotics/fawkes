@@ -13,3 +13,9 @@
   (parse-pddl-domain (path-resolve "test-scenario/domain.pddl"))
   (assert (domain-loaded))
 )
+
+(defrule load-initial-facts
+  (executive-init)
+  =>
+  (assert (domain-fact (name said) (param-values bob hello)))
+)
