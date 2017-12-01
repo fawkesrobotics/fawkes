@@ -142,7 +142,8 @@
           (param-names $?ap-names&:(= (length$ ?ap-names) 0))
           (param-values $?ap-values&:(> (length$ ?ap-values) 0))
         )
-  ?op <- (domain-operator (name ?op-name) (param-names $?param-names))
+  ?op <- (domain-operator (name ?op-name)
+          (param-names $?param-names&:(> (length$ ?param-names) 0)))
   =>
   (modify ?a (param-names ?param-names))
 )
