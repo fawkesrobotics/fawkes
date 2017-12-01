@@ -28,7 +28,8 @@
   "Add new facts to robot memory."
   ?f <- (domain-fact)
   =>
-  (robmem-insert "robmem.clipswm" (rm-structured-fact-to-bson ?f))
+  (bind ?bson (rm-structured-fact-to-bson ?f))
+  (robmem-upsert "robmem.clipswm" ?bson ?bson)
 )
 
 (defrule robot-memory-sync-retract
