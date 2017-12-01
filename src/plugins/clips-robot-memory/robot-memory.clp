@@ -13,6 +13,17 @@
   (slot ptr (type EXTERNAL-ADDRESS))
 )
 
+(deffunction str-replace (?input ?sub ?rep)
+  "Replace all occurrences of ?sub in ?input by ?rep."
+  (bind ?occ (str-index ?sub ?input ))
+  (if (eq ?occ FALSE) then
+    (return ?input)
+  )
+  (bind ?prefix (sub-string 1 (- ?occ 1) ?input))
+  (bind ?suffix (sub-string (+ ?occ 1) (str-length ?input) ?input))
+  (return (str-cat ?prefix ?rep ?suffix))
+)
+
 ;; Creates a BSON document from a structured fact
 ; @param ?fact Fact-Pointer
 ; @return BSON document
@@ -25,10 +36,10 @@
     (if (deftemplate-slot-multip ?templ ?slot)
       then
       ; append multifield as array
-      (bson-append-array ?doc ?slot (fact-slot-value ?fact ?slot))
+      (bson-append-array ?doc (str-replace ?slot "-" "_") (fact-slot-value ?fact ?slot))
       else
       ; appand value directly for singlefields
-      (bson-append ?doc ?slot (fact-slot-value ?fact ?slot))
+      (bson-append ?doc (str-replace ?slot "-" "_") (fact-slot-value ?fact ?slot))
     )
   )      
   (return ?doc)
