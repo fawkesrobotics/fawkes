@@ -249,6 +249,14 @@ void PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionar
           b.append(elem.Array()[i]);
         }
         fill_dict_from_document(dict, b.obj(), prefix + elem.fieldName() + "_");
+        // additionally feed the whole array as space-separated list
+        std::string array_string;
+        for (size_t i = 0; i < elem.Array().size(); i++)
+        {
+          // TODO: This only works for string arrays, adapt to other types.
+          array_string += " " + elem.Array()[i].String();
+        }
+        dict->SetValue(prefix + elem.fieldName(), array_string);
         break;
       }
       default:
