@@ -145,7 +145,7 @@
       (not (confval (path "/clips-executive/use_navgraph")
             (type BOOL) (value TRUE)))
   )
-  (or (ff-feature-loaded pddl_planner)
+  (or (and (ff-feature-loaded pddl_planner) (ff-feature-loaded robot_memory))
       (not (confval (path "/clips-executive/use_pddl")
             (type BOOL) (value TRUE)))
   )
