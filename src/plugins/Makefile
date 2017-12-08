@@ -43,6 +43,7 @@ clips-navgraph clips-agent clips-protobuf clips-tf clips-robot-memory: clips
 clips-navgraph navgraph-clusters: navgraph
 clips-webview: clips webview
 clips-ros: clips ros
+robot-memory: mongodb
 clips-robot-memory: robot-memory
 pddl-robot-memory: robot-memory
 openrave-robot-memory: robot-memory openrave
