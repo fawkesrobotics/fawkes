@@ -21,7 +21,6 @@
  */
 
 #include <interfaces/generator/message.h>
-#include <interfaces/generator/checker.h>
 #include <interfaces/generator/exceptions.h>
 
 
@@ -36,8 +35,6 @@
  */
 InterfaceMessage::InterfaceMessage(const std::string &name, const std::string &comment)
 {
-  if (!InterfaceChecker::validName(name))
-    throw InterfaceGeneratorReservedIdentifierException("message", name.c_str());
   if ( name.find("Message") != std::string::npos )  {
     this->name = name;
   } else {
