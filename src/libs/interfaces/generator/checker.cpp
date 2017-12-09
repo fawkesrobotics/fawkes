@@ -154,12 +154,12 @@ InterfaceChecker::validValue(const std::string &type, const std::string &value)
 /** Check for identifiers that are used by the implementation and cannot be used
 * as field or message names */
 bool
-InterfaceChecker::validName(const std::string &name)
+InterfaceChecker::validName(const std::string &name, const std::set<std::string> &reserved_names)
 {
   if (name.substr(0, 4) == "set_")
-    return reserved_names.find(name.substr(0, 5)) == reserved_names.end();
+    return reserved_names.find(name.substr(5)) == reserved_names.end();
   if (name.substr(0, 3) == "is_")
-    return reserved_names.find(name.substr(0, 4)) == reserved_names.end();
+    return reserved_names.find(name.substr(4)) == reserved_names.end();
   else
     return reserved_names.find(name) == reserved_names.end();
 }
