@@ -15,9 +15,6 @@ class Position2DTrackInterface : public Interface
   int track_timestamps(int index);
   void set_track_timestamps(unsigned int index, const int new_track_timestamps);
   int maxlenof_track_timestamps() const;
-  bool is_valid();
-  void set_valid(const bool new_valid);
-  int maxlenof_valid() const;
   unsigned int length();
   void set_length(const unsigned int new_length);
   int maxlenof_length() const;
