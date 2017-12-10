@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include <interfaces/generator/enum_constant.h>
 
@@ -44,7 +45,7 @@ class InterfaceField
 
   void setAttribute(const std::string &attr_name, const std::string &attr_value);
 
-  void valid();
+  void valid(const std::set<std::string> &reserved_names);
 
   std::string               getName() const;
   std::string               getComment() const;

@@ -42,7 +42,7 @@ class InterfaceParser
   InterfaceParser(std::string config_filename);
   ~InterfaceParser();
 
-  std::vector<InterfaceField>  getFields(xmlpp::Node *node);
+  std::vector<InterfaceField>  getFields(xmlpp::Node *node, const std::set<std::string> &reserved_names);
   std::vector<InterfacePseudoMap> getPseudoMaps(xmlpp::Node *node,
 						std::vector<InterfaceField> &fields);
   void parse();

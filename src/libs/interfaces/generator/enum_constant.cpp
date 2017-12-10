@@ -37,7 +37,7 @@
 InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name,
 					     const std::string &comment)
 {
-  if (!InterfaceChecker::validName(name))
+  if (!InterfaceChecker::validName(name, reserved_names_interface()))
     throw InterfaceGeneratorReservedIdentifierException("enum constant", name.c_str());
   __name  = name;
   __comment = comment;
@@ -83,7 +83,7 @@ InterfaceEnumConstant::get_items() const
 void
 InterfaceEnumConstant::add_item(std::string name, std::string comment)
 {
-  if (!InterfaceChecker::validName(name))
+  if (!InterfaceChecker::validName(name, reserved_names_interface()))
     throw InterfaceGeneratorReservedIdentifierException("enum item", name.c_str());
   std::vector<EnumItem>::iterator i;
   for (i = __items.begin(); i != __items.end(); ++i) {

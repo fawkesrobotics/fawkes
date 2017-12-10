@@ -165,23 +165,34 @@ InterfaceChecker::validName(const std::string &name, const std::set<std::string>
 }
 
 
-const std::set<std::string> InterfaceChecker::reserved_names {
-  "id", "clone", "oftype", "datachunk", "datasize",
-  "type", "uid", "serial", "mem_serial", "hash", "hash_size",
-  "hash_printable", "writer", "validity", "valid",
-  "owner", "from_chunk", "create_message", "copy_values",
-  "enum_tostring", "resize_buffers", "num_buffers",
-  "copy_shared_to_buffer", "copy_private_to_buffer", "read_from_buffer",
-  "compare_buffers", "buffer_timestamp", "read", "write", "has_writer",
-  "num_readers", "writer", "readers", "changed", "timestamp",
-  "auto_timestamping", "timestamp", "clock", "mark_data_changed",
-  "get_message_types", "msgq_enqueue", "msgq_enqueue_copy",
-  "msgq_remove", "msgq_size", "msgq_flush", "msgq_lock", "msgq_try_lock",
-  "msgq_unlock", "msgq_pop", "msgq_first", "msgq_empty", "msgq_append",
-  "msgq_first_is", "msgq_first", "msgq_first_safe", "msgq_begin",
-  "msgq_end", "fields", "fields_end", "num_fields", "parse_uid",
-  "reserved_names", "message_valid", "add_fieldinfo", "add_messageinfo",
-  "data_ptr", "data_size", "data_changed", "data_ts", "type_id",
-  "instance_serial", "mediators", "memory", "readwrite", "owner"
+const std::set<std::string> reserved_names_interface() {
+  return {
+    "id", "clone", "oftype", "datachunk", "datasize",
+    "type", "uid", "serial", "mem_serial", "hash", "hash_size",
+    "hash_printable", "writer", "validity", "valid",
+    "owner", "from_chunk", "create_message", "copy_values",
+    "enum_tostring", "resize_buffers", "num_buffers",
+    "copy_shared_to_buffer", "copy_private_to_buffer", "read_from_buffer",
+    "compare_buffers", "buffer_timestamp", "read", "write", "has_writer",
+    "num_readers", "writer", "readers", "changed",
+    "auto_timestamping", "timestamp", "clock", "mark_data_changed",
+    "get_message_types", "msgq_enqueue", "msgq_enqueue_copy",
+    "msgq_remove", "msgq_size", "msgq_flush", "msgq_lock", "msgq_try_lock",
+    "msgq_unlock", "msgq_pop", "msgq_first", "msgq_empty", "msgq_append",
+    "msgq_first_is", "msgq_first", "msgq_first_safe", "msgq_begin",
+    "msgq_end", "fields", "fields_end", "num_fields", "parse_uid",
+    "reserved_names", "message_valid", "add_fieldinfo", "add_messageinfo",
+    "data_ptr", "data_size", "data_changed", "data_ts", "type_id",
+    "instance_serial", "mediators", "memory", "readwrite", "owner"
+  };
 };
 
+
+
+const std::set<std::string> reserved_names_message() {
+  return {
+    "id", "mark_enqueued", "enqueued", "time_enqueued", "sender_id", "sender_thread_name",
+    "interface", "type", "fields", "fields_end", "num_fields", "datachunk", "datasize",
+    "hops", "from_chunk", "recipient", "clone", "of_type", "as_type"
+  };
+};

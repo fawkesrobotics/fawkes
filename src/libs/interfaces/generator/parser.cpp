@@ -21,6 +21,7 @@
 
 #include "parser.h"
 #include "exceptions.h"
+#include "checker.h"
 
 #include <utils/misc/string_conversions.h>
 #include <interface/interface.h>
@@ -69,7 +70,7 @@ InterfaceParser::~InterfaceParser()
  * @return vector of field representations.
  */
 std::vector<InterfaceField>
-InterfaceParser::getFields(xmlpp::Node *node)
+InterfaceParser::getFields(xmlpp::Node *node, const std::set<std::string> &reserved_names)
 {
   vector<InterfaceField> result;
   NodeSet set = node->find("field");
@@ -101,7 +102,7 @@ InterfaceParser::getFields(xmlpp::Node *node)
     f.setComment(comment_node->get_content());
 
     //std::cout << "Field name: " << field_name << std::endl;
-    f.valid();
+    f.valid(reserved_names);
     result.push_back(f);
   }
   for (vector<InterfaceField>::iterator i = result.begin(); i != result.end(); ++i) {
@@ -556,7 +557,7 @@ InterfaceParser::parse()
     throw InterfaceGeneratorInvalidContentException("no data block");
   }
 
-  data_fields = getFields(set[0]);
+  data_fields = getFields(set[0], reserved_names_interface());
   if ( data_fields.size() == 0 ) {
     throw InterfaceGeneratorInvalidContentException("data block contains no field");
   }
@@ -607,7 +608,7 @@ InterfaceParser::parse()
     }
 
 
-    vector<InterfaceField> msg_fields = getFields(*i);
+    vector<InterfaceField> msg_fields = getFields(*i, reserved_names_message());
 
     NodeSet ref_nodes = (*i)->find("ref/text()");
     for (NodeSet::iterator r = ref_nodes.begin(); r != ref_nodes.end(); ++r) {
