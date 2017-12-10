@@ -72,7 +72,6 @@ class ObjectPositionInterface : public Interface
       flags, use a bit-wise AND to check if a flag has been set.
      */
     bool visible; /**< True, if object is visible. */
-    bool valid; /**< True, if this position is valid. */
     int32_t visibility_history; /**< 
       The visibilitiy history indicates the number of consecutive positive or negative
       sightings. If the history is negative, there have been as many negative sightings
@@ -200,9 +199,6 @@ class ObjectPositionInterface : public Interface
   bool is_visible() const;
   void set_visible(const bool new_visible);
   size_t maxlenof_visible() const;
-  bool is_valid() const;
-  void set_valid(const bool new_valid);
-  size_t maxlenof_valid() const;
   int32_t visibility_history() const;
   void set_visibility_history(const int32_t new_visibility_history);
   size_t maxlenof_visibility_history() const;
