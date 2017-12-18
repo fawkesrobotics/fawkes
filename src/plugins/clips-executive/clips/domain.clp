@@ -58,13 +58,14 @@
 )
 
 (deftemplate domain-precondition
-  "A (non-atomic) precondition of an operator. Must be either part-of an
-   operator or another precondition. Use the name to assign other preconditions
-   as part of this precondition. This can currently be a conjunction or a
-   negation. If it is a negation, it can have only one sub-condition. If it is
-   a conjunction, it can have an arbitrary number of sub-conditions. The action
-   is an optional ID of grounded action this precondition belongs to. Note that
-   grounded should always be yes if the action is not nil."
+  "A (non-atomic) precondition of an operator or a conditional effect.
+   Must be either part-of an operator or another precondition. Use the name to
+   assign other preconditions as part of this precondition. This can currently
+   be a conjunction or a negation. If it is a negation, it can have only one
+   sub-condition. If it is a conjunction, it can have an arbitrary number of
+   sub-conditions. The action is an optional ID of grounded action this
+   precondition belongs to. Note that grounded should always be yes if the
+   action is not nil."
   (slot part-of (type SYMBOL))
   (slot grounded-with (type INTEGER) (default 0))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
@@ -96,6 +97,7 @@
 (deftemplate domain-effect
   "An effect of an operator. For now, effects are just a set of atomic effects
    which are applied after the action was executed successfully."
+  (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot part-of (type SYMBOL))
   (slot predicate (type SYMBOL))
   (multislot param-names (default (create$)))
@@ -148,7 +150,7 @@
   (modify ?a (param-names ?param-names))
 )
 
-(defrule domain-ground-precondition
+(defrule domain-ground-action-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific action-id."
   (not (domain-wm-update))
@@ -156,6 +158,22 @@
   ?precond <- (domain-precondition
                 (name ?precond-name)
                 (part-of ?op)
+                (grounded FALSE))
+  (not (domain-precondition
+        (name ?precond-name) (grounded-with ?action-id) (grounded TRUE)))
+=>
+  (duplicate ?precond (grounded-with ?action-id) (grounded TRUE))
+)
+
+(defrule domain-ground-effect-precondition
+  "Ground a non-atomic precondition. Grounding here merely means that we
+   duplicate the precondition and tie it to one specific effect-id."
+  (not (domain-wm-update))
+  (plan-action (action-name ?op) (id ?action-id) (status EXECUTED))
+  (domain-effect (name ?effect-name) (part-of ?op))
+  ?precond <- (domain-precondition
+                (name ?precond-name)
+                (part-of ?effect-name)
                 (grounded FALSE))
   (not (domain-precondition
         (name ?precond-name) (grounded-with ?action-id) (grounded TRUE)))
@@ -342,11 +360,17 @@
     (param-values $?action-param-values)
   )
   (domain-effect
+    (name ?name)
     (part-of ?op)
     (param-names $?effect-param-names)
     (param-constants $?effect-param-constants)
     (type ?effect-type)
     (predicate ?predicate))
+  (or (not (domain-precondition (part-of ?name)))
+      (domain-precondition (part-of ?name)
+        (is-satisfied TRUE) (grounded TRUE) (grounded-with ?id)
+      )
+  )
 =>
   (bind ?values ?effect-param-names)
   ; Replace constants with their values
@@ -368,14 +392,6 @@
   else
     (assert (domain-retracted-fact (name ?predicate) (param-values ?values)))
   )
-  (assert (domain-wm-update))
-)
-
-(defrule domain-action-is-final
-  "After the effects of an action have been applied, change it to FINAL."
-  ?a <- (plan-action (status EXECUTED))
-  =>
-  (modify ?a (status FINAL))
 )
 
 (defrule domain-retract-negative-effect
@@ -392,6 +408,14 @@
   ?r <- (domain-retracted-fact)
 =>
   (retract ?r)
+)
+
+(defrule domain-action-is-final
+  "After the effects of an action have been applied, change it to FINAL."
+  ?a <- (plan-action (status EXECUTED))
+  =>
+  (modify ?a (status FINAL))
+  (assert (domain-wm-update))
 )
 
 (defrule domain-check-if-action-is-executable
