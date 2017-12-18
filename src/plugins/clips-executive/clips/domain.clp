@@ -337,7 +337,7 @@
   (plan-action
     (id ?id)
     (action-name ?op)
-    (status FINAL)
+    (status EXECUTED)
     (param-names $?action-param-names)
     (param-values $?action-param-values)
   )
@@ -369,6 +369,13 @@
     (assert (domain-retracted-fact (name ?predicate) (param-values ?values)))
   )
   (assert (domain-wm-update))
+)
+
+(defrule domain-action-is-final
+  "After the effects of an action have been applied, change it to FINAL."
+  ?a <- (plan-action (status EXECUTED))
+  =>
+  (modify ?a (status FINAL))
 )
 
 (defrule domain-retract-negative-effect
