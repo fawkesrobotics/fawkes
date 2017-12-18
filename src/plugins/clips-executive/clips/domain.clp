@@ -66,7 +66,7 @@
    is an optional ID of grounded action this precondition belongs to. Note that
    grounded should always be yes if the action is not nil."
   (slot part-of (type SYMBOL))
-  (slot action (type INTEGER) (default 0))
+  (slot grounded-with (type INTEGER) (default 0))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot type (type SYMBOL) (allowed-values conjunction negation))
   (slot grounded (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
@@ -83,7 +83,7 @@
    See the tests for an example.
 "
   (slot part-of (type SYMBOL))
-  (slot action (type INTEGER) (default 0))
+  (slot grounded-with (type INTEGER) (default 0))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot predicate (type SYMBOL))
   (multislot param-names (type SYMBOL))
@@ -158,9 +158,9 @@
                 (part-of ?op)
                 (grounded FALSE))
   (not (domain-precondition
-        (name ?precond-name) (action ?action-id) (grounded TRUE)))
+        (name ?precond-name) (grounded-with ?action-id) (grounded TRUE)))
 =>
-  (duplicate ?precond (action ?action-id) (grounded TRUE))
+  (duplicate ?precond (grounded-with ?action-id) (grounded TRUE))
 )
 
 (defrule domain-ground-nested-precondition
@@ -171,13 +171,13 @@
                 (name ?precond-name)
                 (part-of ?parent)
                 (grounded FALSE))
-  (domain-precondition (name ?parent) (action ?action-id&~0))
+  (domain-precondition (name ?parent) (grounded-with ?action-id&~0))
   (not (domain-precondition
         (name ?precond-name)
-        (action ?action-id)
+        (grounded-with ?action-id)
         (grounded TRUE)))
 =>
-  (duplicate ?precond (action ?action-id) (grounded TRUE))
+  (duplicate ?precond (grounded-with ?action-id) (grounded TRUE))
 )
 
 (defrule domain-ground-atomic-precondition
@@ -188,7 +188,8 @@
     (param-names $?action-param-names)
     (id ?action-id)
     (param-values $?action-values))
-  (domain-precondition (name ?parent) (action ?action-id&~0) (grounded TRUE))
+  (domain-precondition (name ?parent)
+    (grounded-with ?action-id&~0) (grounded TRUE))
   ?precond <- (domain-atomic-precondition
                 (part-of ?parent)
                 (name ?precond-name)
@@ -197,7 +198,7 @@
                 (grounded FALSE)
               )
   (not (domain-atomic-precondition
-        (action ?action-id)
+        (grounded-with ?action-id)
         (name ?precond-name)
         (grounded TRUE)))
 =>
@@ -220,7 +221,7 @@
     )
   )
   (duplicate ?precond
-    (param-values ?values) (action ?action-id) (grounded TRUE))
+    (param-values ?values) (grounded-with ?action-id) (grounded TRUE))
 )
 
 (deffunction intersect
@@ -253,13 +254,18 @@
   ?precond <- (domain-precondition
                 (type negation)
                 (grounded TRUE)
-                (action ?action-id)
+                (grounded-with ?action-id)
                 (name ?pn)
                 (is-satisfied FALSE))
   (or (domain-atomic-precondition
-        (action ?action-id) (part-of ?pn) (grounded TRUE) (is-satisfied FALSE))
+        (grounded-with ?action-id) (part-of ?pn)
+        (grounded TRUE) (is-satisfied FALSE)
+      )
       (domain-precondition
-        (action ?action-id) (part-of ?pn) (grounded TRUE) (is-satisfied FALSE)))
+        (grounded-with ?action-id) (part-of ?pn)
+        (grounded TRUE) (is-satisfied FALSE)
+      )
+  )
 =>
   (modify ?precond (is-satisfied TRUE))
 )
@@ -270,13 +276,18 @@
   ?precond <- (domain-precondition
                 (type negation)
                 (name ?pn)
-                (action ?action-id)
+                (grounded-with ?action-id)
                 (is-satisfied TRUE)
                 (grounded TRUE))
   (or (domain-atomic-precondition
-        (action ?action-id) (part-of ?pn) (grounded TRUE) (is-satisfied TRUE))
+        (grounded-with ?action-id) (part-of ?pn)
+        (grounded TRUE) (is-satisfied TRUE)
+      )
       (domain-precondition
-        (action ?action-id) (part-of ?pn) (grounded TRUE) (is-satisfied TRUE)))
+        (grounded-with ?action-id) (part-of ?pn)
+        (grounded TRUE) (is-satisfied TRUE)
+      )
+  )
 =>
   (modify ?precond (is-satisfied FALSE))
 )
@@ -286,13 +297,15 @@
   ?precond <- (domain-precondition
                 (name ?pn)
                 (type conjunction)
-                (action ?action-id)
+                (grounded-with ?action-id)
                 (grounded TRUE)
                 (is-satisfied FALSE))
   (not (domain-atomic-precondition
-        (part-of ?pn) (grounded TRUE) (action ?action-id) (is-satisfied FALSE)))
+        (part-of ?pn) (grounded TRUE)
+        (grounded-with ?action-id) (is-satisfied FALSE)))
   (not (domain-precondition
-        (part-of ?pn) (grounded TRUE) (action ?action-id) (is-satisfied FALSE)))
+        (part-of ?pn) (grounded TRUE)
+        (grounded-with ?action-id) (is-satisfied FALSE)))
 =>
   (modify ?precond (is-satisfied TRUE))
 )
@@ -303,13 +316,17 @@
   ?precond <- (domain-precondition
                 (name ?pn)
                 (type conjunction)
-                (action ?action-id)
+                (grounded-with ?action-id)
                 (grounded TRUE)
                 (is-satisfied TRUE))
   (or (domain-atomic-precondition
-        (part-of ?pn) (grounded TRUE) (action ?action-id) (is-satisfied FALSE))
+        (part-of ?pn) (grounded TRUE)
+        (grounded-with ?action-id) (is-satisfied FALSE)
+      )
       (domain-precondition
-        (part-of ?pn) (grounded TRUE) (action ?action-id) (is-satisfied FALSE))
+        (part-of ?pn) (grounded TRUE)
+        (grounded-with ?action-id) (is-satisfied FALSE)
+      )
   )
 =>
   (modify ?precond (is-satisfied FALSE))
@@ -373,7 +390,7 @@
 (defrule domain-check-if-action-is-executable
   "If the precondition of an action is satisfied, the action is executable."
   ?action <- (plan-action (id ?action-id) (executable FALSE))
-  (domain-precondition (action ?action-id) (is-satisfied TRUE))
+  (domain-precondition (grounded-with ?action-id) (is-satisfied TRUE))
 =>
   (modify ?action (executable TRUE))
 )
