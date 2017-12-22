@@ -53,6 +53,7 @@ clips-executive:
   specs:
     test:
       domain: test-scenario/test-domain.clp
+      worldmodel: test-scenario/worldmodel-facts.clp
       goal-reasoner: test-scenario/goal-reasoner.clp
       goal-expander: test-scenario/fixed-sequence.clp
       action-selection: test-scenario/action-selection.clp
