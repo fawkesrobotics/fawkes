@@ -33,6 +33,16 @@
   (multislot param-values)
 )
 
+(deffunction domain-fact-key (?param-names ?param-values)
+	(if (<> (length$ ?param-names) (length$ ?param-values)) then
+		(printout error "Cannot generate domain fact key with non-equal length names and values" crlf)
+		(return FALSE)
+	)
+	(bind ?rv (create$))
+	(foreach ?n ?param-names (bind ?rv (append$ ?rv ?n (nth$ ?n-index ?param-values))))
+	(return ?rv)
+)
+
 (deftemplate domain-retracted-fact
   "Helper template that is asserted if a predicate is to be retracted."
   (slot name (type SYMBOL) (default ?NONE))
