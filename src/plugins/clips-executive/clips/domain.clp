@@ -22,7 +22,6 @@
 (deftemplate domain-predicate
 	"Representation of a predicate specification."
   (slot name (type SYMBOL) (default ?NONE))
-	(slot wm-key-pattern (type STRING))
   (multislot param-names (type SYMBOL))
   (multislot param-types (type SYMBOL))
 )
