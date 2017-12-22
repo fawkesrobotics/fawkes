@@ -14,6 +14,7 @@
     (domain-loaded)
     (domain-object-type (name text))
     (domain-operator (name say-hello))
+    (domain-predicate (name said) (param-names c))
     (domain-precondition (part-of say-hello) (type conjunction))
     (domain-effect
       (part-of say-hello) (predicate said) (param-names hello))
@@ -28,5 +29,7 @@
     )
     (domain-effect
       (part-of say-goodbye) (predicate said) (param-names goodbye))
+    (domain-effect
+      (part-of say-goodbye) (predicate said) (param-names hello) (type NEGATIVE))
   )
 )
