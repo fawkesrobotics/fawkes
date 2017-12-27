@@ -33,6 +33,15 @@
   (multislot param-values)
 )
 
+(deffunction domain-wipe ()
+	(foreach ?t (create$ domain-object-type domain-object domain-predicate domain-fact
+											 domain-precondition domain-atomic-precondition
+											 domain-operator domain-operator-parameter
+											 domain-effect domain-retracted-fact domain-error)
+		(delayed-do-for-all-facts ((?d ?t)) TRUE (retract ?d))
+	)
+)
+
 (deffunction domain-fact-key (?param-names ?param-values)
 	(if (<> (length$ ?param-names) (length$ ?param-values)) then
 		(printout error "Cannot generate domain fact key with non-equal length names and values" crlf)
