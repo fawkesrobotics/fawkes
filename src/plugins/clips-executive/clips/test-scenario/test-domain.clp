@@ -13,11 +13,14 @@
   (assert
     (domain-loaded)
     (domain-object-type (name text))
-    (domain-operator (name say-hello))
+
     (domain-predicate (name said) (param-names c))
+
+    (domain-operator (name say-hello))
     (domain-precondition (part-of say-hello) (type conjunction))
     (domain-effect
       (part-of say-hello) (predicate said) (param-names hello))
+
     (domain-operator (name say-goodbye))
     (domain-precondition
       (name say-goodbye-precond) (part-of say-goodbye) (type conjunction))
