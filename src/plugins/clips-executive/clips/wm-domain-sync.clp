@@ -13,29 +13,6 @@
 	(slot domain-fact-idx (type INTEGER))
 )
 
-(defrule wm-sync-add-map-entry
-	(domain-predicate (name ?name) (param-names $?param-names))
-	?df <- (domain-fact (name ?name) (param-values $?param-values))
-	(not (wm-sync-map (domain-fact-name ?name)
-										(wm-fact-id ?id&:(eq ?id (wm-key-to-id domain fact ?name args?
-																													 (domain-fact-key ?param-names ?param-values))))))
-	=>
-	(assert (wm-sync-map (wm-fact-id (wm-key-to-id domain fact ?name args?
-																								 (domain-fact-key ?param-names ?param-values)))
-											 (domain-fact-name ?name)
-											 (domain-fact-idx (fact-index ?df))))
-)
-
-(defrule wm-sync-domain-fact-added
-	(wm-sync-map (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ?idx))
-	(domain-predicate (name ?name) (param-names ?param-names))
-	?df <- (domain-fact (name ?name) (param-values ?param-values))
-	(test (eq ?idx (fact-index ?df)))
-	(not (wm-fact (id ?id)))
-	=>
-	(assert (wm-fact (id ?id) (value TRUE)))
-)
-
 ; Here, we assume that the param-names and the arguments in the key
 ; have the same ordering.
 (deffunction wm-sync-key-arg-values ($?key)
@@ -58,11 +35,51 @@
 	(return ?rv)
 )
 
+(deffunction wm-sync-key-match (?key ?param-values)
+	"Check if the given key matches the passed arguments
+   Currently, this assumes key and param-values to have the
+   same parameter ordering."
+	(return (eq ?param-values (wm-sync-key-arg-values ?key)))
+)
+
+(defrule wm-sync-add-map-entry
+	(domain-predicate (name ?name) (param-names $?param-names))
+	?df <- (domain-fact (name ?name) (param-values $?param-values))
+	(not (wm-sync-map (domain-fact-name ?name)
+										(wm-fact-id ?id&:(eq ?id (wm-key-to-id domain fact ?name args?
+																													 (domain-fact-key ?param-names ?param-values))))))
+	=>
+	(assert (wm-sync-map (wm-fact-id (wm-key-to-id domain fact ?name args?
+																								 (domain-fact-key ?param-names ?param-values)))
+											 (domain-fact-name ?name)
+											 (domain-fact-idx (fact-index ?df))))
+)
+
+(defrule wm-sync-domain-fact-added
+	(wm-sync-map (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ?idx))
+	(domain-predicate (name ?name) (param-names $?param-names))
+	?df <- (domain-fact (name ?name) (param-values $?param-values))
+	(test (eq ?idx (fact-index ?df)))
+	(not (wm-fact (id ?id)))
+	=>
+	(assert (wm-fact (id ?id) (type BOOL) (value TRUE)))
+)
+
+(defrule wm-sync-domain-fact-modify-positive
+	?sf <- (wm-sync-map (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ?idx))
+	(domain-predicate (name ?name) (param-names $?param-names))
+	?wf <- (wm-fact (id ?id) (key $?key) (value FALSE))
+	?df <- (domain-fact (name ?name) (param-values $?param-values&:(wm-sync-key-match ?key ?param-values)))
+	(test (< ?idx (fact-index ?df)))
+	=>
+	(modify ?wf (value TRUE))
+	(modify ?sf (domain-fact-idx (fact-index ?df)))
+)
+
 (defrule wm-sync-domain-fact-removed
 	(wm-sync-map (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ?idx))
 	?wf <- (wm-fact (id ?id) (key $?key) (value TRUE))
-	(not (domain-fact (name ?name) (param-values $?param-values&:(eq ?param-values (wm-sync-key-arg-values ?key)))))
+	(not (domain-fact (name ?name) (param-values $?param-values&:(wm-sync-key-match ?key ?param-values))))
 	=>
-	(printout t "Key: " ?key "   Proc: " (wm-sync-key-arg-values ?key) crlf)
 	(modify ?wf (value FALSE))
 )
