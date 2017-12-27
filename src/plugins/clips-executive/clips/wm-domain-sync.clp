@@ -13,8 +13,6 @@
 	(slot domain-fact-idx (type INTEGER))
 )
 
-; Here, we assume that the param-names and the arguments in the key
-; have the same ordering.
 (deffunction wm-sync-key-arg-values ($?key)
 	(bind ?rv (create$))
 	(bind ?l (member$ args? ?key))
@@ -35,11 +33,58 @@
 	(return ?rv)
 )
 
-(deffunction wm-sync-key-match (?key ?param-values)
-	"Check if the given key matches the passed arguments
-   Currently, this assumes key and param-values to have the
-   same parameter ordering."
-	(return (eq ?param-values (wm-sync-key-arg-values ?key)))
+(deffunction wm-sync-next-arg (?idx $?key)
+	(bind ?L (length$ ?key))
+	(if (= ?idx 0)
+	 then
+		(bind ?l (member$ args? ?key))
+		(if ?l
+		 then
+			; +2: must have arg and value, then return +1, index for arg
+			(if (<= (+ ?l 2) ?L)
+			 then
+				(if (eq (nth$ (+ ?l 2) ?key) [)
+				 then
+					(printout error "Domain facts may not contain argument value list" crlf)
+					(return -1)
+				 else
+					(return (+ ?l 1))
+				)
+			 else
+				(return 0)
+			)
+		 else
+			(return 0)
+		)
+	 else
+		; +3: must have value and again arg and value, then return +2, index for next arg
+		(if (<= (+ ?idx 3) ?L) then (return (+ ?idx 2)) else (return 0))
+	)
+)
+
+(deffunction wm-sync-key-match (?key ?param-names ?param-values)
+	"Check if the given key matches the passed arguments,"
+	;(printout warn "Matching " ?key " to " ?param-names " " ?param-values crlf)
+	(bind ?params-matched 0)
+	(bind ?argidx (wm-sync-next-arg 0 ?key))
+	(while (> ?argidx 0) do
+		(bind ?arg (nth$ ?argidx ?key))
+		(bind ?param-name-idx (member$ ?arg ?param-names))
+		(if ?param-name-idx
+		 then
+			(if (neq (nth$ (+ ?argidx 1) ?key) (nth$ ?param-name-idx ?param-values)) then (return FALSE))
+		 else
+		 (return FALSE)
+		)
+		(bind ?argidx (wm-sync-next-arg ?argidx ?key))
+		(bind ?params-matched (+ ?params-matched 1))
+	)
+	(if (or (< ?params-matched (length$ ?param-names)) (<> ?argidx 0))
+	 then
+		(return FALSE)
+	 else
+		(return TRUE)
+	)
 )
 
 (defrule wm-sync-add-map-entry
@@ -69,7 +114,8 @@
 	?sf <- (wm-sync-map (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ?idx))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key $?key) (value FALSE))
-	?df <- (domain-fact (name ?name) (param-values $?param-values&:(wm-sync-key-match ?key ?param-values)))
+	?df <- (domain-fact (name ?name)
+	                    (param-values $?param-values&:(wm-sync-key-match ?key ?param-names ?param-values)))
 	(test (< ?idx (fact-index ?df)))
 	=>
 	(modify ?wf (value TRUE))
@@ -78,8 +124,10 @@
 
 (defrule wm-sync-domain-fact-removed
 	(wm-sync-map (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ?idx))
+	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key $?key) (value TRUE))
-	(not (domain-fact (name ?name) (param-values $?param-values&:(wm-sync-key-match ?key ?param-values))))
+	(not (domain-fact (name ?name)
+	                  (param-values $?param-values&:(wm-sync-key-match ?key ?param-names ?param-values))))
 	=>
 	(modify ?wf (value FALSE))
 )
