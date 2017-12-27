@@ -228,6 +228,7 @@
 
 (defrule wm-fact-id2key
 	"If a world model fact is added with an ID but no key"
+	(declare (salience 700))
 	?w <- (wm-fact (id ?id) (key))
 	=>
 	(modify ?w (key (wm-id-to-key ?id)))
@@ -235,12 +236,14 @@
 
 (defrule wm-fact-key2id
 	"If a world model fact is added with a key but no ID"
+	(declare (salience 700))
 	?w <- (wm-fact (id "") (key $?key))
 	=>
 	(modify ?w (id (wm-key-to-id ?key)))
 )
 
 (defrule wm-key-conflict
+	(declare (salience 500))
 	?w1 <- (wm-fact (id ?id1) (key $?key))
 	?w2 <- (wm-fact (id ?id2) (key $?key))
 	(test (neq ?w1 ?w2))
