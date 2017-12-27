@@ -30,9 +30,48 @@
       (param-names c)
       (param-constants hello)
     )
-    (domain-effect
+		(domain-effect
       (part-of say-goodbye) (predicate said) (param-names goodbye))
     (domain-effect
       (part-of say-goodbye) (predicate said) (param-names hello) (type NEGATIVE))
+
+    (domain-operator (name say-hello-again))
+    (domain-precondition (name say-hello-again-precond) (part-of say-hello-again) (type conjunction))
+    (domain-atomic-precondition
+      (part-of say-hello-again-precond)
+      (predicate said)
+      (param-names c)
+      (param-constants goodbye)
+    )
+    (domain-precondition (name say-hello-again-precond2) (part-of say-hello-again-precond) (type negation))
+    (domain-atomic-precondition
+      (part-of say-hello-again-precond2)
+      (predicate said)
+      (param-names c)
+      (param-constants hello)
+    )
+    (domain-effect
+		 (part-of say-hello-again) (predicate said) (param-names hello))
+
+		(domain-operator (name say-cleanup))
+    (domain-precondition
+      (name say-cleanup-precond) (part-of say-cleanup) (type conjunction))
+    (domain-atomic-precondition
+      (part-of say-cleanup-precond)
+      (predicate said)
+      (param-names c)
+      (param-constants hello)
+    )
+    (domain-atomic-precondition
+      (part-of say-cleanup-precond)
+      (predicate said)
+      (param-names c)
+      (param-constants goodbye)
+    )
+		(domain-effect
+      (part-of say-cleanup) (predicate said) (param-names goodbye) (type NEGATIVE))
+    (domain-effect
+      (part-of say-cleanup) (predicate said) (param-names hello) (type NEGATIVE))
+
   )
 )
