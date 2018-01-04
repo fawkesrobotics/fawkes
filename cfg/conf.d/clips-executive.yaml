@@ -58,7 +58,7 @@ clips-executive:
       goal-expander: test-scenario/fixed-sequence.clp
       action-selection: test-scenario/action-selection.clp
       #macro-expansion: test-scenario/action-selection.clp
-      action-execution: ["skills-actions.clp"]
+      action-execution: ["skills-actions.clp", "test-scenario/print-action.clp"]
       execution-monitoring: test-scenario/execution-monitoring.clp
       state-estimation: test-scenario/state-estimation.clp
 

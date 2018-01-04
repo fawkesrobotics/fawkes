@@ -21,6 +21,8 @@
     (domain-effect
       (part-of say-hello) (predicate said) (param-names hello))
 
+		(domain-operator (name print))
+
     (domain-operator (name say-goodbye))
     (domain-precondition
       (name say-goodbye-precond) (part-of say-goodbye) (type conjunction))
