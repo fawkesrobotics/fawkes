@@ -10,6 +10,7 @@
 
 ; #  Goal Creation
 (defrule goal-reasoner-create
+	(domain-loaded)
 	(not (goal))
 	(not (goal-already-tried))
 	=>
