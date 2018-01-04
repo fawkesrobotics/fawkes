@@ -135,14 +135,21 @@
 	=>
 	; Common spec config prefix
 	(bind ?pf (str-cat "/clips-executive/specs/" ?spec "/"))
-
 	(foreach ?component (create$ "domain" "worldmodel" "state-estimation"
                                "goal-reasoner" "goal-expander"
                                "macro-expansion" "action-selection"
                                "action-execution" "execution-monitoring")
 		(do-for-fact ((?c confval)) (and (eq ?c:path (str-cat ?pf ?component)) (eq ?c:type STRING))
-			(printout t "Loading component '" ?component "' (" ?c:value ")" crlf)
-			(path-load ?c:value)
+			(if ?c:is-list
+			 then
+			  (progn$ (?v ?c:list-value)
+					(printout t "Loading component '" ?component "/" ?v-index "' (" ?v ")" crlf)
+					(path-load ?v)
+				)
+			 else
+				(printout t "Loading component '" ?component "' (" ?c:value ")" crlf)
+				(path-load ?c:value)
+			)
 		)
 	)
 )
