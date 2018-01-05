@@ -35,14 +35,15 @@
 		(wm-fact (id "/domain/fact/location?robot=R-1&place=C-BS") (value TRUE))
 		; Conversion tests
 		; ID -> key
-		(wm-fact (id "/domain/fact/loaded?robot=R-1&objects=foo,bar") (value TRUE))
-		(wm-fact (id "/domain/fact/loaded?objects=foo2,bar2&robot=R-2") (value TRUE))
+		; the next two cannot be domain facts, they cannot deal with multi-valued args
+		(wm-fact (id "/wm/loaded?robot=R-1&objects=foo,bar") (value TRUE))
+		(wm-fact (id "/wm/loaded?objects=foo2,bar2&robot=R-2") (value TRUE))
 		(wm-fact (id "/domain/fact/holding?object=some-obj&robot=R-2") (value TRUE))
 		; key -> ID
-		(wm-fact (key domain fact loaded args? robot R-1 objects [ cup plate ] ) (value TRUE))
-		(wm-fact (key domain fact loaded-order args? objects [ cup plate ] robot R-1) (value TRUE))
+		(wm-fact (key wm loaded args? robot R-1 objects [ cup plate ] ) (value TRUE))
+		(wm-fact (key wm loaded-order args? objects [ cup plate ] robot R-1) (value TRUE))
 		(wm-fact (key domain fact loctest args? robot R-1 place X ) (value TRUE))
-		(wm-fact (key domain fact broken args? robot R-1 objects [ cup plate ) (value TRUE))
+		(wm-fact (key wm broken args? robot R-1 objects [ cup plate ) (value TRUE))
 	)
 )
 
