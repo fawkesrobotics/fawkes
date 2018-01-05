@@ -326,8 +326,8 @@ BlackboardCLIPSFeature::clips_assert_interface_type(std::string &env_name, std::
   }
 
   if (envs_[env_name]->build(deftemplate) && envs_[env_name]->build(retract)) {
-    logger_->log_info(log_name.c_str(), "Deftemplate:\n%s", deftemplate.c_str());
-    logger_->log_info(log_name.c_str(), "%s:\n%s", logstr.c_str(), retract.c_str());
+    logger_->log_debug(log_name.c_str(), "Deftemplate:\n%s", deftemplate.c_str());
+    logger_->log_debug(log_name.c_str(), "%s:\n%s", logstr.c_str(), retract.c_str());
     return true;
   } else {
     logger_->log_warn(log_name.c_str(), "Defining blackboard type for %s in %s failed",
