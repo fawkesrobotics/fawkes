@@ -9,6 +9,7 @@
 
 (deftemplate wm-sync-map
 	(slot wm-fact-id (type STRING))
+	(slot wm-fact-idx (type INTEGER))
 	(slot domain-fact-name (type SYMBOL))
 	(slot domain-fact-idx (type INTEGER))
 )
@@ -101,6 +102,7 @@
 )
 
 (defrule wm-sync-domain-fact-added
+	"A domain fact has been added for the first time."
 	(wm-sync-map (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ?idx))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?df <- (domain-fact (name ?name) (param-values $?param-values))
@@ -110,12 +112,14 @@
 	(assert (wm-fact (id ?id) (type BOOL) (value TRUE)))
 )
 
-(defrule wm-sync-domain-fact-modify-positive
+(defrule wm-sync-domain-fact-added-again
+	"A domain fact has been added again, after being retracted before."
 	?sf <- (wm-sync-map (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ?idx))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key $?key) (value FALSE))
 	?df <- (domain-fact (name ?name)
 	                    (param-values $?param-values&:(wm-sync-key-match ?key ?param-names ?param-values)))
+	(not (domain-retracted-fact (name ?name) (param-values $?param-values)))
 	(test (< ?idx (fact-index ?df)))
 	=>
 	(modify ?wf (value TRUE))
@@ -123,11 +127,52 @@
 )
 
 (defrule wm-sync-domain-fact-removed
-	(wm-sync-map (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ?idx))
+	"A domain fact has been removed, set wm fact to false"
+	?wm <- (wm-sync-map (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ~0))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key $?key) (value TRUE))
 	(not (domain-fact (name ?name)
 	                  (param-values $?param-values&:(wm-sync-key-match ?key ?param-names ?param-values))))
 	=>
-	(modify ?wf (value FALSE))
+	(bind ?new-wf (modify ?wf (value FALSE)))
+	(modify ?wm (wm-fact-idx (fact-index ?new-wf)) (domain-fact-idx 0))
+)
+
+(defrule wm-sync-worldmodel-fact-added
+	"A wm-fact has been added for the first time."
+	(domain-predicate (name ?name) (param-names $?param-names))
+	?wf <- (wm-fact (id ?id) (key $?key&:(wm-key-prefix ?key domain fact)))
+	(not (wm-sync-map (domain-fact-name ?name)
+										(wm-fact-id ?id&:(eq ?id (wm-key-to-id ?key)))))
+	=>
+	(assert (wm-sync-map (domain-fact-name ?name)
+											 (wm-fact-id (wm-key-to-id ?key))))
+)
+
+(defrule wm-sync-worldmodel-fact-true
+	"The value of a wm fact is modified to TRUE."
+	(domain-predicate (name ?name) (param-names $?param-names))
+	?wf <- (wm-fact (id ?id) (key $?key&:(wm-key-prefix ?key domain fact)) (type BOOL) (value TRUE))
+	?wm <- (wm-sync-map (domain-fact-name ?name) (domain-fact-idx 0)
+											(wm-fact-id ?id) (wm-fact-idx ?idx&:(< ?idx (fact-index ?wf))))
+	(not (domain-fact (name ?name)
+	                  (param-values $?param-values&:(wm-sync-key-match ?key ?param-names ?param-values))))
+	=>
+	(bind ?df (assert (domain-fact (name ?name)
+																 (param-values (wm-sync-key-arg-values ?key)))))
+	(modify ?wm (wm-fact-idx (fact-index ?wf)) (domain-fact-idx (fact-index ?df)))
+)
+
+(defrule wm-sync-worldmodel-fact-false
+	"The value of a wm fact is modified to FALSE."
+	(domain-predicate (name ?name) (param-names $?param-names))
+	?wf <- (wm-fact (id ?id) (key $?key&:(wm-key-prefix ?key domain fact)) (type BOOL) (value FALSE))
+	?wm <- (wm-sync-map (domain-fact-name ?name) (domain-fact-idx ~0)
+											(wm-fact-id ?id) (wm-fact-idx ?idx&:(< ?idx (fact-index ?wf))))
+	(domain-fact (name ?name)
+							 (param-values $?param-values&:(wm-sync-key-match ?key ?param-names ?param-values)))
+	=>
+	(assert (domain-retracted-fact (name ?name)
+																 (param-values (wm-sync-key-arg-values ?key))))
+	(modify ?wm (wm-fact-idx (fact-index ?wf)) (domain-fact-idx 0))
 )

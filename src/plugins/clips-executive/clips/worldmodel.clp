@@ -226,6 +226,14 @@
 	(return ?rv)
 )
 
+(deffunction wm-key-prefix (?key $?prefix)
+	(if (> (length$ ?prefix) (length$ ?key)) then (return FALSE))
+	(foreach ?p ?prefix
+		(if (neq ?p (nth$ ?p-index ?key)) then (return FALSE))
+	)
+	(return TRUE)
+)
+
 (defrule wm-fact-id2key
 	"If a world model fact is added with an ID but no key"
 	(declare (salience 700))
