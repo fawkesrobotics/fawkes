@@ -24,7 +24,7 @@
 			;(bind ?arg (nth$ ?l ?key))
 			(bind ?value (nth$ (+ ?l 1) ?key))
 			(if (and (eq ?value [) (<= (+ ?l 2) ?L)) then
-				(printout error "Domain predicates may not contain argument value list" crlf)
+				(printout error "Domain predicates may not contain argument value list " ?key crlf)
 				(return FALSE)
 			)
 			(bind ?rv (append$ ?rv ?value))
@@ -46,7 +46,7 @@
 			 then
 				(if (eq (nth$ (+ ?l 2) ?key) [)
 				 then
-					(printout error "Domain facts may not contain argument value list" crlf)
+					(printout error "Domain facts may not contain argument value list " ?key crlf)
 					(return -1)
 				 else
 					(return (+ ?l 1))
