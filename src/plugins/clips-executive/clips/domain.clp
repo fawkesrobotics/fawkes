@@ -23,6 +23,9 @@
 	"Representation of a predicate specification."
   (slot name (type SYMBOL) (default ?NONE))
 	(slot wm-key-pattern (type STRING))
+  ; If the predicate is sensed, it is not directly changed by an action effect.
+  ; Instead, we expect the predicate to be changed externally.
+  (slot sensed (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (multislot param-names (type SYMBOL))
   (multislot param-types (type SYMBOL))
 )
@@ -365,7 +368,9 @@
     (param-names $?effect-param-names)
     (param-constants $?effect-param-constants)
     (type ?effect-type)
-    (predicate ?predicate))
+    (predicate ?predicate)
+  )
+  (domain-predicate (name ?predicate) (sensed FALSE))
   (or (not (domain-precondition (part-of ?name)))
       (domain-precondition (part-of ?name)
         (is-satisfied TRUE) (grounded TRUE) (grounded-with ?id)
