@@ -43,6 +43,15 @@
   (multislot param-values)
 )
 
+(deftemplate domain-pending-sensed-fact
+  "An action effect of a sensed predicate that is still pending."
+  (slot name (type SYMBOL) (default ?NONE))
+  (slot action-id (type INTEGER))
+  (slot type (type SYMBOL) (allowed-values POSITIVE NEGATIVE)
+    (default POSITIVE))
+  (multislot param-values)
+)
+
 
 (deftemplate domain-operator
   "An operator of the domain. This only defines the name of the operator, all
@@ -391,7 +400,7 @@
     (type ?effect-type)
     (predicate ?predicate)
   )
-  (domain-predicate (name ?predicate) (sensed FALSE))
+  (domain-predicate (name ?predicate) (sensed ?sensed-predicate))
   (or (not (domain-precondition (part-of ?name)))
       (domain-precondition (part-of ?name)
         (is-satisfied TRUE) (grounded TRUE) (grounded-with ?id)
@@ -405,10 +414,16 @@
                   ?action-param-values
                 )
   )
-  (if (eq ?effect-type POSITIVE) then
-    (assert (domain-fact (name ?predicate) (param-values ?values)))
+  (if ?sensed-predicate then
+    (assert (domain-pending-sensed-fact (name ?predicate) (action-id ?id)
+              (param-values ?values) (type ?effect-type)
+    ))
   else
-    (assert (domain-retracted-fact (name ?predicate) (param-values ?values)))
+    (if (eq ?effect-type POSITIVE) then
+      (assert (domain-fact (name ?predicate) (param-values ?values)))
+    else
+      (assert (domain-retracted-fact (name ?predicate) (param-values ?values)))
+    )
   )
 )
 
@@ -428,9 +443,28 @@
   (retract ?r)
 )
 
+(defrule domain-check-positive-pending-sensed-fact
+  "Remove any pending sensed positive facts that have been sensed."
+  ?ef <- (domain-pending-sensed-fact (type POSITIVE)
+          (name ?predicate) (param-values $?values))
+  ?df <- (domain-fact (name ?predicate) (param-values $?values))
+=>
+  (retract ?ef)
+)
+
+(defrule domain-check-negative-pending-sensed-fact
+  "Remove any pending sensed negative facts that have been sensed."
+  ?ef <- (domain-pending-sensed-fact (type NEGATIVE)
+          (name ?predicate) (param-values $?values))
+  (not (domain-fact (name ?predicate) (param-values $?values)))
+=>
+  (retract ?ef)
+)
+
 (defrule domain-action-is-final
   "After the effects of an action have been applied, change it to FINAL."
-  ?a <- (plan-action (status EXECUTED))
+  ?a <- (plan-action (id ?action-id) (status EXECUTED))
+  (not (domain-pending-sensed-fact (action-id ?action-id)))
   =>
   (modify ?a (status FINAL))
   (assert (domain-wm-update))
