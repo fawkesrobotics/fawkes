@@ -16,6 +16,8 @@
 
 (defrule load-initial-facts
   (executive-init)
+  (domain-loaded)
   =>
   (assert (domain-fact (name said) (param-values bob hello)))
+  (assert (domain-facts-loaded))
 )

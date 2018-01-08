@@ -12,6 +12,7 @@
 (defrule goal-reasoner-create
 	(not (goal))
 	(not (goal-already-tried))
+  (domain-facts-loaded)
 	=>
 	(assert (goal (id TESTGOAL)))
 	; This is just to make sure we formulate the goal only once.
