@@ -14,10 +14,30 @@
   (assert (domain-loaded))
 )
 
+(defrule test-domain-set-sensed-predicates
+  (executive-init)
+  (domain-loaded)
+  ?p <- (domain-predicate (name said) (sensed FALSE))
+=>
+  (modify ?p (sensed TRUE))
+)
+
 (defrule load-initial-facts
   (executive-init)
   (domain-loaded)
   =>
   (assert (domain-fact (name said) (param-values bob hello)))
   (assert (domain-facts-loaded))
+)
+
+(defrule test-domain-set-domain-fact-said-hello
+  (plan-action (action-name say-hello) (param-values peggy) (status EXECUTED))
+=>
+  (assert (domain-fact (name said) (param-values peggy hello)))
+)
+
+(defrule test-domain-set-domain-fact-said-goodbye
+  (plan-action (action-name say-goodbye) (param-values peggy goodbye) (status EXECUTED))
+=>
+  (assert (domain-fact (name said) (param-values peggy goodbye)))
 )
