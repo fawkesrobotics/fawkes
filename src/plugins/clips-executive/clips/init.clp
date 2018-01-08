@@ -116,6 +116,7 @@
 	(path-load "domain.clp")
 	(path-load "worldmodel.clp")
 	(path-load "wm-domain-sync.clp")
+  (path-load "wm-config.clp")
 	(path-load "blackboard-init.clp")
 	(path-load "skills-init.clp")
 )
