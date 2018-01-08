@@ -133,7 +133,7 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const {
     }
     res.push_back(string(
           "(domain-atomic-precondition"
-          " (part-of " + parent_ + ")"
+          " (part-of " + new_parent + ")"
           " (name " + name + ")"
           " (predicate " + p.function + ")"
           " (param-names (create$" + params + "))"
