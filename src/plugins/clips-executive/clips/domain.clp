@@ -353,6 +353,27 @@
   (modify ?precond (is-satisfied FALSE))
 )
 
+(deffunction domain-ground-effect
+  "Ground action effect parameters by replacing them with constants and values."
+  (?effect-param-names ?effect-param-constants ?action-param-names ?action-param-values)
+  (bind ?values $?effect-param-names)
+  ; Replace constants with their values
+  (foreach ?p ?values
+    (if (eq ?p c) then
+      (bind ?values
+        (replace$ ?values ?p-index ?p-index
+          (nth$ ?p-index $?effect-param-constants))
+      )
+    )
+  )
+  (foreach ?p $?action-param-names
+    (bind ?values
+      (replace-member$ ?values (nth$ ?p-index $?action-param-values) ?p)
+    )
+  )
+  (return ?values)
+)
+
 (defrule domain-apply-effect
   "Apply an effect of an action after it succeeded."
   (plan-action
@@ -377,20 +398,12 @@
       )
   )
 =>
-  (bind ?values ?effect-param-names)
-  ; Replace constants with their values
-  (foreach ?p ?values
-    (if (eq ?p c) then
-      (bind ?values
-        (replace$ ?values ?p-index ?p-index
-          (nth$ ?p-index ?effect-param-constants))
-      )
-    )
-  )
-  (foreach ?p ?action-param-names
-    (bind ?values
-      (replace-member$ ?values (nth$ ?p-index ?action-param-values) ?p)
-    )
+  (bind ?values (domain-ground-effect
+                  ?effect-param-names
+                  ?effect-param-constants
+                  ?action-param-names
+                  ?action-param-values
+                )
   )
   (if (eq ?effect-type POSITIVE) then
     (assert (domain-fact (name ?predicate) (param-values ?values)))
