@@ -36,6 +36,7 @@
 
 (defrule robot-memory-sync-add
   "Add new facts to robot memory."
+  (declare (salience 100))
   ?f <- (domain-fact)
   =>
   (bind ?bson (rm-structured-fact-to-bson ?f))
