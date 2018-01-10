@@ -164,6 +164,43 @@
 	(return ?rv)			 
 )
 
+(deffunction wm-key-arg-is-multifield (?key ?l)
+	"Check if argument at given index is a multifield value.
+   Example: to extract argument 'foo' from '/domain/fact/bar?foo=x'
+   (which is the key (create$ domain fact bar args? foo [ a b c ])) you would
+   call (wm-key-arg-is-multifield ?key 5) -> TRUE.
+   @param ?key fact key
+   @param ?l integer with index of argument name
+   @return TRUE if argument is a multifield, i.e., enclosed by  [ and ] symbols"
+	(bind ?L (length$ ?key))
+	(if (>= ?l ?L) then (return FALSE))
+	(if (eq (nth$ (+ ?l 1) ?key) [) then (return TRUE))
+	(return FALSE)
+)
+
+(deffunction wm-key-multifield-arg-end (?key ?l)
+	"Get end-index of closing ] on multifield arg.
+   Example: (wm-key-multifield-arg-end (create$ wm foo args? x [ a b c ]) 4) -> 9
+   @param ?key fact key
+   @param ?l integer with index of argument name
+   @return index of ] symbol in ?key, or (length$ ?key) if no closing bracket is found"
+	(bind ?L (length$ ?key))
+	(bind ?ao 2) ; args offset: offset from ?l of next and eventually last arg
+
+	(while (<= (+ ?l ?ao) ?L) do
+		(bind ?va (nth$ (+ ?l ?ao) ?key))
+		(if (or (eq ?va ]) (= (+ ?l ?ao) ?L))
+		 then
+			; we hit the closing bracket or end of the arguments
+			(break)
+		 else
+			(bind ?ao (+ ?ao 1))
+		)
+	)
+
+	(return (+ ?l ?ao))
+)
+
 (deffunction wm-key-to-id ($?key)
 	(bind ?rv "")
 
@@ -191,28 +228,13 @@
 			(bind ?value (nth$ (+ ?l 1) ?key))
 			(if (and (eq ?value [) (<= (+ ?l 2) ?L)) then
 				; it's a list, process until end
-				(bind ?ao 2) ; args offset: offset from ?l of next and eventually last arg
-				(while (<= (+ ?l ?ao) ?L) do
-					(bind ?va (nth$ (+ ?l ?ao) ?key))
-					(if (or (eq ?va ]) (= (+ ?l ?ao) ?L))
-					 ; we hit the closing bracket or end of the arguments
-					 then
-						; conclude list
-						(bind ?rv (str-cat ?rv ?arg "=" (nth$ (+ ?l 2) ?key)))
-						(bind ?ai 3) ; args index from [?l .. ?l + ?ao]
-						; arg index end, it's ?l+?ao, unless we have ']', then remove that
-						(bind ?ai-end (+ ?l ?ao (if (eq ?va ]) then -1 else 0)))
-						(while (<= (+ ?l ?ai) ?ai-end) do
-							(bind ?rv (str-cat ?rv "," (nth$ (+ ?l ?ai) ?key)))
-							(bind ?ai (+ ?ai 1))
-						)
-						(if (< (+ ?l ?ao) ?L) then (bind ?rv (str-cat ?rv "&")))
-						(break)
-					 else
-						(bind ?ao (+ ?ao 1))
-					)
+				(bind ?arg-end (wm-key-multifield-arg-end ?key ?l))
+				(bind ?rv (str-cat ?rv ?arg "=" (nth$ (+ ?l 2) ?key)))
+				(loop-for-count (?i (+ ?l 3) (- ?arg-end 1))
+					(bind ?rv (str-cat ?rv "," (nth$ ?i ?key)))
 				)
-				(bind ?l (+ ?l ?ao 1))
+				(bind ?l (+ ?arg-end 1))
+				(if (< ?l ?L) then (bind ?rv (str-cat ?rv "&")))
 			 else
 				(bind ?rv (str-cat ?rv ?arg "=" (nth$ (+ ?l 1) ?key) (if (< (+ ?l 2) ?L) then "&" else "")))
 				(bind ?l (+ ?l 2))
@@ -226,12 +248,62 @@
 	(return ?rv)
 )
 
+(deffunction wm-key-arg-idx (?key ?arg)
+	"Get index of a given named argument in key.
+   Example: (wm-key-arg-idx (create$ wm foo args? foo x) foo) -> 4
+   Example: (wm-key-arg-idx (create$ wm foo) bar) -> FALSE
+   @param ?key wm fact key
+   @param ?arg symbol of argument name
+   @return Index of argument if found, FALSE otherwise"
+	(bind ?l (member$ args? ?key))
+	(bind ?L (length$ ?key))
+	(if ?l then
+		(bind ?l (+ ?l 1))
+		(while (<= (+ ?l 1) ?L) do
+			(if (eq (nth$ ?l ?key) ?arg) then (return ?l))
+			(bind ?va (nth$ (+ ?l 1) ?key))
+			(if (eq ?va [)
+			 then
+				(bind ?l (+ (wm-key-multifield-arg-end ?key ?l) 1))
+			 else
+				(bind ?l (+ ?l 2))
+			)
+		)
+	)
+	(return FALSE)
+)
+
 (deffunction wm-key-prefix (?key $?prefix)
+	"Check if key has given prefix.
+   Example: (wm-key-prefix (create$ domain fact foo bar x) domain fact)
+   @param ?key key to check
+   @param ?prefix prefix to check for in key
+   @return TRUE if ?key starts with the entries in ?prefix, FALSE otherwise"
 	(if (> (length$ ?prefix) (length$ ?key)) then (return FALSE))
 	(foreach ?p ?prefix
 		(if (neq ?p (nth$ ?p-index ?key)) then (return FALSE))
 	)
 	(return TRUE)
+)
+
+(deffunction wm-key-arg (?key ?arg)
+	"Extract the argument named in ?arg.
+   @param ?key key of the world model fact
+   @param ?arg name of argument to extract
+
+   @return returns nil if value is not specified, or a single or
+           multi-field value depending on the argument value."
+	(bind ?arg-idx (wm-key-arg-idx ?key ?arg))
+
+	(if ?arg-idx then
+		(if (wm-key-arg-is-multifield ?key ?arg-idx)
+		 then
+			(return (subseq$ ?key (+ ?arg-idx 2) (- (wm-key-multifield-arg-end ?key ?arg-idx) 1)))
+		 else
+			(return (nth$ (+ ?arg-idx 1) ?key))
+		)
+	)
+	(return nil)
 )
 
 (defrule wm-fact-id2key
