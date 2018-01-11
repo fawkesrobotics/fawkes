@@ -110,7 +110,7 @@
             (replace$
               ?param-values
               ?param-index ?param-index
-              (sym-cat (lowcase ?param))
+              (sym-cat (upcase ?param))
             )
       )
     )
