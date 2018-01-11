@@ -111,6 +111,8 @@ PddlRobotMemoryThread::loop()
   //Dictionary how to fill the templates
   ctemplate::TemplateDictionary dict("pddl-rm");
 
+  BSONObjBuilder facets;
+  
   //find queries in template
   size_t cur_pos = 0;
   std::map<std::string, std::string> templates;
@@ -142,7 +144,8 @@ PddlRobotMemoryThread::loop()
 
     try {
       //fill dictionary to expand query template:
-      QResCursor cursor = robot_memory->query(fromjson(query_str), collection);
+	    /*
+	    QResCursor cursor = robot_memory->query(fromjson(query_str), collection);
       while(cursor->more())
       {
         BSONObj obj = cursor->next();
@@ -150,6 +153,13 @@ PddlRobotMemoryThread::loop()
         ctemplate::TemplateDictionary *entry_dict = dict.AddSectionDictionary(template_name);
         fill_dict_from_document(entry_dict, obj);
       }
+	    */
+	    mongo::BufBuilder &bb = facets.subarrayStart(template_name);
+	    mongo::BSONArrayBuilder *arrb = new mongo::BSONArrayBuilder(bb);
+	    BSONObjBuilder query;
+	    query.append("$match", fromjson(query_str));
+	    arrb->append(query.obj());
+	    delete arrb;
     #ifdef HAVE_MONGODB_VERSION_H
     } catch (mongo::MsgAssertionException &e) {
     #else
@@ -159,6 +169,22 @@ PddlRobotMemoryThread::loop()
           e.what(), query_str.c_str());
     }
   }
+
+  BSONObjBuilder aggregate_query;
+  aggregate_query.append("$facet", facets.obj());
+  BSONObj aggregate_query_obj(aggregate_query.obj());
+  std::vector<mongo::BSONObj> aggregate_pipeline{aggregate_query_obj};
+  BSONObj res = robot_memory->aggregate(aggregate_pipeline, collection);
+  BSONObj result = res.getField("result").Obj()["0"].Obj();
+  for( BSONObj::iterator i = result.begin(); i.more(); ) {
+	  BSONElement e = i.next();
+    for( BSONObj::iterator j = e.Obj().begin(); j.more(); ) {
+	    BSONElement f = j.next();
+	    ctemplate::TemplateDictionary *entry_dict = dict.AddSectionDictionary(e.fieldName());
+	    fill_dict_from_document(entry_dict, f.Obj());
+    }
+  }
+
   //Add goal to dictionary
   dict.SetValue("GOAL", goal);
 
