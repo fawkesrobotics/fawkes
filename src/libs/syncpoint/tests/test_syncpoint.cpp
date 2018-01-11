@@ -2,7 +2,7 @@
  *  test_syncpoint.cpp - SyncPoint Unit Test
  *
  *  Created: Wed Jan 22 11:17:43 2014
- *  Copyright  2014-2017  Till Hofmann
+ *  Copyright  2014-2018  Till Hofmann
  *
  ****************************************************************************/
 
@@ -1272,4 +1272,28 @@ TEST_F(SyncPointManagerTest, UnregisterNonEmitter)
   EXPECT_NO_THROW(sp->unregister_emitter("emitter"));
   // "foo" is not known to the syncpoint
   EXPECT_NO_THROW(sp->unregister_emitter("foo"));
+}
+
+TEST_F(SyncPointManagerTest, ReleaseBarrierWaiter)
+{
+  RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter", "/test");
+  sp->register_emitter("emitter");
+  pthread_t waiter_thread;
+  waiter_thread_params thread_params;
+  thread_params.manager = manager;
+  thread_params.thread_nr = 1;
+  thread_params.num_wait_calls = 1;
+  thread_params.sp_identifier = "/test";
+  thread_params.component = "waiter";
+  thread_params.timeout_sec = 2;
+  pthread_create(&waiter_thread, &attrs, start_barrier_waiter_thread,
+    &thread_params);
+  usleep(10000);
+  ASSERT_TRUE(sp->watcher_is_waiting("component 1", SyncPoint::WAIT_FOR_ALL));
+  pthread_cancel(waiter_thread);
+  pthread_join(waiter_thread, NULL);
+  ASSERT_TRUE(sp->watcher_is_waiting("component 1", SyncPoint::WAIT_FOR_ALL));
+  manager->release_syncpoint("component 1", sp);
+  sp = manager->get_syncpoint("component 1", "/test");
+  EXPECT_NO_THROW(sp->reltime_wait_for_all("component 1", 0, 1000000));
 }

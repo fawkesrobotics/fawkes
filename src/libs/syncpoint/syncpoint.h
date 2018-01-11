@@ -2,7 +2,7 @@
  *  syncpoint.h - Fawkes SyncPoint
  *
  *  Created: Thu Jan 09 12:22:03 2014
- *  Copyright  2014-2017  Till Hofmann
+ *  Copyright  2014-2018  Till Hofmann
  *
  ****************************************************************************/
 
@@ -74,6 +74,8 @@ class SyncPoint
     /** wait for the sync point to be emitted by any other component */
     virtual void wait(const std::string & component, WakeupType = WAIT_FOR_ONE,
       uint wait_sec = 0, uint wait_nsec = 0);
+    /** abort waiting */
+    virtual void unwait(const std::string & component);
     virtual void wait_for_one(const std::string & component);
     virtual void wait_for_all(const std::string & component);
     /** wait for the sync point, but abort after given time */
@@ -147,6 +149,8 @@ class SyncPoint
     WaitCondition *cond_wait_for_all_;
     /** true if the wait for all timer is running */
     bool wait_for_all_timer_running_;
+    /** the component that started the wait-for-all timer */
+    std::string wait_for_all_timer_owner_;
     /** maximum waiting time in secs */
     uint max_waittime_sec_;
     /** maximum waiting time in nsecs */

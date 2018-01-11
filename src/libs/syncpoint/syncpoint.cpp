@@ -2,7 +2,7 @@
  *  syncpoint.cpp - Fawkes SyncPoint
  *
  *  Created: Thu Jan 09 12:35:57 2014
- *  Copyright  2014-2017  Till Hofmann
+ *  Copyright  2014-2018  Till Hofmann
  *
  ****************************************************************************/
 
@@ -247,6 +247,7 @@ SyncPoint::wait(const std::string & component,
   CircularBuffer<SyncPointCall> *calls;
   Mutex *mutex_cond;
   bool *timer_running;
+  string *timer_owner;
   // set watchers, cond and calls depending of the Wakeup type
   if (type == WAIT_FOR_ONE) {
     watchers = &watchers_wait_for_one_;
@@ -259,6 +260,7 @@ SyncPoint::wait(const std::string & component,
     cond = cond_wait_for_all_;
     mutex_cond = mutex_wait_for_all_;
     timer_running = &wait_for_all_timer_running_;
+    timer_owner = &wait_for_all_timer_owner_;
     calls = &wait_for_all_calls_;
   } else {
     throw SyncPointInvalidTypeException();
@@ -313,6 +315,7 @@ SyncPoint::wait(const std::string & component,
         pthread_cleanup_pop(1);
       } else {
         *timer_running = true;
+        *timer_owner = component;
         if (wait_sec != 0 || wait_nsec != 0) {
           max_waittime_sec_ = wait_sec;
           max_waittime_nsec_ = wait_nsec;
@@ -383,6 +386,24 @@ SyncPoint::reltime_wait_for_all(const string & component, uint wait_sec,
   uint wait_nsec)
 {
   wait(component, SyncPoint::WAIT_FOR_ALL, wait_sec, wait_nsec);
+}
+
+/** Do not wait for the SyncPoint any longer.
+ *  Removes the component from the list of waiters. If the given component is
+ *  not waiting, do nothing.
+ *  @param component the component to remove from the waiters
+ */
+void
+SyncPoint::unwait(const string & component)
+{
+  MutexLocker ml(mutex_);
+  watchers_wait_for_one_.erase(component);
+  watchers_wait_for_all_.erase(component);
+  if (wait_for_all_timer_owner_ == component) {
+    // TODO: this lets the other waiting components wait indefinitely, even on
+    // a timed wait.
+    wait_for_all_timer_running_ = false;
+  }
 }
 
 

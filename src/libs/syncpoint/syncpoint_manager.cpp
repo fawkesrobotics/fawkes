@@ -2,7 +2,7 @@
  *  syncpoint_manager.cpp - Fawkes SyncPointManager
  *
  *  Created: Thu Jan 09 15:22:19 2014
- *  Copyright  2014  Till Hofmann
+ *  Copyright  2014-2018  Till Hofmann
  *
  ****************************************************************************/
 
@@ -182,6 +182,7 @@ SyncPointManager::release_syncpoint_no_lock(const std::string & component,
     // successor is watched, do not release the syncpoint yet
     return;
   }
+  (*sp_it)->unwait(component);
   if (!(*sp_it)->watchers_.erase(component)) {
     throw SyncPointReleasedByNonWatcherException(component.c_str(),
         sync_point->get_identifier().c_str());
