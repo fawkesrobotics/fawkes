@@ -141,7 +141,7 @@
 (defrule wm-sync-worldmodel-fact-added
 	"A wm-fact has been added for the first time."
 	(domain-predicate (name ?name) (param-names $?param-names))
-	?wf <- (wm-fact (id ?id) (key $?key&:(wm-key-prefix ?key domain fact)))
+	?wf <- (wm-fact (id ?id) (key $?key&:(wm-key-prefix ?key domain fact ?name)))
 	(not (wm-sync-map (domain-fact-name ?name)
 										(wm-fact-id ?id&:(eq ?id (wm-key-to-id ?key)))))
 	=>
