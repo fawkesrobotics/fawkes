@@ -33,7 +33,16 @@
   (robmem-remove "robmem.clipswm" ?doc)
 )
 
-(defrule robot-memory-sync-add
+(defrule robot-memory-sync-add-object
+  "Add new facts to robot memory."
+  (declare (salience 100))
+  ?f <- (domain-object)
+  =>
+  (bind ?bson (rm-structured-fact-to-bson ?f))
+  (robmem-upsert "robmem.clipswm" ?bson ?bson)
+)
+
+(defrule robot-memory-sync-add-fact
   "Add new facts to robot memory."
   (declare (salience 100))
   ?f <- (domain-fact)
@@ -42,7 +51,7 @@
   (robmem-upsert "robmem.clipswm" ?bson ?bson)
 )
 
-(defrule robot-memory-sync-retract
+(defrule robot-memory-sync-retract-fact
   "Remove deleted facts from robot memory."
   (declare (salience 100))
   ?f <- (domain-fact (name ?name) (param-values $?param-values))
