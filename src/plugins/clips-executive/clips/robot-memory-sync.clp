@@ -24,11 +24,10 @@
 ; facts are removed from robot memory.  We may or may not use this in the
 ; future, but it serves its purpose for now.
 
-(defrule robot-memory-sync-clean-on-init
+(deffunction robot-memory-sync-clean-domain-facts
   "Remove all domain facts from the database so it is consistent with CLIPS."
-  (declare (salience 100))
-  (executive-init)
-  =>
+  ()
+  (printout warn "Clearing domain facts from robot memory" crlf)
   (bind ?doc (bson-create))
   (bson-append ?doc "relation" domain-fact)
   (robmem-remove "robmem.clipswm" ?doc)
