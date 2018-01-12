@@ -156,7 +156,7 @@
 	(executive-init)
   (ff-feature-loaded robot_memory)
   ; Only load after the domain file has been loaded.
-  (domain-loaded)
+  (path-info (file "domain.clp") (loaded TRUE))
   (confval (path "/clips-executive/sync_domain_facts") (type BOOL) (value TRUE))
   =>
   (path-load "robot-memory-sync.clp")
@@ -180,6 +180,10 @@
   (or (ff-feature-loaded tf)
       (not (confval (path "/clips-executive/use_tf")
             (type BOOL) (value TRUE)))
+  )
+  (or (path-info (file "robot-memory-sync.clp") (loaded TRUE))
+      (not (confval (path "/clips-executive/sync_domain_facts") (type BOOL)
+        (value TRUE)))
   )
   (confval (path "/clips-executive/spec") (type STRING) (value ?spec))
 	=>
