@@ -74,3 +74,10 @@ clips-executive:
       # code is loaded. That avoid the necessity of splitting interface opening
       # and processing in user code.
       #blackboard-preload: ["Position3DInterface"]
+
+      # Values in the parameters subtree will be added to the "/config" tree
+      # in the world model facts. Everything up until and including /parameters/
+      # in the configuration path is removed.
+      # Example: /clips-executive/specs/test/parameters/home-pos -> /config/home-pos
+      parameters:
+        example: value
