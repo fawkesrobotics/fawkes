@@ -108,10 +108,10 @@
 	?df <- (domain-fact (name ?name) (param-values $?param-values))
 	(not (domain-retracted-fact (name ?name) (param-values $?param-values)))
 	(not (wm-sync-map (domain-fact-name ?name)
-										(wm-fact-id ?id&:(eq ?id (wm-key-to-id domain fact ?name args?
-																													 (domain-fact-key ?param-names ?param-values))))))
+										(wm-fact-id ?id&:(eq ?id (wm-key-to-id domain fact
+																													 (domain-fact-key ?name ?param-names ?param-values))))))
 	=>
-	(bind ?key (create$ domain fact ?name args? (domain-fact-key ?param-names ?param-values)))
+	(bind ?key (create$ domain fact (domain-fact-key ?name ?param-names ?param-values)))
 	(bind ?wf (assert (wm-fact (key ?key) (type BOOL) (value TRUE))))
 	(assert (wm-sync-map (wm-fact-id (wm-key-to-id ?key))
 											 (wm-fact-key ?key)
