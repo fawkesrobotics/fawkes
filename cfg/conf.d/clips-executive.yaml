@@ -62,12 +62,32 @@ clips-executive:
       execution-monitoring: test-scenario/execution-monitoring.clp
       state-estimation: test-scenario/state-estimation.clp
 
+      # Map plan actions to skill strings.
       action-mapping:
         say: say{text=?(text)s, wait=true}
         say-hello: say{text="Hello ?(name)y", wait=true}
         say-hello-again: say{text="Hello again ?(name)y", wait=true}
         say-goodbye: say{text="Good bye", wait=true}
         say-cleanup: say{text="Cleaning up", wait=true}
+
+      # Map domain predicate names to world model fact IDs
+      #wm-remap:
+        # Map the prefix, i.e., replace the path by /domain/fact and
+        # keep the last element of the path.
+        # Example: /wm/foo -> domain predicate foo
+        # Arguments must be compatible (same names and accepted values).
+        # State as a list of world model fact IDs
+        #id-prefix:
+        #  - /wm/foo
+        #  - /wm/bar
+        # Full mapping from domain predicate name to world model fact
+        # ID path (without arguments).
+        # Example: said -> /wm/spoken
+        # Arguments must be compatible (same names and accepted values).
+        # State as map from predicate names to world model fact ID
+        # path.
+        #name-id:
+        #  said: /wm/spoken
 
       # Interface _types_ mentioned in the following list will be pre-loaded,
       # i.e., the fact templates will be created in stage2, before user-specified
