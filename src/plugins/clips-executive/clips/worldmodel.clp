@@ -275,7 +275,7 @@
 
 (deffunction wm-key-prefix (?key $?prefix)
 	"Check if key has given prefix.
-   Example: (wm-key-prefix (create$ domain fact foo bar x) domain fact)
+   Example: (wm-key-prefix (create$ domain fact foo args? bar x) domain fact)
    @param ?key key to check
    @param ?prefix prefix to check for in key
    @return TRUE if ?key starts with the entries in ?prefix, FALSE otherwise"
@@ -284,6 +284,38 @@
 		(if (neq ?p (nth$ ?p-index ?key)) then (return FALSE))
 	)
 	(return TRUE)
+)
+
+(deffunction wm-key-path ($?key)
+	"Extract the path from a key. That is, everything until args? or to the end.
+   Example: (wm-key-path (create$ domain fact foo args? bar x)) -> (create$ domain fact foo)
+   Example: (wm-key-path (create$ domain fact foo)) -> (create$ domain fact foo)
+   @param ?key key to get path for
+   @return multifield with path of key"
+	(bind ?rv (create$))
+  (foreach ?p ?key
+		(if (eq ?p args?) then (return ?rv))
+		(bind ?rv (append$ ?rv ?p))
+	)
+	(return ?rv)
+)
+
+(deffunction wm-key-args ($?key)
+	"Extract args from a key. That is, everything starting at and including args?.
+   Example: (wm-key-args (create$ domain fact foo args? bar x)) -> (create$ args? bar x)
+   Example: (wm-key-args (create$ domain fact foo)) -> (create$)
+   @param ?key key to get path for
+   @return multifield with path of key"
+	(bind ?rv (create$))
+	(bind ?l (member$ args? ?key))
+	(bind ?L (length$ ?key))
+	(if ?l then
+		(while (<= ?l ?L) do
+			(bind ?rv (append$ ?rv (nth$ ?l ?key)))
+			(bind ?l (+ ?l 1))
+		)
+	)
+	(return ?rv)
 )
 
 (deffunction wm-key-arg (?key ?arg)
