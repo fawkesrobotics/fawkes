@@ -153,6 +153,28 @@
 							 (wm-sync-args-match ?key ?param-names ?param-values)))
 )
 
+(defrule wm-sync-config-remap-id-prefix
+	(executive-init)
+	(confval (path "/clips-executive/spec") (type STRING) (value ?spec))
+  ?cf <- (confval (path ?path&:(eq (str-cat "/clips-executive/specs/" ?spec "/wm-remap/id-prefix") ?path))
+									(type STRING) (is-list TRUE) (list-value $?id-prefixes))
+	=>
+	(retract ?cf)
+	(wm-sync-remap-id-prefix ?id-prefixes)
+)
+
+(defrule wm-sync-config-remap-name-id
+	(executive-init)
+	(confval (path "/clips-executive/spec") (type STRING) (value ?spec))
+  ?cf <- (confval (path ?path&:(str-prefix (str-cat "/clips-executive/specs/" ?spec "/wm-remap/name-id/") ?path))
+									(type STRING) (value ?key-path) (is-list FALSE))
+	=>
+	(retract ?cf)
+  (bind ?prefix (str-cat "/clips-executive/specs/" ?spec "/wm-remap/name-id/"))
+  (bind ?name (sym-cat (sub-string (+ (str-length ?prefix) 1) (str-length ?path) ?path)))
+	(assert (wm-sync-remap (domain-fact-name ?name) (wm-fact-key-path (wm-id-to-key ?key-path))))
+)
+
 (defrule wm-sync-domain-fact-added
 	"For a recently added domain fact, add a wm-fact."
 	(domain-predicate (name ?name) (param-names $?param-names))
