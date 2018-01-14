@@ -144,18 +144,18 @@
 
 (defrule domain-translate-obj-slot-type-to-ordered-fact
   "Translate the slot type of a domain-object into the ordered fact
-   obj-is-of-type."
+   domain-obj-is-of-type."
   (domain-object (name ?obj) (type ?type))
 =>
-  (assert (obj-is-of-type ?obj ?type))
+  (assert (domain-obj-is-of-type ?obj ?type))
 )
 
 (defrule domain-get-transitive-types
   "An object of type t also has each super-type of t as its type."
-  (obj-is-of-type ?obj ?type)
+  (domain-obj-is-of-type ?obj ?type)
   (domain-object-type (name ?type) (super-type ?super-type))
 =>
-  (assert (obj-is-of-type ?obj ?super-type))
+  (assert (domain-obj-is-of-type ?obj ?super-type))
 )
 
 (defrule domain-ground-precondition
