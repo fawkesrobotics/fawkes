@@ -2,6 +2,7 @@
 ; Start with echo "(batch wm-domain-sync-test.clp)" | clips | less
 
 (load* "../../../clips/clips/utils.clp")
+(load* "../../../clips/clips/ff-config.clp")
 (load* "../plan.clp")
 (load* "../domain.clp")
 (load* "../worldmodel.clp")

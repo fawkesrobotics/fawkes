@@ -2,6 +2,7 @@
 ; Start with echo "(batch wm-domain-sync-test.clp)" | clips | less
 
 (load* "../../../clips/clips/utils.clp")
+(load* "../../../clips/clips/ff-config.clp")
 (load* "../plan.clp")
 (load* "../domain.clp")
 (load* "../worldmodel.clp")
@@ -26,11 +27,21 @@
 
 (defglobal
 	?*ID* = "/wm/test/different"
+	?*SPEC* = "test"
+	?*CONF-PATH* = (str-cat "/clips-executive/specs/" ?*SPEC* "/")
 )
 
 (printout t "***** ADD remapping *****" crlf)
-(assert (wm-sync-remap (domain-fact-name said) (wm-fact-key-path (wm-id-to-key ?*ID*))))
+;(assert (wm-sync-remap (domain-fact-name said) (wm-fact-key-path (wm-id-to-key ?*ID*))))
 ;(wm-sync-remap-id-prefix ?*ID*)
+(assert (executive-init)
+				(confval (path "/clips-executive/spec") (type STRING) (value ?*SPEC*))
+				(confval (path (str-cat ?*CONF-PATH* "wm-remap/name-id/said"))
+								 (type STRING) (value "/wm/spoken"))
+				;(confval (path (str-cat ?*CONF-PATH* "wm-remap/id-prefix")) (type STRING) (is-list TRUE)
+				;							 (list-value "/wm/said"))
+)
+(run)
 
 (printout t "***** ASSERT domain *****" crlf)
 (assert (domain-fact (name said) (param-values hello)))
