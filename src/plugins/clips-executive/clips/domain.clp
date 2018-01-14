@@ -47,12 +47,25 @@
 		(printout error "Cannot generate domain fact key with non-equal length names and values" crlf)
 		(return FALSE)
 	)
+	(bind ?rv (create$ ?name))
+	(if (> (length$ ?param-names) 0) then
+		(bind ?rv (append$ ?rv args?))
+		(foreach ?n ?param-names (bind ?rv (append$ ?rv ?n (nth$ ?n-index ?param-values))))
+	)
+	(return ?rv)
+)
+
+(deffunction domain-fact-args (?param-names ?param-values)
+	(if (<> (length$ ?param-names) (length$ ?param-values)) then
+		(printout error "Cannot generate domain fact args with non-equal length names and values" crlf)
+		(return FALSE)
+	)
 	(bind ?args (create$))
 	(if (> (length$ ?param-names) 0) then
-		(bind ?args (create$ args?))
+		(bind ?args (append$ ?args args?))
 		(foreach ?n ?param-names (bind ?args (append$ ?args ?n (nth$ ?n-index ?param-values))))
 	)
-	(return (create$ ?name ?args))
+	(return ?args)
 )
 
 (deftemplate domain-retracted-fact
