@@ -23,8 +23,8 @@
 	(slot domain-object-type (type SYMBOL))
 )
 
-(deftemplate wm-sync-remap
-	"Template to inform sync code about a path remapping.
+(deftemplate wm-sync-remap-fact
+	"Template to inform sync code about a path remapping for facts.
 
    The synchronization allows to remap domain-fact sync targets to
    arbitrary wm-fact IDs. This is useful to make the domain and world
@@ -39,11 +39,11 @@
 	(multislot wm-fact-key-path)
 )
 
-(deffunction wm-sync-remap-id-prefix ($?id-paths)
+(deffunction wm-sync-remap-fact-id-prefix ($?id-paths)
 	"Add a number of simple namespace remappings.
    This function takes a number of IDs and re-maps them to domain
    facts taking the last part of the ID path as the predicate name.
-   Example: (wm-sync-remap-id-prefix '/wm/foo' '/wm/bar') will map
+   Example: (wm-sync-remap-fact-id-prefix '/wm/foo' '/wm/bar') will map
             the keys to the predicates foo and bar respectively.
    @param $?id-paths list of ID paths (without arguments), invalid
                      paths are ignored.
@@ -57,7 +57,7 @@
 			(printout error "Cannot remap ID prefix with arguments (" ?p ")" crlf)
 		 else
 			(bind ?name (nth$ (length$ ?path) ?path))
-			(assert (wm-sync-remap (domain-fact-name ?name) (wm-fact-key-path ?key)))
+			(assert (wm-sync-remap-fact (domain-fact-name ?name) (wm-fact-key-path ?key)))
 		)
 	)
 )
@@ -160,33 +160,33 @@
 							 (wm-sync-args-match ?key ?param-names ?param-values)))
 )
 
-(defrule wm-sync-config-remap-id-prefix
+(defrule wm-sync-config-remap-fact-id-prefix
 	(executive-init)
 	(confval (path "/clips-executive/spec") (type STRING) (value ?spec))
-  ?cf <- (confval (path ?path&:(eq (str-cat "/clips-executive/specs/" ?spec "/wm-remap/id-prefix") ?path))
+  ?cf <- (confval (path ?path&:(eq (str-cat "/clips-executive/specs/" ?spec "/wm-remap/facts/id-prefix") ?path))
 									(type STRING) (is-list TRUE) (list-value $?id-prefixes))
 	=>
 	(retract ?cf)
-	(wm-sync-remap-id-prefix ?id-prefixes)
+	(wm-sync-remap-fact-id-prefix ?id-prefixes)
 )
 
-(defrule wm-sync-config-remap-name-id
+(defrule wm-sync-config-remap-fact-name-id
 	(executive-init)
 	(confval (path "/clips-executive/spec") (type STRING) (value ?spec))
-  ?cf <- (confval (path ?path&:(str-prefix (str-cat "/clips-executive/specs/" ?spec "/wm-remap/name-id/") ?path))
+  ?cf <- (confval (path ?path&:(str-prefix (str-cat "/clips-executive/specs/" ?spec "/wm-remap/facts/name-id/") ?path))
 									(type STRING) (value ?key-path) (is-list FALSE))
 	=>
 	(retract ?cf)
-  (bind ?prefix (str-cat "/clips-executive/specs/" ?spec "/wm-remap/name-id/"))
+  (bind ?prefix (str-cat "/clips-executive/specs/" ?spec "/wm-remap/facts/name-id/"))
   (bind ?name (sym-cat (sub-string (+ (str-length ?prefix) 1) (str-length ?path) ?path)))
-	(assert (wm-sync-remap (domain-fact-name ?name) (wm-fact-key-path (wm-id-to-key ?key-path))))
+	(assert (wm-sync-remap-fact (domain-fact-name ?name) (wm-fact-key-path (wm-id-to-key ?key-path))))
 )
 
 (defrule wm-sync-domain-fact-added
 	"For a recently added domain fact, add a wm-fact."
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?df <- (domain-fact (name ?name) (param-values $?param-values))
-	(not (wm-sync-remap (domain-fact-name ?name)))
+	(not (wm-sync-remap-fact (domain-fact-name ?name)))
 	(not (domain-retracted-fact (name ?name) (param-values $?param-values)))
 	(not (wm-sync-map-fact (domain-fact-name ?name)
 												 (wm-fact-id ?id&:(eq ?id (wm-key-to-id domain fact
@@ -205,7 +205,7 @@
 	"For a recently added domain fact, add a path-remapped wm-fact."
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?df <- (domain-fact (name ?name) (param-values $?param-values))
-	(wm-sync-remap (domain-fact-name ?name) (wm-fact-key-path $?key-path))
+	(wm-sync-remap-fact (domain-fact-name ?name) (wm-fact-key-path $?key-path))
 	(not (domain-retracted-fact (name ?name) (param-values $?param-values)))
 	(not (wm-sync-map-fact (domain-fact-name ?name)
 												 (wm-fact-key $?key&:(wm-sync-remapped-pathargs-match ?key ?key-path ?param-names ?param-values))))
@@ -267,7 +267,7 @@
 (defrule wm-sync-worldmodel-fact-added
 	"A wm-fact has been added for the first time."
 	(domain-predicate (name ?name) (param-names $?param-names))
-	(not (wm-sync-remap (domain-fact-name ?name)))
+	(not (wm-sync-remap-fact (domain-fact-name ?name)))
 	?wf <- (wm-fact (id ?id) (key $?key&:(wm-key-prefix ?key domain fact ?name)))
 	(not (wm-sync-map-fact (domain-fact-name ?name)
 												 (wm-fact-id ?id&:(eq ?id (wm-key-to-id ?key)))))
@@ -284,7 +284,7 @@
 (defrule wm-sync-worldmodel-fact-remapped-added
 	"A wm-fact has been added for the first time."
 	(domain-predicate (name ?name) (param-names $?param-names))
-	(wm-sync-remap (domain-fact-name ?name) (wm-fact-key-path $?key-path))
+	(wm-sync-remap-fact (domain-fact-name ?name) (wm-fact-key-path $?key-path))
 	?wf <- (wm-fact (id ?id) (key $?key&:(wm-sync-remapped-path-match ?key ?key-path)))
 	(not (domain-retracted-fact (name ?name) (param-values $?pv&:(eq ?pv (wm-sync-key-arg-values ?key)))))
 	(not (wm-sync-map-fact (domain-fact-name ?name)
