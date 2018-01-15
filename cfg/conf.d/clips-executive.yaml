@@ -72,22 +72,36 @@ clips-executive:
 
       # Map domain predicate names to world model fact IDs
       #wm-remap:
-        # Map the prefix, i.e., replace the path by /domain/fact and
-        # keep the last element of the path.
-        # Example: /wm/foo -> domain predicate foo
-        # Arguments must be compatible (same names and accepted values).
-        # State as a list of world model fact IDs
-        #id-prefix:
-        #  - /wm/foo
-        #  - /wm/bar
-        # Full mapping from domain predicate name to world model fact
-        # ID path (without arguments).
-        # Example: said -> /wm/spoken
-        # Arguments must be compatible (same names and accepted values).
-        # State as map from predicate names to world model fact ID
-        # path.
-        #name-id:
-        #  said: /wm/spoken
+        #facts:
+          # Map the prefix, i.e., replace the path by /domain/fact and
+          # keep the last element of the path.
+          # Example: /wm/foo -> domain predicate foo
+          # Arguments must be compatible (same names and accepted values).
+          # State as a list of world model fact IDs
+          #id-prefix:
+          #  - /wm/foo
+          #  - /wm/bar
+          # Full mapping from domain predicate name to world model fact
+          # ID path (without arguments).
+          # Example: said -> /wm/spoken
+          # Arguments must be compatible (same names and accepted values).
+          # State as map from predicate names to world model fact ID
+          # path.
+          #name-id:
+          #  said: /wm/spoken
+        #objects:
+          # Map the prefix, i.e., replace the path by /domain/fact and
+          # keep the last element of the path.
+          # Example: /wm/foo -> domain predicate foo
+          #id-prefix:
+          #  - /wm/sometype
+          #  - /wm/anothertype
+          # Full mapping from domain predicate name to world model fact
+          # ID path (without arguments).
+          # Example: objecttype -> /wm/differentobjects
+          # path.
+          #name-id:
+          #  objecttype: /wm/differentobjects
 
       # Interface _types_ mentioned in the following list will be pre-loaded,
       # i.e., the fact templates will be created in stage2, before user-specified
