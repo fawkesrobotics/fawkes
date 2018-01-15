@@ -372,7 +372,7 @@
 	(domain-object-type (name ?type-name))
 	(not (wm-sync-map-object-type (domain-object-type ?type-name)))
 	=>
-	(bind ?key (create$ domain objects ?type-name))
+	(bind ?key (create$ domain objects-by-type ?type-name))
 	(assert (wm-sync-map-object-type (wm-fact-id (wm-key-to-id ?key)) (wm-fact-key ?key)
 																	 (wm-fact-idx 0) (domain-object-type ?type-name)))
 )
