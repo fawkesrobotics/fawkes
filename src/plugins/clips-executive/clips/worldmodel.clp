@@ -100,7 +100,7 @@
 	(multislot key (type SYMBOL))
 	; The type definition is optional and informative, it is used in
 	; particular in combination with config values
-  (slot type (type SYMBOL) (allowed-values UNKNOWN FLOAT UINT INT BOOL STRING))
+  (slot type (type SYMBOL) (allowed-values UNKNOWN FLOAT UINT INT BOOL STRING SYMBOL))
 	(slot is-list (type SYMBOL) (allowed-values FALSE TRUE))
 	; Use either slot depending on whether it's a single value or a list
 	(slot value)
