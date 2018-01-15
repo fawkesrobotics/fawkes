@@ -16,6 +16,13 @@
 	(slot domain-fact-idx (type INTEGER))
 )
 
+(deftemplate wm-sync-map-object-type
+	(slot wm-fact-id (type STRING))
+	(multislot wm-fact-key (type SYMBOL))
+	(slot wm-fact-idx (type INTEGER))
+	(slot domain-object-type (type SYMBOL))
+)
+
 (deftemplate wm-sync-remap
 	"Template to inform sync code about a path remapping.
 
@@ -359,4 +366,80 @@
 	                  (param-values $?param-values&:(wm-sync-args-match ?key ?param-names ?param-values))))
 	=>
 	(retract ?wm)
+)
+
+(defrule wm-sync-domain-object-type-added
+	(domain-object-type (name ?type-name))
+	(not (wm-sync-map-object-type (domain-object-type ?type-name)))
+	=>
+	(bind ?key (create$ domain objects ?type-name))
+	(assert (wm-sync-map-object-type (wm-fact-id (wm-key-to-id ?key)) (wm-fact-key ?key)
+																	 (wm-fact-idx 0) (domain-object-type ?type-name)))
+)
+
+(defrule wm-sync-domain-object-mapping-added
+	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-key $?key)
+																	(domain-object-type ?type))
+	(not (wm-fact (key $?key) (type SYMBOL) (is-list TRUE)))
+	=>
+	(bind ?wf (assert (wm-fact (id ?id) (key ?key) (type SYMBOL) (is-list TRUE) (values))))
+	(modify ?wm (wm-fact-idx (fact-index ?wf)))
+)
+	
+
+(defrule wm-sync-domain-object-added
+	"For a recently added domain objects, add a wm-fact."
+	(domain-object (name ?name) (type ?type))
+	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx)
+																	(domain-object-type ?type))
+	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $?objs&~:(member$ ?name ?objs)))
+	(test (<= (fact-index ?wf) ?wf-idx))
+	=>
+	(bind ?new-wf (modify ?wf (values (append$ ?objs ?name))))
+	(modify ?wm (wm-fact-idx (fact-index ?new-wf)))
+)
+
+(defrule wm-sync-domain-object-removed
+	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx)
+																	(domain-object-type ?type))
+	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $? ?name $?))
+	(not (domain-object (name ?name) (type ?type)))
+	(test (<= (fact-index ?wf) ?wf-idx))
+	=>
+	(bind ?objs (fact-slot-value ?wf values))
+	(bind ?obj-idx (member$ ?name ?objs))
+	(bind ?new-objs (delete$ ?objs ?obj-idx ?obj-idx))
+	(bind ?new-wf (modify ?wf (values ?new-objs)))
+	(modify ?wm (wm-fact-idx (fact-index ?new-wf)))
+)
+
+(defrule wm-sync-worldmodel-object-added
+	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx) (domain-object-type ?type))
+	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $? ?name $?))
+	(not (domain-object (name ?name) (type ?type)))
+	(test (> (fact-index ?wf) ?wf-idx))
+	=>
+	; While the rule checks if there is any object that is missing, the update might
+	; actually have added multiple objects with one update. Hence, check them all.
+	(bind ?objs (fact-slot-value ?wf values))
+	(foreach ?o ?objs
+		(if (not (any-factp ((?df domain-object))	(and (eq ?df:name ?o) (eq ?df:type ?type))))
+		 then
+			(assert (domain-object (name ?o) (type ?type)))
+
+		)
+	)
+	(modify ?wm (wm-fact-idx (fact-index ?wf)))
+)
+
+(defrule wm-sync-worldmodel-object-removed
+	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx) (domain-object-type ?type))
+	(domain-object (name ?name) (type ?type))
+	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $?objs&~:(member$ ?name ?objs)))
+	(test (> (fact-index ?wf) ?wf-idx))
+	=>
+	(delayed-do-for-all-facts ((?df domain-object)) (not (member$ ?df:name ?objs))
+		(retract ?df)
+	)
+	(modify ?wm (wm-fact-idx (fact-index ?wf)))
 )
