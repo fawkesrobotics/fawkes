@@ -35,8 +35,24 @@
    The condition for re-mapping is that the arguments are compatible,
    that is all arguments exist on both sides with the same names.
   "
-	(slot domain-fact-name)
-	(multislot wm-fact-key-path)
+	(slot domain-fact-name (type SYMBOL))
+	(multislot wm-fact-key-path (type SYMBOL))
+)
+
+(deftemplate wm-sync-remap-object-type
+	"Template to inform sync code about a path remapping for objects.
+
+   The synchronization allows to remap domain-fact sync targets to
+   arbitrary wm-fact IDs. This is useful to make the domain and world
+   models more independent from each other, by using natural canonical
+   naming for facts, e.g., mapping of /hardware/gripper/grasped in the
+   world model to a holding predicate in the domain predicate.
+
+   The condition for re-mapping is that the arguments are compatible,
+   that is all arguments exist on both sides with the same names.
+  "
+	(slot domain-object-type (type SYMBOL))
+	(multislot wm-fact-key (type SYMBOL))
 )
 
 (deffunction wm-sync-remap-fact-id-prefix ($?id-paths)
@@ -59,6 +75,22 @@
 			(bind ?name (nth$ (length$ ?path) ?path))
 			(assert (wm-sync-remap-fact (domain-fact-name ?name) (wm-fact-key-path ?key)))
 		)
+	)
+)
+
+(deffunction wm-sync-remap-object-id-prefix ($?id-paths)
+	"Add a number of simple namespace remappings.
+   This function takes a number of IDs and re-maps them to domain
+   objects taking the last part of the ID path as the object type.
+   Example: (wm-sync-remap-object-id-prefix '/wm/foo' '/wm/bar') will map
+            the keys to the object types foo and bar respectively.
+   @param $?id-paths list of ID paths (without arguments), invalid
+                     paths are ignored.
+  "
+	(foreach ?p ?id-paths
+		(bind ?key (wm-id-to-key ?p))
+		(bind ?type (nth$ (length$ ?key) ?key))
+		(assert (wm-sync-remap-object-type (domain-object-type ?type) (wm-fact-key ?key)))
 	)
 )
 
@@ -180,6 +212,28 @@
   (bind ?prefix (str-cat "/clips-executive/specs/" ?spec "/wm-remap/facts/name-id/"))
   (bind ?name (sym-cat (sub-string (+ (str-length ?prefix) 1) (str-length ?path) ?path)))
 	(assert (wm-sync-remap-fact (domain-fact-name ?name) (wm-fact-key-path (wm-id-to-key ?key-path))))
+)
+
+(defrule wm-sync-config-remap-object-id-prefix
+	(executive-init)
+	(confval (path "/clips-executive/spec") (type STRING) (value ?spec))
+  ?cf <- (confval (path ?path&:(eq (str-cat "/clips-executive/specs/" ?spec "/wm-remap/objects/id-prefix") ?path))
+									(type STRING) (is-list TRUE) (list-value $?id-prefixes))
+	=>
+	(retract ?cf)
+	(wm-sync-remap-object-id-prefix ?id-prefixes)
+)
+
+(defrule wm-sync-config-remap-object-name-id
+	(executive-init)
+	(confval (path "/clips-executive/spec") (type STRING) (value ?spec))
+  ?cf <- (confval (path ?path&:(str-prefix (str-cat "/clips-executive/specs/" ?spec "/wm-remap/objects/name-id/") ?path))
+									(type STRING) (value ?id) (is-list FALSE))
+	=>
+	(retract ?cf)
+  (bind ?prefix (str-cat "/clips-executive/specs/" ?spec "/wm-remap/objects/name-id/"))
+  (bind ?type (sym-cat (sub-string (+ (str-length ?prefix) 1) (str-length ?path) ?path)))
+	(assert (wm-sync-remap-object-type (domain-object-type ?type) (wm-fact-key (wm-id-to-key ?id))))
 )
 
 (defrule wm-sync-domain-fact-added
@@ -371,8 +425,18 @@
 (defrule wm-sync-domain-object-type-added
 	(domain-object-type (name ?type-name))
 	(not (wm-sync-map-object-type (domain-object-type ?type-name)))
+	(not (wm-sync-remap-object-type (domain-object-type ?type-name)))
 	=>
 	(bind ?key (create$ domain objects-by-type ?type-name))
+	(assert (wm-sync-map-object-type (wm-fact-id (wm-key-to-id ?key)) (wm-fact-key ?key)
+																	 (wm-fact-idx 0) (domain-object-type ?type-name)))
+)
+
+(defrule wm-sync-domain-object-type-remapped-added
+	(domain-object-type (name ?type-name))
+	(not (wm-sync-map-object-type (domain-object-type ?type-name)))
+	(wm-sync-remap-object-type (domain-object-type ?type-name) (wm-fact-key $?key))
+	=>
 	(assert (wm-sync-map-object-type (wm-fact-id (wm-key-to-id ?key)) (wm-fact-key ?key)
 																	 (wm-fact-idx 0) (domain-object-type ?type-name)))
 )
