@@ -378,14 +378,22 @@
 )
 
 (defrule wm-sync-domain-object-mapping-added
-	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-key $?key)
+	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-key $?key) (wm-fact-idx ?idx)
 																	(domain-object-type ?type))
 	(not (wm-fact (key $?key) (type SYMBOL) (is-list TRUE)))
 	=>
 	(bind ?wf (assert (wm-fact (id ?id) (key ?key) (type SYMBOL) (is-list TRUE) (values))))
-	(modify ?wm (wm-fact-idx (fact-index ?wf)))
+	; If the fact idx is zero, or no domain-object of the given type exists, then
+	; this is the first time the mapping is added. Update the fact index as we do
+	; not expect any previous information.
+	; However, if the idx is not zero and there are domain-object of the respective
+	; type, do not (yet) update the wm-fact-idx since this means that the wm-fact
+  ; was retracted altogether, meaning that any still existing domain-object that
+	; were mentioned should now be deleted by the object-removed rule.
+	(if (or (= ?idx 0) (not (any-factp ((?df domain-object)) (eq ?df:type ?type))))
+		then (modify ?wm (wm-fact-idx (fact-index ?wf)))
+	)
 )
-	
 
 (defrule wm-sync-domain-object-added
 	"For a recently added domain objects, add a wm-fact."
