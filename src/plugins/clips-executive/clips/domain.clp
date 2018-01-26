@@ -383,56 +383,6 @@
   (return ?values)
 )
 
-; There is a problem here:
-; if an action has an effect on a sensed predicate, it will assert domain-pending-sensed-fact.
-; If that is updated in the meantime (i.e., before we get to assert the other effects of
-; non-sensed predicates) the domain-pending-sensed-fact fact will be removed, triggering
-; the domain-action-is-final rule before we get to assert the remaining effects.
-;
-; (defrule domain-apply-effect
-;   "Apply an effect of an action after it succeeded."
-;   (plan-action
-;     (id ?id)
-;     (action-name ?op)
-;     (status EXECUTED)
-;     (param-names $?action-param-names)
-;     (param-values $?action-param-values)
-;   )
-;   (domain-effect
-;     (name ?name)
-;     (part-of ?op)
-;     (param-names $?effect-param-names)
-;     (param-constants $?effect-param-constants)
-;     (type ?effect-type)
-;     (predicate ?predicate)
-;   )
-;   (domain-predicate (name ?predicate) (sensed ?sensed-predicate))
-;   (or (not (domain-precondition (part-of ?name)))
-;       (domain-precondition (part-of ?name)
-;         (is-satisfied TRUE) (grounded TRUE) (grounded-with ?id)
-;       )
-;   )
-; =>
-;   (bind ?values (domain-ground-effect
-;                   ?effect-param-names
-;                   ?effect-param-constants
-;                   ?action-param-names
-;                   ?action-param-values
-;                 )
-;   )
-;   (if ?sensed-predicate then
-;     (assert (domain-pending-sensed-fact (name ?predicate) (action-id ?id)
-;               (param-values ?values) (type ?effect-type)
-;     ))
-;   else
-;     (if (eq ?effect-type POSITIVE) then
-;       (assert (domain-fact (name ?predicate) (param-values ?values)))
-;     else
-;       (assert (domain-retracted-fact (name ?predicate) (param-values ?values)))
-;     )
-;   )
-; )
-
 ; Atomically assert all effects of an action after it has been executed.
 (defrule domain-apply-effects
   "Apply effects of an action after it succeeded."
@@ -441,12 +391,6 @@
 	=>
 	(do-for-all-facts ((?e domain-effect) (?p domain-predicate))
 		(and (eq ?e:part-of ?op) (eq ?e:predicate ?p:name))
-
-		; (or (not (domain-precondition (part-of ?name)))
-    ;   (domain-precondition (part-of ?name)
-    ;     (is-satisfied TRUE) (grounded TRUE) (grounded-with ?id)
-    ;   )
-		; 	)
 
 		; apply if this effect is unconditional or the condition is satisfied
 		(if (or (not (any-factp ((?cep domain-precondition)) (eq ?cep:part-of ?e:name)))
