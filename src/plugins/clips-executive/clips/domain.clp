@@ -54,11 +54,14 @@
 
 
 (deftemplate domain-operator
-  "An operator of the domain. This only defines the name of the operator, all
-   other properties (parameters, precondition, effects) are defined in separate
-   templates."
+  "An operator of the domain. This only defines the name of the operator,
+   other properties such as parameters, precondition, or effects are
+   defined in separate templates.
+   The wait-sensed slot defines whether to wait for sensed predicates to
+   achieve the desired value, or whether to ignore such predicates."
   (slot name (type SYMBOL))
   (multislot param-names)
+	(slot wait-sensed (type SYMBOL) (allowed-values TRUE FALSE) (default TRUE))
 )
 
 (deftemplate domain-operator-parameter
@@ -387,7 +390,8 @@
 (defrule domain-apply-effects
   "Apply effects of an action after it succeeded."
   ?pa <- (plan-action	(id ?id) (action-name ?op) (status EXECUTION-SUCCEEDED)
-					(param-names $?action-param-names) (param-values $?action-param-values))
+											(param-names $?action-param-names) (param-values $?action-param-values))
+	(domain-operator (name ?action-name) (wait-sensed ?wait-sensed))
 	=>
 	(do-for-all-facts ((?e domain-effect) (?p domain-predicate))
 		(and (eq ?e:part-of ?op) (eq ?e:predicate ?p:name))
@@ -404,8 +408,10 @@
 
 			(if ?p:sensed
 			 then
-				(assert (domain-pending-sensed-fact (name ?p:name) (action-id ?id)
-																						(param-values ?values) (type ?e:type)))
+				(if ?wait-sensed then
+					(assert (domain-pending-sensed-fact (name ?p:name) (action-id ?id)
+																							(param-values ?values) (type ?e:type)))
+				)
 			 else
 				(if (eq ?e:type POSITIVE)
 				 then
