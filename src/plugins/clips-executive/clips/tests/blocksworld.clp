@@ -59,10 +59,10 @@
 )
 
 (defrule apply-action
-  "Pseudo-execute action by changing its state to EXECUTED."
+  "Pseudo-execute action by changing its state to EXECUTION-SUCCEEDED ."
   ?aa <- (apply-action ?action-id)
   ?pa <- (plan-action (id ?action-id))
 =>
-  (modify ?pa (status EXECUTED))
+  (modify ?pa (status EXECUTION-SUCCEEDED))
   (retract ?aa)
 )

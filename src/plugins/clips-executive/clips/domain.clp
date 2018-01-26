@@ -181,7 +181,7 @@
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific effect-id."
   (not (domain-wm-update))
-  (plan-action (action-name ?op) (id ?action-id) (status EXECUTED))
+  (plan-action (action-name ?op) (id ?action-id) (status EXECUTION-SUCCEEDED))
   (domain-effect (name ?effect-name) (part-of ?op))
   ?precond <- (domain-precondition
                 (name ?precond-name)
@@ -463,10 +463,23 @@
 
 (defrule domain-action-is-final
   "After the effects of an action have been applied, change it to FINAL."
-  ?a <- (plan-action (id ?action-id) (status EXECUTED))
+  ?a <- (plan-action (id ?action-id) (status EFFECTS-APPLIED))
   (not (domain-pending-sensed-fact (action-id ?action-id)))
   =>
   (modify ?a (status FINAL))
+  (assert (domain-wm-update))
+)
+
+; This might be extended: if an action failed, but still all effects
+; have been achieved, consider execution to have succeeded.  This
+; might happen if all effects only refer to sensed predicates and
+; these have the expected values (possibly after a short stabilization
+; period).
+(defrule domain-action-has-failed
+  "An action has failed."
+  ?a <- (plan-action (id ?action-id) (status EXECUTION-FAILED))
+  =>
+  (modify ?a (status FAILED))
   (assert (domain-wm-update))
 )
 

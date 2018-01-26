@@ -41,7 +41,7 @@
 	?sf <- (skill (name ?action-name) (status S_FINAL))
 	=>
 	(printout t "Execution of " ?action-name " completed successfully" crlf)
-	(modify ?pa (status EXECUTED))
+	(modify ?pa (status EXECUTION-SUCCEEDED))
 	(retract ?sf ?pe)
 )
 
@@ -52,6 +52,6 @@
 	?sf <- (skill (name ?action-name) (status S_FAILED) (error-msg ?error))
 	=>
 	(printout warn "Execution of " ?action-name " FAILED (" ?error ")" crlf)
-	(modify ?pa (status FAILED))
+	(modify ?pa (status EXECUTION-FAILED))
 	(retract ?sf ?pe)
 )

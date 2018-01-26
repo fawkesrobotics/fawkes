@@ -38,6 +38,6 @@
   ?aa <- (apply-action ?action-id)
   ?pa <- (plan-action (id ?action-id))
 =>
-  (modify ?pa (status EXECUTED))
+  (modify ?pa (status EXECUTION-SUCCEEDED))
   (retract ?aa)
 )
