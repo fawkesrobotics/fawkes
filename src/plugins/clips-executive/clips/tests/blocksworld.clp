@@ -2,6 +2,11 @@
   "A simple blocksworld domain"
   (domain-object-type (name block) (super-type object))
   ; pick-up
+	(domain-predicate (name ontable) (param-names x))
+	(domain-predicate (name clear) (param-names x))
+	(domain-predicate (name handempty))
+	(domain-predicate (name holding) (param-names x))
+	(domain-predicate (name on) (param-names x y))
   (domain-operator (name pick-up))
   (domain-operator-parameter (operator pick-up) (type block) (name x))
   (domain-precondition
@@ -9,21 +14,21 @@
   (domain-precondition
     (part-of pick-up-precond) (name neg-on-table) (type negation))
   (domain-atomic-precondition
-    (part-of neg-on-table) (param-names (create$ x)) (predicate ontable))
+    (part-of neg-on-table) (param-names x) (predicate ontable))
   (domain-atomic-precondition
-    (part-of pick-up-precond) (param-names (create$ x)) (predicate clear))
+    (part-of pick-up-precond) (param-names x) (predicate clear))
   (domain-atomic-precondition
     (part-of pick-up-precond) (predicate handempty))
   (domain-effect
     (part-of pick-up) (predicate ontable) (type NEGATIVE)
-    (param-names (create$ x)))
+    (param-names x))
   (domain-effect
     (part-of pick-up) (predicate clear) (type NEGATIVE)
-    (param-names (create$ x)))
+    (param-names x))
   (domain-effect
     (part-of pick-up) (predicate handempty) (type NEGATIVE))
   (domain-effect
-    (part-of pick-up) (predicate holding) (param-names (create$ x)))
+    (part-of pick-up) (predicate holding) (param-names x))
   ; unstack
   (domain-operator (name unstack))
   (domain-operator-parameter (operator unstack) (type block) (name x))
@@ -31,31 +36,31 @@
   (domain-precondition
     (part-of unstack) (name unstack-precond) (type conjunction))
   (domain-atomic-precondition
-    (part-of unstack-precond) (param-names (create$ x y)) (predicate on))
+    (part-of unstack-precond) (param-names x y) (predicate on))
   (domain-atomic-precondition
-    (part-of unstack-precond) (param-names (create$ x)) (predicate clear))
+    (part-of unstack-precond) (param-names x) (predicate clear))
   (domain-atomic-precondition
     (part-of unstack-precond) (predicate handempty))
   (domain-effect
-    (part-of unstack) (predicate holding) (param-names (create$ x)))
+    (part-of unstack) (predicate holding) (param-names x))
   (domain-effect
-    (part-of unstack) (predicate clear) (param-names (create$ y)))
+    (part-of unstack) (predicate clear) (param-names y))
   (domain-effect
     (part-of unstack) (predicate clear)  (type NEGATIVE)
-    (param-names (create$ x)))
+    (param-names x))
   (domain-effect
     (part-of unstack) (predicate on) (type NEGATIVE)
-    (param-names (create$ x y)))
+    (param-names x y))
 
   ; world model
   (domain-fact (name handempty))
   (domain-fact (name clear) (param-values b1))
-  (plan-action (id 1) (plan-id p0) (action-name pick-up) (param-names (create$ x))
-    (param-values (create$ b1)))
+  (plan-action (id 1) (plan-id p0) (action-name pick-up) (param-names x)
+    (param-values b1))
 
   (domain-fact (name on) (param-values b1 b2))
   (plan-action (id 2) (plan-id p0) (action-name unstack)
-    (param-names (create$ x y)) (param-values (create$ b1 b2)))
+    (param-names x y) (param-values b1 b2))
 )
 
 (defrule apply-action

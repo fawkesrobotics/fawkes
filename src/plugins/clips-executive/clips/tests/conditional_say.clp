@@ -22,6 +22,8 @@
 (deffacts say
   (domain-object-type (name text))
   (domain-object-type (name speaker))
+	(domain-predicate (name said) (param-names t))
+	(domain-predicate (name speaker-ready) (param-names s))
   (domain-operator (name say))
   (domain-operator-parameter (operator say) (type text) (name t))
   (domain-operator-parameter (operator say) (type speaker) (name s))
