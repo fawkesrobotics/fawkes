@@ -82,6 +82,13 @@
   (modify ?p (status PLANNED))
 )
 
+(deffunction pddl-get-next-action-id ()
+  "Get the ID of the next action, i.e., the max ID of all current actions + 1"
+  (bind ?i 1)
+  (do-for-all-facts ((?a plan-action)) (> ?a:id ?i) (bind ?i (+ 1 ?a:id)))
+  (return ?i)
+)
+
 (defrule pddl-expand-goal
   "Fetch the resulting plan from robot memory and expand the goal."
   ?g <- (goal (id ?goal-id) (mode SELECTED))
@@ -109,7 +116,7 @@
     (assert
       (plan (id ?plan-id) (goal-id ?goal-id))
       (plan-action
-        (id ?action-index)
+        (id (pddl-get-next-action-id))
         (plan-id ?plan-id)
         (action-name (sym-cat (bson-get ?action "name")))
         (param-values ?param-values)
