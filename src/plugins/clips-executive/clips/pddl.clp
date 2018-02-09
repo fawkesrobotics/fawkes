@@ -82,10 +82,10 @@
   (modify ?p (status PLANNED))
 )
 
-(deffunction pddl-get-next-action-id ()
-  "Get the ID of the next action, i.e., the max ID of all current actions + 1"
-  (bind ?i 1)
-  (do-for-all-facts ((?a plan-action)) (> ?a:id ?i) (bind ?i (+ 1 ?a:id)))
+(deffunction pddl-get-max-action-id ()
+  "Get the max ID of all current action"
+  (bind ?i 0)
+  (do-for-all-facts ((?a plan-action)) (> ?a:id ?i) (bind ?i ?a:id))
   (return ?i)
 )
 
@@ -101,6 +101,7 @@
         )
   =>
   (printout t "Fetched a new plan!" crlf)
+  (bind ?id-offset (pddl-get-max-action-id))
   (progn$ (?action (bson-get-array (bson-get ?obj "o") "actions"))
     (bind ?param-values (bson-get-array ?action "args"))
     ; Convert all paramters to lower-case symbols
@@ -116,7 +117,7 @@
     (assert
       (plan (id ?plan-id) (goal-id ?goal-id))
       (plan-action
-        (id (pddl-get-next-action-id))
+        (id (+ ?action-index ?id-offset))
         (plan-id ?plan-id)
         (action-name (sym-cat (bson-get ?action "name")))
         (param-values ?param-values)
