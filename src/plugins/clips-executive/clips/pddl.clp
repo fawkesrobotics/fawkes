@@ -103,24 +103,28 @@
   (printout t "Fetched a new plan!" crlf)
   (bind ?id-offset (pddl-get-max-action-id))
   (progn$ (?action (bson-get-array (bson-get ?obj "o") "actions"))
-    (bind ?param-values (bson-get-array ?action "args"))
-    ; Convert all paramters to lower-case symbols
-    (progn$ (?param ?param-values)
-      (bind ?param-values
-            (replace$
-              ?param-values
-              ?param-index ?param-index
-              (sym-cat (upcase ?param))
-            )
+    (bind ?action-name (sym-cat (bson-get ?action "name")))
+    ; FF sometimes returns the pseudo-action REACH-GOAL. Filter it out.
+    (if (neq ?action-name REACH-GOAL) then
+      (bind ?param-values (bson-get-array ?action "args"))
+      ; Convert all parameters to upper-case symbols
+      (progn$ (?param ?param-values)
+        (bind ?param-values
+              (replace$
+                ?param-values
+                ?param-index ?param-index
+                (sym-cat (upcase ?param))
+              )
+        )
       )
-    )
-    (assert
-      (plan (id ?plan-id) (goal-id ?goal-id))
-      (plan-action
-        (id (+ ?action-index ?id-offset))
-        (plan-id ?plan-id)
-        (action-name (sym-cat (bson-get ?action "name")))
-        (param-values ?param-values)
+      (assert
+        (plan (id ?plan-id) (goal-id ?goal-id))
+        (plan-action
+          (id (+ ?action-index ?id-offset))
+          (plan-id ?plan-id)
+          (action-name ?action-name)
+          (param-values ?param-values)
+        )
       )
     )
   )
