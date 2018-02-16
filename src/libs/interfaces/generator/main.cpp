@@ -133,8 +133,7 @@ main(int argc, char **argv)
 	delete iparse;
 	delete idigest;
       } catch (Exception &e) {
-	cout << "Generating the interface failed." << endl;
-	e.print_trace();
+        cout << "Generating the interface failed: " << e.what_no_backtrace() << endl;
         rv = -1;
       }
     }

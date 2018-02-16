@@ -97,7 +97,6 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   add_fieldinfo(IFT_UINT32, "object_type", 1, &data->object_type);
   add_fieldinfo(IFT_UINT32, "flags", 1, &data->flags);
   add_fieldinfo(IFT_BOOL, "visible", 1, &data->visible);
-  add_fieldinfo(IFT_BOOL, "valid", 1, &data->valid);
   add_fieldinfo(IFT_INT32, "visibility_history", 1, &data->visibility_history);
   add_fieldinfo(IFT_FLOAT, "roll", 1, &data->roll);
   add_fieldinfo(IFT_FLOAT, "pitch", 1, &data->pitch);
@@ -125,7 +124,7 @@ ObjectPositionInterface::ObjectPositionInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "relative_y_velocity", 1, &data->relative_y_velocity);
   add_fieldinfo(IFT_FLOAT, "relative_z_velocity", 1, &data->relative_z_velocity);
   add_fieldinfo(IFT_FLOAT, "relative_xyz_velocity_covariance", 9, &data->relative_xyz_velocity_covariance);
-  unsigned char tmp_hash[] = {0x9f, 0x72, 0x61, 0x39, 0x9a, 0xb4, 0x79, 0x4c, 0x33, 0x3, 0x3a, 0x75, 0xfc, 0xf0, 0xe5, 0x7e};
+  unsigned char tmp_hash[] = {0x65, 0xac, 0x82, 0xde, 0xcd, 0x8b, 0x12, 0x81, 0x7b, 0xe6, 0x61, 0xdd, 0x30, 0x55, 0xd, 0x38};
   set_hash(tmp_hash);
 }
 
@@ -237,37 +236,6 @@ void
 ObjectPositionInterface::set_visible(const bool new_visible)
 {
   data->visible = new_visible;
-  data_changed = true;
-}
-
-/** Get valid value.
- * True, if this position is valid.
- * @return valid value
- */
-bool
-ObjectPositionInterface::is_valid() const
-{
-  return data->valid;
-}
-
-/** Get maximum length of valid value.
- * @return length of valid value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-ObjectPositionInterface::maxlenof_valid() const
-{
-  return 1;
-}
-
-/** Set valid value.
- * True, if this position is valid.
- * @param new_valid new valid value
- */
-void
-ObjectPositionInterface::set_valid(const bool new_valid)
-{
-  data->valid = new_valid;
   data_changed = true;
 }
 

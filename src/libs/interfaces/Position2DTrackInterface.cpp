@@ -53,10 +53,9 @@ Position2DTrackInterface::Position2DTrackInterface() : Interface()
   add_fieldinfo(IFT_FLOAT, "track_x_positions", 30, &data->track_x_positions);
   add_fieldinfo(IFT_FLOAT, "track_y_positions", 30, &data->track_y_positions);
   add_fieldinfo(IFT_INT32, "track_timestamps", 30, &data->track_timestamps);
-  add_fieldinfo(IFT_BOOL, "valid", 1, &data->valid);
   add_fieldinfo(IFT_UINT32, "length", 1, &data->length);
   add_fieldinfo(IFT_UINT32, "track_id", 1, &data->track_id);
-  unsigned char tmp_hash[] = {0xcd, 0xb8, 0x68, 0x14, 0xff, 0x3, 0xe4, 0xc4, 0x20, 0x43, 0x44, 0xb8, 0x86, 0x87, 0xa3, 0x4c};
+  unsigned char tmp_hash[] = {0x48, 0xe9, 0x35, 0x74, 0x18, 0x14, 0x46, 0x31, 0x6e, 0x5c, 0x76, 0x2e, 0x39, 0x1, 0x5, 0x30};
   set_hash(tmp_hash);
 }
 
@@ -282,37 +281,6 @@ Position2DTrackInterface::set_track_timestamps(unsigned int index, const int32_t
   data->track_timestamps[index] = new_track_timestamps;
   data_changed = true;
 }
-/** Get valid value.
- * True, if this track is valid.
- * @return valid value
- */
-bool
-Position2DTrackInterface::is_valid() const
-{
-  return data->valid;
-}
-
-/** Get maximum length of valid value.
- * @return length of valid value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-Position2DTrackInterface::maxlenof_valid() const
-{
-  return 1;
-}
-
-/** Set valid value.
- * True, if this track is valid.
- * @param new_valid new valid value
- */
-void
-Position2DTrackInterface::set_valid(const bool new_valid)
-{
-  data->valid = new_valid;
-  data_changed = true;
-}
-
 /** Get length value.
  * Length of the Tracks (i.e. up to which index there are valid positions).
  * @return length value

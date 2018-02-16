@@ -55,7 +55,6 @@ class Position2DTrackInterface : public Interface
       Timestamps of the track. The first array-element is the oldest position of the track, 
       the last is the newest.
      */
-    bool valid; /**< True, if this track is valid. */
     uint32_t length; /**< Length of the Tracks (i.e. up to which index there are valid positions). */
     uint32_t track_id; /**< The ID of the Track. */
   } Position2DTrackInterface_data_t;
@@ -86,9 +85,6 @@ class Position2DTrackInterface : public Interface
   void set_track_timestamps(unsigned int index, const int32_t new_track_timestamps);
   void set_track_timestamps(const int32_t * new_track_timestamps);
   size_t maxlenof_track_timestamps() const;
-  bool is_valid() const;
-  void set_valid(const bool new_valid);
-  size_t maxlenof_valid() const;
   uint32_t length() const;
   void set_length(const uint32_t new_length);
   size_t maxlenof_length() const;

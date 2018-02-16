@@ -21,6 +21,7 @@
  */
 
 #include <interfaces/generator/message.h>
+#include <interfaces/generator/exceptions.h>
 
 
 /** @class InterfaceMessage message.h <interfaces/generator/message.h>

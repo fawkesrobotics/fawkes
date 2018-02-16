@@ -22,6 +22,7 @@
 
 #include <interfaces/generator/enum_constant.h>
 #include <interfaces/generator/exceptions.h>
+#include <interfaces/generator/checker.h>
 
 /** @class InterfaceEnumConstant interfaces/generator/enum_constant.h
  * Interface generator internal representation of a enum constant as parsed
@@ -36,6 +37,8 @@
 InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name,
 					     const std::string &comment)
 {
+  if (!InterfaceChecker::validName(name, reserved_names_interface()))
+    throw InterfaceGeneratorReservedIdentifierException("enum constant", name.c_str());
   __name  = name;
   __comment = comment;
   __items.clear();
@@ -80,6 +83,8 @@ InterfaceEnumConstant::get_items() const
 void
 InterfaceEnumConstant::add_item(std::string name, std::string comment)
 {
+  if (!InterfaceChecker::validName(name, reserved_names_interface()))
+    throw InterfaceGeneratorReservedIdentifierException("enum item", name.c_str());
   std::vector<EnumItem>::iterator i;
   for (i = __items.begin(); i != __items.end(); ++i) {
     if (i->name == name) {
