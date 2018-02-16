@@ -34,6 +34,7 @@
 #include <fcntl.h>
 #include <cerrno>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <string>
 
@@ -82,6 +83,30 @@ FileLogger::FileLogger(const char* filename_pattern, LogLevel log_level)
   log_file = fdopen(fd, "a");
   // make buffer line-buffered
   setvbuf(log_file, NULL, _IOLBF, 0);
+
+  // create a symlink for the latest log if the filename has a time stamp
+  if (pos != std::string::npos) {
+    std::string latest_filename(filename_pattern);
+    latest_filename.replace(pos, time_var.length(), "latest");
+    int link_res = symlink(filename, latest_filename.c_str());
+    if (link_res == -1) {
+      if (errno == EEXIST) {
+        int unlink_res = unlink(latest_filename.c_str());
+        if (unlink_res == -1) {
+          throw Exception(errno, "Failed to update symlink at %s",
+              latest_filename.c_str());
+        }
+        link_res = symlink(filename, latest_filename.c_str());
+        if (link_res == -1) {
+          throw Exception(errno, "Failed ot create symlink from %s to %s",
+              filename, latest_filename.c_str());
+        }
+      } else {
+          throw Exception(errno, "Failed ot create symlink from %s to %s",
+              filename, latest_filename.c_str());
+      }
+    }
+  }
 
   mutex = new Mutex();
 }
