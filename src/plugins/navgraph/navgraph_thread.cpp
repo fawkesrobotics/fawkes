@@ -833,8 +833,11 @@ NavGraphThread::send_next_goal()
 		      tpose.getOrigin().x(), tpose.getOrigin().y(),
 		      tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
 
+
+    gotomsg->ref();
     nav_if_->msgq_enqueue(gotomsg);
     cmd_msgid_ = gotomsg->id();
+    gotomsg->unref();
     cmd_sent_at_->stamp();
 
     error_at_->stamp();
