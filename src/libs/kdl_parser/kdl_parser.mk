@@ -29,7 +29,7 @@ endif
 HAVE_URDFDOMHEADERS=$(if $(shell $(PKGCONFIG) --exists 'urdfdom_headers'; echo $${?/1/}),1,0)
 HAVE_URDFDOM=$(if $(shell $(PKGCONFIG) --exists 'urdfdom'; echo $${?/1/}),1,0)
 HAVE_TINYXML=$(if $(wildcard $(SYSROOT)/usr/include/tinyxml.h),1,0)
-
+HAVE_URDFDOM_TYPES_H=$(if $(shell $(PKGCONFIG) --atleast-version 0.4.0 'urdfdom_headers'; echo $${?/1/}),1,0)
 
 ifeq ($(HAVE_KDL),1)
   ifeq ($(HAVE_URDFDOMHEADERS),1)
@@ -43,6 +43,9 @@ ifeq ($(HAVE_KDL),1)
           $(shell $(PKGCONFIG) --libs 'urdfdom') \
           -ltinyxml
         HAVE_KDLPARSER=1
+        ifeq ($(HAVE_URDFDOM_TYPES_H),1)
+          CFLAGS_KDLPARSER += -DHAVE_URDFDOM_TYPES_H
+        endif
       endif
     endif
   endif
