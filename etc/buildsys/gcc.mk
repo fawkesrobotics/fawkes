@@ -55,7 +55,7 @@ endif
 ifeq ($(call gcc_atleast_version,5,0),1)
   HAVE_CPP17=1
   CFLAGS_CPP14=-std=c++14
-  CLFAGS_CPP17=-std=c++1z
+  CFLAGS_CPP17=-std=c++1z
 endif
 ifeq ($(call gcc_atleast_version,6,0),1)
   # The default for GCC 6 is C++14
