@@ -145,6 +145,76 @@ namespace fawkes {
  * @param path path to value
  * @return value
  *
+ * @fn float Configuration::get_float_or_default(const char *path, const float &default_val)
+ * Get value from configuration which is of type float, or the given default if
+ * the path does not exist
+ * @param path path to value
+ * @param default_val the default value
+ * @return value
+ *
+ * @fn unsigned int Configuration::get_uint_or_default(const char *path, const unsigned int &default_val)
+ * Get value from configuration which is of type unsigned int, or the given
+ * default if the path does not exist
+ * @param path path to value
+ * @param default_val the default value
+ * @return value
+ *
+ * @fn int Configuration::get_int_or_default(const char *path, const int &default_val)
+ * Get value from configuration which is of type int, or the given default if
+ * the path does not exist
+ * @param path path to value
+ * @param default_val the default value
+ * @return value
+ *
+ * @fn bool Configuration::get_bool_or_default(const char *path, const bool &default_val)
+ * Get value from configuration which is of type bool, or the given default if
+ * the path does not exist
+ * @param path path to value
+ * @param default_val the default value
+ * @return value
+ *
+ * @fn string Configuration::get_string_or_default(const char *path, const string &default_val)
+ * Get value from configuration which is of type string, or the given default if
+ * the path does not exist
+ * @param path path to value
+ * @param default_val the default value
+ * @return value
+ *
+ * @fn std::vector<float> Configuration::get_floats_or_defaults(const char *path, const std::vector<float> &default_val)
+ * Get list of values from configuration which is of type float, or the given
+ * default if the path does not exist
+ * @param path path to value
+ * @param default_val the default value
+ * @return value
+ *
+ * @fn std::vector<unsigned int> Configuration::get_uints_or_defaults(const char *path, const std::vector<unsigned int> &default_val)
+ * Get list of values from configuration which is of type unsigned int, or the given
+ * default if the path does not exist
+ * @param path path to value
+ * @param default_val the default value
+ * @return value
+ *
+ * @fn std::vector<int> Configuration::get_ints_or_defaults(const char *path, const std::vector<int> &default_val)
+ * Get list of values from configuration which is of type int, or the given
+ * default if the path does not exist
+ * @param path path to value
+ * @param default_val the default value
+ * @return value
+ *
+ * @fn std::vector<bool> Configuration::get_bools_or_defaults(const char *path, const std::vector<bool> &default_val)
+ * Get list of values from configuration which is of type bool, or the given
+ * default if the path does not exist
+ * @param path path to value
+ * @param default_val the default value
+ * @return value
+ *
+ * @fn std::vector<string> Configuration::get_strings_or_defaults(const char *path, const std::vector<string> &default_val)
+ * Get list of values from configuration which is of type string, or the given
+ * default if the path does not exist
+ * @param path path to value
+ * @param default_val the default value
+ * @return value
+ *
  * @fn Configuration::ValueIterator * Configuration::get_value(const char *path)
  * Get value from configuration.
  * @param path path to value
@@ -633,5 +703,104 @@ Configuration::notify_handlers(const char *path, bool comment_changed)
   delete h;
 }
 
+float
+Configuration::get_float_or_default(const char *path, const float &default_val)
+{
+  try {
+    return get_float(path);
+  } catch (ConfigEntryNotFoundException & e) {
+    return default_val;
+  }
+}
+
+unsigned int
+Configuration::get_uint_or_default(const char *path, const unsigned int &default_val)
+{
+  try {
+    return get_uint(path);
+  } catch (ConfigEntryNotFoundException & e) {
+    return default_val;
+  }
+}
+
+int
+Configuration::get_int_or_default(const char *path, const int &default_val)
+{
+  try {
+    return get_int(path);
+  } catch (ConfigEntryNotFoundException & e) {
+    return default_val;
+  }
+}
+
+bool
+Configuration::get_bool_or_default(const char *path, const bool &default_val)
+{
+  try {
+    return get_bool(path);
+  } catch (ConfigEntryNotFoundException & e) {
+    return default_val;
+  }
+}
+
+std::string
+Configuration::get_string_or_default(const char *path, const std::string &default_val)
+{
+  try {
+    return get_string(path);
+  } catch (ConfigEntryNotFoundException & e) {
+    return default_val;
+  }
+}
+
+std::vector<float>
+Configuration::get_floats_or_defaults(const char *path, const std::vector<float> &default_val)
+{
+  try {
+    return get_floats(path);
+  } catch (ConfigEntryNotFoundException & e) {
+    return default_val;
+  }
+}
+
+std::vector<unsigned int>
+Configuration::get_uints_or_defaults(const char *path, const std::vector<unsigned int> &default_val)
+{
+  try {
+    return get_uints(path);
+  } catch (ConfigEntryNotFoundException & e) {
+    return default_val;
+  }
+}
+
+std::vector<int>
+Configuration::get_ints_or_defaults(const char *path, const std::vector<int> &default_val)
+{
+  try {
+    return get_ints(path);
+  } catch (ConfigEntryNotFoundException & e) {
+    return default_val;
+  }
+}
+
+std::vector<bool>
+Configuration::get_bools_or_defaults(const char *path, const std::vector<bool> &default_val)
+{
+  try {
+    return get_bools(path);
+  } catch (ConfigEntryNotFoundException & e) {
+    return default_val;
+  }
+}
+
+std::vector<std::string>
+Configuration::get_strings_or_defaults(const char *path, const std::vector<std::string> &default_val)
+{
+  try {
+    return get_strings(path);
+  } catch (ConfigEntryNotFoundException & e) {
+    return default_val;
+  }
+}
 
 } // end namespace fawkes
