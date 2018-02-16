@@ -174,6 +174,7 @@ class InterfaceGeneratorReservedIdentifierException : public fawkes::Exception {
 public:
   /**
    * @brief InterfaceGeneratorReservedIdentifierException
+   * @param item type of offending item
    * @param name Offending name
    */
   InterfaceGeneratorReservedIdentifierException(const char *item, const char *name)

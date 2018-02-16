@@ -151,8 +151,13 @@ InterfaceChecker::validValue(const std::string &type, const std::string &value)
   }
 }
 
-/** Check for identifiers that are used by the implementation and cannot be used
-* as field or message names */
+/** Check identifiers.
+ * Identifiers that are used by the implementation and cannot be used
+ * as field or message names are rejected.
+ * @param name identifier to check
+ * @param reserved_names reserved names to reject
+ * @return true if name is valid, false otherwise
+ */
 bool
 InterfaceChecker::validName(const std::string &name, const std::set<std::string> &reserved_names)
 {

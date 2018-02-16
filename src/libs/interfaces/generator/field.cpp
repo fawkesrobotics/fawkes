@@ -368,6 +368,7 @@ InterfaceField::setAttribute(const std::string &attr_name, const std::string &at
 
 /** Assert validity.
  * Calling valid() acts like an assertion. An Exception is thrown if something is wrong.
+ * @param reserved_names reserved names that may not be used
  * @exception InterfaceGeneratorInvalidTypeException thrown if InterfaceDataTypeChecker
  * reports invalid type.
  * @exception InterfaceGeneratorInvalidValueException thrown if any supplied value is

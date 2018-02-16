@@ -67,6 +67,7 @@ InterfaceParser::~InterfaceParser()
 /** Get parsed fields.
  * Get fields stored below the given node.
  * @param node root node where to start searching
+ * @param reserved_names reserved names which may not be used as identifiers
  * @return vector of field representations.
  */
 std::vector<InterfaceField>
