@@ -71,7 +71,7 @@ MessageRegister::MessageRegister()
  * within these files will automatically be registered and available for dynamic
  * message creation.
  */
-MessageRegister::MessageRegister(std::vector<std::string> &proto_path)
+MessageRegister::MessageRegister(const std::vector<std::string> &proto_path)
 {
   pb_srctree_ = new google::protobuf::compiler::DiskSourceTree();
   for (size_t i = 0; i < proto_path.size(); ++i) {
@@ -122,7 +122,7 @@ MessageRegister::~MessageRegister()
 
 
 google::protobuf::Message *
-MessageRegister::create_msg(std::string &msg_type)
+MessageRegister::create_msg(const std::string &msg_type)
 {
   const google::protobuf::DescriptorPool *pool =
     google::protobuf::DescriptorPool::generated_pool();
@@ -254,7 +254,7 @@ MessageRegister::new_message_for(uint16_t component_id, uint16_t msg_type)
  * for the given message type.
  */
 std::shared_ptr<google::protobuf::Message>
-MessageRegister::new_message_for(std::string &full_name)
+MessageRegister::new_message_for(const std::string &full_name)
 {
   std::lock_guard<std::mutex> lock(maps_mutex_);
   if (message_by_typename_.find(full_name) == message_by_typename_.end()) {
@@ -283,7 +283,7 @@ MessageRegister::new_message_for(std::string &full_name)
  */ 
 void
 MessageRegister::serialize(uint16_t component_id, uint16_t msg_type,
-			   google::protobuf::Message &msg,
+			   const google::protobuf::Message &msg,
 			   frame_header_t &frame_header,
 			   message_header_t &message_header, 
 			   std::string &data)

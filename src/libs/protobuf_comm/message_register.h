@@ -70,7 +70,7 @@ class MessageRegister : boost::noncopyable
 {
  public:
   MessageRegister();
-  MessageRegister(std::vector<std::string> &proto_path);
+  MessageRegister(const std::vector<std::string> &proto_path);
   ~MessageRegister();
 
   void add_message_type(std::string msg_type);
@@ -133,10 +133,10 @@ class MessageRegister : boost::noncopyable
   new_message_for(uint16_t component_id, uint16_t msg_type);
 
   std::shared_ptr<google::protobuf::Message>
-  new_message_for(std::string &full_name);
+  new_message_for(const std::string &full_name);
 
   void serialize(uint16_t component_id, uint16_t msg_type,
-		 google::protobuf::Message &msg,
+		 const google::protobuf::Message &msg,
 		 frame_header_t &frame_header,
 		 message_header_t &message_header, 
 		 std::string &data);
@@ -162,7 +162,7 @@ class MessageRegister : boost::noncopyable
   typedef std::map<std::string, google::protobuf::Message *> TypeNameMap;
 
   KeyType key_from_desc(const google::protobuf::Descriptor *desc);
-  google::protobuf::Message * create_msg(std::string &msg_type);
+  google::protobuf::Message * create_msg(const std::string &msg_type);
 
   std::mutex maps_mutex_;
   TypeMap message_by_comp_type_;
