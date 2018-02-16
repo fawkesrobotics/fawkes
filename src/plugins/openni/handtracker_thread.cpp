@@ -192,7 +192,6 @@ OpenNiHandTrackerThread::finalize()
   for (i = __hands.begin(); i != __hands.end(); ++i) {
     __hand_gen->StopTracking(i->first);
     i->second->set_visible(false);
-    i->second->set_valid(false);
     i->second->write();
     blackboard->close(i->second);
   }
