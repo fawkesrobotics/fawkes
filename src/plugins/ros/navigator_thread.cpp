@@ -53,12 +53,15 @@ RosNavigatorThread::init()
 
   //tell the action client that we want to spin a thread by default
   ac_ = new MoveBaseClient("move_base", false);
+  
 
   cmd_sent_ = false;
   connected_history_ = false;
   nav_if_->set_final(true);
   nav_if_->write();
   load_config();
+
+  ac_init_checktime_ = new fawkes::Time(clock);
 }
 
 void
@@ -72,6 +75,7 @@ RosNavigatorThread::finalize()
     logger->log_error(name(), e);
   }
   delete ac_;
+  delete ac_init_checktime_;
 }
 
 void
@@ -215,6 +219,13 @@ void
 RosNavigatorThread::loop()
 {
   if (! ac_->isServerConnected()) {
+	  fawkes::Time now(clock);
+	  if (now - ac_init_checktime_ >= 5.0) {
+		  // action client never connected, yet. Re-create to avoid stale client.
+		  delete ac_;
+		  ac_ = new MoveBaseClient("move_base", false);
+		  ac_init_checktime_->stamp();
+	  }
     if (! nav_if_->msgq_empty()) {
       logger->log_warn(name(), "Command received while ROS ActionClient "
 		       "not reachable, ignoring");
@@ -228,7 +239,6 @@ RosNavigatorThread::loop()
     }
 
   } else {
-
     connected_history_ = true;
     // process incoming messages from fawkes
     while (! nav_if_->msgq_empty()) {

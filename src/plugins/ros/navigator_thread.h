@@ -28,6 +28,7 @@
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <aspect/tf.h>
+#include <aspect/clock.h>
 #include <plugins/ros/aspect/ros.h>
 
 #include <interfaces/NavigatorInterface.h>
@@ -50,6 +51,7 @@ namespace fawkes {
 
 class RosNavigatorThread
 : public fawkes::Thread,
+  public fawkes::ClockAspect,
   public fawkes::BlockedTimingAspect,
   public fawkes::LoggingAspect,
   public fawkes::BlackBoardAspect,
@@ -90,6 +92,8 @@ class RosNavigatorThread
   bool cmd_sent_;
   bool connected_history_;
 
+  fawkes::Time *ac_init_checktime_;
+  
   std::string cfg_prefix_;
 
   // ROS dynamic reconfigure parts
