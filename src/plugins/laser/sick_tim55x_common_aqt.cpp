@@ -103,15 +103,18 @@ SickTiM55xCommonAcquisitionThread::pre_init(fawkes::Configuration *config,
 
   if (dev_model_ == "TiM5xx") {
     _distances_size = 360;
+    _echoes_size = 360;
     expected_num_data_ = 271;
   } else if (dev_model_ == "TiM571") {
     _distances_size = 1080;
+    _echoes_size = 1080;
     expected_num_data_ = 811;
   } else {
     throw Exception("LaserSick5xx: unknown model %s", dev_model_.c_str());
   }
 
   alloc_distances(_distances_size);
+  alloc_echoes(_echoes_size);
 
   config->add_change_handler(this);
 }
