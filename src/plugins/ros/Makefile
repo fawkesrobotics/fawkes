@@ -152,25 +152,33 @@ ifeq ($(HAVE_ROS),1)
 
   ifeq ($(call ros-have-pkg,sensor_msgs),1)
     ifeq ($(HAVE_PCL),1)
-      CFLAGS_pcl_adapter += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS)
-      CFLAGS_pcl_thread += $(call ros-pkg-cflags,sensor_msgs) \
-			   $(CFLAGS_TF) $(CFLAGS_PCL) $(CFLAGS)
-      CFLAGS_pcl_plugin = $(CFLAGS_pcl_thread) $(CFLAGS)
-      LDFLAGS_ros_pcl += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(call ros-pkg-lflags,sensor_msgs)
-      PLUGINS_all += $(PLUGINDIR)/ros-pcl.so
+      ifeq ($(call ros-have-pkg,pcl_conversions),1)
+        CFLAGS_pcl_adapter += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS)
+        CFLAGS_pcl_thread += $(call ros-pkg-cflags,sensor_msgs) \
+			     $(CFLAGS_TF) $(CFLAGS_PCL) $(CFLAGS)
+        CFLAGS_pcl_plugin = $(CFLAGS_pcl_thread) $(CFLAGS)
+        LDFLAGS_ros_pcl += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(call ros-pkg-lflags,sensor_msgs)
+        PLUGINS_all += $(PLUGINDIR)/ros-pcl.so
+      else
+        WARN_TARGETS += warning_pcl_conversions
+      endif
     else
       WARN_TARGETS += warning_pcl
     endif
 
     ifeq ($(call ros-have-pkg,image_transport),1)
-      ifeq ($(HAVE_TINYXML),1)
-        CFLAGS_image_thread += $(call ros-pkg-cflags,image_transport) $(CFLAGS)
-        CFLAGS_image_plugin = $(CFLAGS_image_thread)
-        LDFLAGS_ros_images += $(call ros-pkg-lflags,image_transport)
-        PLUGINS_all += $(PLUGINDIR)/ros-images.so
+      ifeq ($(call ros-have-pkg,pcl_conversions),1)
+        ifeq ($(HAVE_TINYXML),1)
+          CFLAGS_image_thread += $(call ros-pkg-cflags,image_transport) $(CFLAGS)
+          CFLAGS_image_plugin = $(CFLAGS_image_thread)
+          LDFLAGS_ros_images += $(call ros-pkg-lflags,image_transport)
+          PLUGINS_all += $(PLUGINDIR)/ros-images.so
+        else
+          WARN_TARGETS += warning_tinyxml
+        endif
       else
-        WARN_TARGETS += warning_tinyxml
-    endif
+        WARN_TARGETS += warning_images_pcl_conversions
+      endif
     else
       WARN_TARGETS += warning_images
     endif
@@ -328,8 +336,12 @@ warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (pcl[-devel] not installed)"
 warning_rospcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (ROS package pcl not found)"
+warning_pcl_conversions:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS point clouds plugin$(TNORMAL) (ROS package pcl_conversions not found)"
 warning_images:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS images plugin$(TNORMAL) (ROS package image_transport not found)"
+warning_images_pcl_conversions:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS images plugin$(TNORMAL) (ROS package pcl_conversions not found)"
 warning_laserscan:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS laser scan plugin$(TNORMAL) (ROS package sensor_msgs not found)"
 warning_nav_msgs:
