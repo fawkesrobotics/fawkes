@@ -135,6 +135,7 @@ class NavGraphThread
 
   fawkes::LockPtr<fawkes::NavGraphConstraintRepo> constraint_repo_;
 
+  unsigned int  cmd_msgid_;
   fawkes::Time *cmd_sent_at_;
   fawkes::Time *path_planned_at_;
 

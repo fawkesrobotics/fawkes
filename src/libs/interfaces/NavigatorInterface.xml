@@ -107,6 +107,15 @@
   </data>
   <message name="Stop">
     <comment>Stop motion immediately.</comment>
+    <field type="uint32" name="msgid">
+	    If zero, stops any motion. If non-zero, the component shall only
+	    stop the motion if the currently executed command was received
+	    through a message with that specific ID.
+
+	    Use the specific version whenever possible. It avoids a race
+	    condition if one intstructing component sends a stop, and
+	    another a new drive command at the same time.
+    </field>
   </message>
   <message name="Turn">
     <comment>Turn around own major axis. Opposed to setting a goto with a target

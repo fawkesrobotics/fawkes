@@ -177,6 +177,7 @@ NavGraphThread::init()
   last_node_         = "";
   error_reason_      = "";
   constrained_plan_  = false;
+  cmd_msgid_         = 0;
   cmd_sent_at_       = new Time(clock);
   path_planned_at_   = new Time(clock);
   target_reached_at_ = new Time(clock);
@@ -233,10 +234,16 @@ NavGraphThread::loop()
 
     if (pp_nav_if_->msgq_first_is<NavigatorInterface::StopMessage>()) {
       NavigatorInterface::StopMessage *msg = pp_nav_if_->msgq_first(msg);
-      pp_nav_if_->set_msgid(msg->id());
+      if (msg->msgid() == 0 || msg->msgid() == pp_nav_if_->msgid()) {
+	      NavigatorInterface::StopMessage *msg = pp_nav_if_->msgq_first(msg);
+	      pp_nav_if_->set_msgid(msg->id());
 
-      stop_motion();
-      exec_active_ = false;
+	      stop_motion();
+	      exec_active_ = false;
+      } else {
+	      logger->log_warn(name(), "Received stop message for non-active command "
+	                       "(got %u, running %u)", msg->msgid(), pp_nav_if_->msgid());
+      }
 
     } else if (pp_nav_if_->msgq_first_is<NavigatorInterface::CartesianGotoMessage>()) {
       NavigatorInterface::CartesianGotoMessage *msg = pp_nav_if_->msgq_first(msg);
@@ -715,7 +722,7 @@ NavGraphThread::stop_motion()
 {
 	if (! cfg_enable_path_execution_)  return;
 
-  NavigatorInterface::StopMessage *stop = new NavigatorInterface::StopMessage();
+  NavigatorInterface::StopMessage *stop = new NavigatorInterface::StopMessage(cmd_msgid_);
   try {
     nav_if_->msgq_enqueue(stop);
   } catch (Exception &e) {
@@ -728,6 +735,7 @@ NavGraphThread::stop_motion()
   target_rotating_ = false;
   pp_nav_if_->set_final(true);
   traversal_.invalidate();
+  cmd_msgid_ = 0;
 
 #ifdef HAVE_VISUALIZATION
   if (vt_) {
@@ -796,8 +804,8 @@ NavGraphThread::send_next_goal()
 
   NavigatorInterface::CartesianGotoMessage *gotomsg =
     new NavigatorInterface::CartesianGotoMessage(tpose.getOrigin().x(),
-						 tpose.getOrigin().y(),
-						 tf::get_yaw(tpose.getRotation()));
+                                                 tpose.getOrigin().y(),
+                                                 tf::get_yaw(tpose.getRotation()));
 
   NavigatorInterface::SetStopAtTargetMessage* stop_at_target_msg      = new NavigatorInterface::SetStopAtTargetMessage(stop_at_target);
   NavigatorInterface::SetOrientationModeMessage* orient_mode_msg;
@@ -825,7 +833,11 @@ NavGraphThread::send_next_goal()
 		      tpose.getOrigin().x(), tpose.getOrigin().y(),
 		      tf::get_yaw(tpose.getRotation()), next_target.name().c_str());
 
+
+    gotomsg->ref();
     nav_if_->msgq_enqueue(gotomsg);
+    cmd_msgid_ = gotomsg->id();
+    gotomsg->unref();
     cmd_sent_at_->stamp();
 
     error_at_->stamp();

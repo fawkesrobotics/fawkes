@@ -114,6 +114,15 @@ class NavigatorInterface : public Interface
     typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
+      uint32_t msgid; /**< 
+	    If zero, stops any motion. If non-zero, the component shall only
+	    stop the motion if the currently executed command was received
+	    through a message with that specific ID.
+
+	    Use the specific version whenever possible. It avoids a race
+	    condition if one intstructing component sends a stop, and
+	    another a new drive command at the same time.
+     */
     } StopMessage_data_t;
 
     StopMessage_data_t *data;
@@ -121,11 +130,15 @@ class NavigatorInterface : public Interface
   interface_enum_map_t enum_map_DriveMode;
   interface_enum_map_t enum_map_OrientationMode;
    public:
+    StopMessage(const uint32_t ini_msgid);
     StopMessage();
     ~StopMessage();
 
     StopMessage(const StopMessage *m);
     /* Methods */
+    uint32_t msgid() const;
+    void set_msgid(const uint32_t new_msgid);
+    size_t maxlenof_msgid() const;
     virtual Message * clone() const;
   };
 

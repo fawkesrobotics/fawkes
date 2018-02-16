@@ -127,7 +127,7 @@ NavigatorInterface::NavigatorInterface() : Interface()
   add_messageinfo("SetStopAtTargetMessage");
   add_messageinfo("SetOrientationModeMessage");
   add_messageinfo("ResetParametersMessage");
-  unsigned char tmp_hash[] = {0xf6, 0x4a, 0xa, 0xc5, 0xe6, 0x3e, 0xe5, 0xd9, 0x89, 0x53, 0x89, 0xe8, 0xce, 0xef, 0xe0, 0xd9};
+  unsigned char tmp_hash[] = {0x43, 0xfc, 0x3a, 0xa9, 0x15, 0x62, 0x32, 0x4c, 0x34, 0x54, 0x7d, 0xd4, 0xf, 0x20, 0x43, 0xcc};
   set_hash(tmp_hash);
 }
 
@@ -850,6 +850,26 @@ NavigatorInterface::enum_tostring(const char *enumtype, int val) const
  */
 
 
+/** Constructor with initial values.
+ * @param ini_msgid initial value for msgid
+ */
+NavigatorInterface::StopMessage::StopMessage(const uint32_t ini_msgid) : Message("StopMessage")
+{
+  data_size = sizeof(StopMessage_data_t);
+  data_ptr  = malloc(data_size);
+  memset(data_ptr, 0, data_size);
+  data      = (StopMessage_data_t *)data_ptr;
+  data_ts   = (message_data_ts_t *)data_ptr;
+  data->msgid = ini_msgid;
+  enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
+  enum_map_DriveMode[(int)Forward] = "Forward";
+  enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
+  enum_map_DriveMode[(int)Backward] = "Backward";
+  enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
+  enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
+  enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
+}
 /** Constructor */
 NavigatorInterface::StopMessage::StopMessage() : Message("StopMessage")
 {
@@ -865,6 +885,7 @@ NavigatorInterface::StopMessage::StopMessage() : Message("StopMessage")
   enum_map_DriveMode[(int)ESCAPE] = "ESCAPE";
   enum_map_OrientationMode[(int)OrientAtTarget] = "OrientAtTarget";
   enum_map_OrientationMode[(int)OrientDuringTravel] = "OrientDuringTravel";
+  add_fieldinfo(IFT_UINT32, "msgid", 1, &data->msgid);
 }
 
 /** Destructor */
@@ -886,6 +907,52 @@ NavigatorInterface::StopMessage::StopMessage(const StopMessage *m) : Message("St
 }
 
 /* Methods */
+/** Get msgid value.
+ * 
+	    If zero, stops any motion. If non-zero, the component shall only
+	    stop the motion if the currently executed command was received
+	    through a message with that specific ID.
+
+	    Use the specific version whenever possible. It avoids a race
+	    condition if one intstructing component sends a stop, and
+	    another a new drive command at the same time.
+    
+ * @return msgid value
+ */
+uint32_t
+NavigatorInterface::StopMessage::msgid() const
+{
+  return data->msgid;
+}
+
+/** Get maximum length of msgid value.
+ * @return length of msgid value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+NavigatorInterface::StopMessage::maxlenof_msgid() const
+{
+  return 1;
+}
+
+/** Set msgid value.
+ * 
+	    If zero, stops any motion. If non-zero, the component shall only
+	    stop the motion if the currently executed command was received
+	    through a message with that specific ID.
+
+	    Use the specific version whenever possible. It avoids a race
+	    condition if one intstructing component sends a stop, and
+	    another a new drive command at the same time.
+    
+ * @param new_msgid new msgid value
+ */
+void
+NavigatorInterface::StopMessage::set_msgid(const uint32_t new_msgid)
+{
+  data->msgid = new_msgid;
+}
+
 /** Clone this message.
  * Produces a message of the same type as this message and copies the
  * data to the new message.
