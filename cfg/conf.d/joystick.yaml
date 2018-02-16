@@ -7,6 +7,15 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
   # Joystick device file
   device_file: /dev/input/js0
 
+  # Set this to true to allow that the joystick device is not
+  # present on plugin loading. The joystick will be initialized as
+  # soo as the device is available.
+  allow_deferred_initialization: true
+
+  # Time in seconds in which to retry opening the joystick
+  # if lost or during deferred initialization (float, sec)
+  retry_interval: 2.0
+
   safety_lockout:
     # True to enable safety lockout feature.
     # This feature requires that axes 0 and 1 (usually primary cross) must be

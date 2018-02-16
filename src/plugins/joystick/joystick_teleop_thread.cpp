@@ -227,22 +227,30 @@ JoystickTeleOpThread::loop()
              ! runstop_pressed_ &&
              motor_if_->motor_state() != MotorInterface::MOTOR_DISABLED)
   {
-	  stop();
-	  MotorInterface::SetMotorStateMessage *msg =
-		  new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_DISABLED);
-	  motor_if_->msgq_enqueue(msg);
-	  logger->log_warn(name(), "Runstop ENABLED");
-	  runstop_pressed_ = true;
+	  try {
+		  stop();
+		  MotorInterface::SetMotorStateMessage *msg =
+			  new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_DISABLED);
+		  motor_if_->msgq_enqueue(msg);
+		  runstop_pressed_ = true;
+		  logger->log_warn(name(), "Runstop ENABLED");
+	  } catch (Exception &e) {
+		  logger->log_error(name(), "FAILED to enable runstop: %s", e.what_no_backtrace());
+	  }
   } else if (joystick_if_->pressed_buttons() == cfg_runstop_disable_buttons_ &&
              ! runstop_pressed_ &&
              motor_if_->motor_state() == MotorInterface::MOTOR_DISABLED)
   {
-	  stop();
-	  MotorInterface::SetMotorStateMessage *msg =
-		  new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED);
-	  motor_if_->msgq_enqueue(msg);
-	  logger->log_warn(name(), "Runstop DISABLED");
-	  runstop_pressed_ = true;
+	  try {
+		  stop();
+		  MotorInterface::SetMotorStateMessage *msg =
+			  new MotorInterface::SetMotorStateMessage(MotorInterface::MOTOR_ENABLED);
+		  motor_if_->msgq_enqueue(msg);
+		  logger->log_warn(name(), "Runstop DISABLED");
+		  runstop_pressed_ = true;
+	  } catch (Exception &e) {
+		  logger->log_error(name(), "FAILED to enable runstop: %s", e.what_no_backtrace());
+	  }
   } else if ((joystick_if_->pressed_buttons() & cfg_deadman_butmask_) ||
 	     (cfg_deadman_use_axis_ &&
 	      ((cfg_deadman_ax_thresh_ >= 0 && joystick_if_->axis(cfg_deadman_axis_) > cfg_deadman_ax_thresh_) ||
