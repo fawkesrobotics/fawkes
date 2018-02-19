@@ -1,5 +1,5 @@
 /***************************************************************************
- *  feature_pddl.cpp - CLIPS PDDL Feature
+ *  clips_pddl_parser_feature.cpp - CLIPS PDDL Parser Feature
  *
  *  Created: Mon 16 Oct 2017 11:14:41 CEST 11:14
  *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
@@ -18,9 +18,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "feature_pddl.h"
-#include "pddl/precondition_visitor.h"
-#include "pddl/effect_visitor.h"
+#include "clips_pddl_parser_feature.h"
+#include "precondition_visitor.h"
+#include "effect_visitor.h"
 
 #include <pddl_parser/pddl_parser.h>
 #include <core/threading/mutex_locker.h>
@@ -37,7 +37,7 @@ using namespace pddl_parser;
  * @author Till Hofmann
  */
 PDDLCLIPSFeature::PDDLCLIPSFeature(fawkes::Logger *logger)
-: CLIPSFeature("pddl"), logger_(logger)
+: CLIPSFeature("pddl-parser"), logger_(logger)
 {
 }
 

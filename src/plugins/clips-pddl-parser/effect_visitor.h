@@ -1,7 +1,7 @@
 /***************************************************************************
- *  feature_pddl.h - CLIPS PDDL feature
+ *  effect_visitor.h - A static visitor to translate an effect
  *
- *  Created: Mon 16 Oct 2017 10:20:07 CEST 10:20
+ *  Created: Tue 31 Oct 2017 12:39:10 CET 12:39
  *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
@@ -18,37 +18,24 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_FEATURE_PDDL_H_
-#define __PLUGINS_CLIPS_FEATURE_PDDL_H_
+#ifndef __PLUGINS_CLIPS_PDDL_PARSER_EFFECT_VISITOR_H_
+#define __PLUGINS_CLIPS_PDDL_PARSER_EFFECT_VISITOR_H_
 
-#include <plugins/clips/aspect/clips_feature.h>
-
+#include <pddl_parser/pddl_parser.h>
+#include <boost/variant/variant.hpp>
+#include <vector>
 #include <string>
-#include <map>
 
-namespace CLIPS {
-  class Environment;
-}
-
-namespace fawkes {
-  class Logger;
-}
-
-class PDDLCLIPSFeature : public fawkes::CLIPSFeature
+class EffectToCLIPSFactVisitor
+: public boost::static_visitor<std::vector<std::string>>
 {
  public:
-  PDDLCLIPSFeature(fawkes::Logger *logger);
-  //virtual ~PDDLCLIPSFeature();
-  virtual void clips_context_init(const std::string &env_name,
-				  fawkes::LockPtr<CLIPS::Environment> &clips);
-  virtual void clips_context_destroyed(const std::string &env_name);
-
+  EffectToCLIPSFactVisitor(const std::string &pddl_operator, bool positive);
+  std::vector<std::string> operator()(pddl_parser::Atom &a) const;
+  std::vector<std::string> operator()(pddl_parser::Predicate &p) const;
  private:
-  void parse_domain(std::string env_name, std::string domain_file);
-
- private:
-  fawkes::Logger     *logger_;
-  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+  std::string pddl_operator_;
+  bool positive_effect_;
 };
 
-#endif /* !__PLUGINS_CLIPS_FEATURE_PDDL_H_ */
+#endif /* !__PLUGINS_CLIPS_PDDL_PARSER_EFFECT_VISITOR_H_ */
