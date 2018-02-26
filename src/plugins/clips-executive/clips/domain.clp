@@ -386,15 +386,15 @@
   (return ?values)
 )
 
-; Atomically assert all effects of an action after it has been executed.
-(defrule domain-apply-effects
+(defrule domain-effects-check-for-sensed
   "Apply effects of an action after it succeeded."
   ?pa <- (plan-action	(id ?id) (action-name ?op) (status EXECUTION-SUCCEEDED)
 											(param-names $?action-param-names) (param-values $?action-param-values))
-	(domain-operator (name ?action-name) (wait-sensed ?wait-sensed))
+	(domain-operator (name ?action-name) (wait-sensed TRUE))
 	=>
+	(bind ?next-state SENSED-EFFECTS-HOLD)
 	(do-for-all-facts ((?e domain-effect) (?p domain-predicate))
-		(and (eq ?e:part-of ?op) (eq ?e:predicate ?p:name))
+		(and ?p:sensed (eq ?e:part-of ?op) (eq ?e:predicate ?p:name))
 
 		; apply if this effect is unconditional or the condition is satisfied
 		(if (or (not (any-factp ((?cep domain-precondition)) (eq ?cep:part-of ?e:name)))
@@ -406,19 +406,48 @@
 						(domain-ground-effect ?e:param-names ?e:param-constants
 																	?action-param-names ?action-param-values))
 
-			(if ?p:sensed
+			(assert (domain-pending-sensed-fact (name ?p:name) (action-id ?id)
+																					(param-values ?values) (type ?e:type)))
+			(bind ?next-state SENSED-EFFECTS-WAIT)
+		)
+	)
+	(modify ?pa (status ?next-state))
+)
+
+(defrule domain-effects-ignore-sensed
+  "Apply effects of an action after it succeeded."
+  ?pa <- (plan-action	(id ?id) (action-name ?op) (status EXECUTION-SUCCEEDED)
+											(param-names $?action-param-names) (param-values $?action-param-values))
+	(domain-operator (name ?action-name) (wait-sensed FALSE))
+	=>
+	(modify ?pa (status SENSED-EFFECTS-HOLD))
+)
+
+; Atomically assert all effects of an action after it has been executed.
+(defrule domain-effects-apply
+  "Apply effects of an action after it succeeded."
+  ?pa <- (plan-action	(id ?id) (action-name ?op) (status SENSED-EFFECTS-HOLD)
+											(param-names $?action-param-names) (param-values $?action-param-values))
+	(domain-operator (name ?action-name))
+	=>
+	(do-for-all-facts ((?e domain-effect) (?p domain-predicate))
+		(and (not ?p:sensed) (eq ?e:part-of ?op) (eq ?e:predicate ?p:name))
+
+		; apply if this effect is unconditional or the condition is satisfied
+		(if (or (not (any-factp ((?cep domain-precondition)) (eq ?cep:part-of ?e:name)))
+						(any-factp ((?cep domain-precondition))
+											 (and (eq ?cep:part-of ?e:name) ?cep:is-satisfied
+														?cep:grounded (eq ?cep:grounded-with ?id))))
+		 then
+			(bind ?values
+						(domain-ground-effect ?e:param-names ?e:param-constants
+																	?action-param-names ?action-param-values))
+
+			(if (eq ?e:type POSITIVE)
 			 then
-				(if ?wait-sensed then
-					(assert (domain-pending-sensed-fact (name ?p:name) (action-id ?id)
-																							(param-values ?values) (type ?e:type)))
-				)
+				(assert (domain-fact (name ?p:name) (param-values ?values)))
 			 else
-				(if (eq ?e:type POSITIVE)
-				 then
-					(assert (domain-fact (name ?p:name) (param-values ?values)))
-				 else
-					(assert (domain-retracted-fact (name ?p:name) (param-values ?values)))
-				)
+				(assert (domain-retracted-fact (name ?p:name) (param-values ?values)))
 			)
 		)
 	)
@@ -441,8 +470,8 @@
   (retract ?r)
 )
 
-(defrule domain-check-positive-pending-sensed-fact
-  "Remove any pending sensed positive facts that have been sensed."
+(defrule domain-effect-sensed-positive-holds
+  "Remove a pending sensed positive fact that has been sensed."
   ?ef <- (domain-pending-sensed-fact (type POSITIVE)
           (name ?predicate) (param-values $?values))
   ?df <- (domain-fact (name ?predicate) (param-values $?values))
@@ -450,8 +479,8 @@
   (retract ?ef)
 )
 
-(defrule domain-check-negative-pending-sensed-fact
-  "Remove any pending sensed negative facts that have been sensed."
+(defrule domain-effect-sensed-negative-holds
+  "Remove a pending sensed negative fact that has been sensed."
   ?ef <- (domain-pending-sensed-fact (type NEGATIVE)
           (name ?predicate) (param-values $?values))
   (not (domain-fact (name ?predicate) (param-values $?values)))
@@ -459,10 +488,17 @@
   (retract ?ef)
 )
 
-(defrule domain-action-is-final
+(defrule domain-effect-wait-sensed-done
+  "After the effects of an action have been applied, change it to SENSED-EFFECTS-HOLD."
+  ?a <- (plan-action (id ?action-id) (status SENSED-EFFECTS-WAIT))
+  (not (domain-pending-sensed-fact (action-id ?action-id)))
+  =>
+  (modify ?a (status SENSED-EFFECTS-HOLD))
+)
+
+(defrule domain-action-final
   "After the effects of an action have been applied, change it to FINAL."
   ?a <- (plan-action (id ?action-id) (status EFFECTS-APPLIED))
-  (not (domain-pending-sensed-fact (action-id ?action-id)))
   =>
   (modify ?a (status FINAL))
   (assert (domain-wm-update))
@@ -473,7 +509,7 @@
 ; might happen if all effects only refer to sensed predicates and
 ; these have the expected values (possibly after a short stabilization
 ; period).
-(defrule domain-action-has-failed
+(defrule domain-action-failed
   "An action has failed."
   ?a <- (plan-action (id ?action-id) (status EXECUTION-FAILED))
   =>
