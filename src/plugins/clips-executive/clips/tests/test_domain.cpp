@@ -265,6 +265,47 @@ TEST_F(DomainTest, WaitForSensedEffects)
         "(and (eq ?a:id 1) (eq ?a:status FINAL))"));
 }
 
+/** Do not wait if the operator has wait-sensed set to FALSE. */
+TEST_F(DomainTest, OnlyWaitForEffectsIfWaitSensedIsTRUE)
+{
+  env.reset();
+  env.assert_fact("(domain-operator (name drop) (wait-sensed FALSE))");
+  env.assert_fact("(domain-operator-parameter"
+                  " (operator drop)"
+                  " (type object)"
+                  " (name o)"
+                  ")");
+  env.assert_fact("(domain-predicate"
+                  " (name holding)"
+                  " (param-names o)"
+                  " (sensed TRUE)"
+                  ")");
+  env.assert_fact("(domain-predicate"
+                  " (name on-ground)"
+                  " (param-names o)"
+                  ")");
+  env.assert_fact("(domain-effect"
+                  " (type NEGATIVE)"
+                  " (part-of drop) (predicate holding) (param-names o)"
+                  ")");
+  env.assert_fact("(domain-effect"
+                  " (part-of drop) (predicate on-ground) (param-names o)"
+                  ")");
+  env.assert_fact("(domain-object (name obj1))");
+  env.assert_fact("(domain-fact (name holding) (param-values obj1))");
+  env.assert_fact("(plan-action"
+                  " (id 1)"
+                  " (status EXECUTION-SUCCEEDED)"
+                  " (action-name drop)"
+                  " (param-names o)"
+                  " (param-values obj1))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?f domain-fact))",
+        "(and (eq ?f:name on-ground) (eq ?f:param-values (create$ obj1)))"));
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:status FINAL))"));
+}
+
 /** Test whether constants in preconditions work as expected. */
 TEST_F(DomainTest, PreconditionWithConstant)
 {
