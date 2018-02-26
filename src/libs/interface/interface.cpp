@@ -545,8 +545,8 @@ Interface::datasize() const
 void
 Interface::set_type_id(const char *type, const char *id)
 {
-  strncpy(__type, type, __INTERFACE_TYPE_SIZE + 1);
-  strncpy(__id, id, __INTERFACE_ID_SIZE + 1);
+  strncpy(__type, type, __INTERFACE_TYPE_SIZE);
+  strncpy(__id, id, __INTERFACE_ID_SIZE);
   snprintf(__uid, __INTERFACE_UID_SIZE + 1, "%s::%s", __type, __id);
   // Enforce null-terminated strings. If the input was not properly
   // null-terminated, this truncated the last character of the string.
