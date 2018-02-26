@@ -126,6 +126,15 @@
   (ff-feature-request "protobuf")
 )
 
+(defrule executive-conditional-tf-init
+  "Load tf feature if required in config "
+  (executive-init)
+  (confval (path "/clips-executive/use_tf") (type BOOL) (value TRUE))
+  =>
+  (printout t "Loading tf feature" crlf)
+  (ff-feature-request "tf")
+)
+
 (defrule executive-init-stage2
 	(executive-init)
 	(ff-feature-loaded blackboard)
@@ -166,6 +175,10 @@
   )
   (or (ff-feature-loaded protobuf)
       (not (confval (path "/clips-executive/use_protobuf")
+            (type BOOL) (value TRUE)))
+  )
+  (or (ff-feature-loaded tf)
+      (not (confval (path "/clips-executive/use_tf")
             (type BOOL) (value TRUE)))
   )
   (confval (path "/clips-executive/spec") (type STRING) (value ?spec))
