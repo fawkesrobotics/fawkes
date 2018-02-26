@@ -174,7 +174,8 @@ DynamixelServoInterface::maxlenof_model() const
 void
 DynamixelServoInterface::set_model(const char * new_model)
 {
-  strncpy(data->model, new_model, sizeof(data->model));
+  strncpy(data->model, new_model, sizeof(data->model)-1);
+  data->model[sizeof(data->model)-1] = 0;
   data_changed = true;
 }
 
@@ -1082,7 +1083,8 @@ DynamixelServoInterface::maxlenof_mode() const
 void
 DynamixelServoInterface::set_mode(const char * new_mode)
 {
-  strncpy(data->mode, new_mode, sizeof(data->mode));
+  strncpy(data->mode, new_mode, sizeof(data->mode)-1);
+  data->mode[sizeof(data->mode)-1] = 0;
   data_changed = true;
 }
 
