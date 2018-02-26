@@ -224,8 +224,8 @@ BlackBoardInterfaceManager::create_interface(const char *type, const char *ident
   }
   memset(ptr, 0, interface->datasize() + sizeof(interface_header_t));
 
-  strncpy(ih->type, type, __INTERFACE_TYPE_SIZE);
-  strncpy(ih->id, identifier, __INTERFACE_ID_SIZE);
+  strncpy(ih->type, type, __INTERFACE_TYPE_SIZE-1);
+  strncpy(ih->id, identifier, __INTERFACE_ID_SIZE-1);
   memcpy(ih->hash, interface->hash(), __INTERFACE_HASH_SIZE);
 
   ih->refcount           = 0;

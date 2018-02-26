@@ -77,8 +77,8 @@ BlackBoardNetHandlerInterfaceObserver::send_event(unsigned int msg_id,
 						  const char *type, const char *id)
 {
   bb_ievent_msg_t *esm = (bb_ievent_msg_t *)malloc(sizeof(bb_ievent_msg_t));
-  strncpy(esm->type, type, __INTERFACE_TYPE_SIZE);
-  strncpy(esm->id, id, __INTERFACE_ID_SIZE);
+  strncpy(esm->type, type, __INTERFACE_TYPE_SIZE-1);
+  strncpy(esm->id, id, __INTERFACE_ID_SIZE-1);
 
   try {
     __fnh->broadcast(FAWKES_CID_BLACKBOARD, msg_id, esm, sizeof(bb_ievent_msg_t));  

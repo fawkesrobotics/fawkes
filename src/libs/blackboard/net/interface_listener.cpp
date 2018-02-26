@@ -113,7 +113,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *
   void *payload = calloc(1, payload_size);
   bb_imessage_msg_t *dm = (bb_imessage_msg_t *)payload;
   dm->serial = htonl(interface->serial());
-  strncpy(dm->msg_type, message->type(), __INTERFACE_MESSAGE_TYPE_SIZE);
+  strncpy(dm->msg_type, message->type(), __INTERFACE_MESSAGE_TYPE_SIZE-1);
   dm->data_size = htonl(message->datasize());
   dm->msgid = htonl(message->id());
   dm->hops  = htonl(message->hops());

@@ -88,8 +88,8 @@ BlackBoardInterfaceProxy::BlackBoardInterfaceProxy(FawkesNetworkClient *client,
 
   interface_header_t *ih = (interface_header_t *)__mem_chunk;
 
-  strncpy(ih->type, interface->type(), __INTERFACE_TYPE_SIZE);
-  strncpy(ih->id, interface->id(), __INTERFACE_ID_SIZE);
+  strncpy(ih->type, interface->type(), __INTERFACE_TYPE_SIZE-1);
+  strncpy(ih->id, interface->id(), __INTERFACE_ID_SIZE-1);
   memcpy(ih->hash, interface->hash(), __INTERFACE_HASH_SIZE);
   ih->flag_writer_active = (__has_writer ? 1 : 0);
   ih->num_readers = __num_readers;
@@ -327,7 +327,7 @@ BlackBoardInterfaceProxy::transmit(Message *message)
   dm->msgid  = htonl(msgid);
   dm->hops   = htonl(message->hops());
   message->set_id(msgid);
-  strncpy(dm->msg_type, message->type(), __INTERFACE_MESSAGE_TYPE_SIZE);
+  strncpy(dm->msg_type, message->type(), __INTERFACE_MESSAGE_TYPE_SIZE-1);
   dm->data_size = htonl(message->datasize());
   memcpy((char *)payload + sizeof(bb_imessage_msg_t), message->datachunk(),
 	 message->datasize());
