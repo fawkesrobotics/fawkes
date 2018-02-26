@@ -175,7 +175,7 @@ PluginTool::load()
 {
   printf("Requesting loading of plugin %s\n", plugin_name);
   plugin_load_msg_t *l = (plugin_load_msg_t *)calloc(1, sizeof(plugin_load_msg_t));
-  strncpy(l->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+  strncpy(l->name, plugin_name, PLUGIN_MSG_NAME_LENGTH-1);
 
   FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 						       MSG_PLUGIN_LOAD,
@@ -194,7 +194,7 @@ PluginTool::unload()
 {
   printf("Requesting unloading of plugin %s\n", plugin_name);
   plugin_unload_msg_t *m = (plugin_unload_msg_t *)calloc(1, sizeof(plugin_unload_msg_t));
-  strncpy(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+  strncpy(m->name, plugin_name, PLUGIN_MSG_NAME_LENGTH-1);
 
   FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 						       MSG_PLUGIN_UNLOAD,
