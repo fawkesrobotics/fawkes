@@ -512,6 +512,14 @@
   (modify ?action (executable TRUE))
 )
 
+(defrule domain-check-if-action-is-executable-without-precondition
+  "If the precondition of an action is satisfied, the action is executable."
+  ?action <- (plan-action (id ?action-id) (action-name ?action-name) (executable FALSE))
+  (not (domain-precondition (part-of ?action-name)))
+=>
+  (modify ?action (executable TRUE))
+)
+
 (defrule domain-check-precondition-has-an-operator
   "Check that for each precondition, some operator is defined."
   (domain-precondition (name ?precond) (part-of ?parent))

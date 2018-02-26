@@ -34,6 +34,14 @@
   (slot executable (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
+(deffunction plan-action-arg (?param-name ?param-names ?param-values $?default)
+	(foreach ?p ?param-names
+		(if (eq ?param-name ?p) then (return (nth$ ?p-index ?param-values)))
+	)
+	(if (> (length$ ?default) 0) then (return (nth$ 1 ?default)))
+	(return FALSE)
+)
+
 ; alternative
 ; (deftemplate plan-action-parameter
 ; 	(slot plan-action-id (type INTEGER))
