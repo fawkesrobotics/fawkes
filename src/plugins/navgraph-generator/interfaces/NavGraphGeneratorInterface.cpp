@@ -310,7 +310,8 @@ NavGraphGeneratorInterface::maxlenof_error_message() const
 void
 NavGraphGeneratorInterface::set_error_message(const char * new_error_message)
 {
-  strncpy(data->error_message, new_error_message, sizeof(data->error_message));
+  strncpy(data->error_message, new_error_message, sizeof(data->error_message)-1);
+  data->error_message[sizeof(data->error_message)-1] = 0;
   data_changed = true;
 }
 
@@ -585,8 +586,10 @@ NavGraphGeneratorInterface::SetAlgorithmParameterMessage::SetAlgorithmParameterM
   memset(data_ptr, 0, data_size);
   data      = (SetAlgorithmParameterMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->param, ini_param, 32);
-  strncpy(data->value, ini_value, 64);
+  strncpy(data->param, ini_param, 32-1);
+  data->param[32-1] = 0;
+  strncpy(data->value, ini_value, 64-1);
+  data->value[64-1] = 0;
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
@@ -678,7 +681,8 @@ NavGraphGeneratorInterface::SetAlgorithmParameterMessage::maxlenof_param() const
 void
 NavGraphGeneratorInterface::SetAlgorithmParameterMessage::set_param(const char * new_param)
 {
-  strncpy(data->param, new_param, sizeof(data->param));
+  strncpy(data->param, new_param, sizeof(data->param)-1);
+  data->param[sizeof(data->param)-1] = 0;
 }
 
 /** Get value value.
@@ -714,7 +718,8 @@ NavGraphGeneratorInterface::SetAlgorithmParameterMessage::maxlenof_value() const
 void
 NavGraphGeneratorInterface::SetAlgorithmParameterMessage::set_value(const char * new_value)
 {
-  strncpy(data->value, new_value, sizeof(data->value));
+  strncpy(data->value, new_value, sizeof(data->value)-1);
+  data->value[sizeof(data->value)-1] = 0;
 }
 
 /** Clone this message.
@@ -1119,7 +1124,8 @@ NavGraphGeneratorInterface::SetFilterParamFloatMessage::SetFilterParamFloatMessa
   data      = (SetFilterParamFloatMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->filter = ini_filter;
-  strncpy(data->param, ini_param, 32);
+  strncpy(data->param, ini_param, 32-1);
+  data->param[32-1] = 0;
   data->value = ini_value;
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
@@ -1244,7 +1250,8 @@ NavGraphGeneratorInterface::SetFilterParamFloatMessage::maxlenof_param() const
 void
 NavGraphGeneratorInterface::SetFilterParamFloatMessage::set_param(const char * new_param)
 {
-  strncpy(data->param, new_param, sizeof(data->param));
+  strncpy(data->param, new_param, sizeof(data->param)-1);
+  data->param[sizeof(data->param)-1] = 0;
 }
 
 /** Get value value.
@@ -1430,7 +1437,8 @@ NavGraphGeneratorInterface::AddObstacleMessage::AddObstacleMessage(const char * 
   memset(data_ptr, 0, data_size);
   data      = (AddObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 64);
+  strncpy(data->name, ini_name, 64-1);
+  data->name[64-1] = 0;
   data->x = ini_x;
   data->y = ini_y;
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
@@ -1526,7 +1534,8 @@ NavGraphGeneratorInterface::AddObstacleMessage::maxlenof_name() const
 void
 NavGraphGeneratorInterface::AddObstacleMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Get x value.
@@ -1616,7 +1625,8 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::RemoveObstacleMessage(const c
   memset(data_ptr, 0, data_size);
   data      = (RemoveObstacleMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 64);
+  strncpy(data->name, ini_name, 64-1);
+  data->name[64-1] = 0;
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
@@ -1706,7 +1716,8 @@ NavGraphGeneratorInterface::RemoveObstacleMessage::maxlenof_name() const
 void
 NavGraphGeneratorInterface::RemoveObstacleMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Clone this message.
@@ -1739,7 +1750,8 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::AddPointOfInterestMessage
   memset(data_ptr, 0, data_size);
   data      = (AddPointOfInterestMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 64);
+  strncpy(data->name, ini_name, 64-1);
+  data->name[64-1] = 0;
   data->x = ini_x;
   data->y = ini_y;
   data->mode = ini_mode;
@@ -1838,7 +1850,8 @@ NavGraphGeneratorInterface::AddPointOfInterestMessage::maxlenof_name() const
 void
 NavGraphGeneratorInterface::AddPointOfInterestMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Get x value.
@@ -1966,7 +1979,8 @@ NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::AddPointOfInterest
   memset(data_ptr, 0, data_size);
   data      = (AddPointOfInterestWithOriMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 64);
+  strncpy(data->name, ini_name, 64-1);
+  data->name[64-1] = 0;
   data->x = ini_x;
   data->y = ini_y;
   data->ori = ini_ori;
@@ -2068,7 +2082,8 @@ NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::maxlenof_name() co
 void
 NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Get x value.
@@ -2224,9 +2239,12 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::SetPointOfInteres
   memset(data_ptr, 0, data_size);
   data      = (SetPointOfInterestPropertyMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 64);
-  strncpy(data->property_name, ini_property_name, 64);
-  strncpy(data->property_value, ini_property_value, 1024);
+  strncpy(data->name, ini_name, 64-1);
+  data->name[64-1] = 0;
+  strncpy(data->property_name, ini_property_name, 64-1);
+  data->property_name[64-1] = 0;
+  strncpy(data->property_value, ini_property_value, 1024-1);
+  data->property_value[1024-1] = 0;
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
@@ -2320,7 +2338,8 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::maxlenof_name() c
 void
 NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Get property_name value.
@@ -2350,7 +2369,8 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::maxlenof_property
 void
 NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::set_property_name(const char * new_property_name)
 {
-  strncpy(data->property_name, new_property_name, sizeof(data->property_name));
+  strncpy(data->property_name, new_property_name, sizeof(data->property_name)-1);
+  data->property_name[sizeof(data->property_name)-1] = 0;
 }
 
 /** Get property_value value.
@@ -2382,7 +2402,8 @@ NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::maxlenof_property
 void
 NavGraphGeneratorInterface::SetPointOfInterestPropertyMessage::set_property_value(const char * new_property_value)
 {
-  strncpy(data->property_value, new_property_value, sizeof(data->property_value));
+  strncpy(data->property_value, new_property_value, sizeof(data->property_value)-1);
+  data->property_value[sizeof(data->property_value)-1] = 0;
 }
 
 /** Clone this message.
@@ -2415,8 +2436,10 @@ NavGraphGeneratorInterface::AddEdgeMessage::AddEdgeMessage(const char * ini_p1, 
   memset(data_ptr, 0, data_size);
   data      = (AddEdgeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->p1, ini_p1, 64);
-  strncpy(data->p2, ini_p2, 64);
+  strncpy(data->p1, ini_p1, 64-1);
+  data->p1[64-1] = 0;
+  strncpy(data->p2, ini_p2, 64-1);
+  data->p2[64-1] = 0;
   data->directed = ini_directed;
   data->mode = ini_mode;
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
@@ -2510,7 +2533,8 @@ NavGraphGeneratorInterface::AddEdgeMessage::maxlenof_p1() const
 void
 NavGraphGeneratorInterface::AddEdgeMessage::set_p1(const char * new_p1)
 {
-  strncpy(data->p1, new_p1, sizeof(data->p1));
+  strncpy(data->p1, new_p1, sizeof(data->p1)-1);
+  data->p1[sizeof(data->p1)-1] = 0;
 }
 
 /** Get p2 value.
@@ -2540,7 +2564,8 @@ NavGraphGeneratorInterface::AddEdgeMessage::maxlenof_p2() const
 void
 NavGraphGeneratorInterface::AddEdgeMessage::set_p2(const char * new_p2)
 {
-  strncpy(data->p2, new_p2, sizeof(data->p2));
+  strncpy(data->p2, new_p2, sizeof(data->p2)-1);
+  data->p2[sizeof(data->p2)-1] = 0;
 }
 
 /** Get directed value.
@@ -2637,8 +2662,10 @@ NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::SetGraphDefaultPrope
   memset(data_ptr, 0, data_size);
   data      = (SetGraphDefaultPropertyMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->property_name, ini_property_name, 64);
-  strncpy(data->property_value, ini_property_value, 1024);
+  strncpy(data->property_name, ini_property_name, 64-1);
+  data->property_name[64-1] = 0;
+  strncpy(data->property_value, ini_property_value, 1024-1);
+  data->property_value[1024-1] = 0;
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
@@ -2726,7 +2753,8 @@ NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::maxlenof_property_na
 void
 NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::set_property_name(const char * new_property_name)
 {
-  strncpy(data->property_name, new_property_name, sizeof(data->property_name));
+  strncpy(data->property_name, new_property_name, sizeof(data->property_name)-1);
+  data->property_name[sizeof(data->property_name)-1] = 0;
 }
 
 /** Get property_value value.
@@ -2758,7 +2786,8 @@ NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::maxlenof_property_va
 void
 NavGraphGeneratorInterface::SetGraphDefaultPropertyMessage::set_property_value(const char * new_property_value)
 {
-  strncpy(data->property_value, new_property_value, sizeof(data->property_value));
+  strncpy(data->property_value, new_property_value, sizeof(data->property_value)-1);
+  data->property_value[sizeof(data->property_value)-1] = 0;
 }
 
 /** Clone this message.
@@ -2906,7 +2935,8 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::RemovePointOfInterestM
   memset(data_ptr, 0, data_size);
   data      = (RemovePointOfInterestMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 64);
+  strncpy(data->name, ini_name, 64-1);
+  data->name[64-1] = 0;
   enum_map_ConnectionMode[(int)NOT_CONNECTED] = "NOT_CONNECTED";
   enum_map_ConnectionMode[(int)UNCONNECTED] = "UNCONNECTED";
   enum_map_ConnectionMode[(int)CLOSEST_NODE] = "CLOSEST_NODE";
@@ -2996,7 +3026,8 @@ NavGraphGeneratorInterface::RemovePointOfInterestMessage::maxlenof_name() const
 void
 NavGraphGeneratorInterface::RemovePointOfInterestMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Clone this message.
