@@ -187,7 +187,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 	void *m = calloc(1, data_size);
 
 	config_descriptor_t *cd = (config_descriptor_t *)m;
-	strncpy(cd->path, i->path(), CONFIG_MSG_PATH_LENGTH);
+	strncpy(cd->path, i->path(), CONFIG_MSG_PATH_LENGTH-1);
 	cd->is_default = i->is_default();
 	cd->num_values = s.size();
 
@@ -207,7 +207,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 	  sizeof(config_descriptor_t) + sizeof(config_string_value_t) + s.length() + 1;
 	void *m = calloc(1, data_size);
 	config_descriptor_t *cd = (config_descriptor_t *)m;
-	strncpy(cd->path, i->path(), CONFIG_MSG_PATH_LENGTH);
+	strncpy(cd->path, i->path(), CONFIG_MSG_PATH_LENGTH-1);
 	cd->is_default = i->is_default();
 	cd->num_values = 0;
 
@@ -271,9 +271,9 @@ ConfigNetworkHandler::loop()
     } else if (msg->msgid() == MSG_CONFIG_ERASE_VALUE) {
       try {
 	config_erase_value_msg_t *m = msg->msg<config_erase_value_msg_t>();
-	char path[CONFIG_MSG_PATH_LENGTH + 1];
-	path[CONFIG_MSG_PATH_LENGTH] = 0;
-	strncpy(path, m->cp.path, CONFIG_MSG_PATH_LENGTH);
+	char path[CONFIG_MSG_PATH_LENGTH];
+	path[CONFIG_MSG_PATH_LENGTH-1] = 0;
+	memcpy(path, m->cp.path, CONFIG_MSG_PATH_LENGTH);
 
 	if ( m->cp.is_default == 1 ) {
 	  __config->erase_default(path);

@@ -236,7 +236,7 @@ NetworkConfiguration::send_get(const char *path, unsigned int msgid, unsigned in
 				  "client connection is not alive");
   }
   config_getval_msg_t *g = (config_getval_msg_t *)calloc(1, sizeof(config_getval_msg_t));
-  strncpy(g->cp.path, path, CONFIG_MSG_PATH_LENGTH);
+  strncpy(g->cp.path, path, CONFIG_MSG_PATH_LENGTH-1);
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
                                                         msgid,
                                                         g, sizeof(config_getval_msg_t));
@@ -316,7 +316,7 @@ NetworkConfiguration::get_float(const char *path)
 unsigned int
 NetworkConfiguration::get_uint(const char *path)
 {
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+  if ( strlen(path) >= CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_uint: "
 			       "Maximum length for path exceeded");
   }
@@ -371,7 +371,7 @@ NetworkConfiguration::get_uint(const char *path)
 int
 NetworkConfiguration::get_int(const char *path)
 {
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+  if ( strlen(path) >= CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_int: "
 			       "Maximum length for path exceeded");
   }
@@ -426,7 +426,7 @@ NetworkConfiguration::get_int(const char *path)
 bool
 NetworkConfiguration::get_bool(const char *path)
 {
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+  if ( strlen(path) >= CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_bool: "
 			       "Maximum length for path exceeded");
   }
@@ -481,7 +481,7 @@ NetworkConfiguration::get_bool(const char *path)
 std::string
 NetworkConfiguration::get_string(const char *path)
 {
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+  if ( strlen(path) >= CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_string: "
 			       "Maximum length for path exceeded");
   }
@@ -568,7 +568,7 @@ NetworkConfiguration::get_strings(const char *path)
 std::string
 NetworkConfiguration::get_comment(const char *path)
 {
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+  if ( strlen(path) >= CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_comment: "
 			       "Maximum length for path exceeded");
   }
@@ -618,7 +618,7 @@ NetworkConfiguration::get_comment(const char *path)
 std::string
 NetworkConfiguration::get_default_comment(const char *path)
 {
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+  if ( strlen(path) >= CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_default_comment: "
 			       "Maximum length for path exceeded");
   }
@@ -669,7 +669,7 @@ NetworkConfiguration::get_default_comment(const char *path)
 Configuration::ValueIterator *
 NetworkConfiguration::get_value(const char *path)
 {
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+  if ( strlen(path) >= CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::get_value: "
 			       "Maximum length for path exceeded");
   }
@@ -691,7 +691,7 @@ NetworkConfiguration::get_value(const char *path)
     }
   } else {
     config_getval_msg_t *g = (config_getval_msg_t *)calloc(1, sizeof(config_getval_msg_t));
-    strncpy(g->cp.path, path, CONFIG_MSG_PATH_LENGTH);
+    strncpy(g->cp.path, path, CONFIG_MSG_PATH_LENGTH-1);
     FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							  MSG_CONFIG_GET_VALUE,
 							  g, sizeof(config_getval_msg_t));
@@ -719,7 +719,7 @@ NetworkConfiguration::set_value_internal(unsigned int msg_type,
 					 const char *path, uint16_t num_values,
 					 size_t data_size, void *data)
 {
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+  if ( strlen(path) >= CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::set_float: "
 			       "Maximum length for path exceeded");
   }
@@ -733,7 +733,7 @@ NetworkConfiguration::set_value_internal(unsigned int msg_type,
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							msg_type, msg_size);
   config_descriptor_t *cd = omsg->msgge<config_descriptor_t>();
-  strncpy(cd->path, path, CONFIG_MSG_PATH_LENGTH);
+  strncpy(cd->path, path, CONFIG_MSG_PATH_LENGTH-1);
   cd->num_values = num_values;
 
   void *mdata = ((char *)omsg->payload() + sizeof(config_descriptor_t));
@@ -811,9 +811,11 @@ NetworkConfiguration::set_string(const char *path, const char *s)
   size_t s_length = strlen(s);
   size_t data_size = sizeof(config_string_value_t) + s_length;
   void *data = malloc(data_size);
+  memset(data, 0, data_size);
   config_string_value_t *sv = (config_string_value_t *)data;
   sv->s_length = s_length;
-  strncpy((char *)sv + sizeof(config_string_value_t), s, s_length);
+  strcpy((char *)data + sizeof(config_string_value_t), s);
+
   set_value_internal(MSG_CONFIG_SET_STRING, path, 0, data_size, data);
   free(data);
 }
@@ -825,9 +827,10 @@ NetworkConfiguration::set_default_string(const char *path, const char *s)
   size_t s_length = strlen(s);
   size_t data_size = sizeof(config_string_value_t) + s_length;
   void *data = malloc(data_size);
+  memset(data, 0, data_size);
   config_string_value_t *sv = (config_string_value_t *)data;
   sv->s_length = s_length;
-  strncpy((char *)sv + sizeof(config_string_value_t), s, s_length);
+  strcpy((char *)data + sizeof(config_string_value_t), s);
   set_value_internal(MSG_CONFIG_SET_DEFAULT_STRING, path, 0, data_size, data);
   free(data);
 }
@@ -912,7 +915,7 @@ NetworkConfiguration::set_default_comment(const char *path, std::string &comment
 void
 NetworkConfiguration::erase_internal(const char *path, bool is_default)
 {
-  if ( strlen(path) > CONFIG_MSG_PATH_LENGTH ) {
+  if ( strlen(path) >= CONFIG_MSG_PATH_LENGTH ) {
     throw OutOfBoundsException("NetworkConfiguration::erase: "
 			       "Maximum length for path exceeded");
   }
@@ -927,7 +930,7 @@ NetworkConfiguration::erase_internal(const char *path, bool is_default)
 							sizeof(config_erase_value_msg_t));
   config_erase_value_msg_t *m = omsg->msg<config_erase_value_msg_t>();
   m->cp.is_default = is_default ? 1 : 0;
-  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
+  strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH-1);
   c->enqueue_and_wait(omsg);
   if ( ! __mirror_mode && (msg != NULL) ) {
     msg->unref();

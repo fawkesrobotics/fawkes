@@ -103,7 +103,7 @@ ConfigListContent::append(Configuration::ValueIterator *i)
 
   config_list_entity_header_t cle;
   memset(&cle, 0, sizeof(cle));
-  strncpy(cle.cp.path, i->path(), CONFIG_MSG_PATH_LENGTH);
+  strncpy(cle.cp.path, i->path(), CONFIG_MSG_PATH_LENGTH-1);
   cle.type = MSG_CONFIG_FLOAT_VALUE;
   cle.cp.is_default = (i->is_default() ? 1 : 0);
   cle.cp.num_values = (i->is_list() ? i->get_list_size() : 0);
