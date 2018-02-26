@@ -172,7 +172,7 @@ main(int argc, char **argv)
 
     if (free_host)  free(host);
 
-  } catch (UnknownArgumentException e) {
+  } catch (UnknownArgumentException &e) {
     printf("Error: Unknown Argument\n\n");
     print_usage(argv[0]);
     exit(0);
