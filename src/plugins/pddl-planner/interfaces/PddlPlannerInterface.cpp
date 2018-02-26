@@ -54,7 +54,7 @@ PddlPlannerInterface::PddlPlannerInterface() : Interface()
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
   add_fieldinfo(IFT_STRING, "active_planner", 30, data->active_planner);
   add_messageinfo("PlanMessage");
-  unsigned char tmp_hash[] = {0xcd, 0x44, 0x52, 0xa7, 0xfa, 0xb2, 0xaf, 0xfe, 0xe2, 0xc5, 0x4, 0x6b, 0xe0, 0x97, 0x2b, 0x69};
+  unsigned char tmp_hash[] = {0x4c, 0xd3, 0x21, 0x97, 0x26, 0x2c, 00, 0xf1, 0xb3, 0x44, 0xd6, 0x6c, 0xac, 0xcf, 0x68, 0x95};
   set_hash(tmp_hash);
 }
 
@@ -211,20 +211,6 @@ PddlPlannerInterface::enum_tostring(const char *enumtype, int val) const
  */
 
 
-/** Constructor with initial values.
- * @param ini_dummy initial value for dummy
- */
-PddlPlannerInterface::PlanMessage::PlanMessage(const char * ini_dummy) : Message("PlanMessage")
-{
-  data_size = sizeof(PlanMessage_data_t);
-  data_ptr  = malloc(data_size);
-  memset(data_ptr, 0, data_size);
-  data      = (PlanMessage_data_t *)data_ptr;
-  data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->dummy, ini_dummy, 1-1);
-  data->dummy[1-1] = 0;
-  add_fieldinfo(IFT_STRING, "dummy", 1, data->dummy);
-}
 /** Constructor */
 PddlPlannerInterface::PlanMessage::PlanMessage() : Message("PlanMessage")
 {
@@ -233,7 +219,6 @@ PddlPlannerInterface::PlanMessage::PlanMessage() : Message("PlanMessage")
   memset(data_ptr, 0, data_size);
   data      = (PlanMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  add_fieldinfo(IFT_STRING, "dummy", 1, data->dummy);
 }
 
 /** Destructor */
@@ -255,41 +240,6 @@ PddlPlannerInterface::PlanMessage::PlanMessage(const PlanMessage *m) : Message("
 }
 
 /* Methods */
-/** Get dummy value.
- * 
-    	Just a dummy field.
-    
- * @return dummy value
- */
-char *
-PddlPlannerInterface::PlanMessage::dummy() const
-{
-  return data->dummy;
-}
-
-/** Get maximum length of dummy value.
- * @return length of dummy value, can be length of the array or number of 
- * maximum number of characters for a string
- */
-size_t
-PddlPlannerInterface::PlanMessage::maxlenof_dummy() const
-{
-  return 1;
-}
-
-/** Set dummy value.
- * 
-    	Just a dummy field.
-    
- * @param new_dummy new dummy value
- */
-void
-PddlPlannerInterface::PlanMessage::set_dummy(const char * new_dummy)
-{
-  strncpy(data->dummy, new_dummy, sizeof(data->dummy)-1);
-  data->dummy[sizeof(data->dummy)-1] = 0;
-}
-
 /** Clone this message.
  * Produces a message of the same type as this message and copies the
  * data to the new message.

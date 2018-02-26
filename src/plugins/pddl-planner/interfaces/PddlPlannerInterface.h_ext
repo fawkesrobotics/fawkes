@@ -65,23 +65,16 @@ class PddlPlannerInterface : public Interface
     typedef struct __attribute__((packed)) {
       int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */
       int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */
-      char dummy[1]; /**< 
-    	Just a dummy field.
-     */
     } PlanMessage_data_t;
 
     PlanMessage_data_t *data;
 
    public:
-    PlanMessage(const char * ini_dummy);
     PlanMessage();
     ~PlanMessage();
 
     PlanMessage(const PlanMessage *m);
     /* Methods */
-    char * dummy() const;
-    void set_dummy(const char * new_dummy);
-    size_t maxlenof_dummy() const;
     virtual Message * clone() const;
   };
 

@@ -20,8 +20,5 @@
     <comment>
       Start PDDL planner and parse result
     </comment>
-    <field type="string" length="1" name="dummy">
-    	Just a dummy field.
-    </field>
   </message>
 </interface>
