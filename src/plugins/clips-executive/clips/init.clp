@@ -117,6 +117,15 @@
   (path-load "pddl-init.clp")
 )
 
+(defrule executive-conditional-protobuf-init
+  "Load protobuf feature required for protobuf communication"
+  (executive-init)
+  (confval (path "/clips-executive/use_protobuf") (type BOOL) (value TRUE))
+  =>
+  (printout t "Loading Protobuf feature" crlf)
+  (ff-feature-request "protobuf")
+)
+
 (defrule executive-init-stage2
 	(executive-init)
 	(ff-feature-loaded blackboard)
@@ -153,6 +162,10 @@
   )
   (or (and (ff-feature-loaded pddl_planner) (ff-feature-loaded robot_memory))
       (not (confval (path "/clips-executive/use_pddl")
+            (type BOOL) (value TRUE)))
+  )
+  (or (ff-feature-loaded protobuf)
+      (not (confval (path "/clips-executive/use_protobuf")
             (type BOOL) (value TRUE)))
   )
   (confval (path "/clips-executive/spec") (type STRING) (value ?spec))
