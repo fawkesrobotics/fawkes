@@ -269,9 +269,9 @@ BBLoggerThread::write_header()
   header.endianess = BBLOG_LITTLE_ENDIAN;
 #endif
   header.num_data_items = __num_data_items;
-  strncpy(header.scenario, (const char *)__scenario, BBLOG_SCENARIO_SIZE);
-  strncpy(header.interface_type, __iface->type(), BBLOG_INTERFACE_TYPE_SIZE);
-  strncpy(header.interface_id, __iface->id(), BBLOG_INTERFACE_ID_SIZE);
+  strncpy(header.scenario, (const char *)__scenario, BBLOG_SCENARIO_SIZE-1);
+  strncpy(header.interface_type, __iface->type(), BBLOG_INTERFACE_TYPE_SIZE-1);
+  strncpy(header.interface_id, __iface->id(), BBLOG_INTERFACE_ID_SIZE-1);
   memcpy(header.interface_hash, __iface->hash(), BBLOG_INTERFACE_HASH_SIZE);
   header.data_size = __iface->datasize();
   long start_time_sec, start_time_usec;
