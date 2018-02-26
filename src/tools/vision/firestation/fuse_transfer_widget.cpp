@@ -452,7 +452,7 @@ FuseTransferWidget::remote_lut_selected()
 
       FUSE_lutdesc_message_t* lut_desc = (FUSE_lutdesc_message_t*) malloc( sizeof(FUSE_lutdesc_message_t));
       memset(lut_desc, 0, sizeof(FUSE_lutdesc_message_t));
-      strncpy(lut_desc->lut_id, lut_id.c_str(), LUT_ID_MAX_LENGTH);
+      strncpy(lut_desc->lut_id, lut_id.c_str(), LUT_ID_MAX_LENGTH-1);
       c->enqueue(FUSE_MT_GET_LUT, lut_desc, sizeof(FUSE_lutdesc_message_t));
 
       m_delete_clients.push_locked(c);
