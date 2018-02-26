@@ -326,8 +326,10 @@ OpenRaveInterface::AddObjectMessage::AddObjectMessage(const char * ini_name, con
   memset(data_ptr, 0, data_size);
   data      = (AddObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 30);
-  strncpy(data->path, ini_path, 1024);
+  strncpy(data->name, ini_name, 30-1);
+  data->name[30-1] = 0;
+  strncpy(data->path, ini_path, 1024-1);
+  data->path[1024-1] = 0;
   add_fieldinfo(IFT_STRING, "name", 30, data->name);
   add_fieldinfo(IFT_STRING, "path", 1024, data->path);
 }
@@ -389,7 +391,8 @@ OpenRaveInterface::AddObjectMessage::maxlenof_name() const
 void
 OpenRaveInterface::AddObjectMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Get path value.
@@ -419,7 +422,8 @@ OpenRaveInterface::AddObjectMessage::maxlenof_path() const
 void
 OpenRaveInterface::AddObjectMessage::set_path(const char * new_path)
 {
-  strncpy(data->path, new_path, sizeof(data->path));
+  strncpy(data->path, new_path, sizeof(data->path)-1);
+  data->path[sizeof(data->path)-1] = 0;
 }
 
 /** Clone this message.
@@ -449,7 +453,8 @@ OpenRaveInterface::DeleteObjectMessage::DeleteObjectMessage(const char * ini_nam
   memset(data_ptr, 0, data_size);
   data      = (DeleteObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 30);
+  strncpy(data->name, ini_name, 30-1);
+  data->name[30-1] = 0;
   add_fieldinfo(IFT_STRING, "name", 30, data->name);
 }
 /** Constructor */
@@ -509,7 +514,8 @@ OpenRaveInterface::DeleteObjectMessage::maxlenof_name() const
 void
 OpenRaveInterface::DeleteObjectMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Clone this message.
@@ -586,8 +592,10 @@ OpenRaveInterface::AttachObjectMessage::AttachObjectMessage(const char * ini_nam
   memset(data_ptr, 0, data_size);
   data      = (AttachObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 30);
-  strncpy(data->manip_name, ini_manip_name, 30);
+  strncpy(data->name, ini_name, 30-1);
+  data->name[30-1] = 0;
+  strncpy(data->manip_name, ini_manip_name, 30-1);
+  data->manip_name[30-1] = 0;
   add_fieldinfo(IFT_STRING, "name", 30, data->name);
   add_fieldinfo(IFT_STRING, "manip_name", 30, data->manip_name);
 }
@@ -649,7 +657,8 @@ OpenRaveInterface::AttachObjectMessage::maxlenof_name() const
 void
 OpenRaveInterface::AttachObjectMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Get manip_name value.
@@ -679,7 +688,8 @@ OpenRaveInterface::AttachObjectMessage::maxlenof_manip_name() const
 void
 OpenRaveInterface::AttachObjectMessage::set_manip_name(const char * new_manip_name)
 {
-  strncpy(data->manip_name, new_manip_name, sizeof(data->manip_name));
+  strncpy(data->manip_name, new_manip_name, sizeof(data->manip_name)-1);
+  data->manip_name[sizeof(data->manip_name)-1] = 0;
 }
 
 /** Clone this message.
@@ -709,7 +719,8 @@ OpenRaveInterface::ReleaseObjectMessage::ReleaseObjectMessage(const char * ini_n
   memset(data_ptr, 0, data_size);
   data      = (ReleaseObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 30);
+  strncpy(data->name, ini_name, 30-1);
+  data->name[30-1] = 0;
   add_fieldinfo(IFT_STRING, "name", 30, data->name);
 }
 /** Constructor */
@@ -769,7 +780,8 @@ OpenRaveInterface::ReleaseObjectMessage::maxlenof_name() const
 void
 OpenRaveInterface::ReleaseObjectMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Clone this message.
@@ -848,7 +860,8 @@ OpenRaveInterface::MoveObjectMessage::MoveObjectMessage(const char * ini_name, c
   memset(data_ptr, 0, data_size);
   data      = (MoveObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 30);
+  strncpy(data->name, ini_name, 30-1);
+  data->name[30-1] = 0;
   data->x = ini_x;
   data->y = ini_y;
   data->z = ini_z;
@@ -917,7 +930,8 @@ OpenRaveInterface::MoveObjectMessage::maxlenof_name() const
 void
 OpenRaveInterface::MoveObjectMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Get x value.
@@ -1041,7 +1055,8 @@ OpenRaveInterface::RotateObjectQuatMessage::RotateObjectQuatMessage(const char *
   memset(data_ptr, 0, data_size);
   data      = (RotateObjectQuatMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 30);
+  strncpy(data->name, ini_name, 30-1);
+  data->name[30-1] = 0;
   data->x = ini_x;
   data->y = ini_y;
   data->z = ini_z;
@@ -1113,7 +1128,8 @@ OpenRaveInterface::RotateObjectQuatMessage::maxlenof_name() const
 void
 OpenRaveInterface::RotateObjectQuatMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Get x value.
@@ -1266,7 +1282,8 @@ OpenRaveInterface::RotateObjectMessage::RotateObjectMessage(const char * ini_nam
   memset(data_ptr, 0, data_size);
   data      = (RotateObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 30);
+  strncpy(data->name, ini_name, 30-1);
+  data->name[30-1] = 0;
   data->x = ini_x;
   data->y = ini_y;
   data->z = ini_z;
@@ -1335,7 +1352,8 @@ OpenRaveInterface::RotateObjectMessage::maxlenof_name() const
 void
 OpenRaveInterface::RotateObjectMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Get x value.
@@ -1456,8 +1474,10 @@ OpenRaveInterface::RenameObjectMessage::RenameObjectMessage(const char * ini_nam
   memset(data_ptr, 0, data_size);
   data      = (RenameObjectMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 30);
-  strncpy(data->newName, ini_newName, 30);
+  strncpy(data->name, ini_name, 30-1);
+  data->name[30-1] = 0;
+  strncpy(data->newName, ini_newName, 30-1);
+  data->newName[30-1] = 0;
   add_fieldinfo(IFT_STRING, "name", 30, data->name);
   add_fieldinfo(IFT_STRING, "newName", 30, data->newName);
 }
@@ -1519,7 +1539,8 @@ OpenRaveInterface::RenameObjectMessage::maxlenof_name() const
 void
 OpenRaveInterface::RenameObjectMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Get newName value.
@@ -1549,7 +1570,8 @@ OpenRaveInterface::RenameObjectMessage::maxlenof_newName() const
 void
 OpenRaveInterface::RenameObjectMessage::set_newName(const char * new_newName)
 {
-  strncpy(data->newName, new_newName, sizeof(data->newName));
+  strncpy(data->newName, new_newName, sizeof(data->newName)-1);
+  data->newName[sizeof(data->newName)-1] = 0;
 }
 
 /** Clone this message.
