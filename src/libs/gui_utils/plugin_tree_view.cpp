@@ -361,7 +361,7 @@ PluginTreeView::on_status_toggled(const Glib::ustring& path)
   if (loaded)
   {
     plugin_load_msg_t* m = (plugin_load_msg_t*) calloc(1, sizeof(plugin_load_msg_t));
-    strncpy(m->name, plugin_name.c_str(), PLUGIN_MSG_NAME_LENGTH);
+    strncpy(m->name, plugin_name.c_str(), PLUGIN_MSG_NAME_LENGTH-1);
 
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 							 MSG_PLUGIN_LOAD,
@@ -371,7 +371,7 @@ PluginTreeView::on_status_toggled(const Glib::ustring& path)
   else
   {
     plugin_unload_msg_t* m = (plugin_unload_msg_t *)calloc(1, sizeof(plugin_unload_msg_t));
-    strncpy(m->name, plugin_name.c_str(), PLUGIN_MSG_NAME_LENGTH);
+    strncpy(m->name, plugin_name.c_str(), PLUGIN_MSG_NAME_LENGTH-1);
 
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_PLUGINMANAGER,
 							 MSG_PLUGIN_UNLOAD,
