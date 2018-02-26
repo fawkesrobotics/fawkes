@@ -311,7 +311,8 @@ HumanSkeletonInterface::maxlenof_pose() const
 void
 HumanSkeletonInterface::set_pose(const char * new_pose)
 {
-  strncpy(data->pose, new_pose, sizeof(data->pose));
+  strncpy(data->pose, new_pose, sizeof(data->pose)-1);
+  data->pose[sizeof(data->pose)-1] = 0;
   data_changed = true;
 }
 

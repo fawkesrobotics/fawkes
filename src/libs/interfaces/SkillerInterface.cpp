@@ -125,7 +125,8 @@ SkillerInterface::maxlenof_skill_string() const
 void
 SkillerInterface::set_skill_string(const char * new_skill_string)
 {
-  strncpy(data->skill_string, new_skill_string, sizeof(data->skill_string));
+  strncpy(data->skill_string, new_skill_string, sizeof(data->skill_string)-1);
+  data->skill_string[sizeof(data->skill_string)-1] = 0;
   data_changed = true;
 }
 
@@ -160,7 +161,8 @@ SkillerInterface::maxlenof_error() const
 void
 SkillerInterface::set_error(const char * new_error)
 {
-  strncpy(data->error, new_error, sizeof(data->error));
+  strncpy(data->error, new_error, sizeof(data->error)-1);
+  data->error[sizeof(data->error)-1] = 0;
   data_changed = true;
 }
 
@@ -337,7 +339,8 @@ SkillerInterface::ExecSkillMessage::ExecSkillMessage(const char * ini_skill_stri
   memset(data_ptr, 0, data_size);
   data      = (ExecSkillMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->skill_string, ini_skill_string, 1024);
+  strncpy(data->skill_string, ini_skill_string, 1024-1);
+  data->skill_string[1024-1] = 0;
   enum_map_SkillStatusEnum[(int)S_INACTIVE] = "S_INACTIVE";
   enum_map_SkillStatusEnum[(int)S_FINAL] = "S_FINAL";
   enum_map_SkillStatusEnum[(int)S_RUNNING] = "S_RUNNING";
@@ -411,7 +414,8 @@ SkillerInterface::ExecSkillMessage::maxlenof_skill_string() const
 void
 SkillerInterface::ExecSkillMessage::set_skill_string(const char * new_skill_string)
 {
-  strncpy(data->skill_string, new_skill_string, sizeof(data->skill_string));
+  strncpy(data->skill_string, new_skill_string, sizeof(data->skill_string)-1);
+  data->skill_string[sizeof(data->skill_string)-1] = 0;
 }
 
 /** Clone this message.

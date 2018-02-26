@@ -116,7 +116,8 @@ KeyValueInterface::maxlenof_key() const
 void
 KeyValueInterface::set_key(const char * new_key)
 {
-  strncpy(data->key, new_key, sizeof(data->key));
+  strncpy(data->key, new_key, sizeof(data->key)-1);
+  data->key[sizeof(data->key)-1] = 0;
   data_changed = true;
 }
 
@@ -178,7 +179,8 @@ KeyValueInterface::maxlenof_value_string() const
 void
 KeyValueInterface::set_value_string(const char * new_value_string)
 {
-  strncpy(data->value_string, new_value_string, sizeof(data->value_string));
+  strncpy(data->value_string, new_value_string, sizeof(data->value_string)-1);
+  data->value_string[sizeof(data->value_string)-1] = 0;
   data_changed = true;
 }
 

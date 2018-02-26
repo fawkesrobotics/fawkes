@@ -138,7 +138,8 @@ NavPathInterface::maxlenof_path_node_1() const
 void
 NavPathInterface::set_path_node_1(const char * new_path_node_1)
 {
-  strncpy(data->path_node_1, new_path_node_1, sizeof(data->path_node_1));
+  strncpy(data->path_node_1, new_path_node_1, sizeof(data->path_node_1)-1);
+  data->path_node_1[sizeof(data->path_node_1)-1] = 0;
   data_changed = true;
 }
 
@@ -169,7 +170,8 @@ NavPathInterface::maxlenof_path_node_2() const
 void
 NavPathInterface::set_path_node_2(const char * new_path_node_2)
 {
-  strncpy(data->path_node_2, new_path_node_2, sizeof(data->path_node_2));
+  strncpy(data->path_node_2, new_path_node_2, sizeof(data->path_node_2)-1);
+  data->path_node_2[sizeof(data->path_node_2)-1] = 0;
   data_changed = true;
 }
 
@@ -200,7 +202,8 @@ NavPathInterface::maxlenof_path_node_3() const
 void
 NavPathInterface::set_path_node_3(const char * new_path_node_3)
 {
-  strncpy(data->path_node_3, new_path_node_3, sizeof(data->path_node_3));
+  strncpy(data->path_node_3, new_path_node_3, sizeof(data->path_node_3)-1);
+  data->path_node_3[sizeof(data->path_node_3)-1] = 0;
   data_changed = true;
 }
 
@@ -231,7 +234,8 @@ NavPathInterface::maxlenof_path_node_4() const
 void
 NavPathInterface::set_path_node_4(const char * new_path_node_4)
 {
-  strncpy(data->path_node_4, new_path_node_4, sizeof(data->path_node_4));
+  strncpy(data->path_node_4, new_path_node_4, sizeof(data->path_node_4)-1);
+  data->path_node_4[sizeof(data->path_node_4)-1] = 0;
   data_changed = true;
 }
 
@@ -262,7 +266,8 @@ NavPathInterface::maxlenof_path_node_5() const
 void
 NavPathInterface::set_path_node_5(const char * new_path_node_5)
 {
-  strncpy(data->path_node_5, new_path_node_5, sizeof(data->path_node_5));
+  strncpy(data->path_node_5, new_path_node_5, sizeof(data->path_node_5)-1);
+  data->path_node_5[sizeof(data->path_node_5)-1] = 0;
   data_changed = true;
 }
 
@@ -293,7 +298,8 @@ NavPathInterface::maxlenof_path_node_6() const
 void
 NavPathInterface::set_path_node_6(const char * new_path_node_6)
 {
-  strncpy(data->path_node_6, new_path_node_6, sizeof(data->path_node_6));
+  strncpy(data->path_node_6, new_path_node_6, sizeof(data->path_node_6)-1);
+  data->path_node_6[sizeof(data->path_node_6)-1] = 0;
   data_changed = true;
 }
 
@@ -324,7 +330,8 @@ NavPathInterface::maxlenof_path_node_7() const
 void
 NavPathInterface::set_path_node_7(const char * new_path_node_7)
 {
-  strncpy(data->path_node_7, new_path_node_7, sizeof(data->path_node_7));
+  strncpy(data->path_node_7, new_path_node_7, sizeof(data->path_node_7)-1);
+  data->path_node_7[sizeof(data->path_node_7)-1] = 0;
   data_changed = true;
 }
 
@@ -355,7 +362,8 @@ NavPathInterface::maxlenof_path_node_8() const
 void
 NavPathInterface::set_path_node_8(const char * new_path_node_8)
 {
-  strncpy(data->path_node_8, new_path_node_8, sizeof(data->path_node_8));
+  strncpy(data->path_node_8, new_path_node_8, sizeof(data->path_node_8)-1);
+  data->path_node_8[sizeof(data->path_node_8)-1] = 0;
   data_changed = true;
 }
 
@@ -386,7 +394,8 @@ NavPathInterface::maxlenof_path_node_9() const
 void
 NavPathInterface::set_path_node_9(const char * new_path_node_9)
 {
-  strncpy(data->path_node_9, new_path_node_9, sizeof(data->path_node_9));
+  strncpy(data->path_node_9, new_path_node_9, sizeof(data->path_node_9)-1);
+  data->path_node_9[sizeof(data->path_node_9)-1] = 0;
   data_changed = true;
 }
 
@@ -417,7 +426,8 @@ NavPathInterface::maxlenof_path_node_10() const
 void
 NavPathInterface::set_path_node_10(const char * new_path_node_10)
 {
-  strncpy(data->path_node_10, new_path_node_10, sizeof(data->path_node_10));
+  strncpy(data->path_node_10, new_path_node_10, sizeof(data->path_node_10)-1);
+  data->path_node_10[sizeof(data->path_node_10)-1] = 0;
   data_changed = true;
 }
 
@@ -448,7 +458,8 @@ NavPathInterface::maxlenof_path_node_11() const
 void
 NavPathInterface::set_path_node_11(const char * new_path_node_11)
 {
-  strncpy(data->path_node_11, new_path_node_11, sizeof(data->path_node_11));
+  strncpy(data->path_node_11, new_path_node_11, sizeof(data->path_node_11)-1);
+  data->path_node_11[sizeof(data->path_node_11)-1] = 0;
   data_changed = true;
 }
 
@@ -479,7 +490,8 @@ NavPathInterface::maxlenof_path_node_12() const
 void
 NavPathInterface::set_path_node_12(const char * new_path_node_12)
 {
-  strncpy(data->path_node_12, new_path_node_12, sizeof(data->path_node_12));
+  strncpy(data->path_node_12, new_path_node_12, sizeof(data->path_node_12)-1);
+  data->path_node_12[sizeof(data->path_node_12)-1] = 0;
   data_changed = true;
 }
 
@@ -510,7 +522,8 @@ NavPathInterface::maxlenof_path_node_13() const
 void
 NavPathInterface::set_path_node_13(const char * new_path_node_13)
 {
-  strncpy(data->path_node_13, new_path_node_13, sizeof(data->path_node_13));
+  strncpy(data->path_node_13, new_path_node_13, sizeof(data->path_node_13)-1);
+  data->path_node_13[sizeof(data->path_node_13)-1] = 0;
   data_changed = true;
 }
 
@@ -541,7 +554,8 @@ NavPathInterface::maxlenof_path_node_14() const
 void
 NavPathInterface::set_path_node_14(const char * new_path_node_14)
 {
-  strncpy(data->path_node_14, new_path_node_14, sizeof(data->path_node_14));
+  strncpy(data->path_node_14, new_path_node_14, sizeof(data->path_node_14)-1);
+  data->path_node_14[sizeof(data->path_node_14)-1] = 0;
   data_changed = true;
 }
 
@@ -572,7 +586,8 @@ NavPathInterface::maxlenof_path_node_15() const
 void
 NavPathInterface::set_path_node_15(const char * new_path_node_15)
 {
-  strncpy(data->path_node_15, new_path_node_15, sizeof(data->path_node_15));
+  strncpy(data->path_node_15, new_path_node_15, sizeof(data->path_node_15)-1);
+  data->path_node_15[sizeof(data->path_node_15)-1] = 0;
   data_changed = true;
 }
 
@@ -603,7 +618,8 @@ NavPathInterface::maxlenof_path_node_16() const
 void
 NavPathInterface::set_path_node_16(const char * new_path_node_16)
 {
-  strncpy(data->path_node_16, new_path_node_16, sizeof(data->path_node_16));
+  strncpy(data->path_node_16, new_path_node_16, sizeof(data->path_node_16)-1);
+  data->path_node_16[sizeof(data->path_node_16)-1] = 0;
   data_changed = true;
 }
 
@@ -634,7 +650,8 @@ NavPathInterface::maxlenof_path_node_17() const
 void
 NavPathInterface::set_path_node_17(const char * new_path_node_17)
 {
-  strncpy(data->path_node_17, new_path_node_17, sizeof(data->path_node_17));
+  strncpy(data->path_node_17, new_path_node_17, sizeof(data->path_node_17)-1);
+  data->path_node_17[sizeof(data->path_node_17)-1] = 0;
   data_changed = true;
 }
 
@@ -665,7 +682,8 @@ NavPathInterface::maxlenof_path_node_18() const
 void
 NavPathInterface::set_path_node_18(const char * new_path_node_18)
 {
-  strncpy(data->path_node_18, new_path_node_18, sizeof(data->path_node_18));
+  strncpy(data->path_node_18, new_path_node_18, sizeof(data->path_node_18)-1);
+  data->path_node_18[sizeof(data->path_node_18)-1] = 0;
   data_changed = true;
 }
 
@@ -696,7 +714,8 @@ NavPathInterface::maxlenof_path_node_19() const
 void
 NavPathInterface::set_path_node_19(const char * new_path_node_19)
 {
-  strncpy(data->path_node_19, new_path_node_19, sizeof(data->path_node_19));
+  strncpy(data->path_node_19, new_path_node_19, sizeof(data->path_node_19)-1);
+  data->path_node_19[sizeof(data->path_node_19)-1] = 0;
   data_changed = true;
 }
 
@@ -727,7 +746,8 @@ NavPathInterface::maxlenof_path_node_20() const
 void
 NavPathInterface::set_path_node_20(const char * new_path_node_20)
 {
-  strncpy(data->path_node_20, new_path_node_20, sizeof(data->path_node_20));
+  strncpy(data->path_node_20, new_path_node_20, sizeof(data->path_node_20)-1);
+  data->path_node_20[sizeof(data->path_node_20)-1] = 0;
   data_changed = true;
 }
 
@@ -758,7 +778,8 @@ NavPathInterface::maxlenof_path_node_21() const
 void
 NavPathInterface::set_path_node_21(const char * new_path_node_21)
 {
-  strncpy(data->path_node_21, new_path_node_21, sizeof(data->path_node_21));
+  strncpy(data->path_node_21, new_path_node_21, sizeof(data->path_node_21)-1);
+  data->path_node_21[sizeof(data->path_node_21)-1] = 0;
   data_changed = true;
 }
 
@@ -789,7 +810,8 @@ NavPathInterface::maxlenof_path_node_22() const
 void
 NavPathInterface::set_path_node_22(const char * new_path_node_22)
 {
-  strncpy(data->path_node_22, new_path_node_22, sizeof(data->path_node_22));
+  strncpy(data->path_node_22, new_path_node_22, sizeof(data->path_node_22)-1);
+  data->path_node_22[sizeof(data->path_node_22)-1] = 0;
   data_changed = true;
 }
 
@@ -820,7 +842,8 @@ NavPathInterface::maxlenof_path_node_23() const
 void
 NavPathInterface::set_path_node_23(const char * new_path_node_23)
 {
-  strncpy(data->path_node_23, new_path_node_23, sizeof(data->path_node_23));
+  strncpy(data->path_node_23, new_path_node_23, sizeof(data->path_node_23)-1);
+  data->path_node_23[sizeof(data->path_node_23)-1] = 0;
   data_changed = true;
 }
 
@@ -851,7 +874,8 @@ NavPathInterface::maxlenof_path_node_24() const
 void
 NavPathInterface::set_path_node_24(const char * new_path_node_24)
 {
-  strncpy(data->path_node_24, new_path_node_24, sizeof(data->path_node_24));
+  strncpy(data->path_node_24, new_path_node_24, sizeof(data->path_node_24)-1);
+  data->path_node_24[sizeof(data->path_node_24)-1] = 0;
   data_changed = true;
 }
 
@@ -882,7 +906,8 @@ NavPathInterface::maxlenof_path_node_25() const
 void
 NavPathInterface::set_path_node_25(const char * new_path_node_25)
 {
-  strncpy(data->path_node_25, new_path_node_25, sizeof(data->path_node_25));
+  strncpy(data->path_node_25, new_path_node_25, sizeof(data->path_node_25)-1);
+  data->path_node_25[sizeof(data->path_node_25)-1] = 0;
   data_changed = true;
 }
 
@@ -913,7 +938,8 @@ NavPathInterface::maxlenof_path_node_26() const
 void
 NavPathInterface::set_path_node_26(const char * new_path_node_26)
 {
-  strncpy(data->path_node_26, new_path_node_26, sizeof(data->path_node_26));
+  strncpy(data->path_node_26, new_path_node_26, sizeof(data->path_node_26)-1);
+  data->path_node_26[sizeof(data->path_node_26)-1] = 0;
   data_changed = true;
 }
 
@@ -944,7 +970,8 @@ NavPathInterface::maxlenof_path_node_27() const
 void
 NavPathInterface::set_path_node_27(const char * new_path_node_27)
 {
-  strncpy(data->path_node_27, new_path_node_27, sizeof(data->path_node_27));
+  strncpy(data->path_node_27, new_path_node_27, sizeof(data->path_node_27)-1);
+  data->path_node_27[sizeof(data->path_node_27)-1] = 0;
   data_changed = true;
 }
 
@@ -975,7 +1002,8 @@ NavPathInterface::maxlenof_path_node_28() const
 void
 NavPathInterface::set_path_node_28(const char * new_path_node_28)
 {
-  strncpy(data->path_node_28, new_path_node_28, sizeof(data->path_node_28));
+  strncpy(data->path_node_28, new_path_node_28, sizeof(data->path_node_28)-1);
+  data->path_node_28[sizeof(data->path_node_28)-1] = 0;
   data_changed = true;
 }
 
@@ -1006,7 +1034,8 @@ NavPathInterface::maxlenof_path_node_29() const
 void
 NavPathInterface::set_path_node_29(const char * new_path_node_29)
 {
-  strncpy(data->path_node_29, new_path_node_29, sizeof(data->path_node_29));
+  strncpy(data->path_node_29, new_path_node_29, sizeof(data->path_node_29)-1);
+  data->path_node_29[sizeof(data->path_node_29)-1] = 0;
   data_changed = true;
 }
 
@@ -1037,7 +1066,8 @@ NavPathInterface::maxlenof_path_node_30() const
 void
 NavPathInterface::set_path_node_30(const char * new_path_node_30)
 {
-  strncpy(data->path_node_30, new_path_node_30, sizeof(data->path_node_30));
+  strncpy(data->path_node_30, new_path_node_30, sizeof(data->path_node_30)-1);
+  data->path_node_30[sizeof(data->path_node_30)-1] = 0;
   data_changed = true;
 }
 
@@ -1068,7 +1098,8 @@ NavPathInterface::maxlenof_path_node_31() const
 void
 NavPathInterface::set_path_node_31(const char * new_path_node_31)
 {
-  strncpy(data->path_node_31, new_path_node_31, sizeof(data->path_node_31));
+  strncpy(data->path_node_31, new_path_node_31, sizeof(data->path_node_31)-1);
+  data->path_node_31[sizeof(data->path_node_31)-1] = 0;
   data_changed = true;
 }
 
@@ -1099,7 +1130,8 @@ NavPathInterface::maxlenof_path_node_32() const
 void
 NavPathInterface::set_path_node_32(const char * new_path_node_32)
 {
-  strncpy(data->path_node_32, new_path_node_32, sizeof(data->path_node_32));
+  strncpy(data->path_node_32, new_path_node_32, sizeof(data->path_node_32)-1);
+  data->path_node_32[sizeof(data->path_node_32)-1] = 0;
   data_changed = true;
 }
 
@@ -1130,7 +1162,8 @@ NavPathInterface::maxlenof_path_node_33() const
 void
 NavPathInterface::set_path_node_33(const char * new_path_node_33)
 {
-  strncpy(data->path_node_33, new_path_node_33, sizeof(data->path_node_33));
+  strncpy(data->path_node_33, new_path_node_33, sizeof(data->path_node_33)-1);
+  data->path_node_33[sizeof(data->path_node_33)-1] = 0;
   data_changed = true;
 }
 
@@ -1161,7 +1194,8 @@ NavPathInterface::maxlenof_path_node_34() const
 void
 NavPathInterface::set_path_node_34(const char * new_path_node_34)
 {
-  strncpy(data->path_node_34, new_path_node_34, sizeof(data->path_node_34));
+  strncpy(data->path_node_34, new_path_node_34, sizeof(data->path_node_34)-1);
+  data->path_node_34[sizeof(data->path_node_34)-1] = 0;
   data_changed = true;
 }
 
@@ -1192,7 +1226,8 @@ NavPathInterface::maxlenof_path_node_35() const
 void
 NavPathInterface::set_path_node_35(const char * new_path_node_35)
 {
-  strncpy(data->path_node_35, new_path_node_35, sizeof(data->path_node_35));
+  strncpy(data->path_node_35, new_path_node_35, sizeof(data->path_node_35)-1);
+  data->path_node_35[sizeof(data->path_node_35)-1] = 0;
   data_changed = true;
 }
 
@@ -1223,7 +1258,8 @@ NavPathInterface::maxlenof_path_node_36() const
 void
 NavPathInterface::set_path_node_36(const char * new_path_node_36)
 {
-  strncpy(data->path_node_36, new_path_node_36, sizeof(data->path_node_36));
+  strncpy(data->path_node_36, new_path_node_36, sizeof(data->path_node_36)-1);
+  data->path_node_36[sizeof(data->path_node_36)-1] = 0;
   data_changed = true;
 }
 
@@ -1254,7 +1290,8 @@ NavPathInterface::maxlenof_path_node_37() const
 void
 NavPathInterface::set_path_node_37(const char * new_path_node_37)
 {
-  strncpy(data->path_node_37, new_path_node_37, sizeof(data->path_node_37));
+  strncpy(data->path_node_37, new_path_node_37, sizeof(data->path_node_37)-1);
+  data->path_node_37[sizeof(data->path_node_37)-1] = 0;
   data_changed = true;
 }
 
@@ -1285,7 +1322,8 @@ NavPathInterface::maxlenof_path_node_38() const
 void
 NavPathInterface::set_path_node_38(const char * new_path_node_38)
 {
-  strncpy(data->path_node_38, new_path_node_38, sizeof(data->path_node_38));
+  strncpy(data->path_node_38, new_path_node_38, sizeof(data->path_node_38)-1);
+  data->path_node_38[sizeof(data->path_node_38)-1] = 0;
   data_changed = true;
 }
 
@@ -1316,7 +1354,8 @@ NavPathInterface::maxlenof_path_node_39() const
 void
 NavPathInterface::set_path_node_39(const char * new_path_node_39)
 {
-  strncpy(data->path_node_39, new_path_node_39, sizeof(data->path_node_39));
+  strncpy(data->path_node_39, new_path_node_39, sizeof(data->path_node_39)-1);
+  data->path_node_39[sizeof(data->path_node_39)-1] = 0;
   data_changed = true;
 }
 
@@ -1347,7 +1386,8 @@ NavPathInterface::maxlenof_path_node_40() const
 void
 NavPathInterface::set_path_node_40(const char * new_path_node_40)
 {
-  strncpy(data->path_node_40, new_path_node_40, sizeof(data->path_node_40));
+  strncpy(data->path_node_40, new_path_node_40, sizeof(data->path_node_40)-1);
+  data->path_node_40[sizeof(data->path_node_40)-1] = 0;
   data_changed = true;
 }
 

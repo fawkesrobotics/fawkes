@@ -767,7 +767,8 @@ NavigatorInterface::maxlenof_target_frame() const
 void
 NavigatorInterface::set_target_frame(const char * new_target_frame)
 {
-  strncpy(data->target_frame, new_target_frame, sizeof(data->target_frame));
+  strncpy(data->target_frame, new_target_frame, sizeof(data->target_frame)-1);
+  data->target_frame[sizeof(data->target_frame)-1] = 0;
   data_changed = true;
 }
 
@@ -1298,7 +1299,8 @@ NavigatorInterface::CartesianGotoWithFrameMessage::CartesianGotoWithFrameMessage
   data->x = ini_x;
   data->y = ini_y;
   data->orientation = ini_orientation;
-  strncpy(data->target_frame, ini_target_frame, 64);
+  strncpy(data->target_frame, ini_target_frame, 64-1);
+  data->target_frame[64-1] = 0;
   enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
   enum_map_DriveMode[(int)Forward] = "Forward";
   enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
@@ -1468,7 +1470,8 @@ NavigatorInterface::CartesianGotoWithFrameMessage::maxlenof_target_frame() const
 void
 NavigatorInterface::CartesianGotoWithFrameMessage::set_target_frame(const char * new_target_frame)
 {
-  strncpy(data->target_frame, new_target_frame, sizeof(data->target_frame));
+  strncpy(data->target_frame, new_target_frame, sizeof(data->target_frame)-1);
+  data->target_frame[sizeof(data->target_frame)-1] = 0;
 }
 
 /** Clone this message.
@@ -1670,7 +1673,8 @@ NavigatorInterface::PlaceGotoMessage::PlaceGotoMessage(const char * ini_place) :
   memset(data_ptr, 0, data_size);
   data      = (PlaceGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->place, ini_place, 64);
+  strncpy(data->place, ini_place, 64-1);
+  data->place[64-1] = 0;
   enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
   enum_map_DriveMode[(int)Forward] = "Forward";
   enum_map_DriveMode[(int)AllowBackward] = "AllowBackward";
@@ -1744,7 +1748,8 @@ NavigatorInterface::PlaceGotoMessage::maxlenof_place() const
 void
 NavigatorInterface::PlaceGotoMessage::set_place(const char * new_place)
 {
-  strncpy(data->place, new_place, sizeof(data->place));
+  strncpy(data->place, new_place, sizeof(data->place)-1);
+  data->place[sizeof(data->place)-1] = 0;
 }
 
 /** Clone this message.
@@ -1775,7 +1780,8 @@ NavigatorInterface::PlaceWithOriGotoMessage::PlaceWithOriGotoMessage(const char 
   memset(data_ptr, 0, data_size);
   data      = (PlaceWithOriGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->place, ini_place, 64);
+  strncpy(data->place, ini_place, 64-1);
+  data->place[64-1] = 0;
   data->orientation = ini_orientation;
   enum_map_DriveMode[(int)MovingNotAllowed] = "MovingNotAllowed";
   enum_map_DriveMode[(int)Forward] = "Forward";
@@ -1852,7 +1858,8 @@ NavigatorInterface::PlaceWithOriGotoMessage::maxlenof_place() const
 void
 NavigatorInterface::PlaceWithOriGotoMessage::set_place(const char * new_place)
 {
-  strncpy(data->place, new_place, sizeof(data->place));
+  strncpy(data->place, new_place, sizeof(data->place)-1);
+  data->place[sizeof(data->place)-1] = 0;
 }
 
 /** Get orientation value.

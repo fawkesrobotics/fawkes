@@ -116,7 +116,8 @@ DynamicReconfigureInterface::maxlenof_last_service() const
 void
 DynamicReconfigureInterface::set_last_service(const char * new_last_service)
 {
-  strncpy(data->last_service, new_last_service, sizeof(data->last_service));
+  strncpy(data->last_service, new_last_service, sizeof(data->last_service)-1);
+  data->last_service[sizeof(data->last_service)-1] = 0;
   data_changed = true;
 }
 
@@ -147,7 +148,8 @@ DynamicReconfigureInterface::maxlenof_last_parameter() const
 void
 DynamicReconfigureInterface::set_last_parameter(const char * new_last_parameter)
 {
-  strncpy(data->last_parameter, new_last_parameter, sizeof(data->last_parameter));
+  strncpy(data->last_parameter, new_last_parameter, sizeof(data->last_parameter)-1);
+  data->last_parameter[sizeof(data->last_parameter)-1] = 0;
   data_changed = true;
 }
 
@@ -209,7 +211,8 @@ DynamicReconfigureInterface::maxlenof_last_str_value() const
 void
 DynamicReconfigureInterface::set_last_str_value(const char * new_last_str_value)
 {
-  strncpy(data->last_str_value, new_last_str_value, sizeof(data->last_str_value));
+  strncpy(data->last_str_value, new_last_str_value, sizeof(data->last_str_value)-1);
+  data->last_str_value[sizeof(data->last_str_value)-1] = 0;
   data_changed = true;
 }
 
@@ -432,8 +435,10 @@ DynamicReconfigureInterface::SetBoolMessage::SetBoolMessage(const char * ini_ser
   memset(data_ptr, 0, data_size);
   data      = (SetBoolMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->service, ini_service, 64);
-  strncpy(data->parameter, ini_parameter, 64);
+  strncpy(data->service, ini_service, 64-1);
+  data->service[64-1] = 0;
+  strncpy(data->parameter, ini_parameter, 64-1);
+  data->parameter[64-1] = 0;
   data->value = ini_value;
   enum_map_LastMsgStatus[(int)Succeeded] = "Succeeded";
   enum_map_LastMsgStatus[(int)Failed] = "Failed";
@@ -502,7 +507,8 @@ DynamicReconfigureInterface::SetBoolMessage::maxlenof_service() const
 void
 DynamicReconfigureInterface::SetBoolMessage::set_service(const char * new_service)
 {
-  strncpy(data->service, new_service, sizeof(data->service));
+  strncpy(data->service, new_service, sizeof(data->service)-1);
+  data->service[sizeof(data->service)-1] = 0;
 }
 
 /** Get parameter value.
@@ -532,7 +538,8 @@ DynamicReconfigureInterface::SetBoolMessage::maxlenof_parameter() const
 void
 DynamicReconfigureInterface::SetBoolMessage::set_parameter(const char * new_parameter)
 {
-  strncpy(data->parameter, new_parameter, sizeof(data->parameter));
+  strncpy(data->parameter, new_parameter, sizeof(data->parameter)-1);
+  data->parameter[sizeof(data->parameter)-1] = 0;
 }
 
 /** Get value value.
@@ -594,9 +601,12 @@ DynamicReconfigureInterface::SetStringMessage::SetStringMessage(const char * ini
   memset(data_ptr, 0, data_size);
   data      = (SetStringMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->service, ini_service, 64);
-  strncpy(data->parameter, ini_parameter, 64);
-  strncpy(data->value, ini_value, 64);
+  strncpy(data->service, ini_service, 64-1);
+  data->service[64-1] = 0;
+  strncpy(data->parameter, ini_parameter, 64-1);
+  data->parameter[64-1] = 0;
+  strncpy(data->value, ini_value, 64-1);
+  data->value[64-1] = 0;
   enum_map_LastMsgStatus[(int)Succeeded] = "Succeeded";
   enum_map_LastMsgStatus[(int)Failed] = "Failed";
   add_fieldinfo(IFT_STRING, "service", 64, data->service);
@@ -664,7 +674,8 @@ DynamicReconfigureInterface::SetStringMessage::maxlenof_service() const
 void
 DynamicReconfigureInterface::SetStringMessage::set_service(const char * new_service)
 {
-  strncpy(data->service, new_service, sizeof(data->service));
+  strncpy(data->service, new_service, sizeof(data->service)-1);
+  data->service[sizeof(data->service)-1] = 0;
 }
 
 /** Get parameter value.
@@ -694,7 +705,8 @@ DynamicReconfigureInterface::SetStringMessage::maxlenof_parameter() const
 void
 DynamicReconfigureInterface::SetStringMessage::set_parameter(const char * new_parameter)
 {
-  strncpy(data->parameter, new_parameter, sizeof(data->parameter));
+  strncpy(data->parameter, new_parameter, sizeof(data->parameter)-1);
+  data->parameter[sizeof(data->parameter)-1] = 0;
 }
 
 /** Get value value.
@@ -724,7 +736,8 @@ DynamicReconfigureInterface::SetStringMessage::maxlenof_value() const
 void
 DynamicReconfigureInterface::SetStringMessage::set_value(const char * new_value)
 {
-  strncpy(data->value, new_value, sizeof(data->value));
+  strncpy(data->value, new_value, sizeof(data->value)-1);
+  data->value[sizeof(data->value)-1] = 0;
 }
 
 /** Clone this message.
@@ -756,8 +769,10 @@ DynamicReconfigureInterface::SetUint32Message::SetUint32Message(const char * ini
   memset(data_ptr, 0, data_size);
   data      = (SetUint32Message_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->service, ini_service, 64);
-  strncpy(data->parameter, ini_parameter, 64);
+  strncpy(data->service, ini_service, 64-1);
+  data->service[64-1] = 0;
+  strncpy(data->parameter, ini_parameter, 64-1);
+  data->parameter[64-1] = 0;
   data->value = ini_value;
   enum_map_LastMsgStatus[(int)Succeeded] = "Succeeded";
   enum_map_LastMsgStatus[(int)Failed] = "Failed";
@@ -826,7 +841,8 @@ DynamicReconfigureInterface::SetUint32Message::maxlenof_service() const
 void
 DynamicReconfigureInterface::SetUint32Message::set_service(const char * new_service)
 {
-  strncpy(data->service, new_service, sizeof(data->service));
+  strncpy(data->service, new_service, sizeof(data->service)-1);
+  data->service[sizeof(data->service)-1] = 0;
 }
 
 /** Get parameter value.
@@ -856,7 +872,8 @@ DynamicReconfigureInterface::SetUint32Message::maxlenof_parameter() const
 void
 DynamicReconfigureInterface::SetUint32Message::set_parameter(const char * new_parameter)
 {
-  strncpy(data->parameter, new_parameter, sizeof(data->parameter));
+  strncpy(data->parameter, new_parameter, sizeof(data->parameter)-1);
+  data->parameter[sizeof(data->parameter)-1] = 0;
 }
 
 /** Get value value.
@@ -918,8 +935,10 @@ DynamicReconfigureInterface::SetUint64Message::SetUint64Message(const char * ini
   memset(data_ptr, 0, data_size);
   data      = (SetUint64Message_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->service, ini_service, 64);
-  strncpy(data->parameter, ini_parameter, 64);
+  strncpy(data->service, ini_service, 64-1);
+  data->service[64-1] = 0;
+  strncpy(data->parameter, ini_parameter, 64-1);
+  data->parameter[64-1] = 0;
   data->value = ini_value;
   enum_map_LastMsgStatus[(int)Succeeded] = "Succeeded";
   enum_map_LastMsgStatus[(int)Failed] = "Failed";
@@ -988,7 +1007,8 @@ DynamicReconfigureInterface::SetUint64Message::maxlenof_service() const
 void
 DynamicReconfigureInterface::SetUint64Message::set_service(const char * new_service)
 {
-  strncpy(data->service, new_service, sizeof(data->service));
+  strncpy(data->service, new_service, sizeof(data->service)-1);
+  data->service[sizeof(data->service)-1] = 0;
 }
 
 /** Get parameter value.
@@ -1018,7 +1038,8 @@ DynamicReconfigureInterface::SetUint64Message::maxlenof_parameter() const
 void
 DynamicReconfigureInterface::SetUint64Message::set_parameter(const char * new_parameter)
 {
-  strncpy(data->parameter, new_parameter, sizeof(data->parameter));
+  strncpy(data->parameter, new_parameter, sizeof(data->parameter)-1);
+  data->parameter[sizeof(data->parameter)-1] = 0;
 }
 
 /** Get value value.
@@ -1080,8 +1101,10 @@ DynamicReconfigureInterface::SetFloatMessage::SetFloatMessage(const char * ini_s
   memset(data_ptr, 0, data_size);
   data      = (SetFloatMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->service, ini_service, 64);
-  strncpy(data->parameter, ini_parameter, 64);
+  strncpy(data->service, ini_service, 64-1);
+  data->service[64-1] = 0;
+  strncpy(data->parameter, ini_parameter, 64-1);
+  data->parameter[64-1] = 0;
   data->value = ini_value;
   enum_map_LastMsgStatus[(int)Succeeded] = "Succeeded";
   enum_map_LastMsgStatus[(int)Failed] = "Failed";
@@ -1150,7 +1173,8 @@ DynamicReconfigureInterface::SetFloatMessage::maxlenof_service() const
 void
 DynamicReconfigureInterface::SetFloatMessage::set_service(const char * new_service)
 {
-  strncpy(data->service, new_service, sizeof(data->service));
+  strncpy(data->service, new_service, sizeof(data->service)-1);
+  data->service[sizeof(data->service)-1] = 0;
 }
 
 /** Get parameter value.
@@ -1180,7 +1204,8 @@ DynamicReconfigureInterface::SetFloatMessage::maxlenof_parameter() const
 void
 DynamicReconfigureInterface::SetFloatMessage::set_parameter(const char * new_parameter)
 {
-  strncpy(data->parameter, new_parameter, sizeof(data->parameter));
+  strncpy(data->parameter, new_parameter, sizeof(data->parameter)-1);
+  data->parameter[sizeof(data->parameter)-1] = 0;
 }
 
 /** Get value value.

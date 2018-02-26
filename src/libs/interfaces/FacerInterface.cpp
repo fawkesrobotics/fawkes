@@ -247,7 +247,8 @@ FacerInterface::maxlenof_recognized_name() const
 void
 FacerInterface::set_recognized_name(const char * new_recognized_name)
 {
-  strncpy(data->recognized_name, new_recognized_name, sizeof(data->recognized_name));
+  strncpy(data->recognized_name, new_recognized_name, sizeof(data->recognized_name)-1);
+  data->recognized_name[sizeof(data->recognized_name)-1] = 0;
   data_changed = true;
 }
 
@@ -387,7 +388,8 @@ FacerInterface::maxlenof_most_likely_gender() const
 void
 FacerInterface::set_most_likely_gender(const char * new_most_likely_gender)
 {
-  strncpy(data->most_likely_gender, new_most_likely_gender, sizeof(data->most_likely_gender));
+  strncpy(data->most_likely_gender, new_most_likely_gender, sizeof(data->most_likely_gender)-1);
+  data->most_likely_gender[sizeof(data->most_likely_gender)-1] = 0;
   data_changed = true;
 }
 
@@ -747,7 +749,8 @@ FacerInterface::maxlenof_requested_name() const
 void
 FacerInterface::set_requested_name(const char * new_requested_name)
 {
-  strncpy(data->requested_name, new_requested_name, sizeof(data->requested_name));
+  strncpy(data->requested_name, new_requested_name, sizeof(data->requested_name)-1);
+  data->requested_name[sizeof(data->requested_name)-1] = 0;
   data_changed = true;
 }
 
@@ -852,7 +855,8 @@ FacerInterface::LearnFaceMessage::LearnFaceMessage(const char * ini_name) : Mess
   memset(data_ptr, 0, data_size);
   data      = (LearnFaceMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->name, ini_name, 64);
+  strncpy(data->name, ini_name, 64-1);
+  data->name[64-1] = 0;
   enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
@@ -922,7 +926,8 @@ FacerInterface::LearnFaceMessage::maxlenof_name() const
 void
 FacerInterface::LearnFaceMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Clone this message.
@@ -1192,7 +1197,8 @@ FacerInterface::SetNameMessage::SetNameMessage(const uint32_t ini_index, const c
   data      = (SetNameMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->index = ini_index;
-  strncpy(data->name, ini_name, 64);
+  strncpy(data->name, ini_name, 64-1);
+  data->name[64-1] = 0;
   enum_map_if_facer_opmode_t[(int)OPMODE_DISABLED] = "OPMODE_DISABLED";
   enum_map_if_facer_opmode_t[(int)OPMODE_DETECTION] = "OPMODE_DETECTION";
   enum_map_if_facer_opmode_t[(int)OPMODE_RECOGNITION] = "OPMODE_RECOGNITION";
@@ -1294,7 +1300,8 @@ FacerInterface::SetNameMessage::maxlenof_name() const
 void
 FacerInterface::SetNameMessage::set_name(const char * new_name)
 {
-  strncpy(data->name, new_name, sizeof(data->name));
+  strncpy(data->name, new_name, sizeof(data->name)-1);
+  data->name[sizeof(data->name)-1] = 0;
 }
 
 /** Clone this message.

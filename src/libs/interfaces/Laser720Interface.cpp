@@ -95,7 +95,8 @@ Laser720Interface::maxlenof_frame() const
 void
 Laser720Interface::set_frame(const char * new_frame)
 {
-  strncpy(data->frame, new_frame, sizeof(data->frame));
+  strncpy(data->frame, new_frame, sizeof(data->frame)-1);
+  data->frame[sizeof(data->frame)-1] = 0;
   data_changed = true;
 }
 
