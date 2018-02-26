@@ -32,6 +32,9 @@ class DomainTest : public CLIPSTest
     /** Set up the test environment. */
     virtual void SetUp() {
       LoadCLIPSFiles(clips_files);
+      // Helps a lot to diagnose failures
+      //env.evaluate("(watch facts)");
+      //env.evaluate("(watch rules)");
     }
     /** These files are loaded during setup by default. */
     vector<string> clips_files = { "../plan.clp", "../domain.clp" };
