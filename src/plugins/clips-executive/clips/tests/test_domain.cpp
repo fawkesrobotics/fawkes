@@ -103,10 +103,10 @@ TEST_F(DomainTest, Typing)
   env.assert_fact("(domain-object-type (name cup) (super-type moveable-obj))");
   env.assert_fact("(domain-object (name c1) (type cup))");
   env.run();
-  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "thing", "object" }));
-  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "cup" }));
-  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "moveable-obj" }));
-  EXPECT_TRUE(has_ordered_fact("obj-is-of-type", { "c1", "object" }));
+  EXPECT_TRUE(has_ordered_fact("domain-obj-is-of-type", { "thing", "object" }));
+  EXPECT_TRUE(has_ordered_fact("domain-obj-is-of-type", { "c1", "cup" }));
+  EXPECT_TRUE(has_ordered_fact("domain-obj-is-of-type", { "c1", "moveable-obj" }));
+  EXPECT_TRUE(has_ordered_fact("domain-obj-is-of-type", { "c1", "object" }));
 }
 
 /** There should be no domain error if the specified domain is valid. */

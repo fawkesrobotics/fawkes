@@ -22,7 +22,6 @@
 (deftemplate domain-predicate
 	"Representation of a predicate specification."
   (slot name (type SYMBOL) (default ?NONE))
-	(slot wm-key-pattern (type STRING))
   (multislot param-names (type SYMBOL))
   (multislot param-types (type SYMBOL))
 )
@@ -32,6 +31,41 @@
    If a fact exists, it is considered to be true, false otherwise (closed world assumption)."
   (slot name (type SYMBOL) (default ?NONE))
   (multislot param-values)
+)
+
+(deffunction domain-wipe ()
+	(foreach ?t (create$ domain-object-type domain-object domain-predicate domain-fact
+											 domain-precondition domain-atomic-precondition
+											 domain-operator domain-operator-parameter
+											 domain-effect domain-retracted-fact domain-error)
+		(delayed-do-for-all-facts ((?d ?t)) TRUE (retract ?d))
+	)
+)
+
+(deffunction domain-fact-key (?name ?param-names ?param-values)
+	(if (<> (length$ ?param-names) (length$ ?param-values)) then
+		(printout error "Cannot generate domain fact key with non-equal length names and values" crlf)
+		(return FALSE)
+	)
+	(bind ?rv (create$ ?name))
+	(if (> (length$ ?param-names) 0) then
+		(bind ?rv (append$ ?rv args?))
+		(foreach ?n ?param-names (bind ?rv (append$ ?rv ?n (nth$ ?n-index ?param-values))))
+	)
+	(return ?rv)
+)
+
+(deffunction domain-fact-args (?param-names ?param-values)
+	(if (<> (length$ ?param-names) (length$ ?param-values)) then
+		(printout error "Cannot generate domain fact args with non-equal length names and values" crlf)
+		(return FALSE)
+	)
+	(bind ?args (create$))
+	(if (> (length$ ?param-names) 0) then
+		(bind ?args (append$ ?args args?))
+		(foreach ?n ?param-names (bind ?args (append$ ?args ?n (nth$ ?n-index ?param-values))))
+	)
+	(return ?args)
 )
 
 (deftemplate domain-retracted-fact
@@ -110,18 +144,18 @@
 
 (defrule domain-translate-obj-slot-type-to-ordered-fact
   "Translate the slot type of a domain-object into the ordered fact
-   obj-is-of-type."
+   domain-obj-is-of-type."
   (domain-object (name ?obj) (type ?type))
 =>
-  (assert (obj-is-of-type ?obj ?type))
+  (assert (domain-obj-is-of-type ?obj ?type))
 )
 
 (defrule domain-get-transitive-types
   "An object of type t also has each super-type of t as its type."
-  (obj-is-of-type ?obj ?type)
+  (domain-obj-is-of-type ?obj ?type)
   (domain-object-type (name ?type) (super-type ?super-type))
 =>
-  (assert (obj-is-of-type ?obj ?super-type))
+  (assert (domain-obj-is-of-type ?obj ?super-type))
 )
 
 (defrule domain-ground-precondition

@@ -70,3 +70,13 @@
 ; @param ?b string b to compare
 ; @return true if (str-compare ?a ?b) is greater than thero, false otherwise
 (deffunction string> (?a ?b) (> (str-compare ?a ?b) 0))
+
+(deffunction str-prefix (?prefix ?s)
+	"Check if ?s starts with ?prefix
+   @param ?s string to check
+   @param ?prefix string to check for in ?s
+   @return TRUE if ?s starts with ?prefix, FALSE otherwise"
+	(bind ?p (str-index ?prefix ?s))
+	(if ?p then (return (= ?p 1)))
+	(return FALSE)
+)
