@@ -21,6 +21,7 @@ plugins/robot-memory:
     mongo-client-connection-distributed: "robotmemory-synced"
     # distribute robot memory
     distributed: true
+    distributed-create: true
     # how lagre should the oplog be (minimum 50 mb)
     oplog-size: 1000
     # Where to store log files

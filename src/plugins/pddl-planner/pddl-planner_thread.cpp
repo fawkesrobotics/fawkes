@@ -275,6 +275,7 @@ PddlPlannerThread::BSONFromActionList()
 {
   BSONObjBuilder plan_builder;
   plan_builder << "plan" << 1;
+  plan_builder << "msg_id" << plan_if_->msg_id();
   BSONArrayBuilder action_arr_builder;
   for ( action  a : action_list_ ) {
     BSONObjBuilder action_builder;

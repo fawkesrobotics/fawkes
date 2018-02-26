@@ -5,7 +5,7 @@
 ;  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
 ;  Licensed under GPLv2+ license, cf. LICENSE file in the doc directory.
 ;---------------------------------------------------------------------------
-j
+
 (defglobal
 	?*PDDL-INIT-CONTROL-RETRY-INTERVAL-SEC* = 1
 )
@@ -47,12 +47,27 @@ j
   (blackboard-get-info)
 )
 
+(defrule pddl-init-register-trigger
+  "Register for the robot memory trigger for new plans."
+  (executive-init)
+  (ff-feature-loaded robot_memory)
+  (not (registered-trigger "robmem.pddl-plan" ?))
+  =>
+  (printout t "Registering robot memory trigger for new plans" crlf)
+  (bind ?query (bson-create))
+  (bson-append ?query "plan" 1)
+  (bind ?trigger (robmem-trigger-register "robmem.pddl-plan" ?query "new-plan"))
+  (bson-destroy ?query)
+  (assert (registered-trigger "robmem.pddl-plan" ?trigger))
+)
+
 (defrule pddl-init-pddl-interface
   ?pg <- (pddl-init-control (interface-id "pddl-gen") (has-writer TRUE))
   ?pp <- (pddl-init-control (interface-id "pddl-planner") (has-writer TRUE))
+  (registered-trigger "robmem.pddl-plan" ?)
   =>
   (retract ?pg)
   (retract ?pp)
   (path-load "pddl.clp")
-  (assert (ff-feature-loaded pddl))
+  (assert (ff-feature-loaded pddl_planner))
 )

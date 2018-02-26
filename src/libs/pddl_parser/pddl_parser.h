@@ -50,6 +50,12 @@ class PddlParserException : public fawkes::Exception
     */
   PddlParserException(const char *msg)
     : fawkes::Exception(msg) {}
+  /** Constructor with a string message.
+   * This wraps the constructor with a char* message for usage with std::string.
+   * @param msg A message describing the error.
+   */
+  PddlParserException(const std::string &msg)
+    : fawkes::Exception(msg.c_str()) {}
 };
 
 }

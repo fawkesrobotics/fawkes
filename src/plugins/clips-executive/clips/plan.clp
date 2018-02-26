@@ -28,7 +28,7 @@
 	(multislot param-values)
 	(slot duration (type FLOAT))
 	(slot dispatch-time (type FLOAT))
-	(slot status (type SYMBOL) (allowed-values FORMULATED PENDING WAITING RUNNING FINAL FAILED))
+	(slot status (type SYMBOL) (allowed-values FORMULATED PENDING WAITING RUNNING EXECUTED FINAL FAILED))
   (slot executable (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 

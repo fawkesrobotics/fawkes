@@ -41,7 +41,7 @@
 	?sf <- (skill (name ?action-name) (status S_FINAL))
 	=>
 	(printout t "Execution of " ?action-name " completed successfully" crlf)
-	(modify ?pa (status FINAL))
+	(modify ?pa (status EXECUTED))
 	(retract ?sf ?pe)
 )
 
