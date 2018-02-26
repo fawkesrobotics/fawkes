@@ -433,7 +433,7 @@ SharedMemoryLookupTableHeader::initialize(void *memptr)
   __header = (SharedMemoryLookupTable_header_t *)memptr;
   memset(memptr, 0, sizeof(SharedMemoryLookupTable_header_t));
 	 
-  strncpy(__header->lut_id, __lut_id, LUT_ID_MAX_LENGTH);
+  strncpy(__header->lut_id, __lut_id, LUT_ID_MAX_LENGTH-1);
   __header->width          = __width;
   __header->height         = __height;
   __header->depth          = __depth;

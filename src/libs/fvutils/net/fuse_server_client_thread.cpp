@@ -249,7 +249,7 @@ FuseServerClientThread::process_getimageinfo_message(FuseNetworkMessage *m)
 
     FUSE_imageinfo_t *ii = (FUSE_imageinfo_t *)calloc(1, sizeof(FUSE_imageinfo_t));
     
-    strncpy(ii->image_id, b->image_id(), IMAGE_ID_MAX_LENGTH);
+    strncpy(ii->image_id, b->image_id(), IMAGE_ID_MAX_LENGTH-1);
     ii->colorspace = htons(b->colorspace());
     ii->width = htonl(b->width());
     ii->height = htonl(b->height());
@@ -308,7 +308,7 @@ FuseServerClientThread::process_setlut_message(FuseNetworkMessage *m)
 {
   FuseLutContent *lc = m->msgc<FuseLutContent>();  
   FUSE_lutdesc_message_t *reply = (FUSE_lutdesc_message_t *)malloc(sizeof(FUSE_lutdesc_message_t));
-  strncpy(reply->lut_id, lc->lut_id(), LUT_ID_MAX_LENGTH);
+  strncpy(reply->lut_id, lc->lut_id(), LUT_ID_MAX_LENGTH-1);
   // Currently we expect colormaps, so make sure we get sensible dimensions
 
   SharedMemoryLookupTable *b;

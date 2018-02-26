@@ -68,7 +68,7 @@ RectificationInfoFile::RectificationInfoFile(uint64_t cam_guid, const char *mode
   _cam_guid = cam_guid;
   _model = strdup(model);
 
-  strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
+  strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH-1);
   _header->guid = _cam_guid;
 }
 
@@ -87,7 +87,7 @@ RectificationInfoFile::RectificationInfoFile()
   _cam_guid = 0;
   _model = strdup("");
 
-  strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
+  strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH-1);
   _header->guid = _cam_guid;
 }
 
