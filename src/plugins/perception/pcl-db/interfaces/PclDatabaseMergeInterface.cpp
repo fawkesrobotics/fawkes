@@ -169,7 +169,8 @@ PclDatabaseMergeInterface::maxlenof_error() const
 void
 PclDatabaseMergeInterface::set_error(const char * new_error)
 {
-  strncpy(data->error, new_error, sizeof(data->error));
+  strncpy(data->error, new_error, sizeof(data->error)-1);
+  data->error[sizeof(data->error)-1] = 0;
   data_changed = true;
 }
 
@@ -227,8 +228,10 @@ PclDatabaseMergeInterface::MergeMessage::MergeMessage(const int64_t * ini_timest
   data      = (MergeMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   memcpy(data->timestamps, ini_timestamps, sizeof(int64_t) * 12);
-  strncpy(data->database, ini_database, 64);
-  strncpy(data->collection, ini_collection, 128);
+  strncpy(data->database, ini_database, 64-1);
+  data->database[64-1] = 0;
+  strncpy(data->collection, ini_collection, 128-1);
+  data->collection[128-1] = 0;
   add_fieldinfo(IFT_INT64, "timestamps", 12, &data->timestamps);
   add_fieldinfo(IFT_STRING, "database", 64, data->database);
   add_fieldinfo(IFT_STRING, "collection", 128, data->collection);
@@ -368,7 +371,8 @@ PclDatabaseMergeInterface::MergeMessage::maxlenof_database() const
 void
 PclDatabaseMergeInterface::MergeMessage::set_database(const char * new_database)
 {
-  strncpy(data->database, new_database, sizeof(data->database));
+  strncpy(data->database, new_database, sizeof(data->database)-1);
+  data->database[sizeof(data->database)-1] = 0;
 }
 
 /** Get collection value.
@@ -404,7 +408,8 @@ PclDatabaseMergeInterface::MergeMessage::maxlenof_collection() const
 void
 PclDatabaseMergeInterface::MergeMessage::set_collection(const char * new_collection)
 {
-  strncpy(data->collection, new_collection, sizeof(data->collection));
+  strncpy(data->collection, new_collection, sizeof(data->collection)-1);
+  data->collection[sizeof(data->collection)-1] = 0;
 }
 
 /** Clone this message.

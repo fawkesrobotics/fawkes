@@ -169,7 +169,8 @@ PclDatabaseRetrieveInterface::maxlenof_error() const
 void
 PclDatabaseRetrieveInterface::set_error(const char * new_error)
 {
-  strncpy(data->error, new_error, sizeof(data->error));
+  strncpy(data->error, new_error, sizeof(data->error)-1);
+  data->error[sizeof(data->error)-1] = 0;
   data_changed = true;
 }
 
@@ -229,9 +230,12 @@ PclDatabaseRetrieveInterface::RetrieveMessage::RetrieveMessage(const int64_t ini
   data      = (RetrieveMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->timestamp = ini_timestamp;
-  strncpy(data->database, ini_database, 64);
-  strncpy(data->collection, ini_collection, 128);
-  strncpy(data->target_frame, ini_target_frame, 64);
+  strncpy(data->database, ini_database, 64-1);
+  data->database[64-1] = 0;
+  strncpy(data->collection, ini_collection, 128-1);
+  data->collection[128-1] = 0;
+  strncpy(data->target_frame, ini_target_frame, 64-1);
+  data->target_frame[64-1] = 0;
   data->original_timestamp = ini_original_timestamp;
   add_fieldinfo(IFT_INT64, "timestamp", 1, &data->timestamp);
   add_fieldinfo(IFT_STRING, "database", 64, data->database);
@@ -340,7 +344,8 @@ PclDatabaseRetrieveInterface::RetrieveMessage::maxlenof_database() const
 void
 PclDatabaseRetrieveInterface::RetrieveMessage::set_database(const char * new_database)
 {
-  strncpy(data->database, new_database, sizeof(data->database));
+  strncpy(data->database, new_database, sizeof(data->database)-1);
+  data->database[sizeof(data->database)-1] = 0;
 }
 
 /** Get collection value.
@@ -376,7 +381,8 @@ PclDatabaseRetrieveInterface::RetrieveMessage::maxlenof_collection() const
 void
 PclDatabaseRetrieveInterface::RetrieveMessage::set_collection(const char * new_collection)
 {
-  strncpy(data->collection, new_collection, sizeof(data->collection));
+  strncpy(data->collection, new_collection, sizeof(data->collection)-1);
+  data->collection[sizeof(data->collection)-1] = 0;
 }
 
 /** Get target_frame value.
@@ -418,7 +424,8 @@ PclDatabaseRetrieveInterface::RetrieveMessage::maxlenof_target_frame() const
 void
 PclDatabaseRetrieveInterface::RetrieveMessage::set_target_frame(const char * new_target_frame)
 {
-  strncpy(data->target_frame, new_target_frame, sizeof(data->target_frame));
+  strncpy(data->target_frame, new_target_frame, sizeof(data->target_frame)-1);
+  data->target_frame[sizeof(data->target_frame)-1] = 0;
 }
 
 /** Get original_timestamp value.
