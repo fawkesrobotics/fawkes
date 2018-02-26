@@ -16,6 +16,7 @@ PanTiltInterface.h
 PclDatabaseMergeInterface.h
 PclDatabaseRetrieveInterface.h
 PclDatabaseStoreInterface.h
+PddlGenInterface.h
 PddlPlannerInterface.h
 SkillerDebugInterface.h
 RobotinoSensorInterface.h
