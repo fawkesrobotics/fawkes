@@ -21,6 +21,11 @@
 #include "clips_pddl_parser_thread.h"
 #include "clips_pddl_parser_feature.h"
 
+/** @class ClipsPddlParserThread "clips_pddl_parser_thread.h"
+ * Plugin thread that provides the pddl-parser CLIPS features.
+ * @author Till Hofmann
+ */
+
 ClipsPddlParserThread::ClipsPddlParserThread()
   : Thread("ClipsPddlParserThread", Thread::OPMODE_WAITFORWAKEUP),
     CLIPSFeatureAspect(new PDDLCLIPSFeature(logger))

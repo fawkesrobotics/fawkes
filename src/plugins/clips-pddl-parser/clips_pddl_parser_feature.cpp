@@ -32,9 +32,13 @@
 using namespace std;
 using namespace pddl_parser;
 
-/** @class PDDLCLIPSFeature "feature_pddl.h"
+/** @class PDDLCLIPSFeature "clips_pddl_parser_feature.h"
  * Provide a PDDL parser to a CLIPS environment.
  * @author Till Hofmann
+ */
+
+/** Initialize the CLIPS feature.
+ * @param logger The logger to use for logging in the feature
  */
 PDDLCLIPSFeature::PDDLCLIPSFeature(fawkes::Logger *logger)
 : CLIPSFeature("pddl-parser"), logger_(logger)
