@@ -165,7 +165,8 @@ PddlPlannerInterface::maxlenof_active_planner() const
 void
 PddlPlannerInterface::set_active_planner(const char * new_active_planner)
 {
-  strncpy(data->active_planner, new_active_planner, sizeof(data->active_planner));
+  strncpy(data->active_planner, new_active_planner, sizeof(data->active_planner)-1);
+  data->active_planner[sizeof(data->active_planner)-1] = 0;
   data_changed = true;
 }
 
@@ -220,7 +221,8 @@ PddlPlannerInterface::PlanMessage::PlanMessage(const char * ini_dummy) : Message
   memset(data_ptr, 0, data_size);
   data      = (PlanMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->dummy, ini_dummy, 1);
+  strncpy(data->dummy, ini_dummy, 1-1);
+  data->dummy[1-1] = 0;
   add_fieldinfo(IFT_STRING, "dummy", 1, data->dummy);
 }
 /** Constructor */
@@ -284,7 +286,8 @@ PddlPlannerInterface::PlanMessage::maxlenof_dummy() const
 void
 PddlPlannerInterface::PlanMessage::set_dummy(const char * new_dummy)
 {
-  strncpy(data->dummy, new_dummy, sizeof(data->dummy));
+  strncpy(data->dummy, new_dummy, sizeof(data->dummy)-1);
+  data->dummy[sizeof(data->dummy)-1] = 0;
 }
 
 /** Clone this message.
