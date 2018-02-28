@@ -14,6 +14,14 @@
 	(slot mode (type SYMBOL) (allowed-values FORMULATED SELECTED EXPANDED
 																					 COMMITTED DISPATCHED COMPLETED FAILED))
   (slot parent (type SYMBOL))
+	; Parameters that a goal reasoner or expander might need to evaluate goal.
+	; It is recommended to use a rich descriptive structure similar to wm-fact
+	; keys. Examples:
+	; - (params order O1 robot R1)
+	; - (params machine RS1 robots [ R1 R2 ])
+	; - (params text "Remember the Cant")
+	; - (params location { x 0.0 y 1.0 })
+	(multislot params)
 )
 
 (deftemplate plan
