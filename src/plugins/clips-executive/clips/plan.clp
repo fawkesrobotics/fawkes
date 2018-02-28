@@ -14,6 +14,10 @@
 	(slot mode (type SYMBOL) (allowed-values FORMULATED SELECTED EXPANDED
 																					 COMMITTED DISPATCHED COMPLETED FAILED))
   (slot parent (type SYMBOL))
+	; higher number entails higher priority
+	; A goal might be preferred for selection, expansion, or execution depending
+	; on its priority. Some spec chains may support this, others not.
+	(slot priority (type INTEGER) (default 0))
 	; Parameters that a goal reasoner or expander might need to evaluate goal.
 	; It is recommended to use a rich descriptive structure similar to wm-fact
 	; keys. Examples:
