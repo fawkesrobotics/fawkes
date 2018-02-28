@@ -424,7 +424,7 @@
   "Apply effects of an action after it succeeded."
   ?pa <- (plan-action	(id ?id) (action-name ?op) (status EXECUTION-SUCCEEDED)
 											(param-names $?action-param-names) (param-values $?action-param-values))
-	(domain-operator (name ?action-name) (wait-sensed TRUE))
+	(domain-operator (name ?op) (wait-sensed TRUE))
 	=>
 	(bind ?next-state SENSED-EFFECTS-HOLD)
 	(do-for-all-facts ((?e domain-effect) (?p domain-predicate))
@@ -452,7 +452,7 @@
   "Apply effects of an action after it succeeded."
   ?pa <- (plan-action	(id ?id) (action-name ?op) (status EXECUTION-SUCCEEDED)
 											(param-names $?action-param-names) (param-values $?action-param-values))
-	(domain-operator (name ?action-name) (wait-sensed FALSE))
+	(domain-operator (name ?op) (wait-sensed FALSE))
 	=>
 	(modify ?pa (status SENSED-EFFECTS-HOLD))
 )
@@ -462,7 +462,7 @@
   "Apply effects of an action after it succeeded."
   ?pa <- (plan-action	(id ?id) (action-name ?op) (status SENSED-EFFECTS-HOLD)
 											(param-names $?action-param-names) (param-values $?action-param-values))
-	(domain-operator (name ?action-name))
+	(domain-operator (name ?op))
 	=>
 	(do-for-all-facts ((?e domain-effect) (?p domain-predicate))
 		(and (not ?p:sensed) (eq ?e:part-of ?op) (eq ?e:predicate ?p:name))
