@@ -241,7 +241,6 @@
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?df <- (domain-fact (name ?name) (param-values $?param-values))
 	(not (wm-sync-remap-fact (domain-fact-name ?name)))
-	(not (domain-retracted-fact (name ?name) (param-values $?param-values)))
 	(not (wm-sync-map-fact (domain-fact-name ?name)
 												 (wm-fact-id ?id&:(eq ?id (wm-key-to-id domain fact
 																																(domain-fact-key ?name ?param-names ?param-values))))))
@@ -260,7 +259,6 @@
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?df <- (domain-fact (name ?name) (param-values $?param-values))
 	(wm-sync-remap-fact (domain-fact-name ?name) (wm-fact-key-path $?key-path))
-	(not (domain-retracted-fact (name ?name) (param-values $?param-values)))
 	(not (wm-sync-map-fact (domain-fact-name ?name)
 												 (wm-fact-key $?key&:(wm-sync-remapped-pathargs-match ?key ?key-path ?param-names ?param-values))))
 	=>
@@ -278,7 +276,6 @@
 ; 	(wm-sync-map-fact (wm-fact-id ?id) (wm-fact-idx 0) (domain-fact-name ?name) (domain-fact-idx ?idx))
 ; 	(domain-predicate (name ?name) (param-names $?param-names))
 ; 	?df <- (domain-fact (name ?name) (param-values $?param-values))
-; 	(not (domain-retracted-fact (name ?name) (param-values $?param-values)))
 ; 	(test (eq ?idx (fact-index ?df)))
 ; 	(not (wm-fact (id ?id)))
 ; 	=>
@@ -292,7 +289,6 @@
 	?wf <- (wm-fact (id ?id) (key $?key) (value FALSE))
 	?df <- (domain-fact (name ?name)
 	                    (param-values $?param-values&:(wm-sync-args-match ?key ?param-names ?param-values)))
-	(not (domain-retracted-fact (name ?name) (param-values $?param-values)))
 	(test (< ?idx (fact-index ?df)))
 	=>
 	(modify ?wf (value TRUE))
@@ -340,7 +336,6 @@
 	(domain-predicate (name ?name) (param-names $?param-names))
 	(wm-sync-remap-fact (domain-fact-name ?name) (wm-fact-key-path $?key-path))
 	?wf <- (wm-fact (id ?id) (key $?key&:(wm-sync-remapped-path-match ?key ?key-path)))
-	(not (domain-retracted-fact (name ?name) (param-values $?pv&:(eq ?pv (wm-sync-key-arg-values ?key)))))
 	(not (wm-sync-map-fact (domain-fact-name ?name)
 												 (wm-fact-key $?key&:(wm-sync-remapped-pathargs-match ?key ?key-path ?param-names (wm-sync-key-arg-values ?key)))))
 	=>
@@ -369,15 +364,6 @@
 																	 (param-values (wm-sync-key-arg-values ?key)))))
 		(modify ?wm (wm-fact-idx (fact-index ?wf)) (domain-fact-idx (fact-index ?df)))
 	 else
-		; If it was about to be retracted, don't...
-		(do-for-fact ((?df domain-fact))
-								 (and (eq ?df:name ?name)
-											(wm-sync-args-match ?key ?param-names ?df:param-values))
-			(delayed-do-for-all-facts ((?rf domain-retracted-fact))
-																(and (eq ?rf:name ?name) (eq ?rf:param-values ?df:param-values))
-				(retract ?rf)
-			)
-		)
 		(modify ?wm (wm-fact-idx (fact-index ?wf)))
 	)
 )
@@ -388,12 +374,10 @@
 	?wf <- (wm-fact (id ?id) (key $?key) (type BOOL) (value FALSE))
 	?wm <- (wm-sync-map-fact (domain-fact-name ?name) (domain-fact-idx ~0)
 													 (wm-fact-id ?id) (wm-fact-idx ?idx&:(< ?idx (fact-index ?wf))))
-	(domain-fact (name ?name)
-							 (param-values $?param-values&:(wm-sync-args-match ?key ?param-names ?param-values)))
-	(not (domain-retracted-fact (name ?name) (param-values $?param-values)))
+	?df <- (domain-fact (name ?name)
+											(param-values $?param-values&:(wm-sync-args-match ?key ?param-names ?param-values)))
 	=>
-	(assert (domain-retracted-fact (name ?name)
-																 (param-values (wm-sync-key-arg-values ?key))))
+	(retract ?df)
 	(modify ?wm (wm-fact-idx (fact-index ?wf)) (domain-fact-idx 0))
 )
 
@@ -402,12 +386,11 @@
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?wm <- (wm-sync-map-fact (domain-fact-name ?name) (domain-fact-idx ~0)
 													 (wm-fact-id ?id) (wm-fact-key $?key) (wm-fact-idx ~0))
-	(domain-fact (name ?name)
-							 (param-values $?param-values&:(wm-sync-args-match ?key ?param-names ?param-values)))
+	?df <- (domain-fact (name ?name)
+											(param-values $?param-values&:(wm-sync-args-match ?key ?param-names ?param-values)))
 	(not (wm-fact (id ?id)))
 	=>
-	(assert (domain-retracted-fact (name ?name)
-																 (param-values (wm-sync-key-arg-values ?key))))
+	(retract ?df)
 	(modify ?wm (wm-fact-idx 0) (domain-fact-idx 0))
 )
 
