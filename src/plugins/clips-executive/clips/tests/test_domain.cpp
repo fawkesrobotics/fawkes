@@ -37,7 +37,8 @@ class DomainTest : public CLIPSTest
       //env.evaluate("(watch rules)");
     }
     /** These files are loaded during setup by default. */
-    vector<string> clips_files = { "../plan.clp", "../domain.clp" };
+	vector<string> clips_files =
+	  { "../../../clips/clips/utils.clp", "../plan.clp", "../domain.clp" };
 };
 
 /** Test with the blocksworld domain. */

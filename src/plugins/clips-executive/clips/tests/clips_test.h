@@ -41,6 +41,7 @@ class CLIPSTest : public ::testing::Test
      *  @param files A vector of paths relative to the current directory. */
     virtual void LoadCLIPSFiles(std::vector<std::string> files) {
       for (auto & file : files) {
+	      std::cout << "[          ] loading file " << file << std::endl;
         const std::string path = std::string(TESTDIR) + "/" + file;
         env.evaluate("(load* " + path + ")");
       }
