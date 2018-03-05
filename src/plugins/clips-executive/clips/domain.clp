@@ -40,7 +40,7 @@
 	(foreach ?t (create$ domain-object-type domain-object domain-predicate domain-fact
 											 domain-precondition domain-atomic-precondition
 											 domain-operator domain-operator-parameter
-											 domain-effect domain-retracted-fact domain-error)
+											 domain-effect domain-error)
 		(delayed-do-for-all-facts ((?d ?t)) TRUE (retract ?d))
 	)
 )
@@ -69,12 +69,6 @@
 		(foreach ?n ?param-names (bind ?args (append$ ?args ?n (nth$ ?n-index ?param-values))))
 	)
 	(return ?args)
-)
-
-(deftemplate domain-retracted-fact
-  "Helper template that is asserted if a predicate is to be retracted."
-  (slot name (type SYMBOL) (default ?NONE))
-  (multislot param-values)
 )
 
 (deftemplate domain-pending-sensed-fact
@@ -481,27 +475,15 @@
 			 then
 				(assert (domain-fact (name ?p:name) (param-values ?values)))
 			 else
-				(assert (domain-retracted-fact (name ?p:name) (param-values ?values)))
+				(delayed-do-for-all-facts ((?df domain-fact))
+					(and (eq ?df:name ?p:name) (eq ?df:param-values ?values))
+
+					(retract ?df)
+				)
 			)
 		)
 	)
 	(modify ?pa (status EFFECTS-APPLIED))
-)
-
-(defrule domain-retract-negative-effect
-  "Retract an existing predicate if the same retracted predicate exists."
-  ?p <- (domain-fact (name ?predicate) (param-values $?params))
-  (domain-retracted-fact (name ?predicate) (param-values $?params))
-=>
-  (retract ?p)
-)
-
-(defrule domain-cleanup-retract-facts
-  "Clean up a retract facts after retracting."
-  (declare (salience -100))
-  ?r <- (domain-retracted-fact)
-=>
-  (retract ?r)
 )
 
 (defrule domain-effect-sensed-positive-holds
