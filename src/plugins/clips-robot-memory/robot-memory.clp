@@ -26,11 +26,14 @@
 
 ;; Creates a BSON document from a structured fact
 ; @param ?fact Fact-Pointer
+; @param ?relation optional relation name
 ; @return BSON document
-(deffunction rm-structured-fact-to-bson (?fact)
+(deffunction rm-structured-fact-to-bson (?fact $?relation)
   (bind ?doc (bson-create))
   (bind ?templ (fact-relation ?fact))
-  (bson-append ?doc "relation" (sym-cat ?templ))
+	(if (> (length$ ?relation) 0)
+	 then (bson-append ?doc "relation" (sym-cat (nth$ 1 ?relation)))
+	 else (bson-append ?doc "relation" (sym-cat ?templ)))
   ;append kv-pair for each field
   (progn$ (?slot (fact-slot-names ?fact))
     (if (deftemplate-slot-multip ?templ ?slot)
