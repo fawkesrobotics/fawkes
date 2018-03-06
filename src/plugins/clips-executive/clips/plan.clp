@@ -10,6 +10,7 @@
 ; This is just a dummy until we have a full spec
 (deftemplate goal
 	(slot id (type SYMBOL))
+	(slot class (type SYMBOL))
   (slot type (type SYMBOL) (allowed-values ACHIEVE MAINTAIN) (default ACHIEVE))
 	(slot mode (type SYMBOL) (allowed-values FORMULATED SELECTED EXPANDED
 																					 COMMITTED DISPATCHED COMPLETED FAILED))
