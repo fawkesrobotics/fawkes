@@ -13,7 +13,7 @@
 	(slot class (type SYMBOL))
   (slot type (type SYMBOL) (allowed-values ACHIEVE MAINTAIN) (default ACHIEVE))
 	(slot mode (type SYMBOL) (allowed-values FORMULATED SELECTED EXPANDED
-																					 COMMITTED DISPATCHED COMPLETED FAILED))
+																					 COMMITTED DISPATCHED COMPLETED FAILED REJECTED))
   (slot parent (type SYMBOL))
 )
 
