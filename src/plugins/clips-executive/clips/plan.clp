@@ -15,6 +15,7 @@
 	(slot mode (type SYMBOL) (allowed-values FORMULATED SELECTED EXPANDED
 																					 COMMITTED DISPATCHED COMPLETED FAILED REJECTED))
   (slot parent (type SYMBOL))
+	(slot message (type STRING))
 )
 
 (deftemplate plan
