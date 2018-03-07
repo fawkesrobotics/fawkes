@@ -37,8 +37,8 @@
 
 (defrule apply-action
   "Pseudo-execute action by changing its state to FINAL."
-  ?aa <- (apply-action ?action-id)
-  ?pa <- (plan-action (id ?action-id))
+  ?aa <- (apply-action ?goal-id ?plan-id ?action-id)
+  ?pa <- (plan-action (id ?action-id) (goal-id ?goal-id) (plan-id ?plan-id))
 =>
   (modify ?pa (status EXECUTION-SUCCEEDED))
   (retract ?aa)
