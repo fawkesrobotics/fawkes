@@ -117,3 +117,21 @@ clips-executive:
       # Example: /clips-executive/specs/test/parameters/home-pos -> /config/home-pos
       parameters:
         example: value
+
+    test-pddl:
+      domain: test-scenario-pddl/test-domain.clp
+      worldmodel: test-scenario-pddl/worldmodel-facts.clp
+      goal-reasoner: test-scenario-pddl/goal-reasoner.clp
+      goal-expander: test-scenario-pddl/goal-expander-pddl.clp
+      action-selection: test-scenario-pddl/action-selection.clp
+      action-execution: ["skills-actions.clp", "test-scenario-pddl/print-action.clp"]
+      execution-monitoring: test-scenario-pddl/execution-monitoring.clp
+      state-estimation: test-scenario-pddl/state-estimation.clp
+
+      # Map plan actions to skill strings.
+      action-mapping:
+        say: say{text=?(text)s, wait=true}
+        say-hello: say{text="Hello ?(name)y", wait=true}
+        say-hello-again: say{text="Hello again ?(name)y", wait=true}
+        say-goodbye: say{text="Good bye", wait=true}
+        say-cleanup: say{text="Cleaning up", wait=true}
