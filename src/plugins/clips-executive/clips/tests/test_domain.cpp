@@ -420,7 +420,10 @@ TEST_F(BlocksworldDomainTest, NonUniqueActionIDs)
 {
   env.reset();
   env.assert_fact("(plan-action (id 1) (goal-id g0) (plan-id p1)"
-                  " (action-name unstack)"
+                  " (action-name stack)"
+                  " (param-names x y) (param-values b1 b2))");
+  env.assert_fact("(plan-action (id 1) (goal-id g1) (plan-id p0)"
+                  " (action-name stack)"
                   " (param-names x y) (param-values b1 b2))");
   env.run();
   // The action pick-up with ID 1 in plan p0 of goal g0. This should be
@@ -434,9 +437,10 @@ TEST_F(BlocksworldDomainTest, NonUniqueActionIDs)
         "(and (eq ?a:id 1) (eq ?a:goal-id g0) (eq ?a:plan-id p1)"
         " (eq ?a:executable FALSE))"
         ));
-  env.assert_fact("(plan-action (id 1) (goal-id g1) (plan-id p0)"
-                  " (action-name unstack)"
-                  " (param-names x y) (param-values b1 b2))");
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:goal-id g0) (eq ?a:plan-id p0)"
+        " (eq ?a:executable TRUE))"
+        ));
   EXPECT_TRUE(has_fact("((?a plan-action))",
         "(and (eq ?a:id 1) (eq ?a:goal-id g1) (eq ?a:plan-id p0)"
         " (eq ?a:executable FALSE))"

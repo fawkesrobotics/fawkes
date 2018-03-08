@@ -51,6 +51,26 @@
   (domain-effect
     (part-of unstack) (predicate on) (type NEGATIVE)
     (param-names x y))
+  ; stack
+  (domain-operator (name stack))
+  (domain-operator-parameter (operator stack) (type block) (name x))
+  (domain-operator-parameter (operator stack) (type block) (name y))
+  (domain-precondition
+    (part-of stack) (name stack-precond) (type conjunction))
+  (domain-atomic-precondition
+    (part-of stack-precond) (param-names x) (predicate holding))
+  (domain-atomic-precondition
+    (part-of stack-precond) (param-names y) (predicate clear))
+  (domain-effect
+    (part-of stack) (predicate holding) (param-names x) (type NEGATIVE))
+  (domain-effect
+    (part-of stack) (predicate clear) (param-names y) (type NEGATIVE))
+  (domain-effect
+    (part-of stack) (predicate clear) (param-names x))
+  (domain-effect
+    (part-of stack) (predicate handempty))
+  (domain-effect
+    (part-of stack) (predicate on) (param-names x y))
 
   ; world model
   (domain-fact (name handempty))
