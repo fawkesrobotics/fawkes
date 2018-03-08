@@ -94,6 +94,7 @@
   (slot name (type SYMBOL))
   (multislot param-names)
 	(slot wait-sensed (type SYMBOL) (allowed-values TRUE FALSE) (default TRUE))
+  (slot exogenous (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
 (deftemplate domain-operator-parameter
@@ -234,6 +235,36 @@
   (domain-precondition (name ?parent) (operator ?op&~nil))
 =>
   (modify ?precond (operator ?op))
+)
+
+(deffunction remove-precondition
+  "Remove an atomic precondition from its parent and clean up the precondition
+   tree. If the parent is a disjunction with no other disjunct, simplify it to
+   true by removing it recursively. If it is a negation, remove it recursively.
+   If it's a conjunction, only remove the conjunct."
+  (?precond-name)
+  (do-for-fact
+    ((?precond domain-atomic-precondition) (?parent domain-precondition))
+    (eq ?precond:part-of ?parent:name)
+    (if (or (eq ?parent:type disjunction) (eq ?parent:type negation)) then
+      (remove-precondition ?parent:name)
+    )
+    (retract ?precond)
+  )
+)
+
+(defrule domain-remove-cond-on-sensed-effect-of-exog-action
+  "If an exogenous action has a precondition on a sensed effect of itself, then
+   add the effect as disjunct to the precondition. This means that part of the
+   exogenous action may already have occurred before the action is selected."
+  (domain-operator (name ?op) (exogenous TRUE))
+  (domain-predicate (name ?pred) (sensed TRUE))
+  (domain-effect (part-of ?op) (predicate ?pred)
+    (param-names $?params) (param-constants $?constants))
+  (domain-atomic-precondition (name ?precond) (operator ?op)
+    (predicate ?pred) (param-names $?params) (param-constants $?constants))
+=>
+  (remove-precondition ?precond)
 )
 
 (defrule domain-ground-action-precondition

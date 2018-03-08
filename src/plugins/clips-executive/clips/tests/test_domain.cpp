@@ -344,6 +344,46 @@ TEST_F(DomainTest, OnlyWaitForEffectsIfWaitSensedIsTRUE)
         "(and (eq ?a:id 1) (eq ?a:status FINAL))"));
 }
 
+/** Sensed effects of an exogenous action are dropped from the precondition. */
+TEST_F(DomainTest, ExogenousActions)
+{
+  env.reset();
+  env.assert_fact("(domain-predicate"
+                  " (name holding)"
+                  " (param-names o)"
+                  " (sensed TRUE)"
+                  ")");
+  env.assert_fact("(domain-operator (name drop) (exogenous TRUE))");
+  env.assert_fact("(domain-operator-parameter"
+                  " (operator drop)"
+                  " (type object)"
+                  " (name o)"
+                  ")");
+  env.assert_fact("(domain-precondition"
+                  " (name drop-cond)"
+                  " (part-of drop)"
+                  ")");
+  env.assert_fact("(domain-atomic-precondition (part-of drop-cond) "
+                  " (predicate holding)"
+                  " (param-names o)"
+                  ")");
+  env.assert_fact("(domain-effect"
+                  " (type NEGATIVE)"
+                  " (part-of drop) (predicate holding) (param-names o)"
+                  ")");
+  env.assert_fact("(domain-object (name obj1))");
+  env.assert_fact("(plan-action"
+                  " (id 1)"
+                  " (goal-id g0) (plan-id p0)"
+                  " (action-name drop)"
+                  " (param-names o)"
+                  " (param-values obj1))");
+  env.run();
+  // The precondition (holding obj1) is false, but since it is a sensed effect,
+  // it should be removed from the operator's precondition.
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:executable TRUE))"));
+}
 /** Test whether constants in preconditions work as expected. */
 TEST_F(DomainTest, PreconditionWithConstant)
 {
