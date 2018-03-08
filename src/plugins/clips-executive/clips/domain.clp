@@ -113,6 +113,7 @@
    sub-conditions. The action is an optional ID of grounded action this
    precondition belongs to. Note that grounded should always be yes if the
    action is not nil."
+  (slot operator (type SYMBOL))
   (slot part-of (type SYMBOL))
   (slot goal-id (type SYMBOL))
   (slot plan-id (type SYMBOL))
@@ -134,6 +135,7 @@
    value of param-names will be ignored and should be set to c (for constant).
    See the tests for an example.
 "
+  (slot operator (type SYMBOL))
   (slot part-of (type SYMBOL))
   (slot goal-id (type SYMBOL))
   (slot plan-id (type SYMBOL))
@@ -205,6 +207,33 @@
           (param-names $?param-names&:(> (length$ ?param-names) 0)))
   =>
   (modify ?a (param-names ?param-names))
+)
+
+(defrule domain-add-operator-to-top-precondition
+  "If a precondition has no operator but is part of a name that is an operator,
+   add that name as operator to the precondition."
+  ?precond <- (domain-precondition (operator nil) (part-of ?op))
+  (domain-operator (name ?op))
+=>
+  (modify ?precond (operator ?op))
+)
+
+(defrule domain-add-operator-to-nested-precondition
+  "If a precondition does not have an operator but the parent has one, then copy
+   the operator from the parent to the child."
+  ?precond <- (domain-precondition (operator nil) (part-of ?parent))
+  (domain-precondition (name ?parent) (operator ?op&~nil))
+=>
+  (modify ?precond (operator ?op))
+)
+
+(defrule domain-add-operator-to-atomic-precondition
+  "If an atomic precondition does not have an operator but the parent has one,
+   then copy the operator from the parent to the child."
+  ?precond <- (domain-atomic-precondition (operator nil) (part-of ?parent))
+  (domain-precondition (name ?parent) (operator ?op&~nil))
+=>
+  (modify ?precond (operator ?op))
 )
 
 (defrule domain-ground-action-precondition
