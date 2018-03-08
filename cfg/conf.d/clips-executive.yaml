@@ -11,7 +11,7 @@ clips-executive:
   # from watching, e.g. if they are showing up at too high frequencies or
   # are not of interest.
   unwatch-facts: ["time"]
-  unwatch-rules: ["time-retract", "blackboard-read"]
+  unwatch-rules: ["time-retract"]
 
   # Currently not working in clips-executive!
   #
