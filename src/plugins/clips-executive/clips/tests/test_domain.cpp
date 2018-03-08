@@ -86,6 +86,33 @@ TEST_F(BlocksworldDomainTest, NegativePreconditionIsNotSatisfied)
         "(and (eq ?p:name pick-up-precond) (eq ?p:is-satisfied TRUE))"));
 }
 
+/** Test disjunctive preconditions. */
+TEST_F(DomainTest, DisjunctivePreconditions)
+{
+  env.assert_fact("(domain-operator (name disjunctive-op))");
+  env.assert_fact("(domain-precondition (name pre) (type disjunction)"
+                  " (part-of disjunctive-op))");
+  env.assert_fact("(plan-action (id 1) (goal-id g0) (plan-id p0) "
+                  "(action-name disjunctive-op))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:executable FALSE))"));
+  env.assert_fact("(domain-predicate (name p))");
+  env.assert_fact("(domain-atomic-precondition (part-of pre) (predicate p))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:executable FALSE))"));
+  env.assert_fact("(domain-fact (name p))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:executable TRUE))"));
+  env.assert_fact("(domain-predicate (name q))");
+  env.assert_fact("(domain-atomic-precondition (part-of pre) (predicate q))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:executable TRUE))"));
+}
+
 /** Ground an action with multiple parameters and check that the grounding is
  * correct. Also make sure its precondition is satisfied (which it should be).
  */

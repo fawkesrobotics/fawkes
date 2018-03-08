@@ -121,7 +121,7 @@
   ; stay compatible with lab course code.
   (slot grounded-with (type INTEGER) (default 0))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
-  (slot type (type SYMBOL) (allowed-values conjunction negation))
+  (slot type (type SYMBOL) (allowed-values conjunction disjunction negation))
   (slot grounded (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
@@ -475,6 +475,56 @@
         (part-of ?pn) (grounded TRUE)
         (grounded-with ?action-id) (is-satisfied FALSE)
       )
+  )
+=>
+  (modify ?precond (is-satisfied FALSE))
+)
+
+(defrule domain-check-if-disjunctive-precondition-is-satisfied
+  "Check a grounded disjunctive precondition. At least one child must be
+   satisfied."
+  ?precond <- (domain-precondition
+                (name ?pn)
+                (type disjunction)
+                (goal-id ?g)
+                (plan-id ?p)
+                (grounded-with ?action-id)
+                (grounded TRUE)
+                (is-satisfied FALSE))
+  (or (domain-atomic-precondition
+        (goal-id ?g) (plan-id ?p)
+        (part-of ?pn) (grounded TRUE)
+        (grounded-with ?action-id) (is-satisfied TRUE))
+      (domain-precondition
+        (goal-id ?g) (plan-id ?p)
+        (part-of ?pn) (grounded TRUE)
+        (grounded-with ?action-id) (is-satisfied TRUE))
+  )
+=>
+  (modify ?precond (is-satisfied TRUE))
+)
+
+(defrule domain-retract-disjunctive-precondition-if-child-is-not-satisfied
+  "If a disjunctive precondition is satisfied but none of its children are, then
+   set it to not satisfied."
+  ?precond <- (domain-precondition
+                (name ?pn)
+                (type disjunction)
+                (goal-id ?g)
+                (plan-id ?p)
+                (grounded-with ?action-id)
+                (grounded TRUE)
+                (is-satisfied TRUE))
+  (not
+    (or (domain-atomic-precondition
+          (goal-id ?g) (plan-id ?p)
+          (part-of ?pn) (grounded TRUE)
+          (grounded-with ?action-id) (is-satisfied TRUE))
+        (domain-precondition
+          (goal-id ?g) (plan-id ?p)
+          (part-of ?pn) (grounded TRUE)
+          (grounded-with ?action-id) (is-satisfied TRUE))
+    )
   )
 =>
   (modify ?precond (is-satisfied FALSE))
