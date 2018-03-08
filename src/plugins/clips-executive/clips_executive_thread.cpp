@@ -118,11 +118,15 @@ ClipsExecutiveThread::init()
 		clips->evaluate("(ff-feature-request \"redefine-warning\")");
 	}
 
-	if (!clips->batch_evaluate(SRCDIR"/clips/init.clp")) {
-		logger->log_error(name(), "Failed to initialize CLIPS environment, "
-		                  "batch file failed.");
-		throw Exception("Failed to initialize CLIPS environment, batch file failed.");
-	}
+  std::vector<std::string> files{SRCDIR "/clips/saliences.clp", SRCDIR "/clips/init.clp"};
+	for (const auto f : files) {
+		if (!clips->batch_evaluate(f)) {
+		  logger->log_error(name(), "Failed to initialize CLIPS environment, "
+			                  "batch file '%s' failed.", f.c_str());
+			throw Exception("Failed to initialize CLIPS environment, batch file '%s' failed.",
+			                f.c_str());
+	  }
+  }
 
 	clips->assert_fact("(executive-init)");
 	clips->refresh_agenda();
