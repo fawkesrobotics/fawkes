@@ -567,6 +567,46 @@ TEST_F(DomainTest, ActionHasADomainOperator)
         "(eq ?e:error-type operator-of-action-does-not-exist)"));
 }
 
+/** Value predicates must take at most one value. */
+TEST_F(DomainTest, ValuePredicatesHaveUniqueValues)
+{
+  env.reset();
+  env.assert_fact("(domain-predicate (name p) (value-predicate TRUE))");
+  env.assert_fact("(domain-fact (name p) (param-values a b c 1))");
+  env.assert_fact("(domain-fact (name p) (param-values a b d 1))");
+  env.run();
+  EXPECT_FALSE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type value-predicate-with-multiple-values)"));
+  env.assert_fact("(domain-fact (name p) (param-values a b c 2))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type value-predicate-with-multiple-values)"));
+  env.evaluate("(do-for-fact ((?f domain-fact)) "
+      "(and (eq ?f:name p) (eq ?f:param-values (create$ a b c 2)))"
+      "(retract ?f)"
+      ")");
+  env.run();
+  EXPECT_FALSE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type value-predicate-with-multiple-values)"));
+}
+
+TEST_F(BlocksworldDomainTest, EffectsOnValuePredicatesMustOccurInPairs)
+{
+  env.reset();
+  env.run();
+  EXPECT_FALSE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type value-predicate-without-paired-effect)"));
+  env.evaluate("(do-for-fact ((?p domain-predicate)) "
+               "(eq ?p:name holding) "
+               "(duplicate ?p (value-predicate TRUE))"
+               "(retract ?p)"
+               ")");
+  env.run();
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type value-predicate-without-paired-effect)"));
+}
+
+
 /** Action IDs are only unique within the same plan and goal.
  *  Create multiple actions with the same ID but different plans, and test
  *  if they are treated correctly.

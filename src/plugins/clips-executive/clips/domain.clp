@@ -25,6 +25,12 @@
   ; If the predicate is sensed, it is not directly changed by an action effect.
   ; Instead, we expect the predicate to be changed externally.
   (slot sensed (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
+  ; A value predicate is a predicate that is true for at most one value of the
+  ; last argument. In other words, the predicate represents a partial function,
+  ; with all but the last predicate argument being the function paramters, and
+  ; the last predicate being the function value.
+  (slot value-predicate (type SYMBOL) (allowed-values TRUE FALSE)
+    (default FALSE))
   (multislot param-names (type SYMBOL))
   (multislot param-types (type SYMBOL))
 )
@@ -808,6 +814,41 @@
     (error-msg (str-cat "Precondition " ?precond " is an equality precondition"
                         " but has " (length$ ?param-names) " parameters,"
                         " should be 2."))))
+)
+
+(defrule domain-check-value-predicate-must-have-only-one-value
+  "Make sure that each value predicate has at most one value."
+  (domain-predicate (value-predicate TRUE) (name ?pred))
+  (domain-fact (name ?pred) (param-values $?args ?val))
+  (domain-fact (name ?pred) (param-values $?args ?other-val&~?val))
+=>
+  (assert (domain-error (error-type value-predicate-with-multiple-values)
+    (error-msg (str-cat "Value predicate " ?pred "(" (implode$ ?args) ") "
+    "has multiple values " "(" ?val ", " ?other-val ")"))))
+)
+
+(defrule domain-check-value-predicate-clean-up-unique-value-error
+  "Clean up the error if a value predicate no longer has multiple values."
+  ?e <- (domain-error (error-type value-predicate-with-multiple-values))
+  (not (and (domain-fact (name ?pred) (param-values $?args ?val))
+            (domain-fact (name ?pred) (param-values $?args ?other-val&~?val))))
+=>
+  (retract ?e)
+)
+
+(defrule domain-check-effects-on-value-predicates-must-occur-in-pairs
+  "Value predicates can only have exactly one value. Thus, any effect on value
+   predicated must occur in pairs."
+  (domain-predicate (value-predicate TRUE) (name ?pred))
+  (domain-effect (name ?n) (part-of ?op) (predicate ?pred)
+    (param-names $?args ?) (type ?type))
+  (not (domain-effect (part-of ?op) (predicate ?pred) (param-names $?args ?)
+        (type ?other-type&~?type)))
+=>
+  (assert (domain-error (error-type value-predicate-without-paired-effect)
+            (error-msg (str-cat "Effect " ?n " of operator " ?op " on " ?pred
+              " (" (implode$ ?args) ") "
+              "is not matched with a complementary effect"))))
 )
 
 (defrule domain-cleanup-preconditions-on-worldmodel-change
