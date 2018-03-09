@@ -54,7 +54,7 @@
 )
 
 ; #  Goal Monitoring
-(defrule goal-reasonder-completed
+(defrule goal-reasoner-evaluate-completed
 	?g <- (goal (id ?goal-id) (mode FINISHED) (outcome COMPLETED))
 	?gm <- (goal-meta (goal-id ?goal-id))
 	=>
@@ -62,7 +62,7 @@
 	(modify ?g (mode EVALUATED))
 )
 
-(defrule goal-reasoner-failed
+(defrule goal-reasoner-evaluate-failed
 	?g <- (goal (id ?goal-id) (mode FINISHED) (outcome FAILED))
 	?gm <- (goal-meta (goal-id ?goal-id) (num-tries ?num-tries))
 	=>
@@ -73,7 +73,7 @@
 )
 
 ; # Goal Clean up
-(defrule goal-reasoner-cleanup
+(defrule goal-reasoner-cleanup-completed
 	?g <- (goal (id ?goal-id) (mode EVALUATED) (outcome COMPLETED))
 	?gm <- (goal-meta (goal-id ?goal-id) (num-tries ?num-tries))
 	=>
