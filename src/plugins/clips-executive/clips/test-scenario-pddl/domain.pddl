@@ -21,7 +21,7 @@
 
 (define (domain hello-world)
   (:requirements :strips :typing)
-  (:types name text)
+  (:types text)
   (:predicates
     (said ?n - name ?t - text)
   )
@@ -31,8 +31,8 @@
     :effect (said ?name hello)
   )
   (:action say-goodbye
-    :parameters (?name - name)
+    :parameters (?name - name ?text - text)
     :precondition (said ?name hello)
-    :effect (said ?name goodbye)
+    :effect (said ?name ?text)
   )
 )

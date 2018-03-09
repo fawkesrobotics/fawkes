@@ -14,6 +14,7 @@
   (ff-feature blackboard)
   =>
   (blackboard-enable-time-read)
+  (unwatch rules blackboard-read)
 )
 
 (defrule blackboard-preload

@@ -180,7 +180,8 @@
 (defrule domain-get-transitive-types
   "An object of type t also has each super-type of t as its type."
   (domain-obj-is-of-type ?obj ?type)
-  (domain-object-type (name ?type) (super-type ?super-type))
+  (domain-object-type (name ?type&~object) (super-type ?super-type))
+  (not (domain-obj-is-of-type ?obj ?super-type))
 =>
   (assert (domain-obj-is-of-type ?obj ?super-type))
 )
@@ -593,7 +594,7 @@
 
 (defrule domain-check-super-type-exists
   "Make sure that a super-type of any type in the domain actually exists."
-  (domain-object-type (name ?type) (super-type ?super-type))
+  (domain-object-type (name ?type) (super-type ?super-type&~object))
   (not (domain-object-type (name ?super-type)))
 =>
   (assert (domain-error (error-type super-type-does-not-exist)
