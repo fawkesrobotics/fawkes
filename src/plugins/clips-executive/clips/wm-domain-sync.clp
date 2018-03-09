@@ -238,6 +238,7 @@
 
 (defrule wm-sync-domain-fact-added
 	"For a recently added domain fact, add a wm-fact."
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?df <- (domain-fact (name ?name) (param-values $?param-values))
 	(not (wm-sync-remap-fact (domain-fact-name ?name)))
@@ -256,6 +257,7 @@
 
 (defrule wm-sync-domain-fact-remapped-added
 	"For a recently added domain fact, add a path-remapped wm-fact."
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?df <- (domain-fact (name ?name) (param-values $?param-values))
 	(wm-sync-remap-fact (domain-fact-name ?name) (wm-fact-key-path $?key-path))
@@ -284,6 +286,7 @@
 
 (defrule wm-sync-domain-fact-true
 	"A domain fact has been added again, after being retracted before."
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	?sf <- (wm-sync-map-fact (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ?idx))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key $?key) (value FALSE))
@@ -297,6 +300,7 @@
 
 (defrule wm-sync-domain-fact-removed
 	"A domain fact has been removed, set wm fact to false or retract"
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	?wm <- (wm-sync-map-fact (wm-fact-id ?id) (domain-fact-name ?name) (domain-fact-idx ~0)
 													 (wm-fact-retract ?retract))
 	(domain-predicate (name ?name) (param-names $?param-names))
@@ -316,6 +320,7 @@
 
 (defrule wm-sync-worldmodel-fact-added
 	"A wm-fact has been added for the first time."
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	(not (wm-sync-remap-fact (domain-fact-name ?name)))
 	?wf <- (wm-fact (id ?id) (key $?key&:(wm-key-prefix ?key domain fact ?name)))
@@ -333,6 +338,7 @@
 
 (defrule wm-sync-worldmodel-fact-remapped-added
 	"A wm-fact has been added for the first time."
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	(wm-sync-remap-fact (domain-fact-name ?name) (wm-fact-key-path $?key-path))
 	?wf <- (wm-fact (id ?id) (key $?key&:(wm-sync-remapped-path-match ?key ?key-path)))
@@ -350,6 +356,7 @@
 
 (defrule wm-sync-worldmodel-fact-true
 	"The value of a wm fact is modified to TRUE."
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key $?key) (type BOOL) (value TRUE))
 	?wm <- (wm-sync-map-fact (domain-fact-name ?name) (domain-fact-idx 0)
@@ -370,6 +377,7 @@
 
 (defrule wm-sync-worldmodel-fact-false
 	"The value of a wm fact is modified to FALSE."
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key $?key) (type BOOL) (value FALSE))
 	?wm <- (wm-sync-map-fact (domain-fact-name ?name) (domain-fact-idx ~0)
@@ -383,6 +391,7 @@
 
 (defrule wm-sync-worldmodel-fact-removed
 	"The value of a wm fact has been removed."
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?wm <- (wm-sync-map-fact (domain-fact-name ?name) (domain-fact-idx ~0)
 													 (wm-fact-id ?id) (wm-fact-key $?key) (wm-fact-idx ~0))
@@ -395,6 +404,7 @@
 )
 
 (defrule wm-sync-fact-cleanup
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	?wm <- (wm-sync-map-fact (domain-fact-name ?name) (domain-fact-idx 0)
 													 (wm-fact-id ?id) (wm-fact-key $?key) (wm-fact-idx 0))
 	(not (wm-fact (id ?id)))
@@ -406,6 +416,7 @@
 )
 
 (defrule wm-sync-domain-object-type-added
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	(domain-object-type (name ?type-name))
 	(not (wm-sync-map-object-type (domain-object-type ?type-name)))
 	(not (wm-sync-remap-object-type (domain-object-type ?type-name)))
@@ -416,6 +427,7 @@
 )
 
 (defrule wm-sync-domain-object-type-remapped-added
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	(domain-object-type (name ?type-name))
 	(not (wm-sync-map-object-type (domain-object-type ?type-name)))
 	(wm-sync-remap-object-type (domain-object-type ?type-name) (wm-fact-key $?key))
@@ -425,6 +437,7 @@
 )
 
 (defrule wm-sync-domain-object-mapping-added
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-key $?key) (wm-fact-idx ?idx)
 																	(domain-object-type ?type))
 	(not (wm-fact (key $?key) (type SYMBOL) (is-list TRUE)))
@@ -444,6 +457,7 @@
 
 (defrule wm-sync-domain-object-added
 	"For a recently added domain objects, add a wm-fact."
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	(domain-object (name ?name) (type ?type))
 	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx)
 																	(domain-object-type ?type))
@@ -455,6 +469,7 @@
 )
 
 (defrule wm-sync-domain-object-removed
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx)
 																	(domain-object-type ?type))
 	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $? ?name $?))
@@ -469,6 +484,7 @@
 )
 
 (defrule wm-sync-worldmodel-object-added
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx) (domain-object-type ?type))
 	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $? ?name $?))
 	(not (domain-object (name ?name) (type ?type)))
@@ -488,6 +504,7 @@
 )
 
 (defrule wm-sync-worldmodel-object-removed
+  (declare (salience ?*SALIENCE-WM-SYNC*))
 	?wm <- (wm-sync-map-object-type (wm-fact-id ?id) (wm-fact-idx ?wf-idx) (domain-object-type ?type))
 	(domain-object (name ?name) (type ?type))
 	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $?objs&~:(member$ ?name ?objs)))

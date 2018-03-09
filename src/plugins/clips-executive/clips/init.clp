@@ -29,6 +29,7 @@
 ; )
 
 (defrule executive-enable-debug
+  (declare (salience ?*SALIENCE-INIT*))
   (executive-init)
   (confval (path "/clips-executive/clips-debug") (type BOOL) (value TRUE))
   =>
@@ -39,6 +40,7 @@
 )
 
 (defrule executive-debug-level
+  (declare (salience ?*SALIENCE-INIT*))
   (executive-init)
   (confval (path "/clips-executive/debug-level") (type UINT) (value ?v))
   =>
@@ -47,7 +49,7 @@
 )
 
 (defrule executive-silence-debug-facts
-  (declare (salience -1000))
+  (declare (salience ?*SALIENCE-INIT-LATE*))
   (executive-init)
   (confval (path "/clips-executive/clips-debug") (type BOOL) (value TRUE))
   (confval (path "/clips-executive/unwatch-facts") (type STRING) (is-list TRUE) (list-value $?lv))
@@ -64,7 +66,7 @@
 )
 
 (defrule executive-silence-debug-rules
-  (declare (salience -1000))
+  (declare (salience ?*SALIENCE-INIT-LATE*))
   (executive-init)
   (confval (path "/clips-executive/clips-debug") (type BOOL) (value TRUE))
   (confval (path "/clips-executive/unwatch-rules") (type STRING) (is-list TRUE) (list-value $?lv))
