@@ -24,6 +24,11 @@
 ; facts are removed from robot memory.  We may or may not use this in the
 ; future, but it serves its purpose for now.
 
+(deftemplate robot-memory-sync-mapped
+	(slot name (type SYMBOL))
+	(multislot param-values)
+)
+
 (deffunction robot-memory-sync-clean-domain-facts
   "Remove all domain facts from the database so it is consistent with CLIPS."
   ()
@@ -45,8 +50,10 @@
 (defrule robot-memory-sync-add-fact
   "Add new facts to robot memory."
   (declare (salience 100))
-  ?f <- (domain-fact)
+  ?f <- (domain-fact (name ?name) (param-values $?param-values))
+	(not (robot-memory-sync-mapped (name ?name) (param-values $?param-values)))
   =>
+	(assert (robot-memory-sync-mapped (name ?name) (param-values ?param-values)))
   (bind ?bson (rm-structured-fact-to-bson ?f))
   (robmem-upsert "robmem.clipswm" ?bson ?bson)
 )
@@ -54,8 +61,9 @@
 (defrule robot-memory-sync-retract-fact
   "Remove deleted facts from robot memory."
   (declare (salience 100))
-  ?f <- (domain-fact (name ?name) (param-values $?param-values))
-  ?p <- (domain-retracted-fact (name ?name) (param-values $?param-values))
+	?mf <- (robot-memory-sync-mapped (name ?name) (param-values $?param-values))
+  (not (domain-fact (name ?name) (param-values $?param-values)))
   =>
-  (robmem-remove "robmem.clipswm" (rm-structured-fact-to-bson ?f))
+  (robmem-remove "robmem.clipswm" (rm-structured-fact-to-bson ?mf "domain-fact"))
+	(retract ?mf)
 )

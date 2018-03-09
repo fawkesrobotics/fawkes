@@ -37,7 +37,8 @@ class DomainTest : public CLIPSTest
       //env.evaluate("(watch rules)");
     }
     /** These files are loaded during setup by default. */
-    vector<string> clips_files = { "../plan.clp", "../domain.clp" };
+	vector<string> clips_files =
+	  { "../../../clips/clips/utils.clp", "../plan.clp", "../domain.clp" };
 };
 
 /** Test with the blocksworld domain. */
@@ -257,7 +258,10 @@ TEST_F(DomainTest, WaitForSensedEffects)
         "(and (eq ?a:id 1) (eq ?a:status SENSED-EFFECTS-WAIT))"));
   EXPECT_FALSE(has_fact("((?f domain-fact))",
         "(and (eq ?f:name on-ground) (eq ?f:param-values (create$ obj1)))"));
-  env.assert_fact("(domain-retracted-fact (name holding) (param-values obj1))");
+  env.evaluate("(delayed-do-for-all-facts ((?df domain-fact)) "
+               " (and (eq ?df:name holding) (eq ?df:param-values (create$ obj1))) "
+               "   (retract ?df)"
+               ")");
   env.run();
   EXPECT_TRUE(has_fact("((?f domain-fact))",
         "(and (eq ?f:name on-ground) (eq ?f:param-values (create$ obj1)))"));
