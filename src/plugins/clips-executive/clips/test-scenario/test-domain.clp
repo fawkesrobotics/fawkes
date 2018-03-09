@@ -26,14 +26,18 @@
   (executive-init)
   (domain-loaded)
   =>
-  (assert (domain-object (name hello) (type text)))
-  (assert (domain-object (name goodbye) (type text)))
-  (assert (domain-fact (name said) (param-values bob hello)))
-  (assert (domain-facts-loaded))
+  (assert
+	 (domain-object (name hello) (type text))
+	 (domain-object (name goodbye) (type text))
+	 (domain-operator (name print) (param-names severity text))
+	 (domain-operator (name say-cleanup))
+	 (domain-fact (name said) (param-values bob hello))
+	 (domain-facts-loaded)
+	)
 )
 
 (defrule test-domain-set-domain-fact-said-hello
-  (plan-action (action-name say-hello) (param-values peggy) (status SENSED-EFFECTS-WAIT))
+  (plan-action (action-name say-hello|say-hello-again) (param-values peggy) (status SENSED-EFFECTS-WAIT))
 =>
   (assert (domain-fact (name said) (param-values peggy hello)))
 )

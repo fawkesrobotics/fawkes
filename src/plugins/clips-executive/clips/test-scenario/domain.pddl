@@ -34,5 +34,14 @@
     :parameters (?name - name)
     :precondition (said ?name hello)
     :effect (said ?name goodbye)
+	)
+  (:action say-hello-again
+    :parameters (?name - name)
+    :precondition (not (said ?name hello))
+    :effect (said ?name hello)
   )
+	;(:action print
+	;	:parameters (?severity - text ?text - text)
+	;)
+	;(:action say-cleanup)
 )
