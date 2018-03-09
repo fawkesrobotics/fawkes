@@ -82,13 +82,6 @@
   (modify ?p (status PLANNED))
 )
 
-(deffunction pddl-get-max-action-id ()
-  "Get the max ID of all current action"
-  (bind ?i 0)
-  (do-for-all-facts ((?a plan-action)) (> ?a:id ?i) (bind ?i ?a:id))
-  (return ?i)
-)
-
 (defrule pddl-expand-goal
   "Fetch the resulting plan from robot memory and expand the goal."
   ?g <- (goal (id ?goal-id) (mode SELECTED))
@@ -101,7 +94,6 @@
         )
   =>
   (printout t "Fetched a new plan!" crlf)
-  (bind ?id-offset (pddl-get-max-action-id))
   (progn$ (?action (bson-get-array (bson-get ?obj "o") "actions"))
     (bind ?action-name (sym-cat (bson-get ?action "name")))
     ; FF sometimes returns the pseudo-action REACH-GOAL. Filter it out.
@@ -120,7 +112,8 @@
       (assert
         (plan (id ?plan-id) (goal-id ?goal-id))
         (plan-action
-          (id (+ ?action-index ?id-offset))
+          (id ?action-index)
+          (goal-id ?goal-id)
           (plan-id ?plan-id)
           (action-name ?action-name)
           (param-values ?param-values)

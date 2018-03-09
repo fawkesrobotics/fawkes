@@ -184,7 +184,7 @@ TEST_F(BlocksworldDomainTest, ApplyEffects)
   EXPECT_TRUE(has_fact("((?p domain-fact))", "(eq ?p:name handempty)"));
   EXPECT_TRUE(has_fact("((?p domain-fact))",
         "(and (eq ?p:name clear) (eq ?p:param-values (create$ b1)))"));
-  env.assert_fact("(apply-action 1)");
+  env.assert_fact("(apply-action g0 p0 1)");
   env.run();
   EXPECT_TRUE(has_fact("((?p domain-fact))",
         "(and (eq ?p:name holding) (eq ?p:param-values (create$ b1)))"));
@@ -205,7 +205,7 @@ TEST_F(BlocksworldDomainTest, ApplyContradictingEffectsWithDifferentParams)
         "(and (eq ?p:name clear) (eq ?p:param-values (create$ b1)))"));
   EXPECT_FALSE(has_fact("((?p domain-fact))",
         "(and (eq ?p:name clear) (eq ?p:param-values (create$ b2)))"));
-  env.assert_fact("(apply-action 2)");
+  env.assert_fact("(apply-action g0 p0 2)");
   env.run();
   EXPECT_FALSE(has_fact("((?p domain-fact))",
         "(and (eq ?p:name clear) (eq ?p:param-values (create$ b1)))"));
@@ -244,6 +244,7 @@ TEST_F(DomainTest, WaitForSensedEffects)
   env.assert_fact("(domain-object (name obj1))");
   env.assert_fact("(domain-fact (name holding) (param-values obj1))");
   env.assert_fact("(plan-action"
+                  " (goal-id g0) (plan-id p0)"
                   " (id 1)"
                   " (status EXECUTION-SUCCEEDED)"
                   " (action-name drop)"
@@ -299,6 +300,7 @@ TEST_F(DomainTest, OnlyWaitForEffectsIfWaitSensedIsTRUE)
   env.assert_fact("(domain-fact (name holding) (param-values obj1))");
   env.assert_fact("(plan-action"
                   " (id 1)"
+                  " (goal-id g0) (plan-id p0)"
                   " (status EXECUTION-SUCCEEDED)"
                   " (action-name drop)"
                   " (param-names o)"
@@ -316,6 +318,7 @@ TEST_F(DomainTest, PreconditionWithConstant)
   env.reset();
   env.assert_fact("(plan-action"
                   " (id 1)"
+                  " (goal-id g0) (plan-id p0)"
                   " (action-name op1)"
                   " (param-names y)"
                   " (param-values b))");
@@ -351,6 +354,7 @@ TEST_F(DomainTest, PreconditionWithConstantInSecondSlot)
   env.reset();
   env.assert_fact("(plan-action"
                   " (id 1)"
+                  " (goal-id g0) (plan-id p0)"
                   " (action-name op1)"
                   " (param-names x)"
                   " (param-values b))");
@@ -386,6 +390,7 @@ TEST_F(DomainTest, PreconditionWithUnknownParameter)
   env.reset();
   env.assert_fact("(plan-action"
                   " (id 1)"
+                  " (goal-id g0) (plan-id p0)"
                   " (action-name op1)"
                   " (param-names x)"
                   " (param-values b))");
@@ -411,6 +416,41 @@ TEST_F(DomainTest, ActionHasADomainOperator)
         "(eq ?e:error-type operator-of-action-does-not-exist)"));
 }
 
+/** Action IDs are only unique within the same plan and goal.
+ *  Create multiple actions with the same ID but different plans, and test
+ *  if they are treated correctly.
+ */
+TEST_F(BlocksworldDomainTest, NonUniqueActionIDs)
+{
+  env.reset();
+  env.assert_fact("(plan-action (id 1) (goal-id g0) (plan-id p1)"
+                  " (action-name stack)"
+                  " (param-names x y) (param-values b1 b2))");
+  env.assert_fact("(plan-action (id 1) (goal-id g1) (plan-id p0)"
+                  " (action-name stack)"
+                  " (param-names x y) (param-values b1 b2))");
+  env.run();
+  // The action pick-up with ID 1 in plan p0 of goal g0. This should be
+  // executable, and the executable state should not be copied to the other
+  // actions.
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:goal-id g0) (eq ?a:plan-id p0)"
+        " (eq ?a:executable TRUE))"
+        ));
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:goal-id g0) (eq ?a:plan-id p1)"
+        " (eq ?a:executable FALSE))"
+        ));
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:goal-id g0) (eq ?a:plan-id p0)"
+        " (eq ?a:executable TRUE))"
+        ));
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:goal-id g1) (eq ?a:plan-id p0)"
+        " (eq ?a:executable FALSE))"
+        ));
+}
+
 /** Test with the conditional-say domain. */
 class ConditionalSayDomainTest : public DomainTest
 {
@@ -428,11 +468,12 @@ TEST_F(ConditionalSayDomainTest, DoNotApplyCondEffectIfCondDoesNotHold)
   env.reset();
   env.assert_fact("(plan-action"
                   " (id 1)"
+                  " (goal-id g0) (plan-id p0)"
                   " (action-name say)"
                   " (param-names s t)"
                   " (param-values front_speaker hello)"
                   ")");
-  env.assert_fact("(apply-action 1)");
+  env.assert_fact("(apply-action g0 p0 1)");
   env.run();
   EXPECT_FALSE(has_fact("((?fact domain-fact))",
         "(and (eq ?fact:name said) (eq ?fact:param-values (create$ hello)))"));
@@ -444,14 +485,16 @@ TEST_F(ConditionalSayDomainTest, ApplyCondEffectIfCondHolds)
   env.reset();
   env.assert_fact("(plan-action"
                   " (id 1)"
+                  " (goal-id g0) (plan-id p0)"
                   " (action-name say)"
                   " (param-names s t)"
                   " (param-values front_speaker hello)"
                   ")");
-  env.assert_fact("(apply-action 1)");
+  env.assert_fact("(apply-action g0 p0 1)");
   env.assert_fact(
       "(domain-fact (name speaker-ready) (param-values front_speaker))");
   env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))", "(eq ?a:status FINAL)"));
   EXPECT_TRUE(has_fact("((?fact domain-fact))",
         "(and (eq ?fact:name said) (eq ?fact:param-values (create$ hello)))"));
 }

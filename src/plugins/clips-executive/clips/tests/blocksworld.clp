@@ -51,22 +51,42 @@
   (domain-effect
     (part-of unstack) (predicate on) (type NEGATIVE)
     (param-names x y))
+  ; stack
+  (domain-operator (name stack))
+  (domain-operator-parameter (operator stack) (type block) (name x))
+  (domain-operator-parameter (operator stack) (type block) (name y))
+  (domain-precondition
+    (part-of stack) (name stack-precond) (type conjunction))
+  (domain-atomic-precondition
+    (part-of stack-precond) (param-names x) (predicate holding))
+  (domain-atomic-precondition
+    (part-of stack-precond) (param-names y) (predicate clear))
+  (domain-effect
+    (part-of stack) (predicate holding) (param-names x) (type NEGATIVE))
+  (domain-effect
+    (part-of stack) (predicate clear) (param-names y) (type NEGATIVE))
+  (domain-effect
+    (part-of stack) (predicate clear) (param-names x))
+  (domain-effect
+    (part-of stack) (predicate handempty))
+  (domain-effect
+    (part-of stack) (predicate on) (param-names x y))
 
   ; world model
   (domain-fact (name handempty))
   (domain-fact (name clear) (param-values b1))
-  (plan-action (id 1) (plan-id p0) (action-name pick-up) (param-names x)
+  (plan-action (id 1) (goal-id g0) (plan-id p0) (action-name pick-up) (param-names x)
     (param-values b1))
 
   (domain-fact (name on) (param-values b1 b2))
-  (plan-action (id 2) (plan-id p0) (action-name unstack)
+  (plan-action (id 2) (goal-id g0) (plan-id p0) (action-name unstack)
     (param-names x y) (param-values b1 b2))
 )
 
 (defrule apply-action
   "Pseudo-execute action by changing its state to EXECUTION-SUCCEEDED ."
-  ?aa <- (apply-action ?action-id)
-  ?pa <- (plan-action (id ?action-id))
+  ?aa <- (apply-action ?goal-id ?plan-id ?action-id)
+  ?pa <- (plan-action (id ?action-id) (goal-id ?goal-id) (plan-id ?plan-id))
 =>
   (modify ?pa (status EXECUTION-SUCCEEDED))
   (retract ?aa)

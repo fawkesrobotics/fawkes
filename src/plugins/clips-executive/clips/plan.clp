@@ -108,8 +108,10 @@
 	(slot cost (type FLOAT))
 )
 
+; TODO: Rename slots
 (deftemplate plan-action
 	(slot id (type INTEGER))
+  (slot goal-id (type SYMBOL))
 	(slot plan-id (type SYMBOL))
 	(slot action-name (type SYMBOL))
 	(multislot param-names)
