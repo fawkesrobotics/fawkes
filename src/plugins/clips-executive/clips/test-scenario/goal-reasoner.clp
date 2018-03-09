@@ -86,3 +86,24 @@
 	)
 	(retract ?g ?gm)
 )
+
+(defrule goal-reasoner-cleanup-failed
+  ?g <- (goal (id ?goal-id) (mode EVALUATED) (outcome FAILED))
+  ?gm <- (goal-meta (goal-id ?goal-id) (num-tries ?num-tries))
+  =>
+  (printout t "Goal '" ?goal-id "' has been Evaluated, cleaning up" crlf)
+  (delayed-do-for-all-facts ((?p plan)) (eq ?p:goal-id ?goal-id)
+    (delayed-do-for-all-facts ((?a plan-action)) (eq ?a:plan-id ?p:id)
+      (retract ?a)
+    )
+    (retract ?p)
+  )
+  (if (< ?num-tries ?*GOAL-MAX-TRIES*)
+	then
+		(printout t "Triggering re-expansion" crlf)
+		(modify ?g (mode SELECTED))
+	else
+		(printout t "Goal failed " ?num-tries " times, aborting" crlf)
+		(retract ?g ?gm)
+	)
+)
