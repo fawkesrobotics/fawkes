@@ -203,7 +203,8 @@
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific action-id."
   (not (domain-wm-update))
-  (plan-action (action-name ?op) (id ?action-id))
+  (plan-action (action-name ?op) (id ?action-id) 
+    (status FORMULATED|PENDING|WAITING))
   ?precond <- (domain-precondition
                 (name ?precond-name)
                 (part-of ?op)
@@ -251,6 +252,7 @@
   "Ground an atomic precondition of an operator."
   (not (domain-wm-update))
   (plan-action
+    (status FORMULATED|PENDING|WAITING)
     (action-name ?op)
     (param-names $?action-param-names)
     (id ?action-id)
