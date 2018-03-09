@@ -631,6 +631,9 @@
   (retract ?wmu)
 )
 
-(deffacts domain-facts
-  (domain-object-type (name object))
+(defrule domain-print-error
+  (domain-error (error-type ?type) (error-msg ?msg))
+  =>
+  (printout error "Domain error '" ?type "': " ?msg crlf)
 )
+
