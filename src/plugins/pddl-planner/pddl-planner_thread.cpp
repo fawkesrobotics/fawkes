@@ -78,6 +78,7 @@ PddlPlannerThread::init()
   plan_if_->set_active_planner(planner_string.c_str());
   plan_if_->set_msg_id(0);
   plan_if_->set_final(false);
+  plan_if_->set_success(false);
   plan_if_->write();
 
   //setup interface listener
@@ -104,9 +105,11 @@ PddlPlannerThread::loop()
     BSONObj plan = BSONFromActionList();
     robot_memory->update(fromjson("{plan:{$exists:true}}"), plan, cfg_collection_, true);
     print_action_list();
+    plan_if_->set_success(true);
   } else {
     logger->log_error(name(),"Updating plan failed, action list empty!");
     robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:0}"), cfg_collection_, true);
+    plan_if_->set_success(false);
   }
 
   plan_if_->set_final(true);
@@ -343,6 +346,7 @@ PddlPlannerThread::bb_interface_message_received(Interface *interface, fawkes::M
   if (message->is_of_type<PddlPlannerInterface::PlanMessage>()) {
     PddlPlannerInterface::PlanMessage* msg = (PddlPlannerInterface::PlanMessage*) message;
     plan_if_->set_msg_id(msg->id());
+    plan_if_->set_success(false);
     plan_if_->set_final(false);
     plan_if_->write();
     wakeup(); //activates loop where the generation is done

@@ -49,6 +49,9 @@ class PddlPlannerInterface : public Interface
     bool final; /**< 
       Is the planning finished?
      */
+    bool success; /**< 
+      True if the planner found a plan
+     */
     char active_planner[30]; /**< 
       Currently selected planner
      */
@@ -98,6 +101,9 @@ class PddlPlannerInterface : public Interface
   bool is_final() const;
   void set_final(const bool new_final);
   size_t maxlenof_final() const;
+  bool is_success() const;
+  void set_success(const bool new_success);
+  size_t maxlenof_success() const;
   char * active_planner() const;
   void set_active_planner(const char * new_active_planner);
   size_t maxlenof_active_planner() const;

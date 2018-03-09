@@ -52,9 +52,10 @@ PddlPlannerInterface::PddlPlannerInterface() : Interface()
   memset(data_ptr, 0, data_size);
   add_fieldinfo(IFT_UINT32, "msg_id", 1, &data->msg_id);
   add_fieldinfo(IFT_BOOL, "final", 1, &data->final);
+  add_fieldinfo(IFT_BOOL, "success", 1, &data->success);
   add_fieldinfo(IFT_STRING, "active_planner", 30, data->active_planner);
   add_messageinfo("PlanMessage");
-  unsigned char tmp_hash[] = {0xcd, 0x44, 0x52, 0xa7, 0xfa, 0xb2, 0xaf, 0xfe, 0xe2, 0xc5, 0x4, 0x6b, 0xe0, 0x97, 0x2b, 0x69};
+  unsigned char tmp_hash[] = {0x47, 0x74, 0xd7, 0xcf, 0x3d, 0xe5, 0x68, 0xa6, 0x44, 0xf1, 0x1f, 0x54, 0x5d, 0xc0, 0x4d, 0xd8};
   set_hash(tmp_hash);
 }
 
@@ -131,6 +132,41 @@ void
 PddlPlannerInterface::set_final(const bool new_final)
 {
   data->final = new_final;
+  data_changed = true;
+}
+
+/** Get success value.
+ * 
+      True if the planner found a plan
+    
+ * @return success value
+ */
+bool
+PddlPlannerInterface::is_success() const
+{
+  return data->success;
+}
+
+/** Get maximum length of success value.
+ * @return length of success value, can be length of the array or number of 
+ * maximum number of characters for a string
+ */
+size_t
+PddlPlannerInterface::maxlenof_success() const
+{
+  return 1;
+}
+
+/** Set success value.
+ * 
+      True if the planner found a plan
+    
+ * @param new_success new success value
+ */
+void
+PddlPlannerInterface::set_success(const bool new_success)
+{
+  data->success = new_success;
   data_changed = true;
 }
 
