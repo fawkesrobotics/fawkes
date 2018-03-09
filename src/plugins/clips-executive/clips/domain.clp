@@ -273,6 +273,22 @@
   (remove-precondition ?precond)
 )
 
+(deffunction domain-is-precond-negative
+  "Check if a non-atomic precondition is negative by checking all its parents
+   and counting the number of negations. If the number is odd, the precondition
+   is negative, otherwise it's positive."
+  (?precond-name)
+  (do-for-fact
+    ((?precond domain-precondition))
+    (eq ?precond:name ?precond-name)
+    (if (any-factp ((?op domain-operator)) (eq ?op:name ?precond:part-of)) then
+      return (eq ?precond:type negation)
+    )
+    (bind ?parent-is-negative (domain-is-precond-negative ?precond:part-of))
+    (return (neq (eq ?precond:type negation) ?parent-is-negative))
+  )
+)
+
 (defrule domain-ground-action-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific action-id."

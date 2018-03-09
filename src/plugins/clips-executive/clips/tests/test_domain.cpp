@@ -113,6 +113,37 @@ TEST_F(DomainTest, DisjunctivePreconditions)
         "(and (eq ?a:id 1) (eq ?a:executable TRUE))"));
 }
 
+/** Check whether the function domain-is-precond-negative computes correct
+ * values
+ */
+TEST_F(DomainTest, IsPrecondNegativeFunction)
+{
+  env.assert_fact("(domain-operator (name op))");
+  env.assert_fact("(domain-precondition (name p1) (part-of op)"
+                  "(type conjunction)"
+                  ")");
+  env.assert_fact("(domain-precondition (name p11) (part-of p1)"
+                  "(type negation)"
+                  ")");
+  EXPECT_EQ("TRUE",
+            env.evaluate("(domain-is-precond-negative p11)")[0].as_string());
+  env.assert_fact("(domain-precondition (name p111) (part-of p11)"
+                  "(type negation)"
+                  ")");
+  EXPECT_EQ("FALSE",
+            env.evaluate("(domain-is-precond-negative p111)")[0].as_string());
+  env.assert_fact("(domain-precondition (name p1111) (part-of p111)"
+                  "(type disjunction)"
+                  ")");
+  EXPECT_EQ("FALSE",
+            env.evaluate("(domain-is-precond-negative p1111)")[0].as_string());
+  env.assert_fact("(domain-precondition (name p11111) (part-of p1111)"
+                  "(type negation)"
+                  ")");
+  EXPECT_EQ("TRUE",
+            env.evaluate("(domain-is-precond-negative p11111)")[0].as_string());
+}
+
 /** Ground an action with multiple parameters and check that the grounding is
  * correct. Also make sure its precondition is satisfied (which it should be).
  */
