@@ -15,7 +15,7 @@
 	?g <- (goal (id ?goal-id) (mode DISPATCHED))
 	(not (plan-action (plan-id ?plan-id) (status ~FINAL)))
 	=>
-	(modify ?g (mode COMPLETED))
+	(modify ?g (mode FINISHED) (outcome COMPLETED))
 )
 
 (defrule action-selection-failed
@@ -23,5 +23,6 @@
 	?g <- (goal (id ?goal-id) (mode DISPATCHED))
 	(plan-action (status FAILED))
 	=>
-	(modify ?g (mode FAILED))
+	(modify ?g (mode FINISHED) (outcome FAILED))
 )
+
