@@ -4,6 +4,7 @@
 ;
 ;  Created: Sat Jun 16 15:45:57 2012 (Mexico City)
 ;  Copyright  2011-2013  Tim Niemueller [www.niemueller.de]
+;             2018       Till Hofmann
 ;  Licensed under GPLv2+ license, cf. LICENSE file of cedar
 ;---------------------------------------------------------------------------
 
@@ -11,6 +12,12 @@
   ?*FILE-SEARCH-PATH*   = (create$)
   ?*FF-PATH-SUBST-WHAT* = (create$)
   ?*FF-PATH-SUBST-BY*   = (create$)
+)
+
+(deftemplate path-info
+  (slot file (type STRING))
+  (slot path (type STRING))
+  (slot loaded (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
 ; Completely reset path information.
@@ -77,6 +84,7 @@
   (bind ?f (path-resolve ?file))
   (if ?f
   then
+    (assert (path-info (loaded TRUE) (file ?file) (path ?f)))
     (load ?f)
   else
     (printout error "Cannot load file " ?file " (file not found in " (path-string) ")" crlf)
@@ -88,6 +96,7 @@
   (bind ?f (path-resolve ?file))
   (if ?f
   then
+    (assert (path-info (loaded TRUE) (file ?file) (path ?f)))
     (load* ?f)
   else
     (printout error "Cannot load file " ?file " (file not found in " (path-string) ")" crlf)
