@@ -91,7 +91,7 @@
     (success FALSE))
   =>
   (printout error "Planning failed for goal " ?goal-id crlf)
-  (modify ?g (mode FAILED))
+  (modify ?g (mode FINISHED) (outcome FAILED) )
   (retract ?p)
 )
 
