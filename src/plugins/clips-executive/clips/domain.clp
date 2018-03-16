@@ -267,7 +267,6 @@
   "Ground an atomic precondition of an operator."
   (not (domain-wm-update))
   (plan-action
-    (status FORMULATED|PENDING|WAITING)
     (action-name ?op)
     (param-names $?action-param-names)
     (id ?action-id)
