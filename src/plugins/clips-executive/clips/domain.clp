@@ -217,7 +217,9 @@
     (action-name ?op)
     (param-names $?action-param-names)
     (id ?action-id)
-    (param-values $?action-values))
+    (param-values $?action-values& :
+      (= (length$ ?action-values) (length$ ?action-param-names)))
+  )
   (domain-precondition (name ?parent)
     (grounded-with ?action-id&~0) (grounded TRUE))
   ?precond <- (domain-atomic-precondition
