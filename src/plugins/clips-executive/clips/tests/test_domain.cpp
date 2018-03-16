@@ -387,6 +387,85 @@ TEST_F(DomainTest, PreconditionWithConstantInSecondSlot)
         "(and (eq ?a:id 1) (eq ?a:executable TRUE))"));
 }
 
+/** Test equality predicates. */
+TEST_F(DomainTest, Equality)
+{
+  env.reset();
+  env.assert_fact("(plan-action"
+                  " (id 1)"
+                  " (status PENDING)"
+                  " (goal-id g0) (plan-id p0)"
+                  " (action-name op1)"
+                  " (param-names x y)"
+                  " (param-values b b))");
+  env.assert_fact("(domain-precondition (name p1) (part-of op1))");
+  env.assert_fact("(domain-atomic-precondition"
+             " (name ap1)"
+             " (part-of p1)"
+             " (equality TRUE)"
+             " (param-names x y)"
+             ")");
+  env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 1) (eq ?a:executable TRUE))"));
+  env.assert_fact("(plan-action"
+                  " (id 2)"
+                  " (status PENDING)"
+                  " (goal-id g0) (plan-id p0)"
+                  " (action-name op1)"
+                  " (param-names x y)"
+                  " (param-values b c))");
+  env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))",
+        "(and (eq ?a:id 2) (eq ?a:executable FALSE))"));
+}
+
+/** Test that errors of equality conditions are properly detected.  */
+TEST_F(DomainTest, EqualityErrors)
+{
+  env.reset();
+  env.assert_fact("(domain-atomic-precondition"
+             " (name ap1)"
+             " (part-of p1)"
+             " (equality TRUE)"
+             " (param-names x)"
+             ")");
+  env.run();
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type equality-must-have-exactly-two-parameters)"));
+  env.reset();
+  env.assert_fact("(domain-atomic-precondition"
+             " (name ap1)"
+             " (part-of p1)"
+             " (equality TRUE)"
+             " (param-names x y z)"
+             ")");
+  env.run();
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type equality-must-have-exactly-two-parameters)"));
+  env.reset();
+  env.assert_fact("(domain-atomic-precondition"
+             " (name ap1)"
+             " (part-of p1)"
+             " (equality TRUE)"
+             " (predicate p)"
+             " (param-names x y)"
+             ")");
+  env.run();
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type precondition-with-equality-and-predicate)"));
+  env.reset();
+  env.assert_fact("(domain-atomic-precondition"
+             " (name ap1)"
+             " (part-of p1)"
+             " (param-names x y)"
+             ")");
+  env.run();
+  EXPECT_TRUE(has_fact("((?e domain-error))",
+        "(eq ?e:error-type precondition-must-have-predicate-or-be-equality)"));
+}
+
+
 /** If there is an unknown parameter in a precondition, then the domain contains
  * an error.
  */

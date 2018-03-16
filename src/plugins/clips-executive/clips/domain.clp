@@ -142,6 +142,7 @@
   (slot grounded-with (type INTEGER) (default 0))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot predicate (type SYMBOL))
+  (slot equality (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (multislot param-names (type SYMBOL))
   (multislot param-values (default (create$)))
   (multislot param-constants (default (create$)))
@@ -327,11 +328,26 @@
                 (goal-id ?g) (plan-id ?p)
                 (is-satisfied FALSE)
                 (predicate ?pred)
+                (equality FALSE)
                 (param-values $?params)
                 (grounded TRUE))
   (domain-fact (name ?pred) (param-values $?params))
 =>
   (modify ?precond (is-satisfied TRUE))
+)
+
+(defrule domain-check-if-atomic-equality-precondition-is-satisfied
+  ?precond <- (domain-atomic-precondition
+                (goal-id ?g) (plan-id ?p)
+                (is-satisfied ?is-sat)
+                (equality TRUE)
+                (param-values $?params& :
+                  (and (= (length$ ?params) 2)
+                       (neq ?is-sat (eq (nth$ 1 ?params) (nth$ 2 ?params))))
+                )
+                (grounded TRUE))
+=>
+  (modify ?precond (is-satisfied (eq (nth$ 1 ?params) (nth$ 2 ?params))))
 )
 
 (defrule domain-check-if-negative-precondition-is-satisfied
@@ -637,6 +653,51 @@
   =>
   (assert (domain-error (error-type operator-of-action-does-not-exist)
     (error-msg (str-cat "Operator of action " ?op " does not exist"))))
+)
+
+(defrule domain-check-atomic-precondition-predicate-has-no-equality
+  "Make sure that any atomic precondition with a set predicate has equality set
+   to FALSE."
+  (domain-atomic-precondition
+    (name ?precond)
+    (predicate ?predicate&~nil)
+    (equality TRUE)
+  )
+=>
+  (assert (domain-error
+    (error-type precondition-with-equality-and-predicate)
+    (error-msg (str-cat "Precondition " ?precond " cannot be an equality"
+                        " condition and a condition on the predicate "
+                        ?predicate " at the same time"))))
+)
+
+(defrule domain-check-atomic-precondition-is-on-predicate-or-equality
+  "Make sure that all preconditions have a predicate or are set to equality."
+  (domain-atomic-precondition
+    (name ?precond)
+    (predicate nil)
+    (equality FALSE)
+  )
+=>
+  (assert (domain-error
+    (error-type precondition-must-have-predicate-or-be-equality)
+    (error-msg (str-cat "Precondition " ?precond " must have a predicate "
+                        "or set to equality"))))
+)
+
+(defrule domain-check-equality-must-have-exactly-two-parameters
+  "Make sure that equalities always have exactly two parameters."
+  (domain-atomic-precondition
+    (name ?precond)
+    (equality TRUE)
+    (param-names $?param-names &: (neq (length$ ?param-names) 2))
+  )
+=>
+  (assert (domain-error
+    (error-type equality-must-have-exactly-two-parameters)
+    (error-msg (str-cat "Precondition " ?precond " is an equality precondition"
+                        " but has " (length$ ?param-names) " parameters,"
+                        " should be 2."))))
 )
 
 (defrule domain-cleanup-preconditions-on-worldmodel-change
