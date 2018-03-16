@@ -23,6 +23,9 @@
 #include <vector>
 #include <string>
 
+#include <string>
+#include <cstdio>
+
 using namespace std;
 
 /** Test setup for domain tests. */
@@ -31,6 +34,8 @@ class DomainTest : public CLIPSTest
   protected:
     /** Set up the test environment. */
     virtual void SetUp() {
+      string logfile = tmpnam(nullptr);
+      env.evaluate("(open \"" + logfile + "\" error \"w\")");
       LoadCLIPSFiles(clips_files);
       // Helps a lot to diagnose failures
       //env.evaluate("(watch facts)");
