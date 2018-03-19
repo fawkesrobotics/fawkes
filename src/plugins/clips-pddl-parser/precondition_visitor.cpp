@@ -131,11 +131,19 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const {
         constants += " " + p_string;
       }
     }
+    string predicate_string;
+    if (p.function == "=") {
+      // It's not a predicate but an equality.
+      predicate_string = " (equality TRUE)";
+    } else {
+      predicate_string = " (predicate " + p.function + ")";
+    }
+
     res.push_back(string(
           "(domain-atomic-precondition"
           " (part-of " + new_parent + ")"
           " (name " + name + ")"
-          " (predicate " + p.function + ")"
+          + predicate_string +
           " (param-names (create$" + params + "))"
           " (param-constants (create$" + constants + "))"
           ")"));
