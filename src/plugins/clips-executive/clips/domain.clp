@@ -251,26 +251,12 @@
   (?precond-name)
   (do-for-fact
     ((?precond domain-atomic-precondition) (?parent domain-precondition))
-    (eq ?precond:part-of ?parent:name)
+    (and (eq ?precond:name ?precond-name) (eq ?precond:part-of ?parent:name))
     (if (or (eq ?parent:type disjunction) (eq ?parent:type negation)) then
       (remove-precondition ?parent:name)
     )
     (retract ?precond)
   )
-)
-
-(defrule domain-remove-cond-on-sensed-effect-of-exog-action
-  "If an exogenous action has a precondition on a sensed effect of itself, then
-   add the effect as disjunct to the precondition. This means that part of the
-   exogenous action may already have occurred before the action is selected."
-  (domain-operator (name ?op) (exogenous TRUE))
-  (domain-predicate (name ?pred) (sensed TRUE))
-  (domain-effect (part-of ?op) (predicate ?pred)
-    (param-names $?params) (param-constants $?constants))
-  (domain-atomic-precondition (name ?precond) (operator ?op)
-    (predicate ?pred) (param-names $?params) (param-constants $?constants))
-=>
-  (remove-precondition ?precond)
 )
 
 (deffunction domain-is-precond-negative
@@ -287,6 +273,64 @@
     (bind ?parent-is-negative (domain-is-precond-negative ?precond:part-of))
     (return (neq (eq ?precond:type negation) ?parent-is-negative))
   )
+)
+
+(defrule domain-remove-precond-on-sensed-nonval-effect-of-exog-action
+  "If an exogenous action has a precondition for a non-value predicate that is
+   also a sensed effect of the operator, then remove the precondition on the
+   effect. This means that part of the exogenous action may already have
+   occurred before the action is selected."
+  (domain-operator (name ?op) (exogenous TRUE))
+  (domain-predicate (name ?pred) (sensed TRUE) (value-predicate FALSE))
+  (domain-effect (part-of ?op) (predicate ?pred)
+    (param-names $?params) (param-constants $?constants))
+  (domain-atomic-precondition (name ?precond) (operator ?op) (grounded FALSE)
+    (predicate ?pred) (param-names $?params) (param-constants $?constants))
+=>
+  (remove-precondition ?precond)
+  ; If there are any grounded preconditions, we need to recompute them.
+  (assert (domain-wm-update))
+)
+
+(defrule domain-replace-precond-on-sensed-val-effect-of-exog-action
+  "If an exogenous action has a precondition for a value predicate that is also
+   a sensed effect of the operator, then remove the precondition on the effect.
+   This means that part of the exogenous action may already have occurred before
+   the action is selected."
+  (domain-operator (name ?op) (exogenous TRUE))
+  (domain-predicate (name ?pred) (sensed TRUE) (value-predicate TRUE))
+  (domain-effect (part-of ?op) (predicate ?pred) (type POSITIVE)
+    (param-names $?args ?eff-val) (param-constants $?const-args ?const-eff-val))
+  ?ap <- (domain-atomic-precondition (name ?precond) (operator ?op)
+          (part-of ?parent) (predicate ?pred) (grounded FALSE)
+          (param-names $?args ?cond-val)
+          (param-constants $?const-args ?const-cond-val &:
+            (or
+                ; The values are constants and the constants are different.
+                (and (eq (length$ ?const-args) (length$ ?args))
+                     (neq ?const-cond-val ?const-eff-val)
+                )
+                ; The values are not constants and the parameters are different.
+                ; We rely on the fact that the parameter name of constants is
+                ; always set to the same value, so this is never satisfied if
+                ; the parameters are constants.
+                (neq ?cond-val ?eff-val)))
+         )
+  (not (and (domain-precondition (type disjunction) (name ?parent))
+            (domain-atomic-precondition (part-of ?parent) (predicate ?pred)
+                (param-names $?args ?eff-val)
+                (param-constants $?const-args ?const-eff-val))))
+=>
+  ; Replace the atomic precondition by a disjunction and add the atomic
+  ; precondition as a disjunct. Add the effect as another disjunct.
+  (assert (domain-precondition (type disjunction) (name ?precond) (operator ?op)
+            (part-of ?parent)))
+  (assert (domain-atomic-precondition (name (sym-cat ?precond 2)) (operator ?op)
+            (part-of ?precond) (predicate ?pred) (param-names $?args ?eff-val)
+            (param-constants $?const-args ?const-eff-val)))
+  (modify ?ap (part-of ?precond) (name (sym-cat ?precond 1)))
+  ; If there are any grounded preconditions, we need to recompute them.
+  (assert (domain-wm-update))
 )
 
 (defrule domain-ground-action-precondition

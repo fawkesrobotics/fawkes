@@ -720,3 +720,69 @@ TEST_F(ConditionalSayDomainTest, ApplyCondEffectIfCondHolds)
   EXPECT_TRUE(has_fact("((?fact domain-fact))",
         "(and (eq ?fact:name said) (eq ?fact:param-values (create$ hello)))"));
 }
+
+/** A precondition of an exogenous action on a non-value predicate should be
+ * removed if the action has the same predicate with the same parameters as
+ * effect.
+ */
+TEST_F(DomainTest, ExogenousActionWithNonValuePredicatePrecondition)
+{
+  env.reset();
+  env.assert_fact("(domain-operator (name put) (exogenous TRUE)"
+      " (param-names mps wp)" ")");
+  env.assert_fact("(domain-operator-parameter (name mps) (operator put)"
+      "(type object)" ")");
+  env.assert_fact("(domain-operator-parameter (name wp) (operator put)"
+      "(type object)" ")");
+  env.assert_fact("(domain-predicate (name wp-at) (sensed TRUE)"
+      " (param-names mps wp) (param-types object object)" ")");
+  env.assert_fact("(domain-precondition (operator put) (part-of put)"
+      " (name put-precond) (type conjunction)" ")");
+  env.assert_fact("(domain-precondition (operator put) (part-of put-precond)"
+      " (name put-precond1) (type negation)" ")");
+  env.assert_fact("(domain-atomic-precondition (operator put)"
+      " (name put-precond11)"
+      " (part-of put-precond1) (predicate wp-at) (param-names mps wp)" ")");
+  env.assert_fact("(domain-effect (part-of put) (predicate wp-at)"
+      " (param-names mps wp)" ")");
+  env.assert_fact("(plan-action (id 1) (goal-id g0) (plan-id p0)"
+      " (status FORMULATED)"
+      " (action-name put) (param-names mps wp) (param-values C-CS wp1)" ")");
+  env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))", "(eq ?a:executable TRUE)"));
+}
+
+/** A precondition of an exogenous action on a value predicate should be
+ * replaced by a disjunction of the original precondition and the effect of the
+ * action if the action changes the value of the value predicate.
+ */
+TEST_F(DomainTest, ExogenousActionWithValuePredicatePrecondition)
+{
+  env.reset();
+  env.assert_fact("(domain-operator (name dispense) (exogenous TRUE)"
+      " (param-names mps)" ")");
+  env.assert_fact("(domain-operator-parameter (name mps) (operator dispense)"
+      "(type object)" ")");
+  env.assert_fact("(domain-predicate (name mps-state) (sensed TRUE)"
+      " (param-names mps state) (param-types object object)"
+      " (value-predicate TRUE)" ")");
+  env.assert_fact("(domain-precondition (operator dispense) (part-of dispense)"
+      " (name dispense-precond) (type conjunction)" ")");
+  env.assert_fact("(domain-atomic-precondition (operator dispense)"
+      " (part-of dispense-precond) (predicate mps-state) (param-names mps c)"
+      " (param-constants nil PROCESSING)" ")");
+  env.assert_fact("(domain-effect (part-of dispense) (predicate mps-state)"
+      " (param-names mps c) (param-constants nil READY-AT-OUTPUT)" ")");
+  env.assert_fact("(domain-effect (part-of dispense) (predicate mps-state)"
+      " (type NEGATIVE)"
+      " (param-names mps c) (param-constants nil PROCESSING)" ")");
+  env.assert_fact("(plan-action (id 1) (goal-id g0) (plan-id p0)"
+      " (status FORMULATED)"
+      " (action-name dispense) (param-names mps) (param-values C-CS)" ")");
+  env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))", "(eq ?a:executable FALSE)"));
+  env.assert_fact("(domain-fact (name mps-state)"
+     " (param-values C-CS READY-AT-OUTPUT)" ")");
+  env.run();
+  EXPECT_TRUE(has_fact("((?a plan-action))", "(eq ?a:executable TRUE)"));
+}
