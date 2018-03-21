@@ -54,7 +54,8 @@ class WebRequest {
     METHOD_OPTIONS,	///< OPTIONS
     METHOD_POST,	///< POST
     METHOD_PUT,		///< PUT
-    METHOD_TRACE	///< TRACE
+    METHOD_TRACE,	///< TRACE
+    METHOD_PATCH	///< PATCH
   } Method;
 
   /** HTTP version. */

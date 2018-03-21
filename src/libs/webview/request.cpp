@@ -111,6 +111,8 @@ WebRequest::setup(const char *url, const char *method,
     method_ = METHOD_OPTIONS;
   } else if (0 == strcmp(method, MHD_HTTP_METHOD_TRACE)) {
     method_ = METHOD_TRACE;
+  } else if (0 == strcmp(method, MHD_HTTP_METHOD_PATCH)) {
+    method_ = METHOD_PATCH;
   }
 
   if (0 == strcmp(version, MHD_HTTP_VERSION_1_0)) {
