@@ -226,10 +226,12 @@ class WebRequest {
   void set_header(const std::string &key, const std::string &value)
   { headers_[key] = value; }
 
-  /** Get raw post data.
-   * @return raw port data or empty string if none. Note that this is not necesarily
-   * a printable string (or zero-terminated) */
-  const std::string &  raw_post_data() const { return post_raw_data_; }
+  /** Get body of request.
+   * @return The data that was received with the request. This is not
+   * set if we receive a form submission. The values will be available
+   * as POST values then. Note that this is not necesarily a printable
+   * string (or zero-terminated) */
+  const std::string &  body() const { return body_; }
 
   void   increment_reply_size(size_t increment_by);
   size_t reply_size() const;
@@ -241,7 +243,7 @@ class WebRequest {
    * @param cookies cookies map
    */
   void set_cookies(const std::map<std::string, std::string> &cookies) { cookies_ = cookies; }
-  void set_raw_post_data(const char *data, size_t data_size);
+  void set_body(const char *data, size_t data_size);
 
  private:
   bool is_setup() { return is_setup_; }
@@ -263,7 +265,7 @@ class WebRequest {
   WebReply::Code reply_code_;
   std::map<std::string, std::string> cookies_;
   std::map<std::string, std::string> post_values_;
-  std::string                        post_raw_data_;
+  std::string                        body_;
   std::map<std::string, std::string> get_values_;
   std::map<std::string, std::string> headers_;
 };

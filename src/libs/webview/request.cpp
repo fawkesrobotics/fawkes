@@ -177,16 +177,16 @@ WebRequest::set_post_value(const char *key, const char *data, size_t size)
 }
 
 
-/** Set raw post data.
+/** Set request body.
  * The data is copied as is without assuming a human-readable string
  * or even just zero-termination.
  * @param data data to copy
  * @param data_size size in bytes of \@p data
  */
 void
-WebRequest::set_raw_post_data(const char *data, size_t data_size)
+WebRequest::set_body(const char *data, size_t data_size)
 {
-  post_raw_data_ = std::string(data, data_size);
+  body_ = std::string(data, data_size);
 }
 
 /** Increment reply bytes counter.
