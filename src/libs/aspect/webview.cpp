@@ -68,16 +68,19 @@ WebviewAspect::~WebviewAspect()
  * @param url_manager URL manager to register processors to
  * @param nav_manager Navigation manager to add navigation entries
  * @param request_manager Request manager to query request information
+ * @param rest_api_manager Manager to register REST APIs
  * @see WebviewMaster
  */
 void
 WebviewAspect::init_WebviewAspect(WebUrlManager *url_manager,
-				  WebNavManager *nav_manager,
-				  WebRequestManager *request_manager)
+                                  WebNavManager *nav_manager,
+                                  WebRequestManager *request_manager,
+                                  WebviewRestApiManager *rest_api_manager)
 {
   webview_url_manager = url_manager;
   webview_nav_manager = nav_manager;
   webview_request_manager = request_manager;
+  webview_rest_api_manager = rest_api_manager;
 }
 
 } // end namespace fawkes
