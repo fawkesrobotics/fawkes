@@ -24,6 +24,7 @@
 #include "blackboard_processor.h"
 #include "startpage_processor.h"
 #include "plugins_processor.h"
+#include "rest_processor.h"
 #ifdef HAVE_TF
 #  include "tf_processor.h"
 #endif
@@ -216,6 +217,7 @@ WebviewThread::init()
   __static_processor     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, static_dirs_cstr, logger);
   __blackboard_processor = new WebviewBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
   __plugins_processor    = new WebviewPluginsRequestProcessor(PLUGINS_URL_PREFIX, plugin_manager);
+  __rest_processor       = new WebviewRESTRequestProcessor("/api", webview_rest_api_manager, logger);
 #ifdef HAVE_TF
   __tf_processor         = new WebviewTfRequestProcessor(TF_URL_PREFIX, tf_listener);
 #endif
@@ -223,10 +225,12 @@ WebviewThread::init()
   __image_processor     = new WebviewImageRequestProcessor(IMAGE_URL_PREFIX, config,
 							   logger, thread_collector);
 #endif
+  
   webview_url_manager->register_baseurl("/", __startpage_processor);
   webview_url_manager->register_baseurl(STATIC_URL_PREFIX, __static_processor);
   webview_url_manager->register_baseurl(BLACKBOARD_URL_PREFIX, __blackboard_processor);
   webview_url_manager->register_baseurl(PLUGINS_URL_PREFIX, __plugins_processor);
+  webview_url_manager->register_baseurl("/api", __rest_processor);
 #ifdef HAVE_TF
   webview_url_manager->register_baseurl(TF_URL_PREFIX, __tf_processor);
 #endif

@@ -49,6 +49,7 @@ class WebviewStaticRequestProcessor;
 class WebviewBlackBoardRequestProcessor;
 class WebviewStartPageRequestProcessor;
 class WebviewPluginsRequestProcessor;
+class WebviewRESTRequestProcessor;
 class WebviewServiceBrowseHandler;
 class WebviewFooterGenerator;
 class WebviewHeaderGenerator;
@@ -105,6 +106,7 @@ class WebviewThread
   WebviewStartPageRequestProcessor   *__startpage_processor;
   WebviewBlackBoardRequestProcessor  *__blackboard_processor;
   WebviewPluginsRequestProcessor     *__plugins_processor;
+  WebviewRESTRequestProcessor *__rest_processor;
 #ifdef HAVE_TF
   WebviewTfRequestProcessor          *__tf_processor;
 #endif

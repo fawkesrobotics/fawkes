@@ -55,7 +55,8 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
 		 fawkeslogging
   OBJS_webview = blackboard_processor.o footer_generator.o header_generator.o \
 		 service_browse_handler.o startpage_processor.o static_processor.o \
-		 plugins_processor.o user_verifier.o webview_thread.o webview_plugin.o
+		 plugins_processor.o user_verifier.o webview_thread.o webview_plugin.o \
+     rest_processor.o
   PLUGINS_all = $(PLUGINDIR)/webview.so
   INST_RESDIRS = webview
 
