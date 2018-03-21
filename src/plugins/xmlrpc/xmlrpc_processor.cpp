@@ -72,7 +72,7 @@ XmlRpcRequestProcessor::process_request(const fawkes::WebRequest *request)
     return new WebErrorPageReply(WebErrorPageReply::HTTP_METHOD_NOT_ALLOWED);
   } else {
     std::string response = "";
-    __xmlrpc_registry->processCall(request->raw_post_data(), &response);
+    __xmlrpc_registry->processCall(request->body(), &response);
     //__logger->log_debug("XmlRpcRequestProcessor", "Call: %s  reponse: %s",
     //		          request->raw_post_data().c_str(), response.c_str());
     return new StaticWebReply(WebReply::HTTP_OK, response);
