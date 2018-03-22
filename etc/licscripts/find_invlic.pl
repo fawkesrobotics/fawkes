@@ -51,6 +51,9 @@ sub check_file()
   }
 
   # Only operate on certain files
+  if ( $File::Find::dir =~ /\/node_modules\//) {
+    return;
+  }
   if ( $entry !~ /\.(cpp|h|c|cxx|hpp|ext_h|lua|py)$/ ) {
     return;
   }
