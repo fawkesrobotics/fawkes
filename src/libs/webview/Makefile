@@ -31,9 +31,11 @@ OBJS_all = $(OBJS_libfawkeswebview)
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_libmicrohttpd
+.PHONY: warning_libmicrohttpd warning_rapidjson
 warning_libmicrohttpd:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Webview Library$(TNORMAL) (libmicrohttpd[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Webview Library$(TNORMAL) (libmicrohttpd not found)"
+warning_rapidjson:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Webview Library$(TNORMAL) (RapidJSON not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
