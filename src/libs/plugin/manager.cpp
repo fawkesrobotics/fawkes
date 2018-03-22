@@ -334,6 +334,7 @@ PluginManager::load(const char *plugin_list)
 					LibLogger::log_info("PluginManager", "Loading plugins %s for meta plugin %s",
 					                    pset.c_str(), i->c_str());
 					load(pset.c_str());
+					LibLogger::log_debug("PluginManager", "Loaded meta plugin %s", i->c_str());
 					notify_loaded(i->c_str());
 				} catch (Exception &e) {
 					e.append("Could not initialize meta plugin %s, aborting loading.", i->c_str());
@@ -356,6 +357,7 @@ PluginManager::load(const char *plugin_list)
 	  thread_collector->add(plugin->threads());
 	  plugins.push_back(plugin);
 	  plugin_ids[*i] = next_plugin_id++;
+	  LibLogger::log_debug("PluginManager", "Loaded plugin %s", i->c_str());
 	  notify_loaded(i->c_str());
 	} catch (CannotInitializeThreadException &e) {
 	  e.prepend("Plugin >>> %s <<< could not be initialized, unloading", i->c_str());
