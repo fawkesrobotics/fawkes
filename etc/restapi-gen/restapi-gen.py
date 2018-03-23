@@ -70,6 +70,27 @@ def filter_refs(allOf):
 			rv.append(a['$ref'])
 	return rv
 
+def filter_quote(value):
+	return "'%s'" % str(value)
+
+def recursive_transitive_types(types, type, all_schemas):
+	if type in types: return
+	types.add(type)
+	if type in all_schemas:
+		for n, s in all_schemas.items():
+			if n not in types:
+				if 'allOf' in s:
+					for a in s['allOf']:
+						if '$ref' in a:
+							t = filter_reftype(a['$ref'])
+							if t in types:
+								recursive_transitive_types(types, n, all_schemas)
+	return types
+
+def filter_transitive_types(type, all_schemas):
+	types = set()
+	recursive_transitive_types(types, type, all_schemas)
+	return sorted(types)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Run RCLL Cluster Sim Jobs')
@@ -95,9 +116,11 @@ if __name__ == '__main__':
 	                           autoescape=False,
 	                           line_statement_prefix = '%');
 
-	jinja.filters['reftype']  = filter_reftype
-	jinja.filters['sanitize'] = filter_sanitize
-	jinja.filters['refs']     = filter_refs
+	jinja.filters['reftype']          = filter_reftype
+	jinja.filters['sanitize']         = filter_sanitize
+	jinja.filters['refs']             = filter_refs
+	jinja.filters['quote']            = filter_quote
+	jinja.filters['transitive_types'] = filter_transitive_types
 
 	files = []
 
