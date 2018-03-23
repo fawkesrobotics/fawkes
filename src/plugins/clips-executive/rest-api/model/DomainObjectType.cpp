@@ -1,21 +1,12 @@
 
-/***************************************************************************
+/****************************************************************************
  *  DomainObjectType
  *  (auto-generated, do not modify directly)
+ *
+ *  API Contact: Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ *  API Version: v1beta1
+ *  API License: Apache 2.0
  ****************************************************************************/
-
-/*  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
- *
- *  Read the full text in the LICENSE.GPL file in the doc directory.
- */
 
 #include "DomainObjectType.h"
 
@@ -121,6 +112,8 @@ void
 DomainObjectType::validate(bool subcall) const
 {
   std::vector<std::string> missing;
+	if (! kind_)  missing.push_back("kind");
+	if (! apiVersion_)  missing.push_back("apiVersion");
 	if (! name_)  missing.push_back("name");
 	if (! super_type_)  missing.push_back("super-type");
 
