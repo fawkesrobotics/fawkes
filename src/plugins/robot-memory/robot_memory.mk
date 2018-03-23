@@ -15,8 +15,8 @@
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
-include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
-include $(BASEDIR)/etc/buildsys/boost.mk
+include $(FAWKES_BASEDIR)/src/plugins/mongodb/mongodb.mk
+include $(BUILDSYSDIR)/boost.mk
 
 REQ_BOOST_LIBS = bind function
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
