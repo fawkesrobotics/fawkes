@@ -31,7 +31,7 @@ RESTAPI_APIGEN=$(RESTAPI_BASEDIR)/restapi-gen.py
 RESTAPI_OUTDIR=$(SRCDIR)/model
 RESTAPI_SPECFILES=api.yaml
 RESTAPI_TEMPLATE_DIR=$(RESTAPI_BASEDIR)/templates
-RESTAPI_TEMPLATES=models-c++17.h.template models-c++17.cpp.template
+RESTAPI_TEMPLATES=model-c++17.h.template model-c++17.cpp.template
 RESTAPI_FORCE=-f
 RESTAPI_STAMPFILES=$(addsuffix .stamp,$(RESTAPI_SPECFILES))
 
