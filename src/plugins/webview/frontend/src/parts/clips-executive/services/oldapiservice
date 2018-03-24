@@ -1,0 +1,104 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ConfigurationService } from '../../../services/config.service';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/delay';
+import { catchError, map, tap } from 'rxjs/operators';
+import { of } from 'rxjs/observable/of';
+
+import { Goal } from '../models/Goal';
+import { Plan } from '../models/Plan';
+import { DomainOperator } from '../models/DomainOperator';
+import { DomainObject } from '../models/DomainObject';
+import { DomainPredicate } from '../models/DomainPredicate';
+import { DomainFact } from '../models/DomainFact';
+
+@Injectable()
+export class ClipsExecutiveApiService {
+ 
+  constructor(private config: ConfigurationService,
+              private http: HttpClient)
+  {}
+
+  get_goals() : Observable<Goal[]>
+  {
+    return this.http.get<Goal[]>(`${this.config.get('apiurl')}/clips-executive/goals`)
+      .pipe(
+        tap(goals => console.log(`fetched goals ${JSON.stringify(goals)}`)),
+        catchError(this.handleError('goals', []))
+      );
+  }
+
+  get_goal(id: string) : Observable<Goal>
+  {
+    // return this.http.get<Goal>(this.config.get('apiurl')+`/clips-executive/goals/${id}`)
+    //   .pipe(
+    //     tap(_ => console.log(`fetched goal id=${id}`)),
+    //     catchError(this.handleError<Goal>(`goal id=${id}`))
+    //   );
+    return this.http.get<Goal>(`${this.config.get('apiurl')}/clips-executive/goals/${id}`)
+      .pipe(
+        tap(_ => console.log(`fetched goal id=${id}`))
+      );
+  }
+
+  get_plans(goal: Goal) : Observable<Plan[]>
+  {
+    if (goal.plans && goal.plans.length > 0) {
+      return Observable.forkJoin(
+        goal.plans.map((plan_id: string) => {
+          return this.http.get<Plan>(`${this.config.get('apiurl')}/clips-executive/plans/${goal.id}/${plan_id}`)
+            .map((plan: Plan) => {return plan;});
+        })
+      );
+    }
+    return Observable.of([]);
+  }
+
+  get_domain_objects() : Observable<DomainObject[]>
+  {
+    return this.http.get<DomainObject[]>(`${this.config.get('apiurl')}/clips-executive/domain-objects`)
+  }
+
+  get_domain_predicates() : Observable<DomainPredicate[]>
+  {
+    return this.http.get<DomainPredicate[]>(`${this.config.get('apiurl')}/clips-executive/domain-predicates`)
+  }
+
+  get_domain_operators() : Observable<DomainOperator[]>
+  {
+    return this.http.get<DomainOperator[]>(`${this.config.get('apiurl')}/clips-executive/domain-operators`)
+  }
+
+  get_domain_facts() : Observable<DomainFact[]>
+  {
+    return this.http.get<DomainFact[]>(`${this.config.get('apiurl')}/clips-executive/domain-facts`)
+  }
+
+  /**
+   * Handle Http operation that failed.
+   * Let the app continue.
+   * @param operation - name of the operation that failed
+   * @param result - optional value to return as the observable result
+   */
+  private handleError<T> (operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      
+      // TODO: send the error to remote logging infrastructure
+      console.error(error); // log to console instead
+
+      // TODO: better job of transforming error for user consumption
+      //this.log(`${operation} failed: ${error.message}`);
+
+      // Let the app keep running by returning an empty result.
+      return of(result as T);
+    };
+  }
+}

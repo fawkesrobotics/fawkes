@@ -1,0 +1,38 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// Copyright  2017  The Kubernetes Authors
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+@function rem($multiplier) {
+  $font-size: 10px;
+  @return $multiplier * $font-size;
+}
+
+$headline-font-size-base: rem(2.4) !default;
+$title-font-size-base: rem(2) !default;
+$subhead-font-size-base-lg: rem(1.8) !default;
+$subhead-font-size-base: rem(1.6) !default;
+$body-font-size-base: rem(1.4) !default;
+$caption-font-size-base: rem(1.2) !default;
+$toolbar-height-size-base: rem(6.4) !default;
+$toolbar-height-size-base-sm: rem(4.8) !default;
+$footer-font-size-base: rem(1) !default;
+
+$font-family-monospace: 'Roboto Mono Regular', monospace;
+$font-family-medium-monospace: 'Roboto Mono Medium', monospace;
+$font-family-medium: 'Roboto-Medium';
+$font-family-sans: Roboto, 'Helvetica Neue', sans-serif;
+
+$regular-font-weight: 400;
+$bold-font-weight: 500;
+$light-font-weight: 300;
+
+$layout-breakpoint-lg: 1280px;
+$layout-breakpoint-sm: 960px;
+$layout-breakpoint-xs: 600px;
+
+$whiteframe-shadow-1dp: 0 1px 3px 0 rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 2px 1px -1px rgba(0, 0, 0, .12);
+$baseline-grid: 8px;
+$nav-width: 30 * $baseline-grid;
+$logo-width: 8 * $baseline-grid;
+$logo-height: 8 * $baseline-grid;

@@ -1,0 +1,45 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ Copyright  2017  The Kubernetes Authors
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+
+<mat-drawer-container class="ff-nav">
+  <mat-drawer class="ff-nav"
+              mode="side">
+    <div class="ff-nav-group">
+			<!--
+      <ff-nav-item class="ff-nav-group-item"
+                   [state]="states.cluster"
+                   i18n>Cluster
+      </ff-nav-item>
+      <ff-nav-item class="ff-nav-item"
+                   [state]="states.clusterRole"
+                   i18n>Cluster Roles
+      </ff-nav-item>
+      -->
+      <ff-nav-item class="ff-nav-group-item"
+									 routerLink="/"
+                   i18n>Overview
+      </ff-nav-item>
+
+      <mat-divider></mat-divider>
+
+			<ff-nav-item class="ff-nav-group-item"
+									 routerLink="clips-executive"
+                   i18n>CLIPS Executive
+      </ff-nav-item>
+      <ff-nav-item class="ff-nav-item"
+									 routerLink="clips-executive/goal"
+                   i18n>Goals
+      </ff-nav-item>
+      <ff-nav-item class="ff-nav-item"
+									 routerLink="clips-executive/domain"
+                   i18n>Domain
+      </ff-nav-item>
+    </div>
+
+    <mat-divider></mat-divider>
+
+  </mat-drawer>
+</mat-drawer-container>

@@ -1,0 +1,13 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ Copyright  2017  The Kubernetes Authors
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<a mat-button
+   class="ff-nav-item-button ff-nav-item-button"
+	 routerLink="{{routerLink}}"
+   routerLinkActive="ff-nav-item-button-active"
+	 [routerLinkActiveOptions]="{ exact: true }"
+	 >
+  <ng-content></ng-content>
+</a>
