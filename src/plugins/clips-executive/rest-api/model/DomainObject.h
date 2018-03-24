@@ -1,7 +1,10 @@
 
 /****************************************************************************
- *  CLIPS Executive REST API -- Schema DomainObject
+ *  ClipsExecutive -- Schema DomainObject
  *  (auto-generated, do not modify directly)
+ *
+ *  CLIPS Executive REST API.
+ *  Enables access to goals, plans, and all items in the domain model.
  *
  *  API Contact: Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
  *  API Version: v1beta1
