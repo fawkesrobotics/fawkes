@@ -1,0 +1,106 @@
+
+%- macro gen_imports(spec)
+% for r in spec | path_reftypes
+import { {{ r }} } from '../models/{{ r }}';
+% endfor
+%- endmacro
+
+%- macro arg_type(p)
+%- if p.type == 'integer'
+number
+%- else
+{{ p.type }}
+%- endif
+%- endmacro
+
+
+%- macro args(op)
+%- for p in op | path_args
+{{ p.name | sanitize }}{% if not p.required %}?{% endif %}: {{ arg_type(p) }}{% if not loop.last %}, {% endif %}{# -#}
+%- endfor
+%- endmacro
+
+%- macro return_type(op)
+%- if op.responses and '200' in op.responses and op.responses['200'].content and op.responses and op.responses['200'].content['application/json'] and op.responses['200'].content['application/json'].schema
+%-   set schema = op.responses['200'].content['application/json'].schema
+%-   if schema.type
+%-     if schema.type == 'array'
+%-       if '$ref' in schema['items']
+{{ schema['items']['$ref'] | reftype }}[]
+%-       else
+{{ schema['items'].type }}[]
+%-       endif
+%-     elif schema.type == 'integer'
+number
+%-     else
+{{ schema['items'].type }}
+%-     endif
+%-   elif '$ref' in schema
+{{ schema['$ref'] | reftype }}
+%-   else
+any
+%-   endif
+%- else
+any
+%- endif
+%- endmacro
+
+{#- #}
+/****************************************************************************
+ *  {{ spec.info.title }} -- API Service
+ *  (auto-generated, do not modify directly)
+ *
+{%- if spec.info.description %}
+{{ spec.info.description | prefix(' *  ') | rstrip }}
+ *
+{%- endif %}
+ *  API Contact: {{ spec.info.contact.name }} <{{ spec.info.contact.email }}>
+ *  API Version: {{ spec.info.version }}
+ *  API License: {{ spec.info.license.name }}
+ ****************************************************************************/
+
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/operator/map';
+
+import { ConfigurationService } from '../../../services/config.service';
+
+{{ gen_imports(spec) }}
+
+@Injectable()
+export class {{ name | sanitize }}ApiService
+{
+  constructor(private config: ConfigurationService,
+              private http: HttpClient) {}
+
+% for p in spec.paths
+%-   for method in spec.paths[p]
+%     set op = spec.paths[p][method]
+  public {{ op.operationId }}({{ args(op) }}): Observable<{{ return_type(op) }}>
+  {
+% for p in op | path_args
+%   if p.required
+    if ({{ p.name | sanitize }} === null || {{ p.name | sanitize }} == undefined) {
+      throw new Error("Required parameter {{p.name}} is null or undefined ({{ op.operationId}})");
+    }
+%   endif
+% endfor
+
+    let headers = new HttpHeaders();
+% if op.responses and '200' in op.responses and op.responses['200'].content and op.responses and op.responses['200'].content['application/json']
+    headers = headers.set('Accept', 'application/json');
+% endif
+
+% if op.requestBody
+    headers = headers.set('Content-type', 'application/json');
+% endif
+
+    let options = { headers: headers }
+    return this.http.{{ method }}<{{ return_type(op) }}>(`${this.config.get('apiurl')}{{ p | path_substargs(op, '${encodeURIComponent(String($$))}') }}`, options);
+	}
+
+%    endfor
+% endfor
+}
