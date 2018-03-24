@@ -101,7 +101,7 @@
    names of an existing operator and an existing type respectively."
   (slot name)
   (slot operator (type SYMBOL))
-  (slot type (type SYMBOL) (default obj))
+  (slot type (type SYMBOL) (default object))
 )
 
 (deftemplate domain-precondition
