@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
-  title: CLIPS Executive REST API
+  title: ClipsExecutive
   version: v1beta1
   description: |
-    REST API to the CLIPS Executive.
+    CLIPS Executive REST API.
     Enables access to goals, plans, and all items in the domain model.
   contact:
     name:  Tim Niemueller
@@ -78,7 +78,7 @@ paths:
           description: ID of goal to retrieve
           required: true
           schema:
-            type: integer
+            type: string
             format: symbol
         - name: pretty
           in: query
@@ -91,9 +91,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Goal'
+                $ref: '#/components/schemas/Goal'
         '400':
           description: bad input parameter
     
@@ -158,9 +156,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Plan'
+                $ref: '#/components/schemas/Plan'
         '400':
           description: bad input parameter
             
