@@ -134,14 +134,16 @@ if __name__ == '__main__':
 	jinja.filters['transitive_types'] = filter_transitive_types
 
 	files = []
-
 	for f in args.file:
 		fname = os.path.basename(f)
 		fname_p = fname.split('.')
-		if len(fname_p) < 3:
-			print("Invalid format for %s, must be of form 'name.filext.template'" % f)
+		if len(fname_p) < 4:
+			print("Invalid format for %s, must be of form 'name.<filext>.<type>.template'" % f)
 			sys.exit(-1)
-		files.append({"file": f, "suffix": fname_p[-2], "name": '.'.join(fname_p[:-2])})
+		files.append({"file": f,
+		              "type": fname_p[-2],
+		              "suffix": fname_p[-3],
+		              "name": '.'.join(fname_p[:-2])})
 
 	specfile = open(args.api, "r")
 	spec = yaml.load(specfile)
@@ -151,30 +153,43 @@ if __name__ == '__main__':
 		template = jinja.get_template(f['file'])
 
 		schemas = spec['components']['schemas']
-	
-		for name, schema in schemas.items():
-			schema = schemas[name]
-			if not args.quiet:
-				print("%s: %s/%s.%s" % (f['name'], args.output_dir, name, f['suffix']))
 
+		res = None
+
+		if f['type'] == "model":
+			for name, schema in schemas.items():
+				schema = schemas[name]
+
+				f['filename'] = "%s/%s.%s" % (args.output_dir, name, f['suffix'])
+
+				if not args.quiet:
+					print("%s: %s" % (f['name'], f['filename']))
+
+				vars = {
+					"spec": spec,
+					"name": name,
+					"schema": schema,
+					"all_schemas": schemas
+				}
+
+				res = template.render(vars)
+				write_file(f, res)
+
+		elif f['type'] == "api":
 			vars = {
 				"spec": spec,
-				"name": name,
-				"schema": schema,
+				"name": filter_sanitize(spec['info']['title']),
 				"all_schemas": schemas
 			}
 
-			res = template.render(vars)
+			f['filename'] = "%s/%sApiService.%s" % (args.output_dir, vars['name'], f['suffix'])
 
-			if args.stdout:
-				print(res)
-			elif args.dry_run:
-				print("Generated %s/%s.%s successfully (not writing, dry-run)" %
-				      (args.output_dir, name, f['suffix']))
-			else:
-				filename = "%s/%s.%s" % (args.output_dir, name, f['suffix'])
-				if os.path.lexists(filename) and not args.force:
-					print("File %s already exists" % filename)
-					sys.exit(-2)
-				with open(filename, "w") as output_file:
-					output_file.write(res)
+			if not args.quiet:
+				print("%s: %s" % (f['name'], f['filename']))
+
+			try:
+				res = template.render(vars)
+				write_file(f, res)
+			except TemplateRuntimeError as err:
+				print("Template error in %s: %s" % (f['file'], err))
+				sys.exit(-3)
