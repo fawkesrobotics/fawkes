@@ -93,6 +93,10 @@
  *  {{ spec.info.title }} -- Schema {{ name }}
  *  (auto-generated, do not modify directly)
  *
+{%- if spec.info.description %}
+{{ spec.info.description | prefix(' *  ') | rstrip }}
+ *
+{%- endif %}
  *  API Contact: {{ spec.info.contact.name }} <{{ spec.info.contact.email }}>
  *  API Version: {{ spec.info.version }}
  *  API License: {{ spec.info.license.name }}
