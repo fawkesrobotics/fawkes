@@ -73,6 +73,15 @@ def filter_refs(allOf):
 def filter_quote(value):
 	return "'%s'" % str(value)
 
+def filter_rstrip(value):
+	return str(value).rstrip()
+
+def filter_prefix(value, prefix):
+	rv = ""
+	for l in value.splitlines(True):
+		rv += prefix + l
+	return rv
+
 def recursive_transitive_types(types, type, all_schemas):
 	if type in types: return
 	types.add(type)
@@ -120,6 +129,8 @@ if __name__ == '__main__':
 	jinja.filters['sanitize']         = filter_sanitize
 	jinja.filters['refs']             = filter_refs
 	jinja.filters['quote']            = filter_quote
+	jinja.filters['prefix']           = filter_prefix
+	jinja.filters['rstrip']           = filter_rstrip
 	jinja.filters['transitive_types'] = filter_transitive_types
 
 	files = []
