@@ -7,9 +7,11 @@ import {NgModule} from '@angular/core';
 import {SharedModule} from '../shared.module';
 
 import { DefaultPipe } from './default/default.pipe';
+import { SafeHTMLPipe } from './safe/safe_html.pipe';
 
 const PIPES = [
   DefaultPipe,
+  SafeHTMLPipe,
 ];
 
 @NgModule({
