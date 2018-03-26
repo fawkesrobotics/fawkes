@@ -79,8 +79,7 @@ WebviewRESTRequestProcessor::process_request(const fawkes::WebRequest *request)
 		return NULL;
 	}
 
-	std::string rest_path = rest_url.substr(rest_url_parts[0].length() + 1);
-
+	std::string rest_path = rest_url.substr(rest_url_parts[0].length());
 	std::string rest_api = rest_url_parts[0];
 	WebviewRestApi *api = api_mgr_->get_api(rest_api);
 	if (! api) {
