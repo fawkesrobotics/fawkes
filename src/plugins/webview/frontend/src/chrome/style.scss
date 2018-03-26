@@ -86,12 +86,12 @@
   ::before {
     content: '';
     display: block;
-    margin-bottom: 2.5 * $baseline-grid;
+    //margin-bottom: 2.5 * $baseline-grid;
   }
 
   ::after {
     content: '';
     display: block;
-    padding-bottom: 2 * $baseline-grid;
+    //padding-bottom: 2 * $baseline-grid;
   }
 }

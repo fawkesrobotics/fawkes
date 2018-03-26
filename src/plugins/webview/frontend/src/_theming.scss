@@ -210,7 +210,7 @@
 
 	.ff-vfill-content {
 			// 7*baseline-grid: height of toolbar
-			height: calc(100% - #{7 * $baseline-grid});
+			height: calc(100% - #{2 * $baseline-grid});
 	}
 	.ff-vfill {
 			height: 100%;
