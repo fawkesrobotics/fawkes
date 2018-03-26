@@ -17,9 +17,9 @@ import { ConfigurationService } from '../services/config.service';
 import { AssetsService } from '../services/global/assets';
 
 import { ClipsExecutiveModule } from '../parts/clips-executive/module';
+import { SkillerModule } from '../parts/skiller/module';
 
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
-import { ClipsExecutiveInMemoryDataService } from '../parts/clips-executive/services/mock-data.service';
 
 @NgModule({
 	declarations: [
@@ -34,9 +34,7 @@ import { ClipsExecutiveInMemoryDataService } from '../parts/clips-executive/serv
 
 	  ChromeModule,
 	  ClipsExecutiveModule,
-
-	  //HttpClientInMemoryWebApiModule
-	  //  .forRoot(ClipsExecutiveInMemoryDataService, {apiBase: "api/clips-executive/"}),
+	  SkillerModule,
 
 	  // Keep the AppRoutingModule last
 	  AppRoutingModule,
