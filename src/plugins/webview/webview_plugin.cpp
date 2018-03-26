@@ -25,6 +25,10 @@
 
 #include "webview_thread.h"
 
+#ifdef HAVE_REST_APIS
+#  include "blackboard-rest-api/blackboard-rest-api.h"
+#endif
+
 using namespace fawkes;
 
 /** @class WebviewPlugin <plugins/webview/webview_plugin.h>
@@ -40,6 +44,7 @@ WebviewPlugin::WebviewPlugin(Configuration *config)
   : Plugin(config)
 {
   thread_list.push_back(new WebviewThread());
+  thread_list.push_back(new BlackboardRestApi());
 }
 
 

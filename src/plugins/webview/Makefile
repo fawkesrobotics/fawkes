@@ -95,6 +95,21 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
     LIBS_webview += crypt
     WARN_TARGETS += warning_apr_util
   endif
+
+  ifeq ($(HAVE_CPP17)$(HAVE_RAPIDJSON),11)
+    CFLAGS  += -DHAVE_REST_APIS $(CFLAGS_CPP17)  $(CFLAGS_RAPIDJSON)
+    LDFLAGS += $(LDFLAGS_CPP17) $(LDFLAGS_RAPIDJSON)
+
+    OBJS_webview += blackboard-rest-api/blackboard-rest-api.o \
+                   $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/blackboard-rest-api/model/*.cpp))))
+  else
+    ifneq ($(HAVE_CPP17),1)
+      WARN_TARGETS += warning_cpp17
+    endif
+    ifneq ($(HAVE_RAPIDJSON),1)
+      WARN_TARGETS += warning_rapidjson
+    endif
+  endif
 else
   WARN_TARGETS += warning_libmicrohttpd
 endif
@@ -105,7 +120,7 @@ ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_libmicrohttpd warning_tf warning_graphviz warning_jpeg warning_apr_util warning_cpp11
+.PHONY: warning_libmicrohttpd warning_tf warning_graphviz warning_jpeg warning_apr_util warning_cpp11 warning_cpp17 warning_rapidjson
 warning_libmicrohttpd:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting webview plugin$(TNORMAL) (libmicrohttpd not installed)"
 warning_tf:
@@ -118,6 +133,10 @@ warning_cpp11:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting image viewing support$(TNORMAL) (C++11 not supported)"
 warning_apr_util:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting APR based password verification support$(TNORMAL) (apr-util not found)"
+warning_cpp17:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting REST APIs$(TNORMAL) (C++17 not supported)"
+warning_rapidjson:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting REST APIs$(TNORMAL) (RapidJSON not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
