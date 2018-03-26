@@ -41,9 +41,10 @@ endif
 
 $(SRCDIR)/$(OBJDIR)/%.stamp: $(SRCDIR)/% $(addprefix $(RESTAPI_TEMPLATE_DIR)/,$(RESTAPI_TEMPLATES))
 	$(SILENT) echo -e "$(INDENT_PRINT)[RestAPI] $(PARENTDIR)$(TBOLDGRAY)$(<F)$(TNORMAL)"
-	$(SILENT)$(RESTAPI_APIGEN) --quiet $(RESTAPI_FORCE) \
+	$(SILENT)$(RESTAPI_APIGEN) $(RESTAPI_FORCE) \
 		--api $< --output-dir $(RESTAPI_OUTDIR) \
-		--template-dir $(RESTAPI_TEMPLATE_DIR) $(RESTAPI_TEMPLATES)
+		--template-dir $(RESTAPI_TEMPLATE_DIR) $(RESTAPI_TEMPLATES) | \
+		sed -e "s|^$(realpath $(BASEDIR))/\(.*/\)\([^/]\+\)$$|$(INDENT_PRINT)[RestAPI] -> \1$(patsubst \\%,\\o%,$(TBOLDGRAY))\2$(patsubst \\%,\\o%,$(TNORMAL))|g"
 	$(SILENT)touch $@
 
 ifeq ($(OBJSSUBMAKE),1)
