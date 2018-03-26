@@ -134,6 +134,8 @@ PddlPlannerThread::ff_planner()
   //Parse Result and write it into the robot memory
   logger->log_info(name(), "Parsing result");
 
+  action_list_.clear();
+
   size_t cur_pos = 0;
   if(result.find("found legal plan as follows", cur_pos) == std::string::npos) {
     logger->log_error(name(), "Planning Failed: %s", result.c_str());
@@ -144,7 +146,6 @@ PddlPlannerThread::ff_planner()
   result.erase(result.find("time spent:", cur_pos));
 
   cur_pos = result.find("step", cur_pos) + 4;
-  action_list_.clear();
   while(result.find(": ", cur_pos) != std::string::npos) {
     cur_pos = result.find(": ", cur_pos) + 2;
     size_t line_end =  result.find("\n", cur_pos);
