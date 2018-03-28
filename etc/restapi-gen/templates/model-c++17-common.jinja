@@ -22,6 +22,8 @@ double
 bool
 %-   elif property.type == 'array'
 std::vector<{{ type(property['items']) }}>
+%-   elif property.type == 'object'
+std::shared_ptr<rapidjson::Document>
 %-   else
 UNKNOWN
 %-   endif
@@ -31,7 +33,7 @@ std::shared_ptr<{{ property['$ref'] | reftype }}>
 %- endmacro
 
 % macro option_type(property)
-% if (property.type and property.type == 'array') or '$ref' in property
+% if (property.type and property.type in ['array', 'object']) or '$ref' in property
 {{ type(property) }}
 % else
 std::optional<{{ type(property) }}>
@@ -39,7 +41,7 @@ std::optional<{{ type(property) }}>
 %- endmacro
 
 % macro make_optional(property, initializer=None)
-% if (property.type and property.type == 'array')
+% if (property.type and property.type in ['array', 'object'])
 {{ type(property) }}{};
 % elif '$ref' in property
 {{ type(property) }}{new {{ property['$ref'] | reftype }}({{ initializer | default('') }})};
@@ -93,6 +95,8 @@ UNKNOWN{{property.type}}
 %-   elif property.type == 'boolean'
 false
 %-   elif property.type == 'array'
+{}
+%-   elif property.type == 'object'
 {}
 %-   endif
 %- elif '$ref' in property

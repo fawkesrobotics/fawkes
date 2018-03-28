@@ -17,6 +17,10 @@
 		v_{{ propname | sanitize }}.PushBack(v, allocator);
 	}
 	v.AddMember("{{ propname }}", v_{{ propname | sanitize }}, allocator);
+%  elif p.type and p.type == 'object'
+	if ({{ propname | sanitize }}_) {
+		v.AddMember("{{ propname }}", *{{ propname | sanitize }}_, allocator);
+	}
 %  elif '$ref' in p
 	if ({{ propname | sanitize }}_) {
 		rapidjson::Value v_{{ propname | sanitize }}(rapidjson::kObjectType);
@@ -50,6 +54,12 @@
 %    endif
 		}	
 	}	
+%  elif p.type and p.type == 'object'
+	if (d.HasMember("{{ propname }}") && d["{{ propname }}"].IsObject()) {
+		std::shared_ptr<rapidjson::Document> d_{{ propname | sanitize }} =
+		  std::make_shared<rapidjson::Document>();
+		d_{{ propname | sanitize }}->CopyFrom(d["{{ propname }}"], d_{{ propname | sanitize }}->GetAllocator());
+	}
 %  elif '$ref' in p
 	if (d.HasMember("{{ propname }}") && d["{{ propname }}"].IsObject()) {
 		std::shared_ptr<{{ p['$ref'] | reftype }}>
