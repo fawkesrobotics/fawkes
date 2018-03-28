@@ -6,7 +6,25 @@
 <mat-card class="ff-content-card" fxFlex="70%">
 	<mat-card-title>
 		<div fxLayout="row">
-			<div>Graph</div>
+			<div>
+				<button mat-button class="mat-card-title" [matMenuTriggerFor]="graph_menu">
+					<span>Graph of </span>
+					<span class="ff-muted">{{ selected_skill	}}</span>
+					<span> skill</span>
+					<mat-icon>arrow_drop_down</mat-icon>
+				</button>
+				<mat-menu #graph_menu="matMenu" [overlapTrigger]="false">
+					<button mat-menu-item
+									(click)="select_skill('active')">
+						<span>active</span>
+					</button>
+					<button mat-menu-item
+									*ngFor="let s of skills"
+									(click)="select_skill(s.name)">
+						<span>{{ s.name }}</span>
+					</button>
+				</mat-menu>
+			</div>
 			<div class="ff-right">
 				<button mat-icon-button
 								class="ff-card-title-button"
@@ -25,10 +43,10 @@
 	</mat-card-title>
 	<mat-divider></mat-divider>
 	<mat-card-content class="ff-card-content">
-		<div fxLayoutAlign="center" *ngIf="skill" class="card-div">
+		<div fxLayoutAlign="center" *ngIf="skill && skill.graph != ''" class="card-div">
 			<dotgraph [dot]="skill.graph" ngClass="skill-graph"></dotgraph>
 		</div>
-		<div *ngIf="!skill">
+		<div *ngIf="!skill || skill.graph == ''">
 			<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
 		</div>
 	</mat-card-content>
