@@ -1,10 +1,9 @@
 
 /***************************************************************************
- *  reply.h - Web request reply
+ *  rest_api.h - Webview REST API
  *
  *  Created: Fri Mar 16 17:39:57 2018
  *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,7 +22,6 @@
 #ifndef __LIBS_WEBVIEW_REST_API_H_
 #define __LIBS_WEBVIEW_REST_API_H_
 
-
 #include <webview/request.h>
 #include <webview/reply.h>
 
@@ -31,13 +29,13 @@
 #include <logging/logger.h>
 #include <utils/misc/string_split.h>
 
-#include <cstdio>
 #include <vector>
 #include <string>
 #include <memory>
 #include <map>
 #include <functional>
 #include <algorithm>
+#include <regex>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -188,8 +186,8 @@ class WebviewRestApi
 	 * The API's name will be part of the URL, e.g., '/api/[COMPONENT-NAME]/...'.
 	 * @param logger logger for informative output
 	 */
- WebviewRestApi(const std::string &name, fawkes::Logger *logger)
-	 : name_(name), logger_(logger), pretty_json_(false) {}
+	WebviewRestApi(const std::string &name, fawkes::Logger *logger)
+		: name_(name), logger_(logger), pretty_json_(false) {}
 
 	/** Get name of component.
 	 * @return name of component.
@@ -207,7 +205,7 @@ class WebviewRestApi
 	 */
 	void add_handler(WebRequest::Method method, std::string path, handler_func handler)
 	{
-		routes_.push_back(std::make_tuple(method, path, handler));
+		routes_.push_back(std::make_tuple(method, path, gen_regex(path), handler));
 	}
 
 	/** Add handler function.
@@ -220,7 +218,7 @@ class WebviewRestApi
 	add_handler(WebRequest::Method method, std::string path,
 		            std::function<O (I, WebviewRestParams &)> handler)
 	{
-		routes_.push_back(std::make_tuple(method, path,
+		routes_.push_back(std::make_tuple(method, path, gen_regex(path),
 		                                  [this, handler](const std::string &body, WebviewRestParams& m)
 		                                  -> std::unique_ptr<WebviewRestReply>
 		                                  {
@@ -256,7 +254,7 @@ class WebviewRestApi
 	void add_handler(WebRequest::Method method, std::string path,
 	                 std::function<std::string (I, WebviewRestParams &)> handler)
 	{
-		routes_.push_back(std::make_tuple(method, path,
+		routes_.push_back(std::make_tuple(method, path, gen_regex(path),
 		                                  [this, handler](const std::string &body, WebviewRestParams& m)
 		                                  -> std::unique_ptr<WebviewRestReply>
 		                                  {
@@ -285,7 +283,7 @@ class WebviewRestApi
 	void add_handler(WebRequest::Method method, std::string path,
 	                 std::function<O (WebviewRestParams &)> handler)
 	{
-		routes_.push_back(std::make_tuple(method, path,
+		routes_.push_back(std::make_tuple(method, path, gen_regex(path),
 		                                  [this, handler](const std::string &body, WebviewRestParams& m)
 		                                  -> std::unique_ptr<WebviewRestReply>
 		                                  {
@@ -310,72 +308,24 @@ class WebviewRestApi
 		                                  }));
 	}
 
-	/** Check if an actual path matches an API path pattern.
-	 * @param url requested
-	 * @param api_path configured API path to check
-	 * @param params object to set argument mappings
-	 * @return true if the path cold be matched, false otherwise.
-	 */
-	bool
-	path_match(const std::string & url, const std::string & api_path, WebviewRestParams& params)
-	{
-		std::map<std::string, std::string> m;
-		std::vector<std::string> url_s  = str_split(url, '/');
-		std::vector<std::string> path_s = str_split(api_path, '/');
-		if (url_s.size() != path_s.size())  return false;
-		for (size_t i = 0; i < url_s.size(); ++i) {
-			const std::string &p = path_s[i];
-			const std::string &u = url_s[i];
-			if (p.front() == '{' && p.back() == '}') {
-				m[p.substr(1, p.length() - 2)] = u;
-			} else if (p != u) {
-				return false;
-			}
-		}
-		params.set_path_args(std::move(m));
-		return true;
-	}
-
-	/** Process REST API request.
-	 * @param request incoming request
-	 * @param rest_url the URL stripped of the base URL prefix
-	 * @return reply
-	 */
 	WebReply *
-	process_request(const WebRequest *request, const std::string & rest_url)
-	{
-		WebviewRestParams params;
-		auto ri = std::find_if(routes_.begin(), routes_.end(),
-			                       [this, rest_url, &params, request](auto r) {
-			                       if (std::get<0>(r) != request->method()) {
-				                       return false;
-			                       }
-			                       if (this->path_match(rest_url, std::get<1>(r), params)) {
-				                       return true;
-			                       } else {
-				                       return false;
-			                       }
-		                       });
-		if (ri == routes_.end()) {
-			return new StaticWebReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, "API " + rest_url + " unknown");
-		}
-		params.set_query_args(request->get_values());
-		std::unique_ptr<WebviewRestReply> reply = std::get<2>(*ri)(request->body(), params);
-		return reply.release();
-	}
+		process_request(const WebRequest *request, const std::string & rest_url);
 
-	/** Enable or disable pretty JSON printing globally.
-	 * @param pretty true to enable
-	 */
-	void set_pretty_json(bool pretty)
-	{
-		pretty_json_ = pretty;
-	}
+	void set_pretty_json(bool pretty);
+
+ private:
+	typedef std::pair<std::regex, std::vector<std::string>> path_regex;
+
+	std::pair<std::regex, std::vector<std::string>>
+		gen_regex(const std::string &  path);
+
+	bool path_match(const std::string & url, const path_regex &path_re,
+	                WebviewRestParams& params);
 	
  private:
 	std::string     name_;
 	fawkes::Logger *logger_;
-	std::vector<std::tuple<WebRequest::Method, std::string, handler_func>> routes_;
+	std::vector<std::tuple<WebRequest::Method, std::string, path_regex, handler_func>> routes_;
 	bool            pretty_json_;
 };
 
