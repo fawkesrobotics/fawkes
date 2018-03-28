@@ -95,9 +95,7 @@ InterfaceData::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	v.AddMember("readers", v_readers, allocator);
 	if (data_) {
-		rapidjson::Value v_data;
-		v_data.SetString(*data_, allocator);
-		v.AddMember("data", v_data, allocator);
+		v.AddMember("data", *data_, allocator);
 	}
 	if (timestamp_) {
 		rapidjson::Value v_timestamp;
@@ -143,8 +141,10 @@ InterfaceData::from_json_value(const rapidjson::Value& d)
 			readers_.push_back(v.GetString());
 		}	
 	}	
-	if (d.HasMember("data") && d["data"].IsString()) {
-		data_ = d["data"].GetString();
+	if (d.HasMember("data") && d["data"].IsObject()) {
+		std::shared_ptr<rapidjson::Document> d_data =
+		  std::make_shared<rapidjson::Document>();
+		d_data->CopyFrom(d["data"], d_data->GetAllocator());
 	}
 	if (d.HasMember("timestamp") && d["timestamp"].IsString()) {
 		timestamp_ = d["timestamp"].GetString();

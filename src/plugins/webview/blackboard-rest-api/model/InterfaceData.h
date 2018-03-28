@@ -198,7 +198,7 @@ class InterfaceData
   /** Get data value.
    * @return data value
    */
-	std::optional<std::string>
+	std::shared_ptr<rapidjson::Document>
  data() const
 	{
 		return data_;
@@ -207,7 +207,7 @@ class InterfaceData
 	/** Set data value.
 	 * @param data new value
 	 */
-	void set_data(const std::string& data)
+	void set_data(const std::shared_ptr<rapidjson::Document>& data)
 	{
 		data_ = data;
 	}
@@ -240,7 +240,7 @@ class InterfaceData
  writer_;
 	std::vector<std::string>
  readers_;
-	std::optional<std::string>
+	std::shared_ptr<rapidjson::Document>
  data_;
 	std::optional<std::string>
  timestamp_;

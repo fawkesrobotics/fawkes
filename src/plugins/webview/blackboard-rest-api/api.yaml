@@ -44,7 +44,7 @@ paths:
         '400':
           description: bad input parameter
 
-  /blackboard/interfaces/info/{id+}:
+  /blackboard/interfaces/{type}/{id+}:
     get:
       tags:
       - public
@@ -52,6 +52,13 @@ paths:
       operationId: get_interface_info
       description: Get information about a specific interface.
       parameters:
+        - name: type
+          in: path
+          description: |
+            Type of interface to receive.
+          required: true
+          schema:
+            type: string
         - name: id
           in: path
           description: |
@@ -75,7 +82,7 @@ paths:
         '400':
           description: bad input parameter
 
-  /blackboard/interfaces/data/{id+}:
+  /blackboard/interfaces/{type}/{id+}/data:
     get:
       tags:
       - public
@@ -83,6 +90,13 @@ paths:
       operationId: get_interface_data
       description: Get data of a specific interface.
       parameters:
+        - name: type
+          in: path
+          description: |
+            Type of interface to receive.
+          required: true
+          schema:
+            type: string
         - name: id
           in: path
           description: |
@@ -200,8 +214,7 @@ components:
           items:
             type: string
         data:
-          type: string
-          format: json
+          type: object
         timestamp:
           type: string
           format: date-time

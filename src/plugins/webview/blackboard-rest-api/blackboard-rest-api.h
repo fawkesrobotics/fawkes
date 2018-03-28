@@ -28,8 +28,10 @@
 #include <webview/rest_api.h>
 #include <webview/rest_array.h>
 #include <interface/field_iterator.h>
+#include <interface/interface_info.h>
 
 #include "model/InterfaceInfo.h"
+#include "model/InterfaceData.h"
 
 #include <map>
 #include <string>
@@ -54,9 +56,18 @@ class BlackboardRestApi
 	WebviewRestArray<InterfaceInfo>
 		cb_list_interfaces(fawkes::WebviewRestParams& params);
 
+	InterfaceInfo
+		cb_get_interface_info(fawkes::WebviewRestParams& params);
+
+	InterfaceData
+		cb_get_interface_data(fawkes::WebviewRestParams& params);
+
 	std::vector<std::shared_ptr<InterfaceFieldType>>
 		gen_fields(fawkes::InterfaceFieldIterator begin,
 		           fawkes::InterfaceFieldIterator end);
+
+	InterfaceInfo gen_interface_info(const fawkes::InterfaceInfo &ii);
+	InterfaceData gen_interface_data(fawkes::Interface *iface, bool pretty);
 
  private:
 	fawkes::WebviewRestApi        *rest_api_;
