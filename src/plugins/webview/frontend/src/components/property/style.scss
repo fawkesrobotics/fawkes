@@ -5,9 +5,14 @@
 
 @import '../../variables';
 
-.ff-property-container {
-  margin: (.75 * $baseline-grid) (5 * $baseline-grid) (.75 * $baseline-grid) 0;
+.ff-property-container-horizontal {
+		margin: (.75 * $baseline-grid) (5 * $baseline-grid) (.75 * $baseline-grid) 0;
 }
+
+.ff-property-container-vertical {
+		margin: 0 (.75 * $baseline-grid);
+}
+
 
 .ff-property-label {
   font-size: $caption-font-size-base;
@@ -17,5 +22,5 @@
 .ff-property-value {
   font-size: $title-font-size-base;
   margin-bottom: $baseline-grid;
-  word-break: break-all;
+  word-break: normal;
 }
