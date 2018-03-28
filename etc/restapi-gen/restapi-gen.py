@@ -186,7 +186,7 @@ def filter_path_substargs(path, op, replacement_pattern):
 		for p in op['parameters']:
 			if p['in'] == 'path':
 				replace_by = replacement_pattern.replace('$$', filter_sanitize(p['name']))
-				path = path.replace('{%s}' % p['name'], replace_by)
+				path = re.sub('\{%s\+?\}' % p['name'], replace_by, path)
 	return path	
 
 def filter_regex_replace(value='', pattern='', replacement=''):
