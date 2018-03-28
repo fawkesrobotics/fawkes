@@ -54,10 +54,10 @@ SkillerRestApi::init()
 
 	rest_api_ = new WebviewRestApi("skiller", logger);
 	rest_api_->add_handler<WebviewRestArray<SkillInfo>>
-		(WebRequest::METHOD_GET, "skills",
+		(WebRequest::METHOD_GET, "/skills",
 		 std::bind(&SkillerRestApi::cb_list_skills, this, std::placeholders::_1));
 	rest_api_->add_handler<Skill>
-		(WebRequest::METHOD_GET, "skills/{id}",
+		(WebRequest::METHOD_GET, "/skills/{id}",
 		 std::bind(&SkillerRestApi::cb_get_skill, this, std::placeholders::_1));
 	webview_rest_api_manager->register_api(rest_api_);
 }
