@@ -55,28 +55,28 @@ ClipsExecutiveRestApi::init()
 
 	rest_api_ = new WebviewRestApi("clips-executive", logger);
 	rest_api_->add_handler<WebviewRestArray<Goal>>
-		(WebRequest::METHOD_GET, "goals",
+		(WebRequest::METHOD_GET, "/goals",
 		 std::bind(&ClipsExecutiveRestApi::cb_list_goals, this, std::placeholders::_1));
 	rest_api_->add_handler<Goal>
-		(WebRequest::METHOD_GET, "goals/{id}",
+		(WebRequest::METHOD_GET, "/goals/{id}",
 		 std::bind(&ClipsExecutiveRestApi::cb_get_goal, this, std::placeholders::_1));
 	rest_api_->add_handler<WebviewRestArray<DomainOperator>>
-		(WebRequest::METHOD_GET, "domain-operators",
+		(WebRequest::METHOD_GET, "/domain-operators",
 		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_operators, this, std::placeholders::_1));
 	rest_api_->add_handler<WebviewRestArray<DomainObject>>
-		(WebRequest::METHOD_GET, "domain-objects",
+		(WebRequest::METHOD_GET, "/domain-objects",
 		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_objects, this, std::placeholders::_1));
 	rest_api_->add_handler<WebviewRestArray<DomainPredicate>>
-		(WebRequest::METHOD_GET, "domain-predicates",
+		(WebRequest::METHOD_GET, "/domain-predicates",
 		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_predicates, this, std::placeholders::_1));
 	rest_api_->add_handler<WebviewRestArray<DomainFact>>
-		(WebRequest::METHOD_GET, "domain-facts",
+		(WebRequest::METHOD_GET, "/domain-facts",
 		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_facts, this, std::placeholders::_1));
 	rest_api_->add_handler<WebviewRestArray<Plan>>
-		(WebRequest::METHOD_GET, "plans",
+		(WebRequest::METHOD_GET, "/plans",
 		 std::bind(&ClipsExecutiveRestApi::cb_list_plans, this, std::placeholders::_1));
 	rest_api_->add_handler<Plan>
-		(WebRequest::METHOD_GET, "plans/{goal-id}/{id}",
+		(WebRequest::METHOD_GET, "/plans/{goal-id}/{id}",
 		 std::bind(&ClipsExecutiveRestApi::cb_get_plan, this, std::placeholders::_1));
 	webview_rest_api_manager->register_api(rest_api_);
 }
