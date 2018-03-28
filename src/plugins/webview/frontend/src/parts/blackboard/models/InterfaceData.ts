@@ -21,7 +21,7 @@ export interface InterfaceData
 	type: string;
 	writer?: string;
 	readers?: Array<string>;
-	data: string;
+	data: object;
 	timestamp: string;
 }
 

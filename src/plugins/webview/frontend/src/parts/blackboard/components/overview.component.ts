@@ -18,6 +18,7 @@ export class BlackboardOverviewComponent implements OnInit {
 
   loading = false;
   auto_refresh_subscription = null;
+  selected_interfaces = [];
   interfaces = null;
   zero_message = "No graph has been retrieved";
   
@@ -31,6 +32,52 @@ export class BlackboardOverviewComponent implements OnInit {
   keys(obj) {
     return Object.keys(obj);
   }
+
+  indexof_selected_interface(hash: string, id: string)
+  {
+    return this.selected_interfaces.findIndex(
+      (element) => (element[0] === hash) && (element[1] === id)
+    );
+  }
+
+  select_interface(hash: string, id: string)
+  {
+    let index = this.indexof_selected_interface(hash, id);
+    if (index == -1) {
+      this.selected_interfaces.push([hash, id])
+    }
+    this.refresh_data(hash, id);
+  }
+
+  unselect_interface(hash: string, id: string)
+  {
+    let index = this.indexof_selected_interface(hash, id);
+    if (index >= 0) {
+      this.selected_interfaces.splice(index, 1);
+    }
+  }
+
+  refresh_data(hash: string, id: string)
+  {
+    if (! this.interfaces[hash] || ! this.interfaces[hash].instances[id]) {
+      return;
+    }
+    this.interfaces[hash].instances[id].loading = true;
+    this.zero_message = "Retrieving interface data";
+
+    let type = this.interfaces[hash].type
+
+    this.api_service.get_interface_data(type, id).subscribe(
+      (interface_data) => {
+        this.interfaces[hash].instances[id].data = interface_data
+        this.interfaces[hash].instances[id].loading = false;
+      },
+      (err) => {
+        this.interfaces[hash].instances[id].enabled = false;
+        this.interfaces[hash].instances[id].loading = false;
+      }
+    );
+  }
   
   refresh()
   {
@@ -39,12 +86,35 @@ export class BlackboardOverviewComponent implements OnInit {
 
     this.api_service.list_interfaces().subscribe(
       (interfaces) => {
+        let updated = []
         let ifs = {}
+        if (this.interfaces) {
+          ifs = this.interfaces;
+        }
         for (let i of interfaces) {
-          if (ifs[i.type]) {
-            ifs[i.type].push(i);
+          if (ifs[i.hash]) {
+            if (ifs[i.hash].instances[i.id]) {
+              ifs[i.hash].instances[i.id].info = i;
+            } else {
+              ifs[i.hash].instances[i.id] = {info: i, data: null, loading: false};
+            }
           } else {
-            ifs[i.type] = [i];
+            let instances = {}
+            instances[i.id] = {info: i, data: null, loading: false};
+            ifs[i.hash] = {"type": i.type, instances: instances};
+          }
+          updated.push([i.hash, i.id]);
+        }
+        for (let hash of Object.keys(ifs)) {
+          for (let id of Object.keys(ifs[hash].instances)) {
+            let index = updated.findIndex(
+              (element) => (element[0] === hash) && (element[1] === id));
+            let enabled = (index >= 0);
+            let index_selected = this.indexof_selected_interface(hash, id);
+            if (index_selected >= 0 && enabled && ! ifs[hash].instances[id].enabled) {
+              this.refresh_data(hash, id);
+            }
+            ifs[hash].instances[id].enabled = enabled;
           }
         }
         this.interfaces = ifs;
@@ -88,5 +158,4 @@ export class BlackboardOverviewComponent implements OnInit {
       this.enable_autorefresh();
     }
   }
-
 }

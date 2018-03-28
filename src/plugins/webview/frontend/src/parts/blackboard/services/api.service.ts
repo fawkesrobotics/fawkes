@@ -37,26 +37,32 @@ export class BlackboardApiService
     return this.http.get<InterfaceInfo[]>(`${this.config.get('apiurl')}/blackboard/interfaces`, options);
 	}
 
-  public get_interface_info(id: string, pretty?: boolean): Observable<InterfaceInfo>
+  public get_interface_info(type: string, id: string, pretty?: boolean): Observable<InterfaceInfo>
   {
+    if (type === null || type == undefined) {
+      throw new Error("Required parameter type is null or undefined (get_interface_info)");
+    }
     if (id === null || id == undefined) {
       throw new Error("Required parameter id is null or undefined (get_interface_info)");
     }
     let headers = new HttpHeaders();
     headers = headers.set('Accept', 'application/json');
     let options = { headers: headers }
-    return this.http.get<InterfaceInfo>(`${this.config.get('apiurl')}/blackboard/interfaces/info/{id+}`, options);
+    return this.http.get<InterfaceInfo>(`${this.config.get('apiurl')}/blackboard/interfaces/${encodeURIComponent(String(type))}/${encodeURIComponent(String(id))}`, options);
 	}
 
-  public get_interface_data(id: string, pretty?: boolean): Observable<InterfaceData>
+  public get_interface_data(type: string, id: string, pretty?: boolean): Observable<InterfaceData>
   {
+    if (type === null || type == undefined) {
+      throw new Error("Required parameter type is null or undefined (get_interface_data)");
+    }
     if (id === null || id == undefined) {
       throw new Error("Required parameter id is null or undefined (get_interface_data)");
     }
     let headers = new HttpHeaders();
     headers = headers.set('Accept', 'application/json');
     let options = { headers: headers }
-    return this.http.get<InterfaceData>(`${this.config.get('apiurl')}/blackboard/interfaces/data/{id+}`, options);
+    return this.http.get<InterfaceData>(`${this.config.get('apiurl')}/blackboard/interfaces/${encodeURIComponent(String(type))}/${encodeURIComponent(String(id))}/data`, options);
 	}
 
 }
