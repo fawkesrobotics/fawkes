@@ -43,7 +43,10 @@ using namespace fawkes;
 WebviewPlugin::WebviewPlugin(Configuration *config)
   : Plugin(config)
 {
-  thread_list.push_back(new WebviewThread());
+	bool enable_thread_pool =
+		config->get_bool("/webview/thread-pool/enable");
+
+  thread_list.push_back(new WebviewThread(enable_thread_pool));
   thread_list.push_back(new BlackboardRestApi());
 }
 

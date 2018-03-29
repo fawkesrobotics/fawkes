@@ -71,12 +71,18 @@ const char *WebviewThread::IMAGE_URL_PREFIX = "/images";
  */
 
 
-/** Constructor. */
-WebviewThread::WebviewThread()
-  : Thread("WebviewThread", Thread::OPMODE_CONTINUOUS),
+/** Constructor.
+ * @param enable_tp true to enable thread pool setting the thread to
+ * wait-for-wakeup mode, falso to run request processing in this
+ * thread.
+ */
+WebviewThread::WebviewThread(bool enable_tp)
+	: Thread("WebviewThread", enable_tp ? Thread::OPMODE_WAITFORWAKEUP : Thread::OPMODE_CONTINUOUS),
     LoggerAspect(&__cache_logger)
 {
-  set_prepfin_conc_loop(true);
+	__cfg_use_thread_pool = enable_tp;
+
+	if (!enable_tp) set_prepfin_conc_loop(true);
 }
 
 
@@ -97,50 +103,54 @@ WebviewThread::init()
   __footer_gen = NULL;
   __dispatcher = NULL;
 
-  __cfg_use_ssl = false;
+  __cfg_use_tls = false;
   try {
-    __cfg_use_ssl = config->get_bool("/webview/use_ssl");
+    __cfg_use_tls = config->get_bool("/webview/tls/enable");
   } catch (Exception &e) {}
 
   __cfg_use_ipv4 = config->get_bool("/network/ipv4/enable");
   __cfg_use_ipv6 = config->get_bool("/network/ipv6/enable");
 
-  if (__cfg_use_ssl) {
-    __cfg_ssl_create = false;
+  if (__cfg_use_tls) {
+    __cfg_tls_create = false;
     try {
-      __cfg_ssl_create = config->get_bool("/webview/ssl_create");
+      __cfg_tls_create = config->get_bool("/webview/tls/create");
     } catch (Exception &e) {}
 
-    __cfg_ssl_key  = config->get_string("/webview/ssl_key");
-    __cfg_ssl_cert = config->get_string("/webview/ssl_cert");
+    __cfg_tls_key  = config->get_string("/webview/tls/key-file");
+    __cfg_tls_cert = config->get_string("/webview/tls/cert-file");
 
     try {
-      __cfg_ssl_cipher_suite = config->get_string("/webview/ssl_cipher_suite");
-      logger->log_debug(name(), "Using cipher suite %s", __cfg_ssl_cipher_suite.c_str());
+      __cfg_tls_cipher_suite = config->get_string("/webview/tls/cipher-suite");
+      logger->log_debug(name(), "Using cipher suite %s", __cfg_tls_cipher_suite.c_str());
     } catch (Exception &e) {}
 
-    if (__cfg_ssl_key[0] != '/')
-      __cfg_ssl_key = std::string(CONFDIR"/") + __cfg_ssl_key;
+    if (__cfg_tls_key[0] != '/')
+      __cfg_tls_key = std::string(CONFDIR"/") + __cfg_tls_key;
 
-    if (__cfg_ssl_cert[0] != '/')
-      __cfg_ssl_cert = std::string(CONFDIR"/") + __cfg_ssl_cert;
+    if (__cfg_tls_cert[0] != '/')
+      __cfg_tls_cert = std::string(CONFDIR"/") + __cfg_tls_cert;
 
-    logger->log_debug(name(), "Key: %s  Cert: %s", __cfg_ssl_key.c_str(),
-		      __cfg_ssl_cert.c_str());
+    logger->log_debug(name(), "Key file: %s  Cert file: %s",
+                      __cfg_tls_key.c_str(), __cfg_tls_cert.c_str());
 
-    if (! File::exists(__cfg_ssl_key.c_str())) {
-      if (File::exists(__cfg_ssl_cert.c_str())) {
-	throw Exception("Key file %s does not exist, but certificate file %s "
-			"does", __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str());
-      } else if (__cfg_ssl_create) {
-	ssl_create(__cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str());
-      } else {
- 	throw Exception("Key file %s does not exist", __cfg_ssl_key.c_str());
-      }
-    } else if (! File::exists(__cfg_ssl_cert.c_str())) {
+    if (! File::exists(__cfg_tls_key.c_str())) {
+	    if (File::exists(__cfg_tls_cert.c_str())) {
+		    throw Exception("Key file %s does not exist, but certificate file %s "
+		                    "does", __cfg_tls_key.c_str(), __cfg_tls_cert.c_str());
+	    } else if (__cfg_tls_create) {
+		    tls_create(__cfg_tls_key.c_str(), __cfg_tls_cert.c_str());
+	    } else {
+		    throw Exception("Key file %s does not exist", __cfg_tls_key.c_str());
+	    }
+    } else if (! File::exists(__cfg_tls_cert.c_str())) {
       throw Exception("Certificate file %s does not exist, but key file %s "
-		      "does", __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str());
+		      "does", __cfg_tls_key.c_str(), __cfg_tls_cert.c_str());
     }
+  }
+
+  if (__cfg_use_thread_pool) {
+	  __cfg_num_threads = config->get_uint("/webview/thread-pool/num-threads");
   }
 
   __cfg_use_basic_auth = false;
@@ -175,19 +185,23 @@ WebviewThread::init()
 
 
   try {
-    if (__cfg_use_ssl) {
-      __webserver  = new WebServer(__cfg_port, __dispatcher,
-                                   __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str(),
-                                   __cfg_ssl_cipher_suite.empty() ? NULL : __cfg_ssl_cipher_suite.c_str(),
-                                   logger, __cfg_use_ipv4, __cfg_use_ipv6);
-    } else {
-      __webserver  = new WebServer(__cfg_port, __dispatcher, logger, __cfg_use_ipv4, __cfg_use_ipv6);
+	  __webserver  = new WebServer(__cfg_port, __dispatcher, logger);
+
+	  __webserver->setup_ipv(__cfg_use_ipv4, __cfg_use_ipv6);
+
+    if (__cfg_use_tls) {
+	    __webserver->setup_tls(__cfg_tls_key.c_str(), __cfg_tls_cert.c_str(),
+	                           __cfg_tls_cipher_suite.empty() ? NULL : __cfg_tls_cipher_suite.c_str());
+    }
+
+    if (__cfg_use_thread_pool) {
+	    __webserver->setup_thread_pool(__cfg_num_threads);
     }
 
     if (__cfg_use_basic_auth) {
       __user_verifier = new WebviewUserVerifier(config, logger);
       __webserver->setup_basic_auth(__cfg_basic_auth_realm.c_str(),
-				    __user_verifier);
+                                    __user_verifier);
     }
     __webserver->setup_request_manager(webview_request_manager);
 
@@ -203,8 +217,6 @@ WebviewThread::init()
     delete __dispatcher;
     throw;
   }
-
-
   __startpage_processor  = new WebviewStartPageRequestProcessor(&__cache_logger);
   // get all directories for the static processor
   std::vector<std::string> static_dirs = config->get_strings("/webview/static-dirs");
@@ -225,7 +237,7 @@ WebviewThread::init()
   __image_processor     = new WebviewImageRequestProcessor(IMAGE_URL_PREFIX, config,
 							   logger, thread_collector);
 #endif
-  
+
   webview_url_manager->register_baseurl("/", __startpage_processor);
   webview_url_manager->register_baseurl(STATIC_URL_PREFIX, __static_processor);
   webview_url_manager->register_baseurl(BLACKBOARD_URL_PREFIX, __blackboard_processor);
@@ -255,8 +267,9 @@ WebviewThread::init()
   } else if (__cfg_use_ipv6) {
 	  afs = "IPv6";
   }
+  __webserver->start();
   logger->log_info("WebviewThread", "Listening for HTTP%s connections on port %u (%s)",
-                   __cfg_use_ssl ? "S" : "", __cfg_port, afs.c_str());
+                   __cfg_use_tls ? "S" : "", __cfg_port, afs.c_str());
 
   service_publisher->publish_service(__webview_service);
   service_browser->watch_service("_http._tcp", __service_browse_handler);
@@ -302,6 +315,7 @@ WebviewThread::finalize()
   delete __blackboard_processor;
   delete __startpage_processor;
   delete __plugins_processor;
+  delete __rest_processor;
 #ifdef HAVE_TF
   delete __tf_processor;
 #endif
@@ -317,14 +331,14 @@ WebviewThread::finalize()
 void
 WebviewThread::loop()
 {
-  __webserver->process();
+	if (! __cfg_use_thread_pool) __webserver->process();
 }
 
 
 void
-WebviewThread::ssl_create(const char *ssl_key_file, const char *ssl_cert_file)
+WebviewThread::tls_create(const char *tls_key_file, const char *tls_cert_file)
 {
-  logger->log_info(name(), "Creating SSL key and certificate. "
+  logger->log_info(name(), "Creating TLS key and certificate. "
 		   "This may take a while...");
   HostInfo h;
 
@@ -332,9 +346,9 @@ WebviewThread::ssl_create(const char *ssl_key_file, const char *ssl_cert_file)
   if (asprintf(&cmd, "openssl req -new -x509 -batch -nodes -days 365 "
 	       "-subj \"/C=XX/L=World/O=Fawkes/CN=%s.local\" "
 	       "-out \"%s\" -keyout \"%s\" >/dev/null 2>&1",
-	       h.short_name(), ssl_cert_file, ssl_key_file) == -1)
+	       h.short_name(), tls_cert_file, tls_key_file) == -1)
   {
-    throw OutOfMemoryException("Webview/SSL: Could not generate OpenSSL string");
+    throw OutOfMemoryException("Webview/TLS: Could not generate OpenSSL string");
   }
 
   int status = system(cmd);

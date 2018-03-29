@@ -78,7 +78,7 @@ class WebviewThread
   public fawkes::WebviewAspect
 {
  public:
-  WebviewThread();
+  WebviewThread(bool enable_tp);
   ~WebviewThread();
 
   virtual void init();
@@ -92,7 +92,7 @@ class WebviewThread
   static const char *IMAGE_URL_PREFIX;
 
  private:
-  void ssl_create(const char *ssl_key_file, const char *ssl_cert_file);
+  void tls_create(const char *tls_key_file, const char *tls_cert_file);
 
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -121,14 +121,16 @@ class WebviewThread
   unsigned int __cfg_port;
   bool         __cfg_use_ipv4;
   bool         __cfg_use_ipv6;
-  bool         __cfg_use_ssl;
-  bool         __cfg_ssl_create;
-  std::string  __cfg_ssl_key;
-  std::string  __cfg_ssl_cert;
-  std::string  __cfg_ssl_cipher_suite;
+  bool         __cfg_use_tls;
+  bool         __cfg_tls_create;
+  std::string  __cfg_tls_key;
+  std::string  __cfg_tls_cert;
+  std::string  __cfg_tls_cipher_suite;
   bool         __cfg_use_basic_auth;
   std::string  __cfg_basic_auth_realm;
   std::string  __cfg_access_log;
+  bool         __cfg_use_thread_pool;
+  unsigned int __cfg_num_threads;
 
   fawkes::CacheLogger     __cache_logger;
   fawkes::NetworkService *__webview_service;
