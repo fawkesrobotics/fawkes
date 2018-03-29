@@ -3,7 +3,7 @@
  *  server.cpp - Web server encapsulation around libmicrohttpd
  *
  *  Created: Sun Aug 30 17:40:54 2009
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -52,108 +52,137 @@ namespace fawkes {
  * @param port TCP port to listen on
  * @param dispatcher dispatcher to call for requests
  * @param logger optional logger, used to output possible run-time problems
- * @param enable_ipv4 enable IPv4 support
- * @param enable_ipv6 enable IPv6 support
  */
-WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
-                     fawkes::Logger *logger,
-                     bool enable_ipv4, bool enable_ipv6)
+WebServer::WebServer(unsigned short int port,
+                     WebRequestDispatcher *dispatcher,
+                     fawkes::Logger *logger)
 {
   __port         = port;
   __dispatcher   = dispatcher;
   __logger       = logger;
   __request_manager = NULL;
 
-  __ssl_key_mem  = NULL;
-  __ssl_cert_mem = NULL;
+  __enable_ipv4 = true;
+  __enable_ipv6 = true;
 
+  __num_threads = 1;
+}
+
+/** Setup Transport Layer Security (encryption),
+ * @param key_pem_filepath path to PEM formatted file containing the key
+ * @param cert_pem_filepath path to PEM formatted file containing the certificate
+ * @param cipher_suite which cipers to use for SSL/TLS connections
+ * @return *this to allow for chaining
+ */
+WebServer &
+WebServer::setup_tls(const char *key_pem_filepath, const char *cert_pem_filepath,
+                     const char *cipher_suite)
+{
+	__tls_enabled  = true;
+	__tls_key_mem  = std::move(read_file(key_pem_filepath));
+	__tls_cert_mem = std::move(read_file(cert_pem_filepath));
+  if (cipher_suite == NULL) {
+	  __tls_cipher_suite = WEBVIEW_DEFAULT_CIPHERS;
+  } else {
+	  __tls_cipher_suite = cipher_suite;
+  }
+
+  return *this;
+}
+
+/** Setup protocols, i.e., IPv4 and/or IPv6.
+ * @param enable_ipv4 enable IPv4 support
+ * @param enable_ipv6 enable IPv6 support
+ * @return *this to allow for chaining
+ */
+WebServer &
+WebServer::setup_ipv(bool enable_ipv4, bool enable_ipv6)
+{
+	__enable_ipv4 = enable_ipv4;
+	__enable_ipv6 = enable_ipv6;
+
+  return *this;
+}
+
+/** Setup thread pool.
+ * This also enables epoll on Linux.
+ * @param num_threads number of threads in thread pool. If this equals
+ * one, thread pooling will be disabled and will process requests from
+ * within webview thread.
+ * @return *this to allow for chaining
+ */
+WebServer &
+WebServer::setup_thread_pool(unsigned int num_threads)
+{
+	__num_threads = num_threads;
+
+  return *this;
+}
+
+
+/** Start daemon and enable processing requests.
+ */
+void
+WebServer::start()
+{
   unsigned int flags = MHD_NO_FLAG;
 #if MHD_VERSION >= 0x00090280
-  if (enable_ipv4 && enable_ipv6) {
+  if (__enable_ipv4 && __enable_ipv6) {
 	  flags |= MHD_USE_DUAL_STACK;
-  } else if (enable_ipv6) {
+  } else if (__enable_ipv6) {
 	  flags |= MHD_USE_IPv6;
-  } else if (! enable_ipv4 && ! enable_ipv6) {
+  } else if (! __enable_ipv4 && ! __enable_ipv6) {
 	  throw fawkes::Exception("WebServer: neither IPv4 nor IPv6 enabled");
   }
 #endif
 
-  __daemon = MHD_start_daemon(flags,
-			      __port,
-			      NULL,
-			      NULL,
-			      WebRequestDispatcher::process_request_cb,
-			      (void *)__dispatcher,
-			      MHD_OPTION_NOTIFY_COMPLETED,
-			        WebRequestDispatcher::request_completed_cb, (void *)__dispatcher,
-			      MHD_OPTION_URI_LOG_CALLBACK,
-			        WebRequestDispatcher::uri_log_cb, (void *)__dispatcher,
-			      MHD_OPTION_END);
+  if (__tls_enabled) {
+	  flags |= MHD_USE_SSL;
+  }
+
+  if (__num_threads > 1) {
+#ifdef __linux__
+	  flags |= MHD_USE_EPOLL_LINUX_ONLY;
+#endif
+	  flags |= MHD_USE_SELECT_INTERNALLY;
+  }
+
+  size_t num_options = 3 + (__num_threads > 1 ? 1 : 0) + (__tls_enabled ? 3 : 0);
+
+  size_t cur_op = 0;
+  struct MHD_OptionItem ops[num_options];
+  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_NOTIFY_COMPLETED,
+                                  (intptr_t)WebRequestDispatcher::request_completed_cb,
+                                  (void *)__dispatcher };
+  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_URI_LOG_CALLBACK,
+                                  (intptr_t)WebRequestDispatcher::uri_log_cb,
+                                  (void *)__dispatcher };
+
+  if (__num_threads > 1) {
+	  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_THREAD_POOL_SIZE, __num_threads, NULL };
+  }
+
+  if (__tls_enabled) {
+	  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_HTTPS_MEM_KEY,
+	                                  (intptr_t)__tls_key_mem.c_str(), NULL };
+	  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_HTTPS_MEM_CERT,
+	                                  (intptr_t)__tls_cert_mem.c_str(), NULL };
+	  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_HTTPS_PRIORITIES,
+	                                  (intptr_t)__tls_cipher_suite.c_str(), NULL };
+  }
+
+  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_END, 0, NULL };
+
+  __daemon = MHD_start_daemon(flags, __port, NULL, NULL,
+                              WebRequestDispatcher::process_request_cb,
+                              (void *)__dispatcher,
+                              MHD_OPTION_ARRAY, ops,
+                              MHD_OPTION_END);
 
   if ( __daemon == NULL ) {
     throw fawkes::Exception("Could not start microhttpd");
   }
-
 }
-
-/** SSL constructor.
- * @param port TCP port to listen on
- * @param dispatcher dispatcher to call for requests
- * @param key_pem_filepath path to PEM formatted file containing the key
- * @param cert_pem_filepath path to PEM formatted file containing the certificate
- * @param cipher_suite which cipers to use for SSL/TLS connections
- * @param logger optional logger, used to output possible run-time problems
- * @param enable_ipv4 enable IPv4 support
- * @param enable_ipv6 enable IPv6 support
- */
-WebServer::WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
-                     const char *key_pem_filepath, const char *cert_pem_filepath,
-                     const char *cipher_suite, fawkes::Logger *logger,
-                     bool enable_ipv4, bool enable_ipv6)
-{
-  __port       = port;
-  __dispatcher = dispatcher;
-  __logger     = logger;
-  __request_manager = NULL;
-
-  __ssl_key_mem  = read_file(key_pem_filepath);
-  __ssl_cert_mem = read_file(cert_pem_filepath);
-  if (cipher_suite == NULL) {
-    cipher_suite = WEBVIEW_DEFAULT_CIPHERS;
-  }
-
-  unsigned int flags = MHD_USE_SSL;
-#if MHD_VERSION >= 0x00090280
-  if (enable_ipv4 && enable_ipv6) {
-	  flags |= MHD_USE_DUAL_STACK;
-  } else if (enable_ipv6) {
-	  flags |= MHD_USE_IPv6;
-  } else if (! enable_ipv4 && ! enable_ipv6) {
-	  throw fawkes::Exception("WebServer: neither IPv4 nor IPv6 enabled");
-  }
-#endif
-
-  __daemon = MHD_start_daemon(flags,
-			      __port,
-			      NULL,
-			      NULL,
-			      WebRequestDispatcher::process_request_cb,
-			      (void *)__dispatcher,
-			      MHD_OPTION_NOTIFY_COMPLETED,
-			        WebRequestDispatcher::request_completed_cb, (void *)__dispatcher,
-			      MHD_OPTION_URI_LOG_CALLBACK,
-			        WebRequestDispatcher::uri_log_cb, (void *)__dispatcher,
-			      MHD_OPTION_HTTPS_MEM_KEY,  __ssl_key_mem,
-			      MHD_OPTION_HTTPS_MEM_CERT, __ssl_cert_mem,
-			      MHD_OPTION_HTTPS_PRIORITIES, cipher_suite,
-			      MHD_OPTION_END);
-
-  if ( __daemon == NULL ) {
-    throw fawkes::Exception("Could not start microhttpd (SSL)");
-  }
-
-}
-
 
 /** Destructor. */
 WebServer::~WebServer()
@@ -165,17 +194,16 @@ WebServer::~WebServer()
   MHD_stop_daemon(__daemon);
   __daemon = NULL;
   __dispatcher = NULL;
-
-  if (__ssl_key_mem)   free(__ssl_key_mem);
-  if (__ssl_cert_mem)  free(__ssl_cert_mem);
 }
 
 
 /** Read file into memory.
  * @param filename file path
- * @return memory location of file content, free after done
+ * @return string with file content.
+ * Note that this expects reasonably small file sizes that can be held
+ * in memory completely, as is the case for TLS certificates.
  */
-char *
+std::string
 WebServer::read_file(const char *filename)
 {
   FILE *f = fopen(filename, "rb");
@@ -199,14 +227,12 @@ WebServer::read_file(const char *filename)
     throw Exception("File %s is unexpectedly large", filename);
   }
 
-  char *rv = (char *)malloc(size);
-  if (fread(rv, size, 1, f) != 1) {
+  std::string rv(size+1, 0);
+  if (fread(&rv[0], size, 1, f) != 1) {
     int terrno = errno;
     fclose(f);
-    free(rv);
     throw FileReadException(filename, terrno);
   }
-
   fclose(f);
 
   return rv;
@@ -216,33 +242,39 @@ WebServer::read_file(const char *filename)
 /** Setup basic authentication.
  * @param realm authentication realm to display to the user
  * @param verifier verifier to use for checking credentials
+ * @return *this to allow for chaining
  */
-void
+WebServer &
 WebServer::setup_basic_auth(const char *realm, WebUserVerifier *verifier)
 {
   __dispatcher->setup_basic_auth(realm, verifier);
+  return *this;
 }
 
 
 /** Setup access log.
  * @param filename access log file name
+ * @return *this to allow for chaining
  */
-void
+WebServer &
 WebServer::setup_access_log(const char *filename)
 {
   __dispatcher->setup_access_log(filename);
+  return *this;
 }
 
 
 /** Setup this server as request manager.
  * The registration will be cancelled automatically on destruction.
  * @param request_manager request manager to register with
+ * @return *this to allow for chaining
  */
-void
+WebServer &
 WebServer::setup_request_manager(WebRequestManager *request_manager)
 {
   request_manager->set_server(this);
   __request_manager = request_manager;
+return *this;
 }
 
 /** Get number of active requests.
@@ -265,11 +297,21 @@ WebServer::last_request_completion_time() const
 
 
 /** Process requests.
- * This method waits for new requests and processes them when received.
+ * This method waits for new requests and processes them when
+ * received. It is necessary to call this function if running the
+ * server in single thread mode, i.e., setup_thread_pool() has not
+ * been called or only for a single thread.  The function may always
+ * be called safely, even in thread pool mode. However, when called in
+ * thread pool mode, the function will always return immediately.
  */
 void
 WebServer::process()
 {
+	if (__num_threads > 1) {
+		// nothing to be done when using thread pool mode
+		return;
+	}
+
   fd_set read_fd, write_fd, except_fd;
   int max_fd = 0;
   FD_ZERO(&read_fd); FD_ZERO(&write_fd); FD_ZERO(&except_fd);

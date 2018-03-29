@@ -3,7 +3,7 @@
  *  server.h - Web server encapsulation around libmicrohttpd
  *
  *  Created: Sun Aug 30 17:38:37 2009
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -43,27 +43,26 @@ class WebRequestManager;
 class WebServer {
  public:
   WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
-            fawkes::Logger *logger = 0,
-            bool enable_ipv4 = true, bool enable_ipv6 = true);
-
-  WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
-	    const char *key_pem_filepath, const char *cert_pem_filepath,
-	    const char *cipher_suite = WEBVIEW_DEFAULT_CIPHERS,
-            fawkes::Logger *logger = 0,
-            bool enable_ipv4 = true, bool enable_ipv6 = true);
+            fawkes::Logger *logger = 0);
   ~WebServer();
 
-  void process();
+  WebServer &  setup_tls(const char *key_pem_filepath, const char *cert_pem_filepath,
+                         const char *cipher_suite = WEBVIEW_DEFAULT_CIPHERS);
+  WebServer &  setup_ipv(bool enable_ipv4, bool enable_ipv6);
+  WebServer &  setup_thread_pool(unsigned int num_threads);
+  
+  WebServer &  setup_basic_auth(const char *realm, WebUserVerifier *verifier);
+  WebServer &  setup_request_manager(WebRequestManager *request_manager);
+  WebServer &  setup_access_log(const char *filename);
 
-  void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
-  void setup_request_manager(WebRequestManager *request_manager);
-  void setup_access_log(const char *filename);
+  void start();
+  void process();
 
   unsigned int active_requests() const;
   Time last_request_completion_time() const;
 
  private:
-  static char * read_file(const char *filename);
+  std::string read_file(const char *filename);
 
  private:
   struct MHD_Daemon    *__daemon;
@@ -73,8 +72,14 @@ class WebServer {
 
   unsigned short int    __port;
 
-  char                 *__ssl_key_mem;
-  char                 *__ssl_cert_mem;
+  bool                  __tls_enabled;
+  std::string           __tls_key_mem;
+  std::string           __tls_cert_mem;
+  std::string           __tls_cipher_suite;
+
+  bool                  __enable_ipv4;
+  bool                  __enable_ipv6;
+  unsigned int          __num_threads;
 };
 
 } // end namespace fawkes
