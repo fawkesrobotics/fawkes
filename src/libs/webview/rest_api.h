@@ -24,6 +24,7 @@
 
 #include <webview/request.h>
 #include <webview/reply.h>
+#include <webview/router.h>
 
 #include <core/exception.h>
 #include <logging/logger.h>
@@ -205,7 +206,7 @@ class WebviewRestApi
 	 */
 	void add_handler(WebRequest::Method method, std::string path, handler_func handler)
 	{
-		routes_.push_back(std::make_tuple(method, path, gen_regex(path), handler));
+		router_.add(method, path, handler);
 	}
 
 	/** Add handler function.
@@ -218,31 +219,31 @@ class WebviewRestApi
 	add_handler(WebRequest::Method method, std::string path,
 		            std::function<O (I, WebviewRestParams &)> handler)
 	{
-		routes_.push_back(std::make_tuple(method, path, gen_regex(path),
-		                                  [this, handler](const std::string &body, WebviewRestParams& m)
-		                                  -> std::unique_ptr<WebviewRestReply>
-		                                  {
-			                                  I input;
-			                                  input.from_json(body);
-			                                  try {
-				                                  O output{handler(input, m)};
-				                                  try {
-					                                  output.validate();
-				                                  } catch (std::runtime_error &e) {
-					                                  logger_->log_warn(("RestAPI|" + name_).c_str(), "%s", e.what());
-				                                  }
-				                                  return std::make_unique<WebviewRestReply>
-					                                  (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
-			                                  } catch (WebviewRestException &e) {
-				                                  return std::make_unique<WebviewRestReply>
-					                                  (e.code(), e.what_no_backtrace());
-			                                  } catch (Exception &e) {
-				                                  auto r = std::make_unique<WebviewRestReply>
-					                                  (WebReply::HTTP_INTERNAL_SERVER_ERROR);
-				                                  r->append_body("Execution failed: %s", e.what_no_backtrace());
-				                                  return r;
-			                                  }
-		                                   }));
+		router_.add(method, path,
+		            [this, handler](const std::string &body, WebviewRestParams& m)
+		            -> std::unique_ptr<WebviewRestReply>
+		            {
+			            I input;
+			            input.from_json(body);
+			            try {
+				            O output{handler(input, m)};
+				            try {
+					            output.validate();
+				            } catch (std::runtime_error &e) {
+					            logger_->log_warn(("RestAPI|" + name_).c_str(), "%s", e.what());
+				            }
+				            return std::make_unique<WebviewRestReply>
+					            (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
+			            } catch (WebviewRestException &e) {
+				            return std::make_unique<WebviewRestReply>
+					            (e.code(), e.what_no_backtrace());
+			            } catch (Exception &e) {
+				            auto r = std::make_unique<WebviewRestReply>
+					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
+				            r->append_body("Execution failed: %s", e.what_no_backtrace());
+				            return r;
+			            }
+		            });
 	}
 
 	/** Add handler function.
@@ -254,24 +255,24 @@ class WebviewRestApi
 	void add_handler(WebRequest::Method method, std::string path,
 	                 std::function<std::string (I, WebviewRestParams &)> handler)
 	{
-		routes_.push_back(std::make_tuple(method, path, gen_regex(path),
-		                                  [this, handler](const std::string &body, WebviewRestParams& m)
-		                                  -> std::unique_ptr<WebviewRestReply>
-		                                  {
-			                                  I input;
-			                                  input.from_json(body);
-			                                  try {
-				                                  return std::make_unique<WebviewRestReply>
-					                                  (WebReply::HTTP_OK, handler(input, m));
-			                                  } catch (WebviewRestException &e) {
-				                                  return std::make_unique<WebviewRestReply>
-					                                  (e.code(), e.what_no_backtrace());
-			                                  } catch (Exception &e) {
-				                                  return std::make_unique<WebviewRestReply>
-					                                  (WebReply::HTTP_INTERNAL_SERVER_ERROR,
-					                                   "Execution failed: %s", e.what_no_backtrace());
-			                                  }
-		                                  }));
+		router_.add(method, path,
+		            [this, handler](const std::string &body, WebviewRestParams& m)
+		            -> std::unique_ptr<WebviewRestReply>
+		            {
+			            I input;
+			            input.from_json(body);
+			            try {
+				            return std::make_unique<WebviewRestReply>
+					            (WebReply::HTTP_OK, handler(input, m));
+			            } catch (WebviewRestException &e) {
+				            return std::make_unique<WebviewRestReply>
+					            (e.code(), e.what_no_backtrace());
+			            } catch (Exception &e) {
+				            return std::make_unique<WebviewRestReply>
+					            (WebReply::HTTP_INTERNAL_SERVER_ERROR,
+					             "Execution failed: %s", e.what_no_backtrace());
+			            }
+		            });
 	}
 
 	/** Add handler function.
@@ -283,49 +284,40 @@ class WebviewRestApi
 	void add_handler(WebRequest::Method method, std::string path,
 	                 std::function<O (WebviewRestParams &)> handler)
 	{
-		routes_.push_back(std::make_tuple(method, path, gen_regex(path),
-		                                  [this, handler](const std::string &body, WebviewRestParams& m)
-		                                  -> std::unique_ptr<WebviewRestReply>
-		                                  {
-			                                  try {
-				                                  O output{handler(m)};
-				                                  try {
-					                                  output.validate();
-				                                  } catch (std::runtime_error &e) {
-					                                  logger_->log_warn(("RestAPI|" + name_).c_str(), "%s", e.what());
-				                                  }
-				                                  return std::make_unique<WebviewRestReply>
-					                                  (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
-			                                  } catch (WebviewRestException &e) {
-				                                  return std::make_unique<WebviewRestReply>
-					                                  (e.code(), e.what_no_backtrace());
-			                                  } catch (Exception &e) {
-				                                  auto r = std::make_unique<WebviewRestReply>
-					                                  (WebReply::HTTP_INTERNAL_SERVER_ERROR);
-				                                  r->append_body("Execution failed: %s", e.what_no_backtrace());
-				                                  return r;
-			                                  }
-		                                  }));
+		router_.add(method, path,
+		            [this, handler](const std::string &body, WebviewRestParams& m)
+		            -> std::unique_ptr<WebviewRestReply>
+		            {
+			            try {
+				            O output{handler(m)};
+				            try {
+					            output.validate();
+				            } catch (std::runtime_error &e) {
+					            logger_->log_warn(("RestAPI|" + name_).c_str(), "%s", e.what());
+				            }
+				            return std::make_unique<WebviewRestReply>
+					            (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
+			            } catch (WebviewRestException &e) {
+				            return std::make_unique<WebviewRestReply>
+					            (e.code(), e.what_no_backtrace());
+			            } catch (Exception &e) {
+				            auto r = std::make_unique<WebviewRestReply>
+					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
+				            r->append_body("Execution failed: %s", e.what_no_backtrace());
+				            return r;
+			            }
+		            });
 	}
 
 	WebReply *
-		process_request(const WebRequest *request, const std::string & rest_url);
+		process_request(const WebRequest *request, const std::string &rest_url);
 
 	void set_pretty_json(bool pretty);
 
  private:
-	typedef std::pair<std::regex, std::vector<std::string>> path_regex;
-
-	std::pair<std::regex, std::vector<std::string>>
-		gen_regex(const std::string &  path);
-
-	bool path_match(const std::string & url, const path_regex &path_re,
-	                WebviewRestParams& params);
-	
- private:
 	std::string     name_;
 	fawkes::Logger *logger_;
-	std::vector<std::tuple<WebRequest::Method, std::string, path_regex, handler_func>> routes_;
+	WebviewRouter<handler_func> router_;
 	bool            pretty_json_;
 };
 
