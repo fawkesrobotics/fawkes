@@ -71,7 +71,7 @@ WebviewRESTRequestProcessor::process_request(const fawkes::WebRequest *request)
 		return NULL;
 	}
 
-	std::string rest_url = request->url().substr(baseurl_.length() + 1);
+	std::string rest_url = request->url().substr(baseurl_.length());
 	std::vector<std::string> rest_url_parts{str_split(rest_url, '/')};
 
 	if (rest_url_parts.empty()) {
@@ -92,7 +92,7 @@ WebviewRESTRequestProcessor::process_request(const fawkes::WebRequest *request)
 		reply->add_header("Access-Control-Allow-Origin", "*");
 		return reply;
 	} catch (Exception &e) {
-		logger_->log_error("WebRESTProc", "REST API '%s' failed, exception follosws", rest_api.c_str());
+		logger_->log_error("WebRESTProc", "REST API '%s' failed, exception follows", rest_api.c_str());
 		logger_->log_error("WebRESTProc", e);
 		return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, "REST API '%s': %s",
 		                             rest_api.c_str(), e.what_no_backtrace());

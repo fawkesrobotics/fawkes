@@ -10,26 +10,34 @@ webview:
   # True to allow client side caching. Typically you want this disabled
   # to force proper reloads each time with fresh data.
   client_side_caching: false
-  
-  # Encrypt connections?
-  use_ssl: false
 
-  # Create self-signed certificate if key and certificate files not found?
-  ssl_create: true
+  tls:
+    # Encrypt connections?
+    enable: false
 
-  # Key file name, if not absolute relative to config dir.
-  ssl_key: webview.key
+    # Create self-signed certificate if key and certificate files not found?
+    create: true
 
-  # Certificate file name, if not absolute relative to config dir.
-  ssl_cert: webview.crt
+    # Key file name, if not absolute relative to config dir.
+    key-file: webview.key
 
-  # Default suite allowing only secure ciphers with 128 bits or more for
-  # the stream cipher. Only TLS 1.2 is allowed. Older versions or SSLv3
-  # are disabled.
-  # The cipher suite is documented as GnuTLS priority strings at
-  # http://gnutls.org/manual/html_node/Priority-Strings.html
-  ssl_cipher_suite: SECURE128:-VERS-SSL3.0:-VERS-TLS-ALL:+VERS-TLS1.2
-  
+    # Certificate file name, if not absolute relative to config dir.
+    cert-file: webview.crt
+
+    # Default suite allowing only secure ciphers with 128 bits or more for
+    # the stream cipher. Only TLS 1.2 is allowed. Older versions or SSLv3
+    # are disabled.
+    # The cipher suite is documented as GnuTLS priority strings at
+    # http://gnutls.org/manual/html_node/Priority-Strings.html
+    cipher-suite: SECURE128:-VERS-SSL3.0:-VERS-TLS-ALL:+VERS-TLS1.2
+
+  # libmicrohttpd thread pool settings
+  # Using a thread pool allows for the concurrent processing of
+  # incoming requests and should generally be enabled.
+  thread-pool:
+    enable: true
+    num-threads: 8
+
   # Use basic authentication?
   use_basic_auth: false
 
