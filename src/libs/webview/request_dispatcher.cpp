@@ -430,11 +430,10 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   }
 #endif
 
-  std::string surl = url;
   int ret;
 
   MutexLocker lock(__url_manager->mutex());
-  WebRequestProcessor *proc = __url_manager->find_processor(surl);
+  WebRequestProcessor *proc = __url_manager->find_processor(url);
 
   if (proc) {
     if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
@@ -468,7 +467,7 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
       ret = queue_static_reply(connection, request, &ereply);
     }
   } else {
-    if (surl == "/") {
+	  if (strcmp(url, "/") == 0) {
       WebPageReply preply("Fawkes", "<h1>Welcome to Fawkes.</h1><hr />");
       ret = queue_static_reply(connection, request, &preply);
     } else {
