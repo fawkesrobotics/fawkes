@@ -65,21 +65,21 @@ class WebServer {
   std::string read_file(const char *filename);
 
  private:
-  struct MHD_Daemon    *__daemon;
-  WebRequestDispatcher *__dispatcher;
-  WebRequestManager    *__request_manager;
-  fawkes::Logger       *__logger;
+  struct MHD_Daemon    *daemon_;
+  WebRequestDispatcher *dispatcher_;
+  WebRequestManager    *request_manager_;
+  fawkes::Logger       *logger_;
 
-  unsigned short int    __port;
+  unsigned short int    port_;
 
-  bool                  __tls_enabled;
-  std::string           __tls_key_mem;
-  std::string           __tls_cert_mem;
-  std::string           __tls_cipher_suite;
+  bool                  tls_enabled_;
+  std::string           tls_key_mem_;
+  std::string           tls_cert_mem_;
+  std::string           tls_cipher_suite_;
 
-  bool                  __enable_ipv4;
-  bool                  __enable_ipv6;
-  unsigned int          __num_threads;
+  bool                  enable_ipv4_;
+  bool                  enable_ipv6_;
+  unsigned int          num_threads_;
 };
 
 } // end namespace fawkes

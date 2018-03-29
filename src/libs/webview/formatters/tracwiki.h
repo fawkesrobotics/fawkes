@@ -40,7 +40,7 @@ class TracWikiHeadingFormatter
   virtual std::string format(std::string &text);
 
  private:
-  regex_t __re_heading;
+  regex_t re_heading_;
 };
 
 } // end namespace fawkes

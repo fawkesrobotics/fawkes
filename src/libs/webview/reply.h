@@ -114,10 +114,10 @@ class WebReply
   WebRequest *      get_request() const;
 
  private:
-  Code              __code;
-  HeaderMap         __headers;
-  static bool       __caching;
-  WebRequest       *__request;
+  Code              code_;
+  HeaderMap         headers_;
+  static bool       caching_;
+  WebRequest       *request_;
 };
 
 class DynamicWebReply : public WebReply

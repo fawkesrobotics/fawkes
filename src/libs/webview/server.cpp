@@ -57,15 +57,15 @@ WebServer::WebServer(unsigned short int port,
                      WebRequestDispatcher *dispatcher,
                      fawkes::Logger *logger)
 {
-  __port         = port;
-  __dispatcher   = dispatcher;
-  __logger       = logger;
-  __request_manager = NULL;
+  port_         = port;
+  dispatcher_   = dispatcher;
+  logger_       = logger;
+  request_manager_ = NULL;
 
-  __enable_ipv4 = true;
-  __enable_ipv6 = true;
+  enable_ipv4_ = true;
+  enable_ipv6_ = true;
 
-  __num_threads = 1;
+  num_threads_ = 1;
 }
 
 /** Setup Transport Layer Security (encryption),
@@ -78,13 +78,13 @@ WebServer &
 WebServer::setup_tls(const char *key_pem_filepath, const char *cert_pem_filepath,
                      const char *cipher_suite)
 {
-	__tls_enabled  = true;
-	__tls_key_mem  = std::move(read_file(key_pem_filepath));
-	__tls_cert_mem = std::move(read_file(cert_pem_filepath));
+	tls_enabled_  = true;
+	tls_key_mem_  = std::move(read_file(key_pem_filepath));
+	tls_cert_mem_ = std::move(read_file(cert_pem_filepath));
   if (cipher_suite == NULL) {
-	  __tls_cipher_suite = WEBVIEW_DEFAULT_CIPHERS;
+	  tls_cipher_suite_ = WEBVIEW_DEFAULT_CIPHERS;
   } else {
-	  __tls_cipher_suite = cipher_suite;
+	  tls_cipher_suite_ = cipher_suite;
   }
 
   return *this;
@@ -98,8 +98,8 @@ WebServer::setup_tls(const char *key_pem_filepath, const char *cert_pem_filepath
 WebServer &
 WebServer::setup_ipv(bool enable_ipv4, bool enable_ipv6)
 {
-	__enable_ipv4 = enable_ipv4;
-	__enable_ipv6 = enable_ipv6;
+	enable_ipv4_ = enable_ipv4;
+	enable_ipv6_ = enable_ipv6;
 
   return *this;
 }
@@ -114,7 +114,7 @@ WebServer::setup_ipv(bool enable_ipv4, bool enable_ipv6)
 WebServer &
 WebServer::setup_thread_pool(unsigned int num_threads)
 {
-	__num_threads = num_threads;
+	num_threads_ = num_threads;
 
   return *this;
 }
@@ -127,59 +127,59 @@ WebServer::start()
 {
   unsigned int flags = MHD_NO_FLAG;
 #if MHD_VERSION >= 0x00090280
-  if (__enable_ipv4 && __enable_ipv6) {
+  if (enable_ipv4_ && enable_ipv6_) {
 	  flags |= MHD_USE_DUAL_STACK;
-  } else if (__enable_ipv6) {
+  } else if (enable_ipv6_) {
 	  flags |= MHD_USE_IPv6;
-  } else if (! __enable_ipv4 && ! __enable_ipv6) {
+  } else if (! enable_ipv4_ && ! enable_ipv6_) {
 	  throw fawkes::Exception("WebServer: neither IPv4 nor IPv6 enabled");
   }
 #endif
 
-  if (__tls_enabled) {
+  if (tls_enabled_) {
 	  flags |= MHD_USE_SSL;
   }
 
-  if (__num_threads > 1) {
+  if (num_threads_ > 1) {
 #ifdef __linux__
 	  flags |= MHD_USE_EPOLL_LINUX_ONLY;
 #endif
 	  flags |= MHD_USE_SELECT_INTERNALLY;
   }
 
-  size_t num_options = 3 + (__num_threads > 1 ? 1 : 0) + (__tls_enabled ? 3 : 0);
+  size_t num_options = 3 + (num_threads_ > 1 ? 1 : 0) + (tls_enabled_ ? 3 : 0);
 
   size_t cur_op = 0;
   struct MHD_OptionItem ops[num_options];
   ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_NOTIFY_COMPLETED,
                                   (intptr_t)WebRequestDispatcher::request_completed_cb,
-                                  (void *)__dispatcher };
+                                  (void *)dispatcher_ };
   ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_URI_LOG_CALLBACK,
                                   (intptr_t)WebRequestDispatcher::uri_log_cb,
-                                  (void *)__dispatcher };
+                                  (void *)dispatcher_ };
 
-  if (__num_threads > 1) {
-	  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_THREAD_POOL_SIZE, __num_threads, NULL };
+  if (num_threads_ > 1) {
+	  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_THREAD_POOL_SIZE, num_threads_, NULL };
   }
 
-  if (__tls_enabled) {
+  if (tls_enabled_) {
 	  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_HTTPS_MEM_KEY,
-	                                  (intptr_t)__tls_key_mem.c_str(), NULL };
+	                                  (intptr_t)tls_key_mem_.c_str(), NULL };
 	  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_HTTPS_MEM_CERT,
-	                                  (intptr_t)__tls_cert_mem.c_str(), NULL };
+	                                  (intptr_t)tls_cert_mem_.c_str(), NULL };
 	  ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_HTTPS_PRIORITIES,
-	                                  (intptr_t)__tls_cipher_suite.c_str(), NULL };
+	                                  (intptr_t)tls_cipher_suite_.c_str(), NULL };
   }
 
   ops[cur_op++] = MHD_OptionItem{ MHD_OPTION_END, 0, NULL };
 
-  __daemon = MHD_start_daemon(flags, __port, NULL, NULL,
+  daemon_ = MHD_start_daemon(flags, port_, NULL, NULL,
                               WebRequestDispatcher::process_request_cb,
-                              (void *)__dispatcher,
+                              (void *)dispatcher_,
                               MHD_OPTION_ARRAY, ops,
                               MHD_OPTION_END);
 
-  if ( __daemon == NULL ) {
+  if ( daemon_ == NULL ) {
     throw fawkes::Exception("Could not start microhttpd");
   }
 }
@@ -187,13 +187,13 @@ WebServer::start()
 /** Destructor. */
 WebServer::~WebServer()
 {
-  if (__request_manager) {
-    __request_manager->set_server(NULL);
+  if (request_manager_) {
+    request_manager_->set_server(NULL);
   }
 
-  MHD_stop_daemon(__daemon);
-  __daemon = NULL;
-  __dispatcher = NULL;
+  MHD_stop_daemon(daemon_);
+  daemon_ = NULL;
+  dispatcher_ = NULL;
 }
 
 
@@ -247,7 +247,7 @@ WebServer::read_file(const char *filename)
 WebServer &
 WebServer::setup_basic_auth(const char *realm, WebUserVerifier *verifier)
 {
-  __dispatcher->setup_basic_auth(realm, verifier);
+  dispatcher_->setup_basic_auth(realm, verifier);
   return *this;
 }
 
@@ -259,7 +259,7 @@ WebServer::setup_basic_auth(const char *realm, WebUserVerifier *verifier)
 WebServer &
 WebServer::setup_access_log(const char *filename)
 {
-  __dispatcher->setup_access_log(filename);
+  dispatcher_->setup_access_log(filename);
   return *this;
 }
 
@@ -273,7 +273,7 @@ WebServer &
 WebServer::setup_request_manager(WebRequestManager *request_manager)
 {
   request_manager->set_server(this);
-  __request_manager = request_manager;
+  request_manager_ = request_manager;
 return *this;
 }
 
@@ -283,7 +283,7 @@ return *this;
 unsigned int
 WebServer::active_requests() const
 {
-  return __dispatcher->active_requests();
+  return dispatcher_->active_requests();
 }
 
 /** Get time when last request was completed.
@@ -292,7 +292,7 @@ WebServer::active_requests() const
 Time
 WebServer::last_request_completion_time() const
 {
-  return __dispatcher->last_request_completion_time();
+  return dispatcher_->last_request_completion_time();
 }
 
 
@@ -307,7 +307,7 @@ WebServer::last_request_completion_time() const
 void
 WebServer::process()
 {
-	if (__num_threads > 1) {
+	if (num_threads_ > 1) {
 		// nothing to be done when using thread pool mode
 		return;
 	}
@@ -315,15 +315,15 @@ WebServer::process()
   fd_set read_fd, write_fd, except_fd;
   int max_fd = 0;
   FD_ZERO(&read_fd); FD_ZERO(&write_fd); FD_ZERO(&except_fd);
-  if ( MHD_get_fdset(__daemon, &read_fd, &write_fd, &except_fd, &max_fd) != MHD_YES ) {
-    if (__logger)
-      __logger->log_warn("WebviewThread", "Could not get microhttpd fdsets");
+  if ( MHD_get_fdset(daemon_, &read_fd, &write_fd, &except_fd, &max_fd) != MHD_YES ) {
+    if (logger_)
+      logger_->log_warn("WebviewThread", "Could not get microhttpd fdsets");
     return;
   }
   select(max_fd + 1, &read_fd, &write_fd, &except_fd, NULL);
   Thread::CancelState old_state;
   Thread::set_cancel_state(Thread::CANCEL_DISABLED, &old_state);
-  MHD_run(__daemon);
+  MHD_run(daemon_);
   Thread::set_cancel_state(old_state);
 }
 

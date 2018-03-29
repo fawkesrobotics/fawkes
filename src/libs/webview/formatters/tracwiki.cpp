@@ -43,7 +43,7 @@ namespace fawkes {
 /** Constructor. */
 TracWikiHeadingFormatter::TracWikiHeadingFormatter()
 {
-  if ( regcomp(&__re_heading, "^(=+) (.*) \\1$", REG_EXTENDED) != 0 ) {
+  if ( regcomp(&re_heading_, "^(=+) (.*) \\1$", REG_EXTENDED) != 0 ) {
     throw Exception("Failed to compile heading regex");
   }
 
@@ -53,7 +53,7 @@ TracWikiHeadingFormatter::TracWikiHeadingFormatter()
 /** Destructor. */
 TracWikiHeadingFormatter::~TracWikiHeadingFormatter()
 {
-  regfree(&__re_heading);
+  regfree(&re_heading_);
 }
 
 
@@ -82,7 +82,7 @@ TracWikiHeadingFormatter::format(std::string &text)
 	rv += "</p>\n";
 	in_paragraph = false;
       }
-    } else if (regexec(&__re_heading, sl, num_matches, matches, 0) == 0) {
+    } else if (regexec(&re_heading_, sl, num_matches, matches, 0) == 0) {
       unsigned int h_depth = matches[1].rm_eo - matches[1].rm_so;
 
       if (in_paragraph) {

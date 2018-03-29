@@ -42,21 +42,21 @@ namespace fawkes {
  */
 
 /// Enable caching for this reply?
-bool WebReply::__caching = true;
+bool WebReply::caching_ = true;
 
 /** Constructor.
  * @param code HTTP response code
  */
 WebReply::WebReply(Code code)
 {
-  __code = code;
-  __request = NULL;
+  code_ = code;
+  request_ = NULL;
 
-  if (! __caching) {
+  if (! caching_) {
     // Headers to disable caching
-    __headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-    __headers["Pragma"] = "no-cache";
-    __headers["Expires"] = "0";
+    headers_["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    headers_["Pragma"] = "no-cache";
+    headers_["Expires"] = "0";
   }
 }
 
@@ -76,7 +76,7 @@ WebReply::~WebReply()
 void
 WebReply::set_caching(bool caching)
 {
-  __caching = caching;
+  caching_ = caching;
 }
 
 /** Get response code.
@@ -85,7 +85,7 @@ WebReply::set_caching(bool caching)
 WebReply::Code
 WebReply::code() const
 {
-  return __code;
+  return code_;
 }
 
 
@@ -96,7 +96,7 @@ WebReply::code() const
 void
 WebReply::add_header(std::string header, std::string content)
 {
-  __headers[header] = content;
+  headers_[header] = content;
 }
 
 
@@ -115,7 +115,7 @@ WebReply::add_header(std::string header_string)
     } else {
       content = header_string.substr(pos+1);
     }
-    __headers[header] = content;
+    headers_[header] = content;
   } else {
     throw Exception("Invalid header '%s'", header_string.c_str());
   }
@@ -128,7 +128,7 @@ WebReply::add_header(std::string header_string)
 const WebReply::HeaderMap &
 WebReply::headers() const
 {
-  return __headers;
+  return headers_;
 }
 
 
@@ -139,7 +139,7 @@ WebReply::headers() const
 WebRequest *
 WebReply::get_request() const
 {
-  return __request;
+  return request_;
 }
 
 
@@ -149,7 +149,7 @@ WebReply::get_request() const
 void
 WebReply::set_request(WebRequest *request)
 {
-  __request = request;
+  request_ = request;
 }
 
 /** @class DynamicWebReply <webview/reply.h>

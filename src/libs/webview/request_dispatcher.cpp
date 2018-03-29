@@ -73,24 +73,24 @@ WebRequestDispatcher::WebRequestDispatcher(WebUrlManager *url_manager,
 					   WebPageHeaderGenerator *headergen,
 					   WebPageFooterGenerator *footergen)
 {
-  __realm                 = NULL;
-  __access_log            = NULL;
-  __url_manager           = url_manager;
-  __page_header_generator = headergen;
-  __page_footer_generator = footergen;
-  __active_requests       = 0;
-  __active_requests_mutex = new Mutex();
-  __last_request_completion_time = new Time();
+  realm_                 = NULL;
+  access_log_            = NULL;
+  url_manager_           = url_manager;
+  page_header_generator_ = headergen;
+  page_footer_generator_ = footergen;
+  active_requests_       = 0;
+  active_requests_mutex_ = new Mutex();
+  last_request_completion_time_ = new Time();
 }
 
 
 /** Destructor. */
 WebRequestDispatcher::~WebRequestDispatcher()
 {
-  if (__realm)  free(__realm);
-  delete __active_requests_mutex;
-  delete __last_request_completion_time;
-  delete __access_log;
+  if (realm_)  free(realm_);
+  delete active_requests_mutex_;
+  delete last_request_completion_time_;
+  delete access_log_;
 }
 
 
@@ -105,12 +105,12 @@ WebRequestDispatcher::setup_basic_auth(const char *realm,
 				       WebUserVerifier *verifier)
 {
 #if MHD_VERSION >= 0x00090400
-  if (__realm)  free(__realm);
-  __realm = NULL;
-  __user_verifier = NULL;
+  if (realm_)  free(realm_);
+  realm_ = NULL;
+  user_verifier_ = NULL;
   if (realm && verifier) {
-    __realm = strdup(realm);
-    __user_verifier = verifier;
+    realm_ = strdup(realm);
+    user_verifier_ = verifier;
   }
 #else
   throw Exception("libmicrohttpd >= 0.9.4 is required for basic authentication, "
@@ -125,9 +125,9 @@ WebRequestDispatcher::setup_basic_auth(const char *realm,
 void
 WebRequestDispatcher::setup_access_log(const char *filename)
 {
-  delete __access_log;
-  __access_log = NULL;
-  __access_log = new WebviewAccessLog(filename);
+  delete access_log_;
+  access_log_ = NULL;
+  access_log_ = new WebviewAccessLog(filename);
 }
 
 /** Callback for new requests.
@@ -227,8 +227,8 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
   struct MHD_Response *response;
   WebPageReply *wpreply = dynamic_cast<WebPageReply *>(sreply);
   if (wpreply) {
-    wpreply->pack(__active_baseurl,
-		  __page_header_generator, __page_footer_generator);
+    wpreply->pack(active_baseurl_,
+		  page_header_generator_, page_footer_generator_);
   } else {
     sreply->pack();
   }
@@ -322,11 +322,11 @@ WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection * connection,
   sreply.set_request(request);
   struct MHD_Response *response = prepare_static_response(&sreply);
 
-  int rv = MHD_queue_basic_auth_fail_response(connection, __realm, response);
+  int rv = MHD_queue_basic_auth_fail_response(connection, realm_, response);
   MHD_destroy_response(response);
 #else
   sreply.add_header(MHD_HTTP_HEADER_WWW_AUTHENTICATE,
-		    (std::string("Basic realm=") + __realm).c_str());
+		    (std::string("Basic realm=") + realm_).c_str());
   
   int rv = queue_static_reply(connection, request, &sreply);
 #endif
@@ -405,9 +405,9 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
     // do not respond in the first round...
     request->setup(url, method, version, connection);
 
-    __active_requests_mutex->lock();
-    __active_requests += 1;
-    __active_requests_mutex->unlock();
+    active_requests_mutex_->lock();
+    active_requests_ += 1;
+    active_requests_mutex_->unlock();
 
     if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
       request->pp_ =
@@ -418,11 +418,11 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   }
 
 #if MHD_VERSION >= 0x00090400
-  if (__realm) {
+  if (realm_) {
     char *user, *pass = NULL;
     user = MHD_basic_auth_get_username_password(connection, &pass);
     if ( (user == NULL) || (pass == NULL) ||
-	 ! __user_verifier->verify_user(user, pass))
+	 ! user_verifier_->verify_user(user, pass))
     {
       return queue_basic_auth_fail(connection, request);
     }
@@ -432,8 +432,8 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 
   int ret;
 
-  MutexLocker lock(__url_manager->mutex());
-  WebRequestProcessor *proc = __url_manager->find_processor(url);
+  MutexLocker lock(url_manager_->mutex());
+  WebRequestProcessor *proc = url_manager_->find_processor(url);
 
   if (proc) {
     if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
@@ -482,11 +482,11 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 void
 WebRequestDispatcher::request_completed(WebRequest *request, MHD_RequestTerminationCode term_code)
 {
-  __active_requests_mutex->lock();
-  if (__active_requests >  0)  __active_requests -= 1;
-  __last_request_completion_time->stamp();
-  __active_requests_mutex->unlock();
-  if (__access_log)  __access_log->log(request);
+  active_requests_mutex_->lock();
+  if (active_requests_ >  0)  active_requests_ -= 1;
+  last_request_completion_time_->stamp();
+  active_requests_mutex_->unlock();
+  if (access_log_)  access_log_->log(request);
 }
 
 /** Get number of active requests.
@@ -495,8 +495,8 @@ WebRequestDispatcher::request_completed(WebRequest *request, MHD_RequestTerminat
 unsigned int
 WebRequestDispatcher::active_requests() const
 {
-  MutexLocker lock(__active_requests_mutex);
-  return __active_requests;
+  MutexLocker lock(active_requests_mutex_);
+  return active_requests_;
 }
 
 /** Get time when last request was completed.
@@ -505,8 +505,8 @@ WebRequestDispatcher::active_requests() const
 Time
 WebRequestDispatcher::last_request_completion_time() const
 {
-  MutexLocker lock(__active_requests_mutex);
-  return *__last_request_completion_time;
+  MutexLocker lock(active_requests_mutex_);
+  return *last_request_completion_time_;
 }
 
 } // end namespace fawkes

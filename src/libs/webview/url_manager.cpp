@@ -42,14 +42,14 @@ namespace fawkes {
 /** Constructor. */
 WebUrlManager::WebUrlManager()
 {
-  __mutex = new Mutex();
+  mutex_ = new Mutex();
 }
 
 
 /** Destructor. */
 WebUrlManager::~WebUrlManager()
 {
-  delete __mutex;
+  delete mutex_;
 }
 
 
@@ -63,12 +63,12 @@ void
 WebUrlManager::register_baseurl(const char *url_prefix,
                                 WebRequestProcessor *processor)
 {
-  MutexLocker lock(__mutex);
-  if (__processors.find(url_prefix) != __processors.end()) {
+  MutexLocker lock(mutex_);
+  if (processors_.find(url_prefix) != processors_.end()) {
 	  throw Exception("A processor for %s has already been registered",
 	                  url_prefix);
   }
-  __processors[url_prefix] = processor;
+  processors_[url_prefix] = processor;
 }
 
 
@@ -78,8 +78,8 @@ WebUrlManager::register_baseurl(const char *url_prefix,
 void
 WebUrlManager::unregister_baseurl(const char *url_prefix)
 {
-  MutexLocker lock(__mutex);
-  __processors.erase(url_prefix);
+  MutexLocker lock(mutex_);
+  processors_.erase(url_prefix);
 }
 
 /** Lock mutex and find processor.
@@ -92,11 +92,11 @@ WebUrlManager::unregister_baseurl(const char *url_prefix)
 WebRequestProcessor *
 WebUrlManager::find_processor(const std::string &url) const
 {
-  auto proc = std::find_if(__processors.begin(), __processors.end(),
+  auto proc = std::find_if(processors_.begin(), processors_.end(),
                            [&url](const auto &p) {
 	                           return url.find(p.first) == 0;
                            });
-  if (proc != __processors.end()) {
+  if (proc != processors_.end()) {
 	  return proc->second;
   } else {
 	  return NULL;
@@ -113,7 +113,7 @@ WebUrlManager::find_processor(const std::string &url) const
 Mutex *
 WebUrlManager::mutex()
 {
-  return __mutex;
+  return mutex_;
 }
 
 } // end namespace fawkes

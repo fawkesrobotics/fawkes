@@ -41,14 +41,14 @@ namespace fawkes {
 /** Constructor. */
 WebNavManager::WebNavManager()
 {
-  __mutex = new Mutex();
+  mutex_ = new Mutex();
 }
 
 
 /** Destructor. */
 WebNavManager::~WebNavManager()
 {
-  delete __mutex;
+  delete mutex_;
 }
 
 
@@ -60,12 +60,12 @@ WebNavManager::~WebNavManager()
 void
 WebNavManager::add_nav_entry(std::string baseurl, std::string name)
 {
-  MutexLocker lock(__mutex);
-  if (__nav_entries.find(baseurl) != __nav_entries.end()) {
+  MutexLocker lock(mutex_);
+  if (nav_entries_.find(baseurl) != nav_entries_.end()) {
     throw Exception("Navigation entry for %s has already been added",
 		    baseurl.c_str());
   }
-  __nav_entries[baseurl] = name;
+  nav_entries_[baseurl] = name;
 }
 
 
@@ -75,8 +75,8 @@ WebNavManager::add_nav_entry(std::string baseurl, std::string name)
 void
 WebNavManager::remove_nav_entry(std::string baseurl)
 {
-  MutexLocker lock(__mutex);
-  __nav_entries.erase(baseurl);
+  MutexLocker lock(mutex_);
+  nav_entries_.erase(baseurl);
 }
 
 } // end namespace fawkes

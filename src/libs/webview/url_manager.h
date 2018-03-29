@@ -48,8 +48,8 @@ class WebUrlManager
   Mutex * mutex();
 
  private:
-  Mutex                                        *__mutex;
-  std::map<std::string, WebRequestProcessor *, std::greater<std::string>> __processors;
+  Mutex                                        *mutex_;
+  std::map<std::string, WebRequestProcessor *, std::greater<std::string>> processors_;
 };
 
 } // end namespace fawkes

@@ -46,13 +46,13 @@ class WebNavManager
   void remove_nav_entry(std::string baseurl);
 
   /** Get navigation entries. @return navigation entries map. */
-  const NavMap & get_nav_entries() const { return __nav_entries; }
+  const NavMap & get_nav_entries() const { return nav_entries_; }
   /** Get mutex for navigation entries. @return mutex for navigation entries. */
-  Mutex *  mutex() { return __mutex; }
+  Mutex *  mutex() { return mutex_; }
 
  private:
-  Mutex                                        *__mutex;
-  NavMap __nav_entries;
+  Mutex                                        *mutex_;
+  NavMap nav_entries_;
 };
 
 } // end namespace fawkes

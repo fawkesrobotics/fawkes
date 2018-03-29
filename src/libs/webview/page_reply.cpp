@@ -93,7 +93,7 @@ WebPageReply::WebPageReply(Code code)
 void
 WebPageReply::set_html_header(std::string h)
 {
-  __html_header = h;
+  html_header_ = h;
 }
 
 
@@ -111,33 +111,33 @@ WebPageReply::pack(std::string active_baseurl,
 		   WebPageFooterGenerator *footergen)
 {
   if (headergen && navbar_enabled_)
-    __merged_body += headergen->html_header(_title, active_baseurl, __html_header);
+    merged_body_ += headergen->html_header(_title, active_baseurl, html_header_);
   else {
     fawkes::HostInfo hi;
     char *s;
-    if ( asprintf(&s, PAGE_HEADER, _title.c_str(), __html_header.c_str(), hi.short_name()) != -1 ) {
-      __merged_body += s;
+    if ( asprintf(&s, PAGE_HEADER, _title.c_str(), html_header_.c_str(), hi.short_name()) != -1 ) {
+      merged_body_ += s;
       free(s);
     }
   }
 
-  __merged_body  += _body;
+  merged_body_  += _body;
 
-  if (footergen && footer_enabled_)  __merged_body += footergen->html_footer();
-  else            __merged_body += PAGE_FOOTER;
+  if (footergen && footer_enabled_)  merged_body_ += footergen->html_footer();
+  else            merged_body_ += PAGE_FOOTER;
 }
 
 std::string::size_type
 WebPageReply::body_length()
 {
-  return __merged_body.length();
+  return merged_body_.length();
 }
 
 
 const std::string &
 WebPageReply::body()
 {
-  return __merged_body;
+  return merged_body_;
 }
 
 /** 
