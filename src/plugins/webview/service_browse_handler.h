@@ -66,9 +66,9 @@ class WebviewServiceBrowseHandler : public fawkes::ServiceBrowseHandler
   ServiceList &  service_list();
 
  private:
-  fawkes::Logger         *__logger;
-  fawkes::NetworkService *__webview_service;
-  ServiceList             __service_list;
+  fawkes::Logger         *logger_;
+  fawkes::NetworkService *webview_service_;
+  ServiceList             service_list_;
 };
 
 #endif

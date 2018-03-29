@@ -35,7 +35,7 @@ class WebviewFooterGenerator : public fawkes::WebPageFooterGenerator
   std::string html_footer();
 
  private:
-  WebviewServiceBrowseHandler *__service_browser;
+  WebviewServiceBrowseHandler *service_browser_;
 };
 
 #endif

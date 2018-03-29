@@ -51,38 +51,38 @@ WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(const char *baseurl
 							     std::vector<const char *> htdocs_dirs,
 							     fawkes::Logger *logger)
 {
-  __logger         = logger;
+  logger_         = logger;
   //store all htdocs_dirs
   if(htdocs_dirs.size() <= 0)
   {
     throw Exception(errno, "htdocs_dirs is empty");
   }
-  __htdocs_dirs = std::vector<char *>(htdocs_dirs.size());
-  __htdocs_dirs_len = std::vector<size_t>(htdocs_dirs.size());
+  htdocs_dirs_ = std::vector<char *>(htdocs_dirs.size());
+  htdocs_dirs_len_ = std::vector<size_t>(htdocs_dirs.size());
   for(unsigned int i = 0; i < htdocs_dirs.size(); i++)
   {
     char htdocs_rp[PATH_MAX];
     if (realpath(htdocs_dirs[i], htdocs_rp) != NULL)
     {
-      __htdocs_dirs[i]     = strdup(htdocs_rp);
-      __htdocs_dirs_len[i] = strlen(__htdocs_dirs[i]);
+      htdocs_dirs_[i]     = strdup(htdocs_rp);
+      htdocs_dirs_len_[i] = strlen(htdocs_dirs_[i]);
     } else
     {
       throw Exception(errno, "Failed to resolve htdocs path '%s'", htdocs_dirs[i]);
     }
   }
   
-  __baseurl        = strdup(baseurl);
-  __baseurl_len    = strlen(__baseurl);
+  baseurl_        = strdup(baseurl);
+  baseurl_len_    = strlen(baseurl_);
 }
 
 /** Destructor. */
 WebviewStaticRequestProcessor::~WebviewStaticRequestProcessor()
 {
-  free(__baseurl);
-  for(unsigned int i = 0; i < __htdocs_dirs.size(); i++)
+  free(baseurl_);
+  for(unsigned int i = 0; i < htdocs_dirs_.size(); i++)
   {
-    free(__htdocs_dirs[i]);
+    free(htdocs_dirs_[i]);
   }
 }
 
@@ -90,28 +90,28 @@ WebviewStaticRequestProcessor::~WebviewStaticRequestProcessor()
 WebReply *
 WebviewStaticRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if ( strncmp(__baseurl, request->url().c_str(), __baseurl_len) == 0 ) {
+  if ( strncmp(baseurl_, request->url().c_str(), baseurl_len_) == 0 ) {
     // It is in our URL prefix range
 
     // Try all htdocs_dirs
-    for(unsigned int i = 0; i < __htdocs_dirs.size(); i++)
+    for(unsigned int i = 0; i < htdocs_dirs_.size(); i++)
     {
-      std::string file_path = std::string(__htdocs_dirs[i]) + request->url().substr(__baseurl_len);
+      std::string file_path = std::string(htdocs_dirs_[i]) + request->url().substr(baseurl_len_);
       
       char rf[PATH_MAX];
       char *realfile = realpath(file_path.c_str(), rf);
     
       if(realfile)
       {
-	if (strncmp(realfile, __htdocs_dirs[i], __htdocs_dirs_len[i]) == 0) {
+	if (strncmp(realfile, htdocs_dirs_[i], htdocs_dirs_len_[i]) == 0) {
 	  try {
 	    DynamicFileWebReply *freply = new DynamicFileWebReply(file_path.c_str());
 	    return freply;
 	  } catch (fawkes::Exception &e) {
-	    __logger->log_error("WebStaticReqProc",
+	    logger_->log_error("WebStaticReqProc",
 				"Cannot fulfill request for file %s,"
 				" exception follows", request->url().c_str());
-	    __logger->log_error("WebStaticReqProc", e);
+	    logger_->log_error("WebStaticReqProc", e);
 	    return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
 					 *(e.begin()));
 	  }
@@ -139,8 +139,8 @@ WebviewStaticRequestProcessor::process_request(const fawkes::WebRequest *request
     }
   } else {
     // wrong base url, why the heck are we called!?
-    __logger->log_error("WebStaticReqProc", "Called for invalid base url "
-			"(url: %s, baseurl: %s)", request->url().c_str(), __baseurl);
+    logger_->log_error("WebStaticReqProc", "Called for invalid base url "
+			"(url: %s, baseurl: %s)", request->url().c_str(), baseurl_);
     return NULL;
   }
 }

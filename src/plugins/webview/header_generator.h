@@ -44,7 +44,7 @@ class WebviewHeaderGenerator : public fawkes::WebPageHeaderGenerator
  private:
   static const char *PAGE_HEADER;
 
-  fawkes::WebNavManager *__nav_manager; 
+  fawkes::WebNavManager *nav_manager_; 
 };
 
 #endif

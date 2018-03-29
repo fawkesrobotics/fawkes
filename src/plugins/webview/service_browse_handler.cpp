@@ -42,29 +42,29 @@ using namespace fawkes;
 WebviewServiceBrowseHandler::WebviewServiceBrowseHandler(fawkes::Logger *logger,
 							 fawkes::NetworkService *webview_service)
 {
-  __logger          = logger;
-  __webview_service = webview_service;
+  logger_          = logger;
+  webview_service_ = webview_service;
 }
 
 WebviewServiceBrowseHandler::~WebviewServiceBrowseHandler()
 {
-  for (ServiceList::iterator s = __service_list.begin(); s != __service_list.end(); ++s) {
+  for (ServiceList::iterator s = service_list_.begin(); s != service_list_.end(); ++s) {
     delete s->second;
   }
-  __service_list.clear();
+  service_list_.clear();
 }
 
 void
 WebviewServiceBrowseHandler::all_for_now()
 {
-  //__logger->log_debug("WebviewServiceBrowseHandler", "All for now");
+  //logger_->log_debug("WebviewServiceBrowseHandler", "All for now");
 }
 
 
 void
 WebviewServiceBrowseHandler::cache_exhausted()
 {
-  //__logger->log_debug("WebviewServiceBrowseHandler", "Cache exhausted");
+  //logger_->log_debug("WebviewServiceBrowseHandler", "Cache exhausted");
 }
 
 
@@ -73,7 +73,7 @@ WebviewServiceBrowseHandler::browse_failed(const char *name,
 			     const char *type,
 			     const char *domain)
 {
-  __logger->log_warn("WebviewServiceBrowseHandler", "Browsing for %s.%s in domain %s failed",
+  logger_->log_warn("WebviewServiceBrowseHandler", "Browsing for %s.%s in domain %s failed",
 		     name, type, domain);
 }
 
@@ -90,9 +90,9 @@ WebviewServiceBrowseHandler::service_added(const char *name,
 					   std::list<std::string> &txt,
 					   int flags)
 {
-  if (__service_list.find(name) != __service_list.end()) {
-    delete __service_list[name];
-    __service_list.erase(name);
+  if (service_list_.find(name) != service_list_.end()) {
+    delete service_list_[name];
+    service_list_.erase(name);
   }
   // Check for fawkesver txt record
   for (std::list<std::string>::iterator i = txt.begin(); i != txt.end(); ++i) {
@@ -104,10 +104,10 @@ WebviewServiceBrowseHandler::service_added(const char *name,
 	NetworkService *s = new NetworkService(name, type, domain, host_name, port,
 					       addr, addr_size, txt);
 
-	if (! (*s == *__webview_service)) {
-	  __logger->log_debug("WebviewServiceBrowseHandler", "Service %s.%s on %s:%u added",
+	if (! (*s == *webview_service_)) {
+	  logger_->log_debug("WebviewServiceBrowseHandler", "Service %s.%s on %s:%u added",
 			      name, type, host_name, port);
-	  __service_list[name] = s;
+	  service_list_[name] = s;
 	} else {
 	  delete s;
 	}
@@ -123,11 +123,11 @@ WebviewServiceBrowseHandler::service_removed(const char *name,
 					     const char *type,
 					     const char *domain)
 {
-  if (__service_list.find(name) != __service_list.end()) {
-    delete __service_list[name];
-    __service_list.erase(name);
+  if (service_list_.find(name) != service_list_.end()) {
+    delete service_list_[name];
+    service_list_.erase(name);
   }
-  __logger->log_debug("WebviewServiceBrowseHandler", "Service %s.%s has been removed",
+  logger_->log_debug("WebviewServiceBrowseHandler", "Service %s.%s has been removed",
 		      name, type);
 }
 
@@ -138,5 +138,5 @@ WebviewServiceBrowseHandler::service_removed(const char *name,
 WebviewServiceBrowseHandler::ServiceList &
 WebviewServiceBrowseHandler::service_list()
 {
-  return __service_list;
+  return service_list_;
 }

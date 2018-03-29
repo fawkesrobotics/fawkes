@@ -38,7 +38,7 @@
  */
 WebviewFooterGenerator::WebviewFooterGenerator(WebviewServiceBrowseHandler *service_browser)
 {
-  __service_browser = service_browser;
+  service_browser_ = service_browser;
 }
 
 
@@ -52,10 +52,10 @@ WebviewFooterGenerator::html_footer()
     "rel=\"external\">Fawkes ";
   f += FAWKES_VERSION_STRING;
   f += "</a></div>\n";
-  WebviewServiceBrowseHandler::ServiceList sl = __service_browser->service_list();
+  WebviewServiceBrowseHandler::ServiceList sl = service_browser_->service_list();
   if (! sl.empty()) {
     f += "    <div class=\"instances\"><ul>";
-    WebviewServiceBrowseHandler::ServiceList &sl = __service_browser->service_list();
+    WebviewServiceBrowseHandler::ServiceList &sl = service_browser_->service_list();
     WebviewServiceBrowseHandler::ServiceList::iterator i;
     for (i = sl.begin(); i != sl.end(); ++i) {
       std::string short_host = i->second->host();

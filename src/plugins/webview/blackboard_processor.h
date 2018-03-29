@@ -48,12 +48,12 @@ class WebviewBlackBoardRequestProcessor : public fawkes::WebRequestProcessor
 #endif
 
  private:
-  char *__baseurl;
-  size_t __baseurl_len;
-  fawkes::BlackBoard *__blackboard;
+  char *baseurl_;
+  size_t baseurl_len_;
+  fawkes::BlackBoard *blackboard_;
 
-  std::map<std::string, fawkes::Interface *> __interfaces;
-  std::map<std::string, fawkes::Interface *>::iterator __ifi;
+  std::map<std::string, fawkes::Interface *> interfaces_;
+  std::map<std::string, fawkes::Interface *>::iterator ifi_;
 
 };
 

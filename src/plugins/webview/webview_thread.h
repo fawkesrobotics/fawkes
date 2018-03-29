@@ -99,41 +99,41 @@ class WebviewThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::WebServer                  *__webserver;
-  fawkes::WebRequestDispatcher       *__dispatcher;
+  fawkes::WebServer                  *webserver_;
+  fawkes::WebRequestDispatcher       *dispatcher_;
 
-  WebviewStaticRequestProcessor      *__static_processor;
-  WebviewStartPageRequestProcessor   *__startpage_processor;
-  WebviewBlackBoardRequestProcessor  *__blackboard_processor;
-  WebviewPluginsRequestProcessor     *__plugins_processor;
-  WebviewRESTRequestProcessor *__rest_processor;
+  WebviewStaticRequestProcessor      *static_processor_;
+  WebviewStartPageRequestProcessor   *startpage_processor_;
+  WebviewBlackBoardRequestProcessor  *blackboard_processor_;
+  WebviewPluginsRequestProcessor     *plugins_processor_;
+  WebviewRESTRequestProcessor *rest_processor_;
 #ifdef HAVE_TF
-  WebviewTfRequestProcessor          *__tf_processor;
+  WebviewTfRequestProcessor          *tf_processor_;
 #endif
 #ifdef HAVE_JPEG
-  WebviewImageRequestProcessor       *__image_processor;
+  WebviewImageRequestProcessor       *image_processor_;
 #endif
-  WebviewServiceBrowseHandler        *__service_browse_handler;
-  WebviewHeaderGenerator             *__header_gen;
-  WebviewFooterGenerator             *__footer_gen;
-  WebviewUserVerifier                *__user_verifier;
+  WebviewServiceBrowseHandler        *service_browse_handler_;
+  WebviewHeaderGenerator             *header_gen_;
+  WebviewFooterGenerator             *footer_gen_;
+  WebviewUserVerifier                *user_verifier_;
 
-  unsigned int __cfg_port;
-  bool         __cfg_use_ipv4;
-  bool         __cfg_use_ipv6;
-  bool         __cfg_use_tls;
-  bool         __cfg_tls_create;
-  std::string  __cfg_tls_key;
-  std::string  __cfg_tls_cert;
-  std::string  __cfg_tls_cipher_suite;
-  bool         __cfg_use_basic_auth;
-  std::string  __cfg_basic_auth_realm;
-  std::string  __cfg_access_log;
-  bool         __cfg_use_thread_pool;
-  unsigned int __cfg_num_threads;
+  unsigned int cfg_port_;
+  bool         cfg_use_ipv4_;
+  bool         cfg_use_ipv6_;
+  bool         cfg_use_tls_;
+  bool         cfg_tls_create_;
+  std::string  cfg_tls_key_;
+  std::string  cfg_tls_cert_;
+  std::string  cfg_tls_cipher_suite_;
+  bool         cfg_use_basic_auth_;
+  std::string  cfg_basic_auth_realm_;
+  std::string  cfg_access_log_;
+  bool         cfg_use_thread_pool_;
+  unsigned int cfg_num_threads_;
 
-  fawkes::CacheLogger     __cache_logger;
-  fawkes::NetworkService *__webview_service;
+  fawkes::CacheLogger     cache_logger_;
+  fawkes::NetworkService *webview_service_;
 };
 
 

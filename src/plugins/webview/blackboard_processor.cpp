@@ -60,29 +60,29 @@ using namespace fawkes;
 WebviewBlackBoardRequestProcessor::WebviewBlackBoardRequestProcessor(const char *baseurl,
 								     BlackBoard *blackboard)
 {
-  __baseurl     = strdup(baseurl);
-  __baseurl_len = strlen(__baseurl);
-  __blackboard  = blackboard;
+  baseurl_     = strdup(baseurl);
+  baseurl_len_ = strlen(baseurl_);
+  blackboard_  = blackboard;
 }
 
 
 /** Destructor. */
 WebviewBlackBoardRequestProcessor::~WebviewBlackBoardRequestProcessor()
 {
-  free(__baseurl);
-  for (__ifi = __interfaces.begin(); __ifi != __interfaces.end(); ++__ifi) {
-    __blackboard->close(__ifi->second);
+  free(baseurl_);
+  for (ifi_ = interfaces_.begin(); ifi_ != interfaces_.end(); ++ifi_) {
+    blackboard_->close(ifi_->second);
   }
-  __interfaces.clear();
+  interfaces_.clear();
 }
 
 
 WebReply *
 WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if ( strncmp(__baseurl, request->url().c_str(), __baseurl_len) == 0 ) {
+  if ( strncmp(baseurl_, request->url().c_str(), baseurl_len_) == 0 ) {
     // It is in our URL prefix range
-    std::string subpath = request->url().substr(__baseurl_len);
+    std::string subpath = request->url().substr(baseurl_len_);
 
     if (subpath.find("/graph/graph.png") == 0) {
 #if defined(HAVE_GRAPHVIZ) && ((defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))) || defined(__clang__))
@@ -130,7 +130,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
       }
 
       bool found_some = false;
-      InterfaceInfoList *iil = __blackboard->list_all();
+      InterfaceInfoList *iil = blackboard_->list_all();
       iil->sort();
       for (InterfaceInfoList::iterator i = iil->begin(); i != iil->end(); ++i) {
 	if (! found_some) {
@@ -139,7 +139,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	  found_some = true;
 	}
 	r->append_body("<tr><td><a href=\"%s/view/%s::%s\">%s::%s</a></td><td>%u</td><td style=\"color:%s\">%s</td></tr>\n",
-		       __baseurl, i->type(), i->id(), i->type(), i->id(),
+		       baseurl_, i->type(), i->id(), i->type(), i->id(),
 		       i->num_readers(), i->has_writer() ? "green" : "red", i->has_writer() ? i->writer().c_str() : "no");
       }
       delete iil;
@@ -151,7 +151,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 #ifdef HAVE_GRAPHVIZ
       if (subpath.find("/graph") != 0) {
 	r->append_body("  <div class=\"blackboard-graph-div\">"
-		       "<a href=\"%s/graph\" class=\"blackboard-graph-link\">Graph</a></div>\n", __baseurl);
+		       "<a href=\"%s/graph\" class=\"blackboard-graph-link\">Graph</a></div>\n", baseurl_);
       }
 #endif
 
@@ -167,16 +167,16 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	std::string ifname = iuid.substr(iuid.find("::") + 2);
 
 	r->append_body("<h2>Showing %s</h2>\n", iuid.c_str());
-	if (__interfaces.find(iuid) == __interfaces.end()) {
+	if (interfaces_.find(iuid) == interfaces_.end()) {
 	  try {
-	    Interface *iface = __blackboard->open_for_reading(iftype.c_str(), ifname.c_str());
-	    __interfaces[iuid] = iface;
+	    Interface *iface = blackboard_->open_for_reading(iftype.c_str(), ifname.c_str());
+	    interfaces_[iuid] = iface;
 	  } catch (Exception &e) {
 	    r->append_body("Failed to open interface: %s\n", e.what());
 	  }
 	}
-	if (__interfaces.find(iuid) != __interfaces.end()) {
-	  Interface *iface = __interfaces[iuid];
+	if (interfaces_.find(iuid) != interfaces_.end()) {
+	  Interface *iface = interfaces_[iuid];
 	  iface->read();
 
 	  /*
@@ -261,7 +261,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	    *r += " </tr>\n";
 	  }
 	  r->append_body("</table>\n");
-	  r->append_body("<p><a href=\"%s\">Clear detailed</a></p>\n", __baseurl);
+	  r->append_body("<p><a href=\"%s\">Clear detailed</a></p>\n", baseurl_);
 	}
       } else if (subpath.find("/graph") == 0) {
 	std::string graph_baseurl("/graph/");
@@ -287,7 +287,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	gvFreeContext(gvc);
 
  	r->append_body("<p><img src=\"%s/graph/graph.png%s%s\" usemap=\"#bbmap\" /></p>\n",
-		       __baseurl,
+		       baseurl_,
 		       graph_node.empty() ? "" : "?for=",
 		       graph_node.empty() ? "" : graph_node.c_str());
 	r->append_body("<!-- DOT Graph:\n\n%s\n\n-->\n\n", graph.c_str());
@@ -295,7 +295,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	r->append_body("<p>No graphviz support at compile time</p>\n");
 #endif
 	if (! graph_node.empty()) {
-	  r->append_body("<p><a href=\"%s/graph\">Full Graph</a></p>\n\n", __baseurl);
+	  r->append_body("<p><a href=\"%s/graph\">Full Graph</a></p>\n\n", baseurl_);
 	}
       }
       return r;
@@ -310,7 +310,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 std::string
 WebviewBlackBoardRequestProcessor::generate_graph(std::string for_owner)
 {
-  InterfaceInfoList *iil = __blackboard->list_all();
+  InterfaceInfoList *iil = blackboard_->list_all();
   iil->sort();
 
   std::stringstream mstream;
@@ -352,7 +352,7 @@ WebviewBlackBoardRequestProcessor::generate_graph(std::string for_owner)
 	!= readers.end())
     {
       mstream << "    \"" << ii->type() << "::" << ii->id() << "\""
-	      << " [href=\"" << __baseurl << "/view/" << ii->type() << "::" << ii->id() << "\"";
+	      << " [href=\"" << baseurl_ << "/view/" << ii->type() << "::" << ii->id() << "\"";
 
 
       if (! ii->has_writer()) {
@@ -368,7 +368,7 @@ WebviewBlackBoardRequestProcessor::generate_graph(std::string for_owner)
   mstream << "  node [fontsize=12 shape=octagon width=3];" << std::endl;
   for (i = owners.begin(); i != owners.end(); ++i) {
     mstream << "  \"" << *i << "\""
-	    << " [href=\"" << __baseurl << "/graph/" << *i << "\"];"
+	    << " [href=\"" << baseurl_ << "/graph/" << *i << "\"];"
 	    << std::endl;
   }
 

@@ -41,7 +41,7 @@ using namespace fawkes;
  */
 WebviewStartPageRequestProcessor::WebviewStartPageRequestProcessor(CacheLogger *cache_logger)
 {
-  __cache_logger = cache_logger;
+  cache_logger_ = cache_logger;
 }
 
 
@@ -58,7 +58,7 @@ WebviewStartPageRequestProcessor::process_request(const fawkes::WebRequest *requ
 
     WebPageReply *r = new WebPageReply("Fawkes", "<h1>Welcome to Fawkes.</h1>\n");
 
-    std::list<CacheLogger::CacheEntry> & messages = __cache_logger->get_messages();
+    std::list<CacheLogger::CacheEntry> & messages = cache_logger_->get_messages();
     std::list<CacheLogger::CacheEntry>::reverse_iterator i;
 
     *r += "<h2>Latest log messages</h2>\n";

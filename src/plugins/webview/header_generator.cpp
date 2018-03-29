@@ -54,7 +54,7 @@ const char *  WebviewHeaderGenerator::PAGE_HEADER =
  */
 WebviewHeaderGenerator::WebviewHeaderGenerator(WebNavManager *nav_manager)
 {
-  __nav_manager = nav_manager;
+  nav_manager_ = nav_manager;
 }
 
 std::string
@@ -77,7 +77,7 @@ WebviewHeaderGenerator::html_header(std::string &title,
     "  <div id=\"mainnav\" class=\"nav\"><a id=\"logo\" href=\"/\"/>"
     "<img class=\"navlogo\" src=\"/static/chrome/navlogo.png\" /></a><ul>";
   WebNavManager::NavMap::const_iterator nei;
-  const WebNavManager::NavMap &nav_entries(__nav_manager->get_nav_entries());
+  const WebNavManager::NavMap &nav_entries(nav_manager_->get_nav_entries());
   for (nei = nav_entries.begin(); nei != nav_entries.end(); ++nei) {
     rv += "<li";
     if ( nei->first == active_baseurl ) {

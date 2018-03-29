@@ -42,12 +42,12 @@ class WebviewStaticRequestProcessor : public fawkes::WebRequestProcessor
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
-  char   *__baseurl;
-  size_t  __baseurl_len;
-  std::vector<char*> __htdocs_dirs;
-  std::vector<size_t> __htdocs_dirs_len;
+  char   *baseurl_;
+  size_t  baseurl_len_;
+  std::vector<char*> htdocs_dirs_;
+  std::vector<size_t> htdocs_dirs_len_;
 
-  fawkes::Logger *__logger;
+  fawkes::Logger *logger_;
 };
 
 #endif

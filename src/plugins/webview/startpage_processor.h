@@ -38,7 +38,7 @@ class WebviewStartPageRequestProcessor : public fawkes::WebRequestProcessor
   virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
-  fawkes::CacheLogger *__cache_logger;
+  fawkes::CacheLogger *cache_logger_;
 };
 
 #endif

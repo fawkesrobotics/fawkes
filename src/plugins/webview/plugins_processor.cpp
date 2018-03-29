@@ -45,31 +45,31 @@ using namespace fawkes;
 WebviewPluginsRequestProcessor::WebviewPluginsRequestProcessor(const char *baseurl,
 							       PluginManager *manager)
 {
-  __baseurl     = strdup(baseurl);
-  __baseurl_len = strlen(__baseurl);
-  __manager     = manager;
+  baseurl_     = strdup(baseurl);
+  baseurl_len_ = strlen(baseurl_);
+  manager_     = manager;
 }
 
 
 /** Destructor. */
 WebviewPluginsRequestProcessor::~WebviewPluginsRequestProcessor()
 {
-  free(__baseurl);
+  free(baseurl_);
 }
 
 
 WebReply *
 WebviewPluginsRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if ( strncmp(__baseurl, request->url().c_str(), __baseurl_len) == 0 ) {
+  if ( strncmp(baseurl_, request->url().c_str(), baseurl_len_) == 0 ) {
     // It is in our URL prefix range
-    std::string subpath = request->url().substr(__baseurl_len);
+    std::string subpath = request->url().substr(baseurl_len_);
 
     if (subpath.find("/load/") == 0) {
       std::string plugin_name = subpath.substr(std::string("/load/").length());
       try {
-	__manager->load(plugin_name.c_str());
-	return new WebRedirectReply(__baseurl);
+	manager_->load(plugin_name.c_str());
+	return new WebRedirectReply(baseurl_);
       } catch (Exception &e) {
 	WebPageReply *r = new WebPageReply("Loading plugin failed");
 	r->append_body("<h1>Loading plugin '%s' failed</h1>", plugin_name.c_str());
@@ -78,14 +78,14 @@ WebviewPluginsRequestProcessor::process_request(const fawkes::WebRequest *reques
 	  *r += std::string(*i) + "<br/>\n";
 	}
 	r->append_body("<p><a href=\"%s\">Back to overview</a> - "
-		       "<a href=\"%s\">Retry</a></p>", __baseurl, request->url().c_str());
+		       "<a href=\"%s\">Retry</a></p>", baseurl_, request->url().c_str());
 	return r;
       }
     } else if (subpath.find("/unload/") == 0) {
       std::string plugin_name = subpath.substr(std::string("/unload/").length());
       try {
-	__manager->unload(plugin_name.c_str());
-	return new WebRedirectReply(__baseurl);
+	manager_->unload(plugin_name.c_str());
+	return new WebRedirectReply(baseurl_);
       } catch (Exception &e) {
 	WebPageReply *r = new WebPageReply("Unloading plugin failed");
 	r->append_body("<h1>Unloading plugin '%s' failed</h1>",
@@ -95,7 +95,7 @@ WebviewPluginsRequestProcessor::process_request(const fawkes::WebRequest *reques
 	  *r += std::string(*i) + "<br/>\n";
 	}
 	r->append_body("<p><a href=\"%s\">Back to overview</a> - "
-		       "<a href=\"%s\">Retry</a></p>", __baseurl, request->url().c_str());
+		       "<a href=\"%s\">Retry</a></p>", baseurl_, request->url().c_str());
 	return r;
       }
     } else {
@@ -114,10 +114,10 @@ WebviewPluginsRequestProcessor::process_request(const fawkes::WebRequest *reques
       std::list<std::pair<std::string, std::string> > available_plugins;
       std::list<std::pair<std::string, std::string> >::iterator i;
 
-      available_plugins = __manager->get_available_plugins();
+      available_plugins = manager_->get_available_plugins();
 
       for (i = available_plugins.begin(); i != available_plugins.end(); ++i) {
-	bool is_loaded = __manager->is_loaded(i->first.c_str());
+	bool is_loaded = manager_->is_loaded(i->first.c_str());
 
 	const char *loaded_color = is_loaded ? "green"  : "red";
 	const char *loaded       = is_loaded ? "Yes"    : "No";
@@ -127,7 +127,7 @@ WebviewPluginsRequestProcessor::process_request(const fawkes::WebRequest *reques
 		       "<td><span style=\"color:%s\">%s<span></td>"
 		       "<td><a href=\"%s/%s/%s\">%s</a></td>\n",
 		       i->first.c_str(), i->second.c_str(), loaded_color, loaded,
-		       __baseurl, action_link, i->first.c_str(), action_link);
+		       baseurl_, action_link, i->first.c_str(), action_link);
       }
 
       *r += "</table>\n";
