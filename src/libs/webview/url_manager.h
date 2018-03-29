@@ -25,6 +25,7 @@
 
 #include <map>
 #include <string>
+#include <algorithm>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -43,13 +44,12 @@ class WebUrlManager
   void register_baseurl(const char *url_prefix, WebRequestProcessor *processor);
   void unregister_baseurl(const char *url_prefix);
 
-  WebRequestProcessor * find_processor(std::string &url) const;
+  WebRequestProcessor * find_processor(const std::string& url) const;
   Mutex * mutex();
 
  private:
   Mutex                                        *__mutex;
-  WebRequestProcessor                          *__startpage_processor;
-  std::map<std::string, WebRequestProcessor *>  __processors;
+  std::map<std::string, WebRequestProcessor *, std::greater<std::string>> __processors;
 };
 
 } // end namespace fawkes

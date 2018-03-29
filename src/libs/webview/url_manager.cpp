@@ -43,7 +43,6 @@ namespace fawkes {
 WebUrlManager::WebUrlManager()
 {
   __mutex = new Mutex();
-  __startpage_processor = NULL;
 }
 
 
@@ -62,21 +61,14 @@ WebUrlManager::~WebUrlManager()
  */
 void
 WebUrlManager::register_baseurl(const char *url_prefix,
-				WebRequestProcessor *processor)
+                                WebRequestProcessor *processor)
 {
   MutexLocker lock(__mutex);
-  if (std::string(url_prefix) == "/") {
-    if (__startpage_processor) {
-      throw Exception("Start page processor has already been registered");
-    }
-    __startpage_processor = processor;
-  } else {
-    if (__processors.find(url_prefix) != __processors.end()) {
-      throw Exception("A processor for %s has already been registered",
-		      url_prefix);
-    }
-    __processors[url_prefix] = processor;
+  if (__processors.find(url_prefix) != __processors.end()) {
+	  throw Exception("A processor for %s has already been registered",
+	                  url_prefix);
   }
+  __processors[url_prefix] = processor;
 }
 
 
@@ -87,11 +79,7 @@ void
 WebUrlManager::unregister_baseurl(const char *url_prefix)
 {
   MutexLocker lock(__mutex);
-  if (std::string(url_prefix) == "/") {
-    __startpage_processor = NULL;
-  } else {
-    __processors.erase(url_prefix);
-  }
+  __processors.erase(url_prefix);
 }
 
 /** Lock mutex and find processor.
@@ -102,25 +90,17 @@ WebUrlManager::unregister_baseurl(const char *url_prefix)
  * @return request processor if found, NULL otherwise
  */
 WebRequestProcessor *
-WebUrlManager::find_processor(std::string &url) const
+WebUrlManager::find_processor(const std::string &url) const
 {
-  if ( url == "/" && __startpage_processor ) {
-    return __startpage_processor;
+  auto proc = std::find_if(__processors.begin(), __processors.end(),
+                           [&url](const auto &p) {
+	                           return url.find(p.first) == 0;
+                           });
+  if (proc != __processors.end()) {
+	  return proc->second;
+  } else {
+	  return NULL;
   }
-
-  WebRequestProcessor *proc = NULL;
-  std::map<std::string, WebRequestProcessor *>::const_iterator pit;
-  for (pit = __processors.begin();
-       (proc == NULL) && (pit != __processors.end());
-       ++pit)
-  {
-    if (url.find(pit->first) == 0) {
-      url = pit->first;
-      return pit->second;
-    }
-  }
-
-  return NULL;
 }
 
 
