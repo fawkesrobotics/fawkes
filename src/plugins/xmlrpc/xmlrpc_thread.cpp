@@ -82,7 +82,9 @@ XmlRpcThread::init()
     logger->log_info("XmlRpcThread", "Listening for HTTP connections on port %u",
 		     __cfg_port);
 
-    __url_manager->register_baseurl("/", __processor);
+    __url_manager->add_handler(WebRequest::METHOD_POST, "/",
+                               std::bind(&XmlRpcRequestProcessor::process_request, __processor,
+                                         std::placeholders::_1));
 
     __xmlrpc_service = new NetworkService(nnresolver, "Fawkes XML-RPC on %h",
 					  "_http._tcp", __cfg_port);
@@ -92,7 +94,9 @@ XmlRpcThread::init()
   } else {
     set_opmode(Thread::OPMODE_WAITFORWAKEUP);
     logger->log_info("XmlRpcThread", "Registering as /xmlrpc in webview");
-    webview_url_manager->register_baseurl("/xmlrpc", __processor);
+    webview_url_manager->add_handler(WebRequest::METHOD_POST, "/xmlrpc",
+                                     std::bind(&XmlRpcRequestProcessor::process_request, __processor,
+                                               std::placeholders::_1));
   }
 
 }
@@ -109,7 +113,7 @@ XmlRpcThread::finalize()
     delete __dispatcher;
     delete __url_manager;
   } else {
-    webview_url_manager->unregister_baseurl("/xmlrpc");
+	  webview_url_manager->remove_handler(WebRequest::METHOD_POST, "/xmlrpc");
   }
   delete __processor;
 }

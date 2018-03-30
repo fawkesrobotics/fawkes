@@ -23,6 +23,7 @@
 #include "xmlrpc_processor.h"
 #include <webview/page_reply.h>
 #include <webview/error_reply.h>
+#include <webview/request.h>
 #include <logging/logger.h>
 
 #include <xmlrpc-c/registry.hpp>
@@ -65,6 +66,10 @@ XmlRpcRequestProcessor::registry()
 }
 
 
+/** Process request.
+ * @param request incoming request
+ * @return web reply
+ */
 WebReply *
 XmlRpcRequestProcessor::process_request(const fawkes::WebRequest *request)
 {

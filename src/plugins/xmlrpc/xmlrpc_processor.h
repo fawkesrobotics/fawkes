@@ -23,8 +23,6 @@
 #ifndef __PLUGINS_XMLRPC_XMLRPC_PROCESSOR_H_
 #define __PLUGINS_XMLRPC_XMLRPC_PROCESSOR_H_
 
-#include <webview/request_processor.h>
-
 #include <map>
 #include <string>
 
@@ -34,15 +32,17 @@ namespace xmlrpc_c {
 
 namespace fawkes {
   class Logger;
+  class WebReply;
+  class WebRequest;
 }
 
-class XmlRpcRequestProcessor : public fawkes::WebRequestProcessor
+class XmlRpcRequestProcessor
 {
  public:
   XmlRpcRequestProcessor(fawkes::Logger *logger);
-  virtual ~XmlRpcRequestProcessor();
+  ~XmlRpcRequestProcessor();
 
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+  fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
   xmlrpc_c::registry *  registry();
 
