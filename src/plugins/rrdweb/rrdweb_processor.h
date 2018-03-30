@@ -23,29 +23,26 @@
 #ifndef __PLUGINS_RRDWEB_RRDWEB_PROCESSOR_H_
 #define __PLUGINS_RRDWEB_RRDWEB_PROCESSOR_H_
 
-#include <webview/request_processor.h>
-
 namespace fawkes {
   class RRDManager;
   class Logger;
+  class WebReply;
+  class WebRequest;
 }
 
-class RRDWebRequestProcessor : public fawkes::WebRequestProcessor
+class RRDWebRequestProcessor
 {
  public:
-  RRDWebRequestProcessor(fawkes::RRDManager *rrd_manager, fawkes::Logger *logger,
-			 const char *__baseurl);
+	RRDWebRequestProcessor(fawkes::RRDManager *rrd_manager, fawkes::Logger *logger);
 
   virtual ~RRDWebRequestProcessor();
 
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+  fawkes::WebReply * process_overview();
+  fawkes::WebReply * process_graph(const fawkes::WebRequest *request);
 
  private:
   fawkes::RRDManager   *__rrd_man;
   fawkes::Logger       *__logger;
-
-  const char           *__baseurl;
-  size_t                __baseurl_len;
 };
 
 #endif

@@ -27,6 +27,7 @@
 #include <webview/page_reply.h>
 #include <webview/file_reply.h>
 #include <webview/error_reply.h>
+#include <webview/request.h>
 
 #include <cstring>
 
@@ -41,17 +42,12 @@ using namespace fawkes;
 /** Constructor.
  * @param rrd_manager RRD manager to query
  * @param logger logger to report problems
- * @param baseurl base URL of the RRD webrequest processor
  */
 RRDWebRequestProcessor::RRDWebRequestProcessor(fawkes::RRDManager *rrd_manager,
-					       fawkes::Logger *logger,
-					       const char *baseurl)
+                                               fawkes::Logger *logger)
 {
   __rrd_man = rrd_manager;
   __logger  = logger;
-
-  __baseurl = baseurl;
-  __baseurl_len = strlen(baseurl);
 }
 
 
@@ -60,53 +56,55 @@ RRDWebRequestProcessor::~RRDWebRequestProcessor()
 {
 }
 
+/** Process request for graph.
+ * @param request incoming request, must have "graph" path argument.
+ * @return web reply
+ */
 WebReply *
-RRDWebRequestProcessor::process_request(const fawkes::WebRequest *request)
+RRDWebRequestProcessor::process_graph(const fawkes::WebRequest *request)
 {
-  if ( strncmp(__baseurl, request->url().c_str(), __baseurl_len) == 0 ) {
-    // It is in our URL prefix range
-    std::string subpath = request->url().substr(__baseurl_len);
+	const RWLockVector<RRDGraphDefinition *> &graphs(__rrd_man->get_graphs());
+	RWLockVector<RRDGraphDefinition *>::const_iterator g;
 
-    const RWLockVector<RRDGraphDefinition *> &graphs(__rrd_man->get_graphs());
-    RWLockVector<RRDGraphDefinition *>::const_iterator g;
+	ScopedRWLock(graphs.rwlock(), ScopedRWLock::LOCK_READ);
 
-    ScopedRWLock(graphs.rwlock(), ScopedRWLock::LOCK_READ);
+	std::string graph_name = request->path_arg("graph");
 
-    if (subpath.find("/graph/") == 0) {
-      std::string graph_name = subpath.substr(subpath.find_first_not_of("/", std::string("/graph/").length()));
-
-      for (g = graphs.begin(); g != graphs.end(); ++g) {
-	if (strcmp((*g)->get_name(), graph_name.c_str()) == 0) {
-          try {
-	    return new DynamicFileWebReply((*g)->get_filename());
-	  } catch (Exception &e) {
-            return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, e.what());
-	  }
+	for (g = graphs.begin(); g != graphs.end(); ++g) {
+		if (graph_name == (*g)->get_name()) {
+			try {
+				return new DynamicFileWebReply((*g)->get_filename());
+			} catch (Exception &e) {
+				return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, e.what());
+			}
+		}
 	}
-      }
-      return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "Graph not found");
-    } else {
-      WebPageReply *r = new WebPageReply("RRD Graphs");
-      r->set_html_header("  <link rel=\"stylesheet\" type=\"text/css\" "
-			 "href=\"/static/css/rrdweb.css\" />\n");
-      *r += "<h2>RRD Graphs</h2>\n";
+	return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "Graph not found");
+}
 
-      std::string subpath = request->url().substr(__baseurl_len);
+/** Process incoming request for overview.
+ * @return web reply
+ */
+WebReply *
+RRDWebRequestProcessor::process_overview()
+{
+	const RWLockVector<RRDGraphDefinition *> &graphs(__rrd_man->get_graphs());
 
-      unsigned int i = 0;
-      *r += "<table class=\"rrdgrid\">";
-      for (g = graphs.begin(); g != graphs.end(); ++g) {
-	if ((i % 2) == 0) *r += "  <tr>";
-	r->append_body("<td class=\"%s\"><img src=\"/rrd/graph/%s\" /></td>",
-		       ((i % 2) == 0) ? "left" : "right",
-		       (*g)->get_name());
-	if ((i++ % 2) == 1) *r += "  </tr>\n";
-      }
-      *r += "</table>";
+	WebPageReply *r = new WebPageReply("RRD Graphs");
+	r->set_html_header("  <link rel=\"stylesheet\" type=\"text/css\" "
+	                   "href=\"/static/css/rrdweb.css\" />\n");
+	*r += "<h2>RRD Graphs</h2>\n";
 
-      return r;
-    }
-  } else {
-    return NULL;
-  }
+	unsigned int i = 0;
+	*r += "<table class=\"rrdgrid\">";
+	for (auto g : graphs) {
+		if ((i % 2) == 0) *r += "  <tr>";
+		r->append_body("<td class=\"%s\"><img src=\"/rrd/graph/%s\" /></td>",
+		               ((i % 2) == 0) ? "left" : "right",
+		               g->get_name());
+		if ((i++ % 2) == 1) *r += "  </tr>\n";
+	}
+	*r += "</table>";
+
+	return r;
 }

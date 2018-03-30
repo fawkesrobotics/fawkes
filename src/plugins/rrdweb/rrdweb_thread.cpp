@@ -26,6 +26,8 @@
 #include <webview/url_manager.h>
 #include <webview/nav_manager.h>
 
+#include <functional>
+
 using namespace fawkes;
 
 #define RRD_URL_PREFIX "/rrd"
@@ -54,8 +56,12 @@ RRDWebThread::~RRDWebThread()
 void
 RRDWebThread::init()
 {
-  __processor  = new RRDWebRequestProcessor(rrd_manager, logger, RRD_URL_PREFIX);
-  webview_url_manager->register_baseurl(RRD_URL_PREFIX, __processor);
+  __processor  = new RRDWebRequestProcessor(rrd_manager, logger);
+  webview_url_manager->add_handler(WebRequest::METHOD_GET, "/rrd/graph/{graph}",
+                                   std::bind(&RRDWebRequestProcessor::process_graph, __processor,
+                                             std::placeholders::_1));
+  webview_url_manager->add_handler(WebRequest::METHOD_GET, "/rrd/?",
+                                   std::bind(&RRDWebRequestProcessor::process_overview, __processor));
   webview_nav_manager->add_nav_entry(RRD_URL_PREFIX, "RRD Graphs");
 }
 
@@ -63,7 +69,8 @@ RRDWebThread::init()
 void
 RRDWebThread::finalize()
 {
-  webview_url_manager->unregister_baseurl(RRD_URL_PREFIX);
+	webview_url_manager->remove_handler(WebRequest::METHOD_GET, "/rrd/graph/{graph}");
+	webview_url_manager->remove_handler(WebRequest::METHOD_GET, "/rrd/?");
   webview_nav_manager->remove_nav_entry(RRD_URL_PREFIX);
   delete __processor;
 }
