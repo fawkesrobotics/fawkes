@@ -81,8 +81,8 @@ WebviewRESTRequestProcessor::process_request(const fawkes::WebRequest *request)
 	std::string rest_api = rest_url_parts[0];
 	WebviewRestApi *api = api_mgr_->get_api(rest_api);
 	if (! api) {
-		logger_->log_error("WebRESTProc", "REST API '%s' unknown\n", rest_api.c_str());
-		return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API '" + rest_url + "' unknown\n");
+		logger_->log_error("WebRESTProc", "REST API '%s' unknown", rest_api.c_str());
+		return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API '" + rest_api + "' unknown\n");
 	}
 
 	try {
