@@ -58,6 +58,9 @@ ClipsWebviewThread::init()
   webview_url_manager->add_handler(WebRequest::METHOD_GET, "/clips/{env*}",
                                    std::bind(&ClipsWebRequestProcessor::process_environment, web_proc_,
                                              std::placeholders::_1));
+  webview_url_manager->add_handler(WebRequest::METHOD_GET, "/clips",
+                                   std::bind(&ClipsWebRequestProcessor::process_environment, web_proc_,
+                                             std::placeholders::_1));
   webview_nav_manager->add_nav_entry("/clips/", "CLIPS");
 }
 
