@@ -62,7 +62,23 @@ void
 WebUrlManager::add_handler(WebRequest::Method method, const std::string& path, Handler handler)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
-  router_->add(method, path, handler);
+	router_->add(method, path, handler, 0);
+}
+
+/** Add a request processor with weight.
+ * This one should mostly be necessary to implement "catch-all" handlers.
+ * @param method HTTP method to register for
+ * @param path path pattern to register for, may contain {var}, {var*}, and {var+} elements
+ * @param handler handler function
+ * @param weight the higher the weight the later the handler will be tried.
+ * @exception Exception thrown if a processor has already been registered
+ * for the given URL prefix.
+ */
+void
+WebUrlManager::add_handler(WebRequest::Method method, const std::string& path, Handler handler, int weight)
+{
+	std::lock_guard<std::mutex> lock(mutex_);
+	router_->add(method, path, handler, weight);
 }
 
 

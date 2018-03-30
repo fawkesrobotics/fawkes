@@ -28,7 +28,7 @@
 #include <string>
 #include <map>
 #include <algorithm>
-#include <vector>
+#include <list>
 #include <regex>
 
 namespace fawkes {
@@ -58,14 +58,14 @@ class WebviewRouter
 	{
 		auto ri = std::find_if(routes_.begin(), routes_.end(),
 		                       [this, &path_args, request](auto r) -> bool {
-			                       //printf("Comparing %s to %s\n", request->url().c_str(), std::get<1>(r).c_str());
-			                       return (std::get<0>(r) == request->method() &&
-			                               this->path_match(request->url(), std::get<2>(r), path_args));
+			                       //printf("Comparing %s to %s\n", request->url().c_str(), std::get<2>(r).c_str());
+			                       return (std::get<1>(r) == request->method() &&
+			                               this->path_match(request->url(), std::get<3>(r), path_args));
 		                       });
 		if (ri == routes_.end()) {
 			throw NullPointerException("No handler found");
 		}
-		return std::get<3>(*ri);
+		return std::get<4>(*ri);
 	}
 
 	/** Find a handler.
@@ -82,13 +82,40 @@ class WebviewRouter
 	{
 		auto ri = std::find_if(routes_.begin(), routes_.end(),
 		                       [this, &path_args, &method, &path](auto r) -> bool {
-			                       return (std::get<0>(r) == method &&
-			                               this->path_match(path, std::get<2>(r), path_args));
+			                       return (std::get<1>(r) == method &&
+			                               this->path_match(path, std::get<3>(r), path_args));
 		                       });
 		if (ri == routes_.end()) {
 			throw NullPointerException("No handler found");
 		}
-		return std::get<3>(*ri);
+		return std::get<4>(*ri);
+	}
+
+	/** Add a handler with weight.
+	 * @param method HTTP method to match for
+	 * @param path path pattern. A pattern may contain "{var}" segments
+	 * for a URL. These will match an element of the path, i.e., a string not
+	 * containing a slash. If a pattern has the form {var+} then it may contain
+	 * a slash and therefore match multiple path segments. The handler would
+	 * receive an entry named "var" in the parameters path arguments.
+	 * @param handler handler to store
+	 * @param weight higher weight means the handler is tried later by
+	 * the router. The default is 0.
+	 */
+	void
+	add(WebRequest::Method method, const std::string &path, T handler, int weight)
+	{
+		auto ri = std::find_if(routes_.begin(), routes_.end(),
+		                       [this, method, &path](auto r) -> bool {
+			                       return (std::get<1>(r) == method &&
+			                               std::get<2>(r) == path);
+		                       });
+		if (ri != routes_.end()) {
+			throw Exception("URL handler already registered for %s", path.c_str());
+		}
+		routes_.push_back(std::make_tuple(weight, method, path, gen_regex(path), handler));
+		routes_.sort([](const auto &a, const auto &b) -> bool
+		             { return (std::get<0>(a) < std::get<0>(b)); });
 	}
 
 	/** Add a handler.
@@ -103,17 +130,9 @@ class WebviewRouter
 	void
 	add(WebRequest::Method method, const std::string &path, T handler)
 	{
-		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [this, method, &path](auto r) -> bool {
-			                       return (std::get<0>(r) == method &&
-			                               std::get<1>(r) == path);
-		                       });
-		if (ri != routes_.end()) {
-			throw Exception("URL handler already registered for %s", path.c_str());
-		}
-		routes_.push_back(std::make_tuple(method, path, gen_regex(path), handler));
+		add(method, path, handler, 0);
 	}
-
+	
 	/** Remove a handler.
 	 * @param method HTTP method to match for
 	 * @param path path pattern that equals the one given when adding.
@@ -123,8 +142,8 @@ class WebviewRouter
 	{
 		auto ri = std::find_if(routes_.begin(), routes_.end(),
 		                       [this, method, &path](auto r) -> bool {
-			                       return (std::get<0>(r) == method &&
-			                               std::get<1>(r) == path);
+			                       return (std::get<1>(r) == method &&
+			                               std::get<2>(r) == path);
 		                       });
 		if (ri != routes_.end()) {
 			routes_.erase(ri);
@@ -211,7 +230,7 @@ class WebviewRouter
 	}
 
  private:
-	std::vector<std::tuple<WebRequest::Method, std::string, path_regex, T>> routes_;
+	std::list<std::tuple<int, WebRequest::Method, std::string, path_regex, T>> routes_;
 };
 
 } // end of namespace fawkes

@@ -52,6 +52,8 @@ class WebUrlManager
   void add_handler(WebRequest::Method method, const std::string& path, Handler handler);
   void remove_handler(WebRequest::Method method, const std::string& path);
 
+
+  void add_handler(WebRequest::Method method, const std::string& path, Handler handler, int weight);
  private:
   WebReply * process_request(WebRequest *request);
 
