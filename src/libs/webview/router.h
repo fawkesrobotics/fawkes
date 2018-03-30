@@ -58,6 +58,7 @@ class WebviewRouter
 	{
 		auto ri = std::find_if(routes_.begin(), routes_.end(),
 		                       [this, &path_args, request](auto r) -> bool {
+			                       //printf("Comparing %s to %s\n", request->url().c_str(), std::get<1>(r).c_str());
 			                       return (std::get<0>(r) == request->method() &&
 			                               this->path_match(request->url(), std::get<2>(r), path_args));
 		                       });
@@ -130,12 +131,33 @@ class WebviewRouter
 	std::pair<std::regex, std::vector<std::string>>
 		gen_regex(const std::string &  path)
 	{
+		std::string::size_type pos = 0;
+
 		if (path[0] != '/') {
 			throw Exception("Path '%s' must start with /", path.c_str());
 		}
+		if ((pos = path.find_first_of("[]()^$")) != std::string::npos) {
+			throw Exception("Found illegal character '%c' at position '%zu' in '%s'",
+			                path[pos], pos, path.c_str());
+		}
 
-		std::regex to_re("\\{([^+\\}]+?)\\+?\\}");
+		std::regex to_re("\\{([^+*\\}]+?)[+*]?\\}");
 		std::string m_path = path;
+		// escape special characters for regex
+		pos = 0;
+		while ((pos = m_path.find_first_of(".", pos)) != std::string::npos) {
+			m_path.replace(pos, 1, "\\.");
+			pos += 2;
+		}
+		pos = 0;
+		while ((pos = m_path.find_first_of("+*", pos)) != std::string::npos) {
+			if (pos < m_path.length() - 1 && m_path[pos+1] != '}') {
+				m_path.replace(pos, 1, std::string("\\")+m_path[pos]);
+				pos += 2;
+			} else {
+				pos += 1;
+			}
+		}
 		std::string re_url;
 		std::smatch match;
 		std::vector<std::string> match_indexes;
@@ -144,6 +166,8 @@ class WebviewRouter
 			re_url += match.prefix();
 			if (full_match[full_match.length()-2] == '+') {
 				re_url += "(.+?)";
+			} else if (full_match[full_match.length()-2] == '*') {
+				re_url += "(.*)";
 			} else {
 				re_url += "([^/]+?)";
 			}
@@ -151,6 +175,7 @@ class WebviewRouter
 			m_path = match.suffix();
 		}
 		re_url += m_path;
+		//printf("Regex: %s -> %s\n", path.c_str(), re_url.c_str());
 
 		return std::make_pair(std::regex(re_url), match_indexes);
 	}
@@ -170,6 +195,7 @@ class WebviewRouter
 				return false;
 			}
 			for (size_t i = 0; i < path_re.second.size(); ++i) {
+				//printf("arg %s = %s\n", path_re.second[i].c_str(), matches[i+1].str().c_str());
 				path_args[path_re.second[i]] = matches[i+1].str();
 			}
 			return true;
