@@ -101,24 +101,30 @@ class WebviewRouter
 	 * @param handler handler to store
 	 */
 	void
-	add(WebRequest::Method method, std::string path, T handler)
+	add(WebRequest::Method method, const std::string &path, T handler)
 	{
+		auto ri = std::find_if(routes_.begin(), routes_.end(),
+		                       [this, method, &path](auto r) -> bool {
+			                       return (std::get<0>(r) == method &&
+			                               std::get<1>(r) == path);
+		                       });
+		if (ri != routes_.end()) {
+			throw Exception("URL handler already registered for %s", path.c_str());
+		}
 		routes_.push_back(std::make_tuple(method, path, gen_regex(path), handler));
 	}
 
 	/** Remove a handler.
 	 * @param method HTTP method to match for
 	 * @param path path pattern that equals the one given when adding.
-	 * @param handler handler to remove
 	 */
 	void
-	remove(WebRequest::Method method, std::string path, T handler)
+	remove(WebRequest::Method method, const std::string &path)
 	{
 		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [this, method, &path, &handler](auto r) {
+		                       [this, method, &path](auto r) -> bool {
 			                       return (std::get<0>(r) == method &&
-			                               std::get<1>(r) == path,
-			                               std::get<2>(r) == handler);
+			                               std::get<1>(r) == path);
 		                       });
 		if (ri != routes_.end()) {
 			routes_.erase(ri);
