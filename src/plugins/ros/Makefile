@@ -28,10 +28,6 @@ LIBS_ros_talkerpub = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		     fawkesinterface fawkesrosaspect
 OBJS_ros_talkerpub = talkerpub_plugin.o talkerpub_thread.o
 
-LIBS_ros_webview = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-		   fawkesinterface fawkesrosaspect fawkeswebview
-OBJS_ros_webview = webview_plugin.o webview_thread.o webview_reqproc.o
-
 LIBS_ros_tf = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect fawkestf TransformInterface
 OBJS_ros_tf = tf_plugin.o tf_thread.o
@@ -96,7 +92,7 @@ LIBS_ros_imu = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	      fawkesinterface fawkesrosaspect IMUInterface
 OBJS_ros_imu = imu_plugin.o imu_thread.o
 
-OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) \
+OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_tf) \
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
 	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) \
 	   $(OBJS_ros_robot_description) $(OBJS_ros_move_base) \
@@ -118,16 +114,6 @@ ifeq ($(HAVE_ROS),1)
 
   PLUGINS_all = $(PLUGINDIR)/ros.so \
 		$(PLUGINDIR)/ros-talkerpub.so
-
-  ifeq ($(call ros-have-pkg,fawkes_msgs),1)
-    CFLAGS_webview_thread += $(call ros-pkg-cflags,fawkes_msgs) $(CFLAGS)
-    CFLAGS_webview_plugin = $(CFLAGS_webview_thread)
-    CFLAGS_webview_reqproc = $(CFLAGS_webview_thread)
-    LDFLAGS_ros_webview += $(LDFLAGS) $(call ros-pkg-lflags,fawkes_msgs)
-    PLUGINS_all += $(PLUGINDIR)/ros-webview.so
-  else
-    WARN_TARGETS += warning_fawkes_msgs
-  endif
 
   ifeq ($(call ros-have-pkg,tf),1)
     ifeq ($(HAVE_TF),1)
