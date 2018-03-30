@@ -3,7 +3,7 @@
  *  request_dispatcher.cpp - Web request dispatcher
  *
  *  Created: Mon Oct 13 22:48:04 2008
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,6 @@
  */
 
 #include <webview/request_dispatcher.h>
-#include <webview/request_processor.h>
 #include <webview/url_manager.h>
 #include <webview/page_reply.h>
 #include <webview/error_reply.h>
@@ -59,8 +58,8 @@ namespace fawkes {
 /** @class WebRequestDispatcher "request_dispatcher.h"
  * Web request dispatcher.
  * Takes web request received via a webserver run by libmicrohttpd and dispatches
- * pages to registered WebRequestProcessor instances or gives a 404 error if no
- * processor was registered for the given base url.
+ * pages to registered URL handlers or gives a 404 error if no
+ * handler was registered for the given url.
  * @author Tim Niemueller
  */
 
@@ -70,8 +69,8 @@ namespace fawkes {
  * @param footergen page footer generator
  */
 WebRequestDispatcher::WebRequestDispatcher(WebUrlManager *url_manager,
-					   WebPageHeaderGenerator *headergen,
-					   WebPageFooterGenerator *footergen)
+                                           WebPageHeaderGenerator *headergen,
+                                           WebPageFooterGenerator *footergen)
 {
   realm_                 = NULL;
   access_log_            = NULL;
@@ -410,8 +409,8 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
     active_requests_mutex_->unlock();
 
     if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
-      request->pp_ =
-	MHD_create_post_processor(connection, 1024, &post_iterator, request);
+	    request->pp_ =
+		    MHD_create_post_processor(connection, 1024, &post_iterator, request);
     }
 
     return MHD_YES;
@@ -432,50 +431,49 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 
   int ret;
 
-  MutexLocker lock(url_manager_->mutex());
-  WebRequestProcessor *proc = url_manager_->find_processor(url);
-
-  if (proc) {
-    if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
-      if (MHD_post_process(request->pp_, upload_data, *upload_data_size) == MHD_NO) {
-	request->set_body(upload_data, *upload_data_size);
-      }
-      if (0 != *upload_data_size) {
-	*upload_data_size = 0;
-	return MHD_YES;
-      }
-      MHD_destroy_post_processor(request->pp_);
-      request->pp_ = NULL;
-    }
-
-    WebReply *reply = proc->process_request(request);
-    if ( reply ) {
-      StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
-      DynamicWebReply *dreply = dynamic_cast<DynamicWebReply *>(reply);
-      if (sreply) {
-	ret = queue_static_reply(connection, request, sreply);
-	delete reply;
-      } else if (dreply) {
-	ret = queue_dynamic_reply(connection, request, dreply);
-      } else {
-	WebErrorPageReply ereply(WebReply::HTTP_INTERNAL_SERVER_ERROR);
-	ret = queue_static_reply(connection, request, &ereply);
-	delete reply;
-      }
-    } else {
-      WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-      ret = queue_static_reply(connection, request, &ereply);
-    }
-  } else {
-	  if (strcmp(url, "/") == 0) {
-      WebPageReply preply("Fawkes", "<h1>Welcome to Fawkes.</h1><hr />");
-      ret = queue_static_reply(connection, request, &preply);
-    } else {
-      WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-      ret = queue_static_reply(connection, request, &ereply);
-    }
+  if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
+	  if (MHD_post_process(request->pp_, upload_data, *upload_data_size) == MHD_NO) {
+		  request->set_body(upload_data, *upload_data_size);
+	  }
+	  if (0 != *upload_data_size) {
+		  *upload_data_size = 0;
+		  return MHD_YES;
+	  }
+	  MHD_destroy_post_processor(request->pp_);
+	  request->pp_ = NULL;
   }
-  return ret;
+
+  try {
+	  WebReply *reply = url_manager_->process_request(request);
+
+	  if (reply) {
+	    StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
+	    DynamicWebReply *dreply = dynamic_cast<DynamicWebReply *>(reply);
+      if (sreply) {
+	      ret = queue_static_reply(connection, request, sreply);
+	      delete reply;
+      } else if (dreply) {
+	      ret = queue_dynamic_reply(connection, request, dreply);
+      } else {
+	      WebErrorPageReply ereply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+	                               "Unknown reply type");
+	      ret = queue_static_reply(connection, request, &ereply);
+	      delete reply;
+      }
+	  } else {
+		  WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
+	    ret = queue_static_reply(connection, request, &ereply);
+	  }
+	  return ret;
+  } catch (Exception &e) {
+	  WebErrorPageReply ereply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+	                           "%s", e.what_no_backtrace());
+	  return queue_static_reply(connection, request, &ereply);
+  } catch (std::exception &e) {
+	  WebErrorPageReply ereply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+	                           "%s", e.what());
+	  return queue_static_reply(connection, request, &ereply);
+  }
 }
 
 
