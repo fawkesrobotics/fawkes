@@ -27,8 +27,6 @@
 
 using namespace fawkes;
 
-#define CLIPS_URL_PREFIX "/clips"
-
 /** @class ClipsWebviewThread "clips-webview-thread.h"
  * Provide introspection for CLIPS via webview.
  * @author Tim Niemueller
@@ -50,17 +48,27 @@ ClipsWebviewThread::~ClipsWebviewThread()
 void
 ClipsWebviewThread::init()
 {
-  web_proc_  = new ClipsWebRequestProcessor(clips_env_mgr, logger, CLIPS_URL_PREFIX);
-  webview_url_manager->register_baseurl(CLIPS_URL_PREFIX, web_proc_);
-  webview_nav_manager->add_nav_entry(CLIPS_URL_PREFIX, "CLIPS");
+  web_proc_  = new ClipsWebRequestProcessor(clips_env_mgr, logger);
+  webview_url_manager->add_handler(WebRequest::METHOD_POST, "/clips/{env}/assert",
+                                   std::bind(&ClipsWebRequestProcessor::process_assert, web_proc_,
+                                             std::placeholders::_1));
+  webview_url_manager->add_handler(WebRequest::METHOD_GET, "/clips/{env}/retract/{index}",
+                                   std::bind(&ClipsWebRequestProcessor::process_retract, web_proc_,
+                                             std::placeholders::_1));
+  webview_url_manager->add_handler(WebRequest::METHOD_GET, "/clips/{env*}",
+                                   std::bind(&ClipsWebRequestProcessor::process_environment, web_proc_,
+                                             std::placeholders::_1));
+  webview_nav_manager->add_nav_entry("/clips/", "CLIPS");
 }
 
 
 void
 ClipsWebviewThread::finalize()
 {
-  webview_url_manager->unregister_baseurl(CLIPS_URL_PREFIX);
-  webview_nav_manager->remove_nav_entry(CLIPS_URL_PREFIX);
+	webview_url_manager->remove_handler(WebRequest::METHOD_POST, "/clips/{env}/assert");
+	webview_url_manager->remove_handler(WebRequest::METHOD_GET, "/clips/{env}/retract/{index}");
+	webview_url_manager->remove_handler(WebRequest::METHOD_GET, "/clips/{env*}");
+  webview_nav_manager->remove_nav_entry("/clips/");
   delete web_proc_;
 }
 

@@ -24,7 +24,6 @@
 #define __PLUGINS_CLIPS_WEBVIEW_CLIPS_WEBVIEW_PROCESSOR_H_
 
 #include <core/utils/lockptr.h>
-#include <webview/request_processor.h>
 
 #include <string>
 #include <list>
@@ -32,22 +31,25 @@
 namespace fawkes {
   class Logger;
   class CLIPSEnvManager;
+  class WebRequest;
+  class WebReply;
 }
 
 namespace CLIPS {
   class Environment;
 }
 
-class ClipsWebRequestProcessor : public fawkes::WebRequestProcessor
+class ClipsWebRequestProcessor
 {
  public:
   ClipsWebRequestProcessor(fawkes::LockPtr<fawkes::CLIPSEnvManager> &clips,
-			   fawkes::Logger *logger,
-			   const char *baseurl);
+                           fawkes::Logger *logger);
 
-  virtual ~ClipsWebRequestProcessor();
+  ~ClipsWebRequestProcessor();
 
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+  fawkes::WebReply *  process_assert(const fawkes::WebRequest *request);
+  fawkes::WebReply *  process_retract(const fawkes::WebRequest *request);
+  fawkes::WebReply *  process_environment(const fawkes::WebRequest *request);
 
   void add_error(const char *str);
 
@@ -59,9 +61,6 @@ class ClipsWebRequestProcessor : public fawkes::WebRequestProcessor
  private:
   fawkes::LockPtr<fawkes::CLIPSEnvManager> clips_env_mgr_;
   fawkes::Logger       *logger_;
-
-  const char           *baseurl_;
-  size_t                baseurl_len_;
 
   std::list<std::string> errors_;
 };
