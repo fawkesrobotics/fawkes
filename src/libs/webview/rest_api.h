@@ -24,7 +24,6 @@
 
 #include <webview/request.h>
 #include <webview/reply.h>
-#include <webview/router.h>
 
 #include <core/exception.h>
 #include <logging/logger.h>
@@ -42,6 +41,8 @@ namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
+template <typename T> class WebviewRouter;
 
 /** REST reply via Webview.
  * @author Tim Niemueller
@@ -168,46 +169,19 @@ class WebviewRestParams
 	std::map<std::string, std::string> query_args_;
 };
 
-/** REST API call handler function type. */
-typedef std::function<std::unique_ptr<WebviewRestReply> (std::string, WebviewRestParams&)> handler_func;
-
 class Logger;
 
-/** Webview REST API component.
- * This class represents a specific REST API available through Webview.
- * The API's name will be part of the URL, e.g., '/api/[COMPONENT-NAME]/...'.
- * The REST API can process patterns according to the OpenAPI 3 specification.
- * @author Tim Niemueller
- */
 class WebviewRestApi
 {
  public:
-	/** Constructor.
-	 * @param name of the API.
-	 * The API's name will be part of the URL, e.g., '/api/[COMPONENT-NAME]/...'.
-	 * @param logger logger for informative output
-	 */
-	WebviewRestApi(const std::string &name, fawkes::Logger *logger)
-		: name_(name), logger_(logger), pretty_json_(false) {}
+	WebviewRestApi(const std::string &name, fawkes::Logger *logger);
 
-	/** Get name of component.
-	 * @return name of component.
-	 */
-	const std::string &
-	name() const
-	{
-		return name_;
-	}
+	/** REST API call handler function type. */
+	typedef std::function<std::unique_ptr<WebviewRestReply> (std::string, WebviewRestParams&)> Handler;
 
-	/** Add handler function.
-	 * @param method HTTP method to react to
-	 * @param path path (after component base path) to react to
-	 * @param handler handler function
-	 */
-	void add_handler(WebRequest::Method method, std::string path, handler_func handler)
-	{
-		router_.add(method, path, handler);
-	}
+	const std::string & 	name() const;
+	void add_handler(WebRequest::Method method, std::string path, Handler handler);
+	void set_pretty_json(bool pretty);
 
 	/** Add handler function.
 	 * @param method HTTP method to react to
@@ -219,7 +193,7 @@ class WebviewRestApi
 	add_handler(WebRequest::Method method, std::string path,
 		            std::function<O (I, WebviewRestParams &)> handler)
 	{
-		router_.add(method, path,
+		add_handler(method, path,
 		            [this, handler](const std::string &body, WebviewRestParams& m)
 		            -> std::unique_ptr<WebviewRestReply>
 		            {
@@ -255,7 +229,7 @@ class WebviewRestApi
 	void add_handler(WebRequest::Method method, std::string path,
 	                 std::function<std::string (I, WebviewRestParams &)> handler)
 	{
-		router_.add(method, path,
+		add_handler(method, path,
 		            [this, handler](const std::string &body, WebviewRestParams& m)
 		            -> std::unique_ptr<WebviewRestReply>
 		            {
@@ -284,7 +258,7 @@ class WebviewRestApi
 	void add_handler(WebRequest::Method method, std::string path,
 	                 std::function<O (WebviewRestParams &)> handler)
 	{
-		router_.add(method, path,
+		add_handler(method, path,
 		            [this, handler](const std::string &body, WebviewRestParams& m)
 		            -> std::unique_ptr<WebviewRestReply>
 		            {
@@ -312,13 +286,11 @@ class WebviewRestApi
 	WebReply *
 		process_request(const WebRequest *request, const std::string &rest_url);
 
-	void set_pretty_json(bool pretty);
-
  private:
 	std::string     name_;
 	fawkes::Logger *logger_;
-	WebviewRouter<handler_func> router_;
 	bool            pretty_json_;
+	std::shared_ptr<WebviewRouter<Handler>> router_;
 };
 
 }

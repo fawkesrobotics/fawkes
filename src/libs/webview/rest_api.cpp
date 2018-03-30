@@ -19,7 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "rest_api.h"
+#include <webview/rest_api.h>
+#include <webview/router.h>
 
 #include <core/exception.h>
 
@@ -27,6 +28,33 @@ namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
+
+/** @class WebviewRestApi <webview/rest_api.h>
+ * Webview REST API component.
+ * This class represents a specific REST API available through Webview.
+ * The API's name will be part of the URL, e.g., '/api/[COMPONENT-NAME]/...'.
+ * The REST API can process patterns according to the OpenAPI 3 specification.
+ * @author Tim Niemueller
+ */
+
+/** Constructor.
+ * @param name of the API.
+ * The API's name will be part of the URL, e.g., '/api/[COMPONENT-NAME]/...'.
+ * @param logger logger for informative output
+ */
+WebviewRestApi::WebviewRestApi(const std::string &name, fawkes::Logger *logger)
+	: name_(name), logger_(logger), pretty_json_(false), router_{std::make_shared<WebviewRouter<Handler>>()}
+{
+}
+
+/** Get name of component.
+ * @return name of component.
+ */
+const std::string &
+WebviewRestApi::name() const
+{
+	return name_;
+}
 
 /** Process REST API request.
  * @param request incoming request
@@ -38,15 +66,27 @@ WebviewRestApi::process_request(const WebRequest *request, const std::string & r
 {
 	try {
 		std::map<std::string, std::string> path_args;
-		handler_func handler = router_.find_handler(request->method(), rest_url, path_args);
+		Handler handler = router_->find_handler(request->method(), rest_url, path_args);
 		WebviewRestParams params;
 		params.set_path_args(std::move(path_args));
 		params.set_query_args(request->get_values());
 		std::unique_ptr<WebviewRestReply> reply = handler(request->body(), params);
 		return reply.release();
 	} catch (NullPointerException &e) {
-		return new StaticWebReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, "API " + rest_url + " unknown");
+		return NULL;
 	}
+}
+
+
+/** Add handler function.
+ * @param method HTTP method to react to
+ * @param path path (after component base path) to react to
+ * @param handler handler function
+ */
+void
+WebviewRestApi::add_handler(WebRequest::Method method, std::string path, Handler handler)
+{
+	router_->add(method, path, handler);
 }
 
 /** Enable or disable pretty JSON printing globally.
