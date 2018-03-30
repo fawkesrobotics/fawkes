@@ -20,6 +20,7 @@ include $(BUILDSYSDIR)/utils.mk
 include $(LIBSRCDIR)/webview/webview.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BUILDSYSDIR)/fvconf.mk
+include $(BUILDSYSDIR)/boost.mk
 
 ifneq ($(PKGCONFIG),)
   HAVE_GRAPHVIZ = $(if $(shell $(PKGCONFIG) --exists 'libgvc'; echo $${?/1/}),1,0)
@@ -49,7 +50,11 @@ ifneq ($(PKGCONFIG),)
   endif
 endif
 
-ifeq ($(HAVE_LIBMICROHTTPD),1)
+REQ_BOOST_LIBS = filesystem
+HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
+
+
+ifeq ($(HAVE_BOOST_LIBS)$(HAVE_LIBMICROHTTPD),11)
   LIBS_webview = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		 fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
 		 fawkeslogging
@@ -59,6 +64,9 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
      rest_processor.o
   PLUGINS_all = $(PLUGINDIR)/webview.so
   INST_RESDIRS = webview
+
+	CFLAGS  += $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
+	LDFLAGS += $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
   ifeq ($(HAVE_CPP11)$(HAVE_JPEG),11)
     LIBS_webview += m fvutils fvcams

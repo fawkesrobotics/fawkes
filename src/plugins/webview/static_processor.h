@@ -23,8 +23,9 @@
 #ifndef __PLUGINS_WEBVIEW_STATIC_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_STATIC_PROCESSOR_H_
 
-#include <cstdlib>
 #include <vector>
+#include <string>
+#include <map>
 
 namespace fawkes {
   class Logger;
@@ -37,19 +38,30 @@ class WebviewStaticRequestProcessor
 {
  public:
 	WebviewStaticRequestProcessor(fawkes::WebUrlManager *url_manager,
-	                              std::vector<const char *> htdocs_dir,
+	                              const std::string& base_url,
+	                              std::vector<std::string>& htdocs_dir,
+	                              const std::string& catchall_file,
+	                              const std::string& mime_file,
 	                              fawkes::Logger *logger);
   ~WebviewStaticRequestProcessor();
 
  private:
   fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+  std::string find_file(const std::string& filename);
+  void read_mime_database(const std::string& mime_file);
+  const std::string & get_mime_type(const std::string& file_name);
 
  private:
-  std::vector<char*> htdocs_dirs_;
-  std::vector<size_t> htdocs_dirs_len_;
+  std::vector<std::string> htdocs_dirs_;
 
   fawkes::Logger *logger_;
   fawkes::WebUrlManager *url_manager_;
+
+  std::map<std::string, std::string> mime_types_;
+
+  std::string base_url_;
+  std::string catchall_file_;
+
 };
 
 #endif

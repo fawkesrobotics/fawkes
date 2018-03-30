@@ -207,34 +207,50 @@ WebviewThread::init()
     throw;
   }
   // get all directories for the static processor
-  std::vector<std::string> static_dirs = config->get_strings("/webview/static-dirs");
+  std::vector<std::string> static_dirs = config->get_strings("/webview/htdocs/dirs");
+  std::string catchall_file;
+  try {
+	  catchall_file = config->get_string("/webview/htdocs/catchall-file");
+  } catch (Exception &e) {};
+  std::string mime_file = config->get_string("/webview/htdocs/mime-file");
   static_dirs = StringConversions::resolve_paths(static_dirs);
-  std::vector<const char *> static_dirs_cstr = std::vector<const char *>(static_dirs.size());
-  for(unsigned int i = 0; i < static_dirs.size(); i++)
-  {
-    static_dirs_cstr[i] = static_dirs[i].c_str();
-  }
-  static_processor_     = new WebviewStaticRequestProcessor(webview_url_manager, static_dirs_cstr, logger);
-  blackboard_processor_ = new WebviewBlackBoardRequestProcessor(webview_url_manager, blackboard);
-  plugins_processor_    = new WebviewPluginsRequestProcessor(webview_url_manager, plugin_manager);
+  std::string static_base_url = catchall_file.empty() ? "/static/" : "/";
+  static_processor_     = new WebviewStaticRequestProcessor(webview_url_manager, static_base_url,
+                                                            static_dirs, catchall_file, mime_file, logger);
   rest_processor_       = new WebviewRESTRequestProcessor(webview_url_manager, webview_rest_api_manager, logger);
-#ifdef HAVE_TF
-  tf_processor_         = new WebviewTfRequestProcessor(webview_url_manager, tf_listener);
+
+  startpage_processor_  = NULL;
+  blackboard_processor_ = NULL;
+  plugins_processor_ = NULL;
+#ifdef HAVE_JPEG
+  image_processor_     = NULL;
 #endif
+#ifdef HAVE_TF
+  tf_processor_ = NULL;
+#endif
+
 #ifdef HAVE_JPEG
   image_processor_     = new WebviewImageRequestProcessor(webview_url_manager, config,
                                                           logger, thread_collector);
 #endif
-  startpage_processor_  = new WebviewStartPageRequestProcessor(webview_url_manager, &cache_logger_);
 
-  webview_nav_manager->add_nav_entry("/blackboard/", "BlackBoard");
+  if (catchall_file.empty()) {
+	  blackboard_processor_ = new WebviewBlackBoardRequestProcessor(webview_url_manager, blackboard);
+	  plugins_processor_    = new WebviewPluginsRequestProcessor(webview_url_manager, plugin_manager);
 #ifdef HAVE_TF
-  webview_nav_manager->add_nav_entry("/tf/", "TF");
+	  tf_processor_         = new WebviewTfRequestProcessor(webview_url_manager, tf_listener);
 #endif
-  webview_nav_manager->add_nav_entry("/plugins/", "Plugins");
+	  startpage_processor_  = new WebviewStartPageRequestProcessor(webview_url_manager, &cache_logger_);
+
+	  webview_nav_manager->add_nav_entry("/blackboard/", "BlackBoard");
+#ifdef HAVE_TF
+	  webview_nav_manager->add_nav_entry("/tf/", "TF");
+#endif
+	  webview_nav_manager->add_nav_entry("/plugins/", "Plugins");
 #ifdef HAVE_JPEG
-  webview_nav_manager->add_nav_entry("/images/", "Images");
+	  webview_nav_manager->add_nav_entry("/images/", "Images");
 #endif
+  }
 
   std::string afs;
   if (cfg_use_ipv4_ && cfg_use_ipv6_) {
