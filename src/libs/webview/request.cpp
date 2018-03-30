@@ -3,7 +3,7 @@
  *  request.cpp - Web request
  *
  *  Created: Mon Jun 17 18:04:04 2013
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify

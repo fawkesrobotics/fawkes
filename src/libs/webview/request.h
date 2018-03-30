@@ -3,7 +3,7 @@
  *  request.h - Web request
  *
  *  Created: Mon Jun 17 17:58:51 2013
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -227,6 +227,30 @@ class WebRequest {
   void set_header(const std::string &key, const std::string &value)
   { headers_[key] = value; }
 
+  /** Get a path argument.
+	 * Retrieves a named argument that was a token in the
+	 * registration URL, e.g., retrieve "id" for "/item/{id}".
+	 * @param what what to retrieve
+	 * @return item passed in URL or empty string
+	 */
+	std::string path_arg(const std::string& what) const
+	{
+		const auto p = path_args_.find(what);
+		if (p != path_args_.end()) {
+			return p->second;
+		} else {
+			return "";
+		}
+	}
+
+	/** Set path arguments.
+	 * @param args path arguments
+	 */
+	void set_path_args(std::map<std::string, std::string>&& args)
+	{
+		path_args_ = std::move(args);
+	}
+
   /** Get body of request.
    * @return The data that was received with the request. This is not
    * set if we receive a form submission. The values will be available
@@ -269,6 +293,7 @@ class WebRequest {
   std::string                        body_;
   std::map<std::string, std::string> get_values_;
   std::map<std::string, std::string> headers_;
+	std::map<std::string, std::string> path_args_;
 };
 
 
