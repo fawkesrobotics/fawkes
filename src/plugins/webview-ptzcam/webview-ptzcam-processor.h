@@ -22,8 +22,6 @@
 #ifndef __PLUGINS_WEBVIEW_PTZCAM_WEBVIEW_PTZCAM_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_PTZCAM_WEBVIEW_PTZCAM_PROCESSOR_H_
 
-#include <webview/request_processor.h>
-
 #include <string>
 #include <tuple>
 #include <map>
@@ -34,24 +32,30 @@ namespace fawkes {
   class PanTiltInterface;
   class CameraControlInterface;
   class SwitchInterface;
+  class WebReply;
+  class WebRequest;
 }
 
-class WebviewPtzCamRequestProcessor : public fawkes::WebRequestProcessor
+class WebviewPtzCamRequestProcessor
 {
  public:
-  WebviewPtzCamRequestProcessor(std::string base_url, std::string image_id, std::string pantilt_id,
-				std::string camctrl_id, std::string power_id, std::string camera_id,
-				float pan_increment, float tilt_increment, unsigned int zoom_increment,
-				float post_powerup_time,
-				std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets,
-				fawkes::BlackBoard *blackboard, fawkes::Logger *logger);
+  WebviewPtzCamRequestProcessor(std::string image_id, std::string pantilt_id,
+                                std::string camctrl_id, std::string power_id, std::string camera_id,
+                                float pan_increment, float tilt_increment, unsigned int zoom_increment,
+                                float post_powerup_time,
+                                std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets,
+                                fawkes::BlackBoard *blackboard, fawkes::Logger *logger);
 
-  virtual ~WebviewPtzCamRequestProcessor();
+  ~WebviewPtzCamRequestProcessor();
 
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+  fawkes::WebReply * process_overview();
+  fawkes::WebReply * process_ping();
+  fawkes::WebReply * process_move(const fawkes::WebRequest *request);
+  fawkes::WebReply * process_effect(const fawkes::WebRequest *request);
 
  private:
-
+  void wakeup_hardware();
+  
  private:
   fawkes::Logger       *logger_;
   fawkes::BlackBoard   *blackboard_;
@@ -61,7 +65,6 @@ class WebviewPtzCamRequestProcessor : public fawkes::WebRequestProcessor
   fawkes::SwitchInterface        *power_if_;
   fawkes::SwitchInterface        *camen_if_;
 
-  std::string           baseurl_;
   std::string           image_id_;
 
   std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets_;

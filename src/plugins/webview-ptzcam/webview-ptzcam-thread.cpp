@@ -32,9 +32,11 @@
 #include <interfaces/SwitchInterface.h>
 #include <interfaces/CameraControlInterface.h>
 
+#include <functional>
+
 using namespace fawkes;
 
-#define PTZCAM_URL_PREFIX "/ptzcam"
+#define PTZCAM_URL_PREFIX "/ptzcam/"
 
 /** @class WebviewPtzCamThread "webview-ptzcam-thread.h"
  * Pan/tilt/zoom camera control via webview.
@@ -99,24 +101,34 @@ WebviewPtzCamThread::init()
     if (presets.find(cfg_name) == presets.end()) {
       std::string cfg_prefix = prefix + cfg_name + "/";
       try {
-	std::string name  = config->get_string((cfg_prefix + "name").c_str());
-	float pan         = config->get_float((cfg_prefix + "pan").c_str());
-	float tilt        = config->get_float((cfg_prefix + "tilt").c_str());
-	unsigned int zoom = config->get_uint((cfg_prefix + "zoom").c_str());
-	presets[cfg_name] = std::make_tuple(name, pan, tilt, zoom);
+	      std::string name  = config->get_string((cfg_prefix + "name").c_str());
+	      float pan         = config->get_float((cfg_prefix + "pan").c_str());
+	      float tilt        = config->get_float((cfg_prefix + "tilt").c_str());
+	      unsigned int zoom = config->get_uint((cfg_prefix + "zoom").c_str());
+	      presets[cfg_name] = std::make_tuple(name, pan, tilt, zoom);
       } catch (Exception &e) {
-	logger->log_warn(name(), "Invalid preset %s", cfg_name.c_str());
+	      logger->log_warn(name(), "Invalid preset %s", cfg_name.c_str());
       }
     }
   }
 
-  web_proc_  = new WebviewPtzCamRequestProcessor(PTZCAM_URL_PREFIX, image_id,
-						 pantilt_id, camctrl_id, power_id, camera_id,
-						 pan_increment, tilt_increment,
-						 zoom_increment, post_powerup_time,
-						 presets,
-						 blackboard, logger);
-  webview_url_manager->register_baseurl(PTZCAM_URL_PREFIX, web_proc_);
+  web_proc_  = new WebviewPtzCamRequestProcessor(image_id, pantilt_id, camctrl_id, power_id, camera_id,
+                                                 pan_increment, tilt_increment,
+                                                 zoom_increment, post_powerup_time,
+                                                 presets,
+                                                 blackboard, logger);
+
+  webview_url_manager->add_handler(WebRequest::METHOD_GET, PTZCAM_URL_PREFIX "ping",
+                                   std::bind(&WebviewPtzCamRequestProcessor::process_ping, web_proc_));
+  webview_url_manager->add_handler(WebRequest::METHOD_GET, PTZCAM_URL_PREFIX "move",
+                                   std::bind(&WebviewPtzCamRequestProcessor::process_move, web_proc_,
+                                             std::placeholders::_1));
+  webview_url_manager->add_handler(WebRequest::METHOD_GET, PTZCAM_URL_PREFIX "effect",
+                                   std::bind(&WebviewPtzCamRequestProcessor::process_move, web_proc_,
+                                             std::placeholders::_1));
+  webview_url_manager->add_handler(WebRequest::METHOD_GET, PTZCAM_URL_PREFIX "?",
+                                   std::bind(&WebviewPtzCamRequestProcessor::process_overview, web_proc_));
+
   webview_nav_manager->add_nav_entry(PTZCAM_URL_PREFIX, nav_entry.c_str());
 
   ptu_if_   = blackboard->open_for_reading<PanTiltInterface>(pantilt_id.c_str());
@@ -131,11 +143,11 @@ WebviewPtzCamThread::init()
   if (ceiling_mount) {
     logger->log_info(name(), "Ceiling mode, ordering image mirroring");
     CameraControlInterface *camctrl_if =
-      blackboard->open_for_reading<CameraControlInterface>(camctrl_id.c_str());
+	    blackboard->open_for_reading<CameraControlInterface>(camctrl_id.c_str());
     if (camctrl_if->has_writer()) {
-      CameraControlInterface::SetMirrorMessage *msg
-	= new CameraControlInterface::SetMirrorMessage(true);
-      camctrl_if->msgq_enqueue(msg);
+	    CameraControlInterface::SetMirrorMessage *msg
+		    = new CameraControlInterface::SetMirrorMessage(true);
+	    camctrl_if->msgq_enqueue(msg);
     }
     blackboard->close(camctrl_if);
   }
@@ -147,8 +159,11 @@ WebviewPtzCamThread::init()
 void
 WebviewPtzCamThread::finalize()
 {
-  webview_url_manager->unregister_baseurl(PTZCAM_URL_PREFIX);
   webview_nav_manager->remove_nav_entry(PTZCAM_URL_PREFIX);
+  webview_url_manager->remove_handler(WebRequest::METHOD_GET, PTZCAM_URL_PREFIX "ping");
+  webview_url_manager->remove_handler(WebRequest::METHOD_GET, PTZCAM_URL_PREFIX "move");
+  webview_url_manager->remove_handler(WebRequest::METHOD_GET, PTZCAM_URL_PREFIX "effect");
+  webview_url_manager->remove_handler(WebRequest::METHOD_GET, PTZCAM_URL_PREFIX "?");
   delete web_proc_;
 
   blackboard->close(ptu_if_);
