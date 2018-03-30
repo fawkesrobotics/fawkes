@@ -43,6 +43,30 @@ namespace fawkes {
 
 /** Constructor.
  * @param filename path and name of the file to transmit
+ * @param content_type content type of file, will try to guess by
+ * magic if not given
+ */
+DynamicFileWebReply::DynamicFileWebReply(const std::string& filename,
+                                         const std::string& content_type)
+	: DynamicWebReply(WebReply::HTTP_OK), close_when_done_(true)
+{
+	if (access(filename.c_str(), R_OK) != 0 ||
+	    ((file_ = fopen(filename.c_str(), "r")) == NULL))
+	{
+    throw fawkes::CouldNotOpenFileException(filename.c_str(), errno);
+  }
+
+  determine_file_size();
+
+  if (content_type.empty()) {
+	  add_header("Content-type", fawkes::mimetype_file(filename.c_str()));
+  } else {
+	  add_header("Content-type", content_type);
+  }
+}
+
+/** Constructor.
+ * @param filename path and name of the file to transmit
  */
 DynamicFileWebReply::DynamicFileWebReply(const char *filename)
   : DynamicWebReply(WebReply::HTTP_OK), close_when_done_(true)
