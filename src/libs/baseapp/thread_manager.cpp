@@ -461,8 +461,8 @@ ThreadManager::remove_maybelocked(Thread *thread, bool lock)
 
   thread->cancel();
   thread->join();
-  __finalizer->finalize(thread);
   thread->finalize();
+  __finalizer->finalize(thread);
 
   internal_remove_thread(thread);
 }
@@ -545,8 +545,8 @@ ThreadManager::force_remove(fawkes::Thread *thread)
 
   thread->cancel();
   thread->join();
-  if (__finalizer) __finalizer->finalize(thread);
   thread->finalize();
+  if (__finalizer) __finalizer->finalize(thread);
 
   internal_remove_thread(thread);
 }
