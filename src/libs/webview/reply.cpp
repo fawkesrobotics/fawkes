@@ -94,7 +94,7 @@ WebReply::code() const
  * @param content content of the header field
  */
 void
-WebReply::add_header(std::string header, std::string content)
+WebReply::add_header(const std::string& header, const std::string& content)
 {
   headers_[header] = content;
 }
@@ -104,7 +104,7 @@ WebReply::add_header(std::string header, std::string content)
  * @param header_string header string of the format "Key: Value".
  */
 void
-WebReply::add_header(std::string header_string)
+WebReply::add_header(const std::string& header_string)
 {
   std::string::size_type pos;
   if ((pos = header_string.find(":")) != std::string::npos) {

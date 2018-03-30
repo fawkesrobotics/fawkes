@@ -104,8 +104,8 @@ class WebReply
   virtual ~WebReply();
 
   Code              code() const;
-  void              add_header(std::string header, std::string content);
-  void              add_header(std::string header_string);
+  void              add_header(const std::string& header, const std::string& content);
+  void              add_header(const std::string& header_string);
   const HeaderMap & headers() const;
   
   static void       set_caching(bool caching);
