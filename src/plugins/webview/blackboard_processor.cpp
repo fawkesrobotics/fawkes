@@ -24,6 +24,7 @@
 #include <webview/page_reply.h>
 #include <webview/file_reply.h>
 #include <webview/error_reply.h>
+#include <webview/url_manager.h>
 
 #include <blackboard/blackboard.h>
 #include <interface/interface.h>
@@ -39,6 +40,7 @@
 #include <set>
 #include <sstream>
 #include <algorithm>
+#include <functional>
 #ifdef HAVE_GRAPHVIZ
 #  include <gvc.h>
 #  include <gvcjob.h>
@@ -54,22 +56,36 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param baseurl Base URL where processor is mounted
+ * @param url_manager URL manager to register with
  * @param blackboard BlackBoard instance
  */
-WebviewBlackBoardRequestProcessor::WebviewBlackBoardRequestProcessor(const char *baseurl,
-								     BlackBoard *blackboard)
+WebviewBlackBoardRequestProcessor::WebviewBlackBoardRequestProcessor(fawkes::WebUrlManager *url_manager,
+                                                                     BlackBoard *blackboard)
 {
-  baseurl_     = strdup(baseurl);
-  baseurl_len_ = strlen(baseurl_);
   blackboard_  = blackboard;
+  url_manager_    = url_manager;
+
+  url_manager_->add_handler(WebRequest::METHOD_GET, "/blackboard/view/{uid}",
+                            std::bind(&WebviewBlackBoardRequestProcessor::process_view, this,
+                                      std::placeholders::_1));
+  url_manager_->add_handler(WebRequest::METHOD_GET, "/blackboard/graph/graph.png",
+                            std::bind(&WebviewBlackBoardRequestProcessor::process_graph, this,
+                                      std::placeholders::_1));
+  url_manager_->add_handler(WebRequest::METHOD_GET, "/blackboard/graph/{for*}",
+                            std::bind(&WebviewBlackBoardRequestProcessor::process_graphview, this,
+                                      std::placeholders::_1));
+  url_manager_->add_handler(WebRequest::METHOD_GET, "/blackboard/?",
+                            std::bind(&WebviewBlackBoardRequestProcessor::process_overview, this));
 }
 
 
 /** Destructor. */
 WebviewBlackBoardRequestProcessor::~WebviewBlackBoardRequestProcessor()
 {
-  free(baseurl_);
+	url_manager_->remove_handler(WebRequest::METHOD_GET, "/blackboard/view/{uid}");
+	url_manager_->remove_handler(WebRequest::METHOD_GET, "/blackboard/graph/graph.png");
+	url_manager_->remove_handler(WebRequest::METHOD_GET, "/blackboard/graph/{for*}");
+	url_manager_->remove_handler(WebRequest::METHOD_GET, "/blackboard");
   for (ifi_ = interfaces_.begin(); ifi_ != interfaces_.end(); ++ifi_) {
     blackboard_->close(ifi_->second);
   }
@@ -78,195 +94,50 @@ WebviewBlackBoardRequestProcessor::~WebviewBlackBoardRequestProcessor()
 
 
 WebReply *
-WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *request)
+WebviewBlackBoardRequestProcessor::process_graph(const fawkes::WebRequest *request)
 {
-  if ( strncmp(baseurl_, request->url().c_str(), baseurl_len_) == 0 ) {
-    // It is in our URL prefix range
-    std::string subpath = request->url().substr(baseurl_len_);
-
-    if (subpath.find("/graph/graph.png") == 0) {
 #if defined(HAVE_GRAPHVIZ) && ((defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))) || defined(__clang__))
-      std::string graph_node = request->get_value("for");
-      std::string graph = generate_graph(graph_node);
+	std::string graph_node = request->get_value("for");
+	std::string graph = generate_graph(graph_node);
 
-      FILE *f = tmpfile();
-      if (NULL == f) {
-	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-				     "Cannot open temp file: %s", strerror(errno));
-      }
+	FILE *f = tmpfile();
+	if (NULL == f) {
+		return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+		                             "Cannot open temp file: %s", strerror(errno));
+	}
 
-      GVC_t* gvc = gvContext(); 
-      Agraph_t* G = agmemread((char *)graph.c_str());
-      gvLayout(gvc, G, (char *)"dot");
-      gvRender(gvc, G, (char *)"png", f);
-      gvFreeLayout(gvc, G);
-      agclose(G);    
-      gvFreeContext(gvc);
+	GVC_t* gvc = gvContext(); 
+	Agraph_t* G = agmemread((char *)graph.c_str());
+	gvLayout(gvc, G, (char *)"dot");
+	gvRender(gvc, G, (char *)"png", f);
+	gvFreeLayout(gvc, G);
+	agclose(G);    
+	gvFreeContext(gvc);
 
-      try {
-	DynamicFileWebReply *freply = new DynamicFileWebReply(f);
-	return freply;
-      } catch (fawkes::Exception &e) {
-	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, *(e.begin()));
-      }
+	try {
+		DynamicFileWebReply *freply = new DynamicFileWebReply(f);
+		return freply;
+	} catch (fawkes::Exception &e) {
+		return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, *(e.begin()));
+	}
 #else
-      return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-				   "BlackBoard processor was not built with Graphviz support");
+	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+	                             "BlackBoard processor was not built with Graphviz support");
 #endif
-    } else {
-
-      WebPageReply *r = new WebPageReply("BlackBoard");
-      r->set_html_header("  <link type=\"text/css\" href=\""
-			 "/static/css/jqtheme/jquery-ui.custom.css\" rel=\"stylesheet\" />\n"
-			 "  <link type=\"text/css\" href=\""
-			 "/static/css/blackboard.css\" rel=\"stylesheet\" />\n");
+}
 
 
-      if (subpath.find("/view/") != 0 && subpath.find("/graph") != 0) {
-	*r += "\n\n<h2>Select Interface</h2>\n"
-	  "<div id=\"blackboard-interfaces-mainpart\">\n";
-      } else {
-	*r +=  "\n\n  <div id=\"blackboard-interfaces\">\n";
-      }
+WebReply *
+WebviewBlackBoardRequestProcessor::process_graphview(const fawkes::WebRequest *request)
+{
+	std::string graph_node = request->path_arg("for");
+	
+	WebPageReply *r = new WebPageReply("BlackBoard");
+	r->set_html_header("  <link type=\"text/css\" href=\""
+	                   "/static/css/jqtheme/jquery-ui.custom.css\" rel=\"stylesheet\" />\n"
+	                   "  <link type=\"text/css\" href=\""
+	                   "/static/css/blackboard.css\" rel=\"stylesheet\" />\n");
 
-      bool found_some = false;
-      InterfaceInfoList *iil = blackboard_->list_all();
-      iil->sort();
-      for (InterfaceInfoList::iterator i = iil->begin(); i != iil->end(); ++i) {
-	if (! found_some) {
-	  *r += "<table>\n";
-	  *r += "<tr><th>Interface</th><th>Reader(s)</th><th>Writer</th></tr>\n";
-	  found_some = true;
-	}
-	r->append_body("<tr><td><a href=\"%s/view/%s::%s\">%s::%s</a></td><td>%u</td><td style=\"color:%s\">%s</td></tr>\n",
-		       baseurl_, i->type(), i->id(), i->type(), i->id(),
-		       i->num_readers(), i->has_writer() ? "green" : "red", i->has_writer() ? i->writer().c_str() : "no");
-      }
-      delete iil;
-
-      if (found_some) {
-	*r += "</table>\n";
-      }
-
-#ifdef HAVE_GRAPHVIZ
-      if (subpath.find("/graph") != 0) {
-	r->append_body("  <div class=\"blackboard-graph-div\">"
-		       "<a href=\"%s/graph\" class=\"blackboard-graph-link\">Graph</a></div>\n", baseurl_);
-      }
-#endif
-
-      *r += "  </div>\n";
-
-      if (! found_some) {
-	*r += "<p><b>No interfaces found.</b></p>\n";
-      }
-
-      if (subpath.find("/view/") == 0) {
-	std::string iuid = subpath.substr(subpath.find_first_not_of("/", std::string("/view/").length()));
-	std::string iftype = iuid.substr(0, iuid.find("::"));
-	std::string ifname = iuid.substr(iuid.find("::") + 2);
-
-	r->append_body("<h2>Showing %s</h2>\n", iuid.c_str());
-	if (interfaces_.find(iuid) == interfaces_.end()) {
-	  try {
-	    Interface *iface = blackboard_->open_for_reading(iftype.c_str(), ifname.c_str());
-	    interfaces_[iuid] = iface;
-	  } catch (Exception &e) {
-	    r->append_body("Failed to open interface: %s\n", e.what());
-	  }
-	}
-	if (interfaces_.find(iuid) != interfaces_.end()) {
-	  Interface *iface = interfaces_[iuid];
-	  iface->read();
-
-	  /*
-	   *r += "<script type=\"text/javascript\">\n"
-	   "  $(function(){\n"
-	   "    $(\"#blackboard-interface-details-title\").click(function(){\n"
-	   "	     if ( $(\"#blackboard-interface-details\").is(\":visible\") ) {\n"
-	   "        $(\"#blackboard-interface-details\").hide(\"blind\");\n"
-	   "        $(\"#blackboard-interfaces-icon\").attr(\"src\", "
-	   "\"/static/images/icon-triangle-e.png\");\n"
-	   "      } else {\n"
-	   "	       $(\"#blackboard-interface-details\").show(\"blind\");\n"
-	   "        $(\"#blackboard-interfaces-icon\").attr(\"src\", "
-	   "\"/static/images/icon-triangle-s.png\");\n"
-	   "      }\n"
-	   "    });\n"
-	   "    $(\"#blackboard-interface-details\").hide();\n"
-	   "  });\n"
-	   "</script>\n"
-	   "<div id=\"blackboard-box\">\n"
-	   "  <div><a id=\"blackboard-interface-details-title\" href=\"#\">"
-	   "<img id=\"blackboard-interfaces-icon\" "
-	   "class=\"blackboard-interfaces-icon\" "
-	   "src=\"/static/images/icon-triangle-e.png\" />"
-	   "Interface details</a></div>\n"
-	   "  <div id=\"blackboard-interface-details\">\n";
-	  */
-
-	  std::string writer;
-	  if (iface->has_writer()) {
-	    try {
-	      writer = iface->writer();
-	    } catch (Exception &e) {}
-	  }
-	  std::string readers;
-	  try {
-	    readers = str_join(iface->readers(), ", ");
-	  } catch (Exception &e) {}
-
-	  r->append_body("<table>\n"
-			 " <tr><td><b>Type:</b></td><td>%s</td></tr>\n"
-			 " <tr><td><b>ID:</b></td><td>%s</td></tr>\n"
-			 " <tr><td><b>Writer:</b></td><td><span class=\"blackboard-writer-%s\">%s</span></td></tr>\n"
-			 " <tr><td><b>Readers:</b></td><td>%s (%u)</td></tr>\n"
-			 " <tr><td><b>Serial:</b></td><td>%u</td></tr>\n"
-			 " <tr><td><b>Data size:</b></td><td>%u</td></tr>\n"
-			 " <tr><td><b>Hash:</b></td><td>%s</td></tr>\n"
-			 " <tr><td><b>Data changed:</b></td>"
-			 "<td>%s (last at %s)</td></tr>\n"
-			 "</table>\n",
-			 iface->type(), iface->id(),
-			 iface->has_writer() ? "exists" : "none",
-			 iface->has_writer() ? writer.c_str() : "none",
-			 iface->num_readers() > 0 ? readers.c_str() : "none",
-			 iface->num_readers(),
-			 iface->serial(),
-			 iface->datasize(), iface->hash_printable(),
-			 iface->changed() ? "yes" : "no", iface->timestamp()->str());
-
-	  /*
-	   *r += "  </div>\n"
-	   "</div>\n";
-	  */
-
-	  r->append_body("<table>\n"
-			 " <tr>\n"
-			 "  <th>Name</th><th>Type</th><th>Value</th>\n"
-			 " </tr>\n");
-	  for (InterfaceFieldIterator fi = iface->fields(); fi != iface->fields_end(); ++fi) {
-	    bool is_string = (fi.get_type() == IFT_STRING);
-	    *r += " <tr>\n";
-	    if ( fi.get_length() > 1 ) {
-	      r->append_body("  <td>%s</td><td>%s [%zu]</td><td>%s%s%s</td>\n",
-			     fi.get_name(), fi.get_typename(),
-			     fi.get_length(), is_string ? "<pre>" : "",
-			     fi.get_value_string(), is_string ? "</pre>" : "");
-	    } else {
-	      r->append_body("  <td>%s</td><td>%s</td><td>%s%s%s</td>\n",
-			     fi.get_name(), fi.get_typename(), is_string ? "<pre>" : "",
-			     fi.get_value_string(), is_string ? "</pre>" : "");
-	    }
-	    *r += " </tr>\n";
-	  }
-	  r->append_body("</table>\n");
-	  r->append_body("<p><a href=\"%s\">Clear detailed</a></p>\n", baseurl_);
-	}
-      } else if (subpath.find("/graph") == 0) {
-	std::string graph_baseurl("/graph/");
-	std::string graph_node =
-	  subpath.length() > graph_baseurl.length() ? subpath.substr(graph_baseurl.length()) : "";
 #if defined(HAVE_GRAPHVIZ) && ((defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))) || defined(__clang__))
 	std::string graph = generate_graph(graph_node);
 	char *map;
@@ -286,8 +157,7 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	agclose(G);    
 	gvFreeContext(gvc);
 
- 	r->append_body("<p><img src=\"%s/graph/graph.png%s%s\" usemap=\"#bbmap\" /></p>\n",
-		       baseurl_,
+ 	r->append_body("<p><img src=\"/blackboard/graph/graph.png%s%s\" usemap=\"#bbmap\" /></p>\n",
 		       graph_node.empty() ? "" : "?for=",
 		       graph_node.empty() ? "" : graph_node.c_str());
 	r->append_body("<!-- DOT Graph:\n\n%s\n\n-->\n\n", graph.c_str());
@@ -295,15 +165,137 @@ WebviewBlackBoardRequestProcessor::process_request(const fawkes::WebRequest *req
 	r->append_body("<p>No graphviz support at compile time</p>\n");
 #endif
 	if (! graph_node.empty()) {
-	  r->append_body("<p><a href=\"%s/graph\">Full Graph</a></p>\n\n", baseurl_);
+	  r->append_body("<p><a href=\"/blackboard/graph\">Full Graph</a></p>\n\n");
 	}
-      }
-      return r;
-    }
+	return r;
+}
 
-  } else {
-    return NULL;
-  }
+WebReply *
+WebviewBlackBoardRequestProcessor::process_view(const fawkes::WebRequest *request)
+{
+	std::string iuid = request->path_arg("uid");
+	std::string iftype = iuid.substr(0, iuid.find("::"));
+	std::string ifname = iuid.substr(iuid.find("::") + 2);
+
+	WebPageReply *r = new WebPageReply("BlackBoard");
+	r->set_html_header("  <link type=\"text/css\" href=\""
+	                   "/static/css/jqtheme/jquery-ui.custom.css\" rel=\"stylesheet\" />\n"
+	                   "  <link type=\"text/css\" href=\""
+	                   "/static/css/blackboard.css\" rel=\"stylesheet\" />\n");
+
+	r->append_body("<h2>Showing %s</h2>\n", iuid.c_str());
+	if (interfaces_.find(iuid) == interfaces_.end()) {
+		try {
+			Interface *iface = blackboard_->open_for_reading(iftype.c_str(), ifname.c_str());
+			interfaces_[iuid] = iface;
+		} catch (Exception &e) {
+			r->append_body("Failed to open interface: %s\n", e.what());
+		}
+	}
+	if (interfaces_.find(iuid) != interfaces_.end()) {
+		Interface *iface = interfaces_[iuid];
+		iface->read();
+
+		std::string writer;
+		if (iface->has_writer()) {
+			try {
+				writer = iface->writer();
+			} catch (Exception &e) {}
+		}
+		std::string readers;
+		try {
+			readers = str_join(iface->readers(), ", ");
+		} catch (Exception &e) {}
+
+		r->append_body("<table>\n"
+		               " <tr><td><b>Type:</b></td><td>%s</td></tr>\n"
+		               " <tr><td><b>ID:</b></td><td>%s</td></tr>\n"
+		               " <tr><td><b>Writer:</b></td><td><span class=\"blackboard-writer-%s\">%s</span></td></tr>\n"
+		               " <tr><td><b>Readers:</b></td><td>%s (%u)</td></tr>\n"
+		               " <tr><td><b>Serial:</b></td><td>%u</td></tr>\n"
+		               " <tr><td><b>Data size:</b></td><td>%u</td></tr>\n"
+		               " <tr><td><b>Hash:</b></td><td>%s</td></tr>\n"
+		               " <tr><td><b>Data changed:</b></td>"
+		               "<td>%s (last at %s)</td></tr>\n"
+		               "</table>\n",
+		               iface->type(), iface->id(),
+		               iface->has_writer() ? "exists" : "none",
+		               iface->has_writer() ? writer.c_str() : "none",
+		               iface->num_readers() > 0 ? readers.c_str() : "none",
+		               iface->num_readers(),
+		               iface->serial(),
+		               iface->datasize(), iface->hash_printable(),
+		               iface->changed() ? "yes" : "no", iface->timestamp()->str());
+
+		r->append_body("<table>\n"
+		               " <tr>\n"
+		               "  <th>Name</th><th>Type</th><th>Value</th>\n"
+		               " </tr>\n");
+		for (InterfaceFieldIterator fi = iface->fields(); fi != iface->fields_end(); ++fi) {
+			bool is_string = (fi.get_type() == IFT_STRING);
+			*r += " <tr>\n";
+			if ( fi.get_length() > 1 ) {
+				r->append_body("  <td>%s</td><td>%s [%zu]</td><td>%s%s%s</td>\n",
+				               fi.get_name(), fi.get_typename(),
+				               fi.get_length(), is_string ? "<pre>" : "",
+				               fi.get_value_string(), is_string ? "</pre>" : "");
+			} else {
+				r->append_body("  <td>%s</td><td>%s</td><td>%s%s%s</td>\n",
+				               fi.get_name(), fi.get_typename(), is_string ? "<pre>" : "",
+				               fi.get_value_string(), is_string ? "</pre>" : "");
+			}
+			*r += " </tr>\n";
+		}
+		r->append_body("</table>\n");
+		r->append_body("<p><a href=\"/blackboard/\">Clear detailed</a></p>\n");
+	}
+	return r;
+}
+
+WebReply *
+WebviewBlackBoardRequestProcessor::process_overview()
+{
+	WebPageReply *r = new WebPageReply("BlackBoard");
+	r->set_html_header("  <link type=\"text/css\" href=\""
+	                   "/static/css/jqtheme/jquery-ui.custom.css\" rel=\"stylesheet\" />\n"
+	                   "  <link type=\"text/css\" href=\""
+	                   "/static/css/blackboard.css\" rel=\"stylesheet\" />\n");
+
+
+	*r += "\n\n<h2>Select Interface</h2>\n"
+		"<div id=\"blackboard-interfaces-mainpart\">\n";
+
+	bool found_some = false;
+	InterfaceInfoList *iil = blackboard_->list_all();
+	iil->sort();
+	for (InterfaceInfoList::iterator i = iil->begin(); i != iil->end(); ++i) {
+		if (! found_some) {
+			*r += "<table>\n";
+			*r += "<tr><th>Interface</th><th>Reader(s)</th><th>Writer</th></tr>\n";
+			found_some = true;
+		}
+		r->append_body("<tr><td><a href=\"/blackboard/view/%s::%s\">%s::%s</a></td><td>%u</td><td style=\"color:%s\">%s</td></tr>\n",
+		               i->type(), i->id(), i->type(), i->id(),
+		               i->num_readers(), i->has_writer() ? "green" : "red", i->has_writer() ? i->writer().c_str() : "no");
+	}
+	delete iil;
+
+	if (found_some) {
+		*r += "</table>\n";
+	}
+
+#ifdef HAVE_GRAPHVIZ
+	r->append_body("  <div class=\"blackboard-graph-div\">"
+	               "<a href=\"/blackboard/graph\" class=\"blackboard-graph-link\">Graph</a></div>\n");
+#endif
+
+	*r += "  </div>\n";
+
+	if (! found_some) {
+		*r += "<p><b>No interfaces found.</b></p>\n";
+	}
+
+	return r;
 }
 
 #if defined(HAVE_GRAPHVIZ) && ((defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))) || defined(__clang__))
@@ -352,7 +344,7 @@ WebviewBlackBoardRequestProcessor::generate_graph(std::string for_owner)
 	!= readers.end())
     {
       mstream << "    \"" << ii->type() << "::" << ii->id() << "\""
-	      << " [href=\"" << baseurl_ << "/view/" << ii->type() << "::" << ii->id() << "\"";
+	      << " [href=\"/blackboard/view/" << ii->type() << "::" << ii->id() << "\"";
 
 
       if (! ii->has_writer()) {
@@ -368,7 +360,7 @@ WebviewBlackBoardRequestProcessor::generate_graph(std::string for_owner)
   mstream << "  node [fontsize=12 shape=octagon width=3];" << std::endl;
   for (i = owners.begin(); i != owners.end(); ++i) {
     mstream << "  \"" << *i << "\""
-	    << " [href=\"" << baseurl_ << "/graph/" << *i << "\"];"
+	    << " [href=\"/blackboard/graph/" << *i << "\"];"
 	    << std::endl;
   }
 

@@ -52,17 +52,6 @@
 using namespace fawkes;
 
 
-/** Prefix for the WebStaticRequestProcessor. */
-const char *WebviewThread::STATIC_URL_PREFIX = "/static";
-/** Prefix for the WebBlackBoardRequestProcessor. */
-const char *WebviewThread::BLACKBOARD_URL_PREFIX = "/blackboard";
-/** Prefix for the WebPluginsRequestProcessor. */
-const char *WebviewThread::PLUGINS_URL_PREFIX = "/plugins";
-/** Prefix for the WebTfRequestProcessor. */
-const char *WebviewThread::TF_URL_PREFIX = "/tf";
-/** Prefix for the WebMJPEGRequestProcessor. */
-const char *WebviewThread::IMAGE_URL_PREFIX = "/images";
-
 /** @class WebviewThread "webview_thread.h"
  * Webview Thread.
  * This thread runs the HTTP server and handles requests via the
@@ -181,7 +170,7 @@ WebviewThread::init()
   footer_gen_ = new WebviewFooterGenerator(service_browse_handler_);
 
   dispatcher_ = new WebRequestDispatcher(webview_url_manager,
-					  header_gen_, footer_gen_);
+                                         header_gen_, footer_gen_);
 
 
   try {
@@ -217,7 +206,6 @@ WebviewThread::init()
     delete dispatcher_;
     throw;
   }
-  startpage_processor_  = new WebviewStartPageRequestProcessor(&cache_logger_);
   // get all directories for the static processor
   std::vector<std::string> static_dirs = config->get_strings("/webview/static-dirs");
   static_dirs = StringConversions::resolve_paths(static_dirs);
@@ -226,37 +214,26 @@ WebviewThread::init()
   {
     static_dirs_cstr[i] = static_dirs[i].c_str();
   }
-  static_processor_     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, static_dirs_cstr, logger);
-  blackboard_processor_ = new WebviewBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
-  plugins_processor_    = new WebviewPluginsRequestProcessor(PLUGINS_URL_PREFIX, plugin_manager);
-  rest_processor_       = new WebviewRESTRequestProcessor("/api", webview_rest_api_manager, logger);
+  static_processor_     = new WebviewStaticRequestProcessor(webview_url_manager, static_dirs_cstr, logger);
+  blackboard_processor_ = new WebviewBlackBoardRequestProcessor(webview_url_manager, blackboard);
+  plugins_processor_    = new WebviewPluginsRequestProcessor(webview_url_manager, plugin_manager);
+  rest_processor_       = new WebviewRESTRequestProcessor(webview_url_manager, webview_rest_api_manager, logger);
 #ifdef HAVE_TF
-  tf_processor_         = new WebviewTfRequestProcessor(TF_URL_PREFIX, tf_listener);
+  tf_processor_         = new WebviewTfRequestProcessor(webview_url_manager, tf_listener);
 #endif
 #ifdef HAVE_JPEG
-  image_processor_     = new WebviewImageRequestProcessor(IMAGE_URL_PREFIX, config,
-							   logger, thread_collector);
+  image_processor_     = new WebviewImageRequestProcessor(webview_url_manager, config,
+                                                          logger, thread_collector);
 #endif
+  startpage_processor_  = new WebviewStartPageRequestProcessor(webview_url_manager, &cache_logger_);
 
-  webview_url_manager->register_baseurl("/", startpage_processor_);
-  webview_url_manager->register_baseurl(STATIC_URL_PREFIX, static_processor_);
-  webview_url_manager->register_baseurl(BLACKBOARD_URL_PREFIX, blackboard_processor_);
-  webview_url_manager->register_baseurl(PLUGINS_URL_PREFIX, plugins_processor_);
-  webview_url_manager->register_baseurl("/api", rest_processor_);
+  webview_nav_manager->add_nav_entry("/blackboard/", "BlackBoard");
 #ifdef HAVE_TF
-  webview_url_manager->register_baseurl(TF_URL_PREFIX, tf_processor_);
+  webview_nav_manager->add_nav_entry("/tf/", "TF");
 #endif
+  webview_nav_manager->add_nav_entry("/plugins/", "Plugins");
 #ifdef HAVE_JPEG
-  webview_url_manager->register_baseurl(IMAGE_URL_PREFIX, image_processor_);
-#endif
-
-  webview_nav_manager->add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
-#ifdef HAVE_TF
-  webview_nav_manager->add_nav_entry(TF_URL_PREFIX, "TF");
-#endif
-  webview_nav_manager->add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
-#ifdef HAVE_JPEG
-  webview_nav_manager->add_nav_entry(IMAGE_URL_PREFIX, "Images");
+  webview_nav_manager->add_nav_entry("/images/", "Images");
 #endif
 
   std::string afs;
@@ -286,23 +263,13 @@ WebviewThread::finalize()
     service_browser->unwatch_service("_http._tcp", service_browse_handler_);
   } catch (Exception &e) {} // ignored, can happen if avahi-daemon not running
 
-  webview_url_manager->unregister_baseurl("/");
-  webview_url_manager->unregister_baseurl(STATIC_URL_PREFIX);
-  webview_url_manager->unregister_baseurl(BLACKBOARD_URL_PREFIX);
-  webview_url_manager->unregister_baseurl(PLUGINS_URL_PREFIX);
-  webview_url_manager->unregister_baseurl(IMAGE_URL_PREFIX);
-
+  webview_nav_manager->remove_nav_entry("/blackboard/");
+  webview_nav_manager->remove_nav_entry("/plugins/");
 #ifdef HAVE_TF
-  webview_url_manager->unregister_baseurl(TF_URL_PREFIX);
-#endif
-
-  webview_nav_manager->remove_nav_entry(BLACKBOARD_URL_PREFIX);
-  webview_nav_manager->remove_nav_entry(PLUGINS_URL_PREFIX);
-#ifdef HAVE_TF
-  webview_nav_manager->remove_nav_entry(TF_URL_PREFIX);
+  webview_nav_manager->remove_nav_entry("/tf/");
 #endif
 #ifdef HAVE_JPEG
-  webview_nav_manager->remove_nav_entry(IMAGE_URL_PREFIX);
+  webview_nav_manager->remove_nav_entry("/images/");
 #endif
 
   delete webserver_;

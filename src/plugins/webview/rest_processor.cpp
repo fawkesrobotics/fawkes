@@ -24,6 +24,7 @@
 #include <webview/error_reply.h>
 #include <webview/rest_api_manager.h>
 #include <webview/rest_api.h>
+#include <webview/url_manager.h>
 
 #include <core/exception.h>
 #include <logging/logger.h>
@@ -43,17 +44,21 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param baseurl Base URL where the static processor is mounted
+ * @param url_manager URL manager to register with
  * @param api_mgr REST API manager to check for available APIs
  * @param logger logger
  */
-WebviewRESTRequestProcessor::WebviewRESTRequestProcessor(const char *baseurl,
+WebviewRESTRequestProcessor::WebviewRESTRequestProcessor(fawkes::WebUrlManager *url_manager,
                                                          fawkes::WebviewRestApiManager *api_mgr,
                                                          fawkes::Logger *logger)
 {
   logger_  = logger;
-  baseurl_ = baseurl;
   api_mgr_ = api_mgr;
+  url_mgr_ = url_manager;
+
+  url_mgr_->add_handler(WebRequest::METHOD_GET, "/api/{rest_url*}",
+                        std::bind(&WebviewRESTRequestProcessor::process_request, this,
+                                  std::placeholders::_1));
 }
 
 /** Destructor. */
@@ -65,37 +70,34 @@ WebviewRESTRequestProcessor::~WebviewRESTRequestProcessor()
 WebReply *
 WebviewRESTRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-	if (request->url().find(baseurl_) != 0) {
-		logger_->log_error("WebRESTProc", "Called for invalid base url "
-		                   "(url: %s, baseurl: %s)", request->url().c_str(), baseurl_.c_str());
-		return NULL;
-	}
-
-	std::string rest_url = request->url().substr(baseurl_.length());
+	std::string rest_url = "/" + request->path_arg("rest_url");
 	std::vector<std::string> rest_url_parts{str_split(rest_url, '/')};
 
 	if (rest_url_parts.empty()) {
-		// return list of apis
-		return NULL;
+		return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API overview not yet implemented\n");
 	}
 
-	std::string rest_path = rest_url.substr(rest_url_parts[0].length());
+	std::string rest_path = rest_url.substr(rest_url_parts[0].length()+1);
 	std::string rest_api = rest_url_parts[0];
 	WebviewRestApi *api = api_mgr_->get_api(rest_api);
 	if (! api) {
-		logger_->log_error("WebRESTProc", "REST API '%s' unknown", rest_api.c_str());
-		return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "REST API '%s' unknown", rest_api.c_str());
+		logger_->log_error("WebRESTProc", "REST API '%s' unknown\n", rest_api.c_str());
+		return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API '" + rest_url + "' unknown\n");
 	}
 
 	try {
 		WebReply *reply = api->process_request(request, rest_path);
+		if (! reply) {
+			return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API '" + rest_api +
+			                             "' has no endpoint '" + rest_path + "'\n");
+		}
 		reply->add_header("Access-Control-Allow-Origin", "*");
 		return reply;
 	} catch (Exception &e) {
 		logger_->log_error("WebRESTProc", "REST API '%s' failed, exception follows", rest_api.c_str());
 		logger_->log_error("WebRESTProc", e);
-		return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, "REST API '%s': %s",
-		                             rest_api.c_str(), e.what_no_backtrace());
+		return new StaticWebReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, "REST API '" + rest_api + "': " +
+		                          e.what_no_backtrace() + "\n");
 	}
 	
 }

@@ -3,8 +3,7 @@
  *  plugins_processor.h - Web request processor for plugin info
  *
  *  Created: Thu Feb 12 12:59:25 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,25 +22,28 @@
 #ifndef __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_PLUGINS_PROCESSOR_H_
 
-#include <webview/request_processor.h>
-
 namespace fawkes {
   class PluginManager;
+  class WebReply;
+  class WebRequest;
+  class WebUrlManager;
 }
 
-class WebviewPluginsRequestProcessor : public fawkes::WebRequestProcessor
+class WebviewPluginsRequestProcessor
 {
  public:
-  WebviewPluginsRequestProcessor(const char *baseurl,
-			     fawkes::PluginManager *manager);
-  virtual ~WebviewPluginsRequestProcessor();
-
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+	WebviewPluginsRequestProcessor(fawkes::WebUrlManager *url_manager,
+	                               fawkes::PluginManager *manager);
+  ~WebviewPluginsRequestProcessor();
 
  private:
-  char *baseurl_;
-  size_t baseurl_len_;
+  fawkes::WebReply * process_load(const fawkes::WebRequest *request);
+  fawkes::WebReply * process_unload(const fawkes::WebRequest *request);
+  fawkes::WebReply * process_overview();
+
+ private:
   fawkes::PluginManager *manager_;
+  fawkes::WebUrlManager *url_manager_;
 };
 
 #endif

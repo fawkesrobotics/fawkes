@@ -23,8 +23,6 @@
 #ifndef __PLUGINS_WEBVIEW_TF_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_TF_PROCESSOR_H_
 
-#include <webview/request_processor.h>
-
 #include <tf/transformer.h>
 
 #include <map>
@@ -33,21 +31,25 @@
 namespace fawkes {
   class BlackBoard;
   class Interface;
+  class WebUrlManager;
+  class WebReply;
+  class WebRequest;
 }
 
-class WebviewTfRequestProcessor : public fawkes::WebRequestProcessor
+class WebviewTfRequestProcessor
 {
  public:
-  WebviewTfRequestProcessor(const char *baseurl,
-			    fawkes::tf::Transformer *transformer);
-  virtual ~WebviewTfRequestProcessor();
-
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+	WebviewTfRequestProcessor(fawkes::WebUrlManager *url_manager,
+                            fawkes::tf::Transformer *transformer);
+  ~WebviewTfRequestProcessor();
 
  private:
-  char *baseurl_;
-  size_t baseurl_len_;
+  fawkes::WebReply * process_graph();
+  fawkes::WebReply * process_overview();
+
+ private:
   fawkes::tf::Transformer *transformer_;
+  fawkes::WebUrlManager *url_manager_;
 
 };
 

@@ -24,11 +24,13 @@
 #include <webview/page_reply.h>
 #include <webview/file_reply.h>
 #include <webview/error_reply.h>
+#include <webview/url_manager.h>
 
 #include <string>
 #include <cstring>
 #include <cstdlib>
 #include <cerrno>
+#include <functional>
 
 #include <gvc.h>
 #include <gvcjob.h>
@@ -43,63 +45,62 @@ using namespace fawkes;
  */
 
 /** Constructor.
- * @param baseurl Base URL where processor is mounted
+ * @param url_manager URL manager to register with
  * @param transformer transformer listener to query for DOT graph
  */
-WebviewTfRequestProcessor::WebviewTfRequestProcessor(const char *baseurl,
-						     fawkes::tf::Transformer *transformer)
+WebviewTfRequestProcessor::WebviewTfRequestProcessor(fawkes::WebUrlManager *url_manager,
+                                                     fawkes::tf::Transformer *transformer)
 {
-  baseurl_     = strdup(baseurl);
-  baseurl_len_ = strlen(baseurl_);
   transformer_ = transformer;
+  url_manager_    = url_manager;
+
+  url_manager_->add_handler(WebRequest::METHOD_GET, "/tf/graph.png",
+                            std::bind(&WebviewTfRequestProcessor::process_graph, this));
+  url_manager_->add_handler(WebRequest::METHOD_GET, "/tf/?",
+                            std::bind(&WebviewTfRequestProcessor::process_overview, this));
 }
 
 
 /** Destructor. */
 WebviewTfRequestProcessor::~WebviewTfRequestProcessor()
 {
-  free(baseurl_);
+	url_manager_->remove_handler(WebRequest::METHOD_GET, "/tf/?");
+	url_manager_->remove_handler(WebRequest::METHOD_GET, "/tf/graph.png");
 }
 
 
 WebReply *
-WebviewTfRequestProcessor::process_request(const fawkes::WebRequest *request)
+WebviewTfRequestProcessor::process_graph()
 {
-  if ( strncmp(baseurl_, request->url().c_str(), baseurl_len_) == 0 ) {
-    // It is in our URL prefix range
-    std::string subpath = request->url().substr(baseurl_len_);
+	std::string graph = transformer_->all_frames_as_dot(true);
 
-    if (subpath == "/graph.png") {
-      std::string graph = transformer_->all_frames_as_dot(true);
+	FILE *f = tmpfile();
+	if (NULL == f) {
+		return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+		                             "Cannot open temp file: %s", strerror(errno));
+	}
 
-      FILE *f = tmpfile();
-      if (NULL == f) {
-	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-				     "Cannot open temp file: %s", strerror(errno));
-      }
+	GVC_t* gvc = gvContext(); 
+	Agraph_t* G = agmemread((char *)graph.c_str());
+	gvLayout(gvc, G, (char *)"dot");
+	gvRender(gvc, G, (char *)"png", f);
+	gvFreeLayout(gvc, G);
+	agclose(G);    
+	gvFreeContext(gvc);
 
-      GVC_t* gvc = gvContext(); 
-      Agraph_t* G = agmemread((char *)graph.c_str());
-      gvLayout(gvc, G, (char *)"dot");
-      gvRender(gvc, G, (char *)"png", f);
-      gvFreeLayout(gvc, G);
-      agclose(G);    
-      gvFreeContext(gvc);
+	try {
+		DynamicFileWebReply *freply = new DynamicFileWebReply(f);
+		return freply;
+	} catch (fawkes::Exception &e) {
+		return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, *(e.begin()));
+	}
+}
 
-      try {
-	DynamicFileWebReply *freply = new DynamicFileWebReply(f);
-	return freply;
-      } catch (fawkes::Exception &e) {
-	return new WebErrorPageReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, *(e.begin()));
-      }
-
-    } else {
-      WebPageReply *r = new WebPageReply("Transforms");
-      r->append_body("<p><img src=\"%s/graph.png\" /></p>", baseurl_);
-      //r->append_body("<pre>%s</pre>", transformer_->all_frames_as_dot().c_str());
-      return r;
-    }
-  } else {
-    return NULL;
-  }
+WebReply *
+WebviewTfRequestProcessor::process_overview()
+{
+	WebPageReply *r = new WebPageReply("Transforms");
+	r->append_body("<p><img src=\"/tf/graph.png\" /></p>");
+	//r->append_body("<pre>%s</pre>", transformer_->all_frames_as_dot().c_str());
+	return r;
 }

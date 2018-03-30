@@ -85,12 +85,6 @@ class WebviewThread
   virtual void finalize();
   virtual void loop();
 
-  static const char *STATIC_URL_PREFIX;
-  static const char *BLACKBOARD_URL_PREFIX;
-  static const char *PLUGINS_URL_PREFIX;
-  static const char *TF_URL_PREFIX;
-  static const char *IMAGE_URL_PREFIX;
-
  private:
   void tls_create(const char *tls_key_file, const char *tls_cert_file);
 
@@ -106,7 +100,7 @@ class WebviewThread
   WebviewStartPageRequestProcessor   *startpage_processor_;
   WebviewBlackBoardRequestProcessor  *blackboard_processor_;
   WebviewPluginsRequestProcessor     *plugins_processor_;
-  WebviewRESTRequestProcessor *rest_processor_;
+  WebviewRESTRequestProcessor        *rest_processor_;
 #ifdef HAVE_TF
   WebviewTfRequestProcessor          *tf_processor_;
 #endif

@@ -23,31 +23,33 @@
 #ifndef __PLUGINS_WEBVIEW_STATIC_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_STATIC_PROCESSOR_H_
 
-#include <webview/request_processor.h>
 #include <cstdlib>
 #include <vector>
 
 namespace fawkes {
   class Logger;
+  class WebUrlManager;
+  class WebReply;
+  class WebRequest;
 }
 
-class WebviewStaticRequestProcessor : public fawkes::WebRequestProcessor
+class WebviewStaticRequestProcessor
 {
  public:
-  WebviewStaticRequestProcessor(const char *baseurl,
-				std::vector<const char *> htdocs_dir,
-				fawkes::Logger *logger);
-  virtual ~WebviewStaticRequestProcessor();
-
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+	WebviewStaticRequestProcessor(fawkes::WebUrlManager *url_manager,
+	                              std::vector<const char *> htdocs_dir,
+	                              fawkes::Logger *logger);
+  ~WebviewStaticRequestProcessor();
 
  private:
-  char   *baseurl_;
-  size_t  baseurl_len_;
+  fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+
+ private:
   std::vector<char*> htdocs_dirs_;
   std::vector<size_t> htdocs_dirs_len_;
 
   fawkes::Logger *logger_;
+  fawkes::WebUrlManager *url_manager_;
 };
 
 #endif

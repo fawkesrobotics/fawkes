@@ -3,8 +3,7 @@
  *  image_processor.h - Web request processor for viewing images
  *
  *  Created: Wed Feb 05 17:43:36 2014
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,36 +22,37 @@
 #ifndef __PLUGINS_WEBVIEW_IMAGE_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_IMAGE_PROCESSOR_H_
 
-#include <webview/request_processor.h>
 #include <string>
+#include <map>
 
 namespace fawkes {
   class Configuration;
   class Logger;
   class ThreadCollector;
   class WebviewJpegStreamProducer;
+  class WebReply;
+  class WebRequest;
+  class WebUrlManager;
 }
 
-class WebviewImageRequestProcessor : public fawkes::WebRequestProcessor
+class WebviewImageRequestProcessor
 {
  public:
-  WebviewImageRequestProcessor(const char *baseurl, fawkes::Configuration *config,
-			       fawkes::Logger *logger, fawkes::ThreadCollector *thread_col);
-  virtual ~WebviewImageRequestProcessor();
-
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+	WebviewImageRequestProcessor(fawkes::WebUrlManager *url_manager, fawkes::Configuration *config,
+                               fawkes::Logger *logger, fawkes::ThreadCollector *thread_col);
+  ~WebviewImageRequestProcessor();
 
  private:
+  fawkes::WebReply * process_image(const fawkes::WebRequest *request);
+  fawkes::WebReply * process_overview();
+
   fawkes::WebviewJpegStreamProducer * get_stream(const std::string &image_id);
 
-
  private:
-  char   *baseurl_;
-  size_t  baseurl_len_;
-
   fawkes::Configuration *config_;
   fawkes::Logger *logger_;
   fawkes::ThreadCollector *thread_col_;
+  fawkes::WebUrlManager *url_manager_;
 
   std::map<std::string, fawkes::WebviewJpegStreamProducer *> streams_;
 };

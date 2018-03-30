@@ -3,8 +3,7 @@
  *  startpage_processor.cpp - Web request processor for the start page
  *
  *  Created: Thu Feb 12 00:10:53 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -22,12 +21,11 @@
 
 #include "startpage_processor.h"
 #include <webview/page_reply.h>
+#include <webview/url_manager.h>
 
 #include <logging/cache.h>
 
-#include <string>
-#include <cstring>
-#include <cstdlib>
+#include <functional>
 
 using namespace fawkes;
 
@@ -37,53 +35,54 @@ using namespace fawkes;
  */
 
 /** Constructor.
+ * @param url_manager URL manager to register with
  * @param cache_logger cache logger
  */
-WebviewStartPageRequestProcessor::WebviewStartPageRequestProcessor(CacheLogger *cache_logger)
+WebviewStartPageRequestProcessor::WebviewStartPageRequestProcessor(fawkes::WebUrlManager *url_manager,
+                                                                   CacheLogger *cache_logger)
 {
   cache_logger_ = cache_logger;
+  url_manager_ = url_manager;
+  url_manager_->add_handler(WebRequest::METHOD_GET, "/",
+                            std::bind(&WebviewStartPageRequestProcessor::process_request, this));
 }
 
 
 /** Destructor. */
 WebviewStartPageRequestProcessor::~WebviewStartPageRequestProcessor()
 {
+	url_manager_->remove_handler(WebRequest::METHOD_GET, "/");
 }
 
 
 WebReply *
-WebviewStartPageRequestProcessor::process_request(const fawkes::WebRequest *request)
+WebviewStartPageRequestProcessor::process_request()
 {
-  if ( strncmp("/", request->url().c_str(), 1) == 0 ) {
+	WebPageReply *r = new WebPageReply("Fawkes", "<h1>Welcome to Fawkes.</h1>\n");
 
-    WebPageReply *r = new WebPageReply("Fawkes", "<h1>Welcome to Fawkes.</h1>\n");
+	std::list<CacheLogger::CacheEntry> & messages = cache_logger_->get_messages();
+	std::list<CacheLogger::CacheEntry>::reverse_iterator i;
 
-    std::list<CacheLogger::CacheEntry> & messages = cache_logger_->get_messages();
-    std::list<CacheLogger::CacheEntry>::reverse_iterator i;
+	*r += "<h2>Latest log messages</h2>\n";
+	*r += "<table>\n";
+	for (i = messages.rbegin(); i != messages.rend(); ++i) {
+		CacheLogger::CacheEntry &e = *i;
+		const char *color = NULL;
+		switch (e.log_level) {
+		case Logger::LL_DEBUG: color = "#888888"; break;
+		case Logger::LL_WARN:  color = "orange";  break;
+		case Logger::LL_ERROR: color = "red";     break;
+		default: ;
+		}
+		if (color) {
+			r->append_body("<tr><td>%s</td><td>%s</td><td><span style=\"color:%s\">%s</span></td></tr>\n",
+			               e.timestr.c_str(), e.component.c_str(), color, e.message.c_str());
+		} else {
+			r->append_body("<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+			               e.timestr.c_str(), e.component.c_str(), e.message.c_str());
+		}
+	}
+	*r += "</table>\n";
 
-    *r += "<h2>Latest log messages</h2>\n";
-    *r += "<table>\n";
-    for (i = messages.rbegin(); i != messages.rend(); ++i) {
-      CacheLogger::CacheEntry &e = *i;
-      const char *color = NULL;
-      switch (e.log_level) {
-      case Logger::LL_DEBUG: color = "#888888"; break;
-      case Logger::LL_WARN:  color = "orange";  break;
-      case Logger::LL_ERROR: color = "red";     break;
-      default: ;
-      }
-      if (color) {
-	r->append_body("<tr><td>%s</td><td>%s</td><td><span style=\"color:%s\">%s</span></td></tr>\n",
-		       e.timestr.c_str(), e.component.c_str(), color, e.message.c_str());
-      } else {
-	r->append_body("<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-		       e.timestr.c_str(), e.component.c_str(), e.message.c_str());
-      }
-    }
-    *r += "</table>\n";
-
-    return r;
-  } else {
-    return NULL;
-  }
+	return r;
 }

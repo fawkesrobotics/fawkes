@@ -3,8 +3,7 @@
  *  startpage_processor.h - Web request processor for the start page
  *
  *  Created: Thu Feb 12 00:09:16 2009
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -23,22 +22,26 @@
 #ifndef __PLUGINS_WEBVIEW_STARTPAGE_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_STARTPAGE_PROCESSOR_H_
 
-#include <webview/request_processor.h>
-
 namespace fawkes {
   class CacheLogger;
+  class WebReply;
+  class WebRequest;
+  class WebUrlManager;
 }
 
-class WebviewStartPageRequestProcessor : public fawkes::WebRequestProcessor
+class WebviewStartPageRequestProcessor
 {
  public:
-  WebviewStartPageRequestProcessor(fawkes::CacheLogger *cache_logger);
-  virtual ~WebviewStartPageRequestProcessor();
-
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+	WebviewStartPageRequestProcessor(fawkes::WebUrlManager *url_manager,
+	                                 fawkes::CacheLogger *cache_logger);
+  ~WebviewStartPageRequestProcessor();
 
  private:
-  fawkes::CacheLogger *cache_logger_;
+  fawkes::WebReply * process_request();
+
+ private:
+  fawkes::CacheLogger   *cache_logger_;
+  fawkes::WebUrlManager *url_manager_;
 };
 
 #endif
