@@ -53,10 +53,15 @@ class WebviewRestReply : public StaticWebReply
 	/** Constructor.
 	 * @param code HTTP response code
 	 * @param body body of reply, usually a JSON document.
+	 * @param content_type content type of reply, defaults to application/json.
+	 * When sending text error messages, set to text/plain.
 	 */
-	WebviewRestReply(WebReply::Code code, std::string body = "")
+ WebviewRestReply(WebReply::Code code, const std::string &body = "",
+                  const std::string &content_type = "application/json")
 		: StaticWebReply(code, body)
-	{}
+	{
+		add_header("Content-type", content_type);
+	}
 };
 
 /** REST processing exception.
@@ -210,11 +215,12 @@ class WebviewRestApi
 					            (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
 			            } catch (WebviewRestException &e) {
 				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace());
+					            (e.code(), e.what_no_backtrace(), "text/plain");
 			            } catch (Exception &e) {
 				            auto r = std::make_unique<WebviewRestReply>
 					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
 				            r->append_body("Execution failed: %s", e.what_no_backtrace());
+				            r->add_header("Content-type", "text/plain");
 				            return r;
 			            }
 		            });
@@ -273,11 +279,12 @@ class WebviewRestApi
 					            (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
 			            } catch (WebviewRestException &e) {
 				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace());
+					            (e.code(), e.what_no_backtrace(), "text/plain");
 			            } catch (Exception &e) {
 				            auto r = std::make_unique<WebviewRestReply>
 					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
 				            r->append_body("Execution failed: %s", e.what_no_backtrace());
+				            r->add_header("Content-type", "text/plain");
 				            return r;
 			            }
 		            });
