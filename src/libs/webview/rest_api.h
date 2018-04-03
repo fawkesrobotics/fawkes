@@ -188,6 +188,35 @@ class WebviewRestApi
 	void add_handler(WebRequest::Method method, std::string path, Handler handler);
 	void set_pretty_json(bool pretty);
 
+	/** Add simple handler.
+	 * For a handler that does not require input parameters and that outputs
+	 * a WebviewRestReply instance, for example, only to indicate success.
+	 * @param method HTTP method to react to
+	 * @param path path (after component base path) to react to
+	 * @param handler handler function
+	 */
+	void add_handler(WebRequest::Method method, std::string path,
+	                 std::function<std::unique_ptr<WebviewRestReply> (WebviewRestParams &)> handler)
+	{
+		add_handler(method, path,
+		            [this, handler](const std::string &body, WebviewRestParams& m)
+		            -> std::unique_ptr<WebviewRestReply>
+		            {
+			            try {
+				            return handler(m);
+			            } catch (WebviewRestException &e) {
+				            return std::make_unique<WebviewRestReply>
+					            (e.code(), e.what_no_backtrace(), "text/plain");
+			            } catch (Exception &e) {
+				            auto r = std::make_unique<WebviewRestReply>
+					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
+				            r->append_body("Execution failed: %s", e.what_no_backtrace());
+				            r->add_header("Content-type", "text/plain");
+				            return r;
+			            }
+		            });
+	}
+
 	/** Add handler function.
 	 * @param method HTTP method to react to
 	 * @param path path (after component base path) to react to
