@@ -21,7 +21,7 @@ include $(LIBSRCDIR)/utils/utils.mk
 include $(LIBSRCDIR)/tf/tf.mk
 include $(LIBSRCDIR)/navgraph/navgraph.mk
 
-SUBDIRS = consoletool
+SUBDIRS = consoletool rest-api
 
 # Uncomment to enable time tracking for the skiller
 # CFLAGS += -DSKILLER_TIMETRACKING -DSKILLER_TT_MOD=50
