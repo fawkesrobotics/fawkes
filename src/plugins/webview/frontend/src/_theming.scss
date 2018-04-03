@@ -41,7 +41,14 @@
   // Global style overrides.
 
   a {
-    color: $primary;
+			color: $primary;
+			text-decoration: none;
+			border-bottom: 1px solid mat-color($primary-palette, 0.0);
+			transition: border 250ms ease;
+  }
+
+	a:not(.mat-button):hover {
+			border-bottom: 1px solid mat-color($primary-palette, 1.0);
   }
 
   code {
