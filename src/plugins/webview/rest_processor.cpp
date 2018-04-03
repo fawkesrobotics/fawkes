@@ -91,7 +91,6 @@ WebviewRESTRequestProcessor::process_request(const fawkes::WebRequest *request)
 			return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API '" + rest_api +
 			                             "' has no endpoint '" + rest_path + "'\n");
 		}
-		reply->add_header("Access-Control-Allow-Origin", "*");
 		return reply;
 	} catch (Exception &e) {
 		logger_->log_error("WebRESTProc", "REST API '%s' failed, exception follows", rest_api.c_str());

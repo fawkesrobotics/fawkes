@@ -156,6 +156,14 @@ WebviewThread::init()
     cfg_access_log_ = config->get_string("/webview/access_log");
   } catch (Exception &e) {}
 
+  bool cfg_cors_allow_all = false;
+  try {
+    cfg_cors_allow_all = config->get_bool("/webview/cors/allow/all");
+  } catch (Exception &e) {}
+  std::vector<std::string> cfg_cors_origins;
+  try {
+    cfg_cors_origins = config->get_strings("/webview/cors/allow/origins");
+  } catch (Exception &e) {}
 
   cache_logger_.clear();
 
@@ -176,7 +184,9 @@ WebviewThread::init()
   try {
 	  webserver_  = new WebServer(cfg_port_, dispatcher_, logger);
 
-	  webserver_->setup_ipv(cfg_use_ipv4_, cfg_use_ipv6_);
+	  (*webserver_)
+		  .setup_ipv(cfg_use_ipv4_, cfg_use_ipv6_)
+		  .setup_cors(cfg_cors_allow_all, std::move(cfg_cors_origins));
 
     if (cfg_use_tls_) {
 	    webserver_->setup_tls(cfg_tls_key_.c_str(), cfg_tls_cert_.c_str(),
