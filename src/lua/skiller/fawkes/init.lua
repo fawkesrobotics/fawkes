@@ -119,12 +119,22 @@ function process_skiller_messages()
 				 end
 
 			elseif mtype == "ExecSkillMessage" then
-				 if skiller_if:exclusive_controller() == m:sender_id() then
+				 if skiller_if:exclusive_controller() == 0 or skiller_if:exclusive_controller() == m:sender_id() then
 						if skill_enqueued then
 							 print_warn("More than one skill string enqueued, ignoring previous string (%s).",
                                                                     skiller_if:skill_string())
 						end
-            print_debug("%s wants me to execute '%s'", m:sender_thread_name(), m:skill_string())
+						if skiller_if:exclusive_controller() == 0 then
+							 if m:sender_thread_name() == "Unknown" then
+									print_debug("Remote executes '%s' without any exclusive controller",
+															m:skill_string())
+							 else
+									print_debug("%s executes '%s' without any exclusive controller",
+															m:sender_thread_name(), m:skill_string())
+							 end
+						else
+							 print_debug("%s executes '%s'", m:sender_thread_name(), m:skill_string())
+						end
 
             if sksf then
                print_info("Aborting execution of previous skill string '%s' for new goal",
@@ -149,7 +159,7 @@ function process_skiller_messages()
                skiller_if:set_status(SkillerInterface.S_FAILED)
             end
 				 else
-						print_warn("%s tries to exec while not controller", m:sender_thread_name())
+						print_warn("%s tries to exec, but other thread is controller", m:sender_thread_name())
 				 end
 
 			elseif mtype == "StopExecMessage" then
@@ -162,8 +172,12 @@ function process_skiller_messages()
 						write_skiller_if = true
 						publish_skill_status()
 				 else
-						print_warn("%s tries to stop exec while not controller",
-											 m:sender_thread_name())
+						if m:sender_thread_name() == "Unknown" then
+							 print_debug("Remote sent stop without any exclusive controller");
+						else
+							 print_debug("%s sent stop without any exclusive controller",
+													 m:sender_thread_name())
+						end
 				 end
 			else
 				 print_warn("Unhandled message of type %s in skiller interface", type)
