@@ -164,6 +164,10 @@ WebviewThread::init()
   try {
     cfg_cors_origins = config->get_strings("/webview/cors/allow/origins");
   } catch (Exception &e) {}
+  unsigned int cfg_cors_max_age = 0;
+  try {
+    cfg_cors_max_age = config->get_uint("/webview/cors/max-age");
+  } catch (Exception &e) {}
 
   cache_logger_.clear();
 
@@ -186,7 +190,7 @@ WebviewThread::init()
 
 	  (*webserver_)
 		  .setup_ipv(cfg_use_ipv4_, cfg_use_ipv6_)
-		  .setup_cors(cfg_cors_allow_all, std::move(cfg_cors_origins));
+		  .setup_cors(cfg_cors_allow_all, std::move(cfg_cors_origins), cfg_cors_max_age);
 
     if (cfg_use_tls_) {
 	    webserver_->setup_tls(cfg_tls_key_.c_str(), cfg_tls_cert_.c_str(),
