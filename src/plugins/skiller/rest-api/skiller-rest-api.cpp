@@ -59,6 +59,13 @@ SkillerRestApi::init()
 	rest_api_->add_handler<Skill>
 		(WebRequest::METHOD_GET, "/skills/{id}",
 		 std::bind(&SkillerRestApi::cb_get_skill, this, std::placeholders::_1));
+	rest_api_->add_handler
+		(WebRequest::METHOD_DELETE, "/skills/{id}",
+		 std::bind(&SkillerRestApi::cb_stop_skill, this, std::placeholders::_1));
+	rest_api_->add_handler<SkillCall, Skill>
+		(WebRequest::METHOD_POST, "/call",
+		 std::bind(&SkillerRestApi::cb_exec_skill, this,
+		           std::placeholders::_1, std::placeholders::_2));
 	webview_rest_api_manager->register_api(rest_api_);
 }
 
@@ -167,6 +174,8 @@ SkillerRestApi::cb_get_skill(WebviewRestParams& params)
 		skiller_if_->read();
 		s.set_skill_string(skiller_if_->skill_string());
 		s.set_error(skiller_if_->error());
+		s.set_msg_id(skiller_if_->msgid());
+		s.set_exclusive_controller(skiller_if_->exclusive_controller());
 		switch (skiller_if_->status()) {
 		case SkillerInterface::S_RUNNING:
 			s.set_status("RUNNING");
@@ -186,3 +195,84 @@ SkillerRestApi::cb_get_skill(WebviewRestParams& params)
 	return s;
 }
 
+
+Skill
+SkillerRestApi::cb_exec_skill(const SkillCall &call, fawkes::WebviewRestParams& params)
+{
+	if (params.query_arg("pretty") == "true") {
+		params.set_pretty_json(true);
+	}
+
+	if (! call.skill_string()) {
+		throw WebviewRestException(WebReply::HTTP_BAD_REQUEST,
+		                           "Request lacks skill string");
+	}
+
+	skiller_if_->read();
+	if (! skiller_if_->has_writer()) {
+		throw WebviewRestException(WebReply::HTTP_SERVICE_UNAVAILABLE,
+		                           "Behavior Engine plugin is not loaded");
+	}
+
+	if (skiller_if_->exclusive_controller() != 0) {
+		throw WebviewRestException(WebReply::HTTP_CONFLICT,
+		                           "Another thread is exclusive controller");
+	}
+
+	SkillerInterface::ExecSkillMessage *m =
+		new SkillerInterface::ExecSkillMessage(call.skill_string()->c_str());
+	m->ref();
+
+	try {
+		skiller_if_->msgq_enqueue(m);
+	} catch (Exception &e) {
+		logger->log_error(name(), "Failed to execute skill: %s", e.what_no_backtrace());
+		throw WebviewRestException(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+		                           "Failed to execute skill: %s", e.what_no_backtrace());
+	}
+
+	Skill sk;
+	sk.set_kind("Skill");
+	sk.set_apiVersion(Skill::api_version());
+	sk.set_name("active");
+	sk.set_msg_id(m->id());
+	m->unref();
+	return sk;
+}
+
+
+std::unique_ptr<fawkes::WebviewRestReply>
+SkillerRestApi::cb_stop_skill(WebviewRestParams& params)
+{
+	if (params.query_arg("pretty") == "true") {
+		params.set_pretty_json(true);
+	}
+
+	std::string skill_name{params.path_arg("id")};
+
+	if (skill_name != "active") {
+		throw WebviewRestException(WebReply::HTTP_BAD_REQUEST,
+		                           "Only the 'active' skill can be stopped");
+	}
+
+	skiller_if_->read();
+	if (! skiller_if_->has_writer()) {
+		throw WebviewRestException(WebReply::HTTP_SERVICE_UNAVAILABLE,
+		                           "Behavior Engine plugin is not loaded");
+	}
+
+	if (skiller_if_->exclusive_controller() != 0) {
+		throw WebviewRestException(WebReply::HTTP_CONFLICT,
+		                           "Another thread is exclusive controller");
+	}
+
+	try {
+		skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
+	} catch (Exception &e) {
+		logger->log_error(name(), "Failed to stop skill: %s", e.what_no_backtrace());
+		throw WebviewRestException(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+		                           "Failed to execute skill: %s", e.what_no_backtrace());
+	}
+
+	return std::make_unique<WebviewRestReply>(WebReply::HTTP_OK, "OK", "text/plain");
+}

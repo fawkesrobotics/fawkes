@@ -29,6 +29,7 @@
 #include <webview/rest_array.h>
 
 #include "model/Skill.h"
+#include "model/SkillCall.h"
 #include "model/SkillInfo.h"
 
 namespace fawkes {
@@ -56,6 +57,11 @@ class SkillerRestApi
 		cb_list_skills(fawkes::WebviewRestParams& params);
 
 	Skill	cb_get_skill(fawkes::WebviewRestParams& params);
+
+	Skill	cb_exec_skill(const SkillCall &call, fawkes::WebviewRestParams& params);
+
+	std::unique_ptr<fawkes::WebviewRestReply>
+		cb_stop_skill(fawkes::WebviewRestParams& params);
 
 	void set_and_wait_graph(const char *graph);
 

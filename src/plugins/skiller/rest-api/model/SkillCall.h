@@ -1,6 +1,6 @@
 
 /****************************************************************************
- *  BehaviorEngine -- Schema Skill
+ *  BehaviorEngine -- Schema SkillCall
  *  (auto-generated, do not modify directly)
  *
  *  Behavior Engine REST API.
@@ -25,21 +25,21 @@
 
 
 
-/** Skill representation for JSON transfer. */
-class Skill
+/** SkillCall representation for JSON transfer. */
+class SkillCall
 
 {
  public:
 	/** Constructor. */
-	Skill();
+	SkillCall();
 	/** Constructor from JSON.
 	 * @param json JSON string to initialize from
 	 */
-	Skill(const std::string &json);
+	SkillCall(const std::string &json);
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	Skill(const rapidjson::Value& v);
+	SkillCall(const rapidjson::Value& v);
 
 	/** Get version of implemented API.
 	 * @return string representation of version
@@ -82,7 +82,7 @@ class Skill
 	 */
 	virtual void validate(bool subcall = false) const;
 
-	// Schema: Skill
+	// Schema: SkillCall
  public:
   /** Get kind value.
    * @return kind value
@@ -116,41 +116,8 @@ class Skill
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get name value.
-   * @return name value
-   */
-	std::optional<std::string>
- name() const
-	{
-		return name_;
-	}
-
-	/** Set name value.
-	 * @param name new value
-	 */
-	void set_name(const std::string& name)
-	{
-		name_ = name;
-	}
-  /** Get graph value.
-   * @return graph value
-   */
-	std::optional<std::string>
- graph() const
-	{
-		return graph_;
-	}
-
-	/** Set graph value.
-	 * @param graph new value
-	 */
-	void set_graph(const std::string& graph)
-	{
-		graph_ = graph;
-	}
-	/** The skill string is given only for the active skill.
-
-   * @return skill-string value
+  /** Get skill_string value.
+   * @return skill_string value
    */
 	std::optional<std::string>
  skill_string() const
@@ -158,77 +125,12 @@ class Skill
 		return skill_string_;
 	}
 
-	/** Set skill-string value.
+	/** Set skill_string value.
 	 * @param skill_string new value
 	 */
 	void set_skill_string(const std::string& skill_string)
 	{
 		skill_string_ = skill_string;
-	}
-	/** An error is presented for the active skill if it has FAILED.
-
-   * @return error value
-   */
-	std::optional<std::string>
- error() const
-	{
-		return error_;
-	}
-
-	/** Set error value.
-	 * @param error new value
-	 */
-	void set_error(const std::string& error)
-	{
-		error_ = error;
-	}
-  /** Get msg_id value.
-   * @return msg_id value
-   */
-	std::optional<int64_t>
- msg_id() const
-	{
-		return msg_id_;
-	}
-
-	/** Set msg_id value.
-	 * @param msg_id new value
-	 */
-	void set_msg_id(const int64_t& msg_id)
-	{
-		msg_id_ = msg_id;
-	}
-  /** Get exclusive_controller value.
-   * @return exclusive_controller value
-   */
-	std::optional<int64_t>
- exclusive_controller() const
-	{
-		return exclusive_controller_;
-	}
-
-	/** Set exclusive_controller value.
-	 * @param exclusive_controller new value
-	 */
-	void set_exclusive_controller(const int64_t& exclusive_controller)
-	{
-		exclusive_controller_ = exclusive_controller;
-	}
-  /** Get status value.
-   * @return status value
-   */
-	std::optional<std::string>
- status() const
-	{
-		return status_;
-	}
-
-	/** Set status value.
-	 * @param status new value
-	 */
-	void set_status(const std::string& status)
-	{
-		status_ = status;
 	}
  private:
 	std::optional<std::string>
@@ -236,18 +138,6 @@ class Skill
 	std::optional<std::string>
  apiVersion_;
 	std::optional<std::string>
- name_;
-	std::optional<std::string>
- graph_;
-	std::optional<std::string>
  skill_string_;
-	std::optional<std::string>
- error_;
-	std::optional<int64_t>
- msg_id_;
-	std::optional<int64_t>
- exclusive_controller_;
-	std::optional<std::string>
- status_;
 
 };

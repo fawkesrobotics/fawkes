@@ -79,6 +79,60 @@ paths:
         '400':
           description: bad input parameter
 
+    delete:
+      tags:
+      - public
+      summary: Stop a currently running skill.
+      operationId: stop_skill
+      description: |
+        Stop the currently active skill.
+        The ID must be `active`.
+      parameters:
+        - name: id
+          in: path
+          description: Must be `active`.
+          required: true
+          schema:
+            type: string
+            format: symbol
+      responses:
+        '200':
+          description: Skill was indeed stopped.
+        '400':
+          description: bad input parameter
+
+  /skiller/call:
+    post:
+      tags:
+      - public
+      summary: Execute a new skill.
+      operationId: exec_skill
+      description: |
+        Run a skill.
+        The ID must be `active`.
+      parameters:
+        - name: skill_call
+          in: body
+          description: The actual skill call
+          required: true
+          schema:
+            $ref: '#/components/schemas/SkillCall'
+      responses:
+        '200':
+          description: Skill was started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+        '400':
+          description: bad input parameter
+        '409':
+          description: Another thread is exclusive controller
+        '500':
+          description: An error occured sending the request
+        '503':
+          description: Behavior Engine has not been loaded
+
 components:
   schemas:
     SkillInfo:
@@ -104,7 +158,6 @@ components:
         - kind
         - apiVersion
         - name
-        - graph
       properties:
         kind:
           type: string
@@ -126,6 +179,26 @@ components:
           type: string
           description: |
             An error is presented for the active skill if it has FAILED.
+        msg_id:
+          type: integer
+          format: int64
+        exclusive_controller:
+          type: integer
+          format: int64
         status:
           type: string
           enum: ["INACTIVE", "FINAL", "RUNNING", "FAILED"]
+
+    SkillCall:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - skill_string
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        skill_string:
+          type: string
