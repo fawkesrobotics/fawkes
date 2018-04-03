@@ -89,6 +89,15 @@ WebReply::code() const
 }
 
 
+/** Set response code.
+ * @param code HTTP response code
+ */
+void
+WebReply::set_code(WebReply::Code code)
+{
+	code_ = code;
+}
+
 /** Add a HTTP header.
  * @param header header entry name
  * @param content content of the header field
