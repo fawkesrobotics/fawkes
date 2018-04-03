@@ -129,6 +129,18 @@ WebRequestDispatcher::setup_access_log(const char *filename)
   access_log_ = new WebviewAccessLog(filename);
 }
 
+
+/** Setup cross-origin resource sharing
+ * @param allow_all allow access to all hosts
+ * @param origins allow access from these specific origins
+ */
+void
+WebRequestDispatcher::setup_cors(bool allow_all, std::vector<std::string>&& origins)
+{
+	cors_allow_all_ = allow_all;
+	cors_origins_   = std::move(origins);
+}
+
 /** Callback for new requests.
  * @param cls closure, must be WebRequestDispatcher
  * @param uri requested URI
@@ -429,7 +441,40 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   }
 #endif
 
-  int ret;
+  if (0 == strcmp(method, MHD_HTTP_METHOD_OPTIONS)) {
+	  StaticWebReply *reply = new StaticWebReply(WebReply::HTTP_OK);
+	  const std::map<std::string, std::string> &headers{request->headers()};
+	  const auto &request_method = headers.find("Access-Control-Request-Method");
+	  const auto &request_headers = headers.find("Access-Control-Request-Headers");
+	  if (cors_allow_all_) {
+		  reply->add_header("Access-Control-Allow-Origin", "*");
+		  if (request_method != headers.end()) {
+			  reply->add_header("Access-Control-Allow-Methods", request_method->second);
+		  }
+		  if (request_headers != headers.end()) {
+			  reply->add_header("Access-Control-Allow-Headers", request_headers->second);
+		  }
+	  } else if (! cors_origins_.empty()) {
+		  const auto &origin = headers.find("Origin");
+		  if (origin != headers.end()) {
+			  if (std::find(cors_origins_.begin(), cors_origins_.end(), origin->second) != cors_origins_.end()) {
+				  reply->add_header("Access-Control-Allow-Origin", origin->second);
+				  if (request_method != headers.end()) {
+					  reply->add_header("Access-Control-Allow-Methods", request_method->second);
+				  }
+				  if (request_headers != headers.end()) {
+					  reply->add_header("Access-Control-Allow-Headers", request_headers->second);
+				  }
+			  } else {
+				  reply->set_code(WebReply::HTTP_FORBIDDEN);
+			  }
+		  } else {
+			  reply->set_code(WebReply::HTTP_FORBIDDEN);
+		  }
+	  }
+	  return queue_static_reply(connection, request, reply);
+	  delete reply;
+  }
 
   if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
 	  if (MHD_post_process(request->pp_, upload_data, *upload_data_size) == MHD_NO) {
@@ -445,8 +490,13 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 
   try {
 	  WebReply *reply = url_manager_->process_request(request);
+	  int ret;
 
 	  if (reply) {
+		  if (cors_allow_all_) {
+			  reply->add_header("Access-Control-Allow-Origin", "*");
+		  }
+
 	    StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
 	    DynamicWebReply *dreply = dynamic_cast<DynamicWebReply *>(reply);
       if (sreply) {

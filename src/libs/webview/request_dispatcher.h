@@ -26,8 +26,8 @@
 
 #include <string>
 #include <map>
-#include <stdint.h>
 #include <memory>
+#include <vector>
 
 #include <microhttpd.h>
 
@@ -72,6 +72,7 @@ class WebRequestDispatcher
 
   void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
   void setup_access_log(const char *filename);
+  void setup_cors(bool allow_all, std::vector<std::string>&& origins);
 
   unsigned int active_requests() const;
   Time last_request_completion_time() const;
@@ -106,6 +107,9 @@ class WebRequestDispatcher
   unsigned int              active_requests_;
   fawkes::Time             *last_request_completion_time_;
   fawkes::Mutex            *active_requests_mutex_;
+
+  bool                      cors_allow_all_;
+  std::vector<std::string>  cors_origins_;
 };
 
 } // end namespace fawkes

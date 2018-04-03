@@ -105,6 +105,20 @@ WebServer::setup_ipv(bool enable_ipv4, bool enable_ipv6)
   return *this;
 }
 
+/** Setup cross-origin resource sharing
+ * @param allow_all allow access to all hosts
+ * @param origins allow access from these specific origins
+ * @return *this to allow for chaining
+ */
+WebServer &
+WebServer::setup_cors(bool allow_all, std::vector<std::string>&& origins)
+{
+	cors_allow_all_ = allow_all;
+	cors_origins_   = std::move(origins);
+
+  return *this;
+}
+
 /** Setup thread pool.
  * This also enables epoll on Linux.
  * @param num_threads number of threads in thread pool. If this equals
@@ -140,6 +154,8 @@ WebServer::start()
   if (tls_enabled_) {
 	  flags |= MHD_USE_SSL;
   }
+
+  dispatcher_->setup_cors(cors_allow_all_, std::move(cors_origins_));
 
   if (num_threads_ > 1) {
 #ifdef __linux__
