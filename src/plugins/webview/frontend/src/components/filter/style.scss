@@ -1,0 +1,35 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// Copyright  2017  The Kubernetes Authors
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+@import '../../variables';
+
+:host {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.ff-resource-card-list-filter-wrapper {
+  padding-right: ($baseline-grid / 2);
+}
+
+.ff-search-icon {
+  cursor: pointer;
+  outline: none;
+  padding-left: $baseline-grid;
+}
+
+.ff-search-input {
+  border-bottom: 1px solid;
+  border-left-width: 0;
+  border-right-width: 0;
+  border-top-width: 0;
+  outline: none;
+	padding: 0;
+}
+
+.ff-search-container {
+		user-select: none;
+		vertical-align: middle;
+}

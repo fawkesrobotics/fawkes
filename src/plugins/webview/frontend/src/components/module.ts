@@ -11,12 +11,14 @@ import { PropertyComponent } from './property/component';
 import { HSpaceComponent } from './hspace/component';
 import { ListZeroStateComponent } from './zerostate/component';
 import { DotGraphComponent } from './dotgraph/component';
+import { CardListFilterComponent } from './filter/component';
 
 const COMPONENTS = [
   PropertyComponent,
   HSpaceComponent,
   ListZeroStateComponent,
   DotGraphComponent,
+  CardListFilterComponent,
 ];
 
 @NgModule({
