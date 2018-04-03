@@ -56,14 +56,24 @@ WebviewRESTRequestProcessor::WebviewRESTRequestProcessor(fawkes::WebUrlManager *
   api_mgr_ = api_mgr;
   url_mgr_ = url_manager;
 
-  url_mgr_->add_handler(WebRequest::METHOD_GET, "/api/{rest_url*}",
-                        std::bind(&WebviewRESTRequestProcessor::process_request, this,
-                                  std::placeholders::_1));
+  methods_ = {
+	  WebRequest::METHOD_GET, WebRequest::METHOD_POST,
+	  WebRequest::METHOD_PUT, WebRequest::METHOD_DELETE,
+	  WebRequest::METHOD_PATCH};
+
+  for (const auto &method : methods_) {
+	  url_mgr_->add_handler(method, "/api/{rest_url*}",
+	                        std::bind(&WebviewRESTRequestProcessor::process_request, this,
+	                                  std::placeholders::_1));
+  }
 }
 
 /** Destructor. */
 WebviewRESTRequestProcessor::~WebviewRESTRequestProcessor()
 {
+  for (const auto &method : methods_) {
+	  url_mgr_->remove_handler(method, "/api/{rest_url*}");
+  }
 }
 
 

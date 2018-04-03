@@ -23,12 +23,14 @@
 #ifndef __PLUGINS_WEBVIEW_REST_PROCESSOR_H_
 #define __PLUGINS_WEBVIEW_REST_PROCESSOR_H_
 
+#include <vector>
+#include <webview/request.h>
+
 namespace fawkes {
 	class WebUrlManager;
 	class WebviewRestApiManager;
   class Logger;
   class WebReply;
-  class WebRequest;
 }
 
 class WebviewRESTRequestProcessor
@@ -46,6 +48,8 @@ class WebviewRESTRequestProcessor
   fawkes::WebUrlManager         *url_mgr_;
   fawkes::WebviewRestApiManager *api_mgr_;
   fawkes::Logger *logger_;
+
+  std::vector<fawkes::WebRequest::Method> methods_;
 };
 
 #endif
