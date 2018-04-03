@@ -71,6 +71,7 @@ ClipsWebviewThread::finalize()
 	webview_url_manager->remove_handler(WebRequest::METHOD_POST, "/clips/{env}/assert");
 	webview_url_manager->remove_handler(WebRequest::METHOD_GET, "/clips/{env}/retract/{index}");
 	webview_url_manager->remove_handler(WebRequest::METHOD_GET, "/clips/{env*}");
+	webview_url_manager->remove_handler(WebRequest::METHOD_GET, "/clips");
   webview_nav_manager->remove_nav_entry("/clips/");
   delete web_proc_;
 }
