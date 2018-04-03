@@ -274,10 +274,11 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
  */
 int
 WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection * connection,
-					  WebRequest *request,
-					  DynamicWebReply *dreply)
+                                          WebRequest *request,
+                                          DynamicWebReply *dreply)
 {
   dreply->set_request(request);
+  dreply->pack();
   request->set_reply_code(dreply->code());
 
   struct MHD_Response *response;
@@ -311,6 +312,7 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
 					 StaticWebReply *sreply)
 {
   sreply->set_request(request);
+  sreply->pack();
 
   struct MHD_Response *response = prepare_static_response(sreply);
 
@@ -331,6 +333,7 @@ WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection * connection,
   StaticWebReply sreply(WebReply::HTTP_UNAUTHORIZED, UNAUTHORIZED_REPLY);
 #if MHD_VERSION >= 0x00090400
   sreply.set_request(request);
+  sreply.pack();
   struct MHD_Response *response = prepare_static_response(&sreply);
 
   int rv = MHD_queue_basic_auth_fail_response(connection, realm_, response);

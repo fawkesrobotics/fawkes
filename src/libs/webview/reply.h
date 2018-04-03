@@ -109,15 +109,19 @@ class WebReply
   void              add_header(const std::string& header_string);
   const HeaderMap & headers() const;
   
-  static void       set_caching(bool caching);
+  void              set_caching(bool caching);
+  static void       set_caching_default(bool caching);
 
   void              set_request(WebRequest *request);
   WebRequest *      get_request() const;
 
+  void              pack();
+
  private:
   Code              code_;
   HeaderMap         headers_;
-  static bool       caching_;
+  bool              caching_;
+  static bool       caching_default_;
   WebRequest       *request_;
 };
 

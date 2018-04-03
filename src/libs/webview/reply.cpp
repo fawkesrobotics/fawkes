@@ -42,7 +42,7 @@ namespace fawkes {
  */
 
 /// Enable caching for this reply?
-bool WebReply::caching_ = true;
+bool WebReply::caching_default_ = true;
 
 /** Constructor.
  * @param code HTTP response code
@@ -52,12 +52,7 @@ WebReply::WebReply(Code code)
   code_ = code;
   request_ = NULL;
 
-  if (! caching_) {
-    // Headers to disable caching
-    headers_["Cache-Control"] = "no-cache, no-store, must-revalidate";
-    headers_["Pragma"] = "no-cache";
-    headers_["Expires"] = "0";
-  }
+  caching_ = caching_default_;
 }
 
 
@@ -67,10 +62,19 @@ WebReply::~WebReply()
 }
 
 
-/** Enable or disable caching for all consecutive replies.
+/** Enable or disable caching default for replies.
  * This static setting controls whether following replies will allow
- * for client-side of the web pages or not. Disabling this allows to
- * force clients to always reload the pages.
+ * for client-side of the web pages or not by default. Disabling this
+ * allows to force clients to always reload the pages.
+ * @param caching true to enable client-side caching, false to disable
+ */
+void
+WebReply::set_caching_default(bool caching)
+{
+  caching_default_ = caching;
+}
+
+/** Enable or disable caching for this specific reply.
  * @param caching true to enable client-side caching, false to disable
  */
 void
@@ -78,6 +82,7 @@ WebReply::set_caching(bool caching)
 {
   caching_ = caching;
 }
+
 
 /** Get response code.
  * @return HTTP response code
@@ -159,6 +164,20 @@ void
 WebReply::set_request(WebRequest *request)
 {
   request_ = request;
+}
+
+/** Called just before the reply is sent.
+ * Sets no-caching flags if caching has been disabled. 
+ */
+void
+WebReply::pack()
+{
+  if (! caching_) {
+    // Headers to disable caching
+    headers_["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    headers_["Pragma"] = "no-cache";
+    headers_["Expires"] = "0";
+  }
 }
 
 /** @class DynamicWebReply <webview/reply.h>
