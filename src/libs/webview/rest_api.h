@@ -233,7 +233,7 @@ class WebviewRestApi
 	 */
 	template <class I>
 	void add_handler(WebRequest::Method method, std::string path,
-	                 std::function<std::string (I, WebviewRestParams &)> handler)
+	                 std::function<std::unique_ptr<WebviewRestReply> (I, WebviewRestParams &)> handler)
 	{
 		add_handler(method, path,
 		            [this, handler](const std::string &body, WebviewRestParams& m)
@@ -242,15 +242,16 @@ class WebviewRestApi
 			            I input;
 			            input.from_json(body);
 			            try {
-				            return std::make_unique<WebviewRestReply>
-					            (WebReply::HTTP_OK, handler(input, m));
+				            return handler(std::forward<I>(input), m);
 			            } catch (WebviewRestException &e) {
 				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace());
+					            (e.code(), e.what_no_backtrace(), "text/plain");
 			            } catch (Exception &e) {
-				            return std::make_unique<WebviewRestReply>
-					            (WebReply::HTTP_INTERNAL_SERVER_ERROR,
-					             "Execution failed: %s", e.what_no_backtrace());
+				            auto r = std::make_unique<WebviewRestReply>
+					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
+				            r->append_body("Execution failed: %s", e.what_no_backtrace());
+				            r->add_header("Content-type", "text/plain");
+				            return r;
 			            }
 		            });
 	}
