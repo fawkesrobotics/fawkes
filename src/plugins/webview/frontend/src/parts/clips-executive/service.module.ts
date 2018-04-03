@@ -4,10 +4,10 @@
 
 import {NgModule} from '@angular/core';
 
-import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
+//import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 
 import { ClipsExecutiveApiService } from './services/api.service';
-import { ClipsExecutiveInMemoryDataService } from './services/mock-data.service';
+//import { ClipsExecutiveInMemoryDataService } from './services/mock-data.service';
 
 @NgModule({
   imports: [
