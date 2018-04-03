@@ -84,7 +84,7 @@ WebviewThread::init()
 {
   cfg_port_ = config->get_uint("/webview/port");
 
-  WebReply::set_caching(config->get_bool("/webview/client_side_caching"));
+  WebReply::set_caching_default(config->get_bool("/webview/client_side_caching"));
 
   webview_service_ = NULL;
   service_browse_handler_ = NULL;
