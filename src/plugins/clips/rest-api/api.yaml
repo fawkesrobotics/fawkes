@@ -1,0 +1,149 @@
+openapi: 3.0.0
+info:
+  title: Clips
+  version: v1beta1
+  description: |
+    CLIPS REST API.
+    Enables access to CLIPS environments.
+  contact:
+    name:  Tim Niemueller
+    email: niemueller@kbsg.rwth-aachen.de
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: public
+    description: Public API.
+
+paths:
+  /clips/{env}/facts:
+    get:
+      tags:
+      - public
+      summary: get all facts
+      operationId: get_facts
+      description: |
+        List all facts of an environment.
+      parameters:
+        - name: env
+          in: path
+          description: ID of CLIPS environment
+          required: true
+          schema:
+            type: string
+            format: symbol
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+        - name: formatted
+          in: query
+          description: |
+            Retrieve formatted strings.  If the flag is passed, the
+            `formatted` field of the Fact will contain a formatted
+            string representation suitable for printing. Otherwise the
+            slots field will contain a fact as structures.
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list of facts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Fact'
+        '400':
+          description: bad input parameter
+
+  /clips/:
+    get:
+      tags:
+      - public
+      summary: list all environments
+      operationId: list_environments
+      description: |
+        List all CLIPS environments.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list environments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Environment'
+
+components:
+  schemas:
+    SlotValue:
+      type: object
+      required:
+        - name
+        - is-multifield
+        - values
+      properties:
+        name:
+          type: string
+          format: symbol
+        type:
+          type: string
+          format: symbol
+          enum: ["FLOAT", "INTEGER", "SYMBOL", "STRING", "EXTERNAL-ADDRESS"]
+        is-multifield:
+          type: boolean
+        values:
+          type: array
+          items:
+            type: string
+            
+
+    Fact:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - index
+        - template_name
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        index:
+          type: integer
+          format: int64
+        template_name:
+          type: string
+          format: symbol
+        formatted:
+          type: string
+          format: symbol
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlotValue'
+
+    Environment:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
