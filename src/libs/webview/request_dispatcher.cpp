@@ -80,6 +80,9 @@ WebRequestDispatcher::WebRequestDispatcher(WebUrlManager *url_manager,
   active_requests_       = 0;
   active_requests_mutex_ = new Mutex();
   last_request_completion_time_ = new Time();
+
+  cors_allow_all_        = false;
+  cors_max_age_          = 0;
 }
 
 
@@ -133,12 +136,15 @@ WebRequestDispatcher::setup_access_log(const char *filename)
 /** Setup cross-origin resource sharing
  * @param allow_all allow access to all hosts
  * @param origins allow access from these specific origins
+ * @param max_age maximum cache time to send to the client, zero to disable
  */
 void
-WebRequestDispatcher::setup_cors(bool allow_all, std::vector<std::string>&& origins)
+WebRequestDispatcher::setup_cors(bool allow_all, std::vector<std::string>&& origins,
+                                 unsigned int max_age)
 {
 	cors_allow_all_ = allow_all;
 	cors_origins_   = std::move(origins);
+	cors_max_age_   = max_age;
 }
 
 /** Callback for new requests.
@@ -446,11 +452,15 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 
   if (0 == strcmp(method, MHD_HTTP_METHOD_OPTIONS)) {
 	  StaticWebReply *reply = new StaticWebReply(WebReply::HTTP_OK);
+	  reply->set_caching(true); // handled via Max-Age header anyway
 	  const std::map<std::string, std::string> &headers{request->headers()};
 	  const auto &request_method = headers.find("Access-Control-Request-Method");
 	  const auto &request_headers = headers.find("Access-Control-Request-Headers");
 	  if (cors_allow_all_) {
 		  reply->add_header("Access-Control-Allow-Origin", "*");
+		  if (cors_max_age_ > 0) {
+			  reply->add_header("Access-Control-Max-Age", std::to_string(cors_max_age_));
+		  }
 		  if (request_method != headers.end()) {
 			  reply->add_header("Access-Control-Allow-Methods", request_method->second);
 		  }
@@ -462,6 +472,9 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 		  if (origin != headers.end()) {
 			  if (std::find(cors_origins_.begin(), cors_origins_.end(), origin->second) != cors_origins_.end()) {
 				  reply->add_header("Access-Control-Allow-Origin", origin->second);
+				  if (cors_max_age_ > 0) {
+					  reply->add_header("Access-Control-Max-Age", std::to_string(cors_max_age_));
+				  }
 				  if (request_method != headers.end()) {
 					  reply->add_header("Access-Control-Allow-Methods", request_method->second);
 				  }

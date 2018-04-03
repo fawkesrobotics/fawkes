@@ -72,7 +72,7 @@ class WebRequestDispatcher
 
   void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
   void setup_access_log(const char *filename);
-  void setup_cors(bool allow_all, std::vector<std::string>&& origins);
+  void setup_cors(bool allow_all, std::vector<std::string>&& origins, unsigned int max_age);
 
   unsigned int active_requests() const;
   Time last_request_completion_time() const;
@@ -110,6 +110,7 @@ class WebRequestDispatcher
 
   bool                      cors_allow_all_;
   std::vector<std::string>  cors_origins_;
+  unsigned int              cors_max_age_;
 };
 
 } // end namespace fawkes

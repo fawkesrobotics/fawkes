@@ -108,13 +108,16 @@ WebServer::setup_ipv(bool enable_ipv4, bool enable_ipv6)
 /** Setup cross-origin resource sharing
  * @param allow_all allow access to all hosts
  * @param origins allow access from these specific origins
+ * @param max_age maximum cache time to send to the client, zero to disable
  * @return *this to allow for chaining
  */
 WebServer &
-WebServer::setup_cors(bool allow_all, std::vector<std::string>&& origins)
+WebServer::setup_cors(bool allow_all, std::vector<std::string>&& origins,
+                      unsigned int max_age)
 {
 	cors_allow_all_ = allow_all;
 	cors_origins_   = std::move(origins);
+	cors_max_age_   = max_age;
 
   return *this;
 }
@@ -155,7 +158,7 @@ WebServer::start()
 	  flags |= MHD_USE_SSL;
   }
 
-  dispatcher_->setup_cors(cors_allow_all_, std::move(cors_origins_));
+  dispatcher_->setup_cors(cors_allow_all_, std::move(cors_origins_), cors_max_age_);
 
   if (num_threads_ > 1) {
 #ifdef __linux__

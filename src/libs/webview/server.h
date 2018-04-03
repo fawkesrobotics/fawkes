@@ -53,7 +53,7 @@ class WebServer {
   WebServer &  setup_ipv(bool enable_ipv4, bool enable_ipv6);
   WebServer &  setup_thread_pool(unsigned int num_threads);
   
-  WebServer &  setup_cors(bool allow_all, std::vector<std::string>&& origins);
+  WebServer &  setup_cors(bool allow_all, std::vector<std::string>&& origins, unsigned int max_age);
   WebServer &  setup_basic_auth(const char *realm, WebUserVerifier *verifier);
   WebServer &  setup_request_manager(WebRequestManager *request_manager);
   WebServer &  setup_access_log(const char *filename);
@@ -85,6 +85,7 @@ class WebServer {
   unsigned int          num_threads_;
   bool                  cors_allow_all_;
   std::vector<std::string> cors_origins_;
+  unsigned int          cors_max_age_;
 };
 
 } // end namespace fawkes
