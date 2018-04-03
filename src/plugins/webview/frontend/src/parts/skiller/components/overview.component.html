@@ -52,7 +52,8 @@
 	</mat-card-content>
 </mat-card>
 
-<mat-card class="ff-content-card" fxFlex="30%">
+<div fxFlex="30%" fxLayout="column">
+<mat-card class="ff-content-card">
 	<mat-card-title>
 		<div fxLayout="row">
 			<div>Status</div>
@@ -82,4 +83,40 @@
 		</div>
 	</mat-card-content>
 </mat-card>
+
+<mat-card class="ff-content-card">
+	<mat-card-title>
+		<div fxLayout="row">
+			<div>Execute</div>
+		</div>
+	</mat-card-title>
+	<mat-divider></mat-divider>
+	<mat-card-content class="ff-card-content">
+		<form #f="ngForm" (ngSubmit)="exec_skill(skillstring.value)" fxLayout="row">
+			<mat-form-field
+				[hideRequiredMarker]="true" fxFlex="grow">
+				<input #skillstring matInput placeholder="Skill String"
+							 name="skill_string" required ngModel>
+			</mat-form-field>
+			<div fxLayout="column" fxLayoutAlign="center">
+				<button mat-button type="submit" [disabled]="!f.valid ||
+																										 (skill &&
+																										 selected_skill == 'active' &&
+																										 skill.exclusive_controller != 0)"
+								class="exec-button">
+					Execute
+				</button>
+			</div>
+    </form>
+
+		<div [matTooltip]="tooltip_stop()">
+			<button mat-raised-button color="warn" class="ff-hfill"
+							(click)="stop_skill()"
+							[disabled]="disabled_stop()">
+				<mat-icon>cancel</mat-icon> STOP
+			</button>
+		</div>
+	</mat-card-content>
+</mat-card>
+</div>
 </div>

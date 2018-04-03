@@ -1,5 +1,5 @@
 /****************************************************************************
- *  BehaviorEngine -- Schema Skill
+ *  BehaviorEngine -- Schema SkillCall
  *  (auto-generated, do not modify directly)
  *
  *  Behavior Engine REST API.
@@ -13,29 +13,16 @@
 
 
 
-/** Skill representation for JSON transfer. */
-export interface Skill
+/** SkillCall representation for JSON transfer. */
+export interface SkillCall
 {
 	kind: string;
 	apiVersion: string;
-	name: string;
-	graph?: string;
-	skill_string?: string;
-	error?: string;
-	msg_id?: number;
-	exclusive_controller?: number;
-	status?: Skill.StatusEnum;
+	skill_string: string;
 }
 
-export namespace Skill
+export namespace SkillCall
 {
 	export const API_VERSION: string = "v1beta1";
 
-	export type StatusEnum = 'INACTIVE' | 'FINAL' | 'RUNNING' | 'FAILED';
-	export const StatusEnum = {
-		INACTIVE: 'INACTIVE' as StatusEnum,
-		FINAL: 'FINAL' as StatusEnum,
-		RUNNING: 'RUNNING' as StatusEnum,
-		FAILED: 'FAILED' as StatusEnum
-	}
 }

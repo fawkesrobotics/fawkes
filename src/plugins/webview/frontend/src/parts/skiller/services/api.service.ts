@@ -13,14 +13,13 @@
  ****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/of';
-import 'rxjs/add/operator/map';
 
 import { ConfigurationService } from '../../../services/config.service';
 
 import { Skill } from '../models/Skill';
+import { SkillCall } from '../models/SkillCall';
 import { SkillInfo } from '../models/SkillInfo';
 
 
@@ -32,10 +31,16 @@ export class BehaviorEngineApiService
 
   public list_skills(pretty?: boolean): Observable<SkillInfo[]>
   {
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers }
-    return this.http.get<SkillInfo[]>(`${this.config.get('apiurl')}/skiller/skills`, options);
+    return this.http.get<SkillInfo[]>(`${this.config.get('apiurl')}/skiller/skills`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
   public get_skill(id: string, pretty?: boolean): Observable<Skill>
@@ -43,10 +48,43 @@ export class BehaviorEngineApiService
     if (id === null || id == undefined) {
       throw new Error("Required parameter id is null or undefined (get_skill)");
     }
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers }
-    return this.http.get<Skill>(`${this.config.get('apiurl')}/skiller/skills/${encodeURIComponent(String(id))}`, options);
+    return this.http.get<Skill>(`${this.config.get('apiurl')}/skiller/skills/${encodeURIComponent(String(id))}`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
+	}
+
+  public stop_skill(id: string): Observable<HttpResponse<string>>
+  {
+    if (id === null || id == undefined) {
+      throw new Error("Required parameter id is null or undefined (stop_skill)");
+    }
+		let params = new HttpParams();
+    let headers = new HttpHeaders();
+		
+    return this.http.delete(`${this.config.get('apiurl')}/skiller/skills/${encodeURIComponent(String(id))}`, 
+		  { headers: headers, params: params,
+		    observe: 'response', responseType: 'text' })	;
+	}
+
+  public exec_skill(skill_call: SkillCall): Observable<Skill>
+  {
+    if (skill_call === null || skill_call == undefined) {
+      throw new Error("Required parameter skill_call is null or undefined (exec_skill)");
+    }
+		let params = new HttpParams();
+    let headers = new HttpHeaders();
+		
+    headers = headers.set('Accept', 'application/json');
+    return this.http.post<Skill>(`${this.config.get('apiurl')}/skiller/call`, skill_call, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
 }
