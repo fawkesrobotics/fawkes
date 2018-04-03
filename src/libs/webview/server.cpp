@@ -65,6 +65,7 @@ WebServer::WebServer(unsigned short int port,
   enable_ipv4_ = true;
   enable_ipv6_ = true;
 
+  tls_enabled_ = false;
   num_threads_ = 1;
 }
 
