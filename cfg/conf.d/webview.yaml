@@ -48,6 +48,9 @@ webview:
       # Allow access only from specific domains
       #origins: ["http://localhost:4200"]
 
+    # time to allow clients to cache our response
+    max-age: 86400
+
   # libmicrohttpd thread pool settings
   # Using a thread pool allows for the concurrent processing of
   # incoming requests and should generally be enabled.
