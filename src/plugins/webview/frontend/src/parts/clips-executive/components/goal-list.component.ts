@@ -25,6 +25,8 @@ export class GoalListComponent implements OnInit {
   data_received = false;
   auto_refresh_subscription = null;
 
+  goals: Goal[] = null;
+  goals_graph: string = null;
   loading = false;
 
   zero_message = "No goals received.";
@@ -44,10 +46,15 @@ export class GoalListComponent implements OnInit {
 
     this.api_service.list_goals().subscribe(
       (goals) => {
+        for (let g of goals) {
+          console.log(`Goal ${g.id}`)
+        }
         this.dataSource.data = this.process_tree(goals);
         if (this.dataSource.data.length == 0) {
           this.zero_message = "Executive has currently no goals";
         }
+        this.goals = goals;
+        this.create_goals_graph();
         this.loading = false;
       },
       (err) => {
@@ -189,5 +196,45 @@ export class GoalListComponent implements OnInit {
     } else {
       this.enable_autorefresh();
     }
+  }
+
+  create_goals_graph()
+  {
+    let graph = 'digraph { graph [fontsize=10]; node [fontsize=10]; edge [fontsize=10]; ';
+    if (! this.goals) {
+      graph += '  "no goals"';
+    } else {
+      for (let g of this.goals) {
+        let shape = g.type == 'ACHIEVE' ? 'ellipse' : 'box';
+        let color = '';
+
+        switch (g.mode) {
+          case "SELECTED":   color='#eeeeee'; break;
+          case "EXPANDED":   color='#FFE082'; break;
+          case "COMMITTED":  color='#FFF59D'; break;
+          case "DISPATCHED": color='#90CAF9'; break;
+          case "FINISHED":
+          case "EVALUATED":
+            switch (g.outcome) {
+              case "COMPLETED": color='#A5D6A7'; break;
+              case "FAILED":    color='#EF9A9A'; break;
+            }
+            break;
+          case "REJECTED":   color='#FFCC80'; break;
+          default:;
+        }
+        graph += `  "${g.id}" [href="/clips-executive/goal/${g.id}", shape=${shape}`;
+        if (color != '') {
+          graph += `, style="filled", fillcolor="${color}"`;
+        }
+        graph += "];";
+        if (g.parent) {
+          graph += `  "${g.parent}" -> "${g.id}";`;
+        }
+      }
+    }
+    graph += "}";
+    console.log(`Graph: ${graph}`);
+    this.goals_graph = graph;
   }
 }
