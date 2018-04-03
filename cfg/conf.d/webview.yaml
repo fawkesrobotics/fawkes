@@ -31,6 +31,23 @@ webview:
     # http://gnutls.org/manual/html_node/Priority-Strings.html
     cipher-suite: SECURE128:-VERS-SSL3.0:-VERS-TLS-ALL:+VERS-TLS1.2
 
+  # cross-origin resource sharing (CORS)
+  # This concerns requests where the web app does not originate from
+  # the same server as the URL requested. An example is running the
+  # webview frontend locally in development mode or to access multiple
+  # robots from one interface.
+  #
+  # Modern browsers will only process resources if the server allows
+  # access through the Access-Control-Allow-Origin header.
+  # cf https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+  # or https://enable-cors.org/
+  cors:
+    allow:
+      # Allow all access, sets header to '*'
+      all: true
+      # Allow access only from specific domains
+      #origins: ["http://localhost:4200"]
+
   # libmicrohttpd thread pool settings
   # Using a thread pool allows for the concurrent processing of
   # incoming requests and should generally be enabled.
