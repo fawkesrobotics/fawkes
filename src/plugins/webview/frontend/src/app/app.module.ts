@@ -19,6 +19,7 @@ import { AssetsService } from '../services/global/assets';
 import { ClipsExecutiveModule } from '../parts/clips-executive/module';
 import { SkillerModule } from '../parts/skiller/module';
 import { BlackboardModule } from '../parts/blackboard/module';
+import { ClipsModule } from '../parts/clips/module';
 
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 
@@ -37,6 +38,7 @@ import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 	  ClipsExecutiveModule,
 	  SkillerModule,
 	  BlackboardModule,
+	  ClipsModule,
 
 	  // Keep the AppRoutingModule last
 	  AppRoutingModule,
