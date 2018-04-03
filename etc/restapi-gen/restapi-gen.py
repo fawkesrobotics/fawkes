@@ -132,6 +132,24 @@ def filter_path_reftypes(spec):
 	rv = set()
 	for p in spec['paths']:
 		for method in spec['paths'][p]:
+			if 'parameters' in spec['paths'][p][method]:
+				for param in spec['paths'][p][method]['parameters']:
+					if param['in'] == 'body':
+						if 'schema' in param:
+							schema = param['schema']
+							if 'type' in schema and schema['type'] == 'array':
+								if '$ref' in schema['items']:
+									rv.add(filter_reftype(schema['items']['$ref']))
+								else:
+									raise TemplateRuntimeError("Arrays as parameter types are only supported "+
+									                           "for referenced types (%s)" % param)
+							elif '$ref' in schema:
+								rv.add(filter_reftype(schema['$ref']))
+							else:
+								raise TemplateRuntimeError("Only referenced schemas are supported "
+								                           "as parameter types (%s %s %s)" %
+								                           (param, method, param['name']))
+
 			for code in spec['paths'][p][method]['responses']:
 				if 'content' in spec['paths'][p][method]['responses'][code]:
 					content = spec['paths'][p][method]['responses'][code]['content']
