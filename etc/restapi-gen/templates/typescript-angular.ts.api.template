@@ -60,7 +60,7 @@ any
  ****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/map';
@@ -88,6 +88,18 @@ export class {{ name | sanitize }}ApiService
 %   endif
 % endfor
 
+
+		let params = new HttpParams();
+% for p in op | path_args(only_in='query')
+%   if p.required
+		params = params.set("{{ p.name | sanitize }}", {{ p.name | sanitize }}.toString());
+%   else
+		if ({{ p.name | sanitize }}) {
+		  params = params.set("{{ p.name | sanitize }}", {{ p.name | sanitize }}.toString());
+		}
+% endif
+% endfor
+
     let headers = new HttpHeaders();
 % if op.responses and '200' in op.responses and op.responses['200'].content and op.responses and op.responses['200'].content['application/json']
     headers = headers.set('Accept', 'application/json');
@@ -97,7 +109,7 @@ export class {{ name | sanitize }}ApiService
     headers = headers.set('Content-type', 'application/json');
 % endif
 
-    let options = { headers: headers }
+    let options = { headers: headers, params: params };
     return this.http.{{ method }}<{{ return_type(op) }}>(`${this.config.get('apiurl')}{{ p | path_substargs(op, '${encodeURIComponent(String($$))}') }}`, options);
 	}
 
