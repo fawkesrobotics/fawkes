@@ -82,7 +82,7 @@ SickTiM55xUSBAcquisitionThread::init()
   if ((usb_rv = libusb_init(&usb_ctx_)) != 0) {
     throw Exception("Failed to init libusb: %s", libusb_strerror((libusb_error)usb_rv));
   }
-  libusb_set_debug(usb_ctx_, LIBUSB_LOG_LEVEL_ERROR);
+  libusb_set_option(usb_ctx_, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_ERROR);
 
   usb_mutex_ = new Mutex();
 
