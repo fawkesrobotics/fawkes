@@ -1,0 +1,17 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+//import '../../../node_modules/c3/c3.css';
+
+::ng-deep .c3-grid line {
+    stroke: #eee;
+
+}
+::ng-deep	.c3-xgrid, ::ng-deep .c3-ygrid {
+		stroke-dasharray: 1 0;
+}
+
+::ng-deep .tick line, ::ng-deep .domain {
+		display: none;
+}

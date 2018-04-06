@@ -12,6 +12,7 @@ import { HSpaceComponent } from './hspace/component';
 import { ListZeroStateComponent } from './zerostate/component';
 import { DotGraphComponent } from './dotgraph/component';
 import { CardListFilterComponent } from './filter/component';
+import { PrometheusChartComponent } from './promchart/component';
 
 const COMPONENTS = [
   PropertyComponent,
@@ -19,6 +20,7 @@ const COMPONENTS = [
   ListZeroStateComponent,
   DotGraphComponent,
   CardListFilterComponent,
+  PrometheusChartComponent,
 ];
 
 @NgModule({
