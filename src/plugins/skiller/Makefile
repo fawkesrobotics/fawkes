@@ -60,6 +60,8 @@ endif
 INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
 include $(BUILDSYSDIR)/interface.mk
 
+rest-api: | $(INTERFACES_LIBS)
+
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
