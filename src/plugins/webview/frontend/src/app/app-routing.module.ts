@@ -5,7 +5,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-const routes: Routes = [];
+import { DashboardComponent } from '../parts/dashboard/components/dashboard.component';
+
+const routes: Routes = [
+  { path: '', component: DashboardComponent, pathMatch: 'full' },
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

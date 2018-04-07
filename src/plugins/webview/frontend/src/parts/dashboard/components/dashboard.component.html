@@ -1,0 +1,50 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+	-->
+<div fxLayout="row">
+	<mat-card class="ff-content-card" fxFlex="32">
+		<mat-card-title>
+			<div>CPU</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content">
+			<prom-chart
+				[query]="query_cpu"
+				legend_label="mode"
+				y_tick_format=".0%"
+				[y_min]="0.0"
+				[y_max]="1.0">
+			</prom-chart>
+		</mat-card-content>
+	</mat-card>
+
+	<mat-card class="ff-content-card" fxFlex="32">
+		<mat-card-title>
+			<div>Memory</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content">
+			<prom-chart
+				[query]="query_mem"
+				legend_label="groupname"
+				y_tick_format="bytes">
+			</prom-chart>
+		</mat-card-content>
+	</mat-card>
+
+	<mat-card class="ff-content-card" fxFlex="32">
+		<mat-card-title>
+			<div>Per Thread CPU</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content">
+			<prom-chart
+				[query]="query_threads"
+				legend_label="threadname"
+				y_tick_format=".1%">
+			</prom-chart>
+		</mat-card-content>
+	</mat-card>
+
+</div>
