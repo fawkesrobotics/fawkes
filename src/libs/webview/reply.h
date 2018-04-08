@@ -152,6 +152,8 @@ class StaticWebReply : public WebReply
   std::string _body;
 };
 
+extern WebReply * no_caching(WebReply *reply);
+
 } // end namespace fawkes
 
 #endif

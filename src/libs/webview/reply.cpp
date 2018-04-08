@@ -32,6 +32,26 @@ namespace fawkes {
 }
 #endif
 
+/** Disable caching on a reply.
+ * This is a convenience wrapper to reply->set_caching(false). It enables
+ * the following call styles:
+ * @code
+ * return no_caching(new StaticWebReply(Reply::HTTP_NOT_FOUND, "Not Found"));
+ *
+ * return no_caching(some_handler());
+ * @endcode
+ * This works on any reply without always patching a boolean flag into
+ * the ctor and without first storing the pointer, calling the function,
+ * and then returning.
+ * @param reply reply to disable caching for
+ * @return this
+ */
+WebReply *
+no_caching(WebReply *reply)
+{
+	reply->set_caching(false);
+	return reply;
+}
 
 
 /** @class WebReply <webview/reply.h>
