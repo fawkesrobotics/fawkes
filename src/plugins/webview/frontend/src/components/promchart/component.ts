@@ -2,7 +2,7 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import {Component, Input, AfterViewInit, ViewChild, OnDestroy} from '@angular/core';
+import {Component, Input, AfterViewInit, ViewChild, OnDestroy, HostListener} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
@@ -54,7 +54,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnDestroy {
   @ViewChild('chart') chart_elem;
 
   have_data: boolean = false;
-  zero_message: string = "No date received";
+  zero_message: string = "No data received";
   auto_refresh_subscription = null;
 
   constructor(private http: HttpClient) {}
@@ -87,7 +87,19 @@ export class PrometheusChartComponent implements AfterViewInit, OnDestroy {
   {
     this.disable_autorefresh();
   }
-  
+
+  @HostListener('window:focus', ['$event'])
+  onFocus(ev: FocusEvent)
+  {
+    this.enable_autorefresh();
+  }
+
+  @HostListener('window:blur', ['$event'])
+  onBlur(ev: FocusEvent)
+  {
+    this.disable_autorefresh();
+  }
+
   refresh()
   {
     let end   = Math.floor(Date.now() / 1000);
@@ -223,6 +235,8 @@ export class PrometheusChartComponent implements AfterViewInit, OnDestroy {
               legend: this.legend
             });
             this.have_data = true;
+          } else {
+            this.zero_message = "No data available";
           }
         },
         (err) => {
