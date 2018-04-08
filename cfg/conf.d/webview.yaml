@@ -107,3 +107,14 @@ webview:
     # Typically this is provided by mailcap in /etc/mime.types.
     mime-file: /etc/mime.types
 
+
+  # For the given URLs, a handler will be configured that captures
+  # requests if no other handler is registered, i.e., the actual
+  # plugin handling these requests has not been loaded.
+  # If this is not a user-facing page, but rather an endpoint ingested
+  # by some program, this may provide better feedback.
+  # For user pages, with the appropriate catchall above, we always
+  # serve the UI and it will do something useful.
+  explicit-404:
+    - /metrics
+    - /xmlrpc
