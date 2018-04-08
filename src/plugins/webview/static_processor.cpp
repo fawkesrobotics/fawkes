@@ -87,12 +87,12 @@ WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(fawkes::WebUrlManag
   
   url_manager_->add_handler(WebRequest::METHOD_GET, base_url + "{file+}",
                             std::bind(&WebviewStaticRequestProcessor::process_request, this,
-                                      std::placeholders::_1), 1000);
+                                      std::placeholders::_1), 10040);
 
   if (catchall_file_ != "") {
 	  url_manager_->add_handler(WebRequest::METHOD_GET, base_url + "?",
 	                            std::bind(&WebviewStaticRequestProcessor::process_request, this,
-	                                      std::placeholders::_1), 1050);
+	                                      std::placeholders::_1), 10050);
   }
 }
 

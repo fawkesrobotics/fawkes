@@ -252,6 +252,16 @@ WebviewThread::init()
 	  webview_nav_manager->add_nav_entry("/plugins/", "Plugins");
   }
 
+  try {
+	  cfg_explicit_404_ = config->get_strings("/webview/explicit-404");
+	  for (const auto &u : cfg_explicit_404_) {
+		  webview_url_manager->add_handler(WebRequest::METHOD_GET, u,
+		                                   std::bind(&WebviewThread::produce_404, this),
+		                                   10000);
+	  }
+  } catch (Exception &e) {} // ignored, no explicit 404
+
+  
   std::string afs;
   if (cfg_use_ipv4_ && cfg_use_ipv6_) {
 	  afs = "IPv4,IPv6";
@@ -284,6 +294,10 @@ WebviewThread::finalize()
 #ifdef HAVE_TF
   webview_nav_manager->remove_nav_entry("/tf/");
 #endif
+
+  for (const auto &u : cfg_explicit_404_) {
+	  webview_url_manager->remove_handler(WebRequest::METHOD_GET, u);
+  }
 
   delete webserver_;
 
@@ -334,4 +348,10 @@ WebviewThread::tls_create(const char *tls_key_file, const char *tls_cert_file)
   if (WEXITSTATUS(status) != 0) {
     throw Exception("Failed to auto-generate key/certificate pair");
   }
+}
+
+WebReply *
+WebviewThread::produce_404()
+{
+	return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "Not found\n");
 }

@@ -40,6 +40,7 @@ namespace fawkes {
   class NetworkService;
   class WebServer;
   class WebRequestDispatcher;
+  class WebReply;
 }
 
 class WebviewStaticRequestProcessor;
@@ -78,6 +79,7 @@ class WebviewThread
 
  private:
   void tls_create(const char *tls_key_file, const char *tls_cert_file);
+  fawkes::WebReply * produce_404();
 
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -113,6 +115,7 @@ class WebviewThread
   std::string  cfg_access_log_;
   bool         cfg_use_thread_pool_;
   unsigned int cfg_num_threads_;
+  std::vector<std::string> cfg_explicit_404_;
 
   fawkes::CacheLogger     cache_logger_;
   fawkes::NetworkService *webview_service_;
