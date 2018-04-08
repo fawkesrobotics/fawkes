@@ -4,7 +4,6 @@
  *
  *  Created: Fri Mar 16 12:02:53 2018
  *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -76,7 +75,6 @@ WebviewRESTRequestProcessor::~WebviewRESTRequestProcessor()
   }
 }
 
-
 WebReply *
 WebviewRESTRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
@@ -92,21 +90,23 @@ WebviewRESTRequestProcessor::process_request(const fawkes::WebRequest *request)
 	WebviewRestApi *api = api_mgr_->get_api(rest_api);
 	if (! api) {
 		logger_->log_error("WebRESTProc", "REST API '%s' unknown", rest_api.c_str());
-		return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API '" + rest_api + "' unknown\n");
+		return new StaticWebReply(WebReply::HTTP_NOT_FOUND,
+		                           "REST API '" + rest_api + "' unknown\n");
 	}
 
 	try {
 		WebReply *reply = api->process_request(request, rest_path);
 		if (! reply) {
 			return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API '" + rest_api +
-			                             "' has no endpoint '" + rest_path + "'\n");
+			                          "' has no endpoint '" + rest_path + "'\n");
 		}
-		return reply;
+		return no_caching(reply);
 	} catch (Exception &e) {
 		logger_->log_error("WebRESTProc", "REST API '%s' failed, exception follows", rest_api.c_str());
 		logger_->log_error("WebRESTProc", e);
-		return new StaticWebReply(WebReply::HTTP_INTERNAL_SERVER_ERROR, "REST API '" + rest_api + "': " +
-		                          e.what_no_backtrace() + "\n");
+		return no_caching(new StaticWebReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+		                                     "REST API '" + rest_api + "': " +
+		                                     e.what_no_backtrace() + "\n"));
 	}
 	
 }
