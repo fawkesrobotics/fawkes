@@ -200,7 +200,29 @@ export class PrometheusChartComponent implements AfterViewInit, OnDestroy {
             if (this.y_tick_count) {
               this.y_axis.tick.count = this.y_tick_count + 1;
             }
-      
+
+            if (! this.legend.item) {
+              this.legend.item = {};
+            }
+            this.legend.item.onclick =
+              function (d) {
+                let shown = this.api.data.shown();
+                if (shown.findIndex((de) => de.id == d) < 0) {
+                  // we are switching from another activated single data
+                  this.api.hide();
+                  this.api.show(d);
+                } else {
+                  if (shown.length <= 1) {
+                    // click on zoomed-in data
+                    this.api.show();
+                  } else {
+                    // select data on fully visible chart
+                    this.api.hide();
+                    this.api.show(d);
+                  }
+                }
+              };
+
             let chart = c3.generate({
               bindto: this.chart_elem.nativeElement,
               size: {
