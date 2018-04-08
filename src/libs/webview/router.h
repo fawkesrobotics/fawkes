@@ -106,8 +106,9 @@ class WebviewRouter
 	add(WebRequest::Method method, const std::string &path, T handler, int weight)
 	{
 		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [this, method, &path](auto r) -> bool {
-			                       return (std::get<1>(r) == method &&
+		                       [this, method, &path, &weight](auto r) -> bool {
+			                       return (std::get<0>(r) == weight &&
+			                               std::get<1>(r) == method &&
 			                               std::get<2>(r) == path);
 		                       });
 		if (ri != routes_.end()) {
