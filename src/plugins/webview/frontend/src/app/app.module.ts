@@ -20,6 +20,7 @@ import { ClipsExecutiveModule } from '../parts/clips-executive/module';
 import { SkillerModule } from '../parts/skiller/module';
 import { BlackboardModule } from '../parts/blackboard/module';
 import { ClipsModule } from '../parts/clips/module';
+import { ImageModule } from '../parts/images/module';
 
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 
@@ -39,6 +40,7 @@ import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 	  SkillerModule,
 	  BlackboardModule,
 	  ClipsModule,
+	  ImageModule,
 
 	  // Keep the AppRoutingModule last
 	  AppRoutingModule,
