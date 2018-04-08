@@ -27,6 +27,9 @@
 
 #ifdef HAVE_REST_APIS
 #  include "blackboard-rest-api/blackboard-rest-api.h"
+#  ifdef HAVE_JPEG
+#    include "image-rest-api/image-rest-api.h"
+#  endif
 #endif
 
 using namespace fawkes;
@@ -48,6 +51,9 @@ WebviewPlugin::WebviewPlugin(Configuration *config)
 
   thread_list.push_back(new WebviewThread(enable_thread_pool));
   thread_list.push_back(new BlackboardRestApi());
+#ifdef HAVE_JPEG
+  thread_list.push_back(new ImageRestApi());
+#endif
 }
 
 

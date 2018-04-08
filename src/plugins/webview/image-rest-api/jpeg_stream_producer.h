@@ -23,11 +23,11 @@
 #define __PLUGINS_WEBVIEW_JPEG_STREAM_PRODUCER_H_
 
 #include <core/threading/thread.h>
-#include <core/utils/refptr.h>
 #include <core/utils/lock_list.h>
 #include <aspect/clock.h>
 
 #include <string>
+#include <memory>
 
 namespace firevision {
   class SharedMemoryCamera;
@@ -72,7 +72,7 @@ class WebviewJpegStreamProducer
   class Subscriber {
    public:
     virtual ~Subscriber();
-    virtual void handle_buffer(RefPtr<Buffer> buffer) throw() = 0;
+    virtual void handle_buffer(std::shared_ptr<Buffer> buffer) = 0;
   };
 
  public:
@@ -82,7 +82,7 @@ class WebviewJpegStreamProducer
 
   void add_subscriber(Subscriber *subscriber);
   void remove_subscriber(Subscriber *subscriber);
-  RefPtr<Buffer> wait_for_next_frame();
+  std::shared_ptr<Buffer> wait_for_next_frame();
 
   virtual void init();
   virtual void loop();
@@ -101,7 +101,7 @@ class WebviewJpegStreamProducer
   fawkes::LockList<Subscriber *>   subs_;
   firevision::JpegImageCompressor *jpeg_;
 
-  RefPtr<Buffer>         last_buf_;
+  std::shared_ptr<Buffer>         last_buf_;
   fawkes::Mutex         *last_buf_mutex_;
   fawkes::WaitCondition *last_buf_waitcond_;
 };

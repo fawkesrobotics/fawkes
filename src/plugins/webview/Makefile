@@ -68,19 +68,6 @@ ifeq ($(HAVE_BOOST_LIBS)$(HAVE_LIBMICROHTTPD),11)
 	CFLAGS  += $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
 	LDFLAGS += $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
-  ifeq ($(HAVE_CPP11)$(HAVE_JPEG),11)
-    LIBS_webview += m fvutils fvcams
-    OBJS_webview += image_processor.o mjpeg_reply.o jpeg_stream_producer.o
-    CFLAGS += -DHAVE_JPEG $(CFLAGS_CPP11)
-  else
-    ifneq ($(HAVE_CPP11),1)
-      WARN_TARGETS += warning_cpp11
-    endif
-    ifneq ($(HAVE_JPEG),1)
-      WARN_TARGETS = warning_jpeg
-    endif
-  endif
-
   ifeq ($(HAVE_TF)$(HAVE_GRAPHVIZ),11)
     OBJS_webview += tf_processor.o
     LIBS_webview += fawkestf
@@ -110,6 +97,18 @@ ifeq ($(HAVE_BOOST_LIBS)$(HAVE_LIBMICROHTTPD),11)
 
     OBJS_webview += blackboard-rest-api/blackboard-rest-api.o \
                    $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/blackboard-rest-api/model/*.cpp))))
+
+    ifeq ($(HAVE_JPEG),1)
+      CFLAGS += -DHAVE_JPEG
+      LIBS_webview += m fvutils fvcams
+      OBJS_webview += image-rest-api/image-rest-api.o \
+                      image-rest-api/mjpeg_reply.o \
+                      image-rest-api/jpeg_stream_producer.o \
+                      $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/image-rest-api/model/*.cpp)))
+    else
+      WARN_TARGETS = warning_jpeg
+    endif
+
   else
     ifneq ($(HAVE_CPP17),1)
       WARN_TARGETS += warning_cpp17

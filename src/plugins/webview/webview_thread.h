@@ -30,9 +30,6 @@
 #include <aspect/logger.h>
 #include <aspect/plugin_director.h>
 #include <aspect/webview.h>
-#ifdef HAVE_JPEG
-#  include <aspect/thread_producer.h>
-#endif
 #ifdef HAVE_TF
 #  include <aspect/tf.h>
 #endif
@@ -57,9 +54,6 @@ class WebviewUserVerifier;
 #ifdef HAVE_TF
 class WebviewTfRequestProcessor;
 #endif
-#ifdef HAVE_JPEG
-class WebviewImageRequestProcessor;
-#endif
 
 class WebviewThread
 : public fawkes::Thread,
@@ -69,9 +63,6 @@ class WebviewThread
   public fawkes::NetworkAspect,
   public fawkes::LoggerAspect,
   public fawkes::PluginDirectorAspect,
-#ifdef HAVE_JPEG
-  public fawkes::ThreadProducerAspect,
-#endif
 #ifdef HAVE_TF
   public fawkes::TransformAspect,
 #endif
@@ -103,9 +94,6 @@ class WebviewThread
   WebviewRESTRequestProcessor        *rest_processor_;
 #ifdef HAVE_TF
   WebviewTfRequestProcessor          *tf_processor_;
-#endif
-#ifdef HAVE_JPEG
-  WebviewImageRequestProcessor       *image_processor_;
 #endif
   WebviewServiceBrowseHandler        *service_browse_handler_;
   WebviewHeaderGenerator             *header_gen_;

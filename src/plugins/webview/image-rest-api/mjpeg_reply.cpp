@@ -48,7 +48,7 @@ namespace fawkes {
 /** Constructor.
  * @param stream_producer stream producer to query for JPEG buffers
  */
-DynamicMJPEGStreamWebReply::DynamicMJPEGStreamWebReply(WebviewJpegStreamProducer *stream_producer)
+DynamicMJPEGStreamWebReply::DynamicMJPEGStreamWebReply(std::shared_ptr<WebviewJpegStreamProducer> stream_producer)
   : DynamicWebReply(WebReply::HTTP_OK)
 {
   next_buffer_mutex_ = new fawkes::Mutex();
@@ -75,7 +75,7 @@ DynamicMJPEGStreamWebReply::size()
 }
 
 void
-DynamicMJPEGStreamWebReply::handle_buffer(RefPtr<WebviewJpegStreamProducer::Buffer> buffer) throw()
+DynamicMJPEGStreamWebReply::handle_buffer(std::shared_ptr<WebviewJpegStreamProducer::Buffer> buffer)
 {
   next_buffer_mutex_->lock();
   next_buffer_ = buffer;
@@ -96,7 +96,7 @@ DynamicMJPEGStreamWebReply::next_chunk(size_t pos, char *buffer, size_t buf_max_
       next_buffer_waitcond_->wait();
     }
     buffer_ = next_buffer_;
-    next_buffer_.clear();
+    next_buffer_.reset();
     next_buffer_mutex_->unlock();
 
     char *header;

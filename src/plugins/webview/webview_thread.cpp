@@ -28,9 +28,6 @@
 #ifdef HAVE_TF
 #  include "tf_processor.h"
 #endif
-#ifdef HAVE_JPEG
-#  include "image_processor.h"
-#endif
 #include "service_browse_handler.h"
 #include "header_generator.h"
 #include "footer_generator.h"
@@ -236,16 +233,8 @@ WebviewThread::init()
   startpage_processor_  = NULL;
   blackboard_processor_ = NULL;
   plugins_processor_ = NULL;
-#ifdef HAVE_JPEG
-  image_processor_     = NULL;
-#endif
 #ifdef HAVE_TF
   tf_processor_ = NULL;
-#endif
-
-#ifdef HAVE_JPEG
-  image_processor_     = new WebviewImageRequestProcessor(webview_url_manager, config,
-                                                          logger, thread_collector);
 #endif
 
   if (catchall_file.empty()) {
@@ -261,9 +250,6 @@ WebviewThread::init()
 	  webview_nav_manager->add_nav_entry("/tf/", "TF");
 #endif
 	  webview_nav_manager->add_nav_entry("/plugins/", "Plugins");
-#ifdef HAVE_JPEG
-	  webview_nav_manager->add_nav_entry("/images/", "Images");
-#endif
   }
 
   std::string afs;
@@ -298,9 +284,6 @@ WebviewThread::finalize()
 #ifdef HAVE_TF
   webview_nav_manager->remove_nav_entry("/tf/");
 #endif
-#ifdef HAVE_JPEG
-  webview_nav_manager->remove_nav_entry("/images/");
-#endif
 
   delete webserver_;
 
@@ -315,9 +298,6 @@ WebviewThread::finalize()
   delete rest_processor_;
 #ifdef HAVE_TF
   delete tf_processor_;
-#endif
-#ifdef HAVE_JPEG
-  delete image_processor_;
 #endif
   delete footer_gen_;
   delete header_gen_;

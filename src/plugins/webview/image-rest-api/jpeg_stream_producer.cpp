@@ -62,9 +62,9 @@ WebviewJpegStreamProducer::Buffer::~Buffer()
 /** @class WebviewJpegStreamProducer::Subscriber "jpeg_stream_producer.h"
  * JPEG stream subscriber.
  *
- * @fn void WebviewJpegStreamProducer::Subscriber::handle_buffer(RefPtr<Buffer> buffer) throw() = 0
+ * @fn void WebviewJpegStreamProducer::Subscriber::handle_buffer(std::shared_ptr<Buffer> buffer) throw() = 0
  * Notification if a new buffer is available.
- * @param buffer new buffer, simple unref when done.
+ * @param buffer new buffer
  */
 
 /** Destructor. */
@@ -140,7 +140,7 @@ WebviewJpegStreamProducer::remove_subscriber(Subscriber *subscriber)
 /** Blocks caller until new thread is available.
  * @return newest available buffer once it becomes available
  */
-RefPtr<WebviewJpegStreamProducer::Buffer>
+std::shared_ptr<WebviewJpegStreamProducer::Buffer>
 WebviewJpegStreamProducer::wait_for_next_frame()
 {
   MutexLocker lock(last_buf_mutex_);
@@ -172,7 +172,7 @@ void
 WebviewJpegStreamProducer::loop()
 {
   last_buf_mutex_->lock();
-  last_buf_.clear();
+  last_buf_.reset();
   last_buf_mutex_->unlock();
 
   timewait_->mark_start();
@@ -190,7 +190,8 @@ WebviewJpegStreamProducer::loop()
   cam_->dispose_buffer();
   cam_->unlock();
 
-  RefPtr<Buffer> shared_buf(new Buffer(buffer, jpeg_->compressed_size()));
+  std::shared_ptr<Buffer> shared_buf =
+	  std::make_shared<Buffer>(buffer, jpeg_->compressed_size());
   subs_.lock();
 #if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100) > 40600
   for (auto &s : subs_) {

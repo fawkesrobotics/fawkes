@@ -26,6 +26,8 @@
 #include "jpeg_stream_producer.h"
 
 #include <webview/reply.h>
+
+#include <memory>
 #include <cstdio>
 
 namespace fawkes {
@@ -38,20 +40,20 @@ class DynamicMJPEGStreamWebReply
   public WebviewJpegStreamProducer::Subscriber
 {
  public:
-  DynamicMJPEGStreamWebReply(WebviewJpegStreamProducer *stream_producer);
+	DynamicMJPEGStreamWebReply(std::shared_ptr<WebviewJpegStreamProducer> stream_producer);
   virtual ~DynamicMJPEGStreamWebReply();
 
   virtual size_t size();
   virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);
 
-  virtual void handle_buffer(RefPtr<WebviewJpegStreamProducer::Buffer> buffer) throw();
+  virtual void handle_buffer(std::shared_ptr<WebviewJpegStreamProducer::Buffer> buffer);
  private:
-  WebviewJpegStreamProducer *stream_producer_;
+  std::shared_ptr<WebviewJpegStreamProducer> stream_producer_;
 
-  fawkes::RefPtr<WebviewJpegStreamProducer::Buffer> buffer_;
+  std::shared_ptr<WebviewJpegStreamProducer::Buffer> buffer_;
   size_t buffer_bytes_written_;
 
-  fawkes::RefPtr<WebviewJpegStreamProducer::Buffer> next_buffer_;
+  std::shared_ptr<WebviewJpegStreamProducer::Buffer> next_buffer_;
   fawkes::Mutex                                    *next_buffer_mutex_;
   fawkes::WaitCondition                            *next_buffer_waitcond_;
 
