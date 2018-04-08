@@ -70,7 +70,7 @@ WebviewRestApi::process_request(const WebRequest *request, const std::string & r
 		WebviewRestParams params;
 		params.set_path_args(std::move(path_args));
 		params.set_query_args(request->get_values());
-		std::unique_ptr<WebviewRestReply> reply = handler(request->body(), params);
+		std::unique_ptr<WebReply> reply = handler(request->body(), params);
 		return reply.release();
 	} catch (NullPointerException &e) {
 		return NULL;

@@ -182,7 +182,7 @@ class WebviewRestApi
 	WebviewRestApi(const std::string &name, fawkes::Logger *logger);
 
 	/** REST API call handler function type. */
-	typedef std::function<std::unique_ptr<WebviewRestReply> (std::string, WebviewRestParams&)> Handler;
+	typedef std::function<std::unique_ptr<WebReply> (std::string, WebviewRestParams&)> Handler;
 
 	const std::string & 	name() const;
 	void add_handler(WebRequest::Method method, std::string path, Handler handler);
@@ -196,11 +196,11 @@ class WebviewRestApi
 	 * @param handler handler function
 	 */
 	void add_handler(WebRequest::Method method, std::string path,
-	                 std::function<std::unique_ptr<WebviewRestReply> (WebviewRestParams &)> handler)
+	                 std::function<std::unique_ptr<WebReply> (WebviewRestParams &)> handler)
 	{
 		add_handler(method, path,
 		            [this, handler](const std::string &body, WebviewRestParams& m)
-		            -> std::unique_ptr<WebviewRestReply>
+		            -> std::unique_ptr<WebReply>
 		            {
 			            try {
 				            return handler(m);
@@ -229,7 +229,7 @@ class WebviewRestApi
 	{
 		add_handler(method, path,
 		            [this, handler](const std::string &body, WebviewRestParams& m)
-		            -> std::unique_ptr<WebviewRestReply>
+		            -> std::unique_ptr<WebReply>
 		            {
 			            I input;
 			            input.from_json(body);
@@ -262,11 +262,11 @@ class WebviewRestApi
 	 */
 	template <class I>
 	void add_handler(WebRequest::Method method, std::string path,
-	                 std::function<std::unique_ptr<WebviewRestReply> (I, WebviewRestParams &)> handler)
+	                 std::function<std::unique_ptr<WebReply> (I, WebviewRestParams &)> handler)
 	{
 		add_handler(method, path,
 		            [this, handler](const std::string &body, WebviewRestParams& m)
-		            -> std::unique_ptr<WebviewRestReply>
+		            -> std::unique_ptr<WebReply>
 		            {
 			            I input;
 			            input.from_json(body);
@@ -296,7 +296,7 @@ class WebviewRestApi
 	{
 		add_handler(method, path,
 		            [this, handler](const std::string &body, WebviewRestParams& m)
-		            -> std::unique_ptr<WebviewRestReply>
+		            -> std::unique_ptr<WebReply>
 		            {
 			            try {
 				            O output{handler(m)};
