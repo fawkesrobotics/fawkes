@@ -53,7 +53,7 @@ ClipsRestApi::init()
 		 std::bind(&ClipsRestApi::cb_get_facts, this, std::placeholders::_1));
 	rest_api_->add_handler<WebviewRestArray<Environment>>
 		(WebRequest::METHOD_GET, "/",
-		 std::bind(&ClipsRestApi::cb_list_environments, this, std::placeholders::_1));
+		 std::bind(&ClipsRestApi::cb_list_environments, this));
 	webview_rest_api_manager->register_api(rest_api_);
 }
 
@@ -180,9 +180,6 @@ ClipsRestApi::gen_fact(LockPtr<CLIPS::Environment>& clips, CLIPS::Fact::pointer&
 WebviewRestArray<Fact>
 ClipsRestApi::cb_get_facts(WebviewRestParams& params)
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
 	bool formatted = (params.query_arg("formatted") == "true");
 
 	WebviewRestArray<Fact> rv;
@@ -210,12 +207,8 @@ ClipsRestApi::cb_get_facts(WebviewRestParams& params)
 
 
 WebviewRestArray<Environment>
-ClipsRestApi::cb_list_environments(WebviewRestParams& params)
+ClipsRestApi::cb_list_environments()
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	WebviewRestArray<Environment> rv;
 
 	MutexLocker lock(clips_env_mgr.objmutex_ptr());

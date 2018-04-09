@@ -52,14 +52,13 @@ class ClipsRestApi
 	virtual void finalize();
 
  private:
+	WebviewRestArray<Environment> cb_list_environments();
 	WebviewRestArray<Fact>
 		cb_get_facts(fawkes::WebviewRestParams& params);
 
 	Fact gen_fact(fawkes::LockPtr<CLIPS::Environment>& clips,
 	              CLIPS::Fact::pointer &fact, bool formatted);
 
-	WebviewRestArray<Environment>
-		cb_list_environments(fawkes::WebviewRestParams& params);
 
  private:
 	fawkes::WebviewRestApi *rest_api_;
