@@ -139,6 +139,17 @@ class WebviewRestParams
 		}
 	}
 
+	/** Check if query argument is set.
+	 * Retrieves a named query argument that was passed in the
+	 * URL, e.g., retrieve "pretty" for "?pretty".
+	 * @param what what to check
+	 * @return true if the argument exists (with any value), false otherwise
+	 */
+	bool has_query_arg(const std::string& what)
+	{
+		return (query_args_.find(what) != query_args_.end());
+	}
+
 	/** Is pretty-printed JSON enabled?
 	 * @return true true to request enabling pretty mode
 	 */
