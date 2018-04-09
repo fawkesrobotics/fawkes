@@ -32,9 +32,13 @@ else
     WARN_TARGETS += warning_ng_cli
 endif
 
-dist/index.html: $(SRCS_FRONTEND)
+dist/index.html: $(SRCS_FRONTEND) $(SRCDIR)/node_modules
 	$(SILENT) echo -e "$(INDENT_PRINT)[Angular] $(TBOLDGRAY)Webview Frontend$(TNORMAL)"
 	$(SILENT)ng build --prod --build-optimizer
+
+$(SRCDIR)/node_modules:
+	$(SILENT) echo -e "$(INDENT_PRINT)[npm] $(TBOLDGRAY)Installing dependencies via npm$(TNORMAL)"
+	$(SILENT)npm install
 
 deploy: $(RESDIR)/webview/index.html
 
