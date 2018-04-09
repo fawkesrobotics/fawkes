@@ -43,26 +43,26 @@ paths:
         '400':
           description: bad input parameter
 
-    post:
-      tags:
-      - clips-executive
-      summary: Add a new goal.
-      operationId: add_goal
-      description: |
-        Add a new goal.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Goal'
-        description: Inventory item to add
-      responses:
-        '201':
-          description: item created
-        '400':
-          description: 'invalid input, object invalid'
-        '409':
-          description: an existing item already exists
+    # post:
+    #   tags:
+    #   - clips-executive
+    #   summary: Add a new goal.
+    #   operationId: add_goal
+    #   description: |
+    #     Add a new goal.
+    #   requestBody:
+    #     content:
+    #       application/json:
+    #         schema:
+    #           $ref: '#/components/schemas/Goal'
+    #     description: Inventory item to add
+    #   responses:
+    #     '201':
+    #       description: item created
+    #     '400':
+    #       description: 'invalid input, object invalid'
+    #     '409':
+    #       description: an existing item already exists
 
   /clips-executive/goals/{id}:
     get:
