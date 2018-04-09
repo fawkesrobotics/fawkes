@@ -16,7 +16,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
-import { ConfigurationService } from '../../../services/config.service';
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
 import { Skill } from '../models/Skill';
 import { SkillCall } from '../models/SkillCall';
@@ -26,7 +26,7 @@ import { SkillInfo } from '../models/SkillInfo';
 @Injectable()
 export class BehaviorEngineApiService
 {
-  constructor(private config: ConfigurationService,
+  constructor(private backend: BackendConfigurationService,
               private http: HttpClient) {}
 
   public list_skills(pretty?: boolean): Observable<SkillInfo[]>
@@ -38,7 +38,7 @@ export class BehaviorEngineApiService
     let headers = new HttpHeaders();
 		
     headers = headers.set('Accept', 'application/json');
-    return this.http.get<SkillInfo[]>(`${this.config.get('apiurl')}/skiller/skills`, 
+    return this.http.get<SkillInfo[]>(`${this.backend.url_for('api')}/skiller/skills`, 
 		  { headers: headers, params: params,
 		    observe: 'body', responseType: 'json' })	;
 	}
@@ -55,7 +55,7 @@ export class BehaviorEngineApiService
     let headers = new HttpHeaders();
 		
     headers = headers.set('Accept', 'application/json');
-    return this.http.get<Skill>(`${this.config.get('apiurl')}/skiller/skills/${encodeURIComponent(String(id))}`, 
+    return this.http.get<Skill>(`${this.backend.url_for('api')}/skiller/skills/${encodeURIComponent(String(id))}`, 
 		  { headers: headers, params: params,
 		    observe: 'body', responseType: 'json' })	;
 	}
@@ -68,7 +68,7 @@ export class BehaviorEngineApiService
 		let params = new HttpParams();
     let headers = new HttpHeaders();
 		
-    return this.http.delete(`${this.config.get('apiurl')}/skiller/skills/${encodeURIComponent(String(id))}`, 
+    return this.http.delete(`${this.backend.url_for('api')}/skiller/skills/${encodeURIComponent(String(id))}`, 
 		  { headers: headers, params: params,
 		    observe: 'response', responseType: 'text' })	;
 	}
@@ -82,7 +82,7 @@ export class BehaviorEngineApiService
     let headers = new HttpHeaders();
 		
     headers = headers.set('Accept', 'application/json');
-    return this.http.post<Skill>(`${this.config.get('apiurl')}/skiller/call`, skill_call, 
+    return this.http.post<Skill>(`${this.backend.url_for('api')}/skiller/call`, skill_call, 
 		  { headers: headers, params: params,
 		    observe: 'body', responseType: 'json' })	;
 	}

@@ -15,7 +15,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
-import { ConfigurationService } from '../../../services/config.service';
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
 import { ImageInfo } from '../models/ImageInfo';
 
@@ -23,7 +23,7 @@ import { ImageInfo } from '../models/ImageInfo';
 @Injectable()
 export class ImageApiService
 {
-  constructor(private config: ConfigurationService,
+  constructor(private backend: BackendConfigurationService,
               private http: HttpClient) {}
 
   public list_images(pretty?: boolean): Observable<ImageInfo[]>
@@ -35,7 +35,7 @@ export class ImageApiService
     let headers = new HttpHeaders();
 		
     headers = headers.set('Accept', 'application/json');
-    return this.http.get<ImageInfo[]>(`${this.config.get('apiurl')}/images`, 
+    return this.http.get<ImageInfo[]>(`${this.backend.url_for('api')}/images`, 
 		  { headers: headers, params: params,
 		    observe: 'body', responseType: 'json' })	;
 	}
@@ -51,7 +51,7 @@ export class ImageApiService
 		}
     let headers = new HttpHeaders();
 		
-    return this.http.get(`${this.config.get('apiurl')}/images/${encodeURIComponent(String(id))}`, 
+    return this.http.get(`${this.backend.url_for('api')}/images/${encodeURIComponent(String(id))}`, 
 		  { headers: headers, params: params,
 		    observe: 'response', responseType: 'text' })	;
 	}

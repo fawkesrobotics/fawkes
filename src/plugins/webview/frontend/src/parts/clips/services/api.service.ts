@@ -12,12 +12,10 @@
  ****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/of';
-import 'rxjs/add/operator/map';
 
-import { ConfigurationService } from '../../../services/config.service';
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
 import { Environment } from '../models/Environment';
 import { Fact } from '../models/Fact';
@@ -26,7 +24,7 @@ import { Fact } from '../models/Fact';
 @Injectable()
 export class ClipsApiService
 {
-  constructor(private config: ConfigurationService,
+  constructor(private backend: BackendConfigurationService,
               private http: HttpClient) {}
 
   public get_facts(env: string, pretty?: boolean, formatted?: boolean): Observable<Fact[]>
@@ -42,9 +40,11 @@ export class ClipsApiService
 		  params = params.set("formatted", formatted.toString());
 		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers, params: params };
-    return this.http.get<Fact[]>(`${this.config.get('apiurl')}/clips/${encodeURIComponent(String(env))}/facts`, options);
+    return this.http.get<Fact[]>(`${this.backend.url_for('api')}/clips/${encodeURIComponent(String(env))}/facts`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
   public list_environments(pretty?: boolean): Observable<Environment[]>
@@ -54,9 +54,11 @@ export class ClipsApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers, params: params };
-    return this.http.get<Environment[]>(`${this.config.get('apiurl')}/clips/`, options);
+    return this.http.get<Environment[]>(`${this.backend.url_for('api')}/clips/`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
 }

@@ -12,12 +12,10 @@
  ****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/of';
-import 'rxjs/add/operator/map';
 
-import { ConfigurationService } from '../../../services/config.service';
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
 import { DomainFact } from '../models/DomainFact';
 import { DomainObject } from '../models/DomainObject';
@@ -30,23 +28,21 @@ import { Plan } from '../models/Plan';
 @Injectable()
 export class ClipsExecutiveApiService
 {
-  constructor(private config: ConfigurationService,
+  constructor(private backend: BackendConfigurationService,
               private http: HttpClient) {}
 
   public list_goals(pretty?: boolean): Observable<Goal[]>
   {
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers }
-    return this.http.get<Goal[]>(`${this.config.get('apiurl')}/clips-executive/goals`, options);
-	}
-
-  public add_goal(): Observable<any>
-  {
-    let headers = new HttpHeaders();
-    headers = headers.set('Content-type', 'application/json');
-    let options = { headers: headers }
-    return this.http.post<any>(`${this.config.get('apiurl')}/clips-executive/goals`, options);
+    return this.http.get<Goal[]>(`${this.backend.url_for('api')}/clips-executive/goals`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
   public get_goal(id: string, pretty?: boolean): Observable<Goal>
@@ -54,18 +50,30 @@ export class ClipsExecutiveApiService
     if (id === null || id == undefined) {
       throw new Error("Required parameter id is null or undefined (get_goal)");
     }
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers }
-    return this.http.get<Goal>(`${this.config.get('apiurl')}/clips-executive/goals/${encodeURIComponent(String(id))}`, options);
+    return this.http.get<Goal>(`${this.backend.url_for('api')}/clips-executive/goals/${encodeURIComponent(String(id))}`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
   public list_plans(pretty?: boolean): Observable<Plan[]>
   {
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers }
-    return this.http.get<Plan[]>(`${this.config.get('apiurl')}/clips-executive/plans`, options);
+    return this.http.get<Plan[]>(`${this.backend.url_for('api')}/clips-executive/plans`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
   public get_plan(goal_id: string, id: string, pretty?: boolean): Observable<Plan>
@@ -76,42 +84,72 @@ export class ClipsExecutiveApiService
     if (id === null || id == undefined) {
       throw new Error("Required parameter id is null or undefined (get_plan)");
     }
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers }
-    return this.http.get<Plan>(`${this.config.get('apiurl')}/clips-executive/plans/${encodeURIComponent(String(goal_id))}/${encodeURIComponent(String(id))}`, options);
+    return this.http.get<Plan>(`${this.backend.url_for('api')}/clips-executive/plans/${encodeURIComponent(String(goal_id))}/${encodeURIComponent(String(id))}`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
   public list_domain_objects(pretty?: boolean): Observable<DomainObject[]>
   {
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers }
-    return this.http.get<DomainObject[]>(`${this.config.get('apiurl')}/clips-executive/domain-objects`, options);
+    return this.http.get<DomainObject[]>(`${this.backend.url_for('api')}/clips-executive/domain-objects`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
   public list_domain_predicates(pretty?: boolean): Observable<DomainPredicate[]>
   {
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers }
-    return this.http.get<DomainPredicate[]>(`${this.config.get('apiurl')}/clips-executive/domain-predicates`, options);
+    return this.http.get<DomainPredicate[]>(`${this.backend.url_for('api')}/clips-executive/domain-predicates`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
   public list_domain_facts(pretty?: boolean): Observable<DomainFact[]>
   {
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers }
-    return this.http.get<DomainFact[]>(`${this.config.get('apiurl')}/clips-executive/domain-facts`, options);
+    return this.http.get<DomainFact[]>(`${this.backend.url_for('api')}/clips-executive/domain-facts`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
   public list_domain_operators(pretty?: boolean): Observable<DomainOperator[]>
   {
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
     let headers = new HttpHeaders();
+		
     headers = headers.set('Accept', 'application/json');
-    let options = { headers: headers }
-    return this.http.get<DomainOperator[]>(`${this.config.get('apiurl')}/clips-executive/domain-operators`, options);
+    return this.http.get<DomainOperator[]>(`${this.backend.url_for('api')}/clips-executive/domain-operators`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
 	}
 
 }
