@@ -67,31 +67,18 @@ class ClipsExecutiveRestApi
 	typedef std::map<PlanKey, ClipsFactList> PlanActionMap;
 
  private:
-	WebviewRestArray<Goal>
-		cb_list_goals(fawkes::WebviewRestParams& params);
+
+	WebviewRestArray<Goal>            cb_list_goals();
+	WebviewRestArray<DomainOperator>  cb_list_domain_operators();
+	WebviewRestArray<DomainObject>    cb_list_domain_objects();
+	WebviewRestArray<DomainPredicate> cb_list_domain_predicates();
+	WebviewRestArray<DomainFact>      cb_list_domain_facts();
+	WebviewRestArray<Plan>            cb_list_plans();
 
 	Goal cb_get_goal(fawkes::WebviewRestParams& params);
-
-	WebviewRestArray<DomainOperator>
-		cb_list_domain_operators(fawkes::WebviewRestParams& params);
-
-	WebviewRestArray<DomainObject>
-		cb_list_domain_objects(fawkes::WebviewRestParams& params);
-
-	WebviewRestArray<DomainPredicate>
-		cb_list_domain_predicates(fawkes::WebviewRestParams& params);
-
-	WebviewRestArray<DomainFact>
-		cb_list_domain_facts(fawkes::WebviewRestParams& params);
-
-	
-	WebviewRestArray<Plan>
-		cb_list_plans(fawkes::WebviewRestParams& params);
-
 	Plan cb_get_plan(fawkes::WebviewRestParams& params);
 
 	Goal generate_goal(CLIPS::Fact::pointer fact);
-
 	void gen_plan_precompute(std::map<PlanKey, CLIPS::Fact::pointer> &plans,
 	                         std::map<PlanKey, ClipsFactList> &plan_actions,
 	                         PreCompoundMap &prec,

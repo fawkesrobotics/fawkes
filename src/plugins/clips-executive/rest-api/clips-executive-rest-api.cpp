@@ -56,25 +56,25 @@ ClipsExecutiveRestApi::init()
 	rest_api_ = new WebviewRestApi("clips-executive", logger);
 	rest_api_->add_handler<WebviewRestArray<Goal>>
 		(WebRequest::METHOD_GET, "/goals",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_goals, this, std::placeholders::_1));
+		 std::bind(&ClipsExecutiveRestApi::cb_list_goals, this));
 	rest_api_->add_handler<Goal>
 		(WebRequest::METHOD_GET, "/goals/{id}",
 		 std::bind(&ClipsExecutiveRestApi::cb_get_goal, this, std::placeholders::_1));
 	rest_api_->add_handler<WebviewRestArray<DomainOperator>>
 		(WebRequest::METHOD_GET, "/domain-operators",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_operators, this, std::placeholders::_1));
+		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_operators, this));
 	rest_api_->add_handler<WebviewRestArray<DomainObject>>
 		(WebRequest::METHOD_GET, "/domain-objects",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_objects, this, std::placeholders::_1));
+		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_objects, this));
 	rest_api_->add_handler<WebviewRestArray<DomainPredicate>>
 		(WebRequest::METHOD_GET, "/domain-predicates",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_predicates, this, std::placeholders::_1));
+		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_predicates, this));
 	rest_api_->add_handler<WebviewRestArray<DomainFact>>
 		(WebRequest::METHOD_GET, "/domain-facts",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_facts, this, std::placeholders::_1));
+		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_facts, this));
 	rest_api_->add_handler<WebviewRestArray<Plan>>
 		(WebRequest::METHOD_GET, "/plans",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_plans, this, std::placeholders::_1));
+		 std::bind(&ClipsExecutiveRestApi::cb_list_plans, this));
 	rest_api_->add_handler<Plan>
 		(WebRequest::METHOD_GET, "/plans/{goal-id}/{id}",
 		 std::bind(&ClipsExecutiveRestApi::cb_get_plan, this, std::placeholders::_1));
@@ -184,12 +184,8 @@ ClipsExecutiveRestApi::generate_goal(CLIPS::Fact::pointer fact)
 }
 
 WebviewRestArray<Goal>
-ClipsExecutiveRestApi::cb_list_goals(WebviewRestParams& params)
+ClipsExecutiveRestApi::cb_list_goals()
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	MutexLocker lock(clips_.objmutex_ptr());
 	WebviewRestArray<Goal> rv;
 
@@ -214,9 +210,6 @@ Goal
 ClipsExecutiveRestApi::cb_get_goal(WebviewRestParams& params)
 {
 	const std::string id = params.path_arg("id");
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
 	
 	MutexLocker lock(clips_.objmutex_ptr());
 	CLIPS::Fact::pointer fact = clips_->get_facts();
@@ -240,12 +233,8 @@ ClipsExecutiveRestApi::cb_get_goal(WebviewRestParams& params)
 }
 
 WebviewRestArray<DomainOperator>
-ClipsExecutiveRestApi::cb_list_domain_operators(WebviewRestParams& params)
+ClipsExecutiveRestApi::cb_list_domain_operators()
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	MutexLocker lock(clips_.objmutex_ptr());
 	WebviewRestArray<DomainOperator> rv;
 
@@ -297,12 +286,8 @@ ClipsExecutiveRestApi::cb_list_domain_operators(WebviewRestParams& params)
 }
 
 WebviewRestArray<DomainObject>
-ClipsExecutiveRestApi::cb_list_domain_objects(fawkes::WebviewRestParams& params)
+ClipsExecutiveRestApi::cb_list_domain_objects()
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	MutexLocker lock(clips_.objmutex_ptr());
 	WebviewRestArray<DomainObject> rv;
 
@@ -324,12 +309,8 @@ ClipsExecutiveRestApi::cb_list_domain_objects(fawkes::WebviewRestParams& params)
 }
 
 WebviewRestArray<DomainPredicate>
-ClipsExecutiveRestApi::cb_list_domain_predicates(fawkes::WebviewRestParams& params)
+ClipsExecutiveRestApi::cb_list_domain_predicates()
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	MutexLocker lock(clips_.objmutex_ptr());
 	WebviewRestArray<DomainPredicate> rv;
 
@@ -353,12 +334,8 @@ ClipsExecutiveRestApi::cb_list_domain_predicates(fawkes::WebviewRestParams& para
 }
 
 WebviewRestArray<DomainFact>
-ClipsExecutiveRestApi::cb_list_domain_facts(fawkes::WebviewRestParams& params)
+ClipsExecutiveRestApi::cb_list_domain_facts()
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	MutexLocker lock(clips_.objmutex_ptr());
 	WebviewRestArray<DomainFact> rv;
 
@@ -528,12 +505,8 @@ ClipsExecutiveRestApi::gen_plan(const PlanKey &plan_key,
 
 
 WebviewRestArray<Plan>
-ClipsExecutiveRestApi::cb_list_plans(WebviewRestParams& params)
+ClipsExecutiveRestApi::cb_list_plans()
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	MutexLocker lock(clips_.objmutex_ptr());
 	WebviewRestArray<Plan> rv;
 
