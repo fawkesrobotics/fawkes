@@ -54,7 +54,7 @@ BlackboardRestApi::init()
 	rest_api_ = new WebviewRestApi("blackboard", logger);
 	rest_api_->add_handler<WebviewRestArray<::InterfaceInfo>>
 		(WebRequest::METHOD_GET, "/interfaces",
-		 std::bind(&BlackboardRestApi::cb_list_interfaces, this, std::placeholders::_1));
+		 std::bind(&BlackboardRestApi::cb_list_interfaces, this));
 	rest_api_->add_handler<InterfaceData>
 		(WebRequest::METHOD_GET, "/interfaces/{type}/{id+}/data",
 		 std::bind(&BlackboardRestApi::cb_get_interface_data, this, std::placeholders::_1));
@@ -245,12 +245,8 @@ BlackboardRestApi::gen_interface_data(Interface *iface, bool pretty)
 
 
 WebviewRestArray<::InterfaceInfo>
-BlackboardRestApi::cb_list_interfaces(WebviewRestParams& params)
+BlackboardRestApi::cb_list_interfaces()
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	WebviewRestArray<::InterfaceInfo> rv;
 
 	std::unique_ptr<InterfaceInfoList> ifls{blackboard->list_all()};
@@ -265,10 +261,6 @@ BlackboardRestApi::cb_list_interfaces(WebviewRestParams& params)
 ::InterfaceInfo
 BlackboardRestApi::cb_get_interface_info(WebviewRestParams& params)
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	if (params.path_arg("type").find_first_of("*?") != std::string::npos) {
 		throw WebviewRestException(WebReply::HTTP_BAD_REQUEST, "Type may not contain any of [*?].");
 	}
@@ -289,10 +281,7 @@ BlackboardRestApi::cb_get_interface_info(WebviewRestParams& params)
 InterfaceData
 BlackboardRestApi::cb_get_interface_data(WebviewRestParams& params)
 {
-	bool pretty = false;
-	if (params.query_arg("pretty") == "true") {
-		pretty = true;
-	}
+	bool pretty = params.has_query_arg("pretty");
 	params.set_pretty_json(pretty);
 
 	if (params.path_arg("type").find_first_of("*?") != std::string::npos) {

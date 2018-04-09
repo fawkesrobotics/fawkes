@@ -53,8 +53,7 @@ class BlackboardRestApi
 	virtual void finalize();
 
  private:
-	WebviewRestArray<InterfaceInfo>
-		cb_list_interfaces(fawkes::WebviewRestParams& params);
+	WebviewRestArray<InterfaceInfo> cb_list_interfaces();
 
 	InterfaceInfo
 		cb_get_interface_info(fawkes::WebviewRestParams& params);

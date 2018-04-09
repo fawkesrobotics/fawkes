@@ -52,7 +52,7 @@ ImageRestApi::init()
 	rest_api_ = new WebviewRestApi("images", logger);
 	rest_api_->add_handler<WebviewRestArray<ImageInfo>>
 		(WebRequest::METHOD_GET, "/?",
-		 std::bind(&ImageRestApi::cb_list_images, this, std::placeholders::_1));
+		 std::bind(&ImageRestApi::cb_list_images, this));
 	rest_api_->add_handler(WebRequest::METHOD_GET, "/{id+}",
 	                       std::bind(&ImageRestApi::cb_get_image, this, std::placeholders::_1));
 	webview_rest_api_manager->register_api(rest_api_);
@@ -77,12 +77,8 @@ ImageRestApi::loop()
 
 
 WebviewRestArray<ImageInfo>
-ImageRestApi::cb_list_images(WebviewRestParams& params)
+ImageRestApi::cb_list_images()
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	WebviewRestArray<ImageInfo> rv;
 
 	std::list<SharedMemoryImageBufferMetaData> meta_data =

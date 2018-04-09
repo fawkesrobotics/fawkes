@@ -58,8 +58,7 @@ class ImageRestApi
 	virtual void finalize();
 
  private:
-	WebviewRestArray<ImageInfo>
-		cb_list_images(fawkes::WebviewRestParams& params);
+	WebviewRestArray<ImageInfo> cb_list_images();
 
 	std::shared_ptr<fawkes::WebviewJpegStreamProducer>
 		get_stream(const std::string& image_id);
