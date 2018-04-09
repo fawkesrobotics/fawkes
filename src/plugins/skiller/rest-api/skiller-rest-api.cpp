@@ -55,7 +55,7 @@ SkillerRestApi::init()
 	rest_api_ = new WebviewRestApi("skiller", logger);
 	rest_api_->add_handler<WebviewRestArray<SkillInfo>>
 		(WebRequest::METHOD_GET, "/skills",
-		 std::bind(&SkillerRestApi::cb_list_skills, this, std::placeholders::_1));
+		 std::bind(&SkillerRestApi::cb_list_skills, this));
 	rest_api_->add_handler<Skill>
 		(WebRequest::METHOD_GET, "/skills/{id}",
 		 std::bind(&SkillerRestApi::cb_get_skill, this, std::placeholders::_1));
@@ -64,8 +64,7 @@ SkillerRestApi::init()
 		 std::bind(&SkillerRestApi::cb_stop_skill, this, std::placeholders::_1));
 	rest_api_->add_handler<SkillCall, Skill>
 		(WebRequest::METHOD_POST, "/call",
-		 std::bind(&SkillerRestApi::cb_exec_skill, this,
-		           std::placeholders::_1, std::placeholders::_2));
+		 std::bind(&SkillerRestApi::cb_exec_skill, this, std::placeholders::_1));
 	webview_rest_api_manager->register_api(rest_api_);
 }
 
@@ -107,12 +106,8 @@ SkillerRestApi::set_and_wait_graph(const char *graph)
 }
 
 WebviewRestArray<SkillInfo>
-SkillerRestApi::cb_list_skills(WebviewRestParams& params)
+SkillerRestApi::cb_list_skills()
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	WebviewRestArray<SkillInfo> rv;
 
 	skdb_if_->read();
@@ -145,10 +140,6 @@ SkillerRestApi::cb_list_skills(WebviewRestParams& params)
 Skill
 SkillerRestApi::cb_get_skill(WebviewRestParams& params)
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	std::string skill_name{params.path_arg("id")};
 
 	if (skill_name == "active") {
@@ -197,12 +188,8 @@ SkillerRestApi::cb_get_skill(WebviewRestParams& params)
 
 
 Skill
-SkillerRestApi::cb_exec_skill(const SkillCall &call, fawkes::WebviewRestParams& params)
+SkillerRestApi::cb_exec_skill(const SkillCall &call)
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	if (! call.skill_string()) {
 		throw WebviewRestException(WebReply::HTTP_BAD_REQUEST,
 		                           "Request lacks skill string");
@@ -244,10 +231,6 @@ SkillerRestApi::cb_exec_skill(const SkillCall &call, fawkes::WebviewRestParams& 
 std::unique_ptr<fawkes::WebviewRestReply>
 SkillerRestApi::cb_stop_skill(WebviewRestParams& params)
 {
-	if (params.query_arg("pretty") == "true") {
-		params.set_pretty_json(true);
-	}
-
 	std::string skill_name{params.path_arg("id")};
 
 	if (skill_name != "active") {

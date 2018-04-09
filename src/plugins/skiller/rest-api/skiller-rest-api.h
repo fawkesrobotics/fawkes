@@ -53,12 +53,11 @@ class SkillerRestApi
 	virtual void finalize();
 
  private:
-	WebviewRestArray<SkillInfo>
-		cb_list_skills(fawkes::WebviewRestParams& params);
+	WebviewRestArray<SkillInfo> cb_list_skills();
 
 	Skill	cb_get_skill(fawkes::WebviewRestParams& params);
 
-	Skill	cb_exec_skill(const SkillCall &call, fawkes::WebviewRestParams& params);
+	Skill	cb_exec_skill(const SkillCall &call);
 
 	std::unique_ptr<fawkes::WebviewRestReply>
 		cb_stop_skill(fawkes::WebviewRestParams& params);
