@@ -251,6 +251,9 @@ class WebviewRestApi
 				            } catch (std::runtime_error &e) {
 					            logger_->log_warn(("RestAPI|" + name_).c_str(), "%s", e.what());
 				            }
+				            if (m.has_query_arg("pretty")) {
+					            m.set_pretty_json(true);
+				            }
 				            return std::make_unique<WebviewRestReply>
 					            (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
 			            } catch (WebviewRestException &e) {
@@ -315,6 +318,9 @@ class WebviewRestApi
 					            output.validate();
 				            } catch (std::runtime_error &e) {
 					            logger_->log_warn(("RestAPI|" + name_).c_str(), "%s", e.what());
+				            }
+				            if (m.has_query_arg("pretty")) {
+					            m.set_pretty_json(true);
 				            }
 				            return std::make_unique<WebviewRestReply>
 					            (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
