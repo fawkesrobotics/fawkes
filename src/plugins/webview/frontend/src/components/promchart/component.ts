@@ -2,11 +2,14 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import {Component, Input, AfterViewInit, ViewChild, OnDestroy, HostListener} from '@angular/core';
+import {Component, Input, AfterViewInit, ViewChild,
+        OnInit, OnDestroy, HostListener} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
+
+import { BackendConfigurationService } from '../../services/backend-config/backend-config.service';
 
 import * as c3 from 'c3';
 import * as d3 from 'd3';
@@ -32,7 +35,7 @@ const DEFAULT_LEGEND: c3.LegendOptions = {
   templateUrl: './template.html',
   styleUrls: ['./style.scss']
 })
-export class PrometheusChartComponent implements AfterViewInit, OnDestroy {
+export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() time_range?: number = 900;
   @Input() step_sec?: number = 15;
   @Input() query?: string = null;
@@ -57,22 +60,11 @@ export class PrometheusChartComponent implements AfterViewInit, OnDestroy {
   zero_message: string = "No data received";
   auto_refresh_subscription = null;
 
-  constructor(private http: HttpClient) {}
-  
-  format_bytes(value: number)
-  {
-    let units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']
-    let idx = 0;
-    while (value > 1024 && idx < units.length - 1) {
-      value /= 1024;
-      idx += 1;
-    }
-    if (value > 0 && value < 10) {
-      return d3.format('.1f')(value) + units[idx];
-    } else {
-      return d3.format('.0f')(value) + units[idx];
-    }
-  }
+  private backend_subscription = null;
+
+  constructor(private backendcfg: BackendConfigurationService,
+              private http: HttpClient)
+  {}
 
   ngAfterViewInit()
   {
@@ -83,9 +75,17 @@ export class PrometheusChartComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  ngOnInit() {
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe((backend) => {
+      this.refresh();
+    });
+  }
+
   ngOnDestroy()
   {
     this.disable_autorefresh();
+    this.backend_subscription.unsubscribe();
+    this.backend_subscription = null;
   }
 
   @HostListener('window:focus', ['$event'])
@@ -105,7 +105,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnDestroy {
     let end   = Math.floor(Date.now() / 1000);
     let start = end - this.time_range;
     let url =
-      `http://localhost:9090/api/v1/query_range?query=${encodeURIComponent(String(this.query))}&start=${start}&end=${end}&step=${this.step_sec}s`;
+      `${this.backendcfg.url_for('prometheus')}/api/v1/query_range?query=${encodeURIComponent(String(this.query))}&start=${start}&end=${end}&step=${this.step_sec}s`;
     this.http.get<any>(url)
       .subscribe(
         (obj) => {
@@ -263,12 +263,28 @@ export class PrometheusChartComponent implements AfterViewInit, OnDestroy {
         },
         (err) => {
           if (err.status == 0) {
+            this.have_data = false;
             this.zero_message="Prometheus server unavailable.";
           } else {
             this.zero_message=`Failed to retrieve data: ${err.error}`;
           }
         }
       );
+  }
+
+  format_bytes(value: number)
+  {
+    let units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']
+    let idx = 0;
+    while (value > 1024 && idx < units.length - 1) {
+      value /= 1024;
+      idx += 1;
+    }
+    if (value > 0 && value < 10) {
+      return d3.format('.1f')(value) + units[idx];
+    } else {
+      return d3.format('.0f')(value) + units[idx];
+    }
   }
 
   private enable_autorefresh()
