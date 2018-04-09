@@ -63,14 +63,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
-import { ConfigurationService } from '../../../services/config.service';
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
 {{ gen_imports(spec) }}
 
 @Injectable()
 export class {{ name | sanitize }}ApiService
 {
-  constructor(private config: ConfigurationService,
+  constructor(private backend: BackendConfigurationService,
               private http: HttpClient) {}
 
 % for p in spec.paths
@@ -112,7 +112,7 @@ export class {{ name | sanitize }}ApiService
 % set response_type = 'json'
 % endif
 
-    return this.http.{{ method }}{% if response_type == 'json' %}<{{ return_type(op) }}>{% endif %}(`${this.config.get('apiurl')}{{ p | path_substargs(op, '${encodeURIComponent(String($$))}') }}`, {% for p in op | path_args(only_in='body') %}{{ p.name | sanitize }}, {% endfor %}
+    return this.http.{{ method }}{% if response_type == 'json' %}<{{ return_type(op) }}>{% endif %}(`${this.backend.url_for('api')}{{ p | path_substargs(op, '${encodeURIComponent(String($$))}') }}`, {% for p in op | path_args(only_in='body') %}{{ p.name | sanitize }}, {% endfor %}
 		  { headers: headers, params: params,
 		    observe: '{{ observe }}', responseType: '{{ response_type }}' })	;
 	}
