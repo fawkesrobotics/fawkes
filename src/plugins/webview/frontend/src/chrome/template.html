@@ -7,41 +7,6 @@
 <div fxLayout="column"
      fxFill
      fxFlexFill>
-<!--
-  <mat-toolbar class="ff-toolbar ff-primary-toolbar">
-    <div class="ff-toolbar-tools"
-         fxLayout="row"
-         fxFlex="auto">
-      <div class="kd-logo-bar">
-        <a uiSref="{{getOverviewStateName()}}"
-           class="kd-toolbar-logo-link">
-          <mat-icon [svgIcon]="assets.getAppLogo()"
-                    class="kd-toolbar-logo">
-          </mat-icon>
-          <mat-icon [svgIcon]="assets.getAppLogoText()"
-                    class="kd-toolbar-logo-text">
-          </mat-icon>
-        </a>
-      </div>
-      <kd-search class="kd-search-bar"
-                 fxFlex>
-      </kd-search>
-      <div fxLayout="row">
-        <button mat-icon-button
-                color="primary"
-                class="kd-primary-button kd-global-action-margin"
-                i18n-matTooltip
-                matTooltip="Create any Kubernetes resource"
-                (click)="goToCreateState()">
-          <mat-icon>add</mat-icon>
-        </button>
-        <kd-notifications class="kd-global-action-margin"></kd-notifications>
-        <kd-user-panel class="kd-global-action-margin"></kd-user-panel>
-      </div>
-    </div>
-  </mat-toolbar>
-	-->
-
   <mat-toolbar class="ff-second-toolbar ff-bg-primary">
     <div class="ff-toolbar-tools"
          fxFlex>
@@ -53,6 +18,21 @@
           </mat-icon>
         </a>
       </div>
+			<div class="ff-right" fxFlexLayout="row">
+				<button mat-button [matMenuTriggerFor]="backend_menu"
+								color="accent" class="backend-name">
+					<mat-icon class="cloud-icon">android</mat-icon>
+					{{ backend_conf.backend_name }}
+					<mat-icon class="select-icon">arrow_drop_down</mat-icon>
+				</button>
+				<mat-menu #backend_menu="matMenu">
+					<button mat-menu-item
+									*ngFor="let backend of backend_conf.backend_list; let i = index"
+										(click)="backend_conf.set_backend(backend.id)">
+						<mat-icon>{{ number_symbol(i) }}</mat-icon> {{ backend.name }}
+						</button>
+				</mat-menu>
+			</div>
       <!-- <ff-breadcrumbs class="ff-actionbar-breadcrumbs"></ff-breadcrumbs>
       <ff-actionbar fxFlex="end"></ff-actionbar> -->
     </div>

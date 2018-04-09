@@ -95,3 +95,18 @@
     //padding-bottom: 2 * $baseline-grid;
   }
 }
+
+.backend-name {
+		font-size: $title-font-size-base;
+}
+
+.select-icon {
+		vertical-align: middle;
+		padding-bottom: 2px;
+}
+
+.cloud-icon {
+		vertical-align: middle;
+		padding-bottom: 4px;
+		margin-right: .5 * $baseline-grid;
+}
