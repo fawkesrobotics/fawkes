@@ -13,7 +13,7 @@ import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ChromeModule } from '../chrome/module';
-import { ConfigurationService } from '../services/config.service';
+import { BackendConfigurationService } from '../services/backend-config/backend-config.service';
 import { AssetsService } from '../services/global/assets';
 
 import { ClipsExecutiveModule } from '../parts/clips-executive/module';
@@ -45,7 +45,7 @@ import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 	  // Keep the AppRoutingModule last
 	  AppRoutingModule,
 	],
-  providers: [ConfigurationService, AssetsService],
+  providers: [BackendConfigurationService, AssetsService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
