@@ -2,10 +2,11 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
 
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { BlackboardApiService } from '../services/api.service';
 import { InterfaceInfo } from '../models/InterfaceInfo';
 
@@ -14,23 +15,57 @@ import { InterfaceInfo } from '../models/InterfaceInfo';
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss']
 })
-export class BlackboardOverviewComponent implements OnInit {
+export class BlackboardOverviewComponent implements OnInit, OnDestroy {
+
+  private backend_subscription = null;
 
   loading = false;
   auto_refresh_subscription = null;
   selected_interfaces = [];
   interfaces = null;
   zero_message = "No graph has been retrieved";
+
+  known_types = {};
   
-  constructor(private api_service: BlackboardApiService)
+  constructor(private api_service: BlackboardApiService,
+              private backendcfg: BackendConfigurationService)
   {}
 
   ngOnInit() {
     this.refresh();
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => {
+      this.refresh(true);
+    });
+  }
+
+  ngOnDestroy()
+  {
+    this.backend_subscription.unsubscribe();
+    this.backend_subscription = null;
   }
 
   keys(obj) {
     return Object.keys(obj);
+  }
+
+  /** Check if interface is OK.
+   * An interface is ok if it is in the list of interfaces received from the remote.
+   * @param id_hash array of strings with two entries, id and hash
+   * @return true if interface can be used, false otherwise
+   */
+  iok(hash_id: string[]): boolean {
+    return ( this.interfaces &&
+             hash_id[0] in this.interfaces &&
+             hash_id[1] in this.interfaces[hash_id[0]].instances );
+  }
+
+  /** Get interface.
+   * Assumes that the interface validity has been checked before with iok().
+   * @param hash_id array of strings with two entries, id and hash
+   * @return interface instance descriptor
+   */
+  ifc(hash_id: string[]) {
+    return this.interfaces[hash_id[0]].instances[hash_id[1]];
   }
 
   indexof_selected_interface(hash: string, id: string)
@@ -59,9 +94,8 @@ export class BlackboardOverviewComponent implements OnInit {
 
   refresh_data(hash: string, id: string)
   {
-    if (! this.interfaces[hash] || ! this.interfaces[hash].instances[id]) {
-      return;
-    }
+    if (! this.iok([hash, id])) return;
+
     this.interfaces[hash].instances[id].loading = true;
     this.zero_message = "Retrieving interface data";
 
@@ -73,13 +107,15 @@ export class BlackboardOverviewComponent implements OnInit {
         this.interfaces[hash].instances[id].loading = false;
       },
       (err) => {
-        this.interfaces[hash].instances[id].enabled = false;
-        this.interfaces[hash].instances[id].loading = false;
+        if (this.iok([hash, id])) {
+          this.interfaces[hash].instances[id].enabled = false;
+          this.interfaces[hash].instances[id].loading = false;
+        }
       }
     );
   }
   
-  refresh()
+  refresh(refresh_data = false)
   {
     this.loading = true;
     this.zero_message = "Retrieving interface info";
@@ -92,6 +128,9 @@ export class BlackboardOverviewComponent implements OnInit {
           ifs = this.interfaces;
         }
         for (let i of interfaces) {
+          if (! (i.hash in this.known_types)) {
+            this.known_types[i.hash] = i.type;
+          }
           if (ifs[i.hash]) {
             if (ifs[i.hash].instances[i.id]) {
               ifs[i.hash].instances[i.id].info = i;
@@ -118,6 +157,13 @@ export class BlackboardOverviewComponent implements OnInit {
           }
         }
         this.interfaces = ifs;
+
+        if (refresh_data) {
+          for (let hash_id of this.selected_interfaces) {
+            this.refresh_data(hash_id[0], hash_id[1]);
+          }
+        }
+
         this.loading = false;
       },
       (err) => {

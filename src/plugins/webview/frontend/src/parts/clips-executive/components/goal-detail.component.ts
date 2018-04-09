@@ -2,16 +2,15 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { catchError, tap, switchMap } from 'rxjs/operators';
+import { tap, switchMap } from 'rxjs/operators';
 import 'rxjs/add/observable/forkJoin';
 import 'rxjs/add/observable/interval';
-import 'rxjs/add/operator/catch';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import 'rxjs/add/operator/map';
 
-import { ConfigurationService } from '../../../services/config.service';
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { ClipsExecutiveApiService } from '../services/api.service';
 import { Goal } from '../models/Goal';
 import { Plan } from '../models/Plan';
@@ -27,12 +26,14 @@ import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound
   templateUrl: './goal-detail.component.html',
   styleUrls: ['./goal-detail.component.scss']
 })
-export class GoalDetailComponent implements OnInit {
+export class GoalDetailComponent implements OnInit, OnDestroy {
 
-  constructor(private config: ConfigurationService,
-              private route: ActivatedRoute,
-              private http: HttpClient,
-              private api_service : ClipsExecutiveApiService) { }
+  private backend_subscription = null;
+
+  constructor(private route: ActivatedRoute,
+              private api_service : ClipsExecutiveApiService,
+              private backendcfg: BackendConfigurationService)
+  {}
 
   id = "";
   loading_goal   = false;
@@ -51,8 +52,18 @@ export class GoalDetailComponent implements OnInit {
   displayedPlanActionColumns = [ "operator_name", "params", "status", "executable", "preconditions" ];
 
   ngOnInit() {
-    this.refresh_goal();
     this.refresh_domain();
+    this.refresh_goal();
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => {
+      this.refresh_domain();
+      this.refresh_goal();
+    });
+  }
+
+  ngOnDestroy()
+  {
+    this.backend_subscription.unsubscribe();
+    this.backend_subscription = null;
   }
 
   refresh_domain()

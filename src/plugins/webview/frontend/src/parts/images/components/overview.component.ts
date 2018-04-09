@@ -9,7 +9,7 @@ import 'rxjs/add/observable/interval';
 import { ImageApiService } from '../services/api.service';
 import { ImageInfo } from '../models/ImageInfo';
 
-import { ConfigurationService } from '../../../services/config.service';
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
 @Component({
   selector: 'blackboard-overview',
@@ -49,20 +49,29 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
   image_src: string = null;
   image_selected: string[] = null;
   image_on_blur: string[] = null;
-  
-  constructor(private config: ConfigurationService,
-              private api_service: ImageApiService)
+
+  private backend_subscription = null;
+
+  constructor(private api_service: ImageApiService,
+              private backendcfg: BackendConfigurationService)
   {}
 
   ngOnInit() {
     this.refresh();
     this.image_on_blur = null;
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => {
+      this.disable_autorefresh();
+      this.deselect_image();
+      this.refresh();
+    });
   }
 
   ngOnDestroy()
   {
     this.disable_autorefresh();
     this.deselect_image();
+    this.backend_subscription.unsubscribe();
+    this.backend_subscription = null;
   }
 
   @HostListener('window:focus', ['$event'])
@@ -87,7 +96,7 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
     
     this.image_selected = [image, mode];
     let cache_bust = `${Date.now()}-${Math.random()}`;
-    this.image_src = `${this.config.get('apiurl')}/images/${image}.${mode}?cb=${cache_bust}`;
+    this.image_src = `${this.backendcfg.url_for('api')}/images/${image}.${mode}?cb=${cache_bust}`;
 
     // see @ViewChild comment why we do this
     let img_elem = document.createElement("img");

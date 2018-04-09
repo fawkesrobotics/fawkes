@@ -2,25 +2,26 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { MatTableDataSource } from '@angular/material';
 
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { CardListFilterComponent } from '../../../components/filter/component';
 import { ClipsApiService } from '../services/api.service';
 import { Fact } from '../models/Fact';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
-import 'rxjs/add/operator/switchMap';
-import { catchError, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'clips-env',
   templateUrl: './clips-env.component.html',
   styleUrls: ['./clips-env.component.scss']
 })
-export class ClipsEnvComponent implements OnInit {
+export class ClipsEnvComponent implements OnInit, OnDestroy {
+
+  private backend_subscription = null;
 
   displayed_columns = ['index', 'formatted'];
 
@@ -38,9 +39,9 @@ export class ClipsEnvComponent implements OnInit {
 
   constructor(private readonly api_service: ClipsApiService,
               private route: ActivatedRoute,
-              private router: Router)
-  {
-  }
+              private router: Router,
+              private backendcfg: BackendConfigurationService)
+  {}
 
   ngOnInit() {
 
@@ -57,6 +58,17 @@ export class ClipsEnvComponent implements OnInit {
       .subscribe((query: string) => {
         this.apply_filter(query)
       });
+
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => {
+      this.refresh_envs();
+      this.refresh();
+    });
+  }
+
+  ngOnDestroy()
+  {
+    this.backend_subscription.unsubscribe();
+    this.backend_subscription = null;
   }
 
   refresh()

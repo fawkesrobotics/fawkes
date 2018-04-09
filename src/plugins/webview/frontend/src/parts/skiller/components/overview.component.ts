@@ -2,10 +2,11 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
 
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { BehaviorEngineApiService } from '../services/api.service';
 import { SkillCall } from '../models/SkillCall';
 
@@ -14,7 +15,7 @@ import { SkillCall } from '../models/SkillCall';
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss']
 })
-export class SkillerOverviewComponent implements OnInit {
+export class SkillerOverviewComponent implements OnInit, OnDestroy {
 
   loading = false;
   auto_refresh_subscription = null;
@@ -24,12 +25,26 @@ export class SkillerOverviewComponent implements OnInit {
   zero_message = "No graph has been retrieved";
   message_id = 0;
 
-  constructor(private api_service: BehaviorEngineApiService)
+  private backend_subscription = null;
+
+  constructor(private api_service: BehaviorEngineApiService,
+              private backendcfg: BackendConfigurationService)
   {}
 
   ngOnInit() {
     this.refresh();
     this.refresh_skills();
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => {
+      this.refresh();
+      this.refresh_skills();
+      this.select_skill('active');
+    });
+  }
+
+  ngOnDestroy()
+  {
+    this.backend_subscription.unsubscribe();
+    this.backend_subscription = null;
   }
 
   refresh()

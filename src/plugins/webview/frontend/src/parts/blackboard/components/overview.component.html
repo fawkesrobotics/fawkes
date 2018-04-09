@@ -57,18 +57,18 @@
 			<mat-card class="interface-card" fxFlex="32" *ngFor="let i of selected_interfaces">
 				<mat-card-title>
 					<div fxLayout="row">
-						<div>{{ interfaces[i[0]].type }}::{{ interfaces[i[0]].instances[i[1]].info.id }}</div>
+						<div>{{ known_types[i[0]] }}::{{ i[1] }}</div>
 						<div class="ff-right">
 							<button mat-icon-button
 											class="ff-card-title-button"
-											[disabled]="interfaces[i[0]].instances[i[1]].autosub != null || interfaces[i[0]].instances[i[1]].loading"
+											[disabled]="! iok(i) || ifc(i).loading"
 											(click)="refresh_data(i[0], i[1])">
-								<mat-icon *ngIf="!interfaces[i[0]].instances[i[1]].loading">refresh</mat-icon>
-								<mat-spinner *ngIf="interfaces[i[0]].instances[i[1]].loading" [diameter]="20"></mat-spinner>
+								<mat-icon *ngIf="iok(i) && !ifc(i).loading">refresh</mat-icon>
+								<mat-spinner *ngIf="iok(i) && ifc(i).loading" [diameter]="20"></mat-spinner>
 							</button>
 							<button mat-icon-button
 											class="ff-card-title-button"
-											[disabled]="!interfaces[i[0]].instances[i[1]].enabled"
+											[disabled]="! iok(i) || ! ifc(i).enabled"
 											(click)="toggle_autorefresh()">
 								<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
 							</button>
@@ -81,17 +81,17 @@
 					</div>
 				</mat-card-title>
 				<mat-divider></mat-divider>
-				<div *ngIf="interfaces[i[0]].instances[i[1]].info"
+				<div *ngIf="iok(i) && ifc(i).info"
 						 fxLayout="column" class="reader-writer-info">
 					<ff-property direction="vertical">
 						<div key>Writer</div>
 						<div value>
-							<mat-chip-list *ngIf="interfaces[i[0]].instances[i[1]].info.writer">
+							<mat-chip-list *ngIf="ifc(i).info.writer">
 								<mat-chip color="primary">
-									{{ interfaces[i[0]].instances[i[1]].info.writer }}
+									{{ ifc(i).info.writer }}
 								</mat-chip>
 							</mat-chip-list>
-							<ng-container *ngIf="!interfaces[i[0]].instances[i[1]].info.writer">
+							<ng-container *ngIf="!ifc(i).info.writer">
 								&mdash;
 							</ng-container>
 						</div>
@@ -100,11 +100,11 @@
 						<div key>Readers</div>
 						<div value>
 							<mat-chip-list>
-								<mat-chip *ngFor="let r of interfaces[i[0]].instances[i[1]].info.readers">
+								<mat-chip *ngFor="let r of ifc(i).info.readers">
 									{{ r }}
 								</mat-chip>
 							</mat-chip-list>
-							<ng-container *ngIf="interfaces[i[0]].instances[i[1]].info.readers.length == 0">
+							<ng-container *ngIf="ifc(i).info.readers.length == 0">
 								&mdash;
 							</ng-container>
 						</div>
@@ -112,10 +112,10 @@
 					<ff-property direction="vertical">
 						<div key>Last Updated</div>
 						<div value>
-							<div *ngIf="interfaces[i[0]].instances[i[1]].data.timestamp != '0:0'">
-								{{ interfaces[i[0]].instances[i[1]].data.timestamp }}
+							<div *ngIf="iok(i) && ifc(i).data && ifc(i).data.timestamp != '0:0'">
+								{{ ifc(i).data.timestamp }}
 							</div>
-							<div *ngIf="interfaces[i[0]].instances[i[1]].data.timestamp == '0:0'">
+							<div *ngIf="! iok(i) || ! ifc(i).data || ifc(i).data.timestamp == '0:0'">
 								<span color="red">never</span>
 							</div>
 						</div>
@@ -123,20 +123,20 @@
 				</div>
 				<mat-divider></mat-divider>
 				<mat-card-content class="ff-card-content maybe-disabled-card-content">
-					<div *ngIf="interfaces[i[0]].instances[i[1]].data"
+					<div *ngIf="iok(i) && ifc(i).data"
 							 fxLayout="row wrap" fxLayoutAlign="space-between">
-						<div *ngIf="!interfaces[i[0]].instances[i[1]].enabled" class="disabled-overlay"
+						<div *ngIf="!ifc(i).enabled" class="disabled-overlay"
 								 fxLayout="row" fxLayoutAlign="center center">
 							<div>Not available</div>
 						</div>
 
 						<ff-property  direction="vertical"
-													*ngFor="let f of keys(interfaces[i[0]].instances[i[1]].data.data)">
+													*ngFor="let f of keys(ifc(i).data.data)">
 							<div key>{{ f }}</div>
-							<div value>{{ interfaces[i[0]].instances[i[1]].data.data[f] }}</div>
+							<div value>{{ ifc(i).data.data[f] }}</div>
 						</ff-property>
 					</div>
-					<div *ngIf="!interfaces[i[0]].instances[i[1]].data">
+					<div *ngIf="!iok(i) || !ifc(i).data">
 						<ff-list-zero-state message="No data received"></ff-list-zero-state>
 					</div>
 				</mat-card-content>

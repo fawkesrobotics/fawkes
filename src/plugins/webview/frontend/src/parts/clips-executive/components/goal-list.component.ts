@@ -2,10 +2,11 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material';
 
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { ClipsExecutiveApiService } from '../services/api.service';
 import { Goal } from '../models/Goal';
 
@@ -17,7 +18,9 @@ import 'rxjs/add/observable/interval';
   templateUrl: './goal-list.component.html',
   styleUrls: ['./goal-list.component.scss']
 })
-export class GoalListComponent implements OnInit {
+export class GoalListComponent implements OnInit, OnDestroy {
+
+  private backend_subscription = null;
 
   dataSource = new MatTableDataSource();
   displayedColumns = ['mode', 'id', 'type', 'class'];
@@ -32,11 +35,19 @@ export class GoalListComponent implements OnInit {
   zero_message = "No goals received.";
   
   constructor(private readonly api_service: ClipsExecutiveApiService,
-              private router : Router)
-  { }
+              private router : Router,
+              private backendcfg: BackendConfigurationService)
+  {}
 
   ngOnInit() {
     this.refresh();
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh() });
+  }
+
+  ngOnDestroy()
+  {
+    this.backend_subscription.unsubscribe();
+    this.backend_subscription = null;
   }
 
   refresh()

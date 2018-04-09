@@ -2,21 +2,21 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material';
-
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
 
-//import { DashboardApiService } from '../services/api.service';
+import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
 @Component({
   selector: 'dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+
+  private backend_subscription = null;
 
   auto_refresh_subscription = null;
   loading = false;
@@ -29,12 +29,17 @@ export class DashboardComponent implements OnInit {
 
   query_mem = 'namedprocess_namegroup_memory_bytes{memtype="resident"}';
 
-  constructor(//private readonly api_service: DashboardApiService,
-              private router: Router)
-  {
-  }
+  constructor(private backendcfg: BackendConfigurationService)
+  {}
 
   ngOnInit() {
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh() });
+  }
+
+  ngOnDestroy()
+  {
+    this.backend_subscription.unsubscribe();
+    this.backend_subscription = null;
   }
 
   refresh()
