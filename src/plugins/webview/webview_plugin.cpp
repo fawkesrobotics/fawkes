@@ -27,6 +27,7 @@
 
 #ifdef HAVE_REST_APIS
 #  include "blackboard-rest-api/blackboard-rest-api.h"
+#  include "backendinfo-rest-api/backendinfo-rest-api.h"
 #  ifdef HAVE_JPEG
 #    include "image-rest-api/image-rest-api.h"
 #  endif
@@ -50,9 +51,12 @@ WebviewPlugin::WebviewPlugin(Configuration *config)
 		config->get_bool("/webview/thread-pool/enable");
 
   thread_list.push_back(new WebviewThread(enable_thread_pool));
+#ifdef HAVE_REST_APIS
   thread_list.push_back(new BlackboardRestApi());
-#ifdef HAVE_JPEG
+  thread_list.push_back(new BackendInfoRestApi());
+#  ifdef HAVE_JPEG
   thread_list.push_back(new ImageRestApi());
+#  endif
 #endif
 }
 
