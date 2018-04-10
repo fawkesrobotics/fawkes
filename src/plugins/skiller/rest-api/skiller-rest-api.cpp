@@ -62,7 +62,7 @@ SkillerRestApi::init()
 	rest_api_->add_handler
 		(WebRequest::METHOD_DELETE, "/skills/{id}",
 		 std::bind(&SkillerRestApi::cb_stop_skill, this, std::placeholders::_1));
-	rest_api_->add_handler<SkillCall, Skill>
+	rest_api_->add_handler<Skill, SkillCall>
 		(WebRequest::METHOD_POST, "/call",
 		 std::bind(&SkillerRestApi::cb_exec_skill, this, std::placeholders::_1));
 	webview_rest_api_manager->register_api(rest_api_);
