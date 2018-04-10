@@ -387,7 +387,7 @@ PluginManager::load(const std::string& plugin_list)
 	  LibLogger::log_debug("PluginManager", "Loaded plugin %s", i->c_str());
 	  notify_loaded(i->c_str());
 	} catch (CannotInitializeThreadException &e) {
-	  e.prepend("Plugin >>> %s <<< could not be initialized, unloading", i->c_str());
+	  e.append("Plugin >>> %s <<< could not be initialized, unloading", i->c_str());
 	  plugins.unlock();
 	  plugin_loader->unload(plugin);
 	  throw;
