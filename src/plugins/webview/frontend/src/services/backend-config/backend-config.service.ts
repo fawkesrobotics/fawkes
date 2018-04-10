@@ -32,10 +32,11 @@ export class BackendConfigurationService {
 
     let local_url = new URL(window.location.href);
     let api_url   = new URL(`${local_url.origin}/api`);
-    let prom_url  = new URL(`${api_url.protocol}//${api_url.hostname}:9090`);
+    let prom_url  = null;
 
     if (! environment.production) {
       api_url   = new URL(`http://${local_url.hostname}:8088/api`);
+      prom_url  = new URL(`${api_url.protocol}//${api_url.hostname}:9090`);
     }
 
     this.backends_['origin'] = {
@@ -109,6 +110,10 @@ export class BackendConfigurationService {
   services(): string[]
   {
     return Object.keys(this.backends_[this.current_backend]);
+  }
+
+  has_url_for(service: string): boolean {
+    return (service in this.backends_[this.current_backend].services);
   }
 
   url_for(service : string) {
