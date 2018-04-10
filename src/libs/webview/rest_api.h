@@ -76,13 +76,28 @@ class WebviewRestException : public fawkes::Exception
 	 * @param code HTTP response code
 	 * @param format format string for error message (cf. printf)
 	 */
+	explicit
 	WebviewRestException(WebReply::Code code, const char *format, ...)
-		: Exception(), code_(code)
+		: Exception(), code_(code), content_type_("text/plain")
 	{
 		va_list va;
 		va_start(va, format);
 		append_va(format, va);
 		va_end(va);
+	}
+
+	/** Constructor.
+	 * @param code HTTP response code
+	 * @param o Object to convert to JSON
+	 * @param pretty true to enable pretty printing of the JSON input
+	 */
+	template<typename T,
+		typename = std::enable_if_t<std::is_class<T>::value>>
+	WebviewRestException(WebReply::Code code, const T& o,
+		                     bool pretty = false)
+	 : Exception(), code_(code), content_type_("application/json")
+	{
+		append("%s", o.to_json(pretty).c_str());	
 	}
 
 	/** Get HTTP response code.
@@ -92,9 +107,18 @@ class WebviewRestException : public fawkes::Exception
 	{
 		return code_;
 	}
-	
+
+	/** Get content type of response.
+	 * @return HTTP content type
+	 */
+	const std::string &
+	content_type() const {
+		return content_type_;
+	}
+
  private:
 	WebReply::Code code_;
+	std::string content_type_;
 };
 
 /** REST parameters to pass to handlers.
@@ -217,7 +241,7 @@ class WebviewRestApi
 				            return handler(m);
 			            } catch (WebviewRestException &e) {
 				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace(), "text/plain");
+					            (e.code(), e.what_no_backtrace(), e.content_type());
 			            } catch (Exception &e) {
 				            auto r = std::make_unique<WebviewRestReply>
 					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
@@ -258,7 +282,7 @@ class WebviewRestApi
 					            (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
 			            } catch (WebviewRestException &e) {
 				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace(), "text/plain");
+					            (e.code(), e.what_no_backtrace(), e.content_type());
 			            } catch (Exception &e) {
 				            auto r = std::make_unique<WebviewRestReply>
 					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
@@ -288,7 +312,7 @@ class WebviewRestApi
 				            return handler(std::forward<I>(input), m);
 			            } catch (WebviewRestException &e) {
 				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace(), "text/plain");
+					            (e.code(), e.what_no_backtrace(), e.content_type());
 			            } catch (Exception &e) {
 				            auto r = std::make_unique<WebviewRestReply>
 					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
@@ -326,7 +350,7 @@ class WebviewRestApi
 					            (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
 			            } catch (WebviewRestException &e) {
 				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace(), "text/plain");
+					            (e.code(), e.what_no_backtrace(), e.content_type());
 			            } catch (Exception &e) {
 				            auto r = std::make_unique<WebviewRestReply>
 					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
