@@ -125,6 +125,7 @@ PluginRestApi::cb_set_plugin_state(PluginOpRequest request, WebviewRestParams &p
 			response.set_state("LOADED");
 			return response;
 		} catch (Exception &e) {
+			logger->log_error(name(), e);
 			response.set_state("ERROR");
 			response.set_message(e.what_no_backtrace());
 			throw WebviewRestException(WebReply::HTTP_INTERNAL_SERVER_ERROR, response,
@@ -136,6 +137,7 @@ PluginRestApi::cb_set_plugin_state(PluginOpRequest request, WebviewRestParams &p
 			response.set_state(*des_state);
 			return response;
 		} catch (Exception &e) {
+			logger->log_error(name(), e);
 			response.set_state("ERROR");
 			response.set_message(e.what_no_backtrace());
 			throw WebviewRestException(WebReply::HTTP_INTERNAL_SERVER_ERROR, response,

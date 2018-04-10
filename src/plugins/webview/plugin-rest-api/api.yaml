@@ -109,9 +109,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PluginOpResponse'
+                $ref: '#/components/schemas/PluginOpResponse'
         '400':
           description: bad input parameter
 
@@ -155,8 +153,6 @@ components:
         kind:
           type: string
         apiVersion:
-          type: string
-        type:
           type: string
         desired_state:
           type: string
