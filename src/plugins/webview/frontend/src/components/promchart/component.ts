@@ -267,11 +267,11 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
           }
         },
         (err) => {
+          this.have_data = false;
           if (err.status == 0) {
-            this.have_data = false;
             this.zero_message="Prometheus server unavailable.";
           } else {
-            this.zero_message=`Failed to retrieve data: ${err.error}`;
+            this.zero_message=`Failed to retrieve data: ${err.error || err.status}`;
           }
         }
       );
