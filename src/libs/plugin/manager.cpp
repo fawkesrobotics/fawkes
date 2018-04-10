@@ -255,14 +255,41 @@ PluginManager::get_loaded_plugins()
  * @return true if the plugin is currently loaded, false otherwise
  */
 bool
-PluginManager::is_loaded(const char *plugin_name)
+PluginManager::is_loaded(const std::string& plugin_name)
 {
-  if (plugin_loader->is_loaded(plugin_name)) {
+	if (plugin_loader->is_loaded(plugin_name.c_str())) {
     return true;
   } else {
     // Could still be a meta plugin
     return (__meta_plugins.find(plugin_name) != __meta_plugins.end());
   }
+}
+
+/** Check if plugin is a meta plugin.
+ * @param plugin_name plugin to check
+ * @return true if the plugin is a meta plugin, false otherwise
+ */
+bool
+PluginManager::is_meta_plugin(const std::string& plugin_name)
+{
+	try {
+		std::string meta_plugin_path = __meta_plugin_prefix + plugin_name;
+		return (__config->is_string(meta_plugin_path.c_str()));
+	} catch (ConfigEntryNotFoundException &e) {
+		return false;
+	}
+}
+
+/** Get meta plugin children.
+ * @param plugin_name plugin to check
+ * @return List of plugins which would be loaded for this plugin.
+ */
+std::list<std::string>
+PluginManager::get_meta_plugin_children(const std::string& plugin_name)
+{
+	std::string meta_plugin_path = __meta_plugin_prefix + plugin_name;
+	std::string meta_plugin_str  = __config->get_string(meta_plugin_path.c_str());
+	return parse_plugin_list(meta_plugin_str.c_str());
 }
 
 
@@ -299,9 +326,9 @@ PluginManager::parse_plugin_list(const char *plugin_list)
  * to load. The plugin list can contain meta plugins.
  */
 void
-PluginManager::load(const char *plugin_list)
+PluginManager::load(const std::string& plugin_list)
 {
-	std::list<std::string> pp = parse_plugin_list(plugin_list);
+	std::list<std::string> pp = parse_plugin_list(plugin_list.c_str());
 
 	for (std::list<std::string>::iterator i = pp.begin(); i != pp.end(); ++i) {
 		if ( i->length() == 0 ) continue;
@@ -385,7 +412,7 @@ PluginManager::load(const char *plugin_list)
  * @param plugin_name plugin to unload, can be a meta plugin.
  */
 void
-PluginManager::unload(const char *plugin_name)
+PluginManager::unload(const std::string& plugin_name)
 {
   MutexLocker lock(plugins.mutex());
   if ( (pit = find_if(plugins.begin(), plugins.end(), plname_eq(plugin_name)))
@@ -395,7 +422,7 @@ PluginManager::unload(const char *plugin_name)
       plugin_loader->unload(*pit);
       plugins.erase(pit);
       plugin_ids.erase(plugin_name);
-      notify_unloaded(plugin_name);
+      notify_unloaded(plugin_name.c_str());
       // find all meta plugins that required this module, this can no longer
       // be considered loaded
       __meta_plugins.lock();

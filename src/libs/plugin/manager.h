@@ -72,10 +72,14 @@ class PluginManager
   // for FamListener
   virtual void fam_event(const char *filename, unsigned int mask);
 
-  void load(const char *plugin_list);
-  void unload(const char *plugin_name);
+  void load(const std::string& plugin_list);
+  void unload(const std::string& plugin_name);
 
-  bool is_loaded(const char *plugin_name);
+  bool is_loaded(const std::string& plugin_name);
+  bool is_meta_plugin(const std::string& plugin_name);
+
+  std::list<std::string>
+	  get_meta_plugin_children(const std::string& plugin_name);
 
   std::list<std::string>                           get_loaded_plugins();
   std::list<std::pair<std::string, std::string> >  get_available_plugins();
