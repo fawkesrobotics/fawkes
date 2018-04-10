@@ -15,6 +15,7 @@ import { AppComponent } from './app.component';
 import { ChromeModule } from '../chrome/module';
 import { BackendConfigurationService } from '../services/backend-config/backend-config.service';
 import { AssetsService } from '../services/global/assets';
+import { SwUpdateNotifierService } from '../services/update-notifier/update-notifier.service';
 
 import { ClipsExecutiveModule } from '../parts/clips-executive/module';
 import { SkillerModule } from '../parts/skiller/module';
@@ -45,7 +46,7 @@ import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 	  // Keep the AppRoutingModule last
 	  AppRoutingModule,
 	],
-  providers: [BackendConfigurationService, AssetsService],
+  providers: [BackendConfigurationService, AssetsService, SwUpdateNotifierService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

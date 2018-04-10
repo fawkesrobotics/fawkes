@@ -4,12 +4,18 @@
 
 import { Component } from '@angular/core';
 
+import { SwUpdateNotifierService } from '../services/update-notifier/update-notifier.service';
+
 @Component({
   selector: 'app-root',
   //templateUrl: './app.component.html',
   template: '<ff-chrome class="ff-light-theme"></ff-chrome>',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  providers: [SwUpdateNotifierService]
 })
 export class AppComponent {
   title = 'app';
+
+  constructor(private update_notifier: SwUpdateNotifierService)
+  {}
 }
