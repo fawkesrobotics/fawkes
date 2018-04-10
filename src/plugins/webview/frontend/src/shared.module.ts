@@ -7,7 +7,7 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule} from '@angular/forms';
-import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatButtonModule, MatCardModule, MatChipsModule, MatDialogModule, MatDividerModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatMenuModule, MatPaginatorModule, MatProgressSpinnerModule, MatRadioModule, MatSelectModule, MatSidenavModule, MatSliderModule, MatSlideToggleModule, MatSortModule, MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatExpansionModule, MatSnackBarModule} from '@angular/material';
+import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatButtonModule, MatCardModule, MatChipsModule, MatDialogModule, MatDividerModule, MatFormFieldModule, MatGridListModule, MatIconModule, MatInputModule, MatMenuModule, MatPaginatorModule, MatProgressSpinnerModule, MatRadioModule, MatSelectModule, MatSidenavModule, MatSliderModule, MatSlideToggleModule, MatSortModule, MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatExpansionModule, MatSnackBarModule, MatCheckboxModule} from '@angular/material';
 
 //import {PipesModule} from './common/pipes/module';
 //import {KD_TOOLTIP_DEFAULT_OPTIONS} from './index.config';
@@ -42,6 +42,7 @@ const SHARED_DEPENDENCIES = [
   MatSelectModule,
   MatExpansionModule,
   MatSnackBarModule,
+  MatCheckboxModule,
 
   // Other 3rd party modules
   FlexLayoutModule,
