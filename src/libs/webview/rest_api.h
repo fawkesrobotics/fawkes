@@ -233,7 +233,7 @@ class WebviewRestApi
 	 * @param path path (after component base path) to react to
 	 * @param handler handler function
 	 */
-	template <class I, class O>
+	template <class O, class I>
 	void
 	add_handler(WebRequest::Method method, std::string path,
 		            std::function<O (I, WebviewRestParams &)> handler)
