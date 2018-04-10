@@ -39,6 +39,15 @@ CannotInitializeThreadException::CannotInitializeThreadException()
 {
 }
 
+/** Constructor.
+ * @param e exception to copy initial messages from
+ */
+CannotInitializeThreadException::CannotInitializeThreadException(Exception &e)
+  : Exception()
+{
+	append(e);
+}
+
 
 /** Constructor.
  * @param format message format (reason or symptom of failure)

@@ -35,6 +35,7 @@ class CannotInitializeThreadException : public Exception
 {
  public:
   CannotInitializeThreadException(const char *format, ...);
+  CannotInitializeThreadException(Exception &e);
   CannotInitializeThreadException();
 };
 
