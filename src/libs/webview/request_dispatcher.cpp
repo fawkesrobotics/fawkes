@@ -494,7 +494,7 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 
   if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
 	  if (MHD_post_process(request->pp_, upload_data, *upload_data_size) == MHD_NO) {
-		  request->set_body(upload_data, *upload_data_size);
+		  request->addto_body(upload_data, *upload_data_size);
 	  }
 	  if (0 != *upload_data_size) {
 		  *upload_data_size = 0;
@@ -502,6 +502,12 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
 	  }
 	  MHD_destroy_post_processor(request->pp_);
 	  request->pp_ = NULL;
+  } else if (0 != *upload_data_size) {
+	  request->addto_body(upload_data, *upload_data_size);
+	  *upload_data_size = 0;
+	  return MHD_YES;
+  } else {
+	  request->finish_body();
   }
 
   try {
