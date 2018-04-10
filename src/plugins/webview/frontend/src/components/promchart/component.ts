@@ -102,6 +102,11 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
 
   refresh()
   {
+    if (! this.backendcfg.has_url_for('prometheus')) {
+      this.zero_message = 'No Prometheus backend service known';
+      return;
+    }
+
     let end   = Math.floor(Date.now() / 1000);
     let start = end - this.time_range;
     let url =
