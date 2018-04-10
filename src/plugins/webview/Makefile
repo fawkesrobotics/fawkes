@@ -97,7 +97,8 @@ ifeq ($(HAVE_BOOST_LIBS)$(HAVE_LIBMICROHTTPD),11)
 
     OBJS_webview += blackboard-rest-api/blackboard-rest-api.o \
                     backendinfo-rest-api/backendinfo-rest-api.o \
-                    $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/blackboard-rest-api/model/*.cpp $(SRCDIR)/backendinfo-rest-api/model/*.cpp))))
+                    plugin-rest-api/plugin-rest-api.o \
+                    $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*-rest-api/model/*.cpp))))
 
     ifeq ($(HAVE_JPEG),1)
       CFLAGS += -DHAVE_JPEG
