@@ -30,9 +30,11 @@ export class SwUpdateNotifierService {
     });
     */
 
-    Observable.interval(120000).subscribe((num) => {
-      this.check_now();
-    });
+    if (environment.production) {
+      Observable.interval(120000).subscribe((num) => {
+        this.check_now();
+      });
+    }
   }
 
   check_now()
