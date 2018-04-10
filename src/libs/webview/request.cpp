@@ -203,6 +203,30 @@ WebRequest::set_body(const char *data, size_t data_size)
   body_ = std::string(data, data_size);
 }
 
+/** Add to request body.
+ * The data is copied as is without assuming a human-readable string
+ * or even just zero-termination.
+ * @param data data to copy
+ * @param data_size size in bytes of \@p data
+ */
+void
+WebRequest::addto_body(const char *data, size_t data_size)
+{
+  body_ += std::string(data, data_size);
+}
+
+/** Finalize body handling.
+ * Check for zero termination of body, and if it does not exist, add it.
+ */
+void
+WebRequest::finish_body()
+{
+	if (body_.length() == 0)  return;
+	if (body_[body_.length()-1] != 0) {
+		body_ += '\0';
+	}
+}
+
 /** Increment reply bytes counter.
  * @param increment_by number of bytes sent
  */

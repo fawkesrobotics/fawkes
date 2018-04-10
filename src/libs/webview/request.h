@@ -269,6 +269,8 @@ class WebRequest {
    */
   void set_cookies(const std::map<std::string, std::string> &cookies) { cookies_ = cookies; }
   void set_body(const char *data, size_t data_size);
+  void addto_body(const char *data, size_t data_size);
+  void finish_body();
 
  private:
   bool is_setup() { return is_setup_; }
