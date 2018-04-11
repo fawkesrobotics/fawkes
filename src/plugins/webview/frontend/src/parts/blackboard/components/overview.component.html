@@ -139,7 +139,7 @@
 						<ff-property  direction="vertical"
 													*ngFor="let f of keys(ifc(i).data.data)">
 							<div key>{{ f }}</div>
-							<div value>{{ ifc(i).data.data[f] }}</div>
+							<div value>{{ ifcd(i, f) }}</div>
 						</ff-property>
 					</div>
 					<div *ngIf="!iok(i) || !ifc(i).data">

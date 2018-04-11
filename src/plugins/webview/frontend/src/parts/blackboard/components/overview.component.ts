@@ -72,6 +72,35 @@ export class BlackboardOverviewComponent implements OnInit, OnDestroy {
     return this.interfaces[hash_id[0]].instances[hash_id[1]];
   }
 
+  ifcd(hash_id: string[], field: string) {
+    let iface = this.ifc(hash_id);
+    let idx = iface.info.fields.findIndex(f => f.name == field);
+    if (idx < 0) { // Ooops
+      console.warn(`Cannot find info for field '${hash_id[0]}-${hash_id[1]}--${field}'`);
+      return iface.data.data[field];
+    } else {
+      if (iface.info.fields[idx].is_array) {
+        let rv = [];
+        for (let v of iface.data.data[field]) {
+          let t = iface.info.fields[idx].type;
+          if (t == 'double' || t == 'float') {
+            rv.push(v.toFixed(4));
+          } else {
+            rv.push(v);
+          }
+        }
+        return rv;
+      } else {
+        let t = iface.info.fields[idx].type;
+        if (t == 'double' || t == 'float') {
+          return iface.data.data[field].toFixed(4);
+        } else {
+          return iface.data.data[field];
+        }
+      }
+    }
+  }
+
   indexof_selected_interface(hash: string, id: string)
   {
     return this.selected_interfaces.findIndex(
