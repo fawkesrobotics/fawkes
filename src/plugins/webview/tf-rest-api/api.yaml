@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  title: Transforms
+  version: v1beta1
+  description: |
+    Fawkes Transforms REST API.
+    Transforms information and some calculations.
+  contact:
+    name:  Tim Niemueller
+    email: niemueller@kbsg.rwth-aachen.de
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: public
+    description: Transforms public API.
+
+paths:
+  /transforms/graph:
+    get:
+      tags:
+      - public
+      summary: Get transform graph.
+      operationId: get_graph
+      description: |
+        Get a a dot graph representation of the transforms.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get transform graph
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransformsGraph'
+        '503':
+          description: frames cannot be retrieved
+
+components:
+  schemas:
+    TransformsGraph:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - dotgraph
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        dotgraph:
+          type: string

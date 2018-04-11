@@ -3,8 +3,7 @@
  *  webview_plugin.h - Fawkes Webview Plugin
  *
  *  Created: Mon Oct 13 17:46:57 2008 (I5 Developer's Day)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -32,6 +31,9 @@
 #  ifdef HAVE_JPEG
 #    include "image-rest-api/image-rest-api.h"
 #  endif
+#  ifdef HAVE_TF
+#    include "tf-rest-api/tf-rest-api.h"
+#  endif
 #endif
 
 using namespace fawkes;
@@ -58,6 +60,9 @@ WebviewPlugin::WebviewPlugin(Configuration *config)
   thread_list.push_back(new PluginRestApi());
 #  ifdef HAVE_JPEG
   thread_list.push_back(new ImageRestApi());
+#  endif
+#  ifdef HAVE_TF
+  thread_list.push_back(new TransformsRestApi());
 #  endif
 #endif
 }
