@@ -25,6 +25,10 @@ export class BlackboardOverviewComponent implements OnInit, OnDestroy {
   interfaces = null;
   zero_message = "No graph has been retrieved";
 
+  dotgraph: string = null;
+  dotgraph_zero_message: string = 'No blackboard graph available';
+  dotgraph_loading: boolean = false;
+
   known_types = {};
   
   constructor(private api_service: BlackboardApiService,
@@ -77,6 +81,7 @@ export class BlackboardOverviewComponent implements OnInit, OnDestroy {
 
   select_interface(hash: string, id: string)
   {
+    this.dotgraph = null;
     let index = this.indexof_selected_interface(hash, id);
     if (index == -1) {
       this.selected_interfaces.push([hash, id])
@@ -176,6 +181,44 @@ export class BlackboardOverviewComponent implements OnInit, OnDestroy {
         this.loading = false;
       }
     );
+  }
+
+  refresh_graph()
+  {
+    if (this.dotgraph_loading) return;
+
+    this.dotgraph_loading = true;
+    this.dotgraph_zero_message='Retrieving graph';
+
+    this.api_service.get_graph().subscribe(
+      (graphmsg) => {
+        if (graphmsg.dotgraph != "") {
+          this.dotgraph = graphmsg.dotgraph;
+        } else {
+          this.dotgraph = null;
+          this.dotgraph_zero_message = "Received empty blackboard graph";
+        }
+        this.dotgraph_loading = false;
+      },
+      (err) => {
+        this.dotgraph = null;
+        if (err.status == 0) {
+          this.dotgraph_zero_message="API server unavailable. Robot down?";
+        } else {
+          this.dotgraph_zero_message=`Failed to retrieve graph: ${err.error}`;
+        }
+        this.dotgraph_loading = false;
+      });
+  }
+  
+  toggle_graph()
+  {
+    if (this.dotgraph) {
+      this.dotgraph = null;
+    } else {
+      this.dotgraph = '';
+      this.refresh_graph();
+    }
   }
 
   private enable_autorefresh()

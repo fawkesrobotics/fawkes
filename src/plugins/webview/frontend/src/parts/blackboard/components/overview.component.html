@@ -2,12 +2,18 @@
  Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
  License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 -->
-<div fxLayout="row" class="ff-vfill-content">
+<div fxLayout="row" class="ff-vfill">
 	<mat-card class="ff-content-card" fxFlex="25%">
 		<mat-card-title>
 			<div fxLayout="row">
 				<div>Blackboard</div>
 				<div class="ff-right">
+					<button mat-icon-button
+									[disabled]="!interfaces"
+									class="ff-card-title-button"
+									(click)="toggle_graph()">
+						<mat-icon>device_hub</mat-icon>
+					</button>
 					<button mat-icon-button
 									class="ff-card-title-button"
 									[disabled]="auto_refresh_subscription != null || loading"
@@ -52,7 +58,7 @@
 		</mat-card-content>
 	</mat-card>
 
-	<div fxFlex="75%">
+	<div fxFlex="75%" *ngIf="dotgraph == null">
 		<div fxLayout="row wrap">
 			<mat-card class="interface-card" fxFlex="32" *ngFor="let i of selected_interfaces">
 				<mat-card-title>
@@ -143,4 +149,29 @@
 			</mat-card>
 		</div>
 	</div>
+
+	<mat-card fxFlex="75%" *ngIf="dotgraph != null" class="ff-content-card">
+		<mat-card-title>
+			<div fxLayout="row">
+				<div>Blackboard Graph</div>
+				<div class="ff-right">
+					<button mat-icon-button
+									class="ff-card-title-button"
+									(click)="refresh_graph()">
+						<mat-icon *ngIf="!dotgraph_loading">refresh</mat-icon>
+						<mat-spinner *ngIf="dotgraph_loading" [diameter]="20"></mat-spinner>
+					</button>
+				</div>
+			</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content graph-card">
+			<div *ngIf="dotgraph != ''" fxLayoutAlign="center" class="card-div">
+				<dotgraph [dot]="dotgraph" class="blackboard-graph"></dotgraph>
+			</div>
+			<div *ngIf="dotgraph == ''">
+				<ff-list-zero-state [message]="dotgraph_zero_message"></ff-list-zero-state>
+			</div>
+		</mat-card-content>
+	</mat-card>
 </div>

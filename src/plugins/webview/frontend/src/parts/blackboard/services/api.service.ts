@@ -17,6 +17,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
+import { BlackboardGraph } from '../models/BlackboardGraph';
 import { InterfaceData } from '../models/InterfaceData';
 import { InterfaceInfo } from '../models/InterfaceInfo';
 
@@ -77,6 +78,20 @@ export class BlackboardApiService
 		
     headers = headers.set('Accept', 'application/json');
     return this.http.get<InterfaceData>(`${this.backend.url_for('api')}/blackboard/interfaces/${encodeURIComponent(String(type))}/${encodeURIComponent(String(id))}/data`, 
+		  { headers: headers, params: params,
+		    observe: 'body', responseType: 'json' })	;
+	}
+
+  public get_graph(pretty?: boolean): Observable<BlackboardGraph>
+  {
+		let params = new HttpParams();
+		if (pretty) {
+		  params = params.set("pretty", pretty.toString());
+		}
+    let headers = new HttpHeaders();
+		
+    headers = headers.set('Accept', 'application/json');
+    return this.http.get<BlackboardGraph>(`${this.backend.url_for('api')}/blackboard/graph`, 
 		  { headers: headers, params: params,
 		    observe: 'body', responseType: 'json' })	;
 	}
