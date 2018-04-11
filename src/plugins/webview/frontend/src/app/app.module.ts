@@ -23,6 +23,7 @@ import { BlackboardModule } from '../parts/blackboard/module';
 import { ClipsModule } from '../parts/clips/module';
 import { ImageModule } from '../parts/images/module';
 import { PluginModule } from '../parts/plugins/module';
+import { TransformsModule } from '../parts/transforms/module';
 
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 
@@ -44,6 +45,7 @@ import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 	  ClipsModule,
 	  ImageModule,
 	  PluginModule,
+	  TransformsModule,
 
 	  // Keep the AppRoutingModule last
 	  AppRoutingModule,
