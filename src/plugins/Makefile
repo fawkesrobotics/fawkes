@@ -17,7 +17,7 @@ BASEDIR = ../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 # base + hardware drivers + perception + functional + integration
-SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
+SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
 	  laser imu flite festival joystick openrave \
 	  katana jaco pantilt roomba nao robotino \
 	  bumblebee2 realsense perception amcl \
