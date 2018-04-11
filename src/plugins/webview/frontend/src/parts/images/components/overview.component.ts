@@ -123,6 +123,9 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
     this.api_service.list_images().subscribe(
       (images) => {
         this.images = images;
+        if (this.images.length == 0) {
+          this.zero_message = 'No images available';
+        }
         this.loading = false;
       },
       (err) => {

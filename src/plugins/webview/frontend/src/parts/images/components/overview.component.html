@@ -26,7 +26,7 @@
 		<mat-divider></mat-divider>
 		<mat-card-content class="ff-card-content">
 
-			<mat-accordion [multi]="true" *ngIf="images">
+			<mat-accordion [multi]="true" *ngIf="images && images.length > 0">
 				<ng-container *ngFor="let i of images">
 					<mat-expansion-panel [expanded]="true">
 						<mat-expansion-panel-header>
@@ -58,7 +58,7 @@
 				</ng-container>
 			</mat-accordion>
 
-			<div *ngIf="!images">
+			<div *ngIf="!images || images.length == 0">
 				<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
 			</div>
 		</mat-card-content>
