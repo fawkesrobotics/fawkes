@@ -24,7 +24,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd rrdweb \
 	  skiller luaagent \
 	  laser-filter laser-lines laser-cluster laser-pointclouds \
 	  static_transforms navgraph navgraph-clusters navgraph-generator colli \
-	  clips clips-agent clips-protobuf clips-webview clips-navgraph \
+	  clips clips-agent clips-protobuf clips-navgraph \
 	  clips-pddl-parser clips-ros clips-tf \
 		openprs openprs-agent eclipse-clp \
 	  mongodb mongodb_log robot-memory clips-robot-memory pddl-robot-memory \
@@ -42,7 +42,6 @@ mongodb_log: mongodb
 mongodb: rrd
 clips-navgraph clips-agent clips-pddl-parser clips-protobuf clips-tf clips-robot-memory: clips
 clips-navgraph navgraph-clusters: navgraph
-clips-webview: clips webview
 clips-ros: clips ros
 robot-memory: mongodb
 clips-robot-memory: robot-memory
