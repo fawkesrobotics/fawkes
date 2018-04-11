@@ -120,6 +120,31 @@ paths:
         '400':
           description: bad input parameter
 
+  /blackboard/graph:
+    get:
+      tags:
+      - public
+      summary: Get blackboard graph
+      operationId: get_graph
+      description: |
+        Get a blackboard graph.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get graph
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlackboardGraph'
+        '503':
+          description: failure to retrieve graph
+
 components:
   schemas:
     InterfaceInfo:
@@ -218,3 +243,17 @@ components:
         timestamp:
           type: string
           format: date-time
+
+    BlackboardGraph:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - dotgraph
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        dotgraph:
+          type: string

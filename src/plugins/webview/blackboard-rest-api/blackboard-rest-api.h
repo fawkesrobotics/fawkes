@@ -32,6 +32,7 @@
 
 #include "model/InterfaceInfo.h"
 #include "model/InterfaceData.h"
+#include "model/BlackboardGraph.h"
 
 #include <map>
 #include <string>
@@ -61,12 +62,16 @@ class BlackboardRestApi
 	InterfaceData
 		cb_get_interface_data(fawkes::WebviewRestParams& params);
 
+	BlackboardGraph cb_get_graph();
+
 	std::vector<std::shared_ptr<InterfaceFieldType>>
 		gen_fields(fawkes::InterfaceFieldIterator begin,
 		           fawkes::InterfaceFieldIterator end);
 
 	InterfaceInfo gen_interface_info(const fawkes::InterfaceInfo &ii);
 	InterfaceData gen_interface_data(fawkes::Interface *iface, bool pretty);
+
+	std::string generate_graph(std::string for_owner = "");
 
  private:
 	fawkes::WebviewRestApi        *rest_api_;

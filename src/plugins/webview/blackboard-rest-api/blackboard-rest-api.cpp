@@ -30,6 +30,8 @@
 
 #include <rapidjson/document.h>
 
+#include <set>
+
 using namespace fawkes;
 
 /** @class BlackboardRestApi "skiller-rest-api.h"
@@ -61,6 +63,9 @@ BlackboardRestApi::init()
 	rest_api_->add_handler<::InterfaceInfo>
 		(WebRequest::METHOD_GET, "/interfaces/{type}/{id+}",
 		 std::bind(&BlackboardRestApi::cb_get_interface_info, this, std::placeholders::_1));
+	rest_api_->add_handler<BlackboardGraph>
+		(WebRequest::METHOD_GET, "/graph",
+		 std::bind(&BlackboardRestApi::cb_get_graph, this));
 	webview_rest_api_manager->register_api(rest_api_);
 }
 
@@ -318,6 +323,120 @@ BlackboardRestApi::cb_get_interface_data(WebviewRestParams& params)
 		blackboard->close(iface);
 		throw WebviewRestException(WebReply::HTTP_NOT_FOUND, "Failed to read %s:%s: %s",
 		                           params.path_arg("type").c_str(), params.path_arg("id").c_str(),
+		                           e.what_no_backtrace());
+	}
+}
+
+
+std::string
+BlackboardRestApi::generate_graph(std::string for_owner)
+{
+	InterfaceInfoList *iil = blackboard->list_all();
+	iil->sort();
+
+	std::stringstream mstream;
+	mstream << "digraph bbmap {" << std::endl
+	        << "  graph [fontsize=12,rankdir=LR];" << std::endl;
+
+	std::set<std::string> owners;
+
+	InterfaceInfoList::iterator ii;
+	for (ii = iil->begin(); ii != iil->end(); ++ii) {
+		const std::list<std::string> readers = ii->readers();
+    
+		if (for_owner == "" ||
+		    ii->writer() == for_owner ||
+		    std::find_if(readers.begin(), readers.end(),
+		                 [&for_owner](const std::string &o)->bool { return for_owner == o; })
+		    != readers.end())
+		{
+			if (ii->has_writer()) {
+				const std::string writer = ii->writer();
+				if (! writer.empty())  owners.insert(writer);
+			}
+			std::list<std::string>::const_iterator r;
+			for (r = readers.begin(); r != readers.end(); ++r) {
+				owners.insert(*r);
+			}
+		}
+	}
+
+	mstream << "  node [fontsize=12 shape=box width=4 margin=0.05];" << std::endl
+	        << "  { rank=same; " << std::endl;
+	std::set<std::string>::iterator i;
+	for (ii = iil->begin(); ii != iil->end(); ++ii) {
+		const std::list<std::string> readers = ii->readers();
+		if (for_owner == "" ||
+		    ii->writer() == for_owner ||
+		    std::find_if(readers.begin(), readers.end(),
+		                 [&for_owner](const std::string &o)->bool { return for_owner == o; })
+		    != readers.end())
+		{
+			mstream << "    \"" << ii->type() << "::" << ii->id() << "\""
+			        << " [href=\"/blackboard/view/" << ii->type() << "::" << ii->id() << "\"";
+
+			if (! ii->has_writer()) {
+				mstream << " color=red";
+			} else if (ii->writer().empty()) {
+				mstream << " color=purple";
+			}
+			mstream << "];" << std::endl;
+		}
+	}
+	mstream << "  }" << std::endl;
+
+	mstream << "  node [fontsize=12 shape=octagon width=3];" << std::endl;
+	for (i = owners.begin(); i != owners.end(); ++i) {
+		mstream << "  \"" << *i << "\""
+		        << " [href=\"/blackboard/graph/" << *i << "\"];"
+		        << std::endl;
+	}
+
+	for (ii = iil->begin(); ii != iil->end(); ++ii) {
+		const std::list<std::string> readers = ii->readers();
+		if (for_owner == "" ||
+		    ii->writer() == for_owner ||
+		    std::find_if(readers.begin(), readers.end(),
+		                 [&for_owner](const std::string &o)->bool { return for_owner == o; })
+		    != readers.end())
+		{
+			std::list<std::string> quoted_readers;
+			std::for_each(readers.begin(), readers.end(),
+			              [&quoted_readers](const std::string &r) {
+				              quoted_readers.push_back(std::string("\"")+r+"\"");
+			              });
+			std::string quoted_readers_s = str_join(quoted_readers, ' ');
+			mstream << "  \"" << ii->type() << "::" << ii->id() << "\" -> { "
+			        << quoted_readers_s << " } [style=dashed arrowhead=dot arrowsize=0.5 dir=both];" << std::endl;
+
+			if (ii->has_writer()) {
+				mstream << "  \"" << (ii->writer().empty() ? "???" : ii->writer()) << "\" -> \""
+				        << ii->type() << "::" << ii->id() << "\""
+				        << (ii->writer().empty() ? " [color=purple]" : " [color=\"#008800\"]")
+				        << ";" << std::endl;
+			}
+		}
+	}
+
+	delete iil;
+
+	mstream << "}";
+	return mstream.str();
+}
+
+
+BlackboardGraph
+BlackboardRestApi::cb_get_graph()
+{
+	try {
+		BlackboardGraph graph;
+		graph.set_kind("TransformsGraph");
+		graph.set_apiVersion(BlackboardGraph::api_version());
+		graph.set_dotgraph(generate_graph());
+		return graph;
+	} catch (Exception &e) {
+		throw WebviewRestException(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+		                           "Failed to retrieve blackboard graph: %s",
 		                           e.what_no_backtrace());
 	}
 }
