@@ -118,10 +118,12 @@ export class DomainComponent implements OnInit {
         },
         (err) => {
           this.loading = false;
-          console.log("Failed to receive domain data");
+
           this.zero_message_facts = this.zero_message_predicates =
             this.zero_message_operators = this.zero_message_objects =
-            "API server unavailable. Robot down?";
+            (err.status == 0)
+            ? "API server unavailable. Robot down?"
+            : `Failed to retrieve domain info: ${err.error}`;
         }
       );
   }
