@@ -4,6 +4,16 @@
 
 @import '../../../_variables';
 
+.mat-card-content {
+		height: calc(100% - 56px);
+		overflow: auto;
+		margin: 0 -16px 0 -12px;
+}
+
+.mat-table {
+		margin: 0 4px 16px 4px;
+}
+
 .mat-column-index {
 		flex: 0 0 50px;
 		text-align: center;
