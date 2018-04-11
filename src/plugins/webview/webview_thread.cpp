@@ -3,7 +3,7 @@
  *  webview_thread.cpp - Thread that handles web interface requests
  *
  *  Created: Mon Oct 13 17:51:31 2008 (I5 Developer's Day)
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,16 +21,8 @@
 
 #include "webview_thread.h"
 #include "static_processor.h"
-#include "blackboard_processor.h"
-#include "startpage_processor.h"
-#include "plugins_processor.h"
 #include "rest_processor.h"
-#ifdef HAVE_TF
-#  include "tf_processor.h"
-#endif
 #include "service_browse_handler.h"
-#include "header_generator.h"
-#include "footer_generator.h"
 #include "user_verifier.h"
 
 #include <core/version.h>
@@ -41,7 +33,6 @@
 #include <webview/page_reply.h>
 #include <webview/server.h>
 #include <webview/url_manager.h>
-#include <webview/nav_manager.h>
 #include <utils/misc/string_conversions.h>
 
 #include <sys/wait.h>
@@ -63,8 +54,7 @@ using namespace fawkes;
  * thread.
  */
 WebviewThread::WebviewThread(bool enable_tp)
-	: Thread("WebviewThread", enable_tp ? Thread::OPMODE_WAITFORWAKEUP : Thread::OPMODE_CONTINUOUS),
-    LoggerAspect(&cache_logger_)
+	: Thread("WebviewThread", enable_tp ? Thread::OPMODE_WAITFORWAKEUP : Thread::OPMODE_CONTINUOUS)
 {
 	cfg_use_thread_pool_ = enable_tp;
 
@@ -85,8 +75,6 @@ WebviewThread::init()
 
   webview_service_ = NULL;
   service_browse_handler_ = NULL;
-  header_gen_ = NULL;
-  footer_gen_ = NULL;
   dispatcher_ = NULL;
 
   cfg_use_tls_ = false;
@@ -166,21 +154,14 @@ WebviewThread::init()
     cfg_cors_max_age = config->get_uint("/webview/cors/max-age");
   } catch (Exception &e) {}
 
-  cache_logger_.clear();
-
   webview_service_ = new NetworkService(nnresolver, "Fawkes Webview on %h",
-					 "_http._tcp", cfg_port_);
+                                        "_http._tcp", cfg_port_);
   webview_service_->add_txt("fawkesver=%u.%u.%u",
-			     FAWKES_VERSION_MAJOR, FAWKES_VERSION_MINOR,
-			     FAWKES_VERSION_MICRO);
+                            FAWKES_VERSION_MAJOR, FAWKES_VERSION_MINOR,
+                            FAWKES_VERSION_MICRO);
   service_browse_handler_ = new WebviewServiceBrowseHandler(logger, webview_service_);
 
-  header_gen_ = new WebviewHeaderGenerator(webview_nav_manager);
-  footer_gen_ = new WebviewFooterGenerator(service_browse_handler_);
-
-  dispatcher_ = new WebRequestDispatcher(webview_url_manager,
-                                         header_gen_, footer_gen_);
-
+  dispatcher_ = new WebRequestDispatcher(webview_url_manager);
 
   try {
 	  webserver_  = new WebServer(cfg_port_, dispatcher_, logger);
@@ -212,8 +193,6 @@ WebviewThread::init()
   } catch (Exception &e) {
     delete webview_service_;
     delete service_browse_handler_;
-    delete header_gen_;
-    delete footer_gen_;
     delete dispatcher_;
     throw;
   }
@@ -229,28 +208,6 @@ WebviewThread::init()
   static_processor_     = new WebviewStaticRequestProcessor(webview_url_manager, static_base_url,
                                                             static_dirs, catchall_file, mime_file, logger);
   rest_processor_       = new WebviewRESTRequestProcessor(webview_url_manager, webview_rest_api_manager, logger);
-
-  startpage_processor_  = NULL;
-  blackboard_processor_ = NULL;
-  plugins_processor_ = NULL;
-#ifdef HAVE_TF
-  tf_processor_ = NULL;
-#endif
-
-  if (catchall_file.empty()) {
-	  blackboard_processor_ = new WebviewBlackBoardRequestProcessor(webview_url_manager, blackboard);
-	  plugins_processor_    = new WebviewPluginsRequestProcessor(webview_url_manager, plugin_manager);
-#ifdef HAVE_TF
-	  tf_processor_         = new WebviewTfRequestProcessor(webview_url_manager, tf_listener);
-#endif
-	  startpage_processor_  = new WebviewStartPageRequestProcessor(webview_url_manager, &cache_logger_);
-
-	  webview_nav_manager->add_nav_entry("/blackboard/", "BlackBoard");
-#ifdef HAVE_TF
-	  webview_nav_manager->add_nav_entry("/tf/", "TF");
-#endif
-	  webview_nav_manager->add_nav_entry("/plugins/", "Plugins");
-  }
 
   try {
 	  cfg_explicit_404_ = config->get_strings("/webview/explicit-404");
@@ -289,12 +246,6 @@ WebviewThread::finalize()
     service_browser->unwatch_service("_http._tcp", service_browse_handler_);
   } catch (Exception &e) {} // ignored, can happen if avahi-daemon not running
 
-  webview_nav_manager->remove_nav_entry("/blackboard/");
-  webview_nav_manager->remove_nav_entry("/plugins/");
-#ifdef HAVE_TF
-  webview_nav_manager->remove_nav_entry("/tf/");
-#endif
-
   for (const auto &u : cfg_explicit_404_) {
 	  webview_url_manager->remove_handler(WebRequest::METHOD_GET, u);
   }
@@ -306,15 +257,7 @@ WebviewThread::finalize()
 
   delete dispatcher_;
   delete static_processor_;
-  delete blackboard_processor_;
-  delete startpage_processor_;
-  delete plugins_processor_;
   delete rest_processor_;
-#ifdef HAVE_TF
-  delete tf_processor_;
-#endif
-  delete footer_gen_;
-  delete header_gen_;
   dispatcher_ = NULL;
 }
 

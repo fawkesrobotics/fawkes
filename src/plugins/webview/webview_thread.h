@@ -3,7 +3,7 @@
  *  webview_thread.h - Thread that handles web interface requests
  *
  *  Created: Mon Oct 13 17:49:52 2008 (I5 Developer's Day)
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,14 +25,8 @@
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
-#include <aspect/blackboard.h>
 #include <aspect/network.h>
-#include <aspect/logger.h>
-#include <aspect/plugin_director.h>
 #include <aspect/webview.h>
-#ifdef HAVE_TF
-#  include <aspect/tf.h>
-#endif
 
 #include <logging/cache.h>
 
@@ -44,29 +38,15 @@ namespace fawkes {
 }
 
 class WebviewStaticRequestProcessor;
-class WebviewBlackBoardRequestProcessor;
-class WebviewStartPageRequestProcessor;
-class WebviewPluginsRequestProcessor;
 class WebviewRESTRequestProcessor;
 class WebviewServiceBrowseHandler;
-class WebviewFooterGenerator;
-class WebviewHeaderGenerator;
 class WebviewUserVerifier;
-#ifdef HAVE_TF
-class WebviewTfRequestProcessor;
-#endif
 
 class WebviewThread
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::NetworkAspect,
-  public fawkes::LoggerAspect,
-  public fawkes::PluginDirectorAspect,
-#ifdef HAVE_TF
-  public fawkes::TransformAspect,
-#endif
+	public fawkes::NetworkAspect,
   public fawkes::WebviewAspect
 {
  public:
@@ -90,16 +70,8 @@ class WebviewThread
   fawkes::WebRequestDispatcher       *dispatcher_;
 
   WebviewStaticRequestProcessor      *static_processor_;
-  WebviewStartPageRequestProcessor   *startpage_processor_;
-  WebviewBlackBoardRequestProcessor  *blackboard_processor_;
-  WebviewPluginsRequestProcessor     *plugins_processor_;
   WebviewRESTRequestProcessor        *rest_processor_;
-#ifdef HAVE_TF
-  WebviewTfRequestProcessor          *tf_processor_;
-#endif
   WebviewServiceBrowseHandler        *service_browse_handler_;
-  WebviewHeaderGenerator             *header_gen_;
-  WebviewFooterGenerator             *footer_gen_;
   WebviewUserVerifier                *user_verifier_;
 
   unsigned int cfg_port_;
@@ -117,7 +89,6 @@ class WebviewThread
   unsigned int cfg_num_threads_;
   std::vector<std::string> cfg_explicit_404_;
 
-  fawkes::CacheLogger     cache_logger_;
   fawkes::NetworkService *webview_service_;
 };
 
