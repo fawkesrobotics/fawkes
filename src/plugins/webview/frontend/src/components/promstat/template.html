@@ -1,0 +1,15 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<mat-card class="promstat-card">
+	<mat-card-title class="promstat-card-title">{{ label }}</mat-card-title>
+	<mat-divider></mat-divider>
+	<mat-card-content class="promstat-card-content">
+		<div class="promstat-panel">
+			<div class="promstat-value">
+				<span [ngClass]="css_class">{{value}}</span>
+			</div>
+		</div>
+	</mat-card-content>
+</mat-card>
