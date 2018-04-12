@@ -29,6 +29,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   query_mem = 'namedprocess_namegroup_memory_bytes{memtype="resident"}';
 
+  query_ntp_offset = 'node_ntp_offset_seconds{instance="localhost:9100"}';
+  query_mem_avail = 'node_memory_MemAvailable{instance="localhost:9100"}';
+  query_ssd_avail = 'node_filesystem_avail{instance="localhost:9100",mountpoint="/"}'
+
   constructor(private backendcfg: BackendConfigurationService)
   {}
 

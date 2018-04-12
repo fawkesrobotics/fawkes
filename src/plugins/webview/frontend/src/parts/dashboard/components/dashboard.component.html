@@ -46,5 +46,28 @@
 			</prom-chart>
 		</mat-card-content>
 	</mat-card>
+</div>
 
+<div fxLayout="row">
+	<prom-stat
+		[query]="query_ntp_offset"
+		[factor]="1000"
+		[thresholds]="[-10, -3, 3, 10]"
+		label="NTP Offset"
+		unit="ms">
+	</prom-stat>
+	<prom-stat
+		[query]="query_mem_avail"
+		[factor]="1. / (1024*1024*1024)"
+		[thresholds]="[3,1]"
+		label="Mem Avail"
+		unit="GB">
+	</prom-stat>
+	<prom-stat
+		[query]="query_ssd_avail"
+		[factor]="1. / (1024*1024*1024)"
+		[thresholds]="[20,10]"
+		label="SSD Avail"
+		unit="GB">
+	</prom-stat>
 </div>
