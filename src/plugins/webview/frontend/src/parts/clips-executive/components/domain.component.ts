@@ -63,6 +63,7 @@ export class DomainComponent implements OnInit {
   {
     this.backend_subscription.unsubscribe();
     this.backend_subscription = null;
+    this.disable_autorefresh();
   }
 
   reset_domain_data()

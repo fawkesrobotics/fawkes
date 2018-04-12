@@ -48,6 +48,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
   {
     this.backend_subscription.unsubscribe();
     this.backend_subscription = null;
+    this.disable_autorefresh();
   }
 
   refresh()

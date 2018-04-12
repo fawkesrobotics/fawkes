@@ -64,6 +64,7 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
   {
     this.backend_subscription.unsubscribe();
     this.backend_subscription = null;
+    this.disable_autorefresh();
   }
 
   refresh_domain()
