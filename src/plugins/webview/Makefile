@@ -63,6 +63,7 @@ ifeq ($(HAVE_BOOST_LIBS)$(HAVE_LIBMICROHTTPD),11)
                   backendinfo-rest-api/backendinfo-rest-api.o \
                   plugin-rest-api/plugin-rest-api.o \
                   tf-rest-api/tf-rest-api.o \
+                  config-rest-api/config-rest-api.o \
                   $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*-rest-api/model/*.cpp))))
 
   ifeq ($(HAVE_TF),1)
