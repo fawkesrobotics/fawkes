@@ -8,6 +8,7 @@ import { HttpClient } from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
+import 'rxjs/add/observable/forkJoin';
 
 import { BackendConfigurationService } from '../../services/backend-config/backend-config.service';
 
@@ -39,16 +40,17 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
   @Input() time_range?: number = 900;
   @Input() step_sec?: number = 15;
   @Input() query?: string = null;
-  @Input() legend_label?: string = 'groupname';
+  @Input() queries?: string[] = [];
+  @Input() legend_format?: string = null;;
+  @Input() legend_formats?: string[] = [];
   @Input() y_axis?: c3.YAxisConfiguration = Object.assign({}, DEFAULT_Y_AXIS);
   @Input() show_grid?: boolean = true;
   @Input() legend?: c3.LegendOptions = Object.assign({}, DEFAULT_LEGEND);
   @Input() groups?: string[][] = null;
   @Input() group_all?: boolean = true;
-  @Input() unit?: string = 'bytes';
   @Input() remove_all_zero?: boolean = true;
   @Input() x_tick_format?: string = '%H:%M:%S';
-  @Input() y_tick_format?: string = '.2f';
+  @Input() y_tick_format?: string = '.1f';
   @Input() y_min?: number = null;
   @Input() y_max?: number = null;
   @Input() y_tick_count?: number = 4;
@@ -68,9 +70,25 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
 
   ngAfterViewInit()
   {
-    if (!this.query) {
+    if (!this.query && this.queries.length == 0) {
       this.zero_message='No query configured';
     } else {
+      if (this.query) {
+        this.queries.push(this.query);
+        if (this.legend_format) {
+          this.legend_formats.push(this.legend_format);
+        } else {
+          this.legend_formats.push(this.query);
+        }
+      }
+
+      if (this.queries.length == 0) {
+        this.zero_message='No queries configured';
+      } else if (this.legend_formats.length != this.queries.length) {
+        this.queries = [];
+        this.zero_message = '#queries != #legend_formats';
+      }
+
       this.enable_autorefresh();
     }
   }
@@ -109,92 +127,64 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
 
     let end   = Math.floor(Date.now() / 1000);
     let start = end - this.time_range;
-    let url =
-      `${this.backendcfg.url_for('prometheus')}/api/v1/query_range?query=${encodeURIComponent(String(this.query))}&start=${start}&end=${end}&step=${this.step_sec}s`;
-    this.http.get<any>(url)
+    let step_sec = this.step_sec;
+    let urls = this.queries
+      .map((q) =>
+           `${this.backendcfg.url_for('prometheus')}/api/v1/query_range?query=${encodeURIComponent(String(q))}&start=${start}&end=${end}&step=${this.step_sec}s`);
+
+
+    Observable
+      .forkJoin(urls.map((u) => this.http.get<any>(u)))
+      .map((res: any[]) =>
+           res.map((r,i) => this.proc_res(r, start, end, step_sec, this.legend_formats[i])))
       .subscribe(
-        (obj) => {
+        (data_arr: any[]) => {
+          if (data_arr.length > 0) {
 
-          if (obj.status == 'success' && obj.data.result.length > 0) {
-            let x: number[] = [];
-            let data = [];
-            
+            let timeline: number[] = [];
             for (let i = start; i <= end; i += this.step_sec) {
-              x.push(i * 1000);
-            }
-
-            for (let r of obj.data.result) {
-              let d = {
-                name: r.metric[this.legend_label],
-                values: []
-              };
-
-              let base_timestamp = start;
-              for (let v of r.values) {
-                let dp = parseFloat(v[1]);
-                if (isNaN(dp)) {
-                  dp = 0.;
-                }
-
-                const timestamp = parseFloat(v[0]);
-                for (let t = base_timestamp; t < timestamp; t += this.step_sec)
-                {
-                  d.values.push(0.);
-                }
-
-                base_timestamp = timestamp + this.step_sec;
-                d.values.push(dp);
-              }
-              data.push(d);
-            }
-
-            // filter all-zero metrics
-            if (this.remove_all_zero) {
-              let to_erase = []
-              for (let i = 0; i < obj.data.result.length; ++i) {
-                if (data[i].values.every((y) => (Math.abs(y) < Number.EPSILON))) {
-                  to_erase.push(i);
-                }
-              }
-              if (to_erase.length > 0) {
-                let erase_names = to_erase.map((e) => data[e].name);
-                //console.log(`Removing ${erase_names}`);
-                for (let e of to_erase.sort((a,b) => b - a)) {
-                  data.splice(e, 1);
-                }
-              }
+              timeline.push(i * 1000);
             }
 
             // From here on, the index in data does not reflect the
             // index in obj.data.result since we may have deleted some
-          
+
+            let columns = [['__x', ...timeline]];
+            let groups = this.group_all ? [[]] : this.groups;
             let types = {};
-            for (let d of data) {
-              types[d.name] = 'area';
-            }
 
-            let group = [];
-            if (this.group_all) {
+            for (let data of data_arr) {
+
               for (let d of data) {
-                group.push(d.name);
+                if (d.name in types) {
+                  console.warn(`Duplicate data name ${d.name}, overwriting`);
+                }
+                types[d.name] = 'area';
               }
-            }
-            this.groups = this.group_all ? [group] : [];
 
-            let columns = [['__x', ...x]];
-            for (let d of data) {
-              columns.push([d.name, ...d.values]);
+              let group = [];
+              if (this.group_all) {
+                for (let d of data) {
+                  groups[0].push(d.name);
+                }
+              }
+
+              for (let d of data) {
+                columns.push([d.name, ...d.values]);
+              }
             }
 
             if (! this.y_axis.tick) {
               this.y_axis.tick = {};
             }
             if (this.y_tick_format) {
-              if (this.y_tick_format == 'bytes') {
-                this.y_axis.tick.format = this.format_bytes;
+              if (this.y_tick_format == 'bytes' || this.y_tick_format == 'bytes/s') {
+                this.y_axis.tick.format = this.format_bytes_func(this.y_tick_format);
               } else {
                 this.y_axis.tick.format = d3.format(this.y_tick_format);
               }
+            } else {
+              this.y_axis.tick.format = d3.format('.1f');
             }
             if (this.y_min) {
               this.y_axis.min = this.y_min;
@@ -237,7 +227,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
                 x: '__x',
                 columns: columns,
                 types: types,
-                groups: this.groups,
+                groups: groups,
               },
               axis: {
                 x: {
@@ -277,18 +267,82 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
       );
   }
 
-  format_bytes(value: number)
+  render_label_template(str, labels) {
+    var regex = /\(\(\s*(.+?)\s*\)\)/g;
+    return str.replace(regex, (m,g) => labels[g] ? labels[g] : g);
+  }
+
+  private proc_res(res, start, end, step_sec, legend_format) {
+    if (res.status != 'success')  return null;
+    let data = [];
+
+    for (let r of  res.data.result) {
+      let d = {
+        name: this.render_label_template(legend_format, r.metric),
+        values: []
+      };
+
+      let base_timestamp = start;
+      for (let v of r.values) {
+        let dp = parseFloat(v[1]);
+        if (isNaN(dp)) {
+          dp = 0.;
+        }
+
+        const timestamp = parseFloat(v[0]);
+        for (let t = base_timestamp; t < timestamp; t += step_sec)
+        {
+          d.values.push(0.);
+        }
+
+        base_timestamp = timestamp + step_sec;
+        d.values.push(dp);
+      }
+
+      for (let t = base_timestamp; t < end; t += step_sec)
+      {
+        d.values.push(0.);
+      }
+
+      data.push(d);
+    }
+
+    // filter all-zero metrics
+    if (this.remove_all_zero) {
+      let to_erase = []
+      for (let i = 0; i < res.data.result.length; ++i) {
+        if (data[i].values.every((y) => (Math.abs(y) < Number.EPSILON))) {
+          to_erase.push(i);
+        }
+      }
+      if (to_erase.length > 0) {
+        let erase_names = to_erase.map((e) => data[e].name);
+        for (let e of to_erase.sort((a,b) => b - a)) {
+          data.splice(e, 1);
+        }
+      }
+    }
+
+    return data;
+  }
+
+  format_bytes_func(what: string)
   {
     let units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']
-    let idx = 0;
-    while (value > 1024 && idx < units.length - 1) {
-      value /= 1024;
-      idx += 1;
+    if (what == "bytes/s") {
+      units = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s', 'EB/s']
     }
-    if (value > 0 && value < 10) {
-      return d3.format('.1f')(value) + units[idx];
-    } else {
-      return d3.format('.0f')(value) + units[idx];
+    return function(value: number): string {
+      let idx = 0;
+      while (value > 1024 && idx < units.length - 1) {
+        value /= 1024;
+        idx += 1;
+      }
+      if (value > 0 && value < 10) {
+        return d3.format('.1f')(value) + ' ' + units[idx];
+      } else {
+        return d3.format('.0f')(value) + ' ' + units[idx];
+      }
     }
   }
 
