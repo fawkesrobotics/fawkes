@@ -8,6 +8,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
+import { ConfigurationService } from '../../../services/config/config.service';
 
 @Component({
   selector: 'dashboard',
@@ -32,12 +33,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
   query_ntp_offset = 'node_ntp_offset_seconds{instance="localhost:9100"}';
   query_mem_avail = 'node_memory_MemAvailable{instance="localhost:9100"}';
   query_ssd_avail = 'node_filesystem_avail{instance="localhost:9100",mountpoint="/"}'
+  query_swap_used = '(node_memory_SwapTotal{instance="localhost:9100"}-node_memory_SwapFree{instance="localhost:9100"})/node_memory_SwapTotal{instance="localhost:9100"}';
 
-  constructor(private backendcfg: BackendConfigurationService)
+  charts = [];
+
+  constructor(private backendcfg: BackendConfigurationService,
+              private config: ConfigurationService)
   {}
 
   ngOnInit() {
     this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh() });
+    this.config.get('/webview/dashboard')
+      .subscribe(conf => {
+        this.charts = Object.values(conf['webview']['dashboard']['charts']);
+        this.charts.forEach(c => {
+          if (! ('remove_all_zero' in c)) {
+            c.remove_all_zero = true;
+          }
+        });
+      });
   }
 
   ngOnDestroy()
