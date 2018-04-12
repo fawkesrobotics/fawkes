@@ -14,6 +14,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ChromeModule } from '../chrome/module';
 import { BackendConfigurationService } from '../services/backend-config/backend-config.service';
+import { ConfigurationService } from '../services/config/config.service';
+import { ConfigurationApiService } from '../services/config/api.service';
 import { AssetsService } from '../services/global/assets';
 import { SwUpdateNotifierService } from '../services/update-notifier/update-notifier.service';
 
@@ -50,7 +52,9 @@ import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 	  // Keep the AppRoutingModule last
 	  AppRoutingModule,
 	],
-  providers: [BackendConfigurationService, AssetsService, SwUpdateNotifierService],
+  providers: [BackendConfigurationService,
+              ConfigurationService, ConfigurationApiService,
+              AssetsService, SwUpdateNotifierService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
