@@ -120,6 +120,15 @@ export class PrometheusStatComponent implements AfterViewInit, OnInit, OnDestroy
                 }
               }
             }
+          } else if (obj.status != 'success') {
+            this.value = "N/A";
+            this.css_class = "promstat-red";
+          } else if (obj.data.result.length == 0) {
+            this.value = "N/A";
+            this.css_class = "promstat-orange";
+          } else {
+            this.value = `N/A (${obj.message || '?'})`;
+            this.css_class = "promstat-red";
           }
         });
   }
