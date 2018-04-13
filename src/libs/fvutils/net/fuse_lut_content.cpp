@@ -89,7 +89,7 @@ FuseLutContent::FuseLutContent(SharedMemoryLookupTable *b)
   __header = (FUSE_lut_message_header_t *)_payload;
   __buffer = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
 
-  strncpy(__header->lut_id, b->lut_id(), LUT_ID_MAX_LENGTH);
+  strncpy(__header->lut_id, b->lut_id(), LUT_ID_MAX_LENGTH-1);
   __header->width  = htonl(b->width());
   __header->height = htonl(b->height());
   __header->depth  = htonl(b->depth());
@@ -126,7 +126,7 @@ FuseLutContent::FuseLutContent(const char *lut_id, void *buffer,
   __header = (FUSE_lut_message_header_t *)_payload;
   __buffer = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
 
-  strncpy(__header->lut_id, lut_id, LUT_ID_MAX_LENGTH);
+  strncpy(__header->lut_id, lut_id, LUT_ID_MAX_LENGTH-1);
   __header->width  = htonl(width);
   __header->height = htonl(height);
   __header->depth  = htonl(depth);

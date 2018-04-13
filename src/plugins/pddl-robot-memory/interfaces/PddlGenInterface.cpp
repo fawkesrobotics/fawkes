@@ -184,7 +184,8 @@ PddlGenInterface::GenerateMessage::GenerateMessage(const char * ini_goal) : Mess
   memset(data_ptr, 0, data_size);
   data      = (GenerateMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->goal, ini_goal, 1024);
+  strncpy(data->goal, ini_goal, 1024-1);
+  data->goal[1024-1] = 0;
   add_fieldinfo(IFT_STRING, "goal", 1024, data->goal);
 }
 /** Constructor */
@@ -248,7 +249,8 @@ PddlGenInterface::GenerateMessage::maxlenof_goal() const
 void
 PddlGenInterface::GenerateMessage::set_goal(const char * new_goal)
 {
-  strncpy(data->goal, new_goal, sizeof(data->goal));
+  strncpy(data->goal, new_goal, sizeof(data->goal)-1);
+  data->goal[sizeof(data->goal)-1] = 0;
 }
 
 /** Clone this message.

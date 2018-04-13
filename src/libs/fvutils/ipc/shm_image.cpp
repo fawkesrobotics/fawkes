@@ -153,7 +153,7 @@ void
 SharedMemoryImageBuffer::set_frame_id(const char *frame_id)
 {
   priv_header->set_frame_id(frame_id);
-  strncpy(raw_header->frame_id, frame_id, FRAME_ID_MAX_LENGTH);
+  strncpy(raw_header->frame_id, frame_id, FRAME_ID_MAX_LENGTH-1);
 }
 
 
@@ -774,9 +774,9 @@ SharedMemoryImageBufferHeader::initialize(void *memptr)
   SharedMemoryImageBuffer_header_t *header = (SharedMemoryImageBuffer_header_t *)memptr;
   memset(memptr, 0, sizeof(SharedMemoryImageBuffer_header_t));
 
-  strncpy(header->image_id, _image_id, IMAGE_ID_MAX_LENGTH);
+  strncpy(header->image_id, _image_id, IMAGE_ID_MAX_LENGTH-1);
   if (_frame_id) {
-    strncpy(header->frame_id, _frame_id, FRAME_ID_MAX_LENGTH);
+    strncpy(header->frame_id, _frame_id, FRAME_ID_MAX_LENGTH-1);
   }
   header->colorspace = _colorspace;
   header->width      = _width;

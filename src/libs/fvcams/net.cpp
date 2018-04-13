@@ -203,7 +203,7 @@ NetworkCamera::open()
 
   if ( __image_id) {
     FUSE_imagedesc_message_t *imagedesc = (FUSE_imagedesc_message_t *)calloc(1, sizeof(FUSE_imagedesc_message_t));
-    strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
+    strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH-1);
     __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
 
     if ( ! __fuse_imageinfo ) {
@@ -249,7 +249,7 @@ NetworkCamera::capture()
 
   FUSE_imagereq_message_t *irm = (FUSE_imagereq_message_t *)malloc(sizeof(FUSE_imagereq_message_t));
   memset(irm, 0, sizeof(FUSE_imagereq_message_t));
-  strncpy(irm->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
+  strncpy(irm->image_id, __image_id, IMAGE_ID_MAX_LENGTH-1);
   irm->format = (__get_jpeg ? FUSE_IF_JPEG : FUSE_IF_RAW);
   __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE, irm, sizeof(FUSE_imagereq_message_t));
 
@@ -391,7 +391,7 @@ NetworkCamera::set_image_id(const char *image_id)
   __image_id = strdup(image_id);
 
   FUSE_imagedesc_message_t *imagedesc = (FUSE_imagedesc_message_t *)calloc(1, sizeof(FUSE_imagedesc_message_t));
-  strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH);
+  strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH-1);
   __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
 
   if ( ! __fuse_imageinfo ) {

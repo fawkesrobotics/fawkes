@@ -131,7 +131,7 @@ PluginNetworkHandler::send_load_failure(const char *plugin_name,
 {
   try {
     plugin_load_failed_msg_t *r = (plugin_load_failed_msg_t *)calloc(1, sizeof(plugin_load_failed_msg_t));
-    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH-1);
     __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOAD_FAILED,
 		r, sizeof(plugin_load_failed_msg_t));
   } catch (Exception &e) {
@@ -146,7 +146,7 @@ PluginNetworkHandler::send_load_success(const char *plugin_name, unsigned int cl
 {
   try {
     plugin_loaded_msg_t *r = (plugin_loaded_msg_t *)calloc(1, sizeof(plugin_loaded_msg_t));
-    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH-1);
     __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_LOADED,
 		r, sizeof(plugin_loaded_msg_t));
   } catch (Exception &e) {
@@ -194,7 +194,7 @@ PluginNetworkHandler::send_unload_failure(const char *plugin_name,
 {
   try {
     plugin_unload_failed_msg_t *r = (plugin_unload_failed_msg_t *)calloc(1, sizeof(plugin_unload_failed_msg_t));
-    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH-1);
     __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOAD_FAILED,
 		r, sizeof(plugin_unload_failed_msg_t));
   } catch (Exception &e) {
@@ -209,7 +209,7 @@ PluginNetworkHandler::send_unload_success(const char *plugin_name, unsigned int 
 {
   try {
     plugin_unloaded_msg_t *r = (plugin_unloaded_msg_t *)calloc(1, sizeof(plugin_unloaded_msg_t));
-    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH);
+    strncpy(r->name, plugin_name, PLUGIN_MSG_NAME_LENGTH-1);
     __hub->send(client_id, FAWKES_CID_PLUGINMANAGER, MSG_PLUGIN_UNLOADED,
 		r, sizeof(plugin_unloaded_msg_t));
   } catch (Exception &e) {

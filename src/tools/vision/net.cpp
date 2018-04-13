@@ -318,7 +318,7 @@ class FireVisionNetworkTool
   {
     FUSE_imagereq_message_t *idm = (FUSE_imagereq_message_t *)malloc(sizeof(FUSE_imagereq_message_t));
     memset(idm, 0, sizeof(FUSE_imagereq_message_t));
-    strncpy(idm->image_id, image_id, IMAGE_ID_MAX_LENGTH);
+    strncpy(idm->image_id, image_id, IMAGE_ID_MAX_LENGTH-1);
     idm->format = (jpeg ? FUSE_IF_JPEG : FUSE_IF_RAW);
     __client->enqueue(FUSE_MT_GET_IMAGE, idm, sizeof(FUSE_imagereq_message_t));
   }
@@ -331,7 +331,7 @@ class FireVisionNetworkTool
   {
     FUSE_lutdesc_message_t *ldm = (FUSE_lutdesc_message_t *)malloc(sizeof(FUSE_lutdesc_message_t));
     memset(ldm, 0, sizeof(FUSE_lutdesc_message_t));
-    strncpy(ldm->lut_id, lut_id, LUT_ID_MAX_LENGTH);
+    strncpy(ldm->lut_id, lut_id, LUT_ID_MAX_LENGTH-1);
     __client->enqueue(FUSE_MT_GET_LUT, ldm, sizeof(FUSE_lutdesc_message_t));
   }
 

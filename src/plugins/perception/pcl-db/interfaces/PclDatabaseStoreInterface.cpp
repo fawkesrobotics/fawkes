@@ -169,7 +169,8 @@ PclDatabaseStoreInterface::maxlenof_error() const
 void
 PclDatabaseStoreInterface::set_error(const char * new_error)
 {
-  strncpy(data->error, new_error, sizeof(data->error));
+  strncpy(data->error, new_error, sizeof(data->error)-1);
+  data->error[sizeof(data->error)-1] = 0;
   data_changed = true;
 }
 
@@ -226,9 +227,12 @@ PclDatabaseStoreInterface::StoreMessage::StoreMessage(const char * ini_pcl_id, c
   memset(data_ptr, 0, data_size);
   data      = (StoreMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->pcl_id, ini_pcl_id, 64);
-  strncpy(data->database, ini_database, 64);
-  strncpy(data->collection, ini_collection, 128);
+  strncpy(data->pcl_id, ini_pcl_id, 64-1);
+  data->pcl_id[64-1] = 0;
+  strncpy(data->database, ini_database, 64-1);
+  data->database[64-1] = 0;
+  strncpy(data->collection, ini_collection, 128-1);
+  data->collection[128-1] = 0;
   add_fieldinfo(IFT_STRING, "pcl_id", 64, data->pcl_id);
   add_fieldinfo(IFT_STRING, "database", 64, data->database);
   add_fieldinfo(IFT_STRING, "collection", 128, data->collection);
@@ -296,7 +300,8 @@ PclDatabaseStoreInterface::StoreMessage::maxlenof_pcl_id() const
 void
 PclDatabaseStoreInterface::StoreMessage::set_pcl_id(const char * new_pcl_id)
 {
-  strncpy(data->pcl_id, new_pcl_id, sizeof(data->pcl_id));
+  strncpy(data->pcl_id, new_pcl_id, sizeof(data->pcl_id)-1);
+  data->pcl_id[sizeof(data->pcl_id)-1] = 0;
 }
 
 /** Get database value.
@@ -332,7 +337,8 @@ PclDatabaseStoreInterface::StoreMessage::maxlenof_database() const
 void
 PclDatabaseStoreInterface::StoreMessage::set_database(const char * new_database)
 {
-  strncpy(data->database, new_database, sizeof(data->database));
+  strncpy(data->database, new_database, sizeof(data->database)-1);
+  data->database[sizeof(data->database)-1] = 0;
 }
 
 /** Get collection value.
@@ -368,7 +374,8 @@ PclDatabaseStoreInterface::StoreMessage::maxlenof_collection() const
 void
 PclDatabaseStoreInterface::StoreMessage::set_collection(const char * new_collection)
 {
-  strncpy(data->collection, new_collection, sizeof(data->collection));
+  strncpy(data->collection, new_collection, sizeof(data->collection)-1);
+  data->collection[sizeof(data->collection)-1] = 0;
 }
 
 /** Clone this message.

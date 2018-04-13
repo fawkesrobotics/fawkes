@@ -790,8 +790,11 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *f,
     
     for (i = fields.begin(); i != fields.end(); ++i) {
       if ( (*i).getType() == "string" ) {
-	fprintf(f, "  strncpy(data->%s, ini_%s, %s);\n",
+	fprintf(f,
+		"  strncpy(data->%s, ini_%s, %s-1);\n"
+		"  data->%s[%s-1] = 0;\n",
 		(*i).getName().c_str(), (*i).getName().c_str(),
+		(*i).getLength().c_str(), (*i).getName().c_str(),
 		(*i).getLength().c_str());
       } else if (i->getLengthValue() > 1) {
 	fprintf(f, "  memcpy(data->%s, ini_%s, sizeof(%s) * %s);\n",
@@ -957,8 +960,10 @@ CppInterfaceGenerator::write_methods_cpp(FILE *f, std::string interface_classnam
 	    );
     if ( (*i).getType() == "string" ) {
       fprintf(f,
-	      "  strncpy(data->%s, new_%s, sizeof(data->%s));\n",
-	      (*i).getName().c_str(), (*i).getName().c_str(), (*i).getName().c_str());
+	      "  strncpy(data->%s, new_%s, sizeof(data->%s)-1);\n"
+	      "  data->%s[sizeof(data->%s)-1] = 0;\n",
+	      (*i).getName().c_str(), (*i).getName().c_str(), (*i).getName().c_str(),
+	      (*i).getName().c_str(), (*i).getName().c_str());
     } else if ( (*i).getLength() != "" ) {
       fprintf(f,
 	      "  memcpy(data->%s, new_%s, sizeof(%s) * %s);\n",

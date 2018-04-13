@@ -701,7 +701,8 @@ MotorInterface::maxlenof_controller_thread_name() const
 void
 MotorInterface::set_controller_thread_name(const char * new_controller_thread_name)
 {
-  strncpy(data->controller_thread_name, new_controller_thread_name, sizeof(data->controller_thread_name));
+  strncpy(data->controller_thread_name, new_controller_thread_name, sizeof(data->controller_thread_name)-1);
+  data->controller_thread_name[sizeof(data->controller_thread_name)-1] = 0;
   data_changed = true;
 }
 
@@ -872,7 +873,8 @@ MotorInterface::AcquireControlMessage::AcquireControlMessage(const uint32_t ini_
   data      = (AcquireControlMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
   data->controller = ini_controller;
-  strncpy(data->controller_thread_name, ini_controller_thread_name, 64);
+  strncpy(data->controller_thread_name, ini_controller_thread_name, 64-1);
+  data->controller_thread_name[64-1] = 0;
   add_fieldinfo(IFT_UINT32, "controller", 1, &data->controller);
   add_fieldinfo(IFT_STRING, "controller_thread_name", 64, data->controller_thread_name);
 }
@@ -978,7 +980,8 @@ MotorInterface::AcquireControlMessage::maxlenof_controller_thread_name() const
 void
 MotorInterface::AcquireControlMessage::set_controller_thread_name(const char * new_controller_thread_name)
 {
-  strncpy(data->controller_thread_name, new_controller_thread_name, sizeof(data->controller_thread_name));
+  strncpy(data->controller_thread_name, new_controller_thread_name, sizeof(data->controller_thread_name)-1);
+  data->controller_thread_name[sizeof(data->controller_thread_name)-1] = 0;
 }
 
 /** Clone this message.

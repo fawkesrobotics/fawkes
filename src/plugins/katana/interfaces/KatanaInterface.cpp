@@ -970,8 +970,10 @@ KatanaInterface::LinearGotoMessage::LinearGotoMessage(const float ini_theta_erro
   data->theta_error = ini_theta_error;
   data->offset_xy = ini_offset_xy;
   data->straight = ini_straight;
-  strncpy(data->trans_frame, ini_trans_frame, 32);
-  strncpy(data->rot_frame, ini_rot_frame, 32);
+  strncpy(data->trans_frame, ini_trans_frame, 32-1);
+  data->trans_frame[32-1] = 0;
+  strncpy(data->rot_frame, ini_rot_frame, 32-1);
+  data->rot_frame[32-1] = 0;
   data->x = ini_x;
   data->y = ini_y;
   data->z = ini_z;
@@ -1151,7 +1153,8 @@ KatanaInterface::LinearGotoMessage::maxlenof_trans_frame() const
 void
 KatanaInterface::LinearGotoMessage::set_trans_frame(const char * new_trans_frame)
 {
-  strncpy(data->trans_frame, new_trans_frame, sizeof(data->trans_frame));
+  strncpy(data->trans_frame, new_trans_frame, sizeof(data->trans_frame)-1);
+  data->trans_frame[sizeof(data->trans_frame)-1] = 0;
 }
 
 /** Get rot_frame value.
@@ -1183,7 +1186,8 @@ KatanaInterface::LinearGotoMessage::maxlenof_rot_frame() const
 void
 KatanaInterface::LinearGotoMessage::set_rot_frame(const char * new_rot_frame)
 {
-  strncpy(data->rot_frame, new_rot_frame, sizeof(data->rot_frame));
+  strncpy(data->rot_frame, new_rot_frame, sizeof(data->rot_frame)-1);
+  data->rot_frame[sizeof(data->rot_frame)-1] = 0;
 }
 
 /** Get x value.
@@ -1666,7 +1670,8 @@ KatanaInterface::ObjectGotoMessage::ObjectGotoMessage(const char * ini_object, c
   memset(data_ptr, 0, data_size);
   data      = (ObjectGotoMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->object, ini_object, 32);
+  strncpy(data->object, ini_object, 32-1);
+  data->object[32-1] = 0;
   data->rot_x = ini_rot_x;
   add_fieldinfo(IFT_STRING, "object", 32, data->object);
   add_fieldinfo(IFT_FLOAT, "rot_x", 1, &data->rot_x);
@@ -1729,7 +1734,8 @@ KatanaInterface::ObjectGotoMessage::maxlenof_object() const
 void
 KatanaInterface::ObjectGotoMessage::set_object(const char * new_object)
 {
-  strncpy(data->object, new_object, sizeof(data->object));
+  strncpy(data->object, new_object, sizeof(data->object)-1);
+  data->object[sizeof(data->object)-1] = 0;
 }
 
 /** Get rot_x value.
@@ -2108,7 +2114,8 @@ KatanaInterface::SetPlannerParamsMessage::SetPlannerParamsMessage(const char * i
   memset(data_ptr, 0, data_size);
   data      = (SetPlannerParamsMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->plannerparams, ini_plannerparams, 1024);
+  strncpy(data->plannerparams, ini_plannerparams, 1024-1);
+  data->plannerparams[1024-1] = 0;
   data->straight = ini_straight;
   add_fieldinfo(IFT_STRING, "plannerparams", 1024, data->plannerparams);
   add_fieldinfo(IFT_BOOL, "straight", 1, &data->straight);
@@ -2171,7 +2178,8 @@ KatanaInterface::SetPlannerParamsMessage::maxlenof_plannerparams() const
 void
 KatanaInterface::SetPlannerParamsMessage::set_plannerparams(const char * new_plannerparams)
 {
-  strncpy(data->plannerparams, new_plannerparams, sizeof(data->plannerparams));
+  strncpy(data->plannerparams, new_plannerparams, sizeof(data->plannerparams)-1);
+  data->plannerparams[sizeof(data->plannerparams)-1] = 0;
 }
 
 /** Get straight value.

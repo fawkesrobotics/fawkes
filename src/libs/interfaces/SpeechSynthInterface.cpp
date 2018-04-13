@@ -99,7 +99,8 @@ SpeechSynthInterface::maxlenof_text() const
 void
 SpeechSynthInterface::set_text(const char * new_text)
 {
-  strncpy(data->text, new_text, sizeof(data->text));
+  strncpy(data->text, new_text, sizeof(data->text)-1);
+  data->text[sizeof(data->text)-1] = 0;
   data_changed = true;
 }
 
@@ -265,7 +266,8 @@ SpeechSynthInterface::SayMessage::SayMessage(const char * ini_text) : Message("S
   memset(data_ptr, 0, data_size);
   data      = (SayMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->text, ini_text, 1024);
+  strncpy(data->text, ini_text, 1024-1);
+  data->text[1024-1] = 0;
   add_fieldinfo(IFT_STRING, "text", 1024, data->text);
 }
 /** Constructor */
@@ -329,7 +331,8 @@ SpeechSynthInterface::SayMessage::maxlenof_text() const
 void
 SpeechSynthInterface::SayMessage::set_text(const char * new_text)
 {
-  strncpy(data->text, new_text, sizeof(data->text));
+  strncpy(data->text, new_text, sizeof(data->text)-1);
+  data->text[sizeof(data->text)-1] = 0;
 }
 
 /** Clone this message.

@@ -120,7 +120,8 @@ SkillerDebugInterface::maxlenof_graph_fsm() const
 void
 SkillerDebugInterface::set_graph_fsm(const char * new_graph_fsm)
 {
-  strncpy(data->graph_fsm, new_graph_fsm, sizeof(data->graph_fsm));
+  strncpy(data->graph_fsm, new_graph_fsm, sizeof(data->graph_fsm)-1);
+  data->graph_fsm[sizeof(data->graph_fsm)-1] = 0;
   data_changed = true;
 }
 
@@ -155,7 +156,8 @@ SkillerDebugInterface::maxlenof_graph() const
 void
 SkillerDebugInterface::set_graph(const char * new_graph)
 {
-  strncpy(data->graph, new_graph, sizeof(data->graph));
+  strncpy(data->graph, new_graph, sizeof(data->graph)-1);
+  data->graph[sizeof(data->graph)-1] = 0;
   data_changed = true;
 }
 
@@ -287,7 +289,8 @@ SkillerDebugInterface::SetGraphMessage::SetGraphMessage(const char * ini_graph_f
   memset(data_ptr, 0, data_size);
   data      = (SetGraphMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->graph_fsm, ini_graph_fsm, 32);
+  strncpy(data->graph_fsm, ini_graph_fsm, 32-1);
+  data->graph_fsm[32-1] = 0;
   enum_map_GraphDirectionEnum[(int)GD_TOP_BOTTOM] = "GD_TOP_BOTTOM";
   enum_map_GraphDirectionEnum[(int)GD_BOTTOM_TOP] = "GD_BOTTOM_TOP";
   enum_map_GraphDirectionEnum[(int)GD_LEFT_RIGHT] = "GD_LEFT_RIGHT";
@@ -359,7 +362,8 @@ SkillerDebugInterface::SetGraphMessage::maxlenof_graph_fsm() const
 void
 SkillerDebugInterface::SetGraphMessage::set_graph_fsm(const char * new_graph_fsm)
 {
-  strncpy(data->graph_fsm, new_graph_fsm, sizeof(data->graph_fsm));
+  strncpy(data->graph_fsm, new_graph_fsm, sizeof(data->graph_fsm)-1);
+  data->graph_fsm[sizeof(data->graph_fsm)-1] = 0;
 }
 
 /** Clone this message.

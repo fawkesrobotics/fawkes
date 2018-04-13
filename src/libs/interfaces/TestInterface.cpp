@@ -207,7 +207,8 @@ TestInterface::maxlenof_test_string() const
 void
 TestInterface::set_test_string(const char * new_test_string)
 {
-  strncpy(data->test_string, new_test_string, sizeof(data->test_string));
+  strncpy(data->test_string, new_test_string, sizeof(data->test_string)-1);
+  data->test_string[sizeof(data->test_string)-1] = 0;
   data_changed = true;
 }
 
@@ -425,7 +426,8 @@ TestInterface::SetTestStringMessage::SetTestStringMessage(const char * ini_test_
   memset(data_ptr, 0, data_size);
   data      = (SetTestStringMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->test_string, ini_test_string, 30);
+  strncpy(data->test_string, ini_test_string, 30-1);
+  data->test_string[30-1] = 0;
   enum_map_TestEnum[(int)TEST_ENUM_1] = "TEST_ENUM_1";
   enum_map_TestEnum[(int)TEST_ENUM_2] = "TEST_ENUM_2";
   add_fieldinfo(IFT_STRING, "test_string", 30, data->test_string);
@@ -489,7 +491,8 @@ TestInterface::SetTestStringMessage::maxlenof_test_string() const
 void
 TestInterface::SetTestStringMessage::set_test_string(const char * new_test_string)
 {
-  strncpy(data->test_string, new_test_string, sizeof(data->test_string));
+  strncpy(data->test_string, new_test_string, sizeof(data->test_string)-1);
+  data->test_string[sizeof(data->test_string)-1] = 0;
 }
 
 /** Clone this message.

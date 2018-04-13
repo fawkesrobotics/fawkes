@@ -77,6 +77,7 @@ ifeq ($(HAVE_GTKMM),1)
   ifeq ($(CC),clang)
     CFLAGS_GTKMM += -Wno-overloaded-virtual $(if $(HAVE_GTKMM_2),-Wno-mismatched-tags)
   endif
+  CFLAGS_GTKMM += -Wno-parentheses
 else
   PKG_MISSING += $(PKG_GTKMM)
 endif

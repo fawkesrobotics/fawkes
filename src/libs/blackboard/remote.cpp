@@ -194,8 +194,8 @@ RemoteBlackBoard::open_interface(const char *type, const char *identifier, const
   __mutex->unlock();
 
   bb_iopen_msg_t *om = (bb_iopen_msg_t *)calloc(1, sizeof(bb_iopen_msg_t));
-  strncpy(om->type, type, __INTERFACE_TYPE_SIZE);
-  strncpy(om->id, identifier, __INTERFACE_ID_SIZE);
+  strncpy(om->type, type, __INTERFACE_TYPE_SIZE-1);
+  strncpy(om->id, identifier, __INTERFACE_ID_SIZE-1);
   memcpy(om->hash, iface->hash(), __INTERFACE_HASH_SIZE);
 
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
@@ -409,8 +409,8 @@ RemoteBlackBoard::list(const char *type_pattern, const char *id_pattern)
 
   bb_ilistreq_msg_t *om =
     (bb_ilistreq_msg_t *)calloc(1, sizeof(bb_ilistreq_msg_t));
-  strncpy(om->type_pattern, type_pattern, __INTERFACE_TYPE_SIZE);
-  strncpy(om->id_pattern, id_pattern, __INTERFACE_ID_SIZE);
+  strncpy(om->type_pattern, type_pattern, __INTERFACE_TYPE_SIZE-1);
+  strncpy(om->id_pattern, id_pattern, __INTERFACE_ID_SIZE-1);
 
   FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_BLACKBOARD,
 							MSG_BB_LIST,

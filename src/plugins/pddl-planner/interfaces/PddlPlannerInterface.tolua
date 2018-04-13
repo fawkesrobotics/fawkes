@@ -8,7 +8,6 @@ class PddlPlannerInterface : public Interface
 
   class PlanMessage : public Message
   {
-    PlanMessage(char * ini_dummy);
     PlanMessage();
     ~PlanMessage();
 
@@ -29,9 +28,6 @@ class PddlPlannerInterface : public Interface
     void              unref();
     unsigned int      refcount();
 
-    char * dummy();
-    void set_dummy(const char * new_dummy);
-    int maxlenof_dummy() const;
   };
 
   unsigned int msg_id();

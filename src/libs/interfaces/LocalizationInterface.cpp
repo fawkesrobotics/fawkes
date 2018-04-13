@@ -91,7 +91,8 @@ LocalizationInterface::maxlenof_map() const
 void
 LocalizationInterface::set_map(const char * new_map)
 {
-  strncpy(data->map, new_map, sizeof(data->map));
+  strncpy(data->map, new_map, sizeof(data->map)-1);
+  data->map[sizeof(data->map)-1] = 0;
   data_changed = true;
 }
 
@@ -149,7 +150,8 @@ LocalizationInterface::SetInitialPoseMessage::SetInitialPoseMessage(const char *
   memset(data_ptr, 0, data_size);
   data      = (SetInitialPoseMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->frame, ini_frame, 32);
+  strncpy(data->frame, ini_frame, 32-1);
+  data->frame[32-1] = 0;
   memcpy(data->rotation, ini_rotation, sizeof(double) * 4);
   memcpy(data->translation, ini_translation, sizeof(double) * 3);
   memcpy(data->covariance, ini_covariance, sizeof(double) * 36);
@@ -222,7 +224,8 @@ LocalizationInterface::SetInitialPoseMessage::maxlenof_frame() const
 void
 LocalizationInterface::SetInitialPoseMessage::set_frame(const char * new_frame)
 {
-  strncpy(data->frame, new_frame, sizeof(data->frame));
+  strncpy(data->frame, new_frame, sizeof(data->frame)-1);
+  data->frame[sizeof(data->frame)-1] = 0;
 }
 
 /** Get rotation value.

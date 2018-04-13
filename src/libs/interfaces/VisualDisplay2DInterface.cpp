@@ -1133,7 +1133,8 @@ VisualDisplay2DInterface::AddCartTextMessage::AddCartTextMessage(const float ini
   data_ts   = (message_data_ts_t *)data_ptr;
   data->x = ini_x;
   data->y = ini_y;
-  strncpy(data->text, ini_text, 128);
+  strncpy(data->text, ini_text, 128-1);
+  data->text[128-1] = 0;
   data->anchor = ini_anchor;
   data->size = ini_size;
   memcpy(data->color, ini_color, sizeof(uint8_t) * 4);
@@ -1292,7 +1293,8 @@ VisualDisplay2DInterface::AddCartTextMessage::maxlenof_text() const
 void
 VisualDisplay2DInterface::AddCartTextMessage::set_text(const char * new_text)
 {
-  strncpy(data->text, new_text, sizeof(data->text));
+  strncpy(data->text, new_text, sizeof(data->text)-1);
+  data->text[sizeof(data->text)-1] = 0;
 }
 
 /** Get anchor value.

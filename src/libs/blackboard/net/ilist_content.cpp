@@ -102,8 +102,8 @@ BlackBoardInterfaceListContent::append_interface(const char *type, const char *i
 {
   bb_iinfo_msg_t info;
   memset(&info, 0, sizeof(info));
-  strncpy(info.type, type, __INTERFACE_TYPE_SIZE);
-  strncpy(info.id, id, __INTERFACE_ID_SIZE);
+  strncpy(info.type, type, __INTERFACE_TYPE_SIZE-1);
+  strncpy(info.id, id, __INTERFACE_ID_SIZE-1);
   memcpy(info.hash, hash, __INTERFACE_HASH_SIZE);
   info.serial      = htonl(serial);
   info.writer_readers = htonl(num_readers);
@@ -126,8 +126,8 @@ BlackBoardInterfaceListContent::append_interface(InterfaceInfo &iinfo)
 {
   bb_iinfo_msg_t info;
   memset(&info, 0, sizeof(info));
-  strncpy(info.type, iinfo.type(), __INTERFACE_TYPE_SIZE);
-  strncpy(info.id, iinfo.id(), __INTERFACE_ID_SIZE);
+  strncpy(info.type, iinfo.type(), __INTERFACE_TYPE_SIZE-1);
+  strncpy(info.id, iinfo.id(), __INTERFACE_ID_SIZE-1);
   memcpy(info.hash, iinfo.hash(), __INTERFACE_HASH_SIZE);
   info.serial      = htonl(iinfo.serial());
   info.writer_readers = htonl(iinfo.num_readers());

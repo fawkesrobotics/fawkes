@@ -286,17 +286,17 @@ main(int argc, char **argv)
       aqt.join();
     }
   }
-  catch (UnknownArgumentException e)
+  catch (UnknownArgumentException &e)
   {
     printf("Error: Unknown Argument\n\n");
     print_usage(argv[0]);
     exit(0);
   }
-  catch (SocketException e)
+  catch (SocketException &e)
   {
     printf("\nError: could not connect:\n%s\n", e.what());
   }
-  catch (CouldNotOpenFileException e)
+  catch (CouldNotOpenFileException &e)
   {
     printf("\nError: could not open joystick device:\n%s\n", e.what());
   }

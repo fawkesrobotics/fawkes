@@ -991,7 +991,8 @@ JacoBimanualInterface::SetPlannerParamsMessage::SetPlannerParamsMessage(const ch
   memset(data_ptr, 0, data_size);
   data      = (SetPlannerParamsMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->params, ini_params, 1024);
+  strncpy(data->params, ini_params, 1024-1);
+  data->params[1024-1] = 0;
   add_fieldinfo(IFT_STRING, "params", 1024, data->params);
 }
 /** Constructor */
@@ -1051,7 +1052,8 @@ JacoBimanualInterface::SetPlannerParamsMessage::maxlenof_params() const
 void
 JacoBimanualInterface::SetPlannerParamsMessage::set_params(const char * new_params)
 {
-  strncpy(data->params, new_params, sizeof(data->params));
+  strncpy(data->params, new_params, sizeof(data->params)-1);
+  data->params[sizeof(data->params)-1] = 0;
 }
 
 /** Clone this message.

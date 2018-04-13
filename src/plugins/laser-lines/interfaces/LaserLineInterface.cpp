@@ -97,7 +97,8 @@ LaserLineInterface::maxlenof_frame_id() const
 void
 LaserLineInterface::set_frame_id(const char * new_frame_id)
 {
-  strncpy(data->frame_id, new_frame_id, sizeof(data->frame_id));
+  strncpy(data->frame_id, new_frame_id, sizeof(data->frame_id)-1);
+  data->frame_id[sizeof(data->frame_id)-1] = 0;
   data_changed = true;
 }
 

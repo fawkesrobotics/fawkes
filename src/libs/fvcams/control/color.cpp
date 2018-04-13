@@ -166,13 +166,13 @@ CameraControlColor::set_auto_all(bool enabled)
 {
   try {
     set_auto_gain(enabled);
-  } catch (NotImplementedException) {}
+  } catch (NotImplementedException &e) {}
   try {
     set_auto_white_balance(enabled);
-  } catch (NotImplementedException) {}
+  } catch (NotImplementedException &e) {}
   try {
     set_exposure_auto(enabled);
-  } catch (NotImplementedException) {}
+  } catch (NotImplementedException &e) {}
 }
 
 } // end namespace firevision

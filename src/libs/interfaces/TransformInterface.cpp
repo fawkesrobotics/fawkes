@@ -105,7 +105,8 @@ TransformInterface::maxlenof_frame() const
 void
 TransformInterface::set_frame(const char * new_frame)
 {
-  strncpy(data->frame, new_frame, sizeof(data->frame));
+  strncpy(data->frame, new_frame, sizeof(data->frame)-1);
+  data->frame[sizeof(data->frame)-1] = 0;
   data_changed = true;
 }
 
@@ -142,7 +143,8 @@ TransformInterface::maxlenof_child_frame() const
 void
 TransformInterface::set_child_frame(const char * new_child_frame)
 {
-  strncpy(data->child_frame, new_child_frame, sizeof(data->child_frame));
+  strncpy(data->child_frame, new_child_frame, sizeof(data->child_frame)-1);
+  data->child_frame[sizeof(data->child_frame)-1] = 0;
   data_changed = true;
 }
 

@@ -86,7 +86,7 @@ FuseImageContent::FuseImageContent(SharedMemoryImageBuffer *b)
   __header = (FUSE_image_message_header_t *)_payload;
   __buffer = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
 
-  strncpy(__header->image_id, b->image_id(), IMAGE_ID_MAX_LENGTH);
+  strncpy(__header->image_id, b->image_id(), IMAGE_ID_MAX_LENGTH-1);
   __header->format = FUSE_IF_RAW;
   __header->colorspace = htons(b->colorspace());
   __header->reserved = 0;
@@ -137,7 +137,7 @@ FuseImageContent::FuseImageContent(FUSE_image_format_t image_format, const char 
   __header = (FUSE_image_message_header_t *)_payload;
   __buffer = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
 
-  strncpy(__header->image_id, image_id, IMAGE_ID_MAX_LENGTH);
+  strncpy(__header->image_id, image_id, IMAGE_ID_MAX_LENGTH-1);
   __header->format = image_format;
   __header->colorspace = htons(colorspace);
   __header->reserved = 0;

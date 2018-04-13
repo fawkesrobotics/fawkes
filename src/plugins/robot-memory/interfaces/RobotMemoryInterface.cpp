@@ -93,7 +93,8 @@ RobotMemoryInterface::maxlenof_error() const
 void
 RobotMemoryInterface::set_error(const char * new_error)
 {
-  strncpy(data->error, new_error, sizeof(data->error));
+  strncpy(data->error, new_error, sizeof(data->error)-1);
+  data->error[sizeof(data->error)-1] = 0;
   data_changed = true;
 }
 
@@ -124,7 +125,8 @@ RobotMemoryInterface::maxlenof_result() const
 void
 RobotMemoryInterface::set_result(const char * new_result)
 {
-  strncpy(data->result, new_result, sizeof(data->result));
+  strncpy(data->result, new_result, sizeof(data->result)-1);
+  data->result[sizeof(data->result)-1] = 0;
   data_changed = true;
 }
 
@@ -186,8 +188,10 @@ RobotMemoryInterface::QueryMessage::QueryMessage(const char * ini_query, const c
   memset(data_ptr, 0, data_size);
   data      = (QueryMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->query, ini_query, 1024);
-  strncpy(data->collection, ini_collection, 1024);
+  strncpy(data->query, ini_query, 1024-1);
+  data->query[1024-1] = 0;
+  strncpy(data->collection, ini_collection, 1024-1);
+  data->collection[1024-1] = 0;
   add_fieldinfo(IFT_STRING, "query", 1024, data->query);
   add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
@@ -249,7 +253,8 @@ RobotMemoryInterface::QueryMessage::maxlenof_query() const
 void
 RobotMemoryInterface::QueryMessage::set_query(const char * new_query)
 {
-  strncpy(data->query, new_query, sizeof(data->query));
+  strncpy(data->query, new_query, sizeof(data->query)-1);
+  data->query[sizeof(data->query)-1] = 0;
 }
 
 /** Get collection value.
@@ -279,7 +284,8 @@ RobotMemoryInterface::QueryMessage::maxlenof_collection() const
 void
 RobotMemoryInterface::QueryMessage::set_collection(const char * new_collection)
 {
-  strncpy(data->collection, new_collection, sizeof(data->collection));
+  strncpy(data->collection, new_collection, sizeof(data->collection)-1);
+  data->collection[sizeof(data->collection)-1] = 0;
 }
 
 /** Clone this message.
@@ -310,8 +316,10 @@ RobotMemoryInterface::InsertMessage::InsertMessage(const char * ini_insert, cons
   memset(data_ptr, 0, data_size);
   data      = (InsertMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->insert, ini_insert, 1024);
-  strncpy(data->collection, ini_collection, 1024);
+  strncpy(data->insert, ini_insert, 1024-1);
+  data->insert[1024-1] = 0;
+  strncpy(data->collection, ini_collection, 1024-1);
+  data->collection[1024-1] = 0;
   add_fieldinfo(IFT_STRING, "insert", 1024, data->insert);
   add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
@@ -373,7 +381,8 @@ RobotMemoryInterface::InsertMessage::maxlenof_insert() const
 void
 RobotMemoryInterface::InsertMessage::set_insert(const char * new_insert)
 {
-  strncpy(data->insert, new_insert, sizeof(data->insert));
+  strncpy(data->insert, new_insert, sizeof(data->insert)-1);
+  data->insert[sizeof(data->insert)-1] = 0;
 }
 
 /** Get collection value.
@@ -403,7 +412,8 @@ RobotMemoryInterface::InsertMessage::maxlenof_collection() const
 void
 RobotMemoryInterface::InsertMessage::set_collection(const char * new_collection)
 {
-  strncpy(data->collection, new_collection, sizeof(data->collection));
+  strncpy(data->collection, new_collection, sizeof(data->collection)-1);
+  data->collection[sizeof(data->collection)-1] = 0;
 }
 
 /** Clone this message.
@@ -435,9 +445,12 @@ RobotMemoryInterface::UpdateMessage::UpdateMessage(const char * ini_query, const
   memset(data_ptr, 0, data_size);
   data      = (UpdateMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->query, ini_query, 1024);
-  strncpy(data->update, ini_update, 1024);
-  strncpy(data->collection, ini_collection, 1024);
+  strncpy(data->query, ini_query, 1024-1);
+  data->query[1024-1] = 0;
+  strncpy(data->update, ini_update, 1024-1);
+  data->update[1024-1] = 0;
+  strncpy(data->collection, ini_collection, 1024-1);
+  data->collection[1024-1] = 0;
   add_fieldinfo(IFT_STRING, "query", 1024, data->query);
   add_fieldinfo(IFT_STRING, "update", 1024, data->update);
   add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
@@ -501,7 +514,8 @@ RobotMemoryInterface::UpdateMessage::maxlenof_query() const
 void
 RobotMemoryInterface::UpdateMessage::set_query(const char * new_query)
 {
-  strncpy(data->query, new_query, sizeof(data->query));
+  strncpy(data->query, new_query, sizeof(data->query)-1);
+  data->query[sizeof(data->query)-1] = 0;
 }
 
 /** Get update value.
@@ -531,7 +545,8 @@ RobotMemoryInterface::UpdateMessage::maxlenof_update() const
 void
 RobotMemoryInterface::UpdateMessage::set_update(const char * new_update)
 {
-  strncpy(data->update, new_update, sizeof(data->update));
+  strncpy(data->update, new_update, sizeof(data->update)-1);
+  data->update[sizeof(data->update)-1] = 0;
 }
 
 /** Get collection value.
@@ -561,7 +576,8 @@ RobotMemoryInterface::UpdateMessage::maxlenof_collection() const
 void
 RobotMemoryInterface::UpdateMessage::set_collection(const char * new_collection)
 {
-  strncpy(data->collection, new_collection, sizeof(data->collection));
+  strncpy(data->collection, new_collection, sizeof(data->collection)-1);
+  data->collection[sizeof(data->collection)-1] = 0;
 }
 
 /** Clone this message.
@@ -592,8 +608,10 @@ RobotMemoryInterface::RemoveMessage::RemoveMessage(const char * ini_query, const
   memset(data_ptr, 0, data_size);
   data      = (RemoveMessage_data_t *)data_ptr;
   data_ts   = (message_data_ts_t *)data_ptr;
-  strncpy(data->query, ini_query, 1024);
-  strncpy(data->collection, ini_collection, 1024);
+  strncpy(data->query, ini_query, 1024-1);
+  data->query[1024-1] = 0;
+  strncpy(data->collection, ini_collection, 1024-1);
+  data->collection[1024-1] = 0;
   add_fieldinfo(IFT_STRING, "query", 1024, data->query);
   add_fieldinfo(IFT_STRING, "collection", 1024, data->collection);
 }
@@ -655,7 +673,8 @@ RobotMemoryInterface::RemoveMessage::maxlenof_query() const
 void
 RobotMemoryInterface::RemoveMessage::set_query(const char * new_query)
 {
-  strncpy(data->query, new_query, sizeof(data->query));
+  strncpy(data->query, new_query, sizeof(data->query)-1);
+  data->query[sizeof(data->query)-1] = 0;
 }
 
 /** Get collection value.
@@ -685,7 +704,8 @@ RobotMemoryInterface::RemoveMessage::maxlenof_collection() const
 void
 RobotMemoryInterface::RemoveMessage::set_collection(const char * new_collection)
 {
-  strncpy(data->collection, new_collection, sizeof(data->collection));
+  strncpy(data->collection, new_collection, sizeof(data->collection)-1);
+  data->collection[sizeof(data->collection)-1] = 0;
 }
 
 /** Clone this message.

@@ -97,7 +97,8 @@ SpeechRecognitionInterface::maxlenof_text() const
 void
 SpeechRecognitionInterface::set_text(const char * new_text)
 {
-  strncpy(data->text, new_text, sizeof(data->text));
+  strncpy(data->text, new_text, sizeof(data->text)-1);
+  data->text[sizeof(data->text)-1] = 0;
   data_changed = true;
 }
 

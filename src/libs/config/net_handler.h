@@ -76,7 +76,7 @@ class ConfigNetworkHandler
   T *  prepare_msg(const char *path, bool is_default)
   {
     T * m = (T *)calloc(1, sizeof(T));
-    strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH);
+    snprintf(m->cp.path, CONFIG_MSG_PATH_LENGTH, "%s", path);
     m->cp.is_default = is_default;
     return m;
   }
@@ -89,7 +89,7 @@ class ConfigNetworkHandler
     data_size = sizeof(config_descriptor_t) + sizeof(T) * (is_list ? num_values : 1);
     void* m = calloc(1, data_size);
     config_descriptor_t *cd = (config_descriptor_t *)m;
-    strncpy(cd->path, path, CONFIG_MSG_PATH_LENGTH);
+    snprintf(cd->path, CONFIG_MSG_PATH_LENGTH, "%s", path);
     cd->is_default = is_default;
     cd->num_values = is_list ? num_values : 0;
     *data = (void *)((char *)m + sizeof(config_descriptor_t));

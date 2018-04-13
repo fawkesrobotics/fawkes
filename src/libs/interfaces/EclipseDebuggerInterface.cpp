@@ -119,7 +119,8 @@ EclipseDebuggerInterface::maxlenof_host() const
 void
 EclipseDebuggerInterface::set_host(const char * new_host)
 {
-  strncpy(data->host, new_host, sizeof(data->host));
+  strncpy(data->host, new_host, sizeof(data->host)-1);
+  data->host[sizeof(data->host)-1] = 0;
   data_changed = true;
 }
 

@@ -209,7 +209,7 @@ FireVisionDataFile::set_comment(const char *comment)
 {
   free(__comment);
   __comment = strndup(comment, FVFF_COMMENT_SIZE);
-  strncpy(__header->comment, comment, FVFF_COMMENT_SIZE);
+  strncpy(__header->comment, comment, FVFF_COMMENT_SIZE-1);
 }
 
 

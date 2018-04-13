@@ -96,7 +96,7 @@ FuseLutListContent::add_lutinfo(const char *lut_id,
   FUSE_lutinfo_t lutinfo;
   memset(&lutinfo, 0, sizeof(lutinfo));
 
-  strncpy(lutinfo.lut_id, lut_id, LUT_ID_MAX_LENGTH);
+  strncpy(lutinfo.lut_id, lut_id, LUT_ID_MAX_LENGTH-1);
   lutinfo.width = ntohl(width);
   lutinfo.height = ntohl(height);
   lutinfo.depth  = ntohl(depth);  

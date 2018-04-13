@@ -397,7 +397,7 @@ main(int argc, char **argv)
   try {
     PTUJoystickControl ptuctrl(argc, argv);
     ptuctrl.run();
-  } catch (Exception e) {
+  } catch (Exception &e) {
     printf("Running failed: %s\n\n", e.what());
     print_usage(argv[0]);
     exit(0);
