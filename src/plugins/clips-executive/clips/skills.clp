@@ -13,6 +13,11 @@
 )
 
 (deftemplate skill
+	; Unique ID, meaningful only in the realm of this skill executor
+	; and for components that interface with it.
+	; It is guaranteed to be unique, also for the case when executin the
+	; exact same skill a second time.
+	(slot id (type SYMBOL))
   (slot name (type SYMBOL))
   (slot status (type SYMBOL) (allowed-values S_IDLE S_RUNNING S_FINAL S_FAILED))
   (slot error-msg (type STRING))
@@ -74,10 +79,12 @@
 	(bind ?sks (map-action-skill ?name ?param-names ?param-values))
 	(printout logwarn "sks='" ?sks "'" crlf)
 
+	(bind ?id UNKNOWN)
 	(if (eq ?sks "")
-	then
-		(assert (skill (name (sym-cat ?name)) (status S_FAILED) (start-time (now))
-									 (error-msg (str-cat "Failed to convert action '" ?name "' to skill string"))))
+			then
+		(bind ?id (sym-cat ?name (gensym*)))
+		(assert (skill (id ?id) (name (sym-cat ?name)) (status S_FAILED) (start-time (now))
+		        (error-msg (str-cat "Failed to convert action '" ?name "' to skill string"))))
 	else
 		(bind ?m (blackboard-create-msg "SkillerInterface::Skiller" "ExecSkillMessage"))
 		(blackboard-set-msg-field ?m "skill_string" ?sks)
@@ -85,9 +92,11 @@
 		(printout logwarn "Calling skill '" ?sks "'" crlf)
 		(bind ?msgid (blackboard-send-msg ?m))
 		(bind ?status (if (eq ?msgid 0) then S_FAILED else S_IDLE))
-		(assert (skill (name (sym-cat ?name)) (skill-string ?sks)
+		(bind ?id (sym-cat ?name "-" ?msgid))
+		(assert (skill (id ?id) (name (sym-cat ?name)) (skill-string ?sks)
 									 (status ?status) (msgid ?msgid) (start-time (now))))
 	)
+	(return ?id)
 )
 
 (defrule skill-control-acquire
