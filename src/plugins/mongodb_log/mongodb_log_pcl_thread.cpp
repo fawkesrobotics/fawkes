@@ -3,7 +3,7 @@
  *  mongodb_log_pcl_thread.cpp - Thread to log point clouds to MongoDB
  *
  *  Created: Mon Nov 07 02:58:40 2011
- *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2017  Tim Niemueller [www.niemueller.de]
  *             2012       Bastian Klingen
  ****************************************************************************/
 
@@ -44,7 +44,8 @@ using namespace mongo;
 
 /** Constructor. */
 MongoLogPointCloudThread::MongoLogPointCloudThread()
-  : Thread("MongoLogPointCloudThread", Thread::OPMODE_CONTINUOUS)
+  : Thread("MongoLogPointCloudThread", Thread::OPMODE_CONTINUOUS),
+    MongoDBAspect("default")
 {
   set_prepfin_conc_loop(true);
 }

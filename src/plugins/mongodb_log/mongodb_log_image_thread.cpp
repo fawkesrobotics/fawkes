@@ -3,7 +3,7 @@
  *  mongodb_log_image_thread.cpp - Thread to log images to MongoDB
  *
  *  Created: Tue Apr 10 22:12:38 2012
- *  Copyright  2011-2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2011-2017  Tim Niemueller [www.niemueller.de]
  *             2012       Bastian Klingen
  ****************************************************************************/
 
@@ -45,7 +45,8 @@ using namespace mongo;
 
 /** Constructor. */
 MongoLogImagesThread::MongoLogImagesThread()
-  : Thread("MongoLogImagesThread", Thread::OPMODE_CONTINUOUS)
+  : Thread("MongoLogImagesThread", Thread::OPMODE_CONTINUOUS),
+    MongoDBAspect("default")
 {
   set_prepfin_conc_loop(true);
 }

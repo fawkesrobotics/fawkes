@@ -1,9 +1,9 @@
 /***************************************************************************
  *  robot_memory.h - Class for storing and querying information in the RobotMemory
  *    
- *
  *  Created: Aug 23, 2016 1:34:32 PM 2016
  *  Copyright  2016  Frederik Zwilling
+ *             2017 Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
-#ifndef FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ROBOT_MEMORY_H_
-#define FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ROBOT_MEMORY_H_
+#ifndef __PLUGINS_ROBOT_MEMORY_ROBOT_MEMORY_H_
+#define __PLUGINS_ROBOT_MEMORY_ROBOT_MEMORY_H_
 
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
@@ -137,6 +137,8 @@ class RobotMemory
     EventTriggerManager* trigger_manager_;
     ComputablesManager* computables_manager_;
     std::vector<std::string> distributed_dbs_;
+
+    unsigned int cfg_startup_grace_period_;
 
     void init();
     void loop();

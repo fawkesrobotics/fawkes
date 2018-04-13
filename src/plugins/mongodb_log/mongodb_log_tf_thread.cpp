@@ -3,7 +3,7 @@
  *  mongodb_log_tf_thread.cpp - MongoDB transforms logging Thread
  *
  *  Created: Tue Dec 11 14:58:00 2012 (Freiburg)
- *  Copyright  2010-2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2010-2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -46,6 +46,7 @@ using namespace fawkes;
 /** Constructor. */
 MongoLogTransformsThread::MongoLogTransformsThread()
   : Thread("MongoLogTransformsThread", Thread::OPMODE_CONTINUOUS),
+    MongoDBAspect("default"),
     TransformAspect(TransformAspect::ONLY_LISTENER)
 {
   set_prepfin_conc_loop(true);

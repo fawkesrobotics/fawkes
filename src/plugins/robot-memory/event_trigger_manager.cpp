@@ -38,27 +38,26 @@ using namespace mongo;
  * @param config Configuration
  * @param mongo_connection_manager MongoDBConnCreator
  */
-EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config, MongoDBConnCreator* mongo_connection_manager)
+EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config,
+                                         MongoDBConnCreator* mongo_connection_manager)
   : cfg_debug_(false)
 {
   logger_ = logger;
   config_ = config;
   mongo_connection_manager_ = mongo_connection_manager;
 
-  distributed_ = config_->get_bool("plugins/robot-memory/setup/distributed");
+  con_local_ = mongo_connection_manager_->create_client("robot-memory-local");
+  if (config_->exists("/plugins/mongodb/clients/robot-memory-distributed/enabled") &&
+      config_->get_bool("/plugins/mongodb/clients/robot-memory-distributed/enabled"))
+  {
+    con_replica_ = mongo_connection_manager_->create_client("robot-memory-distributed");
+  }
 
   // create connections to running mongod instances because only there
-  local_db = config_->get_string("plugins/robot-memory/database");
-  std::string local_client = config_->get_string("plugins/robot-memory/setup/mongo-client-connection-local");
-  con_local_ = mongo_connection_manager_->create_client(local_client.c_str());
+  local_db = config_->get_string("/plugins/robot-memory/database");
 
-  repl_set_dist = config_->get_string("plugins/robot-memory/setup/replicated/replica-set-name");
-  repl_set_local = config_->get_string("plugins/robot-memory/setup/local/replica-set-name");
-  if(distributed_)
-  {
-    std::string distributed_client = config_->get_string("plugins/robot-memory/setup/mongo-client-connection-distributed");
-    con_replica_ = mongo_connection_manager_->create_client(distributed_client.c_str());
-  }
+  repl_set_dist = "robot-memory-distributed";
+  repl_set_local = "robot-memory-local";
 
   mutex_ = new Mutex();
 

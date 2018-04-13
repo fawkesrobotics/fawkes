@@ -42,7 +42,8 @@ using namespace mongo;
 
 /** Constructor. */
 PointCloudDBStoreThread::PointCloudDBStoreThread()
-  : Thread("PointCloudDBStoreThread", Thread::OPMODE_WAITFORWAKEUP)
+  : Thread("PointCloudDBStoreThread", Thread::OPMODE_WAITFORWAKEUP),
+    MongoDBAspect("default")
 {
 }
 

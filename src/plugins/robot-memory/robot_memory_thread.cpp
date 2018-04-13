@@ -4,7 +4,7 @@
  *
  *  Created: Sun May 01 13:41:45 2016
  *  Copyright  2016 Frederik Zwilling
- *
+ *             2017 Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,8 +24,9 @@
 #include "interfaces/RobotMemoryInterface.h"
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
-#include <memory>
 
+#include <memory>
+#include <chrono>
 
 using namespace fawkes;
 
@@ -34,14 +35,9 @@ using namespace fawkes;
  * @author Frederik Zwilling
  */
 
-/**
- * Constructor for thread
- * @param mongo_client_connection Which client connection to use for mongodb aspect
- */
-RobotMemoryThread::RobotMemoryThread(std::string mongo_client_connection)
+/** Constructor for thread */
+RobotMemoryThread::RobotMemoryThread()
 	: Thread("RobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
-    ConfigurableAspect(),
-    MongoDBAspect(mongo_client_connection.c_str()),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
     AspectProviderAspect(&robot_memory_inifin_)
 {
@@ -50,8 +46,8 @@ RobotMemoryThread::RobotMemoryThread(std::string mongo_client_connection)
 
 /** Destructor. */
 RobotMemoryThread::~RobotMemoryThread()
-{}
-
+{
+}
 
 void
 RobotMemoryThread::init()

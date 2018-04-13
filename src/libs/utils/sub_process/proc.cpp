@@ -83,6 +83,69 @@ SubProcess::SubProcess(const char *progname, const char *file, const char *argv[
   run_proc(file, argv, envp);
 }
 
+/** Constructor.
+ * @param progname name of program, component name for logging
+ * @param file file to execute, can be a program in the path or a
+ * fully qualified path
+ * @param argv array of arguments for the process, the last element
+ * must be NULL
+ * @param envp array of environment variables for the process, the
+ * last element must be NULL. Can be NULL to omit.
+ */
+SubProcess::SubProcess(const std::string &progname, const std::string &file,
+                       const std::vector<std::string> &argv, const std::vector<std::string> &envp)
+	: progname_(progname),
+	  io_service_work_(io_service_), logger_(NULL),
+	  sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_)
+{
+  io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
+
+  const char *argvc[argv.size() + 1];
+  for (size_t i = 0; i < argv.size(); ++i) {
+	  argvc[i] = argv[i].c_str();
+  }
+  argvc[argv.size()] = NULL;
+  const char *envpc[envp.size() + 1];
+  for (size_t i = 0; i < envp.size(); ++i) {
+	  envpc[i] = envp[i].c_str();
+  }
+  envpc[envp.size()] = NULL;
+  run_proc(file.c_str(), argvc, envpc);
+}
+
+
+/** Constructor.
+ * @param progname name of program, component name for logging
+ * @param file file to execute, can be a program in the path or a
+ * fully qualified path
+ * @param argv array of arguments for the process, the last element
+ * must be NULL
+ * @param envp array of environment variables for the process, the
+ * last element must be NULL. Can be NULL to omit.
+ * @param logger logger to redirect stdout and stderr to
+ */
+SubProcess::SubProcess(const std::string &progname, const std::string &file,
+                       const std::vector<std::string> &argv, const std::vector<std::string> &envp,
+                       fawkes::Logger *logger)
+  : progname_(progname),
+    io_service_work_(io_service_), logger_(logger),
+    sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_)
+{
+  io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
+
+  const char *argvc[argv.size() + 1];
+  for (size_t i = 0; i < argv.size(); ++i) {
+	  argvc[i] = argv[i].c_str();
+  }
+  argvc[argv.size()] = NULL;
+  const char *envpc[envp.size() + 1];
+  for (size_t i = 0; i < envp.size(); ++i) {
+	  envpc[i] = envp[i].c_str();
+  }
+  envpc[envp.size()] = NULL;
+  run_proc(file.c_str(), argvc, envpc);
+}
+
 
 /** Destructor. */
 SubProcess::~SubProcess()
@@ -235,27 +298,40 @@ SubProcess::handle_log_line(const char *logname, Logger::LogLevel log_level,
 }
 
 
+/** Check if process is alive.
+ * @return true if process is alive, false otherwise
+ */
+bool
+SubProcess::alive()
+{
+	check_proc();
+	return pid_ > 0;
+}
+
+
 /** Check if the process is still alive. */
 void
 SubProcess::check_proc()
 {
-  if (pid_ > 0) {
-    int status = 0;
-    if (waitpid(pid_, &status, WUNTRACED | WCONTINUED | WNOHANG) > 0) {
-      if (WIFEXITED(status)) {
-	logger_->log_error(progname_.c_str(), "PID %i exited, status=%d",
-			   pid_, WEXITSTATUS(status));
-	pid_ = -1;
-      } else if (WIFSIGNALED(status)) {
-	logger_->log_error(progname_.c_str(), "PID %i killed by signal %s",
-			   pid_, strsignal(WTERMSIG(status)));
-	pid_ = -1;
-      } else if (WIFSTOPPED(status)) {
-	logger_->log_warn(progname_.c_str(), "PID %i stopped by signal %s",
-			  pid_, strsignal(WSTOPSIG(status)));
-      } else if (WIFCONTINUED(status)) {
-	logger_->log_warn(progname_.c_str(), "PID %i continued", pid_);
-      }
+	if (pid_ > 0) {
+		int status = 0;
+		if (waitpid(pid_, &status, WUNTRACED | WCONTINUED | WNOHANG) > 0) {
+			if (WIFEXITED(status)) {
+				if (WEXITSTATUS(status) != 0) {
+					logger_->log_error(progname_.c_str(), "PID %i exited, status=%d",
+					                   pid_, WEXITSTATUS(status));
+				}
+				pid_ = -1;
+			} else if (WIFSIGNALED(status)) {
+				logger_->log_error(progname_.c_str(), "PID %i killed by signal %s",
+				                   pid_, strsignal(WTERMSIG(status)));
+				pid_ = -1;
+			} else if (WIFSTOPPED(status)) {
+				logger_->log_warn(progname_.c_str(), "PID %i stopped by signal %s",
+				                  pid_, strsignal(WSTOPSIG(status)));
+			} else if (WIFCONTINUED(status)) {
+				logger_->log_warn(progname_.c_str(), "PID %i continued", pid_);
+			}
     }
   }
 }

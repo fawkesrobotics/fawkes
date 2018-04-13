@@ -3,8 +3,7 @@
  *  mongodb.h - MongoDB aspect for Fawkes
  *
  *  Created: Mon Dec 06 00:28:55 2010
- *  Copyright  2006-2010  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2017  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,9 +23,6 @@
 #include <plugins/mongodb/aspect/mongodb.h>
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 
-#include <cstring>
-#include <cstdlib>
-
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
@@ -43,7 +39,7 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-/** @fn const char * MongoDBAspect::mongodb_config_name() const
+/** @fn const std::string & MongoDBAspect::mongodb_config_name() const
  * Get MongoDB configuration name.
  * @return MongoDB path name for the configuration settings from the
  * global configuration. Note that this may return 0 if the default
@@ -67,15 +63,24 @@ namespace fawkes {
  */
 MongoDBAspect::MongoDBAspect(const char *config_name)
 {
-  add_aspect("MongoDBAspect");
-  __config_name = config_name ? strdup(config_name) : 0;
+	add_aspect("MongoDBAspect");
+	mongodb_config_name_ = config_name;
+}
+
+/** Constructor.
+ * Using this constructor will leave the mongodb_client member uninitialized.
+ * The mongodb_connmgr can be used to create connections at a later point in time.
+ */
+MongoDBAspect::MongoDBAspect()
+{
+	add_aspect("MongoDBAspect");
 }
 
 
 /** Virtual empty destructor. */
 MongoDBAspect::~MongoDBAspect()
 {
-  if (__config_name)  free(__config_name);
+	mongodb_config_name_.clear();
 }
 
 
@@ -88,10 +93,10 @@ MongoDBAspect::~MongoDBAspect()
  */
 void
 MongoDBAspect::init_MongoDBAspect(mongo::DBClientBase *mongodb_client,
-				  MongoDBConnCreator *mongodb_connmgr)
+                                  MongoDBConnCreator *mongodb_connmgr)
 {
-  this->mongodb_client  = mongodb_client;
-  this->mongodb_connmgr = mongodb_connmgr;
+	this->mongodb_client  = mongodb_client;
+	this->mongodb_connmgr = mongodb_connmgr;
 }
 
 } // end namespace fawkes

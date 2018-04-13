@@ -34,7 +34,8 @@ using namespace fawkes;
 
 /** Constructor. */
 PointCloudDBRetrieveThread::PointCloudDBRetrieveThread()
-  : Thread("PointCloudDBRetrieveThread", Thread::OPMODE_WAITFORWAKEUP)
+  : Thread("PointCloudDBRetrieveThread", Thread::OPMODE_WAITFORWAKEUP),
+    MongoDBAspect("default")
 {
 }
 

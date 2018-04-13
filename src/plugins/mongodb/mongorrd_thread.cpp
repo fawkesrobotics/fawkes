@@ -43,6 +43,7 @@ using namespace fawkes;
 /** Constructor. */
 MongoRRDThread::MongoRRDThread()
   : Thread("MongoRRDThread", Thread::OPMODE_CONTINUOUS),
+    MongoDBAspect("default"),
     ConfigurationChangeHandler(DB_CONF_PREFIX)
 {
   set_prepfin_conc_loop(true);
