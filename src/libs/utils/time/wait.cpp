@@ -35,7 +35,7 @@ namespace fawkes {
  * This class allows for guaranteed waiting for a specified amout of time. It can
  * either be used to suspend the current thread for at least the given time (static
  * methods) or it can be used to reach a desired minimum loop time. For this instantiate
- * the class and call set_start() at the beginning of the loop and wait() at the end.
+ * the class and call mark_start() at the beginning of the loop and wait() at the end.
  * wait() will then suspend the thread as long as needed to have the desired minimum
  * loop time. The TimeWait utility will use the current clock time. Thus it may wait
  * for a given amount of say simulated time.
