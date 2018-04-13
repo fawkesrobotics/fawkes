@@ -146,9 +146,6 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
               timeline.push(i * 1000);
             }
 
-            // From here on, the index in data does not reflect the
-            // index in obj.data.result since we may have deleted some
-
             let columns = [['__x', ...timeline]];
             let groups = this.group_all ? [[]] : this.groups;
             let types = {};
@@ -172,6 +169,12 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
               for (let d of data) {
                 columns.push([d.name, ...d.values]);
               }
+            }
+
+            // If we only have the x axis, but no actual data, abort
+            if (columns.length == 1) {
+              this.zero_message = "No data available";
+              return;
             }
 
             if (! this.y_axis.tick) {
