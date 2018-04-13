@@ -45,12 +45,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh() });
     this.config.get('/webview/dashboard')
       .subscribe(conf => {
-        this.charts = Object.values(conf['webview']['dashboard']['charts']);
-        this.charts.forEach(c => {
-          if (! ('remove_all_zero' in c)) {
-            c.remove_all_zero = true;
-          }
-        });
+        if ('webview' in conf &&
+            'dashboard' in conf['webview'] &&
+            'charts' in conf['webview']['dashboard'])
+        {
+          this.charts = Object.values(conf['webview']['dashboard']['charts']);
+          this.charts.forEach(c => {
+            if (! ('remove_all_zero' in c)) {
+              c.remove_all_zero = true;
+            }
+          });
+        }
       });
   }
 
