@@ -52,20 +52,22 @@
 )
 
 (defrule skill-action-running
-	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id) (status WAITING))
+	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
+											(action-name ?action-name) (status WAITING))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
 																(action-id ?id) (skill-id ?skill-id))
-	(skill (skill-id ?skill-id) (status S_RUNNING))
+	(skill (id ?skill-id) (status S_RUNNING))
 	=>
 	(printout t "Action " ?action-name " is running" crlf)
 	(modify ?pa (status RUNNING))
 )
 
 (defrule skill-action-final
-	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id) (status WAITING))
+	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
+											(action-name ?action-name) (status RUNNING))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
 																(action-id ?id) (skill-id ?skill-id))
-	?sf <- (skill (skill-id ?skill-id) (status S_FINAL))
+	?sf <- (skill (id ?skill-id) (status S_FINAL))
 	=>
 	(printout t "Execution of " ?action-name " completed successfully" crlf)
 	(modify ?pa (status EXECUTION-SUCCEEDED))
@@ -73,10 +75,11 @@
 )
 
 (defrule skill-action-failed
-	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id) (status WAITING))
+	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
+											(action-name ?action-name) (status RUNNING))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
 																(action-id ?id) (skill-id ?skill-id))
-	?sf <- (skill (skill-id ?skill-id) (status S_FAILED) (error-msg ?error))
+	?sf <- (skill (id ?skill-id) (status S_FAILED) (error-msg ?error))
 	=>
 	(printout warn "Execution of " ?action-name " FAILED (" ?error ")" crlf)
 	(modify ?pa (status EXECUTION-FAILED))
