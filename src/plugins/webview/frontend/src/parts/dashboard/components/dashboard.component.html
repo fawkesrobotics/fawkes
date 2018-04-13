@@ -60,12 +60,16 @@
 										[query]="c.query"
 										[legend_format]="c.legend_format"
 										[y_tick_format]="c.y_tick_format"
+										[y_tick_count]="c.y_tick_count || 4"
+										[y_axis_center]="c.y_axis_center"
 										[remove_all_zero]="c.remove_all_zero">
 				</prom-chart>
 				<prom-chart *ngIf="c.queries"
 										[queries]="c.queries"
 										[legend_formats]="c.legend_formats"
 										[y_tick_format]="c.y_tick_format"
+										[y_tick_count]="c.y_tick_count || 4"
+										[y_axis_center]="c.y_axis_center"
 										[remove_all_zero]="c.remove_all_zero">
 				</prom-chart>
 			</mat-card-content>
