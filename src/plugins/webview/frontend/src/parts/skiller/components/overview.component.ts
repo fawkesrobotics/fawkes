@@ -7,6 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
+import { LockoutService } from '../../../services/lockout/lockout.service';
 import { BehaviorEngineApiService } from '../services/api.service';
 import { SkillCall } from '../models/SkillCall';
 
@@ -28,6 +29,7 @@ export class SkillerOverviewComponent implements OnInit, OnDestroy {
   private backend_subscription = null;
 
   constructor(private api_service: BehaviorEngineApiService,
+              public lockout: LockoutService,
               private backendcfg: BackendConfigurationService)
   {}
 
@@ -175,7 +177,7 @@ export class SkillerOverviewComponent implements OnInit, OnDestroy {
 
   disabled_stop()
   {
-    return !this.skill || this.selected_skill != 'active' ||
+    return this.lockout.enabled || !this.skill || this.selected_skill != 'active' ||
       this.skill.status != 'RUNNING' || this.skill.exclusive_controller != 0;
   }
 

@@ -7,6 +7,7 @@ import { MatTableDataSource, MatSnackBar, MAT_CHECKBOX_CLICK_ACTION } from '@ang
 import { SelectionModel } from '@angular/cdk/collections';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
+import { LockoutService } from '../../../services/lockout/lockout.service';
 import { CardListFilterComponent } from '../../../components/filter/component';
 import { PluginApiService } from '../services/api.service';
 import { Plugin } from '../models/Plugin';
@@ -40,7 +41,8 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
   
   constructor(private snack_bar: MatSnackBar,
               private readonly api_service: PluginApiService,
-              private backendcfg: BackendConfigurationService)
+              private backendcfg: BackendConfigurationService,
+              private lockout: LockoutService)
   {}
 
   ngOnInit() {
@@ -95,6 +97,7 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
 
   plugin_toggle(plugin: Plugin)
   {
+    if (this.lockout.enabled)  return;
     if (this.ops_pending[plugin.name])  return;
 
     let request: PluginOpRequest = {

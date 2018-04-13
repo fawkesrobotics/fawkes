@@ -96,13 +96,15 @@
 			<mat-form-field
 				[hideRequiredMarker]="true" fxFlex="grow">
 				<input #skillstring matInput placeholder="Skill String"
+							 [disabled]="lockout.enabled"
 							 name="skill_string" required ngModel>
 			</mat-form-field>
-			<div fxLayout="column" fxLayoutAlign="center">
-				<button mat-button type="submit" [disabled]="!f.valid ||
-																										 (skill &&
-																										 selected_skill == 'active' &&
-																										 skill.exclusive_controller != 0)"
+			<div fxLayout="column" fxLayoutAlign="center"
+					  [matTooltip]="tooltip_exec()">
+				<button mat-button type="submit"
+								[disabled]="lockout.enabled || !f.valid ||
+														(skill && selected_skill == 'active' &&
+														skill.exclusive_controller != 0)"
 								class="exec-button">
 					Execute
 				</button>
