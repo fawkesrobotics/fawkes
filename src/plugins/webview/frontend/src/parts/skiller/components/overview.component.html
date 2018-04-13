@@ -94,7 +94,8 @@
 	<mat-card-content class="ff-card-content">
 		<form #f="ngForm" (ngSubmit)="exec_skill(skillstring.value)" fxLayout="row">
 			<mat-form-field
-				[hideRequiredMarker]="true" fxFlex="grow">
+				[hideRequiredMarker]="true" fxFlex="grow"
+				[matTooltip]="tooltip_skillstring()">
 				<input #skillstring matInput placeholder="Skill String"
 							 [disabled]="lockout.enabled"
 							 name="skill_string" required ngModel>
