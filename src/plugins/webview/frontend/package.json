@@ -31,6 +31,7 @@
     "core-js": "^2.4.1",
     "hammerjs": "^2.0.8",
     "material-design-icons": "^3.0.1",
+    "ngx-store": "^1.4.1",
     "roboto-fontface": "^0.9.0",
     "rxjs": "^5.5.7",
     "viz.js": "^1.8.1",
