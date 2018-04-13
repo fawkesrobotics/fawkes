@@ -50,3 +50,16 @@
 .ff-nav-item {
   margin-left: 3 * $baseline-grid;
 }
+
+.rw-button {
+		position: absolute;
+		bottom: 4 * $baseline-grid;
+		font-size: $subhead-font-size-base;
+		margin-top: auto;
+		padding-left: $baseline-grid;
+		padding-right: $baseline-grid;
+}
+
+.rw-button-normal {
+		color: #ccc;
+}

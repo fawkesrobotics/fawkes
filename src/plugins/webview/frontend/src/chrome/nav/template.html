@@ -68,5 +68,20 @@
 
     <mat-divider></mat-divider>
 
+		<div fxLayout="column" class="rw-div" fxLayoutAlign="end center">
+			<button mat-raised-button *ngIf="lockout.enabled"
+							class="rw-button"
+							color="warn"
+							(click)="lockout.toggle()">
+				<mat-icon>lock</mat-icon>
+				READ-ONLY
+			</button>
+			<button mat-button *ngIf="! lockout.enabled"
+							class="rw-button rw-button-normal"
+							(click)="lockout.toggle()">
+				<mat-icon>lock_open</mat-icon>
+				Normal
+			</button>
+		</div>
   </mat-drawer>
 </mat-drawer-container>
