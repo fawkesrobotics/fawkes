@@ -15,7 +15,7 @@
 	(not (goal-already-tried))
   (domain-facts-loaded)
 	=>
-	(assert (goal (id TESTGOAL)))
+	(assert (goal (id (sym-cat TESTGOAL- (gensym*))) (class TESTGOAL)))
 	; This is just to make sure we formulate the goal only once.
 	; In an actual domain this would be more sophisticated.
 	(assert (goal-already-tried))
@@ -26,7 +26,7 @@
 ; We can choose one or more goals for expansion, e.g., calling
 ; a planner to determine the required steps.
 (defrule goal-reasoner-select
-	?g <- (goal (id ?goal-id) (mode FORMULATED))
+	?g <- (goal (id ?goal-id) (class TESTGOAL) (mode FORMULATED))
 	=>
 	(modify ?g (mode SELECTED))
 	(assert (goal-meta (goal-id ?goal-id)))
@@ -37,7 +37,7 @@
 ; different planners. This step would allow to commit one out of these
 ; plans.
 (defrule goal-reasoner-commit
-	?g <- (goal (mode EXPANDED))
+	?g <- (goal (class TESTGOAL) (mode EXPANDED))
 	=>
 	(modify ?g (mode COMMITTED))
 )
@@ -48,14 +48,14 @@
 ; orders. It is then up to action selection and execution to determine
 ; what to do when.
 (defrule goal-reasoner-dispatch
-	?g <- (goal (mode COMMITTED))
+	?g <- (goal (class TESTGOAL) (mode COMMITTED))
 	=>
 	(modify ?g (mode DISPATCHED))
 )
 
 ; #  Goal Monitoring
 (defrule goal-reasoner-evaluate-completed
-	?g <- (goal (id ?goal-id) (mode FINISHED) (outcome COMPLETED))
+	?g <- (goal (id ?goal-id) (class TESTGOAL) (mode FINISHED) (outcome COMPLETED))
 	?gm <- (goal-meta (goal-id ?goal-id))
 	=>
 	(printout t "Goal '" ?goal-id "' has been completed, evaluating" crlf)
@@ -63,7 +63,7 @@
 )
 
 (defrule goal-reasoner-evaluate-failed
-	?g <- (goal (id ?goal-id) (mode FINISHED) (outcome FAILED))
+	?g <- (goal (id ?goal-id) (class TESTGOAL) (mode FINISHED) (outcome FAILED))
 	?gm <- (goal-meta (goal-id ?goal-id) (num-tries ?num-tries))
 	=>
 	(printout t "Goal '" ?goal-id "' has failed, evaluating" crlf)
@@ -74,7 +74,7 @@
 
 ; # Goal Clean up
 (defrule goal-reasoner-cleanup-completed
-	?g <- (goal (id ?goal-id) (mode EVALUATED) (outcome COMPLETED))
+	?g <- (goal (id ?goal-id) (class TESTGOAL) (mode EVALUATED) (outcome COMPLETED))
 	?gm <- (goal-meta (goal-id ?goal-id) (num-tries ?num-tries))
 	=>
 	(printout t "Goal '" ?goal-id "' has been Evaluated, cleaning up" crlf)
@@ -82,13 +82,12 @@
 		(delayed-do-for-all-facts ((?a plan-action)) (eq ?a:plan-id ?p:id)
 			(retract ?a)
 		)
-		(retract ?p)
+		(retract ?g ?gm)
 	)
-	(retract ?g ?gm)
 )
 
 (defrule goal-reasoner-cleanup-failed
-  ?g <- (goal (id ?goal-id) (mode EVALUATED) (outcome FAILED))
+  ?g <- (goal (id ?goal-id) (class TESTGOAL) (mode EVALUATED) (outcome FAILED))
   ?gm <- (goal-meta (goal-id ?goal-id) (num-tries ?num-tries))
   =>
   (printout t "Goal '" ?goal-id "' has been Evaluated, cleaning up" crlf)

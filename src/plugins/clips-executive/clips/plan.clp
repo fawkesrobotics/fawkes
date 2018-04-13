@@ -117,7 +117,7 @@
 	(multislot param-names)
 	(multislot param-values)
 	(slot duration (type FLOAT))
-	(slot dispatch-time (type FLOAT))
+	(slot dispatch-time (type FLOAT) (default -1.0))
 	(slot status (type SYMBOL) (allowed-values FORMULATED PENDING WAITING RUNNING EXECUTION-SUCCEEDED SENSED-EFFECTS-WAIT SENSED-EFFECTS-HOLD EFFECTS-APPLIED FINAL EXECUTION-FAILED FAILED))
   (slot executable (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
