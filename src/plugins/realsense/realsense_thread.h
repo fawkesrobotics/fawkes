@@ -35,7 +35,11 @@
 #include <aspect/pointcloud.h>
 #include <aspect/clock.h>
 
+#ifdef HAVE_REALSENSE1
+#include <librealsense1/rs.hpp>
+#else
 #include <librealsense/rs.hpp>
+#endif
 
 #include <string>
 
