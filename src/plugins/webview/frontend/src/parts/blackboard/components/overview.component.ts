@@ -5,6 +5,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
+import { SessionStorage } from 'ngx-store';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { BlackboardApiService } from '../services/api.service';
@@ -21,7 +22,7 @@ export class BlackboardOverviewComponent implements OnInit, OnDestroy {
 
   loading = false;
   auto_refresh_subscription = null;
-  selected_interfaces = [];
+  @SessionStorage() selected_interfaces = [];
   interfaces = null;
   zero_message = "No graph has been retrieved";
 
@@ -36,7 +37,7 @@ export class BlackboardOverviewComponent implements OnInit, OnDestroy {
   {}
 
   ngOnInit() {
-    this.refresh();
+    this.refresh(true);
     this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => {
       this.refresh(true);
     });

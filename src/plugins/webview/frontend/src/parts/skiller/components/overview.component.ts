@@ -5,6 +5,7 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
+import { SessionStorage } from 'ngx-store';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { LockoutService } from '../../../services/lockout/lockout.service';
@@ -22,7 +23,7 @@ export class SkillerOverviewComponent implements OnInit, OnDestroy {
 
   loading = false;
   auto_refresh_subscription = null;
-  selected_skill = "active";
+  @SessionStorage() selected_skill = "active";
   skill = null;
   skills = null;
   zero_message = "No graph has been retrieved";
