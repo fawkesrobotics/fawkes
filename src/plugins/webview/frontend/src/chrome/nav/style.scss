@@ -63,3 +63,19 @@
 .rw-button-normal {
 		color: #ccc;
 }
+
+.rw-fab-button {
+		position: fixed;
+		bottom: 0;
+		left: 4 * $baseline-grid;
+		opacity: 0;
+		z-index: 999;
+		animation: fadein 400ms;
+		animation-delay: 100ms;
+		animation-fill-mode: forwards;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

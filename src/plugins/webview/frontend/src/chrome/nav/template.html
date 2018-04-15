@@ -5,7 +5,8 @@
 -->
 
 <mat-drawer-container class="ff-nav">
-  <mat-drawer class="ff-nav"
+  <mat-drawer #nav_drawer
+							class="ff-nav"
               mode="side">
     <div class="ff-nav-group">
 			<!--
@@ -85,3 +86,16 @@
 		</div>
   </mat-drawer>
 </mat-drawer-container>
+<div class="rw-fab-button" *ngIf="!nav_drawer.opened">
+	<button mat-fab *ngIf="lockout.enabled"
+					class="rw-button"
+					color="warn"
+					(click)="lockout.toggle()">
+		<mat-icon>lock</mat-icon>
+	</button>
+	<button mat-fab *ngIf="!lockout.enabled"
+					class="rw-button"
+					(click)="lockout.toggle()">
+		<mat-icon>lock_open</mat-icon>
+	</button>
+</div>
