@@ -55,4 +55,5 @@ perception: mongodb
 navgraph-generator: navgraph amcl
 openprs-agent: openprs
 laser-filter: amcl
+stn-generator: pddl-planner
 
