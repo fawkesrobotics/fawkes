@@ -81,6 +81,8 @@ class ClipsRobotMemoryThread
   void          clips_robotmemory_update(std::string collection, void *bson, CLIPS::Value query);
   void          clips_robotmemory_replace(std::string collection, void *bson, CLIPS::Value query);
   void          clips_robotmemory_insert(std::string collection, void *bson);
+  void          clips_robotmemory_create_index(std::string collection, void *bson);
+  void          clips_robotmemory_create_unique_index(std::string collection, void *bson);
   void          robotmemory_update(std::string &collection, mongo::BSONObj obj,
                                CLIPS::Value &query, bool upsert);
   CLIPS::Value  clips_robotmemory_query_sort(std::string collection, void *bson, void *bson_sort);

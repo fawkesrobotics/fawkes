@@ -100,6 +100,8 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
   clips->add_function("bson-get", sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get)));
   clips->add_function("bson-get-array", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_array)));
   clips->add_function("bson-get-time", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_time)));
+  clips->add_function("robmem-create-index", sigc::slot<void, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_create_index)));
+  clips->add_function("robmem-create-unique-index", sigc::slot<void, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_create_unique_index)));
 
   clips->build("(deffacts have-feature-mongodb (have-feature MongoDB))");
 
@@ -341,6 +343,30 @@ ClipsRobotMemoryThread::clips_robotmemory_insert(std::string collection, void *b
     robot_memory->insert(b->asTempObj(), collection);
   } catch (mongo::DBException &e) {
     logger->log_warn("MongoDB", "Insert failed: %s", e.what());
+  }
+}
+
+void
+ClipsRobotMemoryThread::clips_robotmemory_create_index(std::string collection, void *bson)
+{
+  mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+
+  try {
+	  robot_memory->create_index(b->asTempObj(), collection, /* unique */ false);
+  } catch (mongo::DBException &e) {
+    logger->log_warn("MongoDB", "Creating index failed: %s", e.what());
+  }
+}
+
+void
+ClipsRobotMemoryThread::clips_robotmemory_create_unique_index(std::string collection, void *bson)
+{
+  mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+
+  try {
+	  robot_memory->create_index(b->asTempObj(), collection, /* unique */ true);
+  } catch (mongo::DBException &e) {
+    logger->log_warn("MongoDB", "Creating unique index failed: %s", e.what());
   }
 }
 
