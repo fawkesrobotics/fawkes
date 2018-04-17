@@ -61,7 +61,7 @@ using namespace fawkes;
 LaserLinesThread::LaserLinesThread()
   : Thread("LaserLinesThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
-    TransformAspect(TransformAspect::BOTH, "laser_lines")
+    TransformAspect(TransformAspect::BOTH_DEFER_PUBLISHER)
 {
 }
 
@@ -445,7 +445,7 @@ LaserLinesThread::set_interface(unsigned int idx,
                            fawkes::LaserLineInterface *iface,
                            bool moving_average,
                            const TrackedLineInfo &tinfo,
-                           const std::string &frame_id) const
+                           const std::string &frame_id)
 {
   const LineInfo& info = moving_average ? tinfo.smooth : tinfo.raw;
 
@@ -498,8 +498,18 @@ LaserLinesThread::set_interface(unsigned int idx,
 	                     tf::Vector3(info.end_point_2[0], info.end_point_2[1], info.end_point_2[2]));
 	    
 	    try {
-		    tf_publisher->send_transform(t1, now, frame_id, frame_name_1);
-		    tf_publisher->send_transform(t2, now, frame_id, frame_name_2);
+              auto tf_it_1 = tf_publishers.find(frame_name_1);
+              if (tf_it_1 == tf_publishers.end()) {
+                tf_add_publisher(frame_name_1.c_str());
+                tf_it_1 = tf_publishers.find(frame_name_1);
+              }
+              auto tf_it_2 = tf_publishers.find(frame_name_2);
+              if (tf_it_2 == tf_publishers.end()) {
+                tf_add_publisher(frame_name_2.c_str());
+                tf_it_2 = tf_publishers.find(frame_name_2);
+              }
+              tf_it_1->second->send_transform(t1, now, frame_id, frame_name_1);
+              tf_it_2->second->send_transform(t2, now, frame_id, frame_name_2);
 	    } catch (Exception &e) {
 		    logger->log_warn(name(), "Failed to publish laser_line_%u_* transforms, exception follows", idx+1);
 		    logger->log_warn(name(), e);
