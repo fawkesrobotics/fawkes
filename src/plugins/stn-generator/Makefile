@@ -17,6 +17,7 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/pddl_parser/pddl_parser.mk
+include $(FAWKES_BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 LIBS_stn_generator = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface fawkespddl_parser \
@@ -26,18 +27,25 @@ OBJS_stn_generator = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$
 
 OBJS_all = $(OBJS_stn-generator)
 
-ifeq ($(HAVE_PDDL_PARSER),1)
+ifeq ($(HAVE_PDDL_PARSER)$(HAVE_MONGODB),11)
   PLUGINS_all = $(PLUGINDIR)/stn-generator.$(SOEXT)
 else
-  WARN_TARGETS += warning_pddl_parser
+  ifneq ($(HAVE_PDDL_PARSER),1)
+    WARN_TARGETS += warning_pddl_parser
+  endif
+  ifneq ($(HAVE_MONGODB),1)
+    WARN_TARGETS += warning_mongodb
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_pddl_parser
+.PHONY: warning_pddl_parser warning_mongodb
 warning_pddl_parser:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting STN plugin$(TNORMAL) (pddl_parser not available)"
+warning_mongodb:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting STN plugin$(TNORMAL) (mongo-cxx-driver not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
