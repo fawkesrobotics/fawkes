@@ -253,6 +253,37 @@ int RobotMemory::insert(mongo::BSONObj obj, std::string collection)
   return 1;
 }
 
+/** Create an index on a collection.
+ * @param obj The keys document as BSONObj
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @param unique true to create unique index
+ * @return 1: Success 0: Error
+ */
+int
+RobotMemory::create_index(mongo::BSONObj obj, std::string collection, bool unique)
+{
+  check_collection_name(collection);
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
+
+  log_deb(std::string("Creating index "+ obj.toString() + " on collection " + collection));
+
+  //lock (mongo_client not thread safe)
+  MutexLocker lock(mutex_);
+
+  //actually execute insert
+  try{
+	  mongodb_client->createIndex(collection, mongo::IndexSpec().addKeys(obj).unique(unique));
+  } catch (DBException &e) {
+	  std::string error = "Error when creating index " + obj.toString()
+		  + "\n Exception: " + e.toString();
+	  log_deb(error, "error");
+	  return 0;
+  }
+  //return success
+  return 1;
+}
+
+
 /**
  * Inserts all document of a vector into the robot memory
  * @param v_obj The vector of BSONObj document

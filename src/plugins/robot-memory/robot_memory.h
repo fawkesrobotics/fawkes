@@ -68,6 +68,7 @@ class RobotMemory
     int clear_memory();
     int restore_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
     int dump_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
+    int create_index(mongo::BSONObj keys, std::string collection = "", bool unique = false);
 
     /**
      * Register a trigger to be notified when the robot memory is updated and the updated document matches the query
