@@ -76,7 +76,7 @@
 
 (defrule skill-action-failed
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-											(action-name ?action-name) (status RUNNING))
+											(action-name ?action-name) (status WAITING|RUNNING))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
 																(action-id ?id) (skill-id ?skill-id))
 	?sf <- (skill (id ?skill-id) (status S_FAILED) (error-msg ?error))
