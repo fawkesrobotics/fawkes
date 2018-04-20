@@ -269,6 +269,8 @@
   (plan-action
     (status FORMULATED|PENDING|WAITING)
     (action-name ?op)
+    (goal-id ?g)
+    (plan-id ?p)	
     (param-names $?action-param-names)
     (id ?action-id)
     (param-values $?action-values& :
