@@ -402,7 +402,10 @@ MongoDBReplicaSetConfig::rs_monitor(const mongo::BSONObj &status_reply)
 				while(members_it.more()) {
 					mongo::BSONObj m = members_it.next().Obj();
 					std::string host = m["host"].str();
-					if (unresponsive.find(host) == unresponsive.end()) {
+					if (hosts_.find(host) == hosts_.end()) {
+					logger->log_warn(name(), "Removing '%s', "
+					  "not part of the replica set configuration", host.c_str());
+					} else if (unresponsive.find(host) == unresponsive.end()) {
 						// it's not unresponsive, add
 						logger->log_warn(name(), "Keeping RS member '%s'", host.c_str());
 						members_arr.append(m);
