@@ -67,10 +67,12 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const {
   stringstream namestream;
   namestream << parent_ << sub_counter_;
   string name = namestream.str();
-  if (p.function == "and" || p.function == "not") {
+  if (p.function == "and" || p.function == "not" || p.function == "or") {
     string type;
     if (p.function == "and") {
       type = "conjunction";
+    } else if (p.function == "or") {
+      type = "disjunction";
     } else if (p.function == "not") {
       type = "negation";
     }
