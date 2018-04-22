@@ -40,37 +40,6 @@
 #include <yaml-cpp/traits.h>
 #include <limits>
 
-#ifndef HAVE_YAMLCPP_0_5
-#  ifdef HAVE_YAMLCPP_ATLEAST_0_3
-// older versions of yaml-cpp had these functions in the
-// YAML, rather than in the YAML::conversion namespace.
-namespace YAML {
-  namespace conversion {
-    using YAML::IsInfinity;
-    using YAML::IsNegativeInfinity;
-    using YAML::IsNaN;
-  }
-}
-#  else
-// older versions do not have this at all
-namespace YAML {
-  namespace conversion {
-    inline bool IsInfinity(const std::string& input) {
-      return input == ".inf" || input == ".Inf" || input == ".INF" || input == "+.inf" || input == "+.Inf" || input == "+.INF";
-    }
-
-    inline bool IsNegativeInfinity(const std::string& input) {
-      return input == "-.inf" || input == "-.Inf" || input == "-.INF";
-    }
-
-    inline bool IsNaN(const std::string& input) {
-      return input == ".nan" || input == ".NaN" || input == ".NAN";
-    }
-  }
-}
-#  endif
-#endif
-
 namespace fawkes {
 
 /// @cond INTERNALS
@@ -243,11 +212,7 @@ class YamlConfigurationNode
   YamlConfigurationNode(std::string name, const YAML::Node &node)
     : name_(name), type_(Type::UNKNOWN), is_default_(false)
   {
-#ifdef HAVE_YAMLCPP_0_5
     scalar_value_ = node.Scalar();
-#else
-    node.GetScalar(scalar_value_);
-#endif
     switch (node.Type()) {
     case YAML::NodeType::Null:      type_ = Type::NONE; break;
     case YAML::NodeType::Scalar:    type_ = determine_scalar_type(); break;
@@ -803,18 +768,14 @@ class YamlConfigurationNode
   void set_sequence(const YAML::Node &n)
   {
     if (n.Type() != YAML::NodeType::Sequence) {
-      throw Exception("Cannot initialize list from non-sequence");
+	    throw Exception("Cannot initialize list from non-sequence (line %i, column %i)",
+	                    n.Mark().line, n.Mark().column);
     }
     type_ = Type::SEQUENCE;
     list_values_.resize(n.size());
     unsigned int i = 0;
-#ifdef HAVE_YAMLCPP_0_5
     for (YAML::const_iterator it = n.begin(); it != n.end(); ++it) {
-      list_values_[i++] = it->as<std::string>();
-#else
-    for (YAML::Iterator it = n.begin(); it != n.end(); ++it) {
-      *it >> list_values_[i++];
-#endif
+	    list_values_[i++] = it->as<std::string>();
     }
   }
 

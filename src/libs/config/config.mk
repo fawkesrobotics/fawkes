@@ -15,7 +15,7 @@
 
 ifneq ($(PKGCONFIG),)
   HAVE_SQLITE    = $(if $(shell $(PKGCONFIG) --exists 'sqlite3'; echo $${?/1/}),1,0)
-  HAVE_YAMLCPP   = $(if $(shell $(PKGCONFIG) --exists 'yaml-cpp'; echo $${?/1/}),1,0)
+  HAVE_YAMLCPP   = $(if $(shell $(PKGCONFIG) --exists 'yaml-cpp' --atleast-version='0.5'; echo $${?/1/}),1,0)
 endif
 ifeq ($(HAVE_SQLITE),1)
   CFLAGS_SQLITE  = -DHAVE_SQLITE $(shell $(PKGCONFIG) --cflags 'sqlite3')
@@ -24,14 +24,5 @@ endif
 ifeq ($(HAVE_YAMLCPP),1)
   CFLAGS_YAMLCPP  = -DHAVE_YAMLCPP $(shell $(PKGCONFIG) --cflags 'yaml-cpp')
   LDFLAGS_YAMLCPP = $(shell $(PKGCONFIG) --libs 'yaml-cpp')
-
-  HAVE_YAMLCPP_0_3 = $(if $(shell $(PKGCONFIG) --atleast-version='0.3' 'yaml-cpp'; echo $${?/1/}),1,0)
-  ifeq ($(HAVE_YAMLCPP_0_3),1)
-    CFLAGS_YAMLCPP += -DHAVE_YAMLCPP_ATLEAST_0_3
-  endif
-  HAVE_YAMLCPP_0_5 = $(if $(shell $(PKGCONFIG) --atleast-version='0.5' 'yaml-cpp'; echo $${?/1/}),1,0)
-  ifeq ($(HAVE_YAMLCPP_0_5),1)
-    CFLAGS_YAMLCPP += -DHAVE_YAMLCPP_0_5
-  endif
 endif
 
