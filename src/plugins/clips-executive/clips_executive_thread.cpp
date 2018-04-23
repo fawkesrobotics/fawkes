@@ -132,7 +132,21 @@ ClipsExecutiveThread::init()
 	clips->refresh_agenda();
 	clips->run();
 
-	started_ = false;
+	// Verify that initialization did not fail (yet)
+	{
+		CLIPS::Fact::pointer fact = clips->get_facts();
+		while (fact) {
+			CLIPS::Template::pointer tmpl = fact->get_template();
+			if (tmpl->name() == "executive-init-stage") {
+				CLIPS::Values v = fact->slot_value("");
+				if (v.size() > 0 && v[0].as_string() == "FAILED") {
+					throw Exception("CLIPS Executive initialization failed");
+				}
+			}
+
+			fact = fact->next();
+		}
+	}
 }
 
 
@@ -149,11 +163,6 @@ void
 ClipsExecutiveThread::loop()
 {
 	MutexLocker lock(clips.objmutex_ptr());
-
-	if (! started_) {
-		clips->assert_fact("(start)");
-		started_ = true;
-	}
 
 	// might be used to trigger loop events
 	// must be cleaned up each loop from within the CLIPS code
