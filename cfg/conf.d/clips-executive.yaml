@@ -5,34 +5,22 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/clips-executive
 ---
 clips-executive:
   # If true, will enable watching of facts and rules
-  clips-debug: true
+  debug:
+    enable: true
 
-  # If CLIPS debugging is enabled, certain rules and facts can be excluded
-  # from watching, e.g. if they are showing up at too high frequencies or
-  # are not of interest.
-  unwatch-facts: ["time"]
-  unwatch-rules: ["time-retract"]
+    # debug level is a number of: 0 ~ none, 1 ~ minimal, 2 ~ more, 3 ~ maximum
+    level: 3
 
-  # Currently not working in clips-executive!
-  #
-  # If true, simulate skills (assuming they always succeed) instead of
-  # actually executing the skills. The time indicates how long it should
-  # take to declare success on skill execution. Note that this cannot
-  # simulate side effects, like a called component writing to an interface
-  #skill-sim: true
-  #skill-sim-time: 2.0
-
-  # debug level is a number of: 0 ~ none, 1 ~ minimal, 2 ~ more, 3 ~ maximum
-  debug-level: 3
+    # If CLIPS debugging is enabled, certain rules and facts can be excluded
+    # from watching, e.g. if they are showing up at too high frequencies or
+    # are not of interest.
+    unwatch-facts: ["time"]
+    unwatch-rules: ["time-retract"]
 
   # automatically pre-require redefine-warning feature? Enabling
   # this in the plugin instead of in the initial code (init.clp) is
   # beneficial because it already catches errors in said file.
   request-redefine-warning-feature: true
-
-  # Automatically assert the (start) fact after successful initialization,
-  # otherwise wait until the an enable message has been received
-  # auto-start: true
 
   # If set to true, will trigger the assertion of a (time (now)) fact in
   # each loop. This can be used to trigger loop events in CLIPS.
@@ -49,22 +37,74 @@ clips-executive:
   # Agent name. On startup the clips-agent will try to resolve a file named
   # <agent name>.clp. It must be in the CLIPS path directories.
   spec: test
-  use_pddl: false
-  sync_domain_facts: false
 
   specs:
     test:
-      domain: test-scenario/test-domain.clp
-      worldmodel: test-scenario/worldmodel-facts.clp
-      goal-reasoner: test-scenario/goal-reasoner.clp
-      goal-expander: test-scenario/fixed-sequence.clp
-      action-selection: test-scenario/action-selection.clp
-      #macro-expansion: test-scenario/action-selection.clp
-      action-execution: ["skills-actions.clp", "test-scenario/print-action.clp"]
-      execution-monitoring: test-scenario/execution-monitoring.clp
-      state-estimation: test-scenario/state-estimation.clp
 
-      # Map plan actions to skill strings.
+      # The following configures CX initialization.
+      # Initialization is organized in three stages:
+      # 1. Basic CLIPS and feature intialization
+      # 2. Domain-independent CX initialization
+      # 3. Domain-specific CX initialization
+      # The stages and the steps within the stages run strictly
+      # ordered. The next stage or step is not executed before the
+      # previous one completes.
+      init:
+        # Basic CLIPS and feature initialization
+        # The first stage is executed in an (almost) bare CLIPS
+        # environment. CX-specific parts such as the domain or world
+        # model have not been loaded, yet.
+        # Use this to request features and load files related to such
+        # features or performing other initialization duties.
+        # In this stage, elements are assumed to reference Fawkes CLIPS
+        # features by default, i.e., an error is reported if a requested
+        # feature is not available  at the time of initialization.
+        # Features will be requested and only after all have been loaded
+        # initialization will progress to stage-2.
+        # To override this for some entries, set "feature-request:
+        # false" for the respective list elements.
+        stage-1:
+          - name: blackboard
+          - name: pddl-parser
+          #- name: robot_memory
+          #- name: pddl-planner
+          #  feature-request: false
+          #  files: ["pddl-init.clp"]
+          - name: navgraph
+
+        # stage-2 is domain-independent CX initialization
+        # It contains a set of fixed items loaded. Custom extensions may
+        # be loaded in this stage. They are loaded *after* the defaults.
+
+        # Domain-specific CX initialization.
+        # In the third stage load domain-specific files such as domain
+        # representations, world model bits (mode of synchronization),
+        # goal reasoner and expander, and action execution machinery.
+        # At this point all features requested in stage-1 have been
+        # provided and the CX domain-independent initialization is
+        # complete. Files are loaded in the order given, account for
+        # dependencies among the files.
+        # Each element of this stage must consist of a name and one or
+        # more files to load.
+        stage-3:
+          - name: domain
+            file: test-scenario/test-domain.clp
+          - name: state-estimation
+            file: test-scenario/state-estimation.clp
+          - name: worldmodel
+            files: [test-scenario/worldmodel-facts.clp]
+          - name: goal-reasoner
+            file: test-scenario/goal-reasoner.clp
+          - name: goal-expander
+            file: test-scenario/fixed-sequence.clp
+          - name: action-selection
+            file: test-scenario/action-selection.clp
+          - name: action-execution
+            files: [skills-actions.clp, test-scenario/print-action.clp]
+          - name: execution-monitoring
+            file: test-scenario/execution-monitoring.clp
+
+      # Map plan actions to skill strings, used by skill action execution
       action-mapping:
         say: say{text=?(text)s, wait=true}
         say-hello: say{text="Hello ?(name)y", wait=true}
