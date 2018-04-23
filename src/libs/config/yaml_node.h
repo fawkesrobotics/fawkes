@@ -3,8 +3,7 @@
  *  yaml_node.h - Utility class for internal YAML config handling
  *
  *  Created: Thu Aug 09 14:08:18 2012
- *  Copyright  2006-2012  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -197,7 +196,7 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 {
  public:
 	struct Type {
-		enum value { NONE, UINT32, INT32, FLOAT, BOOL, STRING, MAP, SEQUENCE, UNKNOWN };
+		enum value { NONE, UINT32, INT32, FLOAT, BOOL, STRING, MAP, SEQUENCE, SEQUENCE_MAP, UNKNOWN };
 		static const char * to_string(value v) {
 			switch (v) {
 			case NONE:     return "NONE";
@@ -208,6 +207,7 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 			case STRING:   return "string";
 			case SEQUENCE: return "SEQUENCE";
 			case MAP:      return "MAP";
+			case SEQUENCE_MAP: return "SEQUENCE_MAP";
 			default:       return "UNKNOWN";
 			}
 		}
@@ -259,7 +259,9 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 	}
 
 	void add_child(std::string &p, std::shared_ptr<YamlConfigurationNode> n) {
-		type_ = Type::MAP;
+		if (type_ != Type::MAP && type_ != Type::SEQUENCE_MAP) {
+			type_ = Type::MAP;
+		}
 		children_[p] = n;
 	}
 
@@ -446,6 +448,15 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 			} else {
 				std::vector<std::string> empty;
 				add_to->set_list(empty);
+			}
+		} else if (add_to->get_type() == Type::SEQUENCE_MAP) {
+			if (n->get_type() != Type::SEQUENCE_MAP) {
+				throw Exception("YamlConfig: cannot overwrite sequence map value %s with non-sequence-map",
+				                add_to->name().c_str());
+			}
+			add_to->children_.clear();
+			for (auto i = n->begin(); i != n->end(); ++i) {
+				*add_to += i->second;
 			}
 		} else {
 			for (auto i = n->begin(); i != n->end(); ++i) {
@@ -778,6 +789,12 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 				unsigned int i = 0;
 				for (YAML::const_iterator it = n.begin(); it != n.end(); ++it) {
 					list_values_[i++] = it->as<std::string>();
+				}
+			} else if (n.begin()->Type() == YAML::NodeType::Map) {
+				type_ = Type::SEQUENCE_MAP;
+				for (size_t i = 0; i < n.size(); ++i) {
+					std::string key{std::to_string(i)};
+					add_child(key, YamlConfigurationNode::create(n[i], key));
 				}
 			} else {
 				throw Exception("Sequence neither of type scalar nor map (line %i, column %i)",
