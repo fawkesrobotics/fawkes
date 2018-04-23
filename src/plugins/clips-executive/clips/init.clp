@@ -3,209 +3,248 @@
 ;  init.clp - CLIPS executive
 ;
 ;  Created: Tue Sep 19 16:49:42 2017
-;  Copyright  2012-2017  Tim Niemueller [www.niemueller.de]
+;  Copyright  2012-2018  Tim Niemueller [www.niemueller.de]
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
 (defglobal
   ?*CONFIG_PREFIX* = "/clips-executive"
+	?*INIT-STAGES* = (create$ STAGE-1 STAGE-2 STAGE-3)
+	?*CX-FILES* = (create$ "plan.clp" "domain.clp" "worldmodel.clp" "wm-domain-sync.clp"
+	                       "wm-config.clp" "blackboard-init.clp" "BATCH|skills.clp")
+)
+
+(deftemplate executive-init-request
+	(slot stage (type SYMBOL))
+	(slot order (type INTEGER))
+	(slot name)
+	(slot feature)
+	(multislot files (type STRING))
+	(slot state (type SYMBOL) (allowed-values PENDING FEATURE-REQUESTED FEATURE-DONE COMPLETED ERROR))
+	(multislot error-msgs (type STRING))
 )
 
 (defrule executive-load-config
+  (declare (salience ?*SALIENCE-INIT*))
   (executive-init)
   =>
   (config-load ?*CONFIG_PREFIX*)
 )
 
-; (defrule executive-load-executive
-;   (executive-init)
-;   (confval (path "/clips-executive/spec") (type STRING) (value ?v))
-;   =>
-;   (printout t "Loading executive spec '" ?v "'" crlf)
-;   (bind ?executive-file (path-resolve (str-cat ?v ".clp")))
-;   (if ?executive-file
-;     then (batch* ?executive-file)
-;     else (printout logerror "Cannot find executive spec " ?v crlf))
-; )
+(deffunction cx-debug-unwatch-facts ($?templates)
+	(bind ?deftemplates (get-deftemplate-list))
+	(printout debug "Unwatching fact templates " ?templates crlf) 
+	(foreach ?v ?templates
+		(bind ?v-sym (sym-cat ?v))
+		(if (member$ ?v-sym ?deftemplates)
+		 then (unwatch facts ?v-sym)
+		 else (printout warn "Cannot unwatch " ?v " (deftemplate not defined)" crlf)
+		 )
+	)
+)
+
+(deffunction cx-debug-unwatch-rules ($?rules)
+	(bind ?defrules (get-defrule-list))
+	(printout debug "Unwatching rules " ?rules crlf) 
+	(foreach ?v ?rules
+		(bind ?v-sym (sym-cat ?v))
+		(if (member$ ?v-sym ?defrules)
+		 then (unwatch rules ?v-sym)
+		 else (printout warn "Cannot unwatch " ?v " (defrule not defined)" crlf)
+		)
+	)
+)
 
 (defrule executive-enable-debug
   (declare (salience ?*SALIENCE-INIT*))
   (executive-init)
-  (confval (path "/clips-executive/clips-debug") (type BOOL) (value TRUE))
+  (confval (path "/clips-executive/debug/enable") (type BOOL) (value TRUE))
+  (confval (path "/clips-executive/spec") (type STRING) (value ?spec))
   =>
   (printout t "CLIPS debugging enabled, watching facts and rules" crlf)
   (watch facts)
   (watch rules)
   ;(dribble-on "trace.txt")
-)
+	(do-for-fact ((?c confval)) (and (eq ?c:path "/clips-executive/debug/level") (eq ?c:type UINT))
+		(printout debug "Setting debug level to " ?c:value " (was " ?*DEBUG* ")" crlf)
+		(debug-set-level ?c:value)
+	)
 
-(defrule executive-debug-level
-  (declare (salience ?*SALIENCE-INIT*))
-  (executive-init)
-  (confval (path "/clips-executive/debug-level") (type UINT) (value ?v))
-  =>
-  (printout t "Setting debug level to " ?v " (was " ?*DEBUG* ")" crlf)
-  (debug-set-level ?v)
-)
-
-(defrule executive-silence-debug-facts
-  (declare (salience ?*SALIENCE-INIT-LATE*))
-  (executive-init)
-  (confval (path "/clips-executive/clips-debug") (type BOOL) (value TRUE))
-  (confval (path "/clips-executive/unwatch-facts") (type STRING) (is-list TRUE) (list-value $?lv))
-  =>
-  (printout t "Disabling watching of the following facts: " ?lv crlf)
-  (bind ?deftemplates (get-deftemplate-list))
-  (foreach ?v ?lv
-    (bind ?v-sym (sym-cat ?v))
-    (if (member$ ?v-sym ?deftemplates)
-     then (unwatch facts ?v-sym)
-     else (printout warn "Cannot unwatch " ?v " (deftemplate not defined)" crlf)
-    )
+	(do-for-fact ((?c confval)) (and (eq ?c:path "/clips-executive/debug/unwatch-facts")
+																	 (eq ?c:type STRING) ?c:is-list)
+	 (cx-debug-unwatch-facts ?c:list-value)
+  )
+	(do-for-fact ((?c confval)) (and (eq ?c:path "/clips-executive/debug/unwatch-rules")
+																	 (eq ?c:type STRING) ?c:is-list)
+	 (cx-debug-unwatch-rules ?c:list-value)
   )
 )
 
-(defrule executive-silence-debug-rules
-  (declare (salience ?*SALIENCE-INIT-LATE*))
-  (executive-init)
-  (confval (path "/clips-executive/clips-debug") (type BOOL) (value TRUE))
-  (confval (path "/clips-executive/unwatch-rules") (type STRING) (is-list TRUE) (list-value $?lv))
-  =>
-  (printout t "Disabling watching of the following rules: " ?lv crlf)
-  (bind ?defrules (get-defrule-list))
-  (foreach ?v ?lv
-    (bind ?v-sym (sym-cat ?v))
-    (if (member$ ?v-sym ?defrules)
-     then (unwatch rules ?v-sym)
-     else (printout warn "Cannot unwatch " ?v " (defrule not defined)" crlf)
-    )
-  )
+(deffunction cx-init-indexes (?spec ?stage)
+	(bind ?rv (create$))
+	(do-for-all-facts ((?c confval)) (str-prefix (str-cat "/clips-executive/specs/" ?spec "/init/" ?stage "/")
+																							 ?c:path)
+		(bind ?path-elements (str-split ?c:path "/"))
+		(bind ?idx (nth$ 6 ?path-elements))
+		(if (not (member$ ?idx ?rv)) then	(bind ?rv (append$ ?rv ?idx)))
+	)
+	(return ?rv)
 )
 
-(defrule executive-init-stage1
-	(executive-init)
-	=>
-  (printout t "PDDL feature" crlf)
-  (ff-feature-request "pddl-parser")
-  (printout t "Blackboard feature and skill exec init" crlf)
-	(ff-feature-request "blackboard")
-)
-
-(defrule executive-conditional-navgraph-init
-  (executive-init)
-  (confval (path "/clips-executive/use_navgraph") (type BOOL) (value TRUE))
-  =>
-  (printout t "Loading navgraph feature" crlf)
-  (ff-feature-request "navgraph")
-)
-
-(defrule executive-conditional-robot-memory-init
-  "Load robot-memory feature required for PDDL."
-  (executive-init)
-  (confval (path "/clips-executive/use_pddl") (type BOOL) (value TRUE))
-  =>
-  (printout t "Robot Memory feature" crlf)
-  (ff-feature-request "robot_memory")
-)
-
-(defrule executive-conditional-pddl-init
-  "Load PDDL feature if requested in the config."
-  (executive-init)
-  (ff-feature-loaded blackboard)
-  (confval (path "/clips-executive/use_pddl") (type BOOL) (value TRUE))
-  (ff-feature-loaded robot_memory)
-  =>
-  (printout t "Loading PDDL Planner interface" crlf)
-  (path-load "pddl-init.clp")
-)
-
-(defrule executive-conditional-protobuf-init
-  "Load protobuf feature required for protobuf communication"
-  (executive-init)
-  (confval (path "/clips-executive/use_protobuf") (type BOOL) (value TRUE))
-  =>
-  (printout t "Loading Protobuf feature" crlf)
-  (ff-feature-request "protobuf")
-)
-
-(defrule executive-conditional-tf-init
-  "Load tf feature if required in config "
-  (executive-init)
-  (confval (path "/clips-executive/use_tf") (type BOOL) (value TRUE))
-  =>
-  (printout t "Loading tf feature" crlf)
-  (ff-feature-request "tf")
-)
-
-(defrule executive-init-stage2
-	(executive-init)
-	(ff-feature-loaded blackboard)
-	=>
-
-	; Here we load basic, non-flow components which deal with
-	; representation and templates
-	(path-load "plan.clp")
-	(path-load "domain.clp")
-	(path-load "worldmodel.clp")
-	(path-load "wm-domain-sync.clp")
-  (path-load "wm-config.clp")
-	(path-load "blackboard-init.clp")
-	(path-load "skills-init.clp")
-)
-
-(defrule executive-init-load-robot-memory-sync
-  "Load the robot memory domain model synchronization if enabled in the config."
-	(executive-init)
-  (ff-feature-loaded robot_memory)
-  ; Only load after the domain file has been loaded.
-  (path-info (file "domain.clp") (loaded TRUE))
-  (confval (path "/clips-executive/sync_domain_facts") (type BOOL) (value TRUE))
-  =>
-  (path-load "robot-memory-sync.clp")
-)
-
-(defrule executive-init-stage3
-	(executive-init)
-	(ff-feature-loaded skills)
-  (or (ff-feature-loaded navgraph)
-      (not (confval (path "/clips-executive/use_navgraph")
-            (type BOOL) (value TRUE)))
-  )
-  (or (and (ff-feature-loaded pddl_planner) (ff-feature-loaded robot_memory))
-      (not (confval (path "/clips-executive/use_pddl")
-            (type BOOL) (value TRUE)))
-  )
-  (or (ff-feature-loaded protobuf)
-      (not (confval (path "/clips-executive/use_protobuf")
-            (type BOOL) (value TRUE)))
-  )
-  (or (ff-feature-loaded tf)
-      (not (confval (path "/clips-executive/use_tf")
-            (type BOOL) (value TRUE)))
-  )
-  (or (path-info (file "robot-memory-sync.clp") (loaded TRUE))
-      (not (confval (path "/clips-executive/sync_domain_facts") (type BOOL)
-        (value TRUE)))
-  )
-  (confval (path "/clips-executive/spec") (type STRING) (value ?spec))
-	=>
-	; Common spec config prefix
-	(bind ?pf (str-cat "/clips-executive/specs/" ?spec "/"))
-	(foreach ?component (create$ "domain" "worldmodel" "state-estimation"
-                               "goal-reasoner" "goal-expander"
-                               "macro-expansion" "action-selection"
-                               "action-execution" "execution-monitoring")
-		(do-for-fact ((?c confval)) (and (eq ?c:path (str-cat ?pf ?component)) (eq ?c:type STRING))
-			(if ?c:is-list
-			 then
-			  (progn$ (?v ?c:list-value)
-					(printout t "Loading component '" ?component "/" ?v-index "' (" ?v ")" crlf)
-					(path-load ?v)
+(deffunction cx-assert-init-requests (?spec ?stage ?feature-default)
+	(bind ?cfg-stage (str-cat (lowcase ?stage)))
+	(bind ?cfgpfx (str-cat "/clips-executive/specs/" ?spec "/init/" ?cfg-stage "/"))
+	(foreach ?i (cx-init-indexes ?spec ?cfg-stage)
+		(bind ?feature ?feature-default)
+		(bind ?name "MISSING")
+		(bind ?files (create$))
+		(bind ?error-msgs (create$))
+		(bind ?state PENDING)
+		(if (not (any-factp ((?c confval)) (eq (str-cat ?cfgpfx ?i "/name") ?c:path)))
+		 then
+			(bind ?state ERROR)
+			(bind ?error-msgs (append$ ?error-msgs (str-cat ?stage " entry " ?i " is missing name entry")))
+		 else
+			(do-for-fact ((?c confval)) (eq (str-cat ?cfgpfx ?i "/name") ?c:path)
+				(bind ?name ?c:value)
+			)
+			(do-for-fact ((?c confval)) (eq (str-cat ?cfgpfx ?i "/feature-request") ?c:path)
+				(bind ?feature ?c:value)
+			)
+			(do-for-fact ((?c confval)) (eq (str-cat ?cfgpfx ?i "/file") ?c:path)
+				(bind ?files (append$ ?files ?c:value))
+			)
+			(do-for-fact ((?c confval)) (eq (str-cat ?cfgpfx ?i "/files") ?c:path)
+				(if (not ?c:is-list)
+				 then
+					(printout warn "Config entry " (str-cat ?cfgpfx ?i "/files") " is not a list value, ignoring")
+				 else
+					(bind ?files (append$ ?files ?c:list-value))
 				)
-			 else
-				(printout t "Loading component '" ?component "' (" ?c:value ")" crlf)
-				(path-load ?c:value)
 			)
 		)
+		(assert (executive-init-request (state ?state) (error-msgs ?error-msgs)
+																		(stage ?stage) (order ?i-index)
+																		(name (sym-cat ?name)) (feature ?feature) (files ?files)))
+	)
+)
+
+(defrule executive-init-start
+  (declare (salience ?*SALIENCE-INIT-LATE*))
+	(executive-init)
+  (confval (path "/clips-executive/spec") (type STRING) (value ?spec))
+	=>
+	(cx-assert-init-requests ?spec STAGE-1 TRUE)
+	(assert (executive-init-request (state PENDING)	(stage STAGE-2) (order 0)
+																	(name cx-files) (feature FALSE) (files ?*CX-FILES*)))
+	(cx-assert-init-requests ?spec STAGE-2 FALSE)
+	(cx-assert-init-requests ?spec STAGE-3 FALSE)
+	(assert (executive-init-stage STAGE-1))
+)
+
+(defrule executive-init-failed
+  (declare (salience ?*SALIENCE-INIT*))
+	(executive-init)
+	(executive-init-request (state ERROR) (stage ?stage) (order ?i) (error-msgs $?error-msgs))
+	?sf <- (executive-init-stage ?stage)
+	=>
+	(printout error crlf)
+	(printout error "***********************************************************" crlf)
+	(printout error crlf)
+	(printout error ?stage " request " ?i " failed: " ?error-msgs crlf)
+	(printout error crlf)
+	(printout error "***********************************************************" crlf)
+	(printout error crlf)
+	(retract ?sf)
+	(assert (executive-init-stage FAILED))
+)
+
+(defrule executive-init-stage-request-feature
+	(executive-init)
+	(executive-init-stage ?stage)
+	?ir <- (executive-init-request (state PENDING) (stage ?stage) (order ?order)
+																 (name ?name) (feature TRUE))
+	(not (executive-init-request (state ~COMPLETED) (stage ?stage) (order ?order2&:(< ?order2 ?order))))
+	(ff-feature ?name)
+	=>
+	(printout t "Init " ?stage ": requesting feature " ?name crlf)
+	(ff-feature-request ?name)
+	(modify ?ir (state FEATURE-REQUESTED))
+)
+
+(defrule executive-init-stage-request-no-feature
+	(executive-init)
+	(executive-init-stage ?stage)
+	?ir <- (executive-init-request (state PENDING) (stage ?stage) (order ?order)
+																 (name ?name) (feature FALSE))
+	(not (executive-init-request (state ~COMPLETED) (stage ?stage) (order ?order2&:(< ?order2 ?order))))
+	=>
+	(printout t "Init " ?stage ": no feature to request for " ?name crlf)
+	(modify ?ir (state FEATURE-DONE))
+)
+
+(defrule executive-init-stage-request-feature-unavailable
+	(executive-init)
+	(executive-init-stage ?stage)
+	?ir <- (executive-init-request (state PENDING) (stage ?stage) (order ?order)
+																 (name ?name) (feature TRUE))
+	(not (executive-init-request (state ~COMPLETED) (stage ?stage) (order ?order2&:(< ?order2 ?order))))
+	;(not (ff-feature ?name))
+	=>
+	(printout error "Init " ?stage ": feature " ?name " is not available" crlf)
+	(modify ?ir (state ERROR) (error-msgs (str-cat "Feature " ?name " is not available")))
+)
+
+(defrule executive-init-stage-request-feature-fulfilled
+	(executive-init)
+	(executive-init-stage ?stage)
+	?ir <- (executive-init-request (state FEATURE-REQUESTED) (stage ?stage) (name ?name))
+	(ff-feature-loaded ?name)
+	=>
+	(printout t "Init " ?stage ": feature request for " ?name " has been fulfilled" crlf)
+	(modify ?ir (state FEATURE-DONE))
+)
+
+(defrule executive-init-stage-request-files
+	(executive-init)
+	(executive-init-stage ?stage)
+	?ir <- (executive-init-request (state FEATURE-DONE) (stage ?stage) (name ?name) (files $?files))
+	=>
+	(if (> (length$ ?files) 0)
+	 then
+		(printout t "Init " ?stage ": loading files for " ?name " " ?files crlf)
+		(foreach ?f ?files
+			(bind ?pipepos (str-index "|" ?f))
+			(bind ?file-op "LOAD")
+			(bind ?file-name ?f)
+			(if ?pipepos then
+				(bind ?file-op (sub-string 1 (- ?pipepos 1) ?f))
+				(bind ?file-name (sub-string (+ ?pipepos 1)  (str-length ?f) ?f))
+			)
+			(switch ?file-op
+				(case "BATCH" then  (path-batch* ?file-name))
+				(case "BATCH*" then (path-batch* ?file-name))
+				(default (path-load ?file-name))
+			)
+		)
+	)
+	(modify ?ir (state COMPLETED))
+)
+
+(defrule executive-init-stage-finished
+	(executive-init)
+	?sf <- (executive-init-stage ?stage)
+	(not (executive-init-request (state ~COMPLETED) (stage ?stage)))
+	=>
+	(retract ?sf)
+	(bind ?stage-idx (member$ ?stage ?*INIT-STAGES*))
+	(if (< ?stage-idx (length$ ?*INIT-STAGES*))
+	 then
+		(bind ?next-stage (nth$ (+ ?stage-idx 1) ?*INIT-STAGES*))
+		(printout t "Init " ?stage ": finished, advancing to " ?next-stage crlf)
+		(assert (executive-init-stage ?next-stage))
+	 else
+	 (printout t "Initialization completed" crlf)
+	 (assert (executive-initialized))
 	)
 )
