@@ -3,7 +3,7 @@
  *  mongodb_replicaset_config.cpp - MongoDB replica set configuration
  *
  *  Created: Thu Jul 13 10:25:19 2017
- *  Copyright  2006-2017  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -62,7 +62,10 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 	set_name("MongoDBReplicaSet|%s",  cfgname.c_str());
 	config_name_ = cfgname;
 	is_leader_ = false;
-	last_status_ = ERROR;
+	last_status_ = ReplicaSetStatus{
+		.member_status  = MongoDBManagedReplicaSetInterface::ERROR,
+		.primary_status = MongoDBManagedReplicaSetInterface::PRIMARY_UNKNOWN
+	};
 	
 	enabled_ = false;
 	try {
@@ -173,6 +176,8 @@ MongoDBReplicaSetConfig::init()
 	logger->log_debug(name(), "Bootstrap Query:  %s", leader_elec_query_.jsonString().c_str());
 	logger->log_debug(name(), "Bootstrap Update: %s", leader_elec_update_.jsonString().c_str());
 
+	rs_status_if_ = blackboard->open_for_writing<MongoDBManagedReplicaSetInterface>(config_name_.c_str());
+
 	timewait_ = new TimeWait(clock, (int)(loop_interval_ * 1000000.));
 }
 
@@ -180,6 +185,7 @@ void
 MongoDBReplicaSetConfig::finalize()
 {
 	leader_resign();
+	blackboard->close(rs_status_if_);
 
 	delete timewait_;
 }
@@ -189,31 +195,33 @@ MongoDBReplicaSetConfig::loop()
 {
 	timewait_->mark_start();
 	mongo::BSONObj reply;
-	ReplicaSetNodeStatus status = rs_status(reply);
-	switch (status) {
-	case PRIMARY:
-		if (last_status_ != status) {
-			logger->log_info(name(), "Became PRIMARY, starting managing");
-		}
-		leader_elect(/* force leaderhsip */ true);
-		rs_monitor(reply);
-		break;
-	case NO_PRIMARY:
+	ReplicaSetStatus status = rs_status(reply);
+
+	if (status.primary_status == MongoDBManagedReplicaSetInterface::NO_PRIMARY) {
 		logger->log_warn(name(), "No primary, triggering leader election");
 		if (leader_elect(/* force leadership */ false)) {
 			logger->log_info(name(), "No primary, we became leader, managing");
 			rs_monitor(reply);
 		}
+	}
+
+	switch (status.member_status) {
+	case MongoDBManagedReplicaSetInterface::PRIMARY:
+		if (last_status_.member_status != status.member_status) {
+			logger->log_info(name(), "Became PRIMARY, starting managing");
+		}
+		leader_elect(/* force leaderhsip */ true);
+		rs_monitor(reply);
 		break;
-	case SECONDARY:
-		if (last_status_ != status) {
+	case MongoDBManagedReplicaSetInterface::SECONDARY:
+		if (last_status_.member_status != status.member_status) {
 			logger->log_info(name(), "Became SECONDARY");
 		}
 		break;
-	case ARBITER:
+	case MongoDBManagedReplicaSetInterface::ARBITER:
 		//logger->log_info(name(), "Arbiter");
 		break;
-	case NOT_INITIALIZED:
+	case MongoDBManagedReplicaSetInterface::NOT_INITIALIZED:
 		if (hosts_.size() == 1 || leader_elect()) {
 			// we are alone or leader, initialize replica set
 			if (hosts_.size() == 1) {
@@ -224,7 +232,7 @@ MongoDBReplicaSetConfig::loop()
 			rs_init();
 		}
 		break;
-	case INVALID_CONFIG:
+	case MongoDBManagedReplicaSetInterface::INVALID_CONFIG:
 		// we might later want to cover some typical cases
 		logger->log_error(name(), "Invalid configuration, hands-on required\n%s",
 		                  reply.jsonString().c_str());
@@ -232,14 +240,28 @@ MongoDBReplicaSetConfig::loop()
 	default:
 		break;
 	}
-	last_status_ = status;
+
+	if (last_status_ != status) {
+		rs_status_if_->set_member_status(status.member_status);
+		rs_status_if_->set_primary_status(status.primary_status);
+		rs_status_if_->set_error_msg(status.error_msg.c_str());
+		rs_status_if_->write();
+
+		last_status_ = status;
+	}
+
 	timewait_->wait_systime();
 }
 
 
-MongoDBReplicaSetConfig::ReplicaSetNodeStatus
+MongoDBReplicaSetConfig::ReplicaSetStatus
 MongoDBReplicaSetConfig::rs_status(mongo::BSONObj &reply)
 {
+	ReplicaSetStatus status = {
+		.member_status  = MongoDBManagedReplicaSetInterface::ERROR,
+		.primary_status = MongoDBManagedReplicaSetInterface::PRIMARY_UNKNOWN
+	};
+
 	mongo::BSONObj cmd(BSON("replSetGetStatus" << 1));
 	try {
 		bool ok = local_client_->runCommand("admin", cmd, reply);
@@ -247,18 +269,23 @@ MongoDBReplicaSetConfig::rs_status(mongo::BSONObj &reply)
 		if (! ok) {
 			if (reply["code"].numberInt() == mongo::ErrorCodes::NotYetInitialized) {
 				logger->log_warn(name(), "Instance has not received replica set configuration, yet");
-				return NOT_INITIALIZED;
+				status.member_status = MongoDBManagedReplicaSetInterface::NOT_INITIALIZED;
+				status.error_msg   = "Instance has not received replica set configuration, yet";
 			} else if (reply["code"].numberInt() == mongo::ErrorCodes::InvalidReplicaSetConfig) {
 				logger->log_error(name(), "Invalid replica set configuration: %s", reply.jsonString().c_str());
-				return INVALID_CONFIG;
+				status.member_status = MongoDBManagedReplicaSetInterface::INVALID_CONFIG;
+				status.error_msg   = "Invalid replica set configuration: " + reply.jsonString();
+			} else {
+				status.error_msg   = "Unknown error";
 			}
-			return ERROR;
+			return status;
 		} else {
 			//logger->log_warn(name(), "rs status reply: %s", reply.jsonString().c_str());
 			try {
 				mongo::BSONObjIterator members(reply.getObjectField("members"));
 				bool have_primary = false;
-				ReplicaSetNodeStatus self_status = REMOVED;
+				MongoDBManagedReplicaSetInterface::ReplicaSetMemberStatus self_status =
+					MongoDBManagedReplicaSetInterface::REMOVED;
 				while(members.more()) {
 					mongo::BSONObj m = members.next().Obj();
 					int state = m["state"].Int();
@@ -266,32 +293,37 @@ MongoDBReplicaSetConfig::rs_status(mongo::BSONObj &reply)
 
 					if (m.hasField("self") && m["self"].boolean()) {
 						switch (state) {
-						case 1: self_status = PRIMARY;   break;
-						case 2:	self_status = SECONDARY; break;
+						case 1: self_status = MongoDBManagedReplicaSetInterface::PRIMARY;   break;
+						case 2:	self_status = MongoDBManagedReplicaSetInterface::SECONDARY; break;
 						case 3: // RECOVERING
 						case 5: // STARTUP2
 						case 9: // ROLLBACK
-							self_status = INITIALIZING;    break;
+							self_status = MongoDBManagedReplicaSetInterface::INITIALIZING;    break;
 							break;
-						case 7: self_status = ARBITER;   break;
-						default: self_status = ERROR;    break;
+						case 7: self_status = MongoDBManagedReplicaSetInterface::ARBITER;   break;
+						default: self_status = MongoDBManagedReplicaSetInterface::ERROR;    break;
 						}
 					}
 				}
-				if (have_primary) {
-					return self_status;
-				} else {
-					return NO_PRIMARY;
-				}
+				status.primary_status =
+					have_primary ? MongoDBManagedReplicaSetInterface::HAVE_PRIMARY
+					             : MongoDBManagedReplicaSetInterface::NO_PRIMARY;
+				status.member_status   = self_status;
+				return status;
 			} catch (mongo::DBException &e) {
 				logger->log_warn(name(), "Failed to analyze member info: %s", e.what());
-				return ERROR;
+				status.member_status = MongoDBManagedReplicaSetInterface::ERROR;
+				status.error_msg   = std::string("Failed to analyze member info: ") + e.what();
+				return status;
 			}
 		}
 	} catch (mongo::DBException &e) {
 		logger->log_warn(name(), "Failed to get RS status: %s", e.what());
-		return ERROR;
+		status.member_status = MongoDBManagedReplicaSetInterface::ERROR;
+		status.error_msg   = std::string("Failed to get RS status: ") + e.what();
+		return status;
 	}
+	return status;
 }
 
 

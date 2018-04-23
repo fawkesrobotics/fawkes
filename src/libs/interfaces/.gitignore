@@ -6,6 +6,7 @@ LaserClusterInterface.h
 HumanSkeletonProjectionInterface.h
 KatanaInterface.h
 LaserLineInterface.h
+MongoDBManagedReplicaSetInterface.h
 NaoJointPositionInterface.h
 NaoJointStiffnessInterface.h
 NaoSensorInterface.h

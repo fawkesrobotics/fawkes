@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="MongoDBManagedReplicaSetInterface" author="Tim Niemueller" year="2018">
+  <constants>
+    <enum name="ReplicaSetMemberStatus">
+	    <comment>
+		    Status for the member of the replica set managed by this
+		    instance.
+
+		    Confer
+		    https://docs.mongodb.com/manual/reference/replica-states/ for
+		    the MongoDB documentation about replica states.
+	    </comment>
+	    <item name="UNKNOWN">
+		    The status has not yet been determined.
+      </item>
+      <item name="PRIMARY">
+	      Member is the primary of the replica set.
+	      (MongoDB PRIMARY replica state)
+      </item>
+      <item name="SECONDARY">
+	      Member is a secondary of the replica set.
+	      (MongoDB SECONDARY replica state)
+      </item>
+      <item name="ARBITER">
+	      Member acts as an arbiter of the replica set, i.e., it
+	      participates in leader elections to break ties but does not
+	      replicate data itself.
+	      (MongoDB ARBITER replica state)
+      </item>
+      <item name="NOT_INITIALIZED">
+	      The instance is up but has not received a replica set
+	      configuration, yet. We expect to join or initiate a cluster
+	      soon.
+	      (mongo-cxx-driver exception with code NotYetInitialized)
+      </item>
+      <item name="INITIALIZING">
+	      The replica set is currently initializing, e.g., performing
+	      the initial data synchronization.
+	      (MongoDB replica states RECOVERING, STARTUP2, and ROLLBACK)
+      </item>
+      <item name="INVALID_CONFIG">
+	      The cluster has an invalid configuration. This requires manual
+	      intervention, the cluster cannot recover automatically.
+	      
+	      (mongo-cxx-driver exceptoin with code InvalidReplicaSetConfig)
+      </item>
+      <item name="REMOVED">
+	      The replica set configuration does not mention this
+	      instance. Seems we have been removed. It is unlikely this node
+	      will join again without intervention.
+	      (local instance not found in member list at all)
+      </item>
+      <item name="ERROR">
+	      There has been an error when handling the result, most likely
+	      caused by an unknown replica state (for a new MongoDB version).
+      </item>
+    </enum> 
+
+    <enum name="ReplicaSetPrimaryStatus">
+	    <comment>
+		    Status of the replica set with regard to a primary.
+	    </comment>
+	    <item name="PRIMARY_UNKNOWN">
+		    Fetching the status failed and we do not know the status
+		    regarding a primary of.
+      </item>
+      <item name="HAVE_PRIMARY">
+	      The replica set does have a primary.
+      </item>
+      <item name="NO_PRIMARY">
+	      The replica set currently has no primary.
+	      We are going to initiate a leader election shortly.
+      </item>
+    </enum> 
+  </constants>
+
+	<data>
+    <comment>
+	    MongoDB Managed Replica Set Statis.
+	    The mongodb plugin can manage replica sets, i.e., it can
+	    bootstrap them for initial setup and add and remove replica set
+	    members dynamically. This interface provides status information.
+    </comment>
+    <field type="ReplicaSetMemberStatus" name="member_status">
+	    The current status of the managed member of the replica set.
+    </field>
+    <field type="ReplicaSetPrimaryStatus" name="primary_status">
+	    Status of the replica set regarding a primary.
+    </field>
+    <field type="string" length="1024" name="error_msg">
+	    A message describing an error in more detail.
+    </field>
+	</data>
+</interface>

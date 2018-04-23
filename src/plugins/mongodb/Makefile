@@ -19,13 +19,14 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/utils/utils.mk
 include $(BUILDSYSDIR)/boost.mk
 
-PRESUBDIRS = aspect
+PRESUBDIRS = aspect interfaces
 
 INCDIRS += $(INCDIRS_MONGODB)
 
 MONGODB_REQ_BOOST_LIBS = system filesystem
 
-LIBS_mongodb = fawkescore fawkesaspects fawkesmongodbaspect
+LIBS_mongodb = fawkescore fawkesaspects fawkesmongodbaspect fawkesblackboard \
+               MongoDBManagedReplicaSetInterface
 OBJS_mongodb = mongodb_plugin.o mongodb_thread.o \
                mongodb_client_config.o \
                mongodb_instance_config.o \
