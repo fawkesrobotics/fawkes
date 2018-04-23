@@ -39,6 +39,10 @@
 #include <algorithm>
 #include <yaml-cpp/traits.h>
 #include <limits>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <regex>
+#include <memory>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -46,6 +50,12 @@ namespace fawkes {
 #endif
 
 /// @cond INTERNALS
+
+#define PATH_REGEX "^[a-zA-Z0-9_-]+$"
+#define YAML_REGEX "^[a-zA-Z0-9_-]+\\.yaml$"
+// from https://www.ietf.org/rfc/rfc3986.txt
+#define URL_REGEX "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
+#define FRAME_REGEX "^([a-zA-Z_][a-zA-Z0-9_/-]*)+$"
 
 namespace yaml_utils {
 
@@ -178,9 +188,12 @@ namespace yaml_utils {
 
 		return false;
 	}
+
+	static std::regex url_regex{URL_REGEX, std::regex_constants::extended};
+	static std::regex frame_regex{FRAME_REGEX, std::regex_constants::extended};
 }
 
-class YamlConfigurationNode
+class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurationNode>
 {
  public:
 	struct Type {
@@ -200,70 +213,77 @@ class YamlConfigurationNode
 		}
 	};
 
- YamlConfigurationNode() : name_("root"), type_(Type::UNKNOWN), is_default_(false) {}
+	YamlConfigurationNode() : name_("root"), type_(Type::UNKNOWN), is_default_(false) {}
 
- YamlConfigurationNode(const YamlConfigurationNode &n)
-	 : name_(n.name_), type_(n.type_), scalar_value_(n.scalar_value_),
-		list_values_(n.list_values_), is_default_(n.is_default_)
+	YamlConfigurationNode(std::string name)
+		: name_(name), type_(Type::NONE), is_default_(false)
 	{}
 
- YamlConfigurationNode(const YamlConfigurationNode *n)
-	 : name_(n->name_), type_(n->type_), scalar_value_(n->scalar_value_),
-		list_values_(n->list_values_), is_default_(n->is_default_)
-	{}
-
- YamlConfigurationNode(std::string name, const YAML::Node &node)
-	 : name_(name), type_(Type::UNKNOWN), is_default_(false)
-	{
-		scalar_value_ = node.Scalar();
-		switch (node.Type()) {
-		case YAML::NodeType::Null:      type_ = Type::NONE; break;
-		case YAML::NodeType::Scalar:    type_ = determine_scalar_type(); break;
-		case YAML::NodeType::Sequence:  type_ = Type::SEQUENCE; set_sequence(node); break;
-		case YAML::NodeType::Map:       type_ = Type::MAP; break;
-		default:
-			type_ = Type::UNKNOWN; break;
-		}
-	}
-
-
- YamlConfigurationNode(std::string name)
-	 : name_(name), type_(Type::NONE), is_default_(false)
-	{}
+	YamlConfigurationNode(const YamlConfigurationNode &n) = delete;
 
 	~YamlConfigurationNode()
 	{
-		std::map<std::string, YamlConfigurationNode *>::iterator i;
-		for (i = children_.begin(); i != children_.end(); ++i) {
-			delete i->second;
-		}
 	}
 
-	void add_child(std::string &p, YamlConfigurationNode *n) {
+	static std::shared_ptr<YamlConfigurationNode>
+	create(const YAML::Node &node, const std::string& name = "root")
+	{
+		auto n = std::make_shared<YamlConfigurationNode>(name);
+
+		switch (node.Type()) {
+		case YAML::NodeType::Null:
+			n->set_type(Type::NONE);
+			break;
+
+		case YAML::NodeType::Scalar:
+			n->set_scalar(node.Scalar());
+			n->verify_scalar(node);
+			break;
+
+		case YAML::NodeType::Sequence:
+			n->set_type(Type::SEQUENCE);
+			n->set_sequence(node);
+			break;
+
+		case YAML::NodeType::Map:
+			n->set_type(Type::MAP);
+			n->set_map(node);
+			break;
+
+		default:
+			n->set_type(Type::UNKNOWN);
+			break;
+		}
+
+		return n;
+	}
+
+	void add_child(std::string &p, std::shared_ptr<YamlConfigurationNode> n) {
 		type_ = Type::MAP;
 		children_[p] = n;
 	}
 
-	std::map<std::string, YamlConfigurationNode *>::iterator  begin()
+	std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::iterator  begin()
 	{ return children_.begin(); }
 
-	std::map<std::string, YamlConfigurationNode *>::iterator  end()
+	std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::iterator  end()
 	{ return children_.end(); }
 
-	std::map<std::string, YamlConfigurationNode *>::size_type size() const
+	std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::size_type size() const
 	{ return children_.size(); }
 
 
-	std::map<std::string, YamlConfigurationNode *>::const_iterator  begin() const
+	std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::const_iterator  begin() const
 	{ return children_.begin(); }
 
-	std::map<std::string, YamlConfigurationNode *>::const_iterator  end() const
+	std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::const_iterator  end() const
 	{ return children_.end(); }
 
-	YamlConfigurationNode * find(std::queue<std::string> &q)
+	std::shared_ptr<YamlConfigurationNode>
+	find(std::queue<std::string> &q)
 	{
 
-		YamlConfigurationNode *n = this;
+		std::shared_ptr<YamlConfigurationNode> n = shared_from_this();
 		std::string path;
 
 		while (! q.empty()) {
@@ -282,15 +302,16 @@ class YamlConfigurationNode
 		return n;
 	}
 
-	YamlConfigurationNode * find_or_insert(const char *path)
+	std::shared_ptr<YamlConfigurationNode>
+	find_or_insert(const char *path)
 	{
 		std::queue<std::string> q = str_split_to_queue(path);
 
-		YamlConfigurationNode *n = this;
+		std::shared_ptr<YamlConfigurationNode> n = shared_from_this();
 		while (! q.empty()) {
 			std::string pel = q.front();
 			if (n->children_.find(pel) == n->children_.end()) {
-				n->add_child(pel, new YamlConfigurationNode(pel));
+				n->add_child(pel, std::make_shared<YamlConfigurationNode>(pel));
 			}
 			n = n->children_[pel];
 			q.pop();
@@ -302,10 +323,10 @@ class YamlConfigurationNode
 	void erase(const char *path)
 	{
 		std::queue<std::string> q = str_split_to_queue(path);
-		std::stack<YamlConfigurationNode *> qs;
+		std::stack<std::shared_ptr<YamlConfigurationNode>> qs;
 		std::string full_path;
 
-		YamlConfigurationNode *n = this;
+		std::shared_ptr<YamlConfigurationNode> n = shared_from_this();
 		while (! q.empty()) {
 
 			std::string pel = q.front();
@@ -324,9 +345,9 @@ class YamlConfigurationNode
 			throw Exception("YamlConfig: cannot erase non-leaf value");
 		}
 
-		YamlConfigurationNode *child = n;
+		std::shared_ptr<YamlConfigurationNode> child = n;
 		while (! qs.empty()) {
-			YamlConfigurationNode *en = qs.top();
+			std::shared_ptr<YamlConfigurationNode> en = qs.top();
 
 			en->children_.erase(child->name());
 
@@ -342,7 +363,8 @@ class YamlConfigurationNode
 
 
 
-	YamlConfigurationNode * find(const char *path)
+	std::shared_ptr<YamlConfigurationNode>
+	find(const char *path)
 	{
 		try {
 			std::queue<std::string> pel_q = str_split_to_queue(path);
@@ -352,20 +374,21 @@ class YamlConfigurationNode
 		}
 	}
 
-	void operator=(const YamlConfigurationNode &n)
+	void operator=(const YamlConfigurationNode&& n)
 		{
-			name_        = n.name_;
-			type_        = n.type_;
-			children_    = n.children_;
-			list_values_ = n.list_values_;
+			name_        = std::move(n.name_);
+			type_        = std::move(n.type_);
+			children_    = std::move(n.children_);
+			list_values_ = std::move(n.list_values_);
 		}
 
 	bool operator< (const YamlConfigurationNode &n) const
 	{ return this->name_ < n.name_; }
 
-	YamlConfigurationNode * operator[] (const std::string &p)
+	std::shared_ptr<YamlConfigurationNode>
+	operator[] (const std::string &p)
 	{
-		std::map<std::string, YamlConfigurationNode *>::iterator i;
+		std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::iterator i;
 		if ((i = children_.find(p)) != children_.end()) {
 			return i->second;
 		} else {
@@ -373,16 +396,18 @@ class YamlConfigurationNode
 		}
 	}
 
-	YamlConfigurationNode & operator+= (const YamlConfigurationNode *n)
+	std::shared_ptr<YamlConfigurationNode>
+	operator+= (const std::shared_ptr<YamlConfigurationNode> n)
 	{
-		if (! n) return *this;
+		if (! n) return shared_from_this();
 
-		YamlConfigurationNode *add_to = this;
+		std::shared_ptr<YamlConfigurationNode> add_to = shared_from_this();
 
 		if (n->name() != "root") {
-			std::map<std::string, YamlConfigurationNode *>::iterator i;
-			if ((i = children_.find(n->name())) == children_.end()) {
-				children_[n->name()] = new YamlConfigurationNode(n);
+			if (children_.find(n->name()) == children_.end()) {
+				auto new_val = std::make_shared<YamlConfigurationNode>(n->name());
+				new_val->set_type(n->get_type());
+				children_[n->name()] = new_val;
 			}
 			add_to = children_[n->name()];
 		}
@@ -423,14 +448,12 @@ class YamlConfigurationNode
 				add_to->set_list(empty);
 			}
 		} else {
-    
-			std::map<std::string, YamlConfigurationNode *>::const_iterator i;
-			for (i = n->begin(); i != n->end(); ++i) {
+			for (auto i = n->begin(); i != n->end(); ++i) {
 				*add_to += i->second;
 			}
 		}
 
-		return *this;
+		return shared_from_this();
 	}
 
 	bool operator==(const YamlConfigurationNode &n) const
@@ -452,15 +475,15 @@ class YamlConfigurationNode
 	 * @param b root node of second tree
 	 * @return list of paths to leaf nodes that changed
 	 */
-	static std::list<std::string> diff(const YamlConfigurationNode *a, const YamlConfigurationNode *b)
+	static std::list<std::string> diff(const std::shared_ptr<YamlConfigurationNode>a, const std::shared_ptr<YamlConfigurationNode>b)
 	{
 		std::list<std::string> rv;
 
-		std::map<std::string, YamlConfigurationNode *> na, nb;
+		std::map<std::string, std::shared_ptr<YamlConfigurationNode>> na, nb;
 		a->enum_leafs(na);
 		b->enum_leafs(nb);
     
-		std::map<std::string, YamlConfigurationNode *>::iterator i;
+		std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::iterator i;
 		for (i = na.begin(); i != na.end(); ++i) {
 			if (nb.find(i->first) == nb.end()) {
 				// this is a new key in a
@@ -586,7 +609,7 @@ class YamlConfigurationNode
 		void
 		set_value(const char *path, T t)
 	{
-		YamlConfigurationNode *n = find_or_insert(path);
+		std::shared_ptr<YamlConfigurationNode> n = find_or_insert(path);
 		if (n->has_children()) {
 			throw Exception("YamlConfig: cannot set value on non-leaf path node %s", path);
 		}
@@ -603,7 +626,7 @@ class YamlConfigurationNode
 		void
 		set_list(const char *path, std::vector<T> &t)
 	{
-		YamlConfigurationNode *n = find_or_insert(path);
+		std::shared_ptr<YamlConfigurationNode> n = find_or_insert(path);
 		if (n->has_children()) {
 			throw Exception("YamlConfig: cannot set value on non-leaf path node %s", path);
 		}
@@ -723,33 +746,6 @@ class YamlConfigurationNode
 		return get_value<bool>();
 	}
 
-	Type::value determine_scalar_type() const
-	{
-		if (is_type<unsigned int>()) {
-			try {
-				int v = get_int();
-				if (v >= 0) {
-					return Type::UINT32;
-				} else {
-					return Type::INT32;
-				}
-			} catch (Exception &e) {
-				// can happen if value > MAX_INT
-				return Type::UINT32;
-			}
-		} else if (is_type<int>()) {
-			return Type::INT32;
-		} else if (is_type<float>()) {
-			return Type::FLOAT;
-		} else if (is_type<bool>()) {
-			return Type::BOOL;
-		} else if (is_type<std::string>()) {
-			return Type::STRING;
-		} else {
-			return Type::UNKNOWN;
-		}
-	}
-
 	std::string get_string() const
 	{
 		return get_value<std::string>();
@@ -777,11 +773,53 @@ class YamlConfigurationNode
 		}
 		type_ = Type::SEQUENCE;
 		list_values_.resize(n.size());
-		unsigned int i = 0;
-		for (YAML::const_iterator it = n.begin(); it != n.end(); ++it) {
-			list_values_[i++] = it->as<std::string>();
+		if (n.size() > 0) {
+			if (n.begin()->Type() == YAML::NodeType::Scalar) {
+				unsigned int i = 0;
+				for (YAML::const_iterator it = n.begin(); it != n.end(); ++it) {
+					list_values_[i++] = it->as<std::string>();
+				}
+			} else {
+				throw Exception("Sequence neither of type scalar nor map (line %i, column %i)",
+				                n.Mark().line, n.Mark().column);
+			}
 		}
 	}
+
+	void set_map(const YAML::Node &node)
+	{
+		for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
+			std::string key = it->first.as<std::string>();
+			std::shared_ptr<YamlConfigurationNode> in = shared_from_this();
+			if (key.find("/") != std::string::npos) {
+				// we need to split and find the proper insertion node
+				std::vector<std::string> pel = str_split(key);
+				for (size_t i = 0; i < pel.size() - 1; ++i) {
+					std::shared_ptr<YamlConfigurationNode> n = (*in)[pel[i]];
+					if (! n) {
+						n = std::make_shared<YamlConfigurationNode>(pel[i]);
+            in->add_child(pel[i], n);
+          }
+          in = n;
+				}
+
+        key = pel.back();
+      }
+
+			if (children_.find(key) != children_.end()) {
+				// we are updating a value
+				auto new_value = YamlConfigurationNode::create(it->second, key);
+				if (new_value->get_type() != children_[key]->get_type()) {
+					throw Exception("YamlConfig (line %d, column %d): overwriting value with incompatible type",
+					                node.Mark().line, node.Mark().column);
+				}
+				in->add_child(key, new_value);
+			} else {
+				in->add_child(key, YamlConfigurationNode::create(it->second, key));
+			}
+		}
+	}
+
 
 	bool has_children() const
 	{
@@ -796,7 +834,7 @@ class YamlConfigurationNode
 
 	void set_default(const char *path, bool is_default)
 	{
-		YamlConfigurationNode *n = find(path);
+		std::shared_ptr<YamlConfigurationNode> n = find(path);
 		n->set_default(is_default);
 	}
 
@@ -805,10 +843,10 @@ class YamlConfigurationNode
 		is_default_ = is_default;
 	}
 
-	void enum_leafs(std::map<std::string, YamlConfigurationNode *> &nodes,
+	void enum_leafs(std::map<std::string, std::shared_ptr<YamlConfigurationNode>> &nodes,
 	                std::string prefix = "") const
 	{
-		std::map<std::string, YamlConfigurationNode *>::const_iterator c;
+		std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::const_iterator c;
 		for (c = children_.begin(); c != children_.end(); ++c) {
 			std::string path = prefix + "/" + c->first;
 			if (c->second->has_children()) {
@@ -821,10 +859,10 @@ class YamlConfigurationNode
 
 	void print(std::string indent = "")
 	{
-		std::cout << indent << name_ << " : ";
+		std::cout << indent << name_;
 		if (! children_.empty()) {
 			std::cout << std::endl;
-			std::map<std::string, YamlConfigurationNode *>::iterator c;
+			std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::iterator c;
 			for (c = children_.begin(); c != children_.end(); ++c) {
 				c->second->print(indent + "  ");
 			}
@@ -838,7 +876,7 @@ class YamlConfigurationNode
 		if (! children_.empty()) {
 			ye << YAML::BeginMap;
 
-			std::map<std::string, YamlConfigurationNode *>::iterator c;
+			std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::iterator c;
 			for (c = children_.begin(); c != children_.end(); ++c) {
 				if (c->second->has_children()) {
 					// recurse
@@ -874,11 +912,108 @@ class YamlConfigurationNode
 	{ return name_; }
 
  private:
+	void set_name(const std::string &name)
+	{
+		name_ = name;
+	}
+
+	void set_type(Type::value type)
+	{
+		type_ = type;
+	}
+
+	Type::value determine_scalar_type() const
+	{
+		if (is_type<unsigned int>()) {
+			try {
+				int v = get_int();
+				if (v >= 0) {
+					return Type::UINT32;
+				} else {
+					return Type::INT32;
+				}
+			} catch (Exception &e) {
+				// can happen if value > MAX_INT
+				return Type::UINT32;
+			}
+		} else if (is_type<int>()) {
+			return Type::INT32;
+		} else if (is_type<float>()) {
+			return Type::FLOAT;
+		} else if (is_type<bool>()) {
+			return Type::BOOL;
+		} else if (is_type<std::string>()) {
+			return Type::STRING;
+		} else {
+			return Type::UNKNOWN;
+		}
+	}
+
+
+	void
+	verify_scalar(const YAML::Node &node) const
+	{
+		if (node.Tag() == "tag:fawkesrobotics.org,cfg/ipv4" ||
+		    node.Tag() == "tag:fawkesrobotics.org,cfg/ipv6")
+		{
+			std::string addr_s;
+			try {
+				addr_s = get_string();
+			} catch (Exception &e) {
+				e.prepend("YamlConfig (line %d, column %d) Invalid IPv4 or IPv6 address (not a string)",
+				          node.Mark().line, node.Mark().column);
+				throw;
+			}
+
+			if (node.Tag() == "tag:fawkesrobotics.org,cfg/ipv4") {
+				struct in_addr addr;
+				if (inet_pton(AF_INET, addr_s.c_str(), &addr) != 1) {
+					throw Exception("YamlConfig: %s is not a valid IPv4 address", addr_s.c_str());
+				}
+			}
+			if (node.Tag() == "tag:fawkesrobotics.org,cfg/ipv6") {
+				struct in6_addr addr;
+				if (inet_pton(AF_INET6, addr_s.c_str(), &addr) != 1) {
+					throw Exception("YamlConfig: %s is not a valid IPv6 address", addr_s.c_str());
+				}
+			}
+
+		} else if (node.Tag() == "tag:fawkesrobotics.org,cfg/tcp-port" ||
+		           node.Tag() == "tag:fawkesrobotics.org,cfg/udp-port")
+		{
+			unsigned int p = 0;
+			try {
+				p = get_uint();
+			} catch (Exception &e) {
+				e.prepend("YamlConfig (line %d, column %d): Invalid TCP/UDP port number (not an unsigned int)",
+				          node.Mark().line, node.Mark().column);
+				throw;
+			}
+			if (p <= 0 || p >= 65535) {
+				throw Exception("YamlConfig: Invalid TCP/UDP port number "
+				                "(%u out of allowed range)", p);
+			}
+		} else if (node.Tag() == "tag:fawkesrobotics.org,cfg/url") {
+			std::string scalar = node.Scalar();
+			if (! regex_match(scalar, yaml_utils::url_regex)) {
+				throw Exception("YamlConfig (line %d, column %d): %s is not a valid URL",
+				                node.Mark().line, node.Mark().column, scalar.c_str());
+			}
+		} else if (node.Tag() == "tag:fawkesrobotics.org,cfg/frame") {
+			std::string scalar = node.Scalar();
+			if (! regex_match(scalar, yaml_utils::frame_regex)) {
+				throw Exception("YamlConfig (line %d, column %d): %s is not a valid frame ID",
+				                node.Mark().line, node.Mark().column, scalar.c_str());
+			}
+		}
+	}
+
+ private:
 
 	std::string name_;
 	Type::value type_;
 	std::string scalar_value_;
-	std::map<std::string, YamlConfigurationNode *> children_;
+	std::map<std::string, std::shared_ptr<YamlConfigurationNode>> children_;
 	std::vector<std::string> list_values_;
 	bool is_default_;
 };
