@@ -18,6 +18,7 @@
   (slot file (type STRING))
   (slot path (type STRING))
   (slot loaded (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
+	(slot error-msg (type STRING))
 )
 
 ; Completely reset path information.
@@ -81,25 +82,61 @@
 )
 
 (deffunction path-load (?file)
-  (bind ?f (path-resolve ?file))
-  (if ?f
-  then
-    (assert (path-info (loaded TRUE) (file ?file) (path ?f)))
-    (load ?f)
-  else
-    (printout error "Cannot load file " ?file " (file not found in " (path-string) ")" crlf)
-    (return ?f)
-  )
+	(bind ?f (path-resolve ?file))
+	(if ?f
+	 then
+		(bind ?loaded (load ?f))
+		(assert (path-info (loaded ?loaded) (file ?file) (path ?f)))
+		(return ?loaded)
+	 else
+		(bind ?emsg (str-cat "Cannot load file " ?file " (file not found in " (path-string) ")"))
+		(printout error ?emsg crlf)
+		(assert (path-info (loaded FALSE) (file ?file) (error-msg ?emsg)))
+		(return FALSE)
+	)
 )
 
 (deffunction path-load* (?file)
-  (bind ?f (path-resolve ?file))
-  (if ?f
-  then
-    (assert (path-info (loaded TRUE) (file ?file) (path ?f)))
-    (load* ?f)
-  else
-    (printout error "Cannot load file " ?file " (file not found in " (path-string) ")" crlf)
-    (return ?f)
-  )
+	(bind ?f (path-resolve ?file))
+	(if ?f
+	 then
+		(bind ?loaded (load* ?f))
+		(assert (path-info (loaded ?loaded) (file ?file) (path ?f)))
+		(return ?loaded)
+	 else
+		(bind ?emsg (str-cat "Cannot load file " ?file " (file not found in " (path-string) ")"))
+		(printout error ?emsg crlf)
+		(assert (path-info (loaded FALSE) (file ?file) (error-msg ?emsg)))
+		(return FALSE)
+	)
+)
+
+(deffunction path-batch (?file)
+	(bind ?f (path-resolve ?file))
+	(if ?f
+	 then
+		(bind ?loaded (batch ?f))
+		(assert (path-info (loaded ?loaded) (file ?file) (path ?f)))
+		(return ?loaded)
+	 else
+		(bind ?emsg (str-cat "Cannot batch load file " ?file " (file not found in " (path-string) ")"))
+		(printout error ?emsg crlf)
+		(assert (path-info (loaded FALSE) (file ?file) (error-msg ?emsg)))
+		(return FALSE)
+	)
+)
+
+(deffunction path-batch* (?file)
+	(bind ?f (path-resolve ?file))
+	(if ?f
+	 then
+		(bind ?loaded (batch* ?f))
+		(assert (path-info (loaded ?loaded) (file ?file) (path ?f)))
+		(return ?loaded)
+	 else
+		(bind ?emsg (str-cat "Cannot batch load file " ?file " (file not found in " (path-string) ")"))
+		(printout error ?emsg crlf)
+		(assert (path-info (loaded FALSE) (file ?file) (error-msg ?emsg)))
+		(return FALSE)
+	)
 )
