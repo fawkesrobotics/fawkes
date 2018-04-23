@@ -80,3 +80,21 @@
 	(if ?p then (return (= ?p 1)))
 	(return FALSE)
 )
+
+(deffunction str-split (?str ?sep)
+	"Split a string into symbols.
+   @param ?str string to split
+   @param ?sep separator of string
+   @return list of symbols of elements in ?str split by ?sep
+  "
+	(bind ?rv (create$))
+	(bind ?idx (str-index ?sep ?str))
+	(while ?idx do
+		(bind ?e (sub-string 1 (- ?idx 1) ?str))
+		(if (> (str-length ?e) 0) then (bind ?rv (append$ ?rv ?e)))
+		(bind ?str (sub-string (+ ?idx 1) (str-length ?str) ?str))
+		(bind ?idx (str-index ?sep ?str))
+	)
+	(if (> (str-length ?str) 0) then (bind ?rv (append$ ?rv ?str)))
+	(return ?rv)
+)
