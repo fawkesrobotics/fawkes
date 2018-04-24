@@ -82,6 +82,10 @@
 	(multislot update-timestamp (type INTEGER) (cardinality 2 2))
 )
 
+(deftemplate wm-robmem-sync-initialized
+	(slot trigger-ptr (type EXTERNAL-ADDRESS))
+)
+
 (deftemplate wm-robmem-sync-conf
 	(multislot wm-fact-key-prefix (type SYMBOL))
 	(slot enabled (type SYMBOL) (allowed-values TRUE FALSE))
@@ -94,20 +98,44 @@
 )
 
 (defrule wm-robmem-sync-init
+	(executive-init)
+	(not (executive-finalize))
 	(not (wm-robmem-sync-initialized))
 	=>
-	(assert (wm-robmem-sync-initialized))
-	(bind ?keys (bson-create))
-	(bson-append ?keys "id" 1)
-	(robmem-create-unique-index ?*WM-ROBMEM-SYNC-COLLECTION* ?keys)
-	(bson-destroy ?keys)
+	; Create unique index on worldmodel collection
+	; Not necessary when using _id, has default implicit unique index
+	;(bind ?keys (bson-create))
+	;(bson-append ?keys "id" 1)
+	;(robmem-create-unique-index ?*WM-ROBMEM-SYNC-COLLECTION* ?keys)
+	;(bson-destroy ?keys)
+
+	; Register trigger on worldmodel collection
+	(bind ?trigger-query (bson-create))
+	(bind ?trigger-ptr (robmem-trigger-register ?*WM-ROBMEM-SYNC-COLLECTION*
+																							?trigger-query "wm-robmem-sync-trigger"))
+	(bson-destroy ?trigger-query)
+
+	(if (not (any-factp ((?wf wm-fact)) (eq ?wf:id "/cx/identity"))) then
+		(printout warn "*** /cx/identity is not set in world model, will not sync until it is set! ***" crlf)
+	)
+
+	(assert (wm-robmem-sync-initialized (trigger-ptr ?trigger-ptr)))
+)
+
+(defrule wm-robmem-sync-finalize
+	(executive-finalize)
+	?wi <- (wm-robmem-sync-initialized (trigger-ptr ?trigger-ptr))
+	=>
+	(robmem-trigger-destroy ?trigger-ptr)
+	(retract ?wi)
 )
 
 
-(deffunction wm-robmem-sync-create-fact-doc (?wf ?update-timestamp)
+(deffunction wm-robmem-sync-create-fact-doc (?wf ?identity ?update-timestamp)
 	(bind ?doc (bson-create))
 	(bson-append-time ?doc "update-timestamp" ?update-timestamp)
-	(bson-append ?doc "id" (fact-slot-value ?wf id))
+	(bson-append ?doc "_id" (fact-slot-value ?wf id))
+	(bson-append ?doc "source" ?identity)
 
 	(bson-append ?doc "type" (fact-slot-value ?wf type))
 	(bson-append ?doc "is-list" (fact-slot-value ?wf is-list))
@@ -124,22 +152,26 @@
 	(bind ?query (bson-create))
 	(bind ?query-lte-timestamp (bson-create))
 	(bson-append-time ?query-lte-timestamp "$lte" ?update-timestamp)
-	(bson-append ?query "id" ?id)
+	(bson-append ?query "_id" ?id)
 	(bson-append ?query "update-timestamp" ?query-lte-timestamp)
+	(bson-destroy ?query-lte-timestamp)
 	(return ?query)
 )
 
-(deffunction wm-robmem-sync-fact-update (?wf ?update-timestamp)
-	(bind ?doc (wm-robmem-sync-create-fact-doc ?wf ?update-timestamp))
+(deffunction wm-robmem-sync-fact-update (?wf ?identity ?update-timestamp)
+	(bind ?doc (wm-robmem-sync-create-fact-doc ?wf ?identity ?update-timestamp))
 	(bind ?query (wm-robmem-sync-create-query (fact-slot-value ?wf id) ?update-timestamp))
 
 	;(printout t "Query: " (bson-tostring ?query) crlf)
 	;(printout t "Doc: " (bson-tostring ?doc) crlf)
 
 	(robmem-upsert ?*WM-ROBMEM-SYNC-COLLECTION* ?doc ?query)
+	(bson-destroy ?doc)
+	(bson-destroy ?query)
 )
 
 (defrule wm-robmem-sync-fact-added
+	(wm-fact (key cx identity) (value ?identity))
 	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
 	?wf <- (wm-fact (id ?id) (key $?key-prefix $?rest)
 									(type ?type) (is-list ?is-list) (value ?value) (values $?values))
@@ -151,10 +183,11 @@
 																		(wm-fact-idx (fact-index ?wf))
 																		(update-timestamp ?now)))
 	
-	(wm-robmem-sync-fact-update ?wf ?now)
+	(wm-robmem-sync-fact-update ?wf ?identity ?now)
 )
 
 (defrule wm-robmem-sync-fact-removed
+	(wm-fact (key cx identity) (value ?identity))
 	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
 	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key $?key-prefix $?rest)
 																	 (update-timestamp $?update-timestamp))
@@ -169,6 +202,7 @@
 )
 
 (defrule wm-robmem-sync-fact-modified
+	(wm-fact (key cx identity) (value ?identity))
 	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
 	?wf <- (wm-fact (id ?id) (key $?key-prefix $?rest))
 	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id)
@@ -178,5 +212,115 @@
 	(bind ?now (now))
 	(modify ?sm (wm-fact-idx (fact-index ?wf)) (update-timestamp ?now))
 
-	(wm-robmem-sync-fact-update ?wf ?now)
+	(wm-robmem-sync-fact-update ?wf ?identity ?now)
+)
+
+(deffunction wm-robmem-sync-update (?obj)
+	(bind ?id (bson-get ?obj "o._id"))
+	(if ?id then
+		(bind ?type (sym-cat (bson-get ?obj "o.type")))
+		(bind ?is-list (sym-cat (bson-get ?obj "o.is-list")))
+		(bind ?update-timestamp (bson-get-time ?obj "o.update-timestamp"))
+		(if (not (nth$ 1 ?update-timestamp)) then (bind ?update-timestamp (bson-get-time ?obj "ts")))
+		(bind ?value nil)
+		(bind ?values (create$))
+		(if ?is-list
+			then (bind ?values (bson-get ?obj "o.values"))
+			else (bind ?value (bson-get ?obj "o.value"))
+		)
+		(if (any-factp ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id)))
+		then
+			(do-for-fact ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id))
+				(if (time> ?update-timestamp ?sm:update-timestamp)
+				then
+					(printout debug "wm-robmem-sync-update: updating (known fact) " ?id crlf)
+					(modify ?wf (type ?type) (is-list ?is-list) (value ?value) (values ?values))
+				else
+					(printout warn "wm-robmem-sync-update: received update for " ?id " with older data than our own" crlf)
+				)
+			)
+		else
+			(if (any-factp ((?wf wm-fact)) (eq ?wf:id ?id))
+			then
+				; we have the fact locally, but not a sync map entry.  We may
+				; either have set the fact locally and haven't gotten around
+				; to sync it just yet, or the opt-in prefixes are different
+				; and we would not sync it (which may be problematic, but we
+				; accept the data for now).
+				(do-for-fact ((?wf wm-fact)) (eq ?wf:id ?id)
+					(printout debug "wm-robmem-sync-update: updating (no sync map entry, yet) " ?id crlf)
+					(bind ?key ?wf:key)
+					(bind ?new-wf (modify ?wf (type ?type) (is-list ?is-list) (value ?value) (values ?values)))
+					(assert (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key ?key)
+																						(wm-fact-idx (fact-index ?new-wf))
+																						(update-timestamp ?update-timestamp)))
+				)
+			else
+				(if (any-factp ((?sm wm-robmem-sync-map-entry)) (eq ?sm:wm-fact-id ?id))
+				then
+					; we don't have the fact locally, but a sync map entry.
+					; Maybe had just deleted this fact but haven't gotten around to
+					;	sync it, yet. If the update timestamp is fresher we take it
+					(do-for-fact ((?sm wm-robmem-sync-map-entry)) (eq ?sm:wm-fact-id ?id)
+						(printout debug "wm-robmem-sync-update: updating (no fact but sync map entry) " ?id crlf)
+						(bind ?new-wf (assert (wm-fact (id ?sm:wm-fact-id) (key ?sm:wm-fact-key)
+																					 (type ?type) (is-list ?is-list) (value ?value) (values ?values))))
+						(modify ?sm (wm-fact-idx (fact-index ?new-wf)) (update-timestamp ?update-timestamp))
+					)
+				else
+					; we have nothing about this update, yet. Just assert everything necessary.
+					(printout debug "wm-robmem-sync-update: inserting (neither fact nor sync map entry) " ?id crlf)
+					(bind ?key (wm-id-to-key ?id))
+					(bind ?new-wf (assert (wm-fact (id ?id) (key ?key)
+																				 (type ?type) (is-list ?is-list) (value ?value) (values ?values))))
+					(assert (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key ?key)
+																						(wm-fact-idx (fact-index ?new-wf))
+																						(update-timestamp ?update-timestamp)))
+				)
+			)
+		)
+	)
+)
+
+(deffunction wm-robmem-sync-delete (?obj)
+	(bind ?id (bson-get ?obj "o._id"))
+	(bind ?ts (bson-get-time ?obj "ts"))
+	(do-for-fact ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id))
+		(if (time> ?ts ?sm:update-timestamp)
+		then
+			(printout debug "wm-robmem-sync-delete: removing " ?id crlf)
+			(retract ?wf)
+		else
+			(printout warn "wm-robmem-sync-delete: received delete for " ?id
+								" with older timetamp than our own" crlf)
+		)
+	)
+)
+
+(defrule wm-robmem-sync-fact-trigger-event
+	(wm-fact (key cx identity) (value ?identity))
+	?rt <- (robmem-trigger (name "wm-robmem-sync-trigger") (ptr ?obj))
+	=>
+	(bind ?op (sym-cat (bson-get ?obj "op")))
+
+	;(printout warn "Trigger: " (bson-tostring ?obj) crlf)
+	(bind ?source (bson-get ?obj "o.source"))
+	(if (not ?source)
+	 then
+		(printout error "Failed to determine input source. Broken contributor." crlf)
+	 else
+	 (if (neq ?source ?identity)
+		then
+			(switch ?op
+				(case i then (wm-robmem-sync-update ?obj))
+				(case u then (wm-robmem-sync-update ?obj))
+				(case d then (wm-robmem-sync-delete ?obj))
+			)
+		;else
+		;	(printout t "Ignoring own update" crlf)
+		)
+	)
+
+	(bson-destroy ?obj)
+	(retract ?rt)
 )
