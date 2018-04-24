@@ -173,10 +173,8 @@ ClipsRobotMemoryThread::clips_bson_append(void *bson, std::string field_name, CL
 
     case CLIPS::TYPE_SYMBOL:
     case CLIPS::TYPE_INSTANCE_NAME:
-      b->append(field_name, value.as_string());
-      break;
     case CLIPS::TYPE_STRING:
-      b->append(field_name, std::string("\"") + value.as_string() + std::string("\""));
+      b->append(field_name, value.as_string());
       break;
     case CLIPS::TYPE_EXTERNAL_ADDRESS:
       {
