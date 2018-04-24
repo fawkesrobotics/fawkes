@@ -63,14 +63,19 @@ clips-executive:
         # initialization will progress to stage-2.
         # To override this for some entries, set "feature-request:
         # false" for the respective list elements.
+        # This stage always implicitly loads the blackboard feature
+        # and blackboard-init.clp.
         stage-1:
-          - name: blackboard
           - name: pddl-parser
-          #- name: robot_memory
           #- name: pddl-planner
           #  feature-request: false
           #  files: ["pddl-init.clp"]
-          - name: navgraph
+          #- name: navgraph
+          - name: robmem-wait
+            feature-request: false
+            files: ["BATCH|robmem-wait-init.clp"]
+            wait-for: robmem-initialized
+          - name: robot_memory
 
         # stage-2 is domain-independent CX initialization
         # It contains a set of fixed items loaded. Custom extensions may
@@ -92,7 +97,7 @@ clips-executive:
           - name: state-estimation
             file: test-scenario/state-estimation.clp
           - name: worldmodel
-            files: [test-scenario/worldmodel-facts.clp]
+            files: [wm-robmem-sync.clp, test-scenario/worldmodel-facts.clp]
           - name: goal-reasoner
             file: test-scenario/goal-reasoner.clp
           - name: goal-expander
