@@ -259,6 +259,18 @@
   )
 )
 
+(deffunction domain-retract-grounding
+  "Retract all ground preconditions."
+  ()
+  (do-for-all-facts ((?precond domain-precondition))
+                    (eq ?precond:grounded TRUE)
+                    (retract ?precond))
+  (do-for-all-facts ((?precond domain-atomic-precondition))
+                    (eq ?precond:grounded TRUE)
+                    (retract ?precond))
+)
+
+
 (deffunction domain-is-precond-negative
   "Check if a non-atomic precondition is negative by checking all its parents
    and counting the number of negations. If the number is odd, the precondition
@@ -289,7 +301,7 @@
 =>
   (remove-precondition ?precond)
   ; If there are any grounded preconditions, we need to recompute them.
-  (assert (domain-wm-update))
+  (domain-retract-grounding)
 )
 
 (defrule domain-replace-precond-on-sensed-val-effect-of-exog-action
@@ -330,13 +342,12 @@
             (param-constants $?const-args ?const-eff-val)))
   (modify ?ap (part-of ?precond) (name (sym-cat ?precond 1)))
   ; If there are any grounded preconditions, we need to recompute them.
-  (assert (domain-wm-update))
+  (domain-retract-grounding)
 )
 
 (defrule domain-ground-action-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific action-id."
-  (not (domain-wm-update))
   (plan-action (action-name ?op) (goal-id ?g) (plan-id ?p) (id ?action-id)
     (status FORMULATED|PENDING|WAITING))
   ?precond <- (domain-precondition
@@ -354,7 +365,6 @@
 (defrule domain-ground-effect-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific effect-id."
-  (not (domain-wm-update))
   (plan-action (action-name ?op) (id ?action-id) (goal-id ?g) (plan-id ?p)
     (status EXECUTION-SUCCEEDED))
   (domain-effect (name ?effect-name) (part-of ?op))
@@ -372,7 +382,6 @@
 (defrule domain-ground-nested-precondition
   "Ground a non-atomic precondition that is part of another precondition. Copy
    the action ID from the parent precondition."
-  (not (domain-wm-update))
   ?precond <- (domain-precondition
                 (name ?precond-name)
                 (part-of ?parent)
@@ -392,7 +401,6 @@
 
 (defrule domain-ground-atomic-precondition
   "Ground an atomic precondition of an operator."
-  (not (domain-wm-update))
   (plan-action
     (action-name ?op)
     (goal-id ?g)
@@ -783,7 +791,7 @@
   ?a <- (plan-action (id ?action-id) (status EFFECTS-APPLIED))
   =>
   (modify ?a (status FINAL))
-  (assert (domain-wm-update))
+  (domain-retract-grounding)
 )
 
 ; This might be extended: if an action failed, but still all effects
@@ -796,7 +804,7 @@
   ?a <- (plan-action (id ?action-id) (status EXECUTION-FAILED))
   =>
   (modify ?a (status FAILED))
-  (assert (domain-wm-update))
+  (domain-retract-grounding)
 )
 
 (defrule domain-check-if-action-is-executable
@@ -938,32 +946,8 @@
               "is not matched with a complementary effect"))))
 )
 
-(defrule domain-cleanup-preconditions-on-worldmodel-change
-  "Retract grounded preconditions when the worldmodel changes."
-  (domain-wm-update)
-  ?precond <- (domain-precondition (grounded TRUE))
-=>
-  (retract ?precond)
-)
-
-(defrule domain-cleanup-atomic-preconditions-on-worldmodel-change
-  "Retract grounded atomic preconditions when the worldmodel changes."
-  (domain-wm-update)
-  ?precond <- (domain-atomic-precondition (grounded TRUE))
-=>
-  (retract ?precond)
-)
-
-(defrule domain-wm-update-done
-  "Updating the world model finished, cleanup update fact."
-  ?wmu <- (domain-wm-update)
-=>
-  (retract ?wmu)
-)
-
 (defrule domain-print-error
   (domain-error (error-type ?type) (error-msg ?msg))
   =>
   (printout error "Domain error '" ?type "': " ?msg crlf)
 )
-
