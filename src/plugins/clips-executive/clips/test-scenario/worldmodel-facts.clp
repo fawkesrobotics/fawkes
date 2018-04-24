@@ -49,6 +49,10 @@
 		; especially in a multi-robot setting.
 		(wm-fact (key cx identity) (value "executive"))
 	)
+
+	(wm-robmem-sync-enable
+	 "/domain/fact"
+	)
 )
 
 
