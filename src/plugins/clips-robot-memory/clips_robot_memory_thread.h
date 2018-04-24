@@ -77,6 +77,12 @@ class ClipsRobotMemoryThread
   void          clips_bson_array_finish(void *barr);
   void          clips_bson_array_append(void *barr, CLIPS::Value value);
   std::string   clips_bson_tostring(void *bson);
+  CLIPS::Values clips_bson_field_names(void *bson);
+  CLIPS::Value  clips_bson_has_field(void *bson, std::string field_name);
+  CLIPS::Value  clips_bson_get(void *bson, std::string field_name);
+  CLIPS::Values clips_bson_get_array(void *bson, std::string field_name);
+  CLIPS::Values clips_bson_get_time(void *bson, std::string field_name);
+
   void          clips_robotmemory_upsert(std::string collection, void *bson, CLIPS::Value query);
   void          clips_robotmemory_update(std::string collection, void *bson, CLIPS::Value query);
   void          clips_robotmemory_replace(std::string collection, void *bson, CLIPS::Value query);
@@ -91,11 +97,13 @@ class ClipsRobotMemoryThread
   CLIPS::Value  clips_robotmemory_cursor_more(void *cursor);
   CLIPS::Value  clips_robotmemory_cursor_next(void *cursor);
   void          clips_robotmemory_cursor_destroy(void *cursor);
-  CLIPS::Values clips_bson_field_names(void *bson);
-  CLIPS::Value  clips_bson_has_field(void *bson, std::string field_name);
-  CLIPS::Value  clips_bson_get(void *bson, std::string field_name);
-  CLIPS::Values clips_bson_get_array(void *bson, std::string field_name);
-  CLIPS::Values clips_bson_get_time(void *bson, std::string field_name);
+
+  CLIPS::Value  clips_robotmemory_mutex_create(std::string name);
+  CLIPS::Value  clips_robotmemory_mutex_destroy(std::string name);
+  CLIPS::Value  clips_robotmemory_mutex_try_lock(std::string name);
+  CLIPS::Value  clips_robotmemory_mutex_force_lock(std::string name);
+  CLIPS::Value  clips_robotmemory_mutex_unlock(std::string name);
+
   CLIPS::Value  clips_robotmemory_register_trigger(std::string env_name, std::string collection, void *query, std::string assert_name);
   void  clips_robotmemory_destroy_trigger(void *trigger);
 

@@ -103,6 +103,22 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
   clips->add_function("robmem-create-index", sigc::slot<void, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_create_index)));
   clips->add_function("robmem-create-unique-index", sigc::slot<void, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_create_unique_index)));
 
+  clips->add_function("robmem-mutex-create",
+                      sigc::slot<CLIPS::Value, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_create)));
+  clips->add_function("robmem-mutex-destroy",
+                      sigc::slot<CLIPS::Value, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_destroy)));
+  clips->add_function("robmem-mutex-try-lock",
+                      sigc::slot<CLIPS::Value, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock)));
+  clips->add_function("robmem-mutex-force-lock",
+                      sigc::slot<CLIPS::Value, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock)));
+  clips->add_function("robmem-mutex-unlock",
+                      sigc::slot<CLIPS::Value, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock)));
+
   clips->build("(deffacts have-feature-mongodb (have-feature MongoDB))");
 
   //load helper functions written in CLIPS
@@ -765,4 +781,39 @@ ClipsRobotMemoryThread::clips_robotmemory_destroy_trigger(void *trigger)
   ClipsRmTrigger *clips_trigger = static_cast<ClipsRmTrigger *>(trigger);
   clips_triggers_.remove(clips_trigger);
   delete clips_trigger; //the triger unregisteres itself at the robot memory
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_create(std::string name)
+{
+	bool rv = robot_memory->mutex_create(name);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_destroy(std::string name)
+{
+	bool rv = robot_memory->mutex_destroy(name);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock(std::string name)
+{
+	bool rv = robot_memory->mutex_try_lock(name);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock(std::string name)
+{
+	bool rv = robot_memory->mutex_try_lock(name, /* force */ true);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock(std::string name)
+{
+	bool rv = robot_memory->mutex_unlock(name);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
 }
