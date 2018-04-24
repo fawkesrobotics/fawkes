@@ -372,6 +372,40 @@ int RobotMemory::update(mongo::Query query, std::string update_str, std::string 
   return update(query, fromjson(update_str), collection, upsert);
 }
 
+
+/** Atomically update and retrieve document.
+ * @param filter The filter defining the document to update.
+ * If multiple match takes the first one.
+ * @param update Update statement. May only contain update operators!
+ * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @param upsert Should the update document be inserted if the query returns no documents?
+ * @param return_new return the document before (false) or after (true) the update has been applied?
+ * @return document, depending on @p return_new either before or after the udpate has been applied.
+ */
+mongo::BSONObj
+RobotMemory::find_one_and_update(const mongo::BSONObj& filter, const mongo::BSONObj& update,
+                                 std::string collection, bool upsert, bool return_new)
+{
+  check_collection_name(collection);
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
+
+  log_deb(std::string("Executing findOneAndUpdate "+update.toString()+
+                      " for filter "+filter.toString()+" on collection "+ collection));
+
+  MutexLocker lock(mutex_);
+
+  try{
+	  return mongodb_client->findAndModify(collection, filter, update, upsert, return_new);
+  } catch (DBException &e) {
+	  std::string error = "Error for update "+update.toString()+" for query "+
+		  filter.toString()+"\n Exception: "+e.toString();
+	  log_deb(error, "error");
+    BSONObjBuilder b;
+    b.append("error", error);
+    return b.obj();
+  }
+}
+
 /**
  * Remove documents from the robot memory
  * @param query Which documents to remove
