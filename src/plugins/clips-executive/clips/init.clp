@@ -20,9 +20,17 @@
 	(slot name (type SYMBOL))
 	(slot order (type INTEGER))
 	(slot feature)
+	(slot wait-for (type SYMBOL) (default nil))
 	(multislot files (type STRING))
-	(slot state (type SYMBOL) (allowed-values PENDING FEATURE-REQUESTED FEATURE-DONE COMPLETED ERROR))
+	(slot state (type SYMBOL) (allowed-values PENDING FEATURE-REQUESTED FEATURE-DONE
+	                                          WAIT-FOR COMPLETED ERROR))
 	(multislot error-msgs (type STRING))
+)
+
+(deftemplate executive-init-signal
+	(slot id (type SYMBOL))
+	(slot ok (type SYMBOL) (allowed-values TRUE FALSE))
+	(slot error-msg (type STRING))
 )
 
 (defrule executive-load-config
@@ -101,6 +109,7 @@
 		(bind ?files (create$))
 		(bind ?error-msgs (create$))
 		(bind ?state PENDING)
+		(bind ?wait-for nil)
 		(if (not (any-factp ((?c confval)) (eq (str-cat ?cfgpfx ?i "/name") ?c:path)))
 		 then
 			(bind ?state ERROR)
@@ -115,6 +124,9 @@
 			(do-for-fact ((?c confval)) (eq (str-cat ?cfgpfx ?i "/file") ?c:path)
 				(bind ?files (append$ ?files ?c:value))
 			)
+			(do-for-fact ((?c confval)) (eq (str-cat ?cfgpfx ?i "/wait-for") ?c:path)
+				(bind ?wait-for (sym-cat ?c:value))
+			)
 			(do-for-fact ((?c confval)) (eq (str-cat ?cfgpfx ?i "/files") ?c:path)
 				(if (not ?c:is-list)
 				 then
@@ -127,7 +139,7 @@
 		(assert (executive-init-request (state ?state) (error-msgs ?error-msgs)
 																		(stage ?stage) (order (+ ?i-index ?*CX-USER-INIT-OFFSET*))
 																		(name (sym-cat ?name)) (feature ?feature)
-																		(files ?files)))
+																		(files ?files) (wait-for ?wait-for)))
 	)
 )
 
@@ -211,7 +223,8 @@
 (defrule executive-init-stage-request-files
 	(executive-init)
 	(executive-init-stage ?stage)
-	?ir <- (executive-init-request (state FEATURE-DONE) (stage ?stage) (name ?name) (files $?files))
+	?ir <- (executive-init-request (state FEATURE-DONE) (stage ?stage) (name ?name)
+																 (files $?files) (wait-for ?wait-for))
 	=>
 	(if (> (length$ ?files) 0)
 	 then
@@ -231,7 +244,36 @@
 			)
 		)
 	)
+	(if (eq ?wait-for nil)
+	then
+		(modify ?ir (state COMPLETED))
+	else
+		(printout t "Init " ?stage ": waiting for signal " ?wait-for " by " ?name crlf)
+		(modify ?ir (state WAIT-FOR))
+	)
+)
+
+(defrule executive-init-stage-wait-for-ok
+	(executive-init)
+	(executive-init-stage ?stage)
+	?ir <- (executive-init-request (state WAIT-FOR) (stage ?stage) (name ?name)
+																 (wait-for ?wait-for))
+	?ws <- (executive-init-signal (id ?wait-for) (ok TRUE))
+	=>
+	(retract ?ws)
+	(printout info "Init " ?stage ": signal " ?wait-for " by " ?name " received" crlf)
 	(modify ?ir (state COMPLETED))
+)
+
+(defrule executive-init-stage-wait-for-fail
+	(executive-init)
+	(executive-init-stage ?stage)
+	?ir <- (executive-init-request (state WAIT-FOR) (stage ?stage) (name ?name)
+																 (wait-for ?wait-for))
+	?ws <- (executive-init-signal (id ?wait-for) (ok FALSE) (error-msg ?error-msg))
+	=>
+	(retract ?ws)
+	(modify ?ir (state ERROR) (error-msgs ?error-msg))
 )
 
 (defrule executive-init-stage-finished
