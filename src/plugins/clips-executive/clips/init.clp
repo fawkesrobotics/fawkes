@@ -136,6 +136,8 @@
 	(executive-init)
   (confval (path "/clips-executive/spec") (type STRING) (value ?spec))
 	=>
+	(assert (executive-init-request (state PENDING)	(stage STAGE-1) (order 0)
+																	(name blackboard) (feature TRUE) (files "BATCH|blackboard-init.clp")))
 	(cx-assert-init-requests ?spec STAGE-1 TRUE)
 	(assert (executive-init-request (state PENDING)	(stage STAGE-2) (order 0)
 																	(name cx-files) (feature FALSE) (files ?*CX-STAGE2-FILES*)))
