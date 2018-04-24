@@ -210,8 +210,6 @@ MongoDBThread::init_replicaset_configs()
 void
 MongoDBThread::finalize()
 {
-	client_configs_.clear();
-
 	for (auto c : instance_configs_) {
 		logger->log_info(name(), "Stopping instance '%s', grace period %u sec",
 		                 c.first.c_str(), c.second->termination_grace_period());
@@ -224,6 +222,12 @@ MongoDBThread::finalize()
 		thread_collector->remove(&*c.second);
 	}
 	replicaset_configs_.clear();
+
+	client_configs_.clear();
+
+#ifdef HAVE_MONGODB_VERSION_H
+	mongo::client::shutdown();
+#endif
 }
 
 
