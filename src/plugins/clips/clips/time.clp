@@ -36,6 +36,13 @@
   (return (> (time-diff-sec ?now ?time) ?timeout))
 )
 
+(deffunction time> (?t1 ?t2)
+	(bind ?rv FALSE)
+	(if (> (nth$ 1 ?t1) (nth$ 1 ?t2)) then (bind ?rv TRUE))
+	(if (and (= (nth$ 1 ?t1) (nth$ 1 ?t2)) (> (nth$ 2 ?t1) (nth$ 2 ?t2))) then (bind ?rv TRUE))
+	(return ?rv)
+)
+
 
 ; Timer deftemplate, to be used with the timeout function.
 ; An example for a periodically triggered rule (assuming that you do have
