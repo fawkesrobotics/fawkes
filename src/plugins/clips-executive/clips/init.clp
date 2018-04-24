@@ -10,14 +10,15 @@
 (defglobal
   ?*CONFIG_PREFIX* = "/clips-executive"
 	?*INIT-STAGES* = (create$ STAGE-1 STAGE-2 STAGE-3)
-	?*CX-FILES* = (create$ "plan.clp" "domain.clp" "worldmodel.clp" "wm-domain-sync.clp"
-	                       "wm-config.clp" "blackboard-init.clp" "BATCH|skills.clp")
+	?*CX-STAGE2-FILES* = (create$ "plan.clp" "domain.clp" "worldmodel.clp" "wm-domain-sync.clp"
+	                              "wm-config.clp" "BATCH|skills.clp")
+	?*CX-USER-INIT-OFFSET* = 10
 )
 
 (deftemplate executive-init-request
 	(slot stage (type SYMBOL))
+	(slot name (type SYMBOL))
 	(slot order (type INTEGER))
-	(slot name)
 	(slot feature)
 	(multislot files (type STRING))
 	(slot state (type SYMBOL) (allowed-values PENDING FEATURE-REQUESTED FEATURE-DONE COMPLETED ERROR))
@@ -124,8 +125,9 @@
 			)
 		)
 		(assert (executive-init-request (state ?state) (error-msgs ?error-msgs)
-																		(stage ?stage) (order ?i-index)
-																		(name (sym-cat ?name)) (feature ?feature) (files ?files)))
+																		(stage ?stage) (order (+ ?i-index ?*CX-USER-INIT-OFFSET*))
+																		(name (sym-cat ?name)) (feature ?feature)
+																		(files ?files)))
 	)
 )
 
@@ -136,7 +138,7 @@
 	=>
 	(cx-assert-init-requests ?spec STAGE-1 TRUE)
 	(assert (executive-init-request (state PENDING)	(stage STAGE-2) (order 0)
-																	(name cx-files) (feature FALSE) (files ?*CX-FILES*)))
+																	(name cx-files) (feature FALSE) (files ?*CX-STAGE2-FILES*)))
 	(cx-assert-init-requests ?spec STAGE-2 FALSE)
 	(cx-assert-init-requests ?spec STAGE-3 FALSE)
 	(assert (executive-init-stage STAGE-1))
@@ -168,7 +170,7 @@
 	(ff-feature ?name)
 	=>
 	(printout t "Init " ?stage ": requesting feature " ?name crlf)
-	(ff-feature-request ?name)
+	(ff-feature-request (str-cat ?name))
 	(modify ?ir (state FEATURE-REQUESTED))
 )
 
@@ -179,7 +181,6 @@
 																 (name ?name) (feature FALSE))
 	(not (executive-init-request (state ~COMPLETED) (stage ?stage) (order ?order2&:(< ?order2 ?order))))
 	=>
-	(printout t "Init " ?stage ": no feature to request for " ?name crlf)
 	(modify ?ir (state FEATURE-DONE))
 )
 
@@ -201,7 +202,7 @@
 	?ir <- (executive-init-request (state FEATURE-REQUESTED) (stage ?stage) (name ?name))
 	(ff-feature-loaded ?name)
 	=>
-	(printout t "Init " ?stage ": feature request for " ?name " has been fulfilled" crlf)
+	(printout debug "Init " ?stage ": feature request for " ?name " has been fulfilled" crlf)
 	(modify ?ir (state FEATURE-DONE))
 )
 
