@@ -114,7 +114,7 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 		bootstrap_client_->createIndex(bootstrap_ns_,
 		                               mongo::IndexSpec().addKey("last_seen").expireAfterSeconds(leader_expiration_));
 
-		leader_elec_query_ = BSON("host" << local_hostport_);
+		leader_elec_query_ = BSON("host" << local_hostport_ << "master" << false);
 		leader_elec_query_force_ = BSON("master" << true);
 
 		mongo::BSONObjBuilder update;
