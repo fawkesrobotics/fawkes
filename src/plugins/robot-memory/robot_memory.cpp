@@ -25,6 +25,7 @@
 #include <core/threading/mutex_locker.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
+#include <utils/system/hostinfo.h>
 
 #include <string>
 #include <chrono>
@@ -771,4 +772,137 @@ void RobotMemory::remove_trigger(EventTrigger* trigger)
 void RobotMemory::remove_computable(Computable* computable)
 {
   computables_manager_->remove_computable(computable);
+}
+
+/** Explicitly create a mutex.
+ * This is an optional step, a mutex is also created automatically when trying
+ * to acquire the lock for the first time. Adding it explicitly may increase
+ * visibility, e.g., in the database. Use it for mutexes which are locked
+ * only very infrequently.
+ * @param name mutex name
+ * @return true if operation was successful, false on failure
+ */
+bool
+RobotMemory::mutex_create(const std::string& name)
+{
+	mongo::DBClientInterface *client =
+		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+	mongo::BSONObjBuilder insert_doc;
+	insert_doc.append("$currentDate", BSON("last_seen" << true));
+	insert_doc.append("_id", name);
+	insert_doc.append("locked", false);
+	try {
+		client->insert("robmem_locking.mutex", insert_doc.obj(),
+		               0, &mongo::WriteConcern::majority);
+		return true;
+	} catch (mongo::DBException &e) {
+		logger_->log_info(name_, "Failed to create mutex %s: %s", name.c_str(), e.what());
+		return false;
+	}
+}
+
+/** Destroy a mutex.
+ * The mutex is erased from the database. This is done disregarding it's current
+ * lock state.
+ * @param name mutex name
+ * @return true if operation was successful, false on failure
+ */
+bool
+RobotMemory::mutex_destroy(const std::string& name)
+{
+	mongo::DBClientInterface *client =
+		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+	mongo::BSONObj destroy_doc{BSON("_id" << name)};
+	try {
+		client->remove("robmem_locking.mutex", destroy_doc,
+		               true, &mongo::WriteConcern::majority);
+		return true;
+	} catch (mongo::DBException &e) {
+		logger_->log_info(name_, "Failed to destroy mutex %s: %s", name.c_str(), e.what());
+		return false;
+	}
+}
+
+/** Try to acquire a lock for a mutex.
+ * This will access the database and atomically find and update (or
+ * insert) a mutex lock. If the mutex has not been created it is added
+ * automatically. If the lock cannot be acquired the function also
+ * returns immediately. There is no blocked waiting for the lock.
+ * @param name mutex name
+ * @param force true to force acquisition of the lock, i.e., even if
+ * the lock has already been acquired take ownership (steal the lock).
+ * @return true if operation was successful, false on failure
+ */
+bool
+RobotMemory::mutex_try_lock(const std::string& name, bool force)
+{
+	mongo::DBClientBase *client =
+		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+
+	HostInfo host_info;
+
+	// here we can add an $or to implement lock timeouts
+	mongo::BSONObj filter_doc{BSON("_id" << name << "locked" << force)};
+
+	mongo::BSONObjBuilder update_doc;
+	update_doc.append("$currentDate", BSON("last_seen" << true));
+	mongo::BSONObjBuilder update_set;
+	update_set.append("locked", true);
+	update_set.append("host", host_info.name());
+	update_doc.append("$set", update_set.obj());
+
+	try {
+		BSONObj new_doc =
+			client->findAndModify("robmem_locking.mutex",
+			                      filter_doc, update_doc.obj(),
+			                      /* upsert */ true, /* return new */ true,
+			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
+			                      &mongo::WriteConcern::majority);
+
+		return (new_doc.getField("host").String() == host_info.name() &&
+		        new_doc.getField("locked").Bool());
+
+	} catch (mongo::OperationException &e) {
+		//if (e.obj()["code"].numberInt() != 11000) {
+		// 11000: Duplicate key exception, occurs if we do not become leader, all fine
+		return false;
+	}
+}
+
+/** Release lock on mutex.
+ * @param name mutex name
+ * @return true if operation was successful, false on failure
+ */
+bool
+RobotMemory::mutex_unlock(const std::string& name)
+{
+	mongo::DBClientBase *client =
+		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+
+	HostInfo host_info;
+
+	// here we can add an $or to implement lock timeouts
+	mongo::BSONObj filter_doc{BSON("_id" << name << "host" << host_info.name())};
+
+	mongo::BSONObjBuilder update_doc;
+	update_doc.append("$currentDate", BSON("last_seen" << true));
+	mongo::BSONObjBuilder update_set;
+	update_set.append("locked", false);
+	update_doc.append("$set", update_set.obj());
+	update_doc.append("$unset", BSON("host" << true));
+
+	try {
+		BSONObj new_doc =
+			client->findAndModify("robmem_locking.mutex",
+			                      filter_doc, update_doc.obj(),
+			                      /* upsert */ true, /* return new */ true,
+			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
+			                      &mongo::WriteConcern::majority);
+
+		return true;
+	} catch (mongo::OperationException &e) {
+		//if (e.obj()["code"].numberInt() != 11000) {
+		// 11000: Duplicate key exception, occurs if we do not become leader, all fine
+		return false;
+	}
 }

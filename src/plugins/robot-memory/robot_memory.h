@@ -73,6 +73,14 @@ class RobotMemory
     int dump_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
     int create_index(mongo::BSONObj keys, std::string collection = "", bool unique = false);
 
+    //bool semaphore_create(const std::string& name, unsigned int value);
+    //bool semaphore_acquire(const std::string& name, unsigned int v = 1);
+    //bool semaphore_release(const std::string& name, unsigned int v = 1);
+    bool mutex_create(const std::string& name);
+    bool mutex_destroy(const std::string& name);
+    bool mutex_try_lock(const std::string& name, bool force = false);
+    bool mutex_unlock(const std::string& name);
+
     /**
      * Register a trigger to be notified when the robot memory is updated and the updated document matches the query
      * @param query Query the updated document has to match
