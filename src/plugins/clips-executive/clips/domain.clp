@@ -488,6 +488,18 @@
   (modify ?precond (is-satisfied (eq (nth$ 1 ?params) (nth$ 2 ?params))))
 )
 
+(defrule domain-retract-atomic-precondition-if-not-satisfied
+  ?precond <- (domain-atomic-precondition
+                (goal-id ?g) (plan-id ?p)
+                (is-satisfied TRUE)
+                (predicate ?pred)
+                (param-values $?params)
+                (grounded TRUE))
+  (not (domain-fact (name ?pred) (param-values $?params)))
+=>
+  (modify ?precond (is-satisfied FALSE))
+)
+
 (defrule domain-check-if-negative-precondition-is-satisfied
   "A negative precondition is satisfied iff its (only) child is not satisfied.
    Note that we need a second rule that retracts the fact if the child is
