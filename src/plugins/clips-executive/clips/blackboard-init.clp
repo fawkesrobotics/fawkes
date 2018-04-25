@@ -12,7 +12,7 @@
 
 (do-for-fact ((?cs confval) (?cp confval))
 						 (and (eq ?cs:path "/clips-executive/spec") (eq ?cs:type STRING)
-									(eq ?cp:path (str-cat "/clips-executive/specs/" ?cs:spec "/blackboard-preload"))
+									(eq ?cp:path (str-cat "/clips-executive/specs/" ?cs:value "/blackboard-preload"))
 									(eq ?cp:type STRING) (eq ?cp:is-list TRUE))
 	(foreach ?t ?cp:list-value (blackboard-preload ?t))
 )
