@@ -10,7 +10,8 @@
 (defglobal
   ?*CONFIG_PREFIX* = "/clips-executive"
 	?*INIT-STAGES* = (create$ STAGE-1 STAGE-2 STAGE-3)
-	?*CX-STAGE2-FILES* = (create$ "plan.clp" "domain.clp" "worldmodel.clp" "wm-domain-sync.clp"
+	?*CX-STAGE2-FILES* = (create$ "plan.clp" "domain.clp"
+	                              "worldmodel.clp" "cx-identity.clp"  "wm-domain-sync.clp"
 	                              "wm-config.clp" "BATCH|skills.clp")
 	?*CX-USER-INIT-OFFSET* = 10
 )
