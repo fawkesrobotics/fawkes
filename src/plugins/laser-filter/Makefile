@@ -17,7 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
-SUBDIRS = deadspots
+SUBDIRS = deadspots interfaces
 
 LIBS_laser_filter = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	            fawkesinterface \
