@@ -107,7 +107,8 @@ class ClipsRobotMemoryThread
 
   CLIPS::Values clips_robotmemory_mutex_create_async(std::string name);
   CLIPS::Values clips_robotmemory_mutex_destroy_async(std::string name);
-  CLIPS::Values clips_robotmemory_mutex_try_lock_async(std::string name, std::string identity);
+  CLIPS::Values clips_robotmemory_mutex_try_lock_async(std::string env_name,
+                                                       std::string name, std::string identity);
   CLIPS::Values clips_robotmemory_mutex_force_lock_async(std::string name, std::string identity);
   CLIPS::Values clips_robotmemory_mutex_unlock_async(std::string name, std::string identity);
 
