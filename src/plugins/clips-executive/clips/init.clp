@@ -20,7 +20,7 @@
 	(slot stage (type SYMBOL))
 	(slot name (type SYMBOL))
 	(slot order (type INTEGER))
-	(slot feature)
+	(slot feature (type SYMBOL) (allowed-values FALSE TRUE))
 	(slot wait-for (type SYMBOL) (default nil))
 	(multislot files (type STRING))
 	(slot state (type SYMBOL) (allowed-values PENDING FEATURE-REQUESTED FEATURE-DONE
