@@ -98,6 +98,8 @@ clips-executive:
             file: test-scenario/state-estimation.clp
           - name: worldmodel
             files: [wm-robmem-sync.clp, test-scenario/worldmodel-facts.clp]
+          - name: coordination
+            file: coordination-mutex.clp
           - name: goal-reasoner
             file: test-scenario/goal-reasoner.clp
           - name: goal-expander
@@ -105,7 +107,10 @@ clips-executive:
           - name: action-selection
             file: test-scenario/action-selection.clp
           - name: action-execution
-            files: [skills-actions.clp, test-scenario/print-action.clp]
+            files:
+              - skills-actions.clp
+              - test-scenario/print-action.clp
+              - lock-actions.clp
           - name: execution-monitoring
             file: test-scenario/execution-monitoring.clp
 
