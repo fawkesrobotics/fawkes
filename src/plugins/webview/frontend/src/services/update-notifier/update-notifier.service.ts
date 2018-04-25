@@ -31,7 +31,8 @@ export class SwUpdateNotifierService {
     */
 
     if (environment.production) {
-      Observable.interval(120000).subscribe((num) => {
+      this.force_install();
+      Observable.interval(60000).subscribe((num) => {
         this.check_now();
       });
     }
@@ -46,7 +47,7 @@ export class SwUpdateNotifierService {
   {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/ngsw-worker.js').then(function (registration) {
-        console.log('Service Worker registered');
+        //console.log('Service Worker registered');
       }).catch(function (err) {
         console.error('Service Worker registration failed: ', err);
       });
