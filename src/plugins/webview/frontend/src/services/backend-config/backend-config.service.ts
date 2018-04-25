@@ -113,15 +113,16 @@ export class BackendConfigurationService {
   }
 
   has_url_for(service: string): boolean {
-    return (service in this.backends_[this.current_backend].services);
+    return (this.backends_[this.current_backend].services[service] != null);
   }
 
   url_for(service : string) {
-    if (service in this.backends_[this.current_backend].services) {
+    if (this.backends_[this.current_backend].services[service]) {
       let url = this.backends_[this.current_backend].services[service].toString();
       return url.replace(/\/$/, "");
     } else {
-      throw `No service ${service} known for backend ${this.current_backend}`;
+      console.log(`No service ${service} known for backend ${this.current_backend}`);
+      return null;
     }
   }
 
