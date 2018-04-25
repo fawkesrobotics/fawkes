@@ -247,6 +247,7 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
     wpreply->pack(active_baseurl_,
 		  page_header_generator_, page_footer_generator_);
   } else {
+    sreply->pack_caching();
     sreply->pack();
   }
   if (sreply->body_length() > 0) {
@@ -284,7 +285,7 @@ WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection * connection,
                                           DynamicWebReply *dreply)
 {
   dreply->set_request(request);
-  dreply->pack();
+  dreply->pack_caching();
   request->set_reply_code(dreply->code());
 
   struct MHD_Response *response;
@@ -318,6 +319,7 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
 					 StaticWebReply *sreply)
 {
   sreply->set_request(request);
+  sreply->pack_caching();
   sreply->pack();
 
   struct MHD_Response *response = prepare_static_response(sreply);
@@ -339,6 +341,7 @@ WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection * connection,
   StaticWebReply sreply(WebReply::HTTP_UNAUTHORIZED, UNAUTHORIZED_REPLY);
 #if MHD_VERSION >= 0x00090400
   sreply.set_request(request);
+  sreply.pack_caching();
   sreply.pack();
   struct MHD_Response *response = prepare_static_response(&sreply);
 

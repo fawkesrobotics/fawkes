@@ -190,13 +190,11 @@ WebReply::set_request(WebRequest *request)
  * Sets no-caching flags if caching has been disabled. 
  */
 void
-WebReply::pack()
+WebReply::pack_caching()
 {
   if (! caching_) {
     // Headers to disable caching
-    headers_["Cache-Control"] = "no-cache, no-store, must-revalidate";
-    headers_["Pragma"] = "no-cache";
-    headers_["Expires"] = "0";
+    headers_["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0";
   }
 }
 

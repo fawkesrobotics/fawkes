@@ -115,7 +115,7 @@ class WebReply
   void              set_request(WebRequest *request);
   WebRequest *      get_request() const;
 
-  void              pack();
+  void              pack_caching();
 
  private:
   Code              code_;
