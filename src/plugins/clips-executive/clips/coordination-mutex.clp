@@ -192,6 +192,15 @@
 	(modify ?mf (response REJECTED) (error-msg (str-cat "Lock held by " ?lb)))
 )
 
+(defrule mutex-lock-op-failed
+	?mf <- (mutex (name ?name) (request LOCK) (response PENDING))
+	?of <- (mutex-op-failed try-lock-async ?name)
+	=>
+	(retract ?of)
+	(modify ?mf (response REJECTED) (error-msg "Lock held by unknown")
+	            (state LOCKED) (locked-by "unknown"))
+)
+
 (defrule mutex-unlock-start
 	?mf <- (mutex (name ?name) (request UNLOCK) (response NONE)
 								(state LOCKED) (locked-by ?lb&:(eq ?lb (cx-identity))))
