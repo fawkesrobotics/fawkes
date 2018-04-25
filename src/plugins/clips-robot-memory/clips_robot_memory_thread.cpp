@@ -645,10 +645,11 @@ ClipsRobotMemoryThread::clips_bson_has_field(void *bson, std::string field_name)
 
   mongo::BSONObj o(b->asTempObj());
 
-  if (! o.hasField(field_name)) {
+  if (o.getFieldDotted(field_name).eoo()) {
     return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  } else {
+	  return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
   }
-  return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
 }
 
 CLIPS::Values
