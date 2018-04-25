@@ -110,13 +110,13 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
                       sigc::slot<CLIPS::Value, std::string>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_destroy)));
   clips->add_function("robmem-mutex-try-lock",
-                      sigc::slot<CLIPS::Value, std::string>
+                      sigc::slot<CLIPS::Value, std::string, std::string>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock)));
   clips->add_function("robmem-mutex-force-lock",
-                      sigc::slot<CLIPS::Value, std::string>
+                      sigc::slot<CLIPS::Value, std::string, std::string>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock)));
   clips->add_function("robmem-mutex-unlock",
-                      sigc::slot<CLIPS::Value, std::string>
+                      sigc::slot<CLIPS::Value, std::string, std::string>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock)));
 
   clips->build("(deffacts have-feature-mongodb (have-feature MongoDB))");
@@ -798,22 +798,22 @@ ClipsRobotMemoryThread::clips_robotmemory_mutex_destroy(std::string name)
 }
 
 CLIPS::Value
-ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock(std::string name)
+ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock(std::string name, std::string identity)
 {
-	bool rv = robot_memory->mutex_try_lock(name);
+	bool rv = robot_memory->mutex_try_lock(name, identity);
 	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
 }
 
 CLIPS::Value
-ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock(std::string name)
+ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock(std::string name, std::string identity)
 {
-	bool rv = robot_memory->mutex_try_lock(name, /* force */ true);
+	bool rv = robot_memory->mutex_try_lock(name, identity, /* force */ true);
 	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
 }
 
 CLIPS::Value
-ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock(std::string name)
+ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock(std::string name, std::string identity)
 {
-	bool rv = robot_memory->mutex_unlock(name);
+	bool rv = robot_memory->mutex_unlock(name, identity);
 	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
 }

@@ -100,9 +100,9 @@ class ClipsRobotMemoryThread
 
   CLIPS::Value  clips_robotmemory_mutex_create(std::string name);
   CLIPS::Value  clips_robotmemory_mutex_destroy(std::string name);
-  CLIPS::Value  clips_robotmemory_mutex_try_lock(std::string name);
-  CLIPS::Value  clips_robotmemory_mutex_force_lock(std::string name);
-  CLIPS::Value  clips_robotmemory_mutex_unlock(std::string name);
+  CLIPS::Value  clips_robotmemory_mutex_try_lock(std::string name, std::string identity);
+  CLIPS::Value  clips_robotmemory_mutex_force_lock(std::string name, std::string identity);
+  CLIPS::Value  clips_robotmemory_mutex_unlock(std::string name, std::string identity);
 
   CLIPS::Value  clips_robotmemory_register_trigger(std::string env_name, std::string collection, void *query, std::string assert_name);
   void  clips_robotmemory_destroy_trigger(void *trigger);
