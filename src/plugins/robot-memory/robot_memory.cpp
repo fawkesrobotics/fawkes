@@ -851,7 +851,11 @@ RobotMemory::mutex_try_lock(const std::string& name,
 	}
 
 	// here we can add an $or to implement lock timeouts
-	mongo::BSONObj filter_doc{BSON("_id" << name << "locked" << force)};
+	mongo::BSONObjBuilder filter_doc;
+	filter_doc.append("_id", name);
+	if (! force) {
+		filter_doc.append("locked", false);
+	}
 
 	mongo::BSONObjBuilder update_doc;
 	update_doc.append("$currentDate", BSON("last_seen" << true));
@@ -863,7 +867,7 @@ RobotMemory::mutex_try_lock(const std::string& name,
 	try {
 		BSONObj new_doc =
 			client->findAndModify(cfg_coord_mutex_collection_,
-			                      filter_doc, update_doc.obj(),
+			                      filter_doc.obj(), update_doc.obj(),
 			                      /* upsert */ true, /* return new */ true,
 			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
 			                      &mongo::WriteConcern::majority);
@@ -931,8 +935,6 @@ RobotMemory::mutex_unlock(const std::string& name,
 
 		return true;
 	} catch (mongo::OperationException &e) {
-		//if (e.obj()["code"].numberInt() != 11000) {
-		// 11000: Duplicate key exception, occurs if we do not become leader, all fine
 		return false;
 	}
 }
