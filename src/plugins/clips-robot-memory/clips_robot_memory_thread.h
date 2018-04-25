@@ -33,6 +33,7 @@
 #include "clips_rm_trigger.h"
 
 #include <string>
+#include <future>
 #include <clipsmm.h>
 
 namespace fawkes {
@@ -104,10 +105,20 @@ class ClipsRobotMemoryThread
   CLIPS::Value  clips_robotmemory_mutex_force_lock(std::string name, std::string identity);
   CLIPS::Value  clips_robotmemory_mutex_unlock(std::string name, std::string identity);
 
+  CLIPS::Values clips_robotmemory_mutex_create_async(std::string name);
+  CLIPS::Values clips_robotmemory_mutex_destroy_async(std::string name);
+  CLIPS::Values clips_robotmemory_mutex_try_lock_async(std::string name, std::string identity);
+  CLIPS::Values clips_robotmemory_mutex_force_lock_async(std::string name, std::string identity);
+  CLIPS::Values clips_robotmemory_mutex_unlock_async(std::string name, std::string identity);
+
   CLIPS::Value  clips_robotmemory_register_trigger(std::string env_name, std::string collection, void *query, std::string assert_name);
   void  clips_robotmemory_destroy_trigger(void *trigger);
 
+  bool mutex_future_ready(const std::string& name);
+
+ private:
   std::list<ClipsRmTrigger*>  clips_triggers_;
+  std::map<std::string, std::future<bool>> mutex_futures_;
 };
 
 

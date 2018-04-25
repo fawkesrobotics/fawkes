@@ -119,6 +119,22 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
                       sigc::slot<CLIPS::Value, std::string, std::string>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock)));
 
+  clips->add_function("robmem-mutex-create-async",
+                      sigc::slot<CLIPS::Values, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_create_async)));
+  clips->add_function("robmem-mutex-destroy-async",
+                      sigc::slot<CLIPS::Values, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_destroy_async)));
+  clips->add_function("robmem-mutex-try-lock-async",
+                      sigc::slot<CLIPS::Values, std::string, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock_async)));
+  clips->add_function("robmem-mutex-force-lock-async",
+                      sigc::slot<CLIPS::Values, std::string, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock_async)));
+  clips->add_function("robmem-mutex-unlock-async",
+                      sigc::slot<CLIPS::Values, std::string, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock_async)));
+
   clips->build("(deffacts have-feature-mongodb (have-feature MongoDB))");
 
   //load helper functions written in CLIPS
@@ -784,6 +800,7 @@ ClipsRobotMemoryThread::clips_robotmemory_destroy_trigger(void *trigger)
   delete clips_trigger; //the triger unregisteres itself at the robot memory
 }
 
+
 CLIPS::Value
 ClipsRobotMemoryThread::clips_robotmemory_mutex_create(std::string name)
 {
@@ -817,4 +834,121 @@ ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock(std::string name, std::st
 {
 	bool rv = robot_memory->mutex_unlock(name, identity);
 	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+
+bool
+ClipsRobotMemoryThread::mutex_future_ready(const std::string& name)
+{
+	auto mf_it = mutex_futures_.find(name);
+	if (mf_it != mutex_futures_.end()) {
+		auto fut_status = mutex_futures_[name].wait_for(std::chrono::milliseconds(0));
+		if (fut_status != std::future_status::ready) {
+			return false;
+		} else {
+			mutex_futures_.erase(mf_it);
+		}
+	}
+	return true;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_create_async(std::string name)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (create failed)"));
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, name] { return robot_memory->mutex_create(name); });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_destroy_async(std::string name)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (destroy failed)"));
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, name] { return robot_memory->mutex_destroy(name); });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock_async(std::string name, std::string identity)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (try-lock failed)"));
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, name, identity] {
+		                      return robot_memory->mutex_try_lock(name, identity);
+	                      });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock_async(std::string name, std::string identity)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (force-lock failed)"));
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, name, identity] {
+		                      return robot_memory->mutex_try_lock(name, identity, /* force */ true);
+	                      });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock_async(std::string name, std::string identity)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (unlock failed)"));
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, name, identity] {
+		                      return robot_memory->mutex_unlock(name, identity);
+	                      });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
 }
