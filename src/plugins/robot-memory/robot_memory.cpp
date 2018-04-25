@@ -852,7 +852,7 @@ RobotMemory::mutex_try_lock(const std::string& name, bool force)
 	update_doc.append("$currentDate", BSON("last_seen" << true));
 	mongo::BSONObjBuilder update_set;
 	update_set.append("locked", true);
-	update_set.append("host", host_info.name());
+	update_set.append("locked-by", identity);
 	update_doc.append("$set", update_set.obj());
 
 	try {
@@ -863,7 +863,7 @@ RobotMemory::mutex_try_lock(const std::string& name, bool force)
 			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
 			                      &mongo::WriteConcern::majority);
 
-		return (new_doc.getField("host").String() == host_info.name() &&
+		return (new_doc.getField("locked-by").String() == identity &&
 		        new_doc.getField("locked").Bool());
 
 	} catch (mongo::OperationException &e) {
@@ -886,14 +886,14 @@ RobotMemory::mutex_unlock(const std::string& name)
 	HostInfo host_info;
 
 	// here we can add an $or to implement lock timeouts
-	mongo::BSONObj filter_doc{BSON("_id" << name << "host" << host_info.name())};
+	mongo::BSONObj filter_doc{BSON("_id" << name << "locked-by" << identity)};
 
 	mongo::BSONObjBuilder update_doc;
 	update_doc.append("$currentDate", BSON("last_seen" << true));
 	mongo::BSONObjBuilder update_set;
 	update_set.append("locked", false);
 	update_doc.append("$set", update_set.obj());
-	update_doc.append("$unset", BSON("host" << true));
+	update_doc.append("$unset", BSON("locked-by" << true));
 
 	try {
 		BSONObj new_doc =
