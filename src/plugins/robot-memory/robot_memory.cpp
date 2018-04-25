@@ -99,6 +99,10 @@ void RobotMemory::init()
 	  cfg_startup_grace_period_ = config_->get_uint("/plugins/robot-memory/startup-grace-period");
   } catch (Exception &e) {} // ignored, use default
 
+  cfg_coord_database_ = config_->get_string("/plugins/robot-memory/coordination/database");
+  cfg_coord_mutex_collection_ = config_->get_string("/plugins/robot-memory/coordination/mutex-collection");
+  cfg_coord_mutex_collection_ = cfg_coord_database_ + "." + cfg_coord_mutex_collection_;
+
   using namespace std::chrono_literals;
   
   //initiate mongodb connections:
@@ -792,7 +796,7 @@ RobotMemory::mutex_create(const std::string& name)
 	insert_doc.append("_id", name);
 	insert_doc.append("locked", false);
 	try {
-		client->insert("robmem_locking.mutex", insert_doc.obj(),
+		client->insert(cfg_coord_mutex_collection_, insert_doc.obj(),
 		               0, &mongo::WriteConcern::majority);
 		return true;
 	} catch (mongo::DBException &e) {
@@ -814,7 +818,7 @@ RobotMemory::mutex_destroy(const std::string& name)
 		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 	mongo::BSONObj destroy_doc{BSON("_id" << name)};
 	try {
-		client->remove("robmem_locking.mutex", destroy_doc,
+		client->remove(cfg_coord_mutex_collection_, destroy_doc,
 		               true, &mongo::WriteConcern::majority);
 		return true;
 	} catch (mongo::DBException &e) {
@@ -853,7 +857,7 @@ RobotMemory::mutex_try_lock(const std::string& name, bool force)
 
 	try {
 		BSONObj new_doc =
-			client->findAndModify("robmem_locking.mutex",
+			client->findAndModify(cfg_coord_mutex_collection_,
 			                      filter_doc, update_doc.obj(),
 			                      /* upsert */ true, /* return new */ true,
 			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
@@ -893,7 +897,7 @@ RobotMemory::mutex_unlock(const std::string& name)
 
 	try {
 		BSONObj new_doc =
-			client->findAndModify("robmem_locking.mutex",
+			client->findAndModify(cfg_coord_mutex_collection_,
 			                      filter_doc, update_doc.obj(),
 			                      /* upsert */ true, /* return new */ true,
 			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
