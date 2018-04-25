@@ -32,6 +32,7 @@
 #ifdef HAVE_TF
 #  include "filters/projection.h"
   #include "filters/map_filter.h"
+  #include "filters/box_filter.h"
 #endif
 
 #include <core/threading/barrier.h>
@@ -501,6 +502,12 @@ LaserFilterThread::create_filter(std::string filter_name,
   } else if (filter_type == "map_filter") {
 #ifdef HAVE_TF
 	  return new LaserMapFilterDataFilter(filter_name, in_data_size, inbufs, tf_listener, config, logger);
+#else
+    throw Exception("Projection filter unavailable, tf missing");
+#endif
+  } else if (filter_type == "box_filter") {
+#ifdef HAVE_TF
+    return new LaserBoxFilterDataFilter(filter_name, in_data_size, inbufs, tf_listener, config, logger, blackboard);
 #else
     throw Exception("Projection filter unavailable, tf missing");
 #endif
