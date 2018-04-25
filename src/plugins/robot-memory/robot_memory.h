@@ -79,7 +79,8 @@ class RobotMemory
     bool mutex_create(const std::string& name);
     bool mutex_destroy(const std::string& name);
     bool mutex_try_lock(const std::string& name, bool force = false);
-    bool mutex_unlock(const std::string& name);
+    bool mutex_try_lock(const std::string& name, std::string identity, bool force = false);
+    bool mutex_unlock(const std::string& name, std::string identity);
 
     /**
      * Register a trigger to be notified when the robot memory is updated and the updated document matches the query

@@ -833,17 +833,22 @@ RobotMemory::mutex_destroy(const std::string& name)
  * automatically. If the lock cannot be acquired the function also
  * returns immediately. There is no blocked waiting for the lock.
  * @param name mutex name
+ * @param identity string to set as lock-holder
  * @param force true to force acquisition of the lock, i.e., even if
  * the lock has already been acquired take ownership (steal the lock).
  * @return true if operation was successful, false on failure
  */
 bool
-RobotMemory::mutex_try_lock(const std::string& name, bool force)
+RobotMemory::mutex_try_lock(const std::string& name,
+                            std::string identity, bool force)
 {
 	mongo::DBClientBase *client =
 		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 
-	HostInfo host_info;
+	if (identity.empty()) {
+		HostInfo host_info;
+		identity = host_info.name();
+	}
 
 	// here we can add an $or to implement lock timeouts
 	mongo::BSONObj filter_doc{BSON("_id" << name << "locked" << force)};
@@ -873,17 +878,38 @@ RobotMemory::mutex_try_lock(const std::string& name, bool force)
 	}
 }
 
-/** Release lock on mutex.
+/** Try to acquire a lock for a mutex.
+ * This will access the database and atomically find and update (or
+ * insert) a mutex lock. If the mutex has not been created it is added
+ * automatically. If the lock cannot be acquired the function also
+ * returns immediately. There is no blocked waiting for the lock.
  * @param name mutex name
+ * @param force true to force acquisition of the lock, i.e., even if
+ * the lock has already been acquired take ownership (steal the lock).
  * @return true if operation was successful, false on failure
  */
 bool
-RobotMemory::mutex_unlock(const std::string& name)
+RobotMemory::mutex_try_lock(const std::string& name, bool force)
+{
+	return mutex_try_lock(name, "", force);
+}
+
+/** Release lock on mutex.
+ * @param name mutex name
+ * @param identity string to set as lock-holder
+ * @return true if operation was successful, false on failure
+ */
+bool
+RobotMemory::mutex_unlock(const std::string& name,
+                          std::string identity)
 {
 	mongo::DBClientBase *client =
 		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 
-	HostInfo host_info;
+	if (identity.empty()) {
+		HostInfo host_info;
+		identity = host_info.name();
+	}
 
 	// here we can add an $or to implement lock timeouts
 	mongo::BSONObj filter_doc{BSON("_id" << name << "locked-by" << identity)};
