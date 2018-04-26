@@ -167,7 +167,9 @@ clips-executive:
       # Example: /clips-executive/specs/test/parameters/home-pos -> /config/home-pos
       parameters:
         coordination:
-          mutex-max-age-sec: 10
+          mutex:
+            renew-interval: 5
+            max-age-sec: 15
 
     test-pddl:
       domain: test-scenario-pddl/test-domain.clp
