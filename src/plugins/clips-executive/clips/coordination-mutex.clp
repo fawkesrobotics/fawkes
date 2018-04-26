@@ -84,7 +84,8 @@
 				; when a mutex is already locked, even if by ourself,
 				; reject another request.
 				; We may later make this configurable behavior.
-				(modify ?m (response REJECTED) (error-msg (str-cat "Lock already held by " ?m:locked-by)))
+				(modify ?m (request LOCK) (response REJECTED)
+				           (error-msg (str-cat "Lock already held by " ?m:locked-by)))
 			else
 				(if (member$ ?m:request (create$ NONE UNLOCK))
 				then
@@ -92,7 +93,7 @@
 				else
 					(bind ?error-msg (str-cat "Mutex " ?name " already has pending LOCK request. "
 					                          "This may lead to unpredictable behavior on both sides!"))
-					(modify ?m (response ERROR) (error-msg ?error-msg))
+					(modify ?m (request LOCK) (response ERROR) (error-msg ?error-msg))
 				)
 			)
 		)
@@ -107,7 +108,8 @@
 		(do-for-fact ((?m mutex)) (eq ?m:name ?name)
 			(if (and (eq ?m:state LOCKED) (neq ?m:locked-by (cx-identity)))
 			then
-				(modify ?m (response ERROR) (error-msg "Lock held by " ?m:locked-by ". Cannot release foreign lock."))
+			(modify ?m (request UNLOCK) (response ERROR)
+			           (error-msg "Lock held by " ?m:locked-by ". Cannot release foreign lock."))
 			else
 				(if (member$ ?m:request (create$ NONE LOCK))
 				then
@@ -115,7 +117,7 @@
 				else
 					(bind ?error-msg (str-cat "Mutex " ?name " already has pending UNLOCK request. "
 					                         "This may lead to unpredictable behavior on both sides!"))
-					(modify ?m (response ERROR) (error-msg ?error-msg))
+					(modify ?m (request UNLOCK) (response ERROR) (error-msg ?error-msg))
 				)
 			)
 		)
@@ -175,7 +177,7 @@
 	?mf <- (mutex (name ?name) (request LOCK) (response NONE)
 								(state LOCKED) (locked-by ?lb))
 	=>
-	(modify ?mf (response ERROR) (error-msg (str-cat "Lock already locked by " ?lb)))
+	(modify ?mf (response ERROR) (error-msg (str-cat "Mutex already locked by " ?lb)))
 )
 
 (defrule mutex-lock-acquired
