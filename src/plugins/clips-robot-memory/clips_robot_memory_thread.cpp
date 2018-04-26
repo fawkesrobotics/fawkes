@@ -113,6 +113,9 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
   clips->add_function("robmem-mutex-try-lock",
                       sigc::slot<CLIPS::Value, std::string, std::string>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock)));
+  clips->add_function("robmem-mutex-renew-lock",
+                      sigc::slot<CLIPS::Value, std::string, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_renew_lock)));
   clips->add_function("robmem-mutex-force-lock",
                       sigc::slot<CLIPS::Value, std::string, std::string>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock)));
@@ -826,6 +829,13 @@ ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock(std::string name, std::
 }
 
 CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_renew_lock(std::string name, std::string identity)
+{
+	bool rv = robot_memory->mutex_renew_lock(name, identity);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
 ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock(std::string name, std::string identity)
 {
 	bool rv = robot_memory->mutex_try_lock(name, identity, /* force */ true);
@@ -914,6 +924,35 @@ ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock_async(std::string env_n
 			                      envs_[env_name]->assert_fact_f("(mutex-op-feedback try-lock-async FAIL %s)",
 			                                                     name.c_str());
 		                      }
+		                      return ok;
+	                      });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_renew_lock_async(std::string env_name,
+                                                                 std::string name, std::string identity)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (try-lock failed)"));
+		MutexLocker lock(envs_[env_name].objmutex_ptr());
+		envs_[env_name]->assert_fact_f("(mutex-op-feedback renew-lock-async FAIL %s)",
+		                               name.c_str());
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, env_name, name, identity] {
+		                      bool ok = robot_memory->mutex_renew_lock(name, identity);
+		                      MutexLocker lock(envs_[env_name].objmutex_ptr());
+		                      envs_[env_name]->assert_fact_f("(mutex-op-feedback renew-lock-async %s %s)",
+		                                                     ok ? "OK" : "FAIL", name.c_str());
 		                      return ok;
 	                      });
 
