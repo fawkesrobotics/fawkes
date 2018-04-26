@@ -67,3 +67,29 @@
 	(modify ?pa (status EXECUTION-SUCCEEDED))
 	(modify ?mf (request NONE) (response NONE))
 )
+
+(defrule lock-actions-flush-locks-start
+	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (status PENDING)
+                      (action-name flush-locks) (executable TRUE))
+	=>
+	(mutex-flush-locks-async)
+	(modify ?pa (status RUNNING))
+)
+
+(defrule lock-actions-flush-locks-succeeded
+	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
+                      (action-name flush-locks) (status RUNNING))
+	?mf <- (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response COMPLETED))
+	=>
+	(modify ?pa (status EXECUTION-SUCCEEDED))
+	(retract ?mf)
+)
+
+(defrule lock-actions-flush-locks-failed
+	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
+                      (action-name flush-locks) (status RUNNING))
+	?mf <- (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response REJECTED|ERROR) (error-msg ?error-msg))
+	=>
+	(modify ?pa (status EXECUTION-FAILED) (error-msg ?error-msg))
+	(retract ?mf)
+)
