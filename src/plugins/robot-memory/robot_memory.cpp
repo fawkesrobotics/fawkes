@@ -976,12 +976,14 @@ RobotMemory::mutex_renew_lock(const std::string& name,
 		BSONObj new_doc =
 			client->findAndModify(cfg_coord_mutex_collection_,
 			                      filter_doc, update_doc.obj(),
-			                      /* upsert */ true, /* return new */ true,
+			                      /* upsert */ false, /* return new */ true,
 			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
 			                      &mongo::WriteConcern::majority);
 
 		return true;
 	} catch (mongo::OperationException &e) {
+		logger_->log_warn(name_, "Renewing lock on mutex %s failed: %s",
+		                  name.c_str(), e.what());
 		return false;
 	}
 }
