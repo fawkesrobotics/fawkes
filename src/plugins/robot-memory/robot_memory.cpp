@@ -988,3 +988,72 @@ RobotMemory::mutex_renew_lock(const std::string& name,
 		return false;
 	}
 }
+
+
+/** Setup time-to-live index for mutexes.
+ * Setting up a time-to-live index for mutexes enables automatic
+ * expiration through the database. Note, however, that the documents
+ * are expired only every 60 seconds. This has two consequences:
+ * - max_age_sec lower than 60 seconds cannot be achieved
+ * - locks may be held for up to just below 60 seconds longer than
+ *   configured, i.e., if the mutex had not yet expired when the
+ *   background tasks runs.
+ * @param max_age_sec maximum age of locks in seconds
+ * @return true if operation was successful, false on failure
+ */
+bool
+RobotMemory::mutex_setup_ttl(float max_age_sec)
+{
+  MutexLocker lock(mutex_);
+
+	mongo::DBClientBase *client =
+		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+
+	BSONObj keys = BSON("lock-time" << true);
+
+	try {
+		client->createIndex(cfg_coord_mutex_collection_, mongo::IndexSpec()
+		                    .addKeys(keys)
+		                    .expireAfterSeconds(max_age_sec));
+  } catch (DBException &e) {
+		logger_->log_warn(name_, "Creating TTL index failed: %s", e.what());
+	  return false;
+  }
+  return true;
+}
+
+/** Expire old locks on mutexes.
+ * This will update the database and set all mutexes to unlocked for
+ * which the lock-time is older than the given maximum age.
+ * @param max_age_sec maximum age of locks in seconds
+ * @return true if operation was successful, false on failure
+ */
+bool
+RobotMemory::mutex_expire_locks(float max_age_sec)
+{
+	mongo::DBClientBase *client =
+		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+
+	using std::chrono::milliseconds;
+	using std::chrono::high_resolution_clock;
+	using std::chrono::time_point;
+	using std::chrono::time_point_cast;
+
+	auto max_age_ms = milliseconds(static_cast<unsigned long int>(std::floor(max_age_sec*1000)));
+	time_point<high_resolution_clock, milliseconds> expire_before =
+		time_point_cast<milliseconds>(high_resolution_clock::now()) - max_age_ms;
+	mongo::Date_t	expire_before_mdb(expire_before.time_since_epoch().count());
+
+	// here we can add an $or to implement lock timeouts
+	mongo::BSONObj filter_doc{BSON("locked" << true <<
+	                               "lock-time" << mongo::LT << expire_before_mdb)};
+
+	try {
+		client->remove(cfg_coord_mutex_collection_, filter_doc,
+		               true, &mongo::WriteConcern::majority);
+
+		return true;
+	} catch (mongo::OperationException &e) {
+		return false;
+	}
+}

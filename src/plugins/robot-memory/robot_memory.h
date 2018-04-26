@@ -76,12 +76,14 @@ class RobotMemory
     //bool semaphore_create(const std::string& name, unsigned int value);
     //bool semaphore_acquire(const std::string& name, unsigned int v = 1);
     //bool semaphore_release(const std::string& name, unsigned int v = 1);
+    bool mutex_setup_ttl(float max_age_sec);
     bool mutex_create(const std::string& name);
     bool mutex_destroy(const std::string& name);
     bool mutex_try_lock(const std::string& name, bool force = false);
     bool mutex_try_lock(const std::string& name, std::string identity, bool force = false);
     bool mutex_unlock(const std::string& name, std::string identity);
     bool mutex_renew_lock(const std::string& name, std::string identity);
+    bool mutex_expire_locks(float max_age_sec);
 
     /**
      * Register a trigger to be notified when the robot memory is updated and the updated document matches the query
