@@ -122,6 +122,12 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
   clips->add_function("robmem-mutex-unlock",
                       sigc::slot<CLIPS::Value, std::string, std::string>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock)));
+  clips->add_function("robmem-mutex-setup-ttl",
+                      sigc::slot<CLIPS::Value, float>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_setup_ttl)));
+  clips->add_function("robmem-mutex-expire-locks",
+                      sigc::slot<CLIPS::Value, float>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks)));
 
   clips->add_function("robmem-mutex-create-async",
                       sigc::slot<CLIPS::Values, std::string>
@@ -134,12 +140,22 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
                       sigc::bind<0>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock_async),
                        env_name)));
+  clips->add_function("robmem-mutex-renew-lock-async",
+                      sigc::slot<CLIPS::Values, std::string, std::string>(
+                      sigc::bind<0>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_renew_lock_async),
+                       env_name)));
   clips->add_function("robmem-mutex-force-lock-async",
                       sigc::slot<CLIPS::Values, std::string, std::string>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock_async)));
   clips->add_function("robmem-mutex-unlock-async",
                       sigc::slot<CLIPS::Values, std::string, std::string>
                       (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock_async)));
+  clips->add_function("robmem-mutex-expire-locks-async",
+                      sigc::slot<CLIPS::Value, float>(
+                      sigc::bind<0>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks_async),
+                       env_name)));
 
   clips->build("(deffacts have-feature-mongodb (have-feature MongoDB))");
 
@@ -849,6 +865,20 @@ ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock(std::string name, std::st
 	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
 }
 
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_setup_ttl(float max_age_sec)
+{
+	bool rv = robot_memory->mutex_setup_ttl(max_age_sec);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks(float max_age_sec)
+{
+	bool rv = robot_memory->mutex_expire_locks(max_age_sec);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
 
 bool
 ClipsRobotMemoryThread::mutex_future_ready(const std::string& name)
@@ -1002,4 +1032,33 @@ ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock_async(std::string name, s
 
 	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
 	return rv;
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks_async(std::string env_name,
+                                                                   float max_age_sec)
+{
+	CLIPS::Values rv;
+	if (mutex_expire_future_.valid()) {
+		// have shared state, expire was or is running
+		auto fut_status = mutex_expire_future_.wait_for(std::chrono::milliseconds(0));
+		if (fut_status != std::future_status::ready) {
+			MutexLocker lock(envs_[env_name].objmutex_ptr());
+			envs_[env_name]->assert_fact_f("(mutex-op-feedback expire-locks-async FAIL)");
+			return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+		}
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, env_name, max_age_sec] {
+		                      bool ok = robot_memory->mutex_expire_locks(max_age_sec);
+		                      MutexLocker lock(envs_[env_name].objmutex_ptr());
+		                      envs_[env_name]->assert_fact_f("(mutex-op-feedback expire-locks-async %s)",
+		                                                     ok ? "OK" : "FAIL");
+		                      return ok;
+	                      });
+
+	mutex_expire_future_ = std::move(fut);
+
+	return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
 }
