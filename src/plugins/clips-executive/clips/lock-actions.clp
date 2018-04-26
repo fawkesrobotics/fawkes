@@ -7,6 +7,40 @@
 ;  Licensed under GPLv2+ license, cf. LICENSE file
 ;---------------------------------------------------------------------------
 
+; Handlers for the following actions:
+;
+; lock ?mutex-name
+;
+; Acquires the lock for a specific mutex.
+; Example PDDL operator:
+; (:action lock
+;   :parameters (?m - mutex)
+;   :precondition (not (locked ?m))
+;   :effect (and (locked ?m))
+; )
+;
+;
+; unlock ?mutex-name
+;
+; Release a lock which is currently been held.
+; Example PDDL operator:
+; (:action unlock
+;   :parameters (?m - mutex)
+;   :precondition (locked ?m)
+;   :effect (not (locked ?m))
+; )
+;
+;
+; flush-locks
+;
+; Remove all locks currently in the robot memory. Useful during initialization.
+; Example PDDL operator:
+; (:action flush-locks
+;   :precondition (is-initialization)
+;   :effect (forall (?m - mutex) (not (locked ?m)))
+; )
+
+
 (defrule lock-actions-lock-start
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (status PENDING)
                       (action-name lock) (executable TRUE)
