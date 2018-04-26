@@ -166,7 +166,8 @@ clips-executive:
       # in the configuration path is removed.
       # Example: /clips-executive/specs/test/parameters/home-pos -> /config/home-pos
       parameters:
-        example: value
+        coordination:
+          mutex-max-age-sec: 10
 
     test-pddl:
       domain: test-scenario-pddl/test-domain.clp
