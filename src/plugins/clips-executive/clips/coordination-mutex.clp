@@ -64,8 +64,8 @@
 	; request and response are set locally.
 	; only ever set request from anywhere outside of this file. The response
 	; will be set based on information from robot-memory.
-	(slot request  (type SYMBOL) (allowed-values NONE LOCK UNLOCK CREATE))
-	(slot response (type SYMBOL) (allowed-values NONE PENDING ACQUIRED REJECTED UNLOCKED ERROR))
+	(slot request  (type SYMBOL) (allowed-values NONE LOCK UNLOCK CREATE FLUSH-LOCKS RENEW-LOCK))
+	(slot response (type SYMBOL) (allowed-values NONE PENDING ACQUIRED REJECTED UNLOCKED ERROR COMPLETED))
 	(slot error-msg (type STRING))
 )
 
@@ -123,6 +123,40 @@
 		)
 	else
 		(assert (mutex (name ?name) (request UNLOCK) (response UNLOCKED)))
+	)
+)
+
+(deffunction mutex-renew-lock-async (?name)
+	(do-for-fact ((?m mutex)) (eq ?m:name ?name)
+		(if (neq ?m:state LOCKED)
+		then
+			(modify ?m (request RENEW-LOCK) (response ERROR)
+			           (error-msg (str-cat "Mutex " ?name " not LOCKED. Cannot renew.")))
+		else
+			(if (neq ?m:locked-by (cx-identity))
+			then
+				(modify ?m (request RENEW-LOCK) (response ERROR)
+				           (error-msg "Lock held by " ?m:locked-by ". Cannot renew foreign lock."))
+			else
+				(if (neq ?m:request NONE)
+				then
+					(bind ?error-msg (str-cat "Mutex " ?name " already has pending " ?m:request " request. "
+				                            "This may lead to unpredictable behavior on both sides!"))
+					(modify ?m (request RENEW-LOCK) (response ERROR) (error-msg ?error-msg))
+				else
+					(modify ?m (request RENEW-LOCK) (response NONE) (error-msg ""))
+				)
+			)
+		)
+	)
+)
+
+(deffunction mutex-flush-locks-async ()
+	(if (any-factp ((?m mutex)) (eq ?m:name FLUSH-LOCKS))
+	then
+		(printout error "Flushing mutex locks already running" crlf)
+	else
+		(assert (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response NONE)))
 	)
 )
 
@@ -196,11 +230,49 @@
 
 (defrule mutex-lock-op-failed
 	?mf <- (mutex (name ?name) (request LOCK) (response PENDING))
-	?of <- (mutex-op-failed try-lock-async ?name)
+	?of <- (mutex-op-feedback try-lock-async FAIL ?name)
 	=>
 	(retract ?of)
-	(modify ?mf (response REJECTED) (error-msg "Lock held by unknown")
+	(modify ?mf (response REJECTED) (error-msg "Lock held by 'unknown'")
 	            (state LOCKED) (locked-by "unknown"))
+)
+
+(defrule mutex-renew-lock-start
+	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response NONE)
+								(state LOCKED) (locked-by ?lb&:(eq ?lb (cx-identity))))
+	=>
+	(printout t "Renewing lock " ?name crlf)
+	(robmem-mutex-renew-lock-async (str-cat ?name) (cx-identity))
+	(modify ?mf (response PENDING))
+)
+
+(defrule mutex-renew-lock-invalid-not-locked
+	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response NONE) (state OPEN))
+	=>
+	(modify ?mf (response ERROR) (error-msg (str-cat "Mutex is not locked")))
+)
+
+(defrule mutex-renew-lock-invalid-foreign-lock
+	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response NONE) (state OPEN)
+								(locked-by ?lb&:(neq ?lb (cx-identity))))
+	=>
+	(modify ?mf (response ERROR) (error-msg (str-cat "Mutex locked by " ?lb " (not '" (cx-identity) "')")))
+)
+
+(defrule mutex-renew-lock-op-succeeded
+	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response PENDING))
+	?of <- (mutex-op-feedback renew-lock-async OK ?name)
+	=>
+	(retract ?of)
+	(modify ?mf (response ACQUIRED))
+)
+
+(defrule mutex-renew-lock-op-failed
+	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response PENDING))
+	?of <- (mutex-op-feedback renew-lock-async FAIL ?name)
+	=>
+	(retract ?of)
+	(modify ?mf (response REJECTED) (error-msg "Renewing the lock failed"))
 )
 
 (defrule mutex-unlock-start
@@ -229,9 +301,33 @@
 (defrule mutex-unlock-succeeded-already-reacquired
 	"Someone else already acquired the lock in the meantime."
 	?mf <- (mutex (name ?name) (request LOCK) (response PENDING)
-								(state LOCKED) (locked-by ?lb&:(neq ?lb (cx-identity))))
+	              (state LOCKED) (locked-by ?lb&:(neq ?lb (cx-identity))))
 	=>
 	(modify ?mf (response UNLOCKED))
+)
+
+(defrule mutex-flush-locks-start
+	?mf <- (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response NONE))
+	=>
+	(printout t "Flushing locks " crlf)
+	(robmem-mutex-expire-locks-async 0.0)
+	(modify ?mf (response PENDING))
+)
+
+(defrule mutex-flush-locks-succeeded
+	?mf <- (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response PENDING))
+	?of <- (mutex-op-feedback expire-locks-async OK)
+	=>
+	(retract ?of)
+	(modify ?mf (response COMPLETED))
+)
+
+(defrule mutex-flush-locks-failed
+	?mf <- (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response PENDING))
+	?of <- (mutex-op-feedback expire-locks-async FAIL)
+	=>
+	(retract ?of)
+	(modify ?mf (response ERROR))
 )
 
 (deffunction mutex-trigger-update (?obj)
