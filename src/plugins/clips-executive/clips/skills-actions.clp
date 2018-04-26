@@ -85,3 +85,17 @@
 	(modify ?pa (status EXECUTION-FAILED))
 	(retract ?sf ?pe)
 )
+
+(defrule skill-action-cancel-if-action-does-not-exist
+	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
+																(action-id ?id) (skill-id ?skill-id))
+  (skill (id ?skill-id) (status S_RUNNING))
+  (not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)))
+  =>
+  (printout warn
+    "Cancelling Skill Execution, corresponding action does not exist" crlf)
+  (bind ?m
+    (blackboard-create-msg "SkillerInterface::Skiller" "StopExecMessage"))
+  (blackboard-send-msg ?m)
+  (retract ?pe)
+)
