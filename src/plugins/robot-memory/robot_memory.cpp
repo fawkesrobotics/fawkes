@@ -938,3 +938,53 @@ RobotMemory::mutex_unlock(const std::string& name,
 		return false;
 	}
 }
+
+
+/** Renew a mutex.
+ * Renewing means updating the lock timestamp to the current time to
+ * avoid expiration. Note that the lock must currently be held by
+ * the given identity.
+ * @param name mutex name
+ * @param identity string to set as lock-holder (defaults to hostname
+ * if empty)
+ * @return true if operation was successful, false on failure
+ */
+bool
+RobotMemory::mutex_renew_lock(const std::string& name,
+                              std::string identity)
+{
+	mongo::DBClientBase *client =
+		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+
+	if (identity.empty()) {
+		HostInfo host_info;
+		identity = host_info.name();
+	}
+
+	// here we can add an $or to implement lock timeouts
+	mongo::BSONObj filter_doc{BSON("_id" << name <<
+	                               "locked" << true <<
+	                               "locked-by" << identity)};
+
+	// we set all data, even the data which is not actually modified, to
+	// make it easier to process the update in triggers.
+	mongo::BSONObjBuilder update_doc;
+	update_doc.append("$currentDate", BSON("lock-time" << true));
+	mongo::BSONObjBuilder update_set;
+	update_set.append("locked", true);
+	update_set.append("locked-by", identity);
+	update_doc.append("$set", update_set.obj());
+
+	try {
+		BSONObj new_doc =
+			client->findAndModify(cfg_coord_mutex_collection_,
+			                      filter_doc, update_doc.obj(),
+			                      /* upsert */ true, /* return new */ true,
+			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
+			                      &mongo::WriteConcern::majority);
+
+		return true;
+	} catch (mongo::OperationException &e) {
+		return false;
+	}
+}
