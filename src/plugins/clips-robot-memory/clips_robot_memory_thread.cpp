@@ -901,6 +901,8 @@ ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock_async(std::string env_n
 	if (! mutex_future_ready(name)) {
 		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
 		rv.push_back(CLIPS::Value("Task already running for "+name+" (try-lock failed)"));
+		envs_[env_name]->assert_fact_f("(mutex-op-feedback try-lock-async FAIL %s)",
+		                               name.c_str());
 		return rv;
 	}
 
@@ -909,7 +911,8 @@ ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock_async(std::string env_n
 		                      bool ok = robot_memory->mutex_try_lock(name, identity);
 		                      if (! ok) {
 			                      MutexLocker lock(envs_[env_name].objmutex_ptr());
-			                      envs_[env_name]->assert_fact_f("(mutex-op-failed try-lock-async %s)", name.c_str());
+			                      envs_[env_name]->assert_fact_f("(mutex-op-feedback try-lock-async FAIL %s)",
+			                                                     name.c_str());
 		                      }
 		                      return ok;
 	                      });
