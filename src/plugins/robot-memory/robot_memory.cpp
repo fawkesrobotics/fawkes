@@ -792,7 +792,7 @@ RobotMemory::mutex_create(const std::string& name)
 	mongo::DBClientInterface *client =
 		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 	mongo::BSONObjBuilder insert_doc;
-	insert_doc.append("$currentDate", BSON("last_seen" << true));
+	insert_doc.append("$currentDate", BSON("lock-time" << true));
 	insert_doc.append("_id", name);
 	insert_doc.append("locked", false);
 	try {
@@ -858,7 +858,7 @@ RobotMemory::mutex_try_lock(const std::string& name,
 	}
 
 	mongo::BSONObjBuilder update_doc;
-	update_doc.append("$currentDate", BSON("last_seen" << true));
+	update_doc.append("$currentDate", BSON("lock-time" << true));
 	mongo::BSONObjBuilder update_set;
 	update_set.append("locked", true);
 	update_set.append("locked-by", identity);
@@ -919,7 +919,7 @@ RobotMemory::mutex_unlock(const std::string& name,
 	mongo::BSONObj filter_doc{BSON("_id" << name << "locked-by" << identity)};
 
 	mongo::BSONObjBuilder update_doc;
-	update_doc.append("$currentDate", BSON("last_seen" << true));
+	update_doc.append("$currentDate", BSON("lock-time" << true));
 	mongo::BSONObjBuilder update_set;
 	update_set.append("locked", false);
 	update_doc.append("$set", update_set.obj());
