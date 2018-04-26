@@ -918,17 +918,14 @@ RobotMemory::mutex_unlock(const std::string& name,
 	// here we can add an $or to implement lock timeouts
 	mongo::BSONObj filter_doc{BSON("_id" << name << "locked-by" << identity)};
 
-	mongo::BSONObjBuilder update_doc;
-	update_doc.append("$currentDate", BSON("lock-time" << true));
-	mongo::BSONObjBuilder update_set;
-	update_set.append("locked", false);
-	update_doc.append("$set", update_set.obj());
-	update_doc.append("$unset", BSON("locked-by" << true));
+	mongo::BSONObj update_doc{BSON("$set" << BSON("locked" << false) <<
+	                               "$unset" << BSON("locked-by" << true <<
+	                                                "lock-time" << true))};
 
 	try {
 		BSONObj new_doc =
 			client->findAndModify(cfg_coord_mutex_collection_,
-			                      filter_doc, update_doc.obj(),
+			                      filter_doc, update_doc,
 			                      /* upsert */ true, /* return new */ true,
 			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
 			                      &mongo::WriteConcern::majority);
