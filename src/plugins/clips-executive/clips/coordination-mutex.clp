@@ -61,11 +61,14 @@
 	; NEVER set this manually!
 	(slot state (type SYMBOL) (allowed-values UNKNOWN OPEN LOCKED))
 	(slot locked-by (type STRING))
+	(multislot lock-time (type INTEGER) (cardinality 2 2))
 	; request and response are set locally.
 	; only ever set request from anywhere outside of this file. The response
 	; will be set based on information from robot-memory.
 	(slot request  (type SYMBOL) (allowed-values NONE LOCK UNLOCK CREATE FLUSH-LOCKS RENEW-LOCK))
+	(multislot pending-requests  (type SYMBOL) (allowed-values NONE UNLOCK AUTO-RENEW-PROC))
 	(slot response (type SYMBOL) (allowed-values NONE PENDING ACQUIRED REJECTED UNLOCKED ERROR COMPLETED))
+	(slot auto-renew (type SYMBOL) (allowed-values TRUE FALSE))
 	(slot error-msg (type STRING))
 )
 
@@ -75,7 +78,12 @@
 
 ; ***** FUNCTIONS ******
 
-(deffunction mutex-try-lock-async (?name)
+(deffunction mutex-try-lock-async (?name $?args)
+	(bind ?auto-renew TRUE)
+	(if (> (length$ ?args) 0)	then
+		(bind ?auto-renew (nth$ 1 ?args))
+	)
+
 	(if (any-factp ((?m mutex)) (eq ?m:name ?name))
 	then
 		(do-for-fact ((?m mutex)) (eq ?m:name ?name)
@@ -89,7 +97,7 @@
 			else
 				(if (eq ?m:request NONE)
 				then
-					(modify ?m (request LOCK) (response NONE) (error-msg ""))
+					(modify ?m (request LOCK) (response NONE) (auto-renew ?auto-renew) (error-msg ""))
 				else
 					(bind ?error-msg (str-cat "Mutex " ?name " already has pending " ?m:request " request. "
 					                          "This may lead to unpredictable behavior on both sides!"))
@@ -98,7 +106,7 @@
 			)
 		)
 	else
-		(assert (mutex (name ?name) (request LOCK)))
+		(assert (mutex (name ?name) (request LOCK) (auto-renew ?auto-renew)))
 	)
 )
 
@@ -111,13 +119,18 @@
 			(modify ?m (request UNLOCK) (response ERROR)
 			           (error-msg "Lock held by " ?m:locked-by ". Cannot release foreign lock."))
 			else
-				(if (eq ?m:request NONE)
-				then
-					(modify ?m (request UNLOCK) (response NONE) (error-msg ""))
+				(if (and (eq ?m:request RENEW-LOCK) (eq ?m:pending-requests (create$ AUTO-RENEW-PROC)))
+				then ; auto-renew is running, wait for this to finish and then unlock
+					(modify ?m (pending-requests ?m:pending-requests UNLOCK))
 				else
-					(bind ?error-msg (str-cat "Mutex " ?name " already has pending UNLOCK request. "
-					                         "This may lead to unpredictable behavior on both sides!"))
-					(modify ?m (request UNLOCK) (response ERROR) (error-msg ?error-msg))
+					(if (eq ?m:request NONE)
+					then
+						(modify ?m (request UNLOCK) (response NONE) (error-msg ""))
+					else
+						(bind ?error-msg (str-cat "Mutex " ?name " already has pending UNLOCK request. "
+						                         "This may lead to unpredictable behavior on both sides!"))
+						(modify ?m (request UNLOCK) (response ERROR) (error-msg ?error-msg))
+					)
 				)
 			)
 		)
@@ -330,6 +343,43 @@
 	(modify ?mf (response ERROR))
 )
 
+(defrule mutex-lock-auto-renew
+	(time $?now)
+	(wm-fact (id "/config/coordination/mutex-max-age-sec") (type FLOAT|UINT|INT) (value ?max-age-sec))
+	?mf <- (mutex (name ?name) (state LOCKED) (request NONE) (pending-requests)
+								(locked-by ?lb&:(eq ?lb (cx-identity)))
+								(lock-time $?lt&:(timeout ?now ?lt ?max-age-sec)))
+	=>
+	(printout t "Automatic renewal of lock for mutex " ?name crlf)
+	(modify ?mf (request RENEW-LOCK) (response NONE) (pending-requests AUTO-RENEW-PROC))
+)
+
+(defrule mutex-lock-auto-renew-done
+	?mf <- (mutex (name ?name) (state LOCKED)
+								(request RENEW-LOCK) (response ACQUIRED)
+								(pending-requests AUTO-RENEW-PROC $?pending-requests))
+	=>
+	(printout t "Automatic renewal of lock for mutex " ?name " completed" crlf)
+	(modify ?mf (request NONE) (response NONE) (pending-requests ?pending-requests))
+)
+
+(defrule mutex-lock-auto-renew-failed
+	?mf <- (mutex (name ?name) (state LOCKED)
+								(request RENEW-LOCK) (response REJECTED) (locked-by ?lb)
+								(pending-requests AUTO-RENEW-PROC $?pending-requests))
+	=>
+	(printout error "Renewing lock for mutex " ?name " failed. LOST LOCK!" crlf)
+	(bind ?new-lb (if (eq ?lb (cx-identity)) then "lost" else ?lb))
+	(modify ?mf (request NONE) (response NONE) (pending-requests ?pending-requests) (locked-by ?new-lb))
+)
+
+(defrule mutex-run-pending-request
+	?mf <- (mutex (name ?name) (request NONE) (pending-requests ?request $?pending-requests))
+	=>
+	(printout t "Run pending request for mutex " ?name ": " ?request crlf)
+	(modify ?mf (request ?request) (response NONE) (pending-requests ?pending-requests))
+)
+
 (deffunction mutex-trigger-update (?obj)
 	(bind ?id nil)
 	(if (bson-has-field ?obj "o._id")
@@ -339,33 +389,51 @@
 		(bind ?id (sym-cat (bson-get ?obj "o2._id")))
 	)	
 	(if ?id then
+		(bind ?set-missing-locked-field FALSE)
 		(bind ?locked FALSE)
 		(bind ?locked-by "")
+		(bind ?lock-time (create$ 0 0))
 
 		(if (bson-has-field ?obj "o.$set")
 		then
 			; It's an incremental update
-			(bind ?locked (bson-get ?obj "o.$set.locked"))
+			(if (bson-has-field ?obj "o.$set.locked")
+				then (bind ?locked (bson-get ?obj "o.$set.locked"))
+				else (bind ?set-missing-locked-field TRUE)
+			)
 			(if (bson-has-field ?obj "o.$set.locked-by") then
 				(bind ?locked-by (bson-get ?obj "o.$set.locked-by"))
-				; else it's in $unset, lock is removed, leave empty string
+				; else it's in $unset, lock is removed
+			)
+			(if (bson-has-field ?obj "o.$set.lock-time") then
+				(bind ?lock-time (bson-get-time ?obj "o.$set.lock-time"))
+				; else it's in $unset, lock is removed
 			)
 		else
 			(bind ?locked (bson-get ?obj "o.locked"))
 			(if (bson-has-field ?obj "o.locked-by") then
 				(bind ?locked-by (bson-get ?obj "o.locked-by"))
 			)
+			(if (bson-has-field ?obj "o.lock-time") then
+				(bind ?lock-time (bson-get-time ?obj "o.lock-time"))
+			)
 		)
 
 		(if (any-factp ((?m mutex)) (eq ?m:name ?id))
 		then
 			(do-for-fact ((?m mutex)) (eq ?m:name ?id)
+				; The following condition can happen on a re-new, the
+				; fields will be pruned by MongoDB as they are unchanged.
+				(if ?set-missing-locked-field then
+					(bind ?locked (eq ?m:state LOCKED))
+					(if ?locked then (bind ?locked-by ?m:locked-by))
+				)
 				(modify ?m (state (if ?locked then LOCKED else OPEN))
-				           (locked-by ?locked-by))
+				           (locked-by ?locked-by) (lock-time ?lock-time))
 			)
 		else
 			(assert (mutex (name ?id) (state (if ?locked then LOCKED else OPEN))
-			               (locked-by ?locked-by)))
+			               (locked-by ?locked-by) (lock-time ?lock-time)))
 		)
 	)
 )
