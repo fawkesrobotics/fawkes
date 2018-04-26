@@ -39,7 +39,14 @@
 ;   :precondition (is-initialization)
 ;   :effect (forall (?m - mutex) (not (locked ?m)))
 ; )
-
+;
+;
+; expire-locks
+;
+; Remove locks of mutexes which have been acquired a configurable
+; duration in the past. The value is taken from the spec configuration
+; value coordination/mutex/max-age-sec.
+; The action could be used in a MAINTAIN goal.
 
 (defrule lock-actions-lock-start
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (status PENDING)
@@ -113,7 +120,7 @@
 (defrule lock-actions-flush-locks-succeeded
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
                       (action-name flush-locks) (status RUNNING))
-	?mf <- (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response COMPLETED))
+	?mf <- (mutex-expire-task (task FLUSH) (state COMPLETED))
 	=>
 	(modify ?pa (status EXECUTION-SUCCEEDED))
 	(retract ?mf)
@@ -122,8 +129,34 @@
 (defrule lock-actions-flush-locks-failed
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
                       (action-name flush-locks) (status RUNNING))
-	?mf <- (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response REJECTED|ERROR) (error-msg ?error-msg))
+	?mf <- (mutex-expire-task (task FLUSH) (state FAILED))
 	=>
-	(modify ?pa (status EXECUTION-FAILED) (error-msg ?error-msg))
+	(modify ?pa (status EXECUTION-FAILED))
+	(retract ?mf)
+)
+
+(defrule lock-actions-expire-locks-start
+	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (status PENDING)
+                      (action-name expire-locks) (executable TRUE))
+	=>
+	(mutex-expire-locks-async)
+	(modify ?pa (status RUNNING))
+)
+
+(defrule lock-actions-expire-locks-succeeded
+	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
+                      (action-name expire-locks) (status RUNNING))
+	?mf <- (mutex-expire-task (task EXPIRE) (state COMPLETED))
+	=>
+	(modify ?pa (status EXECUTION-SUCCEEDED))
+	(retract ?mf)
+)
+
+(defrule lock-actions-expire-locks-failed
+	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
+                      (action-name expire-locks) (status RUNNING))
+	?mf <- (mutex-expire-task (task EXPIRE) (state FAILED))
+	=>
+	(modify ?pa (status EXECUTION-FAILED))
 	(retract ?mf)
 )

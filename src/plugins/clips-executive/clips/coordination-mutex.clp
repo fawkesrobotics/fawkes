@@ -67,9 +67,15 @@
 	; will be set based on information from robot-memory.
 	(slot request  (type SYMBOL) (allowed-values NONE LOCK UNLOCK CREATE FLUSH-LOCKS RENEW-LOCK))
 	(multislot pending-requests  (type SYMBOL) (allowed-values NONE UNLOCK AUTO-RENEW-PROC))
-	(slot response (type SYMBOL) (allowed-values NONE PENDING ACQUIRED REJECTED UNLOCKED ERROR COMPLETED))
+	(slot response (type SYMBOL) (allowed-values NONE PENDING ACQUIRED REJECTED UNLOCKED ERROR))
 	(slot auto-renew (type SYMBOL) (allowed-values TRUE FALSE))
 	(slot error-msg (type STRING))
+)
+
+(deftemplate mutex-expire-task
+	(slot task (type SYMBOL) (allowed-values FLUSH EXPIRE))
+	(slot state (type SYMBOL) (allowed-values NONE PENDING COMPLETED FAILED))
+	(slot max-age-sec (type FLOAT))
 )
 
 (deftemplate mutex-global-data
@@ -165,11 +171,22 @@
 )
 
 (deffunction mutex-flush-locks-async ()
-	(if (any-factp ((?m mutex)) (eq ?m:name FLUSH-LOCKS))
+	(if (any-factp ((?m mutex-expire-task)) TRUE)
 	then
-		(printout error "Flushing mutex locks already running" crlf)
+		(printout error "Mutex lock expiration already running" crlf)
 	else
-		(assert (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response NONE)))
+		(assert (mutex-expire-task (task FLUSH) (state NONE) (max-age-sec 0.0)))
+	)
+)
+
+(deffunction mutex-expire-locks-async ()
+	(if (any-factp ((?m mutex-expire-task)) TRUE)
+	then
+		(printout error "Mutex lock expiration already running" crlf)
+	else
+		(do-for-fact ((?wf wm-fact)) (eq ?wf:id "/config/coordination/mutex/max-age-sec")
+			(assert (mutex-expire-task (task EXPIRE) (state NONE) (max-age-sec ?wf:value)))
+		)
 	)
 )
 
@@ -319,36 +336,36 @@
 	(modify ?mf (response UNLOCKED))
 )
 
-(defrule mutex-flush-locks-start
-	?mf <- (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response NONE))
+(defrule mutex-expire-locks-start
+	?mf <- (mutex-expire-task (task ?task) (state NONE) (max-age-sec ?max-age-sec))
 	=>
-	(printout t "Flushing locks " crlf)
-	(robmem-mutex-expire-locks-async 0.0)
-	(modify ?mf (response PENDING))
+	(printout t ?task " locks " crlf)
+	(robmem-mutex-expire-locks-async ?max-age-sec)
+	(modify ?mf (state PENDING))
 )
 
-(defrule mutex-flush-locks-succeeded
-	?mf <- (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response PENDING))
+(defrule mutex-expire-locks-succeeded
+	?mf <- (mutex-expire-task (task ?task) (state PENDING))
 	?of <- (mutex-op-feedback expire-locks-async OK)
 	=>
 	(retract ?of)
-	(modify ?mf (response COMPLETED))
+	(modify ?mf (state COMPLETED))
 )
 
-(defrule mutex-flush-locks-failed
-	?mf <- (mutex (name FLUSH-LOCKS) (request FLUSH-LOCKS) (response PENDING))
+(defrule mutex-expire-locks-failed
+	?mf <- (mutex-expire-task (task ?task) (state PENDING))
 	?of <- (mutex-op-feedback expire-locks-async FAIL)
 	=>
 	(retract ?of)
-	(modify ?mf (response ERROR))
+	(modify ?mf (state FAILED))
 )
 
 (defrule mutex-lock-auto-renew
 	(time $?now)
-	(wm-fact (id "/config/coordination/mutex-max-age-sec") (type FLOAT|UINT|INT) (value ?max-age-sec))
+	(wm-fact (id "/config/coordination/mutex/renew-interval") (type FLOAT|UINT|INT) (value ?renew-interval))
 	?mf <- (mutex (name ?name) (state LOCKED) (request NONE) (pending-requests)
 								(locked-by ?lb&:(eq ?lb (cx-identity)))
-								(lock-time $?lt&:(timeout ?now ?lt ?max-age-sec)))
+								(lock-time $?lt&:(timeout ?now ?lt ?renew-interval)))
 	=>
 	(printout t "Automatic renewal of lock for mutex " ?name crlf)
 	(modify ?mf (request RENEW-LOCK) (response NONE) (pending-requests AUTO-RENEW-PROC))
