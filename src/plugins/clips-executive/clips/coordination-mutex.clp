@@ -87,11 +87,11 @@
 				(modify ?m (request LOCK) (response REJECTED)
 				           (error-msg (str-cat "Lock already held by " ?m:locked-by)))
 			else
-				(if (member$ ?m:request (create$ NONE UNLOCK))
+				(if (eq ?m:request NONE)
 				then
 					(modify ?m (request LOCK) (response NONE) (error-msg ""))
 				else
-					(bind ?error-msg (str-cat "Mutex " ?name " already has pending LOCK request. "
+					(bind ?error-msg (str-cat "Mutex " ?name " already has pending " ?m:request " request. "
 					                          "This may lead to unpredictable behavior on both sides!"))
 					(modify ?m (request LOCK) (response ERROR) (error-msg ?error-msg))
 				)
@@ -111,7 +111,7 @@
 			(modify ?m (request UNLOCK) (response ERROR)
 			           (error-msg "Lock held by " ?m:locked-by ". Cannot release foreign lock."))
 			else
-				(if (member$ ?m:request (create$ NONE LOCK))
+				(if (eq ?m:request NONE)
 				then
 					(modify ?m (request UNLOCK) (response NONE) (error-msg ""))
 				else
