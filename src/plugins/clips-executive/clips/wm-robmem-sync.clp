@@ -215,19 +215,6 @@
 	(wm-robmem-sync-fact-update ?wf ?identity ?now)
 )
 
-(deffunction wm-robmem-sync-convert (?type ?value)
-	(bind ?rv ?value)
-	(switch ?type
-		(case FLOAT  then (bind ?rv (float (eval ?value))))
-		(case UINT   then (bind ?rv (integer (eval ?value))))
-		(case INT    then (bind ?rv (integer (eval ?value))))
-		(case BOOL   then (bind ?rv (sym-cat ?value)))
-		(case SYMBOL then (bind ?rv (sym-cat ?value)))
-		(case STRING then (bind ?rv (str-cat ?value)))
-	)
-	(return ?rv)
-)
-
 (deffunction wm-robmem-sync-update (?obj)
 	(bind ?id (bson-get ?obj "o._id"))
 	(if ?id then
@@ -239,10 +226,9 @@
 		(bind ?values (create$))
 		(if ?is-list
 		then
-			(bind ?tmp-values (bson-get-array ?obj "o.values"))
-			(foreach ?v ?tmp-values	(bind ?values (append$ ?values (wm-robmem-sync-convert ?type ?v))))
+			(bind ?values (bson-get-array ?obj "o.values"))
 		else
-			(bind ?value (wm-robmem-sync-convert ?type (bson-get ?obj "o.value")))
+			(bind ?value (bson-get ?obj "o.value"))
 		)
 		(if (any-factp ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id)))
 		then
