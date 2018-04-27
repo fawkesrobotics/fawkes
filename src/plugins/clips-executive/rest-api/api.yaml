@@ -543,7 +543,7 @@ components:
         type:
           type: string
           format: symbol
-          enum: ["conjunction", "disjunction", "atom"]
+          enum: ["conjunction", "disjunction", "negation", "atom"]
         grounded:
           type: boolean
         is-satisfied:
