@@ -239,7 +239,7 @@
 		(bind ?values (create$))
 		(if ?is-list
 		then
-			(bind ?tmp-values (bson-get ?obj "o.values"))
+			(bind ?tmp-values (bson-get-array ?obj "o.values"))
 			(foreach ?v ?tmp-values	(bind ?values (append$ ?values (wm-robmem-sync-convert ?type ?v))))
 		else
 			(bind ?value (wm-robmem-sync-convert ?type (bson-get ?obj "o.value")))
