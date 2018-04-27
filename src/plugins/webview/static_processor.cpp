@@ -80,7 +80,7 @@ WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(fawkes::WebUrlManag
     }
   }
 
-  catchall_file_  = std::move(find_file("/" + catchall_file));
+  catchall_file_  = catchall_file;
   //logger_->log_debug("WebStaticReqProc", "Catch-all file: %s", catchall_file_.c_str());
 
   read_mime_database(mime_file);
@@ -201,12 +201,21 @@ WebviewStaticRequestProcessor::process_request(const fawkes::WebRequest *request
 		                   request->url().c_str(), e.what_no_backtrace());
 		return new WebErrorPageReply(WebReply::HTTP_BAD_REQUEST, e.what_no_backtrace());
 	} catch (CouldNotOpenFileException &e) {
-		if (catchall_file_.empty()) {
-			return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "File not found");
+		std::string catchall_file;
+		try {
+			catchall_file = std::move(find_file("/" + catchall_file_));
+		} catch (Exception &e) {} // ignore, serve 404
+
+		if (catchall_file.empty()) {
+			if (catchall_file_.empty()) {
+				return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "File not found");
+			} else {
+				return new WebErrorPageReply(WebReply::HTTP_NOT_FOUND, "File not found. <i>Frontend not deployed?</i>");
+			}
 		} else {
 			try {
-				DynamicFileWebReply *freply = new DynamicFileWebReply(catchall_file_,
-				                                                      get_mime_type(catchall_file_));
+				DynamicFileWebReply *freply = new DynamicFileWebReply(catchall_file,
+				                                                      get_mime_type(catchall_file));
 				return freply;
 			} catch (Exception &e) {
 				logger_->log_error("WebStaticReqProc", "Failed to serve catchall file: %s",
