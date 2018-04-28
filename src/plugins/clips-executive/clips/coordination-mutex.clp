@@ -123,7 +123,7 @@
 			(if (and (eq ?m:state LOCKED) (neq ?m:locked-by (cx-identity)))
 			then
 			(modify ?m (request UNLOCK) (response ERROR)
-			           (error-msg "Lock held by " ?m:locked-by ". Cannot release foreign lock."))
+			           (error-msg (str-cat "Lock held by " ?m:locked-by ". Cannot release foreign lock.")))
 			else
 				(if (and (eq ?m:request RENEW-LOCK) (eq ?m:pending-requests (create$ AUTO-RENEW-PROC)))
 				then ; auto-renew is running, wait for this to finish and then unlock
@@ -155,7 +155,7 @@
 			(if (neq ?m:locked-by (cx-identity))
 			then
 				(modify ?m (request RENEW-LOCK) (response ERROR)
-				           (error-msg "Lock held by " ?m:locked-by ". Cannot renew foreign lock."))
+				           (error-msg (str-cat "Lock held by " ?m:locked-by ". Cannot renew foreign lock.")))
 			else
 				(if (neq ?m:request NONE)
 				then
