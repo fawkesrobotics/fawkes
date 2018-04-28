@@ -11,7 +11,9 @@
 (blackboard-open-reading "MongoDBManagedReplicaSetInterface" "robot-memory-local")
 
 (defrule robmem-wait-init-distributed-ok
-	(MongoDBManagedReplicaSetInterface (id "robot-memory-distributed") (member_status PRIMARY|SECONDARY))
+	(MongoDBManagedReplicaSetInterface (id "robot-memory-distributed")
+	                                   (member_status PRIMARY|SECONDARY)
+	                                   (primary_status HAVE_PRIMARY))
 	(not (executive-init-signal (id robmem-initialized-distributed)))
 	(not (executive-init-signal (id robmem-initialized)))
 	=>
@@ -20,7 +22,9 @@
 )
 
 (defrule robmem-wait-init-local-ok
-	(MongoDBManagedReplicaSetInterface (id "robot-memory-local") (member_status PRIMARY|SECONDARY))
+	(MongoDBManagedReplicaSetInterface (id "robot-memory-local")
+	                                   (member_status PRIMARY|SECONDARY)
+	                                   (primary_status HAVE_PRIMARY))
 	(not (executive-init-signal (id robmem-initialized-local)))
 	(not (executive-init-signal (id robmem-initialized)))
 	=>
