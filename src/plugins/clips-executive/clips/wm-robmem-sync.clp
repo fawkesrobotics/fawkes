@@ -97,6 +97,40 @@
 	)
 )
 
+(deffunction wm-robmem-sync-restore-prefix (?id-prefix)
+	(bind ?regex (bson-create))
+	(bson-append ?regex "$regex" (str-cat "^" ?id-prefix))
+	(bind ?query (bson-create))
+	(bson-append ?query "_id" ?regex)
+	(bson-destroy ?regex)
+	(bind ?cursor (robmem-query ?*WM-ROBMEM-SYNC-COLLECTION* ?query))
+	(if ?cursor then
+		(while (robmem-cursor-more ?cursor) do
+			(bind ?doc (robmem-cursor-next ?cursor))
+			(bind ?id (bson-get ?doc "_id"))
+			(bind ?type (sym-cat (bson-get ?doc "type")))
+			(bind ?is-list (sym-cat (bson-get ?doc "is-list")))
+			(bind ?value  (if (eq ?is-list TRUE) then nil else (bson-get ?doc "value")))
+			(bind ?values (if (eq ?is-list TRUE) then (bson-get-array ?doc "values") else (create$)))
+			(if (any-factp ((?wf wm-fact)) (eq ?wf:id ?id))
+			then
+				(do-for-fact ((?wf wm-fact)) (eq ?wf:id ?id)
+					(modify ?wf (type ?type) (is-list ?is-list) (value ?value) (values ?values))
+				)
+			else
+				(assert (wm-fact (id ?id) (type ?type) (is-list ?is-list) (value ?value) (values ?values)))
+			)
+		)
+	)
+)
+
+(deffunction wm-robmem-sync-restore ()
+	(do-for-all-facts ((?sf wm-robmem-sync-conf)) (eq ?sf:enabled TRUE)
+		(wm-robmem-sync-restore-prefix (wm-key-to-id ?sf:wm-fact-key-prefix))
+	)
+)
+
+
 (defrule wm-robmem-sync-init
 	(executive-init)
 	(not (executive-finalize))
