@@ -29,8 +29,6 @@ import { ImageModule } from '../parts/images/module';
 import { PluginModule } from '../parts/plugins/module';
 import { TransformsModule } from '../parts/transforms/module';
 
-import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
-
 @NgModule({
 	declarations: [
 	  AppComponent,
