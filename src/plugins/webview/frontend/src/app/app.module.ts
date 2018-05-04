@@ -21,6 +21,7 @@ import { AssetsService } from '../services/global/assets';
 import { SwUpdateNotifierService } from '../services/update-notifier/update-notifier.service';
 import { LockoutService } from '../services/lockout/lockout.service';
 
+import { DashboardModule } from '../parts/dashboard/module';
 import { ClipsExecutiveModule } from '../parts/clips-executive/module';
 import { SkillerModule } from '../parts/skiller/module';
 import { BlackboardModule } from '../parts/blackboard/module';
@@ -42,6 +43,7 @@ import { TransformsModule } from '../parts/transforms/module';
 	  WebStorageModule,
 
 	  ChromeModule,
+	  DashboardModule,
 	  ClipsExecutiveModule,
 	  SkillerModule,
 	  BlackboardModule,
