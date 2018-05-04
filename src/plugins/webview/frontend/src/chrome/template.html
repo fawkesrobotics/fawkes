@@ -8,9 +8,8 @@
      fxFill
      fxFlexFill>
   <mat-toolbar class="ff-second-toolbar ff-bg-primary">
-    <div class="ff-toolbar-tools"
-         fxFlex>
-      <ff-nav-hamburger fxFlex="none"></ff-nav-hamburger>
+    <div class="ff-toolbar-tools" fxFlex fxLayout="row" fxLayoutAlign="start center">
+      <ff-nav-hamburger></ff-nav-hamburger>
       <div class="ff-logo-bar">
         <a routerLink="/" class="ff-toolbar-logo-link">
           <mat-icon [svgIcon]="assets.getAppLogo()"
