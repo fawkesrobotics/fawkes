@@ -15,8 +15,7 @@ import { DomainPrecondition } from '../models/DomainPrecondition';
 import { DomainPreconditionAtom } from '../models/DomainPreconditionAtom';
 import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound';
 
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
+import { Observable, interval, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'clips-executive-goal-list',
@@ -113,28 +112,28 @@ export class GoalListComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.zero_message = "Retrieving plans";
 
-    Observable
-      .forkJoin(
-        // forkJoin: retrieve all plans associated to goal in parallel
-        this.plans.map((plan) => {
-            return this.api_service.get_plan(plan.goal_id, plan.plan_id)
-          })
-        )
-      .subscribe(
-        (plans : Plan[]) => {
-          for (let i = 0; i < plans.length; ++i) {
-            console.log("Got plan", this.plans[i].goal_id, this.plans[i].plan_id)
-            this.plans[i].plan = plans[i];
-          }
-          console.log("Plans", this.plans)
-          this.create_goals_graph();
-          this.loading = false;
-        },
-        (err) => {
-          console.log("Failed to retrieve plans");
-          this.create_goals_graph();
-          this.loading = false;
-        });
+    forkJoin(
+      // forkJoin: retrieve all plans associated to goal in parallel
+      this.plans.map((plan) => {
+        return this.api_service.get_plan(plan.goal_id, plan.plan_id)
+      })
+    )
+    .subscribe(
+      (plans : Plan[]) => {
+        for (let i = 0; i < plans.length; ++i) {
+          console.log("Got plan", this.plans[i].goal_id, this.plans[i].plan_id)
+          this.plans[i].plan = plans[i];
+        }
+        console.log("Plans", this.plans)
+        this.create_goals_graph();
+        this.loading = false;
+      },
+      (err) => {
+        console.log("Failed to retrieve plans");
+        this.create_goals_graph();
+        this.loading = false;
+      }
+    );
   }
 
   recursive_add_goals(l, level : number,
@@ -243,7 +242,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
   {
     if (this.auto_refresh_subscription)  return;
     this.auto_refresh_subscription =
-      Observable.interval(2000).subscribe((num) => {
+      interval(2000).subscribe((num) => {
         this.refresh();
       });
     this.refresh();

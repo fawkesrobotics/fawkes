@@ -5,9 +5,8 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable } from 'rxjs/Observable';
+import { Observable, from } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
-import 'rxjs/add/observable/from';
 
 import { BackendConfigurationService } from '../backend-config/backend-config.service';
 import { ConfigTree } from './model/ConfigTree';
@@ -33,7 +32,7 @@ export class ConfigurationService {
     if (query in this.cache &&
         (Date.now() - this.cache[query].retrieval_time) <= CACHE_INTERVAL_MSEC)
     {
-      return Observable.from([this.cache[query].data]);
+      return from([this.cache[query].data]);
     } else {
       return this.config_api.get_config(query)
         .pipe(

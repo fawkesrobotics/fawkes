@@ -6,8 +6,7 @@ import {Component, Input, AfterViewInit, ViewChild,
         OnInit, OnDestroy, HostListener} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
+import { Observable, interval } from 'rxjs';
 
 import { BackendConfigurationService } from '../../services/backend-config/backend-config.service';
 
@@ -152,7 +151,7 @@ export class PrometheusStatComponent implements AfterViewInit, OnInit, OnDestroy
   {
     if (this.auto_refresh_subscription)  return;
     this.auto_refresh_subscription =
-      Observable.interval(this.refresh_interval_sec * 1000).subscribe((num) => {
+      interval(this.refresh_interval_sec * 1000).subscribe((num) => {
         this.refresh();
       });
     this.refresh();

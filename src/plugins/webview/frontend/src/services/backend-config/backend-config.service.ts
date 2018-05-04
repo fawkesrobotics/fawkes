@@ -5,10 +5,8 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
-import 'rxjs/add/operator/retryWhen';
-import 'rxjs/add/operator/delay';
+import { Observable, interval } from 'rxjs';
+import { delay, retryWhen } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 
@@ -139,7 +137,9 @@ export class BackendConfigurationService {
   refresh()
   {
     this.http.get<Backend[]>(this.backends_['origin'].services['api'] + '/backends')
-      .retryWhen(errors => errors.delay(5000))
+      .pipe(
+        retryWhen(errors => errors.pipe(delay(5000)))
+      )
       .subscribe(
         (recv_backends) => {
           let new_backends = {};
@@ -193,7 +193,7 @@ export class BackendConfigurationService {
           }
 
           this.auto_refresh_subscription_ =
-            Observable.interval(300000).subscribe((num) => {
+            interval(300000).subscribe((num) => {
               this.auto_refresh_subscription_.unsubscribe();
               this.auto_refresh_subscription_ = null;
               this.refresh();

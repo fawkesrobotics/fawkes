@@ -11,8 +11,7 @@ import { CardListFilterComponent } from '../../../components/filter/component';
 import { ClipsApiService } from '../services/api.service';
 import { Fact } from '../models/Fact';
 
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
+import { Observable, interval } from 'rxjs';
 
 @Component({
   selector: 'clips-env',
@@ -114,7 +113,7 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
   {
     if (this.auto_refresh_subscription)  return;
     this.auto_refresh_subscription =
-      Observable.interval(2000).subscribe((num) => {
+      interval(2000).subscribe((num) => {
         this.refresh();
       });
     this.refresh();

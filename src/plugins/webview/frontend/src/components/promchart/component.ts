@@ -2,13 +2,12 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import {Component, Input, AfterViewInit, ViewChild,
-        OnInit, OnDestroy, HostListener} from '@angular/core';
+import { Component, Input, AfterViewInit, ViewChild,
+         OnInit, OnDestroy, HostListener } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
-import 'rxjs/add/observable/forkJoin';
+import { Observable, forkJoin, interval } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { BackendConfigurationService } from '../../services/backend-config/backend-config.service';
 
@@ -134,10 +133,11 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
            `${this.backendcfg.url_for('prometheus')}/api/v1/query_range?query=${encodeURIComponent(String(q))}&start=${start}&end=${end}&step=${this.step_sec}s`);
 
 
-    Observable
-      .forkJoin(urls.map((u) => this.http.get<any>(u)))
-      .map((res: any[]) =>
-           res.map((r,i) => this.proc_res(r, start, end, step_sec, this.legend_formats[i])))
+    forkJoin(urls.map((u) => this.http.get<any>(u)))
+      .pipe(
+        map((res: any[]) =>
+            res.map((r,i) => this.proc_res(r, start, end, step_sec, this.legend_formats[i])))
+      )
       .subscribe(
         (data_arr: any[]) => {
           if (data_arr.length > 0) {
@@ -357,7 +357,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
   {
     if (this.auto_refresh_subscription)  return;
     this.auto_refresh_subscription =
-      Observable.interval(this.refresh_interval_sec * 1000).subscribe((num) => {
+      interval(this.refresh_interval_sec * 1000).subscribe((num) => {
         this.refresh();
       });
     this.refresh();

@@ -4,11 +4,8 @@
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { tap, switchMap } from 'rxjs/operators';
-import 'rxjs/add/observable/forkJoin';
-import 'rxjs/add/observable/interval';
-import 'rxjs/add/operator/map';
+import { Observable, interval, forkJoin } from 'rxjs';
+import { map, tap, switchMap } from 'rxjs/operators';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { ClipsExecutiveApiService } from '../services/api.service';
@@ -69,23 +66,24 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
 
   refresh_domain()
   {
-    Observable
-      .forkJoin([
-        // forkjoin here to allow for requesting multiple items
-        this.api_service.list_domain_operators(),
-      ])
-      .map((data: any[]) => {
+    forkJoin([
+      // forkjoin here to allow for requesting multiple items
+      this.api_service.list_domain_operators(),
+    ])
+    .pipe(
+      map((data: any[]) => {
         return { operators: data[0] };
       })
-      .subscribe(
-        (domain) => {
-          console.log("Received domain data");
-          this.domain = domain;
-        },
-        (err) => {
-          console.log("Failed to receive domain data");
-        }
-      );
+    )
+    .subscribe(
+      (domain) => {
+        console.log("Received domain data");
+        this.domain = domain;
+      },
+      (err) => {
+        console.log("Failed to receive domain data");
+      }
+    );
   }
   
   refresh_goal()
@@ -125,19 +123,18 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
     if (this.goal && this.goal.plans && this.goal.plans.length > 0) {
       this.loading_plans = true;
       this.zero_message_plans = "Retrieving plans";
-      Observable
-        .forkJoin(
-          // forkJoin: retrieve all plans associated to goal in parallel
-          this.goal.plans.map((plan_id: string) => {
-            return this.api_service.get_plan(this.goal.id, plan_id)
-            /*
-              .map((plan: Plan) => {return plan;})
-              .catch((err) => {
-                this.domain = null;
-                this.refresh_goal();
-                return Observable.of([] as Plan[]);
-              });
-            */
+      forkJoin(
+        // forkJoin: retrieve all plans associated to goal in parallel
+        this.goal.plans.map((plan_id: string) => {
+          return this.api_service.get_plan(this.goal.id, plan_id)
+          /*
+            .map((plan: Plan) => {return plan;})
+            .catch((err) => {
+            this.domain = null;
+            this.refresh_goal();
+            return Observable.of([] as Plan[]);
+            });
+          */
           })
         )
         .subscribe(
@@ -236,7 +233,7 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
   {
     if (this.auto_refresh_subscription)  return;
     this.auto_refresh_subscription =
-      Observable.interval(2000).subscribe((num) => {
+      interval(2000).subscribe((num) => {
         if (!this.loading_goal && (++this.auto_refresh_tries < 10)) {
           this.auto_refresh_tries = 0;
           this.refresh_goal();

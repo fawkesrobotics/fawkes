@@ -4,10 +4,8 @@
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/forkJoin';
-import 'rxjs/add/observable/interval';
-import 'rxjs/add/operator/map';
+import { Observable, interval, forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
@@ -81,22 +79,23 @@ export class DomainComponent implements OnInit {
   refresh_domain_data()
   {
     this.loading = true;
-    Observable
-      .forkJoin([
-        // forkjoin here to allow for requesting multiple items
-        this.api_service.list_domain_operators(),
-        this.api_service.list_domain_predicates(),
-        this.api_service.list_domain_objects(),
-        this.api_service.list_domain_facts(),
-      ])
-      .map((data: any[]) => {
-        return { operators:      data[0].reduce((map,obj) => (map[obj.name]=obj, map), {}),
-                 operators_arr:  data[0],
-                 predicates:     data[1].reduce((map,obj) => (map[obj.name]=obj, map), {}),
-                 predicates_arr: data[1],
-                 objects:        data[2],
-                 facts:          data[3].sort((a,b) => (a.name < b.name))};
-      })
+    forkJoin([
+      // forkjoin here to allow for requesting multiple items
+      this.api_service.list_domain_operators(),
+      this.api_service.list_domain_predicates(),
+      this.api_service.list_domain_objects(),
+      this.api_service.list_domain_facts(),
+    ])
+      .pipe(
+        map((data: any[]) => {
+          return { operators:      data[0].reduce((map,obj) => (map[obj.name]=obj, map), {}),
+                   operators_arr:  data[0],
+                   predicates:     data[1].reduce((map,obj) => (map[obj.name]=obj, map), {}),
+                   predicates_arr: data[1],
+                   objects:        data[2],
+                   facts:          data[3].sort((a,b) => (a.name < b.name))};
+        })
+      )
       .subscribe(
         (dd) => {
           console.log(`Received domain data: ${Object.keys(dd.operators).length} operators, `+
@@ -133,7 +132,7 @@ export class DomainComponent implements OnInit {
   {
     if (this.auto_refresh_subscription)  return;
     this.auto_refresh_subscription =
-      Observable.interval(2000).subscribe((num) => {
+      interval(2000).subscribe((num) => {
         this.refresh_domain_data();
       });
     this.refresh_domain_data();

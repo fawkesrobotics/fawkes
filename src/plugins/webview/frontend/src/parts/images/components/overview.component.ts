@@ -3,8 +3,7 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Component, OnInit, OnDestroy, ViewChild, HostListener, ElementRef } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
+import { Observable, interval } from 'rxjs';
 
 import { ImageApiService } from '../services/api.service';
 import { ImageInfo } from '../models/ImageInfo';
@@ -144,7 +143,7 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
   {
     if (this.auto_refresh_subscription)  return;
     this.auto_refresh_subscription =
-      Observable.interval(2000).subscribe((num) => {
+      interval(2000).subscribe((num) => {
         this.refresh();
       });
     this.refresh();

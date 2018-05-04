@@ -4,8 +4,7 @@
 
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
+import { Observable, interval } from 'rxjs';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { ConfigurationService } from '../../../services/config/config.service';
@@ -73,7 +72,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   {
     if (this.auto_refresh_subscription)  return;
     this.auto_refresh_subscription =
-      Observable.interval(2000).subscribe((num) => {
+      interval(2000).subscribe((num) => {
         this.refresh();
       });
     this.refresh();

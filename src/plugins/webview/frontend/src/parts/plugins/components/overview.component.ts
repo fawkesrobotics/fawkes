@@ -13,8 +13,7 @@ import { PluginApiService } from '../services/api.service';
 import { Plugin } from '../models/Plugin';
 import { PluginOpRequest } from '../models/PluginOpRequest';
 
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
+import { Observable, interval } from 'rxjs';
 
 @Component({
   selector: 'plugins-overview',
@@ -144,7 +143,7 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
   {
     if (this.auto_refresh_subscription)  return;
     this.auto_refresh_subscription =
-      Observable.interval(10000).subscribe((num) => {
+      interval(10000).subscribe((num) => {
         this.refresh();
       });
     this.refresh();

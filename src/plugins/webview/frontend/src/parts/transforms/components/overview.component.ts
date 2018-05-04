@@ -3,8 +3,7 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
+import { Observable, interval } from 'rxjs';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { TransformsApiService } from '../services/api.service';
@@ -73,7 +72,7 @@ export class TransformsOverviewComponent implements OnInit, OnDestroy {
   {
     if (this.auto_refresh_subscription)  return;
     this.auto_refresh_subscription =
-      Observable.interval(1000).subscribe((num) => {
+      interval(1000).subscribe((num) => {
         this.refresh();
       });
     this.refresh();

@@ -5,8 +5,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { SwUpdate } from '@angular/service-worker';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/interval';
+import { Observable, interval } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Injectable()
@@ -32,7 +31,7 @@ export class SwUpdateNotifierService {
 
     if (environment.production) {
       this.force_install();
-      Observable.interval(60000).subscribe((num) => {
+      interval(60000).subscribe((num) => {
         this.check_now();
       });
     }
