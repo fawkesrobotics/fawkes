@@ -218,50 +218,44 @@ ifeq ($(HAVE_ROS),1)
     WARN_TARGETS += warning_geometry_msgs
   endif
 
-   CFLAGS_dynamic_reconfigure_thread += $(call boost-lib-cflags,thread) \
-			   $(CFLAGS) $(CFLAGS_TF)
-   CFLAGS_dynamic_reconfigure_plugin = $(CFLAGS_dynamic_reconfigure_thread)
-   LDFLAGS_ros_dynamic_reconfigure +=  $(call boost-lib-ldflags,thread) \
-			 $(call boost-lib-ldflags,system) \
-			 $(LDFLAGS_TF)
+  ifeq ($(call ros-have-pkg,dynamic_reconfigure),1)
+    CFLAGS_dynamic_reconfigure_thread += $(call boost-lib-cflags,thread) \
+                                         $(call ros-pkg-cflags,dynamic_reconfigure) \
+                                         $(CFLAGS) $(CFLAGS_TF)
+    CFLAGS_dynamic_reconfigure_plugin = $(CFLAGS_dynamic_reconfigure_thread)
+    LDFLAGS_ros_dynamic_reconfigure +=  $(call boost-lib-ldflags,thread) \
+                                        $(call boost-lib-ldflags,system) \
+                                        $(call ros-pkg-lflags,dynamic_reconfigure) \
+                                        $(LDFLAGS_TF)
+    PLUGINS_all += $(PLUGINDIR)/ros-dynamic_reconfigure.so
+  else
+    WARN_TARGETS += warning_dynamic_reconfigure
+  endif
 
-  PLUGINS_all += $(PLUGINDIR)/ros-dynamic_reconfigure.so
+  ifeq ($(call ros-have-pkgs,move_base_msgs dynamic_reconfigure actionlib),1)
+    ifeq ($(HAVE_TF),1)
+      CFLAGS_navigator_thread += $(call ros-pkgs-cflags,move_base_msgs dynamic_reconfigure actionlib) \
+                                 $(call boost-lib-cflags,thread) \
+                                 $(CFLAGS) $(CFLAGS_TF)
+      CFLAGS_navigator_plugin = $(CFLAGS_navigator_thread)
+      LDFLAGS_ros_navigator += $(call ros-pkgs-lflags,move_base_msgs dynamic_reconfigure actionlib) \
+                               $(call boost-libs-ldflags,thread system) \
+                               $(LDFLAGS_TF)
 
-  ifeq ($(call ros-have-pkg,move_base_msgs),1)
-    ifeq ($(call ros-have-pkg,actionlib),1)
-      ifeq ($(HAVE_TF),1)
-        CFLAGS_navigator_thread += $(call ros-pkg-cflags,move_base_msgs) \
-				   $(call ros-pkg-cflags,actionlib) \
-				   $(call boost-lib-cflags,thread) \
-				   $(CFLAGS) $(CFLAGS_TF)
-        CFLAGS_navigator_plugin = $(CFLAGS_navigator_thread)
-        LDFLAGS_ros_navigator += $(call ros-pkg-lflags,move_base_msgs) \
-				 $(call ros-pkg-lflags,actionlib) \
-				 $(call boost-lib-ldflags,thread) \
-				 $(call boost-lib-ldflags,system) \
-				 $(LDFLAGS_TF)
+      CFLAGS_move_base_thread += $(call ros-pkgs-cflags,move_base_msgs actionlib) \
+                                 $(call boost-libs-cflags,thread system) \
+                                 $(CFLAGS) $(CFLAGS_TF)
+      CFLAGS_move_base_plugin = $(CFLAGS_move_base_thread)
+      LDFLAGS_ros_move_base += $(call ros-pkgs-lflags,move_base_msgs actionlib) \
+                               $(call boost-libs-ldflags,thread system) -lpthread \
+                               $(LDFLAGS_TF)
 
-        CFLAGS_move_base_thread += $(call ros-pkg-cflags,move_base_msgs) \
-				   $(call ros-pkg-cflags,actionlib) \
-				   $(call boost-lib-cflags,thread) \
-				   $(call boost-lib-cflags,system) \
-				   $(CFLAGS) $(CFLAGS_TF)
-        CFLAGS_move_base_plugin = $(CFLAGS_move_base_thread)
-        LDFLAGS_ros_move_base += $(call ros-pkg-lflags,move_base_msgs) \
-				 $(call ros-pkg-lflags,actionlib) \
-				 $(call boost-lib-ldflags,thread) -lpthread \
-				 $(call boost-lib-ldflags,system)  \
-				 $(LDFLAGS_TF)
-
-        PLUGINS_all += $(PLUGINDIR)/ros-navigator.so $(PLUGINDIR)/ros-move-base.so
-      else
-        WARN_TARGETS += warning_navigator_tf
-      endif
+      PLUGINS_all += $(PLUGINDIR)/ros-navigator.so $(PLUGINDIR)/ros-move-base.so
     else
-      WARN_TARGETS += warning_actionlib
+      WARN_TARGETS += warning_navigator_tf
     endif
   else
-    WARN_TARGETS += warning_move_base_msgs
+    WARN_TARGETS += $(addprefix warning_,$(call ros-missing-pkgs move_base_msgs dynamic_reconfigure actionlib))
   endif
   ifeq ($(call ros-have-pkg,sensor_msgs),1)
     CFLAGS_joint_thread = $(CFLAGS) $(call ros-pkg-cflags,sensor_msgs)
@@ -323,7 +317,7 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_ros warning_fawkestf warning_rostf warning_pcl warning_rospcl warning_tf2_msgs
+.PHONY: warning_ros warning_fawkestf warning_rostf warning_pcl warning_rospcl warning_tf2_msgs warning_dynamic_reconfigure
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS Plugins$(TNORMAL) (ROS not found)"
 warning_fawkestf:
@@ -352,6 +346,8 @@ warning_geometry_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS cmdvel Plugin$(TNORMAL) (ROS package geometry_msgs not found)"
 warning_move_base_msgs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator and move_base plugins$(TNORMAL) (ROS package move_base_msgs not found)"
+warning_dynamic_reconfigure:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator and move_base plugins$(TNORMAL) (ROS package dynamic_reconfigure not found)"
 warning_navigator_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ROS navigator and move_base plugins$(TNORMAL) (Fawkes TF library not available)"
 warning_actionlib:
