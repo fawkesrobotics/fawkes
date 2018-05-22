@@ -100,8 +100,8 @@ OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_webview) $(OBJS_ros_tf) 
 	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
 	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) \
 	   $(OBJS_ros_robot_description) $(OBJS_ros_move_base) \
-	   $(OBJS_ros_skiller) $(OBJS_ros_clock) $(OBJS_ros_position_3d)\
-	   $(OBJS_ros_dynamic_reconfigure)
+	   $(OBJS_ros_skiller) $(OBJS_ros_clock) $(OBJS_ros_position_3d) \
+	   $(OBJS_ros_dynamic_reconfigure) $(OBJS_ros_imu) $(OBJS_ros_navgraph_breakout)
 
 ifneq ($(PKGCONFIG),)
   HAVE_TINYXML = $(if $(shell $(PKGCONFIG) --exists 'tinyxml'; echo $${?/1/}),1,0)
