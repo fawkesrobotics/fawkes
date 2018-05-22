@@ -7,6 +7,12 @@
 *_tolua.cpp
 *_tolua.pkg
 
+# Generated interfaces
+*Interface.h_ext
+*Interface.h
+*Interface.cpp
+*Interface.tolua
+
 # Generated protobuf files
 *.pb.h
 *.pb.cpp
