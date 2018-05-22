@@ -65,6 +65,7 @@ ifneq ($(INTERFACES_all),)
 	$(eval OBJS_all                    += $$(OBJS_interfaces_lib$I))	\
 	$(eval INTERFACES_SRCS             += $(SRCDIR)/$I.cpp)			\
 	$(eval INTERFACES_TOLUA            += $(SRCDIR)/$I.tolua)		\
+	$(eval CLEAN_FILES                 += $(SRCDIR)/$I.cpp $(SRCDIR)/$I.tolua $(IFACESRCDIR)/$I.h) \
 	$(eval INTERFACES_HDRS             += $(IFACESRCDIR)/$I.h)		\
 	$(eval INTERFACES_LIBS             += $(IFACEDIR)/lib$I.so)		\
 	$(eval INTERFACES_TOUCH            += $(SRCDIR)/$(OBJDIR)/$I.touch)	\
