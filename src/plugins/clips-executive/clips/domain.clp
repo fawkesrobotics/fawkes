@@ -562,6 +562,14 @@
   (modify ?a (status SENSED-EFFECTS-HOLD))
 )
 
+(defrule domain-effect-sensed-remove-on-removed-action
+  "Remove domain-pending-sensed-fact when the corresponding action was removed"
+  ?ef <- (domain-pending-sensed-fact (action-id ?action-id) (goal-id ?g) (plan-id ?p))
+  (not (plan-action (id ?action-id) (plan-id ?p) (goal-id ?g)))
+  =>
+  (retract ?ef)
+)
+
 (defrule domain-action-final
   "After the effects of an action have been applied, change it to FINAL."
   ?a <- (plan-action (id ?action-id) (status EFFECTS-APPLIED))
