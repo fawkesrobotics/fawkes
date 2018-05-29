@@ -45,6 +45,7 @@ using namespace fawkes;
  * @param tf_listener to access the tf::Transformer aspect
  * @param config to access the Configuration aspect
  * @param logger to access the Logger aspect
+ * @param blackboard to open the LaserBoxFilterInterface for writing
  */
 LaserBoxFilterDataFilter::LaserBoxFilterDataFilter(const std::string filter_name,
                                                    unsigned int in_data_size,
