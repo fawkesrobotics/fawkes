@@ -35,9 +35,6 @@
 #include <unistd.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LuaContext <lua/context.h>
  * Lua C++ wrapper.

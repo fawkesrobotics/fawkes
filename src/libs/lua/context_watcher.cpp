@@ -23,9 +23,6 @@
 #include <lua/context_watcher.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LuaContextWatcher <lua/context_watcher.h>
  * Lua context watcher.

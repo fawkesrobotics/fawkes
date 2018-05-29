@@ -31,9 +31,6 @@
 #include <cstring>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LuaInterfaceImporter <lua/interface_importer.h>
  * Lua interface importer.
