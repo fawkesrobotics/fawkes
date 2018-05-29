@@ -26,9 +26,6 @@
 #include <pcl_utils/utils.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class PointCloudAspectIniFin <aspect/inifins/pointcloud.h>
  * Initializer/finalizer for the PointCloudAspect.

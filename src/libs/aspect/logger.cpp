@@ -24,9 +24,6 @@
 #include <aspect/logger.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LoggerAspect <aspect/logger.h>
  * Thread aspect that allows to provide a logger to Fawkes.

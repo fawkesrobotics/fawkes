@@ -30,9 +30,6 @@ namespace fawkes {
     class Transformer;
   }
 
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class BlackBoard;
 

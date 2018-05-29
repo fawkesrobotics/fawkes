@@ -27,9 +27,6 @@
 
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlockedTimingAspect <aspect/blocked_timing.h>
  * Thread aspect to use blocked timing.

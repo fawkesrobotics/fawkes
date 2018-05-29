@@ -24,9 +24,6 @@
 #include <aspect/webview.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class WebviewAspect <aspect/webview.h>
  * Thread aspect to provide web pages via Webview.

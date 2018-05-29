@@ -32,9 +32,6 @@
 #include <blackboard/ownership.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class TransformAspect <aspect/tf.h>
  * Thread aspect to access the transform system.

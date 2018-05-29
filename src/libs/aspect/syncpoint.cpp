@@ -24,9 +24,6 @@
 #include <core/threading/thread.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SyncPointAspect <aspect/syncpoint_manager.h>
  * Thread aspect to acces to SyncPoints

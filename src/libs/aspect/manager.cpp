@@ -50,9 +50,6 @@
 #endif
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class AspectManager <aspect/manager.h>
  * Aspect and aspect initializer/finalizer manager.

@@ -24,9 +24,6 @@
 #include <aspect/thread_producer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ThreadProducerAspect <aspect/thread_producer.h>
  * Aspect for thread producing threads.

@@ -26,9 +26,6 @@
 #include <netcomm/fawkes/hub.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FawkesNetworkAspectIniFin <aspect/inifins/fawkes_network.h>
  * Initializer/finalizer for the FawkesNetworkAspect.

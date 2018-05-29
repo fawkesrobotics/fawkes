@@ -24,9 +24,6 @@
 #include <aspect/pointcloud.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class PointCloudAspect <aspect/pointcloud.h>
  * Thread aspect to provide and access point clouds.

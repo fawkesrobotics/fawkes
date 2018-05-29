@@ -30,9 +30,6 @@ namespace fawkes {
     class Transformer;
   }
 
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class TransformAspectIniFin <aspect/inifins/tf.h>
  * Initializer/finalizer for the TransformAspect.

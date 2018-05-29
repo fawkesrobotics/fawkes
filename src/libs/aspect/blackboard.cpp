@@ -23,9 +23,6 @@
 #include <aspect/blackboard.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlackBoardAspect <aspect/blackboard.h>
  * Thread aspect to access to BlackBoard.

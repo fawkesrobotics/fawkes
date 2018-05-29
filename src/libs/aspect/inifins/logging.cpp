@@ -25,9 +25,6 @@
 #include <aspect/logging.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LoggingAspectIniFin <aspect/inifins/logging.h>
  * Initializer/finalizer for the LoggingAspect.

@@ -22,9 +22,6 @@
 #include <aspect/syncpoint_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SyncPointManagerAspect <aspect/syncpoint_manager.h>
  * Thread aspect to acces to SyncPoints

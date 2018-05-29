@@ -28,9 +28,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LoggerAspectIniFin <aspect/inifins/logger.h>
  * Initializer/finalizer for the LoggerAspect.

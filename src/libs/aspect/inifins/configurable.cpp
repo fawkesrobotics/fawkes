@@ -26,9 +26,6 @@
 #include <config/config.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ConfigurableAspectIniFin <aspect/inifins/configurable.h>
  * Initializer/finalizer for the ConfigurableAspect.

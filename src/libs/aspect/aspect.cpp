@@ -24,9 +24,6 @@
 #include <aspect/aspect.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Aspect <aspect/aspect.h>
  * Fawkes aspect base class.

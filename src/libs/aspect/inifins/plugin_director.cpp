@@ -27,9 +27,6 @@
 #include <plugin/manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class PluginDirectorAspectIniFin <aspect/inifins/plugin_director.h>
  * Initializer/finalizer for the PluginDirectorAspect.

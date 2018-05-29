@@ -27,9 +27,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class VisionAspectIniFin <aspect/inifins/vision.h>
  * Initializer/finalizer for the VisionAspect.

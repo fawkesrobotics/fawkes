@@ -24,9 +24,6 @@
 #include <syncpoint/syncpoint_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SyncPointManagerAspectIniFin <aspect/inifins/syncpoint_manager.h>
  * Initializer/finalizer for the SyncPointManagerAspect

@@ -30,9 +30,6 @@
 #include <webview/rest_api_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class WebviewAspectIniFin <aspect/inifins/webview.h>
  * Initializer/finalizer for the WebviewAspect.

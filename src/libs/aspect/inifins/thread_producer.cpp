@@ -26,9 +26,6 @@
 #include <core/threading/thread_collector.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ThreadProducerAspectIniFin <aspect/inifins/thread_producer.h>
  * Initializer/finalizer for the ThreadProducerAspect.

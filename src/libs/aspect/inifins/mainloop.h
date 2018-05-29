@@ -30,9 +30,6 @@
 #include <core/threading/thread_notification_listener.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MainLoopEmployer;
 class BlockedTimingExecutor;

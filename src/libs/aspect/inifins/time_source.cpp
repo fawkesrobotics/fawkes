@@ -27,9 +27,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class TimeSourceAspectIniFin <aspect/inifins/time_source.h>
  * Initializer/finalizer for the TimeSourceAspect.

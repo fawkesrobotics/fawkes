@@ -24,9 +24,6 @@
 #include <aspect/plugin_director.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class PluginDirectorAspect <aspect/plugin_director.h>
  * Thread aspect to access the PluginManager.

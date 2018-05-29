@@ -26,9 +26,6 @@
 #include <utils/time/clock.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ClockAspectIniFin <aspect/inifins/clock.h>
  * Initializer/finalizer for the ClockAspect.

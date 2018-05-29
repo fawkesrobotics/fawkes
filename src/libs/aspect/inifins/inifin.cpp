@@ -24,9 +24,6 @@
 #include <aspect/inifins/inifin.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class AspectIniFin <aspect/inifins/inifin.h>
  * Aspect initializer/finalizer base class.
