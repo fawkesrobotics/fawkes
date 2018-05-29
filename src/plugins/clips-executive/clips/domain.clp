@@ -718,11 +718,26 @@
 			 then
 				(assert (domain-fact (name ?pred:name) (param-values ?values)))
 			 else
-				(delayed-do-for-all-facts ((?df domain-fact))
-					(and (eq ?df:name ?pred:name) (eq ?df:param-values ?values))
-
-					(retract ?df)
-				)
+        ; Check if there is also a positive effect for the predicate with the
+        ; same values. Only apply the negative effect if no such effect
+        ; exists.
+        ; NOTE: This does NOT work for conditional effects.
+        (if (not (any-factp
+                  ((?oe domain-effect))
+                  (and
+                    (eq ?oe:part-of ?op) (eq ?oe:predicate ?pred:name)
+                    (eq ?oe:type POSITIVE)
+                    (eq ?values
+                        (domain-ground-effect ?oe:param-names
+                          ?oe:param-constants ?action-param-names
+                          ?action-param-values))
+                  )))
+        then
+				  (delayed-do-for-all-facts ((?df domain-fact))
+					  (and (eq ?df:name ?pred:name) (eq ?df:param-values ?values))
+					  (retract ?df)
+          )
+        )
 			)
 		)
 	)
