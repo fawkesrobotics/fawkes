@@ -99,7 +99,7 @@ XabslEngineThread::init()
   xe_->registerBasicBehavior(*sw);
 
   ball_ry_ = ball_rx_ = NULL;
-  for (Interface::FieldIterator i = wm_ball_if_->fields(); i != wm_ball_if_->fields_end(); ++i) {
+  for (InterfaceFieldIterator i = wm_ball_if_->fields(); i != wm_ball_if_->fields_end(); ++i) {
     if ( strcmp(i.get_name(), "relative_x") == 0 ) {
       ball_rx_ = new XabslInterfaceFieldWrapper<double, float>(i.get_type(), i.get_name(), (float *)i.get_value());
       xe_->registerDecimalInputSymbol("ball.relative_x", ball_rx_,
@@ -128,7 +128,7 @@ XabslEngineThread::init()
   navi_if_ = blackboard->open_for_reading<NavigatorInterface>("Navigator");
 
   std::string base_name = "navi_";
-  Interface::FieldIterator i;
+  InterfaceFieldIterator i;
   for (i = navi_if_->fields(); i != navi_if_->fields_end(); ++i) {
     switch (i.get_type()) {
     case Interface::IFT_BOOL:

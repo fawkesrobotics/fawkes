@@ -44,7 +44,7 @@ template <typename XabslType, typename FieldType>
    * @param name name of the field
    * @param value pointer to the value of the field
    */
-  XabslInterfaceFieldWrapper(fawkes::Interface::interface_fieldtype_t type,
+  XabslInterfaceFieldWrapper(fawkes::interface_fieldtype_t type,
 			     const char *name, FieldType *value)
   {
     pointer_ = new fawkes::InterfaceFieldPointer<FieldType>(type, name, value);
@@ -67,7 +67,7 @@ template <typename XabslType, typename FieldType>
   /** Get type of the field.
    * @return type of the field.
    */
-  fawkes::Interface::interface_fieldtype_t  get_type() const
+  fawkes::interface_fieldtype_t  get_type() const
   {
     return pointer_->get_type();
   }

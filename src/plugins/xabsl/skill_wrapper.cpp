@@ -123,9 +123,9 @@ XabslSkillWrapper::skill_string()
       ParameterValue<double> *pvd;
       ParameterValue<bool>   *pvb;
       if ( (pvd = dynamic_cast<ParameterValue<double> *>(i->second)) != NULL) {
-        rv += i->first + "=" + fawkes::StringConversions::toString(pvd->get_value());
+        rv += i->first + "=" + fawkes::StringConversions::to_string(pvd->get_value());
       } else if ( (pvb = dynamic_cast<ParameterValue<bool> *>(i->second)) != NULL) {
-	rv += i->first + "=" + fawkes::StringConversions::toString(pvb->get_value());
+	rv += i->first + "=" + fawkes::StringConversions::to_string(pvb->get_value());
       } else { 
         throw fawkes::Exception("Unknonw parameter value type");
       }
