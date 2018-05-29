@@ -32,9 +32,6 @@ using namespace std;
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 #define TEST_IF_IS_A_PIXEL(x) ((x)>230)
 

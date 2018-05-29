@@ -33,9 +33,6 @@ using namespace std;
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BoxRelative <fvmodels/relative_position/box_relative.h>
  * Relative (beer) box position model.

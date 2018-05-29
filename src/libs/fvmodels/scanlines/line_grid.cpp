@@ -32,9 +32,6 @@
 using fawkes::upoint_t;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ScanlineLineGrid <fvmodels/scanlines/line_grid.h>
  * Grid of scan lines.

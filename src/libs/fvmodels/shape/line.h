@@ -33,9 +33,6 @@
 #include <fvmodels/shape/shapemodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class HtLinesModel;
 class RhtLinesModel;

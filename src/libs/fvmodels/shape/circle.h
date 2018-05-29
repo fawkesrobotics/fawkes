@@ -34,9 +34,6 @@
 #include <fvmodels/shape/shapemodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 // constants of the limits of the detected ball
 const unsigned int TBY_CIRCLE_RADIUS_MAX = 600;

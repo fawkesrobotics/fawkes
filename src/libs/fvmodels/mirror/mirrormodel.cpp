@@ -24,9 +24,6 @@
 #include <fvmodels/mirror/mirrormodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MirrorModel <fvmodels/mirror/mirrormodel.h>
  * Mirror model interface.

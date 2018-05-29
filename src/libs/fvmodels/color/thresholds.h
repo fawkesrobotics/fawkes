@@ -28,9 +28,6 @@
 #include <fvmodels/color/colormodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /* The following thresholds define certain color regions in the
    two-dimensional UV-Colorspace (ignoring the Y-component).

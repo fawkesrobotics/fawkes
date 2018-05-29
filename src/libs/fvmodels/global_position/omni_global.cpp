@@ -26,9 +26,6 @@
 #include <fvmodels/mirror/mirrormodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OmniGlobal <fvmodels/global_position/omni_global.h>
  * Omni vision global position model.

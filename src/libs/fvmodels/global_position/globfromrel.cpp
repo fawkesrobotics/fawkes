@@ -28,9 +28,6 @@
 #include <fvmodels/relative_position/relativepositionmodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class GlobalFromRelativePos <fvmodels/global_position/globfromrel.h>
  * Calculate global ball position based on a relative position model.

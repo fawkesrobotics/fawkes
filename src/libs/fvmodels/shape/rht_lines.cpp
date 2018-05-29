@@ -33,9 +33,6 @@ using namespace fawkes;
 #define TEST_IF_IS_A_PIXEL(x) ((x)>230)
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class RhtLinesModel <fvmodels/shape/rht_lines.h>
  * Randomized Hough-Transform line model.

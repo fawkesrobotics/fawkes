@@ -30,9 +30,6 @@
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class BoxRelative : public RelativePositionModel
 {

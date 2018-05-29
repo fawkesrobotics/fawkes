@@ -30,9 +30,6 @@ using namespace std;
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BallTrigoRelativePos <fvmodels/relative_position/ball_trigo.h>
  * Relative ball position model for pan/tilt camera.

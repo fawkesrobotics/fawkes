@@ -25,9 +25,6 @@
 #include <fvmodels/relative_position/relativepositionmodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class RelativePositionModel <fvmodels/relative_position/relativepositionmodel.h>
  * Relative Position Model Interface.

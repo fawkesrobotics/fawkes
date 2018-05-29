@@ -24,9 +24,6 @@
 #include <fvmodels/velocity/velocitymodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class VelocityModel <fvmodels/velocity/velocitymodel.h>
  * Velocity model interface.

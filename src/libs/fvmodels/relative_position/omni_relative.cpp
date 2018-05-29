@@ -27,9 +27,6 @@
 #include <fvmodels/relative_position/omni_relative.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OmniRelative <fvmodels/relative_position/omni_relative.h>
  * Omni vision relative position model.

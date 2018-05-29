@@ -29,9 +29,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 const float FitAccum::TOO_SMALL_DELTA = 1.0e-3f;
 

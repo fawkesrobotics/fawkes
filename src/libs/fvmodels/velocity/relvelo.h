@@ -34,9 +34,6 @@
 #include <list>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Position/time tuple. */
 typedef struct {
