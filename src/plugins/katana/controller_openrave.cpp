@@ -38,9 +38,6 @@ using namespace OpenRAVE;
 #endif
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class KatanaControllerOpenrave <plugins/katana/controller_kni.h>
  * Controller class for a Neuronics Katana, using libkni to interact
