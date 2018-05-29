@@ -30,9 +30,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FilterMax <fvfilters/max.h>
  * Maximum filter.

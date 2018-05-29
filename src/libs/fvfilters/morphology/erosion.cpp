@@ -39,9 +39,6 @@
 #endif
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FilterErosion <fvfilters/morphology/erosion.h>
  * Morphological erosion.

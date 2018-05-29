@@ -27,9 +27,6 @@
 #include <fvmodels/shape/shapemodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FilterShapeRemover <fvfilters/shape_remover.h>
  * Remove shapes from an image.

@@ -35,9 +35,6 @@
 #include <cstring>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SEGenerator <fvfilters/morphology/segenerator.h>
  * Basic generators for structuring elements for morphological filters.
