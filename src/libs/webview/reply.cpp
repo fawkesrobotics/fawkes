@@ -119,16 +119,6 @@ WebReply::code() const
 void
 WebReply::set_code(WebReply::Code code)
 {
-	__code = code;
-}
-
-
-/** Set response code.
- * @param code HTTP response code
- */
-void
-WebReply::set_code(WebReply::Code code)
-{
 	code_ = code;
 }
 
