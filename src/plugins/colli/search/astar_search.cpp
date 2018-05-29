@@ -30,9 +30,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class search <plugins/colli/search/astar_search.h>
  * This class tries to translate the found plan to interpreteable

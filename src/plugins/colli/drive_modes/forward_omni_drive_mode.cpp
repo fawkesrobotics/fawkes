@@ -27,9 +27,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ForwardOmniDriveModule <plugins/colli/drive_modes/forward_drive_mode.h>
  * This is the SlowForward drive-module, for slow forward only movements.

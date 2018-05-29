@@ -31,9 +31,6 @@ using namespace std;
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class AStar <plugins/colli/search/astar.h>
  * This is a high efficient implementation. Therefore this code

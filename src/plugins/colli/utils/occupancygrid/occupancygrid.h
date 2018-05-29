@@ -29,9 +29,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Occupancy threshold. */
 const float OCCUPANCY_THRESHOLD = 0.45f;

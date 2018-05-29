@@ -33,9 +33,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class AbstractDriveMode <plugins/colli/drive_modes/abstract_drive_mode.h>
  * This is the base class which calculates drive modes. Drive modes are the

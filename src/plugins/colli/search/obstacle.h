@@ -31,9 +31,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColliFastObstacle <plugins/colli/search/obstacle.h>
  * This is an implementation of a a fast obstacle.

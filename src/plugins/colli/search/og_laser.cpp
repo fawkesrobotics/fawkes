@@ -39,9 +39,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LaserOccupancyGrid <plugins/colli/search/og_laser.h>
  *  This OccGrid is derived by the Occupancy Grid originally from Andreas Strack,

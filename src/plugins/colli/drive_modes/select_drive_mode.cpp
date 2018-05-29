@@ -46,9 +46,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SelectDriveMode <plugins/colli/drive_modes/select_drive_mode.h>
  * This class selects the correct drive mode and calls the appopriate drive component

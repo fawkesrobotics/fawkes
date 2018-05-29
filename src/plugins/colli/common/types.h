@@ -28,9 +28,6 @@
 #include <utils/math/types.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Colli States */
 typedef enum {

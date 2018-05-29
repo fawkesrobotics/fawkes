@@ -25,9 +25,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ForwardDriveModule <plugins/colli/drive_modes/forward_drive_mode.h>
  * This is the Forward drive-module, for forward only movements.

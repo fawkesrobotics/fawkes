@@ -31,9 +31,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class AbstractSearch <plugins/colli/search/abstract_search.h>
  * This is the abstract search interpretation class for an arbitrary
