@@ -259,6 +259,18 @@
   )
 )
 
+(deffunction domain-retract-grounding
+  "Retract all ground preconditions."
+  ()
+  (do-for-all-facts ((?precond domain-precondition))
+                    (eq ?precond:grounded TRUE)
+                    (retract ?precond))
+  (do-for-all-facts ((?precond domain-atomic-precondition))
+                    (eq ?precond:grounded TRUE)
+                    (retract ?precond))
+)
+
+
 (deffunction domain-is-precond-negative
   "Check if a non-atomic precondition is negative by checking all its parents
    and counting the number of negations. If the number is odd, the precondition
@@ -289,7 +301,7 @@
 =>
   (remove-precondition ?precond)
   ; If there are any grounded preconditions, we need to recompute them.
-  (assert (domain-wm-update))
+  (domain-retract-grounding)
 )
 
 (defrule domain-replace-precond-on-sensed-val-effect-of-exog-action
@@ -330,13 +342,13 @@
             (param-constants $?const-args ?const-eff-val)))
   (modify ?ap (part-of ?precond) (name (sym-cat ?precond 1)))
   ; If there are any grounded preconditions, we need to recompute them.
-  (assert (domain-wm-update))
+  (domain-retract-grounding)
 )
 
 (defrule domain-ground-action-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific action-id."
-  (not (domain-wm-update))
+  (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   (plan-action (action-name ?op) (goal-id ?g) (plan-id ?p) (id ?action-id)
@@ -356,7 +368,7 @@
 (defrule domain-ground-effect-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific effect-id."
-  (not (domain-wm-update))
+  (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   (plan-action (action-name ?op) (id ?action-id) (goal-id ?g) (plan-id ?p)
@@ -376,7 +388,7 @@
 (defrule domain-ground-nested-precondition
   "Ground a non-atomic precondition that is part of another precondition. Copy
    the action ID from the parent precondition."
-  (not (domain-wm-update))
+  (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
@@ -398,7 +410,7 @@
 
 (defrule domain-ground-atomic-precondition
   "Ground an atomic precondition of an operator."
-  (not (domain-wm-update))
+  (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   (plan-action
@@ -462,6 +474,7 @@
 )
 
 (defrule domain-check-if-atomic-precondition-is-satisfied
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-atomic-precondition
@@ -490,10 +503,24 @@
   (modify ?precond (is-satisfied (eq (nth$ 1 ?params) (nth$ 2 ?params))))
 )
 
+(defrule domain-retract-atomic-precondition-if-not-satisfied
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
+  ?precond <- (domain-atomic-precondition
+                (goal-id ?g) (plan-id ?p)
+                (is-satisfied TRUE)
+                (predicate ?pred)
+                (param-values $?params)
+                (grounded TRUE))
+  (not (domain-fact (name ?pred) (param-values $?params)))
+=>
+  (modify ?precond (is-satisfied FALSE))
+)
+
 (defrule domain-check-if-negative-precondition-is-satisfied
   "A negative precondition is satisfied iff its (only) child is not satisfied.
    Note that we need a second rule that retracts the fact if the child is
    asserted."
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
@@ -522,6 +549,7 @@
 (defrule domain-retract-negative-precondition-if-child-is-satisfied
   "If a negative precondition's child is satisfied, the precondition is not
    satisfied anymore."
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
@@ -549,6 +577,7 @@
 
 (defrule domain-check-if-conjunctive-precondition-is-satisfied
   "All the precondition's children must be satisfied."
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
@@ -574,6 +603,7 @@
 (defrule domain-retract-conjunctive-precondition-if-child-is-not-satisfied
   "Make sure that a conjunctive precondition is not satisfied if any of its
    children is satisfied."
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
@@ -673,6 +703,7 @@
 ; TODO: ?action-name should be ?op
 (defrule domain-effects-check-for-sensed
   "Apply effects of an action after it succeeded."
+  (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?pa <- (plan-action	(id ?id) (goal-id ?g) (plan-id ?p) (action-name ?op)
@@ -705,6 +736,7 @@
 
 (defrule domain-effects-ignore-sensed
   "Apply effects of an action after it succeeded."
+  (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   ?pa <- (plan-action	(id ?id) (action-name ?op) (status EXECUTION-SUCCEEDED))
 	(domain-operator (name ?op) (wait-sensed FALSE))
 	=>
@@ -714,6 +746,7 @@
 ; Atomically assert all effects of an action after it has been executed.
 (defrule domain-effects-apply
   "Apply effects of an action after it succeeded."
+  (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?pa <- (plan-action	(id ?id) (goal-id ?g) (plan-id ?p) (action-name ?op)
@@ -768,6 +801,7 @@
 
 (defrule domain-effect-sensed-positive-holds
   "Remove a pending sensed positive fact that has been sensed."
+  (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   ?ef <- (domain-pending-sensed-fact (type POSITIVE)
           (name ?predicate) (param-values $?values))
   ?df <- (domain-fact (name ?predicate) (param-values $?values))
@@ -777,6 +811,7 @@
 
 (defrule domain-effect-sensed-negative-holds
   "Remove a pending sensed negative fact that has been sensed."
+  (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   ?ef <- (domain-pending-sensed-fact (type NEGATIVE)
           (name ?predicate) (param-values $?values))
   (not (domain-fact (name ?predicate) (param-values $?values)))
@@ -786,6 +821,7 @@
 
 (defrule domain-effect-wait-sensed-done
   "After the effects of an action have been applied, change it to SENSED-EFFECTS-HOLD."
+  (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   ?a <- (plan-action (id ?action-id) (status SENSED-EFFECTS-WAIT) (plan-id ?p) (goal-id ?g))
   (not (domain-pending-sensed-fact (action-id ?action-id) (goal-id ?g) (plan-id ?p)))
   =>
@@ -802,10 +838,11 @@
 
 (defrule domain-action-final
   "After the effects of an action have been applied, change it to FINAL."
+  (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   ?a <- (plan-action (id ?action-id) (status EFFECTS-APPLIED))
   =>
   (modify ?a (status FINAL))
-  (assert (domain-wm-update))
+  (domain-retract-grounding)
 )
 
 ; This might be extended: if an action failed, but still all effects
@@ -815,14 +852,16 @@
 ; period).
 (defrule domain-action-failed
   "An action has failed."
+  (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
   ?a <- (plan-action (id ?action-id) (status EXECUTION-FAILED))
   =>
   (modify ?a (status FAILED))
-  (assert (domain-wm-update))
+  (domain-retract-grounding)
 )
 
 (defrule domain-check-if-action-is-executable
   "If the precondition of an action is satisfied, the action is executable."
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?action <- (plan-action (id ?action-id) (goal-id ?g) (plan-id ?p)
@@ -835,6 +874,7 @@
 
 (defrule domain-check-if-action-is-executable-without-precondition
   "If the precondition of an action is satisfied, the action is executable."
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
   ?action <- (plan-action (id ?action-id) (action-name ?action-name) (executable FALSE))
   (not (domain-precondition (part-of ?action-name)))
 =>
@@ -962,32 +1002,8 @@
               "is not matched with a complementary effect"))))
 )
 
-(defrule domain-cleanup-preconditions-on-worldmodel-change
-  "Retract grounded preconditions when the worldmodel changes."
-  (domain-wm-update)
-  ?precond <- (domain-precondition (grounded TRUE))
-=>
-  (retract ?precond)
-)
-
-(defrule domain-cleanup-atomic-preconditions-on-worldmodel-change
-  "Retract grounded atomic preconditions when the worldmodel changes."
-  (domain-wm-update)
-  ?precond <- (domain-atomic-precondition (grounded TRUE))
-=>
-  (retract ?precond)
-)
-
-(defrule domain-wm-update-done
-  "Updating the world model finished, cleanup update fact."
-  ?wmu <- (domain-wm-update)
-=>
-  (retract ?wmu)
-)
-
 (defrule domain-print-error
   (domain-error (error-type ?type) (error-msg ?msg))
   =>
   (printout error "Domain error '" ?type "': " ?msg crlf)
 )
-

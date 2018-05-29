@@ -24,16 +24,19 @@
 ; Example could be domain model update -> wm sync -> goal reasoner (and
 ; avoid to make a goal decision before the wm is updated).
 (defglobal
-  ?*SALIENCE-FIRST*        =  10000
-  ?*SALIENCE-INIT*         =   9010
-  ?*SALIENCE-INIT-LATE*    =   9000
-  ?*SALIENCE-WM-IDKEY*     =   5200
-  ?*SALIENCE-WM-SYNC-DEL*  =   5100
-  ?*SALIENCE-WM-SYNC-ADD*  =   5000
-  ?*SALIENCE-HIGH*         =   1000
-  ?*SALIENCE-MODERATE*     =    500
+  ?*SALIENCE-FIRST*         =  10000
+  ?*SALIENCE-INIT*          =   9010
+  ?*SALIENCE-INIT-LATE*     =   9000
+  ?*SALIENCE-WM-IDKEY*      =   5200
+  ?*SALIENCE-WM-SYNC-DEL*   =   5100
+  ?*SALIENCE-WM-SYNC-ADD*   =   5000
+  ?*SALIENCE-DOMAIN-GROUND* =   4200
+  ?*SALIENCE-DOMAIN-CHECK*  =   4100
+  ?*SALIENCE-DOMAIN-APPLY*  =   4000
+  ?*SALIENCE-HIGH*          =   1000
+  ?*SALIENCE-MODERATE*      =    500
 	; the following is just informative
-  ;?*SALIENCE-NORMAL*      =      0
-  ?*SALIENCE-LOW*          =  -1000
-  ?*SALIENCE-LAST*         = -10000
+  ;?*SALIENCE-NORMAL*       =      0
+  ?*SALIENCE-LOW*           =  -1000
+  ?*SALIENCE-LAST*          = -10000
 )
