@@ -1,0 +1,68 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ Copyright  2017  The Kubernetes Authors
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+
+<div fxLayout="column"
+     fxFill
+     fxFlexFill>
+  <mat-toolbar class="ff-second-toolbar ff-bg-primary">
+    <div class="ff-toolbar-tools" fxFlex fxLayout="row" fxLayoutAlign="start center">
+      <ff-nav-hamburger></ff-nav-hamburger>
+      <div class="ff-logo-bar">
+        <a routerLink="/" class="ff-toolbar-logo-link">
+          <mat-icon [svgIcon]="assets.getAppLogo()"
+                    class="ff-toolbar-logo-text">
+          </mat-icon>
+        </a>
+      </div>
+			<div class="ff-right" fxFlexLayout="row">
+				<button mat-button [matMenuTriggerFor]="backend_menu"
+								color="accent" class="backend-name">
+					<mat-icon class="cloud-icon">android</mat-icon>
+					{{ backend_conf.backend_name }}
+					<mat-icon class="select-icon">arrow_drop_down</mat-icon>
+				</button>
+				<mat-menu #backend_menu="matMenu">
+					<button mat-menu-item
+									*ngFor="let backend of backend_conf.backend_list; let i = index"
+										(click)="backend_conf.set_backend(backend.id)">
+						<mat-icon>{{ number_symbol(i) }}</mat-icon> {{ backend.name }}
+						</button>
+				</mat-menu>
+			</div>
+      <!-- <ff-breadcrumbs class="ff-actionbar-breadcrumbs"></ff-breadcrumbs>
+      <ff-actionbar fxFlex="end"></ff-actionbar> -->
+    </div>
+  </mat-toolbar>
+
+  <!-- TODO export to component -->
+  <mat-toolbar class="ff-system-banner"
+               [ngClass]="getSystemBannerClass()"
+               *ngIf="isSystemBannerVisible()"
+               [innerHTML]="getSystemBannerMessage()">
+  </mat-toolbar>
+
+  <div fxFlex
+       fxLayout="row"
+       class="ff-chrome-container ff-bg-background">
+    <ff-nav></ff-nav>
+    <div [ngSwitch]="loading"
+         fxLayoutAlign="center"
+         fxFlex
+         class="ff-scroll-container">
+      <div *ngSwitchCase="true"
+           fxFlexAlign="center">
+        <mat-spinner mode="indeterminate"
+                     [diameter]="48">
+        </mat-spinner>
+      </div>
+      <div *ngSwitchCase="false"
+           fxFlex
+           class="ff-scroll-container">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
+</div>

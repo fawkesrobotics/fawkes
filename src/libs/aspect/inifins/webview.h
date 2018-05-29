@@ -45,6 +45,7 @@ class WebviewAspectIniFin : public AspectIniFin
   WebUrlManager *__url_manager;
   WebNavManager *__nav_manager;
   WebRequestManager *__request_manager;
+  WebviewRestApiManager *__rest_api_manager;
 };
 
 } // end namespace fawkes

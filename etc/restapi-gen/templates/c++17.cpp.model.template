@@ -1,0 +1,258 @@
+
+% import "model-c++17-common.jinja" as common
+
+%- macro gen_to_json(schema)
+% for propname, p in schema['properties'].items()
+%  if p.type and p.type == 'array'
+	rapidjson::Value v_{{ propname | sanitize }}(rapidjson::kArrayType);
+	v_{{ propname | sanitize }}.Reserve({{ propname | sanitize }}_.size(), allocator);
+	for (const auto & e : {{ propname | sanitize }}_) {
+%    if '$ref' in p['items']
+		rapidjson::Value v(rapidjson::kObjectType);
+		e->to_json_value(d, v);
+%    else
+		rapidjson::Value v;
+		v.Set{{ common.rapidjson_type(p) }}(e{% if common.rapidjson_type(p) == 'String' %}, allocator{% endif %});
+%    endif
+		v_{{ propname | sanitize }}.PushBack(v, allocator);
+	}
+	v.AddMember("{{ propname }}", v_{{ propname | sanitize }}, allocator);
+%  elif p.type and p.type == 'object'
+	if ({{ propname | sanitize }}_) {
+		v.AddMember("{{ propname }}", *{{ propname | sanitize }}_, allocator);
+	}
+%  elif '$ref' in p
+	if ({{ propname | sanitize }}_) {
+		rapidjson::Value v_{{ propname | sanitize }}(rapidjson::kObjectType);
+		{{ propname | sanitize }}_->to_json_value(d, v_{{ propname | sanitize }});
+		v.AddMember("{{ propname }}", v_{{ propname | sanitize }}, allocator);
+	}
+%  else
+	if ({{ propname | sanitize }}_) {
+		rapidjson::Value v_{{ propname | sanitize }};
+		v_{{ propname | sanitize }}.Set{{ common.rapidjson_type(p) }}(*{{ propname | sanitize }}_{% if p.type == 'string' %}, allocator{% endif %});
+		v.AddMember("{{ propname }}", v_{{ propname | sanitize }}, allocator);
+	}
+%  endif
+% endfor
+%- endmacro
+
+%- macro gen_from_json(schema)
+% for propname, p in schema['properties'].items()
+%  if p.type and p.type == 'array'
+	if (d.HasMember("{{ propname }}") && d["{{ propname }}"].IsArray()) {
+		const rapidjson::Value& a = d["{{ propname }}"];
+		{{ propname | sanitize }}_ = {{ common.make_optional(p) }};
+		{{ propname | sanitize }}_.reserve(a.Size());
+		for (auto& v : a.GetArray()) {
+%    if '$ref' in p['items']
+			std::shared_ptr<{{ p['items']['$ref'] | reftype }}> nv{new {{ p['items']['$ref'] | reftype }}()};
+			nv->from_json_value(v);
+			{{ propname | sanitize }}_.push_back(std::move(nv));
+%    else
+			{{ propname | sanitize }}_.push_back(v.Get{{ common.rapidjson_type(p) }}());
+%    endif
+		}	
+	}	
+%  elif p.type and p.type == 'object'
+	if (d.HasMember("{{ propname }}") && d["{{ propname }}"].IsObject()) {
+		std::shared_ptr<rapidjson::Document> d_{{ propname | sanitize }} =
+		  std::make_shared<rapidjson::Document>();
+		d_{{ propname | sanitize }}->CopyFrom(d["{{ propname }}"], d_{{ propname | sanitize }}->GetAllocator());
+	}
+%  elif '$ref' in p
+	if (d.HasMember("{{ propname }}") && d["{{ propname }}"].IsObject()) {
+		std::shared_ptr<{{ p['$ref'] | reftype }}>
+			nv{new {{ p['$ref'] | reftype }}(d["{{ propname }}"])};
+		{{ propname | sanitize }}_ = std::move(nv);
+	}
+%  else
+	if (d.HasMember("{{ propname }}") && d["{{ propname }}"].Is{{ common.rapidjson_type(p) }}()) {
+		{{ propname | sanitize }}_ = d["{{ propname }}"].Get{{ common.rapidjson_type(p) }}();
+	}
+%  endif
+% endfor
+%- endmacro
+
+%- macro gen_init(schema)
+% if schema.allOf
+%   for s in schema.allOf
+%     if 'type' in s and s['type'] == 'object'
+{{ gen_init(s) }}
+%     endif
+%   endfor
+% else
+%   for propname, p in schema['properties'].items()
+{{ propname | sanitize }}_ = {{ common.make_optional(p, common.default_value(p)) }};
+%   endfor
+% endif
+%- endmacro
+
+%- macro gen_validate(schema)
+% if schema.allOf
+%   for s in schema.allOf
+%     if '$ref' in s
+	try {
+  	{{ s['$ref'] | reftype }}::validate(true);
+	} catch (std::vector<std::string> &supertype_missing) {
+		missing.insert(missing.end(), supertype_missing.begin(), supertype_missing.end());
+	}
+%     elif 'type' in s and s['type'] == 'object'
+{{ gen_validate(s) }}
+%     endif
+%   endfor
+% else
+%   if schema.required
+%     for r in schema.required
+%       if r in schema.properties and schema.properties[r].type and schema.properties[r].type == 'array'
+%         if '$ref' in schema.properties[r]['items']
+	for (size_t i = 0; i < {{ r | sanitize }}_.size(); ++i) {
+		if (! {{ r | sanitize }}_[i]) {
+			missing.push_back("{{ r }}[" + std::to_string(i) + "]");
+		} else {
+			try {
+				{{ r | sanitize }}_[i]->validate(true);
+			} catch (std::vector<std::string> &subcall_missing) {
+				for (const auto &s : subcall_missing) {
+					missing.push_back("{{ r }}[" + std::to_string(i) + "]." + s);
+				}
+			}
+		}
+	}
+%         endif
+%       else
+	if (! {{ r | sanitize }}_)  missing.push_back("{{ r }}");
+%       endif
+%     endfor
+%   endif
+% endif
+%- endmacro
+
+
+
+/****************************************************************************
+ *  {{ name }}
+ *  (auto-generated, do not modify directly)
+ *
+{%- if spec.info.description %}
+{{ spec.info.description | prefix(' *  ') | rstrip }}
+ *
+{%- endif %}
+ *  API Contact: {{ spec.info.contact.name }} <{{ spec.info.contact.email }}>
+ *  API Version: {{ spec.info.version }}
+ *  API License: {{ spec.info.license.name }}
+ ****************************************************************************/
+
+#include "{{ name }}.h"
+
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+
+#include <sstream>
+
+{{ name }}::{{ name }}()
+{
+}
+
+{{ name }}::{{ name }}(const std::string &json)
+{
+	from_json(json);
+}
+
+{{ name }}::{{ name }}(const rapidjson::Value& v)
+{
+	from_json_value(v);
+}
+
+std::string
+{{ name }}::to_json(bool pretty) const
+{
+	rapidjson::Document d;
+
+	to_json_value(d, d);
+
+	rapidjson::StringBuffer buffer;
+	if (pretty) {
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+		d.Accept(writer);
+	} else {
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		d.Accept(writer);
+	}
+
+	return buffer.GetString();
+}
+
+void
+{{ name }}::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+{
+	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	v.SetObject();
+	// Avoid unused variable warnings
+	(void)allocator;
+
+% if 'properties' in schema
+{{ gen_to_json(schema) }}
+% elif schema.allOf
+%   for s in schema.allOf
+%     if '$ref' in s
+	{{ s['$ref'] | reftype }}::to_json_value(d, v);
+%     elif 'type' in s and s['type'] == 'object'
+{{ gen_to_json(s) }}
+%     endif
+%   endfor
+% endif
+
+}
+
+void
+{{ name }}::from_json(const std::string &json)
+{
+	rapidjson::Document d;
+	d.Parse(json);
+
+	from_json_value(d);
+}
+
+void
+{{ name }}::from_json_value(const rapidjson::Value& d)
+{
+% if 'properties' in schema
+{{ gen_from_json(schema) }}
+% elif schema.allOf
+%   for s in schema.allOf
+%     if '$ref' in s
+	{{ s['$ref'] | reftype }}::from_json_value(d);
+%     elif 'type' in s and s['type'] == 'object'
+{{ gen_from_json(s) }}
+%     endif
+%   endfor
+% endif
+
+}
+
+void
+{{ name }}::validate(bool subcall) const
+{
+  std::vector<std::string> missing;
+{{ gen_validate(schema) }}
+	if (! missing.empty()) {
+		if (subcall) {
+			throw missing;
+		} else {
+			std::ostringstream s;
+			s << "{{ name }} is missing field"
+			  << ((missing.size() > 0) ? "s" : "")
+			  << ": ";
+			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
+				s << missing[i];
+				if (i < (missing.size() - 1)) {
+					s << ", ";
+				}
+			}
+			throw std::runtime_error(s.str());
+		}
+	}
+}

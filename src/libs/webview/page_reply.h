@@ -63,8 +63,8 @@ class WebPageReply : public StaticWebReply
   static const char *PAGE_HEADER;
   static const char *PAGE_FOOTER;
 
-  std::string __merged_body;
-  std::string __html_header;
+  std::string merged_body_;
+  std::string html_header_;
   bool navbar_enabled_;
   bool footer_enabled_;
 };

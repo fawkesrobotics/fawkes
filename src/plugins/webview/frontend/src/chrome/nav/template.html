@@ -1,0 +1,101 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ Copyright  2017  The Kubernetes Authors
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+
+<mat-drawer-container class="ff-nav">
+  <mat-drawer #nav_drawer
+							class="ff-nav"
+              mode="side">
+    <div class="ff-nav-group">
+			<!--
+      <ff-nav-item class="ff-nav-group-item"
+                   [state]="states.cluster"
+                   i18n>Cluster
+      </ff-nav-item>
+      <ff-nav-item class="ff-nav-item"
+                   [state]="states.clusterRole"
+                   i18n>Cluster Roles
+      </ff-nav-item>
+      -->
+      <ff-nav-item class="ff-nav-group-item"
+									 routerLink="/"
+                   i18n>Overview
+      </ff-nav-item>
+      <ff-nav-item class="ff-nav-item"
+									 routerLink="blackboard"
+                   i18n>Blackboard
+      </ff-nav-item>
+      <ff-nav-item class="ff-nav-item"
+									 routerLink="plugins"
+                   i18n>Plugins
+      </ff-nav-item>
+      <ff-nav-item class="ff-nav-item"
+									 routerLink="images"
+                   i18n>Images
+      </ff-nav-item>
+      <ff-nav-item class="ff-nav-item"
+									 routerLink="transforms"
+                   i18n>Transforms
+      </ff-nav-item>
+
+      <mat-divider></mat-divider>
+
+			<ff-nav-item class="ff-nav-group-item"
+									 routerLink="clips-executive"
+                   i18n>CLIPS Executive
+      </ff-nav-item>
+      <ff-nav-item class="ff-nav-item"
+									 routerLink="clips-executive/goal"
+                   i18n>Goals
+      </ff-nav-item>
+      <ff-nav-item class="ff-nav-item"
+									 routerLink="clips-executive/domain"
+                   i18n>Domain
+      </ff-nav-item>
+
+			<ff-nav-item class="ff-nav-group-item"
+									 routerLink="skiller"
+                   i18n>Behavior Engine
+      </ff-nav-item>
+
+      <ff-nav-item class="ff-nav-group-item"
+									 routerLink="clips"
+                   i18n>CLIPS
+      </ff-nav-item>
+
+    </div>
+
+    <mat-divider></mat-divider>
+
+		<div fxLayout="column" class="rw-div" fxLayoutAlign="end center">
+			<button mat-raised-button *ngIf="lockout.enabled"
+							class="rw-button"
+							color="warn"
+							(click)="lockout.toggle()">
+				<mat-icon>lock</mat-icon>
+				READ-ONLY
+			</button>
+			<button mat-button *ngIf="! lockout.enabled"
+							class="rw-button rw-button-normal"
+							(click)="lockout.toggle()">
+				<mat-icon>lock_open</mat-icon>
+				Normal
+			</button>
+		</div>
+  </mat-drawer>
+</mat-drawer-container>
+<div class="rw-fab-button" *ngIf="!nav_drawer.opened">
+	<button mat-fab *ngIf="lockout.enabled"
+					class="rw-button"
+					color="warn"
+					(click)="lockout.toggle()">
+		<mat-icon>lock</mat-icon>
+	</button>
+	<button mat-fab *ngIf="!lockout.enabled"
+					class="rw-button"
+					(click)="lockout.toggle()">
+		<mat-icon>lock_open</mat-icon>
+	</button>
+</div>

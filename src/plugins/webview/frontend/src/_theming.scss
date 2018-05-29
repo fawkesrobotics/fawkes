@@ -1,0 +1,366 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// Copyright  2017  The Kubernetes Authors
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+@import '~@angular/material/theming';
+
+@mixin ff-theme($theme) {
+
+  // Palettes.
+
+  $primary-palette: map-get($theme, primary);
+  $accent-palette: map-get($theme, accent);
+  $warn-palette: map-get($theme, warn);
+  $foreground-palette: map-get($theme, foreground);
+  $background-palette: map-get($theme, background);
+
+  // Colors.
+
+  $primary: mat-color($primary-palette);
+  $accent: mat-color($accent-palette);
+  $background: mat-color($background-palette, background);
+  $card-background: mat-color($background-palette, card);
+  $success: mat-color($warn-palette, lighter);
+  $success-bg: mat-color($warn-palette, 300);
+  $warning: mat-color($warn-palette);
+  $warning-bg: mat-color($warn-palette, 400);
+  $error: mat-color($warn-palette, darker);
+  $error-bg: mat-color($warn-palette, 800);
+  $muted: mat-color($foreground-palette, secondary-text);
+  $muted-light: mat-color($foreground-palette, disabled);
+  $border: mat-color($foreground-palette, divider);
+  $chart-green: mat-color($warn-palette, 50);
+  $chart-blue: mat-color($warn-palette, 200);
+  $box-shadow-1: rgba(0, 0, 0, .2);
+  $box-shadow-2: rgba(0, 0, 0, .14);
+  $box-shadow-3: rgba(0, 0, 0, .12);
+  $box-shadow: 0 3px 1px -2px $box-shadow-1, 0 2px 2px 0 $box-shadow-2, 0 1px 5px 0 $box-shadow-3;
+  $white: #fff;
+
+  // Global style overrides.
+
+  a {
+			color: $primary;
+			text-decoration: none;
+			border-bottom: 1px solid mat-color($primary-palette, 0.0);
+			transition: border 250ms ease;
+  }
+
+	a:not(.mat-button):hover {
+			border-bottom: 1px solid mat-color($primary-palette, 1.0);
+  }
+
+  code {
+    background-color: darken(mat-color($background-palette, card), 5%);
+  }
+
+  * {
+    &::-webkit-scrollbar-thumb {
+      background-color: $border;
+    }
+  }
+
+  // Universal application styles.
+
+  .ff-primary {
+    color: $primary;
+  }
+
+  .ff-bg-primary {
+    background-color: $primary;
+  }
+
+  .ff-accent {
+    color: $accent;
+  }
+
+  .ff-success {
+    color: $success;
+  }
+
+  .ff-bg-success {
+    background-color: $success-bg;
+  }
+
+  .ff-warning {
+    color: $warning;
+  }
+
+  .ff-bg-warning {
+    background-color: $warning-bg;
+  }
+
+  .ff-error {
+    color: $error;
+  }
+
+  .ff-bg-error {
+    background-color: $error-bg;
+  }
+
+  .ff-muted {
+    color: $muted;
+  }
+
+  .ff-muted-light {
+    color: $muted-light;
+  }
+
+  .ff-chart-green {
+    color: $chart-green;
+  }
+
+  .ff-chart-blue {
+    color: $chart-blue;
+  }
+
+  .ff-primary-button {
+    color: mat-color($primary-palette, 50);
+  }
+
+  .ff-bg-background {
+    background-color: $background;
+  }
+
+  .ff-loading-shade {
+    background: $border;
+  }
+
+  .ff-border {
+    border: 1px solid $border;
+  }
+
+  .ff-white {
+    color: $white;
+  }
+
+  // Component-level styles
+
+  .ff-notifications-panel {
+    background-color: $card-background;
+    box-shadow: $box-shadow;
+  }
+
+  .ff-notification-unread {
+    background-color: darken($background, 2.5%);
+  }
+
+  .ff-code-block {
+    background-color: $border;
+  }
+
+  .ff-minimized-card-header:hover {
+    background: $border;
+  }
+
+  .ff-primary-toolbar {
+    background-color: lighten($background, 5%);
+  }
+
+  .ff-search {
+    background-color: darken($background, 5%);
+
+    input {
+      color: mat-color($foreground-palette, base);
+    }
+  }
+
+  .ff-nav-item-button {
+    color: mat-color($primary-palette, lighter);
+  }
+
+  .ff-nav-item-button-active {
+    background-color: mat-color($background-palette, selected-button);
+    color: $primary;
+  }
+
+  .ff-search-input {
+    background: $card-background;
+    border-bottom-color: $border;
+    color: mat-color($foreground-palette, text);
+  }
+
+  .ff-graph-legend-entry {
+    &:not(:last-child) {
+      border-bottom: 1px solid $border;
+    }
+  }
+
+  .ff-namespace-select-input-container {
+    .mat-form-field-underline {
+      background-color: $border;
+    }
+
+    .mat-select-arrow {
+      color: $muted-light;
+    }
+  }
+
+  .ff-namespace-select-input-border {
+    border-bottom: 1px solid $border !important;
+  }
+
+	.ff-content-card {
+			margin: 20px;
+			padding: 2 * $baseline-grid;
+	}
+
+	.ff-content-grid-card {
+			width: 100%;
+			height: calc(100% - 70px);
+	}
+	
+	.ff-icon-column {
+			margin-right: 24px;
+	}
+
+	.ff-vfill-content {
+			// 7*baseline-grid: height of toolbar
+			height: calc(100% - #{12 * $baseline-grid});
+	}
+	.ff-vfill {
+			height: 100%;
+	}
+
+	.ff-hfill {
+			width: 100%;
+	}
+
+	.ff-right {
+			margin-left: auto;
+	}
+
+  .ff-card-title-button {
+    height: 4 * $baseline-grid;
+    width: 4 * $baseline-grid;
+    line-height: 4 * $baseline-grid;
+    vertical-align: top;
+  }
+
+	.ff-fab-lr {
+			position: absolute;
+			right: 30px;
+			bottom: 30px;
+	}
+}
+
+$ff-light-palette-primary: (
+  // Used for primary toolbar button
+  //50: #326de6,
+  50:  #880000,
+  100: #000,
+  200: #90caf9,
+  300: #64b5f6,
+  400: #42a5f5,
+  //500: #326de6,
+  500: #880000,
+  600: #1e88e5,
+  700: #1976d2,
+  800: #1565c0,
+  900: #0d47a1,
+  A100: #82b1ff,
+  A200: #448aff,
+  A400: #2979ff,
+  A700: #2962ff,
+  contrast: (
+    50: $black-87-opacity,
+    100: $black-87-opacity,
+    200: $black-87-opacity,
+    300: $black-87-opacity,
+    400: $black-87-opacity,
+    500: $black-87-opacity,
+    600: #fff,
+    700: #fff,
+    800: $white-87-opacity,
+    900: $white-87-opacity,
+    A100: $black-87-opacity,
+    A200: #fff,
+    A400: #fff,
+    A700: #fff,
+  )
+);
+
+$ff-light-palette-warn: (
+	50: #00c752, // Chart green.
+  100: #008000,
+  200: #326de6, // Chart blue.
+  300: #ccffcc, // light green bg, before: #0d47a1,
+  400: #feffab, // light yellow bg, before: #ff0
+  500: #ffad20,
+  600: #ffd58b, // light orange bg, before: #ff5722,
+  700: #ff1c19,
+  800: #ff9c9c, // light red bg, before: #f51200,
+  900: #f00,
+  A100: #ffd180,
+  A200: #ffab40,
+  A400: #ff9100,
+  A700: #ff6d00,
+  contrast: (
+    50: $black-87-opacity,
+    100: $black-87-opacity,
+    200: $black-87-opacity,
+    300: $black-87-opacity,
+    400: $black-87-opacity,
+    500: $black-87-opacity,
+    600: $black-87-opacity,
+    700: $black-87-opacity,
+    800: #fff,
+    900: #fff,
+    A100: $black-87-opacity,
+    A200: $black-87-opacity,
+    A400: $black-87-opacity,
+    A700: #000,
+  )
+);
+
+$ff-light-palette-accent: (
+  50: #e3f2fd,
+  100: #bbdefb,
+  200: #90caf9,
+  300: #64b5f6,
+  400: #42a5f5,
+  500: #fff,
+  600: #1e88e5,
+  700: #1976d2,
+  800: #1565c0,
+  900: #0d47a1,
+  A100: #82b1ff,
+  A200: #448aff,
+  A400: #2979ff,
+  A700: #2962ff,
+  contrast: (
+    50: $dark-primary-text,
+    100: $dark-primary-text,
+    200: $dark-primary-text,
+    300: $dark-primary-text,
+    400: $dark-primary-text,
+    500: $dark-primary-text,
+    600: $light-primary-text,
+    700: $light-primary-text,
+    800: $light-primary-text,
+    900: $light-primary-text,
+    A100: $dark-primary-text,
+    A200: $light-primary-text,
+    A400: $light-primary-text,
+    A700: $light-primary-text,
+  )
+);
+
+
+// sass-lint:disable function-name-format
+//$ff-light-palette-accent: map_merge($mat-blue, (500: #fff));
+// sass-lint:enable function-name-format
+
+$ff-light-theme-primary: mat-palette($ff-light-palette-primary);
+$ff-light-theme-accent: mat-palette($ff-light-palette-accent);
+$ff-light-theme-warn: mat-palette($ff-light-palette-warn);
+
+$ff-light-theme: mat-light-theme($ff-light-theme-primary,
+																 $ff-light-theme-accent,
+																 $ff-light-theme-warn);
+
+.ff-light-theme {
+	@include angular-material-theme($ff-light-theme);
+	@include ff-theme($ff-light-theme);
+}

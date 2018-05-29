@@ -1,0 +1,631 @@
+openapi: 3.0.0
+info:
+  title: ClipsExecutive
+  version: v1beta1
+  description: |
+    CLIPS Executive REST API.
+    Enables access to goals, plans, and all items in the domain model.
+  contact:
+    name:  Tim Niemueller
+    email: niemueller@kbsg.rwth-aachen.de
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: clips-executive
+    description: CLIPS Executive API calls
+
+paths:
+  /clips-executive/goals:
+    get:
+      tags:
+      - clips-executive
+      summary: List goals
+      operationId: list_goals
+      description: |
+        List all goals currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Goal'
+        '400':
+          description: bad input parameter
+
+    # post:
+    #   tags:
+    #   - clips-executive
+    #   summary: Add a new goal.
+    #   operationId: add_goal
+    #   description: |
+    #     Add a new goal.
+    #   requestBody:
+    #     content:
+    #       application/json:
+    #         schema:
+    #           $ref: '#/components/schemas/Goal'
+    #     description: Inventory item to add
+    #   responses:
+    #     '201':
+    #       description: item created
+    #     '400':
+    #       description: 'invalid input, object invalid'
+    #     '409':
+    #       description: an existing item already exists
+
+  /clips-executive/goals/{id}:
+    get:
+      tags:
+      - clips-executive
+      summary: Get information about a specific goal.
+      operationId: get_goal
+      description: |
+        Get information about a specific goal.
+      parameters:
+        - name: id
+          in: path
+          description: ID of goal to retrieve
+          required: true
+          schema:
+            type: string
+            format: symbol
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: goal information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Goal'
+        '400':
+          description: bad input parameter
+    
+
+  /clips-executive/plans:
+    get:
+      tags:
+      - clips-executive
+      summary: List plans
+      operationId: list_plans
+      description: |
+        List all plans currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plan'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/plans/{goal-id}/{id}:
+    get:
+      tags:
+      - clips-executive
+      summary: Get a specific plan.
+      operationId: get_plan
+      description: |
+        Get the plan for a specific goal.
+      parameters:
+        - name: goal-id
+          in: path
+          description: ID of plan (with respect to goal) to retrieve action for
+          required: true
+          schema:
+            type: string
+            format: symbol
+        - name: id
+          in: path
+          description: ID of plan (with respect to goal) to retrieve
+          required: true
+          schema:
+            type: string
+            format: symbol
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+        '400':
+          description: bad input parameter
+            
+  /clips-executive/domain-objects:
+    get:
+      tags:
+      - clips-executive
+      summary: List domain objects.
+      operationId: list_domain_objects
+      description: |
+        List all domain objects currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list domain objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DomainObject'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/domain-predicates:
+    get:
+      tags:
+      - clips-executive
+      summary: List domain predicates.
+      operationId: list_domain_predicates
+      description: |
+        List all domain predicates currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list predicates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DomainPredicate'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/domain-facts:
+    get:
+      tags:
+      - clips-executive
+      summary: List domain facts.
+      operationId: list_domain_facts
+      description: |
+        List all domain facts currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list domain facts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DomainFact'
+        '400':
+          description: bad input parameter
+
+  /clips-executive/domain-operators:
+    get:
+      tags:
+      - clips-executive
+      summary: List domain operators.
+      operationId: list_domain_operators
+      description: |
+        List all domain operators currently known to the CE.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: list domain operators
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DomainOperator'
+        '400':
+          description: bad input parameter
+  
+components:
+  schemas:
+    Goal:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - type
+        - class
+        - mode
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+          format: symbol
+          example: GOAL-A
+        type:
+          type: string
+          format: symbol
+          enum: ["ACHIEVE", "MAINTAIN"]
+        class:
+          type: string
+          format: symbol
+        mode:
+          type: string
+          format: symbol
+          enum: ["FORMULATED", "SELECTED", "EXPANDED", "COMMITTED",
+                 "DISPATCHED", "FINISHED", "EVALUATED", "REJECTED"]
+        outcome:
+          type: string
+          format: symbol
+          enum: ["UNKNOWN", "COMPLETED", "FAILED"]
+        message:
+          type: string
+        parent:
+          type: string
+          format: symbol
+          example: PARENT-GOAL
+        priority:
+          #type: string
+          type: integer
+          format: int64
+        parameters:
+          type: array
+          items:
+            type: string
+        plans:
+          type: array
+          items:
+            type: string
+
+    Plan:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - goal-id
+        - actions
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+          format: symbol
+        goal-id:
+          type: string
+          format: symbol
+        cost:
+          type: number
+          format: float
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlanAction"
+
+    PlanAction:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - operator-name
+        - param-values
+        - status
+        - executable
+        - preconditions
+        - effects
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: integer
+          format: int64
+        operator-name:
+          type: string
+          format: symbol
+        param-values:
+          type: array
+          items:
+            type: string
+        duration:
+          type: number
+          format: float
+        dispatch-time:
+          type: number
+          format: float
+        status:
+          type: string
+          format: symbol
+          enum: ["FORMULATED", "PENDING", "WAITING", "RUNNING",
+                 "EXECUTION-SUCCEEDED", "SENSED-EFFECTS-WAIT",
+                 "SENSED-EFFECTS-HOLD", "EFFECTS-APPLIED", "FINAL",
+                 "EXECUTION-FAILED", "FAILED"]
+        executable:
+          type: boolean
+        operator:
+          $ref: "#/components/schemas/DomainOperator"
+        preconditions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DomainPrecondition"
+        effects:
+          type: array
+          items:
+            $ref: "#/components/schemas/DomainEffect"
+
+    DomainObjectType:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+        - super-type
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+          format: symbol
+        super-type:
+          type: string
+          format: symbol
+
+    DomainObject:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+        - type
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+          format: symbol
+        type:
+          type: string
+          format: symbol
+
+    DomainPredicate:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+        - sensed
+        - param-names
+        - param-types
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+          format: symbol
+        sensed:
+          type: boolean
+        param-names:
+          type: array
+          items:
+            type: string
+            format: symbol
+        param-types:
+          type: array
+          items:
+            type: string
+
+    DomainFact:
+      type: object
+      # may link to predicate
+      required:
+        - kind
+        - apiVersion
+        - name
+        - param-values
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+          format: symbol
+        param-values:
+          type: array
+          items:
+            type: string
+
+    DomainOperatorParameter:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          format: symbol
+        type:
+          type: string
+          format: symbol
+
+    DomainOperator:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+        - wait-sensed
+        - parameters
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+          format: symbol
+        wait-sensed:
+          type: boolean
+        parameters:
+          type: array
+          items: 
+            $ref: '#/components/schemas/DomainOperatorParameter'
+
+    DomainPrecondition:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+        - type
+        - grounded
+        - is-satisfied
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+          format: symbol
+        type:
+          type: string
+          format: symbol
+          enum: ["conjunction", "disjunction", "negation", "atom"]
+        grounded:
+          type: boolean
+        is-satisfied:
+          type: boolean
+
+    DomainPreconditionCompound:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/DomainPrecondition'
+        - type: object
+          required:
+            - elements
+          properties:
+            elements:
+              type: array
+              items:
+                $ref: '#/components/schemas/DomainPrecondition'
+
+    DomainPreconditionAtom:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/DomainPrecondition'
+        - type: object
+          required:
+            - predicate
+            - param-names
+            - param-values
+            - param-constants
+          properties:
+            predicate:
+              type: string
+              format: symbol
+            param-names:
+              type: array
+              items:
+                type: string
+                format: symbol
+            param-values:
+              type: array
+              items:
+                type: string
+            param-constants:
+              type: array
+              items:
+                type: string
+
+    DomainEffect:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+        - type
+        - predicate
+        - param-names
+        - param-values
+        - param-constants
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+          format: symbol
+        type:
+          type: string
+          format: symbol
+          enum: ["POSITIVE", "NEGATIVE"]
+        predicate:
+          type: string
+          format: symbol
+        param-names:
+          type: array
+          items:
+            type: string
+            format: symbol
+        param-values:
+          type: array
+          items:
+            type: string
+        param-constants:
+          type: array
+          items:
+            type: string

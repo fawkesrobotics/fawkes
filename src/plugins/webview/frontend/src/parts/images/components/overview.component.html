@@ -1,0 +1,80 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<div fxLayout="row" class="ff-vfill-content">
+	<mat-card class="ff-content-card" fxFlex="20">
+		<mat-card-title>
+			<div fxLayout="row">
+				<div>Images</div>
+				<div class="ff-right">
+					<button mat-icon-button
+									class="ff-card-title-button"
+									[disabled]="auto_refresh_subscription != null || loading"
+									(click)="refresh()">
+						<mat-icon *ngIf="!loading">refresh</mat-icon>
+						<mat-spinner *ngIf="loading" [diameter]="20"></mat-spinner>
+					</button>
+					<button mat-icon-button
+									class="ff-card-title-button"
+									(click)="toggle_autorefresh()">
+						<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
+					</button>
+				</div>
+			</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content">
+
+			<mat-accordion [multi]="true" *ngIf="images && images.length > 0">
+				<ng-container *ngFor="let i of images">
+					<mat-expansion-panel [expanded]="true">
+						<mat-expansion-panel-header>
+							{{ i.id }}
+						</mat-expansion-panel-header>
+						<div fxLayout="column" fxLayoutAlign="space-between">
+							<div fxFlex="grow" fxLayout="row">
+								<div fxFlex="40">Dimensions</div>
+								<div fxFlex="60">{{ i.width }}px x {{ i.height }}px</div>
+							</div>
+							<div fxFlex="grow" fxLayout="row">
+								<div fxFlex="40">Size</div>
+								<div fxFlex="60">{{ i.mem_size }} Bytes</div>
+							</div>
+							<div fxFlex="grow" fxLayout="row">
+								<div fxFlex="40">Colorspace</div>
+								<div fxFlex="60">{{ i.colorspace }}</div>
+							</div>
+							<div fxFlex="grow" fxLayout="row">
+								<div fxFlex="40">Frame</div>
+								<div fxFlex="60">{{ i.frame | default:'&mdash;'}}</div>
+							</div>
+						</div>
+						<mat-action-row>
+							<button mat-button (click)="select_image(i.id, 'jpeg')">Image</button>
+							<button mat-button (click)="select_image(i.id, 'mjpeg')">Stream</button>
+						</mat-action-row>
+					</mat-expansion-panel>
+				</ng-container>
+			</mat-accordion>
+
+			<div *ngIf="!images || images.length == 0">
+				<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
+			</div>
+		</mat-card-content>
+	</mat-card>
+
+	<div fxFlex="80">
+		<div fxLayout="row" fxLayoutAlign="center center" class="image-container">
+			<div class="image-wrapper">
+				<!-- See component class for comment on why this is a div and not an img -->
+				<div #image></div>
+				<button mat-mini-fab *ngIf="image_src && image_src != ''"
+								class="image-close" color="accent"
+								(click)="deselect_image()">
+					<mat-icon>close</mat-icon>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>

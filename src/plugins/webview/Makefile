@@ -20,28 +20,9 @@ include $(BUILDSYSDIR)/utils.mk
 include $(LIBSRCDIR)/webview/webview.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BUILDSYSDIR)/fvconf.mk
+include $(BUILDSYSDIR)/boost.mk
 
 ifneq ($(PKGCONFIG),)
-  HAVE_GRAPHVIZ = $(if $(shell $(PKGCONFIG) --exists 'libgvc'; echo $${?/1/}),1,0)
-  ifeq ($(HAVE_GRAPHVIZ),1)
-    GRAPHVIZ_HAVE_GRAPH  = $(if $(shell $(PKGCONFIG) --exists 'libgraph'; echo $${?/1/}),1,0)
-
-    CFLAGS_GRAPHVIZ = -DHAVE_GRAPHVIZ $(shell $(PKGCONFIG) --cflags 'libgvc') -DWITH_CODEGENS
-    ifeq ($(GRAPHVIZ_HAVE_GRAPH),1)
-      LDFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --libs 'libgvc')
-    else
-      # "--libs 'libgvc'" requires -lgraph, even if only cgraph is installed.
-      # Not fixed in stable releases yet
-      LDFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --libs 'libcgraph') -lgvc
-      # add WITH_CGRAPH, in case something is wrong with libgvc.
-      # Should be provided by "/usr/include/graphviz/types.h"
-      CFLAGS_GRAPHVIZ += -DWITH_CGRAPH
-    endif
-
-    VERSION_GRAPHVIZ = $(shell $(PKGCONFIG) --modversion 'libgvc')
-    CFLAGS_GRAPHVIZ += -DGRAPHVIZ_VERSION=$(call version_number,$(VERSION_GRAPHVIZ))
-  endif
-
   HAVE_APR_UTIL = $(if $(shell $(PKGCONFIG) --exists 'apr-util-1'; echo $${?/1/}),1,0)
   ifeq ($(HAVE_APR_UTIL),1)
     CFLAGS_APR_UTIL  = -DHAVE_APR_UTIL $(shell $(PKGCONFIG) --cflags 'apr-util-1')
@@ -49,42 +30,22 @@ ifneq ($(PKGCONFIG),)
   endif
 endif
 
-ifeq ($(HAVE_LIBMICROHTTPD),1)
+REQ_BOOST_LIBS = filesystem
+HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
+
+
+ifeq ($(HAVE_BOOST_LIBS)$(HAVE_LIBMICROHTTPD),11)
   LIBS_webview = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-		 fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
-		 fawkeslogging
-  OBJS_webview = blackboard_processor.o footer_generator.o header_generator.o \
-		 service_browse_handler.o startpage_processor.o static_processor.o \
-		 plugins_processor.o user_verifier.o webview_thread.o webview_plugin.o
+     fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
+     fawkeslogging
+  OBJS_webview = webview_plugin.o webview_thread.o \
+                 service_browse_handler.o user_verifier.o \
+                 static_processor.o rest_processor.o
   PLUGINS_all = $(PLUGINDIR)/webview.so
   INST_RESDIRS = webview
 
-  ifeq ($(HAVE_CPP11)$(HAVE_JPEG),11)
-    LIBS_webview += m fvutils fvcams
-    OBJS_webview += image_processor.o mjpeg_reply.o jpeg_stream_producer.o
-    CFLAGS += -DHAVE_JPEG $(CFLAGS_CPP11)
-  else
-    ifneq ($(HAVE_CPP11),1)
-      WARN_TARGETS += warning_cpp11
-    endif
-    ifneq ($(HAVE_JPEG),1)
-      WARN_TARGETS = warning_jpeg
-    endif
-  endif
-
-  ifeq ($(HAVE_TF)$(HAVE_GRAPHVIZ),11)
-    OBJS_webview += tf_processor.o
-    LIBS_webview += fawkestf
-    CFLAGS  += $(CFLAGS_TF) $(CFLAGS_GRAPHVIZ)
-    LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_GRAPHVIZ)
-  else
-    ifneq ($(HAVE_TF),1)
-      WARN_TARGETS += warning_tf
-    endif
-    ifneq ($(HAVE_GRAPHVIZ),1)
-      WARN_TARGETS += warning_graphviz
-    endif
-  endif
+  CFLAGS  += $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
+  LDFLAGS += $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
   ifeq ($(HAVE_APR_UTIL),1)
     CFLAGS  += $(CFLAGS_APR_UTIL)
@@ -95,17 +56,58 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
     WARN_TARGETS += warning_apr_util
   endif
 
-else
-  WARN_TARGETS += warning_libmicrohttpd
-endif
+  CFLAGS  += -DHAVE_REST_APIS $(CFLAGS_CPP17)  $(CFLAGS_RAPIDJSON)
+  LDFLAGS += $(LDFLAGS_CPP17) $(LDFLAGS_RAPIDJSON)
 
-OBJS_all = $(OBJS_webview)
+  OBJS_webview += blackboard-rest-api/blackboard-rest-api.o \
+                  backendinfo-rest-api/backendinfo-rest-api.o \
+                  plugin-rest-api/plugin-rest-api.o \
+                  tf-rest-api/tf-rest-api.o \
+                  config-rest-api/config-rest-api.o \
+                  $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*-rest-api/model/*.cpp))))
+
+  ifeq ($(HAVE_TF),1)
+    OBJS_webview += tf-rest-api/tf-rest-api.o
+    LIBS_webview += fawkestf
+    CFLAGS  += $(CFLAGS_TF)
+    LDFLAGS += $(LDFLAGS_TF)
+  else
+    WARN_TARGETS += warning_tf
+  endif
+
+  ifeq ($(HAVE_JPEG),1)
+    CFLAGS += -DHAVE_JPEG
+    LIBS_webview += m fvutils fvcams
+    OBJS_webview += image-rest-api/image-rest-api.o \
+                    image-rest-api/mjpeg_reply.o \
+                    image-rest-api/jpeg_stream_producer.o
+  else
+    WARN_TARGETS = warning_jpeg
+  endif
+
+  OBJS_all = $(OBJS_webview)
+
+else
+  ifneq ($(HAVE_LIBMICROHTTPD),1)
+    WARN_TARGETS += warning_libmicrohttpd
+  endif
+  ifneq ($(HAVE_CPP17),1)
+    WARN_TARGETS += warning_cpp17
+  endif
+  ifneq ($(HAVE_RAPIDJSON),1)
+    WARN_TARGETS += warning_rapidjson
+  endif
+  ifneq ($(HAVE_BOOST_LIBS),1)
+    WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
+  endif
+endif
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_libmicrohttpd warning_tf warning_graphviz warning_jpeg warning_apr_util warning_cpp11
+.PHONY: warning_libmicrohttpd warning_tf warning_jpeg warning_apr_util warning_cpp11 warning_cpp17 warning_rapidjson $(WARN_TARGETS_BOOST)
+
 warning_libmicrohttpd:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting webview plugin$(TNORMAL) (libmicrohttpd not installed)"
 warning_tf:
@@ -118,6 +120,14 @@ warning_cpp11:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting image viewing support$(TNORMAL) (C++11 not supported)"
 warning_apr_util:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting APR based password verification support$(TNORMAL) (apr-util not found)"
+warning_cpp17:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting REST APIs$(TNORMAL) (C++17 not supported)"
+warning_rapidjson:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting REST APIs$(TNORMAL) (RapidJSON not available)"
+
+$(WARN_TARGETS_BOOST): warning_boost_%:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build webview plugin$(TNORMAL) (Boost library $* not found)"
+
 endif
 
 include $(BUILDSYSDIR)/base.mk

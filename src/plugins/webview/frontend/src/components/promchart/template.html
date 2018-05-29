@@ -1,0 +1,8 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<div #chart [hidden]="!have_data"></div>
+<div *ngIf="!have_data">
+	<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
+</div>

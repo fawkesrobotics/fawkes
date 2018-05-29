@@ -15,6 +15,7 @@
 
 ifneq ($(PKGCONFIG),)
   HAVE_LIBMICROHTTPD := $(if $(shell $(PKGCONFIG) --exists 'libmicrohttpd'; echo $${?/1/}),1,0)
+  HAVE_RAPIDJSON := $(if $(shell $(PKGCONFIG) --exists 'RapidJSON'; echo $${?/1/}),1,0)
 endif
 
 ifeq ($(HAVE_LIBMICROHTTPD),1)
@@ -30,3 +31,8 @@ else
   endif
 endif
 
+# RapidJSON is optional, but may be convenient
+ifeq ($(HAVE_RAPIDJSON),1)
+  CFLAGS_RAPIDJSON  = -DHAVE_RAPIDJSON $(shell $(PKGCONFIG) --cflags 'RapidJSON')
+  LDFLAGS_RAPIDJSON = $(shell $(PKGCONFIG) --libs 'RapidJSON')
+endif

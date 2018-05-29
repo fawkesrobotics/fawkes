@@ -408,21 +408,24 @@ ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
       break;
     } catch (Exception &e) {
       notify_of_failed_init();
-      cite.append("Could not initialize thread '%s'", (*i)->name());
       cite.append(e);
+      cite.append("Could not initialize thread '%s' (ThreadList %s)",
+                  (*i)->name(), name());
       finalizer->finalize(*i);
       success = false;
       break;
     } catch (std::exception &e) {
       notify_of_failed_init();
-      cite.append("Could not initialize thread '%s'", (*i)->name());
-      cite.append("Caught std::exception or derivative: %s", e.what());
+      cite.append("Caught std::exception: %s", e.what());
+      cite.append("Could not initialize thread '%s' (ThreadList %s)",
+                  (*i)->name(), name());
       finalizer->finalize(*i);
       success = false;
       break;
     } catch (...) {
       notify_of_failed_init();
-      cite.append("Could not initialize thread '%s'", (*i)->name());
+      cite.append("Could not initialize thread '%s' (ThreadList %s)",
+                  (*i)->name(), name());
       cite.append("Unknown exception caught");
       finalizer->finalize(*i);
       success = false;

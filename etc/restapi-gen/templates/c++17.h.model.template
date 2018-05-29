@@ -1,0 +1,186 @@
+
+% import "model-c++17-common.jinja" as common
+
+%- macro gen_schema(name, schema)
+	// Schema: {{ name }}
+ public:
+% for propname, p in schema['properties'].items()
+%   if p.description
+	/** {{ p.description }}
+%   else
+  /** Get {{ propname }} value.
+%   endif
+   * @return {{ propname }} value
+   */
+	{{ common.option_type(p) }} {{ propname | sanitize }}() const
+	{
+		return {{ propname | sanitize }}_;
+	}
+
+	/** Set {{ propname }} value.
+	 * @param {{ propname | sanitize }} new value
+	 */
+	void set_{{ propname | sanitize }}(const {{ common.type(p) }}& {{ propname | sanitize }})
+	{
+		{{ propname | sanitize }}_ = {{ propname | sanitize }};
+	}
+% if p.type == 'array'
+
+	/** Add element to {{ propname }} array.
+	 * @param {{ propname | sanitize }} new value
+	 */
+	void addto_{{ propname | sanitize }}(const {{ common.type(p['items']) }}&& {{ propname | sanitize }})
+	{
+		{{ propname | sanitize }}_.push_back(std::move({{ propname | sanitize }}));
+	}
+
+	/** Add element to {{ propname }} array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param {{ propname | sanitize }} new value
+	 */
+	void addto_{{ propname | sanitize }}(const {{ common.type(p['items']) }}& {{ propname | sanitize }})
+	{
+		{{ propname | sanitize }}_.push_back({{ propname | sanitize }});
+	}
+%   if '$ref' in p['items']
+	/** Add element to {{ propname }} array.
+	 * @param {{ propname | sanitize }} new value
+	 */
+	void addto_{{ propname | sanitize }}(const {{ p['items']['$ref'] | reftype }}&& {{ propname | sanitize }})
+	{
+		{{ propname | sanitize }}_.push_back(std::make_shared<{{ p['items']['$ref'] | reftype }}>(std::move({{ propname | sanitize }})));
+	}
+%   endif
+% endif
+% endfor
+
+ private:
+% for propname, p in schema['properties'].items()
+	{{ common.option_type(p) }} {{ propname | sanitize }}_;
+% endfor
+%- endmacro
+
+%- macro gen_includes(schema)
+% if schema.allOf
+%   for s in schema.allOf
+%     if '$ref' in s
+#include "{{ s['$ref'] | reftype }}.h"
+%     endif
+%   endfor
+% elif schema.properties
+%   for propname, p in schema['properties'].items()
+%     if '$ref' in p
+#include "{{ p['$ref'] | reftype }}.h"
+%     elif p.type == 'array' and '$ref' in p['items']
+#include "{{ p['items']['$ref'] | reftype }}.h"
+%     endif
+%   endfor
+% endif
+%- endmacro
+
+%- macro gen_superclasses(schema)	
+% if schema.allOf
+%   for r in schema.allOf | refs
+%     if loop.first
+:{#- comment to remove newline -#}
+%     endif
+ {% if not loop.first %} {% endif %}public {{ r | reftype }}{% if not loop.last %},{% endif %}
+%   endfor
+% endif
+%- endmacro
+
+/****************************************************************************
+ *  {{ spec.info.title }} -- Schema {{ name }}
+ *  (auto-generated, do not modify directly)
+ *
+{%- if spec.info.description %}
+{{ spec.info.description | prefix(' *  ') | rstrip }}
+ *
+{%- endif %}
+ *  API Contact: {{ spec.info.contact.name }} <{{ spec.info.contact.email }}>
+ *  API Version: {{ spec.info.version }}
+ *  API License: {{ spec.info.license.name }}
+ ****************************************************************************/
+
+#pragma once
+
+#define RAPIDJSON_HAS_STDSTRING 1
+#include <rapidjson/fwd.h>
+
+#include <string>
+#include <cstdint>
+#include <vector>
+#include <memory>
+#include <optional>
+
+{{ gen_includes(schema) }}
+
+/** {{ name }} representation for JSON transfer. */
+class {{ name }}
+{{ gen_superclasses(schema) }}
+{
+ public:
+	/** Constructor. */
+	{{ name }}();
+	/** Constructor from JSON.
+	 * @param json JSON string to initialize from
+	 */
+	{{ name }}(const std::string &json);
+	/** Constructor from JSON.
+	 * @param v RapidJSON value object to initialize from.
+	 */
+	{{ name }}(const rapidjson::Value& v);
+
+	/** Get version of implemented API.
+	 * @return string representation of version
+	 */
+	static std::string api_version()
+	{
+	  return "{{ spec.info.version }}";
+	}
+
+	/** Render object to JSON.
+	 * @param pretty true to enable pretty printing (readable spacing)
+	 * @return JSON string
+	 */
+	virtual std::string to_json(bool pretty = false) const;
+	/** Render object to JSON.
+	 * @param d RapidJSON document to retrieve allocator from
+	 * @param v RapidJSON value to add data to
+	 */
+	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	/** Retrieve data from JSON string.
+	 * @param json JSON representation suitable for this object.
+	 * Will allow partial assignment and not validate automaticaly.
+	 * @see validate()
+	 */
+	virtual void        from_json(const std::string& json);
+	/** Retrieve data from JSON string.
+	 * @param v RapidJSON value suitable for this object.
+	 * Will allow partial assignment and not validate automaticaly.
+	 * @see validate()
+	 */
+	virtual void        from_json_value(const rapidjson::Value& v);
+
+	/** Validate if all required fields have been set.
+	 * @param subcall true if this is called from another class, e.g.,
+	 * a sub-class or array holder. Will modify the kind of exception thrown.
+	 * @exception std::vector<std::string> thrown if required information is
+	 * missing and @p subcall is set to true. Contains a list of missing fields.
+	 * @exception std::runtime_error informative message describing the missing
+	 * fields
+	 */
+	virtual void validate(bool subcall = false) const;
+
+% if 'properties' in schema
+{{ gen_schema(name, schema) }}
+% elif schema.allOf
+
+	// allOf
+%   for s in schema.allOf
+%     if 'type' in s and s['type'] == 'object'
+{{ gen_schema(name + "[" + loop.index | string + "]", s) }}
+%     endif
+%   endfor
+% endif
+};

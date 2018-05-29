@@ -1,0 +1,35 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+@import '../../../_variables';
+
+.mat-column-mode {
+		flex: 0 0 40px;
+		text-align: center;
+}
+
+.goals-graph {
+		max-width: 100%;
+		overflow: auto;
+		//max-width: calc(100% + 30px);
+		margin: 0 -10px 0 -10px;
+}
+
+.mat-table {
+		//height: 100%;
+		max-height: 400px;
+		overflow: auto;
+		//width: calc(100% + 40px);
+		margin: 0 -10px 0 -10px;
+}
+
+
+:host ::ng-deep .node {
+		cursor: pointer;
+		font-family: $font-family-sans;
+}
+
+:host ::ng-deep g text {
+		font-family: $font-family-sans;
+}

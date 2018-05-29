@@ -1,0 +1,33 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+@import '../../../_variables';
+
+.mat-card-content {
+		height: calc(100% - 40px);
+		overflow: auto;
+		margin: 0 -16px 0 -12px;
+}
+
+.mat-table {
+		margin: 0 4px 16px 4px;
+}
+
+.mat-row {
+		line-height: 1.6 * $caption-font-size-base !important;
+		min-height: 1.6 * $caption-font-size-base !important;
+}
+
+.mat-row:hover {
+		background-color: #eee;
+}
+
+.mat-column-select {
+		flex: 0 0 40px;
+		overflow: visible;
+}
+
+.mat-column-name {
+		max-width: 20%;
+}

@@ -1,0 +1,86 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<div fxLayout="column">
+<mat-card class="ff-content-card" fxFlex="50">
+	<mat-card-title>
+		<div fxLayout="row">
+			<div>Goals</div>
+			<div class="ff-right">
+				<button mat-icon-button
+								class="ff-card-title-button"
+								[disabled]="auto_refresh_subscription != null || loading"
+								(click)="refresh()">
+					<mat-icon *ngIf="!loading">refresh</mat-icon>
+					<mat-spinner *ngIf="loading" [diameter]="20"></mat-spinner>
+				</button>
+				<button mat-icon-button
+								class="ff-card-title-button"
+								(click)="toggle_autorefresh()">
+					<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
+				</button>
+			</div>
+		</div>
+	</mat-card-title>
+	<mat-divider></mat-divider>
+	<mat-card-content class="ff-card-content">
+		<div [hidden]="show_zero_state()" class="goal-list-table">
+			<mat-table #table [dataSource]="dataSource">
+
+				<!-- Mode Icon column -->
+				<ng-container matColumnDef="mode">
+					<mat-header-cell *matHeaderCellDef> Mode </mat-header-cell>
+					<mat-cell *matCellDef="let item">
+						<mat-icon  [ngClass]="icon_class(item.goal)"[matTooltip]="item.goal.mode">{{ icon_name(item.goal) }}</mat-icon>
+					</mat-cell>
+				</ng-container>
+
+				<!-- Goal ID column -->
+				<ng-container matColumnDef="id">
+					<mat-header-cell *matHeaderCellDef> ID </mat-header-cell>
+					<mat-cell *matCellDef="let item">
+						<ff-hspace [width]="item.width"></ff-hspace>
+						<a [routerLink]="['/clips-executive/goal/', item.goal.id]">{{item.goal.id}}</a>
+					</mat-cell>
+				</ng-container>
+
+				<!-- Goal type column -->
+				<ng-container matColumnDef="type">
+					<mat-header-cell *matHeaderCellDef> Type </mat-header-cell>
+					<mat-cell *matCellDef="let item"> {{item.goal.type}} </mat-cell>
+				</ng-container>
+
+				<!-- Goal class column -->
+				<ng-container matColumnDef="class">
+					<mat-header-cell *matHeaderCellDef> Class </mat-header-cell>
+					<mat-cell *matCellDef="let item"> {{item.goal.class}} </mat-cell>
+				</ng-container>
+
+				<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+				<mat-row *matRowDef="let row; columns: displayedColumns;">
+				</mat-row>
+			</mat-table>
+		</div>
+
+		<div [hidden]="!show_zero_state()">
+			<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
+		</div>
+	</mat-card-content>
+</mat-card>
+
+<mat-card class="ff-content-card" fxFlex="50">
+	<mat-card-title>
+		<div>Goal Graph</div>
+	</mat-card-title>
+	<mat-divider></mat-divider>
+	<mat-card-content class="ff-card-content">
+		<div fxLayoutAlign="center" *ngIf="!show_zero_state() && goals_graph && goals_graph != ''" class="card-div">
+			<dotgraph [dot]="goals_graph" [strip_size]="false" ngClass="goals-graph"></dotgraph>
+		</div>
+		<div *ngIf="show_zero_state() || !goals_graph">
+			<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
+		</div>
+	</mat-card-content>
+</mat-card>
+</div>

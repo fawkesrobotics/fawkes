@@ -1,0 +1,105 @@
+% macro type(property)
+% if property.type
+%   if property.type == 'string'
+std::string
+%-   elif property.type == 'integer'
+%-     if property.format
+%-       if property.format == 'int32'
+int32_t
+%-       else
+int64_t
+%-       endif
+%-     else
+int64_t
+%-     endif
+%-   elif property.type == 'number'
+%-     if property.format
+{{ property.format }}
+%-     else
+double
+%-     endif
+%-   elif property.type == 'boolean'
+bool
+%-   elif property.type == 'array'
+std::vector<{{ type(property['items']) }}>
+%-   elif property.type == 'object'
+std::shared_ptr<rapidjson::Document>
+%-   else
+UNKNOWN
+%-   endif
+%- elif '$ref' in property
+std::shared_ptr<{{ property['$ref'] | reftype }}>
+%- endif
+%- endmacro
+
+% macro option_type(property)
+% if (property.type and property.type in ['array', 'object']) or '$ref' in property
+{{ type(property) }}
+% else
+std::optional<{{ type(property) }}>
+% endif
+%- endmacro
+
+% macro make_optional(property, initializer=None)
+% if (property.type and property.type in ['array', 'object'])
+{{ type(property) }}{};
+% elif '$ref' in property
+{{ type(property) }}{new {{ property['$ref'] | reftype }}({{ initializer | default('') }})};
+% else
+std::make_optional<{{ type(property) }}>({{ initializer | default('{}') }});
+% endif
+%- endmacro
+
+% macro rapidjson_type(property)
+% if property.type
+%   if property.type == 'string'
+String
+%-   elif property.type == 'integer'
+%-     if property.format
+%-       if property.format == 'int32'
+Int
+%-       else
+Int64
+%-       endif
+%-     else
+Int64
+%-     endif
+%-   elif property.type == 'number'
+%-     if property.format
+%-       if property.format == 'float'
+Float
+%-       else
+Double
+%-       endif
+%-     else
+Double
+%-     endif
+%-   elif property.type == 'boolean'
+Bool
+%-   elif property.type == 'array'
+{{ rapidjson_type(property['items']) }}
+%-   else
+UNKNOWN{{property.type}}
+%-   endif
+%- endif
+%- endmacro
+
+% macro default_value(property)
+% if property.type
+%   if property.type == 'string'
+""
+%-   elif property.type == 'integer'
+0
+%-   elif property.type == 'number'
+0.0
+%-   elif property.type == 'boolean'
+false
+%-   elif property.type == 'array'
+{}
+%-   elif property.type == 'object'
+{}
+%-   endif
+%- elif '$ref' in property
+{{ property['$ref'] | reftype }}()
+%- endif
+%- endmacro

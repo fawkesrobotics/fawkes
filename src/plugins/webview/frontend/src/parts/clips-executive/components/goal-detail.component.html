@@ -1,0 +1,172 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<mat-card class="ff-content-card">
+	<mat-card-title>
+		<div fxLayout="row">
+			<div>Goal: {{ id }}</div>
+			<div class="ff-right">
+				<button mat-icon-button
+								class="ff-card-title-button"
+								[disabled]="auto_refresh_subscription != null || loading_goal"
+								(click)="refresh_goal()">
+					<mat-icon *ngIf="!loading_goal">refresh</mat-icon>
+					<mat-spinner *ngIf="loading_goal" [diameter]="20"></mat-spinner>
+				</button>
+				<button mat-icon-button
+								class="ff-card-title-button"
+								(click)="toggle_autorefresh()">
+					<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
+				</button>
+			</div>
+			<!--
+			<div>
+				<button mat-icon-button [matMenuTriggerFor]="menu_top" class="ff-card-title-button">
+					<mat-icon>more_vert</mat-icon>
+				</button>
+				<mat-menu #menu_top="matMenu">
+					<button mat-menu-item	(click)="enable_autorefresh()">
+						<mat-icon>autorenew</mat-icon>
+						<span>Automatically refresh</span>
+					</button>
+				</mat-menu>
+			</div>
+			-->
+		</div>
+	</mat-card-title>
+	<mat-divider></mat-divider>
+	<mat-card-content class="ff-card-content">
+		<div *ngIf="goal; else nodata">		
+			<div fxLayout="row" fxLayoutWrap fxLayoutAlign="space-between">
+
+				<ff-property>
+					<div key>Class</div>
+					<div value>{{ goal.class }}</div>
+				</ff-property>
+
+				<ff-property>
+					<div key>Type</div>
+					<div value>{{ goal.type }}</div>
+				</ff-property>
+
+				<ff-property>
+					<div key>Mode</div>
+					<div value>{{ goal.mode }}</div>
+				</ff-property>
+
+				<ff-property>
+					<div key>Outcome</div>
+					<div value [ngClass]="{'ff-error': goal.outcome === 'FAILED', 'ff-success': goal.outcome === 'COMPLETED'}">
+						{{ goal.outcome }}
+					</div>
+				</ff-property>
+
+				<ff-property>
+					<div key>Mesage</div>
+					<div value>{{ goal.message | default:'&mdash;'}}</div>
+				</ff-property>
+			</div>
+		
+		</div>
+		<ng-template #nodata>
+			<ff-list-zero-state [message]="zero_message_goal"></ff-list-zero-state>
+		</ng-template>
+	</mat-card-content>
+
+</mat-card>
+
+	<mat-card class="ff-content-card">
+		<mat-card-title>
+			<div fxLayout="row">
+				<div>Plans</div>
+				<div class="ff-right">
+					<button mat-icon-button
+									class="ff-card-title-button"
+									[disabled]="auto_refresh_subscription != null || loading_goal || loading_plans"
+									(click)="refresh_plans()">
+						<mat-icon *ngIf="!loading_plans">refresh</mat-icon>
+						<mat-spinner *ngIf="loading_plans" [diameter]="20"></mat-spinner>
+					</button>
+				</div>
+			</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content">
+			<ng-container *ngIf="domain && plans.length > 0">
+				<mat-tab-group>
+					<mat-tab *ngFor="let plan of plans">
+						<ng-template mat-tab-label>{{ plan.id }}</ng-template>
+						<mat-table #table [dataSource]="plan.actions">
+							
+							<!-- Action name -->
+							<ng-container matColumnDef="operator_name">
+								<mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+								<mat-cell *matCellDef="let action">
+									{{ action["operator-name"] }}
+								</mat-cell>
+							</ng-container>
+
+							<!-- Action parameters -->
+							<ng-container matColumnDef="params">
+								<mat-header-cell *matHeaderCellDef>Parameters</mat-header-cell>
+								<mat-cell *matCellDef="let action">
+									<div *ngFor="let p of domain_operator(domain, action['operator-name'])['parameters']; let i = index">
+										{{ p.name }}={{ action['param-values'][i] }}
+									</div>
+								</mat-cell>
+							</ng-container>
+
+							<!-- Action Preconditions -->
+							<ng-container matColumnDef="preconditions">
+								<mat-header-cell *matHeaderCellDef>Preconditions</mat-header-cell>
+								<mat-cell *matCellDef="let action">
+									<div *ngFor="let p of format_preconditions(action)"
+											 [ngClass]="{'ff-success': p.cond['is-satisfied'], 'ff-error': !p.cond['is-satisfied']}">
+										<ff-hspace [width]="p.width"></ff-hspace>
+										<ng-container *ngIf="p.cond.kind === 'DomainPreconditionCompound'">
+											<ng-container [ngSwitch]="p.cond.type">
+												<ng-container *ngSwitchCase="'conjunction'">AND</ng-container>
+												<ng-container *ngSwitchCase="'disjunction'">OR</ng-container>
+												<ng-container *ngSwitchCase="'negation'">NOT</ng-container>
+											</ng-container>
+										</ng-container>
+										<ng-container *ngIf="p.cond.kind === 'DomainPreconditionAtom'">
+											({{ p.cond.predicate }} <ng-container *ngFor="let v of p.cond['param-values']">{{ v }}</ng-container>)
+										</ng-container>
+									</div>
+								</mat-cell>
+							</ng-container>
+
+							<!-- Action status -->
+							<ng-container matColumnDef="status">
+								<mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+								<mat-cell *matCellDef="let action">
+									{{ action.status }}
+								</mat-cell>
+							</ng-container>
+
+							<!-- Action executable? -->
+							<ng-container matColumnDef="executable">
+								<mat-header-cell *matHeaderCellDef>Executable</mat-header-cell>
+								<mat-cell *matCellDef="let action">
+									<div *ngIf="action.executable; else not_executable" class="ff-success">YES</div>
+									<ng-template #not_executable>
+										<div class="ff-error">No</div>
+									</ng-template>
+								</mat-cell>
+							</ng-container>
+
+							<mat-header-row *matHeaderRowDef="displayedPlanActionColumns"></mat-header-row>
+							<mat-row *matRowDef="let row; columns: displayedPlanActionColumns; let action"
+											 [ngClass]="action_status_classes(action)">
+							</mat-row>
+						</mat-table>
+					</mat-tab>
+				</mat-tab-group>
+			</ng-container>
+			<div *ngIf="! domain || plans.length == 0">
+				<ff-list-zero-state [message]="zero_message_plans"></ff-list-zero-state>
+			</div>
+		</mat-card-content>
+	</mat-card>

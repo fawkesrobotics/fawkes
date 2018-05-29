@@ -37,6 +37,7 @@ endif
 ifneq ($(GCC_TOO_OLD),1)
   ifeq ($(HAVE_CLIPS),1)
     PRESUBDIRS += aspect
+		SUBDIRS += rest-api
 
     CFLAGS  += $(CFLAGS_CLIPS)
     LDFLAGS += $(LDFLAGS_CLIPS)

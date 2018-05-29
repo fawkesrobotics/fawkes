@@ -23,8 +23,11 @@
 #ifndef __LIBS_WEBVIEW_URL_MANAGER_H_
 #define __LIBS_WEBVIEW_URL_MANAGER_H_
 
-#include <map>
-#include <string>
+#include <webview/request.h>
+#include <webview/router.h>
+
+#include <list>
+#include <mutex>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
@@ -32,24 +35,31 @@ namespace fawkes {
 #endif
 
 class Mutex;
-class WebRequestProcessor;
+class WebReply;
+template <typename T> class WebviewRouter;
 
 class WebUrlManager
 {
+	friend WebRequestDispatcher;
  public:
-  WebUrlManager();
+
+	/** Function type for handling requests. */
+	typedef std::function<WebReply* (const WebRequest *)> Handler;
+
+	WebUrlManager();
   ~WebUrlManager();
 
-  void register_baseurl(const char *url_prefix, WebRequestProcessor *processor);
-  void unregister_baseurl(const char *url_prefix);
+  void add_handler(WebRequest::Method method, const std::string& path, Handler handler);
+  void remove_handler(WebRequest::Method method, const std::string& path);
 
-  WebRequestProcessor * find_processor(std::string &url) const;
-  Mutex * mutex();
+
+  void add_handler(WebRequest::Method method, const std::string& path, Handler handler, int weight);
+ private:
+  WebReply * process_request(WebRequest *request);
 
  private:
-  Mutex                                        *__mutex;
-  WebRequestProcessor                          *__startpage_processor;
-  std::map<std::string, WebRequestProcessor *>  __processors;
+  std::mutex  mutex_;
+  std::shared_ptr<WebviewRouter<Handler>>  router_;
 };
 
 } // end namespace fawkes

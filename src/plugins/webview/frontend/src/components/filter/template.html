@@ -1,0 +1,31 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ Copyright  2017  The Kubernetes Authors
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<div class="ff-resource-card-list-filter-wrapper"
+     fxFlex>
+  <div class="ff-search-container"
+       fxFlex
+       fxLayoutAlign="flex-end center">
+    <input #filterInput
+           *ngIf="isSearchVisible()"
+           (keyup)="keyUpEvent.next($event.target.value)"
+           (click)="$event.stopPropagation()"
+           name="search"
+           placeholder="Filter"
+           class="ff-search-input">
+    <mat-icon class="ff-search-icon"
+              i18n-matTooltip
+              matTooltip="Apply filter"
+              *ngIf="!isSearchVisible()"
+              (click)="switchSearchVisibility($event)">
+      filter_list
+    </mat-icon>
+    <mat-icon class="material-icons ff-search-icon"
+              *ngIf="isSearchVisible()"
+              (click)="clearInput($event)">
+      close
+    </mat-icon>
+  </div>
+</div>

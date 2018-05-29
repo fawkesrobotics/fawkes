@@ -1,0 +1,177 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<div fxLayout="row" class="ff-vfill">
+	<mat-card class="ff-content-card" fxFlex="25%">
+		<mat-card-title>
+			<div fxLayout="row">
+				<div>Blackboard</div>
+				<div class="ff-right">
+					<button mat-icon-button
+									[disabled]="!interfaces"
+									class="ff-card-title-button"
+									(click)="toggle_graph()">
+						<mat-icon>device_hub</mat-icon>
+					</button>
+					<button mat-icon-button
+									class="ff-card-title-button"
+									[disabled]="auto_refresh_subscription != null || loading"
+									(click)="refresh()">
+						<mat-icon *ngIf="!loading">refresh</mat-icon>
+						<mat-spinner *ngIf="loading" [diameter]="20"></mat-spinner>
+					</button>
+					<button mat-icon-button
+									class="ff-card-title-button"
+									(click)="toggle_autorefresh()">
+						<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
+					</button>
+				</div>
+			</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content">
+
+			<mat-accordion *ngIf="interfaces">
+				<ng-container *ngFor="let t of keys(interfaces)">
+					<mat-expansion-panel>
+						<mat-expansion-panel-header>
+							{{ interfaces[t].type }}
+						</mat-expansion-panel-header>
+						<div fxLayout="row wrap">
+							<button mat-button
+											(click)="select_interface(t, i)"
+											*ngFor="let i of keys(interfaces[t].instances)">
+								{{ interfaces[t].instances[i].info.id }}
+							</button>
+						</div>
+						<mat-action-row>
+							<button mat-button>Open All</button>
+						</mat-action-row>
+					</mat-expansion-panel>
+				</ng-container>
+			</mat-accordion>
+
+			<div *ngIf="!interfaces">
+				<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
+			</div>
+		</mat-card-content>
+	</mat-card>
+
+	<div fxFlex="75%" *ngIf="dotgraph == null">
+		<div fxLayout="row wrap">
+			<mat-card class="interface-card" fxFlex="32" *ngFor="let i of selected_interfaces">
+				<mat-card-title>
+					<div fxLayout="row">
+						<div>{{ known_types[i[0]] }}::{{ i[1] }}</div>
+						<div class="ff-right">
+							<button mat-icon-button
+											class="ff-card-title-button"
+											[disabled]="! iok(i) || ifc(i).loading"
+											(click)="refresh_data(i[0], i[1])">
+								<mat-icon *ngIf="iok(i) && !ifc(i).loading">refresh</mat-icon>
+								<mat-spinner *ngIf="iok(i) && ifc(i).loading" [diameter]="20"></mat-spinner>
+							</button>
+							<button mat-icon-button
+											class="ff-card-title-button"
+											[disabled]="! iok(i) || ! ifc(i).enabled"
+											(click)="toggle_autorefresh()">
+								<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
+							</button>
+							<button mat-icon-button
+											class="ff-card-title-button"
+											(click)="unselect_interface(i[0], i[1])">
+								<mat-icon>close</mat-icon>
+							</button>
+						</div>
+					</div>
+				</mat-card-title>
+				<mat-divider></mat-divider>
+				<div *ngIf="iok(i) && ifc(i).info"
+						 fxLayout="column" class="reader-writer-info">
+					<ff-property direction="vertical">
+						<div key>Writer</div>
+						<div value>
+							<mat-chip-list *ngIf="ifc(i).info.writer">
+								<mat-chip color="primary">
+									{{ ifc(i).info.writer }}
+								</mat-chip>
+							</mat-chip-list>
+							<ng-container *ngIf="!ifc(i).info.writer">
+								&mdash;
+							</ng-container>
+						</div>
+					</ff-property>
+					<ff-property direction="vertical">
+						<div key>Readers</div>
+						<div value>
+							<mat-chip-list>
+								<mat-chip *ngFor="let r of ifc(i).info.readers">
+									{{ r }}
+								</mat-chip>
+							</mat-chip-list>
+							<ng-container *ngIf="ifc(i).info.readers.length == 0">
+								&mdash;
+							</ng-container>
+						</div>
+					</ff-property>
+					<ff-property direction="vertical">
+						<div key>Last Updated</div>
+						<div value>
+							<div *ngIf="iok(i) && ifc(i).data && ifc(i).data.timestamp != '0:0'">
+								{{ ifc(i).data.timestamp }}
+							</div>
+							<div *ngIf="! iok(i) || ! ifc(i).data || ifc(i).data.timestamp == '0:0'">
+								<span color="red">never</span>
+							</div>
+						</div>
+					</ff-property>
+				</div>
+				<mat-divider></mat-divider>
+				<mat-card-content class="ff-card-content maybe-disabled-card-content">
+					<div *ngIf="iok(i) && ifc(i).data"
+							 fxLayout="row wrap" fxLayoutAlign="space-between">
+						<div *ngIf="!ifc(i).enabled" class="disabled-overlay"
+								 fxLayout="row" fxLayoutAlign="center center">
+							<div>Not available</div>
+						</div>
+
+						<ff-property  direction="vertical"
+													*ngFor="let f of keys(ifc(i).data.data)">
+							<div key>{{ f }}</div>
+							<div value>{{ ifcd(i, f) }}</div>
+						</ff-property>
+					</div>
+					<div *ngIf="!iok(i) || !ifc(i).data">
+						<ff-list-zero-state message="No data received"></ff-list-zero-state>
+					</div>
+				</mat-card-content>
+			</mat-card>
+		</div>
+	</div>
+
+	<mat-card fxFlex="75%" *ngIf="dotgraph != null" class="ff-content-card">
+		<mat-card-title>
+			<div fxLayout="row">
+				<div>Blackboard Graph</div>
+				<div class="ff-right">
+					<button mat-icon-button
+									class="ff-card-title-button"
+									(click)="refresh_graph()">
+						<mat-icon *ngIf="!dotgraph_loading">refresh</mat-icon>
+						<mat-spinner *ngIf="dotgraph_loading" [diameter]="20"></mat-spinner>
+					</button>
+				</div>
+			</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content graph-card">
+			<div *ngIf="dotgraph != ''" fxLayoutAlign="center" class="card-div">
+				<dotgraph [dot]="dotgraph" class="blackboard-graph"></dotgraph>
+			</div>
+			<div *ngIf="dotgraph == ''">
+				<ff-list-zero-state [message]="dotgraph_zero_message"></ff-list-zero-state>
+			</div>
+		</mat-card-content>
+	</mat-card>
+</div>

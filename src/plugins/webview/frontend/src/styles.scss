@@ -1,0 +1,114 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// Copyright  2017  The Kubernetes Authors
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+
+/* You can add global styles to this file, and also import other style files */
+@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
+@import "~material-design-icons/iconfont/material-icons.css";
+@import "~roboto-fontface/css/roboto/roboto-fontface.css";
+
+@import './variables';
+@import './theming';
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: $font-family-sans;
+  background: #eee;
+  font-size: $body-font-size-base;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+//////////////////////////////////////////
+// Overrides of Angular Material styles //
+//////////////////////////////////////////
+
+.mat-progress-spinner {
+  margin: 0 auto;
+}
+
+.mat-progress-spinner-center {
+	margin: auto;
+}
+
+.mat-card {
+  margin: 2.5 * $baseline-grid;
+
+  .mat-card-title {
+    margin-bottom: $baseline-grid;
+  }
+
+  .mat-card-content {
+    padding-top: 2 * $baseline-grid;
+  }
+}
+
+.mat-chip {
+  box-shadow: none !important;
+  margin: $baseline-grid $baseline-grid 0 0 !important;
+  transition: none !important;
+
+  &:last-child {
+    margin-bottom: $baseline-grid !important;
+  }
+}
+
+.mat-header-row,
+.mat-row {
+  min-height: (5 * $baseline-grid) !important;
+  padding: 0 (2 * $baseline-grid) !important;
+}
+
+.mat-header-cell {
+  font-size: $body-font-size-base;
+  padding: 0 ($baseline-grid / 2);
+
+  &:first-child,
+  &:last-child {
+    padding: 0;
+  }
+}
+
+.mat-cell {
+  margin: (.5 * $baseline-grid) 0 !important;
+
+  &:not(:first-child) {
+    &:not(:last-child) {
+      padding: 0 ($baseline-grid / 2);
+    }
+  }
+}
+
+.mat-column-statusicon {
+  flex: 0 0 ($baseline-grid * 5) !important;
+}
+
+.mat-column-labels,
+.mat-column-images,
+.mat-column-name,
+.mat-column-message {
+  flex-grow: 2 !important;
+}
+
+[class^='mat-column-action'],
+[class*='mat-column-action'] {
+  flex: 0 0 ($baseline-grid * 5) !important;
+}
+
+.mat-sort-header-arrow {
+  align-self: center;
+}
+
+.mat-paginator-container,
+.mat-paginator-range-actions {
+  font-size: $body-font-size-base;
+  min-height: 5 * $baseline-grid !important;
+}
+
+.mat-paginator-container {
+  padding-right: 3 * $baseline-grid !important;
+}

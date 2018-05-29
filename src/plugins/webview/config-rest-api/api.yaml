@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Configuration
+  version: v1beta1
+  description: |
+    Fawkes Configuration REST API.
+    Retrieve information from the configuration.
+  contact:
+    name:  Tim Niemueller
+    email: niemueller@kbsg.rwth-aachen.de
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: public
+    description: Configuration public API.
+
+paths:
+  /config:
+    get:
+      tags:
+      - public
+      summary: Get information from the configuration.
+      operationId: get_config
+      description: |
+        Get a list of plugins.
+      parameters:
+        - name: query
+          in: query
+          description: |
+            Search query for configuration values. If no query is
+            given, the full configuration tree will be returned.
+          allowEmptyValue: false
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: matching configuration sub-tree.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigTree'
+        '400':
+          description: bad input parameter
+
+components:
+  schemas:
+    ConfigTree:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - config
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        config:
+          type: object

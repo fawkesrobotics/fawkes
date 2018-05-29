@@ -26,8 +26,8 @@
 
 #include <string>
 #include <map>
-#include <stdint.h>
 #include <memory>
+#include <vector>
 
 #include <microhttpd.h>
 
@@ -72,6 +72,7 @@ class WebRequestDispatcher
 
   void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
   void setup_access_log(const char *filename);
+  void setup_cors(bool allow_all, std::vector<std::string>&& origins, unsigned int max_age);
 
   unsigned int active_requests() const;
   Time last_request_completion_time() const;
@@ -93,19 +94,23 @@ class WebRequestDispatcher
 			 MHD_RequestTerminationCode term_code);
 
  private:
-  WebUrlManager            *__url_manager;
-  WebviewAccessLog         *__access_log;
+  WebUrlManager            *url_manager_;
+  WebviewAccessLog         *access_log_;
 
-  std::string               __active_baseurl;
-  WebPageHeaderGenerator   *__page_header_generator;
-  WebPageFooterGenerator   *__page_footer_generator;
+  std::string               active_baseurl_;
+  WebPageHeaderGenerator   *page_header_generator_;
+  WebPageFooterGenerator   *page_footer_generator_;
 
-  char                     *__realm;
-  WebUserVerifier          *__user_verifier;
+  char                     *realm_;
+  WebUserVerifier          *user_verifier_;
 
-  unsigned int              __active_requests;
-  fawkes::Time             *__last_request_completion_time;
-  fawkes::Mutex            *__active_requests_mutex;
+  unsigned int              active_requests_;
+  fawkes::Time             *last_request_completion_time_;
+  fawkes::Mutex            *active_requests_mutex_;
+
+  bool                      cors_allow_all_;
+  std::vector<std::string>  cors_origins_;
+  unsigned int              cors_max_age_;
 };
 
 } // end namespace fawkes

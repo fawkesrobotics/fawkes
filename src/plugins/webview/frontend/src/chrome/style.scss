@@ -1,0 +1,112 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// Copyright  2017  The Kubernetes Authors
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+@import '../variables';
+
+%ff-toolbar-logo-placeholder {
+  height: 4 * $baseline-grid;
+  margin-right: $baseline-grid;
+  min-height: 4 * $baseline-grid;
+  min-width: 4 * $baseline-grid;
+  width: 4 * $baseline-grid;
+}
+
+.ff-toolbar {
+  height: 6 * $baseline-grid;
+  min-height: 6 * $baseline-grid;
+  padding-left: 1.75 * $baseline-grid;
+}
+
+.ff-toolbar-tools {
+  align-items: center;
+  height: 6 * $baseline-grid;
+  margin: auto;
+  padding-left: $baseline-grid;
+}
+
+.ff-logo-bar {
+  margin-left: 2 * $baseline-grid;
+  height: 4 * $baseline-grid;
+}
+
+.ff-toolbar-logo-link {
+  .ff-toolbar-logo {
+    @extend %ff-toolbar-logo-placeholder;
+  }
+
+  .ff-toolbar-logo-text {
+    @extend %ff-toolbar-logo-placeholder;
+
+    min-width: 10 * $baseline-grid;
+    width: 14 * $baseline-grid;
+  }
+}
+
+.ff-global-action-margin {
+  margin: 0 (.75 * $baseline-grid);
+}
+
+.ff-second-toolbar {
+  box-shadow: $whiteframe-shadow-1dp;
+  height: 7 * $baseline-grid;
+  min-height: 7 * $baseline-grid;
+  padding-left: .5 * $baseline-grid;
+  // Move entire second toolbar above content to avoid elements overlap with
+  // shadow (there was problem with it on IE).
+  z-index: 1;
+}
+
+.ff-system-banner {
+  box-shadow: $whiteframe-shadow-1dp;
+  display: inline;
+  font-size: $body-font-size-base;
+  height: 6 * $baseline-grid;
+  line-height: 6 * $baseline-grid;
+  min-height: 6 * $baseline-grid;
+  overflow: hidden;
+  padding: 0 (3 * $baseline-grid);
+  white-space: nowrap;
+  // Move entire system banner above content to avoid elements overlap with
+  // shadow (there was problem with it on IE).
+  z-index: 2;
+}
+
+.ff-chrome-container {
+  // Set overflow property to disable margin-collapse, which in turn
+  // prevents scrollbar from being always visible.
+  overflow-x: hidden;
+  position: relative;
+}
+
+.ff-scroll-container {
+  overflow-x: auto;
+
+  ::before {
+    content: '';
+    display: block;
+    //margin-bottom: 2.5 * $baseline-grid;
+  }
+
+  ::after {
+    content: '';
+    display: block;
+    //padding-bottom: 2 * $baseline-grid;
+  }
+}
+
+.backend-name {
+		font-size: $title-font-size-base;
+}
+
+.select-icon {
+		vertical-align: middle;
+		padding-bottom: 2px;
+}
+
+.cloud-icon {
+		vertical-align: middle;
+		padding-bottom: 4px;
+		margin-right: .5 * $baseline-grid;
+}

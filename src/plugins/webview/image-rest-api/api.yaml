@@ -1,0 +1,112 @@
+openapi: 3.0.0
+info:
+  title: Image
+  version: v1beta1
+  description: |
+    Fawkes Image REST API.
+    Access images through a REST API.
+  contact:
+    name:  Tim Niemueller
+    email: niemueller@kbsg.rwth-aachen.de
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: public
+    description: Image public API.
+
+paths:
+  /images:
+    get:
+      tags:
+      - public
+      summary: Get list of images.
+      operationId: list_images
+      description: |
+        Get a list of images currently available.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get list of images
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImageInfo'
+        '400':
+          description: bad input parameter
+
+  /images/{id+}:
+    get:
+      tags:
+      - public
+      summary: Get an image.
+      operationId: get_image
+      description: Get an image.
+      parameters:
+        - name: id
+          in: path
+          description: |
+            ID of image to retrieve. Also includes the type through
+            the file suffix. Supports jpeg or mjpeg.
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get image
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: bad input parameter
+
+components:
+  schemas:
+    ImageInfo:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - colorspace
+        - frame
+        - width
+        - height
+        - mem_size
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+        colorspace:
+          type: string
+        frame:
+          type: string
+        width:
+          type: integer
+          format: int64
+        height:
+          type: integer
+          format: int64
+        mem_size:
+          type: integer
+          format: int64

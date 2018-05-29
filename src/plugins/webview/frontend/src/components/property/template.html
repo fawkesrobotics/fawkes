@@ -1,0 +1,18 @@
+<!--
+
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ Copyright  2017  The Kubernetes Authors
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<div [ngClass]="{'ff-property-container-horizontal': (direction == 'horizontal'),
+								 'ff-property-container-vertical': (direction == 'vertical')}"
+     fxLayout="column">
+  <div class="ff-property-label ff-muted"
+       fxLayout="row"
+       fxLayoutAlign=" center">
+    <ng-content select="[key]"></ng-content>
+  </div>
+  <div class="ff-property-value">
+    <ng-content select="[value]"></ng-content>
+  </div>
+</div>

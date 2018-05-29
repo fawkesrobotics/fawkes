@@ -28,6 +28,7 @@
 #include <vector>
 #include <string>
 #include <queue>
+#include <list>
 
 namespace fawkes {
 

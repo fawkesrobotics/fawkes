@@ -21,9 +21,8 @@
  */
 
 #include <webview/url_manager.h>
-#include <webview/request_processor.h>
+#include <webview/router.h>
 #include <core/threading/mutex.h>
-#include <core/threading/mutex_locker.h>
 #include <core/exception.h>
 
 namespace fawkes {
@@ -41,57 +40,57 @@ namespace fawkes {
 
 /** Constructor. */
 WebUrlManager::WebUrlManager()
+	: router_(std::make_shared<WebviewRouter<Handler>>())
 {
-  __mutex = new Mutex();
-  __startpage_processor = NULL;
 }
 
 
 /** Destructor. */
 WebUrlManager::~WebUrlManager()
 {
-  delete __mutex;
 }
 
 
 /** Add a request processor.
- * @param url_prefix baseurl this processor should handle
- * @param processor processor for baseurl
+ * @param method HTTP method to register for
+ * @param path path pattern to register for, may contain {var}, {var*}, and {var+} elements
+ * @param handler handler function
  * @exception Exception thrown if a processor has already been registered
  * for the given URL prefix.
  */
 void
-WebUrlManager::register_baseurl(const char *url_prefix,
-				WebRequestProcessor *processor)
+WebUrlManager::add_handler(WebRequest::Method method, const std::string& path, Handler handler)
 {
-  MutexLocker lock(__mutex);
-  if (std::string(url_prefix) == "/") {
-    if (__startpage_processor) {
-      throw Exception("Start page processor has already been registered");
-    }
-    __startpage_processor = processor;
-  } else {
-    if (__processors.find(url_prefix) != __processors.end()) {
-      throw Exception("A processor for %s has already been registered",
-		      url_prefix);
-    }
-    __processors[url_prefix] = processor;
-  }
+	std::lock_guard<std::mutex> lock(mutex_);
+	router_->add(method, path, handler, 0);
+}
+
+/** Add a request processor with weight.
+ * This one should mostly be necessary to implement "catch-all" handlers.
+ * @param method HTTP method to register for
+ * @param path path pattern to register for, may contain {var}, {var*}, and {var+} elements
+ * @param handler handler function
+ * @param weight the higher the weight the later the handler will be tried.
+ * @exception Exception thrown if a processor has already been registered
+ * for the given URL prefix.
+ */
+void
+WebUrlManager::add_handler(WebRequest::Method method, const std::string& path, Handler handler, int weight)
+{
+	std::lock_guard<std::mutex> lock(mutex_);
+	router_->add(method, path, handler, weight);
 }
 
 
 /** Remove a request processor.
- * @param url_prefix baseurl the processor handled
+ * @param method HTTP method to unregister from
+ * @param path path pattern to unregister from
  */
 void
-WebUrlManager::unregister_baseurl(const char *url_prefix)
+WebUrlManager::remove_handler(WebRequest::Method method, const std::string& path)
 {
-  MutexLocker lock(__mutex);
-  if (std::string(url_prefix) == "/") {
-    __startpage_processor = NULL;
-  } else {
-    __processors.erase(url_prefix);
-  }
+	std::lock_guard<std::mutex> lock(mutex_);
+  router_->remove(method, path);
 }
 
 /** Lock mutex and find processor.
@@ -101,39 +100,18 @@ WebUrlManager::unregister_baseurl(const char *url_prefix)
  * @param url url to get the processor for
  * @return request processor if found, NULL otherwise
  */
-WebRequestProcessor *
-WebUrlManager::find_processor(std::string &url) const
+WebReply *
+WebUrlManager::process_request(WebRequest *request)
 {
-  if ( url == "/" && __startpage_processor ) {
-    return __startpage_processor;
-  }
-
-  WebRequestProcessor *proc = NULL;
-  std::map<std::string, WebRequestProcessor *>::const_iterator pit;
-  for (pit = __processors.begin();
-       (proc == NULL) && (pit != __processors.end());
-       ++pit)
-  {
-    if (url.find(pit->first) == 0) {
-      url = pit->first;
-      return pit->second;
-    }
-  }
-
-  return NULL;
-}
-
-
-/** Get internal mutex.
- * Use this mutex to guard find_processor() and a following invocation of
- * a found processor against changes due to registering/unregistering of
- * processors.
- * @return internal mutex
- */
-Mutex *
-WebUrlManager::mutex()
-{
-  return __mutex;
+	std::lock_guard<std::mutex> lock(mutex_);
+	try {
+		std::map<std::string, std::string> path_args;
+		Handler handler = router_->find_handler(request, path_args);
+		request->set_path_args(std::move(path_args));
+		return handler(request);
+	} catch (NullPointerException &e) {
+		return NULL;
+	}
 }
 
 } // end namespace fawkes

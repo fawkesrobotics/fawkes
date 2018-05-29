@@ -30,6 +30,9 @@
 /plugins_*
 /warnings.txt
 
+# nodejs and Angular files
+/node_modules/
+
 # Eclipse project files, some are using it...
 .cproject
 .project

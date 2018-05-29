@@ -32,6 +32,26 @@ namespace fawkes {
 }
 #endif
 
+/** Disable caching on a reply.
+ * This is a convenience wrapper to reply->set_caching(false). It enables
+ * the following call styles:
+ * @code
+ * return no_caching(new StaticWebReply(Reply::HTTP_NOT_FOUND, "Not Found"));
+ *
+ * return no_caching(some_handler());
+ * @endcode
+ * This works on any reply without always patching a boolean flag into
+ * the ctor and without first storing the pointer, calling the function,
+ * and then returning.
+ * @param reply reply to disable caching for
+ * @return this
+ */
+WebReply *
+no_caching(WebReply *reply)
+{
+	reply->set_caching(false);
+	return reply;
+}
 
 
 /** @class WebReply <webview/reply.h>
@@ -42,22 +62,17 @@ namespace fawkes {
  */
 
 /// Enable caching for this reply?
-bool WebReply::__caching = true;
+bool WebReply::caching_default_ = true;
 
 /** Constructor.
  * @param code HTTP response code
  */
 WebReply::WebReply(Code code)
 {
-  __code = code;
-  __request = NULL;
+  code_ = code;
+  request_ = NULL;
 
-  if (! __caching) {
-    // Headers to disable caching
-    __headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-    __headers["Pragma"] = "no-cache";
-    __headers["Expires"] = "0";
-  }
+  caching_ = caching_default_;
 }
 
 
@@ -67,17 +82,27 @@ WebReply::~WebReply()
 }
 
 
-/** Enable or disable caching for all consecutive replies.
+/** Enable or disable caching default for replies.
  * This static setting controls whether following replies will allow
- * for client-side of the web pages or not. Disabling this allows to
- * force clients to always reload the pages.
+ * for client-side of the web pages or not by default. Disabling this
+ * allows to force clients to always reload the pages.
+ * @param caching true to enable client-side caching, false to disable
+ */
+void
+WebReply::set_caching_default(bool caching)
+{
+  caching_default_ = caching;
+}
+
+/** Enable or disable caching for this specific reply.
  * @param caching true to enable client-side caching, false to disable
  */
 void
 WebReply::set_caching(bool caching)
 {
-  __caching = caching;
+  caching_ = caching;
 }
+
 
 /** Get response code.
  * @return HTTP response code
@@ -85,7 +110,7 @@ WebReply::set_caching(bool caching)
 WebReply::Code
 WebReply::code() const
 {
-  return __code;
+  return code_;
 }
 
 /** Set response code.
@@ -98,14 +123,23 @@ WebReply::set_code(WebReply::Code code)
 }
 
 
+/** Set response code.
+ * @param code HTTP response code
+ */
+void
+WebReply::set_code(WebReply::Code code)
+{
+	code_ = code;
+}
+
 /** Add a HTTP header.
  * @param header header entry name
  * @param content content of the header field
  */
 void
-WebReply::add_header(std::string header, std::string content)
+WebReply::add_header(const std::string& header, const std::string& content)
 {
-  __headers[header] = content;
+  headers_[header] = content;
 }
 
 
@@ -113,7 +147,7 @@ WebReply::add_header(std::string header, std::string content)
  * @param header_string header string of the format "Key: Value".
  */
 void
-WebReply::add_header(std::string header_string)
+WebReply::add_header(const std::string& header_string)
 {
   std::string::size_type pos;
   if ((pos = header_string.find(":")) != std::string::npos) {
@@ -124,7 +158,7 @@ WebReply::add_header(std::string header_string)
     } else {
       content = header_string.substr(pos+1);
     }
-    __headers[header] = content;
+    headers_[header] = content;
   } else {
     throw Exception("Invalid header '%s'", header_string.c_str());
   }
@@ -137,7 +171,7 @@ WebReply::add_header(std::string header_string)
 const WebReply::HeaderMap &
 WebReply::headers() const
 {
-  return __headers;
+  return headers_;
 }
 
 
@@ -148,7 +182,7 @@ WebReply::headers() const
 WebRequest *
 WebReply::get_request() const
 {
-  return __request;
+  return request_;
 }
 
 
@@ -158,7 +192,19 @@ WebReply::get_request() const
 void
 WebReply::set_request(WebRequest *request)
 {
-  __request = request;
+  request_ = request;
+}
+
+/** Called just before the reply is sent.
+ * Sets no-caching flags if caching has been disabled. 
+ */
+void
+WebReply::pack_caching()
+{
+  if (! caching_) {
+    // Headers to disable caching
+    headers_["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0";
+  }
 }
 
 /** @class DynamicWebReply <webview/reply.h>

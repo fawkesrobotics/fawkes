@@ -1,0 +1,108 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+	-->
+<div fxLayout="row wrap" fxLayoutAlign="space-between">
+	<ng-container *ngIf="charts.length == 0">
+	<mat-card class="ff-content-card promchart-card" fxFlex="30">
+		<mat-card-title>
+			<div>CPU</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content">
+			<prom-chart
+				[query]="query_cpu"
+				legend_format="((mode))"
+				y_tick_format=".0%"
+				[y_min]="0.0"
+				[y_max]="1.0">
+			</prom-chart>
+		</mat-card-content>
+	</mat-card>
+
+	<mat-card class="ff-content-card promchart-card" fxFlex="30">
+		<mat-card-title>
+			<div>Memory</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content">
+			<prom-chart
+				[query]="query_mem"
+				legend_format="((groupname))"
+				y_tick_format="bytes">
+			</prom-chart>
+		</mat-card-content>
+	</mat-card>
+
+	<mat-card class="ff-content-card promchart-card" fxFlex="30">
+		<mat-card-title>
+			<div>Per Thread CPU</div>
+		</mat-card-title>
+		<mat-divider></mat-divider>
+		<mat-card-content class="ff-card-content">
+			<prom-chart
+				[query]="query_threads"
+				legend_format="((threadname))"
+				y_tick_format=".1%">
+			</prom-chart>
+		</mat-card-content>
+	</mat-card>
+	</ng-container>
+	<ng-container *ngIf="charts.length > 0">
+		<mat-card *ngFor="let c of charts"
+							class="ff-content-card promchart-card" fxFlex="30">
+			<mat-card-title>
+				<div>{{ c.name }}</div>
+			</mat-card-title>
+			<mat-divider></mat-divider>
+			<mat-card-content class="ff-card-content">
+				<prom-chart *ngIf="c.query"
+										[query]="c.query"
+										[legend_format]="c.legend_format"
+										[y_tick_format]="c.y_tick_format"
+										[y_tick_count]="c.y_tick_count || 4"
+										[y_axis_center]="c.y_axis_center"
+										[remove_all_zero]="c.remove_all_zero">
+				</prom-chart>
+				<prom-chart *ngIf="c.queries"
+										[queries]="c.queries"
+										[legend_formats]="c.legend_formats"
+										[y_tick_format]="c.y_tick_format"
+										[y_tick_count]="c.y_tick_count || 4"
+										[y_axis_center]="c.y_axis_center"
+										[remove_all_zero]="c.remove_all_zero">
+				</prom-chart>
+			</mat-card-content>
+		</mat-card>
+	</ng-container>
+
+<div fxLayout="row wrap">
+	<prom-stat
+		[query]="query_ntp_offset"
+		[factor]="1000"
+		[thresholds]="[-10, -3, 3, 10]"
+		label="NTP Offset"
+		unit="ms">
+	</prom-stat>
+	<prom-stat
+		[query]="query_mem_avail"
+		[factor]="1. / (1024*1024*1024)"
+		[thresholds]="[3,1]"
+		label="Mem Avail"
+		unit="GB">
+	</prom-stat>
+	<prom-stat
+		[query]="query_ssd_avail"
+		[factor]="1. / (1024*1024*1024)"
+		[thresholds]="[20,10]"
+		label="SSD Avail"
+		unit="GB">
+	</prom-stat>
+	<prom-stat
+		[query]="query_swap_used"
+		[factor]="100"
+		[thresholds]="[10,50]"
+		label="Swap Used"
+		unit="%">
+	</prom-stat>
+</div>

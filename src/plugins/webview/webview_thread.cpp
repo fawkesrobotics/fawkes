@@ -3,7 +3,7 @@
  *  webview_thread.cpp - Thread that handles web interface requests
  *
  *  Created: Mon Oct 13 17:51:31 2008 (I5 Developer's Day)
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,18 +21,8 @@
 
 #include "webview_thread.h"
 #include "static_processor.h"
-#include "blackboard_processor.h"
-#include "startpage_processor.h"
-#include "plugins_processor.h"
-#ifdef HAVE_TF
-#  include "tf_processor.h"
-#endif
-#ifdef HAVE_JPEG
-#  include "image_processor.h"
-#endif
+#include "rest_processor.h"
 #include "service_browse_handler.h"
-#include "header_generator.h"
-#include "footer_generator.h"
 #include "user_verifier.h"
 
 #include <core/version.h>
@@ -43,24 +33,12 @@
 #include <webview/page_reply.h>
 #include <webview/server.h>
 #include <webview/url_manager.h>
-#include <webview/nav_manager.h>
 #include <utils/misc/string_conversions.h>
 
 #include <sys/wait.h>
 
 using namespace fawkes;
 
-
-/** Prefix for the WebStaticRequestProcessor. */
-const char *WebviewThread::STATIC_URL_PREFIX = "/static";
-/** Prefix for the WebBlackBoardRequestProcessor. */
-const char *WebviewThread::BLACKBOARD_URL_PREFIX = "/blackboard";
-/** Prefix for the WebPluginsRequestProcessor. */
-const char *WebviewThread::PLUGINS_URL_PREFIX = "/plugins";
-/** Prefix for the WebTfRequestProcessor. */
-const char *WebviewThread::TF_URL_PREFIX = "/tf";
-/** Prefix for the WebMJPEGRequestProcessor. */
-const char *WebviewThread::IMAGE_URL_PREFIX = "/images";
 
 /** @class WebviewThread "webview_thread.h"
  * Webview Thread.
@@ -70,12 +48,17 @@ const char *WebviewThread::IMAGE_URL_PREFIX = "/images";
  */
 
 
-/** Constructor. */
-WebviewThread::WebviewThread()
-  : Thread("WebviewThread", Thread::OPMODE_CONTINUOUS),
-    LoggerAspect(&__cache_logger)
+/** Constructor.
+ * @param enable_tp true to enable thread pool setting the thread to
+ * wait-for-wakeup mode, falso to run request processing in this
+ * thread.
+ */
+WebviewThread::WebviewThread(bool enable_tp)
+	: Thread("WebviewThread", enable_tp ? Thread::OPMODE_WAITFORWAKEUP : Thread::OPMODE_CONTINUOUS)
 {
-  set_prepfin_conc_loop(true);
+	cfg_use_thread_pool_ = enable_tp;
+
+	if (!enable_tp) set_prepfin_conc_loop(true);
 }
 
 
@@ -86,176 +69,170 @@ WebviewThread::~WebviewThread()
 void
 WebviewThread::init()
 {
-  __cfg_port = config->get_uint("/webview/port");
+  cfg_port_ = config->get_uint("/webview/port");
 
-  WebReply::set_caching(config->get_bool("/webview/client_side_caching"));
+  WebReply::set_caching_default(config->get_bool("/webview/client_side_caching"));
 
-  __webview_service = NULL;
-  __service_browse_handler = NULL;
-  __header_gen = NULL;
-  __footer_gen = NULL;
-  __dispatcher = NULL;
+  webview_service_ = NULL;
+  service_browse_handler_ = NULL;
+  dispatcher_ = NULL;
 
-  __cfg_use_ssl = false;
+  cfg_use_tls_ = false;
   try {
-    __cfg_use_ssl = config->get_bool("/webview/use_ssl");
+    cfg_use_tls_ = config->get_bool("/webview/tls/enable");
   } catch (Exception &e) {}
 
-  __cfg_use_ipv4 = config->get_bool("/network/ipv4/enable");
-  __cfg_use_ipv6 = config->get_bool("/network/ipv6/enable");
+  cfg_use_ipv4_ = config->get_bool("/network/ipv4/enable");
+  cfg_use_ipv6_ = config->get_bool("/network/ipv6/enable");
 
-  if (__cfg_use_ssl) {
-    __cfg_ssl_create = false;
+  if (cfg_use_tls_) {
+    cfg_tls_create_ = false;
     try {
-      __cfg_ssl_create = config->get_bool("/webview/ssl_create");
+      cfg_tls_create_ = config->get_bool("/webview/tls/create");
     } catch (Exception &e) {}
 
-    __cfg_ssl_key  = config->get_string("/webview/ssl_key");
-    __cfg_ssl_cert = config->get_string("/webview/ssl_cert");
+    cfg_tls_key_  = config->get_string("/webview/tls/key-file");
+    cfg_tls_cert_ = config->get_string("/webview/tls/cert-file");
 
     try {
-      __cfg_ssl_cipher_suite = config->get_string("/webview/ssl_cipher_suite");
-      logger->log_debug(name(), "Using cipher suite %s", __cfg_ssl_cipher_suite.c_str());
+      cfg_tls_cipher_suite_ = config->get_string("/webview/tls/cipher-suite");
+      logger->log_debug(name(), "Using cipher suite %s", cfg_tls_cipher_suite_.c_str());
     } catch (Exception &e) {}
 
-    if (__cfg_ssl_key[0] != '/')
-      __cfg_ssl_key = std::string(CONFDIR"/") + __cfg_ssl_key;
+    if (cfg_tls_key_[0] != '/')
+      cfg_tls_key_ = std::string(CONFDIR"/") + cfg_tls_key_;
 
-    if (__cfg_ssl_cert[0] != '/')
-      __cfg_ssl_cert = std::string(CONFDIR"/") + __cfg_ssl_cert;
+    if (cfg_tls_cert_[0] != '/')
+      cfg_tls_cert_ = std::string(CONFDIR"/") + cfg_tls_cert_;
 
-    logger->log_debug(name(), "Key: %s  Cert: %s", __cfg_ssl_key.c_str(),
-		      __cfg_ssl_cert.c_str());
+    logger->log_debug(name(), "Key file: %s  Cert file: %s",
+                      cfg_tls_key_.c_str(), cfg_tls_cert_.c_str());
 
-    if (! File::exists(__cfg_ssl_key.c_str())) {
-      if (File::exists(__cfg_ssl_cert.c_str())) {
-	throw Exception("Key file %s does not exist, but certificate file %s "
-			"does", __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str());
-      } else if (__cfg_ssl_create) {
-	ssl_create(__cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str());
-      } else {
- 	throw Exception("Key file %s does not exist", __cfg_ssl_key.c_str());
-      }
-    } else if (! File::exists(__cfg_ssl_cert.c_str())) {
+    if (! File::exists(cfg_tls_key_.c_str())) {
+	    if (File::exists(cfg_tls_cert_.c_str())) {
+		    throw Exception("Key file %s does not exist, but certificate file %s "
+		                    "does", cfg_tls_key_.c_str(), cfg_tls_cert_.c_str());
+	    } else if (cfg_tls_create_) {
+		    tls_create(cfg_tls_key_.c_str(), cfg_tls_cert_.c_str());
+	    } else {
+		    throw Exception("Key file %s does not exist", cfg_tls_key_.c_str());
+	    }
+    } else if (! File::exists(cfg_tls_cert_.c_str())) {
       throw Exception("Certificate file %s does not exist, but key file %s "
-		      "does", __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str());
+		      "does", cfg_tls_key_.c_str(), cfg_tls_cert_.c_str());
     }
   }
 
-  __cfg_use_basic_auth = false;
+  if (cfg_use_thread_pool_) {
+	  cfg_num_threads_ = config->get_uint("/webview/thread-pool/num-threads");
+  }
+
+  cfg_use_basic_auth_ = false;
   try {
-    __cfg_use_basic_auth = config->get_bool("/webview/use_basic_auth");
+    cfg_use_basic_auth_ = config->get_bool("/webview/use_basic_auth");
   } catch (Exception &e) {}
-  __cfg_basic_auth_realm = "Fawkes Webview";
+  cfg_basic_auth_realm_ = "Fawkes Webview";
   try {
-    __cfg_basic_auth_realm = config->get_bool("/webview/basic_auth_realm");
+    cfg_basic_auth_realm_ = config->get_bool("/webview/basic_auth_realm");
   } catch (Exception &e) {}
 
-  __cfg_access_log = "";
+  cfg_access_log_ = "";
   try {
-    __cfg_access_log = config->get_string("/webview/access_log");
+    cfg_access_log_ = config->get_string("/webview/access_log");
   } catch (Exception &e) {}
 
-  __cache_logger.clear();
+  bool cfg_cors_allow_all = false;
+  try {
+    cfg_cors_allow_all = config->get_bool("/webview/cors/allow/all");
+  } catch (Exception &e) {}
+  std::vector<std::string> cfg_cors_origins;
+  try {
+    cfg_cors_origins = config->get_strings("/webview/cors/allow/origins");
+  } catch (Exception &e) {}
+  unsigned int cfg_cors_max_age = 0;
+  try {
+    cfg_cors_max_age = config->get_uint("/webview/cors/max-age");
+  } catch (Exception &e) {}
 
-  __webview_service = new NetworkService(nnresolver, "Fawkes Webview on %h",
-					 "_http._tcp", __cfg_port);
-  __webview_service->add_txt("fawkesver=%u.%u.%u",
-			     FAWKES_VERSION_MAJOR, FAWKES_VERSION_MINOR,
-			     FAWKES_VERSION_MICRO);
-  __service_browse_handler = new WebviewServiceBrowseHandler(logger, __webview_service);
+  webview_service_ = new NetworkService(nnresolver, "Fawkes Webview on %h",
+                                        "_http._tcp", cfg_port_);
+  webview_service_->add_txt("fawkesver=%u.%u.%u",
+                            FAWKES_VERSION_MAJOR, FAWKES_VERSION_MINOR,
+                            FAWKES_VERSION_MICRO);
+  service_browse_handler_ = new WebviewServiceBrowseHandler(logger, webview_service_);
 
-  __header_gen = new WebviewHeaderGenerator(webview_nav_manager);
-  __footer_gen = new WebviewFooterGenerator(__service_browse_handler);
-
-  __dispatcher = new WebRequestDispatcher(webview_url_manager,
-					  __header_gen, __footer_gen);
-
+  dispatcher_ = new WebRequestDispatcher(webview_url_manager);
 
   try {
-    if (__cfg_use_ssl) {
-      __webserver  = new WebServer(__cfg_port, __dispatcher,
-                                   __cfg_ssl_key.c_str(), __cfg_ssl_cert.c_str(),
-                                   __cfg_ssl_cipher_suite.empty() ? NULL : __cfg_ssl_cipher_suite.c_str(),
-                                   logger, __cfg_use_ipv4, __cfg_use_ipv6);
-    } else {
-      __webserver  = new WebServer(__cfg_port, __dispatcher, logger, __cfg_use_ipv4, __cfg_use_ipv6);
+	  webserver_  = new WebServer(cfg_port_, dispatcher_, logger);
+
+	  (*webserver_)
+		  .setup_ipv(cfg_use_ipv4_, cfg_use_ipv6_)
+		  .setup_cors(cfg_cors_allow_all, std::move(cfg_cors_origins), cfg_cors_max_age);
+
+    if (cfg_use_tls_) {
+	    webserver_->setup_tls(cfg_tls_key_.c_str(), cfg_tls_cert_.c_str(),
+	                           cfg_tls_cipher_suite_.empty() ? NULL : cfg_tls_cipher_suite_.c_str());
     }
 
-    if (__cfg_use_basic_auth) {
-      __user_verifier = new WebviewUserVerifier(config, logger);
-      __webserver->setup_basic_auth(__cfg_basic_auth_realm.c_str(),
-				    __user_verifier);
+    if (cfg_use_thread_pool_) {
+	    webserver_->setup_thread_pool(cfg_num_threads_);
     }
-    __webserver->setup_request_manager(webview_request_manager);
 
-    if (__cfg_access_log != "") {
-      logger->log_debug(name(), "Setting up access log %s", __cfg_access_log.c_str());
-      __webserver->setup_access_log(__cfg_access_log.c_str());
+    if (cfg_use_basic_auth_) {
+      user_verifier_ = new WebviewUserVerifier(config, logger);
+      webserver_->setup_basic_auth(cfg_basic_auth_realm_.c_str(),
+                                    user_verifier_);
+    }
+    webserver_->setup_request_manager(webview_request_manager);
+
+    if (cfg_access_log_ != "") {
+      logger->log_debug(name(), "Setting up access log %s", cfg_access_log_.c_str());
+      webserver_->setup_access_log(cfg_access_log_.c_str());
     }
   } catch (Exception &e) {
-    delete __webview_service;
-    delete __service_browse_handler;
-    delete __header_gen;
-    delete __footer_gen;
-    delete __dispatcher;
+    delete webview_service_;
+    delete service_browse_handler_;
+    delete dispatcher_;
     throw;
   }
-
-
-  __startpage_processor  = new WebviewStartPageRequestProcessor(&__cache_logger);
   // get all directories for the static processor
-  std::vector<std::string> static_dirs = config->get_strings("/webview/static-dirs");
+  std::vector<std::string> static_dirs = config->get_strings("/webview/htdocs/dirs");
+  std::string catchall_file;
+  try {
+	  catchall_file = config->get_string("/webview/htdocs/catchall-file");
+  } catch (Exception &e) {};
+  std::string mime_file = config->get_string("/webview/htdocs/mime-file");
   static_dirs = StringConversions::resolve_paths(static_dirs);
-  std::vector<const char *> static_dirs_cstr = std::vector<const char *>(static_dirs.size());
-  for(unsigned int i = 0; i < static_dirs.size(); i++)
-  {
-    static_dirs_cstr[i] = static_dirs[i].c_str();
-  }
-  __static_processor     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, static_dirs_cstr, logger);
-  __blackboard_processor = new WebviewBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
-  __plugins_processor    = new WebviewPluginsRequestProcessor(PLUGINS_URL_PREFIX, plugin_manager);
-#ifdef HAVE_TF
-  __tf_processor         = new WebviewTfRequestProcessor(TF_URL_PREFIX, tf_listener);
-#endif
-#ifdef HAVE_JPEG
-  __image_processor     = new WebviewImageRequestProcessor(IMAGE_URL_PREFIX, config,
-							   logger, thread_collector);
-#endif
-  webview_url_manager->register_baseurl("/", __startpage_processor);
-  webview_url_manager->register_baseurl(STATIC_URL_PREFIX, __static_processor);
-  webview_url_manager->register_baseurl(BLACKBOARD_URL_PREFIX, __blackboard_processor);
-  webview_url_manager->register_baseurl(PLUGINS_URL_PREFIX, __plugins_processor);
-#ifdef HAVE_TF
-  webview_url_manager->register_baseurl(TF_URL_PREFIX, __tf_processor);
-#endif
-#ifdef HAVE_JPEG
-  webview_url_manager->register_baseurl(IMAGE_URL_PREFIX, __image_processor);
-#endif
+  std::string static_base_url = catchall_file.empty() ? "/static/" : "/";
+  static_processor_     = new WebviewStaticRequestProcessor(webview_url_manager, static_base_url,
+                                                            static_dirs, catchall_file, mime_file, logger);
+  rest_processor_       = new WebviewRESTRequestProcessor(webview_url_manager, webview_rest_api_manager, logger);
 
-  webview_nav_manager->add_nav_entry(BLACKBOARD_URL_PREFIX, "BlackBoard");
-#ifdef HAVE_TF
-  webview_nav_manager->add_nav_entry(TF_URL_PREFIX, "TF");
-#endif
-  webview_nav_manager->add_nav_entry(PLUGINS_URL_PREFIX, "Plugins");
-  webview_nav_manager->add_nav_entry(SYNCPOINT_URL_PREFIX, "SyncPoints");
-#ifdef HAVE_JPEG
-  webview_nav_manager->add_nav_entry(IMAGE_URL_PREFIX, "Images");
-#endif
+  try {
+	  cfg_explicit_404_ = config->get_strings("/webview/explicit-404");
+	  for (const auto &u : cfg_explicit_404_) {
+		  webview_url_manager->add_handler(WebRequest::METHOD_GET, u,
+		                                   std::bind(&WebviewThread::produce_404, this),
+		                                   10000);
+	  }
+  } catch (Exception &e) {} // ignored, no explicit 404
 
+  
   std::string afs;
-  if (__cfg_use_ipv4 && __cfg_use_ipv6) {
+  if (cfg_use_ipv4_ && cfg_use_ipv6_) {
 	  afs = "IPv4,IPv6";
-  } else if (__cfg_use_ipv4) {
+  } else if (cfg_use_ipv4_) {
 	  afs = "IPv4";
-  } else if (__cfg_use_ipv6) {
+  } else if (cfg_use_ipv6_) {
 	  afs = "IPv6";
   }
+  webserver_->start();
   logger->log_info("WebviewThread", "Listening for HTTP%s connections on port %u (%s)",
-                   __cfg_use_ssl ? "S" : "", __cfg_port, afs.c_str());
+                   cfg_use_tls_ ? "S" : "", cfg_port_, afs.c_str());
 
-  service_publisher->publish_service(__webview_service);
-  service_browser->watch_service("_http._tcp", __service_browse_handler);
+  service_publisher->publish_service(webview_service_);
+  service_browser->watch_service("_http._tcp", service_browse_handler_);
 }
 
 
@@ -263,66 +240,39 @@ void
 WebviewThread::finalize()
 {
   try {
-    service_publisher->unpublish_service(__webview_service);
+    service_publisher->unpublish_service(webview_service_);
   } catch (Exception &e) {} // ignored, can happen if avahi-daemon not running
   try {
-    service_browser->unwatch_service("_http._tcp", __service_browse_handler);
+    service_browser->unwatch_service("_http._tcp", service_browse_handler_);
   } catch (Exception &e) {} // ignored, can happen if avahi-daemon not running
 
-  webview_url_manager->unregister_baseurl("/");
-  webview_url_manager->unregister_baseurl(STATIC_URL_PREFIX);
-  webview_url_manager->unregister_baseurl(BLACKBOARD_URL_PREFIX);
-  webview_url_manager->unregister_baseurl(PLUGINS_URL_PREFIX);
-  webview_url_manager->unregister_baseurl(IMAGE_URL_PREFIX);
-  webview_url_manager->unregister_baseurl(SYNCPOINT_URL_PREFIX);
+  for (const auto &u : cfg_explicit_404_) {
+	  webview_url_manager->remove_handler(WebRequest::METHOD_GET, u);
+  }
 
-#ifdef HAVE_TF
-  webview_url_manager->unregister_baseurl(TF_URL_PREFIX);
-#endif
+  delete webserver_;
 
-  webview_nav_manager->remove_nav_entry(BLACKBOARD_URL_PREFIX);
-  webview_nav_manager->remove_nav_entry(PLUGINS_URL_PREFIX);
-  webview_nav_manager->remove_nav_entry(SYNCPOINT_URL_PREFIX);
-#ifdef HAVE_TF
-  webview_nav_manager->remove_nav_entry(TF_URL_PREFIX);
-#endif
-#ifdef HAVE_JPEG
-  webview_nav_manager->remove_nav_entry(IMAGE_URL_PREFIX);
-#endif
+  delete webview_service_;
+  delete service_browse_handler_;
 
-  delete __webserver;
-
-  delete __webview_service;
-  delete __service_browse_handler;
-
-  delete __dispatcher;
-  delete __static_processor;
-  delete __blackboard_processor;
-  delete __startpage_processor;
-  delete __plugins_processor;
-#ifdef HAVE_TF
-  delete __tf_processor;
-#endif
-#ifdef HAVE_JPEG
-  delete __image_processor;
-#endif
-  delete __footer_gen;
-  delete __header_gen;
-  __dispatcher = NULL;
+  delete dispatcher_;
+  delete static_processor_;
+  delete rest_processor_;
+  dispatcher_ = NULL;
 }
 
 
 void
 WebviewThread::loop()
 {
-  __webserver->process();
+	if (! cfg_use_thread_pool_) webserver_->process();
 }
 
 
 void
-WebviewThread::ssl_create(const char *ssl_key_file, const char *ssl_cert_file)
+WebviewThread::tls_create(const char *tls_key_file, const char *tls_cert_file)
 {
-  logger->log_info(name(), "Creating SSL key and certificate. "
+  logger->log_info(name(), "Creating TLS key and certificate. "
 		   "This may take a while...");
   HostInfo h;
 
@@ -330,9 +280,9 @@ WebviewThread::ssl_create(const char *ssl_key_file, const char *ssl_cert_file)
   if (asprintf(&cmd, "openssl req -new -x509 -batch -nodes -days 365 "
 	       "-subj \"/C=XX/L=World/O=Fawkes/CN=%s.local\" "
 	       "-out \"%s\" -keyout \"%s\" >/dev/null 2>&1",
-	       h.short_name(), ssl_cert_file, ssl_key_file) == -1)
+	       h.short_name(), tls_cert_file, tls_key_file) == -1)
   {
-    throw OutOfMemoryException("Webview/SSL: Could not generate OpenSSL string");
+    throw OutOfMemoryException("Webview/TLS: Could not generate OpenSSL string");
   }
 
   int status = system(cmd);
@@ -341,4 +291,10 @@ WebviewThread::ssl_create(const char *ssl_key_file, const char *ssl_cert_file)
   if (WEXITSTATUS(status) != 0) {
     throw Exception("Failed to auto-generate key/certificate pair");
   }
+}
+
+WebReply *
+WebviewThread::produce_404()
+{
+	return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "Not found\n");
 }

@@ -1,0 +1,67 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+@import '../../../_variables';
+
+.mat-card-content {
+		height: calc(100% - 56px);
+		overflow: auto;
+		margin: 0 -16px 0 -12px;
+}
+
+.mat-table {
+		margin: 0 4px 16px 4px;
+}
+
+.mat-column-index {
+		flex: 0 0 50px;
+		text-align: center;
+}
+
+.mat-column-delete {
+		flex: 0 0 40px;
+		text-align: center;
+}
+
+.mat-cell-small {
+		font-size: $caption-font-size-base;
+		margin: 2px !important;
+}
+
+.mat-row-small {
+		line-height: 1.2 * $caption-font-size-base !important;
+		min-height: 1.2 * $caption-font-size-base !important;
+}
+
+.mat-cell-large {
+		font-size: $body-font-size-base;
+		margin: 4px !important;
+}
+
+.mat-row-large {
+		line-height: 1.2 * $body-font-size-base !important;
+		min-height: 1.2 * $body-font-size-base !important;
+}
+
+.mat-row:hover {
+		background-color: #eee;
+}
+
+.select-icon {
+		vertical-align: middle;
+		padding-bottom: 2px;
+}
+
+.baseline {
+		vertical-align: baseline;
+}
+
+.delete-button {
+		width:  3 * $baseline-grid;
+		height: 3 * $baseline-grid;
+}
+
+.delete-icon {
+		font-size: 2 * $baseline-grid;
+}

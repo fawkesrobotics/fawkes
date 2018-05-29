@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: BackendInfo
+  version: v1beta1
+  description: |
+    Fawkes Backend Info REST API.
+    Provides backend meta information to the frontend.
+  contact:
+    name:  Tim Niemueller
+    email: niemueller@kbsg.rwth-aachen.de
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: public
+    description: Image public API.
+
+paths:
+  /backends:
+    get:
+      tags:
+      - public
+      summary: Get list of backends.
+      operationId: list_backends
+      description: |
+        Get a list of available backends.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get list of backends
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Backend'
+        '400':
+          description: bad input parameter
+
+components:
+  schemas:
+    Backend:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - name
+        - services
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        url:
+          type: string
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+
+    Service:
+      type: object
+      required:
+        - name
+        - url
+      properties:
+        name:
+          type: string
+        url:
+          type: string

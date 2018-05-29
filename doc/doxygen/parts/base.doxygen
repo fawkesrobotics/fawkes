@@ -663,8 +663,9 @@ EXCLUDE_SYMLINKS       = YES
 # for example use the pattern */test/*
 
 EXCLUDE_PATTERNS       = */.deps/* \
-		       	 *.pb.h \
-			 *.pb.cpp
+     	 *.pb.h \
+       *.pb.cpp \
+       */node_modules/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the

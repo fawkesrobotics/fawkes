@@ -3,7 +3,7 @@
  *  request.cpp - Web request
  *
  *  Created: Mon Jun 17 18:04:04 2013
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -111,6 +111,8 @@ WebRequest::setup(const char *url, const char *method,
     method_ = METHOD_OPTIONS;
   } else if (0 == strcmp(method, MHD_HTTP_METHOD_TRACE)) {
     method_ = METHOD_TRACE;
+  } else if (0 == strcmp(method, MHD_HTTP_METHOD_PATCH)) {
+    method_ = METHOD_PATCH;
   }
 
   if (0 == strcmp(version, MHD_HTTP_VERSION_1_0)) {
@@ -119,32 +121,44 @@ WebRequest::setup(const char *url, const char *method,
     http_version_ = HTTP_VERSION_1_1;
   }
 
-  struct sockaddr *client_addr =
-    MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)
-      ->client_addr;
-
-  char addr_str[INET6_ADDRSTRLEN];
-  switch(client_addr->sa_family) {
-  case AF_INET:
-    inet_ntop(AF_INET, &(((struct sockaddr_in *)client_addr)->sin_addr),
-	      addr_str, INET6_ADDRSTRLEN);
-    break;
-
-  case AF_INET6:
-    inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)client_addr)->sin6_addr),
-	      addr_str, INET6_ADDRSTRLEN);
-    break;
-
-  default:
-    strncpy(addr_str, "Unknown AF", INET6_ADDRSTRLEN);
-  }
-
-  client_addr_ = addr_str;
-
   MHD_get_connection_values(connection, MHD_HEADER_KIND, &header_iterator, this);
   MHD_get_connection_values(connection, MHD_COOKIE_KIND, &cookie_iterator, this);
   MHD_get_connection_values(connection,
 			    MHD_GET_ARGUMENT_KIND, &get_argument_iterator, this);
+
+
+  // check for reverse proxy header fields
+  if (headers_.find("X-Forwarded-For") != headers_.end()) {
+	  std::string forwarded_for{headers_["X-Forwarded-For"]};
+	  std::string::size_type comma_pos = forwarded_for.find(",");
+	  if (comma_pos != std::string::npos) {
+		  forwarded_for = forwarded_for.substr(0, comma_pos);
+	  }
+	  client_addr_ = forwarded_for;
+
+  } else {
+	  struct sockaddr *client_addr =
+		  MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)
+		  ->client_addr;
+
+	  char addr_str[INET6_ADDRSTRLEN];
+	  switch(client_addr->sa_family) {
+	  case AF_INET:
+		  inet_ntop(AF_INET, &(((struct sockaddr_in *)client_addr)->sin_addr),
+		            addr_str, INET6_ADDRSTRLEN);
+		  break;
+
+	  case AF_INET6:
+		  inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)client_addr)->sin6_addr),
+		            addr_str, INET6_ADDRSTRLEN);
+		  break;
+
+	  default:
+		  strncpy(addr_str, "Unknown AF", INET6_ADDRSTRLEN);
+	  }
+
+	  client_addr_ = addr_str;
+  }
 
   is_setup_ = true;
 }
@@ -177,16 +191,40 @@ WebRequest::set_post_value(const char *key, const char *data, size_t size)
 }
 
 
-/** Set raw post data.
+/** Set request body.
  * The data is copied as is without assuming a human-readable string
  * or even just zero-termination.
  * @param data data to copy
  * @param data_size size in bytes of \@p data
  */
 void
-WebRequest::set_raw_post_data(const char *data, size_t data_size)
+WebRequest::set_body(const char *data, size_t data_size)
 {
-  post_raw_data_ = std::string(data, data_size);
+  body_ = std::string(data, data_size);
+}
+
+/** Add to request body.
+ * The data is copied as is without assuming a human-readable string
+ * or even just zero-termination.
+ * @param data data to copy
+ * @param data_size size in bytes of \@p data
+ */
+void
+WebRequest::addto_body(const char *data, size_t data_size)
+{
+  body_ += std::string(data, data_size);
+}
+
+/** Finalize body handling.
+ * Check for zero termination of body, and if it does not exist, add it.
+ */
+void
+WebRequest::finish_body()
+{
+	if (body_.length() == 0)  return;
+	if (body_[body_.length()-1] != 0) {
+		body_ += '\0';
+	}
 }
 
 /** Increment reply bytes counter.

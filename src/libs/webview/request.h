@@ -3,7 +3,7 @@
  *  request.h - Web request
  *
  *  Created: Mon Jun 17 17:58:51 2013
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -54,7 +54,8 @@ class WebRequest {
     METHOD_OPTIONS,	///< OPTIONS
     METHOD_POST,	///< POST
     METHOD_PUT,		///< PUT
-    METHOD_TRACE	///< TRACE
+    METHOD_TRACE,	///< TRACE
+    METHOD_PATCH	///< PATCH
   } Method;
 
   /** HTTP version. */
@@ -226,10 +227,36 @@ class WebRequest {
   void set_header(const std::string &key, const std::string &value)
   { headers_[key] = value; }
 
-  /** Get raw post data.
-   * @return raw port data or empty string if none. Note that this is not necesarily
-   * a printable string (or zero-terminated) */
-  const std::string &  raw_post_data() const { return post_raw_data_; }
+  /** Get a path argument.
+	 * Retrieves a named argument that was a token in the
+	 * registration URL, e.g., retrieve "id" for "/item/{id}".
+	 * @param what what to retrieve
+	 * @return item passed in URL or empty string
+	 */
+	std::string path_arg(const std::string& what) const
+	{
+		const auto p = path_args_.find(what);
+		if (p != path_args_.end()) {
+			return p->second;
+		} else {
+			return "";
+		}
+	}
+
+	/** Set path arguments.
+	 * @param args path arguments
+	 */
+	void set_path_args(std::map<std::string, std::string>&& args)
+	{
+		path_args_ = std::move(args);
+	}
+
+  /** Get body of request.
+   * @return The data that was received with the request. This is not
+   * set if we receive a form submission. The values will be available
+   * as POST values then. Note that this is not necesarily a printable
+   * string (or zero-terminated) */
+  const std::string &  body() const { return body_; }
 
   void   increment_reply_size(size_t increment_by);
   size_t reply_size() const;
@@ -241,7 +268,9 @@ class WebRequest {
    * @param cookies cookies map
    */
   void set_cookies(const std::map<std::string, std::string> &cookies) { cookies_ = cookies; }
-  void set_raw_post_data(const char *data, size_t data_size);
+  void set_body(const char *data, size_t data_size);
+  void addto_body(const char *data, size_t data_size);
+  void finish_body();
 
  private:
   bool is_setup() { return is_setup_; }
@@ -263,9 +292,10 @@ class WebRequest {
   WebReply::Code reply_code_;
   std::map<std::string, std::string> cookies_;
   std::map<std::string, std::string> post_values_;
-  std::string                        post_raw_data_;
+  std::string                        body_;
   std::map<std::string, std::string> get_values_;
   std::map<std::string, std::string> headers_;
+	std::map<std::string, std::string> path_args_;
 };
 
 

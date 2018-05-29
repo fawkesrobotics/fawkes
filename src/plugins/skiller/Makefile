@@ -21,7 +21,8 @@ include $(LIBSRCDIR)/utils/utils.mk
 include $(LIBSRCDIR)/tf/tf.mk
 include $(LIBSRCDIR)/navgraph/navgraph.mk
 
-SUBDIRS = consoletool
+PRESUBDIRS = interfaces
+SUBDIRS = consoletool rest-api
 
 # Uncomment to enable time tracking for the skiller
 # CFLAGS += -DSKILLER_TIMETRACKING -DSKILLER_TT_MOD=50
@@ -56,9 +57,6 @@ ifeq ($(HAVE_LUA),1)
 else
   WARN_TARGETS += warning_lua
 endif
-
-INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
-include $(BUILDSYSDIR)/interface.mk
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)

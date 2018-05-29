@@ -1,0 +1,91 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<mat-card class="ff-vfill-content">
+	<mat-card-title>
+		<div fxLayout="row">
+			<div>
+				<button mat-button class="mat-card-title" [matMenuTriggerFor]="env_menu">
+					CLIPS Environment <span class="ff-muted baseline">{{ env }}</span>
+					<mat-icon class="select-icon">arrow_drop_down</mat-icon>
+				</button>
+				<mat-menu #env_menu="matMenu" [overlapTrigger]="false">
+					<button mat-menu-item
+									*ngFor="let e of envs"
+									[routerLink]="['/clips/', e]">
+						<span>{{ e }}</span>
+					</button>
+				</mat-menu>
+			</div>
+			<div class="ff-right" fxLayout="row" fxLayoutAlign="flex-end center">
+				<ff-card-list-filter></ff-card-list-filter>
+				<button mat-icon-button
+								i18n-matTooltip matTooltip="Toggle font size"
+								class="ff-card-title-button"
+								(click)="toggle_fontsize()">
+					<mat-icon>format_size</mat-icon>
+				</button>
+				<button mat-icon-button
+								i18n-matTooltip matTooltip="Refresh Facts"
+								class="ff-card-title-button"
+								[disabled]="auto_refresh_subscription != null || loading"
+								(click)="refresh()">
+					<mat-icon *ngIf="!loading">refresh</mat-icon>
+					<mat-spinner *ngIf="loading" [diameter]="20"></mat-spinner>
+				</button>
+				<button mat-icon-button
+								i18n-matTooltip matTooltip="Toggle auto-refresh"
+								class="ff-card-title-button"
+								(click)="toggle_autorefresh()">
+					<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
+				</button>
+			</div>
+		</div>
+	</mat-card-title>
+	<mat-divider></mat-divider>
+	<mat-card-content class="ff-card-content">
+		<div [hidden]="data_source.data.length == 0">
+			<mat-table #table [dataSource]="data_source">
+
+				<!-- Mode Icon column -->
+				<ng-container matColumnDef="index">
+					<mat-header-cell *matHeaderCellDef> Index </mat-header-cell>
+					<mat-cell *matCellDef="let fact"
+										[ngClass]="{'mat-cell-small': !font_large, 'mat-cell-large': font_large}">
+						{{ fact.index }}
+					</mat-cell>
+				</ng-container>
+
+				<!-- Goal ID column -->
+				<ng-container matColumnDef="formatted">
+					<mat-header-cell *matHeaderCellDef> Fact </mat-header-cell>
+					<mat-cell *matCellDef="let fact"
+										[ngClass]="{'mat-cell-small': !font_large, 'mat-cell-large': font_large}">
+						{{ fact.formatted }}
+					</mat-cell>
+				</ng-container>
+
+				<!-- Mode Icon column -->
+				<ng-container matColumnDef="delete">
+					<mat-header-cell *matHeaderCellDef><mat-icon>delete</mat-icon> </mat-header-cell>
+					<mat-cell *matCellDef="let fact"
+										[ngClass]="{'mat-cell-small': !font_large, 'mat-cell-large': font_large}">
+						<button mat-icon-button class="delete-button">
+							<mat-icon class="delete-icon">delete_forever</mat-icon>
+						</button>
+					</mat-cell>
+				</ng-container>
+
+				<mat-header-row *matHeaderRowDef="displayed_columns"></mat-header-row>
+				<mat-row *matRowDef="let row; columns: displayed_columns;"
+								 [ngClass]="{'mat-row-small': !font_large, 'mat-row-large': font_large}">
+				</mat-row>
+			</mat-table>
+		</div>
+
+		<div [hidden]="data_source.data.length > 0">
+			<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
+		</div>
+	</mat-card-content>
+</mat-card>

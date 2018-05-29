@@ -34,6 +34,8 @@ namespace fawkes {
 class DynamicFileWebReply : public DynamicWebReply
 {
  public:
+	DynamicFileWebReply(const std::string& filename,
+	                    const std::string& content_type = "");
   DynamicFileWebReply(const char *filename);
   DynamicFileWebReply(FILE *file, bool close_when_done = true);
   virtual ~DynamicFileWebReply();
@@ -45,9 +47,9 @@ class DynamicFileWebReply : public DynamicWebReply
   void determine_file_size();
 
  private:
-  FILE   *__file;
-  size_t  __size;
-  bool    __close_when_done;
+  FILE   *file_;
+  size_t  size_;
+  bool    close_when_done_;
 };
 
 } // end namespace fawkes

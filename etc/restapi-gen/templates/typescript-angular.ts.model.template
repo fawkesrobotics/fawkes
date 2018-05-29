@@ -1,0 +1,108 @@
+
+%- macro type(property)
+%  if property.type
+%-   if property.type == 'integer'
+number
+%-   elif property.type == 'array'
+Array<{{ type(property['items']) }}>
+%-   else
+{{ property.type }}
+%-   endif
+%- elif '$ref' in property
+{{ property['$ref'] | reftype | transitive_types(all_schemas) | join(' | ') }}
+%- endif
+%- endmacro
+
+%- macro gen_schema(schema)
+% for propname, p in schema['properties'].items()
+%   if p.enum
+	{{ propname | sanitize }}{% if not schema.required or propname not in schema.required %}?{% endif %}: {{ name }}.{{ propname | capitalize }}Enum;
+%   else
+	{{ propname | sanitize }}{% if not schema.required or propname not in schema.required %}?{% endif %}: {{ type(p) }};
+%   endif
+% endfor
+%- endmacro
+
+%- macro gen_enums(schema)
+% for propname, p in schema['properties'].items()
+%   if 'enum' in p
+	export type {{ propname | capitalize }}Enum = {{ p['enum'] | map('quote') | join(' | ') }};
+	export const {{ propname | capitalize }}Enum = {
+%     for e in p.enum
+		{{ e | sanitize }}: {{ e|quote }} as {{ propname | capitalize }}Enum{% if not loop.last %},{% endif %}
+%     endfor
+	}
+%   endif
+% endfor
+%- endmacro
+
+%- macro gen_imports(schema)
+%- if schema.allOf
+%-   for s in schema.allOf
+%-     if s.type and s.type == 'object'
+{{ gen_imports(s) }}
+%-     endif
+%-   endfor
+%- elif schema.properties
+%-   for propname, p in schema['properties'].items()
+%-     if '$ref' in p
+%-       for c in (p['$ref'] | reftype | transitive_types(all_schemas) | reject('sameas', name))
+import { {{ c }} } from './{{ c }}';
+%        endfor
+%-     elif p.type == 'array' and '$ref' in p['items']
+%-       for c in (p['items']['$ref'] | reftype | transitive_types(all_schemas) | reject('sameas', name))
+import { {{ c }} } from './{{ c }}';
+%        endfor
+%-     endif
+%-   endfor
+%- endif
+%- endmacro
+
+
+/****************************************************************************
+ *  {{ spec.info.title }} -- Schema {{ name }}
+ *  (auto-generated, do not modify directly)
+ *
+{%- if spec.info.description %}
+{{ spec.info.description | prefix(' *  ') | rstrip }}
+ *
+{%- endif %}
+ *  API Contact: {{ spec.info.contact.name }} <{{ spec.info.contact.email }}>
+ *  API Version: {{ spec.info.version }}
+ *  API License: {{ spec.info.license.name }}
+ ****************************************************************************/
+
+{{ gen_imports(schema) }}
+
+/** {{ name }} representation for JSON transfer. */
+export interface {{ name }}
+{
+% if 'properties' in schema
+{{ gen_schema(schema) }}
+%- elif schema.allOf
+%-   for s in schema.allOf
+%-     if '$ref' in s
+{{ gen_schema(all_schemas[s['$ref'] | reftype])  }}
+%-     elif 'type' in s and s['type'] == 'object'
+{{ gen_schema(s) }}
+%-     endif
+%-   endfor
+%- endif
+}
+
+export namespace {{ name }}
+{
+	export const API_VERSION: string = "{{ spec.info.version }}";
+
+%if 'properties' in schema
+{{ gen_enums(schema) }}
+%- elif schema.allOf
+%-   for s in schema.allOf
+%-     if '$ref' in s
+{{ gen_enums(all_schemas[s['$ref'] | reftype])  }}
+%-     elif 'type' in s and s['type'] == 'object'
+{{ gen_enums(s) }}
+%-     endif
+%-   endfor
+%- endif
+}

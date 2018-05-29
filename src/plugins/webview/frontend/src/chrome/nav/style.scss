@@ -1,0 +1,81 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// Copyright  2017  The Kubernetes Authors
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+@import '../../variables';
+
+.ff-nav {
+  background-color: transparent;
+  font-size: $body-font-size-base;
+  height: 100%;
+  overflow: hidden;
+  overflow-y: auto;
+  padding-top: $baseline-grid;
+  white-space: nowrap;
+
+  .mat-divider {
+    margin: $baseline-grid $baseline-grid (2 * $baseline-grid) 0;
+  }
+
+  // Only show the scrollbar on hover, but always enable scrolling.
+  &:not(:hover) {
+    &::-webkit-scrollbar-thumb {
+      background-color: transparent;
+    }
+  }
+
+  // Children of ff-nav should not shrink to prevent layout issues on IE.
+  & > * {
+    flex-shrink: 0;
+  }
+}
+
+.ff-nav-group {
+  margin-right: $baseline-grid;
+
+  &:last-child {
+    > .ff-nav-item {
+      &:last-child {
+        padding-bottom: 2 * $baseline-grid;
+      }
+    }
+  }
+}
+
+.ff-nav-group-item {
+  margin-left: 1.5 * $baseline-grid;
+}
+
+.ff-nav-item {
+  margin-left: 3 * $baseline-grid;
+}
+
+.rw-button {
+		position: absolute;
+		bottom: 4 * $baseline-grid;
+		font-size: $subhead-font-size-base;
+		margin-top: auto;
+		padding-left: $baseline-grid;
+		padding-right: $baseline-grid;
+}
+
+.rw-button-normal {
+		color: #ccc;
+}
+
+.rw-fab-button {
+		position: fixed;
+		bottom: 0;
+		left: 4 * $baseline-grid;
+		opacity: 0;
+		z-index: 999;
+		animation: fadein 400ms;
+		animation-delay: 100ms;
+		animation-fill-mode: forwards;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

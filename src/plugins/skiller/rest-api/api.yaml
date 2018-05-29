@@ -1,0 +1,204 @@
+openapi: 3.0.0
+info:
+  title: BehaviorEngine
+  version: v1beta1
+  description: |
+    Behavior Engine REST API.
+    Visualize, monitor, and instruct the Skill Execution Run-Time of
+    the Lua-based Behavior Engine.
+  contact:
+    name:  Tim Niemueller
+    email: niemueller@kbsg.rwth-aachen.de
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: public
+    description: Behavior Engine public API.
+
+paths:
+  /skiller/skills:
+    get:
+      tags:
+      - public
+      summary: Get list of available skills.
+      operationId: list_skills
+      description: |
+        Get the graphs of all currently executing top skills.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get list of skills
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SkillInfo'
+        '400':
+          description: bad input parameter
+
+  /skiller/skills/{id}:
+    get:
+      tags:
+      - public
+      summary: Get information about a specific skill.
+      operationId: get_skill
+      description: |
+        Get information about a specific skill.
+        The special ID `active` can be used to retrieve information
+        about the currently running top-skill.
+      parameters:
+        - name: id
+          in: path
+          description: |
+            ID of skill to retrieve. Use `active` to retrieve info
+            about currently running skill.
+          required: true
+          schema:
+            type: string
+            format: symbol
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get skill information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+        '400':
+          description: bad input parameter
+
+    delete:
+      tags:
+      - public
+      summary: Stop a currently running skill.
+      operationId: stop_skill
+      description: |
+        Stop the currently active skill.
+        The ID must be `active`.
+      parameters:
+        - name: id
+          in: path
+          description: Must be `active`.
+          required: true
+          schema:
+            type: string
+            format: symbol
+      responses:
+        '200':
+          description: Skill was indeed stopped.
+        '400':
+          description: bad input parameter
+
+  /skiller/call:
+    post:
+      tags:
+      - public
+      summary: Execute a new skill.
+      operationId: exec_skill
+      description: |
+        Run a skill.
+        The ID must be `active`.
+      parameters:
+        - name: skill_call
+          in: body
+          description: The actual skill call
+          required: true
+          schema:
+            $ref: '#/components/schemas/SkillCall'
+      responses:
+        '200':
+          description: Skill was started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+        '400':
+          description: bad input parameter
+        '409':
+          description: Another thread is exclusive controller
+        '500':
+          description: An error occured sending the request
+        '503':
+          description: Behavior Engine has not been loaded
+
+components:
+  schemas:
+    SkillInfo:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+        
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+          format: symbol
+          example: goto
+
+    Skill:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+          format: symbol
+          example: goto
+        graph:
+          type: string
+          format: dot
+        skill-string:
+          type: string
+          format: function
+          description: |
+            The skill string is given only for the active skill.
+        error:
+          type: string
+          description: |
+            An error is presented for the active skill if it has FAILED.
+        msg_id:
+          type: integer
+          format: int64
+        exclusive_controller:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: ["INACTIVE", "FINAL", "RUNNING", "FAILED"]
+
+    SkillCall:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - skill_string
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        skill_string:
+          type: string

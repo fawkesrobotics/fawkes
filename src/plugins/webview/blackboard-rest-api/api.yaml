@@ -1,0 +1,259 @@
+openapi: 3.0.0
+info:
+  title: Blackboard
+  version: v1beta1
+  description: |
+    Fawkes Blackboard REST API.
+    Access blackboard data through a REST API.
+  contact:
+    name:  Tim Niemueller
+    email: niemueller@kbsg.rwth-aachen.de
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: public
+    description: Blackboard public API.
+
+paths:
+  /blackboard/interfaces:
+    get:
+      tags:
+      - public
+      summary: Get list of interfaces.
+      operationId: list_interfaces
+      description: |
+        Get a list of interfaces currently registered with the blackboard.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get list of interfaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InterfaceInfo'
+        '400':
+          description: bad input parameter
+
+  /blackboard/interfaces/{type}/{id+}:
+    get:
+      tags:
+      - public
+      summary: Get information about a specific interface.
+      operationId: get_interface_info
+      description: Get information about a specific interface.
+      parameters:
+        - name: type
+          in: path
+          description: |
+            Type of interface to receive.
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: |
+            ID of Interface to receive. Spaces must be url encoded.
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get interface information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterfaceInfo'
+        '400':
+          description: bad input parameter
+
+  /blackboard/interfaces/{type}/{id+}/data:
+    get:
+      tags:
+      - public
+      summary: Get data of a specific interface.
+      operationId: get_interface_data
+      description: Get data of a specific interface.
+      parameters:
+        - name: type
+          in: path
+          description: |
+            Type of interface to receive.
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: |
+            ID of interface to receive. Spaces must be url encoded.
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get interface data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterfaceData'
+        '400':
+          description: bad input parameter
+
+  /blackboard/graph:
+    get:
+      tags:
+      - public
+      summary: Get blackboard graph
+      operationId: get_graph
+      description: |
+        Get a blackboard graph.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get graph
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlackboardGraph'
+        '503':
+          description: failure to retrieve graph
+
+components:
+  schemas:
+    InterfaceInfo:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - type
+        - hash
+        - fields
+        - message_types
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+        type:
+          type: string
+        hash:
+          type: string
+        writer:
+          type: string
+        readers:
+          type: array
+          items:
+            type: string
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/InterfaceFieldType'
+        message_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/InterfaceMessageType'
+
+    InterfaceFieldType:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        is_array:
+          type: boolean
+        enums:
+          type: array
+          description: possible enum values for this field
+          items:
+            type: string
+
+    InterfaceMessageType:
+      type: object
+      required:
+        - name
+        - fields
+      properties:
+        name:
+          type: string
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/InterfaceFieldType'
+
+    InterfaceData:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - id
+        - type
+        - data
+        - timestamp
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        id:
+          type: string
+        type:
+          type: string
+        writer:
+          type: string
+        readers:
+          type: array
+          items:
+            type: string
+        data:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    BlackboardGraph:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - dotgraph
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        dotgraph:
+          type: string

@@ -1,0 +1,64 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+@import '../../../_variables';
+
+.interface-card {
+		width: 100%;
+		padding: 2 * $baseline-grid;
+		margin-left: $baseline-grid;
+		margin-right: $baseline-grid;
+		margin-top: 3 * $baseline-grid;
+}
+
+.interface-card .mat-card-title {
+		font-size: 2 * $baseline-grid;
+}
+
+.maybe-disabled-card-content {
+		position: relative;
+}
+
+.disabled-overlay {
+		width: 100%;
+		height: calc(100% - #{2 * $baseline-grid});
+		z-index: 10;
+		position: absolute;
+		background: #fff;
+		opacity: 0.9;
+}
+
+.disabled-overlay div {
+		text-align: center;
+		font-size: 4 * $baseline-grid;
+		font-weight: bold;
+}
+
+.reader-writer-prop-value {
+		font-size: $body-font-size-base;
+}
+
+.reader-writer-info {
+		padding-top: 1 * $baseline-grid;
+}
+
+.graph-card {
+		//height: calc(100% - 64px);
+		margin: 0 -16px 0 -12px;
+}
+
+.mat-card-content {
+		height: calc(100% - 40px);
+}
+
+.card-div {
+		max-height: 100%;
+}
+
+.blackboard-graph {
+		max-height: 100%;
+		overflow: auto;
+		width: calc(100% - 8px);
+		margin: 0 -16px 16px -10px;
+}

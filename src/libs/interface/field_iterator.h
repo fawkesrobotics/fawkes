@@ -28,6 +28,7 @@
 #include <interface/types.h>
 
 #define __STD_LIMIT_MACROS
+#include <list>
 #include <stdint.h>
 
 namespace fawkes {
@@ -55,6 +56,7 @@ class InterfaceFieldIterator
   interface_fieldtype_t  get_type() const;
   const char *           get_typename() const;
   bool                   is_enum() const;
+  std::list<const char*> get_enum_valuenames() const;
   const char *           get_name() const;
   const void *           get_value() const;
   const char *           get_value_string(const char *array_sep = ", ");

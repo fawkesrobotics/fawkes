@@ -1,0 +1,173 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+ -->
+<div fxLayout="row" class="ff-vfill">
+<div *ngIf="domain_data as domain" class="ff-vfill ff-hfill">
+	<mat-grid-list cols="2" rowHeight="fit" fxFlex="grow" class="ff-vfill">
+		<mat-grid-tile>
+			<mat-card class="ff-content-grid-card">
+				<mat-card-title>Facts</mat-card-title>
+				<mat-divider></mat-divider>
+				<mat-card-content class="ff-card-content">
+					<div *ngIf="domain.facts.length > 0; else facts_empty" class="card-div">
+						<mat-table #table [dataSource]="domain.facts">
+							<!-- Predicate Name -->
+							<ng-container matColumnDef="fact_name">
+								<mat-header-cell *matHeaderCellDef>Predicate</mat-header-cell>
+								<mat-cell *matCellDef="let fact">{{ fact.name }}</mat-cell>
+							</ng-container>
+							
+							<!-- Values -->
+							<ng-container matColumnDef="fact_params">
+								<mat-header-cell *matHeaderCellDef>Parameters</mat-header-cell>
+								<mat-cell *matCellDef="let fact">
+									<span *ngFor="let v of fact['param-values']; index as i; last as last">
+										<ng-container *ngIf="domain.predicates[fact['name']] && (i < domain.predicates[fact['name']]['param-names'].length)">
+											{{ domain.predicates[fact['name']]['param-names'][i] }}=
+										</ng-container>
+										{{ v }}<ng-container *ngIf="! last">,</ng-container>
+									</span>
+								</mat-cell>
+							</ng-container>
+
+							<mat-header-row *matHeaderRowDef="displayed_fact_columns"></mat-header-row>
+							<mat-row *matRowDef="let row; columns: displayed_fact_columns">
+							</mat-row>
+						</mat-table>
+					</div>
+					<ng-template #facts_empty>
+						<ff-list-zero-state [message]="zero_message_facts"></ff-list-zero-state>
+					</ng-template>
+				</mat-card-content>
+			</mat-card>
+		</mat-grid-tile>
+		
+		<mat-grid-tile>
+			<mat-card class="ff-content-grid-card">
+				<mat-card-title>Predicates</mat-card-title>
+				<mat-divider></mat-divider>
+				<mat-card-content class="ff-card-content">
+					<div *ngIf="domain.predicates_arr.length > 0; else preds_empty">
+					<mat-table #table [dataSource]="domain.predicates_arr">
+						<!-- Predicate Name -->
+						<ng-container matColumnDef="pred_name">
+							<mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+							<mat-cell *matCellDef="let pred">{{ pred.name }}</mat-cell>
+						</ng-container>
+
+						<!-- Values -->
+						<ng-container matColumnDef="pred_params">
+							<mat-header-cell *matHeaderCellDef>Parameters</mat-header-cell>
+							<mat-cell *matCellDef="let pred">
+								<span *ngFor="let v of pred['param-names']; index as i; last as last">
+									{{ v }} - {{ pred['param-types'][i] }}<ng-container *ngIf="! last">,</ng-container>
+								</span>
+							</mat-cell>
+						</ng-container>
+
+						<ng-container matColumnDef="pred_sensed">
+							<mat-header-cell *matHeaderCellDef>Sensed</mat-header-cell>
+							<mat-cell *matCellDef="let pred">{{ pred.sensed }}</mat-cell>
+						</ng-container>
+
+						<mat-header-row *matHeaderRowDef="displayed_pred_columns"></mat-header-row>
+						<mat-row *matRowDef="let row; columns: displayed_pred_columns">
+						</mat-row>
+					</mat-table>
+					</div>
+					<ng-template #preds_empty>
+						<ff-list-zero-state [message]="zero_message_predicates"></ff-list-zero-state>
+					</ng-template>
+				</mat-card-content>
+			</mat-card>
+		</mat-grid-tile>
+		
+		<mat-grid-tile>
+			<mat-card class="ff-content-grid-card">
+				<mat-card-title>Objects</mat-card-title>
+				<mat-divider></mat-divider>
+				<mat-card-content class="ff-card-content">
+					<div *ngIf="domain.objects.length > 0; else facts_empty">
+					<mat-table #table [dataSource]="domain.objects">
+						<!-- Predicate Name -->
+						<ng-container matColumnDef="object_name">
+							<mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+							<mat-cell *matCellDef="let obj">{{ obj.name }}</mat-cell>
+						</ng-container>
+
+						<!-- Values -->
+						<ng-container matColumnDef="object_type">
+							<mat-header-cell *matHeaderCellDef>Type</mat-header-cell>
+							<mat-cell *matCellDef="let obj">{{ obj.type }}</mat-cell>
+						</ng-container>
+
+						<mat-header-row *matHeaderRowDef="displayed_object_columns"></mat-header-row>
+						<mat-row *matRowDef="let row; columns: displayed_object_columns">
+						</mat-row>
+					</mat-table>
+					</div>
+					<ng-template #objects_empty>
+						<ff-list-zero-state [message]="zero_message_objects"></ff-list-zero-state>
+					</ng-template>
+				</mat-card-content>
+			</mat-card>
+		</mat-grid-tile>
+
+		<mat-grid-tile>
+			<mat-card class="ff-content-grid-card">
+				<mat-card-title>Operators</mat-card-title>
+				<mat-divider></mat-divider>
+				<mat-card-content class="ff-card-content">
+					<div *ngIf="domain.operators_arr.length > 0; else facts_empty">
+					<mat-table #table [dataSource]="domain.operators_arr">
+						<!-- Predicate Name -->
+						<ng-container matColumnDef="op_name">
+							<mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+							<mat-cell *matCellDef="let op">{{ op.name }}</mat-cell>
+						</ng-container>
+
+						<!-- Values -->
+						<ng-container matColumnDef="op_params">
+							<mat-header-cell *matHeaderCellDef>Parameters</mat-header-cell>
+							<mat-cell *matCellDef="let op">
+								<span *ngFor="let p of op.parameters; last as last">
+									{{ p.name }} - {{ p.type }}<ng-container *ngIf="! last">,</ng-container>
+								</span>
+							</mat-cell>
+						</ng-container>
+
+						<ng-container matColumnDef="op_wait_sensed">
+							<mat-header-cell *matHeaderCellDef>Wait Sensed</mat-header-cell>
+							<mat-cell *matCellDef="let op">{{ op['wait-sensed'] }}</mat-cell>
+						</ng-container>
+
+
+						<mat-header-row *matHeaderRowDef="displayed_op_columns"></mat-header-row>
+						<mat-row *matRowDef="let row; columns: displayed_op_columns">
+						</mat-row>
+					</mat-table>
+					</div>
+					<ng-template #operators_empty>
+						<ff-list-zero-state [message]="zero_message_operators"></ff-list-zero-state>
+					</ng-template>
+				</mat-card-content>
+			</mat-card>
+		</mat-grid-tile>
+	</mat-grid-list>
+</div>
+<div class="button-space" fxLayout="column" fxFlexAlign="center flex-start" fxLayoutGap="16px">
+	<button mat-fab
+					color="accent"
+					[disabled]="auto_refresh_subscription != null || loading"
+					(click)="refresh_domain_data()">
+		<mat-icon *ngIf="!loading">refresh</mat-icon>
+		<mat-spinner *ngIf="loading" [diameter]="24"></mat-spinner>
+	</button>
+
+	<button mat-fab
+					color="accent"
+					(click)="toggle_autorefresh()">
+		<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
+	</button>
+</div>

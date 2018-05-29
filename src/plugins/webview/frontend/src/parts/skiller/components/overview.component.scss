@@ -1,0 +1,24 @@
+
+// Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+// License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+@import '../../../_variables';
+
+.mat-card-content {
+		height: calc(100% - 40px);
+}
+
+.card-div {
+		max-height: 100%;
+}
+
+.skill-graph {
+		max-height: 100%;
+		overflow: auto;
+		width: calc(100% + 30px);
+		margin: 0 -15px 16px -10px;
+}
+
+.exec-button {
+		margin-left: $baseline-grid;
+}

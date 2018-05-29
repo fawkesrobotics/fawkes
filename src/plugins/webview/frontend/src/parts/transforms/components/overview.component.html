@@ -1,0 +1,44 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<div fxLayout="row" class="ff-vfill">
+<mat-card class="ff-content-card" fxFlex="100">
+	<mat-card-title>
+		<div fxLayout="row">
+			<div>Transforms</div>
+			<div class="ff-right">
+				<button mat-icon-button
+								class="ff-card-title-button"
+								[disabled]="auto_refresh_subscription != null || loading"
+								(click)="refresh()">
+					<mat-icon *ngIf="!loading">refresh</mat-icon>
+					<mat-spinner *ngIf="loading" [diameter]="20"></mat-spinner>
+				</button>
+				<button mat-icon-button
+								class="ff-card-title-button"
+								(click)="toggle_autorefresh()">
+					<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
+				</button>
+			</div>
+		</div>
+	</mat-card-title>
+	<mat-divider></mat-divider>
+	<mat-card-content class="ff-card-content">
+		<div *ngIf="dotgraph"
+				 fxLayout="row"
+				 fxLayoutAlign="center center"
+				 class="card-div ff-vfill">
+			<div>
+				<dotgraph [dot]="dotgraph"
+									class="tf-graph"
+									[strip_size]="false">
+				</dotgraph>
+				</div>
+		</div>
+		<div *ngIf="!dotgraph">
+			<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
+		</div>
+	</mat-card-content>
+</mat-card>
+</div>

@@ -3,7 +3,7 @@
  *  request_dispatcher.cpp - Web request dispatcher
  *
  *  Created: Mon Oct 13 22:48:04 2008
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,6 @@
  */
 
 #include <webview/request_dispatcher.h>
-#include <webview/request_processor.h>
 #include <webview/url_manager.h>
 #include <webview/page_reply.h>
 #include <webview/error_reply.h>
@@ -59,8 +58,8 @@ namespace fawkes {
 /** @class WebRequestDispatcher "request_dispatcher.h"
  * Web request dispatcher.
  * Takes web request received via a webserver run by libmicrohttpd and dispatches
- * pages to registered WebRequestProcessor instances or gives a 404 error if no
- * processor was registered for the given base url.
+ * pages to registered URL handlers or gives a 404 error if no
+ * handler was registered for the given url.
  * @author Tim Niemueller
  */
 
@@ -70,27 +69,30 @@ namespace fawkes {
  * @param footergen page footer generator
  */
 WebRequestDispatcher::WebRequestDispatcher(WebUrlManager *url_manager,
-					   WebPageHeaderGenerator *headergen,
-					   WebPageFooterGenerator *footergen)
+                                           WebPageHeaderGenerator *headergen,
+                                           WebPageFooterGenerator *footergen)
 {
-  __realm                 = NULL;
-  __access_log            = NULL;
-  __url_manager           = url_manager;
-  __page_header_generator = headergen;
-  __page_footer_generator = footergen;
-  __active_requests       = 0;
-  __active_requests_mutex = new Mutex();
-  __last_request_completion_time = new Time();
+  realm_                 = NULL;
+  access_log_            = NULL;
+  url_manager_           = url_manager;
+  page_header_generator_ = headergen;
+  page_footer_generator_ = footergen;
+  active_requests_       = 0;
+  active_requests_mutex_ = new Mutex();
+  last_request_completion_time_ = new Time();
+
+  cors_allow_all_        = false;
+  cors_max_age_          = 0;
 }
 
 
 /** Destructor. */
 WebRequestDispatcher::~WebRequestDispatcher()
 {
-  if (__realm)  free(__realm);
-  delete __active_requests_mutex;
-  delete __last_request_completion_time;
-  delete __access_log;
+  if (realm_)  free(realm_);
+  delete active_requests_mutex_;
+  delete last_request_completion_time_;
+  delete access_log_;
 }
 
 
@@ -105,12 +107,12 @@ WebRequestDispatcher::setup_basic_auth(const char *realm,
 				       WebUserVerifier *verifier)
 {
 #if MHD_VERSION >= 0x00090400
-  if (__realm)  free(__realm);
-  __realm = NULL;
-  __user_verifier = NULL;
+  if (realm_)  free(realm_);
+  realm_ = NULL;
+  user_verifier_ = NULL;
   if (realm && verifier) {
-    __realm = strdup(realm);
-    __user_verifier = verifier;
+    realm_ = strdup(realm);
+    user_verifier_ = verifier;
   }
 #else
   throw Exception("libmicrohttpd >= 0.9.4 is required for basic authentication, "
@@ -125,9 +127,24 @@ WebRequestDispatcher::setup_basic_auth(const char *realm,
 void
 WebRequestDispatcher::setup_access_log(const char *filename)
 {
-  delete __access_log;
-  __access_log = NULL;
-  __access_log = new WebviewAccessLog(filename);
+  delete access_log_;
+  access_log_ = NULL;
+  access_log_ = new WebviewAccessLog(filename);
+}
+
+
+/** Setup cross-origin resource sharing
+ * @param allow_all allow access to all hosts
+ * @param origins allow access from these specific origins
+ * @param max_age maximum cache time to send to the client, zero to disable
+ */
+void
+WebRequestDispatcher::setup_cors(bool allow_all, std::vector<std::string>&& origins,
+                                 unsigned int max_age)
+{
+	cors_allow_all_ = allow_all;
+	cors_origins_   = std::move(origins);
+	cors_max_age_   = max_age;
 }
 
 /** Callback for new requests.
@@ -227,9 +244,10 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
   struct MHD_Response *response;
   WebPageReply *wpreply = dynamic_cast<WebPageReply *>(sreply);
   if (wpreply) {
-    wpreply->pack(__active_baseurl,
-		  __page_header_generator, __page_footer_generator);
+    wpreply->pack(active_baseurl_,
+		  page_header_generator_, page_footer_generator_);
   } else {
+    sreply->pack_caching();
     sreply->pack();
   }
   if (sreply->body_length() > 0) {
@@ -263,10 +281,11 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
  */
 int
 WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection * connection,
-					  WebRequest *request,
-					  DynamicWebReply *dreply)
+                                          WebRequest *request,
+                                          DynamicWebReply *dreply)
 {
   dreply->set_request(request);
+  dreply->pack_caching();
   request->set_reply_code(dreply->code());
 
   struct MHD_Response *response;
@@ -300,6 +319,8 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
 					 StaticWebReply *sreply)
 {
   sreply->set_request(request);
+  sreply->pack_caching();
+  sreply->pack();
 
   struct MHD_Response *response = prepare_static_response(sreply);
 
@@ -320,13 +341,15 @@ WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection * connection,
   StaticWebReply sreply(WebReply::HTTP_UNAUTHORIZED, UNAUTHORIZED_REPLY);
 #if MHD_VERSION >= 0x00090400
   sreply.set_request(request);
+  sreply.pack_caching();
+  sreply.pack();
   struct MHD_Response *response = prepare_static_response(&sreply);
 
-  int rv = MHD_queue_basic_auth_fail_response(connection, __realm, response);
+  int rv = MHD_queue_basic_auth_fail_response(connection, realm_, response);
   MHD_destroy_response(response);
 #else
   sreply.add_header(MHD_HTTP_HEADER_WWW_AUTHENTICATE,
-		    (std::string("Basic realm=") + __realm).c_str());
+		    (std::string("Basic realm=") + realm_).c_str());
   
   int rv = queue_static_reply(connection, request, &sreply);
 #endif
@@ -405,24 +428,24 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
     // do not respond in the first round...
     request->setup(url, method, version, connection);
 
-    __active_requests_mutex->lock();
-    __active_requests += 1;
-    __active_requests_mutex->unlock();
+    active_requests_mutex_->lock();
+    active_requests_ += 1;
+    active_requests_mutex_->unlock();
 
     if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
-      request->pp_ =
-	MHD_create_post_processor(connection, 1024, &post_iterator, request);
+	    request->pp_ =
+		    MHD_create_post_processor(connection, 1024, &post_iterator, request);
     }
 
     return MHD_YES;
   }
 
 #if MHD_VERSION >= 0x00090400
-  if (__realm) {
+  if (realm_) {
     char *user, *pass = NULL;
     user = MHD_basic_auth_get_username_password(connection, &pass);
     if ( (user == NULL) || (pass == NULL) ||
-	 ! __user_verifier->verify_user(user, pass))
+	 ! user_verifier_->verify_user(user, pass))
     {
       return queue_basic_auth_fail(connection, request);
     }
@@ -430,64 +453,113 @@ WebRequestDispatcher::process_request(struct MHD_Connection * connection,
   }
 #endif
 
-  std::string surl = url;
-  int ret;
-
-  MutexLocker lock(__url_manager->mutex());
-  WebRequestProcessor *proc = __url_manager->find_processor(surl);
-
-  if (proc) {
-    if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
-      if (MHD_post_process(request->pp_, upload_data, *upload_data_size) == MHD_NO) {
-	request->set_raw_post_data(upload_data, *upload_data_size);
-      }
-      if (0 != *upload_data_size) {
-	*upload_data_size = 0;
-	return MHD_YES;
-      }
-      MHD_destroy_post_processor(request->pp_);
-      request->pp_ = NULL;
-    }
-
-    WebReply *reply = proc->process_request(request);
-    if ( reply ) {
-      StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
-      DynamicWebReply *dreply = dynamic_cast<DynamicWebReply *>(reply);
-      if (sreply) {
-	ret = queue_static_reply(connection, request, sreply);
-	delete reply;
-      } else if (dreply) {
-	ret = queue_dynamic_reply(connection, request, dreply);
-      } else {
-	WebErrorPageReply ereply(WebReply::HTTP_INTERNAL_SERVER_ERROR);
-	ret = queue_static_reply(connection, request, &ereply);
-	delete reply;
-      }
-    } else {
-      WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-      ret = queue_static_reply(connection, request, &ereply);
-    }
-  } else {
-    if (surl == "/") {
-      WebPageReply preply("Fawkes", "<h1>Welcome to Fawkes.</h1><hr />");
-      ret = queue_static_reply(connection, request, &preply);
-    } else {
-      WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
-      ret = queue_static_reply(connection, request, &ereply);
-    }
+  if (0 == strcmp(method, MHD_HTTP_METHOD_OPTIONS)) {
+	  StaticWebReply *reply = new StaticWebReply(WebReply::HTTP_OK);
+	  reply->set_caching(true); // handled via Max-Age header anyway
+	  const std::map<std::string, std::string> &headers{request->headers()};
+	  const auto &request_method = headers.find("Access-Control-Request-Method");
+	  const auto &request_headers = headers.find("Access-Control-Request-Headers");
+	  if (cors_allow_all_) {
+		  reply->add_header("Access-Control-Allow-Origin", "*");
+		  if (cors_max_age_ > 0) {
+			  reply->add_header("Access-Control-Max-Age", std::to_string(cors_max_age_));
+		  }
+		  if (request_method != headers.end()) {
+			  reply->add_header("Access-Control-Allow-Methods", request_method->second);
+		  }
+		  if (request_headers != headers.end()) {
+			  reply->add_header("Access-Control-Allow-Headers", request_headers->second);
+		  }
+	  } else if (! cors_origins_.empty()) {
+		  const auto &origin = headers.find("Origin");
+		  if (origin != headers.end()) {
+			  if (std::find(cors_origins_.begin(), cors_origins_.end(), origin->second) != cors_origins_.end()) {
+				  reply->add_header("Access-Control-Allow-Origin", origin->second);
+				  if (cors_max_age_ > 0) {
+					  reply->add_header("Access-Control-Max-Age", std::to_string(cors_max_age_));
+				  }
+				  if (request_method != headers.end()) {
+					  reply->add_header("Access-Control-Allow-Methods", request_method->second);
+				  }
+				  if (request_headers != headers.end()) {
+					  reply->add_header("Access-Control-Allow-Headers", request_headers->second);
+				  }
+			  } else {
+				  reply->set_code(WebReply::HTTP_FORBIDDEN);
+			  }
+		  } else {
+			  reply->set_code(WebReply::HTTP_FORBIDDEN);
+		  }
+	  }
+	  return queue_static_reply(connection, request, reply);
+	  delete reply;
   }
-  return ret;
+
+  if (0 == strcmp(method, MHD_HTTP_METHOD_POST)) {
+	  if (MHD_post_process(request->pp_, upload_data, *upload_data_size) == MHD_NO) {
+		  request->addto_body(upload_data, *upload_data_size);
+	  }
+	  if (0 != *upload_data_size) {
+		  *upload_data_size = 0;
+		  return MHD_YES;
+	  }
+	  MHD_destroy_post_processor(request->pp_);
+	  request->pp_ = NULL;
+  } else if (0 != *upload_data_size) {
+	  request->addto_body(upload_data, *upload_data_size);
+	  *upload_data_size = 0;
+	  return MHD_YES;
+  } else {
+	  request->finish_body();
+  }
+
+  try {
+	  WebReply *reply = url_manager_->process_request(request);
+	  int ret;
+
+	  if (reply) {
+		  if (cors_allow_all_) {
+			  reply->add_header("Access-Control-Allow-Origin", "*");
+		  }
+
+	    StaticWebReply  *sreply = dynamic_cast<StaticWebReply *>(reply);
+	    DynamicWebReply *dreply = dynamic_cast<DynamicWebReply *>(reply);
+      if (sreply) {
+	      ret = queue_static_reply(connection, request, sreply);
+	      delete reply;
+      } else if (dreply) {
+	      ret = queue_dynamic_reply(connection, request, dreply);
+      } else {
+	      WebErrorPageReply ereply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+	                               "Unknown reply type");
+	      ret = queue_static_reply(connection, request, &ereply);
+	      delete reply;
+      }
+	  } else {
+		  WebErrorPageReply ereply(WebReply::HTTP_NOT_FOUND);
+	    ret = queue_static_reply(connection, request, &ereply);
+	  }
+	  return ret;
+  } catch (Exception &e) {
+	  WebErrorPageReply ereply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+	                           "%s", e.what_no_backtrace());
+	  return queue_static_reply(connection, request, &ereply);
+  } catch (std::exception &e) {
+	  WebErrorPageReply ereply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+	                           "%s", e.what());
+	  return queue_static_reply(connection, request, &ereply);
+  }
 }
 
 
 void
 WebRequestDispatcher::request_completed(WebRequest *request, MHD_RequestTerminationCode term_code)
 {
-  __active_requests_mutex->lock();
-  if (__active_requests >  0)  __active_requests -= 1;
-  __last_request_completion_time->stamp();
-  __active_requests_mutex->unlock();
-  if (__access_log)  __access_log->log(request);
+  active_requests_mutex_->lock();
+  if (active_requests_ >  0)  active_requests_ -= 1;
+  last_request_completion_time_->stamp();
+  active_requests_mutex_->unlock();
+  if (access_log_)  access_log_->log(request);
 }
 
 /** Get number of active requests.
@@ -496,8 +568,8 @@ WebRequestDispatcher::request_completed(WebRequest *request, MHD_RequestTerminat
 unsigned int
 WebRequestDispatcher::active_requests() const
 {
-  MutexLocker lock(__active_requests_mutex);
-  return __active_requests;
+  MutexLocker lock(active_requests_mutex_);
+  return active_requests_;
 }
 
 /** Get time when last request was completed.
@@ -506,8 +578,8 @@ WebRequestDispatcher::active_requests() const
 Time
 WebRequestDispatcher::last_request_completion_time() const
 {
-  MutexLocker lock(__active_requests_mutex);
-  return *__last_request_completion_time;
+  MutexLocker lock(active_requests_mutex_);
+  return *last_request_completion_time_;
 }
 
 } // end namespace fawkes

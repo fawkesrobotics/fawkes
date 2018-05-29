@@ -43,11 +43,35 @@ namespace fawkes {
 
 /** Constructor.
  * @param filename path and name of the file to transmit
+ * @param content_type content type of file, will try to guess by
+ * magic if not given
+ */
+DynamicFileWebReply::DynamicFileWebReply(const std::string& filename,
+                                         const std::string& content_type)
+	: DynamicWebReply(WebReply::HTTP_OK), close_when_done_(true)
+{
+	if (access(filename.c_str(), R_OK) != 0 ||
+	    ((file_ = fopen(filename.c_str(), "r")) == NULL))
+	{
+    throw fawkes::CouldNotOpenFileException(filename.c_str(), errno);
+  }
+
+  determine_file_size();
+
+  if (content_type.empty()) {
+	  add_header("Content-type", fawkes::mimetype_file(filename.c_str()));
+  } else {
+	  add_header("Content-type", content_type);
+  }
+}
+
+/** Constructor.
+ * @param filename path and name of the file to transmit
  */
 DynamicFileWebReply::DynamicFileWebReply(const char *filename)
-  : DynamicWebReply(WebReply::HTTP_OK), __close_when_done(true)
+  : DynamicWebReply(WebReply::HTTP_OK), close_when_done_(true)
 {
-  if (access(filename, R_OK) != 0 || ((__file = fopen(filename, "r")) == NULL)) {
+  if (access(filename, R_OK) != 0 || ((file_ = fopen(filename, "r")) == NULL)) {
     throw fawkes::CouldNotOpenFileException(filename, errno);
   }
 
@@ -62,21 +86,21 @@ DynamicFileWebReply::DynamicFileWebReply(const char *filename)
  */
 DynamicFileWebReply::DynamicFileWebReply(FILE *file, bool close_when_done)
   : DynamicWebReply(WebReply::HTTP_OK),
-    __file(file), __close_when_done(close_when_done)
+    file_(file), close_when_done_(close_when_done)
 {
-  fseek(__file, 0, SEEK_SET);
+  fseek(file_, 0, SEEK_SET);
   determine_file_size();
   try {    
-    add_header("Content-type", fawkes::mimetype_file(dup(fileno(__file))));
+    add_header("Content-type", fawkes::mimetype_file(dup(fileno(file_))));
   } catch (Exception &e) {} // ignored
-  fseek(__file, 0, SEEK_SET);
+  fseek(file_, 0, SEEK_SET);
 }
 
 /** Destructor. */
 DynamicFileWebReply::~DynamicFileWebReply()
 {
-  if (__close_when_done)  fclose(__file);
-  __file = NULL;
+  if (close_when_done_)  fclose(file_);
+  file_ = NULL;
 }
 
 
@@ -84,27 +108,27 @@ void
 DynamicFileWebReply::determine_file_size()
 {
   struct stat sbuf;
-  fstat(fileno(__file), &sbuf);
+  fstat(fileno(file_), &sbuf);
 
   if ( S_ISDIR(sbuf.st_mode) ) {
     throw fawkes::Exception("Cannot send directory\n");
   }
-  __size = sbuf.st_size;
+  size_ = sbuf.st_size;
 }
 
 size_t
 DynamicFileWebReply::size()
 {
-  return __size;
+  return size_;
 }
 
 size_t
 DynamicFileWebReply::next_chunk(size_t pos, char *buffer, size_t buf_max_size)
 {
-  if ( (fseek(__file, pos, SEEK_SET) == -1) || feof(__file) ) {
+  if ( (fseek(file_, pos, SEEK_SET) == -1) || feof(file_) ) {
     return (size_t)-1;
   }
-  return fread(buffer, 1, buf_max_size, __file);
+  return fread(buffer, 1, buf_max_size, file_);
 }
 
 } // end namespace fawkes

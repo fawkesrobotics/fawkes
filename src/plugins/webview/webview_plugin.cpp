@@ -3,8 +3,7 @@
  *  webview_plugin.h - Fawkes Webview Plugin
  *
  *  Created: Mon Oct 13 17:46:57 2008 (I5 Developer's Day)
- *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,6 +24,19 @@
 
 #include "webview_thread.h"
 
+#ifdef HAVE_REST_APIS
+#  include "blackboard-rest-api/blackboard-rest-api.h"
+#  include "backendinfo-rest-api/backendinfo-rest-api.h"
+#  include "plugin-rest-api/plugin-rest-api.h"
+#  include "config-rest-api/config-rest-api.h"
+#  ifdef HAVE_JPEG
+#    include "image-rest-api/image-rest-api.h"
+#  endif
+#  ifdef HAVE_TF
+#    include "tf-rest-api/tf-rest-api.h"
+#  endif
+#endif
+
 using namespace fawkes;
 
 /** @class WebviewPlugin <plugins/webview/webview_plugin.h>
@@ -39,7 +51,22 @@ using namespace fawkes;
 WebviewPlugin::WebviewPlugin(Configuration *config)
   : Plugin(config)
 {
-  thread_list.push_back(new WebviewThread());
+	bool enable_thread_pool =
+		config->get_bool("/webview/thread-pool/enable");
+
+  thread_list.push_back(new WebviewThread(enable_thread_pool));
+#ifdef HAVE_REST_APIS
+  thread_list.push_back(new BlackboardRestApi());
+  thread_list.push_back(new BackendInfoRestApi());
+  thread_list.push_back(new PluginRestApi());
+  thread_list.push_back(new ConfigurationRestApi());
+#  ifdef HAVE_JPEG
+  thread_list.push_back(new ImageRestApi());
+#  endif
+#  ifdef HAVE_TF
+  thread_list.push_back(new TransformsRestApi());
+#  endif
+#endif
 }
 
 

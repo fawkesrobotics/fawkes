@@ -1,0 +1,179 @@
+openapi: 3.0.0
+info:
+  title: Plugin
+  version: v1beta1
+  description: |
+    Fawkes Plugin REST API.
+    List, load, and unload plugins.
+  contact:
+    name:  Tim Niemueller
+    email: niemueller@kbsg.rwth-aachen.de
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: public
+    description: Plugin public API.
+
+paths:
+  /plugins:
+    get:
+      tags:
+      - public
+      summary: Get list of plugins.
+      operationId: list_plugins
+      description: |
+        Get a list of plugins.
+      parameters:
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get list of interfaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plugin'
+        '400':
+          description: bad input parameter
+
+  /plugins/{name}:
+    get:
+      tags:
+      - public
+      summary: Get information about specific plugin.
+      operationId: get_plugin
+      description: |
+        Get information about a specific plugin.
+      parameters:
+        - name: name
+          in: path
+          description: |
+            Name of plugin to receive.
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: get plugin information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plugin'
+        '400':
+          description: bad input parameter
+
+    put:
+      tags:
+      - public
+      summary: Load a plugin.
+      operationId: set_plugin_state
+      description: |
+        Set the desired plugin state.
+      parameters:
+        - name: name
+          in: path
+          description: |
+            Name of plugin to set state of.
+          required: true
+          schema:
+            type: string
+        - name: operation
+          in: body
+          description: The requested operation.
+          required: true
+          schema:
+            $ref: '#/components/schemas/PluginOpRequest'
+        - name: pretty
+          in: query
+          description: Request pretty printed reply.
+          allowEmptyValue: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Outcome of the requested operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginOpResponse'
+        '400':
+          description: bad input parameter
+
+
+components:
+  schemas:
+    Plugin:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+        - description
+        - is_meta
+        - is_loaded
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        is_meta:
+          type: boolean
+        meta_children:
+          type: array
+          items:
+            type: string
+        is_loaded:
+          type: boolean
+
+    PluginOpRequest:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - desired_state
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        desired_state:
+          type: string
+          enum: ["LOADED", "AVAILABLE", "UNLOADED"]
+
+    PluginOpResponse:
+      type: object
+      required:
+        - kind
+        - apiVersion
+        - name
+        - state
+      properties:
+        kind:
+          type: string
+        apiVersion:
+          type: string
+        name:
+          type: string
+        state:
+          type: string
+          enum: ["LOADED", "AVAILABLE", "UNLOADED", "ERROR"]
+        message:
+          type: string

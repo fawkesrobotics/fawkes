@@ -1,0 +1,125 @@
+<!--
+ Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
+ License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+-->
+<div fxLayout="row" class="ff-vfill-content">
+<mat-card class="ff-content-card" fxFlex="70%">
+	<mat-card-title>
+		<div fxLayout="row">
+			<div>
+				<button mat-button class="mat-card-title" [matMenuTriggerFor]="graph_menu">
+					<span>Graph of </span>
+					<span class="ff-muted">{{ selected_skill	}}</span>
+					<span> skill</span>
+					<mat-icon>arrow_drop_down</mat-icon>
+				</button>
+				<mat-menu #graph_menu="matMenu" [overlapTrigger]="false">
+					<button mat-menu-item
+									(click)="select_skill('active')">
+						<span>active</span>
+					</button>
+					<button mat-menu-item
+									*ngFor="let s of skills"
+									(click)="select_skill(s.name)">
+						<span>{{ s.name }}</span>
+					</button>
+				</mat-menu>
+			</div>
+			<div class="ff-right">
+				<button mat-icon-button
+								class="ff-card-title-button"
+								[disabled]="auto_refresh_subscription != null || loading"
+								(click)="refresh()">
+					<mat-icon *ngIf="!loading">refresh</mat-icon>
+					<mat-spinner *ngIf="loading" [diameter]="20"></mat-spinner>
+				</button>
+				<button mat-icon-button
+								class="ff-card-title-button"
+								(click)="toggle_autorefresh()">
+					<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
+				</button>
+			</div>
+		</div>
+	</mat-card-title>
+	<mat-divider></mat-divider>
+	<mat-card-content class="ff-card-content">
+		<div fxLayoutAlign="center" *ngIf="skill && skill.graph != ''" class="card-div">
+			<dotgraph [dot]="skill.graph" ngClass="skill-graph"></dotgraph>
+		</div>
+		<div *ngIf="!skill || skill.graph == ''">
+			<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
+		</div>
+	</mat-card-content>
+</mat-card>
+
+<div fxFlex="30%" fxLayout="column">
+<mat-card class="ff-content-card">
+	<mat-card-title>
+		<div fxLayout="row">
+			<div>Status</div>
+		</div>
+	</mat-card-title>
+	<mat-divider></mat-divider>
+	<mat-card-content class="ff-card-content">
+		<div fxLayout="column" fxLayoutWrap fxLayoutAlign="space-between">
+
+			<ff-property>
+				<div key>Skill String</div>
+				<div value *ngIf="skill">{{ skill['skill-string'] }}</div>
+				<div value *ngIf="!skill">&mdash;</div>
+			</ff-property>
+
+			<ff-property>
+				<div key>Status</div>
+				<div value *ngIf="skill">{{ skill.status }}</div>
+				<div value *ngIf="!skill">&mdash;</div>
+			</ff-property>
+
+			<ff-property>
+				<div key>Error</div>
+				<div value *ngIf="skill">{{ skill.error }}</div>
+				<div value *ngIf="!skill">&mdash;</div>
+			</ff-property>
+		</div>
+	</mat-card-content>
+</mat-card>
+
+<mat-card class="ff-content-card">
+	<mat-card-title>
+		<div fxLayout="row">
+			<div>Execute</div>
+		</div>
+	</mat-card-title>
+	<mat-divider></mat-divider>
+	<mat-card-content class="ff-card-content">
+		<form #f="ngForm" (ngSubmit)="exec_skill(skillstring.value)" fxLayout="row">
+			<mat-form-field
+				[hideRequiredMarker]="true" fxFlex="grow"
+				[matTooltip]="tooltip_skillstring()">
+				<input #skillstring matInput placeholder="Skill String"
+							 [disabled]="lockout.enabled"
+							 name="skill_string" required ngModel>
+			</mat-form-field>
+			<div fxLayout="column" fxLayoutAlign="center"
+					  [matTooltip]="tooltip_exec()">
+				<button mat-button type="submit"
+								[disabled]="lockout.enabled || !f.valid ||
+														(skill && selected_skill == 'active' &&
+														skill.exclusive_controller != 0)"
+								class="exec-button">
+					Execute
+				</button>
+			</div>
+    </form>
+
+		<div [matTooltip]="tooltip_stop()">
+			<button mat-raised-button color="warn" class="ff-hfill"
+							(click)="stop_skill()"
+							[disabled]="disabled_stop()">
+				<mat-icon>cancel</mat-icon> STOP
+			</button>
+		</div>
+	</mat-card-content>
+</mat-card>
+</div>
+</div>

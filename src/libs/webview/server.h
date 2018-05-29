@@ -3,7 +3,7 @@
  *  server.h - Web server encapsulation around libmicrohttpd
  *
  *  Created: Sun Aug 30 17:38:37 2009
- *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,8 @@
 
 #include <sys/types.h>
 #include <memory>
+#include <vector>
+#include <string>
 
 struct MHD_Daemon;
 
@@ -43,38 +45,47 @@ class WebRequestManager;
 class WebServer {
  public:
   WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
-            fawkes::Logger *logger = 0,
-            bool enable_ipv4 = true, bool enable_ipv6 = true);
-
-  WebServer(unsigned short int port, WebRequestDispatcher *dispatcher,
-	    const char *key_pem_filepath, const char *cert_pem_filepath,
-	    const char *cipher_suite = WEBVIEW_DEFAULT_CIPHERS,
-            fawkes::Logger *logger = 0,
-            bool enable_ipv4 = true, bool enable_ipv6 = true);
+            fawkes::Logger *logger = 0);
   ~WebServer();
 
-  void process();
+  WebServer &  setup_tls(const char *key_pem_filepath, const char *cert_pem_filepath,
+                         const char *cipher_suite = WEBVIEW_DEFAULT_CIPHERS);
+  WebServer &  setup_ipv(bool enable_ipv4, bool enable_ipv6);
+  WebServer &  setup_thread_pool(unsigned int num_threads);
+  
+  WebServer &  setup_cors(bool allow_all, std::vector<std::string>&& origins, unsigned int max_age);
+  WebServer &  setup_basic_auth(const char *realm, WebUserVerifier *verifier);
+  WebServer &  setup_request_manager(WebRequestManager *request_manager);
+  WebServer &  setup_access_log(const char *filename);
 
-  void setup_basic_auth(const char *realm, WebUserVerifier *verifier);
-  void setup_request_manager(WebRequestManager *request_manager);
-  void setup_access_log(const char *filename);
+  void start();
+  void process();
 
   unsigned int active_requests() const;
   Time last_request_completion_time() const;
 
  private:
-  static char * read_file(const char *filename);
+  std::string read_file(const char *filename);
 
  private:
-  struct MHD_Daemon    *__daemon;
-  WebRequestDispatcher *__dispatcher;
-  WebRequestManager    *__request_manager;
-  fawkes::Logger       *__logger;
+  struct MHD_Daemon    *daemon_;
+  WebRequestDispatcher *dispatcher_;
+  WebRequestManager    *request_manager_;
+  fawkes::Logger       *logger_;
 
-  unsigned short int    __port;
+  unsigned short int    port_;
 
-  char                 *__ssl_key_mem;
-  char                 *__ssl_cert_mem;
+  bool                  tls_enabled_;
+  std::string           tls_key_mem_;
+  std::string           tls_cert_mem_;
+  std::string           tls_cipher_suite_;
+
+  bool                  enable_ipv4_;
+  bool                  enable_ipv6_;
+  unsigned int          num_threads_;
+  bool                  cors_allow_all_;
+  std::vector<std::string> cors_origins_;
+  unsigned int          cors_max_age_;
 };
 
 } // end namespace fawkes
