@@ -29,9 +29,6 @@
 #include <plugins/clips/aspect/clips_env_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class CLIPSManagerAspectIniFin;
 

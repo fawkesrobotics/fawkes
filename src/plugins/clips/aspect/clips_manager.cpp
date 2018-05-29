@@ -25,9 +25,6 @@
 #include <clipsmm.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class CLIPSManagerAspect <plugins/clips/aspect/clips_manager.h>
  * Thread aspect access the CLIPS environment manager.
