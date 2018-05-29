@@ -26,9 +26,6 @@
 #include <ros/node_handle.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ROSAspectIniFin <plugins/ros/aspect/ros_inifin.h>
  * ROSAspect initializer/finalizer.
