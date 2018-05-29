@@ -23,6 +23,7 @@
 
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
+#include <interfaces/RobotMemoryInterface.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
 #include <utils/system/hostinfo.h>
