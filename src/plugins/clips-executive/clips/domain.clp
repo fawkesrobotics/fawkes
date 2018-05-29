@@ -446,7 +446,7 @@
   (bind ?values $?effect-param-names)
   ; Replace constants with their values
   (foreach ?p ?values
-    (if (eq ?p c) then
+    (if (neq (nth$ ?p-index ?effect-param-constants) nil) then
       (bind ?values
         (replace$ ?values ?p-index ?p-index
           (nth$ ?p-index $?effect-param-constants))
