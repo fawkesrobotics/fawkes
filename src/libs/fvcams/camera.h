@@ -28,9 +28,6 @@
 #include <utils/time/time.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Camera
 {

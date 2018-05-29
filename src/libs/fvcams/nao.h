@@ -37,9 +37,6 @@
 #define I2C_SLAVE 0x0703
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class CameraArgumentParser;
 

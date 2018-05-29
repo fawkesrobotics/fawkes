@@ -33,9 +33,6 @@
 #include <utils/system/console_colors.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ViscaControlException <fvcams/control/visca.h>
  * Visca exception.

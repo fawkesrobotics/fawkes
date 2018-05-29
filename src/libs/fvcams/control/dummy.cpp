@@ -26,9 +26,6 @@
 #include <fvcams/control/dummy.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class DummyCameraControl <fvcams/control/dummy.h>
  * Dummy camera control.

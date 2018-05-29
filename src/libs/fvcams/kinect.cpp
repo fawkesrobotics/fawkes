@@ -30,9 +30,6 @@
 #include <cstdio>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Color image */
 const unsigned int KinectCamera::RGB_IMAGE = 0;

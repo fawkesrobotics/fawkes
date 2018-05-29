@@ -51,9 +51,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Bumblebee2Camera <fvcams/bumblebee2.h>
  * Bumblebee2 camera.

@@ -35,9 +35,6 @@ using namespace std;
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Maximum pan. */
 const int   SonyEviD100PControl::MAX_PAN       =  1440;

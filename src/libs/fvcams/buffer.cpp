@@ -28,9 +28,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BufferCamera <fvcams/buffer.h>
  * Simple buffer with a Camera interface.

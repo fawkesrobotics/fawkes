@@ -30,9 +30,6 @@ class LvCameraNode;
 class LvGrabberNode;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class LeutronCamera : public Camera
 {

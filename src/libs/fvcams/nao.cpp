@@ -93,9 +93,6 @@ i2c_smbus_write_block_data(int file, __u8 command,
 #endif
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NaoCamera <fvcams/nao.h>
  * Video4Linux 2 camera with Nao-specific extensions.
