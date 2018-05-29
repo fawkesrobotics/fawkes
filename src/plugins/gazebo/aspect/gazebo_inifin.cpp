@@ -26,9 +26,6 @@
 #include <stdio.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class GazeboAspectIniFin <plugins/gazebo/aspect/gazebo_inifin.h>
  * GazeboAspect initializer/finalizer.
