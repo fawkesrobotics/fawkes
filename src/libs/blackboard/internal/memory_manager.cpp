@@ -51,9 +51,6 @@
 #define chunk_addr(a) (__shmem ? (chunk_list_t *)__shmem->addr(a) : a)
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlackBoardMemoryManager <blackboard/internal/memory_manager.h>
  * BlackBoard memory manager.

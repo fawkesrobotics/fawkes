@@ -26,9 +26,6 @@
 #include <cstring>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlackBoardWithOwnership <blackboard/ownership.h>
  * BlackBoard that traces interface ownership.

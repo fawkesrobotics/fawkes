@@ -32,9 +32,6 @@
 #include <cstring>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlackBoardNetHandlerInterfaceObserver <blackboard/net/interface_observer.h>
  * Interface observer for blackboard network handler.

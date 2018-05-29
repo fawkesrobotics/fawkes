@@ -29,9 +29,6 @@
 #include <cstdlib>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlackBoard <blackboard/blackboard.h>
  * The BlackBoard abstract class.

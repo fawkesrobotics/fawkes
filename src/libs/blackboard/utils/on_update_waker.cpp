@@ -28,9 +28,6 @@
 #include <core/threading/thread.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlackBoardOnUpdateWaker <blackboard/utils/on_update_waker.h>
  * Wake threads when a blackboard interface is updated.

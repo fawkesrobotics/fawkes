@@ -25,9 +25,6 @@
 #define __BLACKBOARD_INSTANCE_FACTORY_H_
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Interface;
 class Module;
