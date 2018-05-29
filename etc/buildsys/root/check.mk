@@ -25,6 +25,7 @@ __buildsys_root_check_mk_ := 1
 
 .PHONY: license-check
 license-check:
+	$(SILENT) echo -e "$(INDENT_PRINT)[CHK] Checking license headers"
 	$(SILENTSYMB)if which perl >/dev/null; then \
 		perl $(FAWKES_BASEDIR)/etc/licscripts/find_invlic.pl -p src -p etc $(if $(SUBMODULE_EXTERN),-p fawkes/src) $(wildcard $(FAWKES_BASEDIR)/doc/headers/lichead*.*); \
 		if [ $$? = 0 ]; then \
