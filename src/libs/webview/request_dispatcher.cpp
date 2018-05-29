@@ -319,8 +319,6 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection * connection,
 					 StaticWebReply *sreply)
 {
   sreply->set_request(request);
-  sreply->pack_caching();
-  sreply->pack();
 
   struct MHD_Response *response = prepare_static_response(sreply);
 
