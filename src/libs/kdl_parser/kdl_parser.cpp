@@ -65,10 +65,6 @@ namespace fawkes {
 
 namespace kdl_parser {
 
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 
 // construct vector
