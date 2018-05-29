@@ -30,9 +30,6 @@
 #include <core/threading/mutex.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** LockPtr<> is a reference-counting shared lockable smartpointer.
  *

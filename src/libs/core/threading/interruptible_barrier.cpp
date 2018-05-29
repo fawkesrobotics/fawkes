@@ -30,9 +30,6 @@
 #include <core/threading/wait_condition.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /// @cond INTERNALS

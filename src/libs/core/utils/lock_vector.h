@@ -29,9 +29,6 @@
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 template <typename Type>
 class LockVector : public std::vector<Type>

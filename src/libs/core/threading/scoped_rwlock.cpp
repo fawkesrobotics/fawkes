@@ -25,9 +25,6 @@
 #include <core/threading/read_write_lock.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ScopedRWLock <core/threading/scoped_rwlock.h>
  * Scoped read/write lock.
