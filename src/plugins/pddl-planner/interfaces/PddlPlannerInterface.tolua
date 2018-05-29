@@ -36,6 +36,9 @@ class PddlPlannerInterface : public Interface
   bool is_final();
   void set_final(const bool new_final);
   int maxlenof_final() const;
+  bool is_success();
+  void set_success(const bool new_success);
+  int maxlenof_success() const;
   char * active_planner();
   void set_active_planner(const char * new_active_planner);
   int maxlenof_active_planner() const;

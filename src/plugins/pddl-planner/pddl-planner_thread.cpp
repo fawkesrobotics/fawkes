@@ -78,6 +78,7 @@ PddlPlannerThread::init()
   plan_if_->set_active_planner(planner_string.c_str());
   plan_if_->set_msg_id(0);
   plan_if_->set_final(false);
+  plan_if_->set_success(false);
   plan_if_->write();
 
   //setup interface listener
@@ -104,9 +105,11 @@ PddlPlannerThread::loop()
     BSONObj plan = BSONFromActionList();
     robot_memory->update(fromjson("{plan:{$exists:true}}"), plan, cfg_collection_, true);
     print_action_list();
+    plan_if_->set_success(true);
   } else {
     logger->log_error(name(),"Updating plan failed, action list empty!");
     robot_memory->update(fromjson("{plan:{$exists:true}}"), fromjson("{plan:0}"), cfg_collection_, true);
+    plan_if_->set_success(false);
   }
 
   plan_if_->set_final(true);
@@ -131,6 +134,8 @@ PddlPlannerThread::ff_planner()
   //Parse Result and write it into the robot memory
   logger->log_info(name(), "Parsing result");
 
+  action_list_.clear();
+
   size_t cur_pos = 0;
   if(result.find("found legal plan as follows", cur_pos) == std::string::npos) {
     logger->log_error(name(), "Planning Failed: %s", result.c_str());
@@ -141,7 +146,6 @@ PddlPlannerThread::ff_planner()
   result.erase(result.find("time spent:", cur_pos));
 
   cur_pos = result.find("step", cur_pos) + 4;
-  action_list_.clear();
   while(result.find(": ", cur_pos) != std::string::npos) {
     cur_pos = result.find(": ", cur_pos) + 2;
     size_t line_end =  result.find("\n", cur_pos);
@@ -343,6 +347,7 @@ PddlPlannerThread::bb_interface_message_received(Interface *interface, fawkes::M
   if (message->is_of_type<PddlPlannerInterface::PlanMessage>()) {
     PddlPlannerInterface::PlanMessage* msg = (PddlPlannerInterface::PlanMessage*) message;
     plan_if_->set_msg_id(msg->id());
+    plan_if_->set_success(false);
     plan_if_->set_final(false);
     plan_if_->write();
     wakeup(); //activates loop where the generation is done

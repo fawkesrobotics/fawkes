@@ -77,9 +77,29 @@
 (defrule pddl-check-if-planner-finished
   "Check whether the planner finished planning."
   ?p <- (pddl-plan (status RUNNING) (plan-id ?plan-id))
-  (PddlPlannerInterface (id "pddl-planner") (msg_id ?plan-id) (final TRUE))
+  (PddlPlannerInterface (id "pddl-planner") (msg_id ?plan-id) (final TRUE)
+    (success TRUE))
   =>
   (modify ?p (status PLANNED))
+)
+
+(defrule pddl-check-if-planner-failed
+  "Check whether the planner finished but has not found a plan."
+  ?g <- (goal (id ?goal-id))
+  ?p <- (pddl-plan (status RUNNING) (goal-id ?goal-id) (plan-id ?plan-id))
+  (PddlPlannerInterface (id "pddl-planner") (msg_id ?plan-id) (final TRUE)
+    (success FALSE))
+  =>
+  (printout error "Planning failed for goal " ?goal-id crlf)
+  (modify ?g (mode FINISHED) (outcome FAILED) )
+  (retract ?p)
+)
+
+(deffunction pddl-get-max-action-id ()
+  "Get the max ID of all current action"
+  (bind ?i 0)
+  (do-for-all-facts ((?a plan-action)) (> ?a:id ?i) (bind ?i ?a:id))
+  (return ?i)
 )
 
 (defrule pddl-expand-goal
