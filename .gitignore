@@ -47,3 +47,7 @@
 # Vim files
 .*.swp
 .*.swo
+
+# Log files
+*.log
+
