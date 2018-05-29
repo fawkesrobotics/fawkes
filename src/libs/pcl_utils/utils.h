@@ -30,10 +30,6 @@
 
 namespace fawkes {
   namespace pcl_utils {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** Union to pack fawkes::Time into the pcl::PointCloud timestamp. */
 typedef union {

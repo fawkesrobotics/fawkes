@@ -32,10 +32,6 @@
 
 namespace fawkes {
   namespace pcl_utils {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** Apply a rigid transform.
  * @param cloud_in the input point cloud

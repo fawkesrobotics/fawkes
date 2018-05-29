@@ -29,10 +29,6 @@
 
 namespace fawkes {
   namespace pcl_utils {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 
 /** Check if point is inside or outside a given polygon.

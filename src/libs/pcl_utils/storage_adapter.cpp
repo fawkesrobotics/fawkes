@@ -24,10 +24,6 @@
 
 namespace fawkes {
   namespace pcl_utils {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class StorageAdapter <pcl_utils/storage_adapter.h>
  * Adapter base class.

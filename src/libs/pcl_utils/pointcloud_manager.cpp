@@ -23,9 +23,6 @@
 #include <pcl_utils/pointcloud_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class PointCloudManager <pcl_utils/pointcloud_manager.h>

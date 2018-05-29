@@ -29,10 +29,6 @@
 
 namespace fawkes {
   namespace pcl_utils {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 template <typename PointT>
 class PointCloudStorageAdapter;
