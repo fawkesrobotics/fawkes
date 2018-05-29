@@ -337,6 +337,8 @@
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific action-id."
   (not (domain-wm-update))
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   (plan-action (action-name ?op) (goal-id ?g) (plan-id ?p) (id ?action-id)
     (status FORMULATED|PENDING|WAITING))
   ?precond <- (domain-precondition
@@ -355,6 +357,8 @@
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific effect-id."
   (not (domain-wm-update))
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   (plan-action (action-name ?op) (id ?action-id) (goal-id ?g) (plan-id ?p)
     (status EXECUTION-SUCCEEDED))
   (domain-effect (name ?effect-name) (part-of ?op))
@@ -373,11 +377,13 @@
   "Ground a non-atomic precondition that is part of another precondition. Copy
    the action ID from the parent precondition."
   (not (domain-wm-update))
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
                 (name ?precond-name)
                 (part-of ?parent)
                 (grounded FALSE))
-  (domain-precondition (name ?parent) (goal-id ?g&~nil) (plan-id ?p&~nil)
+  (domain-precondition (name ?parent) (goal-id ?g) (plan-id ?p)
     (grounded-with ?action-id&~0))
   (not (domain-precondition
         (name ?precond-name)
@@ -393,6 +399,8 @@
 (defrule domain-ground-atomic-precondition
   "Ground an atomic precondition of an operator."
   (not (domain-wm-update))
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   (plan-action
     (action-name ?op)
     (goal-id ?g)
@@ -402,7 +410,7 @@
     (param-values $?action-values& :
       (= (length$ ?action-values) (length$ ?action-param-names)))
   )
-  (domain-precondition (name ?parent) (goal-id ?g&~nil) (plan-id ?p&~nil)
+  (domain-precondition (name ?parent) (goal-id ?g) (plan-id ?p)
     (grounded-with ?action-id&~0) (grounded TRUE))
   ?precond <- (domain-atomic-precondition
                 (part-of ?parent)
@@ -454,6 +462,8 @@
 )
 
 (defrule domain-check-if-atomic-precondition-is-satisfied
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-atomic-precondition
                 (goal-id ?g) (plan-id ?p)
                 (is-satisfied FALSE)
@@ -484,6 +494,8 @@
   "A negative precondition is satisfied iff its (only) child is not satisfied.
    Note that we need a second rule that retracts the fact if the child is
    asserted."
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
                 (type negation)
                 (grounded TRUE)
@@ -510,6 +522,8 @@
 (defrule domain-retract-negative-precondition-if-child-is-satisfied
   "If a negative precondition's child is satisfied, the precondition is not
    satisfied anymore."
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
                 (type negation)
                 (name ?pn)
@@ -535,6 +549,8 @@
 
 (defrule domain-check-if-conjunctive-precondition-is-satisfied
   "All the precondition's children must be satisfied."
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
                 (name ?pn)
                 (type conjunction)
@@ -558,6 +574,8 @@
 (defrule domain-retract-conjunctive-precondition-if-child-is-not-satisfied
   "Make sure that a conjunctive precondition is not satisfied if any of its
    children is satisfied."
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
                 (name ?pn)
                 (type conjunction)
@@ -655,6 +673,8 @@
 ; TODO: ?action-name should be ?op
 (defrule domain-effects-check-for-sensed
   "Apply effects of an action after it succeeded."
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   ?pa <- (plan-action	(id ?id) (goal-id ?g) (plan-id ?p) (action-name ?op)
                       (status EXECUTION-SUCCEEDED)
 											(param-names $?action-param-names)
@@ -694,6 +714,8 @@
 ; Atomically assert all effects of an action after it has been executed.
 (defrule domain-effects-apply
   "Apply effects of an action after it succeeded."
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   ?pa <- (plan-action	(id ?id) (goal-id ?g) (plan-id ?p) (action-name ?op)
                       (status SENSED-EFFECTS-HOLD)
 											(param-names $?action-param-names)
@@ -801,6 +823,8 @@
 
 (defrule domain-check-if-action-is-executable
   "If the precondition of an action is satisfied, the action is executable."
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
   ?action <- (plan-action (id ?action-id) (goal-id ?g) (plan-id ?p)
                           (executable FALSE))
   (domain-precondition (plan-id ?p) (goal-id ?g) (grounded-with ?action-id)
