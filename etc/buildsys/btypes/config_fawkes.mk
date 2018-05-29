@@ -17,5 +17,5 @@ SYSROOT ?=
 
 # Add -DDEBUG_THREADING if you run into threading problems like deadlocks.
 # Read FawkesDebugging in the Fawkes Trac Wiki on how to use it
-CFLAGS_EXTRA ?=	-g -Wall -Werror $(CFLAGS_MTUNE_NATIVE) -O3
+CFLAGS_EXTRA ?=	-g -Wall -Werror -O2
 
