@@ -252,6 +252,7 @@ LaserLinesThread::loop()
   publish_known_lines();
 }
 
+/** Read all configuration values. */
 void
 LaserLinesThread::read_config()
 {
