@@ -23,9 +23,6 @@
 #include <webview/page_header_generator.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class WebPageHeaderGenerator <webview/page_header_generator.h>
  * Interface for HTML header generator.

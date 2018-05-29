@@ -30,9 +30,6 @@
 struct MHD_Daemon;
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Logger;
 class Time;

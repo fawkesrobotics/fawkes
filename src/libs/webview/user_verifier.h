@@ -24,9 +24,6 @@
 #define __LIBS_WEBVIEW_USER_VERIFIER_H_
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class WebUserVerifier
 {

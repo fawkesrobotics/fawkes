@@ -32,9 +32,6 @@
 #include <microhttpd.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class WebviewAccessLog <webview/access_log.h>
  * Webview access_log writer.

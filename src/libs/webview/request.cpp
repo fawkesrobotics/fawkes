@@ -30,9 +30,6 @@
 #include <netinet/in.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /// @cond INTERNAL
 static int

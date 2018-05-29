@@ -23,9 +23,6 @@
 #include <webview/page_footer_generator.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class WebPageFooterGenerator <webview/page_footer_generator.h>
  * Interface for HTML footer generator.

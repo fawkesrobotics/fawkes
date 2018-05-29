@@ -30,9 +30,6 @@
 #include <cstdio>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class WebPageReply <webview/page_reply.h>
  * Basic page reply.

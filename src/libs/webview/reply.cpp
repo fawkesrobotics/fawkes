@@ -28,9 +28,6 @@
 #include <cstdio>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Disable caching on a reply.
  * This is a convenience wrapper to reply->set_caching(false). It enables
