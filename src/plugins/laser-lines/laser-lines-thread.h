@@ -37,6 +37,8 @@
 #include <aspect/tf.h>
 #include <aspect/pointcloud.h>
 
+#include <config/change_handler.h>
+
 #include <Eigen/StdVector>
 #include <pcl/ModelCoefficients.h>
 
@@ -66,6 +68,7 @@ class LaserLinesThread
   public fawkes::ConfigurableAspect,
   public fawkes::BlackBoardAspect,
   public fawkes::BlockedTimingAspect,
+  public fawkes::ConfigurationChangeHandler,
   public fawkes::TransformAspect,
 #ifdef HAVE_VISUAL_DEBUGGING
   public fawkes::ROSAspect,
@@ -93,6 +96,15 @@ class LaserLinesThread
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
+
+ protected:
+  virtual void read_config();
+  virtual void config_tag_changed(const char *) {}
+  virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *) {}
+  virtual void config_value_changed(const fawkes::Configuration::ValueIterator *v) {
+    read_config();
+  }
+  virtual void config_value_erased(const char *path) { read_config(); }
 
  private:
 

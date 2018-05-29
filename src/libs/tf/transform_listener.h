@@ -77,7 +77,8 @@ class TransformListener
   public BlackBoardInterfaceListener
 {
  public:
-	TransformListener(BlackBoard *bb, Transformer *tf_transformer);
+	TransformListener(BlackBoard *bb, Transformer *tf_transformer,
+	    bool bb_is_remote=false);
   virtual ~TransformListener();
 
   // for BlackBoardInterfaceObserver
@@ -96,6 +97,7 @@ class TransformListener
  private:
   BlackBoard  *bb_;
   Transformer *tf_transformer_;
+  bool bb_is_remote_;
 
   std::list<TransformInterface *> tfifs_;
 };

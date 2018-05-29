@@ -61,6 +61,7 @@ using namespace fawkes;
 LaserLinesThread::LaserLinesThread()
   : Thread("LaserLinesThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
+    ConfigurationChangeHandler(CFG_PREFIX),
     TransformAspect(TransformAspect::BOTH_DEFER_PUBLISHER)
 {
 }
@@ -75,40 +76,8 @@ LaserLinesThread::~LaserLinesThread()
 void
 LaserLinesThread::init()
 {
-  //step 1: read config-values
-  cfg_segm_max_iterations_ =
-    config->get_uint(CFG_PREFIX"line_segmentation_max_iterations");
-  cfg_segm_distance_threshold_ =
-    config->get_float(CFG_PREFIX"line_segmentation_distance_threshold");
-  cfg_segm_sample_max_dist_ =
-    config->get_float(CFG_PREFIX"line_segmentation_sample_max_dist");
-  cfg_segm_min_inliers_ =
-    config->get_uint(CFG_PREFIX"line_segmentation_min_inliers");
-  cfg_min_length_ =
-    config->get_float(CFG_PREFIX"line_min_length");
-  cfg_max_length_ =
-    config->get_float(CFG_PREFIX"line_max_length");
-  cfg_min_dist_ =
-    config->get_float(CFG_PREFIX"line_min_distance");
-  cfg_max_dist_ =
-    config->get_float(CFG_PREFIX"line_max_distance");
-  cfg_cluster_tolerance_ =
-    config->get_float(CFG_PREFIX"line_cluster_tolerance");
-  cfg_cluster_quota_ =
-    config->get_float(CFG_PREFIX"line_cluster_quota");
-  cfg_moving_avg_enabled_ =
-    config->get_bool(CFG_PREFIX"moving_avg_enabled");
-  cfg_moving_avg_window_size_ =
-    config->get_uint(CFG_PREFIX"moving_avg_window_size");
-
-  cfg_switch_tolerance_ =
-    config->get_float(CFG_PREFIX"switch_tolerance");
-
-  cfg_input_pcl_             = config->get_string(CFG_PREFIX"input_cloud");
-  //max_num_lines_ resulting in the specified number of interfaces
-  cfg_max_num_lines_         = config->get_uint(CFG_PREFIX"max_num_lines");
-
-  cfg_tracking_frame_id_     = config->get_string("/frames/odom");
+  read_config();
+  config->add_change_handler(this);
 
   finput_ = pcl_manager->get_pointcloud<PointType>(cfg_input_pcl_.c_str());
   input_ = pcl_utils::cloudptr_from_refptr(finput_);
@@ -283,6 +252,43 @@ LaserLinesThread::loop()
   publish_known_lines();
 }
 
+void
+LaserLinesThread::read_config()
+{
+  cfg_segm_max_iterations_ =
+    config->get_uint(CFG_PREFIX"line_segmentation_max_iterations");
+  cfg_segm_distance_threshold_ =
+    config->get_float(CFG_PREFIX"line_segmentation_distance_threshold");
+  cfg_segm_sample_max_dist_ =
+    config->get_float(CFG_PREFIX"line_segmentation_sample_max_dist");
+  cfg_segm_min_inliers_ =
+    config->get_uint(CFG_PREFIX"line_segmentation_min_inliers");
+  cfg_min_length_ =
+    config->get_float(CFG_PREFIX"line_min_length");
+  cfg_max_length_ =
+    config->get_float(CFG_PREFIX"line_max_length");
+  cfg_min_dist_ =
+    config->get_float(CFG_PREFIX"line_min_distance");
+  cfg_max_dist_ =
+    config->get_float(CFG_PREFIX"line_max_distance");
+  cfg_cluster_tolerance_ =
+    config->get_float(CFG_PREFIX"line_cluster_tolerance");
+  cfg_cluster_quota_ =
+    config->get_float(CFG_PREFIX"line_cluster_quota");
+  cfg_moving_avg_enabled_ =
+    config->get_bool(CFG_PREFIX"moving_avg_enabled");
+  cfg_moving_avg_window_size_ =
+    config->get_uint(CFG_PREFIX"moving_avg_window_size");
+
+  cfg_switch_tolerance_ =
+    config->get_float(CFG_PREFIX"switch_tolerance");
+
+  cfg_input_pcl_             = config->get_string(CFG_PREFIX"input_cloud");
+  //max_num_lines_ resulting in the specified number of interfaces
+  cfg_max_num_lines_         = config->get_uint(CFG_PREFIX"max_num_lines");
+
+  cfg_tracking_frame_id_     = config->get_string("/frames/odom");
+}
 
 void
 LaserLinesThread::update_lines(std::vector<LineInfo> &linfos) {

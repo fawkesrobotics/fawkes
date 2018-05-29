@@ -77,10 +77,12 @@ namespace fawkes {
 /** Constructor.
  * @param bb blackboard to listen to
  * @param tf_transformer transformer to add transforms to
+ * @param bb_is_remote must be true if the blackboard is a RemoteBlackboard
  */
-TransformListener::TransformListener(BlackBoard *bb, Transformer *tf_transformer)
+TransformListener::TransformListener(BlackBoard *bb,
+    Transformer *tf_transformer, bool bb_is_remote)
   : BlackBoardInterfaceListener("TransformListener"),
-    bb_(bb), tf_transformer_(tf_transformer)
+    bb_(bb), tf_transformer_(tf_transformer), bb_is_remote_(bb_is_remote)
 {
   if (bb_) {
     tfifs_ = bb_->open_multiple_for_reading<TransformInterface>("/tf*");
@@ -164,6 +166,9 @@ TransformListener::bb_interface_reader_removed(Interface *interface,
 void
 TransformListener::conditional_close(Interface *interface) throw()
 {
+  if (bb_is_remote_) {
+    return;
+  }
   // Verify it's a TransformInterface
   TransformInterface *tfif = dynamic_cast<TransformInterface *>(interface);
   if (! tfif) return;
@@ -192,7 +197,12 @@ TransformListener::bb_interface_data_changed(Interface *interface) throw()
 
   tfif->read();
 
-  std::string authority = tfif->writer();
+  std::string authority;
+  if (bb_is_remote_) {
+    authority = "remote";
+  } else {
+    std::string authority = tfif->writer();
+  }
   
   double *translation = tfif->translation();
   double *rotation = tfif->rotation();
