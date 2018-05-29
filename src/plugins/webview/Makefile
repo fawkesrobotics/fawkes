@@ -56,33 +56,37 @@ ifeq ($(HAVE_BOOST_LIBS)$(HAVE_LIBMICROHTTPD),11)
     WARN_TARGETS += warning_apr_util
   endif
 
-  CFLAGS  += -DHAVE_REST_APIS $(CFLAGS_CPP17)  $(CFLAGS_RAPIDJSON)
-  LDFLAGS += $(LDFLAGS_CPP17) $(LDFLAGS_RAPIDJSON)
+  ifeq ($(HAVE_CPP17)$(HAVE_RAPIDJSON),11)
+    CFLAGS  += -DHAVE_REST_APIS $(CFLAGS_CPP17)  $(CFLAGS_RAPIDJSON)
+    LDFLAGS += $(LDFLAGS_CPP17) $(LDFLAGS_RAPIDJSON)
 
-  OBJS_webview += blackboard-rest-api/blackboard-rest-api.o \
-                  backendinfo-rest-api/backendinfo-rest-api.o \
-                  plugin-rest-api/plugin-rest-api.o \
-                  tf-rest-api/tf-rest-api.o \
-                  config-rest-api/config-rest-api.o \
-                  $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*-rest-api/model/*.cpp))))
+    OBJS_webview += blackboard-rest-api/blackboard-rest-api.o \
+                    backendinfo-rest-api/backendinfo-rest-api.o \
+                    plugin-rest-api/plugin-rest-api.o \
+                    config-rest-api/config-rest-api.o \
+                   $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*-rest-api/model/*.cpp))))
 
-  ifeq ($(HAVE_TF),1)
-    OBJS_webview += tf-rest-api/tf-rest-api.o
-    LIBS_webview += fawkestf
-    CFLAGS  += $(CFLAGS_TF)
-    LDFLAGS += $(LDFLAGS_TF)
+    ifeq ($(HAVE_TF),1)
+      OBJS_webview += tf-rest-api/tf-rest-api.o
+      LIBS_webview += fawkestf
+      CFLAGS  += $(CFLAGS_TF)
+      LDFLAGS += $(LDFLAGS_TF)
+    else
+      WARN_TARGETS += warning_tf
+    endif
+
+    ifeq ($(HAVE_JPEG),1)
+      CFLAGS += -DHAVE_JPEG
+      LIBS_webview += m fvutils fvcams
+      OBJS_webview += image-rest-api/image-rest-api.o \
+                      image-rest-api/mjpeg_reply.o \
+                      image-rest-api/jpeg_stream_producer.o
+    else
+      WARN_TARGETS = warning_jpeg
+    endif
+
   else
-    WARN_TARGETS += warning_tf
-  endif
-
-  ifeq ($(HAVE_JPEG),1)
-    CFLAGS += -DHAVE_JPEG
-    LIBS_webview += m fvutils fvcams
-    OBJS_webview += image-rest-api/image-rest-api.o \
-                    image-rest-api/mjpeg_reply.o \
-                    image-rest-api/jpeg_stream_producer.o
-  else
-    WARN_TARGETS = warning_jpeg
+    WARN_TARGETS += warning_rapidjson
   endif
 
   OBJS_all = $(OBJS_webview)
