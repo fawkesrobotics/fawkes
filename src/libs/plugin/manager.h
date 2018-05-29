@@ -73,6 +73,7 @@ class PluginManager
   virtual void fam_event(const char *filename, unsigned int mask);
 
   void load(const char *plugin_list);
+  void load(const std::list<std::string> &plugin_list);
   void unload(const char *plugin_name);
 
   bool is_loaded(const char *plugin_name);
@@ -102,8 +103,8 @@ class PluginManager
   LockList<Plugin *>::iterator pit;
   LockList<Plugin *>::reverse_iterator rpit;
 
-  LockMap< std::string, std::string > __meta_plugins;
-  LockMap< std::string, std::string >::iterator __mpit;
+  LockMap< std::string, std::list<std::string> > __meta_plugins;
+  LockMap< std::string, std::list<std::string> >::iterator __mpit;
 
   unsigned int next_plugin_id;
   std::map< std::string, unsigned int > plugin_ids;
