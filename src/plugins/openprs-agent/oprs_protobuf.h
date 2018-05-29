@@ -53,9 +53,6 @@ namespace protobuf_comm {
 }
 
 namespace oprs_protobuf {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class OpenPRSProtobuf
 {
