@@ -23,9 +23,6 @@
 #include "motion_utils.h"
 
 namespace motion {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Fix ALMotion's belief of body angles.
  * If body angles have been set via the DCM, ALMotions model is out of

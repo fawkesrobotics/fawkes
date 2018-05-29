@@ -30,9 +30,6 @@
 #include <string>
 
 namespace motion {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 void
 fix_angles(AL::ALPtr<AL::ALMotionProxy> &almotion);

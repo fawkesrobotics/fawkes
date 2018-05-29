@@ -24,9 +24,6 @@
 #include <plugins/nao/aspect/naoqi.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NaoQiAspect <plugins/nao/aspect/naoqi.h>
  * Thread aspect to get access to NaoQi broker.
