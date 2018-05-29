@@ -104,6 +104,7 @@ class WebReply
   virtual ~WebReply();
 
   Code              code() const;
+  void              set_code(Code code);
   void              add_header(std::string header, std::string content);
   void              add_header(std::string header_string);
   const HeaderMap & headers() const;
@@ -136,6 +137,7 @@ class StaticWebReply : public WebReply
   StaticWebReply(Code code, std::string body = "");
 
   void append_body(const char *format, ...);
+  void append_body(const std::string &s);
   StaticWebReply & operator+=(std::string text);
 
   virtual const std::string & body();

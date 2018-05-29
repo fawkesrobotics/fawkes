@@ -88,6 +88,15 @@ WebReply::code() const
   return __code;
 }
 
+/** Set response code.
+ * @param code HTTP response code
+ */
+void
+WebReply::set_code(WebReply::Code code)
+{
+	__code = code;
+}
+
 
 /** Add a HTTP header.
  * @param header header entry name
@@ -231,6 +240,15 @@ StaticWebReply::append_body(const char *format, ...)
     free(s);
   }
   va_end(args);
+}
+
+/** Append string to body.
+ * @param s string to add, this may contain null bytes
+ */
+void
+StaticWebReply::append_body(const std::string &s)
+{
+	_body += s;
 }
 
 
