@@ -113,6 +113,7 @@ PddlRobotMemoryThread::loop()
 
   //find queries in template
   size_t cur_pos = 0;
+  std::map<std::string, std::string> templates;
   while(input.find("<<#", cur_pos) != std::string::npos)
   {
     cur_pos = input.find("<<#", cur_pos) + 3;
@@ -124,6 +125,18 @@ PddlRobotMemoryThread::loop()
     //parse: template name | query
     std::string template_name = input.substr(cur_pos, q_del_pos - cur_pos);
     std::string query_str =  input.substr(q_del_pos + 1, tpl_end_pos - (q_del_pos + 1));
+    if (templates.find(template_name) != templates.end()) {
+      if (templates[template_name] != query_str) {
+        logger->log_error(name(),
+            "Template with same name '%s' but different query '%s' vs '%s'!",
+            template_name.c_str(), query_str.c_str(),
+            templates[template_name].c_str());
+      } else {
+        input.erase(q_del_pos, tpl_end_pos - q_del_pos);
+        continue;
+      }
+    }
+    templates[template_name] = query_str;
     //remove query stuff from input (its not part of the ctemplate features)
     input.erase(q_del_pos, tpl_end_pos - q_del_pos);
 
