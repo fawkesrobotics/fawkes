@@ -37,9 +37,6 @@
 #include <cerrno>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class PluginNetworkHandler <plugin/net/handler.h>
  * Fawkes Plugin Network Handler.
