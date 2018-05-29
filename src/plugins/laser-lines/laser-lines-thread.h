@@ -103,7 +103,7 @@ class LaserLinesThread
                 fawkes::LaserLineInterface *iface,
                 bool moving_average,
                 const TrackedLineInfo &tinfo,
-                const std::string &frame_id = "") const;
+                const std::string &frame_id = "");
 
   void set_empty_interface(fawkes::LaserLineInterface *iface) const;
 

@@ -32,5 +32,11 @@
       the line.
     </field>
     <field type="float" name="length">Length of the line.</field>
+    <field type="string" length="32" name="end_point_frame_1">
+      Coordinate frame ID representing first endpoint's identity
+    </field>
+    <field type="string" length="32" name="end_point_frame_2">
+      Coordinate frame ID representing second endpoint's identity
+    </field>
   </data>
 </interface>
