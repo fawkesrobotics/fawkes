@@ -36,9 +36,6 @@ namespace firevision {
 
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class TimeWait;
 class Mutex;
