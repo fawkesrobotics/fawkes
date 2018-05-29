@@ -482,7 +482,7 @@
 						(domain-ground-effect ?e:param-names ?e:param-constants
 																	?action-param-names ?action-param-values))
 
-			(assert (domain-pending-sensed-fact (name ?pred:name) (action-id ?id)
+			(assert (domain-pending-sensed-fact (name ?pred:name) (action-id ?id) (goal-id ?g) (plan-id ?p)
 																					(param-values ?values) (type ?e:type)))
 			(bind ?next-state SENSED-EFFECTS-WAIT)
 		)
@@ -556,10 +556,18 @@
 
 (defrule domain-effect-wait-sensed-done
   "After the effects of an action have been applied, change it to SENSED-EFFECTS-HOLD."
-  ?a <- (plan-action (id ?action-id) (status SENSED-EFFECTS-WAIT))
-  (not (domain-pending-sensed-fact (action-id ?action-id)))
+  ?a <- (plan-action (id ?action-id) (status SENSED-EFFECTS-WAIT) (plan-id ?p) (goal-id ?g))
+  (not (domain-pending-sensed-fact (action-id ?action-id) (goal-id ?g) (plan-id ?p)))
   =>
   (modify ?a (status SENSED-EFFECTS-HOLD))
+)
+
+(defrule domain-effect-sensed-remove-on-removed-action
+  "Remove domain-pending-sensed-fact when the corresponding action was removed"
+  ?ef <- (domain-pending-sensed-fact (action-id ?action-id) (goal-id ?g) (plan-id ?p))
+  (not (plan-action (id ?action-id) (plan-id ?p) (goal-id ?g)))
+  =>
+  (retract ?ef)
 )
 
 (defrule domain-action-final
