@@ -28,9 +28,6 @@
 #include <Eigen/Geometry>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 #if ! EIGEN_VERSION_AT_LEAST(3,2,0)
 namespace workaround {

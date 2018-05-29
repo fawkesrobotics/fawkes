@@ -25,9 +25,6 @@
 using namespace std;
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphConstraintRepo <navgraph/constraints/constraint_repo.h>
  * Constraint repository to maintain blocks on nodes.

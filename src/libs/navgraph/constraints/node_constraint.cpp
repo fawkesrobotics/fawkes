@@ -22,9 +22,6 @@
 #include <navgraph/constraints/node_constraint.h>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphNodeConstraint <navgraph/constraints/node_constraint.h>
  * Constraint that can be queried to check if a node is blocked.

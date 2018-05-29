@@ -25,9 +25,6 @@
 #include <algorithm>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphStaticListEdgeCostConstraint <navgraph/constraints/static_list_edge_cost_constraint.h>
  * Constraint that hold cost factors for a static list of edges.

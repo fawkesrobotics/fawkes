@@ -25,9 +25,6 @@
 #include <navgraph/generators/generator.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphGenerator <navgraph/generators/generator.h>
  * Base class for navgraph generators.

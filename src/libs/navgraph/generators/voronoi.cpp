@@ -54,9 +54,6 @@ typedef K::Iso_rectangle_2            Iso_rectangle;
 typedef std::map<std::string, Point_2> Point_map;
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphGeneratorVoronoi <navgraph/generators/voronoi.h>
  * Generate navgraph using a Voronoi diagram.

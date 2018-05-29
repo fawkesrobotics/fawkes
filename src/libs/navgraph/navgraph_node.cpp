@@ -23,9 +23,6 @@
 #include <navgraph/navgraph_node.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphNode <navgraph/navgraph_node.h>
  * Topological graph node.

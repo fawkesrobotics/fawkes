@@ -34,14 +34,8 @@
 #include <functional>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 namespace navgraph {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
   typedef
   std::function<float (const fawkes::NavGraphNode &, const fawkes::NavGraphNode &)>
       EstimateFunction;

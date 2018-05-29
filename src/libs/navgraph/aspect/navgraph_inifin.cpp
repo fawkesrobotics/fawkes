@@ -28,9 +28,6 @@
 #include <cstddef>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphAspectIniFin <navgraph/aspect/navgraph_inifin.h>
  * NavGraphAspect initializer/finalizer.

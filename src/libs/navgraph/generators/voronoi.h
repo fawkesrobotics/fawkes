@@ -29,9 +29,6 @@
 #include <utils/math/polygon.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class NavGraphGeneratorVoronoi : public NavGraphGenerator
 {
