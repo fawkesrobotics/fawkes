@@ -26,11 +26,11 @@
 #include "externals/fawkes_logger.h"
 #include "externals/eclipse_path.h"
 #include "externals/eclipseclp_config.h"
+#include "blackboard_listener_thread.h"
 
 #include <interfaces/TestInterface.h>
 #include <core/threading/mutex_locker.h>
 #include <core/exception.h>
-#include <eclipseclass.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -67,14 +67,17 @@ EclipseAgentThread::EclipseAgentThread()
 /** Destructor. */
 EclipseAgentThread::~EclipseAgentThread()
 {
+  if (EclExternalBlackBoard::instance()) {
+    logger->log_info(name(), "Cleaning up");
+    EclExternalBlackBoard::cleanup_instance();
+  }
   delete mutex;
 }
 
 void
 EclipseAgentThread::init()
 {
-  _running = false;
-  fawkes::EclExternalBlackBoard::create_initial_object(blackboard);
+  fawkes::EclExternalBlackBoard::create_initial_object(blackboard, logger);
   fawkes::EclExternalConfig::create_initial_object(config);
   // set ECLiPSe installation directory
   char* eclipse_dir = NULL;
@@ -94,7 +97,7 @@ EclipseAgentThread::init()
   try{
   //set default module in which goals called from the top-level will be executed
   ec_set_option_ptr(EC_OPTION_DEFAULT_MODULE, (void*) agent.c_str());
-    
+
   }
   catch (...){
     throw fawkes::Exception( "Failed to set default ECLiPSe module");
@@ -128,13 +131,16 @@ EclipseAgentThread::init()
     throw Exception("Failed to determine path to filepath module");
   }
   load_file(filepath_path.c_str());
-
-  // load interpreter and agent
-  std::string agent_path = EclipsePath::instance()->locate_file(agent + ".ecl");
-  if (agent_path.empty()) {
-    throw Exception("Failed to determine path to agent module");
-  }
-  load_file( agent_path.c_str() );
+  char *filepath = ::strdup("filepath");
+  post_goal(term(EC_functor(":", 2), EC_atom(filepath),
+                 term(EC_functor("add_library_path", 1),
+                      ::list(EC_word(SRCDIR "/externals"),
+                             ::list(EC_word(SRCDIR "/utils"),
+                                    ::list(EC_word(SRCDIR "/consoletool"),
+                                           ::list(EC_word(SRCDIR "/interpreter"), nil()) ) ) ) )
+  ) );
+  if (EC_succeed != EC_resume())
+    throw Exception("Failed to add " SRCDIR "/externals to library path");
 
   // check if navgraph is used and pass config value
   if (config->get_bool( ("/eclipse-clp/"+agent+"/use_graph").c_str() )){
@@ -146,6 +152,13 @@ EclipseAgentThread::init()
     { throw Exception( "Error loading graph config to agent" ); }
   }
 
+  // load interpreter and agent
+  std::string agent_path = EclipsePath::instance()->locate_file(agent + ".ecl");
+  if (agent_path.empty()) {
+    throw Exception("Failed to determine path to agent module");
+  }
+  load_file( agent_path.c_str() );
+
    // register external predicates
        if ( EC_succeed != ec_external( ec_did( "log",             2 ), p_log,             ec_did( agent.c_str(), 0 ) ) )
   { throw Exception( "Registering external predicate log/2 failed" ); }
@@ -156,52 +169,44 @@ void
 EclipseAgentThread::finalize()
 {
   ec_cleanup();
-  fawkes::EclExternalBlackBoard::cleanup_instance();
+  if (EclExternalBlackBoard::instance())
+    fawkes::EclExternalBlackBoard::cleanup_instance();
 }
 
 
 void
 EclipseAgentThread::once()
 {
-  post_goal( "run" );
-  int res = EC_resume();
-  if(EC_yield == res){
-    //terminate
-  } else { 
-    if ( EC_succeed != res) {
-      logger->log_error(name(), "Running the agent program failed");
-    }
-  }
+  post_goal("run");
+  ec_result = EC_resume("init", ec_yield_reason);
 }
 
-/** Check if the agent is running
- * @return true if ECLiPSe agent is running
- */
-bool EclipseAgentThread::running()
-{
-  MutexLocker lock(mutex);
-  return _running;
-}
 
-/*
 void
 EclipseAgentThread::loop()
 {
-  if (!running()){
-    mutex->lock();
-    _running = true;
-    mutex->unlock();
+  if (ec_result == EC_status::EC_yield) {
+    EC_word bb_updates(::nil());
+    if (EC_word(ec_yield_reason) == EC_atom("exogenous_update")) {
+      while (BlackboardListenerThread::instance()->event_pending())
+        bb_updates = ::list(bb_updates, *BlackboardListenerThread::instance()->event_pop());
+    }
+    else if (BlackboardListenerThread::instance()->event_pending())
+      post_event("event_exogUpdate");
 
-    post_goal( "cycle" );
-    if ( EC_succeed != EC_resume() )
-    { throw Exception( "Error running agent program" ); }
+    ec_result = EC_resume(bb_updates, ec_yield_reason);
+  }
+  else {
+    if (ec_result == EC_status::EC_succeed)
+      logger->log_warn(name(), "Agent program terminated successfully.");
+    else
+      logger->log_error(name(), "Agent program failed.");
 
-    mutex->lock();
-    _running = false;
-    mutex->unlock();
+    logger->log_warn(name(), "Stopping Agent thread.");
+    exit();
   }
 }
-*/
+
 
 /** Post an event to the ECLiPSe context.
  * @param event the name of the event

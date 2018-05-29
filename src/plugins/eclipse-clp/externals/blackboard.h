@@ -25,6 +25,7 @@
 #define __ECLIPSE_EXTERNALS_BLACKBOARD_H_
 
 #include <blackboard/remote.h>
+#include <logging/logger.h>
 #include <vector>
 
 #include <cstdio>
@@ -39,40 +40,39 @@ namespace fawkes
 class EclExternalBlackBoard
 {
 private:
-  /** Constructor. */
-  EclExternalBlackBoard();
-
   /** Constructor.
    * @param blackboard blackboard to use to open interfaces
    */
-  EclExternalBlackBoard(BlackBoard *blackboard);
+  EclExternalBlackBoard(BlackBoard *blackboard, Logger *logger);
 public:
   /** Destructor. */
   ~EclExternalBlackBoard();
 
-  static void create_initial_object(BlackBoard *bb);
+  static void create_initial_object(BlackBoard *bb, Logger *logger);
   static void cleanup_instance();
   static EclExternalBlackBoard* instance();
 
-  void connect(const char *host, long port);
-  bool connected();
-  void disconnect();
   static BlackBoard* blackboard_instance();
   std::map<std::string, Interface *> & interfaces();
+
+  /**
+   * @return A pointer to the plugin-central logger
+   */
+  static Logger *logger() { return m_logger; }
+
+  /**
+   * @return Name for logging
+   */
+  static const char *name() { return "EclExternalBlackBoard"; }
 
 private:
   static EclExternalBlackBoard *      m_instance;
   std::map<std::string, Interface *>  m_interfaces;
   static BlackBoard *                 m_blackboard;
-  bool                                m_own_blackboard;
+  static Logger *                     m_logger;
 };
 }
 
-
-extern "C" int p_bb_connect_to_remote_blackboard();
-extern "C" int p_bb_disconnect_from_blackboard();
-extern "C" int p_bb_is_alive();
-extern "C" int p_bb_is_connected();
 
 extern "C" int p_bb_open_interface();
 extern "C" int p_bb_close_interface();
@@ -91,6 +91,9 @@ extern "C" int p_bb_set();
 
 extern "C" int p_bb_send_message();
 extern "C" int p_bb_recv_messages();
+
+extern "C" int p_bb_observe_pattern();
+extern "C" int p_bb_listen_for_change();
 
 #endif
 

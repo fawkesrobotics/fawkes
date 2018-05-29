@@ -23,6 +23,7 @@
 
 :- export locate_file/2.
 :- export locate_module/2.
+:- export add_library_path/1.
 
 :- external(locate_file/2, p_locate_file).
 
@@ -40,3 +41,12 @@ locate_module_suffixes(_, [], _) :- !, fail.
 
 locate_module_suffixes(Module, [X|Y], File) :-
     locate_module_suffix(Module, X, File); !, locate_module_suffixes(Module, Y, File).
+
+add_library_path(P) :-
+	get_flag(library_path, CurPath),
+	( P = [_|_] ->
+		append(CurPath, P, NewPath)
+	;
+		append(CurPath, [P], NewPath)
+	),
+	set_flag(library_path, NewPath).
