@@ -32,9 +32,6 @@
 #include <cstddef>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BorderShrinker <fvclassifiers/border_shrinker.h>
  * Border shrinker.

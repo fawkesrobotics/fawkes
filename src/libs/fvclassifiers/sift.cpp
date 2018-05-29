@@ -50,9 +50,6 @@ extern "C" {
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SiftClassifier <fvclassifiers/sift.h>
  * SIFT classifier.

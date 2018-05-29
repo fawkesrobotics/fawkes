@@ -42,9 +42,6 @@ typedef struct _IplImage IplImage;
 struct feature;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 class SiftClassifier : public Classifier
 {
  public:

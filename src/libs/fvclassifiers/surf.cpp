@@ -54,9 +54,6 @@
 //#include <fvutils/writers/png.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SurfClassifier <fvclassifiers/surf.h>
  * SURF classifier.

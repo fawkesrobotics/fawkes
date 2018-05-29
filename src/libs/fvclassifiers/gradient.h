@@ -29,9 +29,6 @@
 #include <fvmodels/scanlines/grid.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class GradientClassifier: public Classifier
 {

@@ -54,9 +54,6 @@ namespace fawkes {
 //typedef struct _IplImage IplImage;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 void saveIpoints(std::string sFileName, const std::vector< surf::Ipoint >& ipts, bool bVerbose, bool bLaplacian, int VLength);
 

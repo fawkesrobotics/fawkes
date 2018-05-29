@@ -26,9 +26,6 @@
 #include <cstdlib>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Classifier <fvclassifiers/classifier.h>
  * Classifier to extract regions of interest.

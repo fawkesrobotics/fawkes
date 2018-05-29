@@ -25,9 +25,6 @@
 #define __FIREVISION_CLASSIFIER_SHRINKER_H_
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ROI;
 
