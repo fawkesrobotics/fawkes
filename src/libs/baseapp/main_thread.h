@@ -38,9 +38,6 @@
 #include <getopt.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 class Configuration;
 class Configuration;
 class ConfigNetworkHandler;

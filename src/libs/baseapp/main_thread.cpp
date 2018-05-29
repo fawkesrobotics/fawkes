@@ -47,9 +47,6 @@
 #include <core/macros.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FawkesMainThread <baseapp/main_thread.h>
  * Fawkes default main thread.

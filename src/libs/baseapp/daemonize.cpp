@@ -41,10 +41,6 @@
 
 namespace fawkes {
   namespace daemon {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 #ifdef HAVE_LIBDAEMON
 /** Global variable containing the path to the PID file.

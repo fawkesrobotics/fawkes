@@ -30,10 +30,6 @@
 
 namespace fawkes {
   namespace runtime {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 
 /** @class InitOptions <baseapp/init_options.h>

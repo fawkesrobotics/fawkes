@@ -33,9 +33,6 @@
 #include <aspect/blocked_timing.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ThreadManager <baseapp/thread_manager.h>
  * Base application thread manager.

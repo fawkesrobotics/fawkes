@@ -27,10 +27,6 @@
 
 namespace fawkes {
   namespace daemon {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 void init(const char *pidfile, const char *progname);
 bool start();
