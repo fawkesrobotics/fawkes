@@ -24,9 +24,6 @@
 #include <plugins/openprs/aspect/openprs_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenPRSManagerAspect <plugins/openprs/aspect/openprs_manager.h>
  * Thread aspect access the OpenPRS kernel manager.

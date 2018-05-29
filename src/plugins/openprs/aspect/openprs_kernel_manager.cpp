@@ -33,9 +33,6 @@
 #include <cstring>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class OpenPRSKernelManager <plugins/openprs/aspect/openprs_kernel_manager.h>

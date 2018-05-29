@@ -31,9 +31,6 @@
 #include <boost/signals2.hpp>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class OpenPRSServerProxy;
 class Logger;

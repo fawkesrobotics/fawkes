@@ -39,9 +39,6 @@ extern "C" {
 }
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class OpenPRSComm <plugins/openprs/utils/openprs_comm.h>
