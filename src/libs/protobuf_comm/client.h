@@ -51,9 +51,6 @@
 #include <cstdint>
 
 namespace protobuf_comm {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 class ProtobufStreamClient

@@ -46,9 +46,6 @@
 #endif
 
 namespace protobuf_comm {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BufferEncryptor <protobuf_comm/crypto.h>
  * Encrypt buffers using AES128 in ECB mode.
