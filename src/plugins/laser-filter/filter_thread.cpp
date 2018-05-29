@@ -20,6 +20,7 @@
  */
 
 #include "filter_thread.h"
+#include "filters/copy.h"
 #include "filters/max_circle.h"
 #include "filters/720to360.h"
 #include "filters/1080to360.h"
@@ -429,7 +430,9 @@ LaserFilterThread::create_filter(std::string filter_name,
                                  unsigned int in_data_size,
                                  std::vector<LaserDataFilter::Buffer *> &inbufs)
 {
-  if (filter_type == "720to360") {
+  if (filter_type == "copy") {
+    return new LaserCopyDataFilter(filter_name, in_data_size, inbufs);
+  } else if (filter_type == "720to360") {
     bool average = false;
     try {
       average = config->get_bool((prefix + "average").c_str());
