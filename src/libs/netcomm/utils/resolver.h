@@ -37,9 +37,6 @@
 #include <utility>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class AvahiThread;
 class NetworkNameResolverThread;

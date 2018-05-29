@@ -27,9 +27,6 @@
 #include <netinet/in.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Compare two sockaddr structures.
  * The comparison is based on address family first, and if the same based on

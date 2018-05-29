@@ -27,9 +27,6 @@
 #include <netinet/in.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Get canonical size of sockaddr structure.
  * @param a sockaddr_in or sockaddr_in6 structure with properly set
