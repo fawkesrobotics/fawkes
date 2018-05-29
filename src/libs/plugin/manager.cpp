@@ -328,7 +328,7 @@ PluginManager::parse_plugin_list(const char *plugin_list)
 void
 PluginManager::load(const std::string& plugin_list)
 {
-  load(parse_plugin_list(plugin_list));
+  load(parse_plugin_list(plugin_list.c_str()));
 }
 
 
