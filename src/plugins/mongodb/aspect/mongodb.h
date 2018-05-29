@@ -33,9 +33,6 @@ namespace mongo {
 namespace fawkes {
 	class MongoDBConnCreator;
 
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MongoDBAspectIniFin;
 

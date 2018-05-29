@@ -24,9 +24,6 @@
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MongoDBAspect <plugins/mongodb/aspect/mongodb.h>
  * Thread aspect to access MongoDB.
