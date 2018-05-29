@@ -3,7 +3,7 @@
  *  metrics_processor.h - Metrics exporter
  *
  *  Created: Sat May 06 19:46:38 2017 (German Open 2017)
- *  Copyright  2017  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2017-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -22,16 +22,16 @@
 #ifndef __PLUGINS_METRICS_METRICS_PROCESSOR_H_
 #define __PLUGINS_METRICS_METRICS_PROCESSOR_H_
 
-#include <webview/request_processor.h>
-
 #include "protobuf/metrics.pb.h"
 
 namespace fawkes {
   class Logger;
   class MetricsManager;
+  class WebReply;
+  class WebRequest;
 }
 
-class MetricsRequestProcessor : public fawkes::WebRequestProcessor
+class MetricsRequestProcessor
 {
  public:
 	MetricsRequestProcessor(fawkes::MetricsManager *manager,
@@ -40,7 +40,7 @@ class MetricsRequestProcessor : public fawkes::WebRequestProcessor
 
   virtual ~MetricsRequestProcessor();
 
-  virtual fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+  fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
  private:
   fawkes::MetricsManager *  metrics_manager_;

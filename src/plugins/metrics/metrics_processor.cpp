@@ -23,6 +23,7 @@
 #include "aspect/metrics_manager.h"
 
 #include <webview/page_reply.h>
+#include <webview/request.h>
 #include <logging/logger.h>
 
 #include <sstream>
@@ -61,6 +62,10 @@ MetricsRequestProcessor::~MetricsRequestProcessor()
 {
 }
 
+/** Process request.
+ * @param request incoming request
+ * @return web reply
+ */
 WebReply *
 MetricsRequestProcessor::process_request(const fawkes::WebRequest *request)
 {

@@ -32,6 +32,7 @@
 #include <utils/misc/string_split.h>
 
 #include <algorithm>
+#include <functional>
 #include <chrono>
 
 using namespace fawkes;
@@ -124,14 +125,15 @@ MetricsThread::init()
   metrics_suppliers_.push_back(this);
 
   req_proc_ = new MetricsRequestProcessor(this, logger, URL_PREFIX);
-  webview_url_manager->register_baseurl(URL_PREFIX, req_proc_);
-
+  webview_url_manager->add_handler(WebRequest::METHOD_GET, URL_PREFIX,
+	                                 std::bind(&MetricsRequestProcessor::process_request,
+	                                           req_proc_, std::placeholders::_1));
 }
 
 void
 MetricsThread::finalize()
 {
-	webview_url_manager->unregister_baseurl(URL_PREFIX);
+	webview_url_manager->remove_handler(WebRequest::METHOD_GET, URL_PREFIX);
 	delete req_proc_;
 }
 
