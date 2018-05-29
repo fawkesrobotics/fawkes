@@ -469,22 +469,28 @@ LaserLinesThread::set_interface(unsigned int idx,
     iface->set_end_point_1(if_end_point_1);
     iface->set_end_point_2(if_end_point_2);
 
-    if(tinfo.visibility_history<=0){
-      iface->write();
-      return;
-    }
     // this makes the usual assumption that the laser data is in the X-Y plane
     fawkes::Time now(clock);  
     std::string frame_name_1, frame_name_2;
     char *tmp;
-    if (asprintf(&tmp, "laser_line_%u_e1", idx+1) != -1) {
+    std::string avg = moving_average ? "avg_" : "";
+    if (asprintf(&tmp, "laser_line_%s%u_e1", avg.c_str(), idx+1) != -1) {
 	    frame_name_1 = tmp;
 	    free(tmp);
     }
-    if (asprintf(&tmp, "laser_line_%u_e2", idx+1) != -1) {
+    if (asprintf(&tmp, "laser_line_%s%u_e2", avg.c_str(), idx+1) != -1) {
 	    frame_name_2 = tmp;
 	    free(tmp);
     }
+
+    iface->set_end_point_frame_1(frame_name_1.c_str());
+    iface->set_end_point_frame_2(frame_name_2.c_str());
+
+    if(tinfo.visibility_history<=0){
+      iface->write();
+      return;
+    }
+
     if (frame_name_1 != "" && frame_name_2 != "") {
 	    Eigen::Vector3f bp_unit = info.base_point / info.base_point.norm();
 	    double dotprod = Eigen::Vector3f::UnitX().dot(bp_unit);
