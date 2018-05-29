@@ -31,9 +31,6 @@
 
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class GossipGroup <plugins/gossip/gossip/gossip_group.h>
  * Gossip group communication handler.

@@ -25,9 +25,6 @@
 #include <plugins/gossip/gossip/gossip_group.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class GossipAspect <plugins/gossip/aspect/gossip.h>
  * Thread aspect to communicate with a group of robots.

@@ -25,9 +25,6 @@
 #include <core/exception.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class GossipGroupConfiguration <plugins/gossip/gossip/gossip_group_manager.h>
  * Group configuration for initial groups.
