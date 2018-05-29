@@ -32,9 +32,6 @@
 #define __INTERFACE_MESSAGE_TYPE_SIZE 32
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Mutex;
 class Interface;

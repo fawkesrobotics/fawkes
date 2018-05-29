@@ -34,9 +34,6 @@
 #include <unistd.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Message <interface/message.h>
  * Base class for all messages passed through interfaces in Fawkes BlackBoard.
