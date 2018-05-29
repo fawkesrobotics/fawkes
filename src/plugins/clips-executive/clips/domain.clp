@@ -25,6 +25,12 @@
   ; If the predicate is sensed, it is not directly changed by an action effect.
   ; Instead, we expect the predicate to be changed externally.
   (slot sensed (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
+  ; A value predicate is a predicate that is true for at most one value of the
+  ; last argument. In other words, the predicate represents a partial function,
+  ; with all but the last predicate argument being the function paramters, and
+  ; the last predicate being the function value.
+  (slot value-predicate (type SYMBOL) (allowed-values TRUE FALSE)
+    (default FALSE))
   (multislot param-names (type SYMBOL))
   (multislot param-types (type SYMBOL))
 )
@@ -94,6 +100,7 @@
   (slot name (type SYMBOL))
   (multislot param-names)
 	(slot wait-sensed (type SYMBOL) (allowed-values TRUE FALSE) (default TRUE))
+  (slot exogenous (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
 
 (deftemplate domain-operator-parameter
@@ -113,6 +120,7 @@
    sub-conditions. The action is an optional ID of grounded action this
    precondition belongs to. Note that grounded should always be yes if the
    action is not nil."
+  (slot operator (type SYMBOL))
   (slot part-of (type SYMBOL))
   (slot goal-id (type SYMBOL))
   (slot plan-id (type SYMBOL))
@@ -120,7 +128,7 @@
   ; stay compatible with lab course code.
   (slot grounded-with (type INTEGER) (default 0))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
-  (slot type (type SYMBOL) (allowed-values conjunction negation))
+  (slot type (type SYMBOL) (allowed-values conjunction disjunction negation))
   (slot grounded (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (slot is-satisfied (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 )
@@ -134,6 +142,7 @@
    value of param-names will be ignored and should be set to c (for constant).
    See the tests for an example.
 "
+  (slot operator (type SYMBOL))
   (slot part-of (type SYMBOL))
   (slot goal-id (type SYMBOL))
   (slot plan-id (type SYMBOL))
@@ -142,6 +151,7 @@
   (slot grounded-with (type INTEGER) (default 0))
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot predicate (type SYMBOL))
+  (slot equality (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (multislot param-names (type SYMBOL))
   (multislot param-values (default (create$)))
   (multislot param-constants (default (create$)))
@@ -206,6 +216,123 @@
   (modify ?a (param-names ?param-names))
 )
 
+(defrule domain-add-operator-to-top-precondition
+  "If a precondition has no operator but is part of a name that is an operator,
+   add that name as operator to the precondition."
+  ?precond <- (domain-precondition (operator nil) (part-of ?op))
+  (domain-operator (name ?op))
+=>
+  (modify ?precond (operator ?op))
+)
+
+(defrule domain-add-operator-to-nested-precondition
+  "If a precondition does not have an operator but the parent has one, then copy
+   the operator from the parent to the child."
+  ?precond <- (domain-precondition (operator nil) (part-of ?parent))
+  (domain-precondition (name ?parent) (operator ?op&~nil))
+=>
+  (modify ?precond (operator ?op))
+)
+
+(defrule domain-add-operator-to-atomic-precondition
+  "If an atomic precondition does not have an operator but the parent has one,
+   then copy the operator from the parent to the child."
+  ?precond <- (domain-atomic-precondition (operator nil) (part-of ?parent))
+  (domain-precondition (name ?parent) (operator ?op&~nil))
+=>
+  (modify ?precond (operator ?op))
+)
+
+(deffunction remove-precondition
+  "Remove an atomic precondition from its parent and clean up the precondition
+   tree. If the parent is a disjunction with no other disjunct, simplify it to
+   true by removing it recursively. If it is a negation, remove it recursively.
+   If it's a conjunction, only remove the conjunct."
+  (?precond-name)
+  (do-for-fact
+    ((?precond domain-atomic-precondition) (?parent domain-precondition))
+    (and (eq ?precond:name ?precond-name) (eq ?precond:part-of ?parent:name))
+    (if (or (eq ?parent:type disjunction) (eq ?parent:type negation)) then
+      (remove-precondition ?parent:name)
+    )
+    (retract ?precond)
+  )
+)
+
+(deffunction domain-is-precond-negative
+  "Check if a non-atomic precondition is negative by checking all its parents
+   and counting the number of negations. If the number is odd, the precondition
+   is negative, otherwise it's positive."
+  (?precond-name)
+  (do-for-fact
+    ((?precond domain-precondition))
+    (eq ?precond:name ?precond-name)
+    (if (any-factp ((?op domain-operator)) (eq ?op:name ?precond:part-of)) then
+      return (eq ?precond:type negation)
+    )
+    (bind ?parent-is-negative (domain-is-precond-negative ?precond:part-of))
+    (return (neq (eq ?precond:type negation) ?parent-is-negative))
+  )
+)
+
+(defrule domain-remove-precond-on-sensed-nonval-effect-of-exog-action
+  "If an exogenous action has a precondition for a non-value predicate that is
+   also a sensed effect of the operator, then remove the precondition on the
+   effect. This means that part of the exogenous action may already have
+   occurred before the action is selected."
+  (domain-operator (name ?op) (exogenous TRUE))
+  (domain-predicate (name ?pred) (sensed TRUE) (value-predicate FALSE))
+  (domain-effect (part-of ?op) (predicate ?pred)
+    (param-names $?params) (param-constants $?constants))
+  (domain-atomic-precondition (name ?precond) (operator ?op) (grounded FALSE)
+    (predicate ?pred) (param-names $?params) (param-constants $?constants))
+=>
+  (remove-precondition ?precond)
+  ; If there are any grounded preconditions, we need to recompute them.
+  (assert (domain-wm-update))
+)
+
+(defrule domain-replace-precond-on-sensed-val-effect-of-exog-action
+  "If an exogenous action has a precondition for a value predicate that is also
+   a sensed effect of the operator, then remove the precondition on the effect.
+   This means that part of the exogenous action may already have occurred before
+   the action is selected."
+  (domain-operator (name ?op) (exogenous TRUE))
+  (domain-predicate (name ?pred) (sensed TRUE) (value-predicate TRUE))
+  (domain-effect (part-of ?op) (predicate ?pred) (type POSITIVE)
+    (param-names $?args ?eff-val) (param-constants $?const-args ?const-eff-val))
+  ?ap <- (domain-atomic-precondition (name ?precond) (operator ?op)
+          (part-of ?parent) (predicate ?pred) (grounded FALSE)
+          (param-names $?args ?cond-val)
+          (param-constants $?const-args ?const-cond-val &:
+            (or
+                ; The values are constants and the constants are different.
+                (and (eq (length$ ?const-args) (length$ ?args))
+                     (neq ?const-cond-val ?const-eff-val)
+                )
+                ; The values are not constants and the parameters are different.
+                ; We rely on the fact that the parameter name of constants is
+                ; always set to the same value, so this is never satisfied if
+                ; the parameters are constants.
+                (neq ?cond-val ?eff-val)))
+         )
+  (not (and (domain-precondition (type disjunction) (name ?parent))
+            (domain-atomic-precondition (part-of ?parent) (predicate ?pred)
+                (param-names $?args ?eff-val)
+                (param-constants $?const-args ?const-eff-val))))
+=>
+  ; Replace the atomic precondition by a disjunction and add the atomic
+  ; precondition as a disjunct. Add the effect as another disjunct.
+  (assert (domain-precondition (type disjunction) (name ?precond) (operator ?op)
+            (part-of ?parent)))
+  (assert (domain-atomic-precondition (name (sym-cat ?precond 2)) (operator ?op)
+            (part-of ?precond) (predicate ?pred) (param-names $?args ?eff-val)
+            (param-constants $?const-args ?const-eff-val)))
+  (modify ?ap (part-of ?precond) (name (sym-cat ?precond 1)))
+  ; If there are any grounded preconditions, we need to recompute them.
+  (assert (domain-wm-update))
+)
+
 (defrule domain-ground-action-precondition
   "Ground a non-atomic precondition. Grounding here merely means that we
    duplicate the precondition and tie it to one specific action-id."
@@ -267,7 +394,6 @@
   "Ground an atomic precondition of an operator."
   (not (domain-wm-update))
   (plan-action
-    (status FORMULATED|PENDING|WAITING)
     (action-name ?op)
     (goal-id ?g)
     (plan-id ?p)	
@@ -332,11 +458,26 @@
                 (goal-id ?g) (plan-id ?p)
                 (is-satisfied FALSE)
                 (predicate ?pred)
+                (equality FALSE)
                 (param-values $?params)
                 (grounded TRUE))
   (domain-fact (name ?pred) (param-values $?params))
 =>
   (modify ?precond (is-satisfied TRUE))
+)
+
+(defrule domain-check-if-atomic-equality-precondition-is-satisfied
+  ?precond <- (domain-atomic-precondition
+                (goal-id ?g) (plan-id ?p)
+                (is-satisfied ?is-sat)
+                (equality TRUE)
+                (param-values $?params& :
+                  (and (= (length$ ?params) 2)
+                       (neq ?is-sat (eq (nth$ 1 ?params) (nth$ 2 ?params))))
+                )
+                (grounded TRUE))
+=>
+  (modify ?precond (is-satisfied (eq (nth$ 1 ?params) (nth$ 2 ?params))))
 )
 
 (defrule domain-check-if-negative-precondition-is-satisfied
@@ -435,6 +576,56 @@
         (part-of ?pn) (grounded TRUE)
         (grounded-with ?action-id) (is-satisfied FALSE)
       )
+  )
+=>
+  (modify ?precond (is-satisfied FALSE))
+)
+
+(defrule domain-check-if-disjunctive-precondition-is-satisfied
+  "Check a grounded disjunctive precondition. At least one child must be
+   satisfied."
+  ?precond <- (domain-precondition
+                (name ?pn)
+                (type disjunction)
+                (goal-id ?g)
+                (plan-id ?p)
+                (grounded-with ?action-id)
+                (grounded TRUE)
+                (is-satisfied FALSE))
+  (or (domain-atomic-precondition
+        (goal-id ?g) (plan-id ?p)
+        (part-of ?pn) (grounded TRUE)
+        (grounded-with ?action-id) (is-satisfied TRUE))
+      (domain-precondition
+        (goal-id ?g) (plan-id ?p)
+        (part-of ?pn) (grounded TRUE)
+        (grounded-with ?action-id) (is-satisfied TRUE))
+  )
+=>
+  (modify ?precond (is-satisfied TRUE))
+)
+
+(defrule domain-retract-disjunctive-precondition-if-child-is-not-satisfied
+  "If a disjunctive precondition is satisfied but none of its children are, then
+   set it to not satisfied."
+  ?precond <- (domain-precondition
+                (name ?pn)
+                (type disjunction)
+                (goal-id ?g)
+                (plan-id ?p)
+                (grounded-with ?action-id)
+                (grounded TRUE)
+                (is-satisfied TRUE))
+  (not
+    (or (domain-atomic-precondition
+          (goal-id ?g) (plan-id ?p)
+          (part-of ?pn) (grounded TRUE)
+          (grounded-with ?action-id) (is-satisfied TRUE))
+        (domain-precondition
+          (goal-id ?g) (plan-id ?p)
+          (part-of ?pn) (grounded TRUE)
+          (grounded-with ?action-id) (is-satisfied TRUE))
+    )
   )
 =>
   (modify ?precond (is-satisfied FALSE))
@@ -650,6 +841,86 @@
   =>
   (assert (domain-error (error-type operator-of-action-does-not-exist)
     (error-msg (str-cat "Operator of action " ?op " does not exist"))))
+)
+
+(defrule domain-check-atomic-precondition-predicate-has-no-equality
+  "Make sure that any atomic precondition with a set predicate has equality set
+   to FALSE."
+  (domain-atomic-precondition
+    (name ?precond)
+    (predicate ?predicate&~nil)
+    (equality TRUE)
+  )
+=>
+  (assert (domain-error
+    (error-type precondition-with-equality-and-predicate)
+    (error-msg (str-cat "Precondition " ?precond " cannot be an equality"
+                        " condition and a condition on the predicate "
+                        ?predicate " at the same time"))))
+)
+
+(defrule domain-check-atomic-precondition-is-on-predicate-or-equality
+  "Make sure that all preconditions have a predicate or are set to equality."
+  (domain-atomic-precondition
+    (name ?precond)
+    (predicate nil)
+    (equality FALSE)
+  )
+=>
+  (assert (domain-error
+    (error-type precondition-must-have-predicate-or-be-equality)
+    (error-msg (str-cat "Precondition " ?precond " must have a predicate "
+                        "or set to equality"))))
+)
+
+(defrule domain-check-equality-must-have-exactly-two-parameters
+  "Make sure that equalities always have exactly two parameters."
+  (domain-atomic-precondition
+    (name ?precond)
+    (equality TRUE)
+    (param-names $?param-names &: (neq (length$ ?param-names) 2))
+  )
+=>
+  (assert (domain-error
+    (error-type equality-must-have-exactly-two-parameters)
+    (error-msg (str-cat "Precondition " ?precond " is an equality precondition"
+                        " but has " (length$ ?param-names) " parameters,"
+                        " should be 2."))))
+)
+
+(defrule domain-check-value-predicate-must-have-only-one-value
+  "Make sure that each value predicate has at most one value."
+  (domain-predicate (value-predicate TRUE) (name ?pred))
+  (domain-fact (name ?pred) (param-values $?args ?val))
+  (domain-fact (name ?pred) (param-values $?args ?other-val&~?val))
+=>
+  (assert (domain-error (error-type value-predicate-with-multiple-values)
+    (error-msg (str-cat "Value predicate " ?pred "(" (implode$ ?args) ") "
+    "has multiple values " "(" ?val ", " ?other-val ")"))))
+)
+
+(defrule domain-check-value-predicate-clean-up-unique-value-error
+  "Clean up the error if a value predicate no longer has multiple values."
+  ?e <- (domain-error (error-type value-predicate-with-multiple-values))
+  (not (and (domain-fact (name ?pred) (param-values $?args ?val))
+            (domain-fact (name ?pred) (param-values $?args ?other-val&~?val))))
+=>
+  (retract ?e)
+)
+
+(defrule domain-check-effects-on-value-predicates-must-occur-in-pairs
+  "Value predicates can only have exactly one value. Thus, any effect on value
+   predicated must occur in pairs."
+  (domain-predicate (value-predicate TRUE) (name ?pred))
+  (domain-effect (name ?n) (part-of ?op) (predicate ?pred)
+    (param-names $?args ?) (type ?type))
+  (not (domain-effect (part-of ?op) (predicate ?pred) (param-names $?args ?)
+        (type ?other-type&~?type)))
+=>
+  (assert (domain-error (error-type value-predicate-without-paired-effect)
+            (error-msg (str-cat "Effect " ?n " of operator " ?op " on " ?pred
+              " (" (implode$ ?args) ") "
+              "is not matched with a complementary effect"))))
 )
 
 (defrule domain-cleanup-preconditions-on-worldmodel-change

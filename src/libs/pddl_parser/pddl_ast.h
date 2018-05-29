@@ -59,7 +59,7 @@ namespace pddl_parser {
   struct Predicate
   {
     /** The name of the predicate for atomic formulae, 'and' for a conjunction,
-     * 'not' for a negation.
+     * 'or' for a disjunction, 'not' for a negation.
      */
     Atom function;
     /** The arguments of the predicate or the subformulae of the compound

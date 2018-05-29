@@ -67,10 +67,12 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const {
   stringstream namestream;
   namestream << parent_ << sub_counter_;
   string name = namestream.str();
-  if (p.function == "and" || p.function == "not") {
+  if (p.function == "and" || p.function == "not" || p.function == "or") {
     string type;
     if (p.function == "and") {
       type = "conjunction";
+    } else if (p.function == "or") {
+      type = "disjunction";
     } else if (p.function == "not") {
       type = "negation";
     }
@@ -131,11 +133,19 @@ PreconditionToCLIPSFactVisitor::operator()(Predicate &p) const {
         constants += " " + p_string;
       }
     }
+    string predicate_string;
+    if (p.function == "=") {
+      // It's not a predicate but an equality.
+      predicate_string = " (equality TRUE)";
+    } else {
+      predicate_string = " (predicate " + p.function + ")";
+    }
+
     res.push_back(string(
           "(domain-atomic-precondition"
           " (part-of " + new_parent + ")"
           " (name " + name + ")"
-          " (predicate " + p.function + ")"
+          + predicate_string +
           " (param-names (create$" + params + "))"
           " (param-constants (create$" + constants + "))"
           ")"));
