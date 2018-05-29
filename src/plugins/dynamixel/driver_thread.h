@@ -129,6 +129,7 @@ class DynamixelDriverThread
   float         cfg_min_voltage_;
   float         cfg_max_voltage_;
   std::vector<unsigned int> cfg_servos_to_discover_;
+  bool          cfg_enable_verbose_output_;
   
   void  goto_angle(unsigned int servo_id, float angle);
   void  goto_angle_timed(unsigned int servo_id, float angle, float time_sec);
