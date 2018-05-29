@@ -32,9 +32,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FvRawReader <fvutils/readers/fvraw.h>
  * FvRaw image reader implementation.

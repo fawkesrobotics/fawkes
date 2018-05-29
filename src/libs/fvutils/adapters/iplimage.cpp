@@ -28,9 +28,6 @@
 #include <opencv/cv.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class IplImageAdapter <fvutils/adapters/iplimage.h>
  * Adapter for OpenCV IplImages.

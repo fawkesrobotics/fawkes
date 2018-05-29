@@ -26,9 +26,6 @@
 #define __FIREVISION_UTILS_COLOR_RGBYUV_H
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 #define RGB2YUV(r, g, b, y, u, v) { 				\

@@ -25,9 +25,6 @@
 #define __FIREVISION_FVUTILS_CAMERA_TRACKER_H_
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class RelativePositionModel;
 

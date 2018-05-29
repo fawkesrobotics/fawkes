@@ -25,9 +25,6 @@
 
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ImageDecompressor <fvutils/compression/imagedecompressor.h>
  * Image de-compressor interface.

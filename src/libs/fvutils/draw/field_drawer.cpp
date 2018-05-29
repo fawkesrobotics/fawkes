@@ -33,9 +33,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FieldDrawer <fvutils/draw/field_drawer.h>
  * This class is used to draw a soccer field.

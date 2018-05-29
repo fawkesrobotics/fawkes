@@ -28,9 +28,6 @@
 
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FireVisionDataFileBlock <fvutils/fileformat/fvfile_block.h>
  * FireVision File Format data block.

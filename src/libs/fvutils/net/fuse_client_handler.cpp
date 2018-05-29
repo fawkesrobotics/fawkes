@@ -24,9 +24,6 @@
 #include <fvutils/net/fuse_client_handler.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FuseClientHandler <fvutils/net/fuse_client_handler.h>
  * FUSE client handler.

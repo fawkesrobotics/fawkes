@@ -34,9 +34,6 @@
 #include <cstring>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FuseImageContent <fvutils/net/fuse_image_content.h>
  * FUSE image content.

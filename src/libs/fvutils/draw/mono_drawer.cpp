@@ -38,9 +38,6 @@
 }
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MonoDrawer <fvutils/draw/mono_drawer.h>
  * Draw to a monochrome image.

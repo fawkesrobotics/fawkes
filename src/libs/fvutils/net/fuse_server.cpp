@@ -32,9 +32,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FuseServer <fvutils/net/fuse_server.h>
  * FireVision FUSE protocol server.

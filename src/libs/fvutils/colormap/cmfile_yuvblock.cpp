@@ -29,9 +29,6 @@
 #include <cstring>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColormapFileYuvBlock <fvutils/colormap/cmfile_yuvblock.h>
  * YUV block for colormap file.

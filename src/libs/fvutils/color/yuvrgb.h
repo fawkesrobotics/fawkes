@@ -29,9 +29,6 @@
 #include <fvutils/color/rgb.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 #define YUV2RGB(y, u, v, r, g, b) {\

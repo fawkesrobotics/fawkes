@@ -34,9 +34,6 @@ using namespace std;
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SharedMemoryLookupTable <fvutils/ipc/shm_lut.h>
  * Shared memory lookup table.

@@ -34,9 +34,6 @@
 #include <cstdio>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColormapFile::ColormapBlockVector <fvutils/colormap/cmfile.h>
  * Vector of colormap blocks.

@@ -28,9 +28,6 @@
 #include <sys/types.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Color spaces.
  * Color spaces have their name for historical reasons, but the proper

@@ -26,9 +26,6 @@
 #define __FIREVISION_UTILS_COLOR_YUV_H
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 #define YUV422PA_MACROPIXEL_AT(YUV, width, x, y) ((unsigned char*)YUV + (y)*(width)*2 + ((x)-((x)%2))*2)

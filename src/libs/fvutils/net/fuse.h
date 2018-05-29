@@ -34,9 +34,6 @@
 #pragma pack(push,4)
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** FUSE version enum. */
 typedef enum {

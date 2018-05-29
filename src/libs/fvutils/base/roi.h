@@ -27,9 +27,6 @@
 #include <fvutils/base/types.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /* The values of this enum-type have to be indexed subsequently,
    beginning with 0. The last value has to be "H_SIZE = ...".

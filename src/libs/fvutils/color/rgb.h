@@ -26,9 +26,6 @@
 #define __FIREVISION_UTILS_COLOR_RGB_H
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 #define RGB_PIXEL_SIZE 3
 #define RGB_PIXEL_AT(RGB, width, x, y)    ((RGB_t *)(RGB + ((y) * (width) * RGB_PIXEL_SIZE) + (x) * RGB_PIXEL_SIZE))

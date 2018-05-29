@@ -28,9 +28,6 @@
 #include <fvmodels/scanlines/scanlinemodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ImageDiff {
  public:

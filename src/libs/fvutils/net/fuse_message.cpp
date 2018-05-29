@@ -31,9 +31,6 @@
 #include <netinet/in.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FuseNetworkMessage <fvutils/net/fuse_message.h>
  * FUSE Network Message.

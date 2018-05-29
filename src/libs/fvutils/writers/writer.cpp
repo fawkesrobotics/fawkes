@@ -31,9 +31,6 @@
 #include <cstdio>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Writer <fvutils/writers/writer.h>
  * Interface to write images.

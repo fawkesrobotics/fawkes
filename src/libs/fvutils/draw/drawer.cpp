@@ -29,9 +29,6 @@
 #include <unistd.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Drawer <fvutils/draw/drawer.h>
  * Draw to an image.

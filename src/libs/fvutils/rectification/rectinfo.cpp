@@ -24,9 +24,6 @@
 #include <fvutils/rectification/rectinfo.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 const char * rectinfo_camera_strings[] =
   {

@@ -43,9 +43,6 @@
 using namespace std;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BayesHistosToLut <fvutils/colormap/bayes/bayes_histos_to_lut.h>
  * LUT generation by using Bayesian method on histograms.

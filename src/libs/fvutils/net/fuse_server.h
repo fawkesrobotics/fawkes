@@ -37,9 +37,6 @@ namespace fawkes {
   class NetworkAcceptorThread;
 }
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FuseServerClientThread;
 

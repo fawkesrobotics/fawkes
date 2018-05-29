@@ -29,9 +29,6 @@
 #include <list>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 typedef std::list<fawkes::cart_coord_2d_t> fld_line_points_t;
 

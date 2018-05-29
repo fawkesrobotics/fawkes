@@ -34,9 +34,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SeqWriter <fvutils/writers/seq_writer.h>
  * Writes a sequence of images to disk.

@@ -24,9 +24,6 @@
 #include <fvutils/color/color_object_map.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColorObjectMap <fvutils/color/color_object_map.h>
  * Color mapping class.

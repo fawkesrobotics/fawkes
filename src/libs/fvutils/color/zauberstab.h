@@ -34,9 +34,6 @@
 
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** a "slice" is a row of consecutive pixels
    (horizontal) */

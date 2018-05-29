@@ -32,9 +32,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FuseImageListContent <fvutils/net/fuse_imagelist_content.h>
  * FUSE image list content.

@@ -48,9 +48,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FuseServerClientThread <fvutils/net/fuse_server_client_thread.h>
  * FUSE Server Client Thread.

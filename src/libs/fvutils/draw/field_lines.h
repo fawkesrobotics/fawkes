@@ -27,9 +27,6 @@
 #include <string>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 typedef std::list<fawkes::arc_t> field_circles_t;
 

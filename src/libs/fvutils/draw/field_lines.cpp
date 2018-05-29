@@ -31,9 +31,6 @@ using std::min;
 using std::max;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FieldLines <fvutils/draw/field_lines.h>
  * This class acts as a container for lines on a soccer field.

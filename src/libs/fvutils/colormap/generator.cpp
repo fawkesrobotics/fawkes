@@ -25,9 +25,6 @@
 #include <fvutils/colormap/generator.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColormapGenerator <fvutils/colormap/generator.h>
  * Interface for colormap generators.

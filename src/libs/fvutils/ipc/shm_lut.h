@@ -33,9 +33,6 @@
 #define FIREVISION_SHM_LUT_MAGIC_TOKEN "FireVision LUT"
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Shared memory lookup table header struct. */
 typedef struct {

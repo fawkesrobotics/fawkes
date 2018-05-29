@@ -30,9 +30,6 @@
 
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Header for a histogram block. */
 typedef struct _histogram_block_header_t
