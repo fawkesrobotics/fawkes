@@ -2,7 +2,7 @@
  *  yaw_calibration.cpp - Calibrate yaw transform of the back laser
  *
  *  Created: Tue 18 Jul 2017 17:05:30 CEST 17:05
- *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+ *  Copyright  2017-2018  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,21 @@
 using namespace fawkes;
 using namespace std;
 
+/** @class YawCalibration "yaw_calibration.h"
+ *  Calibrate the yaw angle of the back laser using the front laser.
+ *  This is done by comparing data of both lasers left and right of the robot.
+ *  The yaw angle of the back laser is adapted so the matching cost between both
+ *  lasers is minimzed.
+ *  @author Till Hofmann
+ */
+
+/** Constructor.
+ *  @param laser The interface of the back laser to get the data from
+ *  @param front_laser The interface of the front laser to get the data from
+ *  @param tf_transformer The transformer to use to compute transforms
+ *  @param config The network config to read from and write the time offset to
+ *  @param config_path The config path to read from and write the time offset to
+ */
 YawCalibration::YawCalibration(LaserInterface *laser, LaserInterface *front_laser,
       tf::Transformer *tf_transformer, NetworkConfiguration *config,
       string config_path)
@@ -34,6 +49,10 @@ YawCalibration::YawCalibration(LaserInterface *laser, LaserInterface *front_lase
     random_float_dist_(0,1),
     min_cost_(numeric_limits<float>::max()), min_cost_yaw_(0.) {}
 
+/** The actual calibration.
+ *  Continuously compare the data from both lasers and update the yaw config
+ *  until the cost reaches the threshold.
+ */
 void
 YawCalibration::calibrate() {
   printf("Starting to calibrate yaw angle.\n");
@@ -77,6 +96,10 @@ YawCalibration::calibrate() {
   printf("Yaw calibration finished.\n");
 }
 
+/** Get the cost of the current configuration.
+ *  @param new_yaw A pointer to the yaw configuration to write updates to
+ *  @return The current matching cost
+ */
 float
 YawCalibration::get_current_cost(float *new_yaw) {
   front_laser_->read();
@@ -90,6 +113,14 @@ YawCalibration::get_current_cost(float *new_yaw) {
   return get_matching_cost(front_cloud, back_cloud, new_yaw);
 }
 
+/** Compute the new yaw.
+ *  The yaw is updated by taking steps into one direction until the cost
+ *  increases. In that case, the step is size is decreased and negated.
+ *  Also randomly reset the step size to avoid local minima.
+ *  @param current_cost The current matching cost between both lasers
+ *  @param last_yaw The last yaw configuration
+ *  @return The new yaw configuration
+ */
 float
 YawCalibration::get_new_yaw(float current_cost, float last_yaw) {
   static float last_cost = current_cost;

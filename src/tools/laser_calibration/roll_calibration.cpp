@@ -2,7 +2,7 @@
  *  roll_calibration.cpp - Calibrate roll transform of the back laser
  *
  *  Created: Tue 18 Jul 2017 16:28:09 CEST 16:28
- *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+ *  Copyright  2017-2018  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -33,10 +33,27 @@ using namespace fawkes;
 using namespace std;
 
 
+/** @class RollCalibration "roll_calibration.h"
+ *  Calibrate the roll angle of a laser.
+ *  This is done by splitting the pointcloud in the rear of the robot into a
+ *  left and a right cloud, and comparing the mean z of both clouds.
+ *  @author Till Hofmann
+ */
+
+/** Constructor.
+ *  @param laser The laser to get the data from
+ *  @param tf_transformer The transformer to use to compute transforms
+ *  @param config The network config to read from and write the time offset to
+ *  @param config_path The config path to read from and write the time offset to
+ */
 RollCalibration::RollCalibration(LaserInterface *laser, tf::Transformer
     *tf_transformer, NetworkConfiguration *config, string config_path)
   : LaserCalibration(laser, tf_transformer, config, config_path) {}
 
+/** The actual calibration.
+ *  Iteratively run the calibration until a good roll angle has been found.
+ *  The new value is written to the config in each iteration.
+ */
 void
 RollCalibration::calibrate() {
   printf("Starting to calibrate roll angle.\n");
@@ -60,6 +77,9 @@ RollCalibration::calibrate() {
   printf("Roll calibration finished.\n");
 }
 
+/** Get the difference of the mean of z of the left and right pointclouds.
+ *  @return The mean differenze, >0 if the left cloud is higher than the right
+ */
 float
 RollCalibration::get_lr_mean_diff() {
   laser_->read();
@@ -86,11 +106,20 @@ RollCalibration::get_lr_mean_diff() {
   return get_mean_z(left_cloud) - get_mean_z(right_cloud);
 }
 
+/** Compute a new roll angle based on the mean error and the old roll.
+ *  @param mean_error The mean difference between the left and right cloud
+ *  @param old_roll The roll angle used to get the data
+ *  @return A new roll angle
+ */
 float
 RollCalibration::get_new_roll(float mean_error, float old_roll) {
   return old_roll + 0.5 * mean_error;
 }
 
+/** Filter the input cloud to be useful for roll calibration.
+ *  @param input The pointcloud to filter
+ *  @return The same as the input but without NaN points
+ */
 PointCloudPtr
 RollCalibration::filter_calibration_cloud(PointCloudPtr input) {
   PointCloudPtr filtered(new PointCloud());

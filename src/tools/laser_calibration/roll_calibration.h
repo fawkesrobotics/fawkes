@@ -39,6 +39,7 @@ protected:
 
 protected:
   // TODO: make threshold and min_points configurable
+  /** The threshold of the left-right difference to stop calibration */
   constexpr static float threshold = 0.00001;
 };
 

@@ -2,7 +2,7 @@
  *  laser_calibration.h - Base class for laser transform calibration
  *
  *  Created: Mon 10 Jul 2017 17:37:01 CEST 17:37
- *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+ *  Copyright  2017-2018  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -50,9 +50,15 @@ deg2rad(float deg)
   return (deg * M_PI / 180.f);
 }
 
+/** Exception that is thrown if there are not enough laser points to
+ *  do a matching.
+ */
 class InsufficientDataException : public fawkes::Exception
 {
 public:
+  /** Constructor.
+   *  @param error: the error message
+   */
   InsufficientDataException(const char *error) : Exception(error) {}
 };
 
@@ -80,12 +86,19 @@ protected:
   PointCloudPtr filter_center_cloud(PointCloudPtr input);
 
 protected:
+  /** The laser that provides the input data */
   LaserInterface *laser_;
+  /** The transformer used to compute transforms */
   fawkes::tf::Transformer *tf_transformer_;
+  /** The network config to use for reading and updating config values */
   fawkes::NetworkConfiguration *config_;
+  /** The config path to use for reading and updating config values */
   const std::string config_path_;
+  /** Time in micro seconds to sleep between iterations */
   const static long sleep_time_ = 50000;
+  /** The number of iterations to run before aborting the calibration */
   const static uint max_iterations_ = 100;
+  /** The number of points required in a pointcloud to use it as input data */
   const static size_t min_points = 10;
 };
 

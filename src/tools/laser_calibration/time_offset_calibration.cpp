@@ -2,7 +2,7 @@
  *  time_offset_calibration.cpp - Laser time offset calibration
  *
  *  Created: Tue 18 Jul 2017 17:40:16 CEST 17:40
- *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+ *  Copyright  2017-2018  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -35,6 +35,27 @@
 using namespace fawkes;
 using namespace std;
 
+/** @class TimeOffsetCalibration "time_offset_calibration.h"
+ *  Calibrate the time offset of a laser. This is done as follows:
+ *    1. Move the robot to a place with some recognizable object in the laser,
+ *       e.g., a corner
+ *    2. Start rotating the robot
+ *    3. Record a reference pointcloud
+ *    4. Stop rotating
+ *    5. Record a second pointcloud
+ *    6. Compare the two pointclouds and update the time offset based on the
+ *       angle between the two pointclouds.
+ *
+ *  @author Till Hofmann
+ */
+
+/** Constructor.
+ *  @param laser The laser to get the data from
+ *  @param motor The MotorInterface used to control the rotation of the robot
+ *  @param tf_transformer The transformer to use to compute transforms
+ *  @param config The network config to read from and write the time offset to
+ *  @param config_path The config path to read from and write the time offset to
+ */
 TimeOffsetCalibration::TimeOffsetCalibration(LaserInterface *laser,
     MotorInterface *motor, tf::Transformer *tf_transformer, NetworkConfiguration
     *config, string config_path)
@@ -43,6 +64,13 @@ TimeOffsetCalibration::TimeOffsetCalibration(LaserInterface *laser,
     step_(numeric_limits<float>::max())
   {}
 
+/** Calibrate the time offset.
+ *  Continuously execute the calibration procedure until the offset is small
+ *  enough. To improve convergence rate, in each iteration, jump to the minimum
+ *  with a certain probability based on the current cost and the minimal cost.
+ *  The time offset is written to the config in each iteration. At the end, the
+ *  time offset is always set to the offset with minimal cost.
+ */
 void TimeOffsetCalibration::calibrate() {
   float current_offset = config_->get_float(config_path_.c_str());
   map<float, float> costs;
@@ -114,6 +142,15 @@ void TimeOffsetCalibration::calibrate() {
   config_->set_float(config_path_.c_str(), min_offset);
 }
 
+/** Prepare the laser data for calibration.
+ *  Convert the laser data into a pointcloud and filter it so it only contains
+ *  data that is useful for calibration. In particular, restrict the data in x
+ *  and y directions to the interval [-3,3], remove any points close to the
+ *  robot in y direction, and limit the data in z direction to points above the
+ *  ground and < 1m.
+ *  @param laser The laser interface to read the unfiltered data from
+ *  @return A filtered pointcloud
+ */
 PointCloudPtr
 TimeOffsetCalibration::get_lasercloud(LaserInterface *laser) {
   laser->read();

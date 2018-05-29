@@ -2,7 +2,7 @@
  *  main.cpp - Laser calibration tool
  *
  *  Created: Tue 18 Jul 2017 15:47:58 CEST 15:47
- *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+ *  Copyright  2017-2018  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -39,6 +39,9 @@
 using namespace fawkes;
 using namespace std;
 
+/** Print the usage message.
+ * @param program_name The path of the program.
+ */
 void
 print_usage(const char *program_name)
 {
@@ -54,6 +57,13 @@ print_usage(const char *program_name)
       program_name);
 }
 
+/** Run all calibrations.
+ *  The command line options allow to enable/disable certain calibrations. By
+ *  default, calibrate everything.
+ *  @param argc Number of commandline arguments
+ *  @param argc The commandline arguments
+ *  @return 0 on success, -1 if an error occured.
+ */
 int
 main(int argc, char **argv)
 {

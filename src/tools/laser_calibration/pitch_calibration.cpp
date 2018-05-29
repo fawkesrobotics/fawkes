@@ -2,7 +2,7 @@
  *  pitch_calibration.cpp - Calibrate pitch transform of the back laser
  *
  *  Created: Tue 18 Jul 2017 16:51:36 CEST 16:51
- *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+ *  Copyright  2017-2018  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -25,11 +25,28 @@
 using namespace fawkes;
 using namespace std;
 
+/** @class PitchCalibration "pitch_calibration.h"
+ *  Calibrate the pitch angle of the laser.
+ *  Compute the angle by computing the mean z value of all points in the rear of
+ *  the robot and update the angle accordingly.
+ *  @author Till Hofmann
+ */
+
+/** Constructor.
+ *  @param laser The laser interface to fetch data from
+ *  @param tf_transformer The transformer to use to compute transforms
+ *  @param config The network config to read from and write updates to
+ *  @param config_path The config path to read from and write updates to
+ */
 PitchCalibration::PitchCalibration(LaserInterface *laser,
     tf::Transformer *tf_transformer,
     NetworkConfiguration *config, string config_path)
 : LaserCalibration(laser, tf_transformer, config, config_path) {}
 
+/** The actual calibration.
+ * Apply the method continuously until the mean z reaches the threshold.
+ * Write the upated pitch angle to the config in each iteration.
+ */
 void
 PitchCalibration::calibrate() {
   printf("Starting pitch angle calibration.\n");
@@ -57,6 +74,11 @@ PitchCalibration::calibrate() {
   printf("Pitch calibration finished.\n");
 }
 
+/** Compute the new pitch based on the old pitch and the mean z.
+ *  @param z The mean z value of all points in the rear of the robot.
+ *  @param old_pitch The pitch that was configured when recording the mean z.
+ *  @return The new pitch angle.
+ */
 float
 PitchCalibration::get_new_pitch(float z, float old_pitch) {
   // Note: We could also compute a more accurate new value using the measured

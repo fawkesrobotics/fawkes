@@ -36,11 +36,17 @@ protected:
   PointCloudPtr get_lasercloud(LaserInterface *laser);
 
 protected:
+  /** Time in micro seconds to sleep after each iteration */
   const static long sleep_time_ = 2000000;
+  /** The motor interface used to control the rotation of the robot */
   fawkes::MotorInterface *motor_;
+  /** The angular velocity to use to rotate */
   constexpr static float omega_ = 2.0;
+  /** The frequency for motor commands */
   const static unsigned int frequency_ = 100;
+  /** The time to rotate */
   constexpr static float rotation_time_ = 1.;
+  /** The current step size for the time offset */
   float step_;
 };
 

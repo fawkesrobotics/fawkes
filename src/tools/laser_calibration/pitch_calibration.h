@@ -33,6 +33,7 @@ public:
 protected:
   float get_new_pitch(float z, float old_pitch);
 protected:
+  /** The threshold of the mean of z to stop calibration */
   constexpr static float threshold = 0.001;
 };
 
