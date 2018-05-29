@@ -24,9 +24,6 @@
 #include <plugins/openrave/aspect/openrave.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenRaveAspect <plugins/openrave/aspect/openrave.h>
  * Thread aspect create, update, and graph round-robin databases (RRD).

@@ -30,9 +30,6 @@
 
 using namespace OpenRAVE;
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenRaveRobot <plugins/openrave/robot.h>
 * Class handling interaction with the OpenRAVE::RobotBase class.

@@ -27,9 +27,6 @@
 #include <cstdio>
 
  namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenRaveManipulatorKatana6M180 <plugins/openrave/manipulators/katana6M180.h>
  * Class containing information about all katana6M180 motors.

@@ -27,9 +27,6 @@
 #include <cstdio>
 
  namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenRaveManipulatorNeuronicsKatana <plugins/openrave/manipulators/neuronics_katana.h>
  * Class containing information about all neuronics-katana motors.

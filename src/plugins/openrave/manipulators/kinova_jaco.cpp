@@ -28,9 +28,6 @@
 #include <cstdio>
 
  namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenRaveManipulatorKinovaJaco <plugins/openrave/manipulators/kinova_jaco.h>
  * Class containing information about all Kinova Jaco motors.

@@ -25,9 +25,6 @@
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenRaveManipulator <plugins/openrave/manipulator.h>
  * Class containing information about all manipulator motors.

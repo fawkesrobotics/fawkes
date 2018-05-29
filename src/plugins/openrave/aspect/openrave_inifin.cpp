@@ -28,9 +28,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenRaveAspectIniFin <plugins/openrave/aspect/openrave_inifin.h>
  * OpenRaveAspect initializer/finalizer.

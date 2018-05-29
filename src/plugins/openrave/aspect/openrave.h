@@ -28,9 +28,6 @@
 #include <plugins/openrave/aspect/openrave_connector.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class OpenRaveAspectIniFin;
 
