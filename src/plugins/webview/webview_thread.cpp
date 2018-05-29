@@ -24,7 +24,6 @@
 #include "blackboard_processor.h"
 #include "startpage_processor.h"
 #include "plugins_processor.h"
-#include "syncpoint_processor.h"
 #ifdef HAVE_TF
 #  include "tf_processor.h"
 #endif
@@ -62,8 +61,6 @@ const char *WebviewThread::PLUGINS_URL_PREFIX = "/plugins";
 const char *WebviewThread::TF_URL_PREFIX = "/tf";
 /** Prefix for the WebMJPEGRequestProcessor. */
 const char *WebviewThread::IMAGE_URL_PREFIX = "/images";
-/** Prefix for the SyncPointRequestProcessor. */
-const char *WebviewThread::SYNCPOINT_URL_PREFIX = "/syncpoints";
 
 /** @class WebviewThread "webview_thread.h"
  * Webview Thread.
@@ -159,12 +156,6 @@ WebviewThread::init()
     __cfg_access_log = config->get_string("/webview/access_log");
   } catch (Exception &e) {}
 
-  __cfg_syncpoint_max_age = 20.f;
-  try {
-    __cfg_syncpoint_max_age = config->get_float("/webview/syncpoints/max_age");
-  } catch (Exception &e) {}
-
-
   __cache_logger.clear();
 
   __webview_service = new NetworkService(nnresolver, "Fawkes Webview on %h",
@@ -224,7 +215,6 @@ WebviewThread::init()
   __static_processor     = new WebviewStaticRequestProcessor(STATIC_URL_PREFIX, static_dirs_cstr, logger);
   __blackboard_processor = new WebviewBlackBoardRequestProcessor(BLACKBOARD_URL_PREFIX, blackboard);
   __plugins_processor    = new WebviewPluginsRequestProcessor(PLUGINS_URL_PREFIX, plugin_manager);
-  __syncpoint_processor  = new WebviewSyncPointRequestProcessor(SYNCPOINT_URL_PREFIX, syncpoint_manager, __cfg_syncpoint_max_age);
 #ifdef HAVE_TF
   __tf_processor         = new WebviewTfRequestProcessor(TF_URL_PREFIX, tf_listener);
 #endif
@@ -236,7 +226,6 @@ WebviewThread::init()
   webview_url_manager->register_baseurl(STATIC_URL_PREFIX, __static_processor);
   webview_url_manager->register_baseurl(BLACKBOARD_URL_PREFIX, __blackboard_processor);
   webview_url_manager->register_baseurl(PLUGINS_URL_PREFIX, __plugins_processor);
-  webview_url_manager->register_baseurl(SYNCPOINT_URL_PREFIX, __syncpoint_processor);
 #ifdef HAVE_TF
   webview_url_manager->register_baseurl(TF_URL_PREFIX, __tf_processor);
 #endif
@@ -311,7 +300,6 @@ WebviewThread::finalize()
   delete __blackboard_processor;
   delete __startpage_processor;
   delete __plugins_processor;
-  delete __syncpoint_processor;
 #ifdef HAVE_TF
   delete __tf_processor;
 #endif
