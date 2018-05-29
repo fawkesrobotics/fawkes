@@ -31,9 +31,6 @@
 #include <cstdio>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class TwoLinesCellRenderer <gui_utils/twolines_cellrenderer.h>
  * Gtk cell renderer for two lines of text in a cell.

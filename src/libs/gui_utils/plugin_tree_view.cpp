@@ -34,9 +34,6 @@
 using namespace std;
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class PluginTreeView <gui_utils/plugin_tree_view.h>
  * A TreeView class to list available plugins und trigger their

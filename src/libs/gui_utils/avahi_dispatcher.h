@@ -30,9 +30,6 @@
 #include <core/utils/lock_queue.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 class AvahiThread;
 class NetworkService;
 

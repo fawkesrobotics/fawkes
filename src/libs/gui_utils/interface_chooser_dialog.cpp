@@ -33,9 +33,6 @@
 #include <cstring>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Default title of interface chooser dialogs. */
 const char* const InterfaceChooserDialog::DEFAULT_TITLE = "Select Interfaces";

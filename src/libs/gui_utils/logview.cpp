@@ -29,9 +29,6 @@
 #include <gtkmm.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class LogView <gui_utils/logview.h>
