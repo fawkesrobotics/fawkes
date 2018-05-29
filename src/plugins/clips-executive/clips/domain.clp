@@ -269,6 +269,8 @@
   (plan-action
     (status FORMULATED|PENDING|WAITING)
     (action-name ?op)
+    (goal-id ?g)
+    (plan-id ?p)	
     (param-names $?action-param-names)
     (id ?action-id)
     (param-values $?action-values& :
@@ -291,20 +293,20 @@
         (grounded TRUE)))
 =>
   (bind ?values (create$))
-  (foreach ?p ?precond-param-names
-    (if (neq (nth$ ?p-index ?precond-param-constants) nil) then
+  (foreach ?pre ?precond-param-names
+    (if (neq (nth$ ?pre-index ?precond-param-constants) nil) then
       (bind ?values
-        (insert$ ?values ?p-index (nth$ ?p-index ?precond-param-constants)))
+        (insert$ ?values ?pre-index (nth$ ?pre-index ?precond-param-constants)))
     else
-      (bind ?action-index (member$ ?p ?action-param-names))
+      (bind ?action-index (member$ ?pre ?action-param-names))
       (if (not ?action-index) then
         ; ?p is not in the list of the action parameters
         (assert (domain-error (error-type unknown-parameter) (error-msg
-          (str-cat "Precondition " ?precond-name " has unknown parameter " ?p)))
+          (str-cat "Precondition " ?precond-name " has unknown parameter " ?pre)))
         )
       else
         (bind ?values
-          (insert$ ?values ?p-index (nth$ ?action-index ?action-values)))
+          (insert$ ?values ?pre-index (nth$ ?action-index ?action-values)))
       )
     )
   )
