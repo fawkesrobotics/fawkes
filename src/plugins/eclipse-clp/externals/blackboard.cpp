@@ -59,6 +59,7 @@ EclExternalBlackBoard*  EclExternalBlackBoard::m_instance = NULL;
 
   /** Creates the initial EclExternalBlackBoard object
    * @param bb pointer to the BlackBoard to be used
+   * @param logger pointer to the Logger to be used
    */
   void EclExternalBlackBoard::create_initial_object(BlackBoard *bb, Logger *logger)
   {

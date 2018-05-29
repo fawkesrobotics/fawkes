@@ -55,7 +55,14 @@ public:
   static BlackBoard* blackboard_instance();
   std::map<std::string, Interface *> & interfaces();
 
+  /**
+   * @return A pointer to the plugin-central logger
+   */
   static Logger *logger() { return m_logger; }
+
+  /**
+   * @return Name for logging
+   */
   static const char *name() { return "EclExternalBlackBoard"; }
 
 private:
