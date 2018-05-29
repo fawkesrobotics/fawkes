@@ -33,10 +33,6 @@ namespace fawkes {
   class Configuration;
 
   namespace amcl {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 map_t *
 read_map(const char *map_file,

@@ -27,10 +27,6 @@ using namespace firevision;
 
 namespace fawkes {
   namespace amcl {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 // compute linear index for given map coords
 #define MAP_IDX(sx, i, j) ((sx) * (j) + (i))
