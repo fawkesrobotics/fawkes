@@ -26,9 +26,6 @@
 #include <core/threading/mutex_locker.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class ModuleManager <utils/system/dynamic_module/module_manager.h>

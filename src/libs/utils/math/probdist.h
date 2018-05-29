@@ -28,9 +28,6 @@
 
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** The normal distribution
  * @param diff the differance: (x - mu) for the mean mu and the randomvariable x

@@ -25,9 +25,6 @@
 #define __UTILS_MATH_TRIANGLE_H_
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Calculate triangle area.
  * @param p0 first point of triangle

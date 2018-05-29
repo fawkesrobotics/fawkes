@@ -33,9 +33,6 @@
 #define HUNGARIAN_MODE_MAXIMIZE_UTIL 1
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /// @cond INTERNAL
 typedef struct {

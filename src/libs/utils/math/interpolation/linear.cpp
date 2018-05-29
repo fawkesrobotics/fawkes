@@ -25,9 +25,6 @@
 #include <utils/math/interpolation/linear.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LinearInterpolator <utils/math/interpolation/linear.h>
  * Linear value interpolator.

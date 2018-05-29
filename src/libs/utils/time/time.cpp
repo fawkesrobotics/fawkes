@@ -37,9 +37,6 @@
 #include <limits>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Instance of Time denoting the maximum value possible.
  * This is particularly useful when initializing a minimization in time.

@@ -27,9 +27,6 @@
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 std::string command_args_tostring(const char *argv[]);
 std::string envp_tostring(char *envp[]);

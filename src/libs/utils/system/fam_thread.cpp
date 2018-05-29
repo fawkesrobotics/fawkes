@@ -25,9 +25,6 @@
 #include <unistd.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FamThread <utils/system/fam_thread.h>
  * FileAlterationMonitor thread wrapper.

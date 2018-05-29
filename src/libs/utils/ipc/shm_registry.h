@@ -33,9 +33,6 @@
 #define USER_SHM_NAME "/fawkes-shmem-registry-%s"
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class SharedMemoryRegistry
 {

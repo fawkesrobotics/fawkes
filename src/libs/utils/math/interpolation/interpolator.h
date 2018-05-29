@@ -25,9 +25,6 @@
 #define __UTILS_MATH_INTERPOLATION_INTERPOLATOR_H_
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Interpolator
 {

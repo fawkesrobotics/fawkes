@@ -26,9 +26,6 @@
 #include <Eigen/Geometry>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** Calculate Yaw angle from quaternion.

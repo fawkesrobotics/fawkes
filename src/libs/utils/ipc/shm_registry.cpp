@@ -34,9 +34,6 @@
 #include <cstdlib>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SharedMemoryRegistry <utils/ipc/shm_registry.h>
  * Shared memory registry.

@@ -26,9 +26,6 @@
 #include <Eigen/Geometry>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Check if two line segments intersect.
  * Line segments only intersect if the intersection point of the lines

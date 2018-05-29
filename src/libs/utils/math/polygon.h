@@ -28,9 +28,6 @@
 #include <Eigen/StdVector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Polygon as a vector of 2D points. */
 typedef std::vector<Eigen::Vector2f, Eigen::aligned_allocator<Eigen::Vector2f> > Polygon2D;

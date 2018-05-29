@@ -25,9 +25,6 @@
 #include <cstdlib>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MemAutoFree <utils/misc/autofree.h>
  * Automatically free memory on destruction.

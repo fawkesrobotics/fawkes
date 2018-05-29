@@ -32,9 +32,6 @@
 #define verbose (0)
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 #define hungarian_test_alloc(X) do {if ((void *)(X) == NULL)		\
       fprintf(stderr, "Out of memory in %s, (%s, line %d).\n",		\
