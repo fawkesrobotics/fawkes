@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="LaserBoxFilterInterface" author="Nicolas Limpert" year="2018">
+  <data>
+    <field type="uint32" name="num_boxes">The number of currently applied boxes</field>
+    <comment>
+      Interface to create new laser filters at runtime.
+    </comment>
+    <!-- Raw data output from servo -->
+  </data>
+
+  <!-- Motion commands -->
+  <message name="CreateNewBoxFilter">
+    <comment>Create a new filter.</comment>
+    <field type="double" length="2" name="p1">x,y coordinates of first vector</field>
+    <field type="double" length="2" name="p2">x,y coordinates of second vector</field>
+    <field type="double" length="2" name="p3">x,y coordinates of third vector</field>
+    <field type="double" length="2" name="p4">x,y coordinates of fourth vector</field>
+  </message>
+</interface>
