@@ -63,8 +63,6 @@ class ClipsExecutiveThread
  private:
 	bool        cfg_assert_time_each_loop_;
 
-	bool        started_;
-
 	std::shared_ptr<fawkes::ActionSkillMapping> action_skill_mapping_;
 };
 

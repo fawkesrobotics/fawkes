@@ -25,6 +25,9 @@
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
 #include <aspect/clock.h>
+#include <aspect/blackboard.h>
+
+#include <interfaces/MongoDBManagedReplicaSetInterface.h>
 
 #include <string>
 #include <vector>
@@ -45,7 +48,8 @@ namespace mongo {
 class MongoDBReplicaSetConfig
 : public fawkes::Thread,
 	public fawkes::LoggingAspect,
-	public fawkes::ClockAspect
+	public fawkes::ClockAspect,
+	public fawkes::BlackBoardAspect
 {
  public:
 	MongoDBReplicaSetConfig(fawkes::Configuration *config,
@@ -66,19 +70,19 @@ class MongoDBReplicaSetConfig
 	bool leader_elect(bool force = false);
 	void leader_resign();
 
-	enum ReplicaSetNodeStatus {
-		PRIMARY,
-		SECONDARY,
-		ARBITER,
-		NO_PRIMARY,
-		NOT_INITIALIZED,
-		INITIALIZING,
-		INVALID_CONFIG,
-		REMOVED,
-		ERROR
+	struct ReplicaSetStatus {
+		fawkes::MongoDBManagedReplicaSetInterface::ReplicaSetMemberStatus   member_status;
+		fawkes::MongoDBManagedReplicaSetInterface::ReplicaSetPrimaryStatus  primary_status;
+		std::string                                                         error_msg;
+
+		bool operator!=(const ReplicaSetStatus& other) const {
+			return member_status != other.member_status ||
+				primary_status != other.primary_status ||
+				error_msg != other.error_msg;
+		}
 	};
 
-	ReplicaSetNodeStatus rs_status(mongo::BSONObj &reply);
+	ReplicaSetStatus rs_status(mongo::BSONObj &reply);
 	void rs_init();
 	void rs_monitor(const mongo::BSONObj &reply);
 	bool check_alive(const std::string &h);
@@ -110,7 +114,9 @@ class MongoDBReplicaSetConfig
 	int leader_expiration_;
   fawkes::TimeWait *timewait_;
 
-  ReplicaSetNodeStatus last_status_;
+  ReplicaSetStatus last_status_;
+
+  fawkes::MongoDBManagedReplicaSetInterface*  rs_status_if_;
 };
 
 #endif

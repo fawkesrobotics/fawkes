@@ -63,8 +63,7 @@ class EventTriggerManager
       mongo::BSONObjBuilder query_builder;
       query_builder.append("ns", collection);
       // added/updated object is a subdocument in the oplog document
-      for(mongo::BSONObjIterator it = query.getFilter().begin(); it.more();)
-      {
+      for (mongo::BSONObjIterator it = query.getFilter().begin(); it.more();) {
         mongo::BSONElement elem = it.next();
         query_builder.appendAs(elem, std::string("o.") + elem.fieldName());
       }
@@ -75,10 +74,13 @@ class EventTriggerManager
       mongo::DBClientBase* con;
       std::string oplog;
       oplog = "local.oplog.rs";
-      if(collection.find(repl_set_dist) == 0)
+      if (std::find(dbnames_distributed_.begin(), dbnames_distributed_.end(),
+                    get_db_name(collection)) != dbnames_distributed_.end())
+      {
         con = con_replica_;
-      else
+      } else {
         con = con_local_;
+      }
 
       EventTrigger *trigger = new EventTrigger(oplog_query, collection, boost::bind(callback, obj, _1));
       trigger->oplog_cursor = create_oplog_cursor(con, oplog, oplog_query);
@@ -87,6 +89,8 @@ class EventTriggerManager
     }
 
     void remove_trigger(EventTrigger* trigger);
+
+    static std::string get_db_name(const std::string& ns);
 
   private:
     void check_events();
@@ -102,7 +106,8 @@ class EventTriggerManager
     mongo::DBClientBase* con_local_;
     mongo::DBClientBase* con_replica_;
 
-    std::string repl_set_dist, repl_set_local, local_db;
+    std::vector<std::string> dbnames_distributed_;
+    std::vector<std::string> dbnames_local_;
     bool cfg_debug_;
 
     std::list<EventTrigger*> triggers;

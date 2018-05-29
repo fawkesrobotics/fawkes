@@ -54,14 +54,11 @@ EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config,
   }
 
   // create connections to running mongod instances because only there
-  local_db = config_->get_string("/plugins/robot-memory/database");
-
-  repl_set_dist = "robot-memory-distributed";
-  repl_set_local = "robot-memory-local";
+  std::string local_db = config_->get_string("/plugins/robot-memory/database");
+  dbnames_local_.push_back(local_db);
+  dbnames_distributed_ = std::move(config_->get_strings("/plugins/robot-memory/distributed-db-names"));
 
   mutex_ = new Mutex();
-
-  logger_->log_debug(name.c_str(), "Initialized");
 
   try {
     cfg_debug_ = config->get_bool("/plugins/robot-memory/more-debug-output");
@@ -70,10 +67,9 @@ EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config,
 
 EventTriggerManager::~EventTriggerManager()
 {
-  for(EventTrigger *trigger : triggers)
-    {
-      delete trigger;
-    }
+	for(EventTrigger *trigger : triggers) {
+		delete trigger;
+	}
   mongo_connection_manager_->delete_client(con_local_);
   mongo_connection_manager_->delete_client(con_replica_);
 }
@@ -98,12 +94,11 @@ void EventTriggerManager::check_events()
         logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
       //check if collection is local or replicated
       mongo::DBClientBase* con;
-      if(trigger->oplog_collection.find(repl_set_dist) == 0)
+      if (std::find(dbnames_distributed_.begin(), dbnames_distributed_.end(),
+                    get_db_name(trigger->ns_db)) != dbnames_distributed_.end())
       {
         con = con_replica_;
-      }
-      else
-      {
+      } else {
         con = con_local_;
       }
 
@@ -133,3 +128,17 @@ QResCursor EventTriggerManager::create_oplog_cursor(mongo::DBClientBase* con, st
   return res;
 }
 
+/** Split database name from namespace.
+ * @param ns namespace, format db.collection
+ * @return db part of @p ns
+ */
+std::string
+EventTriggerManager::get_db_name(const std::string& ns)
+{
+	std::string::size_type dot_pos = ns.find(".");
+	if (dot_pos == std::string::npos) {
+		return "";
+	} else {
+		return ns.substr(0, dot_pos);
+	}
+}

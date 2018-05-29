@@ -21,14 +21,26 @@
 
 (define (domain hello-world)
   (:requirements :strips :typing)
-  (:types name text)
+  (:types name text howoften)
   (:predicates
-    (said ?n - name ?t - text)
+	 (said ?n - name ?t - text)
+	 (spoken ?h - howoften)
+	 (locked ?n - name)
   )
   (:action say-hello
     :parameters (?name - name)
     :precondition (not (said ?name hello))
-    :effect (said ?name hello)
+    :effect (and (said ?name hello) (spoken once))
+  )
+  (:action lock
+    :parameters (?name - name)
+    :precondition (not (locked ?name))
+    :effect (and (locked ?name))
+  )
+  (:action unlock
+    :parameters (?name - name)
+    :precondition (locked ?name)
+    :effect (and (not (locked ?name)))
   )
   (:action say-goodbye
     :parameters (?name - name)
@@ -38,7 +50,7 @@
   (:action say-hello-again
     :parameters (?name - name)
     :precondition (not (said ?name hello))
-    :effect (said ?name hello)
+    :effect (and (said ?name hello) (not (spoken once)))
   )
 	;(:action print
 	;	:parameters (?severity - text ?text - text)

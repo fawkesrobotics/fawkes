@@ -61,13 +61,29 @@ class RobotMemory
     int insert(std::string obj_str, std::string collection = "");
     int update(mongo::Query query, mongo::BSONObj update, std::string collection = "", bool upsert = false);
     int update(mongo::Query query, std::string update_str, std::string collection = "", bool upsert = false);
+    mongo::BSONObj find_one_and_update(const mongo::BSONObj& filter, const mongo::BSONObj& update,
+                                       std::string collection, bool upsert = false, bool return_new = true);
     int remove(mongo::Query query, std::string collection = "");
-    mongo::BSONObj mapreduce(mongo::Query query, std::string collection, std::string js_map_fun, std::string js_reduce_fun);
+    mongo::BSONObj mapreduce(mongo::Query query, std::string collection,
+                             std::string js_map_fun, std::string js_reduce_fun);
     QResCursor aggregate(mongo::BSONObj pipeline, std::string collection = "");
     int drop_collection(std::string collection);
     int clear_memory();
     int restore_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
     int dump_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
+    int create_index(mongo::BSONObj keys, std::string collection = "", bool unique = false);
+
+    //bool semaphore_create(const std::string& name, unsigned int value);
+    //bool semaphore_acquire(const std::string& name, unsigned int v = 1);
+    //bool semaphore_release(const std::string& name, unsigned int v = 1);
+    bool mutex_setup_ttl(float max_age_sec);
+    bool mutex_create(const std::string& name);
+    bool mutex_destroy(const std::string& name);
+    bool mutex_try_lock(const std::string& name, bool force = false);
+    bool mutex_try_lock(const std::string& name, std::string identity, bool force = false);
+    bool mutex_unlock(const std::string& name, std::string identity);
+    bool mutex_renew_lock(const std::string& name, std::string identity);
+    bool mutex_expire_locks(float max_age_sec);
 
     /**
      * Register a trigger to be notified when the robot memory is updated and the updated document matches the query
@@ -139,6 +155,8 @@ class RobotMemory
     std::vector<std::string> distributed_dbs_;
 
     unsigned int cfg_startup_grace_period_;
+    std::string  cfg_coord_database_;
+    std::string  cfg_coord_mutex_collection_;
 
     void init();
     void loop();

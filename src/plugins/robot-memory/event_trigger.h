@@ -35,13 +35,14 @@ class EventTrigger
   friend class EventTriggerManager;
 
   public:
-    EventTrigger(mongo::Query oplog_query, std::string oplog_collection,
-      const boost::function<void (mongo::BSONObj)> &callback);
+    EventTrigger(mongo::Query oplog_query, const std::string &ns,
+                 const boost::function<void (mongo::BSONObj)> &callback);
     virtual ~EventTrigger();
 
   private:
     mongo::Query oplog_query;
-    std::string oplog_collection;
+    std::string ns;
+    std::string ns_db;
     QResCursor oplog_cursor;
     boost::function<void (mongo::BSONObj)> callback;
 };

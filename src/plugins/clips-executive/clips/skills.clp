@@ -26,6 +26,17 @@
   (multislot start-time (type INTEGER) (cardinality 2 2) (default (create$ 0 0)))
 )
 
+(deftemplate skiller-control
+	(slot acquired (type SYMBOL) (allowed-values FALSE TRUE))
+	(slot acquiring (type SYMBOL) (allowed-values FALSE TRUE))
+  (multislot last-try (type INTEGER) (cardinality 2 2) (default (create$ 0 0)))
+)
+
+; Expects that the file is batch-loaded
+(blackboard-open-reading "SkillerInterface" "Skiller")
+(assert (skiller-control))
+(assert (ff-feature-loaded skills))
+
 (deffunction merge-params (?params ?param-values)
   (if (not (= (length$ ?params) (length$ ?param-values))) then
     (printout logerror "Invalid skill call, number of parameters is not the "

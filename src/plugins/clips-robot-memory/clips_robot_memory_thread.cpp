@@ -23,6 +23,7 @@
  */
 
 #include "clips_robot_memory_thread.h"
+#include <core/threading/mutex_locker.h>
 
 using namespace fawkes;
 
@@ -100,6 +101,61 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &env_name,
   clips->add_function("bson-get", sigc::slot<CLIPS::Value, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get)));
   clips->add_function("bson-get-array", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_array)));
   clips->add_function("bson-get-time", sigc::slot<CLIPS::Values, void *, std::string>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_get_time)));
+  clips->add_function("robmem-create-index", sigc::slot<void, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_create_index)));
+  clips->add_function("robmem-create-unique-index", sigc::slot<void, std::string, void *>(sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_create_unique_index)));
+
+  clips->add_function("robmem-mutex-create",
+                      sigc::slot<CLIPS::Value, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_create)));
+  clips->add_function("robmem-mutex-destroy",
+                      sigc::slot<CLIPS::Value, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_destroy)));
+  clips->add_function("robmem-mutex-try-lock",
+                      sigc::slot<CLIPS::Value, std::string, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock)));
+  clips->add_function("robmem-mutex-renew-lock",
+                      sigc::slot<CLIPS::Value, std::string, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_renew_lock)));
+  clips->add_function("robmem-mutex-force-lock",
+                      sigc::slot<CLIPS::Value, std::string, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock)));
+  clips->add_function("robmem-mutex-unlock",
+                      sigc::slot<CLIPS::Value, std::string, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock)));
+  clips->add_function("robmem-mutex-setup-ttl",
+                      sigc::slot<CLIPS::Value, float>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_setup_ttl)));
+  clips->add_function("robmem-mutex-expire-locks",
+                      sigc::slot<CLIPS::Value, float>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks)));
+
+  clips->add_function("robmem-mutex-create-async",
+                      sigc::slot<CLIPS::Values, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_create_async)));
+  clips->add_function("robmem-mutex-destroy-async",
+                      sigc::slot<CLIPS::Values, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_destroy_async)));
+  clips->add_function("robmem-mutex-try-lock-async",
+                      sigc::slot<CLIPS::Values, std::string, std::string>(
+                      sigc::bind<0>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock_async),
+                       env_name)));
+  clips->add_function("robmem-mutex-renew-lock-async",
+                      sigc::slot<CLIPS::Values, std::string, std::string>(
+                      sigc::bind<0>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_renew_lock_async),
+                       env_name)));
+  clips->add_function("robmem-mutex-force-lock-async",
+                      sigc::slot<CLIPS::Values, std::string, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock_async)));
+  clips->add_function("robmem-mutex-unlock-async",
+                      sigc::slot<CLIPS::Values, std::string, std::string>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock_async)));
+  clips->add_function("robmem-mutex-expire-locks-async",
+                      sigc::slot<CLIPS::Value, float>(
+                      sigc::bind<0>
+                      (sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks_async),
+                       env_name)));
 
   clips->build("(deffacts have-feature-mongodb (have-feature MongoDB))");
 
@@ -171,10 +227,8 @@ ClipsRobotMemoryThread::clips_bson_append(void *bson, std::string field_name, CL
 
     case CLIPS::TYPE_SYMBOL:
     case CLIPS::TYPE_INSTANCE_NAME:
-      b->append(field_name, value.as_string());
-      break;
     case CLIPS::TYPE_STRING:
-      b->append(field_name, std::string("\"") + value.as_string() + std::string("\""));
+      b->append(field_name, value.as_string());
       break;
     case CLIPS::TYPE_EXTERNAL_ADDRESS:
       {
@@ -341,6 +395,30 @@ ClipsRobotMemoryThread::clips_robotmemory_insert(std::string collection, void *b
     robot_memory->insert(b->asTempObj(), collection);
   } catch (mongo::DBException &e) {
     logger->log_warn("MongoDB", "Insert failed: %s", e.what());
+  }
+}
+
+void
+ClipsRobotMemoryThread::clips_robotmemory_create_index(std::string collection, void *bson)
+{
+  mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+
+  try {
+	  robot_memory->create_index(b->asTempObj(), collection, /* unique */ false);
+  } catch (mongo::DBException &e) {
+    logger->log_warn("MongoDB", "Creating index failed: %s", e.what());
+  }
+}
+
+void
+ClipsRobotMemoryThread::clips_robotmemory_create_unique_index(std::string collection, void *bson)
+{
+  mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+
+  try {
+	  robot_memory->create_index(b->asTempObj(), collection, /* unique */ true);
+  } catch (mongo::DBException &e) {
+    logger->log_warn("MongoDB", "Creating unique index failed: %s", e.what());
   }
 }
 
@@ -558,38 +636,38 @@ ClipsRobotMemoryThread::clips_bson_get(void *bson, std::string field_name)
     return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
   }
 
-  mongo::BSONObj o(b->asTempObj());
+  try {
+	  mongo::BSONObj o(b->asTempObj());
 
-  if (! o.hasField(field_name)) {
-    logger->log_error("MongoDB", "mongodb-bson-get: has no field %s",
-                       field_name.c_str());
+	  mongo::BSONElement el = o.getFieldDotted(field_name);
+
+	  switch (el.type()) {
+	  case mongo::NumberDouble:
+		  return CLIPS::Value(el.Double());
+	  case mongo::String:
+		  return CLIPS::Value(el.String());
+	  case mongo::Bool:
+		  return CLIPS::Value(el.Bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+	  case mongo::NumberInt:
+		  return CLIPS::Value(el.Int());
+	  case mongo::NumberLong:
+		  return CLIPS::Value(el.Long());
+	  case mongo::Object:
+		  {
+			  mongo::BSONObjBuilder *b = new mongo::BSONObjBuilder();
+			  b->appendElements(el.Obj());
+			  return CLIPS::Value(b);
+		  }
+	  case 7: //ObjectId
+		  return CLIPS::Value(el.OID().toString());
+
+	  default:
+		  return CLIPS::Value("INVALID_VALUE_TYPE", CLIPS::TYPE_SYMBOL);
+	  }
+  } catch (mongo::DBException &e) {
+	  logger->log_warn(name(), "mongodb-bson-get: failed to get '%s': %s", field_name.c_str(),
+	                   e.what());
     return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
-  }
-
-  mongo::BSONElement el = o.getField(field_name);
-
-  switch (el.type()) {
-  case mongo::NumberDouble:
-    return CLIPS::Value(el.Double());
-  case mongo::String:
-    return CLIPS::Value(el.String());
-  case mongo::Bool:
-    return CLIPS::Value(el.Bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
-  case mongo::NumberInt:
-    return CLIPS::Value(el.Int());
-  case mongo::NumberLong:
-    return CLIPS::Value(el.Long());
-  case mongo::Object:
-    {
-      mongo::BSONObjBuilder *b = new mongo::BSONObjBuilder();
-      b->appendElements(el.Obj());
-      return CLIPS::Value(b);
-    }
-  case 7: //ObjectId
-    return CLIPS::Value(el.OID().toString());
-
-  default:
-    return CLIPS::Value("INVALID_VALUE_TYPE", CLIPS::TYPE_SYMBOL);
   }
 }
 
@@ -605,10 +683,11 @@ ClipsRobotMemoryThread::clips_bson_has_field(void *bson, std::string field_name)
 
   mongo::BSONObj o(b->asTempObj());
 
-  if (! o.hasField(field_name)) {
+  if (o.getFieldDotted(field_name).eoo()) {
     return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+  } else {
+	  return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
   }
-  return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
 }
 
 CLIPS::Values
@@ -624,54 +703,54 @@ ClipsRobotMemoryThread::clips_bson_get_array(void *bson, std::string field_name)
     return rv;
   }
 
-  mongo::BSONObj o(b->asTempObj());
+  try {
+	  mongo::BSONObj o(b->asTempObj());
 
-  if (! o.hasField(field_name)) {
-    logger->log_error("MongoDB", "mongodb-bson-get-array: has no field %s",
-                       field_name.c_str());
+	  mongo::BSONElement el = o.getFieldDotted(field_name);
+
+	  if (el.type() != mongo::Array) {
+		  logger->log_error("MongoDB", "mongodb-bson-get-array: field %s is not an array",
+		                    field_name.c_str());
+		  rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		  return rv;
+	  }
+
+	  std::vector<mongo::BSONElement> elements(el.Array());
+
+	  for (const mongo::BSONElement &e : elements) {
+		  switch (e.type()) {
+		  case mongo::NumberDouble:
+			  rv.push_back(CLIPS::Value(e.Double())); break;
+		  case mongo::String:
+			  rv.push_back(CLIPS::Value(e.String())); break;
+		  case mongo::Bool:
+			  rv.push_back(CLIPS::Value(e.Bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL));
+			  break;
+		  case mongo::NumberInt:
+			  rv.push_back(CLIPS::Value(e.Int())); break;
+		  case mongo::NumberLong:
+			  rv.push_back(CLIPS::Value(e.Long())); break;
+		  case mongo::Object:
+			  {
+				  mongo::BSONObjBuilder *b = new mongo::BSONObjBuilder();
+				  b->appendElements(e.Obj());
+				  rv.push_back(CLIPS::Value(b));
+			  }
+			  break;
+		  default:
+			  rv.clear();
+			  rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+			  return rv;
+		  }
+	  }
+	  return rv;
+  } catch (mongo::DBException &e) {
+	  logger->log_warn(name(), "mongodb-bson-get: failed to get '%s': %s", field_name.c_str(),
+	                   e.what());
+	  rv.clear();
     rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
     return rv;
   }
-
-  mongo::BSONElement el = o.getField(field_name);
-
-  if (el.type() != mongo::Array) {
-    logger->log_error("MongoDB", "mongodb-bson-get-array: field %s is not an array",
-                       field_name.c_str());
-    rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
-    return rv;
-  }
-
-  std::vector<mongo::BSONElement> elements(el.Array());
-
-  for (const mongo::BSONElement &e : elements) {
-    switch (e.type()) {
-    case mongo::NumberDouble:
-      rv.push_back(CLIPS::Value(e.Double())); break;
-    case mongo::String:
-      rv.push_back(CLIPS::Value(e.String())); break;
-    case mongo::Bool:
-      rv.push_back(CLIPS::Value(e.Bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL));
-      break;
-    case mongo::NumberInt:
-      rv.push_back(CLIPS::Value(e.Int())); break;
-    case mongo::NumberLong:
-      rv.push_back(CLIPS::Value(e.Long())); break;
-    case mongo::Object:
-      {
-        mongo::BSONObjBuilder *b = new mongo::BSONObjBuilder();
-        b->appendElements(e.Obj());
-        rv.push_back(CLIPS::Value(b));
-      }
-      break;
-    default:
-      rv.clear();
-      rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
-      return rv;
-    }
-  }
-  return rv;
-
 }
 
 
@@ -688,36 +767,34 @@ ClipsRobotMemoryThread::clips_bson_get_time(void *bson, std::string field_name)
     return rv;
   }
 
-  mongo::BSONObj o(b->asTempObj());
+  try {
+	  mongo::BSONObj o(b->asTempObj());
 
-  if (! o.hasField(field_name)) {
-    logger->log_error("MongoDB", "mongodb-bson-get-time: has no field %s",
-                       field_name.c_str());
-    rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
-    return rv;
+	  mongo::BSONElement el = o.getFieldDotted(field_name);
+
+	  int64_t ts = 0;
+	  if (el.type() == mongo::Date) {
+		  mongo::Date_t d = el.Date();
+		  ts = d.asInt64();
+	  } else if (el.type() == mongo::Timestamp) {
+		  mongo::Timestamp_t t = el.Timestamp();
+		  ts = (int64_t)t.seconds() * 1000;
+	  } else {
+		  logger->log_error("MongoDB", "mongodb-bson-get-time: field %s is not a time",
+		                    field_name.c_str());
+		  rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		  return rv;
+	  }
+
+
+	  rv.resize(2);
+	  rv[0] = CLIPS::Value((long long int)(ts / 1000));
+	  rv[1] = CLIPS::Value((ts - (rv[0].as_integer() * 1000)) * 1000);
+	  return rv;
+  } catch (mongo::DBException &e) {
+	  rv.resize(2, CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+	  return rv;
   }
-
-  mongo::BSONElement el = o.getField(field_name);
-
-  int64_t ts = 0;
-  if (el.type() == mongo::Date) {
-    mongo::Date_t d = el.Date();
-    ts = d.asInt64();
-  } else if (el.type() == mongo::Timestamp) {
-    mongo::Timestamp_t t = el.Timestamp();
-    ts = t.seconds();
-  } else {
-    logger->log_error("MongoDB", "mongodb-bson-get-time: field %s is not a time",
-                       field_name.c_str());
-    rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
-    return rv;
-  }
-
-
-  rv.resize(2);
-  rv[0] = CLIPS::Value((long long int)(ts / 1000));
-  rv[1] = CLIPS::Value((ts - (rv[0].as_integer() * 1000)) * 1000);
-  return rv;
 }
 
 
@@ -743,4 +820,245 @@ ClipsRobotMemoryThread::clips_robotmemory_destroy_trigger(void *trigger)
   ClipsRmTrigger *clips_trigger = static_cast<ClipsRmTrigger *>(trigger);
   clips_triggers_.remove(clips_trigger);
   delete clips_trigger; //the triger unregisteres itself at the robot memory
+}
+
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_create(std::string name)
+{
+	bool rv = robot_memory->mutex_create(name);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_destroy(std::string name)
+{
+	bool rv = robot_memory->mutex_destroy(name);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock(std::string name, std::string identity)
+{
+	bool rv = robot_memory->mutex_try_lock(name, identity);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_renew_lock(std::string name, std::string identity)
+{
+	bool rv = robot_memory->mutex_renew_lock(name, identity);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock(std::string name, std::string identity)
+{
+	bool rv = robot_memory->mutex_try_lock(name, identity, /* force */ true);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock(std::string name, std::string identity)
+{
+	bool rv = robot_memory->mutex_unlock(name, identity);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_setup_ttl(float max_age_sec)
+{
+	bool rv = robot_memory->mutex_setup_ttl(max_age_sec);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks(float max_age_sec)
+{
+	bool rv = robot_memory->mutex_expire_locks(max_age_sec);
+	return CLIPS::Value(rv ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+}
+
+
+bool
+ClipsRobotMemoryThread::mutex_future_ready(const std::string& name)
+{
+	auto mf_it = mutex_futures_.find(name);
+	if (mf_it != mutex_futures_.end()) {
+		auto fut_status = mutex_futures_[name].wait_for(std::chrono::milliseconds(0));
+		if (fut_status != std::future_status::ready) {
+			return false;
+		} else {
+			mutex_futures_.erase(mf_it);
+		}
+	}
+	return true;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_create_async(std::string name)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (create failed)"));
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, name] { return robot_memory->mutex_create(name); });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_destroy_async(std::string name)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (destroy failed)"));
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, name] { return robot_memory->mutex_destroy(name); });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_try_lock_async(std::string env_name,
+                                                               std::string name, std::string identity)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (try-lock failed)"));
+		envs_[env_name]->assert_fact_f("(mutex-op-feedback try-lock-async FAIL %s)",
+		                               name.c_str());
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, env_name, name, identity] {
+		                      bool ok = robot_memory->mutex_try_lock(name, identity);
+		                      if (! ok) {
+			                      MutexLocker lock(envs_[env_name].objmutex_ptr());
+			                      envs_[env_name]->assert_fact_f("(mutex-op-feedback try-lock-async FAIL %s)",
+			                                                     name.c_str());
+		                      }
+		                      return ok;
+	                      });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_renew_lock_async(std::string env_name,
+                                                                 std::string name, std::string identity)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (try-lock failed)"));
+		MutexLocker lock(envs_[env_name].objmutex_ptr());
+		envs_[env_name]->assert_fact_f("(mutex-op-feedback renew-lock-async FAIL %s)",
+		                               name.c_str());
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, env_name, name, identity] {
+		                      bool ok = robot_memory->mutex_renew_lock(name, identity);
+		                      MutexLocker lock(envs_[env_name].objmutex_ptr());
+		                      envs_[env_name]->assert_fact_f("(mutex-op-feedback renew-lock-async %s %s)",
+		                                                     ok ? "OK" : "FAIL", name.c_str());
+		                      return ok;
+	                      });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_force_lock_async(std::string name, std::string identity)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (force-lock failed)"));
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, name, identity] {
+		                      return robot_memory->mutex_try_lock(name, identity, /* force */ true);
+	                      });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Values
+ClipsRobotMemoryThread::clips_robotmemory_mutex_unlock_async(std::string name, std::string identity)
+{
+	CLIPS::Values rv;
+	if (! mutex_future_ready(name)) {
+		rv.push_back(CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
+		rv.push_back(CLIPS::Value("Task already running for "+name+" (unlock failed)"));
+		return rv;
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, name, identity] {
+		                      return robot_memory->mutex_unlock(name, identity);
+	                      });
+
+	mutex_futures_[name] = std::move(fut);
+
+	rv.push_back(CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL));
+	return rv;
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks_async(std::string env_name,
+                                                                   float max_age_sec)
+{
+	CLIPS::Values rv;
+	if (mutex_expire_future_.valid()) {
+		// have shared state, expire was or is running
+		auto fut_status = mutex_expire_future_.wait_for(std::chrono::milliseconds(0));
+		if (fut_status != std::future_status::ready) {
+			MutexLocker lock(envs_[env_name].objmutex_ptr());
+			envs_[env_name]->assert_fact_f("(mutex-op-feedback expire-locks-async FAIL)");
+			return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+		}
+	}
+
+	auto fut = std::async(std::launch::async,
+	                      [this, env_name, max_age_sec] {
+		                      bool ok = robot_memory->mutex_expire_locks(max_age_sec);
+		                      MutexLocker lock(envs_[env_name].objmutex_ptr());
+		                      envs_[env_name]->assert_fact_f("(mutex-op-feedback expire-locks-async %s)",
+		                                                     ok ? "OK" : "FAIL");
+		                      return ok;
+	                      });
+
+	mutex_expire_future_ = std::move(fut);
+
+	return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
 }

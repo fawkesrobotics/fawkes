@@ -29,6 +29,7 @@
   (assert
 	 (domain-object (name hello) (type text))
 	 (domain-object (name goodbye) (type text))
+	 (domain-object (name lock1) (type name))
 	 (domain-operator (name print) (param-names severity text))
 	 (domain-operator (name say-cleanup))
 	 (domain-fact (name said) (param-values bob hello))

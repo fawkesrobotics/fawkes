@@ -8,5 +8,5 @@
 	(bind ?severity (plan-action-arg severity ?param-names ?param-values info))
 	(bind ?text     (plan-action-arg text ?param-names ?param-values ""))
 	(printout ?severity ?text crlf)
-	(modify ?pa (status FINAL))
+	(modify ?pa (status EXECUTION-SUCCEEDED))
 )

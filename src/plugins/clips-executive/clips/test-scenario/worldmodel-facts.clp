@@ -44,6 +44,14 @@
 		(wm-fact (key wm loaded-order args? objects [ cup plate ] robot R-1) (value TRUE))
 		(wm-fact (key domain fact loctest args? robot R-1 place X ) (value TRUE))
 		(wm-fact (key wm broken args? robot R-1 objects [ cup plate ) (value TRUE))
+
+		; This should be set based on some configuration or system value,
+		; especially in a multi-robot setting.
+		(wm-fact (key cx identity) (value "executive"))
+	)
+
+	(wm-robmem-sync-enable
+	 "/domain/fact"
 	)
 )
 

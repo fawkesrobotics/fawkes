@@ -10,8 +10,13 @@ plugins/robot-memory:
   interface-name: "memory"
   more-debug-output: false
   blackboard-collection: "robmem.bb"
-  # databases with these name are stored in the distrited mongod instance and not in the local one:
-  distributed-db-names: ["syncedrobmem"]
+  coordination:
+    database: robmem_coordination
+    mutex-collection: mutex
+
+  # databases with these name are stored in the distrited mongod
+  # instance and not in the local one:
+  distributed-db-names: ["syncedrobmem", "robmem_coordination"]
 
   startup-grace-period: 30
 

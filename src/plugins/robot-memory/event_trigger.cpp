@@ -20,6 +20,8 @@
  */
 
 #include "event_trigger.h"
+#include "event_trigger_manager.h"
+#include <core/exception.h>
 
 
 /** @class EventTrigger  event_trigger.h
@@ -27,18 +29,19 @@
  * @author Frederik Zwilling
  */
 
-/**
- * Constructor for Class holding all information about an EventTrigger
+/** Constructor.
  * @param oplog_query The Query on the oplog, which defines which database update invokes the trigger
- * @param oplog_collection Collection the trigger is looking at
+ * @param ns namespace of the trigger, format db.collection
  * @param callback Reference to callback function
  */
-EventTrigger::EventTrigger(mongo::Query oplog_query, std::string oplog_collection,
-  const boost::function<void (mongo::BSONObj)> &callback)
+EventTrigger::EventTrigger(mongo::Query oplog_query, const std::string& ns,
+                           const boost::function<void (mongo::BSONObj)> &callback)
+	: oplog_query(oplog_query), ns(ns), ns_db(EventTriggerManager::get_db_name(ns)),
+	  callback(callback)
 {
-  this->oplog_query = oplog_query;
-  this->oplog_collection = oplog_collection;
-  this->callback = callback;
+	if (ns_db == "") {
+		throw fawkes::Exception("Invalid namespace, does not reference database");
+	}
 }
 
 EventTrigger::~EventTrigger(){}
