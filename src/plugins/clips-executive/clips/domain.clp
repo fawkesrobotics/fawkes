@@ -865,9 +865,9 @@
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?action <- (plan-action (id ?action-id) (goal-id ?g) (plan-id ?p)
-                          (executable FALSE))
+                          (action-name ?op) (executable FALSE))
   (domain-precondition (plan-id ?p) (goal-id ?g) (grounded-with ?action-id)
-                       (is-satisfied TRUE))
+                       (part-of ?op)  (is-satisfied TRUE))
 =>
   (modify ?action (executable TRUE))
 )
