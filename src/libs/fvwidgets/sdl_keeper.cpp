@@ -32,9 +32,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 unsigned int SDLKeeper::_refcount = 0;
 Mutex        SDLKeeper::_mutex;

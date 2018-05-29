@@ -31,9 +31,6 @@ typedef struct SDL_Overlay SDL_Overlay;
 typedef struct SDL_Rect    SDL_Rect;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ImageDisplay
 {

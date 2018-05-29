@@ -32,9 +32,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FuseImageListWidget <fvwidgets/fuse_image_list_widget.h>
  * This widget displays all available Fuse images in a tree view. It also can check
