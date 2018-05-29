@@ -110,9 +110,9 @@ class MemoryConfiguration : public Configuration
   virtual void            try_dump();
 
  private:
-  YamlConfigurationNode *  query(const char *path) const;
+  std::shared_ptr<YamlConfigurationNode>  query(const char *path) const;
 
-  YamlConfigurationNode  *root_;
+  std::shared_ptr<YamlConfigurationNode>  root_;
 
  private:
   Mutex *mutex_;

@@ -41,8 +41,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <regex>
 
 #include <yaml-cpp/exceptions.h>
 
@@ -51,11 +50,7 @@ namespace fawkes {
 }
 #endif
 
-#define PATH_REGEX "^[a-zA-Z0-9_-]+$"
-#define YAML_REGEX "^[a-zA-Z0-9_-]+\\.yaml$"
-// from https://www.ietf.org/rfc/rfc3986.txt
-#define URL_REGEX "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
-#define FRAME_REGEX "^([a-zA-Z_][a-zA-Z0-9_/-]*)+$"
+#define YAML_FILE_REGEX "^[a-zA-Z0-9_-]+\\.yaml$"
 
 
 /** @class YamlConfiguration::YamlValueIterator <config/yaml.h>
@@ -70,241 +65,241 @@ namespace fawkes {
  * Creates an iterator representing the invalid iterator.
  */
 YamlConfiguration::YamlValueIterator::YamlValueIterator()
-  : first_(true)
+	: first_(true)
 {
-  current_ = nodes_.end();
+	current_ = nodes_.end();
 }
 
 
 /** Initializing constructor.
  * @param nodes nodes to iterate over
  */
-YamlConfiguration::YamlValueIterator::YamlValueIterator(std::map<std::string, YamlConfigurationNode *> &nodes)
-  : first_(true), nodes_(nodes)
+YamlConfiguration::YamlValueIterator::YamlValueIterator(std::map<std::string, std::shared_ptr<YamlConfigurationNode>> &nodes)
+	: first_(true), nodes_(nodes)
 {
-  current_ = nodes_.end();
+	current_ = nodes_.end();
 }
 
 bool
 YamlConfiguration::YamlValueIterator::next()
 {
-  if (first_) {
-    first_ = false;
-    current_ = nodes_.begin();
-  } else {
-    ++current_;
-  }
-  return (current_ != nodes_.end());
+	if (first_) {
+		first_ = false;
+		current_ = nodes_.begin();
+	} else {
+		++current_;
+	}
+	return (current_ != nodes_.end());
 }
 
 bool
 YamlConfiguration::YamlValueIterator::valid() const
 {
-  return (current_ != nodes_.end());
+	return (current_ != nodes_.end());
 }
     
 const char *
 YamlConfiguration::YamlValueIterator::path() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get path of invalid iterator");
-  }
-  return current_->first.c_str();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get path of invalid iterator");
+	}
+	return current_->first.c_str();
 }
 
 const char *
 YamlConfiguration::YamlValueIterator::type() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get type of invalid iterator");
-  }
-  return YamlConfigurationNode::Type::to_string(current_->second->get_type());
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get type of invalid iterator");
+	}
+	return YamlConfigurationNode::Type::to_string(current_->second->get_type());
 }
     
 bool
 YamlConfiguration::YamlValueIterator::is_float() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
-  }
-  return (current_->second->is_type<float>());
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+	}
+	return (current_->second->is_type<float>());
 }
 
 bool
 YamlConfiguration::YamlValueIterator::is_uint() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
-  }
-  return (current_->second->is_type<unsigned int>());
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+	}
+	return (current_->second->is_type<unsigned int>());
 }
 
 bool
 YamlConfiguration::YamlValueIterator::is_int() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
-  }
-  return (current_->second->is_type<int>());
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+	}
+	return (current_->second->is_type<int>());
 }
 
 bool
 YamlConfiguration::YamlValueIterator::is_bool() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
-  }
-  return (current_->second->is_type<bool>());
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+	}
+	return (current_->second->is_type<bool>());
 }
 
 bool
 YamlConfiguration::YamlValueIterator::is_string() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
-  }
-  return (current_->second->is_type<std::string>());
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+	}
+	return (current_->second->is_type<std::string>());
 }
 
 bool
 YamlConfiguration::YamlValueIterator::is_list() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
-  }
-  return current_->second->get_type() == YamlConfigurationNode::Type::SEQUENCE;
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+	}
+	return current_->second->get_type() == YamlConfigurationNode::Type::SEQUENCE;
 }
 
 
 size_t
 YamlConfiguration::YamlValueIterator::get_list_size() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot check type on invalid iterator");
-  }
-  if (current_->second->get_type() != YamlConfigurationNode::Type::SEQUENCE) {
-    throw Exception("YamlValueIterator: cannot get list size of non-list value");
-  }
-  return current_->second->get_list_size();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot check type on invalid iterator");
+	}
+	if (current_->second->get_type() != YamlConfigurationNode::Type::SEQUENCE) {
+		throw Exception("YamlValueIterator: cannot get list size of non-list value");
+	}
+	return current_->second->get_list_size();
 }
 
 float
 YamlConfiguration::YamlValueIterator::get_float() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->get_value<float>();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->get_value<float>();
 }
 
 unsigned int
 YamlConfiguration::YamlValueIterator::get_uint() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->get_value<unsigned int>();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->get_value<unsigned int>();
 }
 
 int
 YamlConfiguration::YamlValueIterator::get_int() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->get_value<int>();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->get_value<int>();
 }
 
 bool
 YamlConfiguration::YamlValueIterator::get_bool() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->get_value<bool>();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->get_value<bool>();
 }
 
 std::string
 YamlConfiguration::YamlValueIterator::get_string() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->get_value<std::string>();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->get_value<std::string>();
 }
 
 std::string
 YamlConfiguration::YamlValueIterator::get_as_string() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  if (current_->second->get_type() == YamlConfigurationNode::Type::SEQUENCE) {
-    return current_->second->get_list_as_string();
-  } else {
-    return current_->second->get_value<std::string>();
-  }
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	if (current_->second->get_type() == YamlConfigurationNode::Type::SEQUENCE) {
+		return current_->second->get_list_as_string();
+	} else {
+		return current_->second->get_value<std::string>();
+	}
 }
 
 std::vector<float>
 YamlConfiguration::YamlValueIterator::get_floats() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->get_list<float>();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->get_list<float>();
 }
 
 std::vector<unsigned int>
 YamlConfiguration::YamlValueIterator::get_uints() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->get_list<unsigned int>();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->get_list<unsigned int>();
 }
 
 std::vector<int>
 YamlConfiguration::YamlValueIterator::get_ints() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->get_list<int>();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->get_list<int>();
 }
 
 std::vector<bool>
 YamlConfiguration::YamlValueIterator::get_bools() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->get_list<bool>();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->get_list<bool>();
 }
 
 std::vector<std::string>
 YamlConfiguration::YamlValueIterator::get_strings() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->get_list<std::string>();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->get_list<std::string>();
 }
 
 
 std::string
 YamlConfiguration::YamlValueIterator::get_comment() const
 {
-  throw NotImplementedException("YamlConfig: comments are not available");
+	throw NotImplementedException("YamlConfig: comments are not available");
 }
 
 bool
 YamlConfiguration::YamlValueIterator::is_default() const
 {
-  if (current_ == nodes_.end()) {
-    throw Exception("YamlValueIterator: cannot get value of invalid iterator");
-  }
-  return current_->second->is_default();
+	if (current_ == nodes_.end()) {
+		throw Exception("YamlValueIterator: cannot get value of invalid iterator");
+	}
+	return current_->second->is_default();
 }
 
 
@@ -318,30 +313,13 @@ YamlConfiguration::YamlValueIterator::is_default() const
 /** Constructor. */
 YamlConfiguration::YamlConfiguration()
 {
-  root_ = host_root_ = NULL;
-  fam_thread_ = NULL;
-  mutex = new Mutex();
-  write_pending_ = false;
-  write_pending_mutex_ = new Mutex();
+	fam_thread_ = NULL;
+	mutex = new Mutex();
+	write_pending_ = false;
+	write_pending_mutex_ = new Mutex();
 
-  __sysconfdir   = NULL;
-  __userconfdir  = NULL;
-
-#ifdef USE_REGEX_CPP
-  __yaml_regex =  std::regex(YAML_REGEX, std::regex_constants::extended);
-  __url_regex =  std::regex(URL_REGEX, std::regex_constants::extended);
-  __frame_regex =  std::regex(FRAME_REGEX, std::regex_constants::extended);
-#else
-  if (regcomp(&__yaml_regex, YAML_REGEX, REG_EXTENDED) != 0) {
-    throw Exception("Failed to compile YAML regex");
-  }
-  if (regcomp(&__url_regex, URL_REGEX, REG_EXTENDED) != 0) {
-    throw Exception("Failed to compile URL regex");
-  }
-  if (regcomp(&__frame_regex, FRAME_REGEX, REG_EXTENDED) != 0) {
-    throw Exception("Failed to compile frame regex");
-  }
-#endif
+	__sysconfdir   = NULL;
+	__userconfdir  = NULL;
 }
 
 /** Constructor.
@@ -356,70 +334,44 @@ YamlConfiguration::YamlConfiguration()
 YamlConfiguration::YamlConfiguration(const char *sysconfdir,
                                      const char *userconfdir)
 {
-  root_ = host_root_ = NULL;
-  fam_thread_ = NULL;
-  mutex = new Mutex();
-  write_pending_ = false;
-  write_pending_mutex_ = new Mutex();
+	fam_thread_ = NULL;
+	mutex = new Mutex();
+	write_pending_ = false;
+	write_pending_mutex_ = new Mutex();
 
-  __sysconfdir   = strdup(sysconfdir);
+	__sysconfdir   = strdup(sysconfdir);
 
-#ifdef USE_REGEX_CPP
-  __yaml_regex =  std::regex(YAML_REGEX, std::regex_constants::extended);
-  __url_regex =  std::regex(URL_REGEX, std::regex_constants::extended);
-  __frame_regex =  std::regex(FRAME_REGEX, std::regex_constants::extended);
-#else
-  if (regcomp(&__yaml_regex, YAML_REGEX, REG_EXTENDED) != 0) {
-    throw Exception("Failed to compile YAML regex");
-  }
-  if (regcomp(&__url_regex, URL_REGEX, REG_EXTENDED) != 0) {
-    throw Exception("Failed to compile URL regex");
-  }
-  if (regcomp(&__frame_regex, FRAME_REGEX, REG_EXTENDED) != 0) {
-    throw Exception("Failed to compile frame regex");
-  }
-#endif
-
-  if (userconfdir != NULL) {
-    __userconfdir  = strdup(userconfdir);
-  } else {
-    const char *homedir = getenv("HOME");
-    if (homedir == NULL) {
-      __userconfdir = strdup(sysconfdir);
-    } else {
-      if (asprintf(&__userconfdir, "%s/%s", homedir, USERDIR) == -1) {
-	__userconfdir = strdup(sysconfdir);
-      }
-    }
-  }
+	if (userconfdir != NULL) {
+		__userconfdir  = strdup(userconfdir);
+	} else {
+		const char *homedir = getenv("HOME");
+		if (homedir == NULL) {
+			__userconfdir = strdup(sysconfdir);
+		} else {
+			if (asprintf(&__userconfdir, "%s/%s", homedir, USERDIR) == -1) {
+				__userconfdir = strdup(sysconfdir);
+			}
+		}
+	}
 }
 
 /** Destructor. */
 YamlConfiguration::~YamlConfiguration()
 {
-  if (write_pending_) {
-    write_host_file();
-  }
+	if (write_pending_) {
+		write_host_file();
+	}
 
-  delete root_;
-  delete host_root_;
-  root_ = host_root_ = NULL;
+	if (fam_thread_) {
+		fam_thread_->cancel();
+		fam_thread_->join();
+		delete fam_thread_;
+	}
 
-  if (fam_thread_) {
-    fam_thread_->cancel();
-    fam_thread_->join();
-    delete fam_thread_;
-  }
-
-  if (__sysconfdir)   free(__sysconfdir);
-  if (__userconfdir)  free(__userconfdir);
-#ifndef USE_REGEX_CPP
-  regfree(&__yaml_regex);
-  regfree(&__url_regex);
-  regfree(&__frame_regex);
-#endif
-  delete mutex;
-  delete write_pending_mutex_;
+	if (__sysconfdir)   free(__sysconfdir);
+	if (__userconfdir)  free(__userconfdir);
+	delete mutex;
+	delete write_pending_mutex_;
 }
 
 
@@ -427,224 +379,202 @@ void
 YamlConfiguration::load(const char *file_path)
 {
 
-  if (file_path == NULL) {
-    file_path = "config.yaml";
-  }
-
-  std::string filename;
-  if (file_path[0] == '/') {
-    filename = file_path;
-  } else {
-
-    const char *try_paths[] = {__userconfdir, __sysconfdir};
-    int try_paths_len = 2;
-
-
-    for (int i = 0; i < try_paths_len; ++i) {
-      char *path;
-      if (asprintf(&path, "%s/%s", try_paths[i], file_path) != -1) {
-	if (access(path, R_OK) == 0) {
-	  filename = path;
-	  free(path);
-	  break;
+	if (file_path == NULL) {
+		file_path = "config.yaml";
 	}
-	free(path);
-      }
-    }
-    if (filename == "") {
-      throw Exception("YamlConfig: cannot find configuration file %s/%s or %s/%s",
-		      __userconfdir, file_path, __sysconfdir, file_path);
-    }
-  }
 
-  config_file_ = filename;
+	std::string filename;
+	if (file_path[0] == '/') {
+		filename = file_path;
+	} else {
 
-  host_file_ = "";
-  std::list<std::string> files, dirs;
-  read_yaml_config(filename, host_file_, root_, host_root_, files, dirs);
+		const char *try_paths[] = {__userconfdir, __sysconfdir};
+		int try_paths_len = 2;
+
+
+		for (int i = 0; i < try_paths_len; ++i) {
+			char *path;
+			if (asprintf(&path, "%s/%s", try_paths[i], file_path) != -1) {
+				if (access(path, R_OK) == 0) {
+					filename = path;
+					free(path);
+					break;
+				}
+				free(path);
+			}
+		}
+		if (filename == "") {
+			throw Exception("YamlConfig: cannot find configuration file %s/%s or %s/%s",
+			                __userconfdir, file_path, __sysconfdir, file_path);
+		}
+	}
+
+	config_file_ = filename;
+
+	host_file_ = "";
+	std::list<std::string> files, dirs;
+	read_yaml_config(filename, host_file_, root_, host_root_, files, dirs);
 
 #ifdef HAVE_INOTIFY
-  fam_thread_ = new FamThread();
-  RefPtr<FileAlterationMonitor> fam = fam_thread_->get_fam();
-  fam->add_filter("^[^.].*\\.yaml$");
-  std::list<std::string>::iterator f;
-  for (f = files.begin(); f != files.end(); ++f) {
-    //LibLogger::log_info("YC", "Watching %s", f->c_str());
-    fam->watch_file(f->c_str());
-  }
-  for (f = dirs.begin(); f != dirs.end(); ++f) {
-    //LibLogger::log_info("YC", "Watching DIR %s", f->c_str());
-    fam->watch_dir(f->c_str());
-  }
-  fam->add_listener(this);
-  fam_thread_->start();
+	fam_thread_ = new FamThread();
+	RefPtr<FileAlterationMonitor> fam = fam_thread_->get_fam();
+	fam->add_filter("^[^.].*\\.yaml$");
+	std::list<std::string>::iterator f;
+	for (f = files.begin(); f != files.end(); ++f) {
+		//LibLogger::log_info("YC", "Watching %s", f->c_str());
+		fam->watch_file(f->c_str());
+	}
+	for (f = dirs.begin(); f != dirs.end(); ++f) {
+		//LibLogger::log_info("YC", "Watching DIR %s", f->c_str());
+		fam->watch_dir(f->c_str());
+	}
+	fam->add_listener(this);
+	fam_thread_->start();
 #endif
 
-  //root_->print();
+	//root_->print();
 }
 
 
-YamlConfigurationNode *
+std::shared_ptr<YamlConfigurationNode>
 YamlConfiguration::read_yaml_file(std::string filename, bool ignore_missing,
-				  std::queue<LoadQueueEntry> &load_queue,
+                                  std::queue<LoadQueueEntry> &load_queue,
                                   std::string &host_file)
 {
-  if (access(filename.c_str(), R_OK) == -1) {
-    if (ignore_missing) {
-      return NULL;
-    }
-    throw Exception(errno, "YamlConfig: cannot access file %s", filename.c_str());
-  }
+	if (access(filename.c_str(), R_OK) == -1) {
+		if (ignore_missing) {
+			return NULL;
+		}
+		throw Exception(errno, "YamlConfig: cannot access file %s", filename.c_str());
+	}
 
-#ifdef HAVE_YAMLCPP_0_5
-  std::vector<YAML::Node> docs;
-#else
-  std::ifstream fin(filename.c_str());
-  YAML::Parser parser;
-  YAML::Node doc1, doc2;
-#endif
-  bool have_doc1 = false, have_doc2 = false;
+	std::vector<YAML::Node> docs;
+	bool have_doc1 = false, have_doc2 = false;
 
-  try {
-#ifdef HAVE_YAMLCPP_0_5
-    docs = YAML::LoadAllFromFile(filename);
-    have_doc1 = docs.size() > 0;
-    have_doc2 = docs.size() > 1;
-#else
-    parser.Load(fin);
-    have_doc1 = parser.GetNextDocument(doc1);
-    have_doc2 = parser.GetNextDocument(doc2);
-#endif
-  } catch (YAML::ParserException &e) {
-    throw CouldNotOpenConfigException("Failed to parse %s line %i column %i: %s",
-				      filename.c_str(), e.mark.line, e.mark.column,
-				      e.msg.c_str());
-  }
+	try {
+		docs = YAML::LoadAllFromFile(filename);
+		have_doc1 = docs.size() > 0;
+		have_doc2 = docs.size() > 1;
+	} catch (YAML::ParserException &e) {
+		throw CouldNotOpenConfigException("Failed to parse %s line %i column %i: %s",
+		                                  filename.c_str(), e.mark.line, e.mark.column,
+		                                  e.msg.c_str());
+	}
 
-  YamlConfigurationNode *sub_root = NULL;
+	std::shared_ptr<YamlConfigurationNode> sub_root;
 
-  if (! have_doc1) {
-    //throw Exception("YamlConfig: file %s contains no document", filename.c_str());
-    // empty -> ignore
-  } else if (have_doc1 && have_doc2) {
-    // we have a meta info and a config document
-#ifdef HAVE_YAMLCPP_0_5
-    read_meta_doc(docs[0], load_queue, host_file);
-    read_config_doc(docs[1], sub_root);
-#else
-    read_meta_doc(doc1, load_queue, host_file);
-    read_config_doc(doc2, sub_root);
-#endif
+	if (! have_doc1) {
+		//throw Exception("YamlConfig: file %s contains no document", filename.c_str());
+		// empty -> ignore
+	} else if (have_doc1 && have_doc2) {
+		// we have a meta info and a config document
+		read_meta_doc(docs[0], load_queue, host_file);
+		sub_root = read_config_doc(docs[1]);
 
-  } else {
-    // only one, assume this to be the config document
-#ifdef HAVE_YAMLCPP_0_5
-    read_config_doc(docs[0], sub_root);
-#else
-    read_config_doc(doc1, sub_root);
-#endif
-  }
+	} else {
+		// only one, assume this to be the config document
+		sub_root = read_config_doc(docs[0]);
+	}
 
-  return sub_root;
+	return sub_root;
 }
 
 
 void
 YamlConfiguration::read_yaml_config(std::string filename, std::string &host_file,
-                                    YamlConfigurationNode *& root, YamlConfigurationNode *& host_root,
+                                    std::shared_ptr<YamlConfigurationNode>& root,
+                                    std::shared_ptr<YamlConfigurationNode>& host_root,
                                     std::list<std::string> &files, std::list<std::string> &dirs)
 {
-  root = new YamlConfigurationNode();
+	root = std::make_shared<YamlConfigurationNode>();
 
-  std::queue<LoadQueueEntry> load_queue;
-  load_queue.push(LoadQueueEntry(filename, false));
+	std::queue<LoadQueueEntry> load_queue;
+	load_queue.push(LoadQueueEntry(filename, false));
 
-  while (! load_queue.empty()) {
-    LoadQueueEntry &qe = load_queue.front();
+	while (! load_queue.empty()) {
+		LoadQueueEntry &qe = load_queue.front();
 
-    if (qe.is_dir) {
-      dirs.push_back(qe.filename);
-    } else {
-      //LibLogger::log_debug("YamlConfiguration",
-      //                     "Reading YAML file '%s' (ignore missing: %s)",
-      //                     qe.filename.c_str(), qe.ignore_missing ? "yes" : "no");
+		if (qe.is_dir) {
+			dirs.push_back(qe.filename);
+		} else {
+			//LibLogger::log_debug("YamlConfiguration",
+			//                     "Reading YAML file '%s' (ignore missing: %s)",
+			//                     qe.filename.c_str(), qe.ignore_missing ? "yes" : "no");
 
-      YamlConfigurationNode *sub_root = read_yaml_file(qe.filename, qe.ignore_missing, load_queue, host_file);
+			std::shared_ptr<YamlConfigurationNode> sub_root =
+				read_yaml_file(qe.filename, qe.ignore_missing, load_queue, host_file);
 
-      if (sub_root) {
-        files.push_back(qe.filename);
-        *root += sub_root;
-        delete sub_root;
-      }
-    }
+			if (sub_root) {
+				files.push_back(qe.filename);
+				*root += sub_root;
+			}
+		}
 
-    load_queue.pop();
-  }
+		load_queue.pop();
+	}
 
-  if (host_file != "") {
-    //LibLogger::log_debug("YamlConfiguration",
-    //			 "Reading Host YAML file '%s'", host_file.c_str());
-    std::queue<LoadQueueEntry> host_load_queue;
-    host_root = read_yaml_file(host_file, true, host_load_queue, host_file);
-    if (! host_load_queue.empty()) {
-      throw CouldNotOpenConfigException("YamlConfig: includes are not allowed "
-					"in host document");
-    }
-    if (host_root) {
-      *root += host_root;
-      files.push_back(host_file);
-    } else host_root = new YamlConfigurationNode();
-  } else {
-    host_root = new YamlConfigurationNode();
-  }
+	if (host_file != "") {
+		//LibLogger::log_debug("YamlConfiguration",
+		//			 "Reading Host YAML file '%s'", host_file.c_str());
+		std::queue<LoadQueueEntry> host_load_queue;
+		host_root = read_yaml_file(host_file, true, host_load_queue, host_file);
+		if (! host_load_queue.empty()) {
+			throw CouldNotOpenConfigException("YamlConfig: includes are not allowed "
+			                                  "in host document");
+		}
+		if (host_root) {
+			*root += host_root;
+			files.push_back(host_file);
+		} else {
+			host_root = std::make_shared<YamlConfigurationNode>();
+		}
+	} else {
+		host_root = std::make_shared<YamlConfigurationNode>();
+	}
 }
 
 void
 YamlConfiguration::fam_event(const char *filename, unsigned int mask)
 {
-  MutexLocker lock(mutex);
-  try {
-    std::string host_file = "";
-    std::list<std::string> files, dirs;
-    YamlConfigurationNode *root, *host_root;
-    read_yaml_config(config_file_, host_file, root, host_root, files, dirs);
+	MutexLocker lock(mutex);
+	try {
+		std::string host_file = "";
+		std::list<std::string> files, dirs;
+		std::shared_ptr<YamlConfigurationNode> root, host_root;
+		read_yaml_config(config_file_, host_file, root, host_root, files, dirs);
 
-    std::list<std::string> changes = YamlConfigurationNode::diff(root_, root);
+		std::list<std::string> changes = YamlConfigurationNode::diff(root_, root);
 
-    if (! changes.empty()) {
-      YamlConfigurationNode *old_root = root_;
-      YamlConfigurationNode *old_host_root = host_root_;
-      root_ = root;
-      host_root_ = host_root;
-      host_file_ = host_file;
-      delete old_root;
-      delete old_host_root;
+		if (! changes.empty()) {
+			root_ = root;
+			host_root_ = host_root;
+			host_file_ = host_file;
 
-      std::list<std::string>::iterator c;
-      for (c = changes.begin(); c != changes.end(); ++c) {
-        notify_handlers(c->c_str());
-      }
-    }
+			std::list<std::string>::iterator c;
+			for (c = changes.begin(); c != changes.end(); ++c) {
+				notify_handlers(c->c_str());
+			}
+		}
 
-    // includes might have changed to include a new empty file
-    // so even though no value changes were seen, we might very
-    // well have new files we need to watch (or files we do no
-    // longer have to watch, so always reset and re-add.
-    RefPtr<FileAlterationMonitor> fam = fam_thread_->get_fam();
-    fam->reset();
-    std::list<std::string>::iterator f;
-    for (f = files.begin(); f != files.end(); ++f) {
-      fam->watch_file(f->c_str());
-    }
-    for (f = dirs.begin(); f != dirs.end(); ++f) {
-      fam->watch_dir(f->c_str());
-    }
+		// includes might have changed to include a new empty file
+		// so even though no value changes were seen, we might very
+		// well have new files we need to watch (or files we do no
+		// longer have to watch, so always reset and re-add.
+		RefPtr<FileAlterationMonitor> fam = fam_thread_->get_fam();
+		fam->reset();
+		std::list<std::string>::iterator f;
+		for (f = files.begin(); f != files.end(); ++f) {
+			fam->watch_file(f->c_str());
+		}
+		for (f = dirs.begin(); f != dirs.end(); ++f) {
+			fam->watch_dir(f->c_str());
+		}
 
-  } catch (Exception &e) {
-    LibLogger::log_warn("YamlConfiguration",
-                        "Failed to reload changed config, exception follows");
-    LibLogger::log_warn("YamlConfiguration", e);
-  }
+	} catch (Exception &e) {
+		LibLogger::log_warn("YamlConfiguration",
+		                    "Failed to reload changed config, exception follows");
+		LibLogger::log_warn("YamlConfiguration", e);
+	}
 }
 
 /** Create absolute config path.
@@ -655,11 +585,11 @@ YamlConfiguration::fam_event(const char *filename, unsigned int mask)
  */
 static std::string abs_cfg_path(const std::string &path)
 {
-  if (path[0] == '/') {
-     return path;
-  } else {
-    return std::string(CONFDIR) + "/" + path;
-  }
+	if (path[0] == '/') {
+		return path;
+	} else {
+		return std::string(CONFDIR) + "/" + path;
+	}
 }
 
 
@@ -667,298 +597,138 @@ void
 YamlConfiguration::read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue,
                                  std::string &host_file)
 {
-  try {
-    const YAML::Node &includes = doc["include"];
-#ifdef HAVE_YAMLCPP_0_5
-    for (YAML::const_iterator it = includes.begin(); it != includes.end(); ++it) {
-      std::string include = it->as<std::string>();
-#else
-    for (YAML::Iterator it = includes.begin(); it != includes.end(); ++it) {
-      std::string include;
-      *it >> include;
-#endif
-      bool ignore_missing = false;
-      if (it->Tag() == "tag:fawkesrobotics.org,cfg/ignore-missing") {
-	ignore_missing = true;
-      }
+	try {
+		const YAML::Node &includes = doc["include"];
+		for (YAML::const_iterator it = includes.begin(); it != includes.end(); ++it) {
+			std::string include = it->as<std::string>();
+			bool ignore_missing = false;
+			if (it->Tag() == "tag:fawkesrobotics.org,cfg/ignore-missing") {
+				ignore_missing = true;
+			}
 
-      if (it->Tag() == "tag:fawkesrobotics.org,cfg/host-specific") {
-	if (host_file != "") {
-	  throw Exception("YamlConfig: Only one host-specific file can be specified");
-	}
-#ifdef HAVE_YAMLCPP_0_5
-	host_file = abs_cfg_path(it->Scalar());
-#else
-	it->GetScalar(host_file);
-	host_file = abs_cfg_path(host_file);
-#endif
-	continue;
-      }
+			if (it->Tag() == "tag:fawkesrobotics.org,cfg/host-specific") {
+				if (host_file != "") {
+					throw Exception("YamlConfig: Only one host-specific file can be specified");
+				}
+				host_file = abs_cfg_path(it->Scalar());
+				continue;
+			}
 
-      if (include.empty()) {
-	throw Exception("YamlConfig: invalid empty include");
-      }
+			if (include.empty()) {
+				throw Exception("YamlConfig: invalid empty include");
+			}
  
-      if (include[include.size() - 1] == '/') {
-	// this should be a directory
-	std::string dirname = abs_cfg_path(include);
-	struct stat dir_stat;
-	if ((stat(dirname.c_str(), &dir_stat) != 0)) {
-	  if (ignore_missing) continue;
-	  throw Exception(errno, "YamlConfig: Failed to stat directory %s", dirname.c_str());
+			if (include[include.size() - 1] == '/') {
+				// this should be a directory
+				std::string dirname = abs_cfg_path(include);
+				struct stat dir_stat;
+				if ((stat(dirname.c_str(), &dir_stat) != 0)) {
+					if (ignore_missing) continue;
+					throw Exception(errno, "YamlConfig: Failed to stat directory %s", dirname.c_str());
+				}
+
+				if (! S_ISDIR(dir_stat.st_mode)) {
+					throw Exception("YamlConfig: %s is not a directory", dirname.c_str());
+				}
+
+				DIR *d = opendir(dirname.c_str());
+				if (! d) {
+					throw Exception(errno, "YamlConfig: failed to open directory %s",
+					                dirname.c_str());
+				}
+
+				load_queue.push(LoadQueueEntry(dirname, ignore_missing, true));
+
+				std::list<std::string> files;
+
+				std::regex yaml_regex{YAML_REGEX, std::regex_constants::extended};
+
+				struct dirent *dent;
+				while ((dent = readdir(d)) != NULL) {
+					if (regex_search(dent->d_name, yaml_regex)) {
+						std::string dn = dent->d_name;
+						files.push_back(dirname + dn);
+					}
+				}
+				closedir(d);
+
+				files.sort();
+				for (std::list<std::string>::iterator f = files.begin(); f != files.end(); ++f) {
+					load_queue.push(LoadQueueEntry(*f, ignore_missing));
+				}
+
+			} else {
+				load_queue.push(LoadQueueEntry(abs_cfg_path(include), ignore_missing));
+			}
+		}
+	} catch (YAML::KeyNotFound &e) {
+		//ignored, no includes
 	}
-
-	if (! S_ISDIR(dir_stat.st_mode)) {
-	  throw Exception("YamlConfig: %s is not a directory", dirname.c_str());
-	}
-
-	DIR *d = opendir(dirname.c_str());
-	if (! d) {
-	  throw Exception(errno, "YamlConfig: failed to open directory %s",
-			  dirname.c_str());
-	}
-
-        load_queue.push(LoadQueueEntry(dirname, ignore_missing, true));
-
-	std::list<std::string> files;
-
-	struct dirent *dent;
-	while ((dent = readdir(d)) != NULL) {
-#ifdef USE_REGEX_CPP
-	  if (regex_search(dent->d_name, __yaml_regex)) {
-#  if 0
-	    // just for emacs auto-indentation
-	  }
-#  endif
-#else
-	  if (regexec(&__yaml_regex, dent->d_name, 0, NULL, 0) != REG_NOMATCH) {
-#endif
-	    std::string dn = dent->d_name;
-	    files.push_back(dirname + dn);
-	  }
-	}
-	closedir(d);
-
-	files.sort();
-	for (std::list<std::string>::iterator f = files.begin(); f != files.end(); ++f) {
-	    load_queue.push(LoadQueueEntry(*f, ignore_missing));
-	}
-
-      } else {
-	load_queue.push(LoadQueueEntry(abs_cfg_path(include), ignore_missing));
-      }
-    }
-  } catch (YAML::KeyNotFound &e) {
-    //ignored, no includes
-  }
 }
 
 
-void
-YamlConfiguration::read_config_doc(const YAML::Node &doc, YamlConfigurationNode *&node, std::string path)
+std::shared_ptr<YamlConfigurationNode> 
+YamlConfiguration::read_config_doc(const YAML::Node &doc)
 {
-  if (! node) {
-    node = new YamlConfigurationNode("root");
-  }
-
-  if (*path.rbegin() != '/')
-    path += '/';
-  if (node->name() != "root")
-    path += node->name();
-
-  if (doc.Type() == YAML::NodeType::Map) {
-#ifdef HAVE_YAMLCPP_0_5
-    for (YAML::const_iterator it = doc.begin(); it != doc.end(); ++it) {
-      std::string key = it->first.as<std::string>();
-#else
-    for (YAML::Iterator it = doc.begin(); it != doc.end(); ++it) {
-      std::string key;
-      it.first() >> key;
-#endif
-      YamlConfigurationNode *in = node;
-      if (key.find("/") != std::string::npos) {
-	// we need to split and find the proper insertion node
-	std::vector<std::string> pel = str_split(key);
-	for (size_t i = 0; i < pel.size() - 1; ++i) {
-	  YamlConfigurationNode *n = (*in)[pel[i]];
-	  if (! n) {
-	    n = new YamlConfigurationNode(pel[i]);
-	    in->add_child(pel[i], n);
-	  }
-	  in = n;
-	}
-
-	key = pel.back();
-      }
-
-      YamlConfigurationNode *tmp = (*in)[key];
-      if (tmp) {
-#ifdef HAVE_YAMLCPP_0_5
-	if (tmp->is_scalar() && it->second.Type() != YAML::NodeType::Scalar)
-#else
-	if (tmp->is_scalar() && it.second().Type() != YAML::NodeType::Scalar)
-#endif
-	{
-	  throw Exception("YamlConfig: %s: scalar %s cannot be overwritten by non-scalar",
-			  path.c_str(), tmp->name().c_str());
-	}
-#ifdef HAVE_YAMLCPP_0_5
-	tmp->set_scalar(it->second.Scalar());
-#else
-	std::string s;
-	if (it.second().GetScalar(s)) {
-	  tmp->set_scalar(s);
-	}
-#endif
-      } else {
-#ifdef HAVE_YAMLCPP_0_5
-	YamlConfigurationNode *tmp = new YamlConfigurationNode(key, it->second);
-	in->add_child(key, tmp);
-	read_config_doc(it->second, tmp, path);
-#else
-	YamlConfigurationNode *tmp = new YamlConfigurationNode(key, it.second());
-	in->add_child(key, tmp);
-	read_config_doc(it.second(), tmp, path);
-#endif
-      }
-    }
-
-  } else if (doc.Type() == YAML::NodeType::Scalar) {
-    if (doc.Tag() == "tag:fawkesrobotics.org,cfg/ipv4" ||
-        doc.Tag() == "tag:fawkesrobotics.org,cfg/ipv6")
-    {
-	    std::string addr_s;
-	    try {
-		    addr_s = node->get_string();
-      } catch (Exception &e) {
-		    e.prepend("YamlConfig: %s: Invalid IPv4 or IPv6 address (not a string)", path.c_str());
-		    throw;
-	    }
-
-	    if (doc.Tag() == "tag:fawkesrobotics.org,cfg/ipv4") {
-		    struct in_addr addr;
-		    if (inet_pton(AF_INET, addr_s.c_str(), &addr) != 1) {
-			    throw Exception("YamlConfig: %s is not a valid IPv4 address", addr_s.c_str());
-		    }
-	    }
-	    if (doc.Tag() == "tag:fawkesrobotics.org,cfg/ipv6") {
-		    struct in6_addr addr;
-		    if (inet_pton(AF_INET6, addr_s.c_str(), &addr) != 1) {
-			    throw Exception("YamlConfig: %s is not a valid IPv6 address", addr_s.c_str());
-		    }
-	    }
-
-    } else if (doc.Tag() == "tag:fawkesrobotics.org,cfg/tcp-port" ||
-               doc.Tag() == "tag:fawkesrobotics.org,cfg/udp-port")
-    {
-	    unsigned int p = 0;
-	    try {
-		    p = node->get_uint();
-	    } catch (Exception &e) {
-		    e.prepend("YamlConfig: %s: Invalid TCP/UDP port number (not an unsigned int)", path.c_str());
-		    throw;
-	    }
-	    if (p <= 0 || p >= 65535) {
-		    throw Exception("YamlConfig: Invalid TCP/UDP port number "
-		                    "(%u out of allowed range)", p);
-	    }
-    } else if (doc.Tag() == "tag:fawkesrobotics.org,cfg/url") {
-#ifdef HAVE_YAMLCPP_0_5
-      std::string scalar = doc.Scalar();
-#else
-      std::string scalar;
-      doc.GetScalar(scalar);
-#endif
-#ifdef USE_REGEX_CPP
-      if (regex_search(scalar, __url_regex)) {
-#  if 0
-	// just for emacs auto-indentation
-      }
-#  endif
-#else
-      if (regexec(&__url_regex, scalar.c_str(), 0, NULL, 0) == REG_NOMATCH) {
-	throw Exception("YamlConfig: %s: %s is not a valid URL", path.c_str(), scalar.c_str());
-      }
-#endif
-    } else if (doc.Tag() == "tag:fawkesrobotics.org,cfg/frame") {
-#ifdef HAVE_YAMLCPP_0_5
-      std::string scalar = doc.Scalar();
-#else
-      std::string scalar;
-      doc.GetScalar(scalar);
-#endif
-#ifdef USE_REGEX_CPP
-      if (regex_search(scalar, __frame_regex)) {
-#  if 0
-	// just for emacs auto-indentation
-      }
-#  endif
-#else
-      if (regexec(&__frame_regex, scalar.c_str(), 0, NULL, 0) == REG_NOMATCH) {
-	throw Exception("YamlConfig: %s: %s is not a valid frame ID", path.c_str(), scalar.c_str());
-      }
-#endif
-    }
-
-  }
+	return YamlConfigurationNode::create(doc);
 }
 
 void
 YamlConfiguration::write_host_file()
 {
-  if (host_file_ == "") {
-    throw Exception("YamlConfig: no host config file specified");
-  }
-  if (mutex->try_lock()) {
-    try {
-      host_root_->emit(host_file_);
-      mutex->unlock();
-    } catch (...) {
-      write_pending_mutex_->unlock();
-      mutex->unlock();
-      throw;
-    }
-  } else {
-    write_pending_mutex_->lock();
-    write_pending_ = true;
-    write_pending_mutex_->unlock();
-  }
+	if (host_file_ == "") {
+		throw Exception("YamlConfig: no host config file specified");
+	}
+	if (mutex->try_lock()) {
+		try {
+			host_root_->emit(host_file_);
+			mutex->unlock();
+		} catch (...) {
+			write_pending_mutex_->unlock();
+			mutex->unlock();
+			throw;
+		}
+	} else {
+		write_pending_mutex_->lock();
+		write_pending_ = true;
+		write_pending_mutex_->unlock();
+	}
 }
 
 
 void
 YamlConfiguration::copy(Configuration *copyconf)
 {
-  throw NotImplementedException("YamlConfig does not support copying of a configuration");
+	throw NotImplementedException("YamlConfig does not support copying of a configuration");
 }
 
 bool
 YamlConfiguration::exists(const char *path)
 {
-  try {
-    YamlConfigurationNode *n = root_->find(path);
-    return ! n->has_children();
-  } catch (Exception &e) {
-    return false;
-  }
+	try {
+		std::shared_ptr<YamlConfigurationNode> n = root_->find(path);
+		return ! n->has_children();
+	} catch (Exception &e) {
+		return false;
+	}
 }
 
 
 std::string
 YamlConfiguration::get_type(const char *path)
 {
-  YamlConfigurationNode *n = root_->find(path);
-  if (n->has_children()) {
-    throw ConfigEntryNotFoundException(path);
-  }
+	std::shared_ptr<YamlConfigurationNode> n = root_->find(path);
+	if (n->has_children()) {
+		throw ConfigEntryNotFoundException(path);
+	}
 
-  return YamlConfigurationNode::Type::to_string(n->get_type());
+	return YamlConfigurationNode::Type::to_string(n->get_type());
 }
 
 std::string
 YamlConfiguration::get_comment(const char *path)
 {
-  return "";
+	return "";
 }
 
 
@@ -971,13 +741,13 @@ YamlConfiguration::get_comment(const char *path)
  */
 template<typename T>
 static inline T
-get_value_as(YamlConfigurationNode *root, const char *path)
+get_value_as(std::shared_ptr<YamlConfigurationNode> root, const char *path)
 {
-  YamlConfigurationNode *n = root->find(path);
-  if (n->has_children()) {
-    throw ConfigEntryNotFoundException(path);
-  }
-  return n->get_value<T>();
+	std::shared_ptr<YamlConfigurationNode> n = root->find(path);
+	if (n->has_children()) {
+		throw ConfigEntryNotFoundException(path);
+	}
+	return n->get_value<T>();
 }
 
 /** Retrieve value casted to given type T.
@@ -989,77 +759,77 @@ get_value_as(YamlConfigurationNode *root, const char *path)
  */
 template<typename T>
 static inline std::vector<T>
-get_list(YamlConfigurationNode *root, const char *path)
+get_list(std::shared_ptr<YamlConfigurationNode> root, const char *path)
 {
-  YamlConfigurationNode *n = root->find(path);
-  if (n->has_children()) {
-    throw ConfigEntryNotFoundException(path);
-  }
-  return n->get_list<T>();
+	std::shared_ptr<YamlConfigurationNode> n = root->find(path);
+	if (n->has_children()) {
+		throw ConfigEntryNotFoundException(path);
+	}
+	return n->get_list<T>();
 }
 
 
 float
 YamlConfiguration::get_float(const char *path)
 {
-  return get_value_as<float>(root_, path);
+	return get_value_as<float>(root_, path);
 }
 
 unsigned int
 YamlConfiguration::get_uint(const char *path)
 {
-  return get_value_as<unsigned int>(root_, path);
+	return get_value_as<unsigned int>(root_, path);
 }
 
 int
 YamlConfiguration::get_int(const char *path)
 {
-  return get_value_as<int>(root_, path);
+	return get_value_as<int>(root_, path);
 }
 
 bool
 YamlConfiguration::get_bool(const char *path)
 {
-  return get_value_as<bool>(root_, path);
+	return get_value_as<bool>(root_, path);
 }
 
 std::string
 YamlConfiguration::get_string(const char *path)
 {
-  return get_value_as<std::string>(root_, path);
+	return get_value_as<std::string>(root_, path);
 }
 
 
 std::vector<float>
 YamlConfiguration::get_floats(const char *path)
 {
-  return get_list<float>(root_, path);
+	return get_list<float>(root_, path);
 }
 
 
 std::vector<unsigned int>
 YamlConfiguration::get_uints(const char *path)
 {
-  return get_list<unsigned int>(root_, path);
+	return get_list<unsigned int>(root_, path);
 }
 
 
 std::vector<int>
 YamlConfiguration::get_ints(const char *path)
 {
-  return get_list<int>(root_, path);
+	return get_list<int>(root_, path);
 }
 
 std::vector<bool>
 YamlConfiguration::get_bools(const char *path)
 {
-  return get_list<bool>(root_, path);
+	return get_list<bool>(root_, path);
 }
 
 std::vector<std::string>
 YamlConfiguration::get_strings(const char *path)
 {
-  return get_list<std::string>(root_, path);
+	return get_list<std::string>(root_, path);
 }
 
 
@@ -1070,200 +840,200 @@ YamlConfiguration::get_strings(const char *path)
  */
 template<typename T>
 static inline bool
-is_type(YamlConfigurationNode *root, const char *path)
+is_type(std::shared_ptr<YamlConfigurationNode> root, const char *path)
 {
-  YamlConfigurationNode *n = root->find(path);
-  if (n->has_children()) {
-    throw ConfigEntryNotFoundException(path);
-  }
-  return n->is_type<T>();
+	std::shared_ptr<YamlConfigurationNode> n = root->find(path);
+	if (n->has_children()) {
+		throw ConfigEntryNotFoundException(path);
+	}
+	return n->is_type<T>();
 }
 
 
 bool
 YamlConfiguration::is_float(const char *path)
 {
-  return is_type<float>(root_, path);
+	return is_type<float>(root_, path);
 }
 
 bool
 YamlConfiguration::is_uint(const char *path)
 {
-  YamlConfigurationNode *n = root_->find(path);
-  if (n->has_children()) {
-    throw ConfigEntryNotFoundException(path);
-  }
+	std::shared_ptr<YamlConfigurationNode> n = root_->find(path);
+	if (n->has_children()) {
+		throw ConfigEntryNotFoundException(path);
+	}
 
-  if (! n->is_type<unsigned int>())  return false;
+	if (! n->is_type<unsigned int>())  return false;
 
-  int v = n->get_value<int>();
-  return (v >= 0);
+	int v = n->get_value<int>();
+	return (v >= 0);
 }
 
 bool
 YamlConfiguration::is_int(const char *path)
 {
-  return is_type<int>(root_, path);
+	return is_type<int>(root_, path);
 }
 
 bool
 YamlConfiguration::is_bool(const char *path)
 {
-  return is_type<bool>(root_, path);
+	return is_type<bool>(root_, path);
 }
 
 bool
 YamlConfiguration::is_string(const char *path)
 {
-  return is_type<std::string>(root_, path);
+	return is_type<std::string>(root_, path);
 }
 
 
 bool
 YamlConfiguration::is_list(const char *path)
 {
-  YamlConfigurationNode *n = root_->find(path);
-  if (n->has_children()) {
-    throw ConfigEntryNotFoundException(path);
-  }
-  return (n->get_type() == YamlConfigurationNode::Type::SEQUENCE);
+	std::shared_ptr<YamlConfigurationNode> n = root_->find(path);
+	if (n->has_children()) {
+		throw ConfigEntryNotFoundException(path);
+	}
+	return (n->get_type() == YamlConfigurationNode::Type::SEQUENCE);
 }
 
 
 std::string
 YamlConfiguration::get_default_comment(const char *path)
 {
-  return "";
+	return "";
 }
 
 bool
 YamlConfiguration::is_default(const char *path)
 {
-  return false;
+	return false;
 }
 
 
 Configuration::ValueIterator *
 YamlConfiguration::get_value(const char *path)
 {
-  try {
-    YamlConfigurationNode *n = root_->find(path);
-    if (n->has_children()) {
-      return new YamlValueIterator();
-    }
-    std::map<std::string, YamlConfigurationNode *> nodes;
-    nodes[path] = n;
-    return new YamlValueIterator(nodes);
-  } catch (ConfigEntryNotFoundException &e) {
-    return new YamlValueIterator();
-  }
+	try {
+		std::shared_ptr<YamlConfigurationNode> n = root_->find(path);
+		if (n->has_children()) {
+			return new YamlValueIterator();
+		}
+		std::map<std::string, std::shared_ptr<YamlConfigurationNode>> nodes;
+		nodes[path] = n;
+		return new YamlValueIterator(nodes);
+	} catch (ConfigEntryNotFoundException &e) {
+		return new YamlValueIterator();
+	}
 }
 
 
 void
 YamlConfiguration::set_float(const char *path, float f)
 {
-  root_->set_value(path, f);
-  host_root_->set_value(path, f);
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_value(path, f);
+	host_root_->set_value(path, f);
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 void
 YamlConfiguration::set_uint(const char *path, unsigned int uint)
 {
-  root_->set_value(path, uint);
-  host_root_->set_value(path, uint);
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_value(path, uint);
+	host_root_->set_value(path, uint);
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 void
 YamlConfiguration::set_int(const char *path, int i)
 {
-  root_->set_value(path, i);
-  host_root_->set_value(path, i);
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_value(path, i);
+	host_root_->set_value(path, i);
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 void
 YamlConfiguration::set_bool(const char *path, bool b)
 {
-  root_->set_value(path, b);
-  host_root_->set_value(path, b);
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_value(path, b);
+	host_root_->set_value(path, b);
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 void
 YamlConfiguration::set_string(const char *path, const char *s)
 {
-  root_->set_value(path, std::string(s));
-  host_root_->set_value(path, std::string(s));
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_value(path, std::string(s));
+	host_root_->set_value(path, std::string(s));
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 
 void
 YamlConfiguration::set_string(const char *path, std::string &s)
 {
-  set_string(path, s.c_str());
+	set_string(path, s.c_str());
 }
 
 void
 YamlConfiguration::set_floats(const char *path, std::vector<float> &f)
 {
-  root_->set_list(path, f);
-  host_root_->set_list(path, f);
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_list(path, f);
+	host_root_->set_list(path, f);
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 void
 YamlConfiguration::set_uints(const char *path, std::vector<unsigned int> &u)
 {
-  root_->set_list(path, u);
-  host_root_->set_list(path, u);
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_list(path, u);
+	host_root_->set_list(path, u);
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 void
 YamlConfiguration::set_ints(const char *path, std::vector<int> &i)
 {
-  root_->set_list(path, i);
-  host_root_->set_list(path, i);
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_list(path, i);
+	host_root_->set_list(path, i);
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 void
 YamlConfiguration::set_bools(const char *path, std::vector<bool> &b)
 {
-  root_->set_list(path, b);
-  host_root_->set_list(path, b);
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_list(path, b);
+	host_root_->set_list(path, b);
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 void
 YamlConfiguration::set_strings(const char *path, std::vector<std::string> &s)
 {
-  root_->set_list(path, s);
-  host_root_->set_list(path, s);
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_list(path, s);
+	host_root_->set_list(path, s);
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 void
 YamlConfiguration::set_strings(const char *path, std::vector<const char *> &s)
 {
-  root_->set_list(path, s);
-  host_root_->set_list(path, s);
-  write_host_file();
-  notify_handlers(path, false);
+	root_->set_list(path, s);
+	host_root_->set_list(path, s);
+	write_host_file();
+	notify_handlers(path, false);
 }
 
 void
@@ -1279,65 +1049,65 @@ YamlConfiguration::set_comment(const char *path, std::string &comment)
 void
 YamlConfiguration::erase(const char *path)
 {
-  host_root_->erase(path);
-  root_->erase(path);
-  write_host_file();
+	host_root_->erase(path);
+	root_->erase(path);
+	write_host_file();
 }
 
 void
 YamlConfiguration::set_default_float(const char *path, float f)
 {
-  throw NotImplementedException("YamlConfiguration does not support default values");
+	throw NotImplementedException("YamlConfiguration does not support default values");
 }
 
 void
 YamlConfiguration::set_default_uint(const char *path, unsigned int uint)
 {
-  throw NotImplementedException("YamlConfiguration does not support default values");
+	throw NotImplementedException("YamlConfiguration does not support default values");
 }
 
 void
 YamlConfiguration::set_default_int(const char *path, int i)
 {
-  throw NotImplementedException("YamlConfiguration does not support default values");
+	throw NotImplementedException("YamlConfiguration does not support default values");
 }
 
 void
 YamlConfiguration::set_default_bool(const char *path, bool b)
 {
-  throw NotImplementedException("YamlConfiguration does not support default values");
+	throw NotImplementedException("YamlConfiguration does not support default values");
 }
 
 void
 YamlConfiguration::set_default_string(const char *path,
-					const char *s)
+                                      const char *s)
 {
-  throw NotImplementedException("YamlConfiguration does not support default values");
+	throw NotImplementedException("YamlConfiguration does not support default values");
 }
 
 void
 YamlConfiguration::set_default_string(const char *path, std::string &s)
 {
-  set_default_string(path, s.c_str());
+	set_default_string(path, s.c_str());
 }
 
 void
 YamlConfiguration::set_default_comment(const char *path, const char *comment)
 {
-  throw NotImplementedException("YamlConfiguration does not support default values");
+	throw NotImplementedException("YamlConfiguration does not support default values");
 }
 
 void
 YamlConfiguration::set_default_comment(const char *path, std::string &comment)
 {
-  set_default_comment(path, comment.c_str());
+	set_default_comment(path, comment.c_str());
 }
 
 
 void
 YamlConfiguration::erase_default(const char *path)
 {
-  throw NotImplementedException("YamlConfiguration does not support default values");
+	throw NotImplementedException("YamlConfiguration does not support default values");
 }
 
 /** Lock the config.
@@ -1347,7 +1117,7 @@ YamlConfiguration::erase_default(const char *path)
 void
 YamlConfiguration::lock()
 {
-  mutex->lock();
+	mutex->lock();
 }
 
 
@@ -1358,7 +1128,7 @@ YamlConfiguration::lock()
 bool
 YamlConfiguration::try_lock()
 {
-  return mutex->try_lock();
+	return mutex->try_lock();
 }
 
 /** Unlock the config.
@@ -1367,13 +1137,13 @@ YamlConfiguration::try_lock()
 void
 YamlConfiguration::unlock()
 {
-  write_pending_mutex_->lock();
-  if (write_pending_) {
-    host_root_->emit(host_file_);
-    write_pending_ = false;
-  }
-  write_pending_mutex_->unlock();
-  mutex->unlock();
+	write_pending_mutex_->lock();
+	if (write_pending_) {
+		host_root_->emit(host_file_);
+		write_pending_ = false;
+	}
+	write_pending_mutex_->unlock();
+	mutex->unlock();
 }
 
 
@@ -1386,27 +1156,27 @@ YamlConfiguration::try_dump()
 Configuration::ValueIterator *
 YamlConfiguration::iterator()
 {
-  std::map<std::string, YamlConfigurationNode *> nodes;
-  root_->enum_leafs(nodes);
-  return new YamlValueIterator(nodes);
+	std::map<std::string, std::shared_ptr<YamlConfigurationNode>> nodes;
+	root_->enum_leafs(nodes);
+	return new YamlValueIterator(nodes);
 }
 
 Configuration::ValueIterator *
 YamlConfiguration::search(const char *path)
 {
-  std::string tmp_path = path;
-  std::string::size_type tl = tmp_path.length();
-  if ((tl > 0) && (tmp_path[tl - 1] == '/')) {
-    tmp_path.resize(tl - 1);
-  }
-  try {
-    YamlConfigurationNode *n = root_->find(tmp_path.c_str());
-    std::map<std::string, YamlConfigurationNode *> nodes;
-    n->enum_leafs(nodes, tmp_path);
-    return new YamlValueIterator(nodes);
-  } catch (Exception &e) {
-    return new YamlValueIterator();
-  }
+	std::string tmp_path = path;
+	std::string::size_type tl = tmp_path.length();
+	if ((tl > 0) && (tmp_path[tl - 1] == '/')) {
+		tmp_path.resize(tl - 1);
+	}
+	try {
+		std::shared_ptr<YamlConfigurationNode> n = root_->find(tmp_path.c_str());
+		std::map<std::string, std::shared_ptr<YamlConfigurationNode>> nodes;
+		n->enum_leafs(nodes, tmp_path);
+		return new YamlValueIterator(nodes);
+	} catch (Exception &e) {
+		return new YamlValueIterator();
+	}
 }
 
 
@@ -1415,11 +1185,11 @@ YamlConfiguration::search(const char *path)
  * @return node representing requested path query result, if the path only
  * consists of collection and path name returns the whole document.
  */
-YamlConfigurationNode *
+std::shared_ptr<YamlConfigurationNode>
 YamlConfiguration::query(const char *path) const
 {
-  std::queue<std::string> pel_q = str_split_to_queue(path);
-  return root_->find(pel_q);
+	std::queue<std::string> pel_q = str_split_to_queue(path);
+	return root_->find(pel_q);
 }
 
 

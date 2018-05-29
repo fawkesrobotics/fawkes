@@ -44,16 +44,13 @@ namespace fawkes {
 /** Constructor. */
 MemoryConfiguration::MemoryConfiguration()
 {
-  root_ = new YamlConfigurationNode();
+	root_ = std::make_shared<YamlConfigurationNode>();
   mutex_ = new Mutex();
 }
 
 /** Destructor. */
 MemoryConfiguration::~MemoryConfiguration()
 {
-  delete root_;
-  root_ = NULL;
-
   delete mutex_;
 }
 
@@ -74,7 +71,7 @@ bool
 MemoryConfiguration::exists(const char *path)
 {
   try {
-    YamlConfigurationNode *n = root_->find(path);
+    std::shared_ptr<YamlConfigurationNode> n = root_->find(path);
     return ! n->has_children();
   } catch (Exception &e) {
     return false;
@@ -85,7 +82,7 @@ MemoryConfiguration::exists(const char *path)
 std::string
 MemoryConfiguration::get_type(const char *path)
 {
-  YamlConfigurationNode *n = root_->find(path);
+  std::shared_ptr<YamlConfigurationNode> n = root_->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
@@ -109,9 +106,9 @@ MemoryConfiguration::get_comment(const char *path)
  */
 template<typename T>
 static inline T
-get_value_as(YamlConfigurationNode *root, const char *path)
+get_value_as(std::shared_ptr<YamlConfigurationNode> root, const char *path)
 {
-  YamlConfigurationNode *n = root->find(path);
+  std::shared_ptr<YamlConfigurationNode> n = root->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
@@ -127,9 +124,9 @@ get_value_as(YamlConfigurationNode *root, const char *path)
  */
 template<typename T>
 static inline std::vector<T>
-get_list(YamlConfigurationNode *root, const char *path)
+get_list(std::shared_ptr<YamlConfigurationNode> root, const char *path)
 {
-  YamlConfigurationNode *n = root->find(path);
+  std::shared_ptr<YamlConfigurationNode> n = root->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
@@ -208,9 +205,9 @@ MemoryConfiguration::get_strings(const char *path)
  */
 template<typename T>
 static inline bool
-is_type(YamlConfigurationNode *root, const char *path)
+is_type(std::shared_ptr<YamlConfigurationNode> root, const char *path)
 {
-  YamlConfigurationNode *n = root->find(path);
+  std::shared_ptr<YamlConfigurationNode> n = root->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
@@ -252,7 +249,7 @@ MemoryConfiguration::is_string(const char *path)
 bool
 MemoryConfiguration::is_list(const char *path)
 {
-  YamlConfigurationNode *n = root_->find(path);
+  std::shared_ptr<YamlConfigurationNode> n = root_->find(path);
   if (n->has_children()) {
     throw ConfigEntryNotFoundException(path);
   }
@@ -270,7 +267,7 @@ bool
 MemoryConfiguration::is_default(const char *path)
 {
   try {
-    YamlConfigurationNode *n = root_->find(path);
+    std::shared_ptr<YamlConfigurationNode> n = root_->find(path);
     if (n->has_children()) {
       return false;
     }
@@ -287,11 +284,11 @@ Configuration::ValueIterator *
 MemoryConfiguration::get_value(const char *path)
 {
   try {
-    YamlConfigurationNode *n = root_->find(path);
+    std::shared_ptr<YamlConfigurationNode> n = root_->find(path);
     if (n->has_children()) {
       return new YamlConfiguration::YamlValueIterator();
     }
-    std::map<std::string, YamlConfigurationNode *> nodes;
+    std::map<std::string, std::shared_ptr<YamlConfigurationNode>> nodes;
     nodes[path] = n;
     return new YamlConfiguration::YamlValueIterator(nodes);
   } catch (ConfigEntryNotFoundException &e) {
@@ -499,7 +496,7 @@ MemoryConfiguration::try_dump()
 Configuration::ValueIterator *
 MemoryConfiguration::iterator()
 {
-  std::map<std::string, YamlConfigurationNode *> nodes;
+  std::map<std::string, std::shared_ptr<YamlConfigurationNode>> nodes;
   root_->enum_leafs(nodes);
   return new YamlConfiguration::YamlValueIterator(nodes);
 }
@@ -511,10 +508,10 @@ MemoryConfiguration::iterator()
 Configuration::ValueIterator *
 MemoryConfiguration::iterator_default()
 {
-  std::map<std::string, YamlConfigurationNode *> nodes;
+  std::map<std::string, std::shared_ptr<YamlConfigurationNode>> nodes;
   root_->enum_leafs(nodes);
   std::queue<std::string> delnodes;
-  std::map<std::string, YamlConfigurationNode *>::iterator n;
+  std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::iterator n;
   for (n = nodes.begin(); n != nodes.end(); ++n) {
     if (! n->second->is_default()) {
       delnodes.push(n->first);
@@ -533,10 +530,10 @@ MemoryConfiguration::iterator_default()
 Configuration::ValueIterator *
 MemoryConfiguration::iterator_hostspecific()
 {
-  std::map<std::string, YamlConfigurationNode *> nodes;
+  std::map<std::string, std::shared_ptr<YamlConfigurationNode>> nodes;
   root_->enum_leafs(nodes);
   std::queue<std::string> delnodes;
-  std::map<std::string, YamlConfigurationNode *>::iterator n;
+  std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::iterator n;
   for (n = nodes.begin(); n != nodes.end(); ++n) {
     if (n->second->is_default()) {
       delnodes.push(n->first);
@@ -560,8 +557,8 @@ MemoryConfiguration::search(const char *path)
     tmp_path.resize(tl - 1);
   }
   try {
-    YamlConfigurationNode *n = root_->find(tmp_path.c_str());
-    std::map<std::string, YamlConfigurationNode *> nodes;
+    std::shared_ptr<YamlConfigurationNode> n = root_->find(tmp_path.c_str());
+    std::map<std::string, std::shared_ptr<YamlConfigurationNode>> nodes;
     n->enum_leafs(nodes, tmp_path);
     return new YamlConfiguration::YamlValueIterator(nodes);
   } catch (Exception &e) {
@@ -574,7 +571,7 @@ MemoryConfiguration::search(const char *path)
  * @return node representing requested path query result, if the path only
  * consists of collection and path name returns the whole document.
  */
-YamlConfigurationNode *
+std::shared_ptr<YamlConfigurationNode>
 MemoryConfiguration::query(const char *path) const
 {
   std::queue<std::string> pel_q = str_split_to_queue(path);

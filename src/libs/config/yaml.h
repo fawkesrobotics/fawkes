@@ -28,13 +28,6 @@
 #include <utils/system/fam.h>
 
 #include <yaml-cpp/yaml.h>
-#ifdef USE_REGEX_CPP
-// we do not use it atm because it does not work as epxect atm,
-// cf. https://bugzilla.redhat.com/show_bug.cgi?id=718711
-#  include <regex>
-#else
-#  include <regex.h>
-#endif
 #include <memory>
 #include <string>
 #include <vector>
@@ -128,7 +121,7 @@ class YamlConfiguration
  {
   public:
    YamlValueIterator();
-   YamlValueIterator(std::map<std::string, YamlConfigurationNode *> &nodes);
+   YamlValueIterator(std::map<std::string, std::shared_ptr<YamlConfigurationNode>> &nodes);
 
    virtual ~YamlValueIterator() {}
    virtual bool          next();
@@ -163,8 +156,8 @@ class YamlConfiguration
 
   private:
    bool                                    first_;
-   std::map<std::string, YamlConfigurationNode *>           nodes_;
-   std::map<std::string, YamlConfigurationNode *>::iterator current_;
+   std::map<std::string, std::shared_ptr<YamlConfigurationNode>>           nodes_;
+   std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::iterator current_;
  };
 
  private:
@@ -180,38 +173,29 @@ class YamlConfiguration
   };
   /// @endcond
 
-  YamlConfigurationNode *  query(const char *path) const;
+  std::shared_ptr<YamlConfigurationNode>  query(const char *path) const;
   void read_meta_doc(YAML::Node &doc, std::queue<LoadQueueEntry> &load_queue,
                      std::string &host_file);
-  void read_config_doc(const YAML::Node &doc, YamlConfigurationNode *&node, std::string path = "");
-  YamlConfigurationNode * read_yaml_file(std::string filename, bool ignore_missing,
+  std::shared_ptr<YamlConfigurationNode> read_config_doc(const YAML::Node &doc);
+  std::shared_ptr<YamlConfigurationNode> read_yaml_file(std::string filename, bool ignore_missing,
 			std::queue<LoadQueueEntry> &load_queue, std::string &host_file);
   void read_yaml_config(std::string filename, std::string &host_file,
-                        YamlConfigurationNode *& root, YamlConfigurationNode *& host_root,
+                        std::shared_ptr<YamlConfigurationNode>& root,
+                        std::shared_ptr<YamlConfigurationNode>& host_root,
                         std::list<std::string> &files, std::list<std::string> &dirs);
   void write_host_file();
 
   std::string config_file_;
   std::string host_file_;
 
-  YamlConfigurationNode  *root_;
-  YamlConfigurationNode  *host_root_;
+  std::shared_ptr<YamlConfigurationNode> root_;
+  std::shared_ptr<YamlConfigurationNode> host_root_;
 
   bool   write_pending_;
   Mutex *write_pending_mutex_;
 
  private:
   Mutex *mutex;
-
-#ifdef USE_REGEX_CPP
-  std::regex __yaml_regex;
-  std::regex __url_regex;
-  std::regex __frame_regex;
-#else
-  regex_t    __yaml_regex;
-  regex_t    __url_regex;
-  regex_t    __frame_regex;
-#endif
 
   typedef std::map<std::string, YAML::Node *> DocMap;
   mutable DocMap __documents;
