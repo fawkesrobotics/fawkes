@@ -32,9 +32,6 @@
 using namespace KinDrv;
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class JacoArmKindrv <plugins/jaco/arm_kindrv.h>
  * Class for commanding a Kinova Jaco Arm, using libkindrv.

@@ -39,9 +39,6 @@
 #define RETRACT_J5 (99.448242)
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class JacoArmDummy <plugins/jaco/arm_dummy.h>
  * Class for simulating a dummy Kinova Jaco Arm.
