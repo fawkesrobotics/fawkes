@@ -1,9 +1,9 @@
 
 /***************************************************************************
- *  wait_condition.h - condition variable implementation
+ *  thread_loop_listener.h - thread loop listener interface
  *
- *  Created: Thu Sep 14 21:34:58 2006
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
+ *  Created: Thu Feb 19 13:50:42 2015
+ *  Copyright  2015 Till Hofmann
  *
  ****************************************************************************/
 
@@ -21,34 +21,21 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_THREADING_WAIT_CONDITION_H_
-#define __CORE_THREADING_WAIT_CONDITION_H_
+#ifndef __CORE_THREADING_THREAD_LOOP_LISTENER_H_
+#define __CORE_THREADING_THREAD_LOOP_LISTENER_H_
 
 namespace fawkes {
 
-class WaitConditionData;
-class Mutex;
 
-/// @cond INTERNALS
-void cleanup_mutex(void *);
-/// @endcond
+class Thread;
 
-class WaitCondition {
+class ThreadLoopListener
+{
  public:
-  WaitCondition(Mutex *mutex = 0);
-  ~WaitCondition();
+  virtual ~ThreadLoopListener();
 
-  void wait();
-  bool abstimed_wait(long int sec, long int nanosec);
-  bool reltimed_wait(unsigned int sec, unsigned int nanosec);
-
-  void wake_one();
-  void wake_all();
-
- private:
-  WaitConditionData *__cond_data;
-  Mutex             *__mutex;
-  bool               __own_mutex;
+  virtual void pre_loop(Thread *thread);
+  virtual void post_loop(Thread *thread);
 };
 
 

@@ -25,13 +25,33 @@
 #define __ASPECT_BLOCKED_TIMING_H_
 
 #include <aspect/aspect.h>
+#include <aspect/syncpoint.h>
+#include <core/threading/thread_loop_listener.h>
+
+#include <map>
+#include <string>
 
 namespace fawkes {
 #if 0 /* just to make Emacs auto-indent happy */
 }
 #endif
 
-class BlockedTimingAspect : public virtual Aspect
+
+/** @class BlockedTimingLoopListener
+ * Loop Listener of the BlockedTimingAspect.
+ * This loop listener immediately wakes up the thread after loop returned.
+ * The thread will then wait for the syncpoint of the next iteration.
+ * The BlockedTimingAspect cannot be derived from ThreadLoopListener because
+ * the SyncPointAspect is already derived from ThreadLoopListener and we need
+ * another listener. Therefore, use composition instead.
+ */
+class BlockedTimingLoopListener : public ThreadLoopListener
+{
+ public:
+  void post_loop(Thread *thread);
+};
+
+class BlockedTimingAspect : public SyncPointAspect
 {
  public:
   /** Type to define at which hook the thread is woken up.
@@ -59,10 +79,22 @@ class BlockedTimingAspect : public virtual Aspect
 
   static const char *  blocked_timing_hook_to_string(WakeupHook hook);
 
+  static std::string blocked_timing_hook_to_start_syncpoint(WakeupHook hook);
+  static std::string blocked_timing_hook_to_end_syncpoint(WakeupHook hook);
+
+  void init_BlockedTimingAspect(Thread *thread);
+  void finalize_BlockedTimingAspect(Thread *thread);
+
   WakeupHook blockedTimingAspectHook() const;
+
+  /** Translation from WakeupHooks to SyncPoints. Each WakeupHook corresponds to
+   *  exactly one SyncPoint, e.g., WAKEUP_HOOK_PRE_LOOP becomes /preloop.
+   */
+  static const std::map<const WakeupHook, const std::string> hook_to_syncpoint;
 
  private:
   WakeupHook __wakeup_hook;
+  BlockedTimingLoopListener *__loop_listener;
 };
 
 } // end namespace fawkes

@@ -20,7 +20,7 @@ include $(BUILDSYSDIR)/fvconf.mk
 SUBDIRS = core utils interface netcomm blackboard interfaces config logging tf \
 	  plugin lua aspect network_logger webview gui_utils baseapp navgraph \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
-	  kdl_parser protobuf_comm protobuf_clips pcl_utils pddl_parser
+	  kdl_parser protobuf_comm protobuf_clips pcl_utils pddl_parser syncpoint
 
 ifeq ($(HAVE_SIFT),1)
   SUBDIRS += extlib/sift
@@ -46,7 +46,7 @@ navgraph: core utils aspect
 interfaces: core interface
 config: core netcomm utils logging
 plugin: core netcomm utils config logging
-aspect: core utils blackboard netcomm config plugin webview logging tf pcl_utils
+aspect: core utils blackboard netcomm config plugin webview logging tf pcl_utils syncpoint
 lua: core utils blackboard config logging
 interfaces: core interface
 gui_utils: core netcomm blackboard interface plugin logging utils
@@ -54,7 +54,7 @@ logging: core
 network_logger: core utils netcomm
 naoutils: core utils
 webview: core utils logging
-baseapp: core utils aspect config netcomm blackboard plugin logging network_logger
+baseapp: core utils aspect config netcomm blackboard plugin logging syncpoint network_logger
 tf: core utils blackboard interface interfaces
 fvutils: core utils netcomm logging
 fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets: core utils fvutils logging
@@ -67,6 +67,7 @@ protobuf_clips: core logging protobuf_comm
 pcl_utils: core tf
 kdl_parser: core
 pddl_parser: core
+syncpoint: core logging utils
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk

@@ -65,6 +65,7 @@ namespace fawkes {
  * @param multi_logger basic multi logger to use, a network logger will be
  * added in the ctor.
  * @param thread_manager thread manager used to wakeup threads
+ * @param syncpoint_manager syncpoint manager used to manage syncpoints
  * @param plugin_manager plugin manager to load the desired plugins
  * @param load_plugins string with comma-separated list of names of plugins
  * to load on startup.
@@ -73,6 +74,7 @@ namespace fawkes {
 FawkesMainThread::FawkesMainThread(Configuration *config,
 				   MultiLogger *multi_logger,
 				   ThreadManager *thread_manager,
+				   SyncPointManager *syncpoint_manager,
 				   PluginManager *plugin_manager,
 				   const char *load_plugins,
                                    const char *default_plugin)
@@ -80,6 +82,7 @@ FawkesMainThread::FawkesMainThread(Configuration *config,
 {
   __plugin_manager    = plugin_manager;
   __thread_manager    = thread_manager;
+  __syncpoint_manager = syncpoint_manager;
   __multi_logger      = multi_logger;
   __config            = config;
 
@@ -208,6 +211,36 @@ FawkesMainThread::full_start()
 void
 FawkesMainThread::once()
 {
+  // register to all syncpoints of the main loop
+  std::vector<BlockedTimingAspect::WakeupHook> hooks;
+  hooks.push_back(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP);
+  hooks.push_back(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE);
+  hooks.push_back(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE);
+  hooks.push_back(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS);
+  hooks.push_back(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE);
+  hooks.push_back(BlockedTimingAspect::WAKEUP_HOOK_THINK);
+  hooks.push_back(BlockedTimingAspect::WAKEUP_HOOK_SKILL);
+  hooks.push_back(BlockedTimingAspect::WAKEUP_HOOK_ACT);
+  hooks.push_back(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC);
+  hooks.push_back(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP);
+
+  try {
+    for (std::vector<BlockedTimingAspect::WakeupHook>::const_iterator it =
+        hooks.begin(); it != hooks.end(); it++) {
+      __syncpoints_start_hook.push_back(
+        __syncpoint_manager->get_syncpoint("FawkesMainThread",
+          BlockedTimingAspect::blocked_timing_hook_to_start_syncpoint(*it)));
+      __syncpoints_start_hook.back()->register_emitter("FawkesMainThread");
+      __syncpoints_end_hook.push_back(
+        __syncpoint_manager->get_syncpoint("FawkesMainThread",
+          BlockedTimingAspect::blocked_timing_hook_to_end_syncpoint(*it)));
+    }
+  } catch (Exception &e) {
+    __multi_logger->log_error("FawkesMainThread",
+      "Failed to acquire mainloop syncpoint");
+    throw;
+  }
+
   // if plugins passed on command line or in init options, load!
   if ( __load_plugins) {
     try {
@@ -306,16 +339,17 @@ FawkesMainThread::loop()
 	__multi_logger->log_warn("FawkesMainThread", e);
       }
     } else {
-      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       __max_thread_time_usec);
-      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE, __max_thread_time_usec);
-      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE, __max_thread_time_usec);
-      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, __max_thread_time_usec);
-      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     __max_thread_time_usec);
-      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_THINK,          __max_thread_time_usec);
-      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_SKILL,          __max_thread_time_usec);
-      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_ACT,            __max_thread_time_usec);
-      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       __max_thread_time_usec);
-      safe_wake(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,      __max_thread_time_usec);
+      uint num_hooks = __syncpoints_start_hook.size();
+      if (__syncpoints_end_hook.size() != num_hooks) {
+        __multi_logger->log_error("FawkesMainThread",
+          "Hook syncpoints are not initialized properly, not waking up any threads!");
+      } else {
+        for (uint i = 0; i < num_hooks; i++) {
+          __syncpoints_start_hook[i]->emit("FawkesMainThread");
+          __syncpoints_end_hook[i]->reltime_wait_for_all("FawkesMainThread",
+              0, __max_thread_time_nanosec);
+        }
+      }
     }
     __mainloop_mutex->unlock();
     set_cancel_state(old_state);

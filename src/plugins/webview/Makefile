@@ -94,6 +94,16 @@ ifeq ($(HAVE_LIBMICROHTTPD),1)
     LIBS_webview += crypt
     WARN_TARGETS += warning_apr_util
   endif
+
+  ifeq ($(HAVE_GRAPHVIZ),1)
+    OBJS_webview += syncpoint_processor.o
+    LIBS_webview += fawkessyncpoint
+    CFLAGS += $(CFLAGS_GRAPHVIZ)
+    LDFLAGS += $(LDFLAGS_GRAPHVIZ)
+  else
+    WARN_TARGETS += warning_graphviz
+  endif
+
 else
   WARN_TARGETS += warning_libmicrohttpd
 endif
@@ -110,7 +120,7 @@ warning_libmicrohttpd:
 warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting transforms support$(TNORMAL) (TF not available)"
 warning_graphviz:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting transforms support$(TNORMAL) (graphviz not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting transforms and syncpoint support$(TNORMAL) (graphviz not found)"
 warning_jpeg:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting image viewing support$(TNORMAL) (JPEG not available)"
 warning_cpp11:

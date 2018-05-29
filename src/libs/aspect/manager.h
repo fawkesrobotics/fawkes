@@ -51,6 +51,7 @@ class LoggerEmployer;
 class BlockedTimingExecutor;
 class MainLoopEmployer;
 class AspectIniFin;
+class SyncPointManager;
 
 namespace tf {
   class Transformer;
@@ -83,7 +84,8 @@ class AspectManager : public ThreadInitializer, public ThreadFinalizer
 				ServicePublisher *service_publisher,
 				ServiceBrowser *service_browser,
 				PluginManager *pmanager,
-				tf::Transformer *tf_listener);
+				tf::Transformer *tf_listener,
+				SyncPointManager *syncpoint_manager);
 
  private:
   std::map<std::string, AspectIniFin *> __inifins;
