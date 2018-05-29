@@ -25,9 +25,6 @@
 #include <plugins/metrics/aspect/metrics_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MetricsAspectIniFin <plugins/clips/aspect/clips_inifin.h>
  * MetricsAspect initializer/finalizer.

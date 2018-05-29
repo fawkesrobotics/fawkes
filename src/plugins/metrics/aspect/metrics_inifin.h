@@ -30,9 +30,6 @@
 #include <core/utils/lockptr.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Logger;
 class MetricsManager;

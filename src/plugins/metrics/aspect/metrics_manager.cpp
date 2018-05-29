@@ -24,9 +24,6 @@
 #include <plugins/metrics/aspect/metrics_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MetricsManager <plugins/metrics/aspect/metrics_manager.h>
  * Base class for metrics managers.
