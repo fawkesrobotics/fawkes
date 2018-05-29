@@ -24,9 +24,6 @@
 #include <plugins/rrd/aspect/rrd.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class RRDAspect <plugins/rrd/aspect/rrd.h>
  * Thread aspect create, update, and graph round-robin databases (RRD).

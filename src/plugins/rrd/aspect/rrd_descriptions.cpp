@@ -33,9 +33,6 @@
 #include <cfloat>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class RRDDataSource <plugins/rrd/aspect/rrd_descriptions.h>
  * Class to represent a RRD data source.

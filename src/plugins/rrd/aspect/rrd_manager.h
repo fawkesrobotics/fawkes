@@ -28,9 +28,6 @@
 #include <core/utils/rwlock_vector.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class RRDManager <plugins/rrd/aspect/rrd_manager.h>
