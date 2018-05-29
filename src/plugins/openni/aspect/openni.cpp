@@ -25,9 +25,6 @@
 #include <XnCppWrapper.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenNiAspect <plugins/openni/aspect/openni.h>
  * Thread aspect to get access to the OpenNI context.

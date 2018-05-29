@@ -32,10 +32,6 @@
 namespace fawkes {
 
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 void world2projection(xn::DepthGenerator *depthgen, unsigned int num_points,
 		      const XnPoint3D *world, XnPoint3D *proj,

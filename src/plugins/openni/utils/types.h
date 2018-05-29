@@ -32,10 +32,6 @@ namespace fawkes {
   class ObjectPositionInterface;
 
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** User info to pass to draw_skeletons(). */
 typedef struct {

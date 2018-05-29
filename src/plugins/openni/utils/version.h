@@ -27,10 +27,6 @@
 
 namespace fawkes {
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 #define XN_VERSION_GT(major, minor, micro, build)                       \
   (XN_VERSION > (major*100000000 + minor*1000000 + micro*10000 + build))

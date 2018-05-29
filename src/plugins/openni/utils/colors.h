@@ -25,10 +25,6 @@
 
 namespace fawkes {
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 extern float USER_COLORS[][3];
 extern unsigned int NUM_USER_COLORS;
 

@@ -30,10 +30,6 @@
 
 namespace fawkes {
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class SkelIfObserver <plugins/openni/utils/skel_if_observer.h>
  * Skeleton interface observer.

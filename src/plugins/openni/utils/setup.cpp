@@ -24,10 +24,6 @@
 
 namespace fawkes {
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** Get resolution from configuration.
  * This method reads the config values /plugins/openni/resolution and

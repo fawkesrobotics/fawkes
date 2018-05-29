@@ -27,10 +27,6 @@
 
 namespace fawkes {
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class HandIfObserver <plugins/openni/utils/hand_if_observer.h>
  * Hand interface observer.

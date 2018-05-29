@@ -26,9 +26,6 @@
 #include <XnCppWrapper.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenNiAspectIniFin <plugins/openni/aspect/openni_inifin.h>
  * OpenNiAspect initializer/finalizer.

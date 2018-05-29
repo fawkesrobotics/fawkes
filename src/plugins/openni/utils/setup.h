@@ -32,10 +32,6 @@ namespace fawkes {
   class Configuration;
 
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 void get_resolution(fawkes::Configuration *config,
 		    unsigned int &width, unsigned int &height);

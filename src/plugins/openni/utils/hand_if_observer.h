@@ -34,10 +34,6 @@ namespace fawkes {
   class Mutex;
 
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 class HandIfObserver : public BlackBoardInterfaceObserver
 {

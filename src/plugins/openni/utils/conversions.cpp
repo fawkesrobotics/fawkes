@@ -26,10 +26,6 @@
 
 namespace fawkes {
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** Project world coordinate into 2D image projection.
  * This takes the input world coordinates and projects them into the 2D
