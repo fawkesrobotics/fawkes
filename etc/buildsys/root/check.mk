@@ -39,8 +39,35 @@ license-check:
 		exit 1; \
 	fi
 
+.PHONY: format-check
+format-check: check-parallel
+	$(SILENT) echo -e "$(INDENT_PRINT)[CHK] Checking code formatting"
+	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
+		OFFENDING_FILES=$$($(FAWKES_BASEDIR)/etc/format-scripts/check-all-files.sh); \
+		if [ "$$?" != "0" ]; then \
+			for f in $$OFFENDING_FILES; do \
+				echo -e "$(INDENT_PRINT)$(TRED)--> $$f is not properly formatted$(TNORMAL)"; \
+			done; \
+			NUM_FILES=$$(git ls-files *.{h,cpp} | wc -l); \
+			BAD_FILES=$$(wc -w <<< "$$OFFENDING_FILES"); \
+			echo -e "$(INDENT_PRINT)$(TRED)--> $$BAD_FILES/$$NUM_FILES have bad formatting.$(TNORMAL)"; \
+			exit 1; \
+		else \
+			echo -e "$(INDENT_PRINT)$(TGREEN)--> All source files properly formatted$(TNORMAL)"; \
+		fi; \
+	else \
+		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot do format check$(TNORMAL) (clang-format not found)"; \
+    exit 1; \
+  fi
+
+.PHONY: check-parallel
+check-parallel:
+	$(SILENT)if ! type -p parallel >/dev/null; then \
+		echo -e "$(INDENT_PRINT)$(TYELLOW)--> Install GNU Parallel for better progress estimates$(TNORMAL)"; \
+	fi
+
 .PHONY: check
-check: quickdoc license-check
+check: quickdoc license-check format-check
 
 
 endif # __buildsys_root_check_mk_
