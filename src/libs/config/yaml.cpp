@@ -46,9 +46,6 @@
 #include <yaml-cpp/exceptions.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 #define YAML_FILE_REGEX "^[a-zA-Z0-9_-]+\\.yaml$"
 
