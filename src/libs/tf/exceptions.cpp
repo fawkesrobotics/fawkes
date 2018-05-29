@@ -23,10 +23,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class TransformException
  * Base class for fawkes tf exceptions.

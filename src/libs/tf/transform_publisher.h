@@ -62,10 +62,6 @@ namespace fawkes {
   class Mutex;
 
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 class TransformPublisher
 {

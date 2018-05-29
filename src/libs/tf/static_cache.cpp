@@ -55,10 +55,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class StaticCache <tf/time_cache.h>
  * Transform cache for static transforms.

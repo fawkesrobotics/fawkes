@@ -62,10 +62,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class Transformer <tf/transformer.h>
  * Coordinate transforms between any two frames in a system.

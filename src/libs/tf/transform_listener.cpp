@@ -59,10 +59,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class TransformListener <tf/transform_listener.h>
  * Receive transforms and answer queries.

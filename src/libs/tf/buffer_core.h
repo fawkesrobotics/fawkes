@@ -66,10 +66,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 class TimeCacheInterface;
 typedef std::shared_ptr<TimeCacheInterface> TimeCacheInterfacePtr;

@@ -57,10 +57,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** Resolve transform name.
  * @param prefix prefix to prepend to frame name

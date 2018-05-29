@@ -69,10 +69,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** Scalar datatype. */
 typedef btScalar Scalar;
