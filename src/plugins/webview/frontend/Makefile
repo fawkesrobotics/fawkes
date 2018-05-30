@@ -42,6 +42,19 @@ $(SRCDIR)/node_modules:
 
 deploy: $(RESDIR)/webview/index.html
 
+clean: clean-webview
+
+distclean: distclean-webview
+
+clean-webview:
+	$(SILENT) echo -e "$(INDENT_PRINT)[CLN] Clean $(TBOLDGRAY)$(subst $(abspath $(TOP_BASEDIR))/,,$(RESDIR)/webview)$(TNORMAL)"
+	$(SILENT)rm -rf $(RESDIR)/webview/*
+
+distclean-webview: clean
+	$(SILENT) echo -e "$(INDENT_PRINT)[CLEAN] Clean $(TBOLDGRAY)node_modules$(TNORMAL)"
+	$(SILENT)rm -rf $(SRCDIR)/node_modules
+
+
 $(RESDIR)/webview/index.html: dist/index.html
 	$(SILENT) echo -e "$(INDENT_PRINT)[ng-depl] dist -> $(TBOLDGRAY)$(patsubst $(realpath $(BASEDIR))/%,%,$(@D))$(TNORMAL)"
 	$(SILENT)cp -a dist/* $(RESDIR)/webview/
