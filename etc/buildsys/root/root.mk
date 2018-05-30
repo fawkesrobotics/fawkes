@@ -23,6 +23,7 @@ __buildsys_parts_root_mk_ := 1
 include $(BUILDSYSDIR)/root/docs.mk
 include $(BUILDSYSDIR)/root/check.mk
 include $(BUILDSYSDIR)/root/btmgmt.mk
+include $(BUILDSYSDIR)/root/parallel.mk
 include $(BUILDSYSDIR)/root/uncolored.mk
 
 endif # __buildsys_root_root_mk_
