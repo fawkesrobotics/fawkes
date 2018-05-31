@@ -48,7 +48,9 @@
 ; orders. It is then up to action selection and execution to determine
 ; what to do when.
 (defrule goal-reasoner-dispatch
-	?g <- (goal (class TESTGOAL) (mode COMMITTED))
+	?g <- (goal (class TESTGOAL) (mode COMMITTED)
+          (required-resources $?req)
+          (acquired-resources $?acq&:(subsetp ?req ?acq)))
 	=>
 	(modify ?g (mode DISPATCHED))
 )
@@ -110,7 +112,7 @@
 )
 
 (defrule goal-reasoner-retract-goal
-  ?g <- (goal (mode RETRACTED))
+  ?g <- (goal (mode RETRACTED) (acquired-resources))
   =>
   (retract ?g)
 )
