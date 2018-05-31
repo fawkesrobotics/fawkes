@@ -41,17 +41,12 @@
    - FINISHED
      The goal has finished, meaning that no further actions of plans
      belonging to this goal will be executed. The outcome field indicates
-     whether the goal was completed or has failed.
+     whether the goal was completed, rejected, or has failed.
    - EVALUATED
      After a goal has finished, the goal reasoner evaluates the impact of
-     the (succeeded or failed) goal on its own belief.
+     the (succeeded, rejected, or failed) goal on its own belief.
      This deviates from the goal lifecycle by Roberts et al in that it is
      not only relevant during failure, but always after finishing a goal.
-   - REJECTED
-     The goal reasoner deemed this goal not to be feasible or desirable
-     (any more). A goal may only be rejected from the FORMULATED, SELECTED,
-     or EXPANDED mode. Once we have COMMITTED to a goal it can only be stopped
-     by completion or failure.
 
    Once a goal reached the FINISHED mode the outcome determines whether it
    was successful or failed:
@@ -59,6 +54,11 @@
      The goal been achieved and plan execution finished successfully.
    - FAILED
      The goal has failed and can no longer be pursued unless being reset.
+   - REJECTED
+     The goal reasoner deemed this goal not to be feasible or desirable
+     (any more). A goal may only be rejected from the FORMULATED, SELECTED,
+     or EXPANDED mode. Once we have COMMITTED to a goal it can only be stopped
+     by completion or failure.
    - UNKNOWN
      The goal has not reached its FINISHED mode, yet.
 
@@ -83,10 +83,11 @@
 	(slot class (type SYMBOL))
   (slot type (type SYMBOL) (allowed-values ACHIEVE MAINTAIN) (default ACHIEVE))
   (slot parent (type SYMBOL))
-	(slot mode (type SYMBOL) (allowed-values FORMULATED SELECTED EXPANDED
-																					 COMMITTED DISPATCHED FINISHED EVALUATED
-																					 REJECTED))
-	(slot outcome (type SYMBOL) (allowed-values UNKNOWN COMPLETED FAILED))
+	(slot mode (type SYMBOL)
+    (allowed-values FORMULATED SELECTED EXPANDED COMMITTED DISPATCHED FINISHED
+                    EVALUATED))
+	(slot outcome (type SYMBOL)
+    (allowed-values UNKNOWN COMPLETED FAILED REJECTED))
 	(slot message (type STRING))
 	; higher number entails higher priority
 	; A goal might be preferred for selection, expansion, or execution depending
