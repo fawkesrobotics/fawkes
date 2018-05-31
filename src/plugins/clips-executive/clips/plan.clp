@@ -47,6 +47,12 @@
      the (succeeded, rejected, or failed) goal on its own belief.
      This deviates from the goal lifecycle by Roberts et al in that it is
      not only relevant during failure, but always after finishing a goal.
+   - RETRACTED
+     After the goal has been evaluated, some cleanup (e.g., releasing acquired
+     resources) may be necessary before the goal can be destroyed. Once all
+     cleanup has been completed, the goal can be retracted. A retracted goal
+     is being cleaned up and scheduled for destruction, no further operations
+     are allowed on the goal.
 
    Once a goal reached the FINISHED mode the outcome determines whether it
    was successful or failed:
@@ -85,7 +91,7 @@
   (slot parent (type SYMBOL))
 	(slot mode (type SYMBOL)
     (allowed-values FORMULATED SELECTED EXPANDED COMMITTED DISPATCHED FINISHED
-                    EVALUATED))
+                    EVALUATED RETRACTED))
 	(slot outcome (type SYMBOL)
     (allowed-values UNKNOWN COMPLETED FAILED REJECTED))
 	(slot message (type STRING))
