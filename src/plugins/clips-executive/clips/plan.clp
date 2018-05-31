@@ -107,6 +107,8 @@
 	; - (params text "Remember the Cant")
 	; - (params location { x 0.0 y 1.0 })
 	(multislot params)
+  (multislot required-resources)
+  (multislot acquired-resources)
 )
 
 (deftemplate plan
