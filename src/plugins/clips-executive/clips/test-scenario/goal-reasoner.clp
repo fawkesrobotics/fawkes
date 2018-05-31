@@ -82,8 +82,9 @@
 		(delayed-do-for-all-facts ((?a plan-action)) (eq ?a:plan-id ?p:id)
 			(retract ?a)
 		)
-		(retract ?g ?gm)
 	)
+  (retract ?gm)
+  (modify ?g (mode RETRACTED))
 )
 
 (defrule goal-reasoner-cleanup-failed
@@ -103,6 +104,13 @@
 		(modify ?g (mode SELECTED))
 	else
 		(printout t "Goal failed " ?num-tries " times, aborting" crlf)
-		(retract ?g ?gm)
+		(retract ?gm)
+    (modify ?g (mode RETRACTED))
 	)
+)
+
+(defrule goal-reasoner-retract-goal
+  ?g <- (goal (mode RETRACTED))
+  =>
+  (retract ?g)
 )
