@@ -22,31 +22,31 @@ plugins/mongodb:
       name: rs0
       hosts:
         - localhost:27021
-        - localhost:27021
+        - localhost:27022
 
     robot-memory-local-direct:
       enabled: true
       mode: connection
-      hostport: palomino:27021
+      hostport: localhost:27021
 
     robot-memory-local:
       enabled: true
       mode: replica_set
       name: robot-memory-local
       hosts:
-        - palomino:27021
+        - localhost:27021
 
     robot-memory-distributed-direct:
       enabled: true
       mode: connection
-      hostport: palomino:27022
+      hostport: localhost:27022
 
     robot-memory-distributed:
       enabled: true
       mode: replica_set
       name: robot-memory-distributed
       hosts:
-        - palomino:27022
+        - localhost:27022
       
   # The following defines the mongod instances you want
   # the mongodb plugin to run
@@ -112,17 +112,17 @@ plugins/mongodb:
         enabled: false
         local-client: rs0-local
         hosts:
-          - palomino:27021
-          - palomino:27022
+          - localhost:27021
+          - localhost:27022
 
       robot-memory-local:
         enabled: true
         local-client: robot-memory-local-direct
         hosts:
-          - palomino:27021
+          - localhost:27021
 
       robot-memory-distributed:
         enabled: true
         local-client: robot-memory-distributed-direct
         hosts:
-          - palomino:27022
+          - localhost:27022
