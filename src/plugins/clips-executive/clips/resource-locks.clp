@@ -22,14 +22,12 @@
 (defrule resource-locks-request-lock
   (goal (mode COMMITTED)
         (acquired-resources $?acq)
-        (required-resources $?req&:(set-diff ?req ?acq)))
-  (not (mutex (name ?res) (request ~NONE)))
+        (required-resources $?req)
+  (not (mutex (name ?n&:(member$ ?n ?req)) (request ~NONE)))
   =>
   (foreach ?res (set-diff ?req ?acq)
-    (if (not (any-factp ((?m mutex)) (neq ?m:request NONE))) then
-      (printout warn "Trying to lock " ?res crlf)
-      (mutex-try-lock-async ?res)
-    )
+    (printout warn "Trying to lock " ?res crlf)
+    (mutex-try-lock-async ?res)
   )
 )
 
@@ -43,17 +41,41 @@
   (modify ?m (request NONE) (response NONE))
 )
 
-(defrule resource-locks-lock-rejected
+; TODO: deal with mutex errors (response ERROR)
+(defrule resource-locks-lock-rejected-release-acquired-resources
+  "A lock was rejected, therefore release all acquired resources."
   ?m <- (mutex (name ?res)
                (request LOCK)
-               (response REJECTED|ERROR)
+               (response REJECTED)
                (error-msg ?err))
   ?g <- (goal (mode COMMITTED)
               (required-resources $?req)
               (acquired-resources $?acq&:(member$ ?res (set-diff ?req ?acq))))
+  ; We cannot abort a pending request. Thus, we first need to wait to get
+  ; responses for all requested locks.
+  (not (mutex (name ?res&:(member$ ?req)) (response PENDING)))
+  =>
+  (do-for-all-facts ((?om mutex)) (member$ ?om:name ?acq)
+    (mutex-unlock-async ?om:name)
+  )
+)
+
+(defrule resource-locks-reject-goal-on-rejected-lock
+  "A lock was rejected and no resource is acquired anymore. Reject the goal."
+  (mutex (name ?res) (request LOCK) (response REJECTED) (error-msg ?err))
+  ?g <- (goal (mode COMMITTED)
+              (required-resources $?req&:(member$ res ?req))
+              (acquired-resources))
+  ; We cannot abort a pending request. Thus, we first need to wait to get
+  ; responses for all requested locks.
+  (not (mutex (name ?res&:(member$ ?req)) (response PENDING)))
   =>
   (modify ?g (mode FINISHED) (outcome REJECTED) (message ?err))
-  (modify ?m (request NONE) (response NONE) (error-msg ""))
+  (do-for-all-facts
+    ((?om mutex))
+    (and (eq ?m:response REJECTED) (member$ ?om:name ?req))
+    (modify ?om (request NONE) (response NONE) (error-msg ""))
+  )
 )
 
 (defrule resource-locks-unlock-start
@@ -69,8 +91,7 @@
 
 (defrule resource-locks-unlock-done
   ?m <- (mutex (name ?res) (request UNLOCK) (response UNLOCKED))
-  ?g <- (goal (mode RETRACTED)
-              (acquired-resources $?acq&:(member$ ?res ?acq)))
+  ?g <- (goal (acquired-resources $?acq&:(member$ ?res ?acq)))
   =>
   (modify ?g (acquired-resources (delete-member$ ?acq ?res)))
   (modify ?m (request NONE) (response NONE))
