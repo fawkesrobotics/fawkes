@@ -57,12 +57,11 @@
   (modify ?m (request NONE) (response NONE))
 )
 
-; TODO: deal with mutex errors (response ERROR)
 (defrule resource-locks-lock-rejected-release-acquired-resources
   "A lock was rejected, therefore release all acquired resources."
   ?m <- (mutex (name ?res)
                (request LOCK)
-               (response REJECTED)
+               (response REJECTED|ERROR)
                (error-msg ?err))
   ?g <- (goal (mode COMMITTED)
               (required-resources $?req)
@@ -80,7 +79,7 @@
 
 (defrule resource-locks-reject-goal-on-rejected-lock
   "A lock was rejected and no resource is acquired anymore. Reject the goal."
-  (mutex (name ?res) (request LOCK) (response REJECTED) (error-msg ?err))
+  (mutex (name ?res) (request LOCK) (response REJECTED|ERROR) (error-msg ?err))
   ?g <- (goal (mode COMMITTED)
               (required-resources $?req
                 &:(member$ (mutex-to-resource ?res) ?req))
@@ -93,7 +92,7 @@
   (modify ?g (mode FINISHED) (outcome REJECTED) (message ?err))
   (do-for-all-facts
     ((?om mutex))
-    (and (eq ?om:response ERROR)
+    (and (member$ ?om:response (create$ REJECTED ERROR))
          (member$ (mutex-to-resource ?om:name) ?req))
     (modify ?om (request NONE) (response NONE) (error-msg ""))
   )
