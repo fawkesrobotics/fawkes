@@ -102,7 +102,10 @@
   ?g <- (goal (mode RETRACTED) (acquired-resources $?acq))
   =>
   (foreach ?res ?acq
-    (if (not (any-factp ((?m mutex)) (neq ?m:request NONE))) then
+    (if (not (any-factp ((?m mutex))
+                        (and (eq ?m:name (resource-to-mutex ?res))
+                             (eq ?m:request UNLOCK))))
+     then
       (printout warn "Unlocking resource " ?res crlf)
       (mutex-unlock-async (resource-to-mutex ?res))
     )
