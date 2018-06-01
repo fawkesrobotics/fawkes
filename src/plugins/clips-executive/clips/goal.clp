@@ -29,7 +29,8 @@
      intends to achieve the given goal.
    - EXPANDED
      The goal has been expanded, that is, there exists at least one plan
-     intended to achieve the desired goal.
+     intended to achieve the desired goal, or the respective sub-goals
+     have been formulated.
    - COMMITTED
      The goal and (one of) its plan(s) is intended to be executed to achieve
      the respective goal. Committing may require to obtain specific resources
@@ -87,6 +88,7 @@
 	(slot id (type SYMBOL))
 	(slot class (type SYMBOL))
   (slot type (type SYMBOL) (allowed-values ACHIEVE MAINTAIN) (default ACHIEVE))
+	(slot sub-type (type SYMBOL))
   (slot parent (type SYMBOL))
 	(slot mode (type SYMBOL)
     (allowed-values FORMULATED SELECTED EXPANDED COMMITTED DISPATCHED FINISHED
@@ -108,4 +110,9 @@
 	(multislot params)
   (multislot required-resources)
   (multislot acquired-resources)
+
+	; Once committing to a goal, this identifies the goal or plan to
+	; which we have committed, in particular if there are multiple
+	; possible sub-goals or associated plans.
+	(slot committed-to (type SYMBOL))
 )
