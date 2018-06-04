@@ -108,6 +108,13 @@
 	; - (params text "Remember the Cant")
 	; - (params location { x 0.0 y 1.0 })
 	(multislot params)
+
+	; Goal meta data allows the goal reasoner to store arbitrary
+	; information that is necessary to handle the proper operation of
+	; the goal and that is not passed as a parameter. For example, it
+	; could contain the number of tries performed for a goal.
+	(multislot meta)
+
   (multislot required-resources)
   (multislot acquired-resources)
 
