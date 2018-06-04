@@ -118,8 +118,8 @@
 	)
 )
 
-(defrule goal-reasoner-retract-goal
-  ?g <- (goal (mode RETRACTED) (acquired-resources))
-  =>
-  (retract ?g)
-)
+; (defrule goal-reasoner-retract-goal
+;   ?g <- (goal (mode RETRACTED) (acquired-resources))
+;   =>
+;   (retract ?g)
+; )
