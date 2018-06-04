@@ -80,6 +80,10 @@ clips-executive:
         # stage-2 is domain-independent CX initialization
         # It contains a set of fixed items loaded. Custom extensions may
         # be loaded in this stage. They are loaded *after* the defaults.
+        stage-2:
+          - name: goal-types
+            files: ["goals/run-one.clp"]
+
 
         # Domain-specific CX initialization.
         # In the third stage load domain-specific files such as domain
