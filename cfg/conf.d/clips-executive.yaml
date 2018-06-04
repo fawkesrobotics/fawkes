@@ -82,7 +82,7 @@ clips-executive:
         # be loaded in this stage. They are loaded *after* the defaults.
         stage-2:
           - name: goal-types
-            files: ["goals/run-one.clp"]
+            files: ["goals/run-one.clp", "goals/run-all.clp", "goals/try-all.clp", "goals/retry.clp"]
 
 
         # Domain-specific CX initialization.
