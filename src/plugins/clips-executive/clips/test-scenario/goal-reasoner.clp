@@ -10,8 +10,13 @@
 	(not (goal-already-tried))
   (domain-facts-loaded)
 	=>
-	(assert (goal (id (sym-cat TEST-PARENT- (gensym*)))
-								(sub-type RUN-ONE-OF-SUBGOALS) (class TESTGOAL-PARENT)))
+	(bind ?goal-id (sym-cat TEST-PARENT- (gensym*)))
+	(assert (goal (id ?goal-id) (class TESTGOAL-PARENT)
+								;(sub-type RUN-ONE-OF-SUBGOALS)))
+								;(sub-type RUN-ALL-OF-SUBGOALS)))
+								(sub-type TRY-ALL-OF-SUBGOALS)))
+								;(sub-type RETRY-SUBGOAL) (params max-tries 3))
+					;(goal (id (sym-cat TEST-PARENT- (gensym*))) (parent ?goal-id) (class TESTGOAL)))
 	; This is just to make sure we formulate the goal only once.
 	; In an actual domain this would be more sophisticated.
 	(assert (goal-already-tried))
@@ -35,9 +40,9 @@
 	=>
 	(printout t "Expanding " ?goal-id crlf)
 	(assert	(goal (id (sym-cat TESTGOAL- (gensym*))) (parent ?goal-id) (class TESTGOAL)
-								(priority 10) (meta num-tries 0))
+								(priority 10))
 					(goal (id (sym-cat TESTGOAL- (gensym*))) (parent ?goal-id) (class TESTGOAL)
-								(priority 20) (meta num-tries 0)))
+								(priority 20)))
 	(modify ?g (mode EXPANDED))
 )
 
@@ -46,14 +51,22 @@
 ; different planners. This step would allow to commit one out of these
 ; plans.
 (defrule goal-reasoner-subgoal-commit
-	?g <- (goal (class TESTGOAL) (mode EXPANDED) (priority 10))
+	;?pg <- (goal (id ?id) (meta num-tries ?num-tries))
+	?g <- (goal (parent ?id) (class TESTGOAL) (mode EXPANDED) (priority 10))
 	=>
 	(modify ?g (mode COMMITTED))
+	;(modify ?g (mode FINISHED) (outcome FAILED))
+	; (if (> ?num-tries 1)
+	; then
+	; 	(modify ?g (mode FINISHED) (outcome FAILED))
+	; else
+	; 	(modify ?g (mode FINISHED) (outcome REJECTED))
+	; )
 )
 (defrule goal-reasoner-subgoal-reject
 	?g <- (goal (class TESTGOAL) (mode EXPANDED) (priority 20))
 	=>
-	(modify ?g (mode FINISHED) (outcome REJECTED))
+	(modify ?g (mode FINISHED) (outcome FAILED))
 )
 
 ; #  Dispatch goal (action selection and execution now kick in)
