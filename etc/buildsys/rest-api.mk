@@ -28,23 +28,46 @@ endif
 
 RESTAPI_BASEDIR=$(FAWKES_BASEDIR)/etc/restapi-gen
 RESTAPI_APIGEN=$(RESTAPI_BASEDIR)/restapi-gen.py
-RESTAPI_OUTDIR=$(SRCDIR)/model
+RESTAPI_OUTDIR_MODELS=$(SRCDIR)/model
+RESTAPI_OUTDIR_API=$(SRCDIR)/api
 RESTAPI_SPECFILES=api.yaml
 RESTAPI_TEMPLATE_DIR=$(RESTAPI_BASEDIR)/templates
-RESTAPI_TEMPLATES=c++17.h.model.template c++17.cpp.model.template
+RESTAPI_TEMPLATES_CPP=c++17.h.model.template c++17.cpp.model.template
+RESTAPI_TEMPLATES_TS_MODELS=typescript-angular.ts.model.template
+RESTAPI_TEMPLATES_TS_API=typescript-angular.ts.api.template
 RESTAPI_FORCE=-f
-RESTAPI_STAMPFILES=$(addsuffix .stamp,$(RESTAPI_SPECFILES))
+RESTAPI_STAMPFILES_CPP=$(addsuffix .cpp.stamp,$(RESTAPI_SPECFILES))
+RESTAPI_STAMPFILES_TYPESCRIPT=$(addsuffix .ts.stamp,$(RESTAPI_SPECFILES))
 
-ifneq ($(filter restapi-models,$(MAKECMDGOALS)),)
-restapi-models: $(addprefix $(SRCDIR)/$(OBJDIR)/,$(RESTAPI_STAMPFILES))
+WEBVIEW_FRONTEND_DIR=$(FAWKES_BASEDIR)/src/plugins/webview/frontend
+WEBVIEW_FRONTEND_SRCDIR=$(WEBVIEW_FRONTEND_DIR)/src
+
+ifneq ($(RESTAPI_STAMPFILES_CPP)$(RESTAPI_STAMPFILES_TYPESCRIPT),)
+restapi-models: $(addprefix $(SRCDIR)/$(OBJDIR)/,$(RESTAPI_STAMPFILES_CPP))
+restapi-cpp: restapi-models ; @:
+restapi-webview: $(addprefix $(SRCDIR)/$(OBJDIR)/,$(RESTAPI_STAMPFILES_TYPESCRIPT))
 endif
 
-$(SRCDIR)/$(OBJDIR)/%.stamp: $(SRCDIR)/% $(addprefix $(RESTAPI_TEMPLATE_DIR)/,$(RESTAPI_TEMPLATES))
-	$(SILENT) echo -e "$(INDENT_PRINT)[RestAPI] $(PARENTDIR)$(TBOLDGRAY)$(<F)$(TNORMAL)"
+$(SRCDIR)/$(OBJDIR)/%.cpp.stamp: $(SRCDIR)/% $(addprefix $(RESTAPI_TEMPLATE_DIR)/,$(RESTAPI_TEMPLATES_CPP))
+	$(SILENT) echo -e "$(INDENT_PRINT)[RestAPI/C++] $(PARENTDIR)$(TBOLDGRAY)$(<F)$(TNORMAL)"
 	$(SILENT)$(RESTAPI_APIGEN) $(RESTAPI_FORCE) \
-		--api $< --output-dir $(RESTAPI_OUTDIR) \
-		--template-dir $(RESTAPI_TEMPLATE_DIR) $(RESTAPI_TEMPLATES) | \
-		sed -e "s|^$(realpath $(BASEDIR))/\(.*/\)\([^/]\+\)$$|$(INDENT_PRINT)[RestAPI] -> \1$(patsubst \\%,\\o%,$(TBOLDGRAY))\2$(patsubst \\%,\\o%,$(TNORMAL))|g"
+		--api $< --output-dir $(RESTAPI_OUTDIR_MODELS) \
+		--template-dir $(RESTAPI_TEMPLATE_DIR) $(RESTAPI_TEMPLATES_CPP) | \
+		sed -e "s|^$(realpath $(BASEDIR))/\(.*/\)\([^/]\+\)$$|$(INDENT_PRINT)[RestAPI/C++] -> \1$(patsubst \\%,\\o%,$(TBOLDGRAY))\2$(patsubst \\%,\\o%,$(TNORMAL))|g"
+	$(SILENT)touch $@
+
+$(SRCDIR)/$(OBJDIR)/%.ts.stamp: $(SRCDIR)/% $(addprefix $(RESTAPI_TEMPLATE_DIR)/,$(RESTAPI_TEMPLATES_TS_MODELS) $(RESTAPI_TEMPLATES_TS_API))
+	$(SILENT) echo -e "$(INDENT_PRINT)[RestAPI/TS/A] $(PARENTDIR)$(TBOLDGRAY)$(<F)$(TNORMAL)"
+	$(SILENT) mkdir -p $(RESTAPI_OUTDIR_MODELS)
+	$(SILENT)$(RESTAPI_APIGEN) $(RESTAPI_FORCE) \
+		--api $< --output-dir $(RESTAPI_OUTDIR_MODELS) \
+		--template-dir $(RESTAPI_TEMPLATE_DIR) $(RESTAPI_TEMPLATES_TS_MODELS) | \
+	sed -e "s|^$(realpath $(BASEDIR))/\(.*/\)\([^/]\+\)$$|$(INDENT_PRINT)[RestAPI/TS/A] -> \1$(patsubst \\%,\\o%,$(TBOLDGRAY))\2$(patsubst \\%,\\o%,$(TNORMAL))|g"
+	$(SILENT) mkdir -p $(RESTAPI_OUTDIR_API)
+	$(SILENT)$(RESTAPI_APIGEN) $(RESTAPI_FORCE) \
+		--api $< --output-dir $(RESTAPI_OUTDIR_API) \
+		--template-dir $(RESTAPI_TEMPLATE_DIR) $(RESTAPI_TEMPLATES_TS_API) | \
+	sed -e "s|^$(realpath $(BASEDIR))/\(.*/\)\([^/]\+\)$$|$(INDENT_PRINT)[RestAPI/TS/A] -> \1$(patsubst \\%,\\o%,$(TBOLDGRAY))\2$(patsubst \\%,\\o%,$(TNORMAL))|g"
 	$(SILENT)touch $@
 
 ifeq ($(OBJSSUBMAKE),1)
