@@ -38,14 +38,46 @@ RESTAPI_TEMPLATES_TS_API=typescript-angular.ts.api.template
 RESTAPI_FORCE=-f
 RESTAPI_STAMPFILES_CPP=$(addsuffix .cpp.stamp,$(RESTAPI_SPECFILES))
 RESTAPI_STAMPFILES_TYPESCRIPT=$(addsuffix .ts.stamp,$(RESTAPI_SPECFILES))
+ifeq ($(words $(RESTAPI_SPECFILES)),1)
+  RESTAPI_TS_API=$(shell grep -A10 ^info: $(SRCDIR)/api.yaml  | grep "^  title:" | awk -F: '{ print $$2 }' | tr -d " \d")ApiService
+endif
 
 WEBVIEW_FRONTEND_DIR=$(FAWKES_BASEDIR)/src/plugins/webview/frontend
 WEBVIEW_FRONTEND_SRCDIR=$(WEBVIEW_FRONTEND_DIR)/src
 
 ifneq ($(RESTAPI_STAMPFILES_CPP)$(RESTAPI_STAMPFILES_TYPESCRIPT),)
+  ifneq ($(filter restapi-%,$(MAKECMDGOALS)),)
 restapi-models: $(addprefix $(SRCDIR)/$(OBJDIR)/,$(RESTAPI_STAMPFILES_CPP))
 restapi-cpp: restapi-models ; @:
 restapi-webview: $(addprefix $(SRCDIR)/$(OBJDIR)/,$(RESTAPI_STAMPFILES_TYPESCRIPT))
+ endif
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+.PHONY: restapi-deploy-webview-api
+restapi-deploy-webview-api: restapi-webview
+	$(SILENT)if [ "$(WEBVIEW_FRONTEND_PART)" == "" ]; then \
+		echo -e "$(INDENT_PRINT)[ERROR] $(TRED)Frontend part to copy to not defined$(TNORMAL)"; \
+		exit 1; \
+	fi
+	$(SILENT)if [ ! -d "$(WEBVIEW_FRONTEND_SRCDIR)/parts/$(WEBVIEW_FRONTEND_PART)" ]; then \
+		echo -e "$(INDENT_PRINT)[ERROR] $(TRED)Frontend part directory does not exist$(TNORMAL)"; \
+		exit 2; \
+	fi
+	$(SILENT)if [ "$(RESTAPI_TS_API)" == "" ]; then \
+		echo -e "$(INDENT_PRINT)[ERROR] $(TRED)Cannot automatically determine TypeScript API, set RESTAPI_TS_API$(TNORMAL)"; \
+		exit 3; \
+	fi
+
+	$(SILENT)mkdir -p $(WEBVIEW_FRONTEND_SRCDIR)/parts/$(WEBVIEW_FRONTEND_PART)/models
+	$(SILENT)mkdir -p $(WEBVIEW_FRONTEND_SRCDIR)/parts/$(WEBVIEW_FRONTEND_PART)/services
+	$(SILENT)rm -f $(WEBVIEW_FRONTEND_SRCDIR)/parts/$(WEBVIEW_FRONTEND_PART)/models/*.ts
+	$(SILENT)for f in $(SRCDIR)/model/*.ts; do \
+		echo -e "$(INDENT_PRINT)[COPY] $${f#$(SRCDIR)/} -> frontend/src/parts/$(WEBVIEW_FRONTEND_PART)/models/"; \
+		cp -a $$f $(WEBVIEW_FRONTEND_SRCDIR)/parts/$(WEBVIEW_FRONTEND_PART)/models/; \
+	done
+	$(SILENT)echo -e "$(INDENT_PRINT)[COPY] api/$(RESTAPI_TS_API).ts -> frontend/src/parts/$(WEBVIEW_FRONTEND_PART)/services/"
+	$(SILENT)cp -af $(SRCDIR)/api/$(RESTAPI_TS_API).ts $(WEBVIEW_FRONTEND_SRCDIR)/parts/$(WEBVIEW_FRONTEND_PART)/services/api.service.ts
 endif
 
 $(SRCDIR)/$(OBJDIR)/%.cpp.stamp: $(SRCDIR)/% $(addprefix $(RESTAPI_TEMPLATE_DIR)/,$(RESTAPI_TEMPLATES_CPP))
