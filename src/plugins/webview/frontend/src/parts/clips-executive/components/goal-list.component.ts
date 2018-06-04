@@ -336,7 +336,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
       graph += '  "no goals"';
     } else {
       for (let g of this.goals) {
-        let shape = g.type == 'ACHIEVE' ? 'ellipse' : 'box';
+        let shape = g.type == 'ACHIEVE' ? 'box' : 'ellipse';
         let color = '';
 
         switch (g.mode) {
@@ -361,7 +361,29 @@ export class GoalListComponent implements OnInit, OnDestroy {
             }
           default:;
         }
-        graph += `  "${g.id}" [href="/clips-executive/goal/${g.id}", shape=${shape}`;
+
+        let node_label = `<table border="0" cellspacing="1"><tr><td colspan="2" align="center"><b>${g.id}</b></td></tr>`;
+        node_label += `<tr><td align="left"><font color="#444444">Mode:</font></td><td align="left"><font color="#444444">${this.icon_tooltip(g)}</font></td></tr>`;
+
+        if (g['class'] && g['class'] != "") {
+          node_label += `<tr><td align="left"><font color="#444444">Class:</font></td><td align="left"><font color="#444444">${g['class']}</font></td></tr>`;
+        }
+        if (g['sub-type'] && g['sub-type'] != "") {
+          node_label += `<tr><td align="left"><font color="#444444">Sub-type:</font></td><td align="left"><font color="#444444">${g['sub-type']}</font></td></tr>`;
+        }
+        if (g.priority > 0) {
+          node_label += `<tr><td align="left"><font color="#444444">Priority:</font></td><td align="left"><font color="#444444">${g.priority}</font></td></tr>`;
+        }
+        if (g['sub-type'] && g['sub-type'] == 'RETRY-SUBGOAL') {
+          if (g.parameters.length == 2 && g.parameters[0] == 'max-tries' &&
+              g.meta.length == 2 && g.meta[0] == 'num-tries')
+          {
+            node_label += `<tr><td align="left"><font color="#444444">Tries:</font></td><td align="left"><font color="#444444">${g.meta[1]}/${g.parameters[1]}</font></td></tr>`;
+          }
+        }
+        node_label += "</table>";
+
+        graph += `  "${g.id}" [label=<${node_label}>, tooltip="${g.id}", href="/clips-executive/goal/${g.id}", shape=${shape}`;
         if (color != '') {
           graph += `, style="filled", fillcolor="${color}"`;
         }
