@@ -164,8 +164,8 @@ PlanAction::from_json_value(const rapidjson::Value& d)
 		param_values_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			param_values_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 	if (d.HasMember("duration") && d["duration"].IsFloat()) {
 		duration_ = d["duration"].GetFloat();
 	}
@@ -192,8 +192,8 @@ PlanAction::from_json_value(const rapidjson::Value& d)
 			std::shared_ptr<DomainPrecondition> nv{new DomainPrecondition()};
 			nv->from_json_value(v);
 			preconditions_.push_back(std::move(nv));
-		}	
-	}	
+		}
+	}
 	if (d.HasMember("effects") && d["effects"].IsArray()) {
 		const rapidjson::Value& a = d["effects"];
 		effects_ = std::vector<std::shared_ptr<DomainEffect>>{};
@@ -203,8 +203,8 @@ PlanAction::from_json_value(const rapidjson::Value& d)
 			std::shared_ptr<DomainEffect> nv{new DomainEffect()};
 			nv->from_json_value(v);
 			effects_.push_back(std::move(nv));
-		}	
-	}	
+		}
+	}
 
 }
 

@@ -133,8 +133,8 @@ Plan::from_json_value(const rapidjson::Value& d)
 			std::shared_ptr<PlanAction> nv{new PlanAction()};
 			nv->from_json_value(v);
 			actions_.push_back(std::move(nv));
-		}	
-	}	
+		}
+	}
 
 }
 

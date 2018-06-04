@@ -179,8 +179,8 @@ Goal::from_json_value(const rapidjson::Value& d)
 		parameters_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			parameters_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 	if (d.HasMember("plans") && d["plans"].IsArray()) {
 		const rapidjson::Value& a = d["plans"];
 		plans_ = std::vector<std::string>{};
@@ -188,8 +188,8 @@ Goal::from_json_value(const rapidjson::Value& d)
 		plans_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			plans_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 
 }
 
