@@ -160,12 +160,15 @@ ClipsExecutiveRestApi::generate_goal(CLIPS::Fact::pointer fact)
 	g.set_id(get_value<std::string>(fact, "id"));
 	g.set__class(get_value<std::string>(fact, "class"));
 	g.set_type(get_value<std::string>(fact, "type"));
+	g.set_sub_type(get_value<std::string>(fact, "sub-type"));
 	g.set_mode(get_value<std::string>(fact, "mode"));
 	g.set_outcome(get_value<std::string>(fact, "outcome"));
 	g.set_parent(get_value<std::string>(fact, "parent"));
 	g.set_message(get_value<std::string>(fact, "message"));
 	g.set_priority(get_value<long int>(fact, "priority"));
 	g.set_parameters(get_values(fact, "params"));
+	g.set_required_resources(get_values(fact, "required-resources"));
+	g.set_acquired_resources(get_values(fact, "acquired-resources"));
 
 	CLIPS::Fact::pointer pfact = clips_->get_facts();
 	while (pfact) {
