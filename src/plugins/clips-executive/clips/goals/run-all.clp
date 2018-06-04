@@ -1,0 +1,110 @@
+;---------------------------------------------------------------------------
+;  run-all.clp - CLIPS executive - goal to run all sub-goals to completion
+;
+;  Created: Mon Jun 04 15:00:20 2018
+;  Copyright  2017-2018  Tim Niemueller [www.niemueller.de]
+;  Licensed under GPLv2+ license, cf. LICENSE file
+;---------------------------------------------------------------------------
+
+; Sub-type: RUN-ALL-OF-SUBGOALS
+; Perform: one goal at a time, ordered by goal priority
+; Succeed: if all sub-goal succeeds
+; Fail:    if exactly one sub-goal fails
+; Reject:  if any sub-goals is rejected
+;
+; A RUN-ALL parent goal will order the goals by priority and then
+; start performing them in order. If any goal fails, the parent
+; fails. If any sub-goal is rejected, the parent is rejected. If all
+; goals have been completed successfully, the parent goal succeeds.
+
+;
+; Interactions:
+; - User FORMULATES goal
+; - User SELECTS goal
+; - User EXPANDS goal, consisting of:
+;   * create goals with parent ID equal the RUN-ALL goal ID
+;   * set RUN-ALL goal mode to EXPANDED
+; - Automatic: if no sub-goal formulated -> FAIL
+; - Automatic: if all sub-goals rejected -> REJECT
+; - Automatic: take highest FORMULATED sub-goal and COMMIT to
+; - Automatic: DISPATCH committed sub-goal by SELECTING it
+; - User: handle sub-goal expansion, commiting, dispatching
+; - Automatic: one of the following outcomes for the sub-goal:
+;   * REJECTED: mode FINISHED, outcome REJECTED, message
+;   * FAILED: mode FINISHED, outcome FAILED, message
+;   * COMPLETED: mode FINISHED, outcome COMPLETED
+; User: EVALUATE goal
+; User: cleanup goal
+
+(defrule run-all-goal-expand-failed
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ALL-OF-SUBGOALS)
+							 (mode EXPANDED))
+	(not (goal (type ACHIEVE) (parent ?id)))
+	=>
+	(modify ?gf (mode FINISHED) (outcome FAILED)
+					(message (str-cat "No sub-goal for RUN-ALL goal '" ?id "'")))
+)
+
+(defrule run-all-goal-commit
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ALL-OF-SUBGOALS)
+							 (mode EXPANDED))
+	(goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FORMULATED)
+				(priority ?priority))
+	(not (goal (id ~?sub-goal) (parent ?id) (type ACHIEVE) (mode FORMULATED)
+						 (priority ?priority2&:(> ?priority2 ?priority))))
+	=>
+	(modify ?gf (mode COMMITTED) (committed-to ?sub-goal))
+)
+
+(defrule run-all-goal-dispatch
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ALL-OF-SUBGOALS)
+							 (mode COMMITTED) (committed-to ?sub-goal))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FORMULATED))
+	=>
+	(modify ?gf (mode DISPATCHED))
+	(modify ?sg (mode SELECTED))
+)
+
+(defrule run-all-goal-subgoal-rejected
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ALL-OF-SUBGOALS)
+							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome REJECTED))
+	=>
+	; cleanup all plan info associated with the rejected sub-goal
+	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?sub-goal)
+		(delayed-do-for-all-facts ((?pa plan-action))
+			(and (eq ?pa:goal-id ?sub-goal) (eq ?pa:plan-id ?plan:id))
+			(retract ?pa)
+		)
+		(retract ?plan)
+	)
+	(modify ?gf (mode FINISHED) (outcome REJECTED)
+					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ALL goal '" ?id "' was rejected")))
+)
+
+(defrule run-all-goal-subgoal-failed
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ALL-OF-SUBGOALS)
+							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome FAILED))
+	=>
+	(modify ?gf (mode FINISHED) (outcome FAILED)
+					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ALL goal '" ?id "' has failed")))
+)
+
+(defrule run-all-goal-subgoal-completed-one
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ALL-OF-SUBGOALS)
+							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome COMPLETED))
+	(goal (parent ?id) (type ACHIEVE) (mode FORMULATED))
+	=>
+	(modify ?gf (mode EXPANDED))
+)
+
+(defrule run-all-goal-subgoal-completed-all
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ALL-OF-SUBGOALS)
+							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome COMPLETED))
+	(not (goal (parent ?id) (type ACHIEVE) (mode FORMULATED)))
+	=>
+	(modify ?gf (mode FINISHED) (outcome COMPLETED))
+)
