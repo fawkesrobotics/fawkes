@@ -288,6 +288,9 @@ components:
           type: string
           format: symbol
           enum: ["ACHIEVE", "MAINTAIN"]
+        sub-type:
+          type: string
+          format: symbol
         class:
           type: string
           format: symbol
@@ -295,11 +298,11 @@ components:
           type: string
           format: symbol
           enum: ["FORMULATED", "SELECTED", "EXPANDED", "COMMITTED",
-                 "DISPATCHED", "FINISHED", "EVALUATED", "REJECTED"]
+                 "DISPATCHED", "FINISHED", "EVALUATED", "RETRACTED"]
         outcome:
           type: string
           format: symbol
-          enum: ["UNKNOWN", "COMPLETED", "FAILED"]
+          enum: ["UNKNOWN", "COMPLETED", "FAILED", "REJECTED"]
         message:
           type: string
         parent:
@@ -315,6 +318,14 @@ components:
           items:
             type: string
         plans:
+          type: array
+          items:
+            type: string
+        required-resources:
+          type: array
+          items:
+            type: string
+        acquired-resources:
           type: array
           items:
             type: string
