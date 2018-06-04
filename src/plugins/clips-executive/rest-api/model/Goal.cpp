@@ -124,6 +124,14 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_parameters.PushBack(v, allocator);
 	}
 	v.AddMember("parameters", v_parameters, allocator);
+	rapidjson::Value v_meta(rapidjson::kArrayType);
+	v_meta.Reserve(meta_.size(), allocator);
+	for (const auto & e : meta_) {
+		rapidjson::Value v;
+		v.SetString(e, allocator);
+		v_meta.PushBack(v, allocator);
+	}
+	v.AddMember("meta", v_meta, allocator);
 	rapidjson::Value v_plans(rapidjson::kArrayType);
 	v_plans.Reserve(plans_.size(), allocator);
 	for (const auto & e : plans_) {
@@ -203,6 +211,15 @@ Goal::from_json_value(const rapidjson::Value& d)
 		parameters_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			parameters_.push_back(v.GetString());
+		}
+	}
+	if (d.HasMember("meta") && d["meta"].IsArray()) {
+		const rapidjson::Value& a = d["meta"];
+		meta_ = std::vector<std::string>{};
+;
+		meta_.reserve(a.Size());
+		for (auto& v : a.GetArray()) {
+			meta_.push_back(v.GetString());
 		}
 	}
 	if (d.HasMember("plans") && d["plans"].IsArray()) {

@@ -291,6 +291,38 @@ class Goal
 	{
 		parameters_.push_back(parameters);
 	}
+  /** Get meta value.
+   * @return meta value
+   */
+	std::vector<std::string>
+ meta() const
+	{
+		return meta_;
+	}
+
+	/** Set meta value.
+	 * @param meta new value
+	 */
+	void set_meta(const std::vector<std::string>& meta)
+	{
+		meta_ = meta;
+	}
+	/** Add element to meta array.
+	 * @param meta new value
+	 */
+	void addto_meta(const std::string&& meta)
+	{
+		meta_.push_back(std::move(meta));
+	}
+
+	/** Add element to meta array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param meta new value
+	 */
+	void addto_meta(const std::string& meta)
+	{
+		meta_.push_back(meta);
+	}
   /** Get plans value.
    * @return plans value
    */
@@ -412,6 +444,8 @@ class Goal
  priority_;
 	std::vector<std::string>
  parameters_;
+	std::vector<std::string>
+ meta_;
 	std::vector<std::string>
  plans_;
 	std::vector<std::string>

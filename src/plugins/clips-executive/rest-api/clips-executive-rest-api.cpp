@@ -167,6 +167,7 @@ ClipsExecutiveRestApi::generate_goal(CLIPS::Fact::pointer fact)
 	g.set_message(get_value<std::string>(fact, "message"));
 	g.set_priority(get_value<long int>(fact, "priority"));
 	g.set_parameters(get_values(fact, "params"));
+	g.set_meta(get_values(fact, "meta"));
 	g.set_required_resources(get_values(fact, "required-resources"));
 	g.set_acquired_resources(get_values(fact, "acquired-resources"));
 

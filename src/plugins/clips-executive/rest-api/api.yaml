@@ -317,6 +317,10 @@ components:
           type: array
           items:
             type: string
+        meta:
+          type: array
+          items:
+            type: string
         plans:
           type: array
           items:
