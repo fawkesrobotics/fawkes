@@ -27,6 +27,7 @@ export interface Goal
 	parent?: string;
 	priority?: number;
 	parameters?: Array<string>;
+	meta?: Array<string>;
 	plans?: Array<string>;
 	required_resources?: Array<string>;
 	acquired_resources?: Array<string>;
