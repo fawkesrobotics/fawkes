@@ -4,7 +4,7 @@
 
 import {Component, Input} from '@angular/core';
 
-import * as Viz from 'viz.js/viz-lite.js';
+import * as Viz from 'viz.js/viz.js';
 
 @Component({
   selector: 'dotgraph',
