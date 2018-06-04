@@ -32,7 +32,10 @@
 				<ng-container matColumnDef="mode">
 					<mat-header-cell *matHeaderCellDef> Mode </mat-header-cell>
 					<mat-cell *matCellDef="let item">
-						<mat-icon  [ngClass]="icon_class(item.goal)"[matTooltip]="item.goal.mode">{{ icon_name(item.goal) }}</mat-icon>
+						<mat-icon  [ngClass]="icon_class(item.goal)"
+											 [matTooltip]="icon_tooltip(item.goal)">
+							{{ icon_name(item.goal) }}
+						</mat-icon>
 					</mat-cell>
 				</ng-container>
 

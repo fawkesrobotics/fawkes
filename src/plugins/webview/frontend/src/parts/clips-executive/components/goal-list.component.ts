@@ -183,6 +183,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
         switch (goal.outcome) {
           case "COMPLETED": return "check";
           case "FAILED": return "error_outline";
+          case "REJECTED": return "report";
           default: return "help";
         }
       }
@@ -191,10 +192,11 @@ export class GoalListComponent implements OnInit, OnDestroy {
         switch (goal.outcome) {
           case "COMPLETED": return "check_circle";
           case "FAILED": return "error";
+          case "REJECTED": return "report";
           default: return "help";
         }
       }
-      case "REJECTED":   return "report";
+      case "RETRACTED":   return "delete";
       default: return "help_outline";
     }
   }
@@ -212,6 +214,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
         switch (goal.outcome) {
           case "COMPLETED": return "ff-success";
           case "FAILED": return "ff-error";
+          case "REJECTED": return "ff-warning";
           default: return "ff-warning";
         }
       }
@@ -220,11 +223,29 @@ export class GoalListComponent implements OnInit, OnDestroy {
         switch (goal.outcome) {
           case "COMPLETED": return "ff-success";
           case "FAILED": return "ff-error";
+          case "REJECTED": return "ff-warning";
           default: return "ff-warning";
         }
       }
-      case "REJECTED":   return "ff-warning";
+      case "RETRACTED":
+        switch (goal.outcome) {
+          case "COMPLETED": return "ff-success";
+          case "FAILED": return "ff-error";
+          case "REJECTED": return "ff-warning";
+          default: return "ff-primary";
+        }
       default: return "ff-warning";
+    }
+  }
+
+  icon_tooltip(goal: Goal): string
+  {
+    switch (goal.mode) {
+      case "FINISHED":
+      case "EVALUATED":
+        return `${goal.mode}|${goal.outcome}`;
+      default:
+        return goal.mode;
     }
   }
 
@@ -328,9 +349,16 @@ export class GoalListComponent implements OnInit, OnDestroy {
             switch (g.outcome) {
               case "COMPLETED": color='#A5D6A7'; break;
               case "FAILED":    color='#EF9A9A'; break;
+              case "REJECTED":  color='#FFCC80'; break;
             }
             break;
-          case "REJECTED":   color='#FFCC80'; break;
+          case "RETRACTED":
+            switch (g.outcome) {
+              case "COMPLETED": color='#A5D6A7'; break;
+              case "FAILED":    color='#EF9A9A'; break;
+              case "REJECTED":  color='#FFCC80'; break;
+              default:          color='#eeeeee'; break;
+            }
           default:;
         }
         graph += `  "${g.id}" [href="/clips-executive/goal/${g.id}", shape=${shape}`;
