@@ -145,7 +145,22 @@ get_values(const CLIPS::Fact::pointer &fact, const std::string &slot_name)
 	CLIPS::Values v = fact->slot_value(slot_name);
 	std::vector<std::string> rv(v.size());
 	for (size_t i = 0; i < v.size(); ++i) {
-		rv[i] = static_cast<std::string&>(v[i]);
+		switch (v[i].type()) {
+		case CLIPS::TYPE_FLOAT:
+			rv[i] = std::to_string(static_cast<double>(v[i]));
+			break;
+		case CLIPS::TYPE_INTEGER:
+			rv[i] = std::to_string(static_cast<long long int>(v[i]));
+			break;
+		case CLIPS::TYPE_SYMBOL:
+		case CLIPS::TYPE_STRING:
+		case CLIPS::TYPE_INSTANCE_NAME:
+			rv[i] = static_cast<std::string&>(v[i]);
+			break;
+		default:
+			rv[i] = "CANNOT-REPRESENT";
+			break;
+		}
 	}
 	return rv;
 }
