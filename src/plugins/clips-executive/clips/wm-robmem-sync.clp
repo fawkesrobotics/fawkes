@@ -270,7 +270,8 @@
 				(if (time> ?update-timestamp ?sm:update-timestamp)
 				then
 					(printout debug "wm-robmem-sync-update: updating (known fact) " ?id crlf)
-					(modify ?wf (type ?type) (is-list ?is-list) (value ?value) (values ?values))
+					(bind ?new-wf (modify ?wf (type ?type) (is-list ?is-list) (value ?value) (values ?values)))
+					(modify ?sm (wm-fact-idx (fact-index ?new-wf)))
 				else
 					(printout warn "wm-robmem-sync-update: received update for " ?id " with older data than our own" crlf)
 				)
