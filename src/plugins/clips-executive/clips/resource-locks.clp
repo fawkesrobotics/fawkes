@@ -37,13 +37,32 @@
   (goal (mode COMMITTED)
         (acquired-resources $?acq)
         (required-resources $?req))
+  ; We may have multiple goals requiring the same resource. If that's the case,
+  ; wait until the other goal releases the resources.
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
               (request ~NONE)))
+  (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
+              (state ~OPEN)))
   =>
   (foreach ?res (set-diff ?req ?acq)
     (printout warn "Locking resource " ?res crlf)
     (mutex-try-lock-async (resource-to-mutex ?res))
   )
+)
+
+(defrule resource-locks-fast-reject-goal
+  "If a resource is locked by someone else, we have not acquired any resources,
+   and we have no pending requests, then we can directly reject the goal."
+  (wm-fact (key cx identity) (value ?identity))
+  ?g <- (goal (mode COMMITTED)
+              (acquired-resources)
+              (required-resources $?req))
+  (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
+         (state LOCKED) (locked-by ?locker&~?identity))
+  (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
+              (request ~NONE)))
+  =>
+  (modify ?g (mode FINISHED) (outcome REJECTED))
 )
 
 (defrule resource-locks-lock-acquired
