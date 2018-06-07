@@ -362,12 +362,25 @@ CLIPSEnvManager::clips_now()
   return rv;
 }
 
+CLIPS::Values
+CLIPSEnvManager::clips_now_systime()
+{
+  CLIPS::Values rv;
+  fawkes::Time now;
+  now.set_clock(clock_);
+  now.stamp_systime();
+  rv.push_back(now.get_sec());
+  rv.push_back(now.get_usec());
+  return rv;
+}
+
 
 void
 CLIPSEnvManager::add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips)
 {
   clips->add_function("ff-feature-request", sigc::slot<CLIPS::Value, std::string>(sigc::bind<0>(sigc::mem_fun(*this, &CLIPSEnvManager::clips_request_feature), env_name)));
   clips->add_function("now", sigc::slot<CLIPS::Values>(sigc::mem_fun( *this, &CLIPSEnvManager::clips_now)));
+  clips->add_function("now-systime", sigc::slot<CLIPS::Values>(sigc::mem_fun( *this, &CLIPSEnvManager::clips_now_systime)));
 }
 
 void

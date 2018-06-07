@@ -61,6 +61,7 @@ class CLIPSEnvManager
   void add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips);
   CLIPS::Value clips_request_feature(std::string env_name, std::string feature_name);
   CLIPS::Values clips_now();
+  CLIPS::Values clips_now_systime();
   void guarded_load(const std::string &env_name, const std::string &filename);
 
 
