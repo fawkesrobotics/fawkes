@@ -35,8 +35,7 @@
 ; - Automatic: if more than one sub-goal formulated -> FAIL
 ; - Automatic: COMMIT sub-goal
 ; - Automatic: DISPATCH committed sub-goal by SELECTING it
-; - User: handle sub-goal expansion, commiting, dispatching
-; - Automatic: one of the following outcomes for the sub-goal:
+; - Automatic: one of the following outcomes for the EVALUATED sub-goal:
 ;   * if sub-goal rejected and num-tries < max-tries -> EXPANDED
 ;   * if sub-goal fails and num-tries < max-tries -> EXPANDED
 ;   * if sub-goal rejected and num-tries == max-tries -> FINISHED|REJECTED
@@ -115,7 +114,7 @@
 							 (mode DISPATCHED) (committed-to ?sub-goal)
 							 (params max-tries ?max-tries)
 							 (meta num-tries ?num-tries))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome REJECTED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome REJECTED))
 	=>
 	; cleanup all plan info associated with the rejected sub-goal
 	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?sub-goal)
@@ -141,7 +140,7 @@
 							 (mode DISPATCHED) (committed-to ?sub-goal)
 							 (params max-tries ?max-tries)
 							 (meta num-tries ?num-tries))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome FAILED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome FAILED))
 	=>
 	; cleanup all plan info associated with the rejected sub-goal
 	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?sub-goal)
@@ -165,7 +164,7 @@
 (defrule retry-goal-subgoal-completed
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome COMPLETED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome COMPLETED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome COMPLETED))
 )

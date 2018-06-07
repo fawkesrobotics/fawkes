@@ -62,7 +62,7 @@
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS)
 							 (mode EXPANDED))
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
-					(goal (id ?sub-goal) (mode FINISHED) (outcome REJECTED)))
+					(goal (id ?sub-goal) (mode EVALUATED) (outcome REJECTED)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil))
 )
@@ -71,8 +71,8 @@
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS)
 							 (mode EXPANDED))
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
-					(goal (id ?sub-goal) (mode FINISHED) (outcome FAILED|REJECTED)))
-	(goal (id ?some-subgoal) (mode FINISHED) (outcome FAILED))
+					(goal (id ?sub-goal) (mode EVALUATED) (outcome FAILED|REJECTED)))
+	(goal (id ?some-subgoal) (mode EVALUATED) (outcome FAILED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil))
 )
@@ -89,7 +89,7 @@
 (defrule try-all-goal-subgoal-rejected
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome REJECTED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome REJECTED))
 	=>
 	; cleanup all plan info associated with the rejected sub-goal
 	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?sub-goal)
@@ -105,9 +105,9 @@
 (defrule try-all-goal-subgoal-failed
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome FAILED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome FAILED))
 	=>
-	; cleanup all plan info associated with the rejected sub-goal
+x	; cleanup all plan info associated with the rejected sub-goal
 	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?sub-goal)
 		(delayed-do-for-all-facts ((?pa plan-action))
 			(and (eq ?pa:goal-id ?sub-goal) (eq ?pa:plan-id ?plan:id))
@@ -121,7 +121,7 @@
 (defrule try-all-goal-subgoal-completed
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome COMPLETED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome COMPLETED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome COMPLETED))
 )

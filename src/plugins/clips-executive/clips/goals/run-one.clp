@@ -28,7 +28,7 @@
 ; - Automatic: take highest FORMULATED sub-goal and COMMIT to
 ; - Automatic: DISPATCH committed sub-goal by SELECTING it
 ; - User: handle sub-goal expansion, commiting, dispatching
-; - Automatic: one of the following outcomes for the sub-goal:
+; - Automatic: when sub-goal is EVALUATED, outcome determines parent goal:
 ;   * REJECTED: mode EXPANDED (re-try with other sub-goal)
 ;   * FAILED: mode FINISHED, outcome FAILED, message
 ;   * COMPLETED: mode FINISHED, outcome COMPLETED
@@ -59,7 +59,7 @@
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
 							 (mode EXPANDED))
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
-					(goal (id ?sub-goal) (mode FINISHED) (outcome REJECTED)))
+					(goal (id ?sub-goal) (mode EVALUATED) (outcome REJECTED)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil))
 )
@@ -76,7 +76,7 @@
 (defrule run-one-goal-subgoal-rejected
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome REJECTED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome REJECTED))
 	=>
 	; cleanup all plan info associated with the rejected sub-goal
 	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?sub-goal)
@@ -92,7 +92,7 @@
 (defrule run-one-goal-subgoal-failed
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome FAILED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome FAILED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
 					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ONE goal '" ?id "' has failed")))
@@ -101,7 +101,7 @@
 (defrule run-one-goal-subgoal-completed
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FINISHED) (outcome COMPLETED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome COMPLETED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome COMPLETED))
 )
