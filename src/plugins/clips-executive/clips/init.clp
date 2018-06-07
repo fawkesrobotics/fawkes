@@ -95,10 +95,10 @@
 	(do-for-all-facts ((?c confval)) (str-prefix (str-cat "/clips-executive/specs/" ?spec "/init/" ?stage "/")
 																							 ?c:path)
 		(bind ?path-elements (str-split ?c:path "/"))
-		(bind ?idx (nth$ 6 ?path-elements))
+		(bind ?idx (integer (eval (nth$ 6 ?path-elements))))
 		(if (not (member$ ?idx ?rv)) then	(bind ?rv (append$ ?rv ?idx)))
 	)
-	(return ?rv)
+	(return (sort > ?rv))
 )
 
 (deffunction cx-assert-init-requests (?spec ?stage ?feature-default)
