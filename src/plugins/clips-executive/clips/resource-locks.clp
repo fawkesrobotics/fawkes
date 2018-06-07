@@ -91,7 +91,9 @@
   (not (mutex (name ?on&:(member$ (mutex-to-resource ?on) ?req))
               (response PENDING)))
   =>
-  (do-for-all-facts ((?om mutex)) (member$ (mutex-to-resource ?om:name) ?acq)
+  (delayed-do-for-all-facts
+    ((?om mutex))
+    (and (eq ?om:request NONE) (member$ (mutex-to-resource ?om:name) ?acq))
     (mutex-unlock-async ?om:name)
   )
 )
@@ -109,7 +111,7 @@
               (response PENDING)))
   =>
   (modify ?g (mode FINISHED) (outcome REJECTED) (message ?err))
-  (do-for-all-facts
+  (delayed-do-for-all-facts
     ((?om mutex))
     (and (member$ ?om:response (create$ REJECTED ERROR))
          (member$ (mutex-to-resource ?om:name) ?req))
