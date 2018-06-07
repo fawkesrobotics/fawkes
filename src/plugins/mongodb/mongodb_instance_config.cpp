@@ -24,10 +24,12 @@
 #include <config/config.h>
 #include <utils/sub_process/proc.h>
 #include <utils/time/wait.h>
+#include <core/exceptions/system.h>
 
 #include <boost/filesystem.hpp>
 #include <chrono>
 #include <numeric>
+#include <wordexp.h>
 
 #include <mongo/client/dbclient.h>
 
@@ -103,6 +105,49 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 		if (oplog_size_ > 0) {
 			argv_.push_back("--oplogSize");
 			argv_.push_back(std::to_string(oplog_size_));
+		}
+	}
+
+	if (enabled_) {
+		std::string extra_args;
+		try {
+			extra_args = config->get_string(prefix + "args");
+		} catch (Exception &e) {}
+		if (! extra_args.empty()) {
+			wordexp_t p;
+			int wrv = wordexp(extra_args.c_str(), &p, WRDE_NOCMD | WRDE_UNDEF);
+			switch (wrv) {
+			case WRDE_BADCHAR:
+				throw Exception("%s: invalid character in args", name());
+			case WRDE_BADVAL:
+				throw Exception("%s: undefined variable referenced in args", name());
+			case WRDE_CMDSUB:
+				throw Exception("%s: running sub-commands has been disabled for args", name());
+			case WRDE_NOSPACE:
+				throw OutOfMemoryException("Cannot parse args");
+			case WRDE_SYNTAX:
+				throw Exception("%s: shell syntax error in args", name());
+			default: break;
+			}
+
+			// These arguments may not be passed, they are either configured through
+			// config values and could interfere, or they mess with our rs handling.
+			std::vector<std::string> invalid_args = {
+				"--port", "--dbpath", "--fork", "--logappend", "--logpath",
+				"--replSet", "--oplogSize", "--master", "--slave", "--source", "--only"
+			};
+
+			// pass and verify arguments to be added to command line
+			for (size_t i = 0; i < p.we_wordc; ++i) {
+				for (size_t j = 0; j < invalid_args.size(); ++j) {
+					if (invalid_args[j] == p.we_wordv[i]) {
+						wordfree(&p);
+						throw Exception("%s: %s may not be passed in args", name(), invalid_args[j].c_str());
+					}
+				}
+				argv_.push_back(p.we_wordv[i]);
+			}
+			wordfree(&p);
 		}
 	}
 
