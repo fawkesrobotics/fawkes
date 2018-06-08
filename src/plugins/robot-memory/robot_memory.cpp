@@ -114,7 +114,7 @@ void RobotMemory::init()
 		  mongodb_client_local_ = mongo_connection_manager_->create_client("robot-memory-local");
 		  break;
 	  } catch (fawkes::Exception &e) {
-		  logger_->log_info(name_, "Waiting");
+		  logger_->log_info(name_, "Waiting for local");
 		  std::this_thread::sleep_for(500ms);
 	  }
   }
@@ -124,12 +124,12 @@ void RobotMemory::init()
   {
 	  distributed_ = true;
     log("Connect to distributed mongod");
-    for (; startup_tries < cfg_startup_grace_period_ * 2; ++startup_tries) {
+    for (startup_tries = 0; startup_tries < cfg_startup_grace_period_ * 2; ++startup_tries) {
 	    try {
 		    mongodb_client_distributed_ = mongo_connection_manager_->create_client("robot-memory-distributed");
 		    break;
 	    } catch (fawkes::Exception &e) {
-		    logger_->log_info(name_, "Waiting");
+		    logger_->log_info(name_, "Waiting for distributed");
 		    std::this_thread::sleep_for(500ms);
 	    }
     }
