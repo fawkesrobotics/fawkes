@@ -31,6 +31,12 @@ clips-executive:
   # the lock just due to an oversight.
   steal-skiller-control: true
 
+  # If set to true, goals will be cleaned automatically when they
+  # reach the RETRACTED state. Disabling be useful for debugging.
+  # You need to manually cleanup goals (and associated data such as
+  # plans) to keep things tidy.
+  automatic-goal-retraction: true
+
   # Directory where to look for CLIPS files
   clips-dirs: ["@BASEDIR@/src/clips-specs"]
 
