@@ -33,6 +33,7 @@
 ;   * REJECTED: mode FINISHED, outcome REJECTED, message
 ;   * FAILED: mode FINISHED, outcome FAILED, message
 ;   * COMPLETED: mode FINISHED, outcome COMPLETED
+;   -> Sub-goal is RETRACTED.
 ; User: EVALUATE goal
 ; User: RETRACT goal
 
@@ -82,6 +83,7 @@
 	)
 	(modify ?gf (mode FINISHED) (outcome REJECTED)
 					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ALL goal '" ?id "' was rejected")))
+	(modify ?sg (mode RETRACTED))
 )
 
 (defrule run-all-goal-subgoal-failed
@@ -91,6 +93,7 @@
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
 					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ALL goal '" ?id "' has failed")))
+	(modify ?sg (mode RETRACTED))
 )
 
 (defrule run-all-goal-subgoal-completed-one
@@ -100,6 +103,7 @@
 	(goal (parent ?id) (type ACHIEVE) (mode FORMULATED))
 	=>
 	(modify ?gf (mode EXPANDED))
+	(modify ?sg (mode RETRACTED))
 )
 
 (defrule run-all-goal-subgoal-completed-all
@@ -109,4 +113,5 @@
 	(not (goal (parent ?id) (type ACHIEVE) (mode FORMULATED)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome COMPLETED))
+	(modify ?sg (mode RETRACTED))
 )

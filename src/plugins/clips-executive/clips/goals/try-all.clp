@@ -35,8 +35,9 @@
 ;   * REJECTED: mode EXPANDED (re-try with other sub-goal)
 ;   * FAILED: mode EXPANDED (retry with other sub-goal)
 ;   * COMPLETED: mode FINISHED, outcome COMPLETED
+;   -> Sub-goal is RETRACTED.
 ; User: EVALUATE goal
-; User: cleanup goal
+; User: RETRACT goal
 
 (defrule try-all-goal-expand-failed
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS)
@@ -102,6 +103,7 @@
 		(retract ?plan)
 	)
 	(modify ?gf (mode EXPANDED))
+	(modify ?sg (mode RETRACTED))
 )
 
 (defrule try-all-goal-subgoal-failed
@@ -109,7 +111,7 @@
 							 (mode DISPATCHED) (committed-to ?sub-goal))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome FAILED))
 	=>
-x	; cleanup all plan info associated with the rejected sub-goal
+	; cleanup all plan info associated with the rejected sub-goal
 	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?sub-goal)
 		(delayed-do-for-all-facts ((?pa plan-action))
 			(and (eq ?pa:goal-id ?sub-goal) (eq ?pa:plan-id ?plan:id))
@@ -118,6 +120,7 @@ x	; cleanup all plan info associated with the rejected sub-goal
 		(retract ?plan)
 	)
 	(modify ?gf (mode EXPANDED))
+	(modify ?sg (mode RETRACTED))
 )
 
 (defrule try-all-goal-subgoal-completed
@@ -126,4 +129,5 @@ x	; cleanup all plan info associated with the rejected sub-goal
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome COMPLETED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome COMPLETED))
+	(modify ?sg (mode RETRACTED))
 )

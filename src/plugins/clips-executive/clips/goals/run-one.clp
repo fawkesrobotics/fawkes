@@ -32,8 +32,9 @@
 ;   * REJECTED: mode EXPANDED (re-try with other sub-goal)
 ;   * FAILED: mode FINISHED, outcome FAILED, message
 ;   * COMPLETED: mode FINISHED, outcome COMPLETED
+;   -> Sub-goal is RETRACTED.
 ; User: EVALUATE goal
-; User: cleanup goal
+; User: RETRACT goal
 
 (defrule run-one-goal-expand-failed
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
@@ -89,6 +90,7 @@
 		(retract ?plan)
 	)
 	(modify ?gf (mode EXPANDED))
+	(modify ?sg (mode RETRACTED))
 )
 
 (defrule run-one-goal-subgoal-failed
@@ -98,6 +100,7 @@
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
 					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ONE goal '" ?id "' has failed")))
+	(modify ?sg (mode RETRACTED))
 )
 
 (defrule run-one-goal-subgoal-completed
@@ -106,4 +109,5 @@
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome COMPLETED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome COMPLETED))
+	(modify ?sg (mode RETRACTED))
 )

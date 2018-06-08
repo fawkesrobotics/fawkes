@@ -40,8 +40,9 @@
 ;   * if sub-goal fails and num-tries < max-tries -> EXPANDED
 ;   * if sub-goal rejected and num-tries == max-tries -> FINISHED|REJECTED
 ;   * if sub-goal fails and num-tries == max-tries -> FINISHED|FAILED
+;   -> Sub-goal is RETRACTED.
 ; User: EVALUATE goal
-; User: cleanup goal
+; User: RETRACT goal
 
 (defrule retry-goal-failed-no-subgoal
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
@@ -128,6 +129,7 @@
 	)
 	(if (= ?num-tries ?max-tries)
 	then
+		(modify ?sg (mode RETRACTED))
 		(modify ?gf (mode FINISHED) (outcome REJECTED)
 						(message (str-cat "RETRY goal '" ?id "' sub-goal '" ?sub-goal "' was rejected in try "
 															?num-tries "/" ?max-tries)))
@@ -154,6 +156,7 @@
 	)
 	(if (= ?num-tries ?max-tries)
 	then
+		(modify ?sg (mode RETRACTED))
 		(modify ?gf (mode FINISHED) (outcome FAILED)
 						(message (str-cat "RETRY goal '" ?id "' sub-goal '" ?sub-goal "' failed in try "
 															?num-tries "/" ?max-tries)))
@@ -169,4 +172,5 @@
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome COMPLETED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome COMPLETED))
+	(modify ?sg (mode RETRACTED))
 )
