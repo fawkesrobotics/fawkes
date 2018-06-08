@@ -102,7 +102,9 @@
 
 (defrule retry-goal-dispatch
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode COMMITTED) (committed-to ?sub-goal))
+							 (mode COMMITTED) (committed-to ?sub-goal)
+							 (required-resources $?req)
+							 (acquired-resources $?acq&:(subsetp ?req ?acq)))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FORMULATED))
 	=>
 	(modify ?gf (mode DISPATCHED))
