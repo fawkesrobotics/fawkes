@@ -119,14 +119,6 @@
 							 (meta num-tries ?num-tries))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome REJECTED))
 	=>
-	; cleanup all plan info associated with the rejected sub-goal
-	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?sub-goal)
-		(delayed-do-for-all-facts ((?pa plan-action))
-			(and (eq ?pa:goal-id ?sub-goal) (eq ?pa:plan-id ?plan:id))
-			(retract ?pa)
-		)
-		(retract ?plan)
-	)
 	(if (= ?num-tries ?max-tries)
 	then
 		(modify ?sg (mode RETRACTED))
@@ -134,6 +126,7 @@
 						(message (str-cat "RETRY goal '" ?id "' sub-goal '" ?sub-goal "' was rejected in try "
 															?num-tries "/" ?max-tries)))
 	else
+		(plan-retract-all-for-goal ?sub-goal)
 		(modify ?sg (mode FORMULATED) (outcome UNKNOWN))
 		(modify ?gf (mode EXPANDED))
 	)
@@ -146,14 +139,6 @@
 							 (meta num-tries ?num-tries))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome FAILED))
 	=>
-	; cleanup all plan info associated with the rejected sub-goal
-	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?sub-goal)
-		(delayed-do-for-all-facts ((?pa plan-action))
-			(and (eq ?pa:goal-id ?sub-goal) (eq ?pa:plan-id ?plan:id))
-			(retract ?pa)
-		)
-		(retract ?plan)
-	)
 	(if (= ?num-tries ?max-tries)
 	then
 		(modify ?sg (mode RETRACTED))
@@ -161,6 +146,7 @@
 						(message (str-cat "RETRY goal '" ?id "' sub-goal '" ?sub-goal "' failed in try "
 															?num-tries "/" ?max-tries)))
 	else
+		(plan-retract-all-for-goal ?sub-goal)
 		(modify ?sg (mode FORMULATED) (outcome UNKNOWN))
 		(modify ?gf (mode EXPANDED))
 	)

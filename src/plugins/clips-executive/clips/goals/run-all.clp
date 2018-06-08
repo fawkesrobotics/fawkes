@@ -73,14 +73,6 @@
 							 (mode DISPATCHED) (committed-to ?sub-goal))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome REJECTED))
 	=>
-	; cleanup all plan info associated with the rejected sub-goal
-	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?sub-goal)
-		(delayed-do-for-all-facts ((?pa plan-action))
-			(and (eq ?pa:goal-id ?sub-goal) (eq ?pa:plan-id ?plan:id))
-			(retract ?pa)
-		)
-		(retract ?plan)
-	)
 	(modify ?gf (mode FINISHED) (outcome REJECTED)
 					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ALL goal '" ?id "' was rejected")))
 	(modify ?sg (mode RETRACTED))
