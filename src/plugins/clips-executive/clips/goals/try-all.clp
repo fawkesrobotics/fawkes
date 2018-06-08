@@ -89,29 +89,30 @@
 	(modify ?sg (mode SELECTED))
 )
 
-(defrule try-all-goal-subgoal-rejected
+(defrule try-all-goal-subgoal-evaluated
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome REJECTED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED))
 	=>
-	(modify ?gf (mode EXPANDED))
 	(modify ?sg (mode RETRACTED))
 )
 
-(defrule try-all-goal-subgoal-failed
+(defrule try-all-goal-subgoal-failed-or-rejected-resources-clear
+	"This checks for empty acquired-resources to advance our parent goal mode."
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome FAILED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
+							 (type ACHIEVE) (mode RETRACTED) (outcome FAILED|REJECTED))
 	=>
-	(modify ?gf (mode EXPANDED))
-	(modify ?sg (mode RETRACTED))
+	(modify ?gf (mode EXPANDED) (committed-to nil))
 )
 
-(defrule try-all-goal-subgoal-completed
+(defrule try-all-goal-subgoal-completed-resources-clear
+	"This checks for empty acquired-resources to advance our parent goal mode."
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type TRY-ALL-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome COMPLETED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
+							 (type ACHIEVE) (mode RETRACTED) (outcome COMPLETED))
 	=>
-	(modify ?gf (mode FINISHED) (outcome COMPLETED))
-	(modify ?sg (mode RETRACTED))
+	(modify ?gf (mode FINISHED) (outcome COMPLETED) (committed-to nil))
 )

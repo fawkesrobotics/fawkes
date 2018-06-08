@@ -76,30 +76,38 @@
 	(modify ?sg (mode SELECTED))
 )
 
-(defrule run-one-goal-subgoal-rejected
+(defrule run-one-goal-subgoal-evaluated
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome REJECTED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED))
 	=>
-	(modify ?gf (mode EXPANDED))
 	(modify ?sg (mode RETRACTED))
 )
 
-(defrule run-one-goal-subgoal-failed
+(defrule run-one-goal-subgoal-rejected-resources-clear
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome FAILED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
+							 (type ACHIEVE) (mode RETRACTED) (outcome REJECTED))
 	=>
-	(modify ?gf (mode FINISHED) (outcome FAILED)
+	(modify ?gf (mode EXPANDED) (committed-to nil))
+)
+
+(defrule run-one-goal-subgoal-failed-resources-clear
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
+							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
+							 (type ACHIEVE) (mode RETRACTED) (outcome FAILED))
+	=>
+	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil)
 					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ONE goal '" ?id "' has failed")))
-	(modify ?sg (mode RETRACTED))
 )
 
-(defrule run-one-goal-subgoal-completed
+(defrule run-one-goal-subgoal-completed-resources-clear
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
 							 (mode DISPATCHED) (committed-to ?sub-goal))
-	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED) (outcome COMPLETED))
+	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
+							 (type ACHIEVE) (mode RETRACTED) (outcome COMPLETED))
 	=>
-	(modify ?gf (mode FINISHED) (outcome COMPLETED))
-	(modify ?sg (mode RETRACTED))
+	(modify ?gf (mode FINISHED) (outcome COMPLETED) (committed-to nil))
 )
