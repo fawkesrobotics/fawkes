@@ -54,8 +54,8 @@ class MongoDBReplicaSetConfig
  public:
 	MongoDBReplicaSetConfig(fawkes::Configuration *config,
 	                        std::string cfgname, std::string prefix,
-	                        std::shared_ptr<mongo::DBClientBase> bootstrap_client,
 	                        std::string bootstrap_database);
+	void bootstrap(std::shared_ptr<mongo::DBClientBase> bootstrap_client);
 
 	/** Check if configuration is enabled.
 	 * @return true if configuration is enabled, false otherwise
