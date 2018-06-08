@@ -142,7 +142,8 @@ MongoDBClientConfig::create_client()
 			mongo::DBClientReplicaSet *repset =
 				new mongo::DBClientReplicaSet(replicaset_name_, replicaset_hostports_);
 			client = repset;
-			if (! repset->connect())  throw Exception("Cannot connect to database");
+			if (! repset->connect())  throw Exception("Cannot connect to replica set %s",
+			                                          replicaset_name_.c_str());
 			std::list<AuthInfo>::iterator ai;
 			for (ai = auth_infos_.begin(); ai != auth_infos_.end(); ++ai) {
 				if (!repset->auth(ai->dbname, ai->username, ai->clearpwd, errmsg, false)) {
