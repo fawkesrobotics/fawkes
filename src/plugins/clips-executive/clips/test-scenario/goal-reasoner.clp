@@ -37,7 +37,7 @@
 	=>
 	(printout t "Expanding " ?goal-id crlf)
 	(assert	(goal (id (sym-cat TESTGOAL- (gensym*))) (parent ?goal-id) (class TESTGOAL)
-								(priority 10))
+								(priority 10)); (required-resources FOO BAR) (acquired-resources FOO BAR))
 					(goal (id (sym-cat TESTGOAL- (gensym*))) (parent ?goal-id) (class TESTGOAL)
 								(priority 20)))
 	(modify ?g (mode EXPANDED))
@@ -72,9 +72,9 @@
 ; orders. It is then up to action selection and execution to determine
 ; what to do when.
 (defrule goal-reasoner-subgoal-dispatch
-	?g <- (goal (class TESTGOAL) (mode COMMITTED))
-							;(required-resources $?req)
-							;(acquired-resources $?acq&:(subsetp ?req ?acq)))
+	?g <- (goal (class TESTGOAL) (mode COMMITTED)
+							(required-resources $?req)
+							(acquired-resources $?acq&:(subsetp ?req ?acq)))
 	=>
 	(modify ?g (mode DISPATCHED))
 )
