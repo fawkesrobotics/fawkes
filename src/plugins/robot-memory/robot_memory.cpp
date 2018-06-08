@@ -1080,10 +1080,17 @@ RobotMemory::mutex_expire_locks(float max_age_sec)
 	mongo::BSONObj filter_doc{BSON("locked" << true <<
 	                               "lock-time" << mongo::LT << expire_before_mdb)};
 
+	mongo::BSONObjBuilder update_doc;
+	mongo::BSONObjBuilder update_set;
+	update_set.append("locked", false);
+	update_set.append("locked-by", "");
+	update_doc.append("$set", update_set.obj());
+
 	try {
 		MutexLocker lock(mutex_);
-		client->remove(cfg_coord_mutex_collection_, filter_doc,
-		               /* just one */ false, &mongo::WriteConcern::majority);
+		client->update(cfg_coord_mutex_collection_, filter_doc, update_doc.obj(),
+		               /* upsert */ false, /* multi */ true,
+		               &mongo::WriteConcern::majority);
 
 		return true;
 	} catch (mongo::OperationException &e) {
