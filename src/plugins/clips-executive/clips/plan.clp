@@ -36,9 +36,13 @@
 	(return FALSE)
 )
 
-; alternative
-; (deftemplate plan-action-parameter
-; 	(slot plan-action-id (type INTEGER))
-; 	(slot key)
-; 	(slot value)
-; )
+(deffunction plan-retract-all-for-goal (?goal-id)
+	"Retract all plans associated with the given goal."
+	(delayed-do-for-all-facts ((?plan plan)) (eq ?plan:goal-id ?goal-id)
+		(delayed-do-for-all-facts ((?pa plan-action))
+			(and (eq ?pa:goal-id ?goal-id) (eq ?pa:plan-id ?plan:id))
+			(retract ?pa)
+		)
+		(retract ?plan)
+	)
+)
