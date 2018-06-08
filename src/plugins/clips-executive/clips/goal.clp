@@ -123,3 +123,33 @@
 	; possible sub-goals or associated plans.
 	(slot committed-to (type SYMBOL))
 )
+
+(deffunction goal-retract-goal-tree (?id)
+	"Recursively retract a goal tree rooted at the goal with the given ID."
+	(do-for-fact ((?g goal)) (eq ?g:id ?id)
+		(delayed-do-for-all-facts ((?sub-goal goal)) (eq ?sub-goal:parent ?g:id)
+			(goal-retract-goal-tree ?sub-goal:id)
+		)
+		(plan-retract-all-for-goal ?id)
+		(retract ?g)
+	)
+)
+
+(defrule goal-retract
+	(confval (path "/clips-executive/automatic-goal-retraction") (type BOOL) (value TRUE))
+	?g <- (goal (id ?id) (mode RETRACTED) (parent ?parent))
+	; we can retract if there is no parent goal, or the parent goal is a
+	; MAINTAIN goal, i.e., it is never RETRACTED itself.
+	(or (goal (id ?id) (parent nil))
+			(goal (id ?parent) (type MAINTAIN)))
+	=>
+	(printout t "Retracting goal " ?id crlf)
+	(goal-retract-goal-tree ?id)
+)
+
+(defrule goal-cleanup-plans
+	?g <- (goal (id ?id) (mode RETRACTED))
+	(exists (plan (goal-id ?id)))
+	=>
+	(plan-retract-all-for-goal ?id)
+)
