@@ -107,8 +107,9 @@
               (acquired-resources))
   ; We cannot abort a pending request. Thus, we first need to wait to get
   ; responses for all requested locks.
+  ; We also need to release all acquired mutexes before rejecting the goal.
   (not (mutex (name ?ores&:(member$ (mutex-to-resource ?ores) ?req))
-              (response PENDING)))
+              (response PENDING|ACQUIRED)))
   =>
   (modify ?g (mode FINISHED) (outcome REJECTED) (message ?err))
   (delayed-do-for-all-facts
