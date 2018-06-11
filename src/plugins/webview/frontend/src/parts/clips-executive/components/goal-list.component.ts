@@ -381,6 +381,12 @@ export class GoalListComponent implements OnInit, OnDestroy {
             node_label += `<tr><td align="left"><font color="#444444">Tries:</font></td><td align="left"><font color="#444444">${g.meta[1]}/${g.parameters[1]}</font></td></tr>`;
           }
         }
+				if (g['parameters'] && g['parameters'].length > 0) {
+          node_label += `<tr><td align="left"><font color="#444444">Params:</font></td><td align="left"><font color="#444444">${g['parameters'].join(" ")}</font></td></tr>`;
+        }
+				if (g['error'] && g['error'].length > 0) {
+          node_label += `<tr><td align="left"><font color="#444444">Error:</font></td><td align="left"><font color="#ff0000">${g['error'].join(" ")}</font></td></tr>`;
+        }
 				if (g['required-resources'] && g['required-resources'] != "") {
           node_label += `<tr><td align="left"><font color="#444444">Req Resrc:</font></td><td align="left"><font color="#444444">`;
 					if (g.mode == 'COMMITTED') {
@@ -400,7 +406,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
         }
 				if (g['acquired-resources'] && g['acquired-resources'] != "") {
 					let res_color = (g.mode == 'RETRACTED') ? "#ff0000" : "#444444";
-          node_label += `<tr><td align="left"><font color="#444444">Acq Resrc	:</font></td><td align="left"><font color="${res_color}">${g['acquired-resources'].join(", ")}</font></td></tr>`;
+          node_label += `<tr><td align="left"><font color="#444444">Acq Resrc:</font></td><td align="left"><font color="${res_color}">${g['acquired-resources'].join(", ")}</font></td></tr>`;
         }
         node_label += "</table>";
 
