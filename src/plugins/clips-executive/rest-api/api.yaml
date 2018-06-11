@@ -303,6 +303,10 @@ components:
           type: string
           format: symbol
           enum: ["UNKNOWN", "COMPLETED", "FAILED", "REJECTED"]
+        error:
+          type: array
+          items:
+            type: string
         message:
           type: string
         parent:
