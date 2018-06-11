@@ -23,6 +23,7 @@ export interface Goal
 	_class: string;
 	mode: Goal.ModeEnum;
 	outcome?: Goal.OutcomeEnum;
+	error?: Array<string>;
 	message?: string;
 	parent?: string;
 	priority?: number;
