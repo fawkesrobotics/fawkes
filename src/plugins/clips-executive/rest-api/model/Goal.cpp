@@ -101,6 +101,14 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_outcome.SetString(*outcome_, allocator);
 		v.AddMember("outcome", v_outcome, allocator);
 	}
+	rapidjson::Value v_error(rapidjson::kArrayType);
+	v_error.Reserve(error_.size(), allocator);
+	for (const auto & e : error_) {
+		rapidjson::Value v;
+		v.SetString(e, allocator);
+		v_error.PushBack(v, allocator);
+	}
+	v.AddMember("error", v_error, allocator);
 	if (message_) {
 		rapidjson::Value v_message;
 		v_message.SetString(*message_, allocator);
@@ -194,6 +202,15 @@ Goal::from_json_value(const rapidjson::Value& d)
 	}
 	if (d.HasMember("outcome") && d["outcome"].IsString()) {
 		outcome_ = d["outcome"].GetString();
+	}
+	if (d.HasMember("error") && d["error"].IsArray()) {
+		const rapidjson::Value& a = d["error"];
+		error_ = std::vector<std::string>{};
+;
+		error_.reserve(a.Size());
+		for (auto& v : a.GetArray()) {
+			error_.push_back(v.GetString());
+		}
 	}
 	if (d.HasMember("message") && d["message"].IsString()) {
 		message_ = d["message"].GetString();

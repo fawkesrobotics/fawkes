@@ -211,6 +211,38 @@ class Goal
 	{
 		outcome_ = outcome;
 	}
+  /** Get error value.
+   * @return error value
+   */
+	std::vector<std::string>
+ error() const
+	{
+		return error_;
+	}
+
+	/** Set error value.
+	 * @param error new value
+	 */
+	void set_error(const std::vector<std::string>& error)
+	{
+		error_ = error;
+	}
+	/** Add element to error array.
+	 * @param error new value
+	 */
+	void addto_error(const std::string&& error)
+	{
+		error_.push_back(std::move(error));
+	}
+
+	/** Add element to error array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param error new value
+	 */
+	void addto_error(const std::string& error)
+	{
+		error_.push_back(error);
+	}
   /** Get message value.
    * @return message value
    */
@@ -436,6 +468,8 @@ class Goal
  mode_;
 	std::optional<std::string>
  outcome_;
+	std::vector<std::string>
+ error_;
 	std::optional<std::string>
  message_;
 	std::optional<std::string>
