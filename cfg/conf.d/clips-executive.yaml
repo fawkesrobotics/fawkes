@@ -88,8 +88,14 @@ clips-executive:
         # be loaded in this stage. They are loaded *after* the defaults.
         stage-2:
           - name: goal-types
-            files: ["goals/run-one.clp", "goals/run-all.clp", "goals/try-all.clp", "goals/retry.clp"]
-
+            files:
+              - goals/run-one.clp
+              - goals/run-all.clp
+              - goals/try-all.clp
+              - goals/retry.clp
+              - goals/timeout.clp
+              - goals/automatic.clp
+              - goal-tree.clp
 
         # Domain-specific CX initialization.
         # In the third stage load domain-specific files such as domain
@@ -112,7 +118,13 @@ clips-executive:
           #- name: coordination
           #  file: coordination-mutex.clp
           - name: goal-reasoner
-            file: test-scenario/goal-reasoner.clp
+            files:
+              - test-scenario/goal-reasoner.clp
+              - test-scenario/goals/always-fail.clp
+              - test-scenario/goals/always-reject.clp
+              - test-scenario/goals/succeed-second-try.clp
+              - test-scenario/goals/hang-noop.clp
+              - test-scenario/goals/talk.clp
           - name: goal-expander
             file: test-scenario/fixed-sequence.clp
           - name: action-selection
