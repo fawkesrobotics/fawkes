@@ -121,6 +121,11 @@
 	(slot outcome (type SYMBOL)
 	              (allowed-values UNKNOWN COMPLETED FAILED REJECTED))
 
+	; In case of an error, give machine-readable information about the
+	; error. The first entry in the field MUST be a symbol identifying
+	; the general reason of the error, e.g., SKILL-FAILED. The intention
+	; of the field is to allow for error handling and recovery.
+	(multislot error)
 	; A human-readable message describing an error. This message is
 	; passed on to frontends and displayed to the user.
  	(slot message (type STRING))
