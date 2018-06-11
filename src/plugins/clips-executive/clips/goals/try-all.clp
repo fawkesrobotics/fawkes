@@ -45,6 +45,7 @@
 	(not (goal (type ACHIEVE) (parent ?id)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
+					(error NO-SUB-GOALS)
 					(message (str-cat "No sub-goal for TRY-ALL goal '" ?id "'")))
 )
 
@@ -65,7 +66,8 @@
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
 					(goal (id ?sub-goal) (mode EVALUATED) (outcome REJECTED)))
 	=>
-	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil))
+	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil)
+					(error SUB-GOALS-REJECTED))
 )
 
 (defrule try-all-goal-failed
@@ -75,7 +77,8 @@
 					(goal (id ?sub-goal) (mode EVALUATED) (outcome FAILED|REJECTED)))
 	(goal (id ?some-subgoal) (mode EVALUATED) (outcome FAILED))
 	=>
-	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil))
+	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil)
+					(error SUB-GOALS-FAILED))
 )
 
 (defrule try-all-goal-dispatch

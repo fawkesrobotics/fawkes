@@ -62,7 +62,8 @@
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
 					(goal (id ?sub-goal) (mode EVALUATED) (outcome REJECTED)))
 	=>
-	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil))
+	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil)
+					(error SUB-GOALS-REJECTED))
 )
 
 (defrule run-one-goal-dispatch
@@ -100,6 +101,7 @@
 							 (type ACHIEVE) (mode RETRACTED) (outcome FAILED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil)
+					(error SUB-GOAL-FAILED)
 					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ONE goal '" ?id "' has failed")))
 )
 

@@ -37,12 +37,14 @@
 ; User: EVALUATE goal
 ; User: RETRACT goal
 
+
 (defrule run-all-goal-expand-failed
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ALL-OF-SUBGOALS)
 							 (mode EXPANDED))
 	(not (goal (type ACHIEVE) (parent ?id)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
+					(error NO-SUB-GOALS)
 					(message (str-cat "No sub-goal for RUN-ALL goal '" ?id "'")))
 )
 
@@ -83,6 +85,7 @@
 							 (type ACHIEVE) (mode RETRACTED) (outcome REJECTED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil)
+					(error SUB-GOAL-REJECTED)
 					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ALL goal '" ?id "' was rejected")))
 )
 
@@ -94,6 +97,7 @@
 							 (type ACHIEVE) (mode EVALUATED) (outcome FAILED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil)
+					(error SUB-GOAL-FAILED ?sub-goal)
 					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ALL goal '" ?id "' has failed")))
 )
 

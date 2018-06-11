@@ -50,14 +50,17 @@
 	(not (goal (type ACHIEVE) (parent ?id)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
+					(error NO-SUB-GOAL)
 					(message (str-cat "No sub-goal for RETRY goal '" ?id "'")))
 )
 
 (defrule retry-goal-failed-invalid-params
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode EXPANDED) (params $?params&~:(member$ max-tries ?params)|~:(= (length$ ?params) 2)))
+							 (mode EXPANDED)
+							 (params $?params&~:(member$ max-tries ?params)|~:(= (length$ ?params) 2)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
+					(error INVALID-PARAMETERS)
 					(message (str-cat "Invalid parameters for RETRY goal '" ?id "'")))
 )
 
@@ -68,6 +71,7 @@
 	(goal (id ?id2&~?id1) (type ACHIEVE) (parent ?id))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
+					(error TOO-MANY-SUBGOALS)
 					(message (str-cat "More than one sub-goal for RETRY goal '" ?id "'")))
 )
 
@@ -131,6 +135,7 @@
 	(if (= ?num-tries ?max-tries)
 	then
 		(modify ?gf (mode FINISHED) (outcome ?outcome) (committed-to nil)
+						(error (sym-cat SUB-GOAL- ?outcome))
 						(message (str-cat "RETRY goal '" ?id "' sub-goal '" ?sub-goal "' " ?outcome " in try "
 															?num-tries "/" ?max-tries)))
 	else
