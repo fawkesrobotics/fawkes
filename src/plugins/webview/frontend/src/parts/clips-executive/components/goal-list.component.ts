@@ -2,12 +2,14 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChildren, AfterViewInit, QueryList } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { ClipsExecutiveApiService } from '../services/api.service';
+import { DotGraphComponent } from '../../../components/dotgraph/component';
 import { Goal } from '../models/Goal';
 import { Plan } from '../models/Plan';
 import { DomainOperator } from '../models/DomainOperator';
@@ -22,7 +24,11 @@ import { Observable, interval, forkJoin } from 'rxjs';
   templateUrl: './goal-list.component.html',
   styleUrls: ['./goal-list.component.scss']
 })
-export class GoalListComponent implements OnInit, OnDestroy {
+export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
+
+  @ViewChildren("dotgraph")
+  public dotgraphs: QueryList<DotGraphComponent>;
+  public dotgraph: DotGraphComponent;
 
   private backend_subscription = null;
 
@@ -38,17 +44,22 @@ export class GoalListComponent implements OnInit, OnDestroy {
   goals_graph: string = null;
   loading = false;
 
+  graph_svg_available = false;
+  graph_svg_base64: SafeUrl = null;
+
   zero_message = "No goals received.";
   
   constructor(private readonly api_service: ClipsExecutiveApiService,
               private router : Router,
-              private backendcfg: BackendConfigurationService)
+              private backendcfg: BackendConfigurationService,
+              private sanitizer: DomSanitizer)
   {}
 
   ngOnInit() {
     this.refresh_domain();
     this.refresh();
     this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh() });
+    this.graph_svg_base64 = this.sanitizer.bypassSecurityTrustUrl('#');
   }
 
   ngOnDestroy()
@@ -58,6 +69,18 @@ export class GoalListComponent implements OnInit, OnDestroy {
     this.disable_autorefresh();
   }
 
+  ngAfterViewInit()
+  {
+    this.dotgraphs.changes.subscribe((comps: QueryList<DotGraphComponent>) =>
+    {
+      this.dotgraph = comps.first;
+      this.graph_svg_available = false;
+      if (this.dotgraph) {
+        this.dotgraph.svg_updated.subscribe((svg: string) => this.svg_updated(svg));
+      }
+    });
+  }
+
   refresh()
   {
     this.loading = true;
@@ -65,7 +88,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
 
     this.api_service.list_goals().subscribe(
       (goals) => {
-        console.log("Goals", goals)
+        //console.log("Goals", goals)
         let plans = [];
         goals
           .filter(g => g.plans.length > 0)
@@ -121,10 +144,10 @@ export class GoalListComponent implements OnInit, OnDestroy {
     .subscribe(
       (plans : Plan[]) => {
         for (let i = 0; i < plans.length; ++i) {
-          console.log("Got plan", this.plans[i].goal_id, this.plans[i].plan_id)
+          //console.log("Got plan", this.plans[i].goal_id, this.plans[i].plan_id)
           this.plans[i].plan = plans[i];
         }
-        console.log("Plans", this.plans)
+        //console.log("Plans", this.plans)
         this.create_goals_graph();
         this.loading = false;
       },
@@ -473,5 +496,12 @@ export class GoalListComponent implements OnInit, OnDestroy {
     graph += "}";
     //console.log(`Graph: ${graph}`);
     this.goals_graph = graph;
+  }
+
+  svg_updated(svg: string)
+  {
+    this.graph_svg_base64 =
+      this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,'+btoa(svg));
+    this.graph_svg_available = true;
   }
 }
