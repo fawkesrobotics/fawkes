@@ -72,7 +72,9 @@
    may be associated to a specific class of goals. That is, there may be
    multiple instances of a certain class of goals, but these must have
    different IDs. A goal ID may appear only once during the lifetime of the
-   executive.
+   executive. The class allows users to implement the specific handling for
+   specific kinds of goals of that very class, and thus to match these goals
+   in goal reasoning rules' antecendents.
 
    A goal may have a parent goal. This allows for the creation of goal
    hierarchies and sub-goals can contribute to the completion or failure
@@ -88,14 +90,41 @@
 	(slot id (type SYMBOL))
 	(slot class (type SYMBOL))
   (slot type (type SYMBOL) (allowed-values ACHIEVE MAINTAIN) (default ACHIEVE))
+
+	; The sub-type of a goal describes the inherent behavior of a
+	; goal. It is used to specify well-known goals with specific
+	; semantics, for example to run all sub-goals or retry a given
+	; sub-goal. The default sub-type is nil and means an entirely
+	; user-specificed goal, i.e., the user takes control of all stages
+	; in the goal life-cycle.
 	(slot sub-type (type SYMBOL))
+
+	; To form goal trees, a parent goal can be specified to which this
+	; goal belongs. Unless a well-known sub-goal sub-type (e.g.,
+	; RUN-ALL-OF-SUBGOALS, TRY-ALL-OF-SUBGOALS, or RETRY-SUBGOAL) is
+	; used for the parent goal, the user must take take care of all
+	; stages of the lifecycle.
   (slot parent (type SYMBOL))
+
+	; The mode describes the stage in the goal lifecycle the goal is in, see
+	; general template documentation above.
 	(slot mode (type SYMBOL)
-    (allowed-values FORMULATED SELECTED EXPANDED COMMITTED DISPATCHED FINISHED
-                    EVALUATED RETRACTED))
+	           (allowed-values FORMULATED SELECTED EXPANDED COMMITTED
+	   	                       DISPATCHED FINISHED EVALUATED RETRACTED))
+	; The outcome of a goal is initially UNKNOWN, and at the latest when
+	; entering the FINISHED mode must be determined to be either
+	; successfully COMPLETED, or FAILED. A goal may be REJECTED before
+	; it is in COMMITTED mode. The general distinction is that goals can
+	; be REJECTED while they have not started execution, i.e., before
+	; they are enter the COMITTED mode, and may only complete or fail
+	; afterwards.
 	(slot outcome (type SYMBOL)
-    (allowed-values UNKNOWN COMPLETED FAILED REJECTED))
-	(slot message (type STRING))
+	              (allowed-values UNKNOWN COMPLETED FAILED REJECTED))
+
+	; A human-readable message describing an error. This message is
+	; passed on to frontends and displayed to the user.
+ 	(slot message (type STRING))
+
 	; higher number entails higher priority
 	; A goal might be preferred for selection, expansion, or execution depending
 	; on its priority. Some spec chains may support this, others not.
@@ -115,8 +144,20 @@
 	; could contain the number of tries performed for a goal.
 	(multislot meta)
 
-  (multislot required-resources)
-  (multislot acquired-resources)
+	; Resource handling for the given goal.  A goal may list a number of
+	; required resources. The resources can be of different types and
+	; specific handlers need to take care of acquiring these
+	; resources. Acquisition generally happens once committed to a
+	; goal. A goal may only enter the DISPATCHED mode if the required
+	; resources are a subset of the acquired resources. Once a goal has
+	; been RETRACTED the resources must be deallocated again by the
+	; handlers. Only when the acquired resources are empty is a goal
+	; completed removed. For sub-goal types, parent goals shall not
+	; advance beyond a goal until all resources for a goal have been
+	; deallocated. The automatic cleanup waits for all resources to be
+	; deallocated.
+  (multislot required-resources (type SYMBOL))
+  (multislot acquired-resources (type SYMBOL))
 
 	; Once committing to a goal, this identifies the goal or plan to
 	; which we have committed, in particular if there are multiple
