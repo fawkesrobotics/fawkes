@@ -1,6 +1,6 @@
 
 (defrule goal-expander-create-sequence
-	?g <- (goal (mode SELECTED) (id ?goal-id) (class TESTGOAL))
+	?g <- (goal (mode SELECTED) (id ?goal-id) (class TALK))
 	=>
 	(bind ?plan-id (sym-cat ?goal-id -PLAN))
 	(assert
