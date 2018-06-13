@@ -55,6 +55,7 @@
    and we have no pending requests, then we can directly reject the goal."
   (wm-fact (key cx identity) (value ?identity))
   ?g <- (goal (mode COMMITTED)
+              (id ?goal-id)
               (acquired-resources)
               (required-resources $?req))
   (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
@@ -62,6 +63,8 @@
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
               (request ~NONE)))
   =>
+  (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
+                 " is already locked by " ?locker crlf)
   (modify ?g (mode FINISHED) (outcome REJECTED))
 )
 
@@ -102,6 +105,7 @@
   "A lock was rejected and no resource is acquired anymore. Reject the goal."
   (mutex (name ?res) (request LOCK) (response REJECTED|ERROR) (error-msg ?err))
   ?g <- (goal (mode COMMITTED)
+              (id ?goal-id)
               (required-resources $?req
                 &:(member$ (mutex-to-resource ?res) ?req))
               (acquired-resources))
@@ -111,6 +115,8 @@
   (not (mutex (name ?ores&:(member$ (mutex-to-resource ?ores) ?req))
               (response PENDING|ACQUIRED)))
   =>
+  (printout warn "Rejecting goal " ?goal-id ", resource lock "
+                 (mutex-to-resource ?res) " was rejected" crlf)
   (modify ?g (mode FINISHED) (outcome REJECTED) (message ?err))
   (delayed-do-for-all-facts
     ((?om mutex))
