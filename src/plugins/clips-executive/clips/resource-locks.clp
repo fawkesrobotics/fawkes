@@ -42,7 +42,7 @@
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
               (request ~NONE)))
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
-              (state ~OPEN)))
+              (state LOCKED)))
   =>
   (foreach ?res (set-diff ?req ?acq)
     (printout warn "Locking resource " ?res crlf)
