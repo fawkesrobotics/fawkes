@@ -267,6 +267,13 @@
 	            (state LOCKED) (locked-by "unknown"))
 )
 
+(defrule mutex-lock-op-cleanup
+	(not (mutex (name ?name) (response PENDING)))
+	?of <- (mutex-op-feedback try-lock-async FAIL ?name)
+	=>
+	(retract ?of)
+)
+
 (defrule mutex-renew-lock-start
 	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response NONE)
 								(state LOCKED) (locked-by ?lb&:(eq ?lb (cx-identity))))
