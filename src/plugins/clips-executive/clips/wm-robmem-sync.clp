@@ -112,7 +112,7 @@
 			(bind ?is-list (sym-cat (bson-get ?doc "is-list")))
 			(bind ?value  (if (eq ?is-list TRUE) then nil else (bson-get ?doc "value")))
 			(bind ?values (if (eq ?is-list TRUE) then (bson-get-array ?doc "values") else (create$)))
-			(if (eq ?type SYMBOL) then
+			(if (or (eq ?type SYMBOL) (eq ?type BOOL)) then
 				(bind ?value (sym-cat ?value))
 				(bind ?new-values (create$))
 				(foreach ?v ?values (bind ?new-values (append$ ?new-values (sym-cat ?v))))
@@ -270,7 +270,7 @@
 		else
 			(bind ?value (bson-get ?obj "o.value"))
 		)
-		(if (eq ?type SYMBOL) then
+		(if (or (eq ?type SYMBOL) (eq ?type BOOL)) then
 			(bind ?value (sym-cat ?value))
 			(bind ?new-values (create$))
 			(foreach ?v ?values (bind ?new-values (append$ ?new-values (sym-cat ?v))))
