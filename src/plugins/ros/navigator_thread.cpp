@@ -82,8 +82,8 @@ void
 RosNavigatorThread::check_status()
 {
   bool write = false;
-  if (rosnode->hasParam(cfg_dynreconf_path_ + "/" + cfg_dynreconf_x_vel_name_)) {
-      rosnode->getParam(cfg_dynreconf_path_ + "/" + cfg_dynreconf_x_vel_name_, param_max_vel);
+  if (rosnode->hasParam(cfg_dynreconf_path_ + "/" + cfg_dynreconf_trans_vel_name_)) {
+      rosnode->getParam(cfg_dynreconf_path_ + "/" + cfg_dynreconf_trans_vel_name_, param_max_vel);
       nav_if_->set_max_velocity(param_max_vel);
       write = true;
   }
@@ -335,8 +335,7 @@ RosNavigatorThread::loop()
         nav_if_->set_msgid(msg->id());
         nav_if_->write();
 
-        set_dynreconf_value(cfg_dynreconf_x_vel_name_, msg->max_velocity());
-        set_dynreconf_value(cfg_dynreconf_y_vel_name_, msg->max_velocity());
+        set_dynreconf_value(cfg_dynreconf_trans_vel_name_, msg->max_velocity());
 
         send_goal();
       }
@@ -376,10 +375,8 @@ RosNavigatorThread::load_config()
 {
     try {
         cfg_dynreconf_path_ = config->get_string(cfg_prefix_ + "/dynreconf/path");
-        cfg_dynreconf_x_vel_name_ =
-                config->get_string(cfg_prefix_ + "/dynreconf/x_vel_name");
-        cfg_dynreconf_y_vel_name_ =
-                config->get_string(cfg_prefix_ + "/dynreconf/y_vel_name");
+        cfg_dynreconf_trans_vel_name_ =
+                config->get_string(cfg_prefix_ + "/dynreconf/trans_vel_name");
         cfg_dynreconf_rot_vel_name_ =
                 config->get_string(cfg_prefix_ + "/dynreconf/rot_vel_name");
         cfg_fixed_frame_ =
