@@ -81,12 +81,16 @@ void EventTriggerManager::check_events()
 
   for(EventTrigger *trigger : triggers)
   {
-    while(trigger->oplog_cursor->more())
-    {
-      BSONObj change = trigger->oplog_cursor->next();
-      //logger_->log_info(name.c_str(), "Triggering: %s", change.toString().c_str());
-      //actually call the callback function
-      trigger->callback(change);
+    try {
+      while(trigger->oplog_cursor->more())
+      {
+        BSONObj change = trigger->oplog_cursor->next();
+        //logger_->log_info(name.c_str(), "Triggering: %s", change.toString().c_str());
+        //actually call the callback function
+        trigger->callback(change);
+      }
+    } catch (mongo::DBException &e) {
+      logger_->log_error(name.c_str(), "Error while reading the oplog");
     }
     if(trigger->oplog_cursor->isDead())
     {
