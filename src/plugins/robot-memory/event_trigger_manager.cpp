@@ -81,6 +81,7 @@ void EventTriggerManager::check_events()
 
   for(EventTrigger *trigger : triggers)
   {
+    bool ok = true;
     try {
       while (trigger->oplog_cursor->more()) {
         BSONObj change = trigger->oplog_cursor->next();
@@ -90,8 +91,9 @@ void EventTriggerManager::check_events()
       }
     } catch (mongo::DBException &e) {
       logger_->log_error(name.c_str(), "Error while reading the oplog");
+      ok = false;
     }
-    if(trigger->oplog_cursor->isDead())
+    if(!ok || trigger->oplog_cursor->isDead())
     {
       if (cfg_debug_)
         logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
