@@ -1,5 +1,5 @@
 
-(defrule goal-expander-create-sequence
+(defrule plan-talk-expand
 	?g <- (goal (mode SELECTED) (id ?goal-id) (class TALK))
 	=>
 	(bind ?plan-id (sym-cat ?goal-id -PLAN))
@@ -41,5 +41,4 @@
 		             (duration 4.0)
 		             (action-name say-cleanup))
 	)
-	(modify ?g (mode EXPANDED))
 )
