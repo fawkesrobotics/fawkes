@@ -65,3 +65,10 @@
 	=>
   (modify ?g (mode RETRACTED))
 )
+
+(defrule goal-reasoner-expanded
+	?g <- (goal (id ?goal-id) (class TALK) (mode SELECTED))
+	(plan (goal-id ?goal-id))
+	=>
+  (modify ?g (mode EXPANDED))
+)
