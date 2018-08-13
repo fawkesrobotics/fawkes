@@ -125,8 +125,9 @@ clips-executive:
               - test-scenario/goals/succeed-second-try.clp
               - test-scenario/goals/hang-noop.clp
               - test-scenario/goals/talk.clp
-          - name: goal-expander
-            file: test-scenario/fixed-sequence.clp
+          - name: plans
+            files:
+              - test-scenario/plans/talk-plan.clp
           - name: action-selection
             file: test-scenario/action-selection.clp
           - name: action-execution
