@@ -102,6 +102,8 @@ PlexilExecutiveThread::init()
 	for (const auto &a : cfg_adapters) {
 		if (a == "Utility") {
 			logger->log_warn(name(), "Utility adapter configured, consider using FawkesLogging instead");
+		} else if (a == "OSNativeTime") {
+			logger->log_warn(name(), "OSNativeTime adapter configured, consider using FawkesTime instead");
 		}
 		pugi::xml_node xml_adapter = xml_interfaces.append_child(PLEXIL::InterfaceSchema::ADAPTER_TAG());
 		xml_adapter.append_attribute("AdapterType").set_value(a.c_str());
