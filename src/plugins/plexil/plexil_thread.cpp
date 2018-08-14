@@ -79,7 +79,7 @@ PlexilExecutiveThread::init()
 	std::string cfg_prefix = "/plexil/" + cfg_spec_ + "/";
 	std::vector<std::string> cfg_adapters =
 	  config->get_strings_or_defaults((cfg_prefix + "adapters").c_str(), {});
-	
+
 	bool cfg_print_xml =
 	  config->get_bool_or_default((cfg_prefix + "debug/print-xml").c_str(), false);
 	
@@ -93,94 +93,98 @@ PlexilExecutiveThread::init()
 	clock_adapter_ = new PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter>("FawkesTime");
 	log_adapter_   = new PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter>("FawkesLogging");
 
-  pugi::xml_document xml_config;
-  pugi::xml_node xml_interfaces =
-    xml_config.append_child(PLEXIL::InterfaceSchema::INTERFACES_TAG());
+	pugi::xml_document xml_config;
+	pugi::xml_node xml_interfaces =
+	  xml_config.append_child(PLEXIL::InterfaceSchema::INTERFACES_TAG());
 
-  for (const auto &a : cfg_adapters) {
-	  pugi::xml_node xml_adapter = xml_interfaces.append_child(PLEXIL::InterfaceSchema::ADAPTER_TAG());
-	  xml_adapter.append_attribute("AdapterType").set_value(a.c_str());
-  }
+	for (const auto &a : cfg_adapters) {
+		if (a == "Utility") {
+			logger->log_warn(name(), "Utility adapter configured, consider using FawkesLogging instead");
+		}
+		pugi::xml_node xml_adapter = xml_interfaces.append_child(PLEXIL::InterfaceSchema::ADAPTER_TAG());
+		xml_adapter.append_attribute("AdapterType").set_value(a.c_str());
+	}
 
-  if (cfg_print_xml) {
-	  struct xml_string_writer: pugi::xml_writer
-	  {
-		  std::string result;
-		  virtual void write(const void* data, size_t size)
-		  {
-			  result.append(static_cast<const char*>(data), size);
-		  }
-	  };
+	if (cfg_print_xml) {
+		struct xml_string_writer: pugi::xml_writer
+		{
+			std::string result;
+			virtual void write(const void* data, size_t size)
+			{
+				result.append(static_cast<const char*>(data), size);
+			}
+		};
 
-	  xml_string_writer writer;
-	  xml_config.save(writer);
-	  logger->log_info(name(), "Interface config XML:\n%s", writer.result.c_str());
-  }
+		xml_string_writer writer;
+		xml_config.save(writer);
+		logger->log_info(name(), "Interface config XML:\n%s", writer.result.c_str());
+	}
 
-  std::string cfg_debug_conf = config->get_string_or_default((cfg_prefix + "debug/conf").c_str(), "");
-  if (! cfg_debug_conf.empty()) {
-	  replace_tokens(cfg_debug_conf);
+	std::string cfg_debug_conf = config->get_string_or_default((cfg_prefix + "debug/conf").c_str(), "");
+	if (! cfg_debug_conf.empty()) {
+		replace_tokens(cfg_debug_conf);
 
-	  std::ifstream dbg_f(cfg_debug_conf);
-	  if (dbg_f.good()) {
-		  PLEXIL::readDebugConfigStream(dbg_f);
-	  } else {
-		  logger->log_warn(name(), "Error opening debug config: %s", strerror(errno));
-	  }
-  }
+		std::ifstream dbg_f(cfg_debug_conf);
+		if (dbg_f.good()) {
+			PLEXIL::readDebugConfigStream(dbg_f);
+		} else {
+			logger->log_warn(name(), "Error opening debug config: %s", strerror(errno));
+		}
+	}
+
 
 	if (! plexil_->initialize(xml_interfaces)) {
-	  throw Exception("Failed to initialize Plexil application");
-  }
+		throw Exception("Failed to initialize Plexil application");
+	}
 
-  if (! plexil_->startInterfaces()) {
-	  throw Exception("Failed to start Plexil interfaces");
-  }
+	if (! plexil_->startInterfaces()) {
+		throw Exception("Failed to start Plexil interfaces");
+	}
 
-  if (! plexil_->run()) {
-	  throw Exception("Failed to start Plexil");
-  }
+	if (! plexil_->run()) {
+		throw Exception("Failed to start Plexil");
+	}
 
-  std::string cfg_plan_plx = config->get_string_or_default((cfg_prefix + "plan-plx").c_str(), "");
+	std::string cfg_plan_plx = config->get_string_or_default((cfg_prefix + "plan-plx").c_str(), "");
 
-  if (! cfg_plan_plx.empty()) {
-	  replace_tokens(cfg_plan_plx);
+	if (! cfg_plan_plx.empty()) {
+		replace_tokens(cfg_plan_plx);
 
-	  pugi::xml_document plan;
-	  pugi::xml_parse_result parse_result = plan.load_file(cfg_plan_plx.c_str());
-	  if (parse_result.status != pugi::status_ok) {
-		  logger->log_error(name(), "Failed to parse plan: %s", parse_result.description());
-	  } else {
-		  plexil_->addPlan(&plan);
-	  }
-  } else {
-	  logger->log_warn(name(), "No plan to execute specified");
-  }
+		pugi::xml_document plan;
+		pugi::xml_parse_result parse_result = plan.load_file(cfg_plan_plx.c_str());
+		if (parse_result.status != pugi::status_ok) {
+			logger->log_error(name(), "Failed to parse plan: %s", parse_result.description());
+		} else {
+			plexil_->addPlan(&plan);
+		}
+	} else {
+		logger->log_warn(name(), "No plan to execute specified");
+	}
 }
 
 
 bool
 PlexilExecutiveThread::prepare_finalize_user()
 {
-  if (! plexil_->stop()) {
-	  logger->log_error(name(), "Failed to stop Plexil");
-  }
-  return true;
+	if (! plexil_->stop()) {
+		logger->log_error(name(), "Failed to stop Plexil");
+	}
+	return true;
 }
 
 void
 PlexilExecutiveThread::finalize()
 {
-  if (! plexil_->shutdown()) {
-	  logger->log_error(name(), "Failed to shutdown Plexil");
-  }
-  delete clock_adapter_;
+	if (! plexil_->shutdown()) {
+		logger->log_error(name(), "Failed to shutdown Plexil");
+	}
+	delete clock_adapter_;
 }
 
 void
 PlexilExecutiveThread::loop()
 {
-  plexil_->notifyExec();
+	plexil_->notifyExec();
 	plexil_->waitForPlanFinished();
 	static PLEXIL::ExecApplication::ApplicationState state = PLEXIL::ExecApplication::APP_SHUTDOWN;
 	PLEXIL::ExecApplication::ApplicationState new_state =
