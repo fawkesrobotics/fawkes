@@ -21,6 +21,7 @@
 
 #include "plexil_thread.h"
 #include "clock_adapter.h"
+#include "log_adapter.h"
 
 #include <core/threading/mutex_locker.h>
 
@@ -87,7 +88,10 @@ PlexilExecutiveThread::init()
 	plexil_.reset(new PLEXIL::ExecApplication);
 
 	PLEXIL::g_manager->setProperty("::Fawkes::Clock", clock);
+	PLEXIL::g_manager->setProperty("::Fawkes::Logger", logger);
+
 	clock_adapter_ = new PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter>("FawkesTime");
+	log_adapter_   = new PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter>("FawkesLogging");
 
   pugi::xml_document xml_config;
   pugi::xml_node xml_interfaces =

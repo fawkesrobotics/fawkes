@@ -38,6 +38,7 @@ namespace PLEXIL {
 }
 
 class ClockPlexilTimeAdapter;
+class LoggingPlexilAdapter;
 
 class PlexilExecutiveThread
 : public fawkes::Thread,
@@ -62,6 +63,7 @@ class PlexilExecutiveThread
 
 	std::shared_ptr<PLEXIL::ExecApplication> plexil_;
 	PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter> *    clock_adapter_;
+	PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter> *      log_adapter_;
 
 };
 

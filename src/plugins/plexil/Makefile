@@ -21,7 +21,8 @@ LIBS_plexil = \
 	fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	fawkesinterface \
   PlexilAppFramework PlanDebugListener LuvListener PlexilSockets
-OBJS_plexil = plexil_plugin.o plexil_thread.o clock_adapter.o timer_thread.o
+OBJS_plexil = plexil_plugin.o plexil_thread.o clock_adapter.o timer_thread.o \
+  log_adapter.o
 
 OBJS_all = $(OBJS_plexil)
 
