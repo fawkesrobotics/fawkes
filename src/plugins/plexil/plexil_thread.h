@@ -30,6 +30,7 @@
 #include <utils/time/time.h>
 
 #include <memory>
+#include <fstream>
 
 #include <AdapterFactory.hh>
 
@@ -39,6 +40,7 @@ namespace PLEXIL {
 
 class ClockPlexilTimeAdapter;
 class LoggingPlexilAdapter;
+class PlexilLogStreamBuffer;
 
 class PlexilExecutiveThread
 : public fawkes::Thread,
@@ -65,6 +67,9 @@ class PlexilExecutiveThread
 	PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter> *    clock_adapter_;
 	PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter> *      log_adapter_;
 
+	std::shared_ptr<PlexilLogStreamBuffer> log_buffer_;
+	std::shared_ptr<std::ostream>          log_stream_;
+	
 };
 
 #endif

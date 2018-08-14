@@ -22,6 +22,7 @@
 #include "plexil_thread.h"
 #include "clock_adapter.h"
 #include "log_adapter.h"
+#include "log_stream.h"
 
 #include <core/threading/mutex_locker.h>
 
@@ -82,8 +83,6 @@ PlexilExecutiveThread::init()
 
 	bool cfg_print_xml =
 	  config->get_bool_or_default((cfg_prefix + "debug/print-xml").c_str(), false);
-	
-	PLEXIL::setDebugOutputStream(std::cerr);
 
 	plexil_.reset(new PLEXIL::ExecApplication);
 
@@ -131,6 +130,10 @@ PlexilExecutiveThread::init()
 			logger->log_warn(name(), "Error opening debug config: %s", strerror(errno));
 		}
 	}
+
+	log_buffer_.reset(new PlexilLogStreamBuffer(logger));
+	log_stream_.reset(new std::ostream(&*log_buffer_));
+	PLEXIL::setDebugOutputStream(*log_stream_);
 
 
 	if (! plexil_->initialize(xml_interfaces)) {
