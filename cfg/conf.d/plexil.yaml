@@ -16,5 +16,6 @@ plexil:
       # Do not use Utility, use FawkesLogging instead!
       - FawkesTime
       - FawkesLogging
+      - BehaviorEngine
 
     plan-plx: "@BASEDIR@/src/plugins/plexil/specs/test/plan.plx"
