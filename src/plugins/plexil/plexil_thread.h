@@ -4,7 +4,6 @@
  *
  *  Created: Mon Aug 13 11:19:14 2018
  *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -27,6 +26,7 @@
 #include <aspect/clock.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/blackboard.h>
 #include <utils/time/time.h>
 
 #include <memory>
@@ -38,15 +38,17 @@ namespace PLEXIL {
   class ExecApplication;
 }
 
+class PlexilLogStreamBuffer;
 class ClockPlexilTimeAdapter;
 class LoggingPlexilAdapter;
-class PlexilLogStreamBuffer;
+class BehaviorEnginePlexilAdapter;
 
 class PlexilExecutiveThread
 : public fawkes::Thread,
 	public fawkes::LoggingAspect,
 	public fawkes::ConfigurableAspect,
-	public fawkes::ClockAspect
+  public fawkes::ClockAspect,
+  public fawkes::BlackBoardAspect
 {
  public:
 	PlexilExecutiveThread();
@@ -64,8 +66,9 @@ class PlexilExecutiveThread
 	std::string cfg_spec_;
 
 	std::shared_ptr<PLEXIL::ExecApplication> plexil_;
-	PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter> *    clock_adapter_;
-	PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter> *      log_adapter_;
+	PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter> *      clock_adapter_;
+	PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter> *        log_adapter_;
+	PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter> * be_adapter_;
 
 	std::shared_ptr<PlexilLogStreamBuffer> log_buffer_;
 	std::shared_ptr<std::ostream>          log_stream_;

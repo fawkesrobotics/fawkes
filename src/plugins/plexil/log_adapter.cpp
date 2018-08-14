@@ -66,7 +66,6 @@ LoggingPlexilAdapter::~LoggingPlexilAdapter()
 bool
 LoggingPlexilAdapter::initialize()
 {
-	// Automatically register self for time
 	logger_ = reinterpret_cast<fawkes::Logger *>(m_execInterface.getProperty("::Fawkes::Logger"));
 
 	PLEXIL::g_configuration->registerCommandInterface("print", this);
@@ -146,6 +145,10 @@ v_tovalue(const std::vector<PLEXIL::Value> &values, bool pretty) {
 	return rv;
 }
 
+
+/** Perform given command.
+ * @param cmd command to execute
+ */
 void
 LoggingPlexilAdapter::executeCommand(PLEXIL::Command * cmd)
 {
@@ -188,10 +191,12 @@ LoggingPlexilAdapter::executeCommand(PLEXIL::Command * cmd)
   m_execInterface.notifyOfExternalEvent();
 }
 
+/** Abort currently running execution.
+ * @param cmd command to abort
+ */
 void
 LoggingPlexilAdapter::invokeAbort(PLEXIL::Command *cmd)
 {
-  // Just silently acknowledge
   m_execInterface.handleCommandAbortAck(cmd, false);
   m_execInterface.notifyOfExternalEvent();
 }

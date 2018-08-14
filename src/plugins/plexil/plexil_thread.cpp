@@ -20,9 +20,10 @@
  */
 
 #include "plexil_thread.h"
+#include "log_stream.h"
 #include "clock_adapter.h"
 #include "log_adapter.h"
-#include "log_stream.h"
+#include "be_adapter.h"
 
 #include <core/threading/mutex_locker.h>
 
@@ -88,9 +89,11 @@ PlexilExecutiveThread::init()
 
 	PLEXIL::g_manager->setProperty("::Fawkes::Clock", clock);
 	PLEXIL::g_manager->setProperty("::Fawkes::Logger", logger);
+	PLEXIL::g_manager->setProperty("::Fawkes::BlackBoard", blackboard);
 
 	clock_adapter_ = new PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter>("FawkesTime");
 	log_adapter_   = new PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter>("FawkesLogging");
+	be_adapter_    = new PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter>("BehaviorEngine");
 
 	pugi::xml_document xml_config;
 	pugi::xml_node xml_interfaces =
@@ -182,6 +185,8 @@ PlexilExecutiveThread::finalize()
 		logger->log_error(name(), "Failed to shutdown Plexil");
 	}
 	delete clock_adapter_;
+	delete log_adapter_;
+	delete be_adapter_;
 }
 
 void
