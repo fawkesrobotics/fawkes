@@ -1,17 +1,40 @@
 Command pprint(...);
+Command print(...);
 Command log_error(...);
 Command skill_call(...);
 
 HelloWorld:
 {
+  String places[6] = #("C-BS-I" "C-CS1-I" "C-CS2-I" "C-RS1-I" "C-RS2-I" "C-DS");
+
   Print: { pprint ("Hello World"); }
   Log: { log_error ("Hello World"); }
-	Delay1: Wait 2.0;
-	Say:
-	{
-	  EndCondition Say.command_handle == COMMAND_SUCCESS ||
+  Delay1: Wait 2.0;
+  Say:
+  {
+    EndCondition Say.command_handle == COMMAND_SUCCESS ||
                  Say.command_handle == COMMAND_FAILED;
-		PostCondition Say.command_handle == COMMAND_SUCCESS;
-		skill_call ("say", "text", "Hello World", "wait", true);
-	}
+    PostCondition Say.command_handle == COMMAND_SUCCESS;
+    skill_call ("say", "text", "Hello World", "wait", true);
+  }
+  /*
+  This does *not* work. The function call itself is non-blocking.
+  Say:
+  {
+    Boolean result;
+    PostCondition result;
+    SynchronousCommand result = skill_call ("say", "text", "Hello World", "wait", true);
+  }
+  */
+
+  for (Integer i = 0; i < arraySize(places); i + 1)
+  {
+    Skill:
+    {
+      EndCondition Skill.command_handle == COMMAND_SUCCESS ||
+                   Skill.command_handle == COMMAND_FAILED;
+      PostCondition Skill.command_handle == COMMAND_SUCCESS;
+      skill_call ("goto", "place", places[i]);
+    }
+  }
 }
