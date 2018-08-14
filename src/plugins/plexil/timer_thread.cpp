@@ -54,9 +54,9 @@ PlexilTimerThread::loop()
 
 	aborted_ = false;
 	bool woken = false;
-	while (! woken && ! aborted_) {
+	do {
 		woken = waitcond_->abstimed_wait(wait_until_.get_sec(), wait_until_.get_nsec());
-	}
+	} while (woken && ! aborted_);
 	if (! aborted_) {
 		lock.unlock();
 		listener_->timer_event();
