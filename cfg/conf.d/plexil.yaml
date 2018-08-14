@@ -13,7 +13,8 @@ plexil:
       print-xml: true
 
     adapters:
-      - Utility
+      # Do not use Utility, use FawkesLogging instead!
       - FawkesTime
+      - FawkesLogging
 
     plan-plx: "@BASEDIR@/src/plugins/plexil/specs/test/plan.plx"
