@@ -1,6 +1,17 @@
 Command pprint(...);
+Command log_error(...);
+Command skill_call(...);
 
 HelloWorld:
 {
   Print: { pprint ("Hello World"); }
+  Log: { log_error ("Hello World"); }
+	Delay1: Wait 2.0;
+	Say:
+	{
+	  EndCondition Say.command_handle == COMMAND_SUCCESS ||
+                 Say.command_handle == COMMAND_FAILED;
+		PostCondition Say.command_handle == COMMAND_SUCCESS;
+		skill_call ("say", "text", "Hello World", "wait", true);
+	}
 }
