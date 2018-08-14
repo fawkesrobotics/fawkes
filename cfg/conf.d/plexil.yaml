@@ -1,0 +1,19 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/plexil
+---
+plexil:
+
+  spec: test
+
+  test:
+    debug:
+      conf: "@CFGDIR@/plexil/test/Debug.cfg"
+      print-xml: true
+
+    adapters:
+      - Utility
+      - FawkesTime
+
+    plan-plx: "@BASEDIR@/src/plugins/plexil/specs/test/plan.plx"
