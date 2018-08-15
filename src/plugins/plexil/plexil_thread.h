@@ -42,6 +42,7 @@ class PlexilLogStreamBuffer;
 class ClockPlexilTimeAdapter;
 class LoggingPlexilAdapter;
 class BehaviorEnginePlexilAdapter;
+class ThreadNamePlexilAdapter;
 
 class PlexilExecutiveThread
 : public fawkes::Thread,
@@ -55,6 +56,7 @@ class PlexilExecutiveThread
 	virtual ~PlexilExecutiveThread();
 
 	virtual void init();
+	virtual void once();
 	virtual void loop();
 	virtual bool prepare_finalize_user();
 	virtual void finalize();
@@ -64,14 +66,18 @@ class PlexilExecutiveThread
 
  private:
 	std::string cfg_spec_;
+	std::string cfg_plan_plx_;
 
 	std::shared_ptr<PLEXIL::ExecApplication> plexil_;
 	PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter> *      clock_adapter_;
 	PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter> *        log_adapter_;
 	PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter> * be_adapter_;
+	PLEXIL::ConcreteAdapterFactory<ThreadNamePlexilAdapter> *     thread_adapter_;
 
 	std::shared_ptr<PlexilLogStreamBuffer> log_buffer_;
 	std::shared_ptr<std::ostream>          log_stream_;
+
+	std::shared_ptr<pugi::xml_document> plan_plx_;
 	
 };
 

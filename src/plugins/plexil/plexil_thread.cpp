@@ -24,6 +24,7 @@
 #include "clock_adapter.h"
 #include "log_adapter.h"
 #include "be_adapter.h"
+#include "thread_adapter.h"
 
 #include <core/threading/mutex_locker.h>
 
@@ -91,9 +92,10 @@ PlexilExecutiveThread::init()
 	PLEXIL::g_manager->setProperty("::Fawkes::Logger", logger);
 	PLEXIL::g_manager->setProperty("::Fawkes::BlackBoard", blackboard);
 
-	clock_adapter_ = new PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter>("FawkesTime");
-	log_adapter_   = new PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter>("FawkesLogging");
-	be_adapter_    = new PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter>("BehaviorEngine");
+	clock_adapter_  = new PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter>("FawkesTime");
+	log_adapter_    = new PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter>("FawkesLogging");
+	be_adapter_     = new PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter>("BehaviorEngine");
+	thread_adapter_ = new PLEXIL::ConcreteAdapterFactory<ThreadNamePlexilAdapter>("ThreadName");
 
 	pugi::xml_document xml_config;
 	pugi::xml_node xml_interfaces =
@@ -145,29 +147,33 @@ PlexilExecutiveThread::init()
 		throw Exception("Failed to initialize Plexil application");
 	}
 
-	if (! plexil_->startInterfaces()) {
-		throw Exception("Failed to start Plexil interfaces");
-	}
+	cfg_plan_plx_ = config->get_string_or_default((cfg_prefix + "plan-plx").c_str(), "");
 
-	if (! plexil_->run()) {
-		throw Exception("Failed to start Plexil");
-	}
+	if (! cfg_plan_plx_.empty()) {
+		replace_tokens(cfg_plan_plx_);
 
-	std::string cfg_plan_plx = config->get_string_or_default((cfg_prefix + "plan-plx").c_str(), "");
-
-	if (! cfg_plan_plx.empty()) {
-		replace_tokens(cfg_plan_plx);
-
-		pugi::xml_document plan;
-		pugi::xml_parse_result parse_result = plan.load_file(cfg_plan_plx.c_str());
+		plan_plx_.reset(new pugi::xml_document);
+		pugi::xml_parse_result parse_result = plan_plx_->load_file(cfg_plan_plx_.c_str());
 		if (parse_result.status != pugi::status_ok) {
-			logger->log_error(name(), "Failed to parse plan: %s", parse_result.description());
-		} else {
-			plexil_->addPlan(&plan);
+			throw Exception("Failed to parse plan '%s': %s",
+			                cfg_plan_plx_.c_str(), parse_result.description());
 		}
 	} else {
 		logger->log_warn(name(), "No plan to execute specified");
 	}
+}
+
+void
+PlexilExecutiveThread::once()
+{
+	if (! plexil_->startInterfaces()) {
+		throw Exception("Failed to start Plexil interfaces");
+	}
+	if (! plexil_->run()) {
+		throw Exception("Failed to start Plexil");
+	}
+
+	plexil_->addPlan(&*plan_plx_);
 }
 
 
@@ -186,9 +192,14 @@ PlexilExecutiveThread::finalize()
 	if (! plexil_->shutdown()) {
 		logger->log_error(name(), "Failed to shutdown Plexil");
 	}
-	delete clock_adapter_;
+	plexil_.reset();
+	log_stream_.reset();
+	log_buffer_.reset();
+	plan_plx_.reset();
+  delete clock_adapter_;
 	delete log_adapter_;
 	delete be_adapter_;
+	delete thread_adapter_;
 }
 
 void

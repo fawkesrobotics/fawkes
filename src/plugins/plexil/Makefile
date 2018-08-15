@@ -23,7 +23,7 @@ LIBS_plexil = \
   PlexilAppFramework PlanDebugListener LuvListener PlexilSockets \
   SkillerInterface
 OBJS_plexil = plexil_plugin.o plexil_thread.o clock_adapter.o timer_thread.o \
-  log_adapter.o be_adapter.o
+  log_adapter.o be_adapter.o thread_adapter.o
 
 OBJS_all = $(OBJS_plexil)
 
