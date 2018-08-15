@@ -28,9 +28,14 @@
 #include <blackboard/blackboard.h>
 #include <blackboard/interface_listener.h>
 #include <logging/logger.h>
+#include <config/config.h>
 #include <interfaces/SkillerInterface.h>
 
 #include <mutex>
+
+namespace fawkes {
+	class ActionSkillMapping;
+}
 
 /** Interface adapter to provide logging facilities. */
 class BehaviorEnginePlexilAdapter
@@ -62,12 +67,30 @@ public:
 	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
 private:
+	struct skill_config {
+		struct skill_argument {
+			std::string name;
+			PLEXIL::ValueType type;
+		};
+	
+		std::string name;
+		std::vector<skill_argument> args;
+		std::string template_str;
+	};
+
 	std::string format_skillstring(const std::vector<PLEXIL::Value>& values);
+	std::string map_skillstring(const std::string& name,
+	                            const skill_config& skill_config,
+	                            const std::vector<PLEXIL::Value>& values);
+	void call_skill(const std::string& skill_string, PLEXIL::Command* cmd);
 
 private:
+	fawkes::Configuration *     config_;
 	fawkes::Logger *            logger_;
 	fawkes::BlackBoard *        blackboard_;
 	fawkes::SkillerInterface *  skiller_if_;
+
+	std::shared_ptr<fawkes::ActionSkillMapping> action_skill_mapping_;
 
 	std::mutex                  exec_mutex_;
 	
@@ -75,6 +98,9 @@ private:
 	unsigned int                skill_msgid_;
 
 	PLEXIL::Command *           current_cmd_;
+
+	std::map<std::string, skill_config> cfg_skills_;
+
 };
 
 extern "C" {

@@ -86,6 +86,7 @@ PlexilExecutiveThread::init()
 
 	plexil_.reset(new PLEXIL::ExecApplication);
 
+	PLEXIL::g_manager->setProperty("::Fawkes::Config", config);
 	PLEXIL::g_manager->setProperty("::Fawkes::Clock", clock);
 	PLEXIL::g_manager->setProperty("::Fawkes::Logger", logger);
 	PLEXIL::g_manager->setProperty("::Fawkes::BlackBoard", blackboard);
