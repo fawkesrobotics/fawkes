@@ -20,10 +20,10 @@
  */
 
 #include "clips_executive_thread.h"
-#include "map_skill.h"
 
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
+#include <utils/misc/map_skill.h>
 #include <interfaces/SwitchInterface.h>
 #include <core/threading/mutex_locker.h>
 
