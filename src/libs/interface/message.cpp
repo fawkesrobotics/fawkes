@@ -79,11 +79,11 @@ Message::Message(const char *type)
   sender_interface_instance_serial = 0;
   recipient_interface_mem_serial   = 0;
 
-  Thread *t = Thread::current_thread_noexc();
-  if ( t ) {
-    _sender_thread_name = strdup(t->name());
+  std::string sender_name = Thread::current_thread_name();
+  if (sender_name != "") {
+	  _sender_thread_name = strdup(sender_name.c_str());
   } else {
-    _sender_thread_name    = strdup("Unknown");
+	  _sender_thread_name = strdup("Unknown");
   }
 }
 
