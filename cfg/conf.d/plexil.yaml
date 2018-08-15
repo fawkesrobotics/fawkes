@@ -12,10 +12,72 @@ plexil:
       conf: "@CFGDIR@/plexil/test/Debug.cfg"
       print-xml: true
 
+    # Adpater configuration
+    # This part is converted into the Plexil XML interface configuration file.
+    # It is a list of mapping nodes, each describing a single adapter.
+    # Adapter configuration example:
+    # - type: FooAdapter
+    #   attr:
+    #     HostName: localhost
+    #     Port: 3456
+    #   args:
+    #     name: bar
+    #   verbatim-args:
+    #     - tag: DefaultCommandAdapter
+    #     - tag: CustomTag
+    #       text: "some text to put in tag"
+    #       attr:
+    #         name: bar
+    #
+    # Explanation:
+    # type:
+    #   Each adapter must have a type, by which it is loaded.
+    # attr:
+    #   Enables to add XML attributes into the Adapter tag.
+    #   The example shows some viewer parameters for hostname and port.
+    # args:
+    #   Allow passing of parameters to the adapter. Will be added as <Parameter>
+    #   elements with an attribute key referencing the key and the value set as
+    #   the tags text.
+    # verbatim-args:
+    #   Enables directly adding XML tags through the YAML configuration.
+    #   It is a list of mappings, each mapping having the following entries.
+    #   - tag (required): the XML tag name
+    #   - text (optional): added to the text section of the tag
+    #   - attr: attributes added to the XML tag.
     adapters:
       # Do not use Utility, use FawkesLogging instead!
-      - FawkesTime
-      - FawkesLogging
-      - BehaviorEngine
+      # Do not use OSNativeTime, use FawkesTime instead!
+      - type: FawkesTime
+      - type: FawkesLogging
+      - type: BehaviorEngine
+      - type: ThreadName
+        attr:
+          name: PlexilExecutive
+
+    # The Behavior Engine adapter provides a generic skill_call, which can
+    # always be declared as skill_call(...) and which takes the skill name
+    # as the first parameter, and after that an even number of key/value pairs
+    # for the named arguments of the skill.
+    #
+    # However, it may be desirable to have more descriptive names. This is
+    # possible with the following configuration. Then, the adapter will register
+    # itself for commands with each of the given names and perform the appropriate
+    # mapping.
+    skills:
+      # Allows for a declaration as say(String text)
+      # Note that the order of the arguments is important and must match the order
+      # of the arguments in the Plexil declaration!
+      - name: say
+        args:
+          - type: String
+            name: text
+        template: say{text=?(text)s, wait=true}
+
+      - name: goto
+        args:
+          - type: String
+            name: place
+        template: goto{place=?(place)s, duration=1.0, error_prob=.1}
 
     plan-plx: "@BASEDIR@/src/plugins/plexil/specs/test/plan.plx"

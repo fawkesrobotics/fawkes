@@ -68,8 +68,11 @@ public:
 
 private:
 	struct skill_config {
+		/// Specify a skill argument.
 		struct skill_argument {
+			/// Name of skill argument
 			std::string name;
+			/// Expected type of skill argument
 			PLEXIL::ValueType type;
 		};
 	
