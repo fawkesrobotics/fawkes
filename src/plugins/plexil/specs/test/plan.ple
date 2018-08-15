@@ -2,6 +2,8 @@ Command pprint(...);
 Command print(...);
 Command log_error(...);
 Command skill_call(...);
+Command say(String text);
+Command goto(String place);
 
 HelloWorld:
 {
@@ -15,7 +17,8 @@ HelloWorld:
     EndCondition Say.command_handle == COMMAND_SUCCESS ||
                  Say.command_handle == COMMAND_FAILED;
     PostCondition Say.command_handle == COMMAND_SUCCESS;
-    skill_call ("say", "text", "Hello World", "wait", true);
+    //skill_call ("say", "text", "Hello World", "wait", true);
+    say("Hello World");
   }
   /*
   This does *not* work. The function call itself is non-blocking.
@@ -34,7 +37,7 @@ HelloWorld:
       EndCondition Skill.command_handle == COMMAND_SUCCESS ||
                    Skill.command_handle == COMMAND_FAILED;
       PostCondition Skill.command_handle == COMMAND_SUCCESS;
-      skill_call ("goto", "place", places[i]);
+      goto(places[i]);
     }
   }
 }
