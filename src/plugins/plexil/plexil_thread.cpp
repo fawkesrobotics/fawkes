@@ -137,16 +137,15 @@ PlexilExecutiveThread::init()
 		logger->log_info(name(), "Interface config XML:\n%s", writer.result.c_str());
 	}
 
-	std::string cfg_debug_conf = config->get_string_or_default((cfg_prefix + "debug/conf").c_str(), "");
-	if (! cfg_debug_conf.empty()) {
-		replace_tokens(cfg_debug_conf);
+	if (config->get_bool_or_default((cfg_prefix + "debug/enable").c_str(), false)) {
+		std::vector<std::string> debug_markers =
+		  config->get_strings_or_defaults((cfg_prefix + "debug/markers").c_str(), {});
 
-		std::ifstream dbg_f(cfg_debug_conf);
-		if (dbg_f.good()) {
-			PLEXIL::readDebugConfigStream(dbg_f);
-		} else {
-			logger->log_warn(name(), "Error opening debug config: %s", strerror(errno));
+		std::stringstream dbg_config;
+		for (const auto &m : debug_markers) {
+			dbg_config << m << std::endl;
 		}
+		PLEXIL::readDebugConfigStream(dbg_config);
 	}
 
 	log_buffer_.reset(new PlexilLogStreamBuffer(logger));
