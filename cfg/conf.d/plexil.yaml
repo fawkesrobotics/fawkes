@@ -55,6 +55,21 @@ plexil:
         attr:
           name: PlexilExecutive
 
+    # A Listener is an object that reports on node state transitions
+    # in the plan, and other execution events.
+    # cf. http://plexil.sourceforge.net/wiki/index.php/Interface_Configuration_File
+    # The configuration supports the same structure as above for adapters.
+    # Cf. there for possible values. Some examples are given below.
+    # listeners:
+    #   # This enables using the Plexil viewer
+    #   - type: LuvListener
+    #     attr:
+    #       Port: 49100
+    #       HostName: 127.0.0.1
+    #       Blocking: true
+    #   # The PlanDebugListener outputs as "Node:clock", make sure to enable it in Debug.cfg
+    #   - type: PlanDebugListener
+
     # The Behavior Engine adapter provides a generic skill_call, which can
     # always be declared as skill_call(...) and which takes the skill name
     # as the first parameter, and after that an even number of key/value pairs
