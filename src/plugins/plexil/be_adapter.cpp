@@ -365,6 +365,7 @@ BehaviorEnginePlexilAdapter::executeCommand(PLEXIL::Command* cmd)
 void
 BehaviorEnginePlexilAdapter::invokeAbort(PLEXIL::Command *cmd)
 {
+	logger_->log_warn("PlexilBE", "Aborting %s", cmd->getName().c_str());
 	if (current_cmd_) {
 		try {
 			skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
@@ -385,11 +386,15 @@ BehaviorEnginePlexilAdapter::bb_interface_data_changed(fawkes::Interface *interf
 		if (skiller_if_->msgid() == skill_msgid_) {
 			switch (skiller_if_->status()) {
 			case SkillerInterface::S_FINAL:
+				m_execInterface.handleCommandReturn(current_cmd_, PLEXIL::Value(true));
 				m_execInterface.handleCommandAck(current_cmd_, PLEXIL::COMMAND_SUCCESS);
+				m_execInterface.notifyOfExternalEvent();
 				current_cmd_ = nullptr;
 				break;
 			case SkillerInterface::S_FAILED:
+				m_execInterface.handleCommandReturn(current_cmd_, PLEXIL::Value(false));
 				m_execInterface.handleCommandAck(current_cmd_, PLEXIL::COMMAND_FAILED);
+				m_execInterface.notifyOfExternalEvent();
 				current_cmd_ = nullptr;
 				break;
 			default:
@@ -397,7 +402,6 @@ BehaviorEnginePlexilAdapter::bb_interface_data_changed(fawkes::Interface *interf
 					m_execInterface.handleCommandAck(current_cmd_, PLEXIL::COMMAND_RCVD_BY_SYSTEM);
 				}
 			}
-			m_execInterface.notifyOfExternalEvent();
 		}
 	}
 }
