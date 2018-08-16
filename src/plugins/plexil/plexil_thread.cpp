@@ -281,6 +281,14 @@ PlexilExecutiveThread::read_plexil_interface_configs(const std::string& config_p
 					std::string verb_key = path.substr(start_pos, slash_pos - start_pos);
 					cfg_adapters[id].verbatim_args[verb_id].attr[verb_key] = cfg_item->get_as_string();
 				}
+			} else if (what == "verbatim-xml") {
+				logger->log_warn(name(), "Parsing verbatim");
+				pugi::xml_parse_result parse_result =
+				  cfg_adapters[id].verbatim.load_string(cfg_item->get_string().c_str());
+				if (parse_result.status != pugi::status_ok) {
+					throw Exception("Failed to parse verbatim-xml for '%s': %s",
+					                cfg_adapters[id].type.c_str(), parse_result.description());
+				}
 			}
 		}
 	}
@@ -314,6 +322,11 @@ PlexilExecutiveThread::add_plexil_interface_configs(
 			}
 			if (varg.has_text) {
 				xml_adapter_arg.text().set(varg.text.c_str());
+			}
+		}
+		if (a.verbatim && a.verbatim.children().begin() != a.verbatim.children().end()) {
+			for (const auto &child: a.verbatim.children()) {
+				xml_adapter.append_copy(child);
 			}
 		}
 	}

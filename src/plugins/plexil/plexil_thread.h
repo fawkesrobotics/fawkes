@@ -79,6 +79,7 @@ private:
 			std::map<std::string, std::string> attr;
 		};
 		std::map<std::string, verbatim_arg> verbatim_args;
+		pugi::xml_document verbatim;
 	};
 	/// @endcond
 
