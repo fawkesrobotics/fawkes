@@ -85,6 +85,8 @@ plexil:
     #   - tag (required): the XML tag name
     #   - text (optional): added to the text section of the tag
     #   - attr: attributes added to the XML tag.
+    # verbatim-xml:
+    #   Partial XML document which will be inserted as children in the adapter tag.
     adapters:
       # Do not use Utility, use FawkesLogging instead!
       # Do not use OSNativeTime, use FawkesTime instead!
@@ -94,6 +96,28 @@ plexil:
       - type: ThreadName
         attr:
           name: PlexilExecutive
+      # - type: UdpAdapter
+      #   attr:
+      #     debug: true
+      #     default_local_port: 8389
+      #     default_peer_port: 8389
+      #   verbatim-xml: |
+      #     <Message name="test_udp_msg" local_port="8385" peer_port="8385">
+      #       <Parameter type="string" bytes="3" desc="message id"/>
+      #       <Parameter type="bool" bytes="1" desc="send ack flag"/>
+      #       <Parameter type="int" bytes="4" desc="num_widgets"/>
+      #       <Parameter type="float" bytes="4" desc="arg4"/>
+      #       <Parameter type="int-array" elements="3" bytes="2" desc="16 bit ints"/>
+      #       <Parameter type="float-array" elements="3" bytes="4" desc="32 bit floats"/>
+      #       <Parameter type="bool-array" elements="3" bytes="1"/>
+      #       <Parameter type="string-array" elements="3" bytes="3"/>
+      #     </Message>
+      #     <Message name="ack_msg" local_port="8386" peer_port="8386">
+      #       <Parameter type="string" bytes="4"/>
+      #     </Message>
+      #     <Message name="quit_msg" local_port="8387" peer_port="8387">
+      #       <Parameter type="string" bytes="4"/>
+      #     </Message>
 
     # A Listener is an object that reports on node state transitions
     # in the plan, and other execution events.
