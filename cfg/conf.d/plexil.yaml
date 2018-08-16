@@ -9,8 +9,48 @@ plexil:
 
   test:
     debug:
-      conf: "@CFGDIR@/plexil/test/Debug.cfg"
       print-xml: true
+
+      enable: true
+      markers:
+        #- :Node:transition
+        #- :Node:outcome
+        #- :Node:clock
+        #- :Node:deactivatePair
+        #- :Node:activatePair
+        #- :Node:times
+        #- :Node:getDestState
+        #- :Node:createCommand
+        #- :Node:findVariable
+        #- :Node:createDeclaredVars
+        #- :Node:getVarsFromInterface
+        #- :Node
+
+        #- :AdapterFactory
+        #- :ExecApplication
+        #- :ExecListenerFactory
+        #- :ExecListenerFilterFactory
+        #- :InterfaceManager
+        #- :LuvListener
+
+        #- :ExpressionFactory:registerFactory
+        #- :Expression
+        #- :IdTable
+        #- :ConstRealVariable
+        #- :RealVariable
+        #- :BinaryExpression
+        #- :Test
+        #- :StateCache
+        #- :InternalCondition
+
+        #- :PlexilExec
+        #- :PlexilExec:planVerbose
+        #- :PlexilExec:step
+        #- :PlexilExec:printPlan
+        - :PlexilExec:cycle
+        #- :PlexilExec:handleConditionsChanged
+        #- :PlexilExec:addToResourceContention
+
 
     # Adpater configuration
     # This part is converted into the Plexil XML interface configuration file.
