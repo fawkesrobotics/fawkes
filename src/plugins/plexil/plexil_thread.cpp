@@ -84,6 +84,21 @@ PlexilExecutiveThread::init()
 	bool cfg_print_xml =
 	  config->get_bool_or_default((cfg_prefix + "debug/print-xml").c_str(), false);
 
+	std::map<std::string, plexil_interface_config> cfg_adapters =
+	  read_plexil_interface_configs(cfg_prefix + "adapters/");
+
+	std::map<std::string, plexil_interface_config> cfg_listeners =
+	  read_plexil_interface_configs(cfg_prefix + "listeners/");
+
+	for (const auto &a_item : cfg_adapters) {
+		const auto &a = a_item.second;
+		if (a.type == "Utility") {
+			logger->log_warn(name(), "Utility adapter configured, consider using FawkesLogging instead");
+		} else if (a.type == "OSNativeTime") {
+			logger->log_warn(name(), "OSNativeTime adapter configured, consider using FawkesTime instead");
+		}
+	}
+
 	plexil_.reset(new PLEXIL::ExecApplication);
 
 	PLEXIL::g_manager->setProperty("::Fawkes::Config", config);
@@ -100,103 +115,12 @@ PlexilExecutiveThread::init()
 	pugi::xml_node xml_interfaces =
 	  xml_config.append_child(PLEXIL::InterfaceSchema::INTERFACES_TAG());
 
-	//  Data structure for config parse result
-	struct adapter_config {
-		std::string type;
-		std::map<std::string, std::string> attr;
-		std::map<std::string, std::string> args;
-
-		struct verbatim_arg {
-			std::string tag;
-			bool        has_text;
-			std::string text;
-			std::map<std::string, std::string> attr;
-		};
-		std::map<std::string, verbatim_arg> verbatim_args;
-	};
-	std::map<std::string, adapter_config> cfg_adapters;
-
-	// Parse adapter configurations
-	std::string adapter_config_prefix = cfg_prefix + "adapters/";
-	std::unique_ptr<Configuration::ValueIterator>
-	  cfg_item{config->search(adapter_config_prefix)};
-	while (cfg_item->next()) {
-		std::string path = cfg_item->path();
-
-		std::string::size_type start_pos = adapter_config_prefix.size();
-		std::string::size_type slash_pos = path.find("/", start_pos + 1);
-		if (slash_pos != std::string::npos) {
-			std::string id = path.substr(start_pos, slash_pos - start_pos);
-
-			start_pos = slash_pos + 1;
-			slash_pos = path.find("/", start_pos);
-			std::string what = path.substr(start_pos, slash_pos - start_pos);
-
-			if (what == "type") {
-				cfg_adapters[id].type = cfg_item->get_string();
-			} else if (what == "attr") {
-				start_pos = slash_pos + 1;
-				slash_pos = path.find("/", start_pos);
-				std::string key = path.substr(start_pos, slash_pos - start_pos);
-				cfg_adapters[id].attr[key] = cfg_item->get_as_string();
-			} else if (what == "args") {
-				start_pos = slash_pos + 1;
-				slash_pos = path.find("/", start_pos);
-				std::string key = path.substr(start_pos, slash_pos - start_pos);
-				cfg_adapters[id].args[key] = cfg_item->get_as_string();
-			} else if (what == "verbatim-args") {
-				start_pos = slash_pos + 1;
-				slash_pos = path.find("/", start_pos);
-				std::string verb_id = path.substr(start_pos, slash_pos - start_pos);
-
-				start_pos = slash_pos + 1;
-				slash_pos = path.find("/", start_pos);
-				std::string verb_what = path.substr(start_pos, slash_pos - start_pos);
-
-				if (verb_what == "tag") {
-					cfg_adapters[id].verbatim_args[verb_id].tag = cfg_item->get_as_string();
-				} else if (verb_what == "text") {
-					cfg_adapters[id].verbatim_args[verb_id].has_text = true;
-					cfg_adapters[id].verbatim_args[verb_id].text = cfg_item->get_as_string();
-				} else if (verb_what == "attr") {
-					start_pos = slash_pos + 1;
-					slash_pos = path.find("/", start_pos);
-					std::string verb_key = path.substr(start_pos, slash_pos - start_pos);
-					cfg_adapters[id].verbatim_args[verb_id].attr[verb_key] = cfg_item->get_as_string();
-				}
-			}
-		}
-	}
-
-	// Add adapter configurations to Plexil interface XML config
-	for (const auto &a_item : cfg_adapters) {
-		const auto &a = a_item.second;
-		if (a.type == "Utility") {
-			logger->log_warn(name(), "Utility adapter configured, consider using FawkesLogging instead");
-		} else if (a.type == "OSNativeTime") {
-			logger->log_warn(name(), "OSNativeTime adapter configured, consider using FawkesTime instead");
-		}
-		pugi::xml_node xml_adapter = xml_interfaces.append_child(PLEXIL::InterfaceSchema::ADAPTER_TAG());
-		xml_adapter.append_attribute("AdapterType").set_value(a.type.c_str());
-		for (const auto &attr : a.attr) {
-			xml_adapter.append_attribute(attr.first.c_str()).set_value(attr.second.c_str());
-		}
-		for (const auto &arg : a.args) {
-			pugi::xml_node xml_adapter_arg = xml_adapter.append_child("Parameter");
-			xml_adapter_arg.append_attribute("key").set_value(arg.first.c_str());
-			xml_adapter_arg.text().set(arg.second.c_str());
-		}
-		for (const auto &arg : a.verbatim_args) {
-			const auto &varg = arg.second;
-			pugi::xml_node xml_adapter_arg = xml_adapter.append_child(varg.tag.c_str());
-			for (const auto &attr: varg.attr) {
-				xml_adapter_arg.append_attribute(attr.first.c_str()).set_value(attr.second.c_str());
-			}
-			if (varg.has_text) {
-				xml_adapter_arg.text().set(varg.text.c_str());
-			}
-		}
-	}
+	add_plexil_interface_configs(xml_interfaces, cfg_adapters,
+	                             PLEXIL::InterfaceSchema::ADAPTER_TAG(),
+	                             PLEXIL::InterfaceSchema::ADAPTER_TYPE_ATTR());
+	add_plexil_interface_configs(xml_interfaces, cfg_listeners,
+	                             PLEXIL::InterfaceSchema::LISTENER_TAG(),
+	                             PLEXIL::InterfaceSchema::LISTENER_TYPE_ATTR());
 
 	if (cfg_print_xml) {
 		struct xml_string_writer: pugi::xml_writer
@@ -303,4 +227,95 @@ PlexilExecutiveThread::loop()
 	}
 
 	usleep(100000);
+}
+
+
+// Parse adapter configurations
+std::map<std::string, PlexilExecutiveThread::plexil_interface_config>
+PlexilExecutiveThread::read_plexil_interface_configs(const std::string& config_prefix)
+{
+	std::map<std::string, plexil_interface_config> cfg_adapters;
+
+	std::unique_ptr<Configuration::ValueIterator>
+	  cfg_item{config->search(config_prefix)};
+	while (cfg_item->next()) {
+		std::string path = cfg_item->path();
+
+		std::string::size_type start_pos = config_prefix.size();
+		std::string::size_type slash_pos = path.find("/", start_pos + 1);
+		if (slash_pos != std::string::npos) {
+			std::string id = path.substr(start_pos, slash_pos - start_pos);
+
+			start_pos = slash_pos + 1;
+			slash_pos = path.find("/", start_pos);
+			std::string what = path.substr(start_pos, slash_pos - start_pos);
+
+			if (what == "type") {
+				cfg_adapters[id].type = cfg_item->get_string();
+			} else if (what == "attr") {
+				start_pos = slash_pos + 1;
+				slash_pos = path.find("/", start_pos);
+				std::string key = path.substr(start_pos, slash_pos - start_pos);
+				cfg_adapters[id].attr[key] = cfg_item->get_as_string();
+			} else if (what == "args") {
+				start_pos = slash_pos + 1;
+				slash_pos = path.find("/", start_pos);
+				std::string key = path.substr(start_pos, slash_pos - start_pos);
+				cfg_adapters[id].args[key] = cfg_item->get_as_string();
+			} else if (what == "verbatim-args") {
+				start_pos = slash_pos + 1;
+				slash_pos = path.find("/", start_pos);
+				std::string verb_id = path.substr(start_pos, slash_pos - start_pos);
+
+				start_pos = slash_pos + 1;
+				slash_pos = path.find("/", start_pos);
+				std::string verb_what = path.substr(start_pos, slash_pos - start_pos);
+
+				if (verb_what == "tag") {
+					cfg_adapters[id].verbatim_args[verb_id].tag = cfg_item->get_as_string();
+				} else if (verb_what == "text") {
+					cfg_adapters[id].verbatim_args[verb_id].has_text = true;
+					cfg_adapters[id].verbatim_args[verb_id].text = cfg_item->get_as_string();
+				} else if (verb_what == "attr") {
+					start_pos = slash_pos + 1;
+					slash_pos = path.find("/", start_pos);
+					std::string verb_key = path.substr(start_pos, slash_pos - start_pos);
+					cfg_adapters[id].verbatim_args[verb_id].attr[verb_key] = cfg_item->get_as_string();
+				}
+			}
+		}
+	}
+	return cfg_adapters;
+}
+
+	// Add adapter configurations to Plexil interface XML config
+void
+PlexilExecutiveThread::add_plexil_interface_configs(
+  pugi::xml_node &parent,
+  const std::map<std::string, PlexilExecutiveThread::plexil_interface_config> &configs,
+  const char* tag_name, const char* type_attr_name)
+{
+	for (const auto &a_item : configs) {
+		const auto &a = a_item.second;
+		pugi::xml_node xml_adapter = parent.append_child(tag_name);
+		xml_adapter.append_attribute(type_attr_name).set_value(a.type.c_str());
+		for (const auto &attr : a.attr) {
+			xml_adapter.append_attribute(attr.first.c_str()).set_value(attr.second.c_str());
+		}
+		for (const auto &arg : a.args) {
+			pugi::xml_node xml_adapter_arg = xml_adapter.append_child("Parameter");
+			xml_adapter_arg.append_attribute("key").set_value(arg.first.c_str());
+			xml_adapter_arg.text().set(arg.second.c_str());
+		}
+		for (const auto &arg : a.verbatim_args) {
+			const auto &varg = arg.second;
+			pugi::xml_node xml_adapter_arg = xml_adapter.append_child(varg.tag.c_str());
+			for (const auto &attr: varg.attr) {
+				xml_adapter_arg.append_attribute(attr.first.c_str()).set_value(attr.second.c_str());
+			}
+			if (varg.has_text) {
+				xml_adapter_arg.text().set(varg.text.c_str());
+			}
+		}
+	}
 }

@@ -64,6 +64,31 @@ class PlexilExecutiveThread
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
+private:
+	/// @cond INTERNAL
+	//  Data structure for config parse result
+	struct plexil_interface_config {
+		std::string type;
+		std::map<std::string, std::string> attr;
+		std::map<std::string, std::string> args;
+
+		struct verbatim_arg {
+			std::string tag;
+			bool        has_text;
+			std::string text;
+			std::map<std::string, std::string> attr;
+		};
+		std::map<std::string, verbatim_arg> verbatim_args;
+	};
+	/// @endcond
+
+	std::map<std::string, plexil_interface_config>
+	read_plexil_interface_configs(const std::string& config_prefix);
+	void add_plexil_interface_configs(pugi::xml_node &parent,
+	                                  const std::map<std::string,
+	                                  PlexilExecutiveThread::plexil_interface_config> &configs,
+	                                  const char* tag_name, const char* type_attr_name);
+
  private:
 	std::string cfg_spec_;
 	std::string cfg_plan_plx_;
