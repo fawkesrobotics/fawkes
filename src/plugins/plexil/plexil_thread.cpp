@@ -25,6 +25,7 @@
 #include "log_adapter.h"
 #include "be_adapter.h"
 #include "thread_adapter.h"
+#include "protobuf_adapter.h"
 #include "utils.h"
 
 #include <core/threading/mutex_locker.h>
@@ -92,10 +93,11 @@ PlexilExecutiveThread::init()
 	PLEXIL::g_manager->setProperty("::Fawkes::Logger", logger);
 	PLEXIL::g_manager->setProperty("::Fawkes::BlackBoard", blackboard);
 
-	clock_adapter_  = new PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter>("FawkesTime");
-	log_adapter_    = new PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter>("FawkesLogging");
-	be_adapter_     = new PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter>("BehaviorEngine");
-	thread_adapter_ = new PLEXIL::ConcreteAdapterFactory<ThreadNamePlexilAdapter>("ThreadName");
+	clock_adapter_    = new PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter>("FawkesTime");
+	log_adapter_      = new PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter>("FawkesLogging");
+	be_adapter_       = new PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter>("BehaviorEngine");
+	thread_adapter_   = new PLEXIL::ConcreteAdapterFactory<ThreadNamePlexilAdapter>("ThreadName");
+	protobuf_adapter_ = new PLEXIL::ConcreteAdapterFactory<ProtobufCommPlexilAdapter>("ProtobufComm");
 
 	pugi::xml_document xml_config;
 	pugi::xml_node xml_interfaces =
@@ -196,6 +198,7 @@ PlexilExecutiveThread::finalize()
 	delete log_adapter_;
 	delete be_adapter_;
 	delete thread_adapter_;
+	delete protobuf_adapter_;
 }
 
 void

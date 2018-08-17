@@ -55,4 +55,4 @@ extern "C" {
   void initThreadNameAdapter();
 }
 
-#endif // POSIX_TIME_ADAPTER_H
+#endif

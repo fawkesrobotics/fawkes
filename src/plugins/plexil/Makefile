@@ -19,11 +19,11 @@ include $(BUILDSYSDIR)/clips.mk
 
 LIBS_plexil = \
 	fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	fawkesinterface \
-  PlexilAppFramework PlanDebugListener LuvListener PlexilSockets \
+	fawkesinterface fawkes_protobuf_comm \
+  PlexilAppFramework PlexilPlanDebugListener PlexilLuvListener PlexilSockets \
   SkillerInterface
 OBJS_plexil = plexil_plugin.o plexil_thread.o clock_adapter.o timer_thread.o \
-  log_adapter.o be_adapter.o thread_adapter.o
+  log_adapter.o be_adapter.o thread_adapter.o protobuf_adapter.o
 
 OBJS_all = $(OBJS_plexil)
 

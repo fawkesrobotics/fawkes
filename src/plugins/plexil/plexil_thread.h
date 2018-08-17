@@ -43,6 +43,7 @@ class ClockPlexilTimeAdapter;
 class LoggingPlexilAdapter;
 class BehaviorEnginePlexilAdapter;
 class ThreadNamePlexilAdapter;
+class ProtobufCommPlexilAdapter;
 
 class PlexilExecutiveThread
 : public fawkes::Thread,
@@ -99,6 +100,7 @@ private:
 	PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter> *        log_adapter_;
 	PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter> * be_adapter_;
 	PLEXIL::ConcreteAdapterFactory<ThreadNamePlexilAdapter> *     thread_adapter_;
+	PLEXIL::ConcreteAdapterFactory<ProtobufCommPlexilAdapter> *   protobuf_adapter_;
 
 	std::shared_ptr<PlexilLogStreamBuffer> log_buffer_;
 	std::shared_ptr<std::ostream>          log_stream_;
