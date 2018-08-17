@@ -25,6 +25,7 @@
 #include "log_adapter.h"
 #include "be_adapter.h"
 #include "thread_adapter.h"
+#include "utils.h"
 
 #include <core/threading/mutex_locker.h>
 
@@ -58,21 +59,6 @@ PlexilExecutiveThread::~PlexilExecutiveThread()
 {
 }
 
-
-static void replace_tokens(std::string &s) {
-	std::map<std::string, std::string> tokens =
-	  {{"@CFGDIR@", CONFDIR},
-	   {"@BASEDIR@", BASEDIR},
-	   {"@FAWKES_BASEDIR@", FAWKES_BASEDIR},
-	   {"@RESDIR@", RESDIR}};
-
-	for (const auto &token : tokens) {
-		std::string::size_type pos;
-		if ((pos = s.find(token.first)) != std::string::npos) {
-			s.replace(pos, token.first.size(), token.second);
-		}
-	}
-}
 
 void
 PlexilExecutiveThread::init()
