@@ -31,7 +31,10 @@ plexil:
         #- :ExecListenerFactory
         #- :ExecListenerFilterFactory
         #- :InterfaceManager
+        #- :InterfaceAdapter
         #- :LuvListener
+        #- :UdpAdapter
+        - :ProtobufCommAdapter
 
         #- :ExpressionFactory:registerFactory
         #- :Expression
@@ -47,7 +50,7 @@ plexil:
         #- :PlexilExec:planVerbose
         #- :PlexilExec:step
         #- :PlexilExec:printPlan
-        - :PlexilExec:cycle
+        #- :PlexilExec:cycle
         #- :PlexilExec:handleConditionsChanged
         #- :PlexilExec:addToResourceContention
 
@@ -96,6 +99,10 @@ plexil:
       - type: ThreadName
         attr:
           name: PlexilExecutive
+      - type: ProtobufComm
+        attr:
+          protos: "@BASEDIR@/src/plugins/plexil/specs/test/msgs"
+
       # - type: UdpAdapter
       #   attr:
       #     debug: true
