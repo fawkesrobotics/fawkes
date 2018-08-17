@@ -124,9 +124,9 @@ static std::string
 v_tostring(const std::vector<PLEXIL::Value> &values, bool pretty) {
 	std::string rv;
 	if (pretty) {
-		rv = printToString(values).valueToString();
-	} else {
 		rv = pprintToString(values).valueToString();
+	} else {
+		rv = printToString(values).valueToString();
 	}
 	if (rv[rv.size()-1] == '\n') {
 		rv.resize(rv.size() - 1);
@@ -138,9 +138,9 @@ static PLEXIL::Value
 v_tovalue(const std::vector<PLEXIL::Value> &values, bool pretty) {
 	PLEXIL::Value rv;
 	if (pretty) {
-		rv = printToString(values).valueToString();
-	} else {
 		rv = pprintToString(values).valueToString();
+	} else {
+		rv = printToString(values).valueToString();
 	}
 	return rv;
 }

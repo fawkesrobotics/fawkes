@@ -110,4 +110,4 @@ extern "C" {
   void initBehaviorEngineAdapter();
 }
 
-#endif // POSIX_TIME_ADAPTER_H
+#endif
