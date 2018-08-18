@@ -99,7 +99,7 @@ private:
 	bool        cfg_plan_auto_compile_;
 	bool        cfg_plan_force_compile_;
 
-	std::shared_ptr<PLEXIL::ExecApplication> plexil_;
+	std::unique_ptr<PLEXIL::ExecApplication> plexil_;
 	PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter> *      clock_adapter_;
 	PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter> *        log_adapter_;
 	PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter> * be_adapter_;

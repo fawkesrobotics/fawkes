@@ -35,6 +35,7 @@
 #include <Debug.hh>
 #include <InterfaceSchema.hh>
 #include <InterfaceManager.hh>
+#include <AdapterConfiguration.hh>
 #include <pugixml.hpp>
 
 #include <fstream>
@@ -238,7 +239,16 @@ PlexilExecutiveThread::finalize()
 	if (! plexil_->shutdown()) {
 		logger->log_error(name(), "Failed to shutdown Plexil");
 	}
-	plexil_.reset();
+	PLEXIL::g_configuration->clearAdapterRegistry();
+	plexil_->waitForShutdown();
+
+	// We really should do a reset here, killing off the ExecApplication instance.
+	// However, the executive crashes in a state cache destructor if there is any
+	// active wait (or probably any active LookupOnChange, as here on time).
+	// Therefore, we accept this memleak here under the assumption, that we do not
+	// frequently reload the plexil plugin. This at least avoids the segfaut on quit.
+	plexil_.release();
+	//plexil_.reset();
 	log_stream_.reset();
 	log_buffer_.reset();
 	plan_plx_.reset();
