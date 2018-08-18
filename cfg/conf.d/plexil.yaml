@@ -166,4 +166,14 @@ plexil:
             name: place
         template: goto{place=?(place)s, duration=1.0, error_prob=.1}
 
-    plan-plx: "@BASEDIR@/src/plugins/plexil/specs/test/plan.plx"
+    plan:
+      ple: "@BASEDIR@/src/plugins/plexil/specs/test/plan.ple"
+      # If plx is not configured and compilation is enabled, will
+      # replace ".ple" with ".plx" from ple and use that as plx.
+      #plx: "@BASEDIR@/src/plugins/plexil/specs/test/plan.plx"
+      compilation:
+        enable: true
+        # If compilation is enabled:
+        # Force a fresh compile on every startup. Otherwise, will only
+        # compile if PLX does exist or PLE has been modified after PLX.
+        force: false
