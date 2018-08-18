@@ -139,12 +139,16 @@ SubProcess::SubProcess(const std::string &progname, const std::string &file,
 	  argvc[i] = argv[i].c_str();
   }
   argvc[argv.size()] = NULL;
-  const char *envpc[envp.size() + 1];
-  for (size_t i = 0; i < envp.size(); ++i) {
-	  envpc[i] = envp[i].c_str();
+  if (envp.empty()) {
+	  run_proc(file.c_str(), argvc, NULL);
+  } else {
+	  const char *envpc[envp.size() + 1];
+	  for (size_t i = 0; i < envp.size(); ++i) {
+		  envpc[i] = envp[i].c_str();
+	  }
+	  envpc[envp.size()] = NULL;
+	  run_proc(file.c_str(), argvc, envpc);
   }
-  envpc[envp.size()] = NULL;
-  run_proc(file.c_str(), argvc, envpc);
 }
 
 
