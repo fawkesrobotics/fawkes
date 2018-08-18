@@ -85,6 +85,8 @@ class SubProcess
   void check_proc();
   bool alive();
 
+	int  exit_status();
+
  private:
   pid_t run_proc(const char *file, const char *argv[], const char *envp[],
 		 int & pipe_stdin_w, int & pipe_stdout_r, int & pipe_stderr_r);
@@ -119,6 +121,7 @@ class SubProcess
   boost::asio::streambuf buf_stdout_;
   boost::asio::streambuf buf_stderr_;
 
+	int exit_status_;
 };
 
 } // end namespace fawkes

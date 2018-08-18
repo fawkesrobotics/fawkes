@@ -53,7 +53,8 @@ namespace fawkes {
 SubProcess::SubProcess(const char *progname, const char *file, const char *argv[], const char *envp[])
   : progname_(progname),
     io_service_work_(io_service_), logger_(NULL),
-    sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_)
+    sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_),
+    exit_status_(-1)
 {
   io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
   run_proc(file, argv, envp);
@@ -74,7 +75,8 @@ SubProcess::SubProcess(const char *progname, const char *file, const char *argv[
 		       fawkes::Logger *logger)
   : progname_(progname),
     io_service_work_(io_service_), logger_(logger),
-    sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_)
+    sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_),
+    exit_status_(-1)
 {
   io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
   run_proc(file, argv, envp);
@@ -93,7 +95,8 @@ SubProcess::SubProcess(const std::string &progname, const std::string &file,
                        const std::vector<std::string> &argv, const std::vector<std::string> &envp)
 	: progname_(progname),
 	  io_service_work_(io_service_), logger_(NULL),
-	  sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_)
+	  sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_),
+    exit_status_(-1)
 {
   io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
 
@@ -126,7 +129,8 @@ SubProcess::SubProcess(const std::string &progname, const std::string &file,
                        fawkes::Logger *logger)
   : progname_(progname),
     io_service_work_(io_service_), logger_(logger),
-    sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_)
+    sd_stdin_(io_service_), sd_stdout_(io_service_), sd_stderr_(io_service_),
+    exit_status_(-1)
 {
   io_service_thread_ = std::thread([this]() { this->io_service_.run(); });
 
@@ -306,6 +310,20 @@ SubProcess::alive()
 }
 
 
+/** Get exit status of process once it ended.
+ * It is an error to call this on a sub-process which is still alive.
+ * @return exit status of process
+ * @exception Exception if called while process is still alive
+ */
+int
+SubProcess::exit_status()
+{
+	if (alive()) {
+		throw Exception("Cannot get status while process still alive");
+	}
+	return exit_status_;
+}
+
 /** Check if the process is still alive. */
 void
 SubProcess::check_proc()
@@ -314,7 +332,8 @@ SubProcess::check_proc()
 		int status = 0;
 		if (waitpid(pid_, &status, WUNTRACED | WCONTINUED | WNOHANG) > 0) {
 			if (WIFEXITED(status)) {
-				if (WEXITSTATUS(status) != 0) {
+				exit_status_ = WEXITSTATUS(status);
+				if (exit_status_ != 0) {
 					logger_->log_error(progname_.c_str(), "PID %i exited, status=%d",
 					                   pid_, WEXITSTATUS(status));
 				}
