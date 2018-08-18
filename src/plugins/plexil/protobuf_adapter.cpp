@@ -126,6 +126,7 @@ ProtobufCommPlexilAdapter::initialize()
 	PLEXIL::g_configuration->registerCommandInterface("pb_get_real", this);
 	PLEXIL::g_configuration->registerCommandInterface("pb_get_bool", this);
 	PLEXIL::g_configuration->registerCommandInterface("pb_get_string", this);
+	PLEXIL::g_configuration->registerCommandInterface("pb_get_length", this);
 	PLEXIL::g_configuration->registerCommandInterface("pb_tostring", this);
 	PLEXIL::g_configuration->registerCommandInterface("pb_broadcast", this);
 
@@ -206,6 +207,8 @@ ProtobufCommPlexilAdapter::executeCommand(PLEXIL::Command* cmd)
 		pb_get_value(cmd, PLEXIL::BOOLEAN_TYPE);
 	} else if (name == "pb_get_string") {
 		pb_get_value(cmd, PLEXIL::STRING_TYPE);
+	} else if (name == "pb_get_length") {
+		pb_get_length(cmd);
 	} else if (name == "pb_broadcast") {
 		pb_broadcast(cmd);
 	} else if (name == "pb_tostring") {
@@ -1184,11 +1187,75 @@ ProtobufCommPlexilAdapter::pb_get_value(PLEXIL::Command* cmd, PLEXIL::ValueType 
   m_execInterface.notifyOfExternalEvent();
 }
 
+
+void
+ProtobufCommPlexilAdapter::pb_get_length(PLEXIL::Command* cmd)
+{
+	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
+	if (! verify_args(args, "pb_get_length",
+	                  {{"msg_id", PLEXIL::STRING_TYPE},
+	                   {"field", PLEXIL::STRING_TYPE}}))
+	{
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+		m_execInterface.notifyOfExternalEvent();
+		return;
+	}
+
+	std::string   msg_id;
+	std::string   field_name;
+	args[0].getValue(msg_id);
+	args[1].getValue(field_name);
+
+	if (messages_.find(msg_id) == messages_.end()) {
+		warn("ProtobufCommAdapter:pb_get_length:"
+		     << " Unknown message " << msg_id);
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+		m_execInterface.notifyOfExternalEvent();
+		return;
+	}
+
+	message_meta &msgmeta = messages_[msg_id];
+	std::shared_ptr<google::protobuf::Message> m = msgmeta.message;
+
+  const FieldDescriptor *field = nullptr;
+  google::protobuf::Message *msg= m.get();
+   
+  std::string partial_name;
+  long int    partial_index = -1;
+
+  if (! traverse_field(msg, field_name, field, partial_name, partial_index, "pb_get_length")) {
+	  m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+	  m_execInterface.notifyOfExternalEvent();
+	  return;
+  }
+
+  if (! field) {
+		warn("ProtobufCommAdapter:pb_get_length:"
+		     << " Unknown field " << field_name << " for message " << msg_id);
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+		m_execInterface.notifyOfExternalEvent();
+		return;
+  }
+
+  if (! field->is_repeated()) {
+		warn("ProtobufCommAdapter:pb_get_length:"
+		     << " Field " << field_name << " is not a repeated field in " << msg_id);
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+		m_execInterface.notifyOfExternalEvent();
+		return;
+  }
+  const Reflection *refl       = msg->GetReflection();
+
+  m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(refl->FieldSize(*msg, field)));
+  m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
+  m_execInterface.notifyOfExternalEvent();
+}
+
 void
 ProtobufCommPlexilAdapter::pb_tostring(PLEXIL::Command* cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "pb_set_value",
+	if (! verify_args(args, "pb_tostring",
 	                  {{"msg_id", PLEXIL::STRING_TYPE}}))
 	{
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);

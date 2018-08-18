@@ -99,6 +99,7 @@ private:
 	void pb_create(PLEXIL::Command* cmd);
   void pb_set_value(PLEXIL::Command* cmd);
 	void pb_get_value(PLEXIL::Command* cmd, PLEXIL::ValueType value_type);
+  void pb_get_length(PLEXIL::Command* cmd);
   void pb_tostring(PLEXIL::Command* cmd);
   void pb_broadcast(PLEXIL::Command* cmd);
 
