@@ -218,6 +218,7 @@ PlexilExecutiveThread::once()
 	}
 
 	plexil_->addPlan(&*plan_plx_);
+	plexil_->notifyExec();
 }
 
 
@@ -227,6 +228,7 @@ PlexilExecutiveThread::prepare_finalize_user()
 	if (! plexil_->stop()) {
 		logger->log_error(name(), "Failed to stop Plexil");
 	}
+	plexil_->notifyExec();
 	return true;
 }
 
@@ -250,8 +252,8 @@ PlexilExecutiveThread::finalize()
 void
 PlexilExecutiveThread::loop()
 {
-	plexil_->notifyExec();
-	plexil_->waitForPlanFinished();
+	//plexil_->notifyExec();
+	//plexil_->waitForPlanFinished();
 	static PLEXIL::ExecApplication::ApplicationState state = PLEXIL::ExecApplication::APP_SHUTDOWN;
 	PLEXIL::ExecApplication::ApplicationState new_state =
 	  plexil_->getApplicationState();
@@ -260,7 +262,8 @@ PlexilExecutiveThread::loop()
 		state = new_state;
 	}
 
-	usleep(100000);
+	using namespace std::chrono_literals;
+	std::this_thread::sleep_for(500ms);
 }
 
 
