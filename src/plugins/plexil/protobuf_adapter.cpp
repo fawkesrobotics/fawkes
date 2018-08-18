@@ -115,27 +115,36 @@ ProtobufCommPlexilAdapter::initialize()
 
 	message_register_ = std::make_shared<MessageRegister>(cfg_proto_dirs);
 
-	PLEXIL::g_configuration->registerCommandInterface("SendMessage", this);
-	PLEXIL::g_configuration->registerCommandInterface("ReceiveCommand", this);
-	PLEXIL::g_configuration->registerCommandInterface("GetParameter", this);
-	PLEXIL::g_configuration->registerCommandInterface("SendReturnValue", this);
+	namespace p = std::placeholders;
+	commands_ = {
+	  {"ReceiveCommand",  std::bind(&ProtobufCommPlexilAdapter::proc_receive_command, this, p::_1)},
+	  {"GetParameter",    std::bind(&ProtobufCommPlexilAdapter::proc_get_param_command, this, p::_1)},
+	  {"SendReturnValue", std::bind(&ProtobufCommPlexilAdapter::proc_send_rv_command, this, p::_1)},
+	  {"pb_create",       std::bind(&ProtobufCommPlexilAdapter::pb_create, this, p::_1)},
+	  {"pb_destroy",      std::bind(&ProtobufCommPlexilAdapter::pb_destroy, this, p::_1)},
+	  {"pb_set_value",    std::bind(&ProtobufCommPlexilAdapter::pb_set_value, this, p::_1)},
+	  {"pb_get_int",      std::bind(&ProtobufCommPlexilAdapter::pb_get_value, this, p::_1, PLEXIL::INTEGER_TYPE)},
+	  {"pb_get_real",     std::bind(&ProtobufCommPlexilAdapter::pb_get_value, this, p::_1, PLEXIL::REAL_TYPE)},
+	  {"pb_get_bool",     std::bind(&ProtobufCommPlexilAdapter::pb_get_value, this, p::_1, PLEXIL::BOOLEAN_TYPE)},
+	  {"pb_get_string",   std::bind(&ProtobufCommPlexilAdapter::pb_get_value, this, p::_1, PLEXIL::STRING_TYPE)},
+	  {"pb_get_length",   std::bind(&ProtobufCommPlexilAdapter::pb_get_length, this, p::_1)},
+	  {"pb_broadcast",    std::bind(&ProtobufCommPlexilAdapter::pb_broadcast, this, p::_1)},
+	  {"pb_tostring",     std::bind(&ProtobufCommPlexilAdapter::pb_tostring, this, p::_1)},
+	  {"pb_peer_create",  std::bind(&ProtobufCommPlexilAdapter::pb_peer_create, this, p::_1)},
+	  {"pb_peer_destroy", std::bind(&ProtobufCommPlexilAdapter::pb_get_length, this, p::_1)},
+	  {"pb_peer_create_local",
+	   std::bind(&ProtobufCommPlexilAdapter::pb_peer_create_local, this, p::_1)},
+	  {"pb_peer_create_crypto",
+	   std::bind(&ProtobufCommPlexilAdapter::pb_peer_create_crypto, this, p::_1)},
+	  {"pb_peer_create_local_crypto",
+	   std::bind(&ProtobufCommPlexilAdapter::pb_peer_create_local_crypto, this, p::_1, nullptr)},
+	  {"pb_peer_setup_crypto",
+	   std::bind(&ProtobufCommPlexilAdapter::pb_peer_setup_crypto, this, p::_1)},
+	};
 
-	PLEXIL::g_configuration->registerCommandInterface("pb_create", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_set_value", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_get_int", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_get_real", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_get_bool", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_get_string", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_get_length", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_tostring", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_broadcast", this);
-
-	PLEXIL::g_configuration->registerCommandInterface("pb_peer_create", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_peer_create_crypto", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_peer_create_local", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_peer_create_local_crypto", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_peer_setup_crypto", this);
-	PLEXIL::g_configuration->registerCommandInterface("pb_peer_destroy", this);
+	for (const auto &c: commands_) {
+		PLEXIL::g_configuration->registerCommandInterface(c.first, this);
+	}
 
 	return true;
 }
@@ -188,47 +197,16 @@ ProtobufCommPlexilAdapter::executeCommand(PLEXIL::Command* cmd)
 	std::string const &name = cmd->getName();
 
 	//logger_->log_info("PlexilProtobuf", "Processing %s", name.c_str());
-	
-	if (name == "ReceiveCommand") {
-		proc_receive_command(cmd);
-	} else if (name == "GetParameter") {
-		proc_get_param_command(cmd);
-	} else if (name == "SendReturnValue") {
-		proc_send_rv_command(cmd);
-	} else if (name == "pb_create") {
-		pb_create(cmd);
-	} else if (name == "pb_set_value") {
-		pb_set_value(cmd);
-	} else if (name == "pb_get_int") {
-		pb_get_value(cmd, PLEXIL::INTEGER_TYPE);
-	} else if (name == "pb_get_real") {
-		pb_get_value(cmd, PLEXIL::REAL_TYPE);
-	} else if (name == "pb_get_bool") {
-		pb_get_value(cmd, PLEXIL::BOOLEAN_TYPE);
-	} else if (name == "pb_get_string") {
-		pb_get_value(cmd, PLEXIL::STRING_TYPE);
-	} else if (name == "pb_get_length") {
-		pb_get_length(cmd);
-	} else if (name == "pb_broadcast") {
-		pb_broadcast(cmd);
-	} else if (name == "pb_tostring") {
-		pb_tostring(cmd);
-	} else if (name == "pb_peer_create") {
-		pb_peer_create(cmd);
-	} else if (name == "pb_peer_create_local") {
-		pb_peer_create_local(cmd);
-	} else if (name == "pb_peer_create_crypto") {
-		pb_peer_create_crypto(cmd);
-	} else if (name == "pb_peer_create_local_crypto") {
-		pb_peer_create_local_crypto(cmd);
-	} else if (name == "pb_peer_setup_crypto") {
-		pb_peer_setup_crypto(cmd);
-	} else if (name == "pb_peer_destroy") {
-		pb_peer_destroy(cmd);
-	}
 
-	//m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
-	//m_execInterface.notifyOfExternalEvent();
+	auto c = commands_.find(name);
+	if (c != commands_.end()) {
+		c->second(cmd);
+	} else {
+		warn("ProtobufCommAdapter:executeCommand: called for unknown"
+		     " command " << name);
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+		m_execInterface.notifyOfExternalEvent();
+	}
 }
 
 void

@@ -136,6 +136,7 @@ private:
 	std::shared_ptr<protobuf_comm::MessageRegister>  message_register_;
 	PeerMap                                          peers_;
 
+	std::map<std::string, std::function<void (PLEXIL::Command*)>> commands_;
 };
 
 extern "C" {
