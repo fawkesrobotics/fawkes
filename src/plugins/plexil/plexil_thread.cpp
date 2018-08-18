@@ -29,6 +29,7 @@
 #include "utils.h"
 
 #include <core/threading/mutex_locker.h>
+#include <utils/sub_process/proc.h>
 
 #include <ExecApplication.hh>
 #include <Debug.hh>
@@ -38,8 +39,13 @@
 
 #include <fstream>
 #include <cstring>
+#include <numeric>
+#include <boost/filesystem.hpp>
 
 using namespace fawkes;
+namespace fs = boost::filesystem;
+// for C++17 could be:
+// namespace fs = std::filesystem;
 
 /** @class PlexilExecutiveThread "plexil_thread.h"
  * Main thread of PLEXIL executive.
@@ -145,19 +151,59 @@ PlexilExecutiveThread::init()
 		throw Exception("Failed to initialize Plexil application");
 	}
 
-	cfg_plan_plx_ = config->get_string_or_default((cfg_prefix + "plan-plx").c_str(), "");
+	cfg_plan_ple_           = config->get_string_or_default((cfg_prefix + "plan/ple").c_str(), "");
+	cfg_plan_plx_           = config->get_string_or_default((cfg_prefix + "plan/plx").c_str(), "");
+	cfg_plan_auto_compile_  = config->get_bool_or_default((cfg_prefix + "plan/compilation/enable").c_str(), false);
+	cfg_plan_force_compile_ = config->get_bool_or_default((cfg_prefix + "plan/compilation/force").c_str(), false);
 
-	if (! cfg_plan_plx_.empty()) {
-		replace_tokens(cfg_plan_plx_);
+	fs::path ple_path, plx_path;
 
-		plan_plx_.reset(new pugi::xml_document);
-		pugi::xml_parse_result parse_result = plan_plx_->load_file(cfg_plan_plx_.c_str());
-		if (parse_result.status != pugi::status_ok) {
-			throw Exception("Failed to parse plan '%s': %s",
-			                cfg_plan_plx_.c_str(), parse_result.description());
+	replace_tokens(cfg_plan_ple_);
+	replace_tokens(cfg_plan_plx_);
+
+	if (cfg_plan_plx_.empty()) {
+		if (! cfg_plan_auto_compile_) {
+			throw Exception("PLX not configured and auto-compile disabled");
+		}
+		if (cfg_plan_ple_.empty()) {
+			throw Exception("Neither PLX nor PLE configured");
+		}
+		ple_path = cfg_plan_ple_;
+		if (! fs::exists(ple_path)) {
+			throw Exception("PLE configured, but file does not exist");
+		}
+		if (ple_path.extension() != ".ple") {
+			throw Exception("Unknown PLE extension %s, expected .ple", ple_path.extension().string().c_str());
+		}
+		plx_path = fs::path{ple_path}.replace_extension(".plx");
+		cfg_plan_plx_ = plx_path.string();
+		if (cfg_plan_plx_.empty()) {
+			throw Exception("Failed to automatically determine PLX");
+		}
+	}
+
+	if (cfg_plan_auto_compile_) {
+		if (! fs::exists(cfg_plan_plx_) || cfg_plan_force_compile_ ||
+		    fs::last_write_time(cfg_plan_plx_) < fs::last_write_time(cfg_plan_ple_))
+		{
+			logger->log_info(name(), "Compiling %s", cfg_plan_ple_.c_str());
+			plexil_compile(cfg_plan_ple_, cfg_plan_plx_);
 		}
 	} else {
-		logger->log_warn(name(), "No plan to execute specified");
+		if (! fs::exists(cfg_plan_plx_)) {
+			throw Exception("PLX %s does not exist and auto-compile disabled", cfg_plan_plx_.c_str());
+		}
+		if (fs::last_write_time(cfg_plan_plx_) < fs::last_write_time(cfg_plan_ple_))
+		{
+			logger->log_warn(name(), "PLX older than PLE, but auto-compile disabled");
+		}
+	}
+
+	plan_plx_.reset(new pugi::xml_document);
+	pugi::xml_parse_result parse_result = plan_plx_->load_file(cfg_plan_plx_.c_str());
+	if (parse_result.status != pugi::status_ok) {
+		throw Exception("Failed to parse plan '%s': %s",
+		                cfg_plan_plx_.c_str(), parse_result.description());
 	}
 }
 
@@ -318,5 +364,36 @@ PlexilExecutiveThread::add_plexil_interface_configs(
 				xml_adapter.append_copy(child);
 			}
 		}
+	}
+}
+
+void
+PlexilExecutiveThread::plexil_compile(const std::string& ple_file, const std::string& plx_file)
+{
+	std::vector<std::string> argv{"plexilc", "-o", plx_file, ple_file};
+	std::string command_line =
+	  std::accumulate(std::next(argv.begin()), argv.end(), argv.front(),
+	                  [](std::string &s, const std::string &a) { return s + " " + a; });
+	logger->log_debug(name(), "Compiler command: %s", command_line.c_str());
+
+	SubProcess proc("plexilc", "plexilc", argv, {}, logger);
+	using namespace std::chrono_literals;
+	auto compile_start = std::chrono::system_clock::now();
+	auto now = std::chrono::system_clock::now();
+	do {
+		proc.check_proc();
+		if (! proc.alive()) {
+			if (proc.exit_status() != 0) {
+				throw Exception("Plexil compilation failed, check log for messages.");
+			} else {
+				break;
+			}
+		}
+		now = std::chrono::system_clock::now();
+		std::this_thread::sleep_for(500ms);
+	} while (now < compile_start + 30s);
+	if (proc.alive()) {
+		proc.kill(SIGINT);
+		throw Exception("Plexil compilation timeout after 30s");
 	}
 }

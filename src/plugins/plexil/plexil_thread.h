@@ -90,10 +90,14 @@ private:
 	                                  const std::map<std::string,
 	                                  PlexilExecutiveThread::plexil_interface_config> &configs,
 	                                  const char* tag_name, const char* type_attr_name);
+	void plexil_compile(const std::string& ple_file, const std::string& plx_file);
 
  private:
 	std::string cfg_spec_;
 	std::string cfg_plan_plx_;
+	std::string cfg_plan_ple_;
+	bool        cfg_plan_auto_compile_;
+	bool        cfg_plan_force_compile_;
 
 	std::shared_ptr<PLEXIL::ExecApplication> plexil_;
 	PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter> *      clock_adapter_;

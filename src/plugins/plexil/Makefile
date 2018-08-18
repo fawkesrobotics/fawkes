@@ -16,6 +16,11 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
+include $(BUILDSYSDIR)/boost.mk
+
+
+PLEXIL_REQ_BOOST_LIBS = system filesystem
+HAVE_PLEXIL_BOOST_LIBS = $(call boost-have-libs,$(OPENPRS_REQ_BOOST_LIBS))
 
 LIBS_plexil = \
 	fawkescore fawkesutils fawkesaspects fawkesblackboard \
@@ -27,21 +32,38 @@ OBJS_plexil = plexil_plugin.o plexil_thread.o clock_adapter.o timer_thread.o \
 
 OBJS_all = $(OBJS_plexil)
 
-ifeq ($(HAVE_PLEXIL),1)
-  CFLAGS  += $(CFLAGS_PLEXIL)
-  LDFLAGS += $(LDFLAGS_PLEXIL)
+
+
+ifeq ($(HAVE_PLEXIL)$(HAVE_PLEXIL_BOOST_LIBS),11)
+  CFLAGS  += $(CFLAGS_PLEXIL)  $(call boost-libs-cflags,$(PLEXIL_REQ_BOOST_LIBS))
+  LDFLAGS += $(LDFLAGS_PLEXIL) $(call boost-libs-ldflags,$(PLEXIL_REQ_BOOST_LIBS))
 
   PLUGINS_all = $(PLUGINDIR)/plexil.so
 else
-  WARN_TARGETS += warning_plexil
+  ifneq ($(HAVE_PLEXIL),1)
+    WARN_TARGETS += warning_plexil
+  endif
+  #ifneq ($(HAVE_CPP17),1)
+  #  WARN_TARGETS += warning_cpp17
+  #endif
+  ifneq ($(HAVE_OPENPRS_BOOST_LIBS),1)
+    PLEXIL_ERROR += Boost libraries missing
+    PLEXIL_WARN_TARGETS_BOOST = $(foreach l,$(PLEXIL_REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_plexil_boost_$l))
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_plexil
+.PHONY: warning_plexil warning_cpp17 $(PLEXIL_WARN_TARGETS_BOOST)
 warning_plexil:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting plexil plugin$(TNORMAL) ($(PLEXIL_ERROR))"
+warning_cpp17:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting plexil plugin$(TNORMAL) (C++17 required)"
+  ifneq ($(PLEXIL_WARN_TARGETS_BOOST),)
+$(PLEXIL_WARN_TARGETS_BOOST): warning_plexil_boost_%:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting plexil plugin$(TNORMAL) (Boost library $* not found)"
+  endif
 endif
 
 include $(BUILDSYSDIR)/base.mk
