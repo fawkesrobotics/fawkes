@@ -115,8 +115,6 @@ ProtobufCommPlexilAdapter::initialize()
 
 	message_register_ = std::make_shared<MessageRegister>(cfg_proto_dirs);
 
-	PLEXIL::g_configuration->registerLookupInterface("protobuf_incoming", this);
-
 	PLEXIL::g_configuration->registerCommandInterface("SendMessage", this);
 	PLEXIL::g_configuration->registerCommandInterface("ReceiveCommand", this);
 	PLEXIL::g_configuration->registerCommandInterface("GetParameter", this);
@@ -178,16 +176,6 @@ bool
 ProtobufCommPlexilAdapter::shutdown()
 {
 	return true;
-}
-
-/** Immediate lookup of an external state variable.
- * @param state state to lookup
- * @param cache_entry cache entry to assign current value to
- */
-void
-ProtobufCommPlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCacheEntry &cache_entry)
-{
-	cache_entry.update(true);
 }
 
 /** Perform given command.

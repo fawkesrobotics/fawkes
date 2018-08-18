@@ -57,8 +57,6 @@ public:
 	virtual bool reset();
 	virtual bool shutdown();
 
-	void lookupNow(PLEXIL::State const &state, PLEXIL::StateCacheEntry &cache_entry);
-	
 	void executeCommand(PLEXIL::Command *cmd);
   void invokeAbort(PLEXIL::Command *cmd);
 
