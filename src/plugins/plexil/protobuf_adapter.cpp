@@ -544,6 +544,30 @@ ProtobufCommPlexilAdapter::pb_create(PLEXIL::Command* cmd)
   }
 }
 
+/** Destroy Protobuf message.
+ */
+void
+ProtobufCommPlexilAdapter::pb_destroy(PLEXIL::Command* cmd)
+{
+	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
+	if (! verify_args(args, "pb_destroy",
+	                  {{"msg_id", PLEXIL::STRING_TYPE}}))
+	{
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+		m_execInterface.notifyOfExternalEvent();
+		return;
+	}
+
+	std::string msg_id;
+	args[0].getValue(msg_id);
+
+	std::lock_guard<std::mutex> lock(queue_mutex_);
+
+	if (messages_.find(msg_id) != messages_.end()) {
+		messages_.erase(msg_id);
+	}
+}
+
 static std::pair<std::string, long int>
 parse_field_name(const std::string& field_name, const std::string& func)
 {
