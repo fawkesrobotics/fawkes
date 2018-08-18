@@ -166,6 +166,10 @@ ProtobufCommPlexilAdapter::start()
 bool
 ProtobufCommPlexilAdapter::stop()
 {
+	std::lock_guard<std::mutex> lock(queue_mutex_);
+	peers_.clear();
+	queue_.clear();
+	messages_.clear();
 	return true;
 }
 
