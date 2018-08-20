@@ -27,6 +27,7 @@ plexil:
         #- :Node
 
         #- :AdapterFactory
+        #- :DynamicLoader
         #- :ExecApplication
         #- :ExecListenerFactory
         #- :ExecListenerFilterFactory
@@ -93,16 +94,16 @@ plexil:
     adapters:
       # Do not use Utility, use FawkesLogging instead!
       # Do not use OSNativeTime, use FawkesTime instead!
-      - type: FawkesTime
-      - type: FawkesLogging
-      - type: BehaviorEngine
       - type: ThreadName
         attr:
           name: PlexilExecutive
-      - type: ProtobufComm
+      - type: FawkesTimeAdapter
+      - type: FawkesLoggingAdapter
+      - type: BehaviorEngineAdapter
+      - type: ProtobufCommAdapter
         attr:
           protos: "@BASEDIR@/src/plugins/plexil/specs/test/msgs"
-      - type: NavGraph
+      - type: NavGraphAdapter
 
       # - type: UdpAdapter
       #   attr:
