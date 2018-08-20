@@ -129,7 +129,7 @@ ThreadNamePlexilAdapter::shutdown()
 }
 
 extern "C" {
-	void initThreadNameAdapter() {
-		REGISTER_ADAPTER(ThreadNamePlexilAdapter, "ThreadNameAdapter");
+	void initThreadName() {
+		REGISTER_ADAPTER(ThreadNamePlexilAdapter, "ThreadName");
 	}
 }

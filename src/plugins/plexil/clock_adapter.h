@@ -72,4 +72,8 @@ private:
 	
 };
 
+extern "C" {
+  void initFawkesTimeAdapter();
+}
+
 #endif

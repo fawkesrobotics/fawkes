@@ -44,12 +44,6 @@ namespace PLEXIL {
 }
 
 class PlexilLogStreamBuffer;
-class ClockPlexilTimeAdapter;
-class LoggingPlexilAdapter;
-class BehaviorEnginePlexilAdapter;
-class ThreadNamePlexilAdapter;
-class ProtobufCommPlexilAdapter;
-class NavGraphPlexilAdapter;
 class PlexilNavgraphAccessThread;
 
 class PlexilExecutiveThread
@@ -110,15 +104,9 @@ private:
 	bool        cfg_plan_force_compile_;
 
 	std::unique_ptr<PLEXIL::ExecApplication> plexil_;
-	PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter> *      clock_adapter_;
-	PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter> *        log_adapter_;
-	PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter> * be_adapter_;
-	PLEXIL::ConcreteAdapterFactory<ThreadNamePlexilAdapter> *     thread_adapter_;
-	PLEXIL::ConcreteAdapterFactory<ProtobufCommPlexilAdapter> *   protobuf_adapter_;
 
 #ifdef HAVE_NAVGRAPH
 	PlexilNavgraphAccessThread *                                  navgraph_access_thread_;
-	PLEXIL::ConcreteAdapterFactory<NavGraphPlexilAdapter> *       navgraph_adapter_;
 	fawkes::LockPtr<fawkes::NavGraph>                             navgraph_;
 #endif
 

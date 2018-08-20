@@ -52,7 +52,7 @@ public:
 };
 
 extern "C" {
-  void initThreadNameAdapter();
+  void initThreadName();
 }
 
 #endif

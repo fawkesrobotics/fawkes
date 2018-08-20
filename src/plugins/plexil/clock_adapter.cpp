@@ -24,6 +24,7 @@
 
 #include <AdapterConfiguration.hh>
 #include <AdapterExecInterface.hh>
+#include <AdapterFactory.hh>
 #include <State.hh>
 #include <StateCacheEntry.hh>
 
@@ -193,4 +194,10 @@ ClockPlexilTimeAdapter::getCurrentTime() throw (PLEXIL::InterfaceError)
 {
 	fawkes::Time now(clock_);
 	return now.in_sec();
+}
+
+extern "C" {
+	void initFawkesTimeAdapter() {
+		REGISTER_ADAPTER(ClockPlexilTimeAdapter, "FawkesTimeAdapter");
+	}
 }

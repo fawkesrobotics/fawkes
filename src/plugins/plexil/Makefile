@@ -17,6 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
 include $(BUILDSYSDIR)/boost.mk
+include $(BUILDSYSDIR)/protobuf.mk
 include $(LIBSRCDIR)/navgraph/navgraph.mk
 
 PLEXIL_REQ_BOOST_LIBS = system filesystem
@@ -24,29 +25,70 @@ HAVE_PLEXIL_BOOST_LIBS = $(call boost-have-libs,$(OPENPRS_REQ_BOOST_LIBS))
 
 LIBS_plexil = \
 	fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	fawkesinterface fawkes_protobuf_comm \
-  PlexilAppFramework PlexilPlanDebugListener PlexilLuvListener PlexilSockets \
-  SkillerInterface
-OBJS_plexil = plexil_plugin.o plexil_thread.o clock_adapter.o timer_thread.o \
-  log_adapter.o be_adapter.o thread_adapter.o protobuf_adapter.o
+  PlexilAppFramework PlexilPlanDebugListener PlexilLuvListener PlexilSockets
+OBJS_plexil = plexil_plugin.o plexil_thread.o
 
-OBJS_all = $(OBJS_plexil)
+OBJS_plexil_FawkesTimeAdapter = clock_adapter.o timer_thread.o
+LIBS_plexil_FawkesTimeAdapter = fawkescore fawkesutils PlexilAppFramework PlexilIntfc
+NOSOVER_plexil_FawkesTimeAdapter = 1
 
+OBJS_plexil_FawkesLoggingAdapter = log_adapter.o
+LIBS_plexil_FawkesLoggingAdapter = fawkescore fawkesutils PlexilAppFramework PlexilValue PlexilIntfc PlexilExec
+NOSOVER_plexil_FawkesLoggingAdapter = 1
 
+OBJS_plexil_BehaviorEngineAdapter = be_adapter.o
+LIBS_plexil_BehaviorEngineAdapter = fawkescore fawkesutils fawkesblackboard fawkesinterface SkillerInterface \
+                                    PlexilAppFramework PlexilValue PlexilIntfc PlexilExec
+NOSOVER_plexil_BehaviorEngineAdapter = 1
+
+OBJS_plexil_ThreadName = thread_adapter.o
+LIBS_plexil_ThreadName = fawkescore \
+                         PlexilAppFramework PlexilIntfc pugixml
+NOSOVER_plexil_ThreadName = 1
+
+OBJS_plexil_ProtobufCommAdapter = protobuf_adapter.o
+LIBS_plexil_ProtobufCommAdapter = fawkescore fawkesutils fawkes_protobuf_comm \
+                                  PlexilAppFramework PlexilValue PlexilIntfc PlexilUtils pugixml
+CFLAGS_protobuf_adapter            = $(CFLAGS) $(CFLAGS_PROTOBUF)
+LDFLAGS_plexil_ProtobufCommAdapter = $(LDFLAGS) $(LDFLAGS_PROTOBUF)
+NOSOVER_plexil_ProtobufCommAdapter = 1
+
+OBJS_plexil_NavGraphAdapter = navgraph_adapter.o
+LIBS_plexil_NavGraphAdapter = fawkescore fawkesutils fawkes_protobuf_comm fawkesblackboard \
+                              fawkesinterface Position3DInterface fawkesnavgraph \
+                              PlexilAppFramework PlexilValue PlexilIntfc PlexilUtils
+NOSOVER_plexil_NavGraphAdapter = 1
+
+OBJS_all = $(OBJS_plexil) $(OBJS_plexil_FawkesTimeAdapter) $(OBJS_plexil_FawkesLoggingAdapter) \
+           $(OBJS_plexil_BehaviorEngineAdapter) $(OBJS_plexil_ThreadName) \
+           $(OBJS_plexil_ProtobufCommAdapter) $(OBJS_plexil_NavGraphAdapter)
 
 ifeq ($(HAVE_PLEXIL)$(HAVE_PLEXIL_BOOST_LIBS),11)
   CFLAGS  += $(CFLAGS_PLEXIL)  $(call boost-libs-cflags,$(PLEXIL_REQ_BOOST_LIBS))
   LDFLAGS += $(LDFLAGS_PLEXIL) $(call boost-libs-ldflags,$(PLEXIL_REQ_BOOST_LIBS))
 
+  PLUGINS_all = $(PLUGINDIR)/plexil.so
+
+	LIBS_all    = $(LIBDIR)/plexil/FawkesTimeAdapter.$(SOEXT) \
+                $(LIBDIR)/plexil/FawkesLoggingAdapter.$(SOEXT) \
+                $(LIBDIR)/plexil/BehaviorEngineAdapter.$(SOEXT) \
+                $(LIBDIR)/plexil/ThreadName.$(SOEXT)
+
+  ifeq ($(HAVE_PROTOBUF),1)
+    LIBS_all += $(LIBDIR)/plexil/ProtobufCommAdapter.$(SOEXT)
+  else
+    WARN_TARGETS += warning_protobuf
+  endif
+
   ifeq ($(HAVE_NAVGRAPH),1)
-    LIBS_plexil += fawkesnavgraphaspect Position3DInterface
-    OBJS_plexil += navgraph_access_thread.o navgraph_adapter.o
+    LIBS_plexil += fawkesnavgraphaspect
+    OBJS_plexil += navgraph_access_thread.o
     CFLAGS += -DHAVE_NAVGRAPH
+    LIBS_all += $(LIBDIR)/plexil/NavGraphAdapter.$(SOEXT)
   else
     WARN_TARGETS += warning_navgraph
   endif
 
-  PLUGINS_all = $(PLUGINDIR)/plexil.so
 else
   ifneq ($(HAVE_PLEXIL),1)
     WARN_TARGETS += warning_plexil
@@ -73,7 +115,9 @@ $(PLEXIL_WARN_TARGETS_BOOST): warning_plexil_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting plexil plugin$(TNORMAL) (Boost library $* not found)"
   endif
 warning_navgraph:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting navgraph support for plexil$(TNORMAL) (navgraphaspect not available)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting NavGraphAdapter for plexil$(TNORMAL) (navgraphaspect not available)"
+warning_protobuf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting ProtobufCommAdapter for plexil$(TNORMAL) (protobuf not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

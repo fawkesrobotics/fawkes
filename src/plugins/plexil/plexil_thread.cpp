@@ -34,6 +34,7 @@
 
 #include <core/threading/mutex_locker.h>
 #include <utils/sub_process/proc.h>
+#include <utils/system/dynamic_module/module.h>
 
 #include <ExecApplication.hh>
 #include <Debug.hh>
@@ -88,12 +89,18 @@ PlexilExecutiveThread::init()
 	std::map<std::string, plexil_interface_config> cfg_listeners =
 	  read_plexil_interface_configs(cfg_prefix + "listeners/");
 
-	for (const auto &a_item : cfg_adapters) {
-		const auto &a = a_item.second;
+	for (auto &a_item : cfg_adapters) {
+		auto &a = a_item.second;
 		if (a.type == "Utility") {
 			logger->log_warn(name(), "Utility adapter configured, consider using FawkesLogging instead");
 		} else if (a.type == "OSNativeTime") {
 			logger->log_warn(name(), "OSNativeTime adapter configured, consider using FawkesTime instead");
+		}
+
+		std::string filename =
+		  std::string(LIBDIR) + "/plexil/" + a.type + "." + fawkes::Module::get_file_extension();
+		if (fs::exists(filename)) {
+			a.attr["LibPath"] = filename;
 		}
 	}
 
@@ -103,12 +110,6 @@ PlexilExecutiveThread::init()
 	PLEXIL::g_manager->setProperty("::Fawkes::Clock", clock);
 	PLEXIL::g_manager->setProperty("::Fawkes::Logger", logger);
 	PLEXIL::g_manager->setProperty("::Fawkes::BlackBoard", blackboard);
-
-	clock_adapter_    = new PLEXIL::ConcreteAdapterFactory<ClockPlexilTimeAdapter>("FawkesTime");
-	log_adapter_      = new PLEXIL::ConcreteAdapterFactory<LoggingPlexilAdapter>("FawkesLogging");
-	be_adapter_       = new PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter>("BehaviorEngine");
-	thread_adapter_   = new PLEXIL::ConcreteAdapterFactory<ThreadNamePlexilAdapter>("ThreadName");
-	protobuf_adapter_ = new PLEXIL::ConcreteAdapterFactory<ProtobufCommPlexilAdapter>("ProtobufComm");
 
 	pugi::xml_document xml_config;
 	pugi::xml_node xml_interfaces =
@@ -123,7 +124,7 @@ PlexilExecutiveThread::init()
 
 	auto navgraph_adapter_config = std::find_if(cfg_adapters.begin(), cfg_adapters.end(),
 	                                            [](const auto &entry) {
-		                                            return entry.second.type == "NavGraph";
+		                                            return entry.second.type == "NavGraphAdapter";
 	                                            });
 	if (navgraph_adapter_config != cfg_adapters.end()) {
 #ifdef HAVE_NAVGRAPH
@@ -131,7 +132,6 @@ PlexilExecutiveThread::init()
 		thread_collector->add(navgraph_access_thread_);
 		navgraph_ = navgraph_access_thread_->get_navgraph();
 		PLEXIL::g_manager->setProperty("::Fawkes::NavGraph", &navgraph_);
-		navgraph_adapter_ = new PLEXIL::ConcreteAdapterFactory<NavGraphPlexilAdapter>("NavGraph");
 #else
 		throw Exception("NavGraph adapter configured, "
 		                "but navgraph library not available at compile time");
@@ -273,14 +273,8 @@ PlexilExecutiveThread::finalize()
 	log_stream_.reset();
 	log_buffer_.reset();
 	plan_plx_.reset();
-  delete clock_adapter_;
-	delete log_adapter_;
-	delete be_adapter_;
-	delete thread_adapter_;
-	delete protobuf_adapter_;
 #ifdef HAVE_NAVGRAPH
 	if (navgraph_) {
-		delete navgraph_adapter_;
 		navgraph_.clear();
 		thread_collector->remove(navgraph_access_thread_);
 		delete navgraph_access_thread_;
