@@ -29,6 +29,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <cstring>
 
 inline void
 replace_tokens(std::string &s)
@@ -73,5 +74,32 @@ verify_args(const std::vector<PLEXIL::Value> &args, const std::string& func,
 	return true;
 }
 
+
+/** Get configuration value from XML adapter config.
+ * Value name can either reference an attribute name, or a <Parameter> tag with
+ * the key attribte set to the given value. The attribute is preferred.
+ * @param config configuration to query, typically retrieved as getXml()
+ * @param name name/key of configuration value
+ * @return value as string
+ */
+inline std::string
+get_xml_config_value(const pugi::xml_node& config, const std::string& name)
+{
+	pugi::xml_attribute xml_attr = config.attribute(name.c_str());
+	if (xml_attr) {
+		return xml_attr.value();
+	} else {
+		for (const auto &c : config.children()) {
+			if (strcmp(c.name(), "Parameter") == 0) {
+				pugi::xml_attribute xml_key_attr = c.attribute("key");
+				if (xml_key_attr && strcmp(xml_key_attr.value(), name.c_str()) == 0) {
+					return c.text().get();
+				}
+			}
+		}
+	}
+
+	return "";
+}
 
 #endif

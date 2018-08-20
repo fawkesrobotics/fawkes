@@ -89,22 +89,7 @@ ProtobufCommPlexilAdapter::initialize()
 		return false;
 	}
 
-	std::string cfg_proto_dir;
-
-	pugi::xml_node config = getXml();
-	pugi::xml_attribute xml_attr = config.attribute("protos");
-	if (xml_attr) {
-		cfg_proto_dir = xml_attr.value();
-	} else {
-		for (const auto &c : config.children()) {
-			if (strcmp(c.name(), "Parameter") == 0) {
-				pugi::xml_attribute xml_key_attr = c.attribute("key");
-				if (xml_key_attr && strcmp(xml_key_attr.value(), "protos") == 0) {
-					cfg_proto_dir = c.text().get();
-				}
-			}
-		}
-	}
+	std::string cfg_proto_dir = get_xml_config_value(getXml(), "protos");
 	replace_tokens(cfg_proto_dir);
 
 	std::vector<std::string> cfg_proto_dirs{cfg_proto_dir};
