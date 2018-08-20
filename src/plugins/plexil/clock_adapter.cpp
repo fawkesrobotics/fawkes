@@ -65,8 +65,6 @@ bool
 ClockPlexilTimeAdapter::initialize()
 {
 	// Automatically register self for time
-	clock_ = reinterpret_cast<fawkes::Clock *>(m_execInterface.getProperty("::Fawkes::Clock"));
-
 	PLEXIL::g_configuration->registerLookupInterface("time", this);
 	return true;
 }
@@ -78,6 +76,8 @@ ClockPlexilTimeAdapter::initialize()
 bool
 ClockPlexilTimeAdapter::start()
 {
+	clock_ = reinterpret_cast<fawkes::Clock *>(m_execInterface.getProperty("::Fawkes::Clock"));
+
 	timer_ = new PlexilTimerThread();
 	timer_->start();
 	
