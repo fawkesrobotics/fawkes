@@ -17,7 +17,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
 include $(BUILDSYSDIR)/boost.mk
-
+include $(LIBSRCDIR)/navgraph/navgraph.mk
 
 PLEXIL_REQ_BOOST_LIBS = system filesystem
 HAVE_PLEXIL_BOOST_LIBS = $(call boost-have-libs,$(OPENPRS_REQ_BOOST_LIBS))
@@ -38,6 +38,14 @@ ifeq ($(HAVE_PLEXIL)$(HAVE_PLEXIL_BOOST_LIBS),11)
   CFLAGS  += $(CFLAGS_PLEXIL)  $(call boost-libs-cflags,$(PLEXIL_REQ_BOOST_LIBS))
   LDFLAGS += $(LDFLAGS_PLEXIL) $(call boost-libs-ldflags,$(PLEXIL_REQ_BOOST_LIBS))
 
+  ifeq ($(HAVE_NAVGRAPH),1)
+    LIBS_plexil += fawkesnavgraphaspect Position3DInterface
+    OBJS_plexil += navgraph_access_thread.o navgraph_adapter.o
+    CFLAGS += -DHAVE_NAVGRAPH
+  else
+    WARN_TARGETS += warning_navgraph
+  endif
+
   PLUGINS_all = $(PLUGINDIR)/plexil.so
 else
   ifneq ($(HAVE_PLEXIL),1)
@@ -55,7 +63,7 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_plexil warning_cpp17 $(PLEXIL_WARN_TARGETS_BOOST)
+.PHONY: warning_plexil warning_cpp17 $(PLEXIL_WARN_TARGETS_BOOST) warning_navgraph
 warning_plexil:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting plexil plugin$(TNORMAL) ($(PLEXIL_ERROR))"
 warning_cpp17:
@@ -64,6 +72,8 @@ warning_cpp17:
 $(PLEXIL_WARN_TARGETS_BOOST): warning_plexil_boost_%:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting plexil plugin$(TNORMAL) (Boost library $* not found)"
   endif
+warning_navgraph:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting navgraph support for plexil$(TNORMAL) (navgraphaspect not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

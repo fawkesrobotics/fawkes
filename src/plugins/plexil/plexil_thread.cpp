@@ -26,6 +26,10 @@
 #include "be_adapter.h"
 #include "thread_adapter.h"
 #include "protobuf_adapter.h"
+#ifdef HAVE_NAVGRAPH
+#  include "navgraph_access_thread.h"
+#  include "navgraph_adapter.h"
+#endif
 #include "utils.h"
 
 #include <core/threading/mutex_locker.h>
@@ -116,6 +120,23 @@ PlexilExecutiveThread::init()
 	add_plexil_interface_configs(xml_interfaces, cfg_listeners,
 	                             PLEXIL::InterfaceSchema::LISTENER_TAG(),
 	                             PLEXIL::InterfaceSchema::LISTENER_TYPE_ATTR());
+
+	auto navgraph_adapter_config = std::find_if(cfg_adapters.begin(), cfg_adapters.end(),
+	                                            [](const auto &entry) {
+		                                            return entry.second.type == "NavGraph";
+	                                            });
+	if (navgraph_adapter_config != cfg_adapters.end()) {
+#ifdef HAVE_NAVGRAPH
+		navgraph_access_thread_ = new PlexilNavgraphAccessThread();
+		thread_collector->add(navgraph_access_thread_);
+		navgraph_ = navgraph_access_thread_->get_navgraph();
+		PLEXIL::g_manager->setProperty("::Fawkes::NavGraph", &navgraph_);
+		navgraph_adapter_ = new PLEXIL::ConcreteAdapterFactory<NavGraphPlexilAdapter>("NavGraph");
+#else
+		throw Exception("NavGraph adapter configured, "
+		                "but navgraph library not available at compile time");
+#endif
+	}
 
 	if (cfg_print_xml) {
 		struct xml_string_writer: pugi::xml_writer
@@ -257,6 +278,14 @@ PlexilExecutiveThread::finalize()
 	delete be_adapter_;
 	delete thread_adapter_;
 	delete protobuf_adapter_;
+#ifdef HAVE_NAVGRAPH
+	if (navgraph_) {
+		delete navgraph_adapter_;
+		navgraph_.clear();
+		thread_collector->remove(navgraph_access_thread_);
+		delete navgraph_access_thread_;
+	}
+#endif
 }
 
 void

@@ -27,6 +27,11 @@
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#ifdef HAVE_NAVGRAPH
+#  include <core/utils/lockptr.h>
+#  include <navgraph/navgraph.h>
+#  include <aspect/thread_producer.h>
+#endif
 #include <utils/time/time.h>
 
 #include <memory>
@@ -44,12 +49,17 @@ class LoggingPlexilAdapter;
 class BehaviorEnginePlexilAdapter;
 class ThreadNamePlexilAdapter;
 class ProtobufCommPlexilAdapter;
+class NavGraphPlexilAdapter;
+class PlexilNavgraphAccessThread;
 
 class PlexilExecutiveThread
 : public fawkes::Thread,
 	public fawkes::LoggingAspect,
 	public fawkes::ConfigurableAspect,
   public fawkes::ClockAspect,
+#ifdef HAVE_NAVGRAPH
+  public fawkes::ThreadProducerAspect,
+#endif
   public fawkes::BlackBoardAspect
 {
  public:
@@ -105,6 +115,12 @@ private:
 	PLEXIL::ConcreteAdapterFactory<BehaviorEnginePlexilAdapter> * be_adapter_;
 	PLEXIL::ConcreteAdapterFactory<ThreadNamePlexilAdapter> *     thread_adapter_;
 	PLEXIL::ConcreteAdapterFactory<ProtobufCommPlexilAdapter> *   protobuf_adapter_;
+
+#ifdef HAVE_NAVGRAPH
+	PlexilNavgraphAccessThread *                                  navgraph_access_thread_;
+	PLEXIL::ConcreteAdapterFactory<NavGraphPlexilAdapter> *       navgraph_adapter_;
+	fawkes::LockPtr<fawkes::NavGraph>                             navgraph_;
+#endif
 
 	std::shared_ptr<PlexilLogStreamBuffer> log_buffer_;
 	std::shared_ptr<std::ostream>          log_stream_;
