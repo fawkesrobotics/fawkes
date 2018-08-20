@@ -59,9 +59,16 @@ LIBS_plexil_NavGraphAdapter = fawkescore fawkesutils fawkes_protobuf_comm fawkes
                               PlexilAppFramework PlexilValue PlexilIntfc PlexilUtils
 NOSOVER_plexil_NavGraphAdapter = 1
 
+OBJS_plexil_FawkesRemoteAdapter = remote_adapter.o
+LIBS_plexil_FawkesRemoteAdapter = fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
+                              fawkesconfig fawkeslogging fawkesnavgraph pthread \
+                              PlexilAppFramework PlexilValue PlexilIntfc PlexilUtils pugixml
+NOSOVER_plexil_FawkesRemoteAdapter = 1
+
 OBJS_all = $(OBJS_plexil) $(OBJS_plexil_FawkesTimeAdapter) $(OBJS_plexil_FawkesLoggingAdapter) \
            $(OBJS_plexil_BehaviorEngineAdapter) $(OBJS_plexil_ThreadName) \
-           $(OBJS_plexil_ProtobufCommAdapter) $(OBJS_plexil_NavGraphAdapter)
+           $(OBJS_plexil_ProtobufCommAdapter) $(OBJS_plexil_NavGraphAdapter) \
+           $(OBJS_plexil_FawkesRemoteAdapter)
 
 ifeq ($(HAVE_PLEXIL)$(HAVE_PLEXIL_BOOST_LIBS),11)
   CFLAGS  += $(CFLAGS_PLEXIL)  $(call boost-libs-cflags,$(PLEXIL_REQ_BOOST_LIBS))
@@ -71,6 +78,7 @@ ifeq ($(HAVE_PLEXIL)$(HAVE_PLEXIL_BOOST_LIBS),11)
 
 	LIBS_all    = $(LIBDIR)/plexil/FawkesTimeAdapter.$(SOEXT) \
                 $(LIBDIR)/plexil/FawkesLoggingAdapter.$(SOEXT) \
+                $(LIBDIR)/plexil/FawkesRemoteAdapter.$(SOEXT) \
                 $(LIBDIR)/plexil/BehaviorEngineAdapter.$(SOEXT) \
                 $(LIBDIR)/plexil/ThreadName.$(SOEXT)
 

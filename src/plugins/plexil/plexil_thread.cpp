@@ -95,6 +95,9 @@ PlexilExecutiveThread::init()
 			logger->log_warn(name(), "Utility adapter configured, consider using FawkesLogging instead");
 		} else if (a.type == "OSNativeTime") {
 			logger->log_warn(name(), "OSNativeTime adapter configured, consider using FawkesTime instead");
+		} else if (a.type == "FawkesRemoteAdapter") {
+			logger->log_error(name(), "Cannot load FawkesRemoteAdapter when running internally");
+			throw Exception("Plexil: cannot load FawkesRemoteAdapter when running internally");
 		}
 
 		std::string filename =
