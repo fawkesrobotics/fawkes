@@ -102,6 +102,7 @@ plexil:
       - type: ProtobufComm
         attr:
           protos: "@BASEDIR@/src/plugins/plexil/specs/test/msgs"
+      - type: NavGraph
 
       # - type: UdpAdapter
       #   attr:
